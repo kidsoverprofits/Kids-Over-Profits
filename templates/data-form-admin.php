@@ -9,12 +9,14 @@
 
     if (function_exists('wp_enqueue_style')) {
         $data_form_css = $kop_theme_dir . '/css/data-form.css';
-        wp_enqueue_style(
-            'kop-data-form',
-            $kop_theme_uri . '/css/data-form.css',
-            array(),
-            file_exists($data_form_css) ? filemtime($data_form_css) : null
-        );
+        if (!wp_style_is('kop-data-form-style', 'enqueued')) {
+            wp_enqueue_style(
+                'kop-data-form-style',
+                $kop_theme_uri . '/css/data-form.css',
+                array('kadence-parent-style', 'kop-colors'),
+                file_exists($data_form_css) ? filemtime($data_form_css) : null
+            );
+        }
     }
 
     if (function_exists('wp_enqueue_script')) {
