@@ -1,5 +1,5 @@
 // ============================================
-// CONSOLIDATED FACILITY FORM - CLOUD FIRST
+// CONSOLIDATED DATA FORM - CLOUD FIRST
 // All functionality restored, cloud-first storage
 // ============================================
 
@@ -9,9 +9,7 @@
 // `KOP_FormConfig` module in `config.js`.
 // Access via `window.KOP_FormConfig.*`
 // ============================================
-const KOP_CONFIG = window.KOP_FormConfig || {};
-
-const SCRIPT_BUILD_VERSION = KOP_CONFIG.SCRIPT_BUILD_VERSION || 'facility-form.v3.refactored';
+const SCRIPT_BUILD_VERSION = KOP_CONFIG.SCRIPT_BUILD_VERSION || 'data-form.v4.refactored';
 
 // These constants are now pointers to the config module for convenience.
 const API_ENDPOINTS = KOP_CONFIG.API_ENDPOINTS || {};
@@ -35,32 +33,32 @@ function getAPIEndpoints() {
 // debugLog function now defined in utilities.js module
 // Access via window.debugLog
 
-function logActiveFacilityFormConfigOnce() {
+function logActiveDataFormConfigOnce() {
     if (typeof window === 'undefined' || !window.KOP_FormConfig) {
         return;
     }
 
-    if (window.__KOP_FACILITY_FORM_CONFIG_LOGGED) {
+    if (window.__KOP_DATA_FORM_CONFIG_LOGGED) {
         return;
     }
 
-    window.__KOP_FACILITY_FORM_CONFIG_LOGGED = true;
+    window.__KOP_DATA_FORM_CONFIG_LOGGED = true;
 
     if (!KOP_FormConfig.DEBUG_LOGGING_ENABLED || typeof console === 'undefined') {
         return;
     }
 
     try {
-        debugLog('[KOP Facility Form] Loaded script build %s', KOP_FormConfig.SCRIPT_BUILD_VERSION);
+        debugLog('[KOP Data Form] Loaded script build %s', KOP_FormConfig.SCRIPT_BUILD_VERSION);
         if (KOP_FormConfig.normalizedApiBases && KOP_FormConfig.normalizedApiBases.length) {
-            debugLog('[KOP Facility Form] API base candidates:', KOP_FormConfig.normalizedApiBases);
+            debugLog('[KOP Data Form] API base candidates:', KOP_FormConfig.normalizedApiBases);
         }
-        debugLog('[KOP Facility Form] Resolved API endpoints:', KOP_FormConfig.API_ENDPOINTS);
-        debugLog('[KOP Facility Form] Active form mode:', KOP_FormConfig.FORM_MODE);
+        debugLog('[KOP Data Form] Resolved API endpoints:', KOP_FormConfig.API_ENDPOINTS);
+        debugLog('[KOP Data Form] Active form mode:', KOP_FormConfig.FORM_MODE);
         if (KOP_FormConfig.FALLBACK_PROJECTS_URL_CANDIDATES && KOP_FormConfig.FALLBACK_PROJECTS_URL_CANDIDATES.length) {
-            debugLog('[KOP Facility Form] Fallback dataset URL candidates:', KOP_FormConfig.FALLBACK_PROJECTS_URL_CANDIDATES);
+            debugLog('[KOP Data Form] Fallback dataset URL candidates:', KOP_FormConfig.FALLBACK_PROJECTS_URL_CANDIDATES);
         } else {
-            debugLog('[KOP Facility Form] No fallback dataset configured');
+            debugLog('[KOP Data Form] No fallback dataset configured');
         }
     } catch (logError) {
         // Swallow logging errors to avoid breaking initialization if console is locked down
@@ -102,7 +100,7 @@ function invalidateAggregatedData(category = null) {
         return window.invalidateAggregatedData(category);
     }
     // Autocomplete module not loaded - cannot invalidate cache
-    debugLog('[Facility Form] Cannot invalidate cache - autocomplete module not loaded');
+    debugLog('[Data Form] Cannot invalidate cache - autocomplete module not loaded');
 }
 
 // Make globals available
@@ -132,7 +130,7 @@ function normalizeProjectData(data) {
     if (window.KOP_DataNormalizer && typeof window.KOP_DataNormalizer.normalizeProjectData === 'function') {
         return window.KOP_DataNormalizer.normalizeProjectData(data);
     }
-    console.error('[Facility Form] Data Normalizer module not found. Returning raw data.');
+    console.error('[Data Form] Data Normalizer module not found. Returning raw data.');
     return data;
 }
 
@@ -166,7 +164,7 @@ function addCustomValue(category, value) {
         return window.addCustomValue(category, value);
     }
     // Fallback - just return false if module not loaded
-    console.warn('[Facility Form] addCustomValue - autocomplete module not loaded');
+    console.warn('[Data Form] addCustomValue - autocomplete module not loaded');
     return false;
 }
 
@@ -179,7 +177,7 @@ function attachCustomValueRecorder(input, category) {
         return window.attachCustomValueRecorder(input, category);
     }
     // Fallback - skip if module not loaded
-    debugLog('[Facility Form] attachCustomValueRecorder - autocomplete module not loaded');
+    debugLog('[Data Form] attachCustomValueRecorder - autocomplete module not loaded');
 }
 
 // ============================================
@@ -302,7 +300,7 @@ const delegateCreateAutocomplete = (input, getDataFunction, category) => {
         return delegate(input, getDataFunction, category);
     }
     // Autocomplete module not loaded - skip initialization
-    console.warn('[Facility Form] Autocomplete module not loaded, skipping createAutocomplete');
+    console.warn('[Data Form] Autocomplete module not loaded, skipping createAutocomplete');
 };
 
 const delegateInitializeAutocompleteFields = () => {
@@ -311,7 +309,7 @@ const delegateInitializeAutocompleteFields = () => {
         return delegate();
     }
     // Autocomplete module not loaded - skip initialization
-    console.warn('[Facility Form] Autocomplete module not loaded, skipping initializeAutocompleteFields');
+    console.warn('[Data Form] Autocomplete module not loaded, skipping initializeAutocompleteFields');
 };
 
 // ============================================
@@ -409,7 +407,7 @@ function createNewProjectData() {
     if (window.KOP_Project && typeof window.KOP_Project.createNewProjectData === 'function') {
         return window.KOP_Project.createNewProjectData();
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
     // Fallback in case module is not loaded
     return { operator: {}, facilities: [{}], referrer: [], referrerAgency: {}, referrerConsultants: [{}], fieldNotes: {} };
 }
@@ -418,7 +416,7 @@ function loadProject(projectName) {
     if (window.KOP_Project && typeof window.KOP_Project.loadProject === 'function') {
         return window.KOP_Project.loadProject(projectName);
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
     return Promise.reject(new Error('Project module not found.'));
 }
 
@@ -426,14 +424,14 @@ function newProject() {
     if (window.KOP_Project && typeof window.KOP_Project.newProject === 'function') {
         return window.KOP_Project.newProject();
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
 }
 
 function initializeCategoryTabs() {
     if (window.KOP_Project && typeof window.KOP_Project.initializeCategoryTabs === 'function') {
         return window.KOP_Project.initializeCategoryTabs();
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
 }
 window.initializeCategoryTabs = initializeCategoryTabs;
 
@@ -441,21 +439,21 @@ async function renameProject(oldName) {
     if (window.KOP_Project && typeof window.KOP_Project.renameProject === 'function') {
         return window.KOP_Project.renameProject(oldName);
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
 }
 
 async function deleteProject(projectName) {
     if (window.KOP_Project && typeof window.KOP_Project.deleteProject === 'function') {
         return window.KOP_Project.deleteProject(projectName);
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
 }
 
 async function recategorizeProject(projectName) {
     if (window.KOP_Project && typeof window.KOP_Project.recategorizeProject === 'function') {
         return window.KOP_Project.recategorizeProject(projectName);
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
 }
 // ============================================
 // FORM DATA MANAGEMENT
@@ -568,6 +566,13 @@ function loadOperatorData() {
         operator = window.formData.operator;
     }
 
+    // Load Profit Status
+    const profitStatus = operator.profitStatus || 'for-profit';
+    const profitRadio = document.querySelector(`input[name="profitStatus"][value="${profitStatus}"]`);
+    if (profitRadio) {
+        profitRadio.checked = true;
+    }
+
     const operatorName = document.getElementById('operator-name');
     if (operatorName) operatorName.value = operator.name || '';
 
@@ -674,7 +679,9 @@ window.updateAllUI = function() {
         updateJSON();
         window.KOP_UI_Render.renderSavedProjectsList();
         initializeSectionToggles();
-        window.KOP_UI_State.updateProjectStatus();
+        if (window.KOP_UI_State && typeof window.KOP_UI_State.updateProjectStatus === 'function') {
+            window.KOP_UI_State.updateProjectStatus();
+        }
         
         // Initialize autocomplete fields - use delegate or window function
         if (typeof delegateInitializeAutocompleteFields === 'function') {
@@ -683,7 +690,9 @@ window.updateAllUI = function() {
             window.initializeAutocompleteFields();
         }
         
-        window.KOP_UI_State.updateLabelsForProjectType(window.currentProjectName || '');
+        if (window.KOP_UI_State && typeof window.KOP_UI_State.updateLabelsForProjectType === 'function') {
+            window.KOP_UI_State.updateLabelsForProjectType(window.currentProjectName || '');
+        }
         initializeNoteControls();
         if (typeof window.updateToolbarFacilityInfo === 'function') {
             window.updateToolbarFacilityInfo(); // Update toolbar when UI updates
@@ -789,7 +798,7 @@ function determineProjectCategory(name) {
     if (window.KOP_Project && typeof window.KOP_Project.determineProjectCategory === 'function') {
         return window.KOP_Project.determineProjectCategory(name);
     }
-    console.error('[Facility Form] Project module not found.');
+    console.error('[Data Form] Project module not found.');
     return 'companies'; // Fallback
 }
 
@@ -1191,6 +1200,21 @@ function generateReportHTML(data, skipHeader = false) { if (window.KOP_UI_Render
 // EVENT LISTENER ATTACHMENT
 // ============================================
 function attachFieldListeners() {
+    // Profit Status Toggle Listener
+    const profitRadios = document.querySelectorAll('input[name="profitStatus"]');
+    profitRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (window.formData && window.formData.operator) {
+                window.formData.operator.profitStatus = radio.value;
+                updateJSON();
+                autoSave();
+            }
+            if (window.KOP_UI_State && typeof window.KOP_UI_State.updateLabelsForProjectType === 'function') {
+                window.KOP_UI_State.updateLabelsForProjectType();
+            }
+        });
+    });
+
     // Operator fields
     const operatorFields = {
         'operator-name': (val) => {
@@ -1581,7 +1605,7 @@ function attachButtonListeners() {
 // ============================================
 async function initializeForm() {
     debugLog('Initializing consolidated form with cloud-first storage...');
-    logActiveFacilityFormConfigOnce();
+    logActiveDataFormConfigOnce();
 
     // Wait for referrer module to be ready
     if (typeof window.ensureReferrerDataStructures !== 'function') {
@@ -1652,7 +1676,7 @@ async function initializeForm() {
             console.error('Debug info:', {
                 'window.KOP_FormLoader': window.KOP_FormLoader,
                 'window.KOP_LOADER_READY': window.KOP_LOADER_READY,
-                'window.KOP_FACILITY_FORM_CONFIG': window.KOP_FACILITY_FORM_CONFIG
+                'KOP_DATA_FORM_CONFIG': window.KOP_DATA_FORM_CONFIG
             });
             showUploadStatus('Failed to load data loader module', 'error');
 
@@ -1915,18 +1939,18 @@ window.addNoteButtons = addNoteButtons;
 
 // Initialize on DOMContentLoaded
 // Log script execution
-console.log('[Facility Form] Script started executing');
-console.log('[Facility Form] Checking loader:', {
+console.log('[Data Form] Script started executing');
+console.log('[Data Form] Checking loader:', {
     'KOP_FormLoader exists': typeof window.KOP_FormLoader !== 'undefined',
     'KOP_LOADER_READY': window.KOP_LOADER_READY,
-    'KOP_FACILITY_FORM_CONFIG': window.KOP_FACILITY_FORM_CONFIG
+    'KOP_DATA_FORM_CONFIG': window.KOP_DATA_FORM_CONFIG
 });
 
 if (document.readyState === 'loading') {
-    console.log('[Facility Form] DOM still loading, waiting for DOMContentLoaded');
+    console.log('[Data Form] DOM still loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', initializeForm);
 } else {
-    console.log('[Facility Form] DOM already loaded, calling initializeForm immediately');
+    console.log('[Data Form] DOM already loaded, calling initializeForm immediately');
     initializeForm();
 }
 
@@ -1934,7 +1958,7 @@ if (document.readyState === 'loading') {
 // Fallback: sometimes remote resources or slow loads cause UI bits to render incorrectly.
 // Re-run lightweight initialization checks on window.load to recover from intermittent failures.
 window.addEventListener('load', () => {
-    debugLog('facility-form.v4.js: window.load fired — verifying form initialization');
+    debugLog('data-form.v4.js: window.load fired — verifying form initialization');
 
     // ONLY run once - use flag to prevent multiple calls (FIX #1: Prevents rendering loops)
     if (window._uiInitializedOnLoad) {
@@ -1948,12 +1972,12 @@ window.addEventListener('load', () => {
             // Only update UI if formData is ready
             if (window.formData && typeof window.updateAllUI === 'function') {
                 window.updateAllUI();
-                debugLog('✅ facility-form.v4.js: updateAllUI re-run on load (once)');
+                debugLog('✅ data-form.v4.js: updateAllUI re-run on load (once)');
             } else {
                 debugLog('⚠️ Skipping updateAllUI on load - formData not ready');
             }
         } catch (e) {
-            console.error('❌ facility-form.v4.js: error during load-time UI verification', e);
+            console.error('❌ data-form.v4.js: error during load-time UI verification', e);
         }
     }, 150);
 }, { passive: true });

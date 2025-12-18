@@ -6,12 +6,12 @@
     // ============================================
     // CONSTANTS & CONFIGURATION
     // ============================================
-    const SCRIPT_BUILD_VERSION = 'facility-form.v3.sql-autocomplete.2025-10-15.notes';
+    const SCRIPT_BUILD_VERSION = 'data-form.v4.sql-autocomplete.2025-10-15.notes';
     if (typeof window !== 'undefined') {
-        window.KOP_FACILITY_FORM_VERSION = SCRIPT_BUILD_VERSION;
+        window.KOP_DATA_FORM_VERSION = SCRIPT_BUILD_VERSION;
     }
 
-    const FACILITY_FORM_CONFIG = window.KOP_FACILITY_FORM_CONFIG || {};
+    const DATA_FORM_CONFIG = window.KOP_DATA_FORM_CONFIG || {};
 
     let API_ENDPOINT_FALLBACKS = {};
 
@@ -41,8 +41,8 @@
         return normalizedPath;
     }
 
-    const explicitBase = FACILITY_FORM_CONFIG.apiBase;
-    const fallbackBases = FACILITY_FORM_CONFIG.apiBaseFallbacks;
+    const explicitBase = DATA_FORM_CONFIG.apiBase;
+    const fallbackBases = DATA_FORM_CONFIG.apiBaseFallbacks;
     const apiBaseCandidates = [];
 
     if (Array.isArray(explicitBase)) {
@@ -72,10 +72,10 @@
     ));
 
     const defaultApiPaths = {
-        SAVE_MASTER: FACILITY_FORM_CONFIG.endpoints?.SAVE_PROJECT || getResolverEndpoint('save-master.php', '/wp-content/themes/child/api/save-master.php'),
-        SAVE_SUGGESTION: FACILITY_FORM_CONFIG.endpoints?.SAVE_SUGGESTION || FACILITY_FORM_CONFIG.endpoints?.SAVE_PROJECT_SUGGESTION || getResolverEndpoint('save-suggestion.php', '/wp-content/themes/child/api/save-suggestion.php'),
-        LOAD_PROJECTS: FACILITY_FORM_CONFIG.endpoints?.LOAD_PROJECTS || getResolverEndpoint('get-master-data.php', '/wp-content/themes/child/api/get-master-data.php'),
-        AUTOCOMPLETE: FACILITY_FORM_CONFIG.endpoints?.AUTOCOMPLETE || FACILITY_FORM_CONFIG.endpoints?.SUGGESTIONS || getResolverEndpoint('get-autocomplete.php', '/wp-content/themes/child/api/get-autocomplete.php'),
+        SAVE_MASTER: DATA_FORM_CONFIG.endpoints?.SAVE_PROJECT || getResolverEndpoint('save-master.php', '/wp-content/themes/child/api/save-master.php'),
+        SAVE_SUGGESTION: DATA_FORM_CONFIG.endpoints?.SAVE_SUGGESTION || DATA_FORM_CONFIG.endpoints?.SAVE_PROJECT_SUGGESTION || getResolverEndpoint('save-suggestion.php', '/wp-content/themes/child/api/save-suggestion.php'),
+        LOAD_PROJECTS: DATA_FORM_CONFIG.endpoints?.LOAD_PROJECTS || getResolverEndpoint('get-master-data.php', '/wp-content/themes/child/api/get-master-data.php'),
+        AUTOCOMPLETE: DATA_FORM_CONFIG.endpoints?.AUTOCOMPLETE || DATA_FORM_CONFIG.endpoints?.SUGGESTIONS || getResolverEndpoint('get-autocomplete.php', '/wp-content/themes/child/api/get-autocomplete.php'),
         REST_SAVE_PROJECT: '/wp-json/kop/v1/projects/save',
         REST_DELETE_PROJECT: '/wp-json/kop/v1/projects/delete',
         REST_LOAD_PROJECTS: '/wp-json/kop/v1/projects'
@@ -108,13 +108,13 @@
             SAVE_PROJECT: formMode === 'suggestions' ? saveSuggestion : saveMaster,
             LOAD_PROJECTS: loaderEndpoints.LOAD_PROJECTS || API_ENDPOINT_FALLBACKS.LOAD_PROJECTS,
             AUTOCOMPLETE: loaderEndpoints.AUTOCOMPLETE || loaderEndpoints.SUGGESTIONS || API_ENDPOINT_FALLBACKS.AUTOCOMPLETE,
-            REST_SAVE_PROJECT: FACILITY_FORM_CONFIG.restSaveUrl || API_ENDPOINT_FALLBACKS.REST_SAVE_PROJECT,
-            REST_DELETE_PROJECT: FACILITY_FORM_CONFIG.restDeleteUrl || API_ENDPOINT_FALLBACKS.REST_DELETE_PROJECT,
-            REST_NONCE: FACILITY_FORM_CONFIG.restNonce || ''
+            REST_SAVE_PROJECT: DATA_FORM_CONFIG.restSaveUrl || API_ENDPOINT_FALLBACKS.REST_SAVE_PROJECT,
+            REST_DELETE_PROJECT: DATA_FORM_CONFIG.restDeleteUrl || API_ENDPOINT_FALLBACKS.REST_DELETE_PROJECT,
+            REST_NONCE: DATA_FORM_CONFIG.restNonce || ''
         };
     };
 
-    const resolvedFormMode = typeof FACILITY_FORM_CONFIG.mode === 'string' ? FACILITY_FORM_CONFIG.mode : (typeof window !== 'undefined' && typeof window.FORM_MODE === 'string' ? window.FORM_MODE : 'master');
+    const resolvedFormMode = typeof DATA_FORM_CONFIG.mode === 'string' ? DATA_FORM_CONFIG.mode : (typeof window !== 'undefined' && typeof window.FORM_MODE === 'string' ? window.FORM_MODE : 'master');
     const FORM_MODE = typeof resolvedFormMode === 'string' ? resolvedFormMode.toLowerCase() : 'master';
 
     function isSuggestionMode() {
@@ -122,9 +122,9 @@
         return window.KOP_FormConfig.FORM_MODE === 'suggestions';
     }
 
-    const fallbackProjectsConfigValues = Array.isArray(FACILITY_FORM_CONFIG.fallbackProjectsUrls) ? FACILITY_FORM_CONFIG.fallbackProjectsUrls.slice() : [];
-    if (typeof FACILITY_FORM_CONFIG.fallbackProjectsUrl === 'string' && FACILITY_FORM_CONFIG.fallbackProjectsUrl.trim()) {
-        fallbackProjectsConfigValues.unshift(FACILITY_FORM_CONFIG.fallbackProjectsUrl);
+    const fallbackProjectsConfigValues = Array.isArray(DATA_FORM_CONFIG.fallbackProjectsUrls) ? DATA_FORM_CONFIG.fallbackProjectsUrls.slice() : [];
+    if (typeof DATA_FORM_CONFIG.fallbackProjectsUrl === 'string' && DATA_FORM_CONFIG.fallbackProjectsUrl.trim()) {
+        fallbackProjectsConfigValues.unshift(DATA_FORM_CONFIG.fallbackProjectsUrl);
     }
 
     const FALLBACK_PROJECTS_URL_CANDIDATES = Array.from(new Set(
@@ -144,22 +144,23 @@
         return false;
     }
 
-    const DEBUG_LOGGING_ENABLED = (() => {
-        if (isTruthyFlag(FACILITY_FORM_CONFIG.debugLogging) || isTruthyFlag(FACILITY_FORM_CONFIG.debug)) return true;
-        if (typeof window !== 'undefined') {
-            if (isTruthyFlag(window.KOP_FACILITY_FORM_DEBUG)) return true;
-            try {
-                if (window.localStorage && isTruthyFlag(window.localStorage.getItem('KOP_FACILITY_FORM_DEBUG'))) return true;
-                if (window.sessionStorage && isTruthyFlag(window.sessionStorage.getItem('KOP_FACILITY_FORM_DEBUG'))) return true;
-            } catch (e) { /* ignore */ }
-        }
+    function isDebugLoggingEnabled() {
+        if (isTruthyFlag(DATA_FORM_CONFIG.debugLogging) || isTruthyFlag(DATA_FORM_CONFIG.debug)) return true;
+        if (typeof window === 'undefined') return false;
+        if (isTruthyFlag(window.KOP_DATA_FORM_DEBUG)) return true;
+        try {
+            if (window.localStorage && isTruthyFlag(window.localStorage.getItem('KOP_DATA_FORM_DEBUG'))) return true;
+            if (window.sessionStorage && isTruthyFlag(window.sessionStorage.getItem('KOP_DATA_FORM_DEBUG'))) return true;
+        } catch (e) { /* ignore storage errors */ }
         return false;
-    })();
+    }
+
+    const DEBUG_LOGGING_ENABLED = isDebugLoggingEnabled();
 
     // Expose public API
     window.KOP_FormConfig = {
         SCRIPT_BUILD_VERSION,
-        FACILITY_FORM_CONFIG,
+        DATA_FORM_CONFIG,
         getAPIEndpoints, // Function to re-evaluate
         FORM_MODE,
         IS_SUGGESTION_MODE: FORM_MODE === 'suggestions',
@@ -176,5 +177,9 @@
         get: getAPIEndpoints,
         configurable: true
     });
+
+    if (typeof window !== 'undefined' && !window.KOP_CONFIG) {
+        window.KOP_CONFIG = window.KOP_FormConfig;
+    }
 
 })();

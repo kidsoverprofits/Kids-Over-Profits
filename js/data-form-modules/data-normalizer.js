@@ -26,7 +26,11 @@
         // Handle null/undefined data - create default structure
         if (!data) {
             return typeof createNewProjectData === 'function' ? createNewProjectData() : {
-                operator: { name: "", otherNames: [], websites: [], investors: [], keyStaff: { ceo: "", founders: [], keyExecutives: [] }, notes: [] },
+                            operator: {
+                                name: "",
+                                otherNames: [],
+                                profitStatus: "for-profit",
+                                websites: [], investors: [], keyStaff: { ceo: "", founders: [], keyExecutives: [] }, notes: [] },
                 facilities: [],
                 referrerAgency: typeof createDefaultReferrerGroup === 'function' ? createDefaultReferrerGroup() : { name: "", affiliations: [], keyPersonnel: [], notes: "", fieldNotes: {} },
                 referrerConsultants: [typeof createDefaultReferrerIndividual === 'function' ? createDefaultReferrerIndividual() : { firstName: "", lastName: "", affiliations: [], facilitiesReferred: [], fieldNotes: {} }],

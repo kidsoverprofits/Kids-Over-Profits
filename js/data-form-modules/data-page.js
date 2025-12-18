@@ -2060,8 +2060,7 @@ window.updatePrivateOwnershipSliderAppearance = updatePrivateOwnershipSliderAppe
                 }
                 
                 try {
-                    // Fetch all projects from the API
-                    const apiUrl = (window.KOP_FACILITY_FORM_CONFIG?.restUrl || '/wp-json/kop/v1/') + 'facilities';
+window.KOP_DATA_FORM_CONFIG
                     console.log('🔍 Fetching from API:', apiUrl);
                     
                     const response = await fetch(apiUrl);
@@ -2315,8 +2314,8 @@ window.updatePrivateOwnershipSliderAppearance = updatePrivateOwnershipSliderAppe
                     }
                     
                     try {
-                        // Fetch project from API
-                        const apiUrl = (window.KOP_FACILITY_FORM_CONFIG?.restUrl || '/wp-json/kop/v1/') + 'facilities';
+            // If not found in projects, try to load from the master database (API)
+            const apiUrl = (window.KOP_DATA_FORM_CONFIG?.restUrl || '/wp-json/kop/v1/') + 'facilities';
                         const response = await fetch(apiUrl);
                         if (response.ok) {
                             const apiResponse = await response.json();
@@ -2863,7 +2862,7 @@ window.updatePrivateOwnershipSliderAppearance = updatePrivateOwnershipSliderAppe
                 if (referrerMainWrapper) referrerMainWrapper.style.display = 'block';
                 console.log('✅ Initialized referrers view');
             } else {
-                // Companies or locations view - show facility forms
+                // Companies or locations view - show data forms
                 if (facilityMainWrapper) facilityMainWrapper.style.display = 'block';
                 if (referrerMainWrapper) referrerMainWrapper.style.display = 'none';
                 console.log('✅ Initialized', activeCategory, 'view');

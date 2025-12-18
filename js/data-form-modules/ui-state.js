@@ -41,12 +41,14 @@ window.KOP_UI_State = {
     updateLabelsForProjectType: function() {
         const activeTab = document.querySelector('.category-tab.active');
         const category = activeTab ? activeTab.dataset.category : 'companies';
+        const profitStatus = document.querySelector('input[name="profitStatus"]:checked')?.value || 'for-profit';
 
         // Define default and referrer-specific labels
         const labels = {
             toolbarTitle: { default: '🔧 Toolbar', referrer: '🔧 Toolbar' },
-            operatorSectionTitle: { default: 'Operator Information', referrer: 'Group/Agency Information' },
-            operatorNameLabel: { default: 'Operator Name', referrer: 'Group/Agency Name' },
+            operatorSectionTitle: { default: 'Parent Company Information', referrer: 'Group/Agency Information' },
+            operatorNameLabel: { default: 'Parent Company Name', referrer: 'Group/Agency Name' },
+            currentOperatorLabel: { default: 'Current Parent Company', referrer: 'Current Agency' },
             facilitiesOverviewTitle: { default: 'Facilities Overview', referrer: 'Individuals Overview' },
             addFacilityButton: { default: 'Add New Facility', referrer: 'Add New' },
             addFacilityTOC: { default: 'Add New Facility', referrer: 'Add New' },
@@ -61,6 +63,13 @@ window.KOP_UI_State = {
             cloneModalTitle: { default: 'Clone', referrer: 'Clone' },
             cloneModalButton: { default: 'Clone', referrer: 'Clone' }
         };
+
+        // Override for Non-Profit
+        if (profitStatus === 'non-profit') {
+            labels.operatorSectionTitle.default = 'Parent Organization Information';
+            labels.operatorNameLabel.default = 'Parent Organization Name';
+            labels.currentOperatorLabel.default = 'Current Parent Organization';
+        }
 
         const setLabel = (elementId, text) => {
             const el = document.getElementById(elementId);
@@ -90,6 +99,7 @@ window.KOP_UI_State = {
         setLabelForQuery('#operator-section .section-title', labels.operatorSectionTitle[mode]);
         setLabelForQuery('#operator-name + .field-note-btn + .field-notes + label', labels.operatorNameLabel[mode]); // This is tricky, might need better selector
         setLabelForQuery('label[for="operator-name"]', labels.operatorNameLabel[mode]);
+        setLabelForQuery('#current-operator-label', labels.currentOperatorLabel[mode]);
 
         // Update TOC and Facility Controls
         setLabelForQuery('.facility-toc .toc-title', labels.facilitiesOverviewTitle[mode]);

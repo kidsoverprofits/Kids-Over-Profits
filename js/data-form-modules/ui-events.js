@@ -97,7 +97,15 @@
     }
 
     function attachFieldListeners() {
-        // This function will be populated with field-specific listeners
+        // Profit Status Toggle Listener
+        const profitRadios = document.querySelectorAll('input[name="profitStatus"]');
+        profitRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (window.KOP_UI_State && typeof window.KOP_UI_State.updateLabelsForProjectType === 'function') {
+                    window.KOP_UI_State.updateLabelsForProjectType();
+                }
+            });
+        });
     }
 
     function attachButtonListeners() {
