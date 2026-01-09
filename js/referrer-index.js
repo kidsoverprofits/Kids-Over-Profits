@@ -50,34 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function processData(projects) {
         const agencyMap = new Map();
-        const projectList = Object.values(projects);
-        
-        // DEBUG: Output count
-        const debugDiv = document.createElement('div');
-        debugDiv.style.background = '#ffe';
-        debugDiv.style.padding = '10px';
-        debugDiv.style.border = '1px solid #ccc';
-        debugDiv.style.marginBottom = '10px';
-        debugDiv.innerHTML = `<strong>Debug Info:</strong> Found ${projectList.length} total projects.<br>`;
-        document.getElementById(containerId).prepend(debugDiv);
 
-        let referrersCount = 0;
-
-        projectList.forEach(project => {
+        Object.values(projects).forEach(project => {
             const pData = project.data || {};
 
             // Only include entries from referrers_master table
             if (project._sourceTable !== 'referrers') {
                 return;
             }
-            referrersCount++;
-            
-            // Log specific projects we are looking for
-            if (project.name && (project.name.includes('Mary') || project.name.includes('Upwell'))) {
-                debugDiv.innerHTML += `Processing: ${project.name} (Source: ${project._sourceTable})<br>`;
-            }
-
-            // Robustly find referrer data: check root first, then data object
 
             // Robustly find referrer data: check root first, then data object
             const agency = project.referrerAgency || pData.referrerAgency || {};
@@ -89,16 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (ind) consultants = [ind];
             }
 
-            // Check if independent - FORCE FALSE TO DEBUG/FIX RENDERING
-            const isIndependent = false; 
-            /* 
-            project.isIndependentConsultant === true ||
+            // Check if independent
+            const isIndependent = project.isIndependentConsultant === true ||
                                   pData.isIndependentConsultant === true ||
                                   agency.isIndependent === true ||
                                   project.referrerType === 'individual' ||
                                   pData.referrerType === 'individual' ||
                                   (consultants.length === 1 && !agency.name);
-            */
 
             // Determine agency name
             let agencyName = cleanText(agency.name);
@@ -112,7 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 agencyMap.set(agencyName, {
                     name: agencyName,
                     location: agency.location || agency.state || '',
-                    consultants: []
+                    consultants: [],
+                    isIndependent: isIndependent // Track this for rendering if needed
                 });
             }
 
@@ -133,15 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 consultants.forEach(c => {
                     if (!c) return; // Skip invalid entries
 
-                    let cName;
-                    if (isIndependent) {
-                        // For an individual, just make the name match the project name
-                        cName = project.name;
-                    } else {
-                        cName = (c.firstName || '') + ' ' + (c.lastName || '');
-                        if (!cName.trim()) cName = c.fullName || '';
-                        if (!cName.trim() && consultants.length === 1) cName = project.name;
-                    }
+                    // UNIFIED NAME LOGIC: Always prefer specific name fields
+                    let cName = (c.firstName || '') + ' ' + (c.lastName || '');
+                    if (!cName.trim()) cName = c.fullName || '';
+                    if (!cName.trim()) cName = project.name; // Final fallback
 
                     // Construct better location string
                     let cLoc = '';
