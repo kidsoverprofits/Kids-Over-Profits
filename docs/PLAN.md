@@ -124,17 +124,17 @@ the new theme, the second cPanel repository `kop-data` deploys into
 `js/data/`, and the eleven commits made on the old repository later that
 day were replayed by path (old tip b7ea3dc5). Still open:
 
-1. **Secrets only the owner holds**: `CPANEL_TOKEN` on the new theme and
-   `kop-data` repositories (a cPanel API token; the host, user and root are
-   set); `KOP_DATA_TOKEN` on `kop-pipeline` (fine-grained, Contents read and
-   write on `kop-data`); a dispatch token (Actions read and write on
-   `kop-pipeline`) as `KOP_GITHUB_DISPATCH_TOKEN` in the server's
-   `api/config.local.php`, next to `KOP_NETWORK_REBUILD_REPO`. Until the
-   first two exist, a push deploys nothing by itself: deploy over SSH with
-   `uapi VersionControl update repository_root=... branch=main` then
-   `uapi VersionControlDeployment create repository_root=...`. Then press
-   Rebuild now at KOP Tools > Map Rebuild and follow the run in
-   `kop-pipeline`.
+1. (Done 2026-10-13.) The owner's secrets are in place and exercised: `CPANEL_TOKEN`
+   on both deploying repositories (push-deploys green), `KOP_DATA_TOKEN` on
+   `kop-pipeline` (the build's first step now dry-run pushes to `kop-data`,
+   so a token made by the wrong account fails in seconds with the fix named)
+   and the dispatch token in the server's `.env` next to
+   `KOP_NETWORK_REBUILD_REPO=kidsoverprofits/kop-pipeline` (the hourly check
+   and Rebuild now both start a `kop-pipeline` run; a fine-grained token
+   needs Actions: Read and write there, not only repository access).
+   Two tokens made under the old account are to be deleted at
+   github.com/settings/personal-access-tokens, and the duplicate
+   `public_html/.env` (a copy of the theme's, not web-readable) removed.
 2. **Old repositories**: another session was still committing to
    `carlygaejepsen/Kids-Over-Profits` on 2026-10-13, so it stays writable
    for now. A push there no longer reaches the site: replay its commits
