@@ -145,6 +145,8 @@ php scripts/test-operator-history-seed.php      # fill, replace untouched drafts
 # name in several towns, "Program <X> House" names and 3+ records sharing a 2-word start (each card says why, filter by it); an admin confirms each (new or existing program record), Undo deletes
 # a record it made if untouched. Program pages list homes + their news/lawsuits/serious findings; homes name their program;
 # company pages fold homes under it. Directory, map and search still list homes one by one (docs/PLAN.md)
+# Satellite homes of a main facility (names that share nothing): Program Homes > By hand picks the main record and each home; groups.satellite
+# words both pages "Satellite homes" / "One of N satellite homes of" (switch per group on Grouped, which also has "Add a home")
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-program-homes.php   # suggestions, group Newport Academy CA, pages, undo, on a temp copy
 # Parent companies that are one program (every record carries the company's own name, one state; inc/program-homes-convert.php): Program Homes >
 # Companies that are one program converts one: homes grouped under a program record, operator.history printed there (pencil phistory:<id>),

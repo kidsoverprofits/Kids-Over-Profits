@@ -3,7 +3,7 @@
  * Homes of a program (inc/program-homes.php) against the SQLite mirror of
  * production: the suggestions, grouping Newport Academy's California homes
  * under a new program record, the program page, a home page, the company
- * page, and Undo. The tables a grouping writes (facilities_v2, the identity
+ * page, Undo, and satellite homes tied to a main facility by hand. The tables a grouping writes (facilities_v2, the identity
  * and membership tables, the two program tables) are copied into a temp
  * database; everything else is read from tmp/prod.sqlite attached beside it,
  * so the mirror is never written.
@@ -44,7 +44,7 @@ $copy->exec("CREATE TRIGGER facilities_v2_cols AFTER INSERT ON facilities_v2 BEG
         start_year = json_extract(NEW.json_data, '$.operatingPeriod.startYear'), end_year = json_extract(NEW.json_data, '$.operatingPeriod.endYear')
     WHERE id = NEW.id; END");
 $copy->exec('CREATE TABLE wpdl_kop_program_homes (home_id INTEGER PRIMARY KEY, program_id INTEGER NOT NULL, home_name TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');
-$copy->exec('CREATE TABLE wpdl_kop_program_groups (program_id INTEGER PRIMARY KEY, created_record INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, created_by INTEGER NOT NULL DEFAULT 0)');
+$copy->exec('CREATE TABLE wpdl_kop_program_groups (program_id INTEGER PRIMARY KEY, created_record INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, created_by INTEGER NOT NULL DEFAULT 0, satellite INTEGER NOT NULL DEFAULT 0)');
 $copy = null;
 
 require __DIR__ . '/kop-test-harness.php';
@@ -239,6 +239,56 @@ if ($keep) {
     $check('an existing record can be the program', $pid2 === $keep['existing']['id'], $keep['program_name']);
     $check('undo keeps a record it did not make', kop_program_homes_undo($pid2) === 'kept' && (int) $wpdb->get_var("SELECT COUNT(*) FROM facilities_v2 WHERE id = $pid2") === 1);
 }
+
+// ---------------------------------------------------------------------------
+echo "\n-- Satellite homes (by hand) --\n";
+// A main facility and homes whose names share nothing: CA records
+// in no group, the main one the oldest id.
+$free = array_map('intval', $wpdb->get_col("SELECT id FROM facilities_v2 WHERE state = 'CA' AND name <> '' ORDER BY id LIMIT 400"));
+$grouped = kop_program_homes_grouped_ids();
+$free = array_values(array_filter($free, function ($id) use ($grouped) { return !isset($grouped[$id]) && !kop_program_homes_homes_of($id) && !kop_program_homes_program_of($id); }));
+list($main, $sat1, $sat2) = array_slice($free, 0, 3);
+$before = (int) $wpdb->get_var('SELECT COUNT(*) FROM facilities_v2');
+$got = kop_program_homes_group(array($sat1 => 'North House', $sat2 => 'South House'), $main, '', $opts + array('satellite' => true));
+$check('the main facility is the program, no record made', $got === $main && (int) $wpdb->get_var('SELECT COUNT(*) FROM facilities_v2') === $before);
+$check('the group is marked satellite', kop_program_homes_is_satellite($main));
+$check('both homes point at the main facility', (kop_program_homes_program_of($sat1)[0] ?? 0) === $main && (kop_program_homes_program_of($sat2)[0] ?? 0) === $main);
+kop_facility_pages_index(true);
+$mdata = kop_facility_page_data($main);
+$check('the main page data says satellite', !empty($mdata['program_homes']['satellite']));
+$html = $render('facility-page.php', 'kop_facility_page', $mdata);
+file_put_contents($out_dir . '/satellite-main.html', $html);
+$check('the main page says "Main facility of 2 satellite homes"', strpos($html, 'Main facility of 2 satellite homes') !== false);
+$check('the main page heads its list "Satellite homes"', strpos($html, '<h2>Satellite homes</h2>') !== false && strpos($html, 'Homes run from this facility') !== false);
+$check('the main page does not say licensed home by home', strpos($html, 'licenses this program home by home') === false);
+$sdata = kop_facility_page_data($sat1);
+$html = $render('facility-page.php', 'kop_facility_page', $sdata);
+file_put_contents($out_dir . '/satellite-home.html', $html);
+$check('a satellite home says "One of 2 satellite homes of"', strpos($html, 'One of 2 satellite homes of') !== false);
+$check('a satellite home lists the other one', strpos($html, 'Other satellite homes of') !== false && count($sdata['home_of']['others']) === 1);
+$check('a satellite home links "The main facility"', strpos($html, 'The main facility, with every') !== false);
+
+// Adding a home later keeps the wording; a record with homes cannot be a home.
+$sat3 = $free[3];
+kop_program_homes_group(array($sat3 => 'West House'), $main, '', $opts);
+$check('a home added later joins, still satellite', count(kop_program_homes_homes_of($main)) === 3 && kop_program_homes_is_satellite($main));
+$refused = false;
+try { kop_program_homes_group(array($main => 'x'), $free[4], '', $opts); } catch (RuntimeException $e) { $refused = true; }
+$check('a main facility with homes cannot be made a home', $refused && !kop_program_homes_program_of($main));
+$refused = false;
+try { kop_program_homes_group(array($main => 'x'), $main, '', $opts); } catch (RuntimeException $e) { $refused = true; }
+$check('a facility cannot be its own home', $refused);
+
+kop_program_homes_set_satellite($main, false);
+$check('the wording switch turns satellite off', !kop_program_homes_is_satellite($main));
+kop_facility_pages_index(true);
+$html = $render('facility-page.php', 'kop_facility_page', kop_facility_page_data($main));
+$check('then the page says "A program of 3 licensed homes"', strpos($html, 'A program of 3 licensed homes') !== false);
+kop_program_homes_set_satellite($main, true);
+
+$check('undo keeps the main facility and unties its homes', kop_program_homes_undo($main) === 'kept' && !kop_program_homes_homes_of($main) && !kop_program_homes_program_of($sat1)
+    && (int) $wpdb->get_var("SELECT COUNT(*) FROM facilities_v2 WHERE id = $main") === 1);
+$check('undo clears the satellite mark', !kop_program_homes_is_satellite($main));
 
 register_shutdown_function(function () use ($db_path) {
     try { @unlink($db_path); } catch (Throwable $e) {}

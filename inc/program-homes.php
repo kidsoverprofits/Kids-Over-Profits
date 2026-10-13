@@ -10,7 +10,12 @@
  * rebuilds the identification block from known fields) can never drop it:
  *
  *   {prefix}kop_program_homes    home_id (PK), program_id, home_name
- *   {prefix}kop_program_groups   program_id (PK), created_record, created_at, created_by
+ *   {prefix}kop_program_groups   program_id (PK), created_record, created_at, created_by, satellite
+ *
+ * satellite = 1: the program record is a facility of its own (a main campus)
+ * and the homes are its satellite homes, run from it; the pages say so
+ * ("Satellite homes", "Satellite home of ..."). Set when an admin ties homes
+ * to a main facility by hand (the By hand tab) or switches a group's wording.
  *
  * A program page lists its homes and adds their news, lawsuits and approved
  * serious findings to its own; a home page says which program it belongs to
@@ -28,7 +33,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('KOP_PROGRAM_HOMES_DB_VERSION')) {
-    define('KOP_PROGRAM_HOMES_DB_VERSION', '1');
+    define('KOP_PROGRAM_HOMES_DB_VERSION', '2');
 }
 
 // ---------------------------------------------------------------------------
@@ -61,8 +66,12 @@ if (!function_exists('kop_program_homes_install')) {
             created_record TINYINT(1) NOT NULL DEFAULT 0,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            satellite TINYINT(1) NOT NULL DEFAULT 0,
             PRIMARY KEY (program_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        if (!$wpdb->get_var("SHOW COLUMNS FROM {$groups} LIKE 'satellite'")) {
+            $wpdb->query("ALTER TABLE {$groups} ADD COLUMN satellite TINYINT(1) NOT NULL DEFAULT 0");
+        }
         update_option('kop_program_homes_db', KOP_PROGRAM_HOMES_DB_VERSION, false);
     }
     add_action('admin_init', 'kop_program_homes_install');
@@ -91,7 +100,7 @@ if (!function_exists('kop_program_homes_map')) {
     function kop_program_homes_map($refresh = false) {
         static $memo = null;
         if ($memo !== null && !$refresh) return $memo;
-        $memo = array('homes' => array(), 'programs' => array());
+        $memo = array('homes' => array(), 'programs' => array(), 'satellite' => array());
         if (!kop_program_homes_ready()) return $memo;
         global $wpdb;
         $rows = $wpdb->get_results(
@@ -108,6 +117,16 @@ if (!function_exists('kop_program_homes_map')) {
             $memo['homes'][$home] = array($program, (string) $r['home_name']);
             $memo['programs'][$program][] = $home;
         }
+        // Main facilities with satellite homes (the column comes with DB version 2;
+        // until admin_init adds it, no group is one).
+        $quiet = $wpdb->suppress_errors(true);
+        try {
+            foreach ((array) $wpdb->get_col('SELECT program_id FROM ' . kop_program_homes_table('groups') . ' WHERE satellite = 1') as $pid) {
+                if (isset($memo['programs'][(int) $pid])) $memo['satellite'][(int) $pid] = true;
+            }
+        } catch (Throwable $e) {
+        }
+        $wpdb->suppress_errors($quiet);
         return $memo;
     }
 }
@@ -128,13 +147,23 @@ if (!function_exists('kop_program_homes_homes_of')) {
     }
 }
 
+if (!function_exists('kop_program_homes_is_satellite')) {
+    /** True when the program record is a main facility and its homes are satellite homes. */
+    function kop_program_homes_is_satellite($program_id) {
+        $map = kop_program_homes_map();
+        return !empty($map['satellite'][(int) $program_id]);
+    }
+}
+
 if (!function_exists('kop_program_homes_cache_key')) {
     /** Part of kop_facility_pages_fingerprint(): a grouping changes pages. */
     function kop_program_homes_cache_key() {
         if (!kop_program_homes_ready()) return '-';
         global $wpdb;
         $row = $wpdb->get_row('SELECT COUNT(*), MAX(home_id), SUM(program_id) FROM ' . kop_program_homes_table('homes'), ARRAY_N);
-        return is_array($row) ? implode('|', array_map('strval', $row)) : '?';
+        // The wording follows the satellite flag, so it moves the key too.
+        $sat = implode(',', array_keys(kop_program_homes_map()['satellite']));
+        return (is_array($row) ? implode('|', array_map('strval', $row)) : '?') . '|s' . md5($sat);
     }
 }
 
@@ -575,6 +604,9 @@ if (!function_exists('kop_program_homes_group')) {
      * Ties $homes (home_id => home name) to a program: $program_id when given
      * (an existing record), else a new record named $name. Returns the
      * program id. A home already in another group moves to this one.
+     * $opts['satellite'] (true/false) sets the group's wording: satellite
+     * homes of a main facility, or homes of a program; left out, an existing
+     * group keeps its own.
      */
     function kop_program_homes_group(array $homes, $program_id, $name, array $opts) {
         global $wpdb;
@@ -582,6 +614,10 @@ if (!function_exists('kop_program_homes_group')) {
         $program_id = (int) $program_id;
         unset($homes[$program_id]);
         if (count($homes) < 1) throw new RuntimeException('Tick at least one home.');
+        // Homes are one level deep: a record with homes of its own is not a home.
+        foreach (array_keys($homes) as $hid) {
+            if (kop_program_homes_homes_of((int) $hid)) throw new RuntimeException('#' . (int) $hid . ' has homes of its own; take them out (Grouped tab) before making it a home.');
+        }
         $created = false;
         if ($program_id <= 0) {
             list($program_id, $created) = kop_program_homes_create_program($name, array_keys($homes), $opts);
@@ -590,6 +626,7 @@ if (!function_exists('kop_program_homes_group')) {
         }
         if ($program_id <= 0) throw new RuntimeException('The program record could not be made.');
         unset($homes[$program_id]);
+        if (count($homes) < 1) throw new RuntimeException('A facility cannot be its own home.');
         $ht = kop_program_homes_table('homes');
         $gt = kop_program_homes_table('groups');
         foreach ($homes as $hid => $home_name) {
@@ -599,14 +636,27 @@ if (!function_exists('kop_program_homes_group')) {
         // A program cannot also be someone's home.
         $wpdb->query($wpdb->prepare("DELETE FROM {$ht} WHERE home_id = %d", $program_id));
         if (!$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$gt} WHERE program_id = %d", $program_id))) {
-            $wpdb->insert($gt, array(
+            $row = array(
                 'program_id'     => $program_id,
                 'created_record' => $created ? 1 : 0,
                 'created_by'     => function_exists('get_current_user_id') ? (int) get_current_user_id() : 0,
-            ));
+            );
+            if (!empty($opts['satellite'])) $row['satellite'] = 1;
+            $wpdb->insert($gt, $row);
+        } elseif (isset($opts['satellite'])) {
+            $wpdb->query($wpdb->prepare("UPDATE {$gt} SET satellite = %d WHERE program_id = %d", $opts['satellite'] ? 1 : 0, $program_id));
         }
         kop_program_homes_after_change();
         return $program_id;
+    }
+}
+
+if (!function_exists('kop_program_homes_set_satellite')) {
+    /** Words a group as satellite homes of a main facility ($on) or as homes of a program. */
+    function kop_program_homes_set_satellite($program_id, $on) {
+        global $wpdb;
+        $wpdb->query($wpdb->prepare('UPDATE ' . kop_program_homes_table('groups') . ' SET satellite = %d WHERE program_id = %d', $on ? 1 : 0, (int) $program_id));
+        kop_program_homes_after_change();
     }
 }
 
@@ -733,7 +783,8 @@ if (!function_exists('kop_program_homes_rollup')) {
     function kop_program_homes_rollup($program_id, $state_code, array $own = array()) {
         global $wpdb;
         $home_ids = kop_program_homes_homes_of($program_id);
-        $out = array('homes' => array(), 'news' => array(), 'lawsuits' => array(), 'violations' => array(), 'reports' => 0);
+        $out = array('homes' => array(), 'news' => array(), 'lawsuits' => array(), 'violations' => array(), 'reports' => 0,
+            'satellite' => kop_program_homes_is_satellite($program_id));
         if (!$home_ids) return $out;
         $out['homes'] = kop_program_homes_home_rows($home_ids);
         $label = array();
@@ -844,6 +895,7 @@ if (!function_exists('kop_program_homes_for_home')) {
         return array(
             'program'   => array('id' => $program_id, 'name' => $name, 'url' => function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($program_id) : ''),
             'home_name' => $home_name,
+            'satellite' => kop_program_homes_is_satellite($program_id),
             'count'     => count($others) + 1,
             'others'    => kop_program_homes_home_rows($others),
         );
@@ -926,8 +978,22 @@ if (!function_exists('kop_program_homes_handle_post')) {
                 }
                 $program = (string) ($_POST['program'] ?? 'new');
                 $name = sanitize_text_field(wp_unslash($_POST['program_name'] ?? ''));
-                $pid = kop_program_homes_group($homes, ctype_digit($program) ? (int) $program : 0, $name, kop_program_homes_opts());
-                $msg = 'Grouped ' . count($homes) . ' homes under #' . $pid . ' ' . $name . '.';
+                $opts = kop_program_homes_opts();
+                if (isset($_POST['satellite'])) $opts['satellite'] = $_POST['satellite'] === '1';
+                if (ctype_digit($program)) {
+                    // A main facility picked by hand that is itself someone's home.
+                    $up = kop_program_homes_program_of((int) $program);
+                    if ($up) throw new RuntimeException('#' . (int) $program . ' is a home of #' . (int) $up[0] . '; take it out of that group first (Grouped tab).');
+                    if ($name === '') {
+                        global $wpdb;
+                        $name = (string) $wpdb->get_var($wpdb->prepare('SELECT name FROM facilities_v2 WHERE id = %d', (int) $program));
+                    }
+                }
+                $pid = kop_program_homes_group($homes, ctype_digit($program) ? (int) $program : 0, $name, $opts);
+                $msg = (kop_program_homes_is_satellite($pid) ? 'Tied ' . count($homes) . ' satellite ' . (count($homes) === 1 ? 'home' : 'homes') . ' to #' : 'Grouped ' . count($homes) . ' homes under #') . $pid . ' ' . $name . '.';
+            } elseif ($do === 'set_satellite') {
+                kop_program_homes_set_satellite((int) ($_POST['program_id'] ?? 0), ($_POST['satellite'] ?? '') === '1');
+                $msg = ($_POST['satellite'] ?? '') === '1' ? 'Its pages now say "satellite homes" of the main facility.' : 'Its pages now say "homes" of the program.';
             } elseif ($do === 'dismiss' || $do === 'undismiss') {
                 kop_program_homes_set_dismissed(sanitize_text_field(wp_unslash($_POST['key'] ?? '')), $do === 'dismiss');
                 $msg = $do === 'dismiss' ? 'Marked as not one program.' : 'Back in the suggestions.';
@@ -989,6 +1055,7 @@ if (!function_exists('kop_program_homes_page')) {
             <nav class="nav-tab-wrapper">
                 <a class="nav-tab<?php echo $tab === 'suggested' ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url($base); ?>">Suggested (<?php echo count($suggestions); ?>)</a>
                 <a class="nav-tab<?php echo $tab === 'grouped' ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=grouped'); ?>">Grouped (<?php echo count($map['programs']); ?>)</a>
+                <a class="nav-tab<?php echo $tab === 'byhand' ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=byhand'); ?>">By hand (satellite homes)</a>
                 <?php if ($conv) : ?>
                 <a class="nav-tab<?php echo $tab === 'companies' ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=companies'); ?>">Companies that are one program (<?php echo count($companies); ?>)</a>
                 <a class="nav-tab<?php echo $tab === 'converted' ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=converted'); ?>">Converted (<?php echo count($converted); ?>)</a>
@@ -1007,6 +1074,8 @@ if (!function_exists('kop_program_homes_page')) {
             <?php
             if ($tab === 'grouped') {
                 kop_program_homes_page_grouped($map, $q, $hidden);
+            } elseif ($tab === 'byhand') {
+                kop_program_homes_page_byhand($hidden);
             } elseif (($tab === 'campus' || $tab === 'campus_suggested') && $campus) {
                 kop_campus_page_tab($tab, $q, $hidden);
             } elseif ($tab === 'companies' && $conv) {
@@ -1085,7 +1154,74 @@ if (!function_exists('kop_program_homes_page')) {
             .kop-ph-card .kop-ph-actions label { margin-right: 8px; }
             .kop-ph-count, .kop-ph-pages { color: #4A5568; }
             .kop-ph-why { margin: 8px 0; }
+            .kop-ph-picked { margin: 6px 0 10px; }
+            .kop-ph-picked:empty { display: none; }
+            .kop-ph-card fieldset { margin: 10px 0; }
+            .kop-ph-card fieldset label { display: block; margin: 4px 0; }
+            .kop-ph-add { margin-top: 8px; }
         </style>
+        <script>
+        // Each home picked in a finder (inc/facility-finder.php, multi) becomes a
+        // row of its form: ticked, with its name as the home's name.
+        document.addEventListener('kop-facility-picked', function (e) {
+            var form = e.target.closest('form');
+            var list = form && form.querySelector('.kop-ph-picked');
+            if (!list) return;
+            var f = e.detail, id = parseInt(f.id, 10);
+            if (!id || list.querySelector('[data-id="' + id + '"]')) return;
+            var tr = document.createElement('tr');
+            tr.setAttribute('data-id', id);
+            var c1 = document.createElement('td'), c2 = document.createElement('td'), c3 = document.createElement('td');
+            c1.style.width = '24px';
+            var box = document.createElement('input');
+            box.type = 'checkbox'; box.name = 'home[' + id + ']'; box.value = '1'; box.checked = true;
+            box.setAttribute('aria-label', 'Include ' + f.name);
+            c1.appendChild(box);
+            c2.style.width = '40%';
+            var nm = document.createElement('input');
+            nm.type = 'text'; nm.name = 'home_name[' + id + ']'; nm.value = f.name;
+            nm.setAttribute('aria-label', 'Home name');
+            c2.appendChild(nm);
+            c3.textContent = f.name + ' ';
+            var meta = document.createElement('span');
+            meta.className = 'kop-ph-meta';
+            meta.textContent = ['#' + id, f.city, f.state].filter(Boolean).join(' ');
+            c3.appendChild(meta);
+            tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3);
+            list.appendChild(tr);
+            var btn = form.querySelector('.kop-ph-submit');
+            if (btn) btn.disabled = false;
+        });
+        </script>
+        <?php
+    }
+}
+
+if (!function_exists('kop_program_homes_page_byhand')) {
+    /**
+     * Ties homes whose names give nothing away to a main facility: pick the
+     * main record, then each home. The main record keeps its own page; the
+     * homes keep theirs and name it.
+     */
+    function kop_program_homes_page_byhand(callable $hidden) {
+        $finder = function_exists('kop_facility_finder_field');
+        ?>
+        <div class="kop-ph-card">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <?php $hidden(array('do' => 'group')); ?>
+                <h2>Satellite homes of a main facility</h2>
+                <p class="kop-ph-meta">For homes the suggestions cannot find because their names do not start with the program's. Pick the main facility, then each home. Every record keeps its own page, licence and inspection reports. The main facility's page lists its satellite homes, with their news, lawsuits and serious findings. Each home's page names the main facility. To undo it, use the Grouped tab: <em>Take out</em> one home or <em>Undo this group</em>.</p>
+                <p><label>Main facility <?php echo $finder ? kop_facility_finder_field('program', '', ' required') : '<input type="number" name="program" min="1" required>'; ?></label></p>
+                <p><label>Homes <?php echo $finder ? kop_facility_finder_field('', '', '', true) : ''; ?></label></p>
+                <table class="kop-ph-picked"></table>
+                <fieldset>
+                    <legend>On the pages, call them</legend>
+                    <label><input type="radio" name="satellite" value="1" checked> Satellite homes of the main facility (it is a campus or program site of its own)</label>
+                    <label><input type="radio" name="satellite" value="0"> Homes of the program (the main record stands for the whole program)</label>
+                </fieldset>
+                <button type="submit" class="button button-primary kop-ph-submit" disabled>Tie these homes to the main facility</button>
+            </form>
+        </div>
         <?php
     }
 }
@@ -1167,9 +1303,21 @@ if (!function_exists('kop_program_homes_page_grouped')) {
                 $hidden(array('do' => 'remove_home', 'home_id' => $hid));
                 echo '<button class="button-link">Take out</button></form></td></tr>';
             }
-            echo '</tbody></table><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+            echo '</tbody></table>';
+            $sat = !empty($map['satellite'][$pid]);
+            echo '<p class="kop-ph-meta">The pages call them <strong>' . ($sat ? 'satellite homes of this facility' : 'homes of this program') . '</strong>.</p>';
+            if (function_exists('kop_facility_finder_field')) {
+                echo '<form method="post" class="kop-ph-add" action="' . esc_url(admin_url('admin-post.php')) . '">';
+                $hidden(array('do' => 'group', 'program' => $pid, 'program_name' => $names[$pid] ?? ''));
+                echo '<label>Add a home ' . kop_facility_finder_field('', '', '', true) . '</label><table class="kop-ph-picked"></table>'
+                    . '<button type="submit" class="button kop-ph-submit" disabled>Add</button></form>';
+            }
+            echo '<div class="kop-ph-actions" style="margin-top:8px"><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+            $hidden(array('do' => 'set_satellite', 'program_id' => $pid, 'satellite' => $sat ? '0' : '1'));
+            echo '<button class="button">' . ($sat ? 'Call them homes of the program' : 'Call them satellite homes of this facility') . '</button></form>';
+            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
             $hidden(array('do' => 'undo', 'program_id' => $pid));
-            echo '<button class="button">Undo this group</button></form></div>';
+            echo '<button class="button">Undo this group</button></form></div></div>';
         }
     }
 }
