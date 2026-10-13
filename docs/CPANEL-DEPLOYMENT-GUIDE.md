@@ -82,9 +82,9 @@ two never overwrite each other's files.
 2. Delete the broken repository
 3. Click "Create" and re-clone from GitHub
 4. URL: `https://github.com/kidsoverprofits/Kids-Over-Profits.git`
-5. Path: `/home/kidsover/repositories/kids-over-profits`
+5. Path: `/home/kidsover/repositories/Kids-Over-Profits`
 
-Over SSH the same thing is `cd /home/kidsover/repositories/kids-over-profits
+Over SSH the same thing is `cd /home/kidsover/repositories/Kids-Over-Profits
 && git fetch origin && git reset --hard origin/main`, which is also how the
 checkout was moved onto the rewritten history of 2026-10-13 (a pull cannot
 fast-forward across a rewrite).

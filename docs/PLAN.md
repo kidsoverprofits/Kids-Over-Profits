@@ -127,7 +127,7 @@ cutover, in this order:
    `CPANEL_REPO_ROOT`; `kop-pipeline`: `KOP_SSH_KEY`, `KOP_SSH_KNOWN_HOSTS`,
    `KOP_DATA_TOKEN`); make the two fine-grained tokens (`KOP_DATA_TOKEN`:
    Contents on `kop-data`; the dispatch token: Actions on `kop-pipeline`).
-2. **Server**: in `/home/kidsover/repositories/kids-over-profits`, point
+2. **Server**: in `/home/kidsover/repositories/Kids-Over-Profits`, point
    `origin` at the new theme URL and `git fetch origin && git reset --hard
    origin/main` (the history was rewritten, a pull cannot fast-forward);
    run the theme's deploy. In cPanel > Git Version Control, create a second
