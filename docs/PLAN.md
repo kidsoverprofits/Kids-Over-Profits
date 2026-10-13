@@ -112,6 +112,43 @@ Actions only the owner can take (admin browser sessions, hosting, editorial
 calls). Tools that change data show a dry run first; add `?apply=1` to act.
 The date is when each was last confirmed open.
 
+### Repository split (2026-10-13)
+
+The repository was cut into four (`CLAUDE.md`, "Related repositories";
+`docs/REPOSITORY-MAP.md`): this theme, `kop-data` (the datasets, public),
+`kop-pipeline` (builders, scrapers, research tools, private) and
+`kop-send-to-kop` (the extension), all under a new GitHub account. The
+rewritten repositories were built and checked locally; what remains is the
+cutover, in this order:
+
+1. **GitHub**: create the four repositories under the new account (no
+   README), push each rewritten `main`; add the Actions secrets (theme and
+   `kop-data`: `CPANEL_HOST`, `CPANEL_USER`, `CPANEL_TOKEN`,
+   `CPANEL_REPO_ROOT`; `kop-pipeline`: `KOP_SSH_KEY`, `KOP_SSH_KNOWN_HOSTS`,
+   `KOP_DATA_TOKEN`); make the two fine-grained tokens (`KOP_DATA_TOKEN`:
+   Contents on `kop-data`; the dispatch token: Actions on `kop-pipeline`).
+2. **Server**: in `/home/kidsover/repositories/kids-over-profits`, point
+   `origin` at the new theme URL and `git fetch origin && git reset --hard
+   origin/main` (the history was rewritten, a pull cannot fast-forward);
+   run the theme's deploy. In cPanel > Git Version Control, create a second
+   repository from `kop-data` at `/home/kidsover/repositories/kop-data` and
+   put that path in its `CPANEL_REPO_ROOT`; run its deploy; confirm
+   `js/data/network/graph.json` still serves. In `api/config.local.php` add
+   `KOP_NETWORK_REBUILD_REPO` (`kidsoverprofits/kop-pipeline`) and the new
+   `KOP_GITHUB_DISPATCH_TOKEN`; press Rebuild now at KOP Tools > Map Rebuild.
+3. **Old repositories**: archive `carlygaejepsen/Kids-Over-Profits` and
+   `Kids-Over-Profits-Tools` (Settings > Archive). Their commit SHAs, cited
+   in this file and in older notes, keep resolving there.
+4. **This machine**: clone the four under `source\repos\`; move the old
+   checkout's `tmp/` (8 GB of research scratch and the mirror) to
+   `kop-pipeline/tmp/`; run `scripts\link-data.ps1` in the theme; repoint
+   the Windows task "KOP Fornits" to
+   `kop-pipeline\scripts\fornits-process.py`; copy the four uncommitted
+   scraper files from the OneDrive Tools checkout (`STATE_SCRAPER_GUIDE.md`,
+   `fl_scraper.py`, `or_scraper.py`, `scraper_launcher.py`) into
+   `kop-pipeline/scrapers/` and commit them; then delete the OneDrive
+   checkout.
+
 ### Admin runs
 
 1. (Done 2026-09-29, no action: Severe Reports joins the Monitor menu

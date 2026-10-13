@@ -159,8 +159,8 @@ The old `nc_scraper.py` matcher filed adult-only facilities and posted one facil
 
 ## Scrapers
 
-- No scraper lives in this repo any more (`scripts/mn_scraper.py` was removed on 2026-06-01). The state scrapers (`<xx>_scraper.py`, `scraper_launcher.py`, the shared `inspection_api_client.py` that POSTs to `api/inspections-write.php`) and `STATE_SCRAPER_GUIDE.md` are in the companion Kids-Over-Profits-Tools repo.
-- `scripts/sync-prod-sqlite.py` copies production into `tmp/prod.sqlite` for offline work on these tables.
+- No scraper lives in this repo any more (`scripts/mn_scraper.py` was removed on 2026-06-01). The state scrapers (`<xx>_scraper.py`, `scraper_launcher.py`, the shared `inspection_api_client.py` that POSTs to `api/inspections-write.php`) and `STATE_SCRAPER_GUIDE.md` are `kop-pipeline/scrapers/` (the former Kids-Over-Profits-Tools repo); the per-state research plans are `kop-pipeline/docs/state-inspection-reports/plans/`.
+- `kop-pipeline/scripts/sync-prod-sqlite.py` copies production into `tmp/prod.sqlite` for offline work on these tables.
 
 ## Tests
 

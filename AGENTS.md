@@ -11,15 +11,21 @@ This repository is the Kids Over Profits WordPress child theme. Treat it as the 
 - Database: MySQL, WordPress table prefix `wpdl_`; a second "records" database for news, lawsuits, legislation and the memorial (see `DATABASE-COLUMNS.md`)
 - Theme stack: Kadence parent theme plus this child theme
 - Infrastructure in play: Wordfence WAF and LiteSpeed Cache
-- No Node on the server: `scripts/*.js` builds run locally or on GitHub Actions
+- No Node on the server: the builds run locally or on GitHub Actions, from the `kop-pipeline` repo
 - Access constraint: no production credentials live in the repo
 
 ### Repo Assumptions
 - This repo may be checked out standalone and mounted into a WordPress install separately.
 - Do not assume sibling `wp-admin`, `wp-content/plugins`, or Flywheel Local directories exist next to this checkout.
 - Prefer WordPress path helpers such as `get_stylesheet_directory()` and `get_stylesheet_directory_uri()` over hard-coded local paths.
-- Offline tests run against `tmp/prod.sqlite`, a SQLite mirror of production (`scripts/sync-prod-sqlite.py`).
+- Offline tests run against `tmp/prod.sqlite`, a SQLite mirror of production made by `kop-pipeline/scripts/sync-prod-sqlite.py`; `tmp/` here is a junction to the pipeline's `tmp/`.
 - For environment specifics, see `environment-summary.md`.
+
+### The four repositories (since 2026-10-13)
+- `Kids-Over-Profits` (this one, public): the theme, its tests and the scripts the server runs.
+- `kop-data` (public, CC BY-SA): the site's `js/data/` except `pages/` and `glossary/`; deployed into that folder on the server by its own `.cpanel.yml`, linked here by `scripts/link-data.ps1`.
+- `kop-pipeline` (private): builders, importers, research tools, the state scrapers (`scrapers/`, formerly Kids-Over-Profits-Tools), `markdown_output/`, the map rebuild workflow. Commands marked `(kop-pipeline)` in `CLAUDE.md` run there.
+- `kop-send-to-kop` (public): the browser extension. The mobile app is `kids-over-profits-mobile`.
 
 ## Adding Something New
 
@@ -83,10 +89,10 @@ Read `docs/ADDING-CONTENT.md` before adding a data category, facility field, pag
 - `templates/` contains every page template (there are no root `page-*.php` files) and the generated-page templates.
 - `js/` contains page entry points, data-form modules, inspection renderers, the network map and helper libraries.
 - `css/` contains the shared palette (`colors.css`) and page-specific stylesheets.
-- `scripts/` contains data pipelines, importers, builders and the offline test scripts.
+- `scripts/` contains the offline tests, the page checks and the scripts the server runs; builders and importers are in `kop-pipeline`.
 - `seeds/` contains data applied once per version on deploy.
 - `docs/` contains focused workflow docs; `docs/PLAN.md` is the single list of open work.
-- `wp-plugins/kop-tools/` is the KOP Tools admin plugin; `browser-extension/send-to-kop/` the Send to KOP extension.
+- `wp-plugins/kop-tools/` is the KOP Tools admin plugin; the Send to KOP extension is the `kop-send-to-kop` repo.
 
 ### Key Root Files
 - `style.css` contains the WordPress child theme header.
@@ -148,7 +154,7 @@ Read `docs/ADDING-CONTENT.md` before adding a data category, facility field, pag
 - The primary data source is `api/inspections-read.php?state=XX` (`?lite=1` lists, report text on open).
 - Static JSON files in `js/data/` remain fallback or historical snapshots for some states (CA, UT, AZ, CT, WA, MT, MN).
 - `api/inspections-write.php` is the write endpoint for scraper output (protected by `KOP_DATA_API_KEY`).
-- No scrapers live in this repo: they are in the companion Kids-Over-Profits-Tools repo.
+- No scrapers live in this repo: they are `kop-pipeline/scrapers/` (formerly the Kids-Over-Profits-Tools repo).
 - Scraped report PDFs stay in link-shared Drive folders; `api/sync-inspection-archive.php` writes an index of their links.
 
 ## Program Data Pipeline
@@ -184,8 +190,7 @@ node scripts/aggregate-all-programs.js
 ## Scripts and Tooling
 
 - `CLAUDE.md` lists every build, import and test command; most tests are `scripts/test-*.php` run offline against `tmp/prod.sqlite` with Local's `php.exe`.
-- `scripts/aggregate-all-programs.js` rebuilds the program name lists used by the auto-linker.
-- `scripts/build-network-graph.js` / `scripts/test-network-graph.js` build and check the network map.
+- The builders (`aggregate-all-programs.js` for the auto-linker's lists, `build-network-graph.js` for the map, ...) are in `kop-pipeline` and write into `kop-data` and `seeds/` here.
 - Keep generated JSON artifacts and their producing scripts in sync when changing these pipelines.
 
 ## Collaboration Preferences

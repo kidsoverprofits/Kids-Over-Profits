@@ -3,25 +3,31 @@
 Baseline: 2026-09-24. Templates, routes and the tools repository's scrapers
 checked against the code on 2026-10-13.
 
-This workspace contains two related repositories. The web repository is the
-WordPress child theme and application source. The tools repository contains
-the Python scrapers that collect inspection data and post it to the web
-repository's API.
+Since 2026-10-13 the work is split over four repositories, cloned next to each
+other under `source\repos\`. The web repository is the WordPress child theme.
+The data repository is what the theme reads as `js/data/`. The pipeline
+repository holds every builder, importer, research tool and the state
+scrapers (formerly the separate Kids-Over-Profits-Tools repository). The
+extension is its own small repository.
 
 ## Repository Relationship
 
 ```text
-Kids-Over-Profits-Tools
-  state scrapers and inspection utilities
-             |
-             | HTTPS JSON writes
-             v
-Kids-Over-Profits
-  WordPress child theme, APIs, templates, datasets, and documentation
-             |
-             | deployed through cPanel / GitHub Actions
-             v
-  kidsoverprofits.org
+kop-pipeline (private)
+  builders, importers, research tools, scrapers/ (state inspection scrapers)
+      |                      |                         |
+      | writes seeds/        | writes datasets         | HTTPS JSON writes
+      v                      v                         v
+Kids-Over-Profits         kop-data               api/inspections-write.php
+  theme, APIs, templates    js/data/ of the site        (on the live site)
+      |                      |
+      | cPanel deploy        | cPanel deploy (second repository)
+      v                      v
+         kidsoverprofits.org (the theme folder, js/data/ filled by kop-data)
+
+kop-send-to-kop: the browser extension, talks to kop/v1/mobile/* and /extension/*
+kids-over-profits-mobile: the app, talks to kop/v1/facility|operator|news
+Kids-Over-Profits-archive (old account): the history before the split
 ```
 
 ## Web Repository
@@ -42,12 +48,12 @@ provided by the hosting environment.
 | `api/` | Procedural CRUD, submission, inspection, diagnostic, and maintenance endpoints | `api/` |
 | `css/` | Shared palette, layout, component, and page-specific styles | `css/colors.css`, `css/` |
 | `js/` | Vanilla JavaScript page entry points and shared modules | `js/inspections/`, `js/data-form/`, `js/network-map/` |
-| `js/data/` | Packaged and generated datasets used as API fallbacks or page sources | `js/data/` |
-| `scripts/` | Data builders, migration helpers, offline render tests, and production mirror tools | `scripts/` |
+| `js/data/` | Only `pages/` and `glossary/` (page content edited on the site). The datasets are the `kop-data` repository, deployed into this folder on the server and linked here by `scripts/link-data.ps1` | `js/data/pages/` |
+| `scripts/` | Offline render tests, page checks, and the scripts the server runs (`discover-articles.php`, `build-open-data.php`, the portal key tools) | `scripts/kop-test-harness.php` |
 | `seeds/` | Curated content and data applied during deployment | `seeds/` |
 | `docs/` | Architecture, workflow, handoff, and test documentation | `docs/README.md` |
 | `wp-plugins/kop-tools/` | Optional admin dashboard for theme API tools and front-end admin pages | `wp-plugins/kop-tools/kop-tools.php` |
-| `tmp/` | Local production mirror, snapshots, previews, and test output; mostly ignored | `tmp/prod.sqlite` |
+| `tmp/` | A junction to `kop-pipeline/tmp/`: the production mirror, previews and test output; ignored | `tmp/prod.sqlite` |
 
 ### Important runtime flows
 
@@ -147,14 +153,15 @@ its own template.
 | `/how-to-use-this-site/` | `inc/how-to-use.php` | `how-to-use.php` |
 | `/volunteer-review/` | `inc/review-volunteers.php` | `volunteer-review.php` |
 
-## Tools Repository
+## Pipeline Repository
 
-Location: `c:\Users\daniu\OneDrive\Documents\GitHub\Tools\Kids-Over-Profits-Tools`
+Location: `c:\Users\daniu\source\repos\kop-pipeline` (private). Its `scripts/`
+holds the builders, importers and research tools that were this repository's
+`scripts/*.js` and `*.py` (see its `CLAUDE.md`); `scrapers/` is the former
+Kids-Over-Profits-Tools repository, described below. It does not render
+WordPress pages.
 
-Purpose: Python collection and normalization tools for state inspection and
-citation data. The tools repository does not render WordPress pages.
-
-### Main areas
+### Scrapers (`kop-pipeline/scrapers/`)
 
 | Area | Responsibility | Starting points |
 | --- | --- | --- |
@@ -164,7 +171,7 @@ citation data. The tools repository does not render WordPress pages.
 | `inspection_api_client.py` | Shared payload construction, batching, retries, and API writes | `inspection_api_client.py` |
 | `scraper_state.py` | Incremental seen-ID and cursor state helpers | `scraper_state.py` |
 | `scraper_launcher.py` | Desktop launcher and scraper registry | `scraper_launcher.py` |
-| `kop_paths.py` | Locates the separate web repository and Google Drive report folders | `kop_paths.py` |
+| `kop_paths.py` | Locates the pipeline root (`.env`, the NC workbook), the `kop-data` checkout and the Google Drive report folders | `kop_paths.py` |
 | `test_scrapers.py` | Scraper unit and parser tests | `test_scrapers.py` |
 | `STATE_SCRAPER_GUIDE.md` | Shared inspection schema and per-state implementation notes | `STATE_SCRAPER_GUIDE.md` |
 | Local caches and state files | Incremental state, PDFs, OCR, and browser artifacts | Gitignored runtime files |
@@ -323,13 +330,15 @@ node scripts/test-network-modules.js
 `CLAUDE.md` at the repository root lists every other build and test
 command.
 
-From the tools repository:
+From the pipeline repository:
 
 ```text
-python test_scrapers.py
-python scraper_launcher.py
+node scripts/build-network-graph.js
+python scripts/sync-prod-sqlite.py
+python scrapers/test_scrapers.py
+python scrapers/scraper_launcher.py
 ```
 
-The tools repository should use `KOP_REPO_DIR` when the web repository is not
-at its discovered canonical location. Production credentials and API keys are
+The pipeline finds this repository and `kop-data` next to itself, or through
+`KOP_THEME_DIR` and `KOP_DATA_DIR`. Production credentials and API keys are
 not documented in this map.

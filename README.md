@@ -9,7 +9,7 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 - **Code**: GNU General Public License v2 or later, see [LICENSE](LICENSE).
 - **Data and writing**: Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0), see [DATA-LICENSE.md](DATA-LICENSE.md). Credit "Kids Over Profits (https://kidsoverprofits.org)" and share what you build from it under the same license.
 - **Bulk data**: daily CSV/JSON downloads of every public dataset at https://kidsoverprofits.org/open-data/ (`inc/open-data.php`).
-- **Source**: https://github.com/carlygaejepsen/Kids-Over-Profits
+- **Source**: https://github.com/kidsoverprofits/Kids-Over-Profits (this theme), https://github.com/kidsoverprofits/kop-data (the datasets it reads as `js/data/`), https://github.com/kidsoverprofits/kop-send-to-kop (the browser extension). The builders, scrapers and research tools are in a private `kop-pipeline` repo; the history from before the October 2026 split is at https://github.com/carlygaejepsen/Kids-Over-Profits (archived).
 
 ## Repo Assumptions
 
@@ -24,9 +24,10 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 - `api/` holds procedural endpoints (data forms, submissions, inspections, AI processing, server CLI jobs).
 - `templates/` holds every page template and the generated-page templates (`facility-page.php`, `operator-page.php`, `site-map.php`, ...). There are no root `page-*.php` files any more.
 - `js/`, `css/`: page scripts and styles (`css/colors.css` is the palette).
-- `scripts/`: data pipelines, importers, scrapers and the offline test scripts (`scripts/test-*.php`, most run against the `tmp/prod.sqlite` mirror).
+- `scripts/`: the offline tests and page checks (`scripts/test-*.php`, most run against the `tmp/prod.sqlite` mirror; the Node parity tests; the Playwright checks) and the few scripts the server runs (`discover-articles.php`, `build-open-data.php`, the anonymous portal key tools). The builders, importers and scrapers are in the private `kop-pipeline` repo.
+- `js/data/`: only `pages/` and `glossary/` live here; the rest is the `kop-data` repo, deployed into this folder on the server and linked here by `scripts/link-data.ps1`.
 - `seeds/`: data shipped with a deploy and applied once per version.
-- `wp-plugins/kop-tools/`: the KOP Tools admin menu. `browser-extension/send-to-kop/`: the "Send to KOP" extension.
+- `wp-plugins/kop-tools/`: the KOP Tools admin menu. The "Send to KOP" extension is the `kop-send-to-kop` repo.
 - `docs/`: workflow docs; `docs/PLAN.md` is the single list of open work. `CLAUDE.md` lists every subsystem's commands and tests.
 
 ## Major Subsystems

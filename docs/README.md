@@ -144,16 +144,20 @@ on a document tile or at KOP Tools > Document Types.
   proposals, page text (`js/data/pages/`) and the Unsilenced and survivor
   archive link lists. The glossary is in SQL tables; `js/data/glossary/glossary.md` is
   only the source of its one-time import.
-- `scripts/` holds the data pipelines, scrapers and offline test harnesses.
-  Most PHP tests render against `tmp/prod.sqlite`, a mirror of production
-  made by `scripts/sync-prod-sqlite.py`.
+- `scripts/` holds the offline test harnesses, the page checks and the
+  scripts the server runs. Most PHP tests render against `tmp/prod.sqlite`, a
+  mirror of production made by `kop-pipeline/scripts/sync-prod-sqlite.py`
+  (`tmp/` here is a junction to that repo's `tmp/`). The builders, importers,
+  research tools and state scrapers are the private `kop-pipeline` repo; the
+  datasets under `js/data/` (except `pages/` and `glossary/`) are the public
+  `kop-data` repo.
 - `seeds/` holds records that are applied on deploy: facility records, draft
   posts, lawsuits and legislation, text fixes, operator aliases and
   histories, marketers and trade organizations. Each seed applies once per
   version, so a change ships with a version bump.
-- `browser-extension/send-to-kop/` is the "Send to KOP" extension (loaded
-  unpacked or packaged by `package.ps1`, never deployed); the mobile app is
-  its own repository, `kids-over-profits-mobile`.
+- The "Send to KOP" extension is its own repository, `kop-send-to-kop`
+  (loaded unpacked or packaged by its `package.ps1`, never deployed); the
+  mobile app is `kids-over-profits-mobile`.
 
 ## Conventions
 

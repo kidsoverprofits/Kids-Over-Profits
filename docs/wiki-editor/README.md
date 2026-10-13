@@ -16,7 +16,7 @@ The **Wiki Editor** (page title "TTI Wiki Entry Generator") helps users create, 
 - **Styles:** `css/wiki-editor.css`, `css/wiki-program-picker.css`, `css/tutorial-overlay.css`.
 - **Backend APIs:**
   - `api/save-wiki-submission.php` - GET lists/searches (`?search=`, `?status=`, `?limit=`, `?offset=`) or fetches one (`?id=`) submission; POST creates or updates one.
-  - `api/wiki-stubs.php` - empty wiki slugs still needing an entry (from `markdown_output/empty_files_updated.md` plus `markdown_output/wiki_stub_overrides.json`) and the names/slugs already completed.
+  - `api/wiki-stubs.php` - empty wiki slugs still needing an entry (from `markdown_output/empty_files_updated.md`, the one file of the wiki export kept in this repo, plus the manual overrides in `uploads/kop-cache/wiki-stub-overrides.json`) and the names/slugs already completed. The full export, `markdown_output/`, is in `kop-pipeline`.
   - `api/facility-search.php`, `api/facility-picker.php` - program index lookup for the picker.
   - `api/extract-wiki-from-prose.php` - AI extraction of form fields from free prose (shared provider layer in `api/ai-providers.php`; Groq and Gemini take turns by default).
   - `api/wiki-reddit-diff.php` - which saved entries differ from their live r/troubledteens wiki page, for the index badges (`kop_wiki_reddit_compare_all()` in `api/lib-wiki-contact.php`).

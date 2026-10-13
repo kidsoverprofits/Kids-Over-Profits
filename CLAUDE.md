@@ -19,6 +19,30 @@ Kids Over Profits is a WordPress child theme (Kadence parent) that powers a data
 - **CMS**: WordPress with Kadence parent theme
 - **No build process**: Plain PHP, vanilla JavaScript (plain scripts loaded in order by `wp_enqueue_script` dependencies, not ES modules), CSS
 
+## Related repositories (since the 2026-10-13 split)
+
+This repository is the theme only. Three sibling repositories hold the rest; clone them next to this one
+(`source\repos\Kids-Over-Profits`, `kop-data`, `kop-pipeline`, `kop-send-to-kop`) and run `scripts\link-data.ps1` once:
+
+- **kop-data** (public, CC BY-SA): everything that was `js/data/` except `pages/` and `glossary/`, deployed into the
+  theme's `js/data/` on the server by its own `.cpanel.yml` + `deploy.yml` (a second cPanel repository). Locally
+  `link-data.ps1` makes a junction per folder, so PHP, JS and the tests read `js/data/...` as before. The network map
+  bot commits `network/graph.json` there, never here. `.gitignore` here keeps `js/data/*` out except the two folders.
+- **kop-pipeline** (private): every builder, scraper (the old Kids-Over-Profits-Tools repo, now `scrapers/`),
+  importer and research tool, `markdown_output/`, the state scraper plans, `build-network-map.yml`. Commands below
+  marked `(kop-pipeline)` run from that checkout; its `CLAUDE.md` has their details. They find this repo and kop-data
+  by the layout above or `KOP_THEME_DIR` / `KOP_DATA_DIR`, and write into `seeds/` here and into kop-data.
+  `tmp/` here is a junction to the pipeline's `tmp/` (the production mirror `tmp/prod.sqlite` lives there;
+  `python ../kop-pipeline/scripts/sync-prod-sqlite.py` refreshes it).
+- **kop-send-to-kop** (public): the "Send to KOP" browser extension; it only talks to `kop/v1/mobile/*` and
+  `kop/v1/extension/*` here.
+- **Kids-Over-Profits-archive** (the old account, read-only): the whole history before the split, with the original
+  commit SHAs that older notes and `docs/PLAN.md` cite.
+
+Tests of theme code, whatever the language (`scripts/test-*.php`, the Node parity tests, the Playwright page checks),
+stay here. The server runs only `scripts/discover-articles.php` (+ its two JSON configs), `build-open-data.php` and the
+anonymous portal key tools; `.cpanel.yml` ships exactly those.
+
 ## Adding something new
 
 Many lists name every kind of record, page or screen by hand (search, site map, open data, the app, merges, people ids,
@@ -30,20 +54,21 @@ a review queue, a table holding facility ids, a state inspection page, a public 
 
 ```bash
 # After editing any program data files in js/data/
-node scripts/aggregate-all-programs.js
+(kop-pipeline) node scripts/aggregate-all-programs.js
 
 # Other data pipeline scripts
-node scripts/rebuild-search-index.js
-node scripts/extract-reddit-wiki-links.js
+(kop-pipeline) node scripts/rebuild-search-index.js
+(kop-pipeline) node scripts/extract-reddit-wiki-links.js
 
 # After editing the network map CSVs or network-overrides.json
-node scripts/build-network-graph.js
-node scripts/test-network-graph.js
+(kop-pipeline) node scripts/build-network-graph.js
+(kop-pipeline) node scripts/test-network-graph.js
 
 # The map rebuilds itself: inc/network-rebuild.php hashes what the build reads (staff, owners, names, years, status,
-# consultants) hourly and, when it moves, starts .github/workflows/build-network-map.yml (sync 7 tables over SSH,
-# build, test, commit graph.json, deploy). Status and "Rebuild now" at KOP Tools > Map Rebuild.
-# Needs repo secret KOP_SSH_KEY and KOP_GITHUB_DISPATCH_TOKEN in api/config.local.php or .env on the server
+# consultants) hourly and, when it moves, starts kop-pipeline's build-network-map.yml (sync 7 tables over SSH,
+# build, test, commit graph.json + layout.json to kop-data, whose deploy ships them). Status and "Rebuild now" at
+# KOP Tools > Map Rebuild. The workflow's repo is KOP_NETWORK_REBUILD_REPO in api/config.local.php or .env
+# (kop_network_rebuild_repo()), the token KOP_GITHUB_DISPATCH_TOKEN there (Actions: write on that repo)
 php scripts/test-network-rebuild.php            # fingerprint + dispatch, against tmp/prod.sqlite, never calls GitHub
 # After editing anything in js/network-map/
 node scripts/test-network-modules.js
@@ -51,15 +76,15 @@ node scripts/test-network-modules.js
 node scripts/test-network-embed.js [--php=<Local php.exe>]
 node scripts/test-network-timeline.js           # the timeline (store years, timeline.js), seconds
 # Researched map years reviewed at KOP Tools > Map Years (inc/network-years.php); accepted ones go on the map at once
-node scripts/build-years-candidates.js [tmp/years-research]   # results -> js/data/network/years-candidates.json
+(kop-pipeline) node scripts/build-years-candidates.js [tmp/years-research]   # results -> js/data/network/years-candidates.json
 php scripts/test-network-years.php && python scripts/check-network-years-page.py
 # Renamed programs reviewed at KOP Tools > Map Renames (inc/network-renames.php): the rename year splits the two names' years on the map at once
 php scripts/test-network-renames.php
 
 # After editing the reporting directory data in js/data/reporting/
-node scripts/build-reporting-directory.js
-node scripts/verify-reporting-links.js          # slow, hits every agency site
-node scripts/pull-childusa-sol.js               # monthly: CHILD USA sexual-abuse deadlines, review the diff, then rebuild
+(kop-pipeline) node scripts/build-reporting-directory.js
+(kop-pipeline) node scripts/verify-reporting-links.js          # slow, hits every agency site
+(kop-pipeline) node scripts/pull-childusa-sol.js               # monthly: CHILD USA sexual-abuse deadlines, review the diff, then rebuild
 php scripts/test-reporting-directory.php        # renders the page offline
 # The glossary is in SQL tables (inc/glossary-store.php), edited at KOP Tools > Glossary Editor; both tests import
 # js/data/glossary/glossary.md into an in-memory SQLite copy (scripts/lib-glossary-test-db.php)
@@ -111,7 +136,7 @@ php scripts/test-operator-pages.php               # renders every /operator/<slu
 # a large map node); each page has a written history (operator.history, draft = admins only, published with the pencil;
 # drafts come from seeds/operator-histories.json, which fills only empty records), a year-by-year timeline from the map's
 # "operated" years + programs' years + lawsuits + deaths, the map's people, and the documents filed under its programs
-python scripts/build-operator-histories.py      # tmp/operator-histories/*.json -> seeds/operator-histories.json; bump
+(kop-pipeline) python scripts/build-operator-histories.py      # tmp/operator-histories/*.json -> seeds/operator-histories.json; bump
                                                 # KOP_OPERATOR_HISTORY_SEED_VERSION to apply (replaces only drafts nobody edited)
 php scripts/test-operator-history-seed.php      # fill, replace untouched drafts, keep edited/published, on a temp copy
 # Homes and cottages of one program (inc/program-homes.php): each licensed home keeps its record; {prefix}kop_program_homes ties it
@@ -213,7 +238,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-submission-follow
 # is compared with its LIVE Reddit page (never markdown_output/, which is stale): fetch reads the pages in a real Chrome window
 # (solve Reddit's human check when it asks; resumable), compare pairs entries by the page they were imported from, never by name
 # -> js/data/reddit-wiki/live-compare.json (commit it) -> editor index badge + /wiki-feed/ note; no result = no mark
-python scripts/reddit-wiki-live.py fetch [--pages a b] [--refresh] && python scripts/reddit-wiki-live.py compare [--list]   # sync tmp/prod.sqlite first
+(kop-pipeline) python scripts/reddit-wiki-live.py fetch [--pages a b] [--refresh] && python scripts/reddit-wiki-live.py compare [--list]   # sync tmp/prod.sqlite first
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-contact.php [--list]   # rewrite, PHP == JS, migration on a copy, live-result states
 # The editor (js/wiki-generation.js) writes staff as the drafts do: "a therapist" / "the Executive Director" / "worked in admissions",
 # no "Former" or abbreviations in a role, a year only as "from X to Y", a closed program's staff in the past, one paragraph per person;
@@ -245,7 +270,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-gaps.php    
 # running the other record and 2+ more programs, with no years outside it (bare "Embark Behavioral Health" in Marion = Embark at Flathead Valley)
 # is folded in as one program, not a rename; "Sequel TSI Courtland" dates its name by Sequel's years in the operator lines; a company filed as
 # a past name ("Three Springs Inc.") becomes a past-company step. KOP_DAUDIT_LIST=1 / KOP_DAUDIT_EXPORT=<file> on the test print / dump cards
-python scripts/data-audit.py [--kind rename_end_year ...] [--list]   # offline, against tmp/prod.sqlite
+(kop-pipeline) python scripts/data-audit.py [--kind rename_end_year ...] [--list]   # offline, against tmp/prod.sqlite
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=data-audit
 # Federal funding (docs/PLAN.md 3.15): Medicaid, foster care funds, ORR, TRICARE, PPP and Education money found for programs,
 # js/data/federal-funding/proposals.json -> Review inbox > Federal funding (inc/federal-funding.php) -> the record's federalFunding
@@ -253,11 +278,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=federal-funding
 # The sources the audit read that KOP does not hold yet (every proposal's sources, incl. tmp/data-audit/proposals*.json) ->
 # tmp/data-audit/audit-links.json, copied to ~/kop-import/gdocs/; reviewed at Drive Docs (source "Data audit") as news/court/resource links
-python scripts/data-audit-links.py
+(kop-pipeline) python scripts/data-audit-links.py
 # Drafts (tmp/wiki-updates/drafts/<id>/, written by a Haiku/Sonnet/Opus workflow, assembled by scripts/wiki-drafts.py) are reviewed at
 # Review inbox > Wiki updates (inc/wiki-update-drafts.php): export ships only the ops, the site applies them to the entry's text as it is
 # now; Approve writes KOP's copy (exact Undo), then Ready for Reddit has the whole text with Copy and Reddit's edit link
-python scripts/wiki-drafts.py assemble <ids> && python scripts/wiki-drafts.py export <ids>   # -> js/data/reddit-wiki/update-drafts.json (commit it)
+(kop-pipeline) python scripts/wiki-drafts.py assemble <ids> && python scripts/wiki-drafts.py export <ids>   # -> js/data/reddit-wiki/update-drafts.json (commit it)
 # Hub pages that list a category's posts (Editorials, Investigatory Spotlight; inc/hub-posts.php)
 php scripts/test-hub-posts.php
 # Every hub page through templates/page-hub.php + inc/hub-shell.php (per-hub settings), against tmp/prod.sqlite
@@ -380,7 +405,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-search-links.php
 # resolves names to /facility/<slug>/ for "Refers young people to" on /mental-health-providers/ (one batch, ambiguous never links)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-links.php   # prints the Billings list's linked/ambiguous/unmatched names
 node scripts/test-facility-ref-split.js           # the forms split a pasted comma list into entries and mark names that will not link
-# "Send to KOP" Chrome extension (browser-extension/send-to-kop/, loaded unpacked, not deployed) posts to
+# "Send to KOP" Chrome extension (its own repo, kop-send-to-kop; loaded unpacked, not deployed) posts to
 # kop/v1/extension/* (inc/source-submissions.php): articles -> news_submissions, lawsuits, legislation,
 # anything else -> KOP Tools > Websites Sent In; same duplicate rules as the public forms
 php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an in-memory copy of tmp/prod.sqlite
@@ -392,7 +417,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-submit.php
 # xcrun safari-web-extension-converter; package.ps1 zips it for the stores) and the /send/ page + bookmarklet for any browser (via=web;
 # inc/send-page.php, templates/send-page.php, js/send-page.js, prefill ?url=&title=&text=)
 php scripts/test-send-page.php
-npx web-ext lint --source-dir browser-extension/send-to-kop   # 1 expected warning: Firefox ignores background.service_worker
+(kop-send-to-kop) npx web-ext lint --source-dir .   # 1 expected warning: Firefox ignores background.service_worker
 # Signed-in reviewers get the News Processor in the extension's popup (inc/extension-news-processor.php): AI fill from the tab's text
 # (buildPrompt in api/lib-news-ai.php through kop_ai_generate_alternating), every processor field, "Publish on the site now" (admins,
 # filed approved, Undo in Recently done) or the review queue
@@ -434,17 +459,17 @@ php scripts/test-journalists.php [--list]
 # against facilities_v2 in tmp/prod.sqlite with the same name key as the facility pages; matched / no record / ambiguous (never forced),
 # our open records the list lacks (only where the list covers that type), and an added/gone diff against the previous dated snapshot in
 # tmp/state-lists/<st>/<date>/ (MO vanishing from the registry is news). Writes tmp/state-lists/report.md + report.json, no DB writes
-py -3 scripts/state-lists-check.py [--state MO ...] [--refresh] [--full]   # --refresh refetches (1 request/s) and adds today's snapshot
-py -3 scripts/state-lists-check.py --selftest     # parsers + matcher + diff on made-up fixtures
+(kop-pipeline) py -3 scripts/state-lists-check.py [--state MO ...] [--refresh] [--full]   # --refresh refetches (1 request/s) and adds today's snapshot
+(kop-pipeline) py -3 scripts/state-lists-check.py --selftest     # parsers + matcher + diff on made-up fixtures
 # Rows with no record (or more than one) carry candidates (record + why: part of the name, one name holds the other, spelling,
 # shared words; same town only adds); the export is reviewed at KOP Tools > State Lists (inc/state-lists.php, {prefix}kop_state_list_rows):
 # link (one click per candidate or the finder; the listed name becomes an other name only when ticked), create (kop_facdisc_create(),
 # citing the list), not TTI, later, exact Undo on Done; "Left the list" never changes a record. Keys: list + licence, else name key + town
-py -3 scripts/state-lists-check.py --export tmp/state-lists/state-lists.json   # copy to ~/kop-import/state-lists/state-lists.json on the server
+(kop-pipeline) py -3 scripts/state-lists-check.py --export tmp/state-lists/state-lists.json   # copy to ~/kop-import/state-lists/state-lists.json on the server
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-state-lists.php   # PHP/script key parity, import, link/create/undo, re-import, left; writes a preview
 # Subfolders for the largest flat FileBird folders: plan from tmp/prod.sqlite into
 # seeds/media-subfolders.json (report in tmp/), applied on deploy by kop_apply_media_subfolders()
-python scripts/build-media-subfolders.py
+(kop-pipeline) python scripts/build-media-subfolders.py
 php scripts/test-media-subfolders.php
 # Open data bulk downloads (/open-data/, inc/open-data.php; built daily by WP-Cron into uploads/kop-open-data/).
 # Every dataset names its columns; a new public table or column is added there, never via SELECT *
@@ -484,51 +509,51 @@ python -u scripts/check-mobile-overflow.py [--local] [--widths 390,768] [paths] 
 # Woodbury Reports pages about each program (inc/woodbury-mentions.php): scan every issue in the
 # media library (reads tmp/prod.sqlite), cut the pages into C:/tmp/kop-woodbury/pending/, copy that
 # folder to ~/kop-import/woodbury/ on the server, review and file at KOP Tools > Woodbury Reports
-python scripts/woodbury-scan.py [--no-cut]
+(kop-pipeline) python scripts/woodbury-scan.py [--no-cut]
 php scripts/test-woodbury-mentions.php            # "File under" facilities and parent companies (c<id>), company search, rows
 # Woodbury Reports facts (inc/woodbury-facts.php): staff and careers, incidents, openings/closings, names,
 # owners, moves read from every issue into tmp/woodbury-extract/facts/ (readers follow INSTRUCTIONS.md there);
 # the build checks each quote, matches records, drops what they hold -> C:/tmp/kop-woodbury/pending/facts.json,
 # copied to ~/kop-import/woodbury/; owner adds them at KOP Tools > Woodbury Facts (live at once, Undo)
-python scripts/woodbury-facts.py
+(kop-pipeline) python scripts/woodbury-facts.py
 php scripts/test-woodbury-facts.php               # applies every proposal to the real docs, validator, exact undo
 # HEAL's archived site (heal-online.org, gone; Wayback copies) into tmp/heal/: staff lists and program pages are read
 # like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
 # Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
-python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
-python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, never auto-added
-python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
+(kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
+(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, never auto-added
+(kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:
 # text -> tmp/wiki/text/ + INSTRUCTIONS.md, batches of pages not read yet; readers write tmp/wiki/facts/
-python scripts/wiki-source.py text && python scripts/wiki-source.py batches
-python scripts/woodbury-facts.py --also tmp/heal --also tmp/wiki   # wiki facts cite the wiki page, never auto-added
-python scripts/wiki-links.py --gdocs <server links.json>   # the pages' links -> tmp/wiki/wiki-links.json, copied to ~/kop-import/gdocs/, reviewed at Drive Docs
+(kop-pipeline) python scripts/wiki-source.py text && python scripts/wiki-source.py batches
+(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal --also tmp/wiki   # wiki facts cite the wiki page, never auto-added
+(kop-pipeline) python scripts/wiki-links.py --gdocs <server links.json>   # the pages' links -> tmp/wiki/wiki-links.json, copied to ~/kop-import/gdocs/, reviewed at Drive Docs
 php scripts/test-drive-docs.php --links=tmp/wiki/wiki-links.json
 # Links from the owner's Google Docs and Sheets (docs/PLAN.md 3.9): tmp/gdocs/export.gs (from scripts/gdocs-select.py)
 # exports them to G:/My Drive/KOP Doc Export; the links pass ties each link to a facility and drops what is on file ->
 # tmp/gdocs/links.json, copied to ~/kop-import/gdocs/; reviewed at KOP Tools > Drive Docs (inc/drive-docs.php): news,
 # court records and bills to their queues (no emails), program sites to profileLinks, the rest to the record's
 # resourceLinks ({url, label, kind, source}, listed on the /facility/ page under "Materials and links")
-python scripts/gdocs-extract.py
+(kop-pipeline) python scripts/gdocs-extract.py
 php scripts/test-drive-docs.php                   # every link on its real record, validator, exact undo, the page list
 # SCIAD NET (a Zotero archive, survey in tmp/sciad/survey.md) links that are not Drive documents: news
 # (Wayback unwrapped), court records (neutral titles, never a party's name), program pages, media; private classes and what
 # KOP holds dropped -> tmp/sciad/sciad-links.json (report sciad-links-report.md), copied to ~/kop-import/gdocs/, never
 # committed; reviewed at Drive Docs (source filter, Add all per facility), every row it fills credits SCIAD NET, linked
-python scripts/sciad-links.py [--selftest]       # --selftest: court titles and privacy rules on a made-up fixture
+(kop-pipeline) python scripts/sciad-links.py [--selftest]       # --selftest: court titles and privacy rules on a made-up fixture
 php scripts/test-drive-docs.php                   # also SCIAD NET: credit on the page, no private class, court titles, paging
 # Unsilenced's archive (public Drive folders) on facility/operator pages: only documents KOP has no copy of.
 # Server lists every file with its md5 (read-only; ~/kop-import/unsilenced/files.jsonl -> tmp/unsilenced/),
 # then the build compares with the media library md5s and inspection scrapers -> js/data/unsilenced/
 php api/list-unsilenced-files.php [probe] [--minutes=25]   # on the server (ea-php82), resumable
 php api/list-unsilenced-files.php restart --check          # monthly cron: lists into ~/kop-import/unsilenced/check/, mails when Unsilenced added enough
-python scripts/build-unsilenced-links.py                   # report in tmp/unsilenced/build-report.md
+(kop-pipeline) python scripts/build-unsilenced-links.py                   # report in tmp/unsilenced/build-report.md
 php scripts/test-unsilenced-archive.php                    # inc/unsilenced-archive.php, fixture + the build
 # Backup + content titles for the listed files (docs/PLAN.md 3.11): md5-checked copies to I:/My Drive/Unsilenced archive backup,
 # title evidence -> tmp/unsilenced-titles/; titles.json is read by the build (link shows the title, Unsilenced's name muted).
 # Generated titles never name a person (court: type/case/date; reports: type/program/date; clippings: headline/paper/date)
-python scripts/unsilenced-backup.py run [--limit N] [--dest DIR] [--no-keep]   # resumable, ~2-3 s/file, pauses when C: < 4 GB
-python scripts/unsilenced-backup.py titles && python scripts/unsilenced-backup.py status
+(kop-pipeline) python scripts/unsilenced-backup.py run [--limit N] [--dest DIR] [--no-keep]   # resumable, ~2-3 s/file, pauses when C: < 4 GB
+(kop-pipeline) python scripts/unsilenced-backup.py titles && python scripts/unsilenced-backup.py status
 # The same for survivor-run sites (inc/survivor-archives.php; ssi, wwasp, straights = thestraights.net (http only), nhym =
 # nhym-alumni.org): fetch hashes every document their pages link (nothing kept; straights/nhym crawl same-host pages,
 # 1 request a second), build drops what the media library holds or an earlier site lists for the record, drops private
@@ -538,10 +563,10 @@ python scripts/unsilenced-backup.py titles && python scripts/unsilenced-backup.p
 # the survey in tmp/sciad/ and tmp/unsilenced/files.jsonl; a file whose name Unsilenced has is dropped, records from the
 # exact program match or SCIAD_RULES, court records titled from kind/court/year/number only and grouped by case, the
 # block credits SCIAD NET linked to its archive page; every listed title -> tmp/survivor-archives/sciad-review.tsv)
-python scripts/survivor-archives.py fetch [--site ssi|wwasp|straights|nhym]   # resumable, into tmp/survivor-archives/
-python scripts/survivor-archives.py build                      # needs tmp/prod.sqlite (+ tmp/sciad/ for sciad); report in tmp/survivor-archives/build-report.md
-python scripts/survivor-archives.py privacy-review             # every listed document + sha1 -> tmp/survivor-archives/privacy-review.md
-python scripts/survivor-archives.py selftest                   # privacy patterns, SCIAD court titles, privacy.json shape
+(kop-pipeline) python scripts/survivor-archives.py fetch [--site ssi|wwasp|straights|nhym]   # resumable, into tmp/survivor-archives/
+(kop-pipeline) python scripts/survivor-archives.py build                      # needs tmp/prod.sqlite (+ tmp/sciad/ for sciad); report in tmp/survivor-archives/build-report.md
+(kop-pipeline) python scripts/survivor-archives.py privacy-review             # every listed document + sha1 -> tmp/survivor-archives/privacy-review.md
+(kop-pipeline) python scripts/survivor-archives.py selftest                   # privacy patterns, SCIAD court titles, privacy.json shape
 php scripts/test-survivor-archives.php
 # Fornits survivor forum (inc/fornits.php): the crawl copies the treatment-abuse boards into tmp/fornits/ (never committed);
 # the hourly Windows task "KOP Fornits" ties new topics to facilities and uploads them to ~/kop-import/fornits/; on the
@@ -552,12 +577,12 @@ php scripts/test-survivor-archives.php
 php scripts/test-record-enrich.php                # which bare-link news/lawsuits the enrich picks, title handling, offline
 # "Check AI keys" there sends one request per provider through the site's own code (keys never shown)
 python scripts/test-gemini.py                     # is a Gemini key usable? lists its models, names the fix
-python scripts/fornits-crawl.py                   # resumable, one request per 3 s
-python scripts/fornits-process.py [--no-upload] [--keep-crawling]   # --no-upload: dry run, marks nothing read
+(kop-pipeline) python scripts/fornits-crawl.py                   # resumable, one request per 3 s
+(kop-pipeline) python scripts/fornits-process.py [--no-upload] [--keep-crawling]   # --no-upload: dry run, marks nothing read
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # every link + each kind on real docs, exact undo
 # Podcast series transcribed locally with Whisper (scripts/podcast-transcribe.py), each episode's prompt primed with the KOP names its
 # feed mentions + scripts/podcast-vocab/<show>.json (corrections there, 'fix' re-applies); transcripts in tmp/podcasts/, never committed
-py -3.13 scripts/podcast-transcribe.py feed|vocab|run|fix|suspects|status [--show sftf]   # resumable; stops when C: runs low
+(kop-pipeline) py -3.13 scripts/podcast-transcribe.py feed|vocab|run|fix|suspects|status [--show sftf]   # resumable; stops when C: runs low
 # Scraper report PDFs stay in link-shared Drive folders; the sync writes only wp-content/uploads/inspection-reports/<st>/index.json of Drive links,
 # linked as "Archived copy" on the state report pages (server CLI + nightly cron; no apply = dry run)
 php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
@@ -571,15 +596,15 @@ python scripts/preview-network-map.py --shots tmp/map-preview
 # to ignore, critics framed, AI-only notes), AI crawler rules, city doorway pages and pages answering critics. Domains from
 # facilities_v2 profileLinks, tmp/gdocs/links.json program sites and the reputation series; resumable, one request a second
 # per site -> tmp/seo-scan/report.html (filterable), report.csv, raw/<domain>/ copies of everything quoted
-python scripts/seo-scan.py [--limit N] [--domains a.com b.org] [--refresh] [--no-sitemaps] [--report]
+(kop-pipeline) python scripts/seo-scan.py [--limit N] [--domains a.com b.org] [--refresh] [--no-sitemaps] [--report]
 ```
 
 ### Reporting directory data
 
-`js/data/reporting/` holds where to report an abusive therapist or program,
+`js/data/reporting/` (the kop-data repo) holds where to report an abusive therapist or program,
 state by state: `national.json`, one `states/<abbr>.json` per state, and the
 generated `directory.json` the /report-abuse/ page reads. Every channel needs
-a source URL and a `verified_on` date or the build refuses it. `README.md` in
+a source URL and a `verified_on` date or the build (kop-pipeline) refuses it. `README.md` in
 that folder is the field-by-field schema. Rendered server-side by
 `inc/reporting-directory.php`; the state hubs embed their own state's block.
 
@@ -600,16 +625,17 @@ editing it changes nothing on the site.
 
 ### Network map data
 
-`js/data/network/` holds the Miro board export (`tti_nodes.csv`, `tti_edges.csv`)
+`js/data/network/` (the kop-data repo) holds the Miro board export (`tti_nodes.csv`, `tti_edges.csv`)
 and the generated `graph.json` that the network map reads. Corrections go in
 `network-overrides.json`, never in the CSVs, so the next board export does not
 undo them. `staff-movement.csv` holds the reviewed staff moves the build adds
-as edges; `node scripts/extract-staff-movement.js` drafts it from the profile
+as edges; `node scripts/extract-staff-movement.js` (kop-pipeline) drafts it from the profile
 text into `tmp/staff-movement.draft.csv` for comparison. Each build rewrites
 `tmp/network-qa.md` (gitignored) listing every row the rules had to guess at.
 Facility links are resolved against
 `facilities_v2` in `tmp/prod.sqlite` when that mirror is present, and fall back
-to the program aggregate otherwise.
+to the program aggregate otherwise. The build reads `js/network-map/store.js` and
+`js/vendor/d3-force.bundle.min.js` from this repo, so a change there is a map change too.
 
 ## Architecture
 
@@ -727,9 +753,9 @@ accent text, no white on an accent in any stylesheet).
 
 ## Program Data Pipeline
 
-Source files in `js/data/reddit-wiki/programs-XX.json` (by state) and `js/data/tti-program-links.json` (uncategorized). After any edits:
+Source files in `js/data/reddit-wiki/programs-XX.json` (by state) and `js/data/tti-program-links.json` (uncategorized), both in the kop-data repo. After any edits, from the kop-pipeline checkout:
 ```bash
-node scripts/aggregate-all-programs.js
+(kop-pipeline) node scripts/aggregate-all-programs.js
 ```
 This generates `programs-array.json`, `search-index.json`, and `metadata.json`.
 

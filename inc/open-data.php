@@ -28,7 +28,10 @@ if (!defined('ABSPATH')) {
 define('KOP_OPEN_DATA_SLUG', 'open-data');
 define('KOP_OPEN_DATA_LICENSE', 'CC BY-SA 4.0');
 define('KOP_OPEN_DATA_LICENSE_URL', 'https://creativecommons.org/licenses/by-sa/4.0/');
-define('KOP_OPEN_DATA_SOURCE_URL', 'https://github.com/carlygaejepsen/Kids-Over-Profits');
+define('KOP_OPEN_DATA_SOURCE_URL', 'https://github.com/kidsoverprofits/Kids-Over-Profits');
+// The datasets the site reads as js/data/ (the network map, the reporting directory, the
+// program lists...) are their own public repository, CC BY-SA like the downloads here.
+define('KOP_OPEN_DATA_DATA_URL', 'https://github.com/kidsoverprofits/kop-data');
 define('KOP_OPEN_DATA_FULLTEXT', 'inspection-reports-full-text.jsonl.gz');
 define('KOP_OPEN_DATA_ZIP', 'kids-over-profits-open-data.zip');
 // Report text scraped from state PDFs can carry broken UTF-8; substitute rather than lose the row.
@@ -677,6 +680,7 @@ function kop_open_data_readme(array $manifest) {
     $lines[] = '';
     $lines[] = 'The full text of every inspection report is a separate download on ' . home_url('/' . KOP_OPEN_DATA_SLUG . '/');
     $lines[] = 'Source code: ' . KOP_OPEN_DATA_SOURCE_URL;
+    $lines[] = 'The datasets the site reads (network map, reporting directory, program lists): ' . KOP_OPEN_DATA_DATA_URL;
     return implode("\n", $lines) . "\n";
 }
 
@@ -699,6 +703,7 @@ function kop_open_data_build() {
         'license_url'  => KOP_OPEN_DATA_LICENSE_URL,
         'source'       => home_url('/'),
         'source_code'  => KOP_OPEN_DATA_SOURCE_URL,
+        'source_data'  => KOP_OPEN_DATA_DATA_URL,
         'datasets'     => array(),
         'errors'       => array(),
         'zip'          => null,

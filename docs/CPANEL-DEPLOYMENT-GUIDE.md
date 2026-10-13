@@ -28,25 +28,26 @@ The `.cpanel.yml` file **MUST** have Unix line endings (`LF` not `CRLF`).
 ```
 
 ### 3. Working .cpanel.yml Format
-Use the exact format below (tested and working as of Feb 2026):
+The file in this repository is the working one: a list of `/bin/cp` tasks
+into `/home/kidsover/public_html/wp-content/themes/child/`, `inc/` copied
+last, and an `rm -f` line for every file that left the repository (a deploy
+never deletes on its own). Only the scripts the server runs are copied from
+`scripts/`; `docs/` is not deployed.
 
-```yaml
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/kidsover/public_html/wp-content/themes/child/
-    - /bin/cp -R api $DEPLOYPATH
-    - /bin/cp -R inc $DEPLOYPATH
-    - /bin/cp -R css $DEPLOYPATH
-    - /bin/cp -R js $DEPLOYPATH
-    - /bin/cp -R templates $DEPLOYPATH
-    - /bin/cp -R docs $DEPLOYPATH
-    - /bin/cp functions.php $DEPLOYPATH
-    - /bin/cp style.css $DEPLOYPATH
-    - /bin/cp page-*.php $DEPLOYPATH
-    - /bin/cp .htaccess $DEPLOYPATH
-    - /bin/cp *.sql $DEPLOYPATH
-```
+### 4. Two repositories deploy into the theme folder
+Since 2026-10-13 the datasets under `js/data/` are the `kop-data` repository.
+It has its own `.cpanel.yml` (copies everything into the theme's `js/data/`)
+and its own copy of `deploy.yml`, run from a second cPanel repository:
+
+1. cPanel > Git Version Control > Create: clone URL
+   `https://github.com/kidsoverprofits/kop-data.git`, path
+   `/home/kidsover/repositories/kop-data`.
+2. In the `kop-data` GitHub repository, secrets `CPANEL_HOST`, `CPANEL_USER`,
+   `CPANEL_TOKEN` as for the theme and `CPANEL_REPO_ROOT` =
+   `/home/kidsover/repositories/kop-data`.
+
+The theme's deploy ships `js/data/pages/` and `js/data/glossary/` only, so the
+two never overwrite each other's files.
 
 ## Deployment Workflow
 
@@ -80,8 +81,13 @@ deployment:
 1. cPanel → Git Version Control
 2. Delete the broken repository
 3. Click "Create" and re-clone from GitHub
-4. URL: `https://github.com/carlygaejepsen/Kids-Over-Profits.git`
+4. URL: `https://github.com/kidsoverprofits/Kids-Over-Profits.git`
 5. Path: `/home/kidsover/repositories/kids-over-profits`
+
+Over SSH the same thing is `cd /home/kidsover/repositories/kids-over-profits
+&& git fetch origin && git reset --hard origin/main`, which is also how the
+checkout was moved onto the rewritten history of 2026-10-13 (a pull cannot
+fast-forward across a rewrite).
 
 ### .git Folder Copied to Live Site
 **Cause:** Wildcard in .cpanel.yml copied everything
