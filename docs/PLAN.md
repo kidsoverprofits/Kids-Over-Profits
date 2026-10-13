@@ -135,23 +135,22 @@ day were replayed by path (old tip b7ea3dc5). Still open:
    Two tokens made under the old account are to be deleted at
    github.com/settings/personal-access-tokens, and the duplicate
    `public_html/.env` (a copy of the theme's, not web-readable) removed.
-2. **Old repositories**: another session was still committing to
-   `carlygaejepsen/Kids-Over-Profits` on 2026-10-13, so it stays writable
-   for now. A push there no longer reaches the site: replay its commits
-   after b7ea3dc5 by path (`git format-patch <sha>..origin/main --stdout --
-   . ':!js/data'` into the theme, `-- js/data` with `git am -p3` into
-   `kop-data`, moved scripts into `kop-pipeline`), then archive both old
-   repositories (Settings > Archive). Their commit SHAs, cited in this file
-   and in older notes, keep resolving there.
-3. **This machine**: `kop-data`, `kop-pipeline` and `kop-send-to-kop` are
-   cloned under `source\repos\`. When no session uses the old checkout any
-   more: move its `tmp/` (8 GB of research scratch and the mirror) to
-   `kop-pipeline/tmp/`, rename it aside, clone the new theme as
-   `source\repos\Kids-Over-Profits`, run `scripts\link-data.ps1` there,
-   repoint the Windows task "KOP Fornits" to
-   `kop-pipeline\scripts\fornits-process.py`, and delete the OneDrive Tools
-   checkout (its uncommitted FL, OR and guide changes are commit 148bc04 in
-   `kop-pipeline`).
+2. (Done 2026-10-13 23:40Z.) Every commit made on `carlygaejepsen/Kids-Over-Profits`
+   after the split was replayed by path (last one 92d860e5); the Tools
+   repository's head (a6126ba8) is what `kop-pipeline/scrapers` holds. Both old
+   repositories are archived by step 7 of the script below; their commit SHAs,
+   cited in this file and in older notes, keep resolving there.
+3. **This machine** (owner, one script):
+   `powershell -ExecutionPolicy Bypass -File ..\kop-pipeline\splitinish-local.ps1`
+   with no session or scraper using the old checkout. It repoints
+   `sourceepos\Kids-Over-Profits` at the new repository and resets it to
+   `main` (the tree was clean), moves its `tmp/` (8 GB, the mirror included) to
+   `kop-pipeline/tmp/`, runs `scripts\link-data.ps1`, repoints the Windows
+   task "KOP Fornits" to `kop-pipeline`, shrinks `.git`, deletes
+   `C:	mp\kop-split` and the OneDrive Tools checkout (its cursors and caches
+   were copied into `kop-pipeline/scrapers/` first) and archives the two old
+   repositories. `Kids-Over-Profits-Tools.code-workspace` already lists the
+   four repositories.
 
 ### Admin runs
 
