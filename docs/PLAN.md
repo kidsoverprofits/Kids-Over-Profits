@@ -118,36 +118,40 @@ The repository was cut into four (`CLAUDE.md`, "Related repositories";
 `docs/REPOSITORY-MAP.md`): this theme, `kop-data` (the datasets, public),
 `kop-pipeline` (builders, scrapers, research tools, private) and
 `kop-send-to-kop` (the extension), all under a new GitHub account. The
-rewritten repositories were built and checked locally; what remains is the
-cutover, in this order:
+four were pushed on 2026-10-13 (https://github.com/kidsoverprofits), the
+server's checkout at `/home/kidsover/repositories/Kids-Over-Profits` follows
+the new theme, the second cPanel repository `kop-data` deploys into
+`js/data/`, and the eleven commits made on the old repository later that
+day were replayed by path (old tip b7ea3dc5). Still open:
 
-1. **GitHub**: create the four repositories under the new account (no
-   README), push each rewritten `main`; add the Actions secrets (theme and
-   `kop-data`: `CPANEL_HOST`, `CPANEL_USER`, `CPANEL_TOKEN`,
-   `CPANEL_REPO_ROOT`; `kop-pipeline`: `KOP_SSH_KEY`, `KOP_SSH_KNOWN_HOSTS`,
-   `KOP_DATA_TOKEN`); make the two fine-grained tokens (`KOP_DATA_TOKEN`:
-   Contents on `kop-data`; the dispatch token: Actions on `kop-pipeline`).
-2. **Server**: in `/home/kidsover/repositories/Kids-Over-Profits`, point
-   `origin` at the new theme URL and `git fetch origin && git reset --hard
-   origin/main` (the history was rewritten, a pull cannot fast-forward);
-   run the theme's deploy. In cPanel > Git Version Control, create a second
-   repository from `kop-data` at `/home/kidsover/repositories/kop-data` and
-   put that path in its `CPANEL_REPO_ROOT`; run its deploy; confirm
-   `js/data/network/graph.json` still serves. In `api/config.local.php` add
-   `KOP_NETWORK_REBUILD_REPO` (`kidsoverprofits/kop-pipeline`) and the new
-   `KOP_GITHUB_DISPATCH_TOKEN`; press Rebuild now at KOP Tools > Map Rebuild.
-3. **Old repositories**: archive `carlygaejepsen/Kids-Over-Profits` and
-   `Kids-Over-Profits-Tools` (Settings > Archive). Their commit SHAs, cited
-   in this file and in older notes, keep resolving there.
-4. **This machine**: clone the four under `source\repos\`; move the old
-   checkout's `tmp/` (8 GB of research scratch and the mirror) to
-   `kop-pipeline/tmp/`; run `scripts\link-data.ps1` in the theme; repoint
-   the Windows task "KOP Fornits" to
-   `kop-pipeline\scripts\fornits-process.py`; copy the four uncommitted
-   scraper files from the OneDrive Tools checkout (`STATE_SCRAPER_GUIDE.md`,
-   `fl_scraper.py`, `or_scraper.py`, `scraper_launcher.py`) into
-   `kop-pipeline/scrapers/` and commit them; then delete the OneDrive
-   checkout.
+1. **Secrets only the owner holds**: `CPANEL_TOKEN` on the new theme and
+   `kop-data` repositories (a cPanel API token; the host, user and root are
+   set); `KOP_DATA_TOKEN` on `kop-pipeline` (fine-grained, Contents read and
+   write on `kop-data`); a dispatch token (Actions read and write on
+   `kop-pipeline`) as `KOP_GITHUB_DISPATCH_TOKEN` in the server's
+   `api/config.local.php`, next to `KOP_NETWORK_REBUILD_REPO`. Until the
+   first two exist, a push deploys nothing by itself: deploy over SSH with
+   `uapi VersionControl update repository_root=... branch=main` then
+   `uapi VersionControlDeployment create repository_root=...`. Then press
+   Rebuild now at KOP Tools > Map Rebuild and follow the run in
+   `kop-pipeline`.
+2. **Old repositories**: another session was still committing to
+   `carlygaejepsen/Kids-Over-Profits` on 2026-10-13, so it stays writable
+   for now. A push there no longer reaches the site: replay its commits
+   after b7ea3dc5 by path (`git format-patch <sha>..origin/main --stdout --
+   . ':!js/data'` into the theme, `-- js/data` with `git am -p3` into
+   `kop-data`, moved scripts into `kop-pipeline`), then archive both old
+   repositories (Settings > Archive). Their commit SHAs, cited in this file
+   and in older notes, keep resolving there.
+3. **This machine**: `kop-data`, `kop-pipeline` and `kop-send-to-kop` are
+   cloned under `source\repos\`. When no session uses the old checkout any
+   more: move its `tmp/` (8 GB of research scratch and the mirror) to
+   `kop-pipeline/tmp/`, rename it aside, clone the new theme as
+   `source\repos\Kids-Over-Profits`, run `scripts\link-data.ps1` there,
+   repoint the Windows task "KOP Fornits" to
+   `kop-pipeline\scripts\fornits-process.py`, and delete the OneDrive Tools
+   checkout (its uncommitted FL, OR and guide changes are commit 148bc04 in
+   `kop-pipeline`).
 
 ### Admin runs
 
