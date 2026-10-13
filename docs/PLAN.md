@@ -141,13 +141,13 @@ day were replayed by path (old tip b7ea3dc5). Still open:
    repositories are archived by step 7 of the script below; their commit SHAs,
    cited in this file and in older notes, keep resolving there.
 3. **This machine** (owner, one script):
-   `powershell -ExecutionPolicy Bypass -File ..\kop-pipeline\splitinish-local.ps1`
+   `powershell -ExecutionPolicy Bypass -File ..\kop-pipeline\split\finish-local.ps1`
    with no session or scraper using the old checkout. It repoints
-   `sourceepos\Kids-Over-Profits` at the new repository and resets it to
+   `source\repos\Kids-Over-Profits` at the new repository and resets it to
    `main` (the tree was clean), moves its `tmp/` (8 GB, the mirror included) to
    `kop-pipeline/tmp/`, runs `scripts\link-data.ps1`, repoints the Windows
    task "KOP Fornits" to `kop-pipeline`, shrinks `.git`, deletes
-   `C:	mp\kop-split` and the OneDrive Tools checkout (its cursors and caches
+   `C:\tmp\kop-split` and the OneDrive Tools checkout (its cursors and caches
    were copied into `kop-pipeline/scrapers/` first) and archives the two old
    repositories. `Kids-Over-Profits-Tools.code-workspace` already lists the
    four repositories.
