@@ -24,8 +24,9 @@ deployment:
     - /bin/cp scripts/discover-articles.php scripts/discovery-queries.json scripts/discovery-blacklist.json scripts/build-open-data.php scripts/anon-portal-keygen.php scripts/anon-portal-decrypt.php $DEPLOYPATH/scripts/
     - /bin/rm -f $DEPLOYPATH/scripts/discovery-rejected.json
     # Scripts shipped by the old "copy the whole folder" step that nothing on
-    # the server runs: tests, builders and the test harness. Keep the dotfiles.
-    - cd $DEPLOYPATH/scripts && /bin/rm -rf -- *.js *.py *.pyw history podcast-vocab review-inbox-tests lib-glossary-test-db.php kop-test-harness.php test-*.php && cd - > /dev/null
+    # the server runs: tests, builders, the test harness, one-off migrations.
+    # Everything but the six files above and the cron's dotfiles goes.
+    - cd $DEPLOYPATH/scripts && ls -A | grep -vE '^(discover-articles\.php|discovery-queries\.json|discovery-blacklist\.json|build-open-data\.php|anon-portal-keygen\.php|anon-portal-decrypt\.php|\.discovery-state\.json|\.discovery-rejected\.json)$' | xargs -r /bin/rm -rf -- && cd - > /dev/null
     - /bin/rm -f $DEPLOYPATH/templates/Kids-Over-Profits-Tools.code-workspace
     # The glossary moved into SQL tables (inc/glossary-store.php): the Node build and its output are gone.
     - /bin/rm -f $DEPLOYPATH/js/data/glossary/glossary.json $DEPLOYPATH/scripts/build-glossary.js $DEPLOYPATH/scripts/test-glossary-build.php
