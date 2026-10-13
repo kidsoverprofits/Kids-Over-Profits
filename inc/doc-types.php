@@ -43,7 +43,7 @@ if (!defined('ABSPATH')) {
 if (!defined('KOP_DOC_TYPES_DB_VERSION')) define('KOP_DOC_TYPES_DB_VERSION', '1');
 if (!defined('KOP_DOC_TYPES_REWRITE_VERSION')) define('KOP_DOC_TYPES_REWRITE_VERSION', '1');
 // Bump after changing kop_dt_rules(): documents the old rules found nothing for are looked at again.
-if (!defined('KOP_DOC_TYPES_RULES_VERSION')) define('KOP_DOC_TYPES_RULES_VERSION', '1');
+if (!defined('KOP_DOC_TYPES_RULES_VERSION')) define('KOP_DOC_TYPES_RULES_VERSION', '2');
 
 // ---------------------------------------------------------------------------
 // The types
@@ -80,6 +80,8 @@ if (!function_exists('kop_dt_types')) {
                 'Police reports, incident reports and serious occurrence reports.'),
             'government-report' => array('Government report or investigation', 'Government reports and investigations', $g_over,
                 'Congressional, GAO, Inspector General and state agency reports, audits and investigations.'),
+            'ngo-report'       => array('NGO or advocacy report', 'NGO and advocacy reports', $g_over,
+                'Reports and investigations by nonprofits and watchdogs: disability rights (protection and advocacy) groups, human rights groups, youth law centers and survivor-led organizations.'),
             'legislation'      => array('Legislation or testimony', 'Legislation and testimony', $g_over,
                 'Bills, statutes, regulations and testimony given to lawmakers.'),
             'legal-filing'     => array('Legal filing', 'Legal filings', $g_court,
@@ -529,6 +531,7 @@ if (!function_exists('kop_dt_rules')) {
                 array('business-record', '/^property records$|^business records$|^corporate (?:docs|filings|records)$/i'),
                 array('tax-filing', '/^990s?$|^tax (?:returns|filings)$/i'),
                 array('government-report', '/^government(?: reports)?$/i'),
+                array('ngo-report', '/^ngo(?: reports)?$|^(?:advocacy|watchdog|nonprofit) reports$|^protection (?:&|and) advocacy$/i'),
                 array('legislation', '/^legislative$|^lobbying & legislation$|^legislation$/i'),
                 array('research', '/^academia$|^studies$|^research$/i'),
                 array('survivor-account', '/^survivor (?:stories|accounts)$|^testimon(?:y|ies)$/i'),
@@ -542,6 +545,7 @@ if (!function_exists('kop_dt_rules')) {
                 array('inspection-report', '/\bnotice of (?:inspection|violation)\b|\bsurrender(?:ed|s)? (?:its |their )?licen[cs]e\b|\blicen[cs]e (?:surrender|revocation|denial|renewal)\b|\bdeny licen[cs]e\b/i'),
                 array('research', '/\bthesis\b|\bdissertation\b/i'),
                 array('website-capture', '/\bwebsite\b/i'),
+                array('ngo-report', '/\bngo report\b|\bdisability rights [a-z]+ (?:report|investigation|monitoring)\b|\bprotection (?:&|and) advocacy\b|\bhuman rights watch\b|\bamnesty international\b|\bnational disability rights network\b|\bndrn\b|\bchildren\'s rights\b|\bnational center for youth law\b|\bbreaking code silence\b|\bsouthern poverty law center\b/i'),
                 array('government-report', '/\bgao\b|\binspector general\b|\bsenate (?:report|investigation|finance)\b|\bcongressional\b|\bstate audit\b/i'),
                 array('legislation', '/\b[hs]\.? ?b\.? ?\d{2,4}\b|\bhouse bill\b|\bsenate bill\b|\btestimony (?:before|to)\b/i'),
                 array('news-clipping', '/\bnews ?(?:article|clipping|story)\b/i'),

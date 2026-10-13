@@ -123,7 +123,7 @@ Read [every student handbook we hold](https://kidsoverprofits.org/documents/stud
 - The programs' own papers: `student-handbook`, `parent-handbook`,
   `staff-manual`, `enrollment`, `marketing`, `newsletter`, `website-capture`
 - Oversight: `inspection-report`, `incident-report`, `government-report`,
-  `legislation`
+  `ngo-report`, `legislation`
 - Courts: `legal-filing`, `deposition`
 - Press, research and survivors: `news-clipping`, `woodbury`, `research`,
   `survivor-account`
