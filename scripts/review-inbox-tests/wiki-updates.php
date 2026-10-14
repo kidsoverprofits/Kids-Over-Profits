@@ -218,6 +218,15 @@ Last revised by [u](/user/u/)
 
 **Name** was there.
 ", json_encode($fmt));
+    $cap = '***Below is a list of active programs that currently operate in Ohio.***';
+    $check('wiki-updates: a whole line in bold italics (a state or company table caption) is not made a bullet',
+        kop_wiki_drafts_format_line($cap) === $cap, kop_wiki_drafts_format_line($cap));
+    // A correction can take a table row out (moved to the Closed table by another correction).
+    list($moved, $ids, $errs) = kop_wiki_drafts_apply_tense("|A|\n| x | 1 |\n| y | 2 |\n---\n|B|\n| z | 3 |\n", array(
+        array('id' => 'd1', 'old' => '| y | 2 |', 'new' => '', 'delete' => true),
+        array('id' => 'd2', 'old' => '| z | 3 |', 'new' => "| z | 3 |\n| y | 2-2021 |")));
+    $check('wiki-updates: a correction with delete takes its line out, leaving no blank line in the table',
+        $moved === "|A|\n| x | 1 |\n---\n|B|\n| z | 3 |\n| y | 2-2021 |\n" && $ids === array('d1', 'd2') && !$errs, json_encode($moved));
 
     // An entry edited since drafting still takes the additions, placed by heading.
     $md = $r['row']['markdown'];

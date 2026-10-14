@@ -57,6 +57,9 @@ function kop_wiki_drafts_all() {
  * first drafts wrote it in bold italics, which is read too and rewritten in bold.
  */
 const KOP_WIKI_DRAFTS_NAMES_RE = '/^\s*\*{2,3}\s*previous\s*(?:&|and)\s*alternate\s+names\s*:\s*(.*?)\s*\*{2,3}\s*$/iu';
+// A whole line in bold italics (the state and company pages' table captions, "***Below is a list of ...***") is not a
+// lost bullet either. Same as scripts/wiki-drafts.py BOLD_ITALIC_LINE.
+const KOP_WIKI_DRAFTS_BOLD_ITALIC_RE = '/^\s*\*\*\*[^*]+\*\*\*\s*$/u';
 
 function kop_wiki_drafts_names_line(array $names) {
     return $names ? '**Previous & alternate names: ' . implode(', ', $names) . '**' : '';
@@ -263,7 +266,7 @@ function kop_wiki_drafts_reddit_format($md) {
 function kop_wiki_drafts_format_line($line, $first = false) {
     // The names line is kept as it is (in bold italics it is not a lost bullet).
     if (preg_match(KOP_WIKI_DRAFTS_NAMES_RE, (string) $line)) return trim((string) $line);
-    $line = preg_replace('/^\*\*\*(?=\S)/u', '* **', (string) $line);
+    if (!preg_match(KOP_WIKI_DRAFTS_BOLD_ITALIC_RE, (string) $line)) $line = preg_replace('/^\*\*\*(?=\S)/u', '* **', (string) $line);
     $line = preg_replace('/(^|[\s(\[])\*\* +(?=\S)/u', '$1**', $line);
     if ($first) $line = preg_replace('/\*\*\(/', '** (', $line, 1);
     $line = preg_replace_callback('#(?<![/\w])https?://(?:www\.)?heal-online\.org(?::\d+)?(?:/[^\s)\]]*)?#i', function ($m) {
@@ -342,18 +345,25 @@ function kop_wiki_drafts_heal_archive() {
     return $map;
 }
 
-/** Past-tense pairs: each old line must be there once. -> [md, changed ids, errors]. */
+/**
+ * Past-tense pairs and line corrections: each old line must be there once (or 'nth' names which of a repeated line); a
+ * correction with 'delete' takes its line out (a table row moved to another table). Same as scripts/wiki-drafts.py
+ * apply_fixes(). -> [md, changed ids, errors].
+ */
 function kop_wiki_drafts_apply_tense($md, array $pairs) {
     $lines = kop_wiki_drafts_lines($md);
     $changed = array();
     $errors = array();
     foreach ($pairs as $p) {
-        $hits = array_keys($lines, (string) $p['old'], true);
+        $hits = array_values(array_keys($lines, (string) $p['old'], true));
+        $nth = (int) ($p['nth'] ?? 0);   // a line the entry has more than once (two tables' header rows): which one
+        if ($nth > 0 && count($hits) >= $nth) $hits = array($hits[$nth - 1]);
         if (count($hits) !== 1) {
             $errors[] = $p['id'] . ': ' . (!$hits ? 'the line is no longer in the entry' : 'the line is in the entry more than once');
             continue;
         }
-        $lines[$hits[0]] = (string) $p['new'];
+        if (!empty($p['delete'])) unset($lines[$hits[0]]);
+        else $lines[$hits[0]] = (string) $p['new'];
         $changed[] = $p['id'];
     }
     return array(implode("\n", $lines) . "\n", $changed, $errors);
@@ -745,7 +755,7 @@ function kop_wiki_drafts_refresh_approved(PDO $pdo) {
     return $out;
 }
 
-define('KOP_WIKI_DRAFTS_REFRESH_VERSION', '5');   // 1: editorial voice cut from 23 entries; 2: copy-edit; 3: Ballard Sheppard at closed Rivendell in the past (2026-10-09); 4: previous & alternate names line (2026-10-09); 5: names line in bold, with each name's years
+define('KOP_WIKI_DRAFTS_REFRESH_VERSION', '6');   // 1: editorial voice cut from 23 entries; 2: copy-edit; 3: Ballard Sheppard at closed Rivendell in the past (2026-10-09); 4: previous & alternate names line (2026-10-09); 5: names line in bold, with each name's years; 6: a line in bold italics is no longer made a bullet (2026-10-13)
 
 add_action('init', function () {
     if (get_option('kop_wiki_drafts_refresh_version') === KOP_WIKI_DRAFTS_REFRESH_VERSION || get_transient('kop_wiki_drafts_refresh_running')) return;

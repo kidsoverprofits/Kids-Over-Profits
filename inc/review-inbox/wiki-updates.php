@@ -135,7 +135,9 @@ function kop_rinbox_wupd_item(array $r) {
             }
         }
         foreach ((array) ($d['fixes'] ?? array()) as $f) {
-            $details[] = array('label' => 'Corrects a line', 'value' => kop_wiki_drafts_format_line($f['new']) . (($f['note'] ?? '') !== '' ? ' (' . $f['note'] . ')' : ''));
+            $gone = !empty($f['delete']);
+            $details[] = array('label' => $gone ? 'Takes out a line' : 'Corrects a line',
+                'value' => kop_wiki_drafts_format_line($gone ? $f['old'] : $f['new']) . (($f['note'] ?? '') !== '' ? ' (' . $f['note'] . ')' : ''));
         }
         foreach ((array) ($d['conflicts'] ?? array()) as $c) {
             $details[] = array('label' => 'KOP\'s record says otherwise', 'value' => $c['text'] . ($c['source_label'] !== '' ? ' (' . $c['source_label'] . ')' : ''),
