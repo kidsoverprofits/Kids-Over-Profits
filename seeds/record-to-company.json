@@ -1,0 +1,8 @@
+[
+  {
+    "id": 10455,
+    "unique_name": "InnerChange",
+    "company": "InnerChange",
+    "note": "Made from an empty r/troubledteens wiki entry, this record was the company InnerChange (Solacium Holdings 2006-2008, InnerChange 2008-2018, then part of Embark), not a program: an office address in Provo and the head office's staff. Converted 2026-10-14; seeds/operator-records.json makes the company under the same unique_name. Undo: kop_rtc_undo() once that company is deleted."
+  }
+]

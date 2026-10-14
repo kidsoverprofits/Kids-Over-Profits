@@ -217,6 +217,8 @@ require_once get_stylesheet_directory() . '/inc/review-inbox.php';
 require_once get_stylesheet_directory() . '/inc/review-inbox-menu.php';
 // Duplicate facility records found automatically and merged into one, with Undo (KOP Tools > Merge Duplicates)
 require_once get_stylesheet_directory() . '/inc/facility-merge.php';
+// Facility records that are really a parent company leave the facility table, their page 301s to the company (seeds/record-to-company.json)
+require_once get_stylesheet_directory() . '/inc/record-to-company.php';
 // A person id for everyone on a staff list, stamped as personId by an hourly sync (KOP Tools > People)
 require_once get_stylesheet_directory() . '/inc/people.php';
 require_once get_stylesheet_directory() . '/inc/people-admin.php';

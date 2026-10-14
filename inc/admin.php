@@ -2526,6 +2526,8 @@ function kop_apply_template_assignments() {
     $summary['seeded']       = kop_apply_seed_posts();
     $summary['facilities']   = kop_apply_facility_record_seeds();
     $summary['operators']    = kop_apply_operator_alias_seeds();
+    // A facility record that is really a company leaves first, so the company seed can take its name (inc/record-to-company.php).
+    $summary['to_company']   = function_exists('kop_apply_record_to_company_seeds') ? kop_apply_record_to_company_seeds() : array();
     $summary['companies']    = kop_apply_operator_record_seeds();
     $summary['merges']       = kop_apply_facility_merge_seeds();
     $summary['names']        = kop_apply_name_correction_seeds();
@@ -2605,7 +2607,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '123';
+    $version = '124';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

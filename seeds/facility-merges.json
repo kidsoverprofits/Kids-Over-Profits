@@ -12,5 +12,19 @@
     "drop": 10602,
     "drop_name": "The Brown Schools at Laurel Ridge",
     "note": "Not a record of the Brown Schools years: it said Open 1987 to present and held the program's recent news and inspection matches, which the wiki update could not reach. The kept record has the Brown Schools name as a past name and The Brown Schools as a past operator. Merged at the owner's request 2026-10-06; Undo on the Merged tab."
+  },
+  {
+    "keep": 10353,
+    "keep_name": "New Haven RTC",
+    "drop": 10487,
+    "drop_name": "New Haven",
+    "note": "One program (New Haven RTC, Spanish Fork, UT, 1995-; Solacium/InnerChange 2006-2018, Embark since): the bare 'New Haven' record held its staff and news separately. Merged 2026-10-14 with the InnerChange cleanup; Undo on the Merged tab."
+  },
+  {
+    "keep": 10536,
+    "keep_name": "Sunrise RTC",
+    "drop": 100396,
+    "drop_name": "Solacium Sunrise, LLC",
+    "note": "The company name Sunrise RTC is registered under (NPI registry), an empty record. Merged 2026-10-14 with the InnerChange cleanup; Undo on the Merged tab."
   }
 ]

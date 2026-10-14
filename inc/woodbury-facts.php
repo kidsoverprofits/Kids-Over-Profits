@@ -2147,6 +2147,9 @@ function kop_wbf_render_card(array $rows, $tab) {
         echo '<h2>' . esc_html($first['program']) . ($first['place'] !== '' ? ' <span class="kop-wbf-muted">' . esc_html($first['place']) . '</span>' : '') . '</h2>';
         if ($tab === 'youngadult' && $first['ya_why'] !== '') {
             echo '<div class="kop-wbf-muted">Why it is here: ' . esc_html($first['ya_why']) . '</div>';
+        } elseif ($tab === 'norecord' && (string) $first['match_note'] !== '') {
+            // A record that became a parent company (inc/record-to-company.php) says so.
+            echo '<div class="kop-wbf-warn">' . esc_html($first['match_note']) . '</div>';
         }
     }
     echo '</div>';

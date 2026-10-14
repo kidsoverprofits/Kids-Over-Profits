@@ -81,6 +81,8 @@ request.
   - merge undo (inc/facility-merge.php:730)
   - the young adult move (inc/young-adult-programs.php:512)
   - program homes undo (inc/program-homes.php:679)
+  - record to company (inc/record-to-company.php: deletes the row, its Undo
+    re-inserts it)
 - **Readers:** facility page (live), facility index, state feed, directory
   feed, alias index and search, mobile API, open data (daily), network map
   (hourly fingerprint, then the GitHub build), people sync (hourly), the
@@ -296,6 +298,12 @@ but are **not registered**:
 - `suggested_edits.master_id`
 - option `kop_federal_funding_review`
 - graph.json (until the next build)
+
+A record that becomes a company (`kop_rtc_convert()`, seeds/record-to-company.json)
+reads the same list: link rows (`kop_rtc_link_tables()`) are deleted, rows still
+waiting for review are set to facility_id 0 with a `match_note`, decided rows keep
+the id. `/facility/<slug>/` 301s to the company from option
+`kop_record_to_company_log`, which also holds everything for Undo.
 
 ## 3. Where it drifts
 

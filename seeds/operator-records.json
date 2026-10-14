@@ -821,5 +821,227 @@
         "update": true
       }
     ]
+  },
+  {
+    "name": "InnerChange",
+    "note": "Company record created 2026-10-14. Solacium Holdings (2006-2008), renamed InnerChange on November 3, 2008, part of Embark Behavioral Health from October 2018. It had been facility record 10455, made from an empty wiki entry; that record left the facility table (seeds/record-to-company.json) and its staff are the company's executives here. Programs on file linked as past: New Haven RTC, Sunrise RTC, Alldredge Wilderness Journey, Fulshear (2006-2018), Chrysalis (2013-2018), Lake House Academy (about 2014-2018), the Oakley School (a 2013 'partnership' until it closed in 2017), Dragonfly Transitions (by 2018). Not linked: Wilderness Quest (letter of intent in 2007, purchase not confirmed); Vive (no record matches with certainty: 'Vive Adolescent Care', St. George, may be it); OPI (a young adult program).",
+    "operator": {
+      "currentName": "",
+      "otherNames": [
+        "Solacium",
+        "Solacium Holdings",
+        "Solacium Holdings, LLC",
+        "Solacium Group",
+        "InnerChange, LLC",
+        "InnerChange Programs"
+      ],
+      "status": "Merged",
+      "founded": "2006",
+      "operatingPeriod": "2006-2018",
+      "headquarters": "Orem, Utah",
+      "headquartersCity": "Orem",
+      "headquartersState": "UT",
+      "location": "Orem, UT",
+      "investors": [
+        "CIC Partners (majority owner, 2006-2011)",
+        "Cressey & Company (2011-2018)"
+      ],
+      "keyStaff": {
+        "ceo": "",
+        "founders": [],
+        "keyExecutives": [
+          {
+            "name": "David Michel",
+            "role": "President and Chief Executive Officer (2008, Woodbury Reports)",
+            "pastJobs": "",
+            "source": "Woodbury Reports, June 2008 (#166), p. 27",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0608.pdf#page=27"
+          },
+          {
+            "name": "Anthony Geraci",
+            "role": "Chief Operations Officer and Chief Marketing Officer of Solacium (until April 2008, Woodbury Reports)",
+            "pastJobs": "Founder and President - Wellcore, LLC (merged into Solacium 2007); Fulshear Ranch Academy, San Cristobal Ranch Academy, Transitions of Galveston Island",
+            "source": "Woodbury Reports, June 2008 (#166), p. 27",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0608.pdf#page=27"
+          },
+          {
+            "name": "Dustin Tibbits",
+            "role": "President, President and Chief Clinical Officer (2010-2012, Woodbury Reports)",
+            "pastJobs": "Executive Director - New Haven RTC (2008)",
+            "source": "Woodbury Reports, December 2010, p. 11",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1210.pdf#page=11",
+            "personId": 731
+          },
+          {
+            "name": "Dustin Tibbitts",
+            "role": "President (2011, Woodbury Reports)",
+            "pastJobs": "Executive Director - New Haven RTC (2007-2008); Executive Director - New Haven (2008-2009)",
+            "source": "Woodbury Reports, July 2011, p. 10",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0711.pdf#page=10",
+            "personId": 731
+          },
+          {
+            "name": "Janet Farnsworth",
+            "role": "Vice President of Business Development (2014, Woodbury Reports)",
+            "pastJobs": "Director of Strategic Development - Alpine Academy (2013)",
+            "source": "Woodbury Reports, February 2014, p. 10",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0214.pdf#page=10",
+            "personId": 563
+          },
+          {
+            "name": "Tazim Salehani",
+            "role": "Vice President of Marketing and Business Development (2012, Woodbury Reports)",
+            "pastJobs": "Sales Operations Director - Aspen Education Group (before 2012)",
+            "source": "Woodbury Reports, November 2012, p. 12",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1112.pdf#page=12",
+            "personId": 732
+          },
+          {
+            "name": "Val H. Christensen",
+            "role": "Chairman of the Board (2008, Woodbury Reports)",
+            "pastJobs": "CEO, President and Chief Executive Officer - Solacium (2007-2008) [left 2008-04-30]",
+            "source": "Woodbury Reports, December 2008 (#172), p. 22",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1208.pdf#page=22",
+            "personId": 733
+          },
+          {
+            "name": "Ashley Auchterlonie",
+            "role": "Director of Marketing (2008-2009, Woodbury Reports)",
+            "pastJobs": "Director of Marketing - Alldredge Wilderness Journey (2007) [left 2007-08-01]; Marketing Director - Solacium Group (2007) [joined 2007-08-01]; Director of Marketing - Alldredge Academy and Greenbrier Academy (before 2007); Director of Marketing - Greenbrier Academy for Girls (2007); Director of Marketing - Solacium Sunrise, LLC – Sunrise RTC (2008); Director of Marketing - New Haven (2009); Director of Marketing - Fulshear Treatment to Transition – The Ranch (2009); later Director of Business Development - Insight Intensive at Gold Lake (2011) [joined 2011-01]",
+            "source": "Woodbury Reports, December 2008 (#172), p. 21",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1208.pdf#page=21",
+            "personId": 734
+          },
+          {
+            "name": "Mark Oerther",
+            "role": "Clinical Outreach Manager (2011, Woodbury Reports)",
+            "pastJobs": "Admissions Director - SUWS of the Carolinas (2007); Admissions, Admissions Director, Director of Admissions - Trails Carolina (2009-2010)",
+            "source": "Woodbury Reports, December 2011, p. 12",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1211.pdf#page=12",
+            "personId": 735
+          },
+          {
+            "name": "Sarah Engler",
+            "role": "Director of Aftercare and Transition Services (2009, Woodbury Reports)",
+            "pastJobs": "Director of Transition Services - New Haven RTC (2008) [joined 2008-06-05]",
+            "source": "Woodbury Reports, February 2009 (#174), p. 22",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0209.pdf#page=22",
+            "personId": 736
+          },
+          {
+            "name": "Steve Walters",
+            "role": "Social Media Director (2011, Woodbury Reports)",
+            "pastJobs": "",
+            "source": "Woodbury Reports, December 2011, p. 11",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1211.pdf#page=11",
+            "personId": 737
+          },
+          {
+            "name": "Steven Walters",
+            "role": "Director of Social Media (2011, Woodbury Reports)",
+            "pastJobs": "",
+            "source": "Woodbury Reports, November 2011, p. 10",
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1111.pdf#page=10",
+            "personId": 737
+          }
+        ]
+      },
+      "notes": [
+        "July 1, 2006: New Haven (Spanish Fork, UT) bought Sunrise RTC, \"which makes it part of Solacium Holdings, LLC. Solacium also owns Alldredge Academy in West Virginia\" (Woodbury Reports, February 2007, p. 19: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0207.pdf#page=19; press release: https://strugglingteens.com/artman/publish/article_5597.shtml)",
+        "April 2007: Wellcore, LLC (Anthony Geraci, Sugar Land, TX; Fulshear Ranch Academy) merged with Solacium Holdings (Woodbury Reports, May 2007, p. 29: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0507.pdf#page=29)",
+        "August 2007: Solacium, then of Missouri City, TX, \"owner and operator of behavioral healthcare facilities, programs, and schools\", signed a letter of intent to buy Wilderness Quest (Monticello, UT); CEO Val H. Christensen announced Alldredge Academy would become Alldredge Wilderness Journey. Sommerville Young Adult Community was listed as \"a part of Solacium Holdings LLC\" (Woodbury Reports, October 2007, pp. 21 and 27: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1007.pdf#page=21; https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1007.pdf#page=27). Whether the Wilderness Quest purchase closed is not on record: the December 2008 list of programs leaves it out",
+        "April 30, 2008: Anthony Geraci resigned as COO and CMO; David Michel succeeded Val Christensen as President and CEO (Woodbury Reports, June 2008, p. 27: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0608.pdf#page=27)",
+        "June 2008: Solacium was \"majority owned by CIC Partners of Dallas\", formed about two years earlier from Fulshear Ranch and New Haven, and managed five programs (Treatment Magazine, June 5, 2008: https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/)",
+        "November 3, 2008: \"SOLACIUM NOW INNERCHANGE\": CEO David Michel announced the renaming; programs New Haven, Sunrise, Fulshear Ranch Academy and Alldredge Wilderness Journey (Woodbury Reports, December 2008, pp. 20-21: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1208.pdf#page=20)",
+        "2009: offices listed in Addison, TX (Woodbury Reports, April 2009, p. 17: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0409.pdf#page=17); later Orem, UT (Cressey & Company: https://www.cresseyco.com/partnerships/innerchange)",
+        "December 2010: Dustin Tibbitts, Executive Director of New Haven, promoted to President of InnerChange (Woodbury Reports, December 2010, p. 11: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1210.pdf#page=11)",
+        "December 2011: Cressey & Company bought InnerChange from CIC Partners (Preqin: https://www.preqin.com/data/profile/asset/innerchange--llc/78108; PitchBook: https://pitchbook.com/profiles/company/12165-67)",
+        "January 2, 2013: InnerChange bought Chrysalis (Eureka, MT), \"the fourth facility to join the InnerChange family of treatment programs\", all for adolescent girls or young women (Woodbury Reports, February 2013, p. 12: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0213.pdf#page=12; press release: https://strugglingteens.com/artman/publish/printer_InnerChangeBN_130102.shtml)",
+        "August 2013: \"InnerChange, a clinical and operational consulting organization supporting residential treatment centers\", announced a partnership with the Oakley School (Oakley, UT; closed 2017); Paul Taylor, from Copper Canyon Academy, became Oakley's executive director (Woodbury Reports, September 2013, pp. 10-11: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0913.pdf#page=10; https://strugglingteens.com/artman/publish/printer_OakleySchoolBN130802.shtml)",
+        "About 2014: InnerChange bought Lake House Academy (Flat Rock, NC) (r/troubledteens wiki, Lake House Academy: https://www.reddit.com/r/troubledteens/wiki/index/lakehouse)",
+        "October 31, 2018: Embark Behavioral Health was announced as the umbrella name for Calo Programs, InnerChange Programs, New Vision Wilderness Programs and Potomac Pathways. InnerChange's programs then: Optimum Performance Institute (OPI), Chrysalis, New Haven, Sunrise, Vive and Dragonfly Transitions; Lake House and Fulshear were listed under Calo (https://strugglingteens.com/artman/publish/EmbarkBH_BN10312018.shtml). Cressey & Company left in August 2018 (Preqin). OPI and Dragonfly Transitions are young adult programs; when OPI, Vive and Dragonfly joined InnerChange is not on record",
+        "After 2018 \"InnerChange\" was used as the name of a division of Embark (staff lines on the r/troubledteens wiki), and Sunrise RTC's company is still registered as Solacium Sunrise, LLC (NPI registry: https://npiindex.com/npi/1023865656)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10353,
+        "unique_name": "New Haven RTC",
+        "relationship": "past"
+      },
+      {
+        "id": 10536,
+        "unique_name": "Sunrise RTC",
+        "relationship": "past"
+      },
+      {
+        "id": 14017,
+        "unique_name": "Alldredge Wilderness Journey",
+        "relationship": "past"
+      },
+      {
+        "id": 10612,
+        "unique_name": "Fulshear Treatment to Transition",
+        "relationship": "past"
+      },
+      {
+        "id": 12684,
+        "unique_name": "Chrysalis Therapeutic Boarding School",
+        "relationship": "past"
+      },
+      {
+        "id": 11655,
+        "unique_name": "Lake House Academy",
+        "relationship": "past"
+      },
+      {
+        "id": 10349,
+        "unique_name": "Oakley School",
+        "relationship": "past"
+      },
+      {
+        "id": 100255,
+        "unique_name": "Dragonfly Transitions",
+        "relationship": "past"
+      }
+    ]
+  },
+  {
+    "name": "Embark Behavioral Health",
+    "note": "2026-10-14: Sunrise RTC and Dragonfly Transitions were InnerChange programs when Embark was formed (October 31, 2018 announcement); linked as Embark's.",
+    "operator": {
+      "notes": [
+        "October 31, 2018: Embark Behavioral Health announced as the umbrella name for Calo Programs, InnerChange Programs (formerly Solacium, 2006-2018), New Vision Wilderness Programs and Potomac Pathways; InnerChange brought OPI, Chrysalis, New Haven, Sunrise, Vive and Dragonfly Transitions (https://strugglingteens.com/artman/publish/EmbarkBH_BN10312018.shtml)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10536,
+        "unique_name": "Sunrise RTC",
+        "relationship": "current"
+      },
+      {
+        "id": 100255,
+        "unique_name": "Dragonfly Transitions",
+        "relationship": "current"
+      }
+    ]
+  },
+  {
+    "name": "Aspen Education Group",
+    "note": "2026-10-14: the Oakley School partnered with InnerChange from August 2013 until it closed in 2017; Aspen's link set to past.",
+    "operator": {
+      "notes": [
+        "August 2013: the Oakley School (Oakley, UT), owned by Aspen since 2004, began a partnership with InnerChange and ran under it until it closed in 2017 (Wikipedia, Oakley School: https://en.wikipedia.org/wiki/Oakley_School; Woodbury Reports, September 2013, p. 11: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0913.pdf#page=11)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10349,
+        "unique_name": "Oakley School",
+        "relationship": "past",
+        "update": true
+      }
+    ]
   }
 ]
