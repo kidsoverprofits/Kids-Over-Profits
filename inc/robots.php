@@ -2,9 +2,8 @@
 /**
  * The site's robots.txt rules in one group crawlers actually read.
  *
- * WordPress serves a virtual robots.txt; inc/facility-pages.php (/go/) and
- * inc/staging-links.php (/staging/) each add a Disallow line to it, and Yoast
- * then rebuilds the file around its own "User-agent: *" block. That left our
+ * WordPress serves a virtual robots.txt; inc/facility-pages.php (/go/) adds a
+ * Disallow line to it, and Yoast then rebuilds the file around its own "User-agent: *" block. That left our
  * lines above any User-agent line, outside every group, where crawlers ignore
  * them. This runs after Yoast, takes every Disallow line that sits outside a
  * group and puts it, with the paths below, into the "User-agent: *" group.

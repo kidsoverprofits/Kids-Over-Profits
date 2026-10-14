@@ -41,10 +41,10 @@ function star_group($txt) {
 // What the live site served on 2026-10-12: our lines above Yoast's block, outside every group.
 $yoast = "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDisallow:\n\n"
     . "Sitemap: https://kidsoverprofits.org/sitemap_index.xml\n# ---------------------------\n# END YOAST BLOCK";
-$live = "Disallow: /go/\n\nDisallow: /staging/\n\n" . $yoast;
+$live = "Disallow: /go/\n\n" . $yoast;
 $out = kop_robots_txt($live);
 $g = star_group($out);
-foreach (array('/go/', '/staging/', '/tti-data-submission') as $p) {
+foreach (array('/go/', '/tti-data-submission') as $p) {
     ok("live file: Disallow: $p is in the * group", in_array('Disallow: ' . $p, $g, true));
 }
 ok('live file: the empty Disallow is gone', !in_array('Disallow:', $g, true));
@@ -54,12 +54,13 @@ ok('live file: the sitemap line stays', strpos($out, 'Sitemap: https://kidsoverp
 ok('running twice changes nothing', kop_robots_txt($out) === $out);
 ok('no line twice', count($g) === count(array_unique(array_filter($g))) + count(array_filter($g, function ($l) { return $l === ''; })));
 
-// WordPress's own file, no Yoast, after the staging filter.
-$wp = kop_robots_txt(kop_staging_robots("User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n"));
+// WordPress's own file, no Yoast.
+$wp = kop_robots_txt("User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n");
 $g = star_group($wp);
 ok('stock file: wp-admin rule kept', in_array('Disallow: /wp-admin/', $g, true));
 ok('stock file: data form disallowed', in_array('Disallow: /tti-data-submission', $g, true));
-ok('stock file: staging still disallowed', in_array('Disallow: /staging/', $g, true));
+// The staging copy is gone: Google may recrawl its old addresses and see the 404s and redirects.
+ok('stock file: /staging/ is not disallowed', !in_array('Disallow: /staging/', $g, true));
 
 ok('an empty file gets a group', array_values(array_filter(star_group(kop_robots_txt('')))) === array('Disallow: /tti-data-submission'));
 

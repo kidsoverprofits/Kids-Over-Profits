@@ -260,9 +260,10 @@ need the owner's accounts, devices or artwork.
 
 ### Hosting
 
-9. **Close `/staging/`.** It answers 200 and its inner pages carry no
-    `noindex`. Password it in cPanel, set "Discourage search engines" in the
-    staging install, or take it down; nothing on the live site depends on it.
+9. **Staging is deleted** (checked 2026-10-14: no ~/public_html/staging; /staging/ is a 404 and its old
+    inner addresses redirect to the live pages). Only a LiteSpeed-cached copy of its old home page still
+    answers at /staging/ (noindex). **Owner:** LiteSpeed Cache > Toolbox > Purge > Purge by URL `/staging/`.
+    robots.txt no longer disallows /staging/, so Google can recrawl the old addresses and drop them.
 10. **Portal leftovers** (optional). NixiHost backups still hold the one
     pre-encryption submission (`SUB-2025-YLVUY0CL`) until they rotate, unless
     support purges them. The owner deleted the public copies and asked
@@ -2313,7 +2314,7 @@ Open:
    `wpseo_robots` rule for `is_tag()` in inc/seo.php.
 8. **Owner:** verify the site in Google Search Console and Bing Webmaster Tools, submit sitemap_index.xml. Then read
    which program names bring searchers and which pages Google refused, and adjust the plan from that.
-9. **Owner:** close /staging/ (Hosting, item 9 above).
+9. **Owner:** purge the cached /staging/ page (Hosting, item 9 above).
 10. Facility pages are ~500 KB of HTML, company pages ~660 KB: load the long lists (documents, inspections) when
     opened. Its own project.
 11. Google's Rich Results Test on a facility and a company page once Google recrawls them.
