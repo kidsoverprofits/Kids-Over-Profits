@@ -361,6 +361,31 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
 
 - **Is Liz Ianelli the alumna who counted 101 deaths** in the 2018 NYT article? The record lists her as mentioned there.
 
+### Clearview Horizon / Clearview Girls Academy (found 2026-10-14)
+
+One program held as three records: 9698 (Clearview Horizon, Sandpoint ID, operator "RELOCATED", holds the three
+Missoulian 2019 articles), 100124 (Clearview Horizon (MT), Heron) and 12698 (Clearview Girls Academy, Heron). None has
+past names or an operator. The fixes go to Review inbox > Data audit as proposals; these questions stay open:
+
+- **Rename year.** [KFF Health News, 2022-01-21](https://kffhealthnews.org/mental-health/state-laws-aim-to-regulate-troubled-teen-industry-but-loopholes-remain/)
+  says it became Clearview Girls Academy, a "Christian therapeutic boarding school", only after Montana's 2019 law was
+  implemented. The clearviewhorizon.com Wayback captures should date the brand change.
+- **Move year.** The wiki entry (and Woodbury Facts 9481) says it moved from Sandpoint around 2012. Woodbury puts it in
+  Sandpoint in April 2000 ([visit](https://strugglingteens.com/archives/2000/5/visit01.html)) and in Heron, MT by
+  February 2006 ([press release](https://strugglingteens.com/news/press%20releases/clearview_horizon060302.htm)).
+- **Start year.** The records say 1996. NATSAP's "26th year" in 2022 gives about 1996; Woodbury's "celebrating 11 years"
+  (August 2008) gives about 1997. 1996 is also Elk Mountain Academy, Inc.'s IRS ruling year ([GuideStar](https://www.guidestar.org/profile/82-0478366)).
+- **Operator.** [CARF](https://carf.org/provider/elk-mountain-academy-inc-dba-clearview-academy-268130/) has "Elk Mountain
+  Academy, Inc. DBA Clearview Academy" from 2016, and the [2023 Montana provider list](https://www.dphhs.mt.gov/assets/oig/LicensureBureau/PAARPListofProviders2023.pdf)
+  lists the Clearview campus under Elk Mountain Academy (Jason Thielbar). When did the Oldings' boys' program's
+  corporation become Clearview's operator, and does Elk Mountain Academy (9703) still run as a program?
+- **Clearview Horizon, Inc. (Montana D264044)** is in involuntary dissolution ([OpenCorporates](https://opencorporates.com/companies/us_mt/D264044)):
+  its filing and dissolution dates and officers need a Montana Secretary of State lookup.
+- **Plaintiffs.** AP (March 2021) says 9 former students sued, KFF says 10, and a Billings Gazette headline says 13
+  sued Clearview and Reflections Academy together.
+- **Spelling.** Thielbahr (Woodbury, NATSAP) vs Theilbar (AP) vs Thielbar (state list): one family, which spelling
+  do records use.
+
 ### Related-industry pages (found 2026-10-08)
 
 - The Joint Commission complaint number (1-800-994-6610) came from a search summary.
