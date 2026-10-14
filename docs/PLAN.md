@@ -381,6 +381,8 @@ need the owner's accounts, devices or artwork.
     The nursing homes page was rewritten again on 2026-10-14 to docs/WRITING-STYLE.md: the statement gives the
     thesis (same people, same dependence, same investors run both the same way); "Cut off and not believed" puts the
     rates in a table and Bob Bacon's words in a pull quote; the almshouse root leads into it; the owners are a table
+    [later the same day, at the owner's word, the isolation section and its sources were cut: no proven parallel in
+    nursing homes; the page now argues only the shared root and the owners and staffing model]
     (Carlyle, Onex) followed by the buyout mortality study and Ripley's "control staffing" (new source 20, Warehouses
     of Neglect pp. 27 and 104), ending on a verdict. Production had no saved Page Text edits for it on that date.
     Checked against the History articles (2026-10-08); the pages now link them where they meet. Errors found in

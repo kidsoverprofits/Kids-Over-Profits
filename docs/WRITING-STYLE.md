@@ -86,6 +86,9 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
   teen industry: the same owners, the same children passing through, the same methods, shared roots.
 - General facts about the industry (its size, its own oversight gaps, its own drug statistics) go unless they show
   that connection.
+- A parallel needs evidence on both sides. Don't set a TTI practice beside the other industry unless a source shows it
+  there too; otherwise the page turns into a list of how much worse the TTI is. Claim only what is documented for the
+  named company or investor (owning both is not proof of running both the same way).
 - Psychiatric hospitals overlap the TTI (many RTCs and PRTFs sit on a hospital's campus); never call them flatly
   "not the TTI". Migrant children's shelters (ORR), juvenile detention and young adult programs are part of the
   industry, never "related industries". Indian boarding schools are institutional abuse history, outside it.
