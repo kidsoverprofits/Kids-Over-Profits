@@ -10308,5 +10308,517 @@
         "currentOperator": "Ascent Companies"
       }
     }
+  },
+  {
+    "id": 12050,
+    "unique_name": "Family Foundation School",
+    "version": 2,
+    "note": "Paul Geer: choir teacher 1991-2014 (WBNG 2024; NYT 4/4/2024 'more than 20 years'), indicted 2024, convicted 2025, sentenced to 327 months; Liz Ianelli's memoir and documentary. Staff and notes copied from the live record on 2026-10-14 (2026-10-14)",
+    "facility": {
+      "staff": {
+        "pastTTIJobs": [],
+        "notableStaff": [
+          {
+            "name": "Thomas Walker",
+            "role": "Therapeutic Counselor (2013, Woodbury Reports)",
+            "source": "Woodbury Reports, May 2013, p. 7",
+            "pastJobs": "",
+            "personId": 1168,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0513.pdf#page=7"
+          },
+          {
+            "name": "Tom Kovalesky",
+            "role": "Choreographer (2012, Woodbury Reports)",
+            "source": "Woodbury Reports, June 2012, p. 12",
+            "pastJobs": "",
+            "personId": 1169,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0612.pdf#page=12"
+          },
+          {
+            "name": "Marcia Ertola",
+            "role": "Counseling department (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, July 2007 (#155), p. 31",
+            "pastJobs": "",
+            "personId": 1170,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0707.pdf#page=31"
+          },
+          {
+            "name": "Iris Maclean",
+            "role": "Admissions Counselor, Admissions, Assistant Dean of Admissions & Director of Referral Relations (2007-2012, Woodbury Reports)",
+            "source": "Woodbury Reports, July 2007 (#155), p. 31",
+            "pastJobs": "Director of Admissions - Sober College (2011) [joined 2011]",
+            "personId": 1171,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0707.pdf#page=31"
+          },
+          {
+            "name": "Rochelle L. Rhyno",
+            "role": "Staff (2012, Woodbury Reports)",
+            "source": "Woodbury Reports, May 2012, p. 6",
+            "pastJobs": "",
+            "personId": 1172,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0512.pdf#page=6"
+          },
+          {
+            "name": "Gerald Janauer",
+            "role": "Academic Dean, Curriculum Coordinator (2011-2012, Woodbury Reports)",
+            "source": "Woodbury Reports, July 2011, p. 7",
+            "pastJobs": "",
+            "personId": 1173,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0711.pdf#page=7"
+          },
+          {
+            "name": "Bruce Hutchison",
+            "role": "Forensics Coach, Scoutmaster (2007-2009, Woodbury Reports)",
+            "source": "Woodbury Reports, December 2007 (#160), p. 31",
+            "pastJobs": "",
+            "personId": 1174,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1207.pdf#page=31"
+          },
+          {
+            "name": "Ed Leung",
+            "role": "Biology Teacher (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, June 2011, p. 15",
+            "pastJobs": "",
+            "personId": 1175,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0611.pdf#page=15"
+          },
+          {
+            "name": "Scott Cole",
+            "role": "Scoutmaster, Boy Scout Troop 174 (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2011, p. 10",
+            "pastJobs": "",
+            "personId": 1176,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1111.pdf#page=10"
+          },
+          {
+            "name": "Father Ralph Groskoph",
+            "role": "Episcopalian Chaplain (2010, Woodbury Reports), left",
+            "source": "Woodbury Reports, March 2010, p. 15",
+            "pastJobs": "",
+            "personId": 1177,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0310.pdf#page=15"
+          },
+          {
+            "name": "Ann Kozak",
+            "role": "Marketing Specialist, Yearbook Adviser (2006-2009, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1178,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Sid Parham",
+            "role": "VP of Academics (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2011, p. 4",
+            "pastJobs": "",
+            "personId": 1164,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1011.pdf#page=4"
+          },
+          {
+            "name": "Bill Musgrove",
+            "role": "Athletic Director (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, April 2007 (#152), p. 31",
+            "pastJobs": "",
+            "personId": 1180,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0407.pdf#page=31"
+          },
+          {
+            "name": "Tom Kovaleski",
+            "role": "Show Choir Director, Choreographer, Director and Choreographer (2009-2011, Woodbury Reports)",
+            "source": "Woodbury Reports, June 2009 (#178), p. 19",
+            "pastJobs": "",
+            "personId": 1169,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0609.pdf#page=19"
+          },
+          {
+            "name": "Glenn Singer",
+            "role": "Assistant Dean of Admissions (2012, Woodbury Reports)",
+            "source": "Woodbury Reports, August 2012, p. 9",
+            "pastJobs": "later Director of Admissions - Grand River Academy (2013) [joined 2013]",
+            "personId": 1182,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0812.pdf#page=9"
+          },
+          {
+            "name": "Michael K. Ducey",
+            "role": "Family Leader (2010, Woodbury Reports), left",
+            "source": "Woodbury Reports, July 2012, p. 10",
+            "pastJobs": "",
+            "personId": 1183,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0712.pdf#page=10"
+          },
+          {
+            "name": "Paul Geer",
+            "role": "Choir teacher (1991-2014); Choir Director, Family Singers Director, Musical Director (2009-2012, Woodbury Reports)",
+            "source": "Woodbury Reports, April 2009 (#176), p. 19",
+            "pastJobs": "later Music Director - Allynwood Academy (2013)",
+            "personId": 1157,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0409.pdf#page=19"
+          },
+          {
+            "name": "Christopher Stein",
+            "role": "Journalism Department (2008, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2008 (#162), p. 31",
+            "pastJobs": "",
+            "personId": 1184,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0208.pdf#page=31"
+          },
+          {
+            "name": "Curtis Newsome",
+            "role": "Counseling staff (2012, Woodbury Reports)",
+            "source": "Woodbury Reports, December 2012, p. 10",
+            "pastJobs": "",
+            "personId": 1185,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1212.pdf#page=10"
+          },
+          {
+            "name": "Darlene Karcher",
+            "role": "Admissions Assistant / Enrollment Coordinator (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2011, p. 4",
+            "pastJobs": "",
+            "personId": 1186,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1011.pdf#page=4"
+          },
+          {
+            "name": "James (Willy) Williamson",
+            "role": "Athletic Department Director (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2009 (#183), p. 15",
+            "pastJobs": "",
+            "personId": 1187,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1109.pdf#page=15"
+          },
+          {
+            "name": "Meryl Manley",
+            "role": "Psychiatrist (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, March 2009 (#175), p. 16",
+            "pastJobs": "",
+            "personId": 1188,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0309.pdf#page=16"
+          },
+          {
+            "name": "James Kavarnos",
+            "role": "Math Teacher (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, May 2009 (#177), p. 19",
+            "pastJobs": "",
+            "personId": 1189,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0509.pdf#page=19"
+          },
+          {
+            "name": "Caren Samuels",
+            "role": "Counselor for Families and Children at Risk (2006, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1190,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Charles A. Moss",
+            "role": "School Psychologist (2007, Woodbury Reports), left",
+            "source": "Woodbury Reports, October 2007 (#158), p. 31",
+            "pastJobs": "Staff - Sullivan County Community College (before 2007)",
+            "personId": 1191,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1007.pdf#page=31"
+          },
+          {
+            "name": "Mary Burkart",
+            "role": "Counselor (2010, Woodbury Reports)",
+            "source": "Woodbury Reports, September 2010, p. 10",
+            "pastJobs": "",
+            "personId": 1192,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0910.pdf#page=10"
+          },
+          {
+            "name": "Geoff Westby",
+            "role": "Weight Training Instructor (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, April 2007 (#152), p. 31",
+            "pastJobs": "",
+            "personId": 1193,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0407.pdf#page=31"
+          },
+          {
+            "name": "Willy Williamson",
+            "role": "Athletic Director (2010, Woodbury Reports)",
+            "source": "Woodbury Reports, June 2010, p. 13",
+            "pastJobs": "",
+            "personId": 1194,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0610.pdf#page=13"
+          },
+          {
+            "name": "Shannon Quinby",
+            "role": "Enrollment Development & Referral Relations (2013, Woodbury Reports)",
+            "source": "Woodbury Reports, August 2013, p. 10",
+            "pastJobs": "",
+            "personId": 1195,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0813.pdf#page=10"
+          },
+          {
+            "name": "Marian Curtis",
+            "role": "Admissions Outreach (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2011, p. 10",
+            "pastJobs": "",
+            "personId": 1196,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1011.pdf#page=10"
+          },
+          {
+            "name": "Greg Milunich",
+            "role": "Special Education Teacher (2010, Woodbury Reports)",
+            "source": "Woodbury Reports, September 2010, p. 10",
+            "pastJobs": "",
+            "personId": 1197,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0910.pdf#page=10"
+          },
+          {
+            "name": "Jill Harmon",
+            "role": "Individual and Family Therapist (2006, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1198,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Katherine Moroney",
+            "role": "Substance Abuse Counselor (2006, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1199,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Susan Runge",
+            "role": "Chair, Counseling Department (2006, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1200,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Jeffrey Brain",
+            "role": "VP for External Relations (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, September 2007 (#157), p. 28",
+            "pastJobs": "",
+            "personId": 1163,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0907.pdf#page=28"
+          },
+          {
+            "name": "Natalya Kuchukov",
+            "role": "Russian Language Teacher (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, March 2009 (#175), p. 16",
+            "pastJobs": "",
+            "personId": 1201,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0309.pdf#page=16"
+          },
+          {
+            "name": "Chris Stein",
+            "role": "Journalism Teacher (2006, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2006 (#138), p. 31",
+            "pastJobs": "",
+            "personId": 1184,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0206.pdf#page=31"
+          },
+          {
+            "name": "Mike Ducey",
+            "role": "VP of Development (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2007 (#150), p. 31",
+            "pastJobs": "",
+            "personId": 1183,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0207.pdf#page=31"
+          },
+          {
+            "name": "Bob Runge",
+            "role": "Student Advisor, Human Relations Director (1990-2008, Woodbury Reports), left",
+            "source": "Woodbury Reports, October 2008 (#170), p. 30",
+            "pastJobs": "",
+            "personId": 1202,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1008.pdf#page=30"
+          },
+          {
+            "name": "Ellen Singer",
+            "role": "Director of Jewish Studies (2007, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2007 (#158), p. 31",
+            "pastJobs": "",
+            "personId": 1203,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1007.pdf#page=31"
+          },
+          {
+            "name": "Rabbi Michele Medwin",
+            "role": "Director of Jewish Studies (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2009 (#182), p. 15",
+            "pastJobs": "",
+            "personId": 1204,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1009.pdf#page=15"
+          },
+          {
+            "name": "Robin Morgan-North",
+            "role": "Director of Health Services (2009, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2009 (#183), p. 15",
+            "pastJobs": "Case Manager - Sullivan County (NY) Public Health Department (before 2009)",
+            "personId": 1205,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1109.pdf#page=15"
+          },
+          {
+            "name": "Mark P. Vogel",
+            "role": "Consulting Psychologist, Director of Counseling Services, Director of Counseling (2007-2013, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2007 (#159), p. 31",
+            "pastJobs": "",
+            "personId": 1206,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1107.pdf#page=31"
+          },
+          {
+            "name": "Michele Medwin",
+            "role": "Spiritual Advisor to Jewish Students (2007-2008, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2007 (#158), p. 31",
+            "pastJobs": "",
+            "personId": 1207,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1007.pdf#page=31"
+          },
+          {
+            "name": "Carlton Williams",
+            "role": "Athletic Director (2013, Woodbury Reports)",
+            "source": "Woodbury Reports, April 2013, p. 10",
+            "pastJobs": "",
+            "personId": 1208,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0413.pdf#page=10"
+          },
+          {
+            "name": "Ann Lewis",
+            "role": "Therapeutic Counselor (2013, Woodbury Reports)",
+            "source": "Woodbury Reports, May 2013, p. 7",
+            "pastJobs": "",
+            "personId": 1209,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0513.pdf#page=7"
+          },
+          {
+            "name": "Cindy Ray Argiros",
+            "role": "Journalism Teacher (2013, Woodbury Reports)",
+            "source": "Woodbury Reports, September 2013, p. 10",
+            "pastJobs": "",
+            "personId": 1210,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0913.pdf#page=10"
+          },
+          {
+            "name": "Tony and Betty Argiros",
+            "role": "son",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "",
+            "personId": 1162,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/familyfoundation"
+          }
+        ],
+        "administrator": [
+          {
+            "name": "Emmanuel A. Argiros",
+            "role": "President (2007-2009, Woodbury Reports)",
+            "source": "Woodbury Reports, July 2007 (#155), p. 31",
+            "pastJobs": "",
+            "personId": 1158,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0707.pdf#page=31"
+          },
+          {
+            "name": "Mike Argiros",
+            "role": "Executive Director (2011, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2011, p. 5",
+            "pastJobs": "",
+            "personId": 1159,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1011.pdf#page=5"
+          },
+          {
+            "name": "Betty Argiros",
+            "role": "Founder (2006-2009, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2006 (#146), p. 30",
+            "pastJobs": "",
+            "personId": 1160,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1006.pdf#page=30"
+          },
+          {
+            "name": "Ann Janauer",
+            "role": "Vice President, Human Resources, High school principal, Curriculum Coordinator (2008-2011, Woodbury Reports)",
+            "source": "Woodbury Reports, August 2008 (#168), p. 31",
+            "pastJobs": "",
+            "personId": 1161,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0808.pdf#page=31"
+          },
+          {
+            "name": "Tony Argiros",
+            "role": "Founder (2006-2009, Woodbury Reports)",
+            "source": "Woodbury Reports, October 2006 (#146), p. 30",
+            "pastJobs": "",
+            "personId": 1162,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1006.pdf#page=30"
+          },
+          {
+            "name": "Richard Reeve",
+            "role": "Scholarship fund development, Executive Director, Director (2007-2008, Woodbury Reports)",
+            "source": "Woodbury Reports, July 2007 (#155), p. 31",
+            "pastJobs": "later CHAT presenter - Allynwood Academy (2013)",
+            "personId": 1155,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0707.pdf#page=31"
+          },
+          {
+            "name": "Jeff Brain",
+            "role": "Admissions Director, VP for External Relations & Acting Director of Admissions, VP for External Relations and Acting Director of Admissions, Vice President for External Relations, Counselor, Vice President for External Relations and Director of Admissions, Director of External Relations & Dean of Admissions, Dean of Admissions/Director of External Relations, Dean of Admissions (2007-2013, Woodbury Reports)",
+            "source": "Woodbury Reports, April 2007 (#152), p. 28",
+            "pastJobs": "Admissions Director, Director of Counseling - Betton House (2007-2008)",
+            "personId": 1163,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0407.pdf#page=28"
+          },
+          {
+            "name": "Sidney F. Parham",
+            "role": "NATSAP Board Member, Vice President of Academic Affairs, Drama Department Head (2006-2011, Woodbury Reports)",
+            "source": "Woodbury Reports, February 2007 (#150), p. 28",
+            "pastJobs": "Chairman, Education Committee - Natsap (2007) [promoted 2007-02-20]",
+            "personId": 1164,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0207.pdf#page=28"
+          },
+          {
+            "name": "Jason Garnar",
+            "role": "Chairman of the History Department and Middle States Internal Coordinator; Director of College Counseling, Admissions Counselor, History Department Chairman, Director of the FFS Bridge Program (2009-2013, Woodbury Reports)",
+            "source": "Woodbury Reports, September 2009 (#181), p. 31",
+            "pastJobs": "",
+            "personId": 1165,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0909.pdf#page=31"
+          },
+          {
+            "name": "Rita Argiros",
+            "role": "Vice President for Administrative Affairs, Dog Corps Coordinator (2008-2011, Woodbury Reports)",
+            "source": "Woodbury Reports, June 2008 (#166), p. 31",
+            "pastJobs": "later CHAT presenter - Allynwood Academy (2013)",
+            "personId": 1154,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0608.pdf#page=31"
+          },
+          {
+            "name": "Jan Cheripko",
+            "role": "Middle School Principal and English Teacher, English teacher (2007-2013, Woodbury Reports), left",
+            "source": "Woodbury Reports, September 2007 (#157), p. 31",
+            "pastJobs": "",
+            "personId": 1166,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0907.pdf#page=31"
+          },
+          {
+            "name": "Robin Ducey",
+            "role": "Principal, Chair of the Fine Arts Department (2007-2012, Woodbury Reports), left",
+            "source": "Woodbury Reports, January 2008 (#161), p. 31",
+            "pastJobs": "",
+            "personId": 1167,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0108.pdf#page=31"
+          }
+        ]
+      },
+      "notes": [
+        "Note: parents formed a new advocacy group, 'Parents in Partnership Society' (PIPS) (Woodbury Reports, April 2010, p. 11)",
+        "License: New York State registered and accredited boarding school since 1987 (Woodbury Reports, October 2006, p. 30)",
+        "Name change: renamed from Family Foundation School to Allynwood Academy (Woodbury Reports, November 2013, p. 11)",
+        "Note: operates Dog Corps, a dog rescue and rehabilitation program run by students (Woodbury Reports, October 2011, p. 6)",
+        "Length of stay: average 18-24 months (Woodbury Reports, December 2007, p. 10)",
+        "Capacity: 250 (as of 2008) (Woodbury Reports, June 2008, p. 31)",
+        "Opened: 1977 per Woodbury Reports, October 2006, p. 30 (the record says 1984)",
+        "Note: Six educational consultants participated in the New York Boarding School Association's annual tour of the school (Woodbury Reports, May 2007, p. 31)",
+        "Note: approximately 15% of FFS students are Jewish (Woodbury Reports, October 2007, p. 31)",
+        "Note: now offering Russian as a foreign language (Woodbury Reports, March 2009, p. 16)",
+        "Note: now provides recurring, individualized counseling with one of seven staff counselors (Woodbury Reports, August 2010, p. 15)",
+        "Staff: Paul Geer was a choir teacher at the school from 1991 until it closed in 2014 (WBNG, 2024-04-09: https://www.wbng.com/2024/04/09/former-teacher-accused-sex-crimes-faces-alleged-victims/)",
+        "Staff: Paul Geer was indicted in federal court in April 2024 on six counts of enticing three students to travel across state lines for sexual activity and taking them to Maine, Pennsylvania and Toronto to abuse them in 1994, 2000 and 2001. On March 3, 2025 a jury in Albany convicted him on the four counts involving two of the students and could not agree on the third; the evidence also showed he deprived students of food, forced them to eat regurgitated food, bound children in rugs and isolated them (WBNG, 2025-03-03: https://www.wbng.com/2025/03/03/usa-vs-paul-geer-trial-updates-verdict-announced/)",
+        "Staff: Paul Geer was sentenced on September 4, 2025 to 27 years and three months in federal prison (WBNG, 2025-09-04: https://wbng.com/2025/09/04/former-teacher-sentenced-27-years-child-sexual-abuse-crimes)",
+        "Survivor: Liz Ianelli, known online as Survivor993 for the number of days she was confined at the school, was there from 1995 to 1998; she wrote the memoir \"I See You, Survivor\" with Bret Witter (Grand Central Publishing, 2023) and is one of the survivors in Mikaela Shwer's documentary \"The Kids Are Not Alright\" (2026) (Hachette Book Group: https://www.hachettebookgroup.com/titles/liz-ianelli/i-see-you-survivor/9780306831522/)"
+      ]
+    }
   }
 ]

@@ -2728,6 +2728,61 @@
           "link_type": "primary"
         }
       ]
+    },
+    {
+      "case_name": "United States v. Paul Geer",
+      "case_number": "3:24-cr-00170",
+      "court": "United States District Court for the Northern District of New York",
+      "jurisdiction": "Federal",
+      "filing_date": "2024-04-03",
+      "status": "ruling",
+      "plaintiffs": [
+        "United States of America"
+      ],
+      "defendants": [
+        "Paul Geer"
+      ],
+      "facilities_mentioned": [
+        "Family Foundation School (Hancock, New York)"
+      ],
+      "staff_mentioned": [
+        "Paul Geer",
+        "Emmanuel \"Mike\" Argiros"
+      ],
+      "organizations_mentioned": [
+        "Federal Bureau of Investigation",
+        "U.S. Attorney's Office for the Northern District of New York"
+      ],
+      "claims": [
+        "Coercion and enticement of a minor to travel across state lines for unlawful sexual activity (3 counts)",
+        "Transportation of a minor across state lines with intent to engage in criminal sexual activity (3 counts)"
+      ],
+      "outcome": "Convicted March 3, 2025 on two counts of coercion and enticement and two counts of transportation, involving two of the three students; the jury could not agree on the two counts involving the third. Sentenced September 4, 2025 to 327 months (27 years and 3 months) in federal prison, three years of supervised release and sex offender registration.",
+      "settlement_amount": "",
+      "summary": "Paul Geer was a choir teacher at the Family Foundation School in Hancock, New York, from 1991 until it closed in 2014. A federal indictment unsealed in April 2024 charged him with six counts of enticing three students to travel across state lines for sexual activity and taking them to Maine, Pennsylvania and Toronto, in 1994, 2000 and 2001. He was arrested in Hancock, pleaded not guilty in Syracuse and was held in jail. At a two-week jury trial in Albany in February and March 2025, the evidence showed that as a teacher he tortured students: he deprived them of food, forced them to eat regurgitated food, bound children in rugs, left them isolated in empty rooms for hours or days and forced them into physical labor, and that he raped two of the students on the trips. Witnesses included the school's owner, Emmanuel \"Mike\" Argiros, former students and staff, and an FBI expert on grooming. On March 3, 2025 the jury convicted him on the four counts involving two students and could not agree on the counts involving the third. On September 4, 2025 he was sentenced to 27 years and three months in federal prison, followed by three years of supervised release, and must register as a sex offender.",
+      "source_urls": [
+        "https://www.courtlistener.com/docket/68408985/united-states-v-geer/",
+        "https://www.wbng.com/2024/04/09/former-teacher-accused-sex-crimes-faces-alleged-victims/",
+        "https://www.wbng.com/2025/02/19/former-family-foundation-school-teacher-trial-begins-sex-crimes",
+        "https://www.wbng.com/2025/03/03/usa-vs-paul-geer-trial-updates-verdict-announced/",
+        "https://wbng.com/2025/09/04/former-teacher-sentenced-27-years-child-sexual-abuse-crimes",
+        "https://www.bishop-accountability.org/?p=300666"
+      ],
+      "document_urls": [],
+      "tags": [
+        "criminal",
+        "sexual abuse",
+        "federal"
+      ],
+      "facility_links": [
+        {
+          "facility_id": 12050,
+          "link_type": "primary"
+        }
+      ],
+      "news_ids": [
+        213
+      ]
     }
   ],
   "updates": [

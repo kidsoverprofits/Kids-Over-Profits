@@ -1935,8 +1935,9 @@ function kop_apply_text_fixes() {
         return $done;
     }
     $allowed = array(
-        'news_submissions' => array('summary', 'json_data', 'generated_output'),
+        'news_submissions' => array('summary', 'json_data', 'generated_output', 'facilities_mentioned'),
     );
+    $news_changed = array();
     $posts_done = get_option('kop_post_text_fixes_done');
     $posts_done = is_array($posts_done) ? $posts_done : array();
     foreach ($entries as $entry) {
@@ -1978,12 +1979,18 @@ function kop_apply_text_fixes() {
                     $q->execute(array((string) $from, (string) $to, $id, '%' . $from . '%'));
                     if ($q->rowCount() > 0) {
                         $done[] = $table . '#' . $id . '.' . $column;
+                        if ($table === 'news_submissions') $news_changed[$id] = $id;
                     }
                 } catch (Throwable $e) {
                     // Leave the row alone; the admin can edit it by hand.
                 }
             }
         }
+    }
+    // A changed article's facility links, story group and case links follow it, as on every other write path.
+    if ($news_changed) {
+        require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+        kop_resync_news($pdo, array_values($news_changed), 'seed');
     }
     return array_values(array_unique($done));
 }
@@ -2607,7 +2614,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '125';
+    $version = '126';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

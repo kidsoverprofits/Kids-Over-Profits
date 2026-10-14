@@ -349,8 +349,6 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
 
 ### Family Foundation School (found 2026-10-14)
 
-- **Paul Geer's first year at the school**: WBNG gives 1991 (4/9/2024) and 1994 (9/4/2025); Woodbury names him
-  2009-2012 only. The wiki draft says only "until it closed in 2014". The indictment or trial record would settle it.
 - **Is Liz Ianelli the alumna who counted 101 deaths** in the 2018 NYT article? The record lists her as mentioned there.
 
 ### Related-industry pages (found 2026-10-08)
@@ -366,3 +364,7 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
 
 Move a task here with one line on what settled it and the commit that recorded it; prune once it is in the
 records.
+
+- **Paul Geer's first year at the Family Foundation School**: 1991. WBNG's indictment report (4/9/2024) says
+  1991; the NYT (4/4/2024) gives a career of more than 20 years there before the 2014 closure, and 1994 in the
+  sentencing report is the year of the earliest charged conduct. Recorded in the seed and the wiki draft (2026-10-14).
