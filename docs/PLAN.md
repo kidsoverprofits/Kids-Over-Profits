@@ -1959,6 +1959,7 @@ Open, in order:
    shows the quote with its context and the attribution, and lets the owner
    correct the words and the speaker. Facts are matched to records and added
    with exact Undo, like the other fact queues.
-4. **Owner:** where approved statements show. Proposed: an "In their own
-   words" section on the speaker's person and company pages and on the facility
-   pages of the programs they name, each quote linked to the episode at its time.
+4. Owner decisions (2026-10-13): approved statements stay internal, shown
+   nowhere public for now; a former participant who later worked in the
+   industry is a professional (name, jobs, statements, including about their
+   own time in a program); "downplays" is a stance of its own.
