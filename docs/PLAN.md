@@ -1907,14 +1907,22 @@ Open, in order (details in DATA-FLOWS.md section 4):
    (`kop_wiki_staff_record_role()`). Staff already on records: `php api/fix-wiki-staff-former.php apply` ran on
    the live site 2026-10-14, 586 entries on 182 records (227+8 titles cleaned, 172+2 closed, 40 past tense,
    137 not a title -> no role); a second dry run finds 0. `php api/fix-wiki-staff-former.php undo apply` (ea-php82)
-   puts every role back; the log keeps the new role so taking an approval back still works. Still open: about 400 at open
-   programs whose wiki write-up says "is the ..." and may be stale; js/wiki-parser.js still makes the "one" /
-   "current ..." roles (the import cleans them). scripts/test-wiki-staff.php's approve check fails on the
-   mirror because #70's staff are already on the record (pick an entry with staff not yet added). Woodbury
-   Facts and HEAL do the same with dated roles ("Clinical Director (2008, Woodbury Reports)", ~1,800 entries,
-   ~1,080 at closed programs): not fixed. HEAL also filed a phase sheet as a staff list: Moonridge Academy
-   (facility 10343) has a "staff member" named "2 off campus activities in a month" with level rules as its
-   role, source "HEAL, staff list for Moonridge Academy (archived 2025-08-27)"; check that capture's other entries.
+   puts every role back; the log keeps the new role so taking an approval back still works. js/wiki-parser.js
+   gives the same titles (staffRoleTitle(), scripts/test-wiki-staff-title.js: JS == PHP on all 1,049 roles).
+   **Every other staff entry, done 2026-10-14** (inc/staff-former.php, `api/fix-staff-former.php apply` on the live
+   site): 7,169 roles on 522 records now "Former" (4,500 at closed programs, 2,629 dated sightings older than last
+   year such as "Admissions (2007, Woodbury Reports)" / "Teacher (2021, HEAL)", 40 ", left"), and 19 entries that
+   were not people taken off (17 rows of Moonridge Academy's phase sheet HEAL read as a staff list, a licence line at
+   Bethel Bible Village, a headline at Advancing Youth's Academy). `php api/fix-staff-former.php undo apply` puts it
+   all back. Woodbury Facts and Fornits now write "Former" when they add such a person and refuse a non-person
+   name; kop-pipeline's woodbury-facts.py proposes them that way (dbd3ea7).
+   Still open: about 400 wiki staff at open programs whose write-up says "is the ...": the wiki says they are
+   there now and no rule can tell otherwise; a check against each program's current staff page would (a Data
+   audit kind?). A sighting from last year (2025) still reads current until the daily WP-Cron check
+   (kop_staff_former_yearly()) runs the pass in the first days of 2027; check ~/logs/wp-cron.log or the
+   kop_staff_former_year option then. Two checks failed
+   before this work and still do: scripts/test-woodbury-facts.php "every staff entry added or filled names its
+   source and link" (4 without) and scripts/test-fornits.php "every link added" (11 records missing).
 5. Wiki staleness listener + badge (this is 3.12 step 6). Listener and inbox item done 2026-10-14
    (`inc/wiki-auto-updates.php`); the badge is open.
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every

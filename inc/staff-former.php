@@ -139,6 +139,25 @@ if (!function_exists('kop_staff_role_with_former')) {
         return $out;
     }
 
+    /**
+     * Once a year (the first daily run of a new year): sightings from the year before last turn "Former"
+     * ("Teacher (2025, HEAL)" in 2027). Each run's changes join kop_staff_former_log, so undo still works.
+     */
+    function kop_staff_former_yearly() {
+        $year = (int) gmdate('Y');
+        if ((int) get_option('kop_staff_former_year', 0) >= $year || !function_exists('kop_seed_pdo') || !function_exists('kop_seed_v2_prefix')) return;
+        $pdo = kop_seed_pdo();
+        $prefix = $pdo ? kop_seed_v2_prefix($pdo) : null;
+        if (!$pdo || $prefix === null) return;
+        try {
+            $done = kop_staff_former_pass(array('pdo' => $pdo, 'prefix' => $prefix), true);
+            update_option('kop_staff_former_year', $year, false);
+            if ($done) error_log('kop_staff_former_yearly: ' . count($done) . ' staff roles marked Former');
+        } catch (Throwable $e) {
+            error_log('kop_staff_former_yearly: ' . $e->getMessage());
+        }
+    }
+
     /** Entries the pass leaves alone: wiki staff (their own pass and log), and entries with no role. */
     function kop_staff_former_skip($entry) {
         return !is_array($entry) || trim((string) ($entry['role'] ?? '')) === '' || ($entry['source'] ?? '') === 'r/troubledteens wiki';
@@ -220,4 +239,11 @@ if (!function_exists('kop_staff_role_with_former')) {
         }
         return $out;
     }
+}
+
+if (function_exists('add_action')) {
+    add_action('init', function () {
+        if (!wp_next_scheduled('kop_staff_former_daily')) wp_schedule_event(time() + 3600, 'daily', 'kop_staff_former_daily');
+    }, 30);
+    add_action('kop_staff_former_daily', 'kop_staff_former_yearly');
 }
