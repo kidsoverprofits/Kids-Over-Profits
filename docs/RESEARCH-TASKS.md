@@ -367,9 +367,10 @@ One program held as three records: 9698 (Clearview Horizon, Sandpoint ID, operat
 Missoulian 2019 articles), 100124 (Clearview Horizon (MT), Heron) and 12698 (Clearview Girls Academy, Heron). None has
 past names or an operator. The fixes go to Review inbox > Data audit as proposals; these questions stay open:
 
-- **Rename year.** [KFF Health News, 2022-01-21](https://kffhealthnews.org/mental-health/state-laws-aim-to-regulate-troubled-teen-industry-but-loopholes-remain/)
-  says it became Clearview Girls Academy, a "Christian therapeutic boarding school", only after Montana's 2019 law was
-  implemented. The clearviewhorizon.com Wayback captures should date the brand change.
+- **Rename year: settled, 2020.** The program's own home page was "Clearview Academy" on 2020-10-25 and "Clearview Girls
+  Academy" on 2020-11-25 ([our copy](https://kidsoverprofits.org/wp-content/uploads/cvh-2020-11-25.pdf),
+  [Wayback](https://web.archive.org/web/20201125202059/https://www.clearviewhorizon.com/)); every capture through
+  2020-08-05 uses Clearview Horizon. In the Data audit proposal as the rename year.
 - **Move year.** The wiki entry (and Woodbury Facts 9481) says it moved from Sandpoint around 2012. Woodbury puts it in
   Sandpoint in April 2000 ([visit](https://strugglingteens.com/archives/2000/5/visit01.html)) and in Heron, MT by
   February 2006 ([press release](https://strugglingteens.com/news/press%20releases/clearview_horizon060302.htm)).

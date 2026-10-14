@@ -2239,3 +2239,26 @@ Open:
 5. Then the wiki: entry 533's draft (3.12) gives only the June 2026 suit; a line for the litigation as a
    whole goes in its Abuse Allegations, Deaths, and Lawsuits section (record changes draft it, or by hand
    as on 2026-10-14).
+
+### 3.24 Clearview Horizon / Clearview Girls Academy; app donate, map and search; SEO (2026-10-14)
+
+One program held as three records (9698 Sandpoint, 100124 Heron, 12698 Clearview Girls Academy). The research is in
+`docs/RESEARCH-TASKS.md` (Clearview). Renamed in 2020: the program's own home page changed between the Wayback captures
+of 2020-10-25 and 2020-11-25 (our copies are media 15932 and 15933, and HEAL's Clear View page is 15934, all in the
+"Clearview Horizon Inc" folder).
+
+Open:
+1. **Owner:** the card `clearview-horizon-2026-10-14` at Review inbox > Data audit. It merges 9698 into 100124 (a move),
+   then merges 100124 into 12698 as a 2020 rename. It adds past name Clear View and other name Clearview Academy,
+   creates the companies Clearview Horizon, Inc. (past) and Elk Mountain Academy, Inc. (current), and sets Mary
+   Thielbahr's role. It replaces the bare `rename_years-100124-12698` card.
+2. 16 sources (KFF, AP, Parsons Behle, Law360, five Woodbury pages, Markel, Kinsale, DA 24-0687, CARF, GuideStar,
+   NATSAP, the 2023 DPHHS provider list) hit the submit route's hourly cap on 2026-10-14. A retry was running; check
+   Review inbox for them, and resend any that are missing.
+3. A folder "ClearView Communities LLC" (FileBird 92, under "Clearview Horizon Inc") holds 2 files: another company
+   name for the program to look into.
+
+App and SEO work from the same session (in progress): a Donate button opening /donate/ in the in-app browser; the Map
+tab with app controls (search, zoom, fit, Key/List/Timeline, Back through the trail, room for the map); autocomplete
+on Home, Companies, Send and the map from a new `kop/v1/mobile/suggest`; an SEO strategy page for the owner, then
+schema.org data, an operator sitemap and social cards.
