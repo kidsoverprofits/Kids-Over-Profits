@@ -584,8 +584,25 @@
         pagerEl.appendChild(el('span', { text: ' Page ' + pageNo + ' of ' + pageCount + ' ' }));
         pagerEl.appendChild(el('button', {
             type: 'button', class: 'btn-secondary', text: 'Next', disabled: pageNo >= pageCount,
-            onclick: function () { state.pages.push(state.offset); state.offset = state.nextOffset; loadItems(); scrollToPanel(); }
+            onclick: function () {
+                // Cards approved, rejected or moved on this page left the queue, so everything after
+                // them moved up by that many: start the next page that much earlier, or it skips them.
+                state.pages.push(state.offset);
+                state.offset = Math.max(state.offset, state.nextOffset - leftThisPage());
+                loadItems();
+                scrollToPanel();
+            }
         }));
+    }
+
+    /** Cards on this page that have left the view: gone, or refilled with a different status. */
+    function leftThisPage() {
+        var n = 0;
+        listEl.querySelectorAll('.rinbox-card').forEach(function (node) {
+            if (node.classList.contains('rinbox-gone')) n++;
+            else if (node.kopItem && node.kopFirstStatus !== undefined && (node.kopItem.status || '') !== node.kopFirstStatus) n++;
+        });
+        return n;
     }
 
     function scrollToPanel() {
@@ -1214,6 +1231,7 @@
         var s = state.byKey[src];
         var node = el('article', { class: 'rinbox-card', 'data-key': item.key });
         fillCard(node, item, s, src);
+        node.kopFirstStatus = item.status || '';
         return node;
     }
 
