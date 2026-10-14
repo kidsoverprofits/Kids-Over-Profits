@@ -185,6 +185,57 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 - **A series piece can close by naming the next one** ("The next entry in this series will detail ..."), right
   before the closing verdict.
 
+## 12. Facility and company profiles
+
+Model: the Three Springs profile, https://kidsoverprofits.org/three-springs-inc/ (written before the generated
+/facility/ and /operator/ pages; the same rules apply to company histories and a record's "About" prose).
+
+A profile is a reference record, not an argument piece. It covers the program's whole life, in order, and keeps
+more detail than a spotlight would. The rules on wording, sourcing and tone above still hold. What it does:
+
+- **The fixed facts sit in a box above the prose:** founded, founder, what became of it ("Absorbed by Sequel
+  Youth & Family Services in 2009"), then every location with its town and state. The prose never has to list
+  them.
+- **The prose follows the program's life:** what it was modelled on (Three Springs on the Dallas Salesmanship
+  Club Camp: wilderness trips, the group as the therapeutic tool, few mental health professionals), how it grew
+  (25 facilities in 9 states and 900 staff by March 2008), who bought it or tried to (YSI's failed $27 million
+  deal in 1996; Sequel on December 30, 2009), its place in the industry (one of six programs that paid to launch
+  NATSAP, with the people who sat on its first board and ethics committee named), what happened inside, the
+  deaths, the decline and closings, and what each site became.
+- **Follow it to the present.** Say what each site became and under what name: "later shut down as Sequel TSI of
+  Owens Cross Roads and has reopened under new ownership as Pathway of Madison County". A profile that stops at
+  the closing misses that the program is still running.
+- **Public money is stated as a rate:** "$121.50 per day for each youth assigned by the state".
+- **Conditions are grouped by kind,** one paragraph each: living conditions, food, restraint, staff conduct,
+  staff hours, punishments, control of contact with the outside, training, therapy, the program's culture.
+- **Staff accounts stand beside residents'.** A former counselor describing filthy cabins, 300 restraints and
+  lying on incident reports confirms what residents said from inside the staff.
+- **Name the program's own terms and say what each was:** Group Ignore (no one in the group may speak to the
+  child), Primitive (isolation, cooking over a campfire, sleeping under a tarp), Personal Fire Drill (being woken
+  at random in the night), Manure Therapy, non-comm. Give the term, then the plain description.
+- **Specifics, not adjectives:** shifts from 5:45 am to past midnight with 2 to 3 hours of sleep; 8-minute phone
+  calls monitored and cut off if abuse was mentioned; 20 minutes a month with the psychologist; one psychiatrist
+  visit in an 18-month stay.
+- **The stated mission is set against the accounts:** "Despite the organization's stated mission emphasizing
+  love and care and prohibiting corporal punishment, staff members reported ... restraints that involved
+  excessive force."
+- **Attribution shows how many and who:** "a former resident of Paint Rock Valley reported", "one self-identified
+  counselor disclosed", "several former residents and staff described", "a lawsuit alleged". A company's
+  explanation is labelled as its own: "The official reason provided was the struggling economy."
+- **Record findings that cut the other way too,** as found: a death ruled medical is reported as ruled medical.
+  (This never applies to restraint; see section 9.)
+- **Deaths:** name, age, month and year, the program and town, what was alleged and how it ended (a settlement,
+  a ruling).
+- **Graphic details sit behind a click** ("graphic details of abuse"), as in the model pieces.
+- **Numbered citations close each sentence or paragraph** they support.
+- **After the prose, the record:** staff with their other jobs in the industry; survivor groups and forum
+  threads; news, newest first, each with one line stating what happened; then the documents, by kind
+  (enrollment papers, business filings, newsletters and press releases, lawsuits, inspection reports, archived
+  website pages, brochures).
+
+Things in that profile not to copy: filler openers ("Tragically", "paint a picture"), and rates or counts that
+would sit better in the fact box or a table.
+
 ## Checklist before handing a draft over
 
 1. Can you state the piece's point in one sentence? Does every section's and paragraph's point serve it?
