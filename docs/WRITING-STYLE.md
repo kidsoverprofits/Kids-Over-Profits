@@ -67,8 +67,8 @@ https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/ 
 
 - Never open a piece or a section with funding sources, market size or statistics.
 - Dry facts and figures always go in a table, chart or other graphic beside the text, never in paragraphs
-  (dates and counts by program, revenue by year, inspection totals, lists of names and years). Prose keeps only
-  the single number that carries a sentence's point ("$8,000 a month").
+  (dates and counts by program, revenue by year, inspection totals, lists of names and years). A number that
+  carries a sentence's point ("$8,000 a month") is not dry, and belongs in the sentence.
 - A claim of change ("moved from public to private hands") needs its time frame and context in the same sentence.
   Without the "since when", it is bad writing.
 - Keep it short. Few headings; the paragraphs carry the weight.
