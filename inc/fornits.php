@@ -29,6 +29,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
+require_once __DIR__ . '/admin-kit.php';
+add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-fornits'; return $pages; });
+
 define('KOP_FORNITS_DB_VERSION', '3');
 
 function kop_fornits_topics_table() {
@@ -1337,62 +1341,67 @@ function kop_render_fornits_page() {
 
     $t = $wpdb->get_row("SELECT COUNT(*) AS n, SUM(read_status = 'read') AS done, SUM(read_status = 'error') AS err FROM {$topics}", ARRAY_A);
     $last = get_option('kop_fornits_last_run', array());
+    $link = function (array $args) use ($base, $kind, $state, $q, $cat, $min) {
+        $all = array_merge(array('fn_kind' => $kind, 'fn_state' => $state === 'pending' ? '' : $state, 'fn_q' => $q,
+            'fn_cat' => $cat, 'fn_min' => $min >= 0 ? (string) $min : ''), $args);
+        return add_query_arg(array_map(function ($v) { return $v === '' || $v === null ? null : $v; }, $all), $base);
+    };
 
-    echo '<div class="wrap kop-fn"><h1>Fornits</h1>';
+    $notices = '';
     if ($sync['topics']) {
-        echo '<div class="notice notice-info"><p>Loaded ' . (int) $sync['topics'] . ' topics from new batches (' . (int) $sync['links'] . ' new discussion links).</p></div>';
+        $notices .= '<div class="notice notice-info"><p>Loaded ' . (int) $sync['topics'] . ' topics from new batches (' . (int) $sync['links'] . ' new discussion links).</p></div>';
     }
-    echo '<p>What the old Fornits survivor forum (2001 on) says about each facility. Its treatment-abuse boards are copied a topic at a time; '
-        . 'every topic about a facility is offered as a discussion link for its page. The AI (Gemini, then Groq) reads each thread: a short summary, what it says about each facility, '
-        . 'categories, how much it matters (key evidence, useful, opinions only, chatter), and the staff, incidents, survivor accounts and leads in it. '
-        . 'The most important threads come first and start ticked; threads not read yet say so. '
-        . 'Every quote below was checked against the post it came from; one marked <em>not found in the post</em> starts unticked.</p>'
-        . '<ol class="kop-fn-how"><li><strong>Pick a tab</strong> and read down a card: one card per facility.</li>'
-        . '<li><strong>Untick</strong> anything wrong, then <strong>Add checked</strong>. Discussion links appear under "Survivor posts and discussion" on the facility page; '
-        . 'staff and incidents go on the record citing the post; survivor accounts go into the record\'s testimony <em>unpublished</em> '
-        . '(tick "OK to publish" on the record when you want one shown).</li>'
-        . '<li><strong>Wrong facility?</strong> Pick the right one in the box under the card and click <em>Add checked to that record</em>.</li>'
-        . '<li><strong>Changed your mind?</strong> The <em>Added</em> view has Undo.</li></ol>';
-    echo '<p class="kop-fn-progress">Topics loaded: <strong>' . (int) $t['n'] . '</strong> &middot; read by the AI: <strong>' . (int) $t['done'] . '</strong>'
+    if (!(int) $t['n']) {
+        $notices .= '<div class="notice notice-warning"><p>No topics yet. <code>scripts/fornits-process.py</code> uploads batches to <code>'
+            . esc_html(kop_fornits_dir()) . '</code> every hour while the crawl runs.</p></div>';
+    }
+    echo '<div class="wrap kop-ak kop-fn">';
+    echo kop_ak_header('Fornits', array(
+        'lede' => 'What the old Fornits survivor forum (2001 on) says about each facility, one card per facility. The AI (Gemini, then Groq) reads each thread: '
+            . 'a short summary, what it says about each facility, categories, how much it matters, and the staff, incidents, survivor accounts and leads in it. '
+            . 'The most important threads come first and start ticked.',
+        'notices' => $notices,
+        'steps' => array(
+            '<strong>Pick a tab</strong> and read down a card. Every quote was checked against the post it came from; one marked <em>not found in the post</em> starts unticked.',
+            '<strong>Untick</strong> anything wrong, then <strong>Add checked</strong>. Discussion links appear under "Survivor posts and discussion" on the facility page; '
+                . 'staff and incidents go on the record citing the post; survivor accounts go into the record\'s testimony <em>unpublished</em> '
+                . '(tick "OK to publish" on the record when you want one shown). A lead goes where its <em>Goes to</em> says.',
+            '<strong>Wrong facility?</strong> Open <em>Wrong record?</em> under the card, pick the right one and click <em>Add checked to that record</em>.',
+            '<strong>Changed your mind?</strong> <em>Undo</em> shows beside the result of every Add and Skip, and the <em>Added</em> view has Undo too.',
+        ),
+    ));
+
+    $calls = kop_fornits_calls_today();
+    echo kop_ak_status('Topics loaded: <strong>' . number_format((int) $t['n']) . '</strong> &middot; read by the AI: <strong>' . number_format((int) $t['done']) . '</strong>'
         . ' &middot; calls today: ' . implode(', ', array_map(function ($p, $n) { return ucfirst($p) . ' ' . $n . ' of ' . kop_fornits_caps()[$p]; },
-            array_keys(kop_fornits_calls_today()), kop_fornits_calls_today()))
+            array_keys($calls), $calls))
         . ((int) $t['err'] ? ' &middot; could not read: ' . (int) $t['err'] : '')
         . (!empty($last['at']) ? ' &middot; last hourly run ' . esc_html(get_date_from_gmt($last['at'], 'M j, g:i a')) . ': read ' . (int) $last['read']
             . ($last['limit'] ? ' (stopped at the daily limit)' : '') : '')
-        . ' <button type="button" class="button kop-fn-read">Read a few more now</button> <button type="button" class="button kop-fn-check-ai">Check AI keys</button>'
-        . ' <span class="kop-fn-read-out" aria-live="polite"></span></p>';
-    if (!(int) $t['n']) {
-        echo '<div class="notice notice-warning"><p>No topics yet. <code>scripts/fornits-process.py</code> uploads batches to <code>'
-            . esc_html(kop_fornits_dir()) . '</code> every hour while the crawl runs.</p></div>';
-    }
+        . '<div class="kop-ak-result" id="kop-fn-read-out" aria-live="polite"></div>',
+        kop_ak_button('Read a few more now', 'secondary', '', 'kop-fn-read') . kop_ak_button('Check AI keys', 'quiet', '', 'kop-fn-check-ai'));
 
-    echo '<ul class="subsubsub">';
-    $i = 0;
+    $kind_tabs = array();
     foreach ($kinds as $k => $label) {
-        $n = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = 'pending'", $k));
-        echo '<li><a href="' . esc_url(add_query_arg(array('fn_kind' => $k), $base)) . '"' . ($kind === $k && $state === 'pending' ? ' class="current"' : '') . '>'
-            . esc_html($label) . ' <span class="count">(' . $n . ')</span></a> | </li>';
+        $kind_tabs[$k] = array('label' => $label,
+            'count' => (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = 'pending'", $k)));
     }
-    foreach (array('applied' => 'Added', 'rejected' => 'Skipped or already there') as $k => $label) {
-        $n = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = %s", $kind, $k));
-        echo '<li><a href="' . esc_url(add_query_arg(array('fn_kind' => $kind, 'fn_state' => $k), $base)) . '"' . ($state === $k ? ' class="current"' : '') . '>'
-            . esc_html($label . ' (' . $kinds[$kind] . ')') . ' <span class="count">(' . $n . ')</span></a>' . (++$i < 2 ? ' | ' : '') . '</li>';
+    echo kop_ak_tabs($kind_tabs, $kind, function ($k) use ($base) { return add_query_arg('fn_kind', $k, $base); }, array('label' => 'Kinds'));
+    $state_tabs = array();
+    foreach (array('pending' => 'Waiting', 'applied' => 'Added', 'rejected' => 'Skipped or already there') as $k => $label) {
+        $state_tabs[$k] = array('label' => $label,
+            'count' => (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = %s", $kind, $k)));
     }
-    echo '</ul><div style="clear:both"></div>';
+    echo kop_ak_tabs($state_tabs, $state, function ($k) use ($base, $kind) {
+        return add_query_arg(array('fn_kind' => $kind, 'fn_state' => $k === 'pending' ? null : $k), $base);
+    }, array('kind' => 'segments', 'label' => 'Status'));
 
-    echo '<form method="get" class="kop-fn-filter"><input type="hidden" name="page" value="kop-fornits">'
-        . '<input type="hidden" name="fn_kind" value="' . esc_attr($kind) . '"><input type="hidden" name="fn_state" value="' . esc_attr($state) . '">'
-        . '<input type="search" name="fn_q" value="' . esc_attr($q) . '" placeholder="Words, person or poster" style="width:240px" aria-label="Search"> '
-        . '<select name="fn_cat" aria-label="Category"><option value="">Every category</option>';
-    foreach ($cats as $k => $label) {
-        echo '<option value="' . esc_attr($k) . '"' . selected($cat, $k, false) . '>' . esc_html($label) . '</option>';
-    }
-    echo '</select> <select name="fn_min" aria-label="Importance"><option value="">Any importance</option>';
-    foreach (array(3 => 'Key evidence only', 2 => 'Useful or better', 1 => 'Hide chatter', 0 => 'Read by the AI') as $k => $label) {
-        echo '<option value="' . $k . '"' . selected($min, $k, false) . '>' . esc_html($label) . '</option>';
-    }
-    echo '</select> <button class="button">Show</button>'
-        . ($q !== '' || $cat !== '' || $min >= 0 ? ' <a href="' . esc_url(add_query_arg(array('fn_kind' => $kind, 'fn_state' => $state), $base)) . '">Clear</a>' : '') . '</form>';
+    echo kop_ak_filters(array('page' => 'kop-fornits', 'fn_kind' => $kind, 'fn_state' => $state === 'pending' ? '' : $state), array(
+        array('type' => 'search', 'name' => 'fn_q', 'value' => $q, 'placeholder' => 'Words, person or poster', 'label' => 'Search'),
+        array('type' => 'select', 'name' => 'fn_cat', 'value' => $cat, 'label' => 'Category', 'all' => 'Every category', 'options' => $cats),
+        array('type' => 'select', 'name' => 'fn_min', 'value' => $min >= 0 ? (string) $min : '', 'label' => 'Importance', 'all' => 'Any importance',
+            'options' => array(3 => 'Key evidence only', 2 => 'Useful or better', 1 => 'Hide chatter', 0 => 'Read by the AI')),
+    ), $link(array('fn_q' => '', 'fn_cat' => '', 'fn_min' => '')));
 
     // Every query below reads the items as i.
     $where = $wpdb->prepare('i.kind = %s AND i.status = %s', $kind, $state);
@@ -1411,7 +1420,8 @@ function kop_render_fornits_page() {
     $total = (int) $wpdb->get_var("SELECT COUNT(DISTINCT i.{$card}) FROM {$items} i WHERE {$where}");
     $cards = $wpdb->get_col("SELECT i.{$card} FROM {$items} i WHERE {$where} GROUP BY i.{$card} ORDER BY MAX(i.importance) DESC, COUNT(*) DESC LIMIT " . (($paged - 1) * $per) . ", {$per}");
     if (!$cards) {
-        echo '<p>Nothing here' . ($state === 'pending' && (int) $t['n'] > (int) $t['done'] ? ' yet: Groq reads more topics every hour.' : '.') . '</p>';
+        echo kop_ak_empty('Nothing here' . ($q !== '' || $cat !== '' || $min >= 0 ? ' under these filters.'
+            : ($state === 'pending' && (int) $t['n'] > (int) $t['done'] ? ' yet: the AI reads more topics every hour.' : '.')));
         kop_fornits_render_assets();
         echo '</div>';
         return;
@@ -1425,51 +1435,42 @@ function kop_render_fornits_page() {
         $by[(int) $r[$card]][] = $r;
     }
 
-    echo '<div class="kop-fn-bar">';
     if ($state === 'pending') {
-        echo '<button type="button" class="button button-primary kop-fn-all">Add everything ticked on this page</button> ';
+        echo kop_ak_bar(kop_ak_button('Add everything ticked on this page', 'primary', 'data-kop-ak-all="apply"'));
     }
-    echo '<span class="kop-fn-progress-all" aria-live="polite"></span></div>';
     foreach ($cards as $c) {
         if (!empty($by[(int) $c])) {
             kop_fornits_render_card($by[(int) $c], (int) $c, $state);
         }
     }
-    $pages = (int) ceil($total / $per);
-    if ($pages > 1) {
-        echo '<p class="kop-fn-pager">Page ' . $paged . ' of ' . $pages . ' (' . $total . ' facilities) &middot; ';
-        for ($n = 1; $n <= $pages; $n++) {
-            $url = add_query_arg(array('fn_kind' => $kind, 'fn_state' => $state, 'fn_page' => $n, 'fn_q' => $q !== '' ? $q : null,
-                'fn_cat' => $cat !== '' ? $cat : null, 'fn_min' => $min >= 0 ? $min : null), $base);
-            echo $n === $paged ? '<strong>' . $n . '</strong> ' : '<a href="' . esc_url($url) . '">' . $n . '</a> ';
-        }
-        echo '</p>';
-    }
+    echo kop_ak_pager($paged, (int) ceil($total / $per), $total, 'facilities', function ($p) use ($link) { return $link(array('fn_page' => $p)); });
     kop_fornits_render_assets();
     echo '</div>';
 }
 
 function kop_fornits_render_card(array $rows, $fid, $state) {
     $pending = $state === 'pending';
-    echo '<div class="kop-fn-card" data-fid="' . (int) $fid . '"><div class="kop-fn-head">';
+    echo '<section class="kop-ak-card kop-fn-card" data-fid="' . (int) $fid . '">';
     $pdo = function_exists('kop_closure_pdo') ? kop_closure_pdo() : null;
     $label = $fid && $pdo && function_exists('kop_facility_finder_label') ? kop_facility_finder_label($pdo, $fid) : ($fid ? '#' . $fid : 'Sent to the queues');
     $page = $fid && function_exists('kop_facility_page_url') ? kop_facility_page_url($fid) : '';
-    echo '<h2>' . $label . ($page ? ' <a class="kop-fn-small" href="' . esc_url($page) . '" target="_blank" rel="noopener">facility page</a>' : '') . '</h2></div>';
+    echo kop_ak_card_head($label, $page ? '<a href="' . esc_url($page) . '" target="_blank" rel="noopener">Facility page</a>' : '');
     echo '<table class="widefat kop-fn-table"><tbody>';
     foreach ($rows as $r) {
         kop_fornits_render_row($r, $pending);
     }
-    echo '</tbody></table><div class="kop-fn-actions">';
+    echo '</tbody></table>';
     if ($pending) {
-        echo '<button type="button" class="button button-primary" data-act="apply">Add checked</button> '
-            . '<button type="button" class="button" data-act="reject">Skip checked</button>'
-            . '<div class="kop-fn-other"><strong>Another record:</strong> ' . kop_facility_finder_field('', '', ' class="kop-fn-fid"')
-            . ' <button type="button" class="button" data-act="apply" data-other="1">Add checked to that record</button></div>';
+        $buttons = kop_ak_button('Add checked', 'primary', 'data-act="apply"')
+            . kop_ak_button('Skip checked', 'danger', 'data-act="reject"')
+            . kop_ak_fold($fid ? 'Wrong record? Put the checked items on another one' : 'Which record is it?',
+                kop_facility_finder_field('', '', ' class="kop-ak-fid"') . ' '
+                . kop_ak_button('Add checked to that record', 'primary', 'data-act="apply" data-other="1"'), !$fid);
     } else {
-        echo '<button type="button" class="button" data-act="undo">' . ($state === 'applied' ? 'Undo checked' : 'Put checked back to review') . '</button>';
+        $buttons = kop_ak_button($state === 'applied' ? 'Undo checked' : 'Put checked back to review', 'secondary', 'data-act="undo"');
     }
-    echo ' <span class="kop-fn-result" aria-live="polite"></span></div></div>';
+    echo kop_ak_card_actions($buttons);
+    echo '</section>';
 }
 
 function kop_fornits_render_row(array $r, $pending) {
@@ -1477,7 +1478,7 @@ function kop_fornits_render_row(array $r, $pending) {
     $also = json_decode((string) $r['also'], true) ?: array();
     $checked = $pending && (int) $r['preselect'];
     $post_url = kop_fornits_post_url($r['topic_id'], $r['post_n']);
-    echo '<tr data-key="' . esc_attr($r['pkey']) . '"><td class="kop-fn-check"><input type="checkbox" class="kop-fn-pick"' . ($checked ? ' checked' : '') . ' aria-label="Select"></td>';
+    echo '<tr data-key="' . esc_attr($r['pkey']) . '">' . kop_ak_pick($checked);
     echo '<td class="kop-fn-what">';
     if ($r['kind'] === 'link') {
         echo '<a href="' . esc_url($v['url'] ?? $r['topic_url']) . '" target="_blank" rel="noopener noreferrer nofollow"><strong>' . esc_html($r['label']) . '</strong></a>';
@@ -1485,61 +1486,62 @@ function kop_fornits_render_row(array $r, $pending) {
             $imp = kop_fornits_importance_labels()[(int) $r['importance']] ?? '';
             echo '<div class="kop-fn-imp kop-fn-imp-' . (int) $r['importance'] . '">' . esc_html($imp) . '</div>';
         } else {
-            echo '<div class="kop-fn-muted"><em>Not read by the AI yet.</em></div>';
+            echo '<div class="kop-ak-muted"><em>Not read by the AI yet.</em></div>';
         }
-        echo '<div class="kop-fn-muted">Board: ' . esc_html($r['board_name']) . ' &middot; matched by ' . esc_html($r['how']) . '</div>';
+        echo '<div class="kop-ak-muted">Board: ' . esc_html($r['board_name']) . ' &middot; matched by ' . esc_html($r['how']) . '</div>';
     } else {
         echo '<strong>' . esc_html($r['label']) . '</strong>'
-            . '<div class="kop-fn-muted">In <a href="' . esc_url($r['topic_url']) . '" target="_blank" rel="noopener noreferrer nofollow">'
+            . '<div class="kop-ak-muted">In <a href="' . esc_url($r['topic_url']) . '" target="_blank" rel="noopener noreferrer nofollow">'
                 . esc_html(kop_fornits_has_headline($r) ? $r['topic_headline'] : $r['topic_title']) . '</a>'
                 . (kop_fornits_has_headline($r) ? ' (thread "' . esc_html($r['topic_title']) . '")' : '') . '</div>';
     }
     kop_fornits_render_tags((string) $r['categories']);
     if ($also) {
-        echo '<div class="kop-fn-warn">The same name is on other records: ' . esc_html(implode(', ', array_map(function ($a) {
+        echo '<div class="kop-ak-warn">The same name is on other records: ' . esc_html(implode(', ', array_map(function ($a) {
             return $a['name'] . (!empty($a['state']) ? ' (' . $a['state'] . ')' : '') . ' #' . (int) $a['id'];
         }, array_slice($also, 0, 5)))) . '. Check it is this one; starts unticked.</div>';
     }
     if ($pending && $r['kind'] === 'lead') {
         $default = kop_fornits_lead_target($v + array('url' => '', 'type' => 'other'));
-        echo '<label class="kop-fn-muted">Goes to <select class="kop-fn-target">';
+        echo '<label class="kop-ak-goes">Goes to <select class="kop-ak-target">';
         foreach (kop_fornits_lead_targets() as $k => $label) {
             echo '<option value="' . esc_attr($k) . '"' . selected($default, $k, false) . '>' . esc_html($label) . '</option>';
         }
         echo '</select></label>';
         if (!empty($v['url'])) {
-            echo '<div class="kop-fn-muted">Link: <a href="' . esc_url($v['url']) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html($v['url']) . '</a></div>';
+            echo '<div class="kop-ak-muted">Link: <a href="' . esc_url($v['url']) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html($v['url']) . '</a></div>';
         }
     }
     if (!$pending) {
         $done = json_decode((string) $r['applied'], true) ?: array();
         if (!empty($done['reason'])) {
-            echo '<div class="kop-fn-muted">' . esc_html($done['reason']) . '</div>';
+            echo '<div class="kop-ak-muted">' . esc_html($done['reason']) . '</div>';
         }
     }
     echo '</td><td class="kop-fn-ev">';
     if ($r['kind'] === 'link' && trim((string) $r['summary']) !== '') {
         echo '<p class="kop-fn-summary">' . esc_html($r['summary']) . '</p>';
         if (trim((string) $r['topic_summary']) !== '' && $r['topic_summary'] !== $r['summary']) {
-            echo '<p class="kop-fn-muted"><strong>The thread:</strong> ' . esc_html($r['topic_summary']) . '</p>';
+            echo '<p class="kop-ak-muted"><strong>The thread:</strong> ' . esc_html($r['topic_summary']) . '</p>';
         }
     } elseif ($r['kind'] !== 'link' && trim((string) ($r['topic_summary'] ?? '')) !== '') {
-        echo '<p class="kop-fn-muted"><strong>The thread:</strong> ' . esc_html($r['topic_summary']) . '</p>';
+        echo '<p class="kop-ak-muted"><strong>The thread:</strong> ' . esc_html($r['topic_summary']) . '</p>';
     }
-    echo '<div class="kop-fn-muted"><a href="' . esc_url($post_url) . '" target="_blank" rel="noopener noreferrer nofollow">' . ($r['kind'] === 'link' ? 'Opening post' : 'Post ' . ((int) $r['post_n'] + 1)) . '</a> by '
+    echo '<div class="kop-ak-muted"><a href="' . esc_url($post_url) . '" target="_blank" rel="noopener noreferrer nofollow">' . ($r['kind'] === 'link' ? 'Opening post' : 'Post ' . ((int) $r['post_n'] + 1)) . '</a> by '
         . esc_html($r['author']) . ', ' . esc_html(kop_fornits_month($r['post_date'])) . '</div>';
+    $unfound = $r['kind'] !== 'link' && !(int) $r['quote_found'];
     if ($r['quote'] !== '') {
         if ($r['kind'] === 'link' && trim((string) $r['summary']) !== '') {
-            echo '<details><summary>Opening words</summary><blockquote>' . esc_html($r['quote']) . '</blockquote></details>';
+            echo kop_ak_fold('Opening words', '<blockquote class="kop-ak-quote">' . esc_html($r['quote']) . '</blockquote>');
         } else {
-            echo '<blockquote>' . esc_html($r['quote']) . '</blockquote>';
+            echo '<blockquote class="kop-ak-quote' . ($unfound ? ' is-unfound' : '') . '">' . esc_html($r['quote']) . '</blockquote>';
         }
     }
-    if ($r['kind'] !== 'link' && !(int) $r['quote_found']) {
-        echo '<div class="kop-fn-warn">Quote not found in the post: read the post before adding.</div>';
+    if ($unfound) {
+        echo '<div class="kop-ak-warn">Quote not found in the post: read the post before adding.</div>';
     }
     if ($r['kind'] !== 'link' && $r['context'] !== '') {
-        echo '<details><summary>Whole post</summary><div class="kop-fn-post">' . nl2br(esc_html($r['context'])) . '</div></details>';
+        echo kop_ak_fold('Whole post', '<div class="kop-fn-post">' . nl2br(esc_html($r['context'])) . '</div>');
     }
     echo '</td></tr>';
 }
@@ -1550,135 +1552,45 @@ function kop_fornits_render_tags($categories) {
     if ($tags) {
         echo '<div class="kop-fn-tags">';
         foreach ($tags as $c) {
-            echo '<span class="kop-fn-tag">' . esc_html($cats[$c]) . '</span> ';
+            echo '<span class="kop-ak-tag">' . esc_html($cats[$c]) . '</span> ';
         }
         echo '</div>';
     }
 }
 
+/** What only Fornits needs on top of the kit: its action, the importance badge, and the two reading tools. */
 function kop_fornits_render_assets() {
     $nonce = wp_create_nonce('kop_fornits');
     ?>
     <style>
-        .kop-fn-how { margin-left: 20px; max-width: 900px; }
-        .kop-fn-filter { margin: 8px 0 12px; }
-        .kop-fn-bar { position: sticky; top: 32px; z-index: 5; background: #f0f0f1; padding: 8px 0; }
-        .kop-fn-card { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #33A7B5; margin: 0 0 18px; padding: 10px 14px; max-width: 1400px; }
-        .kop-fn-card.kop-fn-done { border-left-color: #B2E102; opacity: .75; }
-        .kop-fn-head h2 { margin: 4px 0 6px; font-size: 1.25em; }
-        .kop-fn-small { font-size: 12px; font-weight: 400; margin-left: 8px; }
-        .kop-fn-table td { vertical-align: top; }
-        .kop-fn-check { width: 28px; }
         .kop-fn-what { width: 38%; }
-        .kop-fn-ev blockquote { margin: 2px 0 6px; padding-left: 8px; border-left: 3px solid #33A7B5; color: #1d2327; }
         .kop-fn-post { max-height: 320px; overflow: auto; background: #f6f7f7; padding: 8px; color: #1d2327; }
-        .kop-fn-muted { color: #4A5568; font-size: 12px; }
-        .kop-fn-warn { color: #9a4a00; font-size: 12px; margin-top: 2px; }
-        .kop-fn-target { font-size: 12px; margin-left: 4px; }
-        .kop-fn-actions { margin-top: 8px; }
-        .kop-fn-other { margin: 8px 0 4px; padding: 8px; background: #f6f7f7; border: 1px solid #dcdcde; }
-        .kop-fn-result.ok, .kop-fn-read-out.ok { color: #007017; }
-        .kop-fn-result.err, .kop-fn-read-out.err { color: #d63638; }
-        tr.kop-fn-gone td { opacity: .45; }
         .kop-fn-summary { margin: 0 0 6px; color: #1d2327; font-size: 13px; }
         .kop-fn-tags { margin-top: 4px; }
-        .kop-fn-tag { display: inline-block; margin: 2px 4px 0 0; padding: 1px 7px; border-radius: 10px; background: #F2EEDF; color: #000435; font-size: 11px; }
         .kop-fn-imp { display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; background: #f0f0f1; color: #1d2327; }
-        .kop-fn-imp-3 { background: #000435; color: #fff; }
-        .kop-fn-imp-2 { background: #B6E3D4; color: #000435; }
+        .kop-fn-imp-3 { background: var(--kop-midnight-blue, #000435); color: #fff; }
+        .kop-fn-imp-2 { background: var(--kop-mint-green, #B6E3D4); color: var(--kop-midnight-blue, #000435); }
     </style>
     <script>
     (function () {
-        var ajax = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>;
-        var nonce = <?php echo wp_json_encode($nonce); ?>;
+        if (!window.KOPAdminKit) return;
+        var kit = KOPAdminKit.cards({ action: 'kop_fornits_act', nonce: <?php echo wp_json_encode($nonce); ?> });
 
-        function post(data) {
-            var body = new URLSearchParams();
-            body.append('action', 'kop_fornits_act');
-            body.append('nonce', nonce);
-            Object.keys(data).forEach(function (k) {
-                var v = data[k];
-                if (Array.isArray(v)) v.forEach(function (x) { body.append(k + '[]', x); });
-                else if (v && typeof v === 'object') Object.keys(v).forEach(function (kk) { body.append(k + '[' + kk + ']', v[kk]); });
-                else if (v !== undefined && v !== null) body.append(k, v);
-            });
-            return fetch(ajax, { method: 'POST', credentials: 'same-origin', body: body }).then(function (r) { return r.json(); });
+        // "Read a few more now" and "Check AI keys" in the status strip.
+        function tool(btn, act, busy, ok) {
+            var out = document.getElementById('kop-fn-read-out');
+            btn.disabled = true;
+            kit.say(out, '', busy);
+            kit.post({ act: act }).then(function (res) {
+                btn.disabled = false;
+                kit.say(out, res.success && ok(res.data) ? 'is-ok' : 'is-err', res.success ? res.data.message + (act === 'read_now' ? ' Reload to see them.' : '') : (res.data || 'Failed.'));
+            }).catch(function () { btn.disabled = false; kit.say(out, 'is-err', 'Network error.'); });
         }
-
-        function run(card, act, btn) {
-            var out = card.querySelector('.kop-fn-result');
-            var keys = [], targets = {};
-            card.querySelectorAll('tr[data-key]').forEach(function (tr) {
-                if (tr.classList.contains('kop-fn-gone') || !tr.querySelector('.kop-fn-pick').checked) return;
-                keys.push(tr.dataset.key);
-                var sel = tr.querySelector('.kop-fn-target');
-                if (sel) targets[tr.dataset.key] = sel.value;
-            });
-            if (!keys.length) { out.className = 'kop-fn-result err'; out.textContent = 'Tick at least one row.'; return Promise.resolve(); }
-            var data = { act: act, keys: keys, targets: targets, fid: '' };
-            if (btn && btn.dataset.other) {
-                var box = card.querySelector('.kop-fn-fid');
-                data.fid = box && box.value ? box.value : '';
-                if (!(+data.fid)) { out.className = 'kop-fn-result err'; out.textContent = 'Pick the record first.'; return Promise.resolve(); }
-            }
-            out.className = 'kop-fn-result'; out.textContent = 'Working...';
-            return post(data).then(function (res) {
-                if (!res.success) { out.className = 'kop-fn-result err'; out.textContent = res.data || 'Failed.'; return; }
-                var ok = 0, problems = [];
-                Object.keys(res.data.results || {}).forEach(function (k) {
-                    var r = res.data.results[k];
-                    var tr = card.querySelector('tr[data-key="' + k + '"]');
-                    if (r.ok) { ok++; if (tr) tr.classList.add('kop-fn-gone'); }
-                    else { problems.push(r.error); if (tr && !r.keep) tr.classList.add('kop-fn-gone'); }
-                });
-                var words = { apply: 'Added ' + ok + '.', reject: 'Skipped ' + ok + '.', undo: 'Undone: ' + ok + '.' }[act];
-                var uniq = problems.filter(function (p, i) { return problems.indexOf(p) === i; });
-                out.className = 'kop-fn-result ' + (uniq.length && !ok ? 'err' : 'ok');
-                out.textContent = words + (uniq.length ? ' Not done (' + problems.length + '): ' + uniq.join(' ') : '');
-                if (res.data.url && ok && act === 'apply') {
-                    var a = document.createElement('a'); a.href = res.data.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = ' Open its page';
-                    out.appendChild(a);
-                }
-                if (!card.querySelector('tr[data-key]:not(.kop-fn-gone)')) card.classList.add('kop-fn-done');
-            }).catch(function () { out.className = 'kop-fn-result err'; out.textContent = 'Network error; try again.'; });
-        }
-
         document.addEventListener('click', function (e) {
-            var btn = e.target.closest('.kop-fn-card [data-act]');
-            if (btn) { run(btn.closest('.kop-fn-card'), btn.dataset.act, btn); return; }
             var read = e.target.closest('.kop-fn-read');
-            if (read) {
-                var out = document.querySelector('.kop-fn-read-out');
-                read.disabled = true; out.className = 'kop-fn-read-out'; out.textContent = 'Reading (up to a minute)...';
-                post({ act: 'read_now' }).then(function (res) {
-                    read.disabled = false;
-                    out.className = 'kop-fn-read-out ' + (res.success ? 'ok' : 'err');
-                    out.textContent = res.success ? res.data.message + ' Reload to see them.' : (res.data || 'Failed.');
-                }).catch(function () { read.disabled = false; out.className = 'kop-fn-read-out err'; out.textContent = 'Network error.'; });
-                return;
-            }
+            if (read) { tool(read, 'read_now', 'Reading (up to a minute)...', function () { return true; }); return; }
             var chk = e.target.closest('.kop-fn-check-ai');
-            if (chk) {
-                var o = document.querySelector('.kop-fn-read-out');
-                chk.disabled = true; o.className = 'kop-fn-read-out'; o.textContent = 'Asking each provider...';
-                post({ act: 'check_ai' }).then(function (res) {
-                    chk.disabled = false;
-                    o.className = 'kop-fn-read-out ' + (res.success && res.data.message.indexOf('NOT WORKING') < 0 ? 'ok' : 'err');
-                    o.textContent = res.success ? res.data.message : (res.data || 'Failed.');
-                }).catch(function () { chk.disabled = false; o.className = 'kop-fn-read-out err'; o.textContent = 'Network error.'; });
-                return;
-            }
-            var all = e.target.closest('.kop-fn-all');
-            if (!all) return;
-            var cards = Array.prototype.slice.call(document.querySelectorAll('.kop-fn-card:not(.kop-fn-done)'));
-            var progress = document.querySelector('.kop-fn-progress-all');
-            all.disabled = true;
-            var i = 0;
-            (function next() {
-                if (i >= cards.length) { all.disabled = false; progress.textContent = 'Done.'; return; }
-                progress.textContent = 'Card ' + (i + 1) + ' of ' + cards.length + '...';
-                run(cards[i++], 'apply', null).then(next);
-            })();
+            if (chk) tool(chk, 'check_ai', 'Asking each provider...', function (d) { return d.message.indexOf('NOT WORKING') < 0; });
         });
     })();
     </script>

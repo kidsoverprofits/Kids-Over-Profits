@@ -41,6 +41,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
+require_once __DIR__ . '/admin-kit.php';
+add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-drive-docs'; return $pages; });
+
 define('KOP_GDOC_LINKS_DB_VERSION', '2');
 if (!defined('KOP_GDL_CARD_ROWS')) {
     define('KOP_GDL_CARD_ROWS', 40);
@@ -973,23 +977,6 @@ function kop_gdl_card_all_where($fid, array $f) {
     return kop_gdl_where('facility', $f) . $wpdb->prepare(' AND facility_id = %d AND facility_how NOT LIKE %s', (int) $fid, '%close%');
 }
 
-/** Page links: the first, the last and three either side of this one. */
-function kop_gdl_pager($paged, $pages, callable $url) {
-    $out = array();
-    $last = 0;
-    for ($n = 1; $n <= $pages; $n++) {
-        if ($n !== 1 && $n !== $pages && abs($n - $paged) > 3) {
-            continue;
-        }
-        if ($last && $n > $last + 1) {
-            $out[] = '&hellip;';
-        }
-        $out[] = $n === $paged ? '<strong>' . $n . '</strong>' : '<a href="' . esc_url($url($n)) . '">' . $n . '</a>';
-        $last = $n;
-    }
-    return implode(' ', $out);
-}
-
 function kop_render_drive_docs_page() {
     if (!current_user_can('manage_options')) {
         wp_die('Not authorized', 'Access Denied', array('response' => 403));
@@ -1013,76 +1000,74 @@ function kop_render_drive_docs_page() {
         return add_query_arg(array_map(function ($v) { return $v === '' || $v === null ? null : $v; }, $q), $base);
     };
 
-    echo '<div class="wrap kop-gdl"><h1>Drive Docs</h1>';
+    $notices = '';
     if ($sync) {
-        echo '<div class="notice notice-info"><p>Loaded a new build: ' . (int) $sync['added'] . ' new, ' . (int) $sync['updated']
+        $notices .= '<div class="notice notice-info"><p>Loaded a new build: ' . (int) $sync['added'] . ' new, ' . (int) $sync['updated']
             . ' updated, ' . (int) $sync['gone'] . ' no longer offered.</p></div>';
     }
     if (!kop_gdl_paths()) {
-        echo '<div class="notice notice-warning"><p>No links uploaded yet. Run <code>python scripts/gdocs-extract.py</code> and copy '
+        $notices .= '<div class="notice notice-warning"><p>No links uploaded yet. Run <code>python scripts/gdocs-extract.py</code> and copy '
             . '<code>tmp/gdocs/links.json</code> to <code>' . esc_html(dirname(kop_gdl_path())) . '</code>.</p></div>';
     }
-    echo '<p>Links from your Google Docs and Sheets, documents saved on HEAL\'s old site (heal-online.org, through the Wayback Machine), '
-        . 'links on the r/troubledteens wiki\'s pages, the outside sources the data audit read, and the news, court records, program pages and media in '
-        . '<a href="' . esc_url($sources['sciad']['credit_url']) . '" target="_blank" rel="noopener">SCIAD NET</a>, '
-        . 'that the database does not have yet, one card per facility. '
-        . 'Each shows where it came from and the words around it. Pick a source to work through one at a time.</p>'
-        . '<ol class="kop-gdl-how"><li><strong>Read down a card.</strong> Links whose facility is a sure match start ticked; untick anything that is not about this place.</li>'
-        . '<li><strong>Check <em>Goes to</em>.</strong> News goes to the news queue, court records and bills to their queues, the program\'s own site to its website links, '
-        . 'and everything else (licensing reports, survivor posts, staff profiles, reference) to the resource links on the facility page. Change it on any row.</li>'
-        . '<li><strong>Click <em>Add checked</em></strong>, or <em>Add everything ticked on this page</em> at the top. Facility links show on the page at once; '
-        . 'news, court records and bills go into their queues already approved (on the site at once, no second approval), with no emails. A card with many links has <em>Add all</em>, '
-        . 'which adds every sure match the card holds under the filters you picked, in batches.</li>'
-        . '<li><strong>Wrong place?</strong> Pick another record in the box under the card and click <em>Add checked to that record</em>. '
-        . 'On <em>Company only</em> and <em>No facility</em>, pick the record first; news can go to the queue without one.</li>'
-        . '<li><strong>Changed your mind?</strong> The <em>Added</em> tab has Undo: the link comes off the record, or leaves its queue if nobody has reviewed it yet.</li></ol>';
+    echo '<div class="wrap kop-ak kop-gdl">';
+    echo kop_ak_header('Drive Docs', array(
+        'lede' => 'Links the database does not have yet, one card per facility: from your Google Docs and Sheets, HEAL\'s old site '
+            . '(through the Wayback Machine), the r/troubledteens wiki, the outside sources the data audit read, and '
+            . '<a href="' . esc_url($sources['sciad']['credit_url']) . '" target="_blank" rel="noopener">SCIAD NET</a>. '
+            . 'Pick a source to work through one at a time.',
+        'notices' => $notices,
+        'steps' => array(
+            '<strong>Read down a card.</strong> Links whose facility is a sure match start ticked; untick anything that is not about this place.',
+            '<strong>Check <em>Goes to</em>.</strong> News goes to the news queue, court records and bills to their queues, the program\'s own site to its website links, '
+                . 'and everything else (licensing reports, survivor posts, staff profiles, reference) to the resource links on the facility page. Change it on any row.',
+            '<strong>Click <em>Add checked</em></strong>, or <em>Add everything ticked on this page</em> at the top. Facility links show on the page at once; '
+                . 'news, court records and bills go into their queues already approved (on the site at once, no second approval), with no emails. A card with many links has '
+                . '<em>Add all sure matches</em>, which adds every sure match the card holds under the filters you picked, in batches.',
+            '<strong>Wrong place?</strong> Open <em>Wrong record?</em> under the card, pick another record and click <em>Add checked to that record</em>. '
+                . 'On <em>Company only</em> and <em>No facility</em>, pick the record first; news can go to the queue without one.',
+            '<strong>Changed your mind?</strong> <em>Undo</em> shows beside the result of every Add and Skip, and the <em>Added</em> tab has Undo too: '
+                . 'the link comes off the record, or leaves its queue if nobody has reviewed it yet.',
+        ),
+    ));
 
     $where = kop_gdl_where($tab, $f);
     $src_where = $f['src'] !== '' ? $wpdb->prepare(' AND source = %s', $f['src']) : '';
 
-    echo '<ul class="subsubsub">';
-    $i = 0;
+    $tab_items = array();
     foreach ($tabs as $k => $t) {
-        $n = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . $t['where'] . $src_where);
-        echo '<li><a href="' . esc_url(add_query_arg(array('gdl_tab' => $k, 'gdl_src' => $f['src'] !== '' ? $f['src'] : null), $base)) . '"'
-            . ($tab === $k ? ' class="current"' : '') . '>'
-            . esc_html($t['label']) . ' <span class="count">(' . $n . ')</span></a>' . (++$i < count($tabs) ? ' | ' : '') . '</li>';
+        $tab_items[$k] = array('label' => $t['label'], 'count' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . $t['where'] . $src_where));
     }
-    echo '</ul><div style="clear:both"></div>';
+    echo kop_ak_tabs($tab_items, $tab, function ($k) use ($base, $f) {
+        return add_query_arg(array('gdl_tab' => $k, 'gdl_src' => $f['src'] !== '' ? $f['src'] : null), $base);
+    });
 
     $by_src = array();
     foreach ((array) $wpdb->get_results("SELECT source, COUNT(*) AS n FROM {$table} WHERE " . $tabs[$tab]['where'] . ' GROUP BY source', ARRAY_A) as $r) {
         $by_src[(string) $r['source']] = (int) $r['n'];
     }
-    echo '<form method="get" class="kop-gdl-filter"><input type="hidden" name="page" value="kop-drive-docs">'
-        . '<input type="hidden" name="gdl_tab" value="' . esc_attr($tab) . '">'
-        . '<select name="gdl_src" aria-label="Source"><option value="">Every source</option>';
+    $src_options = array();
     foreach ($sources as $k => $s) {
-        echo '<option value="' . esc_attr($k) . '"' . selected($f['src'], $k, false) . '>' . esc_html($s['label'] . ' (' . ($by_src[$k] ?? 0) . ')') . '</option>';
+        $src_options[$k] = $s['label'] . ' (' . number_format($by_src[$k] ?? 0) . ')';
     }
-    echo '</select> <input type="search" name="gdl_q" value="' . esc_attr($f['q']) . '" placeholder="Words, address or doc" style="width:240px" aria-label="Search"> '
-        . '<select name="gdl_kind" aria-label="Kind"><option value="">Every kind</option>';
-    foreach ($kinds as $k => $label) {
-        echo '<option value="' . esc_attr($k) . '"' . selected($f['kind'], $k, false) . '>' . esc_html($label) . '</option>';
-    }
-    echo '</select> <button class="button">Show</button>'
-        . ($f['q'] !== '' || $f['kind'] !== '' || $f['src'] !== '' || $f['card'] !== '' ? ' <a href="' . esc_url(add_query_arg('gdl_tab', $tab, $base)) . '">Clear</a>' : '') . '</form>';
+    echo kop_ak_filters(array('page' => 'kop-drive-docs', 'gdl_tab' => $tab), array(
+        array('type' => 'search', 'name' => 'gdl_q', 'value' => $f['q'], 'placeholder' => 'Words, address or doc', 'label' => 'Search'),
+        array('type' => 'select', 'name' => 'gdl_src', 'value' => $f['src'], 'label' => 'Source', 'all' => 'Every source', 'options' => $src_options),
+        array('type' => 'select', 'name' => 'gdl_kind', 'value' => $f['kind'], 'label' => 'Kind', 'all' => 'Every kind', 'options' => $kinds),
+    ), $f['card'] !== '' || $f['q'] !== '' || $f['kind'] !== '' || $f['src'] !== '' ? add_query_arg('gdl_tab', $tab, $base) : '');
     if ($f['card'] !== '') {
         echo '<p><a href="' . esc_url($link(array())) . '">&larr; Every card</a></p>';
     }
 
     list($total, $cards) = kop_gdl_card_page($tab, $where, $paged, $per, $f['card']);
     if (!$cards) {
-        echo '<p>Nothing here.</p></div>';
+        echo kop_ak_empty('Nothing here' . ($f['q'] !== '' || $f['kind'] !== '' || $f['src'] !== '' ? ' under these filters.' : '.')) . '</div>';
         kop_gdl_render_assets();
         return;
     }
 
-    echo '<div class="kop-gdl-bar">';
     if ($tab === 'facility') {
-        echo '<button type="button" class="button button-primary kop-gdl-all">Add everything ticked on this page</button> ';
+        echo kop_ak_bar(kop_ak_button('Add everything ticked on this page', 'primary', 'data-kop-ak-all="apply"'));
     }
-    echo '<span class="kop-gdl-progress" aria-live="polite"></span></div>';
 
     $offset = $f['card'] !== '' ? ($rpage - 1) * $card_rows : 0;
     foreach ($cards as list($c, $n)) {
@@ -1097,16 +1082,13 @@ function kop_render_drive_docs_page() {
         }
         kop_gdl_render_card($rows, $tab, $meta);
         if ($f['card'] !== '' && $n > $card_rows) {
-            echo '<p class="kop-gdl-pager">Links ' . ($offset + 1) . '-' . ($offset + count($rows)) . ' of ' . $n . ' &middot; '
-                . kop_gdl_pager($rpage, (int) ceil($n / $card_rows), function ($p) use ($link, $c) { return $link(array('gdl_card' => $c, 'gdl_rpage' => $p)); })
-                . '</p>';
+            echo kop_ak_pager($rpage, (int) ceil($n / $card_rows), $n, 'links on this card',
+                function ($p) use ($link, $c) { return $link(array('gdl_card' => $c, 'gdl_rpage' => $p)); });
         }
     }
 
-    $pages = (int) ceil($total / $per);
-    if ($pages > 1 && $f['card'] === '') {
-        echo '<p class="kop-gdl-pager">Page ' . $paged . ' of ' . $pages . ' (' . $total . ' cards) &middot; '
-            . kop_gdl_pager($paged, $pages, function ($p) use ($link) { return $link(array('gdl_page' => $p)); }) . '</p>';
+    if ($f['card'] === '') {
+        echo kop_ak_pager($paged, (int) ceil($total / $per), $total, 'cards', function ($p) use ($link) { return $link(array('gdl_page' => $p)); });
     }
     kop_gdl_render_assets();
     echo '</div>';
@@ -1122,32 +1104,31 @@ function kop_gdl_render_card(array $rows, $tab, array $meta = array()) {
     $pending = in_array($tab, array('facility', 'company', 'none'), true);
     $fid = $tab === 'applied' ? (int) $first['applied_fid'] : (int) $first['facility_id'];
     $f = $meta['filters'] ?? array();
-    echo '<div class="kop-gdl-card" data-fid="' . $fid . '" data-kind="' . esc_attr($f['kind'] ?? '') . '" data-src="'
+    echo '<section class="kop-ak-card kop-gdl-card" data-fid="' . $fid . '" data-kind="' . esc_attr($f['kind'] ?? '') . '" data-src="'
         . esc_attr($f['src'] ?? '') . '" data-q="' . esc_attr($f['q'] ?? '') . '">';
-    echo '<div class="kop-gdl-head">';
+    $sub = array();
     if ($tab === 'facility' || ($tab === 'applied' && $fid)) {
-        $label = function_exists('kop_facility_finder_label') && kop_closure_pdo()
+        $title = function_exists('kop_facility_finder_label') && kop_closure_pdo()
             ? kop_facility_finder_label(kop_closure_pdo(), $fid) : '#' . $fid;
         $page = function_exists('kop_facility_page_url') ? kop_facility_page_url($fid) : '';
-        echo '<h2>' . $label . ($page ? ' <a class="kop-gdl-small" href="' . esc_url($page) . '" target="_blank" rel="noopener">facility page</a>' : '') . '</h2>';
+        if ($page) {
+            $sub[] = '<a href="' . esc_url($page) . '" target="_blank" rel="noopener">Facility page</a>';
+        }
     } elseif ($tab === 'company') {
-        echo '<h2>' . esc_html($first['operator_name']) . ' <span class="kop-gdl-muted">company: pick the facility for these links</span></h2>';
+        $title = esc_html($first['operator_name']);
+        $sub[] = 'A company: pick the facility for these links.';
     } elseif ($tab === 'applied') {
-        echo '<h2>Sent to the queues</h2>';
+        $title = 'Sent to the queues';
     } else {
-        echo '<h2>' . esc_html($first['source_doc'] !== '' ? $first['source_doc'] : 'Other links') . ' <span class="kop-gdl-muted">doc</span></h2>';
+        $title = esc_html($first['source_doc'] !== '' ? $first['source_doc'] : 'Other links');
+        $sub[] = 'From this doc; no facility found.';
     }
     $total = (int) ($meta['total'] ?? count($rows));
     if ($total > count($rows)) {
-        echo '<p class="kop-gdl-muted">Showing ' . ((int) ($meta['offset'] ?? 0) + 1) . '-' . ((int) ($meta['offset'] ?? 0) + count($rows))
-            . ' of ' . $total . ' links.' . (!empty($meta['more']) ? ' <a href="' . esc_url($meta['more']) . '">Show them all</a>, 200 a page.' : '') . '</p>';
+        $sub[] = 'Showing ' . ((int) ($meta['offset'] ?? 0) + 1) . '-' . ((int) ($meta['offset'] ?? 0) + count($rows))
+            . ' of ' . $total . ' links.' . (!empty($meta['more']) ? ' <a href="' . esc_url($meta['more']) . '">Show them all</a>, 200 a page.' : '');
     }
-    if ($tab === 'facility' && !empty($meta['all'])) {
-        echo '<p><button type="button" class="button kop-gdl-addall" data-left="' . (int) $meta['all'] . '">Add all '
-            . (int) $meta['all'] . ' sure match' . ((int) $meta['all'] === 1 ? '' : 'es') . ' on this card</button> '
-            . '<span class="kop-gdl-muted">each to where its kind goes, under the filters above, including links not shown</span></p>';
-    }
-    echo '</div>';
+    echo kop_ak_card_head($title, implode('<br>', $sub));
 
     echo '<table class="widefat kop-gdl-table"><tbody>';
     foreach ($rows as $r) {
@@ -1155,22 +1136,23 @@ function kop_gdl_render_card(array $rows, $tab, array $meta = array()) {
     }
     echo '</tbody></table>';
 
-    echo '<div class="kop-gdl-actions">';
+    $buttons = '';
     if ($pending) {
-        if ($tab === 'facility') {
-            echo '<button type="button" class="button button-primary" data-act="apply">Add checked</button> ';
-        } else {
-            echo '<button type="button" class="button button-primary" data-act="apply">Add checked (news only, until a record is picked)</button> ';
+        $buttons .= kop_ak_button($tab === 'facility' ? 'Add checked' : 'Add checked (news only, until a record is picked)', 'primary', 'data-act="apply"')
+            . kop_ak_button('Skip checked', 'danger', 'data-act="reject"');
+        if ($tab === 'facility' && !empty($meta['all'])) {
+            $all = (int) $meta['all'];
+            $buttons .= kop_ak_button('Add all ' . $all . ' sure match' . ($all === 1 ? '' : 'es'), 'secondary',
+                'data-left="' . $all . '" title="Each to where its kind goes, under the filters above, including links not shown"', 'kop-gdl-addall');
         }
-        echo '<button type="button" class="button" data-act="reject">Skip checked</button>'
-            . '<div class="kop-gdl-other"><strong>' . ($tab === 'facility' ? 'Another record:' : 'Which record is it?') . '</strong> '
-            . kop_facility_finder_field('', '', ' class="kop-gdl-fid"')
-            . ' <button type="button" class="button" data-act="apply" data-other="1">Add checked to that record</button></div>';
+        $buttons .= kop_ak_fold($tab === 'facility' ? 'Wrong record? Put the checked links on another one' : 'Which record is it?',
+            kop_facility_finder_field('', '', ' class="kop-ak-fid"') . ' '
+            . kop_ak_button('Add checked to that record', 'primary', 'data-act="apply" data-other="1"'), $tab !== 'facility');
     } else {
-        echo '<button type="button" class="button" data-act="undo">' . ($tab === 'applied' ? 'Undo checked' : 'Put checked back to review') . '</button>';
+        $buttons .= kop_ak_button($tab === 'applied' ? 'Undo checked' : 'Put checked back to review', 'secondary', 'data-act="undo"');
     }
-    echo ' <span class="kop-gdl-result" aria-live="polite"></span></div>';
-    echo '</div>';
+    echo kop_ak_card_actions($buttons);
+    echo '</section>';
 }
 
 function kop_gdl_render_row(array $r, $tab) {
@@ -1179,50 +1161,49 @@ function kop_gdl_render_row(array $r, $tab) {
     $checked = $pending && $tab === 'facility' && kop_gdl_sure_match($r);
     $seen = json_decode((string) $r['seen'], true) ?: array();
     $first = $seen[0] ?? array();
-    echo '<tr data-key="' . esc_attr($r['pkey']) . '">';
-    echo '<td class="kop-gdl-check"><input type="checkbox" class="kop-gdl-pick"' . ($checked ? ' checked' : '') . ' aria-label="Select"></td>';
+    echo '<tr data-key="' . esc_attr($r['pkey']) . '">' . kop_ak_pick($checked);
     echo '<td class="kop-gdl-what"><a href="' . esc_url($r['url']) . '" target="_blank" rel="noopener noreferrer nofollow"><strong>'
         . esc_html($r['label'] !== '' ? $r['label'] : $r['url']) . '</strong></a>'
-        . '<div class="kop-gdl-muted">' . esc_html($kinds[$r['kind']] ?? $r['kind']) . ' &middot; ' . esc_html($r['domain']) . '</div>';
+        . '<div class="kop-ak-muted">' . esc_html($kinds[$r['kind']] ?? $r['kind']) . ' &middot; ' . esc_html($r['domain']) . '</div>';
     if ($pending) {
         $default = kop_gdl_default_target($r['kind']);
-        echo '<label class="kop-gdl-muted">Goes to <select class="kop-gdl-target">';
+        echo '<label class="kop-ak-goes">Goes to <select class="kop-ak-target">';
         foreach (kop_gdl_targets() as $k => $label) {
             echo '<option value="' . esc_attr($k) . '"' . selected($default, $k, false) . '>' . esc_html($label) . '</option>';
         }
         echo '</select></label>';
         if ($r['facility_id'] > 0 && !kop_gdl_sure_match($r)) {
-            echo '<div class="kop-gdl-warn">Matched by a close name (' . esc_html($r['facility_how']) . '): check it is this facility. Starts unticked.</div>';
+            echo '<div class="kop-ak-warn">Matched by a close name (' . esc_html($r['facility_how']) . '): check it is this facility. Starts unticked.</div>';
         }
     } else {
         $done = json_decode((string) $r['applied'], true) ?: array();
         if (!empty($done['reason'])) {
-            echo '<div class="kop-gdl-muted">' . esc_html($done['reason']) . '</div>';
+            echo '<div class="kop-ak-muted">' . esc_html($done['reason']) . '</div>';
         } elseif (!empty($done['target'])) {
             $targets = kop_gdl_targets();
-            echo '<div class="kop-gdl-muted">Went to: ' . esc_html($targets[$done['target']] ?? $done['target'])
+            echo '<div class="kop-ak-muted">Went to: ' . esc_html($targets[$done['target']] ?? $done['target'])
                 . (!empty($done['id']) ? ' #' . (int) $done['id'] : '') . '</div>';
         }
     }
     echo '</td><td class="kop-gdl-ev">';
     $where = trim(($first['doc'] ?? '') . (!empty($first['tab']) ? ' > ' . $first['tab'] : '') . (!empty($first['heading']) ? ' > ' . $first['heading'] : ''));
-    echo '<div class="kop-gdl-muted">From ' . esc_html($where) . (count($seen) > 1 ? ' (and ' . (count($seen) - 1) . ' more place' . (count($seen) > 2 ? 's' : '') . ')' : '') . '</div>';
+    echo '<div class="kop-ak-muted">From ' . esc_html($where) . (count($seen) > 1 ? ' (and ' . (count($seen) - 1) . ' more place' . (count($seen) > 2 ? 's' : '') . ')' : '') . '</div>';
     if (!empty($first['text'])) {
-        echo '<blockquote>' . esc_html(mb_substr(preg_replace('#https?://\S+#', '[link]', (string) $first['text']), 0, 420)) . '</blockquote>';
+        echo '<blockquote class="kop-ak-quote">' . esc_html(mb_substr(preg_replace('#https?://\S+#', '[link]', (string) $first['text']), 0, 420)) . '</blockquote>';
     }
     if (!empty($first['archive']) && preg_match('#^https?://#i', (string) $first['archive'])) {
-        echo '<div class="kop-gdl-muted"><a href="' . esc_url($first['archive']) . '" target="_blank" rel="noopener noreferrer nofollow">Archived copy</a>'
+        echo '<div class="kop-ak-muted"><a href="' . esc_url($first['archive']) . '" target="_blank" rel="noopener noreferrer nofollow">Archived copy</a>'
             . ' (the link above is the original address)</div>';
     }
     $src = kop_gdl_sources()[$r['source'] ?? ''] ?? array();
     if (!empty($src['credit'])) {
-        echo '<div class="kop-gdl-muted">Credit on the record: <a href="' . esc_url($src['credit_url']) . '" target="_blank" rel="noopener">'
+        echo '<div class="kop-ak-muted">Credit on the record: <a href="' . esc_url($src['credit_url']) . '" target="_blank" rel="noopener">'
             . esc_html($src['credit']) . '</a></div>';
     }
     $also = json_decode((string) $r['also_named'], true) ?: array();
     if ($also) {
         // A SCIAD NET collection whose name is two or more KOP records lists them all and ties none.
-        echo '<div class="kop-gdl-muted">' . (($r['source'] ?? '') === 'sciad' && (int) $r['facility_id'] === 0 ? 'Same name as these records, pick one: ' : 'Also names: ')
+        echo '<div class="kop-ak-muted">' . (($r['source'] ?? '') === 'sciad' && (int) $r['facility_id'] === 0 ? 'Same name as these records, pick one: ' : 'Also names: ')
             . esc_html(implode(', ', array_map(function ($a) {
             return $a['name'] . (!empty($a['state']) ? ' (' . $a['state'] . ')' : '');
         }, array_slice($also, 0, 5)))) . '</div>';
@@ -1230,125 +1211,41 @@ function kop_gdl_render_row(array $r, $tab) {
     echo '</td></tr>';
 }
 
+/** What only Drive Docs needs on top of the kit: its action, and "Add all" on a card. */
 function kop_gdl_render_assets() {
     $nonce = wp_create_nonce('kop_drive_docs');
     ?>
     <style>
-        .kop-gdl-how { margin-left: 20px; max-width: 900px; }
-        .kop-gdl-filter { margin: 8px 0 12px; }
-        .kop-gdl-bar { position: sticky; top: 32px; z-index: 5; background: #f0f0f1; padding: 8px 0; }
-        .kop-gdl-card { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #33A7B5; margin: 0 0 18px; padding: 10px 14px; max-width: 1400px; }
-        .kop-gdl-card.kop-gdl-done { border-left-color: #B2E102; opacity: .75; }
-        .kop-gdl-head h2 { margin: 4px 0 6px; font-size: 1.25em; }
-        .kop-gdl-small { font-size: 12px; font-weight: 400; margin-left: 8px; }
-        .kop-gdl-table td { vertical-align: top; }
-        .kop-gdl-check { width: 28px; }
         .kop-gdl-what { width: 40%; }
         .kop-gdl-what a { word-break: break-word; }
-        .kop-gdl-ev blockquote { margin: 2px 0 6px; padding-left: 8px; border-left: 3px solid #33A7B5; color: #1d2327; }
-        .kop-gdl-muted { color: #4A5568; font-size: 12px; }
-        .kop-gdl-warn { color: #9a4a00; font-size: 12px; margin-top: 2px; }
-        .kop-gdl-target { font-size: 12px; margin-left: 4px; }
-        .kop-gdl-actions { margin-top: 8px; }
-        .kop-gdl-other { margin: 8px 0 4px; padding: 8px; background: #f6f7f7; border: 1px solid #dcdcde; }
-        .kop-gdl-result.ok { color: #007017; }
-        .kop-gdl-result.err { color: #d63638; }
-        tr.kop-gdl-gone td { opacity: .45; }
     </style>
     <script>
     (function () {
-        var ajax = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>;
-        var nonce = <?php echo wp_json_encode($nonce); ?>;
-
-        function post(data) {
-            var body = new URLSearchParams();
-            body.append('action', 'kop_gdl_act');
-            body.append('nonce', nonce);
-            Object.keys(data).forEach(function (k) {
-                var v = data[k];
-                if (Array.isArray(v)) v.forEach(function (x) { body.append(k + '[]', x); });
-                else if (v && typeof v === 'object') Object.keys(v).forEach(function (kk) { body.append(k + '[' + kk + ']', v[kk]); });
-                else if (v !== undefined && v !== null) body.append(k, v);
-            });
-            return fetch(ajax, { method: 'POST', credentials: 'same-origin', body: body }).then(function (r) { return r.json(); });
-        }
-
-        function run(card, act, btn) {
-            var out = card.querySelector('.kop-gdl-result');
-            var keys = [], targets = {};
-            card.querySelectorAll('tr[data-key]').forEach(function (tr) {
-                if (tr.classList.contains('kop-gdl-gone') || !tr.querySelector('.kop-gdl-pick').checked) return;
-                keys.push(tr.dataset.key);
-                var sel = tr.querySelector('.kop-gdl-target');
-                if (sel) targets[tr.dataset.key] = sel.value;
-            });
-            if (!keys.length) { out.className = 'kop-gdl-result err'; out.textContent = 'Tick at least one link.'; return Promise.resolve(); }
-            var data = { act: act, keys: keys, targets: targets, fid: card.dataset.fid || '' };
-            if (btn && btn.dataset.other) {
-                var box = card.querySelector('.kop-gdl-fid');
-                data.fid = box && box.value ? box.value : '';
-                if (!(+data.fid)) { out.className = 'kop-gdl-result err'; out.textContent = 'Pick the record first.'; return Promise.resolve(); }
-            }
-            out.className = 'kop-gdl-result'; out.textContent = 'Working...';
-            return post(data).then(function (res) {
-                if (!res.success) { out.className = 'kop-gdl-result err'; out.textContent = res.data || 'Failed.'; return; }
-                var ok = 0, problems = [];
-                Object.keys(res.data.results || {}).forEach(function (k) {
-                    var r = res.data.results[k];
-                    var tr = card.querySelector('tr[data-key="' + k + '"]');
-                    if (r.ok) { ok++; if (tr) tr.classList.add('kop-gdl-gone'); }
-                    else { problems.push(r.error); if (tr && !r.keep) tr.classList.add('kop-gdl-gone'); }
-                });
-                var words = { apply: 'Added ' + ok + (res.data.label ? ' (' + res.data.label + ')' : '') + '.', reject: 'Skipped ' + ok + '.', undo: 'Undone: ' + ok + '.' }[act];
-                var uniq = problems.filter(function (p, i) { return problems.indexOf(p) === i; });
-                out.className = 'kop-gdl-result ' + (uniq.length && !ok ? 'err' : 'ok');
-                out.textContent = words + (uniq.length ? ' Not done (' + problems.length + '): ' + uniq.join(' ') : '');
-                if (res.data.url && ok) {
-                    var a = document.createElement('a'); a.href = res.data.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = ' Open its page';
-                    out.appendChild(a);
-                }
-                if (!card.querySelector('tr[data-key]:not(.kop-gdl-gone)')) card.classList.add('kop-gdl-done');
-            }).catch(function () { out.className = 'kop-gdl-result err'; out.textContent = 'Network error; try again.'; });
-        }
+        if (!window.KOPAdminKit) return;
+        var kit = KOPAdminKit.cards({ action: 'kop_gdl_act', nonce: <?php echo wp_json_encode($nonce); ?> });
 
         // "Add all" on a facility card: the server takes the card's sure matches a batch at a time until none wait.
-        function addAll(card, btn) {
-            var out = card.querySelector('.kop-gdl-result');
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.kop-gdl-addall');
+            if (!btn) return;
+            var card = btn.closest('.kop-ak-card');
+            var out = card.querySelector('.kop-ak-result');
             var added = 0, problems = 0, last = -1;
             btn.disabled = true;
             (function next() {
-                post({ act: 'apply_card', fid: card.dataset.fid, gdl_kind: card.dataset.kind, gdl_src: card.dataset.src, gdl_q: card.dataset.q }).then(function (res) {
-                    if (!res.success) { out.className = 'kop-gdl-result err'; out.textContent = res.data || 'Failed.'; btn.disabled = false; return; }
+                kit.post({ act: 'apply_card', fid: card.dataset.fid, gdl_kind: card.dataset.kind, gdl_src: card.dataset.src, gdl_q: card.dataset.q }).then(function (res) {
+                    if (!res.success) { kit.say(out, 'is-err', res.data || 'Failed.'); btn.disabled = false; return; }
                     Object.keys(res.data.results || {}).forEach(function (k) {
                         var tr = card.querySelector('tr[data-key="' + k + '"]');
                         if (res.data.results[k].ok) added++; else problems++;
-                        if (tr) tr.classList.add('kop-gdl-gone');
+                        if (tr) tr.classList.add('is-gone');
                     });
                     var left = res.data.left || 0;
-                    out.className = 'kop-gdl-result ok';
-                    out.textContent = 'Added ' + added + (problems ? ', ' + problems + ' already on file or refused' : '') + (left ? '; ' + left + ' to go...' : '.');
+                    kit.say(out, 'is-ok', 'Added ' + added + (problems ? ', ' + problems + ' already on file or refused' : '') + (left ? '; ' + left + ' to go...' : '. Undo them on the Added tab.'));
                     if (left && left !== last) { last = left; next(); return; }
                     btn.textContent = 'Done';
-                    if (!card.querySelector('tr[data-key]:not(.kop-gdl-gone)')) card.classList.add('kop-gdl-done');
-                }).catch(function () { out.className = 'kop-gdl-result err'; out.textContent = 'Network error after ' + added + ' added; click again to carry on.'; btn.disabled = false; });
-            })();
-        }
-
-        document.addEventListener('click', function (e) {
-            var many = e.target.closest('.kop-gdl-addall');
-            if (many) { addAll(many.closest('.kop-gdl-card'), many); return; }
-            var btn = e.target.closest('.kop-gdl-card [data-act]');
-            if (btn) { run(btn.closest('.kop-gdl-card'), btn.dataset.act, btn); return; }
-            var all = e.target.closest('.kop-gdl-all');
-            if (!all) return;
-            var cards = Array.prototype.slice.call(document.querySelectorAll('.kop-gdl-card:not(.kop-gdl-done)'));
-            var progress = document.querySelector('.kop-gdl-progress');
-            all.disabled = true;
-            var i = 0;
-            (function next() {
-                if (i >= cards.length) { all.disabled = false; progress.textContent = 'Done.'; return; }
-                progress.textContent = 'Card ' + (i + 1) + ' of ' + cards.length + '...';
-                run(cards[i++], 'apply', null).then(next);
+                    card.classList.toggle('is-done', !card.querySelector('tr[data-key]:not(.is-gone)'));
+                }).catch(function () { kit.say(out, 'is-err', 'Network error after ' + added + ' added; click again to carry on.'); btn.disabled = false; });
             })();
         });
     })();

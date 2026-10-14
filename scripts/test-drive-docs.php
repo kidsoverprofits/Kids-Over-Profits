@@ -518,10 +518,12 @@ $check('"Add all" follows the source filter', $count(kop_gdl_card_all_where($big
     && $count(kop_gdl_card_all_where($big, array('src' => 'sciad'))) === $count(kop_gdl_where('facility', array('src' => 'sciad')) . " AND facility_id = $big"));
 list($a_total) = kop_gdl_card_page('applied', kop_gdl_where('applied', array()), 1, 15);
 $check('the Added tab groups by record in SQL MySQL and SQLite both read', $a_total === 1);
-$pager = kop_gdl_pager(10, 40, function ($p) { return "?p=$p"; });
-$check('the page links skip the middle', strpos($pager, '<strong>10</strong>') !== false && strpos($pager, '?p=1"') !== false
-    && strpos($pager, '?p=40"') !== false && strpos($pager, '?p=13"') !== false && strpos($pager, '?p=20"') === false
-    && substr_count($pager, '&hellip;') === 2, $pager);
+$pager = kop_ak_pager(10, 40, 600, 'cards', function ($p) { return "?p=$p"; });
+$check('the page links skip the middle', strpos($pager, 'aria-current="page">10<') !== false && strpos($pager, '?p=1"') !== false
+    && strpos($pager, '?p=40"') !== false && strpos($pager, '?p=12"') !== false && strpos($pager, '?p=13"') === false
+    && strpos($pager, '?p=9" rel="prev"') !== false && strpos($pager, '?p=11" rel="next"') !== false
+    && substr_count($pager, '&hellip;') === 2 && strpos($pager, '600 cards') !== false, $pager);
+$check('one page draws no pager', kop_ak_pager(1, 1, 5, 'cards', function ($p) { return "?p=$p"; }) === '');
 $GLOBALS['wpdb'] = $real_wpdb;
 @unlink("$dir/links.json");
 @unlink("$dir/sciad-links.json");

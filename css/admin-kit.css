@@ -1,0 +1,750 @@
+/**
+ * One look for the KOP Tools screens (inc/admin-kit.php, js/admin-kit.js).
+ * Every button names its colour and background in every state, so it holds
+ * on a front-end admin page too (Kadence colours button:hover/:focus; see
+ * CLAUDE.md "Kadence colour traps"). Colours come from css/colors.css with
+ * the same values as fallbacks.
+ */
+
+.kop-ak {
+    --ak-line: #D5D9E0;
+    --ak-line-strong: #A9B1BD;
+    --ak-subtle: #F5F6F8;
+    --ak-radius: 4px;
+    --ak-ink: var(--kop-midnight-blue, #000435);
+    --ak-muted: var(--kop-text-muted, #4A5568);
+    --ak-primary: var(--kop-teal-fill, #24757F);
+    --ak-primary-dark: #1B5A62;
+    --ak-danger: var(--kop-coral-pink-ink, #D9020F);
+    --ak-link: var(--kop-navy, #000080);
+    --ak-warn: #8A4500;
+    --ak-ok: #0B6B2B;
+    max-width: 1400px;
+    color: var(--ak-ink);
+}
+
+/* ---- Header -------------------------------------------------------------- */
+
+.kop-ak-header h1 {
+    margin: 4px 0 2px;
+    padding: 0;
+    font-size: 23px;
+    font-weight: 600;
+    color: var(--ak-ink);
+}
+
+.kop-ak-lede {
+    margin: 0 0 10px;
+    max-width: 900px;
+    font-size: 14px;
+    color: var(--ak-ink);
+}
+
+details.kop-ak-help {
+    margin: 0 0 12px;
+    max-width: 900px;
+}
+
+details.kop-ak-help > summary {
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 600;
+    color: var(--ak-link);
+}
+
+.kop-ak-help__body {
+    margin-top: 6px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid var(--ak-line);
+    border-radius: var(--ak-radius);
+}
+
+.kop-ak-help__body ol {
+    margin: 0 0 0 20px;
+}
+
+.kop-ak-help__body li {
+    margin-bottom: 6px;
+}
+
+.kop-ak .notice {
+    max-width: 900px;
+}
+
+.kop-ak-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid var(--ak-line);
+    border-radius: var(--ak-radius);
+    font-size: 13px;
+    color: var(--ak-muted);
+}
+
+.kop-ak-status strong {
+    color: var(--ak-ink);
+}
+
+.kop-ak-status__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+/* ---- Tabs ---------------------------------------------------------------- */
+
+.kop-ak-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 8px 0 0;
+    border-bottom: 1px solid var(--ak-line-strong);
+}
+
+.kop-ak-tabs a.kop-ak-tab,
+.kop-ak-tabs a.kop-ak-tab:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: -1px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--ak-radius) var(--ak-radius) 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ak-link);
+    background: transparent;
+}
+
+.kop-ak-tabs a.kop-ak-tab:hover,
+.kop-ak-tabs a.kop-ak-tab:focus {
+    color: var(--ak-ink);
+    background: var(--ak-subtle);
+    box-shadow: none;
+}
+
+.kop-ak-tabs a.kop-ak-tab.is-current,
+.kop-ak-tabs a.kop-ak-tab.is-current:hover,
+.kop-ak-tabs a.kop-ak-tab.is-current:focus {
+    color: var(--ak-ink);
+    background: #fff;
+    border-color: var(--ak-line-strong) var(--ak-line-strong) #fff;
+}
+
+.kop-ak-segments {
+    display: inline-flex;
+    flex-wrap: wrap;
+    margin: 10px 0 0;
+    border: 1px solid var(--ak-line-strong);
+    border-radius: var(--ak-radius);
+    overflow: hidden;
+}
+
+.kop-ak-segments a.kop-ak-tab,
+.kop-ak-segments a.kop-ak-tab:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ak-link);
+    background: #fff;
+    border-right: 1px solid var(--ak-line-strong);
+}
+
+.kop-ak-segments a.kop-ak-tab:last-child {
+    border-right: 0;
+}
+
+.kop-ak-segments a.kop-ak-tab:hover,
+.kop-ak-segments a.kop-ak-tab:focus {
+    color: var(--ak-ink);
+    background: var(--ak-subtle);
+    box-shadow: none;
+}
+
+.kop-ak-segments a.kop-ak-tab.is-current,
+.kop-ak-segments a.kop-ak-tab.is-current:hover,
+.kop-ak-segments a.kop-ak-tab.is-current:focus {
+    color: #fff;
+    background: var(--ak-ink);
+}
+
+.kop-ak-count {
+    display: inline-block;
+    min-width: 18px;
+    padding: 0 6px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    background: #E4E7EB;
+    color: var(--ak-ink);
+}
+
+.kop-ak-tab.is-current .kop-ak-count {
+    background: var(--kop-sand, #F2EEDF);
+    color: var(--ak-ink);
+}
+
+.kop-ak-tab:focus-visible,
+.kop-ak-page:focus-visible,
+.kop-ak-clear:focus-visible {
+    outline: 2px solid var(--ak-link);
+    outline-offset: 2px;
+}
+
+/* ---- Filters ------------------------------------------------------------- */
+
+.kop-ak-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid var(--ak-line-strong);
+    border-top: 0;
+    border-radius: 0 0 var(--ak-radius) var(--ak-radius);
+}
+
+.kop-ak-segments + .kop-ak-filters {
+    margin-top: 10px;
+    border-top: 1px solid var(--ak-line-strong);
+    border-radius: var(--ak-radius);
+}
+
+.kop-ak-filters .kop-ak-search {
+    flex: 1 1 240px;
+    max-width: 360px;
+    min-width: 0;
+}
+
+.kop-ak-filters select {
+    max-width: 100%;
+}
+
+.kop-ak-filters select.is-set {
+    border-color: var(--ak-primary);
+    box-shadow: inset 0 0 0 1px var(--ak-primary);
+}
+
+/* Applied on change by js/admin-kit.js; the button is there without script. */
+.kop-ak-js .kop-ak-filters .kop-ak-apply {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.kop-ak-clear,
+.kop-ak-clear:visited {
+    font-size: 13px;
+    color: var(--ak-link);
+}
+
+/* ---- Buttons ------------------------------------------------------------- */
+
+.kop-ak .button.kop-ak-btn,
+.kop-ak summary.kop-ak-btn,
+button.kop-ak-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    margin: 0;
+    padding: 0 12px;
+    border-radius: var(--ak-radius);
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 30px;
+    text-decoration: none;
+    text-shadow: none;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.kop-ak .button.kop-ak-btn--primary,
+.kop-ak .button.kop-ak-btn--primary:focus,
+.kop-ak .button.kop-ak-btn--primary:active,
+button.kop-ak-btn--primary,
+button.kop-ak-btn--primary:focus,
+button.kop-ak-btn--primary:active {
+    background: var(--ak-primary);
+    border-color: var(--ak-primary);
+    color: #fff;
+}
+
+.kop-ak .button.kop-ak-btn--primary:hover,
+button.kop-ak-btn--primary:hover {
+    background: var(--ak-primary-dark);
+    border-color: var(--ak-primary-dark);
+    color: #fff;
+}
+
+.kop-ak .button.kop-ak-btn--secondary,
+.kop-ak .button.kop-ak-btn--secondary:focus,
+.kop-ak .button.kop-ak-btn--secondary:active,
+.kop-ak summary.kop-ak-btn--secondary,
+button.kop-ak-btn--secondary,
+button.kop-ak-btn--secondary:focus,
+button.kop-ak-btn--secondary:active {
+    background: #fff;
+    border-color: var(--ak-line-strong);
+    color: var(--ak-ink);
+}
+
+.kop-ak .button.kop-ak-btn--secondary:hover,
+.kop-ak summary.kop-ak-btn--secondary:hover,
+button.kop-ak-btn--secondary:hover {
+    background: var(--ak-subtle);
+    border-color: var(--ak-ink);
+    color: var(--ak-ink);
+}
+
+.kop-ak .button.kop-ak-btn--danger,
+.kop-ak .button.kop-ak-btn--danger:focus,
+.kop-ak .button.kop-ak-btn--danger:active,
+button.kop-ak-btn--danger,
+button.kop-ak-btn--danger:focus,
+button.kop-ak-btn--danger:active {
+    background: #fff;
+    border-color: var(--ak-danger);
+    color: var(--ak-danger);
+}
+
+.kop-ak .button.kop-ak-btn--danger:hover,
+button.kop-ak-btn--danger:hover {
+    background: #FDECEE;
+    border-color: var(--ak-danger);
+    color: var(--ak-danger);
+}
+
+.kop-ak .button.kop-ak-btn--quiet,
+.kop-ak .button.kop-ak-btn--quiet:focus,
+.kop-ak .button.kop-ak-btn--quiet:active,
+button.kop-ak-btn--quiet,
+button.kop-ak-btn--quiet:focus,
+button.kop-ak-btn--quiet:active {
+    min-height: 28px;
+    padding: 0 8px;
+    background: transparent;
+    border-color: transparent;
+    color: var(--ak-link);
+    line-height: 26px;
+    text-decoration: underline;
+}
+
+.kop-ak .button.kop-ak-btn--quiet:hover,
+button.kop-ak-btn--quiet:hover {
+    background: var(--ak-subtle);
+    border-color: transparent;
+    color: var(--ak-ink);
+}
+
+.kop-ak .button.kop-ak-btn:focus-visible,
+.kop-ak summary.kop-ak-btn:focus-visible,
+button.kop-ak-btn:focus-visible {
+    outline: 2px solid var(--ak-link);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.kop-ak .button.kop-ak-btn:disabled,
+button.kop-ak-btn:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+/* ---- More menu and folds ------------------------------------------------- */
+
+details.kop-ak-more {
+    position: relative;
+    display: inline-block;
+}
+
+details.kop-ak-more > summary {
+    list-style: none;
+}
+
+details.kop-ak-more > summary::-webkit-details-marker {
+    display: none;
+}
+
+details.kop-ak-more > summary::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+}
+
+.kop-ak-menu {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    top: calc(100% + 4px);
+    min-width: 240px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid var(--ak-line-strong);
+    border-radius: var(--ak-radius);
+    box-shadow: 0 4px 14px rgba(0, 4, 53, .15);
+}
+
+.kop-ak-menu .kop-ak-btn {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+    line-height: 1.3;
+    padding: 7px 10px;
+}
+
+.kop-ak .kop-ak-menu .button.kop-ak-btn,
+.kop-ak .kop-ak-menu .button.kop-ak-btn:focus {
+    background: #fff;
+    border-color: transparent;
+    color: var(--ak-ink);
+    text-decoration: none;
+}
+
+.kop-ak .kop-ak-menu .button.kop-ak-btn:hover {
+    background: var(--ak-subtle);
+    border-color: transparent;
+    color: var(--ak-ink);
+}
+
+details.kop-ak-fold {
+    margin: 10px 0 0;
+}
+
+details.kop-ak-fold > summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ak-link);
+}
+
+.kop-ak-fold__body {
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: var(--ak-subtle);
+    border: 1px solid var(--ak-line);
+    border-radius: var(--ak-radius);
+}
+
+.kop-ak-fold__body > * + * {
+    margin-top: 8px;
+}
+
+/* ---- Sticky bar, empty, pager -------------------------------------------- */
+
+.kop-ak-bar {
+    position: sticky;
+    top: 32px;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+    margin: 0 0 12px;
+    padding: 8px 0;
+    background: #f0f0f1;
+}
+
+.kop-ak-bar:empty {
+    display: none;
+}
+
+.kop-ak-progress {
+    font-size: 13px;
+    color: var(--ak-ink);
+}
+
+.kop-ak-empty {
+    padding: 28px 16px;
+    text-align: center;
+    background: #fff;
+    border: 1px dashed var(--ak-line-strong);
+    border-radius: var(--ak-radius);
+    color: var(--ak-muted);
+}
+
+.kop-ak-pager {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    margin: 16px 0;
+}
+
+.kop-ak-page,
+a.kop-ak-page:visited {
+    display: inline-block;
+    min-width: 32px;
+    padding: 4px 8px;
+    border: 1px solid var(--ak-line);
+    border-radius: var(--ak-radius);
+    text-align: center;
+    text-decoration: none;
+    background: #fff;
+    color: var(--ak-link);
+}
+
+a.kop-ak-page:hover,
+a.kop-ak-page:focus {
+    background: var(--ak-subtle);
+    color: var(--ak-ink);
+    box-shadow: none;
+}
+
+.kop-ak-page.is-current {
+    background: var(--ak-ink);
+    border-color: var(--ak-ink);
+    color: #fff;
+    font-weight: 600;
+}
+
+.kop-ak-page.is-gap {
+    border-color: transparent;
+    background: transparent;
+    color: var(--ak-muted);
+}
+
+.kop-ak-page.is-off {
+    color: var(--ak-muted);
+    background: transparent;
+}
+
+.kop-ak-pager__total {
+    margin-left: 8px;
+    font-size: 13px;
+    color: var(--ak-muted);
+}
+
+/* ---- Cards of ticked rows ------------------------------------------------ */
+
+.kop-ak-card {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid var(--ak-line);
+    border-left: 4px solid var(--kop-teal-ink, #24757F);
+    border-radius: var(--ak-radius);
+}
+
+.kop-ak-card.is-done {
+    border-left-color: var(--ak-ok);
+    background: var(--ak-subtle);
+}
+
+.kop-ak-card__head {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.kop-ak-card__title {
+    min-width: 0;
+}
+
+.kop-ak-card__head h2 {
+    margin: 2px 0 4px;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--ak-ink);
+    overflow-wrap: anywhere;
+}
+
+.kop-ak-card__sub {
+    font-size: 13px;
+    color: var(--ak-muted);
+}
+
+.kop-ak-card__sub > * + * {
+    margin-top: 4px;
+}
+
+.kop-ak-tickall {
+    flex: none;
+    font-size: 13px;
+    color: var(--ak-muted);
+    white-space: nowrap;
+}
+
+.kop-ak-card table.widefat {
+    border-color: var(--ak-line);
+    box-shadow: none;
+}
+
+.kop-ak-card table.widefat td {
+    vertical-align: top;
+    padding: 10px 8px;
+}
+
+.kop-ak-card table.widefat tr + tr td {
+    border-top: 1px solid var(--ak-line);
+}
+
+.kop-ak-check {
+    width: 28px;
+}
+
+.kop-ak-card tr.is-gone td {
+    opacity: .45;
+}
+
+.kop-ak-card tr.is-gone td.kop-ak-check {
+    opacity: 1;
+}
+
+.kop-ak-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: flex-start;
+    margin-top: 10px;
+}
+
+.kop-ak-card__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.kop-ak-card__buttons > details.kop-ak-fold {
+    flex-basis: 100%;
+    margin: 2px 0 0;
+}
+
+.kop-ak-result {
+    font-size: 13px;
+    line-height: 32px;
+    color: var(--ak-ink);
+}
+
+.kop-ak-result:empty {
+    display: none;
+}
+
+.kop-ak-result.is-ok {
+    color: var(--ak-ok);
+}
+
+.kop-ak-result.is-err {
+    color: var(--ak-danger);
+    font-weight: 600;
+}
+
+.kop-ak-result a {
+    margin-left: 6px;
+}
+
+.kop-ak-result .kop-ak-btn {
+    margin-left: 6px;
+}
+
+/* Small text that several screens share */
+.kop-ak-muted {
+    font-size: 12px;
+    color: var(--ak-muted);
+}
+
+.kop-ak-warn {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--ak-warn);
+}
+
+.kop-ak-quote {
+    margin: 2px 0 6px;
+    padding-left: 8px;
+    border-left: 3px solid var(--kop-teal-ink, #24757F);
+    color: var(--ak-ink);
+}
+
+.kop-ak-quote.is-unfound {
+    border-left-color: var(--ak-danger);
+}
+
+.kop-ak-tag {
+    display: inline-block;
+    margin: 2px 4px 0 0;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: var(--kop-sand, #F2EEDF);
+    color: var(--ak-ink);
+    font-size: 11px;
+}
+
+.kop-ak-goes {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--ak-muted);
+}
+
+.kop-ak-goes select {
+    font-size: 12px;
+    min-height: 26px;
+}
+
+@media (max-width: 782px) {
+    .kop-ak-bar {
+        top: 46px;
+    }
+    .kop-ak-card {
+        padding: 10px 12px;
+    }
+    .kop-ak-card__head {
+        flex-direction: column;
+    }
+    .kop-ak-card table.widefat,
+    .kop-ak-card table.widefat tbody,
+    .kop-ak-card table.widefat tr {
+        display: block;
+    }
+    .kop-ak-card table.widefat tr {
+        position: relative;
+        padding-left: 30px;
+    }
+    .kop-ak-card table.widefat td {
+        display: block;
+        width: auto;
+    }
+    .kop-ak-card table.widefat td.kop-ak-check {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .kop-ak-filters .kop-ak-search {
+        flex-basis: 100%;
+        max-width: none;
+    }
+    .kop-ak-menu {
+        min-width: 200px;
+    }
+}
