@@ -124,6 +124,54 @@ function kop_wiki_staff_is_former(array $s, bool $programClosed = false): bool {
     return (bool)preg_match('/^(?:was|were|had been|worked|served|previously|formerly|left|retired|resigned|died|passed away|began)\b/i', $bio);
 }
 
+/**
+ * The job title a wiki person goes on the record with, or '' when the parser's role is not one.
+ * The parser takes the words after "is"/"was", so its role carries the write-up's wording
+ * ("current Clinical Director", "reported to have worked as the Program Director", "Chief
+ * Operating" cut short at "Officer") or is no title at all: "one" (from "is one of the Founders and
+ * the Chief Clinical Officer", read back from the write-up), "married to ...", "son", "same
+ * position", "now working as ..." (somewhere else). "Former" is left to kop_wiki_staff_is_former().
+ */
+function kop_wiki_staff_title(string $role, string $bio = ''): string {
+    $role = trim(preg_replace('/\s+/u', ' ', $role), " \t,;:.");
+    if ($role === '' || mb_strlen($role) > 60 || preg_match('/\]\(|https?:\/\/|\*\*/', $role)) return '';
+    $lead = '/^(?:former|also|currently|current|cureently(?: the is)?|reportedly|presently|apparently'
+        . '|reported(?: by survivors)? to (?:have )?(?:also |later |previously |even )?(?:been|be|worked|served)(?: in an?)?(?: as)?'
+        . '|(?:previously |later )?(?:worked|served) as|position as|listed as|the|an?)\s+/iu';
+    for ($i = 0; $i < 8 && preg_match($lead, $role); $i++) $role = trim(preg_replace($lead, '', $role, 1));
+    // "one" / "one of the founders": the titles come from the write-up ("one of the Founders and the Chief Clinical Officer of Embark").
+    if (preg_match('/^(?:"|\x{201C})?one(?: of(?: the)?)?(?:\s+(.*))?$/iu', $role, $m)) {
+        // Only the write-up's opening words: a "one of" further on may be about someone else.
+        $text = str_replace('"', '', preg_replace('/\[([^\]]*)\]\([^)]*\)/', '$1', $bio));
+        $role = preg_match('/^\W*(?:\([^)]*\)\s*)?(?:is|was|are|were)\s+(?:also\s+)?(?:reported to (?:be|have been)\s+)?one of (?:the )?(.+?)(?:\s+(?:of|at|for|in|with|who|that|from|until|since)\b|[.,;(]|$)/iu', $text, $b)
+            ? trim($b[1]) : '';
+        $parts = array();
+        foreach (preg_split('/\s*(?:,|\band\b|&)\s*/i', $role) as $t) {
+            $t = trim(preg_replace('/^(?:(?:the|an?|current|currently)\s+)+/i', '', trim($t)));
+            if ($t !== '') $parts[] = preg_replace('/(?<=[a-z])s$/', '', $t);   // "Founders" -> "Founder"
+        }
+        $role = implode(', ', $parts);
+    }
+    // About someone else, a family tie, another job now, or a sentence: never this person's title here.
+    if ($role === '' || preg_match('/\b(?:he|she|his|her|him|they|who|where|met|married|related|wife|husband|son|daughter|brother|sister|father|mother'
+        . '|career|testimony|novel|unknown|known|now|likely|believed|widely|until|since|website|degree|same|cause|own|boss|listed|license|devoted)\b/iu', $role)) return '';
+    $title = '/\b(?:director|founder|co-?founder|founding|owner|co-?owner|ceo|cfo|coo|cmo|president|chairman|chairwoman|chair|head'
+        . '|headmaster|headmistress|principal|dean|therapist|psychotherapist|psychiatrist|psychologist|physician|counsell?or|manager|coordinator'
+        . '|supervisor|staff|nurse|teacher|mentor|sergeant|agent|secretary|treasurer|advisor|adviser|partner|superintendent|administrator'
+        . '|adminastrator|specialist|chief|officer|consultant|pastor|minister|chaplain|guard|instructor|trustee|creator|board member|member)s?\b/iu';
+    if (!preg_match($title, $role)) return '';
+    $role = preg_replace('/\bChief (Operating|Operations|Clinical|Medical|Marketing|Development|Executive|Financial|Quality|Technology|Information)$/i', 'Chief $1 Officer', $role);
+    return mb_strtoupper(mb_substr($role, 0, 1)) . mb_substr($role, 1);
+}
+
+/** A wiki person's role as the record writes it: the title, with "Former " when they left (the record has no "former" field). */
+function kop_wiki_staff_record_role(array $s, bool $programClosed = false): string {
+    $role = kop_wiki_staff_title((string)($s['role'] ?? ''), (string)($s['bio'] ?? ''));
+    // ("Founder, former Executive Director" already says which part is past.)
+    if ($role !== '' && stripos($role, 'former') === false && kop_wiki_staff_is_former($s, $programClosed)) $role = 'Former ' . $role;
+    return $role;
+}
+
 /** The wiki entry's people as the record lists them (inc/facility-store.php kop_facility_person_list()). */
 function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = '', bool $programClosed = false): array {
     $out = [];
@@ -131,12 +179,7 @@ function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = '', boo
         if (!is_array($s)) continue;
         $name = trim(preg_replace('/\s+/', ' ', (string)($s['name'] ?? '')));
         if ($name === '') continue;
-        $role = trim(preg_replace('/\s+/', ' ', (string)($s['role'] ?? '')));
-        // Some wiki "roles" are a sentence of the write-up ("reported to feel no remorse ...
-        // ([source](...))"): not a title, so the person goes on with no role.
-        if (mb_strlen($role) > 60 || preg_match('/\]\(|https?:\/\//', $role)) $role = '';
-        // The record has no "former" field; its entries say so in the role, as "Former ...".
-        if ($role !== '' && stripos($role, 'former') === false && kop_wiki_staff_is_former($s, $programClosed)) $role = 'Former ' . $role;
+        $role = kop_wiki_staff_record_role($s, $programClosed);
         $past = [];
         foreach ((array)($s['previousRoles'] ?? []) as $p) {
             $t = is_array($p) ? implode(', ', array_filter([trim((string)($p['role'] ?? '')), trim((string)($p['employer'] ?? ''))])) : trim((string)$p);
@@ -227,11 +270,13 @@ function kop_wiki_staff_undo(PDO $pdo, int $submissionId): int {
 }
 
 /**
- * Mark "Former" the wiki staff that approvals put on records before kop_wiki_staff_is_former()
- * knew a closed program or a past-tense write-up (2026-10-14): each logged entry still on its
- * record as written gets "Former " before its role, and the log keeps the role it had
- * ('roleBefore') so $undo puts it back and kop_wiki_staff_undo() still finds the entry.
- * Returns [{submission, record, name, from, to}] of what changed (or would, when !$apply).
+ * Rewrite the roles of the wiki staff that approvals put on records before 2026-10-14 as an
+ * approval writes them now (kop_wiki_staff_record_role()): the title, not the parser's wording
+ * ("current Clinical Director", "one", "married to ..."), with "Former " at a closed program or
+ * after a past-tense write-up. Only entries still on their record as the log has them; the log
+ * keeps the first role each had ('roleBefore') so $undo puts it back, and the role as it is now
+ * so kop_wiki_staff_undo() still finds the entry.
+ * Returns [{submission, record, name, from, to, why}] of what changed (or would, when !$apply).
  */
 function kop_wiki_staff_former_pass(PDO $pdo, bool $apply = false, bool $undo = false): array {
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
@@ -251,18 +296,11 @@ function kop_wiki_staff_former_pass(PDO $pdo, bool $apply = false, bool $undo = 
         foreach ((array)(json_decode((string)($w['json_data'] ?? ''), true)['staffMembers'] ?? []) as $s) {
             if (is_array($s)) $members[kop_wiki_staff_fold($s['name'] ?? '')] = $s;
         }
-        // name|role as logged => the role it gets
+        // name|role as logged => [log index, the role undo puts back (null: work it out below)]
         $to = [];
         foreach ((array)$u['staff'] as $i => $e) {
-            $role = (string)($e['role'] ?? '');
-            if ($undo) {
-                if (!isset($e['roleBefore'])) continue;
-                $new = (string)$e['roleBefore'];
-            } else {
-                if ($role === '' || stripos($role, 'former') !== false) continue;
-                $new = 'Former ' . $role;
-            }
-            $to[kop_wiki_staff_fold($e['name']) . '|' . kop_wiki_staff_fold($role)] = [$i, $new];
+            if ($undo && !array_key_exists('roleBefore', $e)) continue;
+            $to[kop_wiki_staff_fold($e['name']) . '|' . kop_wiki_staff_fold($e['role'] ?? '')] = [$i, $undo ? (string)$e['roleBefore'] : null];
         }
         if (!$to) continue;
         $data = &$project['data'];
@@ -280,20 +318,27 @@ function kop_wiki_staff_former_pass(PDO $pdo, bool $apply = false, bool $undo = 
                 if (!is_array($e) || ($e['source'] ?? '') !== 'r/troubledteens wiki') continue;
                 $k = kop_wiki_staff_fold($e['name'] ?? '') . '|' . kop_wiki_staff_fold($e['role'] ?? '');
                 if (!isset($to[$k]) || isset($done[$k])) continue;
-                $m = $members[kop_wiki_staff_fold($e['name'] ?? '')] ?? ['name' => $e['name']];
-                if (!$undo && !kop_wiki_staff_is_former($m, $closed)) continue;
                 [$i, $new] = $to[$k];
+                $why = 'undo';
+                if (!$undo) {
+                    $m = $members[kop_wiki_staff_fold($e['name'] ?? '')] ?? null;
+                    if (!$m) continue;   // the write-up no longer names them: left as it is
+                    $new = kop_wiki_staff_record_role($m, $closed);
+                    if ($new === (string)($e['role'] ?? '')) continue;
+                    $title = kop_wiki_staff_title((string)($m['role'] ?? ''), (string)($m['bio'] ?? ''));
+                    $why = $new === '' ? 'not a title' : (strpos($new, 'Former ') !== 0 || stripos($title, 'former') !== false ? 'title' : ($closed ? 'closed' : 'past tense'));
+                }
                 $out[] = ['submission' => (int)$subId, 'record' => (string)$u['record'], 'name' => (string)$e['name'],
-                    'from' => (string)$e['role'], 'to' => $new, 'why' => $undo ? 'undo' : ($closed ? 'closed' : 'past tense')];
+                    'from' => (string)($e['role'] ?? ''), 'to' => $new, 'why' => $why];
                 $done[$k] = true;
                 $fac['staff']['notableStaff'][$j]['role'] = $new;
                 if ($undo) {
-                    $log[$subId]['staff'][$i]['role'] = $new;
                     unset($log[$subId]['staff'][$i]['roleBefore']);
-                } else {
-                    $log[$subId]['staff'][$i]['roleBefore'] = (string)$e['role'];
-                    $log[$subId]['staff'][$i]['role'] = $new;
+                } elseif (!array_key_exists('roleBefore', $log[$subId]['staff'][$i])) {
+                    $log[$subId]['staff'][$i]['roleBefore'] = (string)($e['role'] ?? '');
                 }
+                // The log holds the role as it is now, so kop_wiki_staff_undo() still finds the entry.
+                $log[$subId]['staff'][$i]['role'] = $new;
             }
             unset($fac);
         }

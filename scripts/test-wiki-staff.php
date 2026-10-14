@@ -62,7 +62,33 @@ $g = kop_wiki_staff_entries(array(
     array('name' => 'M N', 'role' => 'Founders', 'bio' => 'were the Founders and Owners of Ashby Academy.'),
     array('name' => 'O P', 'role' => 'Therapist', 'bio' => 'is currently a Therapist at Eagle Ranch Academy.'),
 ));
-check($g[0]['role'] === 'Former the Program Director','"was the Program Director" is former', $g[0]['role']);
+check($g[0]['role'] === 'Former Program Director', '"was the Program Director" is former', $g[0]['role']);
+// The parser's wording is not a title (kop_wiki_staff_title()).
+$titles = array(
+    array('current Clinical Director', '', 'Clinical Director'),
+    array('current Chief Operating', '', 'Chief Operating Officer'),
+    array('reported to have worked as the Program Director', '', 'Program Director'),
+    array('cureently the is the Assistant Program Director', '', 'Assistant Program Director'),
+    array('one', 'is one of the Founders and the Chief Clinical Officer of Embark Behavioral Health. Prior to this...', 'Founder, Chief Clinical Officer'),
+    array('one', 'is one of the current Executive Directors of Residential Services of Youth Villages.', 'Executive Director'),
+    array('one', 'He began his career as a youth pastor. Later he was one of the Executive Directors of X.', ''),
+    array('married to Rob Dias', '', ''),
+    array('son', 'is the son of Herman Fountain Sr., the founder.', ''),
+    array('now working as an Educational Consultant', '', ''),
+    array('same position', '', ''),
+    array('presently known about her', '', ''),
+    array('a drill sergeant', '', 'Drill sergeant'),
+    array('Founder', '', 'Founder'),
+);
+foreach ($titles as $t) {
+    $got = kop_wiki_staff_title($t[0], $t[1]);
+    check($got === $t[2], 'title: "' . $t[0] . '" -> "' . $t[2] . '"', $got);
+}
+$x = kop_wiki_staff_entries(array(
+    array('name' => 'Q R', 'role' => 'former CEO', 'bio' => 'is the former CEO.'),
+    array('name' => 'S T', 'role' => 'one', 'bio' => 'is one of the Founders and former Executive Director of Carlbrook School.'),
+));
+check($x[0]['role'] === 'Former CEO' && $x[1]['role'] === 'Founder, former Executive Director', '"Former" once, and not before a role that already says which part is past', $x[0]['role'] . ' / ' . $x[1]['role']);
 check($g[1]['role'] === 'Executive Director' && $g[4]['role'] === 'Therapist', '"is the ..." / "is currently ..." stay current', $g[1]['role'] . ' / ' . $g[4]['role']);
 check(strpos($g[2]['role'], 'Former ') === 0 && strpos($g[3]['role'], 'Former ') === 0, 'a nickname before "was", and "were", are read too', $g[2]['role'] . ' / ' . $g[3]['role']);
 $h = kop_wiki_staff_entries(array(array('name' => 'I J', 'role' => 'Executive Director', 'bio' => 'is the Executive Director.')), '', true);
@@ -184,7 +210,7 @@ if (is_array($live_log) && $live_log) {
     $dry = kop_wiki_staff_former_pass($pdo, false);
     check(kop_wiki_staff_log() === $live_log, 'the dry run changes neither the log nor (below) the records');
     $changes = kop_wiki_staff_former_pass($pdo, true);
-    check(count($changes) === count($dry) && count($changes) > 0, count($changes) . ' wiki staff entries marked Former', count($dry) . ' in the dry run');
+    check(count($changes) === count($dry) && count($changes) > 0, count($changes) . ' wiki staff roles rewritten', count($dry) . ' in the dry run');
     $by = array();
     foreach ($changes as $c) $by[$c['why']] = ($by[$c['why']] ?? 0) + 1;
     echo '  ' . json_encode($by) . "\n";
@@ -193,10 +219,10 @@ if (is_array($live_log) && $live_log) {
     foreach ($changes as $c) {
         $hit = false;
         foreach ($staff_of($c['record']) as $e) if (($e['name'] ?? '') === $c['name'] && ($e['role'] ?? '') === $c['to']) $hit = true;
-        if (!$hit || strpos($c['to'], 'Former ') !== 0) { $ok = false; break; }
+        if (!$hit || preg_match('/^(?:Former )?(?:one|current|a|the|married|son|reported)\b/i', $c['to'])) { $ok = false; echo "  bad: {$c['name']}: {$c['to']}\n"; break; }
         if (isset($args['list'])) echo "  {$c['record']}: {$c['name']}: {$c['from']} -> {$c['to']} ({$c['why']})\n";
     }
-    check($ok, 'each is on its record as "Former <role>"');
+    check($ok, 'each is on its record with its new role, none of the parser\'s wording left');
     check(count(kop_wiki_staff_former_pass($pdo, false)) === 0, 'running it again changes nothing');
     // Taking an approval back still finds its renamed entries (the log holds the new role).
     $sid = $changes[0]['submission'];

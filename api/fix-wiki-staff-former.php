@@ -1,9 +1,10 @@
 <?php
 /**
- * Mark "Former" the wiki staff that approvals put on facility records as if they still worked
- * there: everyone at a closed program, and everyone whose write-up opens in the past tense
+ * Rewrite the roles of the wiki staff that approvals put on facility records: the job title
+ * instead of the wiki parser's wording ("current Clinical Director", "one", "married to ..."),
+ * and "Former" for everyone at a closed program or whose write-up opens in the past tense
  * ("was the Program Director"). kop_wiki_staff_former_pass() in api/sync-wiki-facilities.php;
- * new approvals do this themselves (kop_wiki_staff_is_former()).
+ * new approvals do this themselves (kop_wiki_staff_record_role()).
  *
  * CLI only, on the server (ea-php82):
  *   php api/fix-wiki-staff-former.php              dry run: what would change
@@ -51,4 +52,4 @@ foreach ($changes as $c) {
     if ($list) echo "  #{$c['submission']} {$c['record']}: {$c['name']}: {$c['from']} -> {$c['to']} ({$c['why']})\n";
 }
 echo ($apply ? '' : 'Dry run: ') . count($changes) . ' staff entries on ' . count($records) . ' records'
-    . ($undo ? ' put back' : ' marked Former') . ' (' . implode(', ', array_map(function ($k, $v) { return "$v $k"; }, array_keys($why), $why)) . ")\n";
+    . ($undo ? ' put back' : ' rewritten') . ' (' . implode(', ', array_map(function ($k, $v) { return "$v $k"; }, array_keys($why), $why)) . ")\n";
