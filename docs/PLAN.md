@@ -1963,3 +1963,9 @@ Open, in order:
    nowhere public for now; a former participant who later worked in the
    industry is a professional (name, jobs, statements, including about their
    own time in a program); "downplays" is a stance of its own.
+5. A professional's own time in a program is a map connection (owner,
+   2026-10-13: they carry its practices and beliefs with them): readers record
+   it as a person fact with event `attended`, and the review queue's Add for it
+   draws the map's existing survivor-category line (as Rocky Mountain Academy
+   to Mike Strader) through whatever the map reads besides the board CSVs,
+   with Undo.
