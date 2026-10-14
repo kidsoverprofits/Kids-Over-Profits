@@ -2291,7 +2291,21 @@ Open:
 6. The map page's class names and button ids are now read by the app (src/lib/mapPage.ts HIDE_SELECTORS,
    src/lib/mapBridge.ts BUTTONS): renaming one on the website breaks the Map tab.
 
-SEO (in progress): a strategy page for the owner, then schema.org data, an operator sitemap and social cards.
+SEO: the plan is at https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb. Live since 2026-10-14 (inc/seo.php,
+scripts/test-seo.php): past and other names in facility and company titles and descriptions, each program and company
+as a schema.org Organization in Yoast's graph (with the WebPage and breadcrumb these routes lacked), descriptions for
+news posts, state hubs, the map and the news feed, one home title plus an h1, the banner as share image where a page
+has none. Company pages were already in facility-sitemap.xml.
+
+Open:
+7. **Owner:** take the 104 tag archive pages out of search (noindex)? They list a few posts each. Yes -> a
+   `wpseo_robots` rule for `is_tag()` in inc/seo.php.
+8. **Owner:** verify the site in Google Search Console and Bing Webmaster Tools, submit sitemap_index.xml. Then read
+   which program names bring searchers and which pages Google refused, and adjust the plan from that.
+9. **Owner:** close /staging/ (Hosting, item 9 above).
+10. Facility pages are ~500 KB of HTML, company pages ~660 KB: load the long lists (documents, inspections) when
+    opened. Its own project.
+11. Google's Rich Results Test on a facility and a company page once Google recrawls them.
 
 ### 3.25 KOP Tools screens on one look (2026-10-14)
 
