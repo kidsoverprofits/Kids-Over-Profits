@@ -139,6 +139,8 @@ function kop_wiki_staff_title(string $role, string $bio = ''): string {
         . '|reported(?: by survivors)? to (?:have )?(?:also |later |previously |even )?(?:been|be|worked|served)(?: in an?)?(?: as)?'
         . '|(?:previously |later )?(?:worked|served) as|position as|listed as|the|an?)\s+/iu';
     for ($i = 0; $i < 8 && preg_match($lead, $role); $i++) $role = trim(preg_replace($lead, '', $role, 1));
+    // ...and inside it: "Co-Founder and current Clinical Director".
+    $role = trim(preg_replace('/\b(?:current(?:ly)?|presently)\s+/i', '', $role));
     // "one" / "one of the founders": the titles come from the write-up ("one of the Founders and the Chief Clinical Officer of Embark").
     if (preg_match('/^(?:"|\x{201C})?one(?: of(?: the)?)?(?:\s+(.*))?$/iu', $role, $m)) {
         // Only the write-up's opening words: a "one of" further on may be about someone else.

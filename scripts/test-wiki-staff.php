@@ -67,6 +67,7 @@ check($g[0]['role'] === 'Former Program Director', '"was the Program Director" i
 $titles = array(
     array('current Clinical Director', '', 'Clinical Director'),
     array('current Chief Operating', '', 'Chief Operating Officer'),
+    array('Co-Founder and current Clinical Director', '', 'Co-Founder and Clinical Director'),
     array('reported to have worked as the Program Director', '', 'Program Director'),
     array('cureently the is the Assistant Program Director', '', 'Assistant Program Director'),
     array('one', 'is one of the Founders and the Chief Clinical Officer of Embark Behavioral Health. Prior to this...', 'Founder, Chief Clinical Officer'),
