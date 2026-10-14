@@ -70,6 +70,14 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    (url, type, title, notes) under "Not sent yet" in the report so they can be sent next hour.
 5. The report says how many sources were sent and to which queues.
 
+## Open items go in docs/PLAN.md as you go (standing rule, 2026-10-14)
+
+Whenever a session has worked about five minutes without the owner's input, it writes what is still open from
+that work into `docs/PLAN.md` (owner steps, follow-ups, things found broken, checks to make after deploy), in the
+section it belongs to, before going on. Don't save them all up for the end of the session. Finished items move to
+`docs/PLAN-ARCHIVE.md` (verbatim, under their old heading, dated) once nothing still open needs their context;
+a finished step that explains how open work behaves stays. PLAN.md section 1 has the rule in full.
+
 ## Key Commands
 
 ```bash
