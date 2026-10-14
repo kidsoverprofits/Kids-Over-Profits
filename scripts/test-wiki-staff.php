@@ -188,7 +188,8 @@ if ($pick) {
     $before = $staff_of($unique);
     $res = kop_wiki_merge_submission($pdo, $id);
     $after = $staff_of($unique);
-    $added = array_values(array_filter($after, function ($s) { return ($s['source'] ?? '') === 'r/troubledteens wiki'; }));
+    // What this approval added: the entries after it that were not there before (earlier wiki staff may be).
+    $added = array_values(array_slice($after, count($before)));
     check(!empty($res['staff_added']) && count($after) === count($before) + $res['staff_added'], "approving #$id ({$pick['program_name']}) puts its staff on the record", json_encode($res));
     check($added && $added[0]['source'] === 'r/troubledteens wiki', 'each one cites the wiki', json_encode($added[0] ?? null));
     check($added && strpos((string) ($added[0]['sourceUrl'] ?? ''), 'https://www.reddit.com/r/troubledteens/wiki/') === 0, '...linked to its Reddit page', (string) ($added[0]['sourceUrl'] ?? ''));
