@@ -214,8 +214,10 @@ function kop_rinbox_gdl_item(array $r) {
     if ($pending && (int) $r['facility_id'] > 0 && !kop_gdl_sure_match($r)) {
         $lines[] = 'Matched by a close name (' . $r['facility_how'] . '): check it is this facility.';
     }
+    $company = $pending && (int) $r['facility_id'] === 0 && $r['operator_name'] !== '' && function_exists('kop_gdl_company_id')
+        ? kop_gdl_company_id($r['operator_name']) : 0;
     if ($pending && (int) $r['facility_id'] === 0 && $r['operator_name'] !== '') {
-        $lines[] = 'Company: ' . $r['operator_name'] . '. Pick the facility before adding it to a facility page.';
+        $lines[] = 'Company: ' . $r['operator_name'] . '. ' . ($company ? 'Add it to the company page, or pick a facility.' : 'Pick the facility before adding it to a facility page.');
     }
     $also = json_decode((string) $r['also_named'], true) ?: array();
     if ($also) {
@@ -226,6 +228,8 @@ function kop_rinbox_gdl_item(array $r) {
     }
     if (!empty($done['reason'])) {
         $lines[] = $done['reason'];
+    } elseif (($done['target'] ?? '') === 'company') {
+        $lines[] = 'Went to: the company page of ' . ($r['operator_name'] !== '' ? $r['operator_name'] : '#' . (int) ($done['operator_id'] ?? 0)) . '.';
     } elseif (!empty($done['target'])) {
         $lines[] = 'Went to: ' . ($targets[$done['target']] ?? $done['target']) . (!empty($done['id']) ? ' #' . (int) $done['id'] : '') . '.';
     }
@@ -265,6 +269,12 @@ function kop_rinbox_gdl_item(array $r) {
                     'confirm' => 'Add all ' . $n . ' links tied for sure to this facility, each where its kind goes?',
                     'help' => 'Adds every waiting link matched for sure to ' . $fac_name . ', each to the place its kind goes (facility page, website links or a review queue).');
             }
+        }
+        if ($company) {
+            $actions[] = array('id' => 'apply_company', 'label' => 'Add to ' . $r['operator_name'], 'style' => 'approve',
+                'help' => kop_gdl_needs_facility($default)
+                    ? 'Adds this link to the company page of ' . $r['operator_name'] . ($default === 'website' ? ' (its websites).' : ' under "Materials and links".')
+                    : 'Adds this link to the ' . strtolower($targets[$default]) . ', approved and on the site at once, as Add does.');
         }
         $actions[] = array('id' => 'reject', 'label' => 'Reject: skip this link', 'style' => 'reject',
             'help' => 'Nothing is added anywhere; the link moves to the Skipped tab.');
@@ -406,6 +416,13 @@ function kop_rinbox_gdl_act($key, $action, array $params) {
                 ? ($to === 'website' ? 'the website links of ' : 'the "Materials and links" list of ') . kop_rinbox_facility($fid)['name']
                 : 'the ' . strtolower($targets[$to]) . ', approved and on the site now (no emails sent)';
             return array('message' => 'Added to ' . $where . '. Undo is on the Added tab.');
+        case 'apply_company':
+            if ($r['status'] !== 'pending') throw new RuntimeException('This link was already handled (' . $r['status'] . ').');
+            $oid = kop_gdl_company_id($r['operator_name']);
+            if (!$oid) throw new RuntimeException('No company record is named exactly ' . $r['operator_name'] . '.');
+            $res = kop_gdl_apply_company(array($r), $oid, $user)[$r['pkey']] ?? array('ok' => false, 'error' => 'Nothing was done.');
+            if (empty($res['ok'])) return array('message' => 'Not added: ' . $res['error']);
+            return array('message' => 'Added to ' . (($res['target'] ?? '') === 'company' ? 'the company page of ' . $r['operator_name'] : 'the ' . strtolower($targets[$res['target']] ?? 'queue')) . '. Undo is on the Added tab.');
         case 'apply_all':
             if ($r['status'] !== 'pending' || !kop_gdl_sure_match($r)) throw new RuntimeException('This link is not a waiting sure match.');
             $fid = (int) $r['facility_id'];

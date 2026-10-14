@@ -633,6 +633,120 @@ function kop_gdl_apply(array $rows, array $targets, $fid, $reviewer) {
     return $results;
 }
 
+/* ---- Company pages ---------------------------------------------------- */
+
+/** A name as a key for company names: case, punctuation, "&", a leading "The", "Inc" do not count. */
+function kop_gdl_company_key($s) {
+    if (function_exists('kop_autoconn_key')) return kop_autoconn_key($s);
+    return trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower((string) $s)));
+}
+
+/** The company record whose name (or another name of it) is exactly $name, or 0 when none or several. */
+function kop_gdl_company_id($name) {
+    static $index = null;
+    if ($index === null) {
+        global $wpdb;
+        $index = array();
+        foreach ((array) $wpdb->get_results('SELECT id, name, json_data FROM ' . $wpdb->prefix . 'kop_operators', ARRAY_A) as $o) {
+            $j = json_decode((string) $o['json_data'], true);
+            $op = is_array($j['operator'] ?? null) ? $j['operator'] : array();
+            $names = array_merge(array($o['name'], $op['name'] ?? '', $op['currentName'] ?? ''), (array) ($op['otherNames'] ?? array()));
+            foreach ($names as $n) {
+                $k = kop_gdl_company_key(is_array($n) ? ($n['name'] ?? '') : $n);
+                if ($k !== '') $index[$k][(int) $o['id']] = true;
+            }
+        }
+    }
+    $ids = $index[kop_gdl_company_key($name)] ?? array();
+    return count($ids) === 1 ? (int) key($ids) : 0;
+}
+
+function kop_gdl_company_load($oid) {
+    global $wpdb;
+    $raw = $wpdb->get_var($wpdb->prepare('SELECT json_data FROM ' . $wpdb->prefix . 'kop_operators WHERE id = %d', (int) $oid));
+    $json = $raw !== null ? json_decode((string) $raw, true) : null;
+    if (!is_array($json) || !is_array($json['operator'] ?? null)) throw new RuntimeException('Company #' . (int) $oid . ' does not exist.');
+    return $json;
+}
+
+/** Save a company's JSON; its page and the company index start over. */
+function kop_gdl_company_save($oid, array $json) {
+    global $wpdb;
+    $wpdb->query($wpdb->prepare('UPDATE ' . $wpdb->prefix . 'kop_operators SET json_data = %s, updated_at = %s WHERE id = %d',
+        wp_json_encode($json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), current_time('mysql', true), (int) $oid));
+    if (function_exists('kop_operator_pages_flush_index')) kop_operator_pages_flush_index();
+    if (function_exists('kop_ie_purge_url') && function_exists('kop_operator_page_url')) kop_ie_purge_url((string) kop_operator_page_url((int) $oid));
+}
+
+/**
+ * Add links to a company's page: the company's own site to its websites, the
+ * rest to its "Materials and links" (operator.resourceLinks, as on a facility
+ * page). News, court records and bills go to their queues as Add sends them.
+ * Returns [pkey => result].
+ */
+function kop_gdl_apply_company(array $rows, $oid, $reviewer) {
+    global $wpdb;
+    $oid = (int) $oid;
+    $json = kop_gdl_company_load($oid);
+    $results = array();
+    $queue = array();
+    $now = current_time('mysql', true);
+    $changed = array();
+    foreach ($rows as $r) {
+        if ($r['status'] !== 'pending') {
+            $results[$r['pkey']] = array('ok' => false, 'error' => 'Already ' . $r['status'] . '.');
+            continue;
+        }
+        $t = kop_gdl_default_target($r['kind']);
+        if (!kop_gdl_needs_facility($t)) {
+            $queue[] = $r;
+            continue;
+        }
+        $key = kop_gdl_url_key($r['url']);
+        $have = array_merge(array_map(function ($w) { return is_array($w) ? ($w['url'] ?? '') : $w; }, (array) ($json['operator']['websites'] ?? array())),
+            array_column((array) ($json['operator']['resourceLinks'] ?? array()), 'url'));
+        $dupe = false;
+        foreach ($have as $h) $dupe = $dupe || (is_string($h) && kop_gdl_url_key($h) === $key);
+        if ($dupe) {
+            $wpdb->update(kop_gdl_table(), array('status' => 'rejected', 'applied' => wp_json_encode(array('reason' => 'Already on the company page.')),
+                'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+            $results[$r['pkey']] = array('ok' => false, 'error' => 'Already on the company page.');
+            continue;
+        }
+        if ($t === 'website') {
+            $json['operator']['websites'][] = $r['url'];
+        } else {
+            $json['operator']['resourceLinks'][] = array('url' => $r['url'], 'label' => (string) $r['label'],
+                'kind' => kop_gdl_resource_kind($r['kind']), 'source' => kop_gdl_source_line($r));
+        }
+        $changed[$r['pkey']] = array('target' => 'company', 'place' => $t, 'operator_id' => $oid, 'url' => $r['url']);
+    }
+    if ($changed) {
+        kop_gdl_company_save($oid, $json);
+        foreach ($changed as $pkey => $done) {
+            $wpdb->update(kop_gdl_table(), array('status' => 'applied', 'applied' => wp_json_encode($done), 'applied_fid' => 0,
+                'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $pkey));
+            $results[$pkey] = array('ok' => true, 'target' => 'company');
+        }
+    }
+    if ($queue) $results += kop_gdl_apply($queue, array(), 0, $reviewer);
+    return $results;
+}
+
+/** Take links Add put on a company page off it again. $list: [[row, done], ...] for one company. */
+function kop_gdl_company_remove($oid, array $list) {
+    $json = kop_gdl_company_load($oid);
+    $keys = array();
+    foreach ($list as $pair) $keys[kop_gdl_url_key($pair[1]['url'] ?? '')] = true;
+    $json['operator']['websites'] = array_values(array_filter((array) ($json['operator']['websites'] ?? array()), function ($w) use ($keys) {
+        return !isset($keys[kop_gdl_url_key(is_array($w) ? ($w['url'] ?? '') : (string) $w)]);
+    }));
+    $json['operator']['resourceLinks'] = array_values(array_filter((array) ($json['operator']['resourceLinks'] ?? array()), function ($l) use ($keys) {
+        return !is_array($l) || !isset($keys[kop_gdl_url_key($l['url'] ?? '')]);
+    }));
+    kop_gdl_company_save($oid, $json);
+}
+
 function kop_gdl_undo(array $rows, $reviewer) {
     global $wpdb;
     $results = array();
@@ -641,6 +755,7 @@ function kop_gdl_undo(array $rows, $reviewer) {
             'reviewed_by' => $reviewer, 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
     };
     $by_fid = array();
+    $by_company = array();
     $queue_pdo = null;
     foreach ($rows as $r) {
         $done = json_decode((string) $r['applied'], true) ?: array();
@@ -651,6 +766,8 @@ function kop_gdl_undo(array $rows, $reviewer) {
             $results[$r['pkey']] = array('ok' => false, 'error' => 'Nothing to undo.');
         } elseif (in_array($done['target'] ?? '', array('resource', 'website'), true)) {
             $by_fid[(int) $r['applied_fid']][] = array($r, $done);
+        } elseif (($done['target'] ?? '') === 'company') {
+            $by_company[(int) ($done['operator_id'] ?? 0)][] = array($r, $done);
         } else {
             try {
                 $queue_pdo = $queue_pdo ?: kop_gdl_queue_pdo();
@@ -660,6 +777,17 @@ function kop_gdl_undo(array $rows, $reviewer) {
             } catch (RuntimeException $e) {
                 $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage());
             }
+        }
+    }
+    foreach ($by_company as $oid => $list) {
+        try {
+            kop_gdl_company_remove($oid, $list);
+            foreach ($list as $pair) {
+                $back($pair[0]);
+                $results[$pair[0]['pkey']] = array('ok' => true);
+            }
+        } catch (RuntimeException $e) {
+            foreach ($list as $pair) $results[$pair[0]['pkey']] = array('ok' => false, 'error' => $e->getMessage());
         }
     }
     if ($by_fid) {

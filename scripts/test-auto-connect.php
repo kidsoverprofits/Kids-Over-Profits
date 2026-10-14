@@ -257,6 +257,36 @@ if ($has('wpdl_kop_gdoc_links')) {
 ";
         }
     }
+    // Company-only links go on the company's page when its name is exactly one company record.
+    $check('drive docs: a company name finds its one record', kop_gdl_company_id('Straight Inc.') > 0 && kop_gdl_company_id('Straight, Inc') === kop_gdl_company_id('Straight Inc.'));
+    $check('drive docs: a name two company records share finds none', kop_gdl_company_id('Rite of Passage, Inc.') === 0);
+    $acadia = kop_autoconn_drive_program(array('source' => 'sciad', 'source_doc' => 'SCIAD NET: Tennessee / Acadia Healthcare HQ / News'));
+    $check('drive docs: a collection named for a company ("Acadia Healthcare HQ") finds the company', $acadia && kop_gdl_company_id($acadia[0]) > 0);
+    $oid = kop_gdl_company_id('Straight Inc.');
+    $crows = $pdo->query("SELECT * FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0 AND operator_name <> '' AND kind IN ('reference', 'other', 'archive', 'social') ORDER BY id LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+    if ($oid && $crows) {
+        $before_json = $pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . $oid)->fetchColumn();
+        $res = kop_gdl_apply_company($crows, $oid, 'auto');
+        $after = json_decode($pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . $oid)->fetchColumn(), true);
+        $urls = array_column((array) ($after['operator']['resourceLinks'] ?? array()), 'url');
+        $check('drive docs: Add to a company puts the links in its "Materials and links"', count(array_filter($res, function ($x) { return !empty($x['ok']); })) === count($crows)
+            && !array_diff(array_column($crows, 'url'), $urls), count($urls) . ' links on the company');
+        $page = function_exists('kop_facility_pages_resource_links') ? kop_facility_pages_resource_links($after['operator']['resourceLinks']) : null;
+        $check('drive docs: the company page groups them as a facility page does', $page === null || count($page) > 0);
+        $again = kop_gdl_rows(array($crows[0]['pkey']));
+        $again[0]['status'] = 'pending';
+        $dup = kop_gdl_apply_company($again, $oid, 'auto');
+        $check('drive docs: a link already on the company page is not added twice', empty($dup[$crows[0]['pkey']]['ok']));
+        $pdo->exec("UPDATE wpdl_kop_gdoc_links SET status = 'applied', applied = " . $pdo->quote(json_encode(array('target' => 'company', 'place' => 'resource', 'operator_id' => $oid, 'url' => $crows[0]['url']))) . ' WHERE pkey = ' . $pdo->quote($crows[0]['pkey']));
+        $undo = kop_gdl_undo(kop_gdl_rows(array_column($crows, 'pkey')), 'test');
+        $restored = $pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . $oid)->fetchColumn();
+        $left = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND pkey IN (" . implode(',', array_map(array($pdo, 'quote'), array_column($crows, 'pkey'))) . ')')->fetchColumn();
+        $check('drive docs: Undo takes them off the company page and back to waiting',
+            !array_intersect(array_column($crows, 'url'), array_column((array) (json_decode($restored, true)['operator']['resourceLinks'] ?? array()), 'url')) && $left === count($crows));
+        $pdo->prepare('UPDATE wpdl_kop_operators SET json_data = ? WHERE id = ?')->execute(array($before_json, $oid));
+    }
+    $news = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0 AND operator_name = '' AND kind = 'news'")->fetchColumn();
+    echo "  $news news links with no program or company go to the news records\n";
     $dpicks = $pdo->query('SELECT * FROM wpdl_kop_gdoc_links WHERE ' . kop_autoconn_drive_where())->fetchAll(PDO::FETCH_ASSOC);
     $waiting = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending'")->fetchColumn();
     $check('drive docs: exact-name links add themselves, the rest wait', $dpicks && count($dpicks) < $waiting, count($dpicks) . ' of ' . $waiting);

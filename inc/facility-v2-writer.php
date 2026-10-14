@@ -528,6 +528,9 @@ if (!function_exists('kop_v2_save_operator_project')) {
         // keeps (docs/FACILITY-SCHEMA.md, "Standard shapes"). A row whose block
         // is empty still gets the keys, with the name it is filed under.
         $operator['name'] = $name;
+        if (!isset($operator['resourceLinks']) && is_array($stored['operator']['resourceLinks'] ?? null)) {
+            $operator['resourceLinks'] = $stored['operator']['resourceLinks'];
+        }
         $operator = kop_facility_operator_block($operator) ?? array();
 
         $blocks = (is_array($stored) && isset($stored['legacy_blocks']) && is_array($stored['legacy_blocks'])) ? $stored['legacy_blocks'] : array();

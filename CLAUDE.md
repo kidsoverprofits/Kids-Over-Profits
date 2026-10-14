@@ -238,7 +238,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-file
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
-# discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links
+# discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links (no-record ones re-tied by their SCIAD collection or wiki page name; company-only
+# ones onto the company page, operator.resourceLinks = its "Materials and links"; news naming nothing to the news records for the enrich to tie)
 # tied by an exact name (Add publishes them), and in its own run Woodbury Facts items at an exact or past name with the quote found, no
 # conflict (any source: Woodbury, HEAL, wiki; kop_wbf_auto_where()). A name of only common words counts if it has 3+ words and a place word
 # ("Lake House Academy"; kop_autoconn_distinctive()). Close names, shared names, board/title-only, "Wilderness Treatment Center" wait. Each shows in its queue's done tab by 'auto' and in Recently done with Undo; an undone one is never redone

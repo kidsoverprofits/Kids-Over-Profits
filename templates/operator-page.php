@@ -48,6 +48,7 @@ $kop_op_has_survivor_sites = !empty($page['survivor_sites']);
 $kop_op_has_program_docs = !empty($page['program_docs']['programs']);
 $kop_op_has_docs = !empty($page['documents']['html']) || $kop_op_has_program_docs || $kop_op_has_research || $kop_op_has_unsilenced || $kop_op_has_survivor_sites;
 if ($kop_op_has_docs) $kop_op_sections['documents'] = 'Documents';
+if (!empty($page['resource_links'])) $kop_op_sections['materials'] = 'Materials and links';
 if ($page['websites']) $kop_op_sections['links'] = 'Websites';
 
 $kop_op_company_list = static function (array $items) {
@@ -453,6 +454,31 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <?php if ($kop_op_has_survivor_sites) : ?>
                     <?php echo kop_survivor_archives_render($page['survivor_sites'], $page['name']); // Escaped inside. ?>
                 <?php endif; ?>
+            </section>
+            <?php endif; ?>
+
+            <?php if (!empty($page['resource_links'])) : ?>
+            <section class="kop-fp-section" id="materials">
+                <h2>Materials and links</h2>
+                <?php foreach ($page['resource_links'] as $kop_op_group) : ?>
+                    <h3 class="kop-fp-subhead"><?php echo esc_html($kop_op_group['label']); ?></h3>
+                    <ul class="kop-fp-records">
+                        <?php foreach ($kop_op_group['links'] as $l) : ?>
+                            <li>
+                                <a href="<?php echo esc_url($l['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($l['label']); ?></a>
+                                <?php if (!empty($l['live_url'])) : ?>
+                                    <span class="meta"><a href="<?php echo esc_url($l['go_url']); ?>" target="_blank" rel="nofollow noreferrer noopener">live site</a></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php foreach ((array) ($kop_op_group['credits'] ?? array()) as $kop_op_credit) : ?>
+                        <p class="kop-fp-count">
+                            <?php echo $kop_op_credit['count'] < count($kop_op_group['links']) ? esc_html(sprintf('%d of these from', $kop_op_credit['count'])) : 'From'; ?>
+                            <a href="<?php echo esc_url($kop_op_credit['url']); ?>" target="_blank" rel="noopener"><?php echo esc_html($kop_op_credit['label']); ?></a>.
+                        </p>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
             </section>
             <?php endif; ?>
 

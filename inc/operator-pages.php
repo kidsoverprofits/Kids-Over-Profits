@@ -909,6 +909,8 @@ if (!function_exists('kop_operator_page_data')) {
             'lawsuits'      => $lawsuits,
             'memorials'     => $memorials,
             'websites'      => $websites,
+            // Links filed under the company (Drive Docs, by hand), grouped by kind as on a facility page.
+            'resource_links' => function_exists('kop_facility_pages_resource_links') ? (array) kop_facility_pages_resource_links($op['resourceLinks'] ?? null) : array(),
             'notes'         => $notes,
             // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
             'about'         => function_exists('kop_pnotes_build') ? kop_pnotes_build($notes) : null,
