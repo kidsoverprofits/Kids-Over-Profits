@@ -134,9 +134,9 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         'identification' => array('name' => 'Roe Ranch'),
         'staff' => array('administrator' => array(array('name' => 'Jane Q. Roe', 'role' => 'Executive Director (2001)', 'pastJobs' => 'Teacher - Elm School (1995)'),
             array('name' => 'Sam Poe', 'role' => 'Therapist', 'pastJobs' => ''))));
-    $row = function ($op, $path, $value) { return array('op' => $op, 'path' => $path, 'value' => json_encode($value)); };
+    $row = function ($op, $path, $value) { return array('op' => $op, 'path' => $path, 'value' => json_encode($value), 'label' => '', 'evidence' => '[]', 'issue_date' => '', 'pkey' => 'x', 'extra' => ''); };
     // Another role for someone listed with no work history is history, not a conflict: Add writes it into their past jobs, Undo takes it back.
-    $poe = $row('add_staff', 'staff.notableStaff', array('name' => 'Sam Poe', 'role' => 'Founder (2021, HEAL)', 'pastJobs' => 'Intake Coordinator - Pathway (2019)')) + array('evidence' => '[]', 'issue_date' => '', 'pkey' => 'poe');
+    $poe = $row('add_staff', 'staff.notableStaff', array('name' => 'Sam Poe', 'role' => 'Founder (2021, HEAL)', 'pastJobs' => 'Intake Coordinator - Pathway (2019)')) + array('pkey' => 'poe');
     $d2 = $doc;
     $done = kop_wbf_doc_apply($d2, $poe);
     $after = $d2['staff']['administrator'][1];
@@ -145,13 +145,59 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         kop_wbf_conflict($doc, $poe) === '' && kop_wbf_on_record($doc, $poe) === ''
         && $after['role'] === 'Therapist' && $after['pastJobs'] === 'Founder - Roe Ranch (2021); Intake Coordinator - Pathway (2019)'
         && $d2['staff']['administrator'][1]['pastJobs'] === '' && $d2['staff']['administrator'][1]['role'] === 'Therapist', json_encode($after));
-    $check('woodbury-facts: conflict rules (other value, open record, other role) and none for the same thing',
+    $check('woodbury-facts: conflict rules (other value, open record) and none for the same thing',
         kop_wbf_conflict($doc, $row('set_if_empty', 'facilityDetails.type', 'Boot Camp')) === 'The record has Wilderness Therapy; this says Boot Camp.'
         && kop_wbf_conflict($doc, $row('set_if_empty', 'facilityDetails.type', 'wilderness therapy')) === ''
         && kop_wbf_conflict($doc, $row('set_if_empty', 'facilityDetails.capacity', 40)) === ''
         && strpos(kop_wbf_conflict($doc, $row('set_closed', 'operatingPeriod.status', array('endYear' => 2009))), 'The record says it is open') === 0
-        && strpos(kop_wbf_conflict($doc, $row('add_staff', 'staff.notableStaff', array('name' => 'Dr. Jane Roe', 'role' => 'Admissions'))), 'The record lists Jane Q. Roe as Executive Director') === 0
         && kop_wbf_conflict($doc, $row('add_staff', 'staff.notableStaff', array('name' => 'Jane Roe', 'role' => 'executive director'))) === '');
+    // Not conflicts: a type holding the other, a typo, a sentence where the type belongs, another staff role (it joins the history).
+    $types = function ($have, $says) use ($row) {
+        $d = array('facilityDetails' => array('type' => $have));
+        return kop_wbf_conflict($d, $row('set_if_empty', 'facilityDetails.type', $says));
+    };
+    $jane = $row('add_staff', 'staff.notableStaff', array('name' => 'Dr. Jane Roe', 'role' => 'Admissions (2005, Woodbury Reports)', 'pastJobs' => 'Teacher - Elm School (1995)'))
+        + array('pkey' => 'jane');
+    $d3 = $doc;
+    kop_wbf_doc_apply($d3, $jane);
+    $junk = $doc;
+    $junk['staff']['administrator'][1]['role'] = 'one';
+    $junk['facilityDetails']['type'] = 'If you attended this program and would like to contribute information, please write to us.';
+    $d4 = $junk;
+    $done4 = kop_wbf_doc_apply($d4, $poe);
+    $d5 = $junk;
+    $done5 = kop_wbf_doc_apply($d5, $row('set_if_empty', 'facilityDetails.type', 'Therapeutic Boarding School') + array('pkey' => 't'));
+    $roles_back = $d4;
+    kop_wbf_doc_undo($roles_back, $done4);
+    $check('woodbury-facts: not conflicts: a type that holds the other or a typo of it, a placeholder sentence as the type, another staff role',
+        $types('Christian Therapeutic Boarding School', 'Therapeutic Boarding School') === '' && $types('Therapeutic Boarding/Day School', 'Therapeutic Boarding School') === ''
+        && $types('Therpeutic Boarding School', 'Therapeutic Boarding School') === '' && $types('Residential Treatment Center', 'Wilderness Therapy') !== ''
+        && kop_wbf_conflict($junk, $row('set_if_empty', 'facilityDetails.type', 'Therapeutic Boarding School')) === ''
+        && kop_wbf_conflict($doc, $jane) === '' && kop_wbf_on_record($doc, $jane) === ''
+        && $d3['staff']['administrator'][0]['role'] === 'Executive Director (2001)'
+        && $d3['staff']['administrator'][0]['pastJobs'] === 'Teacher - Elm School (1995); Admissions - Roe Ranch (2005)'
+        && kop_wbf_on_record($d3, $jane) !== ''
+        && $d4['staff']['administrator'][1]['role'] === 'Founder (2021, HEAL)' && $roles_back['staff']['administrator'][1]['role'] === 'one'
+        && $d5['facilityDetails']['type'] === 'Therapeutic Boarding School',
+        json_encode(array($d3['staff']['administrator'][0], $d4['staff']['administrator'][1])));
+    // A note never conflicts, whatever the build noted ("Another issue gives 1989; this one is kept as a note").
+    $check('woodbury-facts: a dated note is not a conflict', !kop_rinbox_wbf_built_conflict(array('op' => 'add_list', 'path' => 'notes',
+        'conflict' => 'Another issue gives 1989; this one is kept as a note.', 'current_val' => '', 'value' => '"Start year: 1977"'), $doc));
+    // Reject takes the same fact from the other sources with it; its Undo brings them all back.
+    $twins = $pdo->query("SELECT facility_id, op, path FROM $t WHERE status = 'pending' AND facility_id > 0 AND op = 'set_if_empty'
+        GROUP BY facility_id, op, path, value HAVING COUNT(*) > 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    if ($twins) {
+        $st = $pdo->prepare("SELECT pkey FROM $t WHERE status = 'pending' AND facility_id = ? AND op = ? AND path = ? ORDER BY id");
+        $st->execute(array($twins['facility_id'], $twins['op'], $twins['path']));
+        $first = $st->fetchColumn();
+        $same = kop_rinbox_wbf_same_fact(kop_wbf_rows(array($first))[0]);
+        call_user_func(kop_rinbox_source('woodbury-facts')['act'], $first, 'reject', array());
+        $gone = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'rejected' AND pkey IN ('" . implode("','", array_column($same, 'pkey')) . "')")->fetchColumn();
+        call_user_func(kop_rinbox_source('woodbury-facts')['act'], $first, 'undo', array());
+        $back = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending' AND pkey IN ('" . implode("','", array_merge(array($first), array_column($same, 'pkey'))) . "')")->fetchColumn();
+        $check('woodbury-facts: Reject takes the same fact from the other sources with it, Undo brings them all back',
+            $same && $gone === count($same) && $back === count($same) + 1, count($same) . ' twins, ' . $gone . ' rejected, ' . $back . ' back');
+    }
     // A real waiting item whose record now holds another value.
     $live = null;
     foreach ($pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'set_if_empty' AND facility_id > 0 ORDER BY id LIMIT 4000")->fetchAll(PDO::FETCH_ASSOC) as $r) {

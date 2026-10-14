@@ -308,7 +308,7 @@ function kop_rinbox_wbf_item(array $r) {
         if (isset($extra['original'])) $actions[] = array('id' => 'reset', 'label' => 'Back to what Woodbury said', 'style' => 'neutral',
             'help' => 'Drops the corrections made here; the item reads as Woodbury had it.');
         $actions[] = array('id' => 'reject', 'label' => 'Reject', 'style' => 'reject',
-            'help' => 'Nothing is added anywhere; the item moves to the Rejected tab.');
+            'help' => 'Nothing is added anywhere; the item moves to the Rejected tab, with any waiting item giving the same fact about this record from another source.');
     } elseif ($r['status'] === 'applied') {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes what this item added off the record and puts it back in the waiting list; a record it created stays.');
@@ -441,17 +441,44 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
             return array('message' => 'Back to what Woodbury said.');
         case 'reject':
             $waiting();
-            $wpdb->update(kop_wbf_table(), array('status' => 'rejected', 'reviewed_by' => $user, 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
-            return array('message' => 'Rejected. Nothing was added; "Back to review" on the Rejected tab brings it back.');
+            $now = current_time('mysql', true);
+            $wpdb->update(kop_wbf_table(), array('status' => 'rejected', 'reviewed_by' => $user, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+            // The same fact from the other sources is decided with it, not again one by one; Undo brings them all back.
+            $same = kop_rinbox_wbf_same_fact($r);
+            foreach ($same as $o) {
+                $wpdb->update(kop_wbf_table(), array('status' => 'rejected', 'reviewed_by' => $user, 'reviewed_at' => $now,
+                    'applied' => wp_json_encode(array('reason' => 'The same as "' . $r['label'] . '", rejected with it.', 'with' => (string) $r['pkey']))),
+                    array('pkey' => $o['pkey']));
+            }
+            return array('message' => 'Rejected. Nothing was added' . ($same ? '; ' . count($same) . ' other item' . (count($same) === 1 ? '' : 's')
+                . ' giving the same fact from another source went with it' : '') . '. "Back to review" on the Rejected tab brings ' . ($same ? 'them all' : 'it') . ' back.');
         case 'undo':
             if (!in_array($r['status'], array('applied', 'rejected'), true)) throw new RuntimeException('Nothing to undo.');
             $was = $r['status'];
+            if ($was === 'rejected') {
+                // The items rejected with this one come back with it.
+                foreach ((array) $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'rejected' AND applied LIKE %s",
+                    '%' . $wpdb->esc_like('"with":"' . $r['pkey'] . '"') . '%'), ARRAY_A) as $o) {
+                    $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'reviewed_by' => $user,
+                        'reviewed_at' => current_time('mysql', true)), array('pkey' => $o['pkey']));
+                }
+            }
             kop_wbf_undo(array($r), $user);
             $now = kop_wbf_rows(array($r['pkey']))[0] ?? null;
             if (!$now || $now['status'] !== 'pending') throw new RuntimeException('Undo did not go through. Try again, or use the full screen.');
             return array('message' => $was === 'applied' ? 'Undone: what this item added is off the record again. It is waiting for review.' : 'Waiting for review again.');
     }
     throw new RuntimeException('Unknown action.');
+}
+
+/** The other waiting items giving the same fact about the same record (kop_wbf_fact_key()). */
+function kop_rinbox_wbf_same_fact(array $r) {
+    global $wpdb;
+    $key = kop_wbf_fact_key($r);
+    if ($key === '') return array();
+    $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND facility_id = %d AND op = %s AND path = %s AND pkey <> %s",
+        (int) $r['facility_id'], (string) $r['op'], (string) $r['path'], (string) $r['pkey']), ARRAY_A);
+    return array_values(array_filter($rows, function ($o) use ($key) { return kop_wbf_fact_key($o) === $key; }));
 }
 
 function kop_rinbox_wbf_save($key, array $fields) {
@@ -477,7 +504,7 @@ function kop_rinbox_wbf_save($key, array $fields) {
  */
 function kop_rinbox_wbf_on_file() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf_v2', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_v3', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT pkey, facility_id, op, path, value FROM ' . kop_wbf_table()
             . " WHERE status = 'pending' AND facility_id > 0 AND op IN ('add_staff', 'add_list', 'set_if_empty', 'set_closed')", ARRAY_A);
@@ -517,12 +544,9 @@ function kop_wbf_on_record(array $doc, array $r) {
                 foreach ((array) kop_wbf_get($doc, $path) as $s) {
                     $s = is_array($s) ? $s : array('name' => (string) $s);
                     if (kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
-                    // Add fills only empty role and past jobs: on file when it would fill nothing.
-                    foreach (array('role', 'pastJobs') as $k) {
-                        if (trim((string) ($value[$k] ?? '')) !== '' && trim((string) ($s[$k] ?? '')) === '') return '';
-                    }
-                    // Another role, on an entry with no work history, goes into its past jobs.
-                    if (trim((string) ($s['pastJobs'] ?? '')) === '' && !kop_wbf_role_same($s['role'] ?? '', $value['role'] ?? '')) return '';
+                    // On file when Add would change nothing: same role, every past job listed (kop_wbf_staff_merge()).
+                    list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
+                    if ($role !== trim((string) ($s['role'] ?? '')) || $jobs !== trim((string) ($s['pastJobs'] ?? ''))) return '';
                     return ($s['name'] ?? $value['name']) . ' is on its staff list' . (!empty($s['role']) ? ' (' . $s['role'] . ')' : '');
                 }
             }
@@ -533,8 +557,8 @@ function kop_wbf_on_record(array $doc, array $r) {
                 ? 'already listed (' . (is_array($value) ? (string) ($value['raw'] ?? wp_json_encode($value)) : mb_substr((string) $value, 0, 120)) . ')' : '';
         case 'set_if_empty':
             $slot = kop_wbf_get($doc, $r['path']);
-            if (kop_wbf_no_info($slot)) return '';
-            return $same($slot, $value) ? 'already says ' . (is_array($slot) ? wp_json_encode($slot) : $slot) : '';
+            if (kop_wbf_slot_empty($r['path'], $slot)) return '';
+            return $same($slot, $value) || kop_wbf_value_same($r['path'], $slot, $value) ? 'already says ' . (is_array($slot) ? wp_json_encode($slot) : $slot) : '';
         case 'set_closed':
             $status = (string) ($doc['operatingPeriod']['status'] ?? '');
             $end = $doc['operatingPeriod']['endYear'] ?? null;
@@ -557,14 +581,17 @@ function kop_rinbox_wbf_conflict(array $r) {
 /** The build's notes and the live conflict ($live: kop_wbf_conflict_parts()) as one line. */
 function kop_rinbox_wbf_conflict_text(array $r, $live) {
     $out = array();
-    if ((string) $r['conflict'] !== '') {
+    // With the live check, what the record says is the live text: the build's snapshot of it ("On the record now:
+    // Status now: Unknown", "The record says it is open") is from build time and may be stale.
+    $stale = function ($s) { return preg_match('/^(?:The record (?:has|says|lists)|On the record now)\b/i', trim($s)); };
+    if ((string) $r['conflict'] !== '' && !($live && $stale((string) $r['conflict']))) {
         // The build writes ranges as JSON ("Another issue gives {"min": 10, "max": 14}"): shown as words.
         $out[] = rtrim(preg_replace_callback('/\{[^{}]*\}/', function ($m) {
             $v = json_decode($m[0], true);
             return is_array($v) ? kop_wbf_show_value($v) : $m[0];
         }, (string) $r['conflict']), '.') . '.';
     }
-    if ((string) $r['current_val'] !== '') $out[] = 'On the record now: ' . $r['current_val'] . '.';
+    if ((string) $r['current_val'] !== '' && !$live) $out[] = 'On the record now: ' . $r['current_val'] . '.';
     if ($live && !in_array($live['text'], $out, true)) $out[] = $live['text'];
     return implode(' ', $out);
 }
@@ -578,6 +605,8 @@ function kop_rinbox_wbf_conflict_text(array $r, $live) {
  * while the record still holds a start year other than the item's.
  */
 function kop_rinbox_wbf_built_conflict(array $r, $doc) {
+    // A note only adds a line ("Opened: 2005 per the wiki"): another value elsewhere is what the note is there to keep.
+    if ($r['op'] === 'add_list' && in_array((string) $r['path'], array('notes', 'operatingPeriod.notes'), true)) return false;
     $note = trim((string) $r['conflict']);
     if ($note !== '' && preg_match('/^The record has start year\b/i', $note)) {
         if (!$doc) return true;
@@ -603,7 +632,7 @@ function kop_rinbox_wbf_built_conflict(array $r, $doc) {
  */
 function kop_rinbox_wbf_conflicts() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf_conflicts_v5', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_conflicts_v6', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND ((conflict IS NOT NULL AND conflict <> '')
             OR (current_val IS NOT NULL AND current_val <> '') OR (facility_id > 0 AND op IN ('set_if_empty', 'set_closed', 'add_staff')))", ARRAY_A);

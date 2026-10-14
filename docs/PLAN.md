@@ -1608,6 +1608,18 @@ Open:
    sale took Island View, the Aspen Institute for Behavioral Assessment and
    Copper Canyon, which became Family Help & Wellness partners; no source
    names Turn-About Ranch as one, so the record does not.
+4. **In progress (2026-10-14): one correction, one decision.** 51 steps sit on
+   more than one card (146 copies; the four `sequel_history-*` Three Springs
+   cards share merges, past names and notes). A step made or left off on one
+   card is settled on every card carrying it ("Made on" / "Left off on" with
+   the card's name, unticked); a card with nothing left open moves to its own
+   "Settled on other cards" tab and comes back when that card's decision is
+   undone. Same push: Woodbury Facts conflicts that are not (a type that holds
+   the other, a typo, the wiki's "If you attended this program..." placeholder
+   as a type, a different staff role, which now joins the work history, a
+   dated note, a closure on a record no longer open), and a Woodbury reject
+   rejecting the same fact from the other sources with one Undo. After deploy:
+   count the Conflicts section and the Data audit Waiting tab again.
 
 ### 3.14 Mobile app (2026-10-06)
 

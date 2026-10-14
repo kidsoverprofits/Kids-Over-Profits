@@ -26,6 +26,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
+require_once __DIR__ . '/admin-kit.php';
+add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-woodbury-facts'; return $pages; });
+
 define('KOP_WOODBURY_FACTS_DB_VERSION', '3');
 
 function kop_wbf_table() {
@@ -295,11 +299,121 @@ function kop_wbf_role_plain($s) {
     return trim(preg_replace('/\s+/', ' ', preg_replace('/\([^)]*\)/', '', strtolower((string) $s))));
 }
 
-/** Whether two roles say the same thing (one holds the other), or either says nothing. */
+/** A role's titles: "current Co-Founder and Executive Director (2015)" -> ["co-founder", "executive director"]. */
+function kop_wbf_role_parts($s) {
+    $out = array();
+    foreach (preg_split('/\s*(?:[,;\/&]|\band\b)\s*/', kop_wbf_role_plain($s)) as $part) {
+        $part = trim(preg_replace('/^(?:(?:current|currently|also|the|a|an|former|formerly|previous|previously|first|later)\s+)+/', '', $part));
+        if (mb_strlen($part) >= 3) $out[] = $part;
+    }
+    return $out;
+}
+
+/** Whether a role names a job at all ("one", "wife", "reported to have worked" do not). */
+function kop_wbf_role_is_title($s) {
+    return (bool) preg_match('/\b(?:director|founder|owner|ceo|cfo|coo|president|chair\w*|head\w*|principal|dean|therapist|psycho\w+|psychiatrist'
+        . '|physician|doctor|counsel+or|manager|coordinator|supervisor|staff|nurse|teacher|instructor|mentor|guide|sergeant|agent|secretary|treasurer'
+        . '|advis[eo]r|partner|superintendent|administrator|specialist|chief|officer|consultant|pastor|chaplain|minister|parent|creator|board|trustee'
+        . '|clinician|social worker|liaison|admissions|marketing|operations|executive|guard|cook|worker|employee|volunteer|intern)s?\b/i', (string) $s);
+}
+
+/** Whether two roles say the same thing (a title of one is, or holds, a title of the other), or either says nothing. */
 function kop_wbf_role_same($a, $b) {
-    $a = kop_wbf_role_plain($a);
-    $b = kop_wbf_role_plain($b);
-    return kop_wbf_no_info($a) || kop_wbf_no_info($b) || strpos($a, $b) !== false || strpos($b, $a) !== false;
+    if (kop_wbf_no_info(kop_wbf_role_plain($a)) || kop_wbf_no_info(kop_wbf_role_plain($b))) return true;
+    foreach (kop_wbf_role_parts($a) as $x) {
+        foreach (kop_wbf_role_parts($b) as $y) {
+            if (strpos($x, $y) !== false || strpos($y, $x) !== false) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * A staff item merged into the entry the record has for that person: [role,
+ * pastJobs]. A different role is the person's history, never a disagreement:
+ * the record's role stays (a role that names no job, "one" or "wife" from a
+ * wiki import, is replaced) and the item's role joins the past jobs, as do
+ * past jobs the entry does not list yet. Unchanged = nothing to add.
+ */
+function kop_wbf_staff_merge(array $s, array $value, array $doc) {
+    $role = trim((string) ($s['role'] ?? ''));
+    $jobs = trim((string) ($s['pastJobs'] ?? ''));
+    $new = trim((string) ($value['role'] ?? ''));
+    $list = array_values(array_filter(array_map('trim', explode(';', $jobs)), 'strlen'));
+    $has = function ($text) use (&$list) {
+        $p = kop_wbf_role_plain($text);
+        foreach ($list as $j) {
+            $q = kop_wbf_role_plain($j);
+            if ($p !== '' && (strpos($q, $p) !== false || strpos($p, $q) !== false)) return true;
+        }
+        return false;
+    };
+    if ($new !== '' && !kop_wbf_no_info($new)) {
+        if ($role === '' || kop_wbf_no_info($role) || !kop_wbf_role_is_title($role)) {
+            $role = $new;
+        } elseif (!kop_wbf_role_same($role, $new) && !$has(preg_replace('/\s*\([^)]*\)\s*$/', '', $new))) {
+            $list[] = kop_wbf_role_job($new, $doc);
+        }
+    }
+    foreach (array_map('trim', explode(';', (string) ($value['pastJobs'] ?? ''))) as $j) {
+        if ($j !== '' && !$has($j)) $list[] = $j;
+    }
+    return array($role, implode('; ', $list));
+}
+
+/**
+ * What an item says, whichever source says it: the record, the kind of change
+ * and the fact without its citation ("Opened: 2005 (Woodbury Reports, May
+ * 2009, p. 12)" and "... (HEAL ...)" are one fact; a person is one fact at a
+ * record whatever role each source gives). '' for an item with no record.
+ */
+function kop_wbf_fact_key(array $r) {
+    if ((int) ($r['facility_id'] ?? 0) <= 0) return '';
+    $v = kop_wbf_row_value($r);
+    switch ($r['op']) {
+        case 'add_staff':
+            $what = kop_wbf_person_key(is_array($v) ? ($v['name'] ?? '') : '');
+            break;
+        case 'set_closed':
+            $what = (string) (int) (is_array($v) ? ($v['endYear'] ?? 0) : 0);
+            break;
+        case 'set_if_empty':
+            $what = strtolower(is_array($v) ? wp_json_encode($v) : trim((string) $v));
+            break;
+        default:
+            $s = is_array($v) ? (string) ($v['raw'] ?? wp_json_encode($v)) : (string) $v;
+            $s = preg_replace('/\s*\([^()]*\)\s*\.?\s*$/', '', $s);
+            $what = trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower($s)));
+    }
+    return $what === '' ? '' : (int) $r['facility_id'] . '|' . $r['op'] . '|' . $r['path'] . '|' . $what;
+}
+
+/** Whether a slot holds nothing worth keeping: no information, or a sentence where a type belongs (the wiki's "If you attended..."). */
+function kop_wbf_slot_empty($path, $slot) {
+    if ($slot === null || $slot === '' || kop_wbf_no_info($slot)) return true;
+    return in_array($path, array('facilityDetails.type', 'facilityDetails.gender'), true) && is_string($slot)
+        && (mb_strlen($slot) > 60 || preg_match('/\b(?:please|contribute|if you|this program)\b/i', $slot));
+}
+
+/**
+ * Whether two values say the same thing. Numbers and ranges must match; a
+ * type or gender is the same when one's words hold the other's ("Christian
+ * Therapeutic Boarding School", "Therapeutic Boarding School") or it is a
+ * typo of it ("Therpeutic").
+ */
+function kop_wbf_value_same($path, $a, $b) {
+    if (is_array($a) || is_array($b) || is_numeric($a) || is_numeric($b)) return false;
+    $words = function ($s) {
+        $w = preg_split('/[^a-z0-9]+/', strtolower((string) $s), -1, PREG_SPLIT_NO_EMPTY);
+        return array_values(array_diff($w, array('and', 'the', 'of', 'for', 'a', 'an')));
+    };
+    $x = $words($a);
+    $y = $words($b);
+    if (!$x || !$y) return false;
+    if (!array_diff($x, $y) || !array_diff($y, $x)) return true;
+    $s = implode(' ', $x);
+    $t = implode(' ', $y);
+    return mb_strlen($s) >= 8 && mb_strlen($t) >= 8 && levenshtein($s, $t) <= 2;
 }
 
 /**
@@ -344,20 +458,12 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
                 if ($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) {
                     $before = array('role' => (string) ($s['role'] ?? ''), 'pastJobs' => (string) ($s['pastJobs'] ?? ''),
                         'source' => $s['source'] ?? null, 'sourceUrl' => $s['sourceUrl'] ?? null);
-                    if ($before['role'] !== '' && $before['pastJobs'] !== '') {
+                    list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
+                    if ($role === trim($before['role']) && $jobs === trim($before['pastJobs'])) {
                         throw new RuntimeException('Already on the record\'s staff list.');
                     }
-                    if ($before['role'] === '') {
-                        $s['role'] = $value['role'];
-                    }
-                    if ($before['pastJobs'] === '') {
-                        // Another role here, on an entry with no work history, is history, not a conflict: it joins the past jobs.
-                        $jobs = array_filter(array(trim((string) $value['pastJobs'])));
-                        if ($before['role'] !== '' && !kop_wbf_role_same($before['role'], $value['role'] ?? '')) {
-                            array_unshift($jobs, kop_wbf_role_job($value['role'], $doc));
-                        }
-                        $s['pastJobs'] = implode('; ', array_filter($jobs));
-                    }
+                    $s['role'] = $role;
+                    $s['pastJobs'] = $jobs;
                     if (empty($s['source'])) {
                         $s = array_merge($s, kop_wbf_source_ref($r));
                     }
@@ -399,8 +505,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
             throw new RuntimeException('"' . $value . '" is not one of the agreed facility types.');
         }
         $slot = &kop_wbf_ref($doc, $r['path']);
-        $empty = $slot === null || $slot === '' || (is_array($slot) && ($slot['min'] ?? null) === null && ($slot['max'] ?? null) === null);
-        if (!$empty) {
+        if (!kop_wbf_slot_empty($r['path'], $slot)) {
             throw new RuntimeException('The record already has ' . (is_array($slot) ? wp_json_encode($slot) : $slot) . ' there.');
         }
         $done['before'] = $slot;
@@ -476,8 +581,8 @@ function kop_wbf_conflict_parts(array $doc, array $r) {
     switch ($r['op']) {
         case 'set_if_empty':
             $slot = kop_wbf_get($doc, $r['path']);
-            if (kop_wbf_no_info($slot) || kop_wbf_no_info($value)) return null;
-            if ($same($slot, $value)) return null;
+            if (kop_wbf_slot_empty($r['path'], $slot) || kop_wbf_no_info($value)) return null;
+            if ($same($slot, $value) || kop_wbf_value_same($r['path'], $slot, $value)) return null;
             return array('what' => $what, 'record' => $show($slot), 'item' => $show($value),
                 'text' => 'The record has ' . $show($slot) . '; this says ' . $show($value) . '.', 'slot' => $r['path']);
         case 'set_closed':
@@ -494,21 +599,8 @@ function kop_wbf_conflict_parts(array $doc, array $r) {
             }
             return null;
         case 'add_staff':
-            $key = kop_wbf_person_key($value['name'] ?? '');
-            $role = trim((string) ($value['role'] ?? ''));
-            if ($key === '' || kop_wbf_no_info($role)) return null;
-            foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
-                foreach ((array) kop_wbf_get($doc, $path) as $s) {
-                    if (!is_array($s) || kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
-                    $have = trim((string) ($s['role'] ?? ''));
-                    // "Director (2006, Woodbury Reports)" and "director" are the same role.
-                    if (kop_wbf_role_same($have, $role)) return null;
-                    // An entry with no work history has nothing to disagree with: Add writes this role into its past jobs.
-                    if (trim((string) ($s['pastJobs'] ?? '')) === '') return null;
-                    return array('what' => 'staff', 'record' => $s['name'] . ': ' . $have, 'item' => $s['name'] . ': ' . $role,
-                        'text' => 'The record lists ' . $s['name'] . ' as ' . $have . '; this says ' . $role . '.', 'slot' => $path);
-                }
-            }
+            // A person's other role is their history, never a disagreement: Add keeps the record's role (replacing one that
+            // names no job) and puts the other into the past jobs (kop_wbf_staff_merge()).
             return null;
     }
     return null;
@@ -1018,12 +1110,12 @@ function kop_wbf_ya_panel(array $first) {
     $pdo = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
     $all = $pdo && kop_ya_ready($pdo) ? kop_ya_all($pdo, null) : array();
     $match = $pdo && $all ? (kop_ya_find_by_name($pdo, $first['program']) ?: kop_ya_find_by_name($pdo, $first['program_as_written'])) : null;
-    $html = '<div class="kop-wbf-other"><div class="kop-wbf-pick"><strong>Young adult program:</strong> <select class="kop-wbf-yaid"><option value="">Pick one...</option>';
+    $html = '<div class="kop-wbf-pick"><select class="kop-wbf-yaid" aria-label="Young adult program"><option value="">Pick a young adult program...</option>';
     foreach ($all as $p) {
         $html .= '<option value="' . (int) $p['id'] . '"' . ($match && (int) $match['id'] === (int) $p['id'] ? ' selected' : '') . '>'
             . esc_html($p['name'] . ($p['state'] !== '' ? ' (' . $p['state'] . ')' : '')) . '</option>';
     }
-    $html .= '</select> <button type="button" class="button button-primary" data-act="ya_apply">Add checked to that program</button></div>';
+    $html .= '</select> ' . kop_ak_button('Add checked to that program', 'primary', 'data-act="ya_apply"') . '</div>';
     $city = '';
     $state = $first['place'];
     if (preg_match('/^(.*?),\s*([A-Za-z .]+)$/', $first['place'], $m)) {
@@ -1033,14 +1125,14 @@ function kop_wbf_ya_panel(array $first) {
     $why = (string) $first['ya_why'];
     $ages = preg_match('/^Ages:\s*(.*)$/', $why, $m) ? $m[1] : '';
     $type = $why !== '' && !preg_match('/^(Ages|Name):/', $why) ? $why : '';
-    return $html . '<div class="kop-wbf-create"><strong>Not on the list yet? Create it:</strong><br>'
-        . '<label>Name <input type="text" class="kop-wbf-yname" value="' . esc_attr($first['program']) . '" style="width:260px"></label> '
-        . '<label>City <input type="text" class="kop-wbf-ycity" value="' . esc_attr($city) . '" style="width:140px"></label> '
-        . '<label>State <input type="text" class="kop-wbf-ystate" value="' . esc_attr($state) . '" style="width:90px"></label> '
-        . '<label>or country <input type="text" class="kop-wbf-ycountry" style="width:110px"></label> '
-        . '<label>Ages <input type="text" class="kop-wbf-yages" value="' . esc_attr($ages) . '" style="width:140px"></label> '
-        . '<label>Described as <input type="text" class="kop-wbf-ytype" value="' . esc_attr(mb_substr($type, 0, 255)) . '" style="width:260px"></label> '
-        . '<button type="button" class="button" data-act="ya_create">Create the young adult program and add checked</button></div></div>';
+    return $html . '<div class="kop-wbf-create"><strong>Not on the list yet? Create it:</strong><div class="kop-wbf-fields">'
+        . '<label class="kop-wbf-wide">Name <input type="text" class="kop-wbf-yname" value="' . esc_attr($first['program']) . '"></label>'
+        . '<label>City <input type="text" class="kop-wbf-ycity" value="' . esc_attr($city) . '"></label>'
+        . '<label>State <input type="text" class="kop-wbf-ystate" value="' . esc_attr($state) . '"></label>'
+        . '<label>or country <input type="text" class="kop-wbf-ycountry"></label>'
+        . '<label>Ages <input type="text" class="kop-wbf-yages" value="' . esc_attr($ages) . '"></label>'
+        . '<label class="kop-wbf-wide">Described as <input type="text" class="kop-wbf-ytype" value="' . esc_attr(mb_substr($type, 0, 255)) . '"></label>'
+        . '</div>' . kop_ak_button('Create the young adult program and add checked', 'secondary', 'data-act="ya_create"') . '</div>';
 }
 
 /** The kinds of record a card can create: a program, or what Woodbury wrote about that is not one. */
@@ -1691,9 +1783,9 @@ function kop_wbf_edit_form(array $r) {
         }
         $html .= '</label>';
     }
-    $html .= '<button type="button" class="button button-small kop-wbf-save">Save correction</button> ';
+    $html .= kop_ak_button('Save correction', 'secondary', '', 'kop-wbf-save') . ' ';
     if (isset($extra['original'])) {
-        $html .= '<button type="button" class="button-link kop-wbf-reset">Back to what Woodbury said</button> ';
+        $html .= kop_ak_button('Back to what Woodbury said', 'quiet', '', 'kop-wbf-reset') . ' ';
     }
     return $html . '<span class="kop-wbf-edit-msg" aria-live="polite"></span></div></details>';
 }
@@ -1777,7 +1869,7 @@ function kop_wbf_person_form(array $r) {
         . '<label>Past jobs <textarea data-f="pastJobs" rows="2"></textarea></label>'
         . '<label>List <select data-f="where"><option value="staff.notableStaff">Notable staff</option>'
         . '<option value="staff.administrator">Administrators</option></select></label>'
-        . '<button type="button" class="button button-small kop-wbf-addperson">Add to this card</button>'
+        . kop_ak_button('Add to this card', 'secondary', '', 'kop-wbf-addperson')
         . '<span class="kop-wbf-edit-msg" aria-live="polite"></span></div></details>';
 }
 
@@ -2015,40 +2107,43 @@ function kop_render_woodbury_facts_page() {
     $per = 20;
     $base = admin_url('admin.php?page=kop-woodbury-facts');
 
-    echo '<div class="wrap kop-wbf"><h1>Woodbury Facts</h1>';
+    $notices = '';
     if ($sync) {
-        echo '<div class="notice notice-info"><p>Loaded a new build: ' . (int) $sync['added'] . ' new, ' . (int) $sync['updated']
+        $notices .= '<div class="notice notice-info"><p>Loaded a new build: ' . (int) $sync['added'] . ' new, ' . (int) $sync['updated']
             . ' updated, ' . (int) $sync['gone'] . ' no longer proposed.</p></div>';
     }
     if (!is_readable(kop_wbf_path())) {
-        echo '<div class="notice notice-warning"><p>No facts uploaded yet. Run <code>python scripts/woodbury-facts.py</code> and copy '
+        $notices .= '<div class="notice notice-warning"><p>No facts uploaded yet. Run <code>python scripts/woodbury-facts.py</code> and copy '
             . '<code>facts.json</code> to <code>' . esc_html(dirname(kop_wbf_path())) . '</code>.</p></div>';
     }
-    echo '<p>Everything the Woodbury Reports newsletter (2006-2014) says about a program that its record does not have yet: '
-        . 'the people who worked there and where else they worked, incidents, when it opened or closed, past names, owners, moves, size and ages. '
-        . 'Each item shows the words it comes from and links to the page of the issue.</p>'
-        . '<ol class="kop-wbf-how"><li><strong>Read down a card.</strong> Items with a checked quote and a sure match start ticked. '
-        . 'Untick anything wrong.</li>'
-        . '<li><strong>Read wrong?</strong> Click <em>Edit</em> under the item to fix the name, role, year or text (or move a person between administrators and notable staff), '
-        . 'then <em>Save correction</em> and add it as usual. A corrected item is never added automatically, and a new scan does not overwrite it. '
-        . 'Something already added automatically: Undo it on the <em>Added automatically</em> tab, then edit it here.</li>'
-        . '<li><strong>The words name someone the item missed?</strong> Click <em>Another person in these words</em> under it, '
-        . 'give the name and role, and they join the card as a ticked item citing the same page.</li>'
-        . '<li><strong>Wrong program, or one with no record?</strong> Open <em>Wrong program?</em> under the card to put the checked items on another record, '
-        . 'or create a new record from the name and place Woodbury gives: a program, an educational consultant (firm or person) or a mental health provider. '
-        . 'A consultant or provider record gets the checked items in its notes.</li>'
-        . '<li><strong>A program for people 18 and older?</strong> Those are on the <em>Young adult programs (18+)</em> tab and never become facility records: '
-        . 'each card there creates or adds to a young adult program. A card on <em>Programs with no record</em> that is one: <em>It is a young adult program (18+)</em>.</li>'
-        . '<li><strong>Click <em>Add checked to record</em></strong> on the card, or <em>Add everything ticked on this page</em> at the top. '
-        . 'The facility page shows the additions at once, each citing the issue; new staff, past operators and past names reach the network map on its next build.</li>'
-        . '<li><strong>Changed your mind?</strong> The <em>Added</em> tab has Undo, which takes back exactly what was added.</li></ol>';
+    echo '<div class="wrap kop-ak kop-wbf">';
+    echo kop_ak_header('Woodbury Facts', array(
+        'lede' => 'Everything the Woodbury Reports newsletter (2006-2014) says about a program that its record does not have yet: '
+            . 'the people who worked there and where else they worked, incidents, when it opened or closed, past names, owners, moves, size and ages. '
+            . 'Each item shows the words it comes from and links to the page of the issue.',
+        'notices' => $notices,
+        'steps' => array(
+            '<strong>Read down a card.</strong> Items with a checked quote and a sure match start ticked. Untick anything wrong.',
+            '<strong>Read wrong?</strong> Click <em>Edit</em> under the item to fix the name, role, year or text (or move a person between administrators and notable staff), '
+                . 'then <em>Save correction</em> and add it as usual. A corrected item is never added automatically, and a new scan does not overwrite it. '
+                . 'Something already added automatically: Undo it on the <em>Added automatically</em> tab, then edit it here.',
+            '<strong>The words name someone the item missed?</strong> Click <em>Another person in these words</em> under it, '
+                . 'give the name and role, and they join the card as a ticked item citing the same page.',
+            '<strong>Wrong program, or one with no record?</strong> Open <em>Wrong program?</em> under the card to put the checked items on another record, '
+                . 'or create a new record from the name and place Woodbury gives: a program, an educational consultant (firm or person) or a mental health provider. '
+                . 'A consultant or provider record gets the checked items in its notes.',
+            '<strong>A program for people 18 and older?</strong> Those are on the <em>Young adult programs (18+)</em> tab and never become facility records: '
+                . 'each card there creates or adds to a young adult program. A card on <em>Programs with no record</em> that is one: <em>More</em> &gt; <em>It is a young adult program (18+)</em>.',
+            '<strong>Click <em>Add checked to record</em></strong> on the card, or <em>Add everything ticked on this page</em> at the top. '
+                . 'The facility page shows the additions at once, each citing the issue; new staff, past operators and past names reach the network map on its next build.',
+            '<strong>Changed your mind?</strong> <em>Undo</em> shows beside the result of every action, and the <em>Added</em> tab has Undo too: it takes back exactly what was added.',
+        ),
+    ));
     $auto_done = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_wbf_table() . " WHERE status = 'applied' AND reviewed_by = 'auto'");
-    echo '<div class="notice notice-info inline"><p><strong>Exact-name items are added for you.</strong> '
-        . 'When the program is exactly the name of one record (or a past name of it), the quote is found and nothing on the record is in the way, '
-        . 'the item goes into the record without a click, whatever the source. Close names, other possible records, conflicts and programs with no record wait for you. '
-        . number_format($auto_done) . ' added automatically so far' . ($auto_now ? ' (' . (int) $auto_now . ' just now)' : '')
+    echo kop_ak_status('<strong>Exact-name items are added for you</strong> when the program is exactly one record\'s name (or past name), the quote is found '
+        . 'and nothing on the record is in the way: ' . number_format($auto_done) . ' so far' . ($auto_now ? ' (' . (int) $auto_now . ' just now)' : '')
         . ($auto_left ? ', ' . number_format($auto_left) . ' more being added in the background' : '')
-        . '. Check or undo them on the <em>Added automatically</em> tab; anything you undo stays manual.</p></div>';
+        . '. Close names, other possible records, conflicts and programs with no record wait for you. Anything you undo on <em>Added automatically</em> stays manual.');
 
     $where = $tabs[$tab]['where'];
     if ($grp !== '') {
@@ -2059,24 +2154,15 @@ function kop_render_woodbury_facts_page() {
         $where .= $wpdb->prepare(' AND (program LIKE %s OR program_as_written LIKE %s OR label LIKE %s)', $like, $like, $like);
     }
 
-    echo '<ul class="subsubsub">';
-    $i = 0;
+    $tab_items = array();
     foreach ($tabs as $k => $t) {
-        $n = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . $t['where']);
-        echo '<li><a href="' . esc_url(add_query_arg(array('wbf_tab' => $k), $base)) . '"' . ($tab === $k ? ' class="current"' : '') . '>'
-            . esc_html($t['label']) . ' <span class="count">(' . $n . ')</span></a>' . (++$i < count($tabs) ? ' | ' : '') . '</li>';
+        $tab_items[$k] = array('label' => $t['label'], 'count' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . $t['where']));
     }
-    echo '</ul><div style="clear:both"></div>';
-
-    echo '<form method="get" class="kop-wbf-filter"><input type="hidden" name="page" value="kop-woodbury-facts">'
-        . '<input type="hidden" name="wbf_tab" value="' . esc_attr($tab) . '">'
-        . '<input type="search" name="wbf_q" value="' . esc_attr($q) . '" placeholder="Program or person" style="width:240px"> '
-        . '<select name="wbf_grp"><option value="">Every kind</option>';
-    foreach ($groups as $k => $label) {
-        echo '<option value="' . esc_attr($k) . '"' . selected($grp, $k, false) . '>' . esc_html($label) . '</option>';
-    }
-    echo '</select> <button class="button">Show</button>'
-        . ($q !== '' || $grp !== '' ? ' <a href="' . esc_url(add_query_arg('wbf_tab', $tab, $base)) . '">Clear</a>' : '') . '</form>';
+    echo kop_ak_tabs($tab_items, $tab, function ($k) use ($base) { return add_query_arg('wbf_tab', $k, $base); });
+    echo kop_ak_filters(array('page' => 'kop-woodbury-facts', 'wbf_tab' => $tab), array(
+        array('type' => 'search', 'name' => 'wbf_q', 'value' => $q, 'placeholder' => 'Program or person', 'label' => 'Search'),
+        array('type' => 'select', 'name' => 'wbf_grp', 'value' => $grp, 'label' => 'Kind', 'all' => 'Every kind', 'options' => $groups),
+    ), add_query_arg('wbf_tab', $tab, $base));
 
     // Items filed on a consultant or provider record have no facility: one card per program.
     $card_col = in_array($tab, array('norecord', 'youngadult', 'consultants'), true) ? 'program'
@@ -2086,7 +2172,9 @@ function kop_render_woodbury_facts_page() {
     $cards = $wpdb->get_col("SELECT {$card_col} FROM {$table} WHERE {$where} GROUP BY {$card_col} ORDER BY {$order} LIMIT "
         . (($paged - 1) * $per) . ", {$per}");
     if (!$cards) {
-        echo '<p>Nothing here.</p></div>';
+        echo kop_ak_empty('Nothing here' . ($q !== '' || $grp !== '' ? ' under these filters.' : '.'));
+        kop_wbf_render_assets();
+        echo '</div>';
         return;
     }
     $in = implode(',', array_fill(0, count($cards), '%s'));
@@ -2103,12 +2191,9 @@ function kop_render_woodbury_facts_page() {
             . 'never a facility record. The build puts a program here when Woodbury gives its ages as 17 or older or calls it a young adult program; '
             . 'anything else can be moved here from <em>Programs with no record</em>, and back.</p></div>';
     }
-    $pending = in_array($tab, array('records', 'norecord', 'youngadult', 'consultants'), true);
-    echo '<div class="kop-wbf-bar">';
     if ($tab === 'records') {
-        echo '<button type="button" class="button button-primary kop-wbf-all">Add everything ticked on this page</button> ';
+        echo kop_ak_bar(kop_ak_button('Add everything ticked on this page', 'primary', 'data-kop-ak-all="apply"'));
     }
-    echo '<span class="kop-wbf-progress" aria-live="polite"></span></div>';
 
     foreach ($cards as $c) {
         if (!empty($by[(string) $c])) {
@@ -2116,15 +2201,10 @@ function kop_render_woodbury_facts_page() {
         }
     }
 
-    $pages = (int) ceil($total / $per);
-    if ($pages > 1) {
-        echo '<p class="kop-wbf-pager">Page ' . $paged . ' of ' . $pages . ' (' . $total . ' ' . (in_array($tab, array('norecord', 'youngadult'), true) ? 'programs' : 'facilities') . ') &middot; ';
-        for ($n = 1; $n <= $pages; $n++) {
-            $url = add_query_arg(array('wbf_tab' => $tab, 'wbf_page' => $n, 'wbf_q' => $q !== '' ? $q : null, 'wbf_grp' => $grp !== '' ? $grp : null), $base);
-            echo $n === $paged ? '<strong>' . $n . '</strong> ' : '<a href="' . esc_url($url) . '">' . $n . '</a> ';
-        }
-        echo '</p>';
-    }
+    echo kop_ak_pager($paged, (int) ceil($total / $per), $total, in_array($tab, array('norecord', 'youngadult', 'consultants'), true) ? 'programs' : 'facilities',
+        function ($p) use ($base, $tab, $q, $grp) {
+            return add_query_arg(array('wbf_tab' => $tab, 'wbf_page' => $p, 'wbf_q' => $q !== '' ? $q : null, 'wbf_grp' => $grp !== '' ? $grp : null), $base);
+        });
     kop_wbf_render_assets();
     echo '</div>';
 }
@@ -2135,16 +2215,19 @@ function kop_render_woodbury_facts_page() {
  * from the name and place Woodbury gives.
  */
 function kop_wbf_other_record(array $first, $no_record) {
-    $html = '<div class="kop-wbf-pick"><strong>' . ($no_record ? 'Which record is it?' : 'Another record:') . '</strong> ';
+    $html = '<div class="kop-wbf-pick">';
+    $alts = '';
     foreach (array_slice(json_decode((string) $first['alternatives'], true) ?: array(), 0, 3) as $a) {
         if ((int) $a['id'] === (int) $first['facility_id']) {
             continue;
         }
-        $html .= '<button type="button" class="button button-small kop-wbf-alt" data-fid="' . (int) $a['id'] . '">'
-            . esc_html($a['name'] . ($a['state'] ? ' (' . $a['state'] . ')' : '')) . '</button> ';
+        $alts .= kop_ak_button($a['name'] . ($a['state'] ? ' (' . $a['state'] . ')' : ''), 'quiet', 'data-fid="' . (int) $a['id'] . '"', 'kop-wbf-alt');
     }
-    $html .= kop_facility_finder_field('', '', ' class="kop-wbf-fid"')
-        . ' <button type="button" class="button button-primary" data-act="apply">Add checked to that record</button></div>';
+    if ($alts !== '') {
+        $html .= '<div class="kop-wbf-alts"><span class="kop-ak-muted">Close names:</span> ' . $alts . '</div>';
+    }
+    $html .= kop_facility_finder_field('', '', ' class="kop-ak-fid"') . ' '
+        . kop_ak_button('Add checked to that record', 'primary', 'data-act="apply" data-other="1"') . '</div>';
     $state = '';
     $city = '';
     if (preg_match('/^(.*?),\s*([A-Za-z .]+)$/', $first['place'], $m)) {
@@ -2162,16 +2245,18 @@ function kop_wbf_other_record(array $first, $no_record) {
     foreach (kop_wbf_create_kinds() as $k => $label) {
         $kinds .= '<option value="' . esc_attr($k) . '">' . esc_html($label) . '</option>';
     }
-    return $html . '<div class="kop-wbf-create"><strong>No record yet? Create one:</strong><br>'
-        . '<label>What is it? <select class="kop-wbf-ckind">' . $kinds . '</select></label> '
-        . '<label>Name <input type="text" class="kop-wbf-cname" value="' . esc_attr($name) . '" style="width:260px"></label> '
-        . '<label>City <input type="text" class="kop-wbf-ccity" value="' . esc_attr($city) . '" style="width:140px"></label> '
-        . '<label>State <input type="text" class="kop-wbf-cstate" value="' . esc_attr($state) . '" style="width:90px"></label> '
-        . '<label>or country <input type="text" class="kop-wbf-ccountry" style="width:110px"></label> '
-        . '<span class="kop-wbf-conly"><select class="kop-wbf-ctype" aria-label="Type">' . $types . '</select> '
-        . '<label><input type="checkbox" class="kop-wbf-cforce"> It is a different place from a close match</label></span> '
-        . '<button type="button" class="button" data-act="create">Create the record and add checked</button>'
-        . '<div class="kop-wbf-muted kop-wbf-cnote" hidden>A consultant or provider record gets the checked items in its notes, each citing its issue page. '
+    return $html . '<div class="kop-wbf-create"><strong>No record yet? Create one:</strong>'
+        . '<div class="kop-wbf-fields">'
+        . '<label>What is it? <select class="kop-wbf-ckind">' . $kinds . '</select></label>'
+        . '<label class="kop-wbf-wide">Name <input type="text" class="kop-wbf-cname" value="' . esc_attr($name) . '"></label>'
+        . '<label>City <input type="text" class="kop-wbf-ccity" value="' . esc_attr($city) . '"></label>'
+        . '<label>State <input type="text" class="kop-wbf-cstate" value="' . esc_attr($state) . '"></label>'
+        . '<label>or country <input type="text" class="kop-wbf-ccountry"></label>'
+        . '<span class="kop-wbf-conly"><label>Type <select class="kop-wbf-ctype">' . $types . '</select></label>'
+        . '<label class="kop-wbf-tick"><input type="checkbox" class="kop-wbf-cforce"> It is a different place from a close match</label></span>'
+        . '</div>'
+        . kop_ak_button('Create the record and add checked', 'secondary', 'data-act="create"')
+        . '<div class="kop-ak-muted kop-wbf-cnote" hidden>A consultant or provider record gets the checked items in its notes, each citing its issue page. '
         . 'Its Woodbury pages can be filed under it at KOP Tools &gt; Woodbury Reports.</div></div>';
 }
 
@@ -2179,27 +2264,33 @@ function kop_wbf_render_card(array $rows, $tab) {
     $first = $rows[0];
     $pending = in_array($tab, array('records', 'norecord', 'youngadult', 'consultants'), true);
     $fid = in_array($tab, array('applied', 'auto'), true) ? (int) $first['applied_fid'] : (int) $first['facility_id'];
-    echo '<div class="kop-wbf-card" data-fid="' . $fid . '">';
-    echo '<div class="kop-wbf-head">';
+    echo '<section class="kop-ak-card kop-wbf-card" data-fid="' . $fid . '">';
+    $sub = array();
     if ($fid) {
-        $label = function_exists('kop_facility_finder_label') && function_exists('kop_closure_pdo') && kop_closure_pdo()
+        $title = function_exists('kop_facility_finder_label') && function_exists('kop_closure_pdo') && kop_closure_pdo()
             ? kop_facility_finder_label(kop_closure_pdo(), $fid) : esc_html($first['program']);
-        echo '<h2>' . $label . '</h2>';
+        $page = function_exists('kop_facility_page_url') ? kop_facility_page_url($fid) : '';
+        if ($page) {
+            $sub[] = '<a href="' . esc_url($page) . '" target="_blank" rel="noopener">Facility page</a>';
+        }
         if ($first['match_kind'] !== 'exact' && $pending) {
-            echo '<div class="kop-wbf-warn">Woodbury calls it &ldquo;' . esc_html($first['program_as_written'])
+            $sub[] = '<span class="kop-ak-warn">Woodbury calls it &ldquo;' . esc_html($first['program_as_written'])
                 . ($first['place'] !== '' ? ', ' . esc_html($first['place']) : '') . '&rdquo;. '
-                . esc_html($first['match_note'] ?: 'Close name: check it is the same program.') . ' Items start unticked.</div>';
+                . esc_html($first['match_note'] ?: 'Close name: check it is the same program.') . ' Items start unticked.</span>';
         }
     } else {
-        echo '<h2>' . esc_html($first['program']) . ($first['place'] !== '' ? ' <span class="kop-wbf-muted">' . esc_html($first['place']) . '</span>' : '') . '</h2>';
+        $title = esc_html($first['program']);
+        if ($first['place'] !== '') {
+            $sub[] = esc_html($first['place']);
+        }
         if ($tab === 'youngadult' && $first['ya_why'] !== '') {
-            echo '<div class="kop-wbf-muted">Why it is here: ' . esc_html($first['ya_why']) . '</div>';
+            $sub[] = 'Why it is here: ' . esc_html($first['ya_why']);
         } elseif ($tab === 'norecord' && (string) $first['match_note'] !== '') {
             // A record that became a parent company (inc/record-to-company.php) says so.
-            echo '<div class="kop-wbf-warn">' . esc_html($first['match_note']) . '</div>';
+            $sub[] = '<span class="kop-ak-warn">' . esc_html($first['match_note']) . '</span>';
         }
     }
-    echo '</div>';
+    echo kop_ak_card_head($title, implode('<br>', $sub));
 
     echo '<table class="widefat kop-wbf-table"><tbody>';
     $groups = kop_wbf_groups();
@@ -2213,64 +2304,61 @@ function kop_wbf_render_card(array $rows, $tab) {
     }
     echo '</tbody></table>';
 
-    echo '<div class="kop-wbf-actions">';
     if ($tab === 'records') {
-        echo '<button type="button" class="button button-primary" data-act="apply">Add checked to record</button> '
-            . '<button type="button" class="button" data-act="reject">Reject checked</button>'
-            . '<details class="kop-wbf-other"><summary>Wrong program? Put the checked items on another record, or create a new program, '
-            . 'educational consultant or mental health provider record</summary>'
-            . kop_wbf_other_record($first, false) . '</details>';
+        $buttons = kop_ak_button('Add checked to record', 'primary', 'data-act="apply"')
+            . kop_ak_button('Reject checked', 'danger', 'data-act="reject"')
+            . kop_ak_fold('Wrong program? Put the checked items on another record, or create a new program, educational consultant or mental health provider record',
+                kop_wbf_other_record($first, false));
     } elseif ($tab === 'consultants') {
         $v = kop_wbf_row_value($first);
-        echo '<button type="button" class="button button-primary" data-act="consultant">Flag as former industry staff</button> '
-            . '<button type="button" class="button" data-act="reject">Reject</button>'
-            . '<div class="kop-wbf-muted">' . (!empty($v['referrer_id'])
+        $buttons = kop_ak_button('Flag as former industry staff', 'primary', 'data-act="consultant"')
+            . kop_ak_button('Reject', 'danger', 'data-act="reject"')
+            . '<div class="kop-ak-muted kop-wbf-note">' . (!empty($v['referrer_id'])
                 ? 'Adds these jobs to the Career History on the consultant record ' . esc_html($v['referrer_name']) . '.'
                 : 'No consultant record yet: flagging creates one (filed under Educational Consultants) with this Career History.') . '</div>';
     } elseif ($tab === 'norecord') {
-        echo '<div class="kop-wbf-other">' . kop_wbf_other_record($first, true) . '</div>'
-            . '<button type="button" class="button" data-act="reject">Reject checked</button> '
-            . '<button type="button" class="button" data-act="ya_on">It is a young adult program (18+)</button>';
+        $buttons = kop_ak_fold('Which record is it? Pick one or create it', kop_wbf_other_record($first, true), true)
+            . kop_ak_button('Reject checked', 'danger', 'data-act="reject"')
+            . kop_ak_more(array(kop_ak_button('It is a young adult program (18+)', 'quiet', 'data-act="ya_on"')));
     } elseif ($tab === 'youngadult') {
-        echo kop_wbf_ya_panel($first)
-            . '<button type="button" class="button" data-act="reject">Reject checked</button> '
-            . '<button type="button" class="button" data-act="ya_off">Not a young adult program: move it back</button>';
+        $buttons = kop_ak_fold('Which young adult program? Pick one or create it', kop_wbf_ya_panel($first), true)
+            . kop_ak_button('Reject checked', 'danger', 'data-act="reject"')
+            . kop_ak_more(array(kop_ak_button('Not a young adult program: move it back', 'quiet', 'data-act="ya_off"')));
     } elseif (in_array($tab, array('applied', 'auto'), true)) {
-        echo '<button type="button" class="button" data-act="undo">Undo checked</button>';
+        $buttons = kop_ak_button('Undo checked', 'secondary', 'data-act="undo"');
     } else {
-        echo '<button type="button" class="button" data-act="undo">Put checked back to review</button>';
+        $buttons = kop_ak_button('Put checked back to review', 'secondary', 'data-act="undo"');
     }
-    echo ' <span class="kop-wbf-result" aria-live="polite"></span></div>';
-    echo '</div>';
+    echo kop_ak_card_actions($buttons);
+    echo '</section>';
 }
 
 function kop_wbf_render_row(array $r, $tab) {
     $pending = in_array($tab, array('records', 'norecord', 'youngadult', 'consultants'), true);
     $checked = $pending ? ($r['preselect'] && in_array($tab, array('records', 'consultants'), true)) : false;
     $extra = json_decode((string) $r['extra'], true) ?: array();
-    echo '<tr data-key="' . esc_attr($r['pkey']) . '">';
-    echo '<td class="kop-wbf-check"><input type="checkbox" class="kop-wbf-pick"' . ($checked ? ' checked' : '') . ' aria-label="Select"></td>';
+    echo '<tr data-key="' . esc_attr($r['pkey']) . '">' . kop_ak_pick($checked);
     echo '<td class="kop-wbf-what"><strong class="kop-wbf-label">' . esc_html($r['label']) . '</strong>'
-        . '<div class="kop-wbf-muted">Goes to: <span class="kop-wbf-goes">' . esc_html(kop_wbf_where_it_goes($r)) . '</span></div>';
+        . '<div class="kop-ak-muted">Goes to: <span class="kop-wbf-goes">' . esc_html(kop_wbf_where_it_goes($r)) . '</span></div>';
     if ($r['status'] === 'pending') {
         echo kop_wbf_edit_form($r) . kop_wbf_person_form($r);
     }
     if ($r['status'] === 'applied' && kop_wbf_filed_on($r) !== '') {
         $done = json_decode((string) $r['applied'], true);
-        echo '<div class="kop-wbf-muted">' . (($done['filed'] ?? '') === 'young_adult' ? 'Added to ' : 'Filed in the notes of ')
+        echo '<div class="kop-ak-muted">' . (($done['filed'] ?? '') === 'young_adult' ? 'Added to ' : 'Filed in the notes of ')
             . esc_html(kop_wbf_filed_on($r)) . '</div>';
     }
     if (!empty($extra['manual'])) {
-        echo '<div class="kop-wbf-muted">Added by hand by ' . esc_html($extra['edited_by'] ?? '') . '</div>';
+        echo '<div class="kop-ak-muted">Added by hand by ' . esc_html($extra['edited_by'] ?? '') . '</div>';
     }
     if ($r['conflict'] !== '') {
-        echo '<div class="kop-wbf-warn">' . esc_html($r['conflict']) . '</div>';
+        echo '<div class="kop-ak-warn">' . esc_html($r['conflict']) . '</div>';
     }
     if ($r['current_val'] !== '') {
-        echo '<div class="kop-wbf-muted">On the record now: ' . esc_html($r['current_val']) . '</div>';
+        echo '<div class="kop-ak-muted">On the record now: ' . esc_html($r['current_val']) . '</div>';
     }
     if (!empty($extra['career']) && count($extra['career']) > 1) {
-        echo '<div class="kop-wbf-career"><span class="kop-wbf-muted">Where Woodbury places ' . esc_html($extra['person'] ?? 'them') . ':</span><ul>';
+        echo '<div class="kop-wbf-career"><span class="kop-ak-muted">Where Woodbury places ' . esc_html($extra['person'] ?? 'them') . ':</span><ul>';
         foreach ($extra['career'] as $line) {
             echo '<li>' . esc_html($line) . '</li>';
         }
@@ -2279,155 +2367,124 @@ function kop_wbf_render_row(array $r, $tab) {
     if ($r['status'] === 'rejected') {
         $why = json_decode((string) $r['applied'], true);
         if (!empty($why['reason'])) {
-            echo '<div class="kop-wbf-muted">Skipped: ' . esc_html($why['reason']) . '</div>';
+            echo '<div class="kop-ak-muted">Skipped: ' . esc_html($why['reason']) . '</div>';
         }
     }
     echo '</td><td class="kop-wbf-ev">';
     $ev = kop_wbf_evidence($r);
-    foreach (array_slice($ev, 0, 3) as $e) {
-        echo '<div class="kop-wbf-src"><a href="' . esc_url($e['url']) . '" target="_blank" rel="noopener">' . esc_html(kop_wbf_ev_label($e)) . '</a>';
+    $source = function ($e, $warn) {
+        $html = '<div class="kop-wbf-src"><a href="' . esc_url($e['url']) . '" target="_blank" rel="noopener">' . esc_html(kop_wbf_ev_label($e)) . '</a>';
         if ($e['quote'] !== '') {
-            echo '<blockquote class="' . ($e['found'] ? '' : 'kop-wbf-unfound') . '">' . esc_html($e['quote']) . '</blockquote>';
+            $html .= '<blockquote class="kop-ak-quote' . ($e['found'] ? '' : ' is-unfound') . '">' . esc_html($e['quote']) . '</blockquote>';
         }
-        if (!$e['found']) {
-            echo '<div class="kop-wbf-warn">These words were not found in the ' . (!empty($e['pub']) ? 'archived page' : 'issue text') . ': check the page before adding.</div>';
+        if ($warn && !$e['found']) {
+            $html .= '<div class="kop-ak-warn">These words were not found in the ' . (!empty($e['pub']) ? 'archived page' : 'issue text') . ': check the page before adding.</div>';
         }
-        echo '</div>';
+        return $html . '</div>';
+    };
+    foreach (array_slice($ev, 0, 3) as $e) {
+        echo $source($e, true);
     }
     if (count($ev) > 3) {
-        echo '<details><summary>' . (count($ev) - 3) . ' more</summary>';
-        foreach (array_slice($ev, 3) as $e) {
-            echo '<div class="kop-wbf-src"><a href="' . esc_url($e['url']) . '" target="_blank" rel="noopener">' . esc_html(kop_wbf_ev_label($e)) . '</a>'
-                . ($e['quote'] !== '' ? '<blockquote>' . esc_html($e['quote']) . '</blockquote>' : '') . '</div>';
-        }
-        echo '</details>';
+        echo kop_ak_fold((count($ev) - 3) . ' more', implode('', array_map(function ($e) use ($source) { return $source($e, false); }, array_slice($ev, 3))));
     }
     echo '</td></tr>';
 }
 
+/** What only Woodbury Facts needs on top of the kit: its actions' extra fields, Edit, Another person, the close-name picks. */
 function kop_wbf_render_assets() {
     $nonce = wp_create_nonce('kop_woodbury_facts');
     ?>
     <style>
-        .kop-wbf-how { margin-left: 20px; max-width: 900px; }
-        .kop-wbf-filter { margin: 8px 0 12px; }
-        .kop-wbf-bar { position: sticky; top: 32px; z-index: 5; background: #f0f0f1; padding: 8px 0; }
-        .kop-wbf-card { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #33A7B5; margin: 0 0 18px; padding: 10px 14px; max-width: 1400px; }
-        .kop-wbf-card.kop-wbf-done { border-left-color: #B2E102; opacity: .75; }
-        .kop-wbf-head h2 { margin: 4px 0 6px; font-size: 1.25em; }
-        .kop-wbf-table td { vertical-align: top; }
-        .kop-wbf-grp th { background: #F2EEDF; font-weight: 600; padding: 4px 8px; }
-        .kop-wbf-check { width: 28px; }
+        .kop-wbf-grp th { background: var(--kop-sand, #F2EEDF); color: var(--kop-midnight-blue, #000435); font-weight: 600; padding: 4px 8px; }
         .kop-wbf-what { width: 40%; }
-        .kop-wbf-ev blockquote { margin: 2px 0 6px; padding-left: 8px; border-left: 3px solid #33A7B5; color: #1d2327; }
-        .kop-wbf-ev blockquote.kop-wbf-unfound { border-left-color: #d63638; }
-        .kop-wbf-muted { color: #646970; font-size: 12px; }
-        .kop-wbf-warn { color: #9a4a00; font-size: 12px; margin-top: 2px; }
         .kop-wbf-career ul { margin: 2px 0 0 18px; list-style: disc; font-size: 12px; }
-        .kop-wbf-actions { margin-top: 8px; }
-        .kop-wbf-pick, .kop-wbf-create { margin-bottom: 6px; }
-        .kop-wbf-create label { margin-right: 6px; }
-        .kop-wbf-other { margin: 8px 0 6px; }
-        .kop-wbf-other > summary { cursor: pointer; color: #2271b1; }
-        details.kop-wbf-other[open] { padding: 8px; background: #f6f7f7; border: 1px solid #dcdcde; }
-        .kop-wbf-other .kop-wbf-create { margin-top: 8px; }
-        .kop-wbf-result.ok { color: #007017; }
-        .kop-wbf-result.err { color: #d63638; }
-        tr.kop-wbf-gone td { opacity: .45; }
+        .kop-wbf-alts { margin-bottom: 8px; }
+        .kop-wbf-pick { margin-bottom: 10px; }
+        .kop-wbf-create { padding-top: 10px; border-top: 1px solid #dcdcde; }
+        .kop-wbf-fields { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0 8px; }
+        .kop-wbf-fields label { display: flex; flex-direction: column; font-size: 12px; color: var(--kop-text-muted, #4A5568); min-width: 0; }
+        .kop-wbf-fields label.kop-wbf-wide { flex: 1 1 260px; }
+        .kop-wbf-fields label.kop-wbf-tick { flex-direction: row; align-items: center; gap: 4px; }
+        .kop-wbf-fields input[type=text], .kop-wbf-fields select { max-width: 100%; }
+        .kop-wbf-conly { display: contents; }
+        .kop-wbf-conly[hidden] { display: none; }
+        .kop-wbf-note { flex-basis: 100%; }
         .kop-wbf-edit { margin-top: 4px; }
-        .kop-wbf-edit summary { cursor: pointer; color: #2271b1; font-size: 12px; }
+        .kop-wbf-edit summary { cursor: pointer; color: var(--kop-navy, #000080); font-size: 12px; }
         .kop-wbf-edit-box { margin-top: 4px; padding: 8px; background: #f6f7f7; border: 1px solid #dcdcde; }
-        .kop-wbf-edit-box label { display: block; margin: 0 0 6px; font-size: 12px; color: #50575e; }
+        .kop-wbf-edit-box label { display: block; margin: 0 0 6px; font-size: 12px; color: var(--kop-text-muted, #4A5568); }
         .kop-wbf-edit-box input, .kop-wbf-edit-box textarea, .kop-wbf-edit-box select { display: block; width: 100%; max-width: 100%; }
         .kop-wbf-edit-msg { font-size: 12px; margin-left: 6px; }
         .kop-wbf-edit-msg.ok { color: #007017; }
-        .kop-wbf-edit-msg.err { color: #d63638; }
+        .kop-wbf-edit-msg.err { color: #b32d2e; }
+        @media (max-width: 782px) { .kop-wbf-fields label { flex: 1 1 100%; } }
     </style>
     <script>
     (function () {
+        if (!window.KOPAdminKit) return;
         var ajax = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>;
         var nonce = <?php echo wp_json_encode($nonce); ?>;
+        var to = function (n, d) { return d && d.label ? ' to ' + d.label + '.' : '.'; };
 
-        function post(data) {
+        KOPAdminKit.cards({
+            action: 'kop_wbf_act',
+            nonce: nonce,
+            // Moving a card on or off the young adult tab takes all of it, ticked or not.
+            whole: ['ya_on', 'ya_off'],
+            undoable: ['apply', 'create', 'reject', 'consultant', 'ya_apply', 'ya_create'],
+            words: {
+                apply: function (n, d) { return 'Added ' + n + to(n, d); },
+                create: function (n, d) { return 'Created the record and added ' + n + to(n, d); },
+                ya_apply: function (n, d) { return 'Added ' + n + to(n, d); },
+                ya_create: function (n, d) { return 'Created and added ' + n + to(n, d); },
+                reject: function (n) { return 'Rejected ' + n + '.'; },
+                consultant: function () { return 'Flagged as former industry staff; the jobs are in their Career History on the consultants directory.'; },
+                ya_on: function () { return 'Moved to Young adult programs (18+).'; },
+                ya_off: function () { return 'Moved back to Programs with no record.'; }
+            },
+            before: function (card, act, btn, data) {
+                var v = function (cls) { var el = card.querySelector(cls); return el ? el.value : ''; };
+                if (act === 'apply' && !(+data.fid)) return 'Pick the record first.';
+                if (act === 'create') {
+                    data.name = v('.kop-wbf-cname'); data.city = v('.kop-wbf-ccity'); data.state = v('.kop-wbf-cstate');
+                    data.country = v('.kop-wbf-ccountry'); data.type = v('.kop-wbf-ctype'); data.kind = v('.kop-wbf-ckind');
+                    var force = card.querySelector('.kop-wbf-cforce');
+                    data.force = force && force.checked ? 1 : '';
+                }
+                if (act === 'ya_apply') {
+                    data.ya = v('.kop-wbf-yaid');
+                    if (!(+data.ya)) return 'Pick the young adult program first.';
+                }
+                if (act === 'ya_create') {
+                    ['name', 'city', 'state', 'country', 'ages', 'type'].forEach(function (k) { data[k === 'type' ? 'program_type' : k] = v('.kop-wbf-y' + k); });
+                }
+                return '';
+            }
+        });
+
+        function send(action, fields) {
             var body = new URLSearchParams();
-            body.append('action', 'kop_wbf_act');
+            body.append('action', action);
             body.append('nonce', nonce);
-            Object.keys(data).forEach(function (k) {
-                if (Array.isArray(data[k])) data[k].forEach(function (v) { body.append(k + '[]', v); });
-                else if (data[k] !== undefined && data[k] !== null) body.append(k, data[k]);
-            });
+            Object.keys(fields).forEach(function (k) { body.append(k, fields[k]); });
             return fetch(ajax, { method: 'POST', credentials: 'same-origin', body: body }).then(function (r) { return r.json(); });
         }
 
-        function run(card, act, btn) {
-            // Moving a card on or off the young adult tab takes all of it, ticked or not.
-            var whole = act === 'ya_on' || act === 'ya_off';
-            var keys = Array.prototype.map.call(card.querySelectorAll('tr[data-key]'), function (tr) {
-                return (whole || tr.querySelector('.kop-wbf-pick').checked) && !tr.classList.contains('kop-wbf-gone') ? tr.dataset.key : null;
-            }).filter(Boolean);
-            var out = card.querySelector('.kop-wbf-result');
-            if (!keys.length) { out.className = 'kop-wbf-result err'; out.textContent = 'Tick at least one item.'; return Promise.resolve(); }
-            var data = { act: act, keys: keys, fid: card.dataset.fid || '' };
-            // The finder only counts for the button beside it, never for the card's own "Add checked to record".
-            var other = btn && btn.closest('.kop-wbf-other');
-            var box = other && card.querySelector('.kop-wbf-fid');
-            if (other && act === 'apply') data.fid = box && box.value ? box.value : '';
-            if (act === 'apply' && !(+data.fid)) { out.className = 'kop-wbf-result err'; out.textContent = 'Pick the record first.'; return Promise.resolve(); }
-            if (act === 'create') {
-                data.name = card.querySelector('.kop-wbf-cname').value;
-                data.city = card.querySelector('.kop-wbf-ccity').value;
-                data.state = card.querySelector('.kop-wbf-cstate').value;
-                data.country = card.querySelector('.kop-wbf-ccountry').value;
-                data.type = card.querySelector('.kop-wbf-ctype').value;
-                data.kind = card.querySelector('.kop-wbf-ckind').value;
-                data.force = card.querySelector('.kop-wbf-cforce').checked ? 1 : '';
-            }
-            if (act === 'ya_apply') {
-                data.ya = card.querySelector('.kop-wbf-yaid').value;
-                if (!(+data.ya)) { out.className = 'kop-wbf-result err'; out.textContent = 'Pick the young adult program first.'; return Promise.resolve(); }
-            }
-            if (act === 'ya_create') {
-                ['name', 'city', 'state', 'country', 'ages', 'type'].forEach(function (k) {
-                    data[k === 'type' ? 'program_type' : k] = card.querySelector('.kop-wbf-y' + k).value;
-                });
-            }
-            out.className = 'kop-wbf-result'; out.textContent = 'Working...';
-            return post(data).then(function (res) {
-                if (!res.success) { out.className = 'kop-wbf-result err'; out.textContent = res.data || 'Failed.'; return; }
-                var ok = 0, skipped = [];
-                Object.keys(res.data.results || {}).forEach(function (k) {
-                    var r = res.data.results[k];
-                    var tr = card.querySelector('tr[data-key="' + k + '"]');
-                    if (r.ok) { ok++; if (tr) tr.classList.add('kop-wbf-gone'); }
-                    else { skipped.push(r.error); if (tr) tr.classList.add('kop-wbf-gone'); }
-                });
-                var words = { apply: 'Added ' + ok + ' to ', create: 'Created the record and added ' + ok + ' to ', reject: 'Rejected ' + ok + '.', undo: 'Undone: ' + ok + '.',
-                    ya_apply: 'Added ' + ok + ' to ', ya_create: 'Created and added ' + ok + ' to ',
-                    ya_on: 'Moved to Young adult programs (18+).', ya_off: 'Moved back to Programs with no record.',
-                    consultant: 'Flagged as former industry staff; the jobs are in their Career History on the consultants directory.' }[act];
-                if (act === 'consultant' || act === 'ya_on' || act === 'ya_off') res.data.label = '';
-                out.className = 'kop-wbf-result ok';
-                out.textContent = words + (res.data.label ? res.data.label + '.' : '') + (skipped.length ? ' ' + skipped.length + ' already on the record, skipped.' : '');
-                if (res.data.url) {
-                    var a = document.createElement('a'); a.href = res.data.url; a.target = '_blank'; a.textContent = ' Open its page';
-                    out.appendChild(a);
-                }
-                if (!card.querySelector('tr[data-key]:not(.kop-wbf-gone)')) card.classList.add('kop-wbf-done');
-            }).catch(function () { out.className = 'kop-wbf-result err'; out.textContent = 'Network error; try again.'; });
+        function boxFields(box) {
+            var f = {};
+            box.querySelectorAll('[data-f]').forEach(function (el) { f['f[' + el.dataset.f + ']'] = el.value; });
+            return f;
         }
 
         // Edit: correct what the build read before adding it.
         function saveEdit(box, reset) {
             var tr = box.closest('tr[data-key]');
             var msg = box.querySelector('.kop-wbf-edit-msg');
-            var body = new URLSearchParams();
-            body.append('action', 'kop_wbf_edit');
-            body.append('nonce', nonce);
-            body.append('key', tr.dataset.key);
-            if (reset) body.append('reset', '1');
-            else box.querySelectorAll('[data-f]').forEach(function (f) { body.append('f[' + f.dataset.f + ']', f.value); });
+            var fields = reset ? { reset: '1' } : boxFields(box);
+            fields.key = tr.dataset.key;
             msg.className = 'kop-wbf-edit-msg'; msg.textContent = 'Saving...';
-            fetch(ajax, { method: 'POST', credentials: 'same-origin', body: body }).then(function (r) { return r.json(); }).then(function (res) {
+            send('kop_wbf_edit', fields).then(function (res) {
                 if (!res.success) { msg.className = 'kop-wbf-edit-msg err'; msg.textContent = res.data || 'Failed.'; return; }
                 tr.querySelector('.kop-wbf-label').textContent = res.data.label;
                 tr.querySelector('.kop-wbf-goes').textContent = res.data.goes;
@@ -2439,8 +2496,8 @@ function kop_wbf_render_assets() {
                 var m = fresh.querySelector('.kop-wbf-edit-msg');
                 m.className = 'kop-wbf-edit-msg ok';
                 m.textContent = reset ? '' : 'Saved. Tick it and add it as usual.';
-                var pick = tr.querySelector('.kop-wbf-pick');
-                if (pick && !reset) pick.checked = true;
+                var pick = tr.querySelector('.kop-ak-pick');
+                if (pick && !reset) { pick.checked = true; pick.dispatchEvent(new Event('change', { bubbles: true })); }
             }).catch(function () { msg.className = 'kop-wbf-edit-msg err'; msg.textContent = 'Network error; try again.'; });
         }
 
@@ -2448,19 +2505,17 @@ function kop_wbf_render_assets() {
         function addPerson(box) {
             var tr = box.closest('tr[data-key]');
             var msg = box.querySelector('.kop-wbf-edit-msg');
-            var body = new URLSearchParams();
-            body.append('action', 'kop_wbf_person');
-            body.append('nonce', nonce);
-            body.append('key', tr.dataset.key);
-            box.querySelectorAll('[data-f]').forEach(function (f) { body.append('f[' + f.dataset.f + ']', f.value); });
+            var fields = boxFields(box);
+            fields.key = tr.dataset.key;
             msg.className = 'kop-wbf-edit-msg'; msg.textContent = 'Saving...';
-            fetch(ajax, { method: 'POST', credentials: 'same-origin', body: body }).then(function (r) { return r.json(); }).then(function (res) {
+            send('kop_wbf_person', fields).then(function (res) {
                 if (!res.success) { msg.className = 'kop-wbf-edit-msg err'; msg.textContent = res.data || 'Failed.'; return; }
                 var t = document.createElement('tbody');
                 t.innerHTML = res.data.row;
                 var row = t.firstElementChild;
-                row.querySelector('.kop-wbf-pick').checked = true;
+                row.querySelector('.kop-ak-pick').checked = true;
                 tr.insertAdjacentElement('afterend', row);
+                row.querySelector('.kop-ak-pick').dispatchEvent(new Event('change', { bubbles: true }));
                 box.querySelectorAll('input[data-f], textarea[data-f]').forEach(function (f) { f.value = ''; });
                 msg.className = 'kop-wbf-edit-msg ok'; msg.textContent = 'Added below, ticked. Another?';
             }).catch(function () { msg.className = 'kop-wbf-edit-msg err'; msg.textContent = 'Network error; try again.'; });
@@ -2478,29 +2533,18 @@ function kop_wbf_render_assets() {
         document.addEventListener('click', function (e) {
             var save = e.target.closest('.kop-wbf-save, .kop-wbf-reset');
             if (save) { saveEdit(save.closest('.kop-wbf-edit-box'), save.classList.contains('kop-wbf-reset')); return; }
-            var btn = e.target.closest('.kop-wbf-card [data-act]');
-            if (btn) { run(btn.closest('.kop-wbf-card'), btn.dataset.act, btn); return; }
             var person = e.target.closest('.kop-wbf-addperson');
             if (person) { addPerson(person.closest('.kop-wbf-edit-box')); return; }
+            // A close name the build offered: it fills the finder beside it.
             var alt = e.target.closest('.kop-wbf-alt');
             if (alt) {
-                var card = alt.closest('.kop-wbf-card');
-                var box = card.querySelector('.kop-wbf-fid');
+                var card = alt.closest('.kop-ak-card');
+                var box = card.querySelector('.kop-ak-fid');
                 if (box) { box.value = alt.dataset.fid; box.dispatchEvent(new Event('change', { bubbles: true })); }
-                card.querySelectorAll('.kop-wbf-alt').forEach(function (b) { b.classList.toggle('button-primary', b === alt); });
-                return;
-            }
-            if (e.target.closest('.kop-wbf-all')) {
-                var cards = Array.prototype.slice.call(document.querySelectorAll('.kop-wbf-card:not(.kop-wbf-done)'));
-                var prog = document.querySelector('.kop-wbf-progress');
-                var i = 0;
-                (function next() {
-                    if (i >= cards.length) { prog.textContent = 'Done: ' + cards.length + ' cards.'; return; }
-                    prog.textContent = 'Adding ' + (i + 1) + ' of ' + cards.length + '...';
-                    var c = cards[i++];
-                    var any = c.querySelector('tr[data-key]:not(.kop-wbf-gone) .kop-wbf-pick:checked');
-                    (any ? run(c, 'apply') : Promise.resolve()).then(next);
-                })();
+                card.querySelectorAll('.kop-wbf-alt').forEach(function (b) {
+                    b.classList.toggle('kop-ak-btn--primary', b === alt);
+                    b.classList.toggle('kop-ak-btn--quiet', b !== alt);
+                });
             }
         });
     })();
