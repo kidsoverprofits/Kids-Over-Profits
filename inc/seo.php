@@ -247,6 +247,31 @@ if (!function_exists('kop_seo_add_default_image')) {
 }
 
 // ---------------------------------------------------------------------------
+// Tag archives
+// ---------------------------------------------------------------------------
+
+if (!function_exists('kop_seo_tag_robots')) {
+    /**
+     * Tag archives stay out of search (owner's decision, 2026-10-14): each lists a few posts and adds
+     * nothing the posts don't. Links on them are still followed, and they leave Yoast's sitemap.
+     */
+    function kop_seo_tag_robots($robots) {
+        if (!function_exists('is_tag') || !is_tag() || !is_array($robots)) return $robots;
+        $robots['index'] = 'noindex';
+        $robots['follow'] = 'follow';
+        return $robots;
+    }
+    add_filter('wpseo_robots_array', 'kop_seo_tag_robots', 30);
+}
+
+if (!function_exists('kop_seo_sitemap_exclude_tags')) {
+    function kop_seo_sitemap_exclude_tags($exclude, $taxonomy) {
+        return $taxonomy === 'post_tag' ? true : $exclude;
+    }
+    add_filter('wpseo_sitemap_exclude_taxonomy', 'kop_seo_sitemap_exclude_tags', 30, 2);
+}
+
+// ---------------------------------------------------------------------------
 // Structured data
 // ---------------------------------------------------------------------------
 

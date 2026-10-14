@@ -705,7 +705,7 @@ php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
 php scripts/test-robots.php
 # Search engines (inc/seo.php, the search plan https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb): facility and company titles and descriptions
 # name past/other names (kop_alias_label()), each page describes its program or company as a schema.org Organization added to Yoast's graph
-# (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner. A new page kind gets its pieces there
+# (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner, tag archives are noindex and out of the sitemap. A new page kind gets its pieces there
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] [--id=12161]
 # See the working tree's map in a browser before pushing it
 python scripts/preview-network-map.py --shots tmp/map-preview

@@ -154,5 +154,18 @@ foreach (kop_seo_template_descriptions() as $tpl => $text) {
     $check("$tpl has a description that fits", mb_strlen(sprintf($text, 'Utah')) <= KOP_SEO_DESC_MAX, (string) mb_strlen(sprintf($text, 'Utah')));
 }
 
+echo "-- Tag archives --\n";
+if (!function_exists('is_tag')) {
+    function is_tag() { return !empty($GLOBALS['kop_test_is_tag']); }
+}
+$yoast = array('index' => 'index', 'follow' => 'follow', 'max-image-preview' => 'max-image-preview:large');
+$GLOBALS['kop_test_is_tag'] = true;
+$r = kop_seo_tag_robots($yoast);
+$check('a tag archive is noindex, its links still followed', $r['index'] === 'noindex' && $r['follow'] === 'follow' && $r['max-image-preview'] === 'max-image-preview:large', json_encode($r));
+$GLOBALS['kop_test_is_tag'] = false;
+$check('any other page keeps its robots', kop_seo_tag_robots($yoast) === $yoast);
+$check('tags leave the sitemap, categories stay', kop_seo_sitemap_exclude_tags(false, 'post_tag') === true
+    && kop_seo_sitemap_exclude_tags(false, 'category') === false);
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);
