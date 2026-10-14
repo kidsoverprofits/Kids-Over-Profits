@@ -52,6 +52,24 @@ a review queue, a table holding facility ids, a state inspection page, a public 
 When changing how an existing record is written (a new save, approve, undo or delete path), read `docs/DATA-FLOWS.md`:
 what each store's readers are and what keeps them fresh (link syncs, fingerprints, LiteSpeed), and the known drift.
 
+## Sources found during research (standing rule for every agent)
+
+Any time background research turns up a relevant source that KOP does not hold yet (news article, court record, bill,
+forum post, survivor blog, program page, directory listing, anything), submit it to the database in the same session,
+unprompted. Research agents do the same: every agent prompt that involves web research carries this rule.
+
+1. Check first: `GET https://kidsoverprofits.org/wp-json/kop/v1/mobile/check?url=<url>&type=<type>`; `duplicate: true` = already held, skip it.
+2. Send: `POST https://kidsoverprofits.org/wp-json/kop/v1/mobile/submit` with JSON
+   `{"type": ..., "url": ..., "title": ..., "notes": "<which facility/company/person it is about, why it matters, the key quote>", "submitter_name": "Claude research agent", "via": "web"}`.
+   `type`: `article` (news, opinion, press release) -> news review; `lawsuit` (court records, dockets) -> lawsuit review;
+   `legislation` (bills) -> legislation review; `website` (everything else: forum posts, Reddit threads, blogs, program pages,
+   directories, reports) -> Websites Sent In. Nothing is published: it all waits in Review inbox. Never send the user's email.
+3. Wayback-only sources still follow the archive rule below (PDF into the media library); submit the original URL with the
+   archive link in `notes`.
+4. 409 = duplicate (fine). 429 = the public route's 12-an-hour cap: keep going with the research, and list the unsent links
+   (url, type, title, notes) under "Not sent yet" in the report so they can be sent next hour.
+5. The report says how many sources were sent and to which queues.
+
 ## Key Commands
 
 ```bash
