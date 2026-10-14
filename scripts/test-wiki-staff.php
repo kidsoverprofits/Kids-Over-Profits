@@ -172,7 +172,14 @@ $pick = null;
 foreach ($rows as $r) {
     $row = $r['facility_unique_name'] ? kop_v2_pdo_master_row_by_name($pdo, $prefix, $r['facility_unique_name']) : null;
     $p = $row ? json_decode($row['json_data'], true) : null;
-    if (!empty($p['__facility_ref']) && !empty(json_decode((string) $r['json_data'], true)['staffMembers'])) { $pick = $r; break; }
+    if (empty($p['__facility_ref'])) continue;
+    // One whose staff are not all on the record yet (the live site's approvals already put most of them there).
+    $f = $p['data']['facility'] ?? array();
+    $on = array();
+    foreach (array('administrator', 'notableStaff') as $l) foreach ((array) ($f['staff'][$l] ?? array()) as $e) $on[kop_wiki_staff_fold(is_array($e) ? ($e['name'] ?? '') : $e)] = true;
+    foreach ((array) (json_decode((string) $r['json_data'], true)['staffMembers'] ?? array()) as $s) {
+        if (is_array($s) && trim((string) ($s['name'] ?? '')) !== '' && !isset($on[kop_wiki_staff_fold($s['name'])])) { $pick = $r; break 2; }
+    }
 }
 if ($pick) {
     $id = (int) $pick['id'];

@@ -485,6 +485,37 @@ function cleanStaffRoleCandidate(candidate, programName) {
     return cleaned;
 }
 
+/**
+ * The job title in a staff member's role, or '' when the role is not one: "current Clinical Director" ->
+ * "Clinical Director", "one" -> the titles the write-up's "is one of the Founders and the CEO" names,
+ * "married to ..." / "son" / "same position" -> ''. Must match kop_wiki_staff_title() in
+ * api/sync-wiki-facilities.php, which cleans the role again when an approval puts it on the record
+ * (scripts/test-wiki-staff-title.js checks the two agree on every wiki role).
+ */
+function staffRoleTitle(role, bio) {
+    const ucfirst = s => s.charAt(0).toUpperCase() + s.slice(1);
+    role = String(role || '').replace(/\s+/g, ' ').replace(/^[ \t,;:.]+|[ \t,;:.]+$/g, '');
+    if (role === '' || role.length > 60 || /\]\(|https?:\/\/|\*\*/.test(role)) return '';
+    const lead = /^(?:former|also|currently|current|cureently(?: the is)?|reportedly|presently|apparently|reported(?: by survivors)? to (?:have )?(?:also |later |previously |even )?(?:been|be|worked|served)(?: in an?)?(?: as)?|(?:previously |later )?(?:worked|served) as|position as|listed as|the|an?)\s+/i;
+    for (let i = 0; i < 8 && lead.test(role); i++) role = role.replace(lead, '').trim();
+    role = role.replace(/\b(?:current(?:ly)?|presently)\s+/gi, '').trim();
+    if (/^(?:"|“)?one(?: of(?: the)?)?(?:\s+([\s\S]*))?$/i.test(role)) {
+        const text = String(bio || '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/"/g, '');
+        const b = text.match(/^\W*(?:\([^)]*\)\s*)?(?:is|was|are|were)\s+(?:also\s+)?(?:reported to (?:be|have been)\s+)?one of (?:the )?(.+?)(?:\s+(?:of|at|for|in|with|who|that|from|until|since)\b|[.,;(]|$)/i);
+        role = b ? b[1].trim() : '';
+        const parts = [];
+        role.split(/\s*(?:,|\band\b|&)\s*/i).forEach(t => {
+            t = t.trim().replace(/^(?:(?:the|an?|current|currently)\s+)+/i, '').trim();
+            if (t !== '') parts.push(t.replace(/([a-z])s$/, '$1'));   // "Founders" -> "Founder"
+        });
+        role = parts.join(', ');
+    }
+    if (role === '' || /\b(?:he|she|his|her|him|they|who|where|met|married|related|wife|husband|son|daughter|brother|sister|father|mother|career|testimony|novel|unknown|known|now|likely|believed|widely|until|since|website|degree|same|cause|own|boss|listed|license|devoted)\b/i.test(role)) return '';
+    if (!/\b(?:director|founder|co-?founder|founding|owner|co-?owner|ceo|cfo|coo|cmo|president|chairman|chairwoman|chair|head|headmaster|headmistress|principal|dean|therapist|psychotherapist|psychiatrist|psychologist|physician|counsell?or|manager|coordinator|supervisor|staff|nurse|teacher|mentor|sergeant|agent|secretary|treasurer|advisor|adviser|partner|superintendent|administrator|adminastrator|specialist|chief|officer|consultant|pastor|minister|chaplain|guard|instructor|trustee|creator|board member|member)s?\b/i.test(role)) return '';
+    role = role.replace(/\bChief (Operating|Operations|Clinical|Medical|Marketing|Development|Executive|Financial|Quality|Technology|Information)$/i, 'Chief $1 Officer');
+    return ucfirst(role);
+}
+
 function extractStaffPreviousRoles(bioText) {
     const { maskedText, links } = maskMarkdownLinks(bioText);
     const previousRoles = [];
@@ -1926,6 +1957,9 @@ function parseWikiMarkdown(markdown) {
                 }
             }
 
+            // The title only: "current Clinical Director", "one" (of the Founders), "married to ..." are wording.
+            role = staffRoleTitle(role, bioText);
+
             const previousRoles = extractStaffPreviousRoles(removeFirstSentence(bioText));
 
             parsedData.staffMembers.push({
@@ -2970,7 +3004,7 @@ function getLookupTables() {
 // on script load order; callers must use the wiki-generation.js version so there
 // is a single source of truth.
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { parseWikiMarkdown, getLookupTables, findLookupMatches, sanitizeUrl, looksLikeWikiMarkdown, convertPlainTextToWikiMarkdown };
+    module.exports = { parseWikiMarkdown, getLookupTables, findLookupMatches, sanitizeUrl, looksLikeWikiMarkdown, convertPlainTextToWikiMarkdown, staffRoleTitle };
 } else if (typeof window !== 'undefined') {
     // Expose to global scope for browser usage
     window.parseWikiMarkdown = parseWikiMarkdown;

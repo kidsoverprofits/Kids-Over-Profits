@@ -28,6 +28,7 @@ if (!defined('ABSPATH')) {
 
 // The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
 require_once __DIR__ . '/admin-kit.php';
+require_once __DIR__ . '/staff-former.php';   // kop_staff_role_with_former(): "Former" for an old sighting or a closed program
 add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-woodbury-facts'; return $pages; });
 
 define('KOP_WOODBURY_FACTS_DB_VERSION', '3');
@@ -449,6 +450,9 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
     };
 
     if ($r['op'] === 'add_staff') {
+        if (kop_staff_name_not_person($value['name'] ?? '')) {
+            throw new RuntimeException('That is not a person\'s name (a phase sheet or a headline read as a staff list).');
+        }
         $key = kop_wbf_person_key($value['name'] ?? '');
         foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
             $list = &kop_wbf_ref($doc, $path);
@@ -459,6 +463,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
                     $before = array('role' => (string) ($s['role'] ?? ''), 'pastJobs' => (string) ($s['pastJobs'] ?? ''),
                         'source' => $s['source'] ?? null, 'sourceUrl' => $s['sourceUrl'] ?? null);
                     list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
+                    $role = kop_staff_role_with_former($role, kop_staff_doc_closed($doc));
                     if ($role === trim($before['role']) && $jobs === trim($before['pastJobs'])) {
                         throw new RuntimeException('Already on the record\'s staff list.');
                     }
@@ -476,7 +481,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         }
         $list = &kop_wbf_ref($doc, $r['path']);
         $list = is_array($list) ? $list : array();
-        $list[] = array('name' => (string) $value['name'], 'role' => (string) $value['role'], 'pastJobs' => (string) $value['pastJobs'])
+        $list[] = array('name' => (string) $value['name'], 'role' => kop_staff_role_with_former((string) $value['role'], kop_staff_doc_closed($doc)), 'pastJobs' => (string) $value['pastJobs'])
             + kop_wbf_source_ref($r);
         $done += array('mode' => 'added', 'at' => $r['path'], 'name' => (string) $value['name']);
         return $done;

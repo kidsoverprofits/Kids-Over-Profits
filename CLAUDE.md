@@ -468,6 +468,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-staff.php [--list]   # mapping, approve/again/undo, what approving every entry would add
 # A wiki person goes on as "Former <role>" when the program is closed or the write-up opens "was/were/worked/served" (kop_wiki_staff_is_former());
 # staff approved before that rule: php api/fix-wiki-staff-former.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kept so Undo works
+# The role is the title, not the parser's wording ("current Clinical Director", "one"): kop_wiki_staff_title() == js/wiki-parser.js staffRoleTitle()
+node scripts/test-wiki-staff-title.js --php=<Local php.exe>   # JS == PHP on every wiki role in tmp/prod.sqlite
+# Every other staff entry (Woodbury Facts, HEAL, Fornits, by hand) is "Former" at a closed program or when its role is only a sighting older
+# than last year ("Admissions (2007, Woodbury Reports)"; inc/staff-former.php, applied by Woodbury Facts when it adds a person); names that
+# are not people (a phase sheet read as a staff list) are refused. Records saved before: php api/fix-staff-former.php [--list] [apply] [undo apply]
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-former.php   # the rule, the pass + undo on a copy of the mirror
 # Public data form (/tti-data-submission/) opens on a guided start (js/data-form/data-wizard.js, css/data-wizard.css): find the
 # record or add a new facility/company/provider/transporter/referrer, pick topics, see only those sections; saves still go
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need
