@@ -127,6 +127,9 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 - Restraint is restraint. Being zipped into a bivy sack or sleeping bag overnight, strapped down, bound in sheets
   or pinned is restraint. A physical cause of death (asphyxia, smothering) says how the restraint killed; it never
   replaces the word "restraint". Defer to the owner's knowledge of how programs operate.
+- Children are vulnerable because they are children. Never write that a program makes a child vulnerable or puts a
+  healthy teenager "in the same position" as a dependent adult: programs exploit and deepen a vulnerability that is
+  already there (cutting children off from home, telling parents not to believe them).
 - The AI-instruction copies programs bury in their sites are "hidden in the HTML code for its home page", never
   just "hidden in its home page".
 - Links read as words, never as bare web addresses.
