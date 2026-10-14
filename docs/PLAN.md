@@ -394,6 +394,20 @@ need the owner's accounts, devices or artwork.
     ResCare/BrightSpring, Broadstep or Sabra. Not sent yet (429): website, https://www.sec.gov/Archives/edgar/data/1492298/
     000149229819000006/sbra10k2018.htm, "Sabra Health Care REIT Form 10-K for 2018", notes: nursing home REIT owns Aurora
     Chicago Lakeshore Hospital (acquired 08/17/17) beside its nursing homes.
+    Fourth draft (owner: strike the almshouses, say "thin staff" once, drive it with real cases): each owner's cases
+    on both sides: Onex (Skilled Healthcare's 2010 understaffing verdict; ResCare Woodward Children's Home death,
+    March 15, 2017; Newport Pleasanton substantiated abuse 2023), Carlyle (ManorCare after the 2011 sale-leaseback,
+    Washington Post 2018; Newport Bethlehem CT charge 2021), NME (Colonial Hills plea 1992; Christy Scheck, March
+    1992), Bain (Brendan Blum 2007; Broadstep Georgetown 2021, Kingstree 2024), Sabra (Chicago Lakeshore, Medicare
+    cut 2019). 45 sources. Owner checks: the 13-year-old who died after leaving ResCare's Woodward Children's Home
+    (Charleston, WV, March 15, 2017) is not in the memorial or KOP's records; Chicago Lakeshore's record (13461)
+    is empty (ProPublica 2018-2019, the CMS termination and ALJ CR5480 belong on it); Christy Scheck's memorial
+    date (1992-03-06) may be two days early (San Diego Reader). Nursing home cases left out as weak or unconfirmed:
+    Hillhaven (Seattle Times 1991 citations only), Estia (care-minutes undertakings, document not opened), Good Hope
+    Manor (Wisconsin orders 2026, Broadstep's ownership then unconfirmed), Sabra tenants (Senior Care Centers after
+    Harvey, ownership unconfirmed). Not sent yet (429): 14 youth sources (ProPublica x2, CMS notice, ALJ CR5480,
+    Livermore Vine, WSAZ, Gazette-Mail, Live 5, WIS, Deseret, UPI x2, Bain Double Impact, CCP 2017 exhibit); the
+    research agent's scratchpad sub.py sends what is still new.
     (Carlyle, Onex) followed by the buyout mortality study and Ripley's "control staffing" (new source 20, Warehouses
     of Neglect pp. 27 and 104), ending on a verdict. Production had no saved Page Text edits for it on that date.
     Checked against the History articles (2026-10-08); the pages now link them where they meet. Errors found in
