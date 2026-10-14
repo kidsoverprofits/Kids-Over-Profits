@@ -218,6 +218,10 @@ Last revised by [u](/user/u/)
 
 **Name** was there.
 ", json_encode($fmt));
+    // The conversion dropped each table's "|---|" row; Reddit needs it to draw the table.
+    $tbl = kop_wiki_drafts_reddit_format("*Caption.*\n|**Name**|**Years**|\n| [**A**](https://example.test) | 1990 |\n| **B** | - |\n---\n\n|**Name**|\n|---|\n| **C** |\n", $tmap);
+    $check('wiki-updates: a table gets its |---| row back, set off by blank lines', $tbl === "*Caption.*\n\n|**Name**|**Years**|\n|---|---|\n| [**A**](https://example.test) | 1990 |\n| **B** | - |\n\n---\n\n|**Name**|\n|---|\n| **C** |\n", json_encode($tbl));
+    $check('wiki-updates: and the line numbers move with it', $tmap[1] === 2 && $tmap[2] === 4 && $tmap[4] === 7, json_encode($tmap));
     $cap = '***Below is a list of active programs that currently operate in Ohio.***';
     $check('wiki-updates: a whole line in bold italics (a state or company table caption) is not made a bullet',
         kop_wiki_drafts_format_line($cap) === $cap, kop_wiki_drafts_format_line($cap));

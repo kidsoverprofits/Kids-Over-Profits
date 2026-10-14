@@ -254,12 +254,44 @@ function kop_wiki_drafts_find(array $lines, $name) {
  * missing space before "(years)", and Reddit's page footer ("Last revised by",
  * "## Page title") dropped with the separators before it.
  */
-function kop_wiki_drafts_reddit_format($md) {
+function kop_wiki_drafts_reddit_format($md, &$map = null) {
     $lines = kop_wiki_drafts_lines($md);
     $lines = array_slice($lines, 0, kop_wiki_drafts_footer($lines));
     while ($lines && (trim(end($lines)) === '' || preg_match('/^\s*(-{3,}|\*{3,}|_{3,})\s*$/', end($lines)))) array_pop($lines);
     foreach ($lines as $n => $line) $lines[$n] = kop_wiki_drafts_format_line($line, $n === 0);
+    list($lines, $map) = kop_wiki_drafts_table_rules($lines);
     return implode("\n", $lines) . "\n";
+}
+
+/**
+ * The conversion dropped every table's "|---|" row, without which Reddit prints the table as plain lines: put it back
+ * under each table's first line (one cell per column of that line), with a blank line before and after the table.
+ * Same as scripts/wiki-drafts.py table_rules(). -> [lines, map: each old line number => its new one]
+ */
+function kop_wiki_drafts_table_rules(array $lines) {
+    $is_row = function ($l) { return preg_match('/^\s*\|.*\|\s*$/', (string) $l) === 1; };
+    $is_rule = function ($l) { return preg_match('/^\s*\|(\s*:?-{3,}:?\s*\|)+\s*$/', (string) $l) === 1; };
+    $out = array();
+    $map = array();
+    $n = count($lines);
+    for ($i = 0; $i < $n; $i++) {
+        $line = $lines[$i];
+        $starts = $is_row($line) && !$is_rule($line) && ($i === 0 || !$is_row($lines[$i - 1]));
+        if ($starts) {
+            if ($out && trim(end($out)) !== '') $out[] = '';
+            $map[$i] = count($out);
+            $out[] = $line;
+            if (!($i + 1 < $n && $is_rule($lines[$i + 1]))) {
+                $cells = count(explode('|', trim(trim($line), '|')));
+                $out[] = '|' . implode('|', array_fill(0, $cells, '---')) . '|';
+            }
+            continue;
+        }
+        if ($i > 0 && $is_row($lines[$i - 1]) && !$is_row($line) && trim($line) !== '') $out[] = '';
+        $map[$i] = count($out);
+        $out[] = $line;
+    }
+    return array($out, $map);
 }
 
 /** One line as kop_wiki_drafts_reddit_format() writes it ($first = the header line); the review card shows corrected lines this way too. */
@@ -659,10 +691,13 @@ function kop_wiki_drafts_build_draft(array $d, $current_md, array $edits) {
     $count = count(array_filter($added, function ($i) use ($new_lines) {
         return trim($new_lines[$i]) !== '' && !preg_match('/^\s*(-{3,}|\*{3,}|_{3,})\s*$/', $new_lines[$i]);
     }));
-    // Line numbers above stay right: the format only drops the footer at the end.
-    $md = kop_wiki_drafts_reddit_format($md);
-    $last = count(kop_wiki_drafts_lines($md)) - 1;
-    $added = array_values(array_filter($added, function ($i) use ($last) { return $i <= $last; }));
+    // The format drops the footer at the end and adds the tables' "|---|" rows: carry the line numbers across.
+    $md = kop_wiki_drafts_reddit_format($md, $map);
+    $move = function (array $nums) use ($map) {
+        return array_values(array_map(function ($i) use ($map) { return $map[$i]; }, array_filter($nums, function ($i) use ($map) { return isset($map[$i]); })));
+    };
+    $added = $move($added);
+    $tensed = $move($tensed);
     return array(
         'md' => $md, 'base' => $base, 'added' => $added, 'count' => $count, 'tensed' => $tensed,
         'applied' => $applied, 'tense_ids' => $tense_ids, 'errors' => array_merge($errors, $problems), 'problems' => $problems, 'stale' => $stale,
