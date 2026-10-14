@@ -35,6 +35,16 @@ add_action('rest_api_init', function () {
             'q' => array('required' => true, 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field'),
         ),
     ));
+    register_rest_route('kop/v1', '/mobile/suggest', array(
+        'methods'             => 'GET',
+        'callback'            => 'kop_mobile_suggest_rest',
+        'permission_callback' => '__return_true',
+        'args'                => array(
+            'q'     => array('required' => true, 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field'),
+            'kinds' => array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'),
+            'limit' => array('type' => 'integer'),
+        ),
+    ));
     register_rest_route('kop/v1', '/facility-links', array(
         'methods'             => 'POST',
         'callback'            => 'kop_facility_links_rest',
@@ -79,6 +89,84 @@ if (!function_exists('kop_facility_suggest')) {
         }
         set_transient($cache_key, $out, 10 * MINUTE_IN_SECONDS);
         return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_suggest')) {
+    /**
+     * Suggestions as you type for the mobile app (kop/v1/mobile/suggest): facility records and
+     * companies matching the phrase, by current, past and other names (kop_v2_search(), which keeps
+     * a third of the slots for alternate-name hits). Each item: {kind: 'facility'|'operator', id,
+     * name, hint ("Formerly X"), place, status, slug, url}; slug is the record's page slug ('' when
+     * it has no page), which the app opens as its own screen. Facilities first, then companies.
+     */
+    function kop_mobile_suggest($phrase, array $kinds = array('facility', 'operator'), $limit = 8) {
+        $phrase = trim((string) preg_replace('/\s+/u', ' ', (string) $phrase));
+        if (mb_strlen($phrase) < 2 || mb_strlen($phrase) > 100) return array();
+        $kinds = array_values(array_intersect(array('facility', 'operator'), $kinds));
+        if (!$kinds) return array();
+        $limit = max(1, min(15, (int) $limit));
+
+        $cache_key = 'kop_msug1_' . md5(mb_strtolower($phrase) . '|' . implode(',', $kinds) . '|' . $limit);
+        $cached = get_transient($cache_key);
+        if (is_array($cached)) return $cached;
+
+        $fac_limit = in_array('facility', $kinds, true) ? $limit : 0;
+        $op_limit = in_array('operator', $kinds, true) ? ($fac_limit ? max(3, (int) ceil($limit / 2)) : $limit) : 0;
+        $found = kop_v2_search($phrase, $fac_limit, $op_limit, 0);
+        $slug_of = function ($url, $kind) {
+            return preg_match('~/' . $kind . '/([^/?#]+)/?$~', (string) $url, $m) ? rawurldecode($m[1]) : '';
+        };
+        $hint = function ($r) {
+            return function_exists('kop_v2_search_alias_hint') ? kop_v2_search_alias_hint($r) : '';
+        };
+        // kop_v2_search() fills spare slots with records matching only somewhere in their text; as-you-type
+        // suggestions keep the records whose current or alternate name matches.
+        $want = function_exists('kop_facility_name_key') ? kop_facility_name_key($phrase) : mb_strtolower($phrase);
+        $named = function ($r) use ($want) {
+            if (!empty($r['matched_name'])) return true;
+            $have = function_exists('kop_facility_name_key') ? kop_facility_name_key((string) $r['display']) : mb_strtolower((string) $r['display']);
+            return $want === '' || mb_strpos($have, $want) !== false;
+        };
+        $out = array();
+        foreach ((array) ($found['facilities'] ?? array()) as $f) {
+            if (!$named($f)) continue;
+            $place = (string) ($f['location'] ?? '');
+            $status = '';
+            if (preg_match('/\s*\(([^()]*)\)\s*$/', $place, $m)) {
+                $status = $m[1];
+                $place = trim(substr($place, 0, -strlen($m[0])));
+            }
+            $url = (string) ($f['profile_url'] ?? '');
+            $out[] = array(
+                'kind' => 'facility', 'id' => (int) ($f['id'] ?? 0), 'name' => (string) $f['display'],
+                'hint' => $hint($f), 'place' => $place, 'status' => $status,
+                'slug' => $slug_of($url, 'facility'), 'url' => $url,
+            );
+        }
+        foreach ((array) ($found['operators'] ?? array()) as $o) {
+            if (!$named($o)) continue;
+            $url = (string) ($o['profile_url'] ?? '');
+            $n = (int) ($o['fac_count'] ?? 0);
+            $out[] = array(
+                'kind' => 'operator', 'id' => (int) ($o['id'] ?? 0), 'name' => (string) $o['display'],
+                'hint' => $hint($o), 'place' => $n ? $n . ' program' . ($n === 1 ? '' : 's') : '', 'status' => '',
+                'slug' => $slug_of($url, 'operator'), 'url' => $url,
+            );
+        }
+        set_transient($cache_key, $out, 10 * MINUTE_IN_SECONDS);
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_suggest_rest')) {
+    function kop_mobile_suggest_rest($request) {
+        $q = trim((string) $request->get_param('q'));
+        $kinds = array_filter(array_map('trim', explode(',', (string) ($request->get_param('kinds') ?: 'facility,operator'))));
+        $limit = (int) ($request->get_param('limit') ?: 8);
+        $res = new WP_REST_Response(array('query' => $q, 'items' => kop_mobile_suggest($q, $kinds, $limit)), 200);
+        $res->header('Cache-Control', 'public, max-age=300');
+        return $res;
     }
 }
 

@@ -135,9 +135,35 @@ $s = kop_facility_suggest('Copper Canyon', 10);
 $check("'Copper Canyon' offers Sedona Sky Academy as a past-name hit", (bool) array_filter($s, function ($i) {
     return stripos($i['name'], 'Sedona Sky') !== false && stripos($i['hint'], 'Formerly') === 0;
 }));
-$check('suggestions carry only name, place, status and hint', !array_filter($s, function ($i) {
-    return array_keys($i) !== array('name', 'place', 'status', 'hint');
+$check('suggestions carry only id, name, place, status, hint and page url', !array_filter($s, function ($i) {
+    return array_keys($i) !== array('id', 'name', 'place', 'status', 'hint', 'url');
 }));
+
+echo "-- The app's suggestions (kop/v1/mobile/suggest) --\n";
+$check('under 2 characters suggests nothing', kop_mobile_suggest('P') === array());
+$check('no known kind suggests nothing', kop_mobile_suggest('Provo', array('person')) === array());
+$m = kop_mobile_suggest('Copper Canyon', array('facility', 'operator'), 10);
+foreach (array_slice($m, 0, 8) as $i) {
+    echo '    [' . $i['kind'] . '] ' . $i['name'] . ' | ' . $i['place'] . ($i['hint'] !== '' ? ' | ' . $i['hint'] : '') . ' | ' . $i['slug'] . "\n";
+}
+$check("'Copper Canyon' offers Sedona Sky Academy, labelled Formerly", (bool) array_filter($m, function ($i) {
+    return $i['kind'] === 'facility' && stripos($i['name'], 'Sedona Sky') !== false && stripos($i['hint'], 'Formerly') === 0;
+}));
+$check('every suggestion matches by its name or an alternate name', !array_filter($m, function ($i) {
+    return $i['hint'] === '' && stripos(kop_facility_name_key($i['name']), kop_facility_name_key('Copper Canyon')) === false;
+}));
+$keys = array('kind', 'id', 'name', 'hint', 'place', 'status', 'slug', 'url');
+$check('every item carries exactly the app keys', !array_filter($m, function ($i) use ($keys) { return array_keys($i) !== $keys; }));
+$check('a slug is the last part of its page address', !array_filter($m, function ($i) {
+    return $i['url'] !== '' && $i['slug'] !== '' && substr(rtrim($i['url'], '/'), -strlen($i['slug'])) !== $i['slug'];
+}));
+$ops = kop_mobile_suggest('Sequel', array('operator'), 8);
+$check("'Sequel' as companies only finds companies", $ops && !array_filter($ops, function ($i) { return $i['kind'] !== 'operator'; }), count($ops) . ' items');
+$check('a company carries its operator page slug', (bool) array_filter($ops, function ($i) { return $i['slug'] !== '' && strpos($i['url'], '/operator/') !== false; }));
+$both = kop_mobile_suggest('Sequel', array('facility', 'operator'), 8);
+$first_op = null;
+foreach ($both as $n => $i) if ($i['kind'] === 'operator') { $first_op = $n; break; }
+$check('facilities come before companies', $first_op === null || !array_filter(array_slice($both, $first_op), function ($i) { return $i['kind'] === 'facility'; }));
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

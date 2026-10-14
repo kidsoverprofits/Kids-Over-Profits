@@ -501,6 +501,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-search-links.php
 # Facility names in free-text lists (inc/facility-suggest.php): kop/v1/facility-suggest feeds the data forms'
 # 'facilityref' autocomplete (ttiReferrals, knownReferrals, facilitiesReferred; reuses kop_v2_search); kop/v1/facility-links
 # resolves names to /facility/<slug>/ for "Refers young people to" on /mental-health-providers/ (one batch, ambiguous never links)
+# kop/v1/mobile/suggest?q=&kinds=facility,operator (kop_mobile_suggest()) feeds the app's autocomplete: name and alternate-name hits only,
+# each {kind, id, name, hint, place, status, slug, url}, facilities before companies
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-links.php   # prints the Billings list's linked/ambiguous/unmatched names
 node scripts/test-facility-ref-split.js           # the forms split a pasted comma list into entries and mark names that will not link
 # "Send to KOP" Chrome extension (its own repo, kop-send-to-kop; loaded unpacked, not deployed) posts to
