@@ -312,6 +312,8 @@
         var src = state.source;
         statusEl.textContent = 'Loading…';
         bulkEl.innerHTML = '';
+        // Keep the list's height while the page loads, so the page does not collapse and spring back.
+        listEl.style.minHeight = listEl.offsetHeight + 'px';
         listEl.innerHTML = '';
         pagerEl.innerHTML = '';
         var query = { source: src, view: state.view, search: state.search, origin: state.origin, offset: state.offset, limit: state.limit };
@@ -330,9 +332,11 @@
             statusEl.textContent = (note ? note + ' ' : '') + (state.total ? (state.total + (state.total === 1 ? ' item' : ' items')) : 'Nothing here.')
                 + (data.held ? ' (' + data.held + ' set aside: snoozed or handed to someone else.)' : '');
             items.forEach(function (it) { listEl.appendChild(card(it)); });
+            listEl.style.minHeight = '';
             renderBulk();
             renderPager();
         }).catch(function (e) {
+            listEl.style.minHeight = '';
             statusEl.textContent = 'Could not load this queue: ' + e.message;
         });
     }
@@ -605,8 +609,27 @@
         return n;
     }
 
+    /** Space the WordPress admin bar takes at the top of the window. */
+    function topMargin() {
+        var bar = document.getElementById('wpadminbar');
+        return (bar ? bar.offsetHeight : 0) + 12;
+    }
+
+    /**
+     * Run change() on a card. When the card's top was above the window (the reader scrolled down to its
+     * buttons), the card shrinking would pull the cards below up past them: put its top at the top of the
+     * window instead, at once (a smooth scroll races the layout). A card fully in view is left alone.
+     */
+    function keepInView(node, change) {
+        var margin = topMargin();
+        var above = node.getBoundingClientRect().top < margin;
+        change();
+        if (above) window.scrollBy(0, node.getBoundingClientRect().top - margin);
+    }
+
     function scrollToPanel() {
-        try { panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* old browser */ }
+        var top = panel.getBoundingClientRect().top - topMargin();
+        if (top < 0) window.scrollBy(0, top);
     }
 
     /* ---- Cards ------------------------------------------------------------- */
@@ -984,9 +1007,11 @@
                     if (item.source) { next.source = item.source; next.source_label = item.source_label; }
                     fillCard(node, next, state.byKey[src], src, res.message);
                 } else if (node.classList.contains('rinbox-card')) {
-                    node.classList.add('rinbox-gone');
-                    node.innerHTML = '';
-                    node.appendChild(el('p', { class: 'rinbox-message', text: res.message + ' It is off your list until then; find it under Snoozed or in Recently done.' }));
+                    keepInView(node, function () {
+                        node.classList.add('rinbox-gone');
+                        node.innerHTML = '';
+                        node.appendChild(el('p', { class: 'rinbox-message', text: res.message + ' It is off your list until then; find it under Snoozed or in Recently done.' }));
+                    });
                 } else if (m) {
                     m.hidden = false; m.className = 'rinbox-message'; m.textContent = res.message;
                 }
@@ -1550,16 +1575,17 @@
         if (busy) { busy.hidden = false; busy.className = 'rinbox-message'; busy.textContent = kind === 'ai' ? (body && body.text ? 'Reading the pasted text…' : 'Reading the item and its link…') : 'Working…'; }
         return api(kind, payload).then(function (res) {
             var next = res.item || null;
-            if (next) {
-                fillCard(node, next, s, src, res.message);
-                // A refilled card is often much shorter (an approved wiki update): bring it back
-                // into view instead of leaving the reader among the cards below.
-                if (node.getBoundingClientRect().top < 0) node.scrollIntoView({ block: 'start', behavior: 'smooth' });
-            } else {
-                node.classList.add('rinbox-gone');
-                node.innerHTML = '';
-                node.appendChild(el('p', { class: 'rinbox-message', text: res.message || 'Done.' }));
-            }
+            // A refilled card is often much shorter (an approved wiki update), and a card that left
+            // shrinks to its message: keep it where the reader is instead of the cards below shooting up.
+            keepInView(node, function () {
+                if (next) {
+                    fillCard(node, next, s, src, res.message);
+                } else {
+                    node.classList.add('rinbox-gone');
+                    node.innerHTML = '';
+                    node.appendChild(el('p', { class: 'rinbox-message', text: res.message || 'Done.' }));
+                }
+            });
             refreshCounts();
         }).catch(function (e) {
             fillCard(node, item, s, src, e.message, true);

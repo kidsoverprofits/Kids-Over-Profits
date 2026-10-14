@@ -686,7 +686,31 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Load submissions based on current filters
      */
+    /**
+     * The cards in view before a reload: [{id, top}], so the redrawn list can be put back where the
+     * reader was (a decision reloads the whole list; without this the page jumps to its top).
+     */
+    function visibleCardTops() {
+        const out = [];
+        submissionsList.querySelectorAll(':scope > .submission-card').forEach(card => {
+            const r = card.getBoundingClientRect();
+            if (r.bottom > 0 && r.top < window.innerHeight && out.length < 8) out.push({ id: card.dataset.id, top: r.top });
+        });
+        return out;
+    }
+
+    /** Scroll so the first of those cards still listed is where it was; a card that left is skipped. */
+    function restoreCardTops(tops) {
+        for (const t of tops) {
+            const card = submissionsList.querySelector(':scope > .submission-card[data-id="' + CSS.escape(String(t.id)) + '"]');
+            if (card) { window.scrollBy(0, card.getBoundingClientRect().top - t.top); return; }
+        }
+    }
+
+    let loadSeq = 0;
+
     async function loadSubmissions() {
+        const seq = ++loadSeq;
         const status = statusFilter.value;
         const search = searchFilter.value.trim();
         const currentType = typeFilter ? typeFilter.value : 'wiki';
@@ -719,10 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (el && el.value && !el.closest('[hidden]')) params.set(key, el.value);
         });
 
-        loadingMessage.style.display = 'block';
-        detachModal();              // restore modal to original parent before wiping list
-        submissionsList.innerHTML = '';
-        noSubmissions.style.display = 'none';
+        // The old cards stay until the new list is in (renderSubmissions wipes it), so the page keeps
+        // its height and place; the loading note only shows over an empty list.
+        const tops = visibleCardTops();
+        submissionsList.style.opacity = '0.55';
+        if (!submissionsList.querySelector('.submission-card')) loadingMessage.style.display = 'block';
 
         try {
             let result = null;
@@ -739,15 +764,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 result = Object.assign({}, page, { data: rows });
                 if (page.data.length < PAGE_SIZE || rows.length >= (page.total || 0)) break;
             }
+            // A newer load (another tab, a search typed on) started meanwhile: it draws the list.
+            if (seq !== loadSeq) return;
 
             loadingMessage.style.display = 'none';
+            noSubmissions.style.display = 'none';
+            submissionsList.style.opacity = '';
 
             if (result.success && result.data && result.data.length > 0) {
                 console.log('Found submissions:', result.data.length);
                 allSubmissions = result.data;
                 buildDuplicateMap(result.data);
                 renderSubmissions(result.data);
+                restoreCardTops(tops);
             } else {
+                detachModal();      // restore modal to original parent before wiping list
+                submissionsList.innerHTML = '';
                 console.log('No submissions found or result structure unexpected:', {
                     success: result.success,
                     hasData: !!result.data,
@@ -757,8 +789,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 noSubmissions.style.display = 'block';
             }
         } catch (error) {
+            if (seq !== loadSeq) return;
             console.error('Failed to load submissions:', error);
+            detachModal();
             loadingMessage.style.display = 'none';
+            submissionsList.style.opacity = '';
             submissionsList.innerHTML = '<div class="error-message">Failed to load submissions. Please try again.</div>';
         }
     }
