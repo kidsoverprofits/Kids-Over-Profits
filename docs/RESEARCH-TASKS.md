@@ -52,6 +52,16 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
 
 ### More Sequel and Three Springs-era questions (found 2026-10-12 and 13, Sequel audit sessions)
 
+- **Sequel's draft company history (operator 20, /operator/sequel/, draft)** (found 2026-10-14): it says APM Reports
+  found "20 cases since 2010 in which government investigators concluded that Sequel staff had sexually abused or
+  harassed children"; APM's words are "engaged in sexual or romantic relationships with residents"
+  ([APM Reports, 2020](https://www.apmreports.org/story/2020/09/28/for-profit-sequel-facilities-children-abused)).
+  It also says Connor Bennett died at the program "then still called Sequel TSI of Tuskegee"; NBC News (9/1/2022) and
+  the Senate report (p. 121, note 791) say it had been renamed Brighter Path Tuskegee and Vivant ran it. Fix both lines
+  before publishing the history.
+- **Union Juvenile Residential Facility (9660)** (found 2026-10-14): its company link to Sequel TSI (operator 20) is
+  'current', but the map's line says Sequel ran it 2010-2019. Make the link 'past' once its status is settled (table above).
+
 - **Sequel TSI of North Carolina (11903) / Three Springs of North Carolina (9652)**: duplicates, keep 11903. The end
   year is 2010, or 2011 per the owner's sheet. The audit also proposed a start year of 1990 instead of 2009. The only
   lead is the NC Division of Non-Public Education's 2010-11 closure list, whose page blocks scripts.
