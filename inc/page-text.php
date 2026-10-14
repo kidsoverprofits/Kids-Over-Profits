@@ -349,7 +349,12 @@ function kop_page_text_body_html($body, $style, $prefix) {
             $cell = function ($tag, $text, $attr = '') use ($prefix) {
                 return '<' . $tag . $attr . '>' . kop_page_text_inline($text, $prefix) . '</' . $tag . '>';
             };
-            $html .= '<figure class="' . $prefix . '-table">';
+            // Three columns or more stack into one card per row on a phone (css), each cell labelled by its header.
+            $wide = count($head) > 2 ? ' ' . $prefix . '-table-wide' : '';
+            $labels = array_map(function ($h) use ($prefix) {
+                return kop_page_text_esc(trim(html_entity_decode(strip_tags(kop_page_text_inline($h, $prefix)), ENT_QUOTES, 'UTF-8')));
+            }, $head);
+            $html .= '<figure class="' . $prefix . '-table' . $wide . '">';
             if ($b[1]['caption'] !== '') {
                 $html .= '<figcaption>' . kop_page_text_inline($b[1]['caption'], $prefix) . '</figcaption>';
             }
@@ -361,7 +366,8 @@ function kop_page_text_body_html($body, $style, $prefix) {
             foreach ($rows as $r) {
                 $html .= '<tr>';
                 foreach (array_values($r) as $i => $c) {
-                    $html .= $i === 0 ? $cell('th', $c, ' scope="row"') : $cell('td', $c);
+                    $label = isset($labels[$i]) && $labels[$i] !== '' ? ' data-label="' . $labels[$i] . '"' : '';
+                    $html .= $i === 0 ? $cell('th', $c, ' scope="row"') : $cell('td', $c, $label);
                 }
                 $html .= '</tr>';
             }

@@ -274,6 +274,43 @@
     .kop-ri-table tbody th {
         min-width: 0;
     }
+
+    /* Three columns or more: one card per row, each cell under its column's name. */
+    .kop-ri-table-wide thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .kop-ri-table-wide tr {
+        display: block;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--kop-border-primary, #B6E3D4);
+    }
+
+    .kop-ri-table-wide tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .kop-ri-table-wide th,
+    .kop-ri-table-wide td,
+    .kop-ri-table-wide tbody tr:last-child th,
+    .kop-ri-table-wide tbody tr:last-child td {
+        display: block;
+        padding: 0.2rem 0;
+        border: 0;
+    }
+
+    .kop-ri-table-wide td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--kop-text-muted, #4A5568);
+    }
 }
 
 .kop-ri-table tbody tr:last-child th,
