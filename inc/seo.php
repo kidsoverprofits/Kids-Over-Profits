@@ -184,12 +184,23 @@ if (!function_exists('kop_seo_post_description')) {
         if (!$post) return '';
         $text = trim((string) $post->post_excerpt);
         if ($text === '') {
-            $text = (string) $post->post_content;
-            $text = function_exists('strip_shortcodes') ? strip_shortcodes($text) : $text;
-            $text = preg_replace('/\[\/?[a-z][a-z0-9_-]*(?:\s[^\]]*)?\]/i', ' ', $text);
-            $text = preg_replace('#<(script|style|figure|figcaption)\b.*?</\1>#is', ' ', $text);
-            $text = html_entity_decode(wp_strip_all_tags($text), ENT_QUOTES, 'UTF-8');
-            $text = preg_replace('#https?://\S+#', ' ', $text);
+            $html = (string) $post->post_content;
+            $html = function_exists('strip_shortcodes') ? strip_shortcodes($html) : $html;
+            $html = preg_replace('/\[\/?[a-z][a-z0-9_-]*(?:\s[^\]]*)?\]/i', ' ', $html);
+            $html = preg_replace('#<(script|style|figure|figcaption)\b.*?</\1>#is', ' ', $html);
+            // One line per paragraph or <br>, so blocks never run together ("abuse casePrograms").
+            $html = preg_replace('#<br\s*/?>|</(p|div|li|h[1-6]|blockquote)>#i', "\n", $html);
+            $title = mb_strtolower(trim(html_entity_decode((string) ($post->post_title ?? ''), ENT_QUOTES, 'UTF-8')));
+            $lines = array();
+            foreach (preg_split('/\n+/', html_entity_decode(wp_strip_all_tags($html), ENT_QUOTES, 'UTF-8')) as $line) {
+                $line = trim((string) preg_replace(array('#https?://\S+#', '/\s+/u'), array(' ', ' '), $line));
+                if ($line === '' || preg_match('/^(read more|programs? mentioned:|source:)/i', $line)) continue;
+                // The news posts open with the article's own date and headline, which the title already gives.
+                if ($title !== '' && mb_strpos(mb_strtolower($line), $title) !== false) continue;
+                if (preg_match('/^[A-Z][a-z]+ \d{1,2}, \d{4}\b/', $line) && mb_strlen($line) < 160) continue;
+                $lines[] = preg_match('/[.!?:"\')]$/u', $line) ? $line : $line . '.';
+            }
+            $text = implode(' ', $lines);
         }
         return kop_seo_clip($text);
     }

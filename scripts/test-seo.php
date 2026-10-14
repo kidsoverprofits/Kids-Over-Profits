@@ -141,6 +141,13 @@ echo "-- Posts --\n";
 $post = (object) array('post_excerpt' => '', 'post_content' => '<p>ABC News10 reported <a href="https://x.test/a">here</a> that a worker at the center was charged.</p>[gallery ids="1"] https://news.test/story <script>bad()</script>');
 $d = kop_seo_post_description($post);
 $check('a post with no excerpt is described by its opening words, plain', $d === 'ABC News10 reported here that a worker at the center was charged.', $d);
+// A legacy news post as it is stored (the ABC News10 post): link block, programs, Read more, then the facts.
+$news = (object) array('post_excerpt' => '', 'post_title' => 'ABC News10: Poughkeepsie Center for Autism worker charged in abuse case',
+    'post_content' => '<p class="wp-block-paragraph"><a href="https://www.news10.com/x">August 13, 2024 ABC News10: Poughkeepsie Center for Autism worker charged in abuse case</a><br>Programs Mentioned: Anderson Center for Autism<br>Read more</p>' . "\n\n"
+        . '<p class="wp-block-paragraph">Garnet Collins, staff, arrested for first-degree endangering the welfare of an incompetent or physically disabled person and one count of forcible touching</p>' . "\n\n"
+        . '<p class="wp-block-paragraph">Arraigned and released, protection order issued by judge for both victims</p>');
+$d = kop_seo_post_description($news);
+$check('a news post is described by its facts, not its date, headline or "Read more"', strpos($d, 'Garnet Collins, staff, arrested') === 0 && strpos($d, 'Read more') === false && strpos($d, 'Programs Mentioned') === false, $d);
 $post->post_excerpt = 'The excerpt wins.';
 $check('an excerpt wins', kop_seo_post_description($post) === 'The excerpt wins.');
 foreach (kop_seo_template_descriptions() as $tpl => $text) {
