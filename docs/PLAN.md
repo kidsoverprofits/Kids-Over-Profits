@@ -378,6 +378,11 @@ need the owner's accounts, devices or artwork.
     smaller there and names Onex (Skilled Healthcare and ResCare) as the one owner documented on both sides; the
     Joint Commission complaint number on the psychiatric hospitals page came from a search summary (check it);
     the disability page links NeuroRestorative's program page, which changes if that conversion is undone.
+    The nursing homes page was rewritten again on 2026-10-14 to docs/WRITING-STYLE.md: the statement gives the
+    thesis (same people, same dependence, same investors run both the same way); "Cut off and not believed" puts the
+    rates in a table and Bob Bacon's words in a pull quote; the almshouse root leads into it; the owners are a table
+    (Carlyle, Onex) followed by the buyout mortality study and Ripley's "control staffing" (new source 20, Warehouses
+    of Neglect pp. 27 and 104), ending on a verdict. Production had no saved Page Text edits for it on that date.
     Checked against the History articles (2026-10-08); the pages now link them where they meet. Errors found in
     the articles themselves, all fixed on deploy by seeds/text-fixes.json (page entries, once each, the old text
     kept as a revision; the 'mental defectives' line moved to Devereux 1935): /birth-of-the-tti/ and /idd-timeline/ date Buck v. Bell 1924 (decided
