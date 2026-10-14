@@ -1,13 +1,14 @@
 <?php
 /**
- * API - Extract Lawsuit Details from an Uploaded Complaint (PUBLIC)
+ * API - Extract Lawsuit Details from a Court Document or Pasted Text (PUBLIC)
  *
  * Public counterpart of extract-lawsuit-from-document.php, used by the
  * Submit Lawsuit page to autofill the suggestion form. Same three-action
  * protocol (the browser orchestrates the pacing so each HTTP request stays
  * short-lived on shared hosting):
  *
- * POST action=upload   multipart  complaint (file)
+ * POST action=upload   multipart  complaint (file: any court document from the case)
+ *                                 or text (pasted text of one; no file stored)
  *   → {success, job_id, total_chunks, doc_chars}
  * POST action=chunk    JSON       {job_id, chunk_index}
  *   → {success, chunk_index, total_chunks}
@@ -98,6 +99,17 @@ function kop_pub_action_upload(): void {
         exit;
     }
 
+    // Pasted text instead of a file: read as it is, nothing is stored.
+    $pasted = trim((string)($_POST['text'] ?? ''));
+    if ($pasted !== '' && empty($_FILES['complaint']['name'])) {
+        if (mb_strlen($pasted, 'UTF-8') < 200) {
+            echo json_encode(['success' => false, 'error' => 'That is too little text to read. Paste the whole page or more of the document.']);
+            exit;
+        }
+        kop_pub_start_job(mb_substr($pasted, 0, 60000, 'UTF-8'), '', '');
+        return;
+    }
+
     if (empty($_FILES['complaint']) || ($_FILES['complaint']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         $php_err  = $_FILES['complaint']['error'] ?? UPLOAD_ERR_NO_FILE;
         $messages = [
@@ -113,7 +125,7 @@ function kop_pub_action_upload(): void {
     }
 
     if (($_FILES['complaint']['size'] ?? 0) > KOP_PUB_MAX_BYTES) {
-        echo json_encode(['success' => false, 'error' => 'File is larger than 10 MB. Please upload a smaller document (the complaint itself, not full exhibits).']);
+        echo json_encode(['success' => false, 'error' => 'File is larger than 10 MB. Please upload a smaller document (the filing itself, not full exhibits).']);
         exit;
     }
 
@@ -151,13 +163,18 @@ function kop_pub_action_upload(): void {
         exit;
     }
 
+    kop_pub_start_job($doc_text, $upload['file'], $upload['url']);
+}
+
+/** Chunk the text and store the job; $file_path/$file_url are '' for pasted text. */
+function kop_pub_start_job(string $doc_text, string $file_path, string $file_url): void {
     $chunked = kop_lawsuit_chunk_text($doc_text, KOP_PUB_MAX_CHUNKS);
 
     $job_id = wp_generate_uuid4();
     set_transient(KOP_PUBJOB_PREFIX . $job_id, [
         'chunks'    => $chunked['chunks'],
-        'file_path' => $upload['file'],
-        'file_url'  => $upload['url'],
+        'file_path' => $file_path,
+        'file_url'  => $file_url,
         'total'     => count($chunked['chunks']),
         'results'   => [],
     ], 30 * MINUTE_IN_SECONDS);
@@ -233,7 +250,7 @@ function kop_pub_action_finalize(): void {
 
     $results = array_values(array_filter($job['results']));
     if (empty($results)) {
-        @unlink($job['file_path']);
+        if ($job['file_path'] !== '') @unlink($job['file_path']);
         echo json_encode(['success' => false, 'error' => 'No text could be extracted from the document. Please fill in the form manually.']);
         exit;
     }
@@ -241,10 +258,12 @@ function kop_pub_action_finalize(): void {
     $raw = (count($results) === 1) ? $results[0] : kop_merge_chunk_extractions($results);
 
     $extracted = kop_normalize_lawsuit_extraction($raw);
-    // Keep the uploaded complaint with the submission so the reviewer can read it.
-    $extracted['document_urls'] = array_values(array_unique(array_merge(
-        $extracted['document_urls'] ?? [], [$job['file_url']]
-    )));
+    // Keep the uploaded document with the submission so the reviewer can read it.
+    if ($job['file_url'] !== '') {
+        $extracted['document_urls'] = array_values(array_unique(array_merge(
+            $extracted['document_urls'] ?? [], [$job['file_url']]
+        )));
+    }
 
     echo json_encode([
         'success'      => true,

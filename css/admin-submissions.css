@@ -1787,6 +1787,7 @@ button.btn-refile-undo, button.btn-refile-undo:hover, button.btn-refile-undo:foc
 .kop-edit-paste { margin-top: 10px; }
 .kop-edit-paste textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.82rem; }
 .kop-edit-paste-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.kop-edit-paste-text textarea { font-family: inherit; font-size: 0.92rem; }
 .kop-edit-ai { display: flex; flex-direction: column; gap: 8px; }
 .kop-edit-ai label { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; font-weight: 600; color: var(--kop-text-secondary); }
 .kop-edit-ai > button { align-self: flex-start; }

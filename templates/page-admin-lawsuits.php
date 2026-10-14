@@ -113,12 +113,23 @@ get_header();
                     <button type="button" id="fetchLawsuitBtn" class="primary-btn autofill-btn"><?php echo kop_icon('sparkles'); ?> Auto-populate from CourtListener (federal)</button>
                     <div class="upload-complaint-label">
                         <input type="file" id="lawsuit-complaint-file" accept=".pdf,.doc,.docx,.txt,application/pdf" hidden>
-                        <button type="button" id="extractLawsuitBtn" class="primary-btn autofill-btn"><?php echo kop_icon('file-text'); ?> Upload complaint &amp; auto-extract</button>
-                        <span class="upload-complaint-hint">PDF/DOCX/TXT, up to 20MB · saved to media library</span>
+                        <button type="button" id="extractLawsuitBtn" class="primary-btn autofill-btn"><?php echo kop_icon('file-text'); ?> Upload a court document &amp; auto-extract</button>
+                        <span class="upload-complaint-hint">Complaint, motion, order, settlement, docket... PDF/DOCX/TXT, up to 20MB · saved to media library</span>
+                    </div>
+                    <div class="upload-complaint-label">
+                        <button type="button" id="pasteLawsuitTextBtn" class="primary-btn autofill-btn"><?php echo kop_icon('file-text'); ?> Paste text &amp; auto-extract</button>
+                        <span class="upload-complaint-hint">Text copied from a filing, docket or court page</span>
                     </div>
                     <div class="upload-complaint-label">
                         <button type="button" id="pasteJsonBtn" class="primary-btn autofill-btn"><?php echo kop_icon('clipboard'); ?> Paste extracted JSON</button>
                         <span class="upload-complaint-hint">Import JSON from ChatGPT, Claude, etc.</span>
+                    </div>
+                </div>
+                <div id="pasteLawsuitTextPanel" class="paste-json-panel" hidden>
+                    <textarea id="pasteLawsuitTextInput" class="paste-json-textarea" rows="10" aria-label="Text from a court document" placeholder="Paste the text of any paper from the case: complaint, motion, order, ruling, settlement, docket sheet..."></textarea>
+                    <div class="paste-json-actions">
+                        <button type="button" id="pasteLawsuitTextApplyBtn" class="primary-btn">Read it and fill the form</button>
+                        <button type="button" id="pasteLawsuitTextCancelBtn" class="secondary-btn">Cancel</button>
                     </div>
                 </div>
                 <div id="pasteJsonPanel" class="paste-json-panel" hidden>

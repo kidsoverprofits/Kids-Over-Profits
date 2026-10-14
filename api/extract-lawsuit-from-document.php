@@ -1,11 +1,12 @@
 <?php
 /**
- * API - Extract Lawsuit Details from Uploaded Complaint
+ * API - Extract Lawsuit Details from a Court Document or Pasted Text
  *
  * Three-action protocol so each HTTP request stays short-lived (no long
  * sleeping on shared hosting). The browser orchestrates the pacing.
  *
- * POST action=upload   multipart  complaint (file), filebird_folder_id (int)
+ * POST action=upload   multipart  complaint (file: any court document from the case),
+ *                                 filebird_folder_id (int); or text (pasted text, no file)
  *   → {success, job_id, total_chunks, doc_chars}
  *   Extracts text, splits into chunks, stores in a 30-min WP transient.
  *   Does NOT register the attachment yet (avoids duplicates on retry).
@@ -84,6 +85,17 @@ function kop_action_upload(): void {
         exit;
     }
 
+    // Pasted text instead of a file: read as it is, nothing goes to the media library.
+    $pasted = trim((string)($_POST['text'] ?? ''));
+    if ($pasted !== '' && empty($_FILES['complaint']['name'])) {
+        if (mb_strlen($pasted, 'UTF-8') < 200) {
+            echo json_encode(['success' => false, 'error' => 'That is too little text to read. Paste the whole page or more of the document.']);
+            exit;
+        }
+        kop_start_job($pasted, '', '', '', 0);
+        return;
+    }
+
     if (empty($_FILES['complaint']) || ($_FILES['complaint']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         $php_err  = $_FILES['complaint']['error'] ?? UPLOAD_ERR_NO_FILE;
         $messages = [
@@ -124,10 +136,15 @@ function kop_action_upload(): void {
     $doc_text = kop_extract_document_text($file_path, $file_type);
     if (trim($doc_text) === '') {
         @unlink($file_path);
-        echo json_encode(['success' => false, 'error' => 'Could not extract text from the document. Make sure it is a digital (not scanned) PDF.']);
+        echo json_encode(['success' => false, 'error' => 'Could not extract text from the document. Make sure it is a digital (not scanned) PDF, or paste its text instead.']);
         exit;
     }
 
+    kop_start_job($doc_text, $file_path, $file_url, $file_type, $folder_id);
+}
+
+/** Chunk the text and store the job; the file fields are '' for pasted text. */
+function kop_start_job(string $doc_text, string $file_path, string $file_url, string $file_type, int $folder_id): void {
     $chunked = kop_lawsuit_chunk_text($doc_text, 10);
     $chunks  = $chunked['chunks'];
     $len     = $chunked['length'];
@@ -221,7 +238,7 @@ function kop_action_finalize(): void {
     $results   = array_values(array_filter($job['results']));
 
     if (empty($results)) {
-        @unlink($file_path);
+        if ($file_path !== '') @unlink($file_path);
         echo json_encode(['success' => false, 'error' => 'No chunks were successfully extracted. Please try again.']);
         exit;
     }
@@ -230,7 +247,7 @@ function kop_action_finalize(): void {
 
     // Register attachment now that we know extraction succeeded
     $attachment_id = 0;
-    if (file_exists($file_path)) {
+    if ($file_path !== '' && file_exists($file_path)) {
         $attachment_id = wp_insert_attachment([
             'post_mime_type' => $file_type,
             'post_title'     => preg_replace('/\.[^.]+$/', '', basename($file_path)),
@@ -258,9 +275,11 @@ function kop_action_finalize(): void {
     }
 
     $extracted = kop_normalize_lawsuit_extraction($raw);
-    $extracted['document_urls'] = array_values(array_unique(array_merge(
-        $extracted['document_urls'] ?? [], [$file_url]
-    )));
+    if ($file_url !== '') {
+        $extracted['document_urls'] = array_values(array_unique(array_merge(
+            $extracted['document_urls'] ?? [], [$file_url]
+        )));
+    }
     $extracted['publication_status'] = 'draft';
 
     echo json_encode([

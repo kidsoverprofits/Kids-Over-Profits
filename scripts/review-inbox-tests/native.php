@@ -143,8 +143,33 @@ function kop_rinbox_test_lawsuit(array $src, array $item, callable $check) {
     } catch (Throwable $e) {
         $check('lawsuit: a published case runs the save endpoint\'s folder step', false, $e->getMessage());
     }
-    $pdo->prepare('UPDATE lawsuits SET publication_status = ?, filebird_folder_id = ?, document_urls = ? WHERE id = ?')
-        ->execute(array($before['publication_status'], $before['filebird_folder_id'], $before['document_urls'], (int) $item['key']));
+    // "Mark as lawsuit news": the card becomes a pending lawsuit article in the News queue; Undo brings it back.
+    $url = 'https://example.org/kop-test-lawsuit-news-' . (int) $item['key'];
+    $pdo->prepare("UPDATE lawsuits SET publication_status = 'pending', source_urls = ?, summary = ? WHERE id = ?")
+        ->execute(array(wp_json_encode(array($url)), 'Test summary of the case.', (int) $item['key']));
+    $pending = kop_rinbox_native_item('lawsuit', kop_rinbox_native_row('lawsuit', $item['key']));
+    $check('lawsuit: a pending case with a link offers "Mark as lawsuit news"',
+        (bool) array_filter($pending['actions'], function ($a) { return $a['id'] === 'lawsuit_news'; }));
+    try {
+        $res = call_user_func($src['act'], $item['key'], 'lawsuit_news', array());
+        $log = kop_rinbox_native_moves()['lawsuit:' . (int) $item['key']] ?? null;
+        $news = $log ? kop_rinbox_native_row('news', $log['done']['id']) : null;
+        $check('lawsuit: "Mark as lawsuit news" makes a pending lawsuit article and files the case as rejected',
+            $news && $news['status'] === 'submitted' && $news['article_type'] === 'lawsuit' && $news['summary'] === 'Test summary of the case.'
+            && kop_rinbox_native_row('lawsuit', $item['key'])['publication_status'] === 'rejected', $res['message'] ?? '');
+        $check('lawsuit: the marked case offers Undo and no second mark', (bool) array_filter(
+            kop_rinbox_native_item('lawsuit', kop_rinbox_native_row('lawsuit', $item['key']))['actions'],
+            function ($a) { return $a['id'] === 'unmove'; }));
+        call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('lawsuit: Undo takes the article back (deleted) and the case is pending again',
+            $news && kop_rinbox_native_row('news', $news['id'])['status'] === 'deleted' && kop_rinbox_native_row('lawsuit', $item['key'])['publication_status'] === 'pending');
+    } catch (Throwable $e) {
+        $check('lawsuit: "Mark as lawsuit news" works', false, $e->getMessage());
+    }
+
+    $pdo->prepare('UPDATE lawsuits SET publication_status = ?, filebird_folder_id = ?, document_urls = ?, source_urls = ?, summary = ?, reviewer_notes = ? WHERE id = ?')
+        ->execute(array($before['publication_status'], $before['filebird_folder_id'], $before['document_urls'], $before['source_urls'],
+            $before['summary'], $before['reviewer_notes'], (int) $item['key']));
 }
 
 /** The News Processor's per-type details go into json_data next to what is there. */

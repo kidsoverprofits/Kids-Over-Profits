@@ -2358,13 +2358,37 @@ document.addEventListener('DOMContentLoaded', () => {
             file.type = 'file';
             file.accept = '.pdf,.doc,.docx,.txt,application/pdf';
             file.hidden = true;
-            const up = button('Upload the complaint and read it with AI', 'file-text');
-            up.title = 'PDF, DOCX or TXT up to 20 MB. The file is saved to the media library.';
+            const up = button('Upload a court document and read it with AI', 'file-text');
+            up.title = 'Any paper from the case (complaint, motion, order, settlement, docket). PDF, DOCX or TXT up to 20 MB. The file is saved to the media library.';
             up.addEventListener('click', () => { if (!up.disabled) { file.value = ''; file.click(); } });
             file.addEventListener('change', () => {
                 const f = file.files && file.files[0];
                 if (!f) return;
-                busy(up, 'Uploading...', () => readComplaint(f, up, say, filled));
+                busy(up, 'Uploading...', () => readComplaint({ file: f }, up, say, filled));
+            });
+
+            const pasteText = button('Paste text from a court document', 'file-text');
+            pasteText.title = 'Text copied from a filing, docket or court page; nothing is saved to the media library.';
+            const textPanel = document.createElement('div');
+            textPanel.className = 'kop-edit-paste kop-edit-paste-text';
+            textPanel.hidden = true;
+            textPanel.innerHTML = `<textarea rows="10" class="kop-edit-input" aria-label="Text from a court document"
+                placeholder="Paste the text of any paper from the case: complaint, motion, order, ruling, settlement, docket sheet..."></textarea>
+                <div class="kop-edit-paste-actions"><button type="button" class="btn-save-edits kop-paste-apply">Read it with AI</button>
+                <button type="button" class="btn-secondary kop-paste-cancel">Cancel</button></div>`;
+            const textArea = textPanel.querySelector('textarea');
+            const textGo = textPanel.querySelector('.kop-paste-apply');
+            pasteText.addEventListener('click', () => {
+                textPanel.hidden = !textPanel.hidden;
+                if (!textPanel.hidden) textArea.focus();
+            });
+            textPanel.querySelector('.kop-paste-cancel').addEventListener('click', () => { textPanel.hidden = true; textArea.value = ''; say(''); });
+            textGo.addEventListener('click', () => {
+                const text = textArea.value.trim();
+                if (!text) { textArea.focus(); return; }
+                busy(textGo, 'Sending...', async () => {
+                    if (await readComplaint({ text }, textGo, say, filled)) { textPanel.hidden = true; textArea.value = ''; }
+                });
             });
 
             const paste = button('Paste JSON from another AI', 'clipboard');
@@ -2398,7 +2422,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 panel.hidden = true;
                 ta.value = '';
             });
-            row.append(cl, up, file, paste);
+            row.append(cl, up, file, pasteText, paste);
+            box.appendChild(textPanel);
             box.appendChild(panel);
         }
 
@@ -2527,21 +2552,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return out;
     }
 
-    /** Upload a complaint, read it chunk by chunk, merge (api/extract-lawsuit-from-document.php). */
-    async function readComplaint(file, btn, say, filled) {
-        if (!TOOLS.extractLawsuit) { say('The complaint reader is not available.', true); return; }
+    /**
+     * Read a court document (an uploaded file or pasted text) chunk by chunk and
+     * merge (api/extract-lawsuit-from-document.php). True when it filled the editor.
+     */
+    async function readComplaint({ file = null, text = '' }, btn, say, filled) {
+        if (!TOOLS.extractLawsuit) { say('The court document reader is not available.', true); return false; }
         const post = body => fetch(TOOLS.extractLawsuit, {
             method: 'POST', credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body), signal: AbortSignal.timeout(90 * 1000)
         }).then(r => r.json());
         try {
-            say(`Uploading "${file.name}"...`);
+            say(file ? `Uploading "${file.name}"...` : 'Sending the pasted text...');
             const form = new FormData();
             form.append('action', 'upload');
-            form.append('complaint', file);
-            const folder = editorValue('filebird_folder_id');
-            if (folder) form.append('filebird_folder_id', folder);
+            if (file) {
+                form.append('complaint', file);
+                const folder = editorValue('filebird_folder_id');
+                if (folder) form.append('filebird_folder_id', folder);
+            } else {
+                form.append('text', text);
+            }
             const upload = await fetch(TOOLS.extractLawsuit, { method: 'POST', credentials: 'same-origin', body: form, signal: AbortSignal.timeout(90 * 1000) }).then(r => r.json());
             if (!upload.success) throw new Error(upload.error || 'Upload failed');
             const wait = upload.wait_ms || 65000;
@@ -2559,10 +2591,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = 'Finishing...';
             const done = await post({ action: 'finalize', job_id: upload.job_id });
             if (!done.success) throw new Error(done.error || 'Finishing failed');
-            filled(fillEditor(done.data || {}), 'Read the complaint.');
+            filled(fillEditor(done.data || {}), 'Read the document.');
+            return true;
         } catch (e) {
-            console.error('Complaint read failed', e);
-            say('Reading the complaint failed: ' + e.message, true);
+            console.error('Court document read failed', e);
+            say('Reading the document failed: ' + e.message, true);
+            return false;
         }
     }
 
@@ -3053,7 +3087,7 @@ document.addEventListener('DOMContentLoaded', () => {
         news: { button: 'Add an article', name: 'Article title', url: 'Article web address (optional)',
             help: 'It opens in the Pending tab. Use Read with AI there to fill in the rest, then approve it.' },
         lawsuit: { button: 'Add a lawsuit', name: 'Case name', url: 'Source web address (optional)',
-            help: 'It opens in the Pending tab, where the CourtListener, complaint and paste buttons fill in the rest.' },
+            help: 'It opens in the Pending tab, where the CourtListener, court document and paste buttons fill in the rest.' },
         legislation: { button: 'Add a bill', name: 'Bill title', url: 'Bill text web address (optional)',
             help: 'It opens in the Pending tab, where "Auto-fill from government sources" fills in the rest.' },
     }; }

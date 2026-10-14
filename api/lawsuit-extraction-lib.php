@@ -94,7 +94,7 @@ function kop_lawsuit_ai_call(string $text, int $chunk_num = 1, int $total = 1): 
 // Merge + normalize helpers
 // =============================================================================
 function kop_merge_chunk_extractions(array $chunks): array {
-    $string_fields = ['case_name', 'case_number', 'court', 'jurisdiction', 'filing_date', 'outcome', 'settlement_amount', 'summary'];
+    $string_fields = ['case_name', 'case_number', 'court', 'jurisdiction', 'filing_date', 'status', 'outcome', 'settlement_amount', 'summary'];
     $array_fields  = ['plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned', 'claims', 'tags', 'source_urls', 'document_urls'];
 
     $merged = [];
@@ -145,6 +145,12 @@ function kop_normalize_lawsuit_extraction(array $raw): array {
         $filing = $ts ? date('Y-m-d', $ts) : '';
     }
     $out['filing_date'] = is_string($filing) ? $filing : '';
+
+    // Case status only when the document showed one of the tracker's values.
+    $status = is_string($raw['status'] ?? '') ? strtolower(trim(str_replace([' ', '-'], '_', $raw['status'] ?? ''))) : '';
+    if (in_array($status, ['filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed'], true)) {
+        $out['status'] = $status;
+    }
 
     if ($out['jurisdiction'] !== '') {
         $out['jurisdiction'] = strcasecmp($out['jurisdiction'], 'federal') === 0
@@ -277,7 +283,9 @@ function kop_extract_docx_text(string $path): string {
 // =============================================================================
 function kop_lawsuit_extraction_prompt(): string {
     return <<<PROMPT
-You are an expert legal-research assistant. Read the attached legal complaint or court filing and extract structured information for a Troubled Teen Industry accountability database.
+You are an expert legal-research assistant. Read the attached court document and extract structured information for a Troubled Teen Industry accountability database.
+
+The document can be any paper from the case: a complaint or petition, an answer, a motion, a brief, an order or ruling, a judgment or verdict, a settlement, a docket sheet, a transcript, or a news-style summary of the case. Read what that kind of paper says: an order, judgment, settlement or docket tells you the case's status and outcome; a complaint tells you the parties and the claims.
 
 Apply trauma-sensitive language: factual and neutral, never sensationalist, no graphic injury details, never describe suicide methods.
 
@@ -291,11 +299,14 @@ Return ONLY valid JSON matching this exact schema (omit fields you can't determi
   "filing_date": "YYYY-MM-DD",
   "plaintiffs": ["list of named plaintiffs, one per entry"],
   "defendants": ["list of named defendants, one per entry"],
-  "facilities_mentioned": ["TTI facilities/programs named in the complaint"],
+  "facilities_mentioned": ["TTI facilities/programs named in the document"],
   "staff_mentioned": ["individual staff, owners, or therapists named"],
   "organizations_mentioned": ["parent companies, referrers, accreditation bodies, etc."],
   "claims": ["one short slug per claim, e.g. 'physical_abuse', 'wrongful_death', 'fraud', 'negligence', 'sexual_abuse', 'civil_rights_violation', 'breach_of_contract'"],
-  "summary": "3-5 sentence factual summary of the allegations using neutral language",
+  "status": "only if the document shows it: filed, in_progress, settled, dismissed, ruling, appeal or closed",
+  "outcome": "what the court decided or the parties agreed, if this document shows it (e.g. 'Motion to dismiss denied in part', 'Settled; case dismissed with prejudice')",
+  "settlement_amount": "if a settlement or award amount is stated, as written (e.g. '$1.5 million')",
+  "summary": "3-5 sentence factual summary of the case using neutral language: the allegations, and what this document adds (a ruling, a settlement)",
   "tags": ["3-6 short keyword tags, e.g. 'wilderness therapy', 'restraint', 'class action'"]
 }
 

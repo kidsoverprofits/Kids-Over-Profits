@@ -222,6 +222,10 @@ function kop_rinbox_native_item($type, array $r) {
     if ($log) {
         $targets = kop_rdest_targets();
         $actions[] = array('id' => 'unmove', 'label' => 'Undo move to ' . ($targets[$log['to']]['label'] ?? $log['to']), 'style' => 'undo');
+    } elseif ($type === 'lawsuit' && $moves) {
+        // A news story about a case sent in as the case itself.
+        $actions[] = array('id' => 'lawsuit_news', 'label' => 'Mark as lawsuit news', 'style' => 'neutral',
+            'help' => 'Moves this link to the News queue as a lawsuit article (category Lawsuit, with this summary and facilities), waiting for review there; this card is filed as rejected with a note. Undo moves it back.');
     }
     $title = (string) ($r[$t['title']] ?? '');
     return array(
@@ -327,6 +331,9 @@ function kop_rinbox_native_help($type) {
 
 function kop_rinbox_native_act($type, $key, $action, array $params) {
     if ($action === 'move') return kop_rinbox_native_move($type, $key, (string) ($params['to'] ?? ''), $params);
+    if ($action === 'lawsuit_news' && $type === 'lawsuit') {
+        return kop_rinbox_native_move('lawsuit', $key, 'news', array('lawsuit_news' => true) + $params);
+    }
     if ($action === 'unmove') return kop_rinbox_native_unmove($type, $key);
     if ($action === 'restore') return kop_rinbox_native_restore($type, $key, (string) ($params['status'] ?? ''));
     throw new RuntimeException('Approve and reject this with the buttons on its card.');
@@ -383,6 +390,10 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
             'self' => array($type, (int) $r['id']), 'via' => 'moved',
         ), $reviewer);
         $message = $done['message'];
+        if ($type === 'lawsuit' && $to === 'news' && !empty($params['lawsuit_news']) && !empty($done['id'])) {
+            kop_rinbox_native_mark_lawsuit_news($pdo, (int) $done['id'], $r);
+            $message = 'Moved to the News queue as a lawsuit article (#' . (int) $done['id'] . '), waiting for review.';
+        }
         $pdo->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ?, reviewer_notes = ? WHERE id = ?")
             ->execute(array($t['rejected'], trim($prev_notes . "\n" . $message), (int) $r['id']));
         if ($type === 'news' && in_array($to, array('website', 'resource'), true)) {
@@ -404,6 +415,36 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
         'prev_notes' => $prev_notes, 'by' => $reviewer, 'at' => time());
     update_option('kop_review_inbox_moves', $log, false);
     return array('message' => $message . ' Undo moves it back.');
+}
+
+/**
+ * "Mark as lawsuit news": the article row a lawsuit card became is a lawsuit
+ * article (category lawsuit, which the lawsuit-news links and the Data Manager
+ * read), with the case's summary and facilities where the article has none.
+ */
+function kop_rinbox_native_mark_lawsuit_news(PDO $pdo, $news_id, array $lawsuit) {
+    $st = $pdo->prepare('SELECT summary, facilities_mentioned FROM news_submissions WHERE id = ?');
+    $st->execute(array((int) $news_id));
+    $n = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$n) return;
+    $set = array('article_type = ?');
+    $vals = array('lawsuit');
+    $summary = trim((string) ($lawsuit['summary'] ?? ''));
+    if (trim((string) $n['summary']) === '' && $summary !== '') {
+        $set[] = 'summary = ?';
+        $vals[] = mb_substr($summary, 0, 2000);
+    }
+    $have = json_decode((string) $n['facilities_mentioned'], true);
+    if (empty($have) && function_exists('kop_normalize_facility_mentions')) {
+        $facilities = kop_normalize_facility_mentions((string) ($lawsuit['facilities_mentioned'] ?? ''));
+        if ($facilities) {
+            $set[] = 'facilities_mentioned = ?';
+            $vals[] = wp_json_encode($facilities, JSON_UNESCAPED_UNICODE);
+        }
+    }
+    $vals[] = (int) $news_id;
+    $pdo->prepare('UPDATE news_submissions SET ' . implode(', ', $set) . ' WHERE id = ?')->execute($vals);
+    kop_rinbox_native_resync('news', (int) $news_id);
 }
 
 /** An approved article also listed on a young adult program; the article itself stays as it is. */

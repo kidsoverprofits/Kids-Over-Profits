@@ -42,13 +42,23 @@ if (!$tracker_url) { $tracker_url = home_url('/lawsuits'); }
 
     <div class="kop-autofill-box" id="kop-autofill-box">
         <h2>Let us fill this in for you <span class="hint">(optional)</span></h2>
-        <p>Upload the complaint or another court filing (PDF, DOCX, or TXT) and we'll read it and fill in the form below. Scanned PDFs work too — they're read with OCR right in your browser, which takes a little longer. Or, for federal cases, enter the docket number and we'll look it up. Either way, review the filled-in fields before submitting.</p>
+        <p>Upload any paper from the case (the complaint, a motion, an order or ruling, a settlement, a docket sheet; PDF, DOCX, or TXT) or paste its text, and we'll read it and fill in the form below. Scanned PDFs work too — they're read with OCR right in your browser, which takes a little longer. Or, for federal cases, enter the docket number and we'll look it up. Either way, review the filled-in fields before submitting.</p>
         <div class="kop-autofill-actions">
             <button type="button" class="kop-submit-btn" id="kop-autofill-upload-btn">Upload a case document</button>
             <input type="file" id="kop-autofill-file" accept=".pdf,.doc,.docx,.txt" hidden>
+            <button type="button" class="kop-submit-btn" id="kop-autofill-paste-btn" aria-expanded="false" aria-controls="kop-autofill-paste">Paste text</button>
             <span class="kop-autofill-or">or</span>
             <input type="text" id="kop-autofill-docket" placeholder="Federal docket no., e.g. 2:24-cv-00123" maxlength="255">
             <button type="button" class="kop-submit-btn" id="kop-autofill-lookup-btn">Look up case</button>
+        </div>
+        <div id="kop-autofill-paste" class="kop-autofill-paste" hidden>
+            <label class="kop-field">
+                <span class="kop-field-label">Text from a court document</span>
+                <textarea id="kop-autofill-text" rows="8" placeholder="Paste the text of a filing, a docket sheet or a court's page about the case."></textarea>
+            </label>
+            <div class="kop-autofill-actions">
+                <button type="button" class="kop-submit-btn" id="kop-autofill-read-btn">Read it and fill the form</button>
+            </div>
         </div>
         <div id="kop-autofill-status" class="kop-submit-status" role="status" aria-live="polite"></div>
     </div>
@@ -187,6 +197,10 @@ if (!$tracker_url) { $tracker_url = home_url('/lawsuits'); }
 .kop-autofill-actions input[type="text"] { flex: 1 1 220px; padding: 0.55rem 0.65rem; border: 1px solid #c8c8c8; border-radius: 6px; font: inherit; background: #fff; box-sizing: border-box; }
 .kop-autofill-actions input[type="text"]:focus { outline: 2px solid var(--kop-teal); border-color: var(--kop-teal); }
 .kop-autofill-or { color: #666; font-weight: 600; }
+.kop-autofill-paste { margin-top: 0.85rem; }
+.kop-autofill-paste textarea { width: 100%; box-sizing: border-box; padding: 0.55rem 0.65rem; border: 1px solid #c8c8c8; border-radius: 6px; font: inherit; color: var(--kop-midnight-blue, #000435); background: #fff; resize: vertical; }
+.kop-autofill-paste textarea:focus { outline: 2px solid var(--kop-teal); border-color: var(--kop-teal); }
+.kop-autofill-paste .kop-autofill-actions { margin-top: 0.6rem; }
 #kop-autofill-status { display: block; margin-top: 0.6rem; min-height: 1.2em; }
 .kop-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.25rem; }
 .kop-field { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -236,10 +250,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var docketInput    = document.getElementById('kop-autofill-docket');
     var lookupBtn      = document.getElementById('kop-autofill-lookup-btn');
     var autofillStatus = document.getElementById('kop-autofill-status');
+    var pasteBtn       = document.getElementById('kop-autofill-paste-btn');
+    var pastePanel     = document.getElementById('kop-autofill-paste');
+    var pasteText      = document.getElementById('kop-autofill-text');
+    var readBtn        = document.getElementById('kop-autofill-read-btn');
 
     function setAutofillBusy(busy) {
         if (uploadBtn) uploadBtn.disabled = busy;
         if (lookupBtn) lookupBtn.disabled = busy;
+        if (pasteBtn) pasteBtn.disabled = busy;
+        if (readBtn) readBtn.disabled = busy;
     }
     function autofillMsg(msg, cls) {
         autofillStatus.textContent = msg;
@@ -287,6 +307,71 @@ document.addEventListener('DOMContentLoaded', function () {
     function autofillDone(msg) {
         autofillMsg(msg, 'ok');
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Read every part of a started job, then merge and fill the form.
+    async function finishExtractionJob(up) {
+        for (var i = 0; i < up.total_chunks; i++) {
+            if (i > 0) {
+                // Pace requests to stay inside the free AI tiers' per-minute quota
+                // (the server halves it when Groq and Gemini take turns).
+                for (var s = Math.ceil((up.wait_ms || 65000) / 1000); s > 0; s--) {
+                    autofillMsg('Read part ' + i + ' of ' + up.total_chunks + '. Continuing in ' + s + 's (long documents are read in parts)…');
+                    await new Promise(function (r) { setTimeout(r, 1000); });
+                }
+            }
+            autofillMsg('Reading part ' + (i + 1) + ' of ' + up.total_chunks + '…');
+            var chunkRes = await fetch(extractEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'chunk', job_id: up.job_id, chunk_index: i })
+            });
+            var chunk = await chunkRes.json();
+            if (!chunk.success) throw new Error(chunk.error || ('Part ' + (i + 1) + ' failed.'));
+        }
+
+        autofillMsg('Filling in the form…');
+        var finRes = await fetch(extractEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'finalize', job_id: up.job_id })
+        });
+        var fin = await finRes.json();
+        if (!fin.success) throw new Error(fin.error || 'Extraction failed.');
+
+        populateForm(fin.data || {});
+        autofillDone('Done. Please review the filled-in fields, fix anything that looks off, then submit.');
+    }
+
+    if (pasteBtn && pastePanel && pasteText && readBtn && autofillStatus) {
+        pasteBtn.addEventListener('click', function () {
+            pastePanel.hidden = !pastePanel.hidden;
+            pasteBtn.setAttribute('aria-expanded', pastePanel.hidden ? 'false' : 'true');
+            if (!pastePanel.hidden) pasteText.focus();
+        });
+        readBtn.addEventListener('click', async function () {
+            var text = pasteText.value.trim();
+            if (text.length < 200) {
+                autofillMsg('Paste more of the document first: at least a few paragraphs.', 'error');
+                pasteText.focus();
+                return;
+            }
+            setAutofillBusy(true);
+            try {
+                autofillMsg('Sending the text…');
+                var fd = new FormData();
+                fd.append('action', 'upload');
+                fd.append('text', text.slice(0, 60000));
+                var res = await fetch(extractEndpoint, { method: 'POST', body: fd });
+                var up = await res.json();
+                if (!up.success) throw new Error(up.error || 'Sending the text failed.');
+                await finishExtractionJob(up);
+            } catch (err) {
+                autofillMsg('Extraction failed: ' + err.message, 'error');
+            } finally {
+                setAutofillBusy(false);
+            }
+        });
     }
 
     if (uploadBtn && fileInput && autofillStatus) {
@@ -360,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var file = fileInput.files && fileInput.files[0];
             if (!file) return;
             if (file.size > 10 * 1024 * 1024) {
-                autofillMsg('That file is larger than 10 MB. Please upload the complaint itself rather than full exhibits.', 'error');
+                autofillMsg('That file is larger than 10 MB. Please upload the filing itself rather than full exhibits, or paste its text.', 'error');
                 return;
             }
             setAutofillBusy(true);
@@ -379,37 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     up = await startExtractionJob(file, ocrText);
                 }
                 if (!up.success) throw new Error(up.error || 'Upload failed.');
-
-                for (var i = 0; i < up.total_chunks; i++) {
-                    if (i > 0) {
-                        // Pace requests to stay inside the free AI tiers' per-minute quota
-                        // (the server halves it when Groq and Gemini take turns).
-                        for (var s = Math.ceil((up.wait_ms || 65000) / 1000); s > 0; s--) {
-                            autofillMsg('Read part ' + i + ' of ' + up.total_chunks + '. Continuing in ' + s + 's (long documents are read in parts)…');
-                            await new Promise(function (r) { setTimeout(r, 1000); });
-                        }
-                    }
-                    autofillMsg('Reading part ' + (i + 1) + ' of ' + up.total_chunks + '…');
-                    var chunkRes = await fetch(extractEndpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'chunk', job_id: up.job_id, chunk_index: i })
-                    });
-                    var chunk = await chunkRes.json();
-                    if (!chunk.success) throw new Error(chunk.error || ('Part ' + (i + 1) + ' failed.'));
-                }
-
-                autofillMsg('Filling in the form…');
-                var finRes = await fetch(extractEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'finalize', job_id: up.job_id })
-                });
-                var fin = await finRes.json();
-                if (!fin.success) throw new Error(fin.error || 'Extraction failed.');
-
-                populateForm(fin.data || {});
-                autofillDone('Done. Please review the filled-in fields, fix anything that looks off, then submit.');
+                await finishExtractionJob(up);
             } catch (err) {
                 autofillMsg('Extraction failed: ' + err.message, 'error');
             } finally {
@@ -422,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var runLookup = async function () {
             var docket = docketInput.value.trim() || (form.elements.case_number ? form.elements.case_number.value.trim() : '');
             if (!docket) {
-                autofillMsg('Enter a docket number first, e.g. 2:24-cv-00123. Federal cases only — for state cases, upload the complaint instead.', 'error');
+                autofillMsg('Enter a docket number first, e.g. 2:24-cv-00123. Federal cases only — for state cases, upload a court document or paste its text instead.', 'error');
                 return;
             }
             setAutofillBusy(true);

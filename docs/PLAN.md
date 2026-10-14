@@ -357,9 +357,12 @@ need the owner's accounts, devices or artwork.
     /related-industries/ (index) and /foster-care/, /disability-group-homes/, /nursing-homes/,
     /psychiatric-hospitals/, each arguing only how its industry connects to the TTI (rewritten 2026-10-14: shared
     roots, the same companies and investors, the same methods, the same children), then where to report and who
-    to learn from. Open (2026-10-14): the nursing homes page and the index are to lead with shared vulnerability
-    (older people, disabled people and children depend on their keepers, are isolated and not believed; teen
-    programs build that isolation on purpose); sources being researched. Still drafts, so the public URLs 404
+    to learn from. The nursing homes page and the index lead with shared vulnerability (older people, disabled
+    people and children depend on their keepers, are isolated and not believed; teen programs build that
+    isolation on purpose; NIA, WHO, BJS, the 2007 House hearing). Sources found then and not sent yet (429), to send
+    as type website: the April 24, 2008 House hearing (govinfo CHRG-110hhrg41839), H. Rept. 110-669 (govinfo
+    CRPT-110hrpt669), and the Australian Royal Commission's final report summary (site down; Wayback copy
+    web.archive.org/web/20261011115114/..., which the archive rule wants as a PDF in the media library). Still drafts, so the public URLs 404
     until published; check for older Page Text saved edits overriding the new sections before publishing. Read each, edit at
     [KOP Data Tools > Page Text](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-page-text) or with the pencil,
     then publish in wp-admin; the History hub's "outside" box lists the index once it is published. Questions the
@@ -832,6 +835,12 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
   Types for the 7 the rules give staff ideology (mostly Teen Challenge's "Philosophy & Values" folder)
   and file KOP's own notes as editor's notes (folder "Editor's Notes" or a title with "editor's note"),
   and retype any AI guesses still waiting that belong under the new types.
+- **Lawsuit documents by pasted text; "Mark as lawsuit news" (2026-10-14)**: after deploy, paste a few
+  paragraphs of a court order into /submit-lawsuit/ ("Paste text"), KOP Tools > Lawsuits ("Paste text &
+  auto-extract", on a saved case: only empty fields fill, the id stays) and a pending lawsuit card in
+  Submissions Review ("Paste text from a court document"), and press "Mark as lawsuit news" on a
+  pending lawsuit card that is really an article (it should wait in News as category Lawsuit; Undo).
+  No live AI call has read pasted text yet; the offline inbox test covers the button.
 - No live call has been made to the new Claude, Gemini or Hugging Face
   models in the AI helpers (`docs/news-processor/README.md`); the pages send
   `provider: 'groq'`, so they only run when a request names them.
@@ -1970,6 +1979,26 @@ Open:
    reader per state starting with UT, ID, MT, FL, TX, AZ, NC, or OpenCorporates'
    API (ask about its public-interest access first); SEC EDGAR 10-K / Exhibit 21
    subsidiary lists for the public parents (UHS, Acadia).
+6. (2026-10-14) "Link to a company" here and on Business filings now finds the
+   company by name or makes a new one ("New company named ..." under the
+   matches; its notes cite the IRS listing or state filing; Undo on the Linked
+   tab deletes it again while nothing else uses it). The same field is
+   `kop_record_field_param()` for any queue, and actions for many queues are
+   card add-ons, switched on per queue at KOP Tools > Card Add-ons
+   (`docs/ADDING-CONTENT.md` section 5). After deploy:
+   - **Owner:** open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-card-addons
+     and tick the add-ons where you want them; on a Nonprofit tax filings card,
+     "Link to a company…", type a name not on file, pick the "New company"
+     line, then Undo it from the Linked tab.
+   - Not tested offline: the create itself (`kop_wbc_create()`, MySQL-only
+     SQL); it is the create Woodbury Reports and Wiki links already use. Check
+     the first one made on the live site has its note and folder.
+   - Queues still with their own create form, to move onto the field: Wiki
+     links ("Create the record and link it"), Woodbury Reports, Woodbury
+     Facts. Their forms also ask for city, state and type, which the field
+     does not yet; add those as optional params beside it when moving them.
+   - Next add-on to offer: "Run by a company" (a card's facility tied to a
+     company found or made with the field), off by default.
 
 ---
 
