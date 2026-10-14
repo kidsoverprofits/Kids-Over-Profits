@@ -48,6 +48,13 @@ check($e[1]['role'] === 'Former Owner', '"Former" is not doubled');
 check($e[0]['pastJobs'] === 'Therapist, Provo Canyon School; Aspen', 'previous roles become past jobs', $e[0]['pastJobs']);
 check($e[0]['source'] === 'r/troubledteens wiki' && $e[0]['sourceUrl'] === 'https://www.reddit.com/r/troubledteens/wiki/index/x', 'each entry cites the wiki page');
 check(!isset($e[0]['bio']), 'the write-up text stays on the wiki');
+$f = kop_wiki_staff_entries(array(
+    array('name' => 'A B', 'role' => 'reported to feel no remorse for the children whom CEDU abused ([source](https://medium.com/x))'),
+    array('name' => 'C D', 'role' => 'co-owned/co-founded by Robert Crist, Larry Carter, and Jeff Smith and others'),
+    array('name' => 'E F', 'role' => 'a Primary Therapist & the Transition and Alumni Support Coordinator'),
+));
+check($f[0]['role'] === '' && $f[1]['role'] === '', 'a sentence of the write-up is not printed as a role', $f[0]['role'] . ' / ' . $f[1]['role']);
+check(count($f) === 3, '...the person still goes on the record');
 
 if (!file_exists($mirror)) {
     echo "SKIP the mirror checks: no $mirror\n";

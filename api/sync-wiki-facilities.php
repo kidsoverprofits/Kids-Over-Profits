@@ -105,6 +105,9 @@ function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = ''): ar
         $name = trim(preg_replace('/\s+/', ' ', (string)($s['name'] ?? '')));
         if ($name === '') continue;
         $role = trim(preg_replace('/\s+/', ' ', (string)($s['role'] ?? '')));
+        // Some wiki "roles" are a sentence of the write-up ("reported to feel no remorse ...
+        // ([source](...))"): not a title, so the person goes on with no role.
+        if (mb_strlen($role) > 60 || preg_match('/\]\(|https?:\/\//', $role)) $role = '';
         // The record has no "former" field; its entries say so in the role, as "Former ...".
         if (!empty($s['isFormer']) && $role !== '' && stripos($role, 'former') === false) $role = 'Former ' . $role;
         $past = [];
