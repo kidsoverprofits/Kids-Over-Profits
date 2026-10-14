@@ -2152,20 +2152,37 @@ Built:
 
 Pilot (Sonnet readers): Spring Ridge Academy (10 documents, 312 items) and
 Midwest Academy (14, 347), every quote found on its page; 582 practice lines
-exported. Text taken so far for the 156 handbook-type documents (3,737 pages,
-595 OCRed).
+exported. Owner, 2026-10-14: far too much. Only what is unusual, shocking,
+oppressive or telling goes out: every practice line carries `notable` (one
+sentence on why it matters, shown on the card under the line); a line with
+none is dropped at export, and lines judged on review keep their reason in
+kop-pipeline `scripts/doc-read-notable.json`. Lines sent before and no longer
+kept go out under `withdrawn` and the import deletes them while still waiting.
+The pilot fell to 87 lines; the owner reviewed them (81 added, 4 left off).
+
+Full run, 2026-10-14 (22 readers, by program): the other 54 programs'
+handbook-type documents. 1,419 lines exported, 1,334 waiting on 359 cards.
+A line a document gives to another program goes on the record whose name,
+past name or other name it is (Copper Canyon -> Sedona Sky, Island View ->
+Elevations, a sister program's handbook in the wrong folder); 4 lines of a
+Three Points Center staff handbook are left out (two records share the name).
+Court exhibits: a filing stamp on a scanned page no longer counts as its text
+(the Casa by the Sea handbook, 57 pages, was never OCRed).
 
 Open:
-1. **Owner:** review the two pilot programs' cards once
-   `tmp/doc-read/practices.json` is on the server
-   (`~/kop-import/doc-read/practices.json`).
-2. Read the other handbook-type documents (about 2 M tokens of text; a
-   workflow, by program, the 38 linked wiki entries with an empty rules or
-   structure section first), then `--types reading` (NATSAP profiles,
-   marketing, depositions) for people, program facts and incidents.
-3. After the owner adds lines: rerun `scripts/wiki-gaps.php` (sync the mirror
+1. **Owner:** review the 359 cards (Review inbox > Rules from documents).
+2. Six "handbooks" in the library are only a JPG thumbnail of a PDF
+   (`...-pdf.jpg`: Gateway Academy 2013 and 2014, Caribe Vista 1999, Cherokee
+   Creek family handbook x3, GCTC 2021 x3); the PDFs themselves are not in the
+   media library. Find them (Drive) and import them, then read.
+3. Several readers went over 25 lines on dense manuals (Moonridge 2008: 46,
+   Midwest 2011: 43); if the owner finds those cards too long, tighten the cap.
+4. `--types reading` (NATSAP profiles, marketing, depositions) for people,
+   program facts and incidents; the person/program/incident items already read
+   join Woodbury Facts with `woodbury-facts.py --also tmp/doc-read`.
+5. After the owner adds lines: rerun `scripts/wiki-gaps.php` (sync the mirror
    with the new table first) and draft the wiki sections.
-4. Operator libraries (company pages) are not in the inventory yet.
+6. Operator libraries (company pages) are not in the inventory yet.
 
 ### 3.22 Profile research notes as prose; profiles open by default (2026-10-13)
 
