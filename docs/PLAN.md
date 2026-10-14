@@ -1903,15 +1903,17 @@ Open, in order (details in DATA-FLOWS.md section 4):
    **Too many wiki staff read as current (2026-10-14).** New approvals now write the job title, not the
    parser's wording ("current Clinical Director", "one", "married to ..."; `kop_wiki_staff_title()`), and
    "Former <title>" at a closed program or when the write-up opens "was/were/worked/served"
-   (`kop_wiki_staff_record_role()`). **Owner step / next session:** for staff already on records, run on the
-   server (ea-php82) `php api/fix-wiki-staff-former.php --list`, then `... apply` (574 on the 2026-10-13
-   mirror: 230 titles cleaned, 166 closed, 40 past tense, 138 not a title -> no role; `undo apply` puts them
-   back; the log keeps the new role so taking an approval back still works). Still open: about 400 at open
+   (`kop_wiki_staff_record_role()`). Staff already on records: `php api/fix-wiki-staff-former.php apply` ran on
+   the live site 2026-10-14, 586 entries on 182 records (227+8 titles cleaned, 172+2 closed, 40 past tense,
+   137 not a title -> no role); a second dry run finds 0. `php api/fix-wiki-staff-former.php undo apply` (ea-php82)
+   puts every role back; the log keeps the new role so taking an approval back still works. Still open: about 400 at open
    programs whose wiki write-up says "is the ..." and may be stale; js/wiki-parser.js still makes the "one" /
    "current ..." roles (the import cleans them). scripts/test-wiki-staff.php's approve check fails on the
    mirror because #70's staff are already on the record (pick an entry with staff not yet added). Woodbury
    Facts and HEAL do the same with dated roles ("Clinical Director (2008, Woodbury Reports)", ~1,800 entries,
-   ~1,080 at closed programs): not fixed.
+   ~1,080 at closed programs): not fixed. HEAL also filed a phase sheet as a staff list: Moonridge Academy
+   (facility 10343) has a "staff member" named "2 off campus activities in a month" with level rules as its
+   role, source "HEAL, staff list for Moonridge Academy (archived 2025-08-27)"; check that capture's other entries.
 5. Wiki staleness listener + badge (this is 3.12 step 6). Listener and inbox item done 2026-10-14
    (`inc/wiki-auto-updates.php`); the badge is open.
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
