@@ -774,27 +774,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_dm_apply')
 
     if ($action === 'regen') {
         $done = 0;
-        $failed = 0;
+        $failed = array();
         $left = 0;
         foreach (array_map('intval', kop_dm_ticked_ids('row')) as $id) {
-            if ($done + $failed >= $REGEN_BATCH) {
+            if ($done + array_sum($failed) >= $REGEN_BATCH) {
                 $left++;
                 continue;
             }
-            $abs = get_attached_file($id);
-            if (!$abs || !file_exists($abs) || get_post_mime_type($id) !== 'application/pdf') {
-                $failed++;
+            if (get_post_mime_type($id) !== 'application/pdf') {
                 continue;
             }
-            $meta = wp_generate_attachment_metadata($id, $abs);
-            if (is_array($meta) && !empty($meta['sizes'])) {
-                wp_update_attachment_metadata($id, $meta);
+            $r = kop_pdf_preview_make($id);
+            if ($r['ok']) {
                 $done++;
             } else {
-                $failed++;
+                $why = kop_pdf_preview_reason_label($r['reason']);
+                $failed[$why] = (isset($failed[$why]) ? $failed[$why] : 0) + 1;
             }
         }
-        $apply_log[] = "Regenerated previews for {$done} PDF(s)." . ($failed ? " {$failed} failed (missing file or Ghostscript could not render it)." : '') . ($left ? " {$left} left for the next pass." : '');
+        $why_text = array();
+        foreach ($failed as $why => $n) {
+            $why_text[] = "{$n}: {$why}";
+        }
+        $apply_log[] = "Regenerated previews for {$done} PDF(s)." . ($failed ? ' ' . array_sum($failed) . ' failed (' . implode('; ', $why_text) . ').' : '') . ($left ? " {$left} left for the next pass." : '');
     }
 
     if ($action === 'orphans') {
