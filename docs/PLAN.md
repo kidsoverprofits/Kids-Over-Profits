@@ -12,6 +12,9 @@ Last checked against `main` at
 on 2026-09-28. Check `git log origin/main` for what has landed since, and
 update this file in the same commit as the work it tracks.
 
+Open research questions (sources that disagree, records that look wrong, years a draft had to guess) are
+in [RESEARCH-TASKS.md](RESEARCH-TASKS.md): add one there whenever it comes up, and take it off when settled.
+
 The record of finished work, with the reasoning behind each decision, stays
 where it was written:
 
