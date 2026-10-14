@@ -75,30 +75,21 @@ function kop_facility_to_wiki_json(array $facility, array $operator): array {
 }
 
 /**
- * An approved wiki submission onto its facility record: the wiki_master row
- * for its slug (as the approval wrote it), the submission's facility link,
- * its Reddit page as the staff citation. Staff go on once per submission
- * (logged; kop_wiki_staff_undo() takes them off).
+ * An approved wiki submission onto its facility record, read from the
+ * submission itself (wiki_master, which approval also writes, does not exist
+ * on the live database: before 2026-10-13 this merge never ran there). Its
+ * facility link, its Reddit page as the staff citation. Staff go on once per
+ * submission (logged; kop_wiki_staff_undo() takes them off).
  *
  * @return array{merged:bool, reason:string, staff_added?:int}
  */
 function kop_wiki_merge_submission(PDO $pdo, int $id): array {
-    $st = $pdo->prepare('SELECT id, program_name, json_data, submission_notes, facility_unique_name FROM wiki_submissions WHERE id = ?');
+    $st = $pdo->prepare('SELECT id, program_name, city_state, organization, program_type, years_active, json_data,
+        submission_notes, facility_unique_name FROM wiki_submissions WHERE id = ?');
     $st->execute([$id]);
     $sub = $st->fetch(PDO::FETCH_ASSOC);
     if (!$sub) return ['merged' => false, 'reason' => 'submission gone'];
-    $json = json_decode((string)$sub['json_data'], true);
-    $slug = (is_array($json) && !empty($json['slug']))
-        ? $json['slug']
-        : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $sub['program_name'] ?? '')));
-    $w = $pdo->prepare('SELECT * FROM wiki_master WHERE slug = ? LIMIT 1');
-    $w->execute([$slug]);
-    $entry = $w->fetch(PDO::FETCH_ASSOC);
-    if (!$entry) return ['merged' => false, 'reason' => "no wiki_master row for '$slug'"];
-    // Follow the submission's explicit link rather than name-matching.
-    if (empty($entry['facility_unique_name']) && !empty($sub['facility_unique_name'])) {
-        $entry['facility_unique_name'] = $sub['facility_unique_name'];
-    }
+    $entry = $sub;
     $entry['__submission_id'] = $id;
     $entry['__source_url'] = kop_wiki_staff_source_url($sub);
     $result = kop_merge_wiki_into_facility($pdo, $entry);

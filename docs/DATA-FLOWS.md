@@ -193,9 +193,12 @@ request.
     Rejecting or un-approving takes off exactly those
     (`kop_wiki_staff_undo()`).
   - Accreditations go to `accreditations.current`.
-  - Before that, the merge wrote the old `staffMembers` shape, which the v2
-    save dropped, so no wiki staff reached a record after the write
-    switch.
+  - Before that the merge never ran on the live site at all: it read the
+    entry from `wiki_master`, a table that does not exist there (the
+    approval's upsert into it fails quietly). It now reads the submission
+    itself. Even where it ran, it wrote the old `staffMembers` shape, which
+    the v2 save drops. `api/backfill-wiki-staff.php` merged the entries
+    approved before the fix.
   - The facility page lists entry titles live (`kop_facility_pages_wiki()`,
     facility-pages.php:3483) and links to `/wiki-feed/?search=<current name>`.
 - **Facility to wiki:** nothing on the server.

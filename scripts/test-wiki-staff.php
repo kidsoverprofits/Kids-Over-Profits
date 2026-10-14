@@ -59,7 +59,14 @@ if (!file_exists($mirror)) {
 class KOP_Wiki_Staff_Test_PDO extends PDO {
     private function fix($sql) {
         $sql = preg_replace('/^\s*SHOW TABLES LIKE (.+)$/i', "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE $1 ESCAPE '\\'", (string) $sql);
-        return preg_replace('/^\s*INSERT\s+IGNORE/i', 'INSERT OR IGNORE', $sql);
+        $sql = preg_replace('/^\s*INSERT\s+IGNORE\b/i', 'INSERT OR IGNORE', $sql);
+        // MySQL upserts (location memberships, company links) in SQLite's words.
+        if (stripos($sql, 'ON DUPLICATE KEY UPDATE') !== false) {
+            $sql = str_ireplace('ON DUPLICATE KEY UPDATE', 'ON CONFLICT DO UPDATE SET', $sql);
+            $sql = preg_replace('/\bVALUES\((\w+)\)/i', 'excluded.$1', $sql);
+            $sql = preg_replace('/\bIF\(/i', 'IIF(', $sql);
+        }
+        return $sql;
     }
     public function prepare(string $query, array $options = array()): PDOStatement|false {
         return parent::prepare($this->fix($query), $options);
