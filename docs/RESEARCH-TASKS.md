@@ -347,6 +347,12 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
 - **Exceed Marketing Solutions**: Vive, Oklahoma Adult and Teen Challenge and Sunset Bay list someone else as their
   contact. Is Best Choice Admissions Services a referrer, not a marketer?
 
+### Family Foundation School (found 2026-10-14)
+
+- **Paul Geer's first year at the school**: WBNG gives 1991 (4/9/2024) and 1994 (9/4/2025); Woodbury names him
+  2009-2012 only. The wiki draft says only "until it closed in 2014". The indictment or trial record would settle it.
+- **Is Liz Ianelli the alumna who counted 101 deaths** in the 2018 NYT article? The record lists her as mentioned there.
+
 ### Related-industry pages (found 2026-10-08)
 
 - The Joint Commission complaint number (1-800-994-6610) came from a search summary.

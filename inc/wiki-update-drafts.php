@@ -759,7 +759,7 @@ function kop_wiki_drafts_refresh_approved(PDO $pdo) {
     return $out;
 }
 
-define('KOP_WIKI_DRAFTS_REFRESH_VERSION', '6');   // 1: editorial voice cut from 23 entries; 2: copy-edit; 3: Ballard Sheppard at closed Rivendell in the past (2026-10-09); 4: previous & alternate names line (2026-10-09); 5: names line in bold, with each name's years; 6: a line in bold italics is no longer made a bullet (2026-10-13)
+define('KOP_WIKI_DRAFTS_REFRESH_VERSION', '7');   // 1: editorial voice cut from 23 entries; 2: copy-edit; 3: Ballard Sheppard at closed Rivendell in the past (2026-10-09); 4: previous & alternate names line (2026-10-09); 5: names line in bold, with each name's years; 6: a line in bold italics is no longer made a bullet (2026-10-13); 7: Family Foundation School: Paul Geer's trial, Liz Ianelli's book and film (2026-10-14)
 
 add_action('init', function () {
     if (get_option('kop_wiki_drafts_refresh_version') === KOP_WIKI_DRAFTS_REFRESH_VERSION || get_transient('kop_wiki_drafts_refresh_running')) return;
