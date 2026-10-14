@@ -290,6 +290,34 @@ function kop_wbf_list_has(array $list, $value) {
     return false;
 }
 
+/** One role in plain words: "Director (2006, Woodbury Reports)" -> "director". */
+function kop_wbf_role_plain($s) {
+    return trim(preg_replace('/\s+/', ' ', preg_replace('/\([^)]*\)/', '', strtolower((string) $s))));
+}
+
+/** Whether two roles say the same thing (one holds the other), or either says nothing. */
+function kop_wbf_role_same($a, $b) {
+    $a = kop_wbf_role_plain($a);
+    $b = kop_wbf_role_plain($b);
+    return kop_wbf_no_info($a) || kop_wbf_no_info($b) || strpos($a, $b) !== false || strpos($b, $a) !== false;
+}
+
+/**
+ * A role at this program written as a past job: "Founder (2021, HEAL)" ->
+ * "Founder - Canyon State Academy (2021)", the shape the builds give pastJobs.
+ */
+function kop_wbf_role_job($role, array $doc) {
+    $role = trim((string) $role);
+    $when = '';
+    if (preg_match('/\(([^)]*)\)\s*$/', $role, $m)) {
+        $role = trim(substr($role, 0, -strlen($m[0])));
+        $first = trim(explode(',', $m[1])[0]);
+        if (preg_match('/\d{4}/', $first)) $when = ' (' . $first . ')';
+    }
+    $name = trim((string) ($doc['identification']['name'] ?? ''));
+    return $role . ($name !== '' ? ' - ' . $name : '') . $when;
+}
+
 /**
  * Apply one proposal to a document. Returns what was done, for Undo.
  * Throws when the record already holds a different value.
@@ -323,7 +351,12 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
                         $s['role'] = $value['role'];
                     }
                     if ($before['pastJobs'] === '') {
-                        $s['pastJobs'] = $value['pastJobs'];
+                        // Another role here, on an entry with no work history, is history, not a conflict: it joins the past jobs.
+                        $jobs = array_filter(array(trim((string) $value['pastJobs'])));
+                        if ($before['role'] !== '' && !kop_wbf_role_same($before['role'], $value['role'] ?? '')) {
+                            array_unshift($jobs, kop_wbf_role_job($value['role'], $doc));
+                        }
+                        $s['pastJobs'] = implode('; ', array_filter($jobs));
                     }
                     if (empty($s['source'])) {
                         $s = array_merge($s, kop_wbf_source_ref($r));
@@ -464,15 +497,14 @@ function kop_wbf_conflict_parts(array $doc, array $r) {
             $key = kop_wbf_person_key($value['name'] ?? '');
             $role = trim((string) ($value['role'] ?? ''));
             if ($key === '' || kop_wbf_no_info($role)) return null;
-            // "Director (2006, Woodbury Reports)" and "director" are the same role.
-            $plain = function ($s) { return trim(preg_replace('/\s+/', ' ', preg_replace('/\([^)]*\)/', '', strtolower((string) $s)))); };
             foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
                 foreach ((array) kop_wbf_get($doc, $path) as $s) {
                     if (!is_array($s) || kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
                     $have = trim((string) ($s['role'] ?? ''));
-                    $a = $plain($have);
-                    $b = $plain($role);
-                    if (kop_wbf_no_info($a) || kop_wbf_no_info($b) || strpos($a, $b) !== false || strpos($b, $a) !== false) return null;
+                    // "Director (2006, Woodbury Reports)" and "director" are the same role.
+                    if (kop_wbf_role_same($have, $role)) return null;
+                    // An entry with no work history has nothing to disagree with: Add writes this role into its past jobs.
+                    if (trim((string) ($s['pastJobs'] ?? '')) === '') return null;
                     return array('what' => 'staff', 'record' => $s['name'] . ': ' . $have, 'item' => $s['name'] . ': ' . $role,
                         'text' => 'The record lists ' . $s['name'] . ' as ' . $have . '; this says ' . $role . '.', 'slot' => $path);
                 }

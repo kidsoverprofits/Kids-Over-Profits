@@ -477,7 +477,7 @@ function kop_rinbox_wbf_save($key, array $fields) {
  */
 function kop_rinbox_wbf_on_file() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_v2', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT pkey, facility_id, op, path, value FROM ' . kop_wbf_table()
             . " WHERE status = 'pending' AND facility_id > 0 AND op IN ('add_staff', 'add_list', 'set_if_empty', 'set_closed')", ARRAY_A);
@@ -521,6 +521,8 @@ function kop_wbf_on_record(array $doc, array $r) {
                     foreach (array('role', 'pastJobs') as $k) {
                         if (trim((string) ($value[$k] ?? '')) !== '' && trim((string) ($s[$k] ?? '')) === '') return '';
                     }
+                    // Another role, on an entry with no work history, goes into its past jobs.
+                    if (trim((string) ($s['pastJobs'] ?? '')) === '' && !kop_wbf_role_same($s['role'] ?? '', $value['role'] ?? '')) return '';
                     return ($s['name'] ?? $value['name']) . ' is on its staff list' . (!empty($s['role']) ? ' (' . $s['role'] . ')' : '');
                 }
             }
@@ -601,7 +603,7 @@ function kop_rinbox_wbf_built_conflict(array $r, $doc) {
  */
 function kop_rinbox_wbf_conflicts() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf_conflicts_v4', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_conflicts_v5', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND ((conflict IS NOT NULL AND conflict <> '')
             OR (current_val IS NOT NULL AND current_val <> '') OR (facility_id > 0 AND op IN ('set_if_empty', 'set_closed', 'add_staff')))", ARRAY_A);

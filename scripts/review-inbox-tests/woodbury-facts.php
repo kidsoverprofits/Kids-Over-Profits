@@ -131,8 +131,20 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         && $page['total'] === $counts['records']);
     // Conflicts are always marked: what the record says that disagrees, never ticked, and Add keeps them waiting.
     $doc = array('facilityDetails' => array('type' => 'Wilderness Therapy'), 'operatingPeriod' => array('status' => 'Open', 'endYear' => null),
-        'staff' => array('administrator' => array(array('name' => 'Jane Q. Roe', 'role' => 'Executive Director (2001)'))));
+        'identification' => array('name' => 'Roe Ranch'),
+        'staff' => array('administrator' => array(array('name' => 'Jane Q. Roe', 'role' => 'Executive Director (2001)', 'pastJobs' => 'Teacher - Elm School (1995)'),
+            array('name' => 'Sam Poe', 'role' => 'Therapist', 'pastJobs' => ''))));
     $row = function ($op, $path, $value) { return array('op' => $op, 'path' => $path, 'value' => json_encode($value)); };
+    // Another role for someone listed with no work history is history, not a conflict: Add writes it into their past jobs, Undo takes it back.
+    $poe = $row('add_staff', 'staff.notableStaff', array('name' => 'Sam Poe', 'role' => 'Founder (2021, HEAL)', 'pastJobs' => 'Intake Coordinator - Pathway (2019)')) + array('evidence' => '[]', 'issue_date' => '', 'pkey' => 'poe');
+    $d2 = $doc;
+    $done = kop_wbf_doc_apply($d2, $poe);
+    $after = $d2['staff']['administrator'][1];
+    kop_wbf_doc_undo($d2, $done);
+    $check('woodbury-facts: another role on an entry with no work history goes into its past jobs, no conflict, exact Undo',
+        kop_wbf_conflict($doc, $poe) === '' && kop_wbf_on_record($doc, $poe) === ''
+        && $after['role'] === 'Therapist' && $after['pastJobs'] === 'Founder - Roe Ranch (2021); Intake Coordinator - Pathway (2019)'
+        && $d2['staff']['administrator'][1]['pastJobs'] === '' && $d2['staff']['administrator'][1]['role'] === 'Therapist', json_encode($after));
     $check('woodbury-facts: conflict rules (other value, open record, other role) and none for the same thing',
         kop_wbf_conflict($doc, $row('set_if_empty', 'facilityDetails.type', 'Boot Camp')) === 'The record has Wilderness Therapy; this says Boot Camp.'
         && kop_wbf_conflict($doc, $row('set_if_empty', 'facilityDetails.type', 'wilderness therapy')) === ''
