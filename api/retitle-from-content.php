@@ -639,7 +639,7 @@ function kop_rtc_discover_vision_models() {
     $ids = [];
     foreach (($decoded['data'] ?? []) as $m) {
         $id = (string) ($m['id'] ?? '');
-        if ($id !== '' && preg_match('/(qwen3\.\d|-vl|vision|llama-4|maverick|scout|pixtral)/i', $id)) {
+        if ($id !== '' && preg_match('/(qwen3\.\d|-vl\b|vision|llama-4|maverick|scout|pixtral)/i', $id)) {
             $ids[] = $id;
         }
     }

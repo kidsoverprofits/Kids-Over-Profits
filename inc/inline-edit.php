@@ -306,7 +306,7 @@ add_filter('the_content', function ($content) {
     $out = '';
     foreach (parse_blocks($content) as $index => $block) {
         $html = $blocks ? render_block($block) : $block['innerHTML'];
-        if (trim(wp_strip_all_tags($html)) === '' && !preg_match('/<(img|iframe|video|figure)/i', $html)) {
+        if (trim(wp_strip_all_tags($html)) === '' && !preg_match('/<(img|iframe|video|figure)\b/i', $html)) {
             $out .= $html;
             continue;
         }
