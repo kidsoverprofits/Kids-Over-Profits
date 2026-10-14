@@ -1900,6 +1900,7 @@ function parseWikiMarkdown(markdown) {
             if (/^(?:role(?:s)?\b|current role|previous role|pre-|post-|note[s:]?$|source[s:]?$)/i.test(name)) continue;
 
             const isFormer = /formerly|former|ex-|passed away|death|no longer/i.test(bioText)
+                || /^(?:was|were|had been)\b/i.test(bioText)   // "was the Program Director" (as api/sync-wiki-facilities.php kop_wiki_staff_is_former())
                 || /^worked\b/i.test(bioText)       // "worked as..." implies past
                 || /^previously\s+worked\b/i.test(bioText)
                 || /^served\b/i.test(bioText)       // "served as..." implies past

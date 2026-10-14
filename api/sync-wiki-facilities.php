@@ -97,8 +97,35 @@ function kop_wiki_merge_submission(PDO $pdo, int $id): array {
     return $result;
 }
 
+/**
+ * Is the program closed, by the record's operating period or the wiki's years ("1998-2019")?
+ * A closed program's staff are all past staff.
+ */
+function kop_wiki_program_closed(array $period, string $yearsActive = ''): bool {
+    if (preg_match('/\bclosed\b/i', (string)($period['status'] ?? ''))) return true;
+    if (!empty($period['endYear'])) return true;
+    foreach ([(string)($period['text'] ?? ''), $yearsActive] as $t) {
+        if (preg_match('/\b(?:19|20)\d{2}\s*(?:-|\x{2013}|\x{2014}|to)\s*(?:19|20)\d{2}\b/u', $t)) return true;
+    }
+    return false;
+}
+
+/**
+ * Did this person leave the program? The wiki parser's isFormer ("former", "no longer", a year
+ * range), a closed program, or a write-up that opens in the past tense: "was the Program
+ * Director", "were the Founders", "worked as", "served as". "is" stays current.
+ */
+function kop_wiki_staff_is_former(array $s, bool $programClosed = false): bool {
+    if (!empty($s['isFormer']) || $programClosed) return true;
+    if (preg_match('/\b(former|previous|ex-)/i', (string)($s['role'] ?? ''))) return true;
+    // The bio follows the bold name: '("Doc") was ...', ', also known as "Papa Miguel" by survivors, was ...'.
+    $bio = ltrim((string)($s['bio'] ?? ''));
+    $bio = preg_replace('/^(?:\([^)]*\)\s*)?(?:,\s*(?:also known as|prior to)[^,]*,\s*)?/i', '', $bio);
+    return (bool)preg_match('/^(?:was|were|had been|worked|served|previously|formerly|left|retired|resigned|died|passed away|began)\b/i', $bio);
+}
+
 /** The wiki entry's people as the record lists them (inc/facility-store.php kop_facility_person_list()). */
-function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = ''): array {
+function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = '', bool $programClosed = false): array {
     $out = [];
     foreach ($staffMembers as $s) {
         if (!is_array($s)) continue;
@@ -109,7 +136,7 @@ function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = ''): ar
         // ([source](...))"): not a title, so the person goes on with no role.
         if (mb_strlen($role) > 60 || preg_match('/\]\(|https?:\/\//', $role)) $role = '';
         // The record has no "former" field; its entries say so in the role, as "Former ...".
-        if (!empty($s['isFormer']) && $role !== '' && stripos($role, 'former') === false) $role = 'Former ' . $role;
+        if ($role !== '' && stripos($role, 'former') === false && kop_wiki_staff_is_former($s, $programClosed)) $role = 'Former ' . $role;
         $past = [];
         foreach ((array)($s['previousRoles'] ?? []) as $p) {
             $t = is_array($p) ? implode(', ', array_filter([trim((string)($p['role'] ?? '')), trim((string)($p['employer'] ?? ''))])) : trim((string)$p);
@@ -197,6 +224,87 @@ function kop_wiki_staff_undo(PDO $pdo, int $submissionId): int {
     unset($log[$submissionId]);
     kop_wiki_staff_log_save($log);
     return $removed;
+}
+
+/**
+ * Mark "Former" the wiki staff that approvals put on records before kop_wiki_staff_is_former()
+ * knew a closed program or a past-tense write-up (2026-10-14): each logged entry still on its
+ * record as written gets "Former " before its role, and the log keeps the role it had
+ * ('roleBefore') so $undo puts it back and kop_wiki_staff_undo() still finds the entry.
+ * Returns [{submission, record, name, from, to}] of what changed (or would, when !$apply).
+ */
+function kop_wiki_staff_former_pass(PDO $pdo, bool $apply = false, bool $undo = false): array {
+    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+    $prefix = kop_v2_detect_prefix($pdo);
+    $log = kop_wiki_staff_log();
+    $sub = $pdo->prepare('SELECT years_active, json_data FROM wiki_submissions WHERE id = ?');
+    $out = [];
+    $logChanged = false;
+    foreach ($log as $subId => $u) {
+        $row = kop_v2_pdo_master_row_by_name($pdo, $prefix, (string)($u['record'] ?? ''));
+        if (!$row) continue;
+        $project = json_decode($row['json_data'], true);
+        if (!is_array($project)) continue;
+        $sub->execute([(int)$subId]);
+        $w = $sub->fetch(PDO::FETCH_ASSOC) ?: [];
+        $members = [];
+        foreach ((array)(json_decode((string)($w['json_data'] ?? ''), true)['staffMembers'] ?? []) as $s) {
+            if (is_array($s)) $members[kop_wiki_staff_fold($s['name'] ?? '')] = $s;
+        }
+        // name|role as logged => the role it gets
+        $to = [];
+        foreach ((array)$u['staff'] as $i => $e) {
+            $role = (string)($e['role'] ?? '');
+            if ($undo) {
+                if (!isset($e['roleBefore'])) continue;
+                $new = (string)$e['roleBefore'];
+            } else {
+                if ($role === '' || stripos($role, 'former') !== false) continue;
+                $new = 'Former ' . $role;
+            }
+            $to[kop_wiki_staff_fold($e['name']) . '|' . kop_wiki_staff_fold($role)] = [$i, $new];
+        }
+        if (!$to) continue;
+        $data = &$project['data'];
+        $nodes = !empty($data['facilities']) && is_array($data['facilities']) ? array_keys($data['facilities']) : [null];
+        $done = [];
+        foreach ($nodes as $n) {
+            if ($n === null) {
+                if (!isset($data['facility']) || !is_array($data['facility'])) continue;
+                $fac = &$data['facility'];
+            } else {
+                $fac = &$data['facilities'][$n];
+            }
+            $closed = kop_wiki_program_closed((array)($fac['operatingPeriod'] ?? []), (string)($w['years_active'] ?? ''));
+            foreach ((array)($fac['staff']['notableStaff'] ?? []) as $j => $e) {
+                if (!is_array($e) || ($e['source'] ?? '') !== 'r/troubledteens wiki') continue;
+                $k = kop_wiki_staff_fold($e['name'] ?? '') . '|' . kop_wiki_staff_fold($e['role'] ?? '');
+                if (!isset($to[$k]) || isset($done[$k])) continue;
+                $m = $members[kop_wiki_staff_fold($e['name'] ?? '')] ?? ['name' => $e['name']];
+                if (!$undo && !kop_wiki_staff_is_former($m, $closed)) continue;
+                [$i, $new] = $to[$k];
+                $out[] = ['submission' => (int)$subId, 'record' => (string)$u['record'], 'name' => (string)$e['name'],
+                    'from' => (string)$e['role'], 'to' => $new, 'why' => $undo ? 'undo' : ($closed ? 'closed' : 'past tense')];
+                $done[$k] = true;
+                $fac['staff']['notableStaff'][$j]['role'] = $new;
+                if ($undo) {
+                    $log[$subId]['staff'][$i]['role'] = $new;
+                    unset($log[$subId]['staff'][$i]['roleBefore']);
+                } else {
+                    $log[$subId]['staff'][$i]['roleBefore'] = (string)$e['role'];
+                    $log[$subId]['staff'][$i]['role'] = $new;
+                }
+            }
+            unset($fac);
+        }
+        unset($data);
+        if ($done) {
+            $logChanged = true;
+            if ($apply) kop_v2_save_legacy_row($pdo, $prefix, (string)$row['unique_name'], $project);
+        }
+    }
+    if ($apply && $logChanged) kop_wiki_staff_log_save($log);
+    return $out;
 }
 
 /**
@@ -375,7 +483,8 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
                 if ($k !== '') $have[$k] = true;
             }
         }
-        foreach (kop_wiki_staff_entries($wikiJson['staffMembers'], (string)($wiki['__source_url'] ?? '')) as $entry) {
+        $closed = kop_wiki_program_closed($period, (string)($wiki['years_active'] ?? ''));
+        foreach (kop_wiki_staff_entries($wikiJson['staffMembers'], (string)($wiki['__source_url'] ?? ''), $closed) as $entry) {
             $k = kop_wiki_staff_fold($entry['name']);
             if ($k === '' || isset($have[$k])) continue;
             $have[$k] = true;

@@ -1877,6 +1877,15 @@ Open, in order (details in DATA-FLOWS.md section 4):
    [PLAN-ARCHIVE.md](PLAN-ARCHIVE.md); cards at Review inbox > Wiki staff added). Not merged and still
    open: 14 entries whose linked record is gone (merged or renamed since), 7 linked to a company whose
    program they name is not under it, 8 with no link (Review inbox > Wiki links).
+   **Too many wiki staff read as current (2026-10-14).** New approvals now write "Former <role>" at a
+   closed program or when the write-up opens "was/were/worked/served" (`kop_wiki_staff_is_former()`).
+   For staff already on records, run on the server (ea-php82):
+   `php api/fix-wiki-staff-former.php --list`, then `... apply` (277 on the 2026-10-13 mirror: 231 at
+   closed programs, 46 past-tense write-ups; `undo apply` puts them back). Still open: 35 people at closed
+   programs with no role (nothing to put "Former" before); about 400 at open programs whose wiki
+   write-up says "is the ..." and may be stale; wiki roles read as "one" from "is one of the Founders"
+   (js/wiki-parser.js role pattern). Woodbury Facts and HEAL do the same with dated roles
+   ("Clinical Director (2008, Woodbury Reports)", ~1,800 entries, ~1,080 at closed programs): not fixed.
 5. Wiki staleness listener + badge (this is 3.12 step 6). Listener and inbox item done 2026-10-14
    (`inc/wiki-auto-updates.php`); the badge is open.
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every

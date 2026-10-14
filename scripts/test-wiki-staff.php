@@ -55,6 +55,21 @@ $f = kop_wiki_staff_entries(array(
 ));
 check($f[0]['role'] === '' && $f[1]['role'] === '', 'a sentence of the write-up is not printed as a role', $f[0]['role'] . ' / ' . $f[1]['role']);
 check(count($f) === 3, '...the person still goes on the record');
+$g = kop_wiki_staff_entries(array(
+    array('name' => 'G H', 'role' => 'the Program Director', 'bio' => 'was the Program Director at Ashcreek Ranch Academy from February until July of 2015.'),
+    array('name' => 'I J', 'role' => 'Executive Director', 'bio' => 'is the Co-Founder and current Executive Director of Ashcreek Ranch Academy.'),
+    array('name' => 'K L', 'role' => 'Founder', 'bio' => '("Doc") was the Founder and Executive Director of Anneewakee.'),
+    array('name' => 'M N', 'role' => 'Founders', 'bio' => 'were the Founders and Owners of Ashby Academy.'),
+    array('name' => 'O P', 'role' => 'Therapist', 'bio' => 'is currently a Therapist at Eagle Ranch Academy.'),
+));
+check($g[0]['role'] === 'Former the Program Director','"was the Program Director" is former', $g[0]['role']);
+check($g[1]['role'] === 'Executive Director' && $g[4]['role'] === 'Therapist', '"is the ..." / "is currently ..." stay current', $g[1]['role'] . ' / ' . $g[4]['role']);
+check(strpos($g[2]['role'], 'Former ') === 0 && strpos($g[3]['role'], 'Former ') === 0, 'a nickname before "was", and "were", are read too', $g[2]['role'] . ' / ' . $g[3]['role']);
+$h = kop_wiki_staff_entries(array(array('name' => 'I J', 'role' => 'Executive Director', 'bio' => 'is the Executive Director.')), '', true);
+check($h[0]['role'] === 'Former Executive Director', "a closed program's staff are all former", $h[0]['role']);
+check(kop_wiki_program_closed(array('status' => 'Closed')) && kop_wiki_program_closed(array('endYear' => 2019))
+    && kop_wiki_program_closed(array(), '1998 - 2019') && kop_wiki_program_closed(array(), '1998–2019'), 'closed: status, end year, a year range');
+check(!kop_wiki_program_closed(array('status' => 'Open'), '1998-present') && !kop_wiki_program_closed(array(), '1998'), 'open: "1998-present", a start year only');
 
 if (!file_exists($mirror)) {
     echo "SKIP the mirror checks: no $mirror\n";
@@ -157,6 +172,51 @@ if ($pick) {
     check(kop_wiki_staff_undo($pdo, $id) === 0, 'a second undo does nothing');
 } else {
     echo "SKIP approve/undo: no approved entry with staff linked to one facility\n";
+}
+
+// ---- Staff approved before the rule: the one-time "Former" pass, with the live log ----------
+$pdo->exec("ATTACH DATABASE 'file:" . str_replace('\\', '/', $mirror) . "?mode=ro' AS prod");
+$raw = $pdo->query("SELECT option_value FROM prod.wpdl_options WHERE option_name = 'kop_wiki_staff_log'")->fetchColumn();
+$pdo->exec('DETACH DATABASE prod');
+$live_log = $raw ? @unserialize($raw) : false;
+if (is_array($live_log) && $live_log) {
+    $GLOBALS['kop_wiki_staff_log'] = $live_log;
+    $dry = kop_wiki_staff_former_pass($pdo, false);
+    check(kop_wiki_staff_log() === $live_log, 'the dry run changes neither the log nor (below) the records');
+    $changes = kop_wiki_staff_former_pass($pdo, true);
+    check(count($changes) === count($dry) && count($changes) > 0, count($changes) . ' wiki staff entries marked Former', count($dry) . ' in the dry run');
+    $by = array();
+    foreach ($changes as $c) $by[$c['why']] = ($by[$c['why']] ?? 0) + 1;
+    echo '  ' . json_encode($by) . "\n";
+    $ok = true;
+    $seen = array();
+    foreach ($changes as $c) {
+        $hit = false;
+        foreach ($staff_of($c['record']) as $e) if (($e['name'] ?? '') === $c['name'] && ($e['role'] ?? '') === $c['to']) $hit = true;
+        if (!$hit || strpos($c['to'], 'Former ') !== 0) { $ok = false; break; }
+        if (isset($args['list'])) echo "  {$c['record']}: {$c['name']}: {$c['from']} -> {$c['to']} ({$c['why']})\n";
+    }
+    check($ok, 'each is on its record as "Former <role>"');
+    check(count(kop_wiki_staff_former_pass($pdo, false)) === 0, 'running it again changes nothing');
+    // Taking an approval back still finds its renamed entries (the log holds the new role).
+    $sid = $changes[0]['submission'];
+    $rec = $changes[0]['record'];
+    $renamed = array_filter($changes, function ($c) use ($sid) { return $c['submission'] === $sid; });
+    kop_wiki_staff_undo($pdo, $sid);
+    $still = 0;
+    foreach ($staff_of($rec) as $e) foreach ($renamed as $c) if (($e['name'] ?? '') === $c['name'] && ($e['role'] ?? '') === $c['to']) $still++;
+    check($still === 0, "taking approval #$sid back still takes off the ones marked Former", count($renamed) . " marked, $still left");
+    // The pass's own undo puts every other role back as it was.
+    $back = kop_wiki_staff_former_pass($pdo, true, true);
+    $want = array();
+    foreach ($changes as $c) if ($c['submission'] !== $sid) $want[] = $c['record'] . '|' . $c['name'] . '|' . $c['from'];
+    $got = array_map(function ($c) { return $c['record'] . '|' . $c['name'] . '|' . $c['to']; }, $back);
+    sort($want);
+    sort($got);
+    check($got === $want, 'undo puts every role back as it was', count($back) . ' put back of ' . count($want));
+    check(count(kop_wiki_staff_former_pass($pdo, false, true)) === 0, '...and leaves nothing to put back');
+} else {
+    echo "SKIP the Former pass: no kop_wiki_staff_log in the mirror\n";
 }
 
 // ---- Every approved entry: what approving them all again would put on the records ---------

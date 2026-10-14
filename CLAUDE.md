@@ -456,6 +456,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 # Approving a wiki entry puts its staff on the facility record, cited to the wiki page (kop_wiki_merge_submission(), api/sync-wiki-facilities.php);
 # a name already listed stays; taking the approval back takes them off (kop_wiki_staff_undo(), log in option kop_wiki_staff_log)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-staff.php [--list]   # mapping, approve/again/undo, what approving every entry would add
+# A wiki person goes on as "Former <role>" when the program is closed or the write-up opens "was/were/worked/served" (kop_wiki_staff_is_former());
+# staff approved before that rule: php api/fix-wiki-staff-former.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kept so Undo works
 # Public data form (/tti-data-submission/) opens on a guided start (js/data-form/data-wizard.js, css/data-wizard.css): find the
 # record or add a new facility/company/provider/transporter/referrer, pick topics, see only those sections; saves still go
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need
