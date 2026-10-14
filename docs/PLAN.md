@@ -1903,14 +1903,20 @@ a wiki entry that its record changed.
 Done 2026-10-13: repeated staff entries (11 records, 59 entries) folded by
 `kop_facility_save()` and a one-time pass (scripts/test-staff-dedupe.php).
 
+Done 2026-10-13 (DATA-FLOWS section 4 has the list): `kop_record_changed()`
+(inc/record-events.php, fired by `kop_facility_save()`, purges the facility
+pages); every news/lawsuit write path resyncs links, coverage and story groups
+through api/lib-record-resync.php, deletes leave no link rows, duplicate merges
+move the ties; the fingerprints and ETags read the revisions and the tables
+they missed. Test: scripts/test-record-resync.php.
+
 Open, in order (details in DATA-FLOWS.md section 4):
-1. `kop_record_changed()` (inc/record-events.php), fired by the shared writers;
-   it bumps `kop_rev_<kind>`, flushes the indexes and purges the record's
-   LiteSpeed URLs.
-2. `kop_news_set_status()` / `kop_lawsuit_set_status()` / `kop_bill_set_status()`
-   plus delete functions, used by every path in DATA-FLOWS section 2.
-3. The fingerprints and mobile ETags read the revisions. Then drop the dead
-   `kop_facility_v2_request_sync()` calls.
+1. **Check on the server after deploy:** approve one article and confirm its
+   facility page shows it at once; the `kop_resync_keep_underived` option is 1.
+2. The operator and company-link writers (inc/facility-v2-writer.php) and the
+   people sync fire `kop_record_changed()`.
+3. Drop the dead `kop_facility_v2_request_sync()` calls, then the 10-minute
+   flush once the revisions have proven themselves.
 4. **Owner:** wiki approval's staff (api/sync-wiki-facilities.php:236) are
    dropped today. Should they go straight onto the record (with a log and
    Undo), or wait for review like Woodbury Facts?
@@ -1920,3 +1926,39 @@ Open, in order (details in DATA-FLOWS.md section 4):
 7. The smaller items in DATA-FLOWS section 3: rename flips in a facility's
    Network section, inspection `replace` remap, merge registry gaps, the
    network rebuild hash inputs, state hubs reading Inspection Links.
+
+### 3.18 Podcast transcripts: facts and on-air statements (2026-10-13)
+
+The industry's own podcasts, transcribed locally (kop-pipeline
+`scripts/podcast-transcribe.py`; Stories from the Field first, 333 episodes,
+transcripts in kop-pipeline `tmp/podcasts/`, never committed). The owner wants
+two things from them, kept in their own stream (never through Woodbury Facts):
+facts about programs and people (careers, openings, sales, incidents), and
+every on-air statement by an industry professional, the host included, that
+belongs on the record: restraint, transport, isolation, deprivation, cutting
+kids off from their parents, discrediting kids or survivors, minimising deaths,
+dodging oversight, the business. Whisper has no speaker labels and mishears
+names, so every statement carries who said it, how sure that is
+(sure/likely/unclear) and why, and nothing is used before someone has listened
+to the audio at its time.
+
+Done 2026-10-13: kop-pipeline `scripts/podcast-facts.py`. `batches` writes
+`tmp/podcasts/INSTRUCTIONS.md` and batches of episodes not read yet (68
+episodes in 20 batches so far). Readers write `tmp/podcasts/<show>/facts/<stem>.json`.
+`check` tests every quote against the transcript, stamps its time and an audio
+link that starts there, and writes `proposals.json` + `report.md`.
+
+Open, in order:
+1. Pilot: read 2-3 episodes (221, the Open Sky closure, and 115/116, "A
+   History of Controversies") and have the owner look at what gets flagged
+   before the rest are read.
+2. Read every batch as the transcriber finishes episodes (`batches` again
+   picks up new ones).
+3. A review queue of its own in the theme (Review inbox source
+   `inc/review-inbox/podcasts.php`): each card plays the audio from its time,
+   shows the quote with its context and the attribution, and lets the owner
+   correct the words and the speaker. Facts are matched to records and added
+   with exact Undo, like the other fact queues.
+4. **Owner:** where approved statements show. Proposed: an "In their own
+   words" section on the speaker's person and company pages and on the facility
+   pages of the programs they name, each quote linked to the episode at its time.

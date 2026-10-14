@@ -369,7 +369,10 @@ node scripts/test-testimony-move.js
 # A different middle initial is a different person (Robert W. and Robert B. Lichfield, father and son; kop_people_find())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-people.php [--list] [--no-build]   # needs ../kop-pipeline (or KOP_PIPELINE_DIR) for the personKey parity
 # kop_facility_save() folds a person listed twice under one role (kop_facility_staff_dedupe()); the one-time pass is kop_apply_staff_dedupe()
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]   # sync, pairs, merge+undo, PHP/JS key parity, a map build into tmp/
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]
+# Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
+# kop_record_changed() (inc/record-events.php) moves the page caches and purges the facility pages. docs/DATA-FLOWS.md is the map
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php   # every path calls it, no link lost, reject/undo, deletes, duplicates   # sync, pairs, merge+undo, PHP/JS key parity, a map build into tmp/
 # Public data form (/tti-data-submission/) opens on a guided start (js/data-form/data-wizard.js, css/data-wizard.css): find the
 # record or add a new facility/company/provider/transporter/referrer, pick topics, see only those sections; saves still go
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need
@@ -589,6 +592,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # e
 # Podcast series transcribed locally with Whisper (scripts/podcast-transcribe.py), each episode's prompt primed with the KOP names its
 # feed mentions + scripts/podcast-vocab/<show>.json (corrections there, 'fix' re-applies); transcripts in tmp/podcasts/, never committed
 (kop-pipeline) py -3.13 scripts/podcast-transcribe.py feed|vocab|run|fix|suspects|status [--show sftf]   # resumable; stops when C: runs low
+(kop-pipeline) python scripts/podcast-facts.py batches|check|status   # facts + industry people's on-air statements, own stream (docs/PLAN.md 3.18)
 # Scraper report PDFs stay in link-shared Drive folders; the sync writes only wp-content/uploads/inspection-reports/<st>/index.json of Drive links,
 # linked as "Archived copy" on the state report pages (server CLI + nightly cron; no apply = dry run)
 php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
