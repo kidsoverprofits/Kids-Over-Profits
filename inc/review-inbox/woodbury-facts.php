@@ -14,7 +14,7 @@
  * one-click "Add to" buttons, a new program record with its type and "a
  * different place" box, "Another person in these words"
  * (kop_wbf_add_person()), every quote and the whole career, loading the build
- * again and adding the plainly stated items now (kop_wbf_auto_run()).
+ * again and adding the exact-name items now (kop_wbf_auto_run()).
  */
 
 if (!defined('ABSPATH')) {
@@ -32,15 +32,15 @@ kop_rinbox_register('woodbury-facts', function () {
             . 'Each item shows the words it comes from and links to the issue page. Add puts it on the record citing the page; Undo takes back exactly that. '
             . 'Read wrong? "Edit details" fixes the name, role, year or text before you add it. The words name someone the item missed? Use "Add this person". '
             . 'Wrong program? Pick another record beside Add, or create one. Items with a checked quote and a sure match start ticked. '
-            . 'Plainly stated items (the quote names the person and role, or states the year, size, ages, owner or past name word for word, at a sure match) are added for you every hour: '
-            . 'check or undo them on "Added automatically"; anything you undo stays manual. Closures, incidents, consultant flags and programs with no record always wait for you.'
+            . 'Items whose program is exactly the name of one record (or a past name of it), with the quote found and nothing on the record in the way, are added for you every hour, '
+            . 'whatever the source: check or undo them on "Added automatically"; anything you undo stays manual. Close names, other possible records, conflicts and programs with no record wait for you.'
             . (is_readable(kop_wbf_path()) ? '' : ' No facts uploaded yet: run python scripts/woodbury-facts.py and copy facts.json to ' . dirname(kop_wbf_path()) . '.'),
         'views'    => $views,
         'filters'  => array(array('name' => 'grp', 'label' => 'Kind', 'options' => kop_wbf_groups())),
         'view_counts' => 'kop_rinbox_wbf_view_counts',
         'tools'    => array(
-            array('id' => 'auto', 'label' => 'Add the plainly stated items now', 'style' => 'neutral',
-                'help' => 'Adds the items the build marked as plainly stated, for up to half a minute (the hourly run does the rest). They land on "Added automatically", each with Undo.'),
+            array('id' => 'auto', 'label' => 'Add the exact-name items now', 'style' => 'neutral',
+                'help' => 'Adds the items whose program is exactly the name of one record, for up to half a minute (the hourly run does the rest). They land on "Added automatically", each with Undo.'),
             array('id' => 'resync', 'label' => 'Load the facts file again', 'style' => 'neutral',
                 'help' => 'Reads the uploaded facts.json now, even if it looks unchanged: new items are added, waiting ones take the latest reading.'),
         ),
@@ -128,7 +128,7 @@ function kop_rinbox_wbf_tool($id, array $params) {
         $n = kop_wbf_auto_run(25);
         $table = kop_wbf_table();
         $done = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'applied' AND reviewed_by = 'auto'");
-        $left = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'pending' AND auto = 1 AND facility_id > 0");
+        $left = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . kop_wbf_auto_where());
         return array('message' => 'Added ' . $n . ' just now; ' . number_format($done) . ' added automatically so far'
             . ($left ? ', ' . number_format($left) . ' more to go (the hourly run carries on, or click again)' : '') . '.');
     }

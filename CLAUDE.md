@@ -230,8 +230,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-file
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
-# discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town". Close names, shared names, board/title-only
-# and Drive Docs (Add publishes) wait. Each shows in its queue's done tab by 'auto' and in Recently done with Undo; an undone one is never redone
+# discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links
+# tied by an exact name (Add publishes them), and in its own run Woodbury Facts items at an exact or past name with the quote found, no
+# conflict (any source: Woodbury, HEAL, wiki; kop_wbf_auto_where()). A name of only common words counts if it has 3+ words and a place word
+# ("Lake House Academy"; kop_autoconn_distinctive()). Close names, shared names, board/title-only, "Wilderness Treatment Center" wait. Each shows in its queue's done tab by 'auto' and in Recently done with Undo; an undone one is never redone
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php [--list]   # every pick is exact, wiki link + log + undo, on a scratch copy
 # Pending items already in our records leave the waiting list: news/lawsuits/bills (inc/review-inbox/_on-file.php: same link on a kept
 # record or in a facility's resourceLinks, same headline+outlet, case number, bill) go to the Submissions Review "Already on file" tab
@@ -595,12 +597,12 @@ php scripts/test-woodbury-facts.php               # applies every proposal to th
 # like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
 # Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
 (kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
-(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, never auto-added
+(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
 (kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:
 # text -> tmp/wiki/text/ + INSTRUCTIONS.md, batches of pages not read yet; readers write tmp/wiki/facts/
 (kop-pipeline) python scripts/wiki-source.py text && python scripts/wiki-source.py batches
-(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal --also tmp/wiki   # wiki facts cite the wiki page, never auto-added
+(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal --also tmp/wiki   # wiki facts cite the wiki page, added automatically at an exact name
 (kop-pipeline) python scripts/wiki-links.py --gdocs <server links.json>   # the pages' links -> tmp/wiki/wiki-links.json, copied to ~/kop-import/gdocs/, reviewed at Drive Docs
 php scripts/test-drive-docs.php --links=tmp/wiki/wiki-links.json
 # Links from the owner's Google Docs and Sheets (docs/PLAN.md 3.9): tmp/gdocs/export.gs (from scripts/gdocs-select.py)

@@ -20,8 +20,10 @@
  *   - Nonprofit tax filings and Business filings on "Same name and town": the
  *     organization's own name is exactly one record's, in the same town
  *     (kop_npf_apply(), kop_bizf_apply()). "Check the match" waits.
- * Drive Docs is not here: its Add publishes the link (news approved, cases
- * published, links on the page), which is more than a connection.
+ *   - Drive Docs: a link tied to a record by an exact name, no other record
+ *     named beside it, is added where its kind goes (owner, 2026-10-14, though
+ *     Add publishes: news approved, cases published, links on the page).
+ * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()).
  *
  * Each item is done once: {prefix}kop_auto_connect remembers it, so one a
  * person undoes is never connected again by itself. Each appears in its own
@@ -153,7 +155,21 @@ function kop_autoconn_record_names_safe(PDO $pdo, $fid) {
 function kop_autoconn_names_only(PDO $pdo, $name, $fid) {
     $holders = kop_autoconn_name_index($pdo)[kop_autoconn_key($name)] ?? array();
     if (count($holders) !== 1 || !isset($holders[(int) $fid])) return false;
-    return !function_exists('kop_wiki_upd_tokens') || (bool) kop_wiki_upd_tokens($name);
+    return kop_autoconn_distinctive($name);
+}
+
+/**
+ * True when a name says more than generic words: a word of its own ("Aspen"),
+ * or three words or more with a place word in them ("Lake House Academy",
+ * "West Ridge Academy": every word is common, the name is one program's).
+ * "Wilderness Treatment Center", "Youth Care", "Ranch School" are not.
+ */
+function kop_autoconn_distinctive($name) {
+    if (!function_exists('kop_wiki_upd_tokens') || kop_wiki_upd_tokens($name)) return true;
+    $words = explode(' ', kop_autoconn_key($name));
+    $place = array('mountain', 'mountains', 'valley', 'river', 'creek', 'springs', 'spring', 'lake', 'canyon', 'ridge',
+        'pines', 'oaks', 'north', 'south', 'east', 'west');
+    return count($words) >= 3 && (bool) array_intersect($words, $place);
 }
 
 /* ---- Woodbury Reports pages ------------------------------------------------- */
@@ -229,7 +245,7 @@ function kop_autoconn_wiki_picks(PDO $pdo) {
         $fid = (int) ($c['id'] ?? 0);
         $ok = false;
         foreach (kop_wiki_upd_entry_names($e) as $n) {
-            if ($fid > 0 ? kop_autoconn_names_only($pdo, $n, $fid) : (kop_autoconn_key($n) === kop_autoconn_key($c['name']) && kop_wiki_upd_tokens($n))) $ok = true;
+            if ($fid > 0 ? kop_autoconn_names_only($pdo, $n, $fid) : (kop_autoconn_key($n) === kop_autoconn_key($c['name']) && kop_autoconn_distinctive($n))) $ok = true;
         }
         if ($ok) $out[$id] = array($e, $c);
     }
@@ -384,6 +400,54 @@ function kop_autoconn_businesses($deadline) {
     return kop_autoconn_filings('business-filings', $deadline, kop_bizf_candidates(), kop_bizf_decisions(), 'kop_bizf_apply');
 }
 
+/* ---- Drive Docs -------------------------------------------------------------- */
+
+/**
+ * SQL for waiting links tied to a record by an exact name (in the text, the
+ * heading, the doc's title or folder, a SCIAD collection, the wiki page's own
+ * record, an audit entry), with no other record named beside it and never
+ * one a person has touched. Close names, links only tied by a website, and
+ * links with no record wait.
+ */
+function kop_autoconn_drive_where() {
+    return "status = 'pending' AND facility_id > 0 AND facility_how <> '' AND INSTR(facility_how, 'close') = 0
+        AND facility_how <> 'website on record' AND (also_named IS NULL OR also_named = '' OR also_named = '[]')
+        AND (reviewed_by IS NULL OR reviewed_by = '')";
+}
+
+/** Add each where its kind goes (kop_gdl_apply(): news, court records, bills, the record's links), one record at a time. */
+function kop_autoconn_drive_docs($deadline) {
+    if (!function_exists('kop_gdl_apply')) return 0;
+    global $wpdb;
+    kop_gdl_ensure_table();
+    $table = kop_gdl_table();
+    $tried = kop_autoconn_tried('drive-docs');
+    $n = 0;
+    $fids = (array) $wpdb->get_col("SELECT DISTINCT facility_id FROM {$table} WHERE " . kop_autoconn_drive_where() . ' LIMIT 300');
+    foreach ($fids as $fid) {
+        if (microtime(true) > $deadline) break;
+        $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE " . kop_autoconn_drive_where()
+            . ' AND facility_id = %d ORDER BY id LIMIT 200', (int) $fid), ARRAY_A);
+        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]); }));
+        if (!$rows) continue;
+        try {
+            $res = kop_gdl_apply($rows, array(), (int) $fid, 'auto');
+        } catch (Throwable $e) {
+            foreach ($rows as $r) kop_autoconn_mark('drive-docs', $r['pkey'], (string) $fid, 'failed', $e->getMessage());
+            continue;
+        }
+        foreach ($rows as $r) {
+            $ok = !empty($res[$r['pkey']]['ok']);
+            kop_autoconn_mark('drive-docs', $r['pkey'], (string) $fid, $ok ? 'done' : 'failed', $ok ? '' : (string) ($res[$r['pkey']]['error'] ?? ''));
+            if (!$ok) continue;
+            $n++;
+            kop_autoconn_log('drive-docs', $r['pkey'], (string) ($r['label'] ?: $r['url']),
+                'Added for the program named exactly in the source (' . $r['facility_how'] . ').');
+        }
+    }
+    return $n;
+}
+
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -396,7 +460,8 @@ function kop_autoconn_run($seconds = 120) {
         kop_autoconn_ensure_table();
         foreach (array('wiki-links' => 'kop_autoconn_wiki', 'state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
-                'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury') as $source => $fn) {
+                'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury',
+                'drive-docs' => 'kop_autoconn_drive_docs') as $source => $fn) {
             if (microtime(true) > $deadline) break;
             try {
                 $done[$source] = $fn($deadline);
@@ -417,5 +482,5 @@ add_action('init', function () {
     }
 });
 add_action('kop_auto_connect_hourly', function () {
-    kop_autoconn_run(150);
+    kop_autoconn_run(300);
 });

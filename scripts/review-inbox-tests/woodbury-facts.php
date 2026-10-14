@@ -187,7 +187,31 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     } catch (Throwable $e) {
         $check('woodbury-facts: "Add this person"', false, get_class($e) . ': ' . $e->getMessage());
     }
-    $check('woodbury-facts: queue tools are "Add the plainly stated items now" and "Load again"', array_column($src['tools'], 'id') === array('auto', 'resync'));
+    $check('woodbury-facts: queue tools are "Add the exact-name items now" and "Load again"', array_column($src['tools'], 'id') === array('auto', 'resync'));
+
+    // Exact names go in with no click (owner, 2026-10-14); anything in doubt, or touched by a person, waits.
+    $auto = $pdo->query("SELECT * FROM $t WHERE " . kop_wbf_auto_where())->fetchAll(PDO::FETCH_ASSOC);
+    $pending = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending' AND facility_id > 0")->fetchColumn();
+    $check('woodbury-facts: exact-name items are added automatically, the rest wait', $auto && count($auto) < $pending, count($auto) . ' of ' . $pending);
+    $bad = array_filter($auto, function ($r) {
+        if ((int) $r['auto'] === 1) return false;
+        $exact = ($r['match_kind'] === 'exact' && $r['match_note'] === '')
+            || ($r['match_kind'] === 'past_name' && strpos($r['match_note'], 'Record is in') === false);
+        return !$exact || !(int) $r['found'] || trim((string) $r['conflict']) !== '' || trim((string) $r['alternatives'], '[] ') !== ''
+            || (string) $r['reviewed_by'] !== '' || (int) $r['ya'] || strpos((string) $r['extra'], '"edited_by"') !== false;
+    });
+    $check('woodbury-facts: never a close name, another possible record, a conflict, a state mismatch or an item a person touched', !$bad, count($bad) . ' bad');
+    $one = $auto[0]['pkey'] ?? '';
+    if ($one !== '') {
+        $before = $pdo->query("SELECT reviewed_by, extra FROM $t WHERE pkey = " . $pdo->quote($one))->fetch(PDO::FETCH_ASSOC);
+        $in = function () use ($pdo, $t, $one) { return (bool) $pdo->query("SELECT COUNT(*) FROM $t WHERE pkey = " . $pdo->quote($one) . ' AND ' . kop_wbf_auto_where())->fetchColumn(); };
+        $pdo->exec("UPDATE $t SET reviewed_by = 'owner' WHERE pkey = " . $pdo->quote($one));
+        $check('woodbury-facts: an item a person undid or sent back is never added again', !$in());
+        $pdo->exec("UPDATE $t SET reviewed_by = '', extra = '{\"edited_by\":\"owner\"}' WHERE pkey = " . $pdo->quote($one));
+        $check('woodbury-facts: an item a person corrected waits for them', !$in());
+        $pdo->prepare("UPDATE $t SET reviewed_by = ?, extra = ? WHERE pkey = ?")->execute(array($before['reviewed_by'], $before['extra'], $one));
+        $check('woodbury-facts: put back, it is picked again', $in());
+    }
     $m = call_user_func($src['tool'], 'resync', array());
     $check('woodbury-facts: "Load the facts file again" answers', $m['message'] !== '', $m['message']);
 }

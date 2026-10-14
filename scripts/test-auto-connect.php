@@ -29,7 +29,7 @@ $copy = new PDO('sqlite:' . $db_path);
 $copy->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $copy->exec('ATTACH DATABASE ' . $copy->quote($mirror) . ' AS src');
 foreach (array('facilities_v2', 'wiki_submissions', 'wpdl_options', 'wpdl_kop_operators', 'wpdl_kop_woodbury_mentions', 'wpdl_kop_fornits_items',
-        'wpdl_kop_fornits_topics', 'wpdl_kop_state_list_rows', 'referrers_master', 'wpdl_referrers_master', 'providers_master',
+        'wpdl_kop_fornits_topics', 'wpdl_kop_state_list_rows', 'wpdl_kop_gdoc_links', 'referrers_master', 'wpdl_referrers_master', 'providers_master',
         'wpdl_providers_master', 'transporters_master', 'wpdl_transporters_master') as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();
     if (!$sql) continue;
@@ -115,7 +115,7 @@ if ($has('wpdl_kop_woodbury_mentions')) {
         $exact = false;
         foreach ($found as $n) {
             $k = $key($n);
-            if (isset($names[$fid][$k]) && count($holders[$k] ?? array()) === 1 && kop_wiki_upd_tokens($n)) $exact = true;
+            if (isset($names[$fid][$k]) && count($holders[$k] ?? array()) === 1 && kop_autoconn_distinctive($n)) $exact = true;
         }
         if (!$exact) $bad[] = '#' . $r['id'] . ' ' . ($r['header'] ?: $r['matched_name']) . ' -> ' . $r['facility_name'];
         if ($list) echo '  ' . $r['kind'] . ': "' . ($r['kind'] === 'section' ? $r['header'] : $r['matched_name']) . '" -> ' . $r['facility_name'] . ' (' . $r['facility_state'] . ")\n";
@@ -145,7 +145,7 @@ $wpicks = kop_autoconn_wiki_picks($pdo);
 $entries = kop_wiki_upd_entries($pdo);
 $unlinked = count(array_filter($entries, function ($e) { return $e['kind'] !== 'list' && trim((string) $e['facility_unique_name']) === ''; }));
 echo '  ' . count($wpicks) . ' of ' . $unlinked . " unlinked entries have one exact record\n";
-$check('wiki: a generic name ("The Academy") never links itself', !array_filter($wpicks, function ($p) { return !array_filter(kop_wiki_upd_entry_names($p[0]), 'kop_wiki_upd_tokens'); }));
+$check('wiki: a generic name ("The Academy") never links itself', !array_filter($wpicks, function ($p) { return !array_filter(kop_wiki_upd_entry_names($p[0]), 'kop_autoconn_distinctive'); }));
 if (!$wpicks) {
     // None in the mirror: give one unlinked program entry (on this scratch copy) the exact name of a record in its states.
     foreach ($entries as $eid => $e) {
@@ -215,6 +215,33 @@ if ($has('wpdl_kop_state_list_rows')) {
     $check('state lists: every pick is the record\'s exact name', !$bad, count($spicks) . ' picks; ' . implode('; ', array_slice($bad, 0, 5)));
 } else {
     echo "  (no State Lists table in the mirror)\n";
+}
+
+/* ---- Names made of common words ---- */
+echo "-- Distinctive names --
+";
+foreach (array('Lake House Academy', 'West Ridge Academy', 'Spring Creek Lodge Academy', 'Mountain Valley Treatment Center', 'Aspen Ranch') as $n) {
+    $check("one program's name: $n", kop_autoconn_distinctive($n));
+}
+foreach (array('Wilderness Treatment Center', 'Youth Care', 'Ranch School', 'Family Life Center', "Children's Village", 'Lake Academy') as $n) {
+    $check("generic words wait: $n", !kop_autoconn_distinctive($n));
+}
+
+/* ---- Drive Docs ---- */
+echo "-- Drive Docs --
+";
+if ($has('wpdl_kop_gdoc_links')) {
+    $dpicks = $pdo->query('SELECT * FROM wpdl_kop_gdoc_links WHERE ' . kop_autoconn_drive_where())->fetchAll(PDO::FETCH_ASSOC);
+    $waiting = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending'")->fetchColumn();
+    $check('drive docs: exact-name links add themselves, the rest wait', $dpicks && count($dpicks) < $waiting, count($dpicks) . ' of ' . $waiting);
+    $check('drive docs: never a close name, a website-only match, another record named, or a link a person touched',
+        !array_filter($dpicks, function ($r) {
+            return stripos($r['facility_how'], 'close') !== false || in_array($r['facility_how'], array('', 'website on record'), true)
+                || trim((string) $r['also_named'], '[] ') !== '' || (string) $r['reviewed_by'] !== '';
+        }));
+} else {
+    echo "  (no Drive Docs table in the mirror)
+";
 }
 
 /* ---- Nonprofit tax filings and business filings ---- */

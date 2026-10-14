@@ -1129,11 +1129,26 @@ function kop_wbf_undo(array $rows, $reviewer) {
 /* ---- Automatic additions --------------------------------------------------- */
 
 /**
- * Add the items the build marked as plainly stated (auto = 1: verified quote,
- * sure match, the quote saying exactly what is added; never closures,
- * incidents, consultant flags or programs with no record), one facility at a
- * time until $seconds run out. They land on the "Added automatically" tab,
- * each with Undo. Runs hourly and for a moment whenever the screen opens.
+ * SQL for the items added with no click (owner, 2026-10-12, restated
+ * 2026-10-14: an exact name is approved automatically). The build's plainly
+ * stated items (auto = 1), and every item whose program is exactly one
+ * record's name (or a past name of it, with no other doubt noted), quote found
+ * in the source, nothing else it could be, no conflict, not a young adult
+ * program, and never one a person has sent back, edited or settled. From any
+ * source (Woodbury, HEAL, the wiki). Each lands on the "Added automatically"
+ * tab with Undo; an undone item keeps its reviewer and is never added again.
+ */
+function kop_wbf_auto_where() {
+    return "status = 'pending' AND facility_id > 0 AND (auto = 1 OR (found = 1 AND ya = 0
+        AND (conflict IS NULL OR conflict = '') AND (alternatives IS NULL OR alternatives = '' OR alternatives = '[]')
+        AND (reviewed_by IS NULL OR reviewed_by = '') AND INSTR(COALESCE(extra, ''), '\"edited_by\"') = 0
+        AND ((match_kind = 'exact' AND match_note = '')
+            OR (match_kind = 'past_name' AND match_note = 'Header uses a past name of this record (a different name era).'))))";
+}
+
+/**
+ * Add those items, one facility at a time until $seconds run out. Runs hourly
+ * and for a moment whenever the screen opens.
  */
 function kop_wbf_auto_run($seconds = 40) {
     global $wpdb;
@@ -1145,12 +1160,12 @@ function kop_wbf_auto_run($seconds = 40) {
     $start = microtime(true);
     $added = 0;
     try {
-        $fids = $wpdb->get_col("SELECT DISTINCT facility_id FROM {$table} WHERE status = 'pending' AND auto = 1 AND facility_id > 0 LIMIT 200");
+        $fids = $wpdb->get_col("SELECT DISTINCT facility_id FROM {$table} WHERE " . kop_wbf_auto_where() . ' LIMIT 200');
         foreach ($fids as $fid) {
             if (microtime(true) - $start > $seconds) {
                 break;
             }
-            $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE status = 'pending' AND auto = 1 AND facility_id = %d", (int) $fid), ARRAY_A);
+            $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE " . kop_wbf_auto_where() . ' AND facility_id = %d', (int) $fid), ARRAY_A);
             try {
                 foreach (kop_wbf_apply($rows, (int) $fid, 'auto') as $res) {
                     $added += !empty($res['ok']) ? 1 : 0;
@@ -1957,7 +1972,7 @@ function kop_render_woodbury_facts_page() {
     kop_wbf_ensure_table();
     $sync = kop_wbf_sync(isset($_GET['wbf_resync']));
     $auto_now = kop_wbf_auto_run(15);
-    $auto_left = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND auto = 1 AND facility_id > 0");
+    $auto_left = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_wbf_table() . ' WHERE ' . kop_wbf_auto_where());
     $table = kop_wbf_table();
     $tabs = kop_wbf_tabs();
     $groups = kop_wbf_groups();
@@ -1996,9 +2011,9 @@ function kop_render_woodbury_facts_page() {
         . 'The facility page shows the additions at once, each citing the issue; new staff, past operators and past names reach the network map on its next build.</li>'
         . '<li><strong>Changed your mind?</strong> The <em>Added</em> tab has Undo, which takes back exactly what was added.</li></ol>';
     $auto_done = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_wbf_table() . " WHERE status = 'applied' AND reviewed_by = 'auto'");
-    echo '<div class="notice notice-info inline"><p><strong>Plainly stated items are added for you.</strong> '
-        . 'When the quote itself names the person and their role at the program, or states the year, size, ages, owner or past name word for word, '
-        . 'and the program is a sure match, the item goes into the record without a click. Closures, incidents, consultant flags and programs with no record always wait for you. '
+    echo '<div class="notice notice-info inline"><p><strong>Exact-name items are added for you.</strong> '
+        . 'When the program is exactly the name of one record (or a past name of it), the quote is found and nothing on the record is in the way, '
+        . 'the item goes into the record without a click, whatever the source. Close names, other possible records, conflicts and programs with no record wait for you. '
         . number_format($auto_done) . ' added automatically so far' . ($auto_now ? ' (' . (int) $auto_now . ' just now)' : '')
         . ($auto_left ? ', ' . number_format($auto_left) . ' more being added in the background' : '')
         . '. Check or undo them on the <em>Added automatically</em> tab; anything you undo stays manual.</p></div>';
