@@ -97,6 +97,11 @@ $cases = array(
     array('Washington HB 1815 good', 'legislation'),
     array('NATSAP Member List 2010', 'directory'),
     array('Copy of woodbury april 2010', 'woodbury'),
+    array('Philosophy_of_Teen_Challenge_21', 'staff-ideology'),
+    array('Our_Core_Values_International_Version_Draft_3', 'staff-ideology'),
+    array('Editor\'s Note: the Elan story', 'editor-note'),
+    array('montana legislation missoulian editorial', 'editor-note'),
+    array('Woodbury Reports editor\'s note 2004', 'woodbury'),
     array('motivate counseling discovery ranch', null),
     array('Friends of Seguin Island Fall 2006', null),
 );
@@ -123,6 +128,7 @@ $folder_cases = array(
     array('/^Program Websites/', 'website-capture'),
     array('/^Woodbury Reports Mentions$/', 'woodbury'),
     array('/^Parent & Family Handbooks$/', 'parent-handbook'),
+    array('/^Philosophy & Values$/', 'staff-ideology'),
 );
 foreach ($folder_cases as $c) {
     $fid = $folder_id($c[0]);
