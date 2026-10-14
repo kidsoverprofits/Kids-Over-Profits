@@ -415,11 +415,94 @@ function kop_autoconn_drive_where() {
         AND (reviewed_by IS NULL OR reviewed_by = '')";
 }
 
+/**
+ * The program a link's collection or page is about, when the import tied it to
+ * no record: a SCIAD NET collection "State / Program / Folder" (the program
+ * with its state; "General Non-Program Specific" and "Not in a collection"
+ * name none) or an r/troubledteens wiki page's title. [name, state code or ''],
+ * or null.
+ */
+function kop_autoconn_drive_program(array $r) {
+    $doc = (string) $r['source_doc'];
+    if ($r['source'] === 'sciad' && preg_match('#^SCIAD NET: ([^/]+) / (.+?) / [^/]+$#', $doc, $m)) {
+        $state = trim($m[1]);
+        if (stripos($state, 'General') === 0) return null;
+        $code = function_exists('kop_facility_state_code') ? (string) kop_facility_state_code($state) : '';
+        return array(preg_replace('/ HQ$/', '', trim($m[2])), $state === 'Non-US' ? 'non-us' : $code);
+    }
+    if ($r['source'] === 'wiki' && preg_match('/page "([^"]+)"/', $doc, $m)) {
+        return array(rtrim(preg_replace('/\s*\(\d{4}[^)]*\)$/', '', $m[1]), ': '), '');
+    }
+    return null;
+}
+
+/**
+ * The one record a program name is (its whole name, or each of "A/B" naming
+ * the same record), narrowed by the collection's state when several have it,
+ * or 0. The name must say more than generic words.
+ */
+function kop_autoconn_drive_record(PDO $pdo, $name, $state) {
+    static $states = null;
+    if ($states === null) {
+        $states = array();
+        foreach ($pdo->query('SELECT id, state, country FROM facilities_v2') as $f) {
+            $states[(int) $f['id']] = array(strtoupper((string) $f['state']), strtolower((string) $f['country']));
+        }
+    }
+    $index = kop_autoconn_name_index($pdo);
+    $ids = array();
+    $parts = array_values(array_filter(array_map('trim', explode('/', $name))));
+    if (count($parts) > 1) array_unshift($parts, $name);
+    foreach ($parts as $part) {
+        if (!kop_autoconn_distinctive($part)) continue;
+        foreach ($index[kop_autoconn_key($part)] ?? array() as $id => $_) $ids[$id] = true;
+    }
+    $ids = array_keys($ids);
+    if (count($ids) > 1 && $state !== '') {
+        $ids = array_values(array_filter($ids, function ($id) use ($states, $state) {
+            list($st, $country) = $states[$id] ?? array('', '');
+            return $state === 'non-us' ? ($st === '' && $country !== '' && !in_array($country, array('us', 'usa', 'united states'), true)) : $st === $state;
+        }));
+    }
+    if (count($ids) !== 1) return 0;
+    // A collection in another state is another program of that name.
+    list($st) = $states[$ids[0]] ?? array('');
+    if ($state !== '' && $state !== 'non-us' && $st !== '' && $st !== $state) return 0;
+    return (int) $ids[0];
+}
+
+/**
+ * Tie waiting links with no record to the record their SCIAD collection or
+ * wiki page names exactly (kop_autoconn_drive_record()), so the run below adds
+ * them. Never a link a person has touched. Returns how many were tied.
+ */
+function kop_autoconn_drive_rematch() {
+    global $wpdb;
+    $table = kop_gdl_table();
+    $pdo = kop_seed_pdo();
+    $rows = (array) $wpdb->get_results("SELECT id, source, source_doc FROM {$table} WHERE status = 'pending' AND facility_id = 0
+        AND source IN ('sciad', 'wiki') AND (reviewed_by IS NULL OR reviewed_by = '')", ARRAY_A);
+    $memo = array();
+    $n = 0;
+    foreach ($rows as $r) {
+        $doc = (string) $r['source_doc'];
+        if (!isset($memo[$doc])) {
+            $p = kop_autoconn_drive_program($r);
+            $memo[$doc] = $p ? kop_autoconn_drive_record($pdo, $p[0], $p[1]) : 0;
+        }
+        if (!$memo[$doc]) continue;
+        $how = $r['source'] === 'sciad' ? 'SCIAD collection name (exact)' : 'wiki page title (exact)';
+        $n += (int) $wpdb->update($table, array('facility_id' => $memo[$doc], 'facility_how' => $how), array('id' => (int) $r['id']));
+    }
+    return $n;
+}
+
 /** Add each where its kind goes (kop_gdl_apply(): news, court records, bills, the record's links), one record at a time. */
 function kop_autoconn_drive_docs($deadline) {
     if (!function_exists('kop_gdl_apply')) return 0;
     global $wpdb;
     kop_gdl_ensure_table();
+    kop_autoconn_drive_rematch();
     $table = kop_gdl_table();
     $tried = kop_autoconn_tried('drive-docs');
     $n = 0;

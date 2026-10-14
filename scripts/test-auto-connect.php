@@ -90,7 +90,7 @@ $holders = array(); // key => [facility id => true]
 foreach ($pdo->query('SELECT id, name, unique_name, json_data FROM facilities_v2') as $f) {
     $d = json_decode((string) $f['json_data'], true) ?: array();
     $ident = (array) ($d['identification'] ?? array());
-    $all = array($f['name'], $f['unique_name'], $ident['name'] ?? '');
+    $all = array($f['name'], $f['unique_name'], $ident['name'] ?? '', $ident['currentName'] ?? '');
     foreach (array('otherNames', 'pastNames') as $k) {
         foreach ((array) ($ident[$k] ?? array()) as $n) $all[] = is_array($n) ? ($n['name'] ?? '') : $n;
     }
@@ -231,6 +231,32 @@ foreach (array('Wilderness Treatment Center', 'Youth Care', 'Ranch School', 'Fam
 echo "-- Drive Docs --
 ";
 if ($has('wpdl_kop_gdoc_links')) {
+    if (!function_exists('kop_gdl_table')) require_once dirname(__DIR__) . '/inc/drive-docs.php';
+    if (!function_exists('kop_facility_state_code')) require_once dirname(__DIR__) . '/inc/facility-store.php';
+    $prog = function ($doc, $src = 'sciad') { return kop_autoconn_drive_program(array('source' => $src, 'source_doc' => $doc)); };
+    $check('drive docs: a SCIAD collection names its program and state', $prog('SCIAD NET: Utah / Diamond Ranch Academy / News') === array('Diamond Ranch Academy', 'UT'));
+    $check('drive docs: a company collection drops "HQ"', $prog('SCIAD NET: Tennessee / Acadia Healthcare HQ / News') === array('Acadia Healthcare', 'TN'));
+    $check('drive docs: general collections name no program', $prog('SCIAD NET: General Non-Program Specific / News') === null && $prog('SCIAD NET: Not in a collection') === null);
+    $check('drive docs: a wiki page names its program without its years', $prog('r/troubledteens wiki: page "Synanon (1958-1991)" (as of 2026-01-07)', 'wiki') === array('Synanon', ''));
+    $before = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0")->fetchColumn();
+    $tied = kop_autoconn_drive_rematch();
+    $check('drive docs: links with no record are tied to the record their collection or page names exactly', $tied > 0 && $tied < $before, "$tied of $before");
+    $bad = array();
+    foreach ($pdo->query("SELECT source, source_doc, facility_id FROM wpdl_kop_gdoc_links WHERE facility_how IN ('SCIAD collection name (exact)', 'wiki page title (exact)') AND status = 'pending' GROUP BY source_doc") as $r) {
+        $p = kop_autoconn_drive_program($r);
+        if (!$p) continue;
+        $hit = false;
+        foreach (array_merge(array($p[0]), explode('/', $p[0])) as $part) $hit = $hit || isset($names[(int) $r['facility_id']][$key(trim($part))]);
+        if (!$hit) $bad[] = $r['source_doc'];
+    }
+    $check('drive docs: every tie is an exact name of its record', !$bad, implode('; ', array_slice($bad, 0, 5)));
+    if ($list) {
+        foreach ($pdo->query("SELECT source_doc, facility_id, COUNT(*) n FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_how IN ('SCIAD collection name (exact)', 'wiki page title (exact)') GROUP BY source_doc, facility_id ORDER BY n DESC") as $r) {
+            $nm = $pdo->query('SELECT name FROM facilities_v2 WHERE id = ' . (int) $r['facility_id'])->fetchColumn();
+            echo "  {$r['n']}  {$r['source_doc']} -> $nm
+";
+        }
+    }
     $dpicks = $pdo->query('SELECT * FROM wpdl_kop_gdoc_links WHERE ' . kop_autoconn_drive_where())->fetchAll(PDO::FETCH_ASSOC);
     $waiting = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending'")->fetchColumn();
     $check('drive docs: exact-name links add themselves, the rest wait', $dpicks && count($dpicks) < $waiting, count($dpicks) . ' of ' . $waiting);
