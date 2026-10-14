@@ -77,6 +77,9 @@ Section 11 describes how they are built.
 - A claim of change ("moved from public to private hands") needs its time frame and context in the same sentence.
   Without the "since when", it is bad writing.
 - Keep it short. Few headings; the paragraphs carry the weight.
+- Keep sentences short too: one claim to a sentence. Split a sentence that strings clauses together with commas,
+  semicolons or "and"; a sentence much past 25 words usually needs splitting. Hedging and qualifiers are where long
+  sentences come from.
 
 ## 6. Pages about related industries
 
