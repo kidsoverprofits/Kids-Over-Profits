@@ -121,6 +121,17 @@ $d = kop_sc_diff('lawsuit', array('status' => 'ruling', 'outcome' => 'Motion to 
 check('a lawsuit outcome reworded with no new status is no change', $d === array());
 $d = kop_sc_diff('lawsuit', array('status' => 'unknown', 'outcome' => '', 'settlement_amount' => ''), array('status' => 'unknown', 'outcome' => 'Discovery is under way.', 'settlement_amount' => ''));
 check('an empty outcome is filled even without a new status', $d === array('outcome' => array('', 'Discovery is under way.')));
+// Sweidy v. Spring Ridge Academy: in_progress from the new-trial order through the appeal and the denied certiorari.
+$sw = array('status' => 'in_progress', 'outcome' => 'On January 8, 2025 the court granted the defendants\' motion for a new trial.', 'settlement_amount' => '');
+$ev = 'On January 23, 2026 the Ninth Circuit affirmed the dismissals. On October 5, 2026 the Supreme Court denied certiorari.';
+$d = kop_sc_diff('lawsuit', $sw, array('status' => 'in_progress', 'outcome' => 'A new trial is pending.', 'settlement_amount' => '', 'new_events' => $ev));
+check('newer decisions with the status unchanged go on the end of the outcome', $d === array('outcome' => array($sw['outcome'], $sw['outcome'] . ' ' . $ev)));
+$d = kop_sc_diff('lawsuit', $sw, array('status' => 'in_progress', 'outcome' => '', 'settlement_amount' => '', 'new_events' => 'On January 8, 2025 the court ordered a new trial.'));
+check('"new" events no later than the outcome already gives are no change', $d === array());
+$d = kop_sc_diff('lawsuit', $sw, array('status' => 'in_progress', 'outcome' => '', 'settlement_amount' => '', 'new_events' => 'The case awaits a new trial.'));
+check('new events with no date are no change', $d === array());
+check('latest date: words, ISO, slashes, bare year', kop_sc_latest_date('Jan. 8, 2025; 2025-03-01; 4/2/2025; filed in 2021') === '2025-04-02'
+    && kop_sc_latest_date('in 2026') === '2026-01-01' && kop_sc_latest_date('no dates') === '');
 
 /* ---- CourtListener matching ------------------------------------------ */
 

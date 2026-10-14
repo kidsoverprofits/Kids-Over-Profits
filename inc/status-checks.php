@@ -46,7 +46,8 @@ function kop_sc_bill_statuses() {
 function kop_sc_kinds() {
     return array(
         'bill'    => array('table' => 'legislation', 'label' => 'Bill', 'fields' => array('status', 'last_action_date', 'last_action_text')),
-        'lawsuit' => array('table' => 'lawsuits', 'label' => 'Lawsuit', 'fields' => array('status', 'outcome', 'settlement_amount')),
+        // summary: never found by a check, only written by hand into a proposal (apply/undo keep it exact).
+        'lawsuit' => array('table' => 'lawsuits', 'label' => 'Lawsuit', 'fields' => array('status', 'outcome', 'settlement_amount', 'summary')),
     );
 }
 
@@ -509,6 +510,35 @@ function kop_sc_courtlistener_docket(array $suit) {
     );
 }
 
+/**
+ * The words of the docket's newest filings, which the feed gives only a label ("Report - Status" for a status report saying
+ * the Supreme Court denied certiorari). Needs the CourtListener token (the API refuses anonymous reads); '' without it.
+ */
+function kop_sc_recent_filing_text($docketId, $count = 3, $chars = 1800) {
+    if (kop_sc_cl_token() === '' && empty($GLOBALS['kop_sc_fetch_stub'])) {
+        return '';
+    }
+    try {
+        $raw = kop_sc_cl_fetch('https://www.courtlistener.com/api/rest/v4/recap-documents/?docket_entry__docket__id=' . (int) $docketId
+            . '&order_by=-date_created&fields=document_number,description,plain_text&page_size=' . (int) $count);
+    } catch (RuntimeException $e) {
+        return '';   // the labels alone are still checked
+    }
+    $out = '';
+    foreach ((array) (json_decode((string) $raw, true)['results'] ?? array()) as $d) {
+        $t = (string) ($d['plain_text'] ?? '');
+        $t = preg_replace('/Case \S+\s+Document \d+\s+Filed \S+\s+Page \d+ of \d+/', ' ', $t);   // page headers
+        $t = preg_replace('/^\s*\d{1,2}\s*$/m', ' ', $t);                                        // pleading paper line numbers
+        $t = trim(preg_replace('/\s+/', ' ', $t));
+        // Skip the caption: the body starts after the last "Defendants." in the first part.
+        $head = substr($t, 0, 2500);
+        if (($p = strrpos($head, 'Defendants.')) !== false) $t = substr($t, $p + 11);
+        if ($t === '') continue;
+        $out .= "\nText of entry #" . (int) ($d['document_number'] ?? 0) . ': ' . mb_substr(trim($t), 0, $chars);
+    }
+    return $out !== '' ? "\n\nNEWEST FILINGS" . $out : '';
+}
+
 /** A docket link already on the record (CourtListener, Justia dockets), for cases CourtListener's search did not find. */
 function kop_sc_lawsuit_docket_link(array $suit) {
     foreach (array('source_urls', 'document_urls') as $col) {
@@ -534,6 +564,7 @@ function kop_sc_lawsuit_prompt(array $suit, $text, $terminated) {
         . " \"status\": one of: $statuses (filed = filed, little has happened; in_progress = motions, discovery, trial pending; ruling = a judge decided a significant motion or the case; dismissed = the court dismissed the case; settled = the parties settled; appeal = on appeal; closed = ended for another reason),\n"
         . " \"event_date\": \"YYYY-MM-DD\" of the docket entry that shows this status,\n"
         . " \"outcome\": \"one or two plain sentences on how the case stands or ended, only from the docket; empty if nothing has been decided\",\n"
+        . " \"new_events\": \"one or two plain sentences, each with its date (Month D, YYYY), on decisions in the docket dated after everything our record's outcome already says (an appeal decided, a higher court declining the case, a new trial set); empty if there are none\",\n"
         . " \"settlement_amount\": \"the amount if the docket states one, else empty\",\n"
         . " \"quote\": \"the exact words of the docket entry that shows this, copied character for character\"}\n"
         . "Use only the docket. Do not guess a settlement amount. If the docket shows nothing new beyond our record, repeat our record's status.";
@@ -622,7 +653,8 @@ function kop_sc_check_lawsuit(array $suit) {
                 if (strlen($text) < 100) {
                     $text = kop_sc_html_text(kop_sc_cl_fetch($url . (strpos($url, '?') === false ? '?' : '&') . 'order_by=desc'), 9000);
                 }
-                $text = trim('Case: ' . $docket['case_name'] . ($docket['court'] !== '' ? ' (' . $docket['court'] . ')' : '')) . "\n" . $text;
+                $text = trim('Case: ' . $docket['case_name'] . ($docket['court'] !== '' ? ' (' . $docket['court'] . ')' : '')) . "\n" . $text
+                    . kop_sc_recent_filing_text($docket['docket_id']);
             }
         } catch (RuntimeException $e) {
             return array('error', null, '', '', '', $e->getMessage(), '');
@@ -655,6 +687,7 @@ function kop_sc_check_lawsuit(array $suit) {
         'status' => in_array($reply['status'] ?? '', kop_sc_lawsuit_statuses(), true) ? $reply['status'] : '',
         'outcome' => trim((string) ($reply['outcome'] ?? '')),
         'settlement_amount' => mb_substr(trim((string) ($reply['settlement_amount'] ?? '')), 0, 100),
+        'new_events' => trim((string) ($reply['new_events'] ?? '')),
     );
     return array('checked', $found, $url, trim((string) ($reply['quote'] ?? '')), $text, '', $ref);
 }
@@ -695,7 +728,39 @@ function kop_sc_diff($kind, array $row, array $found) {
             $changes[$f] = array($old, $new);
         }
     }
+    // A case can move on with its status unchanged (in_progress through an appeal and a denied certiorari):
+    // the docket's newer decisions go on the end of the outcome, only when they are dated after every date it gives.
+    $events = (string) ($found['new_events'] ?? '');
+    $old = (string) ($row['outcome'] ?? '');
+    if (!isset($changes['outcome']) && $events !== '' && $old !== '' && strcmp(kop_sc_latest_date($events), kop_sc_latest_date($old)) > 0) {
+        $changes['outcome'] = array($old, rtrim($old) . ' ' . $events);
+    }
     return $changes;
+}
+
+/** The latest date a text gives ("January 8, 2025", "Jan. 8, 2025", "2025-01-08", "1/8/2025"; a bare year counts as its
+ *  January 1), as YYYY-MM-DD, '' if none. */
+function kop_sc_latest_date($text) {
+    $months = array('jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4, 'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8, 'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12);
+    $best = '';
+    $take = function ($y, $m, $d) use (&$best) {
+        $s = sprintf('%04d-%02d-%02d', $y, $m, $d);
+        if ($y >= 1900 && $y <= 2100 && $m >= 1 && $m <= 12 && strcmp($s, $best) > 0) $best = $s;
+    };
+    $text = (string) $text;
+    if (preg_match_all('/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})\b/i', $text, $mm, PREG_SET_ORDER)) {
+        foreach ($mm as $m) $take((int) $m[3], $months[strtolower(substr($m[1], 0, 3))], (int) $m[2]);
+    }
+    if (preg_match_all('/\b(\d{4})-(\d{2})-(\d{2})\b/', $text, $mm, PREG_SET_ORDER)) {
+        foreach ($mm as $m) $take((int) $m[1], (int) $m[2], (int) $m[3]);
+    }
+    if (preg_match_all('#\b(\d{1,2})/(\d{1,2})/(\d{4})\b#', $text, $mm, PREG_SET_ORDER)) {
+        foreach ($mm as $m) $take((int) $m[3], (int) $m[1], (int) $m[2]);
+    }
+    if (preg_match_all('/\b(19\d{2}|20\d{2})\b/', $text, $mm)) {
+        foreach ($mm[1] as $y) $take((int) $y, 1, 1);
+    }
+    return $best;
 }
 
 /** Store a proposal unless the same change was made before (any status); a waiting older one for the record goes stale. */
@@ -889,6 +954,7 @@ function kop_sc_apply(PDO $pdo, $id, $reviewer, array $override = array()) {
     $pdo->prepare('UPDATE ' . $kinds[$kind]['table'] . ' SET ' . implode(', ', $set) . ' WHERE id = ?')->execute($vals);
     $pdo->prepare("UPDATE record_status_proposals SET status = 'applied', previous = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?")
         ->execute(array(json_encode(array('before' => $prev, 'applied' => $applied), JSON_UNESCAPED_UNICODE), $reviewer, kop_sc_now(), (int) $id));
+    if (function_exists('kop_record_changed')) kop_record_changed($kind, array((int) $p['record_id']));   // page caches + the facility pages
     return $row;
 }
 
@@ -921,6 +987,7 @@ function kop_sc_undo(PDO $pdo, $id, $reviewer) {
     }
     $pdo->prepare("UPDATE record_status_proposals SET status = 'pending', previous = NULL, reviewed_by = ?, reviewed_at = ? WHERE id = ?")
         ->execute(array($reviewer, kop_sc_now(), (int) $id));
+    if ($set && function_exists('kop_record_changed')) kop_record_changed($p['kind'], array((int) $p['record_id']));
     return $kept;
 }
 

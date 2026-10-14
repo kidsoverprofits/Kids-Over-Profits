@@ -104,7 +104,7 @@ function kop_rinbox_sc_list(array $q) {
 
 function kop_rinbox_sc_field_label($f) {
     return array('status' => 'Status', 'last_action_date' => 'Last action date', 'last_action_text' => 'Last action',
-                 'outcome' => 'Outcome', 'settlement_amount' => 'Settlement amount')[$f] ?? $f;
+                 'outcome' => 'Outcome', 'settlement_amount' => 'Settlement amount', 'summary' => 'Summary')[$f] ?? $f;
 }
 
 function kop_rinbox_sc_item(array $p) {
@@ -124,7 +124,7 @@ function kop_rinbox_sc_item(array $p) {
                 $fields[] = array('name' => $f, 'label' => 'New status', 'type' => 'select', 'options' => kop_rinbox_options($opts), 'value' => (string) $c[1]);
             } else {
                 $fields[] = array('name' => $f, 'label' => 'New ' . strtolower(kop_rinbox_sc_field_label($f)),
-                    'type' => in_array($f, array('outcome', 'last_action_text'), true) ? 'textarea' : 'text', 'value' => (string) $c[1]);
+                    'type' => in_array($f, array('outcome', 'last_action_text', 'summary'), true) ? 'textarea' : 'text', 'value' => (string) $c[1]);
             }
         }
     }

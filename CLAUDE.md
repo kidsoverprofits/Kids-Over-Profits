@@ -338,6 +338,13 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Drafts (tmp/wiki-updates/drafts/<id>/, written by a Haiku/Sonnet/Opus workflow, assembled by scripts/wiki-drafts.py) are reviewed at
 # Review inbox > Wiki updates (inc/wiki-update-drafts.php): export ships only the ops, the site applies them to the entry's text as it is
 # now; Approve writes KOP's copy (exact Undo), then Ready for Reddit has the whole text with Copy and Reddit's edit link
+# Every record change drafts an update for its linked wiki entry (inc/wiki-auto-updates.php): kop_record_changed() queues the ids
+# (facility, news, lawsuit, operator, wiki), an hourly job re-runs kop_wiki_upd_gaps() for the linked entries (plus a sweep of every
+# linked entry, for writes that skip the event) and writes each new gap as wiki-script-drafts.py's line, placed as the editor's
+# template places it -> Review inbox > Wiki updates from record changes (inc/review-inbox/wiki-changes.php; same tabs, exact Undo).
+# New = not in the entry's keys (option kop_wiki_auto_known: its gaps at the first look, then each decision's); a new line kind
+# goes in kop_wiki_auto_ops() and kop_wiki_auto_gap_key()
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-auto-updates.php [--list]   # script parity, change -> draft -> approve/undo, every entry applies
 (kop-pipeline) python scripts/wiki-drafts.py assemble <ids> && python scripts/wiki-drafts.py export <ids>   # -> js/data/reddit-wiki/update-drafts.json (commit it)
 # Hub pages that list a category's posts (Editorials, Investigatory Spotlight; inc/hub-posts.php)
 php scripts/test-hub-posts.php
@@ -373,6 +380,9 @@ php api/scan-closure-reports.php --type=closure   # on the server (ea-php82): dr
 # number + CourtListener court id, never guessed; remembered per case; anonymous = 5 requests/min, so spaced 13 s; a free token in
 # KOP_COURTLISTENER_TOKEN or COURTLISTENER_API_KEY (api/config.local.php or .env; kop_sc_cl_token()) = 5,000/hour), read by the AI; an unchanged page is not sent to the AI again. Changes
 # wait at Review inbox > Bill and lawsuit updates (record_status_proposals; Apply, exact Undo, a dismissed change never comes back)
+# The feed gives filings only as labels ("Report - Status"), so with the token the newest filings' own words are read too
+# (kop_sc_recent_filing_text()); a case whose status never moves (in_progress through an appeal) still gets the docket's newer
+# decisions added to the end of its outcome, when they are dated after every date the outcome gives (new_events, kop_sc_latest_date())
 # Bill corrections and new bills by hand: seeds/legislation-updates.json + seeds/legislation.json (inc/legislation-updates.php, bump 'version')
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-status-checks.php   # parsing, matching, what is a change, runs with a made-up AI
 php api/check-record-statuses.php [--kind=bill --ids=19] [apply]   # on the server (ea-php82): dry run prints what it finds
