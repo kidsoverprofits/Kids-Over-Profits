@@ -888,6 +888,23 @@ function kop_wiki_upd_gaps(array $entry, array $page, PDO $pdo = null) {
             array('heading' => $s['heading'], 'text' => $s['text'], 'links' => $s['links']));
     }
 
+    // Rules and practices from the program's own handbooks (inc/program-practices.php, added by the owner): the
+    // levels, rules, punishments and limits on contact a "Rules and Punishments" or "Program Structure" section
+    // still says nothing about. A line whose document the entry already links is taken as covered. Cited to the
+    // page of KOP's copy of the document. An entry about an earlier name gets only documents of its own years.
+    if (function_exists('kop_pp_for_facility')) {
+        $structure = array('levels', 'daily_life', 'therapy', 'education', 'admission', 'family');
+        foreach (kop_pp_for_facility((int) $page['id']) as $topic => $rows) {
+            $sec = in_array($topic, $structure, true) ? 'Program Structure' : 'Rules and Punishments';
+            foreach ($rows as $r) {
+                if ($has_url((string) $r['doc_url']) || !$in_era((int) $r['year'] ? (string) $r['year'] : '')) continue;
+                $add('rules', (string) $r['value'], kop_pp_page_url($r), trim($r['doc_title'] . ((int) $r['page'] > 0 ? ', page ' . (int) $r['page'] : '')),
+                    (int) $r['year'] ? (string) $r['year'] : '',
+                    array('topic' => $topic, 'section' => $sec, 'quote' => (string) $r['quote'], 'doc_id' => (int) $r['doc_id'], 'page' => (int) $r['page']));
+            }
+        }
+    }
+
     // KOP is a primary source: a fact whose only source is KOP's own record (names, operators, staff the owner
     // researched) is cited to KOP's page. Where the record holds an outside source (an article, a court record),
     // that is the citation instead, picked above; KOP is never cited for someone else's reporting.

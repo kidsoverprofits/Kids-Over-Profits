@@ -35,6 +35,7 @@ ini_set('memory_limit', '3G');
 
 require __DIR__ . '/kop-test-harness.php';
 require_once dirname(__DIR__) . '/inc/wiki-updates.php';
+require_once dirname(__DIR__) . '/inc/program-practices.php';   // 'rules' gaps: the handbook lines the owner added
 
 foreach (array($out_dir, $out_dir . '/gaps') as $d) if (!is_dir($d)) mkdir($d, 0777, true);
 if (!$want) foreach (glob($out_dir . '/gaps/*.json') ?: array() as $f) unlink($f);

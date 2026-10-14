@@ -222,6 +222,8 @@ if (!function_exists('kop_fmerge_ref_tables')) {
             array('t' => $prefix . 'kop_woodbury_mentions', 'c' => 'facility_id', 'k' => 'id'),
             array('t' => $prefix . 'kop_woodbury_facts', 'c' => 'facility_id', 'k' => 'id'),
             array('t' => $prefix . 'kop_woodbury_facts', 'c' => 'applied_fid', 'k' => 'id'),
+            // Rules and practices from programs' handbooks (inc/program-practices.php).
+            array('t' => $prefix . 'kop_program_practices', 'c' => 'facility_id', 'k' => 'id'),
             // Fornits link proposals carry the id in their key: done one by one below.
             array('t' => $prefix . 'kop_fornits_items', 'c' => 'facility_id', 'k' => 'id', 'where' => "kind <> 'link'"),
             array('t' => $prefix . 'kop_fornits_items', 'c' => 'applied_fid', 'k' => 'id'),

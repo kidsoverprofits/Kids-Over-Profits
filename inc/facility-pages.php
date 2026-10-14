@@ -1924,6 +1924,14 @@ if (!function_exists('kop_facility_checklist_labels')) {
     /** Checklist key => label, as worded in templates/data-form-admin.php. */
     function kop_facility_checklist_labels() {
         return array(
+            'ttiPractices.hasLevelSystem'             => 'Level system',
+            'ttiPractices.hasRestraint'               => 'Restraint',
+            'ttiPractices.hasSeclusion'               => 'Seclusion or isolation',
+            'ttiPractices.hasStripSearches'           => 'Strip searches',
+            'ttiPractices.hasCommunicationRestrictions' => 'Limits on contact with family',
+            'ttiPractices.hasConfrontationGroups'     => 'Confrontation groups',
+            'ttiPractices.hasBehaviorContracts'       => 'Behavior contracts',
+            'ttiPractices.hasForcedMedication'        => 'Forced medication',
             'treatmentTypes.hasABA'                   => 'Applied Behavior Analysis',
             'treatmentTypes.hasEquineTherapy'         => 'Equine therapy',
             'treatmentTypes.hasWorkTherapy'           => 'Work therapy',
@@ -3005,7 +3013,7 @@ if (!function_exists('kop_facility_page_data')) {
 
         // ---- Practices, staff, notes, links --------------------------------------
         $practices = array();
-        foreach (array('treatmentTypes' => 'Treatment methods', 'philosophy' => 'Program philosophy', 'conditions' => 'Conditions treated') as $k => $label) {
+        foreach (array('ttiPractices' => 'Practices', 'treatmentTypes' => 'Treatment methods', 'philosophy' => 'Program philosophy', 'conditions' => 'Conditions treated') as $k => $label) {
             $items = kop_facility_pages_checklist_items($doc[$k] ?? null, $k);
             if ($items) $practices[] = array('label' => $label, 'items' => $items);
         }

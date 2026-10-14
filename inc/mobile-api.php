@@ -165,6 +165,8 @@ if (!function_exists('kop_mobile_facility_payload')) {
             'url'       => (!empty($docs['folder_id']) && !empty($page['url'])) ? $page['url'] . '#documents' : '',
         );
         $out['network'] = !empty($page['id']) ? kop_mobile_facility_network((int) $page['id']) : null;
+        // The page's "Rules and practices" lines from the program's own handbooks (inc/program-practices.php), read now.
+        $out['rules'] = !empty($page['id']) && function_exists('kop_pp_for_app') ? kop_pp_for_app((int) $page['id']) : array();
         return $out;
     }
 }

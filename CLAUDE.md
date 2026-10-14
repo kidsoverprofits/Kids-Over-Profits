@@ -301,6 +301,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # the facility and company pages print a year-by-year table (revenue, expenses, officers' pay, assets, a link to each return), read at render time
 (kop-pipeline) py -3 scripts/nonprofit-990.py [--refresh-bmf] [--refresh-orgs] [--no-search] [--selftest]   # cached in tmp/nonprofit-990/, ~1 request/s
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=nonprofit-filings
+# Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
+# document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
+# Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,
+# {prefix}kop_program_practices; one card per program and topic, exact Undo) -> the facility page's "Rules and practices" section
+# (and the record's checklist boxes they show), the app's 'rules', wiki gaps of kind 'rules'. People/program facts -> woodbury-facts.py --also tmp/doc-read
+php -d extension=pdo_sqlite -d extension=mbstring scripts/doc-inventory.php     # every record's documents -> tmp/doc-read/inventory.json
+(kop-pipeline) py -3 scripts/doc-text.py fetch|batches|export|status [--types handbooks|reading|all] [--facility 12293]
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=program-practices
 # Federal funding (docs/PLAN.md 3.15): Medicaid, foster care funds, ORR, TRICARE, PPP and Education money found for programs,
 # js/data/federal-funding/proposals.json -> Review inbox > Federal funding (inc/federal-funding.php) -> the record's federalFunding
 # field (kop_facility_federal_funding_list(), JS mirror in data-normalizer.js), listed on its facility page; Add/Undo exact by entry ref
@@ -701,6 +709,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_woodbury_mentions` - Woodbury Reports pages about a program (article, news item or mention) found by `scripts/woodbury-scan.py`, pending until an admin files them in the program's "Woodbury Reports Mentions" folder
 - `{prefix}kop_media_folder_tags` - Extra folder memberships (one document, many folders)
 - `{prefix}kop_doc_types` / `{prefix}kop_doc_type_suggestions` - What kind of document each attachment is (one row per type, with rule / ai / person / checked) and, for documents the rules could not type, the AI's guess and its review status (`inc/doc-types.php`)
+- `{prefix}kop_program_practices` - One line per rule, level, punishment or limit read from a program's own handbook (its document, page, quote, topic, the checklist boxes it shows), pending until the owner adds it to the facility page or leaves it off (`inc/program-practices.php`)
 - `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
 - `{prefix}kop_campuses` / `{prefix}kop_campus_programs` - Separate programs that share one campus (a hospital's two residential programs), one campus per record (`inc/campus-programs.php`)
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)

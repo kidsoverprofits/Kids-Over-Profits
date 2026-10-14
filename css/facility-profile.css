@@ -227,6 +227,24 @@
     color: var(--kop-midnight-blue, #000435);
 }
 
+/* Rules and practices from the program's own handbooks (inc/program-practices.php): one plain list per topic. */
+.kop-pp-lines {
+    margin: 0.3rem 0 0.6rem;
+    padding-left: 1.2rem;
+}
+
+.kop-pp-lines li {
+    margin: 0 0 0.3rem;
+    line-height: 1.45;
+}
+
+.kop-pp-more > summary {
+    cursor: pointer;
+    color: var(--kop-navy, #000080);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
 .kop-fp-list {
     margin: 0;
     padding: 0;

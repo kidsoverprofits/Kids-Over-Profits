@@ -2030,3 +2030,62 @@ Open:
    reader per state starting with UT, ID, MT, FL, TX, AZ, NC, or OpenCorporates'
    API (ask about its public-interest access first); SEC EDGAR 10-K / Exhibit 21
    subsidiary lists for the public parents (UHS, Acadia).
+
+---
+
+### 3.21 Programs' own papers read: rules and practices (2026-10-13)
+
+Owner, 2026-10-13: facility profiles and wiki entries make little use of what
+we hold. 361 of 409 current wiki entries said nothing was known about the
+program's rules, and the checklist boxes (level system, restraint, seclusion,
+limits on contact with family) were ticked on 2 of 4,961 records, while the
+media library holds 122 student and parent handbooks, 48 enrollment papers,
+staff manuals and hundreds of untyped ground-rule and phase sheets, filed
+under their programs. The wiki gaps (3.12) counted documents only as links.
+
+Built:
+- `scripts/doc-inventory.php` (theme, offline): every record's document
+  library (the page's folder tree) and its linked wiki entries ->
+  `tmp/doc-read/inventory.json` (3,720 documents under 540 records).
+- kop-pipeline `scripts/doc-text.py`: `fetch` downloads each document from the
+  live site and takes its text page by page (pdftotext; scanned pages OCRed
+  with pdftoppm + tesseract; .doc via antiword) into `tmp/doc-read/text/`, with
+  `issues.json` in the shape `woodbury-facts.py --also` reads; `batches` writes
+  one reading list per program (the same text uploaded twice is read once);
+  `export` writes the checked practice lines to `tmp/doc-read/practices.json`.
+  Readers follow `scripts/doc-read-instructions.md` (kinds practice, person,
+  program, incident; every quote verbatim with its page, checked by the
+  build). Person/program/incident items join Woodbury Facts with
+  `woodbury-facts.py --also tmp/doc-read` (undated documents now accepted).
+- Review inbox > **Rules from documents** (`inc/program-practices.php`,
+  `inc/review-inbox/program-practices.php`, table
+  `{prefix}kop_program_practices`): one card per program and topic, every
+  line ticked and linked to its page of our copy with its quote. Add puts the
+  ticked lines on the facility page and ticks the record's boxes they show;
+  the rest are left off; Undo puts back exactly that. Pencil `pp:<id>` rewords
+  a line or takes it off. The facility page's "Reported practices" section is
+  now **Rules and practices**: the checklist chips (ttiPractices shown too)
+  and the document lines by topic, each with a "source" link. App: `rules` in
+  the facility payload.
+- Wiki: gap kind `rules` (`kop_wiki_upd_gaps()`): added lines whose document
+  the entry does not link yet, for its Program Structure or Rules and
+  Punishments section (`detail.section`); `wiki-script-drafts.py` sends them
+  to the models, and the assembler already replaces the stand-in text.
+- Test: `scripts/test-review-inbox.php --source=program-practices`.
+
+Pilot (Sonnet readers): Spring Ridge Academy (10 documents, 312 items) and
+Midwest Academy (14, 347), every quote found on its page; 582 practice lines
+exported. Text taken so far for the 156 handbook-type documents (3,737 pages,
+595 OCRed).
+
+Open:
+1. **Owner:** review the two pilot programs' cards once
+   `tmp/doc-read/practices.json` is on the server
+   (`~/kop-import/doc-read/practices.json`).
+2. Read the other handbook-type documents (about 2 M tokens of text; a
+   workflow, by program, the 38 linked wiki entries with an empty rules or
+   structure section first), then `--types reading` (NATSAP profiles,
+   marketing, depositions) for people, program facts and incidents.
+3. After the owner adds lines: rerun `scripts/wiki-gaps.php` (sync the mirror
+   with the new table first) and draft the wiki sections.
+4. Operator libraries (company pages) are not in the inventory yet.

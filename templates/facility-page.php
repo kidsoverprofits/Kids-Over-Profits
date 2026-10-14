@@ -336,7 +336,9 @@ if ($kop_fp_homes) $kop_fp_sections['homes'] = $kop_fp_is_program ? ($kop_fp_sat
 // Separate programs on one campus (inc/campus-programs.php).
 $kop_fp_campus = !empty($page['campus']['others']) ? $page['campus'] : null;
 if ($kop_fp_campus) $kop_fp_sections['campus'] = 'Same campus';
-$kop_fp_has_practices = !empty($page['practices']);
+// Rules and practices read from the program's own handbooks (inc/program-practices.php), read at render time.
+$kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
+$kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
 $kop_fp_has_staff = !empty($page['staff']);
 $kop_fp_has_notes = !empty($page['notes']) || !empty($page['field_notes']);
 $kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']);
@@ -448,7 +450,7 @@ if ($kop_fp_has_incidents) $kop_fp_sections['incidents'] = 'Incidents';
 if ($kop_fp_has_news) $kop_fp_sections['news'] = 'News coverage';
 if ($kop_fp_has_videos && !isset($kop_fp_psec['videos'])) $kop_fp_sections['videos'] = 'Videos';
 if ($kop_fp_has_staff) $kop_fp_sections['staff'] = 'Staff';
-if ($kop_fp_has_practices) $kop_fp_sections['practices'] = 'Reported practices';
+if ($kop_fp_has_practices) $kop_fp_sections['practices'] = 'Rules and practices';
 if ($kop_fp_has_inspections) $kop_fp_sections['inspections'] = 'Licensing';
 if ($kop_fp_has_network) $kop_fp_sections['network'] = 'Network';
 if ($kop_fp_has_docs) $kop_fp_sections['documents'] = 'Documents';
@@ -923,11 +925,15 @@ get_header();
 
             <?php if ($kop_fp_has_practices) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('practices'); ?>"<?php echo $kop_fp_edit('practices', 'reported practices'); ?>>
-                <h2>Reported practices</h2>
+                <h2>Rules and practices</h2>
                 <?php foreach ($page['practices'] as $group) : ?>
                     <h3 class="kop-fp-subhead"><?php echo esc_html($group['label']); ?></h3>
                     <?php $kop_fp_list($group['items'], 'kop-fp-chips'); ?>
                 <?php endforeach; ?>
+                <?php if ($kop_fp_rules) : ?>
+                    <p class="kop-fp-count"><?php echo esc_html(kop_pp_sources_line($kop_fp_rules)); ?></p>
+                    <?php echo kop_pp_section_html($kop_fp_rules); // Escaped inside. ?>
+                <?php endif; ?>
             </section>
             <?php endif; ?>
 

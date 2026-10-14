@@ -30,6 +30,13 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### {prefix}kop_addresses / {prefix}kop_facility_addresses
 **Purpose:** Physical address ids and which facility stood where (`api/manage-addresses.php`).
 
+### {prefix}kop_program_practices
+**Columns:** `id`, `ikey` (sha1 of document, page and quote; unique), `facility_id`, `doc_id` (attachment), `doc_title`, `doc_url`, `page`, `topic` (levels, rules, consequences, communication, restraint, searches, therapy, daily_life, education, admission, family), `value` (the line as shown; the pencil rewords it), `value_orig` (as the reader wrote it), `quote`, `year`, `checklist` (comma-separated `ttiPractices.hasX` keys), `status` (pending, added, left), `batch` (the decision that set it), `created_at`
+
+**Purpose:** What programs' own handbooks, manuals and enrollment papers say about their levels, rules, punishments, contact with family, restraint and searches (`inc/program-practices.php`). Imported from kop-pipeline `scripts/doc-text.py export` (`~/kop-import/doc-read/practices.json`, new keys only); decided at Review inbox > Rules from documents (Add / Leave all off / Undo, log in option `kop_pp_log`); added lines print on the facility page under "Rules and practices". Moved by Merge Duplicates.
+
+---
+
 ### {prefix}kop_nonprofit_links
 **Columns:** `id`, `ein` (9 digits), `facility_id`, `operator_id` (one of the two set, the other 0), `created_by`, `created_at`
 
