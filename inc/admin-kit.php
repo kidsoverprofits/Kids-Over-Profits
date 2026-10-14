@@ -42,7 +42,9 @@ function kop_ak_enqueue() {
     }
     wp_enqueue_style('kop-admin-kit', $uri . '/css/admin-kit.css', wp_style_is('kop-colors', 'registered') ? array('kop-colors') : array(),
         filemtime($dir . '/css/admin-kit.css'));
-    wp_enqueue_script('kop-admin-kit', $uri . '/js/admin-kit.js', array(), filemtime($dir . '/js/admin-kit.js'), true);
+    // In the <head>, never the footer: each screen's own script runs inline in the page and calls
+    // KOPAdminKit.cards() at once, so the kit must already be there (a footer kit left every button dead).
+    wp_enqueue_script('kop-admin-kit', $uri . '/js/admin-kit.js', array(), filemtime($dir . '/js/admin-kit.js'), false);
     wp_localize_script('kop-admin-kit', 'KOP_ADMIN_KIT', array('ajax' => admin_url('admin-ajax.php')));
 }
 
