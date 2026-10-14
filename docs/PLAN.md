@@ -784,6 +784,15 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
    key-concepts block, a link into the map on its chain), **18C** Lawsuits
    (intro, status labels, filter micro-copy, grouping, recent updates, how to
    submit).
+4. **The Brochure and the Record rewrite (2026-10-14).** Rewritten around current programs' own claims
+   (Diamond Ranch, Vive, Maple Lake, Trails Carolina, Asheville Academy, Discovery Ranch, Sequel/Lakeside,
+   New Lifehouse, Resolution Ranch, Turning Winds, Senate length of stay, UHS, JRC); WWASP-era material moved
+   to Deceptive Marketing, Then and Now ("Then: the ads", seed v2, allow_published). The 15 Wayback pages it
+   cites were imported (attachments 15910-15924, filed in each program's folder). Open: owner reads the
+   draft (seed v7, overwrite_existing; the Oct 2 wp-admin edit survives as a revision) and publishes it.
+   Follow-ups: submit https://www.fox13now.com/2019/08/14/employee-at-treatment-center-in-southern-utah-facing-felony-child-abuse-charge
+   (Liahona, 2019 choke-hold restraint, 11 staples; the hourly cap refused it); lawsuits #54 Parker and #55
+   Bence have empty source_urls (CourtListener: gov.uscourts.oknd.78072 complaint, docket 73624806).
 
 ### 3.5 Data research
 

@@ -840,7 +840,7 @@ function kop_template_assignments() {
         'how-troubled-teen-programs-market-themselves-online' => 'page-article.php',
         'new-names-same-programs' => 'page-article.php',
         'silencing-critics-and-survivors' => 'page-article.php',
-        // 'the-brochure-and-the-record': off the reputation series until it is rewritten (2026-10-02).
+        'the-brochure-and-the-record' => 'page-article.php',
         'free-help-paid-by-programs' => 'page-article.php',
         'deceptive-marketing-then-and-now' => 'page-article.php',
         'research-shows' => 'page-article.php',
@@ -2614,7 +2614,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '126';
+    $version = '127';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

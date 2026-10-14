@@ -3,8 +3,10 @@
   "slug": "deceptive-marketing-then-and-now",
   "post_type": "page",
   "status": "draft",
-  "seed_version": 1,
+  "seed_version": 2,
   "content_file": "reputation/deceptive-marketing-then-and-now.html",
-  "excerpt": "The toll-free help lines that sold troubled teen programs in the 1990s and 2000s, what Congress heard about them in 2008, and the same pitch online today.",
-  "template": "page-article.php"
+  "excerpt": "The toll-free help lines and magazine ads that sold troubled teen programs in the 1990s and 2000s, what Congress heard about them in 2007 and 2008, and the same pitch online today.",
+  "template": "page-article.php",
+  "allow_published": true,
+  "last_seed_modified_gmt": "2026-10-02 20:16:19"
 }

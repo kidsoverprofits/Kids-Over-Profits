@@ -85,7 +85,7 @@ function kop_article_parents() {
         'how-troubled-teen-programs-market-themselves-online' => 'reputation-management',
         'free-help-paid-by-programs' => 'reputation-management',
         'deceptive-marketing-then-and-now' => 'reputation-management',
-        // the-brochure-and-the-record: off the series until it is rewritten (owner, 2026-10-02).
+        'the-brochure-and-the-record' => 'reputation-management',
         'research-shows' => 'reputation-management',
         'silencing-critics-and-survivors' => 'reputation-management',
         'natsap-reputation-plans' => 'reputation-management',
