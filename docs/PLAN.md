@@ -1641,7 +1641,7 @@ Open:
 
 ### 3.14 Mobile app (2026-10-06)
 
-An iOS and Android app, [kids-over-profits-mobile](https://github.com/carlygaejepsen/kids-over-profits-mobile) (Expo SDK 57,
+An iOS and Android app, [kids-over-profits-mobile](https://github.com/kidsoverprofits/kids-over-profits-mobile) (Expo SDK 57,
 expo-router, TypeScript; the README there has the commands). Version one is
 public and read-only: search a facility by any of its names, the news feed,
 states and countries, parent companies, and a facility page with everything
@@ -1670,7 +1670,7 @@ mirror; `--dump <dir>` writes the files the app's tests read). It checks every
 payload for private keys, HTML and fixture sentinel text.
 
 **Rules in force on the website and in the app** ([68a622df](https://github.com/carlygaejepsen/Kids-Over-Profits/commit/68a622df2bb188cca27715d4a576f8c2201997ef),
-[84f93b2b](https://github.com/carlygaejepsen/kids-over-profits-mobile/commit/84f93b2b95d67843c888eade9517d46e283b0617)): a
+[84f93b2b](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/84f93b2b95d67843c888eade9517d46e283b0617)): a
 citation is only a small "source" link, numbered when there are several. One
 that only points back to us (the network map, a page of this site) is not
 shown. The Woodbury Reports name, issue and page are not printed or put in a
@@ -1683,7 +1683,7 @@ App: `src/lib/citations.ts`, `InlineSources` in `src/components/ui.tsx`.
 
 Done 2026-10-07 (theme [5d8b452b](https://github.com/carlygaejepsen/Kids-Over-Profits/commit/5d8b452b),
 [9fc251fa](https://github.com/carlygaejepsen/Kids-Over-Profits/commit/9fc251fa); app
-[7930afd](https://github.com/carlygaejepsen/kids-over-profits-mobile/commit/7930afd)): fixtures refreshed and
+[7930afd](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/7930afd)): fixtures refreshed and
 extended to Copper Canyon / Sedona Sky, Newport Academy and its home Acre, Provo Canyon, Rebekah Home, Acadia
 Montana and Ascent (`php scripts/test-mobile-api.php --db=tmp/prod.sqlite --id=9605,9606,9607,12155,12161,100284,9758,10371,10865,12688,9688 --dump=<dir>`;
 on the mirror it now builds homes and name eras as the site does); a render test per section

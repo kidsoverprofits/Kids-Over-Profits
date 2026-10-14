@@ -3192,7 +3192,7 @@ names `p0439` in its words and `p0504` as its id.
 
 ### The mobile app's Map tab
 
-The app (github.com/carlygaejepsen/kids-over-profits-mobile) does not have
+The app (github.com/kidsoverprofits/kids-over-profits-mobile) does not have
 a map of its own. Its Map tab is this page in a web view
 (`src/lib/mapPage.ts`): it loads `/network-map/`, opens a name with
 `#open=<node id>` and moves to another by changing the hash, which

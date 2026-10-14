@@ -107,7 +107,7 @@ php scripts/test-facility-pages.php
 # this site; kop_facility_pages_is_own_source()) is not shown, and the Woodbury Reports wording ("Woodbury Reports, May 2007, p. 20") is
 # not printed or put in a preview, only the link to our copy of the issue (kop_facility_pages_woodbury_clean(), _tidy_citations(), _cited_html())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-citation-cleanup.php [--no-db] [--id=9607]   # functions, then real pages from tmp/prod.sqlite
-# The mobile app (github.com/carlygaejepsen/kids-over-profits-mobile) reads kop/v1/facility/<slug>, /operator/<slug|?name=>,
+# The mobile app (github.com/kidsoverprofits/kids-over-profits-mobile) reads kop/v1/facility/<slug>, /operator/<slug|?name=>,
 # /operators (the Companies list), /news and /resources (the /resources/ list, inc/resources-list.php) (inc/mobile-api.php): named keys copied from the page data, so a new page section goes in the keep lists there
 # A facility's names on the network map come as 'network' (kop_mobile_facility_network(), the app's Connections drawing); the app's Map tab is the
 # website's /network-map/ in a web view with the site's header/footer hidden by the app (src/lib/mapPage.ts), so a class renamed there breaks it

@@ -1,6 +1,6 @@
 <?php
 /**
- * "Send to KOP" in the mobile app (github.com/carlygaejepsen/kids-over-profits-mobile), the
+ * "Send to KOP" in the mobile app (github.com/kidsoverprofits/kids-over-profits-mobile), the
  * browser extension without an account, and the /send/ page (via = app | extension | web).
  *
  * The public version of the browser extension (inc/source-submissions.php):
