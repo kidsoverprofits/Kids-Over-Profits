@@ -1919,10 +1919,13 @@ Open, in order (details in DATA-FLOWS.md section 4):
    flush once the revisions have proven themselves.
 4. Wiki approval's staff go straight onto the record (owner, 2026-10-13):
    done, cited to the Reddit page, logged, taken off when the approval is
-   taken back (scripts/test-wiki-staff.php). **Owner:** 229 entries already
-   approved would add 784 staff if approved again. Run that backfill once
-   (a CLI like the other server tools, dry run first), or leave it to new
-   approvals?
+   taken back (scripts/test-wiki-staff.php). The merge had never run on the
+   live site (it read `wiki_master`, which does not exist there). Backfill run
+   2026-10-13 on the server (api/backfill-wiki-staff.php apply): 285 pages,
+   785 staff added from 231 entries; a "role" that is a sentence of the
+   write-up goes on blank. Not merged: 14 entries whose linked record is gone
+   (merged or renamed since), 7 linked to a company whose program they name
+   is not under it, 8 with no link (Review inbox > Wiki links).
 5. Wiki staleness listener + badge (this is 3.12 step 6).
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
    fingerprint moves).
