@@ -1,15 +1,20 @@
 {
   "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, and the note is appended to reviewer_notes. New cases in seeds/lawsuits.json are inserted in the same pass.",
-  "version": "2026-10-12",
+  "version": "2026-10-14",
   "updates": [
     {
-      "id": 38,
-      "case_name": "J.P., as Father and Next Friend of G.P. v. Sequel TSI of Alabama, LLC, et al.",
-      "note": "Remanded to Macon County Circuit Court on March 17, 2023; no later outcome reported (Sequel research, 2026-10-12).",
+      "id": 5,
+      "case_name": "Sweidy v. Spring Ridge Academy, et al.",
+      "note": "Through October 2026: Ninth Circuit affirmed (1/23/2026), rehearing denied (3/16/2026), certiorari denied (10/5/2026), joint status report Doc. 439 (10/7/2026); fraud claims against SRA and Deily await retrial. Previous outcome and summary: seeds/lawsuit-updates.json history / tmp/prod.sqlite of 2026-10-13.",
       "set": {
-        "status": "in_progress",
-        "outcome": "Removed to federal court April 20, 2022; remanded to Macon County Circuit Court on March 17, 2023. No later outcome reported."
-      }
+        "outcome": "On August 15, 2023 the court granted summary judgment to Veronica Borges, Jean Courtney, Suzanne Courtney, Brandon Courtney, Erin Smith, Leslie Filsinger and Justin Zych, and dismissed every claim except fraud and consumer fraud against Spring Ridge Academy and Kate Deily. After a jury trial that began May 29, 2024, the jury returned a $2.5 million verdict for Kimberly Sweidy on June 14, 2024. On January 8, 2025 the court granted the defendants' motion for a new trial, finding a reasonable possibility that a juror viewed prejudicial outside information on Reddit during deliberations, and vacated the verdict; pending motions for attorney fees and costs were denied as moot. Sweidy appealed the 2023 summary judgment rulings; on January 23, 2026 the Ninth Circuit (No. 24-4318) affirmed the dismissal of her claims for intentional infliction of emotional distress, breach of contract, breach of the covenant of good faith and fair dealing, negligence per se and conversion, and of the fraud claims against every defendant except Spring Ridge Academy and Kate Deily, and left those fraud claims to proceed in the district court. Rehearing was denied on March 16, 2026, and the U.S. Supreme Court denied certiorari on October 5, 2026 (No. 25-1402). The parties' joint status report of October 7, 2026 told the court the appeal had concluded; the fraud claims against Spring Ridge Academy and Deily await a new trial, with no date set.",
+        "summary": "Kimberly Sweidy sued Spring Ridge Academy, a therapeutic boarding school for girls in Mayer, Arizona, and eight of its staff in federal court in Arizona on January 21, 2021, after enrolling her daughter there in December 2019 and removing her in February 2020. She alleges the school misrepresented its program before enrollment, used seminars modeled on Lifespring-style large group awareness training rather than evidence-based therapy, and used shaming, isolation and restricted parent contact. In August 2023 the court dismissed the individual staff defendants except Admissions Director Kate Deily and left only the fraud and consumer fraud claims for trial. A jury trial ran from May 29 to June 14, 2024, with testimony from school leaders and staff, former students, a parent of another student and expert witnesses on both sides. The jury returned a $2.5 million verdict for Sweidy on June 14, 2024. On January 8, 2025 Judge Steven P. Logan granted a new trial, finding a juror had likely visited Reddit during deliberations and later posted in the Troubled Teens subreddit that they had served on the jury, so the verdict no longer stands. Sweidy appealed the dismissal of her other claims; the Ninth Circuit upheld it on January 23, 2026, and the U.S. Supreme Court declined to hear the case on October 5, 2026. The fraud claims against Spring Ridge Academy and Kate Deily now await a new trial in the district court, which had not been scheduled as of October 2026."
+      },
+      "add_source_urls": [
+        "https://www.supremecourt.gov/docket/docketfiles/html/public/25-1402.html",
+        "https://storage.courtlistener.com/recap/gov.uscourts.azd.1258639/gov.uscourts.azd.1258639.439.0.pdf",
+        "https://www.tucsonsentinel.com/local/report/010626_boarding_school_retrial/mother-seeks-retrial-boarding-school-emotional-abuse-claims/"
+      ]
     }
   ]
 }
