@@ -1926,6 +1926,8 @@ Open, in order (details in DATA-FLOWS.md section 4):
    write-up goes on blank. Not merged: 14 entries whose linked record is gone
    (merged or renamed since), 7 linked to a company whose program they name
    is not under it, 8 with no link (Review inbox > Wiki links).
+   Every entry's additions are a card at Review inbox > Wiki staff added
+   (inc/review-inbox/wiki-staff.php): Looks right, Take them off, Undo.
 5. Wiki staleness listener + badge (this is 3.12 step 6).
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
    fingerprint moves).
