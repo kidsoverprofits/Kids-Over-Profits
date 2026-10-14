@@ -40,7 +40,7 @@ kop_rinbox_register('data-audit', function () {
         'label'    => 'Data audit',
         'group'    => 'Suggestions to check',
         'help'     => 'Facility data that news, court and SEC filings and licensing records show is wrong: closing years, status, companies, names, map years and people. Each card shows KOP as it is now, the steps to correct it (tick the ones you want) and the quotes they rest on. "Make the ticked changes" puts them on the site at once; "Edit details" changes a record by hand right there. Undo on the Approved tab.',
-        'views'    => array('waiting' => 'Waiting', 'applied' => 'Approved', 'rejected' => 'Rejected'),
+        'views'    => array('waiting' => 'Waiting', 'applied' => 'Approved', 'rejected' => 'Rejected', 'elsewhere' => 'Settled on other cards'),
         'count'    => function () {
             return kop_rinbox_daudit_view_counts()['waiting'];
         },
@@ -66,12 +66,31 @@ kop_rinbox_register('data-audit', function () {
 
 function kop_rinbox_daudit_view($p, array $d) {
     $decision = (string) ($d['decision'] ?? '');
-    return $decision !== '' ? $decision : 'waiting';
+    if ($decision !== '') return $decision;
+    // Every step decided on other cards (the same correction proposed twice): nothing left to decide here.
+    return is_array($p) && kop_daudit_all_settled_elsewhere((string) ($p['key'] ?? ''), $p) ? 'elsewhere' : 'waiting';
+}
+
+/** sig => keys of the waiting cards proposing that step, so a card can say where else it is. */
+function kop_rinbox_daudit_shared() {
+    static $memo = array(null, array());
+    $decisions = kop_daudit_decisions();
+    $stamp = md5(json_encode($decisions));
+    if ($memo[0] === $stamp) return $memo[1];
+    $out = array();
+    foreach (kop_daudit_proposals() as $key => $p) {
+        if (kop_rinbox_daudit_view($p, $decisions[$key] ?? array()) !== 'waiting') continue;
+        foreach ($p['ops'] as $op) {
+            if (($op['type'] ?? '') !== 'check') $out[kop_daudit_op_sig($op)][(string) $key] = (string) ($p['title'] ?? $key);
+        }
+    }
+    $memo = array($stamp, $out);
+    return $out;
 }
 
 function kop_rinbox_daudit_view_counts() {
     $decisions = kop_daudit_decisions();
-    $counts = array('waiting' => 0, 'applied' => 0, 'rejected' => 0);
+    $counts = array('waiting' => 0, 'applied' => 0, 'rejected' => 0, 'elsewhere' => 0);
     foreach (kop_daudit_proposals() as $key => $p) {
         $v = kop_rinbox_daudit_view($p, $decisions[$key] ?? array());
         if (isset($counts[$v])) $counts[$v]++;
@@ -320,7 +339,8 @@ function kop_rinbox_daudit_kinds() {
 /** A step's line under it on the card: where it stands now. */
 function kop_rinbox_daudit_state_words(array $s, array $op) {
     switch ($s['state']) {
-        case 'done': return 'Already so on the site: nothing to do.';
+        case 'done': return 'Already so on the site: nothing to do.' . ($s['why'] !== '' ? ' ' . $s['why'] : '');
+        case 'elsewhere': return $s['why'] . ' Tick it to make it here anyway.';
         case 'changed': return 'Moved since the research: ' . $s['why'] . ' Tick it to make the change over what the record has now.';
         case 'blocked': return 'Cannot be made: ' . $s['why'];
         case 'manual': return 'Done by hand, outside this card (the site has no button for it). Tick it once it is done.';
@@ -363,6 +383,10 @@ function kop_rinbox_daudit_item($key, array $p) {
         elseif ($why !== '' && $why !== $words && !in_array($op['type'], array('note', 'note_remove', 'manual'), true)) $notes[] = 'Why: ' . $why;
         $back = kop_rinbox_daudit_backing($words . ' ' . $why, $sources);
         if ($back !== '') $notes[] = $back;
+        // The same step waits on other cards too: deciding it here settles it there.
+        $also = array_diff_key(kop_rinbox_daudit_shared()[kop_daudit_op_sig($op)] ?? array(), array((string) $key => 1));
+        if ($waiting && $also) $notes[] = 'Also on ' . count($also) . ' other waiting card' . (count($also) === 1 ? '' : 's') . ' ("' . implode('", "', array_slice($also, 0, 3)) . '"'
+            . (count($also) > 3 ? ' and ' . (count($also) - 3) . ' more' : '') . '): made or left off here, it is settled there too.';
         $checklist[] = array('keys' => array((string) $i), 'label' => ($op['type'] === 'manual' ? 'By hand: ' : '') . $words,
             'sub' => kop_rinbox_daudit_state_words($s, $op), 'note' => implode("\n", $notes),
             'checked' => $waiting && $s['state'] === 'ready');
@@ -380,7 +404,12 @@ function kop_rinbox_daudit_item($key, array $p) {
     foreach ($checks as $c) $details[] = array('label' => 'To check', 'value' => $c);
     if (!empty($p['notes'])) $details[] = array('label' => 'Research note', 'value' => (string) $p['notes']);
     if (!empty($p['kop_now'])) $details[] = array('label' => 'KOP when researched', 'value' => (string) $p['kop_now']);
-    if (!$waiting) {
+    if ($view === 'elsewhere') {
+        $on = array();
+        foreach ($p['ops'] as $op) if (($s = kop_daudit_settled_elsewhere($op, $key))) $on[$s['key']] = $s['title'];
+        $details[] = array('label' => 'Settled on other cards', 'value' => 'Every step here was decided on ' . (count($on) === 1 ? 'the card' : 'the cards') . ' "' . implode('", "', $on)
+            . '". Undo there brings this card back.');
+    } elseif (!$waiting) {
         $details[] = array('label' => $view === 'applied' ? 'Approved' : 'Rejected', 'value' => trim(($d['at'] ?? '') . ' by ' . ($d['by'] ?? '')));
     }
     foreach ((array) ($d['edits'] ?? array()) as $n => $e) {
@@ -391,7 +420,10 @@ function kop_rinbox_daudit_item($key, array $p) {
 
     // The decision.
     $ready = count(array_filter($states, function ($s) { return $s['state'] === 'ready'; }));
-    if ($view === 'applied' && !empty($d['by_merge'])) {
+    if ($view === 'elsewhere') {
+        // Nothing of its own to decide: the cards that settled it hold the Undo.
+        $actions = array();
+    } elseif ($view === 'applied' && !empty($d['by_merge'])) {
         // Approved by merging the rename: its Undo is the merge's own (below).
         $actions = array();
     } elseif (!$waiting) {
@@ -437,7 +469,7 @@ function kop_rinbox_daudit_item($key, array $p) {
         'details'      => $details,
         'sources'      => $sources,
         'status'       => $view,
-        'status_label' => array('waiting' => 'Waiting', 'applied' => 'Approved', 'rejected' => 'Rejected')[$view] ?? $view,
+        'status_label' => array('waiting' => 'Waiting', 'applied' => 'Approved', 'rejected' => 'Rejected', 'elsewhere' => 'Settled on other cards')[$view] ?? $view,
         'created'      => (string) ($d['at'] ?? ''),
         'facility'     => !empty($p['facility_id']) ? kop_rinbox_facility((int) $p['facility_id']) : null,
         'actions'      => $actions,

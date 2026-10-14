@@ -905,7 +905,89 @@ function kop_daudit_step_states(array $p, array $opts) {
         elseif ($split['changed']) $out[$i] = array('state' => 'changed', 'why' => implode(' ', $split['changed']));
         else $out[$i] = array('state' => 'ready', 'why' => '');
     }
+    // A step decided on another card: made there, it says so beside "already so"; left off there, it waits unticked.
+    $key = (string) ($p['key'] ?? '');
+    foreach (kop_daudit_steps($p) as $i => $op) {
+        $st = $out[$i]['state'] ?? '';
+        if ($st === 'check' || $st === 'blocked' || !($s = kop_daudit_settled_elsewhere($op, $key))) continue;
+        if ($st === 'done') {
+            if ($s['how'] === 'made') $out[$i]['why'] = kop_daudit_settled_words($s);
+        } elseif ($s['how'] === 'left') {
+            $out[$i] = array('state' => 'elsewhere', 'why' => kop_daudit_settled_words($s), 'was' => $st);
+        }
+    }
     return $out;
+}
+
+/* ---- One correction, one decision -------------------------------------- */
+
+/*
+ * Research on neighbouring flags often proposes the same step on several
+ * cards (the four Three Springs cards each carry the same merges and past
+ * names). A step is decided once: made on one card it is "already so" on the
+ * others (the live check), left off on one card (unticked on an approved card,
+ * or on a rejected card) it waits unticked on the others, saying where it was
+ * left off. A card with every step settled on other cards leaves Waiting for
+ * "Settled on other cards"; undoing that card brings it back (all derived from
+ * the decisions, nothing stored).
+ */
+
+/** What a step changes, whatever card or wording it comes with. */
+function kop_daudit_op_sig(array $op) {
+    $t = (string) ($op['type'] ?? '');
+    if ($t === 'merge') return 'merge|' . (int) ($op['keep'] ?? 0) . '|' . (int) ($op['drop'] ?? 0) . '|' . (empty($op['rename']) ? 0 : 1);
+    $keep = $op;
+    foreach (array('why', 'step_text', 'quote', 'quotes', 'sources', 'source', 'evidence', 'auto', 'note', 'confidence') as $k) unset($keep[$k]);
+    // A step's 'text' only explains it, except where the text is the step (a note, a check, a step done by hand).
+    if (!in_array($t, array('note', 'note_remove', 'check', 'manual'), true)) unset($keep['text']);
+    ksort($keep);
+    return $t . '|' . md5(json_encode($keep));
+}
+
+/** sig => {key, title, how: made|left, at} from every decided card (its own ops; steps found on the records are checked live). */
+function kop_daudit_settled() {
+    static $memo = null;
+    $decisions = kop_daudit_decisions();
+    $stamp = md5(json_encode($decisions));
+    if ($memo !== null && $memo[0] === $stamp) return $memo[1];
+    $out = array();
+    $props = kop_daudit_proposals();
+    foreach ($decisions as $key => $d) {
+        $how = (string) ($d['decision'] ?? '');
+        if (!isset($props[$key]) || !in_array($how, array('applied', 'rejected'), true)) continue;
+        $made = array_flip(array_map('strval', array_merge((array) ($d['picked'] ?? array()), (array) ($d['marked'] ?? array()))));
+        foreach ($props[$key]['ops'] as $i => $op) {
+            if (($op['type'] ?? '') === 'check') continue;
+            $sig = kop_daudit_op_sig($op);
+            $state = $how === 'applied' && isset($made[(string) $i]) ? 'made' : 'left';
+            if (isset($out[$sig]) && $out[$sig]['how'] === 'made') continue;
+            $out[$sig] = array('key' => (string) $key, 'title' => (string) ($props[$key]['title'] ?? $key), 'how' => $state, 'at' => substr((string) ($d['at'] ?? ''), 0, 10));
+        }
+    }
+    $memo = array($stamp, $out);
+    return $out;
+}
+
+/** Where another card settled this step ({key, title, how, at}), or null. */
+function kop_daudit_settled_elsewhere(array $op, $key) {
+    $s = kop_daudit_settled()[kop_daudit_op_sig($op)] ?? null;
+    return $s && $s['key'] !== (string) $key ? $s : null;
+}
+
+/** Whether every step of an undecided card was settled on other cards (none of its own left). */
+function kop_daudit_all_settled_elsewhere($key, array $p) {
+    $n = 0;
+    foreach ($p['ops'] as $op) {
+        if (($op['type'] ?? '') === 'check') continue;
+        if (!kop_daudit_settled_elsewhere($op, $key)) return false;
+        $n++;
+    }
+    return $n > 0;
+}
+
+/** The step in words of another card's decision: 'Made with "X" (2026-10-14).' / 'Left off on "X" (...).' */
+function kop_daudit_settled_words(array $s) {
+    return ($s['how'] === 'made' ? 'Made with' : 'Left off on') . ' the card "' . $s['title'] . '"' . ($s['at'] !== '' ? ' (' . $s['at'] . ')' : '') . '.';
 }
 
 /** The steps a plain Approve makes: every ready step (not by-hand, not to-check, not moved since). */
@@ -967,6 +1049,8 @@ function kop_daudit_apply($key, $reviewer, $over_changes = false, $picked = null
         $op = $steps[$i];
         $s = $states[$i]['state'] ?? 'ready';
         if ($s === 'check' || $s === 'done') continue;
+        // Left off on another card, ticked here: made as it would have been.
+        if ($s === 'elsewhere') $s = (string) ($states[$i]['was'] ?? 'ready');
         if ($s === 'manual') { $marked[] = $i; continue; }
         if ($s === 'blocked') $why[] = $states[$i]['why'];
         if ($s === 'changed' && !$from_card && !$over_changes) $why[] = $states[$i]['why'];
@@ -980,6 +1064,7 @@ function kop_daudit_apply($key, $reviewer, $over_changes = false, $picked = null
     if (!$ops && !$marked) {
         $open = array_filter($states, function ($s) { return in_array($s['state'], array('ready', 'changed', 'manual'), true); });
         if ($open) throw new RuntimeException('No change is ticked (or every ticked one is already on the site).');
+        // Every step already so, or left off on another card: filed as approved, nothing changed.
         // Everything on the card is on the site already (made by hand, or by another card): it is filed as approved.
         $decisions[$key] = kop_daudit_keep_merges($decisions[$key] ?? array(),
             array('decision' => 'applied', 'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s'), 'done' => array(), 'picked' => array(), 'marked' => array()));

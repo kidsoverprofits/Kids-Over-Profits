@@ -265,6 +265,82 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
         $check('data-audit: reject moves it to Rejected with Undo', $got['status'] === 'rejected' && kop_rinbox_test_own_actions($got) === array('undo'));
         call_user_func($src['act'], $item['key'], 'undo', array());
         $check('data-audit: undo a rejection', kop_rinbox_get_item('data-audit', $item['key'])['status'] === $item['status']);
+        kop_rinbox_daudit_test_shared($check, $src);
+    }
+}
+
+/**
+ * One correction, one decision: two waiting cards proposing the same step.
+ * Rejecting one leaves that step unticked on the other ("Left off on ..."), a
+ * card with nothing of its own left moves to "Settled on other cards", and
+ * Undo brings both back as they were.
+ */
+function kop_rinbox_daudit_test_shared(callable $check, array $src) {
+    $decisions = kop_daudit_decisions();
+    $by_sig = array();
+    foreach (kop_daudit_proposals() as $k => $p) {
+        if (!empty($decisions[$k]['decision'])) continue;
+        foreach ($p['ops'] as $op) if (($op['type'] ?? '') !== 'check') $by_sig[kop_daudit_op_sig($op)][(string) $k] = true;
+    }
+    $pair = null;
+    $whole = null;
+    foreach ($by_sig as $sig => $keys) {
+        if (count($keys) < 2) continue;
+        $keys = array_keys($keys);
+        // The pair checked: the first whose shared step is still open on the second card (one already on the site proves nothing).
+        if (!$pair || empty($pair[3])) {
+            foreach (kop_daudit_steps(kop_daudit_proposals()[$keys[1]]) as $j => $op) {
+                if (kop_daudit_op_sig($op) !== $sig) continue;
+                $st = kop_daudit_step_states(kop_daudit_proposals()[$keys[1]], kop_daudit_opts())[$j]['state'] ?? '';
+                $pair = array($keys[0], $keys[1], $sig, $st === 'ready');
+                break;
+            }
+        }
+        // A card all of whose steps another single card carries: it leaves Waiting when that one is decided.
+        foreach ($keys as $a) {
+            foreach ($keys as $b) {
+                if ($a === $b || $whole) continue;
+                $mine = array();
+                foreach (kop_daudit_proposals()[$b]['ops'] as $op) if (($op['type'] ?? '') !== 'check') $mine[] = kop_daudit_op_sig($op);
+                $theirs = array();
+                foreach (kop_daudit_proposals()[$a]['ops'] as $op) $theirs[] = kop_daudit_op_sig($op);
+                if ($mine && !array_diff($mine, $theirs)) $whole = array($a, $b);
+            }
+        }
+    }
+    if (!$pair) {
+        kop_rinbox_test_skip('data-audit: a step shared by two cards is decided once', 'no two waiting cards share a step');
+        return;
+    }
+    list($a, $b, $sig) = array_slice($pair, 0, 3);
+    $sigs = function ($key) {
+        $out = array();
+        foreach (kop_daudit_steps(kop_daudit_proposals()[$key]) as $i => $op) $out[$i] = kop_daudit_op_sig($op);
+        return $out;
+    };
+    $opts = kop_daudit_opts();
+    $before = kop_daudit_step_states(kop_daudit_proposals()[$b], $opts);
+    $card = kop_rinbox_get_item('data-audit', $b);
+    $noted = (bool) array_filter($card['checklist'] ?? array(), function ($c) { return strpos((string) $c['note'], 'other waiting card') !== false; });
+    call_user_func($src['act'], $a, 'reject', array());
+    $after = kop_daudit_step_states(kop_daudit_proposals()[$b], $opts);
+    $i = array_search($sig, $sigs($b), true);
+    $was = $before[$i]['state'] ?? '';
+    $ok = in_array($was, array('ready', 'changed', 'manual'), true) ? ($after[$i]['state'] ?? '') === 'elsewhere' : ($after[$i]['state'] ?? '') === $was;
+    $check('data-audit: a step shared by two cards says so, and rejecting one card leaves it unticked on the other', $noted && $ok,
+        $a . ' / ' . $b . ': ' . $was . ' -> ' . ($after[$i]['state'] ?? '') . ' ' . ($after[$i]['why'] ?? ''));
+    call_user_func($src['act'], $a, 'undo', array());
+    $again = kop_daudit_step_states(kop_daudit_proposals()[$b], $opts);
+    $check('data-audit: ...and Undo on that card brings the step back', ($again[$i]['state'] ?? '') === $was);
+    if ($whole) {
+        list($a, $b) = $whole;
+        call_user_func($src['act'], $a, 'reject', array());
+        $got = kop_rinbox_get_item('data-audit', $b);
+        $listed = call_user_func($src['list'], array('view' => 'elsewhere', 'search' => '', 'offset' => 0, 'limit' => 500, 'filters' => array()));
+        call_user_func($src['act'], $a, 'undo', array());
+        $check('data-audit: a card whose every step another card settled moves to "Settled on other cards", and back on Undo',
+            $got['status'] === 'elsewhere' && in_array($b, array_column($listed['items'], 'key'), true) && !kop_rinbox_test_own_actions($got)
+            && kop_rinbox_get_item('data-audit', $b)['status'] === 'waiting', $a . ' settles ' . $b);
     }
 }
 
