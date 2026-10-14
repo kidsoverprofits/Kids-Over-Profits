@@ -217,6 +217,70 @@
     background: var(--kop-soft-pastel-yellow, #FFF5CB);
 }
 
+/* ---- Figures inserts ("Table:" in the page text) ------------------------ */
+
+.kop-ri-table {
+    margin: 1.25rem 0 1.5rem;
+    padding: 1rem 1.1rem;
+    background: var(--kop-sand, #F2EEDF);
+    border-radius: 8px;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-ri-table figcaption {
+    margin: 0 0 0.6rem;
+    font-weight: 700;
+    color: var(--kop-navy-blue, #000080);
+}
+
+.kop-ri-table-scroll {
+    overflow-x: auto;
+}
+
+.kop-ri-table table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    background: transparent;
+}
+
+.kop-ri-table th,
+.kop-ri-table td {
+    padding: 0.5rem 0.6rem;
+    border: 0;
+    border-bottom: 1px solid var(--kop-border-primary, #B6E3D4);
+    text-align: left;
+    vertical-align: top;
+    color: var(--kop-midnight-blue, #000435);
+    background: transparent;
+}
+
+.kop-ri-table thead th {
+    border-bottom: 2px solid var(--kop-navy-blue, #000080);
+    color: var(--kop-navy-blue, #000080);
+}
+
+.kop-ri-table tbody th {
+    font-weight: 600;
+    min-width: 9rem;
+}
+
+@media (max-width: 600px) {
+    .kop-ri-table {
+        padding: 0.8rem 0.7rem;
+    }
+
+    .kop-ri-table tbody th {
+        min-width: 0;
+    }
+}
+
+.kop-ri-table tbody tr:last-child th,
+.kop-ri-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
 /* ---- Back to the index -------------------------------------------------- */
 
 .kop-ri-back {

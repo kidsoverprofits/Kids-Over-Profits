@@ -13,6 +13,8 @@
  *   ### Subheading
  *   - list item
  *   > a pull quote, set large (inc/pull-quotes.php); "> -- Name" credits it
+ *   Table: caption, then | a | b | rows (the first is the header, a |---|
+ *     row is skipped): a figures insert, so numbers stay out of the prose
  *   **bold**, *italic*, [link text](https://...)
  *   1-800-555-0100 (any 1-xxx-xxx-xxxx number) becomes a tap-to-call link
  *
@@ -246,7 +248,8 @@ function kop_page_text_body_html($body, $style, $prefix) {
     $para = array();
     $list = null;
     $quote = null;
-    $flush = function () use (&$blocks, &$para, &$list, &$quote) {
+    $table = null;
+    $flush = function () use (&$blocks, &$para, &$list, &$quote, &$table) {
         if ($para) {
             $blocks[] = array('p', implode(' ', $para));
             $para = array();
@@ -259,6 +262,12 @@ function kop_page_text_body_html($body, $style, $prefix) {
             $blocks[] = array('quote', $quote);
             $quote = null;
         }
+        if ($table !== null) {
+            if ($table['rows']) {
+                $blocks[] = array('table', $table);
+            }
+            $table = null;
+        }
     };
     foreach (explode("\n", kop_page_text_clean($body)) as $line) {
         $t = trim($line);
@@ -267,7 +276,25 @@ function kop_page_text_body_html($body, $style, $prefix) {
             // The quote ends at the first line without "> ".
             $flush();
         }
-        if ($is_quote) {
+        $is_row = strpos($t, '|') === 0;
+        if ($table !== null && !$is_row) {
+            // The table ends at the first line that is not a "| a | b |" row.
+            $flush();
+        }
+        if (strpos($t, 'Table: ') === 0) {
+            // A figures insert: "Table: caption", then "| a | b |" rows, the first the header.
+            $flush();
+            $table = array('caption' => trim(substr($t, 7)), 'rows' => array());
+        } elseif ($is_row) {
+            if ($table === null) {
+                $flush();
+                $table = array('caption' => '', 'rows' => array());
+            }
+            if (!preg_match('/^\|[\s:|-]+\|?$/', $t)) {
+                // "|---|---|" only separates the header, as in Markdown.
+                $table['rows'][] = array_map('trim', explode('|', preg_replace('/^\||\|$/', '', $t)));
+            }
+        } elseif ($is_quote) {
             // A pull quote (inc/pull-quotes.php): "> " lines, "> -- Name" credits it.
             if ($quote === null) {
                 $flush();
@@ -316,6 +343,29 @@ function kop_page_text_body_html($body, $style, $prefix) {
                     return kop_page_text_inline($l, $prefix);
                 }, $lines)), array('credit' => kop_page_text_inline($b[1]['credit'], $prefix))) . "\n";
             }
+        } elseif ($b[0] === 'table') {
+            $rows = $b[1]['rows'];
+            $head = array_shift($rows);
+            $cell = function ($tag, $text, $attr = '') use ($prefix) {
+                return '<' . $tag . $attr . '>' . kop_page_text_inline($text, $prefix) . '</' . $tag . '>';
+            };
+            $html .= '<figure class="' . $prefix . '-table">';
+            if ($b[1]['caption'] !== '') {
+                $html .= '<figcaption>' . kop_page_text_inline($b[1]['caption'], $prefix) . '</figcaption>';
+            }
+            $html .= '<div class="' . $prefix . '-table-scroll"><table><thead><tr>';
+            foreach ($head as $h) {
+                $html .= $cell('th', $h, ' scope="col"');
+            }
+            $html .= '</tr></thead><tbody>';
+            foreach ($rows as $r) {
+                $html .= '<tr>';
+                foreach (array_values($r) as $i => $c) {
+                    $html .= $i === 0 ? $cell('th', $c, ' scope="row"') : $cell('td', $c);
+                }
+                $html .= '</tr>';
+            }
+            $html .= "</tbody></table></div></figure>\n";
         } elseif ($style === 'cards') {
             $html .= '<ul class="' . $prefix . '-orgs">';
             foreach ($b[1] as $item) {

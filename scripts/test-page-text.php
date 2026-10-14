@@ -128,7 +128,7 @@ check(!$bad, 'every link is https, tel or an in-page anchor');
 libxml_use_internal_errors(true);
 $doc = new DOMDocument();
 $doc->loadHTML('<?xml encoding="utf-8"?>' . $html);
-$errs = array_filter(libxml_get_errors(), function ($e) { return !preg_match('/^Tag (main|header|section) invalid/', trim($e->message)); }); // libxml predates HTML5 tags
+$errs = array_filter(libxml_get_errors(), function ($e) { return !preg_match('/^Tag (main|header|section|figure|figcaption) invalid/', trim($e->message)); }); // libxml predates HTML5 tags
 check(!$errs, 'the page parses as HTML without errors');
 foreach ($errs as $e) {
     echo '       ' . trim($e->message) . ' (line ' . $e->line . ")
@@ -191,15 +191,16 @@ echo "Related industries
 ";
 // One template for the index and every industry page; it reads the page's own slug.
 $topics = array('foster-care', 'disability-group-homes', 'nursing-homes', 'psychiatric-hospitals');
-$topic_keys = array('note', 'outside', 'what', 'history', 'touch', 'documented', 'report', 'learn', 'wrong', 'updated');
+$topic_tail = array('report', 'learn', 'wrong', 'updated', 'sources');
 foreach (array_merge(array('related-industries'), $topics) as $slug) {
     $page = kop_page_text_page($slug);
     check($page && $page['prefix'] === 'kop-ri' && is_readable(dirname(__DIR__) . '/' . $page['file']), "$slug: registered, with its text file");
     $keys = array_column(kop_page_text_defaults($slug), 'key');
     if ($slug !== 'related-industries') {
-        // Every topic page cites like the site's articles: numbered, with a Sources list.
-        $want = array_merge($topic_keys, array('sources'));
-        check($keys === $want, "$slug: the " . count($want) . " sections in order" . ($keys === $want ? '' : ' (' . implode(', ', $keys) . ')'));
+        // Every topic page opens on the note and the statement and ends on reporting, organizations and a
+        // numbered Sources list (cited like the site's articles); the argument between is the page's own.
+        $ok = array_slice($keys, 0, 2) === array('note', 'outside') && array_slice($keys, -5) === $topic_tail && count($keys) > 7;
+        check($ok, "$slug: note and statement first, then its own sections, then " . implode(', ', $topic_tail) . ($ok ? '' : ' (' . implode(', ', $keys) . ')'));
     }
     $GLOBALS['kop_test_slug'] = $slug;
     $html = render_page('page-related-industry.php');
@@ -211,8 +212,10 @@ foreach (array_merge(array('related-industries'), $topics) as $slug) {
         $listed = preg_match_all('#<li id="kop-ri-src-\d+">#', $html);
         check($cited && max($cited) === $listed && count($cited) === $listed, "$slug: every source is cited and every citation has a source ($listed)");
         check(strpos($html, '<sup class="kop-cite"><a href="#kop-ri-src-') !== false && strpos($html, '[^') === false, "$slug: citations print as superscript numbers");
-        preg_match('#<section id="kop-ri-what".*?</section>#s', $html, $what);
-        check($what && !preg_match('#href="https://(?!kidsoverprofits\.org/)#', $what[0]), "$slug: sources are cited by number, not linked in the prose");
+        // The argument's sections (not reporting, organizations or sources) link only our own pages.
+        preg_match_all('#<section(?: class="[^"]*")? id="kop-ri-(?!report|learn|sources)[a-z-]+".*?</section>#s', $html, $prose);
+        $linked = array_filter($prose[0], function ($s) { return preg_match('#href="https://(?!kidsoverprofits\.org/)#', $s); });
+        check($prose[0] && !$linked, "$slug: sources are cited by number, not linked in the prose");
     }
     if ($slug === 'psychiatric-hospitals') {
         check(strpos($html, 'campus') !== false && strpos($html, 'whether or not a hospital is also part of the troubled teen industry') !== false, "$slug: covers every hospital, the ones youth programs sit on included");
@@ -236,7 +239,7 @@ foreach (array_merge(array('related-industries'), $topics) as $slug) {
     libxml_clear_errors();
     $doc = new DOMDocument();
     $doc->loadHTML('<?xml encoding="utf-8"?>' . $html);
-    $errs = array_filter(libxml_get_errors(), function ($e) { return !preg_match('/^Tag (main|header|section) invalid/', trim($e->message)); });
+    $errs = array_filter(libxml_get_errors(), function ($e) { return !preg_match('/^Tag (main|header|section|figure|figcaption) invalid/', trim($e->message)); });
     check(!$errs, "$slug: parses as HTML without errors");
 }
 $GLOBALS['kop_test_slug'] = 'not-a-text-page';
