@@ -109,15 +109,23 @@ function kop_rinbox_test_business_filings(array $src, array $item, callable $che
         list($ent, $ev) = $with_file;
         $att = 990000001;
         $wpdb->insert($wpdb->postmeta, array('post_id' => $att, 'meta_key' => '_wp_attached_file', 'meta_value' => 'kop-test/filing.pdf'));
-        $wpdb->insert($wpdb->postmeta, array('post_id' => $att, 'meta_key' => '_kop_bizf_filing', 'meta_value' => $ent['state'] . ':' . $ent['doc'] . ':' . $ev['file']));
+        $wpdb->insert($wpdb->postmeta, array('post_id' => $att, 'meta_key' => '_kop_bizf_filing', 'meta_value' => $ent['state'] . ':' . $ent['doc'] . ':' . $ev['file'] . ':' . $ev['date']));
         $html = kop_bizf_section_html(array($ent));
         $links = substr_count($html, 'kop-test/filing.pdf');
         $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->postmeta} WHERE post_id = %d", $att));
         $check('business-filings: a filing we hold links our copy, the others stay words', $links === 1
-            && kop_bizf_copies($ent['state'], $ent['doc']) === array(), $ent['state'] . ':' . $ent['doc'] . ':' . $ev['file'] . ' links ' . $links);
+            && kop_bizf_copies($ent['state'], $ent['doc']) === array('file' => array(), 'date' => array()), $ent['state'] . ':' . $ent['doc'] . ':' . $ev['file'] . ' links ' . $links);
     } else {
         $check('business-filings: the build gives events their filing id (rebuild a state with filings)', false);
     }
+
+    // An event with no filing id (Florida) links the one document filed that day; two that day link neither.
+    $ev = array('date' => '2000-11-29', 'filed' => '2000-11-29', 'what' => 'Reinstatement');
+    $one = array('file' => array('A' => 'u1'), 'date' => array('2000-11-29' => array('u1')));
+    $two = array('file' => array('A' => 'u1', 'B' => 'u2'), 'date' => array('2000-11-29' => array('u1', 'u2')));
+    $check('business-filings: a Florida event links the one document filed that day, never a guess between two',
+        kop_bizf_event_copy($ev, $one) === 'u1' && kop_bizf_event_copy($ev, $two) === ''
+        && kop_bizf_event_copy($ev + array('file' => 'C'), $one) === '');
 
     $merge = (string) file_get_contents(dirname(__DIR__, 2) . '/inc/facility-merge.php');
     $check('business-filings: Merge Duplicates moves the links (kop_fmerge_ref_tables)', strpos($merge, "'kop_business_links', 'c' => 'facility_id'") !== false);

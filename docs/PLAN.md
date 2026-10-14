@@ -2086,17 +2086,26 @@ Open:
    saves every filing of the 48 companies except the periodic reports (owner's
    choice: address and agent only), 245 filings, into kop-pipeline
    `tmp/colorado-sos/pdfs/<entity>/<filing>.pdf` + `manifest.json`, never
-   committed; the state answers 429 after a few quick requests, so it waits it
-   out and takes hours. Each page event carries its filing id (`file`).
+   committed; the viewer puts up a Cloudflare check after about ten requests
+   (a script-driven Chrome window only loops on it), so the plain step goes one
+   request every 30 s and waits each check out: most of a day. Each page event
+   carries its filing id (`file`). Florida: `florida-sunbiz.py pdfs` reaches
+   search.sunbiz.org as Chrome (curl_cffi), finds each company's page by its
+   document number (the site's own search form; its page address is kept in
+   `pdfs/detail-urls.json` and the next build links it as "Florida's record of
+   it", the old search link answered 500) and saves every document but the
+   annual reports (one request every 10 s); Florida's events have no filing id,
+   so a page line links the one document filed that day
+   (`kop_bizf_event_copy()`). The next Florida build also fixes event names
+   that kept the file's padding ("Name change         amendment").
    `api/import-business-filings.php <dir> [apply]` (`kop_bizf_import()`) files
    the PDFs of linked companies in a "Business filings" folder of the
    program's library (a company's own folder when linked to a company), typed
    "Business or property record", source = the state's address; the page links
    each filing to our copy (`_kop_bizf_filing` on the attachment). **To do:**
    once the owner has linked companies, copy the folder to
-   `~/kop-import/business-filings/co/` and run it (dry run first); rerun after
-   more links. Florida's document images sit behind Cloudflare on
-   search.sunbiz.org: the real-browser reader below.
+   `~/kop-import/business-filings/co/` (and `fl/`) and run it per folder (dry
+   run first); rerun after more links. Rebuild Florida once its download ends.
 3. **Utah** (businessregistration.utah.gov, Cloudflare + a Turnstile check on
    the search): a reader driving real Chrome for exact-name searches of the UT
    records and their past names, then principal-name searches for the map's

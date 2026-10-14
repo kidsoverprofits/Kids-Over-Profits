@@ -316,11 +316,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # business-filings/<st>/ with the same shape, and kop_bizf_states()
 (kop-pipeline) py -3 scripts/florida-sunbiz.py fetch && py -3 scripts/florida-sunbiz.py build   # ~2 GB download, resumable; selftest too
 (kop-pipeline) py -3 scripts/colorado-sos.py fetch && py -3 scripts/colorado-sos.py build      # Colorado open data (entities, history, trade names); same shape into business-filings/co/
-# The state's PDF of each filing (Colorado: free; periodic reports left out) -> kop-pipeline tmp/colorado-sos/pdfs/ (never committed);
+# The state's PDF of each filing (free; annual and periodic reports left out) -> kop-pipeline tmp/<script>/pdfs/ (never committed);
 # copied to ~/kop-import/business-filings/co/, the linked companies' PDFs go into a "Business filings" folder of the program's library
-# and each filing on the page links our copy (_kop_bizf_filing = "<st>:<doc>:<filing>" on the attachment)
-(kop-pipeline) py -3 scripts/colorado-sos.py pdfs [--ids ...] [--limit N]   # resumable; waits out the state's 429s, hours
-php api/import-business-filings.php ~/kop-import/business-filings/co [apply]   # on the server (ea-php82): dry run first; rerun after more links
+# and each filing on the page links our copy (_kop_bizf_filing = "<st>:<doc>:<filing>:<date>"; Florida's lines match by date)
+(kop-pipeline) py -3 scripts/colorado-sos.py pdfs [--ids ...] [--limit N]   # resumable; one request every 30 s, waits out Cloudflare's checks
+(kop-pipeline) py -3 scripts/florida-sunbiz.py pdfs [--docs ...] [--limit N] # search.sunbiz.org as Chrome; also keeps each company's page address for the build
+php api/import-business-filings.php ~/kop-import/business-filings/<co|fl> [apply]   # on the server (ea-php82): dry run first; rerun after more links
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=business-filings
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).

@@ -29,13 +29,13 @@
  * kop_business_review, "<st>:<doc>" => {decision (linked | rejected), by, at,
  * links: [link ids]}; Undo deletes exactly those rows.
  *
- * Filed documents (Colorado so far): kop-pipeline `colorado-sos.py pdfs` saves
+ * Filed documents: kop-pipeline `colorado-sos.py pdfs` / `florida-sunbiz.py pdfs` save
  * the state's PDF of every filing but the periodic reports, with a
  * manifest.json; copied to the server, api/import-business-filings.php files
  * the PDFs of linked companies in a "Business filings" folder of the program's
  * (or company's) library (kop_bizf_import()). Each attachment carries
- * _kop_bizf_filing = "<st>:<doc>:<filing id>", which the page reads to link
- * each filing to our copy. Undoing a link leaves the documents in the library.
+ * _kop_bizf_filing = "<st>:<doc>:<filing id>:<date>", which the page reads to
+ * link each filing to our copy (kop_bizf_event_copy()). Undoing a link leaves the documents in the library.
  *
  * @package KidsOverProfits
  */
@@ -312,7 +312,7 @@ function kop_bizf_section_html(array $entities) {
                 <ul class="kop-fp-notes">
                     <?php foreach ($e['events'] as $ev) : ?>
                         <li><?php $d = kop_bizf_date($ev['date'] ?? ''); if ($d !== '') : ?><strong><?php echo esc_html($d); ?>:</strong> <?php endif; ?><?php
-                            $copy = !empty($ev['file']) ? ($copies[(string) $ev['file']] ?? '') : '';
+                            $copy = kop_bizf_event_copy($ev, $copies);
                             if ($copy !== '') : ?><a href="<?php echo esc_url($copy); ?>"><?php echo esc_html($ev['what']); ?></a><?php else : echo esc_html($ev['what']); endif; ?><?php
                             if (!empty($ev['name'])) : ?>, as <?php echo esc_html($ev['name']); ?><?php endif; ?><?php
                             if (!empty($ev['notes'])) : ?> <span class="meta">(<?php echo esc_html($ev['notes']); ?>)</span><?php endif; ?></li>
@@ -347,21 +347,41 @@ function kop_bizf_trade_li(array $t) {
 
 /* ---- Filed documents ------------------------------------------------------ */
 
-/** Our copies of a company's filings: filing id => attachment URL. */
+/**
+ * Our copies of a company's filings (tag "<st>:<doc>:<filing id>:<date>"):
+ * {file: {filing id => url}, date: {date => [urls]}}.
+ */
 function kop_bizf_copies($state, $doc) {
     global $wpdb;
-    if (!isset($wpdb->postmeta)) return array();
+    $out = array('file' => array(), 'date' => array());
+    if (!isset($wpdb->postmeta)) return $out;
     $rows = $wpdb->get_results($wpdb->prepare(
         "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_kop_bizf_filing' AND meta_value LIKE %s",
         $wpdb->esc_like($state . ':' . $doc . ':') . '%'
     ), ARRAY_A);
-    $out = array();
     foreach ((array) $rows as $r) {
         $parts = explode(':', (string) $r['meta_value']);
         $url = function_exists('wp_get_attachment_url') ? (string) wp_get_attachment_url((int) $r['post_id']) : '';
-        if (count($parts) === 3 && $url !== '') $out[$parts[2]] = $url;
+        if (count($parts) < 3 || $url === '') continue;
+        $out['file'][$parts[2]] = $url;
+        if (!empty($parts[3])) $out['date'][$parts[3]][] = $url;
     }
     return $out;
+}
+
+/**
+ * The copy an event line links: by the state's filing id (Colorado's events
+ * carry it), else the one document filed that day (Florida's bulk events and
+ * its document list share only the date); '' when none or several.
+ */
+function kop_bizf_event_copy(array $ev, array $copies) {
+    if (!empty($ev['file']) && isset($copies['file'][(string) $ev['file']])) return $copies['file'][(string) $ev['file']];
+    if (!empty($ev['file'])) return '';
+    foreach (array_unique(array_filter(array((string) ($ev['filed'] ?? ''), (string) ($ev['date'] ?? '')))) as $d) {
+        $urls = array_values(array_unique($copies['date'][$d] ?? array()));
+        if (count($urls) === 1) return $urls[0];
+    }
+    return '';
 }
 
 /** The linked record's library folder: a facility's (kop_wb_facility_folder()), a company's document_folder_id. 0 = none, -1 = made when applied. */
@@ -427,7 +447,7 @@ function kop_bizf_import($dir, $apply) {
             foreach ($by_doc[$key] as $item) {
                 $path = $dir . '/' . $item['file'];
                 if (!is_file($path)) continue;
-                $tag = $l['state'] . ':' . $l['doc'] . ':' . $item['filing'];
+                $tag = $l['state'] . ':' . $l['doc'] . ':' . $item['filing'] . ':' . (string) ($item['date'] ?? '');
                 $att = (int) $wpdb->get_var($wpdb->prepare(
                     "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_kop_bizf_filing' AND meta_value = %s LIMIT 1", $tag));
                 $md5 = md5_file($path);

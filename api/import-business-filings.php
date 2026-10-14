@@ -3,9 +3,10 @@
  * File the state's PDFs of linked companies' filings in each program's library
  * (inc/business-filings.php kop_bizf_import()).
  *
- * The PDFs come from kop-pipeline `py -3 scripts/colorado-sos.py pdfs` (its
- * tmp/colorado-sos/pdfs/, with manifest.json), copied to the server by hand
- * (scp -r ... ~/kop-import/business-filings/co); never committed.
+ * The PDFs come from kop-pipeline `py -3 scripts/colorado-sos.py pdfs` and
+ * `florida-sunbiz.py pdfs` (tmp/colorado-sos/pdfs/, tmp/florida-sunbiz/pdfs/,
+ * each with its manifest.json), copied to the server by hand (scp -r ...
+ * ~/kop-import/business-filings/co, .../fl), one run per folder; never committed.
  *
  * CLI only:  php api/import-business-filings.php <dir> [apply]
  * Without "apply" it reports what it would do. Run again after linking more
