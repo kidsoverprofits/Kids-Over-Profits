@@ -141,5 +141,52 @@
       "[]": "[{\"name\":\"Family Foundation School\",\"facility_id\":12050}]"
     },
     "note": "The documentary follows Family Foundation School survivor Liz Ianelli; the review was linked to no facility (2026-10-14)."
+  },
+  {
+    "post": "telling-ai-what-to-say",
+    "fix": "2026-10-14-hidden-in-html-code",
+    "note": "\"Hidden in its home page\" alone reads as nonsense to a parent: the copies are in the page's HTML code (owner, 2026-10-14).",
+    "replace": [
+      [
+        "<a href=\"https://kidsoverprofits.org/wp-content/uploads/resolutionranch.com-hidden-llms-copy-captured-2026-10-13.pdf\">copy Resolution Ranch hides in its home page</a>",
+        "<a href=\"https://kidsoverprofits.org/wp-content/uploads/resolutionranch.com-hidden-llms-copy-captured-2026-10-13.pdf\">copy Resolution Ranch hides in the HTML code for its home page</a>"
+      ],
+      [
+        "also <strong>hide a copy of the file inside their pages</strong>, where a parent never sees it.",
+        "also <strong>hide a copy of the file in the HTML code for their pages</strong>, where a parent never sees it."
+      ],
+      [
+        "The copy hidden in its home page is an older version.",
+        "The copy hidden in the HTML code for its home page is an older version."
+      ],
+      [
+        "alt=\"Text hidden in the home page of brushcreekacademy.com,",
+        "alt=\"Text hidden in the HTML code for the home page of brushcreekacademy.com,"
+      ],
+      [
+        "<figcaption class=\"wp-element-caption\">Hidden in the home page of brushcreekacademy.com,",
+        "<figcaption class=\"wp-element-caption\">Hidden in the HTML code for the home page of brushcreekacademy.com,"
+      ],
+      [
+        "The copy hidden in its home page goes further.",
+        "The copy hidden in the HTML code for its home page goes further."
+      ],
+      [
+        "alt=\"Text hidden in the home page of resolutionranch.com",
+        "alt=\"Text hidden in the HTML code for the home page of resolutionranch.com"
+      ],
+      [
+        "<figcaption class=\"wp-element-caption\">Hidden in the home page of resolutionranch.com,",
+        "<figcaption class=\"wp-element-caption\">Hidden in the HTML code for the home page of resolutionranch.com,"
+      ],
+      [
+        "our copy</a>), the copy hidden in its <a href=\"https://www.brushcreekacademy.com/\">home page</a>",
+        "our copy</a>), the copy hidden in the HTML code for its <a href=\"https://www.brushcreekacademy.com/\">home page</a>"
+      ],
+      [
+        "our copy</a>) and the copy hidden in its <a href=\"https://resolutionranch.com/\">home page</a>",
+        "our copy</a>) and the copy hidden in the HTML code for its <a href=\"https://resolutionranch.com/\">home page</a>"
+      ]
+    ]
   }
 ]
