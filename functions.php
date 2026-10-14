@@ -234,6 +234,8 @@ require_once get_stylesheet_directory() . '/inc/woodbury-facts.php';
 require_once get_stylesheet_directory() . '/inc/data-audit.php';
 // Federal funding found for programs (js/data/federal-funding/proposals.json), added to records in the review inbox
 require_once get_stylesheet_directory() . '/inc/federal-funding.php';
+// Nonprofit tax filings (IRS Form 990) of programs and companies (js/data/nonprofit-filings/, kop-pipeline scripts/nonprofit-990.py), linked in the review inbox
+require_once get_stylesheet_directory() . '/inc/nonprofit-filings.php';
 // Move or remove a document from the page it shows on (the document tile's pencil)
 require_once get_stylesheet_directory() . '/inc/doc-placement.php';
 // Links from the owner's Google Docs and Sheets (scripts/gdocs-extract.py), reviewed at KOP Tools > Drive Docs

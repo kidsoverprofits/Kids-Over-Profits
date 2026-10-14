@@ -1887,3 +1887,54 @@ p.kop-op-draft {
     padding: 0;
     border: 0;
 }
+
+/* Nonprofit tax filings (inc/nonprofit-filings.php): a year-by-year table that scrolls inside its box on a phone. */
+.kop-npf-org + .kop-npf-org {
+    margin-top: 1.5rem;
+}
+
+.kop-npf-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.kop-npf-table {
+    width: 100%;
+    margin: 0 0 0.5rem;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-bg-secondary, #fff);
+}
+
+.kop-npf-table th,
+.kop-npf-table td {
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid var(--kop-border-secondary, #b0e0e6);
+    text-align: right;
+    white-space: nowrap;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-npf-table thead th {
+    font-weight: 600;
+    white-space: normal;
+    vertical-align: bottom;
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-npf-table th:first-child {
+    text-align: left;
+}
+
+.kop-npf-table a {
+    color: var(--kop-navy-blue, #000080);
+    font-weight: 600;
+}
+
+.kop-npf-earlier summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-navy-blue, #000080);
+}

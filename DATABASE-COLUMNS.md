@@ -30,6 +30,11 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### {prefix}kop_addresses / {prefix}kop_facility_addresses
 **Purpose:** Physical address ids and which facility stood where (`api/manage-addresses.php`).
 
+### {prefix}kop_nonprofit_links
+**Columns:** `id`, `ein` (9 digits), `facility_id`, `operator_id` (one of the two set, the other 0), `created_by`, `created_at`
+
+**Purpose:** Which nonprofit organization's IRS returns (Form 990) show on a facility or company page (`inc/nonprofit-filings.php`). The returns themselves are files in `js/data/nonprofit-filings/orgs/<ein>.json` (kop-data, built by kop-pipeline `scripts/nonprofit-990.py`); rows are made at Review inbox > Nonprofit tax filings, deleted by its Undo, moved by Merge Duplicates.
+
 ---
 
 ## Legacy Data Tables

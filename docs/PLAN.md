@@ -1975,3 +1975,53 @@ Open, in order:
    draws the map's existing survivor-category line (as Rocky Mountain Academy
    to Mike Strader) through whatever the map reads besides the board CSVs,
    with Undo.
+
+### 3.19 Nonprofit tax filings (IRS Form 990) (2026-10-13)
+
+Many programs are nonprofits, and their yearly returns are public. kop-pipeline
+`scripts/nonprofit-990.py` matches every record's names (name, current, other,
+past; the facility pages' name key) against the IRS Exempt Organizations
+Business Master File in the same state, and companies' names anywhere; for
+closed, transferred and unknown records no organization matched it asks
+ProPublica's Nonprofit Explorer search (a closed program's nonprofit has often
+lost its exemption and left the IRS file). For each organization it fetches
+every return ProPublica holds: revenue, expenses, assets, liabilities,
+officers' and directors' pay, other salaries, program revenue, gifts and
+grants, and the filed PDF. Output in kop-data `nonprofit-filings/`
+(`candidates.json`, `orgs/<ein>.json`, ~4 MB), report in kop-pipeline
+`tmp/nonprofit-990/report.md`.
+
+First run (2026-10-13): 546 organizations (524 from the IRS file, 22 from the
+search), 504 with returns. 343 are "matched" (the organization's own name is
+exactly one record's, same town); 203 are "check" (another town, several
+records, only the IRS's second name, or exempt other than as a charity: each
+card says which). Some big ones sit in "check" only because the IRS has the
+headquarters town (Devereux, Youth Villages, Southwest Key, Justice Resource
+Institute, Eckerd).
+
+Reviewed at Review inbox > **Nonprofit tax filings**
+(`inc/nonprofit-filings.php`, `inc/review-inbox/nonprofit-filings.php`): Link
+to this program (best facility filled in), Link to a company, Not this program,
+Undo (deletes exactly the links the card made). "Link every same-name,
+same-town match with filings" does the 331 such cards at once. Links are rows
+of `{prefix}kop_nonprofit_links` (moved by Merge Duplicates); the facility and
+company pages print "Nonprofit tax filings" (a table per organization, ten
+latest years, earlier ones folded) from the files at render time, so a rebuild
+shows at once. Test: `scripts/test-review-inbox.php --source=nonprofit-filings`.
+
+Open:
+1. **Owner:** work through the queue (the bulk button first, then "Check the
+   match").
+2. The app: add the section to `inc/mobile-api.php` (page data key and keep
+   list) and the app's facility/company screens.
+3. Officers, directors and key employees by name (Form 990 Part VII, in the
+   IRS e-file XML, not in ProPublica's summary) into people ids and the network
+   map's board/staff lines; related organizations (Schedule R) and payments to
+   management companies (who really runs a nonprofit program).
+4. Rerun monthly (`--refresh-bmf`, and `--refresh-orgs` for new returns); open
+   data: a `nonprofit_filings` dataset of linked organizations.
+5. For-profit companies: state business registries (Secretary of State
+   filings: officers, registered agents, formation and dissolution), one
+   reader per state starting with UT, ID, MT, FL, TX, AZ, NC, or OpenCorporates'
+   API (ask about its public-interest access first); SEC EDGAR 10-K / Exhibit 21
+   subsidiary lists for the public parents (UHS, Acadia).

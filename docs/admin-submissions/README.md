@@ -99,6 +99,7 @@ Tabs are grouped under headings (the source's `'group'`). Each tab's own help li
 - **Duplicate facilities:** two records that look like one place; merge keeps one, moves everything onto it and forwards the other's page. Renamed programs merge only as a rename.
 - **Duplicate people:** one person under two names or spellings; Merge makes them one person everywhere.
 - **Federal funding:** Medicaid, foster care funds, ORR, TRICARE, PPP and Education money found for programs; Add puts it on the record and its facility page.
+- **Nonprofit tax filings:** nonprofits whose name is one of our programs' or companies' names, with their yearly IRS returns (Form 990); Link to this program or Link to a company lists the returns on that page, Not this program changes nothing, Undo takes off exactly the links the card made.
 - **Folder links:** two document folders that are names of one facility; Same facility joins their document feeds, Alternate name keeps them apart.
 - **Inspection links:** a facility record and a state licensing entry whose names differ; Same facility puts that entry's reports on the facility page.
 - **Map renames:** programs that changed their name; give the rename year (or leave it blank), Swap order if the arrow points the wrong way.

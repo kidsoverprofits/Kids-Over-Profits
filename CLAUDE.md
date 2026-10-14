@@ -276,6 +276,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-gaps.php    
 # a past name ("Three Springs Inc.") becomes a past-company step. KOP_DAUDIT_LIST=1 / KOP_DAUDIT_EXPORT=<file> on the test print / dump cards
 (kop-pipeline) python scripts/data-audit.py [--kind rename_end_year ...] [--list]   # offline, against tmp/prod.sqlite
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=data-audit
+# Nonprofit tax filings (docs/PLAN.md 3.19): nonprofits named like our records, from the IRS exempt organizations file (and ProPublica's search for
+# closed programs), with every yearly Form 990 ProPublica holds -> js/data/nonprofit-filings/{candidates.json, orgs/<ein>.json} (commit in kop-data);
+# linked to a facility or company at Review inbox > Nonprofit tax filings ({prefix}kop_nonprofit_links, inc/nonprofit-filings.php, exact Undo);
+# the facility and company pages print a year-by-year table (revenue, expenses, officers' pay, assets, a link to each return), read at render time
+(kop-pipeline) py -3 scripts/nonprofit-990.py [--refresh-bmf] [--refresh-orgs] [--no-search] [--selftest]   # cached in tmp/nonprofit-990/, ~1 request/s
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=nonprofit-filings
 # Federal funding (docs/PLAN.md 3.15): Medicaid, foster care funds, ORR, TRICARE, PPP and Education money found for programs,
 # js/data/federal-funding/proposals.json -> Review inbox > Federal funding (inc/federal-funding.php) -> the record's federalFunding
 # field (kop_facility_federal_funding_list(), JS mirror in data-normalizer.js), listed on its facility page; Add/Undo exact by entry ref
@@ -676,6 +682,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_woodbury_mentions` - Woodbury Reports pages about a program (article, news item or mention) found by `scripts/woodbury-scan.py`, pending until an admin files them in the program's "Woodbury Reports Mentions" folder
 - `{prefix}kop_media_folder_tags` - Extra folder memberships (one document, many folders)
 - `{prefix}kop_doc_types` / `{prefix}kop_doc_type_suggestions` - What kind of document each attachment is (one row per type, with rule / ai / person / checked) and, for documents the rules could not type, the AI's guess and its review status (`inc/doc-types.php`)
+- `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
 - `{prefix}kop_campuses` / `{prefix}kop_campus_programs` - Separate programs that share one campus (a hospital's two residential programs), one campus per record (`inc/campus-programs.php`)
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)
 - `{prefix}kop_glossary_nodes` / `_entries` / `_aliases` / `_tags` / `_log` - The TTI glossary: sections and groups, terms, other names, program tags, and each entry change for Undo (`inc/glossary-store.php`)
