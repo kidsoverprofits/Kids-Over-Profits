@@ -236,6 +236,42 @@ more detail than a spotlight would. The rules on wording, sourcing and tone abov
 Things in that profile not to copy: filler openers ("Tragically", "paint a picture"), and rates or counts that
 would sit better in the fact box or a table.
 
+## 13. Notes and summaries of a document
+
+Model: Warehouses of Neglect, https://kidsoverprofits.org/warehouses-of-neglect/ (notes on the Senate Finance
+Committee's 2024 staff report). Use this form for any long source a reader may not read whole: government
+reports, hearings, court filings, audits, studies, a program's handbook.
+
+A summary is not an argument piece. It gives the reader the document's own findings, fast, with the page to
+check each one. It does not need connecting prose.
+
+- **A header says what the document is:** title, who wrote it, its full subtitle, what it investigated (the
+  companies, listed), when the work began, who was on the committee. Then why that body had a say ("paid for by
+  Medicaid and Social Security"), with its page.
+- **Key findings come first,** as short bullets in plain words, each a whole claim: "RTFs restrain and seclude
+  children to punish them." "RTF operators change the names of their businesses and shuffle ownership around to
+  make it harder to track them." Officialese is turned into plain sentences, with the report's verdict kept.
+- **Then the notes, in the document's order, one point to a line, each ending with its page:** "p. 23",
+  "pp. 15-16". Every note can be checked.
+- **Paraphrase most notes; quote where the document's own words land harder.** Quotes are in quotation marks
+  with the page; the key words are in bold and marked "[emphasis added]".
+- **Explain a term right after the quote that uses it:** "No clinical indicators means that they do not have
+  mental illnesses or disabilities."
+- **Spell out an acronym in bold on first use,** then use the short form: **Residential Treatment Facilities
+  (RTFs)**.
+- **Pull out the industry's own admissions:** Jay Ripley in 2015, "You can make money in this business if you
+  control staffing"; Devereux telling the Committee that "adults who want to abuse children will find a way to
+  work in the child service industry"; UHS blaming "human instinct" for improper restraint.
+- **Add what KOP knows that the document leaves out, briefly,** in the note it belongs to: Ripley co-founded
+  Youth Services International and Sequel before Vivant; a facility's company and state in brackets
+  ("St John's Youth Academy (Sequel/Vivant FL)").
+- **Record what the document says even when it favours the subject** ("Vivant does not use seclusion").
+- **Warn before graphic passages and give their pages instead of repeating them:** "TRIGGER WARNING pp. 33-44:
+  graphic descriptions of child sexual abuse".
+- **End with the document's own conclusion,** quoted, with its strongest lines in bold.
+- **Finish with an index of every program the document names:** name, company and state in brackets, every
+  page it appears on, A to Z. A reader looking for one program can go straight to its pages.
+
 ## Checklist before handing a draft over
 
 1. Can you state the piece's point in one sentence? Does every section's and paragraph's point serve it?
