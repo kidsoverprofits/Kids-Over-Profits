@@ -818,7 +818,8 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
 - **New document types `staff-ideology` and `editor-note` (2026-10-14)**: after deploy, the hourly run
   (rules version 3) looks again at documents the old rules left untyped; check KOP Tools > Document
   Types for the 7 the rules give staff ideology (mostly Teen Challenge's "Philosophy & Values" folder)
-  and the 1 editorial, and retype any AI guesses still waiting that belong under the new types.
+  and file KOP's own notes as editor's notes (folder "Editor's Notes" or a title with "editor's note"),
+  and retype any AI guesses still waiting that belong under the new types.
 - No live call has been made to the new Claude, Gemini or Hugging Face
   models in the AI helpers (`docs/news-processor/README.md`); the pages send
   `provider: 'groq'`, so they only run when a request names them.

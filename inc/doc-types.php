@@ -43,7 +43,7 @@ if (!defined('ABSPATH')) {
 if (!defined('KOP_DOC_TYPES_DB_VERSION')) define('KOP_DOC_TYPES_DB_VERSION', '1');
 if (!defined('KOP_DOC_TYPES_REWRITE_VERSION')) define('KOP_DOC_TYPES_REWRITE_VERSION', '1');
 // Bump after changing kop_dt_rules(): documents the old rules found nothing for are looked at again.
-if (!defined('KOP_DOC_TYPES_RULES_VERSION')) define('KOP_DOC_TYPES_RULES_VERSION', '3');
+if (!defined('KOP_DOC_TYPES_RULES_VERSION')) define('KOP_DOC_TYPES_RULES_VERSION', '4');
 
 // ---------------------------------------------------------------------------
 // The types
@@ -92,8 +92,6 @@ if (!function_exists('kop_dt_types')) {
                 'Deposition transcripts, declarations and documents produced in discovery.'),
             'news-clipping'    => array('News clipping', 'News clippings', $g_press,
                 'Newspaper and magazine articles, saved as they were printed or published.'),
-            'editor-note'      => array('Editor\'s note', 'Editor\'s notes', $g_press,
-                'Editor\'s notes, editorials and letters from the editor of a newspaper, magazine or newsletter, speaking for the publication.'),
             'woodbury'         => array('Woodbury Reports page', 'Woodbury Reports pages', $g_press,
                 'Pages of Woodbury Reports, the educational consultants\' trade newsletter.'),
             'research'         => array('Academic research', 'Academic research', $g_press,
@@ -110,6 +108,8 @@ if (!function_exists('kop_dt_types')) {
                 'Trade group member lists, referral directories and conference programs.'),
             'staff-profile'    => array('Staff profile or résumé', 'Staff profiles and résumés', $g_biz,
                 'LinkedIn pages, résumés and staff biographies.'),
+            'editor-note'      => array('Editor\'s note', 'Editor\'s notes', 'Kids Over Profits',
+                'Kids Over Profits\' own notes: context, corrections and what our research found about a program, a person or a document.'),
             'other'            => array('Other', 'Other documents', 'Other',
                 'Documents that fit none of the types above.'),
         );
@@ -532,7 +532,7 @@ if (!function_exists('kop_dt_rules')) {
                 array('marketing', '/^brochures|^marketing/i'),
                 array('website-capture', '/^program websites|^websites?$|^web ?pages$/i'),
                 array('staff-ideology', '/^philosophy(?: (?:&|and) values)?$|^(?:staff )?ideology$|^core values$|^treatment (?:model|philosophy)$/i'),
-                array('editor-note', '/^editor\'?s?\'? notes?$|^editorials?$/i'),
+                array('editor-note', '/^editor\'?s?\'? notes?$|^(?:kop|kids over profits) notes?$/i'),
                 array('directory', '/^directories$|referral services and directories/i'),
                 array('business-record', '/^property records$|^business records$|^corporate (?:docs|filings|records)$/i'),
                 array('tax-filing', '/^990s?$|^tax (?:returns|filings)$/i'),
@@ -545,7 +545,7 @@ if (!function_exists('kop_dt_rules')) {
             'titles' => array(
                 array('handbook', '/\bhand ?book\b|\bmanual\b|\brule ?book\b|\blevels? (?:system|and privileges)\b|\bphase (?:system|chart)\b/i'),
                 array('enrollment', '/\benrol+ment\b|\badmissions? (?:form|packet|agreement|application)\b|\btuition agreement\b|\bapplication (?:form|packet)\b|\bintake (?:form|packet)\b|\bauthori[sz]ation to release\b|\bregistration form\b|\bpre-?admission\b/i'),
-                array('editor-note', '/\beditor\'?s?\'? notes?\b|\b(?:note|letter) from the editor\b|\beditorial\b/i'),
+                array('editor-note', '/\beditor\'?s?\'? notes?\b|\bnote from the editor\b/i'),
                 array('newsletter', '/\bnewsletter\b|\bpress release\b/i'),
                 array('marketing', '/\bbrochure\b|\bviewbook\b|\bflyer\b/i'),
                 array('legal-filing', '/\bcomplaint\b|\bmotion\b|\border (?:granting|denying|on)\b|\bpetition\b|\baffidavit\b|\bsettlement\b|\banswer to\b|\bsummons\b|\bindictment\b|\bverdict\b|\bjudgment\b|\bdocket\b|\bdeclaration of\b|\bruling\b|\bexpert (?:report|disclosure)\b|\bcourt filing\b/i'),
@@ -556,7 +556,7 @@ if (!function_exists('kop_dt_rules')) {
                 array('ngo-report', '/\bngo report\b|\bdisability rights [a-z]+ (?:report|investigation|monitoring)\b|\bprotection (?:&|and) advocacy\b|\bhuman rights watch\b|\bamnesty international\b|\bnational disability rights network\b|\bndrn\b|\bchildren\'s rights\b|\bnational center for youth law\b|\bbreaking code silence\b|\bsouthern poverty law center\b/i'),
                 array('government-report', '/\bgao\b|\binspector general\b|\bsenate (?:report|investigation|finance)\b|\bcongressional\b|\bstate audit\b/i'),
                 array('legislation', '/\b[hs]\.? ?b\.? ?\d{2,4}\b|\bhouse bill\b|\bsenate bill\b|\btestimony (?:before|to)\b/i'),
-                array('news-clipping', '/\bnews ?(?:article|clipping|story)\b/i'),
+                array('news-clipping', '/\bnews ?(?:article|clipping|story)\b|\beditorial\b/i'),
             ),
         );
     }

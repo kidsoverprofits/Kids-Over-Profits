@@ -126,10 +126,11 @@ Read [every student handbook we hold](https://kidsoverprofits.org/documents/stud
 - Oversight: `inspection-report`, `incident-report`, `government-report`,
   `ngo-report`, `legislation`
 - Courts: `legal-filing`, `deposition`
-- Press, research and survivors: `news-clipping`, `editor-note`, `woodbury`,
-  `research`, `survivor-account`
+- Press, research and survivors: `news-clipping`, `woodbury`, `research`,
+  `survivor-account`
 - Business and industry: `business-record`, `tax-filing`, `natsap-profile`,
   `directory`, `staff-profile`
+- Kids Over Profits: `editor-note` (our own notes)
 - `other`
 
 ### How a Document Gets Its Type
