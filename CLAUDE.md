@@ -142,7 +142,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-citation-cleanup.
 # The mobile app (github.com/kidsoverprofits/kids-over-profits-mobile) reads kop/v1/facility/<slug>, /operator/<slug|?name=>,
 # /operators (the Companies list), /news and /resources (the /resources/ list, inc/resources-list.php) (inc/mobile-api.php): named keys copied from the page data, so a new page section goes in the keep lists there
 # A facility's names on the network map come as 'network' (kop_mobile_facility_network(), the app's Connections drawing); the app's Map tab is the
-# website's /network-map/ in a web view with the site's header/footer hidden by the app (src/lib/mapPage.ts), so a class renamed there breaks it
+# website's /network-map/ in a web view with the site's header/footer, toolbar and stage buttons hidden by the app (src/lib/mapPage.ts) and
+# its own controls pressing the map's buttons by id and calling window.KOPNetworkMap / KOPNetworkSearch (src/lib/mapBridge.ts), so a class,
+# id or one of those globals renamed there breaks it
 # The app lists document libraries itself (/facility/<slug>/documents, /operator/<slug>/documents: the folder tree with file links) and
 # opens our own PDFs (sources included, #page=N kept) in its own viewer, never the website
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-api.php [--id=14182] [--fixture]   # payloads, privacy walk, news filters; --fixture = made-up DB, no mirror needed
@@ -695,6 +697,10 @@ php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
 # a path to keep crawlers out of goes in kop_robots_disallow_paths(). WP-Cron runs from the server's crontab (wp-cron.php every
 # 5 min, ~/logs/wp-cron.log); visitors start it only if that run has not been seen for 20 min (inc/server-cron.php)
 php scripts/test-robots.php
+# Search engines (inc/seo.php, the search plan https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb): facility and company titles and descriptions
+# name past/other names (kop_alias_label()), each page describes its program or company as a schema.org Organization added to Yoast's graph
+# (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner. A new page kind gets its pieces there
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] [--id=12161]
 # See the working tree's map in a browser before pushing it
 python scripts/preview-network-map.py --shots tmp/map-preview
 # Program websites scanned for instructions to AI (llms.txt/ai.txt, the copy Exceed's plugin hides in every page: sources
