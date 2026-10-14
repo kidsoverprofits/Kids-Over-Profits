@@ -240,6 +240,8 @@ require_once get_stylesheet_directory() . '/inc/data-audit.php';
 require_once get_stylesheet_directory() . '/inc/federal-funding.php';
 // Nonprofit tax filings (IRS Form 990) of programs and companies (js/data/nonprofit-filings/, kop-pipeline scripts/nonprofit-990.py), linked in the review inbox
 require_once get_stylesheet_directory() . '/inc/nonprofit-filings.php';
+// State business filings (Florida and Colorado: kop-pipeline scripts/florida-sunbiz.py, colorado-sos.py -> js/data/business-filings/), linked in the review inbox
+require_once get_stylesheet_directory() . '/inc/business-filings.php';
 // Move or remove a document from the page it shows on (the document tile's pencil)
 require_once get_stylesheet_directory() . '/inc/doc-placement.php';
 // Links from the owner's Google Docs and Sheets (scripts/gdocs-extract.py), reviewed at KOP Tools > Drive Docs

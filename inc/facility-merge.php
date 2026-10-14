@@ -234,6 +234,8 @@ if (!function_exists('kop_fmerge_ref_tables')) {
             array('t' => $prefix . 'kop_state_list_rows', 'c' => 'left_record_id', 'k' => 'id'),
             // Nonprofit tax filings (inc/nonprofit-filings.php): the organization linked to a record.
             array('t' => $prefix . 'kop_nonprofit_links', 'c' => 'facility_id', 'k' => 'id'),
+            // State business filings (inc/business-filings.php): the company linked to a record.
+            array('t' => $prefix . 'kop_business_links', 'c' => 'facility_id', 'k' => 'id'),
             // Research library documents filed under a facility.
             array('t' => $prefix . 'postmeta', 'c' => 'meta_value', 'k' => 'id', 'where' => "meta_key = 'kop_research_facilities'"),
         ), $prefix);

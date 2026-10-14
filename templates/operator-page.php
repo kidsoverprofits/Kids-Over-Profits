@@ -39,6 +39,9 @@ if ($page['memorials']) $kop_op_sections['memorials'] = 'Deaths on record';
 // Nonprofit tax returns (IRS Form 990) of the organizations linked to this company (inc/nonprofit-filings.php), read at render time.
 $kop_op_nonprofits = function_exists('kop_npf_for_operator') ? kop_npf_for_operator((int) $page['id']) : array();
 if ($kop_op_nonprofits) $kop_op_sections['tax-filings'] = 'Tax filings';
+// State business filings of the companies linked to it (inc/business-filings.php), read at render time.
+$kop_op_businesses = function_exists('kop_bizf_for_operator') ? kop_bizf_for_operator((int) $page['id']) : array();
+if ($kop_op_businesses) $kop_op_sections['business-filings'] = 'Business filings';
 $kop_op_has_research = !empty($page['research']);
 $kop_op_has_unsilenced = !empty($page['unsilenced']['groups']);
 $kop_op_has_survivor_sites = !empty($page['survivor_sites']);
@@ -379,6 +382,14 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <h2>Nonprofit tax filings</h2>
                 <p class="kop-fp-count">The yearly returns (IRS Form 990) of the nonprofit<?php echo count($kop_op_nonprofits) > 1 ? 's' : ''; ?> behind this company, from the IRS through ProPublica's Nonprofit Explorer.</p>
                 <?php echo kop_npf_section_html($kop_op_nonprofits); // Escaped inside. ?>
+            </section>
+            <?php endif; ?>
+
+            <?php if ($kop_op_businesses) : ?>
+            <section class="kop-fp-section" id="business-filings">
+                <h2>Business filings</h2>
+                <p class="kop-fp-count">This company's registrations with the states, as their business registers list them.</p>
+                <?php echo kop_bizf_section_html($kop_op_businesses); // Escaped inside. ?>
             </section>
             <?php endif; ?>
 

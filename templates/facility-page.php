@@ -336,6 +336,8 @@ $kop_fp_has_lawsuits = !empty($page['lawsuits']);
 $kop_fp_has_funding = !empty($page['federal_funding']);
 // Nonprofit tax returns (IRS Form 990) of the organizations linked to this record (inc/nonprofit-filings.php), read at render time.
 $kop_fp_nonprofits = function_exists('kop_npf_for_facility') ? kop_npf_for_facility((int) $page['id']) : array();
+// State business filings of the companies linked to this record (inc/business-filings.php), read at render time.
+$kop_fp_businesses = function_exists('kop_bizf_for_facility') ? kop_bizf_for_facility((int) $page['id']) : array();
 $kop_fp_has_memorials = !empty($page['memorials']);
 $kop_fp_has_inspections = !empty($page['inspections']);
 $kop_fp_has_research = !empty($page['research']);
@@ -434,6 +436,7 @@ if ($kop_fp_has_violations) $kop_fp_sections['violations'] = 'Serious violations
 if ($kop_fp_has_lawsuits) $kop_fp_sections['lawsuits'] = 'Lawsuits';
 if ($kop_fp_has_funding) $kop_fp_sections['funding'] = 'Federal funding';
 if ($kop_fp_nonprofits) $kop_fp_sections['tax-filings'] = 'Tax filings';
+if ($kop_fp_businesses) $kop_fp_sections['business-filings'] = 'Business filings';
 if ($kop_fp_has_incidents) $kop_fp_sections['incidents'] = 'Incidents';
 if ($kop_fp_has_news) $kop_fp_sections['news'] = 'News coverage';
 if ($kop_fp_has_videos && !isset($kop_fp_psec['videos'])) $kop_fp_sections['videos'] = 'Videos';
@@ -846,6 +849,14 @@ get_header();
                 <h2><?php echo $kop_fp_icon('landmark'); ?>Nonprofit tax filings</h2>
                 <p class="kop-fp-count">The yearly returns (IRS Form 990) of the nonprofit<?php echo count($kop_fp_nonprofits) > 1 ? 's' : ''; ?> this program operates under, from the IRS through ProPublica's Nonprofit Explorer.</p>
                 <?php echo kop_npf_section_html($kop_fp_nonprofits); // Escaped inside. ?>
+            </section>
+            <?php endif; ?>
+
+            <?php if ($kop_fp_businesses) : ?>
+            <section class="kop-fp-section" id="business-filings">
+                <h2><?php echo $kop_fp_icon('landmark'); ?>Business filings</h2>
+                <p class="kop-fp-count">The compan<?php echo count($kop_fp_businesses) > 1 ? 'ies' : 'y'; ?> registered with the state behind this program, as the state's business register lists <?php echo count($kop_fp_businesses) > 1 ? 'them' : 'it'; ?>.</p>
+                <?php echo kop_bizf_section_html($kop_fp_businesses); // Escaped inside. ?>
             </section>
             <?php endif; ?>
 

@@ -117,6 +117,8 @@ function kop_rinbox_npf_candidate_line(array $c) {
     $exists = kop_npf_record_exists($c['kind'] ?? 'facility', (int) $c['id']);
     $line = (string) ($c['name'] ?? '') . (!empty($c['place']) ? ' (' . $c['place'] . ')' : '');
     if (!$exists) return $line . ', ' . $what . ' #' . (int) $c['id'] . ' (not on file any more)';
+    // The record as it is named now, not as the build's copy of the mirror spelled it.
+    $line = kop_npf_record_name($c['kind'] ?? 'facility', (int) $c['id']);
     return $line . (!empty($c['status']) ? ', ' . $c['status'] : '') . ', ' . $what . ' #' . (int) $c['id']
         . ': same name as ' . (string) ($c['how'] ?? 'its name') . (!empty($c['same_town']) ? ', same town' : '');
 }

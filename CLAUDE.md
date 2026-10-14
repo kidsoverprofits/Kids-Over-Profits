@@ -305,6 +305,21 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # the facility and company pages print a year-by-year table (revenue, expenses, officers' pay, assets, a link to each return), read at render time
 (kop-pipeline) py -3 scripts/nonprofit-990.py [--refresh-bmf] [--refresh-orgs] [--no-search] [--selftest]   # cached in tmp/nonprofit-990/, ~1 request/s
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=nonprofit-filings
+# State business filings (docs/PLAN.md 3.20), Florida first: the Division of Corporations' free quarterly bulk files (SFTP; every company,
+# active and inactive, officers, registered agent, events, trade names) read streamed; a company is a candidate when its name, a trade
+# name it registered, its EIN (a nonprofit found for the program) or its street address is a Florida record's -> js/data/business-filings/fl/
+# {candidates.json, entities/<doc>.json} (commit in kop-data; people by name, title, city and state only, never a street address);
+# linked at Review inbox > Business filings ({prefix}kop_business_links, inc/business-filings.php, exact Undo); facility and company pages
+# print the filing (officers, agent, name changes, dissolution, trade names) at render time. A new state: its own build into
+# business-filings/<st>/ with the same shape, and kop_bizf_states()
+(kop-pipeline) py -3 scripts/florida-sunbiz.py fetch && py -3 scripts/florida-sunbiz.py build   # ~2 GB download, resumable; selftest too
+(kop-pipeline) py -3 scripts/colorado-sos.py fetch && py -3 scripts/colorado-sos.py build      # Colorado open data (entities, history, trade names); same shape into business-filings/co/
+# The state's PDF of each filing (Colorado: free; periodic reports left out) -> kop-pipeline tmp/colorado-sos/pdfs/ (never committed);
+# copied to ~/kop-import/business-filings/co/, the linked companies' PDFs go into a "Business filings" folder of the program's library
+# and each filing on the page links our copy (_kop_bizf_filing = "<st>:<doc>:<filing>" on the attachment)
+(kop-pipeline) py -3 scripts/colorado-sos.py pdfs [--ids ...] [--limit N]   # resumable; waits out the state's 429s, hours
+php api/import-business-filings.php ~/kop-import/business-filings/co [apply]   # on the server (ea-php82): dry run first; rerun after more links
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=business-filings
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
 # Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,
@@ -715,6 +730,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_doc_types` / `{prefix}kop_doc_type_suggestions` - What kind of document each attachment is (one row per type, with rule / ai / person / checked) and, for documents the rules could not type, the AI's guess and its review status (`inc/doc-types.php`)
 - `{prefix}kop_program_practices` - One line per rule, level, punishment or limit read from a program's own handbook (its document, page, quote, topic, the checklist boxes it shows), pending until the owner adds it to the facility page or leaves it off (`inc/program-practices.php`)
 - `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
+- `{prefix}kop_business_links` - Which state-registered company (state + document number; files in `js/data/business-filings/<st>/entities/`) shows on a facility or company page (`inc/business-filings.php`)
 - `{prefix}kop_campuses` / `{prefix}kop_campus_programs` - Separate programs that share one campus (a hospital's two residential programs), one campus per record (`inc/campus-programs.php`)
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)
 - `{prefix}kop_glossary_nodes` / `_entries` / `_aliases` / `_tags` / `_log` - The TTI glossary: sections and groups, terms, other names, program tags, and each entry change for Undo (`inc/glossary-store.php`)

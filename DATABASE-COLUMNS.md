@@ -30,6 +30,11 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### {prefix}kop_addresses / {prefix}kop_facility_addresses
 **Purpose:** Physical address ids and which facility stood where (`api/manage-addresses.php`).
 
+### {prefix}kop_business_links
+**Columns:** `id`, `state` (two letters), `doc` (the state's document number), `facility_id`, `operator_id` (one of the two set, the other 0), `created_by`, `created_at`
+
+**Purpose:** Which company in a state's business register shows on a facility or company page (`inc/business-filings.php`). The filings are files in `js/data/business-filings/<st>/entities/<doc>.json` (kop-data; built by kop-pipeline `scripts/florida-sunbiz.py` and `scripts/colorado-sos.py`); rows are made at Review inbox > Business filings, deleted by its Undo, moved by Merge Duplicates.
+
 ### {prefix}kop_program_practices
 **Columns:** `id`, `ikey` (sha1 of document, page and quote; unique), `facility_id`, `doc_id` (attachment), `doc_title`, `doc_url`, `page`, `topic` (levels, rules, consequences, communication, restraint, searches, therapy, daily_life, education, admission, family), `value` (the line as shown; the pencil rewords it), `value_orig` (as the reader wrote it), `quote`, `year`, `checklist` (comma-separated `ttiPractices.hasX` keys), `status` (pending, added, left), `batch` (the decision that set it), `created_at`
 

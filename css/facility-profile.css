@@ -1979,6 +1979,52 @@ p.kop-op-draft {
     font-weight: 600;
 }
 
+/* State business filings (inc/business-filings.php). */
+.kop-bizf-org + .kop-bizf-org {
+    margin-top: 1.5rem;
+}
+
+.kop-bizf-facts {
+    display: grid;
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+    gap: 0.35rem 1rem;
+    margin: 0 0 0.75rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-bizf-facts dt {
+    font-weight: 600;
+}
+
+.kop-bizf-facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.kop-bizf-people {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.kop-bizf-org .meta {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+h4.kop-bizf-h {
+    margin: 0.75rem 0 0.35rem;
+    font-size: 1rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+@media (max-width: 600px) {
+    .kop-bizf-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .kop-bizf-facts dd {
+        margin-bottom: 0.5rem;
+    }
+}
+
 .kop-npf-earlier summary {
     cursor: pointer;
     font-weight: 600;

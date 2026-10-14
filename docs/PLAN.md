@@ -2033,6 +2033,69 @@ Open:
 
 ---
 
+### 3.20 State business filings: Florida and Colorado (2026-10-14)
+
+Most programs are run by a company registered with a state, and the states
+publish those filings. kop-pipeline `scripts/florida-sunbiz.py` reads Florida's
+free quarterly bulk files (Division of Corporations SFTP: about 13 million
+companies, active and inactive, with officers, registered agent, the last three
+annual reports, events and fictitious names), streamed, ~2 GB download.
+`scripts/colorado-sos.py` reads Colorado's open data (data.colorado.gov:
+entities, the full filing history, trade names; no key). A company is a
+candidate when its name, a name it had before, a trade name it registered, its
+EIN (only the nonprofit already matched for the program, and only for nonprofit
+company types) or its street address is a record's in that state; address
+matches with no shared distinctive word, crowded addresses and one-word trade
+names outside the program's town are dropped. Shared rules in
+`scripts/lib/business_filings.py`. Output in kop-data
+`business-filings/<st>/` (`candidates.json`, `entities/<doc>.json`): people by
+name, title, city and state only, never a street address. Reports in
+kop-pipeline `tmp/florida-sunbiz/report.md`, `tmp/colorado-sos/report.md`.
+
+First runs (2026-10-14): Florida 140 companies (13 matched: own name, same
+town; 127 to check), Colorado 48 (12 matched, 36 to check).
+
+Reviewed at Review inbox > **Business filings** (`inc/business-filings.php`,
+`inc/review-inbox/business-filings.php`): Link to this program, Link to a
+company, Not this program, Undo (exact). "Link every same-name, same-town
+match" does the matched view at once. Links are rows of
+`{prefix}kop_business_links` (moved by Merge Duplicates); facility and company
+pages print "Business filings" (status, officers, agent, name changes,
+dissolution, trade names, a link to the state's page) from the files at render
+time. Test: `scripts/test-review-inbox.php --source=business-filings`.
+
+Open:
+1. **Owner:** work through the queue (bulk link first, then the "check" view).
+2. **Filed documents as PDFs** (built 2026-10-14). Colorado: every filing is
+   a free PDF at `coloradosos.gov/biz/ViewImage.do?masterFileId=<entity>&fileId=<transaction>`
+   (a cookie from the detail page, a browser user agent). `colorado-sos.py pdfs`
+   saves every filing of the 48 companies except the periodic reports (owner's
+   choice: address and agent only), 245 filings, into kop-pipeline
+   `tmp/colorado-sos/pdfs/<entity>/<filing>.pdf` + `manifest.json`, never
+   committed; the state answers 429 after a few quick requests, so it waits it
+   out and takes hours. Each page event carries its filing id (`file`).
+   `api/import-business-filings.php <dir> [apply]` (`kop_bizf_import()`) files
+   the PDFs of linked companies in a "Business filings" folder of the
+   program's library (a company's own folder when linked to a company), typed
+   "Business or property record", source = the state's address; the page links
+   each filing to our copy (`_kop_bizf_filing` on the attachment). **To do:**
+   once the owner has linked companies, copy the folder to
+   `~/kop-import/business-filings/co/` and run it (dry run first); rerun after
+   more links. Florida's document images sit behind Cloudflare on
+   search.sunbiz.org: the real-browser reader below.
+3. **Utah** (businessregistration.utah.gov, Cloudflare + a Turnstile check on
+   the search): a reader driving real Chrome for exact-name searches of the UT
+   records and their past names, then principal-name searches for the map's
+   people; ask the Division of Corporations about a custom list (fields,
+   price; $5 for 200 records, then $0.05 each, Utah.gov subscriber);
+   OpenCorporates as a fallback.
+4. Refreshes: Colorado by targeted API queries per record instead of the whole
+   entity file; Florida each quarter.
+5. The app (`inc/mobile-api.php` keep lists), open data, officers into people
+   ids and the network map.
+
+---
+
 ### 3.21 Programs' own papers read: rules and practices (2026-10-13)
 
 Owner, 2026-10-13: facility profiles and wiki entries make little use of what
