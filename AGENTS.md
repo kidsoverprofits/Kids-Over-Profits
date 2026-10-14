@@ -31,6 +31,10 @@ This repository is the Kids Over Profits WordPress child theme. Treat it as the 
 
 Read `docs/ADDING-CONTENT.md` before adding a data category, facility field, page, admin screen, review queue or seed: it lists every search, site map, open data, app, merge, people and docs list that must learn about the new thing.
 
+## Writing Anything a Paragraph or Longer
+
+Read `docs/WRITING-STYLE.md` every time you write something a paragraph or longer (articles, page text, company histories, wiki entries and drafts, summaries), and check the draft against its checklist before handing it over. It holds the owner's rules for longform writing: one point per piece, section and paragraph; argue rather than list; judgments stated beside the facts they rest on; no talking down; citations; people's roles; wording to get right.
+
 ## Recent Important Changes
 
 ### September-October 2026
