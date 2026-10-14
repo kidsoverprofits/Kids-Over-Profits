@@ -158,6 +158,12 @@ function kop_pp_import($force = false) {
         ));
         if ($wpdb->insert_id) $added++;
     }
+    // Lines the export withdraws (judged too ordinary to review: "withdrawn" keys) leave the table while
+    // nobody has decided them; a line already added or left off stays as it is.
+    foreach ((array) ($data['withdrawn'] ?? array()) as $key) {
+        if (!is_string($key) || !preg_match('/^[0-9a-f]{40}$/', $key)) continue;
+        $wpdb->delete(kop_pp_table(), array('ikey' => $key, 'status' => 'pending'));
+    }
     update_option('kop_pp_import_seen', $sig, false);
     return $added;
 }
