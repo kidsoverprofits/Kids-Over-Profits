@@ -285,6 +285,8 @@ require_once get_stylesheet_directory() . '/inc/staging-links.php';
 
 // robots.txt: every Disallow line inside the "User-agent: *" group, the data form kept out
 require_once get_stylesheet_directory() . '/inc/robots.php';
+// Search engines: other names in titles, structured data, missing descriptions, share image (docs/PLAN.md 3.24)
+require_once get_stylesheet_directory() . '/inc/seo.php';
 
 // Featured and in-article photos placed from seeds/page-images.json
 require_once get_stylesheet_directory() . '/inc/page-images.php';

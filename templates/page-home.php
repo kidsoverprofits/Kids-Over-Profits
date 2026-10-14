@@ -192,7 +192,7 @@ $kop_reports_hub_url = !empty($kop_reports_hub_pages) ? get_permalink($kop_repor
 
     <?php kop_ie_html_start('home:hero', 'Home page: opening and audience buttons'); ?>
     <section class="kop-home-hero">
-        <h2>Survivor-led accountability for the Troubled Teen Industry.</h2>
+        <h1>Survivor-led accountability for the Troubled Teen Industry.</h1>
         <p>Click the button that best describes you to get started.</p>
         <div class="kop-home-audience">
             <a class="kop-home-btn" href="/survivors">Survivors</a>

@@ -82,8 +82,12 @@
     text-align: center;
 }
 
+/* The page's one h1 (it was an h2), kept at the h2 size Kadence gives the site. */
+.kop-home-hero h1,
 .kop-home-hero h2 {
     color: var(--kop-midnight-blue, #000435);
+    font-size: 28px;
+    line-height: 1.5;
     margin-bottom: 0.5rem;
 }
 
@@ -644,6 +648,7 @@
     .kop-home section {
         margin-bottom: 1.75rem;
     }
+    .kop-home-hero h1,
     .kop-home-hero h2 {
         font-size: 1.35rem;
     }
