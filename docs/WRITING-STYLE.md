@@ -233,6 +233,10 @@ more detail than a spotlight would. The rules on wording, sourcing and tone abov
   (enrollment papers, business filings, newsletters and press releases, lawsuits, inspection reports, archived
   website pages, brochures).
 
+In a company history (`operator.history`), a paragraph whose lines all start with "|" is a table, with an optional
+first line "Table: <caption>" and the first row as column heads; a paragraph whose lines start with "> " is a pull
+quote. The rewritten Sequel TSI history (https://kidsoverprofits.org/operator/sequel-tsi/) uses both.
+
 Things in that profile not to copy: filler openers ("Tragically", "paint a picture"), and rates or counts that
 would sit better in the fact box or a table.
 
