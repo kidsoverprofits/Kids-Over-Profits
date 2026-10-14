@@ -727,5 +727,99 @@
         "relationship": "current"
       }
     ]
+  },
+  {
+    "name": "EOSIS",
+    "note": "Company record created 2026-10-13 from the company's own releases, Behavioral Health Business, court dockets and Utah licensing records. Formerly Meridian Behavioral Health (renamed 2025-02-17). Facilities: the four KOP records among the five Utah programs that announced in June-July 2026 they had joined EOSIS Utah; The Approach (Elevations' transition program) has no record. Not the Tennessee company Meridian Behavioral Health Systems (Brentwood), which bought Highland Hospital (WV).",
+    "operator": {
+      "currentName": "",
+      "otherNames": [
+        "Meridian Behavioral Health",
+        "Meridian Behavioral Health, LLC",
+        "EOSIS Utah",
+        "EOSIS Utah, LLC"
+      ],
+      "status": "Active",
+      "founded": "",
+      "operatingPeriod": "",
+      "headquarters": "New Brighton, Minnesota",
+      "headquartersCity": "New Brighton",
+      "headquartersState": "MN",
+      "location": "New Brighton, MN",
+      "parentCompanies": [
+        "Renovus Capital Partners"
+      ],
+      "notes": [
+        "2007: Triton Pacific Capital Partners recapitalized Meridian Behavioral Health (Wikipedia, Meridian Behavioral Health: https://en.wikipedia.org/wiki/Meridian_Behavioral_Health)",
+        "February 28, 2011: Meridian Behavioral Health filed for Chapter 11 with its sister company MK Network after lender Fifth Street sent a default notice on a joint loan of about $20.8 million (Twin Cities Business: https://tcbmag.com/meridian-behavioral-health-files-for-ch-11/; docket: https://www.courtlistener.com/docket/40542882/meridian-behavioral-health-llc/)",
+        "December 2015: Audax Private Equity bought the company from Triton Pacific, reportedly for $120 million (Wikipedia: https://en.wikipedia.org/wiki/Meridian_Behavioral_Health)",
+        "September 2016: bought the Stadter Center in Grand Forks, North Dakota, a psychiatric hospital serving adolescents, adults and older patients, and renamed it Red River Behavioral Health System (Business Wire: https://www.businesswire.com/news/home/20160913006706/en/Meridian-Introduce-Red-River-Behavioral-Health-System)",
+        "2017: the company said it ran more than 30 inpatient and outpatient facilities in Minnesota, North Dakota, Maryland, Vermont and Louisiana with more than 1,200 employees (PR Newswire: https://www.prnewswire.com/news-releases/meridian-behavioral-health-acquires-new-beginnings-minnesota-300543134.html)",
+        "October 20, 2020: Red River Behavioral Health System, LLC filed for Chapter 7 after the hospital closed (Grand Forks Herald: https://www.grandforksherald.com/lifestyle/red-river-behavioral-health-to-close; docket: https://www.courtlistener.com/docket/18555425/red-river-behavioral-health-system-llc/)",
+        "2017-2022: a False Claims Act whistleblower case against Meridian Behavioral Health was filed under seal in Minnesota federal court, unsealed in July 2022 and dismissed in October 2022 (docket: https://www.courtlistener.com/docket/13545224/united-states-of-america-ex-rel-v-meridian-behavioral-health/)",
+        "October 2023: Renovus Capital bought Meridian Behavioral Health from Audax (Provident Healthcare Partners, Q4 2023 newsletter: https://providenthp.com/wp-content/uploads/2024/01/Q4-2023-SUD-Newsletter.pdf)",
+        "January 2025: 654 beds across 13 inpatient and eight outpatient addiction treatment facilities, all in Minnesota, about 90% of patients on Medicaid (Behavioral Health Business: https://bhbusiness.com/2025/01/29/sud-treatment-provider-meridian-behavioral-health-acquires-20th-facility-plans-future-growth/)",
+        "February 17, 2025: Meridian Behavioral Health renamed itself EOSIS: \"EOSIS signals a new beginning, with new leadership, therapeutic approaches, services, partnerships and growth\" (PR Newswire: https://www.prnewswire.com/news-releases/meridian-behavioral-health-is-now-eosis-302377969.html)",
+        "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West, Family Help & Wellness programs in Utah, announced they had joined EOSIS Utah, \"a broader acquisition of five Utah-based behavioral health programs\"; none named a seller or a price, and each said it would keep its clinical model and day-to-day care (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/; Solstice West: https://solsticertc.com/solstice-west-joins-eosis-utah/; ViewPoint Center: https://www.viewpointcenter.com/viewpoint-center-joins-eosis-utah/)",
+        "EOSIS UTAH, LLC is a Delaware company registered in Utah at 2650 W. 2700 S., Syracuse, the Elevations RTC campus (OpenCorporates: https://opencorporates.com/companies/us_de/10557203; https://opencorporates.com/companies/us_ut/14676896-0161)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10356,
+        "unique_name": "Elevations RTC",
+        "relationship": "current"
+      },
+      {
+        "id": 10361,
+        "unique_name": "Viewpoint Center",
+        "relationship": "current"
+      },
+      {
+        "id": 10355,
+        "unique_name": "Discover Seven Stars",
+        "relationship": "current"
+      },
+      {
+        "id": 10359,
+        "unique_name": "Solstice West",
+        "relationship": "current"
+      }
+    ]
+  },
+  {
+    "name": "Family Help & Wellness",
+    "note": "2026-10-13: its four Utah programs on file passed to EOSIS Utah in June-July 2026; links set to past.",
+    "operator": {
+      "notes": [
+        "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West announced they had joined EOSIS Utah (formerly Meridian Behavioral Health); the announcements do not name the seller (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10356,
+        "unique_name": "Elevations RTC",
+        "relationship": "past",
+        "update": true
+      },
+      {
+        "id": 10361,
+        "unique_name": "Viewpoint Center",
+        "relationship": "past",
+        "update": true
+      },
+      {
+        "id": 10355,
+        "unique_name": "Discover Seven Stars",
+        "relationship": "past",
+        "update": true
+      },
+      {
+        "id": 10359,
+        "unique_name": "Solstice West",
+        "relationship": "past",
+        "update": true
+      }
+    ]
   }
 ]
