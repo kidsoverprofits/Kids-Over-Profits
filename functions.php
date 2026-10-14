@@ -217,6 +217,8 @@ require_once get_stylesheet_directory() . '/inc/news-archive-links.php';
 // One review inbox for every queue, drawn on the Submissions Review page (inc/review-inbox/ holds a source per queue)
 require_once get_stylesheet_directory() . '/inc/review-inbox.php';
 require_once get_stylesheet_directory() . '/inc/review-inbox-menu.php';
+// A record change drafts an update for its linked wiki entry (hourly; Review inbox > Wiki updates from record changes)
+require_once get_stylesheet_directory() . '/inc/wiki-auto-updates.php';
 // Duplicate facility records found automatically and merged into one, with Undo (KOP Tools > Merge Duplicates)
 require_once get_stylesheet_directory() . '/inc/facility-merge.php';
 // Facility records that are really a parent company leave the facility table, their page 301s to the company (seeds/record-to-company.json)

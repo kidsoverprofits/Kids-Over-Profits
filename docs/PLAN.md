@@ -1572,6 +1572,16 @@ workflow; anything that runs on the server later goes through
    approved news, a lawsuit, a death or a finding since its last update
    gets a "KOP has new information" badge in the wiki editor and a new
    inbox item.
+   **Inbox item done 2026-10-14** (owner: every change to a record makes an
+   update for its wiki entry): `inc/wiki-auto-updates.php` listens to
+   `kop_record_changed()`, re-runs the gaps hourly for the linked entries
+   (and sweeps every linked entry, 30 a run, for writes that skip the
+   event), and writes each new gap as the script drafts do, with no model;
+   Review inbox > Wiki updates from record changes. The first look at an
+   entry is its baseline: what it lacked before this shipped stays with the
+   exported drafts and the workflow. Open: the editor badge; lawsuit and
+   death lines in the models' wording (the site writes the record's own
+   summary); `rules` lines are the handbook's words as they stand.
 
 Tests: `scripts/test-wiki-gaps.php` (linking on the real rows, gap kinds,
 the no-deletion diff, approve and exact Undo on an in-memory copy) and the
@@ -1931,7 +1941,8 @@ Open, in order (details in DATA-FLOWS.md section 4):
    is not under it, 8 with no link (Review inbox > Wiki links).
    Every entry's additions are a card at Review inbox > Wiki staff added
    (inc/review-inbox/wiki-staff.php): Looks right, Take them off, Undo.
-5. Wiki staleness listener + badge (this is 3.12 step 6).
+5. Wiki staleness listener + badge (this is 3.12 step 6). Listener and inbox item done 2026-10-14
+   (`inc/wiki-auto-updates.php`); the badge is open.
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
    fingerprint moves).
 7. The smaller items in DATA-FLOWS section 3: rename flips in a facility's

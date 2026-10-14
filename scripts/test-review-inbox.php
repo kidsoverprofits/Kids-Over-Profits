@@ -48,6 +48,9 @@ register_shutdown_function(function () use ($db_path) { $GLOBALS['pdo'] = null; 
 
 // Writes go to the scratch copy only.
 $GLOBALS['kop_test_wpdb_writes'] = true;
+// The scratch copy is the database: api/sync-wiki-facilities.php (loaded through inc/review-inbox-menu.php ->
+// api/lib-publish-approved.php) would otherwise open api/config.php's MySQL connection.
+if (!defined('KOP_DB_CONFIG_LOADED')) define('KOP_DB_CONFIG_LOADED', true);
 require __DIR__ . '/kop-test-harness.php';
 // MySQL functions the queues use.
 $pdo->sqliteCreateFunction('UTC_TIMESTAMP', function () { return gmdate('Y-m-d H:i:s'); }, 0);

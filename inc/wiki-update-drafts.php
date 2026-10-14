@@ -615,7 +615,11 @@ function kop_wiki_drafts_check($base, $draft, $header_changed, array $removed = 
 function kop_wiki_drafts_build($id, $current_md, $edits = null) {
     $d = kop_wiki_drafts_all()[(int) $id] ?? null;
     if (!$d) throw new RuntimeException('There is no draft for this entry.');
-    $edits = $edits === null ? kop_wiki_drafts_edits($id) : $edits;
+    return kop_wiki_drafts_build_draft($d, $current_md, $edits === null ? kop_wiki_drafts_edits($id) : $edits);
+}
+
+/** kop_wiki_drafts_build() for any draft in that shape (the drafts made from record changes too: inc/wiki-auto-updates.php). */
+function kop_wiki_drafts_build_draft(array $d, $current_md, array $edits) {
     $base = implode("\n", kop_wiki_drafts_lines($current_md)) . "\n";
     $stale = sha1(rtrim(str_replace("\r\n", "\n", (string) $current_md), "\n")) !== (string) ($d['base_sha1'] ?? '');
     $tense = (string) ($edits['_tense'] ?? '1') !== '1' ? array() : (array) ($d['tense'] ?? array());
@@ -826,8 +830,9 @@ function kop_wiki_drafts_reddit_edit_url($url) {
         ? 'https://www.reddit.com/mod/troubledteens/wiki/edit/' . $m[1] . '/' : '';
 }
 
-function kop_wiki_drafts_view_url($id) {
-    return admin_url('admin-post.php?action=kop_wiki_draft_view&id=' . (int) $id);
+/** $from 'changes': the draft made from record changes (inc/wiki-auto-updates.php), else the exported one. */
+function kop_wiki_drafts_view_url($id, $from = '') {
+    return admin_url('admin-post.php?action=kop_wiki_draft_view&id=' . (int) $id . ($from === 'changes' ? '&from=changes' : ''));
 }
 
 /* ---- The whole entry, changes marked, with Copy ---------------------------- */
@@ -837,18 +842,19 @@ add_action('admin_post_kop_wiki_draft_view', 'kop_wiki_drafts_view_page');
 function kop_wiki_drafts_view_page() {
     if (!current_user_can('manage_options')) wp_die('Admins only.', 403);
     $id = (int) ($_GET['id'] ?? 0);
+    $changes = ($_GET['from'] ?? '') === 'changes' && function_exists('kop_wiki_auto_build');
     try {
         $pdo = kop_wiki_upd_pdo();
         $row = kop_wiki_drafts_row($pdo, $id);
-        $state = kop_wiki_drafts_state()[$id] ?? null;
+        $state = ($changes ? kop_wiki_auto_state() : kop_wiki_drafts_state())[$id] ?? null;
         if ($state && in_array($state['view'], array('ready', 'posted'), true)) {
             // Approved: the entry's text is the update; mark what it added against the text it replaced.
-            $old = get_option('kop_wiki_draft_old_' . $id, array());
+            $old = get_option(($changes ? 'kop_wiki_auto_old_' : 'kop_wiki_draft_old_') . $id, array());
             $md = $row['markdown'];
             list(, $added) = kop_wiki_drafts_check((string) ($old['text'] ?? ''), $md, true);
             $b = array('md' => $md, 'added' => $added, 'tensed' => array(), 'errors' => array(), 'stale' => false);
         } else {
-            $b = kop_wiki_drafts_build($id, $row['markdown']);
+            $b = $changes ? kop_wiki_auto_build($id, $row['markdown']) : kop_wiki_drafts_build($id, $row['markdown']);
         }
     } catch (Throwable $e) {
         wp_die(esc_html($e->getMessage()), 404);

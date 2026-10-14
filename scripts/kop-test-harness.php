@@ -247,7 +247,12 @@ class wpdb {
     private function rows($sql) {
         $this->queries++;
         if (preg_match("/^\s*SHOW TABLES LIKE\s+('[^']*')/i", $sql, $m)) {
-            $sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE $m[1]";
+            // An attached database's tables count too (a scratch copy over the mirror: scripts/test-wiki-auto-updates.php).
+            $masters = array('sqlite_master');
+            foreach ($this->pdo->query('PRAGMA database_list')->fetchAll(PDO::FETCH_ASSOC) as $db) {
+                if (!in_array($db['name'], array('main', 'temp'), true)) $masters[] = '"' . $db['name'] . '".sqlite_master';
+            }
+            $sql = implode(' UNION ', array_map(function ($t) use ($m) { return "SELECT name FROM $t WHERE type = 'table' AND name LIKE $m[1]"; }, $masters));
         }
         try {
             $st = $this->pdo->query($sql);

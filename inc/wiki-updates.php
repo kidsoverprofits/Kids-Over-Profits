@@ -672,8 +672,12 @@ function kop_wiki_upd_label_name($name, array $own_names) {
 }
 
 /** The live site's address for a page URL built offline or on a staging host. */
+/**
+ * One of our own addresses (staging, Local, the test harness's host) as the live site's. Any other host is left as it
+ * is: a staff member's source on Reddit, the Wayback Machine or Fornits was once rewritten onto kidsoverprofits.org.
+ */
 function kop_wiki_upd_live_url($url) {
-    return preg_replace('#^https?://[^/]+#', 'https://kidsoverprofits.org', (string) $url);
+    return preg_replace('#^https?://(?:[\w.-]*kidsoverprofits\.(?:org|local)|kids-over-profits\.local|example\.test)(?=[/?\#]|$)#i', 'https://kidsoverprofits.org', (string) $url);
 }
 
 /**

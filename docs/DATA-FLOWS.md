@@ -404,8 +404,9 @@ scripts/test-record-resync.php):
   ETag read them too. The state, directory and mobile caches build on the
   facility fingerprint.
 
-Open: the operator and link writers firing the event, the wiki listener
-(step 4), the drift check (6), and the rest of the no-bypass test (7).
+Open: the operator and link writers firing the event, the drift check (6),
+and the rest of the no-bypass test (7). The wiki listener (step 4) is done
+(2026-10-14) but for its badge.
 
 Today every reader guesses whether something changed. The fix is for every
 writer to say so, once, in one place, and for every reader to listen.
@@ -443,12 +444,15 @@ writer to say so, once, in one place, and for every reader to listen.
      outside WordPress (the scrapers, SQL by hand).
    - The dead `kop_facility_v2_request_sync()` calls go away. The 10-minute
      flush is kept only until the revisions are proven.
-4. **Wiki staleness as a listener.**
-   - On a facility, lawsuit or news event, the wiki entries linked to the
-     affected records get `kop_wiki_upd_gaps()` re-run, in an hourly batch
-     rather than inline.
-   - The result is stored, and shown as the "KOP has new information"
-     badge in the editor and the Wiki updates queue (PLAN 3.12 step 6).
+4. **Wiki staleness as a listener.** Done 2026-10-14 except the badge
+   (`inc/wiki-auto-updates.php`, test scripts/test-wiki-auto-updates.php).
+   - On a facility, lawsuit, news, operator or wiki event, the wiki entries
+     linked to the affected records get `kop_wiki_upd_gaps()` re-run, in an
+     hourly batch rather than inline; a sweep of every linked entry catches
+     writes that skip the event.
+   - Each new gap becomes a written line, waiting at Review inbox > Wiki
+     updates from record changes. Open: the "KOP has new information"
+     badge in the editor (PLAN 3.12 step 6).
 5. **Wiki approval writes staff the way the record holds them.** Done
    2026-10-13, straight to the record with a log and Undo (owner's choice).
    `kop_v2_pdo_master_rows()` no longer keeps a stale copy after a save, so
