@@ -1339,6 +1339,99 @@ if (!function_exists('kop_facility_pages_wiki_url')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_woodbury_url')) {
+    /**
+     * Our copy of the Woodbury Reports issue a citation names, at its page: "Woodbury Reports, March 2007,
+     * p. 3" -> .../woodbury-0307.pdf#page=3. The issues are in the media library as woodbury-MMYY.pdf
+     * (read once from the attachment list, cached a day). '' when the citation names no issue we hold.
+     */
+    function kop_facility_pages_woodbury_url($cite) {
+        static $issues = null;
+        $months = array('jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4, 'may' => 5, 'jun' => 6, 'jul' => 7, 'aug' => 8, 'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12);
+        if (!preg_match('/Woodbury Reports,?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+((?:19|20)\d{2})(?:\s*\(#\d+\))?(?:,\s*pp?\.\s*(\d+))?/i', (string) $cite, $m)) return '';
+        if ($issues === null) {
+            $issues = function_exists('get_transient') ? get_transient('kop_fp_woodbury_issues') : false;
+            if (!is_array($issues)) {
+                global $wpdb;
+                $issues = array();
+                $files = isset($wpdb) ? (array) $wpdb->get_col("SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE '%woodbury-%.pdf'") : array();
+                $base = function_exists('wp_upload_dir') ? rtrim((string) (wp_upload_dir(null, false)['baseurl'] ?? ''), '/') : '';
+                foreach ($files as $f) {
+                    if (!preg_match('/(?:^|\/)woodbury-(\d{4})\.pdf$/i', (string) $f, $fm)) continue;
+                    // The 2024/12 import is the full run; keep it over a stray copy elsewhere.
+                    if (!isset($issues[$fm[1]]) || strpos((string) $f, '2024/12/') === 0) $issues[$fm[1]] = $base . '/' . ltrim((string) $f, '/');
+                }
+                if (function_exists('set_transient')) set_transient('kop_fp_woodbury_issues', $issues, DAY_IN_SECONDS);
+            }
+        }
+        $key = sprintf('%02d%02d', $months[strtolower(substr($m[1], 0, 3))], (int) $m[2] % 100);
+        if (!isset($issues[$key])) return '';
+        return $issues[$key] . (!empty($m[3]) ? '#page=' . (int) $m[3] : '');
+    }
+}
+
+if (!function_exists('kop_facility_pages_cite_url')) {
+    /** Where a citation with no address can still link: the wiki page it names, else our copy of the Woodbury issue. */
+    function kop_facility_pages_cite_url($cite) {
+        $url = kop_facility_pages_wiki_url($cite);
+        if ($url === '') $url = kop_facility_pages_woodbury_url($cite);
+        return $url !== '' ? $url : kop_facility_pages_heal_url($cite);
+    }
+}
+
+if (!function_exists('kop_facility_pages_heal_url')) {
+    /**
+     * The archived HEAL page a citation names ("HEAL, staff list for ViewPoint Center (archived 2025-07-12)"),
+     * where any record gives that same citation with its Wayback address. Read from facilities_v2 once a day.
+     */
+    function kop_facility_pages_heal_url($cite) {
+        static $map = null;
+        $cite = trim((string) $cite);
+        if (strpos($cite, 'HEAL, ') !== 0) return '';
+        if ($map === null) {
+            $map = function_exists('get_transient') ? get_transient('kop_fp_heal_cites') : false;
+            if (!is_array($map)) {
+                global $wpdb;
+                $map = array();
+                $docs = isset($wpdb) ? (array) $wpdb->get_col("SELECT json_data FROM facilities_v2 WHERE json_data LIKE '%HEAL, %archived%http%'") : array();
+                foreach ($docs as $d) {
+                    // In the stored JSON a quote is \" and a slash may be \/.
+                    $d = str_replace(array('\\/', '\\"'), array('/', '"'), (string) $d);
+                    if (!preg_match_all('#\((HEAL, [^()"]*\(archived \d{4}-\d{2}-\d{2}\)):\s*(https?://[^\s"()]+)\)#', $d, $mm, PREG_SET_ORDER)) continue;
+                    foreach ($mm as $m) if (!isset($map[$m[1]])) $map[$m[1]] = rtrim($m[2], '.,;');
+                }
+                if (function_exists('set_transient')) set_transient('kop_fp_heal_cites', $map, DAY_IN_SECONDS);
+            }
+        }
+        return (string) ($map[$cite] ?? '');
+    }
+}
+
+if (!function_exists('kop_facility_pages_sources_html')) {
+    /**
+     * Where a fact, staff entry or incident came from: the word "source" (source 1, source 2 ...) linking to
+     * the page it cites, the full citation in the link's preview. $sources: [{source, cite, url}]. A citation
+     * that only points back to us is not shown; the Woodbury Reports wording is never the preview.
+     */
+    function kop_facility_pages_sources_html($sources, $tag = 'dd') {
+        $sources = array_values(array_filter((array) $sources, static function ($s) { return is_array($s) && !kop_facility_pages_is_own_source($s); }));
+        if (!$sources) return '';
+        $links = array();
+        foreach ($sources as $n => $src) {
+            $label = 'source' . (count($sources) > 1 ? ' ' . ($n + 1) : '');
+            $cite = (string) ($src['cite'] ?? '');
+            $preview = $cite !== '' ? $cite : (string) ($src['source'] ?? '');
+            if (stripos($preview, 'Woodbury Reports') !== false) $preview = '';
+            $url = (string) ($src['url'] ?? '');
+            if ($url === '') $url = kop_facility_pages_cite_url($cite);
+            $links[] = $url !== '' && function_exists('kop_citation_link')
+                ? kop_citation_link($url, $label, $preview, true, '', true)
+                : '<span title="' . esc_attr($preview) . '">' . esc_html($label) . '</span>';
+        }
+        return '<' . $tag . ' class="kop-fp-src">' . implode(', ', $links) . '</' . $tag . '>';
+    }
+}
+
 if (!function_exists('kop_facility_pages_woodbury_clean')) {
     /**
      * Text without the Woodbury Reports wording: "(Woodbury Reports, February 2009, p. 20)" goes,
@@ -3044,7 +3137,7 @@ if (!function_exists('kop_facility_page_data')) {
         $incidents = array_values($incidents);
         $forum_leads = array();
         foreach ($notes as $i => $note) {
-            if (stripos($note, 'Fornits lead') === 0) {
+            if (stripos($note, 'Fornits lead') === 0 || stripos($note, 'Reported closed on Fornits') === 0) {
                 $forum_leads[] = $note;
                 unset($notes[$i]);
             }
@@ -3222,6 +3315,15 @@ if (!function_exists('kop_facility_page_data')) {
             'incidents'     => $incidents,
             'staff'         => $staff,
             'notes'         => $notes,
+            // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
+            // A citation the staff or incident lists give with its address lends it to the same citation there.
+            'about'         => function_exists('kop_pnotes_build') ? kop_pnotes_build($notes, array('known' => (static function () use ($staff, $incidents) {
+                $known = array();
+                foreach (array_merge($incidents, ...array_values($staff ?: array(array()))) as $it) {
+                    if (is_array($it) && ($it['cite'] ?? '') !== '' && ($it['url'] ?? '') !== '' && !isset($known[$it['cite']])) $known[$it['cite']] = $it['url'];
+                }
+                return $known;
+            })())) : null,
             'field_notes'   => $field_notes,
             'testimony'     => $testimony,
             'forum'         => $forum,

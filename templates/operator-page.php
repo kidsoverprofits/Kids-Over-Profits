@@ -27,6 +27,9 @@ $kop_op_has_history = !empty($page['history']) || !empty($page['timeline']) || $
 $kop_op_people = $page['people'] ?? array('leaders' => array(), 'others' => array());
 $kop_op_has_people = !empty($kop_op_people['leaders']) || !empty($kop_op_people['others']);
 if ($kop_op_has_history) $kop_op_sections['history'] = 'History';
+// The research notes as prose with their sources (inc/profile-notes.php), after the history.
+$kop_op_about = !empty($page['about']['paragraphs']) || !empty($page['about']['also']) ? (array) $page['about'] : null;
+if ($kop_op_about) $kop_op_sections['about'] = 'About';
 if ($page['facilities']) $kop_op_sections['programs'] = 'Programs';
 if ($kop_op_has_people) $kop_op_sections['people'] = 'People';
 if ($page['parents'] || $page['subsidiaries']) $kop_op_sections['ownership'] = 'Ownership';
@@ -175,8 +178,8 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     <h3 class="kop-fp-subhead">Year by year</h3>
                     <p class="kop-fp-count">From the records: the years it ran each program, and lawsuits and deaths on record from those years. A program it took over appears only once the records say when it did.</p>
                     <?php
-                    $kop_op_tl_first = array_slice($page['timeline'], 0, 12);
-                    $kop_op_tl_rest = array_slice($page['timeline'], 12);
+                    $kop_op_tl_first = array_slice($page['timeline'], 0, 30);
+                    $kop_op_tl_rest = array_slice($page['timeline'], 30);
                     $kop_op_tl_print = static function (array $years) {
                         foreach ($years as $y) {
                             echo '<li><p class="kop-fp-tl-head"><span class="kop-fp-tl-when">' . (int) $y['year'] . '</span></p>';
@@ -212,6 +215,13 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             </section>
             <?php endif; ?>
 
+            <?php if ($kop_op_about) : ?>
+            <section class="kop-fp-section kop-fp-about" id="about"<?php echo $kop_op_edit; ?>>
+                <h2>About <?php echo esc_html($page['name']); ?></h2>
+                <?php echo kop_pnotes_html($kop_op_about); // Escaped inside. ?>
+            </section>
+            <?php endif; ?>
+
             <?php if ($page['facilities']) : ?>
             <section class="kop-fp-section" id="programs">
                 <h2>Programs it has run</h2>
@@ -227,7 +237,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                             <?php if ($kop_op_homes) :
                                 $kop_op_open_homes = count(array_filter($kop_op_homes, static function ($h) { return strcasecmp($h['status'], 'Open') === 0; }));
                                 ?>
-                                <details class="kop-op-homes">
+                                <details class="kop-op-homes"<?php echo count($kop_op_homes) <= 6 ? ' open' : ''; ?>>
                                     <summary><?php echo esc_html(count($kop_op_homes) . ' licensed ' . (count($kop_op_homes) === 1 ? 'home' : 'homes') . ($kop_op_open_homes ? ', ' . $kop_op_open_homes . ' open' : '')); ?></summary>
                                     <ul>
                                         <?php foreach ($kop_op_homes as $h) :
@@ -278,7 +288,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     </ul>
                 <?php endif; ?>
                 <?php if ($kop_op_people['others']) : ?>
-                    <details class="kop-fp-more">
+                    <details class="kop-fp-more"<?php echo count($kop_op_people['others']) <= 40 ? ' open' : ''; ?>>
                         <summary><?php echo esc_html(count($kop_op_people['others']) . ' other staff on record'); ?></summary>
                         <ul class="kop-fp-people">
                             <?php foreach ($kop_op_people['others'] as $person) : ?>
@@ -433,17 +443,6 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <?php if ($kop_op_has_survivor_sites) : ?>
                     <?php echo kop_survivor_archives_render($page['survivor_sites'], $page['name']); // Escaped inside. ?>
                 <?php endif; ?>
-            </section>
-            <?php endif; ?>
-
-            <?php if ($page['notes']) : ?>
-            <section class="kop-fp-section" id="notes"<?php echo $kop_op_edit; ?>>
-                <h2>Research notes</h2>
-                <ul class="kop-fp-notes">
-                    <?php foreach ($page['notes'] as $note) : ?>
-                        <li><?php echo kop_facility_pages_cited_html($note); ?></li>
-                    <?php endforeach; ?>
-                </ul>
             </section>
             <?php endif; ?>
 

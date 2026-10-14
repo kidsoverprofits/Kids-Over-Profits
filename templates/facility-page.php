@@ -46,23 +46,9 @@ $kop_fp_list = static function (array $items, $class = 'kop-fp-list') {
 
 // Where a fact, staff entry or incident came from: the word "source" (source 1, source 2 ...) linking to
 // the page it cites, the full citation in the link's preview.
+// A citation with no address links the wiki page or our copy of the Woodbury issue it names (kop_facility_pages_sources_html()).
 $kop_fp_sources = static function ($sources, $tag = 'dd') {
-    // A citation that only points back to us is not shown (kop_facility_pages_is_own_source()).
-    $sources = array_values(array_filter((array) $sources, static function ($s) { return !kop_facility_pages_is_own_source($s); }));
-    if (!$sources) return;
-    $links = array();
-    foreach (array_values($sources) as $n => $src) {
-        $label = 'source' . (count($sources) > 1 ? ' ' . ($n + 1) : '');
-        $preview = $src['cite'] !== '' ? $src['cite'] : $src['source'];
-        // The Woodbury Reports name, issue and page add nothing beside the link to our copy of the issue.
-        if (stripos($preview, 'Woodbury Reports') !== false) $preview = '';
-        // A wiki citation with no address links the page it names.
-        $url = $src['url'] !== '' ? $src['url'] : kop_facility_pages_wiki_url($src['cite']);
-        $links[] = $url !== ''
-            ? kop_citation_link($url, $label, $preview, true, '', true)
-            : '<span title="' . esc_attr($preview) . '">' . esc_html($label) . '</span>';
-    }
-    echo '<' . $tag . ' class="kop-fp-src">' . implode(', ', $links) . '</' . $tag . '>';
+    echo kop_facility_pages_sources_html($sources, $tag); // Escaped inside.
 };
 
 // A section heading's icon (inc/icons.php), drawn in the heading's colour.
@@ -164,8 +150,8 @@ $kop_fp_memorial_list = static function (array $items) use ($page) {
     <?php
 };
 $kop_fp_violation_cards = static function (array $items) use ($kop_fp_violation_card) {
-    $kop_fp_v_first = array_slice($items, 0, 4);
-    $kop_fp_v_rest = array_slice($items, 4);
+    $kop_fp_v_first = array_slice($items, 0, 8);
+    $kop_fp_v_rest = array_slice($items, 8);
     ?>
     <div class="kop-fp-vcards">
         <?php foreach ($kop_fp_v_first as $v) $kop_fp_violation_card($v); ?>
@@ -222,8 +208,8 @@ $kop_fp_news_list = static function (array $items) use ($kop_fp_news_card) {
     $kop_fp_n_aside = array_values(array_filter($items, static function ($n) { return !empty($n['aside']); }));
     $items = array_values(array_filter($items, static function ($n) { return empty($n['aside']); }));
     if (function_exists('kop_feat_first')) $items = kop_feat_first($items);   // essential reporting first
-    $kop_fp_n_first = array_slice($items, 0, 6);
-    $kop_fp_n_rest = array_slice($items, 6);
+    $kop_fp_n_first = array_slice($items, 0, 12);
+    $kop_fp_n_rest = array_slice($items, 12);
     ?>
     <?php if ($kop_fp_n_first) : ?>
     <ul class="kop-fp-news">
@@ -327,6 +313,9 @@ $kop_fp_ph = !empty($page['program_history']) ? $page['program_history'] : null;
 $kop_fp_ph_edit = ($kop_fp_ph && function_exists('kop_ie_attr')) ? kop_ie_attr('phistory:' . (int) $kop_fp_ph['operator_id'], 'its history') : '';
 $kop_fp_has_ph = $kop_fp_ph && (!empty($kop_fp_ph['history']) || $kop_fp_ph_edit !== '');
 if ($kop_fp_has_ph) $kop_fp_sections['history'] = 'History';
+// The research notes as prose with their sources (inc/profile-notes.php), near the top of the page.
+$kop_fp_about = !empty($page['about']['paragraphs']) || !empty($page['about']['also']) || !empty($page['field_notes']) ? (array) $page['about'] : null;
+if ($kop_fp_about) $kop_fp_sections['about'] = 'About';
 // Homes of a program (inc/program-homes.php): a program lists them, a home lists the others.
 $kop_fp_homes = !empty($page['program_homes']['homes']) ? $page['program_homes']['homes'] : (!empty($page['home_of']['others']) ? $page['home_of']['others'] : array());
 $kop_fp_is_program = !empty($page['program_homes']['homes']);
@@ -340,7 +329,6 @@ if ($kop_fp_campus) $kop_fp_sections['campus'] = 'Same campus';
 $kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
 $kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
 $kop_fp_has_staff = !empty($page['staff']);
-$kop_fp_has_notes = !empty($page['notes']) || !empty($page['field_notes']);
 $kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']);
 $kop_fp_has_videos = !empty($page['videos']);
 $kop_fp_has_news = !empty($page['news']);
@@ -455,7 +443,6 @@ if ($kop_fp_has_inspections) $kop_fp_sections['inspections'] = 'Licensing';
 if ($kop_fp_has_network) $kop_fp_sections['network'] = 'Network';
 if ($kop_fp_has_docs) $kop_fp_sections['documents'] = 'Documents';
 if ($kop_fp_has_testimony) $kop_fp_sections['testimony'] = 'Survivor testimony';
-if ($kop_fp_has_notes) $kop_fp_sections['notes'] = 'Research notes';
 if ($kop_fp_has_wiki) $kop_fp_sections['wiki'] = 'Wiki entries';
 if ($kop_fp_has_siblings) $kop_fp_sections['related'] = 'Same operator';
 if ($kop_fp_has_resources) $kop_fp_sections['resources'] = 'Materials and links';
@@ -748,6 +735,20 @@ get_header();
             </div>
             <?php endif; ?>
 
+            <?php if ($kop_fp_about) : ?>
+            <section class="kop-fp-section kop-fp-about" id="about"<?php echo $kop_fp_edit('notes', 'research notes'); ?>>
+                <h2><?php echo $kop_fp_icon('book'); ?>About <?php echo esc_html($page['name']); ?></h2>
+                <?php echo kop_pnotes_html($kop_fp_about); // Escaped inside. ?>
+                <?php if ($page['field_notes']) : ?>
+                    <ul class="kop-fp-notes">
+                        <?php foreach ($page['field_notes'] as $fn) : ?>
+                            <li><?php if ($fn['label'] !== '') : ?><strong><?php echo esc_html($fn['label']); ?>:</strong> <?php endif; ?><?php echo kop_facility_pages_cited_html($fn['text']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </section>
+            <?php endif; ?>
+
             <?php foreach ($kop_fp_eras ? $kop_fp_eras['list'] : array() as $kop_fp_era) :
                 $kop_fp_era_meta = array_filter(array($kop_fp_era['years'], $kop_fp_era['operators'] ? implode(', ', $kop_fp_era['operators']) : ''), 'strlen');
                 $kop_fp_era_notes = (array) ($kop_fp_era['notes'] ?? array());
@@ -758,7 +759,7 @@ get_header();
                 <?php if ($kop_fp_era_meta) : ?><p class="kop-fp-era-meta"><?php echo esc_html(implode(' | ', $kop_fp_era_meta)); ?></p><?php endif; ?>
                 <?php if ($kop_fp_era['url'] !== '') : ?><p class="kop-fp-count"><a href="<?php echo esc_url($kop_fp_era['url']); ?>">The record kept under this name</a></p><?php endif; ?>
                 <?php if ($kop_fp_era_notes) : ?>
-                <ul class="kop-fp-notes kop-fp-era-notes"><?php foreach ($kop_fp_era_notes as $kop_fp_note) : ?><li><?php echo kop_facility_pages_cited_html((string) $kop_fp_note); ?></li><?php endforeach; ?></ul>
+                <div class="kop-fp-era-notes"><?php echo kop_pnotes_html(kop_pnotes_build(array_map('strval', $kop_fp_era_notes))); // Escaped inside. ?></div>
                 <?php endif; ?>
                 <?php foreach ($kop_fp_era_kinds as $kop_fp_k => $kop_fp_kind) :
                     $kop_fp_items = $kop_fp_era[$kop_fp_k];
@@ -1123,7 +1124,11 @@ get_header();
                         <?php endforeach; ?>
                     </ol>
                     <?php endif; ?>
-                    <?php if (!empty($kop_fp_forum['leads'])) $kop_fp_list($kop_fp_forum['leads'], 'kop-fp-notes'); ?>
+                    <?php if (!empty($kop_fp_forum['leads'])) : ?>
+                    <ul class="kop-fp-notes">
+                        <?php foreach ($kop_fp_forum['leads'] as $kop_fp_lead) : ?><li><?php echo kop_facility_pages_cited_html($kop_fp_lead); ?></li><?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
                     <?php if (!empty($kop_fp_forum['links'])) : ?>
                     <ul class="kop-fp-records kop-fp-forum-links">
                         <?php foreach ($kop_fp_forum['links'] as $kop_fp_fl) : ?>
@@ -1131,26 +1136,6 @@ get_header();
                         <?php endforeach; ?>
                     </ul>
                     <?php endif; ?>
-                <?php endif; ?>
-            </section>
-            <?php endif; ?>
-
-            <?php if ($kop_fp_has_notes) : ?>
-            <section class="kop-fp-section" id="<?php echo $kop_fp_id('notes'); ?>"<?php echo $kop_fp_edit('notes', 'research notes'); ?>>
-                <h2>Research notes</h2>
-                <?php if ($page['notes']) : ?>
-                    <ul class="kop-fp-notes">
-                        <?php foreach ($page['notes'] as $kop_fp_note) : ?>
-                            <li><?php echo kop_facility_pages_cited_html($kop_fp_note); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-                <?php if ($page['field_notes']) : ?>
-                    <ul class="kop-fp-notes">
-                        <?php foreach ($page['field_notes'] as $fn) : ?>
-                            <li><?php if ($fn['label'] !== '') : ?><strong><?php echo esc_html($fn['label']); ?>:</strong> <?php endif; ?><?php echo kop_facility_pages_cited_html($fn['text']); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
                 <?php endif; ?>
             </section>
             <?php endif; ?>

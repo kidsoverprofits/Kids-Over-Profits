@@ -910,6 +910,8 @@ if (!function_exists('kop_operator_page_data')) {
             'memorials'     => $memorials,
             'websites'      => $websites,
             'notes'         => $notes,
+            // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
+            'about'         => function_exists('kop_pnotes_build') ? kop_pnotes_build($notes) : null,
             'documents'     => $documents,
             'research'      => $research,
             'unsilenced'    => $unsilenced,

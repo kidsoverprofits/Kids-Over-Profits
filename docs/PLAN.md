@@ -2089,3 +2089,45 @@ Open:
 3. After the owner adds lines: rerun `scripts/wiki-gaps.php` (sync the mirror
    with the new table first) and draft the wiki sections.
 4. Operator libraries (company pages) are not in the inventory yet.
+
+### 3.22 Profile research notes as prose; profiles open by default (2026-10-13)
+
+Owner, 2026-10-13: the facility and company profiles buried most of the good
+information in "Research notes" (a bullet list at the bottom of the page), and
+too much was hidden by default.
+
+Built:
+- `inc/profile-notes.php`: each note ("Cost: about $7,100 per month (cite)",
+  "April 2003: bought ...") is read into a sentence that keeps its own "source"
+  link, and the sentences are grouped into paragraphs: what happened and when
+  (oldest first), what the program was like, then licences, accreditation and
+  memberships. The same fact from two sources is one sentence citing both. Left
+  out of the prose: bookkeeping ("Added ... by the news scan from", "Corrected
+  from outside sources") which becomes "Also drawn on" links, facts the rail
+  prints with their source (type, ages, capacity, start year, past names), and
+  Fornits claims ("Reported closed on Fornits" now joins the forum leads with
+  the testimony). Printed as **About <name>** right after the jump links on
+  facility pages, renamed programs' era sections and company pages (after the
+  History); the app gets it as `about`. Nothing is reworded beyond the subject a
+  fragment lacks.
+- Citations with no address now link wherever we can: our copy of the Woodbury
+  issue at its page (`kop_facility_pages_woodbury_url()`, from the media
+  library), the wiki page, or the HEAL archive address another record gives for
+  the same citation (`kop_facility_pages_heal_url()`); `kop_facility_pages_sources_html()`
+  is the one "source" link printer. A "KOP copy: <pdf>" Wayback citation cites
+  both the archive and our copy.
+- `js/facility-profile.js`: every section starts open (staff, licensing,
+  history, programs, people and the era sections were collapsed);
+  "Collapse all" stays. Lists fold later: 8 serious findings, 12 articles, 30
+  timeline years, other staff open up to 40, a program's homes open up to 6.
+- Test: `scripts/test-profile-notes.php [--list] [--id=10347]`.
+
+Open:
+1. About 76 HEAL citations in the records carry no Wayback address anywhere
+   (e.g. "HEAL, Aspen Institute for Behavioral Assessment Exposed! (archived
+   2016-01-03)"): their "source" is unlinked. Fix in kop-pipeline: have
+   `woodbury-facts.py --also tmp/heal` write the capture's address (from
+   `tmp/heal/cdx.txt`) into every HEAL citation, then rerun the facts load.
+2. If the owner wants smoother prose than the rules give, an AI pass over the
+   same sentences (citations kept, owner approves each, like the plain
+   summaries) can replace the rule-built paragraphs per record.

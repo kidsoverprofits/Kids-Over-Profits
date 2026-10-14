@@ -320,6 +320,7 @@ require_once dirname(__DIR__) . '/inc/inspection-highlights.php';
 require_once dirname(__DIR__) . '/inc/news-images.php';
 require_once dirname(__DIR__) . '/inc/heal-archive.php';   // facility pages route heal-online.org links to Wayback
 require_once dirname(__DIR__) . '/inc/facility-pages.php';
+require_once dirname(__DIR__) . '/inc/profile-notes.php';
 require_once dirname(__DIR__) . '/inc/facility-eras.php';
 require_once dirname(__DIR__) . '/inc/operator-pages.php';
 // Loaded before the index is built: a facility the network map draws

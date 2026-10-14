@@ -123,6 +123,10 @@ php api/clean-nc-inspections.php [apply]      # on the server (ea-php82): dry ru
 # Generated /facility/ and /operator/ (parent company) pages, against tmp/prod.sqlite
 # Facility Profile posts listed in kop_facility_pages_merged_profiles() (hyde) print unchanged on their /facility/ page, the post 301s there
 php scripts/test-facility-pages.php
+# A record's research notes are printed as prose, each sentence with its "source" link, in an "About" section near the top of
+# facility and company pages (inc/profile-notes.php; bookkeeping lines become "Also drawn on", rail facts and forum claims stay out).
+# A citation with no address links our Woodbury issue copy, the wiki page or a HEAL capture another record gives (kop_facility_pages_cite_url())
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-profile-notes.php [--list] [--id=10347]   # rules on real lines, every record of the mirror
 # Citations on those pages read as a small "source" link and nothing more: one that only points back to us (the network map, a page of
 # this site; kop_facility_pages_is_own_source()) is not shown, and the Woodbury Reports wording ("Woodbury Reports, May 2007, p. 20") is
 # not printed or put in a preview, only the link to our copy of the issue (kop_facility_pages_woodbury_clean(), _tidy_citations(), _cited_html())

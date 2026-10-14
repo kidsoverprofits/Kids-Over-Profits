@@ -1,9 +1,9 @@
 /* Facility profile: collapsible sections and the video carousel.
+   Every section starts open (a reader should not have to click to find what the record holds);
+   each heading folds its section, and "Collapse all" folds them all.
    Without this script every section is open and every video is a plain link. */
 (function () {
     'use strict';
-
-    var OPEN_BY_DEFAULT = ['memorials', 'violations', 'lawsuits', 'incidents', 'testimony', 'videos', 'news', 'network', 'documents'];
 
     function sectionOf(el) {
         while (el && el !== document.body) {
@@ -67,7 +67,7 @@
             btn.addEventListener('click', function () {
                 setOpen(section, btn.getAttribute('aria-expanded') !== 'true');
             });
-            setOpen(section, OPEN_BY_DEFAULT.indexOf(section.id) !== -1);
+            setOpen(section, true);
             made.push(section);
         });
         if (made.length < 3) return;

@@ -1674,6 +1674,34 @@ p.kop-op-draft {
 .kop-fp-generated-body.kop-fp-reorder > .kop-fp-jump { order: 2; }
 .kop-fp-generated-body.kop-fp-reorder > .kop-fp-expandbar { order: 3; }
 .kop-fp-generated-body.kop-fp-reorder > .kop-fp-testimony-section { order: 10; }
+/* The About prose (inc/profile-notes.php) follows the jump links: it says what the place is. */
+.kop-fp-generated-body.kop-fp-reorder > .kop-fp-about { order: 3; }
+
+/* ---- About: the research notes as prose, each sentence with its source link ---- */
+.kop-fp-about-text,
+.kop-fp-era-notes p {
+    margin: 0 0 0.9rem;
+    line-height: 1.65;
+    color: var(--kop-midnight-blue, #000435);
+}
+.kop-fp-about-text .kop-fp-src,
+.kop-fp-era-notes .kop-fp-src {
+    display: inline;
+    margin: 0 0 0 0.2rem;
+    font-size: 0.78rem;
+    vertical-align: 0.15em;
+}
+.kop-fp-about-also {
+    margin-top: 0.25rem;
+}
+.kop-fp-about-also a {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+.kop-fp-about-also a:hover,
+.kop-fp-about-also a:focus {
+    color: var(--kop-midnight-blue, #000435);
+}
 
 .kop-fp-generated-body .kop-fp-testimony-section {
     padding: 1.1rem 1.25rem 1.25rem;

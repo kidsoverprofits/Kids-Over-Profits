@@ -120,7 +120,7 @@ if (!function_exists('kop_mobile_facility_payload')) {
             'id', 'slug', 'url', 'name', 'unique_name', 'current_name', 'formerly', 'formerly_years', 'later', 'aka', 'status', 'end_year',
             'place', 'city', 'state_code', 'state_name', 'country', 'hub_name', 'hub_url',
             'operator', 'siblings', 'program_homes', 'home_of', 'campus', 'addresses', 'former_locations', 'operated',
-            'summary', 'facts', 'fact_sources', 'practices', 'incidents', 'staff', 'notes', 'field_notes',
+            'summary', 'facts', 'fact_sources', 'practices', 'incidents', 'staff', 'notes', 'about', 'field_notes',
             'testimony', 'forum', 'videos', 'profile_links', 'resources', 'resource_links', 'federal_funding',
             'lawsuits', 'memorials', 'eras', 'wiki', 'updated_at', 'updated_label',
             'news_url', 'lawsuits_url', 'memorial_url', 'wiki_url', 'submit_url',
@@ -304,7 +304,7 @@ if (!function_exists('kop_mobile_operator_payload')) {
     function kop_mobile_operator_payload(array $page) {
         $keep = array(
             'id', 'name', 'full_name', 'url', 'aka', 'current_name', 'status', 'facts', 'parents', 'subsidiaries',
-            'facilities', 'program_tree', 'open_count', 'place_count', 'lawsuits', 'memorials', 'websites', 'notes',
+            'facilities', 'program_tree', 'open_count', 'place_count', 'lawsuits', 'memorials', 'websites', 'notes', 'about',
             'timeline', 'people', 'summary', 'index_url', 'network_url', 'updated', 'updated_label',
         );
         $out = array('api_version' => KOP_MOBILE_API_VERSION);
