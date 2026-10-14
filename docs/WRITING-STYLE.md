@@ -35,8 +35,15 @@ https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/ 
   cases are brief background showing the pattern is old, never the bulk of the piece. Research current cases
   (news, KOP's records, the map's dated renames) before leaning on the archive.
 
-## 3. Say what the record shows, plainly
+## 3. Tone: urgency, and say what the record shows plainly
 
+- The tone comes from urgency and a duty to protect children and other vulnerable people. These programs are
+  hurting people now; write as someone whose job is to stop it, not as a neutral observer cataloguing an industry.
+  The urgency comes from the facts and how hard they are driven home, not from exclamation marks or adjectives
+  piled on (section 4 still holds).
+- Use direct quotes when they strengthen the point: the director's own letter, the inspector's finding, the
+  survivor's words, the company's marketing beside what happened. A quote that only restates what the sentence
+  already says is cut.
 - Name who is responsible and say what they did. A judgment sits right after the documented fact it rests on:
   "His manipulative response reflects his true priorities." "The lack of compassion and professionalism in this
   response is astonishing."
@@ -59,7 +66,9 @@ https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/ 
 ## 5. Openings, numbers and change over time
 
 - Never open a piece or a section with funding sources, market size or statistics.
-- Dry facts and figures that earn a place go in a table or other visual insert beside the text, not in paragraphs.
+- Dry facts and figures always go in a table, chart or other graphic beside the text, never in paragraphs
+  (dates and counts by program, revenue by year, inspection totals, lists of names and years). Prose keeps only
+  the single number that carries a sentence's point ("$8,000 a month").
 - A claim of change ("moved from public to private hands") needs its time frame and context in the same sentence.
   Without the "since when", it is bad writing.
 - Keep it short. Few headings; the paragraphs carry the weight.
@@ -78,6 +87,10 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 
 ## 7. Sources and citations
 
+- Rely on primary sources when they exist: the court filing over the article about it, the state inspection report
+  over a summary of it, the program's own handbook, website or letter, tax returns and business filings, the
+  survivor's own account. Read the primary source itself, quote and cite it; use secondary reporting for what
+  only it holds, or to point to the primary source.
 - KOP is a primary source. The owner's articles and records come from primary material (newspaper scans, records
   nobody else has put online). Never drop a fact because KOP is its only source, never call a KOP source
   "circular", never lower confidence because of it.
@@ -135,3 +148,6 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 7. Are dry figures in a table, not prose?
 8. Are recent cases leading, and the company-level pattern drawn?
 9. Do the ending and the citations follow sections 3 and 7?
+10. Does it read with urgency, as someone with a duty to protect the children involved?
+11. Where a primary source exists, is it the one quoted and cited? Would a direct quote land a point harder than
+    the paraphrase?
