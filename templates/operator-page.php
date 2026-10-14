@@ -45,7 +45,6 @@ $kop_op_has_survivor_sites = !empty($page['survivor_sites']);
 $kop_op_has_program_docs = !empty($page['program_docs']['programs']);
 $kop_op_has_docs = !empty($page['documents']['html']) || $kop_op_has_program_docs || $kop_op_has_research || $kop_op_has_unsilenced || $kop_op_has_survivor_sites;
 if ($kop_op_has_docs) $kop_op_sections['documents'] = 'Documents';
-if ($page['notes']) $kop_op_sections['notes'] = 'Research notes';
 if ($page['websites']) $kop_op_sections['links'] = 'Websites';
 
 $kop_op_company_list = static function (array $items) {
