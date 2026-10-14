@@ -2208,3 +2208,43 @@ Open:
 2. If the owner wants smoother prose than the rules give, an AI pass over the
    same sentences (citations kept, owner approves each, like the plain
    summaries) can replace the rule-built paragraphs per record.
+
+### 3.23 Family Foundation School: the 2026 Education Plus lawsuits (2026-10-14)
+
+Found while adding *United States v. Paul Geer* (3:24-cr-00170, N.D.N.Y.; seeded 2026-10-14, lawsuit 117):
+about 33 federal suits filed June to October 2026 against **Education Plus Corporation**, the company behind
+the Family Foundation School (record 12050, Hancock, NY; Allynwood Academy from 2013, closed 2014). KOP
+holds none of them; the NY Post article of 6/20/2026 (news 213) covers the first.
+
+What is known (CourtListener search `"Education Plus Corporation"`, type r, 2026-10-14):
+- Most are in the Northern District of New York (`nynd`, 3:26-cv-01397 onward), cause 18 U.S.C. 1962 (RICO),
+  nature of suit 360 personal injury; a few are in the Southern and Eastern Districts (Pizzoferrato,
+  1:26-cv-03396 E.D.N.Y. filed 2026-06-05 and 1:26-cv-05250 S.D.N.Y.; Savinovich, 1:26-cv-08085 S.D.N.Y.).
+  Older: Kohlhaus v. Education Plus Corp., 3:23-cv-01453 (N.D.N.Y., 2023-11-19).
+- Defendants named on Doe v. Education Plus Corporation (3:26-cv-01397): Education Plus Corporation, Betty,
+  Emmanuel ("Mike") and Cindy Argiros, Paul and Diane Geer, Jeff Brain, Susan Runge, Lynda Drake, Jennifer
+  Whipple, Ivan Fras, Karen Wells, Nancy Edwards, Suzanne Cusack, Heather Palmer, Kasos Enterprises LLC, Kasos
+  Co Family LP, Chapel Hill Land Holdings LLC, Quest Family Services Inc., Villa Veritas Foundation Inc.,
+  Lackawanna College, K9-5 Inc., NATSAP, NBT Bank / NBT Bancorp, Garnet Health Medical Center
+  Catskills-Callicoon, The Hancock Herald, the Village of Hancock and its police department, Delaware County,
+  its Board of Supervisors and its Sheriff's Office. The Argiros family, Education Plus, the Kasos companies
+  and The Hancock Herald share counsel (Hinman, Howard & Kattell).
+- Plaintiffs: several file under initials or as Doe (V.P., J.K., C.R., S.H.).
+
+Open:
+1. **Owner:** one lawsuit record per case, or one record for the litigation that lists every docket
+   (the cases look like one coordinated filing by the same firms)? Either way, link each to record 12050
+   and to NATSAP (a trade organization record). None of the other companies is a KOP record yet: Education
+   Plus and the Kasos companies may need company records with the Argiros family on them; Quest Family
+   Services and Villa Veritas need looking into first.
+2. Read each complaint (RECAP copies on CourtListener; PACER for the rest) for the claims, the years each
+   plaintiff attended and the staff named. Plaintiffs who filed under initials or as Doe stay that way in
+   every record, page and wiki line; only a name the plaintiff filed under is printed.
+3. Staff named as defendants who are not on the record's staff list yet go on it, cited to the complaint;
+   people already listed (Susan Runge, Paul Geer) get the case on their careers.
+4. Seed through `seeds/lawsuits.json` with docket numbers and full court names, so the nightly status check
+   (`inc/status-checks.php`, CourtListener `nynd`/`nysd`/`nyed`) follows them; a CourtListener token
+   (`KOP_COURTLISTENER_TOKEN`) is needed for 30+ dockets at 5 requests a minute.
+5. Then the wiki: entry 533's draft (3.12) gives only the June 2026 suit; a line for the litigation as a
+   whole goes in its Abuse Allegations, Deaths, and Lawsuits section (record changes draft it, or by hand
+   as on 2026-10-14).
