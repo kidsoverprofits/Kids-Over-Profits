@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('KOP_OPERATOR_HISTORY_SEED_VERSION')) {
-    define('KOP_OPERATOR_HISTORY_SEED_VERSION', '10');
+    define('KOP_OPERATOR_HISTORY_SEED_VERSION', '11');
 }
 
 // ---------------------------------------------------------------------------
@@ -387,6 +387,76 @@ if (!function_exists('kop_operator_history_paragraph_html')) {
     }
 }
 
+if (!function_exists('kop_operator_history_table_parse')) {
+    /**
+     * A history paragraph that is a table: an optional first line "Table: <caption>",
+     * then lines that all start with "|", the first of them the column heads
+     * ("| Year | What |"; a "|---|---|" line under it is skipped). Returns
+     * {caption, head: [cells], rows: [[cells]]}, or null when it is not a table.
+     */
+    function kop_operator_history_table_parse($text) {
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', trim((string) $text))), 'strlen'));
+        $caption = '';
+        if ($lines && preg_match('/^Table:\s*(.+)$/i', $lines[0], $m)) {
+            $caption = trim($m[1]);
+            array_shift($lines);
+        }
+        $rows = array();
+        foreach ($lines as $line) {
+            if ($line[0] !== '|') return null;
+            if (preg_match('/^\|[\s:|-]+$/', $line)) continue;
+            $cells = array_map('trim', explode('|', trim($line, " \t|")));
+            $rows[] = $cells;
+        }
+        if (count($rows) < 2) return null;
+        $head = array_shift($rows);
+        return array('caption' => $caption, 'head' => $head, 'rows' => $rows);
+    }
+}
+
+if (!function_exists('kop_operator_history_table_html')) {
+    /** A parsed history table, its cells escaped with their [words](url) links kept. */
+    function kop_operator_history_table_html(array $t) {
+        $out = '<div class="kop-op-history-table-scroll"><table class="kop-op-history-table">';
+        if ($t['caption'] !== '') $out .= '<caption>' . kop_operator_history_paragraph_html($t['caption']) . '</caption>';
+        $out .= '<thead><tr>';
+        foreach ($t['head'] as $h) $out .= '<th scope="col">' . kop_operator_history_paragraph_html($h) . '</th>';
+        $out .= '</tr></thead><tbody>';
+        foreach ($t['rows'] as $row) {
+            $out .= '<tr>';
+            foreach (array_values($row) as $i => $cell) {
+                $tag = $i === 0 ? 'th scope="row"' : 'td';
+                $out .= '<' . $tag . '>' . kop_operator_history_paragraph_html($cell) . '</' . ($i === 0 ? 'th' : 'td') . '>';
+            }
+            $out .= '</tr>';
+        }
+        return $out . '</tbody></table></div>';
+    }
+}
+
+if (!function_exists('kop_operator_history_plain')) {
+    /**
+     * A history paragraph as plain words for the app: a table becomes its caption
+     * and one "Head: cell; Head: cell" line per row, a pull quote its words.
+     */
+    function kop_operator_history_plain($text) {
+        $t = kop_operator_history_table_parse($text);
+        if ($t) {
+            $lines = $t['caption'] !== '' ? array($t['caption']) : array();
+            foreach ($t['rows'] as $row) {
+                $parts = array();
+                foreach (array_values($row) as $i => $cell) {
+                    if ($cell === '') continue;
+                    $parts[] = (isset($t['head'][$i]) && $t['head'][$i] !== '' ? $t['head'][$i] . ': ' : '') . $cell;
+                }
+                $lines[] = implode('; ', $parts);
+            }
+            return implode("\n", $lines);
+        }
+        return function_exists('kop_pull_quote_plain') ? kop_pull_quote_plain($text) : (string) $text;
+    }
+}
+
 if (!function_exists('kop_operator_history_paragraphs_html')) {
     /**
      * The written history's paragraphs. One whose lines all start with "> " is
@@ -399,6 +469,11 @@ if (!function_exists('kop_operator_history_paragraphs_html')) {
         $out = '';
         $quotes = function_exists('kop_pull_quote_parse_text');
         foreach (array_values($paras) as $i => $para) {
+            $table = kop_operator_history_table_parse($para);
+            if ($table) {
+                $out .= kop_operator_history_table_html($table) . "\n";
+                continue;
+            }
             $q = $quotes ? kop_pull_quote_parse_text($para) : null;
             if ($q) {
                 $edit = function_exists('kop_ie_attr')

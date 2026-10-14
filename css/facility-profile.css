@@ -1571,6 +1571,54 @@
     text-decoration: underline;
 }
 
+/* A table in a written history ("| a | b |" lines; kop_operator_history_table_parse()): scrolls inside its box on a phone. */
+.kop-op-history-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    margin: 0.25rem 0 1rem;
+}
+
+.kop-op-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-bg-secondary, #fff);
+}
+
+.kop-op-history-table caption {
+    caption-side: top;
+    text-align: left;
+    font-weight: 600;
+    padding: 0 0 0.35rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-op-history-table th,
+.kop-op-history-table td {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--kop-border-secondary, #b0e0e6);
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-op-history-table thead th {
+    font-weight: 600;
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-op-history-table tbody th {
+    font-weight: 600;
+}
+
+.kop-op-history-table a {
+    color: var(--kop-navy-blue, #000080);
+    text-decoration: underline;
+}
+
 p.kop-op-draft {
     margin: 0 0 1rem;
     padding: 0.6rem 0.85rem;

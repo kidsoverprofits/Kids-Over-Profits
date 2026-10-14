@@ -337,6 +337,12 @@ need the owner's accounts, devices or artwork.
     listed open (Tampa Bay Times 2026 says it left Florida); TrueCore's lost state
     contract dated 2023 on the timeline, 2024 in the news; The Brown Schools page
     mixes in later UHS programs; Rite of Passage has two records (18, 832).
+    Sequel TSI was rewritten on 2026-10-14 to docs/WRITING-STYLE.md (seed v11, still a draft): it opens on
+    the verdict, and four tables (growth, investors, states that acted, what became of the programs) hold
+    the figures. A history paragraph whose lines start with "|" is now a table (an optional first line
+    "Table: <caption>"). The four pull quotes the owner added are kept. After deploy, check
+    https://kidsoverprofits.org/operator/sequel-tsi/ shows the new draft (tables at 390 px too); open
+    questions are under Company histories in RESEARCH-TASKS.md.
 
 20. **Program homes** (2026-10-03). [KOP Tools > Program Homes](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-program-homes)
     suggests 139 programs whose homes or cottages are separate licensed records (Newport Academy CA 34,

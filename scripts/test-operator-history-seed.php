@@ -133,6 +133,31 @@ $report = kop_operator_history_apply_seed($write_seed(array($newer_d)));
 list(, $jd) = $op($d);
 $check('a published history is kept', ($report[$d] ?? '') === 'kept' && $jd['operator']['historyStatus'] === 'published', json_encode($report));
 
+// The Sequel rewrite (seed v11) replaces the draft on production: v7 with the four pull quotes added on the page.
+$sequel = $by_name['Sequel TSI'] ?? null;
+$report = $sequel ? kop_operator_history_apply_seed($write_seed(array($sequel))) : array();
+list(, $js) = $sequel ? $op('Sequel TSI') : array(null, array());
+$check('the Sequel rewrite replaces the draft with the pull quotes added on the page', ($report['Sequel TSI'] ?? '') === 'replaced'
+    && ($js['operator']['history'] ?? null) === $sequel['history'] && ($js['operator']['historyStatus'] ?? '') === 'draft', json_encode($report));
+$tables = array_values(array_filter((array) ($sequel['history'] ?? array()), 'kop_operator_history_table_parse'));
+$check('the Sequel history has its four tables', count($tables) === 4, (string) count($tables));
+foreach ($tables as $t) {
+    $p = kop_operator_history_table_parse($t);
+    $bad = array_filter($p['rows'], function ($r) use ($p) { return count($r) !== count($p['head']); });
+    $check('every row of "' . $p['caption'] . '" has a cell per column', !$bad, json_encode(array_values($bad)));
+}
+
+// History tables: "| a | b |" lines, an optional "Table:" caption, a separator line skipped.
+$t = kop_operator_history_table_parse("Table: Who paid\n| Year | What |\n|---|---|\n| 2017 | [Alaris](https://example.org/a) <b>x</b> |");
+$check('a table paragraph is parsed', $t && $t['caption'] === 'Who paid' && $t['head'] === array('Year', 'What') && count($t['rows']) === 1, json_encode($t));
+$check('prose and pull quotes are not tables', kop_operator_history_table_parse('A | B') === null && kop_operator_history_table_parse("> | quoted |") === null
+    && kop_operator_history_table_parse("| only a head |") === null);
+$html = kop_operator_history_table_html($t);
+$check('a table is escaped with its links kept', strpos($html, '<caption>Who paid</caption>') !== false && strpos($html, '&lt;b&gt;') !== false
+    && strpos($html, '<a href="https://example.org/a"') !== false && strpos($html, '<th scope="row">2017</th>') !== false, $html);
+$check('a table reads as plain lines in the app', kop_operator_history_plain("Table: Who paid\n| Year | What |\n|---|---|\n| 2017 | Alaris |") === "Who paid\nYear: 2017; What: Alaris");
+$check('the paragraphs draw a table where its paragraph is', strpos(kop_operator_history_paragraphs_html(array('Before.', "| A | B |\n| 1 | 2 |"), 'o', 1), '<table class="kop-op-history-table">') !== false);
+
 // Windows keeps the file open until the process ends.
 register_shutdown_function(function () use ($db_path) {
     try { @unlink($db_path); } catch (Throwable $e) {}

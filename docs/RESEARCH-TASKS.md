@@ -248,6 +248,15 @@ Possible renames to settle at KOP Tools > Merge Duplicates > Renamed programs, e
   - when did OPI, Vive and Dragonfly join;
   - what was Potomac Pathways;
   - Lake House's start year (~2014).
+- **Sequel TSI** ([page](https://kidsoverprofits.org/operator/sequel-tsi/); rewrite of 2026-10-14, seed v11):
+  - Red Rock Canyon School (10368): KOP's memorial has Autumn Sunbear (March 2003, medical neglect) and an unnamed boy
+    (December 2007, suicide) there. The history leaves both out until it is settled who ran Red Rock then: Sequel's
+    record says 1999-2019, but the merger proxy has Sequel buying four Utah schools in 2016. If Sequel ran it, both
+    deaths go in the history's deaths paragraph;
+  - Pomegranate Health Systems: the year Sequel bought it ($54.5 million, merger proxy) is not given; the history's
+    growth table says "By 2017";
+  - Brighter Path Courtland and Pathway of Madison County: who owns them now (Vivant or another company) is not in any
+    source the history uses.
 - **UHS**: some of its 75 records are psychiatric hospitals (e.g. Cedar Ridge Behavioral Hospital). How should they be
   classed?
 
