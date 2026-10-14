@@ -443,6 +443,11 @@ inactive; the owner is not concerned). Never trash, rename or re-slug
 
 Open:
 
+- **Page and post drafts in the Review inbox (2026-10-14)**: after deploy, open Review inbox >
+  Page and post drafts on the live site: the Preview frame shows a draft while signed in,
+  Publish then Back to draft (or Undo in Recently done) brings back the old dates, Schedule
+  sets a future date. 75 drafts were waiting in the mirror (57 pages, 17 posts).
+
 1. **Visual QA of all hubs** (4.2). Run
    `python scripts/preview-hub-pages.py --shots tmp/hub-preview` and look at
    every shot at 390, 768 and 1440. Only Law & Policy, History, Survivors and

@@ -236,6 +236,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # kop_rinbox_cross_act()): a fact (People/Incidents/History/About) citing the card's link, or only the link, on a picked or new (hidden)
 # program; the card moves to "Already on file" (option kop_review_ya_filed), exact Undo. Queues filing their own way are in its skip list
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-file
+# The site's own page and post drafts are a queue too (inc/review-inbox/drafts.php): Drafts / Pending / Scheduled / Published (60 days) /
+# Trashed, Preview in the card, Publish, Schedule, Trash; the status and dates before are kept in _kop_rinbox_was, so Back to draft (the Undo)
+# restores them exactly. Volunteers never see it
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=drafts
 # Card add-ons: an action written once for many queues' cards ("Home of a program", "File under a young adult program") is
 # kop_rinbox_addon() in inc/review-inbox.php ('never' queues, 'default' on/off, a queue's 'addons'); the owner ticks each on/off per queue at
 # KOP Tools > Card Add-ons (inc/review-inbox-addons.php, option kop_review_addons). Picking a company/program/consultant... in an action, or
