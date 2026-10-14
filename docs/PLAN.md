@@ -2279,3 +2279,28 @@ App and SEO work from the same session (in progress): a Donate button opening /d
 tab with app controls (search, zoom, fit, Key/List/Timeline, Back through the trail, room for the map); autocomplete
 on Home, Companies, Send and the map from a new `kop/v1/mobile/suggest`; an SEO strategy page for the owner, then
 schema.org data, an operator sitemap and social cards.
+
+### 3.25 KOP Tools screens on one look (2026-10-14)
+
+The owner asked for streamlined admin screens: fewer, organised buttons, real filtering, and the same meaning for a
+button and a dropdown everywhere. The rules and the shared pieces are in `docs/ADMIN-UI.md` (`inc/admin-kit.php`,
+`css/admin-kit.css`, `js/admin-kit.js`). Done: Drive Docs, Fornits and Woodbury Facts (one card component, tabs with
+counts, one filter toolbar, a numbered pager, Undo on the result line after every action).
+
+Open, in order:
+1. **Check after deploy:** open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-drive-docs,
+   https://kidsoverprofits.org/wp-admin/admin.php?page=kop-fornits and
+   https://kidsoverprofits.org/wp-admin/admin.php?page=kop-woodbury-facts; add one item, click Undo on the result
+   line, and on a phone check the cards stack. Only the offline preview (`scripts/preview-admin-kit.php`, 390/768/1280 px,
+   nothing runs past a card) has been looked at so far.
+2. Review inbox (`inc/review-inbox.php`, `js/review-inbox.js`) aligned to the kit: one primary decision, the rest in
+   More, and its own buttons sorted out (`rinbox-btn-undo` is reused for Cancel, Rename and Close).
+3. Data Manager rows and the merge screens (Merge Duplicates, Merge People) on the kit.
+4. Search and paging for the lists that have neither: Bug Reports, Closure Reports, Facilities from News, Glossary
+   Feedback, Young Adult Programs, Indigenous Schools.
+5. The old wp-admin screens that repeat a Review inbox queue stay (owner's choice) and get the same kit.
+6. Last: the `api/*` tool pages.
+7. `scripts/test-fornits.php` fails one check against today's mirror: "every link added (327)" finds 11 records missing
+   (#13972, #11097, #10333, #13795, #10496, #100048 and others). The screen change did not touch that code; the
+   records were probably merged or moved since the batch was read. Check whether the waiting Fornits rows still point
+   at those ids (kop_fmerge_follow_waiting() should have moved them).

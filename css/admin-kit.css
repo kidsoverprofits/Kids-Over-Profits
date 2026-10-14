@@ -635,7 +635,14 @@ a.kop-ak-page:focus {
 
 .kop-ak-card__buttons > details.kop-ak-fold {
     flex-basis: 100%;
+    min-width: 0;
+    max-width: 100%;
     margin: 2px 0 0;
+}
+
+.kop-ak-fold__body select,
+.kop-ak-fold__body input[type=text] {
+    max-width: 100%;
 }
 
 .kop-ak-result {
@@ -731,14 +738,33 @@ a.kop-ak-page:focus {
         position: relative;
         padding-left: 30px;
     }
-    .kop-ak-card table.widefat td {
+    .kop-ak-card table.widefat td,
+    .kop-ak-card table.widefat th {
         display: block;
         width: auto;
+    }
+    /* A heading row between groups (Woodbury's "Staff and careers") has no tick box to make room for. */
+    .kop-ak-card table.widefat tr:not([data-key]) {
+        padding-left: 0;
     }
     .kop-ak-card table.widefat td.kop-ak-check {
         position: absolute;
         left: 0;
         top: 0;
+    }
+    /* A long label ("Create the young adult program and add checked") wraps instead of widening the card. */
+    .kop-ak-card button.kop-ak-btn {
+        white-space: normal;
+        height: auto;
+        min-height: 32px;
+        line-height: 1.3;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        max-width: 100%;
+    }
+    .kop-ak-card__actions,
+    .kop-ak-card__buttons {
+        min-width: 0;
     }
     .kop-ak-filters .kop-ak-search {
         flex-basis: 100%;

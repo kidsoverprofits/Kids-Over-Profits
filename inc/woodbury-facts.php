@@ -2237,7 +2237,7 @@ function kop_wbf_other_record(array $first, $no_record) {
         $state = $first['place'];
     }
     $name = $no_record ? $first['program'] : ($first['program_as_written'] !== '' ? $first['program_as_written'] : $first['program']);
-    $types = '<option value="">Type: not sure</option>';
+    $types = '<option value="">Not sure</option>';
     foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types() : array() as $t) {
         $types .= '<option value="' . esc_attr($t) . '">' . esc_html($t) . '</option>';
     }

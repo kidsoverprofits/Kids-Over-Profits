@@ -268,6 +268,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php 
 # Woodbury Facts, Fornits and Data audit (approved over a changed 'from') take part. A new queue with conflicts adds both keys
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-on-file.php [--list] [--db=...]
 python scripts/test-review-inbox-ui.py           # the page in a browser against fixtures: tabs, card edits, tags, AI, actions, phone width
+# KOP Tools screens share one look (docs/ADMIN-UI.md: inc/admin-kit.php, css/admin-kit.css, js/admin-kit.js): decisions are buttons
+# (primary first, three at most), the rest in More or a fold, a dropdown never acts, one filter toolbar per list, Undo after every action.
+# A screen opts in with the kop_admin_kit_pages filter; Drive Docs, Fornits and Woodbury Facts are on it
+php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php   # the screens' cards from made-up rows -> tmp/admin-kit-preview/index.html
 # Volunteer reviewers (inc/review-volunteers.php, /volunteer-review/, js/volunteer-review.js): KOP Tools > Volunteer Reviewers makes a
 # personal link per name (no account; only the token's hash stored, cookie kop_vol), turns one off, picks the queues they see
 # (kop_vol_never_sources() can never open). Volunteers only recommend approve/reject/not sure ({prefix}kop_volunteer_recs); items reach
