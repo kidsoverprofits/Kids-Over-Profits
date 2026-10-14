@@ -28,6 +28,7 @@ function kop_publish_approved_counts(PDO $pdo) {
  */
 function kop_publish_approved_records(PDO $pdo, array $only = null) {
     $tables = array_keys(kop_publish_approved_tables());
+    $published = array();
     try {
         $pdo->beginTransaction();
         $updated = array();
@@ -43,6 +44,9 @@ function kop_publish_approved_records(PDO $pdo, array $only = null) {
                 $where .= ' AND id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')';
                 $params = $ids;
             }
+            $pick = $pdo->prepare("SELECT id FROM `$table` WHERE $where");
+            $pick->execute($params);
+            $published[$table] = array_map('intval', $pick->fetchAll(PDO::FETCH_COLUMN));
             // COALESCE keeps any existing timestamp; approved rows have none.
             $stmt = $pdo->prepare("UPDATE `$table` SET publication_status = 'published', published_at = COALESCE(published_at, NOW()) WHERE $where");
             $stmt->execute($params);
@@ -55,5 +59,10 @@ function kop_publish_approved_records(PDO $pdo, array $only = null) {
         }
         throw $e;
     }
+    // Going live: facility and news links, and the case documents filed, as
+    // approval in Submissions Review does (docs/DATA-FLOWS.md).
+    require_once __DIR__ . '/lib-record-resync.php';
+    if (!empty($published['lawsuits'])) kop_resync_lawsuit($pdo, $published['lawsuits'], 'publish', array('documents' => true));
+    if (!empty($published['legislation'])) kop_record_changed('bill', $published['legislation']);
     return array('updated' => $updated, 'total' => array_sum($updated));
 }

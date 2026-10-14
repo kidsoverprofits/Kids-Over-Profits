@@ -2087,7 +2087,7 @@ function kop_apply_lawsuit_seeds() {
                 if (empty($link['facility_id'])) {
                     continue;
                 }
-                $type = in_array($link['link_type'] ?? '', array('mentioned', 'primary', 'related'), true) ? $link['link_type'] : 'mentioned';
+                $type = in_array($link['link_type'] ?? '', array('mentioned', 'primary', 'related'), true) ? $link['link_type'] : 'related';   // picked by hand: the name sync keeps it
                 $link_fac->execute(array($lawsuit_id, (int) $link['facility_id'], $type, $submitted_by));
             }
             foreach ((array) ($case['news_ids'] ?? array()) as $news_id) {
@@ -2142,16 +2142,25 @@ function kop_apply_lawsuit_seeds() {
             if ($keep_name === false || $keep_name !== $drop_name) {
                 continue;
             }
-            $pdo->prepare('DELETE FROM lawsuit_facility_links WHERE lawsuit_id = ?')->execute(array($drop));
-            $pdo->prepare('DELETE FROM lawsuit_news_links WHERE lawsuit_id = ?')->execute(array($drop));
             $pdo->prepare('DELETE FROM lawsuits WHERE id = ?')->execute(array($drop));
+            require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+            kop_records_deleted($pdo, 'lawsuit', array($drop));
             $done[] = 'deleted:' . $drop;
+        }
+        // Cases the seed corrected: links and coverage follow the new values.
+        $updated = array();
+        foreach ($done as $d) {
+            if (is_string($d) && strpos($d, 'updated:') === 0) $updated[] = (int) substr($d, 8);
+        }
+        if ($updated) {
+            require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+            kop_resync_lawsuit($pdo, $updated, 'seed');
         }
         foreach ((array) ($spec['facility_links_add'] ?? array()) as $link) {
             if (empty($link['lawsuit_id']) || empty($link['facility_id'])) {
                 continue;
             }
-            $type = in_array($link['link_type'] ?? '', array('mentioned', 'primary', 'related'), true) ? $link['link_type'] : 'mentioned';
+            $type = in_array($link['link_type'] ?? '', array('mentioned', 'primary', 'related'), true) ? $link['link_type'] : 'related';   // picked by hand: the name sync keeps it
             $pdo->prepare('INSERT INTO lawsuit_facility_links (lawsuit_id, facility_id, link_type, created_by) VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE link_type = VALUES(link_type)')->execute(array((int) $link['lawsuit_id'], (int) $link['facility_id'], $type, $submitted_by));
         }

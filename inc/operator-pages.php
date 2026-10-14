@@ -319,8 +319,10 @@ if (!function_exists('kop_operator_pages_fingerprint')) {
         $ofc = $wpdb->prefix . 'kop_operator_facilities';
         if (!kop_facility_pages_table_exists($ops)) return '';
         $a = $wpdb->get_row("SELECT COUNT(*) AS n, MAX(updated_at) AS u FROM `{$ops}`", ARRAY_A);
-        $b = kop_facility_pages_table_exists($ofc) ? (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$ofc}`") : 0;
-        return md5(json_encode(array($a, $b, KOP_OPERATOR_PAGES_REWRITE_VERSION)));
+        // Sums, not only the count: a program moved between companies keeps the count.
+        $b = kop_facility_pages_table_exists($ofc) ? $wpdb->get_row("SELECT COUNT(*), SUM(facility_id), SUM(operator_id), SUM(CASE WHEN relationship = 'current' THEN facility_id ELSE 0 END) FROM `{$ofc}`", ARRAY_N) : 0;
+        $rev = function_exists('get_option') ? (int) get_option('kop_rev_operator', 0) : 0;
+        return md5(json_encode(array($a, $b, $rev, KOP_OPERATOR_PAGES_REWRITE_VERSION)));
     }
 }
 

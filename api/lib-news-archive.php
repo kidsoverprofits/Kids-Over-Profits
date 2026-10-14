@@ -165,6 +165,11 @@ if (!function_exists('kop_news_archive_split_existing')) {
             $changed[] = array('id' => (int) $r['id'], 'from' => $r['article_url'], 'url' => $s['url'], 'archive' => $s['archive']);
             if ($apply) $upd->execute(array($s['url'], $s['archive'], $jsonText, (int) $r['id']));
         }
+        if ($apply && $changed) {
+            // The article's own address is a case-coverage match.
+            require_once __DIR__ . '/lib-record-resync.php';
+            kop_resync_news($pdo, array_column($changed, 'id'), 'archive split');
+        }
         return array('checked' => count($rows), 'changed' => $changed);
     }
 }

@@ -21,6 +21,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/url-dedupe.php';
 require_once __DIR__ . '/news-story-groups.php';
+require_once __DIR__ . '/lib-record-resync.php';
 
 if (!function_exists('current_user_can') || !current_user_can('manage_options')) {
     http_response_code(403);
@@ -75,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_dup
                          reviewer_notes = TRIM(CONCAT_WS('\n', reviewer_notes, ?))
                      WHERE id IN ($ph) AND status <> 'deleted'");
                 $stmt->execute(array_merge([$kop_dupe_note($keepId)], $dropIds));
+                kop_news_fold_links($pdo, $keepId, $dropIds);
                 $notices[] = 'Kept #' . $keepId . ', deleted ' . $stmt->rowCount()
                     . ' duplicate(s): #' . implode(', #', $dropIds) . '.';
             }
@@ -90,6 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_dup
                      reviewer_notes = TRIM(CONCAT_WS('\n', reviewer_notes, ?))
                  WHERE id = ? AND status <> 'deleted'");
             $stmt->execute([$note, $articleId]);
+            if ($dupeOf > 0) kop_news_fold_links($pdo, $dupeOf, [$articleId]);
+            else kop_resync_news($pdo, [$articleId], 'duplicate manager');
             $notices[] = $stmt->rowCount()
                 ? "Deleted article #{$articleId}."
                 : "Article #{$articleId} not found (or already deleted).";
@@ -101,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_dup
                 "UPDATE news_submissions SET status = 'submitted'
                  WHERE id = ? AND status = 'deleted'");
             $stmt->execute([$articleId]);
+            kop_resync_news($pdo, [$articleId], 'duplicate manager');
             $notices[] = $stmt->rowCount()
                 ? "Restored article #{$articleId} to 'submitted' — re-approve it to put it back on the feed."
                 : "Article #{$articleId} is not in the deleted list.";
@@ -110,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_dup
             $stmt = $pdo->prepare(
                 "DELETE FROM news_submissions WHERE id = ? AND status = 'deleted'");
             $stmt->execute([$articleId]);
+            if ($stmt->rowCount()) kop_records_deleted($pdo, 'news', [$articleId]);
             $notices[] = $stmt->rowCount()
                 ? "Permanently removed article #{$articleId}."
                 : "Article #{$articleId} is not in the deleted list (soft-delete it first).";

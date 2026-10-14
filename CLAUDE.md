@@ -367,12 +367,15 @@ node scripts/test-testimony-move.js
 # transport/provider/marketing company people, published lawsuits' staff + plaintiffs, the memorial, young adult staff, current wiki entries' staff, journalists.
 # Pools (kop_people.pool): industry / harmed (victims, plaintiffs) / press: a name finds an id only in its own pool; map + pages read industry.
 # A different middle initial is a different person (Robert W. and Robert B. Lichfield, father and son; kop_people_find())
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-people.php [--list] [--no-build]   # needs ../kop-pipeline (or KOP_PIPELINE_DIR) for the personKey parity
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-people.php [--list] [--no-build]   # sync, pairs, merge+undo, PHP/JS key parity, a map build into tmp/; personKey parity needs ../kop-pipeline (or KOP_PIPELINE_DIR)
 # kop_facility_save() folds a person listed twice under one role (kop_facility_staff_dedupe()); the one-time pass is kop_apply_staff_dedupe()
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]
 # Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
 # kop_record_changed() (inc/record-events.php) moves the page caches and purges the facility pages. docs/DATA-FLOWS.md is the map
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php   # every path calls it, no link lost, reject/undo, deletes, duplicates   # sync, pairs, merge+undo, PHP/JS key parity, a map build into tmp/
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php   # every path calls it, no link lost, reject/undo, deletes, duplicates
+# Approving a wiki entry puts its staff on the facility record, cited to the wiki page (kop_wiki_merge_submission(), api/sync-wiki-facilities.php);
+# a name already listed stays; taking the approval back takes them off (kop_wiki_staff_undo(), log in option kop_wiki_staff_log)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-staff.php [--list]   # mapping, approve/again/undo, what approving every entry would add
 # Public data form (/tti-data-submission/) opens on a guided start (js/data-form/data-wizard.js, css/data-wizard.css): find the
 # record or add a new facility/company/provider/transporter/referrer, pick topics, see only those sections; saves still go
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need

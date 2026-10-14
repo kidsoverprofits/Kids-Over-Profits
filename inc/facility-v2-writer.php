@@ -224,7 +224,10 @@ if (!function_exists('kop_v2_pdo_master_rows')) {
      * @return array list of {id, unique_name, json_data}
      */
     function kop_v2_pdo_master_rows(PDO $pdo, $prefix) {
-        static $cache = array();
+        // Per request; kop_facility_save() clears it, so a lookup after a save
+        // in the same request (several wiki entries of one program) sees the save.
+        $cache = &$GLOBALS['kop_v2_master_rows_cache'];
+        if (!is_array($cache)) $cache = array();
         if (isset($cache[$prefix])) return $cache[$prefix];
         $t = kop_migration_tables($prefix);
         $rows = array();

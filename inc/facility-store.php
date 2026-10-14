@@ -2098,6 +2098,7 @@ if (!function_exists('kop_facility_save')) {
      * @throws RuntimeException when the document has error-severity violations.
      */
     function kop_facility_save(array $doc, array $opts = array(), &$status = null) {
+        unset($GLOBALS['kop_v2_master_rows_cache']);   // kop_v2_pdo_master_rows() reads the new copy
         // A person listed twice under one role is one entry (DATA-FLOWS.md 3).
         foreach (array('administrator', 'notableStaff') as $list) {
             if (isset($doc['staff'][$list]) && is_array($doc['staff'][$list])) {
@@ -2150,6 +2151,7 @@ if (!function_exists('kop_facility_save')) {
                 && !kop_facility_same_document($existing['doc']['location'] ?? null, $doc['location'])) {
                 kop_facility_rebuild_memberships($id, $doc, $opts);
             }
+            if (function_exists('kop_record_changed')) kop_record_changed('facility', array($id));
             return $id;
         }
 
@@ -2167,6 +2169,8 @@ if (!function_exists('kop_facility_save')) {
         if (empty($opts['skip_memberships'])) {
             kop_facility_rebuild_memberships($id, $doc, $opts);
         }
+        // Page caches move, the record's page is purged (inc/record-events.php).
+        if (function_exists('kop_record_changed')) kop_record_changed('facility', array($id), array('created' => true));
         return $id;
     }
 }

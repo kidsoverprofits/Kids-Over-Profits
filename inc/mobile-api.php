@@ -800,7 +800,8 @@ if (!function_exists('kop_mobile_news_rest')) {
             $row = $wpdb->get_row("SELECT COUNT(*) AS n, MAX(updated_at) AS u FROM news_submissions WHERE status IN ('approved','published')", ARRAY_A);
             $stamp = is_array($row) ? (int) $row['n'] . '|' . (string) $row['u'] : '';
         }
-        $etag = kop_mobile_etag(array('news', $stamp, wp_json_encode($args), kop_mobile_feat_rev()));
+        // Facility links and story groups decide the ?facility= and ?story= lists (kop_record_changed()).
+        $etag = kop_mobile_etag(array('news', $stamp, (int) get_option('kop_rev_news', 0), wp_json_encode($args), kop_mobile_feat_rev()));
         if (kop_mobile_etag_matches($request, $etag)) return kop_mobile_not_modified($etag);
         return kop_mobile_response(kop_mobile_news_feed($args), $etag, 300);
     }

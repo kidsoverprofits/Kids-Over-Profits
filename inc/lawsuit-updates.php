@@ -118,6 +118,11 @@ function kop_apply_lawsuit_updates() {
         error_log('kop_apply_lawsuit_updates: ' . $e->getMessage());
         return null;
     }
+    // Corrected cases: facility links and coverage follow the new values.
+    if (!empty($done['updated'])) {
+        require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+        kop_resync_lawsuit($pdo, $done['updated'], 'seed');
+    }
     return $done;
 }
 

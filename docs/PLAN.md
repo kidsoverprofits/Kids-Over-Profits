@@ -1917,9 +1917,12 @@ Open, in order (details in DATA-FLOWS.md section 4):
    people sync fire `kop_record_changed()`.
 3. Drop the dead `kop_facility_v2_request_sync()` calls, then the 10-minute
    flush once the revisions have proven themselves.
-4. **Owner:** wiki approval's staff (api/sync-wiki-facilities.php:236) are
-   dropped today. Should they go straight onto the record (with a log and
-   Undo), or wait for review like Woodbury Facts?
+4. Wiki approval's staff go straight onto the record (owner, 2026-10-13):
+   done, cited to the Reddit page, logged, taken off when the approval is
+   taken back (scripts/test-wiki-staff.php). **Owner:** 229 entries already
+   approved would add 784 staff if approved again. Run that backfill once
+   (a CLI like the other server tools, dry run first), or leave it to new
+   approvals?
 5. Wiki staleness listener + badge (this is 3.12 step 6).
 6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
    fingerprint moves).

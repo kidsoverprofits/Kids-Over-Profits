@@ -318,6 +318,15 @@ when its version moves, and most never change a record that is already on file.
 - **People named in a new place** get ids through
   `kop_people_named_sources()`, in the right pool (industry, harmed, press).
 - **Colours**: follow "Kadence colour traps" in CLAUDE.md.
+- **A new path that writes a news article, lawsuit or bill** (save, approve,
+  status, move, Undo, delete) calls `kop_resync_news()` /
+  `kop_resync_lawsuit()` / `kop_resync_after_status()` /
+  `kop_records_deleted()` (api/lib-record-resync.php) after its write, and
+  goes in the list in scripts/test-record-resync.php. An exact Undo that puts
+  links back by hand calls only `kop_record_changed()`. Facility documents
+  always go through `kop_facility_save()`. Anything else that changes what a
+  page shows calls `kop_record_changed()` (inc/record-events.php).
+  [DATA-FLOWS.md](DATA-FLOWS.md) has the whole map.
 - **Code in two languages must match**: several rules exist in both PHP and JS
   (or Python), and each has a parity test. Change both sides and run it:
   network map slice (`scripts/test-network-embed.js`), inspection text signals,

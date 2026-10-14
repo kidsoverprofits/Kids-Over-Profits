@@ -511,19 +511,11 @@ function kop_gdl_queue_go_live(PDO $pdo, $target, $id, $reviewer) {
         $pdo->prepare("UPDATE {$table} SET publication_status = 'published', published_at = CURRENT_TIMESTAMP WHERE id = ?")
             ->execute(array((int) $id));
     }
-    if ($target === 'legislation') {
-        return;
-    }
-    try {
-        require_once get_stylesheet_directory() . '/api/lawsuit-news-links.php';
-        if ($target === 'news') {
-            kop_sync_news_lawsuit_links($pdo, (int) $id, (string) $reviewer);
-        } else {
-            kop_sync_lawsuit_news_links($pdo, (int) $id, (string) $reviewer);
-        }
-    } catch (Throwable $e) {
-        error_log('kop drive docs: case links for ' . $target . ' #' . $id . ' failed: ' . $e->getMessage());
-    }
+    // Facility and case links, story groups, and a case's documents filed,
+    // as approving it in its own queue does (api/lib-record-resync.php).
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    $type = $target === 'news' ? 'news' : ($target === 'lawsuit' ? 'lawsuit' : 'legislation');
+    kop_resync_after_status($pdo, $type, array((int) $id), $target === 'news' ? 'approved' : 'published', (string) $reviewer);
 }
 
 /**
@@ -539,14 +531,8 @@ function kop_gdl_queue_remove(PDO $pdo, array $done) {
         if (!$st->rowCount()) {
             throw new RuntimeException('News item #' . $id . ' has been reviewed in the news queue already; remove it there.');
         }
-        if ($live) {
-            try {
-                require_once get_stylesheet_directory() . '/api/lawsuit-news-links.php';
-                kop_sync_news_lawsuit_links($pdo, $id, 'drive docs undo');
-            } catch (Throwable $e) {
-                error_log('kop drive docs undo: case links for news #' . $id . ' failed: ' . $e->getMessage());
-            }
-        }
+        require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+        kop_resync_news($pdo, array($id), 'drive docs undo');
         return;
     }
     $table = $done['target'] === 'lawsuit' ? 'lawsuits' : 'legislation';
@@ -555,14 +541,8 @@ function kop_gdl_queue_remove(PDO $pdo, array $done) {
     if (!$st->rowCount()) {
         throw new RuntimeException(ucfirst($done['target']) . ' #' . $id . ' has been reviewed already; remove it there.');
     }
-    if ($table === 'lawsuits') {
-        $pdo->prepare('DELETE FROM lawsuit_facility_links WHERE lawsuit_id = ?')->execute(array($id));
-        try {
-            $pdo->prepare('DELETE FROM lawsuit_news_links WHERE lawsuit_id = ?')->execute(array($id));
-        } catch (Throwable $e) {
-            // No case-article table on this copy.
-        }
-    }
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    kop_records_deleted($pdo, $table === 'lawsuits' ? 'lawsuit' : 'bill', array($id));
 }
 
 /* ---- Add, skip, undo ----------------------------------------------------- */

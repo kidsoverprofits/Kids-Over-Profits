@@ -203,6 +203,7 @@ function kop_rdest_put($to, array $p, $reviewer) {
     if ($to === 'promo') {
         kop_rdest_promo_enum_ensure($pdo);
         $pdo->prepare("UPDATE news_submissions SET status = 'promotional', reviewed_by = ? WHERE id = ?")->execute(array($reviewer, (int) $id));
+        kop_rdest_resync('news', (int) $id);
     }
     if ($to === 'indigenous') {
         // An article about an Indian boarding school: filed on its page, approved, off the news list.
@@ -213,6 +214,7 @@ function kop_rdest_put($to, array $p, $reviewer) {
         if ($school_id > 0 && !kop_ischools_get($pdo_s, $school_id)) throw new RuntimeException('That school is gone.');
         kop_ischools_link_news($pdo_s, $school_id, (int) $id, $reviewer);
         $pdo->prepare("UPDATE news_submissions SET status = 'approved', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ?")->execute(array($reviewer, (int) $id));
+        kop_rdest_resync('news', (int) $id);
         return array('to' => 'indigenous', 'id' => (int) $id, 'school_id' => $school_id, 'url' => $url,
             'message' => 'Filed on the Indian boarding schools page as article #' . (int) $id . ' (off the news list).');
     }
@@ -279,19 +281,32 @@ function kop_rdest_take_back(array $done) {
         if ($pdo_s) kop_ischools_unlink_news($pdo_s, (int) ($done['school_id'] ?? 0), $id);
         $st = $pdo->prepare("UPDATE news_submissions SET status = 'deleted' WHERE id = ? AND status = 'approved'");
         $st->execute(array($id));
+        kop_rdest_resync('news', $id);
         return;
     }
     if ($to === 'news' || $to === 'promo') {
         $st = $pdo->prepare("UPDATE news_submissions SET status = 'deleted' WHERE id = ? AND status IN ('submitted', 'promotional')");
         $st->execute(array($id));
         if (!$st->rowCount()) throw new RuntimeException('News item #' . $id . ' has been reviewed already, so it stays there.');
+        kop_rdest_resync('news', $id);
         return;
     }
     $table = $to === 'lawsuit' ? 'lawsuits' : 'legislation';
     $st = $pdo->prepare("DELETE FROM {$table} WHERE id = ? AND publication_status = 'pending'");
     $st->execute(array($id));
     if (!$st->rowCount()) throw new RuntimeException(ucfirst($to) . ' #' . $id . ' has been reviewed already, so it stays there.');
-    if ($table === 'lawsuits') $pdo->prepare('DELETE FROM lawsuit_facility_links WHERE lawsuit_id = ?')->execute(array($id));
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    kop_records_deleted($pdo, $table === 'lawsuits' ? 'lawsuit' : 'bill', array($id));
+}
+
+/** After a status write here: links, groups and caches follow (api/lib-record-resync.php). */
+function kop_rdest_resync($type, $id) {
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    try {
+        kop_resync_after_status(kop_rinbox_pdo(), $type, array((int) $id), '', 'review');
+    } catch (Throwable $e) {
+        error_log("kop_rdest_resync($type, $id): " . $e->getMessage());
+    }
 }
 
 /** "Move to" entries for the two sorting destinations every link queue offers (Indian boarding schools, young adult programs). */

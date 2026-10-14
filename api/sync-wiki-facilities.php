@@ -75,6 +75,136 @@ function kop_facility_to_wiki_json(array $facility, array $operator): array {
 }
 
 /**
+ * An approved wiki submission onto its facility record: the wiki_master row
+ * for its slug (as the approval wrote it), the submission's facility link,
+ * its Reddit page as the staff citation. Staff go on once per submission
+ * (logged; kop_wiki_staff_undo() takes them off).
+ *
+ * @return array{merged:bool, reason:string, staff_added?:int}
+ */
+function kop_wiki_merge_submission(PDO $pdo, int $id): array {
+    $st = $pdo->prepare('SELECT id, program_name, json_data, submission_notes, facility_unique_name FROM wiki_submissions WHERE id = ?');
+    $st->execute([$id]);
+    $sub = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$sub) return ['merged' => false, 'reason' => 'submission gone'];
+    $json = json_decode((string)$sub['json_data'], true);
+    $slug = (is_array($json) && !empty($json['slug']))
+        ? $json['slug']
+        : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $sub['program_name'] ?? '')));
+    $w = $pdo->prepare('SELECT * FROM wiki_master WHERE slug = ? LIMIT 1');
+    $w->execute([$slug]);
+    $entry = $w->fetch(PDO::FETCH_ASSOC);
+    if (!$entry) return ['merged' => false, 'reason' => "no wiki_master row for '$slug'"];
+    // Follow the submission's explicit link rather than name-matching.
+    if (empty($entry['facility_unique_name']) && !empty($sub['facility_unique_name'])) {
+        $entry['facility_unique_name'] = $sub['facility_unique_name'];
+    }
+    $entry['__submission_id'] = $id;
+    $entry['__source_url'] = kop_wiki_staff_source_url($sub);
+    $result = kop_merge_wiki_into_facility($pdo, $entry);
+    if ($result['merged']) error_log("Wiki->Facility merge for '{$sub['program_name']}': {$result['reason']}");
+    return $result;
+}
+
+/** The wiki entry's people as the record lists them (inc/facility-store.php kop_facility_person_list()). */
+function kop_wiki_staff_entries(array $staffMembers, string $sourceUrl = ''): array {
+    $out = [];
+    foreach ($staffMembers as $s) {
+        if (!is_array($s)) continue;
+        $name = trim(preg_replace('/\s+/', ' ', (string)($s['name'] ?? '')));
+        if ($name === '') continue;
+        $role = trim(preg_replace('/\s+/', ' ', (string)($s['role'] ?? '')));
+        // The record has no "former" field; its entries say so in the role, as "Former ...".
+        if (!empty($s['isFormer']) && $role !== '' && stripos($role, 'former') === false) $role = 'Former ' . $role;
+        $past = [];
+        foreach ((array)($s['previousRoles'] ?? []) as $p) {
+            $t = is_array($p) ? implode(', ', array_filter([trim((string)($p['role'] ?? '')), trim((string)($p['employer'] ?? ''))])) : trim((string)$p);
+            if ($t !== '') $past[] = $t;
+        }
+        $entry = ['name' => $name, 'role' => $role, 'pastJobs' => implode('; ', $past), 'source' => 'r/troubledteens wiki'];
+        if ($sourceUrl !== '') $entry['sourceUrl'] = $sourceUrl;
+        $out[] = $entry;
+    }
+    return $out;
+}
+
+/** A name's letters and digits, for "already listed" (same rule as kop_facility_staff_dedupe()). */
+function kop_wiki_staff_fold($name): string {
+    $v = preg_replace('/[^\p{L}\p{N}]+/u', ' ', mb_strtolower((string)$name));
+    return trim(preg_replace('/\s+/', ' ', (string)$v));
+}
+
+/** submission id => {record, program, staff[], at}: what each approval put on a record. */
+function kop_wiki_staff_log(): array {
+    if (!function_exists('get_option')) return $GLOBALS['kop_wiki_staff_log'] ?? [];
+    $log = get_option('kop_wiki_staff_log', []);
+    return is_array($log) ? $log : [];
+}
+
+function kop_wiki_staff_log_save(array $log): void {
+    if (!function_exists('update_option')) {
+        $GLOBALS['kop_wiki_staff_log'] = $log;
+        return;
+    }
+    update_option('kop_wiki_staff_log', $log, false);
+}
+
+/** The Reddit page a submission came from, for the citation ('' when unknown). */
+function kop_wiki_staff_source_url(array $submission): string {
+    if (!function_exists('kop_wiki_upd_page_of') && function_exists('get_stylesheet_directory')) {
+        $f = dirname(__DIR__) . '/inc/wiki-updates.php';
+        if (is_readable($f)) require_once $f;
+    }
+    $page = function_exists('kop_wiki_upd_page_of') ? (string)kop_wiki_upd_page_of($submission) : '';
+    return $page !== '' ? 'https://www.reddit.com/r/troubledteens/wiki/' . ltrim($page, '/') : '';
+}
+
+/**
+ * Take back the staff an approval put on a record: the entries it logged
+ * that are still there as it wrote them (same name, role and wiki source).
+ * Entries someone has edited since stay. Returns how many were taken off.
+ */
+function kop_wiki_staff_undo(PDO $pdo, int $submissionId): int {
+    $log = kop_wiki_staff_log();
+    if (empty($log[$submissionId])) return 0;
+    $u = $log[$submissionId];
+    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+    $prefix = kop_v2_detect_prefix($pdo);
+    $row = kop_v2_pdo_master_row_by_name($pdo, $prefix, (string)$u['record']);
+    $removed = 0;
+    if ($row) {
+        $project = json_decode($row['json_data'], true);
+        $data = &$project['data'];
+        $keys = [];
+        foreach ((array)$u['staff'] as $e) $keys[kop_wiki_staff_fold($e['name']) . '|' . kop_wiki_staff_fold($e['role'])] = true;
+        $strip = function (array &$fac) use (&$keys, &$removed) {
+            $list = (array)($fac['staff']['notableStaff'] ?? []);
+            $keep = [];
+            foreach ($list as $e) {
+                $k = is_array($e) ? kop_wiki_staff_fold($e['name'] ?? '') . '|' . kop_wiki_staff_fold($e['role'] ?? '') : '';
+                if ($k !== '' && isset($keys[$k]) && ($e['source'] ?? '') === 'r/troubledteens wiki') {
+                    unset($keys[$k]);
+                    $removed++;
+                    continue;
+                }
+                $keep[] = $e;
+            }
+            if (count($keep) !== count($list)) $fac['staff']['notableStaff'] = $keep;
+        };
+        if (!empty($data['facilities']) && is_array($data['facilities'])) {
+            foreach (array_keys($data['facilities']) as $i) $strip($data['facilities'][$i]);
+        } elseif (isset($data['facility']) && is_array($data['facility'])) {
+            $strip($data['facility']);
+        }
+        unset($data);
+        if ($removed) kop_v2_save_legacy_row($pdo, $prefix, (string)$row['unique_name'], $project);
+    }
+    unset($log[$submissionId]);
+    kop_wiki_staff_log_save($log);
+    return $removed;
+}
+
+/**
  * Merge wiki data into the matching facility in facilities_master.
  * Only fills fields that are blank / null / empty – never overwrites.
  *
@@ -232,20 +362,42 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
         $changed = true;
     }
 
-    // --- staff / accreditations (append; accreditations de-duped)
-    if (!empty($wikiJson['staffMembers']) && is_array($wikiJson['staffMembers'])) {
-        if (!isset($fac['staffMembers']) || !is_array($fac['staffMembers'])) $fac['staffMembers'] = [];
-        foreach ($wikiJson['staffMembers'] as $staff) {
-            $fac['staffMembers'][] = $staff;
+    // --- staff: onto the record, cited to the wiki page; a name the record
+    // already lists (any role) is left as it is. What was added is logged per
+    // submission, so taking the approval back takes it off (kop_wiki_staff_undo()).
+    $addedStaff = [];
+    $subId = (int)($wiki['__submission_id'] ?? 0);
+    if (!empty($wikiJson['staffMembers']) && is_array($wikiJson['staffMembers'])
+        && !($subId && isset(kop_wiki_staff_log()[$subId]))) {
+        if (!isset($fac['staff']) || !is_array($fac['staff'])) $fac['staff'] = [];
+        foreach (['administrator', 'notableStaff'] as $l) {
+            if (!isset($fac['staff'][$l]) || !is_array($fac['staff'][$l])) $fac['staff'][$l] = [];
+        }
+        $have = [];
+        foreach (['administrator', 'notableStaff'] as $l) {
+            foreach ($fac['staff'][$l] as $e) {
+                $k = kop_wiki_staff_fold(is_array($e) ? ($e['name'] ?? '') : $e);
+                if ($k !== '') $have[$k] = true;
+            }
+        }
+        foreach (kop_wiki_staff_entries($wikiJson['staffMembers'], (string)($wiki['__source_url'] ?? '')) as $entry) {
+            $k = kop_wiki_staff_fold($entry['name']);
+            if ($k === '' || isset($have[$k])) continue;
+            $have[$k] = true;
+            $fac['staff']['notableStaff'][] = $entry;
+            $addedStaff[] = $entry;
             $changed = true;
         }
     }
+    // --- accreditations: the record keeps them as {current, past}
     if (!empty($wikiJson['accreditations']) && is_array($wikiJson['accreditations'])) {
         if (!isset($fac['accreditations']) || !is_array($fac['accreditations'])) $fac['accreditations'] = [];
-        $existing = array_map('strtolower', $fac['accreditations']);
+        if (!isset($fac['accreditations']['current']) || !is_array($fac['accreditations']['current'])) $fac['accreditations']['current'] = [];
+        $existing = array_map('strtolower', array_merge($fac['accreditations']['current'], (array)($fac['accreditations']['past'] ?? [])));
         foreach ($wikiJson['accreditations'] as $acc) {
-            if (!in_array(strtolower($acc), $existing, true)) {
-                $fac['accreditations'][] = $acc;
+            if (is_string($acc) && trim($acc) !== '' && !in_array(strtolower(trim($acc)), $existing, true)) {
+                $fac['accreditations']['current'][] = trim($acc);
+                $existing[] = strtolower(trim($acc));
                 $changed = true;
             }
         }
@@ -257,7 +409,12 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
 
     if ($v2_writes) {
         kop_v2_save_legacy_row($pdo, $v2_prefix, (string)$row['unique_name'], $project);
-        return ['merged' => true, 'reason' => "blank fields filled (matched by $matchedBy)"];
+        if ($subId && $addedStaff) {
+            $log = kop_wiki_staff_log();
+            $log[$subId] = ['record' => (string)$row['unique_name'], 'program' => $programName, 'staff' => $addedStaff, 'at' => gmdate('c')];
+            kop_wiki_staff_log_save($log);
+        }
+        return ['merged' => true, 'staff_added' => count($addedStaff), 'reason' => "blank fields filled, " . count($addedStaff) . " staff added (matched by $matchedBy)"];
     }
 
     $updateStmt = $pdo->prepare(

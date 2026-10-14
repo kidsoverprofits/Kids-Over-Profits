@@ -136,6 +136,8 @@ function kop_rinbox_pubapp_act($key, $action, array $params) {
     if ($action === 'unpublish') {
         if (!array_key_exists($table . ':' . $id, $log) || $r['publication_status'] !== 'published') throw new RuntimeException('There is no publish to undo.');
         $pdo->prepare("UPDATE `$table` SET publication_status = 'approved', published_at = ? WHERE id = ?")->execute(array($log[$table . ':' . $id], $id));
+        require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+        kop_record_changed($table === 'lawsuits' ? 'lawsuit' : 'bill', array($id));
         unset($log[$table . ':' . $id]);
         update_option('kop_rinbox_published', $log, false);
         kop_rinbox_flush_counts();

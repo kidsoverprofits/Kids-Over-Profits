@@ -512,9 +512,9 @@ function kop_enrich_lawsuit_row(PDO $pdo, $id, $apply, $text = '') {
     if ($apply && $set) {
         $cols = implode(', ', array_map(function ($c) { return "`{$c}` = ?"; }, array_keys($set)));
         $pdo->prepare("UPDATE lawsuits SET {$cols} WHERE id = ?")->execute(array_merge(array_values($set), array((int) $id)));
-        if (isset($set['facilities_mentioned']) && function_exists('kop_sync_lawsuit_facility_links')) {
-            kop_sync_lawsuit_facility_links($pdo, (int) $id, $set['facilities_mentioned'], 'enrich');
-        }
+        // Names, docket number, dates and plaintiffs all decide links and coverage.
+        require_once __DIR__ . '/lib-record-resync.php';
+        kop_resync_lawsuit($pdo, array((int) $id), 'enrich');
     }
     if ($headless !== '') {
         return $fail($headless) + array('filled' => $filled);

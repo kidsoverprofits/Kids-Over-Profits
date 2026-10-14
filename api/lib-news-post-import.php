@@ -433,13 +433,10 @@ if (!function_exists('kop_news_post_import')) {
                 json_encode($row['content_warnings'], $j), $row['summary'], json_encode($row['json_data'], $j),
                 $status, 'Imported from WP post #' . $pid,
             ]);
-            if ($link && $row['facilities_mentioned'] && function_exists('kop_sync_news_facility_links')) {
-                try {
-                    kop_sync_news_facility_links($pdo, (int) $pdo->lastInsertId(), $row['facilities_mentioned'], 'wp-news-import');
-                } catch (Throwable $e) {
-                    // The article is in the feed either way; links can be redone
-                    // with api/migrate-news-facilities-to-objects.php.
-                }
+            if ($link && function_exists('kop_sync_news_facility_links')) {
+                // Facility links, story group, case coverage (never throws).
+                require_once __DIR__ . '/lib-record-resync.php';
+                kop_resync_news($pdo, array((int) $pdo->lastInsertId()), 'wp-news-import');
             }
         }
         return $stats;

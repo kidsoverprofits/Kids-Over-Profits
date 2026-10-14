@@ -291,7 +291,22 @@ function kop_rinbox_native_save($type, $key, array $fields) {
     if (!$set) return array('message' => 'Nothing to save.');
     $vals[] = (int) $key;
     kop_rinbox_pdo()->prepare("UPDATE {$t['table']} SET " . implode(', ', $set) . ' WHERE id = ?')->execute($vals);
+    kop_rinbox_native_resync($type, (int) $key);
     return array('message' => 'Saved.');
+}
+
+/**
+ * After any write to a native row: facility links, story groups, case
+ * coverage and the page caches follow it (api/lib-record-resync.php). A
+ * lawsuit set to 'published' also files its documents.
+ */
+function kop_rinbox_native_resync($type, $id, $status = '') {
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    try {
+        kop_resync_after_status(kop_rinbox_pdo(), $type, array((int) $id), (string) $status, kop_rinbox_reviewer());
+    } catch (Throwable $e) {
+        error_log("kop_rinbox_native_resync($type, $id): " . $e->getMessage());
+    }
 }
 
 /**
@@ -324,6 +339,8 @@ function kop_rinbox_native_restore($type, $key, $status) {
     if (!in_array($status, $allowed, true)) throw new RuntimeException('Unknown status to go back to.');
     if (!kop_rinbox_native_row($type, $key)) throw new RuntimeException('That submission is gone.');
     kop_rinbox_pdo()->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ? WHERE id = ?")->execute(array($status, (int) $key));
+    // A reject had dropped the article's case links; going back brings them back.
+    kop_rinbox_native_resync($type, (int) $key, $status);
     return array('message' => 'Back to ' . $status . '.');
 }
 
@@ -381,6 +398,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
             kop_followup_mark_moved(kop_followup_kind_for_native($type), (int) $r['id']);
         }
     }
+    kop_rinbox_native_resync($type, (int) $r['id']);
     $log = kop_rinbox_native_moves();
     $log[$type . ':' . (int) $r['id']] = array('to' => $to, 'done' => $done, 'prev_status' => $t['pending'],
         'prev_notes' => $prev_notes, 'by' => $reviewer, 'at' => time());
@@ -428,6 +446,7 @@ function kop_rinbox_native_move_to_school($key, $school_id) {
     if (!$filed && function_exists('kop_followup_mark_moved')) {
         kop_followup_mark_moved(kop_followup_kind_for_native('news'), (int) $r['id']);
     }
+    kop_rinbox_native_resync('news', (int) $r['id']);
     $log = kop_rinbox_native_moves();
     $log['news:' . (int) $r['id']] = array('to' => 'indigenous', 'done' => array('to' => 'indigenous', 'self' => true, 'school_id' => $school_id),
         'prev_status' => (string) $r['status'], 'prev_notes' => $prev_notes, 'by' => $reviewer, 'at' => time());
@@ -458,6 +477,7 @@ function kop_rinbox_native_unmove($type, $key) {
             $pdo->prepare('UPDATE news_submissions SET json_data = ? WHERE id = ?')->execute(array(wp_json_encode($json), (int) $key));
         }
     }
+    kop_rinbox_native_resync($type, (int) $key, (string) $m['prev_status']);
     unset($log[$k]);
     update_option('kop_review_inbox_moves', $log, false);
     return array('message' => in_array($m['prev_status'], array('approved', 'published'), true) ? 'Taken back. The article is as it was.' : 'Moved back. It is pending here again.');

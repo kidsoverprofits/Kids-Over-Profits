@@ -182,13 +182,20 @@ request.
   - draft approval (inc/wiki-update-drafts.php:682)
 - **Wiki to facility:**
   - Approval runs `kop_merge_wiki_into_facility()`
-    (api/sync-wiki-facilities.php:96-275). It fills blank fields, with no
-    log and no Undo. It also appends the entry's staff (:236) and
-    accreditations, but in the old record shape: `staffMembers` and a flat
-    accreditation list, which the save to `facilities_v2` drops
-    (inc/facility-store.php:1065 reads `staff.administrator` /
-    `staff.notableStaff` and `accreditations.current` / `.past`). So since
-    the write switch **wiki staff never reach the record**.
+    through `kop_wiki_merge_submission()`, from `kop_resync_after_status()`.
+    It fills blank fields.
+  - Since 2026-10-13 (owner's choice: straight to the record) it also puts
+    the entry's staff in `staff.notableStaff` as name, role ("Former ..."
+    when marked former), past jobs, and source "r/troubledteens wiki"
+    linked to the Reddit page. A name the record already lists, in any
+    role, stays as it is.
+  - Each approval's additions are logged in option `kop_wiki_staff_log`.
+    Rejecting or un-approving takes off exactly those
+    (`kop_wiki_staff_undo()`).
+  - Accreditations go to `accreditations.current`.
+  - Before that, the merge wrote the old `staffMembers` shape, which the v2
+    save dropped, so no wiki staff reached a record after the write
+    switch.
   - The facility page lists entry titles live (`kop_facility_pages_wiki()`,
     facility-pages.php:3483) and links to `/wiki-feed/?search=<current name>`.
 - **Facility to wiki:** nothing on the server.
@@ -306,8 +313,10 @@ step in section 4 that covers it.
    *Fixed 2026-10-13:* `kop_facility_save()` folds repeated name + role
    entries (`kop_facility_staff_dedupe()`), and a one-time pass
    (`kop_apply_staff_dedupe()`) re-saved the 11 records. Test:
-   scripts/test-staff-dedupe.php. *Still open:* the wiki staff themselves
-   (step 5).
+   scripts/test-staff-dedupe.php. *Also fixed:* wiki staff now go on the
+   record, cited and undoable (step 5; scripts/test-wiki-staff.php).
+   Approving them again would add 784 staff from 229 entries; that backfill
+   waits for the owner (PLAN 3.17).
 3. **Facility changes never reach the wiki.**
    - Closures, staff, operators, lawsuits and news show on the facility
      page; the wiki entry learns of them only when someone runs the offline
@@ -363,6 +372,30 @@ step in section 4 that covers it.
 
 ## 4. The fix: one change event
 
+**Shipped 2026-10-13** (steps 1-3 for news, lawsuits and bills; test
+scripts/test-record-resync.php):
+
+- inc/record-events.php: `kop_record_changed()`. It bumps `kop_rev_<kind>`
+  and purges LiteSpeed for the affected `/facility/` pages at the end of the
+  request. `kop_facility_save()` fires it on every write.
+- api/lib-record-resync.php: `kop_resync_news()`, `kop_resync_lawsuit()`,
+  `kop_resync_after_status()`, `kop_records_deleted()` and
+  `kop_news_fold_links()`. Every news and lawsuit path in the tables of
+  section 2 calls them; the test checks each file.
+- The first resync runs `kop_resync_keep_underived()` once. It retypes to
+  'related' the 'mentioned' links the sync could not give again (61 news,
+  8 case links on the mirror), so no page loses a link. Seeded case links
+  are now typed 'related'.
+- `kop_facility_pages_fingerprint()` (v:6) reads the revisions,
+  `kop_people_version`, Map Renames and Map Years, `kop_operators`,
+  `kop_facility_locations`, approved inspection highlights, and sums (not
+  only the count) of company links. The operator index and the app's news
+  ETag read them too. The state, directory and mobile caches build on the
+  facility fingerprint.
+
+Open: the operator and link writers firing the event, the wiki listener
+(step 4), the drift check (6), and the rest of the no-bypass test (7).
+
 Today every reader guesses whether something changed. The fix is for every
 writer to say so, once, in one place, and for every reader to listen.
 
@@ -405,12 +438,11 @@ writer to say so, once, in one place, and for every reader to listen.
      rather than inline.
    - The result is stored, and shown as the "KOP has new information"
      badge in the editor and the Wiki updates queue (PLAN 3.12 step 6).
-5. **Wiki approval writes staff the way the record holds them.**
-   - Map `staffMembers` to `staff.notableStaff` / `administrator`, and the
-     accreditations to `accreditations.current`. Repeats are already folded
-     by the save.
-   - Log each change with Undo, or send the staff to review like the other
-     imports. The owner chooses.
+5. **Wiki approval writes staff the way the record holds them.** Done
+   2026-10-13, straight to the record with a log and Undo (owner's choice).
+   `kop_v2_pdo_master_rows()` no longer keeps a stale copy after a save, so
+   several entries of one program approved in one request no longer
+   overwrite each other.
 6. **A drift check that runs nightly,** reported at KOP Tools (a
    one-page screen, no files):
    - re-run the four link syncs in dry-run mode over every

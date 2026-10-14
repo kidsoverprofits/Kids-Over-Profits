@@ -363,7 +363,15 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
             'memorial_victims'                       => 'COUNT(*), MAX(updated_at)',
             'inspection_facilities'                  => 'COUNT(*), MAX(id)',
             'inspection_reports'                     => 'MAX(id)',
-            $wpdb->prefix . 'kop_operator_facilities' => 'COUNT(*)',
+            // Sums too, not only the count: a facility moved to another company, or
+            // a link switched between current and past, keeps the count the same.
+            $wpdb->prefix . 'kop_operator_facilities' => "COUNT(*), SUM(facility_id), SUM(operator_id), SUM(CASE WHEN relationship = 'current' THEN facility_id ELSE 0 END)",
+            // Company names and fields print on every facility page and state card.
+            $wpdb->prefix . 'kop_operators'           => 'COUNT(*), MAX(updated_at)',
+            // Which state and city pages list a facility (a placement changes no facility row).
+            $wpdb->prefix . 'kop_facility_locations'  => 'COUNT(*), MAX(created_at), SUM(facility_id)',
+            // Approved serious findings print on the facility page.
+            'inspection_highlights'                  => 'COUNT(*), MAX(updated_at)',
             $wpdb->prefix . 'fbv'                     => 'COUNT(*), MAX(id)',
             $wpdb->prefix . 'fbv_attachment_folder'   => 'COUNT(*)',
         );
@@ -405,7 +413,19 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
         $parts[] = 'program-conversions:' . (function_exists('kop_phc_cache_key') ? kop_phc_cache_key() : '-');
         // Separate programs on one campus (inc/campus-programs.php).
         $parts[] = 'campus:' . (function_exists('kop_campus_cache_key') ? kop_campus_cache_key() : '-');
-        $parts[] = 'v:5';
+        // What kop_record_changed() counts (api/lib-record-resync.php): an
+        // approval, reject or edit of a news article, case or bill moves no count.
+        $rev = array();
+        foreach (array('news', 'lawsuit', 'bill', 'wiki', 'facility', 'operator') as $k) {
+            $rev[] = $k . ':' . (function_exists('get_option') ? (int) get_option('kop_rev_' . $k, 0) : 0);
+        }
+        $parts[] = 'rev:' . implode('|', $rev);
+        // People merges regroup staff; Map Renames and Map Years change a page's names and years.
+        if (function_exists('get_option')) {
+            $parts[] = 'people:' . (int) get_option('kop_people_version', 0);
+            $parts[] = 'map-review:' . md5(serialize(array(get_option('kop_network_rename_review'), get_option('kop_network_years_review'))));
+        }
+        $parts[] = 'v:6';
         return md5(implode(';', $parts));
     }
 }

@@ -48,6 +48,7 @@ if (!defined('ABSPATH')) {
 }
 
 require_once __DIR__ . '/legislation-news-links.php';
+require_once __DIR__ . '/lib-record-resync.php';
 
 /** The record tables: kind => table, title column(s), status column, link table. */
 function kop_dm_record_kinds(): array {
@@ -430,6 +431,9 @@ function kop_dm_record_links(PDO $pdo, string $kind, int $id, string $op, int $f
         $pdo->rollBack();
         throw $e;
     }
+    // Case coverage and story groups read the facility links.
+    if ($kind === 'news') kop_resync_news($pdo, [$id], kop_dm_by());
+    else kop_resync_lawsuit($pdo, [$id], kop_dm_by());
 
     $token = bin2hex(random_bytes(8));
     $log = get_option('kop_dm_link_undo', []);
@@ -464,6 +468,8 @@ function kop_dm_undo_record_links(PDO $pdo, string $token): string {
     }
     unset($log[$token]);
     update_option('kop_dm_link_undo', $log, false);
+    // Exact undo: the links stay as restored; only the page caches move.
+    kop_record_changed($u['kind'] === 'news' ? 'news' : 'lawsuit', [(int)$u['id']]);
     return 'Undone: the links are as they were.';
 }
 
@@ -622,6 +628,7 @@ function kop_dm_restore(PDO $pdo, string $token): string {
     }
     unset($log[$token]);
     update_option('kop_dm_change_undo', $log, false);
+    kop_record_changed($u['kind'] === 'bill' ? 'bill' : ($u['kind'] === 'news' ? 'news' : 'lawsuit'), [$id]);
     return 'Undone: it is as it was.';
 }
 
@@ -652,6 +659,7 @@ function kop_dm_set_news_kind(PDO $pdo, int $id, string $to): array {
     }
     $pdo->prepare('UPDATE news_submissions SET article_type = ?, tags = ? WHERE id = ?')
         ->execute([$type, json_encode($tags, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $id]);
+    kop_resync_news($pdo, [$id], kop_dm_by());   // a case article matches cases differently
     $label = ['general' => 'general news', 'lawsuit' => 'lawsuit news', 'legislation' => 'legislation news'][$to];
     return ['message' => 'Now filed as ' . $label . '.', 'undo_token' => kop_dm_save_undo($snap)];
 }
@@ -694,6 +702,7 @@ function kop_dm_coverage_link(PDO $pdo, string $kind, int $id, int $newsId, stri
             $pdo->prepare('DELETE FROM legislation_news_links WHERE legislation_id = ? AND news_id = ?')->execute([$id, $newsId]);
         }
     }
+    kop_record_changed($kind, [$id]);
     $where = $kind === 'lawsuit' ? 'the case' : 'the bill';
     return ['message' => ($op === 'add' ? '"' . $title . '" now shows as news coverage of ' . $where . '.' : '"' . $title . '" no longer shows on ' . $where . '.'),
         'undo_token' => kop_dm_save_undo($snap)];
@@ -721,6 +730,7 @@ function kop_dm_lawsuit_doc_move(PDO $pdo, int $id, string $url, string $to): ar
     }
     $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     $pdo->prepare('UPDATE lawsuits SET source_urls = ?, document_urls = ? WHERE id = ?')->execute([json_encode($src, $flags), json_encode($doc, $flags), $id]);
+    kop_resync_lawsuit($pdo, [$id], kop_dm_by());   // source links are a coverage match
     return ['message' => $to === 'documents' ? 'Now listed as a court document.' : 'Now listed as a source (news or other page), not a court document.',
         'undo_token' => kop_dm_save_undo($snap)];
 }

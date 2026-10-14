@@ -24,6 +24,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/sync-wiki-facilities.php';
 require_once __DIR__ . '/lib-suggested-edits.php';
 require_once __DIR__ . '/news-mentions.php';
+require_once __DIR__ . '/lib-record-resync.php';
 
 // --- Admin authentication ---
 // This endpoint reads and mutates submissions (approve/reject/publish/delete),
@@ -578,46 +579,12 @@ try {
             // unreviewed files never enter the library).
             // News changing state: an article that just went live may cover a
             // tracked case, and a rejected or PR one must drop off the case cards.
-            if ($type === 'news') {
-                require_once __DIR__ . '/lawsuit-news-links.php';
-                foreach ($ids as $nid) {
-                    try {
-                        kop_sync_news_lawsuit_links($pdo, (int)$nid, $reviewedBy ?: 'review');
-                    } catch (Throwable $e) {
-                        error_log("manage-submissions news lawsuit-link sync (id $nid) failed: " . $e->getMessage());
-                    }
-                }
-            }
-
-            if ($type === 'lawsuit' && $status === 'published') {
-                require_once __DIR__ . '/lawsuit-facility-links.php';
-                require_once __DIR__ . '/lawsuit-news-links.php';
-                foreach ($ids as $lid) {
-                    try {
-                        $rowStmt = $pdo->prepare("SELECT case_name, facilities_mentioned, document_urls, filebird_folder_id FROM lawsuits WHERE id = ?");
-                        $rowStmt->execute([(int)$lid]);
-                        $law = $rowStmt->fetch(PDO::FETCH_ASSOC);
-                        if (!$law) continue;
-
-                        $facilityIds = kop_sync_lawsuit_facility_links($pdo, (int)$lid, $law['facilities_mentioned'], $reviewedBy ?: 'approval');
-                        kop_sync_lawsuit_news_links($pdo, (int)$lid, $reviewedBy ?: 'approval');
-
-                        $folderId = (int)($law['filebird_folder_id'] ?? 0);
-                        if (!$folderId && !empty($facilityIds)) {
-                            $folderId = (int)kop_lawsuit_resolve_facility_folder($pdo, $facilityIds);
-                            if ($folderId) {
-                                $pdo->prepare("UPDATE lawsuits SET filebird_folder_id = ? WHERE id = ?")->execute([$folderId, (int)$lid]);
-                            }
-                        }
-                        if ($folderId) {
-                            $docs = json_decode((string)$law['document_urls'], true);
-                            kop_lawsuit_file_documents(is_array($docs) ? $docs : [], $folderId, (string)$law['case_name']);
-                        }
-                    } catch (Throwable $e) {
-                        error_log("manage-submissions lawsuit post-approval (id $lid) failed: " . $e->getMessage());
-                    }
-                }
-            }
+            // Everything derived from the rows follows the new status: an
+            // article that went live may cover a tracked case, a rejected or
+            // PR one drops off the case cards; a case going live files its
+            // documents (public uploads become media-library attachments only
+            // then, so unreviewed files never enter the library).
+            if ($type !== 'wiki') kop_resync_after_status($pdo, $type, $ids, $status, $reviewedBy ?: 'review');
 
             // NEW: If wiki submissions were approved/published, update wiki_master table
             if ($type === 'wiki' && ($status === 'approved' || $status === 'published')) {
@@ -666,38 +633,13 @@ try {
                         // We don't fail the whole request, but we log it
                     }
 
-                    // Wiki → Facilities merge: fill blank fields in facilities_master
-                    // from the newly-approved wiki entry (no overwrite).
-                    try {
-                        $wikiRow = $pdo->prepare(
-                            "SELECT * FROM wiki_master WHERE slug = ? LIMIT 1"
-                        );
-                        // Use the same slug the upsert above keyed on: prefer
-                        // the submission's own slug from json_data, fall back
-                        // to the name-derived one. Recomputing from the name
-                        // alone missed entries saved under a custom slug.
-                        $mergeJson = isset($sub['json_data']) ? json_decode($sub['json_data'], true) : null;
-                        $slug = (is_array($mergeJson) && !empty($mergeJson['slug']))
-                            ? $mergeJson['slug']
-                            : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $sub['program_name'] ?? '')));
-                        $wikiRow->execute([$slug]);
-                        $wikiEntry = $wikiRow->fetch(PDO::FETCH_ASSOC);
-                        if ($wikiEntry) {
-                            // Carry the submission's facility link into the merge so it
-                            // follows the explicit link rather than name-matching.
-                            if (empty($wikiEntry['facility_unique_name']) && !empty($sub['facility_unique_name'])) {
-                                $wikiEntry['facility_unique_name'] = $sub['facility_unique_name'];
-                            }
-                            $mergeResult = kop_merge_wiki_into_facility($pdo, $wikiEntry);
-                            if ($mergeResult['merged']) {
-                                error_log("Wiki→Facility merge for '{$sub['program_name']}': {$mergeResult['reason']}");
-                            }
-                        }
-                    } catch (Exception $e) {
-                        error_log("Wiki→Facility merge failed for ID $id: " . $e->getMessage());
-                        // Non-fatal – do not interrupt the approval response
-                    }
                 }
+            }
+
+            // Wiki -> facility record (blank fields, staff cited to the wiki page,
+            // Undo by taking the approval back): after wiki_master is current.
+            if ($type === 'wiki') {
+                kop_resync_after_status($pdo, $type, $ids, $status, $reviewedBy ?: 'review');
             }
 
             echo json_encode([
@@ -850,6 +792,8 @@ try {
             $sql = "DELETE FROM $table WHERE id IN ($placeholders)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($ids);
+            $deletedKind = array('news' => 'news', 'lawsuit' => 'lawsuit', 'legislation' => 'bill')[$type] ?? '';
+            if ($deletedKind !== '') kop_records_deleted($pdo, $deletedKind, $ids);
             
             $affected = $stmt->rowCount();
             echo json_encode([
@@ -896,6 +840,7 @@ try {
             $params = array_merge([$newStatus], $ids);
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
+            kop_resync_after_status($pdo, $type, $ids, $newStatus, 'status change');
             
             $affected = $stmt->rowCount();
             echo json_encode([
@@ -1231,28 +1176,14 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
-            // Keep news_facility_links in step with an edited mention list —
-            // same sync save-news-submission.php runs on (re)submission.
-            if ($newsMentions !== null) {
-                kop_sync_news_facility_links($pdo, (int)$id, $newsMentions);
-            }
-            if ($lawsuitMentions !== null) {
-                require_once __DIR__ . '/lawsuit-facility-links.php';
-                kop_sync_lawsuit_facility_links($pdo, (int)$id, $lawsuitMentions);
-            }
-            // Any edited field (source URLs, docket number, plaintiffs, title,
-            // summary) can change which articles cover which case.
-            if ($type === 'lawsuit' || $type === 'news') {
-                try {
-                    require_once __DIR__ . '/lawsuit-news-links.php';
-                    if ($type === 'lawsuit') {
-                        kop_sync_lawsuit_news_links($pdo, (int)$id);
-                    } else {
-                        kop_sync_news_lawsuit_links($pdo, (int)$id);
-                    }
-                } catch (Throwable $e) {
-                    error_log("manage-submissions $type lawsuit-news sync (id $id) failed: " . $e->getMessage());
-                }
+            // Facility links, story groups and case coverage follow the edited
+            // row, as on a full save (api/save-news-submission.php, save-lawsuit.php).
+            if ($type === 'news') {
+                kop_resync_news($pdo, array((int)$id));
+            } elseif ($type === 'lawsuit') {
+                kop_resync_lawsuit($pdo, array((int)$id));
+            } elseif ($type === 'legislation') {
+                kop_record_changed('bill', array((int)$id));
             }
 
             $affected = $stmt->rowCount();
