@@ -89,8 +89,10 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 - A parallel needs evidence on both sides. Don't set a TTI practice beside the other industry unless a source shows it
   there too; otherwise the page turns into a list of how much worse the TTI is. Claim only what is documented for the
   named company or investor (owning both is not proof of running both the same way).
-- Say how the two overlap, never that they are the same thing ("the same business"). An overlap that is shown
-  carries the page; an equation overstates it.
+- Don't call two industries "the same business"; "they follow the same business model" is fine when the model is
+  documented on both sides. Don't overcorrect into hedging either: once the evidence is on the page, state the
+  claim and the verdict plainly ("Both drug the people in their care to make them easier to manage"), with no
+  "investigators have found" in front of every sentence.
 - Psychiatric hospitals overlap the TTI (many RTCs and PRTFs sit on a hospital's campus); never call them flatly
   "not the TTI". Migrant children's shelters (ORR), juvenile detention and young adult programs are part of the
   industry, never "related industries". Indian boarding schools are institutional abuse history, outside it.
