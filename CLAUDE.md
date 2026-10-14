@@ -49,6 +49,8 @@ Many lists name every kind of record, page or screen by hand (search, site map, 
 Woodbury, the tools registry, tutorials). Before adding a data category, a facility field, a page or route, an admin screen,
 a review queue, a table holding facility ids, a state inspection page, a public form or seeded records, read
 `docs/ADDING-CONTENT.md`: one checklist per kind of addition, naming every function and doc to update.
+When changing how an existing record is written (a new save, approve, undo or delete path), read `docs/DATA-FLOWS.md`:
+what each store's readers are and what keeps them fresh (link syncs, fingerprints, LiteSpeed), and the known drift.
 
 ## Key Commands
 

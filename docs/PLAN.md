@@ -1887,3 +1887,32 @@ Open:
    nothing for a known story).
 
 ---
+
+### 3.17 Updates reach every page that shows them (2026-10-13)
+
+The owner wants a change in one place (a wiki entry, a lawsuit) to update
+every facility page, hub and app screen that shows it, with no drift.
+`docs/DATA-FLOWS.md` maps every store: what writes it, how it is tied to a
+facility, who reads it and what keeps each reader fresh. It also lists where
+that fails today. In short: no writer announces a change, and each cache
+guesses from row counts. About 20 news and lawsuit paths skip the link syncs.
+Company, link and location edits move no fingerprint. Most writers never purge
+LiteSpeed. Wiki approval appends duplicate staff. Nothing tells a wiki entry
+that its record changed.
+
+Open, in order (details in DATA-FLOWS.md section 4):
+1. `kop_record_changed()` (inc/record-events.php), fired by the shared writers;
+   it bumps `kop_rev_<kind>`, flushes the indexes and purges the record's
+   LiteSpeed URLs.
+2. `kop_news_set_status()` / `kop_lawsuit_set_status()` / `kop_bill_set_status()`
+   plus delete functions, used by every path in DATA-FLOWS section 2.
+3. The fingerprints and mobile ETags read the revisions. Then drop the dead
+   `kop_facility_v2_request_sync()` calls.
+4. Wiki approval de-duplicates staff, with a log and Undo
+   (api/sync-wiki-facilities.php:236).
+5. Wiki staleness listener + badge (this is 3.12 step 6).
+6. Nightly drift check screen; scripts/test-record-events.php (no bypass, every
+   fingerprint moves).
+7. The smaller items in DATA-FLOWS section 3: rename flips in a facility's
+   Network section, inspection `replace` remap, merge registry gaps, the
+   network rebuild hash inputs, state hubs reading Inspection Links.

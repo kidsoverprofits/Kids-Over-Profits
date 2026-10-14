@@ -1,0 +1,416 @@
+# Data flows: what a change has to reach
+
+[ADDING-CONTENT.md](ADDING-CONTENT.md) lists what to connect when a new *kind*
+of thing is added. This page covers the other half: when an existing record
+changes (a lawsuit is approved, a wiki entry is saved, a company is renamed),
+every place that shows it has to follow. When one doesn't, the facility page,
+the state hub, the app and the wiki say different things, and nobody notices.
+
+Mapped 2026-10-13 from the code. File:line references are as of that date. The
+fix plan is in [PLAN.md 3.17](PLAN.md).
+
+Contents:
+
+1. [How freshness works today](#1-how-freshness-works-today)
+2. [The map, store by store](#2-the-map-store-by-store)
+3. [Where it drifts](#3-where-it-drifts)
+4. [The fix: one change event](#4-the-fix-one-change-event)
+
+---
+
+## 1. How freshness works today
+
+- **Pages are built on every request.** `/facility/`
+  (`kop_facility_page_data()`, inc/facility-pages.php:2798) and `/operator/`
+  (`kop_operator_page_data()`, inc/operator-pages.php:533) query the tables
+  each time. Only the index (which records get a page, their slugs and
+  signals) is cached.
+- **There is no "record changed" event.** `kop_facility_save()`
+  (inc/facility-store.php:2057) is the one writer for facility documents. It
+  fires nothing and flushes nothing. The only hook, `kop_facility_status_changed`,
+  is fired by about 15 callers, and only the network map listens to it.
+- **Each cache works out freshness on its own** from a *fingerprint* of live
+  tables, mostly `COUNT(*)` and `MAX(updated_at)`.
+  `kop_facility_pages_fingerprint()` (inc/facility-pages.php:354) is the main
+  one. The state feed, the directory feed, the mobile ETags, the network map
+  slices and the site map all build on it. Two consequences follow:
+  - A change that leaves the counts alone goes unseen. Examples: a news
+    article approved, a company link switched from current to past, a
+    report edited in place.
+  - A table missing from the fingerprint is invisible.
+- **An accidental 10-minute flush hides much of this.** The legacy
+  `kop_facility_v2_sync` cron still fires every 10 minutes
+  (inc/facility-v2-sync.php:28). Its listeners delete the facility index
+  and network map transients. Caches built on files have no such flush:
+  the state feed (no max age at all), the directory feed (6 hours) and the
+  inspection rollup.
+- **`kop_facility_v2_request_sync()` does nothing since the write switch.**
+  save-master.php:94, admin.php:2481 and save-wiki-submission call it as if
+  it refreshed something.
+- **LiteSpeed caches pages in front of all of this.** Only inline edit,
+  doc types, doc placement, featured reporting, the glossary, page text and
+  program-homes-convert purge it. Every other writer relies on the
+  LiteSpeed TTL.
+- **Links between records are written when a record is saved,** never
+  re-checked afterwards:
+  - `kop_sync_lawsuit_facility_links`, `kop_sync_news_facility_links`
+  - `kop_sync_lawsuit_news_links`, `kop_sync_news_lawsuit_links`
+
+  A write path that skips the sync leaves the link wrong until someone runs
+  `api/backfill-lawsuit-*-links.php` by hand.
+
+## 2. The map, store by store
+
+Each entry gives what writes the store, how it is tied to a facility, what
+reads it, and what keeps each reader fresh. "Live" means queried on every
+request.
+
+### Facility record (`facilities_v2`)
+
+- **Writes.** All of these go through `kop_facility_save()`:
+  - the data form (api/save-master.php)
+  - suggested-edit approval (api/lib-suggested-edits.php:740)
+  - inline edit (inc/inline-edit.php:853)
+  - Woodbury Facts, Fornits, federal funding and data audit (all via
+    `kop_wbf_save()`)
+  - closure reports, Drive Docs, State Lists, Facilities from News,
+    program homes, seeds, and the Data Manager
+
+  These write the table directly instead:
+  - people sync (inc/people.php:754, 919, 944; no lock)
+  - merge undo (inc/facility-merge.php:730)
+  - the young adult move (inc/young-adult-programs.php:512)
+  - program homes undo (inc/program-homes.php:679)
+- **Readers:** facility page (live), facility index, state feed, directory
+  feed, alias index and search, mobile API, open data (daily), network map
+  (hourly fingerprint, then the GitHub build), people sync (hourly), the
+  inspection rollup, and the "on file" review lists.
+- **Fresh by:** `MAX(updated_at)` in most fingerprints. That column is
+  `ON UPDATE CURRENT_TIMESTAMP` with one-second resolution.
+
+### Companies (`kop_operators`) and links to them (`kop_operator_facilities`)
+
+- **Writes:**
+  - the data form: direct UPDATE/INSERT (inc/facility-v2-writer.php:547-593)
+  - `kop_v2_rename_operator()` (:787)
+  - data audit `operator_field` / `operator_link`
+  - inline operator save, woodbury-create (:1175),
+    `kop_v2_add_operator_other_names()`, standardize-facilities (:135)
+- **Readers:** facility page (live), operator page, state feed cards,
+  directory feed, mobile, search, network map.
+- **Fresh by:**
+  - Operator index: `kop_operators` COUNT/MAX + **link COUNT only**.
+  - Facility fingerprint: link COUNT only, and **no `kop_operators` at all**.
+  - Directory feed, inspection rollup and network rebuild do include
+    `kop_operators`.
+
+### Location placements (`kop_facility_locations`)
+
+- **Writes:**
+  - `kop_facility_rebuild_memberships()`, which runs only when the
+    location block changes
+  - direct inserts and deletes: writer:616-699, state-lists:603,
+    facility-discovery:941, federal-funding:224
+- **Readers:** the state feed and the directory feed
+  (`kop_v2_collect_programs`, facility-v2-readers.php:280, 465).
+- **Fresh by:** nothing. The table is in no fingerprint.
+
+### Lawsuits (`lawsuits`, `lawsuit_facility_links`, `lawsuit_news_links`)
+
+- **Writes.** The full path is api/save-lawsuit.php:250 (facility sync, news
+  sync, FileBird filing). Paths that skip some or all of that:
+
+  | Path | Skipped |
+  |---|---|
+  | `api/lib-publish-approved.php:47` (one-click "publish approved") | every sync and the document filing |
+  | `manage-submissions.php:895` update_status | every sync |
+  | `lib-record-enrich.php:514` (AI fills case name, number, plaintiffs) | the news sync |
+  | `inc/lawsuit-updates.php:109` (seed updates, including `facilities_mentioned`) | every sync |
+  | `data-manager-extra.php:723` doc_move (source_urls) | the news sync |
+  | delete, `manage-submissions.php:850` | link rows are left behind |
+- **Tied to facilities by:**
+  - `lawsuit_facility_links` (sync owns `link_type='mentioned'` rows only)
+  - name matching at render on `facilities_mentioned`
+    (facility-pages.php:3399), `kop_state_related_name_key` (rest-api.php:5626),
+    and defendants/organizations on operator pages (operator-pages.php:774)
+- **Readers:** facility and operator pages (live), state hub (feed cache),
+  mobile, open data (links only), `/lawsuits/`, wiki gaps.
+- **Status filter disagrees:**
+  - Facility pages, operator pages, mobile, `/lawsuits/`: approved + published.
+  - State and country hubs, open data: published only.
+
+### News (`news_submissions`, `news_facility_links`)
+
+- **Writes.** Two full paths: api/save-news-submission.php:349/405, and
+  `kop_ext_insert_news()` (inc/source-submissions.php:484), which the
+  extension, app, Fornits and Drive Docs use. Paths that skip a sync:
+
+  | Path | Skipped |
+  |---|---|
+  | `manage-submissions.php:895` update_status | case matching |
+  | inbox Undo (`inc/review-inbox/native.php:326`), after a reject has deleted the case links | the case links stay gone |
+  | move-to-school (native.php:425), review-destinations (:215) | case matching |
+  | `data-manager-extra.php:653` (article type to/from 'lawsuit') | case matching |
+  | archive split (`api/lib-news-archive.php:152`) | case matching; the image is not reset |
+  | update_fields (`manage-submissions.php:1236`) | story group, story arc, journalist |
+  | duplicate merge (`api/manage-duplicate-articles.php:73`) | the dropped copies' facility, case, bill and featured links do not move |
+  | hard deletes (`manage-submissions.php:850`, `manage-duplicate-articles.php:111`) | orphan link rows |
+- **Tied to facilities by:** `news_facility_links` only. There is **no name
+  fallback**, so a mention that didn't resolve when saved never links later.
+  The state hub JS matches by stored name instead (js/state-page.js:837).
+- **Readers:** facility and operator pages, mobile, state hub, search
+  (`facilities_mentioned LIKE`), story groups, featured reporting, news
+  images, closure scan.
+- **Fresh by:** the facility fingerprint counts link rows only. Approving,
+  rejecting or editing an article does not move it.
+
+### Bills (`legislation`)
+
+- **Tied to facilities:** not at all. `facilities_affected` is free text.
+- **Tied to states:** an exact match on `jurisdiction`.
+- **Readers:** state and country hubs (feed cache, COUNT/MAX in its
+  fingerprint), `/legislation/`, open data.
+
+### Wiki entries (`wiki_submissions`, `wiki_master`, js/data/reddit-wiki/)
+
+- **Writes:**
+  - editor save (api/save-wiki-submission.php): **every Submit inserts a
+    new row** (:433)
+  - approve/publish (manage-submissions.php:452-697)
+  - link/confirm/unlink: api/link-wiki-facility.php, data-manager.php, the
+    Wiki links queue, auto-connect
+  - draft approval (inc/wiki-update-drafts.php:682)
+- **Wiki to facility:**
+  - Approval runs `kop_merge_wiki_into_facility()`
+    (api/sync-wiki-facilities.php:96-275). It fills blank fields and
+    **appends every staff entry with no duplicate check** (:236), with no
+    log and no Undo.
+  - The facility page lists entry titles live (`kop_facility_pages_wiki()`,
+    facility-pages.php:3483) and links to `/wiki-feed/?search=<current name>`.
+- **Facility to wiki:** nothing on the server.
+  - The gaps (`kop_wiki_upd_gaps()`) are worked out only by the offline
+    scripts/wiki-gaps.php.
+  - The editor never loads the record's content.
+  - PLAN 3.12 step 6 (a daily "KOP has new information" badge) is not built.
+- **Static copies:**
+  - `programs-array.json` / `search-index.json` index the Reddit page URLs,
+    not `facilities_v2`. The wiki editor's auto-linker reads them. Built
+    2026-06-05 from December 2025 inputs.
+  - `live-compare.json` and `update-drafts.json` are committed snapshots.
+
+### Inspections
+
+- **Writes:**
+  - api/inspections-write.php: upsert, or `replace`, which deletes the
+    state and gives new ids (the NV scraper uses it)
+  - the highlight scanner and review inbox
+  - Inspection Links (option `kop_inspection_links`)
+  - the hourly counts batch, highlight summaries, and the NC cleanup
+- **Readers:**
+  - facility page (live: name keys + Inspection Links + approved highlights
+    + summaries)
+  - `/xx-reports/` (per-state file cache)
+  - state hubs (feed cache; **never read Inspection Links**)
+  - inspection rollup (file cache), mobile, open data (daily)
+- **Fresh by:** the facility fingerprint reads `inspection_facilities`
+  COUNT/MAX(id) and `inspection_reports` MAX(id). In-place report edits,
+  highlight approvals and summaries do not move it.
+
+### Documents (FileBird, folder tags, folder links, doc types)
+
+- **Readers:**
+  - facility page library (live)
+  - operator page counts (transient `kop_operator_folder_counts`, 1 hour,
+    nothing flushes it)
+  - `/documents/<type>/` (keyed by `kop_doc_types_rev`)
+  - document archive landing (`kop_doc_archive_v5`, 6 hours, flushed on
+    attachment add/delete only)
+  - mobile (content hash, always right)
+- **Fresh by:**
+  - Doc types and doc placement flush and purge properly.
+  - Folder moves, folder tags and folder links are in no fingerprint.
+
+### People (`kop_people`, `kop_person_roles`)
+
+- **Writes:** the hourly sync stamps `personId` into facility documents
+  (direct writes, no lock) and rebuilds roles with DELETE + INSERT, outside a
+  transaction. Merge People, Separate.
+- **Readers:** facility page careers (keyed by fingerprint +
+  `kop_people_version`), name variants, the network build.
+- **Gap:** the mobile ETag leaves out `kop_people_version`.
+
+### Network map (graph.json in kop-data, plus runtime overlays)
+
+- **Build:** `inc/network-rebuild.php` hashes the facility columns plus
+  identification/staff/operatingPeriod, operators, links, referrers, memorial
+  counts and industry people hourly. When the hash moves, it dispatches the
+  kop-pipeline workflow.
+- **Inputs the hash misses:**
+  - `legacy.mergedFacilities` (rename years)
+  - `kop_person_roles`
+  - every kop-data CSV/overrides file
+  - js/network-map/store.js and js/vendor/d3-force.bundle.min.js
+
+  A change to those waits for "Rebuild now".
+- **Runtime overlays** (applied in PHP/JS, never in graph.json): Map
+  Renames, Map Years, data-audit years, edge drops, status overrides.
+  - `kop_network_map_facility_connections()` (network-map.php:397) feeds
+    the facility page "Network" section and the app. It applies none of
+    them, so a rename the owner flipped at Map Renames still reads backwards
+    there.
+  - Status overrides only ever force "closed", so reopening a facility
+    waits for the next build.
+- **After a merge,** connections stay on the dropped id until the next
+  build.
+
+### Homes, campuses, conversions, eras
+
+- **Homes, conversions and campuses** each have a cache key in the facility
+  fingerprint and are registered for merges. Fine.
+- **Eras** are computed per request from graph.json, option
+  `kop_network_rename_review` and the record. The directory and alias index
+  include that option. The mobile ETag does not.
+
+### Merges (`kop_fmerge_ref_tables()`, `kop_fmerge_json_tables()`)
+
+Registered tables move with a merge. Tables that hold facility ids or names
+but are **not registered**:
+
+- `kop_woodbury_mentions.also_facilities` and facility-kind `target_id`
+- `kop_facility_addresses.facility`: a name key, rebuilt only by
+  manage-addresses
+- `suggested_edits.master_id`
+- option `kop_federal_funding_review`
+- graph.json (until the next build)
+
+## 3. Where it drifts
+
+Ranked by how often a reader would see it. "Fix" names the change, and the
+step in section 4 that covers it.
+
+1. **News and lawsuit changes miss the links and the caches.**
+   - About 20 write paths approve, publish, edit or delete without running
+     the link syncs (the two tables above).
+   - The facility fingerprint and the mobile ETags count link rows, so an
+     approval or a reject moves nothing.
+   - *Fix:* status and content changes go through one function per table
+     (step 2); the fingerprints read a revision counter (step 3).
+2. **Approving a wiki entry duplicates staff on the facility record**
+   (api/sync-wiki-facilities.php:236). Every approve, re-approve, and
+   approval of another row for the same page appends the staff list again.
+   *Fix:* duplicate check by `kop_people_group_key()`, log + Undo, or route
+   the staff through Woodbury Facts-style review (step 5).
+3. **Facility changes never reach the wiki.**
+   - Closures, staff, operators, lawsuits and news show on the facility
+     page; the wiki entry learns of them only when someone runs the offline
+     gaps + drafts pipeline.
+   - *Fix:* PLAN 3.12 step 6 becomes a listener (step 4).
+4. **Company edits, company-link relationship changes and location
+   placements move no fingerprint.**
+   - The state feed (no max age) keeps them stale until any other facility
+     edit or a deploy.
+   - The app gets 304s.
+   - *Fix:* step 3.
+5. **LiteSpeed is purged by a handful of writers.** A cached `/facility/` or
+   `/operator/` page can outlive every fingerprint. *Fix:* the event purges
+   the affected URLs (step 1).
+6. **The mobile ETags leave out several inputs:** inspection highlights,
+   summaries, `kop_people_version`, `kop_network_rename_review`,
+   `kop_network_years_review`, operator edits, news status. *Fix:* step 3.
+7. **Rename flips are not applied to a facility's Network section** (website
+   and app). *Fix:* apply `kop_network_rename_review` in
+   `kop_network_map_facility_connections()`.
+8. **`replace`-mode inspection imports orphan** Inspection Links,
+   highlights, counts and summaries. In-place report edits are never
+   recounted. *Fix:* remap by state + licence/name key after a replace;
+   count reports by content hash, not by "has a row".
+9. **The wiki store has its own drifts:**
+   - Each editor Submit is a new row, so pages are counted twice and drafts
+     land on an older row.
+   - Link edits bump `updated_at`, so the "newest row" changes and Reddit
+     compares come out falsely "changed".
+   - Re-saving downgrades "confirmed" links to "suggested".
+   - An operator rename orphans its wiki links (`kop_v2_rename_operator()`
+     doesn't repoint them).
+   - `/wiki-feed/` shows `original_markdown`, so approved updates of edited
+     rows are hidden.
+   - The facility page's wiki link searches the feed by the current name
+     only.
+10. **Records not followed on merge** (list above) and **the network
+    rebuild hash misses** `legacy.mergedFacilities`, `kop_person_roles` and
+    the kop-data inputs.
+11. **Smaller:**
+    - State hubs ignore Inspection Links.
+    - `kop_operator_folder_counts` and `kop_doc_archive_v5` are not flushed
+      by moves.
+    - The news-image cache survives a URL change.
+    - The people sync writes with no lock (a lost-update race with admin
+      saves).
+    - Merge undo writes unvalidated JSON.
+    - Indigenous-school articles are filtered out of some readers and not
+      others.
+    - The `KOP_NETWORK_REBUILD_REPO_DEFAULT` constant still names the
+      archived repo (inc/network-rebuild.php:34). The config sets the real
+      one.
+
+## 4. The fix: one change event
+
+Today every reader guesses whether something changed. The fix is for every
+writer to say so, once, in one place, and for every reader to listen.
+
+1. **`kop_record_changed($kind, $ids, $info)`** in a new
+   inc/record-events.php.
+   - `$kind` is one of: facility, operator, link, location, lawsuit, news,
+     bill, wiki, inspection, document, person, map.
+   - Fired from the shared writers, not from each screen:
+     - `kop_facility_save()`
+     - the operator and link writers in inc/facility-v2-writer.php
+     - `kop_facility_rebuild_memberships()`
+     - the news/lawsuit/bill status functions (step 2)
+     - `kop_wiki_upd_link()`, the inspection writer, `kop_dt_changed()`,
+       `kop_dp_after()`, the people sync
+   - Listeners:
+     - bump the per-kind revision (step 3)
+     - flush the index transients
+     - purge LiteSpeed for the affected `/facility/` and `/operator/` URLs
+     - mark linked wiki entries stale (step 4)
+     - call `kop_network_map_flush()` on status changes (this absorbs
+       `kop_facility_status_changed`)
+2. **One status and content function per records table.**
+   - `kop_news_set_status()`, `kop_lawsuit_set_status()` and
+     `kop_bill_set_status()` own the UPDATE, the link syncs, the document
+     filing and the event.
+   - The ~20 paths in section 2 call them.
+   - Deletes go through matching delete functions that remove the link
+     rows.
+3. **Revisions instead of counts.**
+   - Option `kop_rev_<kind>`, bumped by the event.
+   - `kop_facility_pages_fingerprint()`, the operator index, the state and
+     directory feeds and the mobile ETags all read the revisions they
+     depend on. The COUNT/MAX parts stay as a safety net for writes made
+     outside WordPress (the scrapers, SQL by hand).
+   - The dead `kop_facility_v2_request_sync()` calls go away. The 10-minute
+     flush is kept only until the revisions are proven.
+4. **Wiki staleness as a listener.**
+   - On a facility, lawsuit or news event, the wiki entries linked to the
+     affected records get `kop_wiki_upd_gaps()` re-run, in an hourly batch
+     rather than inline.
+   - The result is stored, and shown as the "KOP has new information"
+     badge in the editor and the Wiki updates queue (PLAN 3.12 step 6).
+5. **Wiki approval stops writing staff blindly.**
+   - De-duplicate by person group key, log each change with Undo.
+   - Or send the staff to review like the other imports.
+6. **A drift check that runs nightly,** reported at KOP Tools (a
+   one-page screen, no files):
+   - re-run the four link syncs in dry-run mode over every
+     approved/published row and list what they would change
+   - list facility ids held anywhere that no longer exist (merged or
+     deleted)
+   - list wiki entries whose gaps are not empty
+
+   Anything it finds is a write path that skipped the event.
+7. **A test that no writer bypasses the event:** scripts/test-record-events.php.
+   - Grep for UPDATE/INSERT/DELETE on the watched tables outside the shared
+     writers. The allowed exceptions are listed in the test itself.
+   - On an in-memory copy of tmp/prod.sqlite, check that every reader's
+     fingerprint moves after each kind of write.

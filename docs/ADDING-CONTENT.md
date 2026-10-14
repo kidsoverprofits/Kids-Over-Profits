@@ -9,6 +9,9 @@ to learn about it.
 Each section is a checklist. Function names are the places to edit; the test
 named at the end of a section checks most of it. CLAUDE.md has the commands.
 
+What an existing record's change has to reach (link syncs, caches, the app,
+the wiki) is mapped in [DATA-FLOWS.md](DATA-FLOWS.md).
+
 Contents:
 
 1. [A new data category (a kind of record with its own table)](#1-a-new-data-category)
