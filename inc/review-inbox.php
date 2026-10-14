@@ -793,23 +793,29 @@ function kop_rinbox_cross_act($source, $key, $action, array $params) {
     return null;
 }
 
+/**
+ * Run one action on one item as the card's button does, logged in Recently
+ * done with its Undo. Also used by volunteer projects' "Apply ticked"
+ * (inc/volunteer-projects.php).
+ */
+function kop_rinbox_apply_action($source, $key, $action, array $params) {
+    $src = kop_rinbox_source($source);
+    $before = kop_rinbox_after($source, $key);
+    $res = kop_rinbox_cross_act($source, $key, $action, $params);
+    if ($res === null) $res = call_user_func($src['act'], $key, $action, $params);
+    kop_rinbox_flush_counts();
+    $res = is_array($res) ? $res : array();
+    $res += array('message' => 'Done.', 'item' => kop_rinbox_after($source, $res['key'] ?? $key));
+    kop_rinbox_log_action($source, (string) ($res['key'] ?? $key), $action, $params, $before, $res['item'], $res['message'], $res['undo'] ?? null);
+    unset($res['undo']);
+    return $res;
+}
+
 function kop_rinbox_rest_act(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
-        $source = (string) $req->get_param('source');
-        $key = (string) $req->get_param('key');
-        $src = kop_rinbox_source($source);
         $params = $req->get_param('params');
-        $params = is_array($params) ? wp_unslash($params) : array();
-        $action = sanitize_key((string) $req->get_param('action'));
-        $before = kop_rinbox_after($source, $key);
-        $res = kop_rinbox_cross_act($source, $key, $action, $params);
-        if ($res === null) $res = call_user_func($src['act'], $key, $action, $params);
-        kop_rinbox_flush_counts();
-        $res = is_array($res) ? $res : array();
-        $res += array('message' => 'Done.', 'item' => kop_rinbox_after($source, $res['key'] ?? $key));
-        kop_rinbox_log_action($source, (string) ($res['key'] ?? $key), $action, $params, $before, $res['item'], $res['message'], $res['undo'] ?? null);
-        unset($res['undo']);
-        return $res;
+        return kop_rinbox_apply_action((string) $req->get_param('source'), (string) $req->get_param('key'),
+            sanitize_key((string) $req->get_param('action')), is_array($params) ? wp_unslash($params) : array());
     });
 }
 

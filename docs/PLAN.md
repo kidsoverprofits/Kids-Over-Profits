@@ -2387,3 +2387,25 @@ Open, in order:
    (#13972, #11097, #10333, #13795, #10496, #100048 and others). The screen change did not touch that code; the
    records were probably merged or moved since the batch was read. Check whether the waiting Fornits rows still point
    at those ids (kop_fmerge_follow_waiting() should have moved them).
+
+### 3.26 Volunteer projects (2026-10-14)
+
+The owner could not hand work out: "help review the inbox" got no results. A project is now a small fixed batch from one
+queue (10 to 30 items, 15 to 30 minutes) with one question, an example of a yes and of a no, and a finish line, sent to one
+person as a link (`inc/volunteer-projects.php`, KOP Tools > Volunteer Reviewers > Projects; volunteer side in
+`js/volunteer-review.js`). Ready-made briefs for 13 queues (`kop_volp_kinds()`). "Check their calls" applies the clear
+approve/reject calls with each card's own button (Recently done, Undo). Tested offline (`scripts/test-volunteer-projects.php`).
+
+Open, in order:
+1. **Check after deploy:** at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers make a
+   10-item "Serious findings from state inspections" project for "Someone new" with your own name; open the message's
+   link in a private window, answer three, then "Check their calls" and Apply one. Turn that test volunteer off after.
+2. The five submission queues (News, Lawsuits, Legislation, Wiki, Data) approve through `api/manage-submissions.php`, so
+   "Apply ticked" cannot run them: their rows say "open it in the inbox". Route them through the same apply if News
+   projects get used.
+3. Drive Docs cards are a whole facility's links (up to 100) with nothing a volunteer can click: not offered as a ready-made
+   brief. A per-link volunteer view would open the 16,660-link backlog to projects.
+4. Owner's call, not built: two volunteers per item (apply only where both agree), and letting a volunteer with a high
+   agreement rate apply directly.
+5. `scripts/test-review-inbox.php --source=inspection-highlights` fails "a rejected finding offers approve and back to
+   pending" with or without this change (found 2026-10-14); look at the rejected card's actions.

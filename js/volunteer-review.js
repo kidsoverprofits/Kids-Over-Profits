@@ -1,7 +1,11 @@
 /**
  * /volunteer-review/ (templates/volunteer-review.php, inc/review-volunteers.php).
  *
- * A tab per queue open to volunteers and "Your recommendations". Each card
+ * Projects first (inc/volunteer-projects.php): a small fixed batch with one
+ * question, an example of a yes and of a no, shown one item at a time
+ * ("Item 8 of 20") until it says Done; ?project=<id> opens one. Below them,
+ * or alone when there are none, a tab per queue open to volunteers and "Your
+ * recommendations". Each card
  * shows the item (title, link, facts, what approving or rejecting would do)
  * and three choices with a note: Recommend approve, Recommend reject, Not
  * sure. Saving files a recommendation; an admin makes the decision in the
@@ -17,7 +21,7 @@
     var app = document.getElementById('kop-vol-app');
     if (!cfg.rest || !app) return;
 
-    var state = { queues: [], queue: null, offset: 0, mine: false };
+    var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, skip: [] };
 
     function api(path, body) {
         var headers = { 'Content-Type': 'application/json' };
@@ -91,6 +95,7 @@
     function remember() {
         try {
             var u = new URL(window.location.href);
+            u.searchParams.delete('project');
             u.searchParams.set('q', state.mine ? '_mine' : state.queue);
             window.history.replaceState(null, '', u.toString());
         } catch (e) { /* the tab just is not remembered */ }
@@ -103,6 +108,7 @@
     var status;
 
     function openQueue(key) {
+        state.project = null;
         state.queue = key;
         state.mine = false;
         state.offset = 0;
@@ -141,13 +147,13 @@
         });
     }
 
-    function card(it) {
+    function card(it, onDone) {
         var node = el('article', { class: 'kop-vol-card kop-vol-panel' });
-        fillCard(node, it);
+        fillCard(node, it, onDone);
         return node;
     }
 
-    function fillCard(node, it) {
+    function fillCard(node, it, onDone) {
         node.innerHTML = '';
         node.appendChild(el('h3', { class: 'kop-vol-title', text: it.title || '(no title)' }));
         var meta = [it.subtitle, it.created ? 'Added ' + fmtDate(it.created) : ''].filter(Boolean).join(' · ');
@@ -202,7 +208,8 @@
             buttons.forEach(function (b) { b.disabled = true; });
             msg.hidden = true;
             api('recommend', { source: it.source, key: it.key, verdict: verdict, note: note.value }).then(function (res) {
-                done(node, it, verdict, note.value, res.message);
+                if (onDone) onDone(it, verdict, note.value);
+                else done(node, it, verdict, note.value, res.message);
             }).catch(function (e) {
                 buttons.forEach(function (b) { b.disabled = false; });
                 msg.hidden = false;
@@ -210,6 +217,12 @@
                 msg.textContent = e.message;
                 btn.focus();
             });
+        }
+        if (onDone) {
+            buttons.push(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () {
+                state.skip.push(it.key);
+                nextProjectItem();
+            } }));
         }
         node.appendChild(el('div', { class: 'kop-vol-decide' }, [
             el('label', { for: id, text: 'Your note' }), note,
@@ -240,6 +253,7 @@
     var OUTCOME = { '': 'Waiting for an admin', approve: 'An admin approved it', reject: 'An admin rejected it', gone: 'Handled elsewhere', dismissed: 'Closed by an admin' };
 
     function openMine() {
+        state.project = null;
         state.mine = true;
         renderTabs();
         remember();
@@ -281,22 +295,165 @@
         }).catch(function (e) { st.textContent = 'Could not load: ' + e.message; });
     }
 
+    /* ---- Projects ----------------------------------------------------------------- */
+
+    var projectsPanel = el('section', { class: 'kop-vol-panel kop-vol-projects' });
+
+    function progressBar(done, total) {
+        var pct = total ? Math.round(100 * done / total) : 0;
+        return el('div', { class: 'kop-vol-progress' }, [
+            el('div', { class: 'kop-vol-progress-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(done),
+                'aria-label': done + ' of ' + total + ' done' }, [el('span', { style: 'width:' + pct + '%' })]),
+            el('span', { class: 'kop-vol-progress-text', text: done + ' of ' + total + ' done' })
+        ]);
+    }
+
+    function renderProjects() {
+        projectsPanel.innerHTML = '';
+        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : 'Your projects' }));
+        var ul = el('ul', { class: 'kop-vol-project-list' });
+        state.projects.forEach(function (p) {
+            var finished = p.done >= p.total;
+            ul.appendChild(el('li', { class: 'kop-vol-project' + (finished ? ' is-finished' : '') }, [
+                el('h3', { text: p.title }),
+                el('p', { class: 'kop-vol-meta', text: p.total + ' items, about ' + p.minutes + ' minutes' + (p.mine ? '' : ' · open to every volunteer') }),
+                progressBar(p.done, p.total),
+                finished ? el('p', { text: 'Finished. Thank you!' })
+                    : el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: state.project === p.id ? 'Working on it below' : (p.done ? 'Carry on' : 'Start'),
+                        disabled: state.project === p.id ? true : null, onclick: function () { openProject(p.id); } })
+            ]));
+        });
+        projectsPanel.appendChild(ul);
+    }
+
+    function rememberProject(id) {
+        try {
+            var u = new URL(window.location.href);
+            u.searchParams.delete('q');
+            if (id) u.searchParams.set('project', id); else u.searchParams.delete('project');
+            window.history.replaceState(null, '', u.toString());
+        } catch (e) { /* not remembered */ }
+    }
+
+    var projBrief;
+    var projSlot;
+    var projSaved;
+
+    function openProject(id) {
+        state.project = id;
+        state.skip = [];
+        state.mine = false;
+        state.queue = null;
+        renderTabs();
+        renderProjects();
+        rememberProject(id);
+        body.innerHTML = '';
+        projBrief = el('section', { class: 'kop-vol-panel kop-vol-guide kop-vol-brief' }, [el('p', { role: 'status', text: 'Loading…' })]);
+        projSlot = el('div', { class: 'kop-vol-list' });
+        projSaved = el('ul', { class: 'kop-vol-saved', 'aria-live': 'polite' });
+        body.appendChild(projBrief);
+        body.appendChild(projSlot);
+        body.appendChild(projSaved);
+        nextProjectItem();
+    }
+
+    function drawBrief(p) {
+        projBrief.innerHTML = '';
+        projBrief.appendChild(el('h2', { text: p.title }));
+        projBrief.appendChild(progressBar(p.done, p.total));
+        if (p.note) projBrief.appendChild(el('p', { class: 'kop-vol-note', text: p.note }));
+        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'The question: ' }), p.question]));
+        if (p.yes || p.no) {
+            var dl = el('dl', { class: 'kop-vol-examples' });
+            if (p.yes) { dl.appendChild(el('dt', { text: 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
+            if (p.no) { dl.appendChild(el('dt', { text: 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
+            projBrief.appendChild(dl);
+        }
+        projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
+        state.projects.forEach(function (x) { if (x.id === p.id) { x.done = p.done; x.total = p.total; } });
+    }
+
+    function nextProjectItem() {
+        var id = state.project;
+        projSlot.innerHTML = '';
+        projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { role: 'status', text: 'Loading…' })]));
+        api('project', { id: id, limit: 1, skip: state.skip }).then(function (data) {
+            if (id !== state.project) return;
+            var p = data.project || {};
+            drawBrief(p);
+            renderProjects();
+            projSlot.innerHTML = '';
+            var it = (data.items || [])[0];
+            if (!it) {
+                var skipped = state.skip.length;
+                projSlot.appendChild(el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
+                    el('h3', { text: skipped ? 'That is all but the ones you skipped.' : 'Done. Thank you!' }),
+                    el('p', { text: skipped ? 'You skipped ' + skipped + '. Go through them again, or leave them: that is fine too.'
+                        : 'Every item in this project has an answer. An admin will check them; "Your recommendations" shows what they decide.' }),
+                    skipped ? el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Go through the skipped ones', onclick: function () { state.skip = []; nextProjectItem(); } }) : null
+                ]));
+                return;
+            }
+            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: 'Item ' + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            projSlot.appendChild(card(it, function (item, verdict, note) {
+                var li = el('li', null, ['Saved: ', el('strong', { text: item.title || '(no title)' }), ', you said ', el('em', { text: SAID[verdict] }), note ? ' (' + note + ')' : '', '. ']);
+                li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
+                    var b = this;
+                    b.disabled = true;
+                    api('recommend', { source: item.source, key: item.key, withdraw: 1 }).then(function () {
+                        li.remove();
+                        nextProjectItem();
+                    }).catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });
+                } }));
+                projSaved.insertBefore(li, projSaved.firstChild);
+                while (projSaved.childNodes.length > 5) projSaved.removeChild(projSaved.lastChild);
+                nextProjectItem();
+            }));
+        }).catch(function (e) {
+            projSlot.innerHTML = '';
+            projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));
+        });
+    }
+
     /* ---- Start -------------------------------------------------------------------- */
 
-    api('queues').then(function (data) {
-        state.queues = data.queues || [];
+    function param(name) {
+        try { return new URL(window.location.href).searchParams.get(name); } catch (e) { return null; }
+    }
+
+    Promise.all([
+        api('queues').catch(function () { return { queues: [] }; }),
+        api('projects').catch(function () { return { projects: [] }; })
+    ]).then(function (res) {
+        state.queues = res[0].queues || [];
+        state.projects = res[1].projects || [];
         app.innerHTML = '';
-        if (!state.queues.length) {
+        if (!state.queues.length && !state.projects.length) {
             app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'There is nothing to review right now. Thank you for checking!' })]));
             return;
         }
-        app.appendChild(el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [tabs]));
+        if (state.projects.length) {
+            renderProjects();
+            app.appendChild(projectsPanel);
+        }
+        // With a project, the open queues are a fold: the project is the thing to do.
+        app.appendChild(state.projects.length
+            ? el('details', { class: 'kop-vol-panel kop-vol-browse' }, [el('summary', { text: state.queues.length ? 'Your past answers, or a whole queue' : 'Your past answers' }), tabs])
+            : el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [tabs]));
         app.appendChild(body);
-        var wanted = null;
-        try { wanted = new URL(window.location.href).searchParams.get('q'); } catch (e) { wanted = null; }
-        if (wanted === '_mine') openMine();
+        renderTabs();
+        var wantedProject = parseInt(param('project'), 10);
+        var wanted = param('q');
+        var unfinished = state.projects.filter(function (p) { return p.done < p.total; });
+        if (wantedProject && state.projects.some(function (p) { return p.id === wantedProject; })) openProject(wantedProject);
+        else if (wanted === '_mine') openMine();
         else if (state.queues.some(function (q) { return q.key === wanted; })) openQueue(wanted);
-        else openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
+        else if (wantedProject) {
+            body.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'That project is finished or closed. Thank you!' + (state.projects.length ? ' Your other projects are above.' : '') })]));
+        } else if (state.projects.length) {
+            // Straight to work: their own projects come first.
+            if (unfinished.length) openProject(unfinished[0].id);
+        } else openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
     }).catch(function (e) {
         app.innerHTML = '';
         app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));

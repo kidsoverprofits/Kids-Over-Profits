@@ -347,3 +347,125 @@ button.kop-vol-btn-small:focus {
     .kop-vol-facts dd { margin-bottom: 6px; }
     .kop-vol-buttons .kop-vol-btn { flex: 1 1 100%; }
 }
+
+/* Projects (inc/volunteer-projects.php): the list, the brief, one item at a time. */
+
+.kop-vol-projects {
+    border-top: 6px solid var(--kop-orange, #EF9034);
+}
+
+.kop-vol-project-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 12px;
+}
+
+.kop-vol-project {
+    border: 1px solid var(--kop-border-secondary, #CBD5E0);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    min-width: 0;
+}
+
+.kop-vol-project.is-finished {
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-vol-project h3 {
+    margin-bottom: 4px;
+}
+
+.kop-vol-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 10px;
+}
+
+.kop-vol-progress-bar {
+    flex: 1 1 auto;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--kop-navy, #000080);
+    overflow: hidden;
+}
+
+.kop-vol-progress-bar span {
+    display: block;
+    height: 100%;
+    background: var(--kop-teal-fill, #24757F);
+}
+
+.kop-vol-progress-text {
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-question {
+    font-size: 1.05rem;
+}
+
+.kop-vol-note {
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--kop-midnight-blue, #000435);
+    border-left: 4px solid var(--kop-orange, #EF9034);
+    padding: 6px 10px;
+}
+
+.kop-vol-examples {
+    margin: 0 0 10px;
+}
+
+.kop-vol-examples dt {
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-examples dd {
+    margin: 0 0 8px 0;
+}
+
+.kop-vol-position {
+    margin: 0 0 6px;
+    padding: 4px 12px;
+    display: inline-block;
+    border-radius: 999px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font-weight: 600;
+}
+
+.kop-vol-saved {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.kop-vol-saved li {
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 0 0 6px;
+}
+
+.kop-vol-browse summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-browse[open] summary {
+    margin-bottom: 10px;
+}
+
+.kop-vol-finished {
+    border-top: 6px solid var(--kop-teal, #33A7B5);
+}

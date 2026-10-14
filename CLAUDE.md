@@ -280,6 +280,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # them as kop_vol_item() copies (no fields/actions/tags, emails and phones blanked). Inbox cards show 'recs', "Volunteers recommend"
 # lists them; an approve/reject in the log closes them (agreement rate per volunteer), Undo reopens them
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
+# Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of 10-30 items from one queue,
+# one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>
+# (a new person's invite carries it). The page opens on it one item at a time; a project opens its queue to its volunteer, never a
+# kop_vol_never_sources() one. "Check their calls" applies clear calls with each card's own button (kop_rinbox_apply_action(), Undo in Recently done)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-volunteer-projects.php   # batches, who sees what, apply + log, handled elsewhere
 # "Email me when this has been reviewed" on every public form (inc/submission-followup.php, js/submission-followup.js): forms post
 # notify_email, the endpoint calls kop_followup_register(); a 10-minute cron reads each item's own status and mails once the decision
 # has stood 10 minutes (an Undo inside that cancels it), then blanks the address. A new public form adds the block and a kind there.

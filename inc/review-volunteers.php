@@ -274,7 +274,10 @@ function kop_vol_recommend(array $vol, $source, $key, $verdict, $note) {
     if (!isset(kop_vol_verdicts()[$verdict])) throw new RuntimeException('Choose approve, reject or not sure.');
     $note = trim(mb_substr((string) $note, 0, 1000));
     if ($verdict === 'unsure' && $note === '') throw new RuntimeException('Say in the note what you are not sure about.');
-    $src = kop_vol_source($source);
+    // A project (inc/volunteer-projects.php) opens its own items to its volunteer, even in a queue not open to everyone.
+    $all = kop_rinbox_sources();
+    $src = (!isset(kop_vol_sources()[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
+        && function_exists('kop_volp_allows') && kop_volp_allows((int) $vol['id'], $source, $key)) ? $all[$source] : kop_vol_source($source);
     $item = kop_vol_raw_item($src, $source, $key);
     if (!$item || !kop_vol_actionable($source, $item)) throw new RuntimeException('Someone has already dealt with this one. Thanks anyway.');
     if (isset(kop_vol_held_keys($source)[(string) $key])) throw new RuntimeException('An admin has set this one aside.');
@@ -461,6 +464,11 @@ function kop_vol_private_label($label) {
     return (bool) preg_match('/e-?mail|contact|phone|sent by|submitted by|submitter|reporter|browser|\bip\b|user agent|reviewer|notes? from/i', (string) $label);
 }
 
+/** A link only an admin can open (admin screens, the review tools under api/): no use to a volunteer. */
+function kop_vol_admin_only_url($url) {
+    return (bool) preg_match('#/wp-admin/|/api/review-|/api/manage-|[?&]nonce=#i', (string) $url);
+}
+
 /** One item as a volunteer sees it: what it is, its links and facts, and what Approve and Reject would do. */
 function kop_vol_item($source, array $it) {
     $s = 'kop_vol_scrub';
@@ -482,15 +490,15 @@ function kop_vol_item($source, array $it) {
         if (trim($v) === '') continue;
         $url = (string) ($d['url'] ?? '');
         $facts[] = array('label' => (string) ($d['label'] ?? ''), 'value' => $s(kop_rinbox_excerpt($v, 2000)),
-            'url' => preg_match('#^https?://#i', $url) ? $url : '');
+            'url' => preg_match('#^https?://#i', $url) && !kop_vol_admin_only_url($url) ? $url : '');
     }
     $links = array();
     foreach ((array) ($it['links'] ?? array()) as $l) {
-        if (!empty($l['url']) && preg_match('#^https?://#i', (string) $l['url']) && !kop_vol_private_label($l['label'] ?? '')) {
+        if (!empty($l['url']) && preg_match('#^https?://#i', (string) $l['url']) && !kop_vol_private_label($l['label'] ?? '') && !kop_vol_admin_only_url($l['url'])) {
             $links[] = array('label' => $s((string) ($l['label'] ?? $l['url'])), 'url' => (string) $l['url']);
         }
     }
-    if (!empty($it['preview']['url']) && preg_match('#^https?://#i', (string) $it['preview']['url'])) {
+    if (!empty($it['preview']['url']) && preg_match('#^https?://#i', (string) $it['preview']['url']) && !kop_vol_admin_only_url($it['preview']['url'])) {
         $links[] = array('label' => (string) ($it['preview']['label'] ?? 'The document'), 'url' => (string) $it['preview']['url']);
     }
     // What each choice would do, from the queue's own help text.
@@ -701,7 +709,9 @@ add_action('template_redirect', function () {
         return;
     }
     kop_vol_set_cookie($token);
-    wp_safe_redirect(kop_vol_page_url());
+    // An invite made with a project (inc/volunteer-projects.php) opens on it.
+    $project = (int) ($_GET['project'] ?? 0);
+    wp_safe_redirect($project ? kop_volp_url($project) : kop_vol_page_url());
     exit;
 }, 5);
 
@@ -751,6 +761,8 @@ function kop_vol_admin_page() {
     $notice = '';
     $error = '';
     $link = '';
+    $made = null;
+    if ($volp = kop_volp_admin_post()) list($notice, $error, $made) = $volp;
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kop_vol_do'])) {
         check_admin_referer('kop_vol_admin');
         $do = sanitize_key($_POST['kop_vol_do']);
@@ -786,6 +798,7 @@ function kop_vol_admin_page() {
     $chosen = array_keys(kop_vol_sources());
     $inbox = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-admin-submissions.php') : '';
     $nonce = wp_nonce_field('kop_vol_admin', '_wpnonce', true, false);
+    $project = (int) ($_GET['project'] ?? 0);
     $btn = function ($do, $id, $label, $class = 'button') use ($nonce) {
         return '<form method="post" style="display:inline">' . $nonce . '<input type="hidden" name="kop_vol_do" value="' . esc_attr($do) . '">'
             . '<input type="hidden" name="kop_vol_id" value="' . (int) $id . '"><button type="submit" class="' . esc_attr($class) . '">' . esc_html($label) . '</button></form> ';
@@ -807,6 +820,9 @@ function kop_vol_admin_page() {
                 <p>Anyone with this link can recommend under this name, so send it only to them (a direct message, not a group chat).</p>
             </div>
         <?php endif; ?>
+
+        <?php if ($project) : kop_volp_admin_project($project, $nonce, $vols); ?></div><?php return; endif; ?>
+        <?php kop_volp_admin_section($nonce, $vols, $made); ?>
 
         <h2>Invite someone</h2>
         <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
@@ -894,3 +910,5 @@ function kop_vol_admin_recent($inbox, $nonce) {
     }
     echo '</tbody></table>';
 }
+
+require_once __DIR__ . '/volunteer-projects.php';
