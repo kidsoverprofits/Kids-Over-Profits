@@ -355,9 +355,12 @@ need the owner's accounts, devices or artwork.
 
 21. **Related industries pages** (2026-10-08). Five drafts, created on deploy:
     /related-industries/ (index) and /foster-care/, /disability-group-homes/, /nursing-homes/,
-    /psychiatric-hospitals/, each saying what the industry is, where it meets the TTI (the same companies:
-    UHS, Acadia, Devereux, Sequel, Vivant, Sevita/MENTOR, ResCare/BrightSpring, Onex), what investigations found,
-    where to report and who to learn from. Read each, edit at
+    /psychiatric-hospitals/, each arguing only how its industry connects to the TTI (rewritten 2026-10-14: shared
+    roots, the same companies and investors, the same methods, the same children), then where to report and who
+    to learn from. Open (2026-10-14): the nursing homes page and the index are to lead with shared vulnerability
+    (older people, disabled people and children depend on their keepers, are isolated and not believed; teen
+    programs build that isolation on purpose); sources being researched. Still drafts, so the public URLs 404
+    until published; check for older Page Text saved edits overriding the new sections before publishing. Read each, edit at
     [KOP Data Tools > Page Text](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-page-text) or with the pencil,
     then publish in wp-admin; the History hub's "outside" box lists the index once it is published. Questions the
     research raised: UHS's Cedar Ridge Behavioral Hospital and other psychiatric hospitals sit among its TTI records
