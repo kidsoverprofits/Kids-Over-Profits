@@ -4,8 +4,11 @@ How Kids Over Profits writes anything a paragraph or longer: articles, Investiga
 text, related-industry pages, company histories, wiki entries and wiki update drafts, summaries, captions with
 more than a line. Read it before writing, and check the draft against it before handing it over.
 
-The model piece is the John Santa spotlight:
-https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/ (about 1,100 words of body).
+The model pieces are two Investigatory Spotlights, each about 1,100 words of body:
+- John Santa: https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/
+- NATSAP: https://kidsoverprofits.org/investigatory-spotlight-natsap/
+
+Section 11 describes how they are built.
 
 ## 1. Decide the point before writing
 
@@ -52,7 +55,9 @@ https://kidsoverprofits.org/investigatory-spotlight-john-santa-montana-academy/ 
   a death answered with a dismissive letter).
 - Never invent a judgment the record can't support. Attribute allegations to whoever made them.
 - Name victims where the record does. Costs ($8,000 a month), counts and dates make the point.
-- End on what the facts mean for the wider industry, not on a summary and not on advice.
+- End on what the facts mean for the wider industry, not on a summary and not on advice. The last line can be a
+  verdict that names who has a stake in it: "Families deserve to know the truth: NATSAP's endorsement will not
+  keep your kids safe." That is a verdict, not a how-to.
 
 ## 4. Don't talk down to the reader
 
@@ -137,6 +142,49 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
   site, archived home pages, survivor sites, and last, the entry's KOP facility page).
 - Programs, companies and people link to their own r/troubledteens wiki pages, never to KOP profile pages.
 
+## 11. How the model pieces are built
+
+- **The first paragraph states the subject, the claim and the verdict.** NATSAP opens by saying who it is, what
+  it claims ("membership is marketed as an indication of high quality care") and what the record shows instead
+  ("a staggering proportion of its members have received credible, ongoing reports of abuse"; the standards were
+  "just for show"). The reader knows the thesis before the second paragraph.
+- **The claim is set against the reality, again and again.** "Allegedly ... However", "claimed ... In reality",
+  "has the appearance of a legitimate academic journal but functions as just another marketing tool". Each
+  section takes one thing the subject says about itself and holds it up to what the record shows.
+- **The subject's own words and materials are the evidence against it:** its newsletters, logo, journal, press
+  releases, leaked calls, its officers' testimony. Quote what it said; then show what it did.
+- **Each paragraph's first sentence links it to the last and states its point:** "In fact, the opposite is
+  true", "The ethical failures at NATSAP extend far beyond ...", "The messy relationship NATSAP has with its
+  members and researchers extends into the legislative realm", "Even in the face of active investigations ...".
+  Read only the first sentences and the argument still holds together.
+- **Each section rests on a dated, named event:** the 2007 hearing, licensure required only in 2009, the 2020
+  leaked call, the 2023 conference, a death on November 5, 2024. The piece moves from point to point, and every
+  point stands on something that happened to someone on a date.
+- **Time spans make the point:** "10 full years after NATSAP's founding", "Nearly 20 years later". The gap
+  between when something should have happened and when it did is itself evidence.
+- **The pattern is named only after it is shown:** "Time and time again", "Over and over again" come after the
+  cases, never in place of them.
+- **People are followed across programs.** L. Jay Mitchell's Alldredge Academy kept its membership after Ryan
+  Lewis's death; then he founded Greenbrier Academy, which NATSAP also admitted. Following one person from
+  program to program shows what the institution let happen.
+- **Take on the strongest counterpoint.** NATSAP endorsed SICAA; the piece says this "could be interpreted as a
+  sign of progress", then says from the record why skepticism is warranted. When the subject has done something
+  that looks good, deal with it head-on. Never leave it out.
+- **Say how sure you are.** Documented conduct gets a flat verdict ("a blatant attempt to shield NATSAP
+  programs"); motive that can only be inferred is marked as inference ("NATSAP may have been vying for a seat at
+  the table").
+- **KOP speaks as "we" when it holds the evidence:** "we have plenty of evidence that those standards were not
+  enforced".
+- **Precise identifiers:** spell out an organization's name on first use with its acronym; give bills with their
+  Congress and number ("SCARPTA (110th Congress, H.R.5876)"); give victims' age and the date ("17-year-old Biruk
+  Silvers", "November 5, 2024").
+- **The primary sources come after the piece.** The body is short; below it are a full reference list and long
+  excerpts from the primary sources themselves (hearing transcripts with timestamps and speakers, parents'
+  testimony), each in its own "Click to read" section, with graphic details behind a further click. The body
+  argues; the appendix lets the reader check every claim in the original words.
+- **A series piece can close by naming the next one** ("The next entry in this series will detail ..."), right
+  before the closing verdict.
+
 ## Checklist before handing a draft over
 
 1. Can you state the piece's point in one sentence? Does every section's and paragraph's point serve it?
@@ -151,3 +199,7 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 10. Does it read with urgency, as someone with a duty to protect the children involved?
 11. Where a primary source exists, is it the one quoted and cited? Would a direct quote land a point harder than
     the paraphrase?
+12. Does the first paragraph give the claim and the verdict? Read only the paragraphs' first sentences: do they
+    carry the argument?
+13. Is the strongest counterpoint answered? Is inferred motive marked as inference?
+14. Are the primary sources excerpted after the piece, with graphic details behind a click?
