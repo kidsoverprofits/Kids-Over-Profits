@@ -2290,8 +2290,8 @@ Open:
    creates the companies Clearview Horizon, Inc. (past) and Elk Mountain Academy, Inc. (current), and sets Mary
    Thielbahr's role. It replaces the bare `rename_years-100124-12698` card.
 2. 16 sources sent to Review inbox on 2026-10-14: nine articles (KFF, AP, Parsons Behle, Law360, five Woodbury pages)
-   to news review and three court records (Markel, Kinsale, DA 24-0687) to lawsuit review. Four websites (CARF,
-   GuideStar, NATSAP, the 2023 DPHHS provider list) waited for the hourly cap to reset; check Websites Sent In for them.
+   to news review, three court records (Markel, Kinsale, DA 24-0687) to lawsuit review and four websites (CARF,
+   GuideStar, NATSAP, the 2023 DPHHS provider list) to Websites Sent In; all waiting for review.
 3. A folder "ClearView Communities LLC" (FileBird 92, under "Clearview Horizon Inc") holds 2 files: another company
    name for the program to look into.
 
