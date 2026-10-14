@@ -140,7 +140,7 @@ day were replayed by path (old tip b7ea3dc5). Still open:
    repository's head (a6126ba8) is what `kop-pipeline/scrapers` holds. Both old
    repositories are archived by step 7 of the script below; their commit SHAs,
    cited in this file and in older notes, keep resolving there.
-3. **This machine** (owner, one script):
+3. (Done 2026-10-13: the owner ran the script; the mobile app repo was also transferred to kidsoverprofits.) **This machine** (owner, one script):
    `powershell -ExecutionPolicy Bypass -File ..\kop-pipeline\split\finish-local.ps1`
    with no session or scraper using the old checkout. It repoints
    `source\repos\Kids-Over-Profits` at the new repository and resets it to
