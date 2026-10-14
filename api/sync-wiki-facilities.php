@@ -136,13 +136,14 @@ function kop_wiki_staff_fold($name): string {
 
 /** submission id => {record, program, staff[], at}: what each approval put on a record. */
 function kop_wiki_staff_log(): array {
-    if (!function_exists('get_option')) return $GLOBALS['kop_wiki_staff_log'] ?? [];
+    // Outside WordPress, or in a dry run (api/backfill-wiki-staff.php), the log lives in memory.
+    if (!function_exists('get_option') || !empty($GLOBALS['kop_wiki_staff_dry'])) return $GLOBALS['kop_wiki_staff_log'] ?? [];
     $log = get_option('kop_wiki_staff_log', []);
     return is_array($log) ? $log : [];
 }
 
 function kop_wiki_staff_log_save(array $log): void {
-    if (!function_exists('update_option')) {
+    if (!function_exists('update_option') || !empty($GLOBALS['kop_wiki_staff_dry'])) {
         $GLOBALS['kop_wiki_staff_log'] = $log;
         return;
     }
