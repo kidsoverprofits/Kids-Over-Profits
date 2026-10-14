@@ -1,5 +1,5 @@
 {
- "about": "Draft parent company histories; applied as drafts by inc/operator-history.php. Rebuilt by scripts/build-operator-histories.py.",
+ "about": "Draft parent company histories; applied as drafts by inc/operator-history.php. Merged by scripts/build-operator-histories.py (kop-pipeline); this file is the source of truth.",
  "companies": [
   {
    "name": "Acadia HealthCare",

@@ -138,7 +138,8 @@ php scripts/test-operator-pages.php               # renders every /operator/<slu
 # a large map node); each page has a written history (operator.history, draft = admins only, published with the pencil;
 # drafts come from seeds/operator-histories.json, which fills only empty records), a year-by-year timeline from the map's
 # "operated" years + programs' years + lawsuits + deaths, the map's people, and the documents filed under its programs
-(kop-pipeline) python scripts/build-operator-histories.py      # tmp/operator-histories/*.json -> seeds/operator-histories.json; bump
+(kop-pipeline) python scripts/build-operator-histories.py <slug> ...   # merges those drafts into seeds/operator-histories.json, which is the
+                                                # source of truth (--export refreshes kop-pipeline's tmp/ drafts from it); bump
                                                 # KOP_OPERATOR_HISTORY_SEED_VERSION to apply (replaces only drafts nobody edited)
 php scripts/test-operator-history-seed.php      # fill, replace untouched drafts, keep edited/published, on a temp copy
 # Homes and cottages of one program (inc/program-homes.php): each licensed home keeps its record; {prefix}kop_program_homes ties it
