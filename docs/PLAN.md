@@ -2269,16 +2269,29 @@ Open:
    then merges 100124 into 12698 as a 2020 rename. It adds past name Clear View and other name Clearview Academy,
    creates the companies Clearview Horizon, Inc. (past) and Elk Mountain Academy, Inc. (current), and sets Mary
    Thielbahr's role. It replaces the bare `rename_years-100124-12698` card.
-2. 16 sources (KFF, AP, Parsons Behle, Law360, five Woodbury pages, Markel, Kinsale, DA 24-0687, CARF, GuideStar,
-   NATSAP, the 2023 DPHHS provider list) hit the submit route's hourly cap on 2026-10-14. A retry was running; check
-   Review inbox for them, and resend any that are missing.
+2. 16 sources sent to Review inbox on 2026-10-14: nine articles (KFF, AP, Parsons Behle, Law360, five Woodbury pages)
+   to news review and three court records (Markel, Kinsale, DA 24-0687) to lawsuit review. Four websites (CARF,
+   GuideStar, NATSAP, the 2023 DPHHS provider list) waited for the hourly cap to reset; check Websites Sent In for them.
 3. A folder "ClearView Communities LLC" (FileBird 92, under "Clearview Horizon Inc") holds 2 files: another company
    name for the program to look into.
 
-App and SEO work from the same session (in progress): a Donate button opening /donate/ in the in-app browser; the Map
-tab with app controls (search, zoom, fit, Key/List/Timeline, Back through the trail, room for the map); autocomplete
-on Home, Companies, Send and the map from a new `kop/v1/mobile/suggest`; an SEO strategy page for the owner, then
-schema.org data, an operator sitemap and social cards.
+App work from the same session, pushed to kids-over-profits-mobile (not yet in a build):
+- Donate: a header button on Home and a "Support this work" box on Home and About open /donate/ in the in-app browser.
+- Autocomplete: Home suggests programs and companies from the second letter (`kop/v1/mobile/suggest`,
+  `kop_mobile_suggest()` in inc/facility-suggest.php, live), Companies adds companies found by another name, and the
+  Send form's company field suggests companies.
+- Map tab: the app's own search, zoom, Key/List/Timeline chips, Back through the trail, reload and a menu
+  (src/lib/mapBridge.ts drives the website's page; the website is unchanged). The style that hides the site's header
+  had never applied (it ran before the page had a root element); fixed.
+
+Open:
+4. **Owner:** try the app on a phone (Expo Go or the next EAS build): the Map tab's search, Back through three names,
+   Android's back, the drawer's drag handle, Key/List/Timeline; Donate on Home and About; search "Copper Canyon" on Home.
+5. **Owner:** ship it: an EAS update or a store build (the app's README has the commands).
+6. The map page's class names and button ids are now read by the app (src/lib/mapPage.ts HIDE_SELECTORS,
+   src/lib/mapBridge.ts BUTTONS): renaming one on the website breaks the Map tab.
+
+SEO (in progress): a strategy page for the owner, then schema.org data, an operator sitemap and social cards.
 
 ### 3.25 KOP Tools screens on one look (2026-10-14)
 
