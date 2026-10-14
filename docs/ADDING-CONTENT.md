@@ -222,9 +222,24 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
   Conflicts. Having no information is never a conflict.
 - Volunteers: a queue volunteers must never open goes in
   `kop_vol_never_sources()` (`inc/review-volunteers.php`).
-- A queue that files items its own way goes in the skip list of
-  `inc/review-inbox/_ya-file-action.php` ("File under a young adult
-  program").
+- An action that picks a company, program, consultant, provider, transporter,
+  marketer or trade organization uses `kop_record_field_param()`
+  (`inc/record-field.php`), never a dropdown of every record or its own
+  "create" form: the finder lists only those kinds and ends with "New company
+  named ..."; the action turns the value into a record with
+  `kop_record_field_resolve()` (or `kop_record_field_link()`, which deletes a
+  new record again when the link fails), citing the card in `cite`/`url`, and
+  its Undo calls `kop_record_field_unmake()` after taking its own link off.
+  A new table that can point at a company goes in
+  `kop_record_field_company_refs()`, so Undo never deletes a company in use.
+- An action that belongs on many queues' cards is a card add-on, written once:
+  `kop_rinbox_addon()` (`inc/review-inbox.php`), never another hard-wired block
+  in `kop_rinbox_finish_items()`. It names the queues it can never go on
+  (`never`) and whether it starts on everywhere (`default`); a queue can ask
+  for it with `'addons' => [id]`; the owner ticks it on or off per queue at
+  KOP Tools > Card Add-ons (`inc/review-inbox-addons.php`). A new queue that
+  does an add-on's job its own way goes in that add-on's `never` list (e.g.
+  `kop_rinbox_ya_file_skip_sources()`, `kop_rinbox_homes_skip_sources()`).
 - A test in `scripts/review-inbox-tests/`, run with
   `scripts/test-review-inbox.php --source=<name>`.
 - `docs/admin-submissions/README.md`: the queue and what its buttons do.

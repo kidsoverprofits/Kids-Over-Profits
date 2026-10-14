@@ -162,11 +162,6 @@ function kop_rinbox_bizf_item($key, array $e) {
     $links = array();
     if ($ent && !empty($ent['url'])) $links[] = array('label' => $state_name . "'s record of it", 'url' => (string) $ent['url']);
 
-    $operators = array('' => 'Pick a company');
-    global $wpdb;
-    foreach ((array) $wpdb->get_results('SELECT id, name FROM ' . $wpdb->prefix . 'kop_operators ORDER BY name', ARRAY_A) as $r) {
-        $operators[(string) $r['id']] = (string) $r['name'];
-    }
     $fac = $op = null;
     foreach ((array) ($e['candidates'] ?? array()) as $c) {
         if (!$fac && ($c['kind'] ?? '') === 'facility') $fac = $c;
@@ -180,8 +175,8 @@ function kop_rinbox_bizf_item($key, array $e) {
             'help' => 'Shows this company\'s filing (officers, registered agent, name changes, dissolution, trade names) on the page of the record picked in "Record", at once. Undo on the Linked tab takes the link off.');
         $actions[] = array('id' => 'link_company', 'label' => 'Link to a company…', 'style' => $op && $view !== 'linked' ? 'approve' : 'neutral', 'ask' => true,
             'submit' => 'Link it to the company',
-            'params' => array(array('name' => 'operator_id', 'label' => 'Company', 'type' => 'select', 'options' => $operators, 'value' => $op ? (string) $op['id'] : '')),
-            'help' => 'Shows this company\'s filing on the company page picked, at once. Undo on the Linked tab takes the link off.');
+            'params' => array(kop_record_field_param('operator_id', 'Company', array('kinds' => array('company'), 'value' => $op ? kop_record_field_token('company', $op['id']) : ''))),
+            'help' => 'Shows this company\'s filing on the company page picked, at once. A company not on file yet can be named in the finder: it is made when you click, citing this state filing. Undo on the Linked tab takes the link off (and the new company, if nothing else uses it).');
     }
     if ($open) {
         $actions[] = array('id' => 'reject', 'label' => 'Not this program', 'style' => 'reject',
@@ -217,11 +212,23 @@ function kop_rinbox_bizf_act($key, $action, array $params) {
         case 'link':
             return array('message' => kop_bizf_apply($key, 'facility', (int) ($params['facility_id'] ?? 0), kop_rinbox_reviewer()));
         case 'link_company':
-            return array('message' => kop_bizf_apply($key, 'operator', (int) ($params['operator_id'] ?? 0), kop_rinbox_reviewer()));
+            $e = kop_bizf_candidates()[(string) $key] ?? array();
+            $ent = $e ? kop_bizf_entity($e['state'], $e['doc']) : null;
+            return array('message' => kop_record_field_link((string) ($params['operator_id'] ?? ''), array(
+                'cite' => 'the ' . ($e['state'] ?? '') . ' business filing of "' . ($e['name'] ?? $key) . '" (document ' . ($e['doc'] ?? '') . ')',
+                'url' => (string) ($ent['url'] ?? ''),
+                'city' => (string) ($e['city'] ?? ''), 'state' => (string) ($e['state'] ?? ''), 'by' => kop_rinbox_reviewer(),
+            ), function ($oid) use ($key) { return kop_bizf_apply($key, 'operator', $oid, kop_rinbox_reviewer()); }));
         case 'reject':
             return array('message' => kop_bizf_reject($key, kop_rinbox_reviewer()));
         case 'undo':
-            return array('message' => kop_bizf_undo($key));
+            $made = array();
+            foreach ((array) (kop_bizf_decisions()[(string) $key]['links'] ?? array()) as $lid) {
+                foreach (kop_bizf_links(array('id' => (int) $lid)) as $l) if ((int) $l['operator_id']) $made[] = (int) $l['operator_id'];
+            }
+            $msg = kop_bizf_undo($key);
+            foreach ($made as $oid) $msg .= kop_record_field_unmake('company', $oid);
+            return array('message' => $msg);
     }
     throw new RuntimeException('Unknown action.');
 }

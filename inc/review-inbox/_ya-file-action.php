@@ -244,3 +244,12 @@ function kop_rinbox_ya_filed_wrap($key, array $src) {
     };
     return $src;
 }
+
+kop_rinbox_addon('ya-file', array(
+    'label'   => 'File under a young adult program',
+    'help'    => 'On a card still waiting for a decision: put what it says on a program for people 18 and older (a fact citing its link, or only the link) and move the card to Already on file.',
+    'actions' => KOP_RINBOX_YA_FILE_ACTIONS,
+    'never'   => 'kop_rinbox_ya_file_skip_sources',
+    'card'    => 'kop_rinbox_ya_file_action',
+    'act'     => 'kop_rinbox_ya_file_act',
+));

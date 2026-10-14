@@ -9,8 +9,10 @@
  * drawn on the same page by js/review-inbox.js with the same controls: edit
  * the name and details, change the category, tags, move it to another queue,
  * fill empty fields with AI, and the queue's own actions (with its Undo).
- * Every card about one facility also gets "Home of a program"
- * (inc/review-inbox/_homes-action.php, answered before the queue's 'act').
+ * Cards also get the card add-ons switched on for their queue ("Home of a
+ * program", "File under a young adult program", ...; kop_rinbox_addon(),
+ * below), answered before the queue's 'act'. The owner switches each add-on
+ * on or off per queue at KOP Tools > Card Add-ons (inc/review-inbox-addons.php).
  *
  * A source is an adapter in inc/review-inbox/<name>.php that registers with
  * kop_rinbox_register('<name>', fn () => spec or null). The spec is built on
@@ -66,6 +68,9 @@
  *   'lookup'   fn(string $name, string $q): [{value, label}]  optional; a
  *              text field or param with 'lookup' => name suggests values as
  *              the reviewer types (a company "c12", a consultant...)
+ *   'addons'   [add-on id]  optional; card add-ons this queue has unless the
+ *              owner switches them off (an add-on that is on everywhere needs
+ *              no entry here)
  *
  * An item: key, title, subtitle, url, text, created, status, status_label,
  * facility {id, name, url}, fields [{name, label, type (text, textarea, list,
@@ -81,6 +86,11 @@
  * A param with 'optional' => true may be left empty: the action is still
  * offered for the selected cards, and each card sends what its own inputs
  * say at the time.
+ *
+ * A param that picks a company, program, consultant... (or names a new one)
+ * is kop_record_field_param() (inc/record-field.php): type 'record' with
+ * 'kinds' and 'create'; the action turns its value into a record with
+ * kop_record_field_resolve() and its Undo calls kop_record_field_unmake().
  *
  * An action may carry 'help': one sentence on what clicking it does, shown
  * under the Approve / Reject buttons so the reviewer knows what they approve.
@@ -104,12 +114,66 @@ function kop_rinbox_register($key, callable $build) {
     $GLOBALS['kop_rinbox_builders'][$key] = $build;
 }
 
+/*
+ * Card add-ons: an action any queue's cards can have, written once.
+ *
+ *   kop_rinbox_addon('<id>', array(
+ *       'label'   'Home of a program'   (the Card Add-ons screen)
+ *       'help'    one sentence: what it does on a card   (the same screen)
+ *       'actions' [action ids it answers, its Undo's included]
+ *       'card'    fn(string $source, array $item): action or null
+ *                 (null: not for this card, e.g. no facility on it)
+ *       'act'     fn(string $source, string $key, string $action, array $params): result
+ *                 (as a queue's 'act'; 'undo' => {action, params} for Recently done)
+ *       'never'   [queues it can never be on: about something else, or doing it their own way]
+ *       'default' true: on for every other queue until switched off;
+ *                 false: only where a queue lists it in 'addons' or the owner switches it on
+ *   ));
+ *
+ * kop_rinbox_finish_items() asks each add-on that is on for the queue for its
+ * action; kop_rinbox_cross_act() answers its actions before the queue's own
+ * 'act' (always, so an Undo still works after it is switched off).
+ */
+function kop_rinbox_addon($id, array $spec) {
+    $GLOBALS['kop_rinbox_addons'][$id] = $spec + array('label' => $id, 'help' => '', 'actions' => array(),
+        'card' => null, 'act' => null, 'never' => array(), 'default' => true);
+}
+
+/** Every add-on, by id, in the order they were added. */
+function kop_rinbox_addons() {
+    return (array) ($GLOBALS['kop_rinbox_addons'] ?? array());
+}
+
+/** The owner's choices: [add-on id => [queue => true|false]]. */
+function kop_rinbox_addon_choices() {
+    $v = get_option('kop_review_addons', array());
+    return is_array($v) ? $v : array();
+}
+
+/** Can the add-on ever be on this queue? */
+function kop_rinbox_addon_allowed($id, $source) {
+    $a = kop_rinbox_addons()[$id] ?? null;
+    if (!$a) return false;
+    $never = is_callable($a['never']) ? (array) call_user_func($a['never']) : (array) $a['never'];
+    return !in_array($source, $never, true);
+}
+
+/** Is the add-on on for this queue: the owner's choice, else the queue's 'addons', else its default. */
+function kop_rinbox_addon_on($id, $source) {
+    if (!kop_rinbox_addon_allowed($id, $source)) return false;
+    $choices = kop_rinbox_addon_choices();
+    if (isset($choices[$id][$source])) return (bool) $choices[$id][$source];
+    return kop_rinbox_addon_default($id, $source);
+}
+
 // Where "Move to" can send an item (news, lawsuits, legislation, Industry PR, a facility's website or resources).
 require_once __DIR__ . '/review-destinations.php';
 // Recently done (with Undo), snooze / assign, link previews.
 require_once __DIR__ . '/review-inbox-log.php';
 // Volunteers recommend approve / reject through a personal link (/volunteer-review/).
 require_once __DIR__ . '/review-volunteers.php';
+// KOP Tools > Card Add-ons: which add-on is on for which queue.
+require_once __DIR__ . '/review-inbox-addons.php';
 
 foreach (glob(__DIR__ . '/review-inbox/*.php') ?: array() as $kop_rinbox_file) {
     require_once $kop_rinbox_file;
@@ -342,18 +406,11 @@ function kop_rinbox_finish_items($source, array $items) {
         $it['tags'] = $tags[$it['key']] ?? array();
         $it['hold'] = kop_rinbox_hold_info($source, $it['key']);
         $it['recs'] = $recs[$it['key']] ?? array();
-        // "Home of a program" on every card about one facility (inc/review-inbox/_homes-action.php).
-        if (function_exists('kop_rinbox_homes_action') && is_array($it['facility'])) {
+        // The card add-ons switched on for this queue ("Home of a program", "File under a young adult program", ...).
+        foreach (kop_rinbox_addons() as $aid => $a) {
+            if (!is_callable($a['card']) || !kop_rinbox_addon_on($aid, $source)) continue;
             try {
-                if ($h = kop_rinbox_homes_action($source, $it)) $it['actions'][] = $h;
-            } catch (Throwable $e) {
-                // The card still draws without it.
-            }
-        }
-        // "File under a young adult program" on every card of a content queue (inc/review-inbox/_ya-file-action.php).
-        if (function_exists('kop_rinbox_ya_file_action')) {
-            try {
-                if ($y = kop_rinbox_ya_file_action($source, $it)) $it['actions'][] = $y;
+                if ($act = call_user_func($a['card'], $source, $it)) $it['actions'][] = $act;
             } catch (Throwable $e) {
                 // The card still draws without it.
             }
@@ -724,14 +781,16 @@ function kop_rinbox_after($source, $key) {
 }
 
 /**
- * The actions every card can have whatever its queue ("Home of a program",
- * "File under a young adult program") and their Undo; null when $action is
- * the queue's own.
+ * The card add-ons' actions ("Home of a program", "File under a young adult
+ * program", ...) and their Undo; null when $action is the queue's own.
  */
 function kop_rinbox_cross_act($source, $key, $action, array $params) {
-    $res = function_exists('kop_rinbox_homes_act') ? kop_rinbox_homes_act($source, $key, $action, $params) : null;
-    if ($res === null && function_exists('kop_rinbox_ya_file_act')) $res = kop_rinbox_ya_file_act($source, $key, $action, $params);
-    return $res;
+    foreach (kop_rinbox_addons() as $a) {
+        if (!is_callable($a['act']) || !in_array($action, (array) $a['actions'], true)) continue;
+        $res = call_user_func($a['act'], $source, $key, $action, $params);
+        if ($res !== null) return $res;
+    }
+    return null;
 }
 
 function kop_rinbox_rest_act(WP_REST_Request $req) {

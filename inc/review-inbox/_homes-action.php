@@ -122,3 +122,14 @@ function kop_rinbox_homes_act($source, $key, $action, array $params) {
         'undo' => array('action' => 'undo_home_of_program', 'params' => array('facility' => $fid, 'program' => $pid,
             'before' => $was ? (int) $was[0] : 0, 'before_name' => $was ? (string) $was[1] : '', 'new_group' => !in_array($pid, $groups, true))));
 }
+
+kop_rinbox_addon('home-of-program', array(
+    'label'   => 'Home of a program',
+    'help'    => 'On a card about one facility: list that record as one home or cottage of a program (picked, or a new one named), or take it off its program.',
+    'actions' => KOP_RINBOX_HOMES_ACTIONS,
+    'never'   => 'kop_rinbox_homes_skip_sources',
+    'card'    => function ($source, array $item) {
+        return function_exists('kop_rinbox_homes_action') && is_array($item['facility']) ? kop_rinbox_homes_action($source, $item) : null;
+    },
+    'act'     => 'kop_rinbox_homes_act',
+));

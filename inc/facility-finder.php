@@ -11,6 +11,13 @@
  * Search: kop_facility_finder_search() (plain PDO, so
  * scripts/test-facility-finder.php runs it against tmp/prod.sqlite).
  * Endpoint: admin-ajax.php?action=kop_facility_finder (manage_options + nonce).
+ *
+ * Any record, not only facilities: a box with data-kop-record-kinds="all" (or
+ * a list, "company" or "company,consultant") lists those kinds and fills the
+ * box with "<kind>:<id>" (a facility stays its bare id). With
+ * data-kop-record-create="company" the list ends with "New company named
+ * <what was typed>", which fills the box with "new:company:<name>" for
+ * kop_record_field_resolve() (inc/record-field.php) to make when the action runs.
  */
 
 if (!defined('ABSPATH')) {
@@ -154,7 +161,10 @@ add_action('wp_ajax_kop_facility_finder', function () {
         wp_send_json_error('The records database is not reachable.', 500);
     }
     $q = wp_unslash($_GET['q'] ?? '');
-    $results = kop_facility_finder_search($pdo, $q);
+    // 'all', or the kinds a field asks for ("company", "company,consultant"); none: facilities only.
+    $kinds_param = sanitize_text_field(wp_unslash($_GET['kinds'] ?? ''));
+    $kinds = $kinds_param === '' ? array('facility') : ($kinds_param === 'all' ? array('all') : array_map('kop_record_field_kind', explode(',', $kinds_param)));
+    $results = in_array('facility', $kinds, true) || $kinds === array('all') ? kop_facility_finder_search($pdo, $q) : array();
     foreach ($results as &$r) {
         $r['url'] = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($r['id']) : '';
         $r['kind'] = 'facility';
@@ -162,9 +172,13 @@ add_action('wp_ajax_kop_facility_finder', function () {
     }
     unset($r);
     // "Any record": companies, consultants, providers and transporters too, each as "<kind>:<id>".
-    if (($_GET['kinds'] ?? '') === 'all' && function_exists('kop_wbc_find_records')) {
+    $others = array_values(array_diff($kinds, array('facility')));
+    if ($others && function_exists('kop_wbc_find_records')) {
         try {
-            foreach (kop_wbc_find_records(kop_wbc_pdo(), $q, 10) as $o) {
+            // One kind: its own search, ranked for it (kop_wbc_find_records() ranks companies alone that way).
+            $only = count($others) === 1 && $others !== array('all') ? $others[0] : '';
+            foreach (kop_wbc_find_records(kop_wbc_pdo(), $q, $only !== '' ? 12 : 10, $only) as $o) {
+                if ($others !== array('all') && !in_array($o['kind'], $others, true)) continue;
                 $results[] = array('id' => (int) $o['id'], 'token' => $o['kind'] . ':' . (int) $o['id'], 'kind' => $o['kind'], 'name' => $o['name'],
                     'label' => $o['label'], 'detail' => $o['detail'], 'url' => (string) ($o['url'] ?? ''));
             }
@@ -206,6 +220,7 @@ function kop_facility_finder_print_assets() {
         .kop-ff-list li.kop-ff-note { cursor: default; color: #666; background: #fff; }
         .kop-ff-meta { display: block; color: #666; font-size: 12px; }
         .kop-ff-picked { display: block; font-size: 12px; margin-top: 2px; }
+        .kop-ff-list li.kop-ff-new { border-top: 1px solid #8c8f94; }
     </style>
     <script>
     (function () {
@@ -236,10 +251,17 @@ function kop_facility_finder_print_assets() {
             var q = document.createElement('input');
             q.type = 'search';
             q.className = 'kop-ff-q';
-            var anyKind = box.getAttribute('data-kop-record-kinds') === 'all';
-            q.placeholder = anyKind ? 'Find a program, company, consultant…' : 'Find by name…';
+            // 'all', or the kinds this box takes ("company"); empty: facilities only.
+            var kinds = (box.getAttribute('data-kop-record-kinds') || '').trim();
+            var anyKind = kinds !== '';
+            var create = (box.getAttribute('data-kop-record-create') || '').split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+            var words = { facility: 'program', company: 'company', consultant: 'educational consultant', provider: 'mental health provider',
+                transporter: 'transporter', marketer: 'marketing company', tradeorg: 'trade organization' };
+            var named = kinds === '' || kinds === 'all' ? '' : kinds.split(',').map(function (k) { return words[k.trim()] || k.trim(); }).join(' or ');
+            q.placeholder = named ? 'Find a ' + named + (create.length ? ', or type a new name' : '') + '…'
+                : anyKind ? 'Find a program, company, consultant…' : 'Find by name…';
             q.setAttribute('autocomplete', 'off');
-            q.setAttribute('aria-label', anyKind ? 'Find a record by name' : 'Find a facility by name');
+            q.setAttribute('aria-label', named ? 'Find a ' + named + ' by name' : anyKind ? 'Find a record by name' : 'Find a facility by name');
             var list = document.createElement('ul');
             list.className = 'kop-ff-list';
             list.hidden = true;
@@ -265,6 +287,17 @@ function kop_facility_finder_print_assets() {
                 box.dispatchEvent(new Event('input', { bubbles: true }));
                 box.dispatchEvent(new Event('change', { bubbles: true }));
                 picked.textContent = '';
+                if (f.isNew) {
+                    // Made only when the action runs (kop_record_field_resolve()).
+                    picked.appendChild(document.createTextNode('New ' + (words[f.kind] || f.kind) + ': '));
+                    var nn = document.createElement('strong');
+                    nn.textContent = f.name;
+                    picked.appendChild(nn);
+                    picked.appendChild(document.createTextNode(' (made when you click the button)'));
+                    q.value = '';
+                    close();
+                    return;
+                }
                 var name = document.createElement(f.url ? 'a' : 'strong');
                 name.textContent = f.name;
                 if (f.url) { name.href = f.url; name.target = '_blank'; name.rel = 'noopener'; }
@@ -284,10 +317,33 @@ function kop_facility_finder_print_assets() {
                 list.appendChild(li);
                 list.hidden = false;
             }
+            // "New company named ..." under the matches, when the box may make one.
+            function withNew(found) {
+                var term = q.value.trim().replace(/\s+/g, ' ');
+                if (!create.length || term.length < 2 || /^\d+$/.test(term)) return found;
+                var same = found.some(function (f) { return (f.name || '').toLowerCase() === term.toLowerCase(); });
+                return found.concat(same ? [] : create.map(function (k) {
+                    return { isNew: true, kind: k, name: term, token: 'new:' + k + ':' + term, id: 0 };
+                }));
+            }
             function render() {
                 list.innerHTML = '';
                 if (!results.length) { note((anyKind ? 'No record' : 'No facility') + ' matches. Try part of the name.'); return; }
                 results.forEach(function (f, i) {
+                    if (f.isNew) {
+                        var nl = document.createElement('li');
+                        nl.className = 'kop-ff-new' + (i === active ? ' on' : '');
+                        var nb = document.createElement('strong');
+                        nb.textContent = 'New ' + (words[f.kind] || f.kind) + ' named \u201c' + f.name + '\u201d';
+                        var nm = document.createElement('span');
+                        nm.className = 'kop-ff-meta';
+                        nm.textContent = 'Not on file yet: made when you click the button, citing where this card came from.';
+                        nl.appendChild(nb);
+                        nl.appendChild(nm);
+                        nl.addEventListener('mousedown', function (e) { e.preventDefault(); choose(f); });
+                        list.appendChild(nl);
+                        return;
+                    }
                     var li = document.createElement('li');
                     if (i === active) li.className = 'on';
                     var b = document.createElement('strong');
@@ -309,12 +365,12 @@ function kop_facility_finder_print_assets() {
                 if (term.length < 2 && !/^\d+$/.test(term)) { close(); return; }
                 var mine = ++seq;
                 note('Searching…');
-                fetch(ajax + '?action=kop_facility_finder&nonce=' + encodeURIComponent(nonce) + '&q=' + encodeURIComponent(term) + (anyKind ? '&kinds=all' : ''), { credentials: 'same-origin' })
+                fetch(ajax + '?action=kop_facility_finder&nonce=' + encodeURIComponent(nonce) + '&q=' + encodeURIComponent(term) + (anyKind ? '&kinds=' + encodeURIComponent(kinds) : ''), { credentials: 'same-origin' })
                     .then(function (r) { return r.json(); })
                     .then(function (json) {
                         if (mine !== seq) return;
                         if (!json || !json.success) { note('Search failed: ' + (json && json.data ? json.data : 'try reloading the page')); return; }
-                        results = json.data; active = results.length ? 0 : -1; render();
+                        results = withNew(json.data); active = results.length ? 0 : -1; render();
                     })
                     .catch(function () { if (mine === seq) note('Search failed; try reloading the page.'); });
             }
@@ -343,3 +399,6 @@ function kop_facility_finder_print_assets() {
     </script>
     <?php
 }
+
+// "Pick a record, or make a new one" for any action (kop_record_field_param()).
+require_once __DIR__ . '/record-field.php';

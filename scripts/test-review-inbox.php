@@ -273,6 +273,15 @@ if ($only === '' || $only === 'ya-file') {
     }
 }
 
+if ($only === '' || $only === 'addons') {
+    echo "-- Card add-ons and the find-or-make record field --\n";
+    try {
+        kop_rinbox_test_card_addons($check);
+    } catch (Throwable $e) {
+        $check('addons: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 if ($only === '' || $only === 'ya-moved') {
     echo "-- Items of records moved to the young adult programs --\n";
     try {

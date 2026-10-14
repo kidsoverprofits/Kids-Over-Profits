@@ -236,6 +236,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # kop_rinbox_cross_act()): a fact (People/Incidents/History/About) citing the card's link, or only the link, on a picked or new (hidden)
 # program; the card moves to "Already on file" (option kop_review_ya_filed), exact Undo. Queues filing their own way are in its skip list
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-file
+# Card add-ons: an action written once for many queues' cards ("Home of a program", "File under a young adult program") is
+# kop_rinbox_addon() in inc/review-inbox.php ('never' queues, 'default' on/off, a queue's 'addons'); the owner ticks each on/off per queue at
+# KOP Tools > Card Add-ons (inc/review-inbox-addons.php, option kop_review_addons). Picking a company/program/consultant... in an action, or
+# naming a new one, is kop_record_field_param() (inc/record-field.php; the finder lists those kinds + "New company named ..."):
+# kop_record_field_resolve()/_link() makes it citing the card, Undo's kop_record_field_unmake() deletes it while untouched (nonprofit/business filings)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=addons
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
 # discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links (no-record ones re-tied by their SCIAD collection or wiki page name; company-only

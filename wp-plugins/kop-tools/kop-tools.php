@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.0
+ * Version: 2.5.1
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -41,6 +41,13 @@ function kop_tools_registry() {
                 'desc'     => 'The Review Inbox: every approval queue in one place (news, data, wiki, lawsuits, legislation, the news scans, imports, merges, map years and renames, inspection findings, conflicts...), with Recently done and Undo, Later, Preview and volunteer recommendations.',
                 'type'     => 'wp-page',
                 'template' => 'page-admin-submissions.php',
+            ),
+            array(
+                'title'    => 'Card Add-ons',
+                'desc'     => 'Which actions written once ("Home of a program", "File under a young adult program", ...) show on which review inbox queue\'s cards: tick or untick per queue.',
+                'type'     => 'screen',
+                'screen'   => 'kop-card-addons',
+                'requires' => 'kop_rinbox_addons_page',
             ),
             array(
                 'title'    => 'Anonymous Docs',

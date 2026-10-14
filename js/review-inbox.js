@@ -633,7 +633,10 @@
             input.value = f.value ? String(f.value) : '';
         } else if (type === 'record') {
             // Any record: a program id, or "company:45" etc. from the finder's any-record mode; the finder shows what is picked.
-            input = el('input', { id: id, type: 'hidden', 'data-kop-facility-finder': '1', 'data-kop-record-kinds': 'all',
+            // kop_record_field_param() narrows the kinds (f.kinds) and may let the reviewer name a new one (f.create: "new:company:<name>").
+            input = el('input', { id: id, type: 'hidden', 'data-kop-facility-finder': '1',
+                'data-kop-record-kinds': f.kinds && f.kinds.length ? f.kinds.join(',') : 'all',
+                'data-kop-record-create': f.create && f.create.length ? f.create.join(',') : null,
                 'data-kop-picked-label': f.value_label || '' });
             input.value = f.value ? String(f.value) : '';
         } else if (type === 'checkbox') {
