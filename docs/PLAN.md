@@ -2319,14 +2319,17 @@ has none. Company pages were already in facility-sitemap.xml.
 
 Open:
 7. Tag archives out of search: the owner said yes on 2026-10-14; `kop_seo_tag_robots()` makes them noindex, follow
-   and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. **Check after deploy:** a tag page's
-   `<meta name="robots">` reads noindex, and https://kidsoverprofits.org/sitemap_index.xml lists no post_tag-sitemap.xml.
+   and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. Checked live after deploy:
+   https://kidsoverprofits.org/tag/utah/ reads `noindex, follow` and https://kidsoverprofits.org/sitemap_index.xml lists
+   no tag sitemap. LiteSpeed's cached copies of other tag pages pick it up as they expire.
 8. **Owner:** verify the site in Google Search Console and Bing Webmaster Tools, submit sitemap_index.xml. Then read
    which program names bring searchers and which pages Google refused, and adjust the plan from that.
 9. **Owner:** purge the cached /staging/ page (Hosting, item 9 above).
 10. Facility pages are ~500 KB of HTML, company pages ~660 KB: load the long lists (documents, inspections) when
     opened. Its own project.
-11. Google's Rich Results Test on a facility and a company page once Google recrawls them.
+11. Google's Rich Results Test on a facility and a company page once Google recrawls them. Our own parse of the live
+    JSON-LD (2026-10-14) is clean: Sedona Sky's Organization carries alternateName Copper Canyon Academy, Devereux's
+    lists 46 subOrganization programs, every @id reference resolves.
 
 ### 3.25 KOP Tools screens on one look (2026-10-14)
 
