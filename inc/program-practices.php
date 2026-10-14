@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_PP_DB_VERSION = '1';
+const KOP_PP_DB_VERSION = '2';
 
 function kop_pp_table() {
     global $wpdb;
@@ -57,6 +57,7 @@ function kop_pp_install($force = false) {
         value TEXT NOT NULL,
         value_orig TEXT NOT NULL,
         quote TEXT NOT NULL,
+        why VARCHAR(500) NOT NULL DEFAULT '',
         year SMALLINT UNSIGNED NOT NULL DEFAULT 0,
         checklist VARCHAR(600) NOT NULL DEFAULT '',
         status VARCHAR(10) NOT NULL DEFAULT 'pending',
@@ -67,6 +68,10 @@ function kop_pp_install($force = false) {
         KEY facility_topic (facility_id, topic),
         KEY status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    // 2: why the line is worth reviewing (the reader's or reviewer's reason, kop-pipeline doc-text.py export).
+    if (!$wpdb->get_var($wpdb->prepare('SHOW COLUMNS FROM ' . kop_pp_table() . ' LIKE %s', 'why'))) {
+        $wpdb->query('ALTER TABLE ' . kop_pp_table() . " ADD COLUMN why VARCHAR(500) NOT NULL DEFAULT '' AFTER quote");
+    }
     update_option('kop_pp_db', KOP_PP_DB_VERSION, false);
 }
 add_action('admin_init', 'kop_pp_install');
@@ -132,7 +137,7 @@ function kop_pp_import($force = false) {
     if (!kop_pp_ready()) return 0;
     $file = kop_pp_import_file();
     if (!is_readable($file)) return 0;
-    $sig = filemtime($file) . ':' . filesize($file);
+    $sig = filemtime($file) . ':' . filesize($file) . ':why';
     if (!$force && get_option('kop_pp_import_seen') === $sig) return 0;
     $data = json_decode((string) file_get_contents($file), true);
     $added = 0;
@@ -147,13 +152,18 @@ function kop_pp_import($force = false) {
         if (!preg_match('/^[0-9a-f]{40}$/', $key) || $value === '' || $fid <= 0 || !isset($topics[$topic])) continue;
         if (function_exists('kop_facility_merge_resolve')) $fid = kop_facility_merge_resolve($fid);
         $checks = array_values(array_filter(array_map('kop_pp_clean_check', (array) ($it['checklist'] ?? array()))));
-        $have = $wpdb->get_var($wpdb->prepare('SELECT id FROM ' . kop_pp_table() . ' WHERE ikey = %s', $key));
-        if ($have) continue;
+        $why = mb_substr(trim((string) ($it['why'] ?? '')), 0, 500);
+        $have = $wpdb->get_row($wpdb->prepare('SELECT id, why FROM ' . kop_pp_table() . ' WHERE ikey = %s', $key), ARRAY_A);
+        if ($have) {
+            // A line already here keeps everything but gains the reason when it had none.
+            if ($why !== '' && (string) $have['why'] === '') $wpdb->update(kop_pp_table(), array('why' => $why), array('id' => (int) $have['id']));
+            continue;
+        }
         $wpdb->insert(kop_pp_table(), array(
             'ikey' => $key, 'facility_id' => $fid, 'doc_id' => (int) ($it['doc_id'] ?? 0),
             'doc_title' => mb_substr((string) ($it['doc_title'] ?? ''), 0, 255), 'doc_url' => mb_substr((string) ($it['doc_url'] ?? ''), 0, 600),
             'page' => (int) ($it['page'] ?? 0), 'topic' => $topic, 'value' => $value, 'value_orig' => $value,
-            'quote' => (string) ($it['quote'] ?? ''), 'year' => (int) ($it['year'] ?? 0), 'checklist' => implode(',', $checks),
+            'quote' => (string) ($it['quote'] ?? ''), 'why' => $why, 'year' => (int) ($it['year'] ?? 0), 'checklist' => implode(',', $checks),
             'status' => 'pending', 'batch' => '', 'created_at' => gmdate('Y-m-d H:i:s'),
         ));
         if ($wpdb->insert_id) $added++;

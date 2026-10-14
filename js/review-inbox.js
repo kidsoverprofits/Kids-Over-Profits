@@ -548,6 +548,8 @@
                 linkRow(e).forEach(function (b) { main.appendChild(b); });
             }
             li.appendChild(main);
+            // Why the line is worth a look (Rules from documents: the reader's reason), above where it comes from.
+            if (e.why) li.appendChild(el('div', { class: 'rinbox-check-why', text: e.why }));
             if (e.sub) li.appendChild(el('div', { class: 'rinbox-check-sub', text: e.sub }));
             if (e.note) li.appendChild(el('div', { class: 'rinbox-check-note', text: e.note }));
             if (e.items) {

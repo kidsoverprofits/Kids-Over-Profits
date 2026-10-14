@@ -109,7 +109,7 @@ function kop_rinbox_pp_item($fid, $topic) {
         if ($checks) $sub .= '. Ticks: ' . implode(', ', array_map(function ($k) use ($labels) { return $labels[$k] ?? $k; }, $checks));
         if ($view === 'waiting' && $r['status'] === 'pending') {
             $checklist[] = array('keys' => array((string) $r['id']), 'label' => (string) $r['value'], 'url' => kop_pp_page_url($r),
-                'sub' => $sub, 'note' => '"' . $r['quote'] . '"', 'checked' => true);
+                'why' => (string) ($r['why'] ?? ''), 'sub' => $sub, 'note' => '"' . $r['quote'] . '"', 'checked' => true);
         } elseif ($r['status'] !== 'pending') {
             $details[] = array('label' => $r['status'] === 'added' ? 'On the page' : 'Left off',
                 'value' => $r['value'] . ' (' . $sub . ')', 'url' => '');

@@ -464,6 +464,18 @@ button.rinbox-tag-x:focus-visible {
     white-space: pre-line;
 }
 
+/* Why a line is worth reviewing (js/review-inbox.js 'why'). */
+.rinbox-check-why {
+    margin: 4px 0 0 26px;
+    padding: 2px 8px;
+    border-left: 3px solid var(--kop-orange-ink, #a35a10);
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
 /* Sources: each quote in full, how much was read, a link to the quote in the page. */
 .rinbox-sources-wrap {
     margin: 10px 0;
