@@ -1304,6 +1304,51 @@ function kop_seed_v2_prefix(PDO $pdo) {
  * row alone. Applied once per entry version, tracked by
  * data.facility.kopProfileVersion, so later edits in the data form persist.
  */
+/**
+ * Once per KOP_STAFF_DEDUPE_VERSION: re-save every facility whose staff lists
+ * name one person twice under one role, so kop_facility_save() folds them
+ * (kop_facility_staff_dedupe(); 16 lists, 59 entries on 2026-10-13).
+ * Returns the ids it rewrote.
+ */
+define('KOP_STAFF_DEDUPE_VERSION', 1);
+function kop_apply_staff_dedupe() {
+    $done = array();
+    if ((int) get_option('kop_staff_dedupe_version', 0) >= KOP_STAFF_DEDUPE_VERSION) {
+        return $done;
+    }
+    $pdo = kop_seed_pdo();
+    $prefix = $pdo ? kop_seed_v2_prefix($pdo) : null;
+    if (!$pdo || $prefix === null || !function_exists('kop_facility_staff_dedupe')) {
+        return $done;
+    }
+    $opts = array('pdo' => $pdo, 'prefix' => $prefix);
+    try {
+        $rows = $pdo->query('SELECT id, json_data FROM ' . kop_facility_table('facilities', $opts))->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $row) {
+            $doc = json_decode((string) $row['json_data'], true);
+            $hit = false;
+            foreach (array('administrator', 'notableStaff') as $list) {
+                $l = (array) ($doc['staff'][$list] ?? array());
+                if (count(kop_facility_staff_dedupe($l)) !== count($l)) $hit = true;
+            }
+            if (!$hit) continue;
+            $id = (int) $row['id'];
+            kop_v2_with_write_lock($pdo, function () use ($id, $opts) {
+                $stored = kop_facility_load($id, $opts);
+                if (!$stored) return;
+                $doc = kop_facility_normalize(kop_facility_to_legacy($stored['doc']), array('facility_id' => $stored['id'], 'unique_name' => $stored['unique_name']));
+                $doc['provenance'] = $stored['doc']['provenance'];
+                kop_facility_save($doc, $opts + array('skip_memberships' => true));
+            });
+            $done[] = $id;
+        }
+        update_option('kop_staff_dedupe_version', KOP_STAFF_DEDUPE_VERSION, false);
+    } catch (Throwable $e) {
+        error_log('kop_apply_staff_dedupe: ' . $e->getMessage());
+    }
+    return $done;
+}
+
 function kop_apply_facility_record_seeds() {
     $done = array();
     $path = trailingslashit(get_stylesheet_directory()) . 'seeds/facility-records.json';
@@ -2477,6 +2522,7 @@ function kop_apply_template_assignments() {
     $summary['names']        = kop_apply_name_correction_seeds();
     $summary['directory_folders'] = kop_apply_directory_folder_links();
     $summary['new_facilities'] = kop_apply_new_facility_seeds();
+    $summary['staff_dedupe'] = kop_apply_staff_dedupe();
     if (function_exists('kop_facility_v2_request_sync')) {
         kop_facility_v2_request_sync();   // before the write switch the seeds above edit the legacy tables
     }

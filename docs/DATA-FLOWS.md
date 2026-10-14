@@ -182,9 +182,13 @@ request.
   - draft approval (inc/wiki-update-drafts.php:682)
 - **Wiki to facility:**
   - Approval runs `kop_merge_wiki_into_facility()`
-    (api/sync-wiki-facilities.php:96-275). It fills blank fields and
-    **appends every staff entry with no duplicate check** (:236), with no
-    log and no Undo.
+    (api/sync-wiki-facilities.php:96-275). It fills blank fields, with no
+    log and no Undo. It also appends the entry's staff (:236) and
+    accreditations, but in the old record shape: `staffMembers` and a flat
+    accreditation list, which the save to `facilities_v2` drops
+    (inc/facility-store.php:1065 reads `staff.administrator` /
+    `staff.notableStaff` and `accreditations.current` / `.past`). So since
+    the write switch **wiki staff never reach the record**.
   - The facility page lists entry titles live (`kop_facility_pages_wiki()`,
     facility-pages.php:3483) and links to `/wiki-feed/?search=<current name>`.
 - **Facility to wiki:** nothing on the server.
@@ -295,11 +299,15 @@ step in section 4 that covers it.
      approval or a reject moves nothing.
    - *Fix:* status and content changes go through one function per table
      (step 2); the fingerprints read a revision counter (step 3).
-2. **Approving a wiki entry duplicates staff on the facility record**
-   (api/sync-wiki-facilities.php:236). Every approve, re-approve, and
-   approval of another row for the same page appends the staff list again.
-   *Fix:* duplicate check by `kop_people_group_key()`, log + Undo, or route
-   the staff through Woodbury Facts-style review (step 5).
+2. **Approving a wiki entry drops its staff.** The merge writes staff and
+   accreditations in the old record shape, and the v2 save drops them (see
+   the wiki entry above). Separately, 11 facility records held a whole staff
+   list saved twice (59 repeated entries; Bernalillo Academy 56 -> 28).
+   *Fixed 2026-10-13:* `kop_facility_save()` folds repeated name + role
+   entries (`kop_facility_staff_dedupe()`), and a one-time pass
+   (`kop_apply_staff_dedupe()`) re-saved the 11 records. Test:
+   scripts/test-staff-dedupe.php. *Still open:* the wiki staff themselves
+   (step 5).
 3. **Facility changes never reach the wiki.**
    - Closures, staff, operators, lawsuits and news show on the facility
      page; the wiki entry learns of them only when someone runs the offline
@@ -397,9 +405,12 @@ writer to say so, once, in one place, and for every reader to listen.
      rather than inline.
    - The result is stored, and shown as the "KOP has new information"
      badge in the editor and the Wiki updates queue (PLAN 3.12 step 6).
-5. **Wiki approval stops writing staff blindly.**
-   - De-duplicate by person group key, log each change with Undo.
-   - Or send the staff to review like the other imports.
+5. **Wiki approval writes staff the way the record holds them.**
+   - Map `staffMembers` to `staff.notableStaff` / `administrator`, and the
+     accreditations to `accreditations.current`. Repeats are already folded
+     by the save.
+   - Log each change with Undo, or send the staff to review like the other
+     imports. The owner chooses.
 6. **A drift check that runs nightly,** reported at KOP Tools (a
    one-page screen, no files):
    - re-run the four link syncs in dry-run mode over every

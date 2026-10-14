@@ -2039,6 +2039,49 @@ if (!function_exists('kop_facility_allocate_unique_name')) {
     }
 }
 
+if (!function_exists('kop_facility_staff_dedupe')) {
+    /**
+     * One entry per person and role in a staff list. Two entries are the same
+     * when their names and roles have the same letters and digits (case and
+     * punctuation aside: "Larry D. White" = "Larry D White", but "Robert W."
+     * and "Robert B." stay two). The first keeps its place and takes any field
+     * it lacks (pastJobs, source, sourceUrl, personId) from the later copies.
+     * Lists saved twice over (the whole list repeated) collapse to one.
+     */
+    function kop_facility_staff_dedupe(array $list) {
+        $fold = function ($v) {
+            $v = preg_replace('/[^\p{L}\p{N}]+/u', ' ', mb_strtolower((string) $v));
+            return trim(preg_replace('/\s+/', ' ', (string) $v));
+        };
+        $out = array();
+        $at = array();
+        foreach ($list as $entry) {
+            if (!is_array($entry)) {
+                $out[] = $entry;
+                continue;
+            }
+            $name = $fold($entry['name'] ?? '');
+            if ($name === '') {
+                $out[] = $entry;
+                continue;
+            }
+            $key = $name . '|' . $fold($entry['role'] ?? '');
+            if (!isset($at[$key])) {
+                $at[$key] = count($out);
+                $out[] = $entry;
+                continue;
+            }
+            $kept = &$out[$at[$key]];
+            foreach ($entry as $k => $v) {
+                $blank = !isset($kept[$k]) || $kept[$k] === '' || $kept[$k] === null || $kept[$k] === 0;
+                if ($blank && $v !== '' && $v !== null && $v !== 0) $kept[$k] = $v;
+            }
+            unset($kept);
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_facility_save')) {
     /**
      * Validate and write one facility, then rebuild its derived rows.
@@ -2055,6 +2098,12 @@ if (!function_exists('kop_facility_save')) {
      * @throws RuntimeException when the document has error-severity violations.
      */
     function kop_facility_save(array $doc, array $opts = array(), &$status = null) {
+        // A person listed twice under one role is one entry (DATA-FLOWS.md 3).
+        foreach (array('administrator', 'notableStaff') as $list) {
+            if (isset($doc['staff'][$list]) && is_array($doc['staff'][$list])) {
+                $doc['staff'][$list] = kop_facility_staff_dedupe($doc['staff'][$list]);
+            }
+        }
         $violations = kop_facility_validate($doc);
         $errors = array_values(array_filter($violations, function ($v) {
             return $v['severity'] === 'error';
