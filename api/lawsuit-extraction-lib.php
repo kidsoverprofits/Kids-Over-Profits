@@ -162,35 +162,85 @@ function kop_normalize_lawsuit_extraction(array $raw): array {
 // =============================================================================
 // Text extraction helpers
 // =============================================================================
-function kop_extract_document_text(string $path, string $mime_type): string {
-    if ($mime_type === 'text/plain') return (string)@file_get_contents($path);
+/**
+ * $max_pages / $max_chars: 0 = the whole document. Callers that only need the
+ * start (document types) pass limits so a long PDF is not read end to end.
+ */
+function kop_extract_document_text(string $path, string $mime_type, int $max_pages = 0, int $max_chars = 0): string {
+    if ($mime_type === 'text/plain') return (string)@file_get_contents($path, false, null, 0, $max_chars > 0 ? $max_chars * 4 : null);
     if ($mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return kop_extract_docx_text($path);
-    return kop_extract_pdf_text($path);
+    return kop_extract_pdf_text($path, $max_pages, $max_chars);
 }
 
-function kop_extract_pdf_text(string $path): string {
+/**
+ * Text of a PDF: pdftotext when installed, else the gs program (the host has
+ * Ghostscript, not pdftotext), else a PHP reader of the content streams.
+ *
+ * The PHP reader works one stream at a time with capped inflation: it used to
+ * inflate every stream of the file into one string, and a 50 MB PDF from the
+ * hourly document-type job needed 450 MB+ and killed PHP every hour.
+ */
+function kop_extract_pdf_text(string $path, int $max_pages = 0, int $max_chars = 0): string {
+    $page_args = $max_pages > 0 ? ' -f 1 -l ' . $max_pages : '';
     foreach (['pdftotext', '/usr/bin/pdftotext', '/usr/local/bin/pdftotext'] as $bin) {
         $which = trim((string)@shell_exec('which ' . escapeshellarg($bin) . ' 2>/dev/null'));
         $exe   = ($which !== '') ? $which : $bin;
         if (@is_executable($exe)) {
-            $out = @shell_exec(escapeshellarg($exe) . ' -enc UTF-8 -nopgbrk ' . escapeshellarg($path) . ' - 2>/dev/null');
+            $out = @shell_exec(escapeshellarg($exe) . ' -enc UTF-8 -nopgbrk' . $page_args . ' ' . escapeshellarg($path) . ' - 2>/dev/null');
             if ($out !== null && strlen(trim($out)) > 50) return $out;
             break;
         }
     }
 
+    if (function_exists('shell_exec') && DIRECTORY_SEPARATOR === '/' && @is_executable('/usr/bin/gs')) {
+        $out = (string)@shell_exec((@is_executable('/usr/bin/timeout') ? '/usr/bin/timeout 120 ' : '')
+            . '/usr/bin/gs -q -dNOPAUSE -dBATCH -dSAFER -sDEVICE=txtwrite'
+            . ($max_pages > 0 ? ' -dFirstPage=1 -dLastPage=' . $max_pages : '')
+            . ' -sOutputFile=- ' . escapeshellarg($path) . ' 2>/dev/null');
+        $out = trim(preg_replace('/[ \t]{2,}/', ' ', $out) ?? $out);
+        if (strlen($out) > 50) return $out;
+    }
+
+    // Past this size the PHP reader is not worth the memory.
+    if (@filesize($path) > 80 * 1024 * 1024) return '';
     $raw = @file_get_contents($path);
     if (!$raw) return '';
 
-    if (function_exists('gzuncompress')) {
-        $raw = preg_replace_callback('/stream\r?\n(.*?)\r?\nendstream/s', static function ($m) {
-            $d = @gzuncompress($m[1]);
-            return 'stream' . "\n" . ($d !== false ? $d : $m[1]) . "\nendstream";
-        }, $raw);
-    }
-
     $text = '';
-    if (preg_match_all('/BT\s*(.*?)\s*ET/s', $raw, $blocks, PREG_SET_ORDER)) {
+    $pos  = 0;
+    while (($s = strpos($raw, 'stream', $pos)) !== false) {
+        $start = $s + 6;
+        if (substr($raw, $start, 2) === "\r\n") {
+            $start += 2;
+        } elseif (isset($raw[$start]) && ($raw[$start] === "\n" || $raw[$start] === "\r")) {
+            $start += 1;
+        } else {
+            $pos = $start;
+            continue;
+        }
+        $end = strpos($raw, 'endstream', $start);
+        if ($end === false) break;
+        $pos  = $end + 9;
+        $data = rtrim(substr($raw, $start, $end - $start), "\r\n");
+        if (function_exists('gzuncompress')) {
+            // A content stream is small; a bigger one is an image, not text.
+            $d = @gzuncompress($data, 8 * 1024 * 1024);
+            if ($d !== false) $data = $d;
+        }
+        $text .= kop_pdf_content_text($data);
+        unset($data, $d);
+        if ($max_chars > 0 && strlen($text) > $max_chars * 2) break;
+        if (strlen($text) > 20 * 1024 * 1024) break;
+    }
+    unset($raw);
+    return trim(preg_replace('/[ \t]{2,}/', ' ', $text));
+}
+
+/** The shown strings (Tj / TJ) of one PDF content stream. */
+function kop_pdf_content_text(string $content): string {
+    $text = '';
+    if (strpos($content, 'BT') === false) return '';
+    if (preg_match_all('/BT\s*(.*?)\s*ET/s', $content, $blocks, PREG_SET_ORDER)) {
         foreach ($blocks as $block) {
             $b = $block[1];
             preg_match_all('/\(([^)\\\\]*(?:\\\\.[^)\\\\]*)*)\)\s*Tj/s', $b, $tj, PREG_SET_ORDER);
@@ -203,7 +253,7 @@ function kop_extract_pdf_text(string $path): string {
             }
         }
     }
-    return trim(preg_replace('/[ \t]{2,}/', ' ', $text));
+    return $text;
 }
 
 function kop_pdf_unescape(string $s): string {

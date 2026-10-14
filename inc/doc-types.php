@@ -668,7 +668,7 @@ if (!function_exists('kop_dt_doc_text')) {
         if (!$path || !is_readable($path) || filesize($path) > 60 * 1024 * 1024) return '';
         require_once get_stylesheet_directory() . '/api/lawsuit-extraction-lib.php';
         try {
-            $text = kop_extract_document_text($path, (string) get_post_mime_type((int) $id));
+            $text = kop_extract_document_text($path, (string) get_post_mime_type((int) $id), 5, $chars);
         } catch (Throwable $e) {
             return '';
         }
