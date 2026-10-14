@@ -383,6 +383,17 @@ need the owner's accounts, devices or artwork.
     rates in a table and Bob Bacon's words in a pull quote; the almshouse root leads into it; the owners are a table
     [later the same day, at the owner's word, the isolation section and its sources were cut: no proven parallel in
     nursing homes; the page now argues only the shared root and the owners and staffing model]
+    Third draft the same day (owner: pull elder abuse figures, find more owners): the statement says they are one
+    business; "The same owners" is a table of six (National Medical Enterprises/Hillhaven + Psychiatric Institutes of
+    America, Carlyle, Onex, Bain Capital with Broadstep, Sabra as landlord of Chicago Lakeshore Hospital); "What thin
+    staffing costs" has Gupta's 22,500 deaths, the 2024 staffing rule and its 2025 repeal, Ripley, and a table of
+    nursing home abuse figures (WHO, GAO, OIG); "The same drugs" sets OIG 2026 and HRW beside Warehouses of Neglect
+    pp. 56 and 68. 32 sources. Leads not confirmed: KKR (Benchmark, Sunrise; BrightSpring's youth services not shown
+    residential), Kindred/Vencor (Hillhaven + Community Psychiatric Centers 1997), Medical Properties Trust, American
+    Health Properties (1990s REIT with nursing homes and child psychiatric hospitals). KOP has no company page for NME/PIA,
+    ResCare/BrightSpring, Broadstep or Sabra. Not sent yet (429): website, https://www.sec.gov/Archives/edgar/data/1492298/
+    000149229819000006/sbra10k2018.htm, "Sabra Health Care REIT Form 10-K for 2018", notes: nursing home REIT owns Aurora
+    Chicago Lakeshore Hospital (acquired 08/17/17) beside its nursing homes.
     (Carlyle, Onex) followed by the buyout mortality study and Ripley's "control staffing" (new source 20, Warehouses
     of Neglect pp. 27 and 104), ending on a verdict. Production had no saved Page Text edits for it on that date.
     Checked against the History articles (2026-10-08); the pages now link them where they meet. Errors found in
