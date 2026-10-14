@@ -44,7 +44,9 @@ function isOrganizationFormData(formData = {}) {
     const nameLooksLikeOrganization = /association|company|corporation|corp\.|group|health(?:care|\s+services)|holdings|institute|network|partners|services|collective|natsap|ieca|wwasp|uhs/i.test(programName);
     const typeLooksLikeOrganization = /organization|association|company|corporation|group|operator|network|membership/i.test(programType);
 
+    // Open/Closed "<Company> Programs" tables (the parser's programsHeadingNoun) make an operator page.
     return typeLooksLikeOrganization
+        || !!String(formData.programsHeadingNoun || '').trim()
         || (hasOrgOnlyFields && !hasFacilitySignals)
         || (hasProgramsTable && !hasFacilitySignals)
         || (nameLooksLikeOrganization && !hasFacilitySignals);
@@ -999,7 +1001,10 @@ function generateOrganizationWikiMarkdown(formData, helpers) {
     // Index-style pages already have "Programs" in their own name ("Active
     // Programs in Utah", "The Program Watchlist") — don't produce headings like
     // "Open Active Programs in Utah Programs".
-    const tableNoun = /\bprograms?\b/i.test(programName) ? 'Programs' : `${programName} Programs`;
+    // An imported operator page keeps its own noun ("Open Sequel Programs", not "Open Sequel Youth &
+    // Family Services Programs"), so the Reddit headings and their anchors stay as they were.
+    const tableNoun = String(formData.programsHeadingNoun || '').trim()
+        || (/\bprograms?\b/i.test(programName) ? 'Programs' : `${programName} Programs`);
 
     let programsSection = '';
     const listedPrograms = (formData.relatedPrograms || []).filter((prog) => prog && prog.name);

@@ -592,6 +592,7 @@ function parseWikiMarkdown(markdown) {
         rebrand: '',
         rebrandLink: '',
         relatedPrograms: [], // Programs listed in tables (e.g. WWASP affiliates)
+        programsHeadingNoun: '', // "Sequel Programs" from an operator page's "Open Sequel Programs" heading
 
         // Structured data arrays
         staffMembers: [],
@@ -1272,7 +1273,9 @@ function parseWikiMarkdown(markdown) {
 
     // Parse header
     // 1. Try standard TTI format: ## **Name** (Years) Location
-    let headerMatch = normalizedMarkdown.match(/^#{1,3}\s*\*{0,2}(.+?)\*{0,2}\s*\(([^)]+)\)\s+([^\r\n]+)/m);
+    // The location must be on the header line itself: "\s+" here ran over the
+    // line break and read the "---" rule below a location-less header as the city.
+    let headerMatch = normalizedMarkdown.match(/^#{1,3}\s*\*{0,2}(.+?)\*{0,2}\s*\(([^)]+)\)[ \t]+([^\r\n]+)/m);
     
     if (headerMatch) {
         parsedData.programName = headerMatch[1].trim().replace(/:$/, '');
@@ -2681,13 +2684,24 @@ function parseWikiMarkdown(markdown) {
     for (const heading of programHeadings) {
         const body = getSection(normalizedMarkdown, heading);
         if (!body || !body.includes('|')) continue;
-        const tableLines = body.split('\n').filter(l => l.trim().startsWith('|')).join('\n');
+        // The table, and the operator pages' "*Below is a list of active ... programs.*"
+        // lead-in, which only introduces the table the generator writes again.
+        const tableLines = body.split('\n')
+            .filter(l => l.trim().startsWith('|') || /^\*?\s*below is a list of\b[^\n]*programs?\.?\s*\*?$/i.test(l.trim()))
+            .join('\n\n');
         if (tableLines) {
             programTableSections += (programTableSections ? '\n\n' : '') + tableLines;
         }
-        const status = /\bclosed\b/i.test(heading)
+        const status = /\bclosed\b|\binactive\b/i.test(heading)
             ? 'closed'
             : (/\bopen\b|\bactive\b|\bcurrent\b/i.test(heading) ? 'open' : '');
+        // An operator page names its tables "Open <Company> Programs" / "Closed <Company>
+        // Programs" (state index pages say "Active Programs in Utah"): keep the noun so the
+        // headings come back as written, and so the page is read as an organization.
+        const operatorHeading = heading.match(/^(?:open|closed|active|inactive|current|former)\s+(\S.*?\s+programs)$/i);
+        if (operatorHeading && !parsedData.programsHeadingNoun && parseProgramTable(body).length > 0) {
+            parsedData.programsHeadingNoun = operatorHeading[1];
+        }
         for (const entry of parseProgramTable(body)) {
             const key = entry.name.toLowerCase() + '|' + (entry.yearsActive || '');
             if (seenProgramKeys.has(key)) continue;
@@ -2839,7 +2853,10 @@ function parseWikiMarkdown(markdown) {
         // A facility that merely names its parent company is still a facility, so
         // org-only fields only imply an organization when there are no facility
         // signals (city, address, age range, capacity, tuition, diagnoses, etc.).
-        parsedData.entryType = (typeLooksLikeOrganization || (hasOrgOnlyFields && !hasFacilitySignals) || (hasProgramsTable && !hasFacilitySignals) || (nameLooksLikeOrganization && !hasFacilitySignals))
+        // Open/Closed "<Company> Programs" tables make an operator page, whose header
+        // city is its headquarters (Sequel: "Huntsville, AL").
+        const hasOperatorTables = !!parsedData.programsHeadingNoun;
+        parsedData.entryType = (typeLooksLikeOrganization || hasOperatorTables || (hasOrgOnlyFields && !hasFacilitySignals) || (hasProgramsTable && !hasFacilitySignals) || (nameLooksLikeOrganization && !hasFacilitySignals))
             ? 'organization'
             : 'facility';
     }
