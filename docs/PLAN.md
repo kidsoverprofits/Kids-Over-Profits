@@ -2018,8 +2018,10 @@ Institute, Eckerd).
 Reviewed at Review inbox > **Nonprofit tax filings**
 (`inc/nonprofit-filings.php`, `inc/review-inbox/nonprofit-filings.php`): Link
 to this program (best facility filled in), Link to a company, Not this program,
-Undo (deletes exactly the links the card made). "Link every same-name,
-same-town match with filings" does the 331 such cards at once. Links are rows
+Undo (deletes exactly the links the card made). Every "Same name and town"
+card links itself (inc/auto-connect.php, hourly, by 'auto', Undo in Recently
+done; an undone card is never linked again); "Link every same-name, same-town
+match with filings" is left for any the run has not reached. Links are rows
 of `{prefix}kop_nonprofit_links` (moved by Merge Duplicates); the facility and
 company pages print "Nonprofit tax filings" (a table per organization, ten
 latest years, earlier ones folded) from the files at render time, so a rebuild
@@ -2068,8 +2070,9 @@ town; 127 to check), Colorado 48 (12 matched, 36 to check).
 
 Reviewed at Review inbox > **Business filings** (`inc/business-filings.php`,
 `inc/review-inbox/business-filings.php`): Link to this program, Link to a
-company, Not this program, Undo (exact). "Link every same-name, same-town
-match" does the matched view at once. Links are rows of
+company, Not this program, Undo (exact). The matched view links itself
+(inc/auto-connect.php, hourly, like nonprofit filings); "Link every
+same-name, same-town match" does any it has not reached. Links are rows of
 `{prefix}kop_business_links` (moved by Merge Duplicates); facility and company
 pages print "Business filings" (status, officers, agent, name changes,
 dissolution, trade names, a link to the state's page) from the files at render

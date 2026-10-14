@@ -230,7 +230,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-file
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
-# discussion links (records whose every name is 10+ letters), State Lists rows now on file. Close names, shared names, board/title-only
+# discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town". Close names, shared names, board/title-only
 # and Drive Docs (Add publishes) wait. Each shows in its queue's done tab by 'auto' and in Recently done with Undo; an undone one is never redone
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php [--list]   # every pick is exact, wiki link + log + undo, on a scratch copy
 # Pending items already in our records leave the waiting list: news/lawsuits/bills (inc/review-inbox/_on-file.php: same link on a kept

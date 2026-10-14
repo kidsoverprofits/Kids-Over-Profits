@@ -217,5 +217,29 @@ if ($has('wpdl_kop_state_list_rows')) {
     echo "  (no State Lists table in the mirror)\n";
 }
 
+/* ---- Nonprofit tax filings and business filings ---- */
+echo "-- Nonprofit and business filings --\n";
+require_once dirname(__DIR__) . '/inc/nonprofit-filings.php';
+require_once dirname(__DIR__) . '/inc/business-filings.php';
+foreach (array('nonprofit-filings' => kop_npf_candidates(), 'business-filings' => kop_bizf_candidates()) as $src => $entries) {
+    if (!$entries) { echo "  ($src: no candidates file)\n"; continue; }
+    $matched = array_filter($entries, function ($e) { return ($e['match'] ?? '') === 'matched'; });
+    // A card someone already decided is never touched.
+    $decided = array_slice(array_keys($matched), 0, 1);
+    $decisions = $decided ? array($decided[0] => array('decision' => 'rejected')) : array();
+    $picks = kop_autoconn_filing_picks($src, $entries, $decisions);
+    $check("$src: every \"Same name and town\" card links itself, \"Check the match\" waits",
+        count($picks) === count($matched) - count($decided) && count($picks) < count($entries), count($picks) . ' of ' . count($entries));
+    $check("$src: a decided card is left alone", !$decided || !isset($picks[$decided[0]]));
+    $applied = array();
+    $n = kop_autoconn_filings($src, microtime(true) + 60, $entries, $decisions, function ($k, $kind, $id, $by) use (&$applied) {
+        $applied[$k] = array($kind, $id, $by);
+    });
+    $check("$src: linked to the card's one record, by 'auto'", $n === count($picks) && !array_filter($applied, function ($a) { return $a[2] !== 'auto' || $a[1] <= 0; }));
+    $logged = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_review_log WHERE action = 'auto' AND source = " . $pdo->quote($src))->fetchColumn();
+    $check("$src: each shows in Recently done with Undo", $logged === $n, "$logged logged");
+    $check("$src: one undone is never linked again", !kop_autoconn_filing_picks($src, $entries, $decisions));
+}
+
 echo $failures ? "\n$failures failed\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

@@ -17,6 +17,9 @@
  *     discussion" link); board-only and title-only matches wait.
  *   - State Lists "Already on file": the listed name is now exactly one record's
  *     name in that state (kop_sl_act('link'), no name added).
+ *   - Nonprofit tax filings and Business filings on "Same name and town": the
+ *     organization's own name is exactly one record's, in the same town
+ *     (kop_npf_apply(), kop_bizf_apply()). "Check the match" waits.
  * Drive Docs is not here: its Add publishes the link (news approved, cases
  * published, links on the page), which is more than a connection.
  *
@@ -335,6 +338,52 @@ function kop_autoconn_state_lists($deadline) {
     return $n;
 }
 
+/* ---- Nonprofit tax filings and business filings ------------------------------ */
+
+/**
+ * [key => candidate] for cards on "Same name and town" that no one has decided:
+ * the organization's own name is exactly one record's, in the same town (for a
+ * business filing also: the EIN of that program's exactly-matched nonprofit).
+ */
+function kop_autoconn_filing_picks($source, array $entries, array $decisions) {
+    $tried = kop_autoconn_tried($source);
+    $out = array();
+    foreach ($entries as $key => $e) {
+        $c = $e['candidates'][0] ?? null;
+        if (($e['match'] ?? '') !== 'matched' || count((array) ($e['candidates'] ?? array())) !== 1 || !$c
+            || (string) ($decisions[$key]['decision'] ?? '') !== '' || isset($tried[(string) $key])) continue;
+        $out[(string) $key] = $c;
+    }
+    return $out;
+}
+
+function kop_autoconn_filings($source, $deadline, array $entries, array $decisions, $apply) {
+    $n = 0;
+    foreach (kop_autoconn_filing_picks($source, $entries, $decisions) as $key => $c) {
+        if (microtime(true) > $deadline) break;
+        try {
+            $apply($key, (string) ($c['kind'] ?? 'facility'), (int) $c['id'], 'auto');
+            kop_autoconn_mark($source, $key, (string) (int) $c['id'], 'done');
+            kop_autoconn_log($source, $key, (string) ($entries[$key]['name'] ?? $key),
+                'Linked to ' . ($c['name'] ?? '#' . $c['id']) . ': the only record of exactly this name, in the same town.');
+            $n++;
+        } catch (Throwable $e) {
+            kop_autoconn_mark($source, $key, (string) (int) $c['id'], 'failed', $e->getMessage());
+        }
+    }
+    return $n;
+}
+
+function kop_autoconn_nonprofits($deadline) {
+    if (!function_exists('kop_npf_apply')) return 0;
+    return kop_autoconn_filings('nonprofit-filings', $deadline, kop_npf_candidates(), kop_npf_decisions(), 'kop_npf_apply');
+}
+
+function kop_autoconn_businesses($deadline) {
+    if (!function_exists('kop_bizf_apply')) return 0;
+    return kop_autoconn_filings('business-filings', $deadline, kop_bizf_candidates(), kop_bizf_decisions(), 'kop_bizf_apply');
+}
+
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -346,6 +395,7 @@ function kop_autoconn_run($seconds = 120) {
     try {
         kop_autoconn_ensure_table();
         foreach (array('wiki-links' => 'kop_autoconn_wiki', 'state-lists' => 'kop_autoconn_state_lists',
+                'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
                 'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury') as $source => $fn) {
             if (microtime(true) > $deadline) break;
             try {
