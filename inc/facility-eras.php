@@ -702,7 +702,7 @@ if (!function_exists('kop_facility_eras_build')) {
             'memorials'  => static function ($a, $b) { return strcmp((string) ($b['date'] ?? ''), (string) ($a['date'] ?? '')) ?: $b['id'] - $a['id']; },
             'violations' => static function ($a, $b) { return ($b['severe'] <=> $a['severe']) ?: ($b['weight'] <=> $a['weight']) ?: strcmp((string) $b['date'], (string) $a['date']) ?: ($b['id'] <=> $a['id']); },
             'lawsuits'   => static function ($a, $b) { return strcmp((string) $b['year'], (string) $a['year']) ?: $b['id'] - $a['id']; },
-            'incidents'  => static function ($a, $b) { return ($a['year'] <=> $b['year']) ?: ($a['i'] <=> $b['i']); },
+            'incidents'  => static function ($a, $b) { return ($a['year'] <=> $b['year']) ?: (($a['sort'] ?? 0) <=> ($b['sort'] ?? 0)) ?: (($a['after'] ?? $a['i']) <=> ($b['after'] ?? $b['i'])); },
             'news'       => static function ($a, $b) { return strcmp((string) $b['date'], (string) $a['date']) ?: $b['id'] - $a['id']; },
         );
         $totals = array_fill_keys($kinds, 0);

@@ -505,8 +505,25 @@ $inc = kop_facility_pages_incidents(array(
     '2006: a 16-year-old girl ran away and was found two days later',
 ));
 $check('wiki dates read and sort; one event written twice shows once, both sources kept',
-    array_column($inc, 'when') === array('August 18, 1997', 'February 6, 2000', '2006', 'April 9, 2006', 'Reported December 2025')
+    array_column($inc, 'when') === array('August 18, 1997', 'February 6, 2000', '2006', 'April 9, 2006', '')
     && count($inc[1]['also'] ?? array()) === 1 && strpos($inc[1]['text'], 'one month into his stay') !== false,
+    wp_json_encode(array_column($inc, 'when')));
+// "Reported" + the date the wiki page was read or HEAL's page was archived is not when it happened: the words
+// date it, or it has no date, placed after the item it is about (San Marcos: the lawsuit over the 2008 injury).
+$inc = kop_facility_pages_incidents(array(
+    'Reported 2025-12: Lawsuit: The paralyzed resident\'s parents sued San Marcos and parent company Psychiatric Solutions Inc. in Alaska Superior Court. (r/troubledteens wiki, page "San Marcos Treatment Center" (as of 2025-12-18))',
+    'Reported 2025-12: Abuse: Survivors report physical, sexual and emotional abuse and violent restraints. (r/troubledteens wiki, page "San Marcos Treatment Center" (as of 2025-12-18))',
+    '2008-09: Injury: In September 2008 a resident was reportedly thrown onto a bed twice, broke his neck and was paralyzed. (r/troubledteens wiki, page "San Marcos Treatment Center" (as of 2025-12-18))',
+    '2012: Death: A boy died after a restraint.',
+    'Reported 2025-12: Sexual abuse: A survivor who attended in 2018-2019 alleges sexual assault was ignored. (r/troubledteens wiki, page "La Europa Academy" (as of 2025-12-18))',
+    'Reported 2025-07: Investigation: Police found 30 police reports about the school since 2012. (HEAL, staff list for Alternative Youth Academy (archived 2025-07-09))',
+    'Reported April 2004: Abuse: Former students report forced drugging. (Fornits forum, post by x, April 2004: https://www.fornits.com/y)',
+));
+$check('a snapshot date is dropped: dated from the words, placed after the item it is about, else undated at the end',
+    array_map(static function ($x) { return $x['when'] . '|' . substr($x['text'], 0, 12); }, $inc) === array(
+        'Reported April 2004|Former stude', 'September 2008|In September', '|The paralyze', '2012|A boy died a',
+        "2018\u{2013}2019|A survivor w", '|Survivors re', '|Police found')
+    && !isset($inc[0]['snap']) && !isset($inc[2]['after']),
     wp_json_encode(array_column($inc, 'when')));
 $check('a wiki citation with no address finds its page, by date when two pages share a title',
     kop_facility_pages_wiki_url('r/troubledteens wiki, page "Laurel Ridge Treatment Center" (as of 2025-12-18)') === 'https://www.reddit.com/r/troubledteens/wiki/index/laurelridge'

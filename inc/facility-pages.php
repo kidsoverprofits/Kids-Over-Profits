@@ -1300,6 +1300,16 @@ if (!function_exists('kop_facility_pages_incidents')) {
                 $kind = $m[1];
                 $text = substr($text, strlen($m[0]));
             }
+            // "Reported" + the date a wiki page was read ("as of 2025-12-18") or a
+            // Wayback capture ("archived 2006-07-20") says when we copied the page,
+            // not when it happened or was reported: the item's own words date it,
+            // else it has no date (placed beside the item it is about, below).
+            $snap = false;
+            if ($reported && preg_match('/\((?:as of|archived) \d{4}-\d{2}(?:-\d{2})?\)$/', $cite)) {
+                list($when, $sort) = kop_facility_pages_incident_text_date($text);
+                $reported = false;
+                $snap = $when === '';
+            }
             $year = preg_match('/\d{4}/', $when, $y) ? (int) $y[0] : 9999;
             $out[] = array(
                 'when'   => $when !== '' ? ($reported ? 'Reported ' . $when : $when) : '',
@@ -1311,10 +1321,92 @@ if (!function_exists('kop_facility_pages_incidents')) {
                 'url'    => $url,
                 'i'      => $i,
                 'sort'   => $sort,
+                'snap'   => $snap,
             );
         }
-        usort($out, static function ($a, $b) { return ($a['year'] <=> $b['year']) ?: ($a['sort'] <=> $b['sort']) ?: ($a['i'] <=> $b['i']); });
+        kop_facility_pages_incidents_place_undated($out);
+        usort($out, static function ($a, $b) { return ($a['year'] <=> $b['year']) ?: ($a['sort'] <=> $b['sort']) ?: (($a['after'] ?? $a['i']) <=> ($b['after'] ?? $b['i'])); });
+        foreach ($out as &$o) unset($o['snap'], $o['after']);
+        unset($o);
         return kop_facility_pages_incidents_dedupe($out);
+    }
+}
+
+if (!function_exists('kop_facility_pages_incident_text_date')) {
+    /**
+     * The date an incident's own words give: [when, sort] ("September 2008",
+     * "2018-2019", "2017"), the first one named; ['', 0] when none. A year after
+     * "since", "until", "before" or "by" is not when it happened.
+     */
+    function kop_facility_pages_incident_text_date($text) {
+        $names = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+        $yr = '(?:19[4-9]\d|20[0-4]\d)';
+        $re = '/\b(?:(' . implode('|', $names) . ')\s+(?:(\d{1,2}),?\s+)?(' . $yr . ')|(' . $yr . ')\s*(?:-|\x{2013}|to)\s*(' . $yr . ')|(' . $yr . '))\b/u';
+        if (!preg_match_all($re, (string) $text, $all, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) return array('', 0);
+        $now = (int) gmdate('Y');
+        foreach ($all as $m) {
+            $before = substr((string) $text, max(0, $m[0][1] - 8), min(8, $m[0][1]));
+            if (preg_match('/\b(?:since|until|before|by)\s*$/i', $before)) continue;
+            if (!empty($m[3][0]) && $m[3][1] >= 0) {
+                if ((int) $m[3][0] > $now) continue;
+                $mo = array_search($m[1][0], $names, true) + 1;
+                $day = !empty($m[2][0]) && $m[2][1] >= 0 ? (int) $m[2][0] : 0;
+                return array($m[1][0] . ($day ? ' ' . $day . ',' : '') . ' ' . $m[3][0], $mo * 100 + $day);
+            }
+            if (!empty($m[4][0]) && $m[4][1] >= 0) {
+                if ((int) $m[4][0] > $now || (int) $m[5][0] < (int) $m[4][0]) continue;
+                return array($m[4][0] . "\u{2013}" . $m[5][0], 0);
+            }
+            if (!empty($m[6][0]) && (int) $m[6][0] <= $now) return array($m[6][0], 0);
+        }
+        return array('', 0);
+    }
+}
+
+if (!function_exists('kop_facility_pages_incidents_place_undated')) {
+    /**
+     * An incident left with no date (marked 'snap') that plainly follows on
+     * from a dated one (the lawsuit over a paralysed resident and the injury
+     * itself) is placed right after it, still undated; the rest stay at the end.
+     * "Plainly": shared lowercase words that are not the usual ones (names do
+     * not count: every line about a program names it), worth 2 or more with a
+     * word of 8+ letters worth 2, and no other dated item scoring as much.
+     * Survivors' summaries of the program as a whole are never placed.
+     */
+    function kop_facility_pages_incidents_place_undated(array &$out) {
+        static $common = null;
+        if ($common === null) {
+            $common = array_flip(explode(' ', 'about after also another away been being but by could did does during each from had has have her him his into its more most other over said same says some staff such than that their them then there these they this those through under were what when where which while who with would years year program programs school schools survivor survivors resident residents student students students\' youth child children teen teens parent parents report reports reported reportedly alleged alleges allegation review reviews former abuse abused physical emotional verbal sexual restraint restraints used made make forced including include page wiki facility center academy ranch treatment restrained restraining restrain isolation isolated solitary confinement punishment punished punishments allegedly according deprivation deprived neglect neglected medical manual labor labour communication restrictions conditions including violent excessive multiple several members member behavior behavioral therapy therapist counselor counselors negligence negligent wilderness lack lacking'));
+        }
+        $words = static function ($t) use ($common) {
+            preg_match_all("/(?<![A-Za-z'])[a-z]{4,}(?![A-Za-z])/", str_replace("'s", '', (string) $t), $m);
+            return array_diff_key(array_flip($m[0]), $common);
+        };
+        $dated = array();
+        foreach ($out as $k => $o) {
+            if ($o['year'] !== 9999) $dated[$k] = $words($o['text']);
+        }
+        if (!$dated) return;
+        foreach ($out as $k => &$o) {
+            // "Survivors report ...": the program in general, not one event.
+            if (empty($o['snap']) || preg_match('/^(?:Survivors|Parents and survivors|Survivors and parents|Allegations include)/', $o['text'])) continue;
+            $mine = $words($o['text']);
+            $best = 0;
+            $at = -1;
+            $tie = false;
+            foreach ($dated as $dk => $w) {
+                $n = 0;
+                foreach (array_intersect_key($mine, $w) as $word => $_) $n += strlen($word) >= 8 ? 2 : 1;
+                if ($n > $best) { $best = $n; $at = $dk; $tie = false; }
+                elseif ($n === $best) $tie = true;
+            }
+            if ($best >= 2 && !$tie) {
+                $o['year'] = $out[$at]['year'];
+                $o['sort'] = $out[$at]['sort'] + 0.5;
+                $o['after'] = $out[$at]['i'] + 0.5;
+            }
+        }
+        unset($o);
     }
 }
 
