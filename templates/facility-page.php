@@ -351,7 +351,7 @@ $kop_fp_has_docs = !empty($page['documents']['html']) || $kop_fp_has_research ||
 $kop_fp_has_wiki = !empty($page['wiki']);
 $kop_fp_has_siblings = !empty($page['siblings']);
 $kop_fp_has_resources = !empty($page['resources']) || !empty($page['profile_links']) || !empty($page['resource_links']);
-$kop_fp_has_network = !empty($page['network']['groups']);
+$kop_fp_has_network = !empty($page['network']);   // the embedded map, even when the record already names every company on it
 
 $kop_fp_violations = $kop_fp_has_inspections ? (array) ($page['inspections']['violations'] ?? array()) : array();
 // A program page also shows the findings at its homes, each naming the home.
