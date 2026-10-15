@@ -2434,3 +2434,22 @@ Open, in order:
    agreement rate apply directly.
 5. `scripts/test-review-inbox.php --source=inspection-highlights` fails "a rejected finding offers approve and back to
    pending" with or without this change (found 2026-10-14); look at the rejected card's actions.
+
+### 3.27 Pencils on everything a facility page prints (2026-10-15)
+
+The owner could not edit an earlier name's "It closed in 2005" (San Marcos Treatment Center), article titles or document
+types. Now: `era:<id>:<n>` edits an earlier name merged as a rename (name, years, rename year, status, companies, notes) and
+"Renamed, not closed" (`erarename`, Undo `eraundo`) turns a closing filed on it into the rename (17 names on the mirror);
+the Links form holds `resourceLinks` (Materials and links, Fornits threads); research documents get the `doc:` pencil;
+Unsilenced files get `unsil:<Drive id>` (title + types, option `kop_unsilenced_edits`). Commits 228b45e8, 57965b2c and
+the one after. A scratch audit (render a page with markers on, list text with no `data-kop-edit` ancestor) found the rest.
+
+Open, in order:
+1. **Check after deploy**, signed in, at https://kidsoverprofits.org/facility/san-marcos-treatment-center-tx/: the pencil
+   on "As The Brown Schools at San Marcos", "Renamed, not closed" then Undo, a Fornits thread retitled through the
+   testimony list's pencil, an Unsilenced file's title and type (chip shows, survives a reload).
+2. Still without a pencil: the survivor-site archive lists (`kop_survivor_archives_render()`, same shape as Unsilenced:
+   give it the `unsil` treatment keyed by url), the operator pages' research and Unsilenced lists (`templates/operator-page.php`),
+   the network map's names on the page (edited on the map), inspection report rows and findings (state data; findings have
+   Review inbox), "Other programs run by" rows (each is its own page), and the summary lines under Materials and links.
+3. Unsilenced types are kept on our side only: they are not on /documents/<type>/ pages, which list media library documents.
