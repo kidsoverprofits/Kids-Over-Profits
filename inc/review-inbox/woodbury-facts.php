@@ -70,6 +70,9 @@ kop_rinbox_register('woodbury-facts', function () {
             return $rows ? kop_rinbox_wbf_item($rows[0]) : null;
         },
         'act'      => 'kop_rinbox_wbf_act',
+        // "Record" beside Add takes every kind (KOP Tools > Card Fields): a young adult program ("ya:<id>") gets the
+        // item as a fact through kop_wbf_ya_file(), the others a note (kop_wbf_file_existing()).
+        'record_kinds' => true,
         'save'     => 'kop_rinbox_wbf_save',
     );
 });
@@ -376,6 +379,15 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
     switch ($action) {
         case 'apply':
             $waiting();
+            // A young adult program picked in the finder: the item goes on it as a fact, as "Add to that young adult program" does.
+            if (preg_match('/^ya:(\d+)$/', trim((string) ($params['facility'] ?? '')), $ym)) {
+                $pdo = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
+                if (!$pdo) throw new RuntimeException('The young adult programs records are not available.');
+                if ($r['grp'] === 'consultant') throw new RuntimeException('A consultant\'s career goes on their consultant record, not a young adult program.');
+                $prog = kop_ya_get($pdo, (int) $ym[1]);
+                return $result(kop_wbf_ya_file($pdo, array($r), (int) $ym[1], $user),
+                    'Added to the young adult program "' . ($prog['name'] ?? '#' . (int) $ym[1]) . '", citing its page. Undo is on the Added tab.');
+            }
             $to = function_exists('kop_wbc_parse_record_token') ? kop_wbc_parse_record_token($params['facility'] ?? '') : null;
             if ($to && $to[0] !== 'facility') {
                 kop_wbf_file_existing(array($r), $to[0], $to[1], $user);

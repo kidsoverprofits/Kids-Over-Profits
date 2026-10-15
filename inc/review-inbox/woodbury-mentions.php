@@ -29,6 +29,9 @@ kop_rinbox_register('woodbury-reports', function () {
     foreach (kop_wb_tabs() as $k => $t) $views[$k] = $t['label'];
     return array(
         'label'    => 'Woodbury Reports',
+        // "File under that record" offers every kind with a document folder (kop_wbc_existing_target()); a young
+        // adult program has none, so it is left out. The Best match stays a program (facility_only).
+        'record_kinds' => kop_rinbox_wb_record_kinds(),
         'group'    => 'Imports to review',
         'help'     => 'Pages of the Woodbury Reports newsletter that write about a program. "Show the pages" opens them here. '
             . 'Filing puts those pages, as their own small PDF, in a "Woodbury Reports Mentions" folder on each facility\'s page (and company page): '
@@ -62,6 +65,11 @@ kop_rinbox_register('woodbury-reports', function () {
         'save'     => 'kop_rinbox_wb_save',
     );
 });
+
+/** The kinds of record the pages can be filed under: those with a document folder (not young adult programs). */
+function kop_rinbox_wb_record_kinds() {
+    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg');
+}
 
 function kop_rinbox_wb_kinds() {
     return array('section' => 'Article', 'fuzzy' => 'Article, close name', 'news' => 'News item', 'mention' => 'Mentioned', 'unmatched' => 'Article, no record');
@@ -215,10 +223,11 @@ function kop_rinbox_wb_item(array $r) {
             'params' => kop_rinbox_wb_target_params($r, $best, $alts, $best ? kop_rinbox_wb_parents(array($best)) : array(), 'File under'));
         if (function_exists('kop_wbc_existing_target')) {
             $actions[] = array('id' => 'file_record', 'label' => 'File under that record', 'style' => 'neutral',
-                'help' => 'Files the pages under the consultant, company, provider or transporter you name instead (and any facilities added).',
+                'help' => 'Files the pages under the company, educational consultant, provider, transporter, marketing company or trade organization you pick instead (and any facilities added).',
                 'params' => array(
-                array('name' => 'record', 'label' => 'A consultant, company, provider or transporter', 'type' => 'text', 'value' => '',
-                    'lookup' => 'record', 'placeholder' => 'Name of the firm or person'),
+                // The any-record finder ("company:45", "consultant:12"...), narrowed at KOP Tools > Card Fields.
+                array('name' => 'record', 'label' => 'A company, consultant, provider, transporter, marketing company or trade organization', 'type' => 'record', 'value' => '',
+                    'kinds' => array_values(array_diff(kop_rinbox_wb_record_kinds(), array('facility')))),
                 array('name' => 'facilities', 'label' => 'And these facilities', 'type' => 'facilities', 'value' => array(), 'optional' => true),
             ));
         }
@@ -284,7 +293,8 @@ function kop_rinbox_wb_item(array $r) {
         'facility'     => $r['target_kind'] === 'facility' || $r['target_kind'] === '' ? kop_rinbox_facility((int) $r['facility_id']) : null,
         'fields'       => array(
             array('name' => 'kind', 'label' => 'What it is', 'type' => 'select', 'options' => $kinds, 'value' => (string) $r['kind'], 'category' => true, 'readonly' => !$pending),
-            array('name' => 'facility_id', 'label' => 'Best match', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => !$pending),
+            // The scan's match, stored with its name and state and filed under by "Approve": always a program.
+            array('name' => 'facility_id', 'label' => 'Best match', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => !$pending, 'facility_only' => true),
         ),
         'details'      => $details,
         'preview'      => $preview,
@@ -313,6 +323,7 @@ function kop_rinbox_wb_record($value) {
     $value = strtolower(trim((string) $value));
     if (preg_match('/^c(\d+)$/', $value, $m)) return array('company', (int) $m[1]);
     if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg):(\d+)$/', $value, $m)) return array($m[1], (int) $m[2]);
+    if (preg_match('/^ya:\d+$/', $value)) throw new RuntimeException('A young adult program has no document folder; file the pages under a program or company instead.');
     throw new RuntimeException('Pick the record from the list that opens as you type its name.');
 }
 

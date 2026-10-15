@@ -69,6 +69,11 @@ if (!function_exists('get_edit_post_link')) {
 })();
 
 function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
+    try {
+        kop_rinbox_test_drive_docs_any_record($src, $check);
+    } catch (Throwable $e) {
+        $check('drive-docs any record: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
     $row = function ($key) { return kop_gdl_rows(array($key))[0] ?? null; };
     $by_kind = function ($kind) {
         return $GLOBALS['pdo']->query("SELECT pkey FROM wpdl_kop_gdoc_links WHERE kind = '$kind'")->fetchColumn();
@@ -159,10 +164,10 @@ function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
     $check('drive-docs: a sure match starts ticked, a close name does not',
         kop_rinbox_get_item('drive-docs', $news)['selected'] === true && kop_rinbox_get_item('drive-docs', $lic)['selected'] === false);
     $apply = kop_rinbox_get_item('drive-docs', $news)['actions'][0];
-    $check('drive-docs: Add has an optional Record box (bulk still works)', ($apply['params'][0]['type'] ?? '') === 'facility' && !empty($apply['params'][0]['optional']));
+    $check('drive-docs: Add has an optional Record box (bulk still works)', in_array($apply['params'][0]['type'] ?? '', array('facility', 'record'), true) && !empty($apply['params'][0]['optional']));
     $moves = kop_rinbox_get_item('drive-docs', $news)['moves'];
     $res_move = array_values(array_filter($moves, function ($m) { return $m['id'] === 'resource'; }))[0] ?? array();
-    $check('drive-docs: moving to a facility page asks for the record', ($res_move['params'][0]['type'] ?? '') === 'facility');
+    $check('drive-docs: moving to a facility page asks for the record', in_array($res_move['params'][0]['type'] ?? '', array('facility', 'record'), true));
     $fids = $GLOBALS['pdo']->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 2")->fetchAll(PDO::FETCH_COLUMN);
     try {
         $m = call_user_func($src['act'], $news, 'apply', array('facility' => (string) $fids[1]));
@@ -247,4 +252,104 @@ function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
         $check('drive-docs: a company card asks for the record', false, get_class($e) . ': ' . $e->getMessage());
     }
     $check('drive-docs: a card key that is not a card finds nothing', call_user_func($src['get'], 'g:c' . md5('nobody') . '::') === null);
+}
+
+/**
+ * The Record box takes any record ('record_kinds'): a link Added to a company
+ * goes into its "Materials and links" and Undo takes it off exactly; one Added
+ * to a consultant is a line in its notes, taken off by Undo. Its own made-up
+ * rows (removed after), so it runs whatever the mirror's table holds.
+ */
+function kop_rinbox_test_drive_docs_any_record(array $src, callable $check) {
+    global $wpdb;
+    require_once __DIR__ . '/_shared.php';
+    $pdo = $GLOBALS['pdo'];
+    $fid = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 1")->fetchColumn();
+    $oid = (int) $wpdb->get_var('SELECT id FROM wpdl_kop_operators ORDER BY id LIMIT 1');
+    if ($fid <= 0 || $oid <= 0) {
+        $check('drive-docs any record: a facility and a company in the mirror', false);
+        return;
+    }
+    $make = function ($url, $kind) use ($pdo, $fid) {
+        $pkey = kop_gdl_pkey($url);
+        $pdo->prepare('DELETE FROM wpdl_kop_gdoc_links WHERE pkey = ?')->execute(array($pkey));
+        $pdo->prepare('INSERT INTO wpdl_kop_gdoc_links (pkey, url, original, domain, kind, label, facility_id, facility_how, also_named,
+            operator_name, source_doc, source, rhash, seen, status, applied, applied_fid, created_at)
+            VALUES (?, ?, \'\', \'example-any.test\', ?, \'Any record test page\', ?, \'name in text\', \'[]\', \'\', \'Facility notes\', \'gdocs\', \'\', \'[]\',
+            \'pending\', NULL, 0, \'2026-10-15 09:00:00\')')->execute(array($pkey, $url, $kind, $fid));
+        return $pkey;
+    };
+    $row = function ($key) { return kop_gdl_rows(array($key))[0] ?? null; };
+    $url = 'https://example-any.test/company-pick-' . $oid;
+    $key = $make($url, 'reference');
+    try {
+        $it = kop_rinbox_get_item('drive-docs', $key);
+        $add = $it['actions'][0]['params'][0] ?? array();
+        $fac = array_values(array_filter($it['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
+        $check('drive-docs any record: the Record box on Add offers every kind, the Facility field stays programs only',
+            ($add['type'] ?? '') === 'record' && in_array('company', (array) ($add['kinds'] ?? array()), true) && ($fac['type'] ?? '') === 'facility',
+            json_encode(array($add['type'] ?? '', $add['kinds'] ?? array(), $fac['type'] ?? '')));
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $check, $key, $url, $oid, $row) {
+            $before = kop_gdl_company_load($oid);
+            $m = call_user_func($src['act'], $key, 'apply', array('facility' => 'company:' . $oid));
+            $r = $row($key);
+            $done = json_decode((string) $r['applied'], true) ?: array();
+            $links = array_column(array_filter((array) (kop_gdl_company_load($oid)['operator']['resourceLinks'] ?? array()), 'is_array'), 'url');
+            $check('drive-docs any record: Add to a company puts the link in its "Materials and links"', $r['status'] === 'applied'
+                && ($done['target'] ?? '') === 'company' && (int) ($done['operator_id'] ?? 0) === $oid && in_array($url, $links, true), $m['message']);
+            $m = call_user_func($src['act'], $key, 'undo', array());
+            $after = kop_gdl_company_load($oid);
+            $check('drive-docs any record: Undo takes it off the company exactly and the link waits again', $row($key)['status'] === 'pending'
+                && (array) ($after['operator']['resourceLinks'] ?? array()) == (array) ($before['operator']['resourceLinks'] ?? array())
+                && (array) ($after['operator']['websites'] ?? array()) == (array) ($before['operator']['websites'] ?? array()), $m['message']);
+            // "Move to" website links on the company: its websites, Undo exact.
+            $m = call_user_func($src['act'], $key, 'move', array('to' => 'website', 'facility' => 'company:' . $oid));
+            $sites = (array) (kop_gdl_company_load($oid)['operator']['websites'] ?? array());
+            $check('drive-docs any record: "Move to" website links on a company adds it to its websites', $row($key)['status'] === 'applied'
+                && in_array($url, array_map(function ($w) { return is_array($w) ? ($w['url'] ?? '') : $w; }, $sites), true), $m['message']);
+            call_user_func($src['act'], $key, 'undo', array());
+            $check('drive-docs any record: ...and Undo takes it off', (array) (kop_gdl_company_load($oid)['operator']['websites'] ?? array()) == (array) ($before['operator']['websites'] ?? array()));
+            // The facility card's "Add ticked links" with a company in its Record box, and the click's Undo.
+            $fid = (int) $row($key)['facility_id'];
+            $m = call_user_func($src['act'], 'g:f' . $fid . '::', 'add_picked', array('picked' => array($key), 'facility' => 'company:' . $oid));
+            $links = array_column(array_filter((array) (kop_gdl_company_load($oid)['operator']['resourceLinks'] ?? array()), 'is_array'), 'url');
+            $check('drive-docs any record: "Add ticked links" with a company puts them on the company', $row($key)['status'] === 'applied'
+                && in_array($url, $links, true) && ($m['undo']['params']['keys'] ?? array()) === array($key), $m['message']);
+            call_user_func($src['act'], 'g:f' . $fid . '::', 'undo_picked', $m['undo']['params']);
+            $check('drive-docs any record: ...and Undo of that click takes them off', $row($key)['status'] === 'pending'
+                && (array) (kop_gdl_company_load($oid)['operator']['resourceLinks'] ?? array()) == (array) ($before['operator']['resourceLinks'] ?? array()));
+        });
+        // A consultant: a line in its notes, Undo takes it off.
+        $cid = 0;
+        try {
+            $cid = (int) $pdo->query('SELECT id FROM referrers_master ORDER BY id LIMIT 1')->fetchColumn();
+        } catch (Throwable $e) {
+            $cid = 0;
+        }
+        if ($cid > 0) {
+            $notes = function () use ($cid) {
+                list(, , , $payload) = kop_wbc_load_record(kop_wbc_pdo(), 'consultant', $cid);
+                return json_encode($payload);
+            };
+            try {
+                $before = $notes();
+                $m = call_user_func($src['act'], $key, 'apply', array('facility' => 'consultant:' . $cid));
+            } catch (PDOException $e) {
+                // Notes are written through api/lib-suggested-edits.php, which asks MySQL (SHOW TABLES).
+                echo "  (a consultant's notes need MySQL: the notes path is not run here)
+";
+                return;
+            }
+            $r = $row($key);
+            $done = json_decode((string) $r['applied'], true) ?: array();
+            $check('drive-docs any record: Add to a consultant puts a line citing the link in its notes', $r['status'] === 'applied'
+                && ($done['target'] ?? '') === 'record' && ($done['record']['what'] ?? '') === 'note' && strpos($notes(), 'company-pick-') !== false, $m['message']);
+            $m = call_user_func($src['act'], $key, 'undo', array());
+            $check('drive-docs any record: ...and Undo takes the line off exactly', $row($key)['status'] === 'pending' && $notes() === $before, $m['message']);
+        } else {
+            echo "  (no consultant in the mirror: the notes path is not run)\n";
+        }
+    } finally {
+        $pdo->prepare('DELETE FROM wpdl_kop_gdoc_links WHERE pkey = ?')->execute(array($key));
+    }
 }

@@ -147,6 +147,54 @@ function kop_rinbox_test_facilities_from_news(array $src, array $item, callable 
     $pdo->prepare('UPDATE news_facility_candidates SET decision = ?, facility_id = ?, detail = ?, reviewed_by = ?, updated_at = ? WHERE id = ?')
         ->execute(array($before['decision'], $before['facility_id'], $before['detail'], $before['reviewed_by'], $before['updated_at'], $id));
 
+    // Any record ('record_kinds'): "A different record" is the any-record finder, homes stay programs; a company picked
+    // there lists the article on the company page, and Undo takes it off and puts the name back exactly.
+    $card = kop_rinbox_get_item('facilities-from-news', $item['key']);
+    $by_id = array_column($card['actions'], null, 'id');
+    $check('facilities-from-news: "A different record" offers any record, a new home\'s program stays a program',
+        ($by_id['link_other']['params'][0]['type'] ?? '') === 'record' && in_array('company', (array) ($by_id['link_other']['params'][0]['kinds'] ?? array()), true)
+        && ($by_id['create_home']['params'][3]['type'] ?? '') === 'facility', json_encode($by_id['link_other']['params'][0] ?? null));
+    kop_rinbox_test_copy_tables(array('wpdl_kop_operator_links'));
+    $oid = (int) $pdo->query("SELECT id FROM wpdl_kop_operators WHERE name <> '' ORDER BY id LIMIT 1")->fetchColumn();
+    $has_links = (bool) $pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'wpdl_kop_operator_links'")->fetchColumn();
+    if (!$oid || !$has_links) {
+        kop_rinbox_test_skip('facilities-from-news: a company takes the article', 'no company or company links table in the scratch copy');
+    } else {
+        $orig = $GLOBALS['pdo'];
+        $GLOBALS['pdo'] = new KOP_Rinbox_Test_MySQL_PDO('sqlite:' . $GLOBALS['db_path']);
+        $GLOBALS['pdo']->sqliteCreateFunction('UTC_TIMESTAMP', function () { return gmdate('Y-m-d H:i:s'); }, 0);
+        try {
+            kop_rinbox_test_with_wpdb_writes(function () use ($src, $item, $check, $get, $before, $oid) {
+                $news = (int) $before['news_id'];
+                $count = function () use ($oid, $news) {
+                    return (int) $GLOBALS['pdo']->query("SELECT COUNT(*) FROM wpdl_kop_operator_links WHERE operator_id = $oid AND link_kind = 'news' AND link_id = $news")->fetchColumn();
+                };
+                $had = $count();
+                if ($had) $GLOBALS['pdo']->exec("DELETE FROM wpdl_kop_operator_links WHERE operator_id = $oid AND link_kind = 'news' AND link_id = $news");
+                $res = call_user_func($src['act'], $item['key'], 'link_other', array('facility_id' => 'company:' . $oid));
+                $after = $get();
+                $detail = json_decode((string) $after['detail'], true);
+                $check('facilities-from-news: a company picked lists the article on its page and the name leaves To decide', $after['decision'] === 'matched'
+                    && empty($after['facility_id']) && $count() === 1 && ($detail['filed_on']['kind'] ?? '') === 'company', $res['message']);
+                $moved = kop_rinbox_get_item('facilities-from-news', $item['key']);
+                $check('facilities-from-news: the filed card says where and offers only its Undo', kop_rinbox_test_own_actions($moved) === array('unlink')
+                    && strpos($moved['text'], 'filed on the company') !== false && in_array('Listed on', array_column($moved['details'], 'label'), true), $moved['text']);
+                $res = call_user_func($src['act'], $item['key'], 'unlink', array());
+                $back = $get();
+                $check('facilities-from-news: Undo takes the article off the company and puts the name back exactly', $back['decision'] === $before['decision']
+                    && (string) $back['facility_id'] === (string) $before['facility_id'] && $count() === 0
+                    && json_decode((string) $back['detail'], true) == json_decode((string) $before['detail'], true), $res['message']);
+                if ($had) {
+                    $GLOBALS['pdo']->exec("INSERT INTO wpdl_kop_operator_links (operator_id, link_kind, link_id, link_type, created_by, created_at) VALUES ($oid, 'news', $news, 'primary', 'test', '2026-01-01 00:00:00')");
+                }
+            });
+        } finally {
+            $GLOBALS['pdo'] = $orig;
+        }
+        $pdo->prepare('UPDATE news_facility_candidates SET decision = ?, facility_id = ?, detail = ?, reviewed_by = ?, updated_at = ? WHERE id = ?')
+            ->execute(array($before['decision'], $before['facility_id'], $before['detail'], $before['reviewed_by'], $before['updated_at'], $id));
+    }
+
     $created = call_user_func($src['list'], array('view' => 'created', 'search' => '', 'offset' => 0, 'limit' => 1))['items'][0] ?? null;
     if ($created) {
         $check('facilities-from-news: a created record offers Remove (its undo)', array_column($created['actions'], 'id') === array('remove') && !$created['fields']);

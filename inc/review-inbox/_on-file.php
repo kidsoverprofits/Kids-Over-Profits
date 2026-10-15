@@ -12,6 +12,8 @@
  *     published or saved as drafts (pending and rejected rows are not records)
  *   - the same address in a facility's resourceLinks (its "Materials and
  *     links"); a link only mentioned in notes or a staff source does not count
+ *   - the same address in a company's operator.resourceLinks ("Materials and
+ *     links" on its /operator/ page; {prefix}kop_operators.json_data)
  *   - news: the same headline from the same outlet (kop_news_find_title_duplicates()'s rule)
  *   - lawsuits: the same case number (with a digit, 5+ characters)
  *   - bills: the same bill number, jurisdiction and session year
@@ -80,6 +82,7 @@ function kop_on_file_fingerprint(PDO $pdo, $type) {
         $parts[] = implode(',', $pdo->query("SELECT COUNT(*), MAX(id), MAX(updated_at) FROM {$t['table']}")->fetch(PDO::FETCH_NUM));
     }
     $parts[] = implode(',', $pdo->query('SELECT COUNT(*), MAX(updated_at) FROM facilities_v2')->fetch(PDO::FETCH_NUM));
+    $parts[] = kop_on_file_operators_fp($pdo);
     return md5($type . '|' . implode('|', $parts));
 }
 
@@ -236,7 +239,52 @@ function kop_on_file_match_urls(PDO $pdo, array $want, $self_type = '', $website
             }
         }
     }
+
+    // A company's "Materials and links" (and, for websites, its own websites): one query, the rows that have either.
+    $ops = kop_on_file_operators_table();
+    if ($ops !== '') {
+        try {
+            $q = $pdo->query("SELECT id, name, unique_name, json_data FROM `{$ops}` WHERE json_data LIKE '%resourceLinks%'" . ($websites ? " OR json_data LIKE '%websites%'" : ''));
+            foreach ($q ? $q->fetchAll(PDO::FETCH_ASSOC) : array() as $o) {
+                $json = json_decode((string) $o['json_data'], true);
+                $op = is_array($json['operator'] ?? null) ? $json['operator'] : array();
+                $lists = array('Materials and links' => (array) ($op['resourceLinks'] ?? array()));
+                if ($websites) $lists['its websites'] = (array) ($op['websites'] ?? array());
+                $name = trim((string) $o['name']) !== '' ? (string) $o['name'] : (string) $o['unique_name'];
+                foreach ($lists as $where => $links) {
+                    foreach ($links as $link) {
+                        $raw = is_array($link) ? (string) ($link['url'] ?? '') : (string) $link;
+                        foreach (kop_on_file_urls($raw, $websites) as $u) {
+                            foreach ($want[$u] ?? array() as $id) {
+                                $page = function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $o['id']) : '';
+                                $mark($id, 'On the company page of ' . $name . ' (' . $where . ')', $page);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            // No companies table here: the facilities and records above still count.
+        }
+    }
     return $found;
+}
+
+/** The companies table ({prefix}kop_operators), '' when WordPress's prefix is not known. */
+function kop_on_file_operators_table() {
+    $prefix = isset($GLOBALS['wpdb']) && is_object($GLOBALS['wpdb']) ? (string) ($GLOBALS['wpdb']->prefix ?? '') : '';
+    return $prefix !== '' ? $prefix . 'kop_operators' : '';
+}
+
+/** What a company edit moves in the fingerprints ('' without the table). */
+function kop_on_file_operators_fp(PDO $pdo) {
+    $ops = kop_on_file_operators_table();
+    if ($ops === '') return '';
+    try {
+        return implode(',', (array) $pdo->query("SELECT COUNT(*), MAX(updated_at) FROM `{$ops}`")->fetch(PDO::FETCH_NUM));
+    } catch (Throwable $e) {
+        return '';
+    }
 }
 
 /** [facility id => ['name' => ..., 'doc' => facilities_v2 document]] for the ids given that exist. */
@@ -254,14 +302,15 @@ function kop_on_file_docs(PDO $pdo, array $ids) {
 
 /**
  * $build() cached in a transient until the queue's table ($table, read with
- * $wpdb) or any facility record changes: a newly added item or record is seen at once.
+ * $wpdb) or any facility or company record changes: a newly added item or record is seen at once.
  */
 function kop_on_file_cached($name, $table, callable $build) {
     global $wpdb;
     try {
         $pdo = kop_rinbox_pdo();
         $fp = md5(implode(',', (array) $wpdb->get_row("SELECT COUNT(*), MAX(id), MAX(reviewed_at), SUM(status = 'pending') FROM {$table}", ARRAY_N))
-            . '|' . implode(',', $pdo->query('SELECT COUNT(*), MAX(updated_at) FROM facilities_v2')->fetch(PDO::FETCH_NUM)));
+            . '|' . implode(',', $pdo->query('SELECT COUNT(*), MAX(updated_at) FROM facilities_v2')->fetch(PDO::FETCH_NUM))
+            . '|' . kop_on_file_operators_fp($pdo));
         $cached = get_transient('kop_on_file_' . $name);
         if (is_array($cached) && ($cached['fp'] ?? '') === $fp) return (array) $cached['found'];
         kop_on_file_load_libs();

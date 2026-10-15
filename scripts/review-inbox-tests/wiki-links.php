@@ -52,6 +52,10 @@ function kop_rinbox_test_wiki_links(array $src, array $item, callable $check) {
     // The finder picks any kind of record.
     $finder = array_values(array_filter($card['actions'], function ($a) { return $a['id'] === 'link_other'; }))[0] ?? null;
     $check('wiki-links: the finder looks through every kind of record', $finder && $finder['params'][0]['type'] === 'record');
+    // ...but a young adult program: the link store and its readers know programs, companies and the other record tables only.
+    $kinds = (array) ($finder['params'][0]['kinds'] ?? array());
+    $check('wiki-links: the finder offers companies, consultants and the rest, never a young adult program', in_array('company', $kinds, true)
+        && in_array('consultant', $kinds, true) && !in_array('ya', $kinds, true), json_encode($kinds));
     $other = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE unique_name <> '' ORDER BY id LIMIT 1")->fetchColumn();
     call_user_func($src['act'], (string) $key, 'link_other', array('facility' => (string) $other));
     $un = $pdo->query('SELECT unique_name FROM facilities_v2 WHERE id = ' . $other)->fetchColumn();

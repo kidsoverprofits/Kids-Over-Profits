@@ -321,4 +321,42 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     }
     $m = call_user_func($src['tool'], 'resync', array());
     $check('woodbury-facts: "Load the facts file again" answers', $m['message'] !== '', $m['message']);
+
+    // Any record ('record_kinds'): the Record box beside Add offers a young adult program too; picked there
+    // ("ya:<id>"), the item goes on it as a fact citing the page, and Undo takes the fact off again.
+    $wait = $pick("SELECT pkey FROM $t WHERE status = 'pending' AND grp <> 'consultant' AND ya = 0 AND facility_id > 0 ORDER BY id LIMIT 1");
+    if ($wait === '') return;
+    $card = kop_rinbox_get_item('woodbury-facts', $wait);
+    $apply = array_values(array_filter($card['actions'], function ($a) { return $a['id'] === 'apply'; }))[0] ?? array();
+    $check('woodbury-facts: the Record box offers a young adult program too', in_array('ya', (array) ($apply['params'][0]['kinds'] ?? array()), true)
+        && in_array('company', (array) ($apply['params'][0]['kinds'] ?? array()), true), json_encode($apply['params'][0]['kinds'] ?? null));
+    if (!function_exists('kop_ya_save')) require_once dirname(__DIR__, 2) . '/inc/young-adult-programs.php';
+    $ya = kop_ya_pdo();
+    $ya->exec("CREATE TABLE IF NOT EXISTS young_adult_programs (id INTEGER PRIMARY KEY, name TEXT, name_key TEXT, other_names TEXT, city TEXT DEFAULT '',
+        state TEXT DEFAULT '', country TEXT DEFAULT '', ages TEXT DEFAULT '', program_type TEXT DEFAULT '', run_by TEXT DEFAULT '', opened INTEGER, closed INTEGER,
+        status TEXT DEFAULT 'Unknown', notes TEXT, links TEXT, facts TEXT, review TEXT DEFAULT 'approved', source TEXT DEFAULT '', created_by TEXT DEFAULT '',
+        created_at TEXT, updated_at TEXT)");
+    if (!kop_rinbox_test_options_persist()) {
+        kop_rinbox_test_skip('woodbury-facts: a young adult program picked', 'update_option() does not store in this harness');
+        return;
+    }
+    $yid = kop_ya_save($ya, array('name' => 'Woodbury Pick Test Ranch', 'state' => 'UT', 'review' => 'approved'), 0, 'test');
+    $facts = function () use ($ya, $yid) { return json_decode((string) kop_ya_get($ya, $yid)['facts'], true) ?: array(); };
+    kop_rinbox_test_with_wpdb_writes(function () use ($src, $wait, $check, $facts, $yid) {
+        $res = call_user_func($src['act'], $wait, 'apply', array('facility' => 'ya:' . $yid));
+        $r = kop_wbf_rows(array($wait))[0];
+        $done = json_decode((string) $r['applied'], true) ?: array();
+        $check('woodbury-facts: a young adult program picked beside Add gets the item as a fact', $r['status'] === 'applied' && count($facts()) === 1
+            && ($done['filed'] ?? '') === 'young_adult' && (int) ($done['id'] ?? 0) === $yid, $res['message']);
+        try {
+            $res = call_user_func($src['act'], $wait, 'undo', array());
+            $check('woodbury-facts: Undo takes the fact off the young adult program', kop_wbf_rows(array($wait))[0]['status'] === 'pending' && $facts() === array(), $res['message']);
+        } catch (Throwable $e) {
+            // kop_wbf_undo() opens the facility store first (MySQL): take it back by hand so the copy stays as it was.
+            kop_ya_remove_fact(kop_ya_pdo(), $done['done']);
+            $GLOBALS['pdo']->prepare('UPDATE wpdl_kop_woodbury_facts SET status = ?, applied = NULL WHERE pkey = ?')->execute(array('pending', $wait));
+            kop_rinbox_test_skip('woodbury-facts: Undo of a young adult pick', $e->getMessage());
+        }
+    });
+    $ya->prepare('DELETE FROM young_adult_programs WHERE id = ?')->execute(array($yid));
 }

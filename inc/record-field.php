@@ -44,6 +44,7 @@ function kop_record_field_kind_words() {
         'transporter' => 'transporter',
         'marketer'    => 'marketing company',
         'tradeorg'    => 'trade organization',
+        'ya'          => 'young adult program',
     );
 }
 
@@ -99,6 +100,12 @@ function kop_record_field_name($kind, $id) {
     if ($kind === 'facility') return (string) $wpdb->get_var($wpdb->prepare('SELECT name FROM facilities_v2 WHERE id = %d', $id));
     if ($kind === 'company') {
         return (string) $wpdb->get_var($wpdb->prepare('SELECT COALESCE(NULLIF(name, \'\'), unique_name) FROM ' . $wpdb->prefix . 'kop_operators WHERE id = %d', $id));
+    }
+    if ($kind === 'ya') {
+        // Young adult programs (18+) live in the records DB (inc/young-adult-programs.php).
+        $pdo = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
+        $p = $pdo && function_exists('kop_ya_get') ? kop_ya_get($pdo, $id) : null;
+        return $p ? (string) $p['name'] : '';
     }
     if (function_exists('kop_wbc_record_tables') && function_exists('kop_wbc_pdo')) {
         $spec = kop_wbc_record_tables()[$kind] ?? null;
@@ -207,6 +214,7 @@ function kop_record_field_company_refs() {
         $wpdb->prefix . 'kop_operator_facilities' => 'operator_id',
         $wpdb->prefix . 'kop_nonprofit_links'     => 'operator_id',
         $wpdb->prefix . 'kop_business_links'      => 'operator_id',
+        $wpdb->prefix . 'kop_operator_links'      => 'operator_id',
     );
 }
 

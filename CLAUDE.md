@@ -254,6 +254,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # naming a new one, is kop_record_field_param() (inc/record-field.php; the finder lists those kinds + "New company named ..."):
 # kop_record_field_resolve()/_link() makes it citing the card, Undo's kop_record_field_unmake() deletes it while untouched (nonprofit/business filings)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=addons
+# KOP Tools > Card Fields (inc/review-inbox-fields.php): per queue, which fields ("Edit details", by name) and lines (by label) its cards
+# show, and what kinds its record pickers offer (program, company, consultant, transporter, provider, marketer, trade org, young adult
+# program). A queue with 'record_kinds' gets its 'facility' pickers as the any-record finder; a non-program pick is filed by
+# kop_rinbox_file_on_record() (inc/review-record-file.php: company links/news/notes, YA links/facts, other kinds a cited note), exact Undo
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=card-fields
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
 # discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links (no-record ones re-tied by their SCIAD collection or wiki page name; company-only
@@ -651,16 +656,16 @@ php scripts/test-woodbury-mentions.php            # "File under" facilities and 
 # copied to ~/kop-import/woodbury/; owner adds them at KOP Tools > Woodbury Facts (live at once, Undo)
 (kop-pipeline) python scripts/woodbury-facts.py
 php scripts/test-woodbury-facts.php               # applies every proposal to the real docs, validator, exact undo
-# HEAL's archived site (heal-online.org, gone; Wayback copies) into tmp/heal/: staff lists and program pages are read
-# like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
-# Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
-(kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
-(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
 # An item that would add nothing, word for word or in other words (kop_wbf_list_covers(): ages/size/gender in the record's fields,
 # founders/owners/operators it names, its names, its address, NATSAP years, a line saying the same; kop_wbf_job_held(): a past job
 # whose employer and title the person's entry names; a nickname is one person), is refused by Add and filed hourly as rejected
 # "Already on the record" (kop_wbf_clear_on_record(); Back to review undoes one, never cleared again). Conflicts keep waiting
 php api/clear-woodbury-on-record.php [--list] [apply]   # on the server (ea-php82): run the pass now
+# HEAL's archived site (heal-online.org, gone; Wayback copies) into tmp/heal/: staff lists and program pages are read
+# like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
+# Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
+(kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
+(kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
 (kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:
 # text -> tmp/wiki/text/ + INSTRUCTIONS.md, batches of pages not read yet; readers write tmp/wiki/facts/

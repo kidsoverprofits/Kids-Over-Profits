@@ -240,6 +240,16 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
   KOP Tools > Card Add-ons (`inc/review-inbox-addons.php`). A new queue that
   does an add-on's job its own way goes in that add-on's `never` list (e.g.
   `kop_rinbox_ya_file_skip_sources()`, `kop_rinbox_homes_skip_sources()`).
+- A picker that files the item on a record takes any kind of record unless
+  what it writes only makes sense on a program: the source sets
+  `'record_kinds' => true` (or a list), its act/save reads the value with
+  `kop_rinbox_record_of()` (a bare id is a program, else `<kind>:<id>`),
+  keeps its own path for a program and calls `kop_rinbox_file_on_record()` /
+  `kop_rinbox_unfile_from_record()` (`inc/review-record-file.php`) for the
+  rest. A picker that must stay a program (homes, merges) has
+  `'facility_only' => true`. The owner picks the kinds per queue, and which
+  fields and lines its cards show, at KOP Tools > Card Fields
+  (`inc/review-inbox-fields.php`); a hidden field still sends its value.
 - A test in `scripts/review-inbox-tests/`, run with
   `scripts/test-review-inbox.php --source=<name>`.
 - `docs/admin-submissions/README.md`: the queue and what its buttons do.

@@ -127,6 +127,8 @@ foreach (array_keys(kop_rinbox_native_types()) as $kop_rinbox_native_key) {
                 return kop_rinbox_native_act($type, $key, $action, $params);
             },
         );
+        // "Move to" a website or Materials and links on any record (inc/review-destinations.php).
+        if ($t['moves']) $spec['record_kinds'] = true;
         $spec['origins'] = function (array $q) use ($type) { return kop_rinbox_native_origin_counts($type, $q['status']); };
         if ($t['fields']) {
             $spec['save'] = function ($key, array $fields) use ($type) { return kop_rinbox_native_save($type, $key, $fields); };
@@ -385,7 +387,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
             'url' => $url, 'title' => (string) $r[$t['title']],
             'site_name' => (string) ($r['publication_name'] ?? (parse_url($url, PHP_URL_HOST) ?: '')),
             'published' => (string) ($r['publication_date'] ?? ''),
-            'facility_id' => (int) ($params['facility_id'] ?? 0), 'kind' => (string) ($params['kind'] ?? ''),
+            'facility_id' => (string) ($params['facility_id'] ?? ''), /* a program's id or "<kind>:<id>" */ 'kind' => (string) ($params['kind'] ?? ''),
             'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
             'source_note' => 'Sent in as ' . strtolower($t['label']) . ' (#' . (int) $r['id'] . ')',
             'note' => 'Moved from the ' . $t['label'] . ' queue (#' . (int) $r['id'] . ') by ' . $reviewer . '.',
@@ -398,7 +400,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
         }
         $pdo->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ?, reviewer_notes = ? WHERE id = ?")
             ->execute(array($t['rejected'], trim($prev_notes . "\n" . $message), (int) $r['id']));
-        if ($type === 'news' && in_array($to, array('website', 'resource'), true)) {
+        if ($type === 'news' && in_array($to, array('website', 'resource'), true) && empty($done['record'])) {
             // The note the page's own "Move to facility record" button leaves, so its card shows the move too.
             $json = json_decode((string) $r['json_data'], true);
             $json = is_array($json) ? $json : array();

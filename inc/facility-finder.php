@@ -173,6 +173,25 @@ add_action('wp_ajax_kop_facility_finder', function () {
     unset($r);
     // "Any record": companies, consultants, providers and transporters too, each as "<kind>:<id>".
     $others = array_values(array_diff($kinds, array('facility')));
+    // Young adult programs (18+): their own table in the records DB, "ya:<id>".
+    if (($kinds === array('all') || in_array('ya', $kinds, true)) && function_exists('kop_ya_pdo') && mb_strlen($q) >= 2) {
+        try {
+            $ypdo = kop_ya_pdo();
+            if ($ypdo && kop_ya_ready($ypdo)) {
+                $like = '%' . addcslashes($q, '\\%_') . '%';
+                $st = $ypdo->prepare('SELECT id, name, city, state FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT 8');
+                $st->execute(array($like, $like));
+                foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $y) {
+                    $results[] = array('id' => (int) $y['id'], 'token' => 'ya:' . (int) $y['id'], 'kind' => 'ya', 'name' => (string) $y['name'],
+                        'label' => 'Young adult program (18+)', 'detail' => implode(', ', array_filter(array((string) $y['city'], (string) $y['state']))),
+                        'url' => home_url('/young-adult-programs/#kop-ya-program-' . (int) $y['id']));
+                }
+            }
+        } catch (Throwable $e) {
+            // The other kinds still come back.
+        }
+    }
+    $others = array_values(array_diff($others, array('ya')));
     if ($others && function_exists('kop_wbc_find_records')) {
         try {
             // One kind: its own search, ranked for it (kop_wbc_find_records() ranks companies alone that way).
@@ -256,7 +275,7 @@ function kop_facility_finder_print_assets() {
             var anyKind = kinds !== '';
             var create = (box.getAttribute('data-kop-record-create') || '').split(',').map(function (k) { return k.trim(); }).filter(Boolean);
             var words = { facility: 'program', company: 'company', consultant: 'educational consultant', provider: 'mental health provider',
-                transporter: 'transporter', marketer: 'marketing company', tradeorg: 'trade organization' };
+                transporter: 'transporter', marketer: 'marketing company', tradeorg: 'trade organization', ya: 'young adult program' };
             var named = kinds === '' || kinds === 'all' ? '' : kinds.split(',').map(function (k) { return words[k.trim()] || k.trim(); }).join(' or ');
             q.placeholder = named ? 'Find a ' + named + (create.length ? ', or type a new name' : '') + '…'
                 : anyKind ? 'Find a program, company, consultant…' : 'Find by name…';

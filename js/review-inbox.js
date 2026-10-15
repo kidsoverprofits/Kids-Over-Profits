@@ -1404,7 +1404,7 @@
         node.innerHTML = '';
         node.kopItem = item;
         var prefix = 'rinbox-' + (++cardSeq) + '-';
-        var category = (item.fields || []).filter(function (f) { return f.category; })[0];
+        var category = (item.fields || []).filter(function (f) { return f.category && !f.hidden_by_owner; })[0];
 
         var title = el('h3', { class: 'rinbox-title', text: item.title || '(no name)' });
         var meta = el('div', { class: 'rinbox-meta' }, [
@@ -1567,7 +1567,8 @@
             item.fields.forEach(function (f) {
                 var input = fieldInput(f, prefix);
                 var wide = f.type === 'textarea' || f.type === 'list';
-                grid.appendChild(el('div', { class: 'rinbox-field' + (wide ? ' rinbox-field-wide' : '') }, [
+                // A field the owner hid at KOP Tools > Card Fields stays in the form, unseen, so its value is still sent.
+                grid.appendChild(el('div', { class: 'rinbox-field' + (wide ? ' rinbox-field-wide' : ''), hidden: f.hidden_by_owner ? true : null }, [
                     el('label', { for: prefix + f.name, text: f.label }), input
                 ]));
             });

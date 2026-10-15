@@ -168,12 +168,16 @@ function kop_rinbox_addon_on($id, $source) {
 
 // Where "Move to" can send an item (news, lawsuits, legislation, Industry PR, a facility's website or resources).
 require_once __DIR__ . '/review-destinations.php';
+// Filing an item on any kind of record (company, consultant, young adult program...), with Undo
+require_once __DIR__ . '/review-record-file.php';
 // Recently done (with Undo), snooze / assign, link previews.
 require_once __DIR__ . '/review-inbox-log.php';
 // Volunteers recommend approve / reject through a personal link (/volunteer-review/).
 require_once __DIR__ . '/review-volunteers.php';
 // KOP Tools > Card Add-ons: which add-on is on for which queue.
 require_once __DIR__ . '/review-inbox-addons.php';
+// KOP Tools > Card Fields: what each queue's cards show, and what kinds of record its pickers offer
+require_once __DIR__ . '/review-inbox-fields.php';
 
 foreach (glob(__DIR__ . '/review-inbox/*.php') ?: array() as $kop_rinbox_file) {
     require_once $kop_rinbox_file;
@@ -395,6 +399,7 @@ function kop_rinbox_finish_items($source, array $items) {
     $tags = kop_rinbox_tags_for($source, $keys);
     // What volunteer reviewers recommended (inc/review-volunteers.php).
     $recs = function_exists('kop_vol_recs_for') ? kop_vol_recs_for($source, $keys) : array();
+    $seen = array();
     foreach ($items as &$it) {
         $it += array('subtitle' => '', 'url' => '', 'text' => '', 'created' => '', 'status' => '', 'status_label' => '',
             'facility' => null, 'fields' => array(), 'actions' => array(), 'moves' => array(), 'links' => array(),
@@ -415,8 +420,11 @@ function kop_rinbox_finish_items($source, array $items) {
                 // The card still draws without it.
             }
         }
+        // The owner's Card Fields choices: hidden fields and lines, the kinds of record pickers offer.
+        if (function_exists('kop_rinbox_card_fields_apply')) $it = kop_rinbox_card_fields_apply($source, $it, $seen);
     }
     unset($it);
+    if (function_exists('kop_rinbox_card_fields_note')) kop_rinbox_card_fields_note($seen);
     return $items;
 }
 

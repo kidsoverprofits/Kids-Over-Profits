@@ -67,6 +67,32 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
     call_user_func($src['act'], $item['key'], 'unmove', array());
     $check('news: Undo puts it back in the queue', kop_rinbox_native_row('news', $item['key'])['status'] === 'submitted');
 
+    // Any record: a company picked for "Materials and links" takes the link, the article is filed as rejected
+    // (with no facility note in its JSON); Undo takes the link off exactly and the article is pending again.
+    $oid = (int) $pdo->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
+    $news_url = kop_rinbox_native_url('news', kop_rinbox_native_row('news', $item['key']));
+    if ($oid && $news_url !== '') {
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $item, $check, $oid, $news_url) {
+            $urls = function () use ($oid) {
+                return array_column(array_filter((array) (kop_gdl_company_load($oid)['operator']['resourceLinks'] ?? array()), 'is_array'), 'url');
+            };
+            $before = $urls();
+            try {
+                $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'resource', 'facility_id' => 'company:' . $oid, 'kind' => 'reference'));
+            } catch (RuntimeException $e) {
+                $check('news: a company already holding the link refuses it with a reason', stripos($e->getMessage(), 'already on') !== false, $e->getMessage());
+                return;
+            }
+            $moved = kop_rinbox_native_row('news', $item['key']);
+            $json = json_decode((string) ($moved['json_data'] ?? ''), true);
+            $check('news: a company picked in "Move to" takes the link and the article is filed as rejected',
+                in_array($news_url, $urls(), true) && $moved['status'] === 'rejected' && !isset($json['movedTo']), $res['message']);
+            call_user_func($src['act'], $item['key'], 'unmove', array());
+            $check('news: Undo takes the link off the company exactly and the article is pending again',
+                $urls() === $before && kop_rinbox_native_row('news', $item['key'])['status'] === 'submitted');
+        });
+    }
+
     // An article already on the site can still be filed under a school or listed on a young adult program.
     $pdo->prepare("UPDATE news_submissions SET status = 'approved' WHERE id = ?")->execute(array((int) $item['key']));
     $approved = kop_rinbox_native_row('news', $item['key']);

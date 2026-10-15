@@ -27,6 +27,7 @@ kop_rinbox_register('scraper-finds', function () {
     if (!function_exists('kop_rdest_put')) return null;
     return array(
         'label'    => 'Scraper finds',
+        'record_kinds' => true, // "Move to" a website or Materials and links on any record (inc/review-destinations.php)
         'group'    => 'Found by the news scans',
         'help'     => 'Articles the nightly news scraper found but turned away. Send a good one to the news queue (or elsewhere with "Move to"), or dismiss it. '
             . '"Passed, link not found" are articles the filter accepted but whose Google News link could not be opened that night.',
@@ -272,7 +273,7 @@ function kop_scraper_finds_act($key, $action, array $params) {
             }
             $done = kop_rdest_put((string) ($params['to'] ?? ''), array(
                 'url' => $url, 'title' => (string) ($e['title'] ?? ''), 'site_name' => (string) ($e['host'] ?? ''),
-                'facility_id' => (int) ($params['facility_id'] ?? 0), 'kind' => (string) ($params['kind'] ?? ''),
+                'facility_id' => (string) ($params['facility_id'] ?? ''), /* a program's id or "<kind>:<id>" */ 'kind' => (string) ($params['kind'] ?? ''),
                 'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
                 'source_note' => 'Found by the news scraper', 'via' => 'Scraper finds import',
                 'note' => 'Found by the news scraper (' . ($e['origin'] ?: 'facility sweep') . '), turned away as "'

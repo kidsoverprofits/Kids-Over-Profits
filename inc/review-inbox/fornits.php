@@ -12,6 +12,13 @@
  * items ticked to start with, Add to another record (the Record box on Add,
  * also in bulk), the whole post, "Read a few more now" (kop_fornits_read_batch),
  * and the reading's progress. The AI key check is on KOP Tools > AI Usage.
+ *
+ * The Record box takes any record ('record_kinds', KOP Tools > Card Fields):
+ * a program as before (kop_fornits_apply()), a young adult program through
+ * kop_fornits_ya_file(), anything else through kop_fornits_apply_record()
+ * (links to its links, staff to a company's key staff, the rest a note citing
+ * the post). The Facility field stays programs only: it is the facility the
+ * reading matched, which the on-file and conflict checks read.
  */
 
 if (!defined('ABSPATH')) {
@@ -30,7 +37,8 @@ kop_rinbox_register('fornits', function () {
         'help'     => 'What the old Fornits survivor forum says about each facility, read by the AI (Gemini and Groq in turn): discussion links, staff, incidents, survivor accounts and leads. '
             . 'Each quote was checked against its post; one "not found in the post" starts unticked. The most important items start ticked: "Select all" and Add does a page. '
             . 'Add puts it on the facility record citing the post (discussion links under "Survivor posts and discussion"; survivor accounts unpublished until you tick "OK to publish" on the record). '
-            . 'Wrong facility? Pick another in the Record box beside Add. Undo takes it back.',
+            . 'Wrong facility? Pick another in the Record box beside Add: another program, a company, a consultant, a transport company and so on '
+            . '(on those, a thread goes under its links, a staff member on a company\'s key staff, anything else into its notes citing the post). Undo takes it back.',
         'views'    => $views,
         'filters'  => array(
             array('name' => 'kind', 'label' => 'Kind', 'options' => kop_fornits_kinds()),
@@ -46,6 +54,8 @@ kop_rinbox_register('fornits', function () {
         ),
         'tool'     => 'kop_rinbox_fornits_tool',
         'tool_url' => admin_url('admin.php?page=kop-fornits'),
+        // The Record boxes on Add and "Move to" take any kind of record (kop_fornits_apply_record()).
+        'record_kinds' => true,
         'count'    => function () {
             global $wpdb;
             kop_fornits_ensure_tables();
@@ -221,6 +231,9 @@ function kop_rinbox_fornits_item(array $r) {
         }, array_slice($also, 0, 5))) . '. Check it is this one.';
     }
     if (!empty($done['reason'])) $lines[] = $done['reason'];
+    if (($done['via'] ?? '') === 'record' && !empty($done['record']['message'])) $lines[] = (string) $done['record']['message'];
+    if (($done['via'] ?? '') === 'company_staff') $lines[] = 'Went to: the key staff of company #' . (int) ($done['operator_id'] ?? 0) . '.';
+    if (($done['filed'] ?? '') === 'young_adult') $lines[] = 'Went to: the young adult program "' . (string) ($done['name'] ?? '') . '".';
 
     $links = array();
     if ((string) $r['topic_url'] !== '') $links[] = array('label' => $headline !== '' ? 'Thread: ' . kop_rinbox_excerpt($headline, 80) : 'The forum thread', 'url' => (string) $r['topic_url']);
@@ -311,7 +324,8 @@ function kop_rinbox_fornits_item(array $r) {
     }
     $fields[] = array('name' => 'importance', 'label' => 'How much it matters', 'type' => 'select', 'category' => true, 'readonly' => $ro,
         'options' => array_combine(array_map('strval', array_keys($imp)), array_values($imp)), 'value' => (string) (int) $r['importance']);
-    $fields[] = array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => $ro);
+    // The facility the reading matched (the row's facility_id): programs only.
+    $fields[] = array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => $ro, 'facility_only' => true);
 
     $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'rejected' => 'Skipped');
     $fid = $r['status'] === 'applied' ? (int) $r['applied_fid'] : (int) $r['facility_id'];
@@ -392,6 +406,16 @@ function kop_rinbox_fornits_act($key, $action, array $params) {
                 throw new RuntimeException('Only a lead can go somewhere else.');
             }
             $fid = (int) $r['facility_id'];
+            $any = trim((string) ($params['facility'] ?? ''));
+            if ($any !== '' && !ctype_digit($any) && function_exists('kop_rinbox_record_of')) {
+                // A company, consultant, transporter, provider, marketer, trade organization or young adult program.
+                list($rk, $rid) = kop_rinbox_record_of($any);
+                if ($rk === '' || $rid <= 0) throw new RuntimeException('Pick a record in the finder first.');
+                if ($rk !== 'facility') {
+                    return array('message' => kop_fornits_apply_record($r, $target, $rk . ':' . $rid, $user) . ' Undo is on the Added tab.');
+                }
+                $params['facility'] = (string) $rid;
+            }
             $picked = (int) ($params['facility'] ?? 0);
             // Another record than the reading's match: kop_fornits_apply() puts it there, as "Add checked to that record" did.
             $other = $picked > 0 && $picked !== $fid ? $picked : 0;

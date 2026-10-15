@@ -42,6 +42,42 @@ function kop_rinbox_test_closure(array $src, array $item, callable $check) {
         $check('closure: a quote not found in the article is flagged', in_array('Check the quote', array_column($nf['details'], 'label'), true));
     }
     $check('closure: the scan tool is offered', ($src['tools'][0]['id'] ?? '') === 'scan' && is_callable($src['tool']));
+
+    // Any record ('record_kinds'): "Which facility closed?" is the any-record finder (Edit details stays a program);
+    // a company picked gets a line in its notes, no status changes, and Undo takes the line off exactly.
+    $card = kop_rinbox_get_item('closure', $item['key']);
+    $confirm = array_values(array_filter($card['actions'], function ($a) { return $a['id'] === 'apply'; }))[0] ?? array();
+    $field = array_values(array_filter($card['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
+    $check('closure: Confirm offers any record, Edit details keeps a program', ($confirm['params'][0]['type'] ?? '') === 'record'
+        && in_array('company', (array) ($confirm['params'][0]['kinds'] ?? array()), true) && ($field['type'] ?? '') === 'facility');
+    $oid = (int) $pdo->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
+    if (!$oid) {
+        kop_rinbox_test_skip('closure: a company takes a note', 'no company in the scratch copy');
+        return;
+    }
+    $json_of = function () use ($pdo, $oid) { return (string) $pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . $oid)->fetchColumn(); };
+    // The company as it reads (an empty notes list left by Undo reads as no notes).
+    $company = function () use ($json_of) {
+        $j = json_decode($json_of(), true) ?: array();
+        if (isset($j['operator']) && empty($j['operator']['notes'])) unset($j['operator']['notes']);
+        return $j;
+    };
+    $company_before = $company();
+    $report = kop_closure_get_report($pdo, (int) $item['key']);
+    $res = call_user_func($src['act'], $item['key'], 'apply', array('facility_id' => 'company:' . $oid, 'end_year' => '2019'));
+    $now = kop_closure_get_report($pdo, (int) $item['key']);
+    $notes = (array) ((json_decode($json_of(), true) ?: array())['operator']['notes'] ?? array());
+    $last = (string) end($notes);
+    $check('closure: a company picked gets a line in its notes naming the article, the report leaves the list', $now['status'] === 'applied' && empty($now['facility_id'])
+        && strpos($last, 'per news report') !== false && ($report['article_url'] === '' || $report['article_url'] === null || strpos($last, (string) $report['article_url']) !== false), $res['message'] . ' | ' . $last);
+    $filed = kop_rinbox_get_item('closure', $item['key']);
+    $check('closure: the filed card says where and offers its Undo', kop_rinbox_test_own_actions($filed) === array('undo')
+        && in_array('Filed in the notes of', array_column($filed['details'], 'label'), true));
+    $res = call_user_func($src['act'], $item['key'], 'undo', array());
+    $back = kop_closure_get_report($pdo, (int) $item['key']);
+    $check('closure: Undo takes the note off and the report waits exactly as before', $company() == $company_before && $back['status'] === $report['status']
+        && (string) $back['facility_id'] === (string) $report['facility_id'] && $back['applied_note'] === $report['applied_note'],
+        $res['message']);
     try {
         call_user_func($src['tool'], 'nope', array());
         $check('closure: an unknown tool is refused', false);

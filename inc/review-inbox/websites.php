@@ -17,6 +17,7 @@ kop_rinbox_register('websites', function () {
     if (!function_exists('kop_ext_source_fields')) return null;
     return array(
         'label'    => 'Websites sent in',
+        'record_kinds' => true, // "Move to" a website or Materials and links on any record (inc/review-destinations.php)
         'group'    => 'Sent in by readers',
         'help'     => 'Pages sent with the Send to KOP browser button that are not news, lawsuits or bills. Keep the useful ones, trash the rest; Restore brings a trashed one back.',
         'views'    => array('pending' => 'Waiting', 'publish' => 'Kept', 'draft' => 'Drafts', 'trash' => 'Trashed', 'all' => 'All'),
@@ -109,7 +110,7 @@ function kop_rinbox_websites_item($p) {
     $actions = array();
     if ($p->post_status === 'pending' || $p->post_status === 'draft') {
         $actions[] = array('id' => 'publish', 'label' => 'Approve: keep this website', 'style' => 'approve',
-            'help' => 'Files it under Kept, the internal list of useful websites; it is not shown on the public site. To put it on a facility page or in a queue, use "Move to" instead.');
+            'help' => 'Files it under Kept, the internal list of useful websites; it is not shown on the public site. To put it on the page of a program or other record, or in a queue, use "Move to" instead.');
         $actions[] = array('id' => 'trash', 'label' => 'Reject: trash', 'style' => 'reject',
             'help' => 'Moves it to the trash; Restore brings it back, and WordPress empties the trash after 30 days.');
     } elseif ($p->post_status === 'trash' && get_post_meta($id, '_kop_moved', true)) {
@@ -208,7 +209,7 @@ function kop_rinbox_websites_act($key, $action, array $params) {
                 'site_name' => (string) get_post_meta($id, '_kop_site_name', true),
                 'published' => (string) get_post_meta($id, '_kop_published', true),
                 'facility' => (string) get_post_meta($id, '_kop_facility', true),
-                'facility_id' => (int) ($params['facility_id'] ?? 0), 'kind' => (string) ($params['kind'] ?? ''),
+                'facility_id' => (string) ($params['facility_id'] ?? ''), /* a program's id or "<kind>:<id>" */ 'kind' => (string) ($params['kind'] ?? ''),
                 'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
                 'source_note' => 'Sent in from the browser extension', 'note' => 'Sent in as a website; moved here by ' . kop_rinbox_reviewer() . '.',
                 'via' => 'browser extension',

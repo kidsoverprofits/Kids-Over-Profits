@@ -38,8 +38,41 @@ kop_rinbox_register('closure', function () {
         },
         'act'      => 'kop_rinbox_closure_act',
         'save'     => 'kop_rinbox_closure_save',
+        // "Which facility closed?" takes any kind (KOP Tools > Card Fields): anything but a program gets a line
+        // in its notes and no status changes (kop_rinbox_closure_file_record()). Edit details stays a program.
+        'record_kinds' => true,
     );
 });
+
+/**
+ * Confirm on a record that is not a program (a company, consultant, young
+ * adult program...): the record gets one line in its notes naming the stage
+ * and the article (kop_closure_source_note()), no status or year changes, and
+ * the report is marked applied with no facility id; applied_note keeps what
+ * was filed and where the report was, so Undo puts it back exactly.
+ */
+function kop_rinbox_closure_file_record(PDO $pdo, array $r, $value, $user) {
+    if (!in_array($r['status'], array('pending', 'unmatched'), true)) throw new RuntimeException('This report was decided already. Undo it first.');
+    $done = kop_rinbox_file_on_record($value, array('what' => 'note', 'text' => kop_closure_source_note($r), 'url' => (string) ($r['article_url'] ?? ''),
+        'title' => (string) ($r['article_title'] ?? ''), 'key' => 'closure-' . (int) $r['id']), $user);
+    $note = array('filed_on' => $done, 'was' => array('status' => $r['status'], 'facility_id' => $r['facility_id'] !== null ? (int) $r['facility_id'] : null));
+    try {
+        $pdo->prepare("UPDATE facility_closure_reports SET status = 'applied', facility_id = NULL, applied_note = ?, reviewed_by = ?, reviewed_at = UTC_TIMESTAMP() WHERE id = ?")
+            ->execute(array(wp_json_encode($note), $user, (int) $r['id']));
+    } catch (Throwable $e) {
+        kop_rinbox_unfile_from_record($done);
+        throw $e;
+    }
+    kop_rinbox_flush_counts();
+    return 'Filed. ' . $done['message'] . ' No status was changed. Undo is on the Confirmed tab.';
+}
+
+/** What kop_rinbox_closure_file_record() did for report $r, or null (a normal confirm on a program). */
+function kop_rinbox_closure_filed(array $r) {
+    if ($r['status'] !== 'applied' || (int) $r['facility_id'] > 0) return null;
+    $note = json_decode((string) $r['applied_note'], true);
+    return is_array($note) && !empty($note['filed_on']) ? $note : null;
+}
 
 function kop_rinbox_closure_views() {
     return array('pending' => 'To review', 'applied' => 'Confirmed', 'dismissed' => 'Dismissed', 'other' => 'Already recorded / duplicate', 'all' => 'All');
@@ -145,9 +178,12 @@ function kop_rinbox_closure_item(array $r) {
         $who = $fac ? $fac['name'] : 'the facility you pick';
         $actions[] = array('id' => 'apply', 'label' => 'Confirm: mark ' . $r['target_status'], 'style' => 'approve', 'params' => $params,
             'help' => 'Sets ' . $who . ' to ' . $r['target_status'] . ($r['target_status'] === 'Closed' ? ' (with the end year below)' : '')
-                . ' on its facility page and the network map, and lists this article on its page.');
+                . ' on its facility page and the network map, and lists this article on its page. Picking a company or another kind of record instead puts a line in its notes naming the article; no status changes.');
         $actions[] = array('id' => 'dismiss', 'label' => 'Dismiss: not a closure', 'style' => 'reject',
             'help' => 'No facility changes; the report moves to the Dismissed tab.');
+    } elseif ($filed = kop_rinbox_closure_filed($r)) {
+        $actions[] = array('id' => 'undo', 'label' => 'Undo: take the note off ' . $filed['filed_on']['name'], 'style' => 'undo',
+            'help' => 'Takes the line this put in the notes of ' . $filed['filed_on']['name'] . ' off again, and the report waits for review again.');
     } elseif ($r['status'] === 'applied') {
         $actions[] = array('id' => 'undo', 'label' => 'Undo: restore the old status', 'style' => 'undo',
             'help' => 'Puts the facility back to the status and end year it had before, and the report waits for review again.');
@@ -158,7 +194,11 @@ function kop_rinbox_closure_item(array $r) {
     $quote = (string) $r['quote'];
     $pdo = kop_closure_pdo();
     $details = array();
-    if ((int) $r['facility_id'] > 0) {
+    if ($filed = kop_rinbox_closure_filed($r)) {
+        $on = $filed['filed_on'];
+        $details[] = array('label' => 'Filed in the notes of', 'value' => $on['name'] . ' (' . (kop_rinbox_record_kinds()[$on['kind']] ?? $on['kind']) . '), no status changed',
+            'url' => kop_rinbox_record_url((string) $on['kind'], (int) $on['id']));
+    } elseif ((int) $r['facility_id'] > 0) {
         $now = kop_rinbox_closure_facility_now($pdo, (int) $r['facility_id']);
         $details[] = array('label' => 'Facility now', 'value' => $now !== '' ? $now : 'gone (no such record)');
     } else {
@@ -190,7 +230,7 @@ function kop_rinbox_closure_item(array $r) {
         'facility'     => kop_rinbox_facility($r['facility_id']),
         'fields'       => array(
             array('name' => 'program_name', 'label' => 'Program name', 'type' => 'text', 'value' => $r['program_name']),
-            array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id']),
+            array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'facility_only' => true),
             array('name' => 'stage', 'label' => 'What happened', 'type' => 'select', 'options' => $stages, 'value' => $r['stage'], 'category' => true),
             array('name' => 'closure_date', 'label' => 'Closure date (YYYY-MM-DD)', 'type' => 'text', 'value' => (string) $r['closure_date']),
             array('name' => 'location', 'label' => 'Location', 'type' => 'text', 'value' => (string) $r['location']),
@@ -208,10 +248,27 @@ function kop_rinbox_closure_act($key, $action, array $params) {
             // As the old screen: a cleared end year box is 0 (set no end year);
             // no box at all (a Suspended report) leaves it to the closure date.
             $end = array_key_exists('end_year', $params) ? (int) $params['end_year'] : null;
+            // A pick that is not a program ("company:12"...): a note on that record, no status changes.
+            list($rkind) = kop_rinbox_record_of((string) ($params['facility_id'] ?? ''));
+            if ($rkind !== '' && $rkind !== 'facility') {
+                $r = kop_closure_get_report($pdo, $id);
+                if (!$r) throw new RuntimeException('That report is gone.');
+                return array('message' => kop_rinbox_closure_file_record($pdo, $r, (string) $params['facility_id'], $user));
+            }
             $fid = kop_closure_apply($pdo, $id, $user, (int) ($params['facility_id'] ?? 0), $end);
             return array('message' => 'Confirmed. ' . wp_strip_all_tags(kop_facility_finder_label($pdo, $fid)) . ' is now marked '
                 . kop_rinbox_closure_facility_now($pdo, $fid) . '. Its facility page and the network map already show this. Undo is on the Confirmed tab.');
         case 'undo':
+            $r = kop_closure_get_report($pdo, $id);
+            if ($r && ($filed = kop_rinbox_closure_filed($r))) {
+                kop_rinbox_unfile_from_record((array) $filed['filed_on']);
+                $was = (array) ($filed['was'] ?? array());
+                $status = in_array($was['status'] ?? '', array('pending', 'unmatched'), true) ? $was['status'] : 'unmatched';
+                $pdo->prepare('UPDATE facility_closure_reports SET status = ?, facility_id = ?, applied_note = NULL, reviewed_by = NULL, reviewed_at = NULL WHERE id = ?')
+                    ->execute(array($status, !empty($was['facility_id']) ? (int) $was['facility_id'] : null, $id));
+                kop_rinbox_flush_counts();
+                return array('message' => 'Undone. The note is off ' . $filed['filed_on']['name'] . ' again, and the report is waiting again.');
+            }
             $fid = kop_closure_undo($pdo, $id, $user);
             return array('message' => 'Undone. ' . wp_strip_all_tags(kop_facility_finder_label($pdo, $fid)) . ' is back to '
                 . kop_rinbox_closure_facility_now($pdo, $fid) . ', and the report is waiting again.');

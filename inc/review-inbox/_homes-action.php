@@ -47,7 +47,7 @@ function kop_rinbox_homes_action($source, array $item) {
     return array('id' => 'home_of_program', 'label' => 'Home of a program', 'style' => 'neutral',
         'help' => 'Keeps ' . ($name !== '' ? $name : 'this record') . ' as its own record and lists it as one home or cottage of a program: pick the program\'s record, or name a new one. Undo is in Recently done.',
         'params' => array(
-            array('name' => 'home_program', 'label' => 'Program record', 'type' => 'facility', 'value' => '', 'optional' => true),
+            array('name' => 'home_program', 'label' => 'Program record', 'type' => 'facility', 'value' => '', 'optional' => true, 'facility_only' => true),
             array('name' => 'home_program_name', 'label' => 'or new program named', 'type' => 'text', 'value' => (string) $split[0], 'optional' => true),
         ));
 }

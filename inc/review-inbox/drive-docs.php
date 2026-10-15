@@ -11,6 +11,14 @@
  * ticked to start with, Add to another record (the Record box on Add, also in
  * bulk), "Add all sure matches" for a facility (on the card and as a queue
  * tool, in batches), and loading the links files again.
+ *
+ * The Record box takes any record ('record_kinds', KOP Tools > Card Fields):
+ * a program as before, a company through kop_gdl_apply_company() (its
+ * "Materials and links" or websites), anything else through
+ * kop_gdl_apply_record() (kop_rinbox_file_on_record()). News, court records
+ * and bills go to their queues whatever is picked. The Facility field and
+ * "Add every sure match" stay programs only: they name the facility a link
+ * was matched to.
  */
 
 if (!defined('ABSPATH')) {
@@ -27,7 +35,7 @@ kop_rinbox_register('drive-docs', function () {
         'group'    => 'Imports to review',
         'help'     => 'Links found in your Google Docs, HEAL\'s old site, the r/troubledteens wiki and SCIAD NET that the site does not have yet. '
             . 'Add sends each one where its kind belongs (news to the news queue, court records and bills to their queues, the program\'s own site to its website links, '
-            . 'everything else to "Materials and links" on the facility page). To put it on another record, pick it in the Record box beside Add. '
+            . 'everything else to "Materials and links" on the facility page). To put it on another record (another program, a company, a consultant, a transport company...), pick it in the Record box beside Add. '
             . 'Each card is one facility with all its links; links from one website are folded into one row. Tick what belongs and click "Add ticked links" '
             . '(close-name matches start unticked). News, court records and bills go straight onto the site, with no second approval in their queues. '
             . 'Undo in Recently done takes back a whole click. "Show: One card per link" gives a card per link, with "Move to" and edits. No emails are sent.'
@@ -41,7 +49,7 @@ kop_rinbox_register('drive-docs', function () {
             array('id' => 'add_all', 'label' => 'Add every sure match for a facility', 'style' => 'approve',
                 'help' => 'Adds every waiting link tied for sure to this facility, each where its kind goes, a batch at a time. Click again if it says some are left.',
                 'params' => array(
-                    array('name' => 'facility', 'label' => 'Facility', 'type' => 'facility', 'value' => ''),
+                    array('name' => 'facility', 'label' => 'Facility', 'type' => 'facility', 'value' => '', 'facility_only' => true),
                     array('name' => 'kind', 'label' => 'Only', 'type' => 'select', 'options' => array('' => 'Every kind') + $kinds, 'value' => ''),
                     array('name' => 'source', 'label' => 'From', 'type' => 'select', 'options' => array('' => 'Every source') + $sources, 'value' => ''),
                 )),
@@ -49,6 +57,8 @@ kop_rinbox_register('drive-docs', function () {
                 'help' => 'Reads the uploaded links files now, even if they look unchanged: new links are added, waiting ones take the latest match.'),
         ),
         'tool'     => 'kop_rinbox_gdl_tool',
+        // The Record boxes on Add and "Move to" take any kind of record (kop_rinbox_gdl_record_pick()).
+        'record_kinds' => true,
         'views'    => array(
             'pending'  => 'Waiting',
             'facility' => 'Waiting, for a facility',
@@ -228,6 +238,8 @@ function kop_rinbox_gdl_item(array $r) {
     }
     if (!empty($done['reason'])) {
         $lines[] = $done['reason'];
+    } elseif (($done['target'] ?? '') === 'record') {
+        $lines[] = (string) ($done['record']['message'] ?? ('Went to: ' . (string) ($done['record']['name'] ?? 'another record') . '.'));
     } elseif (($done['target'] ?? '') === 'company') {
         $lines[] = 'Went to: the company page of ' . ($r['operator_name'] !== '' ? $r['operator_name'] : '#' . (int) ($done['operator_id'] ?? 0)) . '.';
     } elseif (!empty($done['target'])) {
@@ -319,7 +331,8 @@ function kop_rinbox_gdl_item(array $r) {
         'fields'       => array(
             array('name' => 'label', 'label' => 'Label', 'type' => 'text', 'value' => (string) $r['label'], 'readonly' => !$pending),
             array('name' => 'kind', 'label' => 'Kind', 'type' => 'select', 'options' => $kinds, 'value' => (string) $r['kind'], 'category' => true, 'readonly' => !$pending),
-            array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => !$pending),
+            // The facility the link was matched to (a row's facility_id): programs only.
+            array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => !$pending, 'facility_only' => true),
         ),
         'actions'      => $actions,
         'moves'        => $moves,
@@ -396,6 +409,20 @@ function kop_rinbox_gdl_act($key, $action, array $params) {
             if (!isset($targets[$to])) throw new RuntimeException('Pick where the link goes.');
             if ($r['status'] !== 'pending') throw new RuntimeException('This link was already handled (' . $r['status'] . ').');
             $fid = (int) $r['facility_id'];
+            $other = kop_rinbox_gdl_record_pick($params['facility'] ?? $params['facility_id'] ?? '');
+            if ($other) {
+                // A company, consultant, transporter, provider, marketer, trade organization or young adult program.
+                $res = kop_gdl_apply_record(array($r), array($r['pkey'] => $to), $other, $user)[$r['pkey']] ?? array('ok' => false, 'error' => 'Nothing was done.');
+                if (empty($res['ok'])) {
+                    if (!empty($res['keep'])) throw new RuntimeException($res['error']);
+                    return array('message' => 'Not added: ' . $res['error'] . ' It is now under "Skipped or already there".');
+                }
+                if (!kop_gdl_needs_facility($to)) {
+                    return array('message' => 'Added to the ' . strtolower($targets[$to]) . ', approved and on the site now (no emails sent). Undo is on the Added tab.');
+                }
+                $msg = ($res['target'] ?? '') === 'company' ? 'Added to the company page of ' . kop_rinbox_gdl_record_name($other) . '.' : (string) ($res['message'] ?? 'Added.');
+                return array('message' => $msg . ' Undo is on the Added tab.');
+            }
             $picked = (int) ($params['facility'] ?? $params['facility_id'] ?? 0);
             if ($picked > 0 && $picked !== $fid) {
                 // Another record than the match: kop_gdl_apply() takes it as the record, as "Add checked to that record" did.
@@ -717,7 +744,8 @@ function kop_rinbox_gdl_group_act($key, $action, array $params) {
     }
     if ($action !== 'add_picked') throw new RuntimeException('Unknown action.');
     $fid = $g['fid'];
-    $picked = (int) ($params['facility'] ?? 0);
+    $other = kop_rinbox_gdl_record_pick($params['facility'] ?? '');
+    $picked = $other ? 0 : (int) ($params['facility'] ?? 0);
     if ($picked > 0 && $picked !== $fid) {
         $st = kop_rinbox_pdo()->prepare('SELECT COUNT(*) FROM facilities_v2 WHERE id = ?');
         $st->execute(array($picked));
@@ -730,7 +758,8 @@ function kop_rinbox_gdl_group_act($key, $action, array $params) {
     $started = time();
     foreach (array_chunk($rows, 40) as $i => $batch) {
         if ($i && time() - $started > 25) { $left += count($batch); continue; }
-        foreach (kop_gdl_apply($batch, array(), $fid, $user) as $pkey => $res) {
+        $done = $other ? kop_gdl_apply_record($batch, array(), $other, $user) : kop_gdl_apply($batch, array(), $fid, $user);
+        foreach ($done as $pkey => $res) {
             if (!empty($res['ok'])) $added[] = (string) $pkey;
             elseif (!empty($res['keep'])) $need++;
             else $refused++;
@@ -738,11 +767,31 @@ function kop_rinbox_gdl_group_act($key, $action, array $params) {
     }
     kop_rinbox_flush_counts();
     $msg = 'Added ' . count($added) . ' link' . (count($added) === 1 ? '' : 's') . ', each where its kind goes'
-        . ($fid > 0 ? ' (facility links on ' . kop_rinbox_facility($fid)['name'] . ')' : '')
+        . ($other ? ' (links for a page on ' . kop_rinbox_gdl_record_name($other) . ')' : ($fid > 0 ? ' (facility links on ' . kop_rinbox_facility($fid)['name'] . ')' : ''))
         . ($refused ? '; ' . $refused . ' already on file or refused (now under "Skipped or already there")' : '')
         . ($need ? '; ' . $need . ' need a facility: pick it in the Record box and add again' : '')
         . ($left ? '; ' . $left . ' not reached yet: click Add again' : '') . '.';
     $out = array('message' => $msg);
     if ($added) $out['undo'] = array('action' => 'undo_picked', 'params' => array('keys' => $added));
     return $out;
+}
+
+/**
+ * The Record box's value when it names a record that is not a program
+ * ("company:45", "consultant:7"...), else '' (a program, or nothing: the
+ * queue's own facility path takes those, as before).
+ */
+function kop_rinbox_gdl_record_pick($value) {
+    $value = trim((string) $value);
+    if ($value === '' || ctype_digit($value) || !function_exists('kop_rinbox_record_of')) return '';
+    list($kind, $id) = kop_rinbox_record_of($value);
+    if ($kind === '' || $id <= 0) throw new RuntimeException('Pick a record in the finder first.');
+    return $kind === 'facility' ? '' : $kind . ':' . $id;
+}
+
+/** "Acme Youth Services" for a picked record. */
+function kop_rinbox_gdl_record_name($value) {
+    list($kind, $id) = kop_rinbox_record_of($value);
+    $name = function_exists('kop_record_field_name') ? (string) kop_record_field_name($kind, $id) : '';
+    return $name !== '' ? $name : $kind . ' #' . $id;
 }

@@ -91,6 +91,22 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
     $opt = array_filter($file['params'], function ($p) { return empty($p['optional']); });
     $company = array_values(array_filter($file['params'], function ($p) { return $p['name'] === 'company'; }))[0] ?? array();
     $check('woodbury-reports: File it can run on many cards (every box optional) and finds companies by name', !$opt && ($company['lookup'] ?? '') === 'company');
+    // Any record with a document folder: "File under that record" is the any-record finder (no programs there, no
+    // young adult programs: they have no folder); the Best match stays a program.
+    $fr = array_values(array_filter($it['actions'], function ($a) { return $a['id'] === 'file_record'; }))[0] ?? array();
+    $rec = array_values(array_filter((array) ($fr['params'] ?? array()), function ($p) { return $p['name'] === 'record'; }))[0] ?? array();
+    $kinds = (array) ($rec['kinds'] ?? array());
+    $check('woodbury-reports: "File under that record" picks any record with a document folder',
+        ($rec['type'] ?? '') === 'record' && in_array('company', $kinds, true) && in_array('consultant', $kinds, true) && in_array('tradeorg', $kinds, true)
+        && !in_array('ya', $kinds, true) && !in_array('facility', $kinds, true), wp_json_encode($rec));
+    $best = array_values(array_filter($it['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
+    $check('woodbury-reports: the Best match stays a program', ($best['type'] ?? '') === 'facility');
+    try {
+        call_user_func($src['act'], $key, 'file_record', array('record' => 'ya:5'));
+        $check('woodbury-reports: a young adult program is refused (no document folder)', false);
+    } catch (RuntimeException $e) {
+        $check('woodbury-reports: a young adult program is refused (no document folder)', stripos($e->getMessage(), 'young adult') !== false, $e->getMessage());
+    }
     $section = $pick("SELECT ckey FROM $t WHERE status = 'pending' AND kind = 'section' AND facility_id > 0 ORDER BY id LIMIT 1");
     $mention = $pick("SELECT ckey FROM $t WHERE status = 'pending' AND kind = 'mention' ORDER BY id LIMIT 1");
     $check('woodbury-reports: articles with a confident match start ticked, mentions do not',

@@ -45,8 +45,58 @@ kop_rinbox_register('federal-funding', function () {
             return array('message' => kop_ffund_save_edits((string) $key, $fields));
         },
         'act'      => 'kop_rinbox_ffund_act',
+        // "Record" takes any kind (KOP Tools > Card Fields); anything but a program gets each entry
+        // as a line in its notes with its source link (kop_rinbox_ffund_file_record()).
+        'record_kinds' => true,
     );
 });
+
+/**
+ * Add on a record that is not a program (a company, consultant, transporter,
+ * young adult program...): each entry becomes one line in its notes ("PPP loan
+ * (2020-2021): <words>: <first source link>"; a young adult program gets a
+ * fact). The decision keeps every filing (filed) for an exact Undo.
+ */
+function kop_rinbox_ffund_file_record($key, $value, $reviewer) {
+    $p = kop_ffund_proposals()[$key] ?? null;
+    if (!$p) throw new RuntimeException('That card is gone.');
+    $decisions = kop_ffund_decisions();
+    if (!empty($decisions[$key]['decision'])) throw new RuntimeException('This card was decided already. Undo it first.');
+    $streams = kop_facility_federal_funding_streams();
+    $filed = array();
+    try {
+        foreach (kop_ffund_entries($key, $p) as $e) {
+            $url = (string) ($e['sources'][0]['url'] ?? '');
+            $text = ($streams[$e['stream']] ?? $e['stream']) . ($e['years'] !== '' ? ' (' . $e['years'] . ')' : '') . ': ' . $e['detail'];
+            try {
+                $filed[] = kop_rinbox_file_on_record($value, array('what' => 'note', 'text' => $text, 'url' => $url,
+                    'title' => (string) ($e['sources'][0]['label'] ?? ''), 'source' => 'federal funding research', 'key' => $e['ref']), $reviewer);
+            } catch (RuntimeException $ex) {
+                // Already in its notes: nothing to add for this entry.
+                if (strpos($ex->getMessage(), 'already') === false) throw $ex;
+            }
+        }
+    } catch (Throwable $ex) {
+        foreach ($filed as $done) kop_rinbox_unfile_from_record($done);
+        throw $ex;
+    }
+    if (!$filed) throw new RuntimeException('Every entry is in that record\'s notes already.');
+    $decisions[$key] = array('decision' => 'applied', 'record' => array('kind' => $filed[0]['kind'], 'id' => (int) $filed[0]['id'], 'name' => $filed[0]['name']),
+        'filed' => $filed, 'at' => current_time('mysql', true), 'by' => (string) $reviewer);
+    kop_ffund_save_decisions($decisions);
+    return 'Added ' . count($filed) . ' federal funding entr' . (count($filed) === 1 ? 'y' : 'ies') . ' to the notes of '
+        . kop_rinbox_record_words($filed[0]['kind'], $filed[0]['name']) . '. Undo on the Added tab takes them off.';
+}
+
+/** Undo kop_rinbox_ffund_file_record(): every line off the record, the card waiting again. */
+function kop_rinbox_ffund_unfile_record($key) {
+    $decisions = kop_ffund_decisions();
+    $d = $decisions[$key] ?? array();
+    foreach (array_reverse((array) ($d['filed'] ?? array())) as $done) kop_rinbox_unfile_from_record((array) $done);
+    unset($decisions[$key]);
+    kop_ffund_save_decisions($decisions);
+    return 'Undone: the entries are off ' . kop_rinbox_record_words((string) ($d['record']['kind'] ?? ''), (string) ($d['record']['name'] ?? '')) . ' again. It is waiting for review.';
+}
 
 function kop_rinbox_ffund_view(array $p, array $d) {
     $decision = (string) ($d['decision'] ?? '');
@@ -146,7 +196,10 @@ function kop_rinbox_ffund_item($key, array $p) {
     if (($p['operating'] ?? '') !== '') $details[] = array('label' => 'Operating since Oct 2021', 'value' => (string) $p['operating']);
     foreach ((array) ($p['flags'] ?? array()) as $f) $details[] = array('label' => 'Check', 'value' => (string) $f);
     $cands = (array) ($p['candidates'] ?? array());
-    if ($view === 'applied') {
+    if ($view === 'applied' && !empty($d['record'])) {
+        $details[] = array('label' => 'Added to the notes of', 'value' => (string) $d['record']['name'] . ' (' . (kop_rinbox_record_kinds()[$d['record']['kind']] ?? $d['record']['kind'])
+            . '), ' . ($d['at'] ?? '') . ' by ' . ($d['by'] ?? ''), 'url' => kop_rinbox_record_url((string) $d['record']['kind'], (int) $d['record']['id']));
+    } elseif ($view === 'applied') {
         $details[] = array('label' => !empty($d['created']) ? 'Made the record' : 'Added to',
             'value' => kop_rinbox_ffund_candidate_line(array('id' => (int) $d['facility_id'], 'how' => '')) . ', ' . ($d['at'] ?? '') . ' by ' . ($d['by'] ?? ''));
     } elseif ($view === 'rejected') {
@@ -176,7 +229,7 @@ function kop_rinbox_ffund_item($key, array $p) {
         $fid = kop_rinbox_ffund_fid($p, $d);
         $actions[] = array('id' => 'add', 'label' => 'Add to this record', 'style' => $view === 'matched' ? 'approve' : 'neutral',
             'params' => array(array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => $fid ?: '')),
-            'help' => 'Puts ' . count($entries) . ' federal funding entr' . (count($entries) === 1 ? 'y' : 'ies') . ' on the record picked in "Record", listed on its facility page at once. Undo on the Added tab takes them off.');
+            'help' => 'Puts ' . count($entries) . ' federal funding entr' . (count($entries) === 1 ? 'y' : 'ies') . ' on the record picked in "Record", listed on its facility page at once (a company or any other kind of record gets them as lines in its notes, with their source links). Undo on the Added tab takes them off.');
         $types = kop_rinbox_options(array_combine(kop_facdisc_types('offered'), kop_facdisc_types('offered')));
         $actions[] = array('id' => 'create', 'label' => 'New record…', 'style' => $view === 'new' ? 'approve' : 'neutral', 'ask' => true,
             'submit' => 'Create the record and add the funding',
@@ -192,9 +245,11 @@ function kop_rinbox_ffund_item($key, array $p) {
             'help' => 'Nothing on the site changes; the card moves to Left off.');
     } else {
         $actions[] = array('id' => 'undo', 'label' => $view === 'applied' ? 'Undo' : 'Back to review', 'style' => 'undo',
-            'help' => $view === 'applied'
+            'help' => $view === 'applied' && !empty($d['record'])
+                ? 'Takes the lines Add put in the notes of ' . $d['record']['name'] . ' off again; the card waits for review again.'
+                : ($view === 'applied'
                 ? 'Takes the entries Add put on the record off it again' . (!empty($d['created']) ? ', and deletes the record it made while nobody has edited it' : '') . '; the card waits for review again.'
-                : 'Nothing on the site changes; the card waits for review again.');
+                : 'Nothing on the site changes; the card waits for review again.'));
     }
 
     $labels = array('matched' => 'Matched to a record', 'check' => 'Pick the record', 'new' => 'No record yet', 'applied' => 'Added', 'rejected' => 'Left off');
@@ -212,7 +267,7 @@ function kop_rinbox_ffund_item($key, array $p) {
         'status'       => $view,
         'status_label' => $labels[$view] ?? $view,
         'created'      => (string) ($d['at'] ?? ''),
-        'facility'     => ($fid = kop_rinbox_ffund_fid($p, $d)) ? kop_rinbox_facility($fid) : null,
+        'facility'     => empty($d['record']) && ($fid = kop_rinbox_ffund_fid($p, $d)) ? kop_rinbox_facility($fid) : null,
         'selected'     => $view === 'matched' && ($p['confidence'] ?? '') === 'high',
         'actions'      => $actions,
     );
@@ -221,12 +276,17 @@ function kop_rinbox_ffund_item($key, array $p) {
 function kop_rinbox_ffund_act($key, $action, array $params) {
     switch ($action) {
         case 'add':
+            list($kind) = kop_rinbox_record_of((string) ($params['facility_id'] ?? ''));
+            if ($kind !== '' && $kind !== 'facility') {
+                return array('message' => kop_rinbox_ffund_file_record($key, (string) $params['facility_id'], kop_rinbox_reviewer()));
+            }
             return array('message' => kop_ffund_apply($key, (int) ($params['facility_id'] ?? 0), kop_rinbox_reviewer()));
         case 'create':
             return array('message' => kop_ffund_create($key, $params, kop_rinbox_reviewer()));
         case 'reject':
             return array('message' => kop_ffund_reject($key, kop_rinbox_reviewer()));
         case 'undo':
+            if (!empty((kop_ffund_decisions()[$key] ?? array())['filed'])) return array('message' => kop_rinbox_ffund_unfile_record($key));
             return array('message' => kop_ffund_undo($key));
     }
     throw new RuntimeException('Unknown action.');

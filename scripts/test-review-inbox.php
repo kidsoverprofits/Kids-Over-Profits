@@ -282,6 +282,16 @@ if ($only === '' || $only === 'addons') {
     }
 }
 
+if ($only === '' || $only === 'card-fields') {
+    echo "-- Card Fields and filing on any record --
+";
+    try {
+        kop_rinbox_test_card_fields($check);
+    } catch (Throwable $e) {
+        $check('card-fields: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 if ($only === '' || $only === 'counts') {
     echo "-- Waiting counts: saved, drawn at once, recounted only when stale --
 ";

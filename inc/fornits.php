@@ -1178,6 +1178,15 @@ function kop_fornits_undo(array $rows, $reviewer) {
             if (function_exists('kop_ya_remove_fact') && kop_ya_pdo()) kop_ya_remove_fact(kop_ya_pdo(), (array) ($done['done'] ?? array()));
             $back($r);
             $results[$r['pkey']] = array('ok' => true);
+        } elseif (in_array($done['via'] ?? '', array('record', 'company_staff'), true)) {
+            // On a company, consultant, transporter, provider, marketer or trade organization (kop_fornits_apply_record()).
+            try {
+                kop_fornits_record_undo($done);
+                $back($r);
+                $results[$r['pkey']] = array('ok' => true);
+            } catch (Throwable $e) {
+                $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage());
+            }
         } elseif (($done['via'] ?? '') === 'queue') {
             try {
                 kop_gdl_queue_remove(kop_gdl_queue_pdo(), $done);
@@ -1585,4 +1594,126 @@ function kop_fornits_ya_file(array $r, $yid, $reviewer) {
     $wpdb->update(kop_fornits_items_table(), array('status' => 'applied', 'applied_fid' => 0, 'reviewed_by' => $reviewer, 'reviewed_at' => $now,
         'applied' => wp_json_encode(array('filed' => 'young_adult', 'id' => (int) $yid, 'name' => $p['name'], 'done' => $done))), array('pkey' => $r['pkey']));
     return 'Added to the young adult program "' . $p['name'] . '", citing the post. Undo is on the Added tab.';
+}
+
+
+/* ---- Any other record ----------------------------------------------------- */
+
+/**
+ * File a waiting item on a record that is not a program, as the review
+ * inbox's Record box names it ("company:45", "consultant:7", "ya:3"...;
+ * kop_rinbox_record_of()). A program keeps kop_fornits_apply(); a young
+ * adult program kop_fornits_ya_file(). For the rest:
+ *   link      -> the record's links (a company's "Materials and links"), kind social
+ *   staff     -> a company's key staff ("Executives", citing the post), else a note
+ *   incident, testimony (its summary, never the account itself), lead -> a note
+ *                citing the post (kop_rinbox_file_on_record() 'note')
+ *   a news or lawsuit lead -> its queue, as for a program
+ * Stored as {via: 'record', record: <what it did>} or {via: 'company_staff', ...};
+ * kop_fornits_undo() takes it back exactly. Returns a sentence.
+ */
+function kop_fornits_apply_record(array $r, $target, $value, $reviewer) {
+    global $wpdb;
+    if ($r['status'] !== 'pending') throw new RuntimeException('This item was already handled (' . $r['status'] . ').');
+    if (!function_exists('kop_rinbox_record_of')) throw new RuntimeException('Pick a program for this item.');
+    list($kind, $id) = kop_rinbox_record_of($value);
+    if ($kind === '' || $id <= 0) throw new RuntimeException('Pick a record in the finder first.');
+    if ($kind === 'facility') throw new RuntimeException('A program is filed by Add itself.');
+    if ($kind === 'ya') return kop_fornits_ya_file($r, $id, $reviewer);
+    $name = function_exists('kop_record_field_name') ? (string) kop_record_field_name($kind, $id) : '';
+    if ($name === '') throw new RuntimeException('That record is not on file any more.');
+    $v = (json_decode((string) $r['value'], true) ?: array()) + array('url' => '', 'type' => 'other', 'year' => '', 'summary' => '', 'person' => '', 'role' => '', 'years' => '');
+    $now = current_time('mysql', true);
+    $mark = function ($status, array $applied) use ($wpdb, $r, $reviewer, $now) {
+        $wpdb->update(kop_fornits_items_table(), array('status' => $status, 'applied' => wp_json_encode($applied), 'applied_fid' => 0,
+            'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+    };
+    if ($r['kind'] === 'lead' && in_array($target, array('news', 'lawsuit'), true)) {
+        $mark('applied', kop_fornits_queue_add($r, $target, $name, $reviewer));
+        return 'Sent to the ' . ($target === 'news' ? 'news' : 'lawsuits') . ' queue, waiting for review there (no emails sent).';
+    }
+    $post = kop_fornits_post_url($r['topic_id'], $r['post_n']);
+    $when = kop_fornits_month($r['post_date']);
+    $source = 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member') . ($when ? ', ' . $when : '');
+    try {
+        if ($r['kind'] === 'staff' && $kind === 'company') {
+            $done = kop_fornits_company_staff_add($id, $v, $source, $post);
+            $mark('applied', $done);
+            return 'Added ' . $v['person'] . ' to the key staff of the company "' . $name . '", citing the post.';
+        }
+        if ($r['kind'] === 'link') {
+            $p = array('what' => 'link', 'url' => (string) $v['url'], 'title' => kop_fornits_link_label($r), 'kind' => 'social',
+                'source' => 'Fornits forum' . (!empty($v['board']) ? ', board "' . $v['board'] . '"' : ''));
+        } else {
+            $role = trim($v['role'] . ($v['years'] !== '' ? ' (' . $v['years'] . ')' : ''));
+            $cats = array('death' => 'Death', 'abuse' => 'Abuse', 'sexual_abuse' => 'Sexual abuse', 'restraint' => 'Restraint',
+                'seclusion' => 'Seclusion', 'neglect' => 'Neglect', 'runaway' => 'Runaway', 'injury' => 'Injury',
+                'lawsuit' => 'Lawsuit', 'investigation' => 'Investigation', 'other' => 'Incident');
+            $text = array(
+                'staff'     => 'Staff: ' . $v['person'] . ($role !== '' ? ', ' . $role : ''),
+                'incident'  => ($v['year'] !== '' ? $v['year'] : 'Reported ' . $when) . ': ' . ($cats[$v['category'] ?? 'other'] ?? 'Incident') . ': ' . rtrim((string) $v['summary'], '.') . '.',
+                // The account itself stays off: survivor accounts are added unpublished, on programs only.
+                'testimony' => 'Survivor account on Fornits' . ($v['years'] !== '' ? ' (' . $v['years'] . ')' : '') . ': ' . rtrim((string) $v['summary'], '.') . '.',
+                'lead'      => 'Fornits lead (' . $v['type'] . '): ' . rtrim((string) $v['summary'], '.') . '.' . ($v['url'] !== '' ? ' ' . $v['url'] : ''),
+            )[$r['kind']] ?? (string) $r['label'];
+            $p = array('what' => 'note', 'text' => $text, 'url' => $post, 'source' => $source);
+        }
+        $p['key'] = 'fornits-' . $r['pkey'];
+        $done = kop_rinbox_file_on_record($kind . ':' . $id, $p, $reviewer);
+    } catch (RuntimeException $e) {
+        if (stripos($e->getMessage(), 'already') === false) throw $e;
+        $mark('rejected', array('reason' => $e->getMessage()));
+        return 'Not added: ' . $e->getMessage() . ' It is now under "Skipped or already there".';
+    }
+    $mark('applied', array('via' => 'record', 'record' => $done));
+    return (string) ($done['message'] ?? 'Added.') . ' It cites the post.';
+}
+
+/** A staff item as one of a company's key staff ("Executives"), citing the post. */
+function kop_fornits_company_staff_add($oid, array $v, $source, $post) {
+    $person = trim((string) ($v['person'] ?? ''));
+    if ($person === '') throw new RuntimeException('Give the person\'s name first.');
+    $key = function ($n) {
+        return function_exists('kop_wbf_person_key') ? kop_wbf_person_key($n) : strtolower(trim(preg_replace('/\s+/', ' ', (string) $n)));
+    };
+    $json = kop_gdl_company_load($oid);
+    $ks = is_array($json['operator']['keyStaff'] ?? null) ? $json['operator']['keyStaff'] : array();
+    $have = array((string) ($ks['ceo'] ?? ''));
+    foreach (array('founders', 'keyExecutives') as $l) {
+        foreach ((array) ($ks[$l] ?? array()) as $e) $have[] = is_array($e) ? (string) ($e['name'] ?? '') : (string) $e;
+    }
+    foreach ($have as $h) {
+        if (trim($h) !== '' && $key($h) === $key($person)) throw new RuntimeException($person . ' is already on the company\'s key staff.');
+    }
+    $entry = array('name' => $person, 'role' => trim((string) ($v['role'] ?? '') . (!empty($v['years']) ? ' (' . $v['years'] . ')' : '')),
+        'pastJobs' => '', 'source' => $source, 'sourceUrl' => $post);
+    $ks['keyExecutives'] = array_values((array) ($ks['keyExecutives'] ?? array()));
+    $ks['keyExecutives'][] = $entry;
+    $json['operator']['keyStaff'] = $ks;
+    kop_gdl_company_save($oid, $json);
+    if (function_exists('kop_rinbox_record_changed')) kop_rinbox_record_changed('company', $oid);
+    return array('via' => 'company_staff', 'operator_id' => (int) $oid, 'entry' => $entry);
+}
+
+/** Take back what kop_fornits_apply_record() did. */
+function kop_fornits_record_undo(array $done) {
+    if (($done['via'] ?? '') === 'company_staff') {
+        $oid = (int) ($done['operator_id'] ?? 0);
+        $want = (array) ($done['entry'] ?? array());
+        $json = kop_gdl_company_load($oid);
+        $list = array_values((array) ($json['operator']['keyStaff']['keyExecutives'] ?? array()));
+        foreach ($list as $i => $e) {
+            if (is_array($e) && (string) ($e['name'] ?? '') === (string) ($want['name'] ?? '') && (string) ($e['role'] ?? '') === (string) ($want['role'] ?? '')
+                && (string) ($e['sourceUrl'] ?? '') === (string) ($want['sourceUrl'] ?? '')) {
+                array_splice($list, $i, 1);
+                $json['operator']['keyStaff']['keyExecutives'] = $list;
+                kop_gdl_company_save($oid, $json);
+                if (function_exists('kop_rinbox_record_changed')) kop_rinbox_record_changed('company', $oid);
+                return;
+            }
+        }
+        return; // Taken off by hand since: nothing left to undo.
+    }
+    if (!function_exists('kop_rinbox_unfile_from_record')) throw new RuntimeException('Undo this from the Review inbox.');
+    kop_rinbox_unfile_from_record((array) ($done['record'] ?? array()));
 }

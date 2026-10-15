@@ -79,6 +79,24 @@ function kop_rinbox_test_scraper_finds(array $src, array $item, callable $check)
     $check('scraper-finds: with the address typed in, it sends', $d['url'] === 'https://www.heraldextra.com/news/2026/10/academy-closes-inbox-test/', $res['message']);
     call_user_func($src['act'], $gn, 'undo', array());
 
+    // Any record: a company picked for "Materials and links" takes the link; Undo takes it off exactly.
+    $oid = (int) $pdo->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
+    if ($oid) {
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $ksl, $check, $oid) {
+            $urls = function () use ($oid) {
+                return array_column(array_filter((array) (kop_gdl_company_load($oid)['operator']['resourceLinks'] ?? array()), 'is_array'), 'url');
+            };
+            $before = $urls();
+            $res = call_user_func($src['act'], $ksl, 'move', array('to' => 'resource', 'facility_id' => 'company:' . $oid, 'kind' => 'reference'));
+            $check('scraper-finds: a company picked in "Move to" takes the link in its Materials and links',
+                in_array('https://www.ksl.com/article/1/ranch-staff-charged-inbox-test', $urls(), true), $res['message']);
+            call_user_func($src['act'], $ksl, 'undo', array());
+            $check('scraper-finds: Undo takes the link off the company exactly', $urls() === $before && !isset(kop_scraper_finds_decisions()[$ksl]));
+        });
+    } else {
+        kop_rinbox_test_skip('scraper-finds: a company takes the link', 'no company in the scratch copy');
+    }
+
     call_user_func($src['act'], $ksl, 'dismiss', array());
     $check('scraper-finds: dismiss', (kop_scraper_finds_decisions()[$ksl]['decision'] ?? '') === 'dismissed');
     call_user_func($src['act'], $ksl, 'undo', array());

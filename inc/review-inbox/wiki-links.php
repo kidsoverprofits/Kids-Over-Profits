@@ -46,6 +46,10 @@ kop_rinbox_register('wiki-links', function () {
             return isset($rows[(int) $key]) ? kop_rinbox_wlinks_item($rows[(int) $key]) : null;
         },
         'act'      => 'kop_rinbox_wlinks_act',
+        // Every kind but a young adult program: the link is a record name in wiki_submissions.facility_unique_name,
+        // and the readers (wiki gaps, link labels, the record-change drafts) know programs, companies and the
+        // consultant/provider/transporter/marketer/trade organization tables only (kop_wiki_upd_pick()).
+        'record_kinds' => array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg'),
     );
 });
 

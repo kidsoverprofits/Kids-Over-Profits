@@ -217,4 +217,43 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
     } catch (RuntimeException $e) {
         $check('websites: a facility destination with no facility is refused', $status() === 'pending', $e->getMessage());
     }
+
+    // Any record ('record_kinds'): the move's picker is the any-record finder; a company takes the link in its
+    // "Materials and links", the same link sent in again is on file there, and Undo move takes it off.
+    $card = kop_rinbox_get_item('websites', $item['key']);
+    $res_move = array_values(array_filter($card['moves'], function ($m) { return $m['id'] === 'resource'; }));
+    $check('websites: the Materials and links move offers any record', $res_move && $res_move[0]['params'][0]['type'] === 'record'
+        && in_array('company', (array) $res_move[0]['params'][0]['kinds'], true), wp_json_encode($res_move[0]['params'][0] ?? null));
+    $oid = (int) $GLOBALS['pdo']->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
+    if (!$oid) {
+        kop_rinbox_test_skip('websites: a company takes the link', 'no company in the scratch copy');
+        return;
+    }
+    kop_rinbox_test_with_wpdb_writes(function () use ($src, $item, $check, $status, $oid, $id) {
+        $url = (string) get_post_meta($id, '_kop_url', true);
+        $links_of = function () use ($oid) {
+            $op = kop_gdl_company_load($oid)['operator'];
+            return array(array_column(array_filter((array) ($op['resourceLinks'] ?? array()), 'is_array'), 'url'), (array) ($op['websites'] ?? array()));
+        };
+        $before = $links_of();
+        $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'resource', 'facility_id' => 'company:' . $oid, 'kind' => 'social'));
+        $after = $links_of();
+        $check('websites: a company picked in "Move to" takes the link in its Materials and links', in_array($url, $after[0], true)
+            && $status() === 'trash', $res['message']);
+        // The same address sent in again is already on file (inc/review-inbox/_on-file.php reads the company's links).
+        $GLOBALS['pdo']->prepare("INSERT INTO wpdl_posts (post_author, post_date, post_content, post_title, post_excerpt, post_status, post_name, post_modified, post_type)
+                       VALUES (1, ?, '', 'Company on file test', '', 'pending', '', ?, ?)")->execute(array(gmdate('Y-m-d H:i:s'), gmdate('Y-m-d H:i:s'), KOP_EXT_SOURCE_CPT));
+        $twin = (int) $GLOBALS['pdo']->lastInsertId();
+        update_post_meta($twin, '_kop_url', $url);
+        $on = kop_rinbox_websites_on_file();
+        $check('websites: a link on a company page is already on file', isset($on[(string) $twin]) && strpos($on[(string) $twin]['label'], 'company page') !== false,
+            $on[(string) $twin]['label'] ?? 'not found');
+        wp_delete_post($twin, true);
+        $res = call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('websites: Undo move takes the link off the company exactly', $links_of() === $before && $status() === 'pending', $res['message']);
+        $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'website', 'facility_id' => 'company:' . $oid));
+        $check('websites: a company picked for "Website" takes it in its websites', in_array($url, $links_of()[1], true), $res['message']);
+        call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('websites: Undo move takes the website off the company', $links_of() === $before && $status() === 'pending');
+    });
 }

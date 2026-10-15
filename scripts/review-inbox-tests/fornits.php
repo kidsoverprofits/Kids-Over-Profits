@@ -78,6 +78,11 @@ if (!function_exists('get_edit_post_link')) {
 })();
 
 function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
+    try {
+        kop_rinbox_test_fornits_any_record($src, $check);
+    } catch (Throwable $e) {
+        $check('fornits any record: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
     $pdo = $GLOBALS['pdo'];
     $key = function ($kind, $status = 'pending') use ($pdo) {
         $st = $pdo->prepare('SELECT pkey FROM wpdl_kop_fornits_items WHERE kind = ? AND status = ? ORDER BY id LIMIT 1');
@@ -194,12 +199,12 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     $pdo->exec("DELETE FROM wpdl_kop_fornits_items WHERE pkey = '" . str_repeat('ab', 16) . "'");
     $it = kop_rinbox_get_item('fornits', $staff);
     $check('fornits: the most important items start ticked', $it['selected'] === true);
-    $check('fornits: Add has an optional Record box (bulk still works)', ($it['actions'][0]['params'][0]['type'] ?? '') === 'facility' && !empty($it['actions'][0]['params'][0]['optional']));
+    $check('fornits: Add has an optional Record box (bulk still works)', in_array($it['actions'][0]['params'][0]['type'] ?? '', array('facility', 'record'), true) && !empty($it['actions'][0]['params'][0]['optional']));
     $check('fornits: the whole post and the board show on the card', in_array('Whole post', array_column($it['details'], 'label'), true)
         && in_array('Board', array_column($it['details'], 'label'), true));
     $lead_it = kop_rinbox_get_item('fornits', $lead);
     $note = array_values(array_filter($lead_it['moves'], function ($m) { return $m['id'] === 'note'; }))[0] ?? array();
-    $check('fornits: a lead going on a record asks which record', ($note['params'][0]['type'] ?? '') === 'facility');
+    $check('fornits: a lead going on a record asks which record', in_array($note['params'][0]['type'] ?? '', array('facility', 'record'), true));
     $fids = $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 2")->fetchAll(PDO::FETCH_COLUMN);
     try {
         call_user_func($src['act'], $lead, 'apply', array('facility' => (string) $fids[1]));
@@ -212,4 +217,91 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     $check('fornits: queue tools are Read more and progress', array_column($src['tools'], 'id') === array('read_now', 'status'));
     $m = call_user_func($src['tool'], 'status', array());
     $check('fornits: the progress line counts the topics', strpos($m['message'], 'Topics loaded: 1') === 0, $m['message']);
+}
+
+/**
+ * The Record box takes any record ('record_kinds'): on a company a thread goes
+ * into its "Materials and links", a staff member onto its key staff and an
+ * incident into its notes, each citing the post, and Undo takes each off
+ * exactly. Its own made-up items (removed after), so it runs whatever the
+ * mirror's table holds.
+ */
+function kop_rinbox_test_fornits_any_record(array $src, callable $check) {
+    global $wpdb;
+    require_once __DIR__ . '/_shared.php';
+    $pdo = $GLOBALS['pdo'];
+    $fid = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 1")->fetchColumn();
+    $oid = (int) $wpdb->get_var('SELECT id FROM wpdl_kop_operators ORDER BY id LIMIT 1');
+    if ($fid <= 0 || $oid <= 0) {
+        $check('fornits any record: a facility and a company in the mirror', false);
+        return;
+    }
+    $tid = 991977;
+    $made = array();
+    $make = function ($kind, array $value, $label) use ($pdo, $fid, $tid, &$made) {
+        $pkey = substr(md5('any-record-test|' . $kind), 0, 16);
+        $pdo->prepare('DELETE FROM wpdl_kop_fornits_items WHERE pkey = ?')->execute(array($pkey));
+        $pdo->prepare("INSERT INTO wpdl_kop_fornits_items (pkey, topic_id, kind, facility_id, also, how, label, value, quote, quote_found, context, summary,
+            categories, importance, post_n, author, post_date, preselect, status, applied, applied_fid, created_at)
+            VALUES (?, ?, ?, ?, '[]', 'name in text', ?, ?, 'The words of the post.', 1, 'The words of the post.', '', '', 2, 2, 'member77', '2004-03-02',
+            0, 'pending', NULL, 0, '2026-10-15 09:00:00')")->execute(array($pkey, $tid, $kind, $fid, $label, json_encode($value)));
+        $made[] = $pkey;
+        return $pkey;
+    };
+    $row = function ($key) { return kop_fornits_rows(array($key))[0] ?? null; };
+    $link = $make('link', array('url' => 'https://www.fornits.com/phpbb/index.php?topic=' . $tid . '.0', 'board' => 'Program Survivors'), 'Fornits: Any record test thread');
+    $staff = $make('staff', array('person' => 'Zed Q. Anyrecord', 'role' => 'night staff', 'years' => '2004'), 'Zed Q. Anyrecord, night staff (2004)');
+    $incident = $make('incident', array('category' => 'restraint', 'year' => '2004', 'summary' => 'Students describe a restraint in the hall'), 'Restraint: Students describe a restraint in the hall');
+    try {
+        $it = kop_rinbox_get_item('fornits', $staff);
+        $add = array_values(array_filter($it['actions'], function ($a) { return $a['id'] === 'apply'; }))[0]['params'][0] ?? array();
+        $fac = array_values(array_filter($it['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
+        $check('fornits any record: the Record box on Add offers every kind, the Facility field stays programs only',
+            ($add['type'] ?? '') === 'record' && in_array('company', (array) ($add['kinds'] ?? array()), true) && ($fac['type'] ?? '') === 'facility',
+            json_encode(array($add['type'] ?? '', $add['kinds'] ?? array(), $fac['type'] ?? '')));
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $check, $oid, $row, $link, $staff, $incident) {
+            $before = kop_gdl_company_load($oid);
+            $op = function () use ($oid) { return kop_gdl_company_load($oid)['operator']; };
+
+            $m = call_user_func($src['act'], $link, 'apply', array('facility' => 'company:' . $oid));
+            $urls = array_column(array_filter((array) ($op()['resourceLinks'] ?? array()), 'is_array'), 'url');
+            $check('fornits any record: a thread Added to a company is in its "Materials and links"', $row($link)['status'] === 'applied'
+                && in_array(json_decode((string) $row($link)['value'], true)['url'], $urls, true), $m['message']);
+            $m = call_user_func($src['act'], $link, 'undo', array());
+            $check('fornits any record: ...and Undo takes it off exactly', $row($link)['status'] === 'pending'
+                && (array) ($op()['resourceLinks'] ?? array()) == (array) ($before['operator']['resourceLinks'] ?? array()), $m['message']);
+
+            $m = call_user_func($src['act'], $staff, 'apply', array('facility' => 'company:' . $oid));
+            $execs = (array) ($op()['keyStaff']['keyExecutives'] ?? array());
+            $last = end($execs) ?: array();
+            $check('fornits any record: a staff member Added to a company is on its key staff, citing the post', $row($staff)['status'] === 'applied'
+                && ($last['name'] ?? '') === 'Zed Q. Anyrecord' && ($last['role'] ?? '') === 'night staff (2004)'
+                && strpos((string) ($last['sourceUrl'] ?? ''), 'fornits.com') !== false, $m['message']);
+            $twice = kop_fornits_apply_record(array_merge($row($staff), array('status' => 'pending')), '', 'company:' . $oid, 'tester');
+            $check('fornits any record: the same person twice is not added again', strpos($twice, 'already') !== false, $twice);
+            $wpdb_status = $row($staff)['status'];
+            // The refused second try filed the item as skipped: put the first Add back so Undo can take it off.
+            $GLOBALS['pdo']->prepare("UPDATE wpdl_kop_fornits_items SET status = 'applied', applied = ? WHERE pkey = ?")
+                ->execute(array(json_encode(array('via' => 'company_staff', 'operator_id' => $oid, 'entry' => $last)), $staff));
+            $m = call_user_func($src['act'], $staff, 'undo', array());
+            $check('fornits any record: ...and Undo takes the person off exactly', $wpdb_status === 'rejected' && $row($staff)['status'] === 'pending'
+                && (array) ($op()['keyStaff']['keyExecutives'] ?? array()) == (array) ($before['operator']['keyStaff']['keyExecutives'] ?? array()), $m['message']);
+
+            try {
+                $m = call_user_func($src['act'], $incident, 'apply', array('facility' => 'company:' . $oid));
+            } catch (PDOException $e) {
+                // Notes are written through api/lib-suggested-edits.php, which asks MySQL (SHOW TABLES).
+                echo "  (a company's notes need MySQL here: the incident path is not run)\n";
+                return;
+            }
+            $notes = implode("\n", array_map('strval', (array) ($op()['notes'] ?? array())));
+            $check('fornits any record: an incident Added to a company is a line in its notes citing the post', $row($incident)['status'] === 'applied'
+                && strpos($notes, 'Students describe a restraint in the hall') !== false && strpos($notes, 'fornits.com') !== false, $m['message']);
+            $m = call_user_func($src['act'], $incident, 'undo', array());
+            $check('fornits any record: ...and Undo takes the line off exactly', $row($incident)['status'] === 'pending'
+                && (array) ($op()['notes'] ?? array()) == (array) ($before['operator']['notes'] ?? array()), $m['message']);
+        });
+    } finally {
+        foreach ($made as $pkey) $pdo->prepare('DELETE FROM wpdl_kop_fornits_items WHERE pkey = ?')->execute(array($pkey));
+    }
 }

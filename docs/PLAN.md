@@ -2562,3 +2562,31 @@ Open:
 5. `js/data-form-modules/data-page.js` (the old report) turns tick-box keys into words itself, so an added box prints as
    its key (`breathing_restraint`); make it read `window.KOP_CHOICE_LISTS` like `data-report-generator.js`.
 6. Gender served, chamber, level and publication statuses stay in code (normalisation and workflow states, not categories).
+
+### 3.30 Card Fields: what review cards show, and filing on any kind of record (2026-10-15)
+
+The owner asked to decide which fields review screens include, and to link items to a company, an educational
+consultant, a transport company, a young adult program... instead of only a facility. KOP Tools > Card Fields
+(https://kidsoverprofits.org/wp-admin/admin.php?page=kop-card-fields, `inc/review-inbox-fields.php`): per queue, the
+fields in "Edit details" and the lines on the card to show (a hidden field still sends its value), and the kinds its
+record picker offers. A non-program pick is filed by `kop_rinbox_file_on_record()` (`inc/review-record-file.php`):
+company links/websites in its "Materials and links", news in `kop_operator_links` (listed on /operator/), notes; young
+adult program links and cited facts; other kinds a cited line in their notes. Exact Undo everywhere. Queues taking any
+record: Move to (news, lawsuits, bills, Websites sent in, Scraper finds), Drive Docs, Fornits, Facilities from News,
+Federal funding, Closure reports, Woodbury Facts (now young adult programs too), Woodbury Reports pages (no young adult
+programs: no document folder), Wiki links (no young adult programs: the link store cannot hold one).
+
+Open:
+1. **Check by hand:** open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox once (the screen learns
+   each queue's fields as cards are drawn), then Card Fields; on a Websites sent in card, "Move to" Materials and links
+   with a company picked, see it on the company page, Undo.
+2. The older KOP Tools > Drive Docs and > Fornits screens still pick programs only: their finder box is
+   `kop_facility_finder_field()` and `js/admin-kit.js` refuses a non-number value.
+3. Podcasts stay program + company: `inc/podcast-statements.php` (`kop_pod_tokens()`, approve, chips, purge) reads only
+   those, and "On air" exists only on facility and company pages.
+4. Facilities from News: an article filed on a company does not make later articles naming that company follow it (the
+   scan follows facility links only).
+5. Notes on consultants, transporters, providers, marketers and trade organizations show where their list pages print
+   notes; check a filed line reads well there.
+6. `scripts/review-inbox-tests/fornits.php` seeds made-up rows only into an empty table; the mirror now holds 8,391 real
+   waiting items, so its count and filter checks fail with or without this work. Re-seed it into its own table.

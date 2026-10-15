@@ -684,9 +684,10 @@ function kop_gdl_company_save($oid, array $json) {
  * Add links to a company's page: the company's own site to its websites, the
  * rest to its "Materials and links" (operator.resourceLinks, as on a facility
  * page). News, court records and bills go to their queues as Add sends them.
- * Returns [pkey => result].
+ * $targets (pkey => target) overrides a link's default place, as for
+ * kop_gdl_apply(). Returns [pkey => result].
  */
-function kop_gdl_apply_company(array $rows, $oid, $reviewer) {
+function kop_gdl_apply_company(array $rows, $oid, $reviewer, array $targets = array()) {
     global $wpdb;
     $oid = (int) $oid;
     $json = kop_gdl_company_load($oid);
@@ -699,7 +700,8 @@ function kop_gdl_apply_company(array $rows, $oid, $reviewer) {
             $results[$r['pkey']] = array('ok' => false, 'error' => 'Already ' . $r['status'] . '.');
             continue;
         }
-        $t = kop_gdl_default_target($r['kind']);
+        $t = (string) ($targets[$r['pkey']] ?? '');
+        $t = isset(kop_gdl_targets()[$t]) ? $t : kop_gdl_default_target($r['kind']);
         if (!kop_gdl_needs_facility($t)) {
             $queue[] = $r;
             continue;
@@ -731,7 +733,62 @@ function kop_gdl_apply_company(array $rows, $oid, $reviewer) {
             $results[$pkey] = array('ok' => true, 'target' => 'company');
         }
     }
-    if ($queue) $results += kop_gdl_apply($queue, array(), 0, $reviewer);
+    if ($queue) $results += kop_gdl_apply($queue, $targets, 0, $reviewer);
+    return $results;
+}
+
+/**
+ * Add links to the record a review inbox picker names ("12" a program,
+ * "<kind>:<id>" anything else; kop_rinbox_record_of()). A program goes through
+ * kop_gdl_apply() and a company through kop_gdl_apply_company(), as before.
+ * Any other record (consultant, transport company, provider, marketing company,
+ * trade organization, young adult program) gets each facility-page link through
+ * kop_rinbox_file_on_record() (a young adult program's links, else a line in
+ * its notes), stored as {target: 'record', place, url, record: <what it did>}
+ * for kop_gdl_undo(). News, court records and bills still go to their queues.
+ * Returns [pkey => result].
+ */
+function kop_gdl_apply_record(array $rows, array $targets, $value, $reviewer) {
+    global $wpdb;
+    if (!function_exists('kop_rinbox_record_of')) throw new RuntimeException('Pick a program for this link.');
+    list($kind, $id) = kop_rinbox_record_of($value);
+    if ($kind === '' || $id <= 0) throw new RuntimeException('Pick a record in the finder first.');
+    if ($kind === 'facility') return kop_gdl_apply($rows, $targets, $id, $reviewer);
+    if ($kind === 'company') return kop_gdl_apply_company($rows, $id, $reviewer, $targets);
+    $valid = kop_gdl_targets();
+    $results = array();
+    $queue = array();
+    $now = current_time('mysql', true);
+    foreach ($rows as $r) {
+        if ($r['status'] !== 'pending') {
+            $results[$r['pkey']] = array('ok' => false, 'error' => 'Already ' . $r['status'] . '.');
+            continue;
+        }
+        $t = (string) ($targets[$r['pkey']] ?? '');
+        $t = isset($valid[$t]) ? $t : kop_gdl_default_target($r['kind']);
+        if (!kop_gdl_needs_facility($t)) {
+            $queue[] = $r;
+            continue;
+        }
+        try {
+            $done = kop_rinbox_file_on_record($value, array('what' => $t === 'website' ? 'website' : 'link', 'url' => (string) $r['url'],
+                'title' => (string) $r['label'], 'kind' => kop_gdl_resource_kind($r['kind']), 'source' => kop_gdl_source_line($r),
+                'key' => 'gdl-' . $r['pkey']), $reviewer);
+        } catch (RuntimeException $e) {
+            if (stripos($e->getMessage(), 'already') === false) {
+                $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage(), 'keep' => true);
+                continue;
+            }
+            $wpdb->update(kop_gdl_table(), array('status' => 'rejected', 'applied' => wp_json_encode(array('reason' => $e->getMessage())),
+                'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+            $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage());
+            continue;
+        }
+        $wpdb->update(kop_gdl_table(), array('status' => 'applied', 'applied_fid' => 0, 'reviewed_by' => $reviewer, 'reviewed_at' => $now,
+            'applied' => wp_json_encode(array('target' => 'record', 'place' => $t, 'url' => (string) $r['url'], 'record' => $done))), array('pkey' => $r['pkey']));
+        $results[$r['pkey']] = array('ok' => true, 'target' => 'record', 'message' => (string) ($done['message'] ?? ''));
+    }
+    if ($queue) $results += kop_gdl_apply($queue, $targets, 0, $reviewer);
     return $results;
 }
 
@@ -770,6 +827,16 @@ function kop_gdl_undo(array $rows, $reviewer) {
             $by_fid[(int) $r['applied_fid']][] = array($r, $done);
         } elseif (($done['target'] ?? '') === 'company') {
             $by_company[(int) ($done['operator_id'] ?? 0)][] = array($r, $done);
+        } elseif (($done['target'] ?? '') === 'record') {
+            // On a consultant, transporter, provider, marketer, trade organization or young adult program (kop_gdl_apply_record()).
+            try {
+                if (!function_exists('kop_rinbox_unfile_from_record')) throw new RuntimeException('Undo this from the Review inbox.');
+                kop_rinbox_unfile_from_record((array) ($done['record'] ?? array()));
+                $back($r);
+                $results[$r['pkey']] = array('ok' => true);
+            } catch (Throwable $e) {
+                $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage());
+            }
         } else {
             try {
                 $queue_pdo = $queue_pdo ?: kop_gdl_queue_pdo();
@@ -1177,6 +1244,8 @@ function kop_gdl_render_row(array $r, $tab) {
         $done = json_decode((string) $r['applied'], true) ?: array();
         if (!empty($done['reason'])) {
             echo '<div class="kop-ak-muted">' . esc_html($done['reason']) . '</div>';
+        } elseif (($done['target'] ?? '') === 'record' && !empty($done['record']['name'])) {
+            echo '<div class="kop-ak-muted">Went to: ' . esc_html($done['record']['name']) . '</div>';
         } elseif (!empty($done['target'])) {
             $targets = kop_gdl_targets();
             echo '<div class="kop-ak-muted">Went to: ' . esc_html($targets[$done['target']] ?? $done['target'])

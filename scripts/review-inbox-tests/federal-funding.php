@@ -116,4 +116,36 @@ function kop_rinbox_test_federal_funding(array $src, array $item, callable $chec
         if ($view !== 'new' && (int) $it['actions'][0]['params'][0]['value'] !== (int) $props[$first]['candidates'][0]['id']) $missing[] = $view . ': record not filled in';
     }
     $check('federal-funding: waiting cards offer Add, New record and Leave it off, each with its help', !$missing, implode(' | ', $missing));
+
+    // Any record ('record_kinds'): Add's "Record" is the any-record finder; a company picked gets each entry as a line
+    // in its notes with its source link, the card moves to Added, and Undo takes exactly those lines off.
+    $card = kop_rinbox_get_item('federal-funding', (string) $key);
+    $add = array_values(array_filter($card['actions'], function ($a) { return $a['id'] === 'add'; }))[0] ?? array();
+    $check('federal-funding: Add offers any record', ($add['params'][0]['type'] ?? '') === 'record' && in_array('company', (array) ($add['params'][0]['kinds'] ?? array()), true));
+    $oid = (int) $pdo->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
+    if (!$oid || !kop_rinbox_test_options_persist()) {
+        kop_rinbox_test_skip('federal-funding: a company takes the entries', 'no company in the scratch copy, or options do not persist');
+        return;
+    }
+    $company = function () use ($pdo, $oid) {
+        $j = json_decode((string) $pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . $oid)->fetchColumn(), true) ?: array();
+        if (isset($j['operator']) && empty($j['operator']['notes'])) unset($j['operator']['notes']);
+        return $j;
+    };
+    $company_before = $company();
+    $decisions_before = kop_ffund_decisions();
+    $res = call_user_func($src['act'], $key, 'add', array('facility_id' => 'company:' . $oid));
+    $notes = (array) ($company()['operator']['notes'] ?? array());
+    $d = kop_ffund_decisions()[$key] ?? array();
+    $first = kop_ffund_entries($key, $p)[0];
+    $check('federal-funding: a company picked gets one line per entry in its notes, with the source link', ($d['decision'] ?? '') === 'applied'
+        && count((array) ($d['filed'] ?? array())) === count($entries) && count($notes) === count((array) ($company_before['operator']['notes'] ?? array())) + count($entries)
+        && in_array(true, array_map(function ($n) use ($first) { return strpos((string) $n, $first['detail']) !== false && strpos((string) $n, $first['sources'][0]['url']) !== false; }, $notes), true),
+        $res['message']);
+    $it = kop_rinbox_ffund_item($key, $p);
+    $check('federal-funding: the Added card names the company and offers Undo', array_column($it['actions'], 'id') === array('undo') && $it['facility'] === null
+        && in_array('Added to the notes of', array_column($it['details'], 'label'), true));
+    $res = call_user_func($src['act'], $key, 'undo', array());
+    $check('federal-funding: Undo takes the lines off the company exactly and the card waits again', $company() == $company_before
+        && kop_ffund_decisions() == $decisions_before, $res['message']);
 }

@@ -11,6 +11,13 @@
  *   website      the program's own website on a facility record (profileLinks)
  *   resource     "Materials and links" on a facility record (resourceLinks)
  *
+ * A queue that takes any record ('record_kinds' in its spec, KOP Tools > Card
+ * Fields) sends "<kind>:<id>" in facility_id for a company, consultant, young
+ * adult program...: website and resource then go through
+ * kop_rinbox_file_on_record() (inc/review-record-file.php; a company's websites
+ * or "Materials and links", the others' links or notes), and Undo through
+ * kop_rinbox_unfile_from_record(). A program (a bare number) is unchanged.
+ *
  * The queue rows go in through kop_ext_insert_*() (the browser extension's
  * inserts, with its duplicate check) without emailing admins; the record
  * links through the Drive Docs save path (kop_gdl_save()), as the Submissions
@@ -31,8 +38,8 @@ function kop_rdest_targets() {
         'promo'       => array('label' => 'Industry PR', 'needs_facility' => false),
         'indigenous'  => array('label' => 'Indian boarding schools', 'needs_facility' => false),
         'young_adult' => array('label' => 'Young adult programs (18+)', 'needs_facility' => false),
-        'website'     => array('label' => 'Facility website', 'needs_facility' => true),
-        'resource'    => array('label' => 'Facility resource (Materials and links)', 'needs_facility' => true),
+        'website'     => array('label' => 'Website on the page of a program or other record', 'needs_facility' => true),
+        'resource'    => array('label' => 'Materials and links on the page of a program or other record', 'needs_facility' => true),
     );
 }
 
@@ -47,7 +54,7 @@ function kop_rdest_moves(array $except = array(), $default_fid = 0, $default_kin
         if (in_array($id, $except, true)) continue;
         $move = array('id' => $id, 'label' => 'Move to ' . $t['label']);
         if ($t['needs_facility']) {
-            $move['params'] = array(array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $default_fid));
+            $move['params'] = array(array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => (int) $default_fid));
             if ($id === 'resource') {
                 $move['params'][] = array('name' => 'kind', 'label' => 'Kind', 'type' => 'select', 'options' => $kinds, 'value' => isset($kinds[$default_kind]) ? $default_kind : 'reference');
             }
@@ -222,8 +229,20 @@ function kop_rdest_put($to, array $p, $reviewer) {
     return array('to' => $to, 'id' => (int) $id, 'url' => $url, 'message' => 'Moved to ' . $where . ' as #' . (int) $id . '.');
 }
 
-/** The website or "Materials and links" of a facility record (the old refile button's path). */
+/** The website or "Materials and links" of a facility record (the old refile button's path), or of any other record. */
 function kop_rdest_put_on_record($to, array $p, $reviewer) {
+    $raw = trim((string) ($p['facility_id'] ?? ''));
+    if ($raw !== '' && !ctype_digit($raw)) {
+        // "<kind>:<id>" from the any-record finder.
+        list($rkind, $rid) = function_exists('kop_rinbox_record_of') ? kop_rinbox_record_of($raw) : array('', 0);
+        if ($rkind === 'facility') {
+            $p['facility_id'] = $rid;
+        } elseif ($rkind !== '' && $rid > 0) {
+            return kop_rdest_put_on_other_record($to, $raw, $p, $reviewer);
+        } else {
+            throw new RuntimeException('Pick the record first.');
+        }
+    }
     $fid = (int) ($p['facility_id'] ?? 0);
     if ($fid <= 0) throw new RuntimeException('Pick the facility first.');
     if (!function_exists('kop_gdl_opts')) throw new RuntimeException('The facility record writer is not loaded.');
@@ -256,9 +275,29 @@ function kop_rdest_put_on_record($to, array $p, $reviewer) {
     return $moved + array('to' => $to, 'message' => 'Put on ' . $moved['facility_name'] . ' as ' . $what . '.');
 }
 
+/**
+ * Website or "Materials and links" on a record that is not a program: a company's
+ * websites or resourceLinks, a young adult program's links, any other record's notes.
+ */
+function kop_rdest_put_on_other_record($to, $value, array $p, $reviewer) {
+    if (!function_exists('kop_rinbox_file_on_record')) throw new RuntimeException('Only a program can take it here.');
+    $kinds = function_exists('kop_facility_resource_link_kinds') ? kop_facility_resource_link_kinds() : array('other' => 'Other links');
+    $kind = (string) ($p['kind'] ?? 'other');
+    $url = trim((string) $p['url']);
+    $done = kop_rinbox_file_on_record($value, array(
+        'what' => $to === 'website' ? 'website' : 'link', 'url' => $url, 'title' => trim((string) ($p['title'] ?? '')),
+        'kind' => isset($kinds[$kind]) ? $kind : 'other', 'source' => (string) ($p['source_note'] ?? 'Sent in for review'), 'key' => $url,
+    ), $reviewer);
+    return array('to' => $to, 'record' => $done, 'url' => $url, 'message' => (string) $done['message']);
+}
+
 /** Undo kop_rdest_put(): take the new row back while nobody has reviewed it, or the link off the record. */
 function kop_rdest_take_back(array $done) {
     $to = (string) ($done['to'] ?? ($done['target'] ?? ''));
+    if (($to === 'website' || $to === 'resource') && !empty($done['record']) && is_array($done['record'])) {
+        kop_rinbox_unfile_from_record($done['record']);
+        return;
+    }
     if ($to === 'website' || $to === 'resource') {
         $opts = kop_gdl_opts();
         kop_v2_with_write_lock($opts['pdo'], function () use ($done, $opts) {
