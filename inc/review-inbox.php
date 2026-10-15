@@ -476,30 +476,104 @@ function kop_rinbox_get_item($source, $key) {
     return $items[0];
 }
 
-/** Waiting counts for every source, cached a minute (some count by scanning). */
-function kop_rinbox_counts($fresh = false) {
-    $cached = $fresh ? false : get_transient('kop_review_inbox_counts');
-    if (is_array($cached)) return $cached;
-    $counts = array();
-    foreach (kop_rinbox_sources() as $key => $src) {
-        if (empty($src['count'])) continue;
-        try {
-            // What is already on file, or in conflict, waits under its own view or the Conflicts section, not here.
-            $counts[$key] = (int) call_user_func($src['count']);
-            if (empty($src['on_file_in_list'])) {
-                $counts[$key] = max(0, $counts[$key] - count(kop_rinbox_on_file_keys($key)) - count(kop_rinbox_conflict_keys($key)));
-            }
-        } catch (Throwable $e) {
-            $counts[$key] = null;
-        }
-    }
-    set_transient('kop_review_inbox_counts', $counts, MINUTE_IN_SECONDS);
-    return $counts;
+/*
+ * Waiting counts. Some queues count by scanning (Inspection Links ~10 s, Merge
+ * Duplicates ~4 s cold), so the page never waits on them: it draws from the
+ * last counts saved in the kop_review_inbox_counts option and asks for the
+ * stale ones afterwards (review-inbox/counts, a few queues a request), and a
+ * 10-minute cron keeps them warm. An action marks every count stale; the
+ * number it had still shows until the new one is in.
+ */
+const KOP_RINBOX_COUNTS_FRESH = 300;
+
+/** [source => ['n' => count|null, 'at' => unix time it was counted, 0 = stale]] */
+function kop_rinbox_counts_stored() {
+    $v = get_option('kop_review_inbox_counts', array());
+    return is_array($v) ? $v : array();
 }
 
-function kop_rinbox_flush_counts() {
-    delete_transient('kop_review_inbox_counts');
+/** One source's waiting count, counted now (null when its count fails). */
+function kop_rinbox_count_one($key) {
+    $src = kop_rinbox_sources()[$key] ?? null;
+    if (!$src || empty($src['count'])) return null;
+    try {
+        $n = (int) call_user_func($src['count']);
+        // What is already on file, or in conflict, waits under its own view or the Conflicts section, not here.
+        if (empty($src['on_file_in_list'])) {
+            $n = max(0, $n - count(kop_rinbox_on_file_keys($key)) - count(kop_rinbox_conflict_keys($key)));
+        }
+        return $n;
+    } catch (Throwable $e) {
+        return null;
+    }
 }
+
+/** Count these sources now (all when null) and save them; returns [source => count]. */
+function kop_rinbox_counts_refresh(array $keys = null) {
+    $all = kop_rinbox_sources();
+    $keys = $keys === null ? array_keys($all) : array_values(array_intersect($keys, array_keys($all)));
+    $got = array();
+    foreach ($keys as $key) {
+        if (empty($all[$key]['count'])) continue;
+        $got[$key] = kop_rinbox_count_one($key);
+    }
+    // Read again just before writing: another request may have saved other queues meanwhile.
+    $stored = kop_rinbox_counts_stored();
+    foreach ($got as $key => $n) $stored[$key] = array('n' => $n, 'at' => time());
+    update_option('kop_review_inbox_counts', $stored, false);
+    return $got;
+}
+
+/** Waiting counts for every source: [source => count|null]; $fresh counts them all now. */
+function kop_rinbox_counts($fresh = false) {
+    if ($fresh) kop_rinbox_counts_refresh();
+    $out = array();
+    foreach (kop_rinbox_counts_stored() as $key => $c) $out[$key] = $c['n'] ?? null;
+    return $out;
+}
+
+/** The sources whose saved count is missing or older than KOP_RINBOX_COUNTS_FRESH. */
+function kop_rinbox_counts_stale() {
+    $stored = kop_rinbox_counts_stored();
+    $out = array();
+    foreach (kop_rinbox_sources() as $key => $src) {
+        if (empty($src['count'])) continue;
+        if (time() - (int) ($stored[$key]['at'] ?? 0) >= KOP_RINBOX_COUNTS_FRESH) $out[] = $key;
+    }
+    return $out;
+}
+
+/** Something was approved, rejected or undone: every count is stale (kept on show until recounted). */
+function kop_rinbox_flush_counts() {
+    $stored = kop_rinbox_counts_stored();
+    if (!$stored) return;
+    foreach ($stored as &$c) $c['at'] = 0;
+    unset($c);
+    update_option('kop_review_inbox_counts', $stored, false);
+}
+
+/** A count as the tabs show it: snoozed items and items handed to someone else are not waiting on me. */
+function kop_rinbox_count_for_me($key, $count) {
+    return $count === null ? null : max(0, (int) $count - count(kop_rinbox_hidden_keys($key)));
+}
+
+add_filter('cron_schedules', function ($schedules) {
+    if (!isset($schedules['kop_ten_minutes'])) {
+        $schedules['kop_ten_minutes'] = array('interval' => 600, 'display' => 'Every 10 minutes (KOP)');
+    }
+    return $schedules;
+});
+
+add_action('init', function () {
+    if (!wp_next_scheduled('kop_review_inbox_counts_cron')) {
+        wp_schedule_event(time() + 120, 'kop_ten_minutes', 'kop_review_inbox_counts_cron');
+    }
+});
+
+add_action('kop_review_inbox_counts_cron', function () {
+    $stale = kop_rinbox_counts_stale();
+    if ($stale) kop_rinbox_counts_refresh($stale);
+});
 
 /* ---- AI ------------------------------------------------------------------- */
 
@@ -614,6 +688,7 @@ add_action('rest_api_init', function () {
     $perm = function () { return current_user_can('manage_options'); };
     $routes = array(
         'sources' => array('GET', 'kop_rinbox_rest_sources'),
+        'counts'  => array('GET', 'kop_rinbox_rest_counts'),
         'items'   => array('GET', 'kop_rinbox_rest_items'),
         'item'    => array('GET', 'kop_rinbox_rest_item'),
         'origins' => array('GET', 'kop_rinbox_rest_origins'),
@@ -643,15 +718,13 @@ function kop_rinbox_rest(callable $fn) {
 
 function kop_rinbox_rest_sources(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
+        // The saved counts only: counting here kept the page blank for up to half a minute.
         $counts = kop_rinbox_counts((bool) $req->get_param('fresh'));
         $out = array();
         foreach (kop_rinbox_sources() as $key => $src) {
-            // Snoozed items and items handed to someone else are not waiting on me.
-            $count = $counts[$key] ?? null;
-            if ($count !== null) $count = max(0, $count - count(kop_rinbox_hidden_keys($key)));
             $out[] = array(
                 'key' => $key, 'label' => $src['label'], 'group' => $src['group'], 'views' => $src['views'],
-                'count' => $count, 'native' => (bool) $src['native'], 'tool_url' => (string) $src['tool_url'],
+                'count' => kop_rinbox_count_for_me($key, $counts[$key] ?? null), 'native' => (bool) $src['native'], 'tool_url' => (string) $src['tool_url'],
                 'help' => (string) ($src['help'] ?? ''), 'can_save' => !empty($src['save']),
                 'can_ai' => (!empty($src['save']) && empty($src['no_ai'])) || !empty($src['ai_fill']),
                 'has_origins' => !empty($src['origins']),
@@ -659,8 +732,18 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
                 'filters' => array_values((array) ($src['filters'] ?? array())),
             );
         }
-        return array('sources' => $out, 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
+        return array('sources' => $out, 'stale' => kop_rinbox_counts_stale(), 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
             'me' => get_current_user_id(), 'held' => kop_rinbox_held_counts() + array('volunteers' => function_exists('kop_vol_open_count') ? kop_vol_open_count() : 0));
+    });
+}
+
+/** Count the named sources now (?sources=a,b): [source => count], as the tabs show it. */
+function kop_rinbox_rest_counts(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $keys = array_slice(array_filter(array_map('sanitize_key', explode(',', (string) $req->get_param('sources'))), 'strlen'), 0, 50);
+        $out = array();
+        foreach (kop_rinbox_counts_refresh($keys) as $key => $n) $out[$key] = kop_rinbox_count_for_me($key, $n);
+        return array('counts' => $out);
     });
 }
 

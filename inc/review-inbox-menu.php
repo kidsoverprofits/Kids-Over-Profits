@@ -12,9 +12,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/** Items waiting across every queue, from the minute-old cache only (never counted on a menu load). */
+/** Items waiting across every queue, from the saved counts only (never counted on a menu load). */
 function kop_rinbox_menu_waiting() {
-    $counts = get_transient('kop_review_inbox_counts');
+    $counts = function_exists('kop_rinbox_counts') ? kop_rinbox_counts() : array();
     return is_array($counts) ? array_sum(array_map('intval', array_filter($counts, 'is_numeric'))) : 0;
 }
 

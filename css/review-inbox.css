@@ -22,6 +22,215 @@
     width: 100%;
 }
 
+/*
+ * The queues as dropdowns, one per group (js/review-inbox.js dropdown()). The
+ * page's own five type tabs are hidden once they are drawn: their queues are
+ * in the Submissions menu.
+ */
+.admin-submissions-page.rinbox-dd-ready .type-tabs {
+    display: none;
+}
+
+.rinbox-tabs.rinbox-dd-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.rinbox-dd {
+    position: relative;
+    max-width: 100%;
+}
+
+button.rinbox-dd-btn,
+button.rinbox-dd-btn:hover,
+button.rinbox-dd-btn:focus,
+button.rinbox-dd-btn:active {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 7px 12px;
+    border: 1px solid var(--rv-line-strong, #A9B1BD);
+    border-radius: var(--rv-radius, 3px);
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+    text-align: left;
+}
+
+button.rinbox-dd-btn:hover {
+    border-color: var(--kop-midnight-blue, #000435);
+    background: var(--rv-subtle, #F5F6F8);
+}
+
+button.rinbox-dd-btn:focus-visible {
+    outline: 2px solid var(--kop-navy, #000080);
+    outline-offset: 2px;
+}
+
+/* The group holding the open queue, and "All tools" while it is open. */
+.rinbox-dd.is-current > button.rinbox-dd-btn,
+.rinbox-dd.is-current > button.rinbox-dd-btn:hover,
+.rinbox-dd.is-current > button.rinbox-dd-btn:focus,
+.rinbox-dd.is-current > button.rinbox-dd-btn:active,
+button.rinbox-dd-btn.rinbox-dd-tools.is-current,
+button.rinbox-dd-btn.rinbox-dd-tools.is-current:hover,
+button.rinbox-dd-btn.rinbox-dd-tools.is-current:focus,
+button.rinbox-dd-btn.rinbox-dd-tools.is-current:active {
+    background: var(--kop-midnight-blue, #000435);
+    border-color: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+}
+
+.rinbox-dd.is-current > .rinbox-dd-btn .tab-count {
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.rinbox-dd-current {
+    /* Right after the group's name: "Submissions: News". */
+    margin-left: -8px;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.rinbox-dd-current::before {
+    content: ": ";
+}
+
+.rinbox-dd-name {
+    white-space: nowrap;
+}
+
+.rinbox-dd-caret {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid currentColor;
+    flex: none;
+}
+
+.rinbox-dd.is-open .rinbox-dd-caret {
+    transform: rotate(180deg);
+}
+
+.rinbox-dd-menu {
+    display: none;
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 260px;
+    max-width: min(360px, calc(100vw - 32px));
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    border: 1px solid var(--rv-line-strong, #A9B1BD);
+    border-radius: var(--rv-radius, 3px);
+    box-shadow: 0 6px 20px rgba(0, 4, 53, 0.18);
+}
+
+.rinbox-dd.is-open .rinbox-dd-menu {
+    display: block;
+}
+
+button.rinbox-dd-item,
+button.rinbox-dd-item:hover,
+button.rinbox-dd-item:focus,
+button.rinbox-dd-item:active {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: var(--rv-radius, 3px);
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+button.rinbox-dd-item:hover,
+button.rinbox-dd-item:focus {
+    background: var(--rv-subtle, #F5F6F8);
+}
+
+button.rinbox-dd-item:focus-visible {
+    outline: 2px solid var(--kop-navy, #000080);
+    outline-offset: -2px;
+}
+
+button.rinbox-dd-item.is-active,
+button.rinbox-dd-item.is-active:hover,
+button.rinbox-dd-item.is-active:focus,
+button.rinbox-dd-item.is-active:active {
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+}
+
+button.rinbox-dd-item.is-active .tab-count {
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+/* Queues with nothing waiting read quieter, but stay in reach. */
+button.rinbox-dd-item.is-empty:not(.is-active) .rinbox-dd-label {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+/* The menu's count shows even while counting ("…"). */
+.rinbox-dd-item .tab-count:empty {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .rinbox-dd,
+    button.rinbox-dd-btn {
+        width: 100%;
+    }
+    button.rinbox-dd-btn,
+    button.rinbox-dd-btn:hover,
+    button.rinbox-dd-btn:focus,
+    button.rinbox-dd-btn:active {
+        justify-content: flex-start;
+    }
+    .rinbox-dd-name {
+        white-space: normal;
+    }
+    .rinbox-dd-btn .tab-count {
+        margin-left: auto;
+    }
+    .rinbox-dd-current + .tab-count {
+        margin-left: 0;
+    }
+    .rinbox-dd-current {
+        flex: 1 1 auto;
+        text-align: left;
+    }
+    .rinbox-dd-menu {
+        position: static;
+        min-width: 0;
+        max-width: none;
+        margin-top: 4px;
+        box-shadow: none;
+    }
+}
+
 .rinbox-group {
     display: flex;
     flex-wrap: wrap;

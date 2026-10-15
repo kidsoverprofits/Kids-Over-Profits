@@ -282,6 +282,37 @@ if ($only === '' || $only === 'addons') {
     }
 }
 
+if ($only === '' || $only === 'counts') {
+    echo "-- Waiting counts: saved, drawn at once, recounted only when stale --
+";
+    try {
+        $GLOBALS['kop_rinbox_count_calls'] = 0;
+        kop_rinbox_register('zz-count', function () {
+            return array('label' => 'Count test', 'views' => array('waiting' => 'Waiting'),
+                'count' => function () { $GLOBALS['kop_rinbox_count_calls']++; return 7; },
+                'list' => function () { return array('items' => array(), 'total' => 0); });
+        });
+        kop_rinbox_sources(true);
+        unset($GLOBALS['kop_test_options']['kop_review_inbox_counts']);
+        $calls = $GLOBALS['kop_rinbox_count_calls'];
+        $counts = kop_rinbox_counts();
+        $check('counts: reading them never counts', $GLOBALS['kop_rinbox_count_calls'] === $calls && !isset($counts['zz-count']));
+        $check('counts: a queue never counted is stale', in_array('zz-count', kop_rinbox_counts_stale(), true));
+        $got = kop_rinbox_counts_refresh(array('zz-count', 'no-such-queue'));
+        $check('counts: a recount counts only the named queues, and saves them', $got === array('zz-count' => 7) && (kop_rinbox_counts()['zz-count'] ?? null) === 7, json_encode($got));
+        $check('counts: a fresh count is not stale', !in_array('zz-count', kop_rinbox_counts_stale(), true));
+        kop_rinbox_flush_counts();
+        $check('counts: after an action every count is stale but still shown', in_array('zz-count', kop_rinbox_counts_stale(), true) && (kop_rinbox_counts()['zz-count'] ?? null) === 7);
+        $res = kop_rinbox_rest_sources(new WP_REST_Request());
+        $data = $res->get_data();
+        $row = array_values(array_filter($data['sources'] ?? array(), function ($r) { return $r['key'] === 'zz-count'; }))[0] ?? array();
+        $check('counts: the sources answer carries the saved count and the stale list, without counting',
+            ($row['count'] ?? null) === 7 && in_array('zz-count', (array) ($data['stale'] ?? array()), true) && $GLOBALS['kop_rinbox_count_calls'] === $calls + 1);
+    } catch (Throwable $e) {
+        $check('counts: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 if ($only === '' || $only === 'ya-moved') {
     echo "-- Items of records moved to the young adult programs --\n";
     try {

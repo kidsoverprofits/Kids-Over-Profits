@@ -102,7 +102,7 @@
 
     /* ---- Tabs -------------------------------------------------------------- */
 
-    var tabsRow = el('div', { class: 'rinbox-tabs', role: 'tablist', 'aria-label': 'Other review queues' });
+    var tabsRow = el('nav', { class: 'rinbox-tabs rinbox-dd-row', 'aria-label': 'Review queues' });
     var panel = el('section', { class: 'rinbox-panel', hidden: true, 'aria-live': 'polite' });
     var controls = page.querySelector('.admin-controls');
     var typeTabs = page.querySelector('.type-tabs');
@@ -117,49 +117,154 @@
         _done: { label: 'Recently done', count: function () { return 0; } }
     };
 
-    function renderTabs() {
-        tabsRow.innerHTML = '';
-        var mine = el('div', { class: 'rinbox-group rinbox-group-yours' }, [el('span', { class: 'rinbox-group-label', text: 'Your inbox' })]);
-        Object.keys(SPECIAL).forEach(function (k) {
-            var n = SPECIAL[k].count();
-            mine.appendChild(el('button', {
-                type: 'button', role: 'tab', class: 'submission-tab rinbox-tab' + (state.special === k ? ' is-active' : ''),
-                'aria-selected': state.special === k ? 'true' : 'false', 'data-special': k,
-                onclick: function () { openSpecial(k); }
-            }, [SPECIAL[k].label + ' ', el('span', { class: 'tab-count' + (n ? ' has-items' : ''), text: n ? String(n) : '' })]));
+    /*
+     * The queues as one dropdown per group ("Your inbox", "Submissions",
+     * "Suggestions to check", ...): the button shows the group's waiting total
+     * (and the open queue's name), its menu every queue with its count. The
+     * page's own five type tabs are hidden; their queues sit in the Submissions
+     * menu and open by clicking the hidden tab, so js/admin-submissions.js
+     * still draws them.
+     */
+    var openMenu = null;
+
+    function closeMenu() {
+        if (!openMenu) return;
+        openMenu.classList.remove('is-open');
+        openMenu.querySelector('.rinbox-dd-btn').setAttribute('aria-expanded', 'false');
+        openMenu = null;
+    }
+    document.addEventListener('click', function (e) {
+        if (openMenu && !openMenu.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && openMenu) {
+            var btn = openMenu.querySelector('.rinbox-dd-btn');
+            closeMenu();
+            btn.focus();
+        }
+    });
+
+    /** A native queue's count: the page's own tab badge once it has one, else the saved count. */
+    function nativeCount(s) {
+        var badge = typeTabs && typeTabs.querySelector('[data-count-for="' + s.key + '"]');
+        if (badge && badge.textContent.trim() !== '') return parseInt(badge.textContent, 10) || 0;
+        return s.count;
+    }
+
+    function fmtCount(n) {
+        return n ? Number(n).toLocaleString() : '';
+    }
+
+    /** [{key, label, count, active, open}] in a dropdown under the group's name. */
+    function dropdown(name, entries, extraClass) {
+        var total = 0, current = null, unknown = false;
+        entries.forEach(function (e) {
+            if (e.count === null || e.count === undefined) unknown = true;
+            total += e.count || 0;
+            if (e.active) current = e;
         });
-        tabsRow.appendChild(mine);
+        var wrap = el('div', { class: 'rinbox-dd' + (current ? ' is-current' : '') + (extraClass ? ' ' + extraClass : '') });
+        var menu = el('div', { class: 'rinbox-dd-menu', role: 'menu' });
+        entries.forEach(function (e) {
+            var known = e.count !== null && e.count !== undefined;
+            menu.appendChild(el('button', {
+                type: 'button', role: 'menuitem', class: 'rinbox-dd-item' + (e.active ? ' is-active' : '') + (e.count ? '' : ' is-empty'),
+                'aria-current': e.active ? 'true' : null, 'data-source': e.key,
+                onclick: function () { closeMenu(); e.open(); }
+            }, [
+                el('span', { class: 'rinbox-dd-label', text: e.label }),
+                el('span', { class: 'tab-count' + (e.count ? ' has-items' : ''), text: known ? fmtCount(e.count) : '…', title: known ? null : 'Counting' })
+            ]));
+        });
+        var btn = el('button', {
+            type: 'button', class: 'rinbox-dd-btn', 'aria-haspopup': 'true', 'aria-expanded': 'false',
+            onclick: function (ev) {
+                ev.stopPropagation();
+                var was = openMenu === wrap;
+                closeMenu();
+                if (was) return;
+                wrap.classList.add('is-open');
+                btn.setAttribute('aria-expanded', 'true');
+                openMenu = wrap;
+                var first = menu.querySelector('.is-active') || menu.querySelector('.rinbox-dd-item');
+                if (first) first.focus();
+            }
+        }, [
+            el('span', { class: 'rinbox-dd-name', text: name }),
+            current ? el('span', { class: 'rinbox-dd-current', text: current.label }) : null,
+            el('span', { class: 'tab-count' + (total ? ' has-items' : ''), text: total ? fmtCount(total) + (unknown ? '+' : '') : '' }),
+            el('span', { class: 'rinbox-dd-caret', 'aria-hidden': 'true' })
+        ]);
+        // Arrow keys move through the open menu.
+        menu.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
+            ev.preventDefault();
+            var items = Array.prototype.slice.call(menu.querySelectorAll('.rinbox-dd-item'));
+            var i = items.indexOf(document.activeElement) + (ev.key === 'ArrowDown' ? 1 : -1);
+            if (items.length) items[(i + items.length) % items.length].focus();
+        });
+        wrap.appendChild(btn);
+        wrap.appendChild(menu);
+        return wrap;
+    }
+
+    function renderTabs() {
+        var wasOpen = openMenu ? openMenu.querySelector('.rinbox-dd-name').textContent : null;
+        var focusKey = document.activeElement && tabsRow.contains(document.activeElement) ? document.activeElement.getAttribute('data-source') : null;
+        openMenu = null;
+        tabsRow.innerHTML = '';
+        page.classList.add('rinbox-dd-ready');
+        var nativeActive = !state.source && !state.special && typeInput ? typeInput.value : null;
+
+        tabsRow.appendChild(dropdown('Your inbox', Object.keys(SPECIAL).map(function (k) {
+            return { key: k, label: SPECIAL[k].label, count: SPECIAL[k].count(), active: state.special === k, open: function () { openSpecial(k); } };
+        }), 'rinbox-dd-yours'));
+
         var groups = {};
         var order = [];
         state.sources.forEach(function (s) {
-            if (s.native) return;
             if (!groups[s.group]) { groups[s.group] = []; order.push(s.group); }
             groups[s.group].push(s);
         });
         order.forEach(function (g) {
-            var row = el('div', { class: 'rinbox-group' }, [el('span', { class: 'rinbox-group-label', text: g })]);
-            groups[g].forEach(function (s) {
-                var count = s.count ? String(s.count) : '';
-                var btn = el('button', {
-                    type: 'button', role: 'tab', class: 'submission-tab rinbox-tab' + (state.source === s.key ? ' is-active' : ''),
-                    'aria-selected': state.source === s.key ? 'true' : 'false', 'data-source': s.key,
-                    onclick: function () { openSource(s.key); }
-                }, [s.label + ' ', el('span', { class: 'tab-count' + (s.count ? ' has-items' : ''), text: count })]);
-                row.appendChild(btn);
-            });
-            tabsRow.appendChild(row);
+            tabsRow.appendChild(dropdown(g, groups[g].map(function (s) {
+                if (s.native) {
+                    return { key: s.key, label: s.label, count: nativeCount(s), active: nativeActive === s.key, open: function () {
+                        var tab = typeTabs && typeTabs.querySelector('[data-type="' + s.key + '"]');
+                        if (tab) tab.click();
+                        leaveInbox();
+                    } };
+                }
+                return { key: s.key, label: s.label, count: s.count, active: state.source === s.key, open: function () { openSource(s.key); } };
+            })));
         });
         // Every KOP tool, the same list as the KOP Tools menu (kop_rinbox_all_tools()).
-        tabsRow.appendChild(el('div', { class: 'rinbox-group rinbox-group-tools' }, [
-            el('span', { class: 'rinbox-group-label', text: 'Tools' }),
-            el('button', {
-                type: 'button', role: 'tab', class: 'submission-tab rinbox-tab' + (state.special === '_tools' ? ' is-active' : ''),
-                'aria-selected': state.special === '_tools' ? 'true' : 'false', 'data-special': '_tools',
-                onclick: function () { openSpecial('_tools'); }, text: 'All tools'
-            })
-        ]));
-        // The page's own five tabs show their counts in data-count-for; a
-        // native source's count is already there.
+        tabsRow.appendChild(el('button', {
+            type: 'button', class: 'rinbox-dd-btn rinbox-dd-tools' + (state.special === '_tools' ? ' is-current' : ''),
+            'aria-pressed': state.special === '_tools' ? 'true' : 'false',
+            onclick: function () { closeMenu(); openSpecial('_tools'); }
+        }, [el('span', { class: 'rinbox-dd-name', text: 'All tools' })]));
+        // A recount redraws the row: keep the menu that was open, and the item that had focus.
+        if (wasOpen) {
+            tabsRow.querySelectorAll('.rinbox-dd').forEach(function (d) {
+                if (d.querySelector('.rinbox-dd-name').textContent !== wasOpen) return;
+                d.classList.add('is-open');
+                d.querySelector('.rinbox-dd-btn').setAttribute('aria-expanded', 'true');
+                openMenu = d;
+                var f = focusKey && d.querySelector('.rinbox-dd-item[data-source="' + focusKey + '"]');
+                if (f) f.focus();
+            });
+        }
+    }
+
+    // The page's own type tabs fill their counts later (js/admin-submissions.js loadTabCounts()): redraw the menus then.
+    if (typeTabs && window.MutationObserver) {
+        var badgeTimer = null;
+        new MutationObserver(function () {
+            if (!state.sources.length) return;
+            clearTimeout(badgeTimer);
+            badgeTimer = setTimeout(renderTabs, 150);
+        }).observe(typeTabs, { subtree: true, childList: true, characterData: true });
     }
 
     function loadSources(fresh) {
@@ -172,9 +277,42 @@
             state.byKey = {};
             state.sources.forEach(function (s) { state.byKey[s.key] = s; });
             renderTabs();
+            recountQueues(data.stale || []);
         }).catch(function (e) {
             tabsRow.textContent = 'Other queues could not be loaded: ' + e.message;
         });
+    }
+
+    /**
+     * Recount the queues whose saved count is old (review-inbox/counts), after
+     * the page is drawn: a few queues a request, three requests at a time, the
+     * slow counters (Inspection links ~10 s, Duplicate facilities ~4 s) each on
+     * their own so the quick ones land first.
+     */
+    var SLOW_COUNTS = ['inspection-links', 'facility-merge', 'wiki-links', 'news', 'fornits'];
+    function recountQueues(keys) {
+        if (!keys.length) return;
+        var slow = keys.filter(function (k) { return SLOW_COUNTS.indexOf(k) !== -1; });
+        var quick = keys.filter(function (k) { return SLOW_COUNTS.indexOf(k) === -1; });
+        var batches = [];
+        for (var i = 0; i < quick.length; i += 8) batches.push(quick.slice(i, i + 8));
+        slow.forEach(function (k) { batches.push([k]); });
+        var running = 0;
+        function next() {
+            while (running < 3 && batches.length) {
+                var batch = batches.shift();
+                running++;
+                api('counts', null, { sources: batch.join(',') }).then(function (data) {
+                    var counts = data.counts || {};
+                    Object.keys(counts).forEach(function (k) { if (state.byKey[k]) state.byKey[k].count = counts[k]; });
+                    renderTabs();
+                }).catch(function () { /* the old number stays */ }).then(function () {
+                    running--;
+                    next();
+                });
+            }
+        }
+        next();
     }
 
     function leaveInbox() {
@@ -1694,12 +1832,16 @@
     function refreshCounts() {
         clearTimeout(countTimer);
         countTimer = setTimeout(function () {
-            api('sources', null, { fresh: 1 }).then(function (data) {
+            // The saved counts and Your inbox (quick), then a recount of only the queue just worked in:
+            // recounting every queue after each click took up to half a minute.
+            api('sources').then(function (data) {
                 (data.sources || []).forEach(function (s) {
                     if (state.byKey[s.key]) state.byKey[s.key].count = s.count;
                 });
                 if (data.held) state.held = data.held;
                 renderTabs();
+                var here = state.source || (!state.special && typeInput ? typeInput.value : null);
+                if (here && state.byKey[here]) recountQueues([here]);
             }).catch(function () { /* counts stay as they were */ });
         }, 800);
     }

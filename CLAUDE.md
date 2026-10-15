@@ -233,6 +233,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-rename-merge.php 
 # Recently done ({prefix}kop_review_log, Undo = the item's 'undo' action, or 'restore' for the five native types, logged from
 # api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), Preview
 # (review-inbox/preview: framed where allowed, else a reading copy)
+# The queues are one dropdown per group (js/review-inbox.js dropdown(); the page's own five type tabs hidden, in the Submissions menu).
+# Counts never block the page: review-inbox/sources returns the saved counts (option kop_review_inbox_counts) + 'stale', the page
+# recounts those after drawing (review-inbox/counts?sources=a,b, slow counters alone), a 10-minute cron keeps them warm;
+# kop_rinbox_flush_counts() only marks them stale. A queue whose count scans goes in SLOW_COUNTS there
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php [--source=closure]   # every source on a scratch copy; checks in scripts/review-inbox-tests/
 # "File under a young adult program" on every waiting card of a content queue (inc/review-inbox/_ya-file-action.php, like "Home of a program";
 # kop_rinbox_cross_act()): a fact (People/Incidents/History/About) citing the card's link, or only the link, on a picked or new (hidden)

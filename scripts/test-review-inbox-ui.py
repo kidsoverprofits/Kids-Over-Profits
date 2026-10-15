@@ -128,7 +128,7 @@ SOURCES = {"sources": [
     {"key": "nom", "label": "Nominated", "group": "Essential reporting", "views": {"nominated": "Nominated", "featured": "Featured", "passed": "Passed over"},
      "count": 1, "native": False, "tool_url": "", "help": "Stored articles put forward as especially good journalism.", "can_save": False, "can_ai": False},
 ], "tags": ["follow up", "needs source", "Neglect"], "admins": [{"id": 1, "name": "Dani"}, {"id": 2, "name": "Pat"}],
-    "me": 1, "held": {"mine": 1, "snoozed": 0}}
+    "me": 1, "held": {"mine": 1, "snoozed": 0}, "stale": ["drive"]}
 
 LOG = {"rows": [{"id": 9, "source": "closure", "source_label": "Closure reports", "key": "36", "title": "Sunrise Ranch",
                  "action": "apply", "action_label": "Confirm closure", "style": "approve", "message": "Confirmed.",
@@ -203,6 +203,11 @@ def main():
         if not ok:
             fails.append(what)
 
+    def open_queue(pg, group, label):
+        """Open a queue from its group's dropdown."""
+        pg.locator(".rinbox-dd-btn", has_text=group).click()
+        pg.locator(".rinbox-dd.is-open .rinbox-dd-item", has_text=label).click()
+
     def route(r):
         url = r.request.url
         if url.startswith(REST):
@@ -211,6 +216,8 @@ def main():
             calls.append((path, body, url))
             if path == "sources":
                 out = SOURCES
+            elif path == "counts":
+                out = {"counts": {"drive": 5}}
             elif path == "origins":
                 out = {"origins": [{"key": "scraper-google", "label": "News scraper: Google News", "count": 3},
                                    {"key": "sciad", "label": "SCIAD NET", "count": 2}]}
@@ -302,10 +309,21 @@ def main():
             pg.on("dialog", lambda d: d.accept())
             pg.route("https://inbox.test/**", route)
             pg.goto(BASE, wait_until="load")
-            pg.wait_for_selector(".rinbox-tab")
-            tabs = pg.locator(".rinbox-tab").all_inner_texts()
-            check(any("Closure reports" in t and "6" in t for t in tabs) and not any(t.startswith("News") for t in tabs),
-                  f"@{width} other queues get tabs with counts, the page's own types do not", " | ".join(tabs))
+            pg.wait_for_selector(".rinbox-dd-btn")
+            groups = pg.locator(".rinbox-dd > .rinbox-dd-btn").all_inner_texts()
+            check(pg.locator(".type-tabs").is_hidden() and any(g.startswith("Submissions") and "News" in g for g in groups),
+                  f"@{width} the queues are dropdowns by group, the page's own type tabs hidden, News open under Submissions", " | ".join(groups))
+            check(any(g.startswith("Found by the news scans") and "6" in g for g in groups), f"@{width} a group's button shows its waiting total", " | ".join(groups))
+            pg.locator(".rinbox-dd-btn", has_text="Found by the news scans").click()
+            items = pg.locator(".rinbox-dd.is-open .rinbox-dd-item").all_inner_texts()
+            check(any("Closure reports" in t and "6" in t for t in items), f"@{width} the menu lists each queue with its count", " | ".join(items))
+            wide = pg.evaluate(WIDTH_JS)
+            check(wide["page"] <= width and not wide["out"], f"@{width} an open menu fits the screen", f"{wide}")
+            pg.screenshot(path=str(shots / f"menu-{width}.png"))
+            pg.keyboard.press("Escape")
+            check(pg.locator(".rinbox-dd.is-open").count() == 0, f"@{width} Escape closes the menu")
+            pg.wait_for_function("() => [...document.querySelectorAll('.rinbox-dd-btn')].some(b => /Imports to review/.test(b.textContent) && /5/.test(b.textContent))")
+            check(any(c[0] == "counts" and "sources=drive" in c[2] for c in calls), f"@{width} a stale count is recounted after the page draws")
 
             pg.wait_for_selector(".submission-card .rinbox-native")
             check(pg.locator(".submission-card .rinbox-native select").count() >= 1, f"@{width} the page's own card gets the quick row")
@@ -347,7 +365,7 @@ def main():
             check(wide["page"] <= width and not wide["out"], f"@{width} the page's own card fits the screen", f"{wide}")
             pg.screenshot(path=str(shots / f"native-{width}.png"), full_page=True)
 
-            pg.locator(".rinbox-tab", has_text="Closure reports").click()
+            open_queue(pg, "Found by the news scans", "Closure reports")
             pg.wait_for_selector(".rinbox-card")
             check(pg.locator(".rinbox-card").first.locator(".rinbox-details").inner_text().find("Open") >= 0, f"@{width} facts show on the card")
             check(pg.locator(".rinbox-card").first.locator(".rinbox-compare tr.rinbox-differs").count() == 1, f"@{width} a comparison marks what differs")
@@ -441,7 +459,7 @@ def main():
             pg.screenshot(path=str(shots / f"closure-{width}.png"), full_page=True)
 
             # A queue's own dropdowns, tab counts, sure matches ticked, optional values in bulk, names looked up as typed.
-            pg.locator(".rinbox-tab", has_text="Drive Docs").click()
+            open_queue(pg, "Imports to review", "Drive Docs")
             pg.wait_for_selector(".rinbox-card[data-key='a2']")
             check("Added (7)" in pg.locator(".rinbox-views").inner_text(), f"@{width} the view tabs show their counts", pg.locator(".rinbox-views").inner_text())
             ticked = pg.evaluate("() => [...document.querySelectorAll('.rinbox-card .rinbox-select')].map(c => c.checked)")
@@ -498,7 +516,7 @@ def main():
             check(group.locator(".rinbox-check").count() == 1, f"@{width} the card then shows what is left")
 
             # Nominated for Essential reporting: the note is edited in the action's own box and sent with Feature.
-            pg.locator(".rinbox-tab", has_text="Nominated").click()
+            open_queue(pg, "Essential reporting", "Nominated")
             pg.wait_for_selector(".rinbox-card[data-key='682'] textarea")
             box = pg.locator(".rinbox-card[data-key='682'] textarea").first
             check("58 complaints" in box.input_value(), f"@{width} a nomination's draft note is in its box")
@@ -514,11 +532,11 @@ def main():
             check(wide["page"] <= width and not wide["out"], f"@{width} the nomination card fits the screen", f"{wide}")
 
             # Your inbox: assigned to you, recently done with Undo.
-            pg.locator(".rinbox-tab", has_text="Assigned to you").click()
+            open_queue(pg, "Your inbox", "Assigned to you")
             pg.wait_for_selector(".rinbox-card[data-key='40']")
             check("Closure reports" in pg.locator(".rinbox-card[data-key='40'] .rinbox-queue-badge").inner_text()
                   and "check dates" in pg.locator(".rinbox-card[data-key='40'] .rinbox-hold").inner_text(), f"@{width} Assigned to you shows the queue and the note")
-            pg.locator(".rinbox-tab", has_text="Recently done").click()
+            open_queue(pg, "Your inbox", "Recently done")
             pg.wait_for_selector(".rinbox-done-row")
             pg.locator(".rinbox-done-row button", has_text="Undo").click()
             pg.wait_for_selector(".rinbox-done-row.is-undone")
@@ -529,7 +547,7 @@ def main():
             if width == 1280:
                 pg.screenshot(path=str(shots / f"done-{width}.png"), full_page=True)
 
-            pg.locator(".type-tabs [data-type='news']").click()
+            open_queue(pg, "Submissions", "News")
             check(pg.locator(".rinbox-panel").is_hidden() and pg.locator(".submissions-list-container").is_visible(), f"@{width} the page's own tab brings its list back")
             check(not errors, f"@{width} no script errors", "; ".join(errors))
             pg.close()
