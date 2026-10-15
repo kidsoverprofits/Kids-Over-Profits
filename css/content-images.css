@@ -19,8 +19,10 @@
     display: block;
 }
 
-.entry-content .wp-block-image:not(.alignleft):not(.alignright) a,
-.entry-content figure.wp-caption:not(.alignleft):not(.alignright) a {
+/* Only the link around the picture: a link in the caption stays in its line. */
+.entry-content figure.wp-block-image:not(.alignleft):not(.alignright) > a,
+.entry-content .wp-block-image:not(.alignleft):not(.alignright) > figure > a,
+.entry-content figure.wp-caption:not(.alignleft):not(.alignright) > a {
     display: block;
 }
 

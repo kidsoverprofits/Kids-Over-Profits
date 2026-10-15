@@ -849,6 +849,14 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
    Follow-ups: submit https://www.fox13now.com/2019/08/14/employee-at-treatment-center-in-southern-utah-facing-felony-child-abuse-charge
    (Liahona, 2019 choke-hold restraint, 11 staples; the hourly cap refused it); lawsuits #54 Parker and #55
    Bence have empty source_urls (CourtListener: gov.uscourts.oknd.78072 complaint, docket 73624806).
+   **Screenshots (2026-10-15, 345de923):** both articles now show the materials they quote, highlighted
+   (13 here at seed v9, 8 in Deceptive Marketing at v3; attachments 16045-16065, folder #8506 "Reputation
+   series - document screenshots"; captions name the date and link the archived page and our copy).
+   Open: our PDF copies of the Vive FAQ, Maple Lake FAQ + Emotional Health and Asheville Academy FAQ were
+   printed with the answers collapsed or faded, so the quoted words are not in them; the screenshots and
+   captions use the Wayback pages, but the "our copy" links in the text should be replaced by prints with
+   the answers opened. New Lifehouse's "Licensed counseling" is only in its hidden AI copy (text corrected);
+   the owner may want a PDF of that hidden text as our copy too.
 
 ### 3.5 Data research
 
