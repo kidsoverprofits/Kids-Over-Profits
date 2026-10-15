@@ -656,6 +656,11 @@ php scripts/test-woodbury-facts.php               # applies every proposal to th
 # Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
 (kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
 (kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
+# An item that would add nothing, word for word or in other words (kop_wbf_list_covers(): ages/size/gender in the record's fields,
+# founders/owners/operators it names, its names, its address, NATSAP years, a line saying the same; kop_wbf_job_held(): a past job
+# whose employer and title the person's entry names; a nickname is one person), is refused by Add and filed hourly as rejected
+# "Already on the record" (kop_wbf_clear_on_record(); Back to review undoes one, never cleared again). Conflicts keep waiting
+php api/clear-woodbury-on-record.php [--list] [apply]   # on the server (ea-php82): run the pass now
 (kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:
 # text -> tmp/wiki/text/ + INSTRUCTIONS.md, batches of pages not read yet; readers write tmp/wiki/facts/

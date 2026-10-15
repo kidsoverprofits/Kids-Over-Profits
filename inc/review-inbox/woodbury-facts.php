@@ -504,7 +504,7 @@ function kop_rinbox_wbf_save($key, array $fields) {
  */
 function kop_rinbox_wbf_on_file() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf_v3', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_v4', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT pkey, facility_id, op, path, value FROM ' . kop_wbf_table()
             . " WHERE status = 'pending' AND facility_id > 0 AND op IN ('add_staff', 'add_list', 'set_if_empty', 'set_closed')", ARRAY_A);
@@ -543,7 +543,7 @@ function kop_wbf_on_record(array $doc, array $r) {
             foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
                 foreach ((array) kop_wbf_get($doc, $path) as $s) {
                     $s = is_array($s) ? $s : array('name' => (string) $s);
-                    if (kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
+                    if (kop_wbf_person_key($s['name'] ?? '') !== $key && !kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))) continue;
                     // On file when Add would change nothing: same role, every past job listed (kop_wbf_staff_merge()).
                     list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
                     if ($role !== trim((string) ($s['role'] ?? '')) || $jobs !== trim((string) ($s['pastJobs'] ?? ''))) return '';
@@ -553,8 +553,11 @@ function kop_wbf_on_record(array $doc, array $r) {
             return '';
         case 'add_list':
             $list = kop_wbf_get($doc, $r['path']);
-            return is_array($list) && kop_wbf_list_has($list, $value)
-                ? 'already listed (' . (is_array($value) ? (string) ($value['raw'] ?? wp_json_encode($value)) : mb_substr((string) $value, 0, 120)) . ')' : '';
+            if (is_array($list) && kop_wbf_list_has($list, $value)) {
+                return 'already listed (' . (is_array($value) ? (string) ($value['raw'] ?? wp_json_encode($value)) : mb_substr((string) $value, 0, 120)) . ')';
+            }
+            // The same information in other words (kop_wbf_list_covers()): Add would refuse it too.
+            return kop_wbf_list_covers($doc, (string) $r['path'], $value);
         case 'set_if_empty':
             $slot = kop_wbf_get($doc, $r['path']);
             if (kop_wbf_slot_empty($r['path'], $slot)) return '';
@@ -632,7 +635,7 @@ function kop_rinbox_wbf_built_conflict(array $r, $doc) {
  */
 function kop_rinbox_wbf_conflicts() {
     kop_wbf_ensure_table();
-    return kop_on_file_cached('wbf_conflicts_v6', kop_wbf_table(), function (PDO $pdo) {
+    return kop_on_file_cached('wbf_conflicts_v7', kop_wbf_table(), function (PDO $pdo) {
         global $wpdb;
         $rows = (array) $wpdb->get_results('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND ((conflict IS NOT NULL AND conflict <> '')
             OR (current_val IS NOT NULL AND current_val <> '') OR (facility_id > 0 AND op IN ('set_if_empty', 'set_closed', 'add_staff')))", ARRAY_A);

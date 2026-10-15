@@ -183,6 +183,55 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     // A note never conflicts, whatever the build noted ("Another issue gives 1989; this one is kept as a note").
     $check('woodbury-facts: a dated note is not a conflict', !kop_rinbox_wbf_built_conflict(array('op' => 'add_list', 'path' => 'notes',
         'conflict' => 'Another issue gives 1989; this one is kept as a note.', 'current_val' => '', 'value' => '"Start year: 1977"'), $doc));
+    // The same information in other words is on the record already: Add refuses it, the hourly pass files it, Undo brings it back.
+    $rec = array('identification' => array('name' => 'Evoke Entrada', 'pastNames' => array('Second Nature Entrada'), 'currentOperator' => 'Universal Health Services (UHS)'),
+        'facilityDetails' => array('ageRange' => array('min' => 12, 'max' => 17), 'gender' => 'Male', 'capacity' => 40),
+        'location' => array('street' => '1329 Browns Ferry Rd', 'raw' => '1329 Browns Ferry Rd, Madison, AL 35758'),
+        'memberships' => array('NATSAP (former member; member from 2006, last listed 2020-21)'),
+        'notes' => array('Cost: $5,400 per month plus $6,000 enrollment deposit (r/troubledteens wiki, page "Academy at Sisters" (as of 2025-12-18))'),
+        'staff' => array('administrator' => array(array('name' => 'John Santa', 'role' => 'Co-Founder', 'pastJobs' => ''),
+            array('name' => 'Matt Hendry', 'role' => 'Clinical Director', 'pastJobs' => 'a Teacher at the reportedly abusive [Cherokee Creek Boys School](https://www'),
+            array('name' => 'Dace Goulding', 'role' => 'Operations Manager', 'pastJobs' => ''))));
+    $covers = function ($note) use ($rec) { return kop_wbf_list_covers($rec, 'notes', $note . ' (HEAL, staff list (archived 2016))') !== ''; };
+    $check('woodbury-facts: same information in other words is on the record; anything more is not',
+        $covers('Ages: boys 12-17') && $covers('Ages: youth, ages 12 to 17 at admission') && !$covers('Ages: boys 12-17; ranch-style boarding school') && !$covers('Ages: girls 12-17')
+        && $covers('Capacity: 40 boys') && !$covers('Capacity: 45')
+        && $covers('Founded by: John Santa (Co-Founder)') && !$covers('Founded by: Dace Goulding')
+        && $covers('Operator: UHS, Inc.') && !$covers('Operator: UHS (parent CRC Health Group, owned by Bain Capital)')
+        && $covers('Name change: Second Nature Entrada renamed Evoke Entrada') && !$covers('Name change: reopened as Evoke Entrada after the 1990 closure')
+        && $covers('Address: 1329 Brownsferry Road, Madison') && !$covers('Address: 1330 Browns Ferry Rd, Madison')
+        && $covers('Membership: NATSAP member since 2006') && !$covers('Membership: NATSAP since 2020') && !$covers('Membership: NATSAP (executive director sits on its board)')
+        && $covers('Cost: $5,400 per month tuition, plus a $6,000 deposit') && !$covers('Cost: $5,400 per month plus a $7,000 deposit'));
+    $hendry = function ($jobs) use ($row) { return $row('add_staff', 'staff.notableStaff', array('name' => 'Matthew Hendry', 'role' => 'Clinical Director (2003, r/troubledteens wiki)', 'pastJobs' => $jobs)); };
+    $check('woodbury-facts: a nickname is the same person and a past job its entry names is no news; a new one is',
+        kop_wbf_on_record($rec, $hendry('Teacher - Cherokee Creek Boys School (2008-2020)')) !== ''
+        && kop_wbf_on_record($rec, $hendry('Staff - Cherokee Creek Boys School (before 2025)')) !== ''
+        && kop_wbf_on_record($rec, $hendry('Field Instructor - Cherokee Creek Boys School (2006)')) === ''
+        && kop_wbf_on_record($rec, $hendry('Teacher - Ironwood School and RTC (2021)')) === '');
+    $refused = '';
+    try { $tmp = $rec; kop_wbf_doc_apply($tmp, $row('add_list', 'notes', 'Ages: boys 12-17 (HEAL)')); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
+    $check('woodbury-facts: Add refuses it as already on the record', strpos($refused, 'Already on the record') === 0, $refused);
+    // On the scratch copy, rolled back after: the later checks see the queue as it was.
+    $pdo->beginTransaction();
+    try {
+        kop_rinbox_test_with_wpdb_writes(function () use ($pdo, $t, $check) {
+            $dry = kop_wbf_clear_on_record(false, 300);
+            $before = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn();
+            $wet = kop_wbf_clear_on_record(true, 300);
+            $cleared = $pdo->query("SELECT * FROM $t WHERE status = 'rejected' AND applied LIKE '%\"cleared\":\"on_record\"%'")->fetchAll(PDO::FETCH_ASSOC);
+            $check('woodbury-facts: the pass files what adds nothing, counted first, nothing else',
+                $dry['cleared'] > 0 && $dry['done'] && $wet['cleared'] === $dry['cleared'] && count($cleared) === $wet['cleared']
+                && (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn() === $before - $wet['cleared'],
+                $wet['cleared'] . ' of ' . $wet['checked'] . ' ' . json_encode($wet['by_kind']) . ', e.g. ' . json_encode(array_slice($wet['examples'], 0, 3)));
+            if (!$cleared) return;
+            kop_wbf_undo(array($cleared[0]), 'tester');
+            $again = kop_wbf_clear_on_record(true, 300);
+            $back = $pdo->query("SELECT status FROM $t WHERE pkey = " . $pdo->quote($cleared[0]['pkey']))->fetchColumn();
+            $check('woodbury-facts: Undo brings one back and the pass leaves it for the person', $back === 'pending' && $again['cleared'] === 0, $back . ' / ' . $again['cleared']);
+        });
+    } finally {
+        $pdo->rollBack();
+    }
     // Reject takes the same fact from the other sources with it; its Undo brings them all back.
     $twins = $pdo->query("SELECT facility_id, op, path FROM $t WHERE status = 'pending' AND facility_id > 0 AND op = 'set_if_empty'
         GROUP BY facility_id, op, path, value HAVING COUNT(*) > 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);

@@ -295,6 +295,305 @@ function kop_wbf_list_has(array $list, $value) {
     return false;
 }
 
+/*
+ * The same information in other words. Sources word one fact many ways
+ * ("Cost: $5,400 per month plus $6,000 enrollment deposit (wiki)" and "Cost:
+ * $5,400 per month tuition, plus a $6,000 deposit (HEAL)"; "Ages: boys 12-17"
+ * on a record whose age range is 12-17 and gender Male; "Founded by: John
+ * Santa" with John Santa on the staff list). Such an item would add nothing:
+ * Add refuses it as already on the record and the waiting list files it
+ * there (kop_wbf_on_record(), kop_wbf_clear_on_record()).
+ */
+
+/** A list line without its citation, link, label or date: [text, year or null]. */
+function kop_wbf_text_core($s, $incident = false) {
+    $s = trim((string) $s);
+    $s = rtrim(preg_replace('/[:\s]+https?:\/\/\S+\s*$/', '', $s), " .");
+    // The last balanced "( ... )" is the citation ("(HEAL, staff list for X (archived 2016))").
+    if (substr($s, -1) === ')') {
+        $depth = 0;
+        for ($i = strlen($s) - 1; $i >= 0; $i--) {
+            if ($s[$i] === ')') $depth++;
+            elseif ($s[$i] === '(' && --$depth === 0) { $s = substr($s, 0, $i); break; }
+        }
+    }
+    $s = trim($s, " .;");
+    $year = null;
+    if (preg_match('/^(?:Reported\s+)?((?:19|20)\d\d)(?:-\d\d){0,2}:\s*(?:[A-Z][\w \/-]{0,30}:\s*)?/', $s, $m)) {
+        $year = (int) $m[1];
+        $s = substr($s, strlen($m[0]));
+    } elseif (!$incident) {
+        $s = preg_replace('/^[A-Z][\w \/\'-]{0,30}:\s*/', '', $s);
+    }
+    return array(trim($s), $year);
+}
+
+function kop_wbf_words($s) {
+    static $stop = array('the', 'a', 'an', 'of', 'and', 'to', 'in', 'at', 'for', 'on', 'with', 'by', 'was', 'were', 'is', 'are', 'its',
+        'it', 'as', 'from', 'that', 'this', 'has', 'had', 'have', 'be', 'been', 'also', 'into', 'after', 'their', 'his', 'her');
+    preg_match_all('/[a-z0-9]+/', strtolower(str_replace(',', '', (string) $s)), $m);
+    return array_values(array_unique(array_diff($m[0], $stop)));
+}
+
+/** Whether two lines say the same: nearly the same words, and every number of the first in the second. */
+function kop_wbf_text_same($a, $b) {
+    $x = kop_wbf_words($a);
+    $y = kop_wbf_words($b);
+    if (count($x) < 5 || count($y) < 5) return false;
+    preg_match_all('/\d+(?:\.\d+)?/', str_replace(',', '', (string) $a), $na);
+    preg_match_all('/\d+(?:\.\d+)?/', str_replace(',', '', (string) $b), $nb);
+    if (array_diff($na[0], $nb[0])) return false;
+    $both = count(array_intersect($x, $y));
+    $small = min(count($x), count($y));
+    if ($both === count($x)) return true;
+    return $both / $small >= 0.85 && $both / max(count($x), count($y)) >= 0.7;
+}
+
+/** A company or program name as a key: "UHS, Inc." -> "uhs". */
+function kop_wbf_org_key($s) {
+    $s = strtolower(preg_replace('/\([^)]*\)/', ' ', (string) $s));
+    $s = preg_replace('/\b(?:inc|llc|l\.l\.c|corp|corporation|co|company|ltd|the|lp|pllc)\b\.?/', ' ', $s);
+    return trim(preg_replace('/[^a-z0-9]+/', ' ', $s));
+}
+
+/** Whether a short phrase names this company: the same name, its acronym in brackets, or the whole of its name. */
+function kop_wbf_org_is($phrase, $name) {
+    $p = kop_wbf_org_key($phrase);
+    $n = kop_wbf_org_key($name);
+    if ($p === '' || $n === '') return false;
+    if ($p === $n) return true;
+    if (preg_match_all('/\(([^)]+)\)/', (string) $name, $m)) {
+        foreach ($m[1] as $a) if (kop_wbf_org_key($a) === $p) return true;
+    }
+    if (preg_match_all('/\(([^)]+)\)/', (string) $phrase, $m)) {
+        foreach ($m[1] as $a) if (kop_wbf_org_key($a) === $n) return true;
+    }
+    return false;
+}
+
+/** A street address as a key: "1329 Brownsferry Road, Madison" == "1329 Browns Ferry Rd, Madison, AL". */
+function kop_wbf_street_key($s) {
+    $s = strtolower(trim(explode(',', (string) $s)[0]));
+    if (!preg_match('/^\d+\s+\S/', $s)) return '';
+    $map = array('west' => 'w', 'east' => 'e', 'north' => 'n', 'south' => 's', 'street' => 'st', 'road' => 'rd', 'avenue' => 'ave',
+        'drive' => 'dr', 'lane' => 'ln', 'boulevard' => 'blvd', 'highway' => 'hwy', 'court' => 'ct', 'place' => 'pl', 'circle' => 'cir',
+        'parkway' => 'pkwy', 'trail' => 'trl', 'route' => 'rte', 'mountain' => 'mtn', 'suite' => 'ste');
+    $w = preg_split('/[^a-z0-9]+/', $s, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($w as $i => $t) $w[$i] = $map[$t] ?? $t;
+    return implode('', $w);
+}
+
+/** Boys, girls or both, as a text says it: 'm', 'f', 'c' or ''. */
+function kop_wbf_gender_of($s) {
+    $s = strtolower((string) $s);
+    $m = preg_match('/\b(?:boys?|men|male|males|young men|sons?)\b/', $s);
+    $f = preg_match('/\b(?:girls?|women|female|females|young women|daughters?)\b/', $s);
+    if (preg_match('/\b(?:co-?ed|coeducational|mixed|all genders)\b/', $s) || ($m && $f)) return 'c';
+    return $m ? 'm' : ($f ? 'f' : '');
+}
+
+/** Everyone on the record's staff lists. */
+function kop_wbf_staff_all(array $doc) {
+    $out = array();
+    foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
+        foreach ((array) kop_wbf_get($doc, $path) as $s) $out[] = is_array($s) ? $s : array('name' => (string) $s);
+    }
+    return $out;
+}
+
+/** Whether two names are one person: the same first and last name, or a nickname of it ("Matt Hendry", "Matthew Hendry"). */
+function kop_wbf_same_person($a, $b) {
+    $x = kop_wbf_person_key($a);
+    if ($x !== '' && $x === kop_wbf_person_key($b)) return true;
+    if (!function_exists('kop_facility_pages_person_key')) return false;
+    $x = kop_facility_pages_person_key($a);
+    return $x !== '' && $x === kop_facility_pages_person_key($b);
+}
+
+/** The record's names, current and earlier. */
+function kop_wbf_record_names(array $doc) {
+    $id = (array) ($doc['identification'] ?? array());
+    $out = array((string) ($id['name'] ?? ''), (string) ($id['currentName'] ?? ''));
+    foreach (array('pastNames', 'otherNames') as $k) {
+        foreach ((array) ($id[$k] ?? array()) as $n) $out[] = is_array($n) ? (string) ($n['name'] ?? '') : (string) $n;
+    }
+    return array_values(array_filter(array_map('trim', $out), 'strlen'));
+}
+
+/** The companies the record names: operator, past and other operators, owners. */
+function kop_wbf_record_orgs(array $doc) {
+    $id = (array) ($doc['identification'] ?? array());
+    $out = array((string) ($id['currentOperator'] ?? ''));
+    foreach (array('pastOperators', 'otherOperators', 'currentOwners') as $k) {
+        foreach ((array) ($id[$k] ?? array()) as $n) $out[] = is_array($n) ? (string) ($n['name'] ?? '') : (string) $n;
+    }
+    return array_values(array_filter(array_map('trim', $out), 'strlen'));
+}
+
+/**
+ * Why a list item adds nothing the record does not hold already, in other
+ * words ('' when it adds something): a line that says the same, or a note
+ * whose fact is in the record's own fields.
+ */
+function kop_wbf_list_covers(array $doc, $path, $value) {
+    $text = is_array($value) ? (string) ($value['raw'] ?? '') : (string) $value;
+    if (trim($text) === '') return '';
+    $incident = $path === 'criticalIncidents.customIncidents';
+
+    if ($path === 'identification.pastNames') {
+        $k = kop_wbf_org_key($text);
+        foreach (kop_wbf_record_names($doc) as $n) {
+            if ($k !== '' && kop_wbf_org_key($n) === $k) return 'the record already has the name ' . $n;
+        }
+        return '';
+    }
+    if ($path !== 'notes' && !$incident) return '';
+
+    list($body, $year) = kop_wbf_text_core($text, $incident);
+    if ($body === '') return '';
+    $pool = array();
+    foreach (array('notes', 'operatingPeriod.notes', 'criticalIncidents.customIncidents', 'memberships', 'licensing', 'accreditations.current', 'accreditations.past', 'certifications') as $p) {
+        foreach ((array) kop_wbf_get($doc, $p) as $line) {
+            $line = is_array($line) ? (string) ($line['raw'] ?? ($line['name'] ?? '')) : (string) $line;
+            if (trim($line) !== '') $pool[] = $line;
+        }
+    }
+    foreach ($pool as $line) {
+        list($b, $y) = kop_wbf_text_core($line, (bool) preg_match('/^(?:Reported\s+)?(?:19|20)\d\d\b/', $line));
+        if ($incident && $year && $y && $year !== $y) continue;
+        if (kop_wbf_text_same($body, $b)) return 'the record says the same: ' . mb_substr(trim($line), 0, 160);
+    }
+    if ($incident) return '';
+
+    $label = preg_match('/^([A-Z][\w \/\'-]{0,30}):/', trim($text), $m) ? strtolower($m[1]) : '';
+    $fd = (array) ($doc['facilityDetails'] ?? array());
+    $op = (array) ($doc['operatingPeriod'] ?? array());
+    preg_match_all('/\d+/', $body, $nums);
+    $nums = array_map('intval', $nums[0]);
+    $gender_ok = function ($s) use ($fd) {
+        $g = kop_wbf_gender_of($s);
+        return $g === '' || $g === kop_wbf_gender_of((string) ($fd['gender'] ?? ''));
+    };
+    $ages_ok = function () use ($fd, $nums, $body) {
+        $min = $fd['ageRange']['min'] ?? null;
+        $max = $fd['ageRange']['max'] ?? null;
+        if (count($nums) === 2) return (int) $min === $nums[0] && (int) $max === $nums[1];
+        if (count($nums) === 1 && preg_match('/\b' . $nums[0] . '\s*\+|\b' . $nums[0] . ' and (?:older|over|up)/', $body)) return (int) $min === $nums[0] && kop_wbf_no_info($max);
+        return false;
+    };
+    // Everything but the names: the words that are left say nothing more.
+    $only = function ($rest, array $extra = array()) {
+        $filler = array_merge(array('also', 'known', 'formerly', 'renamed', 'rebranded', 'rebranding', 'now', 'called', 'became', 'changed', 'name', 'to',
+            'from', 'as', 'aka', 'a', 'k', 'the', 'and', 'or', 'its', 'new', 'previously', 'later', 'operating', 'under', 'reportedly', 'by', 'founded',
+            'co', 'founder', 'founders', 'cofounder', 'with', 'is', 'was', 'were', 'owned', 'operated', 'run', 'owner', 'owners', 'program', 'of', 'a'), $extra);
+        return !array_diff(preg_split('/[^a-z0-9]+/', strtolower($rest), -1, PREG_SPLIT_NO_EMPTY), $filler);
+    };
+    // Ages, gender and size say nothing more than their numbers and boys/girls ("Ages: youth, ages 12 to 17 at admission").
+    $plain_size = function () use ($body, $only) {
+        return $only(preg_replace('/\d+/', ' ', $body), array('ages', 'age', 'aged', 'years', 'year', 'old', 'olds', 'youth', 'youths', 'teens', 'teen',
+            'teenage', 'teenagers', 'adolescent', 'adolescents', 'at', 'admission', 'upon', 'through', 'between', 'students', 'student', 'kids',
+            'children', 'plus', 'up', 'over', 'older', 'only', 'boys', 'boy', 'girls', 'girl', 'men', 'women', 'young', 'male', 'female', 'males',
+            'females', 'coed', 'ed', 'beds', 'bed', 'capacity', 'maximum', 'max', 'licensed', 'for', 'serves', 'serving', 'residents', 'clients', 'about'));
+    };
+
+    switch ($label) {
+        case 'ages':
+            if ($nums && $ages_ok() && $gender_ok($body) && $plain_size()) return 'the record\'s ages are ' . kop_wbf_show_value($fd['ageRange']);
+            return '';
+        case 'gender':
+            if (kop_wbf_gender_of($body) !== '' && $gender_ok($body) && (!$nums || $ages_ok()) && $plain_size()) return 'the record says ' . $fd['gender'] . ($nums ? ', ages ' . kop_wbf_show_value($fd['ageRange']) : '');
+            return '';
+        case 'capacity':
+            if (count($nums) === 1 && !kop_wbf_no_info($fd['capacity'] ?? null) && (int) $fd['capacity'] === $nums[0] && $gender_ok($body) && $plain_size()) return 'the record\'s capacity is ' . (int) $fd['capacity'];
+            return '';
+        case 'opened':
+        case 'start year':
+            $b = preg_replace('/\s+per\s+.*$/i', '', $body);
+            if (preg_match('/^(?:in\s+)?((?:19|20)\d\d)$/', trim($b), $y) && (int) ($op['startYear'] ?? 0) === (int) $y[1]) return 'the record opened in ' . (int) $y[1];
+            return '';
+        case 'founded by':
+        case 'owner':
+        case 'operator':
+        case 'acquired':
+            // Words in brackets count ("Aspen Education Group (parent CRC Health Group)" says more than the operator's name).
+            $rest = $body;
+            $said = false;
+            foreach (kop_wbf_record_orgs($doc) as $o) {
+                foreach (array_unique(array($o, preg_replace('/\s*\([^)]*\)/', '', $o))) as $form) {
+                    if ($form !== '' && stripos($rest, $form) !== false) { $rest = str_ireplace($form, ' ', $rest); $said = true; }
+                }
+                if (preg_match_all('/\(([A-Z][A-Za-z&]{1,10})\)/', $o, $ac)) {
+                    foreach ($ac[1] as $a) {
+                        if (preg_match('/\b' . preg_quote($a, '/') . '\b/', $rest)) { $rest = preg_replace('/\b' . preg_quote($a, '/') . '\b/', ' ', $rest); $said = true; }
+                    }
+                }
+            }
+            // A person counts only when the record has them in that part: a founder as a founder, an owner as an owner.
+            $as = $label === 'founded by' ? '/found/i' : '/\bown|found|ceo|president/i';
+            $staff = array_values(array_filter(kop_wbf_staff_all($doc), function ($s) use ($as) {
+                return (bool) preg_match($as, (string) ($s['role'] ?? '') . ' ' . (string) ($s['pastJobs'] ?? ''));
+            }));
+            foreach (preg_split('/\s*(?:,|;|&|\band\b|\bwith\b)\s*/', trim(preg_replace('/\s*\([^)]*\)/', '', $rest))) as $part) {
+                if (!preg_match('/^(?:(?:Dr|Rev|Mr|Mrs|Ms)\.?\s+)?[A-Z][\w\'.-]*(?:\s+[A-Z][\w\'.-]*){1,3}$/', trim($part))) continue;
+                foreach ($staff as $s) {
+                    if (kop_wbf_same_person($part, $s['name'] ?? '')) { $rest = str_replace($part, ' ', $rest); $said = true; break; }
+                }
+            }
+            $rest = preg_replace('/\b(?:Inc|LLC|Corp)\b\.?/i', ' ', $rest);
+            if ($said && $only($rest, array('acquired', 'bought', 'purchased', 'sold', 'taken', 'over', 'since', 'in', 'president', 'director', 'ceo', 'partnered'))) {
+                return 'the record names them already';
+            }
+            return '';
+        case 'name change':
+        case 'note':
+            if ($label === 'note' && !preg_match('/\b(?:also known as|formerly|renamed|rebranded|now called|a\.?k\.?a\.?)\b/i', $body)) return '';
+            $rest = $body;
+            $names = kop_wbf_record_names($doc);
+            usort($names, function ($a, $b) { return mb_strlen($b) - mb_strlen($a); });
+            $hit = 0;
+            foreach ($names as $n) {
+                if (stripos($rest, $n) !== false) { $rest = str_ireplace($n, ' ', $rest); $hit++; }
+            }
+            if ($hit && $only($rest)) return 'the record has these names: ' . implode(', ', array_slice($names, 0, 6));
+            return '';
+        case 'address':
+        case 'campus':
+        case 'move':
+            $k = kop_wbf_street_key($body);
+            if ($k === '') return '';
+            $loc = (array) ($doc['location'] ?? array());
+            $have = array((string) ($loc['street'] ?? ''), (string) ($loc['raw'] ?? ''));
+            foreach (array('formerLocations', 'additionalLocations') as $p) {
+                foreach ((array) ($loc[$p] ?? array()) as $l) $have[] = is_array($l) ? (string) ($l['street'] ?? ($l['raw'] ?? '')) : (string) $l;
+            }
+            foreach ($have as $h) {
+                if ($h !== '' && kop_wbf_street_key($h) === $k && $only(preg_replace('/^[^,]*/', '', $body), array_merge(kop_wbf_words(implode(' ', $have)),
+                    array('saint', 'st', 'usa', 'us', 'united', 'states')))) return 'the record\'s address is ' . $h;
+            }
+            return '';
+        case 'membership':
+        case 'accreditation':
+            // The group named (its acronym) on the record's list, with no year the record's line lacks.
+            preg_match_all('/\b[A-Z]{3,}\b/', $body, $ac);
+            preg_match_all('/\b(?:19|20)\d\d\b/', $body, $yrs);
+            if (!$ac[0]) return '';
+            foreach ($pool as $line) {
+                $ok = true;
+                foreach (array_unique($ac[0]) as $a) if (!preg_match('/\b' . preg_quote($a, '/') . '\b/', $line)) $ok = false;
+                // "since 2014" is the line's first year ("member from 2014, last listed 2020-21"), never a later one.
+                preg_match_all('/\b(?:19|20)\d\d\b/', $line, $ly);
+                if ($yrs[0] && ($ly[0][0] ?? '') !== $yrs[0][0]) $ok = false;
+                foreach ($yrs[0] as $y) if (strpos($line, $y) === false) $ok = false;
+                $rest = preg_replace('/\b[A-Z]{3,}\b|\b(?:19|20)\d\d\b/', ' ', $body);
+                if ($ok && $only($rest, array('member', 'membership', 'since', 'accredited', 'accreditation', 'joined', 'full', 'listed', 'about', 'until', 'through'))) {
+                    return 'the record says ' . mb_substr($line, 0, 120);
+                }
+            }
+            return '';
+    }
+    return '';
+}
+
 /** One role in plain words: "Director (2006, Woodbury Reports)" -> "director". */
 function kop_wbf_role_plain($s) {
     return trim(preg_replace('/\s+/', ' ', preg_replace('/\([^)]*\)/', '', strtolower((string) $s))));
@@ -330,6 +629,46 @@ function kop_wbf_role_same($a, $b) {
 }
 
 /**
+ * Whether the person's entry already says this job in other words: its
+ * employer named in one of their lines ("Teacher - Cherokee Creek Boys School
+ * (2008-2020)" and "a Teacher at [Cherokee Creek Boys School](...)") with the
+ * same title there, or a title that says nothing more ("Staff", "Unnamed
+ * position"). Years are when a source saw them, not more information.
+ */
+function kop_wbf_job_held($job, array $lines) {
+    $job = trim(preg_replace('/^(?:later|then|previously|formerly|former)\s+/i', '', trim((string) $job)));
+    $job = trim(preg_replace('/\s*(?:\([^()]*\)|\[[^\]]*\])\s*/', ' ', $job));
+    if ($job === '') return false;
+    $parts = preg_split('/\s+-\s+/', $job, 2);
+    $title = trim($parts[0]);
+    $org = trim($parts[1] ?? '');
+    $plain = function ($s) {
+        $s = strtolower(preg_replace('/\]\([^)]*\)?|[\[\]*]/', ' ', (string) $s));
+        $s = preg_replace('/\brtc\b/', 'residential treatment center', $s);
+        return ' ' . trim(preg_replace('/[^a-z0-9]+/', ' ', $s)) . ' ';
+    };
+    $words = array_values(array_diff(preg_split('/\s+/', trim($plain($org)), -1, PREG_SPLIT_NO_EMPTY), array('the', 'of', 'and', 'inc', 'llc', 'at')));
+    $generic = kop_wbf_no_info($title) || preg_match('/^(?:staff|staff member|employee|worked|unnamed position|position|member|unknown role|role unknown)$/i', $title);
+    $titles = kop_wbf_role_parts($title);
+    foreach ($lines as $line) {
+        $l = $plain($line);
+        if (trim($l) === '') continue;
+        foreach ($words as $w) {
+            if (strpos($l, ' ' . $w . ' ') === false) continue 2;
+        }
+        if (!$words && $generic) continue;
+        if ($generic) return true;
+        if (!$titles) continue;
+        $all = true;
+        foreach ($titles as $t) {
+            if (strpos($l, ' ' . trim($plain($t)) . ' ') === false) { $all = false; break; }
+        }
+        if ($all) return true;
+    }
+    return false;
+}
+
+/**
  * A staff item merged into the entry the record has for that person: [role,
  * pastJobs]. A different role is the person's history, never a disagreement:
  * the record's role stays (a role that names no job, "one" or "wife" from a
@@ -341,13 +680,13 @@ function kop_wbf_staff_merge(array $s, array $value, array $doc) {
     $jobs = trim((string) ($s['pastJobs'] ?? ''));
     $new = trim((string) ($value['role'] ?? ''));
     $list = array_values(array_filter(array_map('trim', explode(';', $jobs)), 'strlen'));
-    $has = function ($text) use (&$list) {
+    $has = function ($text) use (&$list, &$role) {
         $p = kop_wbf_role_plain($text);
         foreach ($list as $j) {
             $q = kop_wbf_role_plain($j);
             if ($p !== '' && (strpos($q, $p) !== false || strpos($p, $q) !== false)) return true;
         }
-        return false;
+        return kop_wbf_job_held($text, array_merge(array($role), $list));
     };
     if ($new !== '' && !kop_wbf_no_info($new)) {
         if ($role === '' || kop_wbf_no_info($role) || !kop_wbf_role_is_title($role)) {
@@ -459,7 +798,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
             $list = is_array($list) ? $list : array();
             foreach ($list as $i => $s) {
                 $s = is_array($s) ? $s : array('name' => (string) $s, 'role' => '', 'pastJobs' => '');
-                if ($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) {
+                if (($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) || kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))) {
                     $before = array('role' => (string) ($s['role'] ?? ''), 'pastJobs' => (string) ($s['pastJobs'] ?? ''),
                         'source' => $s['source'] ?? null, 'sourceUrl' => $s['sourceUrl'] ?? null);
                     list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
@@ -493,6 +832,9 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         $list = is_array($list) ? $list : array();
         if (kop_wbf_list_has($list, $value)) {
             throw new RuntimeException('Already on the record.');
+        }
+        if (($why = kop_wbf_list_covers($doc, $r['path'], $value)) !== '') {
+            throw new RuntimeException('Already on the record in other words: ' . $why . '.');
         }
         $list[] = $value;
         unset($list);
@@ -1313,6 +1655,55 @@ function kop_wbf_auto_run($seconds = 40) {
     return $added;
 }
 
+/**
+ * File every waiting item that would add nothing to its record as "already on
+ * the record": Add would refuse it, word for word or in other words
+ * (kop_wbf_on_record(), kop_wbf_list_covers(), kop_wbf_job_held()). A record
+ * holding a different value is a conflict and keeps waiting; an item a
+ * person sent back or edited is left for them. Each lands on the Rejected tab
+ * with its reason; "Back to review" there (Undo) brings it back, and it is
+ * never cleared again. $apply false only counts.
+ * Returns {checked, cleared, by_kind: {op => n}, examples: [label => why], done: bool}.
+ */
+function kop_wbf_clear_on_record($apply = false, $seconds = 60) {
+    global $wpdb;
+    $out = array('checked' => 0, 'cleared' => 0, 'by_kind' => array(), 'examples' => array(), 'done' => true);
+    if (!function_exists('kop_wbf_on_record')) return $out;
+    $table = kop_wbf_table();
+    $start = microtime(true);
+    $opts = kop_wbf_opts();
+    $fids = $wpdb->get_col("SELECT DISTINCT facility_id FROM {$table} WHERE status = 'pending' AND facility_id > 0
+        AND op IN ('add_staff', 'add_list', 'set_if_empty', 'set_closed') AND (reviewed_by IS NULL OR reviewed_by = '')
+        AND INSTR(COALESCE(extra, ''), '\"edited_by\"') = 0 ORDER BY facility_id");
+    $now = current_time('mysql', true);
+    foreach ($fids as $fid) {
+        if (microtime(true) - $start > $seconds) {
+            $out['done'] = false;
+            break;
+        }
+        $stored = kop_facility_load((int) $fid, $opts);
+        if (!$stored) continue;
+        $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE status = 'pending' AND facility_id = %d
+            AND op IN ('add_staff', 'add_list', 'set_if_empty', 'set_closed') AND (reviewed_by IS NULL OR reviewed_by = '')
+            AND INSTR(COALESCE(extra, ''), '\"edited_by\"') = 0", (int) $fid), ARRAY_A);
+        foreach ($rows as $r) {
+            $out['checked']++;
+            $why = kop_wbf_on_record($stored['doc'], $r);
+            if ($why === '' || kop_wbf_conflict_parts($stored['doc'], $r)) continue;
+            $out['cleared']++;
+            $out['by_kind'][$r['op']] = ($out['by_kind'][$r['op']] ?? 0) + 1;
+            if (count($out['examples']) < 5000) $out['examples'][] = '#' . (int) $fid . ' ' . $r['label'] . '  ->  ' . $why;
+            if ($apply) {
+                $wpdb->update($table, array('status' => 'rejected', 'auto' => 0, 'reviewed_by' => 'auto', 'reviewed_at' => $now,
+                    'applied' => wp_json_encode(array('reason' => 'Already on the record: ' . $why . '.', 'cleared' => 'on_record'))),
+                    array('pkey' => $r['pkey'], 'status' => 'pending'));
+            }
+        }
+    }
+    if ($apply && $out['cleared'] && function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
+    return $out;
+}
+
 add_action('init', function () {
     if (!wp_next_scheduled('kop_wbf_auto_hourly')) {
         wp_schedule_event(time() + 300, 'hourly', 'kop_wbf_auto_hourly');
@@ -1323,6 +1714,8 @@ add_action('kop_wbf_auto_hourly', function () {
     kop_wbf_sync();
     kop_wbf_moved_to_ya();
     kop_wbf_auto_run(120);
+    // What a new load or another source's Add made redundant leaves the waiting list.
+    kop_wbf_clear_on_record(true, 90);
 });
 
 /* ---- Educational consultants with an industry past ----------------------- */
