@@ -72,7 +72,11 @@ request.
   - suggested-edit approval (api/lib-suggested-edits.php:740)
   - inline edit (inc/inline-edit.php:853)
   - Woodbury Facts, Fornits, federal funding and data audit (all via
-    `kop_wbf_save()`)
+    `kop_wbf_save()`). Since 2026-10-15 an approved Woodbury Facts item or
+    Fornits staff/incident/lead is only held (`status = 'held'`) and written
+    on when the record's write-up is approved (`kop_wu_publish()`,
+    inc/record-writeups.php), whose text replaces the notes-built About in
+    `kop_facility_page_data()`
   - closure reports, Drive Docs, State Lists, Facilities from News,
     program homes, seeds, and the Data Manager
 

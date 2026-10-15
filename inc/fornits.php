@@ -35,6 +35,7 @@ if (!defined('ABSPATH')) {
 
 // The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
 require_once __DIR__ . '/admin-kit.php';
+require_once __DIR__ . '/record-writeups.php'; // staff, incidents and leads are held for the record's write-up
 add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-fornits'; return $pages; });
 
 define('KOP_FORNITS_DB_VERSION', '3');
@@ -1009,6 +1010,14 @@ function kop_fornits_resolve(array $r, $how, $typed, $reviewer) {
     $fid = (int) $r['facility_id'];
     $w = kop_fornits_as_wbf($r);
     if ($fid <= 0 || !$w) throw new RuntimeException('This item has no value to write to a record.');
+    if (kop_fact_hold_on()) {
+        // Held for the write-up like any approval; approving the write-up writes the value (kop_wu_publish()).
+        $held = array('held' => 1, 'target' => '', 'how' => $how === 'edit' ? 'edit' : 'use');
+        if ($how === 'edit') $held['value'] = kop_wbf_parse_value($w, $typed);
+        $wpdb->update(kop_fornits_items_table(), array('status' => 'held', 'applied' => wp_json_encode($held), 'applied_fid' => $fid,
+            'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+        return ($how === 'edit' ? 'Your value is' : 'This value is') . ' held for the record\'s write-up (Review inbox > Write-ups to approve): the page changes only when the write-up is approved. Undo sends it back to review.';
+    }
     $opts = kop_wbf_opts();
     kop_v2_with_write_lock($opts['pdo'], function () use ($r, $w, $how, $typed, $fid, $opts, $reviewer, $now, $wpdb) {
         $stored = kop_facility_load($fid, $opts);
@@ -1071,9 +1080,16 @@ function kop_fornits_queue_add(array $r, $target, $facility_name, $reviewer) {
 /**
  * Add proposals. $targets maps pkey => lead target; $fid, when given, is the
  * record everything goes on instead of each row's own facility.
+ *
+ * Staff, incidents and leads kept on the record are facts: since 2026-10-15
+ * they are held ('held') with the record until its write-up is approved
+ * (inc/record-writeups.php), checked now against the record as it will be.
+ * Discussion links and survivor accounts (added unpublished) go on at once.
+ * $hold false writes everything at once (the old way; tests).
  */
-function kop_fornits_apply(array $rows, array $targets, $fid, $reviewer) {
+function kop_fornits_apply(array $rows, array $targets, $fid, $reviewer, $hold = null) {
     global $wpdb;
+    $hold = $hold === null ? kop_fact_hold_on() : (bool) $hold;
     $results = array();
     $now = current_time('mysql', true);
     $mark = function ($r, $status, $applied, $applied_fid) use ($wpdb, $reviewer, $now) {
@@ -1122,23 +1138,32 @@ function kop_fornits_apply(array $rows, array $targets, $fid, $reviewer) {
     }
     $opts = kop_wbf_opts();
     foreach ($by_fid as $to => $list) {
-        kop_v2_with_write_lock($opts['pdo'], function () use ($to, $list, $opts, $mark, &$results) {
+        kop_v2_with_write_lock($opts['pdo'], function () use ($to, $list, $opts, $mark, $hold, &$results) {
             $stored = kop_facility_load($to, $opts);
             if (!$stored) {
                 throw new RuntimeException("Facility #{$to} does not exist.");
             }
             $doc = $stored['doc'];
+            // The record as it will be once its write-up is approved: held items are checked against it.
+            $view = $hold && function_exists('kop_wu_doc_with_held') ? kop_wu_doc_with_held($doc, $to) : $doc;
             $applied = array();
+            $held = array();
             foreach ($list as list($r, $target)) {
-                $trial = $doc;
+                $holds = $hold && kop_fornits_is_fact($r, $target);
+                $trial = $holds ? $view : $doc;
                 try {
                     $done = kop_fornits_doc_apply($trial, $r, $target);
-                    $doc = $trial;
-                    $applied[] = array($r, $done);
-                    $results[$r['pkey']] = array('ok' => true);
+                    if ($holds) {
+                        $view = $trial;
+                        $held[] = array($r, array('held' => 1, 'target' => (string) $target));
+                    } else {
+                        $doc = $trial;
+                        $applied[] = array($r, $done);
+                    }
+                    $results[$r['pkey']] = array('ok' => true) + ($holds ? array('held' => true) : array());
                 } catch (RuntimeException $e) {
                     // A different value on the record is a conflict: it keeps waiting, marked on its card.
-                    $conflict = kop_fornits_conflict($doc, $r, $target);
+                    $conflict = kop_fornits_conflict($holds ? $view : $doc, $r, $target);
                     if ($conflict !== '') {
                         $results[$r['pkey']] = array('ok' => false, 'error' => 'Conflict: ' . $conflict, 'keep' => true);
                         continue;
@@ -1153,9 +1178,18 @@ function kop_fornits_apply(array $rows, array $targets, $fid, $reviewer) {
                     $mark($r, 'applied', $done, $to);
                 }
             }
+            foreach ($held as list($r, $done)) {
+                $mark($r, 'held', $done, $to);
+            }
         });
     }
     return $results;
+}
+
+/** Whether approving this item adds a fact the record's write-up must take in (staff, an incident, a lead kept as a closure or note). */
+function kop_fornits_is_fact(array $r, $target = '') {
+    if (in_array($r['kind'], array('staff', 'incident'), true)) return true;
+    return $r['kind'] === 'lead' && !in_array((string) $target, array('news', 'lawsuit'), true);
 }
 
 function kop_fornits_undo(array $rows, $reviewer) {
@@ -1168,7 +1202,8 @@ function kop_fornits_undo(array $rows, $reviewer) {
     $by_fid = array();
     foreach ($rows as $r) {
         $done = json_decode((string) $r['applied'], true) ?: array();
-        if ($r['status'] === 'rejected') {
+        if ($r['status'] === 'rejected' || $r['status'] === 'held') {
+            // Held for a write-up: never on the record, so only the item goes back.
             $back($r);
             $results[$r['pkey']] = array('ok' => true);
         } elseif ($r['status'] !== 'applied') {
@@ -1291,7 +1326,7 @@ function kop_render_fornits_page() {
     $topics = kop_fornits_topics_table();
     $kinds = kop_fornits_kinds();
     $kind = isset($_GET['fn_kind'], $kinds[$_GET['fn_kind']]) ? $_GET['fn_kind'] : 'link';
-    $state = in_array($_GET['fn_state'] ?? '', array('applied', 'rejected'), true) ? $_GET['fn_state'] : 'pending';
+    $state = in_array($_GET['fn_state'] ?? '', array('applied', 'held', 'rejected'), true) ? $_GET['fn_state'] : 'pending';
     $q = isset($_GET['fn_q']) ? trim(sanitize_text_field(wp_unslash($_GET['fn_q']))) : '';
     $cats = kop_fornits_categories();
     $cat = isset($_GET['fn_cat'], $cats[$_GET['fn_cat']]) ? $_GET['fn_cat'] : '';
@@ -1349,7 +1384,7 @@ function kop_render_fornits_page() {
     }
     echo kop_ak_tabs($kind_tabs, $kind, function ($k) use ($base) { return add_query_arg('fn_kind', $k, $base); }, array('label' => 'Kinds'));
     $state_tabs = array();
-    foreach (array('pending' => 'Waiting', 'applied' => 'Added', 'rejected' => 'Skipped or already there') as $k => $label) {
+    foreach (array('pending' => 'Waiting', 'held' => 'Approved, held for the write-up', 'applied' => 'Added', 'rejected' => 'Skipped or already there') as $k => $label) {
         $state_tabs[$k] = array('label' => $label,
             'count' => (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = %s", $kind, $k)));
     }
@@ -1377,7 +1412,7 @@ function kop_render_fornits_page() {
         // "Read by the AI" (0): every row the reading has tagged.
         $where .= $min > 0 ? $wpdb->prepare(' AND i.importance >= %d', $min) : " AND i.categories <> ''";
     }
-    $card = $state === 'applied' ? 'applied_fid' : 'facility_id';
+    $card = in_array($state, array('applied', 'held'), true) ? 'applied_fid' : 'facility_id';
     $total = (int) $wpdb->get_var("SELECT COUNT(DISTINCT i.{$card}) FROM {$items} i WHERE {$where}");
     $cards = $wpdb->get_col("SELECT i.{$card} FROM {$items} i WHERE {$where} GROUP BY i.{$card} ORDER BY MAX(i.importance) DESC, COUNT(*) DESC LIMIT " . (($paged - 1) * $per) . ", {$per}");
     if (!$cards) {
@@ -1428,7 +1463,7 @@ function kop_fornits_render_card(array $rows, $fid, $state) {
                 kop_facility_finder_field('', '', ' class="kop-ak-fid"') . ' '
                 . kop_ak_button('Add checked to that record', 'primary', 'data-act="apply" data-other="1"'), !$fid);
     } else {
-        $buttons = kop_ak_button($state === 'applied' ? 'Undo checked' : 'Put checked back to review', 'secondary', 'data-act="undo"');
+        $buttons = kop_ak_button(in_array($state, array('applied', 'held'), true) ? 'Undo checked' : 'Put checked back to review', 'secondary', 'data-act="undo"');
     }
     echo kop_ak_card_actions($buttons);
     echo '</section>';

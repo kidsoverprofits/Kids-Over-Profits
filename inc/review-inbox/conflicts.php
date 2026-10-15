@@ -411,7 +411,9 @@ function kop_rinbox_conflicts_group_act($queue, $gid, $action, array $params) {
         $clear();
         if (!$done) throw new RuntimeException('None could be added: ' . $why);
         $where = $parsed[0] === 'facility' ? kop_rinbox_facility($parsed[1])['name'] : 'the ' . strtolower(kop_wbc_kinds()[$parsed[0]] ?? 'record') . ' you picked (in its notes)';
-        return array('message' => 'Added ' . count($done) . ' item' . (count($done) === 1 ? '' : 's') . ' to ' . $where
+        $held = $parsed[0] === 'facility' && function_exists('kop_fact_hold_on') && kop_fact_hold_on();
+        return array('message' => ($held ? 'Approved ' : 'Added ') . count($done) . ' item' . (count($done) === 1 ? '' : 's') . ($held ? ' for ' : ' to ') . $where
+            . ($held ? ' (held for its write-up: the page changes when the write-up is approved)' : '')
             . ($bad ? '; ' . $bad . ' could not be (' . $why . ')' : '') . '. Undo in Recently done takes ' . (count($done) === 1 ? 'it' : 'them all') . ' back.',
             'undo' => $undo_all($done));
     }

@@ -227,6 +227,9 @@ if (!function_exists('kop_fmerge_ref_tables')) {
             // Fornits link proposals carry the id in their key: done one by one below.
             array('t' => $prefix . 'kop_fornits_items', 'c' => 'facility_id', 'k' => 'id', 'where' => "kind <> 'link'"),
             array('t' => $prefix . 'kop_fornits_items', 'c' => 'applied_fid', 'k' => 'id'),
+            // Write-ups of approved facts (inc/record-writeups.php): the draft and the About it published, and their log.
+            array('t' => $prefix . 'kop_record_writeups', 'c' => 'facility_id', 'k' => 'id'),
+            array('t' => $prefix . 'kop_record_writeup_log', 'c' => 'facility_id', 'k' => 'id'),
             array('t' => $prefix . 'kop_gdoc_links', 'c' => 'facility_id', 'k' => 'id'),
             array('t' => $prefix . 'kop_gdoc_links', 'c' => 'applied_fid', 'k' => 'id'),
             // State Lists (inc/state-lists.php): the record a listed row was linked to or created as, and the one it matched when it left its list.

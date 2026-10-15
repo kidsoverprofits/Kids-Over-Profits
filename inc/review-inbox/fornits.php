@@ -29,6 +29,7 @@ kop_rinbox_register('fornits', function () {
     if (!function_exists('kop_fornits_apply')) return null;
     $views = array('pending' => 'Waiting');
     foreach (kop_fornits_kinds() as $k => $label) $views[$k] = 'Waiting: ' . strtolower($label);
+    $views['held'] = 'Approved, held for the write-up';
     $views['applied'] = 'Added';
     $views['rejected'] = 'Skipped or already there';
     return array(
@@ -36,7 +37,8 @@ kop_rinbox_register('fornits', function () {
         'group'    => 'Imports to review',
         'help'     => 'What the old Fornits survivor forum says about each facility, read by the AI (Gemini and Groq in turn): discussion links, staff, incidents, survivor accounts and leads. '
             . 'Each quote was checked against its post; one "not found in the post" starts unticked. The most important items start ticked: "Select all" and Add does a page. '
-            . 'Add puts it on the facility record citing the post (discussion links under "Survivor posts and discussion"; survivor accounts unpublished until you tick "OK to publish" on the record). '
+            . 'Add puts a discussion link on the facility page under "Survivor posts and discussion" and a survivor account on the record unpublished (until you tick "OK to publish" there). '
+            . 'Staff, incidents and leads kept on the record are approved, not written on: they are held with the record, seen only by admins, until its write-up (Review inbox > Write-ups to approve) is approved. '
             . 'Wrong facility? Pick another in the Record box beside Add: another program, a company, a consultant, a transport company and so on '
             . '(on those, a thread goes under its links, a staff member on a company\'s key staff, anything else into its notes citing the post). Undo takes it back.',
         'views'    => $views,
@@ -124,7 +126,7 @@ function kop_rinbox_fornits_where($view, array $q) {
     $kinds = kop_fornits_kinds();
     if (isset($kinds[$view])) {
         $where = $wpdb->prepare("i.status = 'pending' AND i.kind = %s", $view);
-    } elseif (in_array($view, array('applied', 'rejected'), true)) {
+    } elseif (in_array($view, array('applied', 'held', 'rejected'), true)) {
         $where = $wpdb->prepare('i.status = %s', $view);
     } else {
         $where = "i.status = 'pending'";
@@ -293,6 +295,9 @@ function kop_rinbox_fornits_item(array $r) {
     } elseif ($r['status'] === 'applied') {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes it off the record (or out of its queue) and puts it back in the waiting list.');
+    } elseif ($r['status'] === 'held') {
+        $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
+            'help' => 'Takes it out of the record\'s write-up and puts it back in the waiting list. The record was never changed.');
     } else {
         $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'neutral',
             'help' => 'Nothing on the site changes; the item waits for review again.');
@@ -327,8 +332,8 @@ function kop_rinbox_fornits_item(array $r) {
     // The facility the reading matched (the row's facility_id): programs only.
     $fields[] = array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => $ro, 'facility_only' => true);
 
-    $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'rejected' => 'Skipped');
-    $fid = $r['status'] === 'applied' ? (int) $r['applied_fid'] : (int) $r['facility_id'];
+    $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'held' => 'Held for the write-up', 'rejected' => 'Skipped');
+    $fid = in_array($r['status'], array('applied', 'held'), true) ? (int) $r['applied_fid'] : (int) $r['facility_id'];
     $when = kop_fornits_month($r['post_date']);
 
     $details = array();
@@ -443,6 +448,9 @@ function kop_rinbox_fornits_act($key, $action, array $params) {
                     'note'    => 'Added as a note on ' . $name . ', citing the post.',
                 )[$target];
             }
+            if (!empty($res['held'])) {
+                return array('message' => 'Approved for ' . $name . '. It is held for the record\'s write-up, seen only by admins, and goes on the page when that write-up is approved (Review inbox > Write-ups to approve). Undo is on the "Approved, held" tab.');
+            }
             return array('message' => $said . ' Undo is on the Added tab.');
         case 'reject':
             if ($r['status'] !== 'pending') throw new RuntimeException('Only a waiting item can be skipped.');
@@ -454,7 +462,8 @@ function kop_rinbox_fornits_act($key, $action, array $params) {
             kop_rdest_undo_row($r);
             $res = kop_fornits_undo(array($r), $user)[$r['pkey']] ?? array('ok' => false, 'error' => 'Nothing to undo.');
             if (empty($res['ok'])) throw new RuntimeException($res['error']);
-            return array('message' => $was === 'applied' ? 'Undone: it came off the record (or out of its queue). It is waiting for review again.' : 'Waiting for review again.');
+            return array('message' => $was === 'applied' ? 'Undone: it came off the record (or out of its queue). It is waiting for review again.'
+                : ($was === 'held' ? 'Out of the write-up and waiting for review again (the record was never changed).' : 'Waiting for review again.'));
     }
     throw new RuntimeException('Unknown action.');
 }

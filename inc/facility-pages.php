@@ -3418,13 +3418,17 @@ if (!function_exists('kop_facility_page_data')) {
             'notes'         => $notes,
             // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
             // A citation the staff or incident lists give with its address lends it to the same citation there.
-            'about'         => function_exists('kop_pnotes_build') ? kop_pnotes_build($notes, array('known' => (static function () use ($staff, $incidents) {
+            // An approved write-up (inc/record-writeups.php) takes its place, with the notes added since under it.
+            'about'         => (static function () use ($facility_id, $notes, $staff, $incidents) {
+                if (!function_exists('kop_pnotes_build')) return null;
                 $known = array();
                 foreach (array_merge($incidents, ...array_values($staff ?: array(array()))) as $it) {
                     if (is_array($it) && ($it['cite'] ?? '') !== '' && ($it['url'] ?? '') !== '' && !isset($known[$it['cite']])) $known[$it['cite']] = $it['url'];
                 }
-                return $known;
-            })())) : null,
+                $build = static function (array $lines) use ($known) { return kop_pnotes_build($lines, array('known' => $known)); };
+                $about = $build($notes);
+                return function_exists('kop_wu_page_about') ? kop_wu_page_about($facility_id, $notes, $about, $build) : $about;
+            })(),
             'field_notes'   => $field_notes,
             'testimony'     => $testimony,
             'forum'         => $forum,

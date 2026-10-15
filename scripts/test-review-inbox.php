@@ -183,6 +183,9 @@ foreach ($sources as $key => $src) {
         $first = call_user_func($src['list'], array('view' => array_keys($src['views'])[0], 'search' => '', 'offset' => 0, 'limit' => 1))['items'][0] ?? null;
         if (!$first) {
             echo "  (nothing waiting in the mirror)\n";
+            // A queue whose checks make their own items (Write-ups: approving facts fills it) runs them anyway.
+            $hook = 'kop_rinbox_test_' . str_replace('-', '_', $key) . '_from_empty';
+            if (function_exists($hook)) $hook($src, $check);
             continue;
         }
         $again = kop_rinbox_get_item($key, $first['key']);

@@ -1637,6 +1637,13 @@
                 var params = {};
                 paramInputs.forEach(function (input) { params[input.dataset.field] = readInput(input); });
                 if (node.kopPicked) params.picked = node.kopPicked();
+                // 'with_fields': the action also gets what the card's editor holds now, saved or not (Write-ups: approve the text as edited).
+                if (a.with_fields && editor) {
+                    params.fields = {};
+                    editor.querySelectorAll('[data-field]').forEach(function (input) {
+                        if (!input.disabled) params.fields[input.dataset.field] = readInput(input);
+                    });
+                }
                 run(node, item, s, src, 'act', { action: a.id, params: params }, b);
             };
             var target = primary ? decide : bar;

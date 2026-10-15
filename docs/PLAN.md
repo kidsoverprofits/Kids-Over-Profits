@@ -2593,3 +2593,33 @@ Open:
    notes; check a filed line reads well there.
 6. `scripts/review-inbox-tests/fornits.php` seeds made-up rows only into an empty table; the mirror now holds 8,391 real
    waiting items, so its count and filter checks fail with or without this work. Re-seed it into its own table.
+
+### 3.31 Approved facts wait for a written-up About (2026-10-15)
+
+The owner: approved facts should no longer go onto the public record by themselves; they wait in an admin-only place
+until everything is written up well and approved. `inc/record-writeups.php`: Add in Woodbury Facts (every source:
+Woodbury, HEAL, the wiki, program documents), its hourly exact-name run, "Use this value" on a conflict, and Fornits
+staff, incidents and leads kept on a record now set the item to `held` (the record is unchanged; each item is still
+checked against the record plus the items already held). Each record with held facts gets a write-up of its About
+section, drafted by the AI hourly (3 records a run) or with "Write it with AI", reviewed at Review inbox > Write-ups to
+approve (https://kidsoverprofits.org/admin-submissions/?type=writeups, `inc/review-inbox/writeups.php`). Approving
+writes every held fact on in one save and makes the text the page's About (the app's 'about' too); Undo in Recently
+done takes it all back. Facility pages show the held facts and the draft to administrators only ("Waiting for the
+write-up"). Fornits discussion links and survivor accounts (added unpublished) still go on at once.
+
+Open:
+1. **Check after deploy:** approve one Woodbury Facts item, see it under "Approved, held for the write-up" and in the
+   admin-only box on its facility page (logged out: not there); "Write it with AI" on its Write-ups card, edit the box,
+   Approve, see the About and the staff list; Undo from Recently done.
+2. The 10,468 items the hourly run used to add at once now pile up as held facts, one write-up per record; at 3 drafts an
+   hour the backlog takes days. Decide whether to raise the batch (AI budget: KOP_AI_BACKGROUND_SHARE) or approve the
+   first ones by hand to judge the drafts.
+3. Not held yet (still written at once, as before): facts filed on companies, consultants and the other record kinds
+   (`kop_wbf_file_existing()`, `kop_fornits_apply_record()`, `kop_rinbox_file_on_record()`), young adult program facts,
+   wiki staff on approval (`kop_wiki_merge_submission()`), Rules from documents, federal funding, Drive Docs links,
+   data audit corrections. Ask the owner which of these count as "facts" for this rule.
+4. A record created from a Woodbury card ("Create") is still made at once (empty but public); only its facts wait.
+5. Company pages: their About is still the notes-built one; a write-up for companies would need the same on
+   `kop_operator_page_data()`.
+6. `scripts/review-inbox-tests/woodbury-facts.php` "not conflicts: ... another staff role" fails with or without this
+   work: a 2021 HEAL sighting is now "older than last year", so `kop_staff_role_with_former()` makes it "Former Founder".

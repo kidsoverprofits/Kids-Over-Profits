@@ -29,6 +29,7 @@ if (!defined('ABSPATH')) {
 // The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
 require_once __DIR__ . '/admin-kit.php';
 require_once __DIR__ . '/staff-former.php';   // kop_staff_role_with_former(): "Former" for an old sighting or a closed program
+require_once __DIR__ . '/record-writeups.php'; // approved items are held for the record's write-up (kop_fact_hold_on())
 add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-woodbury-facts'; return $pages; });
 
 define('KOP_WOODBURY_FACTS_DB_VERSION', '3');
@@ -1055,6 +1056,14 @@ function kop_wbf_resolve(array $r, $how, $typed, $reviewer) {
         return 'Kept the record as it is; the item is under Rejected.';
     }
     if ($fid <= 0) throw new RuntimeException('This item has no record to write to.');
+    if (kop_fact_hold_on()) {
+        // Held for the write-up like any approval; approving the write-up writes the value (kop_wu_publish()).
+        $held = array('held' => 1, 'how' => $how === 'edit' ? 'edit' : 'use');
+        if ($how === 'edit') $held['value'] = kop_wbf_parse_value($r, $typed);
+        $wpdb->update(kop_wbf_table(), array('status' => 'held', 'applied' => wp_json_encode($held), 'applied_fid' => $fid,
+            'reviewed_by' => $reviewer, 'reviewed_at' => $now, 'auto' => 0), array('pkey' => $r['pkey']));
+        return ($how === 'edit' ? 'Your value is' : 'This value is') . ' held for the record\'s write-up (Review inbox > Write-ups to approve): the page changes only when the write-up is approved. Undo sends it back to review.';
+    }
     $opts = kop_wbf_opts();
     $msg = '';
     kop_v2_with_write_lock($opts['pdo'], function () use ($r, $how, $typed, $fid, $opts, $reviewer, $now, $wpdb, &$msg) {
@@ -1211,23 +1220,34 @@ function kop_wbf_rows(array $pkeys) {
 }
 
 /**
- * Add proposals to one facility's record in one save. $fid overrides the
- * build's match. Returns [pkey => result].
+ * Approve proposals for one facility's record. $fid overrides the build's
+ * match. Returns [pkey => result].
+ *
+ * Since 2026-10-15 an approved item is not written onto the public record:
+ * it is held ('held') with the record until the record's write-up is
+ * approved (inc/record-writeups.php), which writes every held item on in one
+ * save. Each item is still checked against the record as it will be (the
+ * record plus the items already held), so "already there" and conflicts are
+ * caught now. $hold false writes at once (the old way; tests).
  */
-function kop_wbf_apply(array $rows, $fid, $reviewer) {
+function kop_wbf_apply(array $rows, $fid, $reviewer, $hold = null) {
     global $wpdb;
     $fid = (int) $fid;
     if ($fid <= 0) {
         throw new RuntimeException('Pick the facility first.');
     }
+    $hold = $hold === null ? kop_fact_hold_on() : (bool) $hold;
     $opts = kop_wbf_opts();
     $results = array();
-    kop_v2_with_write_lock($opts['pdo'], function () use ($rows, $fid, $opts, $reviewer, &$results, $wpdb) {
+    kop_v2_with_write_lock($opts['pdo'], function () use ($rows, $fid, $opts, $reviewer, $hold, &$results, $wpdb) {
         $stored = kop_facility_load($fid, $opts);
         if (!$stored) {
             throw new RuntimeException("Facility #{$fid} does not exist.");
         }
         $doc = $stored['doc'];
+        if ($hold && function_exists('kop_wu_doc_with_held')) {
+            $doc = kop_wu_doc_with_held($doc, $fid);
+        }
         $applied = array();
         foreach ($rows as $r) {
             if ($r['status'] !== 'pending') {
@@ -1251,12 +1271,18 @@ function kop_wbf_apply(array $rows, $fid, $reviewer) {
                     : array('ok' => false, 'error' => $e->getMessage(), 'already' => true);
             }
         }
-        if ($applied) {
+        if ($applied && !$hold) {
             kop_wbf_save($doc, $opts);
         }
         $now = current_time('mysql', true);
         foreach ($rows as $r) {
-            if (isset($applied[$r['pkey']])) {
+            if (isset($applied[$r['pkey']]) && $hold) {
+                // Held for the write-up: the record is unchanged. 'from_fid' lets Undo put it back under the record it named.
+                $held = array('held' => 1);
+                if ((int) $r['facility_id'] !== $fid) $held['from_fid'] = (int) $r['facility_id'];
+                $wpdb->update(kop_wbf_table(), array('status' => 'held', 'applied' => wp_json_encode($held),
+                    'applied_fid' => $fid, 'facility_id' => $fid, 'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+            } elseif (isset($applied[$r['pkey']])) {
                 $wpdb->update(kop_wbf_table(), array('status' => 'applied', 'applied' => wp_json_encode($applied[$r['pkey']]),
                     'applied_fid' => $fid, 'facility_id' => $fid, 'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
             } elseif (!empty($results[$r['pkey']]['conflict'])) {
@@ -1267,7 +1293,7 @@ function kop_wbf_apply(array $rows, $fid, $reviewer) {
             }
         }
     });
-    foreach ($rows as $r) {
+    foreach ($hold ? array() : $rows as $r) {
         if (($r['op'] ?? '') === 'set_closed' && !empty($results[$r['pkey']]['ok'])) {
             do_action('kop_facility_status_changed', $fid);
             break;
@@ -1569,6 +1595,13 @@ function kop_wbf_undo(array $rows, $reviewer) {
         } elseif ($r['status'] === 'rejected') {
             $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'reviewed_by' => $reviewer,
                 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
+        } elseif ($r['status'] === 'held') {
+            // Held for a write-up: never on the record, so only the item goes back.
+            $held = json_decode((string) $r['applied'], true);
+            $back = array('status' => 'pending', 'applied' => null, 'applied_fid' => 0, 'reviewed_by' => $reviewer,
+                'reviewed_at' => current_time('mysql', true));
+            if (is_array($held) && !empty($held['from_fid'])) $back['facility_id'] = (int) $held['from_fid'];
+            $wpdb->update(kop_wbf_table(), $back, array('pkey' => $r['pkey']));
         }
     }
     foreach ($by as $fid => $list) {
@@ -2450,8 +2483,9 @@ function kop_wbf_tabs() {
         'norecord' => array('label' => 'Programs with no record', 'where' => "status = 'pending' AND facility_id = 0 AND grp <> 'consultant' AND ya = 0"),
         'youngadult' => array('label' => 'Young adult programs (18+)', 'where' => "status = 'pending' AND facility_id = 0 AND grp <> 'consultant' AND ya = 1"),
         'consultants' => array('label' => 'Ed cons who worked in the industry', 'where' => "status = 'pending' AND grp = 'consultant'"),
+        'held'     => array('label' => 'Approved, held for the write-up', 'where' => "status = 'held'"),
         'applied'  => array('label' => 'Added', 'where' => "status = 'applied'"),
-        'auto'     => array('label' => 'Added automatically', 'where' => "status = 'applied' AND reviewed_by = 'auto'"),
+        'auto'     => array('label' => 'Approved automatically', 'where' => "status IN ('applied', 'held') AND reviewed_by = 'auto'"),
         'rejected' => array('label' => 'Rejected', 'where' => "status = 'rejected'"),
     );
 }

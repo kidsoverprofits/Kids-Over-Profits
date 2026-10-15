@@ -656,6 +656,12 @@ php scripts/test-woodbury-mentions.php            # "File under" facilities and 
 # copied to ~/kop-import/woodbury/; owner adds them at KOP Tools > Woodbury Facts (live at once, Undo)
 (kop-pipeline) python scripts/woodbury-facts.py
 php scripts/test-woodbury-facts.php               # applies every proposal to the real docs, validator, exact undo
+# Approved facts are not written onto the record by themselves (owner, 2026-10-15; inc/record-writeups.php): Add in Woodbury Facts
+# (any source, the hourly exact-name run, "Use this value") and Fornits staff/incidents/leads set the item to 'held'. The AI drafts the
+# record's About from its current About + the held facts (hourly, or "Write it with AI"); the owner edits and approves it at Review inbox >
+# Write-ups to approve, which writes every held fact on in one save and makes the text the About (page and app); Undo in Recently done.
+# Facility pages show the held facts and the draft to admins only. A new path that adds facts to a record holds them the same way
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=writeups   # approve -> held -> draft -> approve -> About -> undo
 # An item that would add nothing, word for word or in other words (kop_wbf_list_covers(): ages/size/gender in the record's fields,
 # founders/owners/operators it names, its names, its address, NATSAP years, a line saying the same; kop_wbf_job_held(): a past job
 # whose employer and title the person's entry names; a nickname is one person), is refused by Add and filed hourly as rejected

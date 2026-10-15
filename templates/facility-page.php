@@ -758,6 +758,9 @@ get_header();
             </section>
             <?php endif; ?>
 
+            <?php // Facts approved for this page and the draft write-up: administrators only, until the write-up is approved (inc/record-writeups.php).
+            if (function_exists('kop_wu_admin_html')) echo kop_wu_admin_html((int) $page['id']); // Escaped inside. ?>
+
             <?php if ($kop_fp_timeline) : ?>
             <section class="kop-fp-section kop-fp-timeline-section" id="timeline">
                 <h2><?php echo $kop_fp_icon('calendar'); ?>Timeline</h2>

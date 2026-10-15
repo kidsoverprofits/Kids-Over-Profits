@@ -6,6 +6,9 @@
  */
 
 function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
+    // These checks are about how a settled value is written (what approving the record's write-up does): settling
+    // only holds it since 2026-10-15, which scripts/review-inbox-tests/writeups.php checks.
+    $GLOBALS['kop_fact_hold_off'] = true;
     $pdo = $GLOBALS['pdo'];
     $t = 'wpdl_kop_woodbury_facts';
     $all = kop_rinbox_conflicts_all(array());
@@ -76,6 +79,7 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     // The kind filter.
     $staff = kop_rinbox_conflicts_all(array('filters' => array('what' => 'staff')));
     $check('conflicts: the kind filter keeps only that kind', !array_filter($staff, function ($c) { return $c['what'] !== 'staff'; }), count($staff) . ' staff roles');
+    unset($GLOBALS['kop_fact_hold_off']);
 }
 
 /** Conflicts about one program and kind are one card; one choice settles every ticked row, one Undo takes them all back. */

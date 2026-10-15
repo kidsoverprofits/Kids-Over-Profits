@@ -29,18 +29,19 @@ kop_rinbox_register('woodbury-facts', function () {
         'label'    => 'Woodbury Facts',
         'group'    => 'Imports to review',
         'help'     => 'What the Woodbury Reports newsletter says about a program that its record does not have yet: staff, incidents, openings, closings, names, owners, size and ages. '
-            . 'Each item shows the words it comes from and links to the issue page. Add puts it on the record citing the page; Undo takes back exactly that. '
+            . 'Each item shows the words it comes from and links to the issue page. Add approves it: it is held with the record, seen only by admins, until the record\'s write-up '
+            . '(Review inbox > Write-ups to approve) is approved, which puts every held item on the page at once. Undo sends an item back. '
             . 'Read wrong? "Edit details" fixes the name, role, year or text before you add it. The words name someone the item missed? Use "Add this person". '
             . 'Wrong program? Pick another record beside Add, or create one. Items with a checked quote and a sure match start ticked. '
             . 'Items whose program is exactly the name of one record (or a past name of it), with the quote found and nothing on the record in the way, are added for you every hour, '
-            . 'whatever the source: check or undo them on "Added automatically"; anything you undo stays manual. Close names, other possible records, conflicts and programs with no record wait for you.'
+            . 'whatever the source (held for the write-up like any other): check or undo them on "Approved automatically"; anything you undo stays manual. Close names, other possible records, conflicts and programs with no record wait for you.'
             . (is_readable(kop_wbf_path()) ? '' : ' No facts uploaded yet: run python scripts/woodbury-facts.py and copy facts.json to ' . dirname(kop_wbf_path()) . '.'),
         'views'    => $views,
         'filters'  => array(array('name' => 'grp', 'label' => 'Kind', 'options' => kop_wbf_groups())),
         'view_counts' => 'kop_rinbox_wbf_view_counts',
         'tools'    => array(
-            array('id' => 'auto', 'label' => 'Add the exact-name items now', 'style' => 'neutral',
-                'help' => 'Adds the items whose program is exactly the name of one record, for up to half a minute (the hourly run does the rest). They land on "Added automatically", each with Undo.'),
+            array('id' => 'auto', 'label' => 'Approve the exact-name items now', 'style' => 'neutral',
+                'help' => 'Approves the items whose program is exactly the name of one record, for up to half a minute (the hourly run does the rest). They are held for their records\' write-ups and listed on "Approved automatically", each with Undo.'),
             array('id' => 'resync', 'label' => 'Load the facts file again', 'style' => 'neutral',
                 'help' => 'Reads the uploaded facts.json now, even if it looks unchanged: new items are added, waiting ones take the latest reading.'),
         ),
@@ -130,9 +131,9 @@ function kop_rinbox_wbf_tool($id, array $params) {
     if ($id === 'auto') {
         $n = kop_wbf_auto_run(25);
         $table = kop_wbf_table();
-        $done = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'applied' AND reviewed_by = 'auto'");
+        $done = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status IN ('applied', 'held') AND reviewed_by = 'auto'");
         $left = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE " . kop_wbf_auto_where());
-        return array('message' => 'Added ' . $n . ' just now; ' . number_format($done) . ' added automatically so far'
+        return array('message' => 'Approved ' . $n . ' just now (held for their records\' write-ups); ' . number_format($done) . ' approved automatically so far'
             . ($left ? ', ' . number_format($left) . ' more to go (the hourly run carries on, or click again)' : '') . '.');
     }
     if ($id === 'resync') {
@@ -175,7 +176,7 @@ function kop_rinbox_wbf_item(array $r) {
     $extra = json_decode((string) $r['extra'], true) ?: array();
     $ev = kop_wbf_evidence($r);
     $pending = $r['status'] === 'pending';
-    $fid = $r['status'] === 'applied' ? (int) $r['applied_fid'] : (int) $r['facility_id'];
+    $fid = in_array($r['status'], array('applied', 'held'), true) ? (int) $r['applied_fid'] : (int) $r['facility_id'];
     $ya = !empty($r['ya']);
 
     $lines = array();
@@ -213,6 +214,10 @@ function kop_rinbox_wbf_item(array $r) {
     if ($r['status'] === 'rejected') {
         $why = json_decode((string) $r['applied'], true);
         if (!empty($why['reason'])) $lines[] = 'Skipped: ' . $why['reason'];
+    }
+    if ($r['status'] === 'held') {
+        $lines[] = 'Approved and held for the write-up of ' . kop_rinbox_wbf_name((int) $r['applied_fid'])
+            . ': only admins see it until that write-up is approved (Review inbox > Write-ups to approve).';
     }
 
     $links = array();
@@ -315,12 +320,17 @@ function kop_rinbox_wbf_item(array $r) {
     } elseif ($r['status'] === 'applied') {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes what this item added off the record and puts it back in the waiting list; a record it created stays.');
+    } elseif ($r['status'] === 'held') {
+        $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
+            'help' => 'Takes it out of the record\'s write-up and puts it back in the waiting list. The record was never changed.');
     } else {
         $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'neutral',
             'help' => 'Nothing on the site changes; the item waits for review again.');
     }
 
-    $statuses = array('pending' => 'Waiting', 'applied' => $r['reviewed_by'] === 'auto' ? 'Added automatically' : 'Added', 'rejected' => 'Rejected', 'gone' => 'No longer proposed');
+    $statuses = array('pending' => 'Waiting', 'applied' => $r['reviewed_by'] === 'auto' ? 'Added automatically' : 'Added',
+        'held' => $r['reviewed_by'] === 'auto' ? 'Approved automatically, held for the write-up' : 'Held for the write-up',
+        'rejected' => 'Rejected', 'gone' => 'No longer proposed');
     return array(
         'key'          => (string) $r['pkey'],
         'title'        => (string) $r['label'],
@@ -400,8 +410,9 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
                 if (!(int) $st->fetchColumn()) throw new RuntimeException('Facility #' . $fid . ' does not exist.');
             }
             if ($fid <= 0) throw new RuntimeException('Pick the record first (the Record box beside the button).');
-            return $result(kop_wbf_apply(array($r), $fid, $user),
-                'Added to ' . kop_rinbox_wbf_name($fid) . ' (' . kop_wbf_where_it_goes($r) . '), citing ' . (kop_wbf_ev_label(kop_wbf_evidence($r)[0] ?? array('label' => 'Woodbury Reports', 'page' => 0))) . '. Undo is on the Added tab.');
+            return $result(kop_wbf_apply(array($r), $fid, $user), kop_fact_hold_on()
+                ? 'Approved for ' . kop_rinbox_wbf_name($fid) . ' (' . kop_wbf_where_it_goes($r) . '). It is held for the record\'s write-up, seen only by admins, and goes on the page when that write-up is approved (Review inbox > Write-ups to approve). Undo is on the "Approved, held" tab.'
+                : 'Added to ' . kop_rinbox_wbf_name($fid) . ' (' . kop_wbf_where_it_goes($r) . '), citing ' . (kop_wbf_ev_label(kop_wbf_evidence($r)[0] ?? array('label' => 'Woodbury Reports', 'page' => 0))) . '. Undo is on the Added tab.');
         case 'create':
             $waiting();
             $made = kop_rinbox_wbf_create_for(array($r), $params);
@@ -465,7 +476,7 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
             return array('message' => 'Rejected. Nothing was added' . ($same ? '; ' . count($same) . ' other item' . (count($same) === 1 ? '' : 's')
                 . ' giving the same fact from another source went with it' : '') . '. "Back to review" on the Rejected tab brings ' . ($same ? 'them all' : 'it') . ' back.');
         case 'undo':
-            if (!in_array($r['status'], array('applied', 'rejected'), true)) throw new RuntimeException('Nothing to undo.');
+            if (!in_array($r['status'], array('applied', 'rejected', 'held'), true)) throw new RuntimeException('Nothing to undo.');
             $was = $r['status'];
             if ($was === 'rejected') {
                 // The items rejected with this one come back with it.
@@ -478,7 +489,8 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
             kop_wbf_undo(array($r), $user);
             $now = kop_wbf_rows(array($r['pkey']))[0] ?? null;
             if (!$now || $now['status'] !== 'pending') throw new RuntimeException('Undo did not go through. Try again, or use the full screen.');
-            return array('message' => $was === 'applied' ? 'Undone: what this item added is off the record again. It is waiting for review.' : 'Waiting for review again.');
+            return array('message' => $was === 'applied' ? 'Undone: what this item added is off the record again. It is waiting for review.'
+                : ($was === 'held' ? 'Out of the write-up and waiting for review again (the record was never changed).' : 'Waiting for review again.'));
     }
     throw new RuntimeException('Unknown action.');
 }
@@ -720,7 +732,7 @@ function kop_rinbox_wbf_create_for(array $rows, array $params) {
     $done = array_keys(array_filter($results, function ($x) { return !empty($x['ok']); }));
     $left = array_filter($results, function ($x) { return !empty($x['conflict']); });
     $already = array_filter($results, function ($x) { return !empty($x['already']); });
-    $msg = 'Created ' . kop_rinbox_wbf_name($fid) . ' and added ' . ($n === 1 ? 'this item' : count($done) . ' of the ' . $n . ' items') . ' to it'
+    $msg = 'Created ' . kop_rinbox_wbf_name($fid) . ' and ' . (kop_fact_hold_on() ? 'held ' : 'added ') . ($n === 1 ? 'this item' : count($done) . ' of the ' . $n . ' items') . (kop_fact_hold_on() ? ' for its write-up' : ' to it')
         . ($left ? '; ' . count($left) . ' disagree' . (count($left) === 1 ? 's' : '') . ' with what was just added and still wait' . (count($left) === 1 ? 's' : '') . ' under Conflicts' : '')
         . ($already && $n > 1 ? '; ' . count($already) . ' said the same thing and went to Rejected' : '') . '. Undo is on the Added tab.';
     return array('results' => $results, 'done' => array_map('strval', $done), 'message' => $msg);

@@ -83,6 +83,8 @@
  * actions [{id, label, style (approve, reject, neutral, undo), confirm,
  * params [field...]}], moves [{id, label}], links [{label, url}],
  * selected (true: the card's "select" box starts ticked, a sure match).
+ * An action with 'with_fields' => true also gets the card editor's fields as
+ * they are now, saved or not, as $params['fields'] (approve the text as edited).
  * A param with 'optional' => true may be left empty: the action is still
  * offered for the selected cards, and each card sends what its own inputs
  * say at the time.

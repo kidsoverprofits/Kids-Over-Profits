@@ -209,7 +209,8 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     try {
         call_user_func($src['act'], $lead, 'apply', array('facility' => (string) $fids[1]));
         $r = $row($lead);
-        $check('fornits: Add with another record names that record', $r['status'] === 'applied' && (int) $r['applied_fid'] === (int) $fids[1]);
+        // A lead kept on the record is held for its write-up (inc/record-writeups.php); one sent to a queue is added.
+        $check('fornits: Add with another record names that record', in_array($r['status'], array('applied', 'held'), true) && (int) $r['applied_fid'] === (int) $fids[1]);
         call_user_func($src['act'], $lead, 'undo', array());
     } catch (Throwable $e) {
         $check('fornits: Add with another record', false, get_class($e) . ': ' . $e->getMessage());
