@@ -108,6 +108,9 @@ function kop_ext_website_kinds() {
         'social'     => 'Social media post',
         'program'    => 'Program\'s own page',
         'directory'  => 'Directory or listing',
+        'marketing'  => 'Marketing group or referral service',
+        'business'   => 'Business or property record',
+        'staff'      => 'Staff profile or resume',
         'report'     => 'Report or study',
         'government' => 'Government page or record',
         'media'      => 'Video or podcast',
@@ -137,6 +140,11 @@ function kop_ext_website_guess_kind($url) {
     if ($is(array('web.archive.org', 'archive.org', 'archive.today', 'archive.ph', 'archive.is'))) return 'archive';
     if ($is(array('fornits.com', 'fornits.org'))) return 'forum';
     if ($is(array('youtube.com', 'youtu.be', 'vimeo.com', 'podcasts.apple.com', 'open.spotify.com', 'soundcloud.com'))) return 'media';
+    // A LinkedIn person page is a staff profile; the rest of LinkedIn stays social.
+    if ($is(array('linkedin.com')) && preg_match('#^/(in|pub)/#i', (string) parse_url((string) $url, PHP_URL_PATH))) return 'staff';
+    if ($is(array('zoominfo.com', 'rocketreach.co', 'signalhire.com', 'contactout.com', 'doximity.com', 'healthgrades.com', 'npiprofile.com', 'npino.com'))) return 'staff';
+    if ($is(array('opencorporates.com', 'bizapedia.com', 'corporationwiki.com', 'bizprofile.net', 'buzzfile.com', 'dnb.com',
+        'opengovus.com', 'zillow.com', 'redfin.com', 'loopnet.com', 'realtor.com'))) return 'business';
     if ($is(array('facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'tiktok.com', 'threads.net', 'bsky.app', 'linkedin.com'))) return 'social';
     if ($is(array('wordpress.com', 'blogspot.com', 'medium.com', 'substack.com', 'tumblr.com'))) return 'blog';
     if ($is(array('psychologytoday.com', 'yelp.com', 'glassdoor.com', 'indeed.com', 'bbb.org', 'findtreatment.gov', 'natsap.org'))) return 'directory';

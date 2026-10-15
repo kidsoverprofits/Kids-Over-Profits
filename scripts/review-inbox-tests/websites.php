@@ -179,7 +179,13 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
     // The kind of website: guessed from the address until set, saved on the card, an unknown one refused.
     $check('websites: the kind is guessed from the address', kop_ext_website_guess_kind('https://www.reddit.com/r/troubledteens/comments/x') === 'reddit'
         && kop_ext_website_guess_kind('https://web.archive.org/web/2004/http://x.test/') === 'archive'
-        && kop_ext_website_guess_kind('https://dcfs.utah.gov/x') === 'government' && kop_ext_website_guess_kind('https://example.test/alumni') === '');
+        && kop_ext_website_guess_kind('https://dcfs.utah.gov/x') === 'government' && kop_ext_website_guess_kind('https://example.test/alumni') === ''
+        && kop_ext_website_guess_kind('https://www.linkedin.com/in/someone') === 'staff'
+        && kop_ext_website_guess_kind('https://www.linkedin.com/company/x') === 'social'
+        && kop_ext_website_guess_kind('https://opencorporates.com/companies/us_ut/1') === 'business');
+    $check('websites: marketing, business and staff go under their Materials and links kinds',
+        kop_rinbox_websites_resource_kind('marketing') === 'advertising' && kop_rinbox_websites_resource_kind('business') === 'government'
+        && kop_rinbox_websites_resource_kind('staff') === 'people');
     $kf = array_values(array_filter($item['fields'], function ($f) { return $f['name'] === 'kind'; }));
     $check('websites: the kind is the card\'s category, every kind offered', $kf && !empty($kf[0]['category'])
         && array_diff_key(kop_ext_website_kinds(), $kf[0]['options']) === array());

@@ -162,7 +162,7 @@ function kop_rinbox_websites_item($p) {
 /** The "Materials and links" kind a website of this kind goes under on a facility. */
 function kop_rinbox_websites_resource_kind($kind) {
     $map = array('forum' => 'social', 'reddit' => 'social', 'blog' => 'social', 'social' => 'social', 'directory' => 'advertising',
-        'program' => 'advertising', 'government' => 'government', 'archive' => 'archive', 'report' => 'reference', 'media' => 'reference');
+        'program' => 'advertising', 'marketing' => 'advertising', 'business' => 'government', 'staff' => 'people', 'government' => 'government', 'archive' => 'archive', 'report' => 'reference', 'media' => 'reference');
     return $map[$kind] ?? 'reference';
 }
 
