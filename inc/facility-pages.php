@@ -3434,7 +3434,9 @@ if (!function_exists('kop_facility_page_data')) {
             'research'      => $research,
             'unsilenced'    => $unsilenced,
             'survivor_sites' => $survivor_sites,
-            'network'       => kop_facility_pages_network($facility_id),
+            'network'       => kop_facility_pages_network($facility_id, array_merge(array($operator_name),
+                kop_facility_pages_text_items($ident['currentOwners'] ?? null), kop_facility_pages_text_items($ident['otherOperators'] ?? null),
+                kop_facility_pages_text_items($ident['pastOperators'] ?? null), kop_facility_pages_text_items($ident['investors'] ?? null))),
             'updated_at'    => $updated,
             'updated_label' => $updated !== '' ? date_i18n(get_option('date_format') ?: 'F j, Y', strtotime($updated) ?: time()) : '',
             'index_url'     => kop_facility_pages_location_search_url($name),
@@ -4099,18 +4101,27 @@ if (!function_exists('kop_facility_pages_network')) {
      * array('name', 'url', 'role')))) ), or null when the map does not draw it.
      * Grouped as the map's drawer groups them, largest group first; a
      * facility that has its own page links to it, and a rename or an
-     * acquisition says which way it went.
+     * acquisition says which way it went. $named: the companies the page
+     * already names as operator, owner or investor (from the record), left
+     * out here so ownership is said once, in the record's words.
      */
-    function kop_facility_pages_network($facility_id) {
+    function kop_facility_pages_network($facility_id, array $named = array()) {
         if (!function_exists('kop_network_map_facility_connections')) return null;
         $all = kop_network_map_facility_connections();
         $entry = $all[(int) $facility_id] ?? null;
         if (!$entry || empty($entry['links'])) return null;
 
+        $named_keys = array();
+        foreach ($named as $n) {
+            $k = kop_facility_pages_name_key($n);
+            if ($k !== '') $named_keys[$k] = true;
+        }
         $groups = array();
         foreach ($entry['links'] as $link) {
             // People are on the page as staff cards (kop_facility_pages_add_map_people()).
             if (($link['kind'] ?? '') === 'person' && ($link['relation'] ?? '') === '') continue;
+            if (($link['relation'] ?? '') === '' && ($link['category'] ?? '') === 'corporate' && ($link['kind'] ?? '') !== 'facility'
+                && isset($named_keys[kop_facility_pages_name_key($link['name'] ?? '')])) continue;
             if ($link['relation'] === 'became' || $link['relation'] === 'formerly') {
                 $label = 'Names';
             } elseif ($link['relation'] !== '') {
