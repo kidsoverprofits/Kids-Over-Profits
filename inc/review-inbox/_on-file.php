@@ -102,8 +102,16 @@ function kop_on_file_pending(PDO $pdo, $type) {
         if (is_array($cached) && ($cached['fp'] ?? '') === $fp) {
             return $memo[$type] = (array) $cached['found'];
         }
-        $found = kop_on_file_find($pdo, $type);
-        set_transient('kop_on_file_' . $type, array('fp' => $fp, 'found' => $found), HOUR_IN_SECONDS);
+        // One request rebuilds at a time; the others use the last answer meanwhile.
+        if (!kop_on_file_lock($type)) {
+            return $memo[$type] = is_array($cached) ? (array) $cached['found'] : array();
+        }
+        try {
+            $found = kop_on_file_find($pdo, $type);
+            set_transient('kop_on_file_' . $type, array('fp' => $fp, 'found' => $found), HOUR_IN_SECONDS);
+        } finally {
+            kop_on_file_unlock($type);
+        }
         return $memo[$type] = $found;
     } catch (Throwable $e) {
         // Without the check every pending item simply stays in Pending.
@@ -313,13 +321,37 @@ function kop_on_file_cached($name, $table, callable $build) {
             . '|' . kop_on_file_operators_fp($pdo));
         $cached = get_transient('kop_on_file_' . $name);
         if (is_array($cached) && ($cached['fp'] ?? '') === $fp) return (array) $cached['found'];
-        kop_on_file_load_libs();
-        $found = $build($pdo);
-        set_transient('kop_on_file_' . $name, array('fp' => $fp, 'found' => $found), DAY_IN_SECONDS);
+        if (!kop_on_file_lock($name)) return is_array($cached) ? (array) $cached['found'] : array();
+        try {
+            kop_on_file_load_libs();
+            $found = $build($pdo);
+            set_transient('kop_on_file_' . $name, array('fp' => $fp, 'found' => $found), DAY_IN_SECONDS);
+        } finally {
+            kop_on_file_unlock($name);
+        }
         return $found;
     } catch (Throwable $e) {
         return array();
     }
+}
+
+/**
+ * Whether this request may rebuild $name's answer: false while another request
+ * is rebuilding it (an option row is the lock; one left over 5 minutes is stale).
+ * Several 20-second rebuilds at once used up the database's 25 connections.
+ */
+function kop_on_file_lock($name) {
+    if (!function_exists('add_option')) return true;
+    $key = 'kop_on_file_lock_' . $name;
+    if (add_option($key, time(), '', 'no')) return true;
+    $since = (int) get_option($key, 0);
+    if ($since > 0 && time() - $since < 300) return false;
+    delete_option($key);
+    return (bool) add_option($key, time(), '', 'no');
+}
+
+function kop_on_file_unlock($name) {
+    if (function_exists('delete_option')) delete_option('kop_on_file_lock_' . $name);
 }
 
 /** " AND <col> NOT IN (...)" for keys already on file (hex keys only), or ''. */
