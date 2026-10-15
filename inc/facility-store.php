@@ -140,10 +140,11 @@ if (!function_exists('kop_facility_resource_link_kinds')) {
     /**
      * resourceLinks kinds, in the order the facility page groups them. The
      * kinds are in inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists);
-     * $mode 'offered' leaves out hidden ones (dropdowns).
+     * $mode 'offered' leaves out hidden ones (dropdowns). Dropdowns get them
+     * A to Z; $page_order keeps the built-in order the page's headings use.
      */
-    function kop_facility_resource_link_kinds($mode = 'all') {
-        return function_exists('kop_choices') ? kop_choices('resource-link-kinds', null, $mode) : array('other' => 'Other links');
+    function kop_facility_resource_link_kinds($mode = 'all', $page_order = false) {
+        return function_exists('kop_choices') ? kop_choices('resource-link-kinds', null, $mode, !$page_order) : array('other' => 'Other links');
     }
 }
 

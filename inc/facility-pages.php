@@ -2739,7 +2739,7 @@ if (!function_exists('kop_facility_pages_resource_links')) {
      */
     function kop_facility_pages_resource_links($value) {
         if (!is_array($value) || !function_exists('kop_facility_resource_link_list')) return array();
-        $kinds = kop_facility_resource_link_kinds();
+        $kinds = kop_facility_resource_link_kinds('all', true);
         $by = array();
         foreach (kop_facility_resource_link_list($value) as $l) {
             $label = $l['label'];

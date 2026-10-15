@@ -84,8 +84,10 @@ list($ch, $words, $err) = kop_choice_apply_form('t-plain', array('Wilderness' =>
     array(array('label' => 'Group Home'), array('label' => 'rtc')));
 ok(count($err) === 1, 'plain duplicate ignoring case refused');
 kop_choice_set_items('t-plain', $ch, $words);
-ok(t_plain() === array('RTC', 'Wilderness', 'Group Home', 'Other'), 'plain add before Other');
-ok(t_plain('offered') === array('RTC', 'Group Home', 'Other'), 'plain hidden');
+ok(t_plain() === array('Group Home', 'RTC', 'Wilderness', 'Other'), 'plain add sorted A to Z, before Other');
+ok(t_plain('offered') === array('Group Home', 'RTC', 'Other'), 'plain hidden');
+ok(kop_choices('t-plain', array('RTC', 'Wilderness', 'Other'), 'all', false) === array('RTC', 'Wilderness', 'Group Home', 'Other'), 'unsorted keeps the built-in order, added after');
+ok(array_keys(kop_choices('bill-statuses'))[0] === 'proposed', 'an ordered list (bill statuses) keeps its sequence');
 
 // --- slugs --------------------------------------------------------------------
 ok(kop_choice_slug('Court order (state)') === 'court_order_state', 'slug _');

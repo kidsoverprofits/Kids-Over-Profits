@@ -64,6 +64,7 @@ kop_choice_register('lawsuit-statuses', array(
 
 kop_choice_register('bill-statuses', array(
     'label'    => 'Bill statuses',
+    'ordered'  => true, // the order a bill moves through
     'group'    => 'Lawsuits, bills and volunteers',
     'where'    => 'The "Status" of a bill: the legislation editor, the public "Submit Legislation" form, the bill editors in Submissions Review and the review inbox, the pencil on a bill, the statuses the AI may give when it reads a bill\'s page, and the status badges and filters on /legislation/, state and country pages.',
     'note'     => 'Tick "Bill is finished" for a status that means nothing more will happen to the bill: the nightly check of legislature pages stops looking at bills with that status. A vetoed bill is still checked for 120 days in case the veto is overridden.',

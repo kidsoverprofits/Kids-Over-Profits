@@ -61,14 +61,15 @@ if (!function_exists('kop_choice_register')) {
      * the list through kop_choices()), plain, fields {name: {label, type
      * text|textarea|select|check, options (array or callable), required,
      * help}}, slug_sep ('_' default, or '-'), js, last (values kept at the
-     * end, default other/unknown), note (a warning shown over the list),
+     * end, default other/unknown), ordered (keep the built-in order instead
+     * of A to Z: a sequence), note (a warning shown over the list),
      * max_len (label length, default 80).
      */
     function kop_choice_register($key, array $def) {
         $GLOBALS['kop_choice_registry'][$key] = $def + array(
             'label' => $key, 'group' => 'Other lists', 'where' => '', 'source' => '', 'plain' => false,
             'fields' => array(), 'slug_sep' => '_', 'js' => false, 'last' => array('other', 'unknown', 'Other'),
-            'note' => '', 'max_len' => 80, 'defaults' => null,
+            'note' => '', 'max_len' => 80, 'defaults' => null, 'ordered' => false,
         );
     }
 }
@@ -125,8 +126,11 @@ if (!function_exists('kop_choices')) {
      * A list with the screen's changes. $defaults = the built-in choices;
      * $mode 'all' (hidden kept: reading and checking stored values) or
      * 'offered' (what a dropdown, picker or AI prompt offers).
+     * Choices come A to Z by label (catch-alls like Other last), so an added
+     * one is found where it belongs; a list registered 'ordered' (a sequence,
+     * like bill statuses) or $sorted false keeps the built-in order.
      */
-    function kop_choices($key, $defaults = null, $mode = 'all') {
+    function kop_choices($key, $defaults = null, $mode = 'all', $sorted = true) {
         if ($defaults === null) {
             $d = kop_choice_def($key);
             $defaults = $d && is_array($d['defaults'] ?? null) ? $d['defaults'] : array();
@@ -174,6 +178,11 @@ if (!function_exists('kop_choices')) {
             } else {
                 $out[$value] = $label;
             }
+        }
+        if ($sorted && empty($def['ordered'])) {
+            uasort($out, function ($a, $b) use ($plain) {
+                return strnatcasecmp($plain ? (string) $a : kop_choice_label($a), $plain ? (string) $b : kop_choice_label($b));
+            });
         }
         // Catch-alls (Other, Unknown) stay at the end.
         $last = (array) ($def['last'] ?? array('other', 'unknown', 'Other'));
