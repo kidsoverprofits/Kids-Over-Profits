@@ -1402,6 +1402,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--kop-midnight-blue, #000435);
+    overflow-wrap: anywhere; /* an outlet named by its web address ("keepyourchildathome.webs.com") */
 }
 
 .kop-fp-news-type {

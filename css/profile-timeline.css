@@ -130,6 +130,21 @@ a.kop-ptl-tick:focus-visible {
     box-shadow: 0 0 0 3px var(--kop-focus-color, #33A7B5);
 }
 
+/* The hidden year label inside a mark still gets a readable colour (Kadence colours links). */
+a.kop-ptl-tick,
+a.kop-ptl-tick:hover,
+a.kop-ptl-tick:focus,
+a.kop-ptl-tick:active {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+a.kop-ptl-tick.is-major,
+a.kop-ptl-tick.is-major:hover,
+a.kop-ptl-tick.is-major:focus,
+a.kop-ptl-tick.is-major:active {
+    color: #fff;
+}
+
 a.kop-ptl-tick.is-dim {
     opacity: 0.25;
 }

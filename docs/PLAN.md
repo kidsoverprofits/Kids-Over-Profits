@@ -2478,11 +2478,14 @@ CRC Health Group and Keystone, which have no company page).
 Open:
 1. **Owner:** review the 114 cards at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (Company milestones).
    Cards with a "Check" line carry a research caveat (e.g. Sequel's founding year: 1999 in APM Reports, 1992 on the wiki).
-2. **Check after deploy:** https://kidsoverprofits.org/operator/sequel-tsi/ and https://kidsoverprofits.org/operator/universal-health-services-uhs/
-   (timeline, filters, a card on hover and on a phone), and a facility page with a Timeline section, e.g.
-   https://kidsoverprofits.org/facility/sedona-sky-academy-az/. Then `python -u scripts/check-contrast.py` on those pages.
+2. **Check by hand:** https://kidsoverprofits.org/operator/sequel-tsi/ and https://kidsoverprofits.org/operator/universal-health-services/
+   (filters, a card on hover and on a phone) and https://kidsoverprofits.org/facility/sedona-sky-academy-az/. Already
+   checked live on 2026-10-15: contrast (after the year strip's hidden labels got their colours) and phone/tablet overflow.
 3. Sources: 92 of the 109 milestone sources were new to KOP; `tmp/send-milestone-sources.py` sends them 12 an hour
    (log `tmp/send-milestone-sources.log`, done list `tmp/milestone-sources-sent.json`). If it stops early, rerun it; it resumes.
+   After it, the same script sends `tmp/other-sources.json`: the two govinfo records and the Sabra 10-K from item 21 of
+   section 2, and the ADAP letter on Sequel's Alabama PRTFs (log `tmp/send-other-sources.log`). The Royal Commission
+   summary (item 21) still needs its full Wayback address and the PDF the archive rule asks for.
 4. Company pages for Bain Capital, CRC Health Group and Keystone Education and Youth Services would carry their 4 milestones.
 5. `scripts/test-facility-pages.php` "links a staff entry and a fact to their sources" fails with or without the timeline:
    its first sample (Aspen Education Group) is now a renamed program, whose staff go into the name sections. The fixture
