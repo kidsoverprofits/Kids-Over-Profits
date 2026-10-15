@@ -190,6 +190,9 @@ define('GN_TIME_BUDGET_MS', (int)(getenv('GN_TIME_BUDGET_MS') ?: 45 * 60 * 1000)
 // makes at most this many Google News requests, topics and sweep together;
 // the sweep takes what the topics leave and its cursor goes on next run.
 define('GN_REQUESTS_PER_RUN', (int)(getenv('GN_REQUESTS_PER_RUN') ?: 140));
+// The daily list takes at most this share of a run's sweep, so the rotation
+// always moves; a daily list bigger than that takes more than a day.
+define('DAILY_SHARE_MAX', 0.75);
 define('GN_MAX_CONSECUTIVE_FAILURES', 12);
 define('GN_COOLDOWN_MS', 120000);
 define('GENERIC_ALIAS_MIN_FACILITIES', 3);
@@ -1064,14 +1067,16 @@ function sweep_slice(array $requests, int $cursor, ?int $cap = null): array {
 }
 
 /**
- * This run's requests: the daily list's share first (half of it per run with
- * two runs a day, from its own cursor), then the rotation from its cursor,
- * taking all the room left under $cap. Each request carries 'list' (daily /
- * rotation) and 'next', the cursor once it has been answered.
+ * This run's requests: the daily list's share first (1/SWEEP_RUNS_PER_DAY of
+ * it, from its own cursor, but never more than DAILY_SHARE_MAX of the run, so
+ * the rotation always moves), then the rotation from its cursor, taking all
+ * the room left under $cap. Each request carries 'list' (daily / rotation)
+ * and 'next', the cursor once it has been answered.
  */
 function plan_sweep(array $daily, array $rotation, int $dailyCursor, int $rotationCursor, int $cap): array {
     $slice = [];
-    foreach (sweep_slice($daily, $dailyCursor, $cap)[0] as $i => $req) {
+    $dailyCap = $rotation ? (int)floor($cap * DAILY_SHARE_MAX) : $cap;
+    foreach (sweep_slice($daily, $dailyCursor, max(min($cap, 1), $dailyCap))[0] as $i => $req) {
         $slice[] = $req + ['list' => 'daily', 'next' => ($dailyCursor + $i + 1) % count($daily)];
     }
     $take = min(max(0, $cap - count($slice)), count($rotation));

@@ -141,7 +141,11 @@ check('the next run takes the other half of the daily list', $p2[0]['n'] === 3 &
 $p3 = plan_sweep(array(), $rot, 0, 0, 5);
 check('no daily list: the rotation alone', count($p3) === 5 && $p3[0]['list'] === 'rotation');
 $p4 = plan_sweep($daily, $rot, 0, 0, 2);
-check('a small cap is spent on the daily list first', count($p4) === 2 && $p4[1]['list'] === 'daily');
+check('a small cap still leaves the rotation a share', count($p4) === 2 && $p4[0]['list'] === 'daily' && $p4[1]['list'] === 'rotation');
+$big = array_fill(0, 300, array('mode' => 'batch', 'lines' => array()));
+$p6 = plan_sweep($big, $rot, 0, 0, 112);
+$l6 = array_count_values(array_column($p6, 'list'));
+check('a daily list too big for the day takes 3/4 of the run, the rotation the rest', ($l6['daily'] ?? 0) === 84 && ($l6['rotation'] ?? 0) === 28, json_encode($l6));
 check('the cap counts topics: 140 a run, 28 topics leave 112', GN_REQUESTS_PER_RUN === 140);
 
 /* ---- State file upgrade ----------------------------------------------- */
