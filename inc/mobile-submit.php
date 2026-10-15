@@ -329,4 +329,16 @@ add_action('rest_api_init', function () {
             'url' => array('required' => true),
         ),
     ));
+    // The "Kind of website" choices as KOP Tools > Dropdown Lists has them now (the extension's popup fills its select from it).
+    register_rest_route('kop/v1', '/mobile/website-kinds', array(
+        'methods'             => 'GET',
+        'permission_callback' => '__return_true',
+        'callback'            => function () {
+            $out = array();
+            foreach (kop_ext_website_kinds('offered') as $value => $label) {
+                $out[] = array('value' => (string) $value, 'label' => (string) $label);
+            }
+            return $out;
+        },
+    ));
 });
