@@ -1100,7 +1100,7 @@ get_header();
                     <h3 class="kop-fp-subhead">Research that mentions this program</h3>
                     <ul class="kop-fp-records">
                         <?php foreach ($page['research'] as $kop_fp_doc) : ?>
-                            <li>
+                            <li<?php echo function_exists('kop_ie_attr') && !empty($kop_fp_doc['id']) ? kop_ie_attr('doc:' . (int) $kop_fp_doc['id'], $kop_fp_doc['title']) : ''; ?>>
                                 <a href="<?php echo esc_url($kop_fp_doc['url']); ?>" target="_blank" rel="noopener"><?php echo esc_html($kop_fp_doc['title']); ?></a>
                                 <?php
                                 $kop_fp_doc_meta = array_filter(array($kop_fp_doc['byline'], $kop_fp_doc['why'], isset($kop_fp_doc['pages']) && $kop_fp_doc['pages'] !== '' ? 'Named on ' . $kop_fp_doc['pages'] : ''), 'strlen');
@@ -1159,7 +1159,7 @@ get_header();
                     </ul>
                     <?php endif; ?>
                     <?php if (!empty($kop_fp_forum['links'])) : ?>
-                    <ul class="kop-fp-records kop-fp-forum-links">
+                    <ul class="kop-fp-records kop-fp-forum-links"<?php echo $kop_fp_edit('links', 'forum thread titles'); ?>>
                         <?php foreach ($kop_fp_forum['links'] as $kop_fp_fl) : ?>
                             <li><a href="<?php echo esc_url($kop_fp_fl['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($kop_fp_fl['label']); ?></a></li>
                         <?php endforeach; ?>
@@ -1250,7 +1250,7 @@ get_header();
                 <?php endif; ?>
                 <?php foreach ((array) ($page['resource_links'] ?? array()) as $kop_fp_group) : ?>
                     <h3 class="kop-fp-subhead"><?php echo esc_html($kop_fp_group['label']); ?></h3>
-                    <ul class="kop-fp-records">
+                    <ul class="kop-fp-records"<?php echo $kop_fp_edit('links', 'these links and their titles'); ?>>
                         <?php foreach ($kop_fp_group['links'] as $l) : ?>
                             <li>
                                 <a href="<?php echo esc_url($l['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($l['label']); ?></a>

@@ -3548,6 +3548,7 @@ if (!function_exists('kop_facility_pages_research_item')) {
             if (isset($override['byline'])) $byline = (string) $override['byline'];
         }
         return array(
+            'id'      => (int) $attachment->ID,
             'title'   => $title,
             'url'     => $url !== '' ? $url : $library_url,
             'byline'  => $byline,

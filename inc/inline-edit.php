@@ -179,6 +179,7 @@ function kop_ie_sources() {
         'era'      => array('load' => 'kop_ie_era_load', 'save' => 'kop_ie_era_save'),
         'erarename' => array('load' => 'kop_ie_erarename_load', 'save' => 'kop_ie_erarename_save'),
         'eraundo'  => array('load' => 'kop_ie_eraundo_load', 'save' => 'kop_ie_eraundo_save'),
+        'unsil'    => array('load' => 'kop_ie_unsil_load', 'save' => 'kop_ie_unsil_save'),
         'rec'     => array('load' => 'kop_ie_rec_load', 'save' => null),
         'cfg'      => array('load' => 'kop_ie_cfg_load', 'save' => 'kop_ie_cfg_save'),
         'operator' => array('load' => 'kop_ie_operator_load', 'save' => 'kop_ie_operator_save'),
@@ -527,6 +528,9 @@ function kop_ie_facility_groups() {
         )),
         'links' => array('Links', array(
             array('profileLinks', 'Websites and profiles (one address a line)', 'lines'),
+            // "Materials and links" and the forum threads under Survivor testimony.
+            array('resourceLinks', 'Materials, articles and forum threads (the title is what the page shows)', 'rows', array('columns' => array(
+                'label' => 'Title', 'url' => 'Link', 'kind' => 'Kind', 'source' => 'Where it was found'))),
         )),
         'testimony' => array('Survivor testimony', array(
             array('survivorTestimony', 'Testimony', 'rows', array('columns' => array('text' => 'Account', 'date' => 'Date', 'publish' => 'OK to publish'),
@@ -1161,6 +1165,61 @@ function kop_ie_eraundo_save(array $p, array $v) {
     $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
     kop_ie_purge_url($url);
     return array('message' => 'Undone: filed as closed again.', 'redirect' => $url);
+}
+
+/**
+ * unsil:<Drive file id>: a file in the Unsilenced archive lists (inc/unsilenced-archive.php),
+ * which KOP holds no copy of: the title the pages show and what kind of document it is.
+ * Kept in the kop_unsilenced_edits option; an empty title goes back to the build's.
+ */
+function kop_ie_unsil_load(array $p) {
+    $file = function_exists('kop_unsilenced_file') ? kop_unsilenced_file($p[0] ?? '') : null;
+    if (!$file) {
+        throw new RuntimeException('That file is no longer in the Unsilenced lists.');
+    }
+    $edit = kop_unsilenced_edits()[$file['id']] ?? array();
+    $options = array();
+    foreach (function_exists('kop_dt_types') ? kop_dt_types() : array() as $slug => $t) {
+        $options[] = array('value' => $slug, 'label' => $t['label']);
+    }
+    $fields = array(
+        kop_ie_field('title', 'Title', 'text', (string) ($edit['title'] ?? ''), array(
+            'help' => 'Empty = ' . ($file['title'] !== '' ? 'the title read from its content: ' . $file['title'] : 'Unsilenced\'s file name') . '. Unsilenced\'s name (' . $file['name'] . ') stays beside it.')),
+    );
+    if ($options) {
+        $fields[] = kop_ie_field('types', 'What kind of document it is', 'checks', array_values((array) ($edit['types'] ?? array())), array('options' => $options, 'wide' => true));
+    }
+    return array(
+        'title'  => 'Unsilenced archive: ' . ($file['title'] !== '' ? $file['title'] : $file['name']),
+        'help'   => 'A file Unsilenced holds and Kids Over Profits does not. The title shows on every page that lists it.',
+        'fields' => $fields,
+    );
+}
+
+function kop_ie_unsil_save(array $p, array $v) {
+    $file = function_exists('kop_unsilenced_file') ? kop_unsilenced_file($p[0] ?? '') : null;
+    if (!$file) {
+        throw new RuntimeException('That file is no longer in the Unsilenced lists.');
+    }
+    $title = trim(preg_replace('/\s+/', ' ', kop_ie_clean_text($v['title'] ?? '')));
+    $known = function_exists('kop_dt_types') ? kop_dt_types() : array();
+    $types = array();
+    foreach ((array) ($v['types'] ?? array()) as $t) {
+        if (isset($known[(string) $t])) {
+            $types[] = (string) $t;
+        }
+    }
+    $all = get_option('kop_unsilenced_edits', array());
+    $all = is_array($all) ? $all : array();
+    if ($title === '' && !$types) {
+        unset($all[$file['id']]);
+    } else {
+        $all[$file['id']] = array('title' => $title, 'types' => array_values(array_unique($types)), 'at' => gmdate('c'), 'by' => kop_ie_who());
+    }
+    update_option('kop_unsilenced_edits', $all, false);
+    kop_unsilenced_edits(true);
+    do_action('litespeed_purge_all');
+    return array('message' => 'Saved.');
 }
 
 /* ---- Lawsuits, legislation and news rows ------------------------------------- */
@@ -1957,6 +2016,10 @@ function kop_ie_doc_save(array $p, array $v) {
     $title = trim(preg_replace('/\s+/', ' ', kop_ie_clean_text($v['title'] ?? $post->post_title)));
     if ($title === '') {
         throw new RuntimeException('The title cannot be empty.');
+    }
+    // A research document's card shows the library's seeded title until someone edits it (inc/research-library.php).
+    if ($title !== $post->post_title && defined('KOP_RESEARCH_EDITED_META')) {
+        update_post_meta($post->ID, KOP_RESEARCH_EDITED_META, current_time('mysql'));
     }
     $result = wp_update_post(wp_slash(array(
         'ID'           => $post->ID,

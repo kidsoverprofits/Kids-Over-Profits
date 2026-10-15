@@ -239,6 +239,34 @@ $threw = false;
 try { kop_ie_era_renamed(array('legacy' => array('mergedFacilities' => array(array('name' => 'X', 'rename' => array('year' => 2001, 'notes' => array('A note.')))))), 0); } catch (RuntimeException $e) { $threw = true; }
 $check('a name nothing says closed is refused', $threw);
 
+echo "-- A file in the Unsilenced lists: title and type (unsil) --\n";
+require_once dirname(__DIR__) . '/inc/unsilenced-archive.php';
+$u_path = (glob(kop_unsilenced_dir() . '/f/*.json') ?: array(''))[0];
+$u_data = $u_path !== '' ? json_decode((string) file_get_contents($u_path), true) : null;
+$u_file = $u_data['files'][0] ?? null;
+$check('an Unsilenced list to test with', is_array($u_file), $u_path);
+if (is_array($u_file)) {
+    $found = kop_unsilenced_file($u_file['id']);
+    $check('the file is found by its Drive id', $found && $found['name'] === (string) $u_file['name'], json_encode($found));
+    $form = kop_ie_unsil_load(array($u_file['id']));
+    $names = array_column($form['fields'], 'name');
+    $check('its form has the title and the document types', in_array('title', $names, true) && (!function_exists('kop_dt_types') || in_array('types', $names, true)), implode(',', $names));
+    $u_id = (int) basename($u_path, '.json');
+    $archive = kop_unsilenced_archive('f', array($u_id));
+    $html = kop_unsilenced_render($archive, 'X');
+    $check('the listed file carries no pencil for a visitor', $archive && strpos($html, 'data-kop-edit') === false);
+}
+$check('a made-up Drive id is refused', (function () { try { kop_ie_unsil_load(array('nope-not-a-file-id')); } catch (RuntimeException $e) { return true; } return false; })());
+$f_links = null;
+foreach (kop_ie_facility_group_fields(array('resourceLinks' => array(array('url' => 'https://example.org/a', 'label' => 'Old title', 'kind' => 'social', 'source' => 'Fornits'))), 'links') as $f) if ($f['name'] === 'resourceLinks') $f_links = $f;
+$check('Links form lists the materials and forum threads', $f_links && $f_links['type'] === 'rows' && isset($f_links['columns']['label']));
+if ($f_links) {
+    $rows = $as_posted($f_links);
+    $rows[0]['label'] = 'New title';
+    $d = kop_ie_facility_apply_values(array('resourceLinks' => array(array('url' => 'https://example.org/a', 'label' => 'Old title', 'kind' => 'social', 'source' => 'Fornits'))), 'links', array('resourceLinks' => $rows, 'profileLinks' => ''));
+    $check('a link retitled keeps its link, kind and source', ($d['resourceLinks'][0] ?? null) == array('url' => 'https://example.org/a', 'label' => 'New title', 'kind' => 'social', 'source' => 'Fornits'), json_encode($d['resourceLinks'] ?? null));
+}
+
 echo "-- Every parent company sent back unchanged --\n";
 $ops = $changed = 0;
 $examples = array();

@@ -50,6 +50,43 @@ if (!function_exists('kop_unsilenced_index')) {
     }
 }
 
+if (!function_exists('kop_unsilenced_edits')) {
+    /**
+     * Titles and document types set with the pencil on a listed file, by Drive
+     * file id: {id: {title, types: [slug], at, by}} (option kop_unsilenced_edits).
+     * The build's lists never change them.
+     */
+    function kop_unsilenced_edits($reload = false) {
+        static $memo = null;
+        if ($memo === null || $reload) {
+            $v = function_exists('get_option') ? get_option('kop_unsilenced_edits', array()) : array();
+            $memo = is_array($v) ? $v : array();
+        }
+        return $memo;
+    }
+}
+
+if (!function_exists('kop_unsilenced_file')) {
+    /** One listed file by Drive id, from any facility or company list: {id, name, title, folder} or null. */
+    function kop_unsilenced_file($fid) {
+        $fid = (string) $fid;
+        if (!preg_match('/^[\w-]{10,}$/', $fid)) return null;
+        foreach (array('f', 'o') as $kind) {
+            foreach (glob(kop_unsilenced_dir() . '/' . $kind . '/*.json') ?: array() as $path) {
+                $raw = (string) file_get_contents($path);
+                if (strpos($raw, $fid) === false) continue;
+                $data = json_decode($raw, true);
+                foreach ((array) ($data['files'] ?? array()) as $f) {
+                    if ((string) ($f['id'] ?? '') === $fid) {
+                        return array('id' => $fid, 'name' => (string) ($f['name'] ?? ''), 'title' => trim((string) ($f['title'] ?? '')), 'folder' => (string) ($f['folder'] ?? ''));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
+
 if (!function_exists('kop_unsilenced_cache_key')) {
     /** Changes with every build, for the page index fingerprints. */
     function kop_unsilenced_cache_key() {
@@ -99,9 +136,14 @@ if (!function_exists('kop_unsilenced_archive')) {
                 $folder = trim((string) ($f['folder'] ?? ''));
                 $name = (string) ($f['name'] ?? '');
                 $title = trim((string) ($f['title'] ?? ''));
+                // A title or type set with the pencil (kop_unsilenced_edits()) wins over the build's.
+                $edit = kop_unsilenced_edits()[$fid] ?? array();
+                if (trim((string) ($edit['title'] ?? '')) !== '') $title = trim((string) $edit['title']);
                 $groups[$folder][] = array(
+                    'id'    => $fid,
                     'name'  => $name,
                     'title' => $title !== $name ? $title : '',
+                    'types' => array_values(array_filter((array) ($edit['types'] ?? array()), 'is_string')),
                     'url'   => 'https://drive.google.com/file/d/' . $fid . '/view',
                 );
             }
@@ -151,13 +193,18 @@ if (!function_exists('kop_unsilenced_render')) {
             $n = count($g['files']);
             $list = '<ul class="kop-fp-records kop-unsilenced-files">';
             foreach ($g['files'] as $f) {
+                // The pencil: title and type of a file we do not hold (kop_ie_unsil_load()).
+                $li = '<li' . (function_exists('kop_ie_attr') && !empty($f['id']) ? kop_ie_attr('unsil:' . $f['id'], ($f['title'] ?? '') !== '' ? $f['title'] : $f['name']) : '') . '>';
+                $chips = !empty($f['types']) && function_exists('kop_dt_label')
+                    ? ' <span class="kop-dt-chips">' . implode('', array_map(function ($t) { return '<span class="kop-dt-chip">' . esc_html(kop_dt_label($t)) . '</span>'; }, $f['types'])) . '</span>'
+                    : '';
                 if (($f['title'] ?? '') !== '') {
                     // Titled from the content: Unsilenced's file name follows, muted.
-                    $list .= '<li><a href="' . esc_url($f['url']) . '" target="_blank" rel="noopener" title="'
-                        . esc_attr($f['name']) . '">' . esc_html($f['title']) . '</a><span class="meta">'
+                    $list .= $li . '<a href="' . esc_url($f['url']) . '" target="_blank" rel="noopener" title="'
+                        . esc_attr($f['name']) . '">' . esc_html($f['title']) . '</a>' . $chips . '<span class="meta">'
                         . esc_html($f['name']) . '</span></li>';
                 } else {
-                    $list .= '<li><a href="' . esc_url($f['url']) . '" target="_blank" rel="noopener">' . esc_html($f['name']) . '</a></li>';
+                    $list .= $li . '<a href="' . esc_url($f['url']) . '" target="_blank" rel="noopener">' . esc_html($f['name']) . '</a>' . $chips . '</li>';
                 }
             }
             $list .= '</ul>';
