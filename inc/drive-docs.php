@@ -37,6 +37,10 @@
  * matches at once in batches.
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -146,22 +150,16 @@ function kop_gdl_paths() {
     return array_values(kop_gdl_files());
 }
 
-/** The build's kinds, as the review screen names them. */
-function kop_gdl_kinds() {
-    return array(
-        'news'         => 'News article',
-        'court'        => 'Court record',
-        'legislation'  => 'Legislation',
-        'inspection'   => 'Licensing/inspection report',
-        'government'   => 'Government page',
-        'social'       => 'Survivor/social post',
-        'people'       => 'Person (profile, obituary, company)',
-        'advertising'  => 'Advertising/marketing listing',
-        'reference'    => 'Reference',
-        'archive'      => 'Archive copy',
-        'program_site' => "Program's own site",
-        'other'        => 'Other',
-    );
+/**
+ * The build's kinds, as the review screen names them: kind => label. The kinds,
+ * with where Add sends each and its "Materials and links" heading, are in
+ * inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists); $mode 'offered'
+ * leaves out hidden ones (dropdowns).
+ */
+function kop_gdl_kinds($mode = 'all') {
+    $out = array();
+    foreach (kop_choices('drive-docs-kinds', null, $mode) as $k => $c) $out[$k] = kop_choice_label($c);
+    return $out;
 }
 
 /** Where a link can go. */
@@ -176,16 +174,16 @@ function kop_gdl_targets() {
 }
 
 function kop_gdl_default_target($kind) {
-    $map = array('news' => 'news', 'court' => 'lawsuit', 'legislation' => 'legislation', 'program_site' => 'website');
-    return $map[$kind] ?? 'resource';
+    $c = kop_choices('drive-docs-kinds')[$kind] ?? null;
+    $t = is_array($c) ? (string) ($c['target'] ?? '') : '';
+    return isset(kop_gdl_targets()[$t]) ? $t : 'resource';
 }
 
 /** A build kind as a resourceLinks kind (kop_facility_resource_link_kinds()). */
 function kop_gdl_resource_kind($kind) {
-    $map = array('inspection' => 'licensing', 'court' => 'court', 'government' => 'government', 'news' => 'news',
-        'social' => 'social', 'people' => 'people', 'advertising' => 'advertising', 'reference' => 'reference',
-        'archive' => 'archive');
-    return $map[$kind] ?? 'other';
+    $c = kop_choices('drive-docs-kinds')[$kind] ?? null;
+    $rk = is_array($c) ? (string) ($c['resource_kind'] ?? '') : '';
+    return $rk !== '' && isset(kop_facility_resource_link_kinds()[$rk]) ? $rk : 'other';
 }
 
 /** Facility links that need a record (the queues do not). */

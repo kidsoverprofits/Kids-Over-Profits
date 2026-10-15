@@ -34,7 +34,7 @@ kop_rinbox_register('fornits', function () {
         'views'    => $views,
         'filters'  => array(
             array('name' => 'kind', 'label' => 'Kind', 'options' => kop_fornits_kinds()),
-            array('name' => 'cat', 'label' => 'Category', 'options' => kop_fornits_categories()),
+            array('name' => 'cat', 'label' => 'Category', 'options' => kop_fornits_categories('offered')),
             array('name' => 'min', 'label' => 'Importance', 'options' => array('3' => 'Key evidence only', '2' => 'Useful or better', '1' => 'Hide chatter', 'read' => 'Read by the AI')),
         ),
         'view_counts' => 'kop_rinbox_fornits_view_counts',
@@ -75,7 +75,7 @@ kop_rinbox_register('fornits', function () {
 // The reading's categories are offered as tags everywhere.
 add_filter('kop_review_inbox_known_tags', function ($tags) {
     if (function_exists('kop_fornits_categories')) {
-        foreach (array_keys(kop_fornits_categories()) as $c) $tags[] = str_replace('_', ' ', $c);
+        foreach (array_keys(kop_fornits_categories('offered')) as $c) $tags[] = str_replace('_', ' ', $c);
     }
     return $tags;
 });

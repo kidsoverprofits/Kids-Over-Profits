@@ -13,6 +13,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/config.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
 
 // Bootstrap WordPress so we can call current_user_can()
 if (!defined('ABSPATH')) {
@@ -142,7 +143,8 @@ try {
         exit;
     }
 
-    $validStatuses = ['filed','in_progress','settled','dismissed','ruling','appeal','closed','unknown'];
+    // Lawsuit statuses: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php).
+    $validStatuses = kop_lawsuit_status_values('all');
     $status = in_array($data['status'] ?? '', $validStatuses, true) ? $data['status'] : 'unknown';
 
     $validPubStatuses = ['draft','pending','approved','published','rejected'];

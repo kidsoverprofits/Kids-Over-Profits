@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
 require_once __DIR__ . '/url-dedupe.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -72,7 +73,8 @@ try {
         exit;
     }
 
-    $validStatuses = ['filed','in_progress','settled','dismissed','ruling','appeal','closed','unknown'];
+    // Lawsuit statuses: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php); hidden ones are not offered.
+    $validStatuses = kop_lawsuit_status_values('offered');
     $status = in_array($input['status'] ?? '', $validStatuses, true) ? $input['status'] : 'unknown';
 
     $jsonEncode = static function ($value) {

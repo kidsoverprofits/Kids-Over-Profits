@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.1
+ * Version: 2.5.2
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -190,6 +190,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-proper-names',
                 'requires' => 'kop_proper_names_page',
+            ),
+            array(
+                'title'    => 'Dropdown Lists',
+                'desc'     => 'The choices in the site\'s dropdowns and category lists (facility types, document types, website kinds, article types, content warnings, lawsuit and bill statuses...): add a choice, rename a label or hide one. Undo for every save.',
+                'type'     => 'screen',
+                'screen'   => 'kop-choice-lists',
+                'requires' => 'kop_choice_lists_page',
             ),
             array(
                 'title'    => 'Merge Duplicates',

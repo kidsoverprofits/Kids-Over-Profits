@@ -91,7 +91,8 @@ function kop_rinbox_dt_list(array $q) {
 /** The select of every type, as an action's question. */
 function kop_rinbox_dt_type_param($value = '') {
     $opts = array();
-    foreach (kop_dt_types() as $slug => $t) $opts[$slug] = $t['label'];
+    foreach (kop_dt_types('offered') as $slug => $t) $opts[$slug] = $t['label'];
+    if ($value !== '' && !isset($opts[$value]) && isset(kop_dt_types()[$value])) $opts[$value] = kop_dt_types()[$value]['label'];
     return array('name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => $opts, 'value' => $value);
 }
 

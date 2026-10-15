@@ -32,6 +32,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // checklist labels added at KOP Tools > Dropdown Lists
+
 if (!defined('KOP_FACILITY_PAGES_REWRITE_VERSION')) {
     // Bump when the rewrite rule changes; the rules are re-flushed once.
     define('KOP_FACILITY_PAGES_REWRITE_VERSION', '1');
@@ -2110,7 +2112,7 @@ if (!function_exists('kop_facility_pages_staff_entries')) {
 if (!function_exists('kop_facility_checklist_labels')) {
     /** Checklist key => label, as worded in templates/data-form-admin.php. */
     function kop_facility_checklist_labels() {
-        return array(
+        $labels = array(
             'ttiPractices.hasLevelSystem'             => 'Level system',
             'ttiPractices.hasRestraint'               => 'Restraint',
             'ttiPractices.hasSeclusion'               => 'Seclusion or isolation',
@@ -2154,6 +2156,11 @@ if (!function_exists('kop_facility_checklist_labels')) {
             'criticalIncidents.hasStudentHospitalizations' => 'Student hospitalizations',
             'criticalIncidents.hasRiots'              => 'Riots',
         );
+        // Boxes added or renamed at KOP Tools > Dropdown Lists (inc/choice-lists/data-form.php).
+        if (function_exists('kop_df_checklist_label_overrides')) {
+            $labels = array_merge($labels, kop_df_checklist_label_overrides());
+        }
+        return $labels;
     }
 }
 
@@ -3639,7 +3646,7 @@ if (!function_exists('kop_facility_pages_lawsuits')) {
                 'case_number' => trim((string) $r['case_number']),
                 'court'      => trim((string) $r['court']),
                 'year'       => $year,
-                'status'     => ucfirst(str_replace('_', ' ', trim((string) $r['status']))),
+                'status'     => kop_lawsuit_status_label($r['status']),   // KOP Tools > Dropdown Lists
                 'outcome'    => trim((string) $r['outcome']),
                 'summary'    => trim((string) $r['summary']),
                 'link_type'  => $link_type,

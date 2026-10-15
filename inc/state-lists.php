@@ -359,7 +359,7 @@ function kop_sl_screen_data(PDO $pdo) {
         }, $rows),
         'lists'    => $lists,
         'statuses' => kop_sl_statuses(),
-        'types'    => function_exists('kop_facdisc_types') ? kop_facdisc_types() : array(),
+        'types'    => function_exists('kop_facdisc_types') ? kop_facdisc_types('offered') : array(),
         'file'     => array('path' => $path, 'exists' => is_readable($path), 'modified' => is_readable($path) ? gmdate('Y-m-d H:i', filemtime($path)) . ' UTC' : '',
                             'generated' => (string) ($meta['generated'] ?? ''), 'imported_at' => (string) ($meta['imported_at'] ?? '')),
     );

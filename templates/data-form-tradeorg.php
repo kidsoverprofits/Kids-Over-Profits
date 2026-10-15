@@ -116,7 +116,7 @@ if (($kop_tradeorg_part ?? '') === 'panel') : ?>
                     <span class="section-toggle"><?php echo kop_icon('search'); ?></span>
                 </div>
                 <div class="section-content">
-                    <?php foreach (kop_tradeorg_activity_labels() as $key => $label) : ?>
+                    <?php foreach (kop_tradeorg_activity_labels('offered') as $key => $label) : ?>
                         <div class="checkbox-group">
                             <input type="checkbox" class="tradeorg-activity" data-activity="<?php echo esc_attr($key); ?>" id="tradeorg-activity-<?php echo esc_attr($key); ?>">
                             <label for="tradeorg-activity-<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></label>

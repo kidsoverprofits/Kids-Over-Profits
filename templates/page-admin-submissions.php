@@ -7,6 +7,8 @@
 
 kop_require_page_capability('manage_options');
 
+require_once dirname(__DIR__) . '/inc/choice-lists.php'; // content warnings (KOP Tools > Dropdown Lists)
+
 if (!function_exists('kop_submissions_us_states')) {
     /** The states the old Lawsuit and Legislation pages offered as jurisdictions. */
     function kop_submissions_us_states() {
@@ -413,13 +415,8 @@ window.kopSubmissionsTools = <?php echo wp_json_encode(array(
     'folders'         => rest_url('kop/v1/folders'),
     'mediaAdmin'      => admin_url('upload.php'),
     'states'          => kop_submissions_us_states(),
-    'contentWarnings' => array('Physical Restraint', 'Chemical Restraint', 'Seclusion', 'Humiliating Punishments',
-        'Child Sexual Abuse', 'Child-on-Child CSA', 'Graphic Descriptions of Assaults or Injuries',
-        'Peer Violence', 'Child Death', 'Suicide', 'Self-harm', 'Substance Abuse',
-        'Victim Blaming', 'Spiritual Abuse', 'Racism', 'Homophobia', 'Transphobia',
-        'Hate Crimes', 'Slurs', 'Autism-Specific Abuse', 'Food Restriction',
-        'Unsanitary Conditions', 'Medical Neglect', 'Eating Disorders', 'Conversion Therapy',
-        'Forced Labor', 'Involuntary Transport', 'Law Enforcement Abuse'),
+    // KOP Tools > Dropdown Lists (inc/choice-lists/news.php)
+    'contentWarnings' => kop_news_content_warnings('offered'),
 )); ?>;
 </script>
 <?php

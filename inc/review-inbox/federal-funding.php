@@ -177,7 +177,7 @@ function kop_rinbox_ffund_item($key, array $p) {
         $actions[] = array('id' => 'add', 'label' => 'Add to this record', 'style' => $view === 'matched' ? 'approve' : 'neutral',
             'params' => array(array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => $fid ?: '')),
             'help' => 'Puts ' . count($entries) . ' federal funding entr' . (count($entries) === 1 ? 'y' : 'ies') . ' on the record picked in "Record", listed on its facility page at once. Undo on the Added tab takes them off.');
-        $types = kop_rinbox_options(array_combine(kop_facdisc_types(), kop_facdisc_types()));
+        $types = kop_rinbox_options(array_combine(kop_facdisc_types('offered'), kop_facdisc_types('offered')));
         $actions[] = array('id' => 'create', 'label' => 'New record…', 'style' => $view === 'new' ? 'approve' : 'neutral', 'ask' => true,
             'submit' => 'Create the record and add the funding',
             'help' => 'Makes a facility record for ' . $p['name'] . ' with its own page and puts the funding on it. If that name and place already have a record, the funding goes on it instead. Undo deletes the new record while nobody has edited it.',

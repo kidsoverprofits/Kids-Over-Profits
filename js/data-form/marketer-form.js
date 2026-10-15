@@ -8,11 +8,15 @@
  * mirrors createDefaultMarketerCompany() below). Listed on /marketing-companies/.
  */
 
-// Same keys as kop_marketer_service_labels() in api/lib-marketers.php
-const MARKETER_SERVICE_KEYS = [
+// The built-in keys of kop_marketer_service_labels() in api/lib-marketers.php (the fallback). Choices added at
+// KOP Tools > Dropdown Lists come in window.KOP_CHOICE_LISTS['marketer-services'] (hidden ones left out).
+const MARKETER_SERVICE_KEYS_BUILT_IN = [
     'websiteDesign', 'seo', 'cityPages', 'directories', 'helpLine',
     'leadGeneration', 'aiInstructions', 'reputationManagement', 'advertising', 'publicRelations'
 ];
+const MARKETER_SERVICE_KEYS = (window.KOP_CHOICE_LISTS && Array.isArray(window.KOP_CHOICE_LISTS['marketer-services']) && window.KOP_CHOICE_LISTS['marketer-services'].length)
+    ? window.KOP_CHOICE_LISTS['marketer-services'].map(choice => choice.value)
+    : MARKETER_SERVICE_KEYS_BUILT_IN;
 
 const MARKETER_TEXT_FIELDS = ['name', 'city', 'state', 'country', 'address', 'founded', 'status', 'notes'];
 

@@ -7,21 +7,16 @@
  * /marketing-companies/ (inc/marketers.php). Plain functions, no WordPress, so api/ endpoints can load it.
  */
 
+require_once dirname(__DIR__) . '/inc/choice-lists.php';
+
 if (!function_exists('kop_marketer_service_labels')) {
-    /** What a marketer does for programs: key in marketerCompany.services => label (same keys in marketer-form.js). */
-    function kop_marketer_service_labels() {
-        return [
-            'websiteDesign'        => 'Builds program websites',
-            'seo'                  => 'Search engine optimization',
-            'cityPages'            => 'Pages for many towns a program is not in',
-            'directories'          => 'Runs "independent" directories or ranking sites',
-            'helpLine'             => 'Help lines, admissions or placement services',
-            'leadGeneration'       => 'Sells or trades parents\' inquiries',
-            'aiInstructions'       => 'Instructions for AI chatbots (llms.txt, hidden page text)',
-            'reputationManagement' => 'Reputation management (reviews, answering critics)',
-            'advertising'          => 'Paid advertising (search, social media)',
-            'publicRelations'      => 'Public relations and press',
-        ];
+    /**
+     * What a marketer does for programs: key in marketerCompany.services => label. The list is
+     * "Marketer services" at KOP Tools > Dropdown Lists (inc/choice-lists/data-form.php; marketer-form.js
+     * reads it from window.KOP_CHOICE_LISTS). 'all' keeps hidden ones (saving, the page); the form asks 'offered'.
+     */
+    function kop_marketer_service_labels($mode = 'all') {
+        return kop_choices('marketer-services', null, $mode);
     }
 
     /** List fields of marketerCompany (string lists). */

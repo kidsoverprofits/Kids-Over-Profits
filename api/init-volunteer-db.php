@@ -33,7 +33,7 @@ try {
 CREATE TABLE IF NOT EXISTS `volunteer_projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL COMMENT 'Project title',
-  `project_type` enum('research','data_entry','advocacy','tech','outreach','other') NOT NULL DEFAULT 'other',
+  `project_type` varchar(40) NOT NULL DEFAULT 'other' COMMENT 'Volunteer project types list (KOP Tools > Dropdown Lists)',
   `status` enum('open','filled','completed','archived') NOT NULL DEFAULT 'open',
   `description` text DEFAULT NULL COMMENT 'Full description of the project',
   `skills_needed` text DEFAULT NULL COMMENT 'JSON array of skill tags',

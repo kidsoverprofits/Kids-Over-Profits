@@ -24,6 +24,9 @@ require_once get_stylesheet_directory() . '/inc/utilities.php';
 // Names always capitalised as written, wherever the site recases text (KOP Tools > Proper Names)
 require_once get_stylesheet_directory() . '/inc/proper-names.php';
 
+// Dropdown and category lists the owner adds to (KOP Tools > Dropdown Lists; kop_choices())
+require_once get_stylesheet_directory() . '/inc/choice-lists.php';
+
 // Inline SVG icons (kop_icon() / kopIcon()), used in place of emojis
 require_once get_stylesheet_directory() . '/inc/icons.php';
 

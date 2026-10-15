@@ -13,14 +13,8 @@ require_once get_stylesheet_directory() . '/api/config.php';
 $type_filter   = isset($_GET['type'])   ? sanitize_text_field($_GET['type'])   : '';
 $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'open';
 
-$type_labels = [
-    'research'   => 'Research',
-    'data_entry' => 'Data Entry',
-    'advocacy'   => 'Advocacy',
-    'tech'       => 'Tech',
-    'outreach'   => 'Outreach',
-    'other'      => 'Other',
-];
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
+$type_labels = kop_volunteer_project_types('all');   // KOP Tools > Dropdown Lists
 
 try {
     // Render ALL published projects and let the client-side filter handle

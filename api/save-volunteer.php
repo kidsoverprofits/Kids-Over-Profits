@@ -12,6 +12,7 @@
 
 header('Content-Type: application/json');
 require_once __DIR__ . '/config.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
 
 if (!defined('ABSPATH')) {
     $cur = __DIR__;
@@ -103,7 +104,8 @@ try {
 
     if (!$title) { http_response_code(400); echo json_encode(['success' => false, 'error' => 'title required']); exit; }
 
-    $valid_types    = ['research','data_entry','advocacy','tech','outreach','other'];
+    // Project types: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php).
+    $valid_types    = array_keys(kop_volunteer_project_types('all'));
     $valid_statuses = ['open','filled','completed','archived'];
     $valid_pub      = ['draft','published','archived'];
     if (!in_array($project_type, $valid_types, true))        $project_type = 'other';

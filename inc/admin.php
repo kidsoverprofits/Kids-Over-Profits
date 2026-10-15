@@ -7,6 +7,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // lawsuit and bill statuses (KOP Tools > Dropdown Lists)
+
 /**
  * Submissions Review, opened on one type's tab (news, data, wiki, lawsuit,
  * legislation). The one page for approving submissions; '' if no page uses
@@ -2053,7 +2055,7 @@ function kop_apply_lawsuit_seeds() {
         );
         $link_fac  = $pdo->prepare('INSERT IGNORE INTO lawsuit_facility_links (lawsuit_id, facility_id, link_type, created_by) VALUES (?, ?, ?, ?)');
         $link_news = $pdo->prepare('INSERT IGNORE INTO lawsuit_news_links (lawsuit_id, news_id, link_type, match_reason, created_by) VALUES (?, ?, \'manual\', \'seed\', ?)');
-        $allowed_status = array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown');
+        $allowed_status = kop_lawsuit_status_values('all');   // KOP Tools > Dropdown Lists
         foreach ($spec['lawsuits'] as $case) {
             if (empty($case['case_name'])) {
                 continue;
@@ -2181,20 +2183,17 @@ function kop_apply_lawsuit_seeds() {
  * released as a discussion draft that has no bill number yet.
  */
 function kop_legislation_statuses() {
-    return array('proposed', 'introduced', 'in_committee', 'passed_house', 'passed_senate', 'signed', 'vetoed', 'dead', 'enacted', 'unknown');
+    return kop_bill_status_values('all');   // Bill statuses, KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php)
 }
 /**
- * Add any status from kop_legislation_statuses() the live status ENUM lacks.
- * Tables made before 'proposed' existed reject it otherwise.
+ * The status columns were ENUMs, which refuse a status added on the Dropdown
+ * Lists screen (or 'proposed', on tables made before it): they become
+ * VARCHAR(40) once (kop_status_columns_to_varchar(), inc/choice-lists/statuses.php).
  */
 function kop_legislation_status_enum(PDO $pdo) {
-    $type = $pdo->query("SELECT COLUMN_TYPE FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'legislation' AND COLUMN_NAME = 'status'")->fetchColumn();
-    if (!$type || strpos($type, "'proposed'") !== false) {
-        return;
+    if (function_exists('kop_status_columns_to_varchar')) {
+        kop_status_columns_to_varchar($pdo);
     }
-    $list = "'" . implode("','", kop_legislation_statuses()) . "'";
-    $pdo->exec("ALTER TABLE legislation MODIFY status ENUM({$list}) NOT NULL DEFAULT 'unknown'");
 }
 /**
  * Legislation records assembled offline (seeds/legislation.json). Each bill
@@ -2234,7 +2233,7 @@ function kop_apply_legislation_seeds() {
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'published\', ?, ?, NOW())'
         );
         $chambers  = array('house', 'senate', 'assembly', 'joint', 'federal_house', 'federal_senate', 'other', 'unknown');
-        $positions = array('support', 'oppose', 'neutral', 'watch', 'unknown');
+        $positions = kop_bill_position_values('all');
         foreach ($spec['legislation'] as $bill) {
             if (empty($bill['bill_title'])) {
                 continue;

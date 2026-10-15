@@ -17,19 +17,8 @@ $location_filter = isset($_GET['location']) ? sanitize_text_field($_GET['locatio
 $cause_filter    = isset($_GET['cause'])    ? sanitize_text_field($_GET['cause'])    : '';
 $decade_filter   = isset($_GET['decade'])   ? sanitize_text_field($_GET['decade'])   : '';
 
-$cause_labels = [
-    'suicide'         => 'Suicide',
-    'restraint'       => 'Restraint',
-    'medical_neglect' => 'Medical neglect',
-    'overdose'        => 'Overdose / medication',
-    'escape_attempt'  => 'During escape attempt',
-    'drowning'        => 'Drowning',
-    'exposure'        => 'Exposure / heat',
-    'violence'        => 'Violence',
-    'accident'        => 'Accident',
-    'other'           => 'Other',
-    'unknown'         => 'Unknown',
-];
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
+$cause_labels = kop_memorial_causes('all');   // KOP Tools > Dropdown Lists, Other and Unknown last
 
 try {
     $stmt = $pdo->prepare(

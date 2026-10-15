@@ -13,6 +13,13 @@
 if (!defined('ABSPATH')) { exit; }
 
 require_once __DIR__ . '/ai-providers.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
+
+/** Case statuses the AI may give (Lawsuit statuses, KOP Tools > Dropdown Lists; hidden ones left out). */
+function kop_lawsuit_extract_statuses() {
+    return function_exists('kop_lawsuit_status_values') ? kop_lawsuit_status_values('offered')
+        : ['filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown'];
+}
 
 if (!function_exists('kop_resolve_secret')) {
     function kop_resolve_secret($name) {
@@ -148,7 +155,7 @@ function kop_normalize_lawsuit_extraction(array $raw): array {
 
     // Case status only when the document showed one of the tracker's values.
     $status = is_string($raw['status'] ?? '') ? strtolower(trim(str_replace([' ', '-'], '_', $raw['status'] ?? ''))) : '';
-    if (in_array($status, ['filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed'], true)) {
+    if ($status !== 'unknown' && in_array($status, kop_lawsuit_extract_statuses(), true)) {
         $out['status'] = $status;
     }
 
@@ -282,6 +289,7 @@ function kop_extract_docx_text(string $path): string {
 // Extraction prompt
 // =============================================================================
 function kop_lawsuit_extraction_prompt(): string {
+    $statuses = implode(', ', array_diff(kop_lawsuit_extract_statuses(), ['unknown']));
     return <<<PROMPT
 You are an expert legal-research assistant. Read the attached court document and extract structured information for a Troubled Teen Industry accountability database.
 
@@ -303,7 +311,7 @@ Return ONLY valid JSON matching this exact schema (omit fields you can't determi
   "staff_mentioned": ["individual staff, owners, or therapists named"],
   "organizations_mentioned": ["parent companies, referrers, accreditation bodies, etc."],
   "claims": ["one short slug per claim, e.g. 'physical_abuse', 'wrongful_death', 'fraud', 'negligence', 'sexual_abuse', 'civil_rights_violation', 'breach_of_contract'"],
-  "status": "only if the document shows it: filed, in_progress, settled, dismissed, ruling, appeal or closed",
+  "status": "only if the document shows it, one of: {$statuses}",
   "outcome": "what the court decided or the parties agreed, if this document shows it (e.g. 'Motion to dismiss denied in part', 'Settled; case dismissed with prejudice')",
   "settlement_amount": "if a settlement or award amount is stated, as written (e.g. '$1.5 million')",
   "summary": "3-5 sentence factual summary of the case using neutral language: the allegations, and what this document adds (a ruling, a settlement)",

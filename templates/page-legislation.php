@@ -61,18 +61,10 @@ $news_links = !empty($bills) && isset($pdo) && $pdo instanceof PDO
     ? kop_legislation_news_for_bills($pdo, array_map(static function ($b) { return (int)$b['id']; }, $bills))
     : [];
 
-$status_labels = [
-    'proposed'      => 'Proposed (draft)',
-    'introduced'    => 'Introduced',
-    'in_committee'  => 'In Committee',
-    'passed_house'  => 'Passed House',
-    'passed_senate' => 'Passed Senate',
-    'signed'        => 'Signed',
-    'enacted'       => 'Enacted',
-    'vetoed'        => 'Vetoed',
-    'dead'          => 'Dead',
-    'unknown'       => 'Unknown',
-];
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
+// Bill statuses and positions: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php).
+$status_labels = kop_bill_statuses('all');
+if (($status_labels['proposed'] ?? '') === 'Proposed (discussion draft)') $status_labels['proposed'] = 'Proposed (draft)';
 
 // Keep flag files with the theme so the tracker makes no third-party image
 // requests. Country aliases come from the shared location data normalizer.
@@ -165,7 +157,7 @@ $legislation_flag_for = static function ($jurisdiction) {
         <select class="kop-filter-select" id="filter-position" data-filter="position">
             <option value="">All positions</option>
             <?php foreach ($positions as $p => $_): ?>
-                <option value="<?php echo esc_attr($p); ?>" <?php selected($position_filter, $p); ?>><?php echo esc_html(ucfirst($p)); ?></option>
+                <option value="<?php echo esc_attr($p); ?>" <?php selected($position_filter, $p); ?>><?php echo esc_html(kop_bill_position_label($p)); ?></option>
             <?php endforeach; ?>
         </select>
         <?php endif; ?>
@@ -213,7 +205,7 @@ $legislation_flag_for = static function ($jurisdiction) {
                     <?php endif; ?>
                     <?php echo esc_html($bill['bill_title']); ?>
                 </h2>
-                <span class="kop-badge kop-badge-<?php echo esc_attr($status_slug); ?>"><?php echo esc_html($status_label); ?></span>
+                <span class="kop-badge kop-badge-<?php echo esc_attr(kop_bill_status_badge($status_slug)); ?>"><?php echo esc_html($status_label); ?></span>
             </div>
 
             <div class="kop-card-meta">
@@ -221,7 +213,7 @@ $legislation_flag_for = static function ($jurisdiction) {
                     <span class="kop-badge kop-badge-jurisdiction"><?php echo esc_html($bill['jurisdiction']); ?></span>
                 <?php endif; ?>
                 <?php if ($position && $position !== 'unknown'): ?>
-                    <span class="kop-badge kop-badge-<?php echo esc_attr($position); ?>">KOP: <?php echo esc_html(ucfirst($position)); ?></span>
+                    <span class="kop-badge kop-badge-<?php echo esc_attr(kop_bill_position_badge($position)); ?>">KOP: <?php echo esc_html(kop_bill_position_label($position)); ?></span>
                 <?php endif; ?>
                 <?php if ($bill['session_year']): ?>
                     <span><?php echo esc_html($bill['session_year']); ?> session</span>

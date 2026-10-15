@@ -1813,6 +1813,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Per-type editable field definitions. Mirrors the server-side whitelist in
     // manage-submissions.php (kop_editable_fields). type: text | textarea | date
     // | url | select | list (newline-separated -> JSON array).
+    // News article types: KOP Tools > Dropdown Lists (inc/choice-lists/news.php), General first; this copy is the fallback.
+    const NEWS_ARTICLE_TYPES = (function () {
+        const list = (window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS['news-article-types']) || [];
+        const values = list.map(t => t.value).filter(v => v !== 'general');
+        return list.length ? ['general'].concat(values) : ['general', 'lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate'];
+    })();
+
+    // Lawsuit and bill statuses, bill positions: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php),
+    // Unknown first; the array given is the fallback.
+    const choiceValues = (key, fallback) => {
+        const list = (window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS[key]) || [];
+        if (!list.length) return fallback;
+        const values = list.map(s => s.value).filter(v => v !== 'unknown');
+        return ['unknown'].concat(values);
+    };
+
     const FIELD_CONFIGS = {
         legislation: [
             { key: 'bill_title', label: 'Bill title', type: 'text' },
@@ -1821,8 +1837,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'chamber', label: 'Chamber', type: 'select', options: ['unknown','house','senate','assembly','joint','federal_house','federal_senate','other'] },
             { key: 'session_year', label: 'Session / year (choices follow the jurisdiction)', type: 'suggest' },
             { key: 'bill_type', label: 'Bill type (choices follow the jurisdiction)', type: 'suggest' },
-            { key: 'status', label: 'Bill status', type: 'select', options: ['unknown','proposed','introduced','in_committee','passed_house','passed_senate','signed','vetoed','dead','enacted'] },
-            { key: 'position', label: 'KOP position', type: 'select', options: ['unknown','support','oppose','neutral','watch'] },
+            { key: 'status', label: 'Bill status', type: 'select', options: choiceValues('bill-statuses', ['unknown','proposed','introduced','in_committee','passed_house','passed_senate','signed','vetoed','dead','enacted']) },
+            { key: 'position', label: 'KOP position', type: 'select', options: choiceValues('bill-positions', ['unknown','support','oppose','neutral','watch']) },
             { key: 'introduced_date', label: 'Introduced date', type: 'date' },
             { key: 'last_action_date', label: 'Last action date', type: 'date' },
             { key: 'last_action_text', label: 'Last action', type: 'text' },
@@ -1841,7 +1857,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'case_number', label: 'Case number', type: 'text' },
             { key: 'court', label: 'Court', type: 'text' },
             { key: 'jurisdiction', label: 'Jurisdiction', type: 'jurisdiction' },
-            { key: 'status', label: 'Case status', type: 'select', options: ['unknown','filed','in_progress','settled','dismissed','ruling','appeal','closed'] },
+            { key: 'status', label: 'Case status', type: 'select', options: choiceValues('lawsuit-statuses', ['unknown','filed','in_progress','settled','dismissed','ruling','appeal','closed']) },
             { key: 'filing_date', label: 'Filing date', type: 'date' },
             { key: 'settlement_amount', label: 'Settlement amount', type: 'text' },
             { key: 'summary', label: 'Summary', type: 'textarea' },
@@ -1866,7 +1882,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'publication_date', label: 'Publication date', type: 'date' },
             { key: 'article_url', label: 'Article URL (the real link)', type: 'url' },
             { key: 'archive_url', label: 'Archived copy (Wayback Machine or archive.today)', type: 'url' },
-            { key: 'article_type', label: 'Article type', type: 'select', options: ['general','lawsuit','event','expose','arrest','closure','corporate'] },
+            { key: 'article_type', label: 'Article type', type: 'select', options: NEWS_ARTICLE_TYPES },
             { key: 'article_location', label: 'Location (City, State or Country)', type: 'text' },
             { key: 'summary', label: 'Summary (2-3 factual, trauma-sensitive sentences)', type: 'textarea' },
             { key: 'tags', label: 'Tags (one per line)', type: 'list' },
@@ -2022,6 +2038,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     o.textContent = opt || '(not set)';
                     input.appendChild(o);
                 });
+                // A stored value no longer offered (a choice hidden on Dropdown Lists) stays selectable.
+                if (src[f.key] != null && src[f.key] !== '' && !(f.options || []).includes(String(src[f.key]))) {
+                    const o = document.createElement('option');
+                    o.value = String(src[f.key]);
+                    o.textContent = String(src[f.key]);
+                    input.appendChild(o);
+                }
                 input.value = (src[f.key] != null && src[f.key] !== '') ? String(src[f.key]) : (f.options[0] || '');
             } else if (f.type === 'textarea') {
                 input = document.createElement('textarea');

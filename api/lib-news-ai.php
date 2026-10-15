@@ -5,6 +5,9 @@
  * per provider, the JSON it answers parsed.
  */
 
+// Article types, content warnings and preferred tags in the prompt: KOP Tools > Dropdown Lists (inc/choice-lists/news.php).
+require_once dirname(__DIR__) . '/inc/choice-lists.php';
+
 if (!defined('AI_DEBUG_LOGGING')) {
     define('AI_DEBUG_LOGGING', false);
 }
@@ -572,8 +575,8 @@ function buildPrompt($content, $url = '', $customInstructions = '') {
     $prompt .= "  \"survivors\": [\"list of survivors and victims mentioned (use initials or pseudonyms if provided)\"],\n";
     $prompt .= "  \"summary\": \"2-3 sentence trauma-sensitive summary using factual, neutral language\",\n";
     $prompt .= "  \"alternateTitle\": \"alternate title if original is sensationalist (or null)\",\n";
-    $prompt .= "  \"contentWarnings\": [\"relevant warnings from: Physical Restraint, Chemical Restraint, Seclusion, Humiliating Punishments, Child Sexual Abuse, Child-on-Child CSA, Graphic Descriptions of Assaults or Injuries, Peer Violence, Child Death, Suicide, Self-harm, Substance Abuse, Victim Blaming, Spiritual Abuse, Racism, Homophobia, Transphobia, Hate Crimes, Slurs, Autism-Specific Abuse, Food Restriction, Unsanitary Conditions, Medical Neglect, Eating Disorders, Conversion Therapy, Forced Labor, Involuntary Transport, Law Enforcement Abuse\"],\n";
-    $prompt .= "  \"articleType\": \"lawsuit|event|expose|arrest|closure|corporate|general\",\n";
+    $prompt .= "  \"contentWarnings\": [\"relevant warnings from: " . implode(', ', kop_news_content_warnings('offered')) . "\"],\n";
+    $prompt .= "  \"articleType\": \"" . implode('|', kop_news_article_type_values('offered')) . "\",\n";
     $prompt .= "  \"typeSpecificData\": {\n";
     $prompt .= "    \"for lawsuit\": {\"plaintiffs\": \"\", \"defendants\": \"\", \"legalRep\": \"\", \"dateFiled\": \"YYYY-MM-DD\", \"jurisdiction\": \"\", \"pressReleases\": \"\"},\n";
     $prompt .= "    \"for arrest\": {\"staffMemberName\": \"\", \"arrestFacilityName\": \"\", \"misconductDates\": \"\", \"charges\": \"\", \"caseStatus\": \"\"},\n";

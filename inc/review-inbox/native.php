@@ -17,6 +17,8 @@
  * while nobody has reviewed it and restores the original's status.
  */
 
+require_once dirname(__DIR__) . '/choice-lists.php'; // news article types, lawsuit and bill statuses (KOP Tools > Dropdown Lists)
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -30,7 +32,7 @@ function kop_rinbox_native_types() {
             'fields' => array(
                 array('name' => 'article_title', 'label' => 'Title', 'type' => 'text'),
                 array('name' => 'article_type', 'label' => 'Category', 'type' => 'select', 'category' => true,
-                    'options' => kop_rinbox_options(array('general', 'expose', 'lawsuit', 'arrest', 'closure', 'event', 'corporate'))),
+                    'options' => kop_rinbox_options(kop_rinbox_native_news_types())),
                 array('name' => 'publication_name', 'label' => 'Outlet', 'type' => 'text'),
                 array('name' => 'author', 'label' => 'Author', 'type' => 'text'),
                 array('name' => 'publication_date', 'label' => 'Published (YYYY-MM-DD)', 'type' => 'text'),
@@ -44,7 +46,7 @@ function kop_rinbox_native_types() {
             'fields' => array(
                 array('name' => 'case_name', 'label' => 'Case name', 'type' => 'text'),
                 array('name' => 'status', 'label' => 'Case status', 'type' => 'select', 'category' => true,
-                    'options' => kop_rinbox_options(array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown'))),
+                    'options' => kop_rinbox_options(kop_lawsuit_statuses('all'))),   // KOP Tools > Dropdown Lists
                 array('name' => 'case_number', 'label' => 'Case number', 'type' => 'text'),
                 array('name' => 'court', 'label' => 'Court', 'type' => 'text'),
                 array('name' => 'jurisdiction', 'label' => 'Jurisdiction', 'type' => 'text'),
@@ -60,14 +62,14 @@ function kop_rinbox_native_types() {
             'fields' => array(
                 array('name' => 'bill_title', 'label' => 'Bill title', 'type' => 'text'),
                 array('name' => 'position', 'label' => 'Our position', 'type' => 'select', 'category' => true,
-                    'options' => kop_rinbox_options(array('support', 'oppose', 'neutral', 'watch', 'unknown'))),
+                    'options' => kop_rinbox_options(kop_bill_positions('all'))),
                 array('name' => 'bill_number', 'label' => 'Bill number', 'type' => 'text'),
                 array('name' => 'jurisdiction', 'label' => 'Jurisdiction', 'type' => 'text'),
                 array('name' => 'chamber', 'label' => 'Chamber', 'type' => 'select',
                     'options' => kop_rinbox_options(array('house', 'senate', 'assembly', 'joint', 'federal_house', 'federal_senate', 'other', 'unknown'))),
                 array('name' => 'session_year', 'label' => 'Session year', 'type' => 'text'),
                 array('name' => 'status', 'label' => 'Bill status', 'type' => 'select',
-                    'options' => kop_rinbox_options(array('proposed', 'introduced', 'in_committee', 'passed_house', 'passed_senate', 'signed', 'vetoed', 'dead', 'enacted', 'unknown'))),
+                    'options' => kop_rinbox_options(kop_bill_statuses('all'))),
                 array('name' => 'sponsors', 'label' => 'Sponsors', 'type' => 'list'),
                 array('name' => 'introduced_date', 'label' => 'Introduced (YYYY-MM-DD)', 'type' => 'text'),
                 array('name' => 'last_action_text', 'label' => 'Latest action', 'type' => 'text'),
@@ -640,6 +642,16 @@ function kop_rinbox_native_list_order($type, $sort) {
         return "ORDER BY {$dates[$type]} DESC, created_at DESC";
     }
     return 'ORDER BY created_at DESC';
+}
+
+/**
+ * The news card's Category choices: the article types on KOP Tools > Dropdown
+ * Lists (inc/choice-lists/news.php), value => label, General first. Hidden
+ * types stay in, so an article that already has one keeps it when edited.
+ */
+function kop_rinbox_native_news_types() {
+    $types = kop_news_article_types('all');
+    return isset($types['general']) ? array('general' => $types['general']) + $types : $types;
 }
 
 /**

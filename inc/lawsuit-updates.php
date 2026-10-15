@@ -15,6 +15,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // lawsuit and bill statuses (KOP Tools > Dropdown Lists)
+
 function kop_apply_lawsuit_updates() {
     $done = array('updated' => array(), 'skipped' => array(), 'inserted' => array());
     $path = trailingslashit(get_stylesheet_directory()) . 'seeds/lawsuit-updates.json';
@@ -54,7 +56,7 @@ function kop_apply_lawsuit_updates() {
     );
     $lists = array('plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned',
         'claims', 'source_urls', 'document_urls', 'tags');
-    $statuses = array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown');
+    $statuses = kop_lawsuit_status_values('all');   // KOP Tools > Dropdown Lists
     $encode = static function ($v) {
         return wp_json_encode(is_array($v) ? array_values($v) : array(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     };

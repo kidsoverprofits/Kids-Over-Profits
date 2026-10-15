@@ -14,18 +14,12 @@ get_header();
 
 $us_states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 
-$status_labels = [
-    'proposed'      => 'Proposed (discussion draft, no bill number yet)',
-    'introduced'    => 'Introduced',
-    'in_committee'  => 'In committee',
-    'passed_house'  => 'Passed House',
-    'passed_senate' => 'Passed Senate',
-    'signed'        => 'Signed',
-    'enacted'       => 'Enacted',
-    'vetoed'        => 'Vetoed',
-    'dead'          => 'Dead',
-    'unknown'       => 'Not sure',
-];
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
+// Bill statuses (KOP Tools > Dropdown Lists), hidden ones left out; "Not sure" last.
+$status_labels = kop_bill_statuses('offered');
+if (($status_labels['proposed'] ?? '') === 'Proposed (discussion draft)') $status_labels['proposed'] = 'Proposed (discussion draft, no bill number yet)';
+unset($status_labels['unknown']);
+$status_labels['unknown'] = 'Not sure';
 
 $endpoint = get_stylesheet_directory_uri() . '/api/save-legislation-suggestion.php';
 

@@ -79,6 +79,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // memorial causes (KOP Tools > Dropdown Lists)
+
 /** Status values a proposal may set (the owner's rule of 2026-10-06: a program under a new company is Open). */
 function kop_daudit_statuses() {
     return array('Open', 'Closed', 'Suspended', 'Unknown');
@@ -435,8 +437,7 @@ function kop_daudit_memorial_ok($column, $to) {
         case 'age':
             return $to === null || (is_int($to) && $to >= 0 && $to <= 30);
         case 'cause_category':
-            return in_array($to, array('restraint', 'suicide', 'medical_neglect', 'accident', 'drowning', 'escape_attempt',
-                'violence', 'overdose', 'exposure', 'other', 'unknown'), true);
+            return in_array($to, array_keys(kop_memorial_causes('all')), true);   // KOP Tools > Dropdown Lists
         case 'name':
         case 'program':
         case 'cause_of_death':

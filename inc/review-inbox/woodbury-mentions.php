@@ -227,7 +227,7 @@ function kop_rinbox_wb_item(array $r) {
             $states = array('' => '(none, or outside the US)');
             foreach (kop_wb_state_names() as $code => $name) $states[$code] = $code . ' ' . $name;
             $types = array('' => 'Not sure');
-            foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types() : array() as $t) $types[$t] = $t;
+            foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types('offered') : array() as $t) $types[$t] = $t;
             $actions[] = array('id' => 'create', 'label' => 'Create the record and file the pages under it', 'style' => 'neutral',
                 'help' => 'Makes a new record of the kind and name below, then files the pages under it.',
                 'confirm' => 'Create a new record with this name and file the pages under it?', 'params' => array(

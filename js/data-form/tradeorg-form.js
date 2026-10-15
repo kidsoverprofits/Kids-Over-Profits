@@ -8,11 +8,15 @@
  * programs whose records name it as a membership are listed too.
  */
 
-// Same keys as kop_tradeorg_activity_labels() in api/lib-tradeorgs.php
-const TRADEORG_ACTIVITY_KEYS = [
+// The built-in keys of kop_tradeorg_activity_labels() in api/lib-tradeorgs.php (the fallback). Choices added at
+// KOP Tools > Dropdown Lists come in window.KOP_CHOICE_LISTS['tradeorg-activities'] (hidden ones left out).
+const TRADEORG_ACTIVITY_KEYS_BUILT_IN = [
     'standards', 'accreditation', 'lobbying', 'publicRelations',
     'research', 'conferences', 'referralNetwork', 'memberSeal'
 ];
+const TRADEORG_ACTIVITY_KEYS = (window.KOP_CHOICE_LISTS && Array.isArray(window.KOP_CHOICE_LISTS['tradeorg-activities']) && window.KOP_CHOICE_LISTS['tradeorg-activities'].length)
+    ? window.KOP_CHOICE_LISTS['tradeorg-activities'].map(choice => choice.value)
+    : TRADEORG_ACTIVITY_KEYS_BUILT_IN;
 
 const TRADEORG_TEXT_FIELDS = ['name', 'acronym', 'orgType', 'city', 'state', 'country', 'address', 'founded', 'status', 'notes'];
 

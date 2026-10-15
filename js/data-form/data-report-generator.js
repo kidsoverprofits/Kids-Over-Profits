@@ -591,6 +591,17 @@ function generateFacilityResources(facility) {
     `;
 }
 
+// Boxes added at KOP Tools > Dropdown Lists (inc/choice-lists/data-form.php) come in
+// window.KOP_CHOICE_LISTS[key] as {value, label}; the maps below keep their own wording otherwise.
+function addChoiceListLabels(map, key) {
+    const list = window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS[key];
+    if (!Array.isArray(list)) return map;
+    list.forEach(choice => {
+        if (choice && choice.value && !/^(custom|_)/i.test(choice.value) && !map[choice.value]) map[choice.value] = choice.label;
+    });
+    return map;
+}
+
 function generateFacilityTreatmentTypes(facility) {
     if (!facility.treatmentTypes) return '';
 
@@ -617,6 +628,7 @@ function generateFacilityTreatmentTypes(facility) {
         'hasEMDR': 'Eye Movement Desensitization and Reprocessing (EMDR)',
         'hasHypnosis': 'Hypnosis'
     };
+    addChoiceListLabels(treatmentMap, 'treatment-types');
 
     Object.keys(treatmentMap).forEach(key => {
         if (facility.treatmentTypes[key] === true) {
@@ -745,6 +757,7 @@ function generateFacilityPhilosophy(facility) {
         'hasLawOfAttraction': 'Law of Attraction',
         'hasHumanPotentialMovement': 'Human Potential Movement'
     };
+    addChoiceListLabels(philosophyMap, 'philosophies');
 
     Object.keys(philosophyMap).forEach(key => {
         if (facility.philosophy[key] === true) {
@@ -784,6 +797,7 @@ function generateFacilityCriticalIncidents(facility) {
         'hasStudentHospitalizations': 'Student Hospitalizations',
         'hasRiots': 'Riots'
     };
+    addChoiceListLabels(incidentMap, 'critical-incidents');
 
     Object.keys(incidentMap).forEach(key => {
         if (facility.criticalIncidents[key] === true) {

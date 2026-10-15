@@ -35,6 +35,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // kop_facdisc_types() reads the Facility types list
 require_once get_stylesheet_directory() . '/api/news-mentions.php';   // and facility-aliases.php
 
 define('KOP_FACILITY_DISCOVERY_DB_VERSION', '1');
@@ -56,14 +57,13 @@ function kop_facdisc_decisions() {
     );
 }
 
-/** The facility types the model may choose from (the data's own spellings). */
-function kop_facdisc_types() {
-    return array(
-        'Residential Treatment Center', 'Psychiatric Residential Treatment Facility', 'Therapeutic Boarding School',
-        'Wilderness Therapy', 'Boot Camp', 'Therapeutic Group Home', 'Group Home', 'Transitional Living Program',
-        'Substance Abuse Treatment', 'Eating Disorder Treatment Center', 'Maternity Home', 'Fundamentalist Religious Home', 'Specialty Boarding School',
-        'Juvenile Detention Facility', 'Juvenile Correctional Facility', 'Juvenile Justice RTC', 'Other',
-    );
+/**
+ * The facility types (KOP Tools > Dropdown Lists > Facility types, inc/choice-lists/data-form.php).
+ * 'offered' (hidden ones left out) is what the model and the Type dropdowns may choose from;
+ * 'all' checks a stored or posted value.
+ */
+function kop_facdisc_types($mode = 'all') {
+    return kop_choices('facility-types', null, $mode);
 }
 
 function kop_facdisc_ensure_tables(PDO $pdo) {
@@ -486,7 +486,7 @@ function kop_facdisc_build_prompt(array $news, array $names, array $lookalikes, 
     $p .= "sameAs: the id of a listed record that is the same site under the same name: a misspelling, an abbreviation or acronym, or the name with or without its operator's. Not a former or later name.\n";
     $p .= "renameOf: the id of a listed record that is the same site under a different name, earlier or later (the article's name was used before or after the record's). Only an id from that name's list; otherwise null.\n";
     $p .= "For sameAs, besides the above: Only an id from that name's list; null when none is the same place. Two different sites with similar names are not the same, and a college, school district, company or agency that shares a word with a listed program is not that program.\n";
-    $p .= "For a facility, fill the rest only from the article. The state or country may come from anything the article says about where it is: a city, a county (\"Knox County\" in a Tennessee paper), the dateline, the outlet's own state, or the state agency involved. officialName (its correct full name), otherNames (other names the article gives it), city, state or country, type (one of: " . implode(', ', kop_facdisc_types()) . '; empty if unclear), status (Closed only if the article says it closed for good; Suspended if it is temporarily closed, its license or admissions suspended), startYear and endYear (only years the article gives), operator (the company or agency running it), gender. Leave a field empty rather than guess.' . "\n";
+    $p .= "For a facility, fill the rest only from the article. The state or country may come from anything the article says about where it is: a city, a county (\"Knox County\" in a Tennessee paper), the dateline, the outlet's own state, or the state agency involved. officialName (its correct full name), otherNames (other names the article gives it), city, state or country, type (one of: " . implode(', ', kop_facdisc_types('offered')) . '; empty if unclear), status (Closed only if the article says it closed for good; Suspended if it is temporarily closed, its license or admissions suspended), startYear and endYear (only years the article gives), operator (the company or agency running it), gender. Leave a field empty rather than guess.' . "\n";
     return $p;
 }
 
@@ -501,7 +501,7 @@ function kop_facdisc_parse_reply($reply, array $names, array $lookalikes) {
     foreach ($names as $name) {
         $by_key[kop_normalize_name_key($name)] = $name;
     }
-    $types = array_flip(kop_facdisc_types());
+    $types = array_flip(kop_facdisc_types('offered'));
     $str = static function ($v, $max = 255) {
         return is_scalar($v) ? mb_substr(trim(preg_replace('/\s+/', ' ', (string) $v)), 0, $max) : '';
     };
@@ -1334,7 +1334,7 @@ function kop_render_facilities_from_news_page() {
             $field('state', 'State', $e['state'] ?? '', 40);
             $field('country', 'Country', $e['country'] ?? '', 130);
             echo '<label style="display:block;margin-bottom:4px">Type <select name="type"><option value=""></option>';
-            foreach (kop_facdisc_types() as $type) {
+            foreach (kop_facdisc_types('offered') as $type) {
                 echo '<option' . (($e['type'] ?? '') === $type ? ' selected' : '') . '>' . esc_html($type) . '</option>';
             }
             echo '</select></label><button type="submit" class="button button-small">Create this facility</button></form>';

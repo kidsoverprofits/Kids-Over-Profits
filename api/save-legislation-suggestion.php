@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
 require_once __DIR__ . '/url-dedupe.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -75,7 +76,8 @@ try {
     $validChambers = ['house','senate','assembly','joint','federal_house','federal_senate','other','unknown'];
     $chamber = in_array($input['chamber'] ?? '', $validChambers, true) ? $input['chamber'] : 'unknown';
 
-    $validStatuses = ['proposed','introduced','in_committee','passed_house','passed_senate','signed','vetoed','dead','enacted','unknown'];
+    // Bill statuses: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php); hidden ones are not offered.
+    $validStatuses = kop_bill_status_values('offered');
     $status = in_array($input['status'] ?? '', $validStatuses, true) ? $input['status'] : 'unknown';
 
     $jsonEncode = static function ($value) {

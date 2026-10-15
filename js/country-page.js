@@ -1389,10 +1389,24 @@
         return detailRow('Former locations', `<ul class="detail-value-list">${lis.join('')}</ul>`);
     };
 
-    const LAWSUIT_STATUS_LABELS = {
-        filed: 'Filed', in_progress: 'In progress', settled: 'Settled',
-        dismissed: 'Dismissed', ruling: 'Ruling issued', appeal: 'On appeal',
-        closed: 'Closed', unknown: ''
+    // Lawsuit statuses: KOP Tools > Dropdown Lists (window.KOP_CHOICE_LISTS); this copy is the fallback.
+    const LAWSUIT_STATUS_LABELS = (function () {
+        const list = window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS['lawsuit-statuses'];
+        const out = list ? {} : {
+            filed: 'Filed', in_progress: 'In progress', settled: 'Settled',
+            dismissed: 'Dismissed', ruling: 'Ruling issued', appeal: 'On appeal', closed: 'Closed'
+        };
+        (list || []).forEach(s => { out[s.value] = s.label; });
+        out.unknown = '';
+        return out;
+    })();
+
+    // Label and badge colour of a lawsuit or bill status / bill position (KOP Tools > Dropdown Lists):
+    // a status added there borrows a built-in one's pill colour; an unlisted value shows as stored.
+    const choicePill = (key, value) => {
+        const list = (window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS[key]) || [];
+        const c = list.find(s => s.value === value);
+        return { label: c ? c.label : String(value || ''), badge: (c && c.badge) || String(value || '') };
     };
 
     // Lawsuits attached to the tile by the server (linked_lawsuits[]): the
@@ -2004,7 +2018,7 @@
                     <li class="lawsuit-item"${kopEdit(l.id ? `rec:lawsuit:${parseInt(l.id, 10)}` : '', l.case_name)}>
                         <div class="lawsuit-header">
                             <h3 class="lawsuit-name">${escapeHtml(l.case_name)}</h3>
-                            <span class="status-pill status-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span>
+                            <span class="status-pill status-${escapeHtml(choicePill('lawsuit-statuses', l.status).badge)}">${escapeHtml(choicePill('lawsuit-statuses', l.status).label)}</span>
                         </div>
                         <div class="lawsuit-meta">
                             ${l.case_number ? `<span>${escapeHtml(l.case_number)}</span>` : ''}
@@ -2054,8 +2068,8 @@
                                 ${b.bill_number ? `<span class="bill-number">${escapeHtml(b.bill_number)}</span>` : ''}
                                 ${escapeHtml(b.bill_title)}
                             </h3>
-                            <span class="status-pill status-${escapeHtml(b.status)}">${escapeHtml(b.status)}</span>
-                            ${b.position && b.position !== 'unknown' ? `<span class="position-pill position-${escapeHtml(b.position)}">${escapeHtml(b.position)}</span>` : ''}
+                            <span class="status-pill status-${escapeHtml(choicePill('bill-statuses', b.status).badge)}">${escapeHtml(choicePill('bill-statuses', b.status).label)}</span>
+                            ${b.position && b.position !== 'unknown' ? `<span class="position-pill position-${escapeHtml(choicePill('bill-positions', b.position).badge)}">${escapeHtml(choicePill('bill-positions', b.position).label)}</span>` : ''}
                         </div>
                         <div class="legislation-meta">
                             ${b.session_year ? `<span>${escapeHtml(b.session_year)}</span>` : ''}

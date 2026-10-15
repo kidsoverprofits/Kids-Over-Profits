@@ -18,6 +18,10 @@
  *   GET  /wp-json/kop/v1/extension/check?url=...&title=...&site_name=...
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -99,24 +103,13 @@ function kop_ext_source_fields() {
     );
 }
 
-/** What kind of page a website sent in is: key => label (meta _kop_kind). */
-function kop_ext_website_kinds() {
-    return array(
-        'forum'      => 'Forum post or thread',
-        'reddit'     => 'Reddit post or thread',
-        'blog'       => 'Survivor blog or personal site',
-        'social'     => 'Social media post',
-        'program'    => 'Program\'s own page',
-        'directory'  => 'Directory or listing',
-        'marketing'  => 'Marketing group or referral service',
-        'business'   => 'Business or property record',
-        'staff'      => 'Staff profile or resume',
-        'report'     => 'Report or study',
-        'government' => 'Government page or record',
-        'media'      => 'Video or podcast',
-        'archive'    => 'Archived page',
-        'other'      => 'Other',
-    );
+/**
+ * What kind of page a website sent in is: key => label (meta _kop_kind). The
+ * kinds are in inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists);
+ * $mode 'offered' leaves out hidden ones (dropdowns).
+ */
+function kop_ext_website_kinds($mode = 'all') {
+    return kop_choices('website-kinds', null, $mode);
 }
 
 /** A clean kind: one of kop_ext_website_kinds(), else ''. */
@@ -221,7 +214,7 @@ function kop_ext_render_source_box($post) {
         if ($key === 'kind') {
             $kind = kop_ext_website_kind($val);
             $opts = '<option value="">' . esc_html('Not said') . '</option>';
-            foreach (kop_ext_website_kinds() as $k => $l) {
+            foreach (kop_ext_website_kinds('offered') + ($kind !== '' ? array($kind => kop_ext_website_kinds()[$kind]) : array()) as $k => $l) {
                 $opts .= sprintf('<option value="%s"%s>%s</option>', esc_attr($k), selected($kind, $k, false), esc_html($l));
             }
             $field = sprintf('<select id="kop-ext-kind" name="%s">%s</select>', esc_attr($name), $opts);
@@ -478,8 +471,12 @@ function kop_ext_find_duplicates(PDO $pdo, array $p) {
  * per-type details. Every other send arrives with the basics.
  */
 function kop_ext_news_full_fields(array $p) {
-    $types = array('lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate', 'general');
+    if (!function_exists('kop_news_article_type_values')) require_once __DIR__ . '/choice-lists.php';
+    $types = kop_news_article_type_values('all'); // KOP Tools > Dropdown Lists
     $type  = sanitize_key((string) ($p['article_type'] ?? 'general'));
+    if (in_array($type, $types, true) && !in_array($type, array('lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate', 'general'), true)) {
+        kop_news_article_type_column_sync(); // a type added on the screen: the enum column takes it
+    }
     $out = array(
         'alternate_title'  => kop_ext_text($p['alternate_title'] ?? '', 500),
         'article_type'     => in_array($type, $types, true) ? $type : 'general',

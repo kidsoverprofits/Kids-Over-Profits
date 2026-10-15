@@ -328,8 +328,19 @@ when its version moves, and most never change a record that is already on file.
   (`api/ai-providers.php`), never straight to one provider.
 - **Admin pencils**: a new editable element gets `kop_ie_attr('<source>:<what>')`
   and saves through its source's own save path.
-- **Document types**: a new type is one entry in `kop_dt_types()`; after
-  changing the rules bump `KOP_DOC_TYPES_RULES_VERSION`.
+- **Dropdowns and category lists**: a list of choices (kinds, types,
+  statuses, categories) is registered in `inc/choice-lists/<group>.php`
+  (`kop_choice_register()`, its built-in choices in `defaults`) and read with
+  `kop_choices($key, null, $mode)`, never hard-coded, so the owner can add to
+  it at KOP Tools > Dropdown Lists. `'all'` (hidden kept) for checking and
+  labelling stored values; `'offered'` for dropdowns, suggestions and AI
+  prompts. A script reads `window.KOP_CHOICE_LISTS[key]` ('js' => true) and
+  keeps its own copy only as the fallback. A choice that changes behaviour (a
+  status it sets, a queue it goes to) carries it as a field, so a new choice
+  has one too. A database column holding the value is VARCHAR, never ENUM.
+  `scripts/test-choice-lists.php` reads every registered list.
+- **Document types**: a new type is added at KOP Tools > Dropdown Lists
+  ('doc-types'); after changing the rules bump `KOP_DOC_TYPES_RULES_VERSION`.
 - **People named in a new place** get ids through
   `kop_people_named_sources()`, in the right pool (industry, harmed, press).
 - **Colours**: follow "Kadence colour traps" in CLAUDE.md.

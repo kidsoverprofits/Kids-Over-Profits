@@ -1061,11 +1061,17 @@ function initLocationIndex() {
                 let lawsuitStripHtml = '';
                 let lawsuitSectionHtml = '';
                 if (linkedLawsuits.length > 0) {
-                    const lawsuitStatusLabels = {
-                        filed: 'Filed', in_progress: 'In progress', settled: 'Settled',
-                        dismissed: 'Dismissed', ruling: 'Ruling issued', appeal: 'On appeal',
-                        closed: 'Closed', unknown: ''
-                    };
+                    // Lawsuit statuses: KOP Tools > Dropdown Lists (window.KOP_CHOICE_LISTS); this copy is the fallback.
+                    const lawsuitStatusLabels = (function () {
+                        const list = window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS['lawsuit-statuses'];
+                        const out = list ? {} : {
+                            filed: 'Filed', in_progress: 'In progress', settled: 'Settled',
+                            dismissed: 'Dismissed', ruling: 'Ruling issued', appeal: 'On appeal', closed: 'Closed'
+                        };
+                        (list || []).forEach(s => { out[s.value] = s.label; });
+                        out.unknown = '';
+                        return out;
+                    })();
                     const formatLawsuitDate = value => {
                         if (!value) return '';
                         const ts = Date.parse(value);

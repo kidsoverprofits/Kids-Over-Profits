@@ -17,6 +17,10 @@
  *   - a canonical facility document (normalizing it is a no-op apart from schema defaults)
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('KOP_FACILITY_SCHEMA_VERSION')) {
     define('KOP_FACILITY_SCHEMA_VERSION', 3);
 }
@@ -133,20 +137,13 @@ if (!function_exists('kop_facility_testimony_list')) {
 }
 
 if (!function_exists('kop_facility_resource_link_kinds')) {
-    /** resourceLinks kinds, in the order the facility page groups them. */
-    function kop_facility_resource_link_kinds() {
-        return array(
-            'licensing'  => 'Licensing and inspection reports',
-            'court'      => 'Court records',
-            'government' => 'Government records',
-            'news'       => 'News coverage',
-            'social'     => 'Survivor posts and discussion',
-            'people'     => 'Staff and owners',
-            'advertising' => 'Advertising and marketing listings',
-            'reference'  => 'Reference and research',
-            'archive'    => 'Archived pages',
-            'other'      => 'Other links',
-        );
+    /**
+     * resourceLinks kinds, in the order the facility page groups them. The
+     * kinds are in inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists);
+     * $mode 'offered' leaves out hidden ones (dropdowns).
+     */
+    function kop_facility_resource_link_kinds($mode = 'all') {
+        return function_exists('kop_choices') ? kop_choices('resource-link-kinds', null, $mode) : array('other' => 'Other links');
     }
 }
 
@@ -1320,6 +1317,10 @@ if (!function_exists('kop_facility_type')) {
             'eating disorder program' => 'Eating Disorder Treatment Center',
             'eating disorder treatment' => 'Eating Disorder Treatment Center',
             'eating disorder treatment program' => 'Eating Disorder Treatment Center',
+            'juvenile detention center' => 'Juvenile Detention Facility',
+            'fundamentalist religious program' => 'Fundamentalist Religious Home',
+            'qrtp' => 'Qualified Residential Treatment Program (QRTP)',
+            'qualified residential treatment program' => 'Qualified Residential Treatment Program (QRTP)',
         );
         $key = mb_strtolower(preg_replace('/\s+/u', ' ', $s));
         return $map[$key] ?? $s;

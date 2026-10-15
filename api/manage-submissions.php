@@ -25,6 +25,7 @@ require_once __DIR__ . '/sync-wiki-facilities.php';
 require_once __DIR__ . '/lib-suggested-edits.php';
 require_once __DIR__ . '/news-mentions.php';
 require_once __DIR__ . '/lib-record-resync.php';
+require_once dirname(__DIR__) . '/inc/choice-lists.php'; // news article types, lawsuit and bill statuses (KOP Tools > Dropdown Lists)
 
 // --- Admin authentication ---
 // This endpoint reads and mutates submissions (approve/reject/publish/delete),
@@ -125,8 +126,8 @@ function kop_editable_fields($type) {
                 'json_array' => ['sponsors','subject_tags','facilities_affected','tags'],
                 'enums' => [
                     'chamber'  => ['house','senate','assembly','joint','federal_house','federal_senate','other','unknown'],
-                    'status'   => ['proposed','introduced','in_committee','passed_house','passed_senate','signed','vetoed','dead','enacted','unknown'],
-                    'position' => ['support','oppose','neutral','watch','unknown'],
+                    'status'   => kop_bill_status_values('all'),     // KOP Tools > Dropdown Lists
+                    'position' => kop_bill_position_values('all'),
                 ],
             ];
         case 'lawsuit':
@@ -134,7 +135,7 @@ function kop_editable_fields($type) {
                 'cols' => ['case_name','case_number','court','jurisdiction','filing_date','status','plaintiffs','defendants','facilities_mentioned','staff_mentioned','organizations_mentioned','claims','outcome','settlement_amount','summary','source_urls','document_urls','tags','reviewer_notes','filebird_folder_id'],
                 'json_array' => ['plaintiffs','defendants','facilities_mentioned','staff_mentioned','organizations_mentioned','claims','source_urls','document_urls','tags'],
                 'enums' => [
-                    'status' => ['filed','in_progress','settled','dismissed','ruling','appeal','closed','unknown'],
+                    'status' => kop_lawsuit_status_values('all'), // KOP Tools > Dropdown Lists
                 ],
             ];
         case 'news':
@@ -145,7 +146,7 @@ function kop_editable_fields($type) {
                     function_exists('kop_rinbox_native_news_detail_keys') ? kop_rinbox_native_news_detail_keys() : []),
                 'json_array' => ['facilities_mentioned','staff_mentioned','survivors_mentioned','content_warnings'],
                 'enums' => [
-                    'article_type' => ['lawsuit','event','expose','arrest','closure','corporate','general'],
+                    'article_type' => kop_news_article_type_values('all'), // KOP Tools > Dropdown Lists
                 ],
             ];
         case 'data':

@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) { exit; }
 
 get_header();
 require_once get_stylesheet_directory() . '/api/config.php';
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
 require_once get_stylesheet_directory() . '/api/facility-aliases.php';  // kop_normalize_name_key, kop_collect_self_names
 
 $status_filter  = isset($_GET['status'])       ? sanitize_text_field($_GET['status'])       : '';
@@ -217,7 +218,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             <option value="">All case statuses</option>
             <?php foreach ($statuses as $s => $_): ?>
                 <option value="<?php echo esc_attr($s); ?>" <?php selected($status_filter, $s); ?>>
-                    <?php echo esc_html(ucfirst(str_replace('_', ' ', $s))); ?>
+                    <?php echo esc_html(kop_lawsuit_status_label($s)); ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -258,7 +259,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             $tags         = json_decode($case['tags']         ?? '[]', true) ?: [];
             $filing_date  = $case['filing_date'] ? date('M j, Y', strtotime($case['filing_date'])) : '';
             $status_slug  = $case['status'] ?: 'unknown';
-            $status_label = ucfirst(str_replace('_', ' ', $status_slug));
+            $status_label = kop_lawsuit_status_label($status_slug);   // KOP Tools > Dropdown Lists
             $claims_json  = htmlspecialchars(json_encode($claims), ENT_QUOTES);
             $lawsuit_id   = (int)$case['id'];
             $facility_tags = $facility_tags_for($facilities, $facility_links[$lawsuit_id] ?? []);
@@ -294,7 +295,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
 
             <div class="kop-card-header">
                 <h2 class="kop-card-title"><?php echo esc_html($case['case_name']); ?></h2>
-                <span class="kop-badge kop-badge-<?php echo esc_attr($status_slug); ?>"><?php echo esc_html($status_label); ?></span>
+                <span class="kop-badge kop-badge-<?php echo esc_attr(kop_lawsuit_status_badge($status_slug)); ?>"><?php echo esc_html($status_label); ?></span>
             </div>
 
             <div class="kop-card-meta">

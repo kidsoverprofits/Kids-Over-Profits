@@ -36,7 +36,7 @@ kop_rinbox_register('websites', function () {
                 array('name' => 'url', 'label' => 'Link', 'type' => 'text', 'value' => ''),
                 array('name' => 'title', 'label' => 'Title', 'type' => 'text', 'value' => '', 'optional' => true),
                 array('name' => 'website_kind', 'label' => 'Kind of website', 'type' => 'select', 'value' => '',
-                    'options' => array('' => 'Guess from the link') + kop_ext_website_kinds()),
+                    'options' => array('' => 'Guess from the link') + kop_ext_website_kinds('offered')),
                 array('name' => 'facility', 'label' => 'Related facility', 'type' => 'text', 'value' => '', 'optional' => true),
                 array('name' => 'notes', 'label' => 'Note', 'type' => 'text', 'value' => '', 'optional' => true),
             ))),

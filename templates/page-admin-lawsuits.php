@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 kop_require_page_capability('edit_posts');
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
 
 $us_states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 $federal_option = 'Federal';
@@ -88,14 +89,7 @@ get_header();
                     </label>
                     <label>Status
                         <select name="status" id="lawsuit-status">
-                            <option value="unknown">Unknown</option>
-                            <option value="filed">Filed</option>
-                            <option value="in_progress">In progress</option>
-                            <option value="settled">Settled</option>
-                            <option value="dismissed">Dismissed</option>
-                            <option value="ruling">Ruling</option>
-                            <option value="appeal">On appeal</option>
-                            <option value="closed">Closed</option>
+                            <?php echo kop_status_choice_options_html('lawsuit-statuses'); // KOP Tools > Dropdown Lists ?>
                         </select>
                     </label>
                     <label>Publication status

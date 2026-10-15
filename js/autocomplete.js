@@ -35,26 +35,41 @@ function debugLog(...args) {
 // DEFAULT VALUES
 // ============================================
 
-const DEFAULT_FACILITY_TYPES = [
-    'Residential Treatment Center (RTC)',
+// Lists the owner edits at KOP Tools > Dropdown Lists (inc/choice-lists/data-form.php) come in
+// window.KOP_CHOICE_LISTS; the copies below are only the fallback when it is missing.
+function autocompleteChoiceList(key, fallback) {
+    const lists = (typeof window !== 'undefined' && window.KOP_CHOICE_LISTS) || null;
+    return (lists && Array.isArray(lists[key]) && lists[key].length) ? lists[key].slice() : fallback;
+}
+
+const DEFAULT_FACILITY_TYPES = autocompleteChoiceList('facility-types', [
+    'Residential Treatment Center',
+    'Psychiatric Residential Treatment Facility',
     'Therapeutic Boarding School',
-    'Wilderness Therapy Program',
+    'Wilderness Therapy',
     'Long-term Wilderness Program',
+    'Adventure Therapy Program',
     'Boot Camp',
     'Behavior Modification Program',
     'Therapeutic Group Home',
-    'Specialty Boarding School',
-    'Psychiatric Hospital',
+    'Group Home',
+    'Transitional Living Program',
+    'Substance Abuse Treatment',
     'Eating Disorder Treatment Center',
-    'Juvenile Detention Center',
-    'Adventure Therapy Program',
+    'Psychiatric Hospital',
+    'Maternity Home',
+    'Fundamentalist Religious Home',
+    'Christian Boarding School',
+    'Specialty Boarding School',
     'Emotional Growth Boarding School',
     'Ranch Program',
     'Military-Style Academy',
-    'Fundamentalist Religious Program',
     'Qualified Residential Treatment Program (QRTP)',
+    'Juvenile Detention Facility',
+    'Juvenile Correctional Facility',
+    'Juvenile Justice RTC',
     'Other'
-];
+]);
 
 const DEFAULT_OPERATORS = [
     'Sequel Youth & Family Services',
@@ -79,7 +94,7 @@ const DEFAULT_OPERATORS = [
     'Family Help & Wellness'
 ];
 
-const DEFAULT_STAFF_ROLES = [
+const DEFAULT_STAFF_ROLES = autocompleteChoiceList('staff-roles', [
     'Administrator',
     'Director',
     'CEO',
@@ -99,9 +114,9 @@ const DEFAULT_STAFF_ROLES = [
     'Clinical Director',
     'Admissions Director',
     'Other'
-];
+]);
 
-const DEFAULT_ACCREDITATIONS = [
+const DEFAULT_ACCREDITATIONS = autocompleteChoiceList('accreditations', [
     'Joint Commission (JCAHO)',
     'CARF International',
     'Council on Accreditation (COA)',
@@ -118,9 +133,9 @@ const DEFAULT_ACCREDITATIONS = [
     'State Licensed',
     'Medicare Certified',
     'Medicaid Certified'
-];
+]);
 
-const DEFAULT_CERTIFICATIONS = [
+const DEFAULT_CERTIFICATIONS = autocompleteChoiceList('certifications', [
     'Licensed Clinical Social Worker (LCSW)',
     'Licensed Professional Counselor (LPC)',
     'Licensed Marriage and Family Therapist (LMFT)',
@@ -133,7 +148,7 @@ const DEFAULT_CERTIFICATIONS = [
     'First Aid Certified',
     'Trauma-Informed Care Certified',
     'Crisis Intervention Certified'
-];
+]);
 
 // ============================================
 // AGGREGATED DATA CACHE

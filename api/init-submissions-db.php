@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `news_submissions` (
   `publication_name` varchar(255) DEFAULT NULL COMMENT 'Publication source',
   `publication_date` date DEFAULT NULL COMMENT 'Article publication date',
   `article_url` varchar(1000) DEFAULT NULL COMMENT 'URL to original article',
-  `article_type` enum('lawsuit','event','expose','arrest','closure','corporate','general') DEFAULT 'general' COMMENT 'Type of news article',
+  `article_type` varchar(40) DEFAULT 'general' COMMENT 'Type of news article',
   `facilities_mentioned` text COMMENT 'Facilities/companies mentioned (JSON array)',
   `staff_mentioned` text COMMENT 'Staff/owners mentioned (JSON array)',
   `survivors_mentioned` text COMMENT 'Survivors mentioned (JSON array)',

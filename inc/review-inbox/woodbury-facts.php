@@ -274,7 +274,7 @@ function kop_rinbox_wbf_item(array $r) {
         // Any waiting item can go on a new record (the old screen's "Wrong program?").
         $kinds = kop_wbf_create_kinds();
         $types = array('' => 'Not sure');
-        foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types() : array() as $t) $types[$t] = $t;
+        foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types('offered') : array() as $t) $types[$t] = $t;
         $name = (int) $r['facility_id'] === 0 || $r['program_as_written'] === '' ? $r['program'] : $r['program_as_written'];
         $actions[] = array('id' => 'create', 'label' => 'Create the record and add this', 'style' => 'neutral',
             'help' => 'Makes a new record with the name and place below (a facility gets its own facility page) and adds this item to it.',

@@ -139,7 +139,7 @@ $js_list = function ($const) use ($js) {
     preg_match_all("/'([^']+)'/", $m[1] ?? '', $k);
     return $k[1];
 };
-$check('service keys: JS == PHP', $js_list('MARKETER_SERVICE_KEYS') === array_keys(kop_marketer_service_labels()));
+$check('built-in service keys: JS == PHP', $js_list('MARKETER_SERVICE_KEYS_BUILT_IN') === array_keys(kop_choice_defaults('marketer-services')));
 $check('text fields: JS == PHP', $js_list('MARKETER_TEXT_FIELDS') === kop_marketer_text_fields());
 $check('list fields: JS == PHP', $js_list('MARKETER_LIST_FIELDS') === kop_marketer_list_fields());
 foreach (kop_marketer_text_fields() as $field) {

@@ -154,7 +154,7 @@ $js_list = function ($const) use ($js) {
     preg_match_all("/'([^']+)'/", $m[1] ?? '', $k);
     return $k[1];
 };
-$check('activity keys: JS == PHP', $js_list('TRADEORG_ACTIVITY_KEYS') === array_keys(kop_tradeorg_activity_labels()));
+$check('built-in activity keys: JS == PHP', $js_list('TRADEORG_ACTIVITY_KEYS_BUILT_IN') === array_keys(kop_choice_defaults('tradeorg-activities')));
 $check('text fields: JS == PHP', $js_list('TRADEORG_TEXT_FIELDS') === kop_tradeorg_text_fields());
 $check('list fields: JS == PHP', $js_list('TRADEORG_LIST_FIELDS') === kop_tradeorg_list_fields());
 $missing = array();

@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/news-mentions.php';
 require_once __DIR__ . '/news-tags.php';
+require_once dirname(__DIR__) . '/inc/choice-lists.php'; // article types (KOP Tools > Dropdown Lists)
 require_once __DIR__ . '/facility-aliases.php';
 require_once __DIR__ . '/url-dedupe.php';
 require_once __DIR__ . '/lib-news-archive.php';
@@ -246,9 +247,13 @@ try {
     }
     
     // Validate article type
-    $validTypes = ['lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate', 'general'];
-    if (!in_array($articleType, $validTypes)) {
+    // The types on KOP Tools > Dropdown Lists (hidden ones too: a record may already use one).
+    $validTypes = kop_news_article_type_values('all');
+    if (!in_array($articleType, $validTypes, true)) {
         $articleType = 'general';
+    } elseif (!in_array($articleType, ['lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate', 'general'], true)) {
+        // A type added on the screen: make sure the enum column takes it.
+        kop_news_article_type_column_sync($pdo);
     }
     
     // Format date - handle empty strings

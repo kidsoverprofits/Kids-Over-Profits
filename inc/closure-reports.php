@@ -21,6 +21,10 @@
  * Server CLI: php api/scan-closure-reports.php (dry run unless "apply").
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -39,14 +43,14 @@ function kop_closure_report_statuses() {
     );
 }
 
-/** What the article says happened, and the facility status each one sets. */
-function kop_closure_report_stages() {
-    return array(
-        'closed'         => array('label' => 'Closed',                'status' => 'Closed'),
-        'closing'        => array('label' => 'Announced closing',     'status' => 'Closed'),
-        'ordered_closed' => array('label' => 'Ordered closed',        'status' => 'Closed'),
-        'suspended'      => array('label' => 'Suspended',             'status' => 'Suspended'),
-    );
+/**
+ * What the article says happened, and the facility status each one sets:
+ * stage => {label, status, ai_hint}. The stages are in
+ * inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists); $mode 'offered'
+ * leaves out hidden ones (the AI's list).
+ */
+function kop_closure_report_stages($mode = 'all') {
+    return kop_choices('closure-stages', null, $mode);
 }
 
 function kop_closure_classify_report($facility_id, $current_status, $target_status) {
@@ -206,12 +210,12 @@ function kop_closure_build_prompt(array $news, array $linked, $text) {
     }
     $p .= "\nArticle text:\n" . ($text !== '' ? $text : '(could not be fetched; use the title and summary)') . "\n\n";
     $p .= "Return ONLY a JSON object:\n";
-    $p .= '{"closures":[{"program":"name as the article gives it","facilityId":null,"location":"City, State","stage":"closed|closing|ordered_closed|suspended","date":"YYYY-MM-DD, YYYY-MM or YYYY, or empty","quote":"one sentence copied word for word from the article that says it"}]}' . "\n\n";
+    $stages = kop_closure_report_stages('offered');
+    $p .= '{"closures":[{"program":"name as the article gives it","facilityId":null,"location":"City, State","stage":"' . implode('|', array_keys($stages)) . '","date":"YYYY-MM-DD, YYYY-MM or YYYY, or empty","quote":"one sentence copied word for word from the article that says it"}]}' . "\n\n";
     $p .= "Stages:\n";
-    $p .= "- closed: the article says the program has closed, shut down, stopped operating or no longer houses youth. Includes closures in the past that the article states as fact.\n";
-    $p .= "- closing: the article says the program will close (announced, date set, winding down).\n";
-    $p .= "- ordered_closed: a regulator revoked its license or ordered it to close, and the article does not say it has stopped operating (for example it is appealing).\n";
-    $p .= "- suspended: its license or admissions were suspended, or it paused operating.\n";
+    foreach ($stages as $k => $st) {
+        $p .= '- ' . $k . ': ' . trim(preg_replace('/\s+/', ' ', (string) ($st['ai_hint'] ?? $st['label']))) . "\n";
+    }
     $p .= "Leave out:\n";
     $p .= "- attempts, threats, calls, petitions or proposals to close that did not happen, and closures that were reversed;\n";
     $p .= "- one unit, wing, campus building or service closing while the program stays open;\n";

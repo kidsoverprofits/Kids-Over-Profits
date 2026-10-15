@@ -231,7 +231,7 @@ function kop_rinbox_facdisc_item(array $r) {
             'help' => 'Search for the record this article is about and pick it from the list. The article goes on its page, and later articles that name ' . $mention . ' go there too.',
             'params' => array(array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => '')));
         $new_name = (string) (($e['officialName'] ?? '') ?: $r['mention']);
-        $types = kop_rinbox_options(array_combine(kop_facdisc_types(), kop_facdisc_types()));
+        $types = kop_rinbox_options(array_combine(kop_facdisc_types('offered'), kop_facdisc_types('offered')));
         $actions[] = array('id' => 'create', 'label' => 'New program…', 'style' => 'neutral', 'ask' => true,
             'submit' => 'Create the record',
             'help' => 'Makes a new facility record with its own page and lists this article there. Check the name and place first. If that name and place already have a record, the article goes on it instead.',

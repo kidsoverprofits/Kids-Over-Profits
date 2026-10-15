@@ -60,6 +60,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php'; // news article types, statuses, memorial causes (KOP Tools > Dropdown Lists)
+
 define('KOP_IE_CAP', 'manage_options');
 
 /** Whether pencils are drawn on this request. */
@@ -1179,7 +1181,7 @@ function kop_ie_unsil_load(array $p) {
     }
     $edit = kop_unsilenced_edits()[$file['id']] ?? array();
     $options = array();
-    foreach (function_exists('kop_dt_types') ? kop_dt_types() : array() as $slug => $t) {
+    foreach (function_exists('kop_dt_types') ? kop_dt_types('offered') : array() as $slug => $t) {
         $options[] = array('value' => $slug, 'label' => $t['label']);
     }
     $fields = array(
@@ -1234,7 +1236,7 @@ function kop_ie_record_types() {
         'lawsuit' => array('table' => 'lawsuits', 'title' => 'case_name', 'fields' => array(
             'case_name' => array('Case name', 'text'), 'case_number' => array('Case number', 'text'), 'court' => array('Court', 'text'),
             'jurisdiction' => array('Jurisdiction', 'text'), 'filing_date' => array('Filed (YYYY-MM-DD)', 'text'),
-            'status' => array('Status', 'select', array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown')),
+            'status' => array('Status', 'select', kop_lawsuit_status_values('offered')),   // KOP Tools > Dropdown Lists
             'plaintiffs' => array('Plaintiffs', 'lines'), 'defendants' => array('Defendants', 'lines'),
             'facilities_mentioned' => array('Facilities', 'lines'), 'staff_mentioned' => array('Staff named', 'lines'),
             'organizations_mentioned' => array('Organizations named', 'lines'), 'claims' => array('Claims', 'lines'),
@@ -1247,11 +1249,11 @@ function kop_ie_record_types() {
             'bill_number' => array('Bill number', 'text'), 'bill_title' => array('Title', 'text'), 'jurisdiction' => array('Jurisdiction', 'text'),
             'chamber' => array('Chamber', 'select', array('house', 'senate', 'assembly', 'joint', 'federal_house', 'federal_senate', 'other', 'unknown')),
             'session_year' => array('Session year', 'text'), 'bill_type' => array('Bill type', 'text'), 'sponsors' => array('Sponsors', 'lines'),
-            'status' => array('Status', 'select', array('proposed', 'introduced', 'in_committee', 'passed_house', 'passed_senate', 'signed', 'vetoed', 'dead', 'enacted', 'unknown')),
+            'status' => array('Status', 'select', kop_bill_status_values('offered')),
             'introduced_date' => array('Introduced (YYYY-MM-DD)', 'text'), 'last_action_date' => array('Last action (YYYY-MM-DD)', 'text'),
             'last_action_text' => array('Last action', 'textarea'), 'subject_tags' => array('Subjects', 'lines'), 'summary' => array('Summary', 'textarea'),
             'full_text_url' => array('Full text link', 'text'), 'official_url' => array('Official page', 'text'),
-            'position' => array('Our position', 'select', array('support', 'oppose', 'neutral', 'watch', 'unknown')),
+            'position' => array('Our position', 'select', kop_bill_position_values('offered')),
             'facilities_affected' => array('Facilities affected', 'lines'), 'tags' => array('Tags', 'lines'),
             'reviewer_notes' => array('Internal notes (not shown)', 'textarea'),
         )),
@@ -1259,7 +1261,7 @@ function kop_ie_record_types() {
             'article_title' => array('Headline', 'text'), 'alternate_title' => array('Headline shown instead', 'text'),
             'author' => array('Author', 'text'), 'publication_name' => array('Outlet', 'text'), 'publication_date' => array('Published (YYYY-MM-DD)', 'text'),
             'article_url' => array('Link', 'text'),
-            'article_type' => array('Kind', 'select', array('lawsuit', 'event', 'expose', 'arrest', 'closure', 'corporate', 'general')),
+            'article_type' => array('Kind', 'select', kop_news_article_type_values('all')), // KOP Tools > Dropdown Lists
             'facilities_mentioned' => array('Facilities', 'lines'), 'staff_mentioned' => array('Staff named', 'lines'),
             'survivors_mentioned' => array('Survivors named', 'lines'), 'content_warnings' => array('Content warnings', 'lines'),
             'summary' => array('Summary', 'textarea'), 'reviewer_notes' => array('Internal notes (not shown)', 'textarea'),
@@ -1674,7 +1676,7 @@ function kop_ie_row_tables() {
             'date_of_death'      => array('Date of death (YYYY-MM-DD; use 01 for an unknown month or day)', 'date'),
             'date_precision'     => array('How much of the date is known', 'select', array('day', 'month', 'year', 'unknown')),
             'cause_of_death'     => array('Cause, as reported', 'textarea'),
-            'cause_category'     => array('Cause, for the filter', 'select', array('', 'suicide', 'restraint', 'medical_neglect', 'overdose', 'escape_attempt', 'drowning', 'exposure', 'violence', 'accident', 'other', 'unknown')),
+            'cause_category'     => array('Cause, for the filter', 'select', array_merge(array(''), array_keys(kop_memorial_causes('all')))),   // KOP Tools > Dropdown Lists
             'location'           => array('State, or region outside the US', 'text'),
             'source_name'        => array('Source name', 'text'),
             'source_url'         => array('Source link', 'text'),

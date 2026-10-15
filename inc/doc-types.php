@@ -7,7 +7,8 @@
  *
  *   types     kop_dt_types(): slug => {label, plural, group, desc}. A document
  *             can have more than one (a handbook bound with an enrollment
- *             packet). Filterable; a new type is one more entry there
+ *             packet). The types are in inc/choice-lists/sorting.php: a new
+ *             one is added at KOP Tools > Dropdown Lists
  *   store     {prefix}kop_doc_types: one row per document and type, with how
  *             it got there (rule / ai / person). Every change is an entry in
  *             the kop_doc_types_log option with each document's types before
@@ -36,6 +37,10 @@
  * php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-types.php [--list]
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -50,75 +55,17 @@ if (!defined('KOP_DOC_TYPES_RULES_VERSION')) define('KOP_DOC_TYPES_RULES_VERSION
 // ---------------------------------------------------------------------------
 
 if (!function_exists('kop_dt_types')) {
-    /** slug => {label, plural, group, desc}, in the order pages list them. */
-    function kop_dt_types() {
-        static $memo = null;
-        if ($memo !== null) return $memo;
-        $g_prog = 'The programs\' own papers';
-        $g_over = 'Oversight';
-        $g_court = 'Courts';
-        $g_press = 'Press, research and survivors';
-        $g_biz = 'Business and industry';
-        $types = array(
-            'student-handbook' => array('Student or resident handbook', 'Student and resident handbooks', $g_prog,
-                'Rulebooks, level systems and phase charts given to the young people in a program.'),
-            'parent-handbook'  => array('Parent or family handbook', 'Parent and family handbooks', $g_prog,
-                'Manuals, guides and booklets telling parents how the program works and what is expected of them.'),
-            'staff-manual'     => array('Staff manual, training or policy', 'Staff manuals, training and policies', $g_prog,
-                'Employee handbooks, training material and written policies for the people who worked there.'),
-            'enrollment'       => array('Enrollment document', 'Enrollment documents', $g_prog,
-                'Enrollment agreements, applications, intake forms, tuition contracts and consent forms.'),
-            'marketing'        => array('Brochure or marketing', 'Brochures and marketing', $g_prog,
-                'Brochures, viewbooks, flyers and other material written to sell a program to parents and referrers.'),
-            'newsletter'       => array('Newsletter or press release', 'Newsletters and press releases', $g_prog,
-                'A program\'s or company\'s own newsletters, statements and press releases.'),
-            'website-capture'  => array('Website capture', 'Website captures', $g_prog,
-                'Saved copies of program, company and directory web pages.'),
-            'staff-ideology'   => array('Staff ideology', 'Staff ideology', $g_prog,
-                'What a program\'s founders and staff believed and taught: philosophy and core values statements, treatment models, founders\' books, sermons and speeches.'),
-            'inspection-report' => array('Inspection or licensing report', 'Inspection and licensing reports', $g_over,
-                'State inspection, licensing, monitoring and complaint investigation reports.'),
-            'incident-report'  => array('Police or incident report', 'Police and incident reports', $g_over,
-                'Police reports, incident reports and serious occurrence reports.'),
-            'government-report' => array('Government report or investigation', 'Government reports and investigations', $g_over,
-                'Congressional, GAO, Inspector General and state agency reports, audits and investigations.'),
-            'ngo-report'       => array('NGO or advocacy report', 'NGO and advocacy reports', $g_over,
-                'Reports and investigations by nonprofits and watchdogs: disability rights (protection and advocacy) groups, human rights groups, youth law centers and survivor-led organizations.'),
-            'legislation'      => array('Legislation or testimony', 'Legislation and testimony', $g_over,
-                'Bills, statutes, regulations and testimony given to lawmakers.'),
-            'legal-filing'     => array('Legal filing', 'Legal filings', $g_court,
-                'Complaints, answers, motions, orders, rulings and settlements filed in court.'),
-            'deposition'       => array('Deposition or discovery', 'Depositions and discovery', $g_court,
-                'Deposition transcripts, declarations and documents produced in discovery.'),
-            'news-clipping'    => array('News clipping', 'News clippings', $g_press,
-                'Newspaper and magazine articles, saved as they were printed or published.'),
-            'woodbury'         => array('Woodbury Reports page', 'Woodbury Reports pages', $g_press,
-                'Pages of Woodbury Reports, the educational consultants\' trade newsletter.'),
-            'research'         => array('Academic research', 'Academic research', $g_press,
-                'Studies, theses, books and journal articles.'),
-            'survivor-account' => array('Survivor account or testimony', 'Survivor accounts and testimony', $g_press,
-                'Accounts written or given by people who were sent to programs, and their families.'),
-            'business-record'  => array('Business or property record', 'Business and property records', $g_biz,
-                'Corporate filings, business registrations, deeds, liens and property records.'),
-            'tax-filing'       => array('Tax filing (Form 990)', 'Tax filings (Form 990)', $g_biz,
-                'Nonprofit tax returns and other financial filings.'),
-            'natsap-profile'   => array('NATSAP profile', 'NATSAP profiles', $g_biz,
-                'A program\'s entry in the NATSAP directory, in the program\'s own words.'),
-            'directory'        => array('Directory or member list', 'Directories and member lists', $g_biz,
-                'Trade group member lists, referral directories and conference programs.'),
-            'staff-profile'    => array('Staff profile or résumé', 'Staff profiles and résumés', $g_biz,
-                'LinkedIn pages, résumés and staff biographies.'),
-            'editor-note'      => array('Editor\'s note', 'Editor\'s notes', 'Kids Over Profits',
-                'Kids Over Profits\' own notes: context, corrections and what our research found about a program, a person or a document.'),
-            'other'            => array('Other', 'Other documents', 'Other',
-                'Documents that fit none of the types above.'),
-        );
-        $out = array();
-        foreach ($types as $slug => $t) {
-            $out[$slug] = array('label' => $t[0], 'plural' => $t[1], 'group' => $t[2], 'desc' => $t[3]);
-        }
-        $memo = function_exists('apply_filters') ? (array) apply_filters('kop_doc_types', $out) : $out;
-        return $memo;
+    /**
+     * slug => {label, plural, group, desc}, in the order pages list them.
+     * The types are in inc/choice-lists/sorting.php ('doc-types', KOP Tools >
+     * Dropdown Lists). $mode 'offered' leaves out hidden types (pickers, AI).
+     */
+    function kop_dt_types($mode = 'all') {
+        static $memo = array();
+        if (isset($memo[$mode])) return $memo[$mode];
+        $out = function_exists('kop_choices') ? kop_choices('doc-types', null, $mode) : array();
+        $memo[$mode] = function_exists('apply_filters') ? (array) apply_filters('kop_doc_types', $out) : $out;
+        return $memo[$mode];
     }
 }
 
@@ -688,7 +635,7 @@ if (!function_exists('kop_dt_doc_text')) {
 if (!function_exists('kop_dt_ai_prompt')) {
     function kop_dt_ai_prompt($title, $path, $text) {
         $list = array();
-        foreach (kop_dt_types() as $slug => $t) $list[] = '- ' . $slug . ': ' . $t['label'] . '. ' . $t['desc'];
+        foreach (kop_dt_types('offered') as $slug => $t) $list[] = '- ' . $slug . ': ' . $t['label'] . '. ' . $t['desc'];
         return "You sort documents in an archive about the troubled teen industry (residential treatment centers, wilderness programs, therapeutic boarding schools and the companies that run them).\n"
             . "Pick the document type that fits this document. Use one slug from the list. Add a second slug only if the document really is two things at once (for example a handbook bound with an enrollment agreement).\n"
             . "If the text is missing or does not tell you what the document is, and the title does not either, answer \"unclear\".\n\n"
@@ -1166,7 +1113,7 @@ if (!function_exists('kop_dt_enqueue_filter')) {
 if (!function_exists('kop_dt_pencil_fields')) {
     function kop_dt_pencil_fields($id) {
         $options = array();
-        foreach (kop_dt_types() as $slug => $t) $options[] = array('value' => $slug, 'label' => $t['label']);
+        foreach (kop_dt_types('offered') as $slug => $t) $options[] = array('value' => $slug, 'label' => $t['label']);
         $sugg = kop_dt_sugg_get($id);
         $help = 'Tick every kind this document is; most are one. The document is listed on the page of each kind ticked.';
         if ($sugg && $sugg['status'] === 'pending' && $sugg['types'] !== '') {

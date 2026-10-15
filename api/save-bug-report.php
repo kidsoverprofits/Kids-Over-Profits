@@ -157,7 +157,9 @@ try {
         kop_bug_json_exit(['success' => false, 'error' => 'Too many reports in a short time — please wait a few minutes and try again.'], 429);
     }
 
-    $allowedCategories = ['save-failed', 'load-failed', 'broken-ui', 'wrong-data', 'other'];
+    // The categories are in inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists).
+    if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php';
+    $allowedCategories = array_map('strval', array_keys(kop_choices('bug-report-categories')));
     $category = (string)($input['category'] ?? 'other');
     if (!in_array($category, $allowedCategories, true)) {
         $category = 'other';

@@ -9,20 +9,16 @@
  */
 
 require_once __DIR__ . '/lib-marketers.php';
+require_once dirname(__DIR__) . '/inc/choice-lists.php';
 
 if (!function_exists('kop_tradeorg_activity_labels')) {
-    /** What an organization does for its members: key in tradeOrg.activities => label (same keys in tradeorg-form.js). */
-    function kop_tradeorg_activity_labels() {
-        return array(
-            'standards'       => 'Sets standards or ethical principles for members',
-            'accreditation'   => 'Accredits, certifies or inspects members',
-            'lobbying'        => 'Lobbies lawmakers or works against regulation',
-            'publicRelations' => 'Public relations for its members or the industry',
-            'research'        => 'Funds or publishes research',
-            'conferences'     => 'Conferences, training and networking',
-            'referralNetwork' => 'Connects programs with consultants or other referral sources',
-            'memberSeal'      => 'A logo or listing members show parents',
-        );
+    /**
+     * What an organization does for its members: key in tradeOrg.activities => label. The list is
+     * "Trade organization activities" at KOP Tools > Dropdown Lists (inc/choice-lists/data-form.php;
+     * tradeorg-form.js reads it from window.KOP_CHOICE_LISTS). 'all' keeps hidden ones; the form asks 'offered'.
+     */
+    function kop_tradeorg_activity_labels($mode = 'all') {
+        return kop_choices('tradeorg-activities', null, $mode);
     }
 
     /** List fields of tradeOrg (string lists). */

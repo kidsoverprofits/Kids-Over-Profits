@@ -1442,7 +1442,11 @@
         'eating disorder center': 'Eating Disorder Treatment Center',
         'eating disorder program': 'Eating Disorder Treatment Center',
         'eating disorder treatment': 'Eating Disorder Treatment Center',
-        'eating disorder treatment program': 'Eating Disorder Treatment Center'
+        'eating disorder treatment program': 'Eating Disorder Treatment Center',
+        'juvenile detention center': 'Juvenile Detention Facility',
+        'fundamentalist religious program': 'Fundamentalist Religious Home',
+        'qrtp': 'Qualified Residential Treatment Program (QRTP)',
+        'qualified residential treatment program': 'Qualified Residential Treatment Program (QRTP)'
     };
 
     /** Mirrors kop_facility_type(). */

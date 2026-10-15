@@ -882,7 +882,7 @@ function kop_wbc_render_form(array $r) {
     echo '</select></label>';
     echo '<label>Country, outside the US <input type="text" class="kop-wbc-country" value="' . esc_attr($p['country']) . '"></label>';
     echo '<label class="kop-wbc-only" data-kinds="facility">Type <select class="kop-wbc-type"><option value=""></option>';
-    foreach (kop_facdisc_types() as $t) {
+    foreach (kop_facdisc_types('offered') as $t) {
         echo '<option>' . esc_html($t) . '</option>';
     }
     echo '</select></label>';

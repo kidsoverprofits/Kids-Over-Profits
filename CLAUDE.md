@@ -625,6 +625,12 @@ php -d extension=mbstring scripts/test-url-labels.php    # labels, PHP == JS (ne
 # MacLaren, LLC), edited at KOP Tools > Proper Names (option kop_proper_names; js/data/proper-names.json only until first save).
 # Every function that recases text ends with kop_proper_names_apply() / kopProperNames(); a new one does the same
 php -d extension=mbstring scripts/test-proper-names.php   # rules, every case changer wrapped, PHP == JS (needs node)
+# Dropdown Lists (inc/choice-lists.php, KOP Tools > Dropdown Lists): every choice list (website/document/link kinds, closure stages,
+# facility types, form checkboxes, article types, content warnings, news tags, lawsuit/bill statuses...) is registered with its built-in
+# choices in inc/choice-lists/<group>.php and read with kop_choices($key, null, 'all'|'offered'); the owner adds, renames and hides
+# choices (never deletes: records keep their values), Undo per save. Option kop_choice_lists + uploads/kop-choice-lists/lists.json (read
+# by api/ endpoints without WordPress); window.KOP_CHOICE_LISTS for lists registered 'js'. A new list goes there (docs/ADDING-CONTENT.md 10)
+php -d extension=mbstring scripts/test-choice-lists.php [--list]   # merge, form, Undo, every registered list reads
 # After any template or page CSS change: no text may sit on the gradient body background
 python scripts/check-bare-text.py               # one page per child template, live site
 # ...and no text unreadable against its own panel, incl. forced :hover/:focus (see "Kadence colour traps")

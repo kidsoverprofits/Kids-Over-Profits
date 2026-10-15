@@ -25,21 +25,31 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // lawsuit and bill statuses (KOP Tools > Dropdown Lists)
+
 const KOP_STATUS_CHECKS_DB_VERSION = '1';
 
-/** Bills in these statuses are done; vetoed ones are watched 120 days for an override. */
+/**
+ * Statuses ticked "finished" on KOP Tools > Dropdown Lists (built in: bills enacted
+ * and dead, lawsuits settled and closed) are done and never checked again;
+ * vetoed bills are watched 120 days for an override (kop_sc_due()).
+ */
 function kop_sc_final_bill_statuses() {
-    return array('enacted', 'dead');
+    return kop_sc_safe_values(kop_bill_finished_statuses());
 }
 function kop_sc_final_lawsuit_statuses() {
-    return array('settled', 'closed');
+    return kop_sc_safe_values(kop_lawsuit_finished_statuses());
 }
-function kop_sc_lawsuit_statuses() {
-    return array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown');
+/** 'all' = every status a record may hold (applying a proposal); 'offered' = the ones the AI may give. */
+function kop_sc_lawsuit_statuses($mode = 'all') {
+    return kop_lawsuit_status_values($mode);
 }
-function kop_sc_bill_statuses() {
-    return function_exists('kop_legislation_statuses') ? kop_legislation_statuses()
-        : array('proposed', 'introduced', 'in_committee', 'passed_house', 'passed_senate', 'signed', 'vetoed', 'dead', 'enacted', 'unknown');
+function kop_sc_bill_statuses($mode = 'all') {
+    return kop_bill_status_values($mode);
+}
+/** Values safe to write into SQL quotes (new choices are slugs; this keeps it so). */
+function kop_sc_safe_values(array $values) {
+    return array_values(array_filter($values, function ($v) { return (bool) preg_match('/^[a-z0-9_-]+$/', (string) $v); }));
 }
 
 /** Which table and which fields a proposal may change, per kind. */
@@ -372,7 +382,7 @@ Actions, newest first:
 }
 
 function kop_sc_bill_prompt(array $bill, $text) {
-    $statuses = implode(', ', array_diff(kop_sc_bill_statuses(), array('unknown', 'proposed')));
+    $statuses = implode(', ', array_diff(kop_sc_bill_statuses('offered'), array('unknown', 'proposed')));
     return "You check whether a bill's status has changed. Below is what our record says, then the text of the bill's page on the legislature's (or a bill tracker's) website.\n\n"
         . "OUR RECORD\nBill: {$bill['jurisdiction']} {$bill['bill_number']} ({$bill['session_year']}): {$bill['bill_title']}\n"
         . "Status: {$bill['status']}\nLast action date: " . ($bill['last_action_date'] ?: 'none') . "\nLast action: {$bill['last_action_text']}\n\n"
@@ -552,7 +562,7 @@ function kop_sc_lawsuit_docket_link(array $suit) {
 }
 
 function kop_sc_lawsuit_prompt(array $suit, $text, $terminated) {
-    $statuses = implode(', ', array_diff(kop_sc_lawsuit_statuses(), array('unknown')));
+    $statuses = implode(', ', array_diff(kop_sc_lawsuit_statuses('offered'), array('unknown')));
     return "You check whether a lawsuit's status has changed. Below is what our record says, then the newest entries of the case's court docket.\n\n"
         . "OUR RECORD\nCase: {$suit['case_name']}\nCourt: {$suit['court']}\nCase number: {$suit['case_number']}\n"
         . "Status: {$suit['status']}\nOutcome: " . ($suit['outcome'] !== '' ? $suit['outcome'] : 'none recorded') . "\n"
@@ -623,7 +633,7 @@ function kop_sc_check_bill(array $bill) {
         return array('error', null, $url, '', '', 'The page did not show this bill\'s history.', '');
     }
     $found = array(
-        'status' => in_array($reply['status'] ?? '', kop_sc_bill_statuses(), true) ? $reply['status'] : '',
+        'status' => in_array($reply['status'] ?? '', kop_sc_bill_statuses('offered'), true) ? $reply['status'] : '',
         'last_action_date' => kop_sc_clean_date($reply['last_action_date'] ?? ''),
         'last_action_text' => mb_substr(trim((string) ($reply['last_action_text'] ?? '')), 0, 480),
     );
@@ -684,7 +694,7 @@ function kop_sc_check_lawsuit(array $suit) {
         return array('error', null, $url, '', '', $reply ? 'The docket did not match this case.' : 'The AI reply was not readable.', $ref);
     }
     $found = array(
-        'status' => in_array($reply['status'] ?? '', kop_sc_lawsuit_statuses(), true) ? $reply['status'] : '',
+        'status' => in_array($reply['status'] ?? '', kop_sc_lawsuit_statuses('offered'), true) ? $reply['status'] : '',
         'outcome' => trim((string) ($reply['outcome'] ?? '')),
         'settlement_amount' => mb_substr(trim((string) ($reply['settlement_amount'] ?? '')), 0, 100),
         'new_events' => trim((string) ($reply['new_events'] ?? '')),

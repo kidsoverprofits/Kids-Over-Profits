@@ -106,7 +106,7 @@ if (($kop_marketer_part ?? '') === 'panel') : ?>
                     <span class="section-toggle"><?php echo kop_icon('search'); ?></span>
                 </div>
                 <div class="section-content">
-                    <?php foreach (kop_marketer_service_labels() as $key => $label) : ?>
+                    <?php foreach (kop_marketer_service_labels('offered') as $key => $label) : ?>
                         <div class="checkbox-group">
                             <input type="checkbox" class="marketer-service" data-service="<?php echo esc_attr($key); ?>" id="marketer-service-<?php echo esc_attr($key); ?>">
                             <label for="marketer-service-<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></label>

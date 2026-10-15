@@ -21,27 +21,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/** The processor's article types and content warnings (js/news-processor.js has the same lists). */
+require_once __DIR__ . '/choice-lists.php'; // article types and content warnings (KOP Tools > Dropdown Lists)
+
+/**
+ * The processor's article types and content warnings: the lists on KOP Tools >
+ * Dropdown Lists (inc/choice-lists/news.php), as offered; General first here.
+ */
 function kop_ext_news_form_choices() {
+    $types = array();
+    foreach (kop_news_article_types('offered') as $value => $label) {
+        $row = array('value' => (string) $value, 'label' => $label);
+        if ($value === 'general') array_unshift($types, $row);
+        else $types[] = $row;
+    }
     return array(
-        'types' => array(
-            array('value' => 'general', 'label' => 'General news'),
-            array('value' => 'lawsuit', 'label' => 'Lawsuit'),
-            array('value' => 'event', 'label' => 'Specific event'),
-            array('value' => 'expose', 'label' => 'Exposé or survivor account'),
-            array('value' => 'arrest', 'label' => 'Staff arrest'),
-            array('value' => 'closure', 'label' => 'Facility closure'),
-            array('value' => 'corporate', 'label' => 'Corporate change'),
-        ),
-        'warnings' => array(
-            'Physical Restraint', 'Chemical Restraint', 'Seclusion', 'Humiliating Punishments',
-            'Child Sexual Abuse', 'Child-on-Child CSA', 'Graphic Descriptions of Assaults or Injuries',
-            'Peer Violence', 'Child Death', 'Suicide', 'Self-harm', 'Substance Abuse',
-            'Victim Blaming', 'Spiritual Abuse', 'Racism', 'Homophobia', 'Transphobia',
-            'Hate Crimes', 'Slurs', 'Autism-Specific Abuse', 'Food Restriction',
-            'Unsanitary Conditions', 'Medical Neglect', 'Eating Disorders', 'Conversion Therapy',
-            'Forced Labor', 'Involuntary Transport', 'Law Enforcement Abuse',
-        ),
+        'types'    => $types,
+        'warnings' => kop_news_content_warnings('offered'),
         // Per-type details, as the processor's section 4 (json_data keys).
         'details' => array(
             'lawsuit'   => array('plaintiffs' => 'Plaintiffs', 'defendants' => 'Defendants', 'legalRep' => 'Legal representation', 'dateFiled' => 'Date filed', 'jurisdiction' => 'Jurisdiction'),
@@ -78,7 +73,7 @@ function kop_ext_news_ai_fields(array $d) {
     };
     $choices = kop_ext_news_form_choices();
     $type = strtolower($str($d['articleType'] ?? ''));
-    $types = array_column($choices['types'], 'value');
+    $types = kop_news_article_type_values('all');
     $out = array(
         'title'            => $str($d['title'] ?? ''),
         'author'           => $str($d['author'] ?? ''),

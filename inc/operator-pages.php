@@ -29,6 +29,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/choice-lists.php';   // lawsuit status labels (KOP Tools > Dropdown Lists)
+
 // The query var value for /operator/ itself, the index of every company.
 if (!defined('KOP_OPERATOR_INDEX_VAR')) {
     define('KOP_OPERATOR_INDEX_VAR', '_index');
@@ -794,7 +796,7 @@ if (!function_exists('kop_operator_page_data')) {
                     'case_number' => trim((string) $r['case_number']),
                     'court'       => trim((string) $r['court']),
                     'year'        => $r['filing_date'] ? substr((string) $r['filing_date'], 0, 4) : '',
-                    'status'      => ucfirst(str_replace('_', ' ', trim((string) $r['status']))),
+                    'status'      => kop_lawsuit_status_label($r['status']),   // KOP Tools > Dropdown Lists
                     'outcome'     => trim((string) $r['outcome']),
                     'settlement_amount' => trim((string) ($r['settlement_amount'] ?? '')),
                     'summary'     => trim((string) $r['summary']),

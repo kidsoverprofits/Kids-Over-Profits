@@ -128,13 +128,20 @@
     // ---------------------------------------------------------------
     // Widget UI
     // ---------------------------------------------------------------
-    var CATEGORIES = [
+    // The categories come from KOP Tools > Dropdown Lists (window.KOP_CHOICE_LISTS,
+    // inc/choice-lists/sorting.php); this copy is only the fallback.
+    var CATEGORIES_FALLBACK = [
         { value: 'save-failed', label: 'Saving or submitting didn’t work' },
         { value: 'load-failed', label: 'Something didn’t load' },
         { value: 'broken-ui', label: 'Something looks broken or misbehaves' },
         { value: 'wrong-data', label: 'Information is wrong or missing' },
         { value: 'other', label: 'Something else' }
     ];
+    function categories() {
+        var list = window.KOP_CHOICE_LISTS && window.KOP_CHOICE_LISTS['bug-report-categories'];
+        if (!Array.isArray(list) || !list.length) return CATEGORIES_FALLBACK;
+        return list.map(function (c) { return { value: c.value, label: c.public_label || c.label }; });
+    }
 
     var modal = null;
     var lastFocused = null;
@@ -266,7 +273,7 @@
         catLabel.setAttribute('for', 'kop-bug-category');
         var catSelect = el('select', 'kop-bug-reporter__input');
         catSelect.id = 'kop-bug-category';
-        CATEGORIES.forEach(function (cat) {
+        categories().forEach(function (cat) {
             var opt = document.createElement('option');
             opt.value = cat.value;
             opt.textContent = cat.label;

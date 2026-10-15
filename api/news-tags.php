@@ -17,6 +17,9 @@
  * already stored, run api/normalize-news-tags.php as an admin.
  */
 
+// The preferred tags the AI is told to use: KOP Tools > Dropdown Lists (inc/choice-lists/news.php).
+require_once dirname(__DIR__) . '/inc/choice-lists.php';
+
 // Names on the sitewide list keep their capitals (inc/proper-names.php).
 if (!function_exists('kop_proper_names_apply') && is_readable(__DIR__ . '/../inc/proper-names.php')) {
     require_once __DIR__ . '/../inc/proper-names.php';
@@ -308,18 +311,12 @@ if (!function_exists('kop_news_tags_normalize')) {
 }
 
 if (!function_exists('kop_news_tag_prompt_vocabulary')) {
-    /** Preferred topic labels, listed in the AI extraction prompt. */
+    /**
+     * Preferred topic labels, listed in the AI extraction prompt: the
+     * 'news-tags' list (KOP Tools > Dropdown Lists, inc/choice-lists/news.php).
+     */
     function kop_news_tag_prompt_vocabulary(): array {
-        return [
-            'Wilderness Therapy', 'Juvenile Justice', 'Transport', 'Forced Labor', 'Foster Care',
-            'Group Home', 'Child Protective Services', 'Family Law',
-            'Faith-Based Programs', 'Conversion Therapy', 'Human Trafficking', 'Kidnapping',
-            'Death', 'Suicide', 'Self-Harm', 'Escape', 'Riot', 'Arrest', 'Trial', 'Settlement',
-            'Closure', 'Licensing', 'Oversight', 'Legislation', 'Corporate Governance',
-            'Staff Misconduct', 'Sexual Misconduct', 'Safety Violations', 'Survivor Stories',
-            'Documentary', 'Adoption', 'Immigration', 'Disability Rights', 'LGBTQ+ Rights',
-            'Private Schools', 'Private Prisons', 'Medicaid',
-        ];
+        return kop_choices('news-tags', null, 'offered');
     }
 }
 

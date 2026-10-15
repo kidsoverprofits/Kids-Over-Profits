@@ -21,7 +21,9 @@
         staff: [], jurisdictions: [], legalReps: []
     };
 
-    const contentWarnings = [
+    // KOP Tools > Dropdown Lists (inc/choice-lists/news.php); this copy is the fallback.
+    const KOP_LISTS = window.KOP_CHOICE_LISTS || {};
+    const contentWarnings = KOP_LISTS['news-content-warnings'] || [
         'Physical Restraint', 'Chemical Restraint', 'Seclusion', 'Humiliating Punishments',
         'Child Sexual Abuse', 'Child-on-Child CSA', 'Graphic Descriptions of Assaults or Injuries',
         'Peer Violence', 'Child Death', 'Suicide', 'Self-harm', 'Substance Abuse',
@@ -31,7 +33,7 @@
         'Forced Labor', 'Involuntary Transport', 'Law Enforcement Abuse'
     ];
 
-    const articleTypes = [
+    const articleTypes = KOP_LISTS['news-article-types'] || [
         { value: 'lawsuit', label: 'Lawsuit Article' },
         { value: 'event', label: 'Specific Event Article' },
         { value: 'expose', label: 'Exposé or Survivor Account' },

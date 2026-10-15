@@ -2527,3 +2527,30 @@ Open:
 5. `scripts/test-facility-pages.php` "links a staff entry and a fact to their sources" fails with or without the timeline:
    its first sample (Aspen Education Group) is now a renamed program, whose staff go into the name sections. The fixture
    should pick a record without eras.
+
+### 3.29 Dropdown Lists: the owner adds choices to every dropdown (2026-10-15)
+
+The owner asked for an admin panel to add categories to dropdown menus. KOP Tools > Dropdown Lists
+(https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists, `inc/choice-lists.php`) lists 26 choice lists in
+four groups (`inc/choice-lists/{sorting,data-form,news,statuses}.php`): sorting kinds (website kinds, "Materials and
+links" kinds, Drive Docs kinds, Fornits categories, closure stages, document types, bug report categories), data form
+choices (facility types, staff roles, accreditations, certifications, treatment/philosophy/critical-incident tick boxes,
+marketer services, trade-org activities), the news processor (article types, content warnings, preferred tags) and
+lawsuit/bill/volunteer lists (lawsuit and bill statuses with "finished" and a badge colour, bill positions, volunteer
+project types, memorial causes). Add, rename, hide (never delete); Undo per save. Untouched lists give the same AI
+prompts as before (closure and news prompts compared byte for byte).
+
+Open:
+1. **After deploy, check:** the first wp-admin page load turns five ENUM columns in the records DB into VARCHAR(40)
+   (`lawsuits.status`, `legislation.status`, `legislation.position`, `volunteer_projects.project_type`,
+   `news_submissions.article_type`; `kop_maybe_status_columns_to_varchar()` in `inc/choice-lists/statuses.php`). Over SSH:
+   `SHOW COLUMNS FROM lawsuits LIKE 'status'` says varchar(40), and option `kop_status_columns_varchar` is '1'
+   (if not, `~/logs` / the PHP error log has `kop_status_columns_to_varchar:` with the reason).
+2. **Check by hand:** the screen at 390 px and 1280 px; add a test choice to one list, see it in its dropdown, Undo it.
+3. **Owner decision:** the /news/ feed, state and country pages print an article's type as its raw value ("Lawsuit");
+   switching them to the list's labels ("Lawsuit Article", `kop_news_article_type_label()`) would change public wording.
+   The browser extension's popup already shows the list's labels (it reads them from the site, no extension update).
+4. A status added on the screen can only borrow a built-in status's badge colour (no new CSS).
+5. `js/data-form-modules/data-page.js` (the old report) turns tick-box keys into words itself, so an added box prints as
+   its key (`breathing_restraint`); make it read `window.KOP_CHOICE_LISTS` like `data-report-generator.js`.
+6. Gender served, chamber, level and publication statuses stay in code (normalisation and workflow states, not categories).

@@ -8,6 +8,10 @@
  * for updates.
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once dirname(__DIR__) . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -56,15 +60,15 @@ function kop_rinbox_bugs_statuses() {
     return array('new' => 'New', 'in_progress' => 'In progress', 'resolved' => 'Resolved', 'dismissed' => 'Dismissed');
 }
 
-/** The screen's category names. */
-function kop_rinbox_bugs_categories() {
-    return array(
-        'save-failed' => 'Saving/submitting failed',
-        'load-failed' => 'Something didn’t load',
-        'broken-ui'   => 'Broken UI',
-        'wrong-data'  => 'Wrong/missing data',
-        'other'       => 'Other',
-    );
+/**
+ * The screen's category names: value => label. The categories, with the
+ * wording readers see in the Report a problem form, are in
+ * inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists).
+ */
+function kop_rinbox_bugs_categories($mode = 'all') {
+    $out = array();
+    foreach (kop_choices('bug-report-categories', null, $mode) as $k => $c) $out[$k] = kop_choice_label($c);
+    return $out;
 }
 
 function kop_rinbox_bugs_row($id) {

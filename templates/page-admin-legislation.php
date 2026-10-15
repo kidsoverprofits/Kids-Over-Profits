@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 kop_require_page_capability('edit_posts');
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
 
 $us_states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 $federal_option = 'Federal';
@@ -130,16 +131,7 @@ get_header();
                     <label>&nbsp;</label>
                     <label>Status
                         <select name="status" id="leg-status">
-                            <option value="unknown">Unknown</option>
-                            <option value="proposed">Proposed (discussion draft)</option>
-                            <option value="introduced">Introduced</option>
-                            <option value="in_committee">In committee</option>
-                            <option value="passed_house">Passed house</option>
-                            <option value="passed_senate">Passed senate</option>
-                            <option value="signed">Signed</option>
-                            <option value="enacted">Enacted</option>
-                            <option value="vetoed">Vetoed</option>
-                            <option value="dead">Dead</option>
+                            <?php echo kop_status_choice_options_html('bill-statuses'); // KOP Tools > Dropdown Lists ?>
                         </select>
                     </label>
                 </div>
@@ -189,11 +181,7 @@ get_header();
                 <div class="form-row two-col">
                     <label>KOP position
                         <select name="position" id="leg-position">
-                            <option value="unknown">Unknown</option>
-                            <option value="support">Support</option>
-                            <option value="oppose">Oppose</option>
-                            <option value="watch">Watch</option>
-                            <option value="neutral">Neutral</option>
+                            <?php echo kop_status_choice_options_html('bill-positions'); ?>
                         </select>
                     </label>
                     <label>Publication status

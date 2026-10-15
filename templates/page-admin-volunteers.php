@@ -7,6 +7,7 @@
 
 if (!defined('ABSPATH')) { exit; }
 kop_require_page_capability('edit_posts');
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
 
 get_header();
 ?>
@@ -30,12 +31,7 @@ get_header();
                 </select>
                 <select id="filterType">
                     <option value="">All types</option>
-                    <option value="research">Research</option>
-                    <option value="data_entry">Data Entry</option>
-                    <option value="advocacy">Advocacy</option>
-                    <option value="tech">Tech</option>
-                    <option value="outreach">Outreach</option>
-                    <option value="other">Other</option>
+                    <?php echo kop_status_choice_options_html('volunteer-project-types'); // KOP Tools > Dropdown Lists ?>
                 </select>
                 <select id="filterPubStatus">
                     <option value="">All pub statuses</option>
@@ -64,12 +60,7 @@ get_header();
                 <div class="form-row two-col">
                     <label>Project type
                         <select name="project_type" id="vol-type">
-                            <option value="research">Research</option>
-                            <option value="data_entry">Data Entry</option>
-                            <option value="advocacy">Advocacy</option>
-                            <option value="tech">Tech</option>
-                            <option value="outreach">Outreach</option>
-                            <option value="other">Other</option>
+                            <?php echo kop_status_choice_options_html('volunteer-project-types'); ?>
                         </select>
                     </label>
                     <label>Status

@@ -206,7 +206,7 @@ function kop_rinbox_wlinks_create_action(array $e, $name) {
     $states = array('' => '(none, or outside the US)');
     foreach (kop_wb_state_names() as $code => $state_name) $states[$code] = $code . ' ' . $state_name;
     $types = array('' => 'Not sure');
-    foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types() : array() as $t) $types[$t] = $t;
+    foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types('offered') : array() as $t) $types[$t] = $t;
     $kind = $e['kind'] === 'operator' ? 'company' : ($e['kind'] === 'program' ? 'facility' : '');
     return array('id' => 'create', 'label' => 'Create the record and link it', 'style' => 'neutral',
         'help' => 'When KOP has no record of what ' . $name . ' is about: makes a new record of the kind and name below (a program, company, educational consultant, mental health provider or transporter), citing the wiki entry, and links the entry to it. Undo on the Linked here tab takes the link off; the record stays.',

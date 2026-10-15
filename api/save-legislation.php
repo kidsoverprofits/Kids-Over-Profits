@@ -12,6 +12,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/config.php';
+if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
 
 if (!defined('ABSPATH')) {
     $current = __DIR__;
@@ -154,10 +155,11 @@ try {
     $validChambers = ['house','senate','assembly','joint','federal_house','federal_senate','other','unknown'];
     $chamber = in_array($data['chamber'] ?? '', $validChambers, true) ? $data['chamber'] : 'unknown';
 
-    $validStatuses = ['proposed','introduced','in_committee','passed_house','passed_senate','signed','vetoed','dead','enacted','unknown'];
+    // Bill statuses and positions: KOP Tools > Dropdown Lists (inc/choice-lists/statuses.php).
+    $validStatuses = kop_bill_status_values('all');
     $status = in_array($data['status'] ?? '', $validStatuses, true) ? $data['status'] : 'unknown';
 
-    $validPositions = ['support','oppose','neutral','watch','unknown'];
+    $validPositions = kop_bill_position_values('all');
     $position = in_array($data['position'] ?? '', $validPositions, true) ? $data['position'] : 'unknown';
 
     $validPubStatuses = ['draft','pending','approved','published','rejected'];

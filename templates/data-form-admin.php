@@ -9,6 +9,7 @@
 // (and its localized config) off the public site.
 kop_require_page_capability('manage_options');
 
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // kop_df_render_checklist()
 get_header();
 ?>
 
@@ -1434,86 +1435,7 @@ get_header();
                 <h3 style="margin: 20px 0 15px 0; color: #1f2937; font-size: 15px;">Standard Treatment Types</h3>
                 <?php kop_form_panel_help('standard-treatment-types', 'section-help'); ?>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasABA" data-note-scope="facility" data-note-key="treatmentTypes.hasABA" id="has-aba">
-                    <label for="has-aba">Applied Behavior Analysis</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasEquineTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasEquineTherapy" id="has-equine-therapy">
-                    <label for="has-equine-therapy">Equine Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasWorkTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasWorkTherapy" id="has-work-therapy">
-                    <label for="has-work-therapy">Work Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasWildernessTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasWildernessTherapy" id="has-wilderness-therapy">
-                    <label for="has-wilderness-therapy">Wilderness Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasRealityTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasRealityTherapy" id="has-reality-therapy">
-                    <label for="has-reality-therapy">Reality Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasLGATSeminars" data-note-scope="facility" data-note-key="treatmentTypes.hasLGATSeminars" id="has-lgat">
-                    <label for="has-lgat">Large Group Awareness Training Seminars</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasFeedbackHotseatGroups" data-note-scope="facility" data-note-key="treatmentTypes.hasFeedbackHotseatGroups" id="has-feedback-hotseat">
-                    <label for="has-feedback-hotseat">Feedback/Hotseat Groups (aka The Game)</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasPrimalScreamTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasPrimalScreamTherapy" id="has-primal-scream">
-                    <label for="has-primal-scream">Primal Scream Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasRepressedMemoryTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasRepressedMemoryTherapy" id="has-repressed-memory">
-                    <label for="has-repressed-memory">Repressed Memory Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasBehaviorModification" data-note-scope="facility" data-note-key="treatmentTypes.hasBehaviorModification" id="has-behavior-mod">
-                    <label for="has-behavior-mod">Behavior Modification</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasKetamineTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasKetamineTherapy" id="has-ketamine">
-                    <label for="has-ketamine">Ketamine Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasExposureTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasExposureTherapy" id="has-exposure">
-                    <label for="has-exposure">Exposure Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasUnlicensedProvider" data-note-scope="facility" data-note-key="treatmentTypes.hasUnlicensedProvider" id="has-unlicensed">
-                    <label for="has-unlicensed">Therapy with an Unlicensed Provider</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasConversionTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasConversionTherapy" id="has-conversion">
-                    <label for="has-conversion">Sexual Orientation Gender Identity Change Efforts/Conversion/Reparative Therapy (SOGICE)</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasAttachmentTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasAttachmentTherapy" id="has-attachment">
-                    <label for="has-attachment">Attachment Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasRebirthingTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasRebirthingTherapy" id="has-rebirthing">
-                    <label for="has-rebirthing">Rebirthing Therapy</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasTappingTherapy" data-note-scope="facility" data-note-key="treatmentTypes.hasTappingTherapy" id="has-tapping">
-                    <label for="has-tapping">Tapping/Thought Field Therapy (TFT)</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasPsychoanalysis" data-note-scope="facility" data-note-key="treatmentTypes.hasPsychoanalysis" id="has-psychoanalysis">
-                    <label for="has-psychoanalysis">Psychoanalysis</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasEMDR" data-note-scope="facility" data-note-key="treatmentTypes.hasEMDR" id="has-emdr-treatment">
-                    <label for="has-emdr-treatment">Eye Movement Desensitization and Reprocessing (EMDR)</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="treatmentTypes.hasHypnosis" data-note-scope="facility" data-note-key="treatmentTypes.hasHypnosis" id="has-hypnosis">
-                    <label for="has-hypnosis">Hypnosis</label>
-                </div>
+                <?php kop_df_render_checklist('treatmentTypes', '                '); // KOP Tools > Dropdown Lists ?>
 
                 <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 15px;">Custom Treatment Types</h3>
                 <?php kop_form_panel_help('custom-treatment-types', 'section-help'); ?>
@@ -1613,46 +1535,7 @@ get_header();
                 <h3 style="margin: 20px 0 15px 0; color: #1f2937; font-size: 15px;">Standard Philosophies</h3>
                 <?php kop_form_panel_help('standard-philosophies', 'section-help'); ?>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasPositivePeerCulture" data-note-scope="facility" data-note-key="philosophy.hasPositivePeerCulture" id="has-ppc">
-                    <label for="has-ppc">Positive Peer Culture</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.has12Steps" data-note-scope="facility" data-note-key="philosophy.has12Steps" id="has-12-steps">
-                    <label for="has-12-steps">12 Steps</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasFundamentalistBaptist" data-note-scope="facility" data-note-key="philosophy.hasFundamentalistBaptist" id="has-baptist">
-                    <label for="has-baptist">Fundamentalist Baptist</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasPentecostal" data-note-scope="facility" data-note-key="philosophy.hasPentecostal" id="has-pentecostal">
-                    <label for="has-pentecostal">Pentecostal</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasScientology" data-note-scope="facility" data-note-key="philosophy.hasScientology" id="has-scientology">
-                    <label for="has-scientology">Scientology</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasTherapeuticCommunity" data-note-scope="facility" data-note-key="philosophy.hasTherapeuticCommunity" id="has-tc">
-                    <label for="has-tc">Therapeutic Community</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasWildernessRoad" data-note-scope="facility" data-note-key="philosophy.hasWildernessRoad" id="has-wilderness-road">
-                    <label for="has-wilderness-road">Wilderness Road</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasPsychoanalytic" data-note-scope="facility" data-note-key="philosophy.hasPsychoanalytic" id="has-psychoanalytic">
-                    <label for="has-psychoanalytic">Psychoanalytic</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasLawOfAttraction" data-note-scope="facility" data-note-key="philosophy.hasLawOfAttraction" id="has-loa">
-                    <label for="has-loa">Law of Attraction</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="philosophy.hasHumanPotentialMovement" data-note-scope="facility" data-note-key="philosophy.hasHumanPotentialMovement" id="has-hpm">
-                    <label for="has-hpm">Human Potential Movement</label>
-                </div>
+                <?php kop_df_render_checklist('philosophy', '                '); // KOP Tools > Dropdown Lists ?>
 
                 <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 15px;">Custom Philosophies</h3>
                 <?php kop_form_panel_help('custom-philosophies', 'section-help'); ?>
@@ -1679,22 +1562,7 @@ get_header();
                 <h3 style="margin: 20px 0 15px 0; color: #1f2937; font-size: 15px;">Standard Incident Types</h3>
                 <?php kop_form_panel_help('standard-incident-types', 'section-help'); ?>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="criticalIncidents.hasDeaths" data-note-scope="facility" data-note-key="criticalIncidents.hasDeaths" id="has-deaths">
-                    <label for="has-deaths">Deaths</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="criticalIncidents.hasStaffArrests" data-note-scope="facility" data-note-key="criticalIncidents.hasStaffArrests" id="has-staff-arrests">
-                    <label for="has-staff-arrests">Staff Arrests</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="criticalIncidents.hasStudentHospitalizations" data-note-scope="facility" data-note-key="criticalIncidents.hasStudentHospitalizations" id="has-hospitalizations">
-                    <label for="has-hospitalizations">Student Hospitalizations</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" class="facility-checkbox" data-field="criticalIncidents.hasRiots" data-note-scope="facility" data-note-key="criticalIncidents.hasRiots" id="has-riots">
-                    <label for="has-riots">Riots</label>
-                </div>
+                <?php kop_df_render_checklist('criticalIncidents', '                '); // KOP Tools > Dropdown Lists ?>
 
                 <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 15px;">Custom Critical Incidents</h3>
                 <?php kop_form_panel_help('custom-incidents', 'section-help'); ?>

@@ -14,16 +14,11 @@ get_header();
 
 $us_states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 
-$status_labels = [
-    'filed'       => 'Filed',
-    'in_progress' => 'In progress',
-    'settled'     => 'Settled',
-    'dismissed'   => 'Dismissed',
-    'ruling'      => 'Ruling issued',
-    'appeal'      => 'On appeal',
-    'closed'      => 'Closed',
-    'unknown'     => 'Not sure',
-];
+require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
+// Lawsuit statuses (KOP Tools > Dropdown Lists), hidden ones left out; "Not sure" last.
+$status_labels = kop_lawsuit_statuses('offered');
+unset($status_labels['unknown']);
+$status_labels['unknown'] = 'Not sure';
 
 $endpoint         = get_stylesheet_directory_uri() . '/api/save-lawsuit-suggestion.php';
 $extract_endpoint = get_stylesheet_directory_uri() . '/api/extract-lawsuit-suggestion.php';

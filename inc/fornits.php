@@ -25,6 +25,10 @@
  *     an exact Undo, as Drive Docs and Woodbury Facts do.
  */
 
+// Dropdown lists (kop_choices(); KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/choice-lists.php';
+
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -116,29 +120,13 @@ function kop_fornits_ensure_tables() {
     update_option('kop_fornits_db', KOP_FORNITS_DB_VERSION);
 }
 
-/** What a thread is, as the reading tags it. */
-function kop_fornits_categories() {
-    return array(
-        'survivor_account'      => 'Survivor account',
-        'parent_account'        => 'Parent account',
-        'staff_account'         => 'Former staff account',
-        'abuse_allegation'      => 'Abuse',
-        'sexual_abuse'          => 'Sexual abuse',
-        'death'                 => 'Death',
-        'restraint_seclusion'   => 'Restraint or seclusion',
-        'medical_neglect'       => 'Medical neglect',
-        'staff_names'           => 'Staff named',
-        'ownership_business'    => 'Owners and business',
-        'legal'                 => 'Lawsuit or criminal case',
-        'investigation'         => 'Investigation or licensing',
-        'closure_rename'        => 'Closure or new name',
-        'news_coverage'         => 'News coverage',
-        'program_methods'       => 'Program methods',
-        'referral_marketing'    => 'Referrals and marketing',
-        'parent_seeking_advice' => 'Parent asking for advice',
-        'defending_program'     => 'Defending the program',
-        'chatter'               => 'Chatter',
-    );
+/**
+ * What a thread is, as the reading tags it. The categories are in
+ * inc/choice-lists/sorting.php (KOP Tools > Dropdown Lists); $mode 'offered'
+ * leaves out hidden ones (the AI's list, filters).
+ */
+function kop_fornits_categories($mode = 'all') {
+    return kop_choices('fornits-categories', null, $mode);
 }
 
 /** The importance scale the reading uses. */
@@ -417,7 +405,7 @@ function kop_fornits_prompt(array $topic, $posts_text) {
         . "Rules:\n"
         . "- topic.summary: two or three plain sentences on what this thread actually says: who is posting (a survivor, a parent, former staff, "
         . "a program defender), what happened or is claimed, and any names, years, deaths, lawsuits or documents. No opinions of your own.\n"
-        . "- topic.categories: every one that fits, from: " . implode(', ', array_keys(kop_fornits_categories())) . ".\n"
+        . "- topic.categories: every one that fits, from: " . implode(', ', array_keys(kop_fornits_categories('offered'))) . ".\n"
         . "- about: one entry per program above that the thread discusses. says: one or two sentences on what the thread says about that program. "
         . "importance: 3 = key evidence (first-hand abuse, a death, named staff, dated incidents, lawsuits, documents); 2 = useful specific facts; "
         . "1 = opinions or second-hand talk; 0 = only a passing mention or chatter.\n"
