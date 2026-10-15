@@ -79,6 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let allSubmissions = [];
     let currentOriginalMarkdown = '';
     let duplicateUrlMap = new Map(); // Map of normalized URLs to array of submission IDs
+    // Which list load is the newest: an older one that finishes later draws nothing (loadSubmissions()).
+    // Declared up here because the list first loads at "Initialize", before the function's own lines.
+    let loadSeq = 0;
 
     // Inline-expansion state. The submissionModal element gets physically
     // moved into the active card when View Details is clicked; we cache its
@@ -706,8 +709,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (card) { window.scrollBy(0, card.getBoundingClientRect().top - t.top); return; }
         }
     }
-
-    let loadSeq = 0;
 
     async function loadSubmissions() {
         const seq = ++loadSeq;
