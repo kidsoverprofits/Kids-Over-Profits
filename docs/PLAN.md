@@ -849,10 +849,9 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
    Follow-ups: submit https://www.fox13now.com/2019/08/14/employee-at-treatment-center-in-southern-utah-facing-felony-child-abuse-charge
    (Liahona, 2019 choke-hold restraint, 11 staples; the hourly cap refused it); lawsuits #54 Parker and #55
    Bence have empty source_urls (CourtListener: gov.uscourts.oknd.78072 complaint, docket 73624806).
-   **Screenshots (2026-10-15, 345de923):** the article shows the materials it quotes, highlighted (13, seed
-   v9; attachments 16045-16057, folder #8506 "Reputation series - document screenshots"; captions name the
-   date and link the archived page and our copy). The owner wanted them on this page only: the 8 added to
-   Deceptive Marketing were taken off again (seed v4); their images 16058-16065 stay in that folder, unused.
+   **Screenshots (2026-10-15, 345de923):** both articles show the materials they quote, highlighted (13
+   here at seed v9, 8 in Deceptive Marketing at v5; attachments 16045-16065, folder #8506 "Reputation
+   series - document screenshots"; captions name the date and link the archived page and our copy).
    Open: our PDF copies of the Vive FAQ, Maple Lake FAQ + Emotional Health and Asheville Academy FAQ were
    printed with the answers collapsed or faded, so the quoted words are not in them; the screenshots and
    captions use the Wayback pages, but the "our copy" links in the text should be replaced by prints with
