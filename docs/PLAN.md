@@ -885,9 +885,12 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
   inspection-links.php:127), websites, wiki-updates (a card's actions include another queue's
   `home_of_program`), ya-file, ya-moved and merge-follow; `scripts/test-wiki-gaps.php` fails "a page
   with no years or place matches only its exact name" (Mountain Home Academy). Fix the tests or the
-  code per queue. `scripts/test-doc-types.php` fails "most are placed on a program page" (only 20 of
-  47 enrollment documents sit in a program's library), with or without the 2026-10-14 staff ideology
-  and editor's note types.
+  code per queue. `scripts/test-doc-types.php` passes since 2026-10-15 (/documents/ now lists a document
+  in a company's own folder under its /operator/ page). Still on no page, because no page shows their
+  folder: the top-level folders "Hyde" (id 19, 10 Hyde School enrollment papers), "ANASAZI" (214) and
+  "Agape Boarding School" (7815). Owner: link each to its program's folder (Hyde School 297, Anasazi
+  Foundation 5659, Agape Baptist Academy 4819) with api/link-folders.php, or move the files with the
+  tile pencil.
 - **New document types `staff-ideology` and `editor-note` (2026-10-14)**: after deploy, the hourly run
   (rules version 3) looks again at documents the old rules left untyped; check KOP Tools > Document
   Types for the 7 the rules give staff ideology (mostly Teen Challenge's "Philosophy & Values" folder)

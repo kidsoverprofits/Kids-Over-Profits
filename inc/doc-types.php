@@ -828,7 +828,59 @@ if (!function_exists('kop_dt_facility_for')) {
                 if (isset($map['names'][$k])) return $map['names'][$k];
             }
         }
+        // A folder linked to a program's folder (KOP Tools folder links) is shown on that page too.
+        if (function_exists('kop_get_linked_folder_ids')) {
+            static $linked = array();
+            foreach ($folder_ids as $fid) {
+                foreach (kop_dt_chain($fid) as $cid) {
+                    if (!isset($linked[$cid])) $linked[$cid] = kop_get_linked_folder_ids(array($cid));
+                    foreach ($linked[$cid] as $lid) {
+                        if (isset($map['ids'][$lid])) return $map['ids'][$lid];
+                    }
+                }
+            }
+        }
         return 0;
+    }
+}
+
+if (!function_exists('kop_dt_company_folder_map')) {
+    /**
+     * folder id => {id, name, url} of the /operator/ page that shows it (a
+     * company record's own document folder), so documents filed under a
+     * company are listed under it.
+     */
+    function kop_dt_company_folder_map() {
+        static $memo = null;
+        if ($memo !== null) return $memo;
+        global $wpdb;
+        $memo = array();
+        if (!function_exists('kop_operator_pages_index') || !function_exists('kop_operator_page_url')) return $memo;
+        $index = kop_operator_pages_index();
+        $rows = $wpdb->get_results("SELECT id, document_folder_id FROM {$wpdb->prefix}kop_operators WHERE document_folder_id > 0", ARRAY_A);
+        foreach ((array) $rows as $r) {
+            $oid = (int) $r['id'];
+            if (isset($index['alias_of'][$oid])) $oid = (int) $index['alias_of'][$oid];
+            if (!isset($index['ids'][$oid])) continue;
+            $folder = (int) $r['document_folder_id'];
+            if (isset($memo[$folder])) continue;
+            $memo[$folder] = array('id' => $oid, 'name' => (string) $index['ids'][$oid]['display'], 'url' => kop_operator_page_url($oid));
+        }
+        return $memo;
+    }
+}
+
+if (!function_exists('kop_dt_company_for')) {
+    /** The company page a document's folders put it on (nearest folder first), or null. */
+    function kop_dt_company_for(array $folder_ids) {
+        $map = kop_dt_company_folder_map();
+        if (!$map) return null;
+        foreach ($folder_ids as $fid) {
+            foreach (kop_dt_chain($fid) as $cid) {
+                if (isset($map[$cid])) return $map[$cid];
+            }
+        }
+        return null;
     }
 }
 
@@ -844,7 +896,7 @@ if (!function_exists('kop_dt_year')) {
 if (!function_exists('kop_dt_page_items')) {
     /**
      * Every public document of one type: [{id, title, url, thumb, ext, year,
-     * place: {kind: facility|folder, name, url, state}}], grouped and sorted by
+     * place: {kind: facility|company|folder, name, url, state}}], grouped and sorted by
      * the reader page. Cached until a type changes or the facility index is rebuilt.
      */
     function kop_dt_page_items($type) {
@@ -881,8 +933,10 @@ if (!function_exists('kop_dt_page_items')) {
                 $fids[$fid] = true;
                 $place = array('kind' => 'facility', 'id' => $fid, 'name' => $map['pages'][$fid]['name'],
                     'url' => function_exists('kop_facility_pages_url_for_slug') ? kop_facility_pages_url_for_slug($map['pages'][$fid]['slug']) : '', 'state' => '');
+            } elseif ($co = kop_dt_company_for($doc['folders'])) {
+                $place = array('kind' => 'company', 'id' => $co['id'], 'name' => $co['name'], 'url' => $co['url'], 'state' => '');
             } else {
-                // Not on a program's page: named by the top folder it is filed under (a company, a trade group, "Government").
+                // Not on a program's or company's page: named by the top folder it is filed under (a company, a trade group, "Government").
                 $chain = kop_dt_chain($doc['folders'][0]);
                 $root = $chain ? $folders[end($chain)]['name'] : '';
                 if (preg_match('/^[a-z]{2}_pdfs$/i', $root)) $root = strtoupper(substr($root, 0, 2)) . ' state reports';
@@ -912,8 +966,9 @@ if (!function_exists('kop_dt_page_items')) {
             unset($it);
         }
         usort($items, function ($a, $b) {
-            $pa = ($a['place']['kind'] === 'facility' ? '0' : '1') . strtolower($a['place']['name']);
-            $pb = ($b['place']['kind'] === 'facility' ? '0' : '1') . strtolower($b['place']['name']);
+            $order = array('facility' => '0', 'company' => '1');
+            $pa = ($order[$a['place']['kind']] ?? '2') . strtolower($a['place']['name']);
+            $pb = ($order[$b['place']['kind']] ?? '2') . strtolower($b['place']['name']);
             if ($pa !== $pb) return strcmp($pa, $pb);
             if ($a['year'] !== $b['year']) return strcmp($a['year'] === '' ? '9999' : $a['year'], $b['year'] === '' ? '9999' : $b['year']);
             return strcasecmp($a['title'], $b['title']);

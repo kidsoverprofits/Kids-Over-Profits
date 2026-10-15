@@ -197,7 +197,9 @@ $doc = (int) $pdo->query("SELECT attachment_id FROM wpdl_kop_doc_types WHERE typ
 $fields = kop_dt_pencil_fields($doc);
 $check('the pencil offers every type, ticked as now', count($fields[0]['options']) === count($types) && $fields[0]['value'] === array('enrollment'));
 $msg = kop_dt_pencil_save($doc, array('doc_types' => array('enrollment', 'student-handbook')));
-$check('ticking a second type saves both', kop_dt_types_for($doc) === array('student-handbook', 'enrollment'), $msg);
+// Types come back in the list's order (A to Z by label since Dropdown Lists), not the order ticked.
+$both = kop_dt_clean_types(array('student-handbook', 'enrollment'));
+$check('ticking a second type saves both', kop_dt_types_for($doc) === $both, $msg);
 $check('saving it unchanged changes nothing', kop_dt_pencil_save($doc, array('doc_types' => array('student-handbook', 'enrollment'))) === '');
 $check('a dialog without the field leaves the types', kop_dt_pencil_save($doc, array('title' => 'x')) === '' && count(kop_dt_types_for($doc)) === 2);
 kop_dt_pencil_save($doc, array('doc_types' => array()));
@@ -205,7 +207,7 @@ $check('unticking every type clears it for good', kop_dt_types_for($doc) === arr
 $check('cleared documents are never typed again by the rules', kop_dt_run_rules(true)['typed'] === 0);
 $log = kop_dt_log();
 kop_dt_undo($log[0]['id'], 'Test Admin');
-$check('undo of the clear puts both types back and lifts the clear', kop_dt_types_for($doc) === array('student-handbook', 'enrollment') && kop_dt_sugg_get($doc) === null);
+$check('undo of the clear puts both types back and lifts the clear', kop_dt_types_for($doc) === $both && kop_dt_sugg_get($doc) === null);
 kop_dt_undo($log[1]['id'], 'Test Admin');
 $check('undo of the second type leaves enrollment', kop_dt_types_for($doc) === array('enrollment'));
 $tile = kop_dt_tile_attr($doc);
@@ -272,10 +274,13 @@ $check('Undo puts it back on the list', $count("SELECT COUNT(*) FROM wpdl_kop_do
 echo "Reader pages\n";
 $t0 = microtime(true);
 $items = kop_dt_page_items('enrollment');
-$on_pages = count(array_filter($items, function ($i) { return $i['place']['kind'] === 'facility'; }));
-printf("  enrollment: %d documents, %d on a program's page, in %.1fs\n", count($items), $on_pages, microtime(true) - $t0);
+// Placed = on the page that shows it: a program's, or a company's when filed in the company's own folder.
+$on_pages = count(array_filter($items, function ($i) { return $i['place']['kind'] === 'facility' || $i['place']['kind'] === 'company'; }));
+printf("  enrollment: %d documents, %d on a program's or company's page, in %.1fs\n", count($items), $on_pages, microtime(true) - $t0);
 $check('enrollment documents are listed', count($items) > 10);
-$check('most are placed on a program page', $on_pages * 2 >= count($items), "$on_pages of " . count($items));
+$check('most are placed on a program or company page', $on_pages * 2 >= count($items), "$on_pages of " . count($items));
+$co = array_values(array_filter($items, function ($i) { return $i['place']['kind'] === 'company'; }));
+$check('documents in a company\'s folder link its /operator/ page', $co && strpos($co[0]['place']['url'], '/operator/') !== false, $co ? $co[0]['place']['name'] : 'none');
 $check('placed ones carry a state and a page link', !array_filter($items, function ($i) { return $i['place']['kind'] === 'facility' && $i['place']['url'] === ''; }));
 $check('every item has a file link', !array_filter($items, function ($i) { return $i['url'] === ''; }));
 $private = kop_dt_private_folder_ids();
