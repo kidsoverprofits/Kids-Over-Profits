@@ -174,6 +174,8 @@ $kop_dt_rows = array(
         'Saved copies of program, company and directory web pages.'),
     'staff-ideology'   => array('Staff ideology', 'Staff ideology', $kop_dt_g_prog,
         'What a program\'s founders and staff believed and taught: philosophy and core values statements, treatment models, founders\' books, sermons and speeches.'),
+    'glossary'         => array('Glossary', 'Glossaries', $kop_dt_g_prog,
+        'A program\'s own list of its terms, jargon and acronyms, with what each meant there.'),
     'inspection-report' => array('Inspection or licensing report', 'Inspection and licensing reports', $kop_dt_g_over,
         'State inspection, licensing, monitoring and complaint investigation reports.'),
     'incident-report'  => array('Police or incident report', 'Police and incident reports', $kop_dt_g_over,
