@@ -265,6 +265,15 @@ function normalize_name($s): string {
     return trim(preg_replace('/\s+/', ' ', $n));
 }
 
+/**
+ * A record's name as it is searched and matched: a bracketed year range at the
+ * end ("Solstice RTC (2008-2012)", "(2002 to 2023)", "(since 2010)", "(2005)")
+ * is the record's note on when it had the name, never words an article uses.
+ */
+function search_name($s): string {
+    return trim(preg_replace('/\s*\(\s*(?:(?:since|from|until|to)\s+)?\d{4}(?:\s*(?:-|\x{2013}|\x{2014}|to)\s*(?:\d{4}|present|now)?)?\s*\)\s*$/iu', '', (string)($s ?? '')));
+}
+
 $TRAILING_DROP_WORDS = [
     'children', 'child', 'youth', 'youths', 'teens', 'teen', 'adolescents',
     'adolescent', 'boys', 'girls', 'kids', 'minors', 'juveniles', 'inc',
@@ -858,16 +867,16 @@ function build_facility_index(array $apiResponse, array $ignoreAliases = [], arr
             $collectHosts($f['profileLinks'] ?? null);
             if (!empty($f['sourceOperator'])) $collectHosts($f['sourceOperator']['websites'] ?? null);
 
-            $primaryName = trim((string)($ident['currentName'] ?? ''));
-            if ($primaryName === '') $primaryName = (string)($ident['name'] ?? '');
+            $primaryName = search_name($ident['currentName'] ?? '');
+            if ($primaryName === '') $primaryName = search_name($ident['name'] ?? '');
             if ($primaryName === '') continue;
 
             $names = [$primaryName];
-            if (!empty($ident['name']) && $ident['name'] !== $primaryName) $names[] = $ident['name'];
+            if (!empty($ident['name']) && search_name($ident['name']) !== $primaryName) $names[] = search_name($ident['name']);
             foreach ([($ident['otherNames'] ?? null), ($ident['pastNames'] ?? null)] as $list) {
                 if (is_array($list)) {
                     foreach ($list as $n) {
-                        if (is_string($n) && trim($n) !== '') $names[] = trim($n);
+                        if (is_string($n) && search_name($n) !== '') $names[] = search_name($n);
                     }
                 }
             }
@@ -892,11 +901,11 @@ function build_facility_index(array $apiResponse, array $ignoreAliases = [], arr
 
         // --- Operator-level entry (companies category only) ---
         if (($project['category'] ?? '') === 'companies' && $operatorName !== '') {
-            $names = [$operatorName];
+            $names = [search_name($operatorName)];
             foreach ([($operator['otherNames'] ?? null), ($operator['parentCompanies'] ?? null)] as $list) {
                 if (is_array($list)) {
                     foreach ($list as $n) {
-                        if (is_string($n) && trim($n) !== '') $names[] = trim($n);
+                        if (is_string($n) && search_name($n) !== '') $names[] = search_name($n);
                     }
                 }
             }
@@ -2039,7 +2048,7 @@ function main(): void {
         try {
             $pj = fetch_json(PRIORITY_URL, ['timeoutMs' => 60000, 'headers' => ['X-KOP-Internal' => kop_internal_token('discovery')]]);
             foreach (($pj['names'] ?? []) as $n) {
-                $k = normalize_name((string)$n);
+                $k = normalize_name(search_name((string)$n));
                 if ($k !== '') $priorityKeys[$k] = true;
             }
             $priorityRecords = (int)($pj['records'] ?? 0);

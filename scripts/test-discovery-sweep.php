@@ -124,6 +124,23 @@ check('--max-facilities caps the requests', count($s4) === 2 && $c4 === 5);
 list($s5) = sweep_slice(array(), 7);
 check('an empty list is fine', $s5 === array());
 
+/* ---- Names with a bracketed year range (search_name) ------------------ */
+
+foreach (array(
+    'Solstice RTC (2008-2012)' => 'Solstice RTC', 'Shortridge Academy (2002 - 2023)' => 'Shortridge Academy',
+    "Ironwood Maine (2006\u{2013}2024)" => 'Ironwood Maine', 'Copper Canyon (since 2010)' => 'Copper Canyon',
+    'Horizon Academy (2004 to present)' => 'Horizon Academy', 'Aspen Ranch (2005)' => 'Aspen Ranch',
+    'Integrity House (Cedar City, UT)' => 'Integrity House (Cedar City, UT)', 'Academy 2000' => 'Academy 2000',
+    'Provo Canyon School' => 'Provo Canyon School',
+) as $in => $want) {
+    check('search name: ' . $in, search_name($in) === $want, search_name($in));
+}
+$yr = build_facility_index(array('projects' => array(array('category' => 'facilities', 'name' => 'X', 'data' => array('operator' => array('name' => ''),
+    'facilities' => array(array('identification' => array('name' => 'Solstice West', 'otherNames' => array('Solstice RTC (2008-2012)')),
+        'location' => array('city' => 'Kaysville', 'state' => 'UT'), 'operatingPeriod' => array('status' => 'Open'))))))), array(), $queries['genericAliasWords']);
+$yrNames = $yr['facilities'][0]['queryNames'] ?? array();
+check('a record\'s other name is searched without its years', in_array('Solstice RTC', $yrNames, true) && !in_array('Solstice RTC (2008-2012)', $yrNames, true), json_encode($yrNames));
+
 /* ---- Daily list + rotation (plan_sweep) ------------------------------- */
 
 $daily = array_slice($ten, 0, 6);
