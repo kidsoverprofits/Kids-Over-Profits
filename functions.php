@@ -252,6 +252,8 @@ require_once get_stylesheet_directory() . '/inc/doc-placement.php';
 require_once get_stylesheet_directory() . '/inc/drive-docs.php';
 // What the old Fornits survivor forum says about each facility (scripts/fornits-crawl.py, fornits-process.py), reviewed at KOP Tools > Fornits
 require_once get_stylesheet_directory() . '/inc/fornits.php';
+// Which job spent the shared Groq/Gemini free quota, and "Check now" (KOP Tools > AI Usage)
+require_once get_stylesheet_directory() . '/inc/ai-usage.php';
 // Imports whose name is exactly one record's connect themselves hourly (Woodbury pages, wiki links, Fornits links, State Lists)
 require_once get_stylesheet_directory() . '/inc/auto-connect.php';
 
