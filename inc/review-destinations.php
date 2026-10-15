@@ -40,7 +40,7 @@ function kop_rdest_targets() {
  * "Move to" entries for a card, leaving out $except (the queue the item is in).
  * Facility destinations ask for the facility; a resource also asks its kind.
  */
-function kop_rdest_moves(array $except = array(), $default_fid = 0) {
+function kop_rdest_moves(array $except = array(), $default_fid = 0, $default_kind = 'reference') {
     $kinds = function_exists('kop_facility_resource_link_kinds') ? kop_facility_resource_link_kinds() : array('other' => 'Other links');
     $out = array();
     foreach (kop_rdest_targets() as $id => $t) {
@@ -49,7 +49,7 @@ function kop_rdest_moves(array $except = array(), $default_fid = 0) {
         if ($t['needs_facility']) {
             $move['params'] = array(array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $default_fid));
             if ($id === 'resource') {
-                $move['params'][] = array('name' => 'kind', 'label' => 'Kind', 'type' => 'select', 'options' => $kinds, 'value' => 'reference');
+                $move['params'][] = array('name' => 'kind', 'label' => 'Kind', 'type' => 'select', 'options' => $kinds, 'value' => isset($kinds[$default_kind]) ? $default_kind : 'reference');
             }
         }
         if ($id === 'indigenous') {

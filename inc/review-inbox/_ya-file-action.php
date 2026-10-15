@@ -95,6 +95,7 @@ function kop_rinbox_ya_file_action($source, array $item) {
     if (!empty($src['native'])) return null; // the page draws those cards itself; their "Move to" has young adult programs
     if (isset(kop_rinbox_ya_filed()[$source][(string) $item['key']])) return null; // filed already: Undo is in Recently done
     // Only while the card waits for a decision: it still offers an approve or a reject.
+    if (($item['status'] ?? '') === 'trash') return null; // its Delete permanently is a reject, not a decision still to make
     $open = false;
     foreach ((array) ($item['actions'] ?? array()) as $a) {
         if (in_array($a['id'] ?? '', array('ya_file', 'young_adult'), true)) return null; // the queue's own (Facilities from News)

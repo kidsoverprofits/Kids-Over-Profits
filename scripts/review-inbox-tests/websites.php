@@ -135,7 +135,7 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
     $res = call_user_func($src['act'], $item['key'], 'trash', array());
     $check('websites: trash', $status() === 'trash', $res['message']);
     $trashed = kop_rinbox_get_item('websites', $item['key']);
-    $check('websites: a trashed website offers Restore and Delete permanently', array_column($trashed['actions'], 'id') === array('untrash', 'delete'));
+    $check('websites: a trashed website offers Restore and Delete permanently', array_column($trashed['actions'], 'id') === array('untrash', 'delete'), implode(', ', array_column($trashed['actions'], 'id')));
     $res = call_user_func($src['act'], $item['key'], 'untrash', array());
     $check('websites: restore puts it back where it was', $status() === 'pending', $res['message']);
 
@@ -175,6 +175,35 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
     call_user_func($src['act'], (string) $new, 'trash', array());
     $res = call_user_func($src['act'], (string) $new, 'delete', array());
     $check('websites: Delete permanently removes a trashed website', !get_post($new), $res['message']);
+
+    // The kind of website: guessed from the address until set, saved on the card, an unknown one refused.
+    $check('websites: the kind is guessed from the address', kop_ext_website_guess_kind('https://www.reddit.com/r/troubledteens/comments/x') === 'reddit'
+        && kop_ext_website_guess_kind('https://web.archive.org/web/2004/http://x.test/') === 'archive'
+        && kop_ext_website_guess_kind('https://dcfs.utah.gov/x') === 'government' && kop_ext_website_guess_kind('https://example.test/alumni') === '');
+    $kf = array_values(array_filter($item['fields'], function ($f) { return $f['name'] === 'kind'; }));
+    $check('websites: the kind is the card\'s category, every kind offered', $kf && !empty($kf[0]['category'])
+        && array_diff_key(kop_ext_website_kinds(), $kf[0]['options']) === array());
+    call_user_func($src['save'], $item['key'], array('kind' => 'forum'));
+    $card = kop_rinbox_get_item('websites', $item['key']);
+    $res_kind = array_values(array_filter($card['moves'], function ($m) { return $m['id'] === 'resource'; }));
+    $check('websites: a saved kind shows on the card and picks the Materials and links kind', get_post_meta($id, '_kop_kind', true) === 'forum'
+        && strpos($card['subtitle'], 'Forum post') !== false && $res_kind && $res_kind[0]['params'][1]['value'] === 'social', $card['subtitle']);
+    try {
+        call_user_func($src['save'], $item['key'], array('kind' => 'newsletter'));
+        $check('websites: an unknown kind is refused', false);
+    } catch (RuntimeException $e) {
+        $check('websites: an unknown kind is refused', get_post_meta($id, '_kop_kind', true) === 'forum', $e->getMessage());
+    }
+    // A kept website moves too, and Undo move puts it back on the Kept tab.
+    call_user_func($src['act'], $item['key'], 'publish', array());
+    $kept = kop_rinbox_get_item('websites', $item['key']);
+    $check('websites: a kept website offers every destination', count($kept['moves']) === count(kop_rdest_targets()));
+    call_user_func($src['act'], $item['key'], 'move', array('to' => 'lawsuit'));
+    $done = json_decode((string) get_post_meta((int) $item['key'], '_kop_moved', true), true);
+    $check('websites: a kept website moves to the lawsuit queue', $done && $done['to'] === 'lawsuit' && $status() === 'trash');
+    call_user_func($src['act'], $item['key'], 'unmove', array());
+    $check('websites: Undo move puts a kept website back on Kept', $status() === 'publish');
+    call_user_func($src['act'], $item['key'], 'unpublish', array());
 
     try {
         call_user_func($src['act'], $item['key'], 'move', array('to' => 'website'));

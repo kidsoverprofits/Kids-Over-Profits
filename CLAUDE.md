@@ -63,7 +63,8 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    `{"type": ..., "url": ..., "title": ..., "notes": "<which facility/company/person it is about, why it matters, the key quote>", "submitter_name": "Claude research agent", "via": "web"}`.
    `type`: `article` (news, opinion, press release) -> news review; `lawsuit` (court records, dockets) -> lawsuit review;
    `legislation` (bills) -> legislation review; `website` (everything else: forum posts, Reddit threads, blogs, program pages,
-   directories, reports) -> Websites Sent In. Nothing is published: it all waits in Review inbox. Never send the user's email.
+   directories, reports) -> Websites Sent In. A `website` may add `"website_kind"`: forum, reddit, blog, social, program, directory, report, government, media,
+   archive or other (kop_ext_website_kinds(); guessed from the address when left out). Nothing is published: it all waits in Review inbox. Never send the user's email.
 3. Wayback-only sources still follow the archive rule below (PDF into the media library); submit the original URL with the
    archive link in `notes`.
 4. 409 = duplicate (fine). 429 = the public route's 12-an-hour cap: keep going with the research, and list the unsent links

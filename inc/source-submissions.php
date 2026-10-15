@@ -87,6 +87,7 @@ add_action('init', 'kop_ext_register_source_type');
 function kop_ext_source_fields() {
     return array(
         'url'         => 'Link',
+        'kind'        => 'Kind of website',
         'site_name'   => 'Site',
         'author'      => 'Author or source',
         'published'   => 'Date',
@@ -98,12 +99,58 @@ function kop_ext_source_fields() {
     );
 }
 
+/** What kind of page a website sent in is: key => label (meta _kop_kind). */
+function kop_ext_website_kinds() {
+    return array(
+        'forum'      => 'Forum post or thread',
+        'reddit'     => 'Reddit post or thread',
+        'blog'       => 'Survivor blog or personal site',
+        'social'     => 'Social media post',
+        'program'    => 'Program\'s own page',
+        'directory'  => 'Directory or listing',
+        'report'     => 'Report or study',
+        'government' => 'Government page or record',
+        'media'      => 'Video or podcast',
+        'archive'    => 'Archived page',
+        'other'      => 'Other',
+    );
+}
+
+/** A clean kind: one of kop_ext_website_kinds(), else ''. */
+function kop_ext_website_kind($value) {
+    $value = strtolower(trim((string) $value));
+    return isset(kop_ext_website_kinds()[$value]) ? $value : '';
+}
+
+/** The kind the address says, when it says one ('' otherwise). */
+function kop_ext_website_guess_kind($url) {
+    $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+    $host = preg_replace('/^(www|old|m)\./', '', $host);
+    if ($host === '') return '';
+    $is = function (array $hosts) use ($host) {
+        foreach ($hosts as $h) {
+            if ($host === $h || substr($host, -strlen($h) - 1) === '.' . $h) return true;
+        }
+        return false;
+    };
+    if ($is(array('reddit.com', 'redd.it'))) return 'reddit';
+    if ($is(array('web.archive.org', 'archive.org', 'archive.today', 'archive.ph', 'archive.is'))) return 'archive';
+    if ($is(array('fornits.com', 'fornits.org'))) return 'forum';
+    if ($is(array('youtube.com', 'youtu.be', 'vimeo.com', 'podcasts.apple.com', 'open.spotify.com', 'soundcloud.com'))) return 'media';
+    if ($is(array('facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'tiktok.com', 'threads.net', 'bsky.app', 'linkedin.com'))) return 'social';
+    if ($is(array('wordpress.com', 'blogspot.com', 'medium.com', 'substack.com', 'tumblr.com'))) return 'blog';
+    if ($is(array('psychologytoday.com', 'yelp.com', 'glassdoor.com', 'indeed.com', 'bbb.org', 'findtreatment.gov', 'natsap.org'))) return 'directory';
+    if (preg_match('/\.(gov|mil)$|\.state\.[a-z]{2}\.us$|\.gov\.[a-z]{2}$/', $host)) return 'government';
+    return '';
+}
+
 add_filter('manage_' . KOP_EXT_SOURCE_CPT . '_posts_columns', function ($cols) {
     $out = array();
     foreach ($cols as $key => $label) {
         $out[$key] = $label;
         if ($key === 'title') {
             $out['kop_link']     = 'Link';
+            $out['kop_kind']     = 'Kind';
             $out['kop_facility'] = 'Facility';
         }
     }
@@ -117,10 +164,41 @@ add_action('manage_' . KOP_EXT_SOURCE_CPT . '_posts_custom_column', function ($c
             printf('<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', esc_url($url), esc_html((string) wp_parse_url($url, PHP_URL_HOST)));
         }
     }
+    if ($col === 'kop_kind') {
+        $kind = kop_ext_website_kind(get_post_meta($id, '_kop_kind', true));
+        echo esc_html($kind !== '' ? kop_ext_website_kinds()[$kind] : '');
+    }
     if ($col === 'kop_facility') {
         echo esc_html((string) get_post_meta($id, '_kop_facility', true));
     }
 }, 10, 2);
+
+/**
+ * Moving a website to the news, lawsuit or bill queue (or onto a facility) is
+ * done on its Review inbox card; this screen links there.
+ */
+function kop_ext_website_inbox_url() {
+    return function_exists('kop_submissions_review_url') ? (string) kop_submissions_review_url('websites') : '';
+}
+
+add_filter('post_row_actions', function ($actions, $post) {
+    if ($post->post_type !== KOP_EXT_SOURCE_CPT || $post->post_status === 'trash') return $actions;
+    $url = kop_ext_website_inbox_url();
+    if ($url !== '') {
+        $actions = array('kop_inbox' => sprintf('<a href="%s">%s</a>', esc_url($url), 'Move to news, lawsuits, bills or a facility')) + $actions;
+    }
+    return $actions;
+}, 10, 2);
+
+add_action('admin_notices', function () {
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || $screen->post_type !== KOP_EXT_SOURCE_CPT || !in_array($screen->base, array('edit', 'post'), true)) return;
+    $url = kop_ext_website_inbox_url();
+    if ($url === '') return;
+    printf('<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
+        esc_html('To send a website to the news, lawsuit or legislation queue, Industry PR or a facility record, use its card in the Review inbox.'),
+        esc_url($url), esc_html('Open Websites sent in there'));
+});
 
 add_action('add_meta_boxes_' . KOP_EXT_SOURCE_CPT, function () {
     add_meta_box('kop_ext_source_details', 'Website details', 'kop_ext_render_source_box', KOP_EXT_SOURCE_CPT, 'normal', 'high');
@@ -132,7 +210,14 @@ function kop_ext_render_source_box($post) {
     foreach (kop_ext_source_fields() as $key => $label) {
         $val = (string) get_post_meta($post->ID, '_kop_' . $key, true);
         $name = 'kop_ext_source[' . $key . ']';
-        if (in_array($key, array('description', 'selection'), true)) {
+        if ($key === 'kind') {
+            $kind = kop_ext_website_kind($val);
+            $opts = '<option value="">' . esc_html('Not said') . '</option>';
+            foreach (kop_ext_website_kinds() as $k => $l) {
+                $opts .= sprintf('<option value="%s"%s>%s</option>', esc_attr($k), selected($kind, $k, false), esc_html($l));
+            }
+            $field = sprintf('<select id="kop-ext-kind" name="%s">%s</select>', esc_attr($name), $opts);
+        } elseif (in_array($key, array('description', 'selection'), true)) {
             $field = sprintf('<textarea id="kop-ext-%1$s" name="%2$s" rows="3" class="large-text">%3$s</textarea>', esc_attr($key), esc_attr($name), esc_textarea($val));
         } else {
             $field = sprintf('<input type="text" id="kop-ext-%1$s" name="%2$s" value="%3$s" class="regular-text"%4$s>', esc_attr($key), esc_attr($name), esc_attr($val), $key === 'submitted_by' ? ' readonly' : '');
@@ -159,6 +244,7 @@ add_action('save_post_' . KOP_EXT_SOURCE_CPT, function ($id) {
         }
         $clean = in_array($key, array('description', 'selection'), true)
             ? sanitize_textarea_field($in[$key]) : sanitize_text_field($in[$key]);
+        if ($key === 'kind') $clean = kop_ext_website_kind($clean);
         update_post_meta($id, '_kop_' . $key, $clean);
         if ($key === 'url') {
             update_post_meta($id, '_kop_url_norm', (string) kop_normalize_url($clean));
@@ -262,7 +348,9 @@ function kop_ext_jurisdiction_name($value) {
 /** Where a reviewer goes for a record of $type ('news', 'lawsuit', 'legislation', 'website'). */
 function kop_ext_review_url($type) {
     if ($type === 'website') {
-        return admin_url('edit.php?post_type=' . KOP_EXT_SOURCE_CPT . '&post_status=pending');
+        // The Review inbox card, where it can also move to another queue.
+        $inbox = function_exists('kop_submissions_review_url') ? (string) kop_submissions_review_url('websites') : '';
+        return $inbox !== '' ? $inbox : admin_url('edit.php?post_type=' . KOP_EXT_SOURCE_CPT . '&post_status=pending');
     }
     return function_exists('kop_submission_review_url') ? kop_submission_review_url($type) : '';
 }
@@ -608,6 +696,8 @@ function kop_ext_insert_website(array $p, $submitter, $note) {
     }
     $values = array(
         'url'          => $url,
+        // website_kind from the sender (mobile/submit, the extension), else what the address says.
+        'kind'         => kop_ext_website_kind($p['website_kind'] ?? '') ?: kop_ext_website_guess_kind($url),
         'site_name'    => kop_ext_text($p['site_name'] ?? '', 255),
         'author'       => kop_ext_text($p['author'] ?? '', 255),
         'published'    => (string) kop_ext_date($p['published'] ?? ''),
