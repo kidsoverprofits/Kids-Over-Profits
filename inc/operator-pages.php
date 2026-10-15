@@ -217,6 +217,7 @@ if (!function_exists('kop_operator_pages_enqueue')) {
             wp_enqueue_style('kop-facility-profile', $theme_uri . '/css/facility-profile.css', array('kop-colors'), filemtime($css));
         }
         if (function_exists('kop_ptl_enqueue')) kop_ptl_enqueue();
+        if (function_exists('kop_defer_folds_enqueue')) kop_defer_folds_enqueue();
         // The document viewer, for the library's tiles and the page's other
         // PDF links (as on facility pages).
         $doc_css = $theme_dir . '/css/document-library.css';

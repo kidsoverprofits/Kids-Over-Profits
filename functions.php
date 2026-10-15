@@ -85,6 +85,8 @@ require_once get_stylesheet_directory() . '/inc/operator-pages.php';
 require_once get_stylesheet_directory() . '/inc/operator-history.php';
 // Year-by-year timelines on company and facility pages; company milestones reviewed in the Review inbox
 require_once get_stylesheet_directory() . '/inc/profile-timeline.php';
+// Lighter facility and company pages: closed folds drawn only when opened
+require_once get_stylesheet_directory() . '/inc/defer-folds.php';
 require_once get_stylesheet_directory() . '/inc/program-homes.php';
 require_once get_stylesheet_directory() . '/inc/campus-programs.php';
 // Parent companies that are really one program of homes, converted into one (KOP Tools > Program Homes)

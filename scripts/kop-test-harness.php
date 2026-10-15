@@ -331,6 +331,7 @@ require_once dirname(__DIR__) . '/inc/operator-pages.php';
 require_once dirname(__DIR__) . '/inc/operator-history.php';
 // Year-by-year timelines on both kinds of page.
 require_once dirname(__DIR__) . '/inc/profile-timeline.php';
+require_once dirname(__DIR__) . '/inc/defer-folds.php';
 // Loaded before the index is built: a facility the network map draws
 // qualifies for a page, and the page lists its connections.
 require_once dirname(__DIR__) . '/inc/network-map.php';

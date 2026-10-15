@@ -21,9 +21,18 @@
         return n;
     }
 
+    // Tiles drawn on the page and those still waiting in closed folds (js/defer-folds.js).
+    function allTiles(lib) {
+        var tiles = Array.prototype.slice.call(lib.querySelectorAll('li.doc-item'));
+        Array.prototype.forEach.call(lib.querySelectorAll('template[data-kop-defer]'), function (tpl) {
+            tiles = tiles.concat(Array.prototype.slice.call(tpl.content.querySelectorAll('li.doc-item')));
+        });
+        return tiles;
+    }
+
     function setup(lib) {
         if (lib.querySelector('.kop-dtf')) return;
-        var tiles = Array.prototype.slice.call(lib.querySelectorAll('li.doc-item'));
+        var tiles = allTiles(lib);
         var counts = {};
         tiles.forEach(function (li) {
             (li.getAttribute('data-doc-types') || '').split(' ').filter(Boolean).forEach(function (t) {
@@ -38,17 +47,21 @@
         var more = el('p', { class: 'kop-dtf__more' });
         more.hidden = true;
         var buttons = [];
-        var details = Array.prototype.slice.call(lib.querySelectorAll('details'));
-        var wasOpen = details.map(function (d) { return d.open; });
 
         function pick(type, btn) {
             buttons.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+            if (type && window.KOPDeferFolds) window.KOPDeferFolds.stampAll(lib);
+            tiles = Array.prototype.slice.call(lib.querySelectorAll('li.doc-item'));
+            var details = Array.prototype.slice.call(lib.querySelectorAll('details'));
+            details.forEach(function (d) {
+                if (!d.hasAttribute('data-dtf-was-open')) d.setAttribute('data-dtf-was-open', d.open ? '1' : '0');
+            });
             tiles.forEach(function (li) {
                 var has = (' ' + (li.getAttribute('data-doc-types') || '') + ' ').indexOf(' ' + type + ' ') !== -1;
                 li.hidden = !!type && !has;
             });
-            details.forEach(function (d, i) {
-                if (!type) { d.hidden = false; d.open = wasOpen[i]; return; }
+            details.forEach(function (d) {
+                if (!type) { d.hidden = false; d.open = d.getAttribute('data-dtf-was-open') === '1'; return; }
                 var any = !!d.querySelector('li.doc-item:not([hidden])');
                 d.hidden = !any;
                 d.open = any;
@@ -80,6 +93,11 @@
     function init() {
         document.querySelectorAll('.kop-document-folder').forEach(setup);
     }
+
+    // A library inside a fold drawn later.
+    document.addEventListener('kop:stamped', function (e) {
+        if (e.target && e.target.querySelectorAll) e.target.querySelectorAll('.kop-document-folder').forEach(setup);
+    });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

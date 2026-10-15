@@ -65,6 +65,8 @@ $kop_op_company_list = static function (array $items) {
     echo '</ul>';
 };
 
+// Closed folds go out as <template> and are drawn when opened (inc/defer-folds.php).
+$kop_defer_started = function_exists('kop_defer_folds_start') ? kop_defer_folds_start() : false;
 get_header();
 ?>
 <?php
@@ -488,3 +490,4 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
 </article>
 <?php
 get_footer();
+if (function_exists('kop_defer_folds_end')) kop_defer_folds_end($kop_defer_started);

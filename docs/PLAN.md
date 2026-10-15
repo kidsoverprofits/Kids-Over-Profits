@@ -2397,8 +2397,16 @@ Open:
 8. **Owner:** verify the site in Google Search Console and Bing Webmaster Tools, submit sitemap_index.xml. Then read
    which program names bring searchers and which pages Google refused, and adjust the plan from that.
 9. **Owner:** purge the cached /staging/ page (Hosting, item 9 above).
-10. Facility pages are ~500 KB of HTML, company pages ~660 KB: load the long lists (documents, inspections) when
-    opened. Its own project.
+10. Lighter pages (2026-10-15, inc/defer-folds.php + js/defer-folds.js, scripts/test-defer-folds.php): the cost was elements,
+    not bytes (pages are 43-218 KB compressed; Provo Canyon School had 12,400 elements in <main>). A closed fold's contents
+    (older and celebrity/viral news, document subfolders, Unsilenced groups, more findings) now go out in a <template> and
+    are drawn when opened, when the address points inside one, or before printing; the document type filter counts and
+    draws them. Provo 12,371 -> 6,339 elements, Sedona Sky 3,308 -> 1,800, UHS 4,423 -> 2,217. Signed-in editors get the
+    whole page (pencils); ?kop_full=1 does too. Trade-offs: text in a closed fold is no longer indexed by search engines
+    or found by the browser's find-in-page until opened (news headlines of other outlets, file names); staff lists are
+    not in folds and stay whole. Next if needed: Provo's staff (2,347 elements) and the timeline's later years.
+    **Check after deploy:** https://kidsoverprofits.org/facility/provo-canyon-school-ut/ in a private window: open
+    "more articles" and the Unsilenced groups, pick a document type, print preview.
 11. Google's Rich Results Test on a facility and a company page once Google recrawls them. Our own parse of the live
     JSON-LD (2026-10-14) is clean: Sedona Sky's Organization carries alternateName Copper Canyon Academy, Devereux's
     lists 46 subOrganization programs, every @id reference resolves.

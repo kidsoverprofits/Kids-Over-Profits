@@ -252,6 +252,7 @@ if (!function_exists('kop_facility_pages_enqueue')) {
             wp_enqueue_style('kop-facility-profile', $theme_uri . '/css/facility-profile.css', array('kop-colors', 'kop-components'), filemtime($css));
         }
         if (function_exists('kop_ptl_enqueue')) kop_ptl_enqueue();
+        if (function_exists('kop_defer_folds_enqueue')) kop_defer_folds_enqueue();
         // The document viewer: the library's tiles and the page's other PDF
         // links (Woodbury pages, cited reports) open in its modal, so it loads
         // even on pages with no library.

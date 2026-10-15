@@ -710,6 +710,9 @@ python scripts/test-gemini.py                     # is a Gemini key usable? list
 # Year-by-year timelines on both page kinds (inc/profile-timeline.php, css/js profile-timeline): map deals/takeovers, programs, lawsuits, deaths,
 # findings, press; researched company milestones (seeds/company-milestones.json) show only once approved at Review inbox > Company milestones
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=company-milestones
+# Closed folds on facility and company pages go out as <template data-kop-defer>, drawn when opened (inc/defer-folds.php,
+# js/defer-folds.js fires 'kop:stamped'); a script that sets up pieces once listens for it. data-kop-nodefer keeps a fold whole
+php scripts/test-defer-folds.php [--pages=<dir of saved pages>]
 # Daily budget (kop_ai_budget_check()): background jobs stop at KOP_AI_BACKGROUND_SHARE (0.7) of KOP_AI_DAILY_GEMINI / _GROQ (500 / 400) per day
 # from midnight Pacific, throwing a plain Exception that says "rate limit"; jobs in kop_ai_budget_protected_jobs() (discovery, by hand) never wait
 php -d extension=mbstring scripts/test-ai-usage.php

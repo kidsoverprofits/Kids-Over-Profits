@@ -469,6 +469,8 @@ if ($kop_fp_parts) {
     $kop_fp_sections = $kop_fp_nav;
 }
 
+// Closed folds go out as <template> and are drawn when opened (inc/defer-folds.php).
+$kop_defer_started = function_exists('kop_defer_folds_start') ? kop_defer_folds_start() : false;
 get_header();
 ?>
 <article id="facility-<?php echo (int) $page['id']; ?>" class="entry content-bg single-entry kop-facility-profile kop-facility-generated" data-kop-bug-feature="facility-page" data-kop-bug-label="Facility page: <?php echo esc_attr($page['name']); ?>">
@@ -1338,3 +1340,4 @@ get_header();
 </article>
 <?php
 get_footer();
+if (function_exists('kop_defer_folds_end')) kop_defer_folds_end($kop_defer_started);
