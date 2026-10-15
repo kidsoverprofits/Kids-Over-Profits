@@ -209,7 +209,7 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     } catch (Throwable $e) {
         $check('fornits: Add with another record', false, get_class($e) . ': ' . $e->getMessage());
     }
-    $check('fornits: queue tools are Read more, Check AI keys and progress', array_column($src['tools'], 'id') === array('read_now', 'check_ai', 'status'));
+    $check('fornits: queue tools are Read more and progress', array_column($src['tools'], 'id') === array('read_now', 'status'));
     $m = call_user_func($src['tool'], 'status', array());
     $check('fornits: the progress line counts the topics', strpos($m['message'], 'Topics loaded: 1') === 0, $m['message']);
 }

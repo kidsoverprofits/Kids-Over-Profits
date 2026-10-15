@@ -185,8 +185,23 @@ if (!function_exists('kop_ai_api_keys')) {
     /**
      * Generate text from a provider for a prompt. $opts may set: maxTokens,
      * temperature, and per-provider model overrides (groqModel, claudeModel, …).
+     * Every request is counted for KOP Tools > AI Usage (api/ai-usage.php).
      */
     function kop_ai_generate(string $provider, array $apiKeys, string $prompt, array $opts = []): string {
+        require_once __DIR__ . '/ai-usage.php';
+        $model = $provider === 'groq' ? ($opts['groqModel'] ?? (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b'))
+            : ($provider === 'gemini' ? ($opts['geminiModel'] ?? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite')) : $provider);
+        try {
+            $text = kop_ai_generate_once($provider, $apiKeys, $prompt, $opts);
+            kop_ai_usage_record($provider, $model);
+            return $text;
+        } catch (Throwable $e) {
+            if (stripos($e->getMessage(), 'not configured') === false) kop_ai_usage_record($provider, $model, $e->getMessage());
+            throw $e;
+        }
+    }
+
+    function kop_ai_generate_once(string $provider, array $apiKeys, string $prompt, array $opts = []): string {
         $maxTokens = $opts['maxTokens'] ?? 4096;
         $temp = $opts['temperature'] ?? 0.1;
 

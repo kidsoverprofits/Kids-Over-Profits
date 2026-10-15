@@ -11,7 +11,7 @@
  * with counts, the kind, category and importance filters, the most important
  * items ticked to start with, Add to another record (the Record box on Add,
  * also in bulk), the whole post, "Read a few more now" (kop_fornits_read_batch),
- * "Check AI keys" (kop_fornits_check_ai) and the reading's progress.
+ * and the reading's progress. The AI key check is on KOP Tools > AI Usage.
  */
 
 if (!defined('ABSPATH')) {
@@ -41,8 +41,6 @@ kop_rinbox_register('fornits', function () {
         'tools'    => array(
             array('id' => 'read_now', 'label' => 'Read a few more now', 'style' => 'neutral',
                 'help' => 'Loads new batches and has the AI read a few more topics (up to a minute). The hourly run does this on its own.'),
-            array('id' => 'check_ai', 'label' => 'Check AI keys', 'style' => 'neutral',
-                'help' => 'Sends one tiny request to each AI provider through the site\'s own code and says whether it works. Keys are never shown.'),
             array('id' => 'status', 'label' => 'How far the reading is', 'style' => 'neutral',
                 'help' => 'Topics loaded, read by the AI, calls used today and the last hourly run.'),
         ),
@@ -175,13 +173,6 @@ function kop_rinbox_fornits_tool($id, array $params) {
         $c = kop_fornits_read_batch(6, 60);
         return array('message' => 'Read ' . $c['read'] . ' topics, ' . $c['items'] . ' new proposals'
             . ($c['limit'] ? '; the daily limit is reached, the hourly run carries on' : '') . ($c['error'] ? ', ' . $c['error'] . ' errors' : '') . '.');
-    }
-    if ($id === 'check_ai') {
-        $lines = array();
-        foreach (kop_fornits_check_ai() as $p => list($ok, $msg)) {
-            $lines[] = ucfirst($p) . ': ' . ($ok ? '' : 'NOT WORKING. ') . $msg;
-        }
-        return array('message' => implode('  |  ', $lines));
     }
     if ($id === 'status') {
         return array('message' => kop_rinbox_fornits_progress());

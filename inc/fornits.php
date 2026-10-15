@@ -459,11 +459,10 @@ function kop_fornits_quote_found($quote, $text) {
 }
 
 /**
- * Calls a day the reading may make, per provider. Gemini's free tier allows
- * about 500 a day on the Flash-Lite models and nothing else on the site uses
- * it, so it goes first. Groq is shared with the closure scan and the news
- * facility discovery, so it only fills in, up to its own cap. Raise either
- * with KOP_FORNITS_GEMINI_CALLS / KOP_FORNITS_DAILY_CALLS.
+ * Calls a day the reading may make, per provider. Both free tiers are shared
+ * with every other AI job on the site (KOP Tools > AI Usage shows who spends
+ * them), so the reading stays under its own caps. Gemini goes first. Raise
+ * either with KOP_FORNITS_GEMINI_CALLS / KOP_FORNITS_DAILY_CALLS.
  */
 function kop_fornits_caps() {
     return array(
@@ -523,34 +522,6 @@ function kop_fornits_ask($prompt) {
         throw new RuntimeException(implode('; ', $errors));
     }
     throw new RuntimeException('Daily rate limit for the Fornits reading reached' . ($errors ? ' (' . implode('; ', $errors) . ')' : '') . '.');
-}
-
-/**
- * One tiny request to each provider through the site's own code, for the
- * "Check AI keys" button: [provider => [ok, message]]. Never shows a key.
- */
-function kop_fornits_check_ai() {
-    require_once get_stylesheet_directory() . '/api/ai-providers.php';
-    $keys = kop_ai_api_keys();
-    $prompt = 'Return JSON only: {"facility": "<the name>"} for this sentence: I was sent to Thayer Learning Center in 2004.';
-    $out = array();
-    foreach (array('gemini' => 'GEMINI_API_KEY', 'groq' => 'GROQ_API_KEY') as $p => $env) {
-        if (empty($keys[$p])) {
-            $out[$p] = array(false, $env . ' is not set: the site cannot see it in .env (check the line is in the same .env as the other keys, spelled exactly, with no spaces around =).');
-            continue;
-        }
-        try {
-            $reply = $p === 'gemini' ? kop_ai_gemini($prompt, array('maxTokens' => 200))
-                : kop_ai_groq($prompt, array('maxTokens' => 200));
-            $data = kop_ai_extract_json((string) $reply);
-            $ok = is_array($data) && stripos((string) ($data['facility'] ?? ''), 'thayer') !== false;
-            $model = $p === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b');
-            $out[$p] = array($ok, ($ok ? 'Works' : 'Answered, but not as expected: ' . mb_substr((string) $reply, 0, 160)) . ' (model ' . $model . ').');
-        } catch (Throwable $e) {
-            $out[$p] = array(false, mb_substr(preg_replace('/key=[^&\s]+/', 'key=...', $e->getMessage()), 0, 300));
-        }
-    }
-    return $out;
 }
 
 /**
@@ -1263,13 +1234,6 @@ add_action('wp_ajax_kop_fornits_act', function () {
     $keys = isset($_POST['keys']) && is_array($_POST['keys']) ? array_slice($_POST['keys'], 0, 400) : array();
     $user = wp_get_current_user()->user_login;
     try {
-        if ($act === 'check_ai') {
-            $lines = array();
-            foreach (kop_fornits_check_ai() as $p => list($ok, $msg)) {
-                $lines[] = ucfirst($p) . ': ' . ($ok ? '' : 'NOT WORKING. ') . $msg;
-            }
-            wp_send_json_success(array('message' => implode('  |  ', $lines)));
-        }
         if ($act === 'read_now') {
             kop_fornits_sync(20);
             $c = kop_fornits_read_batch(6, 60);
@@ -1379,7 +1343,7 @@ function kop_render_fornits_page() {
         . (!empty($last['at']) ? ' &middot; last hourly run ' . esc_html(get_date_from_gmt($last['at'], 'M j, g:i a')) . ': read ' . (int) $last['read']
             . ($last['limit'] ? ' (stopped at the daily limit)' : '') : '')
         . '<div class="kop-ak-result" id="kop-fn-read-out" aria-live="polite"></div>',
-        kop_ak_button('Read a few more now', 'secondary', '', 'kop-fn-read') . kop_ak_button('Check AI keys', 'quiet', '', 'kop-fn-check-ai'));
+        kop_ak_button('Read a few more now', 'secondary', '', 'kop-fn-read'));
 
     $kind_tabs = array();
     foreach ($kinds as $k => $label) {
@@ -1576,7 +1540,7 @@ function kop_fornits_render_assets() {
         if (!window.KOPAdminKit) return;
         var kit = KOPAdminKit.cards({ action: 'kop_fornits_act', nonce: <?php echo wp_json_encode($nonce); ?> });
 
-        // "Read a few more now" and "Check AI keys" in the status strip.
+        // "Read a few more now" in the status strip.
         function tool(btn, act, busy, ok) {
             var out = document.getElementById('kop-fn-read-out');
             btn.disabled = true;
@@ -1588,9 +1552,7 @@ function kop_fornits_render_assets() {
         }
         document.addEventListener('click', function (e) {
             var read = e.target.closest('.kop-fn-read');
-            if (read) { tool(read, 'read_now', 'Reading (up to a minute)...', function () { return true; }); return; }
-            var chk = e.target.closest('.kop-fn-check-ai');
-            if (chk) tool(chk, 'check_ai', 'Asking each provider...', function (d) { return d.message.indexOf('NOT WORKING') < 0; });
+            if (read) tool(read, 'read_now', 'Reading (up to a minute)...', function () { return true; });
         });
     })();
     </script>

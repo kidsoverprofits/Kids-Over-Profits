@@ -557,9 +557,15 @@ function kop_rtc_alternate(array $legs) {
     if (!$order) {
         return ['ok' => false, 'error' => 'No AI key configured. Add GROQ_API_KEY or GEMINI_API_KEY to .env.'];
     }
+    require_once __DIR__ . '/ai-usage.php';
     $errors = [];
     foreach ($order as $p) {
         $result = $legs[$p]();
+        $err = (string) ($result['error'] ?? '');
+        if (stripos($err, 'not configured') === false) {
+            kop_ai_usage_record($p, $p === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b'),
+                !empty($result['ok']) ? '' : ($err !== '' ? $err : 'failed'));
+        }
         if (!empty($result['ok'])) return $result;
         $errors[] = $result['error'] ?? ($p . ' failed');
     }

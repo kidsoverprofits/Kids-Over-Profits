@@ -234,6 +234,7 @@ function kop_enrich_post_json($url, array $body, $timeout) {
     $headers = array('Content-Type' => 'application/json');
     $purpose = strpos($url, 'process-news-ai.php') !== false ? 'news-ai' : 'news-save';
     if (($token = kop_internal_token($purpose)) !== '') $headers['X-KOP-Internal'] = $token;
+    if ($purpose === 'news-ai') $headers['X-KOP-Job'] = 'enrich'; // KOP Tools > AI Usage
     $res = wp_remote_post($url, array(
         'timeout' => $timeout,
         'user-agent' => 'kids-over-profits-enrich/1.0 (+https://kidsoverprofits.org)',

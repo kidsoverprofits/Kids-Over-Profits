@@ -9,8 +9,22 @@ if (!defined('AI_DEBUG_LOGGING')) {
     define('AI_DEBUG_LOGGING', false);
 }
 
-/** Run one provider over the article; throws on failure. */
+/** Run one provider over the article; throws on failure. Counted for KOP Tools > AI Usage. */
 function processNewsWith($provider, array $apiKeys, $content, $url, $customInstructions) {
+    require_once __DIR__ . '/ai-usage.php';
+    $model = $provider === 'groq' ? (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b')
+        : ($provider === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (string) $provider);
+    try {
+        $result = processNewsWithOnce($provider, $apiKeys, $content, $url, $customInstructions);
+        kop_ai_usage_record((string) $provider, $model);
+        return $result;
+    } catch (Throwable $e) {
+        if (stripos($e->getMessage(), 'not configured') === false) kop_ai_usage_record((string) $provider, $model, $e->getMessage());
+        throw $e;
+    }
+}
+
+function processNewsWithOnce($provider, array $apiKeys, $content, $url, $customInstructions) {
     $result = null;
     switch ($provider) {
         case 'ollama':

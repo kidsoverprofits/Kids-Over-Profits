@@ -696,8 +696,11 @@ php scripts/test-survivor-archives.php
 # Each read thread gets a headline from its summary (20 a call) that replaces the forum title on its links, on records too unless
 # a person changed the label; a lead sent to News/Lawsuits is retitled from the article by the hourly enrich (api/lib-record-enrich.php)
 php scripts/test-record-enrich.php                # which bare-link news/lawsuits the enrich picks, title handling, offline
-# "Check AI keys" there sends one request per provider through the site's own code (keys never shown)
 python scripts/test-gemini.py                     # is a Gemini key usable? lists its models, names the fix
+# KOP Tools > AI Usage (inc/ai-usage.php): every Groq/Gemini request the site makes, logged by the job that made it (api/ai-usage.php,
+# uploads/kop-ai-usage/<day>.tsv, 14 days; kop_ai_generate(), processNewsWith() and kop_rtc_alternate() write it; a job is named by its
+# file in kop_ai_usage_jobs(), or by X-KOP-Job on process-news-ai.php), 48 hourly bars, "Check now" (one request per provider, keys never shown)
+php -d extension=mbstring scripts/test-ai-usage.php
 (kop-pipeline) python scripts/fornits-crawl.py                   # resumable, one request per 3 s
 (kop-pipeline) python scripts/fornits-process.py [--no-upload] [--keep-crawling]   # --no-upload: dry run, marks nothing read
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # every link + each kind on real docs, exact undo

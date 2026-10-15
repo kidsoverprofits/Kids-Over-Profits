@@ -1908,10 +1908,13 @@ Open:
    should not repeat. Done 2026-10-15: an AI rate limit no longer counts as
    a submit error (logged as "AI out of quota: N", carried over), so a night
    that lost nothing no longer exits 1. Check after the next deploy that a
-   quota night ends without the cron's "failed" line. Open: (b) a
+   quota night ends without the cron's "failed" line. Done 2026-10-15:
+   KOP Tools > AI Usage (`inc/ai-usage.php`) logs every request by job,
+   with 48 hourly bars and "Check now" (moved off the Fornits screens).
+   After deploy: open it once a job has run and check each job is named
+   (not a bare file name; add it to `kop_ai_usage_jobs()`). Open: (b) a
    shared daily AI budget, so a backfill (doc types, Fornits, summaries)
-   leaves calls for discovery; `kop_fornits_caps()` still says "nothing
-   else on the site uses" Gemini, no longer true. (c) Google News 503s
+   leaves calls for discovery; the log is the count to budget from. (c) Google News 503s
    ended Google News early (24 failures, then "abandoning") on the night
    runs of 10-03 to 10-06, 10-14 and 10-15 (sweep stopped at 170 of 1,455
    requests last night); the three sweep runs so far covered 97-146

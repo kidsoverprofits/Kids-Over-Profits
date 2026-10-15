@@ -376,6 +376,7 @@ function fetch_text(string $url, array $opts = []): string {
 function post_json(string $url, array $body, array $opts = []): array {
     $headers = ['Content-Type' => 'application/json'];
     if ($url === AI_ENDPOINT && KOP_INTERNAL_AI_TOKEN !== '') $headers['X-KOP-Internal'] = KOP_INTERNAL_AI_TOKEN;
+    if ($url === AI_ENDPOINT) $headers['X-KOP-Job'] = 'discovery'; // KOP Tools > AI Usage
     try {
         $res = http_request($url, [
             'method' => 'POST',

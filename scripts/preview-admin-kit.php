@@ -120,7 +120,7 @@ $fn = '<div class="wrap kop-ak kop-fn">'
         'steps' => array('<strong>Pick a tab</strong> and read down a card.')))
     . kop_ak_status('Topics loaded: <strong>18,204</strong> &middot; read by the AI: <strong>6,551</strong> &middot; calls today: Gemini 31 of 200, Groq 12 of 400'
         . '<div class="kop-ak-result is-ok" id="kop-fn-read-out" aria-live="polite">Read 6 topics, 14 new proposals. Reload to see them.</div>',
-        kop_ak_button('Read a few more now', 'secondary', '', 'kop-fn-read') . kop_ak_button('Check AI keys', 'quiet', '', 'kop-fn-check-ai'))
+        kop_ak_button('Read a few more now', 'secondary', '', 'kop-fn-read'))
     . kop_ak_tabs(array('link' => array('label' => 'Discussion links', 'count' => 2210), 'staff' => array('label' => 'Staff', 'count' => 340),
         'incident' => array('label' => 'Incidents', 'count' => 120), 'account' => array('label' => 'Survivor accounts', 'count' => 88),
         'lead' => array('label' => 'Leads', 'count' => 61)), 'link', $url, array('label' => 'Kinds'))

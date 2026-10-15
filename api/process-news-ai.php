@@ -50,6 +50,13 @@ if (!kop_internal_token_ok('news-ai')
     exit;
 }
 
+// The site's own jobs name themselves (X-KOP-Job) for KOP Tools > AI Usage.
+require_once __DIR__ . '/ai-usage.php';
+$kopJob = strtolower(trim((string) ($_SERVER['HTTP_X_KOP_JOB'] ?? '')));
+if (isset(kop_ai_usage_header_jobs()[$kopJob]) && kop_internal_token_ok('news-ai')) {
+    $GLOBALS['kop_ai_job'] = kop_ai_usage_header_jobs()[$kopJob];
+}
+
 // Get JSON input
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
