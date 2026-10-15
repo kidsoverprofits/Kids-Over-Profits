@@ -59,6 +59,40 @@ unlink($GLOBALS['kop_ai_usage_dir'] . '/' . gmdate('Y-m-d') . '.tsv');
 kop_ai_usage_record('groq', 'm');
 $check('files older than 14 days are deleted with a new day', !file_exists($old));
 
+// The daily budget: a background job stops at its share, discovery never does.
+$day = kop_ai_budget_day_start(strtotime('2026-10-15 13:00 UTC')); // 06:00 Pacific
+$check('the budget day starts at midnight Pacific', gmdate('Y-m-d H:i', $day) === '2026-10-15 07:00', gmdate('Y-m-d H:i', $day));
+putenv('KOP_AI_DAILY_GEMINI=10');
+putenv('KOP_AI_BACKGROUND_SHARE=0.5');
+$l = kop_ai_budget_limits();
+$check('limits from the environment', $l['gemini']['daily'] === 10 && $l['gemini']['background'] === 5 && $l['groq']['daily'] === 400, json_encode($l));
+foreach (glob($GLOBALS['kop_ai_usage_dir'] . '/*.tsv') as $f) unlink($f);
+unset($GLOBALS['kop_ai_budget_counts']);
+$GLOBALS['kop_ai_job'] = 'Document types';
+$held = null;
+for ($i = 0; $i < 8; $i++) {
+    try { kop_ai_budget_check('gemini', 'm'); kop_ai_usage_record('gemini', 'm'); } catch (Exception $e) { $held = $held ?? $i; }
+}
+$check('a background job is held back at its share', $held === 5, var_export($held, true));
+$check('the held-back error says rate limit, so jobs try again later', isset($e) && kop_ai_is_rate_limit($e->getMessage()) && !($e instanceof RuntimeException));
+$check('held-back requests are not counted as sent', kop_ai_budget_used('gemini') === 5);
+$GLOBALS['kop_ai_job'] = 'News discovery (nightly)';
+$ok = true;
+try { kop_ai_budget_check('gemini', 'm'); } catch (Exception $e) { $ok = false; }
+$check('news discovery is never held back', $ok);
+$GLOBALS['kop_ai_job'] = 'Document types';
+$ok = true;
+try { kop_ai_budget_check('groq', 'm'); } catch (Exception $e) { $ok = false; }
+$check('the other provider has its own count', $ok);
+unset($GLOBALS['kop_ai_budget_counts']);
+$check('the count is read back from the log', kop_ai_budget_used('gemini') === 5);
+$rows = kop_ai_usage_read(time() - 60);
+$check('held-back requests are logged as held', count(array_filter($rows, function ($r) { return $r['result'] === 'held'; })) === 3);
+unset($GLOBALS['kop_ai_job']);
+putenv('KOP_AI_DAILY_GEMINI');
+putenv('KOP_AI_BACKGROUND_SHARE');
+kop_ai_usage_record('groq', 'm'); // a request of this file's own, for the screen
+
 // The screen: WordPress stubs only as far as inc/ai-usage.php and the admin kit go.
 define('ABSPATH', $theme . '/');
 define('DAY_IN_SECONDS', 86400);

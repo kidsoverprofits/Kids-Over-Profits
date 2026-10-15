@@ -1912,9 +1912,13 @@ Open:
    KOP Tools > AI Usage (`inc/ai-usage.php`) logs every request by job,
    with 48 hourly bars and "Check now" (moved off the Fornits screens).
    After deploy: open it once a job has run and check each job is named
-   (not a bare file name; add it to `kop_ai_usage_jobs()`). Open: (b) a
-   shared daily AI budget, so a backfill (doc types, Fornits, summaries)
-   leaves calls for discovery; the log is the count to budget from. (c) Google News 503s
+   (not a bare file name; add it to `kop_ai_usage_jobs()`). Done 2026-10-15:
+   a daily AI budget (`kop_ai_budget_check()`, api/ai-usage.php): background
+   jobs stop at 70% of each provider's day (Gemini ~500, Groq ~400 requests,
+   from midnight Pacific; KOP_AI_DAILY_GEMINI / _GROQ / KOP_AI_BACKGROUND_SHARE)
+   and go on after midnight; discovery and anything by hand never wait.
+   After a week: read AI Usage for the real daily ceilings (the first "out of
+   quota" of a day) and set the two numbers from them. Open: (c) Google News 503s
    ended Google News early (24 failures, then "abandoning") on the night
    runs of 10-03 to 10-06, 10-14 and 10-15 (sweep stopped at 170 of 1,455
    requests last night); the three sweep runs so far covered 97-146

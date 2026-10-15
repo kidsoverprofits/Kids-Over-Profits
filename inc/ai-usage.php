@@ -81,7 +81,11 @@ function kop_ai_usage_summary(array $rows, $now = null) {
     for ($h = $first_hour; $h <= $now; $h += 3600) $hours[$h] = array('n' => 0, 'jobs' => array());
     foreach ($rows as $r) {
         $j = $r['job'];
-        if (!isset($jobs[$j])) $jobs[$j] = array('job' => $j, 'groq' => 0, 'gemini' => 0, 'other' => 0, 'limit' => 0, 'error' => 0, 'last' => 0);
+        if (!isset($jobs[$j])) $jobs[$j] = array('job' => $j, 'groq' => 0, 'gemini' => 0, 'other' => 0, 'limit' => 0, 'error' => 0, 'held' => 0, 'last' => 0);
+        if ($r['result'] === 'held') { // kept back by the budget, never sent
+            $jobs[$j]['held']++;
+            continue;
+        }
         $p = in_array($r['provider'], array('groq', 'gemini'), true) ? $r['provider'] : 'other';
         $jobs[$j][$p]++;
         if ($r['result'] === 'limit') $jobs[$j]['limit']++;
@@ -137,6 +141,14 @@ function kop_ai_usage_page() {
         }
     }
 
+    $budget = array();
+    foreach (kop_ai_budget_limits() as $p => $l) {
+        $used = kop_ai_budget_used($p);
+        $budget[] = esc_html(ucfirst($p)) . ' ' . (int) $used . ' of about ' . (int) $l['daily']
+            . ($used >= $l['background'] ? ' (<strong>background jobs paused</strong> at ' . (int) $l['background'] . ')' : ' (background jobs pause at ' . (int) $l['background'] . ')');
+    }
+    $status[] = '<br>Today since midnight Pacific: ' . implode('; ', $budget) . '.';
+
     echo '<div class="wrap kop-ak kop-aiu">';
     echo kop_ak_header('AI Usage', array(
         'lede' => 'Every request the site sends to Groq and Gemini, by the job that sent it. Both are free tiers that every job shares: when one job uses up a day\'s calls, the others get none, the nightly news discovery included.',
@@ -145,9 +157,12 @@ function kop_ai_usage_page() {
             'The table shows which job made the requests in the period. A job far above the rest is the one spending the quota.',
             'The bars are the last 48 hours, one per hour; hover a bar for the jobs in it.',
         ),
-        'help' => '<p>Gemini\'s day starts at midnight Pacific (2:00 am Central), so the 1:30 am discovery run is in the last half hour of Gemini\'s day. Groq limits requests and tokens per minute and per day. The log keeps 14 days.</p>',
+        'help' => '<p>The daily budget: background jobs (document types, Fornits, summaries, scans, the hourly enrich) stop at their share of each provider\'s day and go on after midnight Pacific; '
+            . 'the nightly news discovery and anything started by hand are never held back. Their requests are counted under Held back. '
+            . 'The numbers are KOP_AI_DAILY_GEMINI, KOP_AI_DAILY_GROQ and KOP_AI_BACKGROUND_SHARE in the .env file.</p>'
+            . '<p>Gemini\'s day starts at midnight Pacific (2:00 am Central), so the 1:30 am discovery run is in the last half hour of Gemini\'s day. Groq limits requests and tokens per minute and per day. The log keeps 14 days.</p>',
     ));
-    echo kop_ak_status(implode(' &nbsp;&middot;&nbsp; ', $status) . '<div class="kop-aiu-check-out" role="status" aria-live="polite"></div>',
+    echo kop_ak_status(str_replace(' &nbsp;&middot;&nbsp; <br>', '<br>', implode(' &nbsp;&middot;&nbsp; ', $status)) . '<div class="kop-aiu-check-out" role="status" aria-live="polite"></div>',
         kop_ak_button('Check now', 'secondary', 'data-nonce="' . esc_attr(wp_create_nonce('kop_ai_usage')) . '"', 'kop-aiu-check'));
 
     // The last 48 hours, one bar an hour.
@@ -176,10 +191,12 @@ function kop_ai_usage_page() {
         echo kop_ak_empty('No AI requests in this period.');
     } else {
         echo '<table class="widefat striped kop-aiu-table"><thead><tr><th scope="col">Job</th><th scope="col" class="num">Groq</th><th scope="col" class="num">Gemini</th>'
-            . '<th scope="col" class="num">Out of quota</th><th scope="col" class="num">Failed</th><th scope="col">Last request</th></tr></thead><tbody>';
+            . '<th scope="col" class="num">Out of quota</th><th scope="col" class="num">Failed</th>'
+            . '<th scope="col" class="num" title="Kept back by the daily budget, never sent">Held back</th><th scope="col">Last request</th></tr></thead><tbody>';
         foreach ($sum['jobs'] as $j) {
             echo '<tr><td>' . esc_html($j['job']) . '</td><td class="num">' . (int) $j['groq'] . '</td><td class="num">' . (int) $j['gemini'] . '</td>'
                 . '<td class="num">' . ($j['limit'] ? (int) $j['limit'] : '') . '</td><td class="num">' . ($j['error'] ? (int) $j['error'] : '') . '</td>'
+                . '<td class="num">' . ($j['held'] ? (int) $j['held'] : '') . '</td>'
                 . '<td>' . esc_html($when($j['last'])) . '</td></tr>';
         }
         echo '</tbody></table>';

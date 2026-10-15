@@ -560,11 +560,17 @@ function kop_rtc_alternate(array $legs) {
     require_once __DIR__ . '/ai-usage.php';
     $errors = [];
     foreach ($order as $p) {
+        $model = $p === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b');
+        try {
+            kop_ai_budget_check($p, $model);
+        } catch (Exception $e) {
+            $errors[] = $e->getMessage();
+            continue;
+        }
         $result = $legs[$p]();
         $err = (string) ($result['error'] ?? '');
         if (stripos($err, 'not configured') === false) {
-            kop_ai_usage_record($p, $p === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b'),
-                !empty($result['ok']) ? '' : ($err !== '' ? $err : 'failed'));
+            kop_ai_usage_record($p, $model, !empty($result['ok']) ? '' : ($err !== '' ? $err : 'failed'));
         }
         if (!empty($result['ok'])) return $result;
         $errors[] = $result['error'] ?? ($p . ' failed');

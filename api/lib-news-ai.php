@@ -14,6 +14,7 @@ function processNewsWith($provider, array $apiKeys, $content, $url, $customInstr
     require_once __DIR__ . '/ai-usage.php';
     $model = $provider === 'groq' ? (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b')
         : ($provider === 'gemini' ? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite') : (string) $provider);
+    if (!empty($apiKeys[$provider])) kop_ai_budget_check((string) $provider, $model); // the hourly enrich keeps within its share
     try {
         $result = processNewsWithOnce($provider, $apiKeys, $content, $url, $customInstructions);
         kop_ai_usage_record((string) $provider, $model);

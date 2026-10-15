@@ -115,7 +115,8 @@ if (!function_exists('kop_ai_api_keys')) {
             try {
                 return kop_ai_generate('groq', kop_ai_api_keys(), $prompt, ['groqModel' => $model] + $opts);
             } catch (Throwable $e) {
-                $retry = stripos($e->getMessage(), 'rate limit') !== false || stripos($e->getMessage(), 'validate JSON') !== false;
+                $retry = (stripos($e->getMessage(), 'rate limit') !== false && stripos($e->getMessage(), '(AI budget)') === false)
+                    || stripos($e->getMessage(), 'validate JSON') !== false;
                 if ($i === count($models) - 1 || !$retry) {
                     throw $e;
                 }
@@ -191,6 +192,7 @@ if (!function_exists('kop_ai_api_keys')) {
         require_once __DIR__ . '/ai-usage.php';
         $model = $provider === 'groq' ? ($opts['groqModel'] ?? (getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b'))
             : ($provider === 'gemini' ? ($opts['geminiModel'] ?? (getenv('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite')) : $provider);
+        if (!empty($apiKeys[$provider])) kop_ai_budget_check($provider, $model); // background jobs keep within their share
         try {
             $text = kop_ai_generate_once($provider, $apiKeys, $prompt, $opts);
             kop_ai_usage_record($provider, $model);
