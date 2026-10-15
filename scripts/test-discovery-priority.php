@@ -44,12 +44,12 @@ $auto = kop_dp_auto($pdo, 'wpdl_', null, array());
 $why = array();
 foreach ($auto as $r) foreach ($r as $w) $why[$w] = ($why[$w] ?? 0) + 1;
 echo 'automatic: ' . count($auto) . ' records ' . json_encode($why) . "\n";
-$check('the rule picks a few hundred records, not thousands', count($auto) > 100 && count($auto) < 600, (string) count($auto));
+$check('the rule picks a few hundred records at most, not thousands', count($auto) > 50 && count($auto) < 400, (string) count($auto));
 $check('every pick is open', !array_filter(array_keys($auto), function ($id) use ($status) { return $status($id) !== 'Open'; }));
 $check('news and lawsuits both count', !empty($why['news']) && !empty($why['lawsuit']));
 
 // An approved serious finding counts through the rollup's record -> sites map.
-$st = $pdo->query("SELECT facility_id FROM inspection_highlights WHERE status = 'approved' AND finding_date >= '" . gmdate('Y-m-d', strtotime('-3 years')) . "' LIMIT 1");
+$st = $pdo->query("SELECT facility_id FROM inspection_highlights WHERE status = 'approved' AND finding_date >= '" . gmdate('Y-m-d', strtotime('-' . kop_dp_years() . ' years')) . "' LIMIT 1");
 $site = (int) $st->fetchColumn();
 $closedOnly = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE status = 'Open' ORDER BY id LIMIT 1 OFFSET 2000")->fetchColumn();
 $withFinding = kop_dp_auto($pdo, 'wpdl_', null, array($closedOnly => array('sites' => array($site))));
@@ -104,7 +104,7 @@ $check('a company has no Never daily', $threw);
 $GLOBALS['opts'] = array();
 $all = kop_dp_names($pdo, kop_dp_ids($pdo, 'wpdl_', array()), 'wpdl_');
 echo 'names on the daily list: ' . count($all) . "\n";
-$check('the daily list fits the day (under ~120 searches: at most ~700 names)', count($all) < 700, (string) count($all));
+$check('the daily list fits the day (~155 searches: at most ~350 names; the mirror has no findings map)', count($all) < 350, (string) count($all));
 if ($list) foreach ($all as $n) echo "  $n\n";
 
 echo $fails ? "\n$fails FAILED\n" : "\nAll passed\n";

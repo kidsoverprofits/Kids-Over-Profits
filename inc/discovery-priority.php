@@ -6,8 +6,10 @@
  * a row, so a run makes 140 at most and only so many names can be daily.
  *
  * Automatic (the owner's rule, 2026-10-15): open programs with an approved
- * news article dated in the last three years, a published lawsuit, or an
- * approved serious inspection finding dated in the last three years.
+ * news article dated in the last year, a published lawsuit (any age), or an
+ * approved serious inspection finding dated in the last year. Three years
+ * was 391 programs, 258 searches a day, more than the ~224 two runs allow;
+ * one year is ~220 programs, ~155 searches.
  *
  * By hand: "Daily news search" in the admin toolbar of every facility and
  * company page (pencil source 'dsearch:f:<id>' / 'dsearch:o:<id>'): Automatic,
@@ -25,7 +27,12 @@ if (!defined('ABSPATH')) {
 }
 
 function kop_dp_years() {
-    return 3;
+    return 1;
+}
+
+/** 'the last 12 months' / 'the last 2 years' */
+function kop_dp_window_words() {
+    return kop_dp_years() === 1 ? 'the last 12 months' : 'the last ' . kop_dp_years() . ' years';
 }
 
 /** ['f' => [id => 'on'|'off'], 'o' => [id => 'on'|'off']] */
@@ -189,8 +196,8 @@ function kop_dp_state($kind, $id) {
 }
 
 function kop_dp_why_words($why) {
-    $w = array('news' => 'news in the last ' . kop_dp_years() . ' years', 'lawsuit' => 'a lawsuit',
-        'finding' => 'a serious inspection finding in the last ' . kop_dp_years() . ' years', 'by hand' => 'set by hand', 'company' => 'its company is set to Daily');
+    $w = array('news' => 'news in ' . kop_dp_window_words(), 'lawsuit' => 'a lawsuit',
+        'finding' => 'a serious inspection finding in ' . kop_dp_window_words(), 'by hand' => 'set by hand', 'company' => 'its company is set to Daily');
     return $w[$why] ?? $why;
 }
 
@@ -218,8 +225,8 @@ function kop_dp_ie_load(array $p) {
         : array(array('value' => 'auto', 'label' => 'Automatic (the rule decides)'),
             array('value' => 'on', 'label' => 'Daily, always'),
             array('value' => 'off', 'label' => 'Never daily (it still comes around in the rotation)'));
-    $help = 'The news discovery searches Google News for the names on its daily list every day; every other name comes around in the rotation, about every three weeks. '
-        . 'Automatic puts an open program on the daily list when it has news in the last ' . kop_dp_years() . ' years, a lawsuit, or a serious inspection finding in the last ' . kop_dp_years() . ' years. '
+    $help = 'The news discovery searches Google News for the names on its daily list every day; every other name comes around in the rotation, about every five or six weeks. '
+        . 'Automatic puts an open program on the daily list when it has news in ' . kop_dp_window_words() . ', a lawsuit, or a serious inspection finding in ' . kop_dp_window_words() . '. '
         . ($kind === 'f' ? 'Now: ' . ($why !== '' ? 'on the daily list (' . kop_dp_why_words($why) . ').' : 'not on the daily list.') : '')
         . ' A change reaches the next discovery run.';
     return array(

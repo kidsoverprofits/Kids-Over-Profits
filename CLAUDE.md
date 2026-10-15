@@ -430,9 +430,9 @@ php api/check-record-statuses.php [--kind=bill --ids=19] [apply]   # on the serv
 # request (<= 16 words of names, when: first; Google reads ~32 words), short names one to a request with the state; a cursor in
 # scripts/.discovery-state.json walks the sorted list. Google blocks the server's IP after ~180 searches in a row (measured 2026-10-15: >17 min, <12 h), so a
 # run makes GN_REQUESTS_PER_RUN (140) at most, topics included. The daily list (inc/discovery-priority.php, kop/v1/discovery/priority: open programs
-# with approved news or a serious finding in 3 years or a published lawsuit, plus the "Daily news search" switch in each facility/company page's
+# with approved news or a serious finding in the last 12 months or a published lawsuit, plus the "Daily news search" switch in each facility/company page's
 # admin toolbar, option kop_discovery_priority) is searched every day, half a run, first; every other name rotates through the room left (plan_sweep(),
-# its own cursor; ~3 weeks a pass). A batched hit naming no program in its headline is confirmed by the AI
+# its own cursor; the daily list takes <= 3/4 of a run; ~5-6 weeks a pass). A batched hit naming no program in its headline is confirmed by the AI
 # step (<= 30 a run) before it is submitted, else logged batch-unconfirmed (Review inbox > Scraper finds). Terms in scripts/discovery-queries.json
 php scripts/test-discovery-sweep.php              # offline: names, batches, cursor, daily list + rotation, filter on real headlines, AI confirmation
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-discovery-priority.php [--list]   # the daily list's rule and switches on tmp/prod.sqlite

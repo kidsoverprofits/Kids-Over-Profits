@@ -1924,14 +1924,17 @@ Open:
    minutes (probe stopped there; cleared by the next 12-hourly run). Done
    2026-10-15: a run makes at most GN_REQUESTS_PER_RUN = 140 Google searches;
    the owner's daily list (inc/discovery-priority.php: open programs with
-   news or a serious finding in 3 years, or a lawsuit; "Daily news search"
-   switch on each page) is searched every day, the rest rotate (~3 weeks).
-   After deploy: tonight's log shows "daily list: N records" and no 503s;
-   if 503s still come, lower GN_REQUESTS_PER_RUN in the crontab env.
-   Open: whether the block lifts within an hour (one search at 14:46 and
-   15:46 UTC, 2026-10-15); if it does, an hourly sweep-only cron line would
-   bring the rotation to a day or two (owner's crontab). Check tonight's
-   log that the 34 carried candidates went through.
+   news or a serious finding in the last 12 months, or a lawsuit; "Daily news
+   search" switch on each page) is searched every day, the rest rotate
+   (~5-6 weeks). Three years was 391 programs / 258 searches a day, more than
+   two runs allow; the owner chose 12 months (~220 programs, ~155 searches).
+   The block outlasts an hour (still 503 at 14:46, an hour after it began),
+   so more cron runs do not help. After deploy: tonight's log shows "daily
+   list: N records", "this run: 112 (N daily ...)" and no 503s; if 503s
+   still come, lower GN_REQUESTS_PER_RUN in the crontab env. Check tonight's
+   log that the 34 carried candidates went through. Not done: grouping short
+   names by state ("Grafton" OR "Day One" "Wisconsin") would roughly halve
+   the searches; the owner left it for now.
 6. Declined for now (owner, 2026-10-13): a weekly GDELT full-text pass
    (`scripts/backfill-articles.js` has the query shape; GDELT throttled
    probes from here at one request per 5 seconds) and Bing News (returned
