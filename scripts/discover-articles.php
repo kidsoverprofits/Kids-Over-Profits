@@ -2003,7 +2003,7 @@ function main(): void {
     // Counters accumulated across every submit batch in this run.
     $totals = [
         'candidates' => 0, 'accepted' => 0, 'rejected' => 0,
-        'submitted' => 0, 'submitErrors' => 0, 'unreadable' => 0, 'postResolveRejected' => 0,
+        'submitted' => 0, 'submitErrors' => 0, 'unreadable' => 0, 'aiRateLimited' => 0, 'postResolveRejected' => 0,
         'topicSubmitted' => 0, 'topicAttempted' => 0, 'topicDeferred' => 0,
         'gnResolveDeferred' => 0, 'carriedIn' => 0, 'droppedPending' => 0,
         'pendingAttribution' => 0, 'aiConfirms' => 0, 'confirmed' => 0, 'unconfirmed' => 0, 'confirmDeferred' => 0
@@ -2289,8 +2289,12 @@ function main(): void {
                 // A page the server cannot read (403 to our IP, no archive.org
                 // copy, a form instead of an article) is the page's problem, not
                 // the run's: counted apart so it never fails the cron job.
+                // An AI provider out of quota is the same: the article is carried
+                // to the next run below, nothing is lost.
                 if ($r['stage'] === 'ai' && preg_match('/Could not fetch article content|has no article text/i', $r['error'] ?? '')) {
                     $totals['unreadable']++;
+                } elseif ($r['stage'] === 'ai' && preg_match('/rate limit/i', $r['error'] ?? '')) {
+                    $totals['aiRateLimited']++;
                 } else {
                     $totals['submitErrors']++;
                 }
@@ -2481,6 +2485,7 @@ function main(): void {
     kop_log("  submitted (ok):      {$totals['submitted']}" . ($totals['topicSubmitted'] ? " ({$totals['topicSubmitted']} from topic queries)" : ''));
     kop_log("  submitted (errors):  {$totals['submitErrors']}");
     if ($totals['unreadable']) kop_log("  pages unreadable:    {$totals['unreadable']} (blocked or no article text; retried next run)");
+    if ($totals['aiRateLimited']) kop_log("  AI out of quota:     {$totals['aiRateLimited']} (carried to the next run)");
     if ($totals['topicDeferred']) kop_log("  topic deferred (cap): {$totals['topicDeferred']}");
     kop_log("  rejected (pre-fetch):  {$totals['rejected']}");
     kop_log("  rejected (post-resolve): {$totals['postResolveRejected']}");

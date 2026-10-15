@@ -1905,10 +1905,10 @@ Open:
    (741 calls 16:00-17:00 Central, 994 that day, against its hourly 12),
    inside the same Gemini day (resets 00:00 Pacific = 07:00 UTC, so the
    01:30 Central run is the last half hour of it). Backlog is now 0, so it
-   should not repeat. Open: (a) the exit-1 rule (`submitErrors > 0` and 0
-   submitted) also fires on nights whose only errors are unreadable pages
-   or a rate limit carried over (10-12, 10-13, 10-15), so the cron mails
-   "failed" for runs that lost nothing; count only real failures. (b) a
+   should not repeat. Done 2026-10-15: an AI rate limit no longer counts as
+   a submit error (logged as "AI out of quota: N", carried over), so a night
+   that lost nothing no longer exits 1. Check after the next deploy that a
+   quota night ends without the cron's "failed" line. Open: (b) a
    shared daily AI budget, so a backfill (doc types, Fornits, summaries)
    leaves calls for discovery; `kop_fornits_caps()` still says "nothing
    else on the site uses" Gemini, no longer true. (c) Google News 503s
