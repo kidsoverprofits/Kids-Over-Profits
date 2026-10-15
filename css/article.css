@@ -110,31 +110,10 @@
     margin-right: auto;
 }
 
-/* Sections stand apart: Kadence gives a heading only 1.5em above it, barely more
-   than the gap between two paragraphs (2rem). */
-.kop-article .entry-content > h2 {
-    margin-top: 3.5rem;
-    margin-bottom: 1rem;
-}
-
-.kop-article .entry-content > h3 {
-    margin-top: 2.5rem;
-    margin-bottom: 0.75rem;
-}
-
-/* A subheading straight under its section heading stays with it. */
-.kop-article .entry-content > h2 + h3 {
-    margin-top: 1.25rem;
-}
-
-.kop-article .entry-content > h2:first-child,
-.kop-article .entry-content > h3:first-child {
-    margin-top: 0;
-}
-
-/* Bold-only marker paragraphs promoted to section markers */
+/* Bold-only marker paragraphs promoted to section markers (the space above
+   headings and markers is css/section-spacing.css, on every page) */
 .kop-article .entry-content p.kop-article-marker {
-    margin-top: 3.5rem;
+    margin-top: var(--kop-section-gap, 3.5rem);
     padding-top: 0.5rem;
     border-top: 1px solid var(--kop-border-secondary, #d9d3c0);
     font-size: 1.1rem;

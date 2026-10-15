@@ -37,6 +37,12 @@ function kadence_child_enqueue_styles() {
         wp_enqueue_style('kop-reading-measure', get_stylesheet_directory_uri() . '/css/reading-measure.css', array('kop-colors'), filemtime($measure_css));
     }
 
+    // Room above every section and subsection heading on every page (css/section-spacing.css)
+    $sections_css = get_stylesheet_directory() . '/css/section-spacing.css';
+    if (file_exists($sections_css)) {
+        wp_enqueue_style('kop-section-spacing', get_stylesheet_directory_uri() . '/css/section-spacing.css', array('kop-colors'), filemtime($sections_css));
+    }
+
     // Citation links use the saved source details for a lightweight preview.
     $citation_css = get_stylesheet_directory() . '/css/citation-previews.css';
     if (file_exists($citation_css)) {

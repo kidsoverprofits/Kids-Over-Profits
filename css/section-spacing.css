@@ -1,0 +1,98 @@
+/**
+ * Room between sections, on every page (inc/enqueue.php). A new section starts
+ * 3.5rem below the one before it, a subsection 2.5rem below the text above it,
+ * so a heading reads as the start of something new and not as one more line of
+ * the paragraph above (Kadence gives a heading only 1.5em, about the gap
+ * between two paragraphs). Card titles keep their own spacing.
+ *
+ * Where a page's sections are boxes that open with their heading, the space
+ * goes on the box (margins collapse, so 3.5rem is the gap, not an addition).
+ * A new page kind with its own section boxes adds them here.
+ */
+
+:root {
+    --kop-section-gap: 3.5rem;
+    --kop-subsection-gap: 2.5rem;
+}
+
+/* Posts and pages written in the editor: articles, hubs, profiles, editorials. */
+.entry-content > h2:not(:first-child),
+.entry-content > p.kop-article-marker:not(:first-child) {
+    margin-top: var(--kop-section-gap);
+}
+
+.entry-content > h3:not(:first-child) {
+    margin-top: var(--kop-subsection-gap);
+}
+
+.entry-content > h2 {
+    margin-bottom: 1rem;
+}
+
+.entry-content > h3 {
+    margin-bottom: 0.75rem;
+}
+
+/* A subheading straight under its section heading stays with it. */
+.entry-content > h2 + h3:not(:first-child) {
+    margin-top: 1.25rem;
+}
+
+/* Page Text pages: FAQ, Indian boarding schools, related industries (inc/page-text.php). */
+.kop-faq-page > section:not(:first-child),
+.kop-ibs-page > section:not(:first-child),
+.kop-ri-page > section:not(:first-child) {
+    margin-top: var(--kop-section-gap);
+}
+
+.kop-faq-page section > h3:not(:first-child),
+.kop-ibs-page section > h3:not(:first-child),
+.kop-ri-page section > h3:not(:first-child) {
+    margin-top: var(--kop-subsection-gap);
+}
+
+/* Facility and company pages (css/facility-profile.css). The body is a flex
+   column there, so the gap is the bottom margin alone. A folded section is
+   only its heading and keeps its tight spacing in the list of folds. */
+.kop-fp-body .kop-fp-section:not(.is-collapsed) {
+    margin-bottom: var(--kop-section-gap);
+}
+
+.kop-fp-body .kop-fp-jump + .kop-fp-section {
+    margin-top: var(--kop-section-gap);
+}
+
+.kop-fp-generated-body .kop-fp-section > .kop-fp-subhead:not(:first-child),
+.kop-fp-generated-body .kop-fp-sec-body > .kop-fp-subhead:not(:first-child),
+.kop-fp-generated-body .kop-fp-section > .kop-unsilenced-archive,
+.kop-fp-generated-body .kop-fp-sec-body > .kop-unsilenced-archive:not(:first-child) {
+    margin-top: var(--kop-subsection-gap);
+}
+
+.kop-fp-generated-body .kop-fp-section > h2 + .kop-fp-subhead {
+    margin-top: 1.25rem;
+}
+
+/* The glossary. */
+.kop-gl-main .kop-gl-section {
+    margin-bottom: var(--kop-section-gap);
+}
+
+.kop-gl-main .kop-gl-section > .kop-gl-group:not(:first-child) {
+    margin-top: var(--kop-subsection-gap);
+}
+
+/* Young adult programs, by region. */
+.kop-ya-records > .kop-ya-region {
+    margin-top: var(--kop-section-gap);
+}
+
+/* Where to report abuse. */
+.kop-rep .kop-rep-group {
+    margin-bottom: var(--kop-section-gap);
+}
+
+/* Open data downloads. */
+.kop-od-page > section:not(:first-child) {
+    margin-top: var(--kop-section-gap);
+}
