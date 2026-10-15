@@ -2397,10 +2397,13 @@ Open:
    and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. Checked live after deploy:
    https://kidsoverprofits.org/tag/utah/ reads `noindex, follow` and https://kidsoverprofits.org/sitemap_index.xml lists
    no tag sitemap. LiteSpeed's cached copies of other tag pages pick it up as they expire.
-8. Search Console and Bing Webmaster Tools: verified, sitemap_index.xml submitted by the owner on 2026-10-15. Data needs
-   2-7 days. Then: read which program names bring searchers (Performance, by query and page) and which pages Google
-   refused (Pages > Why pages aren't indexed), and adjust the plan. Search Console can also be connected in Site Kit
-   (installed) so its numbers show in wp-admin.
+8. Search Console: set up for about two years; sitemap_index.xml (re)submitted to Google and Bing on 2026-10-15. Site Kit
+   is connected to the property (owner = user 1) but lacks Search Console permission ("you haven't granted all
+   permissions requested during setup"), so the server cannot read it. **Owner:** grant it in Site Kit (Settings >
+   Connected services, or the "grant permissions" prompt on its dashboard), or export Performance (queries, pages) and
+   Pages > "Why pages aren't indexed" to Google Sheets. Then read which program names bring searchers, which rank but
+   are rarely clicked, and which pages Google refused, and adjust the plan. Left on the server by a blocked cleanup:
+   ~/kop-gsc.json and ~/kop-gsc.err (only the permission error), safe to delete.
 9. /staging/: done 2026-10-15. The owner's purge did not reach it (its cache entry carried the deleted staging site's
    tags, d5d_*); the entry was purged by tag from a one-off script, now removed. /staging/ is a 404 for every visitor.
 10. Lighter pages (2026-10-15, inc/defer-folds.php + js/defer-folds.js, scripts/test-defer-folds.php): the cost was elements,
