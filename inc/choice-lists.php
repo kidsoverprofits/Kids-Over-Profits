@@ -586,7 +586,11 @@ if (!function_exists('kop_choice_lists_page')) {
                 list($changes, $words, $errors) = kop_choice_apply_form($key, $rows, $new);
                 if (!$errors) {
                     $undo_id = kop_choice_set_items($key, $changes, $words);
-                    $notice = $undo_id !== '' ? 'Saved: ' . $words . '.' : 'Nothing changed.';
+                    // Name the list and where it shows: a choice saved to the wrong list looked like a save that did nothing.
+                    $notice = $undo_id !== ''
+                        ? 'Saved to "' . $registry[$key]['label'] . '": ' . $words . '.'
+                            . ($registry[$key]['where'] !== '' ? ' This list is used in: ' . wp_strip_all_tags($registry[$key]['where']) : '')
+                        : 'Nothing changed.';
                 }
             }
         }
