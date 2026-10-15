@@ -178,42 +178,16 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     <p class="kop-op-draft"<?php echo $kop_op_history_edit; ?>>No written history yet. Use the pencil to add one; it stays a draft, seen only by admins, until it is set to Published.</p>
                 <?php endif; ?>
                 <?php if (!empty($page['timeline'])) : ?>
-                    <h3 class="kop-fp-subhead">Year by year</h3>
-                    <p class="kop-fp-count">From the records: the years it ran each program, and lawsuits and deaths on record from those years. A program it took over appears only once the records say when it did.</p>
+                    <h3 class="kop-fp-subhead" id="timeline">Year by year</h3>
                     <?php
-                    $kop_op_tl_first = array_slice($page['timeline'], 0, 30);
-                    $kop_op_tl_rest = array_slice($page['timeline'], 30);
-                    $kop_op_tl_print = static function (array $years) {
-                        foreach ($years as $y) {
-                            echo '<li><p class="kop-fp-tl-head"><span class="kop-fp-tl-when">' . (int) $y['year'] . '</span></p>';
-                            foreach ($y['events'] as $e) {
-                                echo '<p class="kop-fp-tl-text"><strong>' . esc_html($e['text']) . '</strong>';
-                                if ($e['items']) {
-                                    $links = array();
-                                    foreach ($e['items'] as $it) {
-                                        $links[] = $it['url'] !== ''
-                                            ? '<a href="' . esc_url($it['url']) . '">' . esc_html($it['name']) . '</a>'
-                                            : esc_html($it['name']);
-                                    }
-                                    echo ': ' . implode('; ', $links);
-                                }
-                                echo '</p>';
-                            }
-                            echo '</li>';
-                        }
-                    };
+                    // inc/profile-timeline.php: escaped inside. A program's events count only in the years the company ran it.
+                    if (function_exists('kop_ptl_html') && isset($page['timeline'][0]['events'][0]['title'])) {
+                        echo kop_ptl_html($page['timeline'], array(
+                            'id'    => 'tl',
+                            'intro' => 'From the records: deals and takeovers, the programs it ran, and the deaths, lawsuits, inspection findings and news stories from the years it ran them. Point at an event, or tap "More about this", for the details.',
+                        ));
+                    }
                     ?>
-                    <ol class="kop-fp-timeline">
-                        <?php $kop_op_tl_print($kop_op_tl_first); ?>
-                    </ol>
-                    <?php if ($kop_op_tl_rest) : ?>
-                        <details class="kop-fp-more">
-                            <summary><?php echo esc_html(count($kop_op_tl_rest) . ' more ' . (count($kop_op_tl_rest) === 1 ? 'year' : 'years')); ?></summary>
-                            <ol class="kop-fp-timeline">
-                                <?php $kop_op_tl_print($kop_op_tl_rest); ?>
-                            </ol>
-                        </details>
-                    <?php endif; ?>
                 <?php endif; ?>
             </section>
             <?php endif; ?>

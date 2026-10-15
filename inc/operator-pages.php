@@ -216,6 +216,7 @@ if (!function_exists('kop_operator_pages_enqueue')) {
         if (file_exists($css)) {
             wp_enqueue_style('kop-facility-profile', $theme_uri . '/css/facility-profile.css', array('kop-colors'), filemtime($css));
         }
+        if (function_exists('kop_ptl_enqueue')) kop_ptl_enqueue();
         // The document viewer, for the library's tiles and the page's other
         // PDF links (as on facility pages).
         $doc_css = $theme_dir . '/css/document-library.css';
@@ -706,6 +707,7 @@ if (!function_exists('kop_operator_page_data')) {
 
         // ---- News: linked to the company, or to one of its facilities --------
         $news = array();
+        $news_facilities = array();
         $seen_news = array();
         $links_table = $wpdb->prefix . 'kop_operator_links';
         if (kop_facility_pages_table_exists('news_submissions')) {
@@ -717,8 +719,11 @@ if (!function_exists('kop_operator_page_data')) {
             }
             if ($facility_ids && kop_facility_pages_table_exists('news_facility_links')) {
                 $fin = implode(',', array_keys($facility_ids));
-                foreach ((array) $wpdb->get_col("SELECT news_id FROM news_facility_links WHERE facility_id IN ({$fin})") as $nid) {
-                    if (!isset($news_ids[(int) $nid])) $news_ids[(int) $nid] = 'facility';
+                foreach ((array) $wpdb->get_results("SELECT news_id, facility_id FROM news_facility_links WHERE facility_id IN ({$fin})", ARRAY_A) as $nr) {
+                    $nid = (int) $nr['news_id'];
+                    if (!isset($news_ids[$nid])) $news_ids[$nid] = 'facility';
+                    // Which programs each article is about: the timeline counts it only in the years the company ran them.
+                    $news_facilities[$nid][] = (int) $nr['facility_id'];
                 }
             }
             if ($news_ids) {
@@ -765,7 +770,7 @@ if (!function_exists('kop_operator_page_data')) {
                 }
             }
             $lrows = $wpdb->get_results(
-                "SELECT id, case_name, case_number, court, filing_date, status, outcome, summary, defendants, organizations_mentioned
+                "SELECT id, case_name, case_number, court, filing_date, status, outcome, settlement_amount, summary, defendants, organizations_mentioned
                    FROM lawsuits WHERE publication_status IN ('approved','published')
                   ORDER BY filing_date DESC, id DESC",
                 ARRAY_A
@@ -783,12 +788,14 @@ if (!function_exists('kop_operator_page_data')) {
                 }
                 if (!$by_name && !isset($linked[(int) $r['id']])) continue;
                 $lawsuits[] = array(
+                    'id'          => (int) $r['id'],
                     'case_name'   => trim((string) $r['case_name']),
                     'case_number' => trim((string) $r['case_number']),
                     'court'       => trim((string) $r['court']),
                     'year'        => $r['filing_date'] ? substr((string) $r['filing_date'], 0, 4) : '',
                     'status'      => ucfirst(str_replace('_', ' ', trim((string) $r['status']))),
                     'outcome'     => trim((string) $r['outcome']),
+                    'settlement_amount' => trim((string) ($r['settlement_amount'] ?? '')),
                     'summary'     => trim((string) $r['summary']),
                     // Names the company itself, or only its programs (by id).
                     'by_name'     => $defendant,
@@ -807,7 +814,7 @@ if (!function_exists('kop_operator_page_data')) {
                 $fids_by_key[kop_facility_pages_name_key($f['name'])] = (int) $f['id'];
             }
             $mrows = $wpdb->get_results(
-                "SELECT id, name, age, program, date_of_death, date_precision, cause_of_death, kop_url
+                "SELECT id, name, age, program, date_of_death, date_precision, cause_of_death, source_name, source_url, kop_url
                    FROM memorial_victims WHERE publication_status = 'published'
                   ORDER BY date_of_death DESC, id DESC",
                 ARRAY_A
@@ -825,6 +832,9 @@ if (!function_exists('kop_operator_page_data')) {
                     'program'    => $fkeys[$rk],
                     'date_label' => $label,
                     'cause'      => trim((string) $r['cause_of_death']),
+                    'date'       => $date,
+                    'source_name' => trim((string) $r['source_name']),
+                    'source_url' => trim((string) $r['source_url']),
                     'kop_url'    => trim((string) $r['kop_url']),
                     'facility_id' => $fids_by_key[$rk],
                 );
@@ -858,14 +868,21 @@ if (!function_exists('kop_operator_page_data')) {
             ? kop_operator_history_map_node(array_merge(array($entry['name'], $name, $abbr), $aka))
             : null;
         $map_links = $map_node ? kop_operator_history_map_links((string) $map_node['id']) : array();
-        $timeline = function_exists('kop_operator_history_timeline') ? kop_operator_history_timeline(array(
+        $timeline_ctx = array(
             'founded'      => $op['founded'] ?? '',
+            'name'         => $name,
             'facilities'   => $facilities,
             'links'        => $map_links,
+            'map_node'     => $map_node,
             'lawsuits'     => $lawsuits,
             'memorials'    => $memorials,
+            'news'         => $news,
+            'news_facilities' => $news_facilities,
             'lawsuits_url' => $lawsuits_url,
-        )) : array();
+        );
+        // The year-by-year timeline (inc/profile-timeline.php): deals, takeovers, milestones, harm, courts, the press.
+        $timeline = function_exists('kop_ptl_operator') ? kop_ptl_operator($timeline_ctx)
+            : (function_exists('kop_operator_history_timeline') ? kop_operator_history_timeline($timeline_ctx) : array());
         $people = function_exists('kop_operator_history_people')
             ? kop_operator_history_people($map_links, $my_keys)
             : array('leaders' => array(), 'others' => array());

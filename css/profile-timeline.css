@@ -1,0 +1,635 @@
+/*
+ * Year-by-year timelines on company and facility pages (inc/profile-timeline.php,
+ * js/profile-timeline.js). Each kind of event has its colour: ownership navy,
+ * programs teal, deaths and incidents coral, inspections orange, lawsuits
+ * midnight, the press pink. Inks on light grounds, fills under white icons.
+ * Buttons name colour and background in every state (Kadence colours buttons
+ * after this file loads; see CLAUDE.md, "Kadence colour traps").
+ */
+
+.kop-ptl {
+    --ptl-company: var(--kop-navy-blue, #000080);
+    --ptl-company-fill: var(--kop-navy-blue, #000080);
+    --ptl-programs: var(--kop-teal-ink, #1C6E78);
+    --ptl-programs-fill: var(--kop-teal-fill, #1F7A85);
+    --ptl-harm: var(--kop-coral-pink-ink, #B3263A);
+    --ptl-harm-fill: var(--kop-coral-pink-fill, #B3263A);
+    --ptl-oversight: var(--kop-orange-ink, #A3570D);
+    --ptl-oversight-fill: var(--kop-orange-fill, #A3570D);
+    --ptl-legal: var(--kop-midnight-blue, #000435);
+    --ptl-legal-fill: var(--kop-midnight-blue, #000435);
+    --ptl-press: var(--kop-bubblegum-pink-ink, #A3236B);
+    --ptl-press-fill: var(--kop-bubblegum-pink-fill, #A3236B);
+    --ptl-line: var(--kop-mint-green, #B6E3D4);
+    position: relative;
+    margin: 0.75rem 0 1.5rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-ptl-intro {
+    margin: 0 0 0.9rem;
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* ---- Filters ------------------------------------------------------------ */
+
+.kop-ptl-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 1rem;
+}
+
+button.kop-ptl-filter,
+button.kop-ptl-filter:hover,
+button.kop-ptl-filter:focus,
+button.kop-ptl-filter:active {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.3rem 0.75rem;
+    border: 1.5px solid var(--kop-midnight-blue, #000435);
+    border-radius: 999px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+button.kop-ptl-filter:hover {
+    background: var(--kop-sand, #F2EEDF);
+}
+
+button.kop-ptl-filter:focus-visible {
+    outline: 3px solid var(--kop-focus-color, #33A7B5);
+    outline-offset: 2px;
+}
+
+button.kop-ptl-filter.is-on,
+button.kop-ptl-filter.is-on:hover,
+button.kop-ptl-filter.is-on:focus,
+button.kop-ptl-filter.is-on:active {
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+}
+
+.kop-ptl-n {
+    font-weight: 400;
+    opacity: 0.85;
+}
+
+/* ---- The strip of years ---------------------------------------------------- */
+
+.kop-ptl-strip {
+    position: relative;
+    height: 2.6rem;
+    margin: 0 0.6rem 1.25rem;
+}
+
+.kop-ptl-strip-line {
+    position: absolute;
+    top: 0.75rem;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--ptl-line);
+}
+
+a.kop-ptl-tick {
+    position: absolute;
+    top: 0.45rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-left: -0.35rem;
+    border: 2px solid var(--kop-teal-ink, #1C6E78);
+    border-radius: 50%;
+    background: var(--kop-white, #fff);
+    box-sizing: border-box;
+}
+
+a.kop-ptl-tick.is-major {
+    top: 0.3rem;
+    width: 1rem;
+    height: 1rem;
+    margin-left: -0.5rem;
+    border-color: var(--kop-orange-ink, #A3570D);
+    background: var(--kop-orange-ink, #A3570D);
+}
+
+a.kop-ptl-tick:hover,
+a.kop-ptl-tick:focus-visible {
+    transform: scale(1.35);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--kop-focus-color, #33A7B5);
+}
+
+a.kop-ptl-tick.is-dim {
+    opacity: 0.25;
+}
+
+.kop-ptl-strip-end {
+    position: absolute;
+    top: 1.45rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-ptl-strip-start {
+    left: -0.6rem;
+}
+
+.kop-ptl-strip-last {
+    right: -0.6rem;
+}
+
+/* ---- Years ----------------------------------------------------------------- */
+
+.kop-ptl-years,
+.kop-ptl-events {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-ptl-year {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0 0.75rem;
+    margin: 0;
+    scroll-margin-top: 6rem;
+}
+
+.kop-ptl-year.kop-ptl-later,
+.kop-ptl-year.is-empty {
+    display: none;
+}
+
+h3.kop-ptl-yearmark {
+    margin: 0;
+    padding: 0.55rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: var(--kop-midnight-blue, #000435);
+    text-align: right;
+}
+
+h3.kop-ptl-yearmark span {
+    position: sticky;
+    top: 5rem;
+    display: inline-block;
+}
+
+.kop-ptl-events {
+    position: relative;
+    padding: 0.35rem 0 1.1rem 2.9rem;
+}
+
+/* The spine runs through every year. */
+.kop-ptl-events::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1.05rem;
+    width: 3px;
+    background: var(--ptl-line);
+}
+
+/* ---- Events ---------------------------------------------------------------- */
+
+.kop-ptl-ev {
+    --ptl-c: var(--ptl-programs);
+    --ptl-f: var(--ptl-programs-fill);
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.85rem;
+    margin: 0 0 0.65rem;
+    padding: 0.6rem 0.8rem 0.65rem;
+    border: 1px solid #DCD6C3;
+    border-radius: 8px;
+    background: var(--kop-white, #fff);
+}
+
+.kop-ptl-ev[hidden] {
+    display: none;
+}
+
+.kop-ptl-g-company { --ptl-c: var(--ptl-company); --ptl-f: var(--ptl-company-fill); }
+.kop-ptl-g-programs { --ptl-c: var(--ptl-programs); --ptl-f: var(--ptl-programs-fill); }
+.kop-ptl-g-harm { --ptl-c: var(--ptl-harm); --ptl-f: var(--ptl-harm-fill); }
+.kop-ptl-g-oversight { --ptl-c: var(--ptl-oversight); --ptl-f: var(--ptl-oversight-fill); }
+.kop-ptl-g-legal { --ptl-c: var(--ptl-legal); --ptl-f: var(--ptl-legal-fill); }
+.kop-ptl-g-press { --ptl-c: var(--ptl-press); --ptl-f: var(--ptl-press-fill); }
+
+.kop-ptl-ev.is-major {
+    border-left: 5px solid var(--ptl-c);
+    background: #FFFDF6;
+}
+
+.kop-ptl-ev.has-card:hover {
+    border-color: var(--ptl-c);
+}
+
+.kop-ptl-dot {
+    position: absolute;
+    top: 0.6rem;
+    left: -2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 2px solid var(--ptl-c);
+    border-radius: 50%;
+    background: var(--kop-white, #fff);
+    color: var(--ptl-c);
+    box-sizing: border-box;
+}
+
+.kop-ptl-ev.is-major .kop-ptl-dot {
+    width: 2.2rem;
+    height: 2.2rem;
+    top: 0.45rem;
+    left: -2.9rem;
+    border-color: var(--ptl-f);
+    background: var(--ptl-f);
+    color: var(--kop-white, #fff);
+}
+
+.kop-ptl-dot .kop-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.kop-ptl-main {
+    min-width: 0;
+}
+
+.kop-ptl-main > p {
+    margin: 0;
+}
+
+.kop-ptl-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.6rem;
+    align-items: baseline;
+    margin-bottom: 0.1rem !important;
+}
+
+.kop-ptl-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ptl-c);
+}
+
+.kop-ptl-when {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-ptl-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--kop-midnight-blue, #000435);
+    overflow-wrap: anywhere;
+}
+
+.kop-ptl-ev.is-major .kop-ptl-title {
+    font-size: 1.07rem;
+}
+
+.kop-ptl-lead {
+    margin-top: 0.2rem !important;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    color: var(--kop-text-primary, #1A202C);
+}
+
+.kop-ptl-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.9rem;
+    margin: 0.35rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.kop-ptl-items li {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.kop-ptl-items a {
+    font-weight: 600;
+    color: var(--kop-navy-blue, #000080);
+}
+
+.kop-ptl-item-meta,
+.kop-ptl-items-more {
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.85rem;
+}
+
+button.kop-ptl-more,
+button.kop-ptl-more:hover,
+button.kop-ptl-more:focus,
+button.kop-ptl-more:active {
+    display: none;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0.4rem 0 0;
+    padding: 0.15rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--kop-navy-blue, #000080);
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+button.kop-ptl-more:hover {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+button.kop-ptl-more:focus-visible {
+    outline: 3px solid var(--kop-focus-color, #33A7B5);
+    outline-offset: 2px;
+}
+
+.kop-ptl.is-js button.kop-ptl-more {
+    display: inline-flex;
+}
+
+.kop-ptl-more .kop-icon {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: transform 0.15s ease;
+}
+
+.kop-ptl-ev.is-open .kop-ptl-more .kop-icon {
+    transform: rotate(45deg);
+}
+
+.kop-ptl-thumb {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    display: block;
+    width: 5.5rem;
+    height: 5.5rem;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-ptl-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kop-ptl-thumb--logo {
+    background: var(--kop-white, #fff);
+    border: 1px solid #E5E0CF;
+}
+
+.kop-ptl-thumb--logo img {
+    object-fit: contain;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+/* ---- More about an event: inline (no script, or tapped), or a hover card ------ */
+
+.kop-ptl-card {
+    grid-column: 1 / -1;
+    margin-top: 0.4rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 6px;
+    background: var(--kop-sand, #F2EEDF);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--kop-text-primary, #1A202C);
+}
+
+.kop-ptl.is-js .kop-ptl-card {
+    display: none;
+}
+
+.kop-ptl.is-js .kop-ptl-ev.is-open .kop-ptl-card {
+    display: block;
+}
+
+.kop-ptl-card > p,
+.kop-ptl-pop > p {
+    margin: 0 0 0.5rem;
+}
+
+.kop-ptl-card-title {
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+/* Inline, the title is already above it. */
+.kop-ptl-card .kop-ptl-card-title,
+.kop-ptl-card .kop-ptl-card-img {
+    display: none;
+}
+
+.kop-ptl-card-img {
+    display: block;
+    margin: 0 0 0.6rem;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-ptl-card-img img {
+    display: block;
+    width: 100%;
+    max-height: 13rem;
+    object-fit: cover;
+}
+
+.kop-ptl-card-img--logo img {
+    max-height: 4.5rem;
+    object-fit: contain;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    background: var(--kop-white, #fff);
+}
+
+.kop-ptl-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 0.4rem 0.9rem;
+    margin: 0 0 0.6rem;
+}
+
+.kop-ptl-facts div {
+    min-width: 0;
+}
+
+.kop-ptl-facts dt {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-ptl-facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.kop-ptl-card .kop-ptl-items,
+.kop-ptl-pop .kop-ptl-items {
+    margin: 0 0 0.6rem;
+}
+
+.kop-ptl-card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    align-items: baseline;
+    margin: 0 !important;
+    font-size: 0.86rem;
+}
+
+.kop-ptl-card-link {
+    font-weight: 700;
+    color: var(--kop-navy-blue, #000080);
+}
+
+/* The hover card, placed by the script beside or under its event. */
+.kop-ptl-pop {
+    position: absolute;
+    z-index: 60;
+    width: min(25rem, calc(100vw - 2rem));
+    max-height: min(32rem, calc(100vh - 2rem));
+    overflow-y: auto;
+    padding: 0.9rem 1rem;
+    border: 1px solid #CFC8B2;
+    border-top: 4px solid var(--ptl-c, var(--kop-midnight-blue, #000435));
+    border-radius: 8px;
+    background: var(--kop-white, #fff);
+    box-shadow: 0 12px 32px rgba(0, 4, 53, 0.18);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--kop-text-primary, #1A202C);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.kop-ptl-pop.is-shown {
+    opacity: 1;
+    transform: none;
+}
+
+.kop-ptl-pop a {
+    color: var(--kop-navy-blue, #000080);
+}
+
+/* ---- Later years, legend ----------------------------------------------------- */
+
+button.kop-ptl-all,
+button.kop-ptl-all:hover,
+button.kop-ptl-all:focus,
+button.kop-ptl-all:active {
+    display: block;
+    margin: 0.25rem 0 0.75rem 5.25rem;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid var(--kop-midnight-blue, #000435);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+button.kop-ptl-all:hover {
+    background: var(--kop-sand, #F2EEDF);
+}
+
+button.kop-ptl-all[hidden] {
+    display: none;
+}
+
+.kop-ptl-legend {
+    margin: 0.25rem 0 0 5.25rem;
+    font-size: 0.82rem;
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-ptl-legend-major {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    margin-right: 0.3rem;
+    border-radius: 50%;
+    background: var(--kop-orange-ink, #A3570D);
+    vertical-align: -0.1rem;
+}
+
+/* ---- Phones ------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+    .kop-ptl-year {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    h3.kop-ptl-yearmark {
+        padding: 0.5rem 0 0.2rem 2.9rem;
+        text-align: left;
+    }
+
+    .kop-ptl-thumb {
+        width: 4rem;
+        height: 4rem;
+    }
+
+    button.kop-ptl-all,
+    .kop-ptl-legend {
+        margin-left: 0;
+    }
+}
+
+@media print {
+    .kop-ptl-filters,
+    .kop-ptl-strip,
+    button.kop-ptl-more,
+    button.kop-ptl-all {
+        display: none !important;
+    }
+
+    .kop-ptl .kop-ptl-card,
+    .kop-ptl .kop-ptl-year.kop-ptl-later {
+        display: block !important;
+    }
+}

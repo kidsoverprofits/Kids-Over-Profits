@@ -2460,3 +2460,30 @@ Open, in order:
    the network map's names on the page (edited on the map), inspection report rows and findings (state data; findings have
    Review inbox), "Other programs run by" rows (each is its own page), and the summary lines under Materials and links.
 3. Unsilenced types are kept on our side only: they are not on /documents/<type>/ pages, which list media library documents.
+
+### 3.28 Richer timelines on company and facility pages (2026-10-15)
+
+The owner asked for timelines with context, hover cards, pictures and scandals instead of bare "acquired" lists.
+`inc/profile-timeline.php` (+ `css/profile-timeline.css`, `js/profile-timeline.js`) builds the "Year by year" timeline
+of /operator/ pages and a new Timeline section on /facility/ pages: deals and takeovers from the map's operated years
+(a program one company stopped running the year another began is a takeover; a deal names what moved with it), programs
+begun/ended, lawsuits with outcome, deaths with cause, approved serious findings, incidents, renames, press arcs with
+pictures; filter buttons, a year strip, "More about this" cards (hover with a mouse, tap on a phone). A program's events
+count for a company only in the years it ran it. 114 researched company milestones (buyouts, private equity owners,
+investigations, settlements, closures; each source quoted) are in `seeds/company-milestones.json` and wait at
+Review inbox > Company milestones (`inc/review-inbox/company-milestones.php`; Approve / Leave it off / wording edits,
+Undo); none shows until approved. With all approved, 110 render on company pages (the other 4 belong to Bain Capital,
+CRC Health Group and Keystone, which have no company page).
+
+Open:
+1. **Owner:** review the 114 cards at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (Company milestones).
+   Cards with a "Check" line carry a research caveat (e.g. Sequel's founding year: 1999 in APM Reports, 1992 on the wiki).
+2. **Check after deploy:** https://kidsoverprofits.org/operator/sequel-tsi/ and https://kidsoverprofits.org/operator/universal-health-services-uhs/
+   (timeline, filters, a card on hover and on a phone), and a facility page with a Timeline section, e.g.
+   https://kidsoverprofits.org/facility/sedona-sky-academy-az/. Then `python -u scripts/check-contrast.py` on those pages.
+3. Sources: 92 of the 109 milestone sources were new to KOP; `tmp/send-milestone-sources.py` sends them 12 an hour
+   (log `tmp/send-milestone-sources.log`, done list `tmp/milestone-sources-sent.json`). If it stops early, rerun it; it resumes.
+4. Company pages for Bain Capital, CRC Health Group and Keystone Education and Youth Services would carry their 4 milestones.
+5. `scripts/test-facility-pages.php` "links a staff entry and a fact to their sources" fails with or without the timeline:
+   its first sample (Aspen Education Group) is now a renamed program, whose staff go into the name sections. The fixture
+   should pick a record without eras.

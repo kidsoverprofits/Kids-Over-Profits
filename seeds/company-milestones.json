@@ -1,0 +1,2617 @@
+{
+  "version": 1,
+  "about": "Dated milestones of parent companies (buyouts, private equity owners, investigations, settlements, closures), each quoted from its sources. Read by inc/profile-timeline.php; each waits at Review inbox > Company milestones and shows on company and facility timelines only once approved. Researched 2026-10-14.",
+  "milestones": [
+    {
+      "key": "acadia-healthcare-2011-5bd84cb1",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2011,
+      "date": "2011-04-01",
+      "kind": "deal",
+      "title": "Bought Youth and Family Centered Services, a chain of programs for abused and neglected youth",
+      "detail": "Acadia, then owned by Waud Capital Partners, acquired Youth and Family Centered Services, Inc. (YFCS) of Austin, Texas on April 1, 2011 from TA Associates. Fortune described YFCS as a provider of services for troubled children and adolescents with 13 facilities in nine states. Acadia's 10-K called it the largest private, for-profit provider of such services exclusively for abused and neglected children and adolescents.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Acadia Healthcare Form 10-K for 2011, SEC",
+          "url": "https://www.sec.gov/Archives/edgar/data/1520697/000119312512112423/d289754d10k.htm",
+          "quote": "On April 1, 2011, we acquired Youth and Family Centered Services, Inc."
+        },
+        {
+          "label": "Fortune, March 10, 2011",
+          "url": "https://fortune.com/2011/03/10/pe-firms-agree-to-swap-center-for-troubled-kids",
+          "quote": "13 facilities in nine states"
+        }
+      ],
+      "note": "Price not confirmed from a primary source (a deal database gives about $178 million)."
+    },
+    {
+      "key": "acadia-healthcare-2011-aa0fc66a",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2011,
+      "date": "2011-11-01",
+      "kind": "deal",
+      "title": "Merged with PHC Inc. (Pioneer Behavioral Health) and went public on NASDAQ as ACHC",
+      "detail": "Acadia completed its merger with PHC, Inc., which did business as Pioneer Behavioral Health, on November 1, 2011 and began trading on NASDAQ under the symbol ACHC. The combined company operated 34 facilities with about 1,950 licensed beds in 18 states.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Acadia press release, SEC Form 8-K Exhibit 99.1, November 1, 2011",
+          "url": "https://www.sec.gov/Archives/edgar/data/0001520697/000119312511290928/d251019dex991.htm",
+          "quote": "Begins Trading on NASDAQ under Symbol ACHC"
+        }
+      ]
+    },
+    {
+      "key": "acadia-healthcare-2015-608e3f18",
+      "company": "Acadia HealthCare",
+      "also": [
+        "CRC Health Group",
+        "Bain Capital",
+        "Aspen Education Group"
+      ],
+      "year": 2015,
+      "date": "2015-02-11",
+      "kind": "deal",
+      "title": "Bought CRC Health Group, owner of the Aspen youth programs, from Bain Capital",
+      "detail": "Acadia announced a definitive agreement to acquire CRC Health Group on October 29, 2014, describing CRC as the nation's largest specialized behavioral healthcare provider with 36 residential facilities and 84 comprehensive treatment facilities. The deal was valued at $1.175 billion in Acadia stock plus assumed debt; Bain Capital took Acadia shares. Acadia announced completion on February 11, 2015.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Acadia SEC Form 8-K, October 29, 2014",
+          "url": "https://www.sec.gov/Archives/edgar/data/0001520697/000119312514387886/d811363d8k.htm",
+          "quote": "On October 29, 2014, Acadia also announced the signing of a definitive agreement to acquire CRC Health Group, Inc."
+        },
+        {
+          "label": "Acadia SEC Form 8-K, February 11, 2015",
+          "url": "https://www.sec.gov/Archives/edgar/data/0001520697/000119312515044361/d870318d8k.htm",
+          "quote": "On February 11, 2015, Acadia also announced the completion of its acquisition of CRC Health Group, Inc."
+        },
+        {
+          "label": "Treatment Magazine (ATIN), October 30, 2014",
+          "url": "https://treatmentmagazine.com/joey-jacobs-does-largest-deal-in-addictions-history-acquires-crc/",
+          "quote": "Bain Capital cannot be said to have exited the behavioral health space"
+        }
+      ],
+      "note": "Announced value $1.175 billion; Acadia's 2014 10-K (search result, not opened) gives total consideration of about $1.3 billion at closing."
+    },
+    {
+      "key": "acadia-healthcare-2024-ee75f859",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2024,
+      "date": "2024-06-12",
+      "kind": "investigation",
+      "title": "Named in the Senate Finance Committee's 'Warehouses of Neglect' report on youth residential treatment",
+      "detail": "The Senate Finance Committee's two-year investigation of youth residential treatment covered Acadia Healthcare along with Universal Health Services, Devereux Advanced Behavioral Health and Vivant Behavioral Healthcare. It reported rampant civil rights violations and heavy reliance on seclusion and chemical restraint.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Oregon Public Broadcasting (Lauren Dake), June 12, 2024",
+          "url": "https://www.opb.org/article/2024/06/12/senate-report-us-taxpayers-fund-residential-treatment-facilities-that-put-vulnerable-kids-at-risk/",
+          "quote": "rampant civil rights violations"
+        }
+      ],
+      "note": "Same report as the UHS entry."
+    },
+    {
+      "key": "acadia-healthcare-2024-816a91dc",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2024,
+      "date": "2024-09",
+      "kind": "scandal",
+      "title": "New York Times investigation reports Acadia held psychiatric patients until their insurance ran out",
+      "detail": "Jessica Silver-Greenberg and Katie Thomas of The New York Times reported, from more than 50 current and former executives and staff, that Acadia held patients against their will when it was not medically necessary, often until their insurance ran out. The article reported violations in at least 12 of the 19 states where Acadia ran psychiatric hospitals and described children assaulted or neglected at its Lakeview hospital in Georgia. Acadia denied improperly holding patients.",
+      "programs": [
+        "Lakeview Behavioral Health (Georgia)"
+      ],
+      "sources": [
+        {
+          "label": "The New York Times, republished by The Salt Lake Tribune, September 2, 2024",
+          "url": "https://sltrib.com/news/2024/09/02/acadia-healthcare-holds",
+          "quote": "Unless the patients or their families hire lawyers, Acadia often holds them until their insurance runs out."
+        }
+      ],
+      "note": "NYT original appears dated September 1, 2024 (Boston Globe reprint URL); the opened republication is dated September 2."
+    },
+    {
+      "key": "acadia-healthcare-2024-b5bd91f5",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2024,
+      "date": "2024-09-24",
+      "kind": "investigation",
+      "title": "Received federal grand jury subpoenas and a prosecutors' request over admissions and billing",
+      "detail": "On September 24, 2024 Acadia received a voluntary request for information from the U.S. Attorney's Office for the Southern District of New York and a grand jury subpoena from the Western District of Missouri; its subsidiary Lakeland Hospital Acquisition, LLC received another. The inquiries concern admissions, length of stay and billing practices, and Acadia said it expected similar requests from the SEC.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Acadia SEC Form 8-K, September 27, 2024",
+          "url": "https://www.sec.gov/Archives/edgar/data/1520697/000119312524227393/d856245d8k.htm",
+          "quote": "related to its admissions, length of stay and billing practices"
+        }
+      ]
+    },
+    {
+      "key": "acadia-healthcare-2024-a3810565",
+      "company": "Acadia HealthCare",
+      "also": [],
+      "year": 2024,
+      "date": "2024-09-26",
+      "kind": "settlement",
+      "title": "Paid $19.85 million to settle claims of billing for medically unnecessary behavioral health care",
+      "detail": "Acadia agreed to pay $19.85 million to the United States and Florida, Georgia, Michigan and Nevada to resolve allegations that it billed Medicare, Medicaid and TRICARE for medically unnecessary inpatient behavioral health services between 2014 and 2017 and failed to staff and supervise its facilities properly. The case began as a whistleblower suit by former employees. The claims were allegations only.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, September 26, 2024",
+          "url": "https://bhbusiness.com/2024/09/26/acadia-to-pay-19-85m-to-settle-whistleblower-allegations-relating-to-medically-unnecessary-inpatient-behavioral-health-services/",
+          "quote": "knowingly billed for medically unnecessary behavioral health services and endangered patients"
+        }
+      ],
+      "note": "DOJ release (justice.gov/usao-mdfl) not fetchable by the tool."
+    },
+    {
+      "key": "altior-healthcare-2021-297fe07b",
+      "company": "Altior Healthcare",
+      "also": [],
+      "year": 2021,
+      "date": "2021-02",
+      "kind": "deal",
+      "title": "Pine Tree Equity invested in Innercept",
+      "detail": "Miami private equity firm Pine Tree Equity invested in Innercept, a Coeur d'Alene, Idaho residential treatment provider for adolescents and young adults, in February 2021. Pine Tree built Altior Healthcare from Paradigm Treatment Centers, Shortridge Academy, Innercept and Ironwood.",
+      "programs": [
+        "Innercept",
+        "Paradigm Treatment Centers",
+        "Shortridge Academy",
+        "Ironwood"
+      ],
+      "sources": [
+        {
+          "label": "PrivSource deal record",
+          "url": "https://www.privsource.com/acquisitions/deal/ZoSgRn",
+          "quote": "Miami-based private equity firm Pine Tree Equity invested in Innercept"
+        },
+        {
+          "label": "Behavioral Health Business, May 7, 2026",
+          "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+          "quote": "It has acquired Paradigm Treatment Centers, Shortridge Academy, Innercept and Ironwood."
+        }
+      ],
+      "note": "Search summaries put Pine Tree's recapitalization of Paradigm in April 2019 (PrivSource), not opened. Dates for Shortridge and Ironwood not found."
+    },
+    {
+      "key": "altior-healthcare-2026-cb64b817",
+      "company": "Altior Healthcare",
+      "also": [],
+      "year": 2026,
+      "date": "2026-05-07",
+      "kind": "deal",
+      "title": "Owner Pine Tree reported preparing a sale",
+      "detail": "Axios reported, via Behavioral Health Business, that Pine Tree Equity Partners planned to auction Altior Healthcare, which ran Paradigm Treatment Centers, Patriot PowerUp and Ridge RTC with 500 employees in five states. Gladstone Capital had lent Altior $46 million in May 2025.",
+      "programs": [
+        "Paradigm Treatment Centers",
+        "Ridge RTC"
+      ],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, May 7, 2026",
+          "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+          "quote": "lent Altior Healthcare $46 million in May 2025"
+        }
+      ]
+    },
+    {
+      "key": "aspen-education-group-2009-be5ca444",
+      "company": "Aspen Education Group",
+      "also": [
+        "CRC Health Group"
+      ],
+      "year": 2009,
+      "date": "2009-08-28",
+      "kind": "death",
+      "title": "Student Sergey Blashchishen, 16, died on his first day at SageWalk Wilderness School",
+      "detail": "SageWalk, an Aspen program in Oregon, said a student died on August 28, 2009. Oregon's Department of Human Services opened an investigation and asked SageWalk to remove all students, and local police executed a search warrant. Salon later reported the boy, Sergey Blashchishen, died of heatstroke on his first hike.",
+      "programs": [
+        "SageWalk Wilderness School"
+      ],
+      "sources": [
+        {
+          "label": "SageWalk statement, Strugglingteens.com, September 15, 2009",
+          "url": "https://strugglingteens.com/artman/publish/printer_SageWalkBN_091709.shtml",
+          "quote": "that occurred on August 28"
+        },
+        {
+          "label": "Salon (Art Levine), July 18, 2012",
+          "url": "https://www.salon.com/2012/07/18/dark_side_of_a_bain_success/",
+          "quote": "died of heatstroke on his very first school hike"
+        }
+      ],
+      "note": "Cause of death from Salon; an official autopsy ruling was not opened."
+    },
+    {
+      "key": "aspen-education-group-2009-16fb3d91",
+      "company": "Aspen Education Group",
+      "also": [
+        "CRC Health Group"
+      ],
+      "year": 2009,
+      "date": "2009-11-03",
+      "kind": "closure",
+      "title": "Oregon suspended Mount Bachelor Academy's license after confirming nine abuse and neglect allegations",
+      "detail": "Oregon's Department of Human Services ordered Aspen's Mount Bachelor Academy to stop providing all services to children, after confirming nine child abuse and neglect allegations and more than a dozen rule violations. The state said the school posed a serious danger to children. Aspen was owned by CRC Health Group.",
+      "programs": [
+        "Mount Bachelor Academy"
+      ],
+      "sources": [
+        {
+          "label": "The Bulletin (Bend), November 4, 2009",
+          "url": "https://bendbulletin.com/?p=204458",
+          "quote": "poses a serious danger to public health or safety of children"
+        }
+      ],
+      "note": "Search summaries say the school settled with the state in 2010 and the state withdrew its findings (not opened)."
+    },
+    {
+      "key": "aspen-education-group-2011-9022ee6b",
+      "company": "Aspen Education Group",
+      "also": [
+        "CRC Health Group"
+      ],
+      "year": 2011,
+      "date": "2011-03-24",
+      "kind": "closure",
+      "title": "Closed five programs and consolidated three more",
+      "detail": "Aspen announced it would close Bromley Brook School (VT), New Leaf Academy of Oregon, NorthStar Center (Bend, OR), Aspen Ranch (Loa, UT) and SunHawk Adolescent Recovery Center (St. George, UT). Aspen Achievement Academy was combined with Outback Therapeutic Expeditions, Youth Care moved to the Island View campus, and Passages to Recovery moved to Idaho. Aspen cited reduced demand in the economy.",
+      "programs": [
+        "Bromley Brook School",
+        "New Leaf Academy of Oregon",
+        "NorthStar Center",
+        "Aspen Ranch",
+        "SunHawk Adolescent Recovery Center",
+        "Aspen Achievement Academy",
+        "Outback Therapeutic Expeditions",
+        "Youth Care",
+        "Island View",
+        "Passages to Recovery"
+      ],
+      "sources": [
+        {
+          "label": "Aspen Education Group announcement, Strugglingteens.com, March 24, 2011",
+          "url": "https://strugglingteens.com/artman/publish/AspenEducationGroupBN_110324.shtml",
+          "quote": "reduced demand for therapeutic schools and programs in today's economy"
+        }
+      ]
+    },
+    {
+      "key": "bain-capital-2006-7f2b4c21",
+      "company": "Bain Capital",
+      "also": [
+        "CRC Health Group"
+      ],
+      "year": 2006,
+      "date": "2006-02-06",
+      "kind": "deal",
+      "title": "Bought CRC Health Group for about $742 million",
+      "detail": "Funds managed by Bain Capital Partners completed the purchase of CRC Health Group on February 6, 2006, for total cash consideration of about $742.3 million including fees. Later that year CRC, with Bain's backing, bought Aspen Education Group.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "CRC Health Corporation Form 10-K for 2007, SEC",
+          "url": "https://www.sec.gov/Archives/edgar/data/1360474/000119312508076428/d10k.htm",
+          "quote": "On February 6, 2006, investment funds managed by Bain Capital Partners, LLC"
+        }
+      ],
+      "note": "Same event as the CRC entry; listed here so Bain's timeline carries it."
+    },
+    {
+      "key": "cedu-1982-a7f767d6",
+      "company": "CEDU",
+      "also": [],
+      "year": 1982,
+      "date": "",
+      "kind": "founded",
+      "title": "Opened Rocky Mountain Academy in Idaho",
+      "detail": "Rocky Mountain Academy, CEDU's first school in Boundary County, Idaho, opened in 1982. By 2004 CEDU's payroll put about $9 million a year into the local economy.",
+      "programs": [
+        "Rocky Mountain Academy"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "The opening of Rocky Mountain Academy in 1982 helped diversify Bonner County's timber- and agriculture-dependent economy"
+        }
+      ]
+    },
+    {
+      "key": "cedu-1996-75154430",
+      "company": "CEDU",
+      "also": [],
+      "year": 1996,
+      "date": "1996-06-27",
+      "kind": "settlement",
+      "title": "Sued over a student's treatment at Ascent and Northwest Academy",
+      "detail": "A former student's family sued CEDU on June 27, 1996, in Monterey County Superior Court, alleging negligence, false imprisonment and fraud over his time at Ascent and Northwest Academy in Boundary County, Idaho, from December 1994 to May 1995. The suit said CEDU president Mel Wasserman misled the parents. CEDU did not comment.",
+      "programs": [
+        "Ascent",
+        "Northwest Academy"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, July 11, 1996",
+          "url": "https://www.spokesman.com/stories/1996/jul/11/teen-sues-north-idaho-therapy-cs-family-says/",
+          "quote": "The suit was filed June 27 in the Superior Court of Monterey County, Calif., headquarters of the CEDU Family of Services."
+        }
+      ],
+      "note": "A lawsuit filing; outcome not found."
+    },
+    {
+      "key": "cedu-2002-9a92cbfd",
+      "company": "CEDU",
+      "also": [],
+      "year": 2002,
+      "date": "",
+      "kind": "settlement",
+      "title": "Paid $300,000 to settle claims over Northwest Academy",
+      "detail": "CEDU paid a $300,000 settlement in 2002 to the families of two former students who alleged that Northwest Academy staff were poorly trained and abusive.",
+      "programs": [
+        "Northwest Academy"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "CEDU paid a $300,000 settlement in 2002 to the families of two former students who alleged that the staff at Northwest Academy was poorly trained and abusive"
+        }
+      ],
+      "note": "The Spokesman-Review attributes this to 'previous press accounts'."
+    },
+    {
+      "key": "cedu-2004-4e74e9f0",
+      "company": "CEDU",
+      "also": [],
+      "year": 2004,
+      "date": "2004-10",
+      "kind": "settlement",
+      "title": "Sued by more than two dozen parents",
+      "detail": "In October 2004 more than two dozen parents sued Rocky Mountain and Boulder Creek academies, alleging misconduct and breach of contract.",
+      "programs": [
+        "Rocky Mountain Academy",
+        "Boulder Creek Academy"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "More than two dozen parents filed lawsuits against Rocky Mountain and Boulder Creek academies in October, alleging misconduct and breach of contract."
+        }
+      ],
+      "note": "Year inferred: the March 2005 article says 'in October'. Outcome not found."
+    },
+    {
+      "key": "cedu-2005-e5e16dee",
+      "company": "CEDU",
+      "also": [],
+      "year": 2005,
+      "date": "2005-02",
+      "kind": "closure",
+      "title": "Closed Rocky Mountain Academy",
+      "detail": "Rocky Mountain Academy closed in February 2005, a month before the parent company's bankruptcy closed CEDU's remaining schools.",
+      "programs": [
+        "Rocky Mountain Academy"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "Even after the closure of Rocky Mountain Academy in February, the three remaining programs"
+        }
+      ]
+    },
+    {
+      "key": "certs-group-2002-bb5fcce0",
+      "company": "CERTS Group",
+      "also": [],
+      "year": 2002,
+      "date": "2002-03-01",
+      "kind": "founded",
+      "title": "Opened Kolob Canyon RTC, its second program",
+      "detail": "Woodbury Reports said Bear River Residential Treatment Center in Utah was the first CERTS program and that a second, Kolob Canyon RTC, was scheduled to open March 1, 2002.",
+      "programs": [
+        "Bear River Residential Treatment Center",
+        "Kolob Canyon RTC"
+      ],
+      "sources": [
+        {
+          "label": "Woodbury Reports, New Perspectives, February 2002",
+          "url": "https://strugglingteens.com/archives/2002/2/np03.html",
+          "quote": "A second CERTS facility, Kolob Canyon RTC, is scheduled to open March 1, 2002."
+        }
+      ],
+      "note": "Scheduled opening date; actual opening not confirmed."
+    },
+    {
+      "key": "charter-behavioral-health-systems-1997-d7f3a066",
+      "company": "Charter Behavioral Health Systems",
+      "also": [],
+      "year": 1997,
+      "date": "1997-06",
+      "kind": "founded",
+      "title": "Formed when Magellan sold its psychiatric hospitals to Crescent for $417.2 million",
+      "detail": "Magellan Health Services, formerly Charter Medical Corporation, sold substantially all of its domestic acute-care psychiatric hospitals and residential treatment facilities to Crescent Real Estate Equities for $417.2 million in cash. At the same time Magellan and Crescent Operating formed Charter Behavioral Health Systems, LLC to run the hospitals, with Magellan holding 50%.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Magellan Health Services Form 10-K for fiscal 1997, SEC",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000019411/000104746997008640/0001047469-97-008640.txt",
+          "quote": "for $417.2 million in cash"
+        }
+      ],
+      "note": "The 10-K places the sale in the third quarter of fiscal 1997; a search summary of the same filing gives the closing as June 17, 1997, not seen in the text read."
+    },
+    {
+      "key": "charter-behavioral-health-systems-1999-0e31ab14",
+      "company": "Charter Behavioral Health Systems",
+      "also": [],
+      "year": 1999,
+      "date": "1999",
+      "kind": "scandal",
+      "title": "60 Minutes II hidden-camera report on Charter Pines Hospital",
+      "detail": "CBS's 60 Minutes II sent a social worker with a hidden camera to work at Charter Pines Hospital in Charlotte, North Carolina. The report described doctors who barely spoke to patients, falsified records, dangerous conditions and no training in restraint. Charter then announced it would close two hospitals, and three Charter hospitals failed surprise state inspections.",
+      "programs": [
+        "Charter Pines Hospital"
+      ],
+      "sources": [
+        {
+          "label": "CBS News, 'Unsafe Haven', 1999",
+          "url": "https://www.cbsnews.com/news/unsafe-haven",
+          "quote": "Falsified records. Dangerous conditions."
+        }
+      ],
+      "note": "Page dated April 15, 1999; says first broadcast in March 1999. Page does not mention youth patients specifically."
+    },
+    {
+      "key": "charter-behavioral-health-systems-2000-a5c678cc",
+      "company": "Charter Behavioral Health Systems",
+      "also": [],
+      "year": 2000,
+      "date": "2000-02-16",
+      "kind": "closure",
+      "title": "Filed for Chapter 11 bankruptcy after announcing the closure or sale of about 35 facilities",
+      "detail": "Charter Behavioral Health Systems, then the nation's largest psychiatric hospital operator, filed for Chapter 11 in Delaware with less than $50 million in assets and more than $100 million in debts. A month earlier it had announced plans to close and sell about 35 facilities. Crescent Operating owned 90% of the company after Magellan's 1999 sale of its stake.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "California Healthline, February 17, 2000",
+          "url": "https://californiahealthline.org/morning-breakout/behavioral-health-charter-files-for-bankruptcy/",
+          "quote": "the nation's largest psychiatric hospital operator"
+        }
+      ],
+      "note": "Its predecessor Charter Medical had a separate, brief Chapter 11 in 1992; not included."
+    },
+    {
+      "key": "correctional-services-corporation-2005-0736b77a",
+      "company": "Correctional Services Corporation",
+      "also": [],
+      "year": 2005,
+      "date": "2005-11",
+      "kind": "deal",
+      "title": "Acquired by The GEO Group for about $62 million",
+      "detail": "The GEO Group completed its acquisition of Correctional Services Corporation for approximately $62 million, or $6.00 per share. GEO kept CSC's adult facilities and sold the juvenile division, Youth Services International.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "GEO Group press release, November 7, 2005 (Form 8-K exhibit, SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000923796/000095014405011647/g98310exv99w1.htm",
+          "quote": "approximately $62 million, or $6.00 per common share"
+        }
+      ],
+      "note": "The release is dated November 7, 2005; GEO's later filings (search summary, not opened) give November 4, 2005 as the closing date."
+    },
+    {
+      "key": "crc-health-group-2006-50304866",
+      "company": "CRC Health Group",
+      "also": [
+        "Bain Capital"
+      ],
+      "year": 2006,
+      "date": "2006-02-06",
+      "kind": "deal",
+      "title": "Bought by Bain Capital funds for about $742 million",
+      "detail": "Bain Capital agreed in October 2005 to buy CRC Health Group, then described as the biggest US provider of drug and alcohol treatment, for $720 million. Funds managed by Bain Capital Partners completed the purchase on February 6, 2006 for total cash consideration of about $742.3 million including fees.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "CRC Health Corporation Form 10-K for 2007, SEC",
+          "url": "https://www.sec.gov/Archives/edgar/data/1360474/000119312508076428/d10k.htm",
+          "quote": "a total cash consideration of approximately $742.3 million"
+        },
+        {
+          "label": "UPI, October 13, 2005",
+          "url": "https://www.upi.com/Bain-Capital-paying-720M-for-CRC-Health/25721129234475/",
+          "quote": "will pay $720 million to buy California-based CRC Health Group"
+        }
+      ],
+      "note": "Headline price $720 million (2005 announcement); $742.3 million total including $28.5 million fees per the 10-K."
+    },
+    {
+      "key": "crc-health-group-2006-ad7083d8",
+      "company": "CRC Health Group",
+      "also": [
+        "Aspen Education Group",
+        "Bain Capital"
+      ],
+      "year": 2006,
+      "date": "2006-11",
+      "kind": "deal",
+      "title": "Bought Aspen Education Group, the largest for-profit chain of troubled-teen programs, for $279.5 million",
+      "detail": "In November 2006 CRC acquired all of the stock of Aspen Education Group for about $279.5 million. CRC called it its largest acquisition to date. By the end of 2007 its youth division ran 29 programs in 10 states, including ten therapeutic boarding schools and ten outdoor programs.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "CRC Health Corporation Form 10-K for 2007, SEC",
+          "url": "https://www.sec.gov/Archives/edgar/data/1360474/000119312508076428/d10k.htm",
+          "quote": "In November 2006, we acquired all of the outstanding capital stock of Aspen Education Group"
+        },
+        {
+          "label": "Salon (Art Levine), July 18, 2012",
+          "url": "https://www.salon.com/2012/07/18/dark_side_of_a_bain_success/",
+          "quote": "With Bain's backing, CRC purchased Aspen for nearly $300 million in the fall of 2006."
+        }
+      ],
+      "note": "Deal announced October 2006 (VentureBeat, not opened); some sources put closing at end of September 2006."
+    },
+    {
+      "key": "crc-health-group-2012-34d7c548",
+      "company": "CRC Health Group",
+      "also": [
+        "Bain Capital",
+        "Aspen Education Group"
+      ],
+      "year": 2012,
+      "date": "2012-07-18",
+      "kind": "scandal",
+      "title": "Salon and The Investigative Fund report deaths and abuse at CRC and Aspen programs under Bain",
+      "detail": "Art Levine's investigation reported deaths and state actions at CRC and Aspen programs, including the 2009 heat death of Sergey Blashchishen at SageWalk, Oregon's 2009 closure of two Aspen programs and the 2004 death of Matthew Meyer at Lone Star Expeditions. It said the Bain buyout left CRC with over $600 million in debt. CRC said the incidents were isolated, and Bain did not reply.",
+      "programs": [
+        "SageWalk Wilderness School",
+        "Mount Bachelor Academy",
+        "Lone Star Expeditions",
+        "Youth Care",
+        "Aspen Ranch",
+        "Island View",
+        "Turn-About Ranch"
+      ],
+      "sources": [
+        {
+          "label": "Salon (Art Levine), July 18, 2012",
+          "url": "https://www.salon.com/2012/07/18/dark_side_of_a_bain_success/",
+          "quote": "In 2009, the state of Oregon forced the closing of two teen programs run by Aspen Education."
+        }
+      ],
+      "note": "Reported with The Investigative Fund at The Nation Institute."
+    },
+    {
+      "key": "crc-health-group-2013-dfeb7823",
+      "company": "CRC Health Group",
+      "also": [
+        "Aspen Education Group"
+      ],
+      "year": 2013,
+      "date": "2013-07-10",
+      "kind": "closure",
+      "title": "Closed three Eastern therapeutic boarding schools and two wilderness programs",
+      "detail": "Aspen Education Group, part of CRC, announced it would close the Academy at Swift River (Cummington, MA), Talisman Academy (Hendersonville, NC), Stone Mountain School (Black Mountain, NC), SUWS Adolescent and Youth Programs (Shoshone, ID) and Adirondack Leadership Expeditions (Saranac Lake, NY) that summer. It cited families' inability to get credit or loans to pay for treatment.",
+      "programs": [
+        "Academy at Swift River",
+        "Talisman Academy",
+        "Stone Mountain School",
+        "SUWS Adolescent and Youth Programs",
+        "Adirondack Leadership Expeditions"
+      ],
+      "sources": [
+        {
+          "label": "Aspen Education Group announcement, Strugglingteens.com (Woodbury Reports), July 10, 2013",
+          "url": "https://strugglingteens.com/artman/publish/printer_AspenEducationGroupBN_130710.shtml",
+          "quote": "the current market does not support us maintaining our entire network of therapeutic programs"
+        }
+      ]
+    },
+    {
+      "key": "devereux-advanced-behavioral-health-2019-7dcb4232",
+      "company": "Devereux Advanced Behavioral Health",
+      "also": [],
+      "year": 2019,
+      "date": "2019-11-19",
+      "kind": "settlement",
+      "title": "Georgia jury awarded $50 million in punitive damages over a staff sexual assault",
+      "detail": "A Cobb County State Court jury found Devereux liable for the 2012 sexual assault of a 15-year-old patient by an unsupervised employee at the Devereux Georgia Treatment Network in Kennesaw. Devereux said its staff uncovered the crime and reported it to police.",
+      "programs": [
+        "Devereux Georgia Treatment Network (Kennesaw, Georgia)"
+      ],
+      "sources": [
+        {
+          "label": "Marietta Daily Journal, November 27, 2019",
+          "url": "https://www.mdjonline.com/news/cobb-woman-awarded-million-in-lawsuit-against-nonprofit/article_318c8556-1128-11ea-81cb-93d042c901f4.html",
+          "quote": "$50 million in punitive damages"
+        },
+        {
+          "label": "Marietta Daily Journal, November 27, 2019",
+          "url": "https://www.mdjonline.com/news/cobb-woman-awarded-million-in-lawsuit-against-nonprofit/article_318c8556-1128-11ea-81cb-93d042c901f4.html",
+          "quote": "was unsupervised when he assaulted the teenage female patient"
+        }
+      ],
+      "note": "Search summaries also cite $10 million in compensatory damages and a $55 million total; only the $50 million punitive figure was read on the page. Kind is a verdict, not a settlement."
+    },
+    {
+      "key": "devereux-advanced-behavioral-health-2020-0ae6ed5f",
+      "company": "Devereux Advanced Behavioral Health",
+      "also": [],
+      "year": 2020,
+      "date": "2020-08",
+      "kind": "investigation",
+      "title": "Pennsylvania's governor ordered a state investigation of its campuses",
+      "detail": "After the Inquirer report, Pennsylvania Gov. Tom Wolf directed the state Department of Human Services to investigate conditions at Devereux's Pennsylvania campuses.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "WHYY (AP), August 15, 2020",
+          "url": "https://whyy.org/articles/pennsylvania-investigating-sex-abuse-claims-at-care-facility",
+          "quote": "Pennsylvania Gov. Tom Wolf has directed the state Department of Human Services to investigate conditions at the firm's campuses in the state."
+        }
+      ]
+    },
+    {
+      "key": "devereux-advanced-behavioral-health-2020-51d7f6d8",
+      "company": "Devereux Advanced Behavioral Health",
+      "also": [],
+      "year": 2020,
+      "date": "2020-08-11",
+      "kind": "investigation",
+      "title": "Philadelphia Inquirer found 41 children reported sexual assaults at its campuses",
+      "detail": "A Philadelphia Inquirer investigation found that at least 41 intellectually disabled children had reported sexual assaults at Devereux campuses over 25 years. It reported that Devereux, with $467 million in annual revenue, understaffed its campuses and failed to supervise patients and staff. Devereux said it had added safeguards in the previous two years and later hired former U.S. Attorney General Loretta Lynch for a safety audit.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "The Daily Record (AP), August 12, 2020",
+          "url": "https://thedailyrecord.com/maryland-family-law/2020/08/12/report-at-least-41-children-alleged-assaults-at-nonprofit/",
+          "quote": "at least 41 intellectually disabled children have reported sexual assaults over the past quarter-century"
+        },
+        {
+          "label": "City of Philadelphia, September 24, 2020",
+          "url": "https://www.phila.gov/2020-09-24-dhs-and-cbh-to-remove-philadelphia-children-from-devereux-facilities/",
+          "quote": "following a Philadelphia Inquirer report on August 11 about abuse at these facilities"
+        }
+      ],
+      "note": "No Washington Post investigation of Devereux was found; the 2020 investigation was the Inquirer's."
+    },
+    {
+      "key": "devereux-advanced-behavioral-health-2020-4739360b",
+      "company": "Devereux Advanced Behavioral Health",
+      "also": [],
+      "year": 2020,
+      "date": "2020-09-24",
+      "kind": "closure",
+      "title": "Philadelphia removed its 53 children from Devereux and closed intake",
+      "detail": "Philadelphia's Department of Human Services and Community Behavioral Health announced they would remove the 53 Philadelphia children and youth in Devereux residential programs after increased monitoring, and immediately closed intake to new admissions. Devereux called the decision unjustified.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "City of Philadelphia, September 24, 2020",
+          "url": "https://www.phila.gov/2020-09-24-dhs-and-cbh-to-remove-philadelphia-children-from-devereux-facilities/",
+          "quote": "Currently 53 Philadelphia children and youth are in Devereux's residential programs."
+        },
+        {
+          "label": "City of Philadelphia, September 24, 2020",
+          "url": "https://www.phila.gov/2020-09-24-dhs-and-cbh-to-remove-philadelphia-children-from-devereux-facilities/",
+          "quote": "DHS and CBH immediately closed intake to new admissions."
+        }
+      ]
+    },
+    {
+      "key": "eckerd-connects-1968-89ab05d3",
+      "company": "Eckerd Connects",
+      "also": [],
+      "year": 1968,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded by Jack and Ruth Eckerd with an outdoor therapeutic program for boys",
+      "detail": "Jack and Ruth Eckerd founded the organization in 1968 and opened its first outdoor therapeutic (wilderness) program for boys in Florida. A girls' program, E-Nini-Hassee, followed in 1969, and the first juvenile justice program opened in 1982.",
+      "programs": [
+        "E-Nini-Hassee"
+      ],
+      "sources": [
+        {
+          "label": "Eckerd Connects, Our Legacy",
+          "url": "https://eckerd.org/about/our-legacy/",
+          "quote": "Eckerd Connects was founded in 1968 by Jack and Ruth Eckerd."
+        },
+        {
+          "label": "Eckerd Connects, Our Legacy",
+          "url": "https://eckerd.org/about/our-legacy/",
+          "quote": "the organization opened its first juvenile justice program."
+        }
+      ]
+    },
+    {
+      "key": "eckerd-connects-1998-c3bd88e8",
+      "company": "Eckerd Connects",
+      "also": [],
+      "year": 1998,
+      "date": "",
+      "kind": "rename",
+      "title": "Became Eckerd Youth Alternatives, Inc.",
+      "detail": "The organization took the name Eckerd Youth Alternatives, Inc. in 1998. It later operated as Eckerd Kids and then Eckerd Connects.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Eckerd Connects, Our Legacy",
+          "url": "https://eckerd.org/about/our-legacy/",
+          "quote": "Eckerd officially becomes Eckerd Youth Alternatives, Inc."
+        }
+      ],
+      "note": "No dated source found for the later change to the Eckerd Connects name."
+    },
+    {
+      "key": "eckerd-connects-2014-ff11af64",
+      "company": "Eckerd Connects",
+      "also": [],
+      "year": 2014,
+      "date": "",
+      "kind": "deal",
+      "title": "Merged with Caring for Children",
+      "detail": "Eckerd merged with Caring for Children to form a nonprofit focused on foster care and other family services. It merged with Paxen in 2015 and ODLE Management in 2020, moving into workforce development and Job Corps.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Eckerd Connects, Our Legacy",
+          "url": "https://eckerd.org/about/our-legacy/",
+          "quote": "Eckerd and Caring for Children merge"
+        }
+      ]
+    },
+    {
+      "key": "eckerd-connects-2021-3a89a2a0",
+      "company": "Eckerd Connects",
+      "also": [],
+      "year": 2021,
+      "date": "2021-11",
+      "kind": "closure",
+      "title": "Lost its Pinellas and Pasco child welfare contracts and gave up Hillsborough",
+      "detail": "Florida chose not to renew Eckerd's child welfare and foster care contract for Pinellas and Pasco counties, and Eckerd said it would walk away from its $87 million Hillsborough contract in 2022. The Pinellas sheriff opened a criminal investigation after finding children housed in Eckerd's Largo offices in conditions he called as bad as those they were removed from; Eckerd admitted housing children in Hillsborough offices. More than 230 employees were told their jobs would end December 31, 2021.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Tampa Bay Times, November 1, 2021",
+          "url": "https://www.tampabay.com/news/2021/11/01/eckerd-connects-loses-child-welfare-contract-in-pinellas-pasco/",
+          "quote": "also will walk away from its $87 million Hillsborough contract in 2022."
+        },
+        {
+          "label": "WUSF, November 10, 2021",
+          "url": "https://wusf.org/health-news-florida/2021-11-10/hundreds-of-foster-care-workers-in-pinellas-and-pasco-counties-will-lose-their-jobs-when-eckerd-connects-contract-expires",
+          "quote": "The conditions are as bad or worse than the living conditions from which the children were removed."
+        }
+      ],
+      "note": "Eckerd blamed inadequate state funding; the state cited failures (search summaries). This is foster care, not a TTI program, but it ended Eckerd's main Florida work."
+    },
+    {
+      "key": "embark-behavioral-health-2016-35f9a55d",
+      "company": "Embark Behavioral Health",
+      "also": [],
+      "year": 2016,
+      "date": "2016",
+      "kind": "deal",
+      "title": "Housatonic Partners invested",
+      "detail": "Private equity firm Housatonic Partners first invested in Embark Behavioral Health in 2016 and reinvested in 2018.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, February 9, 2023",
+          "url": "https://bhbusiness.com/2023/02/09/consonance-capital-partners-acquires-majority-stake-in-youth-focused-embark-behavioral-health/",
+          "quote": "previously backed Embark Behavioral Health and first invested in the company in 2016"
+        }
+      ]
+    },
+    {
+      "key": "embark-behavioral-health-2022-4008ed8c",
+      "company": "Embark Behavioral Health",
+      "also": [],
+      "year": 2022,
+      "date": "2022-09",
+      "kind": "deal",
+      "title": "Consonance Capital Partners bought a majority stake",
+      "detail": "Consonance Capital Partners acquired a majority stake in Embark Behavioral Health in a deal that closed in September 2022, valued by unnamed sources at about $400 million (12 to 15 times EBITDA). Embark then ran 27 programs at 40 locations in 15 states.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, February 9, 2023",
+          "url": "https://bhbusiness.com/2023/02/09/consonance-capital-partners-acquires-majority-stake-in-youth-focused-embark-behavioral-health/",
+          "quote": "valued at approximately $400 million"
+        }
+      ],
+      "note": "The February 2023 article says only 'The deal closed in September'; a later BHB article (January 2025) puts the acquisition at the end of 2022. Price not officially disclosed."
+    },
+    {
+      "key": "embark-behavioral-health-2024-c889f210",
+      "company": "Embark Behavioral Health",
+      "also": [],
+      "year": 2024,
+      "date": "2024-11",
+      "kind": "closure",
+      "title": "Cut about 60 jobs and closed sites in Los Angeles and Oregon",
+      "detail": "In November 2024 Embark laid off about 60 people and closed several locations in Los Angeles and Oregon; three C-suite members left in January 2025. BHB reported that Embark had shut its wilderness program in 2023.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, January 24, 2025",
+          "url": "https://bhbusiness.com/2025/01/24/embark-behavioral-health-parts-with-3-c-suite-members-to-shift-resources-to-its-programs/",
+          "quote": "It also closed several locations in Los Angeles and Oregon."
+        }
+      ]
+    },
+    {
+      "key": "evolve-adolescent-behavioral-health-2020-6064a730",
+      "company": "Evolve Adolescent Behavioral Health",
+      "also": [],
+      "year": 2020,
+      "date": "2020-01-08",
+      "kind": "deal",
+      "title": "Bought by Galen Partners",
+      "detail": "Healthcare growth equity firm Galen Partners acquired Evolve Treatment Centers, a Los Angeles-based adolescent behavioral health provider with 13 facilities in California, on January 8, 2020.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "PrivSource deal record",
+          "url": "https://www.privsource.com/acquisitions/deal/O3SjEb",
+          "quote": "a Los Angeles-based provider of adolescent behavioral health services with 13 facilities across California"
+        }
+      ],
+      "note": "The GlobeNewswire press release (January 8, 2020) returned 403 and was not read. The company was then called Evolve Treatment Centers."
+    },
+    {
+      "key": "family-help-wellness-2008-f8511f11",
+      "company": "Family Help & Wellness",
+      "also": [],
+      "year": 2008,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded",
+      "detail": "Family Help & Wellness says it was founded to open a single wilderness therapy program and has served families since 2008.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Family Help & Wellness, About Us",
+          "url": "https://famhelp.com/about-us/",
+          "quote": "Since 2008, we've helped over 12,000 families."
+        }
+      ],
+      "note": "Company's own site. Secondary profiles say it began in 2008 as Wilderness Training and Consulting LLC under Tim Dupell and Wayne Laird; not confirmed from a source I opened."
+    },
+    {
+      "key": "family-help-wellness-2014-31f334e6",
+      "company": "Family Help & Wellness",
+      "also": [],
+      "year": 2014,
+      "date": "2014-03-31",
+      "kind": "deal",
+      "title": "Trinity Hunt Partners invested",
+      "detail": "Dallas private equity firm Trinity Hunt Partners made a growth equity investment in Family Help & Wellness in March 2014 on undisclosed terms. North Carolina Health News reported in 2025 that Trinity Hunt still held it after 10 years, twice as long as expected.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "PE Hub, March 31, 2014",
+          "url": "https://www.pehub.com/trinity-hunt-partners-makes-growth-equity-investment-in-family-help-wellness/",
+          "quote": "Trinity Hunt Partners makes growth equity investment in Family Help & Wellness"
+        }
+      ],
+      "note": "PE Hub body is behind registration; the headline and date were read. Terms per North Carolina Health News (2025)."
+    },
+    {
+      "key": "family-help-wellness-2023-eb6545f6",
+      "company": "Family Help & Wellness",
+      "also": [],
+      "year": 2023,
+      "date": "2023-08",
+      "kind": "closure",
+      "title": "Closed WinGate Wilderness Therapy in Utah",
+      "detail": "Family Help & Wellness closed WinGate Wilderness Therapy in Utah in August 2023 and Triple Divide Lodge in Montana in February 2024. A January 29, 2024 internal document described a nearly $7 million shortfall, ordered about $5 million in yearly cuts including 80 positions, and noted a debt payment due April 30, 2024.",
+      "programs": [
+        "WinGate Wilderness Therapy",
+        "Triple Divide Lodge"
+      ],
+      "sources": [
+        {
+          "label": "North Carolina Health News, June 14, 2025",
+          "url": "https://www.northcarolinahealthnews.org/2025/06/14/asheville-academy-trails-carolina-owner-faced-financial-upheaval-before-deaths/",
+          "quote": "Lender will not be in their happy place."
+        }
+      ]
+    },
+    {
+      "key": "family-help-wellness-2024-dfd3e889",
+      "company": "Family Help & Wellness",
+      "also": [],
+      "year": 2024,
+      "date": "2024-03-28",
+      "kind": "closure",
+      "title": "North Carolina moved to revoke Trails Carolina's license after a boy's death",
+      "detail": "A 12-year-old boy died at Trails Carolina in Lake Toxaway, North Carolina, in early February 2024, less than a day after arriving; the death was ruled a homicide by asphyxiation and no charges were filed. On March 28, 2024, the state DHHS notified the camp it was revoking its license, citing five violations that endangered clients, and suspended admissions.",
+      "programs": [
+        "Trails Carolina"
+      ],
+      "sources": [
+        {
+          "label": "WBTV, March 28, 2024",
+          "url": "https://www.wbtv.com/2024/03/28/nc-dhhs-revoke-trails-carolinas-license",
+          "quote": "notified Trails Carolina on Thursday that its license was being revoked"
+        },
+        {
+          "label": "North Carolina Health News, June 14, 2025",
+          "url": "https://www.northcarolinahealthnews.org/2025/06/14/asheville-academy-trails-carolina-owner-faced-financial-upheaval-before-deaths/",
+          "quote": "Lender will not be in their happy place."
+        }
+      ],
+      "note": "Search summaries say the final revocation letter was dated May 17, 2024, with an $18,000 fine (Carolina Public Press, not opened)."
+    },
+    {
+      "key": "family-help-wellness-2025-09032c44",
+      "company": "Family Help & Wellness",
+      "also": [],
+      "year": 2025,
+      "date": "2025-06-04",
+      "kind": "closure",
+      "title": "Asheville Academy closed after two girls died",
+      "detail": "Two girls, ages 13 and 12, died by suicide at Asheville Academy in May 2025. The school shut May 31 and on June 4, 2025, voluntarily gave up its license and closed permanently.",
+      "programs": [
+        "Asheville Academy"
+      ],
+      "sources": [
+        {
+          "label": "North Carolina Health News, June 14, 2025",
+          "url": "https://www.northcarolinahealthnews.org/2025/06/14/asheville-academy-trails-carolina-owner-faced-financial-upheaval-before-deaths/",
+          "quote": "voluntarily relinquished its license"
+        }
+      ]
+    },
+    {
+      "key": "justice-resource-institute-1973-4b04cae8",
+      "company": "Justice Resource Institute",
+      "also": [],
+      "year": 1973,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded in Massachusetts as the state moved away from institutional care",
+      "detail": "JRI was founded in 1973 in Massachusetts during the state's shift away from institutional care, and grew to more than 100 human services programs.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Justice Resource Institute, About",
+          "url": "https://jri.org/about",
+          "quote": "JRI was founded in 1973 in response to massive, systemic problems."
+        }
+      ]
+    },
+    {
+      "key": "justice-resource-institute-2024-681966f2",
+      "company": "Justice Resource Institute",
+      "also": [],
+      "year": 2024,
+      "date": "2024-10",
+      "kind": "scandal",
+      "title": "Sued by former residents over sexual abuse at the Cresson Secure Treatment Unit",
+      "detail": "Two former residents of the Cresson Secure Treatment Unit in Pennsylvania, which JRI ran for up to 52 juveniles from 2008 until Pennsylvania ended the contract and closed it in 2015, sued JRI for negligence over sexual abuse by staff. The suit quotes a 2010 U.S. Department of Justice report on the unit's rates of sexual victimization. The case was moved to federal court; a second suit followed in 2025.",
+      "programs": [
+        "Cresson Secure Treatment Unit (Cresson, Pennsylvania)"
+      ],
+      "sources": [
+        {
+          "label": "Altoona Mirror, October 26, 2024",
+          "url": "https://www.altoonamirror.com/news/local-news/2024/10/former-cresson-juvenile-center-residents-file-lawsuit/",
+          "quote": "some of the highest rates of sexual victimization reported by youth inmates"
+        }
+      ],
+      "note": "The 2025 second suit is from a search summary of an Altoona Mirror page (2025/02) that was not opened. No outcome found."
+    },
+    {
+      "key": "keystone-education-and-youth-services-2005-a4756541",
+      "company": "Keystone Education and Youth Services",
+      "also": [],
+      "year": 2005,
+      "date": "2005-01-11",
+      "kind": "deal",
+      "title": "Bought Wake Forest University Baptist Behavioral Health",
+      "detail": "Keystone, based in Nashville, completed its purchase of Wake Forest University Baptist Behavioral Health on January 11, 2005. Keystone then ran 24 nonresidential and 23 residential facilities in 10 states, serving about 3,000 young people daily.",
+      "programs": [
+        "Wake Forest University Baptist Behavioral Health"
+      ],
+      "sources": [
+        {
+          "label": "Wake Forest Baptist Medical Center news release, January 2005",
+          "url": "https://newsroom.wakehealth.edu/news-releases/2005/01/sale-of-wake-forest-baptist-behavioral-health-is-concluded",
+          "quote": "has been concluded"
+        }
+      ]
+    },
+    {
+      "key": "keystone-education-and-youth-services-2005-2df24ed6",
+      "company": "Keystone Education and Youth Services",
+      "also": [
+        "Universal Health Services (UHS)"
+      ],
+      "year": 2005,
+      "date": "2005-10",
+      "kind": "deal",
+      "title": "Sold with its parent KEYS Group to Universal Health Services for $207 million",
+      "detail": "UHS acquired KEYS Group Holdings, including Keystone Education and Youth Services, effective October 1, 2005, adding 21 residential treatment facilities, 21 therapeutic day schools and four detention facilities in ten states. The net price was $207 million in cash.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "UHS press release, October 10, 2005, via BioSpace",
+          "url": "https://www.biospace.com/b-universal-health-services-inc-b-announces-acquisition-of-b-keys-group-holdings-llc-b-and-five-additional-behavioral-health-facilities-as-we",
+          "quote": "including Keystone Education and Youth Services, LLC"
+        }
+      ],
+      "note": "The prompt's idea that PSI bought Keystone is not supported; UHS was the buyer."
+    },
+    {
+      "key": "kids-centers-of-america-1984-563bdd06",
+      "company": "KIDS Centers of America",
+      "also": [
+        "Straight Inc."
+      ],
+      "year": 1984,
+      "date": "1984",
+      "kind": "founded",
+      "title": "Opened KIDS of Bergen County in New Jersey",
+      "detail": "Miller Newton, formerly Straight's national clinical director, opened KIDS of Bergen County in New Jersey in 1984 as the first KIDS program and the chain's headquarters; it later spread to El Paso, Southern California, Salt Lake City and Calgary.",
+      "programs": [
+        "KIDS of Bergen County"
+      ],
+      "sources": [
+        {
+          "label": "Breaking Code Silence, KIDS Centers of America (1984-1990)",
+          "url": "https://www.breakingcodesilence.org/?p=9682",
+          "quote": "This was first KIDS program to open, and was the headquarters of the organization."
+        }
+      ],
+      "note": "Survivor-advocacy site; no primary source opened. Its headers give the chain 1984-1990 and Bergen County 1984-1998; it says KIDS of North Jersey closed in 1998 and New Jersey opened a Medicaid fraud investigation in 1999, both unconfirmed."
+    },
+    {
+      "key": "kids-centers-of-america-1990-003de97d",
+      "company": "KIDS Centers of America",
+      "also": [],
+      "year": 1990,
+      "date": "1990-01",
+      "kind": "investigation",
+      "title": "Two KIDS of Greater Salt Lake staff arrested after forcing a patient into a car",
+      "detail": "Two peer counselors at KIDS of Greater Salt Lake were arrested in January 1990 for investigation of unlawful detention and assault after a 19-year-old patient who had left was allegedly forced into a car. The center suspended them pending an internal investigation.",
+      "programs": [
+        "KIDS of Greater Salt Lake"
+      ],
+      "sources": [
+        {
+          "label": "Deseret News, January 21, 1990",
+          "url": "https://www.deseret.com/1990/1/21/18842220/substance-abuse-program-defended-by-50-parents",
+          "quote": "investigation of unlawful detention and assault"
+        }
+      ],
+      "note": "A Deseret News article of June 18, 1990, 'KIDS of Greater Salt Lake loses its license, will leave the area', is cited by Breaking Code Silence and Wikipedia but could not be opened."
+    },
+    {
+      "key": "kids-centers-of-america-1990-e720e656",
+      "company": "KIDS Centers of America",
+      "also": [],
+      "year": 1990,
+      "date": "1990-08",
+      "kind": "rename",
+      "title": "Salt Lake program split off as Lifeline",
+      "detail": "By August 1990 the former Salt Lake program operated as Lifeline Inc., which said it had separated from its parent organization, KIDS of Bergen County.",
+      "programs": [
+        "Lifeline for Youth",
+        "KIDS of Greater Salt Lake"
+      ],
+      "sources": [
+        {
+          "label": "Deseret News, August 21, 1990",
+          "url": "https://www.deseret.com/1990/8/21/18877458/lifeline-tries-to-keep-positives-to-help-kids",
+          "quote": "But it has separated from Kids' parent organization, Kids of Bergen County (N.J.)."
+        }
+      ]
+    },
+    {
+      "key": "newport-healthcare-2008-c08d5421",
+      "company": "Newport Healthcare",
+      "also": [],
+      "year": 2008,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded",
+      "detail": "Newport Healthcare, which runs Newport Academy for teens and Newport Institute for young adults, was founded in 2008.",
+      "programs": [
+        "Newport Academy",
+        "Newport Institute"
+      ],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, July 20, 2021",
+          "url": "https://bhbusiness.com/2021/07/20/onex-partners-finalizes-60-purchase-of-newport-in-reported-1-3b-deal/",
+          "quote": "Founded in 2008, Newport Healthcare operates two programs."
+        }
+      ]
+    },
+    {
+      "key": "newport-healthcare-2017-6e32815a",
+      "company": "Newport Healthcare",
+      "also": [],
+      "year": 2017,
+      "date": "2017",
+      "kind": "deal",
+      "title": "The Carlyle Group invested",
+      "detail": "The Carlyle Group backed Newport in 2017 through its US Equity Opportunity Fund and exited in the 2021 sale to Onex.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "PE Hub, July 19, 2021",
+          "url": "https://pehub.com/onex-completes-newport-healthcare-buy-at-1-3bn-value",
+          "quote": "which in 2017 backed Newport through its US Equity Opportunity Fund"
+        }
+      ]
+    },
+    {
+      "key": "newport-healthcare-2021-0c1f8f81",
+      "company": "Newport Healthcare",
+      "also": [],
+      "year": 2021,
+      "date": "2021-07-20",
+      "kind": "deal",
+      "title": "Onex Partners bought about 60 percent",
+      "detail": "Onex Partners V completed its purchase of about 60 percent of Newport Healthcare from the Carlyle Group in July 2021. Terms were not disclosed; PE Hub reported the value as $1.3 billion.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Behavioral Health Business, July 20, 2021",
+          "url": "https://bhbusiness.com/2021/07/20/onex-partners-finalizes-60-purchase-of-newport-in-reported-1-3b-deal/",
+          "quote": "will take an approximately 60% ownership stake in Newport"
+        },
+        {
+          "label": "PE Hub, July 19, 2021",
+          "url": "https://pehub.com/onex-completes-newport-healthcare-buy-at-1-3bn-value",
+          "quote": "Onex completes Newport Healthcare buy at $1.3bn value"
+        }
+      ],
+      "note": "Onex's own press release (GlobeNewswire, July 19, 2021) returned 403 and was not read. PE Hub is dated July 19; BHB says completion was announced Tuesday, July 20."
+    },
+    {
+      "key": "newport-healthcare-2022-b50f1ca3",
+      "company": "Newport Healthcare",
+      "also": [],
+      "year": 2022,
+      "date": "2022-11-30",
+      "kind": "deal",
+      "title": "Bought PrairieCare in Minnesota",
+      "detail": "Newport Healthcare completed the acquisition of PrairieCare, a Minnesota provider with nine locations, an inpatient psychiatric hospital and residential services for youth and adults. Newport then ran programs in 15 metro areas and 11 states.",
+      "programs": [
+        "PrairieCare"
+      ],
+      "sources": [
+        {
+          "label": "Newport Healthcare press release, November 30, 2022",
+          "url": "https://www.newporthealthcare.com/resources/press-releases/2022/prairecare-acquisition/",
+          "quote": "has completed the acquisition of Minnesota-based PrairieCare"
+        }
+      ],
+      "note": "One PrivSource listing dates the deal 2020; the press release says 2022."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2002-f0bae1b3",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [],
+      "year": 2002,
+      "date": "2002-08",
+      "kind": "deal",
+      "title": "Merged with PMR Corporation and listed on NASDAQ",
+      "detail": "Psychiatric Solutions, founded in September 1996, completed its merger with PMR Corporation in August 2002. Its shares were approved for listing on the NASDAQ National Market on August 6, 2002.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Funding Universe company history: Psychiatric Solutions, Inc.",
+          "url": "https://www.fundinguniverse.com/company-histories/psychiatric-solutions-inc-history/",
+          "quote": "the shares of PSI were approved for listing on the NASDAQ National Market"
+        }
+      ],
+      "note": "Secondary company-history source."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2003-f9a5ea73",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [],
+      "year": 2003,
+      "date": "2003",
+      "kind": "deal",
+      "title": "Bought six inpatient behavioral facilities from The Brown Schools for $63 million",
+      "detail": "In 2003 Psychiatric Solutions paid $63 million for six inpatient behavioral health care facilities from The Brown Schools, Inc.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Funding Universe company history: Psychiatric Solutions, Inc.",
+          "url": "https://www.fundinguniverse.com/company-histories/psychiatric-solutions-inc-history/",
+          "quote": "PSI paid $63 million for six inpatient behavioral health care facilities from The Brown Schools, Inc."
+        }
+      ],
+      "note": "Secondary company-history source; exact month not confirmed."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2003-a2ef5314",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [
+        "Ramsay Youth Services"
+      ],
+      "year": 2003,
+      "date": "2003-06-30",
+      "kind": "deal",
+      "title": "Bought Ramsay Youth Services for about $78 million",
+      "detail": "On June 30, 2003 Psychiatric Solutions acquired Ramsay Youth Services, Inc. in a transaction valued at about $78 million, made up of $58.1 million in cash for Ramsay's stock plus the assumption of its debt. A company history says PSI obtained 11 psychiatric hospitals with nearly 1,300 beds.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Lexpert deal summary",
+          "url": "https://www.lexpert.ca/big-deals/psychiatric-solutions-acquires-ramsay-youth-services/345403",
+          "quote": "valued at approximately US$78 million"
+        },
+        {
+          "label": "Funding Universe company history: Psychiatric Solutions, Inc.",
+          "url": "https://www.fundinguniverse.com/company-histories/psychiatric-solutions-inc-history/",
+          "quote": "PSI paid $81 million for Ramsay, obtaining 11 psychiatric hospitals with nearly 1,300 beds."
+        }
+      ],
+      "note": "Price differs: Lexpert $78 million (incl. assumed debt), Funding Universe $81 million."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2006-7d963c27",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [],
+      "year": 2006,
+      "date": "2006-12-04",
+      "kind": "deal",
+      "title": "Bought Alternative Behavioral Services and its nine psychiatric facilities for $210 million",
+      "detail": "Psychiatric Solutions completed its purchase of Alternative Behavioral Services, Inc. from FHC Health Systems for $210 million in cash. ABS operated nine inpatient psychiatric facilities with about 1,050 beds in Virginia, South Carolina, Tennessee, Kentucky, Puerto Rico and the U.S. Virgin Islands. After the deal PSI had 73 owned or leased freestanding psychiatric inpatient facilities in 29 states, Puerto Rico and the U.S. Virgin Islands.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "PSI press release, SEC Form 8-K Exhibit 99, December 4, 2006",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000829608/000095014406011385/g04607exv99.htm",
+          "quote": "a cash purchase price of $210 million"
+        }
+      ],
+      "note": "Announced December 4, 2006; PSI's 2007 10-K gives the closing date as December 1, 2006 (not opened). Originally agreed at $250 million in May 2006 (search summary, not opened)."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2008-961d5cff",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [],
+      "year": 2008,
+      "date": "2008-11",
+      "kind": "scandal",
+      "title": "ProPublica and the Los Angeles Times documented abuse and neglect at PSI hospitals",
+      "detail": "A ProPublica investigation published in the Los Angeles Times in November 2008 described dozens of cases of abuse and neglect at PSI facilities. Inspection reports tied weak supervision, understaffing and poor training to patient rapes, beatings, riots and suicides. Illinois froze foster-child admissions to PSI's Riveredge Hospital, and the Justice Department had subpoenaed records about Riveredge in July 2008.",
+      "programs": [
+        "Riveredge Hospital"
+      ],
+      "sources": [
+        {
+          "label": "ProPublica (Christina Jewett), December 31, 2008",
+          "url": "https://www.propublica.org/article/where-things-stand-troubles-with-private-mental-hospital-conglomerate-1231",
+          "quote": "dozens of instances of abuse and neglect at PSI facilities from coast to coast"
+        }
+      ],
+      "note": "Exact publication day of the November 2008 story not confirmed."
+    },
+    {
+      "key": "psychiatric-solutions-inc-2010-07df6391",
+      "company": "Psychiatric Solutions, Inc.",
+      "also": [],
+      "year": 2010,
+      "date": "2010-04-16",
+      "kind": "investigation",
+      "title": "Florida stopped admissions to its Manatee Palms Youth Services",
+      "detail": "Florida's Agency for Health Care Administration halted admissions on April 16, 2010 to Manatee Palms Youth Services, a 60-bed psychiatric facility for patients aged 6 to 17 run by a PSI subsidiary, after it failed to fix safety violations. It had been cited for making two patients with bone fractures wait hours for treatment and for letting a patient cut themselves with broken glass.",
+      "programs": [
+        "Manatee Palms Youth Services"
+      ],
+      "sources": [
+        {
+          "label": "ProPublica (Robin Fields), May 7, 2010",
+          "url": "https://www.propublica.org/article/florida-regulators-stop-admissions-to-psychiatric-solutions-youth-facility",
+          "quote": "Children and adolescents must not be subjected to such threats and dangers."
+        }
+      ]
+    },
+    {
+      "key": "ramsay-youth-services-1998-4c7e9ba0",
+      "company": "Ramsay Youth Services",
+      "also": [],
+      "year": 1998,
+      "date": "1998",
+      "kind": "deal",
+      "title": "Sold half its psychiatric hospitals and turned the rest into youth-only programs",
+      "detail": "Ramsay Health Care sold off half of its 12 psychiatric hospitals and converted the rest to youth-only residential centers, making youth services its focus. In April 2000 it signed a major contract with the Florida Department of Juvenile Justice.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Funding Universe company history: Ramsay Youth Services, Inc.",
+          "url": "https://www.fundinguniverse.com/company-histories/ramsay-youth-services-inc-history/",
+          "quote": "Youth services becomes focus of company."
+        }
+      ],
+      "note": "Secondary company-history source."
+    },
+    {
+      "key": "ramsay-youth-services-1999-40fd4cb1",
+      "company": "Ramsay Youth Services",
+      "also": [],
+      "year": 1999,
+      "date": "1999-01",
+      "kind": "rename",
+      "title": "Renamed from Ramsay Health Care to Ramsay Youth Services",
+      "detail": "The Coral Gables, Florida company changed its name to Ramsay Youth Services in January 1999. It ran education and treatment programs for at-risk and special-needs youth in nine states and Puerto Rico.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Funding Universe company history: Ramsay Youth Services, Inc.",
+          "url": "https://www.fundinguniverse.com/company-histories/ramsay-youth-services-inc-history/",
+          "quote": "changed its name to Ramsay Youth Services in January 1999"
+        }
+      ]
+    },
+    {
+      "key": "ramsay-youth-services-2003-82f293f9",
+      "company": "Ramsay Youth Services",
+      "also": [
+        "Psychiatric Solutions, Inc."
+      ],
+      "year": 2003,
+      "date": "2003-06-30",
+      "kind": "deal",
+      "title": "Sold to Psychiatric Solutions for about $78 million",
+      "detail": "Psychiatric Solutions acquired Ramsay Youth Services on June 30, 2003 in a transaction valued at about $78 million, including $58.1 million in cash for Ramsay's stock and the assumption of its debt.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Lexpert deal summary",
+          "url": "https://www.lexpert.ca/big-deals/psychiatric-solutions-acquires-ramsay-youth-services/345403",
+          "quote": "valued at approximately US$78 million"
+        }
+      ],
+      "note": "Funding Universe gives $81 million."
+    },
+    {
+      "key": "rite-of-passage-inc-2018-760d9b57",
+      "company": "Rite of Passage, Inc.",
+      "also": [],
+      "year": 2018,
+      "date": "2018-08",
+      "kind": "closure",
+      "title": "Colorado suspended the license of its Durango youth detention center",
+      "detail": "Colorado suspended the license of the Robert E. DeNier Youth Services Center in Durango, run by Rite of Passage, after finding staff had improperly restrained children; the facility closed. The company's Betty K. Marler facility in Lakewood had been shut down in July after staff lost control of teen girls. The company's regional director disputed the state's findings.",
+      "programs": [
+        "Robert E. DeNier Youth Services Center (Durango, Colorado)",
+        "Betty K. Marler Youth Services Center (Lakewood, Colorado)"
+      ],
+      "sources": [
+        {
+          "label": "KUNC (AP), August 24, 2018",
+          "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+          "quote": "improperly restrained two or more children in recent weeks."
+        },
+        {
+          "label": "KUNC (AP), August 24, 2018",
+          "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+          "quote": "lost control of teen girls."
+        }
+      ],
+      "note": "Denver7 (not opened) reported the shutdown came two days after its Contact7 investigation."
+    },
+    {
+      "key": "rite-of-passage-inc-2020-b7a452c2",
+      "company": "Rite of Passage, Inc.",
+      "also": [],
+      "year": 2020,
+      "date": "2020-07",
+      "kind": "deal",
+      "title": "Took over all four of Arkansas's youth lockups under a $70 million contract",
+      "detail": "Rite of Passage took control of the state youth facilities at Dermott, Harrisburg and Mansfield from Youth Opportunity Investments LLC, adding them to the Arkansas Juvenile Assessment and Treatment Center near Alexander that it already ran. Its contract was worth more than $70 million, ran to 2023 and guaranteed pay for 194 beds.",
+      "programs": [
+        "Arkansas Juvenile Assessment and Treatment Center (Alexander)",
+        "Dermott",
+        "Harrisburg",
+        "Mansfield"
+      ],
+      "sources": [
+        {
+          "label": "Arkansas Democrat-Gazette, July 5, 2020",
+          "url": "https://www.arkansasonline.com/news/2020/jul/05/juvenile-justice-overhaul-hits-2nd-phase/",
+          "quote": "officially is taking control of state facilities at Dermott, Harrisburg and Mansfield"
+        },
+        {
+          "label": "Arkansas Democrat-Gazette, July 5, 2020",
+          "url": "https://www.arkansasonline.com/news/2020/jul/05/juvenile-justice-overhaul-hits-2nd-phase/",
+          "quote": "has a contract for more than $70 million that ends in 2023."
+        }
+      ],
+      "note": "Search summaries give July 1, 2020 as the takeover date; the article itself does not print it."
+    },
+    {
+      "key": "rite-of-passage-inc-2023-a8b8709c",
+      "company": "Rite of Passage, Inc.",
+      "also": [],
+      "year": 2023,
+      "date": "2023-07-26",
+      "kind": "investigation",
+      "title": "Arkansas Advocate reported sexual abuse, missed therapy and isolation in its Arkansas lockups",
+      "detail": "An Arkansas Advocate investigation by Hunter Field found a Rite of Passage guard sexually abused two minors at a west Arkansas facility, youths went months without individual therapy, and one youth was confined to his room for 36 straight hours. The state's juvenile ombudsman raised the problems in a July 3, 2023 letter to the company; a new contract had just taken effect raising the daily rate from $292 to $320.",
+      "programs": [
+        "Arkansas Juvenile Assessment and Treatment Center (Alexander)"
+      ],
+      "sources": [
+        {
+          "label": "Arkansas Advocate, July 26, 2023 (republished by Arkadelphian)",
+          "url": "https://arkadelphian.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/?amp=1",
+          "quote": "A guard sexually abused two minors at a west Arkansas facility."
+        },
+        {
+          "label": "Arkansas Advocate, July 26, 2023 (republished by Arkadelphian)",
+          "url": "https://arkadelphian.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/?amp=1",
+          "quote": "Youth are going months without individual therapy services."
+        }
+      ],
+      "note": "The original arkansasadvocate.com page refused the fetch; the republished copy was read."
+    },
+    {
+      "key": "sequel-tsi-1999-91aedb43",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 1999,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded by three people including Jay Ripley",
+      "detail": "Sequel Youth and Family Services was founded in 1999 by three people, one of whom was Jay Ripley. Ripley later founded Vivant Behavioral Healthcare in 2021.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "founded in 2021 by Jay Ripley, one of three people who founded Sequel in 1999."
+        }
+      ],
+      "note": "The r/troubledteens wiki page on Sequel gives 1992 in its title; not checked against a primary source."
+    },
+    {
+      "key": "sequel-tsi-2009-3c352cbc",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2009,
+      "date": "2009-12-30",
+      "kind": "deal",
+      "title": "Acquired Three Springs, Inc. (TSI) of Huntsville, Alabama",
+      "detail": "Sequel announced its acquisition of the privately held Three Springs, Inc. The announcement said the combined companies would operate 22 programs across the country. The Three Springs programs later carried the Sequel TSI name.",
+      "programs": [
+        "Paint Rock Valley (Trenton, Alabama)",
+        "Auldern Academy (Siler City, North Carolina)"
+      ],
+      "sources": [
+        {
+          "label": "Strugglingteens.com, press release dated December 30, 2009",
+          "url": "https://strugglingteens.com/artman/publish/printer_SequelYouthFamilyBN_010210.shtml",
+          "quote": "the combined companies operating 22 programs across the country"
+        },
+        {
+          "label": "Bengur Bryan, healthcare services transactions",
+          "url": "https://bengurbryan.com/portfolio-industry/healthcare-services/",
+          "quote": "advised Sequel in its acquisition of Three Springs, Inc."
+        }
+      ],
+      "note": "The press release is dated December 30, 2009; Wikipedia (not opened) gives September 2009 for the acquisition. Year agrees."
+    },
+    {
+      "key": "sequel-tsi-2017-d8364bc1",
+      "company": "Sequel TSI",
+      "also": [
+        "Altamont Capital Partners"
+      ],
+      "year": 2017,
+      "date": "2017-09-01",
+      "kind": "deal",
+      "title": "Sold a majority stake to Altamont Capital Partners",
+      "detail": "Altamont Capital Partners announced a majority equity investment in Sequel through a holding company, SYFS Parent; terms were not disclosed. At the time Sequel ran 44 programs in 19 states, and APM Reports counted 35 residential treatment centers in 16 states. CEO John Stupak stayed on and co-founder Jay Ripley remained board chairman. Altamont's portfolio page lists the investment as active and says SYFS Parent later acquired Rebecca & Aaron Schools (2017) and Pine Cone Therapies (2020).",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Altamont Capital Partners press release, September 1, 2017",
+          "url": "https://altamontcapital.com/?p=719",
+          "quote": "a majority equity investment into Sequel Youth & Family Services"
+        },
+        {
+          "label": "Altamont Capital Partners, SYFS portfolio page",
+          "url": "https://altamontcapital.com/?p=3047",
+          "quote": "We formed SYFS Parent to acquire a majority stake in Sequel Youth and Family Services."
+        },
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "it had 35 residential treatment centers in 16 states."
+        }
+      ],
+      "note": "The press release counts 44 programs of all kinds in 19 states; APM Reports counts 35 residential treatment centers in 16 states. A 2020 Private Equity Stakeholder Project report (not opened) dates the buyout to August 2017."
+    },
+    {
+      "key": "sequel-tsi-2020-d508ae30",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2020,
+      "date": "2020-05-01",
+      "kind": "death",
+      "title": "Cornelius Fredrick, 16, died after a staff restraint at Lakeside Academy, Michigan",
+      "detail": "Cornelius Fredrick, 16, went into cardiac arrest on April 29, 2020 while staff at Sequel's Lakeside Academy in Kalamazoo restrained him after he threw a sandwich, and he died on May 1. Staff held him on the floor, and the restraint was captured on surveillance video.",
+      "programs": [
+        "Lakeside Academy (Kalamazoo, Michigan)"
+      ],
+      "sources": [
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "the death of Cornelius Fredrick Jr."
+        },
+        {
+          "label": "WLNS 6 News (AP), June 2020",
+          "url": "https://www.wlns.com/news/michigan/michigan-ending-ties-with-company-after-teens-restraint-death/amp/",
+          "quote": "was being restrained by staff after throwing a sandwich"
+        }
+      ],
+      "note": "His surname is spelled Fredrick, Fredericks and Frederick in different outlets. The WLNS page gives April 29 and May 1 without a year; APM Reports places the death in 2020."
+    },
+    {
+      "key": "sequel-tsi-2020-0adbc8a9",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2020,
+      "date": "2020-06",
+      "kind": "investigation",
+      "title": "Michigan cut ties with Sequel and suspended Lakeside Academy's license",
+      "detail": "After the death of Cornelius Fredrick, Gov. Gretchen Whitmer ordered the Michigan Department of Health and Human Services to stop working with Sequel. The state ended its contracts with Lakeside Academy, suspended the facility's license, and moved all 125 youth there to other placements.",
+      "programs": [
+        "Lakeside Academy (Kalamazoo, Michigan)"
+      ],
+      "sources": [
+        {
+          "label": "WLNS 6 News (AP), June 2020",
+          "url": "https://www.wlns.com/news/michigan/michigan-ending-ties-with-company-after-teens-restraint-death/amp/",
+          "quote": "The facility also had its license to operate suspended."
+        },
+        {
+          "label": "WLNS 6 News (AP), June 2020",
+          "url": "https://www.wlns.com/news/michigan/michigan-ending-ties-with-company-after-teens-restraint-death/amp/",
+          "quote": "cannot provide services for facilities licensed by the state agency"
+        }
+      ],
+      "note": "The WLNS page shows no printed date (\"6 years ago\"); the same AP story ran in the Washington Times on June 21, 2020 (URL /2020/jun/21/, page refused the fetch). Other reports (not opened) say the state began the legal process to revoke the license."
+    },
+    {
+      "key": "sequel-tsi-2020-0d660cd0",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2020,
+      "date": "2020-09-28",
+      "kind": "investigation",
+      "title": "APM Reports and OPB published a yearlong investigation of Sequel",
+      "detail": "Curtis Gilbert (APM Reports) and Lauren Dake (OPB) reported that more than 40 states had sent children to Sequel facilities. The investigation found dozens of cases of physical violence, sexual assault and improper restraints, and said the company took in hard-to-treat children while spending little on their care.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "OPB / APM Reports, September 28, 2020",
+          "url": "https://opb.org/article/2020/09/28/youth-were-abused-here",
+          "quote": "The result was dozens of cases of physical violence, sexual assault and improper restraints."
+        }
+      ]
+    },
+    {
+      "key": "sequel-tsi-2021-8972215f",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2021,
+      "date": "",
+      "kind": "closure",
+      "title": "Closed 17 of its 35 residential centers, 11 of them after the 2020 death",
+      "detail": "Of the 35 residential treatment centers Sequel had in 2017, 17 had closed by early 2022. Six closed in 2019, and Sequel shut 11 more after the death of Cornelius Fredrick in 2020; the last named closures were the two Forest Ridge locations in Iowa in December 2021.",
+      "programs": [
+        "Forest Ridge (Iowa)",
+        "Mountain Home (Idaho)",
+        "Pompano (Florida)"
+      ],
+      "sources": [
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "Sequel shut down 11 of those centers, which followed six closures in 2019."
+        },
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "Since then, 17 of those centers have closed."
+        }
+      ],
+      "note": "The closures span 2019 to December 2021; year 2021 marks the end of the run."
+    },
+    {
+      "key": "sequel-tsi-2021-3cd5585e",
+      "company": "Sequel TSI",
+      "also": [],
+      "year": 2021,
+      "date": "2021-12-29",
+      "kind": "settlement",
+      "title": "Fredrick family's second wrongful death suit settled over Lakeside Academy",
+      "detail": "The family of Cornelius Fredrick settled a second wrongful death lawsuit with Lakeside Academy, approved by a Kalamazoo County Circuit judge on December 29, 2021. The terms were filed under seal.",
+      "programs": [
+        "Lakeside Academy (Kalamazoo, Michigan)"
+      ],
+      "sources": [
+        {
+          "label": "Better Care Network (AP), January 3, 2022",
+          "url": "https://bettercarenetwork.org/news-updates/news/family-of-boy-who-died-after-restraint-at-center-settle-suit",
+          "quote": "was approved Dec. 29 by Kalamazoo County Circuit Judge Alexander Lipsey."
+        },
+        {
+          "label": "Better Care Network (AP), January 3, 2022",
+          "url": "https://bettercarenetwork.org/news-updates/news/family-of-boy-who-died-after-restraint-at-center-settle-suit",
+          "quote": "has settled a second wrongful death lawsuit in the case."
+        }
+      ],
+      "note": "AP names Lakeside Academy as the settling party; WWMT (not opened) says the family's suits named Sequel. A search summary says the first suit settled December 2 in federal court; not read on a source page. No amount is public."
+    },
+    {
+      "key": "straight-inc-1991-27e54935",
+      "company": "Straight Inc.",
+      "also": [],
+      "year": 1991,
+      "date": "1991",
+      "kind": "investigation",
+      "title": "Virginia moved not to renew its license",
+      "detail": "Virginia officials announced in 1991 that they would not renew the license of Straight's center there, alleging it failed to educate youths properly, improperly restrained clients and misjudged clients' problems. Straight closed its Washington-area center the next year, blaming the recession.",
+      "programs": [
+        "Straight Inc. (Springfield, Virginia)"
+      ],
+      "sources": [
+        {
+          "label": "St. Petersburg Times, April 27, 1993",
+          "url": "https://www.tampabay.com/archive/1993/04/27/state-investigating-straight-inc-drug-program/",
+          "quote": "Virginia officials in 1991 announced plans not to renew the center's license there"
+        }
+      ]
+    },
+    {
+      "key": "straight-inc-1993-1c298512",
+      "company": "Straight Inc.",
+      "also": [],
+      "year": 1993,
+      "date": "1993-04-24",
+      "kind": "closure",
+      "title": "Closed its St. Petersburg flagship center",
+      "detail": "Straight closed its Tampa Bay area center over the weekend before April 26, 1993, after enrollment fell to 19 in a center built for about 100; the clients moved to Atlanta, leaving Atlanta and Detroit as the only centers. The Times called it the end of a stormy 17-year era. The state health department was already investigating Straight.",
+      "programs": [
+        "Straight Inc. (St. Petersburg)"
+      ],
+      "sources": [
+        {
+          "label": "St. Petersburg Times, April 26, 1993",
+          "url": "https://www.tampabay.com/archive/1993/04/26/drug-program-closes-its-doors/",
+          "quote": "closed its center here over the weekend because of dwindling enrollment"
+        },
+        {
+          "label": "St. Petersburg Times, April 27, 1993",
+          "url": "https://www.tampabay.com/archive/1993/04/27/state-investigating-straight-inc-drug-program/",
+          "quote": "Straight Inc. was under investigation by the state before the controversial adolescent drug treatment program closed its St. Petersburg center this weekend."
+        }
+      ],
+      "note": "Atlanta and Detroit centers were still open in April 1993; when the whole chain stopped is not in these sources. Article text read from the page source; the visible page shows only the headline."
+    },
+    {
+      "key": "straight-inc-1993-979962d8",
+      "company": "Straight Inc.",
+      "also": [],
+      "year": 1993,
+      "date": "1993-07-08",
+      "kind": "investigation",
+      "title": "State audit found its Florida license was renewed under political pressure",
+      "detail": "A Florida state audit concluded that regulators renewed Straight's license because of pressure from state senators and co-founder Mel Sembler, and found cases where clients were held in restraints that kept them from moving their limbs.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "St. Petersburg Times, July 8, 1993",
+          "url": "https://www.tampabay.com/archive/1993/07/08/audit-says-straight-inc-got-breaks/",
+          "quote": "An audit has concluded that state officials renewed the license of controversial drug treatment center Straight Inc. because of pressure from state senators and one of the center's founders, former U.S. Ambassador Mel Sembler."
+        }
+      ],
+      "note": "Article text read from the page source."
+    },
+    {
+      "key": "teen-challenge-1958-72a6ec1b",
+      "company": "Teen Challenge",
+      "also": [],
+      "year": 1958,
+      "date": "1958-02-28",
+      "kind": "founded",
+      "title": "Founded by David Wilkerson in New York City",
+      "detail": "Teen Challenge dates its start to February 28, 1958, when David Wilkerson, a 26-year-old Pentecostal preacher, went to a New York City murder trial of teenage gang members. Wilkerson opened the first center in New York in 1960.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Teen Challenge, Our History",
+          "url": "https://www.teenchallenge.org/about-us/our-history/",
+          "quote": "It was Feb. 28, 1958 when the 26-year-old Pentecostal preacher from rural Pennsylvania disrupted"
+        },
+        {
+          "label": "Teen Challenge, Our History",
+          "url": "https://www.teenchallenge.org/about-us/our-history/",
+          "quote": "Since Wilkerson opened the first center in New York in 1960"
+        }
+      ],
+      "note": "Organization's own account; teenchallenge.org is the Southern California branch's site."
+    },
+    {
+      "key": "teen-challenge-2026-4d311033",
+      "company": "Teen Challenge",
+      "also": [],
+      "year": 2026,
+      "date": "2026-04-08",
+      "kind": "settlement",
+      "title": "Sued by former residents of its Indiana girls' home under the federal trafficking law",
+      "detail": "Nine former residents of Central Indiana Teen Challenge (now The Refuge Girls Academy, Lebanon, Indiana), who lived there between 2011 and 2018, sued Indiana Teen Challenge Inc. and its leaders in U.S. District Court for the Southern District of Indiana (case 1:26-cv-00700). They allege forced labor, isolation as punishment and no licensed teachers or clinicians, under the Trafficking Victims Protection Reauthorization Act. The defense called the complaint unproven.",
+      "programs": [
+        "Central Indiana Teen Challenge",
+        "The Refuge Girls Academy"
+      ],
+      "sources": [
+        {
+          "label": "The Indiana Lawyer, April 9, 2026",
+          "url": "https://theindianalawyer.com/articles/lebanon-based-troubled-teen-program-accused-of-abusing-isolating-residents-during-alleged-treatment",
+          "quote": "depriving them of communication with loved ones outside the facility"
+        }
+      ],
+      "note": "Filing date inferred from 'Wednesday' in the April 9, 2026 article. Later reports (not opened) say the complaint was amended to 35 plaintiffs. Adult & Teen Challenge USA is not a defendant."
+    },
+    {
+      "key": "the-brown-schools-1940-a7bb5705",
+      "company": "The Brown Schools",
+      "also": [],
+      "year": 1940,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded",
+      "detail": "Woodbury Reports, announcing the CEDU deal in 1998, gave 1940 as the year The Brown Schools were founded. The company was based in Austin, Texas, and ran treatment centers mainly in the South.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Woodbury Reports, News & Views, August 1998",
+          "url": "https://strugglingteens.com/archives/1998/8/news05.html",
+          "quote": "The Brown Schools were founded in 1940 and own and operate many treatment centers throughout the country, but especially in the South."
+        }
+      ]
+    },
+    {
+      "key": "the-brown-schools-1998-a4f908ae",
+      "company": "The Brown Schools",
+      "also": [
+        "CEDU"
+      ],
+      "year": 1998,
+      "date": "1998-07-31",
+      "kind": "deal",
+      "title": "Bought a controlling interest in CEDU",
+      "detail": "On July 31, 1998, The Brown Schools of Austin, Texas, and the CEDU Family of Services of Monterey, California, made a final agreement to combine; Woodbury Reports headlined it as Brown buying a controlling interest. CEDU then had six schools in North Idaho and Southern California. The Spokesman-Review later reported, citing the Austin American-Statesman, that Brown paid about $72 million.",
+      "programs": [
+        "Rocky Mountain Academy",
+        "Boulder Creek Academy",
+        "Northwest Academy",
+        "Ascent"
+      ],
+      "sources": [
+        {
+          "label": "Woodbury Reports, News & Views, August 1998",
+          "url": "https://strugglingteens.com/archives/1998/8/news05.html",
+          "quote": "On July 31, 1998, a final agreement was made to combine The Brown Schools, headquartered in Austin Texas, and the CEDU Family of Services"
+        },
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "In 1999, Brown Schools purchased the California-based CEDU programs for about $72 million, according to the Austin American-Statesman."
+        }
+      ],
+      "note": "Year conflict: Woodbury Reports (August 1998) dates the final agreement July 31, 1998; the Spokesman-Review (2005), citing the Austin American-Statesman, says 1999. The $72 million price comes only from the 2005 article."
+    },
+    {
+      "key": "the-brown-schools-2002-85be32a3",
+      "company": "The Brown Schools",
+      "also": [],
+      "year": 2002,
+      "date": "",
+      "kind": "death",
+      "title": "A 17-year-old died after restraint in its Texas wilderness program",
+      "detail": "A 17-year-old enrolled in a Brown Schools wilderness program in Texas died after being restrained by at least three staff members, according to a 2003 Austin American-Statesman article cited by the Spokesman-Review. The Chicago Tribune in January 2004 named the program as OnTrack and said it was no longer owned by Brown and was still in litigation.",
+      "programs": [
+        "OnTrack"
+      ],
+      "sources": [
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "A 17-year-old who was enrolled in a Brown Schools wilderness program in Texas died in 2002 after he was restrained by at least three camp staff members"
+        },
+        {
+          "label": "Chicago Tribune, January 14, 2004",
+          "url": "https://www.chicagotribune.com/news/ct-xpm-2004-01-14-0401140188-story.html",
+          "quote": "Last year, a 17-year-old student died at OnTrack, a wilderness program in Texas, which is no longer owned by Brown and continues to be in litigation."
+        }
+      ],
+      "note": "Year conflict: the Spokesman-Review (2005) says 2002; the Chicago Tribune (January 2004) says 'last year' (2003)."
+    },
+    {
+      "key": "the-brown-schools-2003-3d1904d9",
+      "company": "The Brown Schools",
+      "also": [],
+      "year": 2003,
+      "date": "2003-04",
+      "kind": "deal",
+      "title": "Sold six psychiatric facilities to Psychiatric Solutions for $63 million",
+      "detail": "Psychiatric Solutions, Inc. paid $63 million for six inpatient behavioral health facilities from The Brown Schools, three of them hospitals in Texas, adding 895 licensed beds. The FTC's early termination notice for the transaction lists The Brown Schools, Inc. among the acquired entities. Brown kept its education programs, including the CEDU schools.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Psychiatric Solutions, Inc. company history, FundingUniverse",
+          "url": "https://www.fundinguniverse.com/company-histories/psychiatric-solutions-inc-history/",
+          "quote": "PSI paid $63 million for six inpatient behavioral health care facilities from The Brown Schools, Inc."
+        },
+        {
+          "label": "FTC early termination notice, transaction 20030407",
+          "url": "https://www.ftc.gov/node/10021",
+          "quote": "The Brown Schools, Inc."
+        }
+      ],
+      "note": "FundingUniverse dates completion to April 2003; the FTC notice lists early termination granted March 6, 2003."
+    },
+    {
+      "key": "the-brown-schools-2005-6de0663d",
+      "company": "The Brown Schools",
+      "also": [
+        "CEDU"
+      ],
+      "year": 2005,
+      "date": "2005-03-25",
+      "kind": "closure",
+      "title": "Filed Chapter 7 and closed its 11 schools",
+      "detail": "Brown Schools Inc. filed for Chapter 7 liquidation in Delaware bankruptcy court on a Friday in late March 2005, closing its 11 boarding schools and educational facilities in Texas, Idaho, California, Florida and Vermont. About 300 students in CEDU's seven schools were sent home and about 300 people in North Idaho lost their jobs. The filing listed debts of $10 million to $50 million, including a $1.5 million arbitration settlement among the largest creditors.",
+      "programs": [
+        "Boulder Creek Academy",
+        "Northwest Academy",
+        "Ascent"
+      ],
+      "sources": [
+        {
+          "label": "Deseret News, March 30, 2005",
+          "url": "https://www.deseret.com/2005/3/30/19884513/filing-closes-3-schools-in-idaho",
+          "quote": "filed for Chapter 7 liquidation in a Delaware bankruptcy court"
+        },
+        {
+          "label": "Spokesman-Review, March 29, 2005",
+          "url": "https://www.spokesman.com/stories/2005/mar/29/schools-shutdown-troubles-community/",
+          "quote": "Brown Schools Inc., CEDU's parent corporation, filed for bankruptcy Friday, the same day employees learned they were losing their jobs."
+        },
+        {
+          "label": "Education Week, April 13, 2005",
+          "url": "https://www.edweek.org/ew/articles/2005/04/13/31biz.h24.html",
+          "quote": "11 boarding schools and other educational facilities in California, Florida, Idaho, Texas, and Vermont"
+        }
+      ],
+      "note": "The articles say only 'Friday'; the Spokesman-Review is dated Tuesday, March 29, 2005, which puts the filing on March 25, 2005."
+    },
+    {
+      "key": "three-springs-inc-1985-6f43bdad",
+      "company": "Three Springs Inc.",
+      "also": [],
+      "year": 1985,
+      "date": "",
+      "kind": "founded",
+      "title": "Founded in Huntsville, Alabama",
+      "detail": "Three Springs, based in Huntsville, Alabama, opened its first campus in 1985; by late 1991 it ran five programs in three states, including campuses in Trenton, Alabama, and Centerville, Tennessee.",
+      "programs": [
+        "Paint Rock Valley"
+      ],
+      "sources": [
+        {
+          "label": "Woodbury Reports, visit report (October 1991 visit)",
+          "url": "https://strugglingteens.com/archives/1992/2/visit01.html",
+          "quote": "The first campus was started in 1985."
+        },
+        {
+          "label": "Three Springs press release on Woodbury Reports",
+          "url": "https://strugglingteens.com/news/press%20releases/threesprings060901.htm",
+          "quote": "Founded in 1985 to help adolescents experiencing emotional, behavioral and learning issues"
+        }
+      ]
+    },
+    {
+      "key": "three-springs-inc-2000-2586aa9d",
+      "company": "Three Springs Inc.",
+      "also": [],
+      "year": 2000,
+      "date": "2000-05-02",
+      "kind": "closure",
+      "title": "Closed its North Carolina girls' program",
+      "detail": "Three Springs of North Carolina in Pittsboro announced it would close its girls' program effective August 31, 2000, citing state Medicaid rulings; the boys' program stayed open.",
+      "programs": [
+        "Three Springs of North Carolina"
+      ],
+      "sources": [
+        {
+          "label": "Woodbury Reports, Seen 'n Heard, June 2000",
+          "url": "https://strugglingteens.com/archives/2000/6/seen02.html",
+          "quote": "announced the program was closing their Girls Program, effective August 31st of this year"
+        }
+      ]
+    },
+    {
+      "key": "three-springs-inc-2009-182b09e1",
+      "company": "Three Springs Inc.",
+      "also": [],
+      "year": 2009,
+      "date": "2009-12-30",
+      "kind": "deal",
+      "title": "Sold to Sequel Youth and Family Services",
+      "detail": "Sequel Youth and Family Services announced on December 30, 2009, that it had acquired privately held Three Springs, Inc. of Huntsville, Alabama, including Paint Rock Valley in Trenton, Alabama, and Auldern Academy in Siler City, North Carolina. The combined company ran 22 programs.",
+      "programs": [
+        "Paint Rock Valley",
+        "Auldern Academy"
+      ],
+      "sources": [
+        {
+          "label": "Sequel Youth and Family Services press release, December 30, 2009 (Woodbury Reports)",
+          "url": "https://strugglingteens.com/artman/publish/printer_SequelYouthFamilyBN_010210.shtml",
+          "quote": "announces the acquisition of privately held Three Springs, Inc. (TSI)"
+        }
+      ]
+    },
+    {
+      "key": "truecore-behavioral-solutions-2017-7eeccc22",
+      "company": "TrueCore Behavioral Solutions",
+      "also": [
+        "G4S Youth Services"
+      ],
+      "year": 2017,
+      "date": "",
+      "kind": "rename",
+      "title": "G4S sold its U.S. youth services business for $56.5 million; it became TrueCore",
+      "detail": "G4S sold G4S Youth Services, which ran juvenile programs in Florida, Texas and Tennessee, for $56.5 million in 2017. The business was renamed TrueCore Behavioral Solutions.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
+          "quote": "The company was purchased for $56.5 million in 2017 by an investment fund."
+        },
+        {
+          "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
+          "quote": "Former G4S Youth Services LLC becomes TrueCore Behavioral Solutions"
+        }
+      ],
+      "note": "G4S's own regulatory announcement (g4s.com, URL dated 2017-04-03) names the buyer as BHSB Holdings, Inc., per search summaries; the page is behind bot protection and was not read. A search summary also gives April 1, 2017 for the sale."
+    },
+    {
+      "key": "truecore-behavioral-solutions-2017-7290fcff",
+      "company": "TrueCore Behavioral Solutions",
+      "also": [
+        "G4S Youth Services"
+      ],
+      "year": 2017,
+      "date": "2017-08-17",
+      "kind": "investigation",
+      "title": "Polk County sheriff arrested three former G4S staff of Highlands Youth Academy",
+      "detail": "Polk County sheriff's investigators arrested three former staff of the G4S-run Highlands Youth Academy on felony charges including evidence tampering, failure to report child abuse and willful neglect of juveniles. Sheriff Grady Judd said G4S covered up what happened at the facility and that the Department of Juvenile Justice protected it.",
+      "programs": [
+        "Highlands Youth Academy (Florida)"
+      ],
+      "sources": [
+        {
+          "label": "Polk County Sheriff's Office, August 18, 2017",
+          "url": "https://bradley.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+          "quote": "DJJ has coddled and covered up for G4S."
+        }
+      ],
+      "note": "The arrests came after the 2017 sale; the conduct charged was under G4S."
+    },
+    {
+      "key": "truecore-behavioral-solutions-2024-886b1a29",
+      "company": "TrueCore Behavioral Solutions",
+      "also": [
+        "G4S Youth Services"
+      ],
+      "year": 2024,
+      "date": "2024-05-29",
+      "kind": "death",
+      "title": "Girl, 17, died at TrueCore's Lake Academy in Tampa; Florida ended the contract",
+      "detail": "Zy'Kiria Bell, 17, died at Lake Academy, a Department of Juvenile Justice residential program in Tampa run by TrueCore; her aunt was told she died by suicide in her room. The state moved the girls out, shut the program in June and ended TrueCore's five-year, $31.5 million contract. TrueCore also ended four other DJJ contracts (Hillsborough Girls Academy, Polk Halfway House, Fort Myers Academy, Orange Youth Academy/Orlando Intensive Youth Academy) on August 31, saying this had been planned for months.",
+      "programs": [
+        "Lake Academy (Tampa, Florida)",
+        "Hillsborough Girls Academy",
+        "Polk Halfway House",
+        "Fort Myers Academy",
+        "Orange Youth Academy / Orlando Intensive Youth Academy"
+      ],
+      "sources": [
+        {
+          "label": "Tampa Bay Times, June 20, 2024",
+          "url": "https://www.tampabay.com/news/hillsborough/2024/06/20/lake-academy-tampa-zykiria-bell-florida-djj/",
+          "quote": "state moves kids out, terminates contract"
+        },
+        {
+          "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
+          "quote": "a 17-year-old girl was found dead at Lake Academy in Tampa."
+        },
+        {
+          "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/florida-youth-detention-contractor-will-no-longer-operate-four-youth-facilities",
+          "quote": "The termination of TrueCore's operation at the facilities referenced had been planned for months."
+        }
+      ],
+      "note": "The year comes from the Tampa Bay Times URL (2024/06/20); the Tampa Bay 28 pages print no date. One Tampa Bay 28 passage says 15-year-old, another 17; the Tampa Bay Times says 17. The cause of death was not confirmed by investigators in these sources."
+    },
+    {
+      "key": "universal-health-services-uhs-2005-8722a3db",
+      "company": "Universal Health Services (UHS)",
+      "also": [
+        "Keystone Education and Youth Services"
+      ],
+      "year": 2005,
+      "date": "2005-10",
+      "kind": "deal",
+      "title": "Bought KEYS Group Holdings, parent of Keystone Education and Youth Services, for $207 million",
+      "detail": "UHS announced on October 10, 2005 that it had acquired the stock of KEYS Group Holdings, LLC, including Keystone Education and Youth Services, LLC, effective October 1, 2005. The deal added 46 facilities in ten states: 21 residential treatment facilities with 1,280 beds, 21 non-public therapeutic day schools and four detention facilities. The net purchase price was $207 million in cash.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "UHS press release (PRNewswire-FirstCall), October 10, 2005, via BioSpace",
+          "url": "https://www.biospace.com/b-universal-health-services-inc-b-announces-acquisition-of-b-keys-group-holdings-llc-b-and-five-additional-behavioral-health-facilities-as-we",
+          "quote": "The net purchase price was $207 million and was paid in cash."
+        }
+      ],
+      "note": "The release says 'including 21 residential treatment facilities with 1,280 beds'."
+    },
+    {
+      "key": "universal-health-services-uhs-2010-faaa5fe6",
+      "company": "Universal Health Services (UHS)",
+      "also": [
+        "Psychiatric Solutions, Inc."
+      ],
+      "year": 2010,
+      "date": "2010-11-15",
+      "kind": "deal",
+      "title": "Bought Psychiatric Solutions, adding its 94 behavioral health facilities",
+      "detail": "UHS announced the deal on May 17, 2010, paying $2 billion in cash and taking on $1.1 billion of PSI debt. It completed the acquisition on November 15, 2010. After closing UHS ran 25 acute care hospitals and 102 behavioral health facilities and schools, and PSI brought 94 facilities. ProPublica reported that the combined company would be the largest US operator of inpatient psychiatric care.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "UHS press release, SEC Form 8-K Exhibit 99.1, November 15, 2010",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000352915/000095015710002042/ex99-1.htm",
+          "quote": "has completed its previously announced acquisition of Psychiatric Solutions, Inc."
+        },
+        {
+          "label": "ProPublica (Robin Fields), May 17, 2010",
+          "url": "https://www.propublica.org/article/psychiatric-solutions-acquired-by-competitor-universal-health-services",
+          "quote": "Troubled Mental Health Provider Acquired by Competitor"
+        }
+      ],
+      "note": "The price ($2 billion cash plus $1.1 billion of debt, often given as about $3.1 billion) is from ProPublica; the UHS completion release does not state it."
+    },
+    {
+      "key": "universal-health-services-uhs-2016-1b044170",
+      "company": "Universal Health Services (UHS)",
+      "also": [],
+      "year": 2016,
+      "date": "2016-12-07",
+      "kind": "scandal",
+      "title": "BuzzFeed News investigation reports UHS psychiatric hospitals kept beds filled at patients' expense",
+      "detail": "BuzzFeed News reporter Rosalind Adams published an investigation of UHS's behavioral hospitals based on interviews with 175 current and former UHS staff, including 18 executives who ran UHS hospitals. Employees from at least a dozen hospitals said the facilities tried to keep beds filled even at the expense of staff safety and patients' rights. UHS denied holding patients for financial gain.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "BuzzFeed News (Rosalind Adams), December 7, 2016",
+          "url": "https://www.buzzfeednews.com/amphtml/rosalindadams/intake",
+          "quote": "Scores of employees from at least a dozen hospitals said those facilities tried to keep beds filled"
+        }
+      ],
+      "note": "Follow-ups in the series covered Sen. Grassley's call for a federal review; not dated here."
+    },
+    {
+      "key": "universal-health-services-uhs-2020-81b0b7b3",
+      "company": "Universal Health Services (UHS)",
+      "also": [],
+      "year": 2020,
+      "date": "2020-07-10",
+      "kind": "settlement",
+      "title": "Paid $117 million to settle False Claims Act allegations over its behavioral health hospitals",
+      "detail": "UHS, UHS of Delaware and Turning Point Care Center agreed to pay a combined $122 million; UHS's share was $117 million and Turning Point's $5 million. The government alleged UHS facilities billed Medicare, Medicaid, TRICARE and other programs for inpatient behavioral health services that were not medically necessary, kept patients longer than needed, used restraints and seclusion improperly and had inadequate staffing, from January 2006 to December 2018. The claims were allegations only, with no determination of liability.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "U.S. Department of Justice press release via Oversight.gov, July 10, 2020",
+          "url": "https://www.oversight.gov/universal-health-services-inc-and-related-entities-pay-122-million-settle-false-claims-act",
+          "quote": "agreed to pay a combined total of $122 million to resolve alleged violations of the False Claims Act"
+        }
+      ],
+      "note": "The DOJ's own pages (justice.gov) refused automated fetches; the Oversight.gov copy carries the DOJ release text."
+    },
+    {
+      "key": "universal-health-services-uhs-2024-49881dcc",
+      "company": "Universal Health Services (UHS)",
+      "also": [],
+      "year": 2024,
+      "date": "2024-03-28",
+      "kind": "settlement",
+      "title": "Jury returned a $535 million verdict against its Pavilion hospital over the sexual assault of a minor patient",
+      "detail": "A Champaign County, Illinois jury found The Pavilion, a UHS behavioral hospital, liable for ordinary negligence and awarded $60 million in compensatory and $475 million in punitive damages. Health Care Dive reported the case concerned the hospital having allowed a minor patient to sexually assault another. The Pavilion filed post-trial motions.",
+      "programs": [
+        "The Pavilion (Champaign, Illinois)"
+      ],
+      "sources": [
+        {
+          "label": "UHS SEC Form 8-K, September 27, 2024",
+          "url": "https://www.sec.gov/Archives/edgar/data/352915/000095017024110165/uhs-20240927.htm",
+          "quote": "On March 28, 2024, a jury returned a verdict for ordinary negligence."
+        },
+        {
+          "label": "Health Care Dive, October 2, 2024",
+          "url": "https://www.healthcaredive.com/news/uhs-damages-child-sexual-abuse-pavilion/728559/",
+          "quote": "allowed a minor patient to sexually assault another"
+        }
+      ],
+      "note": "Verdict amount may have been reduced post-trial; outcome of post-trial motions not checked."
+    },
+    {
+      "key": "universal-health-services-uhs-2024-c2f98435",
+      "company": "Universal Health Services (UHS)",
+      "also": [],
+      "year": 2024,
+      "date": "2024-06-12",
+      "kind": "investigation",
+      "title": "Named in the Senate Finance Committee's 'Warehouses of Neglect' report on youth residential treatment",
+      "detail": "The Senate Finance Committee released a report from a two-year investigation of four residential treatment operators: Universal Health Services, Acadia Healthcare, Devereux Advanced Behavioral Health and Vivant Behavioral Healthcare. It reported rampant civil rights violations and heavy reliance on seclusion and chemical restraint, at facilities paid largely with public money.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Oregon Public Broadcasting (Lauren Dake), June 12, 2024",
+          "url": "https://www.opb.org/article/2024/06/12/senate-report-us-taxpayers-fund-residential-treatment-facilities-that-put-vulnerable-kids-at-risk/",
+          "quote": "rampant civil rights violations"
+        }
+      ],
+      "note": "The fourth company is Vivant Behavioral Healthcare, the renamed Sequel Youth and Family Services, not 'Sequel' by name. Report title from the Committee's download link (finance.senate.gov); the PDF itself was not readable through the fetch tool."
+    },
+    {
+      "key": "universal-health-services-uhs-2024-347f1ee1",
+      "company": "Universal Health Services (UHS)",
+      "also": [],
+      "year": 2024,
+      "date": "2024-09-27",
+      "kind": "settlement",
+      "title": "Jury returned a $360 million verdict against its Cumberland Hospital for Children and Adolescents",
+      "detail": "A Virginia jury found Cumberland Hospital for Children and Adolescents and its former medical director Dr. Daniel Davidow liable to three plaintiffs over inappropriate sexual contact during medical examinations. It awarded $60 million in compensatory damages, $180 million in trebled damages under the Virginia Consumer Protection Act and $120 million in punitive damages. UHS and UHS of Delaware were dismissed during trial, and UHS said it expected the punitive award to be capped by law.",
+      "programs": [
+        "Cumberland Hospital for Children and Adolescents"
+      ],
+      "sources": [
+        {
+          "label": "UHS SEC Form 8-K, September 27, 2024",
+          "url": "https://www.sec.gov/Archives/edgar/data/352915/000095017024110165/uhs-20240927.htm",
+          "quote": "On September 27, 2024, a jury entered a verdict finding Dr. Davidow and Cumberland liable."
+        }
+      ],
+      "note": "Plaintiffs' counsel gave the same $360 million total split per plaintiff. About 40 more plaintiffs had similar claims pending per UHS. Appeal outcome not checked."
+    },
+    {
+      "key": "vivant-behavioral-health-2021-e286f3c2",
+      "company": "Vivant Behavioral Health",
+      "also": [
+        "Sequel TSI"
+      ],
+      "year": 2021,
+      "date": "",
+      "kind": "deal",
+      "title": "Founded by Sequel co-founder Jay Ripley and bought most of Sequel's remaining centers",
+      "detail": "Jay Ripley, one of Sequel's three founders, founded Vivant Behavioral Healthcare in 2021. Sequel sold most of its centers that had not closed to Vivant, which now controls most former Sequel treatment centers still open.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "APM Reports, April 26, 2022",
+          "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+          "quote": "sold most of the rest to a new company called Vivant Behavioral Healthcare"
+        },
+        {
+          "label": "Bengur Bryan, healthcare services transactions",
+          "url": "https://bengurbryan.com/portfolio-industry/healthcare-services/",
+          "quote": "Bengur Bryan advised Vivant on the acquisition of certain behavioral health programs from Sequel Youth & Family Services"
+        }
+      ],
+      "note": "Wikipedia (not opened) says Ripley formed Vivant in September 2021. No price or program list found."
+    },
+    {
+      "key": "vivant-behavioral-health-2024-c698301f",
+      "company": "Vivant Behavioral Health",
+      "also": [
+        "Devereux Advanced Behavioral Health",
+        "Sequel TSI"
+      ],
+      "year": 2024,
+      "date": "2024-06-12",
+      "kind": "investigation",
+      "title": "Named in the Senate Finance Committee report 'Warehouses of Neglect'",
+      "detail": "Senate Finance Committee Chair Ron Wyden released a report on a two-year investigation of four residential treatment providers: Universal Health Services, Acadia Healthcare, Vivant Behavioral Healthcare and the nonprofit Devereux Advanced Behavioral Health. The report found children face sexual abuse, dangerous restraints and overmedication, and that the companies fill beds while failing to hire enough qualified staff.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "U.S. Senate Committee on Finance, June 12, 2024",
+          "url": "https://finance.senate.gov/chairmans-news/wyden-investigation-exposes-systemic-taxpayer-funded-child-abuse-and-neglect-in-youth-residential-treatment-facilities",
+          "quote": "Warehouses of Neglect: How Taxpayers Are Funding Systemic Abuse in Youth Residential Treatment Facilities"
+        },
+        {
+          "label": "NBC News, June 12, 2024",
+          "url": "https://www.nbcnews.com/news/us-news/residential-treatment-centers-senate-report-rcna155177",
+          "quote": "Devereux Advanced Behavioral Health, a nonprofit organization"
+        },
+        {
+          "label": "NBC News, June 12, 2024",
+          "url": "https://www.nbcnews.com/news/us-news/residential-treatment-centers-senate-report-rcna155177",
+          "quote": "optimizes profit over the wellbeing and safety of children."
+        }
+      ],
+      "note": "The committee's release names Vivant, not Sequel; Sequel is listed here because Vivant runs most former Sequel centers. NBC says most incidents in the report involve UHS and Acadia facilities."
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2003-04d792e1",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2003,
+      "date": "2003-05-22",
+      "kind": "closure",
+      "title": "Costa Rica raided Dundee Ranch Academy",
+      "detail": "Costa Rica's child welfare agency (PANI) told Dundee Ranch Academy on May 19, 2003, to correct 15 violations; riots broke out when authorities visited on May 20 and again two days later. Owner Narvin Lichfield, brother of WWASPS founder Robert Lichfield, was detained for 30 hours on child abuse charges, which a judge dismissed. The agency said the ranch operated without a license and that 100 of 193 American youths there were in the country illegally.",
+      "programs": [
+        "Academy at Dundee Ranch"
+      ],
+      "sources": [
+        {
+          "label": "Associated Press via Inside Costa Rica, June 17, 2003",
+          "url": "https://insidecostarica.com/specialreports/dundee_ranch.htm",
+          "quote": "Riots broke out when Costa Rican authorities visited Dundee Ranch on May 20 and again two days later"
+        },
+        {
+          "label": "Tico Times",
+          "url": "https://ticotimes.net/?p=12644",
+          "quote": "The raid resulted in a student riot and 35 teens escaped from the site"
+        }
+      ],
+      "note": "AP spells the owner 'Marvin Lichfield'; other sources say Narvin. The Tico Times does not call Dundee a WWASPS member; AP says its methods were used at 10 other schools coordinated by WWASPS. A later Tico Times piece calls the 2003 shutdown voluntary."
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2004-b0dbac63",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2004,
+      "date": "2004-09-10",
+      "kind": "closure",
+      "title": "Mexico closed Casa by the Sea and two other Baja schools",
+      "detail": "Mexican authorities raided and ordered closed three Ensenada-area schools for American teens in September 2004, citing immigration violations and reports of abuse: Casa by the Sea (about 530 students), Casa la Esperanza and Genesis by the Sea. WWASPS president Ken Kay said the association counted the schools among its members. The LA Times noted earlier closures in Mexico and the Czech Republic and the Costa Rica raid.",
+      "programs": [
+        "Casa by the Sea",
+        "Casa la Esperanza",
+        "Genesis by the Sea"
+      ],
+      "sources": [
+        {
+          "label": "Los Angeles Times, September 13, 2004",
+          "url": "https://www.latimes.com/archives/la-xpm-2004-sep-13-me-baja13-story.html",
+          "quote": "Three schools in Baja California that specialize in behavior modification for troubled American teens were raided and ordered to close last week"
+        },
+        {
+          "label": "NPR, January 2, 2005 (via WUWF)",
+          "url": "https://www.wuwf.org/2005-01-02/mexico-shutters-u-s-run-rehab-centers-for-teens",
+          "quote": "is now chained up and sealed by Mexican authorities"
+        }
+      ],
+      "note": "The LA Times says the schools were closed on the Friday before September 13, 2004 (September 10). Wikipedia gives 538 students; the LA Times says about 530."
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2006-0554254c",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2006,
+      "date": "2006",
+      "kind": "settlement",
+      "title": "Sued by former students in Utah federal court; case grew to 350-plus plaintiffs",
+      "detail": "A lawsuit brought in 2006, first on behalf of a Texas man, against WWASPS and principals Robert B. Lichfield and Brent M. Facer had more than 350 plaintiffs by 2011, mostly former students alleging abuse and their parents. Reason reported 133 plaintiffs in June 2007. A separate suit filed in June 2011 in U.S. District Court in Salt Lake City concerned Casa by the Sea and High Impact, which that complaint said Mexico shut in 2002.",
+      "programs": [
+        "Casa by the Sea",
+        "High Impact"
+      ],
+      "sources": [
+        {
+          "label": "Associated Press via Spokesman-Review, June 3, 2011",
+          "url": "https://www.spokesman.com/stories/2011/jun/03/man-claims-abuse-teen-boot-camps/",
+          "quote": "The other lawsuit, brought in 2006 initially on behalf of a Texas man, now has 350-plus plaintiffs"
+        },
+        {
+          "label": "Reason, June 27, 2007",
+          "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+          "quote": "133 plaintiffs filed a civil suit against Romney's Utah finance co-chair, Robert Lichfield"
+        }
+      ],
+      "note": "Courthouse News (2011, seen only in a survivor-site copy) put 357 plaintiffs in Salt Lake County court; AP says the case was pending in federal court. Outcome not confirmed. Reason is an opinion column. The 2002 High Impact closure is the complaint's allegation."
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2007-34905fc1",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2007,
+      "date": "2007-07-16",
+      "kind": "closure",
+      "title": "Network down to two schools from seven in 2005",
+      "detail": "WWASPS president Ken Kay told the Salt Lake Tribune that the network had seven schools in 2005 and two in July 2007, including Majestic Ranch in Randolph, Utah. Kay said he would be surprised if WWASPS lasted more than another year.",
+      "programs": [
+        "Majestic Ranch"
+      ],
+      "sources": [
+        {
+          "label": "Salt Lake Tribune, July 16, 2007",
+          "url": "https://archive.sltrib.com/article.php?id=6385296&itype=NGPSID",
+          "quote": "In 2005, there were seven schools in the network. Now there are two, including Majestic Ranch, said World Wide president Ken Kay."
+        }
+      ]
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2009-ded61f85",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2009,
+      "date": "2009-01",
+      "kind": "closure",
+      "title": "Tranquility Bay and Spring Creek Lodge closed",
+      "detail": "In January 2009 Maia Szalavitz reported that Tranquility Bay in Jamaica and Spring Creek Lodge in Montana, both WWASPS programs, had shut in the previous few weeks.",
+      "programs": [
+        "Tranquility Bay",
+        "Spring Creek Lodge"
+      ],
+      "sources": [
+        {
+          "label": "HuffPost (contributor post by Maia Szalavitz), January 30, 2009",
+          "url": "https://www.huffpost.com/entry/good-news-bad-economy-kil_b_162696",
+          "quote": "In just the last few weeks, the notorious Tranquility Bay program in Jamaica, Spring Creek Lodge in Montana, and Pathway Family Center in Detroit and Ohio have all been shuttered."
+        }
+      ],
+      "note": "Contributor blog, not a news report. The Deseret News (2012) says Spring Creek closed in 2008, conflicting with this January 2009 report."
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2011-c1eb19cc",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2011,
+      "date": "2011-06",
+      "kind": "closure",
+      "title": "Board member said WWASPS existed on paper only",
+      "detail": "In June 2011 former board member Brent Facer told AP that WWASPS existed only on paper and had shut down because its programs were no longer needed.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Associated Press via Spokesman-Review, June 3, 2011",
+          "url": "https://www.spokesman.com/stories/2011/jun/03/man-claims-abuse-teen-boot-camps/",
+          "quote": "indicated it exists now on paper only"
+        }
+      ]
+    },
+    {
+      "key": "world-wide-association-of-specialty-prog-2012-5d91c255",
+      "company": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+      "also": [],
+      "year": 2012,
+      "date": "2012-03",
+      "kind": "settlement",
+      "title": "Montana Supreme Court ordered a new trial in a Spring Creek Lodge suicide suit",
+      "detail": "A 16-year-old girl died by suicide at Spring Creek Lodge near Thompson Falls, Montana, in October 2004. In 2010 a Sanders County jury found WWASPS and Robert Lichfield not negligent; in March 2012 the Montana Supreme Court ordered a new trial, ruling the trial court wrongly limited evidence about other suicide attempts and conditions at the school. WWASPS had supplied Spring Creek's policy and procedure manual.",
+      "programs": [
+        "Spring Creek Lodge"
+      ],
+      "sources": [
+        {
+          "label": "Deseret News, March 9, 2012",
+          "url": "https://www.deseret.com/2012/3/9/20398756/supco-orders-new-trial-in-boarding-school-suicide",
+          "quote": "abused its discretion"
+        }
+      ],
+      "note": "The ruling is dated by the article (March 2012). Final outcome not found."
+    },
+    {
+      "key": "youth-opportunity-investments-2016-739daa7a",
+      "company": "Youth Opportunity Investments",
+      "also": [],
+      "year": 2016,
+      "date": "2016-08",
+      "kind": "deal",
+      "title": "Picked for Arkansas juvenile lockup contract; sued by G4S",
+      "detail": "In August 2016 Arkansas chose Youth Opportunity Investments LLC of Carmel, Indiana, for a $160 million contract to run seven juvenile centers, raising the per-bed rate from $147 to $232. Two G4S Youth Services executives had left G4S in May to head a division of the company, and G4S sued them and Youth Opportunity in Florida in June, alleging unfair and deceptive trade practices.",
+      "programs": [
+        "Colt",
+        "Dermott",
+        "Harrisburg",
+        "Lewisville",
+        "Mansfield"
+      ],
+      "sources": [
+        {
+          "label": "Arkansas Democrat-Gazette, September 15, 2016",
+          "url": "https://www.arkansasonline.com/news/2016/sep/15/2-youth-jail-execs-jumped-ship-20160915/",
+          "quote": "State officials decided last month to award the contract to Youth Opportunity"
+        }
+      ],
+      "note": "Search summaries (not opened) say legislators blocked this contract in late 2016 and the state ran the centers itself until Youth Opportunity took over in July 2019."
+    },
+    {
+      "key": "youth-opportunity-investments-2020-aa947074",
+      "company": "Youth Opportunity Investments",
+      "also": [],
+      "year": 2020,
+      "date": "2020-02-13",
+      "kind": "closure",
+      "title": "Gave up Arkansas youth lockups after one year",
+      "detail": "Youth Opportunity Investments, which took over four Arkansas juvenile facilities (Harrisburg, Lewisville, Dermott, Mansfield) in July 2019 under a one-year contract, told the state in February 2020 it would not continue past June 30, citing infrastructure costs and empty beds. On July 2, 2020, the state ombudsman called conditions at Dermott 'grossly negligent'.",
+      "programs": [
+        "Dermott",
+        "Harrisburg",
+        "Lewisville",
+        "Mansfield"
+      ],
+      "sources": [
+        {
+          "label": "Arkansas Democrat-Gazette, February 13, 2020",
+          "url": "https://www.arkansasonline.com/news/2020/feb/13/youth-opportunity-investments-wont-renew-contract-/",
+          "quote": "The letter cites financial concerns created by infrastructure improvements and vacant facility beds."
+        },
+        {
+          "label": "Arkansas Democrat-Gazette, July 19, 2020",
+          "url": "https://www.arkansasonline.com/news/2020/jul/19/filing-rips-operator-of-lockup-for-youths/",
+          "quote": "these conditions appear grossly negligent and violate the youths' rights"
+        }
+      ]
+    },
+    {
+      "key": "youth-services-international-1999-7d5e4089",
+      "company": "Youth Services International",
+      "also": [
+        "Correctional Services Corporation"
+      ],
+      "year": 1999,
+      "date": "1999-03-31",
+      "kind": "deal",
+      "title": "Merged into Correctional Services Corporation",
+      "detail": "Correctional Services Corporation acquired Youth Services International on March 31, 1999, issuing 3,114,614 CSC shares for all YSI stock in a pooling of interests. The addition took CSC's juvenile operations into 10 new states; its Juvenile Division then ran 35 facilities in 14 states and Puerto Rico.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "Correctional Services Corp, Form 10-K for 1999 (SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000914670/000091467000000010/0000914670-00-000010.txt",
+          "quote": "3,114,614 shares of CSC common stock in exchange for all of the outstanding common stock of YSI"
+        },
+        {
+          "label": "Correctional Services Corp, Form 10-K for 1999 (SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000914670/000091467000000010/0000914670-00-000010.txt",
+          "quote": "operates 35 facilities in 14 states and Puerto Rico"
+        }
+      ],
+      "note": "Search summaries of other CSC filings (not opened) say the deal was announced September 24, 1998 at a higher exchange ratio."
+    },
+    {
+      "key": "youth-services-international-2005-350c46f9",
+      "company": "Youth Services International",
+      "also": [
+        "Correctional Services Corporation"
+      ],
+      "year": 2005,
+      "date": "2005-11",
+      "kind": "deal",
+      "title": "Sold by GEO Group to a company owned by former CSC CEO James Slattery",
+      "detail": "On completing its purchase of CSC, The GEO Group sold Youth Services International for $3.75 million to a newly formed company owned by James F. Slattery, CSC's former chief executive officer.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "GEO Group press release, November 7, 2005 (Form 8-K exhibit, SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000923796/000095014405011647/g98310exv99w1.htm",
+          "quote": "the former Chief Executive Officer of CSC"
+        },
+        {
+          "label": "GEO Group press release, November 7, 2005 (Form 8-K exhibit, SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0000923796/000095014405011647/g98310exv99w1.htm",
+          "quote": "$3.75 million"
+        }
+      ],
+      "note": "A search summary of GEO's 2006 10-K (not opened) splits the price into $1.75 million cash and a $2.0 million note."
+    },
+    {
+      "key": "youth-services-international-2013-5201c44b",
+      "company": "Youth Services International",
+      "also": [],
+      "year": 2013,
+      "date": "2013-10-23",
+      "kind": "investigation",
+      "title": "Huffington Post series 'Prisoners of Profit' examined YSI's record",
+      "detail": "Chris Kirkham's two-part Huffington Post investigation reported that YSI and owner James Slattery's earlier companies had run afoul of the Justice Department and several states. It found the company failed to report riots, assaults and claims of sexual abuse at its Florida juvenile prisons, and that a state monitor who recommended closing Thompson Academy was fired after the company complained.",
+      "programs": [
+        "Thompson Academy (Florida)"
+      ],
+      "sources": [
+        {
+          "label": "Democracy Now!, October 23, 2013 (interview on the HuffPost series)",
+          "url": "https://www.democracynow.org/2013/10/23/prisoners_of_profit_despite_widespread_abuse",
+          "quote": "More than 40,000 boys and girls in 16 states have gone through his facilities in the past two decades."
+        },
+        {
+          "label": "Democracy Now!, October 23, 2013",
+          "url": "https://www.democracynow.org/2013/10/23/prisoners_of_profit_despite_widespread_abuse",
+          "quote": "riots, assaults and claims of sexual abuse"
+        }
+      ],
+      "note": "The original HuffPost articles were not opened; facts are from the Democracy Now! page about them."
+    },
+    {
+      "key": "youth-services-international-2014-d84e5115",
+      "company": "Youth Services International",
+      "also": [],
+      "year": 2014,
+      "date": "2014-08",
+      "kind": "closure",
+      "title": "Florida DJJ cancelled its Santa Rosa contract and barred new bids for a year",
+      "detail": "The Florida Department of Juvenile Justice cancelled YSI's contract for the 40-bed Santa Rosa Substance Abuse Treatment Center, citing unfixed safety and security problems; four staff had been fired within two months for excessive force or failing to report safety issues. YSI could not bid on new state contracts for at least 12 months and still ran nine other Florida juvenile facilities.",
+      "programs": [
+        "Santa Rosa Substance Abuse Treatment Center (Florida)"
+      ],
+      "sources": [
+        {
+          "label": "WUSF / News Service of Florida, August 26, 2014",
+          "url": "https://www.wusf.org/health-news-florida/2014-08-26/djj-cancels-contract-with-controversial-provider",
+          "quote": "I think we were very thorough in our process in identifying where the deficits were with the program"
+        }
+      ]
+    },
+    {
+      "key": "youth-services-international-2016-c56ba6f0",
+      "company": "Youth Services International",
+      "also": [],
+      "year": 2016,
+      "date": "2016-03",
+      "kind": "settlement",
+      "title": "Paid Florida $2 million and lost all seven of its state juvenile contracts",
+      "detail": "The Florida Department of Juvenile Justice ended its relationship with YSI, which held contracts worth roughly $90 million to run seven juvenile lockups, with new operators due by August 31, 2016. Under a settlement of a whistleblower suit by six former employees alleging false claims for services and food, YSI agreed to pay the state $2 million.",
+      "programs": [],
+      "sources": [
+        {
+          "label": "WUSF / News Service of Florida, March 19, 2016",
+          "url": "https://www.wusf.org/2016-03-19/state-ends-juvenile-detention-firm-contract",
+          "quote": "Under terms of the settlement, the firm has agreed to pay $2 million to the state and the lawsuit will be dismissed."
+        },
+        {
+          "label": "WLRN, March 18, 2016",
+          "url": "https://www.wlrn.org/news/2016-03-18/florida-ends-relationship-with-juvenile-justice-contractor-after-years-of-abuse-allegations",
+          "quote": "is ending its relationship with one of the state's largest operators"
+        }
+      ]
+    }
+  ]
+}

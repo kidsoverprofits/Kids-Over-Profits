@@ -29,6 +29,7 @@ if (!is_dir($out_dir)) mkdir($out_dir, 0777, true);
 require __DIR__ . '/kop-test-harness.php';
 require_once dirname(__DIR__) . '/inc/operator-pages.php';
 require_once dirname(__DIR__) . '/inc/operator-history.php';
+require_once dirname(__DIR__) . '/inc/profile-timeline.php';
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
