@@ -37,7 +37,8 @@ $check('a picture with no class attribute gets one', strpos($out, '<img class="k
 $check('single-quoted class is kept', $has(str_replace("'", '"', kop_content_image_mark_fill("<img width='900' class='x' src='a.jpg'>", 0))));
 
 $css = file_get_contents(dirname(__DIR__) . '/css/content-images.css');
-$check('the stylesheet fills the column with marked pictures', strpos($css, 'img.kop-img-fill') !== false && strpos($css, 'width: 100%') !== false);
+$check('the stylesheet caps pictures at 600px wide and 70vh tall', strpos($css, 'max-width: min(100%, 600px)') !== false && strpos($css, 'max-height: 70vh') !== false);
+$check('section photos still span the column', (bool) preg_match('/figure\.kop-page-photo img[^{]*\{[^}]*max-height:\s*none/', $css));
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

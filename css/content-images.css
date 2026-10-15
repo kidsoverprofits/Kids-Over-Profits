@@ -1,6 +1,6 @@
 /**
- * Pictures in editor content (posts, pages, facility profiles): a large one
- * fills the text column, a smaller one sits in the middle of it. Pictures
+ * Pictures in editor content (posts, pages, facility profiles) sit in the
+ * middle of the text column, at most 600px wide and 70vh tall. Pictures
  * aligned left or right keep their float. inc/content-images.php marks each
  * content <img> at least 640px wide with .kop-img-fill.
  */
@@ -41,8 +41,19 @@
     margin-right: auto;
 }
 
-.entry-content img.kop-img-fill:not(.alignleft):not(.alignright) {
+/* No picture is drawn bigger than 600px wide or 70% of the screen tall; it keeps
+   its shape and the full size opens on a click. */
+.entry-content img:not(.alignleft):not(.alignright):not([class*="emoji"]) {
+    width: auto;
+    max-width: min(100%, 600px);
+    max-height: 70vh;
+}
+
+/* The 16:9 section photos (css/article.css) still span the column. */
+.entry-content figure.kop-page-photo img:not(.alignleft):not(.alignright) {
     width: 100%;
+    max-width: 100%;
+    max-height: none;
 }
 
 .entry-content .wp-block-image figcaption,
