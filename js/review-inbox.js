@@ -226,7 +226,11 @@
             if (!groups[s.group]) { groups[s.group] = []; order.push(s.group); }
             groups[s.group].push(s);
         });
+        // Groups and the queues in each A to Z, so a queue is found by its name ("Your inbox" first, "All tools" last).
+        var byLabel = function (a, b) { return String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true }); };
+        order.sort(byLabel);
         order.forEach(function (g) {
+            groups[g].sort(function (a, b) { return byLabel(a.label, b.label); });
             tabsRow.appendChild(dropdown(g, groups[g].map(function (s) {
                 if (s.native) {
                     return { key: s.key, label: s.label, count: nativeCount(s), active: nativeActive === s.key, open: function () {
