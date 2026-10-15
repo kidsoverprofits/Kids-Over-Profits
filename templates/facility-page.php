@@ -288,6 +288,9 @@ $kop_fp_staff_lists = static function (array $staff, $tag = 'h3') use ($kop_fp_s
     <?php
 };
 
+// The year-by-year timeline (inc/profile-timeline.php), read from the whole lists before the name sections split them.
+$kop_fp_timeline = function_exists('kop_ptl_facility') ? kop_ptl_facility($page) : array();
+
 // A renamed program: one section per name holds what is dated to its years,
 // and the ordinary sections below keep only what no name took.
 $kop_fp_eras = !empty($page['eras']['list']) ? $page['eras'] : null;
@@ -316,6 +319,7 @@ if ($kop_fp_has_ph) $kop_fp_sections['history'] = 'History';
 // The research notes as prose with their sources (inc/profile-notes.php), near the top of the page.
 $kop_fp_about = !empty($page['about']['paragraphs']) || !empty($page['about']['also']) || !empty($page['field_notes']) ? (array) $page['about'] : null;
 if ($kop_fp_about) $kop_fp_sections['about'] = 'About';
+if ($kop_fp_timeline) $kop_fp_sections['timeline'] = 'Timeline';
 // Homes of a program (inc/program-homes.php): a program lists them, a home lists the others.
 $kop_fp_homes = !empty($page['program_homes']['homes']) ? $page['program_homes']['homes'] : (!empty($page['home_of']['others']) ? $page['home_of']['others'] : array());
 $kop_fp_is_program = !empty($page['program_homes']['homes']);
@@ -752,12 +756,22 @@ get_header();
             </section>
             <?php endif; ?>
 
+            <?php if ($kop_fp_timeline) : ?>
+            <section class="kop-fp-section kop-fp-timeline-section" id="timeline">
+                <h2><?php echo $kop_fp_icon('calendar'); ?>Timeline</h2>
+                <?php echo kop_ptl_html($kop_fp_timeline, array( // Escaped inside.
+                    'id'    => 'tl',
+                    'intro' => 'From the records: who ran it and the deals that moved it, its names, and the deaths, incidents, inspection findings, lawsuits and news stories on file. Point at an event, or tap "More about this", for the details.',
+                )); ?>
+            </section>
+            <?php endif; ?>
+
             <?php foreach ($kop_fp_eras ? $kop_fp_eras['list'] : array() as $kop_fp_era) :
                 $kop_fp_era_meta = array_filter(array($kop_fp_era['years'], $kop_fp_era['operators'] ? implode(', ', $kop_fp_era['operators']) : ''), 'strlen');
                 $kop_fp_era_notes = (array) ($kop_fp_era['notes'] ?? array());
                 $kop_fp_era_parts = count($kop_fp_era_notes);
                 ?>
-            <section class="kop-fp-section kop-fp-era" id="<?php echo esc_attr($kop_fp_era['id']); ?>">
+            <section class="kop-fp-section kop-fp-era" id="<?php echo esc_attr($kop_fp_era['id']); ?>"<?php echo (!empty($kop_fp_era['edit']) && function_exists('kop_ie_attr')) ? kop_ie_attr($kop_fp_era['edit'], 'this earlier name') : ''; ?>>
                 <h2><span class="kop-fp-era-as">As</span> <?php echo esc_html($kop_fp_era['name']); ?></h2>
                 <?php if ($kop_fp_era_meta) : ?><p class="kop-fp-era-meta"><?php echo esc_html(implode(' | ', $kop_fp_era_meta)); ?></p><?php endif; ?>
                 <?php if ($kop_fp_era['url'] !== '') : ?><p class="kop-fp-count"><a href="<?php echo esc_url($kop_fp_era['url']); ?>">The record kept under this name</a></p><?php endif; ?>

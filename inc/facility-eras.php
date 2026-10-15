@@ -146,9 +146,10 @@ if (!function_exists('kop_facility_eras_doc_renames')) {
     /** The rename entries a record's document carries (legacy.mergedFacilities with 'rename'), oldest rename first. */
     function kop_facility_eras_doc_renames(array $doc) {
         $out = array();
-        foreach ((array) ($doc['legacy']['mergedFacilities'] ?? array()) as $m) {
+        foreach ((array) ($doc['legacy']['mergedFacilities'] ?? array()) as $at => $m) {
             if (!is_array($m) || !is_array($m['rename'] ?? null) || trim((string) ($m['name'] ?? '')) === '') continue;
             if ((int) ($m['rename']['year'] ?? 0) <= 0) continue;
+            $m['_at'] = $at;   // its place in the list, for the pencil (era:<id>:<at>)
             $out[] = $m;
         }
         usort($out, function ($a, $b) {
@@ -182,6 +183,7 @@ if (!function_exists('kop_facility_eras_doc_chain')) {
                 'node' => '', 'name' => trim((string) $m['name']), 'start' => $start ?: $cut, 'end' => $end, 'cut' => $cut,
                 'facility_id' => $fid, 'operators' => array_values(array_filter(array_map('strval', (array) ($r['operators'] ?? array())), 'strlen')),
                 'status' => (string) ($r['status'] ?? ''), 'notes' => array_values(array_filter((array) ($r['notes'] ?? array()), 'is_string')),
+                'merged' => $m['_at'],
             );
             $cut = $year;
         }
@@ -644,6 +646,8 @@ if (!function_exists('kop_facility_eras_build')) {
                 'url'       => ($fid > 0 && $fid !== $facility_id) ? kop_facility_page_url($fid) : '',
                 // An earlier name of a merged record: its status when the name ended, and its own notes.
                 'status'    => ($i < count($chain) - 1) ? (string) ($era['status'] ?? '') : '',
+                // The pencil ref of an earlier name saved on this record (kop_ie_era_load() in inc/inline-edit.php).
+                'edit'      => isset($era['merged']) ? 'era:' . $facility_id . ':' . $era['merged'] : '',
                 'notes'     => ($i < count($chain) - 1 && function_exists('kop_facility_pages_clean_notes')) ? kop_facility_pages_clean_notes($era['notes'] ?? array()) : array_values((array) ($era['notes'] ?? array())),
             );
             foreach ($kinds as $kind) $entry[$kind] = array();

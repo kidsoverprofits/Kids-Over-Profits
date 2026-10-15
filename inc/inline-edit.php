@@ -176,6 +176,7 @@ function kop_ie_sources() {
         'gl'       => array('load' => 'kop_ie_gl_load', 'save' => 'kop_ie_gl_save'),
         'facility' => array('load' => 'kop_ie_facility_load', 'save' => 'kop_ie_facility_save'),
         'fstatus'  => array('load' => 'kop_ie_fstatus_load', 'save' => 'kop_ie_fstatus_save'),
+        'era'      => array('load' => 'kop_ie_era_load', 'save' => 'kop_ie_era_save'),
         'rec'     => array('load' => 'kop_ie_rec_load', 'save' => null),
         'cfg'      => array('load' => 'kop_ie_cfg_load', 'save' => 'kop_ie_cfg_save'),
         'operator' => array('load' => 'kop_ie_operator_load', 'save' => 'kop_ie_operator_save'),
@@ -928,6 +929,112 @@ function kop_ie_fstatus_save(array $p, array $v) {
         $out['undo'] = 'fstatus:' . $fid . ':' . $previous;
     }
     return $out;
+}
+
+/**
+ * era:<facility id>:<n>: an earlier name of a program merged as a rename, the
+ * n-th entry of legacy.mergedFacilities (its "As <name>" section on the page):
+ * the name, its years, the rename year, its status then, its companies, notes.
+ */
+function kop_ie_era_entry(array $doc, $i) {
+    $m = $doc['legacy']['mergedFacilities'][$i] ?? null;
+    if (!is_array($m) || !is_array($m['rename'] ?? null)) {
+        throw new RuntimeException('That earlier name is no longer on this record.');
+    }
+    return $m;
+}
+
+function kop_ie_era_load(array $p) {
+    $fid = (int) ($p[0] ?? 0);
+    $i = (int) ($p[1] ?? -1);
+    $stored = kop_facility_load($fid, kop_ie_facility_opts());
+    if (!$stored) {
+        throw new RuntimeException("Facility #{$fid} does not exist.");
+    }
+    $m = kop_ie_era_entry($stored['doc'], $i);
+    $r = $m['rename'];
+    $year = static function ($y) { return (int) $y > 0 ? (string) (int) $y : ''; };
+    return array(
+        'title'  => (string) ($stored['doc']['identification']['name'] ?? '') . ': as ' . (string) $m['name'],
+        'help'   => 'The earlier name this record was merged from as a rename. Its section on the page and the network map read these.',
+        'fields' => array(
+            kop_ie_field('name', 'Earlier name', 'text', (string) $m['name']),
+            kop_ie_field('startYear', 'First year under this name', 'year', $year($r['startYear'] ?? 0)),
+            kop_ie_field('endYear', 'Last year under this name', 'year', $year($r['endYear'] ?? 0), array('help' => 'Empty = the year it was renamed.')),
+            kop_ie_field('year', 'Year it was renamed', 'year', $year($r['year'] ?? 0)),
+            kop_ie_field('status', 'Status when the name ended', 'select', (string) ($r['status'] ?? ''), array('options' => array(
+                array('value' => '', 'label' => 'Not given'), 'Open', 'Closed', 'Suspended', 'Transferred', 'Unknown'))),
+            kop_ie_field('operators', 'Companies that ran it under this name', 'items', array_values(array_map('strval', array_filter((array) ($r['operators'] ?? array()), 'is_string')))),
+            kop_ie_field('notes', 'Notes shown under this name', 'items', array_values(array_map('strval', array_filter((array) ($r['notes'] ?? array()), 'is_string')))),
+        ),
+        'alt'    => array('ref' => 'facility:' . $fid . ':raw', 'label' => 'Whole record (JSON)'),
+    );
+}
+
+function kop_ie_era_save(array $p, array $v) {
+    $fid = (int) ($p[0] ?? 0);
+    $i = (int) ($p[1] ?? -1);
+    $opts = kop_ie_facility_opts();
+    kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $i, $opts, $v) {
+        $stored = kop_facility_load($fid, $opts);
+        if (!$stored) {
+            throw new RuntimeException("Facility #{$fid} does not exist.");
+        }
+        $doc = $stored['doc'];
+        $m = kop_ie_era_entry($doc, $i);
+        $r = $m['rename'];
+        $name = kop_ie_clean_text($v['name'] ?? '');
+        if ($name === '') {
+            throw new RuntimeException('The earlier name cannot be empty.');
+        }
+        $year = kop_ie_int($v['year'] ?? '', 'Year it was renamed', 1800, 2100);
+        if ($year === null) {
+            throw new RuntimeException('The year it was renamed is needed: the page splits the two names there.');
+        }
+        foreach (array('startYear' => 'First year under this name', 'endYear' => 'Last year under this name') as $k => $label) {
+            $y = kop_ie_int($v[$k] ?? '', $label, 1800, 2100);
+            if ($y === null) {
+                unset($r[$k]);
+            } else {
+                $r[$k] = $y;
+            }
+        }
+        if (isset($r['startYear'], $r['endYear']) && $r['startYear'] > $r['endYear']) {
+            throw new RuntimeException('The first year comes after the last year.');
+        }
+        $r['year'] = $year;
+        $status = (string) ($v['status'] ?? '');
+        if ($status === '') {
+            unset($r['status']);
+        } elseif (in_array($status, array('Open', 'Closed', 'Suspended', 'Transferred', 'Unknown'), true)) {
+            $r['status'] = $status;
+        }
+        foreach (array('operators', 'notes') as $k) {
+            $list = array();
+            foreach ((array) ($v[$k] ?? array()) as $t) {
+                $t = kop_ie_clean_text($t);
+                if ($t !== '') {
+                    $list[] = $t;
+                }
+            }
+            $r[$k] = $list;
+        }
+        $m['name'] = $name;
+        $m['rename'] = $r;
+        $doc['legacy']['mergedFacilities'][$i] = $m;
+        $out = kop_facility_normalize($doc, array('facility_id' => $doc['facility_id'] ?? $fid, 'unique_name' => $stored['unique_name']));
+        try {
+            kop_facility_save($out, $opts);
+        } catch (RuntimeException $e) {
+            throw new RuntimeException(preg_replace('/^kop_facility_save: /', 'Not saved, the record does not check out: ', $e->getMessage()));
+        }
+    });
+    if (function_exists('kop_facility_pages_flush_index')) {
+        kop_facility_pages_flush_index();
+    }
+    $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
+    kop_ie_purge_url($url);
+    return array('message' => 'Saved.', 'redirect' => $url);
 }
 
 /* ---- Lawsuits, legislation and news rows ------------------------------------- */
