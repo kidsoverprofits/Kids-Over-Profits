@@ -2044,9 +2044,9 @@ Open, in order:
    People screen and an "On air" section on each linked facility or company
    page. Filters: kind, severity, stance. Exact Undo.
    Still open:
-   - Copy kop-pipeline `tmp/podcasts/sftf/proposals.json` to
-     `~/kop-import/podcasts/sftf.json` on the server after the deploy (the
-     queue imports it when the file changes), and again after each `check`.
+   - After each `check`, copy kop-pipeline `tmp/podcasts/<show>/proposals.json`
+     to `~/kop-import/podcasts/<show>.json` on the server (the queue imports
+     it when the file changes; the 5 pilot episodes went up 2026-10-15).
    - Person and program facts are only linked so far; writing them onto the
      records (a staff entry with its role, a program's operator or years) with
      exact Undo, like Woodbury Facts, is the next step.
