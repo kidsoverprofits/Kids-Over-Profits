@@ -295,6 +295,14 @@ function kop_people_admin_person($id) {
     </table>
     <?php endif; ?>
 
+    <?php $pod = function_exists('kop_pod_for_person') ? kop_pod_for_person($id) : array();
+    if ($pod) : ?>
+    <h2>On air</h2>
+    <p class="kop-people__muted">What this person said, or what was said about them, on the industry's podcasts, approved at
+        <a href="<?php echo esc_url(kop_pod_inbox_url()); ?>">Review inbox &gt; Podcast statements</a>. Machine transcripts: listen before quoting.</p>
+    <ul class="kop-people__pod"><?php foreach ($pod as $r) echo kop_pod_line_html($r, false); // Escaped inside. ?></ul>
+    <?php endif; ?>
+
     <h2>Same person as</h2>
     <p>If this person already has another id (a nickname, a maiden name, a misspelling), join this id into it. This id then forwards there.
         Every merge can be undone from <a href="<?php echo esc_url(admin_url('admin.php?page=kop-merge-people')); ?>">Merge People</a>, which also lists the likely pairs.</p>
@@ -330,6 +338,9 @@ function kop_people_admin_styles() {
         .kop-people__bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
         .kop-people__muted { color: var(--kop-text-muted, #4A5568); font-weight: normal; font-size: 0.9em; }
         .kop-people table form { margin: 0; }
+        .kop-people__pod { max-width: 60rem; }
+        .kop-people__pod blockquote { margin: 12px 0 4px; padding-left: 12px; border-left: 3px solid var(--kop-teal, #33A7B5); }
+        .kop-people__pod p { margin: 0 0 8px; }
     </style>
     <?php
 }

@@ -821,8 +821,8 @@
             input = el('input', { id: id, type: 'checkbox' });
             input.checked = !!f.value && f.value !== '0';
         } else if (type === 'facilities') {
-            // Several records: chips, and the facility finder adds one per pick.
-            input = facilitiesInput(id, f.value);
+            // Several records: chips, and the facility finder adds one per pick (f.kinds: companies too, as "company:45").
+            input = facilitiesInput(id, f.value, f.kinds);
         } else {
             input = el('input', { id: id, type: type === 'number' ? 'number' : 'text' });
             input.value = f.value === null || f.value === undefined ? '' : String(f.value);
@@ -858,10 +858,11 @@
         });
     }
 
-    function facilitiesInput(id, value) {
+    function facilitiesInput(id, value, kinds) {
         var box = el('span', { id: id, class: 'rinbox-facilities' });
         var chips = el('span', { class: 'rinbox-facility-chips' });
-        var finder = el('input', { type: 'hidden', 'data-kop-facility-finder': 'multi' });
+        var anyKind = kinds && kinds.length;
+        var finder = el('input', { type: 'hidden', 'data-kop-facility-finder': 'multi', 'data-kop-record-kinds': anyKind ? kinds.join(',') : null });
         var picked = [];
         (Array.isArray(value) ? value : (value ? [value] : [])).forEach(function (v) {
             picked.push(typeof v === 'object' ? { id: String(v.id), name: v.name || ('#' + v.id) } : { id: String(v), name: '#' + v });
@@ -878,7 +879,8 @@
         }
         box.addEventListener('kop-facility-picked', function (e) {
             var f = e.detail || {};
-            if (f.id && !picked.some(function (x) { return x.id === String(f.id); })) picked.push({ id: String(f.id), name: f.name || ('#' + f.id) });
+            var pid = String(anyKind && f.token ? f.token : f.id);
+            if (f.id && !picked.some(function (x) { return x.id === pid; })) picked.push({ id: pid, name: f.name || ('#' + f.id) });
             draw();
         });
         box.appendChild(chips);

@@ -370,6 +370,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             </section>
             <?php endif; ?>
 
+            <?php // Approved podcast statements linked to this company: administrators only (inc/podcast-statements.php).
+            if (function_exists('kop_pod_section_html')) echo kop_pod_section_html('company:' . (int) $page['id']); // Escaped inside. ?>
+
             <?php if ($page['memorials']) : ?>
             <section class="kop-fp-section" id="memorials">
                 <h2>Deaths on record</h2>

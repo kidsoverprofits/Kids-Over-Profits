@@ -283,6 +283,8 @@ require_once get_stylesheet_directory() . '/inc/doc-types.php';
 require_once get_stylesheet_directory() . '/inc/doc-types-admin.php';
 // Rules and practices read from programs' own handbooks (kop-pipeline scripts/doc-text.py), reviewed in the review inbox, on facility pages
 require_once get_stylesheet_directory() . '/inc/program-practices.php';
+// What industry professionals say on their own podcasts (kop-pipeline scripts/podcast-facts.py), reviewed in the review inbox, admins only
+require_once get_stylesheet_directory() . '/inc/podcast-statements.php';
 
 // The pieces a long-form page is assembled from: era header, collapsible
 // section, sources, "Why this matters" - as functions and as shortcodes

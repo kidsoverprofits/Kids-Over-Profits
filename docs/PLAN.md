@@ -2033,11 +2033,23 @@ Open, in order:
    before the rest are read.
 2. Read every batch as the transcriber finishes episodes (`batches` again
    picks up new ones).
-3. A review queue of its own in the theme (Review inbox source
-   `inc/review-inbox/podcasts.php`): each card plays the audio from its time,
-   shows the quote with its context and the attribution, and lets the owner
-   correct the words and the speaker. Facts are matched to records and added
-   with exact Undo, like the other fact queues.
+3. Review queue: built 2026-10-15. Review inbox > **Podcast statements**
+   (`inc/podcast-statements.php`, `inc/review-inbox/podcasts.php`, table
+   `{prefix}kop_podcast_items`). Each card has the words, "Listen at" the
+   quote's second, who said it and how sure. "Approve and link" lets the owner
+   correct the words and link a person id (suggested from the speaker's
+   name; a new full name gets a new id, which Undo removes again) and the
+   programs and companies it is about (suggested by exact name only). Approved
+   items show only to administrators: "On air" on the person's KOP Tools >
+   People screen and an "On air" section on each linked facility or company
+   page. Filters: kind, severity, stance. Exact Undo.
+   Still open:
+   - Copy kop-pipeline `tmp/podcasts/sftf/proposals.json` to
+     `~/kop-import/podcasts/sftf.json` on the server after the deploy (the
+     queue imports it when the file changes), and again after each `check`.
+   - Person and program facts are only linked so far; writing them onto the
+     records (a staff entry with its role, a program's operator or years) with
+     exact Undo, like Woodbury Facts, is the next step.
 4. Owner decisions (2026-10-13): approved statements stay internal, shown
    nowhere public for now; a former participant who later worked in the
    industry is a professional (name, jobs, statements, including about their

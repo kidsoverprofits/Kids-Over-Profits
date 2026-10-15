@@ -880,6 +880,9 @@ get_header();
             </section>
             <?php endif; ?>
 
+            <?php // Approved podcast statements linked to this program: administrators only (inc/podcast-statements.php).
+            if (function_exists('kop_pod_section_html')) echo kop_pod_section_html((string) (int) $page['id']); // Escaped inside. ?>
+
             <?php if ($kop_fp_has_incidents) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('incidents'); ?>"<?php echo $kop_fp_edit('practices', 'critical incidents'); ?>>
                 <h2><?php echo $kop_fp_icon('siren'); ?>Incidents on record</h2>

@@ -723,6 +723,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # e
 # feed mentions + scripts/podcast-vocab/<show>.json (corrections there, 'fix' re-applies); transcripts in tmp/podcasts/, never committed
 (kop-pipeline) py -3.13 scripts/podcast-transcribe.py feed|vocab|run|fix|suspects|status [--show sftf]   # resumable; stops when C: runs low
 (kop-pipeline) python scripts/podcast-facts.py batches|check|status   # facts + industry people's on-air statements, own stream (docs/PLAN.md 3.18)
+# tmp/podcasts/<show>/proposals.json -> ~/kop-import/podcasts/<show>.json -> Review inbox > Podcast statements (inc/podcast-statements.php,
+# {prefix}kop_podcast_items): "Approve and link" fixes the words, links a person id and programs/companies; admins only (People screen, "On air"
+# on the linked pages), exact Undo
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=podcasts
 # Scraper report PDFs stay in link-shared Drive folders; the sync writes only wp-content/uploads/inspection-reports/<st>/index.json of Drive links,
 # linked as "Archived copy" on the state report pages (server CLI + nightly cron; no apply = dry run)
 php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
@@ -807,6 +811,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_woodbury_mentions` - Woodbury Reports pages about a program (article, news item or mention) found by `scripts/woodbury-scan.py`, pending until an admin files them in the program's "Woodbury Reports Mentions" folder
 - `{prefix}kop_media_folder_tags` - Extra folder memberships (one document, many folders)
 - `{prefix}kop_doc_types` / `{prefix}kop_doc_type_suggestions` - What kind of document each attachment is (one row per type, with rule / ai / person / checked) and, for documents the rules could not type, the AI's guess and its review status (`inc/doc-types.php`)
+- `{prefix}kop_podcast_items` - On-air statements and facts read from the industry's podcasts (quote, second, speaker, the whole reader entry), pending until the owner approves one linked to a person id and records (`records`: "123,company:45") or rejects it; admins only (`inc/podcast-statements.php`)
 - `{prefix}kop_program_practices` - One line per rule, level, punishment or limit read from a program's own handbook (its document, page, quote, topic, the checklist boxes it shows), pending until the owner adds it to the facility page or leaves it off (`inc/program-practices.php`)
 - `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
 - `{prefix}kop_business_links` - Which state-registered company (state + document number; files in `js/data/business-filings/<st>/entities/`) shows on a facility or company page (`inc/business-filings.php`)
