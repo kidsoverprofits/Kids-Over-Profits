@@ -2397,9 +2397,12 @@ Open:
    and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. Checked live after deploy:
    https://kidsoverprofits.org/tag/utah/ reads `noindex, follow` and https://kidsoverprofits.org/sitemap_index.xml lists
    no tag sitemap. LiteSpeed's cached copies of other tag pages pick it up as they expire.
-8. **Owner:** verify the site in Google Search Console and Bing Webmaster Tools, submit sitemap_index.xml. Then read
-   which program names bring searchers and which pages Google refused, and adjust the plan from that.
-9. **Owner:** purge the cached /staging/ page (Hosting, item 9 above).
+8. Search Console and Bing Webmaster Tools: verified, sitemap_index.xml submitted by the owner on 2026-10-15. Data needs
+   2-7 days. Then: read which program names bring searchers (Performance, by query and page) and which pages Google
+   refused (Pages > Why pages aren't indexed), and adjust the plan. Search Console can also be connected in Site Kit
+   (installed) so its numbers show in wp-admin.
+9. /staging/: done 2026-10-15. The owner's purge did not reach it (its cache entry carried the deleted staging site's
+   tags, d5d_*); the entry was purged by tag from a one-off script, now removed. /staging/ is a 404 for every visitor.
 10. Lighter pages (2026-10-15, inc/defer-folds.php + js/defer-folds.js, scripts/test-defer-folds.php): the cost was elements,
     not bytes (pages are 43-218 KB compressed; Provo Canyon School had 12,400 elements in <main>). A closed fold's contents
     (older and celebrity/viral news, document subfolders, Unsilenced groups, more findings) now go out in a <template> and
