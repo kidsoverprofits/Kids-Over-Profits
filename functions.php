@@ -256,6 +256,8 @@ require_once get_stylesheet_directory() . '/inc/drive-docs.php';
 require_once get_stylesheet_directory() . '/inc/fornits.php';
 // Which job spent the shared Groq/Gemini free quota, and "Check now" (KOP Tools > AI Usage)
 require_once get_stylesheet_directory() . '/inc/ai-usage.php';
+// The news discovery's daily list (programs with recent trouble + the "Daily news search" switch on each page)
+require_once get_stylesheet_directory() . '/inc/discovery-priority.php';
 // Imports whose name is exactly one record's connect themselves hourly (Woodbury pages, wiki links, Fornits links, State Lists)
 require_once get_stylesheet_directory() . '/inc/auto-connect.php';
 

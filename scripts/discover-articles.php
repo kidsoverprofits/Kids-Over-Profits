@@ -16,9 +16,13 @@
  * to a request, OR'd: Google News matches the article body, so one request
  * covers six programs. Short names (one or two words: "Grafton", "Day One")
  * go one to a request with the state name, as before, because a short name
- * in a body is a street or a surname as often as the program. A cursor in the
- * state file walks the sorted request list, half per run, so the two daily
- * runs cover everything once a day and a run that dies resumes where it was.
+ * in a body is a street or a surname as often as the program. Google blocks
+ * the server after ~180 requests in a row, so a run makes GN_REQUESTS_PER_RUN
+ * at most. The daily list's names (kop/v1/discovery/priority, from
+ * inc/discovery-priority.php: programs with recent trouble, and the owner's
+ * picks) are searched every day, half per run; every other name rotates
+ * through the room left, by its own cursor in the state file, so a run that
+ * dies resumes where it was.
  *
  * A batched hit whose headline names none of the request's programs is not
  * thrown away (the name was in the body, or Google would not have returned
@@ -56,6 +60,7 @@
  *   NEWS_API_BASE          (default: https://kidsoverprofits.org)
  *   AI_PROVIDER            (default: auto - Groq and Gemini take turns)
  *   RSS_REQUEST_DELAY_MS   (default: 1500 — pause between Google News requests)
+ *   GN_REQUESTS_PER_RUN    (default: 140 — Google News requests a run, topics + sweep; Google blocks the IP past ~180)
  *   AI_REQUEST_DELAY_MS    (default: 6000 — pause between AI submissions)
  *   RUN_TIME_BUDGET_MS / GN_TIME_BUDGET_MS  (default: 75 min / 45 min)
  *   REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET  (optional OAuth path)
@@ -105,6 +110,8 @@ define('RECENCY_OVERRIDE', $recencyArg !== false && preg_match('/^\d+[dhm]$/', (
 
 define('API_BASE', rtrim(getenv('NEWS_API_BASE') ?: 'https://kidsoverprofits.org', '/'));
 define('FACILITIES_URL', API_BASE . '/wp-json/kop/v1/facilities');
+// The daily list (inc/discovery-priority.php): names searched every day; the rest rotate.
+define('PRIORITY_URL', API_BASE . '/wp-json/kop/v1/discovery/priority');
 define('AI_ENDPOINT', API_BASE . '/wp-content/themes/child/api/process-news-ai.php');
 define('SUBMIT_ENDPOINT', API_BASE . '/wp-content/themes/child/api/save-news-submission.php');
 
@@ -177,6 +184,12 @@ define('GN_TIME_BUDGET_MS', (int)(getenv('GN_TIME_BUDGET_MS') ?: 45 * 60 * 1000)
 // Once Google News starts returning 503s it usually keeps 503ing that IP for
 // the rest of the run: after this many consecutive failures, try one
 // cool-down, then give up on Google News for the day.
+// Google News blocks the server's IP for more than 17 minutes (and less than
+// 12 hours) after about 180 requests in a row: measured 2026-10-15, 178
+// batched requests at this pace then HTTP 503 for every kind of query. A run
+// makes at most this many Google News requests, topics and sweep together;
+// the sweep takes what the topics leave and its cursor goes on next run.
+define('GN_REQUESTS_PER_RUN', (int)(getenv('GN_REQUESTS_PER_RUN') ?: 140));
 define('GN_MAX_CONSECUTIVE_FAILURES', 12);
 define('GN_COOLDOWN_MS', 120000);
 define('GENERIC_ALIAS_MIN_FACILITIES', 3);
@@ -494,11 +507,13 @@ function load_state(): array {
         // last queried. A version-2 file simply starts the walk at 0.
         if (!isset($s['sweepCursor']) || !is_int($s['sweepCursor']) || $s['sweepCursor'] < 0) $s['sweepCursor'] = 0;
         if (!isset($s['sweptAt']) || !is_array($s['sweptAt'])) $s['sweptAt'] = [];
+        // The daily list's own cursor (2026-10-15); sweepCursor walks the rest.
+        if (!isset($s['priorityCursor']) || !is_int($s['priorityCursor']) || $s['priorityCursor'] < 0) $s['priorityCursor'] = 0;
         $s['version'] = 3;
         return $s;
     }
     return ['version' => 3, 'lastRun' => null, 'seenUrls' => [], 'seenHeadlines' => [], 'rejectedUrls' => [], 'pending' => [],
-        'sweepCursor' => 0, 'sweptAt' => [], 'stats' => ['discovered' => 0, 'submitted' => 0, 'rejected' => 0]];
+        'sweepCursor' => 0, 'priorityCursor' => 0, 'sweptAt' => [], 'stats' => ['discovered' => 0, 'submitted' => 0, 'rejected' => 0]];
 }
 
 function save_state(array $state): void {
@@ -1046,6 +1061,25 @@ function sweep_slice(array $requests, int $cursor, ?int $cap = null): array {
     $slice = [];
     for ($i = 0; $i < $take; $i++) $slice[] = $requests[($cursor + $i) % $total];
     return [$slice, ($cursor + $take) % $total];
+}
+
+/**
+ * This run's requests: the daily list's share first (half of it per run with
+ * two runs a day, from its own cursor), then the rotation from its cursor,
+ * taking all the room left under $cap. Each request carries 'list' (daily /
+ * rotation) and 'next', the cursor once it has been answered.
+ */
+function plan_sweep(array $daily, array $rotation, int $dailyCursor, int $rotationCursor, int $cap): array {
+    $slice = [];
+    foreach (sweep_slice($daily, $dailyCursor, $cap)[0] as $i => $req) {
+        $slice[] = $req + ['list' => 'daily', 'next' => ($dailyCursor + $i + 1) % count($daily)];
+    }
+    $take = min(max(0, $cap - count($slice)), count($rotation));
+    for ($i = 0; $i < $take; $i++) {
+        $slice[] = $rotation[($rotationCursor + $i) % count($rotation)]
+            + ['list' => 'rotation', 'next' => ($rotationCursor + $i + 1) % count($rotation)];
+    }
+    return $slice;
 }
 
 // ============================================================
@@ -1992,13 +2026,37 @@ function main(): void {
     $sweepIndex = [];                                   // name key => indices into $facilityIndex
     $sweepCounts = ['batch' => 0, 'single' => 0];
     foreach ($sweepLines as $l) { $sweepIndex[$l['key']] = $l['entries']; $sweepCounts[$l['mode']]++; }
-    $sweepRequests = build_sweep_requests($sweepLines);
-    $cursorStart = (int)$state['sweepCursor'];
-    $slice = NO_FACILITIES ? [] : sweep_slice($sweepRequests, $cursorStart, MAX_FACILITIES)[0];
-    $cursorStart = count($sweepRequests) ? $cursorStart % count($sweepRequests) : 0;
-    kop_log('  sweep: ' . count($sweepLines) . " names ({$sweepCounts['batch']} batched " . GN_BATCH_SIZE . " to a request, {$sweepCounts['single']} single) in "
-        . count($sweepRequests) . ' requests; this run: ' . count($slice) . " from request {$cursorStart}"
-        . (NO_FACILITIES ? ' (--no-facilities)' : (MAX_FACILITIES ? ' (--max-facilities)' : ' (1/' . SWEEP_RUNS_PER_DAY . ' of the list)'))
+    // The daily list's names are searched every day (half each run), first;
+    // every other name rotates through what the run has left.
+    $priorityKeys = [];
+    $priorityRecords = 0;
+    if (!NO_FACILITIES) {
+        try {
+            $pj = fetch_json(PRIORITY_URL, ['timeoutMs' => 60000, 'headers' => ['X-KOP-Internal' => kop_internal_token('discovery')]]);
+            foreach (($pj['names'] ?? []) as $n) {
+                $k = normalize_name((string)$n);
+                if ($k !== '') $priorityKeys[$k] = true;
+            }
+            $priorityRecords = (int)($pj['records'] ?? 0);
+        } catch (Throwable $e) {
+            kop_warn('  ! daily list unavailable (' . $e->getMessage() . '): every name rotates this run');
+        }
+    }
+    $priorityLines = array_values(array_filter($sweepLines, static fn($l) => isset($priorityKeys[$l['key']])));
+    $restLines = array_values(array_filter($sweepLines, static fn($l) => !isset($priorityKeys[$l['key']])));
+    $priorityRequests = build_sweep_requests($priorityLines);
+    $sweepRequests = build_sweep_requests($restLines);
+    $cursorStart = count($sweepRequests) ? (int)$state['sweepCursor'] % count($sweepRequests) : 0;
+    $priorityStart = count($priorityRequests) ? (int)$state['priorityCursor'] % count($priorityRequests) : 0;
+    $gnLeft = max(0, GN_REQUESTS_PER_RUN - (NO_TOPICS ? 0 : count($queries['topicQueries'])));
+    $cap = MAX_FACILITIES !== null ? min(MAX_FACILITIES, $gnLeft) : $gnLeft;
+    $slice = NO_FACILITIES ? [] : plan_sweep($priorityRequests, $sweepRequests, $priorityStart, $cursorStart, $cap);
+    $dailyInSlice = count(array_filter($slice, static fn($r) => $r['list'] === 'daily'));
+    kop_log('  sweep: ' . count($sweepLines) . " names ({$sweepCounts['batch']} batched " . GN_BATCH_SIZE . " to a request, {$sweepCounts['single']} single); "
+        . 'daily list: ' . $priorityRecords . ' records, ' . count($priorityLines) . ' names in ' . count($priorityRequests) . ' requests; '
+        . 'rotation: ' . count($restLines) . ' names in ' . count($sweepRequests) . ' requests; '
+        . 'this run: ' . count($slice) . " ({$dailyInSlice} daily from {$priorityStart}, " . (count($slice) - $dailyInSlice) . " rotation from {$cursorStart})"
+        . (NO_FACILITIES ? ' (--no-facilities)' : (MAX_FACILITIES ? ' (--max-facilities)' : ' (at most ' . GN_REQUESTS_PER_RUN . ' Google News requests a run)'))
         . ', window ' . ($queries['facilityBatchRecency'] ?: 'none'));
 
     // Counters accumulated across every submit batch in this run.
@@ -2443,7 +2501,7 @@ function main(): void {
             if (!$r['failed']) {
                 $requestsDone[$req['mode']]++;
                 foreach ($req['lines'] as $l) { $state['sweptAt'][$l['key']] = $today; $namesSwept++; }
-                $state['sweepCursor'] = ($cursorStart + $i + 1) % $total;
+                if ($req['list'] === 'daily') $state['priorityCursor'] = $req['next']; else $state['sweepCursor'] = $req['next'];
             }
             if (count($r['items']) > 0) {
                 kop_log('  [' . $r['items'][0]['facilityQuery'] . ($req['mode'] === 'single' && $req['lines'][0]['state'] !== '' ? ' / ' . $req['lines'][0]['state'] : '') . '] ' . count($r['items']) . ' items');
@@ -2476,7 +2534,8 @@ function main(): void {
     kop_log("\n--- Done ---");
     kop_log('  sweep requests:      ' . ($requestsDone['batch'] + $requestsDone['single']) . '/' . count($slice)
         . " ({$requestsDone['batch']} batched, {$requestsDone['single']} single), {$namesSwept} of " . count($sweepLines)
-        . " names; cursor {$cursorStart} -> {$state['sweepCursor']} of {$total}");
+        . " names; daily list {$priorityStart} -> {$state['priorityCursor']} of " . count($priorityRequests)
+        . "; rotation {$cursorStart} -> {$state['sweepCursor']} of {$total}");
     kop_log("  topic items:         {$topicCandidates}");
     kop_log("  candidates found:    {$totals['candidates']}");
     kop_log("  accepted by filter:  {$totals['accepted']}" . ($totals['pendingAttribution'] ? " ({$totals['pendingAttribution']} awaiting AI confirmation)" : ''));

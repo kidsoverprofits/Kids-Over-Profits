@@ -428,9 +428,14 @@ php api/check-record-statuses.php [--kind=bill --ids=19] [apply]   # on the serv
 # News discovery (scripts/discover-articles.php, cPanel cron 01:30 + 13:30 Central, docs/news-processor/README.md): r/troubledteens, Google News
 # topic queries, then the facility sweep: every record and every name it has had (closed too), distinctive names several to one Google News
 # request (<= 16 words of names, when: first; Google reads ~32 words), short names one to a request with the state; a cursor in
-# scripts/.discovery-state.json walks the sorted list (2,865 requests; a run's 45 min covers ~1,000, a full pass is ~3 runs). A batched hit naming no program in its headline is confirmed by the AI
+# scripts/.discovery-state.json walks the sorted list. Google blocks the server's IP after ~180 searches in a row (measured 2026-10-15: >17 min, <12 h), so a
+# run makes GN_REQUESTS_PER_RUN (140) at most, topics included. The daily list (inc/discovery-priority.php, kop/v1/discovery/priority: open programs
+# with approved news or a serious finding in 3 years or a published lawsuit, plus the "Daily news search" switch in each facility/company page's
+# admin toolbar, option kop_discovery_priority) is searched every day, half a run, first; every other name rotates through the room left (plan_sweep(),
+# its own cursor; ~3 weeks a pass). A batched hit naming no program in its headline is confirmed by the AI
 # step (<= 30 a run) before it is submitted, else logged batch-unconfirmed (Review inbox > Scraper finds). Terms in scripts/discovery-queries.json
-php scripts/test-discovery-sweep.php              # offline: names, batches, cursor, filter on real headlines, AI confirmation
+php scripts/test-discovery-sweep.php              # offline: names, batches, cursor, daily list + rotation, filter on real headlines, AI confirmation
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-discovery-priority.php [--list]   # the daily list's rule and switches on tmp/prod.sqlite
 php scripts/discover-articles.php --dry-run --max-facilities 40 --no-topics   # against the live API, submits nothing (local php needs -d curl.cainfo=)
 # Facilities the news mentions that have no record (inc/facility-discovery.php): the hourly scan creates
 # them from the article, or links a known one; KOP Tools > Facilities from News to remove or create by hand

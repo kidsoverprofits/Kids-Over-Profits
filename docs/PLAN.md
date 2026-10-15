@@ -1918,12 +1918,20 @@ Open:
    from midnight Pacific; KOP_AI_DAILY_GEMINI / _GROQ / KOP_AI_BACKGROUND_SHARE)
    and go on after midnight; discovery and anything by hand never wait.
    After a week: read AI Usage for the real daily ceilings (the first "out of
-   quota" of a day) and set the two numbers from them. Open: (c) Google News 503s
-   ended Google News early (24 failures, then "abandoning") on the night
-   runs of 10-03 to 10-06, 10-14 and 10-15 (sweep stopped at 170 of 1,455
-   requests last night); the three sweep runs so far covered 97-146
-   requests each, not ~1,000, so a full pass takes weeks at this rate.
-   Check tonight's log that the 34 carried candidates went through.
+   quota" of a day) and set the two numbers from them. (c) Google News 503s:
+   measured 2026-10-15 from the server, 178 batched searches at the cron's
+   pace, then HTTP 503 for batched and single-name searches alike for 17+
+   minutes (probe stopped there; cleared by the next 12-hourly run). Done
+   2026-10-15: a run makes at most GN_REQUESTS_PER_RUN = 140 Google searches;
+   the owner's daily list (inc/discovery-priority.php: open programs with
+   news or a serious finding in 3 years, or a lawsuit; "Daily news search"
+   switch on each page) is searched every day, the rest rotate (~3 weeks).
+   After deploy: tonight's log shows "daily list: N records" and no 503s;
+   if 503s still come, lower GN_REQUESTS_PER_RUN in the crontab env.
+   Open: whether the block lifts within an hour (one search at 14:46 and
+   15:46 UTC, 2026-10-15); if it does, an hourly sweep-only cron line would
+   bring the rotation to a day or two (owner's crontab). Check tonight's
+   log that the 34 carried candidates went through.
 6. Declined for now (owner, 2026-10-13): a weekly GDELT full-text pass
    (`scripts/backfill-articles.js` has the query shape; GDELT throttled
    probes from here at one request per 5 seconds) and Bing News (returned

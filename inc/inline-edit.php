@@ -2385,13 +2385,13 @@ function kop_ie_page_refs() {
         $fid = (int) $GLOBALS['kop_facility_page']['id'];
         $refs[] = array('ref' => 'facility:' . $fid . ':all', 'label' => 'Every field of this facility');
         $refs[] = array('ref' => 'facility:' . $fid . ':raw', 'label' => 'Whole record (JSON)');
-        return $refs;
+        return apply_filters('kop_ie_page_refs', $refs);
     }
     if (!empty($GLOBALS['kop_operator_page']['id'])) {
         $oid = (int) $GLOBALS['kop_operator_page']['id'];
         $refs[] = array('ref' => 'operator:' . $oid . ':all', 'label' => 'Every field of this company');
         $refs[] = array('ref' => 'operator:' . $oid . ':raw', 'label' => 'Whole record (JSON)');
-        return $refs;
+        return apply_filters('kop_ie_page_refs', $refs);
     }
     if (is_singular()) {
         $id = get_queried_object_id();

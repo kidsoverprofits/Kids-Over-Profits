@@ -124,6 +124,26 @@ check('--max-facilities caps the requests', count($s4) === 2 && $c4 === 5);
 list($s5) = sweep_slice(array(), 7);
 check('an empty list is fine', $s5 === array());
 
+/* ---- Daily list + rotation (plan_sweep) ------------------------------- */
+
+$daily = array_slice($ten, 0, 6);
+$rot = array_fill(0, 40, array('mode' => 'batch', 'lines' => array()));
+foreach ($rot as $i => &$r) $r['n'] = 100 + $i;
+unset($r);
+$p = plan_sweep($daily, $rot, 0, 38, 12);
+$lists = array_count_values(array_column($p, 'list'));
+check('daily list first, half of it a run', array_slice(array_column($p, 'list'), 0, 3) === array('daily', 'daily', 'daily') && ($lists['daily'] ?? 0) === 3);
+check('the rotation takes all the room left', ($lists['rotation'] ?? 0) === 9 && count($p) === 12);
+check('rotation wraps and carries its next cursor', $p[3]['n'] === 138 && $p[5]['n'] === 100 && $p[3]['next'] === 39 && $p[5]['next'] === 1);
+check('daily cursor carried', $p[2]['next'] === 3);
+$p2 = plan_sweep($daily, $rot, 3, 7, 12);
+check('the next run takes the other half of the daily list', $p2[0]['n'] === 3 && $p2[2]['next'] === 0);
+$p3 = plan_sweep(array(), $rot, 0, 0, 5);
+check('no daily list: the rotation alone', count($p3) === 5 && $p3[0]['list'] === 'rotation');
+$p4 = plan_sweep($daily, $rot, 0, 0, 2);
+check('a small cap is spent on the daily list first', count($p4) === 2 && $p4[1]['list'] === 'daily');
+check('the cap counts topics: 140 a run, 28 topics leave 112', GN_REQUESTS_PER_RUN === 140);
+
 /* ---- State file upgrade ----------------------------------------------- */
 
 $tmp = tempnam(sys_get_temp_dir(), 'kopstate');
