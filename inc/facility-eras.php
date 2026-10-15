@@ -648,6 +648,9 @@ if (!function_exists('kop_facility_eras_build')) {
                 'status'    => ($i < count($chain) - 1) ? (string) ($era['status'] ?? '') : '',
                 // The pencil ref of an earlier name saved on this record (kop_ie_era_load() in inc/inline-edit.php).
                 'edit'      => isset($era['merged']) ? 'era:' . $facility_id . ':' . $era['merged'] : '',
+                // An earlier name filed as closed (its status, or a "Closed in ..." note): offers "Renamed, not closed".
+                'closed'    => isset($era['merged']) && $i < count($chain) - 1 && (($era['status'] ?? '') === 'Closed' || (function_exists('kop_ie_era_closure_note')
+                    && array_filter((array) ($era['notes'] ?? array()), 'kop_ie_era_closure_note'))),
                 'notes'     => ($i < count($chain) - 1 && function_exists('kop_facility_pages_clean_notes')) ? kop_facility_pages_clean_notes($era['notes'] ?? array()) : array_values((array) ($era['notes'] ?? array())),
             );
             foreach ($kinds as $kind) $entry[$kind] = array();

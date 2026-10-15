@@ -774,6 +774,10 @@ get_header();
             <section class="kop-fp-section kop-fp-era" id="<?php echo esc_attr($kop_fp_era['id']); ?>"<?php echo (!empty($kop_fp_era['edit']) && function_exists('kop_ie_attr')) ? kop_ie_attr($kop_fp_era['edit'], 'this earlier name') : ''; ?>>
                 <h2><span class="kop-fp-era-as">As</span> <?php echo esc_html($kop_fp_era['name']); ?></h2>
                 <?php if ($kop_fp_era_meta) : ?><p class="kop-fp-era-meta"><?php echo esc_html(implode(' | ', $kop_fp_era_meta)); ?></p><?php endif; ?>
+                <?php if (!empty($kop_fp_era['closed']) && function_exists('kop_ie_can') && kop_ie_can()) : ?>
+                <p><button type="button" class="kop-ie-mini kop-ie-quick" data-kop-quick="<?php echo esc_attr('erarename:' . substr($kop_fp_era['edit'], 4)); ?>"
+                    data-kop-quick-confirm="<?php echo esc_attr($kop_fp_era['name'] . ' was renamed ' . $page['name'] . ', not closed? Its closing becomes the rename, in the same year.'); ?>">Renamed, not closed</button></p>
+                <?php endif; ?>
                 <?php if ($kop_fp_era['url'] !== '') : ?><p class="kop-fp-count"><a href="<?php echo esc_url($kop_fp_era['url']); ?>">The record kept under this name</a></p><?php endif; ?>
                 <?php if ($kop_fp_era_notes) : ?>
                 <div class="kop-fp-era-notes"><?php echo kop_pnotes_html(kop_pnotes_build(array_map('strval', $kop_fp_era_notes))); // Escaped inside. ?></div>

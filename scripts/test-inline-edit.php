@@ -203,6 +203,42 @@ if ($fid) {
     $check('unticked becomes false, custom entries kept', ($out4['philosophy']['has12Steps'] ?? null) === false && !empty($out4['philosophy']['customPhilosophy']));
 }
 
+echo "-- An earlier name filed as closed becomes a rename (erarename) --\n";
+$era_n = $era_ok = 0;
+$era_bad = array();
+foreach ($pdo->query("SELECT id, json_data FROM facilities_v2 WHERE json_data LIKE '%laterName%' ORDER BY id") as $row) {
+    $d = json_decode((string) $row['json_data'], true);
+    foreach ((array) ($d['legacy']['mergedFacilities'] ?? array()) as $at => $m) {
+        if (!is_array($m['rename'] ?? null)) continue;
+        $closed = ($m['rename']['status'] ?? '') === 'Closed' || array_filter((array) ($m['rename']['notes'] ?? array()), 'kop_ie_era_closure_note');
+        if (!$closed) continue;
+        $era_n++;
+        try {
+            list($d2, $m2, $before, $r) = kop_ie_era_renamed($d, $at);
+            $out = kop_facility_normalize($d2, array('facility_id' => $d['facility_id'] ?? (int) $row['id'], 'unique_name' => $d['provenance']['uniqueName'] ?? ''));
+            $kept = $out['legacy']['mergedFacilities'][$at]['rename'] ?? array();
+            $ok = !isset($kept['status']) && !array_filter((array) ($kept['notes'] ?? array()), 'kop_ie_era_closure_note')
+                && (int) ($kept['year'] ?? 0) > 0 && count((array) ($kept['notes'] ?? array())) === count((array) ($before['notes'] ?? array()))
+                && ($kept['facts'] ?? null) == ($before['facts'] ?? null);
+            if ($ok) $era_ok++; elseif (count($era_bad) < 5) $era_bad[] = '#' . $row['id'] . ' ' . json_encode($kept);
+            if ((int) $row['id'] === 10618) {
+                $check('San Marcos: the closing note reads as the rename, citation kept', ($kept['notes'][0] ?? '') === 'Renamed San Marcos Treatment Center in 2005 (r/troubledteens wiki, page "Brown Schools Inc." (as of 2026-01-07): https://www.reddit.com/r/troubledteens/wiki/index)', (string) ($kept['notes'][0] ?? ''));
+                if (function_exists('kop_pnotes_html')) {
+                    $text = trim(strip_tags(kop_pnotes_html(kop_pnotes_build($kept['notes']))));
+                    $check('San Marcos: printed as renamed, not closed', stripos($text, 'renamed San Marcos Treatment Center in 2005') !== false && stripos($text, 'closed') === false, $text);
+                }
+            }
+        } catch (Throwable $e) {
+            if (count($era_bad) < 5) $era_bad[] = '#' . $row['id'] . ' ' . $e->getMessage();
+        }
+    }
+}
+$check("$era_n earlier names filed as closed become renames", $era_n > 0 && $era_ok === $era_n, implode('; ', $era_bad));
+$check('Renamed, not closed: the button refs resolve', kop_ie_resolve('erarename:10618:0')[0]['save'] === 'kop_ie_erarename_save' && kop_ie_resolve('eraundo:x')[0]['save'] === 'kop_ie_eraundo_save');
+$threw = false;
+try { kop_ie_era_renamed(array('legacy' => array('mergedFacilities' => array(array('name' => 'X', 'rename' => array('year' => 2001, 'notes' => array('A note.')))))), 0); } catch (RuntimeException $e) { $threw = true; }
+$check('a name nothing says closed is refused', $threw);
+
 echo "-- Every parent company sent back unchanged --\n";
 $ops = $changed = 0;
 $examples = array();

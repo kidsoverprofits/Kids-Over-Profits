@@ -177,6 +177,8 @@ function kop_ie_sources() {
         'facility' => array('load' => 'kop_ie_facility_load', 'save' => 'kop_ie_facility_save'),
         'fstatus'  => array('load' => 'kop_ie_fstatus_load', 'save' => 'kop_ie_fstatus_save'),
         'era'      => array('load' => 'kop_ie_era_load', 'save' => 'kop_ie_era_save'),
+        'erarename' => array('load' => 'kop_ie_erarename_load', 'save' => 'kop_ie_erarename_save'),
+        'eraundo'  => array('load' => 'kop_ie_eraundo_load', 'save' => 'kop_ie_eraundo_save'),
         'rec'     => array('load' => 'kop_ie_rec_load', 'save' => null),
         'cfg'      => array('load' => 'kop_ie_cfg_load', 'save' => 'kop_ie_cfg_save'),
         'operator' => array('load' => 'kop_ie_operator_load', 'save' => 'kop_ie_operator_save'),
@@ -1035,6 +1037,130 @@ function kop_ie_era_save(array $p, array $v) {
     $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
     kop_ie_purge_url($url);
     return array('message' => 'Saved.', 'redirect' => $url);
+}
+
+/** A note filing an earlier name as closed: "Closed in 2005 (sets status Closed, end year 2005) (source)". */
+function kop_ie_era_closure_note($note) {
+    return is_string($note) && preg_match('/^\s*(?:it\s+)?closed\b/i', $note);
+}
+
+/**
+ * erarename:<facility id>:<n>, save only: the earlier name was renamed, not
+ * closed. Its status goes, each "Closed in <year>" note becomes "Renamed <later
+ * name> in <year>" (citation kept), and the closing year is the rename year.
+ * The entry as it was is kept for eraundo:<token>.
+ */
+/**
+ * The document with its n-th earlier name filed as renamed, not closed:
+ * array(doc, entry after, rename before, rename after). Throws when nothing
+ * says the name closed.
+ */
+function kop_ie_era_renamed(array $doc, $i) {
+    $m = kop_ie_era_entry($doc, $i);
+    $before = $m['rename'];
+    $r = $before;
+    $later = trim((string) ($r['laterName'] ?? '')) ?: trim((string) ($doc['identification']['name'] ?? ''));
+    $year = 0;
+    $notes = array();
+    foreach ((array) ($r['notes'] ?? array()) as $note) {
+        if (kop_ie_era_closure_note($note) && preg_match('/^\s*(?:it\s+)?closed\b(?:\s+(?:in|by|around|about))?\s*(\d{4})?\s*(.*)$/is', $note, $mm)) {
+            $y = (int) ($mm[1] ?? 0);
+            if ($y && !$year) {
+                $year = $y;
+            }
+            $rest = preg_replace('/^\s*\(sets status [^)]*\)\s*/i', '', (string) $mm[2]);
+            $note = 'Renamed ' . $later . ($y ? ' in ' . $y : '') . ($rest !== '' ? ' ' . $rest : '');
+        }
+        $notes[] = $note;
+    }
+    if (!$year && ($r['status'] ?? '') === 'Closed') {
+        $year = (int) ($r['endYear'] ?? 0);
+    }
+    if (!$year && ($r['status'] ?? '') !== 'Closed') {
+        throw new RuntimeException('Nothing here says this name closed.');
+    }
+    unset($r['status']);
+    $r['notes'] = $notes;
+    if ($year) {
+        $r['year'] = $year;
+        $r['endYear'] = $year;
+        if ((int) ($r['startYear'] ?? 0) > $year) {
+            unset($r['startYear']);
+        }
+    }
+    $m['rename'] = $r;
+    $doc['legacy']['mergedFacilities'][$i] = $m;
+    return array($doc, $m, $before, $r);
+}
+
+function kop_ie_erarename_load(array $p) {
+    throw new RuntimeException('This button saves at once; there is nothing to open.');
+}
+
+function kop_ie_erarename_save(array $p, array $v) {
+    $fid = (int) ($p[0] ?? 0);
+    $i = (int) ($p[1] ?? -1);
+    $opts = kop_ie_facility_opts();
+    $token = '';
+    kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $i, $opts, &$token) {
+        $stored = kop_facility_load($fid, $opts);
+        if (!$stored) {
+            throw new RuntimeException("Facility #{$fid} does not exist.");
+        }
+        list($doc, $m, $before, $r) = kop_ie_era_renamed($stored['doc'], $i);
+        $out = kop_facility_normalize($doc, array('facility_id' => $doc['facility_id'] ?? $fid, 'unique_name' => $stored['unique_name']));
+        kop_facility_save($out, $opts);
+        $token = wp_generate_password(12, false);
+        $log = get_option('kop_ie_era_undo', array());
+        $log = is_array($log) ? array_slice($log, -49, null, true) : array();
+        $log[$token] = array('fid' => $fid, 'i' => $i, 'name' => (string) $m['name'], 'rename' => $before, 'after' => $out['legacy']['mergedFacilities'][$i]['rename'] ?? $r, 'at' => gmdate('c'), 'by' => kop_ie_who());
+        update_option('kop_ie_era_undo', $log, false);
+    });
+    if (function_exists('kop_facility_pages_flush_index')) {
+        kop_facility_pages_flush_index();
+    }
+    $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
+    kop_ie_purge_url($url);
+    return array('message' => 'Filed as a rename, not a closing.', 'redirect' => $url, 'undo' => 'eraundo:' . $token);
+}
+
+function kop_ie_eraundo_load(array $p) {
+    throw new RuntimeException('This button saves at once; there is nothing to open.');
+}
+
+/** Puts the entry back as it was before "Renamed, not closed", unless it has been edited since. */
+function kop_ie_eraundo_save(array $p, array $v) {
+    $token = (string) ($p[0] ?? '');
+    $log = get_option('kop_ie_era_undo', array());
+    $e = is_array($log) ? ($log[$token] ?? null) : null;
+    if (!is_array($e)) {
+        throw new RuntimeException('There is nothing to undo.');
+    }
+    $fid = (int) $e['fid'];
+    $opts = kop_ie_facility_opts();
+    kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $e, $opts) {
+        $stored = kop_facility_load($fid, $opts);
+        if (!$stored) {
+            throw new RuntimeException("Facility #{$fid} does not exist.");
+        }
+        $doc = $stored['doc'];
+        $i = (int) $e['i'];
+        $m = kop_ie_era_entry($doc, $i);
+        if ((string) $m['name'] !== $e['name'] || $m['rename'] != $e['after']) {
+            throw new RuntimeException('This earlier name has been changed since; edit it with its pencil instead.');
+        }
+        $m['rename'] = $e['rename'];
+        $doc['legacy']['mergedFacilities'][$i] = $m;
+        kop_facility_save(kop_facility_normalize($doc, array('facility_id' => $doc['facility_id'] ?? $fid, 'unique_name' => $stored['unique_name'])), $opts);
+    });
+    unset($log[$token]);
+    update_option('kop_ie_era_undo', $log, false);
+    if (function_exists('kop_facility_pages_flush_index')) {
+        kop_facility_pages_flush_index();
+    }
+    $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
+    kop_ie_purge_url($url);
+    return array('message' => 'Undone: filed as closed again.', 'redirect' => $url);
 }
 
 /* ---- Lawsuits, legislation and news rows ------------------------------------- */
