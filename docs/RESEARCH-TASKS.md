@@ -396,6 +396,16 @@ past names or an operator. The fixes go to Review inbox > Data audit as proposal
 - **Spelling.** Thielbahr (Woodbury, NATSAP) vs Theilbar (AP) vs Thielbar (state list): one family, which spelling
   do records use.
 
+### Arizona Boys Ranch became Canyon State Academy: which year (found 2026-10-15)
+
+Canyon State Academy (9605)'s page heads its earlier name "Arizona Boys Ranch (1949 to 1998)", so the map's rename
+year is 1998. HEAL's staff list for Canyon State Academy ([archived](https://web.archive.org/web/20250719184730/https://heal-online.org/canyon.html))
+says "In March of 2000, Arizona Boys Ranch changed its name to Canyon State Academy"; the same page quotes the
+Arizona Republic ([2020-01-23](https://www.azcentral.com/story/news/local/pinal/2020/01/23/17-year-old-canyon-state-academy-student-dies/4558938002/))
+saying April 2000. 1998 is the year of Nicholaus Contreraz's death, which the rename followed. To do: find the
+rename date in a 2000 newspaper or the Arizona Corporation Commission's filing for the nonprofit, then set the year at
+KOP Tools > Map Renames (the record's note already says March 2000, per HEAL).
+
 ### Related-industry pages (found 2026-10-08)
 
 - The Joint Commission complaint number (1-800-994-6610) came from a search summary.
