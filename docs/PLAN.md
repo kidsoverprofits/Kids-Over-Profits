@@ -482,6 +482,12 @@ inactive; the owner is not concerned). Never trash, rename or re-slug
 
 Open:
 
+- **Review inbox dropdowns and quick load (2026-10-15)**: after deploy, open the inbox on the live
+  site: the page and its group dropdowns should be up in a second or two, the counts filling in
+  afterwards (Inspection links ~10 s, Duplicate facilities ~4 s cold). Approving an item
+  recounts only that queue. If a count stays at "...", check the review-inbox/counts request
+  in the browser's network tab. The cron `kop_review_inbox_counts_cron` (every 10 min) should
+  appear in WP-Cron after the first page load.
 - **Page and post drafts in the Review inbox (2026-10-14)**: after deploy, open Review inbox >
   Page and post drafts on the live site: the Preview frame shows a draft while signed in,
   Publish then Back to draft (or Undo in Recently done) brings back the old dates, Schedule
@@ -1892,7 +1898,25 @@ Open:
    there (it keeps the request's names in "Searched for"); worth a one-click
    "It is about <name>" that files it with that attribution, once the
    measurement says such rows exist.
-5. Declined for now (owner, 2026-10-13): a weekly GDELT full-text pass
+5. **Night run of 2026-10-15 "failed" (found 2026-10-15).** It finished, but
+   both AI providers were out of their daily quota (Gemini "exceeded your
+   current quota", Groq 429): 0 submitted, 34 carried to the next run.
+   Cause: Document Types' AI backlog was drained in one go on 2026-10-14
+   (741 calls 16:00-17:00 Central, 994 that day, against its hourly 12),
+   inside the same Gemini day (resets 00:00 Pacific = 07:00 UTC, so the
+   01:30 Central run is the last half hour of it). Backlog is now 0, so it
+   should not repeat. Open: (a) the exit-1 rule (`submitErrors > 0` and 0
+   submitted) also fires on nights whose only errors are unreadable pages
+   or a rate limit carried over (10-12, 10-13, 10-15), so the cron mails
+   "failed" for runs that lost nothing; count only real failures. (b) a
+   shared daily AI budget, so a backfill (doc types, Fornits, summaries)
+   leaves calls for discovery; `kop_fornits_caps()` still says "nothing
+   else on the site uses" Gemini, no longer true. (c) Google News 503s
+   ended the sweep at 170 of 1,455 requests on every night run since
+   10-03 (24 failures, then "abandoning"), so the sweep covers ~150
+   requests a run, not ~1,000; the full pass is ~10 days, not 1.5.
+   Check tonight's log that the 34 carried candidates went through.
+6. Declined for now (owner, 2026-10-13): a weekly GDELT full-text pass
    (`scripts/backfill-articles.js` has the query shape; GDELT throttled
    probes from here at one request per 5 seconds) and Bing News (returned
    nothing for a known story).
