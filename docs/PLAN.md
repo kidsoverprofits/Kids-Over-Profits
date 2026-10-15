@@ -1912,9 +1912,10 @@ Open:
    shared daily AI budget, so a backfill (doc types, Fornits, summaries)
    leaves calls for discovery; `kop_fornits_caps()` still says "nothing
    else on the site uses" Gemini, no longer true. (c) Google News 503s
-   ended the sweep at 170 of 1,455 requests on every night run since
-   10-03 (24 failures, then "abandoning"), so the sweep covers ~150
-   requests a run, not ~1,000; the full pass is ~10 days, not 1.5.
+   ended Google News early (24 failures, then "abandoning") on the night
+   runs of 10-03 to 10-06, 10-14 and 10-15 (sweep stopped at 170 of 1,455
+   requests last night); the three sweep runs so far covered 97-146
+   requests each, not ~1,000, so a full pass takes weeks at this rate.
    Check tonight's log that the 34 carried candidates went through.
 6. Declined for now (owner, 2026-10-13): a weekly GDELT full-text pass
    (`scripts/backfill-articles.js` has the query shape; GDELT throttled
