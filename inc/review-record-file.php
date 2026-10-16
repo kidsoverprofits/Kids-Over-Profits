@@ -142,6 +142,14 @@ function kop_rinbox_file_on_record($value, array $p, $reviewer = '') {
             'message' => 'Put it on ' . kop_rinbox_record_words($kind, $name) . '.');
     }
 
+    // A website of a consultant, transporter, marketer or trade organization: its websites list.
+    if ($what === 'website' && $url !== '' && in_array($kind, kop_rinbox_record_website_kinds(), true)) {
+        $done = kop_rinbox_record_websites($kind, $id, $url, true);
+        if (!$done) throw new RuntimeException('That link is already on ' . kop_rinbox_record_words($kind, $name) . '.');
+        return array('kind' => $kind, 'id' => $id, 'name' => $name, 'what' => 'website', 'url' => $url,
+            'message' => 'Put the link on ' . kop_rinbox_record_words($kind, $name) . ' (its websites).');
+    }
+
     // Companies (notes) and every other kind: one line in the record's notes.
     $line = kop_rinbox_record_note_line($p);
     $done = kop_wbc_add_notes($kind, $id, array($line));
@@ -167,6 +175,10 @@ function kop_rinbox_unfile_from_record(array $done) {
         kop_rinbox_record_changed('company', $id);
         return;
     }
+    if ($what === 'website' && in_array($kind, kop_rinbox_record_website_kinds(), true)) {
+        kop_rinbox_record_websites($kind, $id, (string) $done['url'], false);
+        return;
+    }
     if ($kind === 'ya' && !empty($done['ya_done'])) {
         kop_rdest_take_back_young_adult((array) $done['ya_done']);
         return;
@@ -179,6 +191,57 @@ function kop_rinbox_unfile_from_record(array $done) {
         kop_wbc_remove_notes($kind, $id, (array) $done['lines']);
         if ($kind === 'company') kop_rinbox_record_changed('company', $id);
     }
+}
+
+/** The kinds besides companies and young adult programs that keep a websites list. */
+function kop_rinbox_record_website_kinds() {
+    return array('consultant', 'transporter', 'marketer', 'tradeorg');
+}
+
+/**
+ * Add $url to (or take it off) the websites list of a consultant, transporter,
+ * marketer or trade organization: the list beside the record's notes
+ * (kop_wbc_note_paths()). Consultants and transporters keep {url, displayText},
+ * marketers and trade organizations plain addresses. True when it changed.
+ */
+function kop_rinbox_record_websites($kind, $id, $url, $add) {
+    $pdo = kop_wbc_pdo();
+    list($table, $id, , $payload) = kop_wbc_load_record($pdo, $kind, $id);
+    $key = kop_gdl_url_key($url);
+    $changed = false;
+    foreach (kop_wbc_note_paths($kind, $payload) as $path) {
+        array_pop($path);
+        $ref = &$payload;
+        foreach ($path as $k) {
+            if (!is_array($ref)) $ref = array();
+            if (!array_key_exists($k, $ref)) $ref[$k] = array();
+            $ref = &$ref[$k];
+        }
+        if (!is_array($ref)) $ref = array();
+        $list = is_array($ref['websites'] ?? null) ? array_values($ref['websites']) : array();
+        $url_of = function ($w) { return is_array($w) ? (string) ($w['url'] ?? '') : (string) $w; };
+        $at = false;
+        foreach ($list as $i => $w) {
+            if ($url_of($w) !== '' && kop_gdl_url_key($url_of($w)) === $key) { $at = $i; break; }
+        }
+        $single = trim((string) ($ref['website'] ?? ''));
+        if ($add) {
+            if ($at !== false || ($single !== '' && kop_gdl_url_key($single) === $key)) { unset($ref); continue; }
+            $list[] = in_array($kind, array('consultant', 'transporter'), true) ? array('url' => $url, 'displayText' => '') : $url;
+            if ($single === '' && in_array($kind, array('consultant', 'transporter'), true)) $ref['website'] = $url;
+        } else {
+            if ($at === false) { unset($ref); continue; }
+            array_splice($list, $at, 1);
+            if ($single !== '' && kop_gdl_url_key($single) === $key) $ref['website'] = $list ? $url_of($list[0]) : '';
+        }
+        $ref['websites'] = $list;
+        $changed = true;
+        unset($ref);
+    }
+    if ($changed) {
+        $pdo->prepare("UPDATE `{$table}` SET json_data = ?, updated_at = NOW() WHERE id = ?")->execute(array(wp_json_encode($payload), $id));
+    }
+    return $changed;
 }
 
 /** A company page's caches follow a change (inc/record-events.php). */

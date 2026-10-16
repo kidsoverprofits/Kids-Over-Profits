@@ -414,7 +414,9 @@ button.btn-quick-unmove, button.btn-quick-unmove:hover, button.btn-quick-unmove:
 }
 .card-move-title { font-weight: 700; }
 .card-move-kind { font-weight: 600; }
-.card-move-kind select { color: var(--kop-midnight-blue); background: var(--kop-white); }
+.card-move-kind select,
+.card-move-owner select { color: var(--kop-midnight-blue); background: var(--kop-white); max-width: 100%; }
+.card-move-finder { display: contents; }
 .card-move .kop-ff-q { color: var(--kop-midnight-blue); background: var(--kop-white); }
 .card-move-mentions { flex-basis: 100%; color: var(--kop-text-muted); font-size: 0.9em; }
 .card-move-status { font-size: 13px; font-weight: 700; }

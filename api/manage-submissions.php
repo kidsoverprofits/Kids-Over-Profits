@@ -692,13 +692,28 @@ try {
                     if (!in_array($target, ['website', 'resource'], true)) {
                         throw new RuntimeException('Choose facility website or additional resource.');
                     }
-                    $fid = (int) ($data['facilityId'] ?? 0);
-                    if ($fid <= 0) {
-                        throw new RuntimeException('Pick the facility first.');
-                    }
                     $url = trim((string) $row['article_url']);
                     if (!preg_match('#^https?://#i', $url)) {
                         throw new RuntimeException('This submission has no web address to move.');
+                    }
+                    // The website of a company, consultant, transporter, marketer, trade
+                    // organization or young adult program: "<kind>:<id>" from the finder,
+                    // filed by kop_rinbox_file_on_record() (its websites list), Undo exact.
+                    $record = trim((string) ($data['record'] ?? ''));
+                    if ($target === 'website' && $record !== '' && !ctype_digit($record)) {
+                        if (!function_exists('kop_rinbox_file_on_record')) {
+                            throw new RuntimeException('Filing on other kinds of records is not available here.');
+                        }
+                        $done = kop_rinbox_file_on_record($record, ['what' => 'website', 'url' => $url,
+                            'title' => trim((string) $row['article_title']), 'source' => "Sent in as news (#{$nid})"], $reviewedBy);
+                        $words = function_exists('kop_record_field_kind_words') ? kop_record_field_kind_words() : [];
+                        $moved = ['target' => 'website', 'facility_id' => 0, 'url' => $url, 'record' => $record, 'done' => $done,
+                            'facility_name' => (string) $done['name'], 'record_kind' => $words[$done['kind']] ?? (string) $done['kind']];
+                        $note = 'Moved to the ' . $moved['record_kind'] . ' ' . $moved['facility_name'] . ' as its website.';
+                    } else {
+                    $fid = (int) ($data['facilityId'] ?? 0);
+                    if ($fid <= 0) {
+                        throw new RuntimeException('Pick the facility first.');
                     }
                     $kind = (string) ($data['resourceKind'] ?? 'other');
                     $kind = isset($kinds[$kind]) ? $kind : 'other';
@@ -725,9 +740,10 @@ try {
                         kop_gdl_save($doc, $opts);
                         $moved['facility_name'] = (string) ($doc['identification']['name'] ?? $stored['unique_name']);
                     });
+                    $note = 'Moved to ' . $moved['facility_name'] . " (#{$fid}) as " . $where_words($moved) . '.';
+                    }
 
                     $json['movedTo'] = $moved;
-                    $note = 'Moved to ' . $moved['facility_name'] . " (#{$fid}) as " . $where_words($moved) . '.';
                     $pdo->prepare("UPDATE news_submissions SET status = 'rejected', json_data = ?,
                             reviewer_notes = TRIM(LEADING '\n' FROM CONCAT(COALESCE(reviewer_notes, ''), '\n', ?)),
                             reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -735,18 +751,22 @@ try {
                     $message = $note;
                 } else {
                     $moved = $json['movedTo'] ?? null;
-                    if (!is_array($moved) || empty($moved['facility_id'])) {
+                    if (is_array($moved) && !empty($moved['done'])) {
+                        // A company's, consultant's... website: take it off that record.
+                        kop_rinbox_unfile_from_record((array) $moved['done']);
+                    } elseif (!is_array($moved) || empty($moved['facility_id'])) {
                         throw new RuntimeException('This article was not moved to a facility record.');
+                    } else {
+                        kop_v2_with_write_lock($opts['pdo'], function () use ($moved, $opts) {
+                            $stored = kop_facility_load((int) $moved['facility_id'], $opts);
+                            if (!$stored) {
+                                return; // the record is gone; nothing to take back
+                            }
+                            $doc = $stored['doc'];
+                            kop_gdl_doc_remove($doc, $moved);
+                            kop_gdl_save($doc, $opts);
+                        });
                     }
-                    kop_v2_with_write_lock($opts['pdo'], function () use ($moved, $opts) {
-                        $stored = kop_facility_load((int) $moved['facility_id'], $opts);
-                        if (!$stored) {
-                            return; // the record is gone; nothing to take back
-                        }
-                        $doc = $stored['doc'];
-                        kop_gdl_doc_remove($doc, $moved);
-                        kop_gdl_save($doc, $opts);
-                    });
                     unset($json['movedTo']);
                     $note = 'Move to ' . ($moved['facility_name'] ?? 'facility') . ' undone; back in the queue.';
                     $pdo->prepare("UPDATE news_submissions SET status = 'submitted', json_data = ?,

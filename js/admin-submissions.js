@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         refileForm.hidden = !!moved;
         refileMoved.hidden = !moved;
         if (moved) {
-            refileMovedText.textContent = `Moved to ${moved.facility_name || 'facility #' + moved.facility_id} as `
+            refileMovedText.textContent = `Moved to ${moved.record_kind ? 'the ' + moved.record_kind + ' ' : ''}${moved.facility_name || 'facility #' + moved.facility_id} as `
                 + (moved.target === 'website' ? 'its website.' : 'an additional resource.');
             return;
         }
@@ -406,6 +406,19 @@ document.addEventListener('DOMContentLoaded', () => {
      * the article's mentions one click away (the first is searched at once),
      * and for a resource its kind. Same refile action as the detail panel.
      */
+    // "Website of a ...": whose site the link is. A program's goes on its record's
+    // profileLinks; the others on that record's websites (a provider's in its notes).
+    const WEBSITE_OWNERS = [
+        ['facility', 'Program'],
+        ['company', 'Company'],
+        ['consultant', 'Educational consultant'],
+        ['transporter', 'Transport company'],
+        ['marketer', 'Marketing company'],
+        ['tradeorg', 'Trade organization'],
+        ['provider', 'Mental health provider'],
+        ['ya', 'Young adult program']
+    ];
+
     function toggleCardMove(card, target) {
         let panel = card.querySelector(':scope > .card-move');
         if (panel && panel.dataset.target === target) {
@@ -419,18 +432,45 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.className = 'card-move';
         panel.dataset.target = target;
         const kinds = refileKind ? refileKind.innerHTML : '<option value="other">Other links</option>';
+        const owners = WEBSITE_OWNERS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
         panel.innerHTML = `
-            <span class="card-move-title">${target === 'website' ? 'Program website of' : 'Resource for'}</span>
-            <input type="number" min="1" class="card-move-fid" data-kop-facility-finder="1" placeholder="id" aria-label="Facility id">
+            ${target === 'website'
+                ? `<label class="card-move-owner"><span class="card-move-title">Website of a</span> <select aria-label="Whose website">${owners}</select></label>`
+                : '<span class="card-move-title">Resource for</span>'}
+            <span class="card-move-finder"></span>
             ${target === 'resource' ? `<label class="card-move-kind">Kind <select>${kinds}</select></label>` : ''}
             <button type="button" class="btn-quick btn-quick-move-go">Move</button>
             <span class="card-move-status" aria-live="polite"></span>
             <div class="card-move-mentions"></div>`;
         card.querySelector(':scope > .submission-footer').insertAdjacentElement('afterend', panel);
-        const fid = panel.querySelector('.card-move-fid');
-        if (window.kopFacilityFinderAttach) window.kopFacilityFinderAttach(fid);
-        const q = panel.querySelector('.kop-ff-q');
+        // The finder for the picked kind: a program's id, else "<kind>:<id>" (consultant, company...).
+        const finderFor = (kind) => {
+            const box = panel.querySelector('.card-move-finder');
+            box.textContent = '';
+            const fid = document.createElement('input');
+            fid.className = 'card-move-fid';
+            fid.dataset.kopFacilityFinder = '1';
+            if (kind === 'facility') {
+                fid.type = 'number';
+                fid.min = '1';
+                fid.placeholder = 'id';
+                fid.setAttribute('aria-label', 'Facility id');
+            } else {
+                fid.type = 'hidden';
+                fid.dataset.kopRecordKinds = kind;
+            }
+            box.appendChild(fid);
+            if (window.kopFacilityFinderAttach) window.kopFacilityFinderAttach(fid);
+        };
+        finderFor('facility');
+        const owner = panel.querySelector('.card-move-owner select');
+        if (owner) owner.addEventListener('change', () => {
+            finderFor(owner.value);
+            const first = panel.querySelector('.btn-refile-mention');
+            if (first) first.click();
+        });
         const search = (name) => {
+            const q = panel.querySelector('.kop-ff-q');
             if (!q) return;
             q.value = name;
             q.dispatchEvent(new Event('input', { bubbles: true }));
@@ -449,8 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 mentions.appendChild(b);
             });
             search(names[0]);
-        } else if (q) {
-            q.focus();
+        } else {
+            const q = panel.querySelector('.kop-ff-q');
+            if (q) q.focus();
         }
         panel.querySelector('.btn-quick-move-go').addEventListener('click', () => cardMove(card, 'refile'));
     }
@@ -471,13 +512,23 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         if (action === 'refile') {
             body.target = panel.dataset.target;
-            body.facilityId = parseInt(panel.querySelector('.card-move-fid').value, 10) || 0;
+            const picked = panel.querySelector('.card-move-fid').value.trim();
+            const owner = panel.querySelector('.card-move-owner select');
+            if (owner && owner.value !== 'facility') {
+                body.record = picked;
+                if (!/^[a-z]+:\d+$/.test(picked)) {
+                    say('error', 'Pick the record first.');
+                    return;
+                }
+            } else {
+                body.facilityId = parseInt(picked, 10) || 0;
+                if (!body.facilityId) {
+                    say('error', 'Pick the facility first.');
+                    return;
+                }
+            }
             const kind = panel.querySelector('.card-move-kind select');
             body.resourceKind = kind ? kind.value : 'other';
-            if (!body.facilityId) {
-                say('error', 'Pick the facility first.');
-                return;
-            }
         }
         card.querySelectorAll('.btn-quick').forEach(b => { b.disabled = true; });
         say('loading', 'Working...');
@@ -836,9 +887,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const moved = currentType === 'news' && submission.json_data && submission.json_data.movedTo;
         const canMove = currentType === 'news' && !moved && /^https?:\/\//i.test(submission.article_url || '');
         const moveHtml = moved
-            ? `<span class="card-moved">On ${escapeHtml(moved.facility_name || 'facility #' + moved.facility_id)} as ${moved.target === 'website' ? 'its website' : 'a resource'}</span>
+            ? `<span class="card-moved">On ${moved.record_kind ? 'the ' + escapeHtml(moved.record_kind) + ' ' : ''}${escapeHtml(moved.facility_name || 'facility #' + moved.facility_id)} as ${moved.target === 'website' ? 'its website' : 'a resource'}</span>
                <button type="button" class="btn-quick btn-quick-unmove" data-unmove="1">Undo move</button>`
-            : (canMove ? `<button type="button" class="btn-quick btn-quick-move" data-move="website" title="Put the link on a facility record as the program's website">${kopIcon('globe')} Website</button>
+            : (canMove ? `<button type="button" class="btn-quick btn-quick-move" data-move="website" title="Put the link on a record as its website: a program, company, educational consultant, transporter...">${kopIcon('globe')} Website</button>
                <button type="button" class="btn-quick btn-quick-move" data-move="resource" title="Put the link on a facility record under Materials and links">${kopIcon('link')} Resource</button>` : '');
         return `
             <div class="submission-footer">

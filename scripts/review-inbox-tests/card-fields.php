@@ -118,5 +118,49 @@ function kop_rinbox_test_card_fields(callable $check) {
         }
         $check('card-fields: a program pick is left to the queue', $refused !== '');
     });
+
+    // A website of a consultant, transporter, marketer or trade organization: its websites list, twice refused, exact Undo.
+    $pdo = kop_wbc_pdo();
+    if (!function_exists('kop_resolve_table_name')) {
+        // api/lib-suggested-edits.php asks MySQL (SHOW TABLES); the scratch copy is SQLite.
+        function kop_resolve_table_name(PDO $pdo, $base, $prefix = '') {
+            foreach (array_filter(array((string) $prefix . $base, $base)) as $t) {
+                $q = $pdo->prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?");
+                $q->execute(array($t));
+                if ($q->fetchColumn()) return $t;
+            }
+            return (string) $prefix . $base;
+        }
+    }
+    foreach (kop_rinbox_record_website_kinds() as $kind) {
+        $table = kop_wbc_table_if_there($pdo, kop_wbc_record_tables()[$kind]['table']);
+        $rid = $table !== '' ? (int) $pdo->query("SELECT id FROM `{$table}` ORDER BY id LIMIT 1")->fetchColumn() : 0;
+        if ($rid <= 0) {
+            echo "  (no {$kind} records in the mirror: its website path is not run here)\n";
+            continue;
+        }
+        $json_of = function () use ($pdo, $table, $rid) {
+            return (string) $pdo->query("SELECT json_data FROM `{$table}` WHERE id = {$rid}")->fetchColumn();
+        };
+        $before = $json_of();
+        $url = 'https://example.org/website-test-' . $kind . '-' . $rid;
+        $done = kop_rinbox_file_on_record($kind . ':' . $rid, array('what' => 'website', 'url' => $url, 'title' => 'Its site'), 'tester');
+        $after = $json_of();
+        $check("card-fields: a {$kind}'s website goes in its websites list", ($done['what'] ?? '') === 'website'
+            && strpos($after, '"websites":[') !== false && strpos(str_replace('\\/', '/', $after), $url) !== false, json_encode($done));
+        $twice = '';
+        try {
+            kop_rinbox_file_on_record($kind . ':' . $rid, array('what' => 'website', 'url' => $url), 'tester');
+        } catch (RuntimeException $e) {
+            $twice = $e->getMessage();
+        }
+        $check("card-fields: the same {$kind} website twice is refused", strpos($twice, 'already') !== false, $twice);
+        kop_rinbox_unfile_from_record($done);
+        $back = json_decode($json_of(), true);
+        $orig = json_decode($before, true);
+        $check("card-fields: Undo takes the {$kind} website off", strpos(str_replace('\\/', '/', $json_of()), $url) === false);
+        $pdo->prepare("UPDATE `{$table}` SET json_data = ? WHERE id = ?")->execute(array($before, $rid));
+        unset($back, $orig);
+    }
     delete_option('kop_review_card_fields_seen');
 }
