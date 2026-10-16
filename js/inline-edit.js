@@ -90,12 +90,27 @@
         box.hidden = false;
     }
 
+    /** Whether the element is drawn: not inside a closed <details>, hidden or display:none. */
+    function shown(target) {
+        // A display:contents wrapper has no box of its own: ask its parent.
+        while (target.parentElement && getComputedStyle(target).display === 'contents') target = target.parentElement;
+        if (target.checkVisibility) return target.checkVisibility({ visibilityProperty: true });
+        var closed = target.closest('details:not([open])');
+        if (closed && !closed.querySelector(':scope > summary').contains(target)) return false;
+        return !target.closest('[hidden]');
+    }
+
     function place() {
         layer.hidden = !on;
+        if (docSel) docSel.paint();
         if (!on) return;
         var taken = {};
         var maxX = document.documentElement.clientWidth - 30;
         pens.forEach(function (p) {
+            // A closed <details> still lays its contents out (Chrome), so its
+            // tiles have boxes where nothing shows: no pencil for them. Tiles
+            // being picked for a move have none either.
+            if (!shown(p.target) || p.target.closest('.kop-ie-selecting')) { p.button.hidden = true; return; }
             var r = rectOf(p.target);
             if (!r.width && !r.height) { p.button.hidden = true; return; }
             p.button.hidden = false;
@@ -114,8 +129,165 @@
     function refresh() {
         if (queued) return;
         queued = true;
-        requestAnimationFrame(function () { queued = false; scan(); place(); });
+        requestAnimationFrame(function () { queued = false; scan(); if (docSel) docSel.scan(); place(); });
     }
+
+    /* ---- Picking several documents (inc/doc-placement.php, ref docs:) --------
+     * Each document library gets "Select documents". While it is on, a click
+     * on a tile picks it (shift-click picks the run since the last one), each
+     * list of tiles offers "Pick all here", and a bar at the foot of the window
+     * moves, takes off or deletes the picked ones in one dialog, one Undo. */
+
+    var docSel = (function () {
+        var TILE = '[data-kop-edit^="doc:"]';
+        var heads = []; // {lib, head, button}
+        var picked = []; // tiles, in the order picked
+        var last = null;
+        var count = el('span', { class: 'kop-ie-docsel-count' });
+        var foot = el('div', { class: 'kop-ie-docsel-bar', role: 'region', 'aria-label': 'Picked documents', hidden: '' }, [count]);
+        [['move', 'Move...'], ['remove', 'Take off this page'], ['delete', 'Delete...']].forEach(function (a) {
+            var b = el('button', { type: 'button', class: 'kop-ie-docsel-act' + (a[0] === 'move' ? ' kop-ie-docsel-main' : ''), text: a[1] });
+            b.addEventListener('click', function () { act(a[0]); });
+            foot.appendChild(b);
+        });
+        var clear = el('button', { type: 'button', class: 'kop-ie-mini', text: 'Clear' });
+        clear.addEventListener('click', function () { setPicked([]); });
+        var done = el('button', { type: 'button', class: 'kop-ie-mini', text: 'Done' });
+        done.addEventListener('click', function () { stopAll(); });
+        foot.appendChild(clear);
+        foot.appendChild(done);
+        document.body.appendChild(foot);
+
+        /** The library a tile belongs to: a folder shortcode's box, else its section. */
+        function libOf(tile) {
+            return tile.closest('.kop-document-folder') || tile.closest('section') || tile.parentNode;
+        }
+
+        function item(tile) {
+            var m = /^doc:(\d+)(?::h(\d+))?/.exec(tile.getAttribute('data-kop-edit') || '');
+            return m ? m[1] + (m[2] ? 'h' + m[2] : '') : '';
+        }
+
+        function selecting() { return document.querySelectorAll('.kop-ie-selecting').length > 0; }
+
+        function setPicked(list) {
+            picked.forEach(function (t) { t.classList.remove('kop-ie-picked'); t.removeAttribute('aria-selected'); });
+            picked = list.filter(function (t) { return document.contains(t); });
+            picked.forEach(function (t) { t.classList.add('kop-ie-picked'); t.setAttribute('aria-selected', 'true'); });
+            paint();
+        }
+
+        function tilesIn(node) {
+            return Array.prototype.filter.call(node.querySelectorAll(TILE), shown);
+        }
+
+        function start(h) {
+            h.lib.classList.add('kop-ie-selecting');
+            h.button.textContent = 'Stop selecting';
+            h.button.setAttribute('aria-pressed', 'true');
+            addPickAll(h.lib);
+            refresh();
+        }
+
+        function stop(h) {
+            h.lib.classList.remove('kop-ie-selecting');
+            h.button.textContent = 'Select documents';
+            h.button.setAttribute('aria-pressed', 'false');
+            h.lib.querySelectorAll('.kop-ie-docsel-all').forEach(function (b) { b.remove(); });
+            setPicked(picked.filter(function (t) { return !h.lib.contains(t); }));
+            refresh();
+        }
+
+        function stopAll() {
+            heads.forEach(function (h) { if (h.lib.classList.contains('kop-ie-selecting')) stop(h); });
+        }
+
+        /** "Pick all here" above every list of tiles in the library. */
+        function addPickAll(lib) {
+            var lists = new Set();
+            lib.querySelectorAll(TILE).forEach(function (t) { if (t.parentNode) lists.add(t.parentNode); });
+            lists.forEach(function (list) {
+                var prev = list.previousElementSibling;
+                if (prev && prev.classList.contains('kop-ie-docsel-all')) return;
+                var b = el('button', { type: 'button', class: 'kop-ie-mini kop-ie-docsel-all' });
+                var own = function () { return Array.prototype.filter.call(list.children, function (c) { return c.matches(TILE) && shown(c); }); };
+                b.textContent = 'Pick all ' + own().length + ' here';
+                b.addEventListener('click', function () {
+                    var tiles = own();
+                    var all = tiles.every(function (t) { return picked.indexOf(t) >= 0; });
+                    setPicked(all ? picked.filter(function (t) { return tiles.indexOf(t) < 0; })
+                                  : picked.concat(tiles.filter(function (t) { return picked.indexOf(t) < 0; })));
+                });
+                list.parentNode.insertBefore(b, list);
+            });
+        }
+
+        function scan() {
+            document.querySelectorAll(TILE).forEach(function (tile) {
+                var lib = libOf(tile);
+                if (!lib || heads.some(function (h) { return h.lib === lib; })) return;
+                var button = el('button', { type: 'button', class: 'kop-ie-mini kop-ie-docsel-toggle', text: 'Select documents', 'aria-pressed': 'false',
+                    title: 'Pick several documents to move, take off this page or delete at once' });
+                var head = el('div', { class: 'kop-ie-docsel-head' }, [button]);
+                var h = { lib: lib, head: head, button: button };
+                button.addEventListener('click', function () {
+                    if (lib.classList.contains('kop-ie-selecting')) stop(h); else start(h);
+                });
+                // Inside a facility page's section, under its heading; else at the top.
+                var heading = lib.matches('section') ? lib.querySelector(':scope > h2') : null;
+                if (heading) heading.parentNode.insertBefore(head, heading.nextSibling);
+                else lib.insertBefore(head, lib.firstChild);
+                heads.push(h);
+            });
+            heads = heads.filter(function (h) { return document.contains(h.lib); });
+        }
+
+        function paint() {
+            // Only real changes: the page's MutationObserver would redraw again on each write.
+            heads.forEach(function (h) { if (h.head.hidden !== !on) h.head.hidden = !on; });
+            var n = picked.length;
+            count.textContent = n ? n + ' document' + (n === 1 ? '' : 's') + ' picked' : 'Click documents to pick them (shift-click picks a run)';
+            foot.querySelectorAll('.kop-ie-docsel-act').forEach(function (b) { b.disabled = !n; });
+            var off = !on || !selecting();
+            if (foot.hidden !== off) foot.hidden = off;
+            if (document.body.classList.contains('kop-ie-docsel-on') === off) document.body.classList.toggle('kop-ie-docsel-on', !off);
+        }
+
+        function act(action) {
+            var items = picked.map(item).filter(Boolean);
+            if (!items.length) return;
+            openEditor('docs:' + items.join('.') + ':' + action);
+        }
+
+        // Picking: a click on a tile in a library being selected picks it
+        // instead of opening the document.
+        document.addEventListener('click', function (e) {
+            if (!on || !e.target.closest) return;
+            var tile = e.target.closest(TILE);
+            if (!tile || !tile.closest('.kop-ie-selecting') || layer.contains(e.target)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var lib = libOf(tile);
+            if (e.shiftKey && last && libOf(last) === lib) {
+                var tiles = tilesIn(lib);
+                var a = tiles.indexOf(last), b = tiles.indexOf(tile);
+                if (a >= 0 && b >= 0) {
+                    var run = tiles.slice(Math.min(a, b), Math.max(a, b) + 1);
+                    setPicked(picked.concat(run.filter(function (t) { return picked.indexOf(t) < 0; })));
+                    last = tile;
+                    return;
+                }
+            }
+            var at = picked.indexOf(tile);
+            setPicked(at >= 0 ? picked.filter(function (t) { return t !== tile; }) : picked.concat([tile]));
+            last = tile;
+        }, true);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !dialog && selecting()) stopAll();
+        });
+
+        return { scan: scan, paint: paint };
+    })();
 
     /* ---- Toolbar ------------------------------------------------------------ */
 

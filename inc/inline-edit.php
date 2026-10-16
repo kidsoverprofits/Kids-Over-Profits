@@ -35,6 +35,8 @@
  *   doc:812[:h45]           a document's title, caption, description, alt text, and
  *                           where it is filed (h45: the folder of the page it is on;
  *                           move it, take it off or delete it: inc/doc-placement.php)
+ *   docs:812h45.813h45[:move] several documents picked on the page (the library's
+ *                           "Select documents"): move, take off or delete them at once
  *   docundo:<token>         undo such a move (save only)
  *   rep:ch:<id>|note:<AB>   a reporting directory entry or state note (kop_reporting_edits)
  *
@@ -192,6 +194,7 @@ function kop_ie_sources() {
         'row'      => array('load' => 'kop_ie_row_load', 'save' => 'kop_ie_row_save'),
         'ya'       => array('load' => 'kop_ie_ya_load', 'save' => 'kop_ie_ya_save'),
         'doc'      => array('load' => 'kop_ie_doc_load', 'save' => 'kop_ie_doc_save'),
+        'docs'     => array('load' => 'kop_ie_docs_load', 'save' => 'kop_ie_docs_save'),
         'docundo'  => array('load' => 'kop_ie_docundo_load', 'save' => 'kop_ie_docundo_save'),
         'rep'      => array('load' => 'kop_ie_rep_load', 'save' => 'kop_ie_rep_save'),
     ));
@@ -2047,6 +2050,31 @@ function kop_ie_doc_save(array $p, array $v) {
         }
     }
     return array('message' => $typed !== '' ? 'Saved. ' . $typed : 'Saved.');
+}
+
+/** docs:<items>[:move|remove|delete]: several documents picked on the page (inc/doc-placement.php). */
+function kop_ie_docs_items(array $p) {
+    if (!function_exists('kop_dp_parse_many')) {
+        throw new RuntimeException('Moving documents is not available here.');
+    }
+    $items = kop_dp_parse_many($p[0] ?? '');
+    foreach ($items as $it) {
+        kop_ie_doc_get($it[0]);
+    }
+    return $items;
+}
+
+function kop_ie_docs_load(array $p) {
+    $items = kop_ie_docs_items($p);
+    return array(
+        'title'  => count($items) . ' document' . (count($items) === 1 ? '' : 's') . ' picked',
+        'help'   => 'Each one moves out of the folders that put it on this page. Move and take off can be undone afterwards.',
+        'fields' => kop_dp_many_fields($items, (string) ($p[1] ?? '')),
+    );
+}
+
+function kop_ie_docs_save(array $p, array $v) {
+    return kop_dp_apply_many(kop_ie_docs_items($p), $v);
 }
 
 /* ---- Where to report abuse (inc/reporting-directory.php) ----------------------- */

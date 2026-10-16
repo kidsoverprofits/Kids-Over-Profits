@@ -304,14 +304,62 @@ function kop_dp_apply($att_id, $home, array $v) {
         throw new RuntimeException('Unknown action.');
     }
 
-    $rel = $wpdb->prefix . 'fbv_attachment_folder';
-    $tags = kop_dp_tag_table();
     $removed = array();
     $added = array();
+    kop_dp_place($ids, $att_id, $picked, $page, $target, !empty($v['dp_keep_sub']), $removed, $added);
+    if (!$removed) {
+        throw new RuntimeException('Nothing changed: it is no longer filed in the ticked folders. Reload the page.');
+    }
+
+    $token = kop_dp_undo_store($removed, $added, $title);
+    kop_dp_after();
+
+    $copies = count($ids) > 1 ? ' (and ' . (count($ids) - 1) . ' identical ' . (count($ids) === 2 ? 'copy' : 'copies') . ')' : '';
+    if ($target) {
+        $msg = 'Moved "' . $title . '"' . $copies . ' to ' . $target[1] . '.';
+        return array('message' => $msg, 'undo' => 'docundo:' . $token, 'link' => kop_dp_target_url($v['dp_target']));
+    }
+    $left = kop_dp_memberships($att_id);
+    return array(
+        'message' => 'Took "' . $title . '"' . $copies . ' off this page.' . ($left ? '' : ' It is now unfiled in the media library.'),
+        'undo'    => 'docundo:' . $token,
+    );
+}
+
+/** The undo record of a move or removal (30 days); its token. */
+function kop_dp_undo_store(array $removed, array $added, $title) {
+    $token = wp_generate_password(16, false);
+    set_transient('kop_dp_undo_' . $token, array('removed' => $removed, 'added' => $added, 'title' => $title, 'user' => get_current_user_id()), 30 * DAY_IN_SECONDS);
+    return $token;
+}
+
+/** The page of a facility target ("f:12"), '' for a folder. */
+function kop_dp_target_url($value) {
+    if (preg_match('/^f:(\d+)$/', (string) $value, $m) && function_exists('kop_facility_page_url')) {
+        return (string) kop_facility_page_url((int) $m[1]);
+    }
+    return '';
+}
+
+/**
+ * Take documents out of folders and, with a target, file them there.
+ * $att_id's rows change when ticked in $picked ("r:12" => true); null picks
+ * every row that puts it on the page ($page['all']), or every row when the
+ * page has no folders. The other $ids (copies) change wherever they sit on
+ * the page. Appends [kind, attachment, folder] to $removed and $added.
+ */
+function kop_dp_place(array $ids, $att_id, $picked, array $page, $target, $keep_sub, array &$removed, array &$added) {
+    global $wpdb;
+    $rel = $wpdb->prefix . 'fbv_attachment_folder';
+    $tags = kop_dp_tag_table();
     foreach ($ids as $id) {
         foreach (kop_dp_memberships($id) as $r) {
             $key = $r['kind'] . ':' . $r['folder'];
-            $take = $id === $att_id ? isset($picked[$key]) : in_array($r['folder'], $page['all'], true);
+            if ($id === (int) $att_id && $picked !== null) {
+                $take = isset($picked[$key]);
+            } else {
+                $take = !$page['all'] || in_array($r['folder'], $page['all'], true);
+            }
             if (!$take) {
                 continue;
             }
@@ -325,7 +373,7 @@ function kop_dp_apply($att_id, $home, array $v) {
                 continue;
             }
             $dest = $target[0];
-            if ($target[2] && !empty($v['dp_keep_sub'])) {
+            if ($target[2] && $keep_sub) {
                 foreach (kop_dp_relative_names($r['folder'], $page['roots']) as $name) {
                     $dest = kop_dp_child_folder($name, $dest);
                 }
@@ -348,28 +396,129 @@ function kop_dp_apply($att_id, $home, array $v) {
             }
         }
     }
-    if (!$removed) {
-        throw new RuntimeException('Nothing changed: it is no longer filed in the ticked folders. Reload the page.');
-    }
+}
 
-    $token = wp_generate_password(16, false);
-    set_transient('kop_dp_undo_' . $token, array('removed' => $removed, 'added' => $added, 'title' => $title, 'user' => get_current_user_id()), 30 * DAY_IN_SECONDS);
-    kop_dp_after();
+/* ---- Several documents at once (the library's "Select documents") ------------- */
 
-    $copies = count($ids) > 1 ? ' (and ' . (count($ids) - 1) . ' identical ' . (count($ids) === 2 ? 'copy' : 'copies') . ')' : '';
-    if ($target) {
-        $msg = 'Moved "' . $title . '"' . $copies . ' to ' . $target[1] . '.';
-        $url = '';
-        if (preg_match('/^f:(\d+)$/', (string) $v['dp_target'], $m) && function_exists('kop_facility_page_url')) {
-            $url = (string) kop_facility_page_url((int) $m[1]);
+/**
+ * docs:<item>.<item>...  each item <id>h<folder> (the page folder its tile is
+ * on) or <id>. Picked on the profile by js/inline-edit.js's select mode.
+ * -> [[id, home], ...], each document once, at most 300.
+ */
+function kop_dp_parse_many($spec) {
+    $out = array();
+    foreach (explode('.', (string) $spec) as $item) {
+        if (preg_match('/^(\d+)(?:h(\d+))?$/', $item, $m) && !isset($out[(int) $m[1]])) {
+            $out[(int) $m[1]] = array((int) $m[1], isset($m[2]) ? (int) $m[2] : 0);
         }
-        return array('message' => $msg, 'undo' => 'docundo:' . $token, 'link' => $url);
     }
-    $left = kop_dp_memberships($att_id);
-    return array(
-        'message' => 'Took "' . $title . '"' . $copies . ' off this page.' . ($left ? '' : ' It is now unfiled in the media library.'),
-        'undo'    => 'docundo:' . $token,
+    if (!$out) {
+        throw new RuntimeException('No documents picked.');
+    }
+    if (count($out) > 300) {
+        throw new RuntimeException('Pick at most 300 documents at a time.');
+    }
+    return array_values($out);
+}
+
+/** The dialog for several documents: what is picked, then move / take off / delete. */
+function kop_dp_many_fields(array $items, $action = '') {
+    $titles = array();
+    $no_home = 0;
+    foreach ($items as $it) {
+        $titles[] = get_the_title($it[0]) . ($it[1] > 0 ? '' : ' (filings everywhere)');
+        if ($it[1] <= 0) {
+            $no_home++;
+        }
+    }
+    $fields = array(
+        kop_ie_field('dp_list', count($items) . ' picked', 'note', $titles),
+        kop_ie_field('dp_action', 'What to do', 'select', in_array($action, array('move', 'remove', 'delete'), true) ? $action : 'move', array(
+            'options' => array(
+                array('value' => 'move', 'label' => 'Move them to another facility or folder'),
+                array('value' => 'remove', 'label' => 'Take them off this page (they stay in the media library)'),
+                array('value' => 'delete', 'label' => 'Delete them for good'),
+            ),
+            'confirm' => array('delete' => 'Delete ' . count($items) . ' documents for good? This cannot be undone.'),
+        )),
+        kop_ie_field('dp_target', 'Move to', 'place', '', array(
+            'show_if' => array('dp_action' => 'move'),
+            'help'    => 'Type a facility name (past names work) or a folder name.',
+        )),
+        kop_ie_field('dp_keep_sub', 'Keep their subfolders (e.g. Woodbury Reports Mentions) when moving to a facility', 'bool', true, array(
+            'show_if' => array('dp_action' => 'move'),
+        )),
+        kop_ie_field('dp_copies', 'Also do it to identical copies on this page (otherwise a copy shows in their place)', 'bool', true, array(
+            'show_if' => array('dp_action' => array('move', 'remove', 'delete')),
+        )),
     );
+    return $fields;
+}
+
+/** Move, take off or delete every picked document; one Undo for the lot. */
+function kop_dp_apply_many(array $items, array $v) {
+    $action = (string) ($v['dp_action'] ?? '');
+    $target = null;
+    if ($action === 'move') {
+        $target = kop_dp_target($v['dp_target'] ?? '');
+    } elseif ($action !== 'remove' && $action !== 'delete') {
+        throw new RuntimeException('Pick what to do with them.');
+    }
+
+    // Each document with its identical copies on its page, every one once.
+    $groups = array();
+    $seen = array();
+    foreach ($items as $it) {
+        list($id, $home) = $it;
+        if (isset($seen[$id]) || get_post_type($id) !== 'attachment') {
+            continue;
+        }
+        $page = kop_dp_page_folders($home);
+        $ids = array($id);
+        if (!empty($v['dp_copies'])) {
+            $ids = array_merge($ids, kop_dp_copies_here($id, $page['all']));
+        }
+        $ids = array_values(array_filter($ids, function ($x) use ($seen) { return !isset($seen[$x]); }));
+        foreach ($ids as $x) {
+            $seen[$x] = true;
+        }
+        $groups[] = array($id, $ids, $page);
+    }
+    if (!$groups) {
+        throw new RuntimeException('None of those documents exist any more. Reload the page.');
+    }
+    $copies = count($seen) - count($groups);
+    $copies_note = $copies > 0 ? ' (and ' . $copies . ' identical ' . ($copies === 1 ? 'copy' : 'copies') . ')' : '';
+    $n = count($groups) . ' document' . (count($groups) === 1 ? '' : 's');
+
+    if ($action === 'delete') {
+        $done = 0;
+        foreach (array_keys($seen) as $id) {
+            if (kop_dp_delete($id)) {
+                $done++;
+            }
+        }
+        if (!$done) {
+            throw new RuntimeException('None of them could be deleted.');
+        }
+        kop_dp_after();
+        return array('message' => 'Deleted ' . $done . ' document' . ($done === 1 ? '' : 's') . ($done < count($seen) ? ' (' . (count($seen) - $done) . ' could not be deleted)' : '') . '.');
+    }
+
+    $removed = array();
+    $added = array();
+    foreach ($groups as $g) {
+        kop_dp_place($g[1], $g[0], null, $g[2], $target, !empty($v['dp_keep_sub']), $removed, $added);
+    }
+    if (!$removed) {
+        throw new RuntimeException('Nothing changed: they are no longer filed on this page. Reload the page.');
+    }
+    $token = kop_dp_undo_store($removed, $added, $n);
+    kop_dp_after();
+    if ($target) {
+        return array('message' => 'Moved ' . $n . $copies_note . ' to ' . $target[1] . '.', 'undo' => 'docundo:' . $token, 'link' => kop_dp_target_url($v['dp_target']));
+    }
+    return array('message' => 'Took ' . $n . $copies_note . ' off this page.', 'undo' => 'docundo:' . $token);
 }
 
 /** Caches that hold which folder a page shows, and the page cache. */

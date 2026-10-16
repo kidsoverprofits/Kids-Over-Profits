@@ -252,6 +252,46 @@ if ($copies) {
     echo "SKIP no identical copies filed in one folder\n";
 }
 
+echo "-- Several documents at once (docs:) --\n";
+$items = kop_dp_parse_many($root_doc . 'h' . $home . '.' . $woodbury_doc . 'h' . $home . '.' . $root_doc . 'h' . $home . '.junk');
+$check('the ref reads each document once with its page folder', $items === array(array($root_doc, $home), array($woodbury_doc, $home)), json_encode($items));
+$threw = false;
+try { kop_dp_parse_many('x.y'); } catch (RuntimeException $e) { $threw = true; }
+$check('a ref with no documents is refused', $threw);
+$fields = $values(kop_dp_many_fields($items, 'remove'));
+$check('the dialog lists the picked documents', count($fields['dp_list']['value']) === 2);
+$check('the dialog opens on the action the bar asked for', $fields['dp_action']['value'] === 'remove');
+$check('a delete of many asks first', strpos($fields['dp_action']['confirm']['delete'] ?? '', 'Delete 2 documents') === 0);
+$b_root = $filed($root_doc);
+$b_wood = $filed($woodbury_doc);
+$res = kop_dp_apply_many($items, array('dp_action' => 'move', 'dp_target' => 'd:' . $target, 'dp_keep_sub' => true, 'dp_copies' => false));
+$check('both move to the folder', in_array($target, $filed($root_doc), true) && in_array($target, $filed($woodbury_doc), true), $res['message']);
+$check('neither is left on this page', !array_intersect($filed($root_doc), $page['all']) && !array_intersect($filed($woodbury_doc), $page['all']));
+$check('the message counts them', strpos($res['message'], 'Moved 2 documents') === 0);
+list($src, $parts) = kop_ie_resolve($res['undo']);
+call_user_func($src['save'], $parts, array());
+$check('one undo puts both back', $filed($root_doc) === $b_root && $filed($woodbury_doc) === $b_wood);
+if ($fid) {
+    $res = kop_dp_apply_many($items, array('dp_action' => 'move', 'dp_target' => 'f:' . $fid, 'dp_keep_sub' => true));
+    $wood_now = $filed($woodbury_doc);
+    $check('to a facility, the Woodbury one keeps its subfolder', $filed($root_doc) === array($fac_folder)
+        && count($wood_now) === 1 && (string) $pdo->query('SELECT name FROM wpdl_fbv WHERE id = ' . (int) $wood_now[0])->fetchColumn() === 'Woodbury Reports Mentions');
+    list($src, $parts) = kop_ie_resolve($res['undo']);
+    call_user_func($src['save'], $parts, array());
+    $check('undo puts both back again', $filed($root_doc) === $b_root && $filed($woodbury_doc) === $b_wood);
+}
+$res = kop_dp_apply_many($items, array('dp_action' => 'remove'));
+$check('take off: both leave the page', !array_intersect($filed($root_doc), $page['all']) && !array_intersect($filed($woodbury_doc), $page['all']), $res['message']);
+list($src, $parts) = kop_ie_resolve($res['undo']);
+call_user_func($src['save'], $parts, array());
+$check('undo files both again', $filed($root_doc) === $b_root && $filed($woodbury_doc) === $b_wood);
+$threw = '';
+try { kop_dp_apply_many($items, array('dp_action' => 'move', 'dp_target' => '')); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+$check('a move of many with no target is refused', $threw !== '' && $filed($root_doc) === $b_root, $threw);
+$threw = '';
+try { kop_dp_apply_many($items, array('dp_action' => '')); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+$check('no action is refused', $threw !== '', $threw);
+
 echo "-- Deleting keeps files another record uses --\n";
 $pair = $pdo->query("SELECT pdf.post_id AS pdf, jpg.post_id AS jpg, jpg.meta_value AS path
     FROM wpdl_postmeta jpg
