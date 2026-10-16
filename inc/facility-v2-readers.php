@@ -442,6 +442,8 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
                     // The card heads with the name then and says what it is called now.
                     $copy['nameUnderOperator'] = $then['name'];
                     if ($then['years'] !== '') $copy['nameUnderOperatorYears'] = $then['years'];
+                    // Its other names under the same company (a program often had several).
+                    if (!empty($then['also'])) $copy['nameUnderOperatorAlso'] = array_values($then['also']);
                 }
             }
             $by_operator[(int)$r['operator_id']][] = $copy;

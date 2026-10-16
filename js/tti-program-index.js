@@ -989,6 +989,8 @@ function displayFacilities(facilitiesData, containerId) {
             .slice(0, 3);
         const nameThen = cleanText(facility && facility.nameUnderOperator);
         if (nameThen) searchParts.push(nameThen);
+        const alsoThen = collectUniqueTexts(facility && facility.nameUnderOperatorAlso);
+        if (alsoThen.length) searchParts.push(...alsoThen);
         const aliases = [];
         collectUniqueTexts(names.normalizedFormerNames, names.aliasNames, nameThen ? [name] : []).forEach(alias => {
             if (normalizeTextKey(alias) === normalizeTextKey(nameThen || name)) return;
@@ -1624,6 +1626,8 @@ function displayFacilities(facilitiesData, containerId) {
                 const thenYears = cleanText(facility.nameUnderOperatorYears);
                 subtextParts.push(`Now known as: ${escapeHtml(facilityNowName)}`);
                 if (thenYears) subtextParts.push(`Under this name: ${escapeHtml(thenYears)}`);
+                const alsoThen = collectUniqueTexts(facility.nameUnderOperatorAlso);
+                if (alsoThen.length) subtextParts.push(`Also called under this company: ${escapeHtml(alsoThen.join(', '))}`);
             }
 
             const formerNamesShown = normalizedFormerNames.filter(n => normalizeTextKey(n) !== normalizeTextKey(facilityHeaderRaw));

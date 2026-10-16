@@ -692,6 +692,7 @@ if (!function_exists('kop_operator_page_data')) {
                 $facilities[$i]['now_name'] = $f['name'];
                 $facilities[$i]['name'] = $then['name'];
                 $facilities[$i]['name_years'] = $then['years'];
+                $facilities[$i]['also_names'] = array_values((array) ($then['also'] ?? array()));
             }
         }
         // Open programs first, then the rest; alphabetical within each.
@@ -837,7 +838,7 @@ if (!function_exists('kop_operator_page_data')) {
             $fkeys = array();
             $fids_by_key = array();
             foreach ($facilities as $f) {
-                foreach (array_filter(array($f['name'], $f['now_name'] ?? '')) as $fn) {
+                foreach (array_filter(array_merge(array($f['name'], $f['now_name'] ?? ''), $f['also_names'] ?? array())) as $fn) {
                     $fkeys[kop_facility_pages_name_key($fn)] = $fn;
                     $fids_by_key[kop_facility_pages_name_key($fn)] = (int) $f['id'];
                 }

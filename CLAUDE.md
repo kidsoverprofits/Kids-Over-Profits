@@ -510,7 +510,7 @@ python scripts/test-directory-feed.py [--refresh] [--cpu 4]   # split feed draws
 # On the parent company tab a renamed program is headed by the name it had under that company ("Now known as" the record's name):
 # kop_facility_eras_name_under() (inc/facility-eras.php) from its names' companies, stamped as nameUnderOperator per company link in the feed
 # The /operator/ page's program list does the same (name then, "Now known as" beside it). A name carrying the company's own name
-# ("Three Springs of Courtland", "Sequel TSI Courtland") wins over the map's dated names; two programs never share one (_settle())
+# ("Three Springs of Courtland", "Sequel TSI Courtland") wins over the map's dated names; every name a program had under that company is listed ('also': "Also called"), one carrying another of its companies' names too is left out; two programs never share one (_settle())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-name-under-operator.php [--list]   # every company link on tmp/prod.sqlite, the feed
 # Alternate names always show up in every search box and autocomplete: a facility's or company's pastNames, otherNames
 # and currentName match, and the row says which, worded by kop_alias_label() ("Formerly X" / "Also known as X" / "Now

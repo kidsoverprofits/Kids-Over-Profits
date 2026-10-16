@@ -777,7 +777,10 @@ if (!function_exists('kop_facility_eras_name_under')) {
      * @param array    $doc           the record's v2 document (may be array())
      * @param string[] $company_names the company's name and its other names
      * @param string   $relationship  the kop_operator_facilities link: 'current' or 'past'
-     * @return array{name:string,years:string}|null
+     * 'also' = the record's other names under the same company (a program
+     * often had several), without the one in 'name'.
+     *
+     * @return array{name:string,years:string,also:string[]}|null
      */
     function kop_facility_eras_name_under($facility_id, array $doc, array $company_names, $relationship = 'current') {
         $facility_id = (int) $facility_id;
@@ -804,7 +807,20 @@ if (!function_exists('kop_facility_eras_name_under')) {
                 }
             }
         }
-        return count($hits) === 1 ? array('name' => reset($hits), 'years' => '') : null;
+        return count($hits) === 1 ? array('name' => reset($hits), 'years' => '', 'also' => array()) : null;
+    }
+}
+
+if (!function_exists('kop_facility_eras_name_fold')) {
+    /** One name however it is spelled: "Owens Cross Rds" == "Owens Cross Roads", "at"/"of" and plurals dropped. */
+    function kop_facility_eras_name_fold($name) {
+        $words = array();
+        foreach (explode(' ', kop_facility_eras_company_key($name)) as $w) {
+            if ($w === '' || in_array($w, array('of', 'at', 'the', 'in', 'and', 'school', 'schools'), true)) continue;
+            $w = $w === 'rds' ? 'roads' : ($w === 'rd' ? 'road' : $w);
+            $words[] = strlen($w) > 3 ? rtrim($w, 's') : $w;
+        }
+        return implode(' ', $words);
     }
 }
 
@@ -812,13 +828,14 @@ if (!function_exists('kop_facility_eras_name_under_settle')) {
     /**
      * One company's list: two programs given the same name then keep it only
      * where it is a past name of the record (the other only lists it among
-     * its other names), else neither shows it. $then = [facility id => result
-     * of kop_facility_eras_name_under(), or null]; returns the same, settled.
+     * its other names), else neither shows it; a program's other names then
+     * ('also') leave out another program's name. $then = [facility id =>
+     * result of kop_facility_eras_name_under(), or null]; returns the same, settled.
      */
     function kop_facility_eras_name_under_settle(array $then) {
         $by_key = array();
         foreach ($then as $fid => $t) {
-            if ($t !== null) $by_key[kop_facility_eras_company_key($t['name'])][] = $fid;
+            if ($t !== null) $by_key[kop_facility_eras_name_fold($t['name'])][] = $fid;
         }
         foreach ($by_key as $fids) {
             if (count($fids) < 2) continue;
@@ -826,6 +843,14 @@ if (!function_exists('kop_facility_eras_name_under_settle')) {
             foreach ($fids as $fid) {
                 if (count($past) !== 1 || $past[0] !== $fid) $then[$fid] = null;
             }
+        }
+        $heads = array();
+        foreach ($then as $fid => $t) if ($t !== null) $heads[kop_facility_eras_name_fold($t['name'])] = $fid;
+        foreach ($then as $fid => $t) {
+            if ($t === null || empty($t['also'])) continue;
+            $then[$fid]['also'] = array_values(array_filter($t['also'], static function ($n) use ($heads, $fid) {
+                return ($heads[kop_facility_eras_name_fold($n)] ?? $fid) === $fid;
+            }));
         }
         return $then;
     }
@@ -858,11 +883,23 @@ if (!function_exists('kop_facility_eras_name_under_branded')) {
             if (count($words) > 1 && strlen($words[0]) >= 6 && !isset($generic[$words[0]])) $brands[$words[0]] = true;
         }
         if (!$brands) return false;
-        $carries = static function ($name) use ($brands) {
+        $has = static function ($name, array $set) {
             $nk = ' ' . kop_facility_eras_company_key($name) . ' ';
-            foreach (array_keys($brands) as $b) if (strpos($nk, ' ' . $b . ' ') !== false) return true;
+            foreach (array_keys($set) as $b) if (strpos($nk, ' ' . $b . ' ') !== false) return true;
             return false;
         };
+        $carries = static function ($name) use ($brands, $has) { return $has($name, $brands); };
+        // The record's other companies: a name carrying one of theirs too was
+        // theirs ("Sequel Three Springs School" is a Sequel name, not Three Springs').
+        $others = array();
+        $ops = array_merge(array((string) ($doc['identification']['currentOperator'] ?? '')), array_map('strval', (array) ($doc['identification']['pastOperators'] ?? array())));
+        foreach ($ops as $op) {
+            $ok = kop_facility_eras_company_key($op);
+            if ($ok === '' || isset($keys[$ok]) || $carries($op)) continue;
+            if (strlen($ok) >= 6) $others[$ok] = true;
+            $words = explode(' ', $ok);
+            if (count($words) > 1 && strlen($words[0]) >= 6 && !isset($generic[$words[0]]) && !isset($brands[$words[0]])) $others[$words[0]] = true;
+        }
 
         $record = trim((string) ($ident['name'] ?? ''));
         $record_key = kop_facility_eras_company_key($record);
@@ -878,29 +915,42 @@ if (!function_exists('kop_facility_eras_name_under_branded')) {
         foreach ((array) ($doc['legacy']['mergedFacilities'] ?? array()) as $m) {
             if (is_array($m) && is_string($m['name'] ?? null)) $merged[] = $m['name'];
         }
+        // Every such name: a program often had several under one company
+        // (Three Springs New Beginnings, Turning Point, New Directions).
+        $record_fold = kop_facility_eras_name_fold($record);
         $hits = array();
         foreach (array('past' => array_merge((array) ($ident['pastNames'] ?? array()), $merged), 'other' => (array) ($ident['otherNames'] ?? array())) as $from => $names) {
             foreach ($names as $n) {
                 if (!is_string($n) || ($n = trim($n)) === '') continue;
-                $nk = kop_facility_eras_company_key($n);
+                $nf = kop_facility_eras_name_fold($n);
                 // The company's own name filed as a past name is not the program's.
-                if ($nk === $record_key || isset($keys[$nk]) || isset($hits[$nk]) || !$carries($n)) continue;
-                $hits[$nk] = array('name' => $n, 'from' => $from);
+                if ($nf === $record_fold || isset($keys[kop_facility_eras_company_key($n)]) || isset($hits[$nf]) || !$carries($n) || $has($n, $others)) continue;
+                $hits[$nf] = array('name' => $n, 'from' => $from);
             }
         }
         if (!$hits) return false;
-        if ($dated !== null && isset($hits[kop_facility_eras_company_key($dated['name'])])) {
-            return $dated + array('from' => $hits[kop_facility_eras_company_key($dated['name'])]['from']);
+        // The dated names among them first, latest first; then the rest as listed.
+        $order = array();
+        foreach (array_merge($dated !== null ? array($dated['name']) : array(), $dated['also'] ?? array()) as $n) {
+            $nf = kop_facility_eras_name_fold($n);
+            if (isset($hits[$nf])) $order[$nf] = $hits[$nf];
         }
-        $pick = reset($hits);
+        $order += $hits;
+        $pick = reset($order);
         $years = '';
-        foreach (kop_facility_eras_chain((int) $facility_id, $doc ?: null) as $era) {
-            if (kop_facility_eras_company_key($era['name']) === kop_facility_eras_company_key($pick['name'])) {
-                $years = kop_facility_eras_years_label($era['start'], $era['end']);
-                break;
+        if ($dated !== null && kop_facility_eras_name_fold($dated['name']) === kop_facility_eras_name_fold($pick['name'])) {
+            $years = $dated['years'];
+        } else {
+            foreach (kop_facility_eras_chain((int) $facility_id, $doc ?: null) as $era) {
+                if (kop_facility_eras_name_fold($era['name']) === kop_facility_eras_name_fold($pick['name'])) {
+                    $years = kop_facility_eras_years_label($era['start'], $era['end']);
+                    break;
+                }
             }
         }
-        return array('name' => $pick['name'], 'years' => $years, 'from' => $pick['from']);
+        $also = array();
+        foreach (array_slice($order, 1) as $h) $also[] = $h['name'];
+        return array('name' => $pick['name'], 'years' => $years, 'from' => $pick['from'], 'also' => $also);
     }
 }
 
@@ -926,10 +976,12 @@ if (!function_exists('kop_facility_eras_name_under_dated')) {
         if (count($own) < 2) return null;
 
         $at = -1;
+        $under = array();   // every name that lists the company
         foreach ($own as $i => $era) {
             foreach ((array) $era['operators'] as $op) {
                 if (isset($keys[kop_facility_eras_company_key($op)])) {
                     $at = $i;
+                    $under[] = $i;
                     break;
                 }
             }
@@ -944,6 +996,16 @@ if (!function_exists('kop_facility_eras_name_under_dated')) {
         $name = trim((string) $own[$at]['name']);
         $record = trim((string) ($doc['identification']['name'] ?? ''));
         if ($name === '' || ($record !== '' && kop_facility_eras_company_key($name) === kop_facility_eras_company_key($record))) return null;
-        return array('name' => $name, 'years' => kop_facility_eras_years_label($own[$at]['start'], $own[$at]['end']));
+        // Its earlier names under the same company, latest first.
+        $also = array();
+        $seen = array(kop_facility_eras_name_fold($name) => true, kop_facility_eras_name_fold($record) => true);
+        foreach (array_reverse($under) as $i) {
+            $n = trim((string) $own[$i]['name']);
+            $nf = kop_facility_eras_name_fold($n);
+            if ($n === '' || isset($seen[$nf])) continue;
+            $seen[$nf] = true;
+            $also[] = $n;
+        }
+        return array('name' => $name, 'years' => kop_facility_eras_years_label($own[$at]['start'], $own[$at]['end']), 'also' => $also);
     }
 }

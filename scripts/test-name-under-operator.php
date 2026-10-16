@@ -51,6 +51,8 @@ $rows = $wpdb->get_results(
 );
 $found = array();
 $raw = array();
+$by_name_early = array();
+foreach ($rows as $r) $by_name_early[$r['oname'] . ':' . $r['facility_id']] = $r['operator_id'] . ':' . $r['facility_id'];
 foreach ($rows as $r) {
     $doc = json_decode($r['json_data'], true);
     $o = json_decode($r['ojson'], true);
@@ -59,13 +61,24 @@ foreach ($rows as $r) {
     $then = kop_facility_eras_name_under((int) $r['facility_id'], is_array($doc) ? $doc : array(), $names, (string) $r['relationship']);
     $raw[(int) $r['operator_id']][(int) $r['facility_id']] = $then;
     if ($then === null) continue;
-    if ($list) echo "  {$r['oname']} ({$r['relationship']}): {$r['fname']} listed as {$then['name']}" . ($then['years'] !== '' ? " ({$then['years']})" : '') . "\n";
+    if ($list) echo "  {$r['oname']} ({$r['relationship']}): {$r['fname']} listed as {$then['name']}" . ($then['years'] !== '' ? " ({$then['years']})" : '') . (!empty($then['also']) ? '; also ' . implode(', ', $then['also']) : '') . "\n";
 }
 // Two programs of one company never share a name then (kop_facility_eras_name_under_settle()).
 foreach ($raw as $oid => $list_then) {
     foreach (kop_facility_eras_name_under_settle($list_then) as $fid => $then) {
         if ($then !== null) $found[$oid . ':' . $fid] = $then['name'];
     }
+}
+// A program can have had several names under one company; a name carrying another company's name too is that company's.
+$alsos = array();
+foreach ($raw as $oid => $list_then) foreach (kop_facility_eras_name_under_settle($list_then) as $fid => $then) if ($then !== null) $alsos[$oid . ':' . $fid] = $then['also'] ?? array();
+$k = $by_name_early['Three Springs Inc.:13678'] ?? null;
+if ($k !== null) {
+    $check('Three Springs Inc. lists 13678 with its other names then', ($alsos[$k] ?? array()) === array('Three Springs Turning Point', 'Three Springs New Directions'), implode(', ', $alsos[$k] ?? array()));
+}
+$k = $by_name_early['Three Springs Inc.:9686'] ?? null;
+if ($k !== null) {
+    $check('a name carrying Sequel too is not a Three Springs name', !in_array('Sequel Three Springs School', $alsos[$k] ?? array(), true), implode(', ', $alsos[$k] ?? array()));
 }
 $check('some company links get the name of their years', count($found) > 0, count($found) . ' of ' . count($rows) . ' links');
 
