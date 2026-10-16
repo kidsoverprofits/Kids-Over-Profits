@@ -101,36 +101,80 @@ button.kop-ie-pq[hidden] {
 
 /* Above the search button, which owns the bottom-left corner (css/global-search.css:
    16px up, about 40px tall). */
+/* Only small squares: the pencil switch, and (while the pencils are on) the page's own
+   editors behind a second square, which open as a menu above them. */
 .kop-ie-bar {
     position: fixed;
     left: 12px;
     bottom: 68px;
     z-index: 99990;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
+    font-size: 13px;
+}
+
+button.kop-ie-bar-sq {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-height: 0;
+    padding: 0;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1;
+    color: #fff;
+    background: var(--kop-midnight, #000435);
+    box-shadow: 0 1px 6px rgba(0, 4, 53, 0.35);
+    cursor: pointer;
+}
+
+button.kop-ie-bar-sq:hover,
+button.kop-ie-bar-sq:focus,
+button.kop-ie-bar-sq:active {
+    color: var(--kop-midnight, #000435);
+    background: #fff;
+    border-color: var(--kop-midnight, #000435);
+}
+
+/* Off: white with a navy pencil, the reverse of on. */
+button.kop-ie-bar-sq[aria-pressed="false"] {
+    color: var(--kop-midnight, #000435);
+    background: #fff;
+    border-color: var(--kop-midnight, #000435);
+}
+
+button.kop-ie-bar-sq[aria-pressed="false"]:hover,
+button.kop-ie-bar-sq[aria-pressed="false"]:focus,
+button.kop-ie-bar-sq[aria-pressed="false"]:active {
+    color: var(--kop-midnight, #000435);
+    background: var(--kop-sand, #F2EEDF);
+}
+
+button.kop-ie-bar-sq[hidden] {
+    display: none;
+}
+
+.kop-ie-menu {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 6px);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    width: max-content;
     max-width: calc(100vw - 24px);
     padding: 6px;
     border-radius: 8px;
     background: var(--kop-midnight, #000435);
     box-shadow: 0 2px 10px rgba(0, 4, 53, 0.4);
-    font-size: 13px;
 }
 
-/* On a phone the wrapped bar was three rows tall over the page's own buttons:
-   one row that scrolls sideways instead. */
-@media (max-width: 600px) {
-    .kop-ie-bar {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        right: 12px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .kop-ie-bar > * {
-        flex: none;
-        white-space: nowrap;
-    }
+.kop-ie-menu[hidden] {
+    display: none;
 }
 
 button.kop-ie-bar-btn,

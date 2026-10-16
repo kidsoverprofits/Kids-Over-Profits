@@ -120,10 +120,23 @@
     /* ---- Toolbar ------------------------------------------------------------ */
 
     var bar = el('div', { class: 'kop-ie-bar', role: 'region', 'aria-label': 'Edit this page' });
-    var toggle = el('button', { type: 'button', class: 'kop-ie-bar-btn' });
+    // One small square that turns the pencils on and off; the page's own editors
+    // ("Every field of this facility", ...) sit behind a second square shown only while they are on.
+    var toggle = el('button', { type: 'button', class: 'kop-ie-bar-sq' });
+    toggle.innerHTML = icon('pencil');
+    var more = null;
+    var menu = null;
+    function closeMenu() {
+        if (!menu) return;
+        menu.hidden = true;
+        more.setAttribute('aria-expanded', 'false');
+    }
     function paintToggle() {
-        toggle.innerHTML = icon('pencil') + ' <span>' + (on ? 'Pencils on' : 'Pencils off') + '</span>';
+        var label = on ? 'Pencils on (click to hide)' : 'Pencils off (click to show)';
         toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
+        if (more) { more.hidden = !on; if (!on) closeMenu(); }
     }
     toggle.addEventListener('click', function () {
         on = !on;
@@ -131,18 +144,36 @@
         paintToggle();
         refresh();
     });
-    paintToggle();
     bar.appendChild(toggle);
-    (C.pageRefs || []).forEach(function (r) {
-        var b;
-        if (r.url) {
-            b = el('a', { class: 'kop-ie-bar-btn', href: r.url, text: r.label });
-        } else {
-            b = el('button', { type: 'button', class: 'kop-ie-bar-btn', text: r.label });
-            b.addEventListener('click', function () { openEditor(r.ref); });
-        }
-        bar.appendChild(b);
-    });
+    if ((C.pageRefs || []).length) {
+        more = el('button', { type: 'button', class: 'kop-ie-bar-sq', 'aria-label': 'Edit the whole page', title: 'Edit the whole page', 'aria-expanded': 'false' });
+        more.innerHTML = icon('settings');
+        menu = el('div', { class: 'kop-ie-menu' });
+        menu.hidden = true;
+        C.pageRefs.forEach(function (r) {
+            var b;
+            if (r.url) {
+                b = el('a', { class: 'kop-ie-bar-btn', href: r.url, text: r.label });
+            } else {
+                b = el('button', { type: 'button', class: 'kop-ie-bar-btn', text: r.label });
+                b.addEventListener('click', function () { closeMenu(); openEditor(r.ref); });
+            }
+            menu.appendChild(b);
+        });
+        more.addEventListener('click', function () {
+            menu.hidden = !menu.hidden;
+            more.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
+        });
+        document.addEventListener('click', function (e) {
+            if (!bar.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMenu();
+        });
+        bar.appendChild(more);
+        bar.appendChild(menu);
+    }
+    paintToggle();
     document.body.appendChild(bar);
 
     /* ---- Dialog -------------------------------------------------------------- */
