@@ -2629,6 +2629,12 @@ Open:
    (a note: no list), young adult program (its links). **Check by hand** at https://kidsoverprofits.org/admin-submissions/:
    move one link as a consultant's website, see it on https://kidsoverprofits.org/referrers-educational-consultants/,
    Undo move. Marketers and trade orgs are not in the mirror, so their path is untested.
+9. The news card's Resource button asks which kind of record too (2026-10-16, "Resource for a", commit
+   https://github.com/kidsoverprofits/Kids-Over-Profits/commit/ae0423ab37fd5b3f2be77202f22b09972ef2b879; the detail panel's
+   "Not a news article?" finder takes any record): a company gets the link in operator.resourceLinks ("Materials and links"
+   on /operator/), a young adult program its links, the others a line in their notes. **Check by hand** at
+   https://kidsoverprofits.org/admin-submissions/: move one link as a company resource, see it under "Materials and links"
+   on that company's /operator/ page, Undo move.
 
 ### 3.31 Approved facts wait for a written-up About (2026-10-15)
 
