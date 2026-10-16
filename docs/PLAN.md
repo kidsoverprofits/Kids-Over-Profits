@@ -2616,6 +2616,13 @@ Open:
    notes; check a filed line reads well there.
 6. `scripts/review-inbox-tests/fornits.php` seeds made-up rows only into an empty table; the mirror now holds 8,391 real
    waiting items, so its count and filter checks fail with or without this work. Re-seed it into its own table.
+7. News cards now have "Connect a record" (2026-10-16, `kop_rinbox_native_connect()` in `inc/review-inbox/native.php`):
+   the article stays in the news (pending or approved) and is also filed on a company (listed on /operator/ once approved),
+   an educational consultant, transporter, provider, marketer, trade organization (a line in its notes citing the article)
+   or a young adult program (its links); "Take off" on the card and Undo in Recently done. **Check by hand** at
+   https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (News tab): connect a consultant, see the note on
+   https://kidsoverprofits.org/referrers-educational-consultants/, Take off. The consultant notes path needs MySQL, so the
+   SQLite test runs only the company path. Programs still go under the card's "Facilities mentioned".
 
 ### 3.31 Approved facts wait for a written-up About (2026-10-15)
 

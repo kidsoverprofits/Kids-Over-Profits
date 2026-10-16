@@ -950,6 +950,7 @@
         form.hidden = true;
         if (!m) return;
         if (!m.params || !m.params.length) { go({ to: m.id }); return; }
+        if (m.help) form.appendChild(el('span', { class: 'rinbox-help', text: m.help }));
         var inputs = m.params.map(function (p) {
             var input = fieldInput(p, prefix + 'mv-' + m.id + '-');
             form.appendChild(el('label', { class: 'rinbox-param' }, [p.label + ' ', input]));
@@ -1969,6 +1970,14 @@
             row.appendChild(moveControl(Object.assign({}, item, { moves: others }), 'rinbox-n' + item.key + '-', moveGo));
         }
         (item.actions || []).forEach(function (a) {
+            if (a.params && a.params.length) {
+                // An action that asks first (News: "Connect a record" with the record finder): a small form, as a move's.
+                row.appendChild(moveButton({ id: a.id, label: a.submit || a.label, help: a.help, params: a.params }, a.label, 'rinbox-n' + item.key + '-', function (params) {
+                    delete params.to;
+                    go('act', { action: a.id, params: params });
+                }));
+                return;
+            }
             row.appendChild(el('button', {
                 type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'), text: a.label,
                 onclick: function (e) { go('act', { action: a.id, params: {} }, e.currentTarget, a.style === 'approve' || a.style === 'reject'); }

@@ -93,6 +93,66 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
         });
     }
 
+    // "Connect a record": the article stays pending and is listed on the company (kop_operator_links) or noted on a
+    // consultant; the card offers Take off, which undoes it exactly.
+    if ($oid && $news_url !== '') {
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $item, $check, $oid, $pdo) {
+            $nid = (int) $item['key'];
+            $linked = function () use ($pdo, $oid, $nid) {
+                return (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_operator_links WHERE link_kind = 'news' AND operator_id = $oid AND link_id = $nid")->fetchColumn();
+            };
+            $was = $linked();
+            $ids = array_map(function ($a) { return $a['id']; }, kop_rinbox_native_item('news', kop_rinbox_native_row('news', $nid))['actions']);
+            $check('news: a pending article offers "Connect a record"', in_array('connect', $ids, true), json_encode($ids));
+            try {
+                $res = call_user_func($src['act'], $nid, 'connect', array('record' => 'company:' . $oid));
+            } catch (RuntimeException $e) {
+                $check('news: connecting a company already listing the article is refused with a reason', $was > 0, $e->getMessage());
+                return;
+            }
+            $row = kop_rinbox_native_row('news', $nid);
+            $check('news: connecting a company lists the article there and it stays pending',
+                $linked() === $was + 1 && $row['status'] === 'submitted' && ($res['undo']['action'] ?? '') === 'unconnect:company:' . $oid, $res['message']);
+            $ids = array_map(function ($a) { return $a['id']; }, kop_rinbox_native_item('news', $row)['actions']);
+            $check('news: the card offers Take off for the company', in_array('unconnect:company:' . $oid, $ids, true), json_encode($ids));
+            try {
+                call_user_func($src['act'], $nid, 'connect', array('record' => 'company:' . $oid));
+                $check('news: connecting the same company twice is refused', false);
+            } catch (RuntimeException $e) {
+                $check('news: connecting the same company twice is refused', true);
+            }
+            try {
+                call_user_func($src['act'], $nid, 'connect', array('record' => '12'));
+                $check('news: a program is refused (it goes under Facilities mentioned)', false);
+            } catch (RuntimeException $e) {
+                $check('news: a program is refused (it goes under Facilities mentioned)', stripos($e->getMessage(), 'Facilities mentioned') !== false);
+            }
+            call_user_func($src['act'], $nid, 'unconnect:company:' . $oid, array());
+            $check('news: Take off unlists it from the company exactly', $linked() === $was && !kop_rinbox_native_connections($nid));
+
+            $ct = '';
+            foreach (array('wpdl_referrers_master', 'referrers_master') as $t) {
+                if ($pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '$t'")->fetchColumn()) { $ct = $t; break; }
+            }
+            $cid = $ct !== '' ? (int) $pdo->query("SELECT id FROM `$ct` ORDER BY id LIMIT 1")->fetchColumn() : 0;
+            try {
+                if ($cid) kop_wbc_load_record(kop_wbc_pdo(), 'consultant', $cid);
+            } catch (Throwable $e) {
+                echo "  (a consultant's notes need MySQL: the notes path is not run here)\n";
+                $cid = 0;
+            }
+            if ($cid) {
+                $json = function () use ($pdo, $ct, $cid) { return (string) $pdo->query("SELECT json_data FROM `$ct` WHERE id = $cid")->fetchColumn(); };
+                $before = $json();
+                $res = call_user_func($src['act'], $nid, 'connect', array('record' => 'consultant:' . $cid));
+                $check('news: connecting a consultant adds a note citing the article', $json() !== $before
+                    && strpos($json(), str_replace('/', '\\/', kop_rinbox_native_url('news', kop_rinbox_native_row('news', $nid)))) !== false, $res['message']);
+                call_user_func($src['act'], $nid, 'unconnect:consultant:' . $cid, array());
+                $check('news: Take off removes the consultant\'s note exactly', $json() === $before);
+            }
+        });
+    }
+
     // An article already on the site can still be filed under a school or listed on a young adult program.
     $pdo->prepare("UPDATE news_submissions SET status = 'approved' WHERE id = ?")->execute(array((int) $item['key']));
     $approved = kop_rinbox_native_row('news', $item['key']);

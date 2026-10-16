@@ -231,6 +231,7 @@ function kop_rinbox_native_item($type, array $r) {
         $actions[] = array('id' => 'lawsuit_news', 'label' => 'Mark as lawsuit news', 'style' => 'neutral',
             'help' => 'Moves this link to the News queue as a lawsuit article (category Lawsuit, with this summary and facilities), waiting for review there; this card is filed as rejected with a note. Undo moves it back.');
     }
+    if ($type === 'news' && !$log) $actions = array_merge($actions, kop_rinbox_native_connect_actions($r));
     $title = (string) ($r[$t['title']] ?? '');
     return array(
         'key'          => (string) (int) $r['id'],
@@ -338,6 +339,8 @@ function kop_rinbox_native_act($type, $key, $action, array $params) {
     if ($action === 'lawsuit_news' && $type === 'lawsuit') {
         return kop_rinbox_native_move('lawsuit', $key, 'news', array('lawsuit_news' => true) + $params);
     }
+    if ($action === 'connect' && $type === 'news') return kop_rinbox_native_connect($key, (string) ($params['record'] ?? ''));
+    if (strpos($action, 'unconnect:') === 0 && $type === 'news') return kop_rinbox_native_unconnect($key, substr($action, 10));
     if ($action === 'unmove') return kop_rinbox_native_unmove($type, $key);
     if ($action === 'restore') return kop_rinbox_native_restore($type, $key, (string) ($params['status'] ?? ''));
     throw new RuntimeException('Approve and reject this with the buttons on its card.');
@@ -419,6 +422,94 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
         'prev_notes' => $prev_notes, 'by' => $reviewer, 'at' => time());
     update_option('kop_review_inbox_moves', $log, false);
     return array('message' => $message . ' Undo moves it back.');
+}
+
+/*
+ * "Connect a record" on a news card: the article stays in the news (pending or
+ * on the site) and is also filed on a record that is not a program, as
+ * kop_rinbox_file_on_record() files things: a company lists it on its page
+ * (kop_operator_links, shown once the article is approved), a young adult
+ * program gets the link, a consultant, transporter, provider, marketer or
+ * trade organization a line in its notes citing the article. Programs are
+ * connected through the card's "Facilities mentioned". Each connection gets a
+ * "Take off" button (the Undo). Option kop_review_news_connections =
+ * {news id: {"<kind>:<id>": what kop_rinbox_file_on_record() did + by, at}}.
+ */
+
+/** The kinds "Connect a record" offers. */
+function kop_rinbox_native_connect_kinds() {
+    return array('company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya');
+}
+
+function kop_rinbox_native_connections($news_id = null) {
+    $all = get_option('kop_review_news_connections', array());
+    $all = is_array($all) ? $all : array();
+    if ($news_id === null) return $all;
+    return is_array($all[(int) $news_id] ?? null) ? $all[(int) $news_id] : array();
+}
+
+function kop_rinbox_native_connections_put($news_id, array $list) {
+    $all = kop_rinbox_native_connections();
+    if ($list) $all[(int) $news_id] = $list;
+    else unset($all[(int) $news_id]);
+    update_option('kop_review_news_connections', $all, false);
+}
+
+/** The card's "Connect a record" and one "Take off" per record it is connected to. */
+function kop_rinbox_native_connect_actions(array $r) {
+    $actions = array();
+    $words = function_exists('kop_record_field_kind_words') ? kop_record_field_kind_words() : array();
+    foreach (kop_rinbox_native_connections((int) $r['id']) as $ref => $done) {
+        $actions[] = array('id' => 'unconnect:' . $ref, 'style' => 'undo',
+            'label' => 'Take off ' . ($words[$done['kind'] ?? ''] ?? 'record') . ' "' . (string) ($done['name'] ?? $ref) . '"');
+    }
+    if (!in_array((string) $r['status'], array('submitted', 'approved', 'published'), true) || kop_rinbox_native_url('news', $r) === '') return $actions;
+    if (!function_exists('kop_record_field_param')) return $actions;
+    $actions[] = array('id' => 'connect', 'label' => 'Connect a record', 'style' => 'neutral', 'submit' => 'Connect',
+        'help' => 'The article stays in the news and is also filed on the record you pick: a company lists it on its page once it is approved, '
+            . 'a young adult program gets the link, any other kind a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes it.',
+        'params' => array(kop_record_field_param('record', 'Record', array('kinds' => kop_rinbox_native_connect_kinds(), 'create' => false))));
+    return $actions;
+}
+
+function kop_rinbox_native_connect($key, $value) {
+    $r = kop_rinbox_native_row('news', $key);
+    if (!$r) throw new RuntimeException('That article is gone.');
+    if (!in_array((string) $r['status'], array('submitted', 'approved', 'published'), true)) throw new RuntimeException('Only a pending or approved article can be connected to a record.');
+    list($kind, $id) = kop_rinbox_record_of($value);
+    if ($kind === 'facility') throw new RuntimeException('A program is connected through the card\'s "Facilities mentioned" (View details, then edit).');
+    if ($kind === '' || $id <= 0 || !in_array($kind, kop_rinbox_native_connect_kinds(), true)) throw new RuntimeException('Pick a company, consultant or other record in the finder first.');
+    $ref = $kind . ':' . $id;
+    $list = kop_rinbox_native_connections((int) $r['id']);
+    if (isset($list[$ref])) throw new RuntimeException('This article is already connected to ' . kop_rinbox_record_words($kind, (string) $list[$ref]['name']) . '.');
+    $url = kop_rinbox_native_url('news', $r);
+    $title = trim((string) $r['article_title']);
+    $src = trim(implode(', ', array_filter(array(trim((string) ($r['publication_name'] ?? '')), trim((string) ($r['publication_date'] ?? ''))))));
+    $reviewer = kop_rinbox_reviewer();
+    $done = kop_rinbox_file_on_record($ref, array(
+        'what'    => $kind === 'company' ? 'news' : ($kind === 'ya' ? 'link' : 'note'),
+        'news_id' => (int) $r['id'],
+        'url'     => $url,
+        'title'   => $title,
+        'text'    => ($title !== '' ? 'News article "' . $title . '"' : 'News article') . ($src !== '' ? ' (' . $src . ')' : ''),
+        'source'  => '',
+        'key'     => 'news-' . (int) $r['id'],
+    ), $reviewer);
+    $list[$ref] = $done + array('by' => $reviewer, 'at' => time());
+    kop_rinbox_native_connections_put((int) $r['id'], $list);
+    $message = $done['message'];
+    if ($kind === 'company' && (string) $r['status'] === 'submitted') $message .= ' It shows on the company page once the article is approved.';
+    return array('message' => $message . ' The article stays in the news.', 'undo' => array('action' => 'unconnect:' . $ref, 'params' => array()));
+}
+
+function kop_rinbox_native_unconnect($key, $ref) {
+    $list = kop_rinbox_native_connections((int) $key);
+    if (empty($list[$ref])) throw new RuntimeException('This article is not connected to that record any more.');
+    $done = $list[$ref];
+    kop_rinbox_unfile_from_record($done);
+    unset($list[$ref]);
+    kop_rinbox_native_connections_put((int) $key, $list);
+    return array('message' => 'Took the article off ' . kop_rinbox_record_words((string) $done['kind'], (string) ($done['name'] ?? $ref)) . '.');
 }
 
 /**

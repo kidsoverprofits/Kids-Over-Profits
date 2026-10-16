@@ -261,6 +261,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # program). A queue with 'record_kinds' gets its 'facility' pickers as the any-record finder; a non-program pick is filed by
 # kop_rinbox_file_on_record() (inc/review-record-file.php: company links/news/notes, YA links/facts, other kinds a cited note), exact Undo
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=card-fields
+# News cards: "Connect a record" files the article on a company (kop_operator_links), consultant, transporter, provider, marketer,
+# trade org (a note citing it) or young adult program while it stays in the news; "Take off" undoes (option kop_review_news_connections)
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
 # discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links (no-record ones re-tied by their SCIAD collection or wiki page name; company-only
