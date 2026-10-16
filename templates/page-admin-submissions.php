@@ -310,12 +310,12 @@ get_header();
                     <div class="refile-section news-only" id="refileSection" hidden>
                         <h3>Not a news article?</h3>
                         <div id="refileForm">
-                            <p class="refile-help">Put the link on a facility record instead. It leaves the news queue (filed as rejected, with a note saying where it went) and can be undone here.</p>
+                            <p class="refile-help">Put the link on a program, company or other record instead. It leaves the news queue (filed as rejected, with a note saying where it went) and can be undone here.</p>
                             <p class="refile-help">About an Indian boarding school? Use the <strong>Indian boarding school</strong> button on the card instead: the article goes on the Indian boarding schools page, off the news list, with Undo.</p>
                             <fieldset class="refile-targets">
                                 <legend>Move it as</legend>
-                                <label><input type="radio" name="refileTarget" value="website" checked> Facility website</label>
-                                <label><input type="radio" name="refileTarget" value="resource"> Additional resource</label>
+                                <label><input type="radio" name="refileTarget" value="website" checked> Its website</label>
+                                <label><input type="radio" name="refileTarget" value="resource"> Additional resource (Materials and links)</label>
                             </fieldset>
                             <div class="refile-resource-fields" id="refileResourceFields" hidden>
                                 <label for="refileKind">Kind</label>
@@ -328,11 +328,12 @@ get_header();
                                 <input type="text" id="refileLabel" placeholder="Defaults to the article title">
                             </div>
                             <div class="refile-facility">
-                                <label>Facility</label>
-                                <?php echo kop_facility_finder_field('', '', ' id="refileFacility"'); ?>
+                                <label>Record</label>
+                                <?php /* Any record: a program's id, or "company:45" etc. (kop_rinbox_file_on_record()). */ ?>
+                                <input type="hidden" id="refileFacility" data-kop-facility-finder="1" data-kop-record-kinds="all">
                                 <div class="refile-mentions" id="refileMentions"></div>
                             </div>
-                            <button type="button" id="refileBtn" class="btn-refile">Move to facility record</button>
+                            <button type="button" id="refileBtn" class="btn-refile">Move to this record</button>
                         </div>
                         <div class="refile-moved" id="refileMoved" hidden>
                             <p id="refileMovedText"></p>

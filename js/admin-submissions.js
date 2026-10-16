@@ -307,12 +307,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         if (action === 'refile') {
             body.target = refileTarget();
-            body.facilityId = parseInt(refileFacility.value, 10) || 0;
+            // A program's id, or "company:45" etc. for any other record.
+            const picked = refileFacility.value.trim();
+            if (/^\d+$/.test(picked)) body.facilityId = parseInt(picked, 10);
+            else body.record = picked;
             body.resourceKind = refileKind.value;
             body.label = refileLabel.value.trim();
-            if (!body.facilityId) {
+            if (!picked) {
                 refileStatus.className = 'action-status';
-                refileStatus.innerHTML = '<span class="error">✗ Pick the facility first.</span>';
+                refileStatus.innerHTML = '<span class="error">✗ Pick the record first.</span>';
                 return;
             }
         }
@@ -349,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         refileBtn.addEventListener('click', () => runRefile('refile'));
         refileUndoBtn.addEventListener('click', () => {
-            if (confirm('Take the link off the facility record and put the article back in the news queue?')) runRefile('unrefile');
+            if (confirm('Take the link off the record and put the article back in the news queue?')) runRefile('unrefile');
         });
     }
 
@@ -389,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             if (move.dataset.move) {
                 toggleCardMove(card, move.dataset.move);
-            } else if (confirm('Take the link off the facility record and put the article back in the news queue?')) {
+            } else if (confirm('Take the link off the record and put the article back in the news queue?')) {
                 cardMove(card, 'unrefile');
             }
             return;
@@ -406,8 +409,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * the article's mentions one click away (the first is searched at once),
      * and for a resource its kind. Same refile action as the detail panel.
      */
-    // "Website of a ...": whose site the link is. A program's goes on its record's
-    // profileLinks; the others on that record's websites (a provider's in its notes).
+    // "Website of a ..." / "Resource for a ...": which kind of record takes the link.
+    // A program's goes on its record's profileLinks or resourceLinks; a company's on
+    // its websites or resourceLinks ("Materials and links" on /operator/); a young
+    // adult program's on its links; the others' websites or notes.
     const WEBSITE_OWNERS = [
         ['facility', 'Program'],
         ['company', 'Company'],
@@ -436,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.innerHTML = `
             ${target === 'website'
                 ? `<label class="card-move-owner"><span class="card-move-title">Website of a</span> <select aria-label="Whose website">${owners}</select></label>`
-                : '<span class="card-move-title">Resource for</span>'}
+                : `<label class="card-move-owner"><span class="card-move-title">Resource for a</span> <select aria-label="What kind of record">${owners}</select></label>`}
             <span class="card-move-finder"></span>
             ${target === 'resource' ? `<label class="card-move-kind">Kind <select>${kinds}</select></label>` : ''}
             <button type="button" class="btn-quick btn-quick-move-go">Move</button>

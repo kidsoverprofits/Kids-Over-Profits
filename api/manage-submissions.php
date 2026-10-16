@@ -696,20 +696,28 @@ try {
                     if (!preg_match('#^https?://#i', $url)) {
                         throw new RuntimeException('This submission has no web address to move.');
                     }
-                    // The website of a company, consultant, transporter, marketer, trade
-                    // organization or young adult program: "<kind>:<id>" from the finder,
-                    // filed by kop_rinbox_file_on_record() (its websites list), Undo exact.
+                    // The website or a resource of a company, consultant, transporter, marketer,
+                    // trade organization or young adult program: "<kind>:<id>" from the finder,
+                    // filed by kop_rinbox_file_on_record() (a company's websites or "Materials and
+                    // links", a young adult program's links, the others' websites or notes), Undo exact.
                     $record = trim((string) ($data['record'] ?? ''));
-                    if ($target === 'website' && $record !== '' && !ctype_digit($record)) {
+                    if ($record !== '' && !ctype_digit($record)) {
                         if (!function_exists('kop_rinbox_file_on_record')) {
                             throw new RuntimeException('Filing on other kinds of records is not available here.');
                         }
-                        $done = kop_rinbox_file_on_record($record, ['what' => 'website', 'url' => $url,
-                            'title' => trim((string) $row['article_title']), 'source' => "Sent in as news (#{$nid})"], $reviewedBy);
+                        $kind = (string) ($data['resourceKind'] ?? 'other');
+                        $title = trim((string) ($data['label'] ?? '')) ?: trim((string) $row['article_title']);
+                        $done = kop_rinbox_file_on_record($record, ['what' => $target === 'website' ? 'website' : 'link', 'url' => $url,
+                            'title' => $title, 'kind' => isset($kinds[$kind]) ? $kind : 'other', 'key' => $url,
+                            'source' => "Sent in as news (#{$nid})"], $reviewedBy);
                         $words = function_exists('kop_record_field_kind_words') ? kop_record_field_kind_words() : [];
-                        $moved = ['target' => 'website', 'facility_id' => 0, 'url' => $url, 'record' => $record, 'done' => $done,
+                        $moved = ['target' => $target, 'facility_id' => 0, 'url' => $url, 'record' => $record, 'done' => $done,
                             'facility_name' => (string) $done['name'], 'record_kind' => $words[$done['kind']] ?? (string) $done['kind']];
-                        $note = 'Moved to the ' . $moved['record_kind'] . ' ' . $moved['facility_name'] . ' as its website.';
+                        if ($target === 'resource') $moved['kind'] = isset($kinds[$kind]) ? $kind : 'other';
+                        // A resource on a consultant, transporter... is a line in its notes; the message says which.
+                        $note = $target === 'website'
+                            ? 'Moved to the ' . $moved['record_kind'] . ' ' . $moved['facility_name'] . ' as its website.'
+                            : (string) $done['message'];
                     } else {
                     $fid = (int) ($data['facilityId'] ?? 0);
                     if ($fid <= 0) {
