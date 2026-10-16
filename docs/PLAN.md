@@ -2525,6 +2525,12 @@ Open, in order:
    the network map's names on the page (edited on the map), inspection report rows and findings (state data; findings have
    Review inbox), "Other programs run by" rows (each is its own page), and the summary lines under Materials and links.
 3. Unsilenced types are kept on our side only: they are not on /documents/<type>/ pages, which list media library documents.
+4. **Check after deploy** (2026-10-16, commits 4a64b92d + 16de6d7b), signed in, at
+   https://kidsoverprofits.org/facility/provo-canyon-school-ut/#documents: with "Woodbury Reports Mentions" closed, no stray
+   pencils over the grid; "Select documents", pick a few (shift-click a run, "Pick all in this folder"), Move to another
+   facility, then Undo from the note after the reload. Not checked live by Claude: the browser window drew no frames that
+   session; scripts/test-doc-select.py (made-up page) and test-doc-placement.php (the moves) pass. Also try a company page's
+   documents (each program's folder its own library, one bar for all).
 
 ### 3.28 Richer timelines on company and facility pages (2026-10-15)
 
