@@ -38,6 +38,13 @@ require_once dirname(__DIR__) . '/inc/facility-finder.php';
 require_once dirname(__DIR__) . '/inc/woodbury-facts.php';
 require_once dirname(__DIR__) . '/inc/drive-docs.php';
 require_once dirname(__DIR__) . '/inc/fornits.php';
+if (!function_exists('wp_unslash')) {
+    function wp_unslash($v) { return is_string($v) ? stripslashes($v) : $v; }
+}
+if (!function_exists('wp_nonce_field')) {
+    function wp_nonce_field($action = -1, $name = '_wpnonce', $referer = true, $echo = true) { $s = '<input type="hidden" name="' . $name . '" value="nonce">'; if ($echo) echo $s; return $s; }
+}
+require_once dirname(__DIR__) . '/inc/directory-editor.php';
 
 $base = 'admin.php?page=kop-preview';
 $url = function ($k) use ($base) { return $base . '&tab=' . rawurlencode((string) $k); };
@@ -178,6 +185,13 @@ $wbf = '<div class="wrap kop-ak kop-wbf">'
     . '</div>';
 
 
+/* ---- Directory Editor (the mirror's companies, read only) ------------------ */
+
+$_GET = array('page' => 'kop-directory-editor', 'q' => 'Sequel', 'open' => 20, 'kop_dired_msg' => rawurlencode('Moved 2 programs to Sequel TSI (still listed under Acme Youth as past).'), 'kop_dired_log' => 12);
+$dired = $capture('kop_dired_page_body');
+$_GET = array();
+
+
 $page = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
     . '<title>Admin kit preview</title>'
     // Inline: tmp/ is a junction into kop-pipeline, so a relative path to css/ would not reach the theme.
@@ -189,7 +203,7 @@ $page = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="
     . 'input[type=text],input[type=search],select{min-height:30px;border:1px solid #8c8f94;border-radius:4px;padding:0 8px;font-size:14px}.notice{background:#fff;border-left:4px solid #72aee6;padding:1px 12px;margin:5px 0 15px}'
     . '@media (max-width:782px){body{padding:10px}}</style>'
     . '<script>window.KOP_ADMIN_KIT={ajax:"#"};</script></head><body>'
-    . $gdl . $fn . $wbf
+    . $gdl . $fn . $wbf . $dired
     // Each screen's own styles (its script is there too; in this one page the three would all answer a click).
     . $capture(function () { kop_gdl_render_assets(); kop_fornits_render_assets(); kop_wbf_render_assets(); })
     . '<script>' . file_get_contents(dirname(__DIR__) . '/js/admin-kit.js') . '</script></body></html>';

@@ -788,6 +788,8 @@ function displayFacilities(facilitiesData, containerId) {
 
         const operatorHasName = !!(cleanText(operator.name) || cleanText(operator.currentName));
         if (!operatorHasName) return null;
+        // Taken off the directory at KOP Tools > Directory Editor (its company page stays).
+        if (operator.directoryHidden) return null;
         const namedFacilityCount = facilities.reduce((sum, f) => {
             const name = getFacilityDisplayName(f);
             return name && name.trim() ? sum + 1 : sum;

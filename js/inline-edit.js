@@ -347,7 +347,8 @@
         bar.appendChild(menu);
     }
     paintToggle();
-    document.body.appendChild(bar);
+    // An admin screen (KOP Tools > Directory Editor) opens the dialogs from its own buttons, with no pencils or bar.
+    if (!C.noBar) document.body.appendChild(bar);
 
     /* ---- Dialog -------------------------------------------------------------- */
 
@@ -884,6 +885,11 @@
         document.addEventListener('click', function (e) {
             var b = e.target.closest && e.target.closest('button[data-kop-quick]');
             if (b) { e.preventDefault(); quickSave(b); }
+        });
+        // A button with data-kop-edit-open="<ref>" opens that ref's dialog (no pencil needed).
+        document.addEventListener('click', function (e) {
+            var b = e.target.closest && e.target.closest('[data-kop-edit-open]');
+            if (b) { e.preventDefault(); openEditor(b.getAttribute('data-kop-edit-open')); }
         });
         refresh();
         window.addEventListener('resize', refresh);

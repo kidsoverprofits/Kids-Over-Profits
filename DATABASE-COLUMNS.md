@@ -49,6 +49,11 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 
 ---
 
+### {prefix}kop_directory_edits
+**Columns:** `id`, `action` (edit, hide, show, create, delete, merge, link, unlink, relationship, transfer), `operator_id` (the company acted on), `other_id` (the program for link actions, the other company for merge and transfer), `before_json`, `after_json` (the company rows, link rows and facility documents as they were and as they were left), `note`, `done_by`, `done_at`, `undone_by`, `undone_at`
+
+**Purpose:** Every change made at KOP Tools > Directory Editor (`inc/directory-editor.php`) to the directory's company cards: `kop_operators` and `kop_operator_facilities` rows and every row `kop_record_field_company_refs()` names. Undo restores exactly one entry's change while the rows still read as it left them.
+
 ### {prefix}kop_investors / {prefix}kop_investor_links / {prefix}kop_investor_log
 **Columns:** investors: `id`, `name`, `name_key` (lower case, no punctuation or legal suffix: one investor per key), `kind` (Dropdown Lists `investor-kinds`), `website`, `about`, `sources` (JSON `[{url, label}]`), `created_by`, `created_at`, `updated_at`; links: `id`, `investor_id`, `operator_id`, `facility_id` (one of the two set, the other 0), `role` (Dropdown Lists `investor-roles`), `start_year`, `end_year` (NULL = not known), `detail` (the stake in its own words), `source_url`, `created_by`, `created_at`; log: `id`, `action` (add, edit, delete, link, relink, unlink), `investor_id`, `link_id`, `before_json`, `after_json`, `note`, `done_by`, `done_at`, `undone_by`, `undone_at`
 

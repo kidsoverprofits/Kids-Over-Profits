@@ -375,6 +375,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # identification.investors entries print only while no link has their name, and wait on the screen's "Not linked yet" tab
 # (the first admin load after the deploy linked those on file then, kop_inv_maybe_import())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   # parsing, import, page lines, every write + exact undo, on a scratch copy
+# The directory's company cards (KOP Tools > Directory Editor, inc/directory-editor.php): per company, edit the card's fields (a rename keeps the old
+# name and its /operator/ address, option kop_dired_redirects), take the card off (operator.directoryHidden: the feed and js/tti-program-index.js skip
+# it, the company page stays), delete, merge into another (every kop_record_field_company_refs() row moves, names join), add / take off / move
+# programs (current, past, other; a moved program's currentOperator follows); {prefix}kop_directory_edits logs each with exact Undo.
+# "Every field" / "Edit program" open inc/inline-edit.php's dialogs from buttons (data-kop-edit-open, KOP_INLINE_EDIT.noBar)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-directory-editor.php [--list]   # every action + exact undo on a scratch copy of the company tables
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
 # Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,
@@ -853,6 +859,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_program_practices` - One line per rule, level, punishment or limit read from a program's own handbook (its document, page, quote, topic, the checklist boxes it shows), pending until the owner adds it to the facility page or leaves it off (`inc/program-practices.php`)
 - `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
 - `{prefix}kop_business_links` - Which state-registered company (state + document number; files in `js/data/business-filings/<st>/entities/`) shows on a facility or company page (`inc/business-filings.php`)
+- `{prefix}kop_directory_edits` - Every change made at KOP Tools > Directory Editor (company edits, hide/show, delete, merge, program links and moves) with the rows before and after, for exact Undo (`inc/directory-editor.php`)
 - `{prefix}kop_investors` / `{prefix}kop_investor_links` / `{prefix}kop_investor_log` - Investors (private equity firms, lenders, royalty funds...), their stakes in companies or programs (role, first and last year, the stake's own words, source), and every change with the rows before and after for exact Undo (`inc/investors.php`, KOP Tools > Investors)
 - `{prefix}kop_campuses` / `{prefix}kop_campus_programs` - Separate programs that share one campus (a hospital's two residential programs), one campus per record (`inc/campus-programs.php`)
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)

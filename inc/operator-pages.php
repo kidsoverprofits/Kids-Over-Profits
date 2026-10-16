@@ -167,6 +167,15 @@ if (!function_exists('kop_operator_pages_route')) {
             }
         }
 
+        // A company renamed or merged at KOP Tools > Directory Editor (inc/directory-editor.php).
+        if (function_exists('kop_dired_redirect_url')) {
+            $to = kop_dired_redirect_url($slug);
+            if ($to !== '') {
+                wp_safe_redirect($to, 301);
+                exit;
+            }
+        }
+
         // A company converted into one program (inc/program-homes-convert.php) lives on the program's page.
         if (function_exists('kop_phc_redirect_url')) {
             $to = kop_phc_redirect_url($slug);

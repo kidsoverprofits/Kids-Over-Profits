@@ -2,7 +2,7 @@
 
 Every review screen under KOP Tools follows the same rules, so a button, a dropdown and a filter mean the
 same thing everywhere. The shared pieces are `inc/admin-kit.php` (markup), `css/admin-kit.css` and
-`js/admin-kit.js`. Screens on the kit so far: Drive Docs, Fornits, Woodbury Facts.
+`js/admin-kit.js`. Screens on the kit so far: Drive Docs, Fornits, Woodbury Facts, Directory Editor.
 
 ## The rules
 

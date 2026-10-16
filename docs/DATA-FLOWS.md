@@ -99,6 +99,8 @@ request.
 - **Writes:**
   - the data form: direct UPDATE/INSERT (inc/facility-v2-writer.php:547-593)
   - `kop_v2_rename_operator()` (:787)
+  - KOP Tools > Directory Editor (inc/directory-editor.php): company edits, hide, delete, merge,
+    program links and moves; each calls `kop_record_changed()` for the operators and facilities it touched
   - data audit `operator_field` / `operator_link`
   - inline operator save, woodbury-create (:1175),
     `kop_v2_add_operator_other_names()`, standardize-facilities (:135)

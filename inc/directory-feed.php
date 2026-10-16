@@ -22,6 +22,8 @@ if (!defined('ABSPATH')) {
 function kop_directory_feed_wanted($project) {
     if (!is_array($project)) return false;
     $category = isset($project['category']) && is_string($project['category']) ? strtolower($project['category']) : '';
+    // A company taken off the directory at KOP Tools > Directory Editor (inc/directory-editor.php).
+    if (!empty($project['data']['operator']['directoryHidden'])) return false;
     return in_array($category, array('', 'companies', 'company', 'operators', 'operator', 'locations', 'location'), true);
 }
 

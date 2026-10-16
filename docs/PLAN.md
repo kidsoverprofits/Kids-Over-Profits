@@ -2683,3 +2683,27 @@ Open:
    (`kop_open_data_datasets()`), people ids for firm partners, filing Woodbury/review cards on an investor. Each is a
    step in `docs/ADDING-CONTENT.md` section 1 if wanted later.
 5. The "About" and "Sources" of an investor print nowhere public yet (no investor page).
+
+### 3.33 Directory Editor: the directory's company cards in one screen (2026-10-16)
+
+The owner asked for an admin screen that makes the TTI Facility Directory easier to edit (remove a company card, edit
+fields, transfer programs). KOP Tools > Directory Editor
+(https://kidsoverprofits.org/wp-admin/admin.php?page=kop-directory-editor, `inc/directory-editor.php`): one card per company
+with what the directory does with it (on it, fewer than 2 programs, same name as another, taken off); edit the card's fields
+(a rename keeps the old name and redirects the old /operator/ address); take the card off the directory or put it back
+(`operator.directoryHidden`; the company page stays); delete; merge into another company; add a program, take one off, set
+its tie (current / past / other); move ticked programs to another company, optionally kept as past. "Every field" and "Edit
+program" open the site's pencil dialogs. Every change in `{prefix}kop_directory_edits` with exact Undo. Test:
+`scripts/test-directory-editor.php`.
+
+Open:
+1. **Check after deploy:** open the screen (the log table is made on the first admin load); hide a company with two or more
+   programs, see its card leave https://kidsoverprofits.org/tti-program-index/ within a few minutes, Undo it from the notice;
+   open "Every field" and "Edit program" (the dialogs load in wp-admin from the same REST route as on the site).
+2. The "Same name or no name" tab lists company records whose card another record of the same name holds; merging them is
+   the owner's call one by one (Merge Duplicates is for programs only).
+3. Merge keeps the target's own values and fills only empty ones; a history (`operator.history`) on both stays the
+   target's. Moving a company's history by hand is the "Every field" dialog.
+4. Not in this scope: reordering programs within a card (sort_order) and editing the location tab's place groups.
+5. Check that saving a company in the admin data form keeps `operator.directoryHidden` (the form may drop keys it does not
+   draw); if it does not, a hidden card comes back after such a save. Hide one, save it in the data form, look again.

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.4
+ * Version: 2.5.5
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -225,6 +225,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-merge-people',
                 'requires' => 'kop_pmerge_page',
+            ),
+            array(
+                'title'    => 'Directory Editor',
+                'desc'     => 'The parent company cards of the TTI Facility Directory in one place: edit a company, take its card off the directory, delete it or merge it into another, add or take off programs, set each tie current or past, move programs to another company; exact Undo under Recent changes.',
+                'type'     => 'screen',
+                'screen'   => 'kop-directory-editor',
+                'requires' => 'kop_dired_admin_page',
             ),
             array(
                 'title'    => 'Investors',
