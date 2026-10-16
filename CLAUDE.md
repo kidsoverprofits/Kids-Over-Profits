@@ -368,6 +368,13 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 (kop-pipeline) py -3 scripts/florida-sunbiz.py pdfs [--docs ...] [--limit N] # search.sunbiz.org as Chrome; also keeps each company's page address for the build
 php api/import-business-filings.php ~/kop-import/business-filings/<co|fl> [apply]   # on the server (ea-php82): dry run first; rerun after more links
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=business-filings
+# Investors (inc/investors.php, KOP Tools > Investors): one row per investor ({prefix}kop_investors, kind from Dropdown Lists 'investor-kinds'),
+# one per stake in a company or program ({prefix}kop_investor_links: role 'investor-roles', years, detail, source), every change in
+# {prefix}kop_investor_log (Undo puts back exactly that change while nothing changed it since). The pages' Investors line is
+# kop_inv_fact_items() (a program names its companies' investors too, "of Sequel TSI"); free-text operator.investors /
+# identification.investors entries print only while no link has their name, and wait on the screen's "Not linked yet" tab
+# (the first admin load after the deploy linked those on file then, kop_inv_maybe_import())
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   # parsing, import, page lines, every write + exact undo, on a scratch copy
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
 # Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,
@@ -846,6 +853,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `{prefix}kop_program_practices` - One line per rule, level, punishment or limit read from a program's own handbook (its document, page, quote, topic, the checklist boxes it shows), pending until the owner adds it to the facility page or leaves it off (`inc/program-practices.php`)
 - `{prefix}kop_nonprofit_links` - Which nonprofit's IRS returns (Form 990, files in `js/data/nonprofit-filings/orgs/`) show on a facility or company page (`inc/nonprofit-filings.php`)
 - `{prefix}kop_business_links` - Which state-registered company (state + document number; files in `js/data/business-filings/<st>/entities/`) shows on a facility or company page (`inc/business-filings.php`)
+- `{prefix}kop_investors` / `{prefix}kop_investor_links` / `{prefix}kop_investor_log` - Investors (private equity firms, lenders, royalty funds...), their stakes in companies or programs (role, first and last year, the stake's own words, source), and every change with the rows before and after for exact Undo (`inc/investors.php`, KOP Tools > Investors)
 - `{prefix}kop_campuses` / `{prefix}kop_campus_programs` - Separate programs that share one campus (a hospital's two residential programs), one campus per record (`inc/campus-programs.php`)
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)
 - `{prefix}kop_glossary_nodes` / `_entries` / `_aliases` / `_tags` / `_log` - The TTI glossary: sections and groups, terms, other names, program tags, and each entry change for Undo (`inc/glossary-store.php`)

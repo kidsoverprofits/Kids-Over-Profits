@@ -584,7 +584,10 @@ if (!function_exists('kop_operator_page_data')) {
         $add('Founders', kop_operator_pages_people($staff['founders'] ?? array()));
         $add('Executives', kop_operator_pages_people($staff['keyExecutives'] ?? array()));
         $add('Owners', kop_facility_pages_text_items($op['owners'] ?? null));
-        $add('Investors', kop_facility_pages_text_items($op['investors'] ?? null));
+        // Linked investors (inc/investors.php), then free-text entries no link holds.
+        $add('Investors', function_exists('kop_inv_fact_items')
+            ? kop_inv_fact_items('company', $members, kop_facility_pages_text_items($op['investors'] ?? null))
+            : kop_facility_pages_text_items($op['investors'] ?? null));
 
         $status = $text($op['status'] ?? '');
         $aka = array_values(array_unique(array_filter(array_map('trim', array_map('strval', (array) ($op['otherNames'] ?? array()))), 'strlen')));

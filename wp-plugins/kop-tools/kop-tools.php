@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.3
+ * Version: 2.5.4
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -225,6 +225,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-merge-people',
                 'requires' => 'kop_pmerge_page',
+            ),
+            array(
+                'title'    => 'Investors',
+                'desc'     => 'The private equity firms, lenders and other money behind the companies and programs: add or edit one, link it to the companies or programs it put money in (role and years), turn investors typed as text on records into links; exact Undo under Recent changes.',
+                'type'     => 'screen',
+                'screen'   => 'kop-investors',
+                'requires' => 'kop_inv_admin_page',
             ),
             array(
                 'title'    => 'Program Homes',

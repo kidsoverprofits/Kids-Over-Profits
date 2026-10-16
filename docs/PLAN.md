@@ -2659,3 +2659,27 @@ Open:
    `kop_operator_page_data()`.
 6. `scripts/review-inbox-tests/woodbury-facts.php` "not conflicts: ... another staff role" fails with or without this
    work: a 2021 HEAL sighting is now "older than last year", so `kop_staff_role_with_former()` makes it "Former Founder".
+
+### 3.32 Investors table (2026-10-16)
+
+The owner asked for a database table for investors (scope picked: table + links). `inc/investors.php`:
+`{prefix}kop_investors` (name, kind, website, about, sources), `{prefix}kop_investor_links` (a stake in a company or
+program: role, first and last year, its own words, source) and `{prefix}kop_investor_log` (exact Undo), edited at KOP
+Tools > Investors (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors). Company and facility pages print
+the links in their Investors line; a program names its companies' investors ("majority owner of Sequel TSI, from 2017").
+The first admin load after the deploy turns the free-text entries on file (Sequel TSI's four, Paradigm's one) into
+investors and links. Test: `scripts/test-investors.php`.
+
+Open:
+1. **Check after deploy:** open the screen; the five imported investors are listed with their stakes (Patriot Capital,
+   Levine Leichtman, Alaris Royalty, Altamont, Pine Tree Equity) and Recent changes shows the import; see the Investors
+   line on https://kidsoverprofits.org/operator/sequel-tsi/ and on a Sequel program's facility page; link one, Undo it.
+2. The import guessed each stake's role and years from the words ("growth financing, exited 2008" = lender, until
+   2008). Check them on the screen; Patriot Capital's start year and Pine Tree's role are not in the text.
+3. More investors are only on the network map, filed as "parent" or "other" nodes (Bain Capital, Trinity Hunt Partners,
+   Youth Opportunity Investments, the four Sequel investors). Add them by hand or decide whether the map build should
+   read this table and draw investors as their own kind.
+4. Left out of this scope (owner's pick): a data form tab, a public /investors/ page, search, site map, open data
+   (`kop_open_data_datasets()`), people ids for firm partners, filing Woodbury/review cards on an investor. Each is a
+   step in `docs/ADDING-CONTENT.md` section 1 if wanted later.
+5. The "About" and "Sources" of an investor print nowhere public yet (no investor page).

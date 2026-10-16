@@ -214,6 +214,7 @@ function kop_record_field_company_refs() {
         $wpdb->prefix . 'kop_operator_facilities' => 'operator_id',
         $wpdb->prefix . 'kop_nonprofit_links'     => 'operator_id',
         $wpdb->prefix . 'kop_business_links'      => 'operator_id',
+        $wpdb->prefix . 'kop_investor_links'      => 'operator_id',
         $wpdb->prefix . 'kop_operator_links'      => 'operator_id',
     );
 }

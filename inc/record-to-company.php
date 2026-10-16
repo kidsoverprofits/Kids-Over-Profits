@@ -37,6 +37,7 @@ if (!function_exists('kop_rtc_link_tables')) {
             array('t' => $prefix . 'kop_facility_addresses', 'c' => 'facility', 'k' => 'name'),   // keyed by the record's name
             array('t' => $prefix . 'kop_nonprofit_links', 'c' => 'facility_id'),
             array('t' => $prefix . 'kop_business_links', 'c' => 'facility_id'),
+            array('t' => $prefix . 'kop_investor_links', 'c' => 'facility_id'),
             array('t' => 'news_facility_links', 'c' => 'facility_id'),
             array('t' => 'lawsuit_facility_links', 'c' => 'facility_id'),
         );

@@ -49,6 +49,13 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 
 ---
 
+### {prefix}kop_investors / {prefix}kop_investor_links / {prefix}kop_investor_log
+**Columns:** investors: `id`, `name`, `name_key` (lower case, no punctuation or legal suffix: one investor per key), `kind` (Dropdown Lists `investor-kinds`), `website`, `about`, `sources` (JSON `[{url, label}]`), `created_by`, `created_at`, `updated_at`; links: `id`, `investor_id`, `operator_id`, `facility_id` (one of the two set, the other 0), `role` (Dropdown Lists `investor-roles`), `start_year`, `end_year` (NULL = not known), `detail` (the stake in its own words), `source_url`, `created_by`, `created_at`; log: `id`, `action` (add, edit, delete, link, relink, unlink), `investor_id`, `link_id`, `before_json`, `after_json`, `note`, `done_by`, `done_at`, `undone_by`, `undone_at`
+
+**Purpose:** The private equity firms, lenders and other money behind companies and programs, and each stake (`inc/investors.php`). Edited at KOP Tools > Investors; company and facility pages print the links in their Investors line (a program also names the investors of the companies that ran it). Undo restores exactly what one log entry changed. Program stakes are moved by Merge Duplicates; a company with stakes is never deleted by a review Undo (`kop_record_field_company_refs()`).
+
+---
+
 ## Legacy Data Tables
 
 ### facilities_master

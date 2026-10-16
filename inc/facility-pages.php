@@ -3196,7 +3196,10 @@ if (!function_exists('kop_facility_page_data')) {
         $add_fact('Owners', kop_facility_pages_text_items($ident['currentOwners'] ?? null));
         $add_fact('Other operators', kop_facility_pages_text_items($ident['otherOperators'] ?? null));
         $add_fact('Past operators', kop_facility_pages_text_items($ident['pastOperators'] ?? null));
-        $add_fact('Investors', kop_facility_pages_text_items($ident['investors'] ?? null));
+        // Linked investors, its companies' too (inc/investors.php), then free-text entries no link holds.
+        $add_fact('Investors', function_exists('kop_inv_fact_items')
+            ? kop_inv_fact_items('facility', array($facility_id), kop_facility_pages_text_items($ident['investors'] ?? null))
+            : kop_facility_pages_text_items($ident['investors'] ?? null));
         $add_fact('Known referrers', kop_facility_pages_text_items($ident['knownReferrers'] ?? null));
         $accr = isset($doc['accreditations']) && is_array($doc['accreditations']) ? $doc['accreditations'] : array();
         $add_fact('Accreditation', kop_facility_pages_text_items($accr['current'] ?? null));
