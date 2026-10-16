@@ -207,7 +207,8 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <p class="kop-fp-count"><?php echo esc_html(count($page['facilities']) . ' on record' . ($page['open_count'] ? ', open ones first' : '') . '.'); ?></p>
                 <ul class="kop-fp-records kop-fp-siblings">
                     <?php foreach (($page['program_tree'] ?? $page['facilities']) as $f) :
-                        $bits = array_filter(array($f['place'], $f['years'], ($f['status'] !== '' && $f['status'] !== 'Unknown') ? $f['status'] : ''), 'strlen');
+                        // A renamed program goes by its name under this company (inc/facility-eras.php), then says what it is called now.
+                        $bits = array_filter(array(!empty($f['now_name']) ? 'Now known as ' . $f['now_name'] : '', $f['place'], $f['years'], ($f['status'] !== '' && $f['status'] !== 'Unknown') ? $f['status'] : ''), 'strlen');
                         $kop_op_homes = $f['homes'] ?? array();
                         ?>
                         <li<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('facility:' . (int) $f['id'] . ':all', $f['name']) : ''; ?>>

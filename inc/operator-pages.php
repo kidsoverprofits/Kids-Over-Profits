@@ -629,6 +629,18 @@ if (!function_exists('kop_operator_page_data')) {
                 ARRAY_A
             );
             $founded_year = preg_match('/\b(1[89]\d\d|20\d\d)\b/', (string) ($op['founded'] ?? ''), $fy) ? (int) $fy[1] : 0;
+            // A renamed program is listed by the name it had while this company
+            // ran it (kop_facility_eras_name_under()): Three Springs of Courtland
+            // under Three Springs, Sequel TSI Courtland under Sequel.
+            $company_names = array($entry['name'], $name);
+            foreach ((array) $rows as $or) {
+                $o = kop_operator_pages_decode($or['json_data']);
+                $company_names[] = (string) $or['name'];
+                foreach (array('otherNames', 'pastNames') as $field) {
+                    foreach ((array) ($o[$field] ?? array()) as $n) if (is_string($n)) $company_names[] = $n;
+                }
+            }
+            $then_names = array();
             foreach ((array) $frows as $r) {
                 $fid = (int) $r['id'];
                 if (isset($facility_ids[$fid])) continue;
@@ -640,6 +652,9 @@ if (!function_exists('kop_operator_page_data')) {
                 // that opened decades before it existed).
                 $fdoc = json_decode((string) $r['json_data'], true);
                 $ident = is_array($fdoc['identification'] ?? null) ? $fdoc['identification'] : array();
+                $then_names[$fid] = function_exists('kop_facility_eras_name_under') && is_array($fdoc)
+                    ? kop_facility_eras_name_under($fid, $fdoc, $company_names, (string) $r['relationship'])
+                    : null;
                 $past_ops = array_filter(array_map('trim', array_map('strval', (array) ($ident['pastOperators'] ?? array()))), 'strlen');
                 $current_op = kop_facility_pages_name_key((string) ($ident['currentOperator'] ?? ''));
                 $own_years = !$past_ops && $current_op !== '' && isset($my_keys[$current_op])
@@ -668,6 +683,15 @@ if (!function_exists('kop_operator_page_data')) {
                     'end_year'   => (int) $r['end_year'],
                     'own_years'  => $own_years,
                 );
+            }
+            if (function_exists('kop_facility_eras_name_under_settle')) $then_names = kop_facility_eras_name_under_settle($then_names);
+            foreach ($facilities as $i => $f) {
+                $then = $then_names[$f['id']] ?? null;
+                if ($then === null) continue;
+                // 'name' is the name then; 'now_name' the record's name today.
+                $facilities[$i]['now_name'] = $f['name'];
+                $facilities[$i]['name'] = $then['name'];
+                $facilities[$i]['name_years'] = $then['years'];
             }
         }
         // Open programs first, then the rest; alphabetical within each.
@@ -813,8 +837,10 @@ if (!function_exists('kop_operator_page_data')) {
             $fkeys = array();
             $fids_by_key = array();
             foreach ($facilities as $f) {
-                $fkeys[kop_facility_pages_name_key($f['name'])] = $f['name'];
-                $fids_by_key[kop_facility_pages_name_key($f['name'])] = (int) $f['id'];
+                foreach (array_filter(array($f['name'], $f['now_name'] ?? '')) as $fn) {
+                    $fkeys[kop_facility_pages_name_key($fn)] = $fn;
+                    $fids_by_key[kop_facility_pages_name_key($fn)] = (int) $f['id'];
+                }
             }
             $mrows = $wpdb->get_results(
                 "SELECT id, name, age, program, date_of_death, date_precision, cause_of_death, source_name, source_url, kop_url

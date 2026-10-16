@@ -44,7 +44,7 @@ function kop_directory_feed_fingerprint() {
     $parts[] = 'v2:' . ((function_exists('kop_v2_active') && kop_v2_active('program_index')) ? '1' : '0');
     // Saved rename years decide which name a record has under each company.
     $parts[] = 'renames:' . md5(serialize(function_exists('get_option') ? get_option('kop_network_rename_review', array()) : array()));
-    $parts[] = 'v:2';
+    $parts[] = 'v:3';   // 3: names then from the company's name in a record's names (kop_facility_eras_name_under_branded())
     return $key = substr(md5(implode(';', $parts)), 0, 16);
 }
 

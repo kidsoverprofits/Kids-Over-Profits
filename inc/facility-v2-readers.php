@@ -391,7 +391,8 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
         foreach ((array)$wpdb->get_results("SELECT id, json_data FROM facilities_v2", ARRAY_A) as $row) {
             $doc = kop_v2_decode($row['json_data']);
             if ($doc === null) continue;
-            if ($eras && (isset($era_map['facility'][(int)$row['id']]) || !empty($doc['legacy']['mergedFacilities']))) {
+            if ($eras && (isset($era_map['facility'][(int)$row['id']]) || !empty($doc['legacy']['mergedFacilities'])
+                || !empty($doc['identification']['pastNames']) || !empty($doc['identification']['otherNames']))) {
                 $era_docs[(int)$row['id']] = array(
                     'facility_id'     => (int)$row['id'],
                     'identification'  => $doc['identification'],
@@ -422,12 +423,21 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
         }
 
         $by_operator = array();
-        foreach ((array)$wpdb->get_results("SELECT operator_id, facility_id, relationship FROM {$wpdb->prefix}kop_operator_facilities ORDER BY operator_id, sort_order, facility_id", ARRAY_A) as $r) {
+        $links = (array)$wpdb->get_results("SELECT operator_id, facility_id, relationship FROM {$wpdb->prefix}kop_operator_facilities ORDER BY operator_id, sort_order, facility_id", ARRAY_A);
+        // Each company's names then, settled within its list (two programs never share one).
+        $then_by = array();
+        foreach ($links as $r) {
+            $fid = (int)$r['facility_id'];
+            if (!isset($facilities[$fid], $era_docs[$fid], $operator_names[(int)$r['operator_id']])) continue;
+            $then_by[(int)$r['operator_id']][$fid] = kop_facility_eras_name_under($fid, $era_docs[$fid], $operator_names[(int)$r['operator_id']], (string)$r['relationship']);
+        }
+        foreach ($then_by as $oid => $list) $then_by[$oid] = kop_facility_eras_name_under_settle($list);
+        foreach ($links as $r) {
             $fid = (int)$r['facility_id'];
             if (!isset($facilities[$fid])) continue;
             $copy = $facilities[$fid];
-            if (isset($era_docs[$fid], $operator_names[(int)$r['operator_id']])) {
-                $then = kop_facility_eras_name_under($fid, $era_docs[$fid], $operator_names[(int)$r['operator_id']], (string)$r['relationship']);
+            if (isset($then_by[(int)$r['operator_id']][$fid])) {
+                $then = $then_by[(int)$r['operator_id']][$fid];
                 if ($then !== null) {
                     // The card heads with the name then and says what it is called now.
                     $copy['nameUnderOperator'] = $then['name'];

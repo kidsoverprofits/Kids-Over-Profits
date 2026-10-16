@@ -1024,6 +1024,18 @@ Next, in order:
    (`api/apply-match-aliases.php`, which wrote the frozen legacy tables,
    was deleted 2026-09-30).
 
+- Names then on company pages (2026-10-16): /operator/ pages and the directory's company tab list a renamed
+  program by the name it had under that company (`kop_facility_eras_name_under()`). Open:
+  - Check after deploy: https://kidsoverprofits.org/operator/three-springs-inc/ lists "Three Springs of Courtland"
+    ("Now known as Brighter Path Courtland"), https://kidsoverprofits.org/operator/sequel-tsi/ lists "Sequel TSI Courtland".
+  - `scripts/test-name-under-operator.php` still fails one case it failed before: Psychiatric Solutions should list
+    #10370 as Rivendell of Utah, gets the record's own name (map/rename data for that record, not this rule).
+  - Duplicate records under Three Springs/Sequel: Three Springs School of Madison #9656 / Sequel TSI Madison #100076,
+    Three Springs School of Tuskegee #9657 / Sequel TSI of Tuskegee #100078, Sequel TSI Montgomery #100077 / Brighter Path
+    Montgomery #13640 (each pair is one program under two names: merge as a rename at Merge Duplicates).
+  - Auldern Academy #9637 lists "Three Springs of North Carolina" among its other names, which is #11903's past name;
+    one of the two records is wrong.
+
 ---
 
 ### 3.8 Follow-through (session review, 2026-09-30)

@@ -50,15 +50,22 @@ $rows = $wpdb->get_results(
     ARRAY_A
 );
 $found = array();
+$raw = array();
 foreach ($rows as $r) {
     $doc = json_decode($r['json_data'], true);
     $o = json_decode($r['ojson'], true);
     $o = is_array($o['operator'] ?? null) ? $o['operator'] : array();
     $names = array_merge(array($r['oname']), array_filter((array) ($o['otherNames'] ?? array()), 'is_string'), array_filter((array) ($o['pastNames'] ?? array()), 'is_string'));
     $then = kop_facility_eras_name_under((int) $r['facility_id'], is_array($doc) ? $doc : array(), $names, (string) $r['relationship']);
+    $raw[(int) $r['operator_id']][(int) $r['facility_id']] = $then;
     if ($then === null) continue;
-    $found[$r['operator_id'] . ':' . $r['facility_id']] = $then['name'];
     if ($list) echo "  {$r['oname']} ({$r['relationship']}): {$r['fname']} listed as {$then['name']}" . ($then['years'] !== '' ? " ({$then['years']})" : '') . "\n";
+}
+// Two programs of one company never share a name then (kop_facility_eras_name_under_settle()).
+foreach ($raw as $oid => $list_then) {
+    foreach (kop_facility_eras_name_under_settle($list_then) as $fid => $then) {
+        if ($then !== null) $found[$oid . ':' . $fid] = $then['name'];
+    }
 }
 $check('some company links get the name of their years', count($found) > 0, count($found) . ' of ' . count($rows) . ' links');
 
@@ -75,6 +82,18 @@ $cases = array(
     array('Three Springs Inc.', 13690, 'Three Springs Paint Rock Valley'),
     array('The Brown Schools', 10815, 'The Brown Schools at Laurel Ridge'),
     array('Psychiatric Solutions, Inc.', 10815, ''),
+    // A name carrying the company's own name was that company's.
+    array('Three Springs Inc.', 13639, 'Three Springs of Courtland'),
+    array('Sequel TSI', 13639, 'Sequel TSI Courtland'),
+    array('Sequel TSI', 13678, 'Sequel TSI Owens Cross Rds'),
+    array('Three Springs Inc.', 12164, 'Three Springs Sierra Vista Schools'),
+    // Only one program keeps a name two records list: the one with it as a past name.
+    array('Three Springs Inc.', 11903, 'Three Springs of North Carolina'),
+    array('Three Springs Inc.', 9637, ''),
+    // A company still running a program runs it under today's name.
+    array('Sequel TSI', 9686, ''),
+    // A record that is only the company's name keeps its dated name.
+    array('Embark Behavioral Health', 100096, 'Embark at The Forge'),
 );
 foreach ($cases as $c) {
     $k = $by_name[$c[0] . ':' . $c[1]] ?? null;
