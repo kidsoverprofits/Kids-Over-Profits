@@ -211,7 +211,7 @@
                 if (prev && prev.classList.contains('kop-ie-docsel-all')) return;
                 var b = el('button', { type: 'button', class: 'kop-ie-mini kop-ie-docsel-all' });
                 var own = function () { return Array.prototype.filter.call(list.children, function (c) { return c.matches(TILE) && shown(c); }); };
-                b.textContent = 'Pick all ' + own().length + ' here';
+                b.textContent = 'Pick all in this folder';
                 b.addEventListener('click', function () {
                     var tiles = own();
                     var all = tiles.every(function (t) { return picked.indexOf(t) >= 0; });
@@ -246,8 +246,9 @@
             // Only real changes: the page's MutationObserver would redraw again on each write.
             heads.forEach(function (h) { if (h.head.hidden !== !on) h.head.hidden = !on; });
             var n = picked.length;
-            count.textContent = n ? n + ' document' + (n === 1 ? '' : 's') + ' picked' : 'Click documents to pick them (shift-click picks a run)';
-            foot.querySelectorAll('.kop-ie-docsel-act').forEach(function (b) { b.disabled = !n; });
+            var text = n ? n + ' document' + (n === 1 ? '' : 's') + ' picked' : 'Click documents to pick them (shift-click picks a run)';
+            if (count.textContent !== text) count.textContent = text;
+            foot.querySelectorAll('.kop-ie-docsel-act').forEach(function (b) { if (b.disabled !== !n) b.disabled = !n; });
             var off = !on || !selecting();
             if (foot.hidden !== off) foot.hidden = off;
             if (document.body.classList.contains('kop-ie-docsel-on') === off) document.body.classList.toggle('kop-ie-docsel-on', !off);

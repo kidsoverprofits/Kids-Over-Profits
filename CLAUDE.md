@@ -466,6 +466,9 @@ php scripts/test-inline-edit.php                  # every facility sent back unc
 # A document on the wrong page: its tile's pencil (doc:<id>:h<page folder>) lists where it is filed and moves it to another
 # facility or a folder found by name, takes it off the page, or deletes it (inc/doc-placement.php; move/remove have Undo)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-placement.php   # real moves + undo on TEMP copies of the folder tables
+# Many at once: "Select documents" on each library (js/inline-edit.js docSel; click, shift-click, "Pick all in this folder"), a bar at the
+# foot opens one docs:<id>h<folder>... dialog (move / take off / delete, kop_dp_apply_many(), one Undo). A hidden pencil needs [hidden] display:none
+python scripts/test-doc-select.py [--shots tmp/doc-select]   # pencils of closed folders, picking, the ref, no redraw loop; made-up page
 # Survivor Testimony "Move to testimony" in the admin data form (js/data-form/testimony.js): every copy of a
 # moved note can be cleared ("Remove copy"), moved text leaves the fields the public pages list
 node scripts/test-testimony-move.js

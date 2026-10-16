@@ -13,6 +13,14 @@
     z-index: 99980;
 }
 
+/* display:inline-flex below would otherwise keep a hidden pencil on screen,
+   at the last place it was put (a tile of a closed folder over the open grid). */
+button.kop-ie-pen[hidden],
+.kop-ie-layer[hidden],
+.kop-ie-box[hidden] {
+    display: none;
+}
+
 .kop-ie-box {
     position: absolute;
     pointer-events: none;
