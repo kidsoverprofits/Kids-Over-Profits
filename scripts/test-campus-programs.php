@@ -37,7 +37,7 @@ foreach (array('facilities_v2', 'wpdl_kop_facility_identity', 'wpdl_kop_operator
 $copy->exec('CREATE TABLE wpdl_kop_program_homes (home_id INTEGER PRIMARY KEY, program_id INTEGER NOT NULL, home_name TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');
 $copy->exec('CREATE TABLE wpdl_kop_program_groups (program_id INTEGER PRIMARY KEY, created_record INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, created_by INTEGER NOT NULL DEFAULT 0)');
 $copy->exec('CREATE TABLE wpdl_kop_campuses (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, created_by INTEGER NOT NULL DEFAULT 0)');
-$copy->exec('CREATE TABLE wpdl_kop_campus_programs (facility_id INTEGER PRIMARY KEY, campus_id INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');
+$copy->exec('CREATE TABLE wpdl_kop_campus_programs (facility_id INTEGER PRIMARY KEY, campus_id INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, role TEXT NOT NULL DEFAULT \'\')');
 $copy = null;
 
 require __DIR__ . '/kop-test-harness.php';
@@ -90,7 +90,7 @@ $render = function ($data) {
 };
 $snapshot = function () use ($wpdb) {
     return json_encode(array(
-        $wpdb->get_results('SELECT facility_id, campus_id FROM wpdl_kop_campus_programs ORDER BY facility_id', ARRAY_A),
+        $wpdb->get_results('SELECT facility_id, campus_id, role FROM wpdl_kop_campus_programs ORDER BY facility_id', ARRAY_A),
         $wpdb->get_results('SELECT id, name FROM wpdl_kop_campuses ORDER BY id', ARRAY_A),
     ));
 };
@@ -188,6 +188,42 @@ $check('an undo cannot run twice', $threw !== '', $threw);
 
 kop_campus_undo($r['log']);
 $check('undo of the first tie leaves nothing', $snapshot() === $empty);
+
+// ---------------------------------------------------------------------------
+echo "\n-- A program and its academic program --\n";
+// Sequel TSI Madison (#100076) and its school, Three Springs School of Madison (#9656).
+if ((int) $wpdb->get_var('SELECT COUNT(*) FROM facilities_v2 WHERE id IN (100076, 9656)') !== 2) {
+    echo "SKIP #100076 / #9656 are not both in this mirror\n";
+} else {
+    $before = $snapshot();
+    $t = kop_campus_tie_school(100076, 9656, 'test');
+    $check('the school is the academic program, the program is not', kop_campus_role(9656) === 'school' && kop_campus_role(100076) === '');
+    kop_facility_pages_index(true);
+    $pp = kop_facility_page_data(100076);
+    $sp = kop_facility_page_data(9656);
+    $check('the program page lists its school', count($pp['campus']['schools'] ?? array()) === 1 && ($pp['campus']['schools'][0]['id'] ?? 0) === 9656 && !$pp['campus']['school_of']);
+    $check('the school page names its program', count($sp['campus']['school_of'] ?? array()) === 1 && ($sp['campus']['school_of'][0]['id'] ?? 0) === 100076);
+    $html = $render($pp);
+    file_put_contents($out_dir . '/sequel-tsi-madison.html', $html);
+    $check('the program page says "Its academic program"', strpos($html, 'Its academic program: ') !== false && strpos($html, 'Shares a campus with') === false);
+    $html = $render($sp);
+    file_put_contents($out_dir . '/three-springs-school-of-madison.html', $html);
+    $check('the school page says "The academic program of"', strpos($html, 'The academic program of ') !== false && strpos($html, 'The program it is the school of') !== false);
+    $threw = '';
+    try { kop_campus_tie_school(9656, 100076); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+    $check('a school cannot be made the program of its program', $threw !== '', $threw);
+    kop_campus_undo($t['log']);
+    $check('undo takes the link off exactly', $snapshot() === $before && kop_campus_role(9656) === '');
+    // A school joining a campus of two programs; Undo puts each step back.
+    $c1 = kop_campus_tie(array(10355, 10356), 'Syracuse campus');
+    $mid = $snapshot();
+    $c2 = kop_campus_tie_school(10355, 9656);
+    $check('a school joins its program\'s campus', kop_campus_of(9656) === kop_campus_of(10355) && kop_campus_role(9656) === 'school');
+    kop_campus_undo($c2['log']);
+    $check('undo of the school leaves the campus as it was', $snapshot() === $mid);
+    kop_campus_undo($c1['log']);
+    $check('...and the first undo leaves nothing', $snapshot() === $before);
+}
 
 // ---------------------------------------------------------------------------
 echo "\n-- Homes of one program are not a campus --\n";

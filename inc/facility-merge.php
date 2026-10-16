@@ -1006,6 +1006,9 @@ if (!function_exists('kop_fmerge_screen_data')) {
         $renames = array();
         foreach (kop_fmerge_find_renames($rows, $dismissed) as $r) {
             if (!isset($by_id[$r['earlier']], $by_id[$r['later']])) continue;
+            // Tied on one campus (a program and its school, say): not one program under two names.
+            $ca = function_exists('kop_campus_of') ? kop_campus_of((int) $r['earlier']) : 0;
+            if ($ca && $ca === kop_campus_of((int) $r['later'])) continue;
             $renames[] = kop_fmerge_rename_plan($by_id[$r['earlier']], $by_id[$r['later']], $side($r['earlier']), $side($r['later']), $r['why']);
         }
         usort($renames, function ($x, $y) {
@@ -1456,6 +1459,11 @@ if (!function_exists('kop_fmerge_ajax')) {
                     . ' Undo is on the Not the same tab.';
             } elseif ($op === 'undo_homes') {
                 $note = kop_fmerge_undo_homes((string) ($_POST['log'] ?? ''));
+            } elseif ($op === 'school' && function_exists('kop_campus_tie_school')) {
+                // One program and its academic program (its school): two records, each naming the other.
+                kop_campus_install();
+                kop_campus_tie_school((int) ($_POST['program'] ?? 0), (int) ($_POST['school'] ?? 0), 'Merge Duplicates');
+                $note = 'Linked as a program and its academic program; each page names the other. Undo is at Program Homes > Same campus.';
             } elseif ($op === 'campus' && function_exists('kop_campus_tie')) {
                 kop_campus_install();
                 kop_campus_tie(array((int) ($_POST['a'] ?? 0), (int) ($_POST['b'] ?? 0)), '', 'Merge Duplicates');
@@ -1691,8 +1699,10 @@ if (!function_exists('kop_fmerge_page')) {
                 cb.type = 'button';
                 cb.addEventListener('click', function () { send({ op: 'campus', a: p.a.id, b: p.b.id }, c); });
                 actions.appendChild(cb);
+                actions.appendChild(schoolButton(p.a, p.b, c));
                 actions.appendChild(el('span', 'kop-fm__muted', 'Keeps "' + k.name + '"; "' + d.name + '" becomes another name for it.'));
                 c.appendChild(actions);
+                c.appendChild(schoolChoice(p.a, p.b, c));
                 if (p.homes) {
                     var form = homesForm(p, c);
                     form.hidden = true;
@@ -1755,6 +1765,34 @@ if (!function_exists('kop_fmerge_page')) {
             }
 
             // One program under two names: the later record is kept, each name keeps its years and what was filed under it.
+            // Not one program: a program and its academic program (its school), two records each naming the other.
+            // The button opens a choice of which record is the school.
+            function schoolButton(a, b, card) {
+                var btn = el('button', 'button', 'Program and its academic program');
+                btn.type = 'button';
+                btn.title = 'Two records: one is the program, the other its school. Neither is merged; each page names the other.';
+                btn.setAttribute('aria-expanded', 'false');
+                btn.addEventListener('click', function () {
+                    var box = card.querySelector('.kop-fm__school');
+                    if (!box) return;
+                    box.hidden = !box.hidden;
+                    btn.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+                });
+                return btn;
+            }
+            function schoolChoice(a, b, card) {
+                var box = el('div', 'kop-fm__actions kop-fm__school');
+                box.hidden = true;
+                box.appendChild(el('span', 'kop-fm__muted', 'Which is the academic program (the school)?'));
+                [[a, b], [b, a]].forEach(function (pair) {
+                    var x = el('button', 'button', '"' + pair[1].name + '" is the school of "' + pair[0].name + '"');
+                    x.type = 'button';
+                    x.addEventListener('click', function () { send({ op: 'school', program: pair[0].id, school: pair[1].id }, card); });
+                    box.appendChild(x);
+                });
+                return box;
+            }
+
             function renameCard(p, byHand) {
                 var flip = !!swapped[p.key];
                 var e = flip ? p.later : p.earlier;
@@ -1802,6 +1840,7 @@ if (!function_exists('kop_fmerge_page')) {
                 alias.title = 'Keeps "' + l.name + '"; "' + e.name + '" becomes another name of it (no years of its own, no rename on the map)';
                 alias.addEventListener('click', function () { send({ op: 'alias', keep: l.id, drop: e.id }, c); });
                 actions.appendChild(alias);
+                actions.appendChild(schoolButton(e, l, c));
                 var sw = el('button', 'button', 'The other way round');
                 sw.type = 'button';
                 sw.addEventListener('click', function () { swapped[p.key] = !flip; delete yearsTyped[p.key]; render(); });
@@ -1819,6 +1858,7 @@ if (!function_exists('kop_fmerge_page')) {
                 }
                 actions.appendChild(el('span', 'kop-fm__muted', 'Keeps "' + l.name + '"; "' + e.name + '" becomes its past name, with its own years and everything filed under it.'));
                 c.appendChild(actions);
+                c.appendChild(schoolChoice(e, l, c));
                 return c;
             }
 

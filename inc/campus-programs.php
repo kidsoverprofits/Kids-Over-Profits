@@ -9,7 +9,12 @@
  * and often their reports.
  *
  *   {prefix}kop_campuses          id, name (optional, "Provo Canyon campus"), created_at, created_by
- *   {prefix}kop_campus_programs   facility_id (PK), campus_id, created_at
+ *   {prefix}kop_campus_programs   facility_id (PK), campus_id, created_at, role
+ *
+ * role 'school': the record is the academic program (the school) of the
+ * other program on its campus, e.g. "Three Springs School of Madison" beside
+ * the residential program. The pages say so ("Its academic program: ...",
+ * "The academic program of ..."); '' is a program like any other.
  *
  * A record is on at most one campus. Each page names the other programs on
  * its campus (they leave its "Same operator" list). Tied at KOP Tools >
@@ -24,7 +29,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('KOP_CAMPUS_DB_VERSION')) {
-    define('KOP_CAMPUS_DB_VERSION', '1');
+    define('KOP_CAMPUS_DB_VERSION', '2');
 }
 
 // ---------------------------------------------------------------------------
@@ -49,13 +54,17 @@ if (!function_exists('kop_campus_install')) {
             created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
             PRIMARY KEY (id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-        $wpdb->query('CREATE TABLE IF NOT EXISTS ' . kop_campus_table('programs') . ' (
+        $wpdb->query('CREATE TABLE IF NOT EXISTS ' . kop_campus_table('programs') . " (
             facility_id BIGINT UNSIGNED NOT NULL,
             campus_id BIGINT UNSIGNED NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            role VARCHAR(20) NOT NULL DEFAULT '',
             PRIMARY KEY (facility_id),
             KEY campus_id (campus_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        if (!$wpdb->get_var('SHOW COLUMNS FROM ' . kop_campus_table('programs') . " LIKE 'role'")) {
+            $wpdb->query('ALTER TABLE ' . kop_campus_table('programs') . " ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT ''");
+        }
         update_option('kop_campus_db', KOP_CAMPUS_DB_VERSION, false);
     }
     add_action('admin_init', 'kop_campus_install');
@@ -78,18 +87,20 @@ if (!function_exists('kop_campus_ready')) {
 
 if (!function_exists('kop_campus_map')) {
     /**
-     * {facilities: facility_id => campus_id, campuses: campus_id => {name, ids}}.
+     * {facilities: facility_id => campus_id, campuses: campus_id => {name, ids},
+     * roles: facility_id => 'school' (only the academic programs)}.
      * Records that are gone (merged away) drop out; a campus left with one
      * program is no campus.
      */
     function kop_campus_map($refresh = false) {
         static $memo = null;
         if ($memo !== null && !$refresh) return $memo;
-        $memo = array('facilities' => array(), 'campuses' => array());
+        $memo = array('facilities' => array(), 'campuses' => array(), 'roles' => array());
         if (!kop_campus_ready()) return $memo;
         global $wpdb;
+        // m.* : the role column comes with DB version 2 (admin_init adds it).
         $rows = $wpdb->get_results(
-            'SELECT m.facility_id, m.campus_id, c.name FROM ' . kop_campus_table('programs') . ' m
+            'SELECT m.*, c.name FROM ' . kop_campus_table('programs') . ' m
                JOIN facilities_v2 f ON f.id = m.facility_id
                LEFT JOIN ' . kop_campus_table('campuses') . ' c ON c.id = m.campus_id
               ORDER BY m.campus_id, m.facility_id',
@@ -100,11 +111,15 @@ if (!function_exists('kop_campus_map')) {
             $cid = (int) $r['campus_id'];
             if (!isset($by[$cid])) $by[$cid] = array('name' => trim((string) $r['name']), 'ids' => array());
             $by[$cid]['ids'][] = (int) $r['facility_id'];
+            if (($r['role'] ?? '') === 'school') $by[$cid]['schools'][(int) $r['facility_id']] = true;
         }
         foreach ($by as $cid => $c) {
             if (count($c['ids']) < 2) continue;
-            $memo['campuses'][$cid] = $c;
-            foreach ($c['ids'] as $id) $memo['facilities'][$id] = $cid;
+            $memo['campuses'][$cid] = array('name' => $c['name'], 'ids' => $c['ids']);
+            foreach ($c['ids'] as $id) {
+                $memo['facilities'][$id] = $cid;
+                if (isset($c['schools'][$id])) $memo['roles'][$id] = 'school';
+            }
         }
         return $memo;
     }
@@ -115,6 +130,14 @@ if (!function_exists('kop_campus_of')) {
     function kop_campus_of($facility_id) {
         $map = kop_campus_map();
         return (int) ($map['facilities'][(int) $facility_id] ?? 0);
+    }
+}
+
+if (!function_exists('kop_campus_role')) {
+    /** 'school' when the record is the academic program of the other program(s) on its campus, else ''. */
+    function kop_campus_role($facility_id) {
+        $map = kop_campus_map();
+        return (string) ($map['roles'][(int) $facility_id] ?? '');
     }
 }
 
@@ -134,6 +157,8 @@ if (!function_exists('kop_campus_cache_key')) {
         if (!kop_campus_ready()) return '-';
         global $wpdb;
         $row = $wpdb->get_row('SELECT COUNT(*), MAX(facility_id), SUM(campus_id) FROM ' . kop_campus_table('programs'), ARRAY_N);
+        // The academic program wording follows the roles.
+        $row[] = md5(implode(',', array_keys(kop_campus_map()['roles'])));
         // A campus name prints on the pages, so a renamed one changes them too.
         $names = $wpdb->get_col('SELECT name FROM ' . kop_campus_table('campuses') . ' ORDER BY id');
         return (is_array($row) ? implode('|', array_map('strval', $row)) : '?') . '|' . md5(implode("\n", (array) $names));
@@ -142,8 +167,11 @@ if (!function_exists('kop_campus_cache_key')) {
 
 if (!function_exists('kop_campus_for_page')) {
     /**
-     * What a facility page prints: {id, name, others: [{id, name, place,
-     * status, years, url}]} or null. Open programs first.
+     * What a facility page prints: {id, name, role, others: [{id, name, place,
+     * status, years, url, role}], school_of: [...], schools: [...]} or null.
+     * Open programs first. role 'school' = the academic program; school_of =
+     * the programs a school is the academic program of, schools = a
+     * program's academic programs (both drawn from others).
      */
     function kop_campus_for_page($facility_id) {
         $others = kop_campus_others($facility_id);
@@ -153,6 +181,7 @@ if (!function_exists('kop_campus_for_page')) {
         $rows = kop_program_homes_home_rows($others);
         foreach ($rows as &$r) {
             unset($r['home_name']);
+            $r['role'] = kop_campus_role((int) $r['id']);
         }
         unset($r);
         usort($rows, static function ($a, $b) {
@@ -160,7 +189,11 @@ if (!function_exists('kop_campus_for_page')) {
             $bo = strcasecmp($b['status'], 'Open') === 0 ? 0 : 1;
             return $ao - $bo ?: strcasecmp($a['name'], $b['name']);
         });
-        return array('id' => $cid, 'name' => (string) ($map['campuses'][$cid]['name'] ?? ''), 'others' => $rows);
+        $role = kop_campus_role($facility_id);
+        $schools = array_values(array_filter($rows, static function ($r) { return $r['role'] === 'school'; }));
+        $programs = array_values(array_filter($rows, static function ($r) { return $r['role'] !== 'school'; }));
+        return array('id' => $cid, 'name' => (string) ($map['campuses'][$cid]['name'] ?? ''), 'role' => $role, 'others' => $rows,
+            'school_of' => $role === 'school' ? $programs : array(), 'schools' => $role === 'school' ? array() : $schools);
     }
 }
 
@@ -176,17 +209,18 @@ if (!function_exists('kop_campus_log')) {
 }
 
 if (!function_exists('kop_campus_snapshot')) {
-    /** The rows of every campus touching $ids: {campuses: [id => name], programs: [facility_id => campus_id]}. */
+    /** The rows of every campus touching $ids: {campuses: [id => name], programs: [facility_id => campus_id], roles: [facility_id => role]}. */
     function kop_campus_snapshot(array $ids) {
         global $wpdb;
         $ids = array_values(array_filter(array_map('intval', $ids)));
-        $snap = array('campuses' => array(), 'programs' => array(), 'ids' => $ids);
+        $snap = array('campuses' => array(), 'programs' => array(), 'roles' => array(), 'ids' => $ids);
         if (!$ids) return $snap;
         $pt = kop_campus_table('programs');
         $cids = array_map('intval', (array) $wpdb->get_col("SELECT DISTINCT campus_id FROM {$pt} WHERE facility_id IN (" . implode(',', $ids) . ')'));
         if ($cids) {
-            foreach ((array) $wpdb->get_results("SELECT facility_id, campus_id FROM {$pt} WHERE campus_id IN (" . implode(',', $cids) . ')', ARRAY_A) as $r) {
+            foreach ((array) $wpdb->get_results("SELECT * FROM {$pt} WHERE campus_id IN (" . implode(',', $cids) . ')', ARRAY_A) as $r) {
                 $snap['programs'][(int) $r['facility_id']] = (int) $r['campus_id'];
+                if (($r['role'] ?? '') !== '') $snap['roles'][(int) $r['facility_id']] = (string) $r['role'];
             }
             foreach ((array) $wpdb->get_results('SELECT id, name FROM ' . kop_campus_table('campuses') . ' WHERE id IN (' . implode(',', $cids) . ')', ARRAY_A) as $r) {
                 $snap['campuses'][(int) $r['id']] = (string) $r['name'];
@@ -216,10 +250,11 @@ if (!function_exists('kop_campus_tie')) {
      * Puts $ids (two or more records) on one campus. A record already on a
      * campus brings it along: the campuses join, and the name given (else the
      * first named one) is kept. Records that are homes of one program are
-     * refused (they are that program's, inc/program-homes.php). Returns
-     * {campus, log}.
+     * refused (they are that program's, inc/program-homes.php). $roles:
+     * facility id => 'school' for the academic program of the others ('' or
+     * left out: a program). Returns {campus, log}.
      */
-    function kop_campus_tie(array $ids, $name = '', $note = '') {
+    function kop_campus_tie(array $ids, $name = '', $note = '', array $roles = array()) {
         global $wpdb;
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
         if (count($ids) < 2 && !array_filter($ids, 'kop_campus_of')) throw new RuntimeException('Pick at least two records.');
@@ -256,13 +291,36 @@ if (!function_exists('kop_campus_tie')) {
             if ($cid <= 0) $cid = (int) $wpdb->get_var("SELECT MAX(id) FROM {$ct}");
         }
         foreach ($ids as $id) {
-            if (($before['programs'][$id] ?? 0) === $cid) continue;
+            $role = (string) ($roles[$id] ?? '');
+            if (($before['programs'][$id] ?? 0) === $cid) {
+                if (array_key_exists($id, $roles) && $role !== (string) ($before['roles'][$id] ?? '')) {
+                    $wpdb->query($wpdb->prepare("UPDATE {$pt} SET role = %s WHERE facility_id = %d", $role, $id));
+                }
+                continue;
+            }
             $wpdb->query($wpdb->prepare("DELETE FROM {$pt} WHERE facility_id = %d", $id));
-            $wpdb->insert($pt, array('facility_id' => $id, 'campus_id' => $cid));
+            $row = array('facility_id' => $id, 'campus_id' => $cid);
+            if ($role !== '') $row['role'] = $role;
+            $wpdb->insert($pt, $row);
         }
-        $log = kop_campus_write_log('tie', $ids, $before, $cid, $note);
+        $log = kop_campus_write_log($roles ? 'school' : 'tie', $ids, $before, $cid, $note);
         kop_campus_after_change();
         return array('campus' => $cid, 'log' => $log);
+    }
+}
+
+if (!function_exists('kop_campus_tie_school')) {
+    /**
+     * Links a program and its academic program (its school): two records,
+     * each keeping its own page, the school's page naming the program and the
+     * program's naming its school. Returns {campus, log}.
+     */
+    function kop_campus_tie_school($program_id, $school_id, $note = '') {
+        $program_id = (int) $program_id;
+        $school_id = (int) $school_id;
+        if ($program_id <= 0 || $school_id <= 0 || $program_id === $school_id) throw new RuntimeException('Pick the program and its academic program: two different records.');
+        if (kop_campus_role($program_id) === 'school') throw new RuntimeException('#' . $program_id . ' is an academic program already; pick the program it serves.');
+        return kop_campus_tie(array($program_id, $school_id), '', $note, array($program_id => '', $school_id => 'school'));
     }
 }
 
@@ -326,7 +384,9 @@ if (!function_exists('kop_campus_undo')) {
                 $wpdb->insert($ct, array('id' => (int) $cid, 'name' => (string) $name));
             }
             foreach ((array) ($b['programs'] ?? array()) as $fid => $cid) {
-                $wpdb->insert($pt, array('facility_id' => (int) $fid, 'campus_id' => (int) $cid));
+                $row = array('facility_id' => (int) $fid, 'campus_id' => (int) $cid);
+                if (!empty($b['roles'][$fid])) $row['role'] = (string) $b['roles'][$fid];
+                $wpdb->insert($pt, $row);
             }
             $log[$i]['undone'] = gmdate('Y-m-d H:i:s');
             update_option('kop_campus_log', $log, false);
@@ -505,6 +565,11 @@ if (!function_exists('kop_campus_handle')) {
             foreach ((array) ($_POST['ids'] ?? array()) as $id) $ids[] = (int) $id;
             foreach (array('a', 'b') as $k) if (!empty($_POST[$k])) $ids[] = (int) $_POST[$k];
             $name = sanitize_text_field(wp_unslash($_POST['campus_name'] ?? ''));
+            if (($_POST['kind'] ?? '') === 'school') {
+                // By hand: a = the program, b = its academic program.
+                kop_campus_tie_school((int) ($_POST['a'] ?? 0), (int) ($_POST['b'] ?? 0));
+                return 'Linked the program and its academic program; each page names the other. Undo is on the Same campus tab.';
+            }
             kop_campus_tie($ids, $name);
             // A Program Homes suggestion that is separate programs leaves the homes suggestions.
             if (!empty($_POST['key']) && function_exists('kop_program_homes_set_dismissed') && !empty($_POST['home'])) {
@@ -598,10 +663,12 @@ if (!function_exists('kop_campus_page_tab')) {
         // Tie by hand.
         echo '<div class="kop-ph-card"><form method="post" action="' . $post . '">';
         $hidden(array('do' => 'campus_tie'));
-        echo '<h2>Tie two programs by hand</h2><p class="kop-ph-meta">If either is on a campus already, the other joins it.</p><div class="kop-ph-actions">';
+        echo '<h2>Tie two programs by hand</h2><p class="kop-ph-meta">If either is on a campus already, the other joins it.</p>';
+        echo '<p><label><input type="radio" name="kind" value="campus" checked> Separate programs on one campus</label><br>'
+            . '<label><input type="radio" name="kind" value="school"> A program (first) and its academic program, its school (second)</label></p><div class="kop-ph-actions">';
         echo '<label>Program ' . (function_exists('kop_facility_finder_field') ? kop_facility_finder_field('a') : '<input type="number" name="a">') . '</label>';
         echo '<label>and ' . (function_exists('kop_facility_finder_field') ? kop_facility_finder_field('b') : '<input type="number" name="b">') . '</label>';
-        echo '<label>Campus name (optional) <input type="text" name="campus_name" size="30"></label><button type="submit" class="button button-primary">They share a campus</button></div></form></div>';
+        echo '<label>Campus name (optional) <input type="text" name="campus_name" size="30"></label><button type="submit" class="button button-primary">Tie them</button></div></form></div>';
 
         $map = kop_campus_map(true);
         $all = array();
@@ -619,7 +686,8 @@ if (!function_exists('kop_campus_page_tab')) {
             $where = $first ? trim($first['city'] . ', ' . $first['state'], ', ') : '';
             echo '<div class="kop-ph-card"><h2>' . esc_html($c['name'] !== '' ? $c['name'] : 'Campus') . ($where !== '' ? ' <span class="kop-ph-meta">' . esc_html($where) . '</span>' : '') . '</h2><table><tbody>';
             foreach ($c['ids'] as $id) {
-                echo '<tr><td>' . $link($id, $d[$id]['name'] ?? '#' . $id) . (($d[$id]['status'] ?? '') !== '' ? ' <span class="kop-ph-meta">' . esc_html($d[$id]['status']) . '</span>' : '') . '</td><td style="width:1%"><form method="post" action="' . $post . '">';
+                echo '<tr><td>' . $link($id, $d[$id]['name'] ?? '#' . $id) . (($d[$id]['status'] ?? '') !== '' ? ' <span class="kop-ph-meta">' . esc_html($d[$id]['status']) . '</span>' : '')
+                    . (!empty($map['roles'][$id]) ? ' <strong>academic program</strong>' : '') . '</td><td style="width:1%"><form method="post" action="' . $post . '">';
                 $hidden(array('do' => 'campus_remove', 'facility_id' => $id));
                 echo '<button class="button-link">Take off</button></form></td></tr>';
             }
@@ -633,7 +701,7 @@ if (!function_exists('kop_campus_page_tab')) {
         if ($log) {
             $names = $details(array_merge(...array_map(static function ($e) { return array_map('intval', (array) $e['ids']); }, $log)));
             echo '<h2>Recent changes</h2><table class="widefat striped" style="max-width:60rem"><tbody>';
-            $verbs = array('tie' => 'Tied', 'remove' => 'Took off', 'rename' => 'Renamed the campus of');
+            $verbs = array('tie' => 'Tied', 'school' => 'Linked as a program and its academic program:', 'remove' => 'Took off', 'rename' => 'Renamed the campus of');
             foreach ($log as $e) {
                 $who = implode(', ', array_map(static function ($id) use ($names) { return $names[$id]['name'] ?? '#' . $id; }, (array) $e['ids']));
                 echo '<tr><td>' . esc_html(($verbs[$e['op']] ?? $e['op']) . ' ' . $who) . '</td><td class="kop-ph-meta">' . esc_html(trim($e['at'] . ' ' . $e['by'])) . '</td><td style="width:1%">';

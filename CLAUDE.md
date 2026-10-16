@@ -194,6 +194,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-program-homes-con
 # company, never a rename or homes of one program), "Separate programs on one campus" on a homes suggestion, "Separate programs, one campus"
 # on a Merge Duplicates pair (pairs on one campus leave that list). Pages: "On the <campus> with ..." + "Other programs on ..." ('campus', also
 # in the app's payload), and they leave "Same operator". Every change logged with the campuses as they were (kop_campus_log): exact Undo
+# A program and its academic program (its school) are a campus pair with role 'school' on the school (kop_campus_tie_school()): "Program and its
+# academic program" on Merge Duplicates cards (both tabs) or Same campus by hand; pages say "Its academic program: X" / "The academic program of Y"
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-campus-programs.php   # suggestions, tie/join/rename/take off + undo, both pages
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home

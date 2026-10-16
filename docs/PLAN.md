@@ -1032,7 +1032,8 @@ Next, in order:
     #10370 as Rivendell of Utah, gets the record's own name (map/rename data for that record, not this rule).
   - Duplicate records under Three Springs/Sequel, each one program under two names: merge as a rename at
     https://kidsoverprofits.org/wp-admin/admin.php?page=kop-merge-duplicates (keep first, earlier name second):
-    #100076 Sequel TSI Madison <- #9656 Three Springs School of Madison; #100078 Sequel TSI of Tuskegee <- #9657
+    #100076 Sequel TSI Madison <- #9656 Three Springs School of Madison (or, if #9656 is the school of the program,
+    "Program and its academic program" on the same card); #100078 Sequel TSI of Tuskegee <- #9657
     Three Springs School of Tuskegee; #13640 Brighter Path Montgomery <- #100077 Sequel TSI Montgomery; #11098
     St. John's Youth Academy <- #9654 Three Springs of St. Johns. Check first: #9648 Three Springs of Duck River vs
     #9639 L.E.A.P.S. Program at Duck River (both Centerville TN; a program on the campus, or the same one?).

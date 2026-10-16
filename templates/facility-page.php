@@ -326,9 +326,13 @@ $kop_fp_is_program = !empty($page['program_homes']['homes']);
 // Satellite homes of a main facility (KOP Tools > Program Homes > By hand) read as such.
 $kop_fp_satellite = $kop_fp_is_program ? !empty($page['program_homes']['satellite']) : !empty($page['home_of']['satellite']);
 if ($kop_fp_homes) $kop_fp_sections['homes'] = $kop_fp_is_program ? ($kop_fp_satellite ? 'Satellite homes' : 'Homes') : ($kop_fp_satellite ? 'Other satellite homes' : 'Other homes');
-// Separate programs on one campus (inc/campus-programs.php).
+// Separate programs on one campus (inc/campus-programs.php); a program and its academic program (school) are one too.
 $kop_fp_campus = !empty($page['campus']['others']) ? $page['campus'] : null;
-if ($kop_fp_campus) $kop_fp_sections['campus'] = 'Same campus';
+$kop_fp_school_of = $kop_fp_campus ? (array) ($kop_fp_campus['school_of'] ?? array()) : array();
+$kop_fp_schools = $kop_fp_campus ? (array) ($kop_fp_campus['schools'] ?? array()) : array();
+// Only the program and its school: worded as that, not as a shared campus.
+$kop_fp_school_only = $kop_fp_campus && count($kop_fp_school_of) + count($kop_fp_schools) === count($kop_fp_campus['others']);
+if ($kop_fp_campus) $kop_fp_sections['campus'] = $kop_fp_school_only ? ($kop_fp_school_of ? 'Its program' : 'Academic program') : 'Same campus';
 // Rules and practices read from the program's own handbooks (inc/program-practices.php), read at render time.
 $kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
 $kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
@@ -520,7 +524,16 @@ get_header();
             }, $kop_fp_campus['others']);
             $kop_fp_cl = count($kop_fp_cl) > 1 ? implode(', ', array_slice($kop_fp_cl, 0, -1)) . ' and ' . end($kop_fp_cl) : $kop_fp_cl[0];
             ?>
+            <?php if ($kop_fp_school_only) :
+                $kop_fp_sl = array_map(static function ($c) {
+                    return $c['url'] !== '' ? '<a href="' . esc_url($c['url']) . '">' . esc_html($c['name']) . '</a>' : esc_html($c['name']);
+                }, $kop_fp_school_of ?: $kop_fp_schools);
+                $kop_fp_sl = count($kop_fp_sl) > 1 ? implode(', ', array_slice($kop_fp_sl, 0, -1)) . ' and ' . end($kop_fp_sl) : $kop_fp_sl[0];
+                ?>
+            <p class="kop-fp-formerly kop-fp-campus-of"><?php echo $kop_fp_school_of ? 'The academic program of ' : 'Its academic program: '; ?><?php echo $kop_fp_sl; ?></p>
+            <?php else : ?>
             <p class="kop-fp-formerly kop-fp-campus-of"><?php echo $kop_fp_campus['name'] !== '' ? 'On the ' . esc_html(preg_replace('/^the\s+/i', '', $kop_fp_campus['name'])) . ' with ' : 'Shares a campus with '; ?><?php echo $kop_fp_cl; ?></p>
+            <?php endif; ?>
         <?php endif; ?>
         <div class="kop-fp-badges"<?php echo $kop_fp_edit('status', 'status and years'); ?>>
             <?php if ($page['status'] !== '') : ?>
@@ -701,11 +714,16 @@ get_header();
 
             <?php if ($kop_fp_campus) : ?>
             <section class="kop-fp-section kop-fp-campus-section" id="<?php echo $kop_fp_id('campus'); ?>">
+                <?php if ($kop_fp_school_only) : ?>
+                <h2><?php echo $kop_fp_school_of ? 'The program it is the school of' : 'Its academic program'; ?></h2>
+                <p class="kop-fp-count"><?php echo $kop_fp_school_of ? 'This is the academic program (the school) of the program below. Each has its own page and its own records.' : 'The program\'s school, its academic program. Each has its own page and its own records.'; ?></p>
+                <?php else : ?>
                 <h2>Other programs on <?php echo $kop_fp_campus['name'] !== '' ? 'the ' . esc_html(preg_replace('/^the\s+/i', '', $kop_fp_campus['name'])) : 'the same campus'; ?></h2>
                 <p class="kop-fp-count">Separate programs run side by side on one site, each with its own page and its own records.</p>
+                <?php endif; ?>
                 <ul class="kop-fp-records kop-fp-campus">
                     <?php foreach ($kop_fp_campus['others'] as $c) :
-                        $bits = array_filter(array($c['place'], $c['years'], ($c['status'] !== '' && $c['status'] !== 'Unknown') ? $c['status'] : ''), 'strlen');
+                        $bits = array_filter(array(!$kop_fp_school_only && ($c['role'] ?? '') === 'school' ? 'Academic program' : '', $c['place'], $c['years'], ($c['status'] !== '' && $c['status'] !== 'Unknown') ? $c['status'] : ''), 'strlen');
                         ?>
                         <li>
                             <?php if ($c['url'] !== '') : ?><a href="<?php echo esc_url($c['url']); ?>"><?php echo esc_html($c['name']); ?></a><?php else : ?><span><?php echo esc_html($c['name']); ?></span><?php endif; ?>
