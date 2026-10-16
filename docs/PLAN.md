@@ -1030,9 +1030,13 @@ Next, in order:
     ("Now known as Brighter Path Courtland"), https://kidsoverprofits.org/operator/sequel-tsi/ lists "Sequel TSI Courtland".
   - `scripts/test-name-under-operator.php` still fails one case it failed before: Psychiatric Solutions should list
     #10370 as Rivendell of Utah, gets the record's own name (map/rename data for that record, not this rule).
-  - Duplicate records under Three Springs/Sequel: Three Springs School of Madison #9656 / Sequel TSI Madison #100076,
-    Three Springs School of Tuskegee #9657 / Sequel TSI of Tuskegee #100078, Sequel TSI Montgomery #100077 / Brighter Path
-    Montgomery #13640 (each pair is one program under two names: merge as a rename at Merge Duplicates).
+  - Duplicate records under Three Springs/Sequel, each one program under two names: merge as a rename at
+    https://kidsoverprofits.org/wp-admin/admin.php?page=kop-merge-duplicates (keep first, earlier name second):
+    #100076 Sequel TSI Madison <- #9656 Three Springs School of Madison; #100078 Sequel TSI of Tuskegee <- #9657
+    Three Springs School of Tuskegee; #13640 Brighter Path Montgomery <- #100077 Sequel TSI Montgomery; #11098
+    St. John's Youth Academy <- #9654 Three Springs of St. Johns. Check first: #9648 Three Springs of Duck River vs
+    #9639 L.E.A.P.S. Program at Duck River (both Centerville TN; a program on the campus, or the same one?).
+    #100076 lists "Three Springs New Directions", also a past name of Pathway of Madison County #13678: one is wrong.
   - Auldern Academy #9637 lists "Three Springs of North Carolina" among its other names, which is #11903's past name;
     one of the two records is wrong.
 
