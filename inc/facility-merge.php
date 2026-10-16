@@ -1462,8 +1462,11 @@ if (!function_exists('kop_fmerge_ajax')) {
             } elseif ($op === 'school' && function_exists('kop_campus_tie_school')) {
                 // One program and its academic program (its school): two records, each naming the other.
                 kop_campus_install();
-                kop_campus_tie_school((int) ($_POST['program'] ?? 0), (int) ($_POST['school'] ?? 0), 'Merge Duplicates');
-                $note = 'Linked as a program and its academic program; each page names the other. Undo is at Program Homes > Same campus.';
+                $tied = kop_campus_tie_school((int) ($_POST['program'] ?? 0), (int) ($_POST['school'] ?? 0), 'Merge Duplicates');
+                $note = 'Linked as a program and its academic program; each page names the other.';
+                $undo_log = (string) $tied['log'];
+            } elseif ($op === 'undo_school' && function_exists('kop_campus_undo')) {
+                $note = kop_campus_undo(sanitize_key((string) ($_POST['log'] ?? ''))) . ' The two records are back on this screen.';
             } elseif ($op === 'campus' && function_exists('kop_campus_tie')) {
                 kop_campus_install();
                 kop_campus_tie(array((int) ($_POST['a'] ?? 0), (int) ($_POST['b'] ?? 0)), '', 'Merge Duplicates');
@@ -1476,7 +1479,7 @@ if (!function_exists('kop_fmerge_ajax')) {
             wp_send_json_error(array('message' => $e->getMessage(), 'data' => kop_fmerge_screen_data(true)), 400);
         }
         kop_fmerge_flush();
-        wp_send_json_success(array('message' => $note, 'data' => kop_fmerge_screen_data(true)));
+        wp_send_json_success(array('message' => $note, 'undo' => $undo_log ?? '', 'data' => kop_fmerge_screen_data(true)));
     }
     add_action('wp_ajax_kop_facility_merge', 'kop_fmerge_ajax');
 }
@@ -1571,6 +1574,10 @@ if (!function_exists('kop_fmerge_page')) {
             .kop-fm__muted { color: #50575e; }
             .kop-fm__company { font-weight: 600; }
             .kop-fm__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+            .kop-fm__school { margin-top: 12px; padding: 10px 12px; border: 1px solid #c3c4c7; border-radius: 6px; background: #f6f7f7; }
+            .kop-fm__school[hidden] { display: none; }
+            .kop-fm__school legend { font-weight: 600; padding: 0 4px; }
+            .kop-fm__school-opt { display: block; margin: 4px 0; }
             .kop-fm__homes { margin-top: 10px; padding: 10px 12px; background: #f6f7f7; border-radius: 6px; }
             .kop-fm__homes-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0; }
             .kop-fm__empty { padding: 24px; background: #fff; border: 1px dashed #c3c4c7; border-radius: 6px; text-align: center; }
@@ -1627,6 +1634,13 @@ if (!function_exists('kop_fmerge_page')) {
                             status.textContent = d.message || 'Saved.';
                         }
                         render();
+                        if (d.undo) {
+                            var u = el('button', 'button-link', 'Undo');
+                            u.type = 'button';
+                            u.style.marginLeft = '10px';
+                            u.addEventListener('click', function () { send({ op: 'undo_school', log: d.undo }, null); });
+                            status.appendChild(u);
+                        }
                     })
                     .catch(function (e) {
                         status.className = 'kop-fm__status is-bad';
@@ -1768,7 +1782,7 @@ if (!function_exists('kop_fmerge_page')) {
             // Not one program: a program and its academic program (its school), two records each naming the other.
             // The button opens a choice of which record is the school.
             function schoolButton(a, b, card) {
-                var btn = el('button', 'button', 'Program and its academic program');
+                var btn = el('button', 'button kop-fm__school-open', 'Program and its academic program');
                 btn.type = 'button';
                 btn.title = 'Two records: one is the program, the other its school. Neither is merged; each page names the other.';
                 btn.setAttribute('aria-expanded', 'false');
@@ -1780,16 +1794,44 @@ if (!function_exists('kop_fmerge_page')) {
                 });
                 return btn;
             }
+            var schoolSeq = 0;
             function schoolChoice(a, b, card) {
-                var box = el('div', 'kop-fm__actions kop-fm__school');
+                var box = el('fieldset', 'kop-fm__school');
                 box.hidden = true;
-                box.appendChild(el('span', 'kop-fm__muted', 'Which is the academic program (the school)?'));
+                box.appendChild(el('legend', '', 'Which record is the academic program (the school)?'));
+                var group = 'kop-fm-school-' + (++schoolSeq);
+                var picked = null;
+                var go = el('button', 'button button-primary', 'Link them');
+                go.type = 'button';
+                go.disabled = true;
+                var what = el('span', 'kop-fm__muted', 'Pick the school first.');
                 [[a, b], [b, a]].forEach(function (pair) {
-                    var x = el('button', 'button', '"' + pair[1].name + '" is the school of "' + pair[0].name + '"');
-                    x.type = 'button';
-                    x.addEventListener('click', function () { send({ op: 'school', program: pair[0].id, school: pair[1].id }, card); });
-                    box.appendChild(x);
+                    var lab = el('label', 'kop-fm__school-opt');
+                    var r = el('input'); r.type = 'radio'; r.name = group;
+                    r.addEventListener('change', function () {
+                        picked = pair;
+                        go.disabled = false;
+                        what.textContent = 'Neither record is merged: "' + pair[0].name + '" is the program, "' + pair[1].name + '" its school, and each page names the other.';
+                    });
+                    lab.appendChild(r);
+                    lab.appendChild(document.createTextNode(' "' + pair[1].name + '" is the school of "' + pair[0].name + '"'));
+                    box.appendChild(lab);
                 });
+                var row = el('div', 'kop-fm__actions');
+                go.addEventListener('click', function () {
+                    if (picked) send({ op: 'school', program: picked[0].id, school: picked[1].id }, card);
+                });
+                row.appendChild(go);
+                var cancel = el('button', 'button', 'Cancel');
+                cancel.type = 'button';
+                cancel.addEventListener('click', function () {
+                    box.hidden = true;
+                    var opener = card.querySelector('.kop-fm__school-open');
+                    if (opener) opener.setAttribute('aria-expanded', 'false');
+                });
+                row.appendChild(cancel);
+                row.appendChild(what);
+                box.appendChild(row);
                 return box;
             }
 
