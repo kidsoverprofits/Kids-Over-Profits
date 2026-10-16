@@ -216,7 +216,7 @@ function kop_mfd_merge_docs(array $keep, array $drop, array $drop_meta, array $r
         $entry['rename'] = array(
             'year'       => (int) $rename['year'],
             'startYear'  => array_key_exists('start', $earlier) ? $int($earlier['start']) : $int($drop_period['startYear'] ?? null),
-            'endYear'    => $int($earlier['end'] ?? null) ?? (int) $rename['year'],
+            'endYear'    => $int($earlier['end'] ?? null) ?? $int($rename['year'] ?? null),
             'status'     => (string) ($earlier['status'] ?? ($drop_period['status'] ?? '')),
             'notes'      => array_values(array_filter((array) ($drop_period['notes'] ?? array()), 'is_string')),
             'operators'  => $operators,

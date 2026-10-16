@@ -1056,8 +1056,8 @@ function kop_daudit_apply($key, $reviewer, $over_changes = false, $picked = null
         if ($s === 'blocked') $why[] = $states[$i]['why'];
         if ($s === 'changed' && !$from_card && !$over_changes) $why[] = $states[$i]['why'];
         if ($op['type'] === 'merge' && !empty($op['rename']) && !(int) ($op['year'] ?? 0)) {
+            // No year is fine: each name keeps what was filed under it, the year can follow (Map Renames).
             $op['year'] = (int) ($years[$i] ?? 0);
-            if (!$op['year']) $why[] = 'Give the year of the rename for step ' . ((int) preg_replace('/\D/', '', $i) + 1) . '.';
         }
         $ops[$i] = $op;
     }
@@ -1437,7 +1437,7 @@ function kop_daudit_rename_state($key, array $r, PDO $pdo) {
 function kop_daudit_rename_years(array $e, array $l, $year) {
     $year = (int) $year;
     return array(
-        'earlier' => array('start' => ($e['start'] && (!$year || $e['start'] <= $year)) ? $e['start'] : null, 'end' => $year ?: null),
+        'earlier' => array('start' => ($e['start'] && (!$year || $e['start'] <= $year)) ? $e['start'] : null, 'end' => $year ?: (($e['end'] ?? null) ?: null)),
         'later'   => array('start' => ($l['start'] && $l['start'] >= $year) ? $l['start'] : ($year ?: null), 'end' => $l['end'] ?: null),
     );
 }
@@ -1505,8 +1505,7 @@ function kop_daudit_rename_merge($key, $pair, $year, $reviewer, $reversed = fals
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $s = kop_daudit_rename_state($key, $r, $pdo);
     if ($s['state'] !== 'separate') throw new RuntimeException(kop_daudit_rename_words($s));
-    $year = (int) $year ?: (int) $s['year'];
-    if (!$year) throw new RuntimeException('Give the year of the rename.');
+    $year = (int) $year ?: (int) $s['year'];   // 0 = not known: allowed
     $y = kop_daudit_rename_years($s['earlier'], $s['later'], $year);
     try {
         $msg = kop_fmerge_do_merge($pdo, $opts['prefix'], $s['later']['id'], $s['earlier']['id'], (string) $reviewer,

@@ -148,12 +148,18 @@ if (!function_exists('kop_facility_eras_doc_renames')) {
         $out = array();
         foreach ((array) ($doc['legacy']['mergedFacilities'] ?? array()) as $at => $m) {
             if (!is_array($m) || !is_array($m['rename'] ?? null) || trim((string) ($m['name'] ?? '')) === '') continue;
-            if ((int) ($m['rename']['year'] ?? 0) <= 0) continue;
             $m['_at'] = $at;   // its place in the list, for the pencil (era:<id>:<at>)
             $out[] = $m;
         }
-        usort($out, function ($a, $b) {
-            return ((int) $a['rename']['year'] <=> (int) $b['rename']['year']) ?: ((int) ($a['rename']['startYear'] ?? 0) <=> (int) ($b['rename']['startYear'] ?? 0));
+        // A rename saved without its year (Merge Duplicates, Map Renames) sorts by the earlier name's own years, else where it was merged.
+        $when = function ($m) {
+            return (int) ($m['rename']['year'] ?? 0) ?: ((int) ($m['rename']['endYear'] ?? 0) ?: (int) ($m['rename']['startYear'] ?? 0));
+        };
+        usort($out, function ($a, $b) use ($when) {
+            $wa = $when($a);
+            $wb = $when($b);
+            if ($wa && $wb && $wa !== $wb) return $wa <=> $wb;
+            return ((int) ($a['rename']['startYear'] ?? 0) <=> (int) ($b['rename']['startYear'] ?? 0)) ?: ($a['_at'] <=> $b['_at']);
         });
         return $out;
     }
@@ -178,9 +184,9 @@ if (!function_exists('kop_facility_eras_doc_chain')) {
             if (strcasecmp(trim((string) $m['name']), $name) === 0) continue;
             $year = (int) $r['year'];
             $start = (int) ($r['startYear'] ?? 0);
-            $end = (int) ($r['endYear'] ?? 0) ?: $year;
+            $end = (int) ($r['endYear'] ?? 0) ?: ($year ?: null);
             $chain[] = array(
-                'node' => '', 'name' => trim((string) $m['name']), 'start' => $start ?: $cut, 'end' => $end, 'cut' => $cut,
+                'node' => '', 'name' => trim((string) $m['name']), 'start' => $start ?: ($cut ?: null), 'end' => $end, 'cut' => $cut,
                 'facility_id' => $fid, 'operators' => array_values(array_filter(array_map('strval', (array) ($r['operators'] ?? array())), 'strlen')),
                 'status' => (string) ($r['status'] ?? ''), 'notes' => array_values(array_filter((array) ($r['notes'] ?? array()), 'is_string')),
                 'merged' => $m['_at'],
@@ -192,7 +198,7 @@ if (!function_exists('kop_facility_eras_doc_chain')) {
         $operator = trim((string) ($doc['identification']['currentOperator'] ?? ''));
         $start = (int) ($op['startYear'] ?? 0);
         $chain[] = array(
-            'node' => '', 'name' => $name, 'start' => ($start && $start >= $cut) ? $start : $cut, 'end' => (int) ($op['endYear'] ?? 0) ?: null, 'cut' => $cut,
+            'node' => '', 'name' => $name, 'start' => ($start && $start >= (int) $cut) ? $start : ($cut ?: null), 'end' => (int) ($op['endYear'] ?? 0) ?: null, 'cut' => $cut,
             'facility_id' => $fid, 'operators' => $operator !== '' ? array($operator) : array(),
             'status' => (string) ($op['status'] ?? ''), 'notes' => array(),
         );

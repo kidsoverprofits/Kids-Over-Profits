@@ -590,19 +590,20 @@ if (!function_exists('kop_fmerge_execute')) {
         $rename = null;
         if (!empty($opts['rename'])) {
             $r = (array) $opts['rename'];
+            // No year is fine (as at Map Renames): each name keeps what was filed under it, the year can follow.
             $year = (int) ($r['year'] ?? 0);
-            if ($year < 1800 || $year > (int) gmdate('Y')) throw new RuntimeException('Give the year of the rename (1800 to ' . gmdate('Y') . ').');
+            if ($year !== 0 && ($year < 1800 || $year > (int) gmdate('Y'))) throw new RuntimeException('That year is not between 1800 and ' . gmdate('Y') . '. Leave it blank if you do not know it.');
             $yr = function ($v) { return (is_numeric($v) && (int) $v > 0) ? (int) $v : null; };
             $e = (array) ($r['earlier'] ?? array());
             $l = (array) ($r['later'] ?? array());
             $e_start = array_key_exists('start', $e) ? $yr($e['start']) : $yr($drop['doc']['operatingPeriod']['startYear'] ?? null);
-            if ($e_start && $e_start > $year) throw new RuntimeException('The earlier name cannot start after the rename (' . $e_start . ' > ' . $year . ').');
-            $l_start = $yr($l['start'] ?? null) ?: $year;
+            if ($year && $e_start && $e_start > $year) throw new RuntimeException('The earlier name cannot start after the rename (' . $e_start . ' > ' . $year . ').');
+            $l_start = $yr($l['start'] ?? null) ?: ($year ?: null);
             $l_end = $yr($l['end'] ?? null);
-            if ($l_end && $l_end < $l_start) throw new RuntimeException('The later name cannot end before it starts (' . $l_end . ' < ' . $l_start . ').');
+            if ($l_end && $l_start && $l_end < $l_start) throw new RuntimeException('The later name cannot end before it starts (' . $l_end . ' < ' . $l_start . ').');
             $rename = array(
                 'year'    => $year,
-                'earlier' => array('start' => $e_start, 'end' => $yr($e['end'] ?? null) ?: $year,
+                'earlier' => array('start' => $e_start, 'end' => $yr($e['end'] ?? null) ?: ($year ?: null),
                     'status' => (string) ($drop['doc']['operatingPeriod']['status'] ?? ''),
                     'operators' => kop_fmerge_operator_names($pdo, $prefix, $drop_id)),
                 'later'   => array('start' => $l_start, 'end' => $l_end),
@@ -1784,14 +1785,13 @@ if (!function_exists('kop_fmerge_page')) {
                 ys.appendChild(eStart.label);
                 ys.appendChild(year.label);
                 ys.appendChild(lEnd.label);
-                ys.appendChild(el('span', 'kop-fm__muted', '(leave the last one blank while it still runs)'));
+                ys.appendChild(el('span', 'kop-fm__muted', '(leave a year blank when it is not known, the last one while it still runs)'));
                 c.appendChild(ys);
                 var actions = el('div', 'kop-fm__actions');
                 var go = el('button', 'button button-primary', 'Merge as a rename');
                 go.type = 'button';
                 go.addEventListener('click', function () {
                     var y = Number(year.input.value) || 0;
-                    if (!y) { status.className = 'kop-fm__status is-bad'; status.textContent = 'Give the year "' + e.name + '" became "' + l.name + '".'; return; }
                     send({ op: 'rename', earlier: e.id, later: l.id, year: y, earlier_start: Number(eStart.input.value) || 0,
                         later_start: y, later_end: Number(lEnd.input.value) || 0, reversed: flip ? 1 : 0 }, c);
                 });

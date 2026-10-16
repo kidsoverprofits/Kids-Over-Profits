@@ -345,7 +345,7 @@ function kop_rinbox_daudit_state_words(array $s, array $op) {
         case 'blocked': return 'Cannot be made: ' . $s['why'];
         case 'manual': return 'Done by hand, outside this card (the site has no button for it). Tick it once it is done.';
     }
-    if ($op['type'] === 'merge' && !empty($op['rename']) && empty($op['year'])) return 'Ready: give the year of the rename in the box below.';
+    if ($op['type'] === 'merge' && !empty($op['rename']) && empty($op['year'])) return 'Ready: give the year of the rename in the box below if it is known (it can be left blank).';
     if ($op['type'] === 'merge') return 'Ready. Made after the other ticked changes; Undo splits the records again.';
     return 'Ready.';
 }
