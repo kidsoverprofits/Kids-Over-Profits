@@ -231,10 +231,13 @@
         var status = el('p', { class: 'kop-ie-status', role: 'status' });
         var save = el('button', { type: 'submit', class: 'kop-ie-save', text: 'Save', disabled: '' });
         var cancel = el('button', { type: 'button', class: 'kop-ie-cancel', text: 'Cancel' });
-        var form = el('form', { method: 'dialog', class: 'kop-ie-form' }, [title, body, el('div', { class: 'kop-ie-actions' }, [status, cancel, save])]);
+        var x = el('button', { type: 'button', class: 'kop-ie-x', 'aria-label': 'Close', title: 'Close', html: icon('x') || '&times;' });
+        var head = el('div', { class: 'kop-ie-head' }, [title, x]);
+        var form = el('form', { method: 'dialog', class: 'kop-ie-form' }, [head, body, el('div', { class: 'kop-ie-actions' }, [status, cancel, save])]);
         dialog.appendChild(form);
         document.body.appendChild(dialog);
         cancel.addEventListener('click', closeDialog);
+        x.addEventListener('click', closeDialog);
         dialog.addEventListener('cancel', function (e) { e.preventDefault(); closeDialog(); });
         dialog.showModal();
 

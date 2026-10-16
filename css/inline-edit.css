@@ -229,7 +229,50 @@ dialog.kop-ie-dialog::backdrop {
     max-height: calc(100vh - 48px);
 }
 
+.kop-ie-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding-right: 10px;
+}
+
+/* The X in the corner: same as Cancel. Colour and background named in every state (Kadence button traps). */
+button.kop-ie-x,
+button.kop-ie-x:hover,
+button.kop-ie-x:focus,
+button.kop-ie-x:active {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 10px 0 0 auto;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--kop-midnight, #000435);
+    background: #fff;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+button.kop-ie-x:hover,
+button.kop-ie-x:focus-visible {
+    background: var(--kop-sand, #F2EEDF);
+    border-color: var(--kop-text-muted, #4A5568);
+}
+
+button.kop-ie-x svg {
+    width: 20px;
+    height: 20px;
+}
+
 .kop-ie-dialog h2.kop-ie-title {
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
     padding: 16px 20px 10px;
     font-size: 20px;
