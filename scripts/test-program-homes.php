@@ -290,6 +290,28 @@ $check('undo keeps the main facility and unties its homes', kop_program_homes_un
     && (int) $wpdb->get_var("SELECT COUNT(*) FROM facilities_v2 WHERE id = $main") === 1);
 $check('undo clears the satellite mark', !kop_program_homes_is_satellite($main));
 
+// ---- One satellite home from a Merge Duplicates card (kop_fmerge_make_homes()) ----
+echo "
+-- One satellite home, from Merge Duplicates --
+";
+if (!function_exists('kop_fmerge_make_homes')) require_once dirname(__DIR__) . '/inc/facility-merge.php';
+if (!function_exists('kop_seed_pdo')) { function kop_seed_pdo() { return $GLOBALS['pdo']; } }
+$keep_writes = $GLOBALS['kop_test_wpdb_writes'] ?? null;
+$GLOBALS['kop_test_wpdb_writes'] = true;   // the homes log is an option, read back by Undo
+$made = kop_fmerge_make_homes($main, $sat1, $main, '', array($sat1 => 'North House'), 'test', true, $opts);
+$check('one record becomes a satellite home of the other', $made['program'] === $main && (kop_program_homes_program_of($sat1)[0] ?? 0) === $main
+    && kop_program_homes_homes_of($main) === array($sat1) && kop_program_homes_is_satellite($main), $made['message']);
+$check('the message says satellite home', strpos($made['message'], 'Tied as a satellite home of') === 0, $made['message']);
+kop_facility_pages_index(true);
+$html = $render('facility-page.php', 'kop_facility_page', kop_facility_page_data($main));
+$check('the main page says "Main facility of 1 satellite home"', strpos($html, 'Main facility of 1 satellite home') !== false);
+$html = $render('facility-page.php', 'kop_facility_page', kop_facility_page_data($sat1));
+$check('the home page says "Satellite home of"', strpos($html, 'Satellite home of ') !== false);
+kop_fmerge_undo_homes($made['log']);
+$check('Undo unties it and clears the satellite mark', !kop_program_homes_program_of($sat1) && !kop_program_homes_homes_of($main) && !kop_program_homes_is_satellite($main)
+    && (int) $wpdb->get_var("SELECT COUNT(*) FROM facilities_v2 WHERE id = $main") === 1);
+$GLOBALS['kop_test_wpdb_writes'] = $keep_writes;
+
 register_shutdown_function(function () use ($db_path) {
     try { @unlink($db_path); } catch (Throwable $e) {}
 });
