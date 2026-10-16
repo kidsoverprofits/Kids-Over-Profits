@@ -2623,6 +2623,12 @@ Open:
    https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (News tab): connect a consultant, see the note on
    https://kidsoverprofits.org/referrers-educational-consultants/, Take off. The consultant notes path needs MySQL, so the
    SQLite test runs only the company path. Programs still go under the card's "Facilities mentioned".
+8. The news card's Website button now asks whose website it is (2026-10-16, "Website of a" dropdown in
+   `js/admin-submissions.js`, `kop_rinbox_record_websites()` in `inc/review-record-file.php`): program (profileLinks, as
+   before), company (operator.websites), consultant / transporter / marketer / trade org (their websites list), provider
+   (a note: no list), young adult program (its links). **Check by hand** at https://kidsoverprofits.org/admin-submissions/:
+   move one link as a consultant's website, see it on https://kidsoverprofits.org/referrers-educational-consultants/,
+   Undo move. Marketers and trade orgs are not in the mirror, so their path is untested.
 
 ### 3.31 Approved facts wait for a written-up About (2026-10-15)
 
