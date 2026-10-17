@@ -33,8 +33,10 @@ if (!function_exists('kop_staff_role_with_former')) {
 
     /** $role with "current" taken off: "(current)", "Current Clinical Director", "currently Director", "presently". */
     function kop_staff_role_no_current($role) {
-        $role = preg_replace('/\s*\((?:current(?:ly)?|present(?:ly)?|now)\)/i', '', (string) $role);
+        $was = (string) $role;
+        $role = preg_replace('/\s*\((?:current(?:ly)?|present(?:ly)?|now)\)/i', '', $was);
         $role = preg_replace('/\b(?:current(?:ly)?|presently)\s+(?:the\s+|an?\s+)?/i', '', $role);
+        if ($role === $was) return $was;   // nothing taken off: the role stays as the source wrote it
         $role = trim(preg_replace('/\s+/u', ' ', $role), " \t,;");
         return $role === '' ? '' : mb_strtoupper(mb_substr($role, 0, 1)) . mb_substr($role, 1);
     }
