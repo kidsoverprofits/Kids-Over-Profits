@@ -376,6 +376,8 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
             $wpdb->prefix . 'kop_facility_locations'  => 'COUNT(*), MAX(created_at), SUM(facility_id)',
             // Approved serious findings print on the facility page.
             'inspection_highlights'                  => 'COUNT(*), MAX(updated_at)',
+            // Names set to the company that ran them (inc/name-eras.php).
+            $wpdb->prefix . 'kop_name_eras'           => 'COUNT(*), MAX(updated_at)',
             $wpdb->prefix . 'fbv'                     => 'COUNT(*), MAX(id)',
             $wpdb->prefix . 'fbv_attachment_folder'   => 'COUNT(*)',
         );
@@ -3374,6 +3376,14 @@ if (!function_exists('kop_facility_page_data')) {
             $by_name = kop_facility_eras_former_years($doc);
             foreach ($formerly as $n) {
                 if (isset($by_name[strtolower($n)])) $formerly_years[$n] = $by_name[strtolower($n)];
+            }
+        }
+        // A name set by hand to the company that ran it (inc/name-eras.php): "Three Springs Inc., 1998 to 2008".
+        if (function_exists('kop_name_eras_for')) {
+            $set = kop_name_eras_for($facility_id);
+            foreach ($formerly as $n) {
+                $e = $set[kop_name_eras_key($n)] ?? null;
+                if ($e && ($label = kop_name_eras_label($e)) !== '') $formerly_years[$n] = $label;
             }
         }
 

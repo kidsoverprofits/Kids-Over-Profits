@@ -1639,6 +1639,82 @@ body.kop-doc-modal-open {
     }
 }
 
+/* "Run by then": the company that ran the program under the name (inc/name-eras.php) */
+.kop-altname-then-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.kop-altnames button.kop-altname-setera,
+.kop-altnames button.kop-altname-era-save,
+.kop-altnames button.kop-altname-era-clear,
+.kop-altnames button.kop-altname-era-cancel {
+    padding: 3px 10px;
+    border: 1px solid var(--kop-navy-blue, #000080);
+    border-radius: 4px;
+    background: var(--kop-white, #FFFFFF);
+    color: var(--kop-navy-blue, #000080);
+    font: inherit;
+    font-size: 0.82em;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.kop-altnames button.kop-altname-setera:hover,
+.kop-altnames button.kop-altname-setera:focus,
+.kop-altnames button.kop-altname-setera:active,
+.kop-altnames button.kop-altname-era-save,
+.kop-altnames button.kop-altname-era-save:hover,
+.kop-altnames button.kop-altname-era-save:focus,
+.kop-altnames button.kop-altname-era-save:active,
+.kop-altnames button.kop-altname-era-clear:hover,
+.kop-altnames button.kop-altname-era-clear:focus,
+.kop-altnames button.kop-altname-era-clear:active,
+.kop-altnames button.kop-altname-era-cancel:hover,
+.kop-altnames button.kop-altname-era-cancel:focus,
+.kop-altnames button.kop-altname-era-cancel:active {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #FFFFFF);
+    border-color: var(--kop-navy-blue, #000080);
+}
+
+.kop-altname-eraform {
+    display: grid;
+    gap: 6px;
+    min-width: 200px;
+}
+
+.kop-altname-eraform label {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.kop-altname-eraform input {
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+    padding: 4px 6px;
+    border: 1px solid #a0a8b5;
+    background: var(--kop-white, #FFFFFF);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.kop-altname-era-years {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+}
+
+.kop-altname-era-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 /* Brief flash on the profile an alternate name jumps to */
 .alias-jump-highlight {
     outline: 3px solid var(--kop-chartreuse, #B2E102);

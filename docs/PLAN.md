@@ -2729,5 +2729,17 @@ Open:
    any heading, the page's search and letters filter it); admins tick two or more names of one record and fold them into one
    (keep one, reword it if wanted; Undo), or open Edit names. **Check after deploy:** on
    https://kidsoverprofits.org/tti-program-index/ fold two names of one program, reload, Undo it from the notice.
-7. Owner (2026-10-17): no easy way to tie one name era to one operator (which company ran the program under which
-   name). Open: design with the owner first.
+7. Name eras by hand (2026-10-17): the Alternate names table's "Run by then" column. Admins press Set company on a row:
+   company (suggested from the companies on file, or typed), first and last year; Undo in the notice
+   (`{prefix}kop_name_eras`, inc/name-eras.php). It wins over the guesses in inc/facility-eras.php for the directory's name
+   under a company and the facility page's "Formerly ... (company, years)". **Check after deploy:** set one (the table is
+   made on the first save), reload the directory: the program heads its listing under that company by that name; open
+   its /facility/ page, see the company and years after the name; Undo. Open:
+   a. The network map build (kop-pipeline build-network-graph.js) does not read kop_name_eras yet: the map still dates names
+      from the board and Map Years. Add it to the sync's 7 tables and to the build, and to inc/network-rebuild.php's fingerprint.
+   b. The facility page cuts into "As <name>" sections only from the map and rename merges; a hand-set era does not cut it yet.
+   c. Only program names have the column; company names (a company's own other names) do not.
+8. scripts/test-name-under-operator.php fails one check on the mirror as committed before this work: Psychiatric
+   Solutions, Inc. lists 10370 under its own name, not "Rivendell of Utah". Look at whether the map or the record changed.
+   Also failing on the mirror before this work (same set with and without it, 2026-10-17): scripts/test-facility-pages.php
+   13 checks (one: "the page renders to the end after the post") and scripts/test-facility-eras.php 1.

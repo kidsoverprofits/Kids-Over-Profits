@@ -180,6 +180,8 @@ require_once get_stylesheet_directory() . '/inc/inline-edit.php';
 
 // The directory's Alternate names table: fold duplicate names of one record (admins)
 require_once get_stylesheet_directory() . '/inc/directory-names.php';
+// Which company ran a program under which name, set in that table (admins)
+require_once get_stylesheet_directory() . '/inc/name-eras.php';
 
 // Indigenous residential schools: their own records, never TTI facilities
 // (listed on /indian-boarding-schools/, KOP Data Tools > Indigenous Schools)
@@ -235,6 +237,7 @@ require_once get_stylesheet_directory() . '/inc/facility-merge.php';
 require_once get_stylesheet_directory() . '/inc/record-to-company.php';
 // A person id for everyone on a staff list, stamped as personId by an hourly sync (KOP Tools > People)
 require_once get_stylesheet_directory() . '/inc/people.php';
+require_once get_stylesheet_directory() . '/inc/person-jobs.php';   // a person's past jobs, held once (kop_person_jobs)
 require_once get_stylesheet_directory() . '/inc/people-admin.php';
 require_once get_stylesheet_directory() . '/inc/people-merge.php';
 require_once get_stylesheet_directory() . '/inc/name-variants.php';

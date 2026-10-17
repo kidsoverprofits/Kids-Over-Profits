@@ -870,6 +870,9 @@ function displayFacilities(facilitiesData, containerId) {
     // the same way for the card's header lines, the list search and the
     // old-name rows.
     const cleanHeaderText = value => cleanText(value).replace(/\s*\($/, '').trim();
+    // A name as inc/name-eras.php keys it: no "Previously" lead-in, spacing and case aside.
+    const eraNameKey = value => cleanText(value).replace(/\s+/g, ' ').trim()
+        .replace(/^(?:previously|formerly|former|prior(?:\s+to)?)\b[\s:;,.\-–—]*/i, '').trim().toLowerCase();
     // Source data frequently stores historical markers ("Previously X",
     // "Formerly Y") inside fields that are rendered as present-tense
     // (operator, owner, alias). These helpers detect and strip those markers
@@ -996,10 +999,13 @@ function displayFacilities(facilitiesData, containerId) {
         const alsoThen = collectUniqueTexts(facility && facility.nameUnderOperatorAlso);
         if (alsoThen.length) searchParts.push(...alsoThen);
         const aliases = [];
+        // Company and years set by hand for a name (inc/name-eras.php), by name.
+        const erasByName = new Map(toArray(facility && facility.nameEras).map(era => [eraNameKey(era.name), era]));
         collectUniqueTexts(names.normalizedFormerNames, names.aliasNames, nameThen ? [name] : []).forEach(alias => {
             if (normalizeTextKey(alias) === normalizeTextKey(nameThen || name)) return;
             aliases.push({ alias, target: operatorName, facility: name, pastOperators: aliasPastOperators,
-                edit: facilityId ? 'facility:' + facilityId + ':names' : '' });
+                edit: facilityId ? 'facility:' + facilityId + ':names' : '',
+                fid: facilityId, era: erasByName.get(eraNameKey(alias)) || null });
         });
 
         return {
@@ -2270,6 +2276,18 @@ function displayFacilities(facilitiesData, containerId) {
     const canEditNames = !!window.KOP_INLINE_EDIT;
     let aliasRowsHtml = '';
     let aliasRowCount = 0;
+    // Every company on file, for the "Run by then" box (name -> id).
+    const altCompanies = new Map();
+    if (facilitiesData && facilitiesData.projects) {
+        Object.values(facilitiesData.projects).forEach(project => {
+            if (!project || !isOperatorCategory(project)) return;
+            const data = project.data || {};
+            const op = data.operator || {};
+            const opName = cleanText(op.name) || cleanText(op.currentName) || cleanText(project.name);
+            if (opName && project.id && !altCompanies.has(opName)) altCompanies.set(opName, Number(project.id));
+        });
+    }
+    window.kopAltCompanies = altCompanies;
     aliasEntries.forEach(entry => {
         const aliasKey = normalizeTextKey(entry.alias);
         if (!aliasKey || renderedOperatorKeys.has(aliasKey)) return;
@@ -2293,6 +2311,7 @@ function displayFacilities(facilitiesData, containerId) {
                 <td class="kop-altname-name">${escapeHtml(entry.alias)}</td>
                 <td class="kop-altname-now"><button type="button" class="kop-altname-go">${escapeHtml(nowName)}</button></td>
                 <td class="kop-altname-company">${escapeHtml(entry.target)}${pastOperators.length ? `<span class="kop-altname-past">earlier: ${escapeHtml(pastOperators.join(', '))}</span>` : ''}</td>
+                <td class="kop-altname-then" data-fid="${entry.fid || ''}" data-then="${escapeAttribute(entry.era ? entry.era.label : '')}" data-op="${escapeAttribute(entry.era ? entry.era.operator || '' : '')}" data-start="${entry.era && entry.era.start ? entry.era.start : ''}" data-end="${entry.era && entry.era.end ? entry.era.end : ''}">${altThenCell(entry.era, canEditNames && entry.fid)}</td>
                 ${canEditNames ? `<td class="kop-altname-edit">${entry.edit ? `<button type="button" class="kop-altname-editbtn" data-kop-edit-open="${escapeAttribute(entry.edit)}">Edit names</button>` : ''}</td>` : ''}
             </tr>`;
     });
@@ -2302,7 +2321,7 @@ function displayFacilities(facilitiesData, containerId) {
         const sortHead = (key, label) => `<th scope="col" aria-sort="${key === 'alias' ? 'ascending' : 'none'}"><button type="button" class="kop-altnames-sort" data-sort="${key}">${label}<span class="kop-altnames-arrow" aria-hidden="true"></span></button></th>`;
         html += `<section class="kop-altnames" id="kop-altnames" aria-labelledby="kop-altnames-title">
                 <h2 id="kop-altnames-title">Alternate names</h2>
-                <p class="kop-altnames-intro">Earlier and other names of the programs and companies above, with the name each goes by now. Click a heading to sort; click a name now in use to open it.</p>
+                <p class="kop-altnames-intro">Earlier and other names of the programs and companies above: the name each goes by now, the company it is listed under, and the company that ran it under the earlier name, where known. Click a heading to sort; click a name now in use to open it.</p>
                 ${canEditNames ? `<div class="kop-altnames-bar" hidden>
                     <span class="kop-altnames-count"></span>
                     <button type="button" class="kop-altnames-fold">Fold into one name</button>
@@ -2316,13 +2335,15 @@ function displayFacilities(facilitiesData, containerId) {
                         ${canEditNames ? '<th scope="col"><span class="screen-reader-text">Pick</span></th>' : ''}
                         ${sortHead('alias', 'Alternate name')}
                         ${sortHead('now', 'Name now')}
-                        ${sortHead('company', 'Company')}
+                        ${sortHead('company', 'Listed under')}
+                        ${sortHead('then', 'Run by then')}
                         ${canEditNames ? '<th scope="col"><span class="screen-reader-text">Edit</span></th>' : ''}
                     </tr></thead>
                     <tbody>${aliasRowsHtml}</tbody>
                 </table>
                 </div>
                 <p class="kop-altnames-none" hidden>No alternate names match.</p>
+                ${canEditNames ? `<datalist id="kop-altnames-companies">${Array.from(altCompanies.keys()).sort(compareDisplayText).map(n => `<option value="${escapeAttribute(n)}"></option>`).join('')}</datalist>` : ''}
             </section>`;
     }
         container.innerHTML = html;
@@ -2360,6 +2381,16 @@ function displayFacilities(facilitiesData, containerId) {
 }
 
 
+// The "Run by then" cell: the company and years set for a name, and for
+// admins the button that sets them (setupAlternateNames).
+function altThenCell(era, canEdit) {
+    const esc = value => String(value == null ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const label = era && era.label ? `<span class="kop-altname-then-label">${esc(era.label)}</span>` : '';
+    const button = canEdit ? `<button type="button" class="kop-altname-setera">${label ? 'Change' : 'Set company'}</button>` : '';
+    return label + button;
+}
+
 // The Alternate names table (built by displayFacilities): sorting by a
 // heading, the jump to the record a name belongs to, and for admins the
 // fold of duplicate names (inc/directory-names.php).
@@ -2370,6 +2401,11 @@ function setupAlternateNames(container) {
     const rowText = (row, key) => {
         if (key === 'now') return row.dataset.aliasFacility || row.dataset.aliasTarget || '';
         if (key === 'company') return (row.dataset.aliasTarget || '') + ' ' + (row.dataset.aliasFacility || '');
+        if (key === 'then') {
+            const cell = row.querySelector('.kop-altname-then');
+            // Rows with nothing set go last either way.
+            return cell && cell.dataset.then ? cell.dataset.then : (sortDir > 0 ? '\uffff' : '');
+        }
         return row.dataset.alias || '';
     };
     const compare = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
@@ -2441,6 +2477,80 @@ function setupAlternateNames(container) {
         if (!r.ok) throw new Error((data && data.message) || ('HTTP ' + r.status));
         return data;
     }));
+    // "Run by then": the company that ran the program under this name, and its years (inc/name-eras.php).
+    const companies = window.kopAltCompanies || new Map();
+    const setEraCells = (fid, alias, era) => {
+        Array.from(tbody.rows).forEach(row => {
+            const cell = row.querySelector('.kop-altname-then');
+            if (!cell || cell.dataset.fid !== String(fid) || row.dataset.alias !== alias) return;
+            cell.dataset.then = era && era.label ? era.label : '';
+            cell.dataset.op = era && era.operator ? era.operator : '';
+            cell.dataset.start = era && era.start ? era.start : '';
+            cell.dataset.end = era && era.end ? era.end : '';
+            cell.innerHTML = altThenCell(era, true);
+        });
+    };
+    tbody.addEventListener('click', event => {
+        const set = event.target.closest && event.target.closest('.kop-altname-setera');
+        if (!set) return;
+        const cell = set.closest('.kop-altname-then');
+        const row = cell.closest('tr');
+        if (cell.querySelector('.kop-altname-eraform')) return;
+        const was = cell.innerHTML;
+        const label = cell.dataset.then || '';
+        cell.innerHTML = `<div class="kop-altname-eraform">
+                <label>Company<input type="text" class="kop-altname-era-op" list="kop-altnames-companies" value="${esc(cell.dataset.op || '')}" placeholder="Pick or type a company"></label>
+                <div class="kop-altname-era-years">
+                    <label>From<input type="text" inputmode="numeric" maxlength="4" class="kop-altname-era-start" value="${esc(cell.dataset.start || '')}"></label>
+                    <label>To<input type="text" inputmode="numeric" maxlength="4" class="kop-altname-era-end" value="${esc(cell.dataset.end || '')}"></label>
+                </div>
+                <div class="kop-altname-era-buttons">
+                    <button type="button" class="kop-altname-era-save">Save</button>
+                    ${label ? '<button type="button" class="kop-altname-era-clear">Clear</button>' : ''}
+                    <button type="button" class="kop-altname-era-cancel">Cancel</button>
+                </div>
+            </div>`;
+        const form = cell.querySelector('.kop-altname-eraform');
+        form.querySelector('.kop-altname-era-op').focus();
+        // Every row of this record and name (a program listed under two companies has two).
+        const show = era => setEraCells(cell.dataset.fid, row.dataset.alias, era);
+        const send = clear => {
+            const op = clear ? '' : form.querySelector('.kop-altname-era-op').value.trim();
+            const body = {
+                facility_id: Number(cell.dataset.fid),
+                name: row.dataset.alias,
+                operator: op,
+                operator_id: op && companies.has(op) ? companies.get(op) : 0,
+                start: clear ? '' : form.querySelector('.kop-altname-era-start').value.trim(),
+                end: clear ? '' : form.querySelector('.kop-altname-era-end').value.trim()
+            };
+            form.querySelectorAll('button').forEach(b => { b.disabled = true; });
+            fetch(getRestBase() + 'name-eras/save', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.KOP_INLINE_EDIT.nonce || '' },
+                body: JSON.stringify(body)
+            }).then(r => r.json().then(data => {
+                if (!r.ok) throw new Error((data && data.message) || ('HTTP ' + r.status));
+                return data;
+            })).then(data => {
+                show(data.era);
+                say(esc(data.message || 'Saved.') + (data.token ? ' <button type="button" class="kop-altnames-undo" data-kind="era" data-token="' + esc(data.token) + '" data-row-fid="' + esc(cell.dataset.fid) + '" data-row-name="' + esc(row.dataset.alias) + '">Undo</button>' : ''));
+            }).catch(error => {
+                form.querySelectorAll('button').forEach(b => { b.disabled = false; });
+                say('Not saved: ' + esc(error.message));
+            });
+        };
+        form.querySelector('.kop-altname-era-save').addEventListener('click', () => send(false));
+        const clearBtn = form.querySelector('.kop-altname-era-clear');
+        if (clearBtn) clearBtn.addEventListener('click', () => send(true));
+        form.querySelector('.kop-altname-era-cancel').addEventListener('click', () => { cell.innerHTML = was; });
+        form.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); send(false); }
+            if (e.key === 'Escape') { e.preventDefault(); cell.innerHTML = was; }
+        });
+    });
+
     const updateBar = () => {
         const rows = picked();
         bar.hidden = rows.length === 0;
@@ -2524,6 +2634,24 @@ function setupAlternateNames(container) {
         const undo = event.target.closest && event.target.closest('.kop-altnames-undo');
         if (!undo) return;
         undo.disabled = true;
+        if (undo.dataset.kind === 'era') {
+            fetch(getRestBase() + 'name-eras/undo', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.KOP_INLINE_EDIT.nonce || '' },
+                body: JSON.stringify({ token: undo.dataset.token })
+            }).then(r => r.json().then(data => {
+                if (!r.ok) throw new Error((data && data.message) || ('HTTP ' + r.status));
+                return data;
+            })).then(data => {
+                setEraCells(undo.dataset.rowFid, undo.dataset.rowName, data.era);
+                say(esc(data.message || 'Undone.'));
+            }).catch(error => {
+                undo.disabled = false;
+                say('Not undone: ' + esc(error.message));
+            });
+            return;
+        }
         post('undo', { token: undo.dataset.token })
             .then(data => {
                 say(esc(data.message || 'Undone.') + ' Reloading...');

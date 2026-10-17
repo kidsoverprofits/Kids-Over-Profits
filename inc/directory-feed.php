@@ -97,7 +97,7 @@ function kop_directory_feed_slim_facility($facility) {
         'postalCode', 'postal_code', 'zip', 'zipcode', 'country',
         'yearsOfOperation', 'yearsActive', 'years_active', 'operating_period_text',
         'founded', 'yearFounded', 'opened', 'startYear', 'year_founded', 'start_year',
-        'isPrivatelyOwned', 'nameUnderOperator', 'nameUnderOperatorYears', 'nameUnderOperatorAlso',
+        'isPrivatelyOwned', 'nameUnderOperator', 'nameUnderOperatorYears', 'nameUnderOperatorAlso', 'nameEras',
     ));
     if (isset($facility['identification']) && is_array($facility['identification'])) {
         $ident = kop_directory_feed_pick($facility['identification'], array(

@@ -410,7 +410,12 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
 
         $operator_rows = (array)$wpdb->get_results("SELECT id, unique_name, name, json_data, document_folder_id, updated_at FROM {$wpdb->prefix}kop_operators ORDER BY id", ARRAY_A);
         $operator_names = array();
-        if ($era_docs) {
+        // Names set by hand to the company that ran them (inc/name-eras.php), read before the guesses.
+        $set_eras = function_exists('kop_name_eras_all') ? kop_name_eras_all() : array();
+        foreach ($set_eras as $fid => $unused) {
+            if (isset($facilities[$fid])) $facilities[$fid]['nameEras'] = kop_name_eras_feed($fid);
+        }
+        if ($era_docs || $set_eras) {
             foreach ($operator_rows as $op) {
                 $stored = json_decode($op['json_data'], true);
                 $o = (is_array($stored) && isset($stored['operator']) && is_array($stored['operator'])) ? $stored['operator'] : array();
@@ -428,7 +433,15 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
         $then_by = array();
         foreach ($links as $r) {
             $fid = (int)$r['facility_id'];
-            if (!isset($facilities[$fid], $era_docs[$fid], $operator_names[(int)$r['operator_id']])) continue;
+            if (!isset($facilities[$fid], $operator_names[(int)$r['operator_id']])) continue;
+            $set = isset($set_eras[$fid]) ? kop_name_eras_name_under($fid, (int)$r['operator_id'], $operator_names[(int)$r['operator_id']]) : null;
+            if ($set !== null) {
+                // Its own name under that company: listed as it is.
+                $own = (string)($facilities[$fid]['identification']['name'] ?? ($facilities[$fid]['name'] ?? ''));
+                $then_by[(int)$r['operator_id']][$fid] = kop_name_eras_key($set['name']) === kop_name_eras_key($own) ? null : $set;
+                continue;
+            }
+            if (!isset($era_docs[$fid])) continue;
             $then_by[(int)$r['operator_id']][$fid] = kop_facility_eras_name_under($fid, $era_docs[$fid], $operator_names[(int)$r['operator_id']], (string)$r['relationship']);
         }
         foreach ($then_by as $oid => $list) $then_by[$oid] = kop_facility_eras_name_under_settle($list);
