@@ -523,13 +523,13 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 # Approving a wiki entry puts its staff on the facility record, cited to the wiki page (kop_wiki_merge_submission(), api/sync-wiki-facilities.php);
 # a name already listed stays; taking the approval back takes them off (kop_wiki_staff_undo(), log in option kop_wiki_staff_log)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-staff.php [--list]   # mapping, approve/again/undo, what approving every entry would add
-# "Former" / "current" only when a source confirms it (owner, 2026-10-17): a wiki person is "Former <role>" only when the write-up says so ("formerly",
-# "retired", "no longer", a year range, "until 2015"; kop_wiki_staff_is_former()), never for a closed program or the past tense alone;
+# "Former" / "current" only when confirmed (owner, 2026-10-17): a wiki person is "Former <role>" when the program is closed or the write-up says so
+# ("formerly", "retired", "no longer", a year range, "until 2015"; kop_wiki_staff_is_former()), never for the past tense alone;
 # staff approved before that rule: php api/fix-wiki-staff-former.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kept so Undo works
 # The role is the title, not the parser's wording ("current Clinical Director", "one"): kop_wiki_staff_title() == js/wiki-parser.js staffRoleTitle()
 node scripts/test-wiki-staff-title.js --php=<Local php.exe>   # JS == PHP on every wiki role in tmp/prod.sqlite
-# Every other staff entry (Woodbury Facts, HEAL, Fornits, by hand) is "Former" only when its source said the person left (", left"); never for a
-# closed program or an old sighting ("Admissions (2007, Woodbury Reports)" stays), and "current" comes off (inc/staff-former.php, applied by
+# Every other staff entry (Woodbury Facts, HEAL, Fornits, by hand) is "Former" when the program is closed or its source said the person left
+# (", left"); never for an old sighting at an open program ("Admissions (2007, Woodbury Reports)" stays), and "current" comes off (inc/staff-former.php, applied by
 # Woodbury Facts when it adds a person); names that are not people (a phase sheet read as a staff list) are refused. The "Former" the old rule
 # put on: php api/fix-staff-unconfirmed.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kop_staff_unconfirmed_log
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-former.php   # the rule, the pass + undo on a copy of the mirror

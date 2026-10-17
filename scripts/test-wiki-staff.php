@@ -103,7 +103,7 @@ check($x[0]['role'] === 'Former CEO' && $x[1]['role'] === 'Founder, former Execu
 check($g[1]['role'] === 'Executive Director' && $g[4]['role'] === 'Therapist', '"is the ..." / "is currently ..." stay current', $g[1]['role'] . ' / ' . $g[4]['role']);
 check($g[2]['role'] === 'Founder' && $g[3]['role'] === 'Founders', '"was the Founder", "were the Founders": past tense alone adds no "Former"', $g[2]['role'] . ' / ' . $g[3]['role']);
 $h = kop_wiki_staff_entries(array(array('name' => 'I J', 'role' => 'Executive Director', 'bio' => 'is the Executive Director.')), '', true);
-check($h[0]['role'] === 'Executive Director', "a closed program is no confirmation: its staff are not marked Former", $h[0]['role']);
+check($h[0]['role'] === 'Former Executive Director', "a closed program's staff are all former: closed is confirmed", $h[0]['role']);
 check(kop_wiki_program_closed(array('status' => 'Closed')) && kop_wiki_program_closed(array('endYear' => 2019))
     && kop_wiki_program_closed(array(), '1998 - 2019') && kop_wiki_program_closed(array(), '1998–2019'), 'closed: status, end year, a year range');
 check(!kop_wiki_program_closed(array('status' => 'Open'), '1998-present') && !kop_wiki_program_closed(array(), '1998'), 'open: "1998-present", a start year only');

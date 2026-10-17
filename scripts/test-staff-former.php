@@ -45,12 +45,13 @@ $cases = array(
     array('Board of Directors (2015-2025, HEAL)', false, 'Board of Directors (2015-2025, HEAL)'),
     array('Executive Director', false, 'Executive Director'),
     array('CEO (appointed 2000)', false, 'CEO (appointed 2000)'),
-    // A closed program is not a confirmation either.
-    array('Executive Director', true, 'Executive Director'),
+    // A closed program is a confirmation: everyone there has left.
+    array('Executive Director', true, 'Former Executive Director'),
     array('Former Program Director (before 2005, Woodbury Reports)', false, 'Former Program Director (before 2005, Woodbury Reports)'),
     array('Former Program Director', true, 'Former Program Director'),
     array('Founder, former Executive Director', false, 'Founder, former Executive Director'),
-    array('Founder, former Executive Director', true, 'Founder, former Executive Director'),
+    array('Founder, former Executive Director', true, 'Former Founder, former Executive Director'),
+    array('Admissions (2007, Woodbury Reports)', true, 'Former Admissions (2007, Woodbury Reports)'),
     array('', true, ''),
 );
 foreach ($cases as $c) {
@@ -133,6 +134,7 @@ if (!file_exists($db_path)) {
     // Taking off the "Former" no source confirmed: the old pass's log says what each role was.
     $cand = array();
     foreach ($before as $id => $d) {
+        if (kop_staff_doc_closed($d)) continue;
         foreach ((array) ($d['staff']['notableStaff'] ?? array()) as $i => $e) {
             if (!kop_staff_former_skip($e) && !preg_match('/\b(?:former|current)/i', (string) $e['role'])) $cand[] = array($id, $i, $e);
         }
@@ -167,6 +169,22 @@ if (!file_exists($db_path)) {
         $check('a Former typed by hand (nothing says what the source gave) stays', $role(2) === $roles[2][0], $role(2));
         $check('"Current" comes off', $role(3) === kop_staff_role_no_current($roles[3][0]) && stripos($role(3), 'current') === false, $role(3));
         $check('a second run finds nothing', count(kop_staff_unconfirmed_pass($opts, false)) === 0);
+        // On a closed program the same "Former" is confirmed and stays.
+        $shut = null;
+        foreach ($before as $id => $d) {
+            if (!kop_staff_doc_closed($d)) continue;
+            foreach ((array) ($d['staff']['notableStaff'] ?? array()) as $i => $e) {
+                if (!kop_staff_former_skip($e) && !preg_match('/\b(?:former|current)/i', (string) $e['role'])) { $shut = array($id, $i, $e); break 2; }
+            }
+        }
+        if ($shut) {
+            $d = kop_facility_load($shut[0], $opts)['doc'];
+            $d['staff']['notableStaff'][$shut[1]]['role'] = 'Former ' . $shut[2]['role'];
+            $pdo->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($d), $shut[0]));
+            $GLOBALS['kop_test_options']['kop_staff_former_log'][$shut[0]][] = array('list' => 'notableStaff', 'name' => $shut[2]['name'], 'from' => $shut[2]['role'], 'to' => 'Former ' . $shut[2]['role']);
+            $hit = array_filter(kop_staff_unconfirmed_pass($opts, false), function ($c) use ($shut) { return $c['id'] === $shut[0] && $c['name'] === $shut[2]['name']; });
+            $check('a closed program\'s staff keep "Former": closed is confirmed', !$hit, json_encode(array_values($hit)));
+        }
         kop_staff_unconfirmed_pass($opts, true, true);
         $check('undo puts the roles back exactly', $role(0) === $roles[0][0] && $role(1) === $roles[1][0] && $role(2) === $roles[2][0] && $role(3) === $roles[3][0], $role(0) . ' | ' . $role(3));
     }

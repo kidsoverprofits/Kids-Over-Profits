@@ -111,14 +111,15 @@ function kop_wiki_program_closed(array $period, string $yearsActive = ''): bool 
 }
 
 /**
- * Did the write-up confirm this person left the program? Only its own words (owner, 2026-10-17): the
- * role says former/previous/ex-, or the write-up opens "formerly", "previously", "was formerly", "is a
- * former", "no longer", "left", "retired", "resigned", "was fired", "died", "passed away", or gives the
- * job's years as a range ("from 2005 to 2010", "2005-2010"). Never a closed program ($programClosed is
- * no longer read) and never the past tense alone ("was the Program Director", "worked as"): the wiki
- * writes past tense when it does not know. The parser's isFormer is that guess too, so it is not read.
+ * Is it confirmed this person left the program (owner, 2026-10-17)? The program is closed, the role says
+ * former/previous/ex-, or the write-up opens "formerly", "previously", "was formerly", "is a former",
+ * "no longer", "left", "retired", "resigned", "was fired", "died", "passed away", or gives the job's
+ * years as a range ("from 2005 to 2010", "2005-2010", "until 2015"). Never the past tense alone ("was
+ * the Program Director", "worked as"): the wiki writes past tense when it does not know. The parser's
+ * isFormer is that guess too, so it is not read.
  */
 function kop_wiki_staff_is_former(array $s, bool $programClosed = false): bool {
+    if ($programClosed) return true;
     if (preg_match('/\b(former|previous|ex-)/i', (string)($s['role'] ?? ''))) return true;
     // The bio follows the bold name: '("Doc") was ...', ', also known as "Papa Miguel" by survivors, was ...'.
     $bio = ltrim((string)($s['bio'] ?? ''));

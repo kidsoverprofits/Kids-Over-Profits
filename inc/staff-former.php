@@ -3,10 +3,10 @@
  * Who on a facility's staff lists has left. The record has no "former" field: an entry says so in its
  * role, as "Former <role>" (kop_wiki_staff_record_role() does the same for the r/troubledteens wiki).
  *
- * Only what a source confirms (owner, 2026-10-17): a role is "Former" when the source says the person
- * left (", left", the Woodbury build's wording for it) or the role says so already. Never by inference:
- * not because the program closed, and not because a sighting is old ("Admissions (2007, Woodbury
- * Reports)" stays as the source wrote it; its year says when). "Current" is never confirmed either:
+ * Only what is confirmed (owner, 2026-10-17): a role is "Former" when the program is closed (everyone on
+ * a closed program's staff lists has left), when the source says the person left (", left", the Woodbury
+ * build's wording for it) or when the role says so already. Never because a sighting is old ("Admissions
+ * (2007, Woodbury Reports)" stays as the source wrote it; its year says when). "Current" is never confirmed:
  * "(current)", "current", "currently" and "presently" come off a role (the source's word at the time).
  *
  * Woodbury Facts (and Fornits, through it) applies this when it adds a person. kop_staff_former_pass()
@@ -40,9 +40,9 @@ if (!function_exists('kop_staff_role_with_former')) {
     }
 
     /**
-     * $role as the record should hold it (see above): "Former " before it only when the source said the
-     * person left (", left"); "current" taken off. $closed and $now are no longer read (a closed program
-     * or an old sighting is not a confirmation); kept so callers need not change.
+     * $role as the record should hold it (see above): "Former " before it when the program is closed
+     * ($closed) or the source said the person left (", left"); "current" taken off. $now is no longer read
+     * (an old sighting is not a confirmation); kept so callers need not change.
      */
     function kop_staff_role_with_former($role, $closed = false, $now = null) {
         $role = trim(preg_replace('/\s+/u', ' ', (string) $role));
@@ -52,7 +52,9 @@ if (!function_exists('kop_staff_role_with_former')) {
         $role = kop_staff_role_no_current($role);
         if ($role === '') return '';
         if (preg_match('/^(?:former|previous|ex-)\b/i', $role)) return $role;
-        return $left ? 'Former ' . $role : $role;
+        // A role that says only part of it is past ("Founder, former Executive Director") is left as written while the program is open.
+        if (preg_match('/\b(?:former|previous|ex-)/i', $role) && !$left && !$closed) return $role;
+        return ($left || $closed) ? 'Former ' . $role : $role;
     }
 
     /** Did the source say this person left? Their role as the source gave it (before any pass rewrote it). */
@@ -209,7 +211,7 @@ if (!function_exists('kop_staff_role_with_former')) {
                     }
                     $new = kop_staff_role_with_former($role, $closed, $now);
                     if ($new === $role) continue;
-                    $why = preg_match('/,\s*left\s*$/i', $role) ? 'left' : (stripos($role, 'current') !== false || stripos($role, 'presently') !== false ? 'current' : 'wording');
+                    $why = preg_match('/,\s*left\s*$/i', $role) ? 'left' : ($closed && strpos($new, 'Former ') === 0 && stripos($role, 'former') !== 0 ? 'closed' : (stripos($role, 'current') !== false || stripos($role, 'presently') !== false ? 'current' : 'wording'));
                     $changes[] = array('list' => $list, 'i' => $i, 'name' => (string) ($e['name'] ?? ''), 'from' => $role, 'to' => $new, 'why' => $why);
                 }
             }
@@ -255,7 +257,8 @@ if (!function_exists('kop_staff_role_with_former')) {
 
 if (!function_exists('kop_staff_unconfirmed_pass')) {
     /**
-     * Take off the "Former" no source confirmed, and every "current" (see the top of this file). An entry's
+     * Take off the "Former" nothing confirmed (an open program, and no source said they left), and every
+     * "current" (see the top of this file). An entry's
      * role as the source gave it is the one kop_staff_former_pass() logged ('from'), else the Woodbury Facts
      * (or Fornits, through it) item that added it; an entry with neither (typed by hand) keeps its "Former".
      * $undo puts back each logged role that still holds what this pass wrote. Logged in the option
@@ -294,6 +297,8 @@ if (!function_exists('kop_staff_unconfirmed_pass')) {
             if ($undo && empty($log[$id])) continue;
             $doc = json_decode((string) $row['json_data'], true);
             if (!is_array($doc)) continue;
+            // A closed program's staff have all left: their "Former" is confirmed.
+            $closed = kop_staff_doc_closed($doc);
             $changes = array();
             foreach (array('administrator', 'notableStaff') as $list) {
                 foreach ((array) ($doc['staff'][$list] ?? array()) as $i => $e) {
@@ -311,7 +316,7 @@ if (!function_exists('kop_staff_unconfirmed_pass')) {
                     }
                     $new = kop_staff_role_no_current($role);
                     $why = $new !== $role ? 'current' : '';
-                    if (preg_match('/^Former\s+(.+)$/i', $new, $m)) {
+                    if (!$closed && preg_match('/^Former\s+(.+)$/i', $new, $m)) {
                         $source = $was[$id . '|' . $name . '|' . $role] ?? null;
                         $pk = function_exists('kop_wbf_person_key') ? $id . '|' . kop_wbf_person_key($name) : '';
                         $given = $source !== null ? array($source) : ($items[$pk] ?? array());
