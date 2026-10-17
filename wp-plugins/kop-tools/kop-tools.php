@@ -452,7 +452,15 @@ function kop_tools_registry() {
             ),
         ),
     );
-    return apply_filters('kop_tools_registry', $tools);
+    // Alphabetical everywhere (owner, 2026-10-17): the categories, and the tools within each, A to Z.
+    $tools = (array) apply_filters('kop_tools_registry', $tools);
+    uksort($tools, 'strcasecmp');
+    foreach ($tools as $category => $list) {
+        $list = array_values((array) $list);
+        usort($list, function ($a, $b) { return strcasecmp((string) ($a['title'] ?? ''), (string) ($b['title'] ?? '')); });
+        $tools[$category] = $list;
+    }
+    return $tools;
 }
 
 /**
@@ -588,38 +596,22 @@ add_action('admin_menu', function () {
 });
 
 /**
- * Put the KOP Tools submenu in registry order once every screen is on it.
- * Screens from categories outside the sidebar list stay, at the end.
+ * Put the KOP Tools submenu in A-to-Z order once every screen is on it (the
+ * theme hangs its screens here later, so this runs last), "All Tools" first.
  */
 function kop_tools_order_sidebar() {
     global $submenu;
     if (empty($submenu['kop-tools'])) {
         return;
     }
-    $rank = array('kop-tools' => 0);
-    $i = 1;
-    foreach (kop_tools_registry() as $tools) {
-        foreach ($tools as $tool) {
-            $type = isset($tool['type']) ? $tool['type'] : 'page';
-            $key = $type === 'screen' ? $tool['screen']
-                : ($type === 'action' ? admin_url('admin.php?page=kop-tools#' . kop_tools_row_id($tool)) : kop_tools_resolve($tool)['url']);
-            if ($key !== '' && !isset($rank[$key])) {
-                $rank[$key] = $i;
-            }
-            $i++;
-        }
-    }
+    // One A-to-Z list by the name shown (owner, 2026-10-17), "All Tools" first.
     $items = array_values($submenu['kop-tools']);
-    $order = array();
-    foreach ($items as $pos => $item) {
-        $order[$pos] = isset($rank[$item[2]]) ? $rank[$item[2]] : 10000 + $pos;
-    }
-    asort($order);
-    $sorted = array();
-    foreach (array_keys($order) as $pos) {
-        $sorted[] = $items[$pos];
-    }
-    $submenu['kop-tools'] = $sorted;
+    usort($items, function ($a, $b) {
+        if (($a[2] ?? '') === 'kop-tools') return -1;
+        if (($b[2] ?? '') === 'kop-tools') return 1;
+        return strcasecmp(trim(strip_tags((string) $a[0])), trim(strip_tags((string) $b[0])));
+    });
+    $submenu['kop-tools'] = $items;
 }
 add_action('admin_menu', 'kop_tools_order_sidebar', 999);
 
