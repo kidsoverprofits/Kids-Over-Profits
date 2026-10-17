@@ -119,7 +119,9 @@
             types: types,
             opening: opening,
             deficiencies: deficiencies,
-            outcome: outcome
+            outcome: outcome,
+            // Our PDF of the state's print view (az_scraper.py, az_pdfs: AZ_<inspection number>.pdf).
+            archive_name: safeString(cats.archive_name)
         };
     }
 
@@ -154,6 +156,7 @@
 
     page.mount({
         state: 'Arizona',
+        archiveState: 'AZ',
         emptyMessage: 'No facilities found in the database for Arizona.',
 
         load: function () {
@@ -229,6 +232,7 @@
                     range ? 'On site ' + range : ''
                 ],
                 link: null,
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Report (archived copy)')] : [],
                 preview: count ? '' : firstSentence(report.opening),
                 body: function () {
                     var html = ui.paragraphs(report.opening.split('\n'), 'kop-rp-purpose');
