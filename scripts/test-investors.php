@@ -123,6 +123,21 @@ if (function_exists('kop_operator_page_data')) {
     }
 }
 
+// ---- Search -----------------------------------------------------------------
+$hits = kop_inv_search('altamont', 4);
+$check('search: "altamont" finds Altamont, opening Sequel TSI\'s page', count($hits) === 1 && $hits[0]['title'] === 'Altamont Capital Partners'
+    && $hits[0]['url'] === kop_inv_record_url('company', 20) && $hits[0]['url'] !== '' && $hits[0]['meta'] === 'Investor - majority owner of Sequel TSI', json_encode($hits));
+$hits = kop_inv_search('Alaris Royalty Corporation', 4);
+$check('search: another legal suffix still finds Alaris', count($hits) === 1 && $hits[0]['title'] === 'Alaris Royalty Corp.', json_encode($hits));
+$hits = kop_inv_search('capital', 10);
+$check('search: "capital" finds the three Capital investors, A to Z', array_column($hits, 'title') === array('Altamont Capital Partners', 'Levine Leichtman Capital Partners', 'Patriot Capital'), json_encode(array_column($hits, 'title')));
+$check('search: one letter finds nothing', kop_inv_search('a', 4) === array());
+$solo = kop_inv_add(array('name' => 'Unlinked Capital Test'), 'test');
+$check('search: an investor with no stake on a page is left out', !array_filter(kop_inv_search('unlinked capital', 4), function ($h) { return $h['title'] === 'Unlinked Capital Test'; }));
+kop_inv_undo((int) $pdo->query('SELECT MAX(id) FROM main.wpdl_kop_investor_log')->fetchColumn(), 'test');
+$check('search: wired into the dropdown, the popup and the search page', strpos(file_get_contents(dirname(__DIR__) . '/inc/ajax-search-lite.php'), 'kop_inv_search(') !== false
+    && strpos(file_get_contents(dirname(__DIR__) . '/inc/global-search.php'), 'kop_inv_search(') !== false && strpos(file_get_contents(dirname(__DIR__) . '/search.php'), 'kop_inv_search(') !== false);
+
 // ---- Writes and exact Undo --------------------------------------------------
 $last = function () use ($pdo) { return (int) $pdo->query('SELECT MAX(id) FROM main.wpdl_kop_investor_log')->fetchColumn(); };
 $snap = function () use ($pdo) {

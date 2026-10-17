@@ -128,6 +128,13 @@ function kop_asl_collect_database_matches($phrase) {
         }
     }
 
+    // --- Investors (inc/investors.php): no page of their own, so the company or program they put money in
+    if (function_exists('kop_inv_search')) {
+        foreach (kop_inv_search($phrase, 2) as $r) {
+            $items[] = array('title' => $r['title'], 'link' => $r['url'], 'meta' => $r['meta']);
+        }
+    }
+
     // --- Wiki submissions --------------------------------------------------
     if (kop_asl_table_exists('wiki_submissions')) {
         $wiki_url = kop_asl_page_url_by_template('page-wiki-feed.php');

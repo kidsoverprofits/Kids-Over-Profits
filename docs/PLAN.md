@@ -2685,10 +2685,15 @@ Open:
 3. More investors are only on the network map, filed as "parent" or "other" nodes (Bain Capital, Trinity Hunt Partners,
    Youth Opportunity Investments, the four Sequel investors). Add them by hand or decide whether the map build should
    read this table and draw investors as their own kind.
-4. Left out of this scope (owner's pick): a data form tab, a public /investors/ page, search, site map, open data
+4. Left out of this scope (owner's pick): a data form tab, a public /investors/ page, site map, open data
    (`kop_open_data_datasets()`), people ids for firm partners, filing Woodbury/review cards on an investor. Each is a
    step in `docs/ADDING-CONTENT.md` section 1 if wanted later.
 5. The "About" and "Sources" of an investor print nowhere public yet (no investor page).
+6. Investors are in search since 2026-10-17 (owner asked; `kop_inv_search()` in the header dropdown, the search popup and
+   search.php). With no investor page, a hit opens the page of the company or program it holds (or held last) a stake
+   in. **Check after deploy:** type "Altamont" in the header search and at https://kidsoverprofits.org/?s=altamont: an
+   Investors result "Investor - majority owner of Sequel TSI" opening https://kidsoverprofits.org/operator/sequel-tsi/.
+   If investors get their own page later, point the results there.
 
 ### 3.33 Directory Editor: the directory's company cards in one screen (2026-10-16)
 

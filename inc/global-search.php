@@ -200,6 +200,17 @@ function kop_global_search_collect($phrase) {
         }
     }
 
+    // --- Investors (inc/investors.php): no page of their own, so the company or program they put money in
+    if (function_exists('kop_inv_search')) {
+        $items = array();
+        foreach (kop_inv_search($phrase, 4) as $r) {
+            $items[] = array('title' => $r['title'], 'url' => $r['url'], 'meta' => $r['meta']);
+        }
+        if ($items) {
+            $groups[] = array('key' => 'investors', 'label' => 'Investors', 'items' => $items);
+        }
+    }
+
     // --- Wiki submissions --------------------------------------------------
     if (kop_asl_table_exists('wiki_submissions')) {
         $wiki_url = kop_asl_page_url_by_template('page-wiki-feed.php');

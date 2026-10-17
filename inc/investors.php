@@ -317,6 +317,60 @@ function kop_inv_fact_items($kind, $ids, array $free = array()) {
     return $items;
 }
 
+/* ---- Search ---------------------------------------------------------------- */
+
+/**
+ * Investors whose name holds $phrase, for the header dropdown, the search
+ * popup and the search page: [{investor_id, title, url, meta}]. An investor
+ * has no page of its own, so the result opens the page of the company or
+ * program it holds (or held last) a stake in; one with no stake on a page is
+ * left out.
+ */
+function kop_inv_search($phrase, $limit = 4) {
+    $phrase = trim((string) $phrase);
+    if (mb_strlen($phrase) < 2 || !kop_inv_ready()) return array();
+    global $wpdb;
+    $key = kop_inv_name_key($phrase);
+    $rows = $wpdb->get_results($wpdb->prepare(
+        'SELECT * FROM ' . kop_inv_table() . ' WHERE name LIKE %s' . ($key !== '' ? ' OR name_key LIKE %s' : '') . ' ORDER BY name LIMIT %d',
+        ...array_merge(array('%' . $wpdb->esc_like($phrase) . '%'), $key !== '' ? array('%' . $wpdb->esc_like($key) . '%') : array(), array(max(1, (int) $limit) * 3))
+    ), ARRAY_A);
+    $out = array();
+    foreach ((array) $rows as $i) {
+        if (count($out) >= $limit) break;
+        $links = kop_inv_links(array('investor_id' => (int) $i['id']));
+        // The stake still held first, then the most recent.
+        usort($links, function ($a, $b) {
+            $ao = $a['end_year'] === null ? 1 : 0;
+            $bo = $b['end_year'] === null ? 1 : 0;
+            if ($ao !== $bo) return $bo <=> $ao;
+            return ((int) ($b['start_year'] ?? $b['end_year'])) <=> ((int) ($a['start_year'] ?? $a['end_year']));
+        });
+        $url = '';
+        $names = array();
+        foreach ($links as $l) {
+            list($kind, $rid) = kop_inv_link_record($l);
+            $u = kop_inv_record_url($kind, $rid);
+            $n = kop_inv_record_name($kind, $rid);
+            if ($kind === 'company' && $n !== '' && function_exists('kop_operator_pages_display_name')) $n = kop_operator_pages_display_name($n);
+            if ($url === '' && $u !== '') $url = $u;
+            if ($n !== '' && !in_array($n, $names, true)) $names[] = $n;
+        }
+        if ($url === '') continue;
+        $first = $links[0];
+        $role = trim((string) $first['role']);
+        if (count($names) === 1 && $role !== '' && $role !== 'Investor') {
+            $r = strtolower($role);
+            if (function_exists('kop_proper_names_apply')) $r = kop_proper_names_apply($r);
+            $meta = 'Investor - ' . $r . ' of ' . $names[0];
+        } else {
+            $meta = 'Investor in ' . implode(', ', array_slice($names, 0, 2)) . (count($names) > 2 ? ' and ' . (count($names) - 2) . ' more' : '');
+        }
+        $out[] = array('investor_id' => (int) $i['id'], 'title' => (string) $i['name'], 'url' => $url, 'meta' => $meta);
+    }
+    return $out;
+}
+
 /* ---- The log --------------------------------------------------------------- */
 
 function kop_inv_log($action, $investor_id, $link_id, $before, $after, $who, $note = '') {

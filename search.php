@@ -206,6 +206,13 @@ global $wpdb;
             'results'  => array(),
         ),
         array(
+            'title'    => 'Investors',
+            'table'    => 'kop_investors', // inc/investors.php: kop_inv_search(), linked to the company or program they put money in
+            'template' => '',
+            'linkable' => false,
+            'results'  => array(),
+        ),
+        array(
             'title'    => 'Locations',
             'table'    => 'locations_master',
             'template' => 'page-location-index.php',
@@ -221,12 +228,17 @@ global $wpdb;
         if ($kop_v2_search !== null && $i === 0) {
             // v2: companies first, then individual facilities linked to their state page.
             $master_sections[$i]['results'] = array_merge($kop_v2_search['operators'], $kop_v2_search['facilities']);
+        } elseif ($section['table'] === 'kop_investors') {
+            $master_sections[$i]['results'] = array();
+            foreach (function_exists('kop_inv_search') ? kop_inv_search($search_query, 10) : array() as $inv) {
+                $master_sections[$i]['results'][] = array('display' => $inv['title'], 'url' => $inv['url'], 'operator' => '', 'location' => $inv['meta'], 'fac_count' => 0);
+            }
         } elseif ($kop_v2_search !== null && $section['table'] === 'locations_master') {
             $master_sections[$i]['results'] = $kop_v2_search['places'];
         } else {
             $master_sections[$i]['results'] = kop_search_master_table($section['table'], $search_query, $limit, $section['table'] === $facilities_table);
         }
-        $master_sections[$i]['url']     = kop_search_page_url_by_template($section['template']);
+        $master_sections[$i]['url']     = $section['template'] !== '' ? kop_search_page_url_by_template($section['template']) : '';
         if (!empty($master_sections[$i]['results'])) {
             $any_master_results = true;
         }

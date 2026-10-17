@@ -376,7 +376,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # {prefix}kop_investor_log (Undo puts back exactly that change while nothing changed it since). The pages' Investors line is
 # kop_inv_fact_items() (a program names its companies' investors too, "of Sequel TSI"); free-text operator.investors /
 # identification.investors entries print only while no link has their name, and wait on the screen's "Not linked yet" tab
-# (the first admin load after the deploy linked those on file then, kop_inv_maybe_import())
+# (the first admin load after the deploy linked those on file then, kop_inv_maybe_import()). Search (header dropdown, popup, search.php)
+# finds them by name through kop_inv_search(): no investor page, so a hit opens the company or program it holds (or held last) a stake in
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   # parsing, import, page lines, every write + exact undo, on a scratch copy
 # The directory's company cards (KOP Tools > Directory Editor, inc/directory-editor.php): per company, edit the card's fields (a rename keeps the old
 # name and its /operator/ address, option kop_dired_redirects), take the card off (operator.directoryHidden: the feed and js/tti-program-index.js skip
