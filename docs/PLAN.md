@@ -785,7 +785,13 @@ updated.
    VPN off) and TX (~11,460 deficiencies, 8-12 h, resumable) backfills started
    2026-10-17 evening. **Owner: MN backfill** needs Chrome closed:
    `py -3 scrapers/mn_scraper.py --backfill-pdfs` (210 reports, ~20 min).
-   Pages linked: VA, AZ, CO, NV, OK, GA, MN, TX (tx_reports.js loads the tx index). **NV junk rows:** the
+   Pages linked: VA, AZ, CO, NV, OK, GA, MN, TX, CT, CA (tx_reports.js and
+   ca-reports.js load their index themselves). NV posted 193 reports with PDFs
+   (nv_scraper fixed to use the launcher's key, kop-pipeline 66d0dfa). CT backfill
+   started. **CA backfill: owner's call** (30,885 reports, CCL is slow: 3-5 days
+   in chunks, resumable): sync the mirror, then `py -3.14 ca_scraper.py
+   --backfill-pdfs`. New CA runs already save PDFs. CA data issue seen: many CA
+   facility rows have the facility number as their name, 98 numbers have two rows. **NV junk rows:** the
    old nv_scraper read the grid's pager as inspections; reports "1", "2", "3"
    and "..." on /nv-reports/ need deleting (owner's go-ahead first).
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
