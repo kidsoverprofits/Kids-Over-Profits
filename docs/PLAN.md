@@ -2752,3 +2752,16 @@ Open:
    Solutions, Inc. lists 10370 under its own name, not "Rivendell of Utah". Look at whether the map or the record changed.
    Also failing on the mirror before this work (same set with and without it, 2026-10-17): scripts/test-facility-pages.php
    13 checks (one: "the page renders to the end after the post") and scripts/test-facility-eras.php 1.
+
+### 3.34 Drive Sync: "Sync now" for the Drive folder's documents (2026-10-17)
+
+KOP Tools > Drive Sync (inc/drive-sync.php) starts api/sync-drive-documents.php in the background (exec + nohup, the same
+lock as the nightly cron) and shows its progress and the last run's report (imported with links, not placed, failed).
+
+Open:
+1. **Check after deploy:** open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-drive-sync, press Sync now: the line
+   should turn to "Reading the Drive folder..." within a few seconds and to a report when it ends. If it says the sync did not
+   start, the web server's PHP is not allowed to start a background process (or kills it when the request ends): look in
+   ~/logs/drive-sync.log, and fall back to a WP-Cron single event that runs the import in the cron's own PHP.
+2. Owner's choice: the server cron runs it once a night (`15 3 * * *`). Every 15 minutes (`*/15 * * * *` in cPanel > Cron Jobs)
+   would bring a new document in within 15 minutes with no button; the lock keeps two runs from overlapping.

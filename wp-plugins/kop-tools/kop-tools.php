@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.6
+ * Version: 2.5.7
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -365,6 +365,14 @@ function kop_tools_registry() {
             ),
         ),
         'Media & folders' => array(
+            array(
+                'title'    => 'Drive Sync',
+                'desc'     => 'Sync now: bring the PDFs and Word documents in the Google Drive FileBird folder into the media library at once (it also runs every night), and see what the last run imported, where, and what it could not place.',
+                'type'     => 'screen',
+                'screen'   => 'kop-drive-sync',
+                'requires' => 'kop_drive_sync_page',
+                'sidebar'  => true,
+            ),
             array(
                 'title'    => 'Document Types',
                 'desc'     => 'What kind each document is (handbook, inspection report, enrollment, news clipping, legal filing...): counts, tag many at once, run the rules, recent changes with Undo. Readers compare them at /documents/.',

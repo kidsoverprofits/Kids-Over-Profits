@@ -267,6 +267,8 @@ require_once get_stylesheet_directory() . '/inc/directory-editor.php';
 require_once get_stylesheet_directory() . '/inc/doc-placement.php';
 // Links from the owner's Google Docs and Sheets (scripts/gdocs-extract.py), reviewed at KOP Tools > Drive Docs
 require_once get_stylesheet_directory() . '/inc/drive-docs.php';
+// "Sync now" for the documents in the Drive FileBird folder (api/sync-drive-documents.php in the background), KOP Tools > Drive Sync
+require_once get_stylesheet_directory() . '/inc/drive-sync.php';
 // What the old Fornits survivor forum says about each facility (scripts/fornits-crawl.py, fornits-process.py), reviewed at KOP Tools > Fornits
 require_once get_stylesheet_directory() . '/inc/fornits.php';
 // Which job spent the shared Groq/Gemini free quota, and "Check now" (KOP Tools > AI Usage)

@@ -87,3 +87,6 @@ node_modules
 /js/data/*
 !/js/data/pages/
 !/js/data/glossary/
+
+# Drive Sync run lock (api/sync-drive-documents.php)
+api/.kop-sync-drive-documents.lock

@@ -796,6 +796,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Scraper report PDFs stay in link-shared Drive folders; the sync writes only wp-content/uploads/inspection-reports/<st>/index.json of Drive links,
 # linked as "Archived copy" on the state report pages (server CLI + nightly cron; no apply = dry run)
 php api/sync-inspection-archive.php apply --limit=2000 --minutes=25
+# PDFs and Word files in the Drive FileBird folder -> media library, filed by their Drive path (nightly cron, 03:15). KOP Tools > Drive Sync
+# (inc/drive-sync.php) has "Sync now" (starts the same script in the background) and the last run's report (option kop_drive_sync_status)
+php api/sync-drive-documents.php [apply] [--only="Folder"] [--limit=100]   # on the server (ea-php82)
+php scripts/test-drive-sync.php                   # the screen's states, the lock, the report; offline
 # robots.txt (inc/robots.php): every Disallow line goes inside Yoast's "User-agent: *" group (lines outside a group are ignored);
 # a path to keep crawlers out of goes in kop_robots_disallow_paths(). WP-Cron runs from the server's crontab (wp-cron.php every
 # 5 min, ~/logs/wp-cron.log); visitors start it only if that run has not been seen for 20 min (inc/server-cron.php)

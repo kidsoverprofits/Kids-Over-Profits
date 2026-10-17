@@ -31,6 +31,10 @@
  *
  * Meant for cron: each run imports up to --limit documents within --minutes and
  * the next run carries on. A lock file stops two runs overlapping.
+ *
+ * An apply run keeps its progress and its report in the kop_drive_sync_status
+ * option, which KOP Tools > Drive Sync shows (inc/drive-sync.php; its "Sync now"
+ * starts this script in the background with --by=<user id>).
  */
 
 if (php_sapi_name() !== 'cli') {
@@ -38,9 +42,9 @@ if (php_sapi_name() !== 'cli') {
     exit('CLI only.');
 }
 
-$opts = array('limit' => 50, 'minutes' => 20, 'max-mb' => 60, 'only' => '');
+$opts = array('limit' => 50, 'minutes' => 20, 'max-mb' => 60, 'only' => '', 'by' => 0);
 foreach (array_slice($argv, 1) as $arg) {
-    if (preg_match('/^--(limit|minutes|max-mb|only)=(.*)$/', $arg, $m)) {
+    if (preg_match('/^--(limit|minutes|max-mb|only|by)=(.*)$/', $arg, $m)) {
         $opts[$m[1]] = $m[1] === 'only' ? trim($m[2]) : max(0, (int)$m[2]);
     }
 }
@@ -49,17 +53,15 @@ $apply = in_array('apply', $argv, true);
 // takes longer than that. --minutes is the budget instead.
 set_time_limit(0);
 
-// Folders at the top of the Drive FileBird folder that are the scrapers' output
-// (see backup_reports.py in the tools repo), plus the doc finder's holding pen.
-$SKIP_TOP = array('inspections', 'nc_pdfs', 'nc_ocr', 'ar_pdfs', 'fl_pdfs', 'or_pdfs', 'wa_pdfs',
-                  'ut_checklists', 'doc finder inbox');
 $DOC_MIMES = array(
     'application/pdf'                                                         => 'pdf',
     'application/msword'                                                      => 'doc',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
 );
 
-$lock = fopen(sys_get_temp_dir() . '/kop-sync-drive-documents.lock', 'c');
+// Beside this file, not in the temp folder: the web server's PHP (Drive Sync's
+// "is it running?") may see a different temp folder than the command line's.
+$lock = fopen(__DIR__ . '/.kop-sync-drive-documents.lock', 'c');
 if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     fwrite(STDERR, "Another run is still going.\n");
     exit(0);
@@ -93,6 +95,18 @@ $tags    = $wpdb->prefix . 'kop_media_folder_tags';
 $has_tags = ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $tags)) === $tags);
 $fbv_columns = $wpdb->get_col("SHOW COLUMNS FROM {$fbv}");
 $started = time();
+
+/** The run as KOP Tools > Drive Sync shows it (apply runs only). */
+function kop_sd_status(array $patch, $fresh = false) {
+    global $apply;
+    if (!$apply) return;
+    $now = $fresh ? array() : get_option('kop_drive_sync_status', array());
+    update_option('kop_drive_sync_status', array_merge(is_array($now) ? $now : array(), $patch), false);
+}
+kop_sd_status(array(
+    'state' => 'listing', 'started' => $started, 'finished' => 0, 'by' => (int)$opts['by'], 'only' => $opts['only'],
+    'limit' => (int)$opts['limit'], 'counts' => array(), 'items' => array(), 'current' => '', 'error' => '', 'stopped' => '',
+), true);
 
 // ---------------------------------------------------------------------------
 // Google Drive, through FileBird Cloud's connection
@@ -289,11 +303,14 @@ function kop_sd_file_in($attachment_id, $folder_id) {
 try {
     $root = njfb_cloud_get_main_folder('google_drive');
     if (!$root) throw new RuntimeException('FileBird Cloud has not made its Drive folder yet.');
-    $files = kop_sd_list($root, array(), $SKIP_TOP, $opts['only']);
+    $files = kop_sd_list($root, array(), kop_sd_skip_top(), $opts['only']);
 } catch (Throwable $e) {
+    kop_sd_status(array('state' => 'failed', 'finished' => time(), 'error' => $e->getMessage()));
     fwrite(STDERR, $e->getMessage() . "\n");
     exit(1);
 }
+kop_sd_status(array('state' => 'running', 'listed' => count($files)));
+$saved_at = 0;
 
 $counts = array();
 $lines = array();
@@ -358,6 +375,10 @@ foreach ($files as $f) {
         continue;
     }
 
+    if (time() - $saved_at >= 2) {
+        kop_sd_status(array('current' => $label, 'counts' => $counts, 'items' => array_slice($lines, -300)));
+        $saved_at = time();
+    }
     $tmp = wp_tempnam($f['name']);
     try {
         kop_sd_download($f['id'], $tmp);
@@ -418,6 +439,8 @@ if ($apply) {
     if ($fixed) $counts['guids fixed'] = (int)$fixed;
 }
 ksort($counts);
+kop_sd_status(array('state' => 'done', 'finished' => time(), 'current' => '', 'counts' => $counts,
+                    'stopped' => $budget_hit, 'items' => array_slice($lines, 0, 300), 'more_items' => max(0, count($lines) - 300)));
 echo json_encode(array(
     'applied'  => $apply,
     'seconds'  => time() - $started,

@@ -6,6 +6,16 @@
  * loaded and FileBird Cloud active.
  */
 
+/**
+ * Folders at the top of the Drive FileBird folder that the document sync leaves
+ * alone: the scrapers' output (see backup_reports.py in the tools repo), which
+ * sync-inspection-archive.php handles, plus the doc finder's holding pen.
+ */
+function kop_sd_skip_top() {
+    return array('inspections', 'nc_pdfs', 'nc_ocr', 'ar_pdfs', 'fl_pdfs', 'or_pdfs', 'wa_pdfs',
+                 'ut_checklists', 'doc finder inbox');
+}
+
 function kop_sd_token() {
     $token = njfb_cloud_get_settings_by_key('google_drive', 'token', array());
     if (!is_array($token) || empty($token['refresh_token'])) {
