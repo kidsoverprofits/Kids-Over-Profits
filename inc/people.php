@@ -832,6 +832,8 @@ if (!function_exists('kop_people_sync')) {
                 foreach ($chunk as $r) foreach ($r as $v) $params[] = $v;
                 kop_facility_db_exec($sql, $params, $opts);
             }
+            // Each staff entry's pastJobs text, folded into the person's jobs once (inc/person-jobs.php).
+            if (function_exists('kop_pjobs_import')) $stats['jobs'] = kop_pjobs_import($opts);
             if (function_exists('update_option')) update_option('kop_people_last_sync', array('at' => time()) + $stats, false);
             if ($stats['created'] || $stats['stamped'] || $stats['docs_written']) kop_people_version_bump();
         }

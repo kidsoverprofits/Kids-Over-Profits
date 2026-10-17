@@ -53,6 +53,30 @@ function kop_people_admin_handle() {
         wp_safe_redirect(kop_people_admin_url(array('person' => $into, 'merged' => $id)));
         exit;
     }
+    // Past jobs, held once on the person (inc/person-jobs.php): every page that lists them shows the change.
+    if (in_array($do, array('job_save', 'job_add', 'job_hide', 'job_show'), true) && $id > 0 && function_exists('kop_pjobs_save')) {
+        $fields = array();
+        foreach (array('place', 'role', 'years', 'source', 'source_url') as $k) {
+            if (isset($_POST[$k])) $fields[$k] = sanitize_text_field(wp_unslash($_POST[$k]));
+        }
+        if ($do === 'job_hide') $fields = array('hidden' => 1);
+        if ($do === 'job_show') $fields = array('hidden' => 0);
+        try {
+            kop_pjobs_save($id, $do === 'job_add' ? 0 : (int) ($_POST['job'] ?? 0), $fields);
+        } catch (Throwable $e) {
+            return $e->getMessage();
+        }
+        return array('job_add' => 'Job added', 'job_save' => 'Job saved', 'job_hide' => 'Job taken off', 'job_show' => 'Job put back')[$do]
+            . ': every page that lists this person shows it now. Undo is under Recent changes below.';
+    }
+    if ($do === 'job_undo' && $id > 0 && function_exists('kop_pjobs_undo')) {
+        try {
+            kop_pjobs_undo((int) ($_POST['n'] ?? 0));
+        } catch (Throwable $e) {
+            return $e->getMessage();
+        }
+        return 'Undone.';
+    }
     if ($do === 'separate' && $id > 0) {
         $new = kop_people_separate((int) ($_POST['facility'] ?? 0), sanitize_text_field(wp_unslash($_POST['list'] ?? '')), (int) ($_POST['position'] ?? 0));
         if (!$new) return 'That entry is not there any more. Sync and try again.';
@@ -295,6 +319,8 @@ function kop_people_admin_person($id) {
     </table>
     <?php endif; ?>
 
+    <?php kop_people_admin_jobs($id); ?>
+
     <?php $pod = function_exists('kop_pod_for_person') ? kop_pod_for_person($id) : array();
     if ($pod) : ?>
     <h2>On air</h2>
@@ -344,3 +370,83 @@ function kop_people_admin_styles() {
     </style>
     <?php
 }
+
+/**
+ * A person's past jobs (inc/person-jobs.php): held once, shown on every facility and company page that lists
+ * them. Each row saves on its own; "Take off" keeps it out (the staff entry's text never brings it back).
+ */
+function kop_people_admin_jobs($id) {
+    if (!function_exists('kop_pjobs_for_person')) return;
+    $jobs = kop_pjobs_for_person($id);
+    echo '<h2>Past jobs</h2>';
+    if ($jobs === null) {
+        echo '<p class="kop-people__muted">The jobs table is made on the next admin page load.</p>';
+        return;
+    }
+    echo '<p class="kop-people__muted">Held once for this person: every page that lists them shows these, so a job is added or fixed here, '
+        . 'not on each profile. Jobs typed into a staff entry\'s "Past jobs" come in by themselves within the hour. Their job at each program '
+        . 'that lists them is under "Where they are named" above.</p>';
+    $t = kop_pjobs_table();
+    $hidden = kop_facility_db_rows("SELECT * FROM {$t} WHERE person_id = ? AND hidden = 1 ORDER BY id", array((int) $id));
+    echo '<table class="widefat striped kop-people__jobs"><thead><tr><th>Role</th><th>Place</th><th>Years</th><th>Source</th><th></th></tr></thead><tbody>';
+    $field = function ($name, $value, $label, $size = 0) {
+        return '<label class="screen-reader-text">' . esc_html($label) . '</label><input type="text" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"'
+            . ($size ? ' size="' . (int) $size . '"' : ' class="regular-text"') . ' aria-label="' . esc_attr($label) . '">';
+    };
+    foreach ($jobs as $j) {
+        $form = 'kop-job-' . (int) $j['id'];
+        echo '<tr><td>' . $field('role', $j['role'], 'Role') . '</td><td>' . $field('place', $j['place'], 'Place') . '</td><td>' . $field('years', $j['years'], 'Years', 12) . '</td><td>'
+            . $field('source', $j['source'], 'Source') . $field('source_url', $j['source_url'], 'Source link') . '</td><td>';
+        // One form per row: the inputs above sit in its cells through the form attribute.
+        echo '<form method="post" id="' . esc_attr($form) . '" class="kop-people__bar">';
+        kop_people_admin_hidden('job_save', $id);
+        echo '<input type="hidden" name="job" value="' . (int) $j['id'] . '"><button type="submit" class="button button-primary">Save</button></form>';
+        echo '<form method="post" class="kop-people__bar">';
+        kop_people_admin_hidden('job_hide', $id);
+        echo '<input type="hidden" name="job" value="' . (int) $j['id'] . '"><button type="submit" class="button" title="Not shown on any page; Undo puts it back">Take off</button></form>';
+        echo '</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '<script>document.querySelectorAll(".kop-people__jobs tbody tr").forEach(function (tr) { var f = tr.querySelector("form"); '
+        . 'if (f) tr.querySelectorAll("input[type=text]").forEach(function (i) { i.setAttribute("form", f.id); }); });</script>';
+    if (!$jobs) echo '<p class="kop-people__muted">No past jobs on file.</p>';
+
+    echo '<form method="post" class="kop-people__form"><h3>Add a job</h3>';
+    kop_people_admin_hidden('job_add', $id);
+    echo '<p><label>Role<br><input type="text" name="role" class="regular-text" placeholder="Program Director"></label> '
+        . '<label>Place<br><input type="text" name="place" class="regular-text" placeholder="A program, company or anything else" required></label> '
+        . '<label>Years<br><input type="text" name="years" size="12" placeholder="2008-2011"></label></p>'
+        . '<p><label>Source<br><input type="text" name="source" class="regular-text" placeholder="Woodbury Reports, May 2007"></label> '
+        . '<label>Source link<br><input type="url" name="source_url" class="regular-text" placeholder="https://"></label></p>'
+        . '<p><button type="submit" class="button">Add the job</button></p></form>';
+
+    if ($hidden) {
+        echo '<details><summary>Taken off (' . count($hidden) . ')</summary><ul>';
+        foreach ($hidden as $j) {
+            echo '<li>' . esc_html(trim($j['role'] . ' - ' . $j['place'] . ($j['years'] !== '' ? ' (' . $j['years'] . ')' : ''), ' -')) . ' <form method="post" style="display:inline">';
+            kop_people_admin_hidden('job_show', $id);
+            echo '<input type="hidden" name="job" value="' . (int) $j['id'] . '"><button type="submit" class="button button-small">Put back</button></form></li>';
+        }
+        echo '</ul></details>';
+    }
+
+    $log = array_slice(kop_pjobs_log_for($id), 0, 10);
+    if ($log) {
+        echo '<h3>Recent changes</h3><ul>';
+        foreach ($log as $l) {
+            $a = $l['after'] ?: $l['before'];
+            $what = $l['before'] === null ? 'Added' : (!empty($l['after']['hidden']) && empty($l['before']['hidden']) ? 'Took off' : (empty($l['after']['hidden']) && !empty($l['before']['hidden']) ? 'Put back' : 'Changed'));
+            echo '<li>' . esc_html($what . ': ' . trim(($a['role'] ?? '') . ' - ' . ($a['place'] ?? ''), ' -') . ' (' . $l['at'] . ' UTC' . ($l['by'] !== '' ? ', ' . $l['by'] : '') . ')') . ' ';
+            if (empty($l['undone'])) {
+                echo '<form method="post" style="display:inline">';
+                kop_people_admin_hidden('job_undo', $id);
+                echo '<input type="hidden" name="n" value="' . (int) $l['n'] . '"><button type="submit" class="button button-small">Undo</button></form>';
+            } else {
+                echo '<span class="kop-people__muted">undone</span>';
+            }
+            echo '</li>';
+        }
+        echo '</ul>';
+    }
+}
+

@@ -1943,6 +1943,18 @@ if (!function_exists('kop_facility_pages_person_career')) {
             $out[$pk] = array('role' => trim((string) $role), 'place' => $place, 'years' => trim((string) $years), 'url' => $url);
         };
 
+        // The person's jobs, held once on the person (inc/person-jobs.php): every profile shows the same ones,
+        // this entry's own pastJobs text included (the hourly sync reads it in). No id or no table: the text.
+        $held = ((int) $person_id > 0 && function_exists('kop_pjobs_for_person')) ? kop_pjobs_for_person((int) $person_id) : null;
+        if ($held !== null) {
+            foreach ($held as $job) $add($job['place'], $job['role'], $job['years'], kop_facility_pages_facility_url_by_name($job['place']));
+            // Text the sync has not read in yet still shows; a job read in (and perhaps taken off since) does not.
+            $fresh = array();
+            foreach (kop_pjobs_parse($past_jobs) as $job) {
+                if (!kop_pjobs_known((int) $person_id, $job)) $fresh[] = $job['role'] . ' - ' . $job['place'] . ($job['years'] !== '' ? ' (' . $job['years'] . ')' : '');
+            }
+            $past_jobs = implode('; ', $fresh);
+        }
         // Notes go first: "[joined 2008-07; joined 2008-10-13]" holds the separator too.
         $past_jobs = preg_replace('/\s*\[[^\]]*\]\s*/', ' ', (string) $past_jobs);
         foreach (preg_split('/\s*;\s*/', trim($past_jobs), -1, PREG_SPLIT_NO_EMPTY) as $job) {
