@@ -701,6 +701,10 @@ php api/clear-woodbury-on-record.php [--list] [apply]   # on the server (ea-php8
 # like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
 # Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
 (kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
+# Same information in other words or run together, which rules cannot see, read by AI agents (Haiku, Sonnet for the tricky ones) next to
+# each record; every verdict quotes the record and is checked: clear (rejected, the quote shown), trim (cut to the new part, still waiting,
+# "Back to what Woodbury said" undoes), dup. First run 2026-10-17: 105 cleared, 108 trimmed, 7 duplicates of 3,978 waiting items
+php api/apply-woodbury-same-info.php [file] [apply] | undo apply   # on the server: ~/kop-import/woodbury/same-info.json, re-checked live
 (kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
 (kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:
