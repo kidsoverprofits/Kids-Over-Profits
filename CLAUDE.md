@@ -210,7 +210,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-inspection-rollup
 # Plain-language summaries for hard-to-read serious findings (inc/highlight-summaries.php): kop_hs_reasons() picks approved findings with
 # codes, numbered people, stitched fragments, run-on sentences or legal citations (about 10%); an hourly job asks the AI (alternating Groq/Gemini)
 # for 1-3 plain sentences from the state's text only; drafts wait at KOP Tools > Review inbox > Plain summaries (edit, approve, reject, write
-# again) and show above the state's wording on facility pages, home cards and /severe-reports/ only once approved. A summary belongs to the
+# again) and show above the state's wording on facility pages, home cards and /severe-reports/ only once approved. A waiting Serious violations
+# card has "Write a plain summary" (any finding, to read it by: shown at the top of the card, a draft in the same queue, public only once the
+# finding is approved too; kop_rinbox_ih_plain()). A summary belongs to the
 # exact excerpt it was written from (excerpt_hash): a changed excerpt hides it and a new draft is made. Table inspection_highlight_summaries
 php scripts/test-highlight-summaries.php           # which findings are picked (the owner's examples), answer checks, printing
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=highlight-summaries   # the queue with a made-up AI

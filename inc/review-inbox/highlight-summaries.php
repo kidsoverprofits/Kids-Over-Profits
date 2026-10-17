@@ -56,7 +56,7 @@ function kop_rinbox_hs_rows($where, array $params, $limit, $offset) {
     $pdo = kop_rinbox_pdo();
     kop_hs_ensure_table($pdo);
     $st = $pdo->prepare("SELECT s.highlight_id, s.excerpt_hash, s.summary, s.status, s.reasons, s.provider, s.reviewed_by, s.reviewed_at, s.created_at,
-            h.excerpt, h.state, h.score, h.finding_date, h.state_label, h.facility_id, h.report_id, f.facility_name,
+            h.excerpt, h.status AS finding_status, h.state, h.score, h.finding_date, h.state_label, h.facility_id, h.report_id, f.facility_name,
             r.report_date, r.report_url, r.report_id AS source_report_id
         FROM inspection_highlight_summaries s
         JOIN inspection_highlights h ON h.id = s.highlight_id
@@ -92,11 +92,17 @@ function kop_rinbox_hs_item(array $r) {
     if ($when !== '') $sub[] = 'Inspected ' . $when;
     if ($r['reasons']) $sub[] = 'Hard to read: ' . $r['reasons'];
     if ($stale) $sub[] = 'Out of date: the state\'s text changed after this was written';
+    // A draft can be asked for from a waiting Serious violations card, to read the finding by.
+    $finding_pending = ($r['finding_status'] ?? 'approved') === 'pending';
+    $finding_rejected = ($r['finding_status'] ?? 'approved') === 'rejected';
+    if ($finding_pending) $sub[] = 'The finding itself still waits at Serious violations: the summary shows once it is approved';
+    if ($finding_rejected) $sub[] = 'The finding itself was rejected, so it is not on the site';
     $status_label = $stale ? 'Out of date' : ($none ? 'Not written' : ucfirst($r['status']));
 
     $actions = array();
-    if (!$stale && !$none && $r['status'] !== 'approved') $actions[] = array('id' => 'approved', 'label' => 'Approve: show this summary', 'style' => 'approve',
-        'help' => 'Shows the summary above the state\'s wording on the facility page of ' . $r['facility_name'] . ', and wherever this finding is listed.');
+    if (!$stale && !$none && !$finding_rejected && $r['status'] !== 'approved') $actions[] = array('id' => 'approved', 'label' => 'Approve: show this summary', 'style' => 'approve',
+        'help' => 'Shows the summary above the state\'s wording on the facility page of ' . $r['facility_name'] . ', and wherever this finding is listed'
+            . ($finding_pending ? ', once the finding itself is approved at Serious violations.' : '.'));
     if ($r['status'] !== 'rejected') $actions[] = array('id' => 'rejected', 'label' => 'Reject: never show it', 'style' => 'reject',
         'help' => 'The state\'s wording is shown alone, as now' . ($r['status'] === 'approved' ? ' (the summary comes off the pages it is on)' : '') . '. It is not written again unless you ask.');
     if ($r['status'] !== 'approved') $actions[] = array('id' => 'rewrite', 'label' => 'Write it again', 'style' => 'neutral',
@@ -160,13 +166,14 @@ function kop_rinbox_hs_act($key, $action, array $params) {
         if ($r['excerpt_hash'] !== kop_hs_hash($r['excerpt'])) throw new RuntimeException('The state\'s text changed after this was written. Use "Write it again".');
         // What goes on the site passes the same checks as an AI draft (no codes, brackets or links), whoever last edited it.
         kop_hs_clean_summary($r['summary']);
-        if ($r['finding_status'] !== 'approved') throw new RuntimeException('The finding itself is not approved, so it is not on the site.');
+        if ($r['finding_status'] === 'rejected') throw new RuntimeException('The finding itself was rejected, so it is not on the site.');
     }
     $pending = $action === 'pending';
     $pdo->prepare('UPDATE inspection_highlight_summaries SET status = ?, reviewed_by = ?, reviewed_at = ? WHERE highlight_id = ?')
         ->execute(array($action, $pending ? null : kop_rinbox_reviewer(), $pending ? null : $now, $id));
     kop_rinbox_flush_counts();
-    if ($action === 'approved') return array('message' => 'Approved. It shows above the state\'s wording. Back to pending is on the Approved tab.');
+    if ($action === 'approved') return array('message' => 'Approved. It shows above the state\'s wording'
+        . ($r['finding_status'] === 'pending' ? ' once the finding itself is approved at Serious violations' : '') . '. Back to pending is on the Approved tab.');
     return array('message' => $action === 'rejected' ? 'Rejected. Only the state\'s wording shows.' : 'Back to pending: it is off the site and waits for review.');
 }
 

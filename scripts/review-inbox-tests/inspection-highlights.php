@@ -9,6 +9,8 @@
 
 // Which licensed sites belong to the companies watched closely (the Inspection Rankings rollup).
 require_once dirname(__DIR__, 2) . '/inc/inspection-rollup.php';
+// Plain summaries of waiting findings (the card's "Write a plain summary").
+require_once dirname(__DIR__, 2) . '/inc/highlight-summaries.php';
 
 (function () {
     $pdo = $GLOBALS['pdo'];
@@ -71,11 +73,34 @@ function kop_rinbox_test_inspection_highlights(array $src, array $item, callable
     $pdo->prepare('UPDATE inspection_highlights SET category = ?, categories = ?, review_note = ? WHERE id = ?')
         ->execute(array($before['category'], $before['categories'], $before['review_note'], $id));
 
+    // A plain summary of a waiting finding, to read it by (a made-up AI); it waits at Plain summaries.
+    $check('inspection-highlights: a waiting card offers a plain summary', in_array('plain', array_column($item['actions'], 'id'), true));
+    $sum = function () use ($pdo, $id) {
+        $st = $pdo->prepare('SELECT * FROM inspection_highlight_summaries WHERE highlight_id = ?');
+        $st->execute(array($id));
+        return $st->fetch(PDO::FETCH_ASSOC);
+    };
+    $GLOBALS['kop_hs_ai'] = function ($prompt) { return 'A staff member held a child in the program on the floor. The state found that this broke its rules.'; };
+    $res = call_user_func($src['act'], $item['key'], 'plain', array());
+    $s = $sum();
+    $check('inspection-highlights: the summary is stored as a pending draft from this excerpt', $s && $s['status'] === 'pending' && $s['excerpt_hash'] === kop_hs_hash($before['excerpt']), $res['message']);
+    $card = kop_rinbox_get_item('inspection-highlights', $item['key']);
+    $check('inspection-highlights: the card shows the summary above the state\'s wording', strpos($card['text'], 'Plain-language summary (draft') === 0
+        && strpos($card['text'], $s['summary']) < strpos($card['text'], "The state's wording"));
+    $check('inspection-highlights: the action reads "Write the summary again" once there is one', in_array('Write the summary again', array_column($card['actions'], 'label'), true));
+    $hs = kop_rinbox_get_item('highlight-summaries', $item['key']);
+    $check('inspection-highlights: Plain summaries lists it, saying the finding still waits, and can approve it', $hs && strpos($hs['subtitle'], 'still waits at Serious violations') !== false
+        && in_array('approved', array_column($hs['actions'], 'id'), true), $hs ? $hs['subtitle'] : 'missing');
+    $res = call_user_func(kop_rinbox_source('highlight-summaries')['act'], $item['key'], 'approved', array());
+    $check('inspection-highlights: approving the summary of a waiting finding says when it shows', $sum()['status'] === 'approved' && strpos($res['message'], 'once the finding itself is approved') !== false, $res['message']);
+    unset($GLOBALS['kop_hs_ai']);
+    $pdo->prepare('DELETE FROM inspection_highlight_summaries WHERE highlight_id = ?')->execute(array($id));
+
     $res = call_user_func($src['act'], $item['key'], 'rejected', array());
     $r = $row();
     $check('inspection-highlights: reject records who and when', $r['status'] === 'rejected' && $r['reviewed_by'] === 'inbox-test' && $r['reviewed_at'] !== null, $res['message']);
     $back = kop_rinbox_get_item('inspection-highlights', $item['key']);
-    $check('inspection-highlights: a rejected finding offers approve and back to pending', array_column($back['actions'], 'id') === array('approved', 'pending'));
+    $check('inspection-highlights: a rejected finding offers approve and back to pending', array_values(array_diff(array_column($back['actions'], 'id'), array('ya_file'))) === array('approved', 'pending'), implode(',', array_column($back['actions'], 'id')));
     call_user_func($src['act'], $item['key'], 'pending', array());
     $r = $row();
     $check('inspection-highlights: back to pending clears the review', $r['status'] === 'pending' && $r['reviewed_by'] === null && $r['reviewed_at'] === null);

@@ -8,7 +8,10 @@
  * (and only those); an hourly job asks the AI for two or three plain
  * sentences about each (Groq and Gemini take turns, api/ai-providers.php);
  * the draft waits in KOP Tools > Review inbox > Plain summaries and goes on
- * the site only when a person approves it. The state's wording always stays
+ * the site only when a person approves it. A waiting finding can get one too,
+ * from its Serious violations card ("Write a plain summary"), to help decide
+ * on it; that draft shows only once the finding is approved as well.
+ * The state's wording always stays
  * under it. A summary belongs to the exact excerpt it was written from
  * (excerpt_hash): when the excerpt changes (a rescan, a same-day merge) the
  * summary stops showing and a new draft is made.

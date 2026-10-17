@@ -132,7 +132,15 @@ function kop_rinbox_ih_item(array $r) {
     foreach (array_filter(array_map('trim', explode(',', (string) $r['categories']))) as $k) {
         if ($k !== $r['category'] && isset($cats[$k])) $also[] = $cats[$k];
     }
-    $text = kop_rinbox_excerpt($r['excerpt'], 900)
+    // A plain-language summary helps read a hard finding before deciding on it (owner, 2026-10-17):
+    // one written from this very excerpt leads the card; it goes on the site only when approved at Plain summaries.
+    $plain = kop_rinbox_ih_plain($r);
+    $text = ($plain ? 'Plain-language summary (' . ($plain['status'] === 'approved' ? 'approved' : 'draft, not on the site') . "):
+" . $plain['summary'] . "
+
+The state's wording:
+" : '')
+        . kop_rinbox_excerpt($r['excerpt'], 900)
         . ($r['standard'] ? "\nCited: " . $r['standard'] : '')
         . ($also ? "\nAlso matched: " . implode(', ', $also) : '')
         . ($r['corrected_on_site'] ? "\nCorrected at the inspection." : '')
@@ -148,6 +156,8 @@ function kop_rinbox_ih_item(array $r) {
         'help' => 'The finding never shows on the site' . ($r['status'] === 'approved' ? ' (it comes off the pages it is on now)' : '') . '; the inspection report itself stays listed.');
     if ($r['status'] !== 'pending') $actions[] = array('id' => 'pending', 'label' => 'Back to pending', 'style' => 'undo',
         'help' => 'Takes the finding off the site and puts it back in the waiting list.');
+    if ($r['status'] === 'pending' && function_exists('kop_hs_write')) $actions[] = array('id' => 'plain', 'label' => $plain ? 'Write the summary again' : 'Write a plain summary', 'style' => 'neutral',
+        'help' => 'Asks the AI for two or three plain sentences from the state\'s text, shown at the top of this card. Nothing goes on the site: the draft waits at Plain summaries, and shows above the state\'s wording only once both it and the finding are approved.');
     $links = array(array(
         'label' => 'Full report (old screen)',
         'url'   => get_stylesheet_directory_uri() . '/api/review-inspection-highlights.php?' . http_build_query(array('status' => $r['status'], 'ids' => (int) $r['id'])),
@@ -178,6 +188,18 @@ function kop_rinbox_ih_item(array $r) {
     );
 }
 
+/** The plain-language summary written from this finding's excerpt as it is now (null when none, out of date, or not written). */
+function kop_rinbox_ih_plain(array $r) {
+    if (!function_exists('kop_hs_hash')) return null;
+    $pdo = kop_rinbox_pdo();
+    kop_hs_ensure_table($pdo);
+    $st = $pdo->prepare('SELECT excerpt_hash, summary, status FROM inspection_highlight_summaries WHERE highlight_id = ?');
+    $st->execute(array((int) $r['id']));
+    $s = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$s || $s['excerpt_hash'] !== kop_hs_hash($r['excerpt']) || strncmp((string) $s['summary'], 'No summary:', 11) === 0) return null;
+    return $s;
+}
+
 function kop_rinbox_ih_get_row(PDO $pdo, $id) {
     $st = $pdo->prepare('SELECT * FROM inspection_highlights WHERE id = ?');
     $st->execute(array((int) $id));
@@ -188,9 +210,21 @@ function kop_rinbox_ih_get_row(PDO $pdo, $id) {
 function kop_rinbox_ih_act($key, $action, array $params) {
     $pdo = kop_rinbox_pdo();
     $id = (int) $key;
-    if (!in_array($action, array('pending', 'approved', 'rejected'), true)) throw new RuntimeException('Unknown action.');
+    if (!in_array($action, array('pending', 'approved', 'rejected', 'plain'), true)) throw new RuntimeException('Unknown action.');
     $r = kop_rinbox_ih_get_row($pdo, $id);
     if (!$r) throw new RuntimeException('That finding is gone (a later scan may have dropped or merged it).');
+    if ($action === 'plain') {
+        // A draft of the summary, to read the finding by; it waits at Plain summaries like the hourly job's drafts.
+        if (!function_exists('kop_hs_write')) throw new RuntimeException('Plain summaries are not loaded.');
+        kop_hs_ensure_table($pdo);
+        try {
+            kop_hs_write($pdo, array('id' => $id, 'excerpt' => $r['excerpt']));
+        } catch (RuntimeException $e) {
+            throw new RuntimeException('No summary: ' . $e->getMessage());
+        }
+        kop_rinbox_flush_counts();
+        return array('message' => 'The summary is at the top of the card. It is a draft: approve it at Plain summaries to show it on the site once the finding is approved.');
+    }
     $note = isset($params['note']) ? mb_substr(trim((string) $params['note']), 0, 500) : trim((string) $r['review_note']);
     $pending = $action === 'pending';
     $pdo->prepare('UPDATE inspection_highlights SET status = ?, review_note = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?')
