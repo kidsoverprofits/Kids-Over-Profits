@@ -2912,8 +2912,10 @@ function handleSort() {
             operatorSections.sort(byName);
     }
 
-    // Re-append sorted sections
-    operatorSections.forEach(section => container.appendChild(section));
+    // Re-append sorted sections: the companies first, the old-name rows after them, never mixed in.
+    const isAlias = section => section.classList.contains('alias-entry');
+    operatorSections.filter(section => !isAlias(section)).forEach(section => container.appendChild(section));
+    operatorSections.filter(isAlias).forEach(section => container.appendChild(section));
 
     // Visibility is owned by filterFacilities(), which reads the dropdown for
     // the violations-only mode. Re-running it resets every section's display
