@@ -116,11 +116,15 @@ foreach ($decisions as $d) {
     }
     // Every quote is still on the record (its field name left out: the batch named fields in words).
     $text = $alnum(json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    foreach ((array) ($d['quotes'] ?? array()) as $q) {
-        $q = $alnum(preg_replace('/^\s*"[^"]+"\s*:\s*/', '', (string) $q));
-        if ($q !== '' && strpos($text, $q) === false) {
-            $n['quote gone']++;
-            continue 2;
+    // A staff line was shown as "name | role | past jobs": each part is its own field on the record.
+    foreach ((array) ($d['quotes'] ?? array()) as $quote_line) {
+        foreach (explode('|', (string) $quote_line) as $q) {
+            $q = $alnum(preg_replace('/^\s*"[^"]+"\s*:\s*/', '', $q));
+            if ($q !== '' && strpos($text, $q) === false) {
+                $n['quote gone']++;
+                if (getenv('KOP_DEBUG')) fwrite(STDERR, $r['pkey'] . ' quote gone: ' . $quote_line . "\n");
+                continue 3;
+            }
         }
     }
     $quote = trim((string) (($d['quotes'] ?? array())[0] ?? ''));
