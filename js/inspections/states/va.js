@@ -194,6 +194,8 @@
             out.listed_with_violations = !!cats.listed_with_violations;
             out.date_corrected = !!cats.date_corrected;
             out.date_as_published = safeString(cats.date_as_published);
+            // Our PDF of the inspection page (va_scraper.py prints it into va_pdfs as vdss_<licence>_<number>.pdf).
+            out.archive_names = cats.archive_name ? [cats.archive_name] : [];
         } else {
             out.purpose = safeString(cats.purpose);
             out.provider = safeString(cats.provider);
@@ -592,8 +594,8 @@
 
         report: function (report, ctx) {
             var vdss = report.source === 'vdss';
-            var links = vdss ? [] : report.archive_names.map(function (name) {
-                return ctx.archiveLink(name, 'Corrective action plan (archived copy)');
+            var links = report.archive_names.map(function (name) {
+                return ctx.archiveLink(name, vdss ? 'Inspection (archived copy)' : 'Corrective action plan (archived copy)');
             });
             return {
                 date: formatIso(ctx, report.report_date) || 'Date unknown',

@@ -2610,7 +2610,7 @@ if (!function_exists('kop_ih_scanner_version')) {
      * facility page. Virginia DBHDS reports all link the same provider search,
      * so those open our archived copy of the report's PDF in Drive instead.
      * A Virginia DSS inspection link lands on DSS's facility search whatever
-     * its query says, and no copy of those pages is archived: no link.
+     * its query says, so it opens our printed copy too, or nothing.
      */
     function kop_ih_source_url(array $row) {
         $url = trim((string) ($row['report_url'] ?? ''));
@@ -2618,7 +2618,9 @@ if (!function_exists('kop_ih_scanner_version')) {
             $archived = kop_ih_archived_copy_url('VA', (int) ($row['report_id'] ?? 0));
             return $archived !== '' ? $archived : '';
         }
-        if (stripos($url, 'dss.virginia.gov/licensed-care/search-licensing-programs/') !== false) return '';
+        if (stripos($url, 'dss.virginia.gov/licensed-care/search-licensing-programs/') !== false) {
+            return kop_ih_archived_copy_url('VA', (int) ($row['report_id'] ?? 0));
+        }
         if ($url !== '') return $url;
         if (($row['state'] ?? '') === 'CA' && preg_match('/^(\d{6,})-/', (string) ($row['source_report_id'] ?? ''), $m)) {
             return 'https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/' . $m[1];
