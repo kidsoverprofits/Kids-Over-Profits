@@ -680,6 +680,32 @@ function kop_vol_is_page() {
     return function_exists('get_query_var') && get_query_var('kop_volreview') === '1';
 }
 
+/**
+ * The page differs per volunteer (the kop_vol cookie), so it is never cached. A raw
+ * X-LiteSpeed-Cache-Control header is not enough: the LiteSpeed Cache plugin sends its
+ * own "public,max-age=604800" later, which wins, and the invite's redirect then landed
+ * on a cached signed-out copy. The plugin's own switch and DONOTCACHEPAGE turn it off.
+ */
+function kop_vol_no_page_cache() {
+    if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+    do_action('litespeed_control_set_nocache', 'kop volunteer page: per-volunteer cookie');
+    nocache_headers();
+    header('X-LiteSpeed-Cache-Control: no-cache');
+}
+
+/** Once after the fix above: purge the signed-out copies LiteSpeed cached (they are served before PHP runs). */
+add_action('init', function () {
+    if (get_option('kop_vol_cache_purged') === '1' || !has_action('litespeed_purge_url')) return;
+    $urls = array(kop_vol_page_url());
+    if (function_exists('kop_volp_table')) {
+        global $wpdb;
+        $ids = $wpdb->get_col('SELECT id FROM ' . kop_volp_table());
+        foreach ((array) $ids as $id) $urls[] = kop_volp_url((int) $id);
+    }
+    foreach ($urls as $u) do_action('litespeed_purge_url', $u);
+    update_option('kop_vol_cache_purged', '1');
+}, 40);
+
 add_action('pre_get_posts', function ($query) {
     if (is_admin() || !$query->is_main_query() || $query->get('kop_volreview') !== '1') return;
     $query->is_home = false;
@@ -696,8 +722,7 @@ add_filter('pre_handle_404', function ($preempt, $query) {
 /** Opening an invite link: set the cookie and send the browser on without the token in the address. */
 add_action('template_redirect', function () {
     if (!kop_vol_is_page()) return;
-    nocache_headers();
-    header('X-LiteSpeed-Cache-Control: no-cache');
+    kop_vol_no_page_cache();
     header('X-Robots-Tag: noindex, nofollow', true);
     header('Referrer-Policy: no-referrer', true);
     status_header(200);
