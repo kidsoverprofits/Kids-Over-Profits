@@ -1,13 +1,17 @@
 <?php
 /**
- * Index the inspection report PDFs the scrapers archive in the Drive FileBird
- * folder, so the state report pages can offer "Archived copy" next to the
+ * Index the inspection report PDFs the scrapers archive in Google Drive, so
+ * the state report pages can offer "Archived copy" next to the
  * state's own link. States take reports down (WA and NC links already 404).
  * The PDFs stay in Drive: the site keeps only the index and links each report
  * to its Drive page.
  *
- *   From      The scraper folders at the top of the Drive FileBird folder
- *             (report_store.py in the tools repo writes them).
+ *   From      The scraper folders in "KOP Inspection Reports" at the top of
+ *             My Drive (kop-pipeline's report_store.py / kop_paths.py write
+ *             them). Never inside the FileBird folder: everything there syncs
+ *             into the media library and fills the site's disk. Until every
+ *             folder has moved out, one still at the top of the FileBird
+ *             folder is read too; the new place wins.
  *   Sharing   A folder is indexed only when it is shared "Anyone with the
  *             link" (its files inherit that). A private folder is reported
  *             and its old index removed, so no page links a file visitors
@@ -41,7 +45,10 @@ foreach (array_slice($argv, 1) as $arg) {
 $apply = in_array('apply', $argv, true);
 set_time_limit(0);
 
-// Drive folder (top of the FileBird folder) => state directory on the site.
+// The scrapers' Drive folder, at the top of My Drive (kop_paths.REPORTS_FOLDER_NAME in kop-pipeline).
+define('KOP_SIA_REPORTS_FOLDER', 'KOP Inspection Reports');
+
+// Drive folder (in KOP_SIA_REPORTS_FOLDER) => state directory on the site.
 $FOLDERS = array(
     'ar_pdfs'       => 'ar',
     'fl_pdfs'       => 'fl',
@@ -169,12 +176,23 @@ $base = trailingslashit($uploads['basedir']) . 'inspection-reports';
 $counts = array();
 
 try {
-    $root = njfb_cloud_get_main_folder('google_drive');
-    if (!$root) throw new RuntimeException('FileBird Cloud has not made its Drive folder yet.');
     $top = array();
-    foreach (kop_sia_children($root, true) as $f) {
-        $top[strtolower($f['name'])] = $f['id'];
+    $root = njfb_cloud_get_main_folder('google_drive');
+    if ($root) {
+        foreach (kop_sia_children($root, true) as $f) {
+            $top[strtolower($f['name'])] = $f['id'];
+        }
     }
+    $res = kop_sd_drive_get('files', array(
+        'q'      => "name = '" . KOP_SIA_REPORTS_FOLDER . "' and 'root' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'",
+        'fields' => 'files(id, name)',
+    ));
+    foreach ((array)($res['files'] ?? array()) as $reports) {
+        foreach (kop_sia_children($reports['id'], true) as $f) {
+            $top[strtolower($f['name'])] = $f['id'];
+        }
+    }
+    if (!$top) throw new RuntimeException('No scraper folders found in "' . KOP_SIA_REPORTS_FOLDER . '" or the FileBird folder.');
 } catch (Throwable $e) {
     fwrite(STDERR, $e->getMessage() . "\n");
     exit(1);
