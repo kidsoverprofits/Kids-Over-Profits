@@ -389,6 +389,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-directory-editor.
 # filter): admins tick names of one record and fold them into one (inc/directory-names.php, kop/v1/directory-names/fold|undo; log option
 # kop_dirnames_log, exact Undo) or open its names dialog (facility:<id>:names, operator:<id>:names)
 php -d extension=mbstring scripts/test-directory-names.php
+# Its "Run by then" column (admins: Set company): which company ran a program under which name, and when ({prefix}kop_name_eras,
+# inc/name-eras.php, kop/v1/name-eras/save|undo, exact Undo). Wins over the guesses: the directory's name under a company
+# (kop_name_eras_name_under() in kop_v2_get_facilities_projects()), the facility page's "Formerly" years; not read by the map build yet
+php -d extension=mbstring scripts/test-name-eras.php
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
 # Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,
@@ -515,13 +519,15 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 # Approving a wiki entry puts its staff on the facility record, cited to the wiki page (kop_wiki_merge_submission(), api/sync-wiki-facilities.php);
 # a name already listed stays; taking the approval back takes them off (kop_wiki_staff_undo(), log in option kop_wiki_staff_log)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-staff.php [--list]   # mapping, approve/again/undo, what approving every entry would add
-# A wiki person goes on as "Former <role>" when the program is closed or the write-up opens "was/were/worked/served" (kop_wiki_staff_is_former());
+# "Former" / "current" only when a source confirms it (owner, 2026-10-17): a wiki person is "Former <role>" only when the write-up says so ("formerly",
+# "retired", "no longer", a year range, "until 2015"; kop_wiki_staff_is_former()), never for a closed program or the past tense alone;
 # staff approved before that rule: php api/fix-wiki-staff-former.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kept so Undo works
 # The role is the title, not the parser's wording ("current Clinical Director", "one"): kop_wiki_staff_title() == js/wiki-parser.js staffRoleTitle()
 node scripts/test-wiki-staff-title.js --php=<Local php.exe>   # JS == PHP on every wiki role in tmp/prod.sqlite
-# Every other staff entry (Woodbury Facts, HEAL, Fornits, by hand) is "Former" at a closed program or when its role is only a sighting older
-# than last year ("Admissions (2007, Woodbury Reports)"; inc/staff-former.php, applied by Woodbury Facts when it adds a person); names that
-# are not people (a phase sheet read as a staff list) are refused. Records saved before: php api/fix-staff-former.php [--list] [apply] [undo apply]
+# Every other staff entry (Woodbury Facts, HEAL, Fornits, by hand) is "Former" only when its source said the person left (", left"); never for a
+# closed program or an old sighting ("Admissions (2007, Woodbury Reports)" stays), and "current" comes off (inc/staff-former.php, applied by
+# Woodbury Facts when it adds a person); names that are not people (a phase sheet read as a staff list) are refused. The "Former" the old rule
+# put on: php api/fix-staff-unconfirmed.php [--list] [apply] [undo apply]   # on the server (ea-php82), log kop_staff_unconfirmed_log
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-former.php   # the rule, the pass + undo on a copy of the mirror
 # Public data form (/tti-data-submission/) opens on a guided start (js/data-form/data-wizard.js, css/data-wizard.css): find the
 # record or add a new facility/company/provider/transporter/referrer, pick topics, see only those sections; saves still go
@@ -697,14 +703,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # whose employer and title the person's entry names; a nickname is one person), is refused by Add and filed hourly as rejected
 # "Already on the record" (kop_wbf_clear_on_record(); Back to review undoes one, never cleared again). Conflicts keep waiting
 php api/clear-woodbury-on-record.php [--list] [apply]   # on the server (ea-php82): run the pass now
-# HEAL's archived site (heal-online.org, gone; Wayback copies) into tmp/heal/: staff lists and program pages are read
-# like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
-# Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
-(kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
 # Same information in other words or run together, which rules cannot see, read by AI agents (Haiku, Sonnet for the tricky ones) next to
 # each record; every verdict quotes the record and is checked: clear (rejected, the quote shown), trim (cut to the new part, still waiting,
 # "Back to what Woodbury said" undoes), dup. First run 2026-10-17: 105 cleared, 108 trimmed, 7 duplicates of 3,978 waiting items
 php api/apply-woodbury-same-info.php [file] [apply] | undo apply   # on the server: ~/kop-import/woodbury/same-info.json, re-checked live
+# HEAL's archived site (heal-online.org, gone; Wayback copies) into tmp/heal/: staff lists and program pages are read
+# like Woodbury issues (tmp/heal/INSTRUCTIONS.md -> facts/), PDFs one by one (DOCS-INSTRUCTIONS.md -> docs/).
+# Fetch is resumable and slow (the Archive refuses connections past ~15 requests a minute)
+(kop-pipeline) python scripts/heal-archive.py fetch && python scripts/heal-archive.py text && python scripts/heal-batches.py
 (kop-pipeline) python scripts/woodbury-facts.py --also tmp/heal   # HEAL facts join Woodbury Facts, cited to the archived copy, added automatically at an exact name
 (kop-pipeline) python scripts/heal-docs.py                         # tmp/heal/heal-links.json -> ~/kop-import/gdocs/, reviewed at Drive Docs
 # The r/troubledteens wiki (markdown_output/ + the wiki editor's copies in tmp/prod.sqlite) read the same way:

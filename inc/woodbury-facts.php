@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
 
 // The KOP Tools look (inc/admin-kit.php): its CSS and JS load on this screen.
 require_once __DIR__ . '/admin-kit.php';
-require_once __DIR__ . '/staff-former.php';   // kop_staff_role_with_former(): "Former" for an old sighting or a closed program
+require_once __DIR__ . '/staff-former.php';   // kop_staff_role_with_former(): "Former" only when the source says they left, never "current"
 require_once __DIR__ . '/record-writeups.php'; // approved items are held for the record's write-up (kop_fact_hold_on())
 add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-woodbury-facts'; return $pages; });
 

@@ -43,7 +43,8 @@ $e = kop_wiki_staff_entries(array(
     array('name' => '', 'role' => 'Therapist'),
 ), 'https://www.reddit.com/r/troubledteens/wiki/index/x');
 check(count($e) === 2, 'entries with no name are left out');
-check($e[0]['name'] === 'Jane Doe' && $e[0]['role'] === 'Former Clinical Director', 'a former staff member reads "Former <role>", as records do', $e[0]['role']);
+// The parser's isFormer is its guess from the past tense, not a confirmation (owner, 2026-10-17): not read.
+check($e[0]['name'] === 'Jane Doe' && $e[0]['role'] === 'Clinical Director', 'the parser\'s isFormer guess alone adds no "Former"', $e[0]['role']);
 check($e[1]['role'] === 'Former Owner', '"Former" is not doubled');
 check($e[0]['pastJobs'] === 'Therapist, Provo Canyon School; Aspen', 'previous roles become past jobs', $e[0]['pastJobs']);
 check($e[0]['source'] === 'r/troubledteens wiki' && $e[0]['sourceUrl'] === 'https://www.reddit.com/r/troubledteens/wiki/index/x', 'each entry cites the wiki page');
@@ -62,7 +63,16 @@ $g = kop_wiki_staff_entries(array(
     array('name' => 'M N', 'role' => 'Founders', 'bio' => 'were the Founders and Owners of Ashby Academy.'),
     array('name' => 'O P', 'role' => 'Therapist', 'bio' => 'is currently a Therapist at Eagle Ranch Academy.'),
 ));
-check($g[0]['role'] === 'Former Program Director', '"was the Program Director" is former', $g[0]['role']);
+check($g[0]['role'] === 'Former Program Director', '"was the Program Director ... until July of 2015": the write-up gives the end, so Former', $g[0]['role']);
+$conf = kop_wiki_staff_entries(array(
+    array('name' => 'U V', 'role' => 'Program Director', 'bio' => 'was formerly the Program Director of X.'),
+    array('name' => 'W X', 'role' => 'Therapist', 'bio' => 'retired in 2019 after twenty years.'),
+    array('name' => 'Y Z', 'role' => 'Director', 'bio' => 'was the Director of X from 2001 to 2008.'),
+    array('name' => 'A C', 'role' => 'Director', 'bio' => 'worked as the Director of X.'),
+    array('name' => 'B D', 'role' => 'Director', 'bio' => 'served as the Director of X.'),
+));
+check(array_column($conf, 'role') === array('Former Program Director', 'Former Therapist', 'Former Director', 'Director', 'Director'),
+    'Former only when the write-up says it ("formerly", "retired", a year range), never for "worked as" / "served as" alone', implode(' / ', array_column($conf, 'role')));
 // The parser's wording is not a title (kop_wiki_staff_title()).
 $titles = array(
     array('current Clinical Director', '', 'Clinical Director'),
@@ -91,9 +101,9 @@ $x = kop_wiki_staff_entries(array(
 ));
 check($x[0]['role'] === 'Former CEO' && $x[1]['role'] === 'Founder, former Executive Director', '"Former" once, and not before a role that already says which part is past', $x[0]['role'] . ' / ' . $x[1]['role']);
 check($g[1]['role'] === 'Executive Director' && $g[4]['role'] === 'Therapist', '"is the ..." / "is currently ..." stay current', $g[1]['role'] . ' / ' . $g[4]['role']);
-check(strpos($g[2]['role'], 'Former ') === 0 && strpos($g[3]['role'], 'Former ') === 0, 'a nickname before "was", and "were", are read too', $g[2]['role'] . ' / ' . $g[3]['role']);
+check($g[2]['role'] === 'Founder' && $g[3]['role'] === 'Founders', '"was the Founder", "were the Founders": past tense alone adds no "Former"', $g[2]['role'] . ' / ' . $g[3]['role']);
 $h = kop_wiki_staff_entries(array(array('name' => 'I J', 'role' => 'Executive Director', 'bio' => 'is the Executive Director.')), '', true);
-check($h[0]['role'] === 'Former Executive Director', "a closed program's staff are all former", $h[0]['role']);
+check($h[0]['role'] === 'Executive Director', "a closed program is no confirmation: its staff are not marked Former", $h[0]['role']);
 check(kop_wiki_program_closed(array('status' => 'Closed')) && kop_wiki_program_closed(array('endYear' => 2019))
     && kop_wiki_program_closed(array(), '1998 - 2019') && kop_wiki_program_closed(array(), '1998–2019'), 'closed: status, end year, a year range');
 check(!kop_wiki_program_closed(array('status' => 'Open'), '1998-present') && !kop_wiki_program_closed(array(), '1998'), 'open: "1998-present", a start year only');

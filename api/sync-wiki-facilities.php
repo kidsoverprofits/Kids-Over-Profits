@@ -111,17 +111,22 @@ function kop_wiki_program_closed(array $period, string $yearsActive = ''): bool 
 }
 
 /**
- * Did this person leave the program? The wiki parser's isFormer ("former", "no longer", a year
- * range), a closed program, or a write-up that opens in the past tense: "was the Program
- * Director", "were the Founders", "worked as", "served as". "is" stays current.
+ * Did the write-up confirm this person left the program? Only its own words (owner, 2026-10-17): the
+ * role says former/previous/ex-, or the write-up opens "formerly", "previously", "was formerly", "is a
+ * former", "no longer", "left", "retired", "resigned", "was fired", "died", "passed away", or gives the
+ * job's years as a range ("from 2005 to 2010", "2005-2010"). Never a closed program ($programClosed is
+ * no longer read) and never the past tense alone ("was the Program Director", "worked as"): the wiki
+ * writes past tense when it does not know. The parser's isFormer is that guess too, so it is not read.
  */
 function kop_wiki_staff_is_former(array $s, bool $programClosed = false): bool {
-    if (!empty($s['isFormer']) || $programClosed) return true;
     if (preg_match('/\b(former|previous|ex-)/i', (string)($s['role'] ?? ''))) return true;
     // The bio follows the bold name: '("Doc") was ...', ', also known as "Papa Miguel" by survivors, was ...'.
     $bio = ltrim((string)($s['bio'] ?? ''));
     $bio = preg_replace('/^(?:\([^)]*\)\s*)?(?:,\s*(?:also known as|prior to)[^,]*,\s*)?/i', '', $bio);
-    return (bool)preg_match('/^(?:was|were|had been|worked|served|previously|formerly|left|retired|resigned|died|passed away|began)\b/i', $bio);
+    if (preg_match('/^(?:(?:was|is|were|are)\s+(?:also\s+)?(?:formerly|previously|no longer|an?\s+former|the\s+former|fired)|formerly|previously|no longer|left|retired|resigned|died|passed away)\b/i', $bio)) return true;
+    // The job's end in the first sentence: "from 2005 to 2010", "2005-2010", "until July of 2015".
+    $first = preg_split('/(?<=[.!?])\s+/', $bio, 2)[0] ?? '';
+    return (bool)preg_match('/\b(?:19|20)\d{2}\s*(?:-|\x{2013}|\x{2014}|to|until)\s*(?:19|20)\d{2}\b|\b(?:until|through|till)\s+(?:[A-Z][a-z]+\s+(?:of\s+)?)?(?:19|20)\d{2}\b/u', $first);
 }
 
 /**
@@ -166,7 +171,7 @@ function kop_wiki_staff_title(string $role, string $bio = ''): string {
     return mb_strtoupper(mb_substr($role, 0, 1)) . mb_substr($role, 1);
 }
 
-/** A wiki person's role as the record writes it: the title, with "Former " when they left (the record has no "former" field). */
+/** A wiki person's role as the record writes it: the title, with "Former " when the write-up confirms they left (the record has no "former" field). */
 function kop_wiki_staff_record_role(array $s, bool $programClosed = false): string {
     $role = kop_wiki_staff_title((string)($s['role'] ?? ''), (string)($s['bio'] ?? ''));
     // ("Founder, former Executive Director" already says which part is past.)

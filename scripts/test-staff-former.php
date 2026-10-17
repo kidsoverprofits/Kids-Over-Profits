@@ -1,9 +1,10 @@
 <?php
 /**
  * Who on a staff list has left (inc/staff-former.php): kop_staff_role_with_former() on the roles the
- * importers write, then the one-time pass over records (kop_staff_former_pass(), api/fix-staff-former.php)
- * on an in-memory copy of facilities_v2 from tmp/prod.sqlite: what changes, nothing else does, the
- * records still validate, a second run finds nothing, undo puts every role back.
+ * importers write ("Former" only when the source says so, never "current"), then the passes over records
+ * (kop_staff_former_pass(), api/fix-staff-former.php; kop_staff_unconfirmed_pass(),
+ * api/fix-staff-unconfirmed.php) on an in-memory copy of facilities_v2 from tmp/prod.sqlite: what changes,
+ * nothing else does, the records still validate, a second run finds nothing, undo puts every role back.
  *
  *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-former.php [--db=tmp/prod.sqlite] [--list]
  */
@@ -28,23 +29,28 @@ $check = function ($label, $ok, $detail = '') use (&$failures) {
     echo ($ok ? 'PASS ' : 'FAIL ') . $label . ($detail !== '' ? "  ($detail)" : '') . "\n";
 };
 
-// --- the rule (this year = 2026) -------------------------------------------------
+// --- the rule: "Former" only when the source says the person left, never "current" (owner, 2026-10-17) ---
 $cases = array(
-    array('Admissions (2007, Woodbury Reports)', false, 'Former Admissions (2007, Woodbury Reports)'),
-    array('Admissions, Marketing (2009-2010, Woodbury Reports)', false, 'Former Admissions, Marketing (2009-2010, Woodbury Reports)'),
+    // An old sighting is not a confirmation: its year says when.
+    array('Admissions (2007, Woodbury Reports)', false, 'Admissions (2007, Woodbury Reports)'),
+    array('Admissions, Marketing (2009-2010, Woodbury Reports)', false, 'Admissions, Marketing (2009-2010, Woodbury Reports)'),
+    array('Founder (2021, HEAL)', false, 'Founder (2021, HEAL)'),
+    // The source said they left.
     array('Director (2008, Woodbury Reports), left', false, 'Former Director (2008, Woodbury Reports)'),
-    array('Cook (current) (2021, HEAL)', false, 'Former Cook (2021, HEAL)'),
+    array('Cook (current) (2021, HEAL)', false, 'Cook (2021, HEAL)'),
+    array('Current Clinical Director', false, 'Clinical Director'),
+    array('Co-Founder and currently Executive Director', false, 'Co-Founder and Executive Director'),
     array('Teacher (2025, HEAL)', false, 'Teacher (2025, HEAL)'),
-    array('Clinical Director (2005, r/troubledteens wiki)', false, 'Former Clinical Director (2005, r/troubledteens wiki)'),
-    array('Therapist (2025, r/troubledteens wiki)', false, 'Therapist (2025, r/troubledteens wiki)'),
+    array('Clinical Director (2005, r/troubledteens wiki)', false, 'Clinical Director (2005, r/troubledteens wiki)'),
     array('Board of Directors (2015-2025, HEAL)', false, 'Board of Directors (2015-2025, HEAL)'),
     array('Executive Director', false, 'Executive Director'),
     array('CEO (appointed 2000)', false, 'CEO (appointed 2000)'),
-    array('Executive Director', true, 'Former Executive Director'),
+    // A closed program is not a confirmation either.
+    array('Executive Director', true, 'Executive Director'),
     array('Former Program Director (before 2005, Woodbury Reports)', false, 'Former Program Director (before 2005, Woodbury Reports)'),
     array('Former Program Director', true, 'Former Program Director'),
     array('Founder, former Executive Director', false, 'Founder, former Executive Director'),
-    array('Founder, former Executive Director', true, 'Former Founder, former Executive Director'),
+    array('Founder, former Executive Director', true, 'Founder, former Executive Director'),
     array('', true, ''),
 );
 foreach ($cases as $c) {
@@ -123,6 +129,47 @@ if (!file_exists($db_path)) {
         }
     }
     $check('...exactly as they were', $same);
+
+    // Taking off the "Former" no source confirmed: the old pass's log says what each role was.
+    $cand = array();
+    foreach ($before as $id => $d) {
+        foreach ((array) ($d['staff']['notableStaff'] ?? array()) as $i => $e) {
+            if (!kop_staff_former_skip($e) && !preg_match('/\b(?:former|current)/i', (string) $e['role'])) $cand[] = array($id, $i, $e);
+        }
+        if (count($cand) >= 4) break;
+    }
+    if (count($cand) < 4) {
+        $check('four staff entries to try the clean-up on', false);
+    } else {
+        $set = array();
+        $GLOBALS['kop_test_options']['kop_staff_former_log'] = array();
+        $GLOBALS['kop_test_options']['kop_staff_unconfirmed_log'] = array();
+        // [0] old sighting marked Former, [1] the source said "left", [2] Former typed by hand (no log), [3] "Current ..."
+        $roles = array(
+            array('Former ' . $cand[0][2]['role'], $cand[0][2]['role']),
+            array('Former ' . $cand[1][2]['role'], $cand[1][2]['role'] . ', left'),
+            array('Former ' . $cand[2][2]['role'], null),
+            array('Current ' . $cand[3][2]['role'], null),
+        );
+        foreach ($cand as $k => $c) {
+            list($id, $i, $e) = $c;
+            $d = kop_facility_load($id, $opts)['doc'];
+            $d['staff']['notableStaff'][$i]['role'] = $roles[$k][0];
+            $pdo->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($d), $id));
+            if ($roles[$k][1] !== null) $GLOBALS['kop_test_options']['kop_staff_former_log'][$id][] = array('list' => 'notableStaff', 'name' => $e['name'], 'from' => $roles[$k][1], 'to' => $roles[$k][0]);
+        }
+        $role = function ($k) use ($cand, $opts) { return (string) kop_facility_load($cand[$k][0], $opts)['doc']['staff']['notableStaff'][$cand[$k][1]]['role']; };
+        $un = kop_staff_unconfirmed_pass($opts, false);
+        if (isset($args['list'])) foreach ($un as $c) echo "  #{$c['id']} {$c['name']}: {$c['from']} -> {$c['to']} ({$c['why']})\n";
+        kop_staff_unconfirmed_pass($opts, true);
+        $check('an old sighting marked Former loses it', $role(0) === $cand[0][2]['role'], $role(0));
+        $check('a Former the source confirmed ("left") stays', $role(1) === $roles[1][0], $role(1));
+        $check('a Former typed by hand (nothing says what the source gave) stays', $role(2) === $roles[2][0], $role(2));
+        $check('"Current" comes off', $role(3) === kop_staff_role_no_current($roles[3][0]) && stripos($role(3), 'current') === false, $role(3));
+        $check('a second run finds nothing', count(kop_staff_unconfirmed_pass($opts, false)) === 0);
+        kop_staff_unconfirmed_pass($opts, true, true);
+        $check('undo puts the roles back exactly', $role(0) === $roles[0][0] && $role(1) === $roles[1][0] && $role(2) === $roles[2][0] && $role(3) === $roles[3][0], $role(0) . ' | ' . $role(3));
+    }
 
     // Entries that are not people: two of Moonridge's phase-sheet rows put among its staff, taken off and put back.
     $mid = 10343;

@@ -3,16 +3,17 @@
  * Who on a facility's staff lists has left. The record has no "former" field: an entry says so in its
  * role, as "Former <role>" (kop_wiki_staff_record_role() does the same for the r/troubledteens wiki).
  *
- * A person is former when the program is closed (everyone on a closed program's staff lists has left),
- * when the role says they left (", left", the Woodbury build's old wording), or when the role is only a
- * dated sighting ("Admissions (2007, Woodbury Reports)", "Teacher (2017, HEAL)") whose latest year is
- * more than a year before this one: a 2008 issue naming someone is no sign they work there now.
- * "(current)" in a dated role is the source's word at the time and goes.
+ * Only what a source confirms (owner, 2026-10-17): a role is "Former" when the source says the person
+ * left (", left", the Woodbury build's wording for it) or the role says so already. Never by inference:
+ * not because the program closed, and not because a sighting is old ("Admissions (2007, Woodbury
+ * Reports)" stays as the source wrote it; its year says when). "Current" is never confirmed either:
+ * "(current)", "current", "currently" and "presently" come off a role (the source's word at the time).
  *
- * Woodbury Facts (and Fornits, through it) applies this when it adds a person; kop_staff_former_pass()
- * rewrote the entries already on records (api/fix-staff-former.php), logged in the option
- * kop_staff_former_log for an exact undo. Wiki entries are left to the wiki's own pass (its log matches
- * entries by role).
+ * Woodbury Facts (and Fornits, through it) applies this when it adds a person. kop_staff_former_pass()
+ * once marked closed programs and old sightings "Former" (api/fix-staff-former.php, the option
+ * kop_staff_former_log); kop_staff_unconfirmed_pass() (api/fix-staff-unconfirmed.php) takes those
+ * back off, logged in kop_staff_unconfirmed_log for an exact undo. Wiki entries are left to the wiki's
+ * own pass (its log matches entries by role).
  */
 
 if (!function_exists('kop_staff_role_with_former')) {
@@ -30,23 +31,33 @@ if (!function_exists('kop_staff_role_with_former')) {
         return $year;
     }
 
+    /** $role with "current" taken off: "(current)", "Current Clinical Director", "currently Director", "presently". */
+    function kop_staff_role_no_current($role) {
+        $role = preg_replace('/\s*\((?:current(?:ly)?|present(?:ly)?|now)\)/i', '', (string) $role);
+        $role = preg_replace('/\b(?:current(?:ly)?|presently)\s+(?:the\s+|an?\s+)?/i', '', $role);
+        $role = trim(preg_replace('/\s+/u', ' ', $role), " \t,;");
+        return $role === '' ? '' : mb_strtoupper(mb_substr($role, 0, 1)) . mb_substr($role, 1);
+    }
+
     /**
-     * $role as the record should hold it: "Former " before it when the person has left (see above).
-     * $closed: the program is closed. $now: this year (tests pass one).
+     * $role as the record should hold it (see above): "Former " before it only when the source said the
+     * person left (", left"); "current" taken off. $closed and $now are no longer read (a closed program
+     * or an old sighting is not a confirmation); kept so callers need not change.
      */
     function kop_staff_role_with_former($role, $closed = false, $now = null) {
         $role = trim(preg_replace('/\s+/u', ' ', (string) $role));
         if ($role === '') return '';
-        $now = $now ?: (int) gmdate('Y');
         $left = (bool) preg_match('/,\s*left\s*$/i', $role);
         if ($left) $role = trim(preg_replace('/,\s*left\s*$/i', '', $role));
-        $year = kop_staff_role_sighting_year($role);
-        if ($year) $role = trim(preg_replace('/\s*\(current\)/i', '', $role));
+        $role = kop_staff_role_no_current($role);
+        if ($role === '') return '';
         if (preg_match('/^(?:former|previous|ex-)\b/i', $role)) return $role;
-        // A role that says only part of it is past ("Founder, former Executive Director") is left as written.
-        if (preg_match('/\b(?:former|previous|ex-)/i', $role) && !$left && !$closed) return $role;
-        if ($closed || $left || ($year && $year < $now - 1)) return 'Former ' . $role;
-        return $role;
+        return $left ? 'Former ' . $role : $role;
+    }
+
+    /** Did the source say this person left? Their role as the source gave it (before any pass rewrote it). */
+    function kop_staff_role_confirmed_former($role) {
+        return (bool) preg_match('/,\s*left\s*$|^(?:former|previous|ex-)\b/i', trim((string) $role));
     }
 
     /** Is the program closed, by its status or an end year (kop_facility_save()'s operatingPeriod)? */
@@ -140,10 +151,11 @@ if (!function_exists('kop_staff_role_with_former')) {
     }
 
     /**
-     * Once a year (the first daily run of a new year): sightings from the year before last turn "Former"
-     * ("Teacher (2025, HEAL)" in 2027). Each run's changes join kop_staff_former_log, so undo still works.
+     * Was once a year: sightings from the year before last turned "Former". Off since 2026-10-17 (an old
+     * sighting is not a confirmation); the daily event is cleared below.
      */
     function kop_staff_former_yearly() {
+        return;
         $year = (int) gmdate('Y');
         if ((int) get_option('kop_staff_former_year', 0) >= $year || !function_exists('kop_seed_pdo') || !function_exists('kop_seed_v2_prefix')) return;
         $pdo = kop_seed_pdo();
@@ -197,7 +209,7 @@ if (!function_exists('kop_staff_role_with_former')) {
                     }
                     $new = kop_staff_role_with_former($role, $closed, $now);
                     if ($new === $role) continue;
-                    $why = $closed ? 'closed' : (preg_match('/,\s*left\s*$/i', $role) ? 'left' : (strpos($new, 'Former ') === 0 && stripos($role, 'former') !== 0 ? 'old sighting' : 'wording'));
+                    $why = preg_match('/,\s*left\s*$/i', $role) ? 'left' : (stripos($role, 'current') !== false || stripos($role, 'presently') !== false ? 'current' : 'wording');
                     $changes[] = array('list' => $list, 'i' => $i, 'name' => (string) ($e['name'] ?? ''), 'from' => $role, 'to' => $new, 'why' => $why);
                 }
             }
@@ -241,9 +253,111 @@ if (!function_exists('kop_staff_role_with_former')) {
     }
 }
 
+if (!function_exists('kop_staff_unconfirmed_pass')) {
+    /**
+     * Take off the "Former" no source confirmed, and every "current" (see the top of this file). An entry's
+     * role as the source gave it is the one kop_staff_former_pass() logged ('from'), else the Woodbury Facts
+     * (or Fornits, through it) item that added it; an entry with neither (typed by hand) keeps its "Former".
+     * $undo puts back each logged role that still holds what this pass wrote. Logged in the option
+     * kop_staff_unconfirmed_log: facility id => [{list, name, from, to}]. Returns [{id, name, list, from, to, why}].
+     */
+    function kop_staff_unconfirmed_pass(array $opts, $apply = false, $undo = false) {
+        $pdo = $opts['pdo'];
+        $get = function ($k) { return (array) (function_exists('get_option') ? get_option($k, array()) : ($GLOBALS[$k] ?? array())); };
+        $log = $get('kop_staff_unconfirmed_log');
+        if ($undo && !$log) return array();
+        // What the sources gave: the former pass's 'from' by "id|name|role now", the items' roles by "id|person key".
+        $was = array();
+        foreach ($get('kop_staff_former_log') as $id => $rows) {
+            foreach ((array) $rows as $l) $was[(int) $id . '|' . $l['name'] . '|' . $l['to']] = (string) $l['from'];
+        }
+        $items = array();
+        if (function_exists('kop_wbf_table') && function_exists('kop_wbf_person_key')) {
+            try {
+                // Woodbury Facts lives in the WordPress tables ($wpdb), not always the records connection.
+                $sql = 'SELECT facility_id, applied_fid, value FROM ' . kop_wbf_table() . " WHERE op = 'add_staff' AND status = 'applied'";
+                $rows = isset($GLOBALS['wpdb']) && is_object($GLOBALS['wpdb']) && method_exists($GLOBALS['wpdb'], 'get_results')
+                    ? (array) $GLOBALS['wpdb']->get_results($sql, ARRAY_A) : $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($rows as $r) {
+                    $v = json_decode((string) $r['value'], true);
+                    if (!is_array($v) || empty($v['name'])) continue;
+                    $fid = (int) ($r['applied_fid'] ?: $r['facility_id']);
+                    $items[$fid . '|' . kop_wbf_person_key($v['name'])][] = (string) ($v['role'] ?? '');
+                }
+            } catch (Throwable $e) {
+                // No Woodbury Facts table here: only the former pass's log is read.
+            }
+        }
+        $out = array();
+        foreach ($pdo->query('SELECT id, json_data FROM ' . kop_facility_table('facilities', $opts))->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $id = (int) $row['id'];
+            if ($undo && empty($log[$id])) continue;
+            $doc = json_decode((string) $row['json_data'], true);
+            if (!is_array($doc)) continue;
+            $changes = array();
+            foreach (array('administrator', 'notableStaff') as $list) {
+                foreach ((array) ($doc['staff'][$list] ?? array()) as $i => $e) {
+                    if (kop_staff_former_skip($e)) continue;
+                    $role = (string) $e['role'];
+                    $name = (string) ($e['name'] ?? '');
+                    if ($undo) {
+                        foreach ((array) $log[$id] as $l) {
+                            if ($l['list'] === $list && $l['name'] === $name && $l['to'] === $role) {
+                                $changes[] = array('list' => $list, 'i' => $i, 'name' => $name, 'from' => $role, 'to' => $l['from'], 'why' => 'undo');
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                    $new = kop_staff_role_no_current($role);
+                    $why = $new !== $role ? 'current' : '';
+                    if (preg_match('/^Former\s+(.+)$/i', $new, $m)) {
+                        $source = $was[$id . '|' . $name . '|' . $role] ?? null;
+                        $pk = function_exists('kop_wbf_person_key') ? $id . '|' . kop_wbf_person_key($name) : '';
+                        $given = $source !== null ? array($source) : ($items[$pk] ?? array());
+                        // Unconfirmed: we know what the sources said and none of them said the person left.
+                        if ($given && !array_filter($given, 'kop_staff_role_confirmed_former')) {
+                            $new = $m[1];
+                            $why = 'unconfirmed former';
+                        }
+                    }
+                    if ($new === $role || $new === '') continue;
+                    $changes[] = array('list' => $list, 'i' => $i, 'name' => $name, 'from' => $role, 'to' => $new, 'why' => $why);
+                }
+            }
+            if (!$changes) continue;
+            foreach ($changes as $c) $out[] = array('id' => $id) + array_diff_key($c, array('i' => 1));
+            if (!$apply) continue;
+            kop_v2_with_write_lock($pdo, function () use ($id, $opts, $changes) {
+                $stored = kop_facility_load($id, $opts);
+                if (!$stored) return;
+                $d = $stored['doc'];
+                foreach ($changes as $c) {
+                    if (isset($d['staff'][$c['list']][$c['i']]) && (string) ($d['staff'][$c['list']][$c['i']]['role'] ?? '') === $c['from']) {
+                        $d['staff'][$c['list']][$c['i']]['role'] = $c['to'];
+                    }
+                }
+                $doc = kop_facility_normalize(kop_facility_to_legacy($d), array('facility_id' => $stored['id'], 'unique_name' => $stored['unique_name']));
+                $doc['provenance'] = $stored['doc']['provenance'];
+                kop_facility_save($doc, $opts + array('skip_memberships' => true));
+            });
+            if ($undo) {
+                unset($log[$id]);
+            } else {
+                foreach ($changes as $c) $log[$id][] = array('list' => $c['list'], 'name' => $c['name'], 'from' => $c['from'], 'to' => $c['to']);
+            }
+        }
+        if ($apply) {
+            if (function_exists('update_option')) update_option('kop_staff_unconfirmed_log', $log, false);
+            else $GLOBALS['kop_staff_unconfirmed_log'] = $log;
+        }
+        return $out;
+    }
+}
+
 if (function_exists('add_action')) {
+    // The yearly "Former" for old sightings is off (2026-10-17): clear its daily event.
     add_action('init', function () {
-        if (!wp_next_scheduled('kop_staff_former_daily')) wp_schedule_event(time() + 3600, 'daily', 'kop_staff_former_daily');
+        if (wp_next_scheduled('kop_staff_former_daily')) wp_clear_scheduled_hook('kop_staff_former_daily');
     }, 30);
-    add_action('kop_staff_former_daily', 'kop_staff_former_yearly');
 }
