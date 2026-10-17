@@ -469,3 +469,9 @@ button.kop-vol-btn-small:focus {
 .kop-vol-finished {
     border-top: 6px solid var(--kop-teal, #33A7B5);
 }
+
+/* Focus is moved to the next item after an answer (js bringToTop) only to keep the reader's place; no ring round it. */
+.kop-vol-card[tabindex="-1"]:focus,
+.kop-vol-list[tabindex="-1"]:focus {
+    outline: none;
+}

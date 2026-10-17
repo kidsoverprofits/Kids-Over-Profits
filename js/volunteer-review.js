@@ -232,6 +232,16 @@
 
     var SAID = { approve: 'approve', reject: 'reject', unsure: 'not sure' };
 
+    // After a card shrinks or is swapped for the next one, the reader is left far below it: bring its top back to
+    // the top of the screen (only when it is above the screen, so nothing moves otherwise) and put focus there.
+    function bringToTop(node) {
+        if (!node || !node.getBoundingClientRect) return;
+        var top = node.getBoundingClientRect().top;
+        if (top < 0) window.scrollBy(0, top - 16);
+        if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '-1');
+        try { node.focus({ preventScroll: true }); } catch (e) { /* old browsers */ }
+    }
+
     function done(node, it, verdict, note, message) {
         node.innerHTML = '';
         node.classList.add('is-done');
@@ -244,8 +254,10 @@
             api('recommend', { source: it.source, key: it.key, withdraw: 1 }).then(function () {
                 node.classList.remove('is-done');
                 fillCard(node, it);
+                bringToTop(node);
             }).catch(function (e) { node.appendChild(el('p', { class: 'kop-vol-msg is-error', text: e.message })); });
         } }));
+        bringToTop(node);
     }
 
     /* ---- Your recommendations ---------------------------------------------------- */
@@ -375,6 +387,8 @@
 
     function nextProjectItem() {
         var id = state.project;
+        // Hold the slot's height while the next item loads, so the page does not collapse and snap the reader's place.
+        projSlot.style.minHeight = projSlot.offsetHeight ? projSlot.offsetHeight + 'px' : '';
         projSlot.innerHTML = '';
         projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { role: 'status', text: 'Loading…' })]));
         api('project', { id: id, limit: 1, skip: state.skip }).then(function (data) {
@@ -383,6 +397,7 @@
             drawBrief(p);
             renderProjects();
             projSlot.innerHTML = '';
+            projSlot.style.minHeight = '';
             var it = (data.items || [])[0];
             if (!it) {
                 var skipped = state.skip.length;
@@ -392,6 +407,7 @@
                         : 'Every item in this project has an answer. An admin will check them; "Your recommendations" shows what they decide.' }),
                     skipped ? el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Go through the skipped ones', onclick: function () { state.skip = []; nextProjectItem(); } }) : null
                 ]));
+                bringToTop(projSlot);
                 return;
             }
             projSlot.appendChild(el('p', { class: 'kop-vol-position', text: 'Item ' + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
@@ -409,8 +425,10 @@
                 while (projSaved.childNodes.length > 5) projSaved.removeChild(projSaved.lastChild);
                 nextProjectItem();
             }));
+            bringToTop(projSlot);
         }).catch(function (e) {
             projSlot.innerHTML = '';
+            projSlot.style.minHeight = '';
             projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));
         });
     }
