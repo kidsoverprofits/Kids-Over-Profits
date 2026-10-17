@@ -759,6 +759,15 @@ updated.
    no PDF backup at all (checked 2026-10-17, no ReportStore or own archive):
    AZ, CA, CO, CT, GA, MN, NV, OK (keeps dated page HTML only), TX. Check after
    deploy: a VA card at Review inbox > Serious violations opens a Drive PDF.
+   **Scraper folders moved out of the FileBird folder (2026-10-17):** all 24
+   (`xx_pdfs`, `me_html`, `nh_html`, `nc_ocr`, `ok_html`, `ut_checklists`,
+   `Inspections`) now sit in `My Drive/KOP Inspection Reports/` (kop-pipeline
+   `kop_paths.reports_drive_base()`, theme `api/sync-inspection-archive.php`).
+   **Owner, before 03:45 Central (the nightly sync):** share `KOP Inspection
+   Reports` as "Anyone with the link". AR, FL, HI, IA, ID, MD, ME, MI, NC, NH and
+   OH were shared only through the FileBird folder, and the sync drops the
+   archive index of a folder that is not shared. Then check with
+   `php api/sync-inspection-archive.php` (dry run): every state shows index entries.
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
    `hi_scraper.py` and `hi_scope.json` (Tools repo, in the launcher and the
    guide), `js/inspections/states/hi.js`, `/hi-reports/` created on deploy
