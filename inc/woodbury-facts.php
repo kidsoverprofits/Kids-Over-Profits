@@ -848,9 +848,10 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
     }
 
     if ($r['op'] === 'set_if_empty') {
-        // A type is only ever one of the agreed types, the list the discovery form and "Create a record" use.
-        if ($r['path'] === 'facilityDetails.type' && function_exists('kop_facdisc_types') && !in_array($value, kop_facdisc_types(), true)) {
-            throw new RuntimeException('"' . $value . '" is not one of the agreed facility types.');
+        // A type is only ever the agreed types (one or several, "A, B"), the list the discovery form and "Create a record" use.
+        if ($r['path'] === 'facilityDetails.type' && function_exists('kop_facdisc_types_value')) {
+            $value = kop_facdisc_types_value($value);
+            if ($value === '') throw new RuntimeException('No facility type to add.');
         }
         $slot = &kop_wbf_ref($doc, $r['path']);
         if (!kop_wbf_slot_empty($r['path'], $slot)) {
@@ -1036,6 +1037,10 @@ function kop_wbf_parse_value(array $r, $text) {
     if (is_int($old) || (is_numeric($old) && !is_string($old))) {
         if (!preg_match('/^\d+$/', $text)) throw new RuntimeException('Type a number.');
         return (int) $text;
+    }
+    // A program's type: one or several ("A, B"). The reviewer's own pick, so a type the record already spells its own way stays.
+    if (($r['path'] ?? '') === 'facilityDetails.type' && function_exists('kop_facility_types_join')) {
+        return kop_facility_type(kop_facility_types_join(kop_facility_types_split($text)));
     }
     return $text;
 }
@@ -1983,7 +1988,8 @@ function kop_wbf_edit_fields(array $r) {
         case 'set_if_empty facilityDetails.gender':
             return array(array('gender', 'Serves', 'select', (string) $v, array('Male', 'Female', 'Co-ed')));
         case 'set_if_empty facilityDetails.type':
-            return array(array('type', 'Type', 'select', (string) $v, function_exists('kop_facdisc_types') ? kop_facdisc_types() : array((string) $v)));
+            // A program can be several types: 'multi' is a box per type (the value "A, B").
+            return array(array('type', 'Type (one or several)', 'multi', (string) $v, function_exists('kop_facdisc_types') ? kop_facdisc_types() : array((string) $v)));
         case 'set_closed operatingPeriod':
             return array(array('endYear', 'Closed in (year, may be empty)', 'num', $years($v['endYear'] ?? '')));
         case 'add_list location.formerLocations':
@@ -2060,10 +2066,9 @@ function kop_wbf_edited_value(array $r, array $f) {
             }
             return array($t('gender'), $path);
         case 'set_if_empty facilityDetails.type':
-            if (function_exists('kop_facdisc_types') && !in_array($t('type'), kop_facdisc_types(), true)) {
-                throw new RuntimeException('Choose one of the agreed facility types.');
-            }
-            return array($t('type'), $path);
+            $type = function_exists('kop_facdisc_types_value') ? kop_facdisc_types_value($f['type'] ?? '') : $t('type');
+            if ($type === '') throw new RuntimeException('Choose one or more of the agreed facility types.');
+            return array($type, $path);
         case 'set_closed operatingPeriod':
             return array(array('endYear' => $year('endYear', true)), $path);
         case 'add_list location.formerLocations':
@@ -2198,6 +2203,15 @@ function kop_wbf_edit_form(array $r) {
         $html .= '<label>' . esc_html($label) . ' ';
         if ($kind === 'area') {
             $html .= '<textarea data-f="' . esc_attr($key) . '" rows="' . ($key === 'text' ? 4 : 3) . '">' . esc_textarea($value) . '</textarea>';
+        } elseif ($kind === 'multi') {
+            // Several at once (a program's types): Ctrl/Cmd-click; the script sends the picked ones as "A, B".
+            $have = function_exists('kop_facility_types_split') ? kop_facility_types_split($value) : array($value);
+            $html .= '<select data-f="' . esc_attr($key) . '" multiple size="6">';
+            foreach ($fd[4] as $ok => $ol) {
+                $ov = is_int($ok) ? $ol : $ok;
+                $html .= '<option value="' . esc_attr($ov) . '"' . (in_array((string) $ov, $have, true) ? ' selected' : '') . '>' . esc_html($ol) . '</option>';
+            }
+            $html .= '</select>';
         } elseif ($kind === 'select') {
             $html .= '<select data-f="' . esc_attr($key) . '">';
             $opts = $fd[4];
@@ -2669,7 +2683,7 @@ function kop_wbf_other_record(array $first, $no_record) {
         $state = $first['place'];
     }
     $name = $no_record ? $first['program'] : ($first['program_as_written'] !== '' ? $first['program_as_written'] : $first['program']);
-    $types = '<option value="">Not sure</option>';
+    $types = '';
     foreach (function_exists('kop_facdisc_types') ? kop_facdisc_types('offered') : array() as $t) {
         $types .= '<option value="' . esc_attr($t) . '">' . esc_html($t) . '</option>';
     }
@@ -2684,7 +2698,7 @@ function kop_wbf_other_record(array $first, $no_record) {
         . '<label>City <input type="text" class="kop-wbf-ccity" value="' . esc_attr($city) . '"></label>'
         . '<label>State <input type="text" class="kop-wbf-cstate" value="' . esc_attr($state) . '"></label>'
         . '<label>or country <input type="text" class="kop-wbf-ccountry"></label>'
-        . '<span class="kop-wbf-conly"><label>Type <select class="kop-wbf-ctype">' . $types . '</select></label>'
+        . '<span class="kop-wbf-conly"><label>Type (none if not sure; Ctrl-click for several) <select class="kop-wbf-ctype" multiple size="4">' . $types . '</select></label>'
         . '<label class="kop-wbf-tick"><input type="checkbox" class="kop-wbf-cforce"> It is a different place from a close match</label></span>'
         . '</div>'
         . kop_ak_button('Create the record and add checked', 'secondary', 'data-act="create"')
@@ -2876,7 +2890,11 @@ function kop_wbf_render_assets() {
                 ya_off: function () { return 'Moved back to Programs with no record.'; }
             },
             before: function (card, act, btn, data) {
-                var v = function (cls) { var el = card.querySelector(cls); return el ? el.value : ''; };
+                var v = function (cls) {
+                    var el = card.querySelector(cls);
+                    if (el && el.multiple) return Array.prototype.map.call(el.selectedOptions, function (o) { return o.value; }).join(', ');
+                    return el ? el.value : '';
+                };
                 if (act === 'apply' && !(+data.fid)) return 'Pick the record first.';
                 if (act === 'create') {
                     data.name = v('.kop-wbf-cname'); data.city = v('.kop-wbf-ccity'); data.state = v('.kop-wbf-cstate');
@@ -2905,7 +2923,9 @@ function kop_wbf_render_assets() {
 
         function boxFields(box) {
             var f = {};
-            box.querySelectorAll('[data-f]').forEach(function (el) { f['f[' + el.dataset.f + ']'] = el.value; });
+            box.querySelectorAll('[data-f]').forEach(function (el) {
+                f['f[' + el.dataset.f + ']'] = el.multiple ? Array.prototype.map.call(el.selectedOptions, function (o) { return o.value; }).join(', ') : el.value;
+            });
             return f;
         }
 

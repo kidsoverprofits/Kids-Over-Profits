@@ -905,6 +905,13 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
 - No live call has been made to the new Claude, Gemini or Hugging Face
   models in the AI helpers (`docs/news-processor/README.md`); the pages send
   `provider: 'groq'`, so they only run when a request names them.
+- Several program types (2026-10-17): a record's `facilityDetails.type` holds them joined with ", "
+  (`kop_facility_types_split()`); every review card's Type is a box per type, a type conflict has "Both are
+  right", the data forms' type box takes a comma list. After deploy: on Review inbox > Conflicts (Kind: Type) press
+  "Both are right" on one card and Undo it; tick two types on a Facilities from News card. Not done: the
+  directory, search and map still show the string as it is (no per-type filter there), and the yearly
+  "Former" staff rule now breaks one check in `--source=woodbury-facts` ("Founder (2021, HEAL)" reads "Former
+  Founder"): the test's expected role needs updating, not the rule.
 
 ### 3.7 Name eras
 

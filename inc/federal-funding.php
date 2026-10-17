@@ -143,9 +143,9 @@ function kop_ffund_create($key, array $fields, $reviewer) {
     if (!function_exists('kop_facdisc_create')) throw new RuntimeException('The record creator (inc/facility-discovery.php) is not loaded.');
     $name = trim(preg_replace('/\s+/u', ' ', (string) ($fields['name'] ?? '')));
     $state = strtoupper(trim((string) ($fields['state'] ?? '')));
-    $type = (string) ($fields['type'] ?? '');
+    $type = kop_facdisc_types_value($fields['type'] ?? '');
     if ($name === '' || !preg_match('/^[A-Z]{2}$/', $state)) throw new RuntimeException('A name and a two-letter state are needed.');
-    if ($type !== '' && !in_array($type, kop_facdisc_types(), true)) throw new RuntimeException('Type: pick one from the list.');
+    // One type or several, each on the list (kop_facdisc_types_value() threw otherwise).
     $opts = kop_ffund_opts();
     $entry = array(
         'name' => $name, 'officialName' => $name, 'otherNames' => array(), 'city' => trim((string) ($fields['city'] ?? '')),

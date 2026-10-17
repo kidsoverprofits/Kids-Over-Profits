@@ -144,7 +144,7 @@ a `migration: original status "..."` note.
 
 | Field | Type |
 |---|---|
-| `type` | string: known synonyms become one spelling (see Standard shapes), others kept as entered |
+| `type` | string: known synonyms become one spelling (see Standard shapes), others kept as entered; a program of several types holds them all, joined with ", " (`kop_facility_types_split()` / `_join()`) |
 | `capacity` | int or null |
 | `currentCensus` | int or null |
 | `ageRange` | `{min: int or null, max: int or null}` |
@@ -284,7 +284,8 @@ re-saved every document on 2026-09-18.
   Residential School` and `TBS` are `Therapeutic Boarding School`; `Eating
   Disorder Center`, `Eating Disorder Program`, `Eating Disorder Treatment` and
   `Eating Disorder Treatment Program` are `Eating Disorder Treatment Center`.
-  Other values are kept as entered.
+  Other values are kept as entered. Several types ("RTC, TBS") are each
+  normalized and joined with ", "; no type on the list has a comma.
 - **Operator block** (`provenance.sourceOperator`, and the `operator` block
   of a `kop_operators` row, which takes the same shape on save): `name`,
   `currentName`,

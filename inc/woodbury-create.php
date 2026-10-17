@@ -188,7 +188,8 @@ function kop_wbc_create_facility(array $r, array $f, PDO $pdo) {
                 . '. File it there, or tick "It is a different place" and create again.');
         }
     }
-    $type = in_array($f['type'] ?? '', kop_facdisc_types(), true) ? $f['type'] : '';
+    // One type or several ("A, B"); any not on the list are left out.
+    $type = kop_facility_types_join(array_values(array_intersect(kop_facility_types_split($f['type'] ?? ''), kop_facdisc_types())));
     $country = $f['country'] !== '' ? $f['country'] : 'United States';
     $legacy = array(
         'identification'  => array('name' => $f['name'], 'currentOperator' => '', 'otherNames' => array()),
@@ -881,7 +882,7 @@ function kop_wbc_render_form(array $r) {
     }
     echo '</select></label>';
     echo '<label>Country, outside the US <input type="text" class="kop-wbc-country" value="' . esc_attr($p['country']) . '"></label>';
-    echo '<label class="kop-wbc-only" data-kinds="facility">Type <select class="kop-wbc-type"><option value=""></option>';
+    echo '<label class="kop-wbc-only" data-kinds="facility">Type (Ctrl-click for several) <select class="kop-wbc-type" multiple size="4">';
     foreach (kop_facdisc_types('offered') as $t) {
         echo '<option>' . esc_html($t) . '</option>';
     }
@@ -957,7 +958,7 @@ function kop_wbc_render_assets() {
                 body.append('city', form.querySelector('.kop-wbc-city').value);
                 body.append('state', form.querySelector('.kop-wbc-state').value);
                 body.append('country', form.querySelector('.kop-wbc-country').value);
-                body.append('type', k === 'provider' ? form.querySelector('.kop-wbc-ptype').value : form.querySelector('.kop-wbc-type').value);
+                body.append('type', k === 'provider' ? form.querySelector('.kop-wbc-ptype').value : Array.prototype.map.call(form.querySelector('.kop-wbc-type').selectedOptions, function (o) { return o.value; }).join(', '));
                 body.append('force', form.querySelector('.kop-wbc-force').checked ? '1' : '');
                 appendTicked(body, tr);
                 go.disabled = true;

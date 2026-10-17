@@ -1298,10 +1298,34 @@ if (!function_exists('kop_facility_gender')) {
     }
 }
 
+if (!function_exists('kop_facility_types_split')) {
+    /**
+     * A program can be several types at once: facilityDetails.type stays one
+     * string, the types joined with ", " (no type in the list has a comma).
+     * A list (from a multi-pick) is taken as it is.
+     */
+    function kop_facility_types_split($raw) {
+        $parts = is_array($raw) ? $raw : explode(',', (string) $raw);
+        $out = array();
+        foreach ($parts as $p) {
+            $p = trim(preg_replace('/\s+/u', ' ', (string) $p));
+            if ($p !== '' && !in_array(mb_strtolower($p), array_map('mb_strtolower', $out), true)) $out[] = $p;
+        }
+        return $out;
+    }
+
+    function kop_facility_types_join(array $types) {
+        return implode(', ', kop_facility_types_split($types));
+    }
+}
+
 if (!function_exists('kop_facility_type')) {
-    /** Facility type: known synonyms to one spelling, anything else as entered. */
+    /** Facility type: known synonyms to one spelling, anything else as entered; several types each so (kop_facility_types_split()). */
     function kop_facility_type($raw) {
         $s = kop_facility_str($raw);
+        if (strpos($s, ',') !== false) {
+            return kop_facility_types_join(array_map('kop_facility_type', kop_facility_types_split($s)));
+        }
         $map = array(
             'rtc' => 'Residential Treatment Center',
             'residential treatment center (rtc)' => 'Residential Treatment Center',

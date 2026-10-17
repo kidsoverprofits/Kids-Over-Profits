@@ -246,7 +246,7 @@ function kop_rinbox_wb_item(array $r) {
                 array('name' => 'city', 'label' => 'City', 'type' => 'text', 'value' => $p['city'], 'optional' => true),
                 array('name' => 'state', 'label' => 'State', 'type' => 'select', 'options' => $states, 'value' => $p['state'], 'optional' => true),
                 array('name' => 'country', 'label' => 'Country, outside the US', 'type' => 'text', 'value' => $p['country'], 'optional' => true),
-                array('name' => 'type', 'label' => 'Program type', 'type' => 'select', 'options' => $types, 'value' => '', 'optional' => true),
+                array('name' => 'type', 'label' => 'Program type', 'type' => 'types', 'options' => $types, 'value' => '', 'optional' => true),
                 array('name' => 'ptype', 'label' => 'Provider type', 'type' => 'text', 'value' => '', 'optional' => true, 'placeholder' => 'psychiatric hospital, outpatient...'),
                 array('name' => 'force', 'label' => 'It is a different place from any close match', 'type' => 'checkbox', 'value' => '', 'optional' => true),
                 array('name' => 'facilities', 'label' => 'Also file under these facilities', 'type' => 'facilities', 'value' => array(), 'optional' => true),

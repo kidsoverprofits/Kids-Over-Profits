@@ -19,8 +19,11 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     foreach ($units as $ukey => $members) {
         if (count($members) === 1) { $item = kop_rinbox_get_item('conflicts', $ukey); break; }
     }
-    $check('conflicts: a card shows the conflict, both sides and the three choices, never ticked', $item['conflict'] !== '' && $item['selected'] === false
-        && array_slice(array_column($item['actions'], 'id'), 0, empty(($all[$item['key']] ?? array())['editable']) ? 2 : 3) === (empty(($all[$item['key']] ?? array())['editable']) ? array('resolve_use', 'resolve_keep') : array('resolve_use', 'resolve_keep', 'resolve_edit')),
+    // Use, Keep, then "Both are right" on a type (a program can be several types), then Edit where the value can be typed.
+    $c1 = $all[$item['key']] ?? array();
+    $want_ids = array_merge(array('resolve_use', 'resolve_keep'), ($c1['what'] ?? '') === 'type' ? array('resolve_both') : array(), empty($c1['editable']) ? array() : array('resolve_edit'));
+    $check('conflicts: a card shows the conflict, both sides and the choices, never ticked', $item['conflict'] !== '' && $item['selected'] === false
+        && array_slice(array_column($item['actions'], 'id'), 0, count($want_ids)) === $want_ids,
         json_encode(array('conflict' => $item['conflict'], 'actions' => array_column($item['actions'], 'id'), 'compare' => $item['compare'])));
 
     // They are not in Woodbury's own waiting list or count.
@@ -71,6 +74,8 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     $check('conflicts: ranges and numbers are read from typing', kop_wbf_parse_value(array('op' => 'set_if_empty', 'value' => '{"min":1,"max":2}'), '12 to 18') === array('min' => 12, 'max' => 18)
         && kop_wbf_parse_value(array('op' => 'set_if_empty', 'value' => '40'), '45') === 45);
 
+    kop_rinbox_test_conflicts_types($check, $wbf, $opts);
+    kop_rinbox_test_conflicts_staff($check, $pdo, $t);
     kop_rinbox_test_conflicts_closed($check);
     kop_rinbox_test_conflicts_rollup($check);
     kop_rinbox_test_conflicts_elsewhere($check);
@@ -286,3 +291,41 @@ function kop_rinbox_test_conflicts_other_kinds(callable $check) {
     kop_rinbox_conflicts_act($single, 'undo', array());
     $check('conflicts: ...and Undo takes exactly that note off', $notes() === $before && kop_wbf_rows(array($k))[0]['status'] === 'pending');
 }
+
+/** A type conflict: "Both are right" keeps the record's type and adds the item's ("A, B"); Edit offers a box per type; Undo puts it back. */
+function kop_rinbox_test_conflicts_types($check, array $wbf, array $opts) {
+    $pick = null;
+    foreach ($wbf as $k => $c) {
+        if (($c['what'] ?? '') !== 'type') continue;
+        $r = kop_wbf_rows(array($k))[0] ?? null;
+        if ($r && $r['op'] === 'set_if_empty' && kop_on_file_doc($r['facility_id'])) { $pick = $r; break; }
+    }
+    if (!$pick) { $check('conflicts: a type conflict to settle exists in the mirror', false); return; }
+    $key = 'woodbury-facts|' . $pick['pkey'];
+    $fid = (int) $pick['facility_id'];
+    $slot = function () use ($fid, $opts) { return (string) (kop_facility_load($fid, $opts)['doc']['facilityDetails']['type'] ?? ''); };
+    $status = function () use ($pick) { return kop_wbf_rows(array($pick['pkey']))[0]['status']; };
+    $before = $slot();
+    $item = kop_rinbox_get_item('conflicts', $key);
+    $edit = array_values(array_filter($item['actions'], function ($a) { return $a['id'] === 'resolve_edit'; }))[0] ?? null;
+    $param = $edit['params'][0] ?? array();
+    $check('conflicts: a type conflict\'s Edit is a box per type with both ticked', ($param['type'] ?? '') === 'types'
+        && kop_facility_types_split($param['value'] ?? '') === kop_facility_types_split($before . ', ' . kop_wbf_row_value($pick)), json_encode($param['value'] ?? null));
+    $msg = kop_rinbox_conflicts_act($key, 'resolve_both', array())['message'];
+    $want = kop_facility_types_join(array($before, kop_wbf_row_value($pick)));
+    $check('conflicts: Both are right keeps the record\'s type and adds the item\'s', $slot() === $want && $status() === 'applied', $slot() . ' / ' . $msg);
+    kop_rinbox_conflicts_act($key, 'undo', array());
+    $check('conflicts: ...and Undo puts the one type back', $slot() === $before && $status() === 'pending', $slot());
+    $check('conflicts: a record of several types holding the item\'s type is no conflict',
+        kop_wbf_conflict_parts(array('facilityDetails' => array('type' => $want)), $pick) === null);
+}
+
+/** A person with more than one role is never a conflict, record loaded or not, whatever the build's snapshot says. */
+function kop_rinbox_test_conflicts_staff($check, PDO $pdo, $t) {
+    $rows = $pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'add_staff' AND current_val <> '' LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
+    $flagged = array_filter($rows, function ($r) { return kop_rinbox_wbf_built_conflict($r, null) || kop_rinbox_wbf_conflict($r) !== ''; });
+    $check('conflicts: another role for a listed person is never a conflict', $rows && !$flagged, count($rows) . ' staff items with a role on the record, ' . count($flagged) . ' flagged');
+    $staff = kop_rinbox_conflicts_all(array('filters' => array('what' => 'staff')));
+    $check('conflicts: no staff role waits in Conflicts', !$staff, count($staff) . ' staff conflicts');
+}
+

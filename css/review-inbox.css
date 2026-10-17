@@ -496,6 +496,41 @@ button.rinbox-tag-x:active {
     box-sizing: border-box;
 }
 
+/* Several types at once: a box per type, in columns, on its own line. */
+.rinbox-param:has(.rinbox-multi),
+.rinbox-quick-field:has(.rinbox-multi),
+.rinbox-field:has(.rinbox-multi) {
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rinbox-multi {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+    gap: 2px 12px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 6px 8px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background: #fff;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.rinbox-multi-opt {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.rinbox-multi-opt input[type="checkbox"] {
+    width: auto;
+    margin-top: 2px;
+}
+
 button.rinbox-btn {
     border: 0;
     border-radius: var(--rv-radius);

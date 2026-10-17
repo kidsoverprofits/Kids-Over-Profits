@@ -493,9 +493,9 @@ function kop_sl_act(PDO $pdo, $id, $action, array $p, $user) {
             if (!function_exists('kop_facdisc_create')) throw new RuntimeException('The record creator (inc/facility-discovery.php) is not loaded.');
             $name = trim(preg_replace('/\s+/u', ' ', (string) ($p['name'] ?? '') ?: kop_sl_suggested_name($r['name'])));
             $state = strtoupper(trim((string) ($p['state'] ?? '') ?: $r['state']));
-            $type = (string) ($p['type'] ?? '');
+            $type = kop_facdisc_types_value($p['type'] ?? '');
             if ($name === '' || !preg_match('/^[A-Z]{2}$/', $state)) throw new RuntimeException('A name and a two-letter state are needed.');
-            if ($type !== '' && !in_array($type, kop_facdisc_types(), true)) throw new RuntimeException('Type: pick one from the list.');
+            // One type or several, each on the list (kop_facdisc_types_value() threw otherwise).
             kop_sl_opts($pdo);   // the write switch
             list($label, $note) = kop_sl_list_citation($r);
             $entry = array(

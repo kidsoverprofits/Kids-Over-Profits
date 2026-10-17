@@ -255,7 +255,7 @@ function kop_rinbox_facdisc_item(array $r) {
                 array('name' => 'city', 'label' => 'City', 'type' => 'text', 'value' => (string) ($e['city'] ?? ''), 'optional' => true),
                 array('name' => 'state', 'label' => 'State', 'type' => 'text', 'value' => (string) ($e['state'] ?? ''), 'optional' => true),
                 array('name' => 'country', 'label' => 'Country', 'type' => 'text', 'value' => (string) ($e['country'] ?? ''), 'optional' => true),
-                array('name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => $types, 'value' => (string) ($e['type'] ?? ''), 'optional' => true),
+                array('name' => 'type', 'label' => 'Type', 'type' => 'types', 'options' => $types, 'value' => (string) ($e['type'] ?? ''), 'optional' => true),
             ));
         $actions[] = array('id' => 'create_home', 'label' => 'New home of a program…', 'style' => 'neutral', 'ask' => true,
             'submit' => 'Create the record as a home',
@@ -280,7 +280,7 @@ function kop_rinbox_facdisc_item(array $r) {
             array('name' => 'city', 'label' => 'City', 'type' => 'text', 'value' => (string) ($e['city'] ?? '')),
             array('name' => 'state', 'label' => 'State (two letters)', 'type' => 'text', 'value' => (string) ($e['state'] ?? '')),
             array('name' => 'country', 'label' => 'Country', 'type' => 'text', 'value' => (string) ($e['country'] ?? '')),
-            array('name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => $types, 'value' => (string) ($e['type'] ?? ''), 'category' => true),
+            array('name' => 'type', 'label' => 'Type', 'type' => 'types', 'options' => $types, 'value' => (string) ($e['type'] ?? ''), 'category' => true),
         );
     }
     if ($held) {
@@ -522,13 +522,12 @@ function kop_rinbox_facdisc_save($key, array $fields) {
     $changed = false;
     foreach (array('officialName', 'city', 'state', 'country', 'type') as $k) {
         if (!array_key_exists($k, $fields)) continue;
-        $v = trim(preg_replace('/\s+/u', ' ', (string) $fields[$k]));
+        $v = $k === 'type' ? kop_facdisc_types_value($fields[$k]) : trim(preg_replace('/\s+/u', ' ', (string) $fields[$k]));
         if ($k === 'officialName' && $v === '') throw new RuntimeException('The name cannot be empty.');
         if ($k === 'state') {
             $v = strtoupper($v);
             if ($v !== '' && !preg_match('/^[A-Z]{2}$/', $v)) throw new RuntimeException('State: write the two-letter code, like UT or NC.');
         }
-        if ($k === 'type' && $v !== '' && !in_array($v, kop_facdisc_types(), true)) throw new RuntimeException('Type: pick one from the list.');
         $entry[$k] = mb_substr($v, 0, 255);
         $changed = true;
     }

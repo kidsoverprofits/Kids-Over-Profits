@@ -66,6 +66,21 @@ function kop_facdisc_types($mode = 'all') {
     return kop_choices('facility-types', null, $mode);
 }
 
+/**
+ * A posted type, one or several (a multi-pick's list, or "A, B"), checked
+ * against the list: the types joined with ", " (kop_facility_types_join()),
+ * '' for none. Throws when one is not on the list.
+ */
+function kop_facdisc_types_value($raw, $label = 'Type') {
+    $known = kop_facdisc_types();
+    $out = array();
+    foreach (kop_facility_types_split($raw) as $t) {
+        if (!in_array($t, $known, true)) throw new RuntimeException($label . ': "' . $t . '" is not on the list of facility types.');
+        $out[] = $t;
+    }
+    return kop_facility_types_join($out);
+}
+
 function kop_facdisc_ensure_tables(PDO $pdo) {
     if (get_option('kop_facility_discovery_db') === KOP_FACILITY_DISCOVERY_DB_VERSION) {
         return;
@@ -556,7 +571,8 @@ function kop_facdisc_parse_reply($reply, array $names, array $lookalikes) {
             'city'         => $str($e['city'] ?? '', 100),
             'state'        => preg_match('/^[A-Z]{2}$/', $state) ? $state : '',
             'country'      => $str($e['country'] ?? '', 100),
-            'type'         => isset($types[$str($e['type'] ?? '')]) ? $str($e['type']) : '',
+            // One type or several ("A, B"): only those on the list.
+            'type'         => kop_facility_types_join(array_filter(kop_facility_types_split($str($e['type'] ?? '')), function ($t) use ($types) { return isset($types[$t]); })),
             'status'       => in_array($status, array('Open', 'Closed', 'Suspended'), true) ? $status : 'Unknown',
             'startYear'    => $kind === 'indigenous_school' ? $old_year($e['startYear'] ?? null) : $year($e['startYear'] ?? null),
             'endYear'      => $kind === 'indigenous_school' ? $old_year($e['endYear'] ?? null) : $year($e['endYear'] ?? null),
@@ -1108,7 +1124,7 @@ function kop_facdisc_create_by_hand(PDO $pdo, $candidate_id, array $fields, $rev
     ), $detail['entry'] ?? array());
     foreach (array('officialName', 'city', 'state', 'country', 'type') as $k) {
         if (isset($fields[$k])) {
-            $entry[$k] = trim((string) $fields[$k]);
+            $entry[$k] = $k === 'type' ? kop_facdisc_types_value($fields[$k]) : trim((string) $fields[$k]);
         }
     }
     $entry['state'] = strtoupper($entry['state']);
@@ -1333,9 +1349,11 @@ function kop_render_facilities_from_news_page() {
             $field('city', 'City', $e['city'] ?? '', 130);
             $field('state', 'State', $e['state'] ?? '', 40);
             $field('country', 'Country', $e['country'] ?? '', 130);
-            echo '<label style="display:block;margin-bottom:4px">Type <select name="type"><option value=""></option>';
+            // Several types at once: Ctrl/Cmd-click (kop_facdisc_types_value() joins them).
+            echo '<label style="display:block;margin-bottom:4px">Type (Ctrl-click for several) <select name="type[]" multiple size="5">';
+            $have = kop_facility_types_split($e['type'] ?? '');
             foreach (kop_facdisc_types('offered') as $type) {
-                echo '<option' . (($e['type'] ?? '') === $type ? ' selected' : '') . '>' . esc_html($type) . '</option>';
+                echo '<option' . (in_array($type, $have, true) ? ' selected' : '') . '>' . esc_html($type) . '</option>';
             }
             echo '</select></label><button type="submit" class="button button-small">Create this facility</button></form>';
         }

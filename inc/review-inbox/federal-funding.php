@@ -238,7 +238,7 @@ function kop_rinbox_ffund_item($key, array $p) {
                 array('name' => 'name', 'label' => 'Name', 'type' => 'text', 'value' => preg_replace('/\s*\([^)]*\)\s*$/', '', (string) $p['name'])),
                 array('name' => 'city', 'label' => 'City', 'type' => 'text', 'value' => (string) ($p['city'] ?? ''), 'optional' => true),
                 array('name' => 'state', 'label' => 'State (two letters)', 'type' => 'text', 'value' => (string) ($p['state'] ?? '')),
-                array('name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => $types, 'value' => '', 'optional' => true),
+                array('name' => 'type', 'label' => 'Type', 'type' => 'types', 'options' => $types, 'value' => '', 'optional' => true),
                 array('name' => 'operator', 'label' => 'Operator', 'type' => 'text', 'value' => (string) ($p['operator'] ?? ''), 'optional' => true),
             ));
         $actions[] = array('id' => 'reject', 'label' => 'Leave it off', 'style' => 'reject',

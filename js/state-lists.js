@@ -166,9 +166,13 @@
                 l.appendChild(el('span', '', label));
                 var inp;
                 if (type === 'select') {
+                    // A program can be several types: Ctrl/Cmd-click; none picked = type unknown. Sent as "A, B".
+                    l.firstChild.textContent = label + ' (none if unknown; Ctrl-click for several)';
                     inp = el('select');
-                    [''].concat(D.types).forEach(function (t) {
-                        var o = el('option', '', t || '(type unknown)'); o.value = t; if (t === value) o.selected = true; inp.appendChild(o);
+                    inp.multiple = true;
+                    inp.size = 4;
+                    D.types.forEach(function (t) {
+                        var o = el('option', '', t); o.value = t; if (t === value) o.selected = true; inp.appendChild(o);
                     });
                 } else {
                     inp = el('input'); inp.type = 'text'; inp.value = value || '';
@@ -187,7 +191,7 @@
             var mk = button('Create record', 'kop-sl__btn--go', 'plus');
             mk.addEventListener('click', function () {
                 if (!window.confirm('Create a new facility record for "' + fName.value + '"?')) return;
-                send('create', it.id, { name: fName.value, city: fCity.value, state: fState.value, type: fType.value }, card);
+                send('create', it.id, { name: fName.value, city: fCity.value, state: fState.value, type: Array.prototype.map.call(fType.selectedOptions, function (o) { return o.value; }).join(', ') }, card);
             });
             cr.appendChild(mk);
             cr.appendChild(help('Makes a new facility record with its own page, its notes and "Materials and links" citing this list. '

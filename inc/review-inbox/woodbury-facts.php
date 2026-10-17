@@ -154,9 +154,14 @@ function kop_rinbox_wbf_place($place) {
 /** The edit form's fields (kop_wbf_edit_fields) in the inbox's shape. */
 function kop_rinbox_wbf_fields(array $r) {
     $out = array();
-    $types = array('num' => 'number', 'area' => 'textarea', 'text' => 'text', 'select' => 'select');
+    $types = array('num' => 'number', 'area' => 'textarea', 'text' => 'text', 'select' => 'select', 'multi' => 'types');
     foreach (kop_wbf_edit_fields($r) as $fd) {
         $f = array('name' => $fd[0], 'label' => $fd[1], 'type' => $types[$fd[2]] ?? 'text', 'value' => (string) $fd[3]);
+        if ($fd[2] === 'multi') {
+            $opts = array();
+            foreach ((array) ($fd[4] ?? array()) as $k => $v) $opts[is_int($k) ? (string) $v : (string) $k] = (string) $v;
+            $f['options'] = $opts;
+        }
         if ($fd[2] === 'select') {
             $opts = array();
             foreach ((array) ($fd[4] ?? array()) as $k => $v) $opts[is_int($k) ? (string) $v : (string) $k] = (string) $v;
@@ -292,7 +297,7 @@ function kop_rinbox_wbf_item(array $r) {
             array('name' => 'city', 'label' => 'City', 'type' => 'text', 'value' => $city),
             array('name' => 'state', 'label' => 'State', 'type' => 'text', 'value' => $state),
             array('name' => 'country', 'label' => 'or country', 'type' => 'text', 'value' => ''),
-            array('name' => 'type', 'label' => 'Program type', 'type' => 'select', 'options' => $types, 'value' => '', 'optional' => true),
+            array('name' => 'type', 'label' => 'Program type', 'type' => 'types', 'options' => $types, 'value' => '', 'optional' => true),
             array('name' => 'force', 'label' => 'It is a different place from a close match', 'type' => 'checkbox', 'value' => '', 'optional' => true),
         ));
         if ((int) $r['facility_id'] === 0) {
@@ -634,6 +639,9 @@ function kop_rinbox_wbf_conflict_text(array $r, $live) {
 function kop_rinbox_wbf_built_conflict(array $r, $doc) {
     // A note only adds a line ("Opened: 2005 per the wiki"): another value elsewhere is what the note is there to keep.
     if ($r['op'] === 'add_list' && in_array((string) $r['path'], array('notes', 'operatingPeriod.notes'), true)) return false;
+    // A person with more than one role is never a conflict: the other role goes on as their history (kop_wbf_staff_merge()),
+    // whether or not the record is loaded, whatever the build's "Name: role" snapshot or an older note says.
+    if ($r['op'] === 'add_staff') return false;
     $note = trim((string) $r['conflict']);
     if ($note !== '' && preg_match('/^The record has start year\b/i', $note)) {
         if (!$doc) return true;

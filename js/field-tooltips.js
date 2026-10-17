@@ -23,7 +23,7 @@ const FIELD_TOOLTIPS = {
 
     // Facility Identification Fields
     'facility-name': 'The official name of the facility/program. Check autocomplete to see if it already exists in our database.',
-    'facility-type': 'Type of program: RTC (Residential Treatment Center), Therapeutic Boarding School, Wilderness Program, Boot Camp, etc.',
+    'facility-type': 'Type of program: RTC (Residential Treatment Center), Therapeutic Boarding School, Wilderness Program, Boot Camp, etc. A program that is several types gets them all, separated by commas.',
 
     // Location Fields
     'international-program-toggle': 'Toggle ON if this program is located outside the United States.',

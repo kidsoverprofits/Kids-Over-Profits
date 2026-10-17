@@ -1295,7 +1295,7 @@ get_header();
                 <div class="form-group">
                     <label>Program Type</label>
                     <div class="autocomplete-wrapper" style="max-width: 400px;">
-                        <input type="text" id="facility-type" data-autocomplete-category="type" placeholder="Type facility type...">
+                        <input type="text" id="facility-type" data-autocomplete-category="type" placeholder="Type a facility type; several: separate with commas">
                     </div>
                 </div>
                 <div class="form-row">

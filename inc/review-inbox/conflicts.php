@@ -37,9 +37,9 @@ kop_rinbox_register('conflicts', function () {
     return array(
         'label'    => 'Conflicts',
         'group'    => 'Conflicts to settle',
-        'help'     => 'Items that disagree with what the record already says: another year, size or type, another role for the same person, a closure on a record marked open, '
-            . 'or a correction researched before someone changed the record. Each card shows both. "Keep the record" leaves the record as it is; '
-            . '"Use this value" writes the item\'s value over it, citing the item\'s source; "Edit" writes a value you type. Undo takes any of them back exactly.',
+        'help'     => 'Items that disagree with what the record already says: another year, size or type, a closure on a record marked open, '
+            . 'or a correction researched before someone changed the record (a person\'s other role is never one: it goes on as their history). Each card shows both. "Keep the record" leaves the record as it is; '
+            . '"Use this value" writes the item\'s value over it, citing the item\'s source; "Both are right" keeps the record\'s types and adds this one; "Edit" writes a value you type. Undo takes any of them back exactly.',
         'views'    => array('pending' => 'To settle'),
         'filters'  => array(
             array('name' => 'from', 'label' => 'From', 'options' => kop_rinbox_conflicts_queues()),
@@ -159,10 +159,13 @@ function kop_rinbox_conflicts_item($key, $c) {
         array('id' => 'resolve_keep', 'label' => 'Keep the record', 'style' => 'reject',
             'help' => 'Leaves ' . $on . ' as it is and files this item as rejected. Undo brings the card back.'),
     );
+    if (($c['what'] ?? '') === 'type') {
+        $actions[] = kop_rinbox_conflicts_both_action($on);
+    }
     if (!empty($c['editable'])) {
         $actions[] = array('id' => 'resolve_edit', 'label' => 'Edit…', 'style' => 'neutral', 'ask' => true, 'submit' => 'Write this value',
-            'help' => 'When neither side is right: type the value to write to ' . $on . ' (a range as "12 to 18", a year, a role). Undo puts the old value back.',
-            'params' => array(array('name' => 'value', 'label' => 'The right value', 'type' => 'text', 'value' => (string) ($c['item'] ?? ''))));
+            'help' => 'When neither side is right: type the value to write to ' . $on . ' (a range as "12 to 18", a year, a role; tick the types). Undo puts the old value back.',
+            'params' => array(kop_rinbox_conflicts_value_param($c, array($c))));
     }
     $it['actions'] = array_merge($actions, kop_rinbox_conflicts_elsewhere($it, (int) ($c['facility_id'] ?? 0)));
     $it['selected'] = false;
@@ -202,10 +205,42 @@ function kop_rinbox_conflicts_elsewhere(array $it, $fid) {
     return $out;
 }
 
+/** "Both are right" on a type conflict: a program can be several types, so the record keeps its own and gains the item's. */
+function kop_rinbox_conflicts_both_action($on, $group = false) {
+    return array('id' => 'resolve_both', 'label' => 'Both are right', 'style' => 'approve',
+        'help' => 'A program can be several types: keeps the types ' . $on . ' has and adds ' . ($group ? 'every ticked item\'s' : 'this one')
+            . ', citing ' . ($group ? 'the first ticked item' : 'the item\'s source') . '. Undo puts the old value back.');
+}
+
+/** The Edit box: a box per type for a type conflict (the record's and the items' types ticked), else a text box. */
+function kop_rinbox_conflicts_value_param(array $c, array $members) {
+    if (($c['what'] ?? '') === 'type' && function_exists('kop_facdisc_types')) {
+        $opts = array();
+        foreach (kop_facdisc_types('offered') as $t) $opts[$t] = $t;
+        $both = kop_rinbox_conflicts_both_value($c['record'] ?? '', $members);
+        foreach (kop_facility_types_split($both) as $t) $opts += array($t => $t);
+        return array('name' => 'value', 'label' => 'The right types', 'type' => 'types', 'options' => $opts, 'value' => $both);
+    }
+    return array('name' => 'value', 'label' => 'The right value', 'type' => 'text', 'value' => (string) ($c['item'] ?? ''));
+}
+
+/** The record's types and every given item's, as one "A, B" value. */
+function kop_rinbox_conflicts_both_value($record, array $members) {
+    $all = kop_facility_types_split($record);
+    foreach ($members as $m) $all = array_merge($all, kop_facility_types_split($m['item'] ?? ''));
+    return kop_facility_types_join($all);
+}
+
 function kop_rinbox_conflicts_act($key, $action, array $params) {
     list($queue, $k) = kop_rinbox_conflicts_split($key);
     if ($k[0] === '@') return kop_rinbox_conflicts_group_act($queue, $k, $action, $params);
     $src = kop_rinbox_source($queue);
+    if ($action === 'resolve_both') {
+        $c = kop_rinbox_conflict_keys($queue)[$k] ?? null;
+        if (!$c || ($c['what'] ?? '') !== 'type') throw new RuntimeException('Only a type conflict can keep both.');
+        $action = 'resolve_edit';
+        $params = array('value' => kop_rinbox_conflicts_both_value($c['record'] ?? '', array($c)));
+    }
     $hows = array('resolve_use' => 'use', 'resolve_keep' => 'keep', 'resolve_edit' => 'edit');
     if (isset($hows[$action])) {
         if (empty($src['resolve'])) throw new RuntimeException('That queue cannot settle conflicts.');
@@ -319,11 +354,14 @@ function kop_rinbox_conflicts_group_item($key, array $members) {
         array('id' => 'resolve_keep', 'label' => 'Keep the record', 'style' => 'reject',
             'help' => 'Leaves ' . $on . ' as it is and files every ticked item as rejected. Undo in Recently done brings them all back.'),
     );
+    if ($what === 'type') {
+        $actions[] = kop_rinbox_conflicts_both_action($on, true);
+    }
     if ($editable && in_array($what, kop_rinbox_conflicts_single_kinds(), true)) {
         $actions[] = array('id' => 'resolve_edit', 'label' => 'Edit…', 'style' => 'neutral', 'ask' => true, 'submit' => 'Write this value',
-            'help' => 'When none of them is right: type the value to write to ' . $on . ' (a range as "12 to 18", a year). It cites the first ticked item; '
+            'help' => 'When none of them is right: type the value to write to ' . $on . ' (a range as "12 to 18", a year; tick the types). It cites the first ticked item; '
                 . 'the other ticked items are filed as rejected. Undo puts the old value back.',
-            'params' => array(array('name' => 'value', 'label' => 'The right value', 'type' => 'text', 'value' => (string) ($first['item'] ?? ''))));
+            'params' => array(kop_rinbox_conflicts_value_param($first, $members)));
     }
 
     $actions = array_merge($actions, kop_rinbox_conflicts_group_elsewhere($src, (string) array_keys($members)[0], $on));
@@ -418,6 +456,12 @@ function kop_rinbox_conflicts_group_act($queue, $gid, $action, array $params) {
             'undo' => $undo_all($done));
     }
 
+    if ($action === 'resolve_both') {
+        $first = $members[$picked[0]];
+        if (($first['what'] ?? '') !== 'type') throw new RuntimeException('Only type conflicts can keep both.');
+        $action = 'resolve_edit';
+        $params['value'] = kop_rinbox_conflicts_both_value($first['record'] ?? '', array_intersect_key($members, array_flip($picked)));
+    }
     $hows = array('resolve_use' => 'use', 'resolve_keep' => 'keep', 'resolve_edit' => 'edit');
     if (!isset($hows[$action])) throw new RuntimeException('Unknown action.');
     if (empty($src['resolve'])) throw new RuntimeException('That queue cannot settle conflicts.');

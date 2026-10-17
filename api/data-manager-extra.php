@@ -85,7 +85,15 @@ function kop_dm_filter_options(PDO $pdo): array {
         }
         return $out;
     };
-    return ['states' => $col('state'), 'statuses' => $col('status'), 'types' => $col('facility_type')];
+    // A program of several types ("A, B") counts under each one.
+    $types = [];
+    foreach ($col('facility_type') as [$v, $n]) {
+        foreach (array_filter(array_map('trim', explode(',', $v)), 'strlen') as $t) $types[$t] = ($types[$t] ?? 0) + $n;
+    }
+    ksort($types, SORT_STRING | SORT_FLAG_CASE);
+    $type_rows = [];
+    foreach ($types as $t => $n) $type_rows[] = [(string)$t, $n];
+    return ['states' => $col('state'), 'statuses' => $col('status'), 'types' => $type_rows];
 }
 
 /** The filters from the request: {state, status, type, years: 'none'|''}. Empty strings = not set. */
@@ -107,8 +115,9 @@ function kop_dm_filter_sql(array $f, array &$params): string {
     if ($f['type'] === '-') {
         $w[] = "(facility_type IS NULL OR facility_type = '')";
     } elseif ($f['type'] !== '') {
-        $w[] = 'facility_type = ?';
-        $params[] = $f['type'];
+        // One of its types: the whole value, or one part of "A, B".
+        $w[] = '(facility_type = ? OR facility_type LIKE ? OR facility_type LIKE ? OR facility_type LIKE ?)';
+        array_push($params, $f['type'], $f['type'] . ', %', '%, ' . $f['type'], '%, ' . $f['type'] . ', %');
     }
     if ($f['years'] === 'none') $w[] = '(start_year IS NULL OR start_year = 0)';
     if ($f['years'] === 'closed_no_end') $w[] = "(status = 'Closed' AND (end_year IS NULL OR end_year = 0))";

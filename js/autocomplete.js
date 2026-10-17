@@ -877,10 +877,13 @@ function attachCustomValueRecorder(input, category) {
         const categoryFunctions = getCategoryFunctions();
         const existingValues = categoryFunctions[category] ? categoryFunctions[category]() : [];
         
-        if (!existingValues.includes(value)) {
-            addCustomValue(category, value);
-            debugLog(`Recorded new custom value for ${category}:`, value);
-        }
+        // Several types in one box ("A, B"): each one is its own value, never the pair.
+        (category === 'type' ? value.split(',').map((p) => p.trim()).filter(Boolean) : [value]).forEach((v) => {
+            if (!existingValues.includes(v)) {
+                addCustomValue(category, v);
+                debugLog(`Recorded new custom value for ${category}:`, v);
+            }
+        });
     };
 
     input.addEventListener('change', recordValue, { passive: true });
@@ -940,10 +943,21 @@ function createAutocomplete(input, getDataFunction, category) {
     let preventBlur = false; // Flag to prevent blur from closing dropdown during selection
     let pendingFetch = null; // Reference to pending fetch timeout
 
+    // A program can be several types: the type box holds "A, B" (kop_facility_types_split()); suggestions
+    // are for the part after the last comma, and a pick replaces only that part.
+    const multiValue = category === 'type';
+    const typedParts = () => input.value.split(',').map((p) => p.trim());
+    const queryText = () => (multiValue ? typedParts().pop() : input.value.trim());
+    const pickedBefore = () => (multiValue ? typedParts().slice(0, -1).filter(Boolean) : []);
+
     function commitSelection(value, options = {}) {
         const { shouldRefocus = false } = options;
         if (typeof value !== 'string') {
             return;
+        }
+        if (multiValue) {
+            const before = pickedBefore().filter((p) => p.toLowerCase() !== value.trim().toLowerCase());
+            value = before.concat(value.trim() ? [value.trim()] : []).join(', ');
         }
 
         // Set flag BEFORE any value changes to prevent input event from triggering
@@ -1061,14 +1075,14 @@ function createAutocomplete(input, getDataFunction, category) {
             if (detail) {
                 const nameEl = document.createElement('span');
                 nameEl.className = 'autocomplete-item-name';
-                renderSuggestionContent(nameEl, suggestionText, input.value);
+                renderSuggestionContent(nameEl, suggestionText, queryText());
                 const detailEl = document.createElement('span');
                 detailEl.className = 'autocomplete-item-detail';
                 detailEl.textContent = detail;
                 div.appendChild(nameEl);
                 div.appendChild(detailEl);
             } else {
-                renderSuggestionContent(div, suggestionText, input.value);
+                renderSuggestionContent(div, suggestionText, queryText());
             }
 
             // Use mousedown to fire BEFORE blur event (which hides dropdown)
@@ -1093,7 +1107,7 @@ function createAutocomplete(input, getDataFunction, category) {
             return;
         }
 
-        const value = input.value.trim();
+        const value = queryText();
         if (!value) {
             hideDropdown();
             return;
@@ -1119,7 +1133,8 @@ function createAutocomplete(input, getDataFunction, category) {
         
         // Merge local items with remote suggestions (debounced)
         const localItems = (typeof getDataFunction === 'function') ? getDataFunction() : [];
-        const localFiltered = localItems.filter(item => item.toLowerCase().includes(value.toLowerCase()));
+        const already = pickedBefore().map((p) => p.toLowerCase());
+        const localFiltered = localItems.filter(item => item.toLowerCase().includes(value.toLowerCase()) && !already.includes(item.toLowerCase()));
         const localSorted = sortByRelevance(localFiltered, value);
 
         // Show local results immediately, or "Loading..." if none
@@ -1277,8 +1292,8 @@ function createAutocomplete(input, getDataFunction, category) {
                 // (facility names: Enter/Tab keep what was typed unless a suggestion is highlighted)
                 maybePreventDefault();
                 commitSelection(actionableItems[0].dataset.value);
-            } else if (input.value.trim() && category) {
-                const trimmedValue = input.value.trim();
+            } else if (queryText() && category) {
+                const trimmedValue = queryText();
                 addCustomValue(category, trimmedValue);
                 maybePreventDefault();
                 commitSelection(trimmedValue);

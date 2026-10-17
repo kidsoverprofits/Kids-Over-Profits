@@ -1452,6 +1452,14 @@
     /** Mirrors kop_facility_type(). */
     function v2Type(raw) {
         const s = v2Str(raw);
+        if (s.indexOf(',') !== -1) {
+            // Several types, joined with ", " (kop_facility_types_split()): each one normalized, repeats dropped.
+            const seen = [];
+            s.split(',').map((p) => p.replace(/\s+/gu, ' ').trim()).filter(Boolean).map(v2Type).forEach((t) => {
+                if (!seen.some((x) => x.toLowerCase() === t.toLowerCase())) seen.push(t);
+            });
+            return seen.join(', ');
+        }
         const key = s.replace(/\s+/gu, ' ').toLowerCase();
         return Object.prototype.hasOwnProperty.call(V2_TYPE_SYNONYMS, key) ? V2_TYPE_SYNONYMS[key] : s;
     }
