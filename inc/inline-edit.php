@@ -1333,6 +1333,7 @@ function kop_ie_operator_fields() {
         array('Names and status', array(
             array('currentName', 'Name it uses now, if different', 'text'),
             array('otherNames', 'Also known as', 'lines'),
+            array('pastNames', 'Past names', 'lines'),
             array('type', 'Type', 'text'),
             array('status', 'Status (Active, Defunct, Acquired, Merged)', 'text'),
             array('founded', 'Founded', 'text'),
@@ -1417,6 +1418,18 @@ function kop_ie_operator_load(array $p) {
             'title'  => $row['name'] . ': whole record',
             'help'   => 'Every field this company holds, as stored. Keep the structure; change the values.',
             'fields' => array(kop_ie_field('json', 'Record', 'code', wp_json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), array('rows' => 30))),
+        );
+    }
+    // The directory's alternate-name rows (js/tti-program-index.js) open this one.
+    if (($p[1] ?? 'all') === 'names') {
+        $fields = array_values(array_filter(kop_ie_operator_form($json['operator']), static function ($f) {
+            return in_array($f['name'], array('currentName', 'otherNames', 'pastNames'), true);
+        }));
+        return array(
+            'title'  => $row['name'] . ': names',
+            'help'   => 'One name a line. The company name itself is changed under KOP Tools > Directory Editor.',
+            'fields' => $fields,
+            'alt'    => array('ref' => 'operator:' . (int) $row['id'] . ':all', 'label' => 'Every field'),
         );
     }
     if (($p[1] ?? 'all') === 'history') {

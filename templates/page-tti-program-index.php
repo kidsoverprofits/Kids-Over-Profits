@@ -53,6 +53,8 @@ get_header();
                         <option value="name">Sort A-Z</option>
                         <option value="violations-only">Violations / Inspections Only</option>
                         <option value="reports-desc">Most Inspection Reports</option>
+                        <option value="aliases-az">Alternate Names A-Z</option>
+                        <option value="aliases-target">Alternate Names by Current Name</option>
                     </select>
 
                     <button id="clearSearch" onclick="clearSearch()">

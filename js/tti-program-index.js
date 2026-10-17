@@ -798,6 +798,7 @@ function displayFacilities(facilitiesData, containerId) {
 
         return {
             key,
+            id: Number(project.id) || 0,
             operator,
             facilities,
             name: cleanText(project.name),
@@ -986,6 +987,7 @@ function displayFacilities(facilitiesData, containerId) {
         // is usually remembered together with who ran it at the time.
         // (The data doesn't record which owner goes with which name, so
         // the tile lists them jointly.)
+        const facilityId = Number(facility && (facility.facility_id || facility.facilityId)) || 0;
         const aliasPastOperators = collectUniqueTexts(names.previousOwnerList)
             .filter(op => normalizeTextKey(op) !== normalizeTextKey(operatorName))
             .slice(0, 3);
@@ -996,7 +998,8 @@ function displayFacilities(facilitiesData, containerId) {
         const aliases = [];
         collectUniqueTexts(names.normalizedFormerNames, names.aliasNames, nameThen ? [name] : []).forEach(alias => {
             if (normalizeTextKey(alias) === normalizeTextKey(nameThen || name)) return;
-            aliases.push({ alias, target: operatorName, facility: name, pastOperators: aliasPastOperators });
+            aliases.push({ alias, target: operatorName, facility: name, pastOperators: aliasPastOperators,
+                edit: facilityId ? 'facility:' + facilityId + ':names' : '' });
         });
 
         return {
@@ -1103,7 +1106,8 @@ function displayFacilities(facilitiesData, containerId) {
         if (mode === 'list') {
             renderedOperatorKeys.add(normalizeTextKey(operatorName));
             operatorAltNames.forEach(alias => {
-                aliasEntries.push({ alias, target: operatorName, facility: '' });
+                aliasEntries.push({ alias, target: operatorName, facility: '',
+                    edit: operatorGroup && operatorGroup.id ? 'operator:' + operatorGroup.id + ':names' : '' });
             });
         }
 
@@ -2262,6 +2266,9 @@ function displayFacilities(facilitiesData, containerId) {
     // alphabetically under the OLD name. Aliases that match a real operator
     // entry are skipped (the real entry already covers them).
     const seenAliasKeys = new Set();
+    // Admins (js/inline-edit.js loaded) get an "Edit names" button on each row:
+    // the record's names dialog, saved through inc/inline-edit.php.
+    const canEditNames = !!window.KOP_INLINE_EDIT;
     aliasEntries.forEach(entry => {
         const aliasKey = normalizeTextKey(entry.alias);
         if (!aliasKey || renderedOperatorKeys.has(aliasKey)) return;
@@ -2289,6 +2296,7 @@ function displayFacilities(facilitiesData, containerId) {
                     ${pastOperatorHtml}
                     <span class="alias-entry-note">former / alternate name — see <strong>${escapeHtml(targetLabel)}</strong> →</span>
                 </button>
+                ${canEditNames && entry.edit ? `<button type="button" class="alias-entry-edit" data-kop-edit-open="${escapeAttribute(entry.edit)}" aria-label="Edit the names of ${escapeAttribute(showFacility ? entry.facility : entry.target)}">Edit names</button>` : ''}
             </div>`;
     });
 
@@ -2296,6 +2304,8 @@ function displayFacilities(facilitiesData, containerId) {
         container.innerHTML = html;
 
         attachAliasEntryLinks(container);
+        // Old-name rows go in among the companies, A-Z (or as the dropdown says).
+        handleSort();
 
         if (container.dataset.lazySectionsBound !== 'true') {
             container.dataset.lazySectionsBound = 'true';
@@ -2376,6 +2386,8 @@ function filterFacilities() {
     // flagged resources.hasViolations (data-has-violations stamped at render).
     const sortSelect = document.getElementById('sortBy');
     const violationsOnly = !!sortSelect && sortSelect.value === 'violations-only';
+    // The two "Alternate names" sorts list the old-name rows alone.
+    const aliasesOnly = !!sortSelect && sortSelect.value.indexOf('aliases-') === 0;
 
     const operatorSections = document.querySelectorAll('#facilities-container .operator-section');
 
@@ -2394,6 +2406,10 @@ function filterFacilities() {
                 && !statusFilter
                 && !violationsOnly;
             section.style.display = show ? 'block' : 'none';
+            return;
+        }
+        if (aliasesOnly) {
+            section.style.display = 'none';
             return;
         }
         // Includes the organization's alternate/past names, not just the
@@ -2441,7 +2457,8 @@ function clearSearch() {
     if (sortBy) sortBy.selectedIndex = 0;
     if (clearButton) clearButton.style.display = 'none';
     window.currentLetterFilter = '';
-    filterFacilities();
+    // Back to A-Z (an "Alternate Names" sort may have regrouped the rows); runs filterFacilities.
+    handleSort();
 }
 
 // Expose to global scope for inline onclick handlers
@@ -2882,6 +2899,13 @@ function handleSort() {
             // Most inspection reports on file (data-report-count stamped at render), then A-Z.
             operatorSections.sort((a, b) => (reportCount(b) - reportCount(a)) || byName(a, b));
             break;
+        case 'aliases-target': {
+            // Grouped by the company and program each old name points to.
+            const target = section => [section.dataset.aliasTarget || section.dataset.operator || '', section.dataset.aliasFacility || ''].join(' › ');
+            operatorSections.sort((a, b) => compareOperatorText(target(a), target(b)) || byName(a, b));
+            break;
+        }
+        case 'aliases-az':
         case 'violations-only':
         case 'name':
         default:
