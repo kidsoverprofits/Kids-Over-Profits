@@ -2725,3 +2725,10 @@ Open:
 4. Not in this scope: reordering programs within a card (sort_order) and editing the location tab's place groups.
 5. Check that saving a company in the admin data form keeps `operator.directoryHidden` (the form may drop keys it does not
    draw); if it does not, a hidden card comes back after such a save. Hide one, save it in the data form, look again.
+6. Alternate-name rows (2026-10-17, commit https://github.com/kidsoverprofits/Kids-Over-Profits/commit/cdc69bfb): the
+   old-name rows on the company tab now sort in A-Z on load; the sort box has "Alternate Names A-Z" and "Alternate Names by
+   Current Name" (old-name rows only); admins get "Edit names" on each row (`facility:<id>:names`, or the new
+   `operator:<id>:names`: current name, also known as, past names). **Check after deploy:** on
+   https://kidsoverprofits.org/tti-program-index/ pick both new sorts, press Edit names on a program row and a company row,
+   save a change, reload (the cached feed follows the record within a load or two). Some "names" are notes, not names
+   ("Academy at Cedar Mountain after CERTS purchased it", "... (1999-2004)"): the owner cleans those with Edit names.
