@@ -108,9 +108,24 @@ function kop_rinbox_websites_item($p) {
         trim((string) $p->post_content) !== '' ? 'Note: ' . kop_rinbox_excerpt($p->post_content, 300) : '',
     ))));
     $actions = array();
+    $linkable = preg_match('#^https?://#i', $meta['url']);
+    if ($linkable && in_array($p->post_status, array('pending', 'publish', 'draft'), true)) {
+        // The usual approval: the link goes on a record's page (the "Move to" website/resource path, so Undo move takes it back).
+        $res_kinds = function_exists('kop_facility_resource_link_kinds') ? kop_facility_resource_link_kinds() : array('reference' => 'Reference');
+        $res_kind = kop_rinbox_websites_resource_kind($kind);
+        $actions[] = array('id' => 'attach', 'label' => 'Approve: put on a record\'s page', 'style' => 'approve',
+            'help' => 'Puts the link on the page of the program, company or other record you pick (its Materials and links, or its own website), then takes it off this list. Undo move on the Trashed tab takes it back off the record.',
+            'params' => array(
+                array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => kop_rinbox_websites_guess_record($meta['facility']) ?: ''),
+                array('name' => 'as', 'label' => 'Put it under', 'type' => 'select', 'value' => $kind === 'program' ? 'website' : 'resource',
+                    'options' => array('resource' => 'Materials and links', 'website' => 'Its own website')),
+                array('name' => 'kind', 'label' => 'Kind (Materials and links)', 'type' => 'select', 'options' => $res_kinds,
+                    'value' => isset($res_kinds[$res_kind]) ? $res_kind : 'reference'),
+            ));
+    }
     if ($p->post_status === 'pending' || $p->post_status === 'draft') {
-        $actions[] = array('id' => 'publish', 'label' => 'Approve: keep this website', 'style' => 'approve',
-            'help' => 'Files it under Kept, the internal list of useful websites; it is not shown on the public site. To put it on the page of a program or other record, or in a queue, use "Move to" instead.');
+        $actions[] = array('id' => 'publish', 'label' => 'Keep, on no record', 'style' => 'neutral',
+            'help' => 'Files it under Kept, the internal list of useful websites, without putting it on any page; it is not shown on the public site.');
         $actions[] = array('id' => 'trash', 'label' => 'Reject: trash', 'style' => 'reject',
             'help' => 'Moves it to the trash; Restore brings it back, and WordPress empties the trash after 30 days.');
     } elseif ($p->post_status === 'trash' && get_post_meta($id, '_kop_moved', true)) {
@@ -160,6 +175,18 @@ function kop_rinbox_websites_item($p) {
     );
 }
 
+/** The record the sender's "About" names, when that name is exactly one record's (else 0: the reviewer picks). */
+function kop_rinbox_websites_guess_record($about) {
+    $about = trim((string) $about);
+    if ($about === '' || !function_exists('kop_autoconn_name_index')) return 0;
+    try {
+        $holders = kop_autoconn_name_index(kop_rinbox_pdo())[kop_autoconn_key($about)] ?? array();
+    } catch (Throwable $e) {
+        return 0;
+    }
+    return count($holders) === 1 ? (int) key($holders) : 0;
+}
+
 /** The "Materials and links" kind a website of this kind goes under on a facility. */
 function kop_rinbox_websites_resource_kind($kind) {
     $map = array('forum' => 'social', 'reddit' => 'social', 'blog' => 'social', 'social' => 'social', 'directory' => 'advertising',
@@ -202,6 +229,10 @@ function kop_rinbox_websites_act($key, $action, array $params) {
             kop_rinbox_flush_counts();
             $now = kop_rinbox_websites_post($id);
             return array('message' => 'Restored ' . $name . ($now && $now->post_status === 'publish' ? ' to the Kept tab.' : ' to the waiting list.'));
+        case 'attach':
+            if (trim((string) ($params['facility_id'] ?? '')) === '') throw new RuntimeException('Pick the record it goes on.');
+            $params['to'] = ($params['as'] ?? '') === 'website' ? 'website' : 'resource';
+            // fall through: the same put as "Move to", so Undo move takes it back
         case 'move':
             if (!in_array($p->post_status, array('pending', 'publish', 'draft'), true)) throw new RuntimeException('A trashed website cannot move; Restore it first.');
             $done = kop_rdest_put((string) ($params['to'] ?? ''), array(

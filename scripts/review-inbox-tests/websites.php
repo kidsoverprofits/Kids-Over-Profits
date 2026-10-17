@@ -255,5 +255,22 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
         $check('websites: a company picked for "Website" takes it in its websites', in_array($url, $links_of()[1], true), $res['message']);
         call_user_func($src['act'], $item['key'], 'unmove', array());
         $check('websites: Undo move takes the website off the company', $links_of() === $before && $status() === 'pending');
+
+        // Approve puts it on a record: the first button, its picker the any-record finder, no record refused.
+        $card = kop_rinbox_get_item('websites', $item['key']);
+        $first = $card['actions'][0] ?? array();
+        $check('websites: the approve button asks for the record', ($first['id'] ?? '') === 'attach' && ($first['style'] ?? '') === 'approve'
+            && ($first['params'][0]['type'] ?? '') === 'record' && in_array('company', (array) ($first['params'][0]['kinds'] ?? array()), true),
+            implode(', ', array_column($card['actions'], 'id')));
+        try {
+            call_user_func($src['act'], $item['key'], 'attach', array('facility_id' => '', 'as' => 'resource'));
+            $check('websites: approve with no record is refused', false);
+        } catch (RuntimeException $e) {
+            $check('websites: approve with no record is refused', $status() === 'pending', $e->getMessage());
+        }
+        $res = call_user_func($src['act'], $item['key'], 'attach', array('facility_id' => 'company:' . $oid, 'as' => 'resource', 'kind' => 'social'));
+        $check('websites: approve puts the link in the record\'s Materials and links', in_array($url, $links_of()[0], true) && $status() === 'trash', $res['message']);
+        $res = call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('websites: Undo move takes the approved link off exactly', $links_of() === $before && $status() === 'pending', $res['message']);
     });
 }
