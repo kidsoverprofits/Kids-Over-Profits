@@ -755,7 +755,9 @@ updated.
    facility search whatever the query says, and `va_pdfs/` holds no VDSS copies,
    so those findings show no outside link (one now: Alpha House I, 2023-11-30).
    Open: `va_scraper.py` saves each VDSS inspection page as a PDF into `va_pdfs/`
-   and records its `archive_name`, then the same lookup links it. Check after
+   and records its `archive_name`, then the same lookup links it. Scrapers with
+   no PDF backup at all (checked 2026-10-17, no ReportStore or own archive):
+   AZ, CA, CO, CT, GA, MN, NV, OK (keeps dated page HTML only), TX. Check after
    deploy: a VA card at Review inbox > Serious violations opens a Drive PDF.
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
    `hi_scraper.py` and `hi_scope.json` (Tools repo, in the launcher and the
