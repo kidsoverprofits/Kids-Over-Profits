@@ -1247,6 +1247,8 @@ if (!function_exists('kop_facility_pages_staff_items')) {
                     $entry['role'] = $role;
                     $entry['personId'] = (int) ($item['personId'] ?? 0);
                     $entry['career'] = kop_facility_pages_person_career($name, (string) ($item['pastJobs'] ?? ''), (int) $facility_id, $entry['personId']);
+                    // Family, business partners (KOP Tools > People, inc/person-relations.php).
+                    $entry['relations'] = function_exists('kop_prel_public_lines') ? kop_prel_public_lines($entry['personId']) : array();
                 }
                 $items[] = $entry;
             }
@@ -1736,6 +1738,7 @@ if (!function_exists('kop_facility_pages_add_map_people')) {
                 'name'   => $p['name'],
                 'role'   => $role,
                 'career' => kop_facility_pages_person_career($p['name'], '', (int) $facility_id, (int) $p['personId']),
+                'relations' => function_exists('kop_prel_public_lines') ? kop_prel_public_lines((int) $p['personId']) : array(),
                 'from_map' => true,
             );
         }

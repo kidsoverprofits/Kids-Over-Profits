@@ -11,7 +11,12 @@
  *
  * A relationship with another id shows on both people: the other side reads the kind the other way round
  * (kop_prel_reverse(): Parent <-> Child). Ids are resolved through merges, so a merged person keeps theirs.
- * Admins only: no public page prints them yet.
+ *
+ * Public (owner, 2026-10-17): facility and company pages print each listed person's relationships under their
+ * name (kop_prel_public_lines()), and the network map build (kop-pipeline build-network-graph.js,
+ * addPersonRelations()) draws a line between two people on the map. A relationship with someone in the harmed
+ * or press pool (a plaintiff, a journalist) is never printed. Every save bumps kop_people_version, so the
+ * pages' cached data follows, and the map's rebuild fingerprint (inc/network-rebuild.php) reads the table.
  */
 
 if (!defined('ABSPATH')) {
@@ -159,6 +164,8 @@ if (!function_exists('kop_prel_save')) {
         $after = kop_facility_db_rows("SELECT * FROM {$t} WHERE id = ?", array((int) $id), $opts)[0] ?? null;
         $people = array_values(array_unique(array_filter(array((int) $after['person_id'], (int) $after['other_id']))));
         kop_prel_log(array('id' => (int) $id, 'people' => $people, 'before' => $before, 'after' => $after));
+        $GLOBALS['kop_prel_public'] = null;
+        if (function_exists('kop_people_version_bump')) kop_people_version_bump();
         return (int) $id;
     }
 
@@ -209,5 +216,46 @@ if (!function_exists('kop_prel_save')) {
         }
         $log[$at]['undone'] = true;
         kop_prel_log_save($log);
+        $GLOBALS['kop_prel_public'] = null;
+        if (function_exists('kop_people_version_bump')) kop_people_version_bump();
+    }
+}
+
+if (!function_exists('kop_prel_public_lines')) {
+    /**
+     * A person's relationships as the public pages print them: [{kind, name, url, detail, source, source_url}],
+     * shown ones only, never one with a harmed or press person. url = a page that lists the other person
+     * (their first facility, else company), '' when none. Cached per request.
+     */
+    function kop_prel_public_lines($person_id, array $opts = array()) {
+        if ((int) $person_id <= 0) return array();
+        $cache = empty($opts);
+        if ($cache && isset($GLOBALS['kop_prel_public'][(int) $person_id])) return $GLOBALS['kop_prel_public'][(int) $person_id];
+        $rels = kop_prel_ready($opts) ? kop_prel_for_person((int) $person_id, $opts) : null;
+        $out = array();
+        if ($rels) {
+            $state = kop_people_load($opts);
+            foreach ($rels as $r) {
+                if (!empty($r['hidden'])) continue;
+                $other = (int) $r['other_resolved'];
+                if ($other > 0 && ($state['rows'][$other]['pool'] ?? 'industry') !== 'industry') continue;
+                $out[] = array('kind' => (string) $r['kind'], 'name' => (string) $r['other_label'], 'url' => $other > 0 ? kop_prel_person_url($other, $opts) : '',
+                    'detail' => (string) $r['detail'], 'source' => (string) $r['source'], 'source_url' => (string) $r['source_url']);
+            }
+        }
+        if ($cache) $GLOBALS['kop_prel_public'][(int) $person_id] = $out;
+        return $out;
+    }
+
+    /** A public page that lists this person: the first facility naming them, else the first company; ''. */
+    function kop_prel_person_url($person_id, array $opts = array()) {
+        if (!function_exists('kop_people_roles_of')) return '';
+        $first = array('facility' => 0, 'operator' => 0);
+        foreach (kop_people_roles_of((int) $person_id, $opts) as $r) {
+            if (isset($first[$r['record_kind']]) && !$first[$r['record_kind']]) $first[$r['record_kind']] = (int) $r['record_id'];
+        }
+        if ($first['facility'] && function_exists('kop_facility_page_url')) return (string) kop_facility_page_url($first['facility']);
+        if ($first['operator'] && function_exists('kop_operator_page_url')) return (string) kop_operator_page_url($first['operator']);
+        return '';
     }
 }

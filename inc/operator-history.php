@@ -258,6 +258,7 @@ if (!function_exists('kop_operator_history_people')) {
                     $jobs[] = $job;
                 }
                 $p['career'] = array_slice($jobs, 0, 8);
+                $p['relations'] = function_exists('kop_prel_public_lines') ? kop_prel_public_lines((int) ($p['personId'] ?? 0)) : array();
             }
             unset($p);
         }

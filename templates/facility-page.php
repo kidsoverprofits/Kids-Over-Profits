@@ -257,6 +257,14 @@ $kop_fp_staff_lists = static function (array $staff, $tag = 'h3') use ($kop_fp_s
                             <?php if ($person['role'] !== '' || $person['source'] !== '') : ?>
                                 <p class="kop-fp-person-role"><?php echo esc_html($person['role']); ?><?php if ($person['source'] !== '') $kop_fp_sources(array($person), 'span'); ?></p>
                             <?php endif; ?>
+                            <?php if (!empty($person['relations'])) : ?>
+                                <p class="kop-fp-person-relations"><?php foreach ($person['relations'] as $i => $rel) :
+                                    echo $i ? '; ' : '';
+                                    echo esc_html($rel['kind']) . ': ' . ($rel['url'] !== '' ? '<a href="' . esc_url($rel['url']) . '">' . esc_html($rel['name']) . '</a>' : esc_html($rel['name']));
+                                    if ($rel['detail'] !== '') echo ' (' . esc_html($rel['detail']) . ')';
+                                    if ($rel['source_url'] !== '') echo ' <a class="kop-fp-source" href="' . esc_url($rel['source_url']) . '">source</a>';
+                                endforeach; ?></p>
+                            <?php endif; ?>
                             <?php if (!empty($person['career'])) : ?>
                                 <div class="kop-fp-career">
                                     <p class="kop-fp-career-label">Elsewhere in the industry</p>

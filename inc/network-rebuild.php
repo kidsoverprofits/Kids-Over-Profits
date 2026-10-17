@@ -83,6 +83,13 @@ if (!function_exists('kop_network_rebuild_fingerprint')) {
             foreach ($people as $row) hash_update($ctx, json_encode(array_values($row)) . "\n");
         } catch (Throwable $e) {
         }
+        // Relationships between people (inc/person-relations.php): the build draws a line between two map people.
+        try {
+            $rels = $query("SELECT person_id, other_id, kind, hidden FROM {$prefix}kop_person_relations WHERE other_id > 0 ORDER BY id");
+            if ($rels) hash_update($ctx, "#relations\n");   // none yet: the fingerprint is as before
+            foreach ($rels as $row) hash_update($ctx, json_encode(array_values($row)) . "\n");
+        } catch (Throwable $e) {
+        }
         return hash_final($ctx);
     }
 }

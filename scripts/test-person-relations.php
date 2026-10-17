@@ -111,5 +111,27 @@ kop_prel_undo(kop_prel_log_for(1)[2]['n'], $opts);
 check((int) $pdo->query("SELECT COUNT(*) FROM {$prefix}kop_person_relations WHERE id = $r1")->fetchColumn() === 0, 'undoing an add deletes it');
 check(kop_prel_reverse('Employer') === 'Employee' && kop_prel_reverse('Spouse') === 'Spouse' && kop_prel_reverse('Neighbour') === 'Neighbour', 'kinds read back');
 
+echo "Public pages\n";
+$pdo->exec("CREATE TABLE {$prefix}kop_person_roles (record_kind TEXT NOT NULL, record_id INTEGER NOT NULL, list TEXT NOT NULL,
+    position INTEGER NOT NULL, person_id INTEGER NOT NULL, name TEXT NOT NULL DEFAULT '', role TEXT, ref TEXT NOT NULL DEFAULT '')");
+$pdo->exec("INSERT INTO {$prefix}kop_people (name, name_key, aliases, notes, pool) VALUES ('Jane Plaintiff', 'jane plaintiff', '', '', 'harmed')");
+$harmed = (int) $pdo->lastInsertId();
+$pdo->exec("INSERT INTO {$prefix}kop_person_roles VALUES ('facility', 77, 'notableStaff', 0, 2, 'Karr Farnsworth', '', '')");
+function kop_facility_page_url($id) { return 'https://example.test/facility/f' . $id . '/'; }
+$p1 = kop_prel_save(1, 0, array('other_id' => 2, 'kind' => 'Business partner', 'source_url' => 'https://example.test/a'), $opts);
+kop_prel_save(1, 0, array('other_id' => $harmed, 'kind' => 'Child'), $opts);
+kop_prel_save(1, 0, array('other_name' => 'Pat Lichfield', 'kind' => 'Spouse'), $opts);
+$pub = kop_prel_public_lines(1, $opts);
+$names = array_map(function ($l) { return $l['name']; }, $pub);
+check(in_array('Karr Farnsworth', $names, true) && in_array('Pat Lichfield', $names, true), 'industry and name-only ties print', implode(', ', $names));
+check(!in_array('Jane Plaintiff', $names, true), 'a tie to someone in the harmed pool never prints');
+$k = array_values(array_filter($pub, function ($l) { return $l['name'] === 'Karr Farnsworth'; }))[0];
+check($k['url'] === 'https://example.test/facility/f77/' && $k['source_url'] === 'https://example.test/a', 'the other person links a page that lists them');
+$back = kop_prel_public_lines(2, $opts);
+$rob = function ($pid) use ($opts) { return array_values(array_filter(kop_prel_public_lines($pid, $opts), function ($l) { return $l['name'] === 'Robert Lichfield'; })); };
+check(count($rob(2)) === 1 && $rob(2)[0]['kind'] === 'Business partner', 'and prints on the other person too');
+kop_prel_save(1, $p1, array('hidden' => 1), $opts);
+check(count($rob(2)) === 0, 'taken off: gone from the pages');
+
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

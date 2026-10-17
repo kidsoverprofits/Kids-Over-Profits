@@ -954,8 +954,11 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
   Undo for every details save (option kop_people_details_log); a ticked person's career ends "Educational consultant"
   on every facility and company page. Relationships (`{prefix}kop_person_relations`, inc/person-relations.php; kinds in
   Dropdown Lists > People) show on both people. After deploy: open People once, tick one person and check their
-  facility page. Owner to decide: should relationships print on public pages (business partners yes, family only
-  between industry people?); they are admin-only now. A consultant record naming the person is shown as a hint, never ticks the box.
+  facility page. Relationships are public (owner, 2026-10-17): printed under each listed person on facility and company
+  pages, and drawn on the map between two people already on it (kop-pipeline addPersonRelations(); a tie to someone not
+  on the map is listed in tmp/network-qa.md, not drawn). After deploy: add one relationship between two map people, check
+  both facility pages, and that the next hourly fingerprint starts a map build that draws the line. Not done yet: the map
+  draws no new person node for a relationship. A consultant record naming the person is shown as a hint, never ticks the box.
 
 ### 3.7 Name eras
 
