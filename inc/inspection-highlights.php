@@ -2666,19 +2666,40 @@ if (!function_exists('kop_ih_scanner_version')) {
         $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
         if (!$pdo) return '';
         try {
-            $st = $pdo->prepare('SELECT categories_json FROM inspection_reports WHERE id = ?');
+            $st = $pdo->prepare('SELECT report_id, report_url, categories_json FROM inspection_reports WHERE id = ?');
             $st->execute(array($report_row_id));
-            $cats = json_decode((string) $st->fetchColumn(), true);
+            $row = $st->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return '';
         }
-        if (!is_array($cats)) return '';
-        $names = is_array($cats['archive_names'] ?? null) ? $cats['archive_names'] : array();
-        if (!empty($cats['archive_name'])) $names[] = $cats['archive_name'];
+        if (!$row) return '';
+        // Each state's scraper names its file its own way (archive_name, archiveName, file_name, a pdf_url,
+        // the report id + .pdf; the state pages' adapters each read their own), so every file name or
+        // address the report carries is tried; a hit in the index can only be a file of this report.
+        $names = array();
+        if (trim((string) $row['report_id']) !== '') {
+            $names[] = $row['report_id'];
+            $names[] = $row['report_id'] . '.pdf';
+        }
+        $collect = function ($value, $key = '') use (&$collect, &$names) {
+            if (is_array($value)) {
+                foreach ($value as $k => $v) $collect($v, is_string($k) ? $k : $key);
+                return;
+            }
+            if (!is_string($value) || $value === '' || strlen($value) > 400) return;
+            if (preg_match('/\.pdf(?:$|[?#])/i', $value) || preg_match('/archive|file_?name|pdf|url/i', $key)) {
+                $names[] = $value;
+                // A file named in the query ("GetAzureFile?filename=20250108_15070.pdf").
+                if (preg_match_all('/[?&][^=&#]+=([^&#]+\.pdf)/i', $value, $m)) foreach ($m[1] as $q) $names[] = $q;
+            }
+        };
+        $collect((string) $row['report_url'], 'url');
+        $collect(json_decode((string) $row['categories_json'], true));
         foreach ($names as $name) {
             $key = preg_replace('/[?#].*$/s', '', (string) $name);
             $key = substr($key, strrpos('/' . $key, '/'));
             $key = strtolower(preg_replace('/[^A-Za-z0-9._-]/', '_', rawurldecode($key)));
+            if ($key === '') continue;
             $href = (string) ($indexes[$state][$key] ?? '');
             if (preg_match('#^https://#', $href)) return $href;
         }

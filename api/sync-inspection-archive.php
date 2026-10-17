@@ -69,6 +69,16 @@ $FOLDERS = array(
     'sd_pdfs'       => 'sd',
     'va_pdfs'       => 'va',
     'hi_pdfs'       => 'hi',
+    // Report pages printed to PDF by kop-pipeline's report_store.PagePrinter (2026-10-17).
+    'az_pdfs'       => 'az',
+    'ca_pdfs'       => 'ca',
+    'co_pdfs'       => 'co',
+    'ct_pdfs'       => 'ct',
+    'ga_pdfs'       => 'ga',
+    'mn_pdfs'       => 'mn',
+    'nv_pdfs'       => 'nv',
+    'ok_pdfs'       => 'ok',
+    'tx_pdfs'       => 'tx',
 );
 
 $lock = fopen(sys_get_temp_dir() . '/kop-sync-inspection-archive.lock', 'c');

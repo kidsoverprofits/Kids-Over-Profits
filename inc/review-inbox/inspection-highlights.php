@@ -173,6 +173,9 @@ The state's wording:
         'label' => 'Full report (old screen)',
         'url'   => get_stylesheet_directory_uri() . '/api/review-inspection-highlights.php?' . http_build_query(array('status' => $r['status'], 'ids' => (int) $r['id'])),
     ));
+    // Our Drive copy of the report (kop-pipeline's scrapers archive every report; api/sync-inspection-archive.php indexes them).
+    $archived = kop_ih_archived_copy_url((string) $r['state'], (int) $r['report_id']);
+    if ($archived !== '' && $archived !== kop_ih_source_url($r)) $links[] = array('label' => 'Archived copy (PDF)', 'url' => $archived);
     return array(
         'key'          => (string) $r['id'],
         'title'        => (string) $r['facility_name'],
