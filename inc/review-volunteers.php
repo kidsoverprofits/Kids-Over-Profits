@@ -537,6 +537,8 @@ function kop_vol_item($source, array $it) {
         'facts'    => $facts,
         'links'    => $links,
         'compare'  => $compare,
+        // The queue reads its full source text out to volunteers (kop/v1/volunteer/fulltext): the admin viewer is closed to them.
+        'full_text' => !empty(kop_rinbox_sources()[$source]['vol_text']),
         'approve'  => array_values(array_filter(array_map($s, $approve), 'strlen')),
         'reject'   => array_values(array_filter(array_map($s, $reject), 'strlen')),
     );
@@ -597,7 +599,7 @@ function kop_vol_mine($vid) {
 /** Who is asking: ['vol' => row] for a volunteer, ['admin' => true] for an admin, or a WP_Error. */
 function kop_vol_rest_who(WP_REST_Request $req) {
     nocache_headers();
-    header('X-LiteSpeed-Cache-Control: no-cache');
+    if (!headers_sent()) header('X-LiteSpeed-Cache-Control: no-cache');
     $vol = kop_vol_current();
     if ($vol) {
         if (!hash_equals(kop_vol_csrf($vol['token']), (string) $req->get_header('x_kop_vol'))) {
@@ -610,7 +612,7 @@ function kop_vol_rest_who(WP_REST_Request $req) {
 }
 
 add_action('rest_api_init', function () {
-    $routes = array('queues' => 'kop_vol_rest_queues', 'items' => 'kop_vol_rest_items', 'recommend' => 'kop_vol_rest_recommend', 'mine' => 'kop_vol_rest_mine');
+    $routes = array('queues' => 'kop_vol_rest_queues', 'items' => 'kop_vol_rest_items', 'recommend' => 'kop_vol_rest_recommend', 'mine' => 'kop_vol_rest_mine', 'fulltext' => 'kop_vol_rest_fulltext');
     foreach ($routes as $path => $cb) {
         register_rest_route('kop/v1', '/volunteer/' . $path, array(
             'methods' => 'POST', 'callback' => $cb,
@@ -640,6 +642,24 @@ function kop_vol_rest_items(WP_REST_Request $req) {
         $vid = isset($who['vol']) ? (int) $who['vol']['id'] : 0;
         return kop_vol_items($vid, (string) $req->get_param('source'), max(0, (int) $req->get_param('offset')),
             max(1, min(20, (int) ($req->get_param('limit') ?: 10))), trim((string) $req->get_param('search')));
+    });
+}
+
+/** The full source text of one item (a scraped inspection report), for a queue that gives 'vol_text'. */
+function kop_vol_rest_fulltext(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $who = kop_vol_rest_who($req);
+        $source = (string) $req->get_param('source');
+        $key = (string) $req->get_param('key');
+        $all = kop_rinbox_sources();
+        // A project's own items are open to its volunteer, as in kop_vol_recommend().
+        $src = (!isset(kop_vol_sources()[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
+            && !empty($who['vol']) && function_exists('kop_volp_allows') && kop_volp_allows((int) $who['vol']['id'], $source, $key))
+            ? $all[$source] : kop_vol_source($source);
+        if (empty($src['vol_text'])) throw new InvalidArgumentException('This queue has no full text to read.');
+        $text = call_user_func($src['vol_text'], $key);
+        if ($text === null) throw new RuntimeException('That report is not on file any more.');
+        return array('text' => kop_vol_scrub($text));
     });
 }
 

@@ -42,6 +42,12 @@ foreach ($wanted as $t) {
     $copy->exec($sql);
     $copy->exec("INSERT INTO main.`$t` SELECT * FROM src.`$t`");
 }
+// Only the reports the findings were read from (the whole table is large).
+$sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = 'inspection_reports'")->fetchColumn();
+if ($sql) {
+    $copy->exec($sql);
+    $copy->exec('INSERT INTO main.inspection_reports SELECT * FROM src.inspection_reports WHERE id IN (SELECT report_id FROM src.inspection_highlights)');
+}
 $copy->exec('DETACH DATABASE src');
 $copy = null;
 register_shutdown_function(function () use ($db_path) { $GLOBALS['pdo'] = null; $GLOBALS['wpdb'] = null; gc_collect_cycles(); @unlink($db_path); });
@@ -194,6 +200,32 @@ if ($first) {
     $check('an item handed to an admin is not shown', !in_array($first['key'], array_column($res['items'], 'key'), true));
     $check('and cannot be recommended', $throws(function () use ($vol2, $first) { kop_vol_recommend($vol2, $first['source'], $first['key'], 'approve', ''); }) !== '');
 }
+
+// Volunteers read a serious finding's whole scraped report (the admin viewer is closed to them).
+$GLOBALS['kop_test_options']['kop_volunteer_sources'] = array('inspection-highlights', 'news');
+$res = kop_vol_items(0, 'inspection-highlights', 0, 5);
+$it = $res['items'][0] ?? null;
+$check('a serious finding card offers the full report', $it && $it['full_text'] === true);
+$check('the admin viewer link is not given to volunteers', $it && !preg_grep('#/api/review-#', array_column($it['links'], 'url')));
+$news = kop_vol_items(0, 'news', 0, 1)['items'][0] ?? null;
+$check('a queue with no report text offers none', !$news || $news['full_text'] === false);
+if ($it) {
+    if (!class_exists('WP_REST_Response')) {
+        class WP_REST_Response { public $data; public $status; public function __construct($d, $s) { $this->data = $d; $this->status = $s; } }
+    }
+    if (!class_exists('WP_REST_Request')) {
+        class WP_REST_Request { private $p; public function __construct($p) { $this->p = $p; } public function get_param($k) { return $this->p[$k] ?? null; } public function get_header($k) { return ''; } }
+    }
+    $rid = (int) $pdo->query('SELECT report_id FROM inspection_highlights WHERE id = ' . (int) $it['key'])->fetchColumn();
+    $raw = trim((string) $pdo->query('SELECT raw_content FROM inspection_reports WHERE id = ' . $rid)->fetchColumn());
+    $got = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'inspection-highlights', 'key' => $it['key'])))->data;
+    $check('fulltext returns the report as scraped', isset($got['text']) && ($raw === '' || strpos($got['text'], substr(kop_vol_scrub($raw), 0, 200)) !== false), strlen($got['text'] ?? '') . ' chars');
+    $bad = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'news', 'key' => '1')))->data;
+    $check('fulltext is refused for a queue without it', !empty($bad['error']));
+    $closed = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'fornits', 'key' => '1')))->data;
+    $check('and for a queue closed to volunteers', !empty($closed['error']));
+}
+unset($GLOBALS['kop_test_options']['kop_volunteer_sources']);
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

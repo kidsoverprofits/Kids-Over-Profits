@@ -2627,6 +2627,25 @@ if (!function_exists('kop_ih_scanner_version')) {
     }
 
     /**
+     * The full scraped text of one report (inspection_reports.id): its scalar
+     * fields as "key: value" lines, then the report text. Null when there is no
+     * such report. Read by the review screen's "Full report" and by volunteers.
+     */
+    function kop_ih_report_text(PDO $pdo, $report_row_id) {
+        $stmt = $pdo->prepare('SELECT raw_content, categories_json FROM inspection_reports WHERE id = ?');
+        $stmt->execute(array((int) $report_row_id));
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$r) return null;
+        $text = '';
+        $data = json_decode((string) $r['categories_json'], true);
+        foreach ((array) $data as $k => $v) {
+            if (is_scalar($v) && trim((string) $v) !== '') $text .= $k . ': ' . trim((string) $v) . "\n\n";
+        }
+        if (trim((string) $r['raw_content']) !== '') $text .= "Report text as scraped:\n\n" . trim((string) $r['raw_content']);
+        return $text;
+    }
+
+    /**
      * The Drive copy of an inspection report (inspection_reports.id), by the
      * archive_name(s) its scraper stored, looked up in the state's index that
      * api/sync-inspection-archive.php writes (the key rule matches

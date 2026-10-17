@@ -41,6 +41,7 @@ kop_rinbox_register('highlight-summaries', function () {
         },
         'act'      => 'kop_rinbox_hs_act',
         'save'     => 'kop_rinbox_hs_save',
+        'vol_text' => 'kop_rinbox_ih_report_text', // keyed by the finding's id, like this queue
         'tools'    => array(array(
             'id'    => 'write',
             'label' => 'Write more drafts now',

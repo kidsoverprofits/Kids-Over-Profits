@@ -132,6 +132,30 @@ button.kop-vol-tab.is-active:focus {
     white-space: pre-line;
 }
 
+.kop-vol-fulltext {
+    margin: 0 0 12px;
+}
+
+.kop-vol-fulltext summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-navy, #000080);
+}
+
+.kop-vol-fulltext-body {
+    margin-top: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px 12px;
+    background: #fff;
+    color: var(--kop-midnight-blue, #000435);
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 6px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 0.92rem;
+}
+
 .kop-vol-facts {
     display: grid;
     grid-template-columns: minmax(110px, max-content) 1fr;

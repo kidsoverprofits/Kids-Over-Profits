@@ -30,17 +30,8 @@ $statuses = array('pending', 'approved', 'rejected');
 // ---------------------------------------------------------------------------
 if (isset($_GET['report'])) {
     header('Content-Type: application/json');
-    $stmt = $pdo->prepare('SELECT raw_content, categories_json FROM inspection_reports WHERE id = ?');
-    $stmt->execute(array((int) $_GET['report']));
-    $r = $stmt->fetch(PDO::FETCH_ASSOC);
-    $text = '';
-    if ($r) {
-        $data = json_decode((string) $r['categories_json'], true);
-        foreach ((array) $data as $k => $v) {
-            if (is_scalar($v) && trim((string) $v) !== '') $text .= $k . ': ' . trim((string) $v) . "\n\n";
-        }
-        if (trim((string) $r['raw_content']) !== '') $text .= "Report text as scraped:\n\n" . trim((string) $r['raw_content']);
-    }
+    $text = kop_ih_report_text($pdo, (int) $_GET['report']);
+    $r = $text !== null;
     if (($_GET['format'] ?? '') === 'text') {
         // Plain text, for the report viewer on the Submissions Review page.
         header('Content-Type: text/plain; charset=utf-8');

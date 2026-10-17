@@ -153,6 +153,24 @@
         return node;
     }
 
+    // The whole scraped report, read when opened (kop/v1/volunteer/fulltext).
+    function fullText(it) {
+        var box = el('div', { class: 'kop-vol-fulltext-body', tabindex: '0', text: 'Loading...' });
+        var fold = el('details', { class: 'kop-vol-fulltext' }, [el('summary', { text: 'Read the full report' }), box]);
+        var asked = false;
+        fold.addEventListener('toggle', function () {
+            if (!fold.open || asked) return;
+            asked = true;
+            api('fulltext', { source: it.source, key: it.key }).then(function (data) {
+                box.textContent = data.text || 'The report has no text on file.';
+            }).catch(function (err) {
+                asked = false;
+                box.textContent = err.message;
+            });
+        });
+        return fold;
+    }
+
     function fillCard(node, it, onDone) {
         node.innerHTML = '';
         node.appendChild(el('h3', { class: 'kop-vol-title', text: it.title || '(no title)' }));
@@ -168,6 +186,7 @@
         if (links.childNodes.length) node.appendChild(links);
 
         if (it.text) node.appendChild(el('p', { class: 'kop-vol-text', text: it.text }));
+        if (it.full_text) node.appendChild(fullText(it));
         if (it.facts && it.facts.length) {
             var dl = el('dl', { class: 'kop-vol-facts' });
             it.facts.forEach(function (f) {

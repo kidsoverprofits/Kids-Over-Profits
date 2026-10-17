@@ -51,8 +51,19 @@ kop_rinbox_register('inspection-highlights', function () {
         },
         'act'      => 'kop_rinbox_ih_act',
         'save'     => 'kop_rinbox_ih_save',
+        // Volunteers cannot open the admin report viewer; they read the same text here (kop/v1/volunteer/fulltext).
+        'vol_text' => 'kop_rinbox_ih_report_text',
     );
 });
+
+/** The full scraped report a finding (inspection_highlights.id) was read from; null when there is none. */
+function kop_rinbox_ih_report_text($highlight_id) {
+    $pdo = kop_rinbox_pdo();
+    $st = $pdo->prepare('SELECT report_id FROM inspection_highlights WHERE id = ?');
+    $st->execute(array((int) $highlight_id));
+    $rid = (int) $st->fetchColumn();
+    return $rid > 0 ? kop_ih_report_text($pdo, $rid) : null;
+}
 
 function kop_rinbox_ih_rows($where, array $params, $order, $limit, $offset) {
     $st = kop_rinbox_pdo()->prepare("SELECT h.*, f.facility_name, r.report_date, r.report_url, r.report_id AS source_report_id
