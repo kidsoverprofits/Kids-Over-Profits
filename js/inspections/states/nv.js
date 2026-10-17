@@ -79,7 +79,9 @@
                     event_id:        present(cats.event_id),
                     license_number:  safeString(cats.license_number),
                     credential_type: safeString(cats.credential_type),
-                    doc_count:       parseInt(cats.doc_count, 10) || 0
+                    doc_count:       parseInt(cats.doc_count, 10) || 0,
+                    // The state's Statement of Deficiencies (nv_scraper.py, nv_pdfs: NV_<licence>_<inspection>.pdf).
+                    archive_name:    safeString(cats.archive_name)
                 };
             }).sort(function (a, b) { return parseDate(b.report_date) - parseDate(a.report_date); });
 
@@ -98,6 +100,7 @@
 
     page.mount({
         state: 'Nevada',
+        archiveState: 'NV',
         emptyMessage: 'No facilities found in the database for Nevada.',
         violationsNote: 'Nevada’s licensing records list inspection dates and reasons but not their findings, so these reports cannot be filtered by violations.',
 
@@ -172,6 +175,7 @@
                     report.time,
                     report.event_id ? 'Event ID ' + report.event_id : ''
                 ],
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Statement of deficiencies (archived copy)')] : [],
                 body: ui.note('Nevada’s licensing records list this inspection but not its findings. ' + docs)
             };
         }

@@ -86,7 +86,9 @@
                     isComplaint:    !!cats.is_complaint,
                     comments:       safeString(cats.comments),
                     citations:      citations,
-                    count:          citations.length
+                    count:          citations.length,
+                    // Our PDF of the report (co_scraper.py, co_pdfs: CO_<facility>_<inspection>.pdf).
+                    archive_name:   safeString(cats.archive_name)
                 };
             }).sort(function (a, b) { return parseDate(b.report_date) - parseDate(a.report_date); });
 
@@ -159,6 +161,7 @@
 
     page.mount({
         state: 'Colorado',
+        archiveState: 'CO',
         emptyMessage: 'No facilities found in the database for Colorado.',
 
         filters: [{
@@ -237,7 +240,7 @@
                     : [{ text: 'No citations', tone: 'clean' }],
                 facts: [report.report_id ? 'Inspection ID ' + report.report_id : ''].filter(Boolean),
                 link: { href: report.report_url, text: 'Health department dashboard' },
-                links: [],
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Report (archived copy)')] : [],
                 preview: reportPreview(report),
                 // Built up front, not on open: severe-flags.js finds a severe
                 // finding by the text on the page.

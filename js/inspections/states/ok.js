@@ -74,7 +74,9 @@
                     visit_type:  safeString(cats.visit_type),
                     purpose:     safeString(cats.purpose),
                     items:       items,
-                    nrs:         items.filter(function (i) { return i.nrs; }).length
+                    nrs:         items.filter(function (i) { return i.nrs; }).length,
+                    // Our PDF of the visit or complaint (ok_scraper.py, ok_pdfs: OK_<case>_<report>.pdf).
+                    archive_name: safeString(cats.archive_name)
                 };
             }).sort(function (a, b) { return parseDate(b.report_date) - parseDate(a.report_date); });
 
@@ -211,6 +213,7 @@
 
     page.mount({
         state: 'Oklahoma',
+        archiveState: 'OK',
         emptyMessage: 'No facilities found in the database for Oklahoma.',
 
         filters: [{
@@ -311,6 +314,7 @@
                 badges: reportBadges(report, ctx),
                 facts: facts,
                 link: { href: report.report_url, text: 'State monitoring page' },
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Report (archived copy)')] : [],
                 preview: first ? first.observed : '',
                 // Built up front, not on open: the bodies are small, and
                 // severe-flags.js finds a severe finding by the text on the page.
