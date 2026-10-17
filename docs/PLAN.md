@@ -781,7 +781,11 @@ updated.
    Done so far: VA VDSS (171 printed and posted 18:41), AZ, NV, OK backfills
    started 2026-10-17 (`py -3 <st>_scraper.py --backfill-pdfs`; VA: `py -3
    va_scraper.py --source vdss --archive-all`). CO has never posted: its first
-   evening run with real citation reads also tests the PDFs. **NV junk rows:** the
+   evening run with real citation reads also tests the PDFs. GA (813 surveys,
+   VPN off) and TX (~11,460 deficiencies, 8-12 h, resumable) backfills started
+   2026-10-17 evening. **Owner: MN backfill** needs Chrome closed:
+   `py -3 scrapers/mn_scraper.py --backfill-pdfs` (210 reports, ~20 min).
+   Pages linked: VA, AZ, CO, NV, OK, GA, MN, TX (tx_reports.js loads the tx index). **NV junk rows:** the
    old nv_scraper read the grid's pager as inspections; reports "1", "2", "3"
    and "..." on /nv-reports/ need deleting (owner's go-ahead first).
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
