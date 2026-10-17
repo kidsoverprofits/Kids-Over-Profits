@@ -217,6 +217,8 @@
                     survey_exit:  cats.survey_exit_date || '',
                     official_url: cats.sod_url || report.report_url || '',
                     event_id:     cats.event_id || '',
+                    // The state's Statement of Deficiencies (ga_scraper.py, ga_pdfs: GA_<FACID>_<event>.pdf).
+                    archive_name: safeString(cats.archive_name),
                     has_text:     !!parsed,
                     opening:      parsed ? parsed.opening : [],
                     closing:      parsed ? parsed.closing : [],
@@ -254,6 +256,7 @@
 
     page.mount({
         state: 'Georgia',
+        archiveState: 'GA',
         emptyMessage: 'No facilities found in the database for Georgia.',
 
         load: function () {
@@ -363,6 +366,7 @@
                     report.event_id ? 'Survey ID ' + report.event_id : ''
                 ],
                 link: { href: report.official_url, text: 'Official report' },
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Report (archived copy)')] : [],
                 body: body
             };
         }

@@ -142,6 +142,8 @@
             type:        type,
             missing:     missing,
             url:         safeString(cats.doc_page_url || report.report_url),
+            // Our PDF of the document (mn_scraper.py, mn_pdfs: MN_<licence>_<dDocName>.pdf).
+            archive_name: safeString(cats.archive_name),
             raw_content: missing ? '' : text,
             violations:  missing ? [] : extractViolations(text),
             report_number: grab(text, /Report Number[:\s]+(\d{7,})/i),
@@ -204,6 +206,7 @@
 
     page.mount({
         state: 'Minnesota',
+        archiveState: 'MN',
         emptyMessage: 'No facilities found in the database for Minnesota.',
 
         load: function () {
@@ -279,6 +282,7 @@
                 badges: badges,
                 facts: [doc.report_number ? 'Report #' + doc.report_number : ''],
                 link: { href: doc.url, text: 'Official document' },
+                links: doc.archive_name ? [ctx.archiveLink(doc.archive_name, 'Document (archived copy)')] : [],
                 preview: preview(doc),
                 body: function () {
                     if (doc.missing) {

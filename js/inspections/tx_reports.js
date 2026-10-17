@@ -68,6 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const themeData = window.txReportsData || window.myThemeData || {};
 
+    // Our PDFs of the inspection pages (tx_scraper.py prints them into tx_pdfs; api/sync-inspection-archive.php
+    // indexes them by file name). Same key rule as archiveKey() in report-page.js.
+    let archiveIndex = {};
+    function archiveKey(name) {
+        let key = String(name || '').replace(/[?#][\s\S]*$/, '');
+        key = key.slice(key.lastIndexOf('/') + 1);
+        try { key = decodeURIComponent(key); } catch (e) { /* keep it */ }
+        return key.replace(/[^A-Za-z0-9._-]/g, '_').toLowerCase();
+    }
+    function archiveHref(name) {
+        const href = name ? archiveIndex[archiveKey(name)] : '';
+        return /^https:\/\//.test(href || '') ? href : '';
+    }
+    const archiveLoaded = fetch('/wp-content/uploads/inspection-reports/tx/index.json', { cache: 'no-cache' })
+        .then(resp => (resp.ok ? resp.json() : {}))
+        .then(data => { archiveIndex = (data && data.files) || {}; })
+        .catch(() => {});
+
     async function initializeReport() {
         try {
 
@@ -86,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to load reports: ' + reportsResponse.status);
             }
             const reportsData = await reportsResponse.json();
+            await archiveLoaded;
             scrapedTimestamp = reportsData.scraped_timestamp || reportsResponse.headers.get('Last-Modified') || '';
             renderLastUpdated();
 
@@ -516,6 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${escapeHtml(citation['Citation Date'] || 'N/A')} - ${escapeHtml(citation['Standard Number / Description'] || 'Citation')}
                 </summary>
                 <div class="inspection-content">
+                    ${archiveHref(citation.archive_name) ? `<p class="tx-archived-copy"><a href="${escapeHtml(archiveHref(citation.archive_name))}" target="_blank" rel="noopener">Inspection report (archived copy)</a></p>` : ''}
                     <div class="inspection-details-block">
                         <strong>Citation Date:</strong> ${escapeHtml(citation['Citation Date'] || 'N/A')}<br>
                         <strong>Standard Number / Description:</strong> ${escapeHtml(citation['Standard Number / Description'] || 'N/A')}<br>
