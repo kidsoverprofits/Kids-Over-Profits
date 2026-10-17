@@ -764,9 +764,10 @@ updated.
    `Inspections`) now sit in `My Drive/KOP Inspection Reports/` (kop-pipeline
    `kop_paths.reports_drive_base()`, theme `api/sync-inspection-archive.php`).
    **Owner, before 03:45 Central (the nightly sync):** share `KOP Inspection
-   Reports` as "Anyone with the link". AR, FL, HI, IA, ID, MD, ME, MI, NC, NH and
-   OH were shared only through the FileBird folder, and the sync drops the
-   archive index of a folder that is not shared. Then check with
+   Reports` as "Anyone with the link". By 18:45 every scraper folder had lost the
+   sharing it inherited from the FileBird folder, and the sync drops the archive
+   index of a folder that is not shared (the VA index was already dropped by an
+   `apply --only=va` run at 18:44; re-run `apply` once shared to rebuild all). Then check with
    `php api/sync-inspection-archive.php` (dry run): every state shows index entries.
    **PDF of every report (2026-10-17, in progress):** kop-pipeline
    `report_store.py` prints report pages to PDF (`PagePrinter`, `archive_page`);
