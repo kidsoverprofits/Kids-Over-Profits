@@ -2261,51 +2261,73 @@ function displayFacilities(facilitiesData, containerId) {
         html += listed.html;
     });
 
-    // Emit the cross-reference rows. They share .operator-section and
-    // data-operator so the A–Z sort and alphabet filter slot them in
-    // alphabetically under the OLD name. Aliases that match a real operator
-    // entry are skipped (the real entry already covers them).
+    // The Alternate names table, below the companies: every past and other
+    // name of a program or company, the name it goes by now and its company.
+    // Names that are a company's own name are skipped (its section covers them).
     const seenAliasKeys = new Set();
-    // Admins (js/inline-edit.js loaded) get an "Edit names" button on each row:
-    // the record's names dialog, saved through inc/inline-edit.php.
+    // Admins (js/inline-edit.js loaded) tick duplicate names of one record and
+    // fold them into one (inc/directory-names.php), and get "Edit names".
     const canEditNames = !!window.KOP_INLINE_EDIT;
+    let aliasRowsHtml = '';
+    let aliasRowCount = 0;
     aliasEntries.forEach(entry => {
         const aliasKey = normalizeTextKey(entry.alias);
         if (!aliasKey || renderedOperatorKeys.has(aliasKey)) return;
         const dedupeKey = aliasKey + '→' + normalizeTextKey(entry.target) + '→' + normalizeTextKey(entry.facility);
         if (seenAliasKeys.has(dedupeKey)) return;
         seenAliasKeys.add(dedupeKey);
+        aliasRowCount += 1;
 
         const showFacility = entry.facility
             && normalizeTextKey(entry.facility) !== normalizeTextKey(entry.target);
-        const targetLabel = showFacility
-            ? `${entry.target} › ${entry.facility}`
-            : entry.target;
-
+        const nowName = showFacility ? entry.facility : entry.target;
         const pastOperators = Array.isArray(entry.pastOperators) ? entry.pastOperators : [];
-        const pastOperatorHtml = pastOperators.length
-            ? `<span class="alias-entry-operator">past operator: ${escapeHtml(pastOperators.join(', '))}</span>`
-            : '';
+        const record = entry.edit ? entry.edit.replace(/:names$/, '') : '';
 
-        html += `<div class="operator-section alias-entry" data-operator="${escapeAttribute(entry.alias)}"
+        aliasRowsHtml += `<tr class="kop-altname-row" data-alias="${escapeAttribute(entry.alias)}"
                 data-alias-target="${escapeAttribute(entry.target)}"
-                data-alias-facility="${escapeAttribute(entry.facility || '')}"
-                data-alias-operators="${escapeAttribute(pastOperators.join(' | '))}">
-                <button type="button" class="alias-entry-row">
-                    <span class="alias-entry-name">${escapeHtml(entry.alias)}</span>
-                    ${pastOperatorHtml}
-                    <span class="alias-entry-note">former / alternate name — see <strong>${escapeHtml(targetLabel)}</strong> →</span>
-                </button>
-                ${canEditNames && entry.edit ? `<button type="button" class="alias-entry-edit" data-kop-edit-open="${escapeAttribute(entry.edit)}" aria-label="Edit the names of ${escapeAttribute(showFacility ? entry.facility : entry.target)}">Edit names</button>` : ''}
-            </div>`;
+                data-alias-facility="${escapeAttribute(showFacility ? entry.facility : '')}"
+                data-alias-operators="${escapeAttribute(pastOperators.join(' | '))}"
+                data-record="${escapeAttribute(record)}">
+                ${canEditNames ? `<td class="kop-altname-pick">${record ? `<input type="checkbox" aria-label="Pick ${escapeAttribute(entry.alias)}">` : ''}</td>` : ''}
+                <td class="kop-altname-name">${escapeHtml(entry.alias)}</td>
+                <td class="kop-altname-now"><button type="button" class="kop-altname-go">${escapeHtml(nowName)}</button></td>
+                <td class="kop-altname-company">${escapeHtml(entry.target)}${pastOperators.length ? `<span class="kop-altname-past">earlier: ${escapeHtml(pastOperators.join(', '))}</span>` : ''}</td>
+                ${canEditNames ? `<td class="kop-altname-edit">${entry.edit ? `<button type="button" class="kop-altname-editbtn" data-kop-edit-open="${escapeAttribute(entry.edit)}">Edit names</button>` : ''}</td>` : ''}
+            </tr>`;
     });
 
     html += '</div>';
+    if (aliasRowCount) {
+        const sortHead = (key, label) => `<th scope="col" aria-sort="${key === 'alias' ? 'ascending' : 'none'}"><button type="button" class="kop-altnames-sort" data-sort="${key}">${label}<span class="kop-altnames-arrow" aria-hidden="true"></span></button></th>`;
+        html += `<section class="kop-altnames" id="kop-altnames" aria-labelledby="kop-altnames-title">
+                <h2 id="kop-altnames-title">Alternate names</h2>
+                <p class="kop-altnames-intro">Earlier and other names of the programs and companies above, with the name each goes by now. Click a heading to sort; click a name now in use to open it.</p>
+                ${canEditNames ? `<div class="kop-altnames-bar" hidden>
+                    <span class="kop-altnames-count"></span>
+                    <button type="button" class="kop-altnames-fold">Fold into one name</button>
+                    <button type="button" class="kop-altnames-clear">Untick all</button>
+                    <div class="kop-altnames-panel" hidden></div>
+                </div>
+                <p class="kop-altnames-notice" role="status" hidden></p>` : ''}
+                <div class="kop-altnames-scroll">
+                <table class="kop-altnames-table">
+                    <thead><tr>
+                        ${canEditNames ? '<th scope="col"><span class="screen-reader-text">Pick</span></th>' : ''}
+                        ${sortHead('alias', 'Alternate name')}
+                        ${sortHead('now', 'Name now')}
+                        ${sortHead('company', 'Company')}
+                        ${canEditNames ? '<th scope="col"><span class="screen-reader-text">Edit</span></th>' : ''}
+                    </tr></thead>
+                    <tbody>${aliasRowsHtml}</tbody>
+                </table>
+                </div>
+                <p class="kop-altnames-none" hidden>No alternate names match.</p>
+            </section>`;
+    }
         container.innerHTML = html;
 
-        attachAliasEntryLinks(container);
-        // Old-name rows go in among the companies, A-Z (or as the dropdown says).
-        handleSort();
+        setupAlternateNames(container);
 
         if (container.dataset.lazySectionsBound !== 'true') {
             container.dataset.lazySectionsBound = 'true';
@@ -2338,41 +2360,179 @@ function displayFacilities(facilitiesData, containerId) {
 }
 
 
-// Clicking a cross-reference row jumps to (and opens) the current profile it
-// points at, scrolling to the specific facility card when one is named.
-function attachAliasEntryLinks(container) {
-    container.querySelectorAll('.alias-entry .alias-entry-row').forEach(btn => {
+// The Alternate names table (built by displayFacilities): sorting by a
+// heading, the jump to the record a name belongs to, and for admins the
+// fold of duplicate names (inc/directory-names.php).
+function setupAlternateNames(container) {
+    const section = container.querySelector('.kop-altnames');
+    if (!section) return;
+    const tbody = section.querySelector('tbody');
+    const rowText = (row, key) => {
+        if (key === 'now') return row.dataset.aliasFacility || row.dataset.aliasTarget || '';
+        if (key === 'company') return (row.dataset.aliasTarget || '') + ' ' + (row.dataset.aliasFacility || '');
+        return row.dataset.alias || '';
+    };
+    const compare = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    let sortKey = 'alias';
+    let sortDir = 1;
+    const sortRows = () => {
+        const rows = Array.from(tbody.rows);
+        rows.sort((a, b) => sortDir * (compare(rowText(a, sortKey), rowText(b, sortKey)) || compare(rowText(a, 'alias'), rowText(b, 'alias'))));
+        rows.forEach(row => tbody.appendChild(row));
+        section.querySelectorAll('th[aria-sort]').forEach(th => {
+            const on = th.querySelector('[data-sort]').dataset.sort === sortKey;
+            th.setAttribute('aria-sort', on ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
+        });
+    };
+    section.querySelectorAll('.kop-altnames-sort').forEach(btn => {
         btn.addEventListener('click', () => {
-            const entry = btn.closest('.alias-entry');
-            const targetName = entry.dataset.aliasTarget || '';
-            const facilityName = entry.dataset.aliasFacility || '';
+            if (sortKey === btn.dataset.sort) sortDir = -sortDir;
+            else { sortKey = btn.dataset.sort; sortDir = 1; }
+            sortRows();
+        });
+    });
+    sortRows();
 
-            let target = null;
-            document.querySelectorAll('#facilities-container .operator-section:not(.alias-entry)').forEach(sec => {
-                if (!target && sec.dataset.operator === targetName) target = sec;
-            });
-            if (!target) return;
+    // A name now in use opens its company and scrolls to the program's card.
+    tbody.addEventListener('click', event => {
+        const go = event.target.closest && event.target.closest('.kop-altname-go');
+        if (!go) return;
+        const row = go.closest('tr');
+        const targetName = row.dataset.aliasTarget || '';
+        const facilityName = row.dataset.aliasFacility || '';
+        let target = null;
+        document.querySelectorAll('#facilities-container .operator-section').forEach(sec => {
+            if (!target && sec.dataset.operator === targetName) target = sec;
+        });
+        if (!target) return;
+        target.style.display = 'block';
+        target.open = true;
+        const jump = () => {
+            let scrollEl = target;
+            if (facilityName) {
+                target.querySelectorAll('.facility-card').forEach(card => {
+                    if (scrollEl === target && card.dataset.facility === facilityName) {
+                        card.style.display = 'block';
+                        scrollEl = card;
+                    }
+                });
+            }
+            scrollEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollEl.classList.add('alias-jump-highlight');
+            setTimeout(() => scrollEl.classList.remove('alias-jump-highlight'), 2200);
+        };
+        ensureOperatorBody(target).then(jump, jump);
+    });
 
-            // The target may be hidden by an active search/filter — reveal it.
-            target.style.display = 'block';
-            target.open = true;
-
-            const jump = () => {
-                let scrollEl = target;
-                if (facilityName) {
-                    target.querySelectorAll('.facility-card').forEach(card => {
-                        if (scrollEl === target && card.dataset.facility === facilityName) {
-                            card.style.display = 'block';
-                            scrollEl = card;
+    const bar = section.querySelector('.kop-altnames-bar');
+    if (!bar || !window.KOP_INLINE_EDIT) return;
+    const panel = bar.querySelector('.kop-altnames-panel');
+    const notice = section.querySelector('.kop-altnames-notice');
+    const esc = value => String(value == null ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const picked = () => Array.from(tbody.querySelectorAll('.kop-altname-pick input:checked')).map(box => box.closest('tr'));
+    const say = html => { notice.innerHTML = html; notice.hidden = !html; };
+    const post = (path, body) => fetch(getRestBase() + 'directory-names/' + path, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.KOP_INLINE_EDIT.nonce || '' },
+        body: JSON.stringify(body)
+    }).then(r => r.json().then(data => {
+        if (!r.ok) throw new Error((data && data.message) || ('HTTP ' + r.status));
+        return data;
+    }));
+    const updateBar = () => {
+        const rows = picked();
+        bar.hidden = rows.length === 0;
+        bar.querySelector('.kop-altnames-count').textContent = rows.length + (rows.length === 1 ? ' name ticked' : ' names ticked');
+        bar.querySelector('.kop-altnames-fold').disabled = rows.length < 2;
+        panel.hidden = true;
+    };
+    tbody.addEventListener('change', event => {
+        if (event.target.matches('.kop-altname-pick input')) updateBar();
+    });
+    bar.querySelector('.kop-altnames-clear').addEventListener('click', () => {
+        tbody.querySelectorAll('.kop-altname-pick input:checked').forEach(box => { box.checked = false; });
+        updateBar();
+    });
+    bar.querySelector('.kop-altnames-fold').addEventListener('click', () => {
+        const rows = picked();
+        const records = Array.from(new Set(rows.map(row => row.dataset.record)));
+        if (records.length > 1) {
+            const now = Array.from(new Set(rows.map(row => row.dataset.aliasFacility || row.dataset.aliasTarget)));
+            panel.innerHTML = '<p>Only names of one program or company fold together. These belong to: ' + now.map(esc).join('; ') + '.</p>';
+            panel.hidden = false;
+            return;
+        }
+        // A program under two companies has a row under each: one name, listed once.
+        const nameKey = name => String(name || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const names = [];
+        rows.forEach(row => {
+            if (!names.some(name => nameKey(name) === nameKey(row.dataset.alias))) names.push(row.dataset.alias);
+        });
+        if (names.length < 2) {
+            panel.innerHTML = '<p>These rows are one name (the program is listed under more than one company). Tick two different names.</p>';
+            panel.hidden = false;
+            return;
+        }
+        panel.innerHTML = '<fieldset><legend>Keep which name?</legend>'
+            + names.map((name, i) => '<label><input type="radio" name="kop-altnames-keep" value="' + i + '"' + (i === 0 ? ' checked' : '') + '> ' + esc(name) + '</label>').join('')
+            + '</fieldset>'
+            + '<label class="kop-altnames-keepas">Keep it as (change the wording if you like)<input type="text" value="' + esc(names[0]) + '"></label>'
+            + '<p class="kop-altnames-help">The other ticked names are taken off the record. Undo puts them back.</p>'
+            + '<button type="button" class="kop-altnames-go">Fold</button> <button type="button" class="kop-altnames-cancel">Cancel</button>';
+        panel.hidden = false;
+        const keepAs = panel.querySelector('.kop-altnames-keepas input');
+        panel.querySelectorAll('input[name="kop-altnames-keep"]').forEach(radio => {
+            radio.addEventListener('change', () => { keepAs.value = names[Number(radio.value)]; });
+        });
+        panel.querySelector('.kop-altnames-cancel').addEventListener('click', () => { panel.hidden = true; });
+        panel.querySelector('.kop-altnames-go').addEventListener('click', event => {
+            const btn = event.currentTarget;
+            const checked = panel.querySelector('input[name="kop-altnames-keep"]:checked');
+            const keepIndex = checked ? Number(checked.value) : 0;
+            const keep = names[keepIndex];
+            btn.disabled = true;
+            btn.textContent = 'Folding...';
+            post('fold', { ref: records[0], keep, keep_as: keepAs.value, remove: names.filter((n, i) => i !== keepIndex) })
+                .then(data => {
+                    // Every row of this record, under each company it is listed under.
+                    const kept = keepAs.value.trim() || keep;
+                    const dropped = new Set(names.filter((n, i) => i !== keepIndex).map(nameKey));
+                    Array.from(tbody.rows).filter(row => row.dataset.record === records[0]).forEach(row => {
+                        const key = nameKey(row.dataset.alias);
+                        if (dropped.has(key) && key !== nameKey(kept)) {
+                            row.remove();
+                        } else if (key === nameKey(keep) || key === nameKey(kept)) {
+                            row.dataset.alias = kept;
+                            row.querySelector('.kop-altname-name').textContent = kept;
+                            const box = row.querySelector('.kop-altname-pick input');
+                            if (box) box.checked = false;
                         }
                     });
-                }
-                scrollEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                scrollEl.classList.add('alias-jump-highlight');
-                setTimeout(() => scrollEl.classList.remove('alias-jump-highlight'), 2200);
-            };
-            ensureOperatorBody(target).then(jump, jump);
+                    updateBar();
+                    say(esc(data.message || 'Folded.') + (data.token ? ' <button type="button" class="kop-altnames-undo" data-token="' + esc(data.token) + '">Undo</button>' : ''));
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    btn.textContent = 'Fold';
+                    say('Not folded: ' + esc(error.message));
+                });
         });
+    });
+    notice.addEventListener('click', event => {
+        const undo = event.target.closest && event.target.closest('.kop-altnames-undo');
+        if (!undo) return;
+        undo.disabled = true;
+        post('undo', { token: undo.dataset.token })
+            .then(data => {
+                say(esc(data.message || 'Undone.') + ' Reloading...');
+                setTimeout(() => window.location.reload(), 800);
+            })
+            .catch(error => {
+                undo.disabled = false;
+                say('Not undone: ' + esc(error.message));
+            });
     });
 }
 
@@ -2386,32 +2546,12 @@ function filterFacilities() {
     // flagged resources.hasViolations (data-has-violations stamped at render).
     const sortSelect = document.getElementById('sortBy');
     const violationsOnly = !!sortSelect && sortSelect.value === 'violations-only';
-    // The two "Alternate names" sorts list the old-name rows alone.
-    const aliasesOnly = !!sortSelect && sortSelect.value.indexOf('aliases-') === 0;
 
     const operatorSections = document.querySelectorAll('#facilities-container .operator-section');
 
     operatorSections.forEach(section => {
         const operatorName = section.dataset.operator.toLowerCase();
 
-        // Cross-reference rows: no facility cards or status of their own.
-        // Match on the old name (and its target); hide under a status filter.
-        if (section.classList.contains('alias-entry')) {
-            const aliasSearch = (operatorName + ' '
-                + (section.dataset.aliasTarget || '') + ' '
-                + (section.dataset.aliasFacility || '') + ' '
-                + (section.dataset.aliasOperators || '')).toLowerCase();
-            const show = (!letterFilter || operatorName.startsWith(letterFilter))
-                && aliasSearch.includes(searchTerm)
-                && !statusFilter
-                && !violationsOnly;
-            section.style.display = show ? 'block' : 'none';
-            return;
-        }
-        if (aliasesOnly) {
-            section.style.display = 'none';
-            return;
-        }
         // Includes the organization's alternate/past names, not just the
         // display name, so old org names still match.
         const operatorSearch = (section.dataset.operatorSearch || section.dataset.operator || '').toLowerCase();
@@ -2441,6 +2581,24 @@ function filterFacilities() {
         // Hide operator section if no facilities match
         section.style.display = visibleNames.size > 0 ? 'block' : 'none';
     });
+
+    // The Alternate names table: the same search and letter (on the old
+    // name); hidden under a status or violations filter.
+    const altSection = document.querySelector('#facilities-container .kop-altnames');
+    if (altSection) {
+        let shown = 0;
+        altSection.querySelectorAll('tbody tr').forEach(row => {
+            const alias = (row.dataset.alias || '').toLowerCase();
+            const text = (alias + ' ' + (row.dataset.aliasTarget || '') + ' ' + (row.dataset.aliasFacility || '') + ' '
+                + (row.dataset.aliasOperators || '')).toLowerCase();
+            const show = (!letterFilter || alias.startsWith(letterFilter)) && text.includes(searchTerm);
+            row.hidden = !show;
+            if (show) shown += 1;
+        });
+        altSection.hidden = !!statusFilter || violationsOnly;
+        const none = altSection.querySelector('.kop-altnames-none');
+        if (none) none.hidden = shown > 0;
+    }
 }
 
 
@@ -2457,8 +2615,7 @@ function clearSearch() {
     if (sortBy) sortBy.selectedIndex = 0;
     if (clearButton) clearButton.style.display = 'none';
     window.currentLetterFilter = '';
-    // Back to A-Z (an "Alternate Names" sort may have regrouped the rows); runs filterFacilities.
-    handleSort();
+    filterFacilities();
 }
 
 // Expose to global scope for inline onclick handlers
@@ -2899,23 +3056,14 @@ function handleSort() {
             // Most inspection reports on file (data-report-count stamped at render), then A-Z.
             operatorSections.sort((a, b) => (reportCount(b) - reportCount(a)) || byName(a, b));
             break;
-        case 'aliases-target': {
-            // Grouped by the company and program each old name points to.
-            const target = section => [section.dataset.aliasTarget || section.dataset.operator || '', section.dataset.aliasFacility || ''].join(' › ');
-            operatorSections.sort((a, b) => compareOperatorText(target(a), target(b)) || byName(a, b));
-            break;
-        }
-        case 'aliases-az':
         case 'violations-only':
         case 'name':
         default:
             operatorSections.sort(byName);
     }
 
-    // Re-append sorted sections: the companies first, the old-name rows after them, never mixed in.
-    const isAlias = section => section.classList.contains('alias-entry');
-    operatorSections.filter(section => !isAlias(section)).forEach(section => container.appendChild(section));
-    operatorSections.filter(isAlias).forEach(section => container.appendChild(section));
+    // Re-append sorted sections
+    operatorSections.forEach(section => container.appendChild(section));
 
     // Visibility is owned by filterFacilities(), which reads the dropdown for
     // the violations-only mode. Re-running it resets every section's display

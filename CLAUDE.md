@@ -385,6 +385,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   #
 # programs (current, past, other; a moved program's currentOperator follows); {prefix}kop_directory_edits logs each with exact Undo.
 # "Every field" / "Edit program" open inc/inline-edit.php's dialogs from buttons (data-kop-edit-open, KOP_INLINE_EDIT.noBar)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-directory-editor.php [--list]   # every action + exact undo on a scratch copy of the company tables
+# The directory's Alternate names table (below the companies, js/tti-program-index.js setupAlternateNames(): sort by heading, search/letter
+# filter): admins tick names of one record and fold them into one (inc/directory-names.php, kop/v1/directory-names/fold|undo; log option
+# kop_dirnames_log, exact Undo) or open its names dialog (facility:<id>:names, operator:<id>:names)
+php -d extension=mbstring scripts/test-directory-names.php
 # Programs' own papers (docs/PLAN.md 3.21): handbooks, manuals, ground rules, phase sheets and enrollment papers in each record's
 # document library, as text page by page (OCR for scans), read per kop-pipeline scripts/doc-read-instructions.md (every quote checked).
 # Practice lines -> ~/kop-import/doc-read/practices.json -> Review inbox > Rules from documents (inc/program-practices.php,

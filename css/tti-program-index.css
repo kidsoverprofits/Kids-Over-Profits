@@ -1359,107 +1359,290 @@ body.kop-doc-modal-open {
 
 
 /* ============================================
-   CROSS-REFERENCE TILES
-   Past/alternate names shown as their own index entries linking to the
-   current profile ("Island View RTC — see Elevations RTC").
+   ALTERNATE NAMES TABLE
+   Below the companies: every past and other name of a program or company,
+   the name it goes by now and its company (js/tti-program-index.js
+   setupAlternateNames). Admins tick names and fold them (inc/directory-names.php).
    ============================================ */
-.operator-section.alias-entry {
-    background: var(--kop-sand, #F2EEDF);
-    border: 2px dashed var(--kop-teal, #33A7B5);
-    min-height: 0;
+.kop-altnames {
+    margin: 32px 0 0;
+    padding: 20px;
+    background: var(--kop-white, #FFFFFF);
+    color: var(--kop-midnight-blue, #000435);
+    border: 2px solid var(--kop-teal, #33A7B5);
+    border-radius: 8px;
+}
+
+.kop-altnames[hidden] {
+    display: none;
+}
+
+.kop-altnames h2 {
+    margin: 0 0 6px;
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 1.5em;
+}
+
+.kop-altnames-intro,
+.kop-altnames-none {
+    margin: 0 0 14px;
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.95em;
+}
+
+.kop-altnames-scroll {
+    max-height: 70vh;
+    overflow: auto;
+    border: 1px solid #d5d9e0;
+    border-radius: 6px;
+}
+
+.kop-altnames-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.kop-altnames-table th,
+.kop-altnames-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e3e6eb;
+    text-align: left;
+    vertical-align: top;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-altnames-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     padding: 0;
+    background: var(--kop-sand, #F2EEDF);
 }
 
-.operator-section.alias-entry:hover {
-    box-shadow: 0 4px 12px rgba(51, 167, 181, 0.35);
-    transform: translateY(-2px);
+.kop-altnames-table tbody tr:nth-child(even) td {
+    background: #fafaf6;
 }
 
-/* Undo the section-wide white-text rule for these light tiles */
-.operator-section.alias-entry *,
-.operator-section.alias-entry span,
-.operator-section.alias-entry strong {
-    color: var(--kop-midnight-blue, #000435) !important;
+.kop-altnames-table tr[hidden] {
+    display: none;
 }
 
-.operator-section.alias-entry:hover .alias-entry-row,
-.operator-section.alias-entry .alias-entry-row:hover,
-.operator-section.alias-entry .alias-entry-row:focus,
-.operator-section.alias-entry .alias-entry-row:active {
-    background: var(--global-palette-btn-bg-hover, var(--kop-navy-blue, #000080));
-    color: var(--global-palette-btn-hover, var(--kop-white, #FFFFFF));
+.kop-altname-name {
+    font-weight: 600;
 }
 
-.operator-section.alias-entry:hover .alias-entry-row *,
-.operator-section.alias-entry .alias-entry-row:hover *,
-.operator-section.alias-entry .alias-entry-row:focus *,
-.operator-section.alias-entry .alias-entry-row:active * {
-    color: var(--global-palette-btn-hover, var(--kop-white, #FFFFFF)) !important;
+.kop-altname-past {
+    display: block;
+    margin-top: 2px;
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.85em;
 }
 
-.alias-entry-row {
+.kop-altname-pick {
+    width: 1%;
+}
+
+.kop-altname-pick input {
+    width: auto;
+    margin: 3px 0 0;
+}
+
+/* Heading sort buttons and the name-now links: text buttons on light ground */
+.kop-altnames button.kop-altnames-sort,
+.kop-altnames button.kop-altnames-sort:hover,
+.kop-altnames button.kop-altnames-sort:focus,
+.kop-altnames button.kop-altnames-sort:active {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 6px;
     width: 100%;
-    height: 100%;
-    padding: 15px;
-    background: none;
-    border: none;
+    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    background: var(--kop-sand, #F2EEDF);
+    color: var(--kop-midnight-blue, #000435);
+    font: inherit;
+    font-weight: 700;
     text-align: left;
     cursor: pointer;
-    box-sizing: border-box;
-    font-family: inherit;
 }
 
-.alias-entry-name {
-    font-size: 1.15em;
-    font-weight: 700;
-}
-
-.alias-entry-note {
-    font-size: 0.85em;
-    line-height: 1.35;
-}
-
-.alias-entry-note strong {
+.kop-altnames button.kop-altnames-sort:hover,
+.kop-altnames button.kop-altnames-sort:focus-visible {
     text-decoration: underline;
 }
 
-/* Admins only: opens the record's names dialog (js/inline-edit.js). */
-.operator-section.alias-entry button.alias-entry-edit {
-    display: inline-block;
-    margin: 0 15px 12px;
-    padding: 4px 12px;
-    font-size: 0.8em;
-    font-weight: 600;
-    line-height: 1.4;
-    border: 1px solid var(--kop-navy-blue, #000080);
-    border-radius: 4px;
-    background: var(--kop-white, #FFFFFF);
-    color: var(--kop-navy-blue, #000080) !important;
+.kop-altnames th[aria-sort="ascending"] .kop-altnames-arrow::after {
+    content: "\25B2";
+    font-size: 0.7em;
+}
+
+.kop-altnames th[aria-sort="descending"] .kop-altnames-arrow::after {
+    content: "\25BC";
+    font-size: 0.7em;
+}
+
+.kop-altnames button.kop-altname-go,
+.kop-altnames button.kop-altname-go:hover,
+.kop-altnames button.kop-altname-go:focus,
+.kop-altnames button.kop-altname-go:active {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--kop-navy-blue, #000080);
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
     cursor: pointer;
 }
 
-.operator-section.alias-entry button.alias-entry-edit:hover,
-.operator-section.alias-entry button.alias-entry-edit:focus,
-.operator-section.alias-entry button.alias-entry-edit:active {
+.kop-altnames button.kop-altname-go:hover,
+.kop-altnames button.kop-altname-go:focus {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+/* Admin buttons: outlined navy, filled on hover/focus */
+.kop-altnames button.kop-altname-editbtn,
+.kop-altnames button.kop-altnames-fold,
+.kop-altnames button.kop-altnames-clear,
+.kop-altnames button.kop-altnames-go,
+.kop-altnames button.kop-altnames-cancel,
+.kop-altnames button.kop-altnames-undo {
+    padding: 4px 12px;
+    border: 1px solid var(--kop-navy-blue, #000080);
+    border-radius: 4px;
+    background: var(--kop-white, #FFFFFF);
+    color: var(--kop-navy-blue, #000080);
+    font: inherit;
+    font-size: 0.85em;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.kop-altnames button.kop-altname-editbtn:hover,
+.kop-altnames button.kop-altname-editbtn:focus,
+.kop-altnames button.kop-altname-editbtn:active,
+.kop-altnames button.kop-altnames-fold:hover,
+.kop-altnames button.kop-altnames-fold:focus,
+.kop-altnames button.kop-altnames-fold:active,
+.kop-altnames button.kop-altnames-clear:hover,
+.kop-altnames button.kop-altnames-clear:focus,
+.kop-altnames button.kop-altnames-clear:active,
+.kop-altnames button.kop-altnames-go:hover,
+.kop-altnames button.kop-altnames-go:focus,
+.kop-altnames button.kop-altnames-go:active,
+.kop-altnames button.kop-altnames-cancel:hover,
+.kop-altnames button.kop-altnames-cancel:focus,
+.kop-altnames button.kop-altnames-cancel:active,
+.kop-altnames button.kop-altnames-undo:hover,
+.kop-altnames button.kop-altnames-undo:focus,
+.kop-altnames button.kop-altnames-undo:active {
     background: var(--kop-navy-blue, #000080);
-    color: var(--kop-white, #FFFFFF) !important;
+    color: var(--kop-white, #FFFFFF);
     border-color: var(--kop-navy-blue, #000080);
 }
 
-/* Brief flash on the profile a cross-reference jumps to */
+.kop-altnames button.kop-altnames-fold[disabled] {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.kop-altnames-bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: var(--kop-pastel-yellow, #FFF5CB);
+    border: 1px solid var(--kop-orange, #EF9034);
+    border-radius: 6px;
+}
+
+.kop-altnames-bar[hidden],
+.kop-altnames-panel[hidden],
+.kop-altnames-notice[hidden],
+.kop-altnames-none[hidden] {
+    display: none;
+}
+
+.kop-altnames-count {
+    font-weight: 700;
+}
+
+.kop-altnames-panel {
+    flex-basis: 100%;
+}
+
+.kop-altnames-panel fieldset {
+    margin: 0 0 10px;
+    padding: 0;
+    border: 0;
+}
+
+.kop-altnames-panel legend {
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+.kop-altnames-panel label {
+    display: block;
+    margin: 2px 0;
+}
+
+.kop-altnames-panel input[type="radio"] {
+    width: auto;
+}
+
+.kop-altnames-keepas input {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    margin-top: 4px;
+    padding: 6px 8px;
+    border: 1px solid #a0a8b5;
+    background: var(--kop-white, #FFFFFF);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-altnames-help {
+    margin: 6px 0 10px;
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.9em;
+}
+
+.kop-altnames-notice {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: var(--kop-mint-green, #B6E3D4);
+    border-radius: 6px;
+}
+
+@media (max-width: 767px) {
+    .kop-altnames {
+        padding: 14px 10px;
+    }
+
+    .kop-altnames-table {
+        font-size: 0.88em;
+    }
+
+    .kop-altnames-table td,
+    .kop-altnames-table th {
+        padding: 6px;
+    }
+}
+
+/* Brief flash on the profile an alternate name jumps to */
 .alias-jump-highlight {
     outline: 3px solid var(--kop-chartreuse, #B2E102);
     outline-offset: 2px;
-}
-
-.alias-entry-operator {
-    font-size: 0.8em;
-    font-style: italic;
-    line-height: 1.3;
-    opacity: 0.85;
 }
 
 /* Link from a facility card to its generated profile page (/facility/<slug>/) */
