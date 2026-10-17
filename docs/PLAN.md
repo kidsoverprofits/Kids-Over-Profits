@@ -909,9 +909,18 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
   (`kop_facility_types_split()`); every review card's Type is a box per type, a type conflict has "Both are
   right", the data forms' type box takes a comma list. After deploy: on Review inbox > Conflicts (Kind: Type) press
   "Both are right" on one card and Undo it; tick two types on a Facilities from News card. Not done: the
-  directory, search and map still show the string as it is (no per-type filter there), and the yearly
-  "Former" staff rule now breaks one check in `--source=woodbury-facts` ("Founder (2021, HEAL)" reads "Former
-  Founder"): the test's expected role needs updating, not the rule.
+  directory, search and map still show the string as it is (no per-type filter there).
+- Staff "Former" / "current" only when confirmed (2026-10-17): a closed program, the source saying they left,
+  or the wiki write-up's own words; never an old sighting or the past tense alone; "current" never. Waiting on
+  the owner's go (both write live records, both have exact undo; dry runs on the server 2026-10-17):
+  `php api/fix-staff-unconfirmed.php apply` (2,651 entries on 226 open programs lose an unconfirmed "Former")
+  and `php api/fix-wiki-staff-former.php apply` (29 wiki entries on 21 records). Check the woodbury-facts
+  inbox test's "Founder (2021, HEAL)" check passes again with the rule changed.
+- Past jobs held once on the person (2026-10-17, `{prefix}kop_person_jobs`, inc/person-jobs.php): after the
+  deploy, open KOP Tools > People once (makes the table), wait for the hourly people sync (or "Sync now") to read
+  the staff entries' pastJobs in (1,536 jobs on the mirror), then check a person listed on two programs shows the
+  same "Also worked at" on both. Not done yet: Woodbury Facts, the wiki and the data forms still write pastJobs
+  text on the entry (the sync reads it in); writing straight to the person's jobs, and a company person's jobs, come next.
 
 ### 3.7 Name eras
 
