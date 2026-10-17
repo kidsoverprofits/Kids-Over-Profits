@@ -2605,12 +2605,63 @@ if (!function_exists('kop_ih_scanner_version')) {
         return preg_match('#^https?://#i', $url) ? $url : '';
     }
 
-    /** A page a person can open for the report: the scraped link, or California's facility page. */
+    /**
+     * A page a person can open for the report: the scraped link, or California's
+     * facility page. Virginia DBHDS reports all link the same provider search,
+     * so those open our archived copy of the report's PDF in Drive instead.
+     * A Virginia DSS inspection link lands on DSS's facility search whatever
+     * its query says, and no copy of those pages is archived: no link.
+     */
     function kop_ih_source_url(array $row) {
         $url = trim((string) ($row['report_url'] ?? ''));
+        if (stripos($url, 'glsuite.us/GLSuiteWeb/Clients/vadbhds/Public/ProviderSearch') !== false) {
+            $archived = kop_ih_archived_copy_url('VA', (int) ($row['report_id'] ?? 0));
+            return $archived !== '' ? $archived : '';
+        }
+        if (stripos($url, 'dss.virginia.gov/licensed-care/search-licensing-programs/') !== false) return '';
         if ($url !== '') return $url;
         if (($row['state'] ?? '') === 'CA' && preg_match('/^(\d{6,})-/', (string) ($row['source_report_id'] ?? ''), $m)) {
             return 'https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/' . $m[1];
+        }
+        return '';
+    }
+
+    /**
+     * The Drive copy of an inspection report (inspection_reports.id), by the
+     * archive_name(s) its scraper stored, looked up in the state's index that
+     * api/sync-inspection-archive.php writes (the key rule matches
+     * kop_inspection_archive_key() there and archiveKey() in report-page.js).
+     * Empty when the report or the index has none.
+     */
+    function kop_ih_archived_copy_url($state, $report_row_id) {
+        static $indexes = array();
+        if ($report_row_id <= 0 || !function_exists('wp_upload_dir')) return '';
+        $state = strtolower($state);
+        if (!isset($indexes[$state])) {
+            $uploads = wp_upload_dir(null, false);
+            $file = $uploads['basedir'] . '/inspection-reports/' . $state . '/index.json';
+            $data = is_readable($file) ? json_decode((string) file_get_contents($file), true) : null;
+            $indexes[$state] = is_array($data['files'] ?? null) ? $data['files'] : array();
+        }
+        if (!$indexes[$state]) return '';
+        $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
+        if (!$pdo) return '';
+        try {
+            $st = $pdo->prepare('SELECT categories_json FROM inspection_reports WHERE id = ?');
+            $st->execute(array($report_row_id));
+            $cats = json_decode((string) $st->fetchColumn(), true);
+        } catch (Exception $e) {
+            return '';
+        }
+        if (!is_array($cats)) return '';
+        $names = is_array($cats['archive_names'] ?? null) ? $cats['archive_names'] : array();
+        if (!empty($cats['archive_name'])) $names[] = $cats['archive_name'];
+        foreach ($names as $name) {
+            $key = preg_replace('/[?#].*$/s', '', (string) $name);
+            $key = substr($key, strrpos('/' . $key, '/'));
+            $key = strtolower(preg_replace('/[^A-Za-z0-9._-]/', '_', rawurldecode($key)));
+            $href = (string) ($indexes[$state][$key] ?? '');
+            if (preg_match('#^https://#', $href)) return $href;
         }
         return '';
     }
