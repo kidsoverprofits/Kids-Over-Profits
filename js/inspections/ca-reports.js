@@ -188,6 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
             source_url: safeString(categories.source_url || ''),
             report_id: safeString(report.report_id || ''),
             report_index: safeString(categories.report_index || ''),
+            // Our PDF of the report page (ca_scraper.py, ca_pdfs).
+            archive_name: safeString(categories.archive_name || ''),
         };
     }
 
@@ -387,6 +389,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return t > 0 && (Date.now() - t) <= NEW_REPORT_WINDOW_MS;
     }
     
+    // Our PDFs of the report pages (ca_scraper.py prints them into ca_pdfs; api/sync-inspection-archive.php
+    // indexes them by file name). Same key rule as archiveKey() in report-page.js.
+    let archiveIndex = {};
+    function archiveKey(name) {
+        let key = String(name || '').replace(/[?#][\s\S]*$/, '');
+        key = key.slice(key.lastIndexOf('/') + 1);
+        try { key = decodeURIComponent(key); } catch (e) { /* keep it */ }
+        return key.replace(/[^A-Za-z0-9._-]/g, '_').toLowerCase();
+    }
+    function archiveHref(name) {
+        const href = name ? archiveIndex[archiveKey(name)] : '';
+        return /^https:\/\//.test(href || '') ? href : '';
+    }
+    const archiveLoaded = fetch('/wp-content/uploads/inspection-reports/ca/index.json', { cache: 'no-cache' })
+        .then(resp => (resp.ok ? resp.json() : {}))
+        .then(data => { archiveIndex = (data && data.files) || {}; })
+        .catch(() => {});
+
     async function initializeReport() {
         try {
 
@@ -410,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // network failure drops that batch instead of blanking the page —
             // with Promise.all, 1 rejection discarded the other 20 batches.
             const settled = await Promise.allSettled(urls.map(url => fetch(url)));
+            await archiveLoaded;
             const failed = settled.filter(r => r.status === 'rejected').length;
             if (failed > 0) {
                 console.warn(`CA reports: ${failed} of ${urls.length} batch files failed to load; continuing with the rest.`);
@@ -940,6 +961,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <strong>Complaint Status:</strong> ${escapeHtml(safeString(inspection.complaint_status) || 'N/A')}<br>
                     <strong>Met With:</strong> ${escapeHtml(safeString(inspection.met_with) || 'N/A')}<br>
                     <strong>Source:</strong> ${facilityDetailLink}
+                    ${archiveHref(inspection.archive_name) ? `<br><a href="${escapeHtml(archiveHref(inspection.archive_name))}" target="_blank" rel="noopener noreferrer">Report (archived copy)</a>` : ''}
                 </div>
                 ${narrative ? `<div class="narrative-section"><h4>Narrative:</h4><p>${narrative}</p></div>` : ''}
                 ${findings ? `<div class="findings-section"><h4>Investigation Findings:</h4><p>${findings}</p></div>` : ''}

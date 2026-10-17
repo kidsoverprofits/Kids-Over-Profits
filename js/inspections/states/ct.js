@@ -192,6 +192,8 @@
         base.text = text;
         base.visit_time = safeString(visit.visit_time);
         base.personnel = Array.isArray(visit.personnel) ? visit.personnel.map(safeString).filter(Boolean) : [];
+        // Our PDF of the report (ct_scraper.py, ct_pdfs: CT-DCF_<report id>.pdf).
+        base.archive_name = safeString(cats.archive_name);
         return base;
     }
 
@@ -240,6 +242,7 @@
 
     page.mount({
         state: 'Connecticut',
+        archiveState: 'CT',
         emptyMessage: 'No facilities found for Connecticut.',
 
         load: function () {
@@ -317,6 +320,7 @@
                     report.personnel.length ? 'Met with ' + report.personnel.join(', ') : ''
                 ],
                 link: null,
+                links: report.archive_name ? [ctx.archiveLink(report.archive_name, 'Report (archived copy)')] : [],
                 preview: preview,
                 body: function () {
                     if (!report.is_form) {
