@@ -768,6 +768,15 @@ updated.
    OH were shared only through the FileBird folder, and the sync drops the
    archive index of a folder that is not shared. Then check with
    `php api/sync-inspection-archive.php` (dry run): every state shows index entries.
+   **PDF of every report (2026-10-17, in progress):** kop-pipeline
+   `report_store.py` prints report pages to PDF (`PagePrinter`, `archive_page`);
+   the scrapers with no copies (VA VDSS, AZ, CA, CO, CT, GA, MN, NV, OK, TX) are
+   being given it, each with a backfill flag. The sync already lists their
+   `xx_pdfs` folders, and every serious-finding card links "Archived copy (PDF)"
+   once a state's index has the report (commit e636bd7f). Open: run each backfill
+   (commands to follow), share each new folder (inside the shared parent it
+   inherits), and Utah cards: their rows carry no checklist id, so the card
+   lookup finds none (the /ut-reports/ page reads ids from ut_reports*.json).
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
    `hi_scraper.py` and `hi_scope.json` (Tools repo, in the launcher and the
    guide), `js/inspections/states/hi.js`, `/hi-reports/` created on deploy
