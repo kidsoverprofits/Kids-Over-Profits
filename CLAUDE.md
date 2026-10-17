@@ -237,7 +237,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-rename-merge.php 
 # "Fill empty fields with AI" (news/lawsuits: kop_enrich_*_row(), else a generic filler). A new queue gets a source file there.
 # Every approve/reject action carries 'help' (one sentence: what clicking does), shown on the card. inc/review-inbox-log.php:
 # Recently done ({prefix}kop_review_log, Undo = the item's 'undo' action, or 'restore' for the five native types, logged from
-# api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), Preview
+# api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), "Needs research" on every card
+# (holds.research = 1: off every queue into Your inbox > Needs research until "Back to the queue" or a decision; review-inbox/research), Preview
 # (review-inbox/preview: framed where allowed, else a reading copy)
 # The queues are one dropdown per group (js/review-inbox.js dropdown(); the page's own five type tabs hidden, in the Submissions menu).
 # Counts never block the page: review-inbox/sources returns the saved counts (option kop_review_inbox_counts) + 'stale', the page

@@ -109,7 +109,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_REVIEW_INBOX_DB_VERSION = '2';
+const KOP_REVIEW_INBOX_DB_VERSION = '3'; // 3: kop_review_holds.research
 
 /** Add a source: $build returns its spec, or null when its queue is not loaded. */
 function kop_rinbox_register($key, callable $build) {

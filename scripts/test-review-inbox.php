@@ -84,7 +84,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_review_log (id INTEGER PRIMARY K
     title TEXT NOT NULL DEFAULT '', action TEXT NOT NULL, action_label TEXT NOT NULL DEFAULT '', style TEXT NOT NULL DEFAULT '', message TEXT,
     undo_action TEXT NOT NULL DEFAULT '', undo_params TEXT, user_login TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, undone_at TEXT, undone_by TEXT NOT NULL DEFAULT '')");
 $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_review_holds (source TEXT NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '',
-    assigned_to INTEGER NOT NULL DEFAULT 0, snooze_until TEXT, note TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
+    assigned_to INTEGER NOT NULL DEFAULT 0, snooze_until TEXT, research INTEGER NOT NULL DEFAULT 0, note TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL, PRIMARY KEY (source, item_key))");
 
 /*
@@ -252,6 +252,27 @@ if ($only === '' || $only === 'log') {
         kop_rinbox_hold_set('zz-test', 'c', 'Item C', 0, 0, '');
         kop_rinbox_holds_active(null, true);
         $check('holds: Put back in the list removes the hold', kop_rinbox_hold_info('zz-test', 'c') === null);
+
+        // Needs research: off every waiting list, listed across queues, kept through a snooze, toggled back.
+        kop_rinbox_research_set('zz-test', 'e', 'Item E', true);
+        $info = kop_rinbox_hold_info('zz-test', 'e');
+        $check('research: the card says so and it leaves the list', $info && $info['research'] && $info['hidden'] && isset(kop_rinbox_hidden_keys('zz-test')['e']), json_encode($info));
+        $res = kop_rinbox_held_items('research');
+        $check('research: Needs research lists it with its queue', array_column($res['items'], 'key') === array('e') && kop_rinbox_held_counts()['research'] === 1, json_encode(array_column($res['items'], 'key')));
+        kop_rinbox_hold_set('zz-test', 'e', 'Item E', 7, 0, '');
+        kop_rinbox_holds_active(null, true);
+        $check('research: a snooze keeps it waiting for research', !empty(kop_rinbox_hold_info('zz-test', 'e')['research']));
+        kop_rinbox_research_set('zz-test', 'e', 'Item E', false);
+        $info = kop_rinbox_hold_info('zz-test', 'e');
+        $check('research: Back to the queue keeps only the snooze', $info && !$info['research'] && $info['snooze_until'] !== '', json_encode($info));
+        kop_rinbox_hold_set('zz-test', 'e', 'Item E', 0, 0, '');
+        kop_rinbox_research_set('zz-test', 'e', 'Item E', true);
+        kop_rinbox_research_set('zz-test', 'e', 'Item E', false);
+        $check('research: off with nothing else holding it removes the hold', kop_rinbox_hold_info('zz-test', 'e') === null);
+        kop_rinbox_research_set('zz-test', 'e', 'Item E', true);
+        $act('e', 'approve');
+        kop_rinbox_holds_active(null, true);
+        $check('research: approving clears it', kop_rinbox_hold_info('zz-test', 'e') === null);
     } catch (Throwable $e) {
         $check('log: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
     }

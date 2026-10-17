@@ -15,6 +15,9 @@
  * everyone it is not assigned to (kop_rinbox_hidden_keys()); acting on it
  * (approve / reject) clears the hold. The assignee gets an email with the
  * link. "Assigned to you" and "Snoozed" list them across every queue.
+ * "Needs research" (research = 1) takes an item off every waiting list until
+ * the owner has looked into it; the card's toggle (review-inbox/research)
+ * puts it back, and an approve or reject clears it like any hold.
  *
  * Preview: kop/v1/review-inbox/preview?url= says whether the page can be shown
  * in a frame (our own site, Google Drive and Docs links as /preview, sites
@@ -67,6 +70,7 @@ function kop_rinbox_log_tables_sql($collate) {
             title VARCHAR(255) NOT NULL DEFAULT '',
             assigned_to BIGINT UNSIGNED NOT NULL DEFAULT 0,
             snooze_until DATETIME NULL,
+            research TINYINT(1) NOT NULL DEFAULT 0,
             note VARCHAR(255) NOT NULL DEFAULT '',
             created_by VARCHAR(60) NOT NULL DEFAULT '',
             created_at DATETIME NOT NULL,
@@ -251,7 +255,7 @@ function kop_rinbox_user_name($id) {
     return $u ? (string) ($u->display_name ?: $u->user_login) : '';
 }
 
-/** Holds still in force: snoozed into the future, or assigned to someone. Read once a request ($reset reads again). */
+/** Holds still in force: snoozed into the future, assigned to someone, or waiting for research. Read once a request ($reset reads again). */
 function kop_rinbox_holds_active($source = null, $reset = false) {
     global $wpdb;
     static $all = null;
@@ -261,7 +265,7 @@ function kop_rinbox_holds_active($source = null, $reset = false) {
             kop_rinbox_ensure_tables();
             $t = kop_rinbox_holds_table();
             $now = current_time('mysql', true);
-            $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $t WHERE assigned_to > 0 OR snooze_until > %s", $now), ARRAY_A);
+            $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $t WHERE assigned_to > 0 OR research = 1 OR snooze_until > %s", $now), ARRAY_A);
             foreach ((array) $rows as $r) {
                 if (!empty($r['snooze_until']) && $r['snooze_until'] <= $now) $r['snooze_until'] = null;
                 $all[$r['source']][$r['item_key']] = $r;
@@ -274,12 +278,17 @@ function kop_rinbox_holds_active($source = null, $reset = false) {
     return $all[$source] ?? array();
 }
 
-/** Keys of $source that leave my waiting list: snoozed, or someone else's. */
-function kop_rinbox_hidden_keys($source) {
+/** Is this hold off my waiting list: snoozed, waiting for research, or someone else's. */
+function kop_rinbox_hold_hides(array $h) {
     $me = get_current_user_id();
+    return !empty($h['snooze_until']) || !empty($h['research']) || ((int) $h['assigned_to'] > 0 && (int) $h['assigned_to'] !== $me);
+}
+
+/** Keys of $source that leave my waiting list (kop_rinbox_hold_hides()). */
+function kop_rinbox_hidden_keys($source) {
     $out = array();
     foreach (kop_rinbox_holds_active($source) as $key => $h) {
-        if (!empty($h['snooze_until']) || ((int) $h['assigned_to'] > 0 && (int) $h['assigned_to'] !== $me)) $out[(string) $key] = true;
+        if (kop_rinbox_hold_hides($h)) $out[(string) $key] = true;
     }
     return $out;
 }
@@ -294,15 +303,17 @@ function kop_rinbox_hold_info($source, $key) {
         'assigned_name' => kop_rinbox_user_name($h['assigned_to']),
         'mine'          => (int) $h['assigned_to'] === $me,
         'snooze_until'  => !empty($h['snooze_until']) ? $h['snooze_until'] . 'Z' : '',
+        'research'      => !empty($h['research']),
         'note'          => (string) $h['note'],
         'by'            => (string) $h['created_by'],
-        'hidden'        => !empty($h['snooze_until']) || ((int) $h['assigned_to'] > 0 && (int) $h['assigned_to'] !== $me),
+        'hidden'        => kop_rinbox_hold_hides($h),
     );
 }
 
 /**
  * Snooze ($days > 0) and/or hand to $assign (user id; 0 = nobody). An empty
- * hold (no snooze, nobody) is removed.
+ * hold (no snooze, nobody) is removed ("Put back in the list", research too);
+ * otherwise an item waiting for research stays so.
  */
 function kop_rinbox_hold_set($source, $key, $title, $days, $assign, $note) {
     global $wpdb;
@@ -321,7 +332,7 @@ function kop_rinbox_hold_set($source, $key, $title, $days, $assign, $note) {
     $wpdb->delete($t, array('source' => $source, 'item_key' => (string) $key));
     $wpdb->insert($t, array(
         'source' => $source, 'item_key' => (string) $key, 'title' => mb_substr((string) $title, 0, 255),
-        'assigned_to' => $assign, 'snooze_until' => $until, 'note' => mb_substr((string) $note, 0, 255),
+        'assigned_to' => $assign, 'snooze_until' => $until, 'research' => !empty($old['research']) ? 1 : 0, 'note' => mb_substr((string) $note, 0, 255),
         'created_by' => kop_rinbox_reviewer(), 'created_at' => current_time('mysql', true),
     ));
     $bits = array();
@@ -331,6 +342,41 @@ function kop_rinbox_hold_set($source, $key, $title, $days, $assign, $note) {
     }
     if ($until) $bits[] = ($bits ? 'back' : 'Snoozed: back') . ' on ' . wp_date('M j', time() + $days * DAY_IN_SECONDS);
     return array('message' => implode(', ', $bits) . '.');
+}
+
+/**
+ * "Needs research" on ($on) or off. On: the item leaves every waiting list for
+ * the Needs research list, keeping any snooze or hand-off. Off: back in its
+ * queue (the row goes when nothing else holds it).
+ */
+function kop_rinbox_research_set($source, $key, $title, $on, $note = '') {
+    global $wpdb;
+    kop_rinbox_source($source);
+    kop_rinbox_ensure_tables();
+    $t = kop_rinbox_holds_table();
+    $old = $wpdb->get_row($wpdb->prepare("SELECT * FROM $t WHERE source = %s AND item_key = %s", $source, (string) $key), ARRAY_A);
+    if ($on) {
+        if ($old) {
+            $set = array('research' => 1);
+            if (trim((string) $note) !== '') $set['note'] = mb_substr((string) $note, 0, 255);
+            $wpdb->update($t, $set, array('source' => $source, 'item_key' => (string) $key));
+        } else {
+            $wpdb->insert($t, array(
+                'source' => $source, 'item_key' => (string) $key, 'title' => mb_substr((string) $title, 0, 255),
+                'assigned_to' => 0, 'snooze_until' => null, 'research' => 1, 'note' => mb_substr((string) $note, 0, 255),
+                'created_by' => kop_rinbox_reviewer(), 'created_at' => current_time('mysql', true),
+            ));
+        }
+        kop_rinbox_holds_active(null, true);
+        return array('message' => 'Moved to Needs research (under Your inbox). It is off the queue until you send it back.');
+    }
+    if ($old) {
+        $held = (int) $old['assigned_to'] > 0 || (!empty($old['snooze_until']) && $old['snooze_until'] > current_time('mysql', true));
+        if ($held) $wpdb->update($t, array('research' => 0), array('source' => $source, 'item_key' => (string) $key));
+        else kop_rinbox_hold_clear($source, $key);
+    }
+    kop_rinbox_holds_active(null, true);
+    return array('message' => 'Back in the queue.');
 }
 
 function kop_rinbox_hold_clear($source, $key) {
@@ -350,21 +396,21 @@ function kop_rinbox_hold_mail($user_id, $source, $title, $note) {
     wp_mail($u->user_email, 'Review Inbox: ' . mb_substr((string) $title, 0, 80), $body);
 }
 
-/** Held items across every queue: 'mine' (assigned to me) or 'snoozed'. Cards, newest hold first. */
+/** Held items across every queue: 'mine' (assigned to me), 'snoozed' or 'research'. Cards, newest hold first. */
 function kop_rinbox_held_items($which) {
     $me = get_current_user_id();
     $rows = array();
     foreach (kop_rinbox_holds_active() as $byKey) {
         foreach ($byKey as $h) {
             $mine = (int) $h['assigned_to'] === $me;
-            if ($which === 'mine' ? !$mine : empty($h['snooze_until'])) continue;
+            if ($which === 'mine' ? !$mine : ($which === 'research' ? empty($h['research']) : empty($h['snooze_until']))) continue;
             $rows[] = $h;
         }
     }
     usort($rows, function ($a, $b) { return strcmp($b['created_at'], $a['created_at']); });
     $items = array();
     $sources = kop_rinbox_sources();
-    foreach (array_slice($rows, 0, 100) as $h) {
+    foreach (array_slice($rows, 0, $which === 'research' ? 500 : 100) as $h) {
         if (!isset($sources[$h['source']])) continue;
         try {
             $item = kop_rinbox_get_item($h['source'], $h['item_key']);
@@ -381,18 +427,20 @@ function kop_rinbox_held_items($which) {
     return array('items' => $items, 'total' => count($items));
 }
 
-/** How many are assigned to me and how many are snoozed (any queue). */
+/** How many are assigned to me, snoozed and waiting for research (any queue). */
 function kop_rinbox_held_counts() {
     $me = get_current_user_id();
     $mine = 0;
     $snoozed = 0;
+    $research = 0;
     foreach (kop_rinbox_holds_active() as $byKey) {
         foreach ($byKey as $h) {
             if ((int) $h['assigned_to'] === $me) $mine++;
             if (!empty($h['snooze_until'])) $snoozed++;
+            if (!empty($h['research'])) $research++;
         }
     }
-    return array('mine' => $mine, 'snoozed' => $snoozed);
+    return array('mine' => $mine, 'snoozed' => $snoozed, 'research' => $research);
 }
 
 /**
@@ -529,6 +577,7 @@ add_action('rest_api_init', function () {
         'log'     => array('GET', 'kop_rinbox_rest_log'),
         'undo'    => array('POST', 'kop_rinbox_rest_undo'),
         'hold'    => array('POST', 'kop_rinbox_rest_hold'),
+        'research' => array('POST', 'kop_rinbox_rest_research'),
         'held'    => array('GET', 'kop_rinbox_rest_held'),
         'preview' => array('GET', 'kop_rinbox_rest_preview'),
     );
@@ -570,11 +619,27 @@ function kop_rinbox_rest_hold(WP_REST_Request $req) {
     });
 }
 
+function kop_rinbox_rest_research(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $source = (string) $req->get_param('source');
+        $key = (string) $req->get_param('key');
+        $title = (string) $req->get_param('title');
+        if ($title === '') {
+            try { $title = (string) kop_rinbox_get_item($source, $key)['title']; } catch (Throwable $e) { $title = $key; }
+        }
+        $on = (bool) $req->get_param('on');
+        $res = kop_rinbox_research_set($source, $key, wp_unslash($title), $on, wp_unslash((string) $req->get_param('note')));
+        kop_rinbox_log_insert(array('source' => $source, 'item_key' => $key, 'title' => wp_unslash($title), 'action' => 'research',
+            'action_label' => $on ? 'Needs research' : 'Back from research', 'style' => 'neutral', 'message' => $res['message']));
+        return $res;
+    });
+}
+
 function kop_rinbox_rest_held(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $which = (string) $req->get_param('which');
         if ($which === 'volunteers' && function_exists('kop_vol_admin_items')) return kop_vol_admin_items();
-        return kop_rinbox_held_items($which === 'snoozed' ? 'snoozed' : 'mine');
+        return kop_rinbox_held_items(in_array($which, array('snoozed', 'research'), true) ? $which : 'mine');
     });
 }
 

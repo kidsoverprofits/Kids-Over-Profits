@@ -112,6 +112,7 @@
 
     var SPECIAL = {
         _mine: { label: 'Assigned to you', count: function () { return state.held.mine; } },
+        _research: { label: 'Needs research', count: function () { return state.held.research || 0; } },
         _snoozed: { label: 'Snoozed', count: function () { return state.held.snoozed; } },
         _volunteers: { label: 'Volunteers recommend', count: function () { return state.held.volunteers || 0; } },
         _done: { label: 'Recently done', count: function () { return 0; } }
@@ -472,7 +473,7 @@
             }
             var items = data.items || [];
             statusEl.textContent = (note ? note + ' ' : '') + (state.total ? (state.total + (state.total === 1 ? ' item' : ' items')) : 'Nothing here.')
-                + (data.held ? ' (' + data.held + ' set aside: snoozed or handed to someone else.)' : '');
+                + (data.held ? ' (' + data.held + ' set aside: needs research, snoozed or handed to someone else.)' : '');
             items.forEach(function (it) { listEl.appendChild(card(it)); });
             listEl.style.minHeight = '';
             renderBulk();
@@ -810,6 +811,17 @@
                 if (String(f.value) === k) o.selected = true;
                 input.appendChild(o);
             });
+        } else if (type === 'types') {
+            // Several choices at once (a program's types): a box per option, sent as "A, B" (kop_facility_types_split()).
+            input = el('span', { id: id, class: 'rinbox-multi', role: 'group', 'aria-label': f.label || f.name });
+            var mopts = f.options || {};
+            var keys = Array.isArray(mopts) ? mopts : Object.keys(mopts).filter(function (k) { return k !== ''; });
+            var have = (Array.isArray(f.value) ? f.value : String(f.value || '').split(',')).map(function (x) { return String(x).trim().toLowerCase(); });
+            keys.forEach(function (k) {
+                var box = el('input', { type: 'checkbox', value: k });
+                box.checked = have.indexOf(String(k).toLowerCase()) !== -1;
+                input.appendChild(el('label', { class: 'rinbox-multi-opt' }, [box, ' ' + (Array.isArray(mopts) ? k : mopts[k])]));
+            });
         } else if (type === 'facility') {
             input = el('input', { id: id, type: 'number', min: '1', placeholder: 'id', 'data-kop-facility-finder': '1' });
             input.value = f.value ? String(f.value) : '';
@@ -896,10 +908,18 @@
     function readInput(input) {
         var kind = input.dataset.kind;
         if (kind === 'checkbox') return input.checked ? '1' : '';
+        if (kind === 'types') {
+            return Array.prototype.map.call(input.querySelectorAll('input[type=checkbox]:checked'), function (b) { return b.value; }).join(', ');
+        }
         if (kind === 'facilities') { try { return JSON.parse(input.dataset.ids || '[]'); } catch (e) { return []; } }
         if (kind === 'list') return input.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
         if (kind === 'facility' || kind === 'number' || kind === 'record') return input.value.trim() === '' ? '' : input.value.trim();
         return input.value;
+    }
+
+    /** A param's label and input; a group of boxes (types) gets a span, since each box has its own label. */
+    function paramLabel(p, input) {
+        return el(input.dataset.kind === 'types' ? 'span' : 'label', { class: 'rinbox-param' }, [p.label + ' ', input]);
     }
 
     var cardSeq = 0;
@@ -909,7 +929,7 @@
         var wrap = el('span', { class: 'rinbox-action-group' });
         var inputs = (def.params || []).map(function (p) {
             var input = fieldInput(p, prefix + def.id + '-');
-            wrap.appendChild(el('label', { class: 'rinbox-param' }, [p.label + ' ', input]));
+            wrap.appendChild(paramLabel(p, input));
             return input;
         });
         var btn = el('button', {
@@ -953,7 +973,7 @@
         if (m.help) form.appendChild(el('span', { class: 'rinbox-help', text: m.help }));
         var inputs = m.params.map(function (p) {
             var input = fieldInput(p, prefix + 'mv-' + m.id + '-');
-            form.appendChild(el('label', { class: 'rinbox-param' }, [p.label + ' ', input]));
+            form.appendChild(paramLabel(p, input));
             return input;
         });
         form.appendChild(el('button', {
@@ -1118,6 +1138,7 @@
     function holdNote(item, src, node) {
         var h = item.hold;
         var bits = [];
+        if (h.research) bits.push('Needs research');
         if (h.assigned_to) bits.push((h.mine ? 'Assigned to you' : 'Handed to ' + h.assigned_name) + (h.by ? ' by ' + h.by : ''));
         if (h.snooze_until) bits.push('snoozed until ' + fmtDate(h.snooze_until));
         var text = bits.join(', ');
@@ -1142,12 +1163,35 @@
     }
 
     function setHold(item, src, node, days, assign, note) {
+        holdCall(item, src, node, 'hold', { source: src, key: item.key, title: item.title || '', days: days, assign: assign, note: note },
+            ' It is off your list until then; find it under Snoozed or in Recently done.');
+    }
+
+    /** "Needs research" on or off: the item leaves every queue for Your inbox > Needs research, or goes back. */
+    function setResearch(item, src, node, on) {
+        holdCall(item, src, node, 'research', { source: src, key: item.key, title: item.title || '', on: on ? 1 : '' }, '');
+    }
+
+    /** The card's toggle: "Needs research" sends it there, "Back to the queue" brings it back. */
+    function researchButton(item, src, node) {
+        var on = !!(item.hold && item.hold.research);
+        return el('button', {
+            type: 'button', class: 'rinbox-btn rinbox-btn-neutral rinbox-research' + (on ? ' is-on' : ''), 'aria-pressed': on ? 'true' : 'false',
+            text: on ? 'Back to the queue' : 'Needs research',
+            title: on ? 'Put it back in its queue to decide' : 'Take it off the queue until you have looked into it; it waits under Your inbox > Needs research',
+            onclick: function (e) { e.currentTarget.disabled = true; setResearch(item, src, node, !on); }
+        });
+    }
+
+    function holdCall(item, src, node, route, body, goneNote) {
         var m = node.querySelector('.rinbox-message');
-        api('hold', { source: src, key: item.key, title: item.title || '', days: days, assign: assign, note: note }).then(function (res) {
+        api(route, body).then(function (res) {
             return api('items', null, { source: src, keys: item.key }).then(function (data) {
                 var next = (data.items || [])[0];
                 if (node.kopAfterHold) { node.kopAfterHold(res, next); refreshCounts(); return; }
                 var hidden = next && next.hold && next.hold.hidden;
+                // In the Needs research list, a card sent back to its queue leaves the list.
+                if (state.special === '_research' && !(next && next.hold && next.hold.research)) hidden = true;
                 if (node.classList.contains('rinbox-card') && next && !hidden) {
                     if (item.source) { next.source = item.source; next.source_label = item.source_label; }
                     fillCard(node, next, state.byKey[src], src, res.message);
@@ -1155,7 +1199,7 @@
                     keepInView(node, function () {
                         node.classList.add('rinbox-gone');
                         node.innerHTML = '';
-                        node.appendChild(el('p', { class: 'rinbox-message', text: res.message + ' It is off your list until then; find it under Snoozed or in Recently done.' }));
+                        node.appendChild(el('p', { class: 'rinbox-message', text: res.message + goneNote }));
                     });
                 } else if (m) {
                     m.hidden = false; m.className = 'rinbox-message'; m.textContent = res.message;
@@ -1209,7 +1253,7 @@
         renderTabs();
         setUrl();
         if (k === '_tools') renderAllTools();
-        else if (k === '_done') renderDone(); else renderHeld(k === '_mine' ? 'mine' : k === '_volunteers' ? 'volunteers' : 'snoozed');
+        else if (k === '_done') renderDone(); else renderHeld(k === '_mine' ? 'mine' : k === '_volunteers' ? 'volunteers' : k === '_research' ? 'research' : 'snoozed');
     }
 
     /* ---- All tools: every KOP tool, grouped as in the KOP Tools menu ---------- */
@@ -1289,12 +1333,14 @@
     function renderHeld(which) {
         panel.innerHTML = '';
         panel.appendChild(el('div', { class: 'rinbox-head' }, [
-            el('h2', { text: which === 'mine' ? 'Assigned to you' : which === 'volunteers' ? 'Volunteers recommend' : 'Snoozed' }),
+            el('h2', { text: which === 'mine' ? 'Assigned to you' : which === 'volunteers' ? 'Volunteers recommend' : which === 'research' ? 'Needs research' : 'Snoozed' }),
             el('p', { class: 'rinbox-help', text: which === 'mine'
                 ? 'Items from any queue that someone handed to you. Approve or reject them here; that takes them off this list.'
                 : which === 'volunteers'
                     ? 'Items volunteer reviewers have looked at, the most recommended first. Their advice is on each card; your Approve or Reject is the decision and takes the item off this list. Volunteers and their links: KOP Tools > Volunteer Reviewers.'
-                    : 'Items set aside for later. Each comes back to its queue on the date shown, or now with "Put back in the list".' })
+                    : which === 'research'
+                        ? 'Items from every queue you sent here to look into before deciding, newest first. Approve or reject them here, or press "Back to the queue" to put one back where it came from.'
+                        : 'Items set aside for later. Each comes back to its queue on the date shown, or now with "Put back in the list".' })
         ]));
         statusEl = el('p', { class: 'rinbox-status', role: 'status', text: 'Loading…' });
         listEl = el('div', { class: 'rinbox-list' });
@@ -1308,7 +1354,7 @@
             items.forEach(function (it) {
                 listEl.appendChild(card(it));
                 if (it.native) listEl.lastChild.appendChild(el('p', { class: 'rinbox-help' }, [
-                    which === 'snoozed' ? 'Put it back in the list, then approve or reject it on the ' : 'Approve or reject this one on the ',
+                    which === 'snoozed' || which === 'research' ? 'Put it back in the list, then approve or reject it on the ' : 'Approve or reject this one on the ',
                     el('button', { type: 'button', class: 'rinbox-pv-btn', text: it.source_label + ' tab', onclick: function () {
                         var tab = page.querySelector('.type-tabs [data-type="' + it.source + '"]');
                         if (tab) tab.click();
@@ -1551,10 +1597,10 @@
             var catInput = fieldInput(category, prefix + 'cat-');
             catInput.addEventListener('change', function () {
                 var fields = {};
-                fields[category.name] = catInput.value;
+                fields[category.name] = readInput(catInput);
                 run(node, item, s, src, 'save', { fields: fields });
             });
-            quick.appendChild(el('label', { class: 'rinbox-quick-field' }, [category.label + ' ', catInput]));
+            quick.appendChild(el(catInput.dataset.kind === 'types' ? 'span' : 'label', { class: 'rinbox-quick-field' }, [category.label + ' ', catInput]));
         }
         quick.appendChild(tagEditor(item, src, node));
         if (item.moves && item.moves.length) {
@@ -1571,7 +1617,7 @@
             var grid = el('div', { class: 'rinbox-editor-grid' });
             item.fields.forEach(function (f) {
                 var input = fieldInput(f, prefix);
-                var wide = f.type === 'textarea' || f.type === 'list';
+                var wide = f.type === 'textarea' || f.type === 'list' || f.type === 'types';
                 // A field the owner hid at KOP Tools > Card Fields stays in the form, unseen, so its value is still sent.
                 grid.appendChild(el('div', { class: 'rinbox-field' + (wide ? ' rinbox-field-wide' : ''), hidden: f.hidden_by_owner ? true : null }, [
                     el('label', { for: prefix + f.name, text: f.label }), input
@@ -1664,7 +1710,7 @@
                 if (a.help) askForm.appendChild(el('p', { class: 'rinbox-help', text: a.help }));
                 var askFields = el('div', { class: 'rinbox-action-group' });
                 (a.params || []).forEach(function (p, i) {
-                    askFields.appendChild(el('label', { class: 'rinbox-param' }, [p.label + ' ', paramInputs[i]]));
+                    askFields.appendChild(paramLabel(p, paramInputs[i]));
                 });
                 askForm.appendChild(askFields);
                 var submit = el('button', {
@@ -1687,7 +1733,7 @@
             if (paramInputs.length) {
                 var group = el('span', { class: 'rinbox-action-group' });
                 (a.params || []).forEach(function (p, i) {
-                    group.appendChild(el('label', { class: 'rinbox-param' }, [p.label + ' ', paramInputs[i]]));
+                    group.appendChild(paramLabel(p, paramInputs[i]));
                 });
                 group.appendChild(btn);
                 target.appendChild(group);
@@ -1696,6 +1742,7 @@
             }
             if (a.help && a.style !== 'undo') does.appendChild(el('li', { class: 'rinbox-does-' + (a.style || 'neutral') }, [el('strong', { text: a.label + ': ' }), a.help]));
         });
+        bar.appendChild(researchButton(item, src, node));
         bar.appendChild(laterControl(item, src, node));
         // A card with Copy, or one whose queue asks for it (item.decide_first: Wiki updates), has its
         // buttons right under the title, before the lines and the whole-entry frame.
@@ -1956,10 +2003,10 @@
             var cat = fieldInput(category, 'rinbox-n' + item.key + '-');
             cat.addEventListener('change', function () {
                 var fields = {};
-                fields[category.name] = cat.value;
+                fields[category.name] = readInput(cat);
                 go('save', { fields: fields });
             });
-            row.appendChild(el('label', { class: 'rinbox-quick-field' }, [category.label + ' ', cat]));
+            row.appendChild(el(cat.dataset.kind === 'types' ? 'span' : 'label', { class: 'rinbox-quick-field' }, [category.label + ' ', cat]));
         }
         row.appendChild(tagEditor(item, src, row));
         var moveGo = function (params) { go('act', { action: 'move', params: params }); };
@@ -1992,6 +2039,7 @@
             }));
             row.appendChild(nativeText);
         }
+        row.appendChild(researchButton(item, src, row));
         row.appendChild(laterControl(item, src, row));
         row.kopAfterHold = function (res, next) {
             if (next && next.hold && next.hold.hidden && card.classList.contains('is-pending')) {
@@ -2045,7 +2093,7 @@
             ownList.parentNode.insertBefore(note, ownList);
         }
         note.innerHTML = '';
-        note.appendChild(document.createTextNode(hiddenCount + (hiddenCount === 1 ? ' item is' : ' items are') + ' set aside (snoozed or handed to someone else) and not shown. '));
+        note.appendChild(document.createTextNode(hiddenCount + (hiddenCount === 1 ? ' item is' : ' items are') + ' set aside (needs research, snoozed or handed to someone else) and not shown. '));
         note.appendChild(el('button', {
             type: 'button', class: 'rinbox-pv-btn', text: 'Show them',
             onclick: function () {
