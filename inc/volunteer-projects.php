@@ -243,7 +243,7 @@ function kop_volp_recommended_keys($source) {
 }
 
 /**
- * Make a project. $in: source, size (5-50), search, volunteer_id (0 = anyone
+ * Make a project. $in: source, size (any; 0 = every item waiting), search, volunteer_id (0 = anyone
  * with a link) or new_name (makes a volunteer), note, and optional question /
  * yes / no / title over the kind's. Returns [id, link, invite link or ''].
  */
@@ -252,7 +252,8 @@ function kop_volp_create(array $in) {
     $sources = kop_volp_sources();
     if (!isset($sources[$source])) throw new RuntimeException('Pick a queue volunteers may see.');
     $src = $sources[$source];
-    $size = max(5, min(50, (int) ($in['size'] ?? 20)));
+    $size = (int) ($in['size'] ?? 20);   // 0 (or less) = every item waiting
+    if ($size < 1) $size = PHP_INT_MAX;
     $search = trim(mb_substr((string) ($in['search'] ?? ''), 0, 100));
     $kind = kop_volp_kind($source);
 
@@ -270,17 +271,20 @@ function kop_volp_create(array $in) {
     $views = array_keys((array) $src['views']);
     $picked = array();
     $offset = 0;
-    for ($page = 0; $page < 40 && count($picked) < $size; $page++) {
+    $seen = array();
+    while (count($picked) < $size) {
         $res = call_user_func($src['list'], array('view' => $views[0], 'search' => $search, 'offset' => $offset, 'limit' => 25, 'origin' => '', 'filters' => array()));
         $items = (array) ($res['items'] ?? array());
+        $fresh = 0;
         foreach ($items as $it) {
             $offset++;
             $k = (string) ($it['key'] ?? '');
+            if ($k !== '' && !isset($seen[$k])) { $seen[$k] = true; $fresh++; }
             if ($k === '' || isset($skip[$k]) || isset($picked[$k]) || !kop_vol_actionable($source, $it)) continue;
             $picked[$k] = array((string) ($it['title'] ?? ''), (string) ($it['status'] ?? ''));
             if (count($picked) >= $size) break;
         }
-        if (count($items) < 25) break;
+        if (count($items) < 25 || !$fresh) break;   // the end, or a list that ignores offset
     }
     if (!$picked) {
         throw new RuntimeException($search !== '' ? 'Nothing waiting in that queue matches "' . $search . '" (or it is all in other projects already).'
@@ -656,7 +660,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
     foreach ($vols as $v) $names[(int) $v['id']] = $v['name'];
     ?>
     <h2 id="projects">Projects</h2>
-    <p style="max-width:760px">A project is a small batch from one queue (10 to 30 items) with one question per item, an example of a yes and a no,
+    <p style="max-width:760px">A project is a batch from one queue (as many items as you like; 10 to 30 is a good first try) with one question per item, an example of a yes and a no,
         and a finish line. Send the link to one person. When they are done, <em>Check their calls</em> lists what they said and applies the ones you tick,
         each with its Undo in Recently done.</p>
     <?php if ($notice_made) :
@@ -695,9 +699,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
             }
             ?>
         </select></label>
-        <label>How many<br><select name="kop_volp_size" style="width:100%">
-            <option value="10">10 (a quick first try)</option><option value="20" selected>20</option><option value="30">30</option>
-        </select></label>
+        <label>How many (blank or 0 = every item waiting)<br><input type="number" name="kop_volp_size" min="0" step="1" value="20" style="width:100%"></label>
         <label>Only ones about (optional)<br><input type="text" name="kop_volp_search" maxlength="100" placeholder="a state, a program, a word" style="width:100%"></label>
         <label>Who<br><select name="kop_volp_who" style="width:100%" onchange="this.form.querySelector('.kop-volp-new').hidden=this.value!=='new'">
             <option value="new">Someone new (makes their link)</option>

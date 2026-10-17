@@ -197,7 +197,14 @@ $check('an item handled in the inbox leaves the project', array_column($after['i
 kop_volp_set_status($p1, 'closed');
 $check('a closed project is gone from Sam\'s page', !in_array($p1, $ids($sam_id), true));
 $check('no recommending in a closed project', $throws(function () use ($sam, $Q, $k1) { kop_vol_recommend($sam, $Q, $k1[4], 'approve', ''); }) !== '');
-$check('and its items are free again', in_array($k1[4], $keys_of(kop_volp_create(array('source' => $Q, 'size' => 50, 'volunteer_id' => 0))[0]), true));
+list($p50) = kop_volp_create(array('source' => $Q, 'size' => 50, 'volunteer_id' => 0));
+$check('and its items are free again', in_array($k1[4], $keys_of($p50), true));
+$n50 = count($keys_of($p50));
+kop_volp_set_status($p50, 'closed');
+list($pall) = kop_volp_create(array('source' => $Q, 'size' => 0, 'volunteer_id' => 0));
+$nall = count($keys_of($pall));
+$check('size 0 takes every waiting item, no cap', $nall >= $n50 && $nall > 30, "$nall vs $n50");
+kop_volp_set_status($pall, 'closed');
 
 echo "\nWhat volunteers can open\n";
 $check('admin screens are not links for volunteers', kop_vol_admin_only_url('https://example.test/wp-admin/admin-ajax.php?action=kop_wb_view&key=x&nonce=y')

@@ -298,7 +298,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # them as kop_vol_item() copies (no fields/actions/tags, emails and phones blanked). Inbox cards show 'recs', "Volunteers recommend"
 # lists them; an approve/reject in the log closes them (agreement rate per volunteer), Undo reopens them
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
-# Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of 10-30 items from one queue,
+# Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>
 # (a new person's invite carries it). The page opens on it one item at a time; a project opens its queue to its volunteer, never a
 # kop_vol_never_sources() one. "Check their calls" applies clear calls with each card's own button (kop_rinbox_apply_action(), Undo in Recently done)
