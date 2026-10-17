@@ -749,6 +749,14 @@ updated.
    more when it ends (everything comes from cache) to mark "No Violation"
    plans clean. **Owner:** approve
    each state's first post (run it from the launcher), then publish its page.
+   **VA links (2026-10-17, commit 3174a2a3):** serious-finding links (review
+   cards, volunteers, facility pages, /severe-reports/) open the DBHDS report's
+   Drive PDF instead of the provider search. VDSS inspection links land on DSS's
+   facility search whatever the query says, and `va_pdfs/` holds no VDSS copies,
+   so those findings show no outside link (one now: Alpha House I, 2023-11-30).
+   Open: `va_scraper.py` saves each VDSS inspection page as a PDF into `va_pdfs/`
+   and records its `archive_name`, then the same lookup links it. Check after
+   deploy: a VA card at Review inbox > Serious violations opens a Drive PDF.
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
    `hi_scraper.py` and `hi_scope.json` (Tools repo, in the launcher and the
    guide), `js/inspections/states/hi.js`, `/hi-reports/` created on deploy
