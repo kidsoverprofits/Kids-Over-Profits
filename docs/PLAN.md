@@ -778,6 +778,12 @@ updated.
    (commands to follow), share each new folder (inside the shared parent it
    inherits), and Utah cards: their rows carry no checklist id, so the card
    lookup finds none (the /ut-reports/ page reads ids from ut_reports*.json).
+   Done so far: VA VDSS (171 printed and posted 18:41), AZ, NV, OK backfills
+   started 2026-10-17 (`py -3 <st>_scraper.py --backfill-pdfs`; VA: `py -3
+   va_scraper.py --source vdss --archive-all`). CO has never posted: its first
+   evening run with real citation reads also tests the PDFs. **NV junk rows:** the
+   old nv_scraper read the grid's pager as inspections; reports "1", "2", "3"
+   and "..." on /nv-reports/ need deleting (owner's go-ahead first).
    **Hawaii built 2026-10-05, waiting for the owner's word to post:**
    `hi_scraper.py` and `hi_scope.json` (Tools repo, in the launcher and the
    guide), `js/inspections/states/hi.js`, `/hi-reports/` created on deploy
