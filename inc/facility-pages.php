@@ -1998,6 +1998,10 @@ if (!function_exists('kop_facility_pages_person_career')) {
             }
             $add($place, $role, '', $url);
         }
+        // The owner's tick on KOP Tools > People: they became an educational consultant (inc/people.php).
+        if ((int) $person_id > 0 && function_exists('kop_people_is_ed_consultant') && kop_people_is_ed_consultant((int) $person_id)) {
+            $add('Educational consultant', '', '', (string) kop_facility_pages_page_url_by_template('page-referrer-index.php', '/referrers-educational-consultants/'));
+        }
         return kop_facility_pages_career_fold(array_values($out));
     }
 }
@@ -3953,7 +3957,7 @@ if (!function_exists('kop_facility_pages_violations')) {
         $placeholders = implode(',', array_fill(0, count($inspection_ids), '%d'));
         $suppress = $wpdb->suppress_errors(true);
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT h.id, h.state, h.category, h.categories, h.score, h.finding_date, h.excerpt, h.state_label, h.text_hash,
+            "SELECT h.id, h.report_id, h.state, h.category, h.categories, h.score, h.finding_date, h.excerpt, h.state_label, h.text_hash,
                     r.report_date, r.report_url, r.report_id AS source_report_id
                FROM inspection_highlights h
                JOIN inspection_reports r ON r.id = h.report_id

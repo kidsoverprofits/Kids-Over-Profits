@@ -921,6 +921,13 @@ the text goes in the page body, never in post meta, ACF or a table (owner,
   the staff entries' pastJobs in (1,536 jobs on the mirror), then check a person listed on two programs shows the
   same "Also worked at" on both. Not done yet: Woodbury Facts, the wiki and the data forms still write pastJobs
   text on the entry (the sync reads it in); writing straight to the person's jobs, and a company person's jobs, come next.
+- People editor additions (2026-10-17, KOP Tools > People): Details now open the person's page, with "Became an
+  educational consultant" (`ed_consultant`, people table version 4: the ALTER runs on the first admin load) and
+  Undo for every details save (option kop_people_details_log); a ticked person's career ends "Educational consultant"
+  on every facility and company page. Relationships (`{prefix}kop_person_relations`, inc/person-relations.php; kinds in
+  Dropdown Lists > People) show on both people. After deploy: open People once, tick one person and check their
+  facility page. Owner to decide: should relationships print on public pages (business partners yes, family only
+  between industry people?); they are admin-only now. A consultant record naming the person is shown as a hint, never ticks the box.
 
 ### 3.7 Name eras
 

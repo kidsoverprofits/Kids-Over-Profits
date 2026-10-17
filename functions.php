@@ -238,6 +238,7 @@ require_once get_stylesheet_directory() . '/inc/record-to-company.php';
 // A person id for everyone on a staff list, stamped as personId by an hourly sync (KOP Tools > People)
 require_once get_stylesheet_directory() . '/inc/people.php';
 require_once get_stylesheet_directory() . '/inc/person-jobs.php';   // a person's past jobs, held once (kop_person_jobs)
+require_once get_stylesheet_directory() . '/inc/person-relations.php';   // relationships between people (kop_person_relations)
 require_once get_stylesheet_directory() . '/inc/people-admin.php';
 require_once get_stylesheet_directory() . '/inc/people-merge.php';
 require_once get_stylesheet_directory() . '/inc/name-variants.php';

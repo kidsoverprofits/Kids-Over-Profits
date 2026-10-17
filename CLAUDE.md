@@ -515,6 +515,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-people.php [--lis
 # entry's pastJobs text in once (kop_pjobs_import()); every page that lists the person reads them (kop_facility_pages_person_career()), so a
 # job is fixed once at KOP Tools > People > Past jobs (add, change, take off, put back; Undo there, log kop_person_jobs_log), not per profile
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php   # reading pastJobs, the import, edits + undo, merges
+# The People editor also holds "Became an educational consultant" (kop_people.ed_consultant: a ticked person's career ends "Educational
+# consultant" on every page; details saves logged in kop_people_details_log, Undo there) and relationships ({prefix}kop_person_relations,
+# inc/person-relations.php: family, business partners; by id or name, shown on both people, Parent <-> Child; kinds in Dropdown Lists 'person-relations')
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-relations.php   # details + undo, the tick through merges, relationships both sides + undo
 # kop_facility_save() folds a person listed twice under one role (kop_facility_staff_dedupe()); the one-time pass is kop_apply_staff_dedupe()
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]
 # Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
@@ -871,6 +875,7 @@ to the program aggregate otherwise. The build reads `js/network-map/store.js` an
 - `wiki_submissions` / `news_submissions` - Content submissions
 - `{prefix}kop_volunteers` / `{prefix}kop_volunteer_recs` - Volunteer reviewers (name, hash of their link's token) and their approve/reject/not sure recommendations on review inbox items, closed with the admin's decision (`inc/review-volunteers.php`)
 - `{prefix}kop_person_jobs` - A person's past jobs (place, role, years, source), held once and shown on every page that lists them; read in from staff entries' pastJobs by the hourly sync, edited at KOP Tools > People (`inc/person-jobs.php`)
+- `{prefix}kop_person_relations` - Relationships between people (family, business partners...): the other person's id or name, kind, detail, source; shown on both people at KOP Tools > People, admin-only (`inc/person-relations.php`)
 - `{prefix}kop_people` / `{prefix}kop_person_roles` - One id per person named anywhere in the records (`personId` on each `facilities_v2` staff entry; everyone else linked by name), its pool (industry, harmed, press), and where each is named (derived, rebuilt by the hourly sync; `inc/people.php`)
 - `journalists` / `journalist_articles` - Internal-only list of journalists covering the TTI, extracted from news bylines (`api/lib-journalists.php`, managed in `api/manage-journalists.php`); never exposed publicly
 - `inspection_report_counts` - Each inspection report's state verdicts (citations, high-risk, repeat, complaints, substantiated) as JSON, its year and a content hash so a report stored twice counts once; filled hourly (`inc/inspection-rollup.php`)

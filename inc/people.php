@@ -56,13 +56,19 @@
  * shares the name; Merge People pairs only within a pool. An admin can still
  * merge across pools by hand. The map and the facility pages read the
  * industry pool only.
+ *
+ * ed_consultant (version 4) is the owner's tick "became an educational
+ * consultant", set on KOP Tools > People; the person's career on every page
+ * that lists them then ends with "Educational consultant". Every change to a
+ * person's details is logged in the kop_people_details_log option for Undo
+ * (kop_people_details_write(), kop_people_details_undo()).
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KOP_PEOPLE_DB_VERSION', '3');
+define('KOP_PEOPLE_DB_VERSION', '4');
 define('KOP_PEOPLE_LISTS', 'administrator,notableStaff');
 
 if (!function_exists('kop_people_table')) {
@@ -113,6 +119,10 @@ if (!function_exists('kop_people_install')) {
         if (!$wpdb->get_var("SHOW COLUMNS FROM {$people} LIKE 'pool'")) {
             $wpdb->query("ALTER TABLE {$people} ADD COLUMN pool VARCHAR(12) NOT NULL DEFAULT 'industry'");
         }
+        // Version 3 tables had no educational consultant tick.
+        if (!$wpdb->get_var("SHOW COLUMNS FROM {$people} LIKE 'ed_consultant'")) {
+            $wpdb->query("ALTER TABLE {$people} ADD COLUMN ed_consultant TINYINT(1) NOT NULL DEFAULT 0");
+        }
         update_option('kop_people_db', KOP_PEOPLE_DB_VERSION, false);
     }
     add_action('admin_init', 'kop_people_install');
@@ -142,20 +152,29 @@ if (!function_exists('kop_people_pool_key')) {
 if (!function_exists('kop_people_has_pool')) {
     /** Whether the people table has the pool column yet (version 3). */
     function kop_people_has_pool(array $opts = array()) {
+        return kop_people_has_column('pool', $opts);
+    }
+
+    /** Whether the people table has the educational consultant tick yet (version 4). */
+    function kop_people_has_consultant(array $opts = array()) {
+        return kop_people_has_column('ed_consultant', $opts);
+    }
+
+    function kop_people_has_column($col, array $opts = array()) {
         static $known = array();
         $t = kop_people_table('people', $opts);
-        $k = $t . (!empty($opts['pdo']) && $opts['pdo'] instanceof PDO ? '#' . spl_object_id($opts['pdo']) : '');
+        $k = $t . '.' . $col . (!empty($opts['pdo']) && $opts['pdo'] instanceof PDO ? '#' . spl_object_id($opts['pdo']) : '');
         if (isset($known[$k])) return $known[$k];
         if (!empty($opts['pdo']) && $opts['pdo'] instanceof PDO) {
             try {
-                $opts['pdo']->query("SELECT pool FROM {$t} LIMIT 1");
+                $opts['pdo']->query("SELECT {$col} FROM {$t} LIMIT 1");
                 return $known[$k] = true;
             } catch (Throwable $e) {
                 return $known[$k] = false;
             }
         }
         global $wpdb;
-        return $known[$k] = isset($wpdb) && method_exists($wpdb, 'get_var') && (bool) $wpdb->get_var("SHOW COLUMNS FROM {$t} LIKE 'pool'");
+        return $known[$k] = isset($wpdb) && method_exists($wpdb, 'get_var') && (bool) $wpdb->get_var("SHOW COLUMNS FROM {$t} LIKE '{$col}'");
     }
 }
 
@@ -254,6 +273,97 @@ if (!function_exists('kop_people_version_bump')) {
     }
 }
 
+if (!function_exists('kop_people_details_write')) {
+    /**
+     * Writes a person's details ($fields: name, name_key, aliases, notes, ed_consultant; any of them),
+     * logged in the kop_people_details_log option so kop_people_details_undo() puts them back.
+     * Returns the log entry's number, or 0 when nothing changed.
+     */
+    function kop_people_details_write($id, array $fields, array $opts = array()) {
+        $cols = array('name', 'name_key', 'aliases', 'notes');
+        if (kop_people_has_consultant($opts)) $cols[] = 'ed_consultant';
+        $t = kop_people_table('people', $opts);
+        $before = kop_facility_db_rows('SELECT ' . implode(', ', $cols) . " FROM {$t} WHERE id = ?", array((int) $id), $opts)[0] ?? null;
+        if (!$before) throw new RuntimeException('No such person.');
+        $set = array();
+        foreach ($cols as $c) {
+            if (!array_key_exists($c, $fields)) continue;
+            $v = $c === 'ed_consultant' ? ($fields[$c] ? 1 : 0) : (string) $fields[$c];
+            if ((string) $v !== (string) ($before[$c] ?? '')) $set[$c] = $v;
+        }
+        if (!$set) return 0;
+        kop_facility_db_exec("UPDATE {$t} SET " . implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($set))) . ' WHERE id = ?',
+            array_merge(array_values($set), array((int) $id)), $opts);
+        $n = kop_people_details_log(array('person' => (int) $id, 'before' => array_intersect_key($before, $set), 'after' => $set));
+        $GLOBALS['kop_people_consultants'] = null;
+        kop_people_version_bump();
+        return $n;
+    }
+
+    function kop_people_details_log_all() {
+        return function_exists('get_option') ? (array) get_option('kop_people_details_log', array()) : (array) ($GLOBALS['kop_people_details_log'] ?? array());
+    }
+
+    function kop_people_details_log_save(array $log) {
+        if (function_exists('update_option')) update_option('kop_people_details_log', $log, false);
+        else $GLOBALS['kop_people_details_log'] = $log;
+    }
+
+    function kop_people_details_log(array $entry) {
+        $log = kop_people_details_log_all();
+        $user = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
+        $entry += array('at' => gmdate('Y-m-d H:i:s'), 'by' => $user ? (string) $user->user_login : '', 'undone' => false);
+        $entry['n'] = (int) (end($log)['n'] ?? 0) + 1;
+        $log[] = $entry;
+        kop_people_details_log_save(array_slice($log, -500));
+        return $entry['n'];
+    }
+
+    /** One person's detail changes, newest first. */
+    function kop_people_details_log_for($person_id) {
+        return array_reverse(array_values(array_filter(kop_people_details_log_all(), function ($l) use ($person_id) { return (int) $l['person'] === (int) $person_id; })));
+    }
+
+    /** Undo change $n: the fields back as they were, while nobody changed them since. */
+    function kop_people_details_undo($n, array $opts = array()) {
+        $log = kop_people_details_log_all();
+        $at = null;
+        foreach ($log as $i => $l) if ((int) $l['n'] === (int) $n) $at = $i;
+        if ($at === null || !empty($log[$at]['undone'])) throw new RuntimeException('Nothing to undo there.');
+        $l = $log[$at];
+        $cols = array_keys((array) $l['after']);
+        $t = kop_people_table('people', $opts);
+        $now = kop_facility_db_rows('SELECT ' . implode(', ', $cols) . " FROM {$t} WHERE id = ?", array((int) $l['person']), $opts)[0] ?? null;
+        if (!$now) throw new RuntimeException('That person is gone.');
+        foreach ($cols as $c) {
+            if ((string) $now[$c] !== (string) $l['after'][$c]) throw new RuntimeException('Changed again since; undo the later change first.');
+        }
+        kop_facility_db_exec("UPDATE {$t} SET " . implode(', ', array_map(function ($c) { return "$c = ?"; }, $cols)) . ' WHERE id = ?',
+            array_merge(array_map(function ($c) use ($l) { return $l['before'][$c]; }, $cols), array((int) $l['person'])), $opts);
+        $log[$at]['undone'] = true;
+        kop_people_details_log_save($log);
+        $GLOBALS['kop_people_consultants'] = null;
+        kop_people_version_bump();
+    }
+
+    /** Is this person (their id resolved through merges) ticked as having become an educational consultant? */
+    function kop_people_is_ed_consultant($person_id, array $opts = array()) {
+        $mine = empty($opts);
+        $opts = $opts ?: (array) ($GLOBALS['kop_people_opts'] ?? array());   // tests: a SQLite copy
+        if ((int) $person_id <= 0 || !kop_people_has_consultant($opts)) return false;
+        $cached = $mine && isset($GLOBALS['kop_people_consultants']) && is_array($GLOBALS['kop_people_consultants']);
+        $c = $cached ? $GLOBALS['kop_people_consultants'] : null;
+        if (!$c) {
+            $state = kop_people_load($opts);
+            $on = array();
+            foreach ($state['rows'] as $r) if ($r['ed_consultant']) $on[kop_people_resolve($state, $r['id'])] = true;
+            $c = array('on' => $on, 'state' => $state);
+            if ($mine) $GLOBALS['kop_people_consultants'] = $c;
+        }
+        return isset($c['on'][kop_people_resolve($c['state'], (int) $person_id)]);
+    }
+}
+
 if (!function_exists('kop_people_alias_list')) {
     function kop_people_alias_list($text) {
         $out = array();
@@ -273,11 +383,13 @@ if (!function_exists('kop_people_load')) {
      */
     function kop_people_load(array $opts = array()) {
         $rows = array();
-        $cols = 'id, name, name_key, aliases, merged_into, notes' . (kop_people_has_pool($opts) ? ', pool' : '');
+        $cols = 'id, name, name_key, aliases, merged_into, notes' . (kop_people_has_pool($opts) ? ', pool' : '')
+            . (kop_people_has_consultant($opts) ? ', ed_consultant' : '');
         foreach (kop_facility_db_rows('SELECT ' . $cols . ' FROM ' . kop_people_table('people', $opts) . ' ORDER BY id', array(), $opts) as $r) {
             $r['id'] = (int) $r['id'];
             $r['pool'] = isset($r['pool']) && $r['pool'] !== '' ? (string) $r['pool'] : 'industry';
             $r['merged_into'] = $r['merged_into'] !== null && (int) $r['merged_into'] > 0 ? (int) $r['merged_into'] : 0;
+            $r['ed_consultant'] = !empty($r['ed_consultant']) ? 1 : 0;
             $rows[$r['id']] = $r;
         }
         $state = array('rows' => $rows, 'by_key' => array(), 'keys' => array(), 'initials' => array());
