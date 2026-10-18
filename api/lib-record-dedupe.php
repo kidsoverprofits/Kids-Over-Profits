@@ -355,6 +355,17 @@ if (!function_exists('kop_dd_same_event')) {
         if (strlen($x['date']) === 10 && strlen($y['date']) === 10 && $x['date'] !== $y['date']) return false;
         // So are two tellings that give different ages ("a 13-year-old", "a 12-year-old").
         if (preg_match_all('/\b(\d{1,2})-year-old/', $a, $ax) && preg_match_all('/\b(\d{1,2})-year-old/', $b, $bx) && !array_intersect($ax[1], $bx[1])) return false;
+        // ...or different numbers of people ("17 former students", "nine former students": two lawsuits at Mount Bachelor).
+        $people = function ($s) {
+            static $words = array('one' => 1, 'two' => 2, 'three' => 3, 'four' => 4, 'five' => 5, 'six' => 6, 'seven' => 7, 'eight' => 8, 'nine' => 9,
+                'ten' => 10, 'eleven' => 11, 'twelve' => 12, 'thirteen' => 13, 'fourteen' => 14, 'fifteen' => 15, 'sixteen' => 16, 'seventeen' => 17,
+                'eighteen' => 18, 'nineteen' => 19, 'twenty' => 20);
+            preg_match_all('/\b(\d+|' . implode('|', array_keys($words)) . ')\s+(?:former\s+|other\s+)?(?:students|plaintiffs|residents|girls|boys|youths|teens|children|kids|staff|employees|people|women|men)\b/i', $s, $m);
+            return array_map(function ($n) use ($words) { return is_numeric($n) ? (int) $n : $words[strtolower($n)]; }, $m[1]);
+        };
+        $pa = $people($a);
+        $pb = $people($b);
+        if ($pa && $pb && !array_intersect($pa, $pb)) return false;
         if (strlen($x['date']) === 10 && $x['date'] === $y['date']) return true;
         if (substr($x['date'], 0, 4) !== substr($y['date'], 0, 4)) return false;
         $small = min(count($x['words']), count($y['words']));
@@ -385,8 +396,13 @@ if (!function_exists('kop_dd_fold_incidents')) {
                 $drop = $longer ? $have : $line;
                 $key = 'inc:' . md5($drop);
                 if (!kop_dd_allowed($allow, $key)) continue;
-                $steps[] = array('key' => $key, 'kind' => 'incident', 'text' => 'One event told twice. Keeps "' . $short($longer ? $line : $have) . '"; takes off "' . $short($drop) . '"');
-                if ($longer) $out[$i] = $line;
+                $kept = $longer ? $line : $have;
+                // The fuller telling keeps the more exact date of the two ("2006: ..." takes "2006-04" from the other).
+                $dk = kop_dd_event_parts($kept)['date'];
+                $dd = kop_dd_event_parts($drop)['date'];
+                if (strlen($dd) > strlen($dk) && strpos($dd, $dk) === 0) $kept = preg_replace('/^' . preg_quote($dk, '/') . '\b/', $dd, $kept, 1);
+                $steps[] = array('key' => $key, 'kind' => 'incident', 'text' => 'One event told twice. Keeps "' . $short($kept) . '"; takes off "' . $short($drop) . '"');
+                $out[$i] = $kept;
                 continue 2;
             }
             $out[] = $line;
