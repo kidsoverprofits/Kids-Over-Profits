@@ -252,6 +252,8 @@ require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-mentions.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-create.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-facts.php';
+// Copies earlier approvals and merges left on facility records (one person twice, a name twice, one event twice), tidied in the review inbox
+require_once get_stylesheet_directory() . '/inc/record-cleanup.php';
 // Corrections found by checking KOP's data against outside sources (scripts/data-audit.py), approved in the review inbox
 require_once get_stylesheet_directory() . '/inc/data-audit.php';
 // Federal funding found for programs (js/data/federal-funding/proposals.json), added to records in the review inbox

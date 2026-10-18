@@ -30,6 +30,7 @@ if (!defined('ABSPATH')) {
 require_once __DIR__ . '/admin-kit.php';
 require_once __DIR__ . '/staff-former.php';   // kop_staff_role_with_former(): "Former" only when the source says they left, never "current"
 require_once __DIR__ . '/record-writeups.php'; // approved items are held for the record's write-up (kop_fact_hold_on())
+require_once dirname(__DIR__) . '/api/lib-record-dedupe.php'; // one person, name and event per record, whichever source says it
 add_filter('kop_admin_kit_pages', function ($pages) { $pages[] = 'kop-woodbury-facts'; return $pages; });
 
 define('KOP_WOODBURY_FACTS_DB_VERSION', '3');
@@ -441,12 +442,39 @@ function kop_wbf_list_covers(array $doc, $path, $value) {
     if (trim($text) === '') return '';
     $incident = $path === 'criticalIncidents.customIncidents';
 
-    if ($path === 'identification.pastNames') {
+    if ($path === 'identification.pastNames' || $path === 'identification.otherNames') {
+        // "Red River Academy (2006-2015)", "Sequel TSI of Tuskegee", "X (AYA)" are names the record has already.
         $k = kop_wbf_org_key($text);
+        $dk = kop_dd_name_key($text);
         foreach (kop_wbf_record_names($doc) as $n) {
-            if ($k !== '' && kop_wbf_org_key($n) === $k) return 'the record already has the name ' . $n;
+            if (($k !== '' && kop_wbf_org_key($n) === $k) || ($dk !== '' && kop_dd_name_key($n) === $dk)) return 'the record already has the name ' . $n;
         }
         return '';
+    }
+    if ($path === 'location.formerLocations') {
+        // "Havre, MT" and "Havre, Montana": one town, whichever way a source writes the state.
+        $place = function ($l) {
+            $l = is_array($l) ? $l : array('raw' => (string) $l);
+            $city = trim((string) ($l['city'] ?? ''));
+            $state = trim((string) ($l['state'] ?? ''));
+            if ($city === '' && preg_match('/^([^,]+),\s*([^,(]+)/', (string) ($l['raw'] ?? ''), $m)) { $city = $m[1]; $state = $m[2]; }
+            if (function_exists('kop_facility_state_code')) $state = (string) kop_facility_state_code(trim($state));
+            $city = strtolower(trim(preg_replace('/[^a-z ]+/i', ' ', $city)));
+            return $city === '' ? '' : $city . '|' . strtolower(trim($state));
+        };
+        $want = $place($value);
+        if ($want === '') return '';
+        $loc = (array) ($doc['location'] ?? array());
+        foreach (array_merge(array($loc), (array) ($loc['formerLocations'] ?? array()), (array) ($loc['additionalLocations'] ?? array())) as $l) {
+            if ($place($l) === $want) return 'the record already lists ' . (is_array($l) ? trim((string) ($l['raw'] ?? (($l['city'] ?? '') . ', ' . ($l['state'] ?? ''))), ', ') : $l);
+        }
+        return '';
+    }
+    if ($incident) {
+        // The same event told by another source (the same kind in the same month, mostly the same words).
+        foreach ((array) kop_wbf_get($doc, 'criticalIncidents.customIncidents') as $line) {
+            if (is_string($line) && kop_dd_same_event($line, $text)) return 'the record has this event: ' . mb_substr(trim($line), 0, 160);
+        }
     }
     if ($path !== 'notes' && !$incident) return '';
 
@@ -799,12 +827,16 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
             $list = is_array($list) ? $list : array();
             foreach ($list as $i => $s) {
                 $s = is_array($s) ? $s : array('name' => (string) $s, 'role' => '', 'pastJobs' => '');
-                if (($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) || kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))) {
+                // Another source's spelling of someone listed ("Jim Omer", "Adam McClain", "Angela Agundez (Smith)") is that person.
+                if (($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) || kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))
+                    || kop_dd_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))) {
                     $before = array('role' => (string) ($s['role'] ?? ''), 'pastJobs' => (string) ($s['pastJobs'] ?? ''),
                         'source' => $s['source'] ?? null, 'sourceUrl' => $s['sourceUrl'] ?? null);
                     list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);
-                    $role = kop_staff_role_with_former($role, kop_staff_doc_closed($doc));
-                    if ($role === trim($before['role']) && $jobs === trim($before['pastJobs'])) {
+                    // Each title once, no source name in the role (the entry's source field says it).
+                    $role = kop_dd_role_tidy(kop_staff_role_with_former($role, kop_staff_doc_closed($doc)));
+                    $jobs = kop_dd_join_jobs($jobs, '');
+                    if ($role === kop_dd_role_tidy(trim($before['role'])) && $jobs === kop_dd_join_jobs(trim($before['pastJobs']), '')) {
                         throw new RuntimeException('Already on the record\'s staff list.');
                     }
                     $s['role'] = $role;
@@ -821,7 +853,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         }
         $list = &kop_wbf_ref($doc, $r['path']);
         $list = is_array($list) ? $list : array();
-        $list[] = array('name' => (string) $value['name'], 'role' => kop_staff_role_with_former((string) $value['role'], kop_staff_doc_closed($doc)), 'pastJobs' => (string) $value['pastJobs'])
+        $list[] = array('name' => (string) $value['name'], 'role' => kop_dd_role_tidy(kop_staff_role_with_former((string) $value['role'], kop_staff_doc_closed($doc))), 'pastJobs' => kop_dd_join_jobs((string) $value['pastJobs'], ''))
             + kop_wbf_source_ref($r);
         $done += array('mode' => 'added', 'at' => $r['path'], 'name' => (string) $value['name']);
         return $done;

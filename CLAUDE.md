@@ -253,6 +253,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Trashed, Preview in the card, Publish, Schedule, Trash; the status and dates before are kept in _kop_rinbox_was, so Back to draft (the Undo)
 # restores them exactly. Volunteers never see it
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=drafts
+# One person, one name, one event per record (api/lib-record-dedupe.php): every approval (kop_wbf_doc_apply(), wiki approve) and every Merge
+# Duplicates join asks kop_dd_same_person() (nickname, other spelling one letter off, maiden name in brackets; a different middle initial or
+# "X and Y" stays two), kop_dd_name_key() ("X (AYA)" = X) and kop_dd_same_event() (same kind and month; two exact days or two ages stay two)
+# before adding a copy; roles keep each title once and no source name (kop_dd_role_tidy()). What earlier approvals left is tidied at
+# Review inbox > Record cleanup (inc/record-cleanup.php: one card per record, tick the changes, whole-record Undo while unchanged since)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=record-cleanup
 # Card add-ons: an action written once for many queues' cards ("Home of a program", "File under a young adult program") is
 # kop_rinbox_addon() in inc/review-inbox.php ('never' queues, 'default' on/off, a queue's 'addons'); the owner ticks each on/off per queue at
 # KOP Tools > Card Add-ons (inc/review-inbox-addons.php, option kop_review_addons). Picking a company/program/consultant... in an action, or

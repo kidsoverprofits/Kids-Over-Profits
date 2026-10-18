@@ -294,7 +294,7 @@
      * slow counters (Inspection links ~10 s, Duplicate facilities ~4 s) each on
      * their own so the quick ones land first.
      */
-    var SLOW_COUNTS = ['inspection-links', 'facility-merge', 'wiki-links', 'news', 'fornits'];
+    var SLOW_COUNTS = ['inspection-links', 'facility-merge', 'wiki-links', 'news', 'fornits', 'record-cleanup'];
     function recountQueues(keys) {
         if (!keys.length) return;
         var slow = keys.filter(function (k) { return SLOW_COUNTS.indexOf(k) !== -1; });

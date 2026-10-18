@@ -29,6 +29,7 @@ if (!defined('KOP_DB_CONFIG_LOADED')) {
     // config.php was not loaded by the including file yet
     require_once __DIR__ . '/config.php';
 }
+require_once __DIR__ . '/lib-record-dedupe.php'; // kop_dd_same_person(): another spelling of someone listed is that person
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -530,17 +531,24 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
             if (!isset($fac['staff'][$l]) || !is_array($fac['staff'][$l])) $fac['staff'][$l] = [];
         }
         $have = [];
+        $haveNames = [];
         foreach (['administrator', 'notableStaff'] as $l) {
             foreach ($fac['staff'][$l] as $e) {
-                $k = kop_wiki_staff_fold(is_array($e) ? ($e['name'] ?? '') : $e);
-                if ($k !== '') $have[$k] = true;
+                $n = is_array($e) ? (string)($e['name'] ?? '') : (string)$e;
+                $k = kop_wiki_staff_fold($n);
+                if ($k !== '') { $have[$k] = true; $haveNames[] = $n; }
             }
         }
         $closed = kop_wiki_program_closed($period, (string)($wiki['years_active'] ?? ''));
         foreach (kop_wiki_staff_entries($wikiJson['staffMembers'], (string)($wiki['__source_url'] ?? ''), $closed) as $entry) {
             $k = kop_wiki_staff_fold($entry['name']);
             if ($k === '' || isset($have[$k])) continue;
+            // "Angela Agundez (Smith)" next to "Angela Agundez", "John Sarchio" next to "John Sarachio": already listed.
+            foreach ($haveNames as $n) {
+                if (kop_dd_same_person($entry['name'], $n)) continue 2;
+            }
             $have[$k] = true;
+            $haveNames[] = $entry['name'];
             $fac['staff']['notableStaff'][] = $entry;
             $addedStaff[] = $entry;
             $changed = true;

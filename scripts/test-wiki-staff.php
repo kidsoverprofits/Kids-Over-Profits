@@ -185,10 +185,14 @@ foreach ($rows as $r) {
     if (empty($p['__facility_ref'])) continue;
     // One whose staff are not all on the record yet (the live site's approvals already put most of them there).
     $f = $p['data']['facility'] ?? array();
+    // "Not on it" by the approval's own rule: another spelling of a listed person is that person (kop_dd_same_person()).
     $on = array();
-    foreach (array('administrator', 'notableStaff') as $l) foreach ((array) ($f['staff'][$l] ?? array()) as $e) $on[kop_wiki_staff_fold(is_array($e) ? ($e['name'] ?? '') : $e)] = true;
+    foreach (array('administrator', 'notableStaff') as $l) foreach ((array) ($f['staff'][$l] ?? array()) as $e) $on[] = is_array($e) ? (string) ($e['name'] ?? '') : (string) $e;
     foreach ((array) (json_decode((string) $r['json_data'], true)['staffMembers'] ?? array()) as $s) {
-        if (is_array($s) && trim((string) ($s['name'] ?? '')) !== '' && !isset($on[kop_wiki_staff_fold($s['name'])])) { $pick = $r; break 2; }
+        if (!is_array($s) || trim((string) ($s['name'] ?? '')) === '') continue;
+        $listed = false;
+        foreach ($on as $n) if (kop_wiki_staff_fold($n) === kop_wiki_staff_fold($s['name']) || kop_dd_same_person($s['name'], $n)) $listed = true;
+        if (!$listed) { $pick = $r; break 2; }
     }
 }
 if ($pick) {

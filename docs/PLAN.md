@@ -2877,10 +2877,21 @@ Still writing with no click (not behind the hold gate): Fornits discussion links
 and company links (auto-connect.php:533, 573); these dedupe by URL key. Clicks that write fields directly: wiki approve /
 wiki-staff (kop_wiki_merge_submission), closures, data audit, federal funding, program practices, Websites attach.
 
-Open (waiting on the owner's choice of approach):
-1. Stop the field+note double write: the source goes on the field (or a sources list), not a note line; second sources of a
-   held fact fold into the first.
-2. Writers check by meaning before writing: people by kop_people key / nickname / middle initial, deaths by date, notes by
-   the field they restate.
-3. "Record cleanup" review queue, one card per record (notes restating a filled field off, two spellings merged, role
-   baggage off with the source kept, repeated deaths combined, misfiled past names moved), exact Undo.
+The note lines stay (owner, 2026-10-18): they are where the page's "source" links come from (kop_facility_pages_note_sources()).
+Traced on the records the owner approved facts on (2026-10-18): Merge Duplicates joined both records' copies of the same facts
+(Alternative Youth Adventures: James Omer 3 times, the 2007 death 3 times, "(AYA)" as another name); another source's
+spelling of a listed person was a new person (McLain/McClain, Clarke/Clark; the wiki approve compared exact names only);
+roles piled titles and "(year, source)"; one event told by two sources was two lines.
+
+Built 2026-10-18 (api/lib-record-dedupe.php, inc/record-cleanup.php, inc/review-inbox/record-cleanup.php): approvals, wiki
+approve and Merge Duplicates ask kop_dd_same_person() / kop_dd_name_key() / kop_dd_same_event() before adding a copy, and roles
+are tidied; Review inbox > Record cleanup tidies what is there (dry run on the 2026-10-18 pull: 577 records; 253 people listed
+twice, 549 records with roles to tidy, 44 names, 17 events).
+
+Open:
+1. After deploy: open https://kidsoverprofits.org/admin-submissions/ > Record cleanup (the first open works the cards out,
+   ~30 s); check a few cards (Alternative Youth Adventures, Canyon State Academy, Boulder Creek Academy) before tidying many.
+2. People the people table holds as two ids (different personId) are never folded: merge them at KOP Tools > Merge People
+   first, then their card appears.
+3. Not done: note lines that repeat a filled field from a second source (171 on 91 records) could fold into one line with both
+   sources; Fornits/Drive Docs auto links still write without a click (they dedupe by address).

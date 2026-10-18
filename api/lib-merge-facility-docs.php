@@ -17,6 +17,7 @@
  */
 
 require_once dirname(__DIR__) . '/inc/facility-store.php';
+require_once __DIR__ . '/lib-record-dedupe.php';
 
 function kop_mfd_is_empty($value) {
     return $value === null || $value === '' || $value === array() || $value === false;
@@ -171,8 +172,8 @@ function kop_mfd_merge_docs(array $keep, array $drop, array $drop_meta, array $r
         // The text form of the years would still give the whole site's life.
         if (!empty($later['start']) || !empty($later['end'])) $period['yearsOfOperation'] = '';
         $merged['operatingPeriod'] = $period;
-    } elseif ($drop_name !== '' && kop_facility_name_key($drop_name) !== kop_facility_name_key($name)) {
-        // A genuinely different spelling is worth keeping as another name.
+    } elseif ($drop_name !== '' && kop_facility_name_key($drop_name) !== kop_facility_name_key($name) && kop_dd_name_key($drop_name) !== kop_dd_name_key($name)) {
+        // A genuinely different spelling is worth keeping as another name (not "X (AYA)" or "X, LLC" beside X).
         $merged['identification']['otherNames'] = kop_mfd_union(array($merged['identification']['otherNames'] ?? array(), array($drop_name)));
     }
     if ($rename === null && $alias) {
@@ -196,6 +197,11 @@ function kop_mfd_merge_docs(array $keep, array $drop, array $drop_meta, array $r
             $merged['provenance'][$key] = $drop['provenance'][$key];
         }
     }
+
+    // Both records often got their own copy of the same facts (one person under two spellings, one death told
+    // by two sources, the same name twice): the joined lists keep one of each (api/lib-record-dedupe.php).
+    // A rename keeps each item under the name it was filed under (its era keys), so there only the names are tidied.
+    list($merged) = $rename === null ? kop_dd_tidy_doc($merged) : kop_dd_tidy_names($merged);
 
     $legacy = is_array($merged['legacy'] ?? null) ? $merged['legacy'] : array();
     $legacy['mergedFacilities'] = kop_mfd_is_list($legacy['mergedFacilities'] ?? null) ? $legacy['mergedFacilities'] : array();

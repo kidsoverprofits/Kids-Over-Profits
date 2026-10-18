@@ -37,6 +37,8 @@ function kop_rinbox_ya_file_skip_sources() {
         'highlight-summaries', 'bug-reports', 'glossary-feedback', 'featured-nominations', 'status_checks', 'publish-approved',
         // KOP's own wiki text and which record a wiki entry is about: nothing in them to file on a program
         'wiki-updates', 'wiki-links',
+        // Tidying copies on a record: nothing new to file
+        'record-cleanup',
         // Lines from a program's own handbook, already filed under its record
         'program-practices',
     );

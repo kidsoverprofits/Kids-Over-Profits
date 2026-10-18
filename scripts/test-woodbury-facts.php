@@ -104,8 +104,9 @@ foreach ($by as $fid => $rows) {
         $at = $get($saved, $d['at'] ?? $r['path']);
         $ok = true;
         if ($r['op'] === 'add_staff') {
-            // Merged into the entry the record has for that person, perhaps under a nickname ("Andy Coe" for "Andrew Coe").
-            $mine = array_filter((array) $at, function ($s) use ($v) { return is_array($s) && kop_wbf_same_person((string) ($s['name'] ?? ''), (string) $v['name']); });
+            // Merged into the entry the record has for that person, perhaps under a nickname ("Andy Coe" for "Andrew Coe") or
+            // another spelling ("John Sarchio" for "John Sarachio", kop_dd_same_person()).
+            $mine = array_filter((array) $at, function ($s) use ($v) { return is_array($s) && (kop_wbf_same_person((string) ($s['name'] ?? ''), (string) $v['name']) || kop_dd_same_person((string) ($s['name'] ?? ''), (string) $v['name'])); });
             $ok = (bool) $mine;
             // The entry names where it came from, through the save normalizer.
             if ($mine && (trim((string) (reset($mine)['source'] ?? '')) === '' || !preg_match('#^https?://#', (string) (reset($mine)['sourceUrl'] ?? '')))) {
