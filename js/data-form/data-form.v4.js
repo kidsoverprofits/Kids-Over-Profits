@@ -881,8 +881,76 @@ function handleFileUpload(event) {
     reader.readAsText(file);
 }
 
+function importValueIsEmpty(value) {
+    if (value === null || value === undefined || value === '' || value === false) return true;
+    if (Array.isArray(value)) return value.every(importValueIsEmpty);
+    if (typeof value === 'object') return Object.values(value).every(importValueIsEmpty);
+    return false;
+}
+
+/** Fill what `target` lacks from `source`: empty values are taken, lists gain new entries, objects go key by key. */
+function importFillValue(target, source) {
+    if (importValueIsEmpty(source)) return target;
+    if (importValueIsEmpty(target)) return JSON.parse(JSON.stringify(source));
+    if (Array.isArray(target) && Array.isArray(source)) {
+        const kept = target.filter(v => !importValueIsEmpty(v));
+        const seen = new Set(kept.map(v => JSON.stringify(v)));
+        source.forEach(v => {
+            const key = JSON.stringify(v);
+            if (!importValueIsEmpty(v) && !seen.has(key)) {
+                seen.add(key);
+                kept.push(JSON.parse(key));
+            }
+        });
+        return kept;
+    }
+    if (target && source && typeof target === 'object' && typeof source === 'object'
+        && !Array.isArray(target) && !Array.isArray(source)) {
+        Object.keys(source).forEach(k => { target[k] = importFillValue(target[k], source[k]); });
+    }
+    return target;
+}
+
+function importFacilityKey(facility) {
+    const name = facility?.identification?.name || facility?.name || '';
+    return String(name).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 /**
- * Import one project (or a {projects: {...}} export) from raw JSON text.
+ * Merge imported project pieces into one project's data (fills, never overwrites).
+ * @returns {{added: number, filled: number}}
+ */
+function mergeImportedPieces(project, pieces) {
+    const counts = { added: 0, filled: 0 };
+    if (!Array.isArray(project.facilities)) project.facilities = [];
+    pieces.forEach(raw => {
+        // Raw, not normalized: template defaults ("USA", "for-profit") must not fill the open project.
+        const piece = JSON.parse(JSON.stringify(raw));
+        const facilities = Array.isArray(piece.facilities) ? piece.facilities : [];
+        delete piece.facilities;
+        // Placeholder facilities from piece templates carry no name: never add them.
+        facilities.filter(f => importFacilityKey(f)).forEach(facility => {
+            const key = importFacilityKey(facility);
+            const match = project.facilities.find(f => importFacilityKey(f) === key);
+            if (match) {
+                importFillValue(match, facility);
+                counts.filled++;
+            } else {
+                // An unnamed placeholder facility (new project) gives its slot to the first one in.
+                const blank = project.facilities.findIndex(f => !importFacilityKey(f));
+                if (blank >= 0) project.facilities[blank] = facility;
+                else project.facilities.push(facility);
+                counts.added++;
+            }
+        });
+        Object.keys(piece).forEach(k => { project[k] = importFillValue(project[k], piece[k]); });
+    });
+    return counts;
+}
+
+/**
+ * Import one project, a list of projects or facilities, or a {projects: {...}} export, from raw JSON text.
+ * With a project open, a project or list goes into it (mergeImportedPieces()).
  * Shared by the file picker and the "Paste JSON" box.
  * @param {string} text
  * @returns {boolean} true when at least one project was imported
@@ -895,15 +963,27 @@ function importProjectsFromJsonText(text) {
     {
         try {
             const data = JSON.parse(text);
-            if (!data || typeof data !== 'object' || Array.isArray(data)) {
-                throw new Error('Expected a JSON object describing a project.');
+            if (!data || typeof data !== 'object') {
+                throw new Error('Expected a JSON object or a list of them.');
             }
             let importedProjects = {};
 
-            // A project is open: one project's JSON goes into it, no new project needed.
-            // The loaded baseline stays as it was, so the import counts as changes to it.
+            // Pieces: a project, a list of projects, or bare facilities (anything with
+            // identification and no facilities list).
+            const pieces = data.projects ? [] : (Array.isArray(data) ? data : [data])
+                .filter(p => p && typeof p === 'object' && !Array.isArray(p))
+                .map(p => (p.identification && !p.facilities) ? { facilities: [p] } : p);
+            if (!data.projects && !pieces.length) {
+                throw new Error('Nothing in that JSON looks like a project or a facility.');
+            }
+
+            // A project is open: the pieces go into it, no new project needed. Fields it
+            // already has stay; empty ones are filled, lists gain the new entries, a facility
+            // with a name already listed fills that facility, others are added. The loaded
+            // baseline stays as it was, so the import counts as changes to it.
             if (!data.projects && window.currentProjectName) {
-                window.formData = normalizeProjectData(data);
+                const added = mergeImportedPieces(window.formData, pieces);
+                window.formData = normalizeProjectData(window.formData);
                 ['ensureReferrerDataStructures', 'ensureTransporterDataStructures', 'ensureProviderDataStructures',
                     'ensureMarketerDataStructures', 'ensureTradeOrgDataStructures'].forEach(fn => {
                     if (typeof window[fn] === 'function') window[fn]();
@@ -913,19 +993,22 @@ function importProjectsFromJsonText(text) {
                 if (typeof window.updateAllUI === 'function') window.updateAllUI();
                 updateJSON();
                 autoSave();
-                showUploadStatus(`Imported into "${window.currentProjectName}". Save to keep it.`, 'success');
+                showUploadStatus(`Imported into "${window.currentProjectName}": ${added.added} facilit${added.added === 1 ? 'y' : 'ies'} added, ${added.filled} filled in. Save to keep it.`, 'success');
                 return true;
             }
 
             if (data.projects) {
                 importedProjects = data.projects;
             } else {
-                const projectName = data.operator?.name || `imported-${Date.now()}`;
-                importedProjects[projectName] = {
-                    name: projectName,
-                    data: normalizeProjectData(data),
-                    timestamp: new Date().toISOString()
-                };
+                // One project per company name; pieces naming the same company join.
+                pieces.forEach(piece => {
+                    const projectName = piece.operator?.name || `imported-${Date.now()}`;
+                    if (!importedProjects[projectName]) {
+                        importedProjects[projectName] = { name: projectName, data: { facilities: [] }, timestamp: new Date().toISOString() };
+                    }
+                    mergeImportedPieces(importedProjects[projectName].data, [piece]);
+                });
+                Object.values(importedProjects).forEach(p => { p.data = normalizeProjectData(p.data); });
             }
 
             Object.entries(importedProjects).forEach(([key, project]) => {
