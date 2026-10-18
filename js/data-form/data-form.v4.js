@@ -899,7 +899,24 @@ function importProjectsFromJsonText(text) {
                 throw new Error('Expected a JSON object describing a project.');
             }
             let importedProjects = {};
-            
+
+            // A project is open: one project's JSON goes into it, no new project needed.
+            // The loaded baseline stays as it was, so the import counts as changes to it.
+            if (!data.projects && window.currentProjectName) {
+                window.formData = normalizeProjectData(data);
+                ['ensureReferrerDataStructures', 'ensureTransporterDataStructures', 'ensureProviderDataStructures',
+                    'ensureMarketerDataStructures', 'ensureTradeOrgDataStructures'].forEach(fn => {
+                    if (typeof window[fn] === 'function') window[fn]();
+                });
+                const facilityCount = (window.formData.facilities || []).length;
+                if (!(window.currentFacilityIndex < facilityCount)) window.currentFacilityIndex = 0;
+                if (typeof window.updateAllUI === 'function') window.updateAllUI();
+                updateJSON();
+                autoSave();
+                showUploadStatus(`Imported into "${window.currentProjectName}". Save to keep it.`, 'success');
+                return true;
+            }
+
             if (data.projects) {
                 importedProjects = data.projects;
             } else {
