@@ -632,7 +632,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-types.php [--
 # unchanged, original kept in uploads/kop-clipping-originals/<id>/), their text in {prefix}kop_doc_text (the header search finds words inside
 # documents) and one waiting article each in Submissions Review > News (the processor's AI read; linked to the printed web address, else our scan)
 (kop-pipeline) py -3 scripts/clippings-ocr.py run [--ids ..] [--limit N] && py -3 scripts/clippings-ocr.py upload   # resumable; selftest too
-php api/import-clippings.php ~/kop-import/clippings [apply] [--ids=..] [--news-only]   # on the server (ea-php82): dry run first; undo [apply] [--ids=..]
+php api/import-clippings.php ~/kop-import/clippings [apply] [--ids=..] [--news-only]   # on the server (ea-php82): dry run first; undo|titles [apply] [--ids=..]
+# File-name titles become "Headline (Outlet, date)" (kop_clip_is_slug_title()); libraries with stored text get a search box (js/doc-type-filter.js, kop/v1/doc-text-search)
 php -d extension=mbstring scripts/test-news-clippings.php
 # Marketing companies (Marketers tab, /marketing-companies/): record shape, seed, page, form markup == marketer-form.js
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-marketers.php [--out=tmp/marketers]

@@ -95,3 +95,50 @@ button.kop-dtf__btn:focus-visible {
 .kop-dtf__more a:focus {
     color: var(--kop-midnight-blue, #000435);
 }
+
+/* Search inside the documents' words (js/doc-type-filter.js setupSearch). */
+.kop-dts {
+    margin: 0 0 0.6rem;
+}
+
+.kop-dts__label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-width: 32rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-dts__input,
+.kop-dts__input:focus {
+    width: 100%;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--kop-navy-blue, #000080);
+    border-radius: 6px;
+}
+
+.kop-dts__status {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-dts__status:empty {
+    display: none;
+}
+
+.kop-dts__snip {
+    display: block;
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--kop-text-muted, #4A5568);
+    background: var(--kop-white, #fff);
+    overflow-wrap: anywhere;
+}

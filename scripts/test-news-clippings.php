@@ -11,6 +11,8 @@ define('ABSPATH', __DIR__ . '/');
 function wp_parse_url($url, $part = -1) { return parse_url($url, $part); }
 function home_url($p = '') { return 'https://kidsoverprofits.org' . $p; }
 function esc_url_raw($u) { return $u; }
+function kop_title_case($s) { return ucwords($s); }
+function add_action() {}
 require dirname(__DIR__) . '/inc/news-clippings.php';
 
 $fail = 0;
@@ -40,6 +42,29 @@ $text = "MAINE TIMES\n\nJoe Gauld teaches tough. Gauld promotes Bath's Hyde Scho
 $check('snippet finds the words', kop_clip_snippet($text, 'character development', 15), '... and its character development program with ...');
 $check('snippet of missing words', kop_clip_snippet($text, 'wilderness', 15), '');
 $check('instructions name the document', strpos(kop_clip_instructions('Maine Times 1974'), '"Maine Times 1974"') !== false, true);
+
+// File-name titles are renamed after the article; written ones stay.
+foreach (array('cedu crummel criminal', 'CEDU_Experiment', 'eagle092510', 'GoodHousekeepingRX', 'Hyde Times Record 06-05-2006pdf',
+    'medium.com-Running My Anger The Legacy of CEDU', 'lizditz.typepad.com-CEDU A Timeline Work In Progress', 'daily beast') as $t) {
+    $check('file-name title: ' . $t, kop_clip_is_slug_title($t), true);
+}
+foreach (array('Hyde Maine Sunday Telegram 03-10-2002', 'Maine Times Joe Gauld Teaches Tough 1974', 'YSI Palm Beach Post 03-21-2016',
+    'Hidden Lake officials see Chapter 11 as chance to regroup (Dahlonega Nugget, 2009-06-04, Wayback copy)') as $t) {
+    $check('written title kept: ' . $t, kop_clip_is_slug_title($t), false);
+}
+$check('doc title', kop_clip_doc_title('Death row serial molester connected to CEDU', 'The Alpenhorn News', '2009-11-12'),
+    'Death row serial molester connected to CEDU (The Alpenhorn News, 2009-11-12)');
+$check('doc title in capitals is recased', kop_clip_doc_title('THE PARENTING PRINCIPLES', 'Sunday Telegram', ''), 'The Parenting Principles (Sunday Telegram)');
+$check('doc title without a headline', kop_clip_doc_title('', 'Times', '2001-01-01'), '');
+
+// Every clipping on the mirror: which titles the pass would rename.
+$db = dirname(__DIR__) . '/tmp/prod.sqlite';
+if (extension_loaded('pdo_sqlite') && is_file($db)) {
+    $pdo = new PDO('sqlite:' . $db);
+    $rows = $pdo->query("SELECT p.post_title FROM wpdl_kop_doc_types d JOIN wpdl_posts p ON p.ID = d.attachment_id WHERE d.type = 'news-clipping'")->fetchAll(PDO::FETCH_COLUMN);
+    $renamed = array_values(array_filter($rows, 'kop_clip_is_slug_title'));
+    echo "\n" . count($renamed) . ' of ' . count($rows) . " clipping titles would be renamed after their article:\n  " . implode("\n  ", $renamed) . "\n";
+}
 
 echo $fail ? "\n$fail failed\n" : "\nall passed\n";
 exit($fail ? 1 : 0);

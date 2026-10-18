@@ -8,6 +8,7 @@
  * CLI only (ea-php82):
  *   php api/import-clippings.php <dir> [apply] [--ids=1,2] [--limit=10] [--no-news] [--news-only]
  *   php api/import-clippings.php undo [apply] [--ids=1,2]
+ *   php api/import-clippings.php titles [apply] [--ids=1,2]   (file-name titles of clippings applied earlier)
  * Without "apply" it reports what it would do.
  */
 
@@ -26,10 +27,12 @@ $opt = function ($name) use ($args) {
 };
 $ids = array_values(array_filter(array_map('intval', explode(',', (string) $opt('ids')))));
 $undo = ($args[0] ?? '') === 'undo';
-$dir = $undo ? '' : rtrim((string) ($args[0] ?? ''), '/');
-if (!$undo && ($dir === '' || !is_readable($dir . '/manifest.json'))) {
+$titles = ($args[0] ?? '') === 'titles';
+$dir = ($undo || $titles) ? '' : rtrim((string) ($args[0] ?? ''), '/');
+if (!$undo && !$titles && ($dir === '' || !is_readable($dir . '/manifest.json'))) {
     fwrite(STDERR, "Usage: php api/import-clippings.php <dir with manifest.json> [apply] [--ids=..] [--limit=N] [--no-news] [--news-only]\n"
-        . "       php api/import-clippings.php undo [apply] [--ids=..]\n");
+        . "       php api/import-clippings.php undo [apply] [--ids=..]\n"
+        . "       php api/import-clippings.php titles [apply] [--ids=..]\n");
     exit(2);
 }
 
@@ -48,12 +51,16 @@ if (!defined('ABSPATH')) {
 @set_time_limit(0);
 
 try {
-    $report = $undo
-        ? kop_clip_undo($apply, $ids)
-        : kop_clip_import($dir, $apply, array(
+    if ($undo) {
+        $report = kop_clip_undo($apply, $ids);
+    } elseif ($titles) {
+        $report = kop_clip_retitle_all($apply, $ids);
+    } else {
+        $report = kop_clip_import($dir, $apply, array(
             'ids' => $ids, 'limit' => (int) $opt('limit'),
             'no_news' => in_array('--no-news', $args, true), 'news_only' => in_array('--news-only', $args, true),
         ));
+    }
 } catch (Throwable $e) {
     fwrite(STDERR, $e->getMessage() . "\n");
     exit(1);

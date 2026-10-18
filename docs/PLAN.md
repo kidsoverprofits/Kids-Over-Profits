@@ -2839,6 +2839,10 @@ Open:
    checks them; #10496 (CEDU, Alpenhorn News) tied to no record. Then the other 44: `run` + `upload` + `apply` (the 10 are skipped).
    The AI also lists places that are not programs (Bath Iron Works, Desert Hospital): untick them on the card.
 2. New clippings later: run the script again (only unread ones are read; sync tmp/prod.sqlite first so it sees them).
-3. Not done: images typed news-clipping (none today) get text and an article but keep their file; the facility library's own
-   filter does not search the text yet; clippings' slug titles ("cedu crummel criminal") are not renamed from the AI's headline.
+3. Built 2026-10-18: each library holding documents with stored text has "Search the words inside these documents"
+   (js/doc-type-filter.js, kop/v1/doc-text-search; tiles carry data-doc-id/data-doc-text from kop_dt_tile_attr()); file-name
+   titles (23 of 54: "cedu crummel criminal", "medium.com-...") become "Headline (Outlet, date)" after their article
+   (kop_clip_is_slug_title(), Undo puts the old title back); an image clipping becomes a searchable PDF beside its picture,
+   whose address keeps working. **Check after deploy:** `php api/import-clippings.php titles` (dry run, then apply) for the 10
+   applied before; the search box on https://kidsoverprofits.org/facility/hyde-school/ (cached pages show it once rebuilt).
 

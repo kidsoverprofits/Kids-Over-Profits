@@ -1116,10 +1116,17 @@ if (function_exists('add_action')) {
 // ---------------------------------------------------------------------------
 
 if (!function_exists('kop_dt_tile_attr')) {
-    /** ' data-doc-types="a b"' for a document tile, '' when it has no type. */
+    /**
+     * ' data-doc-types="a b"' for a document tile ('' when it has no type), plus data-doc-id and data-doc-text
+     * when the document's words are stored (inc/news-clippings.php), for the library's search box.
+     */
     function kop_dt_tile_attr($id) {
         $types = kop_dt_types_for($id);
-        return $types ? ' data-doc-types="' . esc_attr(implode(' ', $types)) . '"' : '';
+        $out = $types ? ' data-doc-types="' . esc_attr(implode(' ', $types)) . '"' : '';
+        if (function_exists('kop_clip_text_ids') && isset(kop_clip_text_ids()[(int) $id])) {
+            $out .= ' data-doc-id="' . (int) $id . '" data-doc-text="1"';
+        }
+        return $out;
     }
 }
 
@@ -1157,7 +1164,7 @@ if (!function_exists('kop_dt_enqueue_filter')) {
         $done = true;
         $labels = array();
         foreach (kop_dt_types() as $slug => $t) $labels[$slug] = array('label' => $t['label'], 'plural' => $t['plural'], 'url' => kop_dt_url($slug));
-        wp_localize_script('kop-doc-type-filter', 'KOP_DOC_TYPES', array('types' => $labels));
+        wp_localize_script('kop-doc-type-filter', 'KOP_DOC_TYPES', array('types' => $labels, 'textSearch' => rest_url('kop/v1/doc-text-search')));
     }
 }
 

@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_CLIP_DB_VERSION = 1;
+const KOP_CLIP_DB_VERSION = 2;
 
 function kop_clip_tables() {
     global $wpdb;
@@ -51,6 +51,11 @@ function kop_clip_install() {
         original_md5 CHAR(32) NOT NULL DEFAULT '',
         backup_file VARCHAR(255) NOT NULL DEFAULT '',
         file_replaced TINYINT(1) NOT NULL DEFAULT 0,
+        original_file VARCHAR(255) NOT NULL DEFAULT '',
+        original_mime VARCHAR(100) NOT NULL DEFAULT '',
+        original_meta LONGTEXT NULL,
+        prior_title TEXT NULL,
+        new_title TEXT NULL,
         prior_text LONGTEXT NULL,
         news_id BIGINT UNSIGNED NULL,
         news_result VARCHAR(20) NOT NULL DEFAULT '',
@@ -146,6 +151,69 @@ function kop_clip_news_params(array $fields, $title, $url) {
         if (isset($fields[$k])) $p[$k] = $fields[$k];
     }
     return $p;
+}
+
+/**
+ * True for a title that is only a file name ("cedu crummel criminal", "CEDU_Experiment", "eagle092510",
+ * "Hyde Times Record 06-05-2006pdf", "medium.com-Running My Anger"); a written title stays.
+ */
+function kop_clip_is_slug_title($title) {
+    $t = trim((string) $title);
+    if ($t === '') return true;
+    if (strpos($t, '_') !== false || strpos($t, ' ') === false) return true;
+    if (preg_match('/pdf$/i', $t) && !preg_match('/\.pdf$/i', $t)) return true;
+    if (preg_match('/^[a-z0-9-]+(\.[a-z0-9-]+)*\.(com|org|net|edu|gov|us|info)\b/i', $t)) return true;
+    return !preg_match('/\p{Lu}/u', $t);
+}
+
+/** "Headline (Outlet, 2006-06-05)", the library's way of naming a clipping; '' without a headline. */
+function kop_clip_doc_title($headline, $outlet = '', $date = '') {
+    $h = trim(preg_replace('/\s+/u', ' ', (string) $headline));
+    if ($h === '') return '';
+    // A headline set in capitals reads as a sentence-cased title.
+    if (!preg_match('/\p{Ll}/u', $h) && function_exists('kop_title_case')) $h = kop_title_case(mb_strtolower($h));
+    $bits = array_filter(array(trim((string) $outlet), preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date) ? (string) $date : ''));
+    return mb_substr($h . ($bits ? ' (' . implode(', ', $bits) . ')' : ''), 0, 250);
+}
+
+/**
+ * Names a clipping with a file-name title after its article (news row $news_id), logged for Undo.
+ * Returns the new title, or '' when the title is kept.
+ */
+function kop_clip_retitle($id, $news_id, $apply = true) {
+    global $wpdb;
+    $title = get_the_title($id);
+    if (!$news_id || !kop_clip_is_slug_title($title)) return '';
+    $pdo = kop_seed_pdo();
+    if (!$pdo) return '';
+    $st = $pdo->prepare('SELECT article_title, publication_name, publication_date FROM news_submissions WHERE id = ?');
+    $st->execute(array((int) $news_id));
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$row) return '';
+    $new = kop_clip_doc_title($row['article_title'], $row['publication_name'], substr((string) $row['publication_date'], 0, 10));
+    if ($new === '' || $new === $title || kop_clip_is_slug_title($new)) return '';
+    if ($apply) {
+        wp_update_post(array('ID' => (int) $id, 'post_title' => $new));
+        $t = kop_clip_tables();
+        $wpdb->update($t['log'], array('prior_title' => $title, 'new_title' => $new), array('attachment_id' => (int) $id));
+    }
+    return $new;
+}
+
+/** The titles pass: every applied clipping with a file-name title and an article, renamed after it. */
+function kop_clip_retitle_all($apply, array $ids = array()) {
+    global $wpdb;
+    kop_clip_install();
+    $t = kop_clip_tables();
+    $where = "state = 'applied' AND news_id IS NOT NULL AND (new_title IS NULL OR new_title = '')"
+        . ($ids ? ' AND attachment_id IN (' . implode(',', array_map('intval', $ids)) . ')' : '');
+    $out = array();
+    foreach ((array) $wpdb->get_results("SELECT attachment_id, news_id FROM {$t['log']} WHERE {$where}", ARRAY_A) as $r) {
+        $old = get_the_title((int) $r['attachment_id']);
+        $new = kop_clip_retitle((int) $r['attachment_id'], (int) $r['news_id'], $apply);
+        $out[] = array('id' => (int) $r['attachment_id'], 'title' => $old, 'result' => $new === '' ? 'kept' : ($apply ? 'renamed' : 'would rename'), 'new_title' => $new);
+    }
+    return $out;
 }
 
 /** The manifest the script wrote: [{id, src_md5, pdf, txt, pages, page_url, title}, ...]. */
@@ -267,13 +335,16 @@ function kop_clip_import($dir, $apply, array $opts = array()) {
             $line['result'] = 'article retry';
         } else {
             $current_md5 = is_readable($file) ? md5_file($file) : '';
-            $is_pdf = get_post_mime_type($id) === 'application/pdf';
-            $swap = $is_pdf && !empty($e['pdf']) && is_readable($pdf);
+            $mime = (string) get_post_mime_type($id);
+            $is_pdf = $mime === 'application/pdf';
+            $is_image = strpos($mime, 'image/') === 0;
+            $swap = ($is_pdf || $is_image) && !empty($e['pdf']) && is_readable($pdf);
             if ($swap && $current_md5 !== (string) ($e['src_md5'] ?? '')) {
                 $report[] = $line + array('result' => 'skipped: the file on the site changed since it was read (run the script again)');
                 continue;
             }
-            $line['file'] = $swap ? 'replaced with the searchable copy' : ($is_pdf ? 'kept (no searchable copy)' : 'kept (not a PDF)');
+            $line['file'] = !$swap ? 'kept (no searchable copy)'
+                : ($is_pdf ? 'replaced with the searchable copy' : 'switched to a searchable PDF (the picture stays at its address)');
             if (!$apply) {
                 $line['result'] = 'would apply';
                 $line['article'] = $line['chars'] >= 300 ? 'would be read by the AI' : 'too little text for an article';
@@ -281,7 +352,24 @@ function kop_clip_import($dir, $apply, array $opts = array()) {
                 continue;
             }
             $backup_rel = '';
-            if ($swap) {
+            $was = array('original_file' => '', 'original_mime' => '', 'original_meta' => null);
+            if ($swap && $is_image) {
+                // A picture: the document becomes a searchable PDF beside it; the picture file stays, so links to it still open.
+                $name = wp_unique_filename(dirname($file), pathinfo($file, PATHINFO_FILENAME) . '.pdf');
+                $dest = dirname($file) . '/' . $name;
+                if (!copy($pdf, $dest)) {
+                    $report[] = $line + array('result' => 'error: could not write the searchable copy');
+                    continue;
+                }
+                $was = array(
+                    'original_file' => (string) get_post_meta($id, '_wp_attached_file', true),
+                    'original_mime' => $mime,
+                    'original_meta' => wp_json_encode(wp_get_attachment_metadata($id)),
+                );
+                update_attached_file($id, $dest);
+                wp_update_post(array('ID' => $id, 'post_mime_type' => 'application/pdf'));
+                wp_update_attachment_metadata($id, array('filesize' => filesize($dest)));
+            } elseif ($swap) {
                 $backup_rel = 'kop-clipping-originals/' . $id . '/' . basename($file);
                 wp_mkdir_p(dirname($upload['basedir'] . '/' . $backup_rel));
                 if (!copy($file, $upload['basedir'] . '/' . $backup_rel) || md5_file($upload['basedir'] . '/' . $backup_rel) !== $current_md5) {
@@ -306,6 +394,8 @@ function kop_clip_import($dir, $apply, array $opts = array()) {
             $wpdb->replace($t['log'], array(
                 'attachment_id' => $id, 'state' => 'applied', 'original_md5' => $current_md5,
                 'backup_file' => $backup_rel, 'file_replaced' => $swap ? 1 : 0,
+                'original_file' => $was['original_file'], 'original_mime' => $was['original_mime'], 'original_meta' => $was['original_meta'],
+                'prior_title' => null, 'new_title' => null,
                 'prior_text' => $prior, 'news_id' => null, 'news_result' => '', 'note' => '',
                 'applied_at' => current_time('mysql'), 'undone_at' => null,
             ));
@@ -321,6 +411,10 @@ function kop_clip_import($dir, $apply, array $opts = array()) {
             $wpdb->update($t['log'], array('news_id' => $news_id, 'news_result' => $res, 'note' => $note), array('attachment_id' => $id));
             $line['news'] = $res;
             $line['news_id'] = $news_id;
+            if (in_array($res, array('made', 'duplicate'), true)) {
+                $renamed = kop_clip_retitle($id, $news_id, true);
+                if ($renamed !== '') $line['new_title'] = $renamed;
+            }
             if ($note !== '') $line['note'] = $note;
         }
         $report[] = $line;
@@ -342,7 +436,8 @@ function kop_clip_undo($apply, array $ids = array()) {
         $line = array('id' => $id, 'title' => get_the_title($id));
         $file = get_attached_file($id);
         $backup = $log['backup_file'] !== '' ? $upload['basedir'] . '/' . $log['backup_file'] : '';
-        if ($log['file_replaced'] && (!$backup || !is_readable($backup))) {
+        $switched = $log['file_replaced'] && $log['original_file'] !== '';
+        if ($log['file_replaced'] && !$switched && (!$backup || !is_readable($backup))) {
             $report[] = $line + array('result' => 'error: the original copy is missing (' . $log['backup_file'] . ')');
             continue;
         }
@@ -359,12 +454,20 @@ function kop_clip_undo($apply, array $ids = array()) {
             else $news = 'deleted #' . $log['news_id'];
         }
         $line += array('file' => $log['file_replaced'] ? 'original put back' : 'unchanged', 'news' => $news);
+        if (!empty($log['new_title'])) $line['title_back'] = (string) $log['prior_title'];
         if (!$apply) {
             $line['result'] = 'would undo';
             $report[] = $line;
             continue;
         }
-        if ($log['file_replaced']) {
+        if ($switched) {
+            // Back to the picture; the searchable PDF beside it goes.
+            update_attached_file($id, $upload['basedir'] . '/' . $log['original_file']);
+            wp_update_post(array('ID' => $id, 'post_mime_type' => $log['original_mime']));
+            $meta = json_decode((string) $log['original_meta'], true);
+            if (is_array($meta)) wp_update_attachment_metadata($id, $meta);
+            if ($file && is_file($file) && strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'pdf') @unlink($file);
+        } elseif ($log['file_replaced']) {
             copy($backup, $file);
             $meta = wp_get_attachment_metadata($id);
             if (is_array($meta)) {
@@ -394,6 +497,9 @@ function kop_clip_undo($apply, array $ids = array()) {
             }
             if (function_exists('kop_record_changed')) kop_record_changed('news', array($nid));
         }
+        if (!empty($log['new_title']) && get_the_title($id) === $log['new_title']) {
+            wp_update_post(array('ID' => $id, 'post_title' => (string) $log['prior_title']));
+        }
         $wpdb->update($t['log'], array('state' => 'undone', 'undone_at' => current_time('mysql')), array('attachment_id' => $id));
         $line['result'] = 'undone';
         $report[] = $line;
@@ -401,3 +507,46 @@ function kop_clip_undo($apply, array $ids = array()) {
     if ($apply && function_exists('wp_cache_flush')) wp_cache_flush();
     return $report;
 }
+
+/** Ids of every document whose text is stored, once per request (a small set: the tiles' data-doc-text). */
+function kop_clip_text_ids() {
+    static $ids = null;
+    if ($ids !== null) return $ids;
+    global $wpdb;
+    $t = kop_clip_tables();
+    $suppress = $wpdb->suppress_errors(true);
+    $ids = array_flip(array_map('intval', (array) $wpdb->get_col("SELECT attachment_id FROM {$t['text']}")));
+    $wpdb->suppress_errors($suppress);
+    return $ids;
+}
+
+/**
+ * GET kop/v1/doc-text-search?q=<words>&ids=1,2,3: which of these documents hold the words, with the words around
+ * them ({matches: {id: snippet}}). Public: the documents themselves are; the library's search box (js/doc-type-filter.js).
+ */
+function kop_clip_rest_search(WP_REST_Request $req) {
+    global $wpdb;
+    $q = trim(preg_replace('/\s+/u', ' ', (string) $req['q']));
+    if (mb_strlen($q) < 3 || mb_strlen($q) > 100) return array('matches' => (object) array());
+    $ids = array_slice(array_values(array_unique(array_filter(array_map('intval', explode(',', (string) $req['ids']))))), 0, 1000);
+    if (!$ids) return array('matches' => (object) array());
+    $t = kop_clip_tables();
+    $suppress = $wpdb->suppress_errors(true);
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT d.attachment_id, d.text FROM {$t['text']} d JOIN {$wpdb->posts} p ON p.ID = d.attachment_id AND p.post_type = 'attachment'
+          WHERE d.attachment_id IN (" . implode(',', $ids) . ") AND d.text LIKE %s",
+        '%' . $wpdb->esc_like($q) . '%'
+    ), ARRAY_A);
+    $wpdb->suppress_errors($suppress);
+    $out = array();
+    foreach ((array) $rows as $r) $out[(string) $r['attachment_id']] = kop_clip_snippet($r['text'], $q, 60);
+    return array('matches' => (object) $out);
+}
+
+add_action('rest_api_init', function () {
+    register_rest_route('kop/v1', '/doc-text-search', array(
+        'methods'             => 'GET',
+        'callback'            => 'kop_clip_rest_search',
+        'permission_callback' => '__return_true',
+    ));
+});
