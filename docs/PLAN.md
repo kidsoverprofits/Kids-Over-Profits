@@ -260,10 +260,6 @@ need the owner's accounts, devices or artwork.
 
 ### Hosting
 
-9. **Staging is deleted** (checked 2026-10-14: no ~/public_html/staging; /staging/ is a 404 and its old
-    inner addresses redirect to the live pages). Only a LiteSpeed-cached copy of its old home page still
-    answers at /staging/ (noindex). **Owner:** LiteSpeed Cache > Toolbox > Purge > Purge by URL `/staging/`.
-    robots.txt no longer disallows /staging/, so Google can recrawl the old addresses and drop them.
 10. **Portal leftovers** (optional). NixiHost backups still hold the one
     pre-encryption submission (`SUB-2025-YLVUY0CL`) until they rotate, unless
     support purges them. The owner deleted the public copies and asked
@@ -624,6 +620,35 @@ updated.
    --file=<pa --out json>` prints the list). Then the severe finding
    extractor (plan step 11: each citation's description of violation;
    follow-ups that repeat a counted citation document skipped).
+   **Scanned PA reports re-read with better OCR (2026-10-18, no AI):** the
+   pre-2019 scans are 200 dpi faxes and Tesseract's fast model misread them
+   badly ("Realdent # 8 had a safely plan ... thal"), and got dates wrong
+   (8/6/16 for 8/5/15). OCR version 2 in kop-pipeline `pa_scraper.py` takes
+   each page's scan out of the PDF as stored (the state's black boxes over
+   blanked names are drawn over the scan, so every filled box is painted
+   onto it first; a page with other drawings or annotations is drawn whole;
+   `python scripts/test-pa-scan-image.py`), enlarges and smooths fax pages, uses
+   Tesseract's best English model (downloaded once to
+   `scrapers/.tessdata_best/`), then `scrapers/ocr_repair.py` swaps only the
+   letters this typeface confuses, toward words the clean 2019+ reports use
+   (`scripts/build-pa-ocr-vocab.py` -> `scrapers/pa_ocr_vocab.json`), and
+   moves a year 2+ past the report's. Exact words on four hand-copied
+   passages: 51-91% before, 93-100% after; clean text changes 0.06% of
+   words (mostly fixing OCR junk). `python scripts/test-ocr-repair.py`.
+   Open:
+   - **Owner: rerun the PA scraper on the scanned years** (`python
+     pa_scraper.py --full`; extractions from OCR version 1 are read again,
+     text-layer ones are kept), about 5,750 documents at ~5.5 s a page, with
+     memory free (it pauses below 1.5 GB). The 164 waiting PA serious
+     findings from 2012-17 are replaced by fresh ones from the new text
+     (pending findings follow the report; none from those years is approved).
+   - A day or month misread (5/6/8 in this font) cannot be told from the
+     text: pages the repair changed 8%+ of carry `categories.ocr_poor_pages`.
+     Show "read from a poor scan: check dates against the PDF" on the
+     Serious violations card and the report viewer for those pages
+     (theme: inc/review-inbox/inspection-highlights.php, js/inspections/states/pa.js).
+   - Do not write plain summaries (inc/highlight-summaries.php) from PA text
+     read by OCR version 1; after the rerun, check a few 2013-16 findings.
 6. **Second round of state scrapers** (researched 2026-10-01; every state
    and DC has now been checked). Ten build plans in
    `docs/state-inspection-reports/plans/`, in build order: New Hampshire
@@ -1051,6 +1076,19 @@ Next, in order:
    are not renames: a reused campus, a road name, or two schools mixed up
    (Woodward Academy and Georgia Military School). The rest fall back to
    the board's own years.
+6. **Owner pass on curated aliases that name another era**, restored on
+   2026-09-29:
+   - Bethel Boys Academy (#13927)
+   - Laurel Ridge Treatment Center (#10602)
+   - Agape Boarding School (#11361)
+   - Refuge of Grace (#11462)
+   - Change Academy at Lake of the Ozarks (#11355)
+   - Cleo Wallace Academy (#12621)
+
+   New curated aliases go in `api/match-aliases-seed.json` and are copied
+   into the v2 documents by `api/restore-match-aliases.php`
+   (`api/apply-match-aliases.php`, which wrote the frozen legacy tables,
+   was deleted 2026-09-30).
 2. **Rename years into the records.** A saved rename sets the two facility
    records' start and end years (facilities_v2, through the
    to_legacy/normalize path) and records the link as
@@ -1081,20 +1119,6 @@ Next, in order:
    split by name; staff carry no dates, so one record holding two names
    keeps its staff in the ordinary section. `identification.listAs` holds
    the owner's headline-name override.
-6. **Owner pass on curated aliases that name another era**, restored on
-   2026-09-29:
-   - Bethel Boys Academy (#13927)
-   - Laurel Ridge Treatment Center (#10602)
-   - Agape Boarding School (#11361)
-   - Refuge of Grace (#11462)
-   - Change Academy at Lake of the Ozarks (#11355)
-   - Cleo Wallace Academy (#12621)
-
-   New curated aliases go in `api/match-aliases-seed.json` and are copied
-   into the v2 documents by `api/restore-match-aliases.php`
-   (`api/apply-match-aliases.php`, which wrote the frozen legacy tables,
-   was deleted 2026-09-30).
-
 - Names then on company pages (2026-10-16): /operator/ pages and the directory's company tab list a renamed
   program by the name it had under that company (`kop_facility_eras_name_under()`). Open:
   - Check after deploy: https://kidsoverprofits.org/operator/three-springs-inc/ lists "Three Springs of Courtland"
@@ -1119,6 +1143,36 @@ Next, in order:
 A read of every session since 2026-09-02 for requests that were started and
 not finished, checked against git, the code and the mirror. Everything else
 asked for in that time shipped or is already listed above.
+
+Owner:
+
+- **Provo Canyon School profile** (draft,
+  [post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)):
+  the text says suspended, the record (10371) says Closed. Say which,
+  then publish.
+- **Document finder retries.** `.tti_doc_finder_state.json` holds 1,783
+  uploads that failed before the OneDrive fix, plus 383 waiting for
+  review: `py tti_doc_finder.py upload --retry-failed`, or tick "retry the
+  ones that failed" in its window.
+- **Industry PR refiling.** 148 rejected news items to sort through
+  (4 refiled so far).
+- **News discovery crontab (2026-10-13, section 3.16).** Both lines exist
+  in cPanel > Cron Jobs (01:30 and 13:30 Central). The sweep now walks every
+  name by a cursor, half per run, so: (a) the 13:30 line loses
+  `--no-facilities`; (b) the 01:30 line gets `--recency 30d` after
+  `discover-articles.php` for one night (the last month's backlog), then
+  loses it again; (c) optional, both lines drop `AI_PROVIDER=groq` so the AI
+  step alternates with Gemini like every other job (the confirm step adds
+  calls, and Groq's free tier is 8,000 tokens a minute); (d) optional, a
+  third line (07:30, the 13:30 line's shape with `flock`) makes the full
+  pass daily instead of every day and a half.
+- **Scraper launcher window** (Tools 4a0df69): open it and confirm the
+  size and Output pane look right.
+- **Pushing local database changes to prod** (asked 2026-09-17).
+  `scripts/local-db.pyw` only pulls. Recommendation: do not build a
+  general push. Schema changes ship through `api/update-schema.php` and
+  data changes through a seed or an admin tool, both reviewed, so the
+  shared live database never takes an unreviewed bulk write.
 
 Each item names the model to run it with:
 
@@ -1181,36 +1235,6 @@ In order:
     `api/promote-facilities-to-rows.php` and the `_bak_20260916` tables
     remain. Ask the owner whether the bake is over before deleting
     anything, back up first, and do one step per commit.
-
-Owner:
-
-- **Provo Canyon School profile** (draft,
-  [post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)):
-  the text says suspended, the record (10371) says Closed. Say which,
-  then publish.
-- **Document finder retries.** `.tti_doc_finder_state.json` holds 1,783
-  uploads that failed before the OneDrive fix, plus 383 waiting for
-  review: `py tti_doc_finder.py upload --retry-failed`, or tick "retry the
-  ones that failed" in its window.
-- **Industry PR refiling.** 148 rejected news items to sort through
-  (4 refiled so far).
-- **News discovery crontab (2026-10-13, section 3.16).** Both lines exist
-  in cPanel > Cron Jobs (01:30 and 13:30 Central). The sweep now walks every
-  name by a cursor, half per run, so: (a) the 13:30 line loses
-  `--no-facilities`; (b) the 01:30 line gets `--recency 30d` after
-  `discover-articles.php` for one night (the last month's backlog), then
-  loses it again; (c) optional, both lines drop `AI_PROVIDER=groq` so the AI
-  step alternates with Gemini like every other job (the confirm step adds
-  calls, and Groq's free tier is 8,000 tokens a minute); (d) optional, a
-  third line (07:30, the 13:30 line's shape with `flock`) makes the full
-  pass daily instead of every day and a half.
-- **Scraper launcher window** (Tools 4a0df69): open it and confirm the
-  size and Output pane look right.
-- **Pushing local database changes to prod** (asked 2026-09-17).
-  `scripts/local-db.pyw` only pulls. Recommendation: do not build a
-  general push. Schema changes ship through `api/update-schema.php` and
-  data changes through a seed or an admin tool, both reviewed, so the
-  shared live database never takes an unreviewed bulk write.
 
 ### 3.9 Facility information from the Google Docs (2026-09-30)
 
@@ -1745,13 +1769,6 @@ Open:
    `person_common-34` (Jeff Johnson: one career, but no source yet for
    Boulder Creek, Allynwood or Auldern). That session's proxy blocked the
    article pages, so open a source before approving either.
-3. Turn-About Ranch's current operator (done 2026-10-06): the buyer in
-   Aspen's March 7, 2014 sale was Escalante RTC, LLC, co-owned by its
-   managers (Webster, Carter, Bartlett); still operating. Its proposal now
-   sets current operator and status Open instead of a by-hand step. The same
-   sale took Island View, the Aspen Institute for Behavioral Assessment and
-   Copper Canyon, which became Family Help & Wellness partners; no source
-   names Turn-About Ranch as one, so the record does not.
 4. **Shipped 2026-10-14 (8f0289f6 Woodbury side, next commit Data audit): one correction, one decision.** 51 steps sit on
    more than one card (146 copies; the four `sequel_history-*` Three Springs
    cards share merges, past names and notes). A step made or left off on one
@@ -2198,19 +2215,6 @@ shows at once. Test: `scripts/test-review-inbox.php --source=nonprofit-filings`.
 Open:
 1. **Owner:** work through the queue (the bulk button first, then "Check the
    match").
-2. The app: add the section to `inc/mobile-api.php` (page data key and keep
-   list) and the app's facility/company screens.
-3. Officers, directors and key employees by name (Form 990 Part VII, in the
-   IRS e-file XML, not in ProPublica's summary) into people ids and the network
-   map's board/staff lines; related organizations (Schedule R) and payments to
-   management companies (who really runs a nonprofit program).
-4. Rerun monthly (`--refresh-bmf`, and `--refresh-orgs` for new returns); open
-   data: a `nonprofit_filings` dataset of linked organizations.
-5. For-profit companies: state business registries (Secretary of State
-   filings: officers, registered agents, formation and dissolution), one
-   reader per state starting with UT, ID, MT, FL, TX, AZ, NC, or OpenCorporates'
-   API (ask about its public-interest access first); SEC EDGAR 10-K / Exhibit 21
-   subsidiary lists for the public parents (UHS, Acadia).
 6. (2026-10-14) "Link to a company" here and on Business filings now finds the
    company by name or makes a new one ("New company named ..." under the
    matches; its notes cite the IRS listing or state filing; Undo on the Linked
@@ -2231,7 +2235,19 @@ Open:
      does not yet; add those as optional params beside it when moving them.
    - Next add-on to offer: "Run by a company" (a card's facility tied to a
      company found or made with the field), off by default.
-
+2. The app: add the section to `inc/mobile-api.php` (page data key and keep
+   list) and the app's facility/company screens.
+3. Officers, directors and key employees by name (Form 990 Part VII, in the
+   IRS e-file XML, not in ProPublica's summary) into people ids and the network
+   map's board/staff lines; related organizations (Schedule R) and payments to
+   management companies (who really runs a nonprofit program).
+4. Rerun monthly (`--refresh-bmf`, and `--refresh-orgs` for new returns); open
+   data: a `nonprofit_filings` dataset of linked organizations.
+5. For-profit companies: state business registries (Secretary of State
+   filings: officers, registered agents, formation and dissolution), one
+   reader per state starting with UT, ID, MT, FL, TX, AZ, NC, or OpenCorporates'
+   API (ask about its public-interest access first); SEC EDGAR 10-K / Exhibit 21
+   subsidiary lists for the public parents (UHS, Acadia).
 ---
 
 ### 3.20 State business filings: Florida and Colorado (2026-10-14)
@@ -2504,10 +2520,6 @@ news posts, state hubs, the map and the news feed, one home title plus an h1, th
 has none. Company pages were already in facility-sitemap.xml.
 
 Open:
-7. Tag archives out of search: the owner said yes on 2026-10-14; `kop_seo_tag_robots()` makes them noindex, follow
-   and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. Checked live after deploy:
-   https://kidsoverprofits.org/tag/utah/ reads `noindex, follow` and https://kidsoverprofits.org/sitemap_index.xml lists
-   no tag sitemap. LiteSpeed's cached copies of other tag pages pick it up as they expire.
 8. Search Console: set up for about two years; sitemap_index.xml (re)submitted to Google and Bing on 2026-10-15. Site Kit
    is connected to the property (owner = user 1) but lacks Search Console permission ("you haven't granted all
    permissions requested during setup"), so the server cannot read it. **Owner:** grant it in Site Kit (Settings >
@@ -2515,8 +2527,6 @@ Open:
    Pages > "Why pages aren't indexed" to Google Sheets. Then read which program names bring searchers, which rank but
    are rarely clicked, and which pages Google refused, and adjust the plan. Left on the server by a blocked cleanup:
    ~/kop-gsc.json and ~/kop-gsc.err (only the permission error), safe to delete.
-9. /staging/: done 2026-10-15. The owner's purge did not reach it (its cache entry carried the deleted staging site's
-   tags, d5d_*); the entry was purged by tag from a one-off script, now removed. /staging/ is a 404 for every visitor.
 10. Lighter pages (2026-10-15, inc/defer-folds.php + js/defer-folds.js, scripts/test-defer-folds.php): the cost was elements,
     not bytes (pages are 43-218 KB compressed; Provo Canyon School had 12,400 elements in <main>). A closed fold's contents
     (older and celebrity/viral news, document subfolders, Unsilenced groups, more findings) now go out in a <template> and
@@ -2828,6 +2838,25 @@ kop-pipeline `py -3 scripts/clippings-ocr.py run` (ocrmypdf: an invisible text l
 pages that already have text are left alone) and `upload` to ~/kop-import/clippings/. On the server
 `php api/import-clippings.php ~/kop-import/clippings [apply]` (inc/news-clippings.php) replaces each PDF with its searchable
 copy (the original kept in uploads/kop-clipping-originals/<id>/), stores the text in {prefix}kop_doc_text (the header search
+and its popup find documents by the words inside them, with the words around the match), and files one article per clipping
+in Submissions Review > News through the News Processor's AI read: linked to the address a saved web page prints, else to
+our copy of the scan; json_data.clippingAttachmentId names the document. Held articles (same link, same headline and
+outlet) make no row. `undo apply [--ids=..]` puts every file back and deletes the articles still unreviewed.
+
+Open:
+1. **Trial of 10 applied 2026-10-17** (documents 2999, 3005, 4171, 4255, 5233, 9632, 11142, 11831, 13276, 13283 -> articles
+   #10491-#10500, waiting in https://kidsoverprofits.org/admin-submissions/?type=news). Owner
+   checks them; #10496 (CEDU, Alpenhorn News) tied to no record. Then the other 44: `run` + `upload` + `apply` (the 10 are skipped).
+   The AI also lists places that are not programs (Bath Iron Works, Desert Hospital): untick them on the card.
+2. New clippings later: run the script again (only unread ones are read; sync tmp/prod.sqlite first so it sees them).
+3. Built 2026-10-18: each library holding documents with stored text has "Search the words inside these documents"
+   (js/doc-type-filter.js, kop/v1/doc-text-search; tiles carry data-doc-id/data-doc-text from kop_dt_tile_attr()); file-name
+   titles (23 of 54: "cedu crummel criminal", "medium.com-...") become "Headline (Outlet, date)" after their article
+   (kop_clip_is_slug_title(), Undo puts the old title back); an image clipping becomes a searchable PDF beside its picture,
+   whose address keeps working. Checked 2026-10-18: `titles apply` renamed 4 of the 10 (the rest are written titles); the
+   search finds "Crummel" in two clippings on https://kidsoverprofits.org/operator/cedu/ (390 and 1280 px). The other 44 still
+   wait for `run` + `upload` + `apply`; their file-name titles are renamed as they go.
+
 
 ### 3.36 Duplicated fields on records: stop the direct writes, clean up (2026-10-18)
 
@@ -2855,22 +2884,3 @@ Open (waiting on the owner's choice of approach):
    the field they restate.
 3. "Record cleanup" review queue, one card per record (notes restating a filled field off, two spellings merged, role
    baggage off with the source kept, repeated deaths combined, misfiled past names moved), exact Undo.
-and its popup find documents by the words inside them, with the words around the match), and files one article per clipping
-in Submissions Review > News through the News Processor's AI read: linked to the address a saved web page prints, else to
-our copy of the scan; json_data.clippingAttachmentId names the document. Held articles (same link, same headline and
-outlet) make no row. `undo apply [--ids=..]` puts every file back and deletes the articles still unreviewed.
-
-Open:
-1. **Trial of 10 applied 2026-10-17** (documents 2999, 3005, 4171, 4255, 5233, 9632, 11142, 11831, 13276, 13283 -> articles
-   #10491-#10500, waiting in https://kidsoverprofits.org/admin-submissions/?type=news). Owner
-   checks them; #10496 (CEDU, Alpenhorn News) tied to no record. Then the other 44: `run` + `upload` + `apply` (the 10 are skipped).
-   The AI also lists places that are not programs (Bath Iron Works, Desert Hospital): untick them on the card.
-2. New clippings later: run the script again (only unread ones are read; sync tmp/prod.sqlite first so it sees them).
-3. Built 2026-10-18: each library holding documents with stored text has "Search the words inside these documents"
-   (js/doc-type-filter.js, kop/v1/doc-text-search; tiles carry data-doc-id/data-doc-text from kop_dt_tile_attr()); file-name
-   titles (23 of 54: "cedu crummel criminal", "medium.com-...") become "Headline (Outlet, date)" after their article
-   (kop_clip_is_slug_title(), Undo puts the old title back); an image clipping becomes a searchable PDF beside its picture,
-   whose address keeps working. Checked 2026-10-18: `titles apply` renamed 4 of the 10 (the rest are written titles); the
-   search finds "Crummel" in two clippings on https://kidsoverprofits.org/operator/cedu/ (390 and 1280 px). The other 44 still
-   wait for `run` + `upload` + `apply`; their file-name titles are renamed as they go.
-
