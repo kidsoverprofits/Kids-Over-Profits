@@ -2843,6 +2843,7 @@ Open:
    (js/doc-type-filter.js, kop/v1/doc-text-search; tiles carry data-doc-id/data-doc-text from kop_dt_tile_attr()); file-name
    titles (23 of 54: "cedu crummel criminal", "medium.com-...") become "Headline (Outlet, date)" after their article
    (kop_clip_is_slug_title(), Undo puts the old title back); an image clipping becomes a searchable PDF beside its picture,
-   whose address keeps working. **Check after deploy:** `php api/import-clippings.php titles` (dry run, then apply) for the 10
-   applied before; the search box on https://kidsoverprofits.org/facility/hyde-school/ (cached pages show it once rebuilt).
+   whose address keeps working. Checked 2026-10-18: `titles apply` renamed 4 of the 10 (the rest are written titles); the
+   search finds "Crummel" in two clippings on https://kidsoverprofits.org/operator/cedu/ (390 and 1280 px). The other 44 still
+   wait for `run` + `upload` + `apply`; their file-name titles are renamed as they go.
 
