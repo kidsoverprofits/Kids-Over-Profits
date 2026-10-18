@@ -111,12 +111,16 @@
         var input = el('input', { type: 'search', class: 'kop-dts__input', autocomplete: 'off', placeholder: 'A name, a place, a phrase' });
         var label = el('label', { class: 'kop-dts__label' }, ['Search the words inside these documents', input]);
         var status = el('p', { class: 'kop-dts__status', 'aria-live': 'polite' });
-        var box = el('div', { class: 'kop-dts', role: 'search' }, [label, status]);
+        // The words around each match, one line per document (the tiles keep their own size).
+        var found = el('ul', { class: 'kop-dts__found' });
+        found.hidden = true;
+        var box = el('div', { class: 'kop-dts', role: 'search' }, [label, status, found]);
         var timer = null;
         var asked = 0;
 
         function clear() {
-            Array.prototype.forEach.call(lib.querySelectorAll('.kop-dts__snip'), function (n) { n.parentNode.removeChild(n); });
+            found.textContent = '';
+            found.hidden = true;
             Array.prototype.forEach.call(lib.querySelectorAll('li.doc-item[data-dts-hid]'), function (li) {
                 li.hidden = false;
                 li.removeAttribute('data-dts-hid');
@@ -131,18 +135,30 @@
         function show(q, matches) {
             clear();
             var words = q.toLowerCase();
+            var seen = {};
             var n = 0;
             Array.prototype.forEach.call(lib.querySelectorAll('li.doc-item'), function (li) {
                 var id = li.getAttribute('data-doc-id');
-                var snip = id && matches[id];
+                var snip = id ? matches[id] : undefined;
                 var hit = snip !== undefined || (li.getAttribute('data-title') || '').toLowerCase().indexOf(words) !== -1;
                 if (!hit) {
                     if (!li.hidden) { li.hidden = true; li.setAttribute('data-dts-hid', '1'); }
                     return;
                 }
                 if (li.hidden) return; // left out by the type buttons
+                // One document filed in two folders counts once.
+                var key = id || li.getAttribute('data-title') || '';
+                if (seen[key]) return;
+                seen[key] = true;
                 n++;
-                if (snip) li.appendChild(el('span', { class: 'kop-dts__snip', text: snip }));
+                if (!snip) return;
+                var a = li.querySelector('a[href]');
+                var name = li.getAttribute('data-title') || '';
+                found.appendChild(el('li', {}, [
+                    a ? el('a', { href: a.getAttribute('href'), target: '_blank', rel: 'noopener', text: name }) : el('span', { text: name }),
+                    el('span', { class: 'kop-dts__snip', text: snip }),
+                ]));
+                found.hidden = false;
             });
             Array.prototype.forEach.call(lib.querySelectorAll('details'), function (d) {
                 if (d.hidden) return;
@@ -163,11 +179,15 @@
                 status.textContent = '';
                 return;
             }
-            if (window.KOPDeferFolds) window.KOPDeferFolds.stampAll(lib);
             status.textContent = 'Searching...';
             fetch(TEXT_SEARCH + (TEXT_SEARCH.indexOf('?') === -1 ? '?' : '&') + 'q=' + encodeURIComponent(q) + '&ids=' + ids.join(','))
                 .then(function (r) { return r.ok ? r.json() : { matches: {} }; })
-                .then(function (d) { if (mine === asked) show(q, (d && d.matches) || {}); })
+                .then(function (d) {
+                    if (mine !== asked) return;
+                    // Folded sections are drawn only now, so the library goes straight to the matches.
+                    if (window.KOPDeferFolds) window.KOPDeferFolds.stampAll(lib);
+                    show(q, (d && d.matches) || {});
+                })
                 .catch(function () { if (mine === asked) status.textContent = 'The search did not answer. Try again.'; });
         }
 
