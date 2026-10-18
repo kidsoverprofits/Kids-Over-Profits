@@ -2828,6 +2828,33 @@ kop-pipeline `py -3 scripts/clippings-ocr.py run` (ocrmypdf: an invisible text l
 pages that already have text are left alone) and `upload` to ~/kop-import/clippings/. On the server
 `php api/import-clippings.php ~/kop-import/clippings [apply]` (inc/news-clippings.php) replaces each PDF with its searchable
 copy (the original kept in uploads/kop-clipping-originals/<id>/), stores the text in {prefix}kop_doc_text (the header search
+
+### 3.36 Duplicated fields on records: stop the direct writes, clean up (2026-10-18)
+
+Measured on a fresh pull of facilities_v2 (2026-10-18) against the 2026-10-13 mirror: 1,174 records changed, ~5,250 staff
+entries, ~2,000 note lines, ~1,600 incidents, ~4,200 links added. Main writers: the Woodbury Facts exact-name auto run on
+2026-10-14 (9,982 Woodbury/HEAL/wiki items applied before the hold rule of 3.31 existed), Drive Docs auto (12,675 links),
+Fornits auto (~1,330, still daily). Duplication found, all records: 523 roles carrying "(2021, HEAL)"; ~1,280 note lines
+repeating a structured field (Ages, Address, Operator/Acquired, Capacity, Type, Serves, Opened, Past name) on ~600 records;
+152 people listed twice under two spellings; 24 notes twice from two sources; 11 deaths listed 2-3 times; 5 past names
+filed under pastOperators; 49 records with an exact repeat in one list.
+
+Why the notes repeat fields: kop_wbf_doc_apply() (inc/woodbury-facts.php ~780-875, also kop_wbf_doc_overwrite ~1010) writes a
+provenance note (kop_wbf_source_line()) beside every field it sets, deduped by exact string only, so a second source of the
+same fact adds a second line even when the field write is a no-op; held facts take the same path when a write-up is approved
+(kop_wu_apply_row()). kop-pipeline woodbury-facts.py note() also turns some facts into notes instead of fields.
+
+Still writing with no click (not behind the hold gate): Fornits discussion links (auto-connect.php:312), Drive Docs facility
+and company links (auto-connect.php:533, 573); these dedupe by URL key. Clicks that write fields directly: wiki approve /
+wiki-staff (kop_wiki_merge_submission), closures, data audit, federal funding, program practices, Websites attach.
+
+Open (waiting on the owner's choice of approach):
+1. Stop the field+note double write: the source goes on the field (or a sources list), not a note line; second sources of a
+   held fact fold into the first.
+2. Writers check by meaning before writing: people by kop_people key / nickname / middle initial, deaths by date, notes by
+   the field they restate.
+3. "Record cleanup" review queue, one card per record (notes restating a filled field off, two spellings merged, role
+   baggage off with the source kept, repeated deaths combined, misfiled past names moved), exact Undo.
 and its popup find documents by the words inside them, with the words around the match), and files one article per clipping
 in Submissions Review > News through the News Processor's AI read: linked to the address a saved web page prints, else to
 our copy of the scan; json_data.clippingAttachmentId names the document. Held articles (same link, same headline and
