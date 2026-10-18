@@ -2834,9 +2834,10 @@ our copy of the scan; json_data.clippingAttachmentId names the document. Held ar
 outlet) make no row. `undo apply [--ids=..]` puts every file back and deletes the articles still unreviewed.
 
 Open:
-1. **Trial of 10** (2999, 3005, 4171, 4255, 5233, 9632, 11142, 11831, 13276, 13283): read locally 2026-10-17. Run the
-   dry run, then apply, on the server after the deploy; owner checks the 10 articles in Submissions Review > News and a
-   word search in the header search, then the other 44: `run` + `upload` + `apply`.
+1. **Trial of 10 applied 2026-10-17** (documents 2999, 3005, 4171, 4255, 5233, 9632, 11142, 11831, 13276, 13283 -> articles
+   #10491-#10500, waiting in https://kidsoverprofits.org/admin-submissions/?type=news). Owner
+   checks them; #10496 (CEDU, Alpenhorn News) tied to no record. Then the other 44: `run` + `upload` + `apply` (the 10 are skipped).
+   The AI also lists places that are not programs (Bath Iron Works, Desert Hospital): untick them on the card.
 2. New clippings later: run the script again (only unread ones are read; sync tmp/prod.sqlite first so it sees them).
 3. Not done: images typed news-clipping (none today) get text and an article but keep their file; the facility library's own
    filter does not search the text yet; clippings' slug titles ("cedu crummel criminal") are not renamed from the AI's headline.
