@@ -2820,3 +2820,24 @@ Open:
    ~/logs/drive-sync.log, and fall back to a WP-Cron single event that runs the import in the cron's own PHP.
 2. Owner's choice: the server cron runs it once a night (`15 3 * * *`). Every 15 minutes (`*/15 * * * *` in cPanel > Cron Jobs)
    would bring a new document in within 15 minutes with no button; the lock keeps two runs from overlapping.
+
+### 3.35 News clippings read by OCR, searchable, filed as articles (2026-10-17)
+
+The media library's news clippings (documents typed `news-clipping`, 54 on the mirror) are read on the owner's computer by
+kop-pipeline `py -3 scripts/clippings-ocr.py run` (ocrmypdf: an invisible text layer over the scan, the picture unchanged;
+pages that already have text are left alone) and `upload` to ~/kop-import/clippings/. On the server
+`php api/import-clippings.php ~/kop-import/clippings [apply]` (inc/news-clippings.php) replaces each PDF with its searchable
+copy (the original kept in uploads/kop-clipping-originals/<id>/), stores the text in {prefix}kop_doc_text (the header search
+and its popup find documents by the words inside them, with the words around the match), and files one article per clipping
+in Submissions Review > News through the News Processor's AI read: linked to the address a saved web page prints, else to
+our copy of the scan; json_data.clippingAttachmentId names the document. Held articles (same link, same headline and
+outlet) make no row. `undo apply [--ids=..]` puts every file back and deletes the articles still unreviewed.
+
+Open:
+1. **Trial of 10** (2999, 3005, 4171, 4255, 5233, 9632, 11142, 11831, 13276, 13283): read locally 2026-10-17. Run the
+   dry run, then apply, on the server after the deploy; owner checks the 10 articles in Submissions Review > News and a
+   word search in the header search, then the other 44: `run` + `upload` + `apply`.
+2. New clippings later: run the script again (only unread ones are read; sync tmp/prod.sqlite first so it sees them).
+3. Not done: images typed news-clipping (none today) get text and an article but keep their file; the facility library's own
+   filter does not search the text yet; clippings' slug titles ("cedu crummel criminal") are not renamed from the AI's headline.
+

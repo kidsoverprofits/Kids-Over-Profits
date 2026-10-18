@@ -307,7 +307,8 @@ if (!function_exists('kop_news_images_pending')) {
         global $wpdb;
         $images = get_option('kop_news_images', array());
         if (!is_array($images)) $images = array();
-        $where = "n.status IN ('approved','published') AND n.article_url LIKE 'http%'";
+        // Scans in our own media library (news clippings, inc/news-clippings.php) have no share image to find.
+        $where = "n.status IN ('approved','published') AND n.article_url LIKE 'http%' AND n.article_url NOT LIKE '%/wp-content/uploads/%'";
         if ($only_ids) $where .= ' AND n.id IN (' . implode(',', array_map('intval', $only_ids)) . ')';
         $suppress = $wpdb->suppress_errors(true);
         $rows = $wpdb->get_results(

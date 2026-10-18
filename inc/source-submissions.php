@@ -588,7 +588,7 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
         }
     }
 
-    if (!$approved && function_exists('kop_notify_admins')) {
+    if (!$approved && function_exists('kop_notify_admins') && empty($GLOBALS['kop_ext_quiet_notify'])) {
         kop_notify_admins('news', $title, '', array(
             'Publication' => $outlet, 'URL' => $url, 'Submitted by' => $submitter, 'Reference' => '#' . $id,
         ));

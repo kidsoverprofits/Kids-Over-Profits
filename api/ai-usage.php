@@ -42,6 +42,7 @@ if (!function_exists('kop_ai_usage_record')) {
             'review-inbox.php'             => 'Review inbox: fill with AI',
             'drive-docs.php'               => 'Drive Docs',
             'lib-record-enrich.php'        => 'Hourly enrich',
+            'news-clippings.php'           => 'News clippings',
         ];
     }
 
@@ -138,7 +139,7 @@ if (!function_exists('kop_ai_usage_record')) {
     /** Jobs the budget never holds back: the nightly discovery and what a person starts by hand. */
     function kop_ai_budget_protected_jobs(): array {
         return ['News discovery (nightly)', 'News processor (by hand)', 'News processor (browser extension)',
-            'Review inbox: fill with AI', 'Check now (AI Usage)'];
+            'Review inbox: fill with AI', 'Check now (AI Usage)', 'News clippings'];
     }
 
     /** Requests sent to $provider since the budget's day began, every job (held-back ones are not sent). */

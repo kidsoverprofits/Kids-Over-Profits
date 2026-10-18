@@ -628,6 +628,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-story-coverage.ph
 # facility/company libraries (js/doc-type-filter.js), 'types' in the app's document payloads; set with the pencil on a tile or at KOP Tools >
 # Document Types (counts, tag many, Recent changes with Undo; log in the kop_doc_types_log option)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-types.php [--list] [--untyped]   # rules, run + undo, pencil, AI stand-in, inbox, pages
+# News clippings by OCR (docs/PLAN.md 3.35, inc/news-clippings.php): documents typed news-clipping get an ocrmypdf text layer (picture
+# unchanged, original kept in uploads/kop-clipping-originals/<id>/), their text in {prefix}kop_doc_text (the header search finds words inside
+# documents) and one waiting article each in Submissions Review > News (the processor's AI read; linked to the printed web address, else our scan)
+(kop-pipeline) py -3 scripts/clippings-ocr.py run [--ids ..] [--limit N] && py -3 scripts/clippings-ocr.py upload   # resumable; selftest too
+php api/import-clippings.php ~/kop-import/clippings [apply] [--ids=..] [--news-only]   # on the server (ea-php82): dry run first; undo [apply] [--ids=..]
+php -d extension=mbstring scripts/test-news-clippings.php
 # Marketing companies (Marketers tab, /marketing-companies/): record shape, seed, page, form markup == marketer-form.js
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-marketers.php [--out=tmp/marketers]
 # Trade organizations (/trade-organizations/): the same checks, plus membership matching on the mirror's facility records

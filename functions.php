@@ -296,6 +296,7 @@ require_once get_stylesheet_directory() . '/inc/legal-documents.php';
 require_once get_stylesheet_directory() . '/inc/document-archive.php';
 // Document types (handbook, inspection report, legal filing...): /documents/<type>/, tile chips, KOP Tools > Document Types
 require_once get_stylesheet_directory() . '/inc/doc-types.php';
+require_once get_stylesheet_directory() . '/inc/news-clippings.php'; // OCR text of news clippings + their articles
 require_once get_stylesheet_directory() . '/inc/doc-types-admin.php';
 // Rules and practices read from programs' own handbooks (kop-pipeline scripts/doc-text.py), reviewed in the review inbox, on facility pages
 require_once get_stylesheet_directory() . '/inc/program-practices.php';

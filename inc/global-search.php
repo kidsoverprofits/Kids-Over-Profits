@@ -314,6 +314,21 @@ function kop_global_search_collect($phrase) {
         ),
         ARRAY_A
     );
+    // Words inside the document: the OCR text of news clippings (inc/news-clippings.php).
+    $seen = array();
+    foreach ((array) $attachments as $row) {
+        $seen[(int) $row['ID']] = true;
+    }
+    $inside = array();
+    if (function_exists('kop_clip_search_ids') && count($attachments) < 5) {
+        foreach (kop_clip_search_ids($phrase, 5 - count($attachments)) as $aid) {
+            if (isset($seen[$aid]) || get_post_status($aid) === false) {
+                continue;
+            }
+            $inside[$aid] = true;
+            $attachments[] = array('ID' => $aid, 'post_title' => get_the_title($aid), 'post_mime_type' => get_post_mime_type($aid));
+        }
+    }
     $items = array();
     foreach ((array) $attachments as $row) {
         $url = wp_get_attachment_url((int) $row['ID']);
@@ -321,10 +336,15 @@ function kop_global_search_collect($phrase) {
             continue;
         }
         $mime    = (string) $row['post_mime_type'];
+        $meta    = $mime ? strtoupper(preg_replace('#^.*/#', '', $mime)) : '';
+        if (isset($inside[(int) $row['ID']])) {
+            $snippet = kop_clip_snippet(kop_clip_doc_text((int) $row['ID']), $phrase, 50);
+            $meta    = trim($meta . ($snippet !== '' ? ' · "' . $snippet . '"' : ' · found in the text'));
+        }
         $items[] = array(
             'title' => $row['post_title'] !== '' ? $row['post_title'] : basename($url),
             'url'   => $url,
-            'meta'  => $mime ? strtoupper(preg_replace('#^.*/#', '', $mime)) : '',
+            'meta'  => $meta,
         );
     }
     if ($items) {
