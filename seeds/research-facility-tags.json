@@ -106,15 +106,6 @@
           "pages": "47-48, 102"
         },
         {
-          "id": 11163,
-          "name": "Devereux Florida Specialized Therapeutic Group Homes",
-          "state": "FL",
-          "report_names": [
-            "Devereux Titusville"
-          ],
-          "pages": "35, 39"
-        },
-        {
           "id": 11240,
           "name": "Village Behavioral Health Treatment Center",
           "state": "TN",
@@ -149,24 +140,6 @@
             "Natchez Trace Youth Academy"
           ],
           "pages": "116"
-        },
-        {
-          "id": 11249,
-          "name": "Oak Plains Academy",
-          "state": "TN",
-          "report_names": [
-            "Oak Plains Academy"
-          ],
-          "pages": "112"
-        },
-        {
-          "id": 11260,
-          "name": "Acadia Village",
-          "state": "TN",
-          "report_names": [
-            "Village Behavioral Health"
-          ],
-          "pages": "82, 86, 101, 121"
         },
         {
           "id": 11279,
@@ -717,15 +690,6 @@
           "pages": "54, 64, 69, 72-73, 83-84, 92"
         },
         {
-          "id": 14054,
-          "name": "Brighter Transition Youth Treatment Center",
-          "state": "SD",
-          "report_names": [
-            "Brighter Transition Youth Treatment Center"
-          ],
-          "pages": "103"
-        },
-        {
           "id": 14058,
           "name": "Brighter Transition Youth Treatment Center/Falls Academy",
           "state": "SD",
@@ -761,15 +725,6 @@
             "Hill Crest Behavioral Health Services"
           ],
           "pages": "65-66, 88, 94, 100, 106-107, 119-120, 124"
-        },
-        {
-          "id": 100049,
-          "name": "Laurel Oaks Behavioral Health Center RTC",
-          "state": "AL",
-          "report_names": [
-            "Laurel Oaks Behavioral Health Center"
-          ],
-          "pages": "42"
         },
         {
           "id": 100098,

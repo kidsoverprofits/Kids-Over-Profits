@@ -413,6 +413,16 @@ KOP Tools > Map Renames (the record's note already says March 2000, per HEAL).
 - The Fernald Center's town (Waltham, MA) came from outside KOP's articles.
 - AdvoServ/Bellwether (12145, Bear, DE) is a bare record.
 
+### Three Points Center's earlier names (found 2026-10-18, record 10545)
+
+Record 10545 (Three Points Center, LLC, Hurricane, UT) holds two rename merges, and its page cuts in this order:
+Olympus Academy (2013-2014), then Diamond Ranch Academy (1999-2023, cut from 2014), then Three Points Center (2023-2025).
+Olympus Academy and Diamond Ranch Academy were separate Hurricane programs that ran at the same time, so one can't
+have been renamed the other. The network map has a different line for the name: Horizon Academy, then Youth Foundation
+Success Academy (record 10592, 2013-2014), then Three Points Center from 2014. To do: find which program actually became
+Three Points Center and when (Utah licence numbers: Olympus Academy LLC was #6600 at 2994 S Gould Wash), then undo the
+rename merge that is wrong at Merge Duplicates > Merged and set the year at KOP Tools > Map Renames.
+
 ---
 
 ## Settled

@@ -446,6 +446,8 @@ $check('the notes give each fact its dated source', ($src_notes['Capacity'][0]['
     wp_json_encode($src_notes));
 if ($picks) {
     $data = kop_facility_page_data($picks[0]);
+    // A renamed program's page is cut by name and lists its staff per name, not from 'staff'.
+    unset($data['eras']);
     $data['staff'] = $src_items;
     $data['facts'][] = array('label' => 'Capacity', 'value' => '35');
     $data['fact_sources'] = $src_notes;
@@ -605,7 +607,7 @@ $check('news page pictures: share image first, publisher logo and touch icon as 
 // A merged Facility Profile (kop_facility_pages_merged_profiles()): Hyde School's
 // post prints on its facility page, unchanged, and the post 301s there.
 echo "\n-- Merged profile (Hyde School) --\n";
-$hyde_post = (int) $wpdb->get_var("SELECT ID FROM wpdl_posts WHERE post_name = 'hyde' AND post_status = 'publish' AND post_type = 'post'");
+$hyde_post = (int) $wpdb->get_var("SELECT ID FROM wpdl_posts WHERE post_name = 'hyde' AND post_status = 'publish' AND post_type IN ('post', 'page')");
 $hyde_id = 0;
 foreach ($index['ids'] as $id => $e) if ((int) ($e['profile_post'] ?? 0) === $hyde_post) $hyde_id = $id;
 $check('Hyde School record carries its profile post and no editorial redirect', $hyde_post > 0 && $hyde_id > 0 && $index['ids'][$hyde_id]['editorial'] === '', "post $hyde_post, record $hyde_id");

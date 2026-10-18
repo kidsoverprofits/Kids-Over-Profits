@@ -981,6 +981,13 @@ if (!function_exists('kop_ptl_facility')) {
             $e['lead'] = trim($as($l) . $e['lead']);
             $events[] = $e;
         }
+        // A page cut by name lists each finding under its name's section (#<era id>-violations), not #violations.
+        $viol_at = array();
+        foreach ($eras as $era) {
+            foreach ((array) ($era['violations'] ?? array()) as $v) {
+                if (is_array($v) && isset($v['id']) && !isset($viol_at[(int) $v['id']])) $viol_at[(int) $v['id']] = (string) $era['id'] . '-violations';
+            }
+        }
         $by_year = array();
         foreach ($lists['violations'] as $v) {
             $y = kop_ptl_date($v['date'] ?? '')[0];
@@ -1003,7 +1010,7 @@ if (!function_exists('kop_ptl_facility')) {
             $events[] = kop_ptl_event((int) $y, 'finding', 'State inspectors recorded ' . ($n === 1 ? 'a serious finding' : $n . ' serious findings'), array(
                 'lead'   => ucfirst(implode(', ', array_slice($bits, 0, 4))) . '.',
                 'detail' => $detail,
-                'more'   => array('label' => 'Read the findings', 'url' => '#violations'),
+                'more'   => array('label' => 'Read the findings', 'url' => '#' . ($viol_at[(int) ($vs[0]['id'] ?? 0)] ?? 'violations')),
                 'major'  => $grave,
             ));
         }

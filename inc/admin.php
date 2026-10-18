@@ -2413,6 +2413,10 @@ function kop_apply_research_facility_tags() {
         $added   = 0;
         foreach ((array) ($doc['facilities'] ?? array()) as $f) {
             $fid = (int) ($f['id'] ?? 0);
+            // A record merged away since the seed was written: tag the one it lives in now.
+            if ($fid > 0 && function_exists('kop_facility_merge_resolve')) {
+                $fid = kop_facility_merge_resolve($fid);
+            }
             if ($fid <= 0) {
                 continue;
             }

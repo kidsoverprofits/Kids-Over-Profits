@@ -97,7 +97,9 @@ $bad = array();
 $ids = array_keys($map['facility']);
 sort($ids);
 foreach ($ids as $fid) {
-    $chain = kop_facility_eras_chain($fid);
+    // The chain the page cuts by: a merged renamed program's own names before the map's.
+    $doc = kop_v2_decode((string) $wpdb->get_var($wpdb->prepare('SELECT json_data FROM facilities_v2 WHERE id = %d', $fid)));
+    $chain = kop_facility_eras_chain($fid, is_array($doc) ? $doc : null);
     if (count($chain) < 2) $chain = kop_facility_eras_branch_chain($fid);
     $name = (string) $wpdb->get_var($wpdb->prepare('SELECT name FROM facilities_v2 WHERE id = %d', $fid));
     if ($name === '') continue;

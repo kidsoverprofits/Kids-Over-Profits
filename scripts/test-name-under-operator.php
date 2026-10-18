@@ -90,7 +90,8 @@ $cases = array(
     array('Youth Opportunity Investments', 11095, ''),
     array('Sequel TSI', 11144, 'Charles Britt Academy'),
     array('Wayne Halfway House', 11144, ''),
-    array('Psychiatric Solutions, Inc.', 10370, 'Rivendell of Utah'),
+    // Rivendell of Utah became Copper Hills in 1997 (Map Renames); PSI ran it from the 2000s to 2010, as Copper Hills.
+    array('Psychiatric Solutions, Inc.', 10370, ''),
     array('Universal Health Services (UHS)', 10370, ''),
     array('Three Springs Inc.', 13690, 'Three Springs Paint Rock Valley'),
     array('The Brown Schools', 10815, 'The Brown Schools at Laurel Ridge'),
