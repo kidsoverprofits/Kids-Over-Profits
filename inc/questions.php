@@ -37,6 +37,10 @@
  *   companies        kop_dired_edit(), Undo kop_dired_undo()
  *   conflicts        each member through Review inbox > Conflicts
  *                    (kop_rinbox_conflicts_act(): keep / use / edit)
+ * Email is optional and only for "tell me when my answers are checked":
+ * kop_q_notify() groups a reader's answers into one
+ * {prefix}kop_question_batches row that inc/submission-followup.php (kind
+ * 'questions') emails about once, then deletes the address.
  * {prefix}kop_question_state holds a settled or dismissed question, what it
  * wrote ('done', for Undo) and its words. Undo deletes it, so the question
  * is asked again.
@@ -48,7 +52,7 @@ if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
     exit;
 }
 
-if (!defined('KOP_Q_DB_VERSION')) define('KOP_Q_DB_VERSION', '1');
+if (!defined('KOP_Q_DB_VERSION')) define('KOP_Q_DB_VERSION', '2'); // 2: answers.batch, kop_question_batches
 if (!defined('KOP_Q_REWRITE_VERSION')) define('KOP_Q_REWRITE_VERSION', '1');
 if (!defined('KOP_Q_AGREE')) define('KOP_Q_AGREE', 3);
 if (!defined('KOP_Q_HOURLY_CAP')) define('KOP_Q_HOURLY_CAP', 60);
@@ -64,6 +68,12 @@ function kop_q_table() {
 function kop_q_state_table() {
     global $wpdb;
     return $wpdb->prefix . 'kop_question_state';
+}
+
+/** One person's set of answers that asked for an email when it has been checked (inc/submission-followup.php kind 'questions'). */
+function kop_q_batch_table() {
+    global $wpdb;
+    return $wpdb->prefix . 'kop_question_batches';
 }
 
 function kop_q_ensure_tables() {
@@ -83,9 +93,20 @@ function kop_q_ensure_tables() {
         source_url TEXT NULL,
         note TEXT NULL,
         who CHAR(24) NOT NULL DEFAULT '',
+        batch BIGINT UNSIGNED NOT NULL DEFAULT 0,
         created_at DATETIME NULL,
         PRIMARY KEY  (id),
         KEY qkey (qkey),
+        KEY who (who),
+        KEY batch (batch)
+    ) {$charset};");
+    dbDelta('CREATE TABLE ' . kop_q_batch_table() . " (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        who CHAR(24) NOT NULL DEFAULT '',
+        status VARCHAR(12) NOT NULL DEFAULT 'pending',
+        title VARCHAR(190) NOT NULL DEFAULT '',
+        created_at DATETIME NULL,
+        PRIMARY KEY  (id),
         KEY who (who)
     ) {$charset};");
     dbDelta('CREATE TABLE ' . kop_q_state_table() . " (
@@ -657,7 +678,7 @@ function kop_q_answer(array $p) {
         'qkey' => $key, 'record_kind' => $q['record']['kind'], 'record_id' => (int) $q['record']['id'],
         'answer_key' => $a['key'], 'answer' => mb_substr($a['label'], 0, 4000), 'value' => wp_json_encode($a['value']),
         'how' => $how, 'source_url' => $src, 'note' => kop_q_clean($p['note'] ?? '', 1000),
-        'who' => $who, 'created_at' => current_time('mysql', true),
+        'who' => $who, 'batch' => kop_q_batch_mine((int) ($p['batch'] ?? 0)), 'created_at' => current_time('mysql', true),
     ));
     set_transient(kop_q_rate_key(), (int) get_transient(kop_q_rate_key()) + 1, HOUR_IN_SECONDS);
     if (function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
@@ -677,6 +698,68 @@ function kop_q_answer(array $p) {
     return array('message' => 'Thank you. Your answer is saved and will be checked.', 'settled' => false);
 }
 
+/* ---- "Email me when my answers have been checked" -------------------------- */
+
+/**
+ * Optional, and only for that one email: a reader who leaves an address gets
+ * a set of answers ("batch") holding everything they answered in the last
+ * day and what they answer next. inc/submission-followup.php (kind
+ * 'questions') sends the receipt, then one email once every answer in it
+ * has been settled or dismissed, and deletes the address.
+ */
+function kop_q_notify(array $p) {
+    $email = substr(trim((string) ($p['notify_email'] ?? '')), 0, 190);
+    if ($email === '' || !is_email($email)) throw new RuntimeException('That email address does not look right.');
+    if (!function_exists('kop_followup_register')) throw new RuntimeException('Email updates are not available right now.');
+    kop_q_ensure_tables();
+    global $wpdb;
+    $who = kop_q_who();
+    $wpdb->insert(kop_q_batch_table(), array('who' => $who, 'status' => 'pending',
+        'title' => 'Your answers on the We have questions page', 'created_at' => current_time('mysql', true)));
+    $id = (int) $wpdb->insert_id;
+    if ($id <= 0) throw new RuntimeException('Could not set up the email. Your answers are saved either way.');
+    $wpdb->query($wpdb->prepare('UPDATE ' . kop_q_table() . ' SET batch = %d WHERE who = %s AND batch = 0 AND created_at > %s',
+        $id, $who, gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS)));
+    kop_q_batch_refresh($id);
+    if (!kop_followup_register('questions', $id, array('notify_email' => $email))) {
+        throw new RuntimeException('Could not set up the email. Your answers are saved either way.');
+    }
+    return array('batch' => $id, 'message' => 'Thank you. We will email you once, when your answers have been checked.');
+}
+
+/** The batch id an answer joins: the reader's own batch, still waiting; else 0. */
+function kop_q_batch_mine($id) {
+    if ((int) $id <= 0) return 0;
+    global $wpdb;
+    $b = $wpdb->get_row($wpdb->prepare('SELECT who, status FROM ' . kop_q_batch_table() . ' WHERE id = %d', (int) $id), ARRAY_A);
+    return ($b && $b['who'] === kop_q_who() && $b['status'] === 'pending') ? (int) $id : 0;
+}
+
+/**
+ * A batch's status from its questions: pending while any is open, 'added'
+ * when at least one answer in it was used, else 'declined'.
+ */
+function kop_q_batch_refresh($id) {
+    global $wpdb;
+    $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT qkey, answer FROM ' . kop_q_table() . ' WHERE batch = %d', (int) $id), ARRAY_A);
+    $status = $rows ? 'declined' : 'pending';
+    foreach ($rows as $r) {
+        $st = kop_q_state($r['qkey']);
+        if (!$st) { $status = 'pending'; break; }
+        if ($st['status'] === 'settled' && kop_q_text_key($st['answer']) === kop_q_text_key($r['answer'])) $status = 'added';
+    }
+    $wpdb->update(kop_q_batch_table(), array('status' => $status), array('id' => (int) $id));
+    return $status;
+}
+
+/** Every batch with an answer to this question, refreshed. */
+function kop_q_batches_refresh($qkey) {
+    global $wpdb;
+    foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT DISTINCT batch FROM ' . kop_q_table() . ' WHERE qkey = %s AND batch > 0', (string) $qkey)) as $id) {
+        kop_q_batch_refresh((int) $id);
+    }
+}
+
 /* ---- Settling ----------------------------------------------------------- */
 
 function kop_q_state($qkey) {
@@ -692,6 +775,7 @@ function kop_q_set_state($qkey, $status, $ask, $answer, $done, $by) {
     $wpdb->insert(kop_q_state_table(), array('qkey' => (string) $qkey, 'status' => $status, 'ask' => (string) $ask, 'answer' => (string) $answer,
         'done' => wp_json_encode($done), 'reviewed_by' => (string) $by, 'reviewed_at' => current_time('mysql', true)));
     kop_q_state_changed();
+    kop_q_batches_refresh($qkey);
 }
 
 /**
@@ -869,6 +953,7 @@ function kop_q_undo($qkey, $by) {
     if (!empty($done['conflicts'])) delete_transient('kop_q_conflicts');
     $wpdb->delete(kop_q_state_table(), array('qkey' => (string) $qkey));
     kop_q_state_changed();
+    kop_q_batches_refresh($qkey);
     return 'Undone. The question is asked again.';
 }
 
@@ -966,6 +1051,10 @@ if (function_exists('add_action')) {
         register_rest_route('kop/v1', '/questions/find', array('methods' => 'GET', 'permission_callback' => $open,
             'callback' => $wrap(function (WP_REST_Request $r) {
                 return array('results' => function_exists('kop_mobile_suggest') ? kop_mobile_suggest((string) $r->get_param('q'), array('facility', 'operator'), 8) : array());
+            })));
+        register_rest_route('kop/v1', '/questions/notify', array('methods' => 'POST', 'permission_callback' => $open,
+            'callback' => $wrap(function (WP_REST_Request $r) {
+                return kop_q_notify((array) $r->get_json_params() + (array) $r->get_body_params());
             })));
         register_rest_route('kop/v1', '/questions/answer', array('methods' => 'POST', 'permission_callback' => $open,
             'callback' => $wrap(function (WP_REST_Request $r) {

@@ -7,7 +7,9 @@
  * (kop/v1/questions/deck, more fetched as it runs low). Yes/no cards swipe:
  * right is yes, left is no (arrow keys too); every card also has buttons.
  * "How do you know?" is optional and remembered for the next card.
- * Answers go to kop/v1/questions/answer. #f<id> / #o<id> open a record's
+ * Answers go to kop/v1/questions/answer. After the first answer the page
+ * offers, once and closed by default, an optional email for when the answers
+ * have been checked (kop/v1/questions/notify); answering never needs one. #f<id> / #o<id> open a record's
  * questions; #q=<key> opens the record that question is about.
  */
 (function () {
@@ -27,9 +29,16 @@
         answered: 0,
         loading: false,
         exhausted: false,
-        how: ''
+        how: '',
+        batch: 0,              // the reader's "email me" set of answers, once they left an address
+        emailNo: false,        // they said no thanks: the offer stays closed
+        emailOpen: false
     };
-    try { state.how = sessionStorage.getItem('kopQHow') || ''; } catch (e) { /* no storage */ }
+    try {
+        state.how = sessionStorage.getItem('kopQHow') || '';
+        state.batch = parseInt(sessionStorage.getItem('kopQBatch') || '0', 10) || 0;
+        state.emailNo = sessionStorage.getItem('kopQEmailNo') === '1';
+    } catch (e) { /* no storage */ }
 
     // ------------------------------------------------------------------
     // Helpers
@@ -212,8 +221,10 @@
         var q = state.queue[0];
         if (!q) {
             deckEl.appendChild(doneCard());
+            if (state.answered && !state.batch) deckEl.appendChild(emailPanel(true));
             return;
         }
+        if (state.answered && !state.batch && !state.emailNo) deckEl.appendChild(emailPanel(state.emailOpen));
         var stack = h('div', { className: 'kop-q-stack' });
         if (state.queue[1]) stack.appendChild(h('div', { className: 'kop-q-card kop-q-under', 'aria-hidden': 'true' }));
         stack.appendChild(card(q));
@@ -234,6 +245,57 @@
         ];
         kids.push(h('div', { className: 'kop-q-actions' }, [btn('Answer questions about other programs', 'kop-q-btn-primary', backToStart)]));
         return h('div', { className: 'kop-q-card kop-q-done' }, kids);
+    }
+
+    /**
+     * "Email me when my answers have been checked": optional, never needed to
+     * answer, and used for that one email only (kop/v1/questions/notify).
+     */
+    function emailPanel(open) {
+        var wrap = h('section', { className: 'kop-q-email', 'aria-label': 'Optional email when your answers are checked' });
+        if (!open) {
+            wrap.appendChild(h('p', { className: 'kop-q-email-line' }, [
+                btn('Want an email when your answers have been checked? (optional)', 'kop-q-btn-plain kop-q-email-open', function () {
+                    state.emailOpen = true;
+                    wrap.replaceWith(emailPanel(true));
+                })
+            ]));
+            return wrap;
+        }
+        var input = h('input', { type: 'email', className: 'kop-q-input', id: 'kop-q-email', maxlength: '190', autocomplete: 'email', placeholder: 'you@example.com' });
+        var msg = h('p', { className: 'kop-q-error', role: 'alert', hidden: true });
+        function send() {
+            var email = input.value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                msg.textContent = 'That email address does not look right.';
+                msg.hidden = false;
+                input.focus();
+                return;
+            }
+            msg.hidden = true;
+            post('notify', { notify_email: email }).then(function (res) {
+                state.batch = res.batch || 0;
+                try { sessionStorage.setItem('kopQBatch', String(state.batch)); } catch (e) { /* no storage */ }
+                wrap.replaceWith(h('p', { className: 'kop-q-email kop-q-email-done', role: 'status', text: res.message || 'Thank you. We will email you once, when your answers have been checked.' }));
+            }).catch(function (e) {
+                msg.textContent = e.message;
+                msg.hidden = false;
+            });
+        }
+        enter(input, send);
+        wrap.appendChild(h('h2', { className: 'kop-q-email-title', text: 'Want to know when your answers have been checked?' }));
+        wrap.appendChild(h('p', { text: 'This is completely optional. You do not need an email to answer anything here.' }));
+        wrap.appendChild(h('p', { text: 'If you leave one, we will send you a single email once a person has checked your answers. That is the only thing we use it for: it is never published, never added to a mailing list, and we delete it after that email.' }));
+        wrap.appendChild(h('label', { className: 'kop-q-label', for: 'kop-q-email', text: 'Your email (optional)' }));
+        wrap.appendChild(h('div', { className: 'kop-q-row' }, [input, btn('Email me', 'kop-q-btn-primary', send)]));
+        wrap.appendChild(msg);
+        wrap.appendChild(h('div', { className: 'kop-q-foot' }, [btn('No thanks', 'kop-q-btn-plain', function () {
+            state.emailNo = true;
+            state.emailOpen = false;
+            try { sessionStorage.setItem('kopQEmailNo', '1'); } catch (e) { /* no storage */ }
+            wrap.remove();
+        })]));
+        return wrap;
     }
 
     function next() {
@@ -268,7 +330,7 @@
         function send(answer, label) {
             err.hidden = true;
             el.classList.add('is-sending');
-            var body = { key: q.key, answer: answer, how: how.value(), source: how.source(), note: how.note() };
+            var body = { key: q.key, answer: answer, how: how.value(), source: how.source(), note: how.note(), batch: state.batch };
             return post('answer', body).then(function (res) {
                 state.seen.push(q.key);
                 if (!res.gone) state.answered++;

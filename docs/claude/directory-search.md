@@ -34,7 +34,10 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # browser), 60 an hour. KOP_Q_AGREE (3) people agreeing with nobody disagreeing settles it on its own through Review inbox > Answers
 # to our questions ('settle', reviewer "questions page", Undo in Recently done); staff and rules always wait. Facility values go in as
 # Woodbury Facts rows (extra.via 'questions') through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
-# name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act()
+# name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act().
+# Email is optional and only for "tell me when my answers are checked" (the page says so): kop_q_notify() puts the reader's answers
+# in one {prefix}kop_question_batches row (status from kop_q_batch_refresh()), and inc/submission-followup.php kind 'questions' sends
+# the receipt and one email when all are decided, then deletes the address. No newsletter box on this page
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php                         # questions, answers, agreement, every real record
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
 # Admin facility id boxes: always kop_facility_finder_field() (inc/facility-finder.php), never a bare id input

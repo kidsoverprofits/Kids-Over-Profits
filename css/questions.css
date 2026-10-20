@@ -439,6 +439,38 @@ article.kop-questions .entry-content-wrap {
 }
 
 .kop-q-done p { margin: 0 0 10px; }
+
+/* The optional email offer: its own panel, never part of a question card. */
+.kop-q-email {
+    background: var(--kop-soft-pastel-yellow, #fff5cb);
+    color: var(--kop-text-primary, #1a202c);
+    border: 1px solid var(--kop-border-primary, #cbd5e0);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 0 0 12px;
+}
+
+.kop-q-done + .kop-q-email { margin-top: 12px; }
+.kop-q-email p { margin: 0 0 8px; }
+.kop-q-email-line { margin: 0; }
+.kop-q-email.kop-q-email-done { font-weight: 600; }
+
+.kop-questions h2.kop-q-email-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    color: var(--kop-midnight-blue, #000435);
+    margin: 0 0 8px;
+}
+
+.kop-questions button.kop-q-email-open,
+.kop-questions button.kop-q-email-open:hover,
+.kop-questions button.kop-q-email-open:focus,
+.kop-questions button.kop-q-email-open:active {
+    min-height: 40px;
+    padding: 4px 0;
+    text-align: left;
+    white-space: normal;
+}
 .kop-q-done a { color: var(--kop-navy, #000080); }
 .kop-q-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 

@@ -107,6 +107,12 @@ function kop_followup_kinds() {
             'noun' => 'glossary note',
             'added' => array('added'), 'declined' => array('dismissed'), 'gone' => array(),
         ),
+        // One reader's answers on /questions/ (inc/questions.php kop_q_batch_refresh() keeps the status).
+        'questions' => array(
+            'db' => 'wp', 'table' => $wpdb->prefix . 'kop_question_batches', 'status' => 'status', 'title' => 'title',
+            'noun' => 'set of answers',
+            'added' => array('added'), 'declined' => array('declined'), 'gone' => array(),
+        ),
     );
 }
 
