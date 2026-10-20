@@ -24,10 +24,11 @@ $GLOBALS['menus'] = array(
     (object) array('term_id' => 9, 'name' => 'Footer'),
 );
 
-function kop_test_item($id, $parent, $title, $object_id = 0, $order = 0, $object = 'page') {
+function kop_test_item($id, $parent, $title, $object_id = 0, $order = 0, $object = 'page', $url = '') {
     return (object) array(
         'ID' => $id, 'menu_item_parent' => (string) $parent, 'title' => $title,
         'object_id' => $object_id, 'object' => $object, 'menu_order' => $order,
+        'url' => $url !== '' ? $url : ($object === 'custom' ? '#' : 'https://example.org/?page_id=' . $object_id),
     );
 }
 
@@ -66,7 +67,8 @@ function wp_update_nav_menu_item($menu_id, $item_id, $args) {
     $GLOBALS['inserted'][] = array('menu' => $menu_id, 'args' => $args);
     $GLOBALS['items'][$menu_id][] = kop_test_item(
         $id, $args['menu-item-parent-id'], $args['menu-item-title'],
-        $args['menu-item-object-id'], $args['menu-item-position']
+        $args['menu-item-object-id'] ?? 0, $args['menu-item-position'],
+        ($args['menu-item-type'] ?? '') === 'custom' ? 'custom' : 'page', $args['menu-item-url'] ?? ''
     );
     return $id;
 }
@@ -76,6 +78,7 @@ function add_submenu_page() {} function get_option() { return false; }
 function update_option() { return true; }
 function current_user_can() { return true; }
 function get_stylesheet_directory() { return dirname(__DIR__); }
+function home_url($path = '') { return 'https://kidsoverprofits.org' . $path; }
 
 if (!defined('KOP_REPORTING_SLUG')) {
     define('KOP_REPORTING_SLUG', 'report-abuse');
@@ -116,7 +119,7 @@ function check($label, $ok, $detail = '') {
 
 // 1. One insert per page, under the right parent, in the right menu.
 $first = kop_ensure_nav_items();
-check('adds two entries', count($GLOBALS['inserted']) === 2, count($GLOBALS['inserted']) . ' inserted');
+check('adds three entries', count($GLOBALS['inserted']) === 3, count($GLOBALS['inserted']) . ' inserted');
 $ins = $GLOBALS['inserted'][0] ?? array('menu' => 0, 'args' => array());
 check('lands in the menu holding the parent', ($ins['menu'] ?? 0) === 3, 'menu ' . ($ins['menu'] ?? '?'));
 check('nests under Get Involved', ($ins['args']['menu-item-parent-id'] ?? 0) === 10944,
@@ -131,9 +134,17 @@ check('Severe Reports nests under Monitor', ($sev['args']['menu-item-parent-id']
     'parent ' . ($sev['args']['menu-item-parent-id'] ?? '?'));
 check('Severe Reports appended after Monitor\'s children', ($sev['args']['menu-item-position'] ?? 0) === 18,
     'position ' . ($sev['args']['menu-item-position'] ?? '?'));
+$q = $GLOBALS['inserted'][2] ?? array('menu' => 0, 'args' => array());
+check('/questions/ is a custom link under Get Involved', ($q['args']['menu-item-type'] ?? '') === 'custom'
+    && ($q['args']['menu-item-url'] ?? '') === 'https://kidsoverprofits.org/questions/'
+    && ($q['args']['menu-item-parent-id'] ?? 0) === 10944 && !isset($q['args']['menu-item-object-id']),
+    json_encode($q['args']));
+check('/questions/ goes after Report Abuse', ($q['args']['menu-item-position'] ?? 0) === 38,
+    'position ' . ($q['args']['menu-item-position'] ?? '?'));
 check('reports what it did', kop_test_added($first) === array(
         'report-abuse => Primary > Get Involved',
         'severe-reports => Primary > Monitor',
+        '/questions/ => Primary > Get Involved',
     ), implode('; ', $first) ?: 'nothing');
 
 // 2. Idempotent: a second run must do nothing at all.
@@ -147,10 +158,11 @@ $GLOBALS['items'][3] = array(
     kop_test_item(10944, 0, 'Get Involved', 0, 30, 'custom'),
     kop_test_item(10945, 10944, 'Volunteer', 61, 31),
     kop_test_item(11000, 0, 'Report Abuse', 777, 5),
+    kop_test_item(11001, 0, 'Questions', 0, 6, 'custom', 'https://kidsoverprofits.org/questions'),
 );
 $GLOBALS['inserted'] = array();
 kop_ensure_nav_items();
-check('leaves a hand-moved entry alone', count($GLOBALS['inserted']) === 0,
+check('leaves hand-moved entries alone (page and custom link)', count($GLOBALS['inserted']) === 0,
     count($GLOBALS['inserted']) . ' re-added');
 
 // 4. No parent with that label: add nothing rather than guess.
@@ -167,7 +179,7 @@ $GLOBALS['items'] = array(
 );
 $GLOBALS['inserted'] = array();
 kop_ensure_nav_items();
-check('matches the parent label loosely', count($GLOBALS['inserted']) === 1,
+check('matches the parent label loosely', count($GLOBALS['inserted']) === 2,
     count($GLOBALS['inserted']) . ' added');
 
 echo "\n" . ($failures ? "$failures FAILED\n" : "ALL PASSED\n");

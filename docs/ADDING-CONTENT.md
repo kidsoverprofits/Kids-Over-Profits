@@ -172,7 +172,9 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
   the menu.
 - A route (like /operator/, /site-map/, /essential-reporting/, /documents/):
   a rewrite rule in its own `inc/` file, a `*_url()` helper, and the rewrite
-  flush that file already does on a version change.
+  flush that file already does on a version change. A menu entry for a route
+  is a `kop_nav_item_specs()` entry with `url` instead of `slug` (a custom
+  link; /questions/ is one), then bump the `kop_template_assignments` version.
 - `inc/site-map.php`: every page template gets a section in
   `kop_site_map_template_sections()`; a route gets an item in its section;
   `kop_site_map_quick_links()` if it should appear in the search popup before

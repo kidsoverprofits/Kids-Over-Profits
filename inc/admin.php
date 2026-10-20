@@ -559,6 +559,9 @@ function kop_tool_page_specs() {
  * or deletes an item somebody has arranged by hand.
  *
  *   slug   - the page the item links to
+ *   url    - instead of slug, a site path for a route with no Page (a
+ *            rewrite rule such as /questions/); added as a custom link and
+ *            matched on its path
  *   parent - the label of the top-level item to nest under, matched
  *            case-insensitively; the item goes in whichever menu that
  *            parent lives in, so no menu or item ID is hard-coded
@@ -606,6 +609,11 @@ function kop_nav_item_specs() {
             'parent' => 'Monitor',
             'title'  => 'Trade Organizations',
         ),
+        array(
+            'url'    => '/questions/',
+            'parent' => 'Get Involved',
+            'title'  => 'We Have Questions',
+        ),
     );
 }
 
@@ -626,8 +634,9 @@ function kop_ensure_nav_items() {
     }
 
     foreach (kop_nav_item_specs() as $spec) {
-        $page = get_page_by_path($spec['slug']);
-        if (!$page) {
+        $path = isset($spec['url']) ? rtrim($spec['url'], '/') : null;
+        $page = $path === null ? get_page_by_path($spec['slug']) : null;
+        if ($path === null && !$page) {
             $done[] = $spec['slug'] . ': page does not exist yet';
             continue;
         }
@@ -655,7 +664,12 @@ function kop_ensure_nav_items() {
             $exists = false;
             $last_position = (int) $parent->menu_order;
             foreach ($items as $item) {
-                if ($item->object === 'page' && (int) $item->object_id === (int) $page->ID) {
+                if ($page && $item->object === 'page' && (int) $item->object_id === (int) $page->ID) {
+                    $exists = true;
+                    break;
+                }
+                if ($path !== null && isset($item->url)
+                    && rtrim((string) parse_url($item->url, PHP_URL_PATH), '/') === $path) {
                     $exists = true;
                     break;
                 }
@@ -667,17 +681,22 @@ function kop_ensure_nav_items() {
                 continue;
             }
 
-            $new_id = wp_update_nav_menu_item($menu->term_id, 0, array(
+            $link = $page ? array(
                 'menu-item-object-id' => (int) $page->ID,
                 'menu-item-object'    => 'page',
                 'menu-item-type'      => 'post_type',
+            ) : array(
+                'menu-item-url'       => function_exists('home_url') ? home_url($spec['url']) : $spec['url'],
+                'menu-item-type'      => 'custom',
+            );
+            $new_id = wp_update_nav_menu_item($menu->term_id, 0, $link + array(
                 'menu-item-title'     => $spec['title'],
                 'menu-item-parent-id' => (int) $parent->ID,
                 'menu-item-status'    => 'publish',
                 'menu-item-position'  => $last_position + 1,
             ));
             if ($new_id && !is_wp_error($new_id)) {
-                $done[] = sprintf('%s => %s > %s', $spec['slug'], $menu->name, $spec['parent']);
+                $done[] = sprintf('%s => %s > %s', $spec['slug'] ?? $spec['url'], $menu->name, $spec['parent']);
             }
         }
     }
@@ -2617,7 +2636,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '130';
+    $version = '131';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
