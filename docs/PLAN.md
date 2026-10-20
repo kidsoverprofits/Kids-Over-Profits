@@ -174,6 +174,14 @@ first; add `?apply=1` to act. The date is when the item was last confirmed open.
    keep C: above 4 GB. Then ask a session for the titles and rebuild (old 3.11).
 6. **Document finder retries**: `py tti_doc_finder.py upload --retry-failed` (1,783 failed, 383 waiting).
 7. **Scraper launcher window**: open it and confirm the size and Output pane look right.
+8. **MN report filed under two licences** (2026-10-20): the 2026-10-18 MN run filed the 2024-12-02 correction
+   order `LLO_471879` (licence 1074484, 180 Degrees Inc) under 180 Degrees Hope House (1086169) too, as
+   `MN-1086169-002`. Check whether DHS lists it on both licence pages; if not, fix `mn_scraper.py`'s matching and
+   take the copy off Hope House on /mn-reports/.
+9. **`scrapers/test_scrapers.py` has 5 stale failures** (2026-10-20, all from before the CA/PA fixes in kop-pipeline
+   `f22040c`): the CA payload test unpacks two values from `scrape()` (it returns three now), the Oregon date
+   format, `smart_title_case` (two cases) and the data structure check. Bring the tests up to the code.
+   Run them with `py -3`; plain `python` lacks `requests` and `pymupdf`.
 
 ### 2.3 Review queues to work through
 
@@ -433,12 +441,12 @@ Pick from here. Items marked "owner first" need the owner's word before starting
 
 ### 4.5 Wiki
 
-1. The "KOP has new information" badge in the wiki editor.
-2. `kop_wiki_auto_staff_line()` does not split a "was also" role pair as `also_roles()` does.
-3. Stub and missing pages (827 stubs, 724 index slugs) in "new entry" mode, after the existing entries.
-4. After Rules from documents lines are added: sync the mirror, rerun `scripts/wiki-gaps.php`, draft the
+1. **Wiki editor badge**: "KOP has new information" on entries whose record changed.
+2. **Staff line split**: `kop_wiki_auto_staff_line()` does not split a "was also" role pair as `also_roles()` does.
+3. **Stub and missing pages** (827 stubs, 724 index slugs) in "new entry" mode, after the existing entries.
+4. **Rules sections**: after Rules from documents lines are added: sync the mirror, rerun `scripts/wiki-gaps.php`, draft the
    sections.
-5. Family Foundation School: once 2.4 item 3 is decided, read the complaints, add named staff (Doe and
+5. **Family Foundation School**: once 2.4 item 3 is decided, read the complaints, add named staff (Doe and
    initials plaintiffs stay so), seed through `seeds/lawsuits.json` with docket numbers, then the wiki line for
    entry 533 (old 3.23).
 
@@ -497,14 +505,14 @@ passes, deploy green, live HTML checked (no `critical error`), the design plan's
 
 ### 4.8 App
 
-1. A pass with VoiceOver and TalkBack, the largest font and a tablet (colours in `src/theme/colors.ts` follow
+1. **Accessibility pass**: VoiceOver and TalkBack, the largest font and a tablet (colours in `src/theme/colors.ts` follow
    `css/colors.css`).
-2. Deep links on a device (`npx uri-scheme open kidsoverprofits://facility/<slug>`); site addresses after 2.6 item 4.
-3. Essential reporting: the strip above the news tab, the flag and note on a card, a list for `?featured=1`.
-4. The news tab's story and month filters reset when it unmounts.
-5. The app payload's `notes` list still carries the Woodbury wording and raw addresses (both readers clean
+2. **Deep links** on a device (`npx uri-scheme open kidsoverprofits://facility/<slug>`); site addresses after 2.6 item 4.
+3. **Essential reporting**: the strip above the news tab, the flag and note on a card, a list for `?featured=1`.
+4. **News tab filters**: the story and month filters reset when it unmounts.
+5. **Payload notes**: the app payload's `notes` list still carries the Woodbury wording and raw addresses (both readers clean
    them when they print).
-6. The map page's class names and button ids are read by the app (`mapPage.ts`, `mapBridge.ts`): renaming one
+6. **Map tab coupling** (a standing caution): the map page's class names and button ids are read by the app (`mapPage.ts`, `mapBridge.ts`): renaming one
    on the website breaks the Map tab.
 
 ---
@@ -513,36 +521,37 @@ passes, deploy green, live HTML checked (no `critical error`), the design plan's
 
 Each predates the work that found it; fix the test or the code.
 
-- `scripts/test-review-inbox.php` (`-d memory_limit=6G`): 28 checks in data-audit, drive-docs,
+- **test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 28 checks in data-audit, drive-docs,
   facilities-from-news, federal-funding, fornits, inspection-highlights ("a rejected finding offers approve and back
   to pending"), inspection-links ("Undefined array key 0" at inspection-links.php:127), websites, wiki-updates
   (another queue's `home_of_program` action), ya-file, ya-moved, merge-follow, woodbury-facts ("not conflicts:
   another staff role": a 2021 HEAL sighting is now "Former Founder"). `scripts/review-inbox-tests/fornits.php`
   seeds only an empty table; re-seed it into its own.
-- `scripts/test-facility-pages.php`: 13 checks (merged Facility Profile posts; "the page renders to the end after
+- **test-facility-pages**: `scripts/test-facility-pages.php`, 13 checks (merged Facility Profile posts; "the page renders to the end after
   the post"; "links a staff entry and a fact" samples Aspen Education Group, now a renamed program).
-- `scripts/test-facility-eras.php`: 1 check. `scripts/test-name-under-operator.php`: Psychiatric Solutions / #10370.
-- `scripts/test-wiki-gaps.php`: "a page with no years or place matches only its exact name" (Mountain Home Academy).
-- `scripts/test-woodbury-facts.php`: "every staff entry added or filled names its source and link" (4 without).
-- `scripts/test-fornits.php`: "every link added" finds 11 records missing (#13972, #11097, #10333, #13795, #10496,
+- **test-facility-eras**: `scripts/test-facility-eras.php`, 1 check.
+- **test-name-under-operator**: `scripts/test-name-under-operator.php`, Psychiatric Solutions / #10370.
+- **test-wiki-gaps**: `scripts/test-wiki-gaps.php`, "a page with no years or place matches only its exact name" (Mountain Home Academy).
+- **test-woodbury-facts**: `scripts/test-woodbury-facts.php`, "every staff entry added or filled names its source and link" (4 without).
+- **test-fornits**: `scripts/test-fornits.php`, "every link added" finds 11 records missing (#13972, #11097, #10333, #13795, #10496,
   #100048 ...): check `kop_fmerge_follow_waiting()` moved the waiting rows.
 
 ---
 
 ## 6. Later, or not without the owner's word
 
-- Network map: chain hulls and group-by-network (2d.4); "Suggest a correction" from the map (Phase 3); new person
+- **Network map**: chain hulls and group-by-network (2d.4); "Suggest a correction" from the map (Phase 3); new person
   nodes for relationships to people not on the map.
-- Investors: a data form tab, a public page, site map, open data, people ids for partners, filing cards on an
+- **Investors**: a data form tab, a public page, site map, open data, people ids for partners, filing cards on an
   investor.
-- Discovery: grouping short names by state; a weekly GDELT pass and Bing News (declined 2026-10-13).
-- App: other outlets' coverage of a story, paging through every inspection report, an offline index, notifications.
-- Directory Editor: reordering programs within a card; editing the location tab's place groups.
-- Lighter pages: Provo's staff list and the timeline's later years, if pages are still heavy.
-- Unchecked: no real upload through the anonymous portal since it began sealing files; no live call to the
+- **Discovery**: grouping short names by state; a weekly GDELT pass and Bing News (declined 2026-10-13).
+- **App**: other outlets' coverage of a story, paging through every inspection report, an offline index, notifications.
+- **Directory Editor**: reordering programs within a card; editing the location tab's place groups.
+- **Lighter pages**: Provo's staff list and the timeline's later years, if pages are still heavy.
+- **Unchecked**: no real upload through the anonymous portal since it began sealing files; no live call to the
   Claude, Gemini or Hugging Face models in the AI helpers.
 
 ### Unconfirmed settings
 
-Which mode production's `kop_data_model` / `kop_data_model_areas` options use for the `program_index` read area,
-and the value of `kop_submission_notify_emails` (no admin screen; default `admin_email`).
+- **Data model and notify settings**: which mode production's `kop_data_model` / `kop_data_model_areas` options use for the `program_index` read area,
+  and the value of `kop_submission_notify_emails` (no admin screen; default `admin_email`).
