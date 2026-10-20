@@ -61,8 +61,8 @@
           "pages": "35, 39"
         },
         {
-          "id": 11098,
-          "name": "St. John's Youth Academy",
+          "id": 11130,
+          "name": "St. Augustine Youth Academy",
           "state": "FL",
           "report_names": [
             "St. John's Youth Academy"
@@ -373,9 +373,10 @@
           "name": "Harbor Point Behavioral Health Center",
           "state": "VA",
           "report_names": [
-            "Harbor Point Behavioral Health Center"
+            "Harbor Point Behavioral Health Center",
+            "The Pines Residential Treatment Center"
           ],
-          "pages": "50, 52-54, 75, 82, 94, 96, 115"
+          "pages": "50, 52-54, 75, 82, 85, 94, 96, 115"
         },
         {
           "id": 12804,
@@ -412,15 +413,6 @@
             "North Spring Behavioral Healthcare"
           ],
           "pages": "46, 59"
-        },
-        {
-          "id": 12808,
-          "name": "Pines Residential Treatment Center",
-          "state": "VA",
-          "report_names": [
-            "The Pines Residential Treatment Center"
-          ],
-          "pages": "85"
         },
         {
           "id": 12810,
@@ -697,16 +689,6 @@
             "Brighter Transition Youth Treatment Center"
           ],
           "pages": "103"
-        },
-        {
-          "id": 14160,
-          "name": "Cumberland Hospital",
-          "state": "VA",
-          "report_names": [
-            "Cumberland Children's Hospital",
-            "Cumberland Hospital"
-          ],
-          "pages": "36, 44-46, 95, 97"
         },
         {
           "id": 100006,
