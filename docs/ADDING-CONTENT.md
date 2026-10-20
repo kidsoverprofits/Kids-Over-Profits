@@ -184,6 +184,11 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
 - Words that the owner edits: `js/data/pages/<slug>.json` + Page Text
   (`inc/page-text.php`) instead of text in the template.
 - Kept out of search engines: `kop_robots_disallow_paths()` (`inc/robots.php`).
+- Names on facility and company pages: one name shows once across "Formerly",
+  "Later called", "Also known as" / "Other names" and the title or "Now known as".
+  Any new name list goes through `kop_facility_pages_dedupe_name_lists()`
+  (`inc/facility-pages.php`), never a hand-made `in_array` check; the rule and
+  test are in `docs/claude/facility-pages.md`.
 - Checks: `python scripts/check-bare-text.py` (no text on the gradient),
   `python -u scripts/check-contrast.py --local`, `python -u
   scripts/check-mobile-overflow.py --local`, `php scripts/test-site-map.php`.
