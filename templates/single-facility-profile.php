@@ -483,6 +483,14 @@ while (have_posts()) :
                 <?php endforeach; ?>
             </section>
             <?php endif; ?>
+
+            <?php
+            // "We have questions about ...", as on the generated facility pages (inc/questions.php); filled when the page opens.
+            if ($kop_fp_record_id && function_exists('kop_q_box_html')) {
+                kop_q_box_enqueue();
+                echo kop_q_box_html('facility', (int) $kop_fp_record_id, wp_strip_all_tags(get_the_title())); // Escaped inside.
+            }
+            ?>
         </div>
 
     </div>
