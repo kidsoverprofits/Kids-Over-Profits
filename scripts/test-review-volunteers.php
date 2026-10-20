@@ -315,7 +315,29 @@ kop_vol_recommend($vb, 'folder-links', 'f', 'approve', '');
 $check('a queue not ticked waits', $status('f') === 'pending');
 kop_vol_auto_save(array('on' => 0, 'sources' => array('folder-links')));
 $check('turning it off keeps the ticks', kop_vol_auto_settings()['sources'] === array('folder-links') && !kop_vol_auto_settings()['on']);
-unset($GLOBALS['kop_test_options']['kop_volunteer_sources'], $GLOBALS['kop_test_options']['kop_vol_auto']);
+
+// Marking each volunteer: Yes counts without a record, No never counts.
+kop_vol_auto_save(array('on' => 1, 'sources' => array('folder-links')));
+foreach (array('g', 'h', 'i') as $k) $GLOBALS['kop_auto_items'][$k] = 'pending';
+$check('everyone starts as "if their record is good"', kop_vol_auto_mark_of((int) $vc['id']) === 'record');
+kop_vol_auto_set_mark((int) $vc['id'], 'yes');
+kop_vol_recommend($vc, 'folder-links', 'g', 'approve', '');
+kop_vol_recommend($va, 'folder-links', 'g', 'approve', '');
+$check('marked Yes: a new volunteer counts', $status('g') === 'approved');
+kop_vol_auto_set_mark((int) $va['id'], 'no');
+kop_vol_recommend($va, 'folder-links', 'h', 'approve', '');
+kop_vol_recommend($vb, 'folder-links', 'h', 'approve', '');
+$check('marked No: a trusted volunteer does not count', $status('h') === 'pending');
+kop_vol_recommend($vc, 'folder-links', 'h', 'approve', '');
+$check('and the other two still can', $status('h') === 'approved');
+kop_vol_recommend($va, 'folder-links', 'i', 'reject', '');
+kop_vol_recommend($vb, 'folder-links', 'i', 'approve', '');
+kop_vol_recommend($vc, 'folder-links', 'i', 'approve', '');
+$check('a No volunteer who disagrees still holds it', $status('i') === 'pending');
+kop_vol_auto_set_mark((int) $vc['id'], 'record');
+$check('back to "if their record is good"', kop_vol_auto_mark_of((int) $vc['id']) === 'record' && kop_vol_auto_mark_of((int) $va['id']) === 'no');
+$check('an unknown choice is refused', $throws(function () use ($vc) { kop_vol_auto_set_mark((int) $vc['id'], 'always'); }) !== '');
+unset($GLOBALS['kop_test_options']['kop_volunteer_sources'], $GLOBALS['kop_test_options']['kop_vol_auto'], $GLOBALS['kop_test_options']['kop_vol_auto_people']);
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

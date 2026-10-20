@@ -96,7 +96,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # "Let agreed calls go through on their own"): 2+ trusted volunteers (20 admin-decided calls, 90% agreed, all three settable) give the same
 # approve/reject, nobody disagrees or says Not sure, queue ticked (only kop_vol_auto_allowed() can be) -> kop_rinbox_apply_action() as reviewer
 # 'volunteers' (KOP_VOL_AUTO_BY via $GLOBALS['kop_rinbox_reviewer_as']), in Recently done with Undo; once undone an item never auto-applies again.
-# Recs closed this way (outcome_by 'volunteers') never count toward agreement or self-assign. Tests: the last section of test-review-volunteers.php
+# Recs closed this way (outcome_by 'volunteers') never count toward agreement or self-assign. Per person, the Volunteers table's "Goes through on
+# their own" (option kop_vol_auto_people): Yes counts without a record, No never counts, default by record. Tests: the last section of test-review-volunteers.php
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-volunteer-projects.php   # batches, who sees what, apply + log, handled elsewhere, messages, research + inbox links
 python scripts/test-volunteer-review-ui.py [--shots tmp/volunteer-review-ui]   # the volunteer page in a browser: research card, messages, 1280 + 390 px
 # "Email me when this has been reviewed" on every public form (inc/submission-followup.php, js/submission-followup.js): forms post

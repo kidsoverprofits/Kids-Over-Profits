@@ -22,6 +22,11 @@
  * kop_volp_self_status()): trust comes from the admin's own decisions.
  * Turning it off stops new ones; nothing already applied changes.
  *
+ * Each volunteer can be marked in the Volunteers table (option kop_vol_auto_people
+ * [id => yes|no]): "Yes, I trust them" counts without a record, "No, never"
+ * never counts toward the agreeing volunteers (a disagreement or Not sure from
+ * them still holds the item for the admin).
+ *
  * Option kop_vol_auto {on, sources, agree, decided, rate}.
  * Tested by scripts/test-review-volunteers.php.
  */
@@ -88,6 +93,39 @@ function kop_vol_auto_trusted(array $track, array $s) {
     return $track['decided'] >= $s['decided'] && $track['agreed'] * 100 >= $s['rate'] * $track['decided'];
 }
 
+/** How the admin marked each volunteer: [id => 'yes' | 'no']; anyone not listed counts by their record. */
+function kop_vol_auto_marks() {
+    $m = get_option('kop_vol_auto_people', array());
+    $out = array();
+    foreach ((is_array($m) ? $m : array()) as $id => $v) if (in_array($v, array('yes', 'no'), true)) $out[(int) $id] = $v;
+    return $out;
+}
+
+function kop_vol_auto_mark_labels() {
+    return array('record' => 'If their record is good', 'yes' => 'Yes, I trust them', 'no' => 'No, never');
+}
+
+function kop_vol_auto_mark_of($vid) {
+    return kop_vol_auto_marks()[(int) $vid] ?? 'record';
+}
+
+/** 'yes': their calls count without a record; 'no': never; 'record': by the rules. */
+function kop_vol_auto_set_mark($vid, $mark) {
+    if (!isset(kop_vol_auto_mark_labels()[$mark])) throw new RuntimeException('Pick one of the choices.');
+    $m = kop_vol_auto_marks();
+    if ($mark === 'record') unset($m[(int) $vid]);
+    else $m[(int) $vid] = $mark;
+    update_option('kop_vol_auto_people', $m, false);
+}
+
+/** Does this volunteer's call count toward going through on its own? */
+function kop_vol_auto_counts($vid, array $track, array $s) {
+    $mark = kop_vol_auto_mark_of($vid);
+    if ($mark === 'yes') return true;
+    if ($mark === 'no') return false;
+    return kop_vol_auto_trusted($track, $s);
+}
+
 /** Has this item ever gone through on volunteers' word (undone or not)? */
 function kop_vol_auto_went_before($source, $key) {
     global $wpdb;
@@ -112,7 +150,8 @@ function kop_vol_auto_try($source, $key) {
         foreach ($rows as $r) if (empty($r['revoked_at'])) $live[] = (int) $r['volunteer_id'];
         if (count($live) < $s['agree']) return null;
         $trusted = 0;
-        foreach (kop_vol_auto_track($live) as $t) if (kop_vol_auto_trusted($t, $s)) $trusted++;
+        $track = kop_vol_auto_track($live);
+        foreach ($live as $vid) if (kop_vol_auto_counts($vid, $track[$vid] ?? array('decided' => 0, 'agreed' => 0), $s)) $trusted++;
         if ($trusted < $s['agree']) return null;
         if (isset(kop_vol_held_keys($source)[(string) $key])) return null;
         if (kop_vol_auto_went_before($source, $key)) return null;
@@ -130,6 +169,23 @@ function kop_vol_auto_try($source, $key) {
     } catch (Throwable $e) {
         return null;
     }
+}
+
+/** The Volunteers table's cell: the mark and what it means for them now. */
+function kop_vol_auto_mark_cell(array $v, $nonce) {
+    $mark = kop_vol_auto_mark_of((int) $v['id']);
+    $s = kop_vol_auto_settings();
+    $t = array('decided' => (int) $v['decided'], 'agreed' => (int) $v['agreed']);
+    if ($mark === 'yes') $now = 'Counts';
+    elseif ($mark === 'no') $now = 'Never counts';
+    elseif (kop_vol_auto_trusted($t, $s)) $now = 'Counts (record is good)';
+    elseif ($t['decided'] < $s['decided']) $now = 'Not yet: ' . $t['decided'] . ' of ' . $s['decided'] . ' decided';
+    else $now = 'Not yet: under ' . $s['rate'] . '%';
+    $out = '<form method="post" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">' . $nonce
+        . '<input type="hidden" name="kop_vol_do" value="automark"><input type="hidden" name="kop_vol_id" value="' . (int) $v['id'] . '">'
+        . '<select name="kop_vol_auto_mark" aria-label="Goes through on their own">';
+    foreach (kop_vol_auto_mark_labels() as $k => $label) $out .= '<option value="' . esc_attr($k) . '"' . selected($mark, $k, false) . '>' . esc_html($label) . '</option>';
+    return $out . '</select><button type="submit" class="button-link">Save</button></form><small>' . esc_html($now . ($s['on'] ? '' : ' (switch is off)')) . '</small>';
 }
 
 /** The latest items that went through on volunteers' word, for the admin screen. */
@@ -154,7 +210,8 @@ function kop_vol_auto_admin_section($nonce, $inbox) {
         <p>Trusted means at least
             <input type="number" name="kop_vol_auto_decided" value="<?php echo (int) $s['decided']; ?>" min="5" max="500" style="width:70px" aria-label="Calls you decided"> of their calls decided by you,
             agreeing with you <input type="number" name="kop_vol_auto_rate" value="<?php echo (int) $s['rate']; ?>" min="50" max="100" style="width:64px" aria-label="Agreement percent">% of the time or more.
-            Volunteers needed: <input type="number" name="kop_vol_auto_agree" value="<?php echo (int) $s['agree']; ?>" min="2" max="5" style="width:56px" aria-label="Volunteers needed">.</p>
+            Volunteers needed: <input type="number" name="kop_vol_auto_agree" value="<?php echo (int) $s['agree']; ?>" min="2" max="5" style="width:56px" aria-label="Volunteers needed">.
+            You can also mark each person in the Volunteers table above: <em>Yes, I trust them</em> counts them whatever their record, <em>No, never</em> leaves their calls for you.</p>
         <p style="margin-bottom:4px">In these queues (the others are never offered: publishing, named people, survivor material, a public status, merges, the submission queues):</p>
         <div style="columns:3 220px">
         <?php foreach (kop_vol_auto_allowed() as $key) :

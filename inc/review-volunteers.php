@@ -844,6 +844,10 @@ function kop_vol_admin_page() {
                 $picked = array_map('sanitize_key', (array) ($_POST['kop_vol_sources'] ?? array()));
                 update_option('kop_volunteer_sources', array_values(array_diff($picked, kop_vol_never_sources())), false);
                 $notice = 'Queues saved.';
+            } elseif ($do === 'automark') {
+                $mark = sanitize_key((string) ($_POST['kop_vol_auto_mark'] ?? ''));
+                kop_vol_auto_set_mark($id, $mark);
+                $notice = 'Saved: ' . kop_vol_auto_mark_labels()[$mark] . '.';
             } elseif ($do === 'auto') {
                 $s = kop_vol_auto_save(array(
                     'on'      => !empty($_POST['kop_vol_auto_on']),
@@ -909,7 +913,7 @@ function kop_vol_admin_page() {
         <h2>Volunteers</h2>
         <?php if (!$vols) : ?><p>Nobody yet.</p><?php else : ?>
         <table class="widefat striped" style="max-width:1100px">
-            <thead><tr><th>Name</th><th>Note</th><th>Recommended</th><th>Agreed with the admin</th><th>Last seen</th><th>Link made</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Note</th><th>Recommended</th><th>Agreed with the admin</th><th><a href="#kop-vol-auto">Goes through on their own</a></th><th>Last seen</th><th>Link made</th><th></th></tr></thead>
             <tbody>
             <?php foreach ($vols as $v) :
                 $off = !empty($v['revoked_at']);
@@ -924,6 +928,7 @@ function kop_vol_admin_page() {
                     <td><?php echo esc_html($v['note']); ?></td>
                     <td><?php echo (int) $v['recs']; ?></td>
                     <td><?php echo esc_html($rate); ?></td>
+                    <td><?php echo kop_vol_auto_mark_cell($v, $nonce); ?></td>
                     <td><?php echo $v['last_seen'] ? esc_html(get_date_from_gmt($v['last_seen'], 'M j, Y g:i a')) : 'never opened'; ?></td>
                     <td><?php echo esc_html(get_date_from_gmt($v['link_at'], 'M j, Y')); ?></td>
                     <td><a class="button" href="<?php echo esc_url(kop_volm_admin_url((int) $v['id'])); ?>">Message</a>
