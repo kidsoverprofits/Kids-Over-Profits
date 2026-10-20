@@ -38,6 +38,13 @@ require_once dirname(__DIR__) . '/inc/woodbury-facts.php';
 require_once dirname(__DIR__) . '/inc/drive-docs.php';
 require_once dirname(__DIR__) . '/inc/fornits.php';
 require_once dirname(__DIR__) . '/api/lib-record-enrich.php';
+require_once dirname(__DIR__) . '/inc/facility-merge.php';
+// The live merge map, from the copied options table (the harness's get_option() does not read it): a batch
+// names the records as they were when it was built, and kop_fmerge_follow_waiting() moves its waiting links
+// to the record each was merged into since.
+$raw = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_facility_merged_into'")->fetchColumn();
+if ($raw !== false) $GLOBALS['kop_test_options']['kop_facility_merged_into'] = unserialize($raw);
+unset($raw);
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -129,7 +136,7 @@ while (($line = gzgets($fh)) !== false) {
     $t = json_decode($line, true);
     foreach ((array) $t['facilities'] as $f) {
         $first = $t['posts'][0];
-        $by[(int) $f['id']][] = array(
+        $by[kop_facility_merge_resolve((int) $f['id'])][] = array(
             'pkey' => 'x', 'kind' => 'link', 'topic_id' => $t['topic'], 'post_n' => 0, 'author' => $first['author'], 'post_date' => $first['date'],
             'label' => 'Fornits: ' . $t['title'] . ' (2004, 3 posts)', 'title' => $t['title'], 'summary' => 'Survivors describe restraints and a death in 2004.', 'quote' => '', 'value' => json_encode(array('url' => $t['url'], 'board' => $t['board_name'])),
         );
