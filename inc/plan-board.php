@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/admin-kit.php';
 
-const KOP_PB_DB_VERSION = '1';
+const KOP_PB_DB_VERSION = '2';
 
 add_filter('kop_admin_kit_pages', function ($pages) {
     $pages[] = 'kop-plan-board';
@@ -55,7 +55,7 @@ function kop_pb_install($force = false) {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         item_id VARCHAR(200) NOT NULL,
         item_hash VARCHAR(20) NOT NULL DEFAULT '',
-        lead VARCHAR(255) NOT NULL DEFAULT '',
+        item_lead VARCHAR(255) NOT NULL DEFAULT '',
         kind VARCHAR(10) NOT NULL,
         body TEXT NULL,
         user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
@@ -64,7 +64,13 @@ function kop_pb_install($force = false) {
         PRIMARY KEY (id),
         KEY item_id (item_id(100))
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    update_option('kop_pb_db', KOP_PB_DB_VERSION, false);
+    // Marked done only once the table is there: version 1 named a column `lead` (reserved in MySQL 8), its
+    // CREATE failed and the flag was set anyway, so no answer was ever saved.
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', kop_pb_table())) === kop_pb_table()) {
+        update_option('kop_pb_db', KOP_PB_DB_VERSION, false);
+    } elseif ($wpdb->last_error !== '') {
+        error_log('kop_pb_install: ' . $wpdb->last_error);
+    }
 }
 add_action('admin_init', 'kop_pb_install', 5);
 
@@ -147,7 +153,7 @@ function kop_pb_open_export(array $open, array $items) {
         $out[] = array(
             'answer' => (int) $r['id'],
             'itemId' => $item_id,
-            'lead' => $r['lead'],
+            'lead' => $r['item_lead'],
             'kind' => $r['kind'],
             'text' => (string) $r['body'],
             'savedAt' => $r['saved_at'],
@@ -235,7 +241,7 @@ function kop_pb_save($item_id, $kind, $text, $user_id) {
     kop_pb_withdraw($item_id);
     $now = current_time('mysql', true);
     $ok = $wpdb->insert(kop_pb_table(), array(
-        'item_id' => $item_id, 'item_hash' => (string) ($items[$item_id]['hash'] ?? ''), 'lead' => mb_substr((string) $items[$item_id]['lead'], 0, 255),
+        'item_id' => $item_id, 'item_hash' => (string) ($items[$item_id]['hash'] ?? ''), 'item_lead' => mb_substr((string) $items[$item_id]['lead'], 0, 255),
         'kind' => $kind, 'body' => $text, 'user_id' => (int) $user_id, 'saved_at' => $now,
     ));
     return $ok ? (int) $wpdb->insert_id : 'Could not save: ' . $wpdb->last_error;
@@ -330,7 +336,7 @@ function kop_pb_page() {
     if ($lost) {
         $list = '';
         foreach ($lost as $item_id => $r) {
-            $list .= '<li><span class="kop-pb-id">' . esc_html($item_id) . '</span> (' . esc_html($r['lead']) . '): ' . esc_html($r['body'] !== '' ? $r['body'] : (kop_pb_kinds()[$r['kind']] ?? '')) . '</li>';
+            $list .= '<li><span class="kop-pb-id">' . esc_html($item_id) . '</span> (' . esc_html($r['item_lead']) . '): ' . esc_html($r['body'] !== '' ? $r['body'] : (kop_pb_kinds()[$r['kind']] ?? '')) . '</li>';
         }
         echo kop_ak_fold('Answers to items no longer on the plan (' . count($lost) . ')', '<ul class="kop-pb-pass">' . $list . '</ul><p>Claude still reads these on its next pass.</p>', true);
     }

@@ -33,7 +33,7 @@ $items = kop_pb_items(kop_pb_plan());
 if (in_array('--all', $argv, true)) {
     $out = array();
     foreach ($rows as $r) {
-        $out[] = array('answer' => (int) $r['id'], 'itemId' => $r['item_id'], 'lead' => $r['lead'], 'kind' => $r['kind'],
+        $out[] = array('answer' => (int) $r['id'], 'itemId' => $r['item_id'], 'lead' => $r['item_lead'], 'kind' => $r['kind'],
             'text' => (string) $r['body'], 'savedAt' => $r['saved_at'], 'foldedIn' => $handled[(int) $r['id']] ?? null);
     }
 } else {

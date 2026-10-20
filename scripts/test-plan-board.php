@@ -67,15 +67,17 @@ unlink($tmp);
 
 $first = array_values($items)[0];
 $rows = array(
-    array('id' => 1, 'item_id' => $first['id'], 'item_hash' => $first['hash'], 'lead' => $first['lead'], 'kind' => 'answer', 'body' => 'older', 'saved_at' => '2026-10-20 09:00:00'),
-    array('id' => 2, 'item_id' => 'x:a', 'item_hash' => 'h', 'lead' => 'Gone', 'kind' => 'done', 'body' => '', 'saved_at' => '2026-10-20 09:00:00'),
-    array('id' => 3, 'item_id' => $first['id'], 'item_hash' => 'stale', 'lead' => $first['lead'], 'kind' => 'later', 'body' => 'newer', 'saved_at' => '2026-10-20 10:00:00'),
+    array('id' => 1, 'item_id' => $first['id'], 'item_hash' => $first['hash'], 'item_lead' => $first['lead'], 'kind' => 'answer', 'body' => 'older', 'saved_at' => '2026-10-20 09:00:00'),
+    array('id' => 2, 'item_id' => 'x:a', 'item_hash' => 'h', 'item_lead' => 'Gone', 'kind' => 'done', 'body' => '', 'saved_at' => '2026-10-20 09:00:00'),
+    array('id' => 3, 'item_id' => $first['id'], 'item_hash' => 'stale', 'item_lead' => $first['lead'], 'kind' => 'later', 'body' => 'newer', 'saved_at' => '2026-10-20 10:00:00'),
 );
 list($open, $folded) = kop_pb_split($rows, $handled);
 $check('the newest open answer stands for its item', ($open[$first['id']]['id'] ?? 0) === 3);
 $check('a folded-in answer is not open', !isset($open['x:a']) && isset($folded['x:a']));
 $exp = kop_pb_open_export($open, $items);
-$check('export: one open answer, item reworded since', count($exp) === 1 && $exp[0]['itemChanged'] === true && $exp[0]['onPlan'] === true, json_encode($exp));
+$check('export: one open answer, item reworded since', count($exp) === 1 && $exp[0]['itemChanged'] === true && $exp[0]['onPlan'] === true && $exp[0]['lead'] === $first['lead'], json_encode($exp));
+$create = file_get_contents($theme . '/inc/plan-board.php');
+$check('no column named after a MySQL 8 reserved word', !preg_match('/^\s+(lead|lag|rank|row_number|window|groups|key|order|rows)\s+(VARCHAR|TEXT|BIGINT|INT|DATETIME|SMALLINT)\b/mi', $create));
 
 // Every card renders, with an answer, folded in, and plain.
 $errs = array();
