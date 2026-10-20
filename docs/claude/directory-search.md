@@ -33,7 +33,7 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # state deck; #f<id> / #o<id> / #q=<key> open a record. Answers: {prefix}kop_question_answers, one per person (keyed hash of address +
 # browser), 60 an hour. KOP_Q_AGREE (3) people agreeing with nobody disagreeing settles it on its own through Review inbox > Answers
 # to our questions ('settle', reviewer "questions page", Undo in Recently done); staff and rules always wait. Facility values go in as
-# Woodbury Facts rows (extra.via 'questions') through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
+# Woodbury Facts rows (extra.via 'questions', badged "Questions page" there and in Conflicts, kop_wbf_origin()) through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
 # name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act().
 # Email is optional and only for "tell me when my answers are checked" (the page says so): kop_q_notify() puts the reader's answers
 # in one {prefix}kop_question_batches row (status from kop_q_batch_refresh()), and inc/submission-followup.php kind 'questions' sends

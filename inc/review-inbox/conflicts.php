@@ -42,7 +42,7 @@ kop_rinbox_register('conflicts', function () {
             . '"Use this value" writes the item\'s value over it, citing the item\'s source; "Both are right" keeps the record\'s types and adds this one; "Edit" writes a value you type. Undo takes any of them back exactly.',
         'views'    => array('pending' => 'To settle'),
         'filters'  => array(
-            array('name' => 'from', 'label' => 'From', 'options' => kop_rinbox_conflicts_queues()),
+            array('name' => 'from', 'label' => 'From', 'options' => kop_rinbox_conflicts_froms()),
             array('name' => 'what', 'label' => 'Kind', 'options' => kop_rinbox_conflicts_kinds()),
         ),
         'view_counts' => function (array $q) { return array('pending' => count(kop_rinbox_conflicts_units($q))); },
@@ -76,6 +76,25 @@ function kop_rinbox_conflicts_queues() {
     return $out;
 }
 
+/**
+ * The From filter: the queues, with the questions page's answers (rows in the
+ * Woodbury Facts table, kop_wbf_origin()) split off Woodbury Facts.
+ */
+function kop_rinbox_conflicts_froms() {
+    $out = array();
+    foreach (kop_rinbox_conflicts_queues() as $k => $label) {
+        $out[$k] = $label;
+        if ($k === 'woodbury-facts' && function_exists('kop_wbf_origins')) $out['questions'] = kop_wbf_origins()['questions'];
+    }
+    return $out;
+}
+
+/** A conflict's badge: its queue, or "Questions page" for the questions page's rows. */
+function kop_rinbox_conflicts_label($queue, array $c) {
+    if (($c['origin'] ?? '') === 'questions' && function_exists('kop_wbf_origins')) return kop_wbf_origins()['questions'];
+    return kop_rinbox_conflicts_queues()[$queue];
+}
+
 function kop_rinbox_conflicts_kinds() {
     return array('dates' => 'Years and dates', 'size' => 'Size and ages', 'type' => 'Type', 'staff' => 'Staff roles', 'closure' => 'Closures', 'other' => 'Other');
 }
@@ -92,10 +111,14 @@ function kop_rinbox_conflicts_all(array $q) {
     $from = (string) ($q['filters']['from'] ?? '');
     $what = (string) ($q['filters']['what'] ?? '');
     $search = mb_strtolower(trim((string) ($q['search'] ?? '')));
+    // "questions" is part of the Woodbury Facts queue; picking Woodbury Facts leaves those rows out.
+    $from_queue = $from === 'questions' ? 'woodbury-facts' : $from;
+    $origin = $from === 'questions' ? 'questions' : ($from === 'woodbury-facts' ? 'woodbury' : '');
     $all = array();
     foreach (array_keys(kop_rinbox_conflicts_queues()) as $queue) {
-        if ($from !== '' && $from !== $queue) continue;
+        if ($from_queue !== '' && $from_queue !== $queue) continue;
         foreach (kop_rinbox_conflict_keys($queue) as $k => $c) {
+            if ($origin !== '' && ($c['origin'] ?? 'woodbury') !== $origin) continue;
             if ($what !== '' && ($c['what'] ?? 'other') !== $what) continue;
             if ($search !== '' && mb_strpos(mb_strtolower(($c['title'] ?? '') . ' ' . ($c['text'] ?? '') . ' ' . kop_rinbox_conflicts_facility_name($c)), $search) === false) continue;
             $all[$queue . '|' . $k] = $c + array('queue' => $queue);
@@ -131,7 +154,7 @@ function kop_rinbox_conflicts_item($key, $c) {
     $it = call_user_func($src['get'], $k);
     if (!$it) return null;
     $it['key'] = (string) $key;
-    $it['source_label'] = kop_rinbox_conflicts_queues()[$queue];
+    $it['source_label'] = kop_rinbox_conflicts_label($queue, (array) $c);
     $it['fields'] = array();
     $it['moves'] = array();
     // The program leads the card: the queues' own titles ("Opened 1998", "Staff: ...") never name it.
@@ -370,7 +393,8 @@ function kop_rinbox_conflicts_group_item($key, array $members) {
         'key'            => (string) $key,
         'title'          => ($program !== '' ? $program . ': ' : '') . $kind,
         'subtitle'       => $n . ' items',
-        'source_label'   => kop_rinbox_conflicts_queues()[$queue],
+        'source_label'   => count(array_unique(array_map(function ($c) { return $c['origin'] ?? ''; }, $members))) === 1
+            ? kop_rinbox_conflicts_label($queue, $first) : kop_rinbox_conflicts_queues()[$queue],
         'url'            => '',
         'text'           => 'Untick any row the choice should not apply to; it stays here for later.',
         'created'        => $created,

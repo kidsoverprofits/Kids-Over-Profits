@@ -98,6 +98,23 @@ function kop_rinbox_test_questions(array $src, array $item, callable $check) {
     $wbf = !empty($done['wbf']) ? (kop_wbf_rows(array($done['wbf']))[0] ?? null) : null;
     $check('questions: it waits for the record write-up as an approved fact citing the page', $wbf && $wbf['status'] === 'held'
         && $wbf['path'] === 'operatingPeriod.startYear' && json_decode($wbf['value'], true) === 1998 && strpos($wbf['evidence'], '3 people agreed') !== false, json_encode($wbf));
+    // In Woodbury Facts (Held tab) and Conflicts it is named as the questions page, never as Woodbury.
+    if ($wbf) {
+        $card = kop_rinbox_get_item('woodbury-facts', $wbf['pkey']);
+        $check('questions: its Woodbury Facts card is badged "Questions page" and says where it came from', $card && $card['source_label'] === 'Questions page'
+            && strpos($card['text'], 'From the questions page') !== false && strpos($card['text'], 'Woodbury calls it') === false
+            && strpos($card['text'], 'Added by hand by') === false && strpos($card['text'], 'these words were not found') === false, json_encode(array($card['source_label'] ?? null, $card['text'] ?? null)));
+        $wsrc = kop_rinbox_sources()['woodbury-facts'];
+        $in = function ($origin) use ($wsrc, $wbf) {
+            $l = call_user_func($wsrc['list'], array('view' => 'held', 'search' => '', 'offset' => 0, 'limit' => 500, 'filters' => array('origin' => $origin)));
+            return in_array($wbf['pkey'], array_column($l['items'], 'key'), true);
+        };
+        $check('questions: the Woodbury Facts "From" filter keeps it under Questions page, not Woodbury Reports', $in('questions') && !$in('woodbury') && $in(''));
+    }
+    $froms = kop_rinbox_conflicts_froms();
+    $check('questions: Conflicts can be filtered to the questions page', ($froms['questions'] ?? '') === 'Questions page', json_encode($froms));
+    $check('questions: a conflict from the questions page is badged so', kop_rinbox_conflicts_label('woodbury-facts', array('origin' => 'questions')) === 'Questions page'
+        && kop_rinbox_conflicts_label('woodbury-facts', array('origin' => 'woodbury')) === 'Woodbury Facts');
     $logged = $GLOBALS['wpdb']->get_row("SELECT * FROM wpdl_kop_review_log WHERE source = 'questions' AND item_key = '$key' ORDER BY id DESC LIMIT 1", ARRAY_A);
     $check('questions: it is in Recently done with its Undo, as the questions page', $logged && $logged['undo_action'] === 'undo' && $logged['user_login'] === KOP_Q_BY, json_encode($logged));
     call_user_func($src['act'], $key, 'undo', array());

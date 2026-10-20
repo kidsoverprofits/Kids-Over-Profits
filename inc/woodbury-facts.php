@@ -253,6 +253,32 @@ function kop_wbf_ev_label(array $e) {
     return !empty($e['cite']) ? (string) $e['cite'] : $e['label'] . ', p. ' . (int) $e['page'];
 }
 
+/**
+ * Where a row came from: 'questions' for values settled on the questions page
+ * (kop_q_wbf_write(), extra.via), else 'woodbury'. [key => label] in kop_wbf_origins().
+ */
+function kop_wbf_origin(array $r) {
+    $extra = is_array($r['extra'] ?? null) ? $r['extra'] : (json_decode((string) ($r['extra'] ?? ''), true) ?: array());
+    return ($extra['via'] ?? '') === 'questions' ? 'questions' : 'woodbury';
+}
+
+function kop_wbf_origins() {
+    return array('woodbury' => 'Woodbury Reports', 'questions' => 'Questions page');
+}
+
+/** SQL for one origin's rows (the questions page writes extra as {"manual":1,"via":"questions",...}). */
+function kop_wbf_origin_where($origin) {
+    if ($origin === 'questions') return " AND extra LIKE '%\"via\":\"questions\"%'";
+    if ($origin === 'woodbury') return " AND (extra IS NULL OR extra NOT LIKE '%\"via\":\"questions\"%')";
+    return '';
+}
+
+/** The line a hand-added row carries: who added it, or the questions page's readers. */
+function kop_wbf_manual_line(array $r, array $extra) {
+    if (kop_wbf_origin($r) === 'questions') return 'From the questions page: readers\' answers, settled there.';
+    return 'Added by hand by ' . ($extra['edited_by'] ?? '') . '.';
+}
+
 /** The source a record created from these items names (kop_wbc_source_note()). */
 function kop_wbf_create_source(array $e) {
     $first = $e ? $e[0] : array('issue_id' => 0, 'label' => '', 'number' => '', 'page' => 0);
@@ -2751,7 +2777,8 @@ function kop_wbf_render_card(array $rows, $tab) {
         if ($page) {
             $sub[] = '<a href="' . esc_url($page) . '" target="_blank" rel="noopener">Facility page</a>';
         }
-        if ($first['match_kind'] !== 'exact' && $pending) {
+        // 'id': the questions page names the record itself, so there is no Woodbury name to check.
+        if (!in_array($first['match_kind'], array('exact', 'id'), true) && $pending) {
             $sub[] = '<span class="kop-ak-warn">Woodbury calls it &ldquo;' . esc_html($first['program_as_written'])
                 . ($first['place'] !== '' ? ', ' . esc_html($first['place']) : '') . '&rdquo;. '
                 . esc_html($first['match_note'] ?: 'Close name: check it is the same program.') . ' Items start unticked.</span>';
@@ -2827,7 +2854,7 @@ function kop_wbf_render_row(array $r, $tab) {
             . esc_html(kop_wbf_filed_on($r)) . '</div>';
     }
     if (!empty($extra['manual'])) {
-        echo '<div class="kop-ak-muted">Added by hand by ' . esc_html($extra['edited_by'] ?? '') . '</div>';
+        echo '<div class="kop-ak-muted">' . esc_html(kop_wbf_manual_line($r, $extra)) . '</div>';
     }
     if ($r['conflict'] !== '') {
         echo '<div class="kop-ak-warn">' . esc_html($r['conflict']) . '</div>';
@@ -2852,10 +2879,10 @@ function kop_wbf_render_row(array $r, $tab) {
     $ev = kop_wbf_evidence($r);
     $source = function ($e, $warn) {
         $html = '<div class="kop-wbf-src"><a href="' . esc_url($e['url']) . '" target="_blank" rel="noopener">' . esc_html(kop_wbf_ev_label($e)) . '</a>';
-        if ($e['quote'] !== '') {
+        if (($e['quote'] ?? '') !== '') {
             $html .= '<blockquote class="kop-ak-quote' . ($e['found'] ? '' : ' is-unfound') . '">' . esc_html($e['quote']) . '</blockquote>';
         }
-        if ($warn && !$e['found']) {
+        if ($warn && empty($e['found']) && ($e['quote'] ?? '') !== '') {
             $html .= '<div class="kop-ak-warn">These words were not found in the ' . (!empty($e['pub']) ? 'archived page' : 'issue text') . ': check the page before adding.</div>';
         }
         return $html . '</div>';
