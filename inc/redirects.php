@@ -88,3 +88,28 @@ function kop_apply_redirect_map() {
     exit;
 }
 add_action('template_redirect', 'kop_apply_redirect_map', 1);
+
+/**
+ * Published posts and pages that a map entry redirects (a top-level slug that is a key above). They stay
+ * published (Support's page, the old news listings), so Yoast would list them in its sitemap and the SEO
+ * Descriptions screen would ask for their fields; both leave them out.
+ */
+function kop_redirected_post_ids() {
+    static $ids = null;
+    if ($ids !== null) return $ids;
+    global $wpdb;
+    $slugs = array_keys(kop_redirect_map());
+    if (!$slugs || !isset($wpdb)) return $ids = array();
+    $in = implode(',', array_fill(0, count($slugs), '%s'));
+    $ids = array_map('intval', (array) $wpdb->get_col($wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('post', 'page') AND post_parent = 0 AND post_name IN ($in)",
+        $slugs
+    )));
+    return $ids;
+}
+
+function kop_redirect_sitemap_exclude($ids) {
+    $ids = is_array($ids) ? array_map('intval', $ids) : array();
+    return array_values(array_unique(array_merge($ids, kop_redirected_post_ids())));
+}
+add_filter('wpseo_exclude_from_sitemap_by_post_ids', 'kop_redirect_sitemap_exclude', 31);

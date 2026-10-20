@@ -64,6 +64,7 @@ require_once dirname(__DIR__) . '/inc/template-layout.php';   // kop_template_la
 require_once dirname(__DIR__) . '/inc/seo.php';
 require_once dirname(__DIR__) . '/inc/admin-kit.php';
 require_once dirname(__DIR__) . '/inc/seo-drafts.php';
+require_once dirname(__DIR__) . '/inc/redirects.php';
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -110,6 +111,9 @@ $tools = array_filter($todo, function ($c) { return kop_seo_noindex_page($c[0], 
 $check('no tool page is listed', !$tools, implode(',', array_map(function ($c) { return $c[0]->ID; }, $tools)));
 $ex = kop_seo_sitemap_exclude_tools(array(5));
 $check("the tool pages leave Yoast's sitemap, other exclusions kept", in_array(5, $ex, true) && in_array(6053, $ex, true) && in_array(9366, $ex, true) && !in_array(2251, $ex, true), implode(',', $ex));
+$redir = kop_redirected_post_ids();
+$check('pages that redirect away (/support/, /news/, /news-2/, /international/) leave the sitemap', !array_diff(array(186, 829, 55, 775), kop_redirect_sitemap_exclude(array())) && in_array(5, kop_redirect_sitemap_exclude(array(5)), true), implode(',', $redir));
+$check('and are not listed for a description', !array_intersect($redir, array_map(function ($c) { return (int) $c[0]->ID; }, $todo)));
 $check('every listed page has a drafted description', !$no_draft, implode(' | ', array_slice($no_draft, 0, 8)));
 $check('no draft runs past 158', !$long, implode(',', $long));
 // Two posts of one article (the Walrus piece, posted twice with small edits) get the same draft; each card names the other.

@@ -272,7 +272,7 @@ function kop_seo_drafts_keyphrase($post) {
 
 /**
  * Published posts and pages with an empty Yoast description or keyphrase that are not kept out of search
- * (Yoast's noindex box, or a tool page: kop_seo_noindex_page()), each [post, stored desc, stored kw]. Pages the owner skipped are left out unless $skipped.
+ * (Yoast's noindex box, or a tool page: kop_seo_noindex_page()) or redirected away, each [post, stored desc, stored kw]. Pages the owner skipped are left out unless $skipped.
  */
 function kop_seo_drafts_candidates($skipped = false) {
     global $wpdb;
@@ -297,6 +297,7 @@ function kop_seo_drafts_candidates($skipped = false) {
         if (isset($seen[$id])) continue;   // a page with two meta rows of one key
         $seen[$id] = true;
         if (kop_seo_noindex_page($r, kop_seo_drafts_template($r))) continue;
+        if (function_exists('kop_redirected_post_ids') && in_array($id, kop_redirected_post_ids(), true)) continue;   // redirects away (inc/redirects.php)
         if (isset($skip[$id]) !== (bool) $skipped) continue;
         $out[] = array($r, trim((string) $r->metadesc), trim((string) $r->focuskw));
     }
