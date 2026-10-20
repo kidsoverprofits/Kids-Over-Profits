@@ -60,18 +60,24 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
             if (kop_daudit_doc_check($doc, $ops)) $stale[] = $key;
         }
     }
-    // Company fields and moved links are checked against the mirror the way Approve checks them.
+    // Company fields and moved links are checked against the mirror the way Approve checks them. A value
+    // edited since (' is now "') is shown on the card to tick anyway (kop_daudit_step_states()), not a fault.
     $why_new = array();
+    $edited_since = array();
     foreach ($props as $key => $p) {
         $mine = array_values(array_filter($p['ops'], function ($op) { return in_array($op['type'], array('operator_field', 'links_move'), true); }));
         if (!$mine) continue;
         try {
-            foreach (kop_daudit_check(array('ops' => $mine), array('pdo' => $pdo, 'prefix' => 'wpdl_')) as $w) $why_new[] = $key . ': ' . $w;
+            foreach (kop_daudit_check(array('ops' => $mine), array('pdo' => $pdo, 'prefix' => 'wpdl_')) as $w) {
+                if (preg_match('/ is now "/', $w)) $edited_since[$key] = true;
+                else $why_new[] = $key . ': ' . $w;
+            }
         } catch (Throwable $e) {
             $why_new[] = $key . ': ' . $e->getMessage();
         }
     }
-    $check('data-audit: company fields and moved articles still fit the records', !$why_new, implode(' | ', array_slice($why_new, 0, 6)));
+    $check('data-audit: company fields and moved articles still fit the records', !$why_new,
+        count($edited_since) . ' edited since (' . implode(', ', array_keys($edited_since)) . ')' . ($why_new ? '; ' . implode(' | ', array_slice($why_new, 0, 6)) : ''));
     $check('data-audit: every proposal is well formed', !$bad, count($props) . ' proposals, ' . count($merged) . ' naming a record merged since'
         . ($bad ? '; ' . implode(' | ', array_slice($bad, 0, 6)) : ''));
     $check('data-audit: nearly every proposal still fits its record (the rest are refused on Approve)', count($stale) <= max(3, (int) (count($props) / 20)),

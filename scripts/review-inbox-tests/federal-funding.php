@@ -51,6 +51,11 @@ function kop_rinbox_test_federal_funding(array $src, array $item, callable $chec
     $fid = (int) $p['candidates'][0]['id'];
     $doc = $doc_of($fid);
     $entries = kop_ffund_entries($key, $p);
+    // The record as it was before this proposal's Add (the live one may have been added already).
+    $doc['federalFunding'] = array_values(array_filter((array) ($doc['federalFunding'] ?? array()), function ($e) use ($entries) {
+        return !in_array($e['ref'] ?? '', array_column($entries, 'ref'), true);
+    }));
+    if (!$doc['federalFunding']) unset($doc['federalFunding']);
     $after = $doc;
     $refs = kop_ffund_doc_add($after, $entries);
     $check('federal-funding: Add puts every entry on the record with its ref and credit', count($refs) === count($entries)
