@@ -2972,3 +2972,19 @@ other name's (it is now cut into "As <name>" sections like the website); the oth
    is not under it, 8 with no link (Review inbox > Wiki links).
    Every entry's additions are a card at Review inbox > Wiki staff added
    (inc/review-inbox/wiki-staff.php): Looks right, Take them off, Undo.
+
+## 5. Tests failing on main (finished 2026-10-20)
+
+Passing on the 2026-10-20 mirror; the last three fixed in eb2acbeb.
+
+- **test-facility-pages**: `scripts/test-facility-pages.php`, 13 checks (merged Facility Profile posts; "the page renders to the end after
+  the post"; "links a staff entry and a fact" samples Aspen Education Group, now a renamed program).
+- **test-facility-eras**: `scripts/test-facility-eras.php`, 1 check.
+- **test-name-under-operator**: `scripts/test-name-under-operator.php`, Psychiatric Solutions / #10370.
+- **test-wiki-gaps**: `scripts/test-wiki-gaps.php`, "a page with no years or place matches only its exact name" (Mountain Home Academy).
+  The page gained years and a place on 2026-10-14; the check now builds its own entry, and a placeholder `years_active` ("-")
+  gives way to the header's years.
+- **test-woodbury-facts**: `scripts/test-woodbury-facts.php`, "every staff entry added or filled names its source and link" (4 without).
+  They were merges into entries that already named a source (r/troubledteens wiki, no link), which the merge rightly keeps.
+- The `@unlink` at shutdown of a scratch copy (test-volunteer-projects, test-review-inbox) turned all-passed runs into exit 255;
+  the harness's error handler now lets @-silenced warnings be.
