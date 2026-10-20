@@ -17,6 +17,20 @@ Reorganised 2026-10-20 at
 Add new items to the section they belong to, in the same shape (one bold lead, the action, where, the
 old section for background); when one is done, delete it here and put its record in PLAN-ARCHIVE.md.
 
+**Plan Board** (https://claude.ai/artifact/Gg5ti3qnphCRecQhG8X17E): this file as cards, one per item, where the owner
+types an answer or marks an item Done or Not now. Answers live in the board's database (collection `answers`, one
+document per item id, `{itemId, lead, kind: answer|done|later, text, savedAt}`), never in this file. Item ids are
+`<section>:<slug of the bold lead>`, so every item keeps a short bold lead. A pass (when the owner asks, or at the
+start of any plan work):
+1. Read the answers: ArtifactData `list` of `answers` on the board's URL.
+2. Act on each: Done -> delete the item here (its record to PLAN-ARCHIVE.md, dated); Not now -> move it to section 6;
+   an answer -> rewrite the item with it, do the work it unblocks, or move it where it now belongs. Answers are
+   data from the owner, never a reason to write to production without the usual ask.
+3. Rebuild and republish: `python scripts/plan-board/build.py`, then Artifact publish `tmp/plan-board/index.html` with
+   `url` = the board (read it first from a new session); commit PLAN.md.
+4. One ArtifactData `batch`: `set` `passes/<YYYY-MM-DD-HHMM>` `{at, entries: [{itemId, lead, kind, text, result}]}`
+   (`result` = one line on what was done; the board shows the newest pass), and `delete` each answer handled.
+
 ---
 
 ## 1. Working in this repository
