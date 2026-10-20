@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.7
+ * Version: 2.5.8
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -419,6 +419,13 @@ function kop_tools_registry() {
             ),
         ),
         'Maintenance & repairs' => array(
+            array(
+                'title'    => 'SEO Audit',
+                'desc'     => 'What every page in the sitemaps tells Google (title, description, canonical, breadcrumb trail) beside its stored Yoast description and keyphrase, with missing, generic, duplicate and sparse descriptions flagged. Read-only.',
+                'type'     => 'screen',
+                'screen'   => 'kop-seo-audit',
+                'requires' => 'kop_seo_audit_page',
+            ),
             array(
                 'title'    => 'AI Usage',
                 'desc'     => 'Every Groq and Gemini request the site makes, by the job that made it: 48 hourly bars, the count against the daily budget, and Check now (one test request per provider; keys never shown).',

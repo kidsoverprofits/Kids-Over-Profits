@@ -91,6 +91,12 @@ php scripts/test-robots.php
 # (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner, tag archives are noindex and out of the sitemap. A new page kind gets its pieces there
 # Yoast's dashboard and editor analysis read the stored post meta (_yoast_wpseo_metadesc, _yoast_wpseo_focuskw), not our wpseo_* filters, so its "default meta description" / keyphrase warnings can show where the live page is fine (see docs/plan/4.7 items 8-10)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] [--id=12161]
+# SEO audit (docs/plan/4.7 item 8): the crawl reads every sitemap page's live title, description, canonical and BreadcrumbList,
+# compares them with the stored _yoast_wpseo_* fields in tmp/prod.sqlite and flags problems -> kop-pipeline/tmp/seo-audit/audit.json;
+# copy it to wp-content/uploads/kop-seo-audit/audit.json on the server and it shows at KOP Tools > SEO Audit (inc/seo-audit.php, read-only)
+(kop-pipeline) python scripts/seo-audit.py [--limit N] [--refresh]
+scp ../kop-pipeline/tmp/seo-audit/audit.json <prod>:public_html/wp-content/uploads/kop-seo-audit/audit.json
+php -d extension=mbstring scripts/test-seo-audit.php [--audit=../kop-pipeline/tmp/seo-audit/audit.json]
 # Program websites scanned for instructions to AI (llms.txt/ai.txt, the copy Exceed's plugin hides in every page: sources
 # to ignore, critics framed, AI-only notes), AI crawler rules, city doorway pages and pages answering critics. Domains from
 # facilities_v2 profileLinks, tmp/gdocs/links.json program sites and the reputation series; resumable, one request a second

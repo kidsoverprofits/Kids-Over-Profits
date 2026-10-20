@@ -318,6 +318,8 @@ require_once get_stylesheet_directory() . '/inc/staging-links.php';
 require_once get_stylesheet_directory() . '/inc/robots.php';
 // Search engines: other names in titles, structured data, missing descriptions, share image (docs/PLAN.md 3.24)
 require_once get_stylesheet_directory() . '/inc/seo.php';
+// KOP Tools > SEO Audit: the crawl's titles, descriptions and breadcrumbs per sitemap page, problems flagged (read-only)
+require_once get_stylesheet_directory() . '/inc/seo-audit.php';
 
 // Featured and in-article photos placed from seeds/page-images.json
 require_once get_stylesheet_directory() . '/inc/page-images.php';
