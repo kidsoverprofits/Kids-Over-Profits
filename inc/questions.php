@@ -190,6 +190,20 @@ function kop_q_box_html($kind, $id, $name) {
         . '</section>';
 }
 
+/**
+ * Facility and company pages are cached whole by LiteSpeed: when the box's
+ * markup first ships (or changes), clear the cache once so they carry it.
+ * Bump KOP_Q_BOX_VERSION with any change to kop_q_box_html().
+ */
+if (!defined('KOP_Q_BOX_VERSION')) define('KOP_Q_BOX_VERSION', '1');
+if (function_exists('add_action')) {
+    add_action('init', function () {
+        if (get_option('kop_q_box_version') === KOP_Q_BOX_VERSION) return;
+        update_option('kop_q_box_version', KOP_Q_BOX_VERSION, false);
+        do_action('litespeed_purge_all');
+    }, 40);
+}
+
 /** The box's script and styles, on facility and company pages. */
 function kop_q_box_enqueue() {
     $dir = get_stylesheet_directory();
