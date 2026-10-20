@@ -205,6 +205,37 @@ $check('applying again does nothing', !array_filter(kop_volp_apply($P1, array($k
 $sam_row = array_values(array_filter(kop_vol_list(), function ($v) use ($sam_id) { return (int) $v['id'] === $sam_id; }))[0];
 $check('agreement rate counts project calls', (int) $sam_row['decided'] === 2 && (int) $sam_row['agreed'] === 2);
 
+echo "\nSelf-assign\n";
+$st = kop_volp_self_status($sam_id);
+$check('2 decided calls is not enough to self-assign', !$st['eligible'] && $st['decided'] === 2 && $st['need_decided'] === 10 && !$st['queues'], json_encode($st));
+$check('a refused self-assign says what earns it', strpos($throws(function () use ($sam, $Q) { kop_volp_self_assign($sam, $Q); }), '10 of your calls') !== false);
+$check('a volunteer with no calls is not eligible', !kop_volp_self_status($alex_id)['eligible']);
+// Eight more calls the admin agreed with, plus two that differed (8 of 10 + 2 = 10 of 12 = 83%).
+$now = current_time('mysql', true);
+for ($i = 0; $i < 10; $i++) {
+    $wpdb->insert(kop_vol_recs_table(), array('volunteer_id' => $sam_id, 'source' => 'news', 'item_key' => "selftest-$i", 'title' => "Self test $i",
+        'verdict' => 'approve', 'note' => '', 'created_at' => $now, 'updated_at' => $now, 'outcome' => $i < 8 ? 'approve' : 'reject', 'outcome_by' => 'admin', 'outcome_at' => $now));
+}
+$st = kop_volp_self_status($sam_id);
+$check('10+ decided at 80%+ agreement: eligible', $st['eligible'] && $st['decided'] === 12 && $st['agreed'] === 10 && $st['open'] === 0, json_encode($st));
+$check('the choices are the queues open to everyone', $st['queues'] && !array_diff(array_column($st['queues'], 'key'), array_keys(kop_vol_sources())), json_encode(array_column($st['queues'], 'key')));
+$S = $st['queues'][0]['key'];
+$err = '';
+try { $mine = kop_volp_self_assign($sam, $S); } catch (Throwable $e) { $err = $e->getMessage(); $mine = null; }
+if ($mine) {
+    $row = kop_volp_get($mine['id']);
+    $check('a batch is made for him, marked self-assigned', (int) $row['volunteer_id'] === $sam_id && $row['created_by'] === KOP_VOLP_SELF_CREATED_BY && $row['source'] === $S);
+    $check('...of the self-assign size at most', count($keys_of($mine['id'])) >= 1 && count($keys_of($mine['id'])) <= $st['size']);
+    $check('...and it is his only open self-assigned one', kop_volp_self_status($sam_id)['open'] === $mine['id']);
+    $check('a second batch waits for the first', strpos($throws(function () use ($sam, $S) { kop_volp_self_assign($sam, $S); }), 'Finish') !== false);
+    kop_volp_set_status($mine['id'], 'closed');
+} else {
+    $check('self-assign made a batch', false, $err);
+}
+$check('a queue not open to everyone is refused', strpos($throws(function () use ($sam, $Q) { kop_volp_self_assign($sam, $Q); }), 'Pick one') !== false);
+$check('a never-for-volunteers queue is refused', strpos($throws(function () use ($sam) { kop_volp_self_assign($sam, 'bug-reports'); }), 'Pick one') !== false);
+$wpdb->query('DELETE FROM ' . kop_vol_recs_table() . " WHERE item_key LIKE 'selftest-%'");
+
 echo "\nHandled elsewhere, closing\n";
 // The admin approves one of Sam's untouched items from the inbox: it counts as done for him.
 kop_rinbox_apply_action($Q, $k1[3], 'approved', array('note' => ''));

@@ -427,7 +427,7 @@ function kop_volp_create(array $in) {
         'minutes'     => max(5, (int) ceil(count($picked) * $per / 5) * 5),
         'volunteer_id' => (int) $vid,
         'status'      => 'open',
-        'created_by'  => $u && $u->exists() ? $u->user_login : '',
+        'created_by'  => isset($in['created_by']) ? mb_substr((string) $in['created_by'], 0, 60) : ($u && $u->exists() ? $u->user_login : ''),
         'created_at'  => current_time('mysql', true),
     ));
     $id = (int) $wpdb->insert_id;
@@ -749,10 +749,84 @@ function kop_volp_apply(array $p, array $keys) {
     return $results;
 }
 
+/* ---- Self-assign (volunteers with a track record) ---------------------------------- */
+
+const KOP_VOLP_SELF_CREATED_BY = 'self-assigned';
+
+/** What earns self-assign: this many calls the admin decided, agreeing at this share (0..1). */
+function kop_volp_self_rules() {
+    return array(
+        'decided' => max(1, (int) apply_filters('kop_volp_self_min_decided', 10)),
+        'rate'    => (float) apply_filters('kop_volp_self_min_rate', 0.8),
+        'size'    => max(1, (int) apply_filters('kop_volp_self_size', 10)),
+    );
+}
+
+/**
+ * Can this volunteer pick their own batch? {eligible, decided, agreed, need_decided, need_rate, open (an unfinished
+ * self-assigned project's id, or 0), queues [{key, label, count}]}. One self-assigned batch at a time: the next
+ * opens when the last is finished.
+ */
+function kop_volp_self_status($vid) {
+    $rules = kop_volp_self_rules();
+    $out = array('eligible' => false, 'decided' => 0, 'agreed' => 0, 'need_decided' => $rules['decided'], 'need_rate' => (int) round($rules['rate'] * 100),
+        'size' => $rules['size'], 'open' => 0, 'queues' => array());
+    if (!(int) $vid) return $out;
+    global $wpdb;
+    kop_vol_ensure_tables();
+    $r = kop_vol_recs_table();
+    $row = $wpdb->get_row($wpdb->prepare("SELECT
+            SUM(outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject')) AS decided,
+            SUM(outcome IN ('approve', 'reject') AND verdict = outcome) AS agreed
+        FROM $r WHERE volunteer_id = %d", (int) $vid), ARRAY_A);
+    $out['decided'] = (int) ($row['decided'] ?? 0);
+    $out['agreed'] = (int) ($row['agreed'] ?? 0);
+    $out['eligible'] = $out['decided'] >= $rules['decided'] && $out['agreed'] >= $rules['rate'] * $out['decided'];
+    if (!$out['eligible']) return $out;
+
+    kop_volp_ensure_tables();
+    $mine = $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_volp_table() . " WHERE status = 'open' AND volunteer_id = %d AND created_by = %s ORDER BY id",
+        (int) $vid, KOP_VOLP_SELF_CREATED_BY), ARRAY_A);
+    foreach ((array) $mine as $p) {
+        $pub = kop_volp_public($p, (int) $vid);
+        if ($pub['done'] < $pub['total']) { $out['open'] = (int) $p['id']; break; }
+    }
+    $counts = function_exists('kop_rinbox_counts') ? kop_rinbox_counts() : array();
+    foreach (kop_vol_sources() as $key => $src) {
+        if (empty($src['list']) || empty($src['get'])) continue;
+        $n = isset($counts[$key]) ? (int) $counts[$key] : null;
+        if ($n === 0) continue;
+        $out['queues'][] = array('key' => $key, 'label' => (string) $src['label'], 'count' => $n);
+    }
+    return $out;
+}
+
+/** Make the volunteer a batch of their own from a queue open to everyone. Returns {id, link}. */
+function kop_volp_self_assign(array $vol, $source) {
+    $vid = (int) $vol['id'];
+    $st = kop_volp_self_status($vid);
+    if (!$st['eligible']) throw new RuntimeException('Picking your own batch opens after ' . $st['need_decided'] . ' of your calls have been checked by an admin, agreeing ' . $st['need_rate'] . '% of the time.');
+    if ($st['open']) throw new RuntimeException('Finish the batch you have open first. Thank you!');
+    $source = sanitize_key((string) $source);
+    if (!isset(kop_vol_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
+    kop_vol_rate_check($vid);
+    list($id, $link) = kop_volp_create(array('source' => $source, 'size' => $st['size'], 'volunteer_id' => $vid,
+        'note' => 'Picked by ' . $vol['name'] . '.', 'created_by' => KOP_VOLP_SELF_CREATED_BY));
+    return array('id' => (int) $id, 'link' => $link);
+}
+
+function kop_volp_rest_selfassign(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $who = kop_vol_rest_who($req);
+        if (empty($who['vol'])) throw new RuntimeException('Admins see this page as a preview; make a project on the Volunteer Reviewers screen.');
+        return kop_volp_self_assign($who['vol'], (string) $req->get_param('source'));
+    });
+}
+
 /* ---- REST (volunteer page) --------------------------------------------------------- */
 
 add_action('rest_api_init', function () {
-    foreach (array('projects' => 'kop_volp_rest_projects', 'project' => 'kop_volp_rest_project') as $path => $cb) {
+    foreach (array('projects' => 'kop_volp_rest_projects', 'project' => 'kop_volp_rest_project', 'selfassign' => 'kop_volp_rest_selfassign') as $path => $cb) {
         register_rest_route('kop/v1', '/volunteer/' . $path, array(
             'methods' => 'POST', 'callback' => $cb,
             'permission_callback' => function (WP_REST_Request $req) {
@@ -766,7 +840,8 @@ add_action('rest_api_init', function () {
 function kop_volp_rest_projects(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $who = kop_vol_rest_who($req);
-        return array('projects' => kop_volp_list_for(isset($who['vol']) ? (int) $who['vol']['id'] : 0));
+        $vid = isset($who['vol']) ? (int) $who['vol']['id'] : 0;
+        return array('projects' => kop_volp_list_for($vid), 'self' => kop_volp_self_status($vid));
     });
 }
 

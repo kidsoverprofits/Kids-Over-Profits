@@ -452,7 +452,7 @@
 
     function renderProjects() {
         projectsPanel.innerHTML = '';
-        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : 'Your projects' }));
+        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : 'Your next batch') }));
         var ul = el('ul', { class: 'kop-vol-project-list' });
         state.projects.forEach(function (p) {
             var finished = p.done >= p.total;
@@ -465,7 +465,39 @@
                         disabled: state.project === p.id ? true : null, onclick: function () { openProject(p.id); } })
             ]));
         });
-        projectsPanel.appendChild(ul);
+        if (state.projects.length) projectsPanel.appendChild(ul);
+        var self = state.self;
+        if (self && self.eligible && !self.open && self.queues.length) projectsPanel.appendChild(selfAssignForm(self));
+    }
+
+    // Volunteers whose calls an admin has checked and agreed with can pick their next batch.
+    function selfAssignForm(self) {
+        var pick = el('select', { id: 'kop-vol-self-queue' }, self.queues.map(function (q) {
+            return el('option', { value: q.key, text: q.label + (q.count ? ' (' + q.count + ' waiting)' : '') });
+        }));
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+        var go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Give me ' + self.size, disabled: cfg.preview ? true : null, onclick: function () {
+            go.disabled = true;
+            msg.className = 'kop-vol-msg';
+            msg.textContent = 'Setting it up…';
+            api('selfassign', { source: pick.value }).then(function (res) {
+                return api('projects').then(function (data) {
+                    state.projects = data.projects || [];
+                    state.self = data.self;
+                    openProject(res.id);
+                });
+            }).catch(function (e) {
+                go.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+            });
+        } });
+        return el('div', { class: 'kop-vol-self' }, [
+            el('h3', { text: 'Pick your next batch' }),
+            el('p', { class: 'kop-vol-meta', text: 'Your calls have matched the admins’ ' + self.agreed + ' of ' + self.decided + ' times, so you can choose what to review next.' }),
+            el('label', { for: 'kop-vol-self-queue', text: 'Queue ' }),
+            pick, ' ', go, msg
+        ]);
     }
 
     function rememberProject(id) {
@@ -714,6 +746,7 @@
     ]).then(function (res) {
         state.queues = res[0].queues || [];
         state.projects = res[1].projects || [];
+        state.self = res[1].self || null;
         app.innerHTML = '';
         buildMessages();
         app.appendChild(newLine);
@@ -729,7 +762,8 @@
             startMessages();
             return;
         }
-        if (state.projects.length) {
+        var canSelf = state.self && state.self.eligible && !state.self.open && state.self.queues.length;
+        if (state.projects.length || canSelf) {
             renderProjects();
             app.appendChild(projectsPanel);
         }

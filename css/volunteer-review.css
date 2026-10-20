@@ -619,3 +619,6 @@ p.kop-vol-newreply {
     .kop-vol-link-row { grid-template-columns: minmax(0, 1fr); }
     .kop-vol-msg-row { max-width: 100%; }
 }
+
+.kop-vol-self { margin-top: 1rem; }
+.kop-vol-self select { max-width: 100%; margin: 0 .25rem .5rem 0; }

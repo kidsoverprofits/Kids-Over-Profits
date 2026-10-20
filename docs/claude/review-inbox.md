@@ -81,6 +81,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>
 # (a new person's invite carries it). The page opens on it one item at a time; a project opens its queue to its volunteer, never a
 # kop_vol_never_sources() one. "Check their calls" applies clear calls with each card's own button (kop_rinbox_apply_action(), Undo in Recently done)
+# Self-assign (kop_volp_self_status()/kop_volp_self_assign(), REST volunteer/selfassign, 'self' in volunteer/projects): a volunteer with 10+ calls the admin decided,
+# 80%+ agreeing (filters kop_volp_self_min_decided / _min_rate / _size) sees "Pick your next batch": a queue open to everyone, 10 items, created_by 'self-assigned';
+# one unfinished self-assigned batch at a time. Turn a volunteer off with Revoke
 # Research projects (inc/volunteer-research.php): source 'research:<kind>' (kop_volr_kinds(): closing-year, opening-year, status, news = facilities_v2
 # records lacking it, narrowed by a state or a word; custom = typed questions, one per line). The volunteer writes what they found + links, or
 # "Could not find it" + where they looked ({prefix}kop_vol_answers); each new link goes to the review inbox at once (kop_ext_insert_*, same
