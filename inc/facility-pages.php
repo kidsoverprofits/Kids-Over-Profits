@@ -889,6 +889,33 @@ if (!function_exists('kop_facility_pages_name_key')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_dedupe_name_lists')) {
+    /**
+     * The same name never displays in two of "Formerly", "Later called", "Also known as", "Other names" (or twice in one),
+     * nor next to the page's own name. $skip = names already shown (title, "Now known as"); $lists = the lists in priority
+     * order, the first list keeping a name. Names compare by kop_facility_pages_name_key(); returns the lists, same order.
+     */
+    function kop_facility_pages_dedupe_name_lists(array $skip, array $lists) {
+        $seen = array();
+        foreach ($skip as $n) {
+            $k = kop_facility_pages_name_key($n);
+            if ($k !== '') $seen[$k] = true;
+        }
+        $out = array();
+        foreach ($lists as $list) {
+            $keep = array();
+            foreach ((array) $list as $n) {
+                $k = kop_facility_pages_name_key($n);
+                if ($k === '' || isset($seen[$k])) continue;
+                $seen[$k] = true;
+                $keep[] = $n;
+            }
+            $out[] = $keep;
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_facility_pages_key_matches')) {
     /** Exact match, or the record name extends the facility name (12+ chars). */
     function kop_facility_pages_key_matches($facility_key, $record_key) {
@@ -3182,6 +3209,9 @@ if (!function_exists('kop_facility_page_data')) {
                 else $later[] = $m['name'];
             }
         }
+
+        // One name shows once: Formerly wins over Later called, which wins over Also known as; none repeats the page's own name.
+        list($formerly, $later, $aka) = kop_facility_pages_dedupe_name_lists(array($name, $current_name), array($formerly, $later, $aka));
 
         // ---- Facts rail -------------------------------------------------------
         $facts = array();

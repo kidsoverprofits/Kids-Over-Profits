@@ -75,6 +75,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   #
 # Edit in place (inc/inline-edit.php, js/inline-edit.js): admins get a pencil on every marked element
 # (kop_ie_attr('<source>:<what>')) that saves through the source's own save path; a new page or field gets a marker there
 php scripts/test-inline-edit.php                  # every facility sent back unchanged is unchanged, edits land, against tmp/prod.sqlite
+# One name shows once on facility and company pages: "Formerly", "Later called", "Also known as" / "Other names" never repeat a name
+# between them (or inside one), nor the page's own title or "Now known as". Priority: Formerly, then Later called, then Also known as.
+# Names compare by kop_facility_pages_name_key(); every new name list on a page goes through kop_facility_pages_dedupe_name_lists()
+# (inc/facility-pages.php, used by the facility and operator page builders), never a hand-made in_array check.
 # Closed folds on facility and company pages go out as <template data-kop-defer>, drawn when opened (inc/defer-folds.php,
 # js/defer-folds.js fires 'kop:stamped'); a script that sets up pieces once listens for it. data-kop-nodefer keeps a fold whole
 php scripts/test-defer-folds.php [--pages=<dir of saved pages>]

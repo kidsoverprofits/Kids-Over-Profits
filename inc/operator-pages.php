@@ -602,6 +602,8 @@ if (!function_exists('kop_operator_page_data')) {
         $aka = array_values(array_unique(array_filter(array_map('trim', array_map('strval', (array) ($op['otherNames'] ?? array()))), 'strlen')));
         $abbr = kop_operator_pages_abbreviation($entry['name']);
         if ($abbr !== '' && !in_array($abbr, $aka, true)) array_unshift($aka, $abbr);
+        // Each name shows once, and never the company's own name.
+        list($aka) = kop_facility_pages_dedupe_name_lists(array($entry['name'], $name), array($aka));
 
         // ---- Parents and subsidiaries --------------------------------------
         $parents = array();
