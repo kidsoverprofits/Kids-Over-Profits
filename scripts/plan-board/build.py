@@ -1,15 +1,16 @@
-"""Build the Plan Board page (an Artifact) from the plan files in docs/plan/.
+"""Build seeds/plan-board.json, the plan the KOP Tools > Plan Board screen shows, from docs/plan/*.md.
 
-    python scripts/plan-board/build.py [--out tmp/plan-board/index.html] [--json]
+    python scripts/plan-board/build.py [--out seeds/plan-board.json] [--json]
 
 docs/PLAN.md is the index; the items are in docs/plan/*.md, read in name order. A file of a numbered subsection
 repeats its section heading ("## 4. ..."), which joins the section already read.
 Every list item in sections 2 and up becomes a card with a stable id
-("<section>:<slug of its bold lead>"); the owner's answers are kept in the
-artifact's database (collection "answers", one document per item id), never in
-this page. docs/PLAN.md section "Plan Board" says how a session folds them in.
+("<section>:<slug of its bold lead>") and a hash of its text. The owner's answers are kept on the site
+({prefix}kop_plan_answers, inc/plan-board.php), never in these files. docs/PLAN.md section "Plan Board" says how a
+session folds them in. docs/ is not deployed, so this file is how the server sees the plan.
 """
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -18,7 +19,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PLAN_DIR = ROOT / 'docs' / 'plan'
-TEMPLATE = Path(__file__).with_name('template.html')
 
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
 LEAD = re.compile(r'^\*\*(.+?)\*\*')
@@ -113,7 +113,7 @@ def parse(md):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--out', default=str(ROOT / 'tmp' / 'plan-board' / 'index.html'))
+    ap.add_argument('--out', default=str(ROOT / 'seeds' / 'plan-board.json'))
     ap.add_argument('--json', action='store_true', help='print the parsed items instead')
     a = ap.parse_args()
     files = sorted(PLAN_DIR.glob('*.md'))
@@ -121,12 +121,14 @@ def main():
     if a.json:
         json.dump(sections, sys.stdout, indent=1, ensure_ascii=False)
         return
+    for s in sections:
+        for g in s['groups']:
+            for it in g['items']:
+                it['hash'] = hashlib.sha1(it['text'].encode('utf-8')).hexdigest()[:12]
     data = {'built': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'sections': sections}
-    blob = json.dumps(data, ensure_ascii=False).replace('</', '<\\/')
-    html = TEMPLATE.read_text(encoding='utf-8').replace('/*__PLAN__*/null', blob)
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html, encoding='utf-8', newline='\n')
+    out.write_text(json.dumps(data, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
     n = sum(len(g['items']) for s in sections for g in s['groups'])
     print(f'{n} items -> {out}')
 

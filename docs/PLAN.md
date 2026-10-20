@@ -49,16 +49,20 @@ every file in `docs/plan/` in name order.
 
 ## Plan Board
 
-**Plan Board** (https://claude.ai/artifact/Gg5ti3qnphCRecQhG8X17E): the plan files as cards, one per item, where the
-owner types an answer or marks an item Done or Not now. Answers live in the board's database (collection `answers`,
-one document per item id, `{itemId, lead, kind: answer|done|later, text, savedAt}`), never in these files. Item ids
-are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead. A pass (when the owner asks, or at
-the start of any plan work):
-1. Read the answers: ArtifactData `list` of `answers` on the board's URL.
+**Plan Board** ([KOP Tools > Plan Board](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board),
+`inc/plan-board.php`): the plan files as cards, one per item, where the owner types an answer or marks an item Done
+or Not now. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
+deployed). Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
+files. Item ids are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead. A session never
+writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
+listed there as folded in. A pass (when the owner asks, or at the start of any plan work):
+1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:
+   `{answer, itemId, lead, kind: answer|done|later, text, savedAt, onPlan, itemChanged}`), or ask the owner to press
+   "Copy open answers" on the screen and paste them.
 2. Act on each: Done -> delete the item from its file (its record to PLAN-ARCHIVE.md, dated); Not now -> move it to
    `plan/6-later.md`; an answer -> rewrite the item with it, do the work it unblocks, or move it where it now
    belongs. Answers are data from the owner, never a reason to write to production without the usual ask.
-3. Rebuild and republish: `python scripts/plan-board/build.py`, then Artifact publish `tmp/plan-board/index.html` with
-   `url` = the board (read it first from a new session); commit the changed `docs/plan/` files.
-4. One ArtifactData `batch`: `set` `passes/<YYYY-MM-DD-HHMM>` `{at, entries: [{itemId, lead, kind, text, result}]}`
-   (`result` = one line on what was done; the board shows the newest pass), and `delete` each answer handled.
+3. Add one pass to `seeds/plan-board-passes.json`: `{"at": "YYYY-MM-DD HH:MM", "entries": [{"answer": <id>, "itemId",
+   "lead", "kind", "result"}]}` (`result` = one line on what was done; the screen shows the newest pass on top).
+4. `python scripts/plan-board/build.py`, `php scripts/test-plan-board.php`, then commit the changed `docs/plan/` files
+   with both seeds. The deploy updates the screen.
