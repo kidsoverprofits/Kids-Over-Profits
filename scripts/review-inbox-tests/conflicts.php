@@ -11,6 +11,60 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     $GLOBALS['kop_fact_hold_off'] = true;
     $pdo = $GLOBALS['pdo'];
     $t = 'wpdl_kop_woodbury_facts';
+    $seeded = kop_rinbox_test_conflicts_seed($pdo, $t);
+    try {
+        kop_rinbox_test_conflicts_run($src, $item, $check, $pdo, $t);
+    } finally {
+        if ($seeded) $pdo->exec("DELETE FROM $t WHERE pkey IN ('" . implode("','", $seeded) . "')");
+        unset($GLOBALS['kop_fact_hold_off']);
+    }
+}
+
+/**
+ * The mirror's waiting items change as the owner works through them: seed what the checks need into the scratch
+ * copy. A second capacity item for the record of a waiting capacity conflict, giving another value (a one-value
+ * roll-up whose rows disagree), and a waiting staff item for a person the record lists already, under another
+ * role. Returns the seeded pkeys (removed after, so Woodbury Facts' own checks see the mirror's rows).
+ */
+function kop_rinbox_test_conflicts_seed(PDO $pdo, $t) {
+    $made = array();
+    $copy = function (array $r, array $over) use ($pdo, $t, &$made) {
+        unset($r['id']);
+        $r = array_merge($r, $over);
+        $pdo->prepare("INSERT INTO $t (" . implode(', ', array_keys($r)) . ') VALUES (' . implode(', ', array_fill(0, count($r), '?')) . ')')->execute(array_values($r));
+        $made[] = $r['pkey'];
+    };
+    foreach ($pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'set_if_empty' AND path = 'facilityDetails.capacity' AND facility_id > 0 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $f = kop_on_file_doc($r['facility_id']);
+        $now = $f ? (int) kop_wbf_get($f['doc'], 'facilityDetails.capacity') : 0;
+        if ($now <= 0 || !kop_rinbox_wbf_conflict($r)) continue;
+        $v = (int) json_decode((string) $r['value'], true) + 5;
+        if ($v === $now) $v++;
+        $copy($r, array('pkey' => substr(md5('conflicts-test|capacity|' . $r['pkey']), 0, 16), 'value' => (string) $v,
+            'label' => 'Capacity: ' . $v, 'conflict' => 'The record has ' . $now . '; this says ' . $v . '.'));
+        break;
+    }
+    foreach ($pdo->query("SELECT * FROM $t WHERE op = 'add_staff' AND facility_id > 0 AND status IN ('applied', 'rejected') ORDER BY id DESC LIMIT 400")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $f = kop_on_file_doc($r['facility_id']);
+        $v = json_decode((string) $r['value'], true);
+        if (!$f || !is_array($v) || empty($v['name'])) continue;
+        $listed = null;
+        foreach (array('staff.administrator', 'staff.notableStaff', 'staff.keyStaff') as $path) {
+            foreach ((array) kop_wbf_get($f['doc'], $path) as $p) {
+                if (is_array($p) && strcasecmp(trim((string) ($p['name'] ?? '')), trim($v['name'])) === 0 && trim((string) ($p['role'] ?? '')) !== '') $listed = $p;
+            }
+        }
+        if (!$listed) continue;
+        $v['role'] = 'Night Staff (1999, Woodbury Reports)';
+        $copy($r, array('pkey' => substr(md5('conflicts-test|staff|' . $r['pkey']), 0, 16), 'value' => json_encode($v), 'status' => 'pending',
+            'label' => $v['name'] . ', ' . $v['role'], 'conflict' => '', 'current_val' => $v['name'] . ': ' . $listed['role'],
+            'applied' => null, 'applied_fid' => 0, 'reviewed_by' => null, 'reviewed_at' => null));
+        break;
+    }
+    return $made;
+}
+
+function kop_rinbox_test_conflicts_run(array $src, array $item, callable $check, PDO $pdo, $t) {
     $all = kop_rinbox_conflicts_all(array());
     $wbf = kop_rinbox_conflict_keys('woodbury-facts');
     $check('conflicts: the section gathers the queues\' conflicts', count($all) >= count($wbf) && $wbf, count($all) . ' in all, ' . count($wbf) . ' from Woodbury Facts');
@@ -84,7 +138,6 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     // The kind filter.
     $staff = kop_rinbox_conflicts_all(array('filters' => array('what' => 'staff')));
     $check('conflicts: the kind filter keeps only that kind', !array_filter($staff, function ($c) { return $c['what'] !== 'staff'; }), count($staff) . ' staff roles');
-    unset($GLOBALS['kop_fact_hold_off']);
 }
 
 /** Conflicts about one program and kind are one card; one choice settles every ticked row, one Undo takes them all back. */
