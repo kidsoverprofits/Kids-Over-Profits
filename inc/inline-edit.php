@@ -717,6 +717,14 @@ function kop_ie_facility_apply(array &$doc, array $field, $value) {
                     if ($x !== '' && $x !== null) {
                         $empty = false;
                     }
+                    // Columns are every row's keys together: a blank one this row never had stays off it, and a
+                    // value sent back as it was keeps its type (a person id stays a number).
+                    if (($x === '' || $x === null) && !array_key_exists($k, $item)) {
+                        continue;
+                    }
+                    if (array_key_exists($k, $item) && (is_int($item[$k]) || is_float($item[$k])) && (string) $item[$k] === (string) $x) {
+                        continue;
+                    }
                     $item[$k] = $x;
                 }
                 if (!$empty) {

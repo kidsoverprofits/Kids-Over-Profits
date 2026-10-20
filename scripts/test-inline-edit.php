@@ -217,8 +217,10 @@ foreach ($pdo->query("SELECT id, json_data FROM facilities_v2 WHERE json_data LI
             list($d2, $m2, $before, $r) = kop_ie_era_renamed($d, $at);
             $out = kop_facility_normalize($d2, array('facility_id' => $d['facility_id'] ?? (int) $row['id'], 'unique_name' => $d['provenance']['uniqueName'] ?? ''));
             $kept = $out['legacy']['mergedFacilities'][$at]['rename'] ?? array();
+            // A year only when the era gives one (its end year or a closing note's); "Closed" alone leaves it unknown.
+            $gave_year = (int) ($m['rename']['endYear'] ?? 0) > 0 || preg_grep('/\b(19|20)\d{2}\b/', array_filter((array) ($m['rename']['notes'] ?? array()), 'kop_ie_era_closure_note'));
             $ok = !isset($kept['status']) && !array_filter((array) ($kept['notes'] ?? array()), 'kop_ie_era_closure_note')
-                && (int) ($kept['year'] ?? 0) > 0 && count((array) ($kept['notes'] ?? array())) === count((array) ($before['notes'] ?? array()))
+                && (!$gave_year || (int) ($kept['year'] ?? 0) > 0) && count((array) ($kept['notes'] ?? array())) === count((array) ($before['notes'] ?? array()))
                 && ($kept['facts'] ?? null) == ($before['facts'] ?? null);
             if ($ok) $era_ok++; elseif (count($era_bad) < 5) $era_bad[] = '#' . $row['id'] . ' ' . json_encode($kept);
             if ((int) $row['id'] === 10618) {
