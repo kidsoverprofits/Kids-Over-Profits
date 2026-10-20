@@ -304,9 +304,13 @@ foreach ($sample_ids as $fid) {
         $walk_lib($lib);
         $check("facility $fid library total counts every file", $lib['total'] === count($flat), $lib['total'] . ' vs ' . count($flat));
         $bad_files = array_filter($flat, function ($f) {
-            return array_keys($f) !== array('id', 'title', 'url', 'ext', 'mime', 'size', 'thumb') || $f['url'] === '' || $f['title'] === '';
+            if (array_keys($f) !== array('id', 'title', 'url', 'ext', 'mime', 'size', 'thumb', 'types') || $f['url'] === '' || $f['title'] === '' || !is_array($f['types'])) return true;
+            foreach ($f['types'] as $t) {
+                if (!is_array($t) || array_keys($t) !== array('slug', 'label') || $t['slug'] === '' || $t['label'] === '') return true;
+            }
+            return false;
         });
-        $check("facility $fid library files are {id, title, url, ext, mime, size, thumb}", !$bad_files, json_encode(array_slice(array_values($bad_files), 0, 1)));
+        $check("facility $fid library files are {id, title, url, ext, mime, size, thumb, types: [{slug, label}]}",!$bad_files, json_encode(array_slice(array_values($bad_files), 0, 1)));
         if ($list) echo "    library: {$lib['total']} files, " . count($lib['folders']) . " folders\n";
         $dump("documents-$fid.json", array_merge(array('api_version' => KOP_MOBILE_API_VERSION, 'kind' => 'facility', 'name' => $payload['name'], 'page_url' => $payload['documents']['url']), $lib, array('programs' => array())));
     }

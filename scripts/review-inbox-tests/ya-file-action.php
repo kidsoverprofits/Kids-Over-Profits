@@ -25,6 +25,8 @@ function kop_rinbox_test_ya_file_action(callable $check) {
         return;
     }
     $yid = kop_ya_save($ya, array('name' => 'Filing Test Ranch', 'state' => 'UT', 'review' => 'approved'), 0, 'test');
+    // The program list is read once a request; earlier sources in a full run already filled it before this program existed.
+    kop_rinbox_ya_file_programs(true);
 
     $GLOBALS['kop_rinbox_yaf'] = array(
         'a' => array('key' => 'a', 'title' => 'Filing Test Ranch', 'url' => 'https://example.test/news/ranch-closes', 'text' => 'The ranch closed.'),

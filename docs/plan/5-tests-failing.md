@@ -3,16 +3,16 @@
 Each predates the work that found it; fix the test or the code. Last full run 2026-10-20 (mirror synced that day,
 main at 366c8d84, portable PHP 8.2 from windows.php.net).
 
-- **test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 6 checks on the 2026-10-20 mirror
-  after the 2026-10-20 test pass (was 42; causes 2 and 4 done, see PLAN-ARCHIVE "5. Tests failing on main, review
+- **test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 4 checks on the 2026-10-20 mirror
+  (was 42; see PLAN-ARCHIVE "5. Tests failing on main, review
   inbox causes"). Run it alone: a second PHP run beside it ran Windows out of paging file. What is left:
   1. *Build files naming records deleted outright* (no merge to follow; merged ones are followed since 2a11d220):
      data-audit and federal-funding "every proposal is well formed" (#100014, #9660), business-filings "every company
      is well formed" (company #832). Rebuild those files in kop-pipeline.
   2. *program-practices*: needs `kop-pipeline/tmp/doc-read/practices.json`, lost in the 2026-10-17 tmp wipe;
      rebuild it with doc-text.py (kop-pipeline).
-  3. *Still open from before*: facilities-from-news "after Remove the link it can be linked again", ya-file
-     ("the card's own name picks its program": "0"). Not looked at in the 2026-10-20 pass.
+  (The two older ones, facilities-from-news "after Remove the link it can be linked again" and ya-file "the card's
+  own name picks its program", were test bugs and are fixed: 4 checks left in the full run, all rebuilds above.)
   - Run from a scratch worktree, program-practices and three wiki-updates draft checks also fail: they look for
     `kop-pipeline` next to the checkout. Not a bug; run from the real checkout.
 - **test-fornits**: `scripts/test-fornits.php` cannot run: `tmp/fornits/` is gone (the 2026-10-17 junction wipe of
@@ -28,5 +28,3 @@ main at 366c8d84, portable PHP 8.2 from windows.php.net).
   Beloved Ones, Center for Positive Changes, Chad Youth Enhancement Center, Dimondale, Heritage Youth Services,
   NeuroRestorative, New Hope Of Arizona, New Horizon Youth Homes, Pacific Autism Center (converted into programs or
   removed since seeds/operator-histories.json was written).
-- **test-mobile-api**: `scripts/test-mobile-api.php`, "facility 9607 library files are {id, title, url, ext, mime, size,
-  thumb}": the document types commit (6165d1bd) added `types` to each file; the check predates it.

@@ -131,7 +131,8 @@ function kop_rinbox_test_facilities_from_news(array $src, array $item, callable 
         $check('facilities-from-news: Remove the link puts the name back and takes the article off', $back['decision'] === $before['decision']
             && (string) $back['facility_id'] === (string) $before['facility_id'] && (int) $linked->fetchColumn() === $had, $res['message']);
         $linked->closeCursor();
-        $check('facilities-from-news: after Remove the link it can be linked again', array_column(kop_rinbox_get_item('facilities-from-news', $item['key'])['actions'], 'id') === $choices);
+        $own = kop_rinbox_test_own_actions(kop_rinbox_get_item('facilities-from-news', $item['key']));
+        $check('facilities-from-news: after Remove the link it can be linked again', $own === $choices, json_encode($own) . ' vs ' . json_encode($choices));
         try {
             call_user_func($src['act'], $item['key'], 'unlink', array());
             $check('facilities-from-news: Remove the link is refused when nothing is linked', false);
