@@ -83,7 +83,10 @@ function kop_npf_candidates() {
     $file = kop_npf_dir() . '/candidates.json';
     $data = is_readable($file) ? json_decode((string) file_get_contents($file), true) : null;
     foreach ((array) ($data['organizations'] ?? array()) as $e) {
-        if (is_array($e) && preg_match('/^\d{9}$/', (string) ($e['ein'] ?? ''))) $memo[(string) $e['ein']] = $e;
+        if (!is_array($e) || !preg_match('/^\d{9}$/', (string) ($e['ein'] ?? ''))) continue;
+        // Records merged since the file was built: the one each went into.
+        if (function_exists('kop_facility_merge_follow_candidates')) $e['candidates'] = kop_facility_merge_follow_candidates($e['candidates'] ?? array());
+        $memo[(string) $e['ein']] = $e;
     }
     return $memo;
 }

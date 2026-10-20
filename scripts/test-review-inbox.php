@@ -54,6 +54,11 @@ $GLOBALS['kop_test_wpdb_writes'] = true;
 // api/lib-publish-approved.php) would otherwise open api/config.php's MySQL connection.
 if (!defined('KOP_DB_CONFIG_LOADED')) define('KOP_DB_CONFIG_LOADED', true);
 require __DIR__ . '/kop-test-harness.php';
+// The harness's get_option() does not read the copied options table: the live merge map, from it, so
+// queues that follow merges (kop_facility_merge_resolve()) see the records merged since their build files.
+$raw = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_facility_merged_into'")->fetchColumn();
+if ($raw !== false) $GLOBALS['kop_test_options']['kop_facility_merged_into'] = unserialize($raw);
+unset($raw);
 // MySQL functions the queues use.
 $pdo->sqliteCreateFunction('UTC_TIMESTAMP', function () { return gmdate('Y-m-d H:i:s'); }, 0);
 $pdo->sqliteCreateFunction('NOW', function () { return gmdate('Y-m-d H:i:s'); }, 0);

@@ -28,6 +28,8 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
         'map_years', 'operator_link', 'operator_field', 'links_move', 'person_merge', 'memorial', 'check', 'manual');
     $bad = array();
     $stale = array();
+    // Records merged since the file was built: Approve refuses those steps ("is gone (merged into #...)"), by design.
+    $merged = array();
     foreach ($props as $key => $p) {
         foreach ($p['ops'] as $op) {
             $t = (string) ($op['type'] ?? '');
@@ -49,7 +51,12 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
         }
         foreach ($by_fid as $fid => $ops) {
             $doc = $doc_of($fid);
-            if ($doc === null) { $bad[] = $key . ': no record #' . $fid; continue; }
+            if ($doc === null) {
+                $now = kop_daudit_resolve($fid);
+                if ($now !== (int) $fid && $doc_of($now) !== null) $merged[] = $key . ': #' . $fid . ' -> #' . $now;
+                else $bad[] = $key . ': no record #' . $fid;
+                continue;
+            }
             if (kop_daudit_doc_check($doc, $ops)) $stale[] = $key;
         }
     }
@@ -65,7 +72,8 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
         }
     }
     $check('data-audit: company fields and moved articles still fit the records', !$why_new, implode(' | ', array_slice($why_new, 0, 6)));
-    $check('data-audit: every proposal is well formed', !$bad, count($props) . ' proposals' . ($bad ? '; ' . implode(' | ', array_slice($bad, 0, 6)) : ''));
+    $check('data-audit: every proposal is well formed', !$bad, count($props) . ' proposals, ' . count($merged) . ' naming a record merged since'
+        . ($bad ? '; ' . implode(' | ', array_slice($bad, 0, 6)) : ''));
     $check('data-audit: nearly every proposal still fits its record (the rest are refused on Approve)', count($stale) <= max(3, (int) (count($props) / 20)),
         count($stale) . ' changed since: ' . implode(', ', array_slice($stale, 0, 8)));
 
@@ -221,15 +229,18 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
     // Steps on every card: where each stands now. A step that cannot be made at all is rare (records merged since).
     $opts = array('pdo' => $pdo, 'prefix' => 'wpdl_');
     $blocked = array();
+    $nmerged = 0;
     $nsteps = 0;
     foreach ($props as $key => $p) {
         foreach (kop_daudit_step_states($p, $opts) as $i => $st) {
             $nsteps++;
-            if ($st['state'] === 'blocked') $blocked[] = $key . '/' . $i . ': ' . $st['why'];
+            if ($st['state'] !== 'blocked') continue;
+            if (preg_match('/is gone \(merged into #\d+\)/', (string) $st['why'])) $nmerged++;
+            else $blocked[] = $key . '/' . $i . ': ' . $st['why'];
         }
     }
-    $check('data-audit: nearly every step can be made (blocked ones are records merged since)', count($blocked) <= max(5, (int) ($nsteps / 25)),
-        $nsteps . ' steps, ' . count($blocked) . ' blocked: ' . implode(' | ', array_slice($blocked, 0, 4)));
+    $check('data-audit: nearly every step can be made (apart from records merged since)', count($blocked) <= max(5, (int) ($nsteps / 25)),
+        $nsteps . ' steps, ' . $nmerged . ' on records merged since, ' . count($blocked) . ' blocked otherwise' . ($blocked ? ': ' . implode(' | ', array_slice($blocked, 0, 4)) : ''));
 
     kop_rinbox_daudit_test_companies($check, $opts);
     kop_rinbox_daudit_test_aliases($check, $opts);

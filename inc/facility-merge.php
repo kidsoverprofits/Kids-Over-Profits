@@ -773,6 +773,29 @@ if (!function_exists('kop_facility_merge_resolve')) {
     }
 }
 
+if (!function_exists('kop_facility_merge_follow_candidates')) {
+    /**
+     * A build file's candidate records ([{id, kind?, ...}], kind 'facility' or none) with each merged-away
+     * facility id moved to the record it went into; a second candidate landing on the same record is dropped.
+     * The filings and federal funding queues read their files through this, so a card never offers a record
+     * merged since the file was built.
+     */
+    function kop_facility_merge_follow_candidates($cands) {
+        $out = array();
+        $seen = array();
+        foreach ((array) $cands as $c) {
+            if (is_array($c) && in_array($c['kind'] ?? 'facility', array('facility', ''), true) && (int) ($c['id'] ?? 0) > 0) {
+                $now = kop_facility_merge_resolve((int) $c['id']);
+                if (isset($seen[$now])) continue;
+                $seen[$now] = true;
+                if ($now !== (int) $c['id']) $c['id'] = $now;
+            }
+            $out[] = $c;
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_facility_merge_expand_ids')) {
     /** $ids plus every id merged into one of them, for lists built per id (archive files). */
     function kop_facility_merge_expand_ids($ids) {

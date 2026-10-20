@@ -107,6 +107,8 @@ function kop_bizf_candidates() {
         foreach ((array) ($data['entities'] ?? array()) as $e) {
             if (!is_array($e) || !preg_match('/^[A-Z0-9-]{1,20}$/', (string) ($e['doc'] ?? ''))) continue;
             $e['state'] = $st;
+            // Records merged since the file was built: the one each went into.
+            if (function_exists('kop_facility_merge_follow_candidates')) $e['candidates'] = kop_facility_merge_follow_candidates($e['candidates'] ?? array());
             $memo[$st . ':' . $e['doc']] = $e;
         }
     }

@@ -42,7 +42,10 @@ function kop_ffund_proposals() {
     $file = get_stylesheet_directory() . '/js/data/federal-funding/proposals.json';
     $list = is_readable($file) ? json_decode((string) file_get_contents($file), true) : array();
     foreach ((array) $list as $p) {
-        if (is_array($p) && !empty($p['key']) && is_array($p['entries'] ?? null)) $memo[(string) $p['key']] = $p;
+        if (!is_array($p) || empty($p['key']) || !is_array($p['entries'] ?? null)) continue;
+        // Records merged since the file was built: the one each went into.
+        if (isset($p['candidates']) && function_exists('kop_facility_merge_follow_candidates')) $p['candidates'] = kop_facility_merge_follow_candidates($p['candidates']);
+        $memo[(string) $p['key']] = $p;
     }
     return $memo;
 }
