@@ -3,9 +3,11 @@
  * scripts/test-review-inbox.php checks for the 'drive-docs' source
  * (inc/review-inbox/drive-docs.php over inc/drive-docs.php).
  *
- * {prefix}kop_gdoc_links is not in the mirror: it is made here with the
- * columns of kop_gdl_ensure_table() and a few rows like the real ones, tied
- * to real facilities. Adding to a facility record needs MySQL (write lock,
+ * {prefix}kop_gdoc_links comes from the mirror when it has it (the shape
+ * checks read those rows), else it is made here with the columns of
+ * kop_gdl_ensure_table(). The queue's own checks then empty it in the scratch
+ * copy and seed a few rows like the real ones, tied to real facilities, so
+ * each kind they pick is the made-up row. Adding to a facility record needs MySQL (write lock,
  * facilities_v2 save) and is not run; sending a link to the news queue and
  * taking it back is.
  */
@@ -45,7 +47,13 @@ if (!function_exists('get_edit_post_link')) {
         source_doc TEXT NOT NULL DEFAULT \'\', source TEXT NOT NULL DEFAULT \'\', rhash TEXT NOT NULL DEFAULT \'\', seen TEXT NULL,
         status TEXT NOT NULL DEFAULT \'pending\', applied TEXT NULL, applied_fid INTEGER NOT NULL DEFAULT 0,
         reviewed_by TEXT NULL, reviewed_at TEXT NULL, created_at TEXT NOT NULL)');
-    if ((int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_gdoc_links')->fetchColumn()) return;
+    if (!(int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_gdoc_links')->fetchColumn()) kop_rinbox_test_drive_docs_seed();
+})();
+
+/** Empties the Drive Docs table in the scratch copy and puts in the made-up links. */
+function kop_rinbox_test_drive_docs_seed() {
+    $pdo = $GLOBALS['pdo'];
+    $pdo->exec('DELETE FROM wpdl_kop_gdoc_links');
     $fids = $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 2")->fetchAll(PDO::FETCH_COLUMN);
     $seen = function ($doc, $text) {
         return json_encode(array(array('doc' => $doc, 'tab' => 'Notes', 'heading' => 'Staff', 'text' => $text)));
@@ -66,7 +74,7 @@ if (!function_exists('get_edit_post_link')) {
             $seen($r[7], 'Words around link ' . $i . ' https://x.test/'), $r[9], $r[10], $r[11],
             $decided ? 'someone' : null, $decided ? '2026-10-01 10:00:00' : null, '2026-10-0' . ($i + 1) . ' 09:00:00'));
     }
-})();
+}
 
 function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
     try {
@@ -74,6 +82,7 @@ function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
     } catch (Throwable $e) {
         $check('drive-docs any record: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
     }
+    kop_rinbox_test_drive_docs_seed();
     $row = function ($key) { return kop_gdl_rows(array($key))[0] ?? null; };
     $by_kind = function ($kind) {
         return $GLOBALS['pdo']->query("SELECT pkey FROM wpdl_kop_gdoc_links WHERE kind = '$kind'")->fetchColumn();
