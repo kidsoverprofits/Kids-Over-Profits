@@ -113,7 +113,8 @@ php -d extension=mbstring scripts/test-seo-audit.php [--audit=../kop-pipeline/tm
 # KOP Tools > SEO Descriptions (inc/seo-drafts.php): a draft description + focus keyphrase for every post/page with an empty Yoast field;
 # stored in _yoast_wpseo_metadesc/_focuskw only when the owner approves (log + exact Undo, refused if the field changed since). Drafts:
 # seeds/seo-descriptions.json (hand-written, by post id + title check) first, then one rule per kind (kop_seo_drafts_kind()). Keyphrase
-# rules in kop_seo_drafts_keyphrase(); facility and state wording waits on option kop_seo_kw_wording, set on that screen (plan 2.4 item 11).
+# rules in kop_seo_drafts_keyphrase(); facility and state wording waits on option kop_seo_kw_wording, set on that screen (plan 2.4 item 11);
+# a news post's program comes from news_facility_links (kop_seo_drafts_news_program(), records DB via kop_seed_pdo()).
 # Tool pages (kop_seo_noindex_page()) are never listed and leave Yoast's sitemap (wpseo_exclude_from_sitemap_by_post_ids)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo-drafts.php [--list]   # seeds, which pages, every rule, approve/undo, the screen
 # Program websites scanned for instructions to AI (llms.txt/ai.txt, the copy Exceed's plugin hides in every page: sources

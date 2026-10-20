@@ -141,6 +141,63 @@ function kop_seo_drafts_country_count($country) {
     return (int) ($all[strtolower(trim((string) $country))] ?? 0);
 }
 
+/**
+ * The program a news post is about, from the news_facility_links of its news_submissions row (found by the
+ * import's json_data.source_post_id, else by an article link in the post): [name, other linked names].
+ * One program named in the post's title wins; else the only program in the strongest link kind
+ * (primary, then mentioned, then related); else ''. The other linked names come back for the card, for the owner to check.
+ */
+function kop_seo_drafts_news_program($post) {
+    static $memo = array();
+    $id = (int) $post->ID;
+    if (isset($memo[$id])) return $memo[$id];
+    $memo[$id] = array('', array());
+    $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : ($GLOBALS['pdo'] ?? null);
+    if (!$pdo instanceof PDO) return $memo[$id];
+    try {
+        $st = $pdo->prepare("SELECT id FROM news_submissions WHERE status IN ('approved','published') AND (json_data LIKE ? OR json_data LIKE ?) ORDER BY id LIMIT 1");
+        $st->execute(array('%"source_post_id":' . $id . ',%', '%"source_post_id":' . $id . '}%'));
+        $news = (int) $st->fetchColumn();
+        if (!$news && preg_match_all('/href=["\'](https?:\/\/[^"\']+)["\']/i', (string) $post->post_content, $m)) {
+            $urls = array();
+            foreach (array_unique($m[1]) as $u) {
+                $u = html_entity_decode($u, ENT_QUOTES, 'UTF-8');
+                if (stripos($u, 'kidsoverprofits.org') !== false) continue;
+                $urls[] = $u;
+                $urls[] = substr($u, -1) === '/' ? rtrim($u, '/') : $u . '/';
+            }
+            if ($urls = array_slice($urls, 0, 40)) {
+                $st = $pdo->prepare("SELECT id FROM news_submissions WHERE status IN ('approved','published') AND article_url IN (" . implode(',', array_fill(0, count($urls), '?')) . ') ORDER BY id LIMIT 1');
+                $st->execute($urls);
+                $news = (int) $st->fetchColumn();
+            }
+        }
+        if (!$news) return $memo[$id];
+        $st = $pdo->prepare('SELECT f.name, l.link_type FROM news_facility_links l JOIN facilities_v2 f ON f.id = l.facility_id WHERE l.news_id = ?');
+        $st->execute(array($news));
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return $memo[$id];
+    }
+    $rank = array('primary' => 0, 'mentioned' => 1, 'related' => 2);
+    $names = array();   // name => strongest link kind
+    foreach ($rows as $r) {
+        $n = trim((string) preg_replace('/,?\s+(LLC|L\.L\.C\.|Inc\.?|Corp\.?)$/i', '', trim((string) $r['name'])));
+        if ($n === '') continue;
+        $k = $rank[(string) $r['link_type']] ?? 2;
+        $names[$n] = isset($names[$n]) ? min($names[$n], $k) : $k;
+    }
+    if (!$names) return $memo[$id];
+    $title = mb_strtolower(kop_seo_drafts_title($post));
+    $in_title = array_values(array_filter(array_keys($names), function ($n) use ($title) { return mb_strpos($title, mb_strtolower($n)) !== false; }));
+    $best = array_keys($names, min($names), true);
+    asort($names);
+    if (count($in_title) === 1) $pick = $in_title[0];
+    elseif (count($best) === 1) $pick = $best[0];
+    else $pick = '';
+    return $memo[$id] = array($pick, array_values(array_diff(array_keys($names), array($pick))));
+}
+
 /** [description, how it was drafted] for one post. */
 function kop_seo_drafts_description($post) {
     $seed = kop_seo_drafts_seed();
@@ -201,7 +258,10 @@ function kop_seo_drafts_keyphrase($post) {
         case 'folder':
             return array(trim((string) preg_replace('/^document library:\s*/i', '', $title)) . ' documents', 'Document folder: its subject + "documents"', false);
         case 'news':
-            return $w['facility'] !== '' ? array('', 'News post: type the program or company it is about', false) : array('', 'Waits on the facility wording below (the program it is about)', true);
+            if ($w['facility'] === '') return array('', 'Waits on the facility wording below (the program it is about)', true);
+            list($name, $others) = kop_seo_drafts_news_program($post);
+            if ($name !== '') return array($fill($w['facility'], $name), 'News post: the program its story is linked to, in the facility wording' . ($others ? '; also linked: ' . implode(', ', array_slice($others, 0, 4)) : ''), false);
+            return array('', $others ? 'News post linked to ' . implode(', ', array_slice($others, 0, 4)) . ': type the one it is about' : 'News post: type the program or company it is about', false);
     }
     return array('', 'No rule fits: type one, or leave it empty', false);
 }

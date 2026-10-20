@@ -31,6 +31,8 @@ foreach (array('wpdl_posts', 'wpdl_postmeta', 'facilities_v2', 'inspection_facil
     $copy->exec("INSERT INTO main.`$t` SELECT * FROM src.`$t`");
 }
 $copy->exec('CREATE TABLE inspection_reports AS SELECT id, facility_id FROM src.inspection_reports');
+$copy->exec('CREATE TABLE news_submissions AS SELECT id, article_title, article_url, json_data, status FROM src.news_submissions');
+$copy->exec('CREATE TABLE news_facility_links AS SELECT * FROM src.news_facility_links');
 $copy->exec('DETACH DATABASE src');
 $copy = null;
 register_shutdown_function(function () use ($db_path) { $GLOBALS['pdo'] = null; $GLOBALS['wpdb'] = null; gc_collect_cycles(); @unlink($db_path); });
@@ -151,6 +153,26 @@ if ($wy) {
     $check('once set, the wording fills it', kop_seo_drafts_keyphrase($wy)[0] === 'troubled teen programs Wyoming', kop_seo_drafts_keyphrase($wy)[0]);
     unset($GLOBALS['kop_test_options']['kop_seo_kw_wording']);
 }
+// News posts: the program comes from news_facility_links once the facility wording is set.
+$GLOBALS['kop_test_options']['kop_seo_kw_wording'] = array('facility' => '{name} abuse', 'state' => '');
+$p = $post(820);
+if ($p) $check('a news post: its one linked program, in the facility wording', kop_seo_drafts_keyphrase($p)[0] === 'Provo Canyon School abuse', kop_seo_drafts_keyphrase($p)[0]);
+$p = $post(2309);
+if ($p) {
+    $k = kop_seo_drafts_keyphrase($p);
+    $check("the post's own link beats discovery's guesses; the card names the others", $k[0] === 'Youth Dynamics abuse' && strpos($k[1], 'Yellowstone Boys and Girls Ranch') !== false, $k[0] . ' / ' . $k[1]);
+}
+$p = $post(2315);
+if ($p) {
+    $k = kop_seo_drafts_keyphrase($p);
+    $check('several programs of one kind, none in the title: empty, the card names them', $k[0] === '' && strpos($k[1], 'Discovery Ranch') !== false, $k[1]);
+}
+$p = $post(470);
+if ($p) $check('a news post the import skipped is found by its article link', kop_seo_drafts_keyphrase($p)[0] === 'Robert Land Academy abuse', kop_seo_drafts_keyphrase($p)[0]);
+if ($list) {
+    foreach (kop_seo_drafts_candidates(false) as $c) if (kop_seo_drafts_kind($c[0]) === 'news') { $k = kop_seo_drafts_keyphrase($c[0]); echo '  news ' . $c[0]->ID . ': ' . ($k[0] !== '' ? $k[0] : '(' . $k[1] . ')') . "\n"; }
+}
+unset($GLOBALS['kop_test_options']['kop_seo_kw_wording']);
 $ut = $wpdb->get_row("SELECT ID, post_type, post_name, post_title, post_excerpt, post_content FROM wpdl_posts WHERE post_name = 'ut-reports' AND post_status = 'publish'");
 if ($ut) {
     $d = kop_seo_drafts_description($ut)[0];
