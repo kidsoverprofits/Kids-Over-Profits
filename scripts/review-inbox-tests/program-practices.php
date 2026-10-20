@@ -90,15 +90,15 @@ function kop_rinbox_test_program_practices(array $src, array $item, callable $ch
     $check('program-practices: the card moves to Added, where Undo is offered', $after['status'] === 'added' && in_array('undo', array_column($after['actions'], 'id'), true));
     $msg = kop_rinbox_pp_act($card['key'], 'undo', array())['message'];
     $check('program-practices: Undo puts every line of the card back to waiting and off the page',
-        $count("facility_id = " . (int) $fid . " AND topic = '" . $topic . "' AND status = 'pending'") === count($ids) && !kop_pp_for_facility((int) $fid), $msg);
+        $count("facility_id = " . (int) $fid . " AND topic = '" . $topic . "' AND status = 'pending'") === count($ids) && empty(kop_pp_for_facility((int) $fid)[$topic]), $msg);
     try {
         kop_rinbox_pp_act($card['key'], 'add', array('picked' => array()));
         $check('program-practices: Add with nothing ticked is refused', false);
     } catch (RuntimeException $e) {
-        $check('program-practices: Add with nothing ticked is refused', $count("status <> 'pending'") === 0, $e->getMessage());
+        $check('program-practices: Add with nothing ticked is refused', $count("facility_id = " . (int) $fid . " AND topic = '" . $topic . "' AND status <> 'pending'") === 0, $e->getMessage());
     }
     kop_rinbox_pp_act($card['key'], 'leave', array());
-    $check('program-practices: Leave all off changes no page', !kop_pp_for_facility((int) $fid) && kop_rinbox_pp_item((int) $fid, $topic)['status'] === 'left');
+    $check('program-practices: Leave all off changes no page', empty(kop_pp_for_facility((int) $fid)[$topic]) && kop_rinbox_pp_item((int) $fid, $topic)['status'] === 'left');
     kop_rinbox_pp_act($card['key'], 'undo', array());
 
     // The pencil: reword a line, refuse an empty one, take one off.

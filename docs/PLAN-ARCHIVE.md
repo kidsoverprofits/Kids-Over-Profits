@@ -3031,3 +3031,24 @@ holds the real ones); cause 2, the conflicts, Woodbury Facts, federal funding, n
 ya-moved and merge-follow checks seed or reset their samples in the scratch copy; cause 1, the filings and federal
 funding queues follow records merged since their build files (kop_facility_merge_follow_candidates()) and the test loads
 the live merge map; woodbury-facts "another staff role" expects a role without its source's name (kop_dd_role_tidy()).
+
+### 5. Tests failing on main: test-review-inbox and test-inline-edit (done 2026-10-20)
+
+- **test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`). Run it alone: a second PHP run
+  beside it ran Windows out of paging file. Run from the real checkout (it looks for `kop-pipeline` next to it).
+  2026-10-20: program-practices passes again (`python scripts/doc-text.py restore` in kop-pipeline rebuilt
+  `tmp/doc-read/practices.json` from the mirror's 1,419 imported lines; the readers' facts are gone, so a fresh
+  `export` needs the documents read again). The deleted records (#100014, #9660, company #832) were taken out of
+  kop-data's data-audit, federal-funding and business-filings files by hand: none has a builder to rerun short of
+  research agents (data audit, federal funding) or ~3 GB of fresh state downloads (Colorado + Florida `fetch`,
+  which would also lose Florida's page links in the wiped `tmp/florida-sunbiz/pdfs/detail-urls.json`). What the
+  pruned audit cards held is in docs/RESEARCH-TASKS.md ("Two Florida renames ...").
+- **test-inline-edit**: `scripts/test-inline-edit.php`, 2 checks (same with and without 366c8d84): "31 earlier names
+  filed as closed become renames" (#10401 -> Bryce Canyon Academy, #11201 -> Okeechobee Youth Development Center) and
+  "52 company records round-trip unchanged" (#500017 keyStaff.keyExecutives.0.personId missing on one side).
+
+Done 2026-10-20: the full test-review-inbox run passes (1,359 checks). program-practices: `doc-text.py restore`
+(kop-pipeline 27a8d1c), its scratch table gained the `why` column, and its Undo / Leave / empty-Add checks look at the
+card's own facility and topic (other sources' tests decide practice lines in the shared scratch copy). Deleted records
+pruned from kop-data (da6664e). test-inline-edit passes (54): a row sent back unchanged gains no blank column it never
+had and keeps its numbers (bf25d805); the era check asks for a year only when the earlier name gives one.

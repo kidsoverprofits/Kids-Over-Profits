@@ -423,6 +423,25 @@ Success Academy (record 10592, 2013-2014), then Three Points Center from 2014. T
 Three Points Center and when (Utah licence numbers: Olympus Academy LLC was #6600 at 2994 S Gould Wash), then undo the
 rename merge that is wrong at Merge Duplicates > Merged and set the year at KOP Tools > Map Renames.
 
+### Two Florida renames whose earlier records were deleted (found 2026-10-20, data audit)
+
+Records #9660 (Union Juvenile Residential Facility) and #100014 (Camp E-How-Kee) were deleted outright, not merged;
+their names live on as past names of #100071 (Redwood Youth Academy, Raiford) and #11145 (Brooksville Youth
+Academy). The data-audit cards about them were taken out of kop-data `data-audit/proposals.json`
+(`status_years-318`, `sequel-union-link`, `sequel_history-9660` and the two `rename_years` cards). Two of their
+findings are not on any record:
+
+- **Redwood Youth Academy (#100071) may be closed.** The audit read a Florida DJJ request for information
+  posted July 29, 2026 calling the site the "former Redwood Youth Academy"; the record says Open. Youth
+  Opportunity Investments took the contract in 2019 (DJJ, August 2019) and ran it at least through June 2021;
+  the owner's Sequel sheet names Wayne Halfway House as a later provider. Sequel TSI ran it 2010 to July 2019
+  ([CBS4](https://mycbs4.com/news/local/child-battery-investigation-closes-union-juvenile-residential-facility-officials-say)).
+  To do: find the DJJ notice, then file the closure through the closure reports path; set the era years.
+- **Camp E-How-Kee opened in 1968** (Eckerd's first outdoor program,
+  [Woodbury New Perspectives 3/05](https://strugglingteens.com/archives/2005/4/e-how-kee0504np.html)). With
+  #100014 gone, the Camp E-How-Kee years have no record; #11145 starts in 2012 as Brooksville Youth Academy.
+  To do: decide whether the Camp E-How-Kee era needs its own record again (name eras are separate records).
+
 ---
 
 ## Settled
