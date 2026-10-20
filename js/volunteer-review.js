@@ -30,7 +30,7 @@
     var app = document.getElementById('kop-vol-app');
     if (!cfg.rest || !app) return;
 
-    var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, skip: [], msgCtx: null };
+    var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, practice: false, skip: [], msgCtx: null };
 
     function api(path, body) {
         var headers = { 'Content-Type': 'application/json' };
@@ -118,6 +118,7 @@
 
     function openQueue(key) {
         state.project = null;
+        state.practice = false;
         state.queue = key;
         state.mine = false;
         state.offset = 0;
@@ -223,7 +224,7 @@
         }
 
         var id = 'kop-vol-note-' + Math.random().toString(36).slice(2);
-        var note = el('textarea', { id: id, rows: '2', maxlength: '1000', placeholder: 'Why? (optional for approve or reject, needed for not sure)' });
+        var note = el('textarea', { id: id, rows: '2', maxlength: '1000', placeholder: it.practice ? 'Why? (just for you: practice notes are not kept)' : 'Why? (optional for approve or reject, needed for not sure)' });
         var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
         var buttons = [
             ['approve', 'Recommend approve', 'kop-vol-btn kop-vol-btn-approve'],
@@ -235,8 +236,10 @@
         function send(verdict, btn) {
             buttons.forEach(function (b) { b.disabled = true; });
             msg.hidden = true;
-            api('recommend', { source: it.source, key: it.key, verdict: verdict, note: note.value }).then(function (res) {
-                if (onDone) onDone(it, verdict, note.value);
+            // A practice card's call goes to the practice round only, never in as a recommendation.
+            (it.practice ? api('practice', { do: 'answer', key: it.key, verdict: verdict })
+                : api('recommend', { source: it.source, key: it.key, verdict: verdict, note: note.value })).then(function (res) {
+                if (onDone) onDone(it, verdict, note.value, res);
                 else done(node, it, verdict, note.value, res.message);
             }).catch(function (e) {
                 buttons.forEach(function (b) { b.disabled = false; });
@@ -246,7 +249,7 @@
                 btn.focus();
             });
         }
-        if (onDone) {
+        if (onDone && !it.practice) {
             buttons.push(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () {
                 state.skip.push(it.key);
                 nextProjectItem();
@@ -374,6 +377,7 @@
 
     function openMine() {
         state.project = null;
+        state.practice = false;
         state.mine = true;
         renderTabs();
         remember();
@@ -452,7 +456,7 @@
 
     function renderProjects() {
         projectsPanel.innerHTML = '';
-        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : 'Your next batch') }));
+        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : (canPractice() ? 'Start here' : 'Your next batch')) }));
         var ul = el('ul', { class: 'kop-vol-project-list' });
         state.projects.forEach(function (p) {
             var finished = p.done >= p.total;
@@ -468,6 +472,155 @@
         if (state.projects.length) projectsPanel.appendChild(ul);
         var self = state.self;
         if (self && self.eligible && !self.open && self.queues.length) projectsPanel.appendChild(selfAssignForm(self));
+        if (canPractice()) projectsPanel.appendChild(practiceForm(self.practice));
+    }
+
+    /* ---- Practice round (inc/volunteer-practice.php) ------------------------------------ */
+
+    // Not able to pick a batch yet, and a practice round to start or carry on.
+    function canPractice() {
+        var self = state.self;
+        return !!(self && !self.eligible && self.practice && (self.practice.open || self.practice.queues.length)) && !cfg.preview;
+    }
+
+    function practiceForm(pr) {
+        var box = el('div', { class: 'kop-vol-self' }, [
+            el('h3', { text: 'Practice round' }),
+            el('p', { class: 'kop-vol-meta', text: pr.size + ' items the admins have already decided. After each one you see what they decided. Get ' + pr.pass + ' of ' + pr.size
+                + ' right and you can pick your own batches from that queue.' })
+        ]);
+        if (pr.last && !pr.last.passed && !pr.open) {
+            box.appendChild(el('p', { class: 'kop-vol-meta', text: 'Last round: ' + pr.last.right + ' of ' + pr.last.total + ' right in ' + pr.last.label + '.' }));
+        }
+        if (pr.open) {
+            box.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: state.practice ? 'Working on it below' : 'Carry on (' + pr.open.done + ' of ' + pr.open.total + ')',
+                disabled: state.practice ? true : null, onclick: openPractice }));
+            return box;
+        }
+        var pick = el('select', { id: 'kop-vol-practice-queue' }, pr.queues.map(function (q) { return el('option', { value: q.key, text: q.label }); }));
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+        var go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Start practice', onclick: function () {
+            go.disabled = true;
+            msg.className = 'kop-vol-msg';
+            msg.textContent = 'Setting it up…';
+            startPractice(pick.value).catch(function (e) {
+                go.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+            });
+        } });
+        box.appendChild(el('label', { for: 'kop-vol-practice-queue', text: 'Queue ' }));
+        box.appendChild(pick);
+        box.appendChild(document.createTextNode(' '));
+        box.appendChild(go);
+        box.appendChild(msg);
+        return box;
+    }
+
+    function startPractice(source) {
+        return api('practice', { do: 'start', source: source }).then(function (pr) {
+            state.self.practice = pr;
+            openPractice();
+        });
+    }
+
+    function openPractice() {
+        state.project = null;
+        state.practice = true;
+        state.mine = false;
+        state.queue = null;
+        renderTabs();
+        renderProjects();
+        body.innerHTML = '';
+        projBrief = el('section', { class: 'kop-vol-panel kop-vol-guide kop-vol-brief' }, [el('p', { role: 'status', text: 'Loading…' })]);
+        projSlot = el('div', { class: 'kop-vol-list' });
+        body.appendChild(projBrief);
+        body.appendChild(projSlot);
+        nextPracticeItem();
+    }
+
+    function drawPracticeBrief(brief, round) {
+        projBrief.innerHTML = '';
+        projBrief.appendChild(el('h2', { text: brief.title }));
+        projBrief.appendChild(progressBar(round.done, round.total));
+        projBrief.appendChild(el('p', { class: 'kop-vol-note', text: 'These are already decided: nothing you say here changes anything or counts as a recommendation.' }));
+        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'The question: ' }), brief.question]));
+        if (brief.yes || brief.no) {
+            var dl = el('dl', { class: 'kop-vol-examples' });
+            if (brief.yes) { dl.appendChild(el('dt', { text: 'A yes looks like' })); dl.appendChild(el('dd', { text: brief.yes })); }
+            if (brief.no) { dl.appendChild(el('dt', { text: 'A no looks like' })); dl.appendChild(el('dd', { text: brief.no })); }
+            projBrief.appendChild(dl);
+        }
+        projBrief.appendChild(askButton({ project_id: 0, label: 'the practice round' }, 'Ask a question about the practice round'));
+    }
+
+    function nextPracticeItem() {
+        projSlot.style.minHeight = projSlot.offsetHeight ? projSlot.offsetHeight + 'px' : '';
+        projSlot.innerHTML = '';
+        projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { role: 'status', text: 'Loading…' })]));
+        api('practice', { do: 'next' }).then(function (data) {
+            if (!state.practice) return;
+            var round = data.round || {};
+            drawPracticeBrief(data.brief || {}, round);
+            projSlot.innerHTML = '';
+            projSlot.style.minHeight = '';
+            if (!data.item) { practiceResult(round); return; }
+            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: 'Item ' + Math.min(round.total, round.done + 1) + ' of ' + round.total }));
+            var node = card(data.item, function (item, verdict, note, res) {
+                node.innerHTML = '';
+                node.classList.add('is-done');
+                var said = verdict === 'unsure' ? 'You said not sure. ' : '';
+                node.appendChild(el('p', { class: 'kop-vol-done' }, [
+                    el('strong', { text: res.right ? 'Same as the admin. ' : 'Not this time. ' }), said + res.said
+                ]));
+                if (res.round) drawPracticeBrief(data.brief || {}, res.round);
+                var next = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: res.round && res.round.finished ? 'See how you did' : 'Next',
+                    onclick: function () { if (res.round && res.round.finished) practiceResult(res.round); else nextPracticeItem(); } });
+                node.appendChild(next);
+                bringToTop(node);
+                try { next.focus({ preventScroll: true }); } catch (e) { next.focus(); }
+            });
+            projSlot.appendChild(node);
+            bringToTop(projSlot);
+        }).catch(function (e) {
+            projSlot.innerHTML = '';
+            projSlot.style.minHeight = '';
+            projSlot.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));
+        });
+    }
+
+    function practiceResult(round) {
+        projSlot.innerHTML = '';
+        var panel = el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
+            el('h3', { text: 'You got ' + round.right + ' of ' + round.total + ' the same as the admins.' }),
+            el('p', { text: round.passed ? 'You passed. You can pick your own batches from ' + round.label + ' now.'
+                : 'Read the question and the examples again, then try another round: it has different items.' })
+        ]);
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+        var btn = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: round.passed ? 'Pick a batch' : 'Try another round', onclick: function () {
+            btn.disabled = true;
+            (round.passed ? Promise.resolve() : api('practice', { do: 'start', source: round.source })).then(function () {
+                return api('projects');
+            }).then(function (data) {
+                state.projects = data.projects || [];
+                state.self = data.self;
+                if (round.passed) {
+                    state.practice = false;
+                    renderProjects();
+                    if (!projectsPanel.parentNode) app.insertBefore(projectsPanel, app.firstChild);
+                    body.innerHTML = '';
+                    bringToTop(projectsPanel);
+                } else openPractice();
+            }).catch(function (e) {
+                btn.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+            });
+        } });
+        panel.appendChild(btn);
+        panel.appendChild(msg);
+        projSlot.appendChild(panel);
+        bringToTop(projSlot);
     }
 
     // Volunteers whose calls an admin has checked and agreed with can pick their next batch.
@@ -494,7 +647,8 @@
         } });
         return el('div', { class: 'kop-vol-self' }, [
             el('h3', { text: 'Pick your next batch' }),
-            el('p', { class: 'kop-vol-meta', text: 'Your calls have matched the admins’ ' + self.agreed + ' of ' + self.decided + ' times, so you can choose what to review next.' }),
+            el('p', { class: 'kop-vol-meta', text: self.via === 'practice' ? 'You passed the practice round, so you can choose what to review next.'
+                : 'Your calls have matched the admins’ ' + self.agreed + ' of ' + self.decided + ' times, so you can choose what to review next.' }),
             el('label', { for: 'kop-vol-self-queue', text: 'Queue ' }),
             pick, ' ', go, msg
         ]);
@@ -515,6 +669,7 @@
 
     function openProject(id) {
         state.project = id;
+        state.practice = false;
         state.skip = [];
         state.mine = false;
         state.queue = null;
@@ -763,7 +918,7 @@
             return;
         }
         var canSelf = state.self && state.self.eligible && !state.self.open && state.self.queues.length;
-        if (state.projects.length || canSelf) {
+        if (state.projects.length || canSelf || canPractice()) {
             renderProjects();
             app.appendChild(projectsPanel);
         }
@@ -785,7 +940,8 @@
         } else if (state.projects.length) {
             // Straight to work: their own projects come first.
             if (unfinished.length) openProject(unfinished[0].id);
-        } else openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
+        } else if (canPractice() && state.self.practice.open) openPractice();
+        else openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
     }).catch(function (e) {
         app.innerHTML = '';
         app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));

@@ -765,7 +765,8 @@ function kop_volp_self_rules() {
 /**
  * Can this volunteer pick their own batch? {eligible, decided, agreed, need_decided, need_rate, open (an unfinished
  * self-assigned project's id, or 0), queues [{key, label, count}]}. One self-assigned batch at a time: the next
- * opens when the last is finished.
+ * opens when the last is finished. Before the record has 'decided' calls, a passed practice round opens its queue
+ * ('via' => 'practice', queues only those); not eligible yet, 'practice' carries kop_volpr_status().
  */
 function kop_volp_self_status($vid) {
     $rules = kop_volp_self_rules();
@@ -782,6 +783,13 @@ function kop_volp_self_status($vid) {
     $out['decided'] = (int) ($row['decided'] ?? 0);
     $out['agreed'] = (int) ($row['agreed'] ?? 0);
     $out['eligible'] = $out['decided'] >= $rules['decided'] && $out['agreed'] >= $rules['rate'] * $out['decided'];
+    // Until there is a record of real calls, a passed practice round (inc/volunteer-practice.php) opens its own queue.
+    $practiced = $out['decided'] < $rules['decided'] && function_exists('kop_volpr_passed') ? kop_volpr_passed((int) $vid) : array();
+    if ($practiced) {
+        $out['eligible'] = true;
+        $out['via'] = 'practice';
+    }
+    if (function_exists('kop_volpr_status') && !$out['eligible']) $out['practice'] = kop_volpr_status((int) $vid);
     if (!$out['eligible']) return $out;
 
     kop_volp_ensure_tables();
@@ -794,6 +802,7 @@ function kop_volp_self_status($vid) {
     $counts = function_exists('kop_rinbox_counts') ? kop_rinbox_counts() : array();
     foreach (kop_vol_sources() as $key => $src) {
         if (empty($src['list']) || empty($src['get'])) continue;
+        if ($practiced && !in_array($key, $practiced, true)) continue;
         $n = isset($counts[$key]) ? (int) $counts[$key] : null;
         if ($n === 0) continue;
         $out['queues'][] = array('key' => $key, 'label' => (string) $src['label'], 'count' => $n);
@@ -805,10 +814,11 @@ function kop_volp_self_status($vid) {
 function kop_volp_self_assign(array $vol, $source) {
     $vid = (int) $vol['id'];
     $st = kop_volp_self_status($vid);
-    if (!$st['eligible']) throw new RuntimeException('Picking your own batch opens after ' . $st['need_decided'] . ' of your calls have been checked by an admin, agreeing ' . $st['need_rate'] . '% of the time.');
+    if (!$st['eligible']) throw new RuntimeException('Picking your own batch opens after you pass a practice round, or after ' . $st['need_decided'] . ' of your calls have been checked by an admin, agreeing ' . $st['need_rate'] . '% of the time.');
     if ($st['open']) throw new RuntimeException('Finish the batch you have open first. Thank you!');
     $source = sanitize_key((string) $source);
     if (!isset(kop_vol_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
+    if (($st['via'] ?? '') === 'practice' && !in_array($source, array_column($st['queues'], 'key'), true)) throw new RuntimeException('Pick one of the queues listed: the ones you passed a practice round in.');
     kop_vol_rate_check($vid);
     list($id, $link) = kop_volp_create(array('source' => $source, 'size' => $st['size'], 'volunteer_id' => $vid,
         'note' => 'Picked by ' . $vol['name'] . '.', 'created_by' => KOP_VOLP_SELF_CREATED_BY));

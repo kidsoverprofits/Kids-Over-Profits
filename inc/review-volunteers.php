@@ -936,7 +936,9 @@ function kop_vol_admin_page() {
                     <td><?php echo esc_html($v['note']);
                         if (!empty($v['email'])) echo '<br><a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a>'; ?></td>
                     <td><?php echo (int) $v['recs']; ?></td>
-                    <td><?php echo esc_html($rate); ?></td>
+                    <td><?php echo esc_html($rate);
+                        $practice = function_exists('kop_volpr_summary') ? kop_volpr_summary((int) $v['id']) : '';
+                        if ($practice !== '') echo '<br><span class="description">' . esc_html($practice) . '</span>'; ?></td>
                     <td><?php echo kop_vol_auto_mark_cell($v, $nonce); ?></td>
                     <td><?php echo $v['last_seen'] ? esc_html(get_date_from_gmt($v['last_seen'], 'M j, Y g:i a')) : 'never opened'; ?></td>
                     <td><?php echo esc_html(get_date_from_gmt($v['link_at'], 'M j, Y')); ?></td>
@@ -1005,5 +1007,6 @@ function kop_vol_admin_recent($inbox, $nonce) {
 }
 
 require_once __DIR__ . '/volunteer-projects.php';
+require_once __DIR__ . '/volunteer-practice.php';
 require_once __DIR__ . '/volunteer-auto.php';
 require_once __DIR__ . '/volunteer-signup.php';

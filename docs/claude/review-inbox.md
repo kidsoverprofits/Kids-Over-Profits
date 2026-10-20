@@ -89,6 +89,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # Self-assign (kop_volp_self_status()/kop_volp_self_assign(), REST volunteer/selfassign, 'self' in volunteer/projects): a volunteer with 10+ calls the admin decided,
 # 80%+ agreeing (filters kop_volp_self_min_decided / _min_rate / _size) sees "Pick your next batch": a queue open to everyone, 10 items, created_by 'self-assigned';
 # one unfinished self-assigned batch at a time. Turn a volunteer off with Revoke
+# Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
+# 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
+# half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);
+# each call says what the admin decided; 8 of 10 passes (filters kop_volpr_size / _pass / _min_each). A pass opens self-assign for that queue
+# ('via' 'practice') until the volunteer has 10 admin-checked calls, which then decide. Practice never writes kop_volunteer_recs, so it never
+# closes anything or counts toward agreement, self-assign by record or volunteer-auto. The Volunteers table shows "Practice: News 9 of 10, passed"
 # Research projects (inc/volunteer-research.php): source 'research:<kind>' (kop_volr_kinds(): closing-year, opening-year, status, news = facilities_v2
 # records lacking it, narrowed by a state or a word; custom = typed questions, one per line). The volunteer writes what they found + links, or
 # "Could not find it" + where they looked ({prefix}kop_vol_answers); each new link goes to the review inbox at once (kop_ext_insert_*, same

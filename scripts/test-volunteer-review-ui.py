@@ -52,6 +52,121 @@ FINDING = {"source": "inspection-highlights", "key": "704", "title": "Inappropri
            "facts": [], "links": [], "compare": None, "full_text": False, "approve": ["Approve: shows it"], "reject": ["Reject: hides it"]}
 
 
+PRACTICE_ITEMS = [
+    {"source": "news", "key": "101", "title": "Ranch staff charged", "subtitle": "", "url": "https://news.test/a", "text": "Two staff were charged.", "created": "2026-09-01",
+     "facility": None, "facts": [{"label": "Outlet", "value": "The Paper"}], "links": [], "compare": None, "full_text": False, "approve": [], "reject": [], "practice": True},
+    {"source": "news", "key": "102", "title": "High school football scores", "subtitle": "", "url": "https://news.test/b", "text": "Scores.", "created": "2026-09-02",
+     "facility": None, "facts": [], "links": [], "compare": None, "full_text": False, "approve": [], "reject": [], "practice": True},
+]
+PRACTICE_ANSWERS = {"101": "approve", "102": "reject"}
+BRIEF = {"title": "Practice: News stories", "question": "Is the story about a troubled teen program?", "yes": "Abuse at a ranch.", "no": "Sports scores."}
+
+
+def practice(width, shots, check):
+    """A new volunteer: "Start here" offers a practice round; each call says what the admin decided; passing opens "Pick your next batch"."""
+    print("\nPractice round at %d px" % width)
+    st = {"started": False, "calls": {}, "passed": False, "posts": []}
+
+    def round_now():
+        right = sum(1 for k, v in st["calls"].items() if v == PRACTICE_ANSWERS[k])
+        done = len(st["calls"])
+        return {"round": 1, "source": "news", "label": "News", "total": 2, "done": done, "right": right, "finished": done == 2, "passed": done == 2 and right >= 1}
+
+    def status():
+        return {"size": 2, "pass": 1, "open": round_now() if st["started"] and len(st["calls"]) < 2 else None, "last": None,
+                "passed": ["news"] if st["passed"] else [], "queues": [] if st["passed"] else [{"key": "news", "label": "News"}]}
+
+    def handle(route):
+        req = route.request
+        url = req.url
+        if not url.startswith(REST):
+            path = ROOT / url.replace(BASE, "").split("?")[0]
+            if path.is_file():
+                ctype = "text/css" if path.suffix == ".css" else "application/javascript" if path.suffix == ".js" else "text/html"
+                return route.fulfill(status=200, body=path.read_bytes(), headers={"Content-Type": ctype})
+            if url.startswith(BASE + "volunteer-review/"):
+                return route.fulfill(status=200, body=PAGE, headers={"Content-Type": "text/html"})
+            return route.fulfill(status=404, body="")
+        name = url[len(REST):].split("?")[0]
+        body = json.loads(req.post_data or "{}")
+        st["posts"].append((name, body))
+        out = {}
+        if name == "queues":
+            out = {"queues": [{"key": "news", "label": "News", "count": 3, "guidance": "Is it about a program?"}]}
+        elif name == "items":
+            out = {"items": [], "next_offset": -1, "total": 0}
+        elif name == "projects":
+            self_ = ({"eligible": True, "via": "practice", "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10, "open": 0,
+                      "queues": [{"key": "news", "label": "News", "count": 3}]} if st["passed"]
+                     else {"eligible": False, "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10, "open": 0, "queues": [], "practice": status()})
+            out = {"projects": [], "self": self_}
+        elif name == "practice":
+            do = body.get("do")
+            if do == "start":
+                st["started"] = True
+                out = status()
+            elif do == "next":
+                left = [i for i in PRACTICE_ITEMS if i["key"] not in st["calls"]]
+                out = {"round": round_now(), "brief": BRIEF, "item": left[0] if left else None}
+            elif do == "answer":
+                st["calls"][body["key"]] = body["verdict"]
+                r = round_now()
+                st["passed"] = r["passed"]
+                ans = PRACTICE_ANSWERS[body["key"]]
+                out = {"right": body["verdict"] == ans, "answer": ans, "said": "An admin %s this one." % ("approved" if ans == "approve" else "rejected"), "round": r}
+        elif name == "messages":
+            out = {"messages": [], "unread": 0}
+        return route.fulfill(status=200, body=json.dumps(out), headers={"Content-Type": "application/json"})
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": width, "height": 900})
+        errors = []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.route("**/*", handle)
+        page.goto(BASE + "volunteer-review/")
+        page.wait_for_selector(".kop-vol-projects")
+        panel = page.locator(".kop-vol-projects")
+        check("a new volunteer sees Start here with a practice round", panel.locator("h2").inner_text() == "Start here"
+              and "Practice round" in panel.inner_text() and "Get 1 of 2 right" in panel.inner_text())
+        panel.locator("button", has_text="Start practice").click()
+        page.wait_for_selector(".kop-vol-card h3")
+        check("the round opens with its brief", "Practice: News stories" in page.locator(".kop-vol-brief").inner_text()
+              and "nothing you say here changes anything" in page.locator(".kop-vol-brief").inner_text())
+        check("no Skip on a practice card", page.locator(".kop-vol-card button", has_text="Skip for now").count() == 0)
+        check("item 1 of 2", "Item 1 of 2" in page.locator(".kop-vol-position").inner_text())
+        if shots:
+            page.screenshot(path=str(shots / ("practice-%d.png" % width)), full_page=True)
+        page.locator(".kop-vol-card button", has_text="Recommend reject").click()
+        page.wait_for_selector(".kop-vol-card.is-done")
+        done = page.locator(".kop-vol-card.is-done").inner_text()
+        check("a wrong call says what the admin decided", "Not this time" in done and "An admin approved this one" in done, done)
+        page.locator(".kop-vol-card.is-done button", has_text="Next").click()
+        page.wait_for_function("document.querySelector('.kop-vol-card h3') && document.querySelector('.kop-vol-card h3').textContent.indexOf('football') >= 0")
+        page.locator(".kop-vol-card button", has_text="Recommend reject").click()
+        page.wait_for_selector(".kop-vol-card.is-done")
+        check("a right call says so", "Same as the admin" in page.locator(".kop-vol-card.is-done").inner_text())
+        page.locator(".kop-vol-card.is-done button", has_text="See how you did").click()
+        page.wait_for_selector(".kop-vol-finished")
+        fin = page.locator(".kop-vol-finished").inner_text()
+        check("the result: 1 of 2, passed", "You got 1 of 2" in fin and "You passed" in fin, fin)
+        if shots:
+            page.screenshot(path=str(shots / ("practice-done-%d.png" % width)), full_page=True)
+        page.locator(".kop-vol-finished button", has_text="Pick a batch").click()
+        page.wait_for_selector(".kop-vol-projects .kop-vol-self h3:has-text('Pick your next batch')")
+        check("passing opens Pick your next batch", "You passed the practice round" in page.locator(".kop-vol-projects").inner_text())
+        check("no practice call was sent as a recommendation", not [n for n, b in st["posts"] if n == "recommend"])
+        check("the practice answers went to the practice route", [b.get("verdict") for n, b in st["posts"] if n == "practice" and b.get("do") == "answer"] == ["reject", "reject"])
+        wide = page.evaluate("""() => {
+            const w = document.documentElement.clientWidth, out = [];
+            document.querySelectorAll('.kop-vol-page *').forEach(n => { const r = n.getBoundingClientRect(); if (r.width && r.right > w + 1) out.push(n.className || n.tagName); });
+            return out.slice(0, 5);
+        }""")
+        check("nothing runs off the screen", not wide, json.dumps(wide))
+        check("no script errors", not errors, "; ".join(errors))
+        browser.close()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--shots", default="")
@@ -197,6 +312,8 @@ def main():
             check("nothing runs off the screen", not wide, json.dumps(wide))
             check("no script errors", not errors, "; ".join(errors))
             browser.close()
+
+        practice(width, shots, check)
 
     print("\n%d FAILED" % len(failures) if failures else "\nAll passed")
     sys.exit(1 if failures else 0)
