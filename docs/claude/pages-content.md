@@ -89,6 +89,7 @@ php scripts/test-robots.php
 # Search engines (inc/seo.php, the search plan https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb): facility and company titles and descriptions
 # name past/other names (kop_alias_label()), each page describes its program or company as a schema.org Organization added to Yoast's graph
 # (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner, tag archives are noindex and out of the sitemap. A new page kind gets its pieces there
+# Yoast's dashboard and editor analysis read the stored post meta (_yoast_wpseo_metadesc, _yoast_wpseo_focuskw), not our wpseo_* filters, so its "default meta description" / keyphrase warnings can show where the live page is fine (see docs/plan/4.7 items 8-10)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] [--id=12161]
 # Program websites scanned for instructions to AI (llms.txt/ai.txt, the copy Exceed's plugin hides in every page: sources
 # to ignore, critics framed, AI-only notes), AI crawler rules, city doorway pages and pages answering critics. Domains from

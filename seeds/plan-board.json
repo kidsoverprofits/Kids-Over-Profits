@@ -1,5 +1,5 @@
 {
- "built": "2026-10-20 18:23 UTC",
+ "built": "2026-10-20 19:12 UTC",
  "sections": [
   {
    "key": "2",
@@ -334,6 +334,12 @@
        "lead": "Not built, the owner's call",
        "text": "**Not built, the owner's call**: two volunteers per item, or high-agreement volunteers applying directly; an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
        "hash": "0c55bd125b64"
+      },
+      {
+       "id": "2.4:seo-keyphrase-wording",
+       "lead": "SEO keyphrase wording",
+       "text": "**SEO keyphrase wording**: which words people search for. Facility name alone, or with \"abuse\" / \"reviews\"; \"troubled teen\" vs \"residential treatment\" for state hubs. Blocks 4.7 item 9.",
+       "hash": "32f61a8dd422"
       }
      ]
     },
@@ -549,6 +555,12 @@
        "lead": "Rich Results Test",
        "text": "**Rich Results Test** on a facility and a company page once Google recrawls them.",
        "hash": "212a4860d934"
+      },
+      {
+       "id": "3:volunteer-messages-and-research-projects",
+       "lead": "Volunteer messages and research projects",
+       "text": "**Volunteer messages and research projects**: open [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers) once (makes `kop_vol_messages`, `kop_vol_answers` and the projects' new `detail` column); make a small \"When did these programs close?\" project for yourself with a state, open its link in a private window, answer one with a link (it appears waiting in Submissions Review > News), ask a question, answer it under Messages (the menu shows a count, an email arrives), and see the reply marked New on the volunteer page. Mark the answer Used, then close the project.",
+       "hash": "21995a4e5a82"
       }
      ]
     }
@@ -692,6 +704,12 @@
        "lead": "Data model phase 5",
        "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit.",
        "hash": "1f5a25d516d9"
+      },
+      {
+       "id": "4.3:business-filing-fields",
+       "lead": "Business filing fields",
+       "text": "**Business filing fields** (`identification.legalName`, `dbaNames`, `registrants`, added 2026-10-20): empty on every record. Fill them from the state business searches the filings research reads (`inc/nonprofit-filings.php`, `docs/claude/filings-research.md`) as a review queue, never unreviewed. Then: registrants who are people get person ids (`kop_people_named_sources()` in `inc/people.php`); a registrant company that is a KOP operator links to it; legal names and DBAs join the name index (`kop_v2_alias_index()`, a \"Legal name\" / \"Doing business as\" label in `kop_alias_label()`) so search and the merge matcher find them.",
+       "hash": "849ea2fc2625"
       }
      ]
     },
@@ -920,6 +938,30 @@
        "lead": "Admin stylesheets",
        "text": "**Admin stylesheets** still use about fifty accent colours as text (16B).",
        "hash": "7c37fc242e0a"
+      },
+      {
+       "id": "4.7:seo-audit-read-only-first",
+       "lead": "SEO audit (read-only, first)",
+       "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet.",
+       "hash": "fcceb1931de8"
+      },
+      {
+       "id": "4.7:focus-keyphrases",
+       "lead": "Focus keyphrases",
+       "text": "**Focus keyphrases**: one rule per page kind (facility, operator, state hub, article/post, hub page). For real posts and pages, store `_yoast_wpseo_focuskw`. Generated /facility/ and /operator/ routes have no post, so they get no stored keyphrase. Extend test-seo.php. Wording waits on 2.4 item 11. Model: Opus for the rules, Sonnet for the code.",
+       "hash": "990801553d9b"
+      },
+      {
+       "id": "4.7:meta-descriptions-yoast-sees",
+       "lead": "Meta descriptions Yoast sees",
+       "text": "**Meta descriptions Yoast sees**: for pages the audit flags, write a description into `_yoast_wpseo_metadesc` (drafted, owner approves on a review screen) so the dashboard and the editor analysis stop warning. Also make sparse generated facility/operator descriptions name something specific (inspections, closure, lawsuits, operator). `kop_seo_facility_description()` in inc/seo.php. Model: Opus for the wording, Sonnet for the screen.",
+       "hash": "42e32475fe4f"
+      },
+      {
+       "id": "4.7:breadcrumbs-on-facility-operator-and-state-pages",
+       "lead": "Breadcrumbs on facility, operator and state pages",
+       "text": "**Breadcrumbs on facility, operator and state pages**: visible trail plus the same trail in Yoast's BreadcrumbList through `wpseo_breadcrumb_links`. Reuse `kop_article_breadcrumbs()` / `kop_article_yoast_breadcrumbs()` (inc/article-parts.php:244-290). Check what inc/seo.php's added breadcrumb on these routes currently emits so the two never disagree. CSS rules in docs/claude/css-checks.md. Model: Sonnet, Opus checks.",
+       "hash": "e40e7ae53c94"
       }
      ]
     },
@@ -976,50 +1018,26 @@
      "key": "5",
      "title": "",
      "intro": [
-      "Each predates the work that found it; fix the test or the code."
+      "Each predates the work that found it; fix the test or the code. Last full run 2026-10-20 (mirror synced that day, main at eb2acbeb, portable PHP 8.2 from windows.php.net)."
      ],
      "items": [
       {
        "id": "5:test-review-inbox",
        "lead": "test-review-inbox",
-       "text": "**test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 28 checks in data-audit, drive-docs, facilities-from-news, federal-funding, fornits, inspection-highlights (\"a rejected finding offers approve and back to pending\"), inspection-links (\"Undefined array key 0\" at inspection-links.php:127), websites, wiki-updates (another queue's `home_of_program` action), ya-file, ya-moved, merge-follow, woodbury-facts (\"not conflicts: another staff role\": a 2021 HEAL sighting is now \"Former Founder\"). `scripts/review-inbox-tests/fornits.php` seeds only an empty table; re-seed it into its own.",
-       "hash": "e172c2a2d2db"
-      },
-      {
-       "id": "5:test-facility-pages",
-       "lead": "test-facility-pages",
-       "text": "**test-facility-pages**: `scripts/test-facility-pages.php`, 13 checks (merged Facility Profile posts; \"the page renders to the end after the post\"; \"links a staff entry and a fact\" samples Aspen Education Group, now a renamed program).",
-       "hash": "b7f1309289b3"
-      },
-      {
-       "id": "5:test-facility-eras",
-       "lead": "test-facility-eras",
-       "text": "**test-facility-eras**: `scripts/test-facility-eras.php`, 1 check.",
-       "hash": "da955d26b2d1"
-      },
-      {
-       "id": "5:test-name-under-operator",
-       "lead": "test-name-under-operator",
-       "text": "**test-name-under-operator**: `scripts/test-name-under-operator.php`, Psychiatric Solutions / #10370.",
-       "hash": "de8230048386"
-      },
-      {
-       "id": "5:test-wiki-gaps",
-       "lead": "test-wiki-gaps",
-       "text": "**test-wiki-gaps**: `scripts/test-wiki-gaps.php`, \"a page with no years or place matches only its exact name\" (Mountain Home Academy).",
-       "hash": "ac27153afb00"
-      },
-      {
-       "id": "5:test-woodbury-facts",
-       "lead": "test-woodbury-facts",
-       "text": "**test-woodbury-facts**: `scripts/test-woodbury-facts.php`, \"every staff entry added or filled names its source and link\" (4 without).",
-       "hash": "6eeb1b9d9774"
+       "text": "**test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 61 checks on the 2026-10-20 mirror (34 on the 2026-10-13 one: most of the rise is tests that sample live data). By cause: 1. *Proposals naming records merged away since their build file was made*: business-filings, nonprofit-filings, data-audit and federal-funding \"every proposal is well formed\", data-audit \"nearly every step can be made\" (148 of 1105 blocked, e.g. #9644, #9659, #11653). Either follow the merge (`kop_fmerge_follow_waiting()` / the merge log) in those checks or rebuild the seed files (kop-pipeline). 2. *Checks that pick a live sample that has changed*: nonprofit-filings Link (\"Childhaven, Inc. already has this organization\", so Undo / second Link / company Link all fall through), data-audit \"company fields and moved articles still fit\" (Sequel's executives and websites were edited), conflicts (0 staff items with a role; \"Unknown conflict\" at `inc/review-inbox/conflicts.php:86`), woodbury-facts auto-add \"0 of 4089\" and \"the pass files what adds nothing\", writeups (9 checks: approving holds facts, held list, waiting records), federal-funding \"Undo leaves an entry added by hand since\", drive-docs (\"Undo it before editing\" at drive-docs.php:475). Fix: seed the sample into the scratch copy, as the other queues' tests do. 3. *`home_of_program` add-on on cards it should not reach*: data-audit rename-only card, wiki-updates card 75, writeups \"with no draft offers only Write it with AI\". 4. *Harness gaps*: card-fields runs MySQL `SHOW` at `api/lib-suggested-edits.php:50`; inspection-links finds 0 programs with homes and then reads `array_keys($map['programs'])[0]` unguarded (`scripts/review-inbox-tests/inspection-links.php:127`). 5. *Fornits* (12 checks: filters, counts, progress, \"lead to the news queue\": Undefined array key \"id\"): `scripts/review-inbox-tests/fornits.php` seeds only an empty table; re-seed it into its own. 6. *Still open from before*: facilities-from-news \"after Remove the link it can be linked again\", ya-file (\"the card's own name picks its program\": \"0\"), ya-moved and merge-follow (0 waiting rows to move), woodbury-facts \"not conflicts: another staff role\" (a 2021 HEAL sighting is now \"Former Founder\"). - Run from a scratch worktree, program-practices and three wiki-updates draft checks also fail: they look for `kop-pipeline` next to the checkout. Not a bug; run from the real checkout.",
+       "hash": "ecd85ffd3ed6"
       },
       {
        "id": "5:test-fornits",
        "lead": "test-fornits",
-       "text": "**test-fornits**: `scripts/test-fornits.php`, \"every link added\" finds 11 records missing (#13972, #11097, #10333, #13795, #10496, #100048 ...): check `kop_fmerge_follow_waiting()` moved the waiting rows.",
-       "hash": "ebde6a49a8b7"
+       "text": "**test-fornits**: `scripts/test-fornits.php` cannot run: `tmp/fornits/` is gone (the 2026-10-17 junction wipe of kop-pipeline/tmp). Rebuild a batch with `python scripts/fornits-process.py --no-upload` (kop-pipeline), then check \"every link added\" (11 records missing before: #13972, #11097, #10333, ...; `kop_fmerge_follow_waiting()`).",
+       "hash": "1f1c62548a1c"
+      },
+      {
+       "id": "5:test-mobile-api",
+       "lead": "test-mobile-api",
+       "text": "**test-mobile-api**: `scripts/test-mobile-api.php`, \"facility 9607 library files are {id, title, url, ext, mime, size, thumb}\": the document types commit (6165d1bd) added `types` to each file; the check predates it.",
+       "hash": "ac35cbc5c34d"
       }
      ]
     }
