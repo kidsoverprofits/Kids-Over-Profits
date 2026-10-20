@@ -41,6 +41,9 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # Facility and company pages carry "We have questions about <name>" (kop_q_box_html(), js/questions-box.js): an empty hidden section
 # filled from kop/v1/questions/record when the page opens (the pages are cached whole), up to four questions linking to
 # /questions/#f<id>:<key> (#o<id>:<key>), which opens that record's questions with that one first
+# The data form's wizard (steps 1-2) and its full-form bar end with "Short on time? Answer a few questions instead"
+# (questionsLine() in data-wizard.js, URL from window.kopWizardConfig in inc/enqueue.php); for a picked facility or
+# company it links /questions/#find=<name>, which fills that page's search box
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php                         # questions, answers, agreement, every real record
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
 # Admin facility id boxes: always kop_facility_finder_field() (inc/facility-finder.php), never a bare id input

@@ -10,7 +10,7 @@
  * Answers go to kop/v1/questions/answer. After the first answer the page
  * offers, once and closed by default, an optional email for when the answers
  * have been checked (kop/v1/questions/notify); answering never needs one. #f<id> / #o<id> open a record's
- * questions; #f<id>:<key> and #q=<key> open them with that question first.
+ * questions; #f<id>:<key> and #q=<key> open them with that question first; #find=<name> searches for it.
  */
 (function () {
     'use strict';
@@ -543,6 +543,12 @@
 
     function fromHash() {
         var hash = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+        // #find=<name> (from the data form's "Short on time?" link): start a search for it.
+        if (hash.indexOf('find=') === 0) {
+            find.value = hash.slice(5);
+            find.dispatchEvent(new Event('input'));
+            return;
+        }
         // #f<id>, #f<id>:<question key> (from a facility or company page's questions), #q=<key>.
         var m = hash.match(/^(?:q=)?([fo])(\d+)(?:([.:])(.*))?$/);
         if (!m) return;

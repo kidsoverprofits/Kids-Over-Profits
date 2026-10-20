@@ -407,6 +407,44 @@ button.kop-wiz-link:focus {
     color: var(--kop-text-muted, #4A5568);
 }
 
+/* "Short on time?" link to /questions/ (steps 1-2 and under the full form's bar).
+   Kadence colours a and a:focus directly, so every state names its colour. */
+.kop-wiz-quick {
+    margin: 14px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--kop-border-primary, #CBD5E0);
+    font-size: 15px;
+    color: var(--kop-midnight, #000435);
+}
+
+.kop-wiz-slim + .kop-wiz-quick {
+    margin: 8px 0 0;
+    padding: 10px 14px;
+    border: 1px solid var(--kop-border-primary, #CBD5E0);
+    border-radius: 8px;
+    background: var(--kop-white, #FFFFFF);
+}
+
+a.kop-wiz-quick-link,
+a.kop-wiz-quick-link:visited,
+a.kop-wiz-quick-link:active {
+    color: var(--kop-navy, #000080);
+    background: transparent;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+a.kop-wiz-quick-link:hover,
+a.kop-wiz-quick-link:focus {
+    color: var(--kop-midnight, #000435);
+    background: transparent;
+}
+
+a.kop-wiz-quick-link:focus-visible {
+    outline: 3px solid var(--kop-teal, #33A7B5);
+    outline-offset: 2px;
+}
+
 /* ---- Editing bar --------------------------------------------------------- */
 
 .kop-wiz-more {

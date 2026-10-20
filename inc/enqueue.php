@@ -1573,6 +1573,8 @@ function enqueue_data_form_script() {
                 }
                 if (file_exists($wizard_js)) {
                     wp_enqueue_script('kop-data-wizard', get_stylesheet_directory_uri() . '/js/data-form/data-wizard.js', array('data-form-legacy', 'kop-data-toolbar-script'), filemtime($wizard_js), true);
+                    // "Short on time? Answer a few questions instead" links to /questions/.
+                    wp_add_inline_script('kop-data-wizard', 'window.kopWizardConfig = ' . wp_json_encode(array('questionsUrl' => home_url('/questions/'))) . ';', 'before');
                 }
             }
 

@@ -44,10 +44,18 @@ with sync_playwright() as p:
         time.sleep(0.5)
         print(" hits aspen:", pg.eval_on_selector_all(".kop-wiz-hit", "els => els.map(e => e.innerText.replace(/\\s+/g,' '))")[:6])
         pg.screenshot(path=OUT + f"wiz-find-{width}.png", full_page=False)
+        quick = pg.get_attribute(".kop-wiz-quick-link", "href")
+        print(" questions link (find):", quick)
+        if not quick or not quick.endswith("/questions/"):
+            errors.append(f"{width}: find step's questions link is {quick!r}")
         pg.fill("#kop-wiz-q", "turn-about")
         time.sleep(0.4)
         pg.click(".kop-wiz-hit >> nth=0")
         pg.screenshot(path=OUT + f"wiz-topics-{width}.png", full_page=False)
+        quick = pg.get_attribute(".kop-wiz-quick-link", "href")
+        print(" questions link (topics):", quick)
+        if not quick or "/questions/#find=" not in quick:
+            errors.append(f"{width}: topics step's questions link is {quick!r}")
         pg.check(".kop-wiz-topic input[value=staff]")
         pg.check(".kop-wiz-topic input[value=dates]")
         pg.click("button[data-act=go]")

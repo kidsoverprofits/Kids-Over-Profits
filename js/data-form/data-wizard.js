@@ -14,7 +14,9 @@
  * submitSuggestion() -> api/save-suggestion.php unchanged. "Show every field"
  * drops back to the full form. Body classes: kop-wiz-pick (steps 1-2),
  * kop-wiz-focus (step 3), neither (full form). ?find=<name> starts a search,
- * ?full=1 opens the full form.
+ * ?full=1 opens the full form. Steps 1-2 and the full form's bar link to
+ * /questions/ ("Short on time?"); for a known facility or company the link
+ * carries #find=<name>, which opens that page's search on it.
  */
 (function () {
     'use strict';
@@ -142,6 +144,16 @@
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // /questions/ asks about facilities and companies only (inc/questions.php).
+    const QUESTIONS_URL = (window.kopWizardConfig && window.kopWizardConfig.questionsUrl) || '/questions/';
+
+    function questionsLine(t) {
+        const named = t && !t.isNew && t.name && (t.type === 'facility' || t.type === 'company');
+        const href = QUESTIONS_URL + (named ? '#find=' + encodeURIComponent(t.name) : '');
+        const what = named ? `a few questions about ${esc(t.name)}` : 'a few questions';
+        return `<p class="kop-wiz-quick">Short on time? <a class="kop-wiz-quick-link" href="${esc(href)}">Answer ${what} instead</a>: one tap each, about what our records are missing.</p>`;
     }
 
     function icon(name) {
@@ -426,6 +438,7 @@
                     You do not need to know everything about it. One fact and where you learned it is a real help.
                     <button type="button" class="kop-wiz-link" data-act="full">Show the full form instead</button>
                 </p>
+                ${questionsLine(null)}
             </section>`;
 
         const input = root.querySelector('#kop-wiz-q');
@@ -570,6 +583,7 @@
                     <button type="button" class="kop-wiz-btn kop-wiz-primary" data-act="go">Continue</button>
                     <button type="button" class="kop-wiz-btn" data-act="go-all">Show every field</button>
                 </div>
+                ${questionsLine(t)}
             </section>`;
 
         root.querySelectorAll('.kop-wiz-topic input').forEach((box) => {
@@ -658,7 +672,8 @@
             <div class="kop-wiz-slim">
                 <span>You are using the full form.</span>
                 <button type="button" class="kop-wiz-btn" data-act="guided">Use the guided form instead</button>
-            </div>`;
+            </div>
+            ${questionsLine(null)}`;
         root.querySelector('[data-act="guided"]').addEventListener('click', restart);
     }
 
