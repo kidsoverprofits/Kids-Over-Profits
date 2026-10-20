@@ -242,10 +242,28 @@ if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_r
     echo "-- The waiting queue settled again (rolled back) --\n";
     $before = $pdo->query("SELECT id, program_name, location, status, facility_id FROM facility_closure_reports WHERE status IN ('pending','unmatched')")->fetchAll(PDO::FETCH_ASSOC);
     $pdo->beginTransaction();
+    // As an earlier, looser pass left them on the live site: a generic name
+    // and a closure of an Open record put away as already recorded, and one
+    // the owner marked by hand, which stays.
+    $planted = array();
+    foreach (array(array('girls program', 'already'), array('Sequel Pompano Youth Treatment Center', 'already')) as $p) {
+        $id = $pdo->query('SELECT r.id FROM facility_closure_reports r WHERE r.program_name = ' . $pdo->quote($p[0]) . ' AND r.reviewed_at IS NULL ORDER BY r.id LIMIT 1')->fetchColumn();
+        if ($id) {
+            $pdo->exec("UPDATE facility_closure_reports SET status = '{$p[1]}' WHERE id = " . (int) $id);
+            $planted[$p[0]] = (int) $id;
+        }
+    }
+    $hand = (int) $pdo->query("SELECT id FROM facility_closure_reports WHERE status = 'duplicate' AND reviewed_at IS NOT NULL ORDER BY id LIMIT 1")->fetchColumn();
     $moved = kop_closure_resettle_open($pdo);
     $after = array();
     foreach ($pdo->query('SELECT id, status, facility_id FROM facility_closure_reports') as $r) $after[(int) $r['id']] = $r;
     $pdo->rollBack();
+    if (isset($planted['girls program'])) $check('"girls program" put away as already is vague now', $after[$planted['girls program']]['status'] === 'vague', $after[$planted['girls program']]['status']);
+    if (isset($planted['Sequel Pompano Youth Treatment Center'])) {
+        $a = $after[$planted['Sequel Pompano Youth Treatment Center']];
+        $check('a closure of an Open record put away as already waits again', in_array($a['status'], array('pending', 'duplicate'), true), $a['status'] . ' #' . $a['facility_id']);
+    }
+    if ($hand) $check('a status the owner gave is left alone', $after[$hand]['status'] === 'duplicate');
     printf("  %d waiting before, moved: %s\n", count($before), json_encode($moved));
     $by = array();
     foreach ($before as $r) {

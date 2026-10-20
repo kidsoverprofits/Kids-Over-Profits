@@ -633,9 +633,11 @@ function kop_closure_settle_report(PDO $pdo, array $report, $published, &$alias_
 }
 
 /**
- * Settle the stored reports still waiting again, with today's rules and
- * records: the queue as it stood before 2026-10-20 held generic names and
- * programs the records already had as closed under another spelling. Oldest
+ * Settle the stored reports again, with today's rules and records: the
+ * queue as it stood before 2026-10-20 held generic names and programs the
+ * records already had as closed under another spelling. Every status the
+ * scan set itself (waiting, already, duplicate, old, vague), never one the
+ * owner gave (reviewed_at), so a looser earlier match is undone too. Oldest
  * first, so the first report of a change stays and later ones are its
  * duplicates. Returns [status => count] of the rows that moved.
  */
@@ -645,7 +647,8 @@ function kop_closure_resettle_open(PDO $pdo) {
     $set = $pdo->prepare('UPDATE facility_closure_reports SET facility_id = ?, status = ? WHERE id = ? AND status = ?');
     $rows = $pdo->query("SELECT r.id, r.news_id, r.program_name, r.location, r.facility_id, r.stage, r.target_status, r.closure_date, r.status, n.publication_date
                            FROM facility_closure_reports r LEFT JOIN news_submissions n ON n.id = r.news_id
-                          WHERE r.status IN ('pending','unmatched') ORDER BY r.id")->fetchAll(PDO::FETCH_ASSOC);
+                          WHERE r.status IN ('pending','unmatched','already','duplicate','old','vague')
+                            AND r.reviewed_at IS NULL ORDER BY r.id")->fetchAll(PDO::FETCH_ASSOC);
     $linked = $pdo->prepare('SELECT 1 FROM news_facility_links WHERE news_id = ? AND facility_id = ?');
     foreach ($rows as $r) {
         // The model only picks among the article's own links: a stored id that
@@ -997,10 +1000,11 @@ function kop_closure_scan_cron() {
             return;
         }
         // The queue as it stood before the 2026-10-20 rules, settled again once
-        // ('b': the name match no longer counts "youth" or "systems").
-        if (get_option('kop_closure_resettled') !== '2026-10-20b') {
+        // ('b': the name match no longer counts "youth" or "systems"; 'c': rows
+        // an earlier pass moved out of the queue are settled again too).
+        if (get_option('kop_closure_resettled') !== '2026-10-20c') {
             $moved = kop_closure_resettle_open($pdo);
-            update_option('kop_closure_resettled', '2026-10-20b', false);
+            update_option('kop_closure_resettled', '2026-10-20c', false);
             error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at
