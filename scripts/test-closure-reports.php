@@ -197,5 +197,59 @@ $nodes = array(array('id' => 'a', 'facilityId' => 5, 'status' => 'open'), array(
 $check('apply writes only the listed facilities', kop_network_map_apply_status_overrides($nodes, array(5 => 'closed')) ===
     array(array('id' => 'a', 'facilityId' => 5, 'status' => 'closed'), array('id' => 'b', 'status' => '')));
 
+// ---------------------------------------------------------------------------
+echo "-- Names that name no program --\n";
+// From the queue as it stood on 2026-10-20: the first list was waiting for review.
+foreach (array('youth facility', 'mental health center', 'juvenile boot camps', 'Missouri boarding school', 'South Dakota boot camp',
+        'treatment center in Raeford', 'youth detention center', 'Group Home', "girls' boot camp at Plankinton",
+        'unlicensed Christian boarding school in Missouri', 'Massachusetts psychiatric hospital',
+        'adult day-care therapy and counseling center on 8th Avenue', 'Residential Charter School for Teen Mothers') as $n) {
+    $check("\"$n\" names no program", kop_closure_is_vague_name($n));
+}
+foreach (array('Sequel', 'Milestones', 'Ascent', 'Iowa Juvenile Home at Toledo', 'Plankinton Training School', 'Lincoln Hills School for Boys',
+        'Teen Mentor', 'Dundee Ranch', 'Paulding Regional Youth Detection Center', 'Bay County boot camp', 'CEDU', 'Straight Inc.',
+        'Academy at Ivy Ridge', 'Academy at Canyon Creek', 'Youth Center at Beloit', 'Youth Rehabilitation and Treatment Center in Geneva') as $n) {
+    $check("\"$n\" is a name", !kop_closure_is_vague_name($n));
+}
+$check('a state from "Macon, GA"', kop_closure_location_state('Macon, GA') === 'GA');
+$check('a state from "Grand Forks, North Dakota"', kop_closure_location_state('Grand Forks, North Dakota') === 'ND');
+$check('West Virginia is not Virginia', kop_closure_location_state('Wheeling, West Virginia') === 'WV');
+$check('"Costa Rica" names no state', kop_closure_location_state('Tárcoles de Garabito, Costa Rica') === '');
+
+echo "-- Old suspensions --\n";
+$check('a suspension in 2010 is old', kop_closure_classify_report(5, 'Open', 'Suspended', '2010-08-19') === 'old');
+$check('a suspension this month waits', kop_closure_classify_report(5, 'Open', 'Suspended', gmdate('Y-m')) === 'pending');
+$check('an old closure of an open record still waits (the record may be wrong)', kop_closure_classify_report(5, 'Open', 'Closed', '2005-03') === 'pending');
+$check('a Closed record is already recorded, suspended or not', kop_closure_classify_report(5, 'Closed', 'Suspended', '') === 'already');
+
+if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_reports'")->fetchColumn()) {
+    echo "-- The waiting queue settled again (rolled back) --\n";
+    $before = $pdo->query("SELECT id, program_name, location, status, facility_id FROM facility_closure_reports WHERE status IN ('pending','unmatched')")->fetchAll(PDO::FETCH_ASSOC);
+    $pdo->beginTransaction();
+    $moved = kop_closure_resettle_open($pdo);
+    $after = array();
+    foreach ($pdo->query('SELECT id, status, facility_id FROM facility_closure_reports') as $r) $after[(int) $r['id']] = $r;
+    $pdo->rollBack();
+    printf("  %d waiting before, moved: %s\n", count($before), json_encode($moved));
+    $by = array();
+    foreach ($before as $r) {
+        $a = $after[(int) $r['id']];
+        $by[$r['program_name']] = $a['status'] . ($a['facility_id'] ? ' #' . $a['facility_id'] : '');
+        if (getenv('KOP_SHOW')) printf("  %-10s -> %-10s %s (%s)%s\n", $r['status'], $a['status'], $r['program_name'], $r['location'], $a['facility_id'] ? ' #' . $a['facility_id'] : '');
+    }
+    $is = static function ($name, $status) use ($by) { return isset($by[$name]) && strpos($by[$name], $status) === 0; };
+    foreach (array('youth facility' => 'vague', 'Group Home' => 'vague', 'Dundee Ranch' => 'already', 'Ivy Ridge' => 'already',
+            'Five Oaks Achievement Center' => 'old') as $name => $want) {
+        if (isset($by[$name])) $check("\"$name\" now $want", $is($name, $want), $by[$name]);
+    }
+    foreach (array('Bay County boot camp' => '#9632', 'Eckerd wilderness camp in Ocala' => '#11165', 'Copper Lake youth prison' => '#10370',
+            'juvenile boot camps' => '#11207', 'Gulf Coast Youth Academy' => '#11116') as $name => $wrong) {
+        if (isset($by[$name])) $check("\"$name\" is not matched to $wrong", strpos($by[$name], $wrong) === false, $by[$name]);
+    }
+    $waiting = 0;
+    foreach ($after as $a) if (in_array($a['status'], kop_closure_open_statuses(), true)) $waiting++;
+    $check('the queue shrank', $waiting < count($before), "$waiting left of " . count($before));
+}
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

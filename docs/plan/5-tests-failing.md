@@ -22,6 +22,12 @@ main at 366c8d84, portable PHP 8.2 from windows.php.net).
   filed as closed become renames" (#10401 -> Bryce Canyon Academy, #11201 -> Okeechobee Youth Development Center) and
   "52 company records round-trip unchanged" (#500017 keyStaff.keyExecutives.0.personId missing on one side).
 - **test-facility-pages**: `scripts/test-facility-pages.php`, 2 checks on the 2026-10-20 mirror: "every seeded facility
+- **test-closure-reports**: 2 checks on the 2026-10-20 mirror, failing before the closure re-sort work too: "an untouched
+  rewrite changes nothing but the schema upgrade" (kop_closure_rewrite_period() on a real document) and "a closed or
+  rebranded name is never touched" (kop_network_map_status_overrides()).
+- **test-facility-discovery**: 3 checks on the 2026-10-20 mirror, failing before the vague-name rule too: "a genuinely
+  new name is not a near duplicate", "new programs from the dry run stay new", "no record already has its name key in
+  its state". Probably records created since the test's names were picked; check its names against the mirror.
   exists and cites pages" and "every tagged facility has a page" (11098, 12808, 14160 have no facilities_v2 row;
   merged or deleted since the seed). Data, not the page template.
 - **test-operator-pages**: `scripts/test-operator-pages.php`, "every drafted history names a company with a page":

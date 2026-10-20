@@ -40,7 +40,132 @@ function kop_closure_report_statuses() {
         'dismissed' => 'Dismissed',
         'already'   => 'Already recorded',
         'duplicate' => 'Duplicate',
+        'vague'     => 'No program named',
+        'old'       => 'Old news',
     );
+}
+
+/**
+ * Report statuses that wait for a person. 'vague' (the article gives no
+ * program's name: "youth facility", "Missouri boarding school") and 'old'
+ * (a suspension years ago) are kept for the record but never queued.
+ */
+function kop_closure_open_statuses() {
+    return array('pending', 'unmatched');
+}
+
+/**
+ * A suspension older than this many days is history, not news; so is an
+ * announced closing ('closing') older than KOP_CLOSURE_OLD_CLOSING_DAYS of a
+ * record that is still open (Lincoln Hills has been "closing" since 2018).
+ */
+define('KOP_CLOSURE_OLD_SUSPENSION_DAYS', 365);
+define('KOP_CLOSURE_OLD_CLOSING_DAYS', 730);
+
+/**
+ * Words that say what kind of place a program is and never which one. A
+ * report whose name is only these, stopwords and a state ("juvenile boot
+ * camps", "Group Home", "mental health center", "South Dakota boot camp")
+ * names no program. Narrower than discovery's genericAliasWords on purpose:
+ * "Milestones", "Ascent" and "Sequel" are real programs.
+ */
+function kop_closure_descriptor_words() {
+    static $words = null;
+    if ($words === null) {
+        $words = array_flip(preg_split('/\s+/', trim('
+            a an the of in at on for and to its their this that former controversial troubled embattled shuttered closed
+            unlicensed licensed private nonprofit for-profit christian religious faith based catholic state county city local regional
+            youth juvenile juveniles teen teens teenage teenaged adolescent adolescents child children childrens kid kids boy boys girl girls
+            young people adult adults women men mothers student students minors migrant
+            facility facilities center centers centre home homes group house houses program programs school schools academy academies
+            institute institution hospital hospitals clinic clinics unit units campus campuses shelter shelters camp camps boot ranch ranches
+            residential treatment mental health behavioral behavioural psychiatric therapy therapeutic counseling care day drug addiction
+            detention correctional corrections prison prisons jail jails reform training rehabilitation rehab services service development
+            boarding charter military style wilderness facility operator provider agency rtc rtf strtp
+            street avenue road ave st
+        ')));
+    }
+    return $words;
+}
+
+/** Lowercase US state names and two-letter codes => code. */
+function kop_closure_state_words() {
+    static $map = null;
+    if ($map === null) {
+        $map = array();
+        $states = array(
+            'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California', 'CO' => 'Colorado',
+            'CT' => 'Connecticut', 'DE' => 'Delaware', 'DC' => 'District of Columbia', 'FL' => 'Florida', 'GA' => 'Georgia',
+            'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
+            'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan',
+            'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+            'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York', 'NC' => 'North Carolina',
+            'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island',
+            'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont',
+            'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming',
+        );
+        foreach ($states as $code => $name) {
+            $map[strtolower($name)] = $code;
+            $map[strtolower($code)] = $code;
+        }
+    }
+    return $map;
+}
+
+/** The two-letter state a report's location names, or ''. */
+function kop_closure_location_state($location) {
+    $text = ' ' . kop_closure_norm($location) . ' ';
+    $names = kop_closure_state_words();
+    uksort($names, static function ($a, $b) { return strlen($b) - strlen($a); });   // West Virginia before Virginia
+    foreach ($names as $word => $code) {
+        if (strlen($word) === 2) {
+            // A code only as its own upper-case token ("Macon, GA"), never "in" or "me".
+            if (preg_match('/(^|[\s,])' . strtoupper($word) . '($|[\s,.])/', (string) $location)) return $code;
+        } elseif (strpos($text, ' ' . $word . ' ') !== false) {
+            return $code;
+        }
+    }
+    return '';
+}
+
+/**
+ * Does the report's name fail to name a program? True when nothing is left
+ * once descriptor words and stopwords are taken off, along with a trailing
+ * "in/at/near <place>" after words written in lower case ("treatment center
+ * in Raeford", "girls' boot camp at Plankinton"); or when only a state is
+ * left and the rest is lower case ("Missouri boarding school",
+ * "Massachusetts psychiatric hospital"). Words written as a title keep their
+ * place: "Academy at Ivy Ridge", "Youth Center at Beloit" and "Iowa Juvenile
+ * Home" are names.
+ */
+function kop_closure_is_vague_name($name) {
+    $name = trim((string) $name);
+    $head = preg_split('/\s+(?:in|at|near|outside|on)\s+/i', $name, 2)[0];
+    // A title: no word of three letters or more starts in lower case, but for the small ones.
+    if ($head !== $name && !preg_match('/(?<![\p{L}\'’])(?!(?:and|of|for|the)\b)[a-z]{3,}/u', $head)) {
+        $head = $name;
+    }
+    $words = array_values(array_filter(explode(' ', kop_closure_norm(str_replace(array("'", '’'), '', $head))), 'strlen'));
+    if (!$words) return true;
+    $descriptors = kop_closure_descriptor_words();
+    $states = kop_closure_state_words();
+    $left = array();
+    foreach ($words as $w) {
+        if (isset($descriptors[$w]) || preg_match('/^\d+(st|nd|rd|th)?$/', $w)) continue;
+        $left[] = $w;
+    }
+    if (!$left) return true;
+    $rest = trim(preg_replace('/\s+/', ' ', ' ' . implode(' ', $left) . ' '));
+    foreach (array_keys($states) as $s) {
+        if (strlen($s) > 2) $rest = trim(str_replace(' ' . $s . ' ', ' ', ' ' . $rest . ' '));
+    }
+    if ($rest !== '') return false;
+    // Only a state is left: a name when its other words are capitalised.
+    preg_match_all('/[A-Za-z]+/', $head, $m);
+    foreach ($m[0] as $w) {
+        if (isset($descriptors[strtolower($w)]) && strlen($w) > 3 && ctype_lower($w[0])) return true;
+    }
+    return false;
 }
 
 /**
@@ -53,11 +178,125 @@ function kop_closure_report_stages($mode = 'all') {
     return kop_choices('closure-stages', null, $mode);
 }
 
-function kop_closure_classify_report($facility_id, $current_status, $target_status) {
+/**
+ * $reported: the closure date the article gives, else its publication date
+ * ('YYYY', 'YYYY-MM' or 'YYYY-MM-DD'; '' when neither is known). Only used to
+ * set a suspension long past aside.
+ */
+function kop_closure_classify_report($facility_id, $current_status, $target_status, $reported = '', $stage = '') {
     if (!$facility_id) {
         return 'unmatched';
     }
-    return $current_status === 'Closed' || $current_status === $target_status ? 'already' : 'pending';
+    if ($current_status === 'Closed' || $current_status === $target_status) {
+        return 'already';
+    }
+    if ($target_status === 'Suspended' && kop_closure_days_ago($reported) > KOP_CLOSURE_OLD_SUSPENSION_DAYS) {
+        return 'old';
+    }
+    if ($stage === 'closing' && kop_closure_days_ago($reported) > KOP_CLOSURE_OLD_CLOSING_DAYS) {
+        return 'old';
+    }
+    return 'pending';
+}
+
+/** Days since a 'YYYY[-MM[-DD]]' date (its last day for a year or month), or -1. */
+function kop_closure_days_ago($date) {
+    $date = trim((string) $date);
+    if (!preg_match('/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/', $date, $m)) {
+        return -1;
+    }
+    $y = (int) $m[1];
+    $mo = isset($m[2]) && $m[2] !== '' ? (int) $m[2] : 12;
+    $d = isset($m[3]) && $m[3] !== '' ? (int) $m[3] : (int) gmdate('t', gmmktime(0, 0, 0, $mo, 1, $y));
+    $ts = gmmktime(0, 0, 0, $mo, $d, $y);
+    return $ts ? (int) floor((time() - $ts) / 86400) : -1;
+}
+
+/**
+ * Facilities a report's name may mean when it matches no name exactly: a
+ * record whose name (or another name) holds every distinctive word of the
+ * report's, or whose distinctive words all appear in the report's
+ * ("Dundee Ranch" -> Academy at Dundee Ranch, "Ivy Ridge" -> Academy at Ivy
+ * Ridge, "Straight Inc." in Tampa Bay -> Straight – Tampa Bay). Kept to the
+ * report's state when it names one. Returns [id => status].
+ */
+function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias_index) {
+    static $facilities = null;
+    if ($facilities === null) {
+        $facilities = array();
+        foreach ($pdo->query('SELECT id, state, status FROM facilities_v2') as $f) {
+            $facilities[(int) $f['id']] = array('state' => strtoupper(trim((string) $f['state'])), 'status' => (string) $f['status']);
+        }
+    }
+    // A name's words split in two: what kind of place it is, and the rest.
+    // Lake, Hills, Ridge stay distinctive here ("Copper Lake" is not "Copper
+    // Hills"), unlike kop_news_stopwords().
+    $descriptors = kop_closure_descriptor_words();
+    $states = kop_closure_state_words();
+    $split = static function ($text) use ($descriptors, $states) {
+        $distinct = array();
+        $kind = array();
+        foreach (explode(' ', kop_normalize_name_key($text)) as $t) {
+            if ($t === '' || ctype_digit($t) || in_array($t, array('inc', 'llc', 'ltd', 'corp', 'co', 'formerly', 'former'), true)) continue;
+            if (isset($descriptors[$t])) {
+                $kind[rtrim($t, 's')] = true;
+            } elseif (strlen($t) >= 3 && !isset($states[$t])) {
+                $distinct[$t] = true;
+            }
+        }
+        return array($distinct, $kind);
+    };
+    list($mine, $my_kind) = $split(preg_split('/\s+(?:in|at|near)\s+/i', (string) $program, 2)[0]);
+    if (!$mine) {
+        return array();
+    }
+    $place = array_flip(explode(' ', kop_normalize_name_key((string) $location)));
+    $state = kop_closure_location_state($location);
+    $out = array('loose' => array(), 'strict' => array());
+    foreach ($alias_index['exact'] ?? array() as $key => $fid) {
+        $fid = (int) $fid;
+        if (!isset($facilities[$fid])) continue;
+        if ($state !== '' && $facilities[$fid]['state'] !== '' && $facilities[$fid]['state'] !== $state) continue;
+        list($theirs, $their_kind) = $split((string) $key);
+        // Loose: every distinctive word of the report's name is in the record's.
+        if (array_diff_key($mine, $theirs)) continue;
+        // "Gulf Coast Youth Academy" is not "Gulf Coast Treatment Center".
+        if ($my_kind && $their_kind && !array_intersect_key($my_kind, $their_kind)) continue;
+        // One distinctive word is a weak match: it needs the same kind of
+        // place too ("Bay County boot camp" is not Straight – Tampa Bay,
+        // "Eckerd wilderness camp" not Eckerd Connects E-Nini-Hassee).
+        if (count($mine) === 1 && $my_kind && !array_intersect_key($my_kind, $their_kind)) continue;
+        $out['loose'][$fid] = $facilities[$fid]['status'];
+        // Strict: the record's other words are the report's place ("Straight
+        // Inc." in Tampa Bay -> Straight – Tampa Bay). Confirmed by a shared
+        // kind of place or the same state, or it is only a guess.
+        if (!array_diff_key(array_diff_key($theirs, $mine), $place)) {
+            $confirmed = ($my_kind && array_intersect_key($my_kind, $their_kind)) || ($state !== '' && $facilities[$fid]['state'] === $state);
+            $out['strict'][$fid] = !empty($out['strict'][$fid]) || $confirmed;
+        }
+    }
+    return $out;
+}
+
+/**
+ * The record a report's name means by kop_closure_name_candidates(), or 0:
+ * the only loose match; else the only strict one, when confirmed. Several
+ * matches that are all Closed (or already at the report's status) return the
+ * first, so the report is filed as already recorded.
+ */
+function kop_closure_pick_candidate(array $cands, $target_status) {
+    $loose = $cands['loose'] ?? array();
+    if (count($loose) === 1) {
+        return (int) array_key_first($loose);
+    }
+    $strict = $cands['strict'] ?? array();
+    if (count($strict) === 1 && reset($strict)) {
+        return (int) array_key_first($strict);
+    }
+    $done = array_filter($loose, static function ($s) use ($target_status) {
+        return $s === 'Closed' || $s === $target_status;
+    });
+    return $loose && count($done) === count($loose) ? (int) array_key_first($loose) : 0;
 }
 
 /** The records DB (news_submissions lives there, not in $wpdb on prod). */
@@ -221,6 +460,7 @@ function kop_closure_build_prompt(array $news, array $linked, $text) {
     $p .= "- one unit, wing, campus building or service closing while the program stays open;\n";
     $p .= "- a program renamed or sold that kept operating under a new name;\n";
     $p .= "- companies, agencies, bank branches and anything that is not a youth program. When a company closed its programs, list each program the article names.\n";
+    $p .= "- a program the article does not name (\"a youth facility\", \"the group home\", \"Missouri boarding school\"): program is always the name the article gives it.\n";
     $p .= "facilityId: the id from the list above when the program is one of them, otherwise null. Never guess an id.\n";
     $p .= "If the article reports no closure, return {\"closures\":[]}.\n";
     return $p;
@@ -322,6 +562,99 @@ function kop_closure_resolve_facility(PDO $pdo, array $report, &$alias_index) {
 }
 
 /**
+ * Where a report goes: array(facility_id|null, status, current facility
+ * status|null). In order: the exact name (or the article's own link); else
+ * the looser name match, taken when it finds one record, or several that are
+ * all already Closed; else 'vague' when the name names no program. A matched
+ * one is 'already' when the record says so, 'old' for a suspension long past,
+ * and 'duplicate' when the same change to the same facility is already
+ * waiting, or was dismissed from an article at least as recent.
+ *
+ * $report: program, location, facility_id, target_status, date; $published:
+ * the article's publication date; $id: the report's own row when settling
+ * one that is stored (so it is not its own duplicate).
+ */
+function kop_closure_settle_report(PDO $pdo, array $report, $published, &$alias_index, $id = 0) {
+    // "Embark Behavioral Health (formerly Shelterwood Academy)": the program
+    // that closed is the former one, whatever id the model picked.
+    if (preg_match('/\(\s*(?:formerly|previously|once)\s+([^()]+)\)\s*$/i', (string) $report['program'], $m)) {
+        $report['program'] = trim($m[1]);
+        $report['facility_id'] = null;
+    }
+    if (kop_closure_is_vague_name($report['program'])) {
+        return array(null, 'vague', null);
+    }
+    $fid = kop_closure_resolve_facility($pdo, $report, $alias_index);
+    $current = null;
+    $status_of = static function ($fid) use ($pdo) {
+        $stmt = $pdo->prepare('SELECT status FROM facilities_v2 WHERE id = ?');
+        $stmt->execute(array((int) $fid));
+        $s = $stmt->fetchColumn();
+        return $s === false ? null : (string) $s;
+    };
+    if (!$fid) {
+        $fid = kop_closure_pick_candidate(
+            kop_closure_name_candidates($pdo, $report['program'], $report['location'] ?? '', $alias_index),
+            $report['target_status']
+        ) ?: null;
+    }
+    if (!$fid) {
+        return array(null, 'unmatched', null);
+    }
+    $current = $status_of($fid);
+    $reported = ($report['date'] ?? '') !== '' ? $report['date'] : (string) $published;
+    $status = kop_closure_classify_report($fid, $current, $report['target_status'], $reported, (string) ($report['stage'] ?? ''));
+    if ($status === 'pending') {
+        $waiting = $pdo->prepare("SELECT COUNT(*) FROM facility_closure_reports
+                                   WHERE facility_id = ? AND target_status = ? AND status = 'pending' AND id <> ?");
+        $waiting->execute(array($fid, $report['target_status'], (int) $id));
+        if ((int) $waiting->fetchColumn() > 0) {
+            $status = 'duplicate';
+        } else {
+            $dismissed = $pdo->prepare("SELECT n.publication_date FROM facility_closure_reports r
+                                     LEFT JOIN news_submissions n ON n.id = r.news_id
+                                         WHERE r.facility_id = ? AND r.target_status = ? AND r.status = 'dismissed' AND r.id <> ?");
+            $dismissed->execute(array($fid, $report['target_status'], (int) $id));
+            foreach ($dismissed->fetchAll(PDO::FETCH_COLUMN) as $then) {
+                // Not newer news than a report the owner already turned down.
+                if ((string) $published === '' || ((string) $then !== '' && strcmp((string) $then, (string) $published) >= 0)) {
+                    $status = 'duplicate';
+                    break;
+                }
+            }
+        }
+    }
+    return array($fid, $status, $current);
+}
+
+/**
+ * Settle the stored reports still waiting again, with today's rules and
+ * records: the queue as it stood before 2026-10-20 held generic names and
+ * programs the records already had as closed under another spelling. Oldest
+ * first, so the first report of a change stays and later ones are its
+ * duplicates. Returns [status => count] of the rows that moved.
+ */
+function kop_closure_resettle_open(PDO $pdo) {
+    $alias_index = null;
+    $moved = array();
+    $set = $pdo->prepare('UPDATE facility_closure_reports SET facility_id = ?, status = ? WHERE id = ? AND status = ?');
+    $rows = $pdo->query("SELECT r.id, r.program_name, r.location, r.facility_id, r.stage, r.target_status, r.closure_date, r.status, n.publication_date
+                           FROM facility_closure_reports r LEFT JOIN news_submissions n ON n.id = r.news_id
+                          WHERE r.status IN ('pending','unmatched') ORDER BY r.id")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $r) {
+        list($fid, $status) = kop_closure_settle_report($pdo, array(
+            'program' => $r['program_name'], 'location' => (string) $r['location'],
+            'facility_id' => $r['facility_id'] !== null ? (int) $r['facility_id'] : null,
+            'stage' => $r['stage'], 'target_status' => $r['target_status'], 'date' => (string) $r['closure_date'],
+        ), (string) $r['publication_date'], $alias_index, (int) $r['id']);
+        if ($status === $r['status'] && (int) $fid === (int) $r['facility_id']) continue;
+        $set->execute(array($fid, $status, (int) $r['id'], $r['status']));
+        $moved[$status] = ($moved[$status] ?? 0) + 1;
+    }
+    return $moved;
+}
+
+/**
  * An article's text for a Groq prompt, or '' when it cannot be fetched.
  * Groq's free tier counts tokens per minute, and what the scans look for is
  * nearly always in the opening paragraphs, so it is cut at $max bytes.
@@ -388,16 +721,10 @@ function kop_closure_scan_article(PDO $pdo, array $news, $write, &$alias_index) 
     $stages = kop_closure_report_stages();
     $haystack = $text . ' ' . $news['article_title'] . ' ' . $news['summary'];
     foreach ($reports as &$r) {
-        $r['facility_id'] = kop_closure_resolve_facility($pdo, $r, $alias_index);
         $r['target_status'] = $stages[$r['stage']]['status'];
         $r['quote_found'] = kop_closure_quote_found($r['quote'], $haystack);
-        $r['current_status'] = null;
-        if ($r['facility_id']) {
-            $stmt = $pdo->prepare('SELECT status FROM facilities_v2 WHERE id = ?');
-            $stmt->execute(array($r['facility_id']));
-            $r['current_status'] = $stmt->fetchColumn() ?: null;
-        }
-        $r['report_status'] = kop_closure_classify_report($r['facility_id'], $r['current_status'], $r['target_status']);
+        list($r['facility_id'], $r['report_status'], $r['current_status']) =
+            kop_closure_settle_report($pdo, $r, (string) ($news['publication_date'] ?? ''), $alias_index);
     }
     unset($r);
 
@@ -655,6 +982,12 @@ function kop_closure_scan_cron() {
         $pdo = kop_closure_pdo();
         if (!$pdo) {
             return;
+        }
+        // The queue as it stood before the 2026-10-20 rules, settled again once.
+        if (get_option('kop_closure_resettled') !== '2026-10-20') {
+            $moved = kop_closure_resettle_open($pdo);
+            update_option('kop_closure_resettled', '2026-10-20', false);
+            error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at
         // many; Groq calls are what the time budget is for.

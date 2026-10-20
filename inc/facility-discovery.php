@@ -716,6 +716,13 @@ function kop_facdisc_apply_entry(PDO $pdo, array $entry, array $news, $write) {
         $decision = 'not_facility';
         $fid = null;
         $detail['entry']['by'] = 'place name';
+    } elseif ($entry['kind'] === 'facility' && function_exists('kop_closure_is_vague_name')
+        && kop_closure_is_vague_name(($entry['officialName'] ?? '') !== '' ? $entry['officialName'] : $entry['name'])) {
+        // "youth treatment facility", "girls' boot camp at Plankinton": a
+        // description, not a program's name (inc/closure-reports.php).
+        $decision = 'not_facility';
+        $fid = null;
+        $detail['entry']['by'] = 'no program name';
     } elseif ($entry['kind'] === 'facility' && isset($entry['quoted']) && !$entry['quoted']) {
         // Not in the article it read: held for a person, with the record it looked like.
         $decision = 'unquoted';
@@ -870,7 +877,7 @@ function kop_facdisc_rematch_closure_reports(PDO $pdo) {
     $n = 0;
     $status = $pdo->prepare('SELECT status FROM facilities_v2 WHERE id = ?');
     $set = $pdo->prepare("UPDATE facility_closure_reports SET facility_id = ?, status = ? WHERE id = ? AND status = 'unmatched'");
-    foreach ($pdo->query("SELECT id, program_name, target_status FROM facility_closure_reports WHERE status = 'unmatched'")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+    foreach ($pdo->query("SELECT id, program_name, target_status, closure_date FROM facility_closure_reports WHERE status = 'unmatched'")->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $fid = kop_resolve_mention_to_facility($r['program_name'], $index);
         if ($fid === null) {
             continue;
@@ -880,7 +887,9 @@ function kop_facdisc_rematch_closure_reports(PDO $pdo) {
         if ($now === false) {
             continue;   // an operator project, not a facility
         }
-        $set->execute(array($fid, $now === $r['target_status'] ? 'already' : 'pending', (int) $r['id']));
+        $set->execute(array($fid, function_exists('kop_closure_classify_report')
+            ? kop_closure_classify_report($fid, $now, $r['target_status'], (string) $r['closure_date'])
+            : ($now === 'Closed' || $now === $r['target_status'] ? 'already' : 'pending'), (int) $r['id']));
         $n++;
     }
     return $n;

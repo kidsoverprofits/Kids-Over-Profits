@@ -75,7 +75,7 @@ function kop_rinbox_closure_filed(array $r) {
 }
 
 function kop_rinbox_closure_views() {
-    return array('pending' => 'To review', 'applied' => 'Confirmed', 'dismissed' => 'Dismissed', 'other' => 'Already recorded / duplicate', 'all' => 'All');
+    return array('pending' => 'To review', 'applied' => 'Confirmed', 'dismissed' => 'Dismissed', 'other' => 'Already recorded / duplicate / no program named', 'all' => 'All');
 }
 
 /** The SQL condition for one view. */
@@ -84,7 +84,7 @@ function kop_rinbox_closure_view_where($view) {
         'pending'   => "r.status IN ('pending','unmatched')",
         'applied'   => "r.status = 'applied'",
         'dismissed' => "r.status = 'dismissed'",
-        'other'     => "r.status IN ('already','duplicate')",
+        'other'     => "r.status IN ('already','duplicate','vague','old')",
         'all'       => '1=1',
     )[$view] ?? "r.status IN ('pending','unmatched')";
 }
@@ -114,7 +114,7 @@ function kop_rinbox_closure_view_counts(array $q = array()) {
         'pending'   => ($by['pending'] ?? 0) + ($by['unmatched'] ?? 0),
         'applied'   => $by['applied'] ?? 0,
         'dismissed' => $by['dismissed'] ?? 0,
-        'other'     => ($by['already'] ?? 0) + ($by['duplicate'] ?? 0),
+        'other'     => ($by['already'] ?? 0) + ($by['duplicate'] ?? 0) + ($by['vague'] ?? 0) + ($by['old'] ?? 0),
         'all'       => array_sum($by),
     );
 }
