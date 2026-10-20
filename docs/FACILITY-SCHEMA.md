@@ -46,6 +46,14 @@ inside each facility's JSON document, so no SQL columns are added.
 | `currentName` | string | The name the facility trades under now. Empty when it would only repeat `name`. |
 | `otherNames` | string[] | Other spellings and names in use at the same time. A plain duplicate merge adds the dropped record's name here; a State Lists link adds the listed name when ticked; a Data audit step can add one. |
 | `pastNames` | string[] | Earlier names. Legacy `previousNames` is merged in. A rename merge (KOP Tools > Merge Duplicates > Renamed programs) puts the earlier name here, never in `otherNames`; Woodbury Facts and a Data audit step can add one. |
+| `legalName` | string | The name on the program's state business filing ("CT Clinical Services, LLC"). Shown on the facility page as "Legal name" when it differs from `name`, and in the open data `legal_name` column. |
+| `dbaNames` | string[] | Trade names that filing registers (doing business as). Facility page "Doing business as"; open data `dba_names`. |
+| `registrants` | `{name, role}[]` | Who is named on the filing: registered agent, organizer, members and managers of an LLC, officers of a corporation. `name` can be a person or a company. Plus `{source, sourceUrl}` when given; an entry with no name is dropped (`kop_facility_registrant_list()`, JS `v2RegistrantList()`). Facility page "Registrants" as "Name (role)". |
+
+The three filing fields are written by the data forms (facility Identification section) and the facility page pencil's "Business filing" group (`inc/inline-edit.php`). Merges union the lists and fill an empty `legalName`.
+
+| Field | Type | Notes |
+|---|---|---|
 | `currentOperator` | string | |
 | `currentOwners` | string[] | Legacy single `currentOwner` is merged in. |
 | `otherOperators` | string[] | Was top-level `otherOperators`. |

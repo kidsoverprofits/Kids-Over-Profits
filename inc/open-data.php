@@ -163,6 +163,8 @@ function kop_open_data_datasets() {
                     'id'             => $id,
                     'name'           => (string) $row['name'],
                     'other_names'    => kop_open_data_names(array_merge((array) ($ident['otherNames'] ?? array()), (array) ($ident['pastNames'] ?? array()))),
+                    'legal_name'     => (string) ($ident['legalName'] ?? ''),
+                    'dba_names'      => kop_open_data_names((array) ($ident['dbaNames'] ?? array())),
                     'status'         => (string) $row['status'],
                     'facility_type'  => (string) $row['facility_type'],
                     'street'         => (string) ($loc['street'] ?? ''),

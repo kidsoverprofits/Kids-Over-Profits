@@ -718,6 +718,7 @@ if (!function_exists('kop_facility_blank_document')) {
             'identification' => array(
                 'name' => '', 'nameKey' => '', 'currentName' => '',
                 'otherNames' => array(), 'pastNames' => array(),
+                'legalName' => '', 'dbaNames' => array(), 'registrants' => array(),
                 'currentOperator' => '', 'currentOwners' => array(),
                 'otherOperators' => array(), 'pastOperators' => array(),
                 'knownReferrers' => array(), 'investors' => array(),
@@ -860,6 +861,12 @@ if (!function_exists('kop_facility_normalize')) {
             kop_facility_list($ident['previousNames'] ?? array())
         );
         $doc['identification']['pastNames'] = kop_facility_list($past_names);
+
+        // The name on its state business filing, the trade names that filing
+        // registers (doing business as), and who is named on it.
+        $doc['identification']['legalName'] = kop_facility_str($ident['legalName'] ?? '');
+        $doc['identification']['dbaNames'] = kop_facility_list($ident['dbaNames'] ?? array());
+        $doc['identification']['registrants'] = kop_facility_registrant_list($ident['registrants'] ?? array());
 
         $doc['identification']['currentOperator'] = kop_facility_str($ident['currentOperator'] ?? '');
 
@@ -1186,6 +1193,35 @@ if (!function_exists('kop_facility_person_list')) {
                 $entry = array('name' => kop_facility_str($item), 'role' => '', 'pastJobs' => '');
             }
             if ($entry['name'] === '' && $entry['role'] === '' && $entry['pastJobs'] === '') continue;
+            $out[] = $entry;
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_facility_registrant_list')) {
+    /**
+     * The people and companies named on the facility's state business filing
+     * (registered agent, organizer, members, managers, officers): {name, role},
+     * plus {source, sourceUrl} when given. A bare string is a name; an entry
+     * without a name is dropped. Mirrors v2RegistrantList() in
+     * js/data-form-modules/data-normalizer.js.
+     */
+    function kop_facility_registrant_list($value) {
+        $out = array();
+        foreach (kop_facility_list($value) as $item) {
+            if (is_array($item)) {
+                $entry = array(
+                    'name' => kop_facility_str($item['name'] ?? ''),
+                    'role' => kop_facility_str($item['role'] ?? ''),
+                );
+                foreach (array('source', 'sourceUrl') as $k) {
+                    if (kop_facility_str($item[$k] ?? '') !== '') $entry[$k] = kop_facility_str($item[$k]);
+                }
+            } else {
+                $entry = array('name' => kop_facility_str($item), 'role' => '');
+            }
+            if ($entry['name'] === '') continue;
             $out[] = $entry;
         }
         return $out;
@@ -1545,6 +1581,8 @@ if (!function_exists('kop_facility_validate')) {
         $lists = array(
             'identification.otherNames'   => $ident['otherNames'] ?? null,
             'identification.pastNames'    => $ident['pastNames'] ?? null,
+            'identification.dbaNames'     => $ident['dbaNames'] ?? null,
+            'identification.registrants'  => $ident['registrants'] ?? null,
             'identification.currentOwners' => $ident['currentOwners'] ?? null,
             'operatingPeriod.notes'       => $op['notes'] ?? null,
             'memberships'                 => $doc['memberships'] ?? null,
@@ -1721,6 +1759,9 @@ if (!function_exists('kop_facility_to_legacy')) {
                 'currentName'     => $ident['currentName'],
                 'otherNames'      => $ident['otherNames'],
                 'pastNames'       => $ident['pastNames'],
+                'legalName'       => $ident['legalName'] ?? '',
+                'dbaNames'        => $ident['dbaNames'] ?? array(),
+                'registrants'     => $ident['registrants'] ?? array(),
                 'currentOperator' => $ident['currentOperator'],
                 'currentOwner'    => $ident['currentOwners'] ? $ident['currentOwners'][0] : '',
                 'currentOwners'   => $ident['currentOwners'],

@@ -476,6 +476,12 @@ function kop_ie_facility_groups() {
             array('identification.pastNames', 'Past names', 'lines'),
             array('identification.otherNames', 'Also known as', 'lines'),
         )),
+        // The state business filing behind the program (inc/facility-store.php).
+        'filing' => array('Business filing', array(
+            array('identification.legalName', 'Legal name, as filed with the state', 'text'),
+            array('identification.dbaNames', 'Doing business as (one name a line)', 'lines'),
+            array('identification.registrants', 'Registrants (registered agent, organizer, members, managers, officers)', 'rows', array('columns' => array('name' => 'Person or company', 'role' => 'Role'))),
+        )),
         'status' => array('Status and years', array(
             array('operatingPeriod.status', 'Status', 'select', array('options' => array('Open', 'Closed', 'Suspended', 'Transferred', 'Unknown'))),
             array('operatingPeriod.startYear', 'Opened (year)', 'year'),

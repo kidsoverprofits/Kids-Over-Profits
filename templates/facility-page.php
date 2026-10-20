@@ -32,6 +32,7 @@ $kop_fp_fact_groups = array(
     'Type' => 'details', 'Serves' => 'details', 'Capacity' => 'details', 'Current census' => 'details', 'Ownership' => 'details',
     'Operated' => 'status',
     'Operator' => 'people', 'Owners' => 'people', 'Other operators' => 'people', 'Past operators' => 'people', 'Investors' => 'people', 'Known referrers' => 'people',
+    'Legal name' => 'filing', 'Doing business as' => 'filing', 'Registrants' => 'filing',
     'Accreditation' => 'credentials', 'Past accreditation' => 'credentials', 'Memberships' => 'credentials', 'Certifications' => 'credentials', 'Licensing' => 'credentials',
 );
 

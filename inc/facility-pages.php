@@ -2388,12 +2388,14 @@ if (!function_exists('kop_facility_page_signals')) {
         $ident = isset($doc['identification']) && is_array($doc['identification']) ? $doc['identification'] : array();
         $name = trim((string) ($ident['name'] ?? ''));
 
-        foreach (array('otherNames', 'pastNames', 'currentOwners', 'otherOperators', 'pastOperators', 'knownReferrers', 'investors') as $k) {
+        foreach (array('otherNames', 'pastNames', 'dbaNames', 'currentOwners', 'otherOperators', 'pastOperators', 'knownReferrers', 'investors') as $k) {
             if (kop_facility_pages_text_items($ident[$k] ?? null)) $s[] = 'identification.' . $k;
         }
         if (kop_facility_pages_has_value($ident['currentOperator'] ?? null)) $s[] = 'identification.currentOperator';
         $current = trim((string) ($ident['currentName'] ?? ''));
         if ($current !== '' && strcasecmp($current, $name) !== 0) $s[] = 'identification.currentName';
+        if (kop_facility_pages_has_value($ident['legalName'] ?? null)) $s[] = 'identification.legalName';
+        if (!empty($ident['registrants'])) $s[] = 'identification.registrants';
 
         $op = isset($doc['operatingPeriod']) && is_array($doc['operatingPeriod']) ? $doc['operatingPeriod'] : array();
         if (!empty($op['startYear'])) $s[] = 'operatingPeriod.startYear';
@@ -3214,6 +3216,17 @@ if (!function_exists('kop_facility_page_data')) {
         if (isset($fd['isPrivatelyOwned']) && $fd['isPrivatelyOwned'] !== null) {
             $add_fact('Ownership', $fd['isPrivatelyOwned'] ? 'Privately owned' : 'Publicly operated');
         }
+        // The state business filing: its legal name, trade names, and who is named on it.
+        $legal_name = trim((string) ($ident['legalName'] ?? ''));
+        $add_fact('Legal name', strcasecmp($legal_name, $name) === 0 ? '' : $legal_name);
+        $add_fact('Doing business as', kop_facility_pages_text_items($ident['dbaNames'] ?? null));
+        $registrants = array();
+        foreach ((array) ($ident['registrants'] ?? array()) as $r) {
+            $r_name = is_array($r) ? trim((string) ($r['name'] ?? '')) : trim((string) $r);
+            $r_role = is_array($r) ? trim((string) ($r['role'] ?? '')) : '';
+            if ($r_name !== '') $registrants[] = $r_role !== '' ? $r_name . ' (' . $r_role . ')' : $r_name;
+        }
+        $add_fact('Registrants', $registrants);
         $add_fact('Operator', $operator_name);
         $add_fact('Owners', kop_facility_pages_text_items($ident['currentOwners'] ?? null));
         $add_fact('Other operators', kop_facility_pages_text_items($ident['otherOperators'] ?? null));

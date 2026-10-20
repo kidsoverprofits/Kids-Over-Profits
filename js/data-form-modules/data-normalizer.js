@@ -397,7 +397,7 @@
 
                 // Ensure nested array fields are arrays
                 if (normalized.identification) {
-                    ['otherNames', 'pastNames', 'knownReferrers'].forEach(field => {
+                    ['otherNames', 'pastNames', 'dbaNames', 'registrants', 'knownReferrers'].forEach(field => {
                         if (normalized.identification[field] && !Array.isArray(normalized.identification[field])) {
                             if (typeof normalized.identification[field] === 'string') {
                                 normalized.identification[field] = [normalized.identification[field]];
@@ -1261,6 +1261,7 @@
             facility_id: null,
             identification: {
                 name: '', nameKey: '', currentName: '', otherNames: [], pastNames: [],
+                legalName: '', dbaNames: [], registrants: [],
                 currentOperator: '', currentOwners: [], otherOperators: [], pastOperators: [],
                 knownReferrers: [], investors: []
             },
@@ -1335,6 +1336,25 @@
                 entry = { name: v2Str(item), role: '', pastJobs: '' };
             }
             if (entry.name === '' && entry.role === '' && entry.pastJobs === '') return;
+            out.push(entry);
+        });
+        return out;
+    }
+
+    /** Who is named on the state business filing. Mirrors kop_facility_registrant_list(). */
+    function v2RegistrantList(value) {
+        const out = [];
+        v2List(value).forEach((item) => {
+            let entry;
+            if (item !== null && typeof item === 'object') {
+                entry = { name: v2Str(item.name), role: v2Str(item.role) };
+                ['source', 'sourceUrl'].forEach((k) => {
+                    if (v2Str(item[k]) !== '') entry[k] = v2Str(item[k]);
+                });
+            } else {
+                entry = { name: v2Str(item), role: '' };
+            }
+            if (entry.name === '') return;
             out.push(entry);
         });
         return out;
@@ -1540,6 +1560,11 @@
         if (doc.identification.currentName.toLowerCase() === name.toLowerCase()) doc.identification.currentName = '';
         doc.identification.otherNames = v2List(ident.otherNames);
         doc.identification.pastNames = v2List(v2List(ident.pastNames).concat(v2List(ident.previousNames)));
+        // The name on its state business filing, the trade names that filing
+        // registers (doing business as), and who is named on it.
+        doc.identification.legalName = v2Str(ident.legalName);
+        doc.identification.dbaNames = v2List(ident.dbaNames);
+        doc.identification.registrants = v2RegistrantList(ident.registrants);
         doc.identification.currentOperator = v2Str(ident.currentOperator);
         const owners = v2List(ident.currentOwners);
         const singleOwner = v2Str(ident.currentOwner);
@@ -1779,6 +1804,9 @@
                 currentName: ident.currentName || '',
                 otherNames: ident.otherNames || [],
                 pastNames: ident.pastNames || [],
+                legalName: ident.legalName || '',
+                dbaNames: ident.dbaNames || [],
+                registrants: ident.registrants || [],
                 currentOperator: ident.currentOperator || '',
                 currentOwner: (ident.currentOwners && ident.currentOwners[0]) || '',
                 currentOwners: ident.currentOwners || [],

@@ -700,7 +700,7 @@ function loadFacilityData() {
     const facilityType = document.getElementById('facility-type');
     if (facilityType) facilityType.value = facility.facilityDetails?.type || '';
 
-    const arrayPaths = ['identification.otherNames', 'identification.knownReferrers', 'otherOperators', 'operatingPeriod.notes', 'staff.administrator', 'staff.notableStaff', 'staff.pastTTIJobs', 'profileLinks', 'accreditations.current', 'accreditations.past', 'memberships', 'certifications', 'licensing', 'resources.notes', 'notes', 'locationDetails.additionalLocations', 'locationDetails.formerLocations',
+    const arrayPaths = ['identification.otherNames', 'identification.dbaNames', 'identification.registrants', 'identification.knownReferrers', 'otherOperators', 'operatingPeriod.notes', 'staff.administrator', 'staff.notableStaff', 'staff.pastTTIJobs', 'profileLinks', 'accreditations.current', 'accreditations.past', 'memberships', 'certifications', 'licensing', 'resources.notes', 'notes', 'locationDetails.additionalLocations', 'locationDetails.formerLocations',
         // Mental health provider lists; renderArray skips them outside the providers view.
         'providerDetails.otherCareTypes', 'providerDetails.otherTtiPractices', 'providerDetails.ttiReferrals', 'providerDetails.transportersUsed', 'providerDetails.ttiAffiliations'];
     arrayPaths.forEach(path => {

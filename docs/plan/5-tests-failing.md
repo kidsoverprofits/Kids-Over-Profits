@@ -16,3 +16,5 @@ Each predates the work that found it; fix the test or the code.
 - **test-woodbury-facts**: `scripts/test-woodbury-facts.php`, "every staff entry added or filled names its source and link" (4 without).
 - **test-fornits**: `scripts/test-fornits.php`, "every link added" finds 11 records missing (#13972, #11097, #10333, #13795, #10496,
   #100048 ...): check `kop_fmerge_follow_waiting()` moved the waiting rows.
+- **test-mobile-api**: `scripts/test-mobile-api.php`, "facility 9607 library files are {id, title, url, ext, mime, size,
+  thumb}": the document types commit (6165d1bd) added `types` to each file; the check predates it.

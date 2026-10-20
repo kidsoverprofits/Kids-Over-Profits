@@ -605,6 +605,8 @@
 
             const isPastTTIJobs = /pastTTIJobs$/.test(path);
             const isStaffRoleName = /^staff\./.test(path) || /^operator\.keyStaff\./.test(path);
+            // Who is named on the state business filing: {role, name}, no details box.
+            const isRegistrant = /identification\.registrants$/.test(path);
             const isAdditionalLocation = /locationDetails\.additionalLocations$/.test(path);
             const isFormerLocation = /locationDetails\.formerLocations$/.test(path);
 
@@ -626,7 +628,7 @@
             if (data.length === 0) {
                 if (isPastTTIJobs) {
                     data.push({ role: '', employer: '', organization: '' });
-                } else if (isStaffRoleName) {
+                } else if (isStaffRoleName || isRegistrant) {
                     data.push({ role: '', name: '' });
                 } else if (isAdditionalLocation) {
                     data.push({ address: '', city: '', state: '', zip: '' });
@@ -681,6 +683,37 @@
 
                     row.appendChild(roleInp);
                     row.appendChild(employerInp);
+                } else if (isRegistrant) {
+                    let normalized = item;
+                    if (typeof normalized !== 'object' || normalized === null) {
+                        normalized = { role: '', name: typeof item === 'string' ? item : '' };
+                        data[index] = normalized;
+                    }
+                    const setField = (key, value) => {
+                        if (typeof window.updateArrayObjectItemValue === 'function') {
+                            window.updateArrayObjectItemValue(path, index, key, value);
+                        } else {
+                            normalized[key] = value;
+                            if (window.updateJSON) window.updateJSON();
+                        }
+                    };
+
+                    const roleInp = document.createElement('textarea');
+                    roleInp.rows = 1;
+                    roleInp.className = 'array-input array-input-role';
+                    roleInp.placeholder = 'Role (registered agent, organizer, member, manager)';
+                    roleInp.value = normalized.role || '';
+                    roleInp.oninput = (e) => setField('role', e.target.value);
+
+                    const nameInp = document.createElement('textarea');
+                    nameInp.rows = 1;
+                    nameInp.className = 'array-input array-input-name';
+                    nameInp.placeholder = 'Person or company';
+                    nameInp.value = normalized.name || '';
+                    nameInp.oninput = (e) => setField('name', e.target.value);
+
+                    row.appendChild(roleInp);
+                    row.appendChild(nameInp);
                 } else if (isStaffRoleName) {
                     let normalized = item;
                     if (typeof normalized !== 'object' || normalized === null) {
@@ -1112,7 +1145,7 @@
                             employer: employerVal,
                             organization: employerVal
                         };
-                    } else if (isStaffRoleName) {
+                    } else if (isStaffRoleName || isRegistrant) {
                         const existing = (typeof liveArray[rowIndex] === 'object' && liveArray[rowIndex] !== null)
                             ? liveArray[rowIndex] : {};
                         liveArray[rowIndex] = {
@@ -1135,7 +1168,7 @@
                 const liveArray = resolveLiveArray() || data;
                 if (isPastTTIJobs) {
                     liveArray.push({ role: '', employer: '', organization: '' });
-                } else if (isStaffRoleName) {
+                } else if (isStaffRoleName || isRegistrant) {
                     liveArray.push({ role: '', name: '' });
                 } else if (isAdditionalLocation) {
                     liveArray.push({ address: '', city: '', state: '', zip: '' });

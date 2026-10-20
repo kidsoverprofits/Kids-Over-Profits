@@ -957,6 +957,21 @@ get_header();
                         <input type="text" class="facility-field" data-field="identification.currentName" data-autocomplete-category="facility">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Legal Name (as filed with the state)</label>
+                        <input type="text" class="facility-field" data-field="identification.legalName" placeholder="e.g. CT Clinical Services, LLC">
+                    </div>
+                    <div class="form-group">
+                        <label>Doing Business As (DBA)</label>
+                        <div class="array-container" data-path="identification.dbaNames"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Registrants (who is named on the business filing)</label>
+                    <div style="color: #4A5568; font-size: 13px; margin-bottom: 6px;">Registered agent, organizer, members and managers of an LLC, officers of a corporation.</div>
+                    <div class="array-container" data-path="identification.registrants"></div>
+                </div>
                 <!-- Current Operator (shown for corporate ownership) -->
                 <div class="form-group" id="current-operator-group">
                     <label id="current-operator-label">Current Parent Company</label>
