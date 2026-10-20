@@ -538,6 +538,37 @@ if (!function_exists('kop_seo_year')) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Breadcrumbs: the pages between Home and a record or place page, {title, url}.
+// The visible trail (kop_page_trail_set(), inc/article-parts.php) and the
+// BreadcrumbList (below, and Yoast's on the post-backed pages) read these, so
+// the two never disagree.
+// ---------------------------------------------------------------------------
+
+if (!function_exists('kop_seo_place_steps')) {
+    /** The location directory, then the state or country hub when it has a page. */
+    function kop_seo_place_steps($place_name = '', $place_url = '') {
+        $index = function_exists('kop_location_index_url') ? kop_location_index_url() : home_url('/tti-program-index/?view=location');
+        $steps = array(array('title' => 'Programs by location', 'url' => $index));
+        if (trim((string) $place_name) !== '' && trim((string) $place_url) !== '') {
+            $steps[] = array('title' => (string) $place_name, 'url' => (string) $place_url);
+        }
+        return $steps;
+    }
+}
+
+if (!function_exists('kop_seo_facility_steps')) {
+    function kop_seo_facility_steps(array $page) {
+        return kop_seo_place_steps((string) ($page['hub_name'] ?? ''), (string) ($page['hub_url'] ?? ''));
+    }
+}
+
+if (!function_exists('kop_seo_operator_steps')) {
+    function kop_seo_operator_steps(array $page) {
+        return !empty($page['index_url']) ? array(array('title' => 'Parent companies', 'url' => (string) $page['index_url'])) : array();
+    }
+}
+
 if (!function_exists('kop_seo_facility_pieces')) {
     /** WebPage, BreadcrumbList and the program as an Organization, for one facility page. */
     function kop_seo_facility_pieces(array $page) {
@@ -573,7 +604,7 @@ if (!function_exists('kop_seo_facility_pieces')) {
         }
 
         $crumbs = array(array('Home', $site));
-        if (!empty($page['hub_url']) && !empty($page['hub_name'])) $crumbs[] = array((string) $page['hub_name'], (string) $page['hub_url']);
+        foreach (kop_seo_facility_steps($page) as $s) $crumbs[] = array($s['title'], $s['url']);
         $crumbs[] = array((string) $page['name'], $url);
         return kop_seo_page_pieces($url, kop_seo_facility_title($page), kop_seo_facility_description($page), $crumbs, $org, (string) ($page['updated_at'] ?? ''));
     }
@@ -605,7 +636,7 @@ if (!function_exists('kop_seo_operator_pieces')) {
         if ($parents) $org['parentOrganization'] = count($parents) === 1 ? $parents[0] : $parents;
 
         $crumbs = array(array('Home', home_url('/')));
-        if (!empty($page['index_url'])) $crumbs[] = array('Parent companies', (string) $page['index_url']);
+        foreach (kop_seo_operator_steps($page) as $s) $crumbs[] = array($s['title'], $s['url']);
         $crumbs[] = array((string) $page['name'], $url);
         return kop_seo_page_pieces($url, kop_seo_operator_title($page), kop_seo_operator_description($page), $crumbs, $org, '');
     }

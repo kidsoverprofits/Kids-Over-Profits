@@ -9,6 +9,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Home > Programs by location > this page, in the trail and Yoast's BreadcrumbList alike.
+if (function_exists('kop_page_trail_set') && function_exists('kop_seo_place_steps')) kop_page_trail_set(kop_seo_place_steps());
+
 get_header();
 
 $post_slug = get_post_field('post_name', get_post());
@@ -31,6 +34,7 @@ $rest_url = esc_url_raw(rest_url('kop/v1/state/' . $state_slug));
 
 <div class="state-page" data-state-slug="<?php echo esc_attr($state_slug); ?>" data-state-name="<?php echo esc_attr($state_name); ?>">
     <header class="state-page-header">
+        <?php echo function_exists('kop_page_trail_html') ? kop_page_trail_html(get_the_title()) : ''; ?>
         <h1 class="state-page-title"><?php the_title(); ?></h1>
         <?php if (has_excerpt()): ?>
             <p class="state-page-summary"><?php echo esc_html(get_the_excerpt()); ?></p>

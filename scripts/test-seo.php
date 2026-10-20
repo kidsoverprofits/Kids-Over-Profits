@@ -159,6 +159,43 @@ foreach (array_keys($ops['ids']) as $oid) {
 }
 $check('every company page lists its programs as subOrganization and has a description', $op_bad === 0, count($ops['ids']) . " companies, $op_named with another name");
 
+echo "-- Breadcrumbs --\n";
+// The trail a reader sees and the BreadcrumbList are one list (docs/plan/4.7 item 11).
+require_once dirname(__DIR__) . '/inc/article-parts.php';
+$trail_names = function ($html) {
+    preg_match_all('/<li[^>]*>(?:<a href="([^"]*)">)?([^<]*)/', $html, $m, PREG_SET_ORDER);
+    return array_map(function ($x) { return array(html_entity_decode($x[2], ENT_QUOTES, 'UTF-8'), html_entity_decode($x[1], ENT_QUOTES, 'UTF-8')); }, $m);
+};
+$schema_names = function ($pieces) {
+    return array_map(function ($i) { return array($i['name'], (string) ($i['item'] ?? '')); }, $pieces[1]['itemListElement']);
+};
+if ($sedona) {
+    kop_page_trail_set(kop_seo_facility_steps($sedona));
+    $seen = $trail_names(kop_page_trail_html($sedona['name']));
+    $schema = $schema_names(kop_seo_facility_pieces($sedona));
+    $check('a facility page: the trail and the BreadcrumbList are the same steps and links', $seen === $schema, json_encode($seen, JSON_UNESCAPED_SLASHES));
+    // Its state step only when the state hub has a page (the harness finds none, so it is left out here).
+    $want = $sedona['hub_url'] !== '' ? array('Home', 'Programs by location', $sedona['hub_name'], $sedona['name']) : array('Home', 'Programs by location', $sedona['name']);
+    $check('Home > Programs by location > its state (when it has a page) > the page', array_column($seen, 0) === $want, implode(' > ', array_column($seen, 0)));
+    $check('the location step is the By location tab, never the parent company tab', strpos($seen[1][1], 'view=location') !== false, $seen[1][1]);
+}
+$op_ids = array_keys($ops['ids']);
+$op = $op_ids ? kop_operator_page_data($op_ids[0]) : null;
+if ($op) {
+    kop_page_trail_set(kop_seo_operator_steps($op));
+    $seen = $trail_names(kop_page_trail_html($op['name']));
+    $check('a company page: the trail and the BreadcrumbList agree, Home > Parent companies > the page', $seen === $schema_names(kop_seo_operator_pieces($op)) && array_column($seen, 0) === array('Home', 'Parent companies', $op['name']), implode(' > ', array_column($seen, 0)));
+}
+kop_page_trail_set(kop_seo_place_steps());
+$yoast = kop_page_trail_yoast(array(array('url' => home_url('/'), 'text' => 'Home'), array('url' => home_url('/utah/'), 'text' => 'Utah')));
+$check("a state hub: Yoast's list gets the location step between Home and the page", array_column($yoast, 'text') === array('Home', 'Programs by location', 'Utah'), implode(' > ', array_column($yoast, 'text')));
+$check('and its trail says the same', array_column($trail_names(kop_page_trail_html('Utah')), 0) === array('Home', 'Programs by location', 'Utah'));
+kop_page_trail_set(kop_seo_place_steps('Utah', ''));
+$check('a place with no page of its own is left out, not printed unlinked', count($GLOBALS['kop_page_trail']) === 1);
+unset($GLOBALS['kop_page_trail']);
+$plain = array(array('url' => home_url('/'), 'text' => 'Home'), array('url' => home_url('/faq/'), 'text' => 'FAQ'));
+$check("a page that set no trail keeps Yoast's list and prints none", kop_page_trail_yoast($plain) === $plain && kop_page_trail_html('FAQ') === '');
+
 echo "-- Posts --\n";
 $post = (object) array('post_excerpt' => '', 'post_content' => '<p>ABC News10 reported <a href="https://x.test/a">here</a> that a worker at the center was charged.</p>[gallery ids="1"] https://news.test/story <script>bad()</script>');
 $d = kop_seo_post_description($post);

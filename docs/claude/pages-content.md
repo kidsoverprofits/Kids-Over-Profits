@@ -99,6 +99,10 @@ php scripts/test-robots.php
 # Search engines (inc/seo.php, the search plan https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb): facility and company titles and descriptions
 # name past/other names (kop_alias_label()), each page describes its program or company as a schema.org Organization added to Yoast's graph
 # (wpseo_schema_graph), posts/state hubs/map/news feed get descriptions, pages with no image share the banner, tag archives are noindex and out of the sitemap. A new page kind gets its pieces there
+# Breadcrumbs on /facility/, /operator/, profile posts and state/country hubs: steps from kop_seo_facility_steps() /
+# kop_seo_operator_steps() / kop_seo_place_steps() -> kop_page_trail_set() before get_header() -> kop_page_trail_html() in
+# the header; the same steps make the BreadcrumbList (inc/seo.php, or Yoast's via kop_page_trail_yoast()). Never build a
+# trail by hand in a template: a new record or place page adds a steps builder there
 # Yoast's dashboard and editor analysis read the stored post meta (_yoast_wpseo_metadesc, _yoast_wpseo_focuskw), not our wpseo_* filters, so its "default meta description" / keyphrase warnings can show where the live page is fine (see docs/plan/4.7 items 8-10)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] [--id=12161]
 # SEO audit (docs/plan/4.7 item 8): the crawl reads every sitemap page's live title, description, canonical and BreadcrumbList,

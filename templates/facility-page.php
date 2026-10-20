@@ -484,11 +484,14 @@ if ($kop_fp_parts) {
 
 // Closed folds go out as <template> and are drawn when opened (inc/defer-folds.php).
 $kop_defer_started = function_exists('kop_defer_folds_start') ? kop_defer_folds_start() : false;
+// Home > Programs by location > its state > this page; the BreadcrumbList is the same list (inc/seo.php).
+if (function_exists('kop_page_trail_set') && function_exists('kop_seo_facility_steps')) kop_page_trail_set(kop_seo_facility_steps($page));
 get_header();
 ?>
 <article id="facility-<?php echo (int) $page['id']; ?>" class="entry content-bg single-entry kop-facility-profile kop-facility-generated" data-kop-bug-feature="facility-page" data-kop-bug-label="Facility page: <?php echo esc_attr($page['name']); ?>">
 
     <header class="kop-fp-header">
+        <?php echo function_exists('kop_page_trail_html') ? kop_page_trail_html($page['name']) : ''; ?>
         <p class="kop-fp-eyebrow">
             Facility profile
             <?php if ($page['hub_name'] !== '') : ?>

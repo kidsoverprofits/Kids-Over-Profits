@@ -67,6 +67,8 @@ $kop_op_company_list = static function (array $items) {
 
 // Closed folds go out as <template> and are drawn when opened (inc/defer-folds.php).
 $kop_defer_started = function_exists('kop_defer_folds_start') ? kop_defer_folds_start() : false;
+// Home > Parent companies > this page; the BreadcrumbList is the same list (inc/seo.php).
+if (function_exists('kop_page_trail_set') && function_exists('kop_seo_operator_steps')) kop_page_trail_set(kop_seo_operator_steps($page));
 get_header();
 ?>
 <?php
@@ -76,6 +78,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
 <article id="operator-<?php echo (int) $page['id']; ?>" class="entry content-bg single-entry kop-facility-profile kop-facility-generated kop-operator-profile" data-kop-bug-feature="operator-page" data-kop-bug-label="Operator page: <?php echo esc_attr($page['name']); ?>">
 
     <header class="kop-fp-header">
+        <?php echo function_exists('kop_page_trail_html') ? kop_page_trail_html($page['name']) : ''; ?>
         <p class="kop-fp-eyebrow">Parent company profile</p>
         <h1 class="entry-title kop-fp-title"<?php echo $kop_op_edit; ?>><?php echo esc_html($page['name']); ?></h1>
         <?php if ($page['current_name'] !== '') : ?>

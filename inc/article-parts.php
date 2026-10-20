@@ -290,6 +290,56 @@ function kop_article_yoast_breadcrumbs($links) {
 add_filter('wpseo_breadcrumb_links', 'kop_article_yoast_breadcrumbs');
 
 /**
+ * The same trail on the record and place pages: /facility/ and /operator/,
+ * the hand-built facility profiles, and the state and country hubs. $steps
+ * are the pages between Home and this one ({title, url}); the template
+ * builds them once, from kop_seo_facility_steps() / kop_seo_operator_steps() /
+ * kop_seo_place_steps() (inc/seo.php), so the trail a reader sees and the
+ * BreadcrumbList search engines read are one list. Set before get_header():
+ * it loads the trail's stylesheet and gives Yoast the steps.
+ */
+function kop_page_trail_set(array $steps) {
+    $GLOBALS['kop_page_trail'] = array_values(array_filter($steps, function ($s) {
+        return is_array($s) && trim((string) ($s['title'] ?? '')) !== '' && trim((string) ($s['url'] ?? '')) !== '';
+    }));
+    $path = get_stylesheet_directory() . '/css/trail.css';
+    if (file_exists($path) && function_exists('wp_enqueue_style')) {
+        wp_enqueue_style('kop-trail', get_stylesheet_directory_uri() . '/css/trail.css', array(), filemtime($path));
+    }
+}
+
+/** The trail kop_page_trail_set() was given, as markup ending in $current_title; '' when none was set. */
+function kop_page_trail_html($current_title) {
+    if (!isset($GLOBALS['kop_page_trail']) || !is_array($GLOBALS['kop_page_trail'])) {
+        return '';
+    }
+    $crumbs = array_merge(array(array('title' => 'Home', 'url' => home_url('/'))), $GLOBALS['kop_page_trail']);
+    $out = '<nav class="kop-article-trail" aria-label="Breadcrumb"><ol>';
+    foreach ($crumbs as $crumb) {
+        $out .= '<li><a href="' . esc_url($crumb['url']) . '">' . esc_html($crumb['title']) . '</a></li>';
+    }
+    return $out . '<li aria-current="page">' . esc_html($current_title) . '</li></ol></nav>';
+}
+
+/**
+ * Yoast's BreadcrumbList on those pages that are posts (the profiles and the
+ * hubs): home, the steps, then the page as Yoast named it. The generated
+ * /facility/ and /operator/ routes have no post; inc/seo.php writes their list
+ * from the same steps.
+ */
+function kop_page_trail_yoast($links) {
+    if (!is_array($links) || count($links) < 2 || !isset($GLOBALS['kop_page_trail']) || !is_array($GLOBALS['kop_page_trail'])) {
+        return $links;
+    }
+    $middle = array();
+    foreach ($GLOBALS['kop_page_trail'] as $step) {
+        $middle[] = array('url' => $step['url'], 'text' => $step['title']);
+    }
+    return array_merge(array(reset($links)), $middle, array(end($links)));
+}
+add_filter('wpseo_breadcrumb_links', 'kop_page_trail_yoast', 20);
+
+/**
  * Previous and next in the reading order, for the foot of an article. The
  * next link carries the hub's name, because "Continue" on its own does not
  * say what a reader is continuing through.

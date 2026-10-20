@@ -294,6 +294,9 @@ $kop_fp_has_facts = $kop_fp_addresses || $kop_fp_founded || $kop_fp_closed || $k
     || $kop_fp_type || $kop_fp_gender || $kop_fp_ages;
 $kop_fp_staff = kop_fp_staff_connections($kop_fp_transfers);
 
+// Home > Programs by location > its state > this page, in the trail and Yoast's BreadcrumbList alike.
+if (function_exists('kop_page_trail_set') && function_exists('kop_seo_place_steps')) kop_page_trail_set(kop_seo_place_steps($kop_fp_state_name, $kop_fp_state_url));
+
 get_header();
 
 while (have_posts()) :
@@ -302,6 +305,7 @@ while (have_posts()) :
 <article id="post-<?php the_ID(); ?>" <?php post_class('entry content-bg single-entry kop-facility-profile'); ?>>
 
     <header class="kop-fp-header">
+        <?php echo function_exists('kop_page_trail_html') ? kop_page_trail_html(get_the_title()) : ''; ?>
         <p class="kop-fp-eyebrow">
             Facility profile
             <?php if ($kop_fp_state_name !== '') : ?>
