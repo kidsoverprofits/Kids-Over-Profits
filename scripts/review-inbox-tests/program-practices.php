@@ -21,7 +21,7 @@ require_once dirname(__DIR__, 2) . '/inc/program-practices.php';
 
 $GLOBALS['pdo']->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_program_practices (id INTEGER PRIMARY KEY AUTOINCREMENT, ikey TEXT NOT NULL UNIQUE,
     facility_id INTEGER NOT NULL DEFAULT 0, doc_id INTEGER NOT NULL DEFAULT 0, doc_title TEXT NOT NULL DEFAULT '', doc_url TEXT NOT NULL DEFAULT '',
-    page INTEGER NOT NULL DEFAULT 0, topic TEXT NOT NULL DEFAULT '', value TEXT NOT NULL, value_orig TEXT NOT NULL, quote TEXT NOT NULL,
+    page INTEGER NOT NULL DEFAULT 0, topic TEXT NOT NULL DEFAULT '', value TEXT NOT NULL, value_orig TEXT NOT NULL, quote TEXT NOT NULL, why TEXT NOT NULL DEFAULT '',
     year INTEGER NOT NULL DEFAULT 0, checklist TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'pending', batch TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL)");
 
