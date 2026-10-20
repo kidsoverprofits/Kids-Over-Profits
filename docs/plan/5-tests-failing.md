@@ -33,5 +33,12 @@ main at 366c8d84, portable PHP 8.2 from windows.php.net).
 - **test-inline-edit**: `scripts/test-inline-edit.php`, 2 checks (same with and without 366c8d84): "31 earlier names
   filed as closed become renames" (#10401 -> Bryce Canyon Academy, #11201 -> Okeechobee Youth Development Center) and
   "52 company records round-trip unchanged" (#500017 keyStaff.keyExecutives.0.personId missing on one side).
+- **test-facility-pages**: `scripts/test-facility-pages.php`, 2 checks on the 2026-10-20 mirror: "every seeded facility
+  exists and cites pages" and "every tagged facility has a page" (11098, 12808, 14160 have no facilities_v2 row;
+  merged or deleted since the seed). Data, not the page template.
+- **test-operator-pages**: `scripts/test-operator-pages.php`, "every drafted history names a company with a page":
+  Beloved Ones, Center for Positive Changes, Chad Youth Enhancement Center, Dimondale, Heritage Youth Services,
+  NeuroRestorative, New Hope Of Arizona, New Horizon Youth Homes, Pacific Autism Center (converted into programs or
+  removed since seeds/operator-histories.json was written).
 - **test-mobile-api**: `scripts/test-mobile-api.php`, "facility 9607 library files are {id, title, url, ext, mime, size,
   thumb}": the document types commit (6165d1bd) added `types` to each file; the check predates it.

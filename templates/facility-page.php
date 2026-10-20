@@ -774,7 +774,7 @@ get_header();
             <?php if ($kop_fp_about) : ?>
             <section class="kop-fp-section kop-fp-about" id="about"<?php echo $kop_fp_edit('notes', 'research notes'); ?>>
                 <h2><?php echo $kop_fp_icon('book'); ?>About <?php echo esc_html($page['name']); ?></h2>
-                <?php echo kop_pnotes_html($kop_fp_about); // Escaped inside. ?>
+                <?php echo kop_content_links_html(kop_pnotes_html($kop_fp_about), array($page['url'], kop_facility_page_url($page['id'])), $page['name'] . ' ' . $page['state_name']); // Escaped inside; first mentions link to our pages (inc/content-links.php). ?>
                 <?php if ($page['field_notes']) : ?>
                     <ul class="kop-fp-notes">
                         <?php foreach ($page['field_notes'] as $fn) : ?>
@@ -812,7 +812,7 @@ get_header();
                 <?php endif; ?>
                 <?php if ($kop_fp_era['url'] !== '') : ?><p class="kop-fp-count"><a href="<?php echo esc_url($kop_fp_era['url']); ?>">The record kept under this name</a></p><?php endif; ?>
                 <?php if ($kop_fp_era_notes) : ?>
-                <div class="kop-fp-era-notes"><?php echo kop_pnotes_html(kop_pnotes_build(array_map('strval', $kop_fp_era_notes))); // Escaped inside. ?></div>
+                <div class="kop-fp-era-notes"><?php echo kop_content_links_html(kop_pnotes_html(kop_pnotes_build(array_map('strval', $kop_fp_era_notes))), array($page['url'], kop_facility_page_url($page['id'])), $page['name'] . ' ' . $page['state_name']); // Escaped inside. ?></div>
                 <?php endif; ?>
                 <?php foreach ($kop_fp_era_kinds as $kop_fp_k => $kop_fp_kind) :
                     $kop_fp_items = $kop_fp_era[$kop_fp_k];

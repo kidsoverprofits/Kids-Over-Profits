@@ -209,6 +209,9 @@ get_header();
                 // (scripts/reddit-wiki-live.py; no result = no note)
                 $reddit = kop_wiki_reddit_compare($item);
 
+                // Its facility and company pages, and the record pages its text names (inc/content-links.php).
+                $kopLinks = function_exists('kop_content_links_wiki_card') ? kop_content_links_wiki_card($item, $markdown) : array('title_url' => '', 'org_url' => '', 'box' => '');
+
                 $btnLabel = $isOriginal ? 'View Wiki Entry' : 'View Generated Wiki Entry';
                 if ($markdown === '') $btnLabel = 'No Entry Content Available';
             ?>
@@ -218,7 +221,11 @@ get_header();
                             <?php echo esc_html($item['program_type'] ?: 'Program'); ?>
                         </span>
                         <h2 class="wiki-card-title">
-                            <?php echo esc_html($item['program_name']); ?>
+                            <?php if ($kopLinks['title_url'] !== '') : ?>
+                                <a href="<?php echo esc_url($kopLinks['title_url']); ?>"><?php echo esc_html($item['program_name']); ?></a>
+                            <?php else : ?>
+                                <?php echo esc_html($item['program_name']); ?>
+                            <?php endif; ?>
                         </h2>
                     </div>
 
@@ -234,7 +241,7 @@ get_header();
 
                     <div class="wiki-card-body">
                         <div class="wiki-summary">
-                            <strong>Organization:</strong> <?php echo esc_html($org); ?>
+                            <strong>Organization:</strong> <?php if ($kopLinks['org_url'] !== '') : ?><a href="<?php echo esc_url($kopLinks['org_url']); ?>"><?php echo esc_html($org); ?></a><?php else : echo esc_html($org); endif; ?>
                         </div>
                         
                         <div class="wiki-markdown-section" style="margin-top: 15px;">
@@ -252,6 +259,7 @@ get_header();
                                 <div class="rendered-markdown"></div>
                             </div>
                         </div>
+                        <?php echo $kopLinks['box']; // Escaped inside. ?>
                     </div>
 
                     <div class="wiki-card-footer">

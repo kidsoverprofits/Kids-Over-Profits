@@ -166,7 +166,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                                 </details>
                             <?php endif; ?>
                         <?php endif; ?>
-                        <?php echo kop_operator_history_paragraphs_html($page['history']['paragraphs'], 'o', (int) $page['id']); // Escaped inside; "> " paragraphs are pull quotes. ?>
+                        <?php echo kop_content_links_html(kop_operator_history_paragraphs_html($page['history']['paragraphs'], 'o', (int) $page['id']), $page['url'], $page['name']); // Escaped inside; "> " paragraphs are pull quotes; first mentions link to our pages (inc/content-links.php). ?>
                         <?php if ($page['history']['sources']) : ?>
                             <h3 class="kop-fp-subhead">Sources</h3>
                             <ol class="kop-op-sources">
@@ -197,7 +197,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             <?php if ($kop_op_about) : ?>
             <section class="kop-fp-section kop-fp-about" id="about"<?php echo $kop_op_edit; ?>>
                 <h2>About <?php echo esc_html($page['name']); ?></h2>
-                <?php echo kop_pnotes_html($kop_op_about); // Escaped inside. ?>
+                <?php echo kop_content_links_html(kop_pnotes_html($kop_op_about), $page['url'], $page['name']); // Escaped inside. ?>
             </section>
             <?php endif; ?>
 

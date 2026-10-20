@@ -72,6 +72,16 @@ php -d extension=mbstring scripts/test-pull-quotes.php [--wp=<WordPress root>]  
 # kopUrlLabel() (js/url-labels.js, on every page, relabels JS-drawn lists as they appear) must give the same label;
 # a new renderer that prints a link uses one of them for its text. data-kop-keep-url opts an element out
 php -d extension=mbstring scripts/test-url-labels.php    # labels, PHP == JS (needs node), the content filter
+# Links to our own pages in the text (inc/content-links.php): the first mention of a facility, parent company, state or
+# glossary term in a post or page (the_content, 12), the About/history prose of facility and company pages
+# (kop_content_links_html() in the templates) and a wiki entry (its card's title, company and an "Also on" box) links to
+# its page; a post ends with "Related on Kids Over Profits" (css/content-links.css). Names only (posts hold no record ids),
+# so: every word capitalised, one-word names only as capital abbreviations (CEDU) or states, names of common words never,
+# a short name inside a longer one never ("New York Times"), a 1-2 word or shared facility name only when the text names
+# its state, a record named like a company goes to the company page. Names cached 6 h (transient kop_content_links_dict,
+# dropped on kop_facility_v2_sync; bump KOP_CONTENT_LINKS_VERSION after changing what goes in). A page opts out with the
+# kop_content_links_skip filter. A false link: add the rule here and a case to the test, never a stored exception
+php -d extension=mbstring -d extension=pdo_sqlite -d memory_limit=4G scripts/test-content-links.php [--posts=200] [--list]   # rules, then real posts
 # Proper names (inc/proper-names.php, js/proper-names.js): one sitewide list of names always capitalised as written (NATSAP,
 # MacLaren, LLC), edited at KOP Tools > Proper Names (option kop_proper_names; js/data/proper-names.json only until first save).
 # Every function that recases text ends with kop_proper_names_apply() / kopProperNames(); a new one does the same

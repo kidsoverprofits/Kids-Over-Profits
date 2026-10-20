@@ -339,3 +339,5 @@ require_once dirname(__DIR__) . '/inc/defer-folds.php';
 require_once dirname(__DIR__) . '/inc/network-map.php';
 // The facility template asks this for the "where to report" deep link.
 require_once dirname(__DIR__) . '/inc/reporting-directory.php';
+// Facility and company prose links its first mentions to our pages.
+require_once dirname(__DIR__) . '/inc/content-links.php';

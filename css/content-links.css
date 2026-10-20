@@ -1,0 +1,43 @@
+/* "Related on Kids Over Profits" under a post and a wiki entry (inc/content-links.php).
+   A solid sand panel with its own ink, so it never sits on the gradient and never
+   takes a parent's colour; links named explicitly because Kadence colours <a>. */
+.kop-related-links {
+    margin: 2rem 0 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--kop-sand, #F2EEDF);
+    border-left: 4px solid var(--kop-teal, #33A7B5);
+    border-radius: 6px;
+    color: var(--kop-midnight, #000435);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+.kop-related-links-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--kop-midnight, #000435);
+}
+.kop-related-links-group {
+    margin: 0.25rem 0;
+    line-height: 1.6;
+    color: var(--kop-midnight, #000435);
+}
+.kop-related-links-label {
+    font-weight: 600;
+    color: var(--kop-midnight, #000435);
+}
+.kop-related-links a,
+.kop-related-links a:visited {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+.kop-related-links a:hover,
+.kop-related-links a:focus {
+    color: var(--kop-midnight, #000435);
+    background: transparent;
+}
+.wiki-card .kop-related-links {
+    margin: 1rem 0 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}

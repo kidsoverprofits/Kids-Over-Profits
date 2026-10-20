@@ -78,3 +78,10 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists&list=investor-kinds); Undo it
     there. Also the Status dropdown on the admin lawsuits and legislation pages and the Type dropdowns on Woodbury Facts.
     Selects not fed by a registered list (publication status, jurisdiction, filters) deliberately have no such option.
+25. **Links to our own pages in the text** (inc/content-links.php): logged out, a news post (e.g.
+    [Provo probation](https://kidsoverprofits.org/man-on-probation-after-hitting-student-at-provo-residential-treatment-center/)) links its
+    facility and state in the text and ends with "Related on Kids Over Profits" on a sand panel; the
+    [Sequel TSI](https://kidsoverprofits.org/operator/sequel-tsi/) history and a facility page's About link other records;
+    [Wiki feed](https://kidsoverprofits.org/wiki-feed/) titles link to facility pages with an "Also on" box under each.
+    First load after deploy builds the name list (~5-10 s, once per 6 h); `check-contrast.py` on one post and the wiki
+    feed; `check-mobile-overflow.py` at 390. Look for a wrong link on 10 posts; report any to the session for a rule.

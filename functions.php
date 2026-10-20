@@ -224,6 +224,8 @@ require_once get_stylesheet_directory() . '/inc/content-images.php';
 require_once get_stylesheet_directory() . '/inc/pull-quotes.php';
 // Links read as words, never as long web addresses (the_content filter + js/url-labels.js)
 require_once get_stylesheet_directory() . '/inc/url-labels.php';
+// First mentions of facilities, companies, states and glossary terms link to their pages; posts end with "Related on Kids Over Profits".
+require_once get_stylesheet_directory() . '/inc/content-links.php';
 // An article's real link and its archived copy (news_submissions.archive_url)
 require_once get_stylesheet_directory() . '/inc/news-archive-links.php';
 // One review inbox for every queue, drawn on the Submissions Review page (inc/review-inbox/ holds a source per queue)
