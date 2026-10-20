@@ -71,12 +71,13 @@ printf("  %d proposals on %d records\n", array_sum(array_map('count', $by)), cou
 echo "-- Apply, save shape, undo on every record --\n";
 $stmt = $pdo->prepare('SELECT json_data FROM facilities_v2 WHERE id = ?');
 $applied = $refused = $invalid = $lost = $undo_bad = $twice_bad = $unsourced = 0;
-$examples = array();
+$examples = $gone = array();
 foreach ($by as $fid => $rows) {
     $stmt->execute(array($fid));
     $doc = json_decode((string) $stmt->fetchColumn(), true);
     if (!is_array($doc)) {
-        $examples[] = "#$fid missing";
+        // Merged away since the facts were built; listed once below, not in the example slots.
+        $gone[] = $fid;
         continue;
     }
     $base = $normalize($doc);
@@ -108,8 +109,10 @@ foreach ($by as $fid => $rows) {
             // another spelling ("John Sarchio" for "John Sarachio", kop_dd_same_person()).
             $mine = array_filter((array) $at, function ($s) use ($v) { return is_array($s) && (kop_wbf_same_person((string) ($s['name'] ?? ''), (string) $v['name']) || kop_dd_same_person((string) ($s['name'] ?? ''), (string) $v['name'])); });
             $ok = (bool) $mine;
-            // The entry names where it came from, through the save normalizer.
-            if ($mine && (trim((string) (reset($mine)['source'] ?? '')) === '' || !preg_match('#^https?://#', (string) (reset($mine)['sourceUrl'] ?? '')))) {
+            // The entry names where it came from, through the save normalizer. An entry that already named its source
+            // ("r/troubledteens wiki", no link) keeps it: the merge fills a source only where there was none.
+            $filled = ($d['mode'] ?? '') !== 'merged' || trim((string) ($d['before']['source'] ?? '')) === '';
+            if ($mine && $filled && (trim((string) (reset($mine)['source'] ?? '')) === '' || !preg_match('#^https?://#', (string) (reset($mine)['sourceUrl'] ?? '')))) {
                 $unsourced++;
                 if (count($examples) < 12) $examples[] = "#$fid staff without a source: " . $v['name'];
             }
@@ -144,6 +147,7 @@ foreach ($by as $fid => $rows) {
     }
 }
 printf("  applied %d, refused as already on the record %d\n", $applied, $refused);
+if ($gone) printf("  %d records no longer in the mirror (merged since the build): #%s\n", count($gone), implode(', #', $gone));
 $check('every staff entry added or filled names its source and link', $unsourced === 0, "$unsourced without");
 $check('every changed record passes the validator', $invalid === 0, "$invalid records");
 $check('every addition survives the save normalizer', $lost === 0, "$lost lost");

@@ -76,9 +76,16 @@ $c = $cands_of('Woodland Hills Academy');
 $check('a town\'s name alone matches nothing (Woodland Hills Academy)', is_array($c) && !in_array('Woodland Hills Maternity Home', array_column($c, 'name'), true), json_encode(array_column((array) $c, 'name')));
 $c = $cands_of('Clearview Horizon');
 $check('a two-state entry offers the record in each state', is_array($c) && count(array_unique(array_column(array_slice($c, 0, 2), 'place'))) === 2, json_encode(array_column((array) $c, 'place')));
-$e = $entry('Mountain Home Academy');
-$c = $e ? kop_wiki_upd_candidates($e, $pdo) : array();
-$check('a page with no years or place matches only its exact name', $e && $e['kind'] === 'other' && count($c) === 1 && in_array(kop_wiki_upd_link_state($e, $c), array('clear', 'linked'), true));
+// Made here, not a real entry: real pages gain years and a place as they are written (Mountain Home Academy did, 2026-10-14).
+$row = array('id' => 0, 'program_name' => 'Mountain Home Academy', 'city_state' => '---', 'organization' => '', 'program_type' => '',
+    'years_active' => '-', 'json_data' => '', 'original_markdown' => "# **Mountain Home Academy**\n\nA page about it.", 'generated_markdown' => '',
+    'status' => 'approved', 'submitted_by' => 'bulk-upload', 'facility_unique_name' => '', 'facility_link_status' => '');
+$e = $row + array('page' => '', 'kind' => kop_wiki_upd_kind($row, ''), 'older' => array());
+$c = kop_wiki_upd_candidates($e, $pdo);
+$check('a page with no years or place matches only its exact name', $e['kind'] === 'other' && count($c) === 1 && in_array(kop_wiki_upd_link_state($e, $c), array('clear', 'linked'), true),
+    $e['kind'] . ' ' . json_encode(array_column($c, 'name')));
+$check('a placeholder years_active ("-") gives way to the header\'s years',
+    kop_wiki_upd_years(array('years_active' => '-', 'original_markdown' => '# **X** (2001-2021) Town, ID', 'generated_markdown' => '', 'submitted_by' => 'bulk-upload')) === array(2001, 2021));
 $c = $cands_of('Acadia Healthcare');
 $check('a company page matches the company', $c && !empty($c[0]['operator']), json_encode($c[0] ?? null));
 $lists = array_filter($entries, function ($e) { return $e['kind'] === 'list'; });

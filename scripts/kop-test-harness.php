@@ -14,6 +14,8 @@ if (PHP_SAPI !== 'cli') {
 
 error_reporting(E_ALL);
 set_error_handler(function ($no, $str, $file, $line) {
+    // An @-silenced call (a scratch copy's @unlink at shutdown, still open on Windows) stays silent, as in production.
+    if (!(error_reporting() & $no)) return false;
     throw new ErrorException($str, 0, $no, $file, $line);
 });
 

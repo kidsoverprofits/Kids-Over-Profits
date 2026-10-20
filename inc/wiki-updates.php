@@ -141,7 +141,8 @@ function kop_wiki_upd_states(array $row) {
 /** [start, end] from years_active or the header: end is an int, 'present' or null (not given). */
 function kop_wiki_upd_years(array $row, $md = null) {
     $ya = trim((string) ($row['years_active'] ?? ''));
-    if ($ya === '') {
+    // A placeholder ("-", "?", "---") says nothing: the header's years count.
+    if (!preg_match('/\d|present|current|now|open/i', $ya)) {
         $first = trim((string) strtok($md ?? kop_wiki_upd_markdown($row), "\n"));
         if (preg_match('/\*\*\s*\(([^)]*)\)/u', $first, $m)) $ya = $m[1];
     }
