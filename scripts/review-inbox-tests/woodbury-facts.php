@@ -214,11 +214,16 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     // On the scratch copy, rolled back after: the later checks see the queue as it was.
     $pdo->beginTransaction();
     try {
+        // The hourly pass has filed the mirror's own: one item the record holds already, seeded from a real one.
+        kop_rinbox_test_wbf_seed_on_record($pdo, $t);
         kop_rinbox_test_with_wpdb_writes(function () use ($pdo, $t, $check) {
             $dry = kop_wbf_clear_on_record(false, 300);
             $before = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn();
+            // Only what this run files: the live pass has filed others before.
+            $filed = "SELECT * FROM $t WHERE status = 'rejected' AND applied LIKE '%\"cleared\":\"on_record\"%'";
+            $earlier = array_flip(array_column($pdo->query($filed)->fetchAll(PDO::FETCH_ASSOC), 'pkey'));
             $wet = kop_wbf_clear_on_record(true, 300);
-            $cleared = $pdo->query("SELECT * FROM $t WHERE status = 'rejected' AND applied LIKE '%\"cleared\":\"on_record\"%'")->fetchAll(PDO::FETCH_ASSOC);
+            $cleared = array_values(array_filter($pdo->query($filed)->fetchAll(PDO::FETCH_ASSOC), function ($r) use ($earlier) { return !isset($earlier[$r['pkey']]); }));
             $check('woodbury-facts: the pass files what adds nothing, counted first, nothing else',
                 $dry['cleared'] > 0 && $dry['done'] && $wet['cleared'] === $dry['cleared'] && count($cleared) === $wet['cleared']
                 && (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn() === $before - $wet['cleared'],
@@ -297,6 +302,14 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     $check('woodbury-facts: queue tools are "Add the exact-name items now" and "Load again"', array_column($src['tools'], 'id') === array('auto', 'resync'));
 
     // Exact names go in with no click (owner, 2026-10-14); anything in doubt, or touched by a person, waits.
+    // The hourly run has added the mirror's own: one waiting row on a record stands in as a clean exact-name match.
+    $seeded = null;
+    if (!(int) $pdo->query("SELECT COUNT(*) FROM $t WHERE " . kop_wbf_auto_where())->fetchColumn()) {
+        $seeded = $pdo->query("SELECT id, match_kind, match_note, found, ya, conflict, alternatives, reviewed_by, extra, auto FROM $t
+            WHERE status = 'pending' AND facility_id > 0 AND (reviewed_by IS NULL OR reviewed_by = '') ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($seeded) $pdo->prepare("UPDATE $t SET match_kind = 'exact', match_note = '', found = 1, ya = 0, conflict = '', alternatives = '[]', extra = '', auto = 0 WHERE id = ?")
+            ->execute(array($seeded['id']));
+    }
     $auto = $pdo->query("SELECT * FROM $t WHERE " . kop_wbf_auto_where())->fetchAll(PDO::FETCH_ASSOC);
     $pending = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending' AND facility_id > 0")->fetchColumn();
     $check('woodbury-facts: exact-name items are added automatically, the rest wait', $auto && count($auto) < $pending, count($auto) . ' of ' . $pending);
@@ -318,6 +331,11 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         $check('woodbury-facts: an item a person corrected waits for them', !$in());
         $pdo->prepare("UPDATE $t SET reviewed_by = ?, extra = ? WHERE pkey = ?")->execute(array($before['reviewed_by'], $before['extra'], $one));
         $check('woodbury-facts: put back, it is picked again', $in());
+    }
+    if ($seeded) {
+        $id = $seeded['id'];
+        unset($seeded['id']);
+        $pdo->prepare("UPDATE $t SET " . implode(' = ?, ', array_keys($seeded)) . ' = ? WHERE id = ?')->execute(array_merge(array_values($seeded), array($id)));
     }
     $m = call_user_func($src['tool'], 'resync', array());
     $check('woodbury-facts: "Load the facts file again" answers', $m['message'] !== '', $m['message']);
@@ -359,4 +377,34 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         }
     });
     $ya->prepare('DELETE FROM young_adult_programs WHERE id = ?')->execute(array($yid));
+}
+
+/**
+ * A waiting staff item for a person exactly as a record lists them (name and role), copied from a real staff item
+ * on that record, so kop_wbf_clear_on_record() has one to file. Checked with kop_wbf_on_record() before it is used.
+ * Returns its pkey, or ''.
+ */
+function kop_rinbox_test_wbf_seed_on_record(PDO $pdo, $t) {
+    $opts = kop_wbf_opts();
+    $rows = $pdo->query("SELECT * FROM $t WHERE op = 'add_staff' AND facility_id > 0 ORDER BY id DESC LIMIT 400")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $r) {
+        $stored = kop_facility_load((int) $r['facility_id'], $opts);
+        if (!$stored) continue;
+        foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
+            foreach ((array) kop_wbf_get($stored['doc'], $path) as $p) {
+                if (!is_array($p) || trim((string) ($p['name'] ?? '')) === '' || trim((string) ($p['role'] ?? '')) === '') continue;
+                $copy = $r;
+                unset($copy['id']);
+                $copy = array_merge($copy, array('pkey' => substr(md5('wbf-test|on-record|' . $r['pkey']), 0, 16), 'path' => $path,
+                    'value' => json_encode(array('name' => $p['name'], 'role' => $p['role'], 'pastJobs' => '')), 'label' => $p['name'] . ', ' . $p['role'],
+                    'status' => 'pending', 'conflict' => '', 'current_val' => '', 'extra' => '', 'reviewed_by' => null, 'reviewed_at' => null,
+                    'applied' => null, 'applied_fid' => 0, 'auto' => 0));
+                if (kop_wbf_on_record($stored['doc'], $copy) === '' || kop_wbf_conflict_parts($stored['doc'], $copy)) continue;
+                $pdo->prepare("INSERT INTO $t (" . implode(', ', array_keys($copy)) . ') VALUES (' . implode(', ', array_fill(0, count($copy), '?')) . ')')
+                    ->execute(array_values($copy));
+                return $copy['pkey'];
+            }
+        }
+    }
+    return '';
 }
