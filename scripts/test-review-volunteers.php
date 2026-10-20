@@ -227,5 +227,95 @@ if ($it) {
 }
 unset($GLOBALS['kop_test_options']['kop_volunteer_sources']);
 
+// Agreed calls going through on their own (inc/volunteer-auto.php), on a made-up queue under an allowed key.
+echo "\nAgreed calls go through on their own\n";
+$pdo->exec("DELETE FROM wpdl_kop_volunteer_recs");
+$pdo->exec("DELETE FROM wpdl_kop_review_holds");
+kop_rinbox_holds_active(null, true);
+$GLOBALS['kop_auto_items'] = array();
+foreach (array('a', 'b', 'c', 'd', 'e', 'f') as $k) $GLOBALS['kop_auto_items'][$k] = 'pending';
+$auto_item = function ($k) {
+    $st = $GLOBALS['kop_auto_items'][$k] ?? null;
+    if ($st === null) return null;
+    $actions = $st === 'pending'
+        ? array(array('id' => 'yes', 'label' => 'Same place', 'style' => 'approve'), array('id' => 'no', 'label' => 'Different', 'style' => 'reject'))
+        : array(array('id' => 'back', 'label' => 'Back to waiting', 'style' => 'undo'));
+    return array('key' => $k, 'title' => "Pair $k", 'text' => '', 'status' => $st, 'actions' => $actions);
+};
+$GLOBALS['kop_rinbox_builders']['folder-links'] = function () use ($auto_item) {
+    return array('label' => 'Folder links', 'get' => $auto_item,
+        'list' => function (array $q) use ($auto_item) { return array('items' => array_values(array_filter(array_map($auto_item, array_keys($GLOBALS['kop_auto_items'])))), 'total' => 0); },
+        'act' => function ($k, $action, array $params) {
+            $GLOBALS['kop_auto_items'][$k] = array('yes' => 'approved', 'no' => 'rejected', 'back' => 'pending')[$action];
+            return array('message' => 'Done ' . $action . '.');
+        });
+};
+kop_rinbox_sources(true);
+$GLOBALS['kop_test_options']['kop_volunteer_sources'] = array('folder-links');
+$va = kop_vol_by_token(substr($url2 = kop_vol_create('Trusted A')[1], strpos($url2, 'invite=') + 7));
+$vb = kop_vol_by_token(substr($url3 = kop_vol_create('Trusted B')[1], strpos($url3, 'invite=') + 7));
+$vc = kop_vol_by_token(substr($url4 = kop_vol_create('New C')[1], strpos($url4, 'invite=') + 7));
+$past = $pdo->prepare("INSERT INTO wpdl_kop_volunteer_recs (volunteer_id, source, item_key, verdict, created_at, updated_at, outcome, outcome_by)
+    VALUES (?, 'folder-links', ?, 'approve', '2026-01-01', '2026-01-01', ?, ?)");
+foreach (array($va, $vb) as $v) for ($i = 0; $i < 20; $i++) $past->execute(array($v['id'], 'past-' . $i, $i < 19 ? 'approve' : 'reject', 'admin'));
+$GLOBALS['kop_test_options']['kop_vol_projects_db'] = KOP_VOLP_DB_VERSION;
+$pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_vol_projects (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, source TEXT NOT NULL, search TEXT NOT NULL DEFAULT '',
+    question TEXT, yes_example TEXT, no_example TEXT, note TEXT, minutes INTEGER NOT NULL DEFAULT 20, volunteer_id INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open', created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, closed_at TEXT)");
+$status = function ($k) { return $GLOBALS['kop_auto_items'][$k]; };
+$auto_rows = function () use ($pdo) { return (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_review_log WHERE user_login = 'volunteers'")->fetchColumn(); };
+
+$check('off until turned on', kop_vol_auto_settings()['on'] === false);
+kop_vol_recommend($va, 'folder-links', 'a', 'approve', '');
+$r = kop_vol_recommend($vb, 'folder-links', 'a', 'approve', '');
+$check('off: two trusted agreeing still wait', $status('a') === 'pending' && empty($r['applied']));
+
+$s = kop_vol_auto_save(array('on' => 1, 'sources' => array('folder-links', 'closure', 'writeups'), 'agree' => 1, 'decided' => 20, 'rate' => 90));
+$check('only allowed queues can be ticked', $s['sources'] === array('folder-links'), implode(',', $s['sources']));
+$check('never fewer than two volunteers', $s['agree'] === 2);
+
+$r = kop_vol_recommend($va, 'folder-links', 'b', 'approve', '');
+$check('on: one volunteer is not enough', $status('b') === 'pending' && empty($r['applied']));
+$r = kop_vol_recommend($vb, 'folder-links', 'b', 'approve', '');
+$check('on: two trusted agreeing go through', $status('b') === 'approved' && !empty($r['applied']), $r['message']);
+$check('filed in Recently done under "volunteers", with an Undo', $auto_rows() === 1
+    && (string) $pdo->query("SELECT undo_action FROM wpdl_kop_review_log WHERE user_login = 'volunteers'")->fetchColumn() === 'back');
+$check('their recs close as "volunteers"', (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_volunteer_recs WHERE item_key = 'b' AND outcome = 'approve' AND outcome_by = 'volunteers'")->fetchColumn() === 2);
+$list = array();
+foreach (kop_vol_list() as $v) $list[(int) $v['id']] = $v;
+$check('and do not count toward agreement', (int) $list[(int) $va['id']]['decided'] === 20 && (int) $list[(int) $va['id']]['agreed'] === 19);
+$check('nor toward self-assign', kop_volp_self_status((int) $va['id'])['decided'] === 20);
+$check('the recent list shows it', count(kop_vol_auto_recent()) === 1);
+
+kop_vol_recommend($va, 'folder-links', 'c', 'approve', '');
+kop_vol_recommend($vb, 'folder-links', 'c', 'reject', '');
+$check('a disagreement waits', $status('c') === 'pending');
+
+kop_vol_recommend($va, 'folder-links', 'd', 'approve', '');
+kop_vol_recommend($vc, 'folder-links', 'd', 'unsure', 'Not sure the towns match');
+kop_vol_recommend($vb, 'folder-links', 'd', 'approve', '');
+$check('a Not sure holds it', $status('d') === 'pending');
+
+kop_vol_recommend($va, 'folder-links', 'e', 'reject', '');
+kop_vol_recommend($vc, 'folder-links', 'e', 'reject', '');
+$check('an untrusted second volunteer does not count', $status('e') === 'pending');
+kop_vol_recommend($vb, 'folder-links', 'e', 'reject', '');
+$check('a third, trusted one does', $status('e') === 'rejected');
+
+$log_id = (int) $pdo->query("SELECT id FROM wpdl_kop_review_log WHERE user_login = 'volunteers' AND item_key = 'b'")->fetchColumn();
+kop_rinbox_log_undo($log_id);
+$check('Undo puts it back and reopens their recs', $status('b') === 'pending' && count(kop_vol_recs_for('folder-links', array('b'))['b'] ?? array()) === 2);
+kop_vol_withdraw($va, 'folder-links', 'b');
+kop_vol_recommend($va, 'folder-links', 'b', 'approve', '');
+$check('once undone, it never goes through on its own again', $status('b') === 'pending');
+
+kop_vol_auto_save(array('on' => 1, 'sources' => array()));
+kop_vol_recommend($va, 'folder-links', 'f', 'approve', '');
+kop_vol_recommend($vb, 'folder-links', 'f', 'approve', '');
+$check('a queue not ticked waits', $status('f') === 'pending');
+kop_vol_auto_save(array('on' => 0, 'sources' => array('folder-links')));
+$check('turning it off keeps the ticks', kop_vol_auto_settings()['sources'] === array('folder-links') && !kop_vol_auto_settings()['on']);
+unset($GLOBALS['kop_test_options']['kop_volunteer_sources'], $GLOBALS['kop_test_options']['kop_vol_auto']);
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

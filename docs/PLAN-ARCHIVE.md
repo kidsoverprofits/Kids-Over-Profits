@@ -2988,3 +2988,13 @@ Passing on the 2026-10-20 mirror; the last three fixed in eb2acbeb.
   They were merges into entries that already named a source (r/troubledteens wiki, no link), which the merge rightly keeps.
 - The `@unlink` at shutdown of a scratch copy (test-volunteer-projects, test-review-inbox) turned all-passed runs into exit 255;
   the harness's error handler now lets @-silenced warnings be.
+
+## 2.4 Decisions waiting, item 10 (finished 2026-10-20)
+
+10. **Not built, the owner's call**: two volunteers per item, or high-agreement volunteers applying directly
+    (suggested 2026-10-20: two volunteers with 90%+ agreement who agree apply on their own in low-risk queues
+    such as doc-types, scraper-finds, websites, woodbury-reports, map-years, folder-links, with Undo and a weekly
+    sample of 10 for the owner; publishing queues and anything about a named person stay with the owner; see 4.4
+    item 8).
+
+Owner, 2026-10-20: build it with an On/Off toggle. Built in inc/volunteer-auto.php, off until turned on.

@@ -1,5 +1,5 @@
 {
- "built": "2026-10-20 19:45 UTC",
+ "built": "2026-10-20 20:27 UTC",
  "sections": [
   {
    "key": "2",
@@ -332,8 +332,8 @@
       {
        "id": "2.4:not-built-the-owner-s-call",
        "lead": "Not built, the owner's call",
-       "text": "**Not built, the owner's call**: two volunteers per item, or high-agreement volunteers applying directly (suggested 2026-10-20: two volunteers with 90%+ agreement who agree apply on their own in low-risk queues such as doc-types, scraper-finds, websites, woodbury-reports, map-years, folder-links, with Undo and a weekly sample of 10 for the owner; publishing queues and anything about a named person stay with the owner; see 4.4 item 8); an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
-       "hash": "3e80f46ffec4"
+       "text": "**Not built, the owner's call**: an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
+       "hash": "d0897dd6959b"
       },
       {
        "id": "2.4:seo-keyphrase-wording",
@@ -567,6 +567,18 @@
        "lead": "\"+ Add new...\" in dropdowns",
        "text": "**\"+ Add new...\" in dropdowns**: on [Investors](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors) pick Kind > \"+ Add new...\", type a test kind, Add: it is selected and appears at [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists&list=investor-kinds); Undo it there. Also the Status dropdown on the admin lawsuits and legislation pages and the Type dropdowns on Woodbury Facts. Selects not fed by a registered list (publication status, jurisdiction, filters) deliberately have no such option.",
        "hash": "bc99f1d16bb1"
+      },
+      {
+       "id": "3:links-to-our-own-pages-in-the-text",
+       "lead": "Links to our own pages in the text",
+       "text": "**Links to our own pages in the text** (inc/content-links.php): logged out, a news post (e.g. [Provo probation](https://kidsoverprofits.org/man-on-probation-after-hitting-student-at-provo-residential-treatment-center/)) links its facility and state in the text and ends with \"Related on Kids Over Profits\" on a sand panel; the [Sequel TSI](https://kidsoverprofits.org/operator/sequel-tsi/) history and a facility page's About link other records; [Wiki feed](https://kidsoverprofits.org/wiki-feed/) titles link to facility pages with an \"Also on\" box under each. First load after deploy builds the name list (~5-10 s, once per 6 h); `check-contrast.py` on one post and the wiki feed; `check-mobile-overflow.py` at 390. Look for a wrong link on 10 posts; report any to the session for a rule.",
+       "hash": "901baaf5b756"
+      },
+      {
+       "id": "3:volunteers-agreed-calls-switch",
+       "lead": "Volunteers' agreed calls switch",
+       "text": "**Volunteers' agreed calls switch**: [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers#kop-vol-auto) shows \"Let agreed calls go through on their own\" as Off; the Volunteers table's agreement rates are unchanged. Turn it On only when you want it; the first ones show under \"Gone through on their own\" with Undo in Recently done.",
+       "hash": "ad70a15b928d"
       }
      ]
     }
@@ -763,8 +775,8 @@
       {
        "id": "4.4:self-service-volunteering",
        "lead": "Self-service volunteering",
-       "text": "**Self-service volunteering** (audit 2026-10-20; the owner finds the back-and-forth overwhelming, so the default becomes \"a volunteer can start, learn, pick work and get answers without the owner\"). Today the owner makes every link, picks every project, answers every question and applies every call. In order: a. **Sign-up makes the link**: a form on /volunteer/ (name, optional email) calls `kop_vol_create()` and shows the link at once; the old `volunteer_projects` listing (`templates/page-volunteers.php`) points to it. b. **Practice round instead of the owner's first 10 calls**: 10 known-answer items drawn from the owner's past approve/reject log for the chosen queue; passing opens self-assign (`kop_volp_self_min_decided` gate in `inc/volunteer-projects.php:752-824` counts practice). c. **Next batch on Done**: \"Done. Thank you!\" (`js/volunteer-review.js:568`) offers the next 10 from the same queue; finished projects close themselves; research kinds can be self-assigned too. d. **Lost link / new device without the owner**: if an email was given, \"Send me my link\" mails a fresh one; replies to their questions can mail them (opt-in). e. **Questions answer themselves**: each brief shows \"Questions others asked\" (answers the owner marks \"Add to the brief's FAQ\"); trusted volunteers can answer; the owner gets one daily digest, not per message. f. **Research answers become one-click edits**: a year/status answer with a link becomes a proposed change card (Apply = writes the field + Undo) instead of the owner editing the record by hand. g. **Briefs for the open queues that lack one**: wiki-staff, young-adult-programs, wiki-updates, wiki-changes, the quote-check half of data-audit and conflicts. Record cleanup: open it or bulk-apply. h. **Close two gaps first**: bar `drive-docs` (quotes the owner's private Docs) and `podcasts` (statements attributed to named people) in `kop_vol_never_sources()`; the data form's \"a volunteer checks every suggestion\" (`js/tutorial-overlay.js:1172`, `js/data-form/data-wizard.js:610`) is untrue while `data` is barred. Depends on 2.4 item 10 for anything that applies without the owner.",
-       "hash": "3272cc94b556"
+       "text": "**Self-service volunteering** (audit 2026-10-20; the owner finds the back-and-forth overwhelming, so the default becomes \"a volunteer can start, learn, pick work and get answers without the owner\"). Today the owner makes every link, picks every project, answers every question and applies every call. In order: a. **Sign-up makes the link**: a form on /volunteer/ (name, optional email) calls `kop_vol_create()` and shows the link at once; the old `volunteer_projects` listing (`templates/page-volunteers.php`) points to it. b. **Practice round instead of the owner's first 10 calls**: 10 known-answer items drawn from the owner's past approve/reject log for the chosen queue; passing opens self-assign (`kop_volp_self_min_decided` gate in `inc/volunteer-projects.php:752-824` counts practice). c. **Next batch on Done**: \"Done. Thank you!\" (`js/volunteer-review.js:568`) offers the next 10 from the same queue; finished projects close themselves; research kinds can be self-assigned too. d. **Lost link / new device without the owner**: if an email was given, \"Send me my link\" mails a fresh one; replies to their questions can mail them (opt-in). e. **Questions answer themselves**: each brief shows \"Questions others asked\" (answers the owner marks \"Add to the brief's FAQ\"); trusted volunteers can answer; the owner gets one daily digest, not per message. f. **Research answers become one-click edits**: a year/status answer with a link becomes a proposed change card (Apply = writes the field + Undo) instead of the owner editing the record by hand. g. **Briefs for the open queues that lack one**: wiki-staff, young-adult-programs, wiki-updates, wiki-changes, the quote-check half of data-audit and conflicts. Record cleanup: open it or bulk-apply. h. **Close two gaps first**: bar `drive-docs` (quotes the owner's private Docs) and `podcasts` (statements attributed to named people) in `kop_vol_never_sources()`; the data form's \"a volunteer checks every suggestion\" (`js/tutorial-overlay.js:1172`, `js/data-form/data-wizard.js:610`) is untrue while `data` is barred. Done: agreed calls going through on their own, behind the owner's On/Off switch (`inc/volunteer-auto.php`).",
+       "hash": "bdae6a1002f3"
       },
       {
        "id": "4.4:research-tag-proposals-from-document-text",
@@ -960,8 +972,8 @@
       {
        "id": "4.7:seo-audit-read-only-first",
        "lead": "SEO audit (read-only, first)",
-       "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet. Status 2026-10-20: the screen is live code (KOP Tools > SEO Audit, inc/seo-audit.php, scripts/test-seo-audit.php, commit https://github.com/kidsoverprofits/Kids-Over-Profits/commit/32e2a0ec); the crawler is (kop-pipeline) scripts/seo-audit.py, not committed yet. Open: finish the full crawl, scp audit.json to wp-content/uploads/kop-seo-audit/audit.json, check https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-audit, commit the crawler in kop-pipeline, write the findings here for items 9-11.",
-       "hash": "eca2a6c1990e"
+       "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet. Done 2026-10-20: screen = KOP Tools > SEO Audit (inc/seo-audit.php, commit 32e2a0ec); crawler = (kop-pipeline) scripts/seo-audit.py; audit.json copied to wp-content/uploads/kop-seo-audit/ on the server. Review it at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-audit. Findings (3,753 URLs): 1,838 sparse + 147 thin facility descriptions (item 10); 1,762 titles over 65 chars (1,637 facility, 81 posts: news posts carry the full headline + site name; decide whether to clip); 296 posts/pages with no stored Yoast description and 292 with no keyphrase (items 9, 10); 95 with no live description (58 pages, 36 category pages, author page); 53 template descriptions; 12 duplicate descriptions (posts that appear twice, e.g. the two Jane/June Doe v. Trails summaries); 5 admin tool pages in the sitemap but noindex (take out of the sitemap); 2 pages with no breadcrumb. Open: 19 facility pages took 20+ s to answer (mount-bachelor-academy-or, family-foundation-school-ny, ...; a slow page query to find); re-crawl after items 10-11 with `python scripts/seo-audit.py` and re-upload audit.json.",
+       "hash": "52d78a93a6f2"
       },
       {
        "id": "4.7:focus-keyphrases",
@@ -980,6 +992,18 @@
        "lead": "Breadcrumbs on facility, operator and state pages",
        "text": "**Breadcrumbs on facility, operator and state pages**: visible trail plus the same trail in Yoast's BreadcrumbList through `wpseo_breadcrumb_links`. Reuse `kop_article_breadcrumbs()` / `kop_article_yoast_breadcrumbs()` (inc/article-parts.php:244-290). Check what inc/seo.php's added breadcrumb on these routes currently emits so the two never disagree. CSS rules in docs/claude/css-checks.md. Model: Sonnet, Opus checks.",
        "hash": "e40e7ae53c94"
+      },
+      {
+       "id": "4.7:report-a-problem-link-contrast",
+       "lead": "\"Report a problem\" link contrast",
+       "text": "**\"Report a problem\" link contrast** (found 2026-10-20, already live before the home page phone trim): `python -u scripts/check-contrast.py --mobile /` flags `.kop-bug-report-link__text` at 3.97:1 on white (needs 4.5). css/bug-reporter.css:58 and its :hover/:focus rules; use `--kop-teal-ink` or navy.",
+       "hash": "3356cfe8438e"
+      },
+      {
+       "id": "4.7:home-page-on-phones-after-deploy",
+       "lead": "Home page on phones, after deploy",
+       "text": "**Home page on phones, after deploy**: trimmed 2026-10-20 (11,638px -> about 8,300px at 390 wide). Check https://kidsoverprofits.org/ on a phone: the inspection box says \"Trackers for N states\" and the state sentence is hidden; Essential reporting cards have no thumbnail; one headline per Ongoing Story. Still the tallest blocks: Essential reporting (~1,100px) and Ongoing Stories (~1,250px); if the owner wants it shorter, show two cards of each on phones.",
+       "hash": "856eed050b6c"
       }
      ]
     },
@@ -1056,6 +1080,18 @@
        "lead": "test-inline-edit",
        "text": "**test-inline-edit**: `scripts/test-inline-edit.php`, 2 checks (same with and without 366c8d84): \"31 earlier names filed as closed become renames\" (#10401 -> Bryce Canyon Academy, #11201 -> Okeechobee Youth Development Center) and \"52 company records round-trip unchanged\" (#500017 keyStaff.keyExecutives.0.personId missing on one side).",
        "hash": "0c4482fac59a"
+      },
+      {
+       "id": "5:test-facility-pages",
+       "lead": "test-facility-pages",
+       "text": "**test-facility-pages**: `scripts/test-facility-pages.php`, 2 checks on the 2026-10-20 mirror: \"every seeded facility exists and cites pages\" and \"every tagged facility has a page\" (11098, 12808, 14160 have no facilities_v2 row; merged or deleted since the seed). Data, not the page template.",
+       "hash": "7cc03215d295"
+      },
+      {
+       "id": "5:test-operator-pages",
+       "lead": "test-operator-pages",
+       "text": "**test-operator-pages**: `scripts/test-operator-pages.php`, \"every drafted history names a company with a page\": Beloved Ones, Center for Positive Changes, Chad Youth Enhancement Center, Dimondale, Heritage Youth Services, NeuroRestorative, New Hope Of Arizona, New Horizon Youth Homes, Pacific Autism Center (converted into programs or removed since seeds/operator-histories.json was written).",
+       "hash": "c757a2ccd426"
       },
       {
        "id": "5:test-mobile-api",

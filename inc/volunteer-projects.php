@@ -778,7 +778,7 @@ function kop_volp_self_status($vid) {
     $row = $wpdb->get_row($wpdb->prepare("SELECT
             SUM(outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject')) AS decided,
             SUM(outcome IN ('approve', 'reject') AND verdict = outcome) AS agreed
-        FROM $r WHERE volunteer_id = %d", (int) $vid), ARRAY_A);
+        FROM $r WHERE volunteer_id = %d AND outcome_by <> %s", (int) $vid, KOP_VOL_AUTO_BY), ARRAY_A);
     $out['decided'] = (int) ($row['decided'] ?? 0);
     $out['agreed'] = (int) ($row['agreed'] ?? 0);
     $out['eligible'] = $out['decided'] >= $rules['decided'] && $out['agreed'] >= $rules['rate'] * $out['decided'];

@@ -85,3 +85,6 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     [Wiki feed](https://kidsoverprofits.org/wiki-feed/) titles link to facility pages with an "Also on" box under each.
     First load after deploy builds the name list (~5-10 s, once per 6 h); `check-contrast.py` on one post and the wiki
     feed; `check-mobile-overflow.py` at 390. Look for a wrong link on 10 posts; report any to the session for a rule.
+26. **Volunteers' agreed calls switch**: [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers#kop-vol-auto)
+    shows "Let agreed calls go through on their own" as Off; the Volunteers table's agreement rates are unchanged. Turn it On only
+    when you want it; the first ones show under "Gone through on their own" with Undo in Recently done.

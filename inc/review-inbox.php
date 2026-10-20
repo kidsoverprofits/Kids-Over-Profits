@@ -224,6 +224,8 @@ function kop_rinbox_source($key) {
 
 /** Who is reviewing, as the queues record it. */
 function kop_rinbox_reviewer() {
+    // Volunteers' agreed calls (inc/volunteer-auto.php) are filed under their own name.
+    if (!empty($GLOBALS['kop_rinbox_reviewer_as'])) return (string) $GLOBALS['kop_rinbox_reviewer_as'];
     $u = wp_get_current_user();
     return $u && $u->exists() ? (string) $u->user_login : 'admin';
 }

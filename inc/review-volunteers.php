@@ -44,6 +44,8 @@ const KOP_VOL_COOKIE = 'kop_vol';
 const KOP_VOL_PATH = 'volunteer-review';
 const KOP_VOL_REWRITE_VERSION = '1';
 const KOP_VOL_HOURLY_LIMIT = 300;
+/** The reviewer name on calls that went through on volunteers' word (inc/volunteer-auto.php). */
+const KOP_VOL_AUTO_BY = 'volunteers';
 
 /* ---- Tables --------------------------------------------------------------- */
 
@@ -249,16 +251,20 @@ function kop_vol_rename($id, $name) {
     $wpdb->update(kop_vol_table(), array('name' => mb_substr($name, 0, 100)), array('id' => (int) $id));
 }
 
-/** Every volunteer with how many they recommended and how often the admin decided the same way. */
+/**
+ * Every volunteer with how many they recommended and how often the admin decided the same way (calls that went
+ * through on volunteers' word are not the admin's decision and do not count).
+ */
 function kop_vol_list() {
     global $wpdb;
     kop_vol_ensure_tables();
     $v = kop_vol_table();
     $r = kop_vol_recs_table();
+    $by = "'" . KOP_VOL_AUTO_BY . "'";
     return (array) $wpdb->get_results("SELECT v.*,
             (SELECT COUNT(*) FROM $r WHERE volunteer_id = v.id) AS recs,
-            (SELECT COUNT(*) FROM $r WHERE volunteer_id = v.id AND outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject')) AS decided,
-            (SELECT COUNT(*) FROM $r WHERE volunteer_id = v.id AND outcome IN ('approve', 'reject') AND verdict = outcome) AS agreed
+            (SELECT COUNT(*) FROM $r WHERE volunteer_id = v.id AND outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject') AND outcome_by <> $by) AS decided,
+            (SELECT COUNT(*) FROM $r WHERE volunteer_id = v.id AND outcome IN ('approve', 'reject') AND verdict = outcome AND outcome_by <> $by) AS agreed
         FROM $v v ORDER BY v.revoked_at IS NOT NULL, v.name", ARRAY_A);
 }
 
@@ -296,6 +302,9 @@ function kop_vol_recommend(array $vol, $source, $key, $verdict, $note) {
         $wpdb->insert($t, $row + array('volunteer_id' => (int) $vol['id'], 'source' => $source, 'item_key' => (string) $key, 'created_at' => $now));
     }
     delete_transient('kop_vol_open_count');
+    if (function_exists('kop_vol_auto_try') && kop_vol_auto_try($source, $key) !== null) {
+        return array('message' => 'Thanks. Other volunteers said the same, so it has gone through. An admin can still undo it.', 'applied' => true);
+    }
     return array('message' => 'Thanks. Your recommendation is saved; an admin makes the final call.');
 }
 
@@ -835,6 +844,15 @@ function kop_vol_admin_page() {
                 $picked = array_map('sanitize_key', (array) ($_POST['kop_vol_sources'] ?? array()));
                 update_option('kop_volunteer_sources', array_values(array_diff($picked, kop_vol_never_sources())), false);
                 $notice = 'Queues saved.';
+            } elseif ($do === 'auto') {
+                $s = kop_vol_auto_save(array(
+                    'on'      => !empty($_POST['kop_vol_auto_on']),
+                    'sources' => (array) ($_POST['kop_vol_auto_sources'] ?? array()),
+                    'agree'   => (int) ($_POST['kop_vol_auto_agree'] ?? 0),
+                    'decided' => (int) ($_POST['kop_vol_auto_decided'] ?? 0),
+                    'rate'    => (int) ($_POST['kop_vol_auto_rate'] ?? 0),
+                ));
+                $notice = $s['on'] ? 'On: agreed calls in ' . count($s['sources']) . ' queue(s) now go through on their own.' : 'Off: every volunteer call waits for you.';
             } elseif ($do === 'dismiss') {
                 kop_vol_resolve(sanitize_key((string) ($_POST['kop_vol_source'] ?? '')), (string) wp_unslash($_POST['kop_vol_key'] ?? ''), 'dismissed', wp_get_current_user()->user_login);
                 $notice = 'Dismissed.';
@@ -857,7 +875,10 @@ function kop_vol_admin_page() {
     <div class="wrap">
         <h1>Volunteer Reviewers</h1>
         <p style="max-width:760px">Volunteers help with the <a href="<?php echo esc_url($inbox); ?>">Review Inbox</a> through a personal link: no account, no password.
-            They see the queues ticked below and can only <strong>recommend</strong> approve or reject, with a note. Nothing on the site changes until you act on the item;
+            They see the queues ticked below and can only <strong>recommend</strong> approve or reject, with a note.
+            <?php echo kop_vol_auto_settings()['on']
+                ? 'Agreed calls in the queues ticked under <a href="#kop-vol-auto">Let agreed calls go through on their own</a> go through by themselves (it is <strong>on</strong>); everything else waits for you;'
+                : 'Nothing on the site changes until you act on the item (<a href="#kop-vol-auto">letting agreed calls go through on their own</a> is off);'; ?>
             the inbox shows what they said on each card and lists them under <em>Volunteers recommend</em>. To see what they see, open
             <a href="<?php echo esc_url(kop_vol_page_url()); ?>" target="_blank" rel="noopener">the volunteer page</a> while signed in.</p>
         <?php if ($notice) : ?><div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div><?php endif; ?>
@@ -930,6 +951,8 @@ function kop_vol_admin_page() {
             <p><button type="submit" class="button">Save queues</button></p>
         </form>
 
+        <?php kop_vol_auto_admin_section($nonce, $inbox); ?>
+
         <h2>Recent recommendations</h2>
         <?php kop_vol_admin_recent($inbox, $nonce); ?>
     </div>
@@ -948,8 +971,10 @@ function kop_vol_admin_recent($inbox, $nonce) {
     $outcomes = array('' => 'Waiting for you', 'approve' => 'You approved', 'reject' => 'You rejected', 'gone' => 'Handled elsewhere', 'dismissed' => 'Dismissed');
     echo '<table class="widefat striped" style="max-width:1100px"><thead><tr><th>When</th><th>Who</th><th>Queue</th><th>Item</th><th>Said</th><th>Note</th><th>Outcome</th></tr></thead><tbody>';
     foreach ($rows as $r) {
-        $agree = in_array($r['outcome'], array('approve', 'reject'), true) && in_array($r['verdict'], array('approve', 'reject'), true)
+        $auto = $r['outcome_by'] === KOP_VOL_AUTO_BY;
+        $agree = !$auto && in_array($r['outcome'], array('approve', 'reject'), true) && in_array($r['verdict'], array('approve', 'reject'), true)
             ? ($r['outcome'] === $r['verdict'] ? ' (agreed)' : ' (differed)') : '';
+        if ($auto) $agree = ' (went through on volunteers\' word)';
         $url = $inbox !== '' ? add_query_arg('type', $r['outcome'] === '' ? '_volunteers' : $r['source'], $inbox) : '';
         echo '<tr><td>' . esc_html(get_date_from_gmt($r['updated_at'], 'M j g:i a')) . '</td><td>' . esc_html($r['name']) . '</td><td>'
             . esc_html($sources[$r['source']]['label'] ?? $r['source']) . '</td><td>' . ($url ? '<a href="' . esc_url($url) . '">' . esc_html($r['title'] ?: $r['item_key']) . '</a>' : esc_html($r['title']))
@@ -966,3 +991,4 @@ function kop_vol_admin_recent($inbox, $nonce) {
 }
 
 require_once __DIR__ . '/volunteer-projects.php';
+require_once __DIR__ . '/volunteer-auto.php';
