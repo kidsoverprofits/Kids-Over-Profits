@@ -227,25 +227,65 @@ check('a batched hit for a name the sweep index lacks still goes to the AI, not 
 /* ---- AI confirmation --------------------------------------------------- */
 
 $cand = $item('Nevada officials close youth mental hospital for urgent overhaul', 'batch', $batchNames, $batchKeys);
-$m = confirm_batch_attribution($cand, array(
+$chk = static fn($program, $about, $place) => array('program' => $program, 'aboutProgram' => $about, 'place' => $place);
+$desertWillow = array(
     'title' => 'Nevada officials close youth mental hospital for urgent overhaul',
     'facilities' => array('Desert Willow Treatment Center'),
     'summary' => 'The state closed the Las Vegas hospital for children...', 'location' => 'Las Vegas, NV',
-), $facilityIndex, $sweepIndex);
-check('the AI naming Desert Willow confirms it', $m !== null && $m['facility']['queryName'] === 'Desert Willow Treatment Center');
+    'discoveryCheck' => $chk('Desert Willow Treatment Center', true, 'Las Vegas, Nevada'),
+);
+$m = confirm_batch_attribution($cand, $desertWillow, $facilityIndex, $sweepIndex);
+check('the AI naming Desert Willow as what the story is about confirms it', $m !== null && $m['facility']['queryName'] === 'Desert Willow Treatment Center');
+
+$m = confirm_batch_attribution($cand, array_merge($desertWillow, array('discoveryCheck' => $chk('Desert Willow Treatment Center', 'true', 'Las Vegas, NV'))), $facilityIndex, $sweepIndex);
+check('aboutProgram given as the string "true" still counts', $m !== null);
+
+$noCheck = $desertWillow;
+unset($noCheck['discoveryCheck']);
+check('no discoveryCheck in the answer leaves it unconfirmed (a name in the facilities list is not enough)',
+    confirm_batch_attribution($cand, $noCheck, $facilityIndex, $sweepIndex) === null);
+
+// Canada base fire: victims taken to a hospital that shares a record's name.
+$m = confirm_batch_attribution($cand, array_merge($desertWillow, array(
+    'title' => 'Deaths reported when blaze hits Canada military base', 'location' => 'Edmonton, Alberta',
+    'discoveryCheck' => $chk('Desert Willow Treatment Center', false, 'Edmonton, Alberta'),
+)), $facilityIndex, $sweepIndex);
+check('a program named only as where people were taken (aboutProgram false) is unconfirmed', $m === null);
+
+$m = confirm_batch_attribution($cand, array_merge($desertWillow, array(
+    'location' => 'Edmonton, Alberta', 'discoveryCheck' => $chk('Desert Willow Treatment Center', true, 'Edmonton, Alberta'),
+)), $facilityIndex, $sweepIndex);
+check('a namesake in another place (neither the state nor the city of the record) is unconfirmed', $m === null);
+
+$m = confirm_batch_attribution($cand, array_merge($desertWillow, array(
+    'location' => '', 'discoveryCheck' => $chk('Desert Willow Treatment Center', true, 'Las Vegas'),
+)), $facilityIndex, $sweepIndex);
+check('the city of the record alone is enough of a place', $m !== null);
+
+$m = confirm_batch_attribution($cand, array_merge($desertWillow, array(
+    'discoveryCheck' => $chk('Clark County Juvenile Hall', true, 'Las Vegas, NV'),
+)), $facilityIndex, $sweepIndex);
+check('the story about a program outside the request is unconfirmed, though the searched one is in the facilities list', $m === null);
 
 $m = confirm_batch_attribution($cand, array(
     'title' => 'Scam operations on the rise', 'facilities' => array(), 'summary' => 'Nothing about any program.', 'location' => 'Washington, DC',
+    'discoveryCheck' => $chk('', false, ''),
 ), $facilityIndex, $sweepIndex);
 check('the AI naming none of the batch leaves it unconfirmed', $m === null);
 
 $m = confirm_batch_attribution($cand, array(
     'title' => 'Former Copper Canyon Academy students sue', 'facilities' => array('Copper Canyon Academy'), 'summary' => '', 'location' => '',
+    'discoveryCheck' => $chk('Copper Canyon Academy', true, 'Rimrock, Arizona'),
 ), $facilityIndex, $sweepIndex);
-check('a past name in the AI answer confirms its record', $m !== null && $m['facility']['queryName'] === 'Sedona Sky Academy');
+check('a past name as the subject confirms its record', $m !== null && $m['facility']['queryName'] === 'Sedona Sky Academy');
 
-$m = confirm_batch_attribution($cand, array('title' => 'Grafton man arrested', 'facilities' => array('Grafton'), 'summary' => '', 'location' => ''), $facilityIndex, $sweepIndex);
-check('a program outside the request\'s names does not confirm', $m === null);
+$m = confirm_batch_attribution($cand, array('title' => 'Grafton man arrested', 'facilities' => array('Grafton'), 'summary' => '', 'location' => '',
+    'discoveryCheck' => $chk('Grafton', true, 'Grafton, WI')), $facilityIndex, $sweepIndex);
+check('a program outside the names searched does not confirm', $m === null);
+
+$ask = batch_confirm_instructions($cand, $facilityIndex, $sweepIndex);
+check('the AI is asked for discoveryCheck and told the searched programs with their places',
+    str_contains($ask, '"discoveryCheck"') && str_contains($ask, 'Desert Willow Treatment Center (Las Vegas, NV)'), $ask);
 
 /* ---- Request carries what the filter needs ----------------------------- */
 

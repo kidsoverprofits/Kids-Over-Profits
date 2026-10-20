@@ -1901,12 +1901,12 @@ function resolve_google_news_url(string $url): string {
  * The AI step: api/process-news-ai.php reads the article and returns its
  * fields. ['ok' => true, 'data' => [...]] or ['ok' => false, 'stage' => 'ai', 'error' => ...].
  */
-function ai_process_candidate(array $candidate): array {
+function ai_process_candidate(array $candidate, string $instructions = ''): array {
     kop_log('  → AI processing: ' . substr($candidate['link'], 0, 90));
     $aiRes = post_json(AI_ENDPOINT, [
         'url' => $candidate['link'],
         'provider' => AI_PROVIDER,
-        'customInstructions' => ''
+        'customInstructions' => $instructions
     ], ['timeoutMs' => AI_TIMEOUT_MS]);
 
     if (!$aiRes['ok'] || empty($aiRes['body']['success'])) {
@@ -1917,27 +1917,69 @@ function ai_process_candidate(array $candidate): array {
     return ['ok' => true, 'data' => is_array($aiRes['body']['data'] ?? null) ? $aiRes['body']['data'] : []];
 }
 
-/**
- * Which of the programs a batched sweep item was searched for does the
- * article name? Matched over what the AI read: the facilities it listed, the
- * title, summary and location. The longest alias wins, as in match_facility.
- * Null when none of them is named: the article only mentioned the name in
- * passing, or Google's match was loose.
- */
-function confirm_batch_attribution(array $candidate, array $data, array $facilityIndex, array $sweepIndex): ?array {
+/** The records a batched sweep item was searched for, keyed like $facilityIndex. */
+function batch_own_records(array $candidate, array $facilityIndex, array $sweepIndex): array {
     $own = [];
     foreach ($candidate['batchKeys'] ?? [] as $k) {
         foreach ($sweepIndex[$k] ?? [] as $i) {
             if (isset($facilityIndex[$i])) $own[$i] = $facilityIndex[$i];
         }
     }
+    return $own;
+}
+
+/**
+ * What the AI is asked about a batched sweep hit, besides the usual fields:
+ * which youth program the story is about, whether the story is about what
+ * that program did or what happened in its care, and where it is. A name in
+ * the body is not enough: a fire's victims taken to a hospital that shares a
+ * record's name, a boy arrested for car theft and booked into a county
+ * detention center, a school named John Dewey (October 2026 submissions the
+ * owner rejected) all named a searched program.
+ */
+function batch_confirm_instructions(array $candidate, array $facilityIndex, array $sweepIndex): string {
+    $lines = [];
+    foreach (batch_own_records($candidate, $facilityIndex, $sweepIndex) as $fac) {
+        $place = trim(implode(', ', array_filter([$fac['city'] ?? '', $fac['state'] ?? ''])));
+        $lines[] = '- ' . $fac['queryName'] . ($place !== '' ? " ({$place})" : '');
+    }
+    $lines = array_values(array_unique($lines));
+    return "Also add this key to the JSON:\n"
+        . '"discoveryCheck": {"program": "the youth program this article is mainly about, named exactly as the article names it, or empty", '
+        . '"aboutProgram": true or false, "place": "City, State (or Country) of that program"}' . "\n"
+        . "aboutProgram is true only when the article reports what that program or its staff did, or what happened to young people "
+        . "in its care: abuse, a death, restraint, neglect, an escape, a lawsuit, an inspection, a license action, a closure, its conditions. "
+        . "It is false when the program is only where someone was taken, booked, held or treated after something that happened elsewhere, "
+        . "when the place named is a hospital, school, agency or business that is not a youth residential program, "
+        . "or when the article is about something else and mentions the program in passing.\n"
+        . "We searched for these programs:\n" . implode("\n", $lines);
+}
+
+/**
+ * Which of the programs a batched sweep item was searched for is the article
+ * about? Three things must agree: the AI says the article is about a youth
+ * program's own conduct or care (discoveryCheck.aboutProgram), the program it
+ * names is one of those searched, and its place fits the record (the state,
+ * else the city; a record with neither is taken on the name). Null otherwise:
+ * the name came up in passing, it is a namesake elsewhere, or Google's match
+ * was loose. The longest alias wins, as in match_facility.
+ */
+function confirm_batch_attribution(array $candidate, array $data, array $facilityIndex, array $sweepIndex): ?array {
+    $own = batch_own_records($candidate, $facilityIndex, $sweepIndex);
     if (!$own) return null;
-    $join = static fn($v) => is_array($v) ? implode(' ', array_map('strval', $v)) : (string)($v ?? '');
-    $text = implode(' ', [
-        $join($data['facilities'] ?? ''), (string)($data['title'] ?? ''), (string)($data['alternateTitle'] ?? ''),
-        (string)($data['summary'] ?? ''), (string)($data['location'] ?? ''), $candidate['title'] ?? ''
-    ]);
-    return match_facility($text, $own);
+    $check = is_array($data['discoveryCheck'] ?? null) ? $data['discoveryCheck'] : [];
+    $about = $check['aboutProgram'] ?? false;
+    if ($about !== true && !(is_string($about) && strtolower(trim($about)) === 'true')) return null;
+    $m = match_facility((string)($check['program'] ?? ''), $own);
+    if ($m === null) return null;
+    $fac = $m['facility'];
+    $place = trim((string)($check['place'] ?? '') . ' ' . (string)($data['location'] ?? ''));
+    $state = (string)($fac['state'] ?? '');
+    $city = (string)($fac['city'] ?? '');
+    if ($state === '' && $city === '') return $m;
+    if ($state !== '' && isset(extract_state_signals($place)[$state])) return $m;
+    if ($city !== '' && text_names_city($place, $city)) return $m;
+    return null;
 }
 
 /**
@@ -2314,7 +2356,8 @@ function main(): void {
             if ($isTopic) $totals['topicAttempted']++;
             if ($isPending) $totals['aiConfirms']++;
             sleep_ms(AI_REQUEST_DELAY_MS);
-            $r = ai_process_candidate($q['candidate']);
+            $askAi = $isPending ? batch_confirm_instructions($q['candidate'], $facilityIndex, $sweepIndex) : '';
+            $r = ai_process_candidate($q['candidate'], $askAi);
 
             // Provider rate limits are transient — wait a cool-down and retry a
             // couple of times within the run before carrying the candidate to
@@ -2323,7 +2366,7 @@ function main(): void {
                  !$r['ok'] && $r['stage'] === 'ai' && preg_match('/rate limit/i', $r['error'] ?? ''); $attempt++) {
                 kop_log("    rate-limited; retry {$attempt}/" . AI_RATE_LIMIT_RETRIES . ' after ' . (AI_RATE_LIMIT_WAIT_MS / 1000) . 's cool-down…');
                 sleep_ms(AI_RATE_LIMIT_WAIT_MS);
-                $r = ai_process_candidate($q['candidate']);
+                $r = ai_process_candidate($q['candidate'], $askAi);
             }
 
             // A batched sweep hit: the article has been read, so now settle
@@ -2334,12 +2377,13 @@ function main(): void {
                 if ($m === null) {
                     $totals['unconfirmed']++;
                     $named = is_array($r['data']['facilities'] ?? null) ? implode(', ', array_map('strval', $r['data']['facilities'])) : (string)($r['data']['facilities'] ?? '');
-                    kop_log('    not about ' . implode(' / ', $q['candidate']['batchNames'] ?? []) . ($named !== '' ? " (names: {$named})" : ''));
+                    $said = is_array($r['data']['discoveryCheck'] ?? null) ? json_encode($r['data']['discoveryCheck'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : 'no answer';
+                    kop_log('    not about ' . implode(' / ', $q['candidate']['batchNames'] ?? []) . ($named !== '' ? " (names: {$named})" : '') . " (AI: {$said})");
                     $postResolveLog[] = [
                         'link' => $q['candidate']['link'], 'title' => $q['candidate']['title'], 'origin' => 'google-news',
                         'host' => host_of($q['candidate']['link']), 'facilityQuery' => $q['candidate']['facilityQuery'] ?? null,
                         'reason' => 'batch-unconfirmed',
-                        'meta' => ['score' => $q['evalResult']['score'], 'reasons' => $q['evalResult']['reasons'], 'aiFacilities' => $named]
+                        'meta' => ['score' => $q['evalResult']['score'], 'reasons' => $q['evalResult']['reasons'], 'aiFacilities' => $named, 'aiCheck' => $said]
                     ];
                     continue;
                 }
