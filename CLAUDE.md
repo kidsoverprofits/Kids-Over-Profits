@@ -80,6 +80,20 @@ section it belongs to, before going on. Don't save them all up for the end of th
 `docs/PLAN-ARCHIVE.md` (verbatim, under their old heading, dated) once nothing still open needs their context;
 a finished step that explains how open work behaves stays. PLAN.md section 1 has the rule in full.
 
+## Topic change = handoff + new session (standing rule, 2026-10-20)
+
+When the owner's message moves to a different task than the one the session has been working on (a different
+feature, screen, pipeline, record or question; not a follow-up, fix or extension of the same work), stop before
+starting it and hand off the last task:
+
+1. Write what is still open from it into `docs/PLAN.md` (the rule above), and commit + push whatever finished.
+2. Reply with a short handoff: what was done (commit links), what is open (the PLAN.md items), and the files,
+   commands and decisions a new session needs, ending with a paste-ready opening message for that session.
+3. Remind the owner to start a new session (or `/clear`) for the new topic and paste that message in.
+
+Do not start the new topic in the same session unless the owner says to ("go ahead here"). A one-line question
+needing no tools or file reads can be answered in place. When unsure whether it is a new topic, ask in one line.
+
 ## Key Commands
 
 ```bash
