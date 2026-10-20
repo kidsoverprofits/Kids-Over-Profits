@@ -92,6 +92,49 @@ function kop_render_page_text_editor() {}
 function kop_network_years_page() {}
 function kop_network_renames_page() {}
 class AnonymousDocPortal {}
+// Every other screen's 'requires' is stubbed when the theme defines it, so a
+// screen counts as missing only when no theme file has its function or class;
+// its sidebar entry is added when a theme file adds a KOP Tools submenu and
+// names its slug, as that file does on the site.
+$theme_files = array($theme . '/functions.php');
+foreach (array('inc', 'api', 'templates') as $dir) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($theme . '/' . $dir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if (substr($file->getFilename(), -4) === '.php') {
+            $theme_files[] = $file->getPathname();
+        }
+    }
+}
+$theme_src = array_map('file_get_contents', $theme_files);
+$theme_php = implode("\n", $theme_src);
+$stub_screens = array();
+foreach (kop_tools_registry() as $tools) {
+    foreach ($tools as $tool) {
+        $req = isset($tool['type'], $tool['requires']) && $tool['type'] === 'screen' ? $tool['requires'] : '';
+        if ($req === '' || function_exists($req) || class_exists($req) || !preg_match('/^\w+$/', $req)) {
+            continue;
+        }
+        if (preg_match('/\bfunction\s+' . $req . '\s*\(/i', $theme_php)) {
+            eval("function $req() {}");
+        } elseif (preg_match('/\bclass\s+' . $req . '\b/', $theme_php)) {
+            eval("class $req {}");
+        } else {
+            continue;
+        }
+        foreach ($theme_src as $src) {
+            if (preg_match('/add_submenu_page\(\s*kop_tools_parent_slug\(\)/', $src)
+                && preg_match("/['\"]" . preg_quote($tool['screen'], '/') . "['\"]/", $src)) {
+                $stub_screens[] = $tool;
+                break;
+            }
+        }
+    }
+}
+add_action('admin_menu', function () use ($stub_screens) {
+    foreach ($stub_screens as $tool) {
+        add_submenu_page(kop_tools_parent_slug(), $tool['title'], $tool['title'], 'manage_options', $tool['screen']);
+    }
+}, 21);
 add_action('admin_menu', function () {
     add_submenu_page(kop_tools_parent_slug(), 'Glossary Editor', 'Glossary Editor', 'manage_options', 'kop-glossary-editor');
     add_submenu_page(kop_tools_parent_slug(), 'Glossary Feedback', 'Glossary Feedback', 'manage_options', 'kop-glossary-feedback');
