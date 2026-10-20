@@ -971,7 +971,8 @@ if (!function_exists('kop_facility_pages_link_sets')) {
         if (kop_facility_pages_table_exists('wiki_submissions')) {
             $rows = $wpdb->get_results("SELECT facility_unique_name, program_name FROM wiki_submissions WHERE status IN ('approved','published')", ARRAY_A);
             foreach ((array) $rows as $r) {
-                foreach (array($r['facility_unique_name'], $r['program_name']) as $n) {
+                // An entry linked to a record counts for that record only; its title matches by name only while unlinked.
+                foreach (trim((string) $r['facility_unique_name']) !== '' ? array($r['facility_unique_name']) : array($r['program_name']) as $n) {
                     $n = strtolower(trim((string) $n));
                     if ($n !== '') $sets['wiki'][$n] = ($sets['wiki'][$n] ?? 0) + 1;
                 }
@@ -3749,7 +3750,7 @@ if (!function_exists('kop_facility_pages_memorials')) {
 }
 
 if (!function_exists('kop_facility_pages_wiki')) {
-    /** Approved wiki entries filed under this facility. */
+    /** Approved wiki entries filed under this facility: linked to it, or unlinked with one of its names as title. */
     function kop_facility_pages_wiki($name, $unique_name, $current_name) {
         global $wpdb;
         if (!kop_facility_pages_table_exists('wiki_submissions')) return array();
@@ -3760,7 +3761,8 @@ if (!function_exists('kop_facility_pages_wiki')) {
             "SELECT id, program_name, city_state, organization, program_type, years_active, updated_at
                FROM wiki_submissions
               WHERE status IN ('approved','published')
-                AND (facility_unique_name IN ($placeholders) OR program_name IN ($placeholders))
+                AND (facility_unique_name IN ($placeholders)
+                     OR (COALESCE(facility_unique_name, '') = '' AND program_name IN ($placeholders)))
               ORDER BY updated_at DESC, id DESC",
             array_merge($names, $names)
         ), ARRAY_A);
