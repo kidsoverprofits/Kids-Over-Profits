@@ -205,6 +205,31 @@ $GLOBALS['kop_test_options']['kop_seo_drafts_skipped'] = array(2301 => time());
 $check('a skipped page moves to the Skipped tab', !in_array(2301, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(false)), true)
     && in_array(2301, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(true)), true));
 
+echo "-- Rule drafts stored --\n";
+$GLOBALS['kop_test_options'] = array_diff_key($GLOBALS['kop_test_options'], array('kop_seo_drafts_log' => 1, 'kop_seo_drafts_skipped' => 1, 'kop_seo_kw_wording' => 1));
+$before = kop_seo_drafts_candidates(false);
+$stored = kop_seo_drafts_store_rule_drafts();
+$after = kop_seo_drafts_candidates(false);
+$seed_ids = array_map('intval', array_keys(kop_seo_drafts_seed()));
+$log = kop_seo_drafts_log();
+$touched = array_map(function ($e) { return (int) $e['post']; }, $log);
+echo '  ' . count($before) . " listed, $stored stored by rule, " . count($after) . " still listed\n";
+$check('every rule draft is stored, logged as stored by rule', $stored > 150 && count($log) === $stored && !array_filter($log, function ($e) { return $e['via'] !== 'rules'; }), (string) $stored);
+$check('no hand-written page is touched', !array_intersect($touched, $seed_ids));
+$left_desc = array_filter($after, function ($c) use ($seed_ids) { return $c[1] === '' && !in_array((int) $c[0]->ID, $seed_ids, true) && kop_seo_drafts_description($c[0])[0] !== ''; });
+$check('no page with a rule description is left without one', !$left_desc, implode(',', array_map(function ($c) { return $c[0]->ID; }, $left_desc)));
+$wy = array_values(array_filter($after, function ($c) { return kop_seo_drafts_kind($c[0]) === 'state'; }));
+$check('state hubs stay listed for their keyphrase, description stored', $wy && $wy[0][1] !== '' && $wy[0][2] === '');
+$check('a second run stores nothing', kop_seo_drafts_store_rule_drafts() === 0);
+$GLOBALS['kop_test_options']['kop_seo_kw_wording'] = array('facility' => '{name} abuse', 'state' => 'troubled teen programs {name}');
+$more = kop_seo_drafts_store_rule_drafts();
+$check('once the wording is set, the waiting keyphrases are stored too', $more > 40 && get_post_meta((int) $wy[0][0]->ID, '_yoast_wpseo_focuskw', true) === 'troubled teen programs ' . kop_seo_drafts_title($wy[0][0]), "$more");
+// A page the wording run did not touch again (Undo is refused once a field changed since, by design).
+$later = array_map(function ($e) { return (int) $e['post']; }, array_slice(kop_seo_drafts_log(), 0, $more));
+$first = current(array_filter($log, function ($e) use ($later) { return !in_array((int) $e['post'], $later, true); }));
+$check('a stored rule draft undoes exactly', kop_seo_drafts_undo($first['token']) === true && (string) get_post_meta((int) $first['post'], '_yoast_wpseo_metadesc', true) === $first['before']['metadesc']);
+unset($GLOBALS['kop_test_options']['kop_seo_kw_wording']);
+
 echo "-- Screen --\n";
 foreach (array('' => 'To review', 'skipped' => 'Skipped', 'done' => 'Done') as $tab => $label) {
     $_GET = array('page' => 'kop-seo-drafts', 'tab' => $tab);

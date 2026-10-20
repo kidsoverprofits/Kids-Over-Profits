@@ -344,7 +344,7 @@ function kop_seo_drafts_set($id, $key, $value) {
  * Store an approved description and keyphrase on post $id, logged with the fields as they were.
  * An empty box leaves that field as it is. Returns the log entry, or null when nothing changed.
  */
-function kop_seo_drafts_approve($id, $desc, $kw) {
+function kop_seo_drafts_approve($id, $desc, $kw, $via = '') {
     $id = (int) $id;
     $desc = trim((string) preg_replace('/\s+/u', ' ', wp_strip_all_tags((string) $desc)));
     $kw = trim((string) preg_replace('/\s+/u', ' ', wp_strip_all_tags((string) $kw)));
@@ -361,7 +361,7 @@ function kop_seo_drafts_approve($id, $desc, $kw) {
     kop_seo_drafts_refresh_yoast($id);
     $entry = array('token' => function_exists('wp_generate_password') ? wp_generate_password(12, false) : bin2hex(random_bytes(6)),
         'post' => $id, 'before' => $before, 'after' => $after, 'user' => function_exists('get_current_user_id') ? get_current_user_id() : 0,
-        'at' => time(), 'undone' => 0);
+        'at' => time(), 'undone' => 0, 'via' => (string) $via);
     $log = kop_seo_drafts_log();
     array_unshift($log, $entry);
     update_option('kop_seo_drafts_log', array_slice($log, 0, KOP_SEO_DRAFTS_LOG_MAX), false);
@@ -369,6 +369,39 @@ function kop_seo_drafts_approve($id, $desc, $kw) {
     if (isset($skip[$id])) { unset($skip[$id]); update_option('kop_seo_drafts_skipped', $skip, false); }
     return $entry;
 }
+
+/**
+ * Store every draft a rule made (owner, 2026-10-20: "store the rule drafts, with Undo"): each listed page not in
+ * seeds/seo-descriptions.json gets its rule description and, where a rule gives one, its keyphrase, logged like an
+ * approval (Done tab, Undo). Hand-written pages, pages with nothing drafted, skipped pages and a person's keyphrase
+ * (name only; the owner adds role or employer) stay for the owner. Runs once on deploy and again when the keyphrase
+ * wording is saved, so the facility, state and news keyphrases follow. Returns how many pages were stored.
+ */
+function kop_seo_drafts_store_rule_drafts() {
+    $seed = kop_seo_drafts_seed();
+    $done = 0;
+    foreach (kop_seo_drafts_candidates(false) as $c) {
+        $post = $c[0];
+        if (isset($seed[(string) $post->ID])) continue;
+        $desc = $c[1] !== '' ? '' : kop_seo_drafts_description($post)[0];
+        $kw = '';
+        if ($c[2] === '' && kop_seo_drafts_kind($post) !== 'person') {
+            $k = kop_seo_drafts_keyphrase($post);
+            if (empty($k[2])) $kw = (string) $k[0];
+        }
+        if (kop_seo_drafts_approve((int) $post->ID, $desc, $kw, 'rules')) $done++;
+    }
+    return $done;
+}
+
+/** The first store, once per version (bump to run it again after a rule changes). */
+function kop_seo_drafts_maybe_store_rule_drafts() {
+    $version = 1;
+    if (!current_user_can('manage_options') || (int) get_option('kop_seo_drafts_rules_v', 0) >= $version) return;
+    update_option('kop_seo_drafts_rules_v', $version, false);
+    kop_seo_drafts_store_rule_drafts();
+}
+add_action('admin_init', 'kop_seo_drafts_maybe_store_rule_drafts');
 
 /**
  * Put back the fields an approval replaced. Refused (false) when either field has changed since, so a
@@ -408,7 +441,8 @@ function kop_seo_drafts_handle() {
             'facility' => sanitize_text_field((string) ($w['facility'] ?? '')),
             'state'    => sanitize_text_field((string) ($w['state'] ?? '')),
         ), false);
-        wp_safe_redirect(add_query_arg('kop_done', 'wording', $back));
+        $n = kop_seo_drafts_store_rule_drafts();   // the keyphrases that waited on the wording
+        wp_safe_redirect(add_query_arg('kop_done', 'wording:' . $n, $back));
         exit;
     }
     if (!empty($_POST['undo'])) {
@@ -498,13 +532,13 @@ function kop_seo_drafts_done_list() {
     $log = kop_seo_drafts_log();
     if (!$log) return kop_ak_empty('Nothing approved yet.');
     $out = '<div class="kop-seod-list">';
-    foreach (array_slice($log, 0, 100) as $e) {
+    foreach ($log as $e) {
         $id = (int) $e['post'];
         $post = get_post($id);
         $name = $post ? kop_seo_drafts_title($post) : 'Post ' . $id;
         $out .= '<article class="kop-seod-card' . (!empty($e['undone']) ? ' is-undone' : '') . '">'
             . '<p class="kop-seod-done-head"><a class="kop-seod-title" href="' . esc_url(get_permalink($post ?: $id)) . '" target="_blank" rel="noopener">' . esc_html($name) . '</a> '
-            . '<span class="kop-seod-kind">' . esc_html(wp_date('M j, Y g:i a', (int) $e['at'])) . (!empty($e['undone']) ? ', undone' : '') . '</span></p>'
+            . '<span class="kop-seod-kind">' . esc_html(wp_date('M j, Y g:i a', (int) $e['at'])) . (($e['via'] ?? '') === 'rules' ? ', stored by rule' : '') . (!empty($e['undone']) ? ', undone' : '') . '</span></p>'
             . '<dl class="kop-seod-diff">';
         foreach (array('metadesc' => 'Description', 'focuskw' => 'Focus keyphrase') as $k => $label) {
             if ($e['before'][$k] === $e['after'][$k]) continue;
@@ -548,7 +582,7 @@ function kop_seo_drafts_screen() {
     $flash = sanitize_text_field(wp_unslash($_GET['kop_done'] ?? ''));
     if ($flash !== '') {
         list($what, $n) = array_pad(explode(':', $flash, 2), 2, '');
-        $msg = array('approve' => (int) $n . ' approved.', 'skip' => (int) $n . ' skipped.', 'unskip' => 'Put back in the list.', 'undo' => 'Undone: the fields are as they were.', 'wording' => 'Keyphrase wording saved.');
+        $msg = array('approve' => (int) $n . ' approved.', 'skip' => (int) $n . ' skipped.', 'unskip' => 'Put back in the list.', 'undo' => 'Undone: the fields are as they were.', 'wording' => 'Keyphrase wording saved; ' . (int) $n . ' pages took their keyphrase from it (Done tab, Undo).');
         echo kop_ak_status(esc_html($msg[$what] ?? 'Saved.'));
     }
     if (!empty($_GET['kop_undo_failed'])) echo kop_ak_status('Not undone: the fields have changed since (in the post editor or another approval). Change them in the editor instead.');
