@@ -150,6 +150,8 @@ require_once get_stylesheet_directory() . '/inc/site-map.php';
 
 // /how-to-use-this-site/: where to start, the main destinations grouped by what a reader came to do.
 require_once get_stylesheet_directory() . '/inc/how-to-use.php';
+// /questions/: "We have questions about..." one short question at a time about what records lack; answers settle by agreement or in the Review inbox
+require_once get_stylesheet_directory() . '/inc/questions.php';
 // Cite and print on /facility/ and /operator/ pages, and the press desk on /journalists/
 require_once get_stylesheet_directory() . '/inc/press-tools.php';
 

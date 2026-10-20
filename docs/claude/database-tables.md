@@ -33,4 +33,5 @@ What each table holds and which file owns it. A new table goes here (and in `DAT
 - `{prefix}kop_folder_links` - Legacy/current-name folder equivalence (curated in `api/link-folders.php`)
 - `{prefix}kop_glossary_nodes` / `_entries` / `_aliases` / `_tags` / `_log` - The TTI glossary: sections and groups, terms, other names, program tags, and each entry change for Undo (`inc/glossary-store.php`)
 - `{prefix}kop_glossary_feedback` - Reader notes from the glossary's "My facility used this too" / "Suggest a correction" buttons (`inc/glossary-feedback.php`; reviewed under KOP Tools > Glossary Feedback)
+- `{prefix}kop_question_answers` / `{prefix}kop_question_state` - Readers' answers on /questions/, one per person and question, and each settled or dismissed question with what it wrote for Undo (`inc/questions.php`; Review inbox > Answers to our questions)
 - `{prefix}kop_addresses` / `{prefix}kop_facility_addresses` - Physical address IDs and which facility stood where (`api/manage-addresses.php`; join table rebuilt from facility data on each seed)

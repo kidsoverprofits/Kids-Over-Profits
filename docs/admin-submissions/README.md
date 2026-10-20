@@ -77,6 +77,7 @@ Tabs are grouped under headings (the source's `'group'`). Each tab's own help li
 **Sent in by readers**
 - **Anonymous documents:** documents from the anonymous upload page, sealed with the portal's public key: download and open one with `scripts/anon-portal-decrypt.php` and the private key, then mark it handled.
 - **Bug reports:** reports from the on-site bug widget; changing the status emails the reader when they asked for updates.
+- **Answers to our questions:** what readers answered on /questions/ (years, towns, ages, practices, staff, rules, company facts, and which source is right where sources disagree), one card per question with each answer, how many gave it, how they know and their notes. Three people giving the same answer with nobody disagreeing settles it on its own (listed under Settled, with Undo); staff years and rules always wait. Use this answer writes the one you pick (a program's facts go on with its next write-up), Write my own writes yours, Dismiss stops asking; Undo takes back what was written and asks again.
 - **Glossary feedback:** reader notes from the glossary's "My facility used this too" and "Suggest a correction" buttons; make the change in the Glossary Editor, then mark the note added.
 - **Websites sent in:** pages sent with the Send to KOP button that are not news, lawsuits or bills; keep, trash or restore.
 

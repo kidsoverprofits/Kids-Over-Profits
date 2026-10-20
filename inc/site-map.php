@@ -492,6 +492,9 @@ if (!function_exists('kop_site_map_build')) {
         if (function_exists('kop_dt_url')) {
             $sections['sources']['items'][] = kop_site_map_item('Documents by type', kop_dt_url(), 'Handbooks, manuals, court filings and other documents, one kind at a time across programs');
         }
+        if (function_exists('kop_q_url')) {
+            $sections['take-part']['items'][] = kop_site_map_item('We have questions', kop_q_url(), 'Short questions about what our records are missing, for people who were in a program, worked at one or sent a child to one');
+        }
         if (function_exists('kop_send_page_url')) {
             $sections['take-part']['items'][] = kop_site_map_item('Send a link', kop_send_page_url(), 'An article, lawsuit, bill or website we are missing, from any browser');
         }

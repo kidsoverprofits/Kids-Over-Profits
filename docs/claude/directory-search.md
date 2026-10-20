@@ -26,6 +26,17 @@ node scripts/test-testimony-move.js
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need
 # data-growing-text-field="true" or ui-events.js swaps them for textareas
 python scripts/test-data-wizard.py               # live page + working-tree wizard, 1280 and 390 px
+# /questions/ ("We have questions", inc/questions.php + templates/questions.php + js/questions.js + css/questions.css): one short
+# question at a time, phone first, about what a record lacks (open?, opened, closed, town, boys/girls, ages, until when an earlier
+# name was used, each unticked practice, "was <staff> there when you were? year", remembered rules; companies: founded, based,
+# operating?, owner) and Review inbox > Conflicts as multiple choice. Yes/no cards swipe (right yes, left no). Found by search or a
+# state deck; #f<id> / #o<id> / #q=<key> open a record. Answers: {prefix}kop_question_answers, one per person (keyed hash of address +
+# browser), 60 an hour. KOP_Q_AGREE (3) people agreeing with nobody disagreeing settles it on its own through Review inbox > Answers
+# to our questions ('settle', reviewer "questions page", Undo in Recently done); staff and rules always wait. Facility values go in as
+# Woodbury Facts rows (extra.via 'questions') through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
+# name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act()
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php                         # questions, answers, agreement, every real record
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
 # Admin facility id boxes: always kop_facility_finder_field() (inc/facility-finder.php), never a bare id input
 php scripts/test-facility-finder.php              # search by name/past name/id against tmp/prod.sqlite, no bare id boxes left
 # Facility directory (/tti-program-index/, both tabs) loads in steps: lists from kop/v1/facilities?view=index (each facility
