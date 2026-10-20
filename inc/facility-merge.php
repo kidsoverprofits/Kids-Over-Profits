@@ -804,10 +804,19 @@ if (!function_exists('kop_facility_merge_redirect')) {
             $id = (int) $m[1];
         }
         if ($id <= 0 || !isset($map['ids'][$id])) return;
+        // A live record's own slug wins over a dropped record's old one: the
+        // kept record can take the dropped name (a rename merge), and an undone
+        // merge can leave its id behind. Redirecting then loops on itself.
+        if (function_exists('kop_facility_pages_index')) {
+            $index = kop_facility_pages_index();
+            if (isset($index['slugs'][$slug]) || isset($index['ids'][$id])) return;
+        }
         $keep = kop_facility_merge_resolve($id);
         $url = function_exists('kop_facility_page_url') ? kop_facility_page_url($keep) : '';
         if ($url === '' && function_exists('kop_facility_pages_thin_target')) $url = kop_facility_pages_thin_target($keep);
         if ($url === '') return;
+        $here = trim((string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+        if (strtolower(rawurldecode($here)) === strtolower(trim((string) parse_url($url, PHP_URL_PATH), '/'))) return;
         wp_safe_redirect($url, 301);
         exit;
     }
