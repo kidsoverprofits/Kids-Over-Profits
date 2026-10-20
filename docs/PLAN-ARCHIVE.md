@@ -3064,3 +3064,11 @@ had and keeps its numbers (bf25d805); the era check asks for a year only when th
 - **test-fornits**: the batch's facility ids follow merges (kop_facility_merge_resolve() over the mirror's merge map),
   as kop_fmerge_follow_waiting() does on the server; 15 records of the Oct 2 batch were merged since. Run against a copy
   of `~/kop-import/fornits/batch-20261002-192403.jsonl.gz` with `--batch=`. e9f78c06.
+
+- **Hourly task "KOP Fornits" fails every hour (exit 1)** since the 2026-10-17 wipe of kop-pipeline/tmp: the
+  `tmp\fornits\` folder its `--log` writes to is gone. The crawl had probably finished by then (the batches on the
+  server stop at `~/kop-import/fornits/batch-20261002-192403.jsonl.gz`). Owner's call: disable the task (`schtasks /change /tn "KOP
+  Fornits" /disable`), or let it re-crawl: with `tmp/fornits/` present and no `crawl.done` it restarts the full crawl
+  (about 19 hours) and, `processed.json` being gone too, sends every topic again as new batches. Do not create
+  `tmp/fornits/` until this is decided; run test-fornits with `--batch=<a copy of a server batch>`.
+  Owner, 2026-10-20: disable it. Disabled the same day (schtasks /change /disable); re-enable it only with a new crawl.
