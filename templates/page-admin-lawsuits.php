@@ -88,7 +88,7 @@ get_header();
                         <input type="date" name="filing_date" id="lawsuit-filing-date">
                     </label>
                     <label>Status
-                        <select name="status" id="lawsuit-status">
+                        <select name="status" id="lawsuit-status"<?php echo kop_choice_select_attr('lawsuit-statuses'); ?>>
                             <?php echo kop_status_choice_options_html('lawsuit-statuses'); // KOP Tools > Dropdown Lists ?>
                         </select>
                     </label>

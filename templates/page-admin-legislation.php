@@ -130,7 +130,7 @@ get_header();
                 <div class="form-row two-col">
                     <label>&nbsp;</label>
                     <label>Status
-                        <select name="status" id="leg-status">
+                        <select name="status" id="leg-status"<?php echo kop_choice_select_attr('bill-statuses'); ?>>
                             <?php echo kop_status_choice_options_html('bill-statuses'); // KOP Tools > Dropdown Lists ?>
                         </select>
                     </label>
@@ -180,7 +180,7 @@ get_header();
 
                 <div class="form-row two-col">
                     <label>KOP position
-                        <select name="position" id="leg-position">
+                        <select name="position" id="leg-position"<?php echo kop_choice_select_attr('bill-positions'); ?>>
                             <?php echo kop_status_choice_options_html('bill-positions'); ?>
                         </select>
                     </label>

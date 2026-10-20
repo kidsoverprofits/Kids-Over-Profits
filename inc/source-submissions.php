@@ -217,7 +217,7 @@ function kop_ext_render_source_box($post) {
             foreach (kop_ext_website_kinds('offered') + ($kind !== '' ? array($kind => kop_ext_website_kinds()[$kind]) : array()) as $k => $l) {
                 $opts .= sprintf('<option value="%s"%s>%s</option>', esc_attr($k), selected($kind, $k, false), esc_html($l));
             }
-            $field = sprintf('<select id="kop-ext-kind" name="%s">%s</select>', esc_attr($name), $opts);
+            $field = sprintf('<select id="kop-ext-kind" name="%s"%s>%s</select>', esc_attr($name), kop_choice_select_attr('website-kinds'), $opts);
         } elseif (in_array($key, array('description', 'selection'), true)) {
             $field = sprintf('<textarea id="kop-ext-%1$s" name="%2$s" rows="3" class="large-text">%3$s</textarea>', esc_attr($key), esc_attr($name), esc_textarea($val));
         } else {

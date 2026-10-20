@@ -882,7 +882,7 @@ function kop_wbc_render_form(array $r) {
     }
     echo '</select></label>';
     echo '<label>Country, outside the US <input type="text" class="kop-wbc-country" value="' . esc_attr($p['country']) . '"></label>';
-    echo '<label class="kop-wbc-only" data-kinds="facility">Type (Ctrl-click for several) <select class="kop-wbc-type" multiple size="4">';
+    echo '<label class="kop-wbc-only" data-kinds="facility">Type (Ctrl-click for several) <select class="kop-wbc-type" multiple size="4"' . kop_choice_select_attr('facility-types') . '>';
     foreach (kop_facdisc_types('offered') as $t) {
         echo '<option>' . esc_html($t) . '</option>';
     }

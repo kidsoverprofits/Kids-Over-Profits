@@ -59,7 +59,7 @@ get_header();
 
                 <div class="form-row two-col">
                     <label>Project type
-                        <select name="project_type" id="vol-type">
+                        <select name="project_type" id="vol-type"<?php echo kop_choice_select_attr('volunteer-project-types'); ?>>
                             <?php echo kop_status_choice_options_html('volunteer-project-types'); ?>
                         </select>
                     </label>

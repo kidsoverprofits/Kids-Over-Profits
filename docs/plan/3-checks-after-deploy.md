@@ -73,3 +73,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     close?" project for yourself with a state, open its link in a private window, answer one with a link (it appears
     waiting in Submissions Review > News), ask a question, answer it under Messages (the menu shows a count, an email
     arrives), and see the reply marked New on the volunteer page. Mark the answer Used, then close the project.
+24. **"+ Add new..." in dropdowns**: on [Investors](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors) pick
+    Kind > "+ Add new...", type a test kind, Add: it is selected and appears at
+    [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists&list=investor-kinds); Undo it
+    there. Also the Status dropdown on the admin lawsuits and legislation pages and the Type dropdowns on Woodbury Facts.
+    Selects not fed by a registered list (publication status, jurisdiction, filters) deliberately have no such option.

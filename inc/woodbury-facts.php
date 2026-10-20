@@ -2730,7 +2730,7 @@ function kop_wbf_other_record(array $first, $no_record) {
         . '<label>City <input type="text" class="kop-wbf-ccity" value="' . esc_attr($city) . '"></label>'
         . '<label>State <input type="text" class="kop-wbf-cstate" value="' . esc_attr($state) . '"></label>'
         . '<label>or country <input type="text" class="kop-wbf-ccountry"></label>'
-        . '<span class="kop-wbf-conly"><label>Type (none if not sure; Ctrl-click for several) <select class="kop-wbf-ctype" multiple size="4">' . $types . '</select></label>'
+        . '<span class="kop-wbf-conly"><label>Type (none if not sure; Ctrl-click for several) <select class="kop-wbf-ctype" multiple size="4"' . kop_choice_select_attr('facility-types') . '>' . $types . '</select></label>'
         . '<label class="kop-wbf-tick"><input type="checkbox" class="kop-wbf-cforce"> It is a different place from a close match</label></span>'
         . '</div>'
         . kop_ak_button('Create the record and add checked', 'secondary', 'data-act="create"')

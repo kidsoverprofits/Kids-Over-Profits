@@ -550,6 +550,104 @@ if (!function_exists('kop_choice_lists_enqueue')) {
         wp_register_script('kop-choice-lists', false, array(), null, false);
         wp_enqueue_script('kop-choice-lists');
         wp_add_inline_script('kop-choice-lists', 'window.KOP_CHOICE_LISTS = ' . wp_json_encode(kop_choice_lists_js_data()) . ';');
+        kop_choice_add_enqueue();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// "Add new..." in a dropdown (js/choice-add.js).
+//
+// A <select> fed by a registered list carries data-kop-choice="<list key>"
+// (kop_choice_select_attr()). For an admin, js/choice-add.js adds a last
+// option "+ Add new..."; picking it opens a text box (and the list's extra
+// fields), saves the choice through the same code as KOP Tools > Dropdown
+// Lists (kop_choice_apply_form() + kop_choice_set_items(), so it is logged and
+// can be undone there) and selects it. A select whose values are not a
+// registered list (publication status, jurisdiction, filters, sorts) has
+// nothing to save to and gets no such option.
+
+if (!function_exists('kop_choice_select_attr')) {
+    /** The attribute that makes a <select> offer "Add new..." for list $key ('' when not registered). $by_label: the options' values are the labels. */
+    function kop_choice_select_attr($key, $by_label = false) {
+        if (!kop_choice_def($key)) return '';
+        return ' data-kop-choice="' . htmlspecialchars($key, ENT_QUOTES) . '"' . ($by_label ? ' data-kop-choice-by="label"' : '');
+    }
+}
+
+if (!function_exists('kop_choice_add_meta')) {
+    /** What the script needs to know of each list: label, plain, extra fields. */
+    function kop_choice_add_meta() {
+        $out = array();
+        foreach (kop_choice_registry() as $key => $def) {
+            $fields = array();
+            foreach ((array) $def['fields'] as $f => $fd) {
+                $opts = array();
+                if (($fd['type'] ?? 'text') === 'select') {
+                    foreach (kop_choice_field_options($fd) as $v => $l) $opts[] = array('value' => (string) $v, 'label' => (string) $l);
+                }
+                $fields[] = array('name' => (string) $f, 'label' => (string) ($fd['label'] ?? $f), 'type' => (string) ($fd['type'] ?? 'text'),
+                    'options' => $opts, 'required' => !empty($fd['required']), 'help' => (string) ($fd['help'] ?? ''));
+            }
+            $out[$key] = array('label' => (string) $def['label'], 'plain' => !empty($def['plain']), 'max' => (int) $def['max_len'], 'fields' => $fields);
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_choice_add_enqueue')) {
+    function kop_choice_add_enqueue() {
+        static $done = false;
+        if ($done || !function_exists('current_user_can') || !current_user_can('manage_options')) return;
+        $done = true;
+        $dir = get_stylesheet_directory();
+        $file = $dir . '/js/choice-add.js';
+        if (!is_readable($file)) return;
+        wp_enqueue_script('kop-choice-add', get_stylesheet_directory_uri() . '/js/choice-add.js', array('kop-choice-lists'), filemtime($file), true);
+        wp_localize_script('kop-choice-add', 'KOP_CHOICE_ADD', array(
+            'ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('kop_choice_add'), 'lists' => kop_choice_add_meta(),
+            'manage' => admin_url('admin.php?page=' . KOP_CHOICE_LISTS_PAGE),
+        ));
+    }
+}
+
+if (function_exists('add_action')) {
+    add_action('wp_ajax_kop_choice_add', 'kop_choice_add_ajax');
+}
+
+if (!function_exists('kop_choice_add_new')) {
+    /**
+     * Adds one choice to list $key. $row = {label, <field>}. Returns
+     * {ok, error, value, label, change, offered}: the value the records store
+     * (what the dropdown option carries), or the error to show.
+     */
+    function kop_choice_add_new($key, array $row) {
+        $def = kop_choice_def($key);
+        if (!$def) return array('ok' => false, 'error' => 'Unknown list.');
+        list($changes, $words, $errors) = kop_choice_apply_form($key, array(), array($row));
+        if ($errors) return array('ok' => false, 'error' => implode(' ', $errors));
+        if (!$changes) return array('ok' => false, 'error' => 'Type the new choice first.');
+        $value = (string) key($changes);
+        $id = kop_choice_set_items($key, $changes, $words);
+        $now = kop_choice_current($key, 'all');
+        $c = $now[$value] ?? null;
+        $label = $c === null ? trim((string) ($row['label'] ?? '')) : kop_choice_label($c);
+        return array('ok' => true, 'error' => '', 'value' => $value, 'label' => $label, 'change' => $id,
+            'extra' => is_array($c) ? $c : array());
+    }
+}
+
+if (!function_exists('kop_choice_add_ajax')) {
+    function kop_choice_add_ajax() {
+        if (!current_user_can('manage_options')) wp_send_json_error(array('error' => 'Not allowed.'), 403);
+        check_ajax_referer('kop_choice_add', 'nonce');
+        $key = sanitize_key(wp_unslash($_POST['list'] ?? ''));
+        $row = array('label' => sanitize_text_field(wp_unslash($_POST['label'] ?? '')));
+        foreach ((array) wp_unslash($_POST['fields'] ?? array()) as $f => $v) {
+            if (is_scalar($v)) $row[sanitize_key($f)] = is_string($v) ? sanitize_textarea_field($v) : $v;
+        }
+        $r = kop_choice_add_new($key, $row);
+        if (empty($r['ok'])) wp_send_json_error(array('error' => $r['error']), 200);
+        wp_send_json_success($r);
     }
 }
 

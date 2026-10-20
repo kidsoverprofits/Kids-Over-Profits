@@ -353,7 +353,13 @@ when its version moves, and most never change a record that is already on file.
   keeps its own copy only as the fallback. A choice that changes behaviour (a
   status it sets, a queue it goes to) carries it as a field, so a new choice
   has one too. A database column holding the value is VARCHAR, never ENUM.
-  `scripts/test-choice-lists.php` reads every registered list.
+  `scripts/test-choice-lists.php` reads every registered list. An admin
+  `<select>` fed by a list carries `kop_choice_select_attr($key)` (a script-built
+  one `data-kop-choice="<key>"`; `data-kop-choice-by="label"` when its option
+  values are the labels): `js/choice-add.js` then gives it a last option
+  "+ Add new..." that saves a choice to the list for good (logged, Undo on the
+  Dropdown Lists screen). A select not fed by a registered list has nothing to
+  save to; register the list first.
 - **Document types**: a new type is added at KOP Tools > Dropdown Lists
   ('doc-types'); after changing the rules bump `KOP_DOC_TYPES_RULES_VERSION`.
 - **People named in a new place** get ids through

@@ -138,7 +138,7 @@ function kop_dt_admin_form_open($do, $extra = '') {
 }
 
 function kop_dt_type_select($name, $selected = '', $blank = 'Pick a type') {
-    $html = '<select name="' . esc_attr($name) . '"><option value="">' . esc_html($blank) . '</option>';
+    $html = '<select name="' . esc_attr($name) . '"' . kop_choice_select_attr('doc-types') . '><option value="">' . esc_html($blank) . '</option>';
     $group = null;
     foreach (kop_dt_types() as $slug => $t) {
         if ($t['group'] !== $group) {

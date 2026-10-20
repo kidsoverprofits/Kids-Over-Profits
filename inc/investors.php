@@ -798,8 +798,8 @@ function kop_inv_form($act, array $hidden, $body, $class = '') {
     return $h . $body . '</form>';
 }
 
-function kop_inv_select($name, array $choices, $value, $blank = '') {
-    $h = '<select name="' . esc_attr($name) . '">';
+function kop_inv_select($name, array $choices, $value, $blank = '', $list = '') {
+    $h = '<select name="' . esc_attr($name) . '"' . ($list !== '' ? kop_choice_select_attr($list, true) : '') . '>';
     if ($blank !== '') $h .= '<option value="">' . esc_html($blank) . '</option>';
     if ($value !== '' && !in_array($value, $choices, true)) $choices[] = $value;
     foreach ($choices as $c) $h .= '<option value="' . esc_attr($c) . '"' . selected($value, $c, false) . '>' . esc_html($c) . '</option>';
@@ -811,7 +811,7 @@ function kop_inv_fields_html(array $i = array()) {
     $sources = array();
     foreach ((array) json_decode((string) ($i['sources'] ?? ''), true) as $s) $sources[] = $s['url'] ?? '';
     return '<p><label>Name<br><input type="text" name="name" required class="regular-text" value="' . esc_attr($i['name'] ?? '') . '"></label></p>'
-        . '<p><label>Kind<br>' . kop_inv_select('kind', kop_inv_kinds('offered'), (string) ($i['kind'] ?? ''), 'Not known') . '</label></p>'
+        . '<p><label>Kind<br>' . kop_inv_select('kind', kop_inv_kinds('offered'), (string) ($i['kind'] ?? ''), 'Not known', 'investor-kinds') . '</label></p>'
         . '<p><label>Website<br><input type="url" name="website" class="regular-text" value="' . esc_attr($i['website'] ?? '') . '"></label></p>'
         . '<p><label>About (printed nowhere yet; what the firm is and does)<br><textarea name="about" rows="3" class="large-text">' . esc_textarea($i['about'] ?? '') . '</textarea></label></p>'
         . '<p><label>Sources, one web address a line<br><textarea name="sources" rows="2" class="large-text">' . esc_textarea(implode("\n", $sources)) . '</textarea></label></p>';
@@ -819,7 +819,7 @@ function kop_inv_fields_html(array $i = array()) {
 
 /** The stake fields of a link. */
 function kop_inv_link_fields_html(array $l = array()) {
-    return '<p><label>Role<br>' . kop_inv_select('role', kop_inv_roles('offered'), (string) ($l['role'] ?? 'Investor')) . '</label> '
+    return '<p><label>Role<br>' . kop_inv_select('role', kop_inv_roles('offered'), (string) ($l['role'] ?? 'Investor'), '', 'investor-roles') . '</label> '
         . '<label>First year <input type="number" name="start_year" min="1900" max="2100" style="width:90px" value="' . esc_attr($l['start_year'] ?? '') . '"></label> '
         . '<label>Last year <input type="number" name="end_year" min="1900" max="2100" style="width:90px" value="' . esc_attr($l['end_year'] ?? '') . '"></label></p>'
         . '<p><label>The stake in its own words (optional)<br><input type="text" name="detail" class="regular-text" value="' . esc_attr($l['detail'] ?? '') . '" placeholder="preferred units"></label></p>'

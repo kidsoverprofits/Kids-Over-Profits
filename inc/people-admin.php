@@ -577,7 +577,7 @@ function kop_people_admin_relations($id) {
         . 'this on their page too ("Parent" here reads "Child" there). Admins only for now.</p>';
     $kinds = kop_prel_kinds();
     $select = function ($value, $form = '') use ($kinds) {
-        $out = '<select name="kind" aria-label="Relationship"' . ($form !== '' ? ' form="' . esc_attr($form) . '"' : '') . ' required><option value="">Pick one</option>';
+        $out = '<select name="kind" aria-label="Relationship"' . kop_choice_select_attr('person-relations') . ($form !== '' ? ' form="' . esc_attr($form) . '"' : '') . ' required><option value="">Pick one</option>';
         if ($value !== '' && !in_array($value, $kinds, true)) $kinds[] = $value;
         foreach ($kinds as $k) $out .= '<option value="' . esc_attr($k) . '"' . selected($value, $k, false) . '>' . esc_html($k) . '</option>';
         return $out . '</select>';

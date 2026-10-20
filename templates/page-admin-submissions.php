@@ -319,7 +319,7 @@ get_header();
                             </fieldset>
                             <div class="refile-resource-fields" id="refileResourceFields" hidden>
                                 <label for="refileKind">Kind</label>
-                                <select id="refileKind">
+                                <select id="refileKind"<?php echo kop_choice_select_attr('resource-link-kinds'); ?>>
                                     <?php foreach (kop_facility_resource_link_kinds() as $kop_kind => $kop_kind_label) : ?>
                                         <option value="<?php echo esc_attr($kop_kind); ?>"<?php selected($kop_kind, 'reference'); ?>><?php echo esc_html($kop_kind_label); ?></option>
                                     <?php endforeach; ?>

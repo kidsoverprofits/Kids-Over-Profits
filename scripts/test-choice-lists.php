@@ -93,6 +93,20 @@ ok(array_keys(kop_choices('bill-statuses'))[0] === 'proposed', 'an ordered list 
 ok(kop_choice_slug('Court order (state)') === 'court_order_state', 'slug _');
 ok(kop_choice_slug('Court order (state)', '-') === 'court-order-state', 'slug -');
 
+// --- "Add new..." in a dropdown (kop_choice_add_new) --------------------------------
+$r = kop_choice_add_new('t-plain', array('label' => '  Boarding   school '));
+ok($r['ok'] && $r['value'] === 'Boarding school' && $r['label'] === 'Boarding school', 'add new: a plain choice is stored as written, spaces tidied');
+ok(in_array('Boarding school', t_plain(), true), 'add new: the plain list has it for good');
+$r = kop_choice_add_new('t-plain', array('label' => 'boarding school'));
+ok(!$r['ok'] && strpos($r['error'], 'already on the list') !== false, 'add new: a duplicate is refused with the reason');
+$r = kop_choice_add_new('t-plain', array('label' => '   '));
+ok(!$r['ok'], 'add new: an empty box saves nothing');
+$r = kop_choice_add_new('t-fields', array('label' => 'Zed'));
+ok(!$r['ok'] && stripos($r['error'], 'needs') !== false, 'add new: a list with a required field says what is missing');
+ok(!kop_choice_add_new('no-such-list', array('label' => 'X'))['ok'], 'add new: an unknown list is refused');
+ok(kop_choice_select_attr('no-such-list') === '' && strpos(kop_choice_select_attr('bill-statuses'), 'data-kop-choice="bill-statuses"') !== false, 'select attribute only for registered lists');
+ok(isset(kop_choice_add_meta()['t-fields']['fields'][0]['name']), 'add new: the script learns the extra fields of each list');
+
 // --- every registered list ----------------------------------------------------
 $GLOBALS['kop_choice_test_store'] = array();
 $list = in_array('--list', $argv, true);

@@ -1350,7 +1350,7 @@ function kop_render_facilities_from_news_page() {
             $field('state', 'State', $e['state'] ?? '', 40);
             $field('country', 'Country', $e['country'] ?? '', 130);
             // Several types at once: Ctrl/Cmd-click (kop_facdisc_types_value() joins them).
-            echo '<label style="display:block;margin-bottom:4px">Type (Ctrl-click for several) <select name="type[]" multiple size="5">';
+            echo '<label style="display:block;margin-bottom:4px">Type (Ctrl-click for several) <select name="type[]" multiple size="5"' . kop_choice_select_attr('facility-types') . '>';
             $have = kop_facility_types_split($e['type'] ?? '');
             foreach (kop_facdisc_types('offered') as $type) {
                 echo '<option' . (in_array($type, $have, true) ? ' selected' : '') . '>' . esc_html($type) . '</option>';
