@@ -107,6 +107,15 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo.php [--list] 
 (kop-pipeline) python scripts/seo-audit.py [--limit N] [--refresh]
 scp ../kop-pipeline/tmp/seo-audit/audit.json <prod>:public_html/wp-content/uploads/kop-seo-audit/audit.json
 php -d extension=mbstring scripts/test-seo-audit.php [--audit=../kop-pipeline/tmp/seo-audit/audit.json]
+# Sparse facility/company descriptions (kop_seo_facility_description(), kop_seo_operator_description()): a summary that says only name,
+# kind and place goes on with what the record holds, worst first ("On record: 1 death, 2 lawsuits and 14 state inspection reports."),
+# or "Not on file yet: who ran it and its years"; a merged profile post's hand-written excerpt is left alone. State hubs give their count
+# KOP Tools > SEO Descriptions (inc/seo-drafts.php): a draft description + focus keyphrase for every post/page with an empty Yoast field;
+# stored in _yoast_wpseo_metadesc/_focuskw only when the owner approves (log + exact Undo, refused if the field changed since). Drafts:
+# seeds/seo-descriptions.json (hand-written, by post id + title check) first, then one rule per kind (kop_seo_drafts_kind()). Keyphrase
+# rules in kop_seo_drafts_keyphrase(); facility and state wording waits on option kop_seo_kw_wording, set on that screen (plan 2.4 item 11).
+# Tool pages (kop_seo_noindex_page()) are never listed and leave Yoast's sitemap (wpseo_exclude_from_sitemap_by_post_ids)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo-drafts.php [--list]   # seeds, which pages, every rule, approve/undo, the screen
 # Program websites scanned for instructions to AI (llms.txt/ai.txt, the copy Exceed's plugin hides in every page: sources
 # to ignore, critics framed, AI-only notes), AI crawler rules, city doorway pages and pages answering critics. Domains from
 # facilities_v2 profileLinks, tmp/gdocs/links.json program sites and the reputation series; resumable, one request a second

@@ -38,6 +38,25 @@ $check('a cut ends on a whole sentence when one ends far enough in', kop_seo_cli
 $check('one past name leads with Formerly', kop_seo_names_lead(array(array('past', 'Copper Canyon Academy'))) === 'Formerly Copper Canyon Academy.');
 $check('two past names and another name', kop_seo_names_lead(array(array('past', 'A'), array('past', 'B'), array('other', 'C'))) === 'Formerly A and B; Also known as C.');
 $check('no names, no lead', kop_seo_names_lead(array()) === '');
+$c = kop_seo_clip('Formerly Charles Britt Academy. Britt Technical Youth Academy was a juvenile justice program in St. Petersburg, Florida, operated by the Florida Department of Juvenile Justice for many years.');
+$check('"St. " ends no sentence', strpos($c, 'in St.') === false || strpos($c, 'St. Petersburg') !== false, $c);
+list($l, $t) = kop_seo_lead_and(array(array('past', 'KIDS of Southern California'), array('other', 'STRAIGHT Southern California')), str_repeat('Kids of Southern California was a program in a place with a long name, run by a company. ', 2));
+$c = kop_seo_clip_after($t, mb_strlen($l));
+$check('a cut never leaves the names lead alone', mb_strlen($c) > mb_strlen($l) + 20, $c);
+$care = array('name' => 'Centers for Adolescent Recovery and Education', 'current_name' => 'Centers for Adolescent Recovery and Education (CARE)', 'aka' => array('CARE'));
+$check("the page's own name with its abbreviation is no other name", kop_seo_other_names($care) === array(), json_encode(kop_seo_other_names($care)));
+
+echo "-- Sparse records --\n";
+$sparse = array('name' => 'Remmers residence', 'summary' => 'Remmers residence is a group home in Corona, California.',
+    'seo_description' => 'Remmers residence is a group home in Corona, California.', 'operator' => array('name' => ''), 'doc' => array());
+$d = kop_seo_facility_description($sparse);
+$check('a record holding nothing says what is not on file', $d === 'Remmers residence is a group home in Corona, California. Not on file yet: who ran it and its years; send what you know.', $d);
+$full = $sparse + array('memorials' => array(1), 'lawsuits' => array(1, 2), 'inspections' => array('total' => 14, 'violations' => array(1, 2, 3)), 'news' => array(1, 2, 3, 4, 5), 'staff' => array('director' => array(1)));
+$d = kop_seo_facility_description($full);
+$check('a sparse summary goes on with what the record holds, worst first', strpos($d, 'California. On record: 1 death, 2 lawsuits, 3 serious inspection findings') !== false && mb_strlen($d) <= KOP_SEO_DESC_MAX && substr($d, -1) === '.', $d);
+$hand = $full;
+$hand['seo_description'] = 'A hand-written excerpt.';
+$check("a merged profile post's excerpt is left as written", kop_seo_facility_description($hand) === 'A hand-written excerpt.');
 
 echo "-- Facility pages --\n";
 $index = kop_facility_pages_index(true);
@@ -58,7 +77,7 @@ if (!empty($args['id'])) {
     $ids = array_merge(array(12161), $ids, array_slice($rest, 0, $sample));
     $ids = array_values(array_unique($ids));
 }
-$named = $long_titles = $bad_desc = $bad_json = $leaks = $no_alt = 0;
+$still_sparse = $named = $long_titles = $bad_desc = $bad_json = $leaks = $no_alt = 0;
 $examples = array();
 foreach ($ids as $id) {
     $page = kop_facility_page_data($id);
@@ -75,6 +94,8 @@ foreach ($ids as $id) {
         $examples['title changed with no past name'][] = "$id $title";
     }
     if (mb_strlen($title) > KOP_SEO_TITLE_MAX + 10 && $past && $title !== $page['name'] . ', formerly ' . $past[0][1]) $long_titles++;
+    // The audit's "sparse" description (docs/plan/4.7 item 8): one sentence, name + kind + place.
+    if (preg_match('/^[^.]{1,200} (is|was) an? [^.]+\.$/u', $desc) && strpos($desc, ' operated by ') === false) { $still_sparse++; $examples['still only name, kind and place'][] = "$id $desc"; }
     if ($desc === '' || mb_strlen($desc) > KOP_SEO_DESC_MAX) { $bad_desc++; $examples['bad description'][] = "$id [" . mb_strlen($desc) . "] $desc"; }
     $pieces = kop_seo_facility_pieces($page);
     $json = json_encode($pieces, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -93,6 +114,7 @@ $check('every page with a past name has it in the title and opens its descriptio
 $check('a page with no past name keeps its own title', empty($examples['title changed with no past name']));
 $check('no title runs long when a shorter form fits', $long_titles === 0, (string) $long_titles);
 $check('every description is there and fits', $bad_desc === 0, (string) $bad_desc);
+$check('no description says only the name, kind and place', $still_sparse === 0, (string) $still_sparse);
 $check('structured data encodes for every page, three pieces', $bad_json === 0, (string) $bad_json);
 $check('alternateName lists every other name', $no_alt === 0, (string) $no_alt);
 $check('nothing private reaches the structured data', $leaks === 0, (string) $leaks);
