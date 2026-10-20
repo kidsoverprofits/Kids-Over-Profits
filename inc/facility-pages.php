@@ -279,6 +279,7 @@ if (!function_exists('kop_facility_pages_enqueue')) {
         if (file_exists($fp_js)) {
             wp_enqueue_script('kop-facility-profile', $theme_uri . '/js/facility-profile.js', array(), filemtime($fp_js), true);
         }
+        if (function_exists('kop_q_box_enqueue')) kop_q_box_enqueue();   // "We have questions about ..." (inc/questions.php)
     }
     add_action('wp_enqueue_scripts', 'kop_facility_pages_enqueue', 20);
 }
@@ -1701,7 +1702,7 @@ if (!function_exists('kop_facility_pages_incidents_dedupe')) {
             }
             if ($dupe === null) { $keep[] = $inc; continue; }
             $a = $keep[$dupe];
-            $fuller = ($inc['sort'] % 100 > 0) !== ($a['sort'] % 100 > 0) ? ($inc['sort'] % 100 > 0 ? $inc : $a)
+            $fuller = ((int) $inc['sort'] % 100 > 0) !== ((int) $a['sort'] % 100 > 0) ? ((int) $inc['sort'] % 100 > 0 ? $inc : $a)
                 : (mb_strlen($inc['text']) > mb_strlen($a['text']) ? $inc : $a);
             $other = $fuller === $inc ? $a : $inc;
             if ($fuller['kind'] === '') $fuller['kind'] = $other['kind'];

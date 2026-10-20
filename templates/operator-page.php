@@ -446,6 +446,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             <?php endif; ?>
 
             <?php if (!empty($page['resource_links'])) : ?>
+            <?php // "We have questions about ...": filled from the questions page when the page opens (inc/questions.php).
+            if (function_exists('kop_q_box_html')) echo kop_q_box_html('operator', (int) $page['id'], $page['name']); // Escaped inside. ?>
+
             <section class="kop-fp-section" id="materials">
                 <h2>Materials and links</h2>
                 <?php foreach ($page['resource_links'] as $kop_op_group) : ?>

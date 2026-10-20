@@ -10,7 +10,7 @@
  * Answers go to kop/v1/questions/answer. After the first answer the page
  * offers, once and closed by default, an optional email for when the answers
  * have been checked (kop/v1/questions/notify); answering never needs one. #f<id> / #o<id> open a record's
- * questions; #q=<key> opens the record that question is about.
+ * questions; #f<id>:<key> and #q=<key> open them with that question first.
  */
 (function () {
     'use strict';
@@ -543,8 +543,11 @@
 
     function fromHash() {
         var hash = decodeURIComponent((location.hash || '').replace(/^#/, ''));
-        var m = hash.match(/^(?:q=)?([fo])(\d+)(?:\.|$)/);
-        if (m) openRecord(m[1] === 'o' ? 'operator' : 'facility', parseInt(m[2], 10), '', '', hash.indexOf('q=') === 0 ? hash.slice(2) : '');
+        // #f<id>, #f<id>:<question key> (from a facility or company page's questions), #q=<key>.
+        var m = hash.match(/^(?:q=)?([fo])(\d+)(?:([.:])(.*))?$/);
+        if (!m) return;
+        var focus = m[3] === ':' ? m[4] : (hash.indexOf('q=') === 0 ? hash.slice(2) : '');
+        openRecord(m[1] === 'o' ? 'operator' : 'facility', parseInt(m[2], 10), '', '', focus);
     }
     fromHash();
 })();

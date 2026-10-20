@@ -1,0 +1,53 @@
+/*
+ * "We have questions about <name>" on facility and company pages
+ * (kop_q_box_html(), js/questions-box.js). Sits in the page's reading column
+ * as one of its sections (css/facility-profile.css draws the section).
+ */
+
+.kop-q-box {
+    border-left: 4px solid var(--kop-teal, #33a7b5);
+}
+
+.kop-q-box .kop-q-box-lede {
+    color: var(--kop-text-primary, #1a202c);
+    margin: 0 0 10px;
+}
+
+.kop-q-box .kop-q-box-list {
+    margin: 0 0 12px;
+    padding-left: 1.2em;
+}
+
+.kop-q-box .kop-q-box-list li {
+    margin: 0 0 8px;
+    line-height: 1.45;
+}
+
+.kop-q-box .kop-q-box-list a,
+.kop-q-box .kop-q-box-all a {
+    color: var(--kop-navy, #000080);
+}
+
+.kop-q-box .kop-q-box-list a:hover,
+.kop-q-box .kop-q-box-list a:focus,
+.kop-q-box .kop-q-box-all a:hover,
+.kop-q-box .kop-q-box-all a:focus {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-q-box .kop-q-box-flag {
+    display: inline-block;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-soft-pastel-yellow, #fff5cb);
+    border: 1px solid var(--kop-orange-ink, #9c4a00);
+    white-space: nowrap;
+}
+
+.kop-q-box .kop-q-box-all {
+    margin: 0;
+    font-weight: 600;
+}

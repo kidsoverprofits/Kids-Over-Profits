@@ -158,9 +158,45 @@ function kop_q_company_statuses() {
     return array('Active' => 'Still operating', 'Defunct' => 'Closed down', 'Acquired' => 'Bought by another company');
 }
 
-function kop_q_url($key = '') {
+/**
+ * The questions page, or one question on it: #f<id>:<key> (#o<id>:<key> for a
+ * company) opens that record's questions with this one first. A conflict's key
+ * does not name its record, so $q (the question, or its record) is given when known.
+ */
+function kop_q_url($key = '', $q = null) {
     $base = function_exists('home_url') ? home_url('/questions/') : '/questions/';
-    return $key === '' ? $base : $base . '#q=' . rawurlencode($key);
+    if ($key === '') return $base;
+    $rec = is_array($q) ? ($q['record'] ?? $q) : null;
+    if ($rec && !empty($rec['id'])) return $base . '#' . (($rec['kind'] ?? '') === 'operator' ? 'o' : 'f') . (int) $rec['id'] . ':' . rawurlencode($key);
+    return $base . '#q=' . rawurlencode($key);
+}
+
+/**
+ * "We have questions about <name>" on a facility or company page: a section
+ * js/questions-box.js fills from kop/v1/questions/record when the page opens
+ * (the pages are cached whole; the questions change as people answer). It
+ * stays hidden when there is nothing to ask. $kind 'facility' or 'operator'.
+ */
+function kop_q_box_html($kind, $id, $name) {
+    $kind = $kind === 'operator' ? 'operator' : 'facility';
+    $all = kop_q_url() . '#' . ($kind === 'operator' ? 'o' : 'f') . (int) $id;
+    $who = $kind === 'operator' ? 'worked for it or sent your child to one of its programs' : 'were there, worked there or sent your child there';
+    return '<section class="kop-fp-section kop-q-box" id="questions" hidden data-kop-q-box="' . esc_attr($kind) . '" data-kop-q-id="' . (int) $id . '"'
+        . ' data-kop-q-page="' . esc_url(kop_q_url()) . '">'
+        . '<h2>We have questions about ' . esc_html($name) . '</h2>'
+        . '<p class="kop-q-box-lede">If you ' . esc_html($who) . ', you can help fill in what our records are missing. Each question takes a moment; skip anything you do not know.</p>'
+        . '<ul class="kop-q-box-list"></ul>'
+        . '<p class="kop-q-box-all"><a href="' . esc_url($all) . '">Answer questions about ' . esc_html($name) . '</a></p>'
+        . '</section>';
+}
+
+/** The box's script and styles, on facility and company pages. */
+function kop_q_box_enqueue() {
+    $dir = get_stylesheet_directory();
+    $uri = get_stylesheet_directory_uri();
+    wp_enqueue_style('kop-questions-box', $uri . '/css/questions-box.css', array('kop-colors'), filemtime($dir . '/css/questions-box.css'));
+    wp_enqueue_script('kop-questions-box', $uri . '/js/questions-box.js', array(), filemtime($dir . '/js/questions-box.js'), true);
+    wp_localize_script('kop-questions-box', 'KOP_QUESTIONS_BOX', array('rest' => esc_url_raw(rest_url('kop/v1/questions/record'))));
 }
 
 /* ---- Small helpers (no WordPress needed: the test loads these) ------------ */
@@ -795,7 +831,7 @@ function kop_q_wbf_write(array $q, $op, $path, $value, $label, $count, $by) {
         'pkey' => $pkey, 'facility_id' => $fid, 'program' => mb_substr($q['record']['name'], 0, 255), 'place' => mb_substr($q['record']['place'], 0, 120),
         'match_kind' => 'id', 'grp' => $grp, 'op' => $op, 'path' => $path, 'value' => wp_json_encode($value), 'label' => $label,
         'extra' => wp_json_encode(array('manual' => 1, 'via' => 'questions', 'qkey' => $q['key'])),
-        'evidence' => wp_json_encode(array(array('cite' => $cite, 'url' => kop_q_url($q['key'])))),
+        'evidence' => wp_json_encode(array(array('cite' => $cite, 'url' => kop_q_url($q['key'], $q)))),
         'status' => 'pending', 'created_at' => current_time('mysql', true),
     ));
     $rows = kop_wbf_rows(array($pkey));

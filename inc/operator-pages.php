@@ -243,6 +243,7 @@ if (!function_exists('kop_operator_pages_enqueue')) {
         if (file_exists($js)) {
             wp_enqueue_script('kop-submit-info', $theme_uri . '/js/submit-info.js', array(), filemtime($js), true);
         }
+        if (kop_operator_pages_is_page() && function_exists('kop_q_box_enqueue')) kop_q_box_enqueue();   // "We have questions about ..." (inc/questions.php)
     }
     add_action('wp_enqueue_scripts', 'kop_operator_pages_enqueue', 20);
 }

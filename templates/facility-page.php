@@ -1242,6 +1242,9 @@ get_header();
 
             <?php if (isset($kop_fp_psec['related'])) $kop_fp_profile_section($kop_fp_psec['related']); ?>
 
+            <?php // "We have questions about ...": filled from the questions page when the page opens (inc/questions.php).
+            if (function_exists('kop_q_box_html')) echo kop_q_box_html('facility', (int) $page['id'], $page['name']); // Escaped inside. ?>
+
             <?php if ($kop_fp_has_resources) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('resources'); ?>">
                 <h2>Materials and links</h2>

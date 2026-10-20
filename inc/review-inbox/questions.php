@@ -127,7 +127,7 @@ function kop_rinbox_q_item($key) {
         'title'        => $ask !== '' ? $ask : $key,
         'subtitle'     => $total . ' ' . ($total === 1 ? 'answer' : 'answers') . ($tally ? ' · most say ' . mb_substr($tally[0]['label'], 0, 60) : '')
             . ($question && empty($question['auto']) ? ' · always waits for you' : ''),
-        'url'          => kop_q_url($key),
+        'url'          => kop_q_url($key, $question ?: ($fac ? array('kind' => 'facility', 'id' => (int) $fac['id']) : null)),
         'text'         => (string) ($question['sub'] ?? ''),
         'details'      => $details,
         'links'        => $links,
