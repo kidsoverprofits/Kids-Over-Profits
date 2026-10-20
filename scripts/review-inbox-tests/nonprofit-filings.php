@@ -75,6 +75,12 @@ function kop_rinbox_test_nonprofit_filings(array $src, array $item, callable $ch
         array_column($card['actions'], 'id') === array('link', 'link_company', 'reject') && (int) $card['actions'][0]['params'][0]['value'] === $fid
         && !array_filter($card['actions'], function ($a) { return empty($a['help']); }), json_encode(array_column($card['actions'], 'id')));
 
+    // The checks below start from no links and no decision on the sample: earlier queues' checks in the same run
+    // (or the live site) may have linked organizations in the scratch copy.
+    $wpdb->query("DELETE FROM {$table}");
+    $d = kop_npf_decisions();
+    unset($d[$ein]);
+    kop_npf_save_decisions($d);
     $before = $count();
     $msg = kop_npf_apply($ein, 'facility', $fid, 'inbox-test');
     $orgs = kop_npf_for_facility($fid);

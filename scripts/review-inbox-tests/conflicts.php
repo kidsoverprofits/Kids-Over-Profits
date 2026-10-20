@@ -15,7 +15,11 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     try {
         kop_rinbox_test_conflicts_run($src, $item, $check, $pdo, $t);
     } finally {
-        if ($seeded) $pdo->exec("DELETE FROM $t WHERE pkey IN ('" . implode("','", $seeded) . "')");
+        if ($seeded) {
+            $pdo->exec("DELETE FROM $t WHERE pkey IN ('" . implode("','", $seeded) . "')");
+            // The conflict lists are kept for the request: drop them, so later queues count without the seeds.
+            foreach (kop_rinbox_conflicts_caches() as $c) delete_transient('kop_on_file_' . $c);
+        }
         unset($GLOBALS['kop_fact_hold_off']);
     }
 }
