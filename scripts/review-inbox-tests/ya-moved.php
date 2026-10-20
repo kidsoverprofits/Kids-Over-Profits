@@ -13,6 +13,16 @@ function kop_rinbox_test_ya_moved(callable $check) {
     $check('ya-moved: the moved records are known by their old ids', count($map) >= 1, json_encode(array_map(function ($p) { return $p['name']; }, $map)));
     $ids = implode(',', array_map('intval', array_keys($map)));
     $t = 'wpdl_kop_woodbury_facts';
+    // The live job has filed the mirror's own: a waiting copy of a real item on each of the first two moved ids stands in.
+    $r = $pdo->query("SELECT * FROM $t WHERE status = 'pending' AND facility_id > 0 AND ya = 0 AND grp <> 'consultant' ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    foreach ($r ? array_slice(array_keys($map), 0, 2) : array() as $moved_id) {
+        if ((int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending' AND facility_id = " . (int) $moved_id)->fetchColumn()) continue;
+        $copy = $r;
+        unset($copy['id']);
+        $copy['pkey'] = substr(md5('ya-moved-test|' . $moved_id . '|' . $r['pkey']), 0, 16);
+        $copy['facility_id'] = (int) $moved_id;
+        $pdo->prepare("INSERT INTO $t (" . implode(', ', array_keys($copy)) . ') VALUES (' . implode(', ', array_fill(0, count($copy), '?')) . ')')->execute(array_values($copy));
+    }
     $before = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending' AND facility_id IN ($ids)")->fetchColumn();
 
     // Woodbury Facts: onto the young adult tab with the program picked, and no "Facility #N does not exist" conflict.
@@ -69,6 +79,17 @@ function kop_rinbox_test_merge_follow(callable $check) {
     $drops = array_map('intval', array_keys($map['ids']));
     if (!$drops) { echo "  (no merges in the mirror)\n"; return; }
     $in = implode(',', $drops);
+    // The hourly run has moved the mirror's own: a waiting Woodbury item copied onto a merged-away id stands in.
+    if (!(int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_woodbury_facts WHERE facility_id IN ($in) AND status = 'pending'")->fetchColumn()) {
+        $r = $pdo->query("SELECT * FROM wpdl_kop_woodbury_facts WHERE status = 'pending' AND facility_id > 0 ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        if ($r) {
+            unset($r['id']);
+            $r['pkey'] = substr(md5('merge-follow-test|' . $r['pkey']), 0, 16);
+            $r['facility_id'] = $drops[0];
+            $pdo->prepare('INSERT INTO wpdl_kop_woodbury_facts (' . implode(', ', array_keys($r)) . ') VALUES (' . implode(', ', array_fill(0, count($r), '?')) . ')')
+                ->execute(array_values($r));
+        }
+    }
     $count = function ($t, $where) use ($pdo, $in) { return (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE facility_id IN ($in) AND $where")->fetchColumn(); };
     $w0 = $count('wpdl_kop_woodbury_facts', "status = 'pending'");
     $f0 = $count('wpdl_kop_fornits_items', "status = 'pending'");
