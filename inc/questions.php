@@ -1050,13 +1050,13 @@ if (function_exists('add_action')) {
         foreach (array('we-have-questions', 'answer-questions') as $alias) if (!isset($map[$alias])) $map[$alias] = '/questions/';
         return $map;
     });
-    $title = function ($t) { return kop_q_is_page() ? 'We have questions | ' . get_bloginfo('name') : $t; };
-    add_filter('pre_get_document_title', $title, 20);
-    add_filter('wpseo_title', $title, 20);
-    add_filter('wpseo_opengraph_title', $title, 20);
-    $desc = function ($d) { return kop_q_is_page() ? kop_q_summary() : $d; };
-    add_filter('wpseo_metadesc', $desc, 20);
-    add_filter('wpseo_opengraph_desc', $desc, 20);
+    $kop_q_title_filter = function ($t) { return kop_q_is_page() ? 'We have questions | ' . get_bloginfo('name') : $t; };
+    add_filter('pre_get_document_title', $kop_q_title_filter, 20);
+    add_filter('wpseo_title', $kop_q_title_filter, 20);
+    add_filter('wpseo_opengraph_title', $kop_q_title_filter, 20);
+    $kop_q_desc_filter = function ($d) { return kop_q_is_page() ? kop_q_summary() : $d; };
+    add_filter('wpseo_metadesc', $kop_q_desc_filter, 20);
+    add_filter('wpseo_opengraph_desc', $kop_q_desc_filter, 20);
     add_filter('wpseo_canonical', function ($u) { return kop_q_is_page() ? kop_q_url() : $u; }, 20);
 
     add_action('wp_enqueue_scripts', function () {
