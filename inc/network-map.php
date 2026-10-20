@@ -162,14 +162,19 @@ if (!function_exists('kop_network_map_status_overrides')) {
 }
 
 if (!function_exists('kop_network_map_apply_status_overrides')) {
-    /** graph.json-shaped nodes with the overrides written into 'status'. */
+    /**
+     * graph.json-shaped nodes with the overrides written into 'status', on
+     * names drawn open or blank only (a facility's old, rebranded name shares
+     * its id). applyStatusOverrides() in js/network-map/store.js matches.
+     */
     function kop_network_map_apply_status_overrides(array $nodes, array $overrides) {
         if (!$overrides) {
             return $nodes;
         }
         foreach ($nodes as $i => $node) {
             $fid = (int) ($node['facilityId'] ?? 0);
-            if ($fid > 0 && isset($overrides[$fid])) {
+            $bucket = kop_network_map_status_bucket($node['status'] ?? '');
+            if ($fid > 0 && isset($overrides[$fid]) && ($bucket === 'open' || $bucket === 'unknown')) {
                 $nodes[$i]['status'] = $overrides[$fid];
             }
         }

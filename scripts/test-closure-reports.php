@@ -135,8 +135,19 @@ $undone = kop_closure_doc_undo($doc, $applied);
 $current = kop_closure_rewrite_period($open_doc, static function ($op) { return $op; });
 // Schema 3 only adds these, empty; everything the record holds comes through.
 $v3 = array('schema_version' => 1, 'targetedDiagnoses' => 1, 'targetedBehaviors' => 1, 'ttiPractices' => 1, 'survivorTestimony' => 1);
+// Fields added since (legalName, dbaNames, registrants) also come in empty.
+$drop_new_empty = static function ($new, $old) use (&$drop_new_empty) {
+    foreach ($new as $k => $v) {
+        if (!array_key_exists($k, (array) $old)) {
+            if ($v === '' || $v === array() || $v === null) unset($new[$k]);
+        } elseif (is_array($v) && is_array($old[$k])) {
+            $new[$k] = $drop_new_empty($v, $old[$k]);
+        }
+    }
+    return $new;
+};
 $check('an untouched rewrite changes nothing but the schema upgrade', kop_facility_same_document(
-    array_diff_key($open_doc, $v3), array_diff_key($current, $v3)));
+    array_diff_key($open_doc, $v3), array_diff_key($drop_new_empty($current, $open_doc), $v3)));
 $check('undo gives back the original document', kop_facility_same_document($current, $undone));
 $check('provenance survives the rewrite', $doc['provenance'] === $open_doc['provenance']);
 
@@ -171,12 +182,17 @@ $got = $overrides;
 ksort($got);
 printf("  %d map names drawn open or blank are Closed in facilities_v2\n", count($overrides));
 $check('overrides are exactly the open/blank names Closed in the data', $got === $expected);
+// A facility's old, rebranded name shares its id with the open one.
 $never = 0;
-foreach ($graph['nodes'] as $n) {
-    $f = (int) ($n['facilityId'] ?? 0);
-    if ($f > 0 && isset($overrides[$f]) && in_array(kop_network_map_status_bucket($n['status'] ?? ''), array('closed', 'rebranded'), true)) $never++;
+$shared = 0;
+foreach (kop_network_map_apply_status_overrides($graph['nodes'], $overrides) as $i => $n) {
+    $was = $graph['nodes'][$i]['status'] ?? '';
+    if (in_array(kop_network_map_status_bucket($was), array('closed', 'rebranded'), true)) {
+        if (($n['status'] ?? '') !== $was) $never++;
+        if (isset($overrides[(int) ($n['facilityId'] ?? 0)])) $shared++;
+    }
 }
-$check('a closed or rebranded name is never touched', $never === 0);
+$check('a closed or rebranded name is never touched', $never === 0, "$shared share an id with an overridden name");
 $check('cached read returns the same map', kop_network_map_status_overrides() === $overrides);
 $check('config carries the overrides', (array) kop_network_map_config()['statusOverrides'] === $overrides);
 

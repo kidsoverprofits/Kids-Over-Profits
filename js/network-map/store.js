@@ -50,12 +50,14 @@
     /* graph.json is built offline from the board; a facility closed since
      * then comes from PHP as facility id => status (KOP_NETWORK_CONFIG.
      * statusOverrides, kop_network_map_status_overrides()) and is written
-     * over the file's status here, before anything reads it. */
+     * over the file's status here, before anything reads it. Only names
+     * drawn open or blank: a facility's old, rebranded name shares its id. */
     function applyStatusOverrides(graph, overrides) {
         if (!graph || !overrides) return graph;
         (graph.nodes || []).forEach(function (raw) {
             var status = raw.facilityId != null ? overrides[raw.facilityId] : undefined;
-            if (status) raw.status = status;
+            var bucket = statusBucket(raw.status);
+            if (status && (bucket === 'open' || bucket === 'unknown')) raw.status = status;
         });
         return graph;
     }
