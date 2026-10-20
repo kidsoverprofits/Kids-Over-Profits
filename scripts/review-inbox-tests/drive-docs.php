@@ -139,9 +139,9 @@ function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
         $st = $GLOBALS['pdo']->prepare('SELECT status, article_url FROM news_submissions WHERE id = ?');
         $st->execute(array((int) ($done['id'] ?? 0)));
         $news_row = $st->fetch(PDO::FETCH_ASSOC);
-        // Adding is the review: the news row is approved at once (kop_gdl_queue_go_live), no second approval in the news queue.
-        $check('drive-docs: "Move to" the news queue adds the article approved', $r['status'] === 'applied' && ($done['target'] ?? '') === 'news'
-            && !empty($done['live']) && $news_row && $news_row['status'] === 'approved' && $news_row['article_url'] === $r['url'], $m['message']);
+        // News waits in the news queue for its summary and date and the owner's approval there (2026-10-20).
+        $check('drive-docs: "Move to" the news queue adds the article waiting', $r['status'] === 'applied' && ($done['target'] ?? '') === 'news'
+            && empty($done['live']) && $news_row && $news_row['status'] === 'submitted' && $news_row['article_url'] === $r['url'], $m['message']);
         $m = call_user_func($src['act'], $lic, 'undo', array());
         $st->execute(array((int) $done['id']));
         $check('drive-docs: Undo takes it out of the news queue', $row($lic)['status'] === 'pending' && $st->fetchColumn() === 'deleted', $m['message']);
@@ -234,15 +234,15 @@ function kop_rinbox_test_drive_docs(array $src, array $item, callable $check) {
         $done = json_decode((string) $row($news)['applied'], true) ?: array();
         $st = $GLOBALS['pdo']->prepare('SELECT status FROM news_submissions WHERE id = ?');
         $st->execute(array((int) ($done['id'] ?? 0)));
-        $check('drive-docs: Add ticked adds only the ticked link, the news approved at once', $row($news)['status'] === 'applied'
-            && $row($lic)['status'] === 'pending' && $st->fetchColumn() === 'approved', $m['message']);
+        $check('drive-docs: Add ticked adds only the ticked link, the news waiting in its queue', $row($news)['status'] === 'applied'
+            && $row($lic)['status'] === 'pending' && $st->fetchColumn() === 'submitted', $m['message']);
         $check('drive-docs: ...and names its Undo for every link it added', ($m['undo']['action'] ?? '') === 'undo_picked'
             && ($m['undo']['params']['keys'] ?? array()) === array($news));
         $left = kop_rinbox_get_item('drive-docs', $fcard);
         $check('drive-docs: the card then shows only what is left', $left && count($left['checklist']) === 1 && $left['checklist'][0]['keys'] === array($lic));
         $u = call_user_func($src['act'], $fcard, 'undo_picked', $m['undo']['params']);
         $st->execute(array((int) $done['id']));
-        $check('drive-docs: Undo of the click takes the article off the site and back to waiting', $row($news)['status'] === 'pending'
+        $check('drive-docs: Undo of the click takes the article out of the news queue and back to waiting', $row($news)['status'] === 'pending'
             && $st->fetchColumn() === 'deleted', $u['message']);
     } catch (Throwable $e) {
         $check('drive-docs: Add ticked and Undo', false, get_class($e) . ': ' . $e->getMessage());

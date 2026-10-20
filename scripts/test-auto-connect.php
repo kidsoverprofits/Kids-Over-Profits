@@ -285,8 +285,9 @@ if ($has('wpdl_kop_gdoc_links')) {
             !array_intersect(array_column($crows, 'url'), array_column((array) (json_decode($restored, true)['operator']['resourceLinks'] ?? array()), 'url')) && $left === count($crows));
         $pdo->prepare('UPDATE wpdl_kop_operators SET json_data = ? WHERE id = ?')->execute(array($before_json, $oid));
     }
-    $news = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0 AND operator_name = '' AND kind = 'news'")->fetchColumn();
-    echo "  $news news links with no program or company go to the news records\n";
+    // News is only ever added by a person (owner, 2026-10-20).
+    $check('drive docs: no pass sends news links by itself', !function_exists('kop_autoconn_drive_news')
+        && kop_autoconn_drive_is_news(array('kind' => 'news')) && !kop_autoconn_drive_is_news(array('kind' => 'reference')));
     $dpicks = $pdo->query('SELECT * FROM wpdl_kop_gdoc_links WHERE ' . kop_autoconn_drive_where())->fetchAll(PDO::FETCH_ASSOC);
     $waiting = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending'")->fetchColumn();
     $check('drive docs: exact-name links add themselves, the rest wait', $dpicks && count($dpicks) < $waiting, count($dpicks) . ' of ' . $waiting);

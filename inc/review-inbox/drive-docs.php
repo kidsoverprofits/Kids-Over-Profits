@@ -266,7 +266,9 @@ function kop_rinbox_gdl_item(array $r) {
         } elseif ($default === 'website') {
             $add_help = 'Adds this link to the website links of ' . $fac_name . '.';
         } else {
-            $add_help = 'Adds this link to the ' . strtolower($targets[$default]) . ' already approved, so it is on the site at once with no second approval there (the hourly AI reader still fills in its details). No email is sent.';
+            $add_help = $default === 'news'
+                ? 'Adds this link to the news queue, where it waits in Submissions Review > News: the hourly AI reader fills in its summary, date and headline, and it goes on the site when you approve it there. No email is sent.'
+                : 'Adds this link to the ' . strtolower($targets[$default]) . ' already approved, so it is on the site at once with no second approval there (the hourly AI reader still fills in its details). No email is sent.';
         }
         // The Record box is the old screen's "Add checked to that record": another record than the match.
         $actions[] = array('id' => 'apply', 'label' => 'Add: ' . $targets[$default], 'style' => 'approve', 'help' => $add_help, 'params' => array(
@@ -286,7 +288,7 @@ function kop_rinbox_gdl_item(array $r) {
             $actions[] = array('id' => 'apply_company', 'label' => 'Add to ' . $r['operator_name'], 'style' => 'approve',
                 'help' => kop_gdl_needs_facility($default)
                     ? 'Adds this link to the company page of ' . $r['operator_name'] . ($default === 'website' ? ' (its websites).' : ' under "Materials and links".')
-                    : 'Adds this link to the ' . strtolower($targets[$default]) . ', approved and on the site at once, as Add does.');
+                    : 'Adds this link to the ' . strtolower($targets[$default]) . ($default === 'news' ? ', waiting for your approval there,' : ', approved and on the site at once,') . ' as Add does.');
         }
         $actions[] = array('id' => 'reject', 'label' => 'Reject: skip this link', 'style' => 'reject',
             'help' => 'Nothing is added anywhere; the link moves to the Skipped tab.');
@@ -418,7 +420,7 @@ function kop_rinbox_gdl_act($key, $action, array $params) {
                     return array('message' => 'Not added: ' . $res['error'] . ' It is now under "Skipped or already there".');
                 }
                 if (!kop_gdl_needs_facility($to)) {
-                    return array('message' => 'Added to the ' . strtolower($targets[$to]) . ', approved and on the site now (no emails sent). Undo is on the Added tab.');
+                    return array('message' => 'Added to ' . kop_rinbox_gdl_queue_words($to, $targets) . '. Undo is on the Added tab.');
                 }
                 $msg = ($res['target'] ?? '') === 'company' ? 'Added to the company page of ' . kop_rinbox_gdl_record_name($other) . '.' : (string) ($res['message'] ?? 'Added.');
                 return array('message' => $msg . ' Undo is on the Added tab.');
@@ -441,7 +443,7 @@ function kop_rinbox_gdl_act($key, $action, array $params) {
             }
             $where = kop_gdl_needs_facility($to)
                 ? ($to === 'website' ? 'the website links of ' : 'the "Materials and links" list of ') . kop_rinbox_facility($fid)['name']
-                : 'the ' . strtolower($targets[$to]) . ', approved and on the site now (no emails sent)';
+                : kop_rinbox_gdl_queue_words($to, $targets);
             return array('message' => 'Added to ' . $where . '. Undo is on the Added tab.');
         case 'apply_company':
             if ($r['status'] !== 'pending') throw new RuntimeException('This link was already handled (' . $r['status'] . ').');
@@ -580,10 +582,17 @@ function kop_rinbox_gdl_group_parse($key) {
     return array('where' => $where, 'fid' => $fid, 'name' => $name, 'company' => $m[1] === 'c');
 }
 
+/** "the news queue, waiting for your approval there (no emails sent)": where Add put a queue link. */
+function kop_rinbox_gdl_queue_words($to, array $targets) {
+    return 'the ' . strtolower($targets[$to]) . ($to === 'news'
+        ? ', waiting in Submissions Review > News for its summary, date and your approval (no emails sent)'
+        : ', approved and on the site now (no emails sent)');
+}
+
 /** Where a link goes when added, in words. */
 function kop_rinbox_gdl_goes($kind) {
     $t = kop_gdl_default_target($kind);
-    return array('news' => 'news, live at once', 'lawsuit' => 'lawsuits, live at once', 'legislation' => 'legislation, live at once',
+    return array('news' => 'news queue, to approve there', 'lawsuit' => 'lawsuits, live at once', 'legislation' => 'legislation, live at once',
         'website' => 'website links', 'resource' => '"Materials and links"')[$t] ?? $t;
 }
 

@@ -22,11 +22,11 @@
  *     (kop_npf_apply(), kop_bizf_apply()). "Check the match" waits.
  *   - Drive Docs: a link tied to a record by an exact name, no other record
  *     named beside it, is added where its kind goes (owner, 2026-10-14, though
- *     Add publishes: news approved, cases published, links on the page).
- *     A link naming only a company that is exactly one company record goes
- *     on that company's page; a news link naming no program or company goes
- *     into the news records, approved, and the hourly reader ties it to the
- *     programs the article names.
+ *     Add publishes: cases published, links on the page). A link naming only
+ *     a company that is exactly one company record goes on that company's
+ *     page. News links are never added by themselves (owner, 2026-10-20: the
+ *     8,561 sent in approved on 2026-10-14..16 had no summary and wrong dates;
+ *     api/undo-auto-drive-news.php took them back); a person adds them.
  * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()).
  *
  * Each item is done once: {prefix}kop_auto_connect remembers it, so one a
@@ -513,7 +513,12 @@ function kop_autoconn_drive_rematch() {
     return $n;
 }
 
-/** Add each where its kind goes (kop_gdl_apply(): news, court records, bills, the record's links), one record at a time. */
+/** True for a Drive Docs link that would go to the news queue, which only a person adds. */
+function kop_autoconn_drive_is_news(array $r) {
+    return kop_gdl_default_target((string) $r['kind']) === 'news';
+}
+
+/** Add each where its kind goes (kop_gdl_apply(): court records, bills, the record's links; never news), one record at a time. */
 function kop_autoconn_drive_docs($deadline) {
     if (!function_exists('kop_gdl_apply')) return 0;
     global $wpdb;
@@ -527,7 +532,7 @@ function kop_autoconn_drive_docs($deadline) {
         if (microtime(true) > $deadline) break;
         $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE " . kop_autoconn_drive_where()
             . ' AND facility_id = %d ORDER BY id LIMIT 200', (int) $fid), ARRAY_A);
-        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]); }));
+        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]) && !kop_autoconn_drive_is_news($r); }));
         if (!$rows) continue;
         try {
             $res = kop_gdl_apply($rows, array(), (int) $fid, 'auto');
@@ -549,8 +554,8 @@ function kop_autoconn_drive_docs($deadline) {
 
 /**
  * Links that name only a company, and that company is exactly one company
- * record: on the company's page ("Materials and links", its websites), news,
- * court records and bills to their queues (kop_gdl_apply_company()).
+ * record: on the company's page ("Materials and links", its websites), court
+ * records and bills to their queues (kop_gdl_apply_company()); never news.
  */
 function kop_autoconn_drive_companies($deadline) {
     if (!function_exists('kop_gdl_apply_company')) return 0;
@@ -567,7 +572,7 @@ function kop_autoconn_drive_companies($deadline) {
         $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE status = 'pending' AND facility_id = 0 AND operator_name = %s
             AND (reviewed_by IS NULL OR reviewed_by = '')
             AND pkey NOT IN (SELECT item_key FROM " . kop_autoconn_table() . " WHERE source = 'drive-docs') ORDER BY id LIMIT 300", $name), ARRAY_A);
-        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]); }));
+        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]) && !kop_autoconn_drive_is_news($r); }));
         if (!$rows) continue;
         try {
             $res = kop_gdl_apply_company($rows, $oid, 'auto');
@@ -587,47 +592,6 @@ function kop_autoconn_drive_companies($deadline) {
     return $n;
 }
 
-/**
- * News links tied to no program and no company (owner, 2026-10-14): into the
- * news records approved, as Add does; the hourly reader
- * (api/lib-record-enrich.php) fills each article and ties it to the programs
- * its own text names. Never one a person has touched.
- */
-function kop_autoconn_drive_news($deadline) {
-    if (!function_exists('kop_gdl_apply')) return 0;
-    global $wpdb;
-    $table = kop_gdl_table();
-    $tried = kop_autoconn_tried('drive-docs');
-    $n = 0;
-    while (microtime(true) < $deadline) {
-        $rows = (array) $wpdb->get_results("SELECT * FROM {$table} WHERE status = 'pending' AND facility_id = 0 AND operator_name = ''
-            AND kind = 'news' AND (reviewed_by IS NULL OR reviewed_by = '')
-            AND pkey NOT IN (SELECT item_key FROM " . kop_autoconn_table() . " WHERE source = 'drive-docs') ORDER BY id LIMIT 300", ARRAY_A);
-        $rows = array_values(array_filter($rows, function ($r) use ($tried) { return !isset($tried[$r['pkey']]); }));
-        if (!$rows) break;
-        $batch = array_slice($rows, 0, 40);
-        try {
-            $res = kop_gdl_apply($batch, array(), 0, 'auto');
-        } catch (Throwable $e) {
-            foreach ($batch as $r) {
-                kop_autoconn_mark('drive-docs', $r['pkey'], 'news', 'failed', $e->getMessage());
-                $tried[$r['pkey']] = true;
-            }
-            continue;
-        }
-        foreach ($batch as $r) {
-            $tried[$r['pkey']] = true;
-            $ok = !empty($res[$r['pkey']]['ok']);
-            kop_autoconn_mark('drive-docs', $r['pkey'], 'news', $ok ? 'done' : 'failed', $ok ? '' : (string) ($res[$r['pkey']]['error'] ?? ''));
-            if (!$ok) continue;
-            $n++;
-            kop_autoconn_log('drive-docs', $r['pkey'], (string) ($r['label'] ?: $r['url']),
-                'Added to the news records; the hourly reader ties it to the programs the article names.');
-        }
-    }
-    return $n;
-}
-
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -641,8 +605,7 @@ function kop_autoconn_run($seconds = 120) {
         foreach (array('wiki-links' => 'kop_autoconn_wiki', 'state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
                 'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury',
-                'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies',
-                'drive-docs-news' => 'kop_autoconn_drive_news') as $source => $fn) {
+                'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies') as $source => $fn) {
             if (microtime(true) > $deadline) break;
             try {
                 $done[$source] = $fn($deadline);

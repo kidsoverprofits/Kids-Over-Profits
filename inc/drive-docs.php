@@ -11,10 +11,11 @@
  * KOP Tools > Drive Docs shows one card per facility with its links. Each
  * link goes where its kind belongs, and the reviewer can send it elsewhere:
  *   - news articles: the news queue, as the browser extension sends them,
- *     naming the facility, and approved at once (the reviewer has just looked
- *     at it; the hourly reader in api/lib-record-enrich.php still fills it);
+ *     naming the facility, waiting for review there (the hourly reader in
+ *     api/lib-record-enrich.php fills its summary, date and headline first;
+ *     until 2026-10-20 they went in approved, with neither);
  *   - court records and bills: the lawsuits and legislation queues, published
- *     at once the same way;
+ *     at once (the reviewer has just looked at it);
  *   - the program's own website: the record's profileLinks;
  *   - everything else (licensing reports, survivor posts, staff profiles,
  *     reference, government pages, archive copies): the record's
@@ -495,14 +496,19 @@ function kop_gdl_queue_add(PDO $pdo, array $r, $target, $facility_name, $reviewe
     } finally {
         remove_filter('kop_notify_admins_enabled', $quiet);
     }
+    // News waits in Submissions Review > News (owner, 2026-10-20): a bare link has no summary and often the
+    // wrong date until the hourly reader (api/lib-record-enrich.php) fills it, so it is approved there.
+    if ($target === 'news') {
+        return array('target' => $target, 'id' => (int) $id, 'live' => false);
+    }
     kop_gdl_queue_go_live($pdo, $target, (int) $id, $reviewer);
     return array('target' => $target, 'id' => (int) $id, 'live' => true);
 }
 
 /**
- * Adding a link from Drive Docs is the review: the row it made goes live as
- * approving it in its own queue would (news approved, lawsuits and bills
- * published), with the same case links api/manage-submissions.php makes.
+ * Adding a court record or bill from Drive Docs is the review: the row it made
+ * goes live as approving it in its own queue would (published), with the same
+ * case links api/manage-submissions.php makes. News never comes here.
  */
 function kop_gdl_queue_go_live(PDO $pdo, $target, $id, $reviewer) {
     if ($target === 'news') {
@@ -1086,7 +1092,7 @@ function kop_render_drive_docs_page() {
             '<strong>Check <em>Goes to</em>.</strong> News goes to the news queue, court records and bills to their queues, the program\'s own site to its website links, '
                 . 'and everything else (licensing reports, survivor posts, staff profiles, reference) to the resource links on the facility page. Change it on any row.',
             '<strong>Click <em>Add checked</em></strong>, or <em>Add everything ticked on this page</em> at the top. Facility links show on the page at once; '
-                . 'news, court records and bills go into their queues already approved (on the site at once, no second approval), with no emails. A card with many links has '
+                . 'news waits in Submissions Review &gt; News for its summary and date and your approval there; court records and bills go into their queues already approved (on the site at once, no second approval). No emails. A card with many links has '
                 . '<em>Add all sure matches</em>, which adds every sure match the card holds under the filters you picked, in batches.',
             '<strong>Wrong place?</strong> Open <em>Wrong record?</em> under the card, pick another record and click <em>Add checked to that record</em>. '
                 . 'On <em>Company only</em> and <em>No facility</em>, pick the record first; news can go to the queue without one.',
