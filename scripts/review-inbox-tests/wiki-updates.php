@@ -148,7 +148,10 @@ function kop_rinbox_test_wiki_updates(array $src, array $item, callable $check) 
     $check('wiki-updates: Approve writes the update into the entry\'s own column only', $after[$col] === $want && $after[$other] === $before[$other], $res['message']);
     $check('wiki-updates: the entry is the newest row again', $after['updated_at'] !== $before['updated_at']);
     $got = kop_rinbox_get_item('wiki-updates', (string) $key);
-    $check('wiki-updates: it moves to Ready for Reddit with Pasted on Reddit and Undo', $got['status'] === 'ready' && array_column($got['actions'], 'id') === array('posted', 'undo'));
+    // "Home of a program" is on every card about one facility (_homes-action.php), not this queue's.
+    $check('wiki-updates: it moves to Ready for Reddit with Pasted on Reddit and Undo', $got['status'] === 'ready'
+        && array_values(array_diff(array_column($got['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS)) === array('posted', 'undo'),
+        $got['status'] . ': ' . implode(', ', array_column($got['actions'], 'id')));
     $check('wiki-updates: the ready card copies the approved text itself, with Edit it on Reddit beside it',
         ($got['copy']['text'] ?? null) === $want && (!isset($got['go']) || strpos($got['go']['url'], '/wiki/edit/') !== false));
     call_user_func($src['act'], (string) $key, 'posted', array());
@@ -210,14 +213,9 @@ function kop_rinbox_test_wiki_updates(array $src, array $item, callable $check) 
 Last revised by [u](/user/u/)
 ## Page title
 ");
-    $check('wiki-updates: the text is put in Reddit form', $fmt === "# **X** (1990-present) Town, UT
-
-## **History**
-
-* **Level One:** rules (see [**Y**](https://example.test))
-
-**Name** was there.
-", json_encode($fmt));
+    // Escapes, not a literal spread over lines: the file's CRLF endings would be in the string.
+    $check('wiki-updates: the text is put in Reddit form', $fmt === "# **X** (1990-present) Town, UT\n\n## **History**\n\n"
+        . "* **Level One:** rules (see [**Y**](https://example.test))\n\n**Name** was there.\n", json_encode($fmt));
     // The conversion dropped each table's "|---|" row; Reddit needs it to draw the table.
     $tbl = kop_wiki_drafts_reddit_format("*Caption.*\n|**Name**|**Years**|\n| [**A**](https://example.test) | 1990 |\n| **B** | - |\n---\n\n|**Name**|\n|---|\n| **C** |\n", $tmap);
     $check('wiki-updates: a table gets its |---| row back, set off by blank lines', $tbl === "*Caption.*\n\n|**Name**|**Years**|\n|---|---|\n| [**A**](https://example.test) | 1990 |\n| **B** | - |\n\n---\n\n|**Name**|\n|---|\n| **C** |\n", json_encode($tbl));
