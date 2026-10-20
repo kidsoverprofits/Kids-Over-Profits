@@ -88,3 +88,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
 26. **Volunteers' agreed calls switch**: [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers#kop-vol-auto)
     shows "Let agreed calls go through on their own" as Off; the Volunteers table's agreement rates are unchanged. Turn it On only
     when you want it; the first ones show under "Gone through on their own" with Undo in Recently done.
+27. **Drive Docs news waits for review** (2026-10-20, [587a4532](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/587a4532)):
+    in [Review inbox > Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox) Add one news link; it shows waiting in
+    [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/), not on the site; within an hour or two the reader fills its summary and
+    date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
+    `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
+    Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
