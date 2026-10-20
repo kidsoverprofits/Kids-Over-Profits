@@ -119,7 +119,7 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
     $ids = kop_rinbox_wu_ids('waiting', '');
     $check('writeups: the record waits in the queue', in_array($fid, $ids, true), count($ids) . ' records');
     $card = kop_rinbox_get_item('writeups', (string) $fid);
-    $check('writeups: with no draft the card offers only "Write it with AI"', array_column($card['actions'], 'id') === array('write'), implode(',', array_column($card['actions'], 'id')));
+    $check('writeups: with no draft the card offers only "Write it with AI"', array_values(array_diff(array_column($card['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS)) === array('write'), implode(',', array_column($card['actions'], 'id')));
     try {
         kop_wu_publish($fid, 'tester');
         $check('writeups: nothing to approve without a draft', false);

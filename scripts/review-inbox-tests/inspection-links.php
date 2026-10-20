@@ -124,10 +124,14 @@ function kop_rinbox_test_inspection_links(array $src, array $item, callable $che
         kop_rinbox_test_skip('inspection-links: "only <home>"', 'no entry suggested from a home in the mirror');
     }
     // By hand: a program and any entry, given as the picker's "Name, address #id".
-    $pid = (int) array_keys($map['programs'])[0];
-    $n = kop_inspection_links_save(array('manual_record' => (string) $pid, 'manual_row' => 'Anything, Somewhere #' . $rid));
-    $check('inspection-links: an entry linked to a program by hand', $n === 1 && in_array($rid, kop_inspection_links_for($pid), true));
-    kop_inspection_links_save(array('unlink' => array($pid . '-' . $rid)));
+    $pid = (int) (array_keys($map['programs'])[0] ?? 0);
+    if ($pid > 0) {
+        $n = kop_inspection_links_save(array('manual_record' => (string) $pid, 'manual_row' => 'Anything, Somewhere #' . $rid));
+        $check('inspection-links: an entry linked to a program by hand', $n === 1 && in_array($rid, kop_inspection_links_for($pid), true));
+        kop_inspection_links_save(array('unlink' => array($pid . '-' . $rid)));
+    } else {
+        kop_rinbox_test_skip('inspection-links: an entry linked to a program by hand', 'no program with homes in the copy');
+    }
 
     // seeds/inspection-links.json: every pair names a record and a licensing row that exist, in the
     // record's state; applied once, a "Not this one" pair skipped, a removed link never comes back.

@@ -37,7 +37,41 @@ if (!function_exists('kop_v2_writes_active')) {
     function kop_v2_writes_active(PDO $pdo, $prefix, $refresh = false) { return true; }
 }
 
+/**
+ * The checks below group suggestions under a record named just "Program"; with the mirror's homes copied in
+ * (inspection-links needs them) those are grouped already. Run them on empty homes tables, then put the rows back.
+ */
 function kop_rinbox_test_program_homes(array $src, array $item, callable $check) {
+    $pdo = $GLOBALS['pdo'];
+    $tables = array(kop_program_homes_table('homes'), kop_program_homes_table('groups'));
+    $kept = array();
+    foreach ($tables as $t) {
+        $kept[$t] = $pdo->query("SELECT * FROM $t")->fetchAll(PDO::FETCH_ASSOC);
+        $pdo->exec("DELETE FROM $t");
+    }
+    $reset = function () {
+        delete_transient('kop_program_homes_suggestions');
+        kop_program_homes_map(true);
+    };
+    $reset();
+    try {
+        foreach (kop_program_homes_suggestions(true) as $s) {
+            if ($s['existing']) { $item = kop_rinbox_get_item('program-homes', $s['key']); break; }
+        }
+        kop_rinbox_test_program_homes_run($src, $item, $check);
+    } finally {
+        foreach ($tables as $t) {
+            $pdo->exec("DELETE FROM $t");
+            foreach ($kept[$t] as $row) {
+                $cols = array_keys($row);
+                $pdo->prepare("INSERT INTO $t (" . implode(', ', $cols) . ') VALUES (' . implode(', ', array_fill(0, count($cols), '?')) . ')')->execute(array_values($row));
+            }
+        }
+        $reset();
+    }
+}
+
+function kop_rinbox_test_program_homes_run(array $src, array $item, callable $check) {
     $pdo = $GLOBALS['pdo'];
     // A suggestion with a record named just "Program" there: grouping under it
     // runs on SQLite (making a new record writes MySQL-only memberships).

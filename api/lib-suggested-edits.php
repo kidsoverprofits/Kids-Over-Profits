@@ -46,8 +46,10 @@ if (!function_exists('kop_resolve_table_name')) {
         }
         $candidates[] = $base;
 
+        // The offline tests run on SQLite (tmp/prod.sqlite), which has no SHOW TABLES.
+        $sqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
         foreach ($candidates as $candidate) {
-            $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
+            $stmt = $pdo->prepare($sqlite ? "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?" : 'SHOW TABLES LIKE ?');
             $stmt->execute([$candidate]);
             if ($stmt->fetchColumn()) {
                 return $candidate;

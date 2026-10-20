@@ -35,6 +35,8 @@ $wanted = array(
     'wpdl_kop_woodbury_facts', 'wpdl_kop_woodbury_mentions', 'wpdl_kop_gdoc_links', 'wpdl_kop_fornits_items',
     'wpdl_kop_fornits_topics', 'wpdl_posts', 'wpdl_postmeta', 'wpdl_kop_review_tags', 'wpdl_fbv', 'wpdl_fbv_attachment_folder',
     'referrers_master', 'wpdl_referrers_master', 'providers_master', 'wpdl_providers_master', 'transporters_master', 'wpdl_transporters_master',
+    // Program homes: without them the scratch copy makes its own empty tables (inspection-links' program cards).
+    'wpdl_kop_program_homes', 'wpdl_kop_program_groups',
 );
 foreach ($wanted as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();

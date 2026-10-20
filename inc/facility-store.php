@@ -1581,8 +1581,10 @@ if (!function_exists('kop_facility_validate')) {
         $lists = array(
             'identification.otherNames'   => $ident['otherNames'] ?? null,
             'identification.pastNames'    => $ident['pastNames'] ?? null,
-            'identification.dbaNames'     => $ident['dbaNames'] ?? null,
-            'identification.registrants'  => $ident['registrants'] ?? null,
+            // New 2026-10-20: a record stored before then has neither, and saves that keep the stored shape
+            // (Record cleanup's Tidy, for an exact Undo) must still go through.
+            'identification.dbaNames'     => $ident['dbaNames'] ?? array(),
+            'identification.registrants'  => $ident['registrants'] ?? array(),
             'identification.currentOwners' => $ident['currentOwners'] ?? null,
             'operatingPeriod.notes'       => $op['notes'] ?? null,
             'memberships'                 => $doc['memberships'] ?? null,
