@@ -1,5 +1,5 @@
 {
- "built": "2026-10-20 19:14 UTC",
+ "built": "2026-10-20 19:45 UTC",
  "sections": [
   {
    "key": "2",
@@ -118,8 +118,8 @@
       {
        "id": "2.2:backfills",
        "lead": "Backfills",
-       "text": "**Backfills**: MN with Chrome closed (`py -3 scrapers/mn_scraper.py --backfill-pdfs`, ~20 min); CA is the owner's call (30,885 reports, 3-5 days: sync the mirror, then `py -3.14 ca_scraper.py --backfill-pdfs`). GA, TX and CT were started 2026-10-17: confirm they finished.",
-       "hash": "567902232778"
+       "text": "**Backfills**: MN with Chrome closed (`py -3 scrapers/mn_scraper.py --backfill-pdfs`, ~20 min); CA is the owner's call (30,885 reports: sync the mirror, then `py -3.14 ca_scraper.py --backfill-pdfs`). Fixed 2026-10-20 in kop-pipeline `c228130`: CCL's end-of-list answer (HTTP 400 \"Index out of range\") had made every facility count as unfinished, so each run started over. CCL now takes ~1 minute a report page, so the whole walk is closer to 3 weeks than 3-5 days; it resumes, so it can run in evening stretches. GA, TX and CT were started 2026-10-17: confirm they finished.",
+       "hash": "6f0423936ab8"
       },
       {
        "id": "2.2:first-posts-then-publish-the-page",
@@ -332,8 +332,8 @@
       {
        "id": "2.4:not-built-the-owner-s-call",
        "lead": "Not built, the owner's call",
-       "text": "**Not built, the owner's call**: two volunteers per item, or high-agreement volunteers applying directly; an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
-       "hash": "0c55bd125b64"
+       "text": "**Not built, the owner's call**: two volunteers per item, or high-agreement volunteers applying directly (suggested 2026-10-20: two volunteers with 90%+ agreement who agree apply on their own in low-risk queues such as doc-types, scraper-finds, websites, woodbury-reports, map-years, folder-links, with Undo and a weekly sample of 10 for the owner; publishing queues and anything about a named person stay with the owner; see 4.4 item 8); an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
+       "hash": "3e80f46ffec4"
       },
       {
        "id": "2.4:seo-keyphrase-wording",
@@ -561,6 +561,12 @@
        "lead": "Volunteer messages and research projects",
        "text": "**Volunteer messages and research projects**: open [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers) once (makes `kop_vol_messages`, `kop_vol_answers` and the projects' new `detail` column); make a small \"When did these programs close?\" project for yourself with a state, open its link in a private window, answer one with a link (it appears waiting in Submissions Review > News), ask a question, answer it under Messages (the menu shows a count, an email arrives), and see the reply marked New on the volunteer page. Mark the answer Used, then close the project.",
        "hash": "21995a4e5a82"
+      },
+      {
+       "id": "3:add-new-in-dropdowns",
+       "lead": "\"+ Add new...\" in dropdowns",
+       "text": "**\"+ Add new...\" in dropdowns**: on [Investors](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors) pick Kind > \"+ Add new...\", type a test kind, Add: it is selected and appears at [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists&list=investor-kinds); Undo it there. Also the Status dropdown on the admin lawsuits and legislation pages and the Type dropdowns on Woodbury Facts. Selects not fed by a registered list (publication status, jurisdiction, filters) deliberately have no such option.",
+       "hash": "bc99f1d16bb1"
       }
      ]
     }
@@ -755,6 +761,12 @@
        "hash": "d7d0e4ae2ea9"
       },
       {
+       "id": "4.4:self-service-volunteering",
+       "lead": "Self-service volunteering",
+       "text": "**Self-service volunteering** (audit 2026-10-20; the owner finds the back-and-forth overwhelming, so the default becomes \"a volunteer can start, learn, pick work and get answers without the owner\"). Today the owner makes every link, picks every project, answers every question and applies every call. In order: a. **Sign-up makes the link**: a form on /volunteer/ (name, optional email) calls `kop_vol_create()` and shows the link at once; the old `volunteer_projects` listing (`templates/page-volunteers.php`) points to it. b. **Practice round instead of the owner's first 10 calls**: 10 known-answer items drawn from the owner's past approve/reject log for the chosen queue; passing opens self-assign (`kop_volp_self_min_decided` gate in `inc/volunteer-projects.php:752-824` counts practice). c. **Next batch on Done**: \"Done. Thank you!\" (`js/volunteer-review.js:568`) offers the next 10 from the same queue; finished projects close themselves; research kinds can be self-assigned too. d. **Lost link / new device without the owner**: if an email was given, \"Send me my link\" mails a fresh one; replies to their questions can mail them (opt-in). e. **Questions answer themselves**: each brief shows \"Questions others asked\" (answers the owner marks \"Add to the brief's FAQ\"); trusted volunteers can answer; the owner gets one daily digest, not per message. f. **Research answers become one-click edits**: a year/status answer with a link becomes a proposed change card (Apply = writes the field + Undo) instead of the owner editing the record by hand. g. **Briefs for the open queues that lack one**: wiki-staff, young-adult-programs, wiki-updates, wiki-changes, the quote-check half of data-audit and conflicts. Record cleanup: open it or bulk-apply. h. **Close two gaps first**: bar `drive-docs` (quotes the owner's private Docs) and `podcasts` (statements attributed to named people) in `kop_vol_never_sources()`; the data form's \"a volunteer checks every suggestion\" (`js/tutorial-overlay.js:1172`, `js/data-form/data-wizard.js:610`) is untrue while `data` is barred. Depends on 2.4 item 10 for anything that applies without the owner.",
+       "hash": "3272cc94b556"
+      },
+      {
        "id": "4.4:research-tag-proposals-from-document-text",
        "lead": "Research tag proposals from document text",
        "text": "**Research tag proposals from document text**: a one-page review screen proposing facilities and operators from documents' contents, with acronyms guarded; replaces the JSON file of `api/propose-research-facility-tags.php` (old 3.8 item 6).",
@@ -796,6 +808,12 @@
        "lead": "Family Foundation School",
        "text": "**Family Foundation School**: once 2.4 item 3 is decided, read the complaints, add named staff (Doe and initials plaintiffs stay so), seed through `seeds/lawsuits.json` with docket numbers, then the wiki line for entry 533 (old 3.23).",
        "hash": "951ec196f06b"
+      },
+      {
+       "id": "4.5:reddit-wiki-watch",
+       "lead": "Reddit wiki watch",
+       "text": "**Reddit wiki watch** (daily task \"KOP Reddit Wiki Watch\", 03:00, kop-pipeline `scripts/watch-reddit-wiki.ps1`, built 2026-10-20): re-reads the 341 non-stub pages and writes kop-data `reddit-wiki/live-changes.json`. Open: (a) check `tmp/reddit-wiki-live/watch.log` after the first night and that kop-data pushed; (b) the Review inbox screen for those changes (page, before/after samples, link to the Reddit page and its edit link; ADDING-CONTENT.md \"review queue\"). \"Accept\" cannot write Reddit's text into KOP's copy yet: the page read is plain text, not markdown. It needs the markdown from Reddit's edit page, which requires a logged-in mod session in the watch Chrome profile (now logged out).",
+       "hash": "16c7a5a79835"
       }
      ]
     },
@@ -942,8 +960,8 @@
       {
        "id": "4.7:seo-audit-read-only-first",
        "lead": "SEO audit (read-only, first)",
-       "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet.",
-       "hash": "fcceb1931de8"
+       "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet. Status 2026-10-20: the screen is live code (KOP Tools > SEO Audit, inc/seo-audit.php, scripts/test-seo-audit.php, commit https://github.com/kidsoverprofits/Kids-Over-Profits/commit/32e2a0ec); the crawler is (kop-pipeline) scripts/seo-audit.py, not committed yet. Open: finish the full crawl, scp audit.json to wp-content/uploads/kop-seo-audit/audit.json, check https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-audit, commit the crawler in kop-pipeline, write the findings here for items 9-11.",
+       "hash": "eca2a6c1990e"
       },
       {
        "id": "4.7:focus-keyphrases",
@@ -1018,20 +1036,26 @@
      "key": "5",
      "title": "",
      "intro": [
-      "Each predates the work that found it; fix the test or the code. Last full run 2026-10-20 (mirror synced that day, main at eb2acbeb, portable PHP 8.2 from windows.php.net)."
+      "Each predates the work that found it; fix the test or the code. Last full run 2026-10-20 (mirror synced that day, main at 366c8d84, portable PHP 8.2 from windows.php.net)."
      ],
      "items": [
       {
        "id": "5:test-review-inbox",
        "lead": "test-review-inbox",
-       "text": "**test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 61 checks on the 2026-10-20 mirror (34 on the 2026-10-13 one: most of the rise is tests that sample live data). By cause: 1. *Proposals naming records merged away since their build file was made*: business-filings, nonprofit-filings, data-audit and federal-funding \"every proposal is well formed\", data-audit \"nearly every step can be made\" (148 of 1105 blocked, e.g. #9644, #9659, #11653). Either follow the merge (`kop_fmerge_follow_waiting()` / the merge log) in those checks or rebuild the seed files (kop-pipeline). 2. *Checks that pick a live sample that has changed*: nonprofit-filings Link (\"Childhaven, Inc. already has this organization\", so Undo / second Link / company Link all fall through), data-audit \"company fields and moved articles still fit\" (Sequel's executives and websites were edited), conflicts (0 staff items with a role; \"Unknown conflict\" at `inc/review-inbox/conflicts.php:86`), woodbury-facts auto-add \"0 of 4089\" and \"the pass files what adds nothing\", writeups (9 checks: approving holds facts, held list, waiting records), federal-funding \"Undo leaves an entry added by hand since\", drive-docs (\"Undo it before editing\" at drive-docs.php:475). Fix: seed the sample into the scratch copy, as the other queues' tests do. 3. *`home_of_program` add-on on cards it should not reach*: data-audit rename-only card, wiki-updates card 75, writeups \"with no draft offers only Write it with AI\". 4. *Harness gaps*: card-fields runs MySQL `SHOW` at `api/lib-suggested-edits.php:50`; inspection-links finds 0 programs with homes and then reads `array_keys($map['programs'])[0]` unguarded (`scripts/review-inbox-tests/inspection-links.php:127`). 5. *Fornits* (12 checks: filters, counts, progress, \"lead to the news queue\": Undefined array key \"id\"): `scripts/review-inbox-tests/fornits.php` seeds only an empty table; re-seed it into its own. 6. *Still open from before*: facilities-from-news \"after Remove the link it can be linked again\", ya-file (\"the card's own name picks its program\": \"0\"), ya-moved and merge-follow (0 waiting rows to move), woodbury-facts \"not conflicts: another staff role\" (a 2021 HEAL sighting is now \"Former Founder\"). - Run from a scratch worktree, program-practices and three wiki-updates draft checks also fail: they look for `kop-pipeline` next to the checkout. Not a bug; run from the real checkout.",
-       "hash": "ecd85ffd3ed6"
+       "text": "**test-review-inbox**: `scripts/test-review-inbox.php` (`-d memory_limit=6G`), 42 checks on the 2026-10-20 mirror after 366c8d84 (was 61; that commit fixed card-fields, writeups, record-cleanup, program-homes, inspection-links and the `home_of_program` action lists). What is left, by cause: 1. *Proposals naming records merged away since their build file was made*: business-filings, nonprofit-filings, data-audit and federal-funding \"every proposal is well formed\", data-audit \"nearly every step can be made\" (148 of 1105 blocked, e.g. #9644, #9659, #11653). Either follow the merge (`kop_fmerge_follow_waiting()` / the merge log) in those checks or rebuild the seed files (kop-pipeline). 2. *Checks that pick a live sample that has changed*: nonprofit-filings Link (\"Childhaven, Inc. already has this organization\", so Undo / second Link / company Link all fall through), data-audit \"company fields and moved articles still fit\" (Sequel's executives and websites were edited), conflicts (0 staff items with a role on the record; no roll-up, so its roll-up checks skip: seed two Woodbury conflicts of one kind on one record), woodbury-facts auto-add \"0 of 4089\" and \"the pass files what adds nothing\", federal-funding \"Add puts every entry on the record\" and \"Undo leaves an entry added by hand since\", drive-docs (\"Undo it before editing\" at drive-docs.php:475), wiki-updates \"moves to Ready for Reddit\" and \"the text is put in Reddit form\". Fix: seed the sample into the scratch copy, as the other queues' tests do. 3. *program-practices*: needs `kop-pipeline/tmp/doc-read/practices.json`, lost in the 2026-10-17 tmp wipe; rebuild it with doc-text.py (kop-pipeline). 4. *Fornits* (12 checks: filters, counts, progress, \"lead to the news queue\": Undefined array key \"id\"): `scripts/review-inbox-tests/fornits.php` seeds only an empty table; re-seed it into its own. 5. *Still open from before*: facilities-from-news \"after Remove the link it can be linked again\", ya-file (\"the card's own name picks its program\": \"0\"), ya-moved and merge-follow (0 waiting rows to move), woodbury-facts \"not conflicts: another staff role\" (a 2021 HEAL sighting is now \"Former Founder\"). - Run from a scratch worktree, program-practices and three wiki-updates draft checks also fail: they look for `kop-pipeline` next to the checkout. Not a bug; run from the real checkout.",
+       "hash": "8ba3aa213a98"
       },
       {
        "id": "5:test-fornits",
        "lead": "test-fornits",
        "text": "**test-fornits**: `scripts/test-fornits.php` cannot run: `tmp/fornits/` is gone (the 2026-10-17 junction wipe of kop-pipeline/tmp). Rebuild a batch with `python scripts/fornits-process.py --no-upload` (kop-pipeline), then check \"every link added\" (11 records missing before: #13972, #11097, #10333, ...; `kop_fmerge_follow_waiting()`).",
        "hash": "1f1c62548a1c"
+      },
+      {
+       "id": "5:test-inline-edit",
+       "lead": "test-inline-edit",
+       "text": "**test-inline-edit**: `scripts/test-inline-edit.php`, 2 checks (same with and without 366c8d84): \"31 earlier names filed as closed become renames\" (#10401 -> Bryce Canyon Academy, #11201 -> Okeechobee Youth Development Center) and \"52 company records round-trip unchanged\" (#500017 keyStaff.keyExecutives.0.personId missing on one side).",
+       "hash": "0c4482fac59a"
       },
       {
        "id": "5:test-mobile-api",
