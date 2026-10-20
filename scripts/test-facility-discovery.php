@@ -67,7 +67,10 @@ $check('a misspelled name finds the right record among its look-alikes',
 $check('a near-identical name in the same state is caught before a create',
     kop_facdisc_near_duplicate($pdo, 'Ashville Academy for Girls', 'NC') === 11656);
 $check('and the same name in another state is not', kop_facdisc_near_duplicate($pdo, 'Ashville Academy for Girls', 'MT') === null);
-$check('a genuinely new name is not a near duplicate', kop_facdisc_near_duplicate($pdo, 'Silver Oak Academy', 'MD', 'Keymar') === null);
+// Silver Oak Academy and Walker's Point were new until the scan created them (#100185, #100184, 2026-09-29),
+// so the new name is made up and those two now check that a record the scan made is found again.
+$check('a genuinely new name is not a near duplicate', kop_facdisc_near_duplicate($pdo, 'Larkspur Hollow Academy', 'MD', 'Keymar') === null);
+$check('a record the scan created before is found again, not created twice', kop_facdisc_near_duplicate($pdo, 'Silver Oak Academy', 'MD', 'Keymar') === 100185);
 $check('a program whose campuses are on record is held ("Maple Lake Academy")',
     in_array(kop_facdisc_near_duplicate($pdo, 'Maple Lake Academy', 'UT', 'Spanish Fork'), array(10475, 10476), true));
 $check('a same-city name sharing a distinctive word is held ("Three Points Ranch", Hurricane)',
@@ -78,8 +81,8 @@ $check('an acronym of a same-state record is held ("Camp SAYLA")', kop_facdisc_n
 $check('the same acronym in another state is not', kop_facdisc_near_duplicate($pdo, 'Camp SAYLA', 'GA', '') === null);
 $check('generic words alone do not make a duplicate', kop_facdisc_near_duplicate($pdo, 'Spanish Fork Girls Academy Treatment Program', 'UT', 'Provo') === null);
 $check('the same words in another city are not', kop_facdisc_near_duplicate($pdo, 'Three Points Ranch', 'UT', 'Provo') === null);
-$check('new programs from the dry run stay new', kop_facdisc_near_duplicate($pdo, 'Zion Hills Academy', 'UT', '') === null
-    && kop_facdisc_near_duplicate($pdo, "Walker's Point Youth and Family Center", 'WI', 'Milwaukee') === null);
+$check('new programs from the dry run stay new, or match only their own record', kop_facdisc_near_duplicate($pdo, 'Zion Hills Academy', 'UT', '') === null
+    && kop_facdisc_near_duplicate($pdo, "Walker's Point Youth and Family Center", 'WI', 'Milwaukee') === 100184);
 $check('a name of stopwords only has no look-alikes', kop_facdisc_lookalikes($pdo, 'Youth Academy Center', $index) === array());
 
 $check('agencies, police, courts, colleges and jails are decided without Groq',
@@ -150,8 +153,9 @@ $check('the stored copy still matches after a JSON round trip (so Remove can tel
 $edited = $doc;
 $edited['location']['city'] = 'Taneytown';
 $check('and an edited record does not match', !kop_facility_same_document($doc, $edited));
-$check('no record already has its name key in its state (the identity rule would match it)',
-    !$pdo->query("SELECT 1 FROM facilities_v2 WHERE name_key = " . $pdo->quote(kop_facility_name_key('Silver Oak Academy')) . " AND state = 'MD'")->fetchColumn());
+$same_key = $pdo->query("SELECT id FROM facilities_v2 WHERE name_key = " . $pdo->quote(kop_facility_name_key($doc['identification']['name'])) . " AND state = 'MD'")->fetchAll(PDO::FETCH_COLUMN);
+$check('only the record the scan made has its name key in its state (the identity rule matches that one)',
+    array_map('intval', $same_key) === array(100185), implode(', ', $same_key));
 $foreign = kop_facdisc_build_doc(array_merge($s, array('name' => 'Brisbane Youth Detention Centre', 'officialName' => 'Brisbane Youth Detention Centre',
     'state' => '', 'country' => 'Australia', 'city' => 'Wacol', 'type' => 'Juvenile Detention Facility', 'otherNames' => array())), $article);
 $check('a facility abroad keeps its country and no state', $foreign['location']['country'] === 'Australia' && $foreign['location']['state'] === null,
