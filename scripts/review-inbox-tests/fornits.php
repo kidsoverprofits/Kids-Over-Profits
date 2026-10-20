@@ -3,9 +3,11 @@
  * scripts/test-review-inbox.php checks for the 'fornits' source
  * (inc/review-inbox/fornits.php over inc/fornits.php).
  *
- * {prefix}kop_fornits_topics and _items are not in the mirror: they are made
- * here with the columns of kop_fornits_ensure_tables() and one made-up thread
- * with an item of every kind, tied to a real facility. Adding to a facility
+ * {prefix}kop_fornits_topics and _items come from the mirror when it has them
+ * (the shape checks read those), else they are made here with the columns of
+ * kop_fornits_ensure_tables(). The queue's own checks then empty both tables in
+ * the scratch copy and seed one made-up thread with an item of every kind,
+ * tied to a real facility, so their counts are the thread's. Adding to a facility
  * record needs MySQL (write lock, facilities_v2 save) and is not run; sending
  * a lead to the news queue and taking it back is.
  */
@@ -48,7 +50,14 @@ if (!function_exists('get_edit_post_link')) {
         author TEXT NOT NULL DEFAULT '', post_date TEXT NOT NULL DEFAULT '', preselect INTEGER NOT NULL DEFAULT 0,
         status TEXT NOT NULL DEFAULT 'pending', applied TEXT NULL, applied_fid INTEGER NOT NULL DEFAULT 0,
         reviewed_by TEXT NULL, reviewed_at TEXT NULL, created_at TEXT NOT NULL)");
-    if ((int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_fornits_items')->fetchColumn()) return;
+    if (!(int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_fornits_items')->fetchColumn()) kop_rinbox_test_fornits_seed();
+})();
+
+/** Empties both Fornits tables in the scratch copy and puts in the made-up thread. */
+function kop_rinbox_test_fornits_seed() {
+    $pdo = $GLOBALS['pdo'];
+    $pdo->exec('DELETE FROM wpdl_kop_fornits_items');
+    $pdo->exec('DELETE FROM wpdl_kop_fornits_topics');
     $fid = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 1")->fetchColumn();
     $tid = 991001;
     $post = 'I was there in 2004. Staff member John Example ran the seclusion room and kept kids in it for days at a time. '
@@ -75,7 +84,7 @@ if (!function_exists('get_edit_post_link')) {
             $it[0] === 'link' ? 'Says the seclusion room was used for days.' : '', $it[5], $i, $it[6], $it[7], $it[8],
             $decided ? 'someone' : null, $decided ? '2026-10-02 10:00:00' : null, '2026-10-01 09:00:0' . $i));
     }
-})();
+}
 
 function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     try {
@@ -83,6 +92,7 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     } catch (Throwable $e) {
         $check('fornits any record: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
     }
+    kop_rinbox_test_fornits_seed();
     $pdo = $GLOBALS['pdo'];
     $key = function ($kind, $status = 'pending') use ($pdo) {
         $st = $pdo->prepare('SELECT pkey FROM wpdl_kop_fornits_items WHERE kind = ? AND status = ? ORDER BY id LIMIT 1');
@@ -145,8 +155,10 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     // A lead: its destinations are moves; sending it to the news queue and Undo.
     $lead = $key('lead');
     $it = kop_rinbox_get_item('fornits', $lead);
+    // A lead with a link can also go to the indigenous schools or young adult programs (kop_rdest_sort_moves()).
     $check('fornits: a lead with a news link defaults to the news queue', strpos($it['actions'][0]['label'], 'News queue') !== false
-        && array_column($it['moves'], 'id') === array('lawsuit', 'closed', 'note'));
+        && array_column($it['moves'], 'id') === array('lawsuit', 'closed', 'note', 'indigenous', 'young_adult'),
+        $it['actions'][0]['label'] . ' ' . json_encode(array_column($it['moves'], 'id')));
     try {
         $m = call_user_func($src['act'], $lead, 'apply', array());
         $r = $row($lead);
