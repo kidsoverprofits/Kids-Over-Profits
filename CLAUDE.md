@@ -72,13 +72,16 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    (url, type, title, notes) under "Not sent yet" in the report so they can be sent next hour.
 5. The report says how many sources were sent and to which queues.
 
-## Open items go in docs/PLAN.md as you go (standing rule, 2026-10-14)
+## Open items go in the plan files as you go (standing rule, 2026-10-14)
 
+The open list is split by section: `docs/PLAN.md` is the index (one line per file, the Plan Board pass) and the
+items are in `docs/plan/<section>-<slug>.md`. Read the index, then only the file the work belongs to.
 Whenever a session has worked about five minutes without the owner's input, it writes what is still open from
-that work into `docs/PLAN.md` (owner steps, follow-ups, things found broken, checks to make after deploy), in the
+that work (owner steps, follow-ups, things found broken, checks to make after deploy) into the file of the
 section it belongs to, before going on. Don't save them all up for the end of the session. Finished items move to
 `docs/PLAN-ARCHIVE.md` (verbatim, under their old heading, dated) once nothing still open needs their context;
-a finished step that explains how open work behaves stays. PLAN.md section 1 has the rule in full.
+a finished step that explains how open work behaves stays. `docs/plan/1-working-here.md` has the owner's rules
+for working in this checkout.
 
 ## Topic change = handoff + new session (standing rule, 2026-10-20)
 
@@ -86,8 +89,8 @@ When the owner's message moves to a different task than the one the session has 
 feature, screen, pipeline, record or question; not a follow-up, fix or extension of the same work), stop before
 starting it and hand off the last task:
 
-1. Write what is still open from it into `docs/PLAN.md` (the rule above), and commit + push whatever finished.
-2. Reply with a short handoff: what was done (commit links), what is open (the PLAN.md items), and the files,
+1. Write what is still open from it into its `docs/plan/` file (the rule above), and commit + push whatever finished.
+2. Reply with a short handoff: what was done (commit links), what is open (the plan items), and the files,
    commands and decisions a new session needs, ending with a paste-ready opening message for that session.
 3. Remind the owner to start a new session (or `/clear`) for the new topic and paste that message in.
 

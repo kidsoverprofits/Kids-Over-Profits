@@ -1,8 +1,10 @@
-"""Build the Plan Board page (an Artifact) from docs/PLAN.md.
+"""Build the Plan Board page (an Artifact) from the plan files in docs/plan/.
 
     python scripts/plan-board/build.py [--out tmp/plan-board/index.html] [--json]
 
-Every list item in sections 2 and up of PLAN.md becomes a card with a stable id
+docs/PLAN.md is the index; the items are in docs/plan/*.md, read in name order. A file of a numbered subsection
+repeats its section heading ("## 4. ..."), which joins the section already read.
+Every list item in sections 2 and up becomes a card with a stable id
 ("<section>:<slug of its bold lead>"); the owner's answers are kept in the
 artifact's database (collection "answers", one document per item id), never in
 this page. docs/PLAN.md section "Plan Board" says how a session folds them in.
@@ -15,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PLAN = ROOT / 'docs' / 'PLAN.md'
+PLAN_DIR = ROOT / 'docs' / 'plan'
 TEMPLATE = Path(__file__).with_name('template.html')
 
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
@@ -30,6 +32,7 @@ def slug(text, limit=60):
 
 def parse(md):
     sections = []          # [{key, title, intro, groups: [{key, title, intro, items}]}]
+    by_key = {}
     sec = grp = item = None
     para = []
 
@@ -50,8 +53,12 @@ def parse(md):
         m3 = re.match(r'^### (?:(\d+\.\d+)\s+)?(.*)', line)
         if line.startswith('## '):
             flush_para(); close_item()
-            if m2 and int(m2.group(1)) >= 2:
+            if m2 and m2.group(1) in by_key:      # the same section, continued in the next file
+                sec = by_key[m2.group(1)]
+                grp = sec['groups'][0]
+            elif m2 and int(m2.group(1)) >= 2:
                 sec = {'key': m2.group(1), 'title': m2.group(2), 'groups': []}
+                by_key[sec['key']] = sec
                 grp = {'key': m2.group(1), 'title': '', 'intro': [], 'items': []}
                 sec['groups'].append(grp)
                 sections.append(sec)
@@ -109,7 +116,8 @@ def main():
     ap.add_argument('--out', default=str(ROOT / 'tmp' / 'plan-board' / 'index.html'))
     ap.add_argument('--json', action='store_true', help='print the parsed items instead')
     a = ap.parse_args()
-    sections = parse(PLAN.read_text(encoding='utf-8'))
+    files = sorted(PLAN_DIR.glob('*.md'))
+    sections = parse('\n\n'.join(p.read_text(encoding='utf-8') for p in files))
     if a.json:
         json.dump(sections, sys.stdout, indent=1, ensure_ascii=False)
         return
