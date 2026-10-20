@@ -25,6 +25,14 @@
 /* Lock body scroll during tutorial - handled by JS now, but good fallback */
 /* Removed empty ruleset for body.tutorial-active */
 
+/* While a tour runs the launcher goes: on phones it sat on the card's Next
+   button (the card has its own X). !important beats the inline display set
+   by createToggleButton(). */
+body.tutorial-active .tutorial-toggle-btn,
+body.tutorial-active .tutorial-toggle-tooltip {
+    display: none !important;
+}
+
 /* The highlight hole element */
 .tutorial-target-highlight {
     position: absolute;

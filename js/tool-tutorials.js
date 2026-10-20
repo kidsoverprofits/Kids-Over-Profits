@@ -251,6 +251,64 @@
                 }
             ], { storageKey: 'kop_anon_portal_tutorial_seen' });
         }
+
+        // ------------------------------------------------------------------
+        // We have questions (/questions/, templates/questions.php). The cards
+        // are drawn by js/questions.js; when no deck is open the card steps
+        // have no visible target and show in the middle of the screen.
+        // ------------------------------------------------------------------
+        if (document.getElementById('kop-q-start') && !window.kopQuestionsTutorial) {
+            window.kopQuestionsTutorial = new window.TutorialOverlay([
+                {
+                    title: 'We have questions',
+                    content: 'Our records on troubled teen programs have gaps, and some of our sources disagree. Each card here asks one short question about one program or company. Answer what you know and skip the rest.',
+                    target: null
+                },
+                {
+                    title: 'A Program You Know',
+                    content: 'Type the name of a program or company you were at, worked for, or sent your child to, and pick it from the list. You get only the questions about that record.',
+                    target: '#kop-q-find',
+                    position: 'bottom',
+                    highlightPadding: 6
+                },
+                {
+                    title: 'Or Pick a State',
+                    content: 'Don\'t have one name in mind? Pick a state (or leave it on Any state) and press <strong>Start</strong> for questions about programs there. Questions where our sources disagree come first.',
+                    target: '#kop-q-state, #kop-q-go',
+                    highlightAll: true,
+                    position: 'bottom',
+                    highlightPadding: 6
+                },
+                {
+                    title: 'One Question per Card',
+                    content: 'Most cards are yes or no: swipe right for yes and left for no, or use the buttons (on a keyboard, the left and right arrow keys). Others ask for a year, an age range or a choice. Cards marked <strong>Sources disagree</strong> show what each source says so you can pick the right one.',
+                    target: '#kop-q-deck .kop-q-card:not(.kop-q-under)',
+                    position: 'top',
+                    highlightPadding: 6
+                },
+                {
+                    title: 'Skip What You Don\'t Know',
+                    content: '<strong>I don\'t know, skip</strong> moves on without answering. A wrong guess costs us more than a skipped card.',
+                    target: '#kop-q-deck .kop-q-foot',
+                    position: 'top',
+                    highlightPadding: 6
+                },
+                {
+                    title: 'How Do You Know? (Optional)',
+                    content: 'Under each card you can say how you know: you were there, you worked there, your child went, or you read it somewhere (with a link). It helps us weigh the answer. It is never required.',
+                    target: '#kop-q-deck .kop-q-how',
+                    position: 'top',
+                    highlightPadding: 6
+                },
+                {
+                    title: 'What Happens Next',
+                    content: 'No account, name or email needed. A person reads every answer before anything changes on the site, unless several people give the same answer. When you finish you can leave an email to hear once when your answers have been checked; that is optional too.',
+                    target: '.kop-q-header .kop-q-small',
+                    position: 'bottom',
+                    highlightPadding: 6
+                }
+            ], { storageKey: 'kop_questions_tutorial_seen' });
+        }
     };
 
     if (document.readyState === 'loading') {

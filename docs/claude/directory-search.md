@@ -44,6 +44,7 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # The data form's wizard (steps 1-2) and its full-form bar end with "Short on time? Answer a few questions instead"
 # (questionsLine() in data-wizard.js, URL from window.kopWizardConfig in inc/enqueue.php); for a picked facility or
 # company it links /questions/#find=<name>, which fills that page's search box
+# Guided tour: the /questions/ block in js/tool-tutorials.js (card steps point at '#kop-q-deck ...' and show centred when no deck is open)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php                         # questions, answers, agreement, every real record
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
 # Admin facility id boxes: always kop_facility_finder_field() (inc/facility-finder.php), never a bare id input

@@ -1685,7 +1685,9 @@ function kop_enqueue_tool_tutorials() {
     ];
     global $post;
     $has_portal = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'anonymous_doc_portal');
-    if (!is_page_template($tour_templates) && !$has_portal) {
+    // /questions/ is a rewrite route with no page template (inc/questions.php).
+    $is_questions = function_exists('kop_q_is_page') && kop_q_is_page();
+    if (!is_page_template($tour_templates) && !$has_portal && !$is_questions) {
         return;
     }
 

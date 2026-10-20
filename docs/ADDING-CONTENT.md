@@ -388,7 +388,7 @@ when its version moves, and most never change a record that is already on file.
 | --- | --- | --- |
 | Readers | How to use this site (`inc/how-to-use.php`, `templates/how-to-use.php`) | a new main destination or way to search |
 | Readers | Site map (`inc/site-map.php`) | any new public page or route |
-| Readers | Guided tours: `js/tutorial-overlay.js` (data form), `js/wiki-editor-tutorial.js`, `js/tool-tutorials.js` (News Processor, lawsuit and legislation forms, anonymous portal), `js/program-index-tutorial.js`, `js/network-map-tutorial.js`, `js/inspection-reports-tutorial.js`, `js/glossary-tutorial.js` | the toured page gains, loses or renames something a step points at (each step's `target` is a CSS selector) |
+| Readers | Guided tours: `js/tutorial-overlay.js` (data form), `js/wiki-editor-tutorial.js`, `js/tool-tutorials.js` (News Processor, lawsuit and legislation forms, anonymous portal, /questions/), `js/program-index-tutorial.js`, `js/network-map-tutorial.js`, `js/inspection-reports-tutorial.js`, `js/glossary-tutorial.js` | the toured page gains, loses or renames something a step points at (each step's `target` is a CSS selector) |
 | Readers | Field help (`inc/form-help.php`, test `scripts/test-form-help.js`) | a form field's meaning changes |
 | Readers | /open-data/ (`inc/open-data.php`) | a new public table or column |
 | Admins | KOP Tools registry (`wp-plugins/kop-tools/kop-tools.php`) | a new, renamed or retired admin screen |
