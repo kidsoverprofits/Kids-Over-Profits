@@ -213,12 +213,56 @@ function kop_closure_days_ago($date) {
 }
 
 /**
+ * A name's words split in two: [distinctive words, kinds of place], each as
+ * word => true. Lake, Hills, Ridge stay distinctive here ("Copper Lake" is
+ * not "Copper Hills"), unlike kop_news_stopwords().
+ */
+function kop_closure_name_words($text) {
+    static $audience = null;
+    if ($audience === null) {
+        $audience = array_flip(explode(' ', 'youth juvenile juveniles teen teens teenage teenaged adolescent adolescents child children childrens '
+            . 'kid kids boy boys girl girls young people adult adults women men mothers student students minors migrant '
+            . 'christian catholic religious faith based private nonprofit state county city local regional former'));
+    }
+    $descriptors = kop_closure_descriptor_words();
+    $states = kop_closure_state_words();
+    $distinct = array();
+    $kind = array();
+    foreach (explode(' ', kop_normalize_name_key((string) $text)) as $t) {
+        if ($t === '' || ctype_digit($t) || in_array($t, array('inc', 'llc', 'ltd', 'corp', 'co', 'system', 'systems', 'formerly', 'former'), true)) continue;
+        if (isset($descriptors[$t])) {
+            // Who a program serves is no kind of place: "Okaloosa Youth
+            // Development Center" is not Okaloosa Youth Academy.
+            if (!isset($audience[$t])) $kind[rtrim($t, 's')] = true;
+        } elseif (strlen($t) >= 3 && !isset($states[$t])) {
+            $distinct[$t] = true;
+        }
+    }
+    return array($distinct, $kind);
+}
+
+/**
+ * A report's name as [name, place]: "Youth Rehabilitation and Treatment
+ * Center in Geneva" -> [Youth Rehabilitation and Treatment Center, Geneva].
+ * A trailing acronym is dropped ("... Center (YRTC)"): it names no place.
+ */
+function kop_closure_name_head($program) {
+    $name = preg_replace('/\s*\(\s*[A-Z]{2,8}\s*\)\s*$/', '', trim((string) $program));
+    $parts = preg_split('/\s+(?:in|at|near)\s+/i', $name, 2);
+    return array($parts[0], trim($parts[1] ?? ''));
+}
+
+/**
  * Facilities a report's name may mean when it matches no name exactly: a
  * record whose name (or another name) holds every distinctive word of the
  * report's, or whose distinctive words all appear in the report's
  * ("Dundee Ranch" -> Academy at Dundee Ranch, "Ivy Ridge" -> Academy at Ivy
  * Ridge, "Straight Inc." in Tampa Bay -> Straight – Tampa Bay). Kept to the
- * report's state when it names one. Returns [id => status].
+ * report's state when it names one. A name of descriptor words alone goes
+ * by its place ("Youth Rehabilitation and Treatment Center in Geneva" ->
+ * Geneva Youth Treatment and Rehabilitation Center). Returns ['loose' =>
+ * [id => status], 'strict' => [id => confirmed], 'own' => [id => true] for
+ * the records matched by their own name].
  */
 function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias_index) {
     static $facilities = null;
@@ -228,41 +272,23 @@ function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias
             $facilities[(int) $f['id']] = array('state' => strtoupper(trim((string) $f['state'])), 'status' => (string) $f['status']);
         }
     }
-    // A name's words split in two: what kind of place it is, and the rest.
-    // Lake, Hills, Ridge stay distinctive here ("Copper Lake" is not "Copper
-    // Hills"), unlike kop_news_stopwords().
-    $descriptors = kop_closure_descriptor_words();
-    $states = kop_closure_state_words();
-    $audience = array_flip(explode(' ', 'youth juvenile juveniles teen teens teenage teenaged adolescent adolescents child children childrens '
-        . 'kid kids boy boys girl girls young people adult adults women men mothers student students minors migrant '
-        . 'christian catholic religious faith based private nonprofit state county city local regional former'));
-    $split = static function ($text) use ($descriptors, $states, $audience) {
-        $distinct = array();
-        $kind = array();
-        foreach (explode(' ', kop_normalize_name_key($text)) as $t) {
-            if ($t === '' || ctype_digit($t) || in_array($t, array('inc', 'llc', 'ltd', 'corp', 'co', 'system', 'systems', 'formerly', 'former'), true)) continue;
-            if (isset($descriptors[$t])) {
-                // Who a program serves is no kind of place: "Okaloosa Youth
-                // Development Center" is not Okaloosa Youth Academy.
-                if (!isset($audience[$t])) $kind[rtrim($t, 's')] = true;
-            } elseif (strlen($t) >= 3 && !isset($states[$t])) {
-                $distinct[$t] = true;
-            }
-        }
-        return array($distinct, $kind);
-    };
-    list($mine, $my_kind) = $split(preg_split('/\s+(?:in|at|near)\s+/i', (string) $program, 2)[0]);
+    list($head, $where) = kop_closure_name_head($program);
+    list($mine, $my_kind) = kop_closure_name_words($head);
+    if (!$mine && $my_kind) {
+        // Only the place tells it apart: "in Geneva", else the location's town.
+        list($mine) = kop_closure_name_words($where !== '' ? $where : explode(',', (string) $location)[0]);
+    }
     if (!$mine) {
         return array();
     }
     $place = array_flip(explode(' ', kop_normalize_name_key((string) $location)));
     $state = kop_closure_location_state($location);
-    $out = array('loose' => array(), 'strict' => array());
+    $out = array('loose' => array(), 'strict' => array(), 'own' => array());
     foreach ($alias_index['exact'] ?? array() as $key => $fid) {
         $fid = (int) $fid;
         if (!isset($facilities[$fid])) continue;
         if ($state !== '' && $facilities[$fid]['state'] !== '' && $facilities[$fid]['state'] !== $state) continue;
-        list($theirs, $their_kind) = $split((string) $key);
+        list($theirs, $their_kind) = kop_closure_name_words((string) $key);
         // Loose: every distinctive word of the report's name is in the record's.
         if (array_diff_key($mine, $theirs)) continue;
         // "Gulf Coast Youth Academy" is not "Gulf Coast Treatment Center".
@@ -272,6 +298,7 @@ function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias
         // "Eckerd wilderness camp" not Eckerd Connects E-Nini-Hassee).
         if (count($mine) === 1 && $my_kind && !array_intersect_key($my_kind, $their_kind)) continue;
         $out['loose'][$fid] = $facilities[$fid]['status'];
+        if ($key === kop_normalize_name_key((string) ($alias_index['names'][$fid] ?? ''))) $out['own'][$fid] = true;
         // Strict: the record's other words are the report's place ("Straight
         // Inc." in Tampa Bay -> Straight – Tampa Bay). Confirmed by a shared
         // kind of place or the same state, or it is only a guess.
@@ -285,9 +312,11 @@ function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias
 
 /**
  * The record a report's name means by kop_closure_name_candidates(), or 0:
- * the only loose match; else the only strict one, when confirmed. Several
- * matches that are all Closed (or already at the report's status) return the
- * first, so the report is filed as already recorded.
+ * the only loose match; else the only strict one, when confirmed; else the
+ * only confirmed strict one matched by its own name (Academy at Dundee Ranch,
+ * not Pillars of Hope, which lists it among its old names). Several matches
+ * that are all Closed (or already at the report's status) return the first,
+ * so the report is filed as already recorded.
  */
 function kop_closure_pick_candidate(array $cands, $target_status) {
     $loose = $cands['loose'] ?? array();
@@ -297,6 +326,10 @@ function kop_closure_pick_candidate(array $cands, $target_status) {
     $strict = $cands['strict'] ?? array();
     if (count($strict) === 1 && reset($strict)) {
         return (int) array_key_first($strict);
+    }
+    $own = array_intersect_key(array_filter($strict), $cands['own'] ?? array());
+    if (count($own) === 1) {
+        return (int) array_key_first($own);
     }
     $done = array_filter($loose, static function ($s) use ($target_status) {
         return $s === 'Closed' || $s === $target_status;
@@ -590,6 +623,20 @@ function kop_closure_settle_report(PDO $pdo, array $report, $published, &$alias_
         return array(null, 'vague', null);
     }
     $fid = kop_closure_resolve_facility($pdo, $report, $alias_index);
+    if ($fid && empty($report['facility_id']) && !kop_closure_name_words(kop_closure_name_head($report['program'])[0])[0]) {
+        // A name of descriptor words alone is one record's name but many
+        // places': "Youth Rehabilitation and Treatment Center" (Kearney) in
+        // Geneva, Nebraska is the Geneva one. It stands unless the report's
+        // place names another town than the record's.
+        $city = $pdo->prepare('SELECT city FROM facilities_v2 WHERE id = ?');
+        $city->execute(array($fid));
+        $city = kop_normalize_name_key((string) $city->fetchColumn());
+        $place = implode(' ', array(kop_closure_name_head($report['program'])[1], (string) ($report['location'] ?? '')));
+        $towns = kop_closure_name_words($place)[0];   // a state alone names no town
+        if ($city !== '' && $towns && strpos(' ' . kop_normalize_name_key($place) . ' ', " $city ") === false) {
+            $fid = null;
+        }
+    }
     $current = null;
     $status_of = static function ($fid) use ($pdo) {
         $stmt = $pdo->prepare('SELECT status FROM facilities_v2 WHERE id = ?');
@@ -1002,9 +1049,9 @@ function kop_closure_scan_cron() {
         // The queue as it stood before the 2026-10-20 rules, settled again once
         // ('b': the name match no longer counts "youth" or "systems"; 'c': rows
         // an earlier pass moved out of the queue are settled again too).
-        if (get_option('kop_closure_resettled') !== '2026-10-20c') {
+        if (get_option('kop_closure_resettled') !== '2026-10-20d') {
             $moved = kop_closure_resettle_open($pdo);
-            update_option('kop_closure_resettled', '2026-10-20c', false);
+            update_option('kop_closure_resettled', '2026-10-20d', false);
             error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at

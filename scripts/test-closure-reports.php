@@ -22,6 +22,13 @@ if (!file_exists($db_path)) {
     exit(2);
 }
 
+// The mirror holds writes = v2, but kop_migration_tables_exist() asks MySQL's
+// SHOW TABLES, which SQLite cannot answer, so the alias index would be built
+// from the frozen facilities_master. Read the switch as production does.
+function kop_v2_writes_active(PDO $pdo, $prefix, $refresh = false) {
+    $s = $pdo->query("SELECT state_value FROM {$prefix}kop_migration_state WHERE state_key = 'writes'")->fetchColumn();
+    return $s && (json_decode($s, true)['mode'] ?? '') === 'v2';
+}
 require __DIR__ . '/kop-test-harness.php';
 require_once dirname(__DIR__) . '/inc/closure-reports.php';
 
@@ -272,8 +279,13 @@ if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_r
         if (getenv('KOP_SHOW')) printf("  %-10s -> %-10s %s (%s)%s\n", $r['status'], $a['status'], $r['program_name'], $r['location'], $a['facility_id'] ? ' #' . $a['facility_id'] : '');
     }
     $is = static function ($name, $status) use ($by) { return isset($by[$name]) && strpos($by[$name], $status) === 0; };
-    foreach (array('youth facility' => 'vague', 'Group Home' => 'vague', 'Dundee Ranch' => 'already', 'Ivy Ridge' => 'already',
-            'Five Oaks Achievement Center' => 'old') as $name => $want) {
+    // Pillars of Hope lists "Academy at Dundee Ranch (2000-2003)" among its
+    // names; the record of that name wins. "Youth Rehabilitation and
+    // Treatment Center" alone is Kearney's name, not Geneva's.
+    foreach (array('youth facility' => 'vague', 'Group Home' => 'vague', 'Dundee Ranch' => 'already #14109', 'Ivy Ridge' => 'already',
+            'Dundee Ranch Academy' => 'already #14109', 'Five Oaks Achievement Center' => 'old',
+            'Youth Rehabilitation and Treatment Center (YRTC)' => 'already #100619',
+            'Youth Rehabilitation and Treatment Center in Geneva' => 'already #100619') as $name => $want) {
         if (isset($by[$name])) $check("\"$name\" now $want", $is($name, $want), $by[$name]);
     }
     foreach (array('Bay County boot camp' => '#9632', 'Eckerd wilderness camp in Ocala' => '#11165', 'Copper Lake youth prison' => '#10370',
