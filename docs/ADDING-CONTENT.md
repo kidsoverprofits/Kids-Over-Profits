@@ -7,7 +7,7 @@ merge tool. This page lists, for each kind of addition, every place that has
 to learn about it.
 
 Each section is a checklist. Function names are the places to edit; the test
-named at the end of a section checks most of it. CLAUDE.md has the commands.
+named at the end of a section checks most of it. The area files in `docs/claude/` (indexed in CLAUDE.md) have the commands.
 
 What an existing record's change has to reach (link syncs, caches, the app,
 the wiki) is mapped in [DATA-FLOWS.md](DATA-FLOWS.md).
@@ -121,7 +121,7 @@ touch.
   key to `$expected` in `scripts/test-open-data.php`.
 - `inc/mobile-api.php` if the app should show it.
 
-**Docs**: CLAUDE.md (Database Tables and a test line), `README.md`,
+**Docs**: `docs/claude/database-tables.md` and a test line in the area's `docs/claude/` file, `README.md`,
 `AGENTS.md`, `DATABASE-COLUMNS.md`, `docs/data-forms/README.md`,
 `docs/REPOSITORY-MAP.md`, and the data form tour in `js/tutorial-overlay.js`
 if it lists the tabs.
@@ -267,7 +267,7 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
 - If its rows show on facility pages, the page data and its fingerprint (cached
   pages and feeds rebuild only when their fingerprint moves:
   `kop_state_feed_fingerprint()`, the directory feed, the facility page index).
-- `DATABASE-COLUMNS.md` and the Database Tables list in CLAUDE.md.
+- `DATABASE-COLUMNS.md` and `docs/claude/database-tables.md`.
 - Test: `scripts/test-facility-merge.php`.
 
 ---
@@ -353,7 +353,7 @@ when its version moves, and most never change a record that is already on file.
   ('doc-types'); after changing the rules bump `KOP_DOC_TYPES_RULES_VERSION`.
 - **People named in a new place** get ids through
   `kop_people_named_sources()`, in the right pool (industry, harmed, press).
-- **Colours**: follow "Kadence colour traps" in CLAUDE.md.
+- **Colours**: follow "Kadence colour traps" in `docs/claude/css-checks.md`.
 - **A new path that writes a news article, lawsuit or bill** (save, approve,
   status, move, Undo, delete) calls `kop_resync_news()` /
   `kop_resync_lawsuit()` / `kop_resync_after_status()` /
@@ -382,7 +382,7 @@ when its version moves, and most never change a record that is already on file.
 | Readers | /open-data/ (`inc/open-data.php`) | a new public table or column |
 | Admins | KOP Tools registry (`wp-plugins/kop-tools/kop-tools.php`) | a new, renamed or retired admin screen |
 | Admins | Review inbox help strings and `docs/admin-submissions/README.md` | a new queue or a changed action |
-| Developers | CLAUDE.md | a new subsystem, table, test or command |
+| Developers | the area's `docs/claude/` file (a new area: a new file + a row in CLAUDE.md's index) | a new subsystem, table, test or command |
 | Developers | `README.md`, `AGENTS.md`, `DATABASE-COLUMNS.md`, `docs/README.md`, `docs/REPOSITORY-MAP.md` | a new subsystem, table, template or page |
 | Developers | `docs/FACILITY-SCHEMA.md`, `docs/data-forms/README.md` and the other `docs/<area>/README.md` | that area changes |
 | Owner | `docs/PLAN.md` | open work and the owner's queue (the one open list) |

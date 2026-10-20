@@ -2,7 +2,7 @@
 
 This folder documents the Kids Over Profits child theme. Unless a document
 says otherwise, it describes the live site at https://kidsoverprofits.org.
-The repository root `CLAUDE.md` lists every build and test command; this page
+The repository root `CLAUDE.md` and its area files in `docs/claude/` list every build and test command; this page
 says where to read about each part.
 
 ## Start here
@@ -64,7 +64,7 @@ says where to read about each part.
   public on 2026-09-21. The document is its plan and a record of each phase.
 
 Some public pages have no document of their own yet. Read the code listed
-here, and the tests `CLAUDE.md` names for each one:
+here, and the tests `docs/claude/` names for each one:
 
 | Page | Code |
 | --- | --- |
@@ -90,7 +90,7 @@ here, and the tests `CLAUDE.md` names for each one:
 ## Review and admin tools
 
 These have no document of their own either; the header comment of each file
-says how it works, and `CLAUDE.md` names its test.
+says how it works, and its `docs/claude/` file names its test.
 
 | Tool | Code |
 | --- | --- |

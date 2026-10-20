@@ -28,7 +28,7 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 - `js/data/`: only `pages/` and `glossary/` live here; the rest is the `kop-data` repo, deployed into this folder on the server and linked here by `scripts/link-data.ps1`.
 - `seeds/`: data shipped with a deploy and applied once per version.
 - `wp-plugins/kop-tools/`: the KOP Tools admin menu. The "Send to KOP" extension is the `kop-send-to-kop` repo.
-- `docs/`: workflow docs; `docs/PLAN.md` is the single list of open work. `CLAUDE.md` lists every subsystem's commands and tests.
+- `docs/`: workflow docs; `docs/PLAN.md` is the single list of open work. `CLAUDE.md` indexes every subsystem's commands and tests (in `docs/claude/`).
 
 ## Major Subsystems
 
@@ -65,7 +65,7 @@ node scripts/aggregate-all-programs.js
 
 ## Helpful References
 
-- `CLAUDE.md` (commands and tests for every subsystem)
+- `CLAUDE.md` + `docs/claude/` (commands and tests for every subsystem)
 - `AGENTS.md` (contributor guide)
 - `DATABASE-COLUMNS.md` (main tables and columns)
 - `environment-summary.md`

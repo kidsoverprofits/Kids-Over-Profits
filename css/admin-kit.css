@@ -2,7 +2,7 @@
  * One look for the KOP Tools screens (inc/admin-kit.php, js/admin-kit.js).
  * Every button names its colour and background in every state, so it holds
  * on a front-end admin page too (Kadence colours button:hover/:focus; see
- * CLAUDE.md "Kadence colour traps"). Colours come from css/colors.css with
+ * docs/claude/css-checks.md "Kadence colour traps"). Colours come from css/colors.css with
  * the same values as fallbacks.
  */
 

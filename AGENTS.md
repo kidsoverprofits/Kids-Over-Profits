@@ -1,6 +1,6 @@
 # Kids Over Profits Contributor Guide
 
-This repository is the Kids Over Profits WordPress child theme. Treat it as the theme source itself, not as a full local WordPress or Flywheel site checkout. `CLAUDE.md` is the detailed reference: every subsystem's commands, tests and rules. This guide is the overview.
+This repository is the Kids Over Profits WordPress child theme. Treat it as the theme source itself, not as a full local WordPress or Flywheel site checkout. `CLAUDE.md` is the detailed reference: the standing rules, and an index of `docs/claude/<area>.md` files holding every subsystem's commands, tests and rules. This guide is the overview.
 
 ## Environment Snapshot
 
@@ -193,7 +193,7 @@ node scripts/aggregate-all-programs.js
 
 ## Scripts and Tooling
 
-- `CLAUDE.md` lists every build, import and test command; most tests are `scripts/test-*.php` run offline against `tmp/prod.sqlite` with Local's `php.exe`.
+- `CLAUDE.md` and its area files in `docs/claude/` list every build, import and test command; most tests are `scripts/test-*.php` run offline against `tmp/prod.sqlite` with Local's `php.exe`.
 - The builders (`aggregate-all-programs.js` for the auto-linker's lists, `build-network-graph.js` for the map, ...) are in `kop-pipeline` and write into `kop-data` and `seeds/` here.
 - Keep generated JSON artifacts and their producing scripts in sync when changing these pipelines.
 
@@ -225,7 +225,7 @@ node scripts/aggregate-all-programs.js
   - Sand / Warm Ivory: `#F2EEDF`
   - Powder Blue: `#AEE0ED`
   - Bubblegum Pink: `#FC8ED6`
-- Every text passes WCAG AA and every icon 3:1, in every state; see "Kadence colour traps" in `CLAUDE.md` (accent text uses `--kop-*-ink`, white text sits on `--kop-*-fill`).
+- Every text passes WCAG AA and every icon 3:1, in every state; see "Kadence colour traps" in `docs/claude/css-checks.md` (accent text uses `--kop-*-ink`, white text sits on `--kop-*-fill`).
 - Use the brightest accents for highlights, outlines, and focus states rather than large background fills.
 - Use `var(--kop-*)` variables from `css/colors.css` instead of introducing new hard-coded palette values.
 

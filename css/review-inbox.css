@@ -1,7 +1,7 @@
 /**
  * The review inbox on the Submissions Review page (js/review-inbox.js).
  * Every button names its colour and background in every state (Kadence
- * colours button:hover/:focus otherwise; see CLAUDE.md "Kadence colour traps").
+ * colours button:hover/:focus otherwise; see docs/claude/css-checks.md "Kadence colour traps").
  */
 
 /* While another queue is open, the page's own list and its controls step aside. */

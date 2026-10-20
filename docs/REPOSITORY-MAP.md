@@ -327,7 +327,7 @@ php scripts/test-site-map.php
 node scripts/test-network-modules.js
 ```
 
-`CLAUDE.md` at the repository root lists every other build and test
+`CLAUDE.md` at the repository root (with its area files in `docs/claude/`) lists every other build and test
 command.
 
 From the pipeline repository:

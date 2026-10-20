@@ -68,6 +68,6 @@ Other secrets (AI keys, `KOP_GITHUB_DISPATCH_TOKEN`, `KOP_COURTLISTENER_TOKEN`, 
 
 ## 8. Documentation References
 
-- `CLAUDE.md` (commands and tests per subsystem)
+- `CLAUDE.md` + `docs/claude/` (commands and tests per subsystem)
 - `AGENTS.md`, `README.md`, `DATABASE-COLUMNS.md`, `QUICK-REFERENCE.md`
 - `docs/README.md`, `docs/PLAN.md`
