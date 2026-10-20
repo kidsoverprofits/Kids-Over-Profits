@@ -101,7 +101,7 @@ check('a person\'s latest answer replaces their earlier one', count($t) === 1 &&
 
 // ---- Words ----
 check('a conflict about an opening year is asked as one', kop_q_conflict_ask('dates', 'operatingPeriod.startYear', 'X') === 'What year did X open?');
-check('a conflict with no known field is asked by its kind', kop_q_conflict_ask('closure', '', 'X') === 'When did X close?');
+check('a conflict with no known field is asked by its kind', kop_q_conflict_ask('closure', '', 'X') === 'Is X still open, or did it close?');
 check('"City, ST" splits', kop_q_split_place('Provo, UT') === array('Provo', 'UT') && kop_q_split_place('Provo') === array('Provo', ''));
 
 // ---- Every real record ----

@@ -354,7 +354,7 @@ function kop_q_conflict_ask($what, $path, $name) {
     if (isset($by_path[$path])) return $by_path[$path];
     $by_what = array(
         'dates'   => "Which year is right for $name?",
-        'closure' => "When did $name close?",
+        'closure' => "Is $name still open, or did it close?",
         'size'    => "What size or ages is right for $name?",
         'type'    => "What kind of program is $name?",
     );
