@@ -1,5 +1,5 @@
 {
- "built": "2026-10-20 19:12 UTC",
+ "built": "2026-10-20 19:14 UTC",
  "sections": [
   {
    "key": "2",
@@ -338,8 +338,8 @@
       {
        "id": "2.4:seo-keyphrase-wording",
        "lead": "SEO keyphrase wording",
-       "text": "**SEO keyphrase wording**: which words people search for. Facility name alone, or with \"abuse\" / \"reviews\"; \"troubled teen\" vs \"residential treatment\" for state hubs. Blocks 4.7 item 9.",
-       "hash": "32f61a8dd422"
+       "text": "**SEO keyphrase wording**: which words people search for. Facility name alone, or with \"abuse\" / \"reviews\"; \"troubled teen\" vs \"residential treatment\" for state hubs. Blocks 4.7 item 9. (People are settled: name + role or employer.)",
+       "hash": "c35e394b7e8e"
       }
      ]
     },
@@ -948,8 +948,8 @@
       {
        "id": "4.7:focus-keyphrases",
        "lead": "Focus keyphrases",
-       "text": "**Focus keyphrases**: one rule per page kind (facility, operator, state hub, article/post, hub page). For real posts and pages, store `_yoast_wpseo_focuskw`. Generated /facility/ and /operator/ routes have no post, so they get no stored keyphrase. Extend test-seo.php. Wording waits on 2.4 item 11. Model: Opus for the rules, Sonnet for the code.",
-       "hash": "990801553d9b"
+       "text": "**Focus keyphrases**: one rule per page kind (facility, operator, state hub, article/post, hub page). For real posts and pages, store `_yoast_wpseo_focuskw`. Generated /facility/ and /operator/ routes have no post, so they get no stored keyphrase. Extend test-seo.php. People (owner, 2026-10-20): the person's name + their role or employer (\"Jane Doe Copper Canyon Academy director\"), for any page or post about one person; there is no /person/ route yet. Facility and state wording still waits on 2.4 item 11. Model: Opus for the rules, Sonnet for the code.",
+       "hash": "06d9e801ad71"
       },
       {
        "id": "4.7:meta-descriptions-yoast-sees",
