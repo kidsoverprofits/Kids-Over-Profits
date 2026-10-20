@@ -1169,7 +1169,7 @@ if (window.TutorialOverlay) {
         const guidedSteps = [
             {
                 title: 'Welcome to the Data Form!',
-                content: 'This form starts with three short steps: find the record (or add a new one), pick what you want to add or fix, then fill in only those fields. Nothing is sent to us until you press <strong>Submit for review</strong>, and a volunteer checks every suggestion before it goes on the site.',
+                content: 'This form starts with three short steps: find the record (or add a new one), pick what you want to add or fix, then fill in only those fields. Nothing is sent to us until you press <strong>Submit for review</strong>, and we check every suggestion before it goes on the site.',
                 target: null
             },
             {

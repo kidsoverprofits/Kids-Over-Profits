@@ -607,7 +607,7 @@
                 <h2 id="kop-wiz-h">Fill in what you know</h2>
                 <p class="kop-wiz-lead">Showing: ${chosen.map((topic) => esc(topic.label)).join('; ')}.
                     Leave blank anything you are not sure of. When you are done, press <strong>${submitWord}</strong> at the bottom
-                    and say where you learned it (a link, a document, or your own time there). A volunteer checks every suggestion before it goes on the site.</p>
+                    and say where you learned it (a link, a document, or your own time there). We check every suggestion before it goes on the site.</p>
                 ${others.length ? `
                 <details class="kop-wiz-more">
                     <summary>Add something else too</summary>
