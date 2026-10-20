@@ -243,7 +243,8 @@ if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_r
         if (isset($by[$name])) $check("\"$name\" now $want", $is($name, $want), $by[$name]);
     }
     foreach (array('Bay County boot camp' => '#9632', 'Eckerd wilderness camp in Ocala' => '#11165', 'Copper Lake youth prison' => '#10370',
-            'juvenile boot camps' => '#11207', 'Gulf Coast Youth Academy' => '#11116') as $name => $wrong) {
+            'juvenile boot camps' => '#11207', 'Gulf Coast Youth Academy' => '#11116', 'Charter Behavioral Health Systems' => '#',
+            'Okaloosa Youth Development Center' => '#11120') as $name => $wrong) {
         if (isset($by[$name])) $check("\"$name\" is not matched to $wrong", strpos($by[$name], $wrong) === false, $by[$name]);
     }
     $waiting = 0;

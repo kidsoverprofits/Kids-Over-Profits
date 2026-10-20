@@ -233,13 +233,18 @@ function kop_closure_name_candidates(PDO $pdo, $program, $location, array $alias
     // Hills"), unlike kop_news_stopwords().
     $descriptors = kop_closure_descriptor_words();
     $states = kop_closure_state_words();
-    $split = static function ($text) use ($descriptors, $states) {
+    $audience = array_flip(explode(' ', 'youth juvenile juveniles teen teens teenage teenaged adolescent adolescents child children childrens '
+        . 'kid kids boy boys girl girls young people adult adults women men mothers student students minors migrant '
+        . 'christian catholic religious faith based private nonprofit state county city local regional former'));
+    $split = static function ($text) use ($descriptors, $states, $audience) {
         $distinct = array();
         $kind = array();
         foreach (explode(' ', kop_normalize_name_key($text)) as $t) {
-            if ($t === '' || ctype_digit($t) || in_array($t, array('inc', 'llc', 'ltd', 'corp', 'co', 'formerly', 'former'), true)) continue;
+            if ($t === '' || ctype_digit($t) || in_array($t, array('inc', 'llc', 'ltd', 'corp', 'co', 'system', 'systems', 'formerly', 'former'), true)) continue;
             if (isset($descriptors[$t])) {
-                $kind[rtrim($t, 's')] = true;
+                // Who a program serves is no kind of place: "Okaloosa Youth
+                // Development Center" is not Okaloosa Youth Academy.
+                if (!isset($audience[$t])) $kind[rtrim($t, 's')] = true;
             } elseif (strlen($t) >= 3 && !isset($states[$t])) {
                 $distinct[$t] = true;
             }
@@ -638,13 +643,21 @@ function kop_closure_resettle_open(PDO $pdo) {
     $alias_index = null;
     $moved = array();
     $set = $pdo->prepare('UPDATE facility_closure_reports SET facility_id = ?, status = ? WHERE id = ? AND status = ?');
-    $rows = $pdo->query("SELECT r.id, r.program_name, r.location, r.facility_id, r.stage, r.target_status, r.closure_date, r.status, n.publication_date
+    $rows = $pdo->query("SELECT r.id, r.news_id, r.program_name, r.location, r.facility_id, r.stage, r.target_status, r.closure_date, r.status, n.publication_date
                            FROM facility_closure_reports r LEFT JOIN news_submissions n ON n.id = r.news_id
                           WHERE r.status IN ('pending','unmatched') ORDER BY r.id")->fetchAll(PDO::FETCH_ASSOC);
+    $linked = $pdo->prepare('SELECT 1 FROM news_facility_links WHERE news_id = ? AND facility_id = ?');
     foreach ($rows as $r) {
+        // The model only picks among the article's own links: a stored id that
+        // is not one of them came from a name match, which is made again.
+        $kept = null;
+        if ($r['facility_id'] !== null) {
+            $linked->execute(array((int) $r['news_id'], (int) $r['facility_id']));
+            $kept = $linked->fetchColumn() ? (int) $r['facility_id'] : null;
+        }
         list($fid, $status) = kop_closure_settle_report($pdo, array(
             'program' => $r['program_name'], 'location' => (string) $r['location'],
-            'facility_id' => $r['facility_id'] !== null ? (int) $r['facility_id'] : null,
+            'facility_id' => $kept,
             'stage' => $r['stage'], 'target_status' => $r['target_status'], 'date' => (string) $r['closure_date'],
         ), (string) $r['publication_date'], $alias_index, (int) $r['id']);
         if ($status === $r['status'] && (int) $fid === (int) $r['facility_id']) continue;
@@ -983,10 +996,11 @@ function kop_closure_scan_cron() {
         if (!$pdo) {
             return;
         }
-        // The queue as it stood before the 2026-10-20 rules, settled again once.
-        if (get_option('kop_closure_resettled') !== '2026-10-20') {
+        // The queue as it stood before the 2026-10-20 rules, settled again once
+        // ('b': the name match no longer counts "youth" or "systems").
+        if (get_option('kop_closure_resettled') !== '2026-10-20b') {
             $moved = kop_closure_resettle_open($pdo);
-            update_option('kop_closure_resettled', '2026-10-20', false);
+            update_option('kop_closure_resettled', '2026-10-20b', false);
             error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at
