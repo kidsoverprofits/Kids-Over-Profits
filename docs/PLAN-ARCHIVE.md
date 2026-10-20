@@ -3052,3 +3052,15 @@ Done 2026-10-20: the full test-review-inbox run passes (1,359 checks). program-p
 card's own facility and topic (other sources' tests decide practice lines in the shared scratch copy). Deleted records
 pruned from kop-data (da6664e). test-inline-edit passes (54): a row sent back unchanged gains no blank column it never
 had and keeps its numbers (bf25d805); the era check asks for a year only when the earlier name gives one.
+
+### 5. Tests failing on main: test-facility-pages, test-operator-pages, test-fornits (done 2026-10-20)
+- **test-facility-pages** (2 checks): seeds/research-facility-tags.json named 11098, 12808 and 14160, merged on
+  2026-10-16 into 11130 (St. Augustine Youth Academy), 12801 (Harbor Point, The Pines' later name: report name and
+  page 85 added there) and 12800 (14160's entry was a duplicate of 12800's, dropped). 97a192c8.
+- **test-operator-pages**: the nine companies converted into programs on 2026-10-09 (Beloved Ones, Center for Positive
+  Changes, Chad Youth Enhancement Center, Dimondale, Heritage Youth Services, NeuroRestorative, New Hope Of Arizona,
+  New Horizon Youth Homes, Pacific Autism Center) left seeds/operator-histories.json; each conversion row holds the same
+  draft (hash checked), printed on the program page and restored on Undo. 03c5eed4.
+- **test-fornits**: the batch's facility ids follow merges (kop_facility_merge_resolve() over the mirror's merge map),
+  as kop_fmerge_follow_waiting() does on the server; 15 records of the Oct 2 batch were merged since. Run against a copy
+  of `~/kop-import/fornits/batch-20261002-192403.jsonl.gz` with `--batch=`. e9f78c06.

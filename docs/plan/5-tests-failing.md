@@ -2,18 +2,15 @@
 
 Each predates the work that found it; fix the test or the code. Last full run 2026-10-20 (mirror synced that day,
 main at 366c8d84, portable PHP 8.2 from windows.php.net). test-review-inbox and test-inline-edit pass in full
-since 2026-10-20 (see PLAN-ARCHIVE).
+since 2026-10-20, and test-facility-pages, test-operator-pages and test-fornits
+since later that day (see PLAN-ARCHIVE).
 
-- **test-fornits**: `scripts/test-fornits.php` cannot run: `tmp/fornits/` is gone (the 2026-10-17 junction wipe of
-  kop-pipeline/tmp). Rebuild a batch with `python scripts/fornits-process.py --no-upload` (kop-pipeline), then
-  check "every link added" (11 records missing before: #13972, #11097, #10333, ...; `kop_fmerge_follow_waiting()`).
-- **test-facility-pages**: `scripts/test-facility-pages.php`, 2 checks on the 2026-10-20 mirror: "every seeded facility
-  exists and cites pages" and "every tagged facility has a page" (11098, 12808, 14160 have no facilities_v2 row;
-  merged or deleted since the seed). Data, not the page template.
-- **test-operator-pages**: `scripts/test-operator-pages.php`, "every drafted history names a company with a page":
-  Beloved Ones, Center for Positive Changes, Chad Youth Enhancement Center, Dimondale, Heritage Youth Services,
-  NeuroRestorative, New Hope Of Arizona, New Horizon Youth Homes, Pacific Autism Center (converted into programs or
-  removed since seeds/operator-histories.json was written).
+- **Hourly task "KOP Fornits" fails every hour (exit 1)** since the 2026-10-17 wipe of kop-pipeline/tmp: its `--log
+  tmpornits\process.log` folder is gone. The crawl had finished by 2026-10-02 (the last batch on the server is
+  `~/kop-import/fornits/batch-20261002-192403.jsonl.gz`). Owner's call: disable the task (`schtasks /change /tn "KOP
+  Fornits" /disable`), or let it re-crawl: with `tmp/fornits/` present and no `crawl.done` it restarts the full crawl
+  (about 19 hours) and, `processed.json` being gone too, sends every topic again as new batches. Do not create
+  `tmp/fornits/` until this is decided; run test-fornits with `--batch=<a copy of a server batch>`.
 - **test-closure-reports**: 2 checks on the 2026-10-20 mirror, failing before the closure re-sort work too: "an untouched
   rewrite changes nothing but the schema upgrade" (kop_closure_rewrite_period() on a real document) and "a closed or
   rebranded name is never touched" (kop_network_map_status_overrides()).
