@@ -4,6 +4,34 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-10-18
+
+### Waiting on the owner > Hosting
+
+9. **Staging is deleted** (checked 2026-10-14: no ~/public_html/staging; /staging/ is a 404 and its old
+    inner addresses redirect to the live pages). Only a LiteSpeed-cached copy of its old home page still
+    answers at /staging/ (noindex). **Owner:** LiteSpeed Cache > Toolbox > Purge > Purge by URL `/staging/`.
+    robots.txt no longer disallows /staging/, so Google can recrawl the old addresses and drop them.
+
+### 3.13 Data audit against outside sources (2026-10-06)
+
+3. Turn-About Ranch's current operator (done 2026-10-06): the buyer in
+   Aspen's March 7, 2014 sale was Escalante RTC, LLC, co-owned by its
+   managers (Webster, Carter, Bartlett); still operating. Its proposal now
+   sets current operator and status Open instead of a by-hand step. The same
+   sale took Island View, the Aspen Institute for Behavioral Assessment and
+   Copper Canyon, which became Family Help & Wellness partners; no source
+   names Turn-About Ranch as one, so the record does not.
+
+### 3.24 Clearview Horizon / Clearview Girls Academy; app donate, map and search; SEO (2026-10-14)
+
+7. Tag archives out of search: the owner said yes on 2026-10-14; `kop_seo_tag_robots()` makes them noindex, follow
+   and `kop_seo_sitemap_exclude_tags()` drops post_tag from Yoast's sitemap. Checked live after deploy:
+   https://kidsoverprofits.org/tag/utah/ reads `noindex, follow` and https://kidsoverprofits.org/sitemap_index.xml lists
+   no tag sitemap. LiteSpeed's cached copies of other tag pages pick it up as they expire.
+9. /staging/: done 2026-10-15. The owner's purge did not reach it (its cache entry carried the deleted staging site's
+   tags, d5d_*); the entry was purged by tag from a one-off script, now removed. /staging/ is a 404 for every visitor.
+
 ## Moved 2026-10-14
 
 ### Waiting on the owner > Repository split (2026-10-13)
