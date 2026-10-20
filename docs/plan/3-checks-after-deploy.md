@@ -67,3 +67,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     job (unnamed ones go in `kop_ai_usage_jobs()`). Data audit Waiting and the Conflicts section counted again.
 21. **Inspections**: a VA card at Review inbox > Serious violations opens a Drive PDF.
 22. **Rich Results Test** on a facility and a company page once Google recrawls them.
+23. **Volunteer messages and research projects**: open
+    [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers) once (makes
+    `kop_vol_messages`, `kop_vol_answers` and the projects' new `detail` column); make a small "When did these programs
+    close?" project for yourself with a state, open its link in a private window, answer one with a link (it appears
+    waiting in Submissions Review > News), ask a question, answer it under Messages (the menu shows a count, an email
+    arrives), and see the reply marked New on the volunteer page. Mark the answer Used, then close the project.

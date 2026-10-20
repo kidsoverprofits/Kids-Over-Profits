@@ -81,7 +81,16 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>
 # (a new person's invite carries it). The page opens on it one item at a time; a project opens its queue to its volunteer, never a
 # kop_vol_never_sources() one. "Check their calls" applies clear calls with each card's own button (kop_rinbox_apply_action(), Undo in Recently done)
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-volunteer-projects.php   # batches, who sees what, apply + log, handled elsewhere
+# Research projects (inc/volunteer-research.php): source 'research:<kind>' (kop_volr_kinds(): closing-year, opening-year, status, news = facilities_v2
+# records lacking it, narrowed by a state or a word; custom = typed questions, one per line). The volunteer writes what they found + links, or
+# "Could not find it" + where they looked ({prefix}kop_vol_answers); each new link goes to the review inbox at once (kop_ext_insert_*, same
+# duplicate rules as mobile/submit, submitter "<name> (volunteer)"). Nothing changes a record: the admin reads answers on the project page, Used /
+# Not needed ("not needed" frees the record for a later project). A new kind = one entry in kop_volr_kinds() with its 'where'
+# Messages (inc/volunteer-messages.php, {prefix}kop_vol_messages): one conversation per volunteer, "Ask a question" on a brief or card names the
+# project/item; answered at Volunteer Reviewers > Messages (menu count bubble), shown on their page marked New; volunteers are never mailed, the
+# notification list is (every 15 min per volunteer at most, option kop_volm_email)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-volunteer-projects.php   # batches, who sees what, apply + log, handled elsewhere, messages, research + inbox links
+python scripts/test-volunteer-review-ui.py [--shots tmp/volunteer-review-ui]   # the volunteer page in a browser: research card, messages, 1280 + 390 px
 # "Email me when this has been reviewed" on every public form (inc/submission-followup.php, js/submission-followup.js): forms post
 # notify_email, the endpoint calls kop_followup_register(); a 10-minute cron reads each item's own status and mails once the decision
 # has stood 10 minutes (an Undo inside that cancels it), then blanks the address. A new public form adds the block and a kind there.

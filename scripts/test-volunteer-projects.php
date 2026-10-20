@@ -15,6 +15,9 @@ if (PHP_SAPI !== 'cli') {
     exit("CLI only.\n");
 }
 
+// Sending a research link to the news queue reads every facility's names (kop_normalize_facility_mentions()).
+ini_set('memory_limit', '1024M');
+
 $args = getopt('', array('db::', 'list'));
 $mirror = $args['db'] ?? (dirname(__DIR__) . '/tmp/prod.sqlite');
 if (!file_exists($mirror)) {
@@ -81,7 +84,15 @@ $pdo->exec("CREATE TABLE wpdl_kop_vol_projects (id INTEGER PRIMARY KEY AUTOINCRE
     question TEXT, yes_example TEXT, no_example TEXT, note TEXT, minutes INTEGER NOT NULL DEFAULT 20, volunteer_id INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'open', created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, closed_at TEXT)");
 $pdo->exec("CREATE TABLE wpdl_kop_vol_project_items (project_id INTEGER NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '',
-    position INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT '', gone INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (project_id, item_key))");
+    position INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT '', gone INTEGER NOT NULL DEFAULT 0, detail TEXT, PRIMARY KEY (project_id, item_key))");
+$GLOBALS['kop_test_options']['kop_vol_messages_db'] = KOP_VOLM_DB_VERSION;
+$pdo->exec("CREATE TABLE wpdl_kop_vol_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, volunteer_id INTEGER NOT NULL, project_id INTEGER NOT NULL DEFAULT 0,
+    item_key TEXT NOT NULL DEFAULT '', item_title TEXT NOT NULL DEFAULT '', sender TEXT NOT NULL, author TEXT NOT NULL DEFAULT '', body TEXT NOT NULL,
+    created_at TEXT NOT NULL, read_at TEXT)");
+$GLOBALS['kop_test_options']['kop_vol_answers_db'] = KOP_VOLR_DB_VERSION;
+$pdo->exec("CREATE TABLE wpdl_kop_vol_answers (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, item_key TEXT NOT NULL, volunteer_id INTEGER NOT NULL,
+    title TEXT NOT NULL DEFAULT '', answer TEXT, found INTEGER NOT NULL DEFAULT 1, links TEXT, status TEXT NOT NULL DEFAULT '', decided_by TEXT NOT NULL DEFAULT '',
+    decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -99,9 +110,15 @@ $Q = 'inspection-highlights';
 
 echo "Ready-made briefs\n";
 $all = kop_rinbox_sources();
+// A queue that needs a library this test does not load (doc-types) is still checked by name against its registration.
+$registered = array();
+foreach (glob(dirname(__DIR__) . '/inc/review-inbox/*.php') as $f) {
+    if (preg_match_all("/kop_rinbox_register\('([a-z_-]+)'/", file_get_contents($f), $mm)) foreach ($mm[1] as $x) $registered[$x] = true;
+}
+foreach (kop_rinbox_native_types() as $x => $t) $registered[$x] = true;
 foreach (kop_volp_kinds() as $key => $k) {
-    $ok = isset($all[$key]) && !in_array($key, kop_vol_never_sources(), true) && $k['question'] !== '' && $k['yes'] !== '' && $k['no'] !== '' && (int) $k['minutes'] > 0;
-    $check("$key: a real queue, open to volunteers, question + yes + no", $ok);
+    $ok = (isset($all[$key]) || isset($registered[$key])) && !in_array($key, kop_vol_never_sources(), true) && $k['question'] !== '' && $k['yes'] !== '' && $k['no'] !== '' && (int) $k['minutes'] > 0;
+    $check("$key: a real queue, open to volunteers, question + yes + no", $ok, isset($all[$key]) ? '' : 'not loaded here');
 }
 $check('the queue under test is not open to everyone', !isset(kop_vol_sources()[$Q]));
 
@@ -219,6 +236,112 @@ foreach (array('woodbury-reports', 'inspection-highlights') as $src_key) {
     }
     $check("$src_key: no admin-only links on the volunteer copy", $bad === 0, $bad . ' found');
 }
+
+echo "\nMessages\n";
+$check('no messages yet', kop_volm_unread_count() === 0 && !kop_volm_threads());
+$check('an empty message is refused', $throws(function () use ($sam_id) { kop_volm_send($sam_id, 'vol', "  \n "); }) !== '');
+$check('a very long one is refused', $throws(function () use ($sam_id) { kop_volm_send($sam_id, 'vol', str_repeat('a', KOP_VOLM_MAX + 1)); }) !== '');
+$m1 = kop_volm_send($sam_id, 'vol', "Is a restraint with no injury still a yes?", array('project_id' => $p2, 'item_key' => $Q . ':' . $k2[0], 'item_title' => 'A finding'));
+$check('Sam asks about a project item', $m1['id'] > 0 && $m1['author'] === 'Sam Example' && (int) $m1['project_id'] === $p2);
+kop_volm_send($alex_id, 'vol', 'Where do I start?');
+$check('two unread for the admins', kop_volm_unread_count() === 2 && kop_volm_unread_count($sam_id) === 1);
+$threads = kop_volm_threads();
+$check('both conversations listed, newest first', count($threads) === 2 && $threads[0]['unread'] === 1, json_encode(array_column($threads, 'name')));
+$check('a project names its questions', count(kop_volm_for_project($p2)) === 1);
+$check('a project that does not exist is not named', (int) kop_volm_send($alex_id, 'vol', 'Another', array('project_id' => 999999))['project_id'] === 0);
+kop_volm_send($sam_id, 'admin', 'Yes: any restraint that broke the rules is a yes.', array('project_id' => $p2), 'Owner');
+$check('answering reads what Sam wrote', kop_volm_unread_count($sam_id) === 0 && kop_volm_unread_count() === 2);
+$check('Sam has one reply to read', kop_volm_unread_for_vol($sam_id) === 1);
+$pub = kop_volm_public(kop_volm_thread($sam_id));
+$check('his page shows both, the reply marked new, no admin name', count($pub) === 2 && $pub[1]['unread'] && $pub[1]['author'] === 'Kids Over Profits' && $pub[0]['author'] === 'You'
+    && $pub[0]['project'] === kop_volp_get($p2)['title'], json_encode($pub));
+kop_volm_mark_read($sam_id, 'vol');
+$check('seen: nothing new for Sam', kop_volm_unread_for_vol($sam_id) === 0 && !kop_volm_public(kop_volm_thread($sam_id))[1]['unread']);
+$check('Alex sees none of Sam\'s', count(kop_volm_thread($alex_id)) === 2 && !array_filter(kop_volm_thread($alex_id), function ($r) use ($sam_id) { return (int) $r['volunteer_id'] === $sam_id; }));
+list($gone_id) = kop_vol_create('Gone Example');
+kop_vol_revoke($gone_id);
+$check('a turned-off volunteer cannot write', $throws(function () use ($gone_id) { kop_volm_send($gone_id, 'vol', 'Hello'); }) !== '');
+$check('...but can be written to (read once they have a new link)', kop_volm_send($gone_id, 'admin', 'Your link is off.', array(), 'Owner')['id'] > 0);
+
+echo "\nResearch projects\n";
+$check('research is never a review queue', !isset(kop_volp_sources()['research:closing-year']));
+$check('an unknown kind is refused', $throws(function () { kop_volp_create(array('source' => 'research:nope')); }) !== '');
+$state = $pdo->query("SELECT state FROM facilities_v2 WHERE status = 'Closed' AND end_year IS NULL AND name <> '' GROUP BY state ORDER BY COUNT(*) DESC LIMIT 1")->fetchColumn();
+list($r1) = kop_volp_create(array('source' => 'research:closing-year', 'size' => 3, 'search' => strtolower($state), 'volunteer_id' => $sam_id));
+$R1 = kop_volp_get($r1);
+$rk1 = $keys_of($r1);
+$ok = count($rk1) === 3;
+foreach ($rk1 as $k) {
+    $f = $pdo->query('SELECT status, end_year, state FROM facilities_v2 WHERE id = ' . (int) substr($k, 1))->fetch(PDO::FETCH_ASSOC);
+    $ok = $ok && $f['status'] === 'Closed' && $f['end_year'] === null && $f['state'] === $state;
+}
+$check("3 closed $state records with no closing year", $ok, implode(', ', $rk1));
+$check('titled by the kind and the state', $R1['title'] === kop_volr_kinds()['closing-year']['title'] . ': ' . $state && $R1['source'] === 'research:closing-year', $R1['title']);
+list($r2) = kop_volp_create(array('source' => 'research:closing-year', 'size' => 3, 'search' => $state, 'volunteer_id' => 0));
+$check('a second project of the kind asks about other records', !array_intersect($rk1, $keys_of($r2)));
+$check('typed questions with nothing typed are refused', $throws(function () { kop_volp_create(array('source' => 'research:custom', 'questions' => "\n  \n")); }) !== '');
+list($r3) = kop_volp_create(array('source' => 'research:custom', 'size' => 2, 'volunteer_id' => $sam_id,
+    'questions' => "1. Who owned Hidden Lake Academy before 2005?\n- Which company ran its transport?\n\n* When did it get its licence?"));
+$titles = array_column(kop_volp_item_rows($r3), 'title');
+$check('every typed line is a question (list marks dropped, size ignored)', $titles === array('Who owned Hidden Lake Academy before 2005?', 'Which company ran its transport?', 'When did it get its licence?'), json_encode($titles));
+$listed = array();
+foreach (kop_volp_list_for($sam_id) as $x) $listed[$x['id']] = $x;
+$check('Sam\'s page lists them as research', isset($listed[$r1], $listed[$r3]) && $listed[$r1]['kind'] === 'research' && isset($listed[$r1]['link_kinds']['lawsuit']));
+
+$res = kop_volp_items($sam_id, $r1, 3);
+$it = $res['items'][0];
+$check('a question card: the record, its page and what we hold', $it['source'] === 'research' && $it['key'] === $rk1[0] && $it['record']['name'] !== ''
+    && in_array('Status on our record', array_column($it['facts'], 'label'), true) && $it['question'] === $R1['question'], json_encode($it));
+$check('Alex cannot open Sam\'s research', $throws(function () use ($alex_id, $r1) { kop_volp_items($alex_id, $r1, 1); }) !== '');
+$check('nothing found and nothing said is refused', $throws(function () use ($sam, $r1, $rk1) { kop_volr_answer($sam, $r1, $rk1[0], '', array()); }) !== '');
+$check('"could not find it" needs where they looked', $throws(function () use ($sam, $r1, $rk1) { kop_volr_answer($sam, $r1, $rk1[0], '', array(), false); }) !== '');
+$check('a link that is not a web address is refused', strpos($throws(function () use ($sam, $r1, $rk1) { kop_volr_answer($sam, $r1, $rk1[0], 'Closed', array(array('url' => 'not a link'))); }), 'web address') !== false);
+$check('Alex cannot answer in Sam\'s project', $throws(function () use ($alex, $r1, $rk1) { kop_volr_answer($alex, $r1, $rk1[0], 'Closed in 2009', array()); }) !== '');
+$check('a key outside the project is refused', $throws(function () use ($sam, $r1) { kop_volr_answer($sam, $r1, 'f1', 'Closed', array()); }) !== '');
+
+// The links go to the review inbox as they are saved: a new one is a waiting news row, one we hold is not added twice.
+require_once dirname(__DIR__) . '/inc/source-submissions.php';
+$held = $pdo->query("SELECT article_url FROM news_submissions WHERE article_url LIKE 'https://%' ORDER BY id LIMIT 1")->fetchColumn();
+$fresh = 'https://example-news.test/kop-volunteer-test-' . getmypid();
+$before = (int) $pdo->query('SELECT COUNT(*) FROM news_submissions')->fetchColumn();
+$a = kop_volr_answer($sam, $r1, $rk1[0], 'Closed in 2009: "the academy shut its doors in June 2009".',
+    array(array('url' => $fresh, 'kind' => 'article', 'title' => 'Academy closes'), array('url' => $held, 'kind' => 'article'), array('url' => $fresh)));
+$sent = array_column($a['links'], 'sent', 'url');
+$check('the answer is saved with its two links (the repeat dropped)', count($a['links']) === 2 && $a['found'], json_encode($a));
+$check('the new link went to the news queue', ($sent[$fresh] ?? '') === 'news review', json_encode($sent));
+$row = $pdo->query('SELECT status, submitted_by, submission_notes AS notes FROM news_submissions WHERE article_url = ' . $pdo->quote($fresh))->fetch(PDO::FETCH_ASSOC);
+$check('...waiting, from the volunteer, the question in its note', $row && $row['status'] === 'submitted' && strpos($row['submitted_by'], 'Sam Example (volunteer)') === 0
+    && strpos($row['notes'], 'When did this program close?') !== false, json_encode($row));
+$check('the held link was not added again', ($sent[$held] ?? '') === 'already held' && (int) $pdo->query('SELECT COUNT(*) FROM news_submissions')->fetchColumn() === $before + 1);
+$a2 = kop_volr_answer($sam, $r1, $rk1[0], 'Closed in June 2009.', array(array('url' => $fresh, 'kind' => 'article')));
+$check('changing the answer does not send the link twice', $a2['answer'] === 'Closed in June 2009.' && $a2['links'][0]['sent'] === 'news review'
+    && (int) $pdo->query('SELECT COUNT(*) FROM news_submissions WHERE article_url = ' . $pdo->quote($fresh))->fetchColumn() === 1);
+kop_volr_answer($sam, $r1, $rk1[1], 'Searched the state licence lookup and three newspapers, nothing.', array(), false);
+$after = kop_volp_items($sam_id, $r1, 3);
+$check('answered questions leave his list', array_column($after['items'], 'key') === array($rk1[2]) && $after['project']['done'] === 2);
+$prog = kop_volp_progress($R1);
+$check('admin progress: 2 of 3, 2 to read', $prog['done'] === 2 && $prog['open'] === 2 && $prog['total'] === 3, json_encode($prog));
+$mine = kop_volr_mine($sam_id);
+$check('"Your past answers" lists both', count($mine) === 2 && $mine[0]['kind'] === 'answer' && in_array(false, array_column($mine, 'found'), true));
+
+$aid = (int) $pdo->query("SELECT id FROM wpdl_kop_vol_answers WHERE project_id = $r1 AND item_key = " . $pdo->quote($rk1[0]))->fetchColumn();
+kop_volr_decide($aid, 'used');
+$check('used: no more changes to it', $throws(function () use ($sam, $r1, $rk1) { kop_volr_answer($sam, $r1, $rk1[0], 'Changed', array()); }) !== '');
+$check('...nor taking it back', (kop_volr_withdraw($sam, $r1, $rk1[0]) || true) && kop_volr_get_answer($r1, $rk1[0], $sam_id) !== null);
+$prog = kop_volp_progress($R1);
+$check('1 to read, 1 decided', $prog['open'] === 1 && $prog['decided'] === 1, json_encode($prog));
+$check('a used answer keeps the record out of later projects', isset(kop_volr_taken_keys('research:closing-year')[$rk1[0]]));
+kop_volp_set_status($r1, 'closed');
+$check('a not-found answer does not', !isset(kop_volr_taken_keys('research:closing-year')[$rk1[1]]));
+kop_volr_decide($aid, 'dismissed');
+$check('"not needed" frees the record again', !isset(kop_volr_taken_keys('research:closing-year')[$rk1[0]]));
+$check('no answering in a closed project', $throws(function () use ($sam, $r1, $rk1) { kop_volr_answer($sam, $r1, $rk1[2], 'Closed', array()); }) !== '');
+$check('a closed research project leaves his page', !in_array($r1, $ids($sam_id), true));
+kop_volr_answer($sam, $r3, 'q1', 'The founder, until a 2005 sale.', array());
+kop_volr_withdraw($sam, $r3, 'q1');
+$check('an unread answer can be taken back', kop_volr_get_answer($r3, 'q1', $sam_id) === null);
+$check('the message for a research project says so', strpos(kop_volp_message(kop_volp_get($r3), 'https://x.test'), 'could not find it') !== false
+    && strpos(kop_volp_message(kop_volp_get($r3), 'https://x.test'), 'Ask a question') !== false);
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

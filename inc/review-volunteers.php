@@ -677,7 +677,11 @@ function kop_vol_rest_recommend(WP_REST_Request $req) {
 function kop_vol_rest_mine(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $who = kop_vol_rest_who($req);
-        return array('rows' => !empty($who['vol']) ? kop_vol_mine((int) $who['vol']['id']) : array());
+        if (empty($who['vol'])) return array('rows' => array());
+        // Research answers (inc/volunteer-research.php) sit in the same list, newest first.
+        $rows = array_merge(kop_vol_mine((int) $who['vol']['id']), kop_volr_mine((int) $who['vol']['id']));
+        usort($rows, function ($a, $b) { return strcmp($b['at'], $a['at']); });
+        return array('rows' => $rows);
     });
 }
 
@@ -808,6 +812,7 @@ function kop_vol_admin_page() {
     $link = '';
     $made = null;
     if ($volp = kop_volp_admin_post()) list($notice, $error, $made) = $volp;
+    if ($volm = kop_volm_admin_post()) list($notice, $error) = $volm;
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kop_vol_do'])) {
         check_admin_referer('kop_vol_admin');
         $do = sanitize_key($_POST['kop_vol_do']);
@@ -867,6 +872,9 @@ function kop_vol_admin_page() {
         <?php endif; ?>
 
         <?php if ($project) : kop_volp_admin_project($project, $nonce, $vols); ?></div><?php return; endif; ?>
+        <?php $thread = (int) ($_GET['messages'] ?? 0);
+        if ($thread) : kop_volm_admin_thread($thread, $nonce); ?></div><?php return; endif; ?>
+        <?php kop_volm_admin_section($nonce); ?>
         <?php kop_volp_admin_section($nonce, $vols, $made); ?>
 
         <h2>Invite someone</h2>
@@ -897,7 +905,8 @@ function kop_vol_admin_page() {
                     <td><?php echo esc_html($rate); ?></td>
                     <td><?php echo $v['last_seen'] ? esc_html(get_date_from_gmt($v['last_seen'], 'M j, Y g:i a')) : 'never opened'; ?></td>
                     <td><?php echo esc_html(get_date_from_gmt($v['link_at'], 'M j, Y')); ?></td>
-                    <td><?php echo $btn('newlink', $v['id'], $off ? 'Turn on with a new link' : 'New link');
+                    <td><a class="button" href="<?php echo esc_url(kop_volm_admin_url((int) $v['id'])); ?>">Message</a>
+                        <?php echo $btn('newlink', $v['id'], $off ? 'Turn on with a new link' : 'New link');
                         if (!$off) echo $btn('revoke', $v['id'], 'Turn off', 'button button-link-delete'); ?></td>
                 </tr>
             <?php endforeach; ?>

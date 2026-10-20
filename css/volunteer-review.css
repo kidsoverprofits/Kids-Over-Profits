@@ -499,3 +499,123 @@ button.kop-vol-btn-small:focus {
 .kop-vol-list[tabindex="-1"]:focus {
     outline: none;
 }
+
+/* Research questions (inc/volunteer-research.php): an answer, the links it rests on. */
+
+.kop-vol-research {
+    border-left: 6px solid var(--kop-teal, #33A7B5);
+}
+
+.kop-vol-label {
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+    margin: 10px 0 4px;
+}
+
+.kop-vol-link-rows {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 8px;
+}
+
+.kop-vol-link-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 11em);
+    gap: 6px;
+}
+
+.kop-vol-link-row input,
+.kop-vol-link-row select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 9px;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    font: inherit;
+}
+
+.kop-vol-link-row select option {
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+}
+
+.kop-vol-link-row input::placeholder {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-vol-research .kop-vol-buttons {
+    margin-top: 10px;
+}
+
+/* Questions? Ask us (inc/volunteer-messages.php) */
+
+.kop-vol-messages {
+    border-top: 6px solid var(--kop-navy, #000080);
+}
+
+.kop-vol-thread {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.kop-vol-msg-row {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    max-width: 85%;
+}
+
+.kop-vol-msg-row.is-mine {
+    justify-self: end;
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-vol-msg-row.is-theirs {
+    justify-self: start;
+    border-left: 4px solid var(--kop-teal-ink, #24757F);
+}
+
+.kop-vol-msg-row p { margin: 0 0 4px; }
+
+.kop-vol-msg-body {
+    white-space: pre-wrap;
+}
+
+.kop-vol-new {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--kop-teal-fill, #24757F);
+    color: var(--kop-white, #fff);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.kop-vol-msg-about {
+    margin: 0 0 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--kop-sand, #F2EEDF);
+    color: var(--kop-text-primary, #1A202C);
+}
+
+.kop-vol-ask {
+    margin: 14px 0 0;
+}
+
+p.kop-vol-newreply {
+    border-left: 6px solid var(--kop-teal-ink, #24757F);
+}
+
+@media (max-width: 600px) {
+    .kop-vol-link-row { grid-template-columns: minmax(0, 1fr); }
+    .kop-vol-msg-row { max-width: 100%; }
+}

@@ -34,7 +34,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_VOLP_DB_VERSION = '1';
+const KOP_VOLP_DB_VERSION = '2';
 
 /* ---- Tables --------------------------------------------------------------- */
 
@@ -81,6 +81,7 @@ function kop_volp_ensure_tables() {
         position INT NOT NULL DEFAULT 0,
         status VARCHAR(40) NOT NULL DEFAULT '',
         gone TINYINT NOT NULL DEFAULT 0,
+        detail LONGTEXT NULL,
         PRIMARY KEY  (project_id, item_key)
     ) $c;");
     update_option('kop_vol_projects_db', KOP_VOLP_DB_VERSION);
@@ -180,6 +181,118 @@ function kop_volp_kinds() {
             'no'       => 'A different program with a similar name, a rumour, or only one building closing: recommend reject.',
             'minutes'  => 2,
         ),
+        'lawsuit' => array(
+            'title'    => 'Court cases sent in',
+            'question' => 'Is this a real court case about a troubled teen program, its staff or its owners, and do the case name, court and dates on the card match the source?',
+            'yes'      => 'A wrongful death suit against a ranch program, and the docket link shows the same case number, court and filing date: recommend approve.',
+            'no'       => 'A case about an unrelated business with a similar name, or the card says something the court record does not: recommend reject and say what is wrong.',
+            'minutes'  => 3,
+        ),
+        'legislation' => array(
+            'title'    => 'Bills sent in',
+            'question' => 'Is this a real bill about youth residential programs (restraint, seclusion, licensing, oversight, transport), and do the bill number and state match the official link?',
+            'yes'      => 'A state bill limiting restraint in youth residential treatment, and the legislature\'s page shows the same number and title: recommend approve.',
+            'no'       => 'A bill about public schools only, or the number on the card is not the bill the link shows: recommend reject and say which.',
+            'minutes'  => 3,
+        ),
+        'wiki' => array(
+            'title'    => 'Wiki write-ups sent in',
+            'question' => 'Is the write-up about the program it names, factual, and free of personal attacks on private people (former students, parents)?',
+            'yes'      => 'A write-up of a program\'s history, staff and lawsuits, each claim from a news story or court record: recommend approve.',
+            'no'       => 'Something that looks invented or copied from the program\'s advertising, or that names a private person who was a student: recommend reject and say which part.',
+            'minutes'  => 4,
+        ),
+        'highlight-summaries' => array(
+            'title'    => 'Plain summaries of hard-to-read findings',
+            'question' => 'Does the plain summary say only what the state\'s own wording under it says, and nothing more?',
+            'yes'      => 'The state wrote "Staff #3 utilized a prone hold on Child A for 12 minutes, contrary to policy"; the summary says a staff member held a child face down for 12 minutes against the rules: recommend approve.',
+            'no'       => 'The summary adds an injury, a name or a number the state\'s text does not give, or gets who did what the wrong way round: recommend reject and say which words.',
+            'minutes'  => 2,
+        ),
+        'map-years' => array(
+            'title'    => 'Opening and closing years for the map',
+            'question' => 'Does the quoted sentence (open its link) really give this year for this place or company?',
+            'yes'      => '"The academy opened its doors in 1996" from a news story about that academy, for its opening year: recommend approve.',
+            'no'       => 'The year is when a new owner bought it, or the sentence is about another program with a similar name: recommend reject and say which.',
+            'minutes'  => 2,
+        ),
+        'doc-types' => array(
+            'title'    => 'What kind of document is it?',
+            'question' => 'Open the document. Is the AI\'s guess of what kind of document it is right?',
+            'yes'      => 'A booklet of rules, levels and consequences for students, guessed as "Student handbook": recommend approve.',
+            'no'       => 'A state inspection report guessed as "News clipping": recommend reject and write the right kind in the note.',
+            'minutes'  => 1,
+        ),
+        'program-practices' => array(
+            'title'    => 'Rules read from program handbooks',
+            'question' => 'Open each line\'s page of the document. Does the line say what the program\'s own words on that page say?',
+            'yes'      => 'The line "Students on Level 1 may not call home" and page 12 says "Level One students have no phone privileges": recommend approve.',
+            'no'       => 'A line says more than the page (a punishment, a time limit), or the page is about something else: recommend reject and say which line.',
+            'minutes'  => 3,
+        ),
+        'company-milestones' => array(
+            'title'    => 'Events in parent companies\' histories',
+            'question' => 'Do the quoted sources say this event happened to this company, in this year?',
+            'yes'      => 'A buyout dated 2015 and a press story saying the deal closed in 2015, naming the same company: recommend approve.',
+            'no'       => 'The source names a different company, gives another year, or only says the deal was planned: recommend reject and say which.',
+            'minutes'  => 2,
+        ),
+        'federal-funding' => array(
+            'title'    => 'Federal money paid to programs',
+            'question' => 'Do the sources show that this program (the same place, not one with a similar name) received this federal money?',
+            'yes'      => 'A PPP loan record with the program\'s own name, its town and its street: recommend approve.',
+            'no'       => 'A loan or grant to a different business with a similar name, or in another state: recommend reject.',
+            'minutes'  => 2,
+        ),
+        'websites' => array(
+            'title'    => 'Websites sent in',
+            'question' => 'Is this page useful to Kids Over Profits: about a troubled teen program, the people who ran one, or the industry (a forum post, a survivor\'s blog, a program page, a directory)?',
+            'yes'      => 'A survivor\'s blog post about their time at a named program, or a directory listing programs for "troubled teens": recommend approve.',
+            'no'       => 'Spam, a broken link, or a page about something else (an adult rehab, a summer camp): recommend reject.',
+            'minutes'  => 2,
+        ),
+        'folder-links' => array(
+            'title'    => 'Document folders for one program',
+            'question' => 'Are these two folder names both names of one program (a rename, a rebrand, a past name)?',
+            'yes'      => 'A folder for "Copper Canyon Academy" and one for "Sedona Sky Academy", the name it took later: recommend approve.',
+            'no'       => 'Two different programs that share a word ("Academy", "Ranch"), or two programs of one company: recommend reject.',
+            'minutes'  => 1,
+        ),
+        'program-homes' => array(
+            'title'    => 'Homes of one program',
+            'question' => 'Are these records the separate licensed homes of one program, rather than separate programs? Open the records.',
+            'yes'      => 'Numbered homes ("Echelon 1", "Echelon 3") run by one company in one area: recommend approve.',
+            'no'       => 'Programs that only share a word like "House" or "Youth", or are run by different companies: recommend reject.',
+            'minutes'  => 2,
+        ),
+        'status_checks' => array(
+            'title'    => 'Changes to bills and court cases',
+            'question' => 'Open the source link. Does it say what the card says changed (a bill passed or died, a case settled or was dismissed)?',
+            'yes'      => 'The card says the case settled in May, and the court\'s docket shows a settlement entered in May: recommend approve.',
+            'no'       => 'The source does not say it, or it is about another bill or case: recommend reject and say what the source does say.',
+            'minutes'  => 2,
+        ),
+        'writeups' => array(
+            'title'    => 'Write-ups of what we learned about a program',
+            'question' => 'Does every sentence of the draft rest on the facts listed with it (with their sources), and nothing more?',
+            'yes'      => 'Each sentence matches a fact on the card, and the draft does not guess at anything: recommend approve.',
+            'no'       => 'A sentence adds a year, a job, an event or an opinion that no listed fact gives: recommend reject and quote the sentence.',
+            'minutes'  => 4,
+        ),
+        'wiki-links' => array(
+            'title'    => 'Wiki entries matched to our records',
+            'question' => 'Is the record the card suggests the program (or company, or person) this r/troubledteens wiki entry is about? Open both.',
+            'yes'      => 'The wiki entry and our record have the same name and town, or the entry gives the name our record lists as a past name: recommend approve.',
+            'no'       => 'A different place with a similar name, or the entry is about the company and the record is one of its programs: recommend reject and say which.',
+            'minutes'  => 2,
+        ),
+        'indigenous-schools' => array(
+            'title'    => 'Indian boarding schools from the news',
+            'question' => 'Is this an Indian boarding, residential or mission school, and do the name, place and years on the card match the article?',
+            'yes'      => 'A federal Indian boarding school named in a story about the Interior Department\'s report, with the same state: recommend approve.',
+            'no'       => 'A present-day troubled teen program, a public school, or details the article does not give: recommend reject and say which.',
+            'minutes'  => 2,
+        ),
         'scraper-finds' => array(
             'title'    => 'Articles the news scanner set aside',
             'question' => 'Is the article really about a troubled teen program or the industry?',
@@ -248,6 +361,7 @@ function kop_volp_recommended_keys($source) {
  * yes / no / title over the kind's. Returns [id, link, invite link or ''].
  */
 function kop_volp_create(array $in) {
+    if (strpos((string) ($in['source'] ?? ''), 'research:') === 0) return kop_volp_create_research($in);
     $source = sanitize_key((string) ($in['source'] ?? ''));
     $sources = kop_volp_sources();
     if (!isset($sources[$source])) throw new RuntimeException('Pick a queue volunteers may see.');
@@ -326,6 +440,64 @@ function kop_volp_create(array $in) {
     return array($id, $link, $invite);
 }
 
+/**
+ * A research project (inc/volunteer-research.php): $in['source'] is
+ * 'research:<kind>', search a state or a word, questions the typed lines
+ * for 'research:custom'. Same return as kop_volp_create().
+ */
+function kop_volp_create_research(array $in) {
+    $kind_key = substr(sanitize_text_field((string) $in['source']), 9);
+    $kinds = kop_volr_kinds();
+    if (!isset($kinds[$kind_key])) throw new RuntimeException('Unknown kind of research.');
+    $kind = $kinds[$kind_key];
+    $size = (int) ($in['size'] ?? 20);
+    // Typed questions: every line typed, whatever the size box says.
+    if ($size < 1 || $kind['where'] === '') $size = PHP_INT_MAX;
+    $search = trim(mb_substr((string) ($in['search'] ?? ''), 0, 100));
+    $vid = (int) ($in['volunteer_id'] ?? 0);
+    $new_name = trim((string) ($in['new_name'] ?? ''));
+    if ($vid && !$new_name) {
+        global $wpdb;
+        kop_vol_ensure_tables();
+        if (!$wpdb->get_var($wpdb->prepare('SELECT id FROM ' . kop_vol_table() . ' WHERE id = %d AND revoked_at IS NULL', $vid))) throw new RuntimeException('That volunteer is turned off or gone.');
+    }
+    $picked = kop_volr_pick($kind_key, $search, $size, (string) ($in['questions'] ?? ''));
+    $invite = '';
+    if ($new_name !== '') list($vid, $invite) = kop_vol_create($new_name, 'Made for a project');
+
+    global $wpdb;
+    kop_volp_ensure_tables();
+    $title = trim((string) ($in['title'] ?? ''));
+    if ($title === '') $title = $kind['title'] . ($search !== '' ? ': ' . (preg_match('/^[A-Za-z]{2}$/', $search) ? strtoupper($search) : $search) : '');
+    $u = wp_get_current_user();
+    $wpdb->insert(kop_volp_table(), array(
+        'title' => mb_substr($title, 0, 200), 'source' => 'research:' . $kind_key, 'search' => $search,
+        'question' => trim((string) ($in['question'] ?? '')) ?: $kind['question'],
+        'yes_example' => trim((string) ($in['yes'] ?? '')) ?: $kind['yes'],
+        'no_example' => trim((string) ($in['no'] ?? '')) ?: $kind['no'],
+        'note' => trim(mb_substr((string) ($in['note'] ?? ''), 0, 1000)),
+        'minutes' => max(5, (int) ceil(count($picked) * max(1, (int) $kind['minutes']) / 5) * 5),
+        'volunteer_id' => (int) $vid, 'status' => 'open',
+        'created_by' => $u && $u->exists() ? $u->user_login : '', 'created_at' => current_time('mysql', true),
+    ));
+    $id = (int) $wpdb->insert_id;
+    $n = 0;
+    foreach ($picked as $k => $t) {
+        $wpdb->insert(kop_volp_items_table(), array('project_id' => $id, 'item_key' => (string) $k, 'title' => $t[0], 'status' => '', 'position' => $n++,
+            'detail' => wp_json_encode($t[1])));
+    }
+    $link = kop_volp_url($id);
+    if ($invite !== '') $invite = add_query_arg('project', $id, $invite);
+    return array($id, $link, $invite);
+}
+
+/** What a project's items are, in words: the brief's title for a queue, or the research kind. */
+function kop_volp_source_label(array $p) {
+    if (kop_volr_is($p)) return 'Research: ' . kop_volr_kind_of($p)['title'];
+    $all = kop_rinbox_sources();
+    return (string) ($all[$p['source']]['label'] ?? $p['source']);
+}
+
 function kop_volp_set_status($id, $status) {
     if (!in_array($status, array('open', 'closed'), true)) throw new RuntimeException('Unknown status.');
     global $wpdb;
@@ -347,10 +519,11 @@ function kop_volp_update_brief($id, array $in) {
 }
 
 /** A project's items in order: [{item_key, title, status (when the project was made), gone}]. */
-function kop_volp_item_rows($id) {
+function kop_volp_item_rows($id, $detail = false) {
     global $wpdb;
     kop_volp_ensure_tables();
-    return (array) $wpdb->get_results($wpdb->prepare('SELECT item_key, title, status, gone FROM ' . kop_volp_items_table() . ' WHERE project_id = %d ORDER BY position', (int) $id), ARRAY_A);
+    return (array) $wpdb->get_results($wpdb->prepare('SELECT item_key, title, status, gone' . ($detail ? ', detail' : '') . ' FROM ' . kop_volp_items_table()
+        . ' WHERE project_id = %d ORDER BY position', (int) $id), ARRAY_A);
 }
 
 /** Recommendations on a project's items: [item_key => [rows]], the project's volunteer only when it has one. */
@@ -375,6 +548,7 @@ function kop_volp_recs(array $p, array $keys = null) {
 
 /** {total, done (recommended or handled elsewhere), open (recommended, waiting on you), decided} for a project. */
 function kop_volp_progress(array $p) {
+    if (kop_volr_is($p)) return kop_volr_progress($p);
     $rows = kop_volp_item_rows($p['id']);
     $recs = kop_volp_recs($p, array_column($rows, 'item_key'));
     $out = array('total' => count($rows), 'done' => 0, 'open' => 0, 'decided' => 0, 'last' => '');
@@ -425,7 +599,10 @@ function kop_volp_list_for($vid) {
 function kop_volp_public(array $p, $vid) {
     $rows = kop_volp_item_rows($p['id']);
     $mine = array();
-    if ($vid) {
+    $research = kop_volr_is($p);
+    if ($research) {
+        if ($vid) $mine = kop_volr_answered_keys($p['id'], $vid);
+    } elseif ($vid) {
         global $wpdb;
         $keys = array_column($rows, 'item_key');
         if ($keys) {
@@ -440,6 +617,7 @@ function kop_volp_public(array $p, $vid) {
         'id' => (int) $p['id'], 'title' => (string) $p['title'], 'question' => (string) $p['question'],
         'yes' => (string) $p['yes_example'], 'no' => (string) $p['no_example'], 'note' => (string) $p['note'],
         'minutes' => (int) $p['minutes'], 'total' => count($rows), 'done' => $done, 'mine' => (int) $p['volunteer_id'] === (int) $vid && $vid,
+        'kind' => $research ? 'research' : 'review', 'link_kinds' => $research ? kop_volr_link_kinds() : null,
     );
 }
 
@@ -451,6 +629,10 @@ function kop_volp_public(array $p, $vid) {
 function kop_volp_items($vid, $id, $limit = 3, array $skip = array()) {
     $p = kop_volp_get($id);
     if (!$p || ($vid && !kop_volp_for_volunteer($p, $vid))) throw new RuntimeException('This project is finished or not yours. Thank you!');
+    if (kop_volr_is($p)) {
+        $items = kop_volr_items($p, $vid, $limit, $skip);
+        return array('project' => kop_volp_public(kop_volp_get($id), $vid), 'items' => $items);
+    }
     $src = kop_rinbox_sources()[$p['source']] ?? null;
     if (!$src) throw new RuntimeException('That queue is gone.');
     $held = kop_vol_held_keys($p['source']);
@@ -613,9 +795,13 @@ function kop_volp_admin_post() {
             $made = kop_volp_create(array(
                 'source' => $in['kop_volp_source'] ?? '', 'size' => $in['kop_volp_size'] ?? 20, 'search' => $in['kop_volp_search'] ?? '',
                 'volunteer_id' => $who === 'new' ? 0 : (int) $who, 'new_name' => $who === 'new' ? (string) ($in['kop_volp_new_name'] ?? '') : '',
-                'note' => $in['kop_volp_note'] ?? '',
+                'note' => $in['kop_volp_note'] ?? '', 'questions' => (string) ($in['kop_volp_questions'] ?? ''),
             ));
             return array('Project made.', '', $made);
+        }
+        if ($do === 'decide') {
+            kop_volr_decide((int) ($in['kop_volr_answer'] ?? 0), sanitize_key((string) ($in['kop_volr_status'] ?? '')));
+            return array('Saved. They see it under "Your answers".', '', null);
         }
         if ($do === 'close') { kop_volp_set_status($id, 'closed'); return array('Project closed. Its items go back to being free for other projects.', '', null); }
         if ($do === 'reopen') { kop_volp_set_status($id, 'open'); return array('Project reopened.', '', null); }
@@ -646,7 +832,9 @@ function kop_volp_message(array $p, $link, $name = '') {
     $hi = $name !== '' ? 'Hi ' . $name . ', c' : 'C';
     return $hi . 'ould you do a small task for Kids Over Profits? "' . $p['title'] . '": ' . $prog['total'] . ' items, about ' . (int) $p['minutes'] . " minutes.\n\n"
         . 'For each one there is one question: ' . $p['question'] . "\n\n"
-        . "You only recommend; nothing changes on the site until I check it, so it is fine to say \"not sure\".\n\n"
+        . (kop_volr_is($p) ? "Nothing changes on the site until I read your answer, so it is fine to say you could not find it (and where you looked).\n\n"
+            : "You only recommend; nothing changes on the site until I check it, so it is fine to say \"not sure\".\n\n")
+        . "If anything is unclear, ask me on the page (\"Ask a question\"); my answer shows up there.\n\n"
         . 'Start here: ' . $link;
 }
 
@@ -697,10 +885,15 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
                 }
                 echo '</optgroup>';
             }
+            echo '<optgroup label="Research: find something out, with a link">';
+            foreach (kop_volr_kinds() as $key => $k) {
+                echo '<option value="research:' . esc_attr($key) . '">' . esc_html($k['title'] . ($key === 'custom' ? ' (type your own)' : '')) . '</option>';
+            }
+            echo '</optgroup>';
             ?>
         </select></label>
         <label>How many (blank or 0 = every item waiting)<br><input type="number" name="kop_volp_size" min="0" step="1" value="20" style="width:100%"></label>
-        <label>Only ones about (optional)<br><input type="text" name="kop_volp_search" maxlength="100" placeholder="a state, a program, a word" style="width:100%"></label>
+        <label>Only ones about (optional)<br><input type="text" name="kop_volp_search" maxlength="100" placeholder="a state (UT), a program, a word" style="width:100%"></label>
         <label>Who<br><select name="kop_volp_who" style="width:100%" onchange="this.form.querySelector('.kop-volp-new').hidden=this.value!=='new'">
             <option value="new">Someone new (makes their link)</option>
             <?php foreach ($vols as $v) : if (!empty($v['revoked_at'])) continue; ?>
@@ -709,6 +902,13 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
             <option value="0">Anyone with a volunteer link</option>
         </select></label>
         <label class="kop-volp-new">Their name<br><input type="text" name="kop_volp_new_name" maxlength="100" style="width:100%"></label>
+        <label class="kop-volp-questions" style="grid-column:1/-1" hidden>The questions, one on each line<br>
+            <textarea name="kop_volp_questions" rows="6" style="width:100%" placeholder="Who owned Hidden Lake Academy before 2005?&#10;Which company ran the transport for Ascent in 2003?"></textarea></label>
+        <script>(function () {
+            var f = document.currentScript.parentNode, s = f.querySelector('[name=kop_volp_source]'), q = f.querySelector('.kop-volp-questions');
+            function show() { q.hidden = s.value !== 'research:custom'; }
+            s.addEventListener('change', show); show();
+        })();</script>
         <label style="grid-column:1/-1">A line from you (optional, shown above the question)<br><input type="text" name="kop_volp_note" maxlength="1000" style="width:100%"
             placeholder="e.g. These are all Texas findings; anything about restraint is a yes."></label>
         <p style="grid-column:1/-1;margin:0"><button type="submit" class="button button-primary">Make the project</button></p>
@@ -725,10 +925,10 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
         $closed = $p['status'] === 'closed';
         $who = (int) $p['volunteer_id'] ? ($names[(int) $p['volunteer_id']] ?? '(gone)') : 'Anyone';
         echo '<tr' . ($closed ? ' style="opacity:.65"' : '') . '><td><a href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '"><strong>' . esc_html($p['title']) . '</strong></a><br><span class="description">'
-            . esc_html(($sources[$p['source']]['label'] ?? $p['source']) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
+            . esc_html(kop_volp_source_label($p) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
             . (int) $prog['done'] . ' of ' . (int) $prog['total'] . '</td><td>' . ($prog['open'] ? '<strong>' . (int) $prog['open'] . '</strong>' : '0') . '</td><td>'
             . ($prog['last'] ? esc_html(get_date_from_gmt($prog['last'], 'M j g:i a')) : 'not started') . '</td><td>'
-            . '<a class="button' . ($prog['open'] ? ' button-primary' : '') . '" href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '">Check their calls</a> '
+            . '<a class="button' . ($prog['open'] ? ' button-primary' : '') . '" href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '">' . (kop_volr_is($p) ? 'Read their answers' : 'Check their calls') . '</a> '
             . '<form method="post" style="display:inline">' . $nonce . '<input type="hidden" name="kop_volp_do" value="' . ($closed ? 'reopen' : 'close') . '"><input type="hidden" name="kop_volp_id" value="' . (int) $p['id'] . '">'
             . '<button type="submit" class="button-link">' . ($closed ? 'Reopen' : 'Close') . '</button></form></td></tr>';
     }
@@ -742,9 +942,10 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
     if (!$p) { echo '<p>No such project. <a href="' . esc_url($base . '#projects') . '">Back</a></p>'; return; }
     $names = array();
     foreach ($vols as $v) $names[(int) $v['id']] = $v['name'];
-    $src = kop_rinbox_sources()[$p['source']] ?? array('label' => $p['source']);
+    $src = array('label' => kop_volp_source_label($p));
     $inbox = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-admin-submissions.php') : '';
-    $rows = kop_volp_review_rows($p);
+    $research = kop_volr_is($p);
+    $rows = $research ? array() : kop_volp_review_rows($p);
     $prog = kop_volp_progress($p);
     $labels = kop_vol_verdicts();
     $state_words = array(
@@ -762,6 +963,9 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
         <textarea readonly rows="8" style="width:100%" onclick="this.select()"><?php echo esc_textarea(kop_volp_message($p, kop_volp_url($p['id']), (string) ($names[(int) $p['volunteer_id']] ?? ''))); ?></textarea>
     </details>
 
+    <?php kop_volp_admin_project_messages($p, $names); ?>
+
+    <?php if ($research) : kop_volr_admin_project($p, $nonce, $names); else : ?>
     <h3>Their calls</h3>
     <form method="post">
         <?php echo $nonce; ?><input type="hidden" name="kop_volp_do" value="apply"><input type="hidden" name="kop_volp_id" value="<?php echo (int) $p['id']; ?>">
@@ -789,6 +993,7 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
         </table>
         <p><button type="submit" class="button button-primary">Apply ticked</button></p>
     </form>
+    <?php endif; ?>
 
     <h3>The brief they see</h3>
     <form method="post" style="max-width:900px">
@@ -802,3 +1007,22 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
     </form>
     <?php
 }
+
+/** Questions volunteers asked about this project (inc/volunteer-messages.php), each linked to its conversation. */
+function kop_volp_admin_project_messages(array $p, array $names) {
+    $rows = kop_volm_for_project((int) $p['id']);
+    if (!$rows) return;
+    $unread = count(array_filter($rows, function ($r) { return $r['sender'] === 'vol' && empty($r['read_at']); }));
+    echo '<details style="max-width:900px;margin-bottom:16px"' . ($unread ? ' open' : '') . '><summary><strong>Questions about this project</strong> ('
+        . count($rows) . ($unread ? ', ' . $unread . ' new' : '') . ')</summary>';
+    foreach ($rows as $r) {
+        $who = $r['sender'] === 'admin' ? 'You' : (string) ($r['name'] ?? '');
+        echo '<p style="margin:8px 0"><strong>' . esc_html($who) . '</strong> · ' . esc_html(get_date_from_gmt($r['created_at'], 'M j g:i a'))
+            . ($r['item_title'] !== '' ? ' · ' . esc_html($r['item_title']) : '') . '<br><span style="white-space:pre-wrap">' . esc_html($r['body']) . '</span>'
+            . ($r['sender'] === 'vol' ? '<br><a href="' . esc_url(kop_volm_admin_url((int) $r['volunteer_id'])) . '">' . (empty($r['read_at']) ? 'Answer' : 'Open the conversation') . '</a>' : '') . '</p>';
+    }
+    echo '</details>';
+}
+
+require_once __DIR__ . '/volunteer-research.php';
+require_once __DIR__ . '/volunteer-messages.php';

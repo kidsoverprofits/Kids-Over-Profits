@@ -11,6 +11,15 @@
  * sure. Saving files a recommendation; an admin makes the decision in the
  * review inbox. A recommendation can be taken back until the admin acts.
  *
+ * A research project (inc/volunteer-research.php) shows a question card
+ * instead: what they found, the links they found it at (each sent to the
+ * review inbox), or "Could not find it" with where they looked.
+ *
+ * At the foot, "Questions? Ask us" (inc/volunteer-messages.php): one
+ * conversation with the admins. "Ask a question" on a brief or a card names
+ * the project or item the message is about. Replies show there with a "New"
+ * mark and a line at the top of the page until they have been on screen.
+ *
  * Every request is a POST to kop/v1/volunteer/* with the X-KOP-Vol header
  * the page was given (window.kopVolunteer.page).
  */
@@ -21,7 +30,7 @@
     var app = document.getElementById('kop-vol-app');
     if (!cfg.rest || !app) return;
 
-    var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, skip: [] };
+    var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, skip: [], msgCtx: null };
 
     function api(path, body) {
         var headers = { 'Content-Type': 'application/json' };
@@ -89,7 +98,7 @@
         tabs.appendChild(el('button', {
             type: 'button', class: 'kop-vol-tab kop-vol-tab-mine' + (state.mine ? ' is-active' : ''), 'aria-pressed': state.mine ? 'true' : 'false',
             onclick: openMine
-        }, ['Your recommendations']));
+        }, ['Your past answers']));
     }
 
     function remember() {
@@ -247,6 +256,86 @@
             el('label', { for: id, text: 'Your note' }), note,
             el('div', { class: 'kop-vol-buttons' }, buttons), msg
         ]));
+        node.appendChild(askButton({ project_id: state.project || 0, item_key: it.source + ':' + it.key, item_title: it.title, label: it.title || 'this item' }));
+    }
+
+    /* ---- A research question --------------------------------------------------------- */
+
+    var SENT = { 'news review': 'sent to the news queue', 'lawsuit review': 'sent to the court cases queue', 'legislation review': 'sent to the bills queue',
+        'website review': 'sent to the websites queue', 'already held': 'we already have it', 'not sent': 'saved with your answer' };
+
+    function linkRow(kinds, l) {
+        var url = el('input', { type: 'url', class: 'kop-vol-link-url', placeholder: 'https://', value: l.url || '', 'aria-label': 'Link' });
+        var kind = el('select', { class: 'kop-vol-link-kind', 'aria-label': 'What kind of page' });
+        Object.keys(kinds).forEach(function (k) {
+            var o = el('option', { value: k, text: kinds[k] });
+            if (k === l.kind) o.selected = true;
+            kind.appendChild(o);
+        });
+        var row = el('div', { class: 'kop-vol-link-row' }, [url, kind]);
+        row.read = function () { return { url: url.value.trim(), kind: kind.value }; };
+        return row;
+    }
+
+    function researchCard(it, p, onDone) {
+        var node = el('article', { class: 'kop-vol-card kop-vol-panel kop-vol-research' });
+        var kinds = p.link_kinds || { article: 'News story', website: 'Other page' };
+        node.appendChild(el('h3', { class: 'kop-vol-title', text: it.title || '(no title)' }));
+        if (it.question && it.question !== it.title) node.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'Find out: ' }), it.question]));
+        if (it.record && it.record.name) {
+            node.appendChild(el('ul', { class: 'kop-vol-links' }, [el('li', null, [safe(it.record.url) ? link(it.record.url, 'What our page says about ' + it.record.name) : it.record.name])]));
+        }
+        if (it.facts && it.facts.length) {
+            var dl = el('dl', { class: 'kop-vol-facts' });
+            it.facts.forEach(function (f) { dl.appendChild(el('dt', { text: f.label })); dl.appendChild(el('dd', { text: f.value })); });
+            node.appendChild(dl);
+        }
+        var id = 'kop-vol-answer-' + Math.random().toString(36).slice(2);
+        var prev = it.answer || {};
+        var answer = el('textarea', { id: id, rows: '4', maxlength: '4000', placeholder: 'What did you find? Quote the sentence that says it if you can.' });
+        answer.value = prev.answer || '';
+        var links = el('div', { class: 'kop-vol-link-rows' });
+        (prev.links && prev.links.length ? prev.links : [{ kind: it.link_kind }]).forEach(function (l) { links.appendChild(linkRow(kinds, l)); });
+        var add = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Add another link', onclick: function () {
+            if (links.childNodes.length >= 6) return;
+            var r = linkRow(kinds, { kind: it.link_kind });
+            links.appendChild(r);
+            r.firstChild.focus();
+        } });
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
+        var buttons = [
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Save my answer', disabled: cfg.preview ? true : null, onclick: function () { send(false, this); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Could not find it', disabled: cfg.preview ? true : null, onclick: function () { send(true, this); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } })
+        ];
+        function send(notFound, btn) {
+            var list = Array.prototype.map.call(links.childNodes, function (r) { return r.read(); }).filter(function (l) { return l.url; });
+            if (notFound && !answer.value.trim()) {
+                msg.hidden = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = 'Say where you looked first, so nobody searches the same places again.';
+                answer.focus();
+                return;
+            }
+            buttons.forEach(function (b) { b.disabled = true; });
+            msg.hidden = true;
+            api('answer', { project_id: it.project_id, key: it.key, answer: answer.value, links: list, not_found: notFound ? 1 : 0 }).then(function (res) {
+                onDone(it, res.answer || {});
+            }).catch(function (e) {
+                buttons.forEach(function (b) { b.disabled = false; });
+                msg.hidden = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+                btn.focus();
+            });
+        }
+        node.appendChild(el('div', { class: 'kop-vol-decide' }, [
+            el('label', { for: id, text: 'Your answer' }), answer,
+            el('p', { class: 'kop-vol-label', text: 'Where you found it (each link goes to our review queue too)' }), links, add,
+            el('div', { class: 'kop-vol-buttons' }, buttons), msg
+        ]));
+        node.appendChild(askButton({ project_id: it.project_id, item_key: 'research:' + it.project_id + ':' + it.key, item_title: it.title, label: it.title }));
+        return node;
     }
 
     var SAID = { approve: 'approve', reject: 'reject', unsure: 'not sure' };
@@ -290,8 +379,8 @@
         remember();
         body.innerHTML = '';
         var panel = el('section', { class: 'kop-vol-panel' }, [
-            el('h2', { text: 'Your recommendations' }),
-            el('p', { text: 'Everything you recommended and what the admin decided. You can take back a recommendation until an admin acts on it.' })
+            el('h2', { text: 'Your past answers' }),
+            el('p', { text: 'Everything you recommended or answered, and what the admin decided. You can take one back until an admin acts on it.' })
         ]);
         var st = el('p', { class: 'kop-vol-status', role: 'status', text: 'Loading…' });
         panel.appendChild(st);
@@ -303,6 +392,7 @@
             if (!rows.length) return;
             var ul = el('ul', { class: 'kop-vol-mine' });
             rows.forEach(function (r) {
+                if (r.kind === 'answer') { ul.appendChild(mineAnswer(r)); return; }
                 var same = (r.outcome === 'approve' || r.outcome === 'reject') && r.verdict !== 'unsure'
                     ? (r.outcome === r.verdict ? ' (same as you)' : ' (differently from you)') : '';
                 var li = el('li', null, [
@@ -324,6 +414,27 @@
             });
             panel.appendChild(ul);
         }).catch(function (e) { st.textContent = 'Could not load: ' + e.message; });
+    }
+
+    var ANSWERED = { '': 'Waiting for an admin to read it', used: 'An admin used it. Thank you!', dismissed: 'An admin read it; it was not needed this time' };
+
+    function mineAnswer(r) {
+        var li = el('li', null, [
+            el('strong', { text: r.title || r.key }), el('span', { class: 'kop-vol-meta', text: ' ' + r.source_label + ', ' + fmtDate(r.at) }), el('br'),
+            r.found ? 'You answered' : 'You could not find it', r.answer ? ': ' + (r.answer.length > 160 ? r.answer.slice(0, 157) + '...' : r.answer) : '',
+            r.links ? ' (' + r.links + (r.links === 1 ? ' link' : ' links') + ')' : '', '. ',
+            el('span', { class: 'kop-vol-outcome', text: (ANSWERED[r.outcome] || r.outcome) + '.' })
+        ]);
+        if (r.outcome === '') {
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
+                var b = this;
+                b.disabled = true;
+                api('answer', { project_id: r.project_id, key: r.key, withdraw: 1 }).then(function () { li.remove(); })
+                    .catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });
+            } }));
+        }
+        return li;
     }
 
     /* ---- Projects ----------------------------------------------------------------- */
@@ -394,13 +505,17 @@
         projBrief.appendChild(progressBar(p.done, p.total));
         if (p.note) projBrief.appendChild(el('p', { class: 'kop-vol-note', text: p.note }));
         projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'The question: ' }), p.question]));
+        var research = p.kind === 'research';
         if (p.yes || p.no) {
             var dl = el('dl', { class: 'kop-vol-examples' });
-            if (p.yes) { dl.appendChild(el('dt', { text: 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
-            if (p.no) { dl.appendChild(el('dt', { text: 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
+            if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
+            if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
             projBrief.appendChild(dl);
         }
-        projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
+        projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: research
+            ? 'Could not find it? Say where you looked: that helps too. An admin reads every answer before anything changes.'
+            : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
+        projBrief.appendChild(askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'));
         state.projects.forEach(function (x) { if (x.id === p.id) { x.done = p.done; x.total = p.total; } });
     }
 
@@ -423,13 +538,33 @@
                 projSlot.appendChild(el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
                     el('h3', { text: skipped ? 'That is all but the ones you skipped.' : 'Done. Thank you!' }),
                     el('p', { text: skipped ? 'You skipped ' + skipped + '. Go through them again, or leave them: that is fine too.'
-                        : 'Every item in this project has an answer. An admin will check them; "Your recommendations" shows what they decide.' }),
+                        : 'Every item in this project has an answer. An admin will check them; "Your past answers" shows what they decide.' }),
                     skipped ? el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Go through the skipped ones', onclick: function () { state.skip = []; nextProjectItem(); } }) : null
                 ]));
                 bringToTop(projSlot);
                 return;
             }
-            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: 'Item ' + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            if (p.kind === 'research') {
+                projSlot.appendChild(researchCard(it, p, function (item, ans) {
+                    var sent = (ans.links || []).map(function (l) { return SENT[l.sent] || ''; }).filter(function (w, i, all) { return w && all.indexOf(w) === i; });
+                    var li = el('li', null, ['Saved: ', el('strong', { text: item.title || '(no title)' }), ans.found ? '' : ', could not find it',
+                        (ans.links || []).length ? ', ' + ans.links.length + ((ans.links.length === 1) ? ' link' : ' links') + (sent.length ? ' (' + sent.join(', ') + ')' : '') : '', '. ']);
+                    li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
+                        var b = this;
+                        b.disabled = true;
+                        api('answer', { project_id: item.project_id, key: item.key, withdraw: 1 }).then(function () {
+                            li.remove();
+                            nextProjectItem();
+                        }).catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });
+                    } }));
+                    projSaved.insertBefore(li, projSaved.firstChild);
+                    while (projSaved.childNodes.length > 5) projSaved.removeChild(projSaved.lastChild);
+                    nextProjectItem();
+                }));
+                bringToTop(projSlot);
+                return;
+            }
             projSlot.appendChild(card(it, function (item, verdict, note) {
                 var li = el('li', null, ['Saved: ', el('strong', { text: item.title || '(no title)' }), ', you said ', el('em', { text: SAID[verdict] }), note ? ' (' + note + ')' : '', '. ']);
                 li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
@@ -452,6 +587,121 @@
         });
     }
 
+    /* ---- Questions? Ask us ---------------------------------------------------------------- */
+
+    var msgPanel = el('section', { class: 'kop-vol-panel kop-vol-messages', id: 'kop-vol-messages', 'aria-labelledby': 'kop-vol-messages-h' });
+    var msgList = el('ol', { class: 'kop-vol-thread', 'aria-live': 'polite' });
+    var msgCtx = el('p', { class: 'kop-vol-msg-about', hidden: true });
+    var msgBox = el('textarea', { id: 'kop-vol-msg-body', rows: '3', maxlength: '2000', placeholder: 'Your question' });
+    var msgStatus = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
+    var msgSend = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Send', disabled: cfg.preview ? true : null, onclick: sendMessage });
+    var newLine = el('p', { class: 'kop-vol-panel kop-vol-newreply', hidden: true }, [
+        el('strong', { text: 'You have a reply. ' }),
+        el('a', { href: '#kop-vol-messages', text: 'Read it', onclick: function (e) { e.preventDefault(); msgPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }); markSeen(); } })
+    ]);
+    var msgs = [];
+    var unreadShown = false;
+
+    function buildMessages() {
+        msgPanel.appendChild(el('h2', { id: 'kop-vol-messages-h', text: 'Questions? Ask us' }));
+        msgPanel.appendChild(el('p', { text: cfg.preview
+            ? 'Admin preview: volunteers write to you here, and you answer at KOP Tools > Volunteer Reviewers > Messages.'
+            : 'Ask about a project, one item, or anything else. We answer here: open this page again later to see the reply.' }));
+        msgPanel.appendChild(msgList);
+        msgPanel.appendChild(el('div', { class: 'kop-vol-decide' }, [
+            msgCtx, el('label', { for: 'kop-vol-msg-body', text: 'Your message' }), msgBox,
+            el('div', { class: 'kop-vol-buttons' }, [msgSend]), msgStatus
+        ]));
+    }
+
+    function drawContext() {
+        msgCtx.innerHTML = '';
+        msgCtx.hidden = !state.msgCtx;
+        if (!state.msgCtx) return;
+        msgCtx.appendChild(document.createTextNode('About ' + state.msgCtx.label + ' '));
+        msgCtx.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Not about that', onclick: function () {
+            state.msgCtx = null;
+            drawContext();
+        } }));
+    }
+
+    // "Ask a question" on a brief or a card: the message names what it is about.
+    function askButton(ctx, text) {
+        return el('p', { class: 'kop-vol-ask' }, [el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: text || 'Ask a question about this one', onclick: function () {
+            state.msgCtx = ctx;
+            drawContext();
+            msgPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try { msgBox.focus({ preventScroll: true }); } catch (e) { msgBox.focus(); }
+        } })]);
+    }
+
+    function drawMessages() {
+        msgList.innerHTML = '';
+        if (!msgs.length) {
+            msgList.appendChild(el('li', { class: 'kop-vol-meta', text: 'No messages yet.' }));
+        }
+        msgs.forEach(function (m) {
+            var about = [m.project, m.item].filter(Boolean).join(' · ');
+            msgList.appendChild(el('li', { class: 'kop-vol-msg-row ' + (m.from === 'vol' ? 'is-mine' : 'is-theirs') }, [
+                el('p', { class: 'kop-vol-meta' }, [el('strong', { text: m.author }), ' · ' + fmtDate(m.at), m.unread ? el('span', { class: 'kop-vol-new', text: 'New' }) : null]),
+                about ? el('p', { class: 'kop-vol-meta', text: 'About ' + about }) : null,
+                el('p', { class: 'kop-vol-msg-body', text: m.body })
+            ]));
+        });
+        var unread = msgs.filter(function (m) { return m.unread; }).length;
+        newLine.hidden = !unread;
+        // Replies the server still counts unread (new since the last look) are watched for again.
+        if (unread) { unreadShown = false; watching = false; watchSeen(); }
+    }
+
+    function loadMessages(read) {
+        return api('messages', { read: read ? 1 : 0 }).then(function (data) {
+            msgs = data.messages || [];
+            drawMessages();
+        }).catch(function () { /* the panel keeps what it had */ });
+    }
+
+    // Replies count as read once the panel has been on screen.
+    function markSeen() {
+        if (unreadShown) return;
+        unreadShown = true;
+        api('messages', { read: 1 }).then(function () { newLine.hidden = true; }).catch(function () { unreadShown = false; watching = false; });
+    }
+
+    var watching = false;
+
+    function watchSeen() {
+        if (watching) return;
+        watching = true;
+        if (!('IntersectionObserver' in window)) { markSeen(); return; }
+        var io = new IntersectionObserver(function (entries) {
+            if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); markSeen(); }
+        });
+        io.observe(msgList);
+    }
+
+    function sendMessage() {
+        var body = msgBox.value.trim();
+        if (!body) { msgBox.focus(); return; }
+        msgSend.disabled = true;
+        msgStatus.hidden = true;
+        var c = state.msgCtx || {};
+        api('message', { body: body, project_id: c.project_id || 0, item_key: c.item_key || '', item_title: c.item_title || '' }).then(function (res) {
+            msgs = res.messages || msgs;
+            drawMessages();
+            msgBox.value = '';
+            state.msgCtx = null;
+            drawContext();
+            msgStatus.hidden = false;
+            msgStatus.className = 'kop-vol-msg';
+            msgStatus.textContent = res.message || 'Sent.';
+        }).catch(function (e) {
+            msgStatus.hidden = false;
+            msgStatus.className = 'kop-vol-msg is-error';
+            msgStatus.textContent = e.message;
+        }).then(function () { msgSend.disabled = !!cfg.preview; });
+    }
+
     /* ---- Start -------------------------------------------------------------------- */
 
     function param(name) {
@@ -465,8 +715,18 @@
         state.queues = res[0].queues || [];
         state.projects = res[1].projects || [];
         app.innerHTML = '';
+        buildMessages();
+        app.appendChild(newLine);
+        // The conversation is always last on the page, under whatever they are working on.
+        var startMessages = function () {
+            app.appendChild(msgPanel);
+            loadMessages(false);
+            // A reply may come while the page is open: look again every two minutes while it is in view.
+            window.setInterval(function () { if (!document.hidden) loadMessages(false); }, 120000);
+        };
         if (!state.queues.length && !state.projects.length) {
             app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'There is nothing to review right now. Thank you for checking!' })]));
+            startMessages();
             return;
         }
         if (state.projects.length) {
@@ -478,6 +738,7 @@
             ? el('details', { class: 'kop-vol-panel kop-vol-browse' }, [el('summary', { text: state.queues.length ? 'Your past answers, or a whole queue' : 'Your past answers' }), tabs])
             : el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [tabs]));
         app.appendChild(body);
+        startMessages();
         renderTabs();
         var wantedProject = parseInt(param('project'), 10);
         var wanted = param('q');
