@@ -177,7 +177,8 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         && $d3['staff']['administrator'][0]['role'] === 'Executive Director (2001)'
         && $d3['staff']['administrator'][0]['pastJobs'] === 'Teacher - Elm School (1995); Admissions - Roe Ranch (2005)'
         && kop_wbf_on_record($d3, $jane) !== ''
-        && $d4['staff']['administrator'][1]['role'] === 'Founder (2021, HEAL)' && $roles_back['staff']['administrator'][1]['role'] === 'one'
+        // A role keeps its years, not its source's name (kop_dd_role_tidy(), 2026-10-18).
+        && $d4['staff']['administrator'][1]['role'] === 'Founder (2021)' && $roles_back['staff']['administrator'][1]['role'] === 'one'
         && $d5['facilityDetails']['type'] === 'Therapeutic Boarding School',
         json_encode(array($d3['staff']['administrator'][0], $d4['staff']['administrator'][1])));
     // A note never conflicts, whatever the build noted ("Another issue gives 1989; this one is kept as a note").
