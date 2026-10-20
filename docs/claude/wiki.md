@@ -10,6 +10,10 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # (solve Reddit's human check when it asks; resumable), compare pairs entries by the page they were imported from, never by name
 # -> js/data/reddit-wiki/live-compare.json (commit it) -> editor index badge + /wiki-feed/ note; no result = no mark
 (kop-pipeline) python scripts/reddit-wiki-live.py fetch [--pages a b] [--refresh] && python scripts/reddit-wiki-live.py compare [--list]   # sync tmp/prod.sqlite first
+# Daily watch (Task Scheduler "KOP Reddit Wiki Watch" 03:00 -> scripts/watch-reddit-wiki.ps1): re-reads every page that exists on Reddit and is not
+# a stub (empty-slugs.json), logs words/revision date that moved in js/data/reddit-wiki/live-changes.json, reruns compare, pushes kop-data.
+# Reddit has no readable feed (403/Blocked for scripts, the sitewide revisions list is login-only); only a real Chrome window works
+(kop-pipeline) python scripts/reddit-wiki-live.py watch [--push] [--limit 3]   # --limit = trial; log: tmp/reddit-wiki-live/watch.log
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-wiki-contact.php [--list]   # rewrite, PHP == JS, migration on a copy, live-result states
 # The editor (js/wiki-generation.js) writes staff as the drafts do: "a therapist" / "the Executive Director" / "worked in admissions",
 # no "Former" or abbreviations in a role, a year only as "from X to Y", a closed program's staff in the past, one paragraph per person;
