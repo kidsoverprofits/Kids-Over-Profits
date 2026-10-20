@@ -165,11 +165,19 @@
 
 @media (max-width: 640px) {
     .kop-home-numbers {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+        padding: 1rem 0;
     }
     .kop-number-value {
-        font-size: 1.7rem;
+        font-size: 1.35rem;
+    }
+    .kop-number-label {
+        font-size: 0.66rem;
+        letter-spacing: 0.03em;
+    }
+    .kop-number-note {
+        display: none;
     }
 }
 
@@ -193,6 +201,11 @@
     margin: 0 0 25px;
     color: #fff;
     text-align: left;
+}
+
+/* The state list in words; phones show the count instead (the buttons name every state). */
+.kop-home-reports-count {
+    display: none;
 }
 
 /* The navy link style (.kop-volunteer-more) would be navy on this navy box,
@@ -682,10 +695,66 @@
         padding: 10px 12px;
         font-size: 0.95rem;
     }
+
+    /* Each long section shows a taste on phones; its "all" link leads on.
+       Scoped to .kop-home so the strip and story cards keep their full
+       form on the news feed. */
+    .kop-home .kop-feat-strip .kop-feat-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .kop-home .kop-feat-strip .kop-feat-card__thumb,
+    .kop-home .kop-feat-card__about {
+        display: none;
+    }
+    .kop-home .ongoing-card-latest li:nth-child(n+2) {
+        display: none;
+    }
+    .kop-home .kop-preview-list li:nth-child(n+3) {
+        display: none;
+    }
+    .kop-home-reports-states {
+        display: none;
+    }
+    .kop-home-reports-count {
+        display: inline;
+    }
+    .kop-home-reports p {
+        margin-bottom: 16px;
+    }
+    .kop-home-reports-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+    .kop-home .kop-home-report-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 3px;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    .kop-topics-grid,
+    .kop-volunteer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .kop-home-topics,
+    .kop-home-volunteer {
+        padding: 1rem;
+    }
+    .kop-topic-link,
+    .kop-volunteer-link {
+        padding: 0.55rem 0.65rem;
+    }
+    .kop-topic-desc,
+    .kop-volunteer-desc {
+        display: none;
+    }
 }
 
 /* Small phones: stack the audience buttons */
-@media (max-width: 400px) {
+@media (max-width: 340px) {
     .kop-home-audience {
         flex-direction: column;
         align-items: stretch;

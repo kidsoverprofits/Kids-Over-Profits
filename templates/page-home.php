@@ -335,7 +335,8 @@ $kop_reports_hub_url = !empty($kop_reports_hub_pages) ? get_permalink($kop_repor
 
     <section class="kop-home-reports">
         <h2<?php echo kop_text_attr('home:reports-heading', 'Home page: inspection reports heading'); ?>><?php echo esc_html(kop_text('home:reports-heading', 'New Inspection Reports Available!', 'Home page: inspection reports heading')); ?></h2>
-        <p><span<?php echo kop_text_attr('home:reports-before', 'Home page: inspection reports line'); ?>><?php echo esc_html(kop_text('home:reports-before', 'We created inspection trackers to make it easier for everyone to monitor violations in facilities for kids.', 'Home page: inspection reports line')); ?></span> <?php echo esc_html(kop_report_state_sentence()); ?> are available now.
+        <p><span<?php echo kop_text_attr('home:reports-before', 'Home page: inspection reports line'); ?>><?php echo esc_html(kop_text('home:reports-before', 'We created inspection trackers to make it easier for everyone to monitor violations in facilities for kids.', 'Home page: inspection reports line')); ?></span> <span class="kop-home-reports-states"><?php echo esc_html(kop_report_state_sentence()); ?> are available now.</span>
+        <span class="kop-home-reports-count">Trackers for <?php echo esc_html(count($kop_report_states)); ?> states are available now.</span>
         <span<?php echo kop_text_attr('home:reports-after', 'Home page: inspection reports line'); ?>><?php echo esc_html(kop_text('home:reports-after', 'More trackers are coming soon!', 'Home page: inspection reports line')); ?></span></p>
         <div class="kop-home-reports-buttons">
             <?php foreach ($kop_report_states as $slug => $label): ?>
