@@ -3072,3 +3072,17 @@ had and keeps its numbers (bf25d805); the era check asks for a year only when th
   (about 19 hours) and, `processed.json` being gone too, sends every topic again as new batches. Do not create
   `tmp/fornits/` until this is decided; run test-fornits with `--batch=<a copy of a server batch>`.
   Owner, 2026-10-20: disable it. Disabled the same day (schtasks /change /disable); re-enable it only with a new crawl.
+
+## 5. Tests failing on main, closure reports and facility discovery (finished 2026-10-20)
+
+- **test-closure-reports**: 2 checks on the 2026-10-20 mirror, failing before the closure re-sort work too: "an untouched
+  rewrite changes nothing but the schema upgrade" (kop_closure_rewrite_period() on a real document) and "a closed or
+  rebranded name is never touched" (kop_network_map_status_overrides()).
+  Passing in full by the end of 2026-10-20 with no test change: the code was wrong, fixed in 600857eb (a facility closed in
+  the data no longer repaints its rebranded or closed old name) and the closure re-sort commits up to bd7b9923.
+- **test-facility-discovery**: 3 checks on the 2026-10-20 mirror, failing before the vague-name rule too: "a genuinely
+  new name is not a near duplicate", "new programs from the dry run stay new", "no record already has its name key in
+  its state". Probably records created since the test's names were picked; check its names against the mirror.
+  The samples went stale: the scan itself created Silver Oak Academy (#100185) and Walker's Point Youth and Family Center
+  (#100184) on 2026-09-29, and kop_facdisc_near_duplicate() rightly finds them. Fixed in 40a7b516: the new name is made up
+  (Larkspur Hollow Academy), and the two now check that a record the scan made is found again (Zion Hills Academy still new).
