@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_VOL_DB_VERSION = '1';
+const KOP_VOL_DB_VERSION = '2';
 const KOP_VOL_COOKIE = 'kop_vol';
 const KOP_VOL_PATH = 'volunteer-review';
 const KOP_VOL_REWRITE_VERSION = '1';
@@ -70,6 +70,7 @@ function kop_vol_ensure_tables() {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(100) NOT NULL,
         note VARCHAR(255) NOT NULL DEFAULT '',
+        email VARCHAR(190) NOT NULL DEFAULT '',
         token_hash CHAR(64) NOT NULL,
         created_by VARCHAR(60) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
@@ -213,8 +214,11 @@ function kop_vol_invite_url($token) {
 
 /* ---- Volunteers (admin) ------------------------------------------------------ */
 
-/** Make a volunteer and their link. Returns [id, url]; the url is shown once. */
-function kop_vol_create($name, $note = '') {
+/**
+ * Make a volunteer and their link. Returns [id, url, token]; the url is shown once.
+ * $extra: 'email', 'created_by' (the sign-up form, inc/volunteer-signup.php, passes both).
+ */
+function kop_vol_create($name, $note = '', $extra = array()) {
     $name = trim(preg_replace('/\s+/u', ' ', (string) $name));
     if ($name === '') throw new RuntimeException('Give the volunteer a name.');
     global $wpdb;
@@ -222,12 +226,14 @@ function kop_vol_create($name, $note = '') {
     $token = kop_vol_new_token();
     $now = current_time('mysql', true);
     $u = wp_get_current_user();
+    $by = isset($extra['created_by']) ? (string) $extra['created_by'] : ($u && $u->exists() ? $u->user_login : '');
     $wpdb->insert(kop_vol_table(), array(
         'name' => mb_substr($name, 0, 100), 'note' => mb_substr(trim((string) $note), 0, 255),
-        'token_hash' => kop_vol_hash($token), 'created_by' => $u && $u->exists() ? $u->user_login : '',
+        'email' => mb_substr(trim((string) ($extra['email'] ?? '')), 0, 190),
+        'token_hash' => kop_vol_hash($token), 'created_by' => mb_substr($by, 0, 60),
         'created_at' => $now, 'link_at' => $now,
     ));
-    return array((int) $wpdb->insert_id, kop_vol_invite_url($token));
+    return array((int) $wpdb->insert_id, kop_vol_invite_url($token), $token);
 }
 
 /** Replace a volunteer's link (the old one stops working) and turn them back on. Returns the new url. */
@@ -927,7 +933,8 @@ function kop_vol_admin_page() {
                         <input type="text" name="kop_vol_name" value="<?php echo esc_attr($v['name']); ?>" style="width:150px" aria-label="Name">
                         <button type="submit" class="button-link">Rename</button></form>
                         <?php echo $off ? '<em>Turned off</em>' : ''; ?></td>
-                    <td><?php echo esc_html($v['note']); ?></td>
+                    <td><?php echo esc_html($v['note']);
+                        if (!empty($v['email'])) echo '<br><a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a>'; ?></td>
                     <td><?php echo (int) $v['recs']; ?></td>
                     <td><?php echo esc_html($rate); ?></td>
                     <td><?php echo kop_vol_auto_mark_cell($v, $nonce); ?></td>
@@ -999,3 +1006,4 @@ function kop_vol_admin_recent($inbox, $nonce) {
 
 require_once __DIR__ . '/volunteer-projects.php';
 require_once __DIR__ . '/volunteer-auto.php';
+require_once __DIR__ . '/volunteer-signup.php';

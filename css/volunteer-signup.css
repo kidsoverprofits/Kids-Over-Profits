@@ -1,0 +1,155 @@
+/* Sign up to review on /volunteer/ (inc/volunteer-signup.php). A solid white
+   panel; every button names its colour and background in each state
+   (docs/claude/css-checks.md, Kadence colour traps). */
+
+.kop-vols {
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1a202c);
+    border: 1px solid var(--kop-border-primary, #d8d2bd);
+    border-left: 4px solid var(--kop-teal, #33a7b5);
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1.5rem;
+    max-width: 44rem;
+}
+
+.kop-vols h2.kop-hub-h {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vols p {
+    color: var(--kop-text-primary, #1a202c);
+    margin: 0 0 0.75rem;
+}
+
+.kop-vols .kop-vols-lead {
+    margin-bottom: 1rem;
+}
+
+.kop-vols-field {
+    margin: 0 0 1rem;
+}
+
+.kop-vols-field label {
+    display: block;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+    margin: 0 0 0.25rem;
+}
+
+.kop-vols .kop-vols-opt,
+.kop-vols p.kop-vols-help {
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--kop-text-muted, #4a5568);
+}
+
+.kop-vols p.kop-vols-help {
+    margin: 0.25rem 0 0;
+}
+
+.kop-vols input[type="text"],
+.kop-vols input[type="email"] {
+    width: 100%;
+    max-width: 26rem;
+    box-sizing: border-box;
+    padding: 0.5rem 0.65rem;
+    font-size: 1rem;
+    color: var(--kop-text-primary, #1a202c);
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--kop-text-muted, #4a5568);
+    border-radius: 6px;
+}
+
+.kop-vols input:focus {
+    outline: 2px solid var(--kop-focus-color, #000080);
+    outline-offset: 1px;
+}
+
+/* The field bots fill in: off screen, never display:none (some bots skip those). */
+.kop-vols-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.kop-vols p.kop-vols-error {
+    color: var(--kop-coral-pink-ink, #a3262e);
+    font-weight: 600;
+}
+
+.kop-vols p.kop-vols-error a {
+    color: var(--kop-navy, #000080);
+}
+
+.kop-vols p.kop-vols-done-h {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vols-done:focus {
+    outline: none;
+}
+
+.kop-vols-link {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+}
+
+.kop-vols-link input[type="text"] {
+    flex: 1 1 16rem;
+    max-width: none;
+    min-width: 0;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+button.kop-vols-btn,
+a.kop-vols-btn {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    color: var(--kop-white, #fff);
+    background: var(--kop-teal-fill, #1f7a85);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button.kop-vols-btn:hover,
+button.kop-vols-btn:focus,
+button.kop-vols-btn:active,
+a.kop-vols-btn:hover,
+a.kop-vols-btn:focus,
+a.kop-vols-btn:active {
+    color: var(--kop-white, #fff);
+    background: var(--kop-navy, #000080);
+}
+
+button.kop-vols-btn:focus-visible,
+a.kop-vols-btn:focus-visible {
+    outline: 2px solid var(--kop-midnight-blue, #000435);
+    outline-offset: 2px;
+}
+
+button.kop-vols-btn:disabled {
+    color: var(--kop-white, #fff);
+    background: var(--kop-text-muted, #4a5568);
+    cursor: wait;
+}
+
+button.kop-vols-copy,
+button.kop-vols-copy:hover,
+button.kop-vols-copy:focus,
+button.kop-vols-copy:active {
+    color: var(--kop-navy, #000080);
+    background: var(--kop-sand, #f2eedf);
+    border: 1px solid var(--kop-navy, #000080);
+}

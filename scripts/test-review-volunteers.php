@@ -76,7 +76,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_review_log (id INTEGER PRIMARY K
 $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_review_holds (source TEXT NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '',
     assigned_to INTEGER NOT NULL DEFAULT 0, snooze_until TEXT, research INTEGER NOT NULL DEFAULT 0, note TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL, PRIMARY KEY (source, item_key))");
-$pdo->exec("CREATE TABLE wpdl_kop_volunteers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, note TEXT NOT NULL DEFAULT '',
+$pdo->exec("CREATE TABLE wpdl_kop_volunteers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', email TEXT NOT NULL DEFAULT '',
     token_hash TEXT NOT NULL UNIQUE, created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, link_at TEXT NOT NULL, last_seen TEXT, revoked_at TEXT)");
 $pdo->exec("CREATE TABLE wpdl_kop_volunteer_recs (id INTEGER PRIMARY KEY AUTOINCREMENT, volunteer_id INTEGER NOT NULL, source TEXT NOT NULL,
     item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '', verdict TEXT NOT NULL, note TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
@@ -338,6 +338,34 @@ kop_vol_auto_set_mark((int) $vc['id'], 'record');
 $check('back to "if their record is good"', kop_vol_auto_mark_of((int) $vc['id']) === 'record' && kop_vol_auto_mark_of((int) $va['id']) === 'no');
 $check('an unknown choice is refused', $throws(function () use ($vc) { kop_vol_auto_set_mark((int) $vc['id'], 'always'); }) !== '');
 unset($GLOBALS['kop_test_options']['kop_volunteer_sources'], $GLOBALS['kop_test_options']['kop_vol_auto'], $GLOBALS['kop_test_options']['kop_vol_auto_people']);
+
+echo "\nSign-up on /volunteer/ (inc/volunteer-signup.php)\n";
+if (!function_exists('is_email')) { function is_email($v) { return (bool) filter_var((string) $v, FILTER_VALIDATE_EMAIL); } }
+$made = kop_vol_signup('  Robin   Reader ', 'robin@example.org', 'who-a');
+$row = $pdo->query('SELECT * FROM wpdl_kop_volunteers WHERE id = ' . (int) $made['id'])->fetch(PDO::FETCH_ASSOC);
+$check('it makes a working link at once', strlen($made['token']) === 48 && (int) (kop_vol_by_token($made['token'])['id'] ?? 0) === $made['id']
+    && strpos($made['url'], 'invite=' . $made['token']) !== false);
+$check('the name is tidied and the email kept', $row['name'] === 'Robin Reader' && $row['email'] === 'robin@example.org');
+$check('the row says how it was made', $row['note'] === KOP_VOLS_NOTE && $row['created_by'] === KOP_VOLS_BY);
+$check('only the hash is stored', $row['token_hash'] !== $made['token']);
+$check('the email is optional', kop_vol_signup('Kai', '', 'who-b')['id'] > 0);
+$check('a one-letter name is refused', $throws(function () { kop_vol_signup('K', '', 'who-c'); }) !== '');
+$check('a web address as a name is refused', $throws(function () { kop_vol_signup('cheap pills www.spam.example', '', 'who-c'); }) !== '');
+$check('a bad email is refused', $throws(function () { kop_vol_signup('Lee', 'not-an-email', 'who-c'); }) !== '');
+kop_vol_signup('Lee', '', 'who-a');
+kop_vol_signup('Lee two', '', 'who-a');
+$check('one device makes three a day at most', strpos($throws(function () { kop_vol_signup('Lee three', '', 'who-a'); }), 'several links') !== false);
+$GLOBALS['kop_test_transients']['kop_vols_' . gmdate('Ymd')] = KOP_VOLS_PER_DAY;
+$check('and the site takes a set number a day', strpos($throws(function () { kop_vol_signup('Morgan', '', 'who-d'); }), 'try again tomorrow') !== false);
+$check('a signed-up volunteer never sees a barred queue', !array_intersect(array_keys(kop_vol_sources()), kop_vol_never_sources()));
+$bot = kop_vols_rest_signup(new WP_REST_Request(array('name' => 'Bot', 'website' => 'http://spam.example')));
+$check('the hidden field stops bots', $bot->status === 400 && !$pdo->query("SELECT COUNT(*) FROM wpdl_kop_volunteers WHERE name = 'Bot'")->fetchColumn());
+$_COOKIE[KOP_VOL_COOKIE] = $token;
+$again = kop_vols_rest_signup(new WP_REST_Request(array('name' => 'Sam again')));
+$check('a device already signed in is sent to its page', $again->status === 409 && !empty($again->data['signed_in'])
+    && !$pdo->query("SELECT COUNT(*) FROM wpdl_kop_volunteers WHERE name = 'Sam again'")->fetchColumn());
+$check('the form is the /volunteer/ hub module', (kop_vols_hub_modules(array())['volunteer'] ?? '') === 'kop_vols_module');
+$check('never-open queues include drive-docs and podcasts', !array_diff(array('drive-docs', 'podcasts'), kop_vol_never_sources()));
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

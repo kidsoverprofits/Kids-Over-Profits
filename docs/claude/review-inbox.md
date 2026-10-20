@@ -76,6 +76,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # (kop_vol_never_sources() can never open). Volunteers only recommend approve/reject/not sure ({prefix}kop_volunteer_recs); items reach
 # them as kop_vol_item() copies (no fields/actions/tags, emails and phones blanked). Inbox cards show 'recs', "Volunteers recommend"
 # lists them; an approve/reject in the log closes them (agreement rate per volunteer), Undo reopens them
+# Sign-up (inc/volunteer-signup.php, the 'volunteer' hub module on /volunteer/ + js/volunteer-signup.js, public POST kop/v1/volunteer/signup):
+# name + optional email -> kop_vol_signup() -> kop_vol_create() at once (note "Signed up on the Volunteer page", created_by 'sign-up',
+# email in the volunteers row, admin-only); shows the link once and sets the cookie. Hidden bot field, 3 a day per address+browser, 30 a day
+# in all (filters kop_vols_per_day_each / kop_vols_per_day); a signed-in device is sent to its page. The volunteer_projects listing (templates/page-volunteers.php) links to it.
+# kop_vol_never_sources() also bars drive-docs (the owner's private Docs) and podcasts (statements by named people)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
 # Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>
