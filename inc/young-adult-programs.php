@@ -818,6 +818,21 @@ function kop_ya_fact_text($label) {
 }
 
 /** The approved programs, by state or country, each with its facts and their sources. */
+/**
+ * The program's documents, as a facility page lists its own
+ * (kop_facility_pages_documents()): its folder and every folder of the same
+ * name, subfolders kept, through the folder shortcode's function. '' when it
+ * has no folder or the folder holds nothing.
+ */
+function kop_ya_documents_html(array $p) {
+    $folder = (int) ($p['document_folder_id'] ?? 0);
+    if ($folder <= 0 || !function_exists('kop_filebird_folder_shortcode')) {
+        return '';
+    }
+    $html = (string) kop_filebird_folder_shortcode(array('folder_id' => $folder, 'merge' => 'name', 'layout' => 'grid', 'title' => 'Documents on file', 'show_count' => 'yes'));
+    return stripos($html, 'no-documents') !== false ? '' : $html;
+}
+
 function kop_ya_render_public() {
     $pdo = kop_ya_pdo();
     if (!$pdo || !kop_ya_ready($pdo)) {
@@ -896,12 +911,19 @@ function kop_ya_render_public() {
                 echo '</ul>';
             }
             $links = kop_ya_parse_links($p['links']);
+            $docs = kop_ya_documents_html($p);
+            if ($links || $docs !== '') {
+                echo '<p class="kop-ya-list-title">More about this program</p>';
+            }
             if ($links) {
-                echo '<p class="kop-ya-list-title">More about this program</p><ul class="kop-ya-list">';
+                echo '<ul class="kop-ya-list">';
                 foreach ($links as $l) {
                     echo '<li><a href="' . $e($l[1]) . '">' . $e($l[0]) . '</a></li>';
                 }
                 echo '</ul>';
+            }
+            if ($docs !== '') {
+                echo '<div class="kop-ya-docs"><p class="kop-ya-docs-title">Documents on file</p>' . $docs . '</div>';
             }
             echo "</article>\n";
         }

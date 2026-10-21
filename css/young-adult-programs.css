@@ -120,3 +120,27 @@
     font-size: 0.9em;
     color: var(--kop-text-muted, #4A5568);
 }
+
+/* The program's documents (kop_ya_documents_html()): the media library grid
+   (css/document-library.css), under "More about this program". The
+   shortcode's own title is replaced by a smaller one, as facility pages do. */
+.kop-ya-docs {
+    margin: 0.5rem 0 0.25rem;
+}
+
+.kop-ya-docs-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-ya-docs .doc-folder-title-single {
+    display: none;
+}
+
+.kop-ya-docs .kop-document-folder {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}

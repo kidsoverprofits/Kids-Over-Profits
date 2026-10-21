@@ -21,6 +21,15 @@ $kop_ya_css = get_stylesheet_directory() . '/css/young-adult-programs.css';
 if (file_exists($kop_ya_css)) {
     wp_enqueue_style('kop-young-adult-programs', get_stylesheet_directory_uri() . '/css/young-adult-programs.css', array('kop-colors'), filemtime($kop_ya_css));
 }
+// The programs' documents (kop_ya_documents_html()): the library grid and its viewer, as on facility pages.
+$kop_ya_doc_css = get_stylesheet_directory() . '/css/document-library.css';
+if (file_exists($kop_ya_doc_css)) {
+    wp_enqueue_style('kop-document-library-style', get_stylesheet_directory_uri() . '/css/document-library.css', array('kop-colors'), filemtime($kop_ya_doc_css));
+}
+$kop_ya_doc_js = get_stylesheet_directory() . '/js/document-library.js';
+if (file_exists($kop_ya_doc_js)) {
+    wp_enqueue_script('kop-document-library-script', get_stylesheet_directory_uri() . '/js/document-library.js', array('jquery'), filemtime($kop_ya_doc_js), true);
+}
 
 get_header();
 ?>

@@ -172,9 +172,33 @@ $closed = array('pkey' => 'c1', 'grp' => 'history', 'op' => 'set_closed', 'path'
 list($fact, $fill) = kop_wbf_ya_fact($closed);
 kop_ya_add_fact($ya, $id, $fact, $fill);
 $hidden = kop_ya_save($ya, array('name' => 'Hidden Program', 'review' => 'pending'), 0, 'tester');
+// The folder shortcode (inc/features.php, not loaded here): a stand-in that names the folder it was asked for.
+function kop_filebird_folder_shortcode($atts) {
+    $GLOBALS['kop_test_ya_shortcodes'][] = $atts;
+    return (int) $atts['folder_id'] === 78 ? '<p class="no-documents">No documents found in this folder.</p>'
+        : '<div class="kop-document-folder" data-test-folder="' . (int) $atts['folder_id'] . '"><ul class="doc-list doc-layout-grid"><li class="doc-item">A document</li></ul></div>';
+}
+$ya->prepare('UPDATE young_adult_programs SET document_folder_id = 77 WHERE id = ?')->execute(array($id));
+$empty = kop_ya_save($ya, array('name' => 'Empty Folder Program', 'state' => 'UT'), 0, 'tester');
+$ya->prepare('UPDATE young_adult_programs SET document_folder_id = 78 WHERE id = ?')->execute(array($empty));
 ob_start();
 kop_ya_render_public();
 $html = ob_get_clean();
+$card = function ($pid) use ($html) {
+    return preg_match('#<article class="kop-ya-program" id="kop-ya-program-' . (int) $pid . '".*?</article>#s', $html, $m) ? $m[0] : '';
+};
+$c = $card($id);
+$check('a program\'s documents show on its card, under "More about this program"', strpos($c, 'data-test-folder="77"') !== false
+    && strpos($c, 'More about this program') !== false && strpos($c, 'More about this program') < strpos($c, 'Documents on file')
+    && strpos($c, 'Documents on file') < strpos($c, 'data-test-folder="77"'));
+$asked = array_values(array_filter((array) ($GLOBALS['kop_test_ya_shortcodes'] ?? array()), function ($a) { return (int) $a['folder_id'] === 77; }))[0] ?? array();
+$check('as a facility page lists them (same-name folders merged, the grid)', ($asked['merge'] ?? '') === 'name' && ($asked['layout'] ?? '') === 'grid');
+$c = $card($empty);
+$check('an empty folder shows nothing, not even the heading', $c !== '' && strpos($c, 'Documents on file') === false && strpos($c, 'More about this program') === false
+    && strpos($c, 'no-documents') === false);
+$c = $card($id2);
+$check('a program with no folder shows no documents', $c === '' || strpos($c, 'Documents on file') === false);
+kop_ya_delete($ya, $empty);
 $check('a listed program is on the page', strpos($html, 'Echo Springs Transition Study Center') !== false);
 $check('a hidden program is not', strpos($html, 'Hidden Program') === false);
 $check('a closing fills status and year', strpos($html, '2004') === false && strpos($html, 'Closed 2011') !== false);
