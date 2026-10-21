@@ -7,6 +7,31 @@
     padding-top: 1.5rem;
 }
 
+/* MailerLite splits the email + Subscribe row 70/30, which leaves the button
+   too narrow for its label in the ~340px sidebar (6px out at 1100 wide).
+   Give the button its own width and the email field the rest. Under 401px
+   MailerLite stacks the two itself. */
+@media (min-width: 401px) {
+    .primary-sidebar .ml-form-formContent.horozintalForm .ml-form-horizontalRow {
+        display: flex;
+        align-items: flex-start;
+    }
+    .primary-sidebar .ml-form-formContent.horozintalForm .ml-form-horizontalRow .ml-input-horizontal {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        float: none;
+    }
+    .primary-sidebar .ml-form-formContent.horozintalForm .ml-form-horizontalRow .horizontal-fields {
+        width: 100%;
+    }
+    .primary-sidebar .ml-form-formContent.horozintalForm .ml-form-horizontalRow .ml-button-horizontal {
+        flex: 0 0 auto;
+        width: auto;
+        float: none;
+    }
+}
+
 /* Desktop: js/sidebar-float.js moves the sidebar into the content panel and
    floats it, so the page runs full width below it instead of staying in a
    narrow grid column the whole way down. Without the script Kadence's grid

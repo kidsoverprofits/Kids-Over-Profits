@@ -11,7 +11,10 @@ a[data-kop-citation-preview]::after {
     z-index: 10000;
     top: calc(100% + 0.45rem);
     left: 0;
-    display: block;
+    /* Not laid out until shown: a hidden preview still counts toward the
+       page's scroll width, so a link near the right edge scrolled the page
+       sideways (facility rail, 2026-10-21). */
+    display: none;
     width: max-content;
     max-width: min(26rem, calc(100vw - 2rem));
     max-height: 12rem;
@@ -30,16 +33,21 @@ a[data-kop-citation-preview]::after {
     text-decoration: none;
     white-space: normal;
     overflow-wrap: anywhere;
-    visibility: hidden;
-    opacity: 0;
     pointer-events: none;
     transition: opacity 120ms ease;
 }
 
 a[data-kop-citation-preview]:hover::after,
 a[data-kop-citation-preview]:focus-visible::after {
-    visibility: visible;
+    display: block;
     opacity: 1;
+}
+
+@starting-style {
+    a[data-kop-citation-preview]:hover::after,
+    a[data-kop-citation-preview]:focus-visible::after {
+        opacity: 0;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

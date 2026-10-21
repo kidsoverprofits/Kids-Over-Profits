@@ -109,6 +109,11 @@
         width: 260px;
         margin: 0 0 1.5rem 1.75rem;
     }
+    /* The rail sits at the right edge: open source previews leftward. */
+    .kop-fp-rail a[data-kop-citation-preview]::after {
+        left: auto;
+        right: 0;
+    }
 }
 
 @media (max-width: 959px) {
