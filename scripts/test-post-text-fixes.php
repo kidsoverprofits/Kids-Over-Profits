@@ -45,6 +45,8 @@ if (!is_readable($db)) {
 } else {
     $pdo = new PDO('sqlite:' . $db);
     $q = $pdo->prepare("SELECT post_content FROM wpdl_posts WHERE post_name = ? AND post_type IN ('page','post') AND post_status = 'publish' ORDER BY ID DESC LIMIT 1");
+    $done = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_post_text_fixes_done'")->fetchColumn();
+    $done = $done ? (array) @unserialize($done) : array();
     $ids = array();
     foreach ($posts as $e) {
         check(!empty($e['fix']) && !isset($ids[$e['fix']]), $e['post'] . ': has its own fix id');
@@ -53,6 +55,24 @@ if (!is_readable($db)) {
         $content = $q->fetchColumn();
         if ($content === false) {
             check(false, $e['post'] . ': page found in the mirror');
+            continue;
+        }
+        if (in_array($e['fix'] ?? '', $done, true)) {
+            // Applied on the site already: the page has the new text and a run changes nothing.
+            check(kop_text_fix_swaps($content, $e['replace']) === null, $e['post'] . ' (' . $e['fix'] . '): applied on the site, a run finds nothing to change');
+            // As later fixes to the same page left it.
+            $later = array();
+            foreach (array_slice($posts, array_search($e, $posts, true) + 1) as $l) {
+                if ($l['post'] === $e['post'] && in_array($l['fix'] ?? '', $done, true)) $later = array_merge($later, $l['replace']);
+            }
+            foreach ($e['replace'] as $pair) {
+                if ($pair[1] !== '') {
+                    $want = $pair[1];
+                    foreach ($later as $lp) $want = str_replace($lp[0], $lp[1], $want);
+                    check(strpos(str_replace(array("\r\n", "\r"), "\n", $content), str_replace(array("\r\n", "\r"), "\n", $want)) !== false,
+                        $e['post'] . ': new text is on the page (' . mb_substr(strip_tags($pair[1]), 0, 50) . ')');
+                }
+            }
             continue;
         }
         $new = kop_text_fix_swaps($content, $e['replace']);
