@@ -96,8 +96,11 @@ function kop_rinbox_test_questions(array $src, array $item, callable $check) {
     $check('questions: the emailed set reads as added once its answer was used', $bstatus() === 'added');
     $done = $state ? (json_decode($state['done'], true) ?: array()) : array();
     $wbf = !empty($done['wbf']) ? (kop_wbf_rows(array($done['wbf']))[0] ?? null) : null;
+    // The citation never says how many agreed (owner, 2026-10-20); the count is kept in extra.
     $check('questions: it waits for the record write-up as an approved fact citing the page', $wbf && $wbf['status'] === 'held'
-        && $wbf['path'] === 'operatingPeriod.startYear' && json_decode($wbf['value'], true) === 1998 && strpos($wbf['evidence'], '3 people agreed') !== false, json_encode($wbf));
+        && $wbf['path'] === 'operatingPeriod.startYear' && json_decode($wbf['value'], true) === 1998
+        && strpos($wbf['evidence'], 'questions page') !== false && strpos($wbf['evidence'], 'agreed') === false
+        && (json_decode($wbf['extra'], true)['answers'] ?? 0) === 3, json_encode($wbf));
     // In Woodbury Facts (Held tab) and Conflicts it is named as the questions page, never as Woodbury.
     if ($wbf) {
         $card = kop_rinbox_get_item('woodbury-facts', $wbf['pkey']);

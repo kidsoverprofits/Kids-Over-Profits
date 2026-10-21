@@ -848,12 +848,13 @@ function kop_q_wbf_write(array $q, $op, $path, $value, $label, $count, $by) {
     global $wpdb;
     $fid = (int) $q['record']['id'];
     $pkey = md5('questions|' . $q['key'] . '|' . microtime(true));
-    $cite = 'Answers on Kids Over Profits\' questions page' . ($count > 1 ? ' (' . (int) $count . ' people agreed)' : '');
+    // The citation never says how many readers agreed (owner, 2026-10-20); the count stays in extra.
+    $cite = 'Answers on Kids Over Profits\' questions page';
     $grp = in_array($path, array('facilityDetails.gender', 'facilityDetails.ageRange'), true) || strpos($path, 'ttiPractices.') === 0 ? 'details' : 'history';
     $wpdb->insert(kop_wbf_table(), array(
         'pkey' => $pkey, 'facility_id' => $fid, 'program' => mb_substr($q['record']['name'], 0, 255), 'place' => mb_substr($q['record']['place'], 0, 120),
         'match_kind' => 'id', 'grp' => $grp, 'op' => $op, 'path' => $path, 'value' => wp_json_encode($value), 'label' => $label,
-        'extra' => wp_json_encode(array('manual' => 1, 'via' => 'questions', 'qkey' => $q['key'])),
+        'extra' => wp_json_encode(array('manual' => 1, 'via' => 'questions', 'qkey' => $q['key'], 'answers' => (int) $count)),
         'evidence' => wp_json_encode(array(array('cite' => $cite, 'url' => kop_q_url($q['key'], $q)))),
         'status' => 'pending', 'created_at' => current_time('mysql', true),
     ));
