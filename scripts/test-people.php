@@ -144,7 +144,10 @@ foreach ($after as $id => $json) {
             $k = kop_people_key($e['name'] ?? '');
             if ($k === '') continue;
             if (empty($e['personId'])) { $missing++; continue; }
-            $keys[$k][(int) $e['personId']] = true;
+            // The middle name's initial: names that give two different ones are two people.
+            $parts = preg_split('/\s+/', trim(preg_replace('/,?\s+(?:jr|sr|ii|iii|iv)\.?$/i', '', (string) $e['name'])));
+            $mid = count($parts) > 2 ? strtolower(substr($parts[1], 0, 1)) : '';
+            $keys[$k][(int) $e['personId']] = $mid;
         }
         if (kop_facility_person_list($doc['staff'][$l] ?? array()) != array_values(array_filter((array) ($doc['staff'][$l] ?? array()), 'is_array'))) $normal++;
     }
@@ -154,7 +157,11 @@ foreach ($graph['nodes'] as $n) if (($n['kind'] ?? '') === 'person' && kop_peopl
 check($s['created'] > 1000 && $s['stamped'] > 1000, 'people created and entries stamped');
 check($missing === 0, "every two-word name has an id ($missing missing)");
 check($other === 0, "nothing else changed in any document ($other changed)");
-check(count(array_filter($keys, function ($ids) { return count($ids) > 1; })) === 0, 'one id per name key across records');
+$split = array_filter($keys, function ($ids) {
+    // Two ids are right only when their names give different middle initials (Robert B. / Robert Walter Lichfield).
+    return count($ids) > 1 && (in_array('', $ids, true) || count(array_unique($ids)) < count($ids));
+});
+check(!$split, 'one id per name key across records, but for different middle names' . ($split ? ' (' . implode(', ', array_keys($split)) . ')' : ''));
 check($normal === 0, "kop_facility_person_list() keeps personId ($normal lists differ)");
 $ops = (int) $pdo->query("SELECT COUNT(*) FROM {$prefix}kop_person_roles WHERE record_kind = 'operator'")->fetchColumn();
 check($ops > 0, "company founders and executives linked ($ops)");
@@ -335,7 +342,11 @@ foreach ($all as $i => $n) if (!is_array($js) || ($js[$i] ?? null) !== kop_peopl
 check(is_array($js) && !$diff, count($all) . ' names, ' . count($diff) . ' differ' . ($diff ? ': ' . implode('; ', array_slice($diff, 0, 5)) : ''));
 
 // ---- A map build from the copy ------------------------------------------------------
-if (!isset($args['no-build'])) {
+// The map builder lives in the kop-pipeline checkout beside this one since the 2026-10-13 split.
+$builder = (getenv('KOP_PIPELINE_DIR') ?: dirname($root) . '/kop-pipeline') . '/scripts/build-network-graph.js';
+if (!isset($args['no-build']) && !is_file($builder)) {
+    echo "Map build\n  skipped: no kop-pipeline checkout beside this one (or KOP_PIPELINE_DIR)\n";
+} elseif (!isset($args['no-build'])) {
     echo "Map build\n";
     // Two map people merged into one: the build must draw them as one node.
     // Two board people (not added by the build), each named on its own lines.
@@ -354,7 +365,7 @@ if (!isset($args['no-build'])) {
     putenv('KOP_NETWORK_GRAPH_OUT=' . $out);
     putenv('KOP_NETWORK_QA_OUT=' . $dir . '/network-qa.md');
     $t0 = microtime(true);
-    exec('node ' . escapeshellarg($root . '/scripts/build-network-graph.js') . ' 2>&1', $lines, $code);
+    exec('node ' . escapeshellarg($builder) . ' 2>&1', $lines, $code);
     printf("  built in %.0fs (exit %d)\n", microtime(true) - $t0, $code);
     if ($code) echo '  ' . implode("\n  ", array_slice($lines, -10)) . "\n";
     $g = json_decode((string) @file_get_contents($out), true);
