@@ -76,8 +76,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   #
 # (kop_ie_attr('<source>:<what>')) that saves through the source's own save path; a new page or field gets a marker there
 php scripts/test-inline-edit.php                  # every facility sent back unchanged is unchanged, edits land, against tmp/prod.sqlite
 # Who runs it: identification.currentOperator, else the first company link (kop_v2_operators_for_facilities(), current links
-# first, returns 'relationship'). When that link is 'past' the page, cards and JSON-LD word it as the former operator, never
-# "operated by"; a new place that prints the operator reads $page['operator']['past'] (or the card's past_operators)
+# first, returns 'relationship'). When every link is 'past', kop_facility_pages_latest_operator() names the latest company known
+# (links + pastOperators + the map's operator lines): a map line marked current makes it the Operator; else a later year wins
+# (map "operated 1999-2004", "(1999-2002)" in pastOperators), a buyer after the company it bought only when years are missing,
+# else the first link. The page, cards and JSON-LD word it as the former operator, never "operated by", the rest under
+# "Other past operators"; a new place that prints the operator reads $page['operator']['past'] (or the card's past_operators)
 # One name shows once on facility and company pages: "Formerly", "Later called", "Also known as" / "Other names" never repeat a name
 # between them (or inside one), nor the page's own title or "Now known as". Priority: Formerly, then Later called, then Also known as.
 # Names compare by kop_facility_pages_name_key(); every new name list on a page goes through kop_facility_pages_dedupe_name_lists()

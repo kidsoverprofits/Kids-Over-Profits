@@ -301,8 +301,10 @@ if (!function_exists('kop_v2_collect_programs')) {
             $fid = (int)$row['id'];
             if (isset($operators[$fid])) {
                 $data['operator'] = $operators[$fid]['operator'];
-                // Only past links: the card lists the company under Past operators (kop_state_build_program_record()).
-                if ($operators[$fid]['relationship'] === 'past') $data['operator_past'] = true;
+                // Only past links: the card names the latest company the page does (kop_state_build_program_record()).
+                if ($operators[$fid]['relationship'] === 'past' && function_exists('kop_facility_pages_latest_operator')) {
+                    $data['operator_latest'] = kop_facility_pages_latest_operator($fid, is_array($doc['identification'] ?? null) ? $doc['identification'] : array());
+                }
             }
 
             $meta = array('master_id' => $fid, 'facility_count' => 1, 'updated_at' => (string)$row['updated_at']);

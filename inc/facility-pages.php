@@ -3063,6 +3063,125 @@ if (!function_exists('kop_facility_pages_summary_sentence')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_latest_operator')) {
+    /**
+     * Who ran a facility last, for a record with no currentOperator whose company links
+     * ({prefix}kop_operator_facilities) are all 'past': {name, id, past, others}, or null.
+     * Candidates are the linked companies, identification.pastOperators and the network
+     * map's operator lines. A map line marked current ("operates (current)") makes that
+     * company the operator (past false). Otherwise the one that comes after every other:
+     * a later year (map "operated 1999-2004", "(1999-2002)" in pastOperators), or, when
+     * either has no year, the map saying it bought the other. When none does, the first
+     * link. others = the rest, latest year first.
+     */
+    function kop_facility_pages_latest_operator($facility_id, array $ident) {
+        global $wpdb;
+        $facility_id = (int) $facility_id;
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT o.id, o.name, ofc.relationship
+               FROM {$wpdb->prefix}kop_operator_facilities ofc
+               JOIN {$wpdb->prefix}kop_operators o ON o.id = ofc.operator_id
+              WHERE ofc.facility_id = %d
+              ORDER BY ofc.sort_order, o.id",
+            $facility_id
+        ), ARRAY_A);
+        if (!$rows) return null;
+        foreach ($rows as $r) if ((string) $r['relationship'] !== 'past') return null;
+
+        $key_of = static function ($name) {
+            return function_exists('kop_ptl_company_key') ? kop_ptl_company_key($name) : 'name:' . kop_facility_pages_name_key($name);
+        };
+        $years = static function ($text) {
+            if (!function_exists('kop_operator_history_years')) return 0;
+            list($from, $to) = kop_operator_history_years((string) $text);
+            return max($from, $to);
+        };
+        $cands = array();
+        $add = static function ($name, $id, $year, $current, $node_id = '') use (&$cands, $key_of) {
+            // "Youth Services International (1999-2002)": the years are not part of the name.
+            $name = trim(preg_replace('/\s*\([^()]*\b(1[89]\d\d|20\d\d)\b[^()]*\)\s*$/', '', trim((string) $name)));
+            $key = $name !== '' ? $key_of($name) : '';
+            if ($key === '' || $key === 'name:') return;
+            if (!isset($cands[$key])) {
+                $cands[$key] = array('name' => $name, 'id' => 0, 'year' => 0, 'current' => false, 'node' => '', 'order' => count($cands));
+            }
+            $c =& $cands[$key];
+            if ($id > 0 && $c['id'] === 0) { $c['id'] = (int) $id; $c['name'] = $name; }
+            $c['year'] = max($c['year'], (int) $year);
+            $c['current'] = $c['current'] || $current;
+            if ($node_id !== '' && $c['node'] === '') $c['node'] = $node_id;
+        };
+        foreach ($rows as $r) $add($r['name'], (int) $r['id'], 0, false);
+        foreach (kop_facility_pages_text_items($ident['pastOperators'] ?? null) as $p) $add($p, 0, $years($p), false);
+        $g = function_exists('kop_ptl_graph') ? kop_ptl_graph() : null;
+        foreach ($g ? ($g['by_fid'][$facility_id] ?? array()) : array() as $nid) {
+            foreach (kop_ptl_runners($nid) as $run) {
+                if (!preg_match('/operat/i', $run['role'])) continue;   // not "affiliated", "shared campus"
+                $add((string) $run['node']['name'], 0, max($run['from'], $run['to']), (bool) preg_match('/\bcurrent\b/i', $run['role']), (string) $run['node']['id']);
+            }
+        }
+        // Company nodes of the map by name, for candidates the map has no line to this facility for.
+        static $node_by_key = null;
+        if ($node_by_key === null) {
+            $node_by_key = array();
+            foreach ($g ? $g['nodes'] : array() as $n) {
+                if (($n['kind'] ?? '') !== 'parent') continue;
+                foreach (array_merge(array((string) ($n['name'] ?? '')), (array) ($n['aliases'] ?? array())) as $nm) {
+                    if (trim((string) $nm) !== '') $node_by_key += array($key_of($nm) => (string) $n['id']);
+                }
+            }
+        }
+        foreach ($cands as $k => &$c) {
+            if ($c['id'] === 0 && function_exists('kop_operator_page_id_for_name')) $c['id'] = kop_operator_page_id_for_name($c['name']);
+            if ($c['node'] === '' && isset($node_by_key[$k])) $c['node'] = $node_by_key[$k];
+        }
+        unset($c);
+        // A company the record lists under otherOperators keeps that line only.
+        $other_keys = array();
+        foreach (kop_facility_pages_text_items($ident['otherOperators'] ?? null) as $o) $other_keys[$key_of($o)] = true;
+
+        // Company nodes the map says bought another: "a bought b".
+        $bought = array();
+        foreach ($cands as $k => $c) {
+            if ($c['node'] === '' || !function_exists('kop_ptl_company_deals')) continue;
+            foreach (kop_ptl_company_deals($c['node']) as $d) {
+                if ($d['as'] === 'bought') $bought[$k][$key_of((string) $d['node']['name'])] = true;
+            }
+        }
+        $after = static function ($a, $b) use ($cands, $bought) {
+            $ya = $cands[$a]['year'];
+            $yb = $cands[$b]['year'];
+            if ($ya > 0 && $yb > 0) return $ya > $yb;
+            return isset($bought[$a][$b]);
+        };
+
+        $pick = '';
+        foreach ($cands as $k => $c) {
+            if ($c['current']) { $pick = $k; break; }
+        }
+        if ($pick === '') {
+            foreach (array_keys($cands) as $a) {
+                $last = true;
+                foreach (array_keys($cands) as $b) {
+                    if ($a !== $b && !$after($a, $b)) { $last = false; break; }
+                }
+                if ($last) { $pick = $a; break; }
+            }
+        }
+        if ($pick === '') $pick = array_key_first($cands);
+        $others = array_values(array_diff_key($cands, array($pick => true), $other_keys));
+        usort($others, static function ($a, $b) {
+            return $b['year'] <=> $a['year'] ?: $a['order'] <=> $b['order'];
+        });
+        return array(
+            'name'   => $cands[$pick]['name'],
+            'id'     => $cands[$pick]['id'],
+            'past'   => !$cands[$pick]['current'],
+            'others' => array_map(static function ($c) { return $c['name']; }, $others),
+        );
+    }
+}
+
 if (!function_exists('kop_facility_page_data')) {
     /**
      * Everything templates/facility-page.php prints for one facility, or
@@ -3133,11 +3252,21 @@ if (!function_exists('kop_facility_page_data')) {
             $ops = kop_v2_operators_for_facilities(array($facility_id));
             if (isset($ops[$facility_id])) $operator_row = $ops[$facility_id];
         }
-        // No currentOperator and every company link is 'past': the company ran it before, and the page says so.
+        // No currentOperator and every company link is 'past': the page names the latest company it
+        // knows of as the former operator (or as the operator, when the map says one runs it now).
         $operator_past = false;
+        $operator_latest = null;
         if ($operator_name === '' && $operator_row) {
             $operator_name = trim((string) $operator_row['name']);
-            $operator_past = ($operator_row['relationship'] ?? '') === 'past';
+            if (($operator_row['relationship'] ?? '') === 'past') {
+                $operator_past = true;
+                $operator_latest = kop_facility_pages_latest_operator($facility_id, $ident);
+            }
+        }
+        if ($operator_latest) {
+            $operator_name = $operator_latest['name'];
+            $operator_past = $operator_latest['past'];
+            $operator_row = $operator_latest['id'] > 0 ? array('id' => $operator_latest['id'], 'name' => $operator_latest['name']) : null;
         }
         $siblings = array();
         if ($operator_row) {
@@ -3263,12 +3392,8 @@ if (!function_exists('kop_facility_page_data')) {
             if ($r_name !== '') $registrants[] = $r_role !== '' ? $r_name . ' (' . $r_role . ')' : $r_name;
         }
         $add_fact('Registrants', $registrants);
-        $past_operators = kop_facility_pages_text_items($ident['pastOperators'] ?? null);
-        if ($operator_past) {
-            $past_operators = array_values(array_filter($past_operators, static function ($p) use ($operator_name) {
-                return kop_facility_pages_name_key($p) !== kop_facility_pages_name_key($operator_name);
-            }));
-        }
+        // The latest company's others hold pastOperators too, latest first.
+        $past_operators = $operator_latest ? $operator_latest['others'] : kop_facility_pages_text_items($ident['pastOperators'] ?? null);
         $add_fact($operator_past ? 'Former operator' : 'Operator', $operator_name);
         $add_fact('Owners', kop_facility_pages_text_items($ident['currentOwners'] ?? null));
         $add_fact('Other operators', kop_facility_pages_text_items($ident['otherOperators'] ?? null));

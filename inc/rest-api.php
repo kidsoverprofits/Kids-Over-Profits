@@ -3056,12 +3056,14 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
     $is_location_aggregate = strcasecmp($project_operator_type, 'Location Aggregate') === 0
         || !empty($meta['location_aggregate'])
         || kop_state_is_location_aggregate_operator($project_operator_name, $project_name);
-    // A company the facility is linked to only as 'past' (kop_v2_collect_programs()) ran it before:
-    // it goes under Past operators, never in the Operator line.
-    $past_company = '';
-    if ($facility_operator === '' && !$is_location_aggregate && !empty($data['operator_past'])) {
-        $past_company = $project_operator_name;
-        $project_operator_name = '';
+    // A facility linked to companies only as 'past' (kop_v2_collect_programs()): the latest one the
+    // facility page names (kop_facility_pages_latest_operator()) goes first under Past operators, the
+    // rest after it; when the map says one runs it now, that one is the Operator.
+    $latest = ($facility_operator === '' && !$is_location_aggregate && !empty($data['operator_latest'])) ? $data['operator_latest'] : null;
+    $past_from_links = array();
+    if ($latest) {
+        $project_operator_name = $latest['past'] ? '' : $latest['name'];
+        $past_from_links = array_merge($latest['past'] ? array($latest['name']) : array(), $latest['others']);
     }
     $resolved_operator = $facility_operator !== ''
         ? $facility_operator
@@ -3129,10 +3131,8 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
     $current_owners   = $scrub_list($as_array($identification['currentOwners'] ?? null));
     $past_owners      = $scrub_list($as_array($identification['pastOwners'] ?? null));
     $other_operators  = $scrub_list($as_array($facility['otherOperators'] ?? null));
-    $past_operators   = $scrub_list($as_array($identification['pastOperators'] ?? null));
-    if ($past_company !== '' && !in_array(mb_strtolower($past_company), array_map('mb_strtolower', $past_operators), true)) {
-        array_unshift($past_operators, $past_company);
-    }
+    // The latest company's others already hold pastOperators.
+    $past_operators   = $scrub_list($latest ? $past_from_links : $as_array($identification['pastOperators'] ?? null));
     $status =$as_string($operating['status'] ?? '');
     if ($closed_marker && ($status === '' || strcasecmp($status, 'open') === 0)) {
         $status = 'Closed';

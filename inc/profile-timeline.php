@@ -313,7 +313,7 @@ if (!function_exists('kop_ptl_edge_role')) {
 
 if (!function_exists('kop_ptl_runners')) {
     /**
-     * The companies the map says ran a facility node: [{node, from, to, acquired}]
+     * The companies the map says ran a facility node: [{node, from, to, acquired, role}]
      * (from/to 0 when the line gives no year).
      */
     function kop_ptl_runners($facility_node_id) {
@@ -326,7 +326,7 @@ if (!function_exists('kop_ptl_runners')) {
             $node = $g['nodes'][$other] ?? null;
             if (!$node || !kop_ptl_is_company($node)) continue;
             list($from, $to) = function_exists('kop_operator_history_years') ? kop_operator_history_years(kop_ptl_edge_role($e)) : array(0, 0);
-            $out[] = array('node' => $node, 'from' => $from, 'to' => $to, 'acquired' => ($e['direction'] ?? '') === 'acquirer' && $e['source'] === $other);
+            $out[] = array('node' => $node, 'from' => $from, 'to' => $to, 'acquired' => ($e['direction'] ?? '') === 'acquirer' && $e['source'] === $other, 'role' => kop_ptl_edge_role($e));
         }
         return $out;
     }

@@ -435,13 +435,35 @@ foreach ($past_only as $pid) {
     $pp = kop_facility_page_data((int) $pid);
     if (!$pp || $pp['operator']['name'] === '') continue;
     $plabels = array_column($pp['facts'], 'label');
+    if (empty($pp['operator']['past'])) {
+        // The map marks one of its companies as running it now.
+        $check('#' . $pid . ' ' . $pp['name'] . ': the company the map says runs it now is the operator',
+            strpos($pp['summary'], ', operated by ' . $pp['operator']['name']) !== false && in_array('Operator', $plabels, true), $pp['summary']);
+        continue;
+    }
     $check('#' . $pid . ' ' . $pp['name'] . ': a past-only company reads as former',
-        !empty($pp['operator']['past']) && strpos($pp['summary'], ', formerly run by ' . $pp['operator']['name']) !== false
+        strpos($pp['summary'], ', formerly run by ' . $pp['operator']['name']) !== false
             && strpos($pp['summary'], 'operated by') === false && in_array('Former operator', $plabels, true) && !in_array('Operator', $plabels, true),
         $pp['summary']);
     if (++$past_checked >= 5) break;
 }
 $check('past-only records were found to check', $past_checked > 0, $past_checked . ' checked');
+// The latest company known: a buyer after the company it bought (UHS after Psychiatric Solutions at North
+// Spring), the map's "operates (current)" line (AMIkids at AMIkids Polk), the rest latest year first.
+$fact_of = static function ($p, $label) {
+    foreach ($p['facts'] as $f) if ($f['label'] === $label) return $f['value'];
+    return null;
+};
+$ns = kop_facility_page_data(12896);
+if ($ns) $check('North Spring names UHS, which bought Psychiatric Solutions, as its former operator',
+    stripos($ns['operator']['name'], 'Universal Health Services') === 0 && !empty($ns['operator']['past'])
+        && in_array('Psychiatric Solutions, Inc.', (array) $fact_of($ns, 'Other past operators'), true), $ns['summary']);
+$ap = kop_facility_page_data(11135);
+if ($ap) $check('AMIkids Polk: the map\'s current line makes AMIkids the operator, past ones latest first, none repeated',
+    $ap['operator']['name'] === 'AMIkids' && empty($ap['operator']['past'])
+        && array_slice((array) $fact_of($ap, 'Past operators'), 0, 1) === array('Youth Services International')
+        && !in_array('Correctional Services Corporation', (array) $fact_of($ap, 'Past operators'), true),
+    json_encode(array($ap['operator'], $fact_of($ap, 'Past operators'))));
 $cur = (int) $wpdb->get_var("SELECT facility_id FROM wpdl_kop_operator_facilities WHERE relationship = 'current' ORDER BY facility_id LIMIT 1");
 $cp = $cur ? kop_facility_page_data($cur) : null;
 $check('a current company still reads as the operator', $cp && empty($cp['operator']['past']) && $cp['operator']['name'] !== ''

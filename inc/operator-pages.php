@@ -465,17 +465,25 @@ if (!function_exists('kop_operator_page_url_for_name')) {
      * its other names. '' when no operator has that name.
      */
     function kop_operator_page_url_for_name($name) {
+        $id = kop_operator_page_id_for_name($name);
+        return $id > 0 ? kop_operator_page_url($id) : '';
+    }
+}
+
+if (!function_exists('kop_operator_page_id_for_name')) {
+    /** The kop_operators id kop_operator_page_url_for_name() matches a free-text name to, or 0. */
+    function kop_operator_page_id_for_name($name) {
         $key = kop_facility_pages_name_key($name);
-        if ($key === '') return '';
+        if ($key === '') return 0;
         $index = kop_operator_pages_index();
-        if (isset($index['names'][$key])) return kop_operator_page_url($index['names'][$key]);
+        if (isset($index['names'][$key])) return (int) $index['names'][$key];
         // "Three Springs" for "Three Springs Inc.", "Straight" for "Straight Inc."
         $trimmed = trim(preg_replace('/\b(inc|llc|corp|corporation|company|co|ltd)\b\.?$/', '', $key));
         foreach ($index['names'] as $nk => $id) {
             $nk_trimmed = trim(preg_replace('/\b(inc|llc|corp|corporation|company|co|ltd)\b\.?$/', '', $nk));
-            if ($nk_trimmed !== '' && $nk_trimmed === $trimmed) return kop_operator_page_url($id);
+            if ($nk_trimmed !== '' && $nk_trimmed === $trimmed) return (int) $id;
         }
-        return '';
+        return 0;
     }
 }
 
