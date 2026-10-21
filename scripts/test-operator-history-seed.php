@@ -137,7 +137,8 @@ $check('a published history is kept', ($report[$d] ?? '') === 'kept' && $jd['ope
 $sequel = $by_name['Sequel TSI'] ?? null;
 $report = $sequel ? kop_operator_history_apply_seed($write_seed(array($sequel))) : array();
 list(, $js) = $sequel ? $op('Sequel TSI') : array(null, array());
-$check('the Sequel rewrite replaces the draft with the pull quotes added on the page', ($report['Sequel TSI'] ?? '') === 'replaced'
+// "same" once the site has applied it (the mirror then holds the rewrite already).
+$check('the Sequel rewrite replaces the draft with the pull quotes added on the page', in_array($report['Sequel TSI'] ?? '', array('replaced', 'same'), true)
     && ($js['operator']['history'] ?? null) === $sequel['history'] && ($js['operator']['historyStatus'] ?? '') === 'draft', json_encode($report));
 $tables = array_values(array_filter((array) ($sequel['history'] ?? array()), 'kop_operator_history_table_parse'));
 $check('the Sequel history has its four tables', count($tables) === 4, (string) count($tables));
