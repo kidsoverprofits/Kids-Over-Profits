@@ -90,6 +90,17 @@ $pdo->exec("CREATE TABLE wpdl_kop_facility_addresses AS SELECT * FROM m.wpdl_kop
 foreach (array('news_submissions', 'news_facility_links', 'news_facility_candidates', 'lawsuit_facility_links', 'facility_closure_reports') as $t) {
     $pdo->exec("CREATE TABLE $t AS SELECT * FROM m.$t");
 }
+// Once the move has run on the site the mirror no longer has the four records;
+// the checks below then look at what the real move left (its four schools,
+// their migration-filed articles and its log) instead of running it again.
+$site_log = $pdo->query("SELECT option_value FROM m.wpdl_options WHERE option_name = 'kop_ischools_migration_log'")->fetchColumn();
+$site_log = $site_log ? @unserialize($site_log) : null;
+$site_moved = is_array($site_log) && !empty($site_log['lines']);
+$site_schools = $site_news = array();
+if ($site_moved) {
+    $site_schools = $pdo->query("SELECT * FROM m.indigenous_schools WHERE id <= 4 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+    $site_news = $pdo->query("SELECT * FROM m.indigenous_school_news WHERE created_by = 'migration'")->fetchAll(PDO::FETCH_ASSOC);
+}
 $pdo->exec("DETACH DATABASE m");
 // SQLite forms of the two tables kop_ischools_install() makes in MySQL.
 $pdo->exec("CREATE TABLE indigenous_schools (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, name_key TEXT NOT NULL UNIQUE,
@@ -125,9 +136,22 @@ function count_rows(PDO $pdo, $sql, array $p = array()) {
 /* ---- The first move ------------------------------------------------------ */
 
 echo "First move\n";
-$before_links = count_rows($pdo, 'SELECT COUNT(*) FROM news_facility_links WHERE facility_id = 100211');
-check($before_links === 1, 'St. Paul\'s has its article link in the facility data before the move');
-kop_ischools_maybe_migrate();
+if ($site_moved) {
+    echo '       (ran on the site ' . gmdate('Y-m-d', (int) $site_log['time']) . "; checking what it left)\n";
+    foreach (array('indigenous_schools' => $site_schools, 'indigenous_school_news' => $site_news) as $t => $rows) {
+        foreach ($rows as $row) {
+            $cols = array_keys($row);
+            $pdo->prepare("INSERT INTO $t (" . implode(',', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')')
+                ->execute(array_values($row));
+        }
+    }
+    update_option('kop_ischools_migration_log', $site_log);
+    update_option('kop_ischools_migrated', '1');
+} else {
+    $before_links = count_rows($pdo, 'SELECT COUNT(*) FROM news_facility_links WHERE facility_id = 100211');
+    check($before_links === 1, 'St. Paul\'s has its article link in the facility data before the move');
+    kop_ischools_maybe_migrate();
+}
 $log = get_option('kop_ischools_migration_log');
 echo '       ' . implode("\n       ", $log['lines']) . "\n";
 check(get_option('kop_ischools_migrated') === '1', 'the move is marked done');
@@ -228,7 +252,11 @@ kop_render_ischools_admin();
 $screen = ob_get_clean();
 check(strpos($screen, 'Schools (5)') !== false && strpos($screen, 'Move here') !== false && strpos($screen, 'data-kop-facility-finder') !== false,
     'the screen lists the schools and offers the move by facility search');
-check(strpos($screen, 'First move') !== false && strpos($screen, 'Moved facility record 11605') !== false, 'the first move\'s log is shown');
+if (time() - (int) $log['time'] < 14 * DAY_IN_SECONDS) {
+    check(strpos($screen, 'First move') !== false && strpos($screen, 'Moved facility record 11605') !== false, 'the first move\'s log is shown');
+} else {
+    check(strpos($screen, 'First move') === false, 'the first move\'s log is not shown after two weeks');
+}
 $_GET = array('edit' => $sid);
 ob_start();
 kop_render_ischools_admin();

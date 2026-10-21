@@ -101,10 +101,23 @@ foreach (array('facilities_v2', 'wpdl_kop_facility_locations', 'wpdl_kop_operato
     'lawsuit_facility_links', 'facility_closure_reports') as $t) {
     $pdo->exec("CREATE TABLE $t AS SELECT * FROM m.$t");
 }
+// Once the move has run on the site the mirror no longer has the seven
+// records; the checks then look at what the real move left (its seven
+// programs and its log) instead of running it again.
+$site_log = $pdo->query("SELECT option_value FROM m.wpdl_options WHERE option_name = 'kop_ya_migration_log'")->fetchColumn();
+$site_log = $site_log ? @unserialize($site_log) : null;
+$site_moved = is_array($site_log) && !empty($site_log['lines']);
+$site_programs = $site_moved ? $pdo->query("SELECT * FROM m.young_adult_programs WHERE id <= 7 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC) : array();
 $pdo->exec('DETACH DATABASE m');
-// Version 3 of the Woodbury Facts table (dbDelta adds these on the site).
-$pdo->exec("ALTER TABLE wpdl_kop_woodbury_facts ADD COLUMN ya INTEGER NOT NULL DEFAULT 0");
-$pdo->exec("ALTER TABLE wpdl_kop_woodbury_facts ADD COLUMN ya_why TEXT");
+// Version 3 of the Woodbury Facts table (dbDelta adds these on the site; a
+// mirror synced since has them already).
+$wbf_cols = array_column($pdo->query("PRAGMA table_info(wpdl_kop_woodbury_facts)")->fetchAll(PDO::FETCH_ASSOC), 'name');
+if (!in_array('ya', $wbf_cols, true)) {
+    $pdo->exec("ALTER TABLE wpdl_kop_woodbury_facts ADD COLUMN ya INTEGER NOT NULL DEFAULT 0");
+}
+if (!in_array('ya_why', $wbf_cols, true)) {
+    $pdo->exec("ALTER TABLE wpdl_kop_woodbury_facts ADD COLUMN ya_why TEXT");
+}
 update_option('kop_woodbury_facts_db', '3');
 // SQLite form of the table kop_ya_install() makes in MySQL.
 $pdo->exec("CREATE TABLE young_adult_programs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, name_key TEXT NOT NULL UNIQUE,
@@ -139,6 +152,46 @@ function rows(PDO $pdo, $sql, array $p = array()) {
 
 $ids = array_keys(kop_ya_first_moves());
 $in = implode(',', $ids);
+if ($site_moved) {
+    echo 'The move ran on the site ' . gmdate('Y-m-d', (int) $site_log['time']) . "; checking what it left\n";
+    foreach ($site_programs as $row) {
+        $cols = array_keys($row);
+        $pdo->prepare('INSERT INTO young_adult_programs (' . implode(',', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')')
+            ->execute(array_values($row));
+    }
+    update_option('kop_ya_migration_log', $site_log);
+    update_option('kop_ya_migrated', '1');
+    $log = $site_log;
+    check(count(preg_grep('/^Moved facility record/', $log['lines'])) === 7, 'all seven moved');
+    foreach ($ids as $fid) {
+        $left = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2 WHERE id = ?', array($fid))
+            + rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_facility_locations WHERE facility_id = ?', array($fid))
+            + rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_facility_identity WHERE facility_id = ?', array($fid))
+            + rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_operator_facilities WHERE facility_id = ?', array($fid));
+        check($left === 0, "#$fid is out of the facility tables");
+    }
+    $progs = kop_ya_all($pdo, 'approved');
+    check(count($progs) === 7, 'seven young adult programs, listed');
+    $byname = array();
+    foreach ($progs as $p) {
+        $byname[$p['name_key']] = $p;
+    }
+    $fulshear = $byname[kop_ya_key('Fulshear Treatment to Transition – The Ranch')] ?? array('facts' => '[]', 'notes' => '');
+    $f = array_values(array_filter(kop_ya_facts($fulshear), function ($x) { return strpos($x['label'], 'Operator: InnerChange') === 0; }));
+    check($f && $f[0]['cites'][0]['label'] === 'July 2009' && (int) $f[0]['cites'][0]['page'] === 7, 'a cited note became a fact citing its page (Fulshear: Operator: InnerChange, July 2009 p. 7)');
+    check(rows($pdo, "SELECT COUNT(*) FROM wpdl_kop_woodbury_facts WHERE applied_fid IN ($in) OR (status IN ('pending','gone') AND facility_id IN ($in))") === 0,
+        'no Woodbury item still points at a moved record');
+    update_option('kop_ya_migration_log', null);
+    kop_ya_maybe_migrate();
+    check(get_option('kop_ya_migration_log') === null, 'the move runs only once');
+    ob_start();
+    kop_ya_render_public();
+    $html = ob_get_clean();
+    check(substr_count($html, 'class="kop-ya-program"') === 7, 'seven programs on the page');
+    check(strpos($html, 'Woodbury Reports, July 2009, p. 7') !== false, 'with their Woodbury sources');
+    echo $failed ? "\n$failed failed\n" : "\nAll checks passed\n";
+    exit($failed ? 1 : 0);
+}
 $docs = array();
 foreach ($pdo->query("SELECT id, json_data FROM facilities_v2 WHERE id IN ($in)")->fetchAll(PDO::FETCH_ASSOC) as $r) {
     $docs[(int) $r['id']] = json_decode($r['json_data'], true);
