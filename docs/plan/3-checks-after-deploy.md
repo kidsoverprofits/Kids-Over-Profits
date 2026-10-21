@@ -99,3 +99,5 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom.
     https://kidsoverprofits.org/wp-content/themes/child/js/sidebar-float.js should 404 (deleted by .cpanel.yml). Under 1025 the sidebar follows the content.
     Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.
+    On https://kidsoverprofits.org/facility/provo-canyon-school-ut/ at 1100+, the About text runs full width once the At a glance
+    rail ends (it was a 381px strip the whole way down), and About comes before Survivor testimony and History as before.

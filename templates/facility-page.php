@@ -623,7 +623,11 @@ get_header();
             </p>
         </aside>
 
-        <div class="kop-fp-body kop-fp-generated-body<?php echo $kop_fp_parts ? '' : ' kop-fp-reorder'; ?>">
+        <?php // A page without its own content puts About, the homes or campus, and the testimony first, then the
+        // company history. The sections print in that order (not CSS order on a flex column) so the text can wrap
+        // under the floated rail. A page with its own content keeps the order below.
+        $kop_fp_lead_first = !$kop_fp_parts; ?>
+        <div class="kop-fp-body kop-fp-generated-body">
 
             <p class="kop-fp-summary"<?php echo $kop_fp_edit('all', 'every field of this facility'); ?>><?php echo esc_html($page['summary']); ?></p>
 
@@ -667,6 +671,7 @@ get_header();
             </nav>
             <?php endif; ?>
 
+            <?php ob_start(); ?>
             <?php if ($kop_fp_has_ph) : $kop_fp_hist = $kop_fp_ph['history']; ?>
             <section class="kop-fp-section kop-op-history" id="<?php echo $kop_fp_id('history'); ?>">
                 <h2>History</h2>
@@ -696,7 +701,9 @@ get_header();
                 <?php endif; ?>
             </section>
             <?php endif; ?>
+            <?php $kop_fp_history_html = ob_get_clean(); if (!$kop_fp_lead_first) echo $kop_fp_history_html; ?>
 
+            <?php ob_start(); ?>
             <?php if ($kop_fp_homes) : ?>
             <section class="kop-fp-section kop-fp-homes-section" id="<?php echo $kop_fp_id('homes'); ?>">
                 <?php if ($kop_fp_is_program) : ?>
@@ -745,6 +752,7 @@ get_header();
                 </ul>
             </section>
             <?php endif; ?>
+            <?php $kop_fp_homes_html = ob_get_clean(); if (!$kop_fp_lead_first) echo $kop_fp_homes_html; ?>
 
             <?php if ($kop_fp_parts) :
                 // The post is the global post while its blocks render (embeds, the
@@ -787,6 +795,54 @@ get_header();
                 <?php endif; ?>
             </section>
             <?php endif; ?>
+
+            <?php ob_start(); ?>
+            <?php if ($kop_fp_has_testimony) : ?>
+            <section class="kop-fp-section kop-fp-testimony-section" id="<?php echo $kop_fp_id('testimony'); ?>"<?php echo $kop_fp_edit('testimony', 'survivor testimony'); ?>>
+                <?php echo $kop_fp_alias('testimony', 'testimony'); ?>
+                <h2><?php echo $kop_fp_icon('users'); ?><?php echo esc_html($kop_fp_title('testimony', 'Survivor testimony')); ?></h2>
+                <p class="kop-fp-testimony-lead">What people who lived or worked here say happened. Survivors' own words are published with their permission; forum accounts are what was posted publicly and are reported as claims, not findings.</p>
+                <?php if (isset($kop_fp_psec['testimony'])) $kop_fp_render_items($kop_fp_psec['testimony']['items']); ?>
+                <?php foreach ((array) ($page['testimony'] ?? array()) as $kop_fp_t) : ?>
+                    <figure class="kop-fp-testimony">
+                        <blockquote><?php foreach (preg_split('/\R\s*\R/', $kop_fp_t['text']) as $kop_fp_para) : ?><p><?php echo nl2br(esc_html(trim($kop_fp_para))); ?></p><?php endforeach; ?></blockquote>
+                        <figcaption><?php echo !empty($kop_fp_t['submitted']) ? 'Submitted by a survivor' : 'Survivor account'; ?><?php if ($kop_fp_t['date_label'] !== '') : ?>, shared <?php echo esc_html($kop_fp_t['date_label']); ?><?php endif; ?></figcaption>
+                    </figure>
+                <?php endforeach; ?>
+                <?php if (!empty($page['forum'])) : $kop_fp_forum = $page['forum']; ?>
+                    <h3 class="kop-fp-subhead">Reported on survivor forums</h3>
+                    <?php if (!empty($kop_fp_forum['incidents'])) : ?>
+                    <ol class="kop-fp-timeline kop-fp-forum">
+                        <?php foreach ($kop_fp_forum['incidents'] as $inc) : ?>
+                            <li>
+                                <?php if ($inc['when'] !== '' || $inc['kind'] !== '') : ?>
+                                    <p class="kop-fp-tl-head">
+                                        <?php if ($inc['when'] !== '') : ?><span class="kop-fp-tl-when"><?php echo esc_html($inc['when']); ?></span><?php endif; ?>
+                                        <?php if ($inc['kind'] !== '') : ?><span class="kop-fp-tl-kind"><?php echo esc_html($inc['kind']); ?></span><?php endif; ?>
+                                    </p>
+                                <?php endif; ?>
+                                <p class="kop-fp-tl-text"><?php echo esc_html($inc['text']); ?><?php if ($inc['source'] !== '') $kop_fp_sources(array($inc), 'span'); ?></p>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                    <?php endif; ?>
+                    <?php if (!empty($kop_fp_forum['leads'])) : ?>
+                    <ul class="kop-fp-notes">
+                        <?php foreach ($kop_fp_forum['leads'] as $kop_fp_lead) : ?><li><?php echo kop_facility_pages_cited_html($kop_fp_lead); ?></li><?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
+                    <?php if (!empty($kop_fp_forum['links'])) : ?>
+                    <ul class="kop-fp-records kop-fp-forum-links"<?php echo $kop_fp_edit('links', 'forum thread titles'); ?>>
+                        <?php foreach ($kop_fp_forum['links'] as $kop_fp_fl) : ?>
+                            <li><a href="<?php echo esc_url($kop_fp_fl['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($kop_fp_fl['label']); ?></a></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </section>
+            <?php endif; ?>
+            <?php $kop_fp_testimony_html = ob_get_clean(); ?>
+            <?php if ($kop_fp_lead_first) echo $kop_fp_homes_html . $kop_fp_testimony_html . $kop_fp_history_html; ?>
 
             <?php // Facts approved for this page and the draft write-up: administrators only, until the write-up is approved (inc/record-writeups.php).
             if (function_exists('kop_wu_admin_html')) echo kop_wu_admin_html((int) $page['id']); // Escaped inside. ?>
@@ -1162,50 +1218,7 @@ get_header();
             </section>
             <?php endif; ?>
 
-            <?php if ($kop_fp_has_testimony) : ?>
-            <section class="kop-fp-section kop-fp-testimony-section" id="<?php echo $kop_fp_id('testimony'); ?>"<?php echo $kop_fp_edit('testimony', 'survivor testimony'); ?>>
-                <?php echo $kop_fp_alias('testimony', 'testimony'); ?>
-                <h2><?php echo $kop_fp_icon('users'); ?><?php echo esc_html($kop_fp_title('testimony', 'Survivor testimony')); ?></h2>
-                <p class="kop-fp-testimony-lead">What people who lived or worked here say happened. Survivors' own words are published with their permission; forum accounts are what was posted publicly and are reported as claims, not findings.</p>
-                <?php if (isset($kop_fp_psec['testimony'])) $kop_fp_render_items($kop_fp_psec['testimony']['items']); ?>
-                <?php foreach ((array) ($page['testimony'] ?? array()) as $kop_fp_t) : ?>
-                    <figure class="kop-fp-testimony">
-                        <blockquote><?php foreach (preg_split('/\R\s*\R/', $kop_fp_t['text']) as $kop_fp_para) : ?><p><?php echo nl2br(esc_html(trim($kop_fp_para))); ?></p><?php endforeach; ?></blockquote>
-                        <figcaption><?php echo !empty($kop_fp_t['submitted']) ? 'Submitted by a survivor' : 'Survivor account'; ?><?php if ($kop_fp_t['date_label'] !== '') : ?>, shared <?php echo esc_html($kop_fp_t['date_label']); ?><?php endif; ?></figcaption>
-                    </figure>
-                <?php endforeach; ?>
-                <?php if (!empty($page['forum'])) : $kop_fp_forum = $page['forum']; ?>
-                    <h3 class="kop-fp-subhead">Reported on survivor forums</h3>
-                    <?php if (!empty($kop_fp_forum['incidents'])) : ?>
-                    <ol class="kop-fp-timeline kop-fp-forum">
-                        <?php foreach ($kop_fp_forum['incidents'] as $inc) : ?>
-                            <li>
-                                <?php if ($inc['when'] !== '' || $inc['kind'] !== '') : ?>
-                                    <p class="kop-fp-tl-head">
-                                        <?php if ($inc['when'] !== '') : ?><span class="kop-fp-tl-when"><?php echo esc_html($inc['when']); ?></span><?php endif; ?>
-                                        <?php if ($inc['kind'] !== '') : ?><span class="kop-fp-tl-kind"><?php echo esc_html($inc['kind']); ?></span><?php endif; ?>
-                                    </p>
-                                <?php endif; ?>
-                                <p class="kop-fp-tl-text"><?php echo esc_html($inc['text']); ?><?php if ($inc['source'] !== '') $kop_fp_sources(array($inc), 'span'); ?></p>
-                            </li>
-                        <?php endforeach; ?>
-                    </ol>
-                    <?php endif; ?>
-                    <?php if (!empty($kop_fp_forum['leads'])) : ?>
-                    <ul class="kop-fp-notes">
-                        <?php foreach ($kop_fp_forum['leads'] as $kop_fp_lead) : ?><li><?php echo kop_facility_pages_cited_html($kop_fp_lead); ?></li><?php endforeach; ?>
-                    </ul>
-                    <?php endif; ?>
-                    <?php if (!empty($kop_fp_forum['links'])) : ?>
-                    <ul class="kop-fp-records kop-fp-forum-links"<?php echo $kop_fp_edit('links', 'forum thread titles'); ?>>
-                        <?php foreach ($kop_fp_forum['links'] as $kop_fp_fl) : ?>
-                            <li><a href="<?php echo esc_url($kop_fp_fl['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($kop_fp_fl['label']); ?></a></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </section>
-            <?php endif; ?>
+            <?php if (!$kop_fp_lead_first) echo $kop_fp_testimony_html; ?>
 
             <?php if ($kop_fp_has_wiki) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('wiki'); ?>">

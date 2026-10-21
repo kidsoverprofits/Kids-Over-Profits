@@ -297,6 +297,15 @@ foreach ($picks as $id) {
     foreach ($m[1] as $sec) $sections_seen[$sec] = ($sections_seen[$sec] ?? 0) + 1;
     $check(sprintf('render %d %s', $id, $data['name']), $rendered && strpos($html, '<h1') !== false,
         sprintf('%.0f ms, %d KB, sections: %s', $data_s * 1000, strlen($html) / 1024, implode(',', $m[1]) ?: 'none'));
+    // A page without its own content prints About, homes/campus and testimony
+    // ahead of the rest in the HTML itself: the body is a plain block (never a
+    // flex column) so the text wraps under the floated At a glance rail.
+    if (!empty($kop_fp_lead_first)) {
+        $want = array_values(array_intersect(array('about', 'homes', 'campus', 'testimony', 'history', 'timeline'), $m[1]));
+        $got = array_values(array_intersect($m[1], $want));
+        $check("  $id lead sections first, body wraps under the rail", $got === $want && strpos($html, 'kop-fp-reorder') === false,
+            implode(',', $got));
+    }
     if (in_array('network', $m[1], true)) {
         // The map above the list (Phase 4.1): a hidden figure whose JSON is
         // the slice for this facility's name on the map.
