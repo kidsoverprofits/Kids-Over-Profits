@@ -55,6 +55,7 @@ define('OBJECT', 'OBJECT');
 define('MINUTE_IN_SECONDS', 60);
 define('HOUR_IN_SECONDS', 3600);
 define('DAY_IN_SECONDS', 86400);
+define('WEEK_IN_SECONDS', 604800);
 
 $GLOBALS['kop_test_query_vars'] = array();
 $GLOBALS['kop_test_transients'] = array();
@@ -239,6 +240,10 @@ require_once $theme . '/inc/rest-api.php';
 require_once $theme . '/inc/country-rest-api.php';
 require_once $theme . '/inc/heal-archive.php';
 require_once $theme . '/inc/facility-pages.php';
+// A past-only record's latest operator (kop_facility_pages_latest_operator())
+// reads the map's operator lines and the timeline's years, as on the site.
+require_once $theme . '/inc/profile-timeline.php';
+require_once $theme . '/inc/network-map.php';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -391,6 +396,47 @@ printf("%-22s %6d %6d %8d %8d %8d %6d\n\n", 'TOTAL', $totals['tiles'], $totals['
 echo "tiles: tiles on the page; alt: tiles whose card shows an alternate name;\n";
 echo "v2named: facilities_v2 records on the page with an alternate name; shown: of those, all names on their tile;\n";
 echo "missing: records whose names do not all reach a tile; opname: tiles showing an operator-only name.\n\n";
+
+// ---------------------------------------------------------------------------
+// Past-only records: the card names the latest operator the facility page does
+// ---------------------------------------------------------------------------
+
+/** The card carrying a facility id on its state/country page, or null. */
+function kop_test_card_for($fid) {
+    global $wpdb, $state_upper;
+    $key = (string) $wpdb->get_var($wpdb->prepare(
+        "SELECT location_key FROM wpdl_kop_facility_locations WHERE facility_id = %d AND location_key NOT IN ('', 'UNKNOWN') LIMIT 1", $fid));
+    if ($key === '') return null;
+    $feed = isset($state_upper[$key]) ? kop_state_collect_facilities($state_upper[$key]) : kop_country_collect_facilities(ucwords(strtolower($key)));
+    foreach (array_merge($feed['active'] ?? array(), $feed['closed'] ?? array()) as $tile) {
+        if (in_array($fid, array_map('intval', (array) ($tile['facility_ids'] ?? array())), true)) return $tile;
+    }
+    return null;
+}
+
+$card_checks = array(
+    // UHS bought Psychiatric Solutions, so it is the latest of North Spring's past companies.
+    array(12896, 'North Spring: past_operators start with Universal Health Services', function ($t) {
+        $past = kop_test_names($t['past_operators'] ?? array());
+        return $past && stripos($past[0], 'Universal Health Services') === 0;
+    }),
+    // The map's "operates (current)" line makes AMIkids the Operator.
+    array(11135, 'AMIkids Polk: operator_name is AMIkids', function ($t) {
+        return ($t['operator_name'] ?? '') === 'AMIkids';
+    }),
+);
+echo "Past-only cards:\n";
+foreach ($card_checks as $c) {
+    list($fid, $label, $test) = $c;
+    $tile = kop_test_card_for($fid);
+    if ($tile && $test($tile)) {
+        echo "  PASS $label\n";
+    } else {
+        $failures[] = "$label (" . ($tile ? json_encode(array($tile['operator_name'] ?? '', $tile['past_operators'] ?? array())) : 'no card') . ')';
+        echo "  FAIL $label\n";
+    }
+}
+echo "\n";
 
 foreach ($failures as $f) echo "FAIL $f\n";
 
