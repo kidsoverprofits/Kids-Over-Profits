@@ -37,10 +37,10 @@ harness is wrong; *?* = not looked at yet):
 - test-program-homes: "undo removes the record this tool made" (kept), "undo leaves no company link behind". ?
 - test-rename-merge: stale. Copper Canyon (#12155) was merged into Sedona Sky (#12161) as a rename on the site 2026-10-11; the test undoes that merge on its scratch copy from the merge log, and compares Sedona Sky's operator to its own pre-merge value (86e040d7). Passes.
 - test-search-aliases: stale. Copper Canyon merged into Sedona Sky, Bethel Boys Academy moved to Eagle Point's past names, Three Springs of Osceola merged into Kissimmee Youth Academy; samples replaced (0d24c688). Passes.
-- test-staff-former: fatal at line 86 (Undefined array key 0) after 22 passes. ?
+- test-staff-former: stale. The pass ran on the site (4,299 roles), so the dry run found nothing; the test undoes it on the copy from the site's kop_staff_former_log first, and the clean-up check takes exactly four entries (it took more when one record had several) (94a0c295). Passes.
 - test-state-feed-names: harness wrong. It now loads inc/heal-archive.php, stubs wp_upload_dir() and ignores @-silenced warnings (aa527fa0). Passes.
 - test-state-lists: "every candidate is a facilities_v2 record" (108 of 109). ?
 - test-submission-notify: stale expectations. f97643ac moved lawsuits and bills onto Submissions Review tabs; the fallback check hides the pages instead (aa527fa0). Passes.
-- test-wiki-staff: "0 wiki staff roles rewritten" then a fatal at line 254. ?
-- test-woodbury-facts: fatal at line 308 (no doc) after 20 passes. ?
+- test-wiki-staff: stale. The Former pass ran on the site; the test runs the pass's own undo on the copy first (557 put back, 551 rewritten again) (df2b0293). Passes.
+- test-woodbury-facts: test wrong. The corrected-staff check picked a record merged away since the facts file was built; it now skips those, as the main loop does (this commit). Passes.
 - test-young-adult-move: stale. The move ran on the site 2026-10-01 and production has the ya columns; the test checks what the real move left (86e9bc8b). Passes.
