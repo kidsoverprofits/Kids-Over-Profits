@@ -115,6 +115,27 @@ touch.
   to it.
 - The admin finder (`inc/facility-finder.php`) if admins need to pick one.
 
+**Its documents** (when records of the kind get a media library folder; young
+adult programs, 2026-10-21, are the example: a `document_folder_id` column)
+- Where the folder id lives: `documentFolderId` in the record's JSON, or a
+  column (add it with an ALTER beside the CREATE and bump the table's version).
+- `inc/woodbury-create.php` `kop_wbc_existing_target()` (finds or makes the
+  folder, under the kind's parent folder: `kop_wbc_record_tables()` for a
+  json_data table, a branch of its own otherwise), `kop_wbc_find_records()`
+  (the search), `kop_wbc_target_kinds()` (its label).
+- `inc/woodbury-mentions.php` `kop_wb_parse_target()` and
+  `kop_wb_target_token()` if Woodbury's "File under" ticks it (a token such
+  as `ya:<id>`), `kop_wb_place()` (its page), `kop_wb_also()`.
+- `inc/review-inbox/woodbury-mentions.php` `kop_rinbox_wb_record_kinds()` and
+  `kop_rinbox_wb_record()`.
+- `inc/doc-placement.php` `kop_dp_target()`, `kop_dp_target_url()` and the
+  `kop/v1/doc-place` search: the document pencil's "Move to".
+- Its page renders the folder with `kop_filebird_folder_shortcode()`
+  (`merge` = `name`, as facility pages), and its template enqueues
+  `css/document-library.css` and `js/document-library.js`.
+- Tests: `scripts/test-doc-placement.php`,
+  `scripts/review-inbox-tests/woodbury-reports.php`.
+
 **Open data and the app**
 - `inc/open-data.php` `kop_open_data_datasets()`: a dataset naming every
   column (never `SELECT *`); strip contact details and internal notes. Add the

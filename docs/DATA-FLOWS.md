@@ -240,8 +240,19 @@ request.
 
 ### Documents (FileBird, folder tags, folder links, doc types)
 
+- **Which folder is a record's:** a facility's `documentFolderId` or the
+  folder of its name (the facility index), a company's `documentFolderId` /
+  `kop_operators.document_folder_id`, a directory record's
+  `documentFolderId`, and `young_adult_programs.document_folder_id`. The
+  last is written by `kop_wbc_existing_target('ya', id)` (Woodbury filing,
+  the document pencil's "Move to": made under "Young Adult Programs" the
+  first time), `kop_ya_move_facility()` (the folder the facility's page
+  showed) and the moved-programs link (plan 4.3 item 13b). A folder that is
+  gone is replaced on the next filing (`kop_wbc_live_folder()`).
 - **Readers:**
   - facility page library (live)
+  - /young-adult-programs/ cards (`kop_ya_documents_html()`, live under
+    LiteSpeed: doc placement purges it, Woodbury filing waits for the TTL)
   - operator page counts (transient `kop_operator_folder_counts`, 1 hour,
     nothing flushes it)
   - `/documents/<type>/` (keyed by `kop_doc_types_rev`)

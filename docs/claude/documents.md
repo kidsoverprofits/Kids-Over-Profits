@@ -7,6 +7,8 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # A document on the wrong page: its tile's pencil (doc:<id>:h<page folder>) lists where it is filed and moves it to another
 # facility or a folder found by name, takes it off the page, or deletes it (inc/doc-placement.php; move/remove have Undo)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-placement.php   # real moves + undo on TEMP copies of the folder tables
+# "Move to" also takes a young adult program (y:<id>): its folder (young_adult_programs.document_folder_id, made under "Young
+# Adult Programs" the first time by kop_wbc_existing_target('ya', id)), shown on its card at /young-adult-programs/ (kop_ya_documents_html())
 # Many at once: "Select documents" on each library (js/inline-edit.js docSel; click, shift-click, "Pick all in this folder"), a bar at the
 # foot opens one docs:<id>h<folder>... dialog (move / take off / delete, kop_dp_apply_many(), one Undo). A hidden pencil needs [hidden] display:none
 python scripts/test-doc-select.py [--shots tmp/doc-select]   # pencils of closed folders, picking, the ref, no redraw loop; made-up page
