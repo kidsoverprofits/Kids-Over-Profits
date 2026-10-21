@@ -869,6 +869,22 @@ try {
                 $newStatus = $schema['pending'];
             }
 
+            if ($type === 'data' && $newStatus !== 'approved') {
+                // An approved suggestion leaves "approved" only by undoing what Approve wrote
+                // (api/lib-suggestion-undo.php); a status flip alone would leave the records changed.
+                $wasApproved = $pdo->prepare("SELECT id FROM $table WHERE status = 'approved' AND id IN (" . implode(',', array_fill(0, count($ids), '?')) . ")");
+                $wasApproved->execute(array_map('intval', $ids));
+                $undoPrefix = isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '';
+                foreach ($wasApproved->fetchAll(PDO::FETCH_COLUMN) as $aid) {
+                    $undone = kop_undo_suggested_edit($pdo, (int) $aid, $undoPrefix);
+                    if (!$undone['success']) {
+                        http_response_code(409);
+                        echo json_encode(['success' => false, 'error' => 'ID ' . (int) $aid . ': ' . $undone['error']]);
+                        exit;
+                    }
+                }
+            }
+
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $sql = "UPDATE $table SET {$schema['status_col']} = ? WHERE id IN ($placeholders)";
             $params = array_merge([$newStatus], $ids);

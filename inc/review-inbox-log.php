@@ -160,7 +160,8 @@ function kop_rinbox_log_native($type, array $before, $action) {
         $labels = array('approve' => 'Approve', 'reject' => 'Reject', 'publish' => 'Publish', 'promo' => 'File as industry PR');
         $styles = array('approve' => 'approve', 'reject' => 'reject', 'publish' => 'approve', 'promo' => 'reject');
         foreach ($before as $id => $b) {
-            $undo = !($type === 'data' && $action !== 'reject');
+            // A data approval is undone too: kop_rinbox_native_restore() puts back what it wrote (api/lib-suggestion-undo.php).
+            $undo = true;
             kop_rinbox_log_insert(array(
                 'source' => $type, 'item_key' => (string) (int) $id, 'title' => (string) ($b['title'] ?? ''),
                 'action' => $action, 'action_label' => $labels[$action] ?? $action, 'style' => $styles[$action] ?? '',

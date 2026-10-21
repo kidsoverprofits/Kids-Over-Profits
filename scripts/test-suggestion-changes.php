@@ -125,5 +125,87 @@ $check('approve: the record keeps its type and staff and has the note',
 $res = kop_suggestion_resolve_entries($pdo, array(array('identification' => array('name' => 'Zzq No Such Program Anywhere'))), '', 'wpdl_');
 $check('approve: a name with no record is left to become a new facility', empty($res['facilities'][0]['facility_id']) && !$res['all_on_file']);
 
+// Undo (api/lib-suggestion-undo.php), on the same scratch copy. The company save uses MySQL's INSERT IGNORE and GET_LOCK.
+class KOP_Sugg_Test_PDO extends PDO {
+    // A new facility's upserts never meet an existing row here, so "ON DUPLICATE KEY UPDATE ..." is an insert-or-ignore.
+    private function fix($sql) {
+        $sql = (string) $sql;
+        if (preg_match('/ON\s+DUPLICATE\s+KEY\s+UPDATE/i', $sql)) {
+            $sql = preg_replace('/^\s*INSERT\s+INTO\b/i', 'INSERT OR IGNORE INTO', preg_replace('/\s*ON\s+DUPLICATE\s+KEY\s+UPDATE.*$/is', '', $sql));
+        }
+        return preg_replace('/^\s*INSERT\s+IGNORE\b/i', 'INSERT OR IGNORE', $sql);
+    }
+    public function prepare(string $query, array $options = array()): PDOStatement|false { return parent::prepare($this->fix($query), $options); }
+    public function exec(string $statement): int|false { return parent::exec($this->fix($statement)); }
+}
+$mp = new KOP_Sugg_Test_PDO('sqlite:' . $db_path);
+$mp->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$mp->sqliteCreateFunction('GET_LOCK', function () { return 1; }, 2);
+$mp->sqliteCreateFunction('RELEASE_LOCK', function () { return 1; }, 1);
+$mp->sqliteCreateFunction('JSON_UNQUOTE', function ($v) { return $v; }, 1);
+$mp->sqliteCreateFunction('JSON_EXTRACT', function ($j, $p) {
+    $d = json_decode((string) $j, true);
+    foreach (explode('.', substr($p, 2)) as $k) { if (!is_array($d) || !array_key_exists($k, $d)) return null; $d = $d[$k]; }
+    return is_array($d) ? json_encode($d) : $d;
+}, 2);
+$mp->sqliteCreateFunction('NOW', function () { return gmdate('Y-m-d H:i:s'); }, 0);
+$sid = (int) $mp->query('SELECT MAX(id) FROM suggested_edits')->fetchColumn() + 1;
+$mp->prepare("INSERT INTO suggested_edits (id, master_id, edited_json_data, status, reason) VALUES (?, ?, '{}', 'approved', '')")->execute(array($sid, $name));
+$raw = function ($fid) use ($mp) { $st = $mp->prepare('SELECT json_data FROM facilities_v2 WHERE id = ?'); $st->execute(array($fid)); return $st->fetchColumn(); };
+$links = function ($fid) use ($mp) {
+    $a = $mp->prepare('SELECT COUNT(*) FROM wpdl_kop_facility_locations WHERE facility_id = ?'); $a->execute(array($fid));
+    $b = $mp->prepare('SELECT COUNT(*) FROM wpdl_kop_operator_facilities WHERE facility_id = ?'); $b->execute(array($fid));
+    return (int) $a->fetchColumn() . '/' . (int) $b->fetchColumn();
+};
+
+// 1. A mini-form note merged onto the record, then undone.
+$fid = (int) $row['id'];
+$before_raw = $raw($fid);
+$before_links = $links($fid);
+$res = kop_suggestion_resolve_entries($mp, $mini(array('notes' => array('Undo me.')))['facilities'], 'from /' . $state_name . '/', 'wpdl_');
+$snap = kop_sugg_undo_snapshot($mp, 'wpdl_', $res['facilities'], null, null);
+kop_v2_save_facility_entries($mp, 'wpdl_', $res['facilities'], array());
+kop_sugg_undo_store($sid, kop_sugg_undo_finish($mp, 'wpdl_', $snap));
+$check('undo: the approval changed the record', in_array('Undo me.', json_decode($raw($fid), true)['notes'], true));
+$u = kop_undo_suggested_edit($mp, $sid, 'wpdl_');
+$st = $mp->prepare('SELECT status FROM suggested_edits WHERE id = ?'); $st->execute(array($sid));
+$check('undo: the record is exactly as before, its links too, and the suggestion waits again',
+    $u['success'] && $raw($fid) === $before_raw && $links($fid) === $before_links && $st->fetchColumn() === 'pending', $u['message'] . $u['error']);
+$check('undo: twice is refused (no copy left)', !kop_undo_suggested_edit($mp, $sid, 'wpdl_')['success']);
+
+// 2. An approval that makes a new facility under a new company: Undo removes both.
+$mp->prepare("UPDATE suggested_edits SET status = 'approved' WHERE id = ?")->execute(array($sid));
+$n = (int) $mp->query('SELECT COUNT(*) FROM facilities_v2')->fetchColumn();
+$o = (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_operators')->fetchColumn();
+$j = (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_operator_facilities')->fetchColumn();
+$l = (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_facility_locations')->fetchColumn();
+$new = array(array('identification' => array('name' => 'Zzq Undo Test Program'), 'location' => array('city' => 'Erda', 'state' => 'UT'), 'facilityDetails' => array('type' => 'RTC')));
+$snap = kop_sugg_undo_snapshot($mp, 'wpdl_', $new, 'Zzq Undo Test Company', null);
+kop_v2_save_form_project($mp, 'wpdl_', 'Zzq Undo Test Company', array('facilities' => $new), 'companies', array('partial' => true, 'timestamp' => gmdate('c')));
+$snap = kop_sugg_undo_finish($mp, 'wpdl_', $snap);
+kop_sugg_undo_store($sid, $snap);
+$check('undo: the approval made one facility and one company', count($snap['created']) === 1 && $snap['operator_created']
+    && (int) $mp->query('SELECT COUNT(*) FROM facilities_v2')->fetchColumn() === $n + 1, json_encode(array($snap['created'], $snap['operator_created'])));
+$u = kop_undo_suggested_edit($mp, $sid, 'wpdl_');
+$check('undo: the new facility, its company and their links are gone',
+    $u['success'] && (int) $mp->query('SELECT COUNT(*) FROM facilities_v2')->fetchColumn() === $n
+    && (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_operators')->fetchColumn() === $o
+    && (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_operator_facilities')->fetchColumn() === $j
+    && (int) $mp->query('SELECT COUNT(*) FROM wpdl_kop_facility_locations')->fetchColumn() === $l, $u['message'] . $u['error']);
+
+// 3. A record changed after the approval is never written over.
+$mp->prepare("UPDATE suggested_edits SET status = 'approved' WHERE id = ?")->execute(array($sid));
+$res = kop_suggestion_resolve_entries($mp, $mini(array('notes' => array('Second note.')))['facilities'], 'from /' . $state_name . '/', 'wpdl_');
+$snap = kop_sugg_undo_snapshot($mp, 'wpdl_', $res['facilities'], null, null);
+kop_v2_save_facility_entries($mp, 'wpdl_', $res['facilities'], array());
+kop_sugg_undo_store($sid, kop_sugg_undo_finish($mp, 'wpdl_', $snap));
+$later = json_decode($raw($fid), true);
+$later['notes'][] = 'Someone edited it afterwards.';
+$mp->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($later), $fid));
+$u = kop_undo_suggested_edit($mp, $sid, 'wpdl_');
+$check('undo: refused when the record changed since, naming it, and nothing is written',
+    !$u['success'] && strpos($u['error'], $name) !== false && in_array('Someone edited it afterwards.', json_decode($raw($fid), true)['notes'], true), $u['error']);
+$mp = null;
+
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

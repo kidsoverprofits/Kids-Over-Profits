@@ -351,7 +351,16 @@ function kop_rinbox_native_restore($type, $key, $status) {
     $t = kop_rinbox_native_types()[$type];
     $allowed = array('submitted', 'pending', 'approved', 'published', 'rejected', 'promotional', 'draft');
     if (!in_array($status, $allowed, true)) throw new RuntimeException('Unknown status to go back to.');
-    if (!kop_rinbox_native_row($type, $key)) throw new RuntimeException('That submission is gone.');
+    $row = kop_rinbox_native_row($type, $key);
+    if (!$row) throw new RuntimeException('That submission is gone.');
+    if ($type === 'data' && (string) $row['status'] === 'approved' && $status !== 'approved') {
+        // Undo an approval: the records it changed go back first (api/lib-suggestion-undo.php), then the status.
+        require_once get_stylesheet_directory() . '/api/lib-suggested-edits.php';
+        $res = kop_undo_suggested_edit(kop_rinbox_pdo(), (int) $key, isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '');
+        if (!$res['success']) throw new RuntimeException($res['error']);
+        if ($status !== 'pending') kop_rinbox_pdo()->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ? WHERE id = ?")->execute(array($status, (int) $key));
+        return array('message' => $res['message']);
+    }
     kop_rinbox_pdo()->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ? WHERE id = ?")->execute(array($status, (int) $key));
     // A reject had dropped the article's case links; going back brings them back.
     kop_rinbox_native_resync($type, (int) $key, $status);
