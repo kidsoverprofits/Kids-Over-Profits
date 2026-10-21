@@ -11,11 +11,15 @@
  *   finding (highlight-summaries)        /severe-reports/#finding-<id>, the plain summary
  *                                        and the state's own words, uncut in meaning
  *   reporting (featured-nominations)     the article, its picture, the featured note
- *   money (federal-funding / add)        the facility page, the entry as it reads there
  *   numbers                              one card: the week's counts by queue
  *
- * Bulk work (drive-docs, doc-types, fornits, woodbury, merges) never makes a
- * card. At most kop_vsoc_per_angle (8) cards per angle, newest first. A card
+ * Only news makes a card: the item's own date (the closure, else its article;
+ * the filing; the bill's last action, else its introduction; the finding; the
+ * article) must fall within kop_vsoc_max_age_days (60) of the roundup's end,
+ * and an item with no date makes none (owner, 2026-10-21: approving a 1986
+ * closure this week is not news). So public money, which has only years,
+ * makes no card. Bulk work (drive-docs, doc-types, fornits, woodbury, merges)
+ * never makes a card. At most kop_vsoc_per_angle (8) cards per angle, newest first. A card
  * key is '<angle>:<id>', so a week's cards never repeat an item.
  * Tested by scripts/test-volunteer-projects.php ("Social media roundup").
  */
@@ -32,7 +36,6 @@ function kop_vsoc_angles() {
         'bill'      => array('label' => 'Bill', 'source' => 'legislation', 'actions' => array('approve')),
         'finding'   => array('label' => 'State finding', 'source' => 'highlight-summaries', 'actions' => array('approved')),
         'reporting' => array('label' => 'Essential reporting', 'source' => 'featured-nominations', 'actions' => array('feature')),
-        'money'     => array('label' => 'Public money', 'source' => 'federal-funding', 'actions' => array('add')),
     );
 }
 
@@ -81,6 +84,20 @@ function kop_vsoc_facility($fid) {
     return array((string) $r['name'], $place, preg_match('#^https?://#', $url) ? $url : '');
 }
 
+/**
+ * Whether a date ('Y', 'Y-m' or 'Y-m-d'; a part date counts as its last day)
+ * is within kop_vsoc_max_age_days of $to. No date, or one that does not read, is not.
+ */
+function kop_vsoc_recent($d, $to) {
+    if (!preg_match('/^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/', trim((string) $d), $m)) return false;
+    $y = (int) $m[1];
+    $mo = isset($m[2]) && $m[2] !== '' ? (int) $m[2] : 12;
+    $day = isset($m[3]) && $m[3] !== '' ? (int) $m[3] : (int) gmdate('t', gmmktime(0, 0, 0, $mo, 1, $y));
+    $at = gmmktime(23, 59, 59, $mo, $day, $y);
+    $days = max(1, (int) apply_filters('kop_vsoc_max_age_days', 60));
+    return $at >= strtotime($to . ' UTC') - $days * DAY_IN_SECONDS;
+}
+
 function kop_vsoc_date($d) {
     $t = $d ? strtotime((string) $d) : false;
     return $t ? gmdate('F j, Y', $t) : '';
@@ -98,7 +115,8 @@ function kop_vsoc_cards($from, $to) {
             } catch (Throwable $e) {
                 $c = null;   // the records database unreachable, or the item gone
             }
-            if (!$c) continue;
+            if (!$c || !kop_vsoc_recent($c['dated'] ?? '', $to)) continue;   // old news approved this week is still old
+            unset($c['dated']);
             $c += array('url' => '', 'url_label' => '', 'summary' => '', 'quote' => '', 'image' => '', 'when' => '');
             $c['key'] = $angle . ':' . $row['item_key'];
             $c['angle'] = $angle;
@@ -121,7 +139,14 @@ function kop_vsoc_card_closure($id) {
     $f = kop_vsoc_facility((int) $r['facility_id']);
     if (!$f) return null;
     $when = trim((string) $r['closure_date']);
+    $article = '';
+    if ((int) $r['news_id']) {
+        $st = $pdo->prepare('SELECT publication_date FROM news_submissions WHERE id = ?');
+        $st->execute(array((int) $r['news_id']));
+        $article = (string) $st->fetchColumn();
+    }
     return array(
+        'dated' => $when !== '' ? $when : $article,
         'fact' => $f[0] . ($f[1] !== '' ? ' (' . $f[1] . ')' : '') . ' has closed' . ($when !== '' ? ', ' . $when : '') . '.',
         'url' => $f[2], 'url_label' => 'Our page on ' . $f[0],
         'quote' => (int) $r['quote_found'] ? kop_vsoc_cut((string) $r['quote'], 400) : '',
@@ -137,6 +162,7 @@ function kop_vsoc_card_lawsuit($id) {
     $where = trim((string) ($r['court'] ?: $r['jurisdiction']));
     $filed = kop_vsoc_date($r['filing_date']);
     return array(
+        'dated' => (string) $r['filing_date'],
         'fact' => trim((string) $r['case_name']) . ($where !== '' ? ', ' . $where : '') . ($filed !== '' ? ', filed ' . $filed : '') . '.',
         'url' => home_url('/lawsuits/#lawsuit-' . (int) $r['id']), 'url_label' => 'The case on our lawsuits page',
         'summary' => kop_vsoc_cut((string) $r['summary'], 600), 'when' => $filed,
@@ -151,6 +177,7 @@ function kop_vsoc_card_bill($id) {
     if (!$r) return null;
     $name = trim(trim((string) $r['jurisdiction']) . ' ' . trim((string) $r['bill_number']));
     return array(
+        'dated' => (string) ($r['last_action_date'] ?: $r['introduced_date']),
         'fact' => $name . ': ' . trim((string) $r['bill_title']) . (trim((string) $r['status']) !== '' ? ' (' . trim((string) $r['status']) . ')' : '') . '.',
         'url' => home_url('/legislation/#bill-' . (int) $r['id']), 'url_label' => 'The bill on our legislation page',
         'summary' => kop_vsoc_cut((string) $r['summary'], 600),
@@ -170,6 +197,7 @@ function kop_vsoc_card_finding($id) {
     $name = trim((string) $h['facility_name']);
     $when = kop_vsoc_date($h['finding_date']);
     return array(
+        'dated' => (string) $h['finding_date'],
         'fact' => trim((string) $h['state']) . ' inspectors\' finding at ' . $name . ($when !== '' ? ', ' . $when : '') . '.',
         'url' => function_exists('kop_ih_severe_page_url') ? kop_ih_severe_page_url((int) $h['id']) : home_url('/severe-reports/#finding-' . (int) $h['id']),
         'url_label' => 'The finding on our serious findings page',
@@ -187,27 +215,11 @@ function kop_vsoc_card_reporting($news_id) {
     $img = function_exists('kop_news_image') ? kop_news_image((int) $r['id'], (string) $r['article_url']) : null;
     $when = kop_vsoc_date($r['publication_date']);
     return array(
+        'dated' => (string) $r['publication_date'],
         'fact' => '"' . trim((string) $r['article_title']) . '"' . (trim((string) $r['publication_name']) !== '' ? ', ' . trim((string) $r['publication_name']) : '') . ($when !== '' ? ', ' . $when : '') . '.',
         'url' => function_exists('kop_feat_url') ? kop_feat_url() : home_url('/essential-reporting/'), 'url_label' => 'Our Essential reporting page',
         'summary' => kop_vsoc_cut(trim((string) $r['note']) !== '' ? (string) $r['note'] : (string) $r['summary'], 600),
         'image' => is_array($img) && ($img['kind'] ?? '') === 'photo' ? (string) $img['src'] : '', 'when' => $when,
-    );
-}
-
-function kop_vsoc_card_money($key) {
-    if (!function_exists('kop_ffund_proposals')) return null;
-    $p = kop_ffund_proposals()[$key] ?? null;
-    $d = function_exists('kop_ffund_decisions') ? (kop_ffund_decisions()[$key] ?? array()) : array();
-    if (!$p || ($d['decision'] ?? '') !== 'applied' || !empty($d['filed']) || !(int) ($d['facility_id'] ?? 0)) return null;
-    $f = kop_vsoc_facility((int) $d['facility_id']);
-    if (!$f) return null;
-    $entries = function_exists('kop_ffund_entries') ? kop_ffund_entries($key, $p) : (array) $p['entries'];
-    $lines = array();
-    foreach ($entries as $e) if (trim((string) ($e['detail'] ?? '')) !== '') $lines[] = trim((string) $e['detail']);
-    if (!$lines) return null;
-    return array(
-        'fact' => $f[0] . ($f[1] !== '' ? ' (' . $f[1] . ')' : '') . ' is paid with public money.',
-        'url' => $f[2], 'url_label' => 'Our page on ' . $f[0], 'summary' => kop_vsoc_cut(implode(' ', $lines), 600),
     );
 }
 

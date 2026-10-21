@@ -446,7 +446,17 @@ $bill = $one("SELECT id FROM legislation WHERE publication_status = 'published' 
 $hs = $one("SELECT s.highlight_id FROM inspection_highlight_summaries s JOIN inspection_highlights h ON h.id = s.highlight_id JOIN inspection_facilities f ON f.id = h.facility_id
     WHERE s.status = 'approved' AND h.status = 'approved' ORDER BY s.highlight_id DESC LIMIT 1");
 $feat = $one("SELECT f.news_id FROM news_featured f JOIN news_submissions n ON n.id = f.news_id WHERE n.status IN ('approved', 'published') ORDER BY f.news_id DESC LIMIT 1");
+// Only news makes a card: give these their own recent dates, and keep one old closure approved this week.
+$recent = gmdate('Y-m-d', time() - 10 * 86400);
+$cl_old = $one("SELECT r.id FROM facility_closure_reports r JOIN facilities_v2 f ON f.id = r.facility_id WHERE r.status = 'applied' AND r.id <> " . (int) $cl . " ORDER BY r.id DESC LIMIT 1");
+$pdo->exec("UPDATE facility_closure_reports SET closure_date = '$recent' WHERE id = " . (int) $cl);
+$pdo->exec("UPDATE facility_closure_reports SET closure_date = '1998-09' WHERE id = " . (int) $cl_old);
+$pdo->exec("UPDATE lawsuits SET filing_date = '$recent' WHERE id = " . (int) $ls);
+$pdo->exec("UPDATE legislation SET last_action_date = '$recent' WHERE id = " . (int) $bill);
+$pdo->exec("UPDATE inspection_highlights SET finding_date = '$recent' WHERE id = " . (int) $hs);
+$pdo->exec("UPDATE news_submissions SET publication_date = '$recent' WHERE id = " . (int) $feat);
 $log('closure', 'apply', $cl, 2);
+$log('closure', 'apply', $cl_old, 1);             // approved this week, closed in 1998
 $log('lawsuit', 'approve', $ls, 3);
 $log('lawsuit', 'approve', $ls_old, 10);           // the week before
 $log('legislation', 'approve', $bill, 1);
@@ -471,6 +481,9 @@ $check('a finding carries its approved plain summary and the state\'s words', $b
     && strpos($byk['finding']['url'], '#finding-' . $hs) !== false);
 $check('a closure links the facility page', strpos($byk['closure']['url'], 'example.test/') !== false && strpos($byk['closure']['fact'], 'has closed') !== false, $byk['closure']['url']);
 $check('the week in numbers counts, leaving out what was undone', strpos($byk['numbers']['summary'], '2 news stories added') !== false, $byk['numbers']['summary']);
+$check('an item from more than two months ago makes no card, however recently approved', !in_array('closure:' . $cl_old, array_column($cards, 'key'), true));
+$check('a date reads as its last day; no date is not recent', kop_vsoc_recent(gmdate('Y-m'), $to) && !kop_vsoc_recent('2014', $to) && !kop_vsoc_recent('', $to)
+    && !kop_vsoc_recent(gmdate('Y-m-d', time() - 70 * 86400), $to) && kop_vsoc_recent(gmdate('Y-m-d', time() - 50 * 86400), $to));
 $check('a quiet week makes no cards', kop_vsoc_cards($at(40), $at(33)) === array());
 
 $check('a roundup is always one person\'s', strpos($throws(function () { kop_vsoc_make_roundup(0); }), 'Pick who') !== false);
