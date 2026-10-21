@@ -591,6 +591,33 @@ function kop_ya_maybe_migrate() {
 }
 add_action('admin_init', 'kop_ya_maybe_migrate', 20);
 
+/**
+ * Programs added offline (seeds/young-adult-programs.json), run with the
+ * template assignments. Each is added once: a program already on file under
+ * that name or one of its other names is left as it is. Returns the new ids.
+ */
+function kop_ya_apply_seeds() {
+    $done = array();
+    $path = get_stylesheet_directory() . '/seeds/young-adult-programs.json';
+    $pdo = kop_ya_pdo();
+    $entries = file_exists($path) ? json_decode((string) file_get_contents($path), true) : null;
+    if (!$pdo || !is_array($entries)) {
+        return $done;
+    }
+    try {
+        kop_ya_install($pdo);
+        foreach ($entries as $f) {
+            if (!is_array($f) || kop_ya_find_by_name($pdo, $f['name'] ?? '')) {
+                continue;
+            }
+            $done[] = kop_ya_save($pdo, $f + array('review' => 'approved'), 0, 'seed');
+        }
+    } catch (Throwable $e) {
+        error_log('kop_ya_apply_seeds: ' . $e->getMessage());
+    }
+    return $done;
+}
+
 /* ---- The page -------------------------------------------------------- */
 
 function kop_ya_fact_groups() {

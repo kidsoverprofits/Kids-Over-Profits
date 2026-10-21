@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Arabella House",
+    "other_names": "Linden Oaks at Arabella House",
+    "city": "Naperville",
+    "state": "IL",
+    "country": "United States",
+    "ages": "",
+    "program_type": "Eating disorder residential home",
+    "run_by": "Linden Oaks",
+    "opened": null,
+    "closed": 2012,
+    "status": "Closed",
+    "notes": "Linden Oaks's home in Naperville for women with eating disorders, a step between intensive treatment and living at home; residents had to have been through treatment first, and the house held eight women at a time (Daily Herald, 2010).\n\nDescribed as Linden Oaks's residential care home for women with eating disorders (Patch).\n\nClosed in 2012 while Linden Oaks stayed open (public data submission, 2026-10-04).\n\nAdded 2026-10-21 from the Linden Oaks record (seeds/young-adult-programs.json): filed as a young adult program because every source describes it as serving women.",
+    "links": "Daily Herald, 2010 | https://www.dailyherald.com/20100207/lifestyle/napervilles-arabella-house-helps-women-with-eating-disorders/\nPatch | https://patch.com/illinois/naperville/an--shut-up-skinny-bitches-author-to-hold-book-signinea2c114b36",
+    "source": "Linden Oaks record (facility 100402)"
+  }
+]

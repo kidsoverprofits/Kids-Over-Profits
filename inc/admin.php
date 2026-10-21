@@ -2570,6 +2570,7 @@ function kop_apply_template_assignments() {
     $summary['names']        = kop_apply_name_correction_seeds();
     $summary['directory_folders'] = kop_apply_directory_folder_links();
     $summary['new_facilities'] = kop_apply_new_facility_seeds();
+    $summary['young_adult']  = function_exists('kop_ya_apply_seeds') ? kop_ya_apply_seeds() : array();
     $summary['staff_dedupe'] = kop_apply_staff_dedupe();
     if (function_exists('kop_facility_v2_request_sync')) {
         kop_facility_v2_request_sync();   // before the write switch the seeds above edit the legacy tables
@@ -2644,7 +2645,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '132';
+    $version = '133';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
