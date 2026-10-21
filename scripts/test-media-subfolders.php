@@ -94,6 +94,21 @@ foreach ($spec['folders'] as $e) {
     if ($id) $existing[] = $e['parent'] . '/' . $e['name'];
 }
 
+// What the site has done since: the fixes' folders may exist already, and documents may have been deleted
+// (they are left out of the checks below).
+$fix_missing = array();
+foreach (array(array(0, 'Mel Blount Youth Home'), array(61, '1970s')) as $f) {
+    if (!$pdo->query("SELECT COUNT(*) FROM wpdl_fbv WHERE parent = {$f[0]} AND name = " . $pdo->quote($f[1]))->fetchColumn()) $fix_missing[] = $f[1];
+}
+$alive = array_flip(array_map('intval', $pdo->query("SELECT ID FROM m.wpdl_posts WHERE post_type = 'attachment'")->fetchAll(PDO::FETCH_COLUMN)));
+// A planned subfolder that does not exist is made only while one of its documents still waits in the parent.
+$unneeded_keys = array();
+foreach ($spec['folders'] as $e) {
+    if (in_array($e['parent'] . '/' . $e['name'], $existing, true)) continue;
+    $ids = array_map('intval', $e['attachments']) ?: array(0);
+    if (!$pdo->query('SELECT COUNT(*) FROM wpdl_fbv_attachment_folder WHERE folder_id = ' . (int) $e['parent'] . ' AND attachment_id IN (' . implode(',', $ids) . ')')->fetchColumn()) $unneeded_keys[$e['parent'] . '/' . $e['name']] = true;
+}
+
 // The same order as kop_apply_template_assignments(): folder fixes, then subfolders.
 $fixes = kop_apply_media_folder_fixes();
 $folders_after_fixes = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_fbv")->fetchColumn();
@@ -105,17 +120,20 @@ echo count($done) . " actions, $created folders created\n";
 check('filings are moved, not added or lost', (int) $pdo->query("SELECT COUNT(*) FROM wpdl_fbv_attachment_folder")->fetchColumn() === $before);
 // The fixes may create a planned subfolder first (a move into Hyde / News
 // Clippings / 1970s), so the two passes together create what did not exist.
-check('the fixes create the two folders they name (Mel Blount, 1970s)', $created_by_fixes === 2, "created $created_by_fixes");
+check('the fixes create the folders they name that did not exist (' . (implode(', ', $fix_missing) ?: 'none') . ')', $created_by_fixes === count($fix_missing), "created $created_by_fixes");
 check('together, one new folder per planned subfolder that did not exist',
-    $created + $created_by_fixes - 1 === count($spec['folders']) - count($existing),
-    "subfolders created $created, fixes created $created_by_fixes, planned " . count($spec['folders']) . ', existing ' . count($existing));
+    // (Mel Blount Youth Home is a fix's folder, not a planned subfolder; 1970s is both.)
+    $created + $created_by_fixes - (in_array('Mel Blount Youth Home', $fix_missing, true) ? 1 : 0) === count($spec['folders']) - count($existing) - count($unneeded_keys),
+    "subfolders created $created, fixes created $created_by_fixes, planned " . count($spec['folders']) . ', existing ' . count($existing) . ", nothing left to file in " . count($unneeded_keys));
 check('the folder table grew by exactly that', (int) $pdo->query("SELECT COUNT(*) FROM wpdl_fbv")->fetchColumn() === $folders_after_fixes + $created);
 
 $misplaced = array();
 foreach ($spec['folders'] as $e) {
     $child = $pdo->query("SELECT id FROM wpdl_fbv WHERE parent = " . (int) $e['parent'] . " AND LOWER(name) = " . $pdo->quote(strtolower($e['name'])))->fetchAll(PDO::FETCH_COLUMN);
+    if (!$child && isset($unneeded_keys[$e['parent'] . '/' . $e['name']])) continue;
     if (count($child) !== 1) { $misplaced[] = $e['name'] . ' (' . count($child) . ' folders)'; continue; }
     foreach ($e['attachments'] as $aid) {
+        if (!isset($alive[(int) $aid])) continue;
         $in_parent = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_fbv_attachment_folder WHERE folder_id = " . (int) $e['parent'] . " AND attachment_id = " . (int) $aid)->fetchColumn();
         $in_child  = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_fbv_attachment_folder WHERE folder_id = " . (int) $child[0] . " AND attachment_id = " . (int) $aid)->fetchColumn();
         if ($in_parent || !$in_child) $misplaced[] = $e['name'] . ':' . $aid;
@@ -141,6 +159,10 @@ $expect = array(
     11142 => '61/1970s',
 );
 foreach ($expect as $aid => $where) {
+    if (!isset($alive[$aid])) {
+        echo "SKIP document $aid: deleted on the site\n";
+        continue;
+    }
     $got = $folders_of($aid);
     // Parent ids of the state folders come from the mirror; compare names and
     // the parent only where the test names it exactly.
