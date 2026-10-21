@@ -3086,3 +3086,36 @@ had and keeps its numbers (bf25d805); the era check asks for a year only when th
   The samples went stale: the scan itself created Silver Oak Academy (#100185) and Walker's Point Youth and Family Center
   (#100184) on 2026-09-29, and kop_facdisc_near_duplicate() rightly finds them. Fixed in 40a7b516: the new name is made up
   (Larkspur Hollow Academy), and the two now check that a record the scan made is found again (Zion Hills Academy still new).
+
+## 5. Tests failing on main, full run (finished 2026-10-20)
+
+Full run of all 126 tests on the 2026-10-20 mirror (main at 95cde58d). Cause: *stale* = the sample changed in the
+data, *code* = the code or the test's own harness was wrong.
+
+- test-auto-connect: stale. The site's hourly pass has connected all it can; the test seeds 20 Woodbury pages, 50 Drive Docs ties and a second Rite of Passage company row (f07f18f1). Passes.
+- test-citation-cleanup: test too broad. Woodbury Reports issues are news items since the SCIAD import (2026-10-12), so News coverage names the outlet, and a staff member's past job is at Woodbury Reports; neither is citation wording (a08d95f3). Passes.
+- test-facility-eras: code wrong. kop_facility_eras_build() dropped a second item with the same words on the same record (Viewpoint Center's two identical incident lines cited to two wiki pages), so the cut page showed 6 of 7; it now drops only the same item on another record of the line (e789320a). Passes; facility-pages, operator-pages, name-eras, rename-merge, inline-edit still pass.
+- test-indigenous-schools: stale. The move ran on the site 2026-09-30, so the four source records are gone; the test now checks what the real move left (86e9bc8b). Passes.
+- test-inspection-rollup: stale. The mirror holds production's inspection_report_counts now; the check is that the mirror's counts are unchanged (f07f18f1). Passes.
+- test-investors: stale. Company #500017 gained two investors (CIC Partners, Cressey & Company); the counts follow the entries found (447e0960). Passes.
+- test-kop-tools-menu: test harness wrong. It stubbed only the 8 screens it knew in 2026-09; screens now count when the theme defines their function and adds their submenu (091022a3). Passes.
+- test-name-under-operator: stale. 13678's past names were edited on the site ("Three Springs New Direction", "Three Springs Turning Point - Girls"), and Auldern Academy (#11939) gained "Three Springs of North Carolina", already a past name of #11903, so by the settle rule neither is listed under it. Expectations updated; which program carried the name is a new item in docs/RESEARCH-TASKS.md (283731c8). Passes.
+- test-nc-inspection-cleanup: stale. The plan ran on the site 2026-10-06; the test checks what it left when no planned row remains (f07f18f1). Passes.
+- test-network-renames: stale. The rename merge gave Copper Canyon 1998-2014 and Sedona Sky 2014-2025, so no overlap; 12 of 93 researched years in kop-data's network/rename-candidates.json are for lines no longer on the map (merged pairs), now counted, not failed (5b1d8185). Passes.
+- test-news-archive: harness wrong. archive.js is read from the kop-send-to-kop checkout; the split copies every column but archive_url and skips the resync (2e870308). Passes.
+- test-news-post-import: stale. The import ran on the site; the checks count its rows, and the row checks now cover them (56a561a5). Passes.
+- test-open-data: environment. The portable PHP needs `-d extension=zip`; passes with it.
+- test-operator-history-seed: stale. The Sequel rewrite is on the site already, so the seed reports "same"; accepted (596f211a). Passes.
+- test-people: harness wrong + test too strict. The map builder moved to kop-pipeline (run from there now); Robert B. and Robert Walter Lichfield are rightly two ids (different middle names) (b697895a). Passes.
+- test-post-text-fixes: stale. All eight fixes are applied on the site (kop_post_text_fixes_done); applied ones are checked as applied, the new text read as later fixes to the same page left it (88a3d4c0). Passes.
+- test-program-homes-convert: stale. The site converted 15 companies on 2026-10-09; the test undoes them on its copy first, and compares documents rather than MySQL's JSON spacing (f7895df6). Passes.
+- test-program-homes: stale. The site made #100284 Newport Academy on 2026-10-03, which the tool rightly reuses by name; the made-record case now uses a made-up name (62ebabd9). Passes.
+- test-rename-merge: stale. Copper Canyon (#12155) was merged into Sedona Sky (#12161) as a rename on the site 2026-10-11; the test undoes that merge on its scratch copy from the merge log, and compares Sedona Sky's operator to its own pre-merge value (86e040d7). Passes.
+- test-search-aliases: stale. Copper Canyon merged into Sedona Sky, Bethel Boys Academy moved to Eagle Point's past names, Three Springs of Osceola merged into Kissimmee Youth Academy; samples replaced (0d24c688). Passes.
+- test-staff-former: stale. The pass ran on the site (4,299 roles), so the dry run found nothing; the test undoes it on the copy from the site's kop_staff_former_log first, and the clean-up check takes exactly four entries (it took more when one record had several) (94a0c295). Passes.
+- test-state-feed-names: harness wrong. It now loads inc/heal-archive.php, stubs wp_upload_dir() and ignores @-silenced warnings (aa527fa0). Passes.
+- test-state-lists: code gap. The State Lists import stored candidate ids as built, while the filings and federal funding queues follow merges; #100103 was merged since the export. The import now follows merges and the test loads the live merge map (08ac3ad5). Passes.
+- test-submission-notify: stale expectations. f97643ac moved lawsuits and bills onto Submissions Review tabs; the fallback check hides the pages instead (aa527fa0). Passes.
+- test-wiki-staff: stale. The Former pass ran on the site; the test runs the pass's own undo on the copy first (557 put back, 551 rewritten again) (df2b0293). Passes.
+- test-woodbury-facts: test wrong. The corrected-staff check picked a record merged away since the facts file was built; it now skips those, as the main loop does (d8126f68). Passes.
+- test-young-adult-move: stale. The move ran on the site 2026-10-01 and production has the ya columns; the test checks what the real move left (86e9bc8b). Passes.
