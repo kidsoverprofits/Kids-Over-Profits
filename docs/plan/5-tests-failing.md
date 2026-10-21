@@ -24,8 +24,7 @@ harness is wrong; *?* = not looked at yet):
 - test-media-subfolders: 5 checks (Mel Blount / 1970s folders, documents 9609, 9610 under 150/Aspen Achievement Academy). ?
 - test-name-under-operator: Three Springs Inc. lists 13678 / 11903 with their old names. ?
 - test-nc-inspection-cleanup: "every plan row matches the mirror" (merges 6576, 6577, ... changed or gone) and 3 more. ?
-- test-network-renames: "the overlap is flagged", "saving 2014 splits the years: Copper Canyon 1998-2014", "the
-  researched years load" (93 candidates). ?
+- test-network-renames: stale. The rename merge gave Copper Canyon 1998-2014 and Sedona Sky 2014-2025, so no overlap; 12 of 93 researched years in kop-data's network/rename-candidates.json are for lines no longer on the map (merged pairs), now counted, not failed (5b1d8185). Passes.
 - test-news-archive: harness wrong. archive.js is read from the kop-send-to-kop checkout; the split copies every column but archive_url and skips the resync (2e870308). Passes.
 - test-news-post-import: "at least 70 of the posts reach the feed", "the table holds what the stats say". ?
 - test-open-data: environment. The portable PHP needs `-d extension=zip`; passes with it.
@@ -36,9 +35,8 @@ harness is wrong; *?* = not looked at yet):
 - test-program-homes-convert: Dimondale / NeuroRestorative not suggested, then a fatal ("Company #5748 is not one
   program any more"). ?
 - test-program-homes: "undo removes the record this tool made" (kept), "undo leaves no company link behind". ?
-- test-rename-merge: exits before any check (Copper Canyon / Sedona Sky not one record each). ?
-- test-search-aliases: "Copper Canyon finds Copper Canyon Academy", "...flagged as an other-name hit", "Kissimmee
-  Youth finds Three Springs of Osceola". ?
+- test-rename-merge: stale. Copper Canyon (#12155) was merged into Sedona Sky (#12161) as a rename on the site 2026-10-11; the test undoes that merge on its scratch copy from the merge log, and compares Sedona Sky's operator to its own pre-merge value (86e040d7). Passes.
+- test-search-aliases: stale. Copper Canyon merged into Sedona Sky, Bethel Boys Academy moved to Eagle Point's past names, Three Springs of Osceola merged into Kissimmee Youth Academy; samples replaced (0d24c688). Passes.
 - test-staff-former: fatal at line 86 (Undefined array key 0) after 22 passes. ?
 - test-state-feed-names: harness wrong. It now loads inc/heal-archive.php, stubs wp_upload_dir() and ignores @-silenced warnings (aa527fa0). Passes.
 - test-state-lists: "every candidate is a facilities_v2 record" (108 of 109). ?
