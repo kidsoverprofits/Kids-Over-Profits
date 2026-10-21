@@ -290,6 +290,7 @@ $check('a job line needs a program', $refuse('consultant_jobs', 'referrer', arra
 // A corrected staff member, moved to the other list, applies and passes the validator.
 $staff = null;
 foreach ($by as $fid => $rows) {
+    if (in_array($fid, $gone, true)) continue;
     foreach ($rows as $row) {
         if ($row['op'] === 'add_staff' && $row['path'] === 'staff.notableStaff') {
             $staff = array($fid, $row);
