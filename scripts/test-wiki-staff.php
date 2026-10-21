@@ -230,6 +230,11 @@ $pdo->exec('DETACH DATABASE prod');
 $live_log = $raw ? @unserialize($raw) : false;
 if (is_array($live_log) && $live_log) {
     $GLOBALS['kop_wiki_staff_log'] = $live_log;
+    // The pass has run on the site; its own undo puts those roles back on the
+    // copy first, so there is something to rewrite.
+    $put_back = count(kop_wiki_staff_former_pass($pdo, true, true));
+    echo "  $put_back roles the site's pass rewrote put back on the copy\n";
+    $live_log = kop_wiki_staff_log();
     $dry = kop_wiki_staff_former_pass($pdo, false);
     check(kop_wiki_staff_log() === $live_log, 'the dry run changes neither the log nor (below) the records');
     $changes = kop_wiki_staff_former_pass($pdo, true);
