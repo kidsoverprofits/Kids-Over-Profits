@@ -105,11 +105,34 @@ $snapshot = function () use ($pdo) {
         'wpdl_kop_program_homes' => 'home_id', 'wpdl_kop_program_groups' => 'program_id', 'news_facility_links' => 'news_id, facility_id',
         'facilities_v2' => 'id', 'wpdl_kop_program_conversions' => 'operator_id') as $t => $order) {
         $cols = $t === 'facilities_v2' ? 'id, unique_name, json_data' : ($t === 'wpdl_kop_program_homes' ? 'home_id, program_id, home_name' : ($t === 'wpdl_kop_program_groups' ? 'program_id, created_record' : '*'));
-        $out[$t] = md5(json_encode($pdo->query("SELECT $cols FROM main.$t ORDER BY $order")->fetchAll(PDO::FETCH_NUM)));
+        $rows = $pdo->query("SELECT $cols FROM main.$t ORDER BY $order")->fetchAll(PDO::FETCH_NUM);
+        // The mirror keeps MySQL's JSON text ("key": value); a rewritten document is compact. Compare documents, not spacing.
+        if ($t === 'facilities_v2') foreach ($rows as $i => $r) $rows[$i][2] = json_decode((string) $r[2], true);
+        $out[$t] = md5(json_encode($rows));
     }
     return $out;
 };
 $opts = array('pdo' => $pdo, 'prefix' => 'wpdl_', 'skip_memberships' => true);
+
+// The site converted its companies on 2026-10-09; undo those conversions on the copy, newest first,
+// so the companies the checks name are companies again.
+$site = $pdo->query("SELECT name FROM prod.sqlite_master WHERE type = 'table' AND name = 'wpdl_kop_program_conversions'")->fetchColumn()
+    ? $pdo->query('SELECT operator_id FROM prod.wpdl_kop_program_conversions ORDER BY converted_at DESC')->fetchAll(PDO::FETCH_COLUMN) : array();
+if ($site) {
+    $pdo->exec('INSERT INTO main.wpdl_kop_program_conversions SELECT * FROM prod.wpdl_kop_program_conversions');
+    $undone = 0;
+    foreach ($site as $oid) {
+        try {
+            kop_phc_undo((int) $oid, $opts);
+            $undone++;
+        } catch (RuntimeException $e) {
+            echo "  could not undo the site's conversion of company #$oid: " . $e->getMessage() . "\n";
+        }
+    }
+    $pdo->exec('DELETE FROM main.wpdl_kop_program_conversions');
+    if (function_exists('kop_phc_rows')) kop_phc_rows(true);
+    echo "  undid $undone of the site's " . count($site) . " conversions on the copy\n";
+}
 $by_id = function (array $list, $id) {
     foreach ($list as $s) if ($s['operator_id'] === $id) return $s;
     return null;
