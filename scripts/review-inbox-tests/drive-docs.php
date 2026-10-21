@@ -295,8 +295,10 @@ function kop_rinbox_test_drive_docs_any_record(array $src, callable $check) {
         $it = kop_rinbox_get_item('drive-docs', $key);
         $add = $it['actions'][0]['params'][0] ?? array();
         $fac = array_values(array_filter($it['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
-        $check('drive-docs any record: the Record box on Add offers every kind, the Facility field stays programs only',
-            ($add['type'] ?? '') === 'record' && in_array('company', (array) ($add['kinds'] ?? array()), true) && ($fac['type'] ?? '') === 'facility',
+        // A young adult program too: its links go on the program (kop_rinbox_file_on_record()).
+        $check('drive-docs any record: the Record box on Add offers every kind, young adult programs too, the Facility field stays programs only',
+            ($add['type'] ?? '') === 'record' && in_array('company', (array) ($add['kinds'] ?? array()), true) && in_array('ya', (array) ($add['kinds'] ?? array()), true)
+            && ($fac['type'] ?? '') === 'facility',
             json_encode(array($add['type'] ?? '', $add['kinds'] ?? array(), $fac['type'] ?? '')));
         kop_rinbox_test_with_wpdb_writes(function () use ($src, $check, $key, $url, $oid, $row) {
             $before = kop_gdl_company_load($oid);
