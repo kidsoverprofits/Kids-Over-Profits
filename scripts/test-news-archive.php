@@ -49,12 +49,16 @@ $cases = array(
     array('https://perma.cc/AB12-CD34', 'https://a.com/y'), array('ftp://x.com/a', 'javascript:alert(1)'),
 );
 $node = trim((string) shell_exec(PHP_OS_FAMILY === 'Windows' ? 'where node 2>NUL' : 'command -v node 2>/dev/null'));
+// The extension lives in the kop-send-to-kop checkout beside this one since the 2026-10-13 split.
+$ext_dir = getenv('KOP_SEND_TO_KOP_DIR') ?: dirname(__DIR__, 2) . '/kop-send-to-kop';
 if ($node === '') {
     echo "skip: node not found, PHP == JS not checked\n";
+} elseif (!is_file($ext_dir . '/archive.js')) {
+    echo "skip: no kop-send-to-kop checkout beside this one (or KOP_SEND_TO_KOP_DIR), PHP == JS not checked\n";
 } else {
     $root = realpath(__DIR__ . '/..');
     $site = str_replace('\\', '/', $root . '/js/news-archive-links.js');
-    $ext  = str_replace('\\', '/', $root . '/browser-extension/send-to-kop/archive.js');
+    $ext  = str_replace('\\', '/', $ext_dir . '/archive.js');
     $js = 'const site = require(' . json_encode($site) . ');'
         . 'import(' . json_encode('file:///' . ltrim($ext, '/')) . ').then((ext) => {'
         . 'const cases = ' . json_encode($cases) . ';'
@@ -88,7 +92,14 @@ if (!is_file($mirror) || !extension_loaded('pdo_sqlite')) {
     $pdo = new PDO('sqlite::memory:');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec("ATTACH DATABASE " . $pdo->quote(realpath($mirror)) . " AS m");
-    $pdo->exec('CREATE TABLE news_submissions AS SELECT id, article_url, json_data FROM m.news_submissions');
+    // Every column but archive_url, so the split runs on the rows as they were
+    // before it. The resync after it (links to facilities and cases) needs
+    // tables this copy does not hold; it is test-record-resync's business.
+    $cols = array_diff(array_column($pdo->query('PRAGMA m.table_info(news_submissions)')->fetchAll(PDO::FETCH_ASSOC), 'name'), array('archive_url'));
+    if (!function_exists('kop_resync_news')) {
+        function kop_resync_news(PDO $pdo, $ids, $by = null) { return array(); }
+    }
+    $pdo->exec('CREATE TABLE news_submissions AS SELECT ' . implode(', ', $cols) . ' FROM m.news_submissions');
     $pdo->exec('DETACH DATABASE m');
     $check('ensure adds the column', kop_news_archive_ensure($pdo), true);
     $dry = kop_news_archive_split_existing($pdo, false);
