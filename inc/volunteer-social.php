@@ -15,16 +15,23 @@
  * Projects ("Weekly roundup goes to"); with nobody picked, no roundup is made.
  * A social project is always one person's: never "anyone with a link".
  *
+ * The picture is a link (Canva, Drive) or an upload (owner, 2026-10-21):
+ * images only (PNG, JPEG, WebP, GIF), 10 MB at most (kop_vsoc_upload_max),
+ * re-encoded so a phone photo's location and camera data are gone, and kept
+ * in uploads/kop-private/social/ (no web access) until an admin approves the
+ * post; Approve copies it into the media library (kop_vsoc_to_media()).
+ *
  * Source 'social:roundup'. Table {prefix}kop_vol_social (one row per idea per
  * volunteer: status taken | ready | approved | sent_back | passed).
- * REST: kop/v1/volunteer/post. Tested by scripts/test-volunteer-projects.php.
+ * REST: kop/v1/volunteer/post, kop/v1/volunteer/upload (multipart, field
+ * 'image'). Tested by scripts/test-volunteer-projects.php.
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_VSOC_DB_VERSION = '1';
+const KOP_VSOC_DB_VERSION = '2';
 const KOP_VSOC_SOURCE = 'social:roundup';
 const KOP_VSOC_CAPTION_MAX = 2200;   // Instagram's cap, the shortest of the likely platforms but X
 
@@ -47,6 +54,8 @@ function kop_vsoc_ensure_tables() {
         status VARCHAR(12) NOT NULL DEFAULT 'taken',
         caption TEXT NULL,
         image_url VARCHAR(500) NOT NULL DEFAULT '',
+        image_file VARCHAR(100) NOT NULL DEFAULT '',
+        attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
         note TEXT NULL,
         owner_note TEXT NULL,
         decided_by VARCHAR(60) NOT NULL DEFAULT '',
@@ -153,6 +162,7 @@ function kop_vsoc_get_post($pid, $key, $vid) {
 
 function kop_vsoc_public_post(array $r) {
     return array('status' => (string) $r['status'], 'caption' => (string) $r['caption'], 'image_url' => (string) $r['image_url'],
+        'uploaded' => (string) ($r['image_file'] ?? '') !== '' || (int) ($r['attachment_id'] ?? 0) > 0,
         'note' => (string) $r['note'], 'owner_note' => (string) $r['owner_note']);
 }
 
@@ -200,17 +210,21 @@ function kop_vsoc_touched_keys($pid) {
     return array_fill_keys(array_map('strval', (array) $wpdb->get_col($wpdb->prepare('SELECT DISTINCT item_key FROM ' . kop_vsoc_table() . ' WHERE project_id = %d', (int) $pid))), true);
 }
 
-/**
- * The volunteer works on one idea. $do: take (start a draft), draft (save it),
- * ready (send it for review: needs a caption, and an image link unless the
- * card has a picture), pass (not this one), back (take a sent one back).
- */
-function kop_vsoc_save(array $vol, $pid, $key, $do, array $in = array()) {
+/** The idea's project row, checked as this volunteer's and open: [project, item row]. */
+function kop_vsoc_idea(array $vol, $pid, $key) {
     $p = kop_volp_get($pid);
     if (!$p || !kop_vsoc_is($p) || !kop_volp_for_volunteer($p, (int) $vol['id'])) throw new RuntimeException('This project is finished or not yours. Thank you!');
-    $row = null;
-    foreach (kop_volp_item_rows($pid, true) as $r) if ($r['item_key'] === (string) $key) $row = $r;
-    if (!$row) throw new RuntimeException('That idea is not in this project any more.');
+    foreach (kop_volp_item_rows($pid, true) as $r) if ($r['item_key'] === (string) $key) return array($p, $r);
+    throw new RuntimeException('That idea is not in this project any more.');
+}
+
+/**
+ * The volunteer works on one idea. $do: take (start a draft), draft (save it),
+ * ready (send it for review: needs a caption, and a picture: an upload, a
+ * link, or the card's own), pass (not this one), back (take a sent one back).
+ */
+function kop_vsoc_save(array $vol, $pid, $key, $do, array $in = array()) {
+    list(, $row) = kop_vsoc_idea($vol, $pid, $key);
     if (!in_array($do, array('take', 'draft', 'ready', 'pass', 'back'), true)) throw new RuntimeException('Unknown step.');
     kop_vol_rate_check((int) $vol['id']);
     $old = kop_vsoc_get_post($pid, $key, (int) $vol['id']);
@@ -224,7 +238,7 @@ function kop_vsoc_save(array $vol, $pid, $key, $do, array $in = array()) {
     if ($do === 'ready') {
         if ($caption === '') throw new RuntimeException('Write the caption first.');
         $card = json_decode((string) $row['detail'], true);
-        if ($image === '' && empty($card['image'])) throw new RuntimeException('Add a link to your picture (Canva, Google Drive, anywhere we can open it).');
+        if ($image === '' && empty($card['image']) && empty($old['image_file'])) throw new RuntimeException('Upload your picture, or add a link to it (Canva, Google Drive, anywhere we can open it).');
     }
     $status = array('take' => 'taken', 'draft' => 'taken', 'ready' => 'ready', 'pass' => 'passed', 'back' => 'taken')[$do];
     if ($do === 'draft' && $old && $old['status'] === 'sent_back') $status = 'sent_back';   // still waiting for their change
@@ -239,6 +253,134 @@ function kop_vsoc_save(array $vol, $pid, $key, $do, array $in = array()) {
         $wpdb->insert(kop_vsoc_table(), $data + array('project_id' => (int) $pid, 'item_key' => (string) $key, 'volunteer_id' => (int) $vol['id'], 'created_at' => $now));
     }
     return kop_vsoc_public_post(kop_vsoc_get_post($pid, $key, (int) $vol['id']));
+}
+
+/* ---- Uploaded pictures ------------------------------------------------------------------------- */
+
+function kop_vsoc_upload_max() {
+    return max(1, (int) apply_filters('kop_vsoc_upload_max', 10 * 1024 * 1024));
+}
+
+/** Where uploads wait for approval: no web access (an .htaccess denies it all). */
+function kop_vsoc_private_dir() {
+    $dir = rtrim((string) wp_upload_dir()['basedir'], '/\\') . '/kop-private/social';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $deny = dirname($dir) . '/.htaccess';
+    if (!is_file($deny)) @file_put_contents($deny, "Require all denied\nDeny from all\n");
+    if (!is_file(dirname($dir) . '/index.php')) @file_put_contents(dirname($dir) . '/index.php', "<?php\n// Silence.\n");
+    return $dir;
+}
+
+/**
+ * Keep an uploaded picture for one idea: checked as an image by its bytes (not
+ * its name), re-encoded without its metadata, replacing any earlier upload.
+ * Returns the post as the page shows it.
+ */
+function kop_vsoc_store_upload(array $vol, $pid, $key, $tmp_path, $size = null) {
+    list(, $row) = kop_vsoc_idea($vol, $pid, $key);
+    $old = kop_vsoc_get_post($pid, $key, (int) $vol['id']);
+    if ($old && $old['status'] === 'approved') throw new RuntimeException('This one is approved already.');
+    if (!is_file((string) $tmp_path)) throw new RuntimeException('The picture did not arrive. Try again.');
+    $size = $size ?? filesize($tmp_path);
+    if ($size > kop_vsoc_upload_max()) throw new RuntimeException('That picture is too big: ' . (int) round(kop_vsoc_upload_max() / 1048576) . ' MB at most.');
+    $info = @getimagesize($tmp_path);
+    $types = array(IMAGETYPE_PNG => 'png', IMAGETYPE_JPEG => 'jpg', IMAGETYPE_WEBP => 'webp', IMAGETYPE_GIF => 'gif');
+    if (!$info || !isset($types[$info[2]])) throw new RuntimeException('That is not a picture we can take: PNG, JPEG, WebP or GIF.');
+    kop_vol_rate_check((int) $vol['id']);
+    $ext = $types[$info[2]];
+    $bytes = (string) file_get_contents($tmp_path);
+    // Re-encode (GD keeps no EXIF): a phone photo's location goes. A GIF stays as sent, to keep it moving.
+    if ($ext !== 'gif' && function_exists('imagecreatefromstring')) {
+        $im = @imagecreatefromstring($bytes);
+        if (!$im) throw new RuntimeException('That picture could not be read. Save it again as PNG or JPEG and try once more.');
+        ob_start();
+        if ($ext === 'png') { imagesavealpha($im, true); imagepng($im, null, 6); }
+        elseif ($ext === 'webp') { imagewebp($im, null, 90); }
+        else { imagejpeg($im, null, 90); }
+        $bytes = (string) ob_get_clean();
+        imagedestroy($im);
+    }
+    $name = bin2hex(random_bytes(10)) . '.' . $ext;
+    $dir = kop_vsoc_private_dir();
+    if (@file_put_contents($dir . '/' . $name, $bytes) === false) throw new RuntimeException('The picture could not be saved. Try again later.');
+    if ($old && (string) $old['image_file'] !== '') @unlink($dir . '/' . basename((string) $old['image_file']));
+
+    global $wpdb;
+    kop_vsoc_ensure_tables();
+    $now = current_time('mysql', true);
+    if ($old) {
+        $wpdb->update(kop_vsoc_table(), array('image_file' => $name, 'updated_at' => $now), array('id' => (int) $old['id']));
+    } else {
+        $wpdb->insert(kop_vsoc_table(), array('project_id' => (int) $pid, 'item_key' => (string) $key, 'volunteer_id' => (int) $vol['id'],
+            'title' => mb_substr((string) $row['title'], 0, 255), 'status' => 'taken', 'caption' => '', 'image_file' => $name, 'note' => '',
+            'created_at' => $now, 'updated_at' => $now));
+    }
+    return kop_vsoc_public_post(kop_vsoc_get_post($pid, $key, (int) $vol['id']));
+}
+
+/** The private file of a post, or ''. */
+function kop_vsoc_upload_path(array $post) {
+    $f = basename((string) ($post['image_file'] ?? ''));
+    if ($f === '') return '';
+    $path = kop_vsoc_private_dir() . '/' . $f;
+    return is_file($path) ? $path : '';
+}
+
+/** On approve: the upload goes into the media library (once) and leaves the private folder. Returns the attachment id or 0. */
+function kop_vsoc_to_media(array $post) {
+    if ((int) $post['attachment_id']) return (int) $post['attachment_id'];
+    $path = kop_vsoc_upload_path($post);
+    if ($path === '') return 0;
+    if (!function_exists('wp_generate_attachment_metadata') && defined('ABSPATH') && is_file(ABSPATH . 'wp-admin/includes/image.php')) {
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+    }
+    $ext = pathinfo($path, PATHINFO_EXTENSION);
+    $upload = wp_upload_bits(sanitize_file_name('kop-post-' . (int) $post['id'] . '.' . $ext), null, (string) file_get_contents($path));
+    if (!empty($upload['error'])) throw new RuntimeException('The picture could not go into the media library: ' . $upload['error']);
+    $mime = array('png' => 'image/png', 'jpg' => 'image/jpeg', 'webp' => 'image/webp', 'gif' => 'image/gif')[$ext] ?? 'image/jpeg';
+    $att = wp_insert_attachment(array('post_mime_type' => $mime, 'post_title' => 'Social media post: ' . (string) $post['title'],
+        'post_content' => '', 'post_status' => 'inherit'), $upload['file']);
+    if (is_wp_error($att) || !$att) {
+        @unlink($upload['file']);
+        throw new RuntimeException('The picture could not go into the media library.');
+    }
+    if (function_exists('wp_generate_attachment_metadata')) wp_update_attachment_metadata($att, wp_generate_attachment_metadata($att, $upload['file']));
+    update_post_meta($att, '_kop_vsoc_post', (int) $post['id']);
+    global $wpdb;
+    $wpdb->update(kop_vsoc_table(), array('attachment_id' => (int) $att, 'image_file' => ''), array('id' => (int) $post['id']));
+    @unlink($path);
+    return (int) $att;
+}
+
+/** Admin only: the waiting upload, for the project page's preview. */
+add_action('admin_post_kop_vsoc_image', function () {
+    if (!current_user_can('manage_options')) wp_die('Not allowed.', 403);
+    check_admin_referer('kop_vsoc_image');
+    global $wpdb;
+    kop_vsoc_ensure_tables();
+    $post = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . kop_vsoc_table() . ' WHERE id = %d', (int) ($_GET['post'] ?? 0)), ARRAY_A);
+    $path = $post ? kop_vsoc_upload_path($post) : '';
+    if ($path === '') wp_die('No picture.', 404);
+    $info = @getimagesize($path);
+    nocache_headers();
+    header('Content-Type: ' . ($info['mime'] ?? 'application/octet-stream'));
+    header('X-Content-Type-Options: nosniff');
+    header('Content-Length: ' . filesize($path));
+    readfile($path);
+    exit;
+});
+
+/** Where the admin sees a post's picture: the media library copy, the waiting upload, their link, or the card's. ['url', 'label', 'show' (an <img>)]. */
+function kop_vsoc_admin_picture(array $x, array $card) {
+    if ((int) $x['attachment_id'] && function_exists('wp_get_attachment_url') && ($u = wp_get_attachment_url((int) $x['attachment_id']))) {
+        return array($u, 'Their picture (in the media library)', true);
+    }
+    if ((string) $x['image_file'] !== '') {
+        return array(wp_nonce_url(admin_url('admin-post.php?action=kop_vsoc_image&post=' . (int) $x['id']), 'kop_vsoc_image'), 'Their uploaded picture', true);
+    }
+    if ((string) $x['image_url'] !== '') return array((string) $x['image_url'], 'Their picture', false);
+    if ((string) ($card['image'] ?? '') !== '') return array((string) $card['image'], 'The card\'s picture', true);
+    return array('', '', false);
 }
 
 /** {total, done, open (waiting for the admin), decided (approved), last} like kop_volp_progress(). */
@@ -276,6 +418,7 @@ function kop_vsoc_decide($post_id, $status, $owner_note = '') {
     if (!$r) throw new RuntimeException('No such post.');
     $owner_note = trim(mb_substr((string) $owner_note, 0, 1000));
     if ($status === 'sent_back' && $owner_note === '') throw new RuntimeException('Say what to change, so they know what to do.');
+    if ($status === 'approved') kop_vsoc_to_media($r);
     $u = wp_get_current_user();
     $wpdb->update(kop_vsoc_table(), array('status' => $status, 'owner_note' => $status === 'sent_back' ? $owner_note : (string) $r['owner_note'],
         'decided_by' => $status === 'ready' ? '' : ($u && $u->exists() ? $u->user_login : ''), 'decided_at' => $status === 'ready' ? null : current_time('mysql', true)),
@@ -296,7 +439,27 @@ add_action('rest_api_init', function () {
             return is_wp_error($who) ? $who : true;
         },
     ));
+    register_rest_route('kop/v1', '/volunteer/upload', array(
+        'methods' => 'POST', 'callback' => 'kop_vsoc_rest_upload',
+        'permission_callback' => function (WP_REST_Request $req) {
+            $who = kop_vol_rest_who($req);
+            return is_wp_error($who) ? $who : true;
+        },
+    ));
 });
+
+function kop_vsoc_rest_upload(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $who = kop_vol_rest_who($req);
+        if (empty($who['vol'])) throw new RuntimeException('Admins see this page as a preview; uploading is for the volunteer.');
+        $f = $req->get_file_params()['image'] ?? null;
+        if (!is_array($f) || (int) ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $f['tmp_name'])) {
+            throw new RuntimeException((int) ($f['error'] ?? 0) === UPLOAD_ERR_INI_SIZE ? 'That picture is too big.' : 'The picture did not arrive. Try again.');
+        }
+        $post = kop_vsoc_store_upload($who['vol'], (int) $req->get_param('project_id'), (string) $req->get_param('key'), (string) $f['tmp_name'], (int) $f['size']);
+        return array('post' => $post, 'message' => 'Picture saved. Only the reviewers see it until it is approved.');
+    });
+}
 
 function kop_vsoc_rest_post(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
@@ -383,8 +546,12 @@ function kop_vsoc_admin_project(array $p, $nonce, array $names) {
                 <td><?php if (!$x) : ?><span class="description">Not taken yet</span><?php else : ?>
                     <strong><?php echo esc_html($words[$x['status']] ?? $x['status']); ?></strong>
                     <?php if ((string) $x['caption'] !== '') : ?><div style="white-space:pre-wrap;margin:6px 0"><?php echo esc_html((string) $x['caption']); ?></div><?php endif; ?>
-                    <?php $img = (string) $x['image_url'] !== '' ? (string) $x['image_url'] : (string) ($c['image'] ?? ''); ?>
-                    <?php if ($img !== '') : ?><a href="<?php echo esc_url($img); ?>" target="_blank" rel="noopener noreferrer"><?php echo (string) $x['image_url'] !== '' ? 'Their picture' : 'The card\'s picture'; ?></a><?php endif; ?>
+                    <?php list($img, $img_label, $img_show) = kop_vsoc_admin_picture($x, $c); ?>
+                    <?php if ($img !== '') : ?>
+                        <a href="<?php echo esc_url($img); ?>" target="_blank" rel="noopener noreferrer"><?php
+                            echo $img_show ? '<img src="' . esc_url($img) . '" alt="" style="display:block;max-width:240px;max-height:240px;margin:4px 0">' : ''; ?><?php echo esc_html($img_label); ?></a>
+                        <?php if ((string) $x['image_url'] !== '' && $img_label !== 'Their picture') : ?><br><a href="<?php echo esc_url((string) $x['image_url']); ?>" target="_blank" rel="noopener noreferrer">Their link</a><?php endif; ?>
+                    <?php endif; ?>
                     <?php if ((string) $x['note'] !== '') : ?><br><span class="description">Their note: <?php echo esc_html((string) $x['note']); ?></span><?php endif; ?>
                     <?php if ((string) $x['owner_note'] !== '' && $x['status'] !== 'approved') : ?><br><span class="description">Your note: <?php echo esc_html((string) $x['owner_note']); ?></span><?php endif; ?>
                 <?php endif; ?></td>

@@ -101,7 +101,8 @@ $pdo->exec("CREATE TABLE wpdl_kop_vol_practice (id INTEGER PRIMARY KEY AUTOINCRE
     position INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, answered_at TEXT, UNIQUE (volunteer_id, source, item_key))");
 $GLOBALS['kop_test_options']['kop_vol_social_db'] = KOP_VSOC_DB_VERSION;
 $pdo->exec("CREATE TABLE wpdl_kop_vol_social (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, item_key TEXT NOT NULL, volunteer_id INTEGER NOT NULL,
-    title TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'taken', caption TEXT, image_url TEXT NOT NULL DEFAULT '', note TEXT, owner_note TEXT,
+    title TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'taken', caption TEXT, image_url TEXT NOT NULL DEFAULT '', image_file TEXT NOT NULL DEFAULT '',
+    attachment_id INTEGER NOT NULL DEFAULT 0, note TEXT, owner_note TEXT,
     decided_by TEXT NOT NULL DEFAULT '', decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
 foreach (array('highlight-summaries', 'featured-reporting', 'news-images', 'federal-funding') as $lib) require_once dirname(__DIR__) . "/inc/$lib.php";
 
@@ -505,13 +506,59 @@ kop_vsoc_save($sam, $ps1, $it['key'], 'ready');
 kop_vsoc_decide($post['id'], 'approved');
 $check('approved is final for the volunteer', strpos($throws(function () use ($sam, $ps1, $it) { kop_vsoc_save($sam, $ps1, $it['key'], 'draft', array('caption' => 'x')); }), 'approved') !== false
     && kop_volp_progress(kop_volp_get($ps1))['decided'] === 1);
+// An uploaded picture instead of a link: checked by its bytes, stripped of its metadata, private until approved, then into the media library.
+if (!function_exists('sanitize_file_name')) { function sanitize_file_name($n) { return preg_replace('/[^A-Za-z0-9._-]/', '', $n); } }
+if (!function_exists('wp_upload_bits')) {
+    function wp_upload_bits($name, $dep, $bits) { $f = sys_get_temp_dir() . '/kop-uploads/' . $name; @mkdir(dirname($f), 0777, true); file_put_contents($f, $bits); return array('file' => $f, 'error' => false); }
+}
+if (!function_exists('wp_insert_attachment')) { function wp_insert_attachment($a, $file) { $GLOBALS['kop_test_attached'][] = array($a, $file); return 9000 + count($GLOBALS['kop_test_attached']); } }
+if (!function_exists('wp_update_attachment_metadata')) { function wp_update_attachment_metadata($id, $m) { return true; } }
+if (!function_exists('update_post_meta')) { function update_post_meta($id, $k, $v) { return true; } }
+$idea2 = $keys_of($ps1)[1];
+$png = sys_get_temp_dir() . '/kop-vsoc-test.png';
+$im = imagecreatetruecolor(40, 30);
+imagepng($im, $png);
+$jpg = sys_get_temp_dir() . '/kop-vsoc-test.jpg';
+imagejpeg($im, $jpg);
+// A JPEG carrying a comment block stands in for camera metadata: re-encoding must drop it.
+$raw = file_get_contents($jpg);
+file_put_contents($jpg, substr($raw, 0, 2) . "\xFF\xFE\x00\x12GPS 40.7N 74.0W!" . substr($raw, 2));
+$fake = sys_get_temp_dir() . '/kop-vsoc-test-fake.png';
+file_put_contents($fake, '<?php echo "not a picture"; ?>');
+$check('a file that is not a picture is refused, whatever its name', strpos($throws(function () use ($sam, $ps1, $idea2, $fake) { kop_vsoc_store_upload($sam, $ps1, $idea2, $fake); }), 'not a picture') !== false);
+$GLOBALS['kop_test_filters_vsoc'] = true;
+$check('a picture over the cap is refused', strpos($throws(function () use ($sam, $ps1, $idea2, $png) { kop_vsoc_store_upload($sam, $ps1, $idea2, $png, 11 * 1048576); }), 'too big') !== false);
+$check('Alex cannot upload to Sam\'s idea', $throws(function () use ($alex, $ps1, $idea2, $png) { kop_vsoc_store_upload($alex, $ps1, $idea2, $png); }) !== '');
+$up = kop_vsoc_store_upload($sam, $ps1, $idea2, $jpg);
+$row2 = kop_vsoc_get_post($ps1, $idea2, $sam_id);
+$kept = kop_vsoc_upload_path($row2);
+$check('an upload is kept for the idea and says so', $up['uploaded'] && $kept !== '' && $row2['status'] === 'taken');
+$check('...re-encoded, its metadata gone', getimagesize($kept)[2] === IMAGETYPE_JPEG && strpos(file_get_contents($kept), 'GPS 40.7N') === false);
+$check('...in a folder the web cannot open', strpos($kept, '/kop-private/social/') !== false && is_file(dirname(dirname($kept)) . '/.htaccess')
+    && strpos(file_get_contents(dirname(dirname($kept)) . '/.htaccess'), 'Require all denied') !== false);
+kop_vsoc_store_upload($sam, $ps1, $idea2, $png);
+$row2 = kop_vsoc_get_post($ps1, $idea2, $sam_id);
+$check('a second upload replaces the first', !is_file($kept) && substr(kop_vsoc_upload_path($row2), -4) === '.png');
+$check('an upload is a picture for Send for review', kop_vsoc_save($sam, $ps1, $idea2, 'ready', array('caption' => 'A lawsuit.'))['status'] === 'ready');
+$waiting = kop_vsoc_upload_path($row2);
+kop_vsoc_decide($row2['id'], 'approved');
+$row2 = kop_vsoc_get_post($ps1, $idea2, $sam_id);
+$check('approving puts it in the media library and out of the private folder', (int) $row2['attachment_id'] > 0 && $row2['image_file'] === '' && !is_file($waiting)
+    && end($GLOBALS['kop_test_attached'])[0]['post_mime_type'] === 'image/png');
+$n_att = count($GLOBALS['kop_test_attached']);
+kop_vsoc_decide($row2['id'], 'ready');
+kop_vsoc_decide($row2['id'], 'approved');
+$check('approving again does not copy it twice', count($GLOBALS['kop_test_attached']) === $n_att);
+$check('an approved post takes no new picture', strpos($throws(function () use ($sam, $ps1, $idea2, $png) { kop_vsoc_store_upload($sam, $ps1, $idea2, $png); }), 'approved') !== false);
+foreach (array($png, $jpg, $fake) as $f) @unlink($f);
+
 $numbers = 'numbers:' . substr($from, 0, 10);
-$check('Pass on this one counts as done', kop_vsoc_save($sam, $ps1, $numbers, 'pass')['status'] === 'passed' && kop_volp_public(kop_volp_get($ps1), $sam_id)['done'] === 2);
+$check('Pass on this one counts as done', kop_vsoc_save($sam, $ps1, $numbers, 'pass')['status'] === 'passed' && kop_volp_public(kop_volp_get($ps1), $sam_id)['done'] === 3);
 // The sweep: four quiet days hand the untouched ideas back and keep the ones he worked on.
 $wpdb->update(kop_volp_table(), array('created_at' => $at(5)), array('id' => $ps1));
 $wpdb->query('UPDATE ' . kop_vsoc_table() . " SET updated_at = '" . $at(4) . "' WHERE project_id = $ps1");
 $swept = $sweep_ids(kop_volp_sweep());
-$check('a quiet roundup hands back the ideas nobody took', ($swept[$ps1]['released'] ?? 0) === 4 && count($keys_of($ps1)) === 2, json_encode($swept[$ps1] ?? null));
+$check('a quiet roundup hands back the ideas nobody took', ($swept[$ps1]['released'] ?? 0) === 3 && count($keys_of($ps1)) === 3, json_encode($swept[$ps1] ?? null));
 
 // Monday's run.
 unset($GLOBALS['kop_test_options']['kop_vsoc_designer'], $GLOBALS['kop_test_options']['kop_vsoc_last_week']);

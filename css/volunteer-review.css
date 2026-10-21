@@ -607,6 +607,18 @@ button.kop-vol-btn-small:focus {
     font: inherit;
 }
 
+.kop-vol-social .kop-vol-decide input[type="file"] {
+    padding: 6px;
+}
+
+.kop-vol-upload-preview {
+    display: block;
+    max-width: min(100%, 320px);
+    max-height: 320px;
+    margin: 0 0 8px;
+    border-radius: 6px;
+}
+
 .kop-vol-social .kop-vol-decide input::placeholder {
     color: var(--kop-text-muted, #4A5568);
 }

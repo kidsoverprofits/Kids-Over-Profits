@@ -108,6 +108,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # picture link -> Send for review; the admin approves or sends back with a note on the project page (a send-back reopens a closed batch). No AI
 # captions, nothing posted yet (plan 4.4 10d). Cards: kop_vsoc_cards() in inc/volunteer-social-cards.php, one kop_vsoc_card_<angle>() per angle
 # in kop_vsoc_angles() (closure, lawsuit, bill, finding with a plain summary, reporting, money) + the week in numbers; only public facts and URLs
+# Picture uploads (REST volunteer/upload, multipart 'image'; kop_vsoc_store_upload()): checked by getimagesize, PNG/JPEG/WebP/GIF, 10 MB
+# (kop_vsoc_upload_max), re-encoded by GD (no EXIF/location), kept in uploads/kop-private/social/ (.htaccess denies all); admins preview through
+# admin-post.php?action=kop_vsoc_image; Approve copies it into the media library once (kop_vsoc_to_media(), meta _kop_vsoc_post)
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
 # 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);

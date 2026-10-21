@@ -32,6 +32,20 @@
 
     var state = { queues: [], queue: null, offset: 0, mine: false, projects: [], project: null, practice: false, skip: [], msgCtx: null };
 
+    // A multipart post (a picture upload): the same sign-in headers, the browser sets the content type.
+    function apiForm(path, form) {
+        var headers = {};
+        if (cfg.page) headers['X-KOP-Vol'] = cfg.page;
+        if (cfg.nonce) headers['X-WP-Nonce'] = cfg.nonce;
+        return fetch(cfg.rest + path, { method: 'POST', credentials: 'same-origin', headers: headers, body: form })
+            .then(function (res) {
+                return res.json().catch(function () { return {}; }).then(function (data) {
+                    if (!res.ok) throw new Error(data && (data.error || data.message) || ('Something went wrong (' + res.status + ').'));
+                    return data;
+                });
+            });
+    }
+
     function api(path, body) {
         var headers = { 'Content-Type': 'application/json' };
         if (cfg.page) headers['X-KOP-Vol'] = cfg.page;
@@ -393,6 +407,27 @@
         image.value = post.image_url || '';
         var note = el('input', { id: noteId, type: 'text', maxlength: '1000', placeholder: 'Anything for the reviewer (optional)' });
         note.value = post.note || '';
+        var fileId = capId + '-file';
+        var file = el('input', { id: fileId, type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', disabled: cfg.preview ? true : null });
+        var upState = el('p', { class: 'kop-vol-meta', 'aria-live': 'polite', text: post.uploaded ? 'Your uploaded picture is saved. Upload another to replace it.' : 'PNG, JPEG, WebP or GIF, up to 10 MB.' });
+        var preview = el('img', { class: 'kop-vol-upload-preview', alt: 'Your picture', hidden: true });
+        file.addEventListener('change', function () {
+            var f = file.files && file.files[0];
+            if (!f) return;
+            var form = new FormData();
+            form.append('project_id', it.project_id);
+            form.append('key', it.key);
+            form.append('image', f);
+            upState.textContent = 'Uploading…';
+            file.disabled = true;
+            apiForm('upload', form).then(function (res) {
+                post.uploaded = true;
+                upState.textContent = res.message || 'Picture saved.';
+                try { preview.src = URL.createObjectURL(f); preview.hidden = false; } catch (e) { /* no preview */ }
+            }).catch(function (e) {
+                upState.textContent = e.message;
+            }).then(function () { file.disabled = false; file.value = ''; });
+        });
         var buttons = [
             el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Send for review', disabled: cfg.preview ? true : null, onclick: function () { save('ready'); } }),
             el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Save draft', disabled: cfg.preview ? true : null, onclick: function () { save('draft'); } }),
@@ -415,7 +450,8 @@
         }
         node.appendChild(el('div', { class: 'kop-vol-decide' }, [
             el('label', { for: capId, text: 'Caption' }), caption, count,
-            el('label', { for: imgId, text: 'Link to your picture' + (safe(it.image) ? ' (leave empty to use ours)' : '') }), image,
+            el('label', { for: fileId, text: 'Upload your picture' }), file, upState, preview,
+            el('label', { for: imgId, text: 'Or a link to it' + (safe(it.image) ? ' (leave both empty to use ours)' : '') }), image,
             el('label', { for: noteId, text: 'Note' }), note,
             el('div', { class: 'kop-vol-buttons' }, buttons), msg
         ]));

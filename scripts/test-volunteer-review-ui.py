@@ -167,6 +167,8 @@ def practice(width, shots, check):
         browser.close()
 
 
+PNG_1PX = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000"
+                        "1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082")
 SOCIAL = {"id": 21, "title": "Post ideas: Oct 13 to Oct 19", "question": "Take the ideas you want, make the picture and write the caption, then send it for review.",
           "yes": "One clear fact.", "no": "A guess.", "note": "", "minutes": 20, "total": 2, "done": 0, "mine": True, "kind": "social", "link_kinds": None,
           "faq": [], "caption_max": 2200}
@@ -183,7 +185,7 @@ IDEAS = [
 def social(width, shots, check):
     """The designer's roundup: Taking this opens the caption box, an error keeps the card, Send for review moves on, Take it back works."""
     print("\nSocial media roundup at %d px" % width)
-    st = {"posts": {}, "calls": []}
+    st = {"posts": {}, "calls": [], "uploads": []}
 
     def handle(route):
         req = route.request
@@ -197,6 +199,15 @@ def social(width, shots, check):
                 return route.fulfill(status=200, body=PAGE, headers={"Content-Type": "text/html"})
             return route.fulfill(status=404, body="")
         name = url[len(REST):].split("?")[0]
+        if name == "upload":
+            raw = req.post_data_buffer or b""
+            st["uploads"].append({"type": req.headers.get("content-type", ""), "raw": raw})
+            if b'name="key"' not in raw or b"closure:9" not in raw or b'name="image"' not in raw:
+                return route.fulfill(status=400, body=json.dumps({"error": "bad upload"}), headers={"Content-Type": "application/json"})
+            cur = st["posts"].setdefault("closure:9", {"status": "taken", "caption": "", "image_url": "", "note": "", "owner_note": ""})
+            cur["uploaded"] = True
+            return route.fulfill(status=200, body=json.dumps({"post": cur, "message": "Picture saved. Only the reviewers see it until it is approved."}),
+                                 headers={"Content-Type": "application/json"})
         body = json.loads(req.post_data or "{}")
         st["calls"].append((name, body))
         done = [k for k, v in st["posts"].items() if v["status"] in ("ready", "approved", "passed")]
@@ -247,7 +258,12 @@ def social(width, shots, check):
         page.wait_for_selector(".kop-vol-social .kop-vol-msg.is-error")
         check("an empty caption is refused and the card stays", "caption" in card.locator(".kop-vol-msg").inner_text())
         card.locator("textarea").fill("Sunrise Ranch in Utah has closed.")
-        check("the caption counts its characters", "33 of 2200" in card.locator(".kop-vol-decide .kop-vol-meta").inner_text())
+        check("the caption counts its characters", "33 of 2200" in card.locator(".kop-vol-decide .kop-vol-meta").first.inner_text())
+        card.locator("input[type=file]").set_input_files({"name": "sunrise.png", "mimeType": "image/png", "buffer": PNG_1PX})
+        page.wait_for_function("document.querySelector('.kop-vol-upload-preview') && !document.querySelector('.kop-vol-upload-preview').hidden")
+        up = st["uploads"][-1] if st["uploads"] else {"type": "", "raw": b""}
+        check("a picture uploads as multipart with the idea's key, and shows", up["type"].startswith("multipart/form-data")
+              and b'filename="sunrise.png"' in up["raw"] and "Only the reviewers see it" in card.inner_text())
         card.locator("input[type=url]").fill("https://www.canva.com/design/abc")
         if shots:
             page.screenshot(path=str(shots / ("social-%d.png" % width)), full_page=True)
