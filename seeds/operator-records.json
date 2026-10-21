@@ -633,7 +633,9 @@
       {
         "id": 100402,
         "unique_name": "Linden Oaks",
-        "relationship": "past"
+        "relationship": "past",
+        "drop": true,
+        "drop_note": "Taken off 2026-10-21 at the owner's word: the link rested only on a 1994 10-K leased-hospital entry, and data submission #58 says Linden Oaks is not a Charter program."
       }
     ]
   },

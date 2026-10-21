@@ -1676,7 +1676,8 @@ function kop_apply_facility_merge_seeds() {
  * for a company that no longer runs the place) and a high sort order, so each
  * facility keeps its own current company first. Idempotent: an existing
  * company of that name is reused and existing links are left alone; a listed
- * facility is linked only when its unique_name still matches.
+ * facility is linked only when its unique_name still matches; one marked
+ * 'drop' has its link taken off instead.
  *
  * A company named like one of its programs (Three Points Center) gives its
  * own 'unique_name' ("Three Points Center (company)"): the record key must
@@ -1745,6 +1746,13 @@ function kop_apply_operator_record_seeds() {
                 $fid = (int) ($f['id'] ?? 0);
                 $check->execute(array($fid));
                 if (!$fid || $check->fetchColumn() !== (string) ($f['unique_name'] ?? '')) {
+                    continue;
+                }
+                // "drop": true takes a seeded link off again (and keeps it off on later runs).
+                if (!empty($f['drop'])) {
+                    $pdo->prepare("DELETE FROM `{$prefix}kop_operator_facilities` WHERE operator_id = ? AND facility_id = ?")
+                        ->execute(array($id, $fid));
+                    if (function_exists('kop_record_changed')) kop_record_changed('facility', array($fid));
                     continue;
                 }
                 $rel = in_array($f['relationship'] ?? '', array('current', 'past', 'other'), true) ? $f['relationship'] : 'past';
@@ -2636,7 +2644,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '131';
+    $version = '132';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

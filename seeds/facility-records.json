@@ -10820,5 +10820,215 @@
         "Survivor: Liz Ianelli, known online as Survivor993 for the number of days she was confined at the school, was there from 1995 to 1998; she wrote the memoir \"I See You, Survivor\" with Bret Witter (Grand Central Publishing, 2023) and is one of the survivors in Mikaela Shwer's documentary \"The Kids Are Not Alright\" (2026) (Hachette Book Group: https://www.hachettebookgroup.com/titles/liz-ianelli/i-see-you-survivor/9780306831522/)"
       ]
     }
+  },
+  {
+    "id": 100402,
+    "unique_name": "Linden Oaks",
+    "version": 1,
+    "note": "Data submission #57 (2026-10-19): the submitter asked to take down the three notes on group therapy and the level system until they finish writing them. The Arabella House sentence was filed as another name; it stays in the history notes (operatingPeriod.notes). Identification and fieldNotes copied from production 2026-10-21.",
+    "facility": {
+      "identification": {
+        "name": "Linden Oaks",
+        "investors": [],
+        "pastNames": [],
+        "otherNames": [
+          "Naperville Psychiatric Ventures"
+        ],
+        "currentName": "",
+        "currentOwners": [
+          "Endeavor Health"
+        ],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": ""
+      },
+      "fieldNotes": {
+        "resources.hasNews": [
+          ""
+        ],
+        "resources.hasLawsuits": [
+          ""
+        ],
+        "treatmentTypes.hasEMDR": [
+          ""
+        ],
+        "targetedDiagnoses.hasOCD": [
+          ""
+        ],
+        "targetedDiagnoses.hasADHD": [
+          ""
+        ],
+        "targetedDiagnoses.hasPTSD": [
+          ""
+        ],
+        "ttiPractices.hasRestraint": [
+          ""
+        ],
+        "ttiPractices.hasSeclusion": [
+          ""
+        ],
+        "targetedBehaviors.hasLying": [
+          ""
+        ],
+        "criticalIncidents.hasDeaths": [
+          ""
+        ],
+        "ttiPractices.hasLevelSystem": [
+          ""
+        ],
+        "philosophy.hasPsychoanalytic": [
+          ""
+        ],
+        "targetedDiagnoses.hasAnxiety": [
+          ""
+        ],
+        "field-1791171914862-st5wgut7g": [
+          {
+            "id": "field-1791171914862-st5wgut7g_note_1791172621581",
+            "text": "They operate under the designation of an inpatient psychiatric hospital. However, former patients have alleged that practices associated with behavior modification programs have been used.",
+            "timestamp": "2026-10-05T03:58:03.292Z"
+          }
+        ],
+        "field-1791171916089-xipau580l": [
+          {
+            "id": "field-1791171916089-xipau580l_note_1791172282517",
+            "text": "Edward-Elmhurst",
+            "timestamp": "2026-10-05T03:51:26.617Z"
+          }
+        ],
+        "field-1791172820498-vzvpx1wxj": [
+          {
+            "id": "field-1791172820498-vzvpx1wxj_note_1791172820499",
+            "text": "https://www.dailyherald.com/20130627/news/naperville-hospital-settles-teen-suicide-case-for-1-65-million/",
+            "timestamp": "2026-10-05T04:05:41.547Z"
+          }
+        ],
+        "field-1791173147649-ypf4cvc25": [
+          {
+            "id": "field-1791173147649-ypf4cvc25_note_1791173147650",
+            "text": "https://www.illinoiscourts.gov/Resources/56da1182-578a-4823-abe4-699f6e7226bc/2100614_R23.pdf",
+            "timestamp": "2026-10-05T04:05:49.431Z"
+          }
+        ],
+        "targetedBehaviors.hasAdoption": [
+          ""
+        ],
+        "targetedBehaviors.hasDefiance": [
+          ""
+        ],
+        "targetedBehaviors.hasSelfHarm": [
+          ""
+        ],
+        "targetedBehaviors.hasStealing": [
+          ""
+        ],
+        "ttiPractices.hasStripSearches": [
+          ""
+        ],
+        "targetedBehaviors.hasAggression": [
+          ""
+        ],
+        "targetedBehaviors.hasAttachment": [
+          ""
+        ],
+        "targetedDiagnoses.hasDepression": [
+          ""
+        ],
+        "targetedBehaviors.hasRunningAway": [
+          ""
+        ],
+        "treatmentTypes.hasPsychoanalysis": [
+          ""
+        ],
+        "treatmentTypes.hasRealityTherapy": [
+          ""
+        ],
+        "ttiPractices.hasForcedMedication": [
+          ""
+        ],
+        "criticalIncidents.hasStaffArrests": [
+          ""
+        ],
+        "targetedBehaviors.hasManipulation": [
+          ""
+        ],
+        "treatmentTypes.hasExposureTherapy": [
+          ""
+        ],
+        "ttiPractices.hasBehaviorContracts": [
+          ""
+        ],
+        "philosophy.hasTherapeuticCommunity": [
+          ""
+        ],
+        "targetedBehaviors.hasFamilyConflict": [
+          ""
+        ],
+        "targetedBehaviors.hasSocialProblems": [
+          ""
+        ],
+        "targetedDiagnoses.hasEatingDisorder": [
+          ""
+        ],
+        "targetedDiagnoses.hasSubstanceAbuse": [
+          ""
+        ],
+        "targetedDiagnoses.hasBipolarDisorder": [
+          ""
+        ],
+        "targetedDiagnoses.hasConductDisorder": [
+          ""
+        ],
+        "treatmentTypes.hasUnlicensedProvider": [
+          ""
+        ],
+        "targetedBehaviors.hasAcademicStruggles": [
+          ""
+        ],
+        "targetedBehaviors.hasImpulsiveBehavior": [
+          ""
+        ],
+        "treatmentTypes.hasBehaviorModification": [
+          ""
+        ],
+        "targetedDiagnoses.hasEmotionalDisorders": [
+          ""
+        ],
+        "targetedDiagnoses.hasBehavioralDisorders": [
+          ""
+        ],
+        "targetedDiagnoses.hasCoOccurringDisorders": [
+          ""
+        ],
+        "targetedDiagnoses.hasPersonalityDisorders": [
+          ""
+        ],
+        "targetedDiagnoses.hasPsychiatricDisorders": [
+          ""
+        ],
+        "ttiPractices.hasCommunicationRestrictions": [
+          ""
+        ],
+        "targetedBehaviors.hasEmotionalDysregulation": [
+          ""
+        ],
+        "targetedDiagnoses.hasAutismSpectrumDisorder": [
+          ""
+        ],
+        "targetedDiagnoses.hasReactiveAttachmentDisorder": [
+          ""
+        ],
+        "targetedDiagnoses.hasOppositionalDefiantDisorder": [
+          ""
+        ],
+        "targetedBehaviors.hasSexuallyInappropriateBehavior": [
+          ""
+        ],
+        "targetedDiagnoses.hasBorderlinePersonalityDisorder": [
+          ""
+        ]
+      }
+    }
   }
 ]
