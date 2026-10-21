@@ -5,8 +5,8 @@
  * kop_rinbox_finish_items() adds the action to every card still waiting for
  * a decision (it offers an approve or a reject) in every queue except the
  * ones in kop_rinbox_ya_file_skip_sources() (queues about something else,
- * and Woodbury Facts and Fornits, which file on a young adult program their
- * own way). It puts what the card says on a program in
+ * and Woodbury Facts, Woodbury Reports and Fornits, which file on a young
+ * adult program their own way). It puts what the card says on a program in
  * young_adult_programs (inc/young-adult-programs.php): a fact under People,
  * Incidents, History or About the program, citing the card's link, or only
  * the link under "More about this program". The program is picked from the
@@ -33,6 +33,8 @@ const KOP_RINBOX_YA_FILE_ACTIONS = array('ya_file', 'ya_unfile');
 function kop_rinbox_ya_file_skip_sources() {
     return array(
         'young-adult-programs', 'woodbury-facts', 'fornits', 'conflicts', 'data-audit',
+        // The pages go in the program's document folder ("File under that record", ya:<id>)
+        'woodbury-reports',
         'people-merge', 'facility-merge', 'folder-links', 'map-renames', 'map-years', 'program-homes',
         'highlight-summaries', 'bug-reports', 'glossary-feedback', 'featured-nominations', 'status_checks', 'publish-approved',
         // KOP's own wiki text and which record a wiki entry is about: nothing in them to file on a program

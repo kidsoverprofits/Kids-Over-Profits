@@ -408,7 +408,7 @@ function kop_wb_file_locked(array $r, array $target, $reviewer) {
     ), array('ckey' => $r['ckey']));
     delete_transient('kop_hidden_preview_ids');
     return array('attachment_id' => (int) $att, 'folder_id' => $folder, 'url' => (string) wp_get_attachment_url($att), 'facility' => $fac['name'],
-        'places' => array(kop_wb_place($kind === 'facility' ? $fid : ($kind === 'company' ? (int) $target['id'] : 0), $fac['name'], $folder, true, $kind)));
+        'places' => array(kop_wb_place($kind === 'facility' ? $fid : (kop_wb_target_token($kind, $target['id']) !== '' ? (int) $target['id'] : 0), $fac['name'], $folder, true, $kind)));
 }
 
 /** "Utah › Wellspring Academies › Woodbury Reports Mentions": the folder's path in the media library. */
@@ -429,27 +429,33 @@ function kop_wb_folder_path($folder_id) {
 
 /**
  * A "File under" choice as the page sends it: "123" is facility 123, "c45" is
- * company (operator) 45. Returns [kind, id], or null.
+ * company (operator) 45, "ya:6" is young adult program 6
+ * (inc/young-adult-programs.php). Returns [kind, id], or null.
  */
 function kop_wb_parse_target($token) {
-    if (preg_match('/^(c?)(\d+)$/', strtolower(trim((string) $token)), $m) && (int) $m[2] > 0) {
+    $token = strtolower(trim((string) $token));
+    if (preg_match('/^(c?)(\d+)$/', $token, $m) && (int) $m[2] > 0) {
         return array($m[1] === 'c' ? 'company' : 'facility', (int) $m[2]);
+    }
+    if (preg_match('/^ya:(\d+)$/', $token, $m) && (int) $m[1] > 0) {
+        return array('ya', (int) $m[1]);
     }
     return null;
 }
 
-/** A "File under" token from the page, "123" or "c45", anything else ''. */
+/** A "File under" token from the page, "123", "c45" or "ya:6", anything else ''. */
 function kop_wb_clean_token($t) {
     return kop_wb_parse_target($t) ? strtolower(trim((string) $t)) : '';
 }
 
-/** The page's token for a record: "123" for a facility, "c45" for a company, '' for anything else. */
+/** The page's token for a record: "123" for a facility, "c45" for a company, "ya:6" for a young adult program, '' for anything else. */
 function kop_wb_target_token($kind, $id) {
     $id = (int) $id;
     if ($id <= 0) {
         return '';
     }
-    return $kind === 'company' ? 'c' . $id : ($kind === 'facility' ? (string) $id : '');
+    $tokens = array('facility' => (string) $id, 'company' => 'c' . $id, 'ya' => 'ya:' . $id);
+    return $tokens[$kind] ?? '';
 }
 
 /** A company's lead record: duplicates of one company share one /operator/ page. */
@@ -466,7 +472,9 @@ function kop_wb_place($fid, $name, $folder, $primary, $kind = 'facility') {
     $page = '';
     if ($kind === 'company') {
         $page = $fid && function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $fid) : '';
-    } elseif ($fid && function_exists('kop_facility_page_url')) {
+    } elseif ($kind === 'ya') {
+        $page = $fid && function_exists('kop_ya_url') ? kop_ya_url((int) $fid) : '';
+    } elseif ($kind === 'facility' && $fid && function_exists('kop_facility_page_url')) {
         $page = (string) kop_facility_page_url((int) $fid);
     }
     return array(
@@ -481,12 +489,12 @@ function kop_wb_place($fid, $name, $folder, $primary, $kind = 'facility') {
     );
 }
 
-/** The extra facilities and companies a filed excerpt is tagged under: [{id, kind, name, folder}]. */
+/** The extra facilities, companies and young adult programs a filed excerpt is tagged under: [{id, kind, name, folder}]. */
 function kop_wb_also(array $r) {
     $also = json_decode((string) ($r['also_facilities'] ?? ''), true);
     $also = is_array($also) ? array_values($also) : array();
     foreach ($also as &$a) {
-        $a['kind'] = ($a['kind'] ?? '') === 'company' ? 'company' : 'facility';
+        $a['kind'] = in_array($a['kind'] ?? '', array('company', 'ya'), true) ? $a['kind'] : 'facility';
     }
     unset($a);
     return $also;
@@ -497,7 +505,7 @@ function kop_wb_places(array $r) {
     $places = array();
     if ($r['status'] === 'filed') {
         $kind = $r['target_kind'];
-        $id = $kind === 'facility' ? (int) $r['facility_id'] : ($kind === 'company' ? (int) $r['target_id'] : 0);
+        $id = $kind === 'facility' ? (int) $r['facility_id'] : (kop_wb_target_token($kind, $r['target_id']) !== '' ? (int) $r['target_id'] : 0);
         $places[] = kop_wb_place($id, $r['facility_name'], (int) $r['folder_id'], true, $kind);
         foreach (kop_wb_also($r) as $a) {
             $places[] = kop_wb_place((int) $a['id'], $a['name'], (int) $a['folder'], false, $a['kind']);
@@ -552,14 +560,14 @@ function kop_wb_parent_companies(array $fids) {
     return array_values($out);
 }
 
-/** The record a token names, as a filing target: kind, id, name and, for a company, its document folder. */
+/** The record a token names, as a filing target: kind, id, name and, for a company or young adult program, its document folder. */
 function kop_wb_target_for($kind, $id) {
     global $wpdb;
-    if ($kind === 'company') {
+    if ($kind === 'company' || $kind === 'ya') {
         if (!function_exists('kop_wbc_existing_target')) {
-            throw new RuntimeException('Filing under a company is not available.');
+            throw new RuntimeException('Filing under a company or young adult program is not available.');
         }
-        return kop_wbc_existing_target('company', kop_wb_company_lead($id));
+        return kop_wbc_existing_target($kind, $kind === 'company' ? kop_wb_company_lead($id) : (int) $id);
     }
     $fac = $wpdb->get_row($wpdb->prepare('SELECT id, name FROM facilities_v2 WHERE id = %d', (int) $id), ARRAY_A);
     if (!$fac) {
@@ -578,24 +586,22 @@ function kop_wb_retitle(array $r) {
 }
 
 /**
- * File the excerpt under several facilities and companies ("123", "c45"): the
- * PDF goes in the first facility's folder (the first company's when only
- * companies are ticked), the others get it as a tag in their own Woodbury
- * subfolder.
+ * File the excerpt under several facilities, companies and young adult
+ * programs ("123", "c45", "ya:6"): the PDF goes in the first facility's
+ * folder (else the first company's, else the first program's), the others get
+ * it as a tag in their own Woodbury subfolder.
  */
 function kop_wb_file_many(array $r, array $tokens, $reviewer) {
-    $facilities = $companies = array();
+    $by = array('facility' => array(), 'company' => array(), 'ya' => array());
     foreach ($tokens as $t) {
         $p = kop_wb_parse_target($t);
-        if ($p && $p[0] === 'facility') {
-            $facilities[$p[1]] = kop_wb_target_token('facility', $p[1]);
-        } elseif ($p) {
-            $companies[$p[1]] = kop_wb_target_token('company', $p[1]);
+        if ($p) {
+            $by[$p[0]][$p[1]] = kop_wb_target_token($p[0], $p[1]);
         }
     }
-    $tokens = array_merge(array_values($facilities), array_values($companies));
+    $tokens = array_merge(array_values($by['facility']), array_values($by['company']), array_values($by['ya']));
     if (!$tokens) {
-        throw new RuntimeException('Tick at least one facility or company to file it under.');
+        throw new RuntimeException('Tick at least one facility, company or young adult program to file it under.');
     }
     $first = kop_wb_parse_target(array_shift($tokens));
     $res = kop_wb_file_target($r, kop_wb_target_for($first[0], $first[1]), $reviewer);
@@ -607,8 +613,8 @@ function kop_wb_file_many(array $r, array $tokens, $reviewer) {
 }
 
 /**
- * Tag an already filed excerpt into more facilities' and companies' folders
- * (tokens "123", "c45"). Returns the new places.
+ * Tag an already filed excerpt into more facilities', companies' and young
+ * adult programs' folders (tokens "123", "c45", "ya:6"). Returns the new places.
  */
 function kop_wb_add_facilities(array $r, array $tokens) {
     global $wpdb;
@@ -637,7 +643,7 @@ function kop_wb_add_facilities(array $r, array $tokens) {
         }
         $target = kop_wb_target_for($kind, $id);
         $id = (int) $target['id'];
-        $parent = $kind === 'company' ? (int) $target['folder'] : kop_wb_facility_folder($id);
+        $parent = $kind === 'facility' ? kop_wb_facility_folder($id) : (int) $target['folder'];
         if ($parent <= 0) {
             throw new RuntimeException('No document folder for ' . $target['name'] . '.');
         }
@@ -657,7 +663,7 @@ function kop_wb_add_facilities(array $r, array $tokens) {
     return $places;
 }
 
-/** Take one extra facility or company ("123", "c45") off a filed excerpt (the PDF stays with the others). */
+/** Take one extra facility, company or young adult program ("123", "c45", "ya:6") off a filed excerpt (the PDF stays with the others). */
 function kop_wb_remove_facility(array $r, $token) {
     global $wpdb;
     $keep = array();
@@ -1077,6 +1083,8 @@ function kop_wb_place_html(array $p) {
         : '<strong>' . esc_html($p['name']) . '</strong>' . ($p['id'] ? ' <span class="kop-wb-muted">(no public page yet)</span>' : '');
     if ($p['kind'] === 'company') {
         $name .= ' <span class="kop-wb-muted">company</span>';
+    } elseif ($p['kind'] === 'ya') {
+        $name .= ' <span class="kop-wb-muted">young adult program</span>';
     }
     return '<li data-fid="' . esc_attr($p['key']) . '">' . $name
         . ($p['where'] !== '' ? '<span class="kop-wb-where">Folder: ' . esc_html($p['where']) . '</span>' : '')

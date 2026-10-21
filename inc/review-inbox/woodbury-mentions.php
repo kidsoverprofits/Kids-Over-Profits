@@ -3,8 +3,9 @@
  * Review inbox source: pages of the Woodbury Reports newsletter that write
  * about a program (inc/woodbury-mentions.php). Filing puts those pages, as
  * their own small PDF, in the program's "Woodbury Reports Mentions" folder
- * through kop_wb_file_many() (facility ids, or c<id> for a company); Skip
- * and Put back are kop_wb_set_status(); Undo is kop_wb_undo().
+ * through kop_wb_file_many() (facility ids, c<id> for a company, ya:<id> for
+ * a young adult program); Skip and Put back are kop_wb_set_status(); Undo is
+ * kop_wb_undo().
  *
  * Everything the old screen (KOP Tools > Woodbury Reports) does is here too:
  * the tabs with counts, the cut pages shown in the card (kop_wb_view), filing
@@ -29,14 +30,14 @@ kop_rinbox_register('woodbury-reports', function () {
     foreach (kop_wb_tabs() as $k => $t) $views[$k] = $t['label'];
     return array(
         'label'    => 'Woodbury Reports',
-        // "File under that record" offers every kind with a document folder (kop_wbc_existing_target()); a young
-        // adult program has none, so it is left out. The Best match stays a program (facility_only).
+        // "File under that record" offers every kind with a document folder (kop_wbc_existing_target(); a young
+        // adult program's is made the first time). The Best match stays a program (facility_only).
         'record_kinds' => kop_rinbox_wb_record_kinds(),
         'group'    => 'Imports to review',
         'help'     => 'Pages of the Woodbury Reports newsletter that write about a program. "Show the pages" opens them here. '
             . 'Filing puts those pages, as their own small PDF, in a "Woodbury Reports Mentions" folder on each facility\'s page (and company page): '
             . 'the best match is filled in, tick its other possible matches or parent companies, or add any other facility or company. '
-            . 'About an educational consultant, company, provider or transporter? Use "File under that record", or create the record and file in one click. '
+            . 'About an educational consultant, company, provider, transporter or young adult program (18+)? Use "File under that record", or create the record and file in one click. '
             . 'Articles with a confident match start ticked. On the Filed tab, Undo takes the copy back out and "Also file under" adds more records.'
             . (is_readable(kop_wb_pending_dir() . '/candidates.json') ? '' : ' No scan uploaded yet: run python scripts/woodbury-scan.py and copy its pending folder to ' . kop_wb_pending_dir() . '.'),
         'views'    => $views,
@@ -66,9 +67,9 @@ kop_rinbox_register('woodbury-reports', function () {
     );
 });
 
-/** The kinds of record the pages can be filed under: those with a document folder (not young adult programs). */
+/** The kinds of record the pages can be filed under: every kind with a document folder (kop_wbc_existing_target()). */
 function kop_rinbox_wb_record_kinds() {
-    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg');
+    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya');
 }
 
 function kop_rinbox_wb_kinds() {
@@ -145,10 +146,12 @@ function kop_rinbox_wb_target_params(array $r, $best, array $alts, array $parent
     }
     $params[] = array('name' => 'company', 'label' => 'And a company', 'type' => 'text', 'value' => '', 'optional' => true,
         'lookup' => 'company', 'placeholder' => 'Type a company name');
+    $params[] = array('name' => 'ya', 'label' => 'And a young adult program (18+)', 'type' => 'record', 'kinds' => array('ya'), 'create' => array(),
+        'value' => '', 'optional' => true);
     return $params;
 }
 
-/** The tokens ("123", "c45") the target params name. */
+/** The tokens ("123", "c45", "ya:6") the target params name. */
 function kop_rinbox_wb_tokens(array $params) {
     $tokens = array();
     $ids = $params['facilities'] ?? array();
@@ -162,7 +165,7 @@ function kop_rinbox_wb_tokens(array $params) {
         if (preg_match('/^alt_(\d+)$/', (string) $k, $m) && !empty($v) && $v !== '0') $tokens[] = $m[1];
         if (preg_match('/^co_(\d+)$/', (string) $k, $m) && !empty($v) && $v !== '0') $tokens[] = 'c' . $m[1];
     }
-    foreach (preg_split('/[\s,;]+/', (string) ($params['company'] ?? '') . ' ' . (string) ($params['also'] ?? '')) as $t) {
+    foreach (preg_split('/[\s,;]+/', (string) ($params['company'] ?? '') . ' ' . (string) ($params['also'] ?? '') . ' ' . (string) ($params['ya'] ?? '')) as $t) {
         if (preg_match('/^company:(\d+)$/i', $t, $m)) $t = 'c' . $m[1];
         $t = kop_wb_clean_token($t);
         if ($t !== '') $tokens[] = $t;
@@ -192,7 +195,7 @@ function kop_rinbox_wb_item(array $r) {
     $places = $filed ? kop_wb_places($r) : array();
     foreach ($places as $p) {
         $details[] = array('label' => $p['primary'] ? 'Filed under' : 'Also filed under',
-            'value' => $p['name'] . ($p['kind'] === 'company' ? ' (company)' : '') . ($p['where'] !== '' ? ', folder ' . $p['where'] : ''),
+            'value' => $p['name'] . kop_rinbox_wb_kind_note($p['kind']) . ($p['where'] !== '' ? ', folder ' . $p['where'] : ''),
             'url' => $p['page']);
     }
     if (!$pending && (string) $r['reviewed_by'] !== '') $details[] = array('label' => $filed ? 'Filed by' : 'Handled by', 'value' => (string) $r['reviewed_by']);
@@ -223,10 +226,10 @@ function kop_rinbox_wb_item(array $r) {
             'params' => kop_rinbox_wb_target_params($r, $best, $alts, $best ? kop_rinbox_wb_parents(array($best)) : array(), 'File under'));
         if (function_exists('kop_wbc_existing_target')) {
             $actions[] = array('id' => 'file_record', 'label' => 'File under that record', 'style' => 'neutral',
-                'help' => 'Files the pages under the company, educational consultant, provider, transporter, marketing company or trade organization you pick instead (and any facilities added).',
+                'help' => 'Files the pages under the company, educational consultant, provider, transporter, marketing company, trade organization or young adult program you pick instead (and any facilities added).',
                 'params' => array(
                 // The any-record finder ("company:45", "consultant:12"...), narrowed at KOP Tools > Card Fields.
-                array('name' => 'record', 'label' => 'A company, consultant, provider, transporter, marketing company or trade organization', 'type' => 'record', 'value' => '',
+                array('name' => 'record', 'label' => 'A company, consultant, provider, transporter, marketing company, trade organization or young adult program', 'type' => 'record', 'value' => '',
                     'kinds' => array_values(array_diff(kop_rinbox_wb_record_kinds(), array('facility')))),
                 array('name' => 'facilities', 'label' => 'And these facilities', 'type' => 'facilities', 'value' => array(), 'optional' => true),
             ));
@@ -263,7 +266,7 @@ function kop_rinbox_wb_item(array $r) {
         $actions[] = array('id' => 'add', 'label' => 'Also file it there', 'style' => 'neutral', 'params' => $add,
             'help' => 'Lists the same filed PDF under another record as well; nothing is copied.');
         $extras = array();
-        foreach ($places as $p) if (!$p['primary'] && $p['key'] !== '') $extras[$p['key']] = $p['name'] . ($p['kind'] === 'company' ? ' (company)' : '');
+        foreach ($places as $p) if (!$p['primary'] && $p['key'] !== '') $extras[$p['key']] = $p['name'] . kop_rinbox_wb_kind_note($p['kind']);
         if ($extras) {
             $actions[] = array('id' => 'untag', 'label' => 'Take it off', 'style' => 'neutral',
                 'help' => 'Takes the PDF off the record you pick; it stays with the other records.',
@@ -311,26 +314,31 @@ function kop_rinbox_wb_row($key) {
     return $r;
 }
 
+/** " (company)" or " (young adult program)" after a place's name; nothing for a facility. */
+function kop_rinbox_wb_kind_note($kind) {
+    $notes = array('company' => ' (company)', 'ya' => ' (young adult program)');
+    return $notes[$kind] ?? '';
+}
+
 /** "Filed under A, B (company)" from kop_wb places. */
 function kop_rinbox_wb_names(array $places) {
     $names = array();
-    foreach ($places as $p) $names[] = $p['name'] . (($p['kind'] ?? '') === 'company' ? ' (company)' : '');
+    foreach ($places as $p) $names[] = $p['name'] . kop_rinbox_wb_kind_note($p['kind'] ?? '');
     return implode(', ', $names);
 }
 
-/** A 'record' lookup value ("consultant:12", "company:4", or "c4") as [kind, id]. */
+/** A 'record' lookup value ("consultant:12", "company:4", "ya:6", or "c4") as [kind, id]. */
 function kop_rinbox_wb_record($value) {
     $value = strtolower(trim((string) $value));
     if (preg_match('/^c(\d+)$/', $value, $m)) return array('company', (int) $m[1]);
-    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg):(\d+)$/', $value, $m)) return array($m[1], (int) $m[2]);
-    if (preg_match('/^ya:\d+$/', $value)) throw new RuntimeException('A young adult program has no document folder; file the pages under a program or company instead.');
+    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg|ya):(\d+)$/', $value, $m)) return array($m[1], (int) $m[2]);
     throw new RuntimeException('Pick the record from the list that opens as you type its name.');
 }
 
 /** File under $target, then tag the pages into the extra facilities and companies, as kop_wbc_file_with_ticked() does. */
 function kop_rinbox_wb_file_target(array $r, array $target, array $tokens, $user) {
     $filed = kop_wb_file_target($r, $target, $user);
-    $msg = 'Filed under ' . $target['name'] . (in_array($target['kind'], array('facility', 'company'), true) ? '' : ' (' . strtolower(kop_wbc_kinds()[$target['kind']] ?? $target['kind']) . ')');
+    $msg = 'Filed under ' . $target['name'] . (in_array($target['kind'], array('facility', 'company'), true) ? '' : ' (' . strtolower(kop_wbc_target_kinds()[$target['kind']] ?? $target['kind']) . ')');
     if ($tokens) {
         try {
             $more = kop_wb_add_facilities(kop_wb_get($r['ckey']), $tokens);
@@ -395,7 +403,7 @@ function kop_rinbox_wb_act($key, $action, array $params) {
         case 'add':
             if ($r['status'] !== 'filed') throw new RuntimeException('File it first.');
             $tokens = kop_rinbox_wb_tokens($params);
-            if (!$tokens) throw new RuntimeException('Pick a facility or company to file it under too.');
+            if (!$tokens) throw new RuntimeException('Pick a facility, company or young adult program to file it under too.');
             $more = kop_wb_add_facilities($r, $tokens);
             if (!$more) throw new RuntimeException('Already filed there.');
             return array('message' => 'Also filed under ' . kop_rinbox_wb_names($more) . '.');

@@ -91,29 +91,44 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
     $opt = array_filter($file['params'], function ($p) { return empty($p['optional']); });
     $company = array_values(array_filter($file['params'], function ($p) { return $p['name'] === 'company'; }))[0] ?? array();
     $check('woodbury-reports: File it can run on many cards (every box optional) and finds companies by name', !$opt && ($company['lookup'] ?? '') === 'company');
-    // Any record with a document folder: "File under that record" is the any-record finder (no programs there, no
-    // young adult programs: they have no folder); the Best match stays a program.
+    // Any record with a document folder: "File under that record" is the any-record finder (no programs there; young
+    // adult programs too, their folder made the first time); the Best match stays a program.
     $fr = array_values(array_filter($it['actions'], function ($a) { return $a['id'] === 'file_record'; }))[0] ?? array();
     $rec = array_values(array_filter((array) ($fr['params'] ?? array()), function ($p) { return $p['name'] === 'record'; }))[0] ?? array();
     $kinds = (array) ($rec['kinds'] ?? array());
     $check('woodbury-reports: "File under that record" picks any record with a document folder',
         ($rec['type'] ?? '') === 'record' && in_array('company', $kinds, true) && in_array('consultant', $kinds, true) && in_array('tradeorg', $kinds, true)
-        && !in_array('ya', $kinds, true) && !in_array('facility', $kinds, true), wp_json_encode($rec));
+        && in_array('ya', $kinds, true) && !in_array('facility', $kinds, true), wp_json_encode($rec));
     $best = array_values(array_filter($it['fields'], function ($f) { return $f['name'] === 'facility_id'; }))[0] ?? array();
     $check('woodbury-reports: the Best match stays a program', ($best['type'] ?? '') === 'facility');
-    try {
-        call_user_func($src['act'], $key, 'file_record', array('record' => 'ya:5'));
-        $check('woodbury-reports: a young adult program is refused (no document folder)', false);
-    } catch (RuntimeException $e) {
-        $check('woodbury-reports: a young adult program is refused (no document folder)', stripos($e->getMessage(), 'young adult') !== false, $e->getMessage());
-    }
+    $check('woodbury-reports: a young adult program can be picked under "File under that record"', kop_rinbox_wb_record('ya:5') === array('ya', 5)
+        && kop_rinbox_wb_record('c4') === array('company', 4));
+    $ya = array_values(array_filter($file['params'], function ($p) { return $p['name'] === 'ya'; }))[0] ?? array();
+    $check('woodbury-reports: File it also takes a young adult program', ($ya['type'] ?? '') === 'record' && ($ya['kinds'] ?? null) === array('ya')
+        && !empty($ya['optional']), wp_json_encode($ya));
+    $check('woodbury-reports: the generic "File under a young adult program" is not on these cards (the pages go in its folder instead)',
+        !in_array('ya_file', array_column($it['actions'], 'id'), true));
+    // The ya:<id> token, everywhere File it and the old screen read tokens (inc/woodbury-mentions.php).
+    $check('woodbury-reports: "ya:6" names young adult program 6', kop_wb_parse_target('ya:6') === array('ya', 6) && kop_wb_clean_token(' YA:6 ') === 'ya:6'
+        && kop_wb_parse_target('ya:0') === null && kop_wb_clean_token('ya:x') === '' && kop_wb_target_token('ya', 6) === 'ya:6'
+        && kop_wb_target_token('consultant', 6) === '');
+    $place = kop_wb_place(6, 'Test Program', 0, false, 'ya');
+    $check('woodbury-reports: a young adult program place links its card', $place['key'] === 'ya:6' && strpos($place['page'], '/young-adult-programs/#kop-ya-program-6') !== false,
+        wp_json_encode($place));
+    $consultant = kop_wb_place(0, 'A Consultant', 0, true, 'consultant');
+    $check('woodbury-reports: a consultant place still has no page or key', $consultant['page'] === '' && $consultant['key'] === '');
+    $also = kop_wb_also(array('also_facilities' => wp_json_encode(array(array('id' => 6, 'kind' => 'ya', 'name' => 'P', 'folder' => 1),
+        array('id' => 7, 'kind' => 'odd', 'name' => 'Q', 'folder' => 2)))));
+    $check('woodbury-reports: an extra young adult program stays one when read back', $also[0]['kind'] === 'ya' && $also[1]['kind'] === 'facility');
+    $check('woodbury-reports: names say which are young adult programs', kop_rinbox_wb_names(array($place, kop_wb_place(4, 'Co', 0, false, 'company')))
+        === 'Test Program (young adult program), Co (company)');
     $section = $pick("SELECT ckey FROM $t WHERE status = 'pending' AND kind = 'section' AND facility_id > 0 ORDER BY id LIMIT 1");
     $mention = $pick("SELECT ckey FROM $t WHERE status = 'pending' AND kind = 'mention' ORDER BY id LIMIT 1");
     $check('woodbury-reports: articles with a confident match start ticked, mentions do not',
         ($section === '' || kop_rinbox_get_item('woodbury-reports', $section)['selected'] === true)
         && ($mention === '' || kop_rinbox_get_item('woodbury-reports', $mention)['selected'] === false));
-    $tokens = kop_rinbox_wb_tokens(array('facilities' => array('12', '0'), 'alt_5' => '1', 'alt_8' => '', 'co_7' => '1', 'company' => 'c9', 'also' => 'company:3 x'));
-    $check('woodbury-reports: ticked boxes and picked companies become filing targets', $tokens === array('12', '5', 'c7', 'c9', 'c3'), implode(',', $tokens));
+    $tokens = kop_rinbox_wb_tokens(array('facilities' => array('12', '0'), 'alt_5' => '1', 'alt_8' => '', 'co_7' => '1', 'company' => 'c9', 'also' => 'company:3 x', 'ya' => 'ya:6'));
+    $check('woodbury-reports: ticked boxes and picked companies and programs become filing targets', $tokens === array('12', '5', 'c7', 'c9', 'c3', 'ya:6'), implode(',', $tokens));
     $counts = call_user_func($src['view_counts'], array('search' => ''));
     $waiting = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn();
     $check('woodbury-reports: every tab has its count', $counts['pending'] === $waiting && count($counts) === 7, json_encode($counts));
@@ -127,6 +142,13 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
     }
     $hits = call_user_func($src['lookup'], 'company', 'Aspen');
     $check('woodbury-reports: companies are found by name for filing', $hits && preg_match('/^c\d+$/', $hits[0]['value']), $hits ? $hits[0]['label'] : 'none');
+    $yname = $pick("SELECT name FROM young_adult_programs WHERE review = 'approved' ORDER BY id LIMIT 1");
+    try {
+        $hits = $yname === '' ? array() : array_values(array_filter(call_user_func($src['lookup'], 'record', $yname), function ($h) { return strpos($h['value'], 'ya:') === 0; }));
+        $check('woodbury-reports: a young adult program is found by name for "File under that record"', (bool) $hits, $hits ? $hits[0]['label'] : 'none for ' . $yname);
+    } catch (PDOException $e) {
+        kop_rinbox_test_skip('woodbury-reports: a young adult program is found by name for "File under that record"', 'the master tables need MySQL (SHOW TABLES)');
+    }
     try {
         $hits = call_user_func($src['lookup'], 'record', 'Aspen');
         $check('woodbury-reports: any non-facility record is found by name', $hits && preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg):\d+$/', $hits[0]['value']), $hits ? $hits[0]['label'] : 'none');
