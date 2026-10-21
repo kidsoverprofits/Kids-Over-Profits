@@ -25,7 +25,7 @@
         return true;
     }
 
-    // Moving a widget (js/sidebar-float.js floats the sidebar on desktop)
+    // Moving a widget (the old js/sidebar-float.js did, 2026-10-20)
     // makes it rebuild its button without the rule: watch each widget's
     // shadow root and look again (the new button draws its own a moment later).
     function watch(outer) {

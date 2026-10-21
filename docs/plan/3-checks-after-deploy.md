@@ -94,10 +94,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
     `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
     Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
-28. **Desktop sidebar float** (2026-10-20, docs/plan/4.7 item 16): at 1280+ wide, https://kidsoverprofits.org/ and
-    https://kidsoverprofits.org/open-data/ show the newsletter and Donate in the panel's top-left corner with the page full width
-    below; https://kidsoverprofits.org/ca-reports/ keeps the old side column; narrowing the window under 1025 puts the sidebar
-    after the content. Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.
-    Live 2026-10-21 (e989fe74 + 21af5267, the one-time LiteSpeed purge): the float measured on / and /open-data/ at 1360,
-    /ca-reports/ unfloated, back after the content at 800; bare text 0 of 30, contrast clean on /, /open-data/, a facility
-    page, /ca-reports/ (and / at 390). Open: the owner's own look at 1280+ and a narrow window.
+28. **Desktop sidebar sticky column** (2026-10-21, docs/plan/4.7 item 16): at 1280+ wide, open a post (any
+    https://kidsoverprofits.org/ blog post), https://kidsoverprofits.org/ and a facility page: the newsletter and Donate sit in the
+    side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom.
+    https://kidsoverprofits.org/wp-content/themes/child/js/sidebar-float.js should 404 (deleted by .cpanel.yml). Under 1025 the sidebar follows the content.
+    Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.

@@ -64,14 +64,10 @@ function kadence_child_enqueue_styles() {
         );
     }
 
-    // Primary sidebar tweaks (newsletter embed spacing) + desktop float (sidebar-float.js)
+    // Primary sidebar tweaks (newsletter embed spacing, sticky column on desktop)
     $sidebar_css = get_stylesheet_directory() . '/css/sidebar.css';
     if (is_active_sidebar('sidebar-primary') && file_exists($sidebar_css)) {
         wp_enqueue_style('kop-sidebar', get_stylesheet_directory_uri() . '/css/sidebar.css', array('kadence-parent-style'), filemtime($sidebar_css));
-        $sidebar_js = get_stylesheet_directory() . '/js/sidebar-float.js';
-        if (file_exists($sidebar_js)) {
-            wp_enqueue_script('kop-sidebar-float', get_stylesheet_directory_uri() . '/js/sidebar-float.js', array(), filemtime($sidebar_js), true);
-        }
     }
 
     // Homepage widget styles (loaded whenever the homepage sidebar has active widgets)
@@ -132,11 +128,11 @@ add_action('wp_enqueue_scripts', 'kadence_child_enqueue_styles');
 
 /**
  * LiteSpeed caches pages whole, so cached copies keep their old script tags:
- * when the sidebar float first ships (or changes how it loads), clear the
- * cache once so every page with a sidebar carries js/sidebar-float.js.
+ * when how the sidebar loads changes, clear the cache once so no cached page
+ * still carries the old tags (version 2 drops js/sidebar-float.js).
  * Bump KOP_SIDEBAR_FLOAT_VERSION with any such change.
  */
-if (!defined('KOP_SIDEBAR_FLOAT_VERSION')) define('KOP_SIDEBAR_FLOAT_VERSION', '1');
+if (!defined('KOP_SIDEBAR_FLOAT_VERSION')) define('KOP_SIDEBAR_FLOAT_VERSION', '2');
 add_action('init', function () {
     if (get_option('kop_sidebar_float_version') === KOP_SIDEBAR_FLOAT_VERSION) return;
     update_option('kop_sidebar_float_version', KOP_SIDEBAR_FLOAT_VERSION, false);
