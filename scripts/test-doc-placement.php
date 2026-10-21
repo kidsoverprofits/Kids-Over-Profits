@@ -74,7 +74,13 @@ foreach (array('wpdl_fbv_attachment_folder', 'wpdl_kop_media_folder_tags', 'wpdl
 $pdo->exec('CREATE UNIQUE INDEX temp.dp_rel ON wpdl_fbv_attachment_folder (folder_id, attachment_id)');
 $pdo->exec('CREATE UNIQUE INDEX temp.dp_tag ON wpdl_kop_media_folder_tags (folder_id, attachment_id)');
 
+// Young adult programs (the records DB): a TEMP copy with the folder column, written by a move to one.
+$pdo->exec('CREATE TEMP TABLE young_adult_programs AS SELECT *, NULL AS document_folder_id FROM main.young_adult_programs');
+function kop_seed_pdo() { return $GLOBALS['pdo']; }
+
 require_once dirname(__DIR__) . '/inc/woodbury-mentions.php';
+require_once dirname(__DIR__) . '/inc/woodbury-create.php';
+require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
 require_once dirname(__DIR__) . '/inc/inline-edit.php';
 require_once dirname(__DIR__) . '/inc/doc-placement.php';
 
@@ -187,6 +193,35 @@ if (!$fid) {
     list($src, $parts) = kop_ie_resolve($res['undo']);
     call_user_func($src['save'], $parts, array());
 }
+
+echo "-- Move to a young adult program --\n";
+$yp = $pdo->query("SELECT id, name FROM young_adult_programs WHERE review = 'approved' ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+if (!$yp) {
+    echo "SKIP no young adult program in the mirror\n";
+} else {
+    $yid = (int) $yp['id'];
+    $hits = kop_dp_ya_search($yp['name']);
+    $check('"Move to" finds a young adult program by name', in_array('y:' . $yid, array_column($hits, 'value'), true)
+        && ($hits[0]['kind'] ?? '') === 'Young adult program', wp_json_encode($hits[0] ?? null));
+    $t = kop_dp_target('y:' . $yid);
+    $parent = (string) $pdo->query('SELECT p.name FROM wpdl_fbv f JOIN wpdl_fbv p ON p.id = f.parent WHERE f.id = ' . (int) $t[0])->fetchColumn();
+    $check('its folder is made under "Young Adult Programs" and kept on the program', $t[0] > 0 && $t[2] === true && $parent === KOP_YA_FOLDER_PARENT
+        && (int) kop_ya_get($pdo, $yid)['document_folder_id'] === $t[0], $parent);
+    $check('the move links its card', strpos(kop_dp_target_url('y:' . $yid), '#kop-ya-program-' . $yid) !== false);
+    $before = $filed($woodbury_doc);
+    $res = kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'move', 'dp_rows' => array('r:' . $sub['sub']), 'dp_target' => 'y:' . $yid, 'dp_keep_sub' => true));
+    $now = $filed($woodbury_doc);
+    $check('the document lands in a Woodbury subfolder of the program\'s folder', count($now) === 1
+        && (int) $pdo->query('SELECT parent FROM wpdl_fbv WHERE id = ' . (int) $now[0])->fetchColumn() === $t[0], $res['message']);
+    $check('the message names the program', strpos($res['message'], $yp['name'] . ' (young adult program)') !== false, $res['message']);
+    list($src, $parts) = kop_ie_resolve($res['undo']);
+    call_user_func($src['save'], $parts, array());
+    $check('undo puts it back', $filed($woodbury_doc) === $before);
+    $threw = '';
+    try { kop_dp_target('y:999999'); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+    $check('a program that is not there is refused', stripos($threw, 'not found') !== false, $threw);
+}
+
 $threw = '';
 try { kop_dp_apply($root_doc, $home, array('dp_action' => 'move', 'dp_rows' => array('r:' . $home), 'dp_target' => '')); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
 $check('a move with no target is refused', $threw !== '' && $filed($root_doc) === array_values(array_unique($filed($root_doc))), $threw);
