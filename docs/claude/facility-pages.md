@@ -75,6 +75,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-investors.php   #
 # Edit in place (inc/inline-edit.php, js/inline-edit.js): admins get a pencil on every marked element
 # (kop_ie_attr('<source>:<what>')) that saves through the source's own save path; a new page or field gets a marker there
 php scripts/test-inline-edit.php                  # every facility sent back unchanged is unchanged, edits land, against tmp/prod.sqlite
+# Who runs it: identification.currentOperator, else the first company link (kop_v2_operators_for_facilities(), current links
+# first, returns 'relationship'). When that link is 'past' the page, cards and JSON-LD word it as the former operator, never
+# "operated by"; a new place that prints the operator reads $page['operator']['past'] (or the card's past_operators)
 # One name shows once on facility and company pages: "Formerly", "Later called", "Also known as" / "Other names" never repeat a name
 # between them (or inside one), nor the page's own title or "Now known as". Priority: Formerly, then Later called, then Also known as.
 # Names compare by kop_facility_pages_name_key(); every new name list on a page goes through kop_facility_pages_dedupe_name_lists()
