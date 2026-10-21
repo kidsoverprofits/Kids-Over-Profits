@@ -93,6 +93,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # its unanswered items back (gone = KOP_VOLP_RELEASED: out of the project, free for the next) and closes, closed_why 'stalled'; never while the
 # last message about it is the volunteer's. A finished batch closes a day after its last answer (kop_volp_finished_close_hours), 'finished'.
 # Calls stay open to check; the Projects list keeps closed batches with calls waiting up with the open ones
+# Brief FAQ (inc/volunteer-faq.php, option kop_volf): per queue, live entries show on every brief as "Questions others asked" (kop_volf_live() via
+# kop_volp_public()); edited at Volunteer Reviewers > Brief FAQ (?faq=<source>). kop_volf_seed() drafts are added once, never live until published;
+# each has an admin-only 'from' (what it rests on, what goes the other way). A new seed = one entry there with a new id
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
 # 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);

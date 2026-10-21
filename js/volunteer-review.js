@@ -699,6 +699,11 @@
             if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
             projBrief.appendChild(dl);
         }
+        if (p.faq && p.faq.length) {
+            var faq = el('dl', { class: 'kop-vol-examples' });
+            p.faq.forEach(function (f) { faq.appendChild(el('dt', { text: f.q })); faq.appendChild(el('dd', { text: f.a })); });
+            projBrief.appendChild(el('details', { class: 'kop-vol-faq' }, [el('summary', { text: 'Questions others asked (' + p.faq.length + ')' }), faq]));
+        }
         projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: research
             ? 'Could not find it? Say where you looked: that helps too. An admin reads every answer before anything changes.'
             : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));

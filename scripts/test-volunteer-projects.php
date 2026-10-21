@@ -398,6 +398,32 @@ $check('an admin close has no reason', (kop_volp_set_status($pq, 'closed') || tr
 foreach (array($pw, $pn, $pnext) as $x) kop_volp_set_status($x, 'closed');
 $wpdb->query('DELETE FROM ' . kop_volm_table() . ' WHERE project_id = ' . (int) $pw);
 
+echo "\nBrief FAQ\n";
+unset($GLOBALS['kop_test_options']['kop_volf'], $GLOBALS['kop_test_options']['kop_volf_seeded']);
+$faq = kop_volf_list($Q);
+$check('the drafts from the Not sure notes are added', count($faq) === count(kop_volf_seed()[$Q]) && !array_filter(array_column($faq, 'live')));
+$check('every draft says what it rests on', !array_filter($faq, function ($e) { return trim((string) $e['from']) === ''; }));
+$check('a seed answer names no volunteer to volunteers', !array_filter($faq, function ($e) { return preg_match('/greenfionn|mission_eris|Prestigious|Seelie|awfully/i', $e['q'] . $e['a']); }));
+$check('the answers keep to the brief\'s own words (recommend, not decide)', !array_filter($faq, function ($e) { return stripos($e['a'], 'recommend') === false && stripos($e['a'], 'Not sure') === false; }));
+list($pfaq) = kop_volp_create(array('source' => $Q, 'size' => 1, 'volunteer_id' => $sam_id));
+$check('drafts never reach the brief', kop_volp_public(kop_volp_get($pfaq), $sam_id)['faq'] === array());
+$first = $faq[0];
+$res = kop_volf_admin_post('faq_save', array('kop_volf_source' => $Q, 'kop_volf_id' => $first['id'], 'kop_volf_q' => $first['q'], 'kop_volf_a' => $first['a'] . ' Edited.', 'kop_volf_live' => '1'));
+$pub = kop_volp_public(kop_volp_get($pfaq), $sam_id)['faq'];
+$check('Publish puts it on every brief of the queue', $res[1] === '' && count($pub) === 1 && substr($pub[0]['a'], -7) === 'Edited.', json_encode($pub));
+$check('the brief carries only the question and the answer', array_keys($pub[0]) === array('q', 'a'));
+$check('another queue\'s brief does not show it', kop_volf_live('scraper-finds') === array());
+$check('a research brief has none', kop_volp_public(kop_volp_get($r_any = kop_volp_create_research(array('source' => 'research:custom', 'questions' => "Who ran it?", 'volunteer_id' => $sam_id))[0]), $sam_id)['faq'] === array());
+kop_volp_set_status($r_any, 'closed');
+kop_volf_admin_post('faq_save', array('kop_volf_source' => $Q, 'kop_volf_id' => $first['id'], 'kop_volf_q' => $first['q'], 'kop_volf_a' => $first['a'], 'kop_volf_live' => '0'));
+$check('Unpublish takes it off again', kop_volf_live($Q) === array());
+kop_volf_admin_post('faq_delete', array('kop_volf_source' => $Q, 'kop_volf_id' => $faq[1]['id']));
+$check('a deleted seed stays deleted', !in_array($faq[1]['id'], array_column(kop_volf_list($Q), 'id'), true) && count(kop_volf_list($Q)) === count($faq) - 1);
+$new = kop_volf_save($Q, '', array('q' => 'Is a missed meal a yes?', 'a' => 'Recommend approve when it was a punishment.', 'live' => true));
+$check('an admin can add their own', in_array($new, array_column(kop_volf_list($Q), 'id'), true) && count(kop_volf_live($Q)) === 1);
+$check('a question needs its answer', $throws(function () use ($Q) { kop_volf_save($Q, '', array('q' => 'Half', 'a' => '')); }) !== '');
+kop_volp_set_status($pfaq, 'closed');
+
 echo "\nWhat volunteers can open\n";
 $check('admin screens are not links for volunteers', kop_vol_admin_only_url('https://example.test/wp-admin/admin-ajax.php?action=kop_wb_view&key=x&nonce=y')
     && kop_vol_admin_only_url('https://example.test/theme/api/review-inspection-highlights.php?report=1') && !kop_vol_admin_only_url('https://example.test/wp-content/uploads/2024/12/woodbury-1108.pdf#page=20'));

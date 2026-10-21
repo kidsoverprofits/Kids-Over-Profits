@@ -136,6 +136,15 @@ button.kop-vol-tab.is-active:focus {
     margin: 0 0 12px;
 }
 
+.kop-vol-faq {
+    margin: 0 0 10px;
+}
+
+.kop-vol-faq[open] summary {
+    margin-bottom: 8px;
+}
+
+.kop-vol-faq summary,
 .kop-vol-fulltext summary {
     cursor: pointer;
     font-weight: 600;

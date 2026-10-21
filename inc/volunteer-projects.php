@@ -631,6 +631,7 @@ function kop_volp_public(array $p, $vid) {
         'yes' => (string) $p['yes_example'], 'no' => (string) $p['no_example'], 'note' => (string) $p['note'],
         'minutes' => (int) $p['minutes'], 'total' => count($rows), 'done' => $done, 'mine' => (int) $p['volunteer_id'] === (int) $vid && $vid,
         'kind' => $research ? 'research' : 'review', 'link_kinds' => $research ? kop_volr_link_kinds() : null,
+        'faq' => $research ? array() : kop_volf_live((string) $p['source']),
     );
 }
 
@@ -975,6 +976,7 @@ function kop_volp_admin_post() {
     $id = (int) ($_POST['kop_volp_id'] ?? 0);
     $in = wp_unslash($_POST);
     try {
+        if ($faq = kop_volf_admin_post($do, $in)) return $faq;
         if ($do === 'create') {
             $who = (string) ($in['kop_volp_who'] ?? '0');
             if ($who === 'new' && trim((string) ($in['kop_volp_new_name'] ?? '')) === '') throw new RuntimeException('Give the new person a name.');
@@ -1056,6 +1058,8 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
             <?php endif; ?>
         </div>
     <?php endif; ?>
+
+    <?php kop_volf_admin_summary(); ?>
 
     <h3>Start a project</h3>
     <form method="post" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px 16px;max-width:900px;align-items:end">
@@ -1193,6 +1197,9 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
     <?php endif; ?>
 
     <h3>The brief they see</h3>
+    <?php if (!$research) : ?>
+        <p><a href="<?php echo esc_url(kop_volf_admin_url($p['source'])); ?>">Questions others asked</a>: <?php echo count(kop_volf_live($p['source'])); ?> live on every brief of this queue.</p>
+    <?php endif; ?>
     <form method="post" style="max-width:900px">
         <?php echo $nonce; ?><input type="hidden" name="kop_volp_do" value="brief"><input type="hidden" name="kop_volp_id" value="<?php echo (int) $p['id']; ?>">
         <p><label>Title<br><input type="text" name="kop_volp_title" value="<?php echo esc_attr($p['title']); ?>" style="width:100%"></label></p>
@@ -1222,4 +1229,5 @@ function kop_volp_admin_project_messages(array $p, array $names) {
 }
 
 require_once __DIR__ . '/volunteer-research.php';
+require_once __DIR__ . '/volunteer-faq.php';
 require_once __DIR__ . '/volunteer-messages.php';

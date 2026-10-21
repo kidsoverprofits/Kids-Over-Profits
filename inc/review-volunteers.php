@@ -905,6 +905,7 @@ function kop_vol_admin_page() {
         <?php endif; ?>
 
         <?php if ($project) : kop_volp_admin_project($project, $nonce, $vols); ?></div><?php return; endif; ?>
+        <?php if (isset($_GET['faq'])) : kop_volf_admin_page(sanitize_key(wp_unslash($_GET['faq'])), $nonce); ?></div><?php return; endif; ?>
         <?php $thread = (int) ($_GET['messages'] ?? 0);
         if ($thread) : kop_volm_admin_thread($thread, $nonce); ?></div><?php return; endif; ?>
         <?php kop_volm_admin_section($nonce); ?>

@@ -8,7 +8,7 @@ link rows), "Save my answer" posts the answer with its links and moves on,
 this project" names the project in the message box, a sent message shows in
 the conversation, a reply waiting is marked New with a line at the top and is
 marked read once on screen, the review project still shows its card with
-"Ask a question about this one", "Your past answers" lists an answer, and
+"Ask a question about this one", the brief's "Questions others asked", "Your past answers" lists an answer, and
 nothing is wider than a phone screen. Screenshots go to --shots.
 
     python scripts/test-volunteer-review-ui.py [--shots tmp/volunteer-review-ui]
@@ -38,7 +38,7 @@ RESEARCH = {"id": 7, "title": "When did these programs close?: AZ", "question": 
             "yes": "\"Closed in March 2009\" with a link to a news story.", "no": "A year with no link.", "note": "",
             "minutes": 15, "total": 3, "done": 0, "mine": True, "kind": "research", "link_kinds": LINK_KINDS}
 REVIEW = {"id": 8, "title": "Serious findings from state inspections", "question": "Does this finding describe real harm?",
-          "yes": "A restraint.", "no": "Paperwork.", "note": "", "minutes": 5, "total": 2, "done": 0, "mine": True, "kind": "review", "link_kinds": None}
+          "yes": "A restraint.", "no": "Paperwork.", "note": "", "minutes": 5, "total": 2, "done": 0, "mine": True, "kind": "review", "link_kinds": None, "faq": [{"q": "The finding says allegations. Approve?", "a": "Recommend approve when the inspector cites the facility over it."}]}
 QUESTIONS = [
     {"source": "research", "project_id": 7, "key": "f12166", "title": "A Dream Called Hope LLC", "question": RESEARCH["question"],
      "record": {"name": "A Dream Called Hope LLC", "url": "https://kidsoverprofits.org/facility/a-dream-called-hope-llc-az/"},
@@ -296,6 +296,12 @@ def main():
             page.wait_for_selector(".kop-vol-card:not(.kop-vol-research)")
             rc = page.locator(".kop-vol-card").first
             check("a review project still shows its card", rc.locator("button", has_text="Recommend approve").count() == 1)
+            faq = page.locator(".kop-vol-brief details.kop-vol-faq")
+            check("the brief has Questions others asked, folded", faq.count() == 1 and "(1)" in faq.locator("summary").inner_text() and not faq.locator("dd").is_visible())
+            faq.locator("summary").click()
+            check("...and opens on the answer", "cites the facility" in faq.locator("dd").inner_text())
+            if shots:
+                page.screenshot(path=str(shots / ("brief-faq-%d.png" % width)), full_page=True)
             rc.locator("button", has_text="Ask a question about this one").click()
             check("asking about one item names it", "Inappropriate restraint" in page.locator(".kop-vol-msg-about").inner_text())
 
