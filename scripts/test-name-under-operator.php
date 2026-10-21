@@ -74,7 +74,9 @@ $alsos = array();
 foreach ($raw as $oid => $list_then) foreach (kop_facility_eras_name_under_settle($list_then) as $fid => $then) if ($then !== null) $alsos[$oid . ':' . $fid] = $then['also'] ?? array();
 $k = $by_name_early['Three Springs Inc.:13678'] ?? null;
 if ($k !== null) {
-    $check('Three Springs Inc. lists 13678 with its other names then', ($alsos[$k] ?? array()) === array('Three Springs Turning Point', 'Three Springs New Directions'), implode(', ', $alsos[$k] ?? array()));
+    $got_also = $alsos[$k] ?? array();
+    sort($got_also);
+    $check('Three Springs Inc. lists 13678 with its other names then', $got_also === array('Three Springs New Direction', 'Three Springs Turning Point - Girls'), implode(', ', $alsos[$k] ?? array()));
 }
 $k = $by_name_early['Three Springs Inc.:9686'] ?? null;
 if ($k !== null) {
@@ -101,8 +103,10 @@ $cases = array(
     array('Sequel TSI', 13639, 'Sequel TSI Courtland'),
     array('Sequel TSI', 13678, 'Sequel TSI Owens Cross Rds'),
     array('Three Springs Inc.', 12164, 'Three Springs Sierra Vista Schools'),
-    // Only one program keeps a name two records list: the one with it as a past name.
-    array('Three Springs Inc.', 11903, 'Three Springs of North Carolina'),
+    // A name two records list goes to the one with it as a past name; with both
+    // (Auldern Academy gained it in 2026-10, docs/RESEARCH-TASKS.md) to neither.
+    array('Three Springs Inc.', 11903, ''),
+    array('Three Springs Inc.', 11939, ''),
     array('Three Springs Inc.', 9637, ''),
     // A company still running a program runs it under today's name.
     array('Sequel TSI', 9686, ''),

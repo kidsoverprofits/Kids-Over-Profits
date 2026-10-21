@@ -442,6 +442,13 @@ findings are not on any record:
   #100014 gone, the Camp E-How-Kee years have no record; #11145 starts in 2012 as Brooksville Youth Academy.
   To do: decide whether the Camp E-How-Kee era needs its own record again (name eras are separate records).
 
+### Which program was Three Springs of North Carolina (found 2026-10-20, test-name-under-operator)
+
+Two records hold "Three Springs of North Carolina" as a past name: #11903 (Sequel TSI of North Carolina,
+2009-2010) and #11939 (Auldern Academy, Siler City, closed 2021; the name was added there in 2026-10). With both
+claiming it, neither page lists it under Three Springs Inc. To do: find which program carried the name and when
+(NC DHHS licence records, Woodbury Reports), then take it off the other record or give each its own years.
+
 ---
 
 ## Settled
