@@ -411,7 +411,9 @@
     "The Bridge",
     "The Village",
     "Summit View",
-    "Our Home Inc."
+    "Our Home Inc.",
+    "Child and Family Services",
+    "Royal Alexandra Hospital"
   ],
   "_ignoreAliasesComment": "Names that must never count as a facility match or be searched on their own. For facility records whose name is not a real place name (a record literally named \"Kansas\" turned every Kansas City crime story into a facility hit). Bare US state names are ignored automatically. Compared case-insensitively after stripping punctuation.",
   "ignoreAliases": [

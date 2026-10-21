@@ -137,8 +137,10 @@ define('GN_BATCH_CAP', 25);
 // confirmations a run, the rest carried to the next run.
 define('AI_CONFIRM_PER_RUN', (int)(getenv('AI_CONFIRM_PER_RUN') ?: 30));
 // The sweep's finds are resolved and submitted every this many requests,
-// while Google still answers the link resolver (see the header).
-define('GN_SUBMIT_EVERY', 50);
+// while Google still answers the link resolver (see the header). At 50 the
+// first resolve of a step was already refused (Oct 21: after 50 sweep
+// requests, and once after only the 28 topic requests).
+define('GN_SUBMIT_EVERY', 25);
 // When each name was last queried is kept this long in the state file.
 define('SWEPT_AT_DAYS', 30);
 
@@ -2408,8 +2410,18 @@ function main(): void {
                 // the run's: counted apart so it never fails the cron job.
                 // An AI provider out of quota is the same: the article is carried
                 // to the next run below, nothing is lost.
-                if ($r['stage'] === 'ai' && preg_match('/Could not fetch article content|has no article text/i', $r['error'] ?? '')) {
+                // Such a page answers the same next run (the 403s and timeouts are
+                // to our IP), so it goes to Scraper finds with its headline for
+                // the owner to send on, instead of being retried and dropped.
+                $unreadable = $r['stage'] === 'ai' && preg_match('/Could not fetch article content|has no article text/i', $r['error'] ?? '');
+                if ($unreadable) {
                     $totals['unreadable']++;
+                    $postResolveLog[] = [
+                        'link' => $q['candidate']['link'], 'title' => $q['candidate']['title'], 'origin' => $q['candidate']['origin'],
+                        'host' => host_of($q['candidate']['link']), 'facilityQuery' => $q['candidate']['facilityQuery'] ?? null,
+                        'reason' => 'unreadable',
+                        'meta' => ['score' => $q['evalResult']['score'], 'reasons' => $q['evalResult']['reasons'], 'error' => substr((string)$r['error'], 0, 120)]
+                    ];
                 } elseif ($r['stage'] === 'ai' && preg_match('/rate limit/i', $r['error'] ?? '')) {
                     $totals['aiRateLimited']++;
                 } else {
@@ -2418,7 +2430,7 @@ function main(): void {
                 // AI-stage failure says nothing bad about the URL (rate limit,
                 // provider hiccup, timeout) — un-mark and carry it to the next
                 // run. Submit-stage failures (e.g. duplicates) stay marked.
-                if ($r['stage'] === 'ai') {
+                if ($r['stage'] === 'ai' && !$unreadable) {
                     unset($seen[$q['urlHash']], $seen[hash_url($q['candidate']['link'])]);
                     $defer($q, 'AI stage failed');
                 }
@@ -2602,7 +2614,7 @@ function main(): void {
     if ($totals['carriedIn']) kop_log("  carried in:          {$totals['carriedIn']}");
     kop_log("  submitted (ok):      {$totals['submitted']}" . ($totals['topicSubmitted'] ? " ({$totals['topicSubmitted']} from topic queries)" : ''));
     kop_log("  submitted (errors):  {$totals['submitErrors']}");
-    if ($totals['unreadable']) kop_log("  pages unreadable:    {$totals['unreadable']} (blocked or no article text; retried next run)");
+    if ($totals['unreadable']) kop_log("  pages unreadable:    {$totals['unreadable']} (blocked or no article text; logged for Scraper finds)");
     if ($totals['aiRateLimited']) kop_log("  AI out of quota:     {$totals['aiRateLimited']} (carried to the next run)");
     if ($totals['topicDeferred']) kop_log("  topic deferred (cap): {$totals['topicDeferred']}");
     kop_log("  rejected (pre-fetch):  {$totals['rejected']}");
