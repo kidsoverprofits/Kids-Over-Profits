@@ -86,7 +86,9 @@ $check('unlinked: Sequel TSI\'s four entries and Paradigm\'s one, no provenance 
 
 kop_inv_maybe_import();
 $check('import: once, at the first admin load', get_option('kop_inv_import') === KOP_INV_IMPORT_VERSION);
-$check('import: 5 investors, 5 links, 10 log rows', $count('investors') === 5 && $count('investor_links') === 5 && $count('investor_log') === 10,
+// One investor and one link per unlinked entry (company #500017 gained two since 2026-10: CIC Partners, Cressey & Company).
+$n = count($entries);
+$check("import: $n investors, $n links, " . (2 * $n) . ' log rows', $n >= 5 && $count('investors') === $n && $count('investor_links') === $n && $count('investor_log') === 2 * $n,
     $count('investors') . '/' . $count('investor_links') . '/' . $count('investor_log'));
 $check('import: nothing left unlinked', kop_inv_unlinked_entries() === array());
 $alt = kop_inv_find_by_name('Altamont Capital Partners');
@@ -96,7 +98,7 @@ $check('import: Altamont is a private equity firm, majority owner of company 20 
     && $altl[0]['detail'] === 'majority owner from 2017');
 $check('import: Alaris is royalty finance', ($a = kop_inv_find_by_name('Alaris Royalty')) && $a['kind'] === 'Royalty or specialty finance');
 kop_inv_maybe_import();
-$check('import: a second run adds nothing', $count('investors') === 5 && $count('investor_links') === 5);
+$check('import: a second run adds nothing', $count('investors') === $n && $count('investor_links') === $n);
 
 // ---- Pages ----------------------------------------------------------------
 $free = array('Patriot Capital (growth financing, exited 2008)', 'Somebody Else LLC');
