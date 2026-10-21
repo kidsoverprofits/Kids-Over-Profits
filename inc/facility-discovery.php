@@ -867,7 +867,9 @@ function kop_facdisc_scan_article(PDO $pdo, array $news, $write) {
 
 /**
  * Closure reports whose program had no record: match them again now that
- * the scan may have created it.
+ * the scan may have created it, by the closure queue's own rules
+ * (kop_closure_settle_report(): "Embark Behavioral Health (formerly
+ * Shelterwood Academy)" is Shelterwood's closure, not Embark's).
  */
 function kop_facdisc_rematch_closure_reports(PDO $pdo) {
     if (!$pdo->query("SHOW TABLES LIKE 'facility_closure_reports'")->fetchColumn()) {
@@ -877,7 +879,22 @@ function kop_facdisc_rematch_closure_reports(PDO $pdo) {
     $n = 0;
     $status = $pdo->prepare('SELECT status FROM facilities_v2 WHERE id = ?');
     $set = $pdo->prepare("UPDATE facility_closure_reports SET facility_id = ?, status = ? WHERE id = ? AND status = 'unmatched'");
-    foreach ($pdo->query("SELECT id, program_name, target_status, closure_date FROM facility_closure_reports WHERE status = 'unmatched'")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+    $rows = $pdo->query("SELECT r.id, r.program_name, r.location, r.stage, r.target_status, r.closure_date, n.publication_date
+                           FROM facility_closure_reports r LEFT JOIN news_submissions n ON n.id = r.news_id
+                          WHERE r.status = 'unmatched' ORDER BY r.id")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $r) {
+        if (function_exists('kop_closure_settle_report')) {
+            list($fid, $now_status) = kop_closure_settle_report($pdo, array(
+                'program' => $r['program_name'], 'location' => (string) $r['location'], 'facility_id' => null,
+                'stage' => $r['stage'], 'target_status' => $r['target_status'], 'date' => (string) $r['closure_date'],
+            ), (string) $r['publication_date'], $index, (int) $r['id']);
+            if (!$fid) {
+                continue;
+            }
+            $set->execute(array($fid, $now_status, (int) $r['id']));
+            $n++;
+            continue;
+        }
         $fid = kop_resolve_mention_to_facility($r['program_name'], $index);
         if ($fid === null) {
             continue;

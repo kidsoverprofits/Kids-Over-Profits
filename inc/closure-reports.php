@@ -1049,9 +1049,9 @@ function kop_closure_scan_cron() {
         // The queue as it stood before the 2026-10-20 rules, settled again once
         // ('b': the name match no longer counts "youth" or "systems"; 'c': rows
         // an earlier pass moved out of the queue are settled again too).
-        if (get_option('kop_closure_resettled') !== '2026-10-20d') {
+        if (get_option('kop_closure_resettled') !== '2026-10-20e') {
             $moved = kop_closure_resettle_open($pdo);
-            update_option('kop_closure_resettled', '2026-10-20d', false);
+            update_option('kop_closure_resettled', '2026-10-20e', false);
             error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at
