@@ -112,8 +112,11 @@ if (!$no_db) {
             continue;
         }
         $html = ob_get_clean();
-        // The document library tiles can carry an issue's own title; look at the page's prose and citation links.
-        $main = preg_replace('#<section class="kop-fp-section[^"]*" id="documents".*?</section>#s', '', $html);
+        // The document library tiles can carry an issue's own title, and News coverage names each item's outlet
+        // (Woodbury Reports issues are news items since the SCIAD import, 2026-10-12); look at the page's prose and citation links.
+        $main = preg_replace('#<section class="kop-fp-section[^"]*" id="(?:documents|[\w-]*news)".*?</section>#s', '', $html);
+        // Someone who worked at Woodbury Reports has it as a place in their past jobs: an employer, not a citation.
+        $main = preg_replace('#<span class="kop-fp-career-place">Woodbury Reports</span>#', '', $main);
         $links = array();
         preg_match_all('#<a [^>]*kop-citation-link[^>]*>.*?</a>#s', $main, $lm);
         foreach ($lm[0] as $a) $links[] = $a;
