@@ -206,6 +206,13 @@ $check('a skipped page moves to the Skipped tab', !in_array(2301, array_map(func
     && in_array(2301, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(true)), true));
 
 echo "-- Rule drafts stored --\n";
+// The site stored its rule drafts (236 on 2026-10-21): undo them on the copy first, so the store has its pages again.
+$site_log = (new PDO('sqlite:' . $mirror))->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_seo_drafts_log'")->fetchColumn();
+$site_log = $site_log ? @unserialize($site_log) : array();
+$GLOBALS['kop_test_options']['kop_seo_drafts_log'] = is_array($site_log) ? $site_log : array();
+foreach (array_reverse($GLOBALS['kop_test_options']['kop_seo_drafts_log']) as $e) {
+    if (($e['via'] ?? '') === 'rules' && empty($e['undone'])) kop_seo_drafts_undo($e['token']);
+}
 $GLOBALS['kop_test_options'] = array_diff_key($GLOBALS['kop_test_options'], array('kop_seo_drafts_log' => 1, 'kop_seo_drafts_skipped' => 1, 'kop_seo_kw_wording' => 1));
 $before = kop_seo_drafts_candidates(false);
 $stored = kop_seo_drafts_store_rule_drafts();
