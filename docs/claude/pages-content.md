@@ -42,7 +42,12 @@ php scripts/test-indigenous-schools.php          # the first move and the page, 
 # /young-adult-programs/, managed at KOP Tools > Young Adult Programs, filled from Woodbury Facts' "Young adult programs (18+)" tab
 php scripts/test-young-adult-programs.php       # records, facts + exact undo, every no-record Woodbury item, the page
 php scripts/test-young-adult-move.php           # the first move of 18+ facility records, on an in-memory copy (sync the mirror first)
-# Items still naming a moved record (kop_ya_moved_from_map(): source "Moved from facility record N") are filed on the program: Woodbury
+#   ...and the second pass, kop_ya_maybe_link_and_move() (2026-10-21, log in option kop_ya_twins_log): the moved programs' facility-era
+#   folders (kop_ya_folder_links()), then three second copies moved in (kop_ya_twin_moves(); kop_ya_move_facility() 'into' a program,
+#   an article on the copy becomes a program link). seeds/new-facilities.json never re-adds a young adult program's name
+#   (kop_apply_new_facility_seeds(); it brought Four Circles and Dragonfly back the night of the first move)
+# Items still naming a moved record (kop_ya_moved_from_map(): source "Moved from facility record N", or option kop_ya_moved_into for a
+# record moved into a program it did not make) are filed on the program; Woodbury Reports picks the program for one (kop_wb_moved_program()): Woodbury
 # Facts moves them to its young adult tab, program picked (kop_wbf_moved_to_ya(), after every facts load and hourly); Fornits cards offer
 # "Add to <program>" (kop_fornits_ya_file(), a fact citing the post; Undo takes it off)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=ya-moved

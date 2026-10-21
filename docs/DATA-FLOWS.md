@@ -83,7 +83,9 @@ request.
   These write the table directly instead:
   - people sync (inc/people.php:754, 919, 944; no lock)
   - merge undo (inc/facility-merge.php:730)
-  - the young adult move (inc/young-adult-programs.php:512)
+  - the young adult move (`kop_ya_move_facility()`; also deletes the
+    record's news links: a deleted article's, or one it lists on the
+    program when asked)
   - program homes undo (inc/program-homes.php:679)
   - record to company (inc/record-to-company.php: deletes the row, its Undo
     re-inserts it)

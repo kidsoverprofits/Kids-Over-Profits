@@ -1,7 +1,9 @@
 <?php
 /**
  * Offline check of the first move of young adult programs out of the
- * facility data (kop_ya_maybe_migrate() in inc/young-adult-programs.php).
+ * facility data (kop_ya_maybe_migrate() in inc/young-adult-programs.php), and
+ * of the second pass (kop_ya_maybe_link_and_move(): the moved programs'
+ * folders, and the second copies of three of them moved in).
  *
  *   php scripts/test-young-adult-move.php [--db=tmp/prod.sqlite]
  *
@@ -81,7 +83,7 @@ class KOP_YA_Test_Wpdb {
     public function get_results($sql, $o = ARRAY_A) { return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC); }
     public function get_col($sql) { return $this->pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN); }
     public function get_var($sql) { $v = $this->pdo->query($sql)->fetchColumn(); return $v === false ? null : $v; }
-    public function query($sql) { return $this->pdo->exec($sql); }
+    public function query($sql) { return $this->pdo->exec(preg_replace('/^INSERT IGNORE /i', 'INSERT OR IGNORE ', $sql)); }
     public function update($table, array $data, array $where) {
         $set = implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($data)));
         $w = implode(' AND ', array_map(function ($c) { return "$c = ?"; }, array_keys($where)));
@@ -98,7 +100,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec('ATTACH DATABASE ' . $pdo->quote($mirror) . ' AS m');
 foreach (array('facilities_v2', 'wpdl_kop_facility_locations', 'wpdl_kop_operator_facilities', 'wpdl_kop_facility_identity',
     'wpdl_kop_facility_addresses', 'wpdl_kop_woodbury_facts', 'news_facility_links', 'news_facility_candidates',
-    'lawsuit_facility_links', 'facility_closure_reports') as $t) {
+    'lawsuit_facility_links', 'facility_closure_reports', 'news_submissions', 'wpdl_fbv', 'wpdl_kop_folder_links') as $t) {
     $pdo->exec("CREATE TABLE $t AS SELECT * FROM m.$t");
 }
 // Once the move has run on the site the mirror no longer has the seven
@@ -124,8 +126,9 @@ $pdo->exec("CREATE TABLE young_adult_programs (id INTEGER PRIMARY KEY AUTOINCREM
     other_names TEXT, city TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT '', country TEXT NOT NULL DEFAULT '', ages TEXT NOT NULL DEFAULT '',
     program_type TEXT NOT NULL DEFAULT '', run_by TEXT NOT NULL DEFAULT '', opened INTEGER, closed INTEGER, status TEXT NOT NULL DEFAULT 'Unknown',
     notes TEXT, links TEXT, facts TEXT, review TEXT NOT NULL DEFAULT 'approved', source TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
-    created_at TEXT NOT NULL, updated_at TEXT NOT NULL)");
-update_option('kop_ya_db', '1');
+    created_at TEXT NOT NULL, updated_at TEXT NOT NULL, document_folder_id INTEGER)");
+// The folder links table exists (copied above); the MySQL install is not run here.
+function kop_folder_links_install() {}
 $GLOBALS['pdo'] = $pdo;
 $GLOBALS['wpdb'] = new KOP_YA_Test_Wpdb($pdo);
 
@@ -133,6 +136,7 @@ require_once dirname(__DIR__) . '/inc/facility-store.php';
 require_once dirname(__DIR__) . '/inc/facility-migration.php';
 require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
 require_once dirname(__DIR__) . '/inc/woodbury-facts.php';
+update_option('kop_ya_db', KOP_YA_DB_VERSION);
 
 $failed = 0;
 function check($ok, $what) {
@@ -189,8 +193,58 @@ if ($site_moved) {
     $html = ob_get_clean();
     check(substr_count($html, 'class="kop-ya-program"') === 7, 'seven programs on the page');
     check(strpos($html, 'Woodbury Reports, July 2009, p. 7') !== false, 'with their Woodbury sources');
+    kop_ya_test_second_pass($pdo);
     echo $failed ? "\n$failed failed\n" : "\nAll checks passed\n";
     exit($failed ? 1 : 0);
+}
+
+/** kop_ya_maybe_link_and_move() on the copy: the folders, then the second copies moved in. */
+function kop_ya_test_second_pass(PDO $pdo) {
+    echo "Folders and second copies (kop_ya_maybe_link_and_move)\n";
+    $twins = kop_ya_twin_moves();
+    $there = array();
+    foreach ($twins as $fid => $t) {
+        $there[$fid] = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2 WHERE id = ?', array($fid)) > 0;
+    }
+    if (!array_filter($there)) {
+        echo "  (the mirror has none of the second copies: the pass ran on the site already)\n";
+        return;
+    }
+    $programs = rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs');
+    $total = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2');
+    $article = $pdo->query("SELECT n.id, n.article_url, n.status FROM news_facility_links l JOIN news_submissions n ON n.id = l.news_id
+        WHERE l.facility_id = 10612 AND n.status <> 'deleted' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    kop_ya_maybe_link_and_move();
+    $log = get_option('kop_ya_twins_log');
+    echo '       ' . implode("\n       ", (array) ($log['lines'] ?? array())) . "\n";
+    check(get_option('kop_ya_twins_done') === '1', 'marked done');
+    foreach (kop_ya_folder_links() as $yid => $link) {
+        $live = rows($pdo, 'SELECT COUNT(*) FROM wpdl_fbv WHERE id = ?', array($link[1])) > 0;
+        $p = kop_ya_get($pdo, $yid);
+        check(!$live || (int) $p['document_folder_id'] === (int) $link[1], "{$link[0]} has its facility-era folder {$link[1]}");
+    }
+    foreach ($twins as $fid => $t) {
+        if (!$there[$fid]) continue;
+        check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2 WHERE id = ?', array($fid)) === 0
+            && rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_facility_locations WHERE facility_id = ?', array($fid)) === 0
+            && rows($pdo, 'SELECT COUNT(*) FROM news_facility_links WHERE facility_id = ?', array($fid)) === 0, "#$fid ($t[0]) is out of the facility tables");
+        check((int) (kop_ya_moved_from_map()[$fid]['id'] ?? 0) === $t[2], "  and its Woodbury and Fornits items find program $t[2]");
+    }
+    check(rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs') === $programs, 'no new program: each copy joined its program');
+    check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2') === $total - count(array_filter($there)), 'every other facility is untouched');
+    $fulshear = kop_ya_get($pdo, 4);
+    check(in_array('Fulshear Treatment to Transition', kop_ya_lines($fulshear['other_names']), true), 'Fulshear: the copy\'s name is one of the program\'s other names');
+    if ($article) {
+        $urls = array_column(kop_ya_parse_links($fulshear['links']), 1);
+        check(in_array(trim($article['article_url']), $urls, true), 'Fulshear: its article is a link under "More about this program"');
+        check(rows($pdo, 'SELECT COUNT(*) FROM news_submissions WHERE id = ? AND status = ?', array($article['id'], $article['status'])) === 1, '  and the article itself is unchanged');
+    }
+    if ($there[10612] && rows($pdo, 'SELECT COUNT(*) FROM wpdl_fbv WHERE id = 4162') > 0) {
+        check(rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_folder_links WHERE folder_a = 4162 AND folder_b = 4163') === 1, 'Fulshear: the copy\'s folder 4162 is linked to the program\'s 4163');
+    }
+    update_option('kop_ya_twins_log', null);
+    kop_ya_maybe_link_and_move();
+    check(get_option('kop_ya_twins_log') === null, 'the pass runs only once');
 }
 $docs = array();
 foreach ($pdo->query("SELECT id, json_data FROM facilities_v2 WHERE id IN ($in)")->fetchAll(PDO::FETCH_ASSOC) as $r) {

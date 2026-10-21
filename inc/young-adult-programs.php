@@ -407,9 +407,16 @@ function kop_ya_staff_label(array $s) {
  * kop_ischools_move_facility() does. Woodbury Facts items added to it follow
  * it: a person keeps its item's key (Undo takes them off again) and waiting
  * items move to the "Young adult programs (18+)" tab. Refuses a record with a
- * lawsuit or an article linked. Returns the program id.
+ * lawsuit or an article linked (a deleted article does not count; its link
+ * goes). Returns the program id.
+ *
+ * $o: 'into' => a program id: add to that program though its name differs
+ * (a second record of the same program; the record's name becomes one of its
+ * other names). 'articles' => 'links': an article linked to the record becomes
+ * a line under the program's "More about this program" instead of refusing,
+ * and its link to the record goes (the article stays published).
  */
-function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
+function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '', array $o = array()) {
     global $wpdb;
     require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
     $fid = (int) $facility_id;
@@ -418,17 +425,38 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
     if (!$stored) {
         throw new RuntimeException('There is no facility record ' . $fid . '.');
     }
-    foreach (array('lawsuit_facility_links' => 'A lawsuit', 'news_facility_links' => 'An article') as $table => $what) {
-        $n = 0;
-        try {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM {$table} WHERE facility_id = ?");
-            $stmt->execute(array($fid));
-            $n = (int) $stmt->fetchColumn();
-        } catch (PDOException $e) {
-            // No such table on this install.
-        }
-        if ($n > 0) {
-            throw new RuntimeException($what . ' is linked to facility record ' . $fid . '; it stays a facility until that is sorted out by hand.');
+    $into = (int) ($o['into'] ?? 0);
+    if ($into && !kop_ya_get($pdo, $into)) {
+        throw new RuntimeException('There is no young adult program ' . $into . '.');
+    }
+    $n = 0;
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM lawsuit_facility_links WHERE facility_id = ?');
+        $stmt->execute(array($fid));
+        $n = (int) $stmt->fetchColumn();
+    } catch (PDOException $e) {
+        // No such table on this install.
+    }
+    if ($n > 0) {
+        throw new RuntimeException('A lawsuit is linked to facility record ' . $fid . '; it stays a facility until that is sorted out by hand.');
+    }
+    $articles = array();
+    try {
+        $stmt = $pdo->prepare("SELECT n.id, n.article_title, n.publication_name, n.publication_date, n.article_url
+            FROM news_facility_links l JOIN news_submissions n ON n.id = l.news_id WHERE l.facility_id = ? AND n.status <> 'deleted'");
+        $stmt->execute(array($fid));
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // No news tables on this install.
+    }
+    if ($articles && ($o['articles'] ?? '') !== 'links') {
+        throw new RuntimeException('An article is linked to facility record ' . $fid . '; it stays a facility until that is sorted out by hand.');
+    }
+    $article_lines = array();
+    foreach ($articles as $a) {
+        if (preg_match('#^https?://#i', (string) $a['article_url'])) {
+            $when = substr((string) $a['publication_date'], 0, 4);
+            $article_lines[] = trim((string) $a['article_title']) . ' (' . implode(', ', array_filter(array(trim((string) $a['publication_name']), $when))) . ') | ' . trim($a['article_url']);
         }
     }
     $doc = $stored['doc'];
@@ -539,9 +567,25 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
 
     kop_ya_install($pdo);
     $t = kop_migration_tables($prefix);
-    $yid = kop_v2_with_write_lock($pdo, function () use ($pdo, $t, $fid, $fields, $facts, $name, $by, $prefix, $folder) {
-        $have = kop_ya_find_by_name($pdo, $name);
+    $yid = kop_v2_with_write_lock($pdo, function () use ($pdo, $t, $fid, $fields, $facts, $name, $by, $prefix, $folder, $into, $article_lines) {
+        $have = $into ? kop_ya_get($pdo, $into) : kop_ya_find_by_name($pdo, $name);
         $yid = $have ? (int) $have['id'] : kop_ya_save($pdo, $fields, 0, $by);
+        if ($have && ($into || $article_lines)) {
+            // A second record of the program: its name and its articles join the program's.
+            $others = kop_ya_lines($have['other_names']);
+            if (kop_ya_key($name) !== kop_ya_key($have['name']) && !in_array(kop_ya_key($name), array_map('kop_ya_key', $others), true)) {
+                $others[] = $name;
+            }
+            $links = kop_ya_lines($have['links']);
+            foreach ($article_lines as $line) {
+                if (!in_array($line, $links, true)) $links[] = $line;
+            }
+            $pdo->prepare('UPDATE young_adult_programs SET other_names = ?, links = ?, updated_at = ? WHERE id = ?')
+                ->execute(array(implode("\n", $others), implode("\n", $links), kop_ya_now(), $yid));
+        } elseif ($article_lines) {
+            $pdo->prepare('UPDATE young_adult_programs SET links = ?, updated_at = ? WHERE id = ?')
+                ->execute(array(implode("\n", $article_lines), kop_ya_now(), $yid));
+        }
         if ($folder > 0) {
             $pdo->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ? AND (document_folder_id IS NULL OR document_folder_id = 0)')->execute(array($folder, $yid));
         }
@@ -556,6 +600,12 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
 
         foreach (array($t['facility_locations'], $t['operator_facilities'], $t['identity']) as $table) {
             $pdo->prepare("DELETE FROM `{$table}` WHERE facility_id = ?")->execute(array($fid));
+        }
+        try {
+            // Links to deleted articles, and the articles now listed on the program.
+            $pdo->prepare('DELETE FROM news_facility_links WHERE facility_id = ?')->execute(array($fid));
+        } catch (PDOException $e) {
+            // No news tables on this install.
         }
         try {
             $pdo->prepare('DELETE FROM `' . $prefix . 'kop_facility_addresses` WHERE facility = ?')->execute(array($name));
@@ -593,6 +643,14 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
         foreach ((array) $wpdb->get_col($wpdb->prepare("SELECT DISTINCT program FROM {$wbf_table} WHERE match_note = %s", $note)) as $program) {
             kop_wbf_ya_override($program, 1);
         }
+    }
+    // A record added to a program it did not make (a second copy, a name the program already had): kop_ya_moved_from_map() reads this too.
+    $p = kop_ya_get($pdo, $yid);
+    if ($p && !preg_match('/facility record ' . $fid . '\b/', (string) $p['source'])) {
+        $into = get_option('kop_ya_moved_into', array());
+        $into = is_array($into) ? $into : array();
+        $into[$fid] = $yid;
+        update_option('kop_ya_moved_into', $into, false);
     }
     do_action('kop_facility_status_changed', $fid);
     return $yid;
@@ -732,6 +790,119 @@ function kop_ya_maybe_migrate() {
     update_option('kop_ya_migration_log', array('time' => time(), 'lines' => $log), false);
 }
 add_action('admin_init', 'kop_ya_maybe_migrate', 20);
+
+/**
+ * The facility-era folders of the programs moved on 2026-09-30, found on
+ * production 2026-10-21 (the copy holding the files where a name has empty
+ * duplicates) and approved by the owner: [program id => [name, folder id]].
+ * Austin Sendero Recovery (11) had none.
+ */
+function kop_ya_folder_links() {
+    return array(
+        1 => array('Homelines', 3136),
+        2 => array('Optimum Performance Institute', 258),
+        3 => array('Legacy Outdoor Adventures', 3888),
+        4 => array('Fulshear Treatment to Transition – The Ranch', 4163),
+        5 => array('Cottonwood Tucson', 5687),
+        6 => array('Four Circles Recovery Center', 193),
+        7 => array('Dragonfly Transitions', 8228),
+    );
+}
+
+/**
+ * Facility records that are second copies of moved programs (the owner,
+ * 2026-10-21): [facility id => [name, state, program id, its folder to link
+ * to the program's, or 0]]. Four Circles and Dragonfly came back from
+ * seeds/new-facilities.json the night of the first move. Fulshear's one
+ * article becomes a link on the program.
+ */
+function kop_ya_twin_moves() {
+    return array(
+        100254 => array('Four Circles Recovery Center', 'NC', 6, 0),
+        100255 => array('Dragonfly Transitions', 'OR', 7, 0),
+        10612  => array('Fulshear Treatment to Transition', 'TX', 4, 4162),
+    );
+}
+
+/**
+ * Version 1: link the folders above (only to a program with none, to a folder
+ * that is still there), then move the twins into their programs, each only if
+ * it is still there under that name and state. A twin's own folder is linked
+ * to the program's (kop_folder_links, as api/link-folders.php does), so its
+ * documents stay on the program's card. What happened is kept in
+ * kop_ya_twins_log.
+ */
+function kop_ya_maybe_link_and_move() {
+    $version = '1';
+    if (get_option('kop_ya_twins_done') === $version) {
+        return;
+    }
+    $pdo = kop_ya_pdo();
+    if (!$pdo || !function_exists('kop_wbf_ensure_table')) {
+        return;
+    }
+    update_option('kop_ya_twins_done', $version);
+    global $wpdb;
+    $log = array();
+    $live = function ($folder) use ($wpdb) {
+        return (int) $wpdb->get_var($wpdb->prepare('SELECT id FROM ' . $wpdb->prefix . 'fbv WHERE id = %d', (int) $folder)) > 0;
+    };
+    try {
+        kop_ya_install($pdo);
+        foreach (kop_ya_folder_links() as $yid => $link) {
+            $p = kop_ya_get($pdo, $yid);
+            if (!$p || kop_ya_key($p['name']) !== kop_ya_key($link[0])) {
+                $log[] = "Program $yid is not {$link[0]}; folder {$link[1]} not linked.";
+            } elseif ((int) $p['document_folder_id'] > 0) {
+                $log[] = "Program $yid ({$p['name']}) has folder {$p['document_folder_id']} already.";
+            } elseif (!$live($link[1])) {
+                $log[] = "Folder {$link[1]} is gone; program $yid gets a new one when something is filed.";
+            } else {
+                $pdo->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ?')->execute(array((int) $link[1], $yid));
+                $log[] = "Program $yid ({$p['name']}) has folder {$link[1]}.";
+            }
+        }
+        kop_wbf_ensure_table();
+        require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
+        foreach (kop_ya_twin_moves() as $fid => $twin) {
+            list($want, $state, $yid, $folder) = $twin;
+            try {
+                $stored = kop_facility_load($fid, array('pdo' => $pdo, 'prefix' => $wpdb->prefix));
+                $name = $stored ? kop_ya_clean_name(($stored['doc']['identification']['name'] ?? '') ?: $stored['unique_name']) : '';
+                $at = $stored ? strtoupper((string) ($stored['doc']['location']['state'] ?? '')) : '';
+                if (!$stored || kop_ya_key($name) !== kop_ya_key($want) || $at !== $state) {
+                    $log[] = "Facility record $fid was not there as $want ($state); left alone.";
+                    continue;
+                }
+                $moved = kop_ya_move_facility($pdo, $fid, 'migration', array('into' => $yid, 'articles' => 'links'));
+                $log[] = "Moved facility record $fid ($name) into young adult program $moved.";
+                $p = kop_ya_get($pdo, $moved);
+                $mine = (int) ($p['document_folder_id'] ?? 0);
+                if ($folder && $mine && $folder !== $mine && $live($folder) && function_exists('kop_folder_links_install')) {
+                    try {
+                        kop_folder_links_install();
+                        $wpdb->query($wpdb->prepare('INSERT IGNORE INTO ' . $wpdb->prefix . 'kop_folder_links (folder_a, folder_b, note) VALUES (%d, %d, %s)',
+                            min($folder, $mine), max($folder, $mine), 'Same program: facility record ' . $fid . ' moved into young adult program ' . $moved));
+                        $log[] = "Linked its folder $folder to the program's folder $mine.";
+                    } catch (Throwable $e) {
+                        $log[] = "Its folder $folder was not linked to the program's folder $mine: " . $e->getMessage();
+                    }
+                }
+            } catch (Throwable $e) {
+                $log[] = "Facility record $fid ($want) not moved: " . $e->getMessage();
+            }
+        }
+        if (function_exists('kop_facility_pages_flush_index')) {
+            kop_facility_pages_flush_index();
+        }
+        do_action('litespeed_purge_all');
+    } catch (Throwable $e) {
+        $log[] = 'Stopped: ' . $e->getMessage();
+        update_option('kop_ya_twins_done', '');
+    }
+    update_option('kop_ya_twins_log', array('time' => time(), 'lines' => $log), false);
+}
+add_action('admin_init', 'kop_ya_maybe_link_and_move', 22);
 
 /**
  * Programs added offline (seeds/young-adult-programs.json), run with the
@@ -945,7 +1116,8 @@ add_action('admin_init', function () {
 /**
  * [old facilities_v2 id => ['id' => program id, 'name' => ...]] for the
  * programs moved out of the facility records (source "Moved from facility
- * record N", kop_ya_move_facility()). Woodbury Facts and Fornits items that
+ * record N", and the kop_ya_moved_into option for a record moved into a
+ * program it did not make, kop_ya_move_facility()). Woodbury Facts and Fornits items that
  * still name the old record are filed on the program instead.
  */
 function kop_ya_moved_from_map(PDO $pdo = null) {
@@ -956,6 +1128,11 @@ function kop_ya_moved_from_map(PDO $pdo = null) {
     if (!$pdo || !kop_ya_ready($pdo)) return $memo;
     foreach ($pdo->query("SELECT id, name, source FROM young_adult_programs WHERE source LIKE 'Moved from facility record %'")->fetchAll(PDO::FETCH_ASSOC) as $p) {
         if (preg_match('/facility record (\d+)/', (string) $p['source'], $m)) $memo[(int) $m[1]] = array('id' => (int) $p['id'], 'name' => (string) $p['name']);
+    }
+    // Records moved into a program they did not make (kop_ya_move_facility()).
+    foreach ((array) get_option('kop_ya_moved_into', array()) as $fid => $yid) {
+        $p = isset($memo[(int) $fid]) ? null : kop_ya_get($pdo, (int) $yid);
+        if ($p) $memo[(int) $fid] = array('id' => (int) $p['id'], 'name' => (string) $p['name']);
     }
     return $memo;
 }
