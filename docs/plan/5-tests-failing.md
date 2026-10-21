@@ -15,23 +15,23 @@ harness is wrong; *?* = not looked at yet):
 - test-auto-connect: "woodbury: some waiting pages connect themselves" (0 of 375), "drive docs: links with no record
   are tied to the record their collection or page names exactly" (0 of 2866), "drive docs: a name two company records
   share finds none". ?
-- test-citation-cleanup: "no Woodbury wording in the text" on pages 9643, 9689, 9690, 9691. ?
+- test-citation-cleanup: test too broad. Woodbury Reports issues are news items since the SCIAD import (2026-10-12), so News coverage names the outlet, and a staff member's past job is at Woodbury Reports; neither is citation wording (a08d95f3). Passes.
 - test-facility-eras: "every cut page is sound" (10361 Viewpoint Center: incidents 7 on the record, 6 on the page). ?
 - test-indigenous-schools: stale. The move ran on the site 2026-09-30, so the four source records are gone; the test now checks what the real move left (86e9bc8b). Passes.
 - test-inspection-rollup: "nothing written to the mirror". ?
-- test-investors: "import: 5 investors, 5 links, 10 log rows", "a second run adds nothing". ?
+- test-investors: stale. Company #500017 gained two investors (CIC Partners, Cressey & Company); the counts follow the entries found (447e0960). Passes.
 - test-kop-tools-menu: test harness wrong. It stubbed only the 8 screens it knew in 2026-09; screens now count when the theme defines their function and adds their submenu (091022a3). Passes.
 - test-media-subfolders: 5 checks (Mel Blount / 1970s folders, documents 9609, 9610 under 150/Aspen Achievement Academy). ?
 - test-name-under-operator: Three Springs Inc. lists 13678 / 11903 with their old names. ?
 - test-nc-inspection-cleanup: "every plan row matches the mirror" (merges 6576, 6577, ... changed or gone) and 3 more. ?
 - test-network-renames: stale. The rename merge gave Copper Canyon 1998-2014 and Sedona Sky 2014-2025, so no overlap; 12 of 93 researched years in kop-data's network/rename-candidates.json are for lines no longer on the map (merged pairs), now counted, not failed (5b1d8185). Passes.
 - test-news-archive: harness wrong. archive.js is read from the kop-send-to-kop checkout; the split copies every column but archive_url and skips the resync (2e870308). Passes.
-- test-news-post-import: "at least 70 of the posts reach the feed", "the table holds what the stats say". ?
+- test-news-post-import: stale. The import ran on the site; the checks count its rows, and the row checks now cover them (56a561a5). Passes.
 - test-open-data: environment. The portable PHP needs `-d extension=zip`; passes with it.
-- test-operator-history-seed: "the Sequel rewrite replaces the draft with the pull quotes" ({"Sequel TSI":"same"}). ?
+- test-operator-history-seed: stale. The Sequel rewrite is on the site already, so the seed reports "same"; accepted (596f211a). Passes.
 - test-people: "one id per name key across records", "770 of 778 person nodes carry personId", "two merged map
   people are one node (Brad M. Reedy -> Tere Snodgrass)". ?
-- test-post-text-fixes: "every swap applies" for 8 fix files (2026-10-08 ... 2026-10-14). ?
+- test-post-text-fixes: stale. All eight fixes are applied on the site (kop_post_text_fixes_done); applied ones are checked as applied, the new text read as later fixes to the same page left it (88a3d4c0). Passes.
 - test-program-homes-convert: Dimondale / NeuroRestorative not suggested, then a fatal ("Company #5748 is not one
   program any more"). ?
 - test-program-homes: "undo removes the record this tool made" (kept), "undo leaves no company link behind". ?
