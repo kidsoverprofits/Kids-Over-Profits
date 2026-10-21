@@ -245,6 +245,16 @@ $check('a suspension this month waits', kop_closure_classify_report(5, 'Open', '
 $check('an old closure of an open record still waits (the record may be wrong)', kop_closure_classify_report(5, 'Open', 'Closed', '2005-03') === 'pending');
 $check('a Closed record is already recorded, suspended or not', kop_closure_classify_report(5, 'Closed', 'Suspended', '') === 'already');
 
+echo "-- The same name told again --\n";
+$check('"CEDU Education schools" is the same name as "CEDU"', kop_closure_same_name_key('CEDU Education schools') === kop_closure_same_name_key('CEDU'));
+$check('"Lincoln Hills Youth Prison" is "Lincoln Hills"', kop_closure_same_name_key('Lincoln Hills Youth Prison') === kop_closure_same_name_key('Lincoln Hills'));
+$check('"Copper Lake" is not "Copper Hills"', kop_closure_same_name_key('Copper Lake School') !== kop_closure_same_name_key('Copper Hills Youth Center'));
+$check('a name of descriptors alone has no key', kop_closure_same_name_key('youth facility') === '');
+$check('the same closure year repeats a dismissed report, whatever the news date', kop_closure_repeats_dismissed('2005-04', '2026-01-01', '2005-03-28', '2010-05-01'));
+$check('another closure year does not', !kop_closure_repeats_dismissed('2019', '2019-06-01', '2005-03-28', '2010-05-01'));
+$check('no dates: newer news than the dismissed one waits', !kop_closure_repeats_dismissed('', '2026-01-01', '', '2010-05-01'));
+$check('no dates: older news is a repeat', kop_closure_repeats_dismissed('', '2009-01-01', '', '2010-05-01'));
+
 if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_reports'")->fetchColumn()) {
     echo "-- The waiting queue settled again (rolled back) --\n";
     $before = $pdo->query("SELECT id, program_name, location, status, facility_id FROM facility_closure_reports WHERE status IN ('pending','unmatched')")->fetchAll(PDO::FETCH_ASSOC);
@@ -294,6 +304,23 @@ if ($pdo->query("SELECT name FROM sqlite_master WHERE name = 'facility_closure_r
             'Embark Behavioral Health (formerly Shelterwood Academy)' => '#10433') as $name => $wrong) {
         if (isset($by[$name])) $check("\"$name\" is not matched to $wrong", strpos($by[$name], $wrong) === false, $by[$name]);
     }
+    if (isset($by['Sequel'])) $check('"Sequel" in Madison, Alabama is Sequel TSI Madison', $is('Sequel', 'already #100076'), $by['Sequel']);
+    // A company name told five times (2026-10-21: a volunteer confirmed CEDU five times).
+    $repeats = array();
+    foreach ($before as $r) {
+        $a = $after[(int) $r['id']];
+        if (in_array($a['status'], kop_closure_open_statuses(), true)) {
+            $k = kop_closure_same_name_key($r['program_name']) . '|' . $a['facility_id'];
+            $repeats[$k] = ($repeats[$k] ?? 0) + 1;
+        }
+    }
+    $cedu = $repeats['cedu|'] ?? 0;
+    $check('CEDU waits once at most', $cedu <= 1, "$cedu waiting");
+    $okaloosa = 0;
+    foreach ($before as $r) {
+        if ($r['program_name'] === 'Okaloosa Youth Development Center' && in_array($after[(int) $r['id']]['status'], kop_closure_open_statuses(), true)) $okaloosa++;
+    }
+    $check('a name matched to a record keeps one card, its unmatched twin goes', $okaloosa <= 1, "$okaloosa waiting");
     $waiting = 0;
     foreach ($after as $a) if (in_array($a['status'], kop_closure_open_statuses(), true)) $waiting++;
     $check('the queue shrank', $waiting < count($before), "$waiting left of " . count($before));

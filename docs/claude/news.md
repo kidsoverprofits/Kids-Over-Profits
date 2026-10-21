@@ -15,8 +15,11 @@ php api/scan-closure-reports.php --type=closure   # on the server (ea-php82): dr
 # boarding school", "treatment center in Raeford"; kop_closure_is_vague_name()) is 'vague'; else the exact name, else the
 # looser match (kop_closure_name_candidates(): same distinctive words, record's extra words = the report's place, a shared
 # kind of place for one-word names; several matches all Closed = already recorded); a suspension > 1 year or an announced
-# "closing" > 2 years old is 'old'; a second report of the same change to the same facility, or one no newer than a dismissed
-# one, is 'duplicate'. Only pending + unmatched wait in the queue. Facilities from News never creates a record from a vague name
+# "closing" > 2 years old is 'old'; a second report of the same change to the same facility, or one of the same closure year as
+# (or, undated, no newer than) a dismissed one, is 'duplicate'. Only pending + unmatched wait in the queue.
+# Company names ("CEDU", "Sequel"; 2026-10-21): one record in the report's town is that record (kop_closure_candidate_in_town());
+# else an unmatched report is a duplicate of one with the same name and change (kop_closure_same_name_key(), same state) that
+# waits or was dismissed for the same year, and takes the record of one that was confirmed (kop_closure_same_name_report()) Facilities from News never creates a record from a vague name
 # Discovery's batched sweep hits are confirmed only when the AI's discoveryCheck says the story is about that program
 # (aboutProgram) and its place fits the record (confirm_batch_attribution()); a turned-down hit logs the AI's answer
 # Bill and lawsuit statuses (inc/status-checks.php): a nightly WP-Cron run (09:00 UTC, then every 10 min until done, 30 runs max)

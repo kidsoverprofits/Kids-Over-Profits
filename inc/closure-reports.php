@@ -337,6 +337,89 @@ function kop_closure_pick_candidate(array $cands, $target_status) {
     return $loose && count($done) === count($loose) ? (int) array_key_first($loose) : 0;
 }
 
+/**
+ * Of several records a company's name may mean, the only one in the report's
+ * town ("Sequel" in Madison, Alabama -> Sequel TSI Madison), or 0.
+ */
+function kop_closure_candidate_in_town(PDO $pdo, array $cands, $location) {
+    $loose = $cands['loose'] ?? array();
+    $town = kop_normalize_name_key(explode(',', (string) $location)[0]);
+    if (count($loose) < 2 || $town === '') {
+        return 0;
+    }
+    $ids = implode(',', array_map('intval', array_keys($loose)));
+    $here = array();
+    foreach ($pdo->query("SELECT id, city FROM facilities_v2 WHERE id IN ($ids)") as $f) {
+        if (kop_normalize_name_key((string) $f['city']) === $town) $here[] = (int) $f['id'];
+    }
+    return count($here) === 1 ? $here[0] : 0;
+}
+
+/**
+ * A report's name as a key for telling the same name told twice: its
+ * distinctive words, sorted, without the company words that come and go
+ * ("CEDU Education schools" = "CEDU Education"); '' for a name of
+ * descriptor words alone.
+ */
+function kop_closure_same_name_key($program) {
+    $words = kop_closure_name_words(kop_closure_name_head($program)[0])[0];
+    foreach (array('education', 'educational', 'enterprises', 'holdings', 'company', 'corporation', 'incorporated') as $w) {
+        unset($words[$w]);
+    }
+    ksort($words);
+    return implode(' ', array_keys($words));
+}
+
+/**
+ * Whether a report repeats one that was dismissed: the same closure year when
+ * both give one, else no newer news than the dismissed one's.
+ */
+function kop_closure_repeats_dismissed($date, $published, $then_date, $then_published) {
+    if ((string) $date !== '' && (string) $then_date !== '') {
+        return substr((string) $date, 0, 4) === substr((string) $then_date, 0, 4);
+    }
+    return (string) $published === '' || ((string) $then_published !== '' && strcmp((string) $then_published, (string) $published) >= 0);
+}
+
+/**
+ * For a report that matched no record: another report of the same name and
+ * change. Returns [facility id of a confirmed one, null] to take its record;
+ * [null, 'duplicate'] when one matched to a record waits, an unmatched one
+ * waits (an earlier one, when $id is a stored row), or one was dismissed for
+ * the same closure; else [null, null].
+ * Names in two different states are two programs.
+ */
+function kop_closure_same_name_report(PDO $pdo, array $report, $published, $id = 0) {
+    $key = kop_closure_same_name_key($report['program']);
+    if ($key === '') {
+        return array(null, null);
+    }
+    $state = kop_closure_location_state($report['location'] ?? '');
+    $stmt = $pdo->prepare("SELECT r.id, r.program_name, r.location, r.facility_id, r.closure_date, r.status, n.publication_date
+                             FROM facility_closure_reports r LEFT JOIN news_submissions n ON n.id = r.news_id
+                            WHERE r.target_status = ? AND r.status IN ('applied','pending','unmatched','dismissed') AND r.id <> ?
+                            ORDER BY r.id");
+    $stmt->execute(array($report['target_status'], (int) $id));
+    $duplicate = false;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (kop_closure_same_name_key($r['program_name']) !== $key) continue;
+        $their_state = kop_closure_location_state((string) $r['location']);
+        if ($state !== '' && $their_state !== '' && $state !== $their_state) continue;
+        if ($r['status'] === 'applied' && $r['facility_id']) {
+            return array((int) $r['facility_id'], null);
+        }
+        // One matched to a record is the card to keep, whichever came first.
+        if (($r['status'] === 'pending' && $r['facility_id'])
+            || (in_array($r['status'], array('pending', 'unmatched'), true) && (!$id || (int) $r['id'] < (int) $id))) {
+            $duplicate = true;
+        } elseif ($r['status'] === 'dismissed'
+            && kop_closure_repeats_dismissed($report['date'] ?? '', $published, $r['closure_date'], $r['publication_date'])) {
+            $duplicate = true;
+        }
+    }
+    return array(null, $duplicate ? 'duplicate' : null);
+}
+
 /** The records DB (news_submissions lives there, not in $wpdb on prod). */
 function kop_closure_pdo() {
     $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
@@ -645,10 +728,19 @@ function kop_closure_settle_report(PDO $pdo, array $report, $published, &$alias_
         return $s === false ? null : (string) $s;
     };
     if (!$fid) {
-        $fid = kop_closure_pick_candidate(
-            kop_closure_name_candidates($pdo, $report['program'], $report['location'] ?? '', $alias_index),
-            $report['target_status']
-        ) ?: null;
+        $cands = kop_closure_name_candidates($pdo, $report['program'], $report['location'] ?? '', $alias_index);
+        $fid = kop_closure_pick_candidate($cands, $report['target_status'])
+            ?: kop_closure_candidate_in_town($pdo, $cands, $report['location'] ?? '') ?: null;
+    }
+    if (!$fid) {
+        // A company's name ("CEDU", "Sequel") matches no one record, so the
+        // facility check below never sees it: the same name told the same
+        // change before is the same report.
+        list($same_fid, $same_status) = kop_closure_same_name_report($pdo, $report, $published, $id);
+        if ($same_status) {
+            return array(null, $same_status, null);
+        }
+        $fid = $same_fid;
     }
     if (!$fid) {
         return array(null, 'unmatched', null);
@@ -663,13 +755,13 @@ function kop_closure_settle_report(PDO $pdo, array $report, $published, &$alias_
         if ((int) $waiting->fetchColumn() > 0) {
             $status = 'duplicate';
         } else {
-            $dismissed = $pdo->prepare("SELECT n.publication_date FROM facility_closure_reports r
+            $dismissed = $pdo->prepare("SELECT r.closure_date, n.publication_date FROM facility_closure_reports r
                                      LEFT JOIN news_submissions n ON n.id = r.news_id
                                          WHERE r.facility_id = ? AND r.target_status = ? AND r.status = 'dismissed' AND r.id <> ?");
             $dismissed->execute(array($fid, $report['target_status'], (int) $id));
-            foreach ($dismissed->fetchAll(PDO::FETCH_COLUMN) as $then) {
-                // Not newer news than a report the owner already turned down.
-                if ((string) $published === '' || ((string) $then !== '' && strcmp((string) $then, (string) $published) >= 0)) {
+            foreach ($dismissed->fetchAll(PDO::FETCH_ASSOC) as $then) {
+                // The closure the owner already turned down, or no newer news.
+                if (kop_closure_repeats_dismissed($report['date'] ?? '', $published, $then['closure_date'], $then['publication_date'])) {
                     $status = 'duplicate';
                     break;
                 }
@@ -1048,10 +1140,11 @@ function kop_closure_scan_cron() {
         }
         // The queue as it stood before the 2026-10-20 rules, settled again once
         // ('b': the name match no longer counts "youth" or "systems"; 'c': rows
-        // an earlier pass moved out of the queue are settled again too).
-        if (get_option('kop_closure_resettled') !== '2026-10-20e') {
+        // an earlier pass moved out of the queue are settled again too; '2026-10-21':
+        // a company name told again, "CEDU" five times, is one report).
+        if (get_option('kop_closure_resettled') !== '2026-10-21') {
             $moved = kop_closure_resettle_open($pdo);
-            update_option('kop_closure_resettled', '2026-10-20e', false);
+            update_option('kop_closure_resettled', '2026-10-21', false);
             error_log('kop closure resettle: ' . json_encode($moved));
         }
         // Past the keyword gate most rows cost nothing, so a run can look at
