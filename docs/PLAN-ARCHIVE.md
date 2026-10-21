@@ -3161,3 +3161,23 @@ into kop-pipeline/tmp). Fixed in 5f5977f1 (only a kop-* copy in %TEMP% is delete
 The 18 tests that had failed were rerun: 17 pass; test-seo-drafts was stale (the site stored its 236 rule drafts)
 and now undoes them on the copy first (3002693b). test-name-under-operator's earlier exit was Windows running out
 of paging file, not the code; it passes alone.
+
+## 4.7 Pages and templates, items 15 and 17: sideways scroll and the Subscribe button (finished 2026-10-21)
+
+15. **Facility pages scroll sideways on desktop** (found 2026-10-20 while checking the sidebar float, already live without it):
+    https://kidsoverprofits.org/facility/cedar-crest-hospital-rtc-tx/ at 1360 wide has a 1457px scroll width; no element in
+    `body` reports a box past the viewport, so look for a transform, an off-screen tooltip or `100vw` width. The operator page is fine.
+17. **MailerLite Subscribe button spills 6px at 1100 wide** (found 2026-10-21, not from the float: /open-data/ did it before the
+    float, and /ca-reports/, which keeps Kadence's column, does it now): `python -u scripts/check-mobile-overflow.py --widths 1100
+    /ca-reports/` reports `div.ml-button-horizontal.primary > button.primary` "Subscribe" 6px out. The newsletter form's
+    horizontal row is too narrow for the button in a 338px column; let the row wrap or shrink the button padding in css/sidebar.css.
+
+Done 2026-10-21 in [ee288bf7](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/ee288bf7cf85296d8ffc0b19d616df8dd2373868). Item 15: the hidden source-preview tooltip
+(`a[data-kop-citation-preview]::after`, css/citation-previews.css) was laid out all the time, only made invisible, and
+up to 416px wide from the link's left edge, so a "source" link in the facility rail (x 1041) stretched the page to 1457px.
+Hidden previews are now `display: none` (the fade kept through `@starting-style`), and the rail (960px and up) opens
+them leftward (css/facility-profile.css). Item 17: above 400px the sidebar's MailerLite row is a flex row, the button
+at its own width and the email field taking the rest (css/sidebar.css); under 401px MailerLite still stacks them.
+Checked live after deploy: check-mobile-overflow.py --widths 1100,1360 is clean, with no sideways scroll, on the Cedar Crest,
+Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more facility pages and an operator page, and at
+390/768); check-contrast.py --local passes; hovering a preview in the rail and in the body shows it inside the screen.
