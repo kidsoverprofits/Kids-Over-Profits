@@ -3119,3 +3119,16 @@ data, *code* = the code or the test's own harness was wrong.
 - test-wiki-staff: stale. The Former pass ran on the site; the test runs the pass's own undo on the copy first (557 put back, 551 rewritten again) (df2b0293). Passes.
 - test-woodbury-facts: test wrong. The corrected-staff check picked a record merged away since the facts file was built; it now skips those, as the main loop does (d8126f68). Passes.
 - test-young-adult-move: stale. The move ran on the site 2026-10-01 and production has the ya columns; the test checks what the real move left (86e9bc8b). Passes.
+
+## 4.4 Review inbox and admin screens, item 8: scratch copies left in %TEMP% (finished 2026-10-20)
+
+   Found 2026-10-20: the mirror-copy tests (test-volunteer-projects, test-review-volunteers, test-review-inbox, test-seo-drafts, ...)
+   leave their 200-450 MB %TEMP%\kop-*.sqlite copy behind on Windows (the shutdown unlink runs while the PDO is still open); 60 of
+   them filled the C: drive today. Fix: close every handle before the unlink, or sweep kop-*.sqlite older than a day at the start.
+
+Done: closing every handle cannot work (kop_seed_pdo() in inc/admin.php keeps the PDO in a function static), so
+scripts/kop-test-harness.php, which every mirror-copy test loads right after making its copy, now (1) sweeps
+kop-*.sqlite* in %TEMP% untouched for 2 hours (a peer's running test keeps its copy) and (2) on Windows starts a
+detached PowerShell at shutdown that deletes this run's copy and its -journal once the process has let go of it.
+Checked with test-investors: before, each run left its copy; after, none is left. The 2.3 GB left by finished runs
+that evening was deleted (only copies whose PHP process had ended).

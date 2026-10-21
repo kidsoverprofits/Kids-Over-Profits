@@ -305,6 +305,27 @@ class wpdb {
     }
 }
 
+// Scratch copies left by earlier runs. On Windows a test's shutdown @unlink fails while a handle is still open
+// (kop_seed_pdo() keeps the PDO in a static), so each run leaves a 200-450 MB kop-*.sqlite in %TEMP%; 60 of them
+// filled the C: drive on 2026-10-20. Sweep the ones untouched for 2 hours (a test running now keeps its own; on
+// Windows an open file refuses the unlink anyway).
+foreach (glob(sys_get_temp_dir() . '/kop-*.sqlite*') ?: array() as $old) {
+    if (realpath($old) === realpath($db_path)) continue;
+    if (@filemtime($old) > time() - 2 * HOUR_IN_SECONDS) continue;
+    @unlink($old);
+}
+// And this run's copy: a detached PowerShell deletes it once this process has exited and let go of the file.
+if (PHP_OS_FAMILY === 'Windows') {
+    register_shutdown_function(function () use ($db_path) {
+        if (!file_exists($db_path)) return;
+        $p = str_replace("'", "''", $db_path);
+        $ps = "for(\$i=0;\$i -lt 120;\$i++){Remove-Item -LiteralPath '$p','$p-journal' -Force -ErrorAction SilentlyContinue;"
+            . "if(-not(Test-Path -LiteralPath '$p')){break};Start-Sleep -Milliseconds 500}";
+        $h = @popen('start "" /B powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command "' . $ps . '"', 'r');
+        if ($h) pclose($h);
+    });
+}
+
 $pdo = new PDO('sqlite:' . $db_path);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->sqliteCreateFunction('REGEXP', function ($pattern, $value) {
