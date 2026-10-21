@@ -302,7 +302,7 @@
                 },
                 {
                     title: 'What Happens Next',
-                    content: 'No account, name or email needed. A person reads every answer before anything changes on the site, unless several people give the same answer. When you finish you can leave an email to hear once when your answers have been checked; that is optional too.',
+                    content: 'No account, name or email needed. We check every answer before anything changes on the site. When you finish you can leave an email to hear once when your answers have been checked; that is optional too.',
                     target: '.kop-q-header .kop-q-small',
                     position: 'bottom',
                     highlightPadding: 6

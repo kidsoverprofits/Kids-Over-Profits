@@ -738,7 +738,8 @@ function kop_q_answer(array $p) {
         $GLOBALS['kop_rinbox_reviewer_as'] = KOP_Q_BY;
         try {
             kop_rinbox_apply_action('questions', $key, 'settle', array('answer' => $agreed['key']));
-            return array('message' => 'Thank you. That makes ' . $agreed['count'] . ' people who agree, so it goes to the record.', 'settled' => true);
+            // Readers are not told that agreeing answers settle a question (owner, 2026-10-20).
+            return array('message' => 'Thank you.', 'settled' => true);
         } catch (Throwable $e) {
             // It waits for the owner in the Review inbox.
         } finally {

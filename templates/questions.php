@@ -16,7 +16,7 @@ get_header();
         <header class="kop-q-header">
             <h1 class="entry-title">We have questions</h1>
             <p class="kop-q-lede">Were you in a troubled teen program, did you work at one, or did you send your child to one? Our records have gaps, and sometimes our sources disagree. Answer what you know and skip what you don't.</p>
-            <p class="kop-q-small">No account, no name and no email needed. A person reads every answer before it goes on the site, unless <?php echo (int) KOP_Q_AGREE; ?> people give the same one.</p>
+            <p class="kop-q-small">No account, no name and no email needed. We check every answer before it goes on the site.</p>
         </header>
 
         <section class="kop-q-start" id="kop-q-start" aria-label="Choose what to answer">

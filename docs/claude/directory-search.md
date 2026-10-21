@@ -38,6 +38,7 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # Email is optional and only for "tell me when my answers are checked" (the page says so): kop_q_notify() puts the reader's answers
 # in one {prefix}kop_question_batches row (status from kop_q_batch_refresh()), and inc/submission-followup.php kind 'questions' sends
 # the receipt and one email when all are decided, then deletes the address. No newsletter box on this page.
+# Owner rule (2026-10-20): never tell readers that agreeing answers settle a question (page text, tour, toasts, emails)
 # Facility and company pages carry "We have questions about <name>" (kop_q_box_html(), js/questions-box.js): an empty hidden section
 # filled from kop/v1/questions/record when the page opens (the pages are cached whole), up to four questions linking to
 # /questions/#f<id>:<key> (#o<id>:<key>), which opens that record's questions with that one first
