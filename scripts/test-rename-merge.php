@@ -126,6 +126,22 @@ $find = function ($name) use ($pdo) {
 };
 $cc = $find('Copper Canyon Academy');
 $ss = $find('Sedona Sky Academy');
+if (!$cc && $ss) {
+    // Merged on the site since (as a rename): undo that merge on the
+    // scratch copy from its log entry, so the pair is two records again.
+    $raw = $pdo->query("SELECT option_value FROM main.wpdl_options WHERE option_name = 'kop_facility_merge_log'")->fetchColumn();
+    $site_log = $raw ? @unserialize($raw) : array();
+    foreach (array_reverse(is_array($site_log) ? $site_log : array()) as $entry) {
+        $u = $entry['undo'] ?? array();
+        $drop = json_decode((string) ($u['drop_raw']['json_data'] ?? ''), true);
+        if ((int) ($u['keep_raw']['id'] ?? 0) === $ss && ($drop['identification']['name'] ?? '') === 'Copper Canyon Academy') {
+            kop_fmerge_undo($pdo, 'wpdl_', $entry);
+            echo 'Undid the site\'s merge of Copper Canyon Academy into Sedona Sky Academy (' . ($entry['at'] ?? '?') . ") on the scratch copy\n";
+            break;
+        }
+    }
+    $cc = $find('Copper Canyon Academy');
+}
 if (!$cc || !$ss) {
     fwrite(STDERR, "The mirror has no single Copper Canyon Academy / Sedona Sky Academy record (were they merged already?).\n");
     exit(2);
@@ -205,6 +221,7 @@ $only_cc = array_diff_key($flat($before_cc), $flat($before_ss));
 $only_ss = array_diff_key($flat($before_ss), $flat($before_cc));
 echo '  Copper Canyon lists ' . count($flat($before_cc)) . ' items (' . count($only_cc) . ' its own), Sedona Sky ' . count($flat($before_ss)) . ' (' . count($only_ss) . " its own)\n";
 $cc_doc = $doc_of($cc);
+$ss_operator = $doc_of($ss)['identification']['currentOperator'] ?? null;
 
 // ---- The merge -----------------------------------------------------------------
 echo "\n-- Merge as a rename --\n";
@@ -224,7 +241,7 @@ $check('Sedona Sky keeps its own years: 2014 to 2025, Closed', (int) $op['startY
     json_encode(array($op['startYear'], $op['endYear'], $op['status'])));
 $check('none of Copper Canyon\'s notes join Sedona Sky\'s', !array_intersect((array) $op['notes'], (array) ($cc_doc['operatingPeriod']['notes'] ?? array())));
 $check('Aspen is a past operator, the current one unchanged',
-    in_array('Aspen Education Group', (array) $idn['pastOperators'], true) && $idn['currentOperator'] === 'New Legal Name: Emoticare');
+    in_array('Aspen Education Group', (array) $idn['pastOperators'], true) && $idn['currentOperator'] === $ss_operator, json_encode($idn['currentOperator']));
 $m = null;
 foreach ((array) $doc['legacy']['mergedFacilities'] as $x) if ((int) $x['facility_id'] === $cc) $m = $x;
 $r = $m['rename'] ?? array();
