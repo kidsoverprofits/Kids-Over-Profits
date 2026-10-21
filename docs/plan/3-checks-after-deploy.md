@@ -98,3 +98,6 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     https://kidsoverprofits.org/open-data/ show the newsletter and Donate in the panel's top-left corner with the page full width
     below; https://kidsoverprofits.org/ca-reports/ keeps the old side column; narrowing the window under 1025 puts the sidebar
     after the content. Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.
+    Live 2026-10-21 (e989fe74 + 21af5267, the one-time LiteSpeed purge): the float measured on / and /open-data/ at 1360,
+    /ca-reports/ unfloated, back after the content at 800; bare text 0 of 30, contrast clean on /, /open-data/, a facility
+    page, /ca-reports/ (and / at 390). Open: the owner's own look at 1280+ and a narrow window.
