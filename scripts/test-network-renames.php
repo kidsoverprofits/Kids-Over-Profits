@@ -40,11 +40,14 @@ $check('each name carries its own operator', $cc && in_array('Aspen Education Gr
     && (bool) array_filter($cc['later']['operators'], static function ($o) { return stripos($o, 'Family Help') === 0; }),
     $cc ? implode('; ', $cc['earlier']['operators']) . ' | ' . implode('; ', $cc['later']['operators']) : '');
 $a = kop_network_renames_assess($cc);
-$check('the overlap is flagged', in_array('overlap', $a['flags'], true), implode(',', $a['flags']));
+// The site's rename merge (2026-10-11) gave the two names their own years, so
+// the overlap the board once had (Sedona Sky from 1998) is gone.
+$check('no overlap now each name has its own years (1998-2014, 2014-2025)', !in_array('overlap', $a['flags'], true)
+    && ($cc['earlier']['years'] ?? '') === '1998-2014' && ($cc['later']['years'] ?? '') === '2014-2025', implode(',', $a['flags']));
 $check('2014 is suggested, from the year Copper Canyon closed', $a['suggest'] === 2014, (string) $a['suggest']);
 $years = kop_network_renames_apply_years($base, array('copper-canyon-academy>sedona-sky-academy' => array('decision' => 'saved', 'year' => 2014)));
-$check('saving 2014 splits the years: Copper Canyon 1998-2014, Sedona Sky from 2014',
-    ($years['copper-canyon-academy'] ?? '') === '1998-2014' && ($years['sedona-sky-academy'] ?? '') === 'from 2014', json_encode($years));
+$check('saving 2014 splits the years: Copper Canyon 1998-2014, Sedona Sky 2014-2025',
+    ($years['copper-canyon-academy'] ?? '') === '1998-2014' && ($years['sedona-sky-academy'] ?? '') === '2014-2025', json_encode($years));
 
 echo "-- Flags across the board --\n";
 $counts = array('same' => 0, 'overlap' => 0, 'missing' => 0, 'reversed' => 0);
@@ -91,7 +94,10 @@ $check('and moves "rebranded" to the name that is now earlier', $nodes[0]['statu
 
 echo "-- Researched years --\n";
 $cands = kop_network_renames_candidates();
-$check('the researched years load, one per rename line at most', count($cands) > 0 && !array_diff_key($cands, $by), count($cands) . ' candidates');
+// A candidate whose line the rebuilt map no longer draws (the two records were
+// merged, or the line removed) is never shown; it is only counted here.
+$stray = array_diff_key($cands, $by);
+$check('the researched years load, one per rename line at most', count($cands) > count($stray), count($cands) . ' candidates, ' . count($stray) . ' for lines no longer on the map');
 $cc = $cands['copper-canyon-academy>sedona-sky-academy'] ?? null;
 $check('Copper Canyon -> Sedona Sky: 2014 from the sources, order as drawn', $cc && $cc['year'] === 2014 && !$cc['swapped']);
 $bad = 0;
