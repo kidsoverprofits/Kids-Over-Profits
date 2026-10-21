@@ -474,6 +474,8 @@ function kop_wb_place($fid, $name, $folder, $primary, $kind = 'facility') {
         $page = $fid && function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $fid) : '';
     } elseif ($kind === 'ya') {
         $page = $fid && function_exists('kop_ya_url') ? kop_ya_url((int) $fid) : '';
+    } elseif ($kind === 'facility' && $fid && ($moved = kop_wb_moved_program($fid))) {
+        $page = kop_ya_url($moved['id']); // filed while it was a facility record
     } elseif ($kind === 'facility' && $fid && function_exists('kop_facility_page_url')) {
         $page = (string) kop_facility_page_url((int) $fid);
     }
@@ -560,7 +562,23 @@ function kop_wb_parent_companies(array $fids) {
     return array_values($out);
 }
 
-/** The record a token names, as a filing target: kind, id, name and, for a company or young adult program, its document folder. */
+/**
+ * The young adult program a facility record was moved into
+ * (kop_ya_moved_from_map()): ['id', 'name'], or null. The scan's matches and
+ * filed rows still name the old record.
+ */
+function kop_wb_moved_program($fid) {
+    if (!function_exists('kop_ya_moved_from_map') || !function_exists('kop_ya_url')) {
+        return null;
+    }
+    return kop_ya_moved_from_map()[(int) $fid] ?? null;
+}
+
+/**
+ * The record a token names, as a filing target: kind, id, name and, for a
+ * company or young adult program, its document folder. A facility record
+ * moved to the young adult programs names its program.
+ */
 function kop_wb_target_for($kind, $id) {
     global $wpdb;
     if ($kind === 'company' || $kind === 'ya') {
@@ -571,6 +589,10 @@ function kop_wb_target_for($kind, $id) {
     }
     $fac = $wpdb->get_row($wpdb->prepare('SELECT id, name FROM facilities_v2 WHERE id = %d', (int) $id), ARRAY_A);
     if (!$fac) {
+        $moved = kop_wb_moved_program($id);
+        if ($moved && function_exists('kop_wbc_existing_target')) {
+            return kop_wbc_existing_target('ya', $moved['id']);
+        }
         throw new RuntimeException('Facility #' . (int) $id . ' not found.');
     }
     return array('kind' => 'facility', 'id' => (int) $fac['id'], 'name' => $fac['name']);
@@ -642,7 +664,11 @@ function kop_wb_add_facilities(array $r, array $tokens) {
             continue;
         }
         $target = kop_wb_target_for($kind, $id);
+        $kind = $target['kind'];
         $id = (int) $target['id'];
+        if (in_array(kop_wb_target_token($kind, $id), $have, true)) {
+            continue; // a moved record's program, already filed there
+        }
         $parent = $kind === 'facility' ? kop_wb_facility_folder($id) : (int) $target['folder'];
         if ($parent <= 0) {
             throw new RuntimeException('No document folder for ' . $target['name'] . '.');

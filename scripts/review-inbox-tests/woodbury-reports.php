@@ -120,6 +120,23 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
     $also = kop_wb_also(array('also_facilities' => wp_json_encode(array(array('id' => 6, 'kind' => 'ya', 'name' => 'P', 'folder' => 1),
         array('id' => 7, 'kind' => 'odd', 'name' => 'Q', 'folder' => 2)))));
     $check('woodbury-reports: an extra young adult program stays one when read back', $also[0]['kind'] === 'ya' && $also[1]['kind'] === 'facility');
+    // A best match moved to the young adult programs (kop_ya_moved_from_map()): its program is picked instead.
+    $moved = function_exists('kop_ya_moved_from_map') ? kop_ya_moved_from_map() : array();
+    $mkey = $moved ? $pick("SELECT ckey FROM $t WHERE status = 'pending' AND facility_id IN (" . implode(',', array_map('intval', array_keys($moved))) . ") ORDER BY id LIMIT 1") : '';
+    if ($mkey === '') {
+        kop_rinbox_test_skip('woodbury-reports: a best match moved to the young adult programs files on its program', 'no waiting row names a moved record');
+    } else {
+        $mr = kop_wb_get($mkey);
+        $prog = $moved[(int) $mr['facility_id']];
+        $mit = kop_rinbox_get_item('woodbury-reports', $mkey);
+        $mfile = $mit['actions'][0];
+        $mya = array_values(array_filter($mfile['params'], function ($p) { return $p['name'] === 'ya'; }))[0] ?? array();
+        $check('woodbury-reports: a best match moved to the young adult programs files on its program (picked, not the gone record)',
+            ($mya['value'] ?? '') === 'ya:' . $prog['id'] && $mfile['params'][0]['value'] === array()
+            && strpos($mit['text'], 'now the young adult program ' . $prog['name']) !== false, wp_json_encode($mya));
+        $mp = kop_wb_place((int) $mr['facility_id'], $mr['facility_name'], 0, true, 'facility');
+        $check('woodbury-reports: pages filed under it before it moved link the program\'s card', strpos($mp['page'], '#kop-ya-program-' . $prog['id']) !== false, $mp['page']);
+    }
     $check('woodbury-reports: names say which are young adult programs', kop_rinbox_wb_names(array($place, kop_wb_place(4, 'Co', 0, false, 'company')))
         === 'Test Program (young adult program), Co (company)');
     $section = $pick("SELECT ckey FROM $t WHERE status = 'pending' AND kind = 'section' AND facility_id > 0 ORDER BY id LIMIT 1");

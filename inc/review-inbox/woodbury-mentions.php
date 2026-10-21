@@ -131,7 +131,9 @@ function kop_rinbox_wb_parents(array $fids) {
  */
 function kop_rinbox_wb_target_params(array $r, $best, array $alts, array $parents, $first_label) {
     $params = array();
-    $start = $best > 0 ? array(array('id' => $best, 'name' => $r['facility_name'] . ($r['facility_state'] !== '' ? ' (' . $r['facility_state'] . ')' : ''))) : array();
+    // A best match moved to the young adult programs: its program is picked instead (kop_wb_moved_program()).
+    $moved = $best > 0 ? kop_wb_moved_program($best) : null;
+    $start = $best > 0 && !$moved ? array(array('id' => $best, 'name' => $r['facility_name'] . ($r['facility_state'] !== '' ? ' (' . $r['facility_state'] . ')' : ''))) : array();
     $params[] = array('name' => 'facilities', 'label' => $first_label, 'type' => 'facilities', 'value' => $start, 'optional' => true);
     $shown = array($best => true);
     foreach (array_slice($alts, 0, 5) as $a) {
@@ -146,8 +148,8 @@ function kop_rinbox_wb_target_params(array $r, $best, array $alts, array $parent
     }
     $params[] = array('name' => 'company', 'label' => 'And a company', 'type' => 'text', 'value' => '', 'optional' => true,
         'lookup' => 'company', 'placeholder' => 'Type a company name');
-    $params[] = array('name' => 'ya', 'label' => 'And a young adult program (18+)', 'type' => 'record', 'kinds' => array('ya'), 'create' => array(),
-        'value' => '', 'optional' => true);
+    $params[] = array('name' => 'ya', 'label' => $moved ? 'Young adult program (18+)' : 'And a young adult program (18+)', 'type' => 'record', 'kinds' => array('ya'),
+        'create' => array(), 'value' => $moved ? 'ya:' . (int) $moved['id'] : '', 'value_label' => $moved ? (string) $moved['name'] : '', 'optional' => true);
     return $params;
 }
 
@@ -189,6 +191,8 @@ function kop_rinbox_wb_item(array $r) {
     if (trim((string) $r['note']) !== '') $lines[] = trim((string) $r['note']);
     if ($pending && $r['kind'] === 'fuzzy' && (int) $r['facility_id']) $lines[] = 'Close name: check it is this facility.';
     if ($pending && !(int) $r['facility_id']) $lines[] = 'No facility matched this name: pick one under "File under", file it under another kind of record, or create the record.';
+    $moved = $pending && (int) $r['facility_id'] ? kop_wb_moved_program((int) $r['facility_id']) : null;
+    if ($moved) $lines[] = 'The matched record (#' . (int) $r['facility_id'] . ') is now the young adult program ' . $moved['name'] . ': filing puts the pages in its folder.';
 
     $details = array();
     if ($snippet !== '' && mb_strlen($snippet) > 600) $details[] = array('label' => 'All the words', 'value' => $snippet);
