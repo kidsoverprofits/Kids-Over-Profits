@@ -14,6 +14,7 @@
 
 require_once __DIR__ . '/lib-marketers.php';
 require_once __DIR__ . '/lib-tradeorgs.php';
+require_once __DIR__ . '/lib-suggestion-changes.php';   // mini-form entries onto their records (kop_suggestion_resolve_entries)
 
 if (!function_exists('kop_ensure_master_table')) {
     /**
@@ -728,6 +729,23 @@ if (!function_exists('kop_apply_suggested_edit')) {
                 require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
                 $v2_prefix = $wp_prefix !== '' ? $wp_prefix : (isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '');
                 if (kop_v2_writes_active($pdo, $v2_prefix)) {
+                    // An entry sent without its facility_id (the "Submit info" mini-form sends none, and no
+                    // state) is matched to its record and only its filled fields merged in; without this the
+                    // save could not find the record and made a second, mostly blank facility.
+                    if (!empty($project_data['facilities']) && is_array($project_data['facilities'])) {
+                        $resolved = kop_suggestion_resolve_entries($pdo, $project_data['facilities'], (string) ($submission['reason'] ?? ''), $v2_prefix);
+                        $project_data['facilities'] = $resolved['facilities'];
+                        if ($resolved['all_on_file'] && empty($project_data['operator'])) {
+                            // Only facilities already on file: save them, and make no company named after one.
+                            kop_v2_with_write_lock($pdo, function () use ($pdo, $v2_prefix, $project_data) {
+                                return kop_v2_save_facility_entries($pdo, $v2_prefix, $project_data['facilities'], array());
+                            });
+                            kop_mark_suggested_edit_status($pdo, $suggested_edits_table, $id, 'approved');
+                            $pdo->commit();
+                            $names = array_map(function ($f) { return (string) ($f['identification']['name'] ?? ''); }, $project_data['facilities']);
+                            return ['success' => true, 'projectName' => implode(', ', array_filter($names)), 'error' => null, 'httpCode' => 200];
+                        }
+                    }
                     $v2_name = $resolved_master_id;
                     $raw_name = trim((string) $master_id);
                     if ($category === 'companies' && $raw_name !== '' && $raw_name !== $v2_name) {

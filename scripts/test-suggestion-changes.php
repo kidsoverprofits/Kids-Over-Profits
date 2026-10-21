@@ -3,15 +3,31 @@
  * "What changed" on data suggestion cards (api/lib-suggestion-changes.php):
  * the record is found, empty and unticked fields never show, a whole-record
  * edit that matches the record is "nothing new", a name with no record is new.
- * Reads tmp/prod.sqlite; writes nothing.
+ * And Approve on a mini-form suggestion: its filled fields merge into the
+ * record it is about, no second facility and no company named after it.
+ * Runs on a scratch copy of the tables it needs from tmp/prod.sqlite.
  *
  *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-suggestion-changes.php [--db=tmp/prod.sqlite]
  */
 
 if (PHP_SAPI !== 'cli') exit("CLI only.\n");
 $args = getopt('', array('db::'));
-$db_path = $args['db'] ?? (dirname(__DIR__) . '/tmp/prod.sqlite');
-if (!file_exists($db_path)) { fwrite(STDERR, "No mirror at $db_path\n"); exit(2); }
+$mirror = $args['db'] ?? (dirname(__DIR__) . '/tmp/prod.sqlite');
+if (!file_exists($mirror)) { fwrite(STDERR, "No mirror at $mirror\n"); exit(2); }
+$db_path = sys_get_temp_dir() . '/kop-suggestion-changes-' . getmypid() . '.sqlite';
+@unlink($db_path);
+$copy = new PDO('sqlite:' . $db_path);
+$copy->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$copy->exec('ATTACH DATABASE ' . $copy->quote($mirror) . ' AS src');
+foreach ($copy->query("SELECT name, sql FROM src.sqlite_master WHERE type = 'table'
+    AND (name LIKE 'wpdl_kop_operator%' OR name LIKE 'wpdl_kop_facility%' OR name IN ('facilities_v2', 'suggested_edits'))")->fetchAll() as $t) {
+    $copy->exec($t['sql']);
+    $copy->exec("INSERT INTO main.`{$t['name']}` SELECT * FROM src.`{$t['name']}`");
+}
+$copy->exec('DETACH DATABASE src');
+$copy = null;
+register_shutdown_function(function () use ($db_path) { $GLOBALS['pdo'] = null; $GLOBALS['wpdb'] = null; gc_collect_cycles(); @unlink($db_path); });
+$GLOBALS['kop_test_wpdb_writes'] = true;
 if (!defined('KOP_DB_CONFIG_LOADED')) define('KOP_DB_CONFIG_LOADED', true);
 require __DIR__ . '/kop-test-harness.php';
 $pdo->sqliteCreateFunction('JSON_UNQUOTE', function ($v) { return $v; }, 1);
@@ -20,6 +36,7 @@ $pdo->sqliteCreateFunction('JSON_EXTRACT', function ($j, $p) {
     foreach (explode('.', substr($p, 2)) as $k) { if (!is_array($d) || !array_key_exists($k, $d)) return null; $d = $d[$k]; }
     return is_array($d) ? json_encode($d) : $d;
 }, 2);
+require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
 require_once dirname(__DIR__) . '/api/lib-suggested-edits.php';
 require_once dirname(__DIR__) . '/api/lib-suggestion-changes.php';
 
@@ -79,6 +96,34 @@ $check('a name with no record is marked new, with what was sent (not its name ag
 
 $c = kop_suggestion_changes($pdo, array('referrerConsultants' => array(array('firstName' => 'Ann', 'lastName' => 'Lee', 'role' => '', 'affiliations' => array()))), '', 'wpdl_');
 $check('other kinds show what was sent, blanks left out', $c['other'] === array(array('label' => 'Referrer consultants', 'after' => 'Ann, Lee')), json_encode($c['other']));
+
+// Approve: a note and a gender, sent with Submit info (no state, no facility_id).
+$opts = array('pdo' => $pdo, 'prefix' => 'wpdl_');
+$sent = $mini(array('notes' => array('A note sent with Submit info.'), 'facilityDetails' => array('gender' => 'Girls')));
+$res = kop_suggestion_resolve_entries($pdo, $sent['facilities'], 'Public mini-form submission (facility) for "' . $name . '" from /' . $state_name . '/', 'wpdl_');
+$m = $res['facilities'][0];
+$girls = kop_facility_normalize(array('identification' => array('name' => 'x'), 'facilityDetails' => array('gender' => 'Girls')))['facilityDetails']['gender'];
+$check('approve: the entry becomes its record (facility_id), every facility on file', (int) $m['facility_id'] === (int) $row['id'] && $res['all_on_file']);
+$check('approve: what the entry left empty keeps the record\'s value',
+    $m['facilityDetails']['type'] === $doc['facilityDetails']['type'] && $m['operatingPeriod']['status'] === $doc['operatingPeriod']['status']
+    && $m['location'] == $doc['location'] && $m['staff'] == $doc['staff'], json_encode(array($m['facilityDetails'], $m['operatingPeriod']['status'])));
+$check('approve: a filled value replaces, a list item is added to what was there',
+    $m['facilityDetails']['gender'] === $girls && end($m['notes']) === 'A note sent with Submit info.' && count($m['notes']) === count($doc['notes']) + 1);
+
+$count = function () use ($pdo) { return (int) $pdo->query('SELECT COUNT(*) FROM facilities_v2')->fetchColumn(); };
+$ops = function () use ($pdo) { return (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_operators')->fetchColumn(); };
+$n = $count();
+$o = $ops();
+kop_v2_save_facility_entries($pdo, 'wpdl_', $res['facilities'], array());
+$after = kop_facility_load((int) $row['id'], $opts)['doc'];
+$check('approve: saved onto the record, no second facility and no new company', $count() === $n && $ops() === $o, "$n -> " . $count() . ", companies $o -> " . $ops());
+$check('approve: the record keeps its type and staff and has the note',
+    $after['facilityDetails']['type'] === $doc['facilityDetails']['type'] && count($after['staff']['notableStaff']) === count($doc['staff']['notableStaff'])
+    && in_array('A note sent with Submit info.', $after['notes'], true) && $after['facilityDetails']['gender'] === $girls);
+
+// A name with no record still makes a new facility, as the card says.
+$res = kop_suggestion_resolve_entries($pdo, array(array('identification' => array('name' => 'Zzq No Such Program Anywhere'))), '', 'wpdl_');
+$check('approve: a name with no record is left to become a new facility', empty($res['facilities'][0]['facility_id']) && !$res['all_on_file']);
 
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

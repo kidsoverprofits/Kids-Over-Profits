@@ -70,7 +70,9 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # Data suggestions (suggested_edits, the "Data" queue) show "What changed" on the card, not the record sent: api/lib-suggestion-changes.php
 # finds the record (facility_id, the /facility/<slug>/ or /<state>/ page named in the reason, name + state, the one record with that name),
 # normalizes both sides and lists only fields whose sent value differs; empty, "Unknown" and unticked flags are no information. Dropped
-# list items and emptied fields show only for whole-record edits (facility_id sent), which Approve writes over the record. Raw JSON is folded
+# list items and emptied fields show only for whole-record edits (facility_id sent), which Approve writes over the record. Raw JSON is folded.
+# Approve matches an entry sent without facility_id the same way and merges only its filled fields (kop_suggestion_resolve_entries());
+# all on file = those facilities saved alone, no company made from a mini-form's facility name
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-suggestion-changes.php
 # KOP Tools screens share one look (docs/ADMIN-UI.md: inc/admin-kit.php, css/admin-kit.css, js/admin-kit.js): decisions are buttons
 # (primary first, three at most), the rest in More or a fold, a dropdown never acts, one filter toolbar per list, Undo after every action.

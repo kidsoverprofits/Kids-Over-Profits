@@ -275,3 +275,77 @@ if (!function_exists('kop_suggestion_diff')) {
         return $rows;
     }
 }
+
+if (!function_exists('kop_suggestion_filled')) {
+    /** A sent value that says something: not empty, "Unknown", null or an unticked box (the card's rule). */
+    function kop_suggestion_filled($v) {
+        if (is_array($v)) return (bool) $v;
+        if ($v === null || $v === false) return false;
+        return !in_array(mb_strtolower(trim((string) $v)), array('', 'unknown', 'null'), true);
+    }
+}
+
+if (!function_exists('kop_suggestion_merge_into')) {
+    /**
+     * A mini-form entry laid onto the record it is about: each filled value
+     * replaces the record's, each list gains the items it lacks, and nothing
+     * the entry leaves empty is touched. Ids, the name and provenance stay the
+     * record's. Returns the record's document with facility_id set.
+     */
+    function kop_suggestion_merge_into(array $record_doc, array $entry, $facility_id) {
+        $sent = kop_facility_normalize($entry);
+        $keep = array('schema_version', 'facility_id', 'provenance', 'legacy', 'documentFolderId');
+        $merge = function (array $base, array $over, $path) use (&$merge, $keep) {
+            foreach ($over as $k => $v) {
+                $p = $path === '' ? (string) $k : $path . '.' . $k;
+                if (in_array($p, $keep, true) || in_array($p, array('identification.name', 'identification.nameKey'), true)) continue;
+                if (is_array($v) && $v && array_keys($v) !== range(0, count($v) - 1)) {
+                    $base[$k] = $merge(is_array($base[$k] ?? null) ? $base[$k] : array(), $v, $p);
+                } elseif (is_array($v)) {
+                    $have = is_array($base[$k] ?? null) ? array_values($base[$k]) : array();
+                    $seen = array_map(function ($i) { return mb_strtolower(kop_suggestion_item_text($i)); }, $have);
+                    foreach ($v as $item) {
+                        $text = mb_strtolower(kop_suggestion_item_text($item));
+                        if ($text === '' || in_array($text, $seen, true)) continue;
+                        $have[] = $item;
+                        $seen[] = $text;
+                    }
+                    $base[$k] = $have;
+                } elseif (kop_suggestion_filled($v)) {
+                    $base[$k] = $v;
+                }
+            }
+            return $base;
+        };
+        $doc = $merge($record_doc, $sent, '');
+        $doc['facility_id'] = (int) $facility_id;
+        return $doc;
+    }
+}
+
+if (!function_exists('kop_suggestion_resolve_entries')) {
+    /**
+     * Before Approve saves a suggestion: each facility entry without a
+     * facility_id that is about a record on file (kop_suggestion_find_facility())
+     * becomes that record with the entry's filled values merged in, so the save
+     * updates it instead of making a second, mostly blank facility.
+     * Returns {facilities, all_on_file}: all_on_file when every entry is now a
+     * record on file, which Approve then saves alone (no company is made from
+     * a mini-form's facility name).
+     */
+    function kop_suggestion_resolve_entries(PDO $pdo, array $facilities, $reason, $prefix) {
+        $opts = array('pdo' => $pdo, 'prefix' => $prefix);
+        $all = (bool) $facilities;
+        $merged_any = false;
+        foreach ($facilities as $i => $entry) {
+            if (!is_array($entry)) { $all = false; continue; }
+            if ((int) ($entry['facility_id'] ?? 0) > 0) continue;
+            $fid = kop_suggestion_find_facility($entry, kop_facility_normalize($entry), (string) $reason, $opts);
+            $record = $fid ? kop_facility_load($fid, $opts) : null;
+            if (!$record) { $all = false; continue; }
+            $facilities[$i] = kop_suggestion_merge_into($record['doc'], $entry, $record['id']);
+            $merged_any = true;
+        }
+        return array('facilities' => $facilities, 'all_on_file' => $all && $merged_any);
+    }
+}
