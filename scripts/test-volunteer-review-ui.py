@@ -167,6 +167,111 @@ def practice(width, shots, check):
         browser.close()
 
 
+SOCIAL = {"id": 21, "title": "Post ideas: Oct 13 to Oct 19", "question": "Take the ideas you want, make the picture and write the caption, then send it for review.",
+          "yes": "One clear fact.", "no": "A guess.", "note": "", "minutes": 20, "total": 2, "done": 0, "mine": True, "kind": "social", "link_kinds": None,
+          "faq": [], "caption_max": 2200}
+IDEAS = [
+    {"source": "social", "project_id": 21, "key": "closure:9", "title": "Sunrise Ranch has closed.", "angle": "closure", "angle_label": "Closure",
+     "fact": "Sunrise Ranch (Hurricane, UT) has closed, March 2025.", "url": "https://vol.test/facility/sunrise-ranch/", "url_label": "Our page on Sunrise Ranch",
+     "summary": "", "quote": "The ranch closed its doors on March 3.", "image": "", "when": "", "post": None},
+    {"source": "social", "project_id": 21, "key": "finding:3401", "title": "UT finding", "angle": "finding", "angle_label": "State finding",
+     "fact": "UT inspectors' finding at Some Ranch.", "url": "https://vol.test/severe-reports/#finding-3401", "url_label": "The finding",
+     "summary": "A staff member restrained a child face down.", "quote": "Staff placed C1 in a prone restraint.", "image": "", "when": "", "post": None},
+]
+
+
+def social(width, shots, check):
+    """The designer's roundup: Taking this opens the caption box, an error keeps the card, Send for review moves on, Take it back works."""
+    print("\nSocial media roundup at %d px" % width)
+    st = {"posts": {}, "calls": []}
+
+    def handle(route):
+        req = route.request
+        url = req.url
+        if not url.startswith(REST):
+            path = ROOT / url.replace(BASE, "").split("?")[0]
+            if path.is_file():
+                ctype = "text/css" if path.suffix == ".css" else "application/javascript" if path.suffix == ".js" else "text/html"
+                return route.fulfill(status=200, body=path.read_bytes(), headers={"Content-Type": ctype})
+            if url.startswith(BASE + "volunteer-review/"):
+                return route.fulfill(status=200, body=PAGE, headers={"Content-Type": "text/html"})
+            return route.fulfill(status=404, body="")
+        name = url[len(REST):].split("?")[0]
+        body = json.loads(req.post_data or "{}")
+        st["calls"].append((name, body))
+        done = [k for k, v in st["posts"].items() if v["status"] in ("ready", "approved", "passed")]
+        proj = dict(SOCIAL, done=len(done))
+        out = {}
+        if name == "queues":
+            out = {"queues": []}
+        elif name == "projects":
+            out = {"projects": [proj], "self": {"eligible": False, "queues": [], "open": 0, "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10}}
+        elif name == "project":
+            skip = body.get("skip") or []
+            left = [dict(i, post=st["posts"].get(i["key"])) for i in IDEAS if i["key"] not in done and i["key"] not in skip]
+            out = {"project": proj, "items": left[:1]}
+        elif name == "post":
+            key, do = body["key"], body["do"]
+            cur = dict(st["posts"].get(key) or {"status": "taken", "caption": "", "image_url": "", "note": "", "owner_note": ""})
+            for f in ("caption", "image_url", "note"):
+                if f in body:
+                    cur[f] = body[f]
+            if do == "ready" and not cur["caption"].strip():
+                return route.fulfill(status=400, body=json.dumps({"error": "Write the caption first."}), headers={"Content-Type": "application/json"})
+            cur["status"] = {"take": "taken", "draft": "taken", "ready": "ready", "pass": "passed", "back": "taken"}[do]
+            st["posts"][key] = cur
+            out = {"post": cur, "message": "Draft saved." if do == "draft" else "ok"}
+        elif name == "messages":
+            out = {"messages": [], "unread": 0}
+        return route.fulfill(status=200, body=json.dumps(out), headers={"Content-Type": "application/json"})
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": width, "height": 900})
+        errors = []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.route("**/*", handle)
+        page.goto(BASE + "volunteer-review/?project=21")
+        page.wait_for_selector(".kop-vol-social")
+        card = page.locator(".kop-vol-social")
+        check("the idea opens: angle, fact, our page, the quote", "Closure" in card.locator(".kop-vol-angle").inner_text()
+              and "has closed" in card.locator("h3").inner_text() and card.locator("a", has_text="Our page on Sunrise Ranch").count() == 1
+              and "closed its doors" in card.locator(".kop-vol-quote").inner_text())
+        check("idea 1 of 2; the brief says nothing is posted before approval", "Idea 1 of 2" in page.locator(".kop-vol-position").inner_text()
+              and "Nothing is posted until an admin approves it" in page.locator(".kop-vol-brief").inner_text())
+        check("no caption box before Taking this", card.locator("textarea").count() == 0)
+        card.locator("button", has_text="Taking this").click()
+        page.wait_for_selector(".kop-vol-social textarea")
+        card = page.locator(".kop-vol-social")
+        card.locator("button", has_text="Send for review").click()
+        page.wait_for_selector(".kop-vol-social .kop-vol-msg.is-error")
+        check("an empty caption is refused and the card stays", "caption" in card.locator(".kop-vol-msg").inner_text())
+        card.locator("textarea").fill("Sunrise Ranch in Utah has closed.")
+        check("the caption counts its characters", "33 of 2200" in card.locator(".kop-vol-decide .kop-vol-meta").inner_text())
+        card.locator("input[type=url]").fill("https://www.canva.com/design/abc")
+        if shots:
+            page.screenshot(path=str(shots / ("social-%d.png" % width)), full_page=True)
+        card.locator("button", has_text="Send for review").click()
+        page.wait_for_function("document.querySelector('.kop-vol-social h3') && document.querySelector('.kop-vol-social h3').textContent.indexOf('inspectors') >= 0")
+        sent = [b for n, b in st["calls"] if n == "post" and b.get("do") == "ready"]
+        check("Send for review posts the caption and the picture link", sent[-1].get("caption") == "Sunrise Ranch in Utah has closed."
+              and sent[-1].get("image_url") == "https://www.canva.com/design/abc")
+        check("the next idea shows its plain summary", "face down" in page.locator(".kop-vol-social").inner_text())
+        check("the sent one is listed with Take it back", "Sent for review" in page.locator(".kop-vol-saved").inner_text()
+              and page.locator(".kop-vol-saved button", has_text="Take it back").count() == 1)
+        page.locator(".kop-vol-saved button", has_text="Take it back").click()
+        page.wait_for_function("document.querySelector('.kop-vol-social h3') && document.querySelector('.kop-vol-social h3').textContent.indexOf('has closed') >= 0")
+        check("taken back, it comes back with its caption", page.locator(".kop-vol-social textarea").input_value() == "Sunrise Ranch in Utah has closed.")
+        wide = page.evaluate("""() => {
+            const w = document.documentElement.clientWidth, out = [];
+            document.querySelectorAll('.kop-vol-page *').forEach(n => { const r = n.getBoundingClientRect(); if (r.width && r.right > w + 1) out.push(n.className || n.tagName); });
+            return out.slice(0, 5);
+        }""")
+        check("nothing runs off the screen", not wide, json.dumps(wide))
+        check("no script errors", not errors, "; ".join(errors))
+        browser.close()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--shots", default="")
@@ -320,6 +425,7 @@ def main():
             browser.close()
 
         practice(width, shots, check)
+        social(width, shots, check)
 
     print("\n%d FAILED" % len(failures) if failures else "\nAll passed")
     sys.exit(1 if failures else 0)

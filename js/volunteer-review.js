@@ -341,6 +341,88 @@
         return node;
     }
 
+    // A post idea (social media project): the card's facts, then Taking this -> caption + picture link -> Send for review.
+    function socialCard(it, p, onDone) {
+        var node = el('article', { class: 'kop-vol-card kop-vol-panel kop-vol-social' });
+        var post = it.post || null;
+        if (it.angle_label) node.appendChild(el('p', { class: 'kop-vol-angle', text: it.angle_label + (it.when ? ' · ' + it.when : '') }));
+        node.appendChild(el('h3', { class: 'kop-vol-title', text: it.fact || it.title || '(no title)' }));
+        if (safe(it.url)) node.appendChild(el('ul', { class: 'kop-vol-links' }, [el('li', null, [link(it.url, it.url_label || 'Our page about it')])]));
+        if (it.summary) node.appendChild(el('p', { class: 'kop-vol-text' }, [el('strong', { text: 'In plain words: ' }), it.summary]));
+        if (it.quote) node.appendChild(el('blockquote', { class: 'kop-vol-quote', text: it.quote }));
+        if (safe(it.image)) node.appendChild(el('p', null, [link(it.image, 'A picture we hold (use it or make your own)')]));
+        if (post && post.status === 'sent_back' && post.owner_note) {
+            node.appendChild(el('p', { class: 'kop-vol-sentback' }, [el('strong', { text: 'Sent back: ' }), post.owner_note]));
+        }
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
+        function fail(e, buttons) {
+            buttons.forEach(function (b) { b.disabled = false; });
+            msg.hidden = false;
+            msg.className = 'kop-vol-msg is-error';
+            msg.textContent = e.message;
+        }
+        if (!post || post.status === 'passed') {
+            var start = [
+                el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Taking this', disabled: cfg.preview ? true : null, onclick: function () { step('take'); } }),
+                el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Pass on this one', disabled: cfg.preview ? true : null, onclick: function () { step('pass'); } }),
+                el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } })
+            ];
+            var step = function (doing) {
+                start.forEach(function (b) { b.disabled = true; });
+                api('post', { project_id: it.project_id, key: it.key, do: doing }).then(function (res) {
+                    if (doing === 'pass') { onDone(it, 'pass'); return; }
+                    it.post = res.post;
+                    node.replaceWith(socialCard(it, p, onDone));
+                }).catch(function (e) { fail(e, start); });
+            };
+            node.appendChild(el('div', { class: 'kop-vol-buttons' }, start));
+            node.appendChild(msg);
+            node.appendChild(askButton({ project_id: it.project_id, item_key: 'social:' + it.project_id + ':' + it.key, item_title: it.fact || it.title, label: it.fact || it.title }));
+            return node;
+        }
+        var capId = 'kop-vol-caption-' + Math.random().toString(36).slice(2);
+        var imgId = capId + '-img';
+        var noteId = capId + '-note';
+        var caption = el('textarea', { id: capId, rows: '6', maxlength: String(p.caption_max || 2200), placeholder: 'The caption, as it will be posted.' });
+        caption.value = post.caption || '';
+        var count = el('p', { class: 'kop-vol-meta', 'aria-live': 'polite' });
+        function counted() { count.textContent = caption.value.length + ' of ' + (p.caption_max || 2200) + ' characters'; }
+        caption.addEventListener('input', function () { counted(); if (msg.className.indexOf('is-error') >= 0) msg.hidden = true; });
+        counted();
+        var image = el('input', { id: imgId, type: 'url', maxlength: '500', placeholder: 'https://… (Canva, Google Drive, anywhere we can open it)' });
+        image.value = post.image_url || '';
+        var note = el('input', { id: noteId, type: 'text', maxlength: '1000', placeholder: 'Anything for the reviewer (optional)' });
+        note.value = post.note || '';
+        var buttons = [
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Send for review', disabled: cfg.preview ? true : null, onclick: function () { save('ready'); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Save draft', disabled: cfg.preview ? true : null, onclick: function () { save('draft'); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Pass on this one', disabled: cfg.preview ? true : null, onclick: function () { save('pass'); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } })
+        ];
+        function save(doing) {
+            buttons.forEach(function (b) { b.disabled = true; });
+            msg.hidden = true;
+            api('post', { project_id: it.project_id, key: it.key, do: doing, caption: caption.value, image_url: image.value.trim(), note: note.value }).then(function (res) {
+                if (doing === 'draft') {
+                    buttons.forEach(function (b) { b.disabled = false; });
+                    msg.hidden = false;
+                    msg.className = 'kop-vol-msg';
+                    msg.textContent = res.message || 'Draft saved.';
+                    return;
+                }
+                onDone(it, doing);
+            }).catch(function (e) { fail(e, buttons); });
+        }
+        node.appendChild(el('div', { class: 'kop-vol-decide' }, [
+            el('label', { for: capId, text: 'Caption' }), caption, count,
+            el('label', { for: imgId, text: 'Link to your picture' + (safe(it.image) ? ' (leave empty to use ours)' : '') }), image,
+            el('label', { for: noteId, text: 'Note' }), note,
+            el('div', { class: 'kop-vol-buttons' }, buttons), msg
+        ]));
+        node.appendChild(askButton({ project_id: it.project_id, item_key: 'social:' + it.project_id + ':' + it.key, item_title: it.fact || it.title, label: it.fact || it.title }));
+        return node;
+    }
+
     var SAID = { approve: 'approve', reject: 'reject', unsure: 'not sure' };
 
     // After a card shrinks or is swapped for the next one, the reader is left far below it: bring its top back to
@@ -691,12 +773,13 @@
         projBrief.appendChild(el('h2', { text: p.title }));
         projBrief.appendChild(progressBar(p.done, p.total));
         if (p.note) projBrief.appendChild(el('p', { class: 'kop-vol-note', text: p.note }));
-        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'The question: ' }), p.question]));
         var research = p.kind === 'research';
+        var social = p.kind === 'social';
+        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: social ? 'What to do: ' : 'The question: ' }), p.question]));
         if (p.yes || p.no) {
             var dl = el('dl', { class: 'kop-vol-examples' });
-            if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
-            if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
+            if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : social ? 'A good post' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
+            if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : social ? 'Keep out of it' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
             projBrief.appendChild(dl);
         }
         if (p.faq && p.faq.length) {
@@ -706,6 +789,7 @@
         }
         projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: research
             ? 'Could not find it? Say where you looked: that helps too. An admin reads every answer before anything changes.'
+            : p.kind === 'social' ? 'Use only what the card says. Nothing is posted until an admin approves it; one sent back says what to change.'
             : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
         projBrief.appendChild(askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'));
         state.projects.forEach(function (x) { if (x.id === p.id) { x.done = p.done; x.total = p.total; } });
@@ -736,7 +820,27 @@
                 bringToTop(projSlot);
                 return;
             }
-            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : p.kind === 'social' ? 'Idea ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            if (p.kind === 'social') {
+                projSlot.appendChild(socialCard(it, p, function (item, doing) {
+                    var li = el('li', null, [doing === 'pass' ? 'Passed on: ' : 'Sent for review: ', el('strong', { text: item.fact || item.title || '(no title)' }), '. ']);
+                    if (doing === 'ready') {
+                        li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
+                            var b = this;
+                            b.disabled = true;
+                            api('post', { project_id: item.project_id, key: item.key, do: 'back' }).then(function () {
+                                li.remove();
+                                nextProjectItem();
+                            }).catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });
+                        } }));
+                    }
+                    projSaved.insertBefore(li, projSaved.firstChild);
+                    while (projSaved.childNodes.length > 5) projSaved.removeChild(projSaved.lastChild);
+                    nextProjectItem();
+                }));
+                bringToTop(projSlot);
+                return;
+            }
             if (p.kind === 'research') {
                 projSlot.appendChild(researchCard(it, p, function (item, ans) {
                     var sent = (ans.links || []).map(function (l) { return SENT[l.sent] || ''; }).filter(function (w, i, all) { return w && all.indexOf(w) === i; });

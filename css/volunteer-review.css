@@ -558,6 +558,59 @@ button.kop-vol-btn-small:focus {
     margin-top: 10px;
 }
 
+/* Post ideas (inc/volunteer-social.php): the idea, then the caption and the picture link. */
+
+.kop-vol-social {
+    border-left: 6px solid var(--kop-orange, #EF9034);
+}
+
+.kop-vol-angle {
+    display: inline-block;
+    margin: 0 0 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.kop-vol-quote {
+    margin: 0 0 10px;
+    padding: 6px 12px;
+    border-left: 4px solid var(--kop-teal, #33A7B5);
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    font-style: italic;
+}
+
+.kop-vol-sentback {
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    border-left: 4px solid var(--kop-coral-pink, #FE8088);
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-social .kop-vol-decide label {
+    margin-top: 10px;
+}
+
+.kop-vol-social .kop-vol-decide input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 9px;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    font: inherit;
+}
+
+.kop-vol-social .kop-vol-decide input::placeholder {
+    color: var(--kop-text-muted, #4A5568);
+}
+
 /* Questions? Ask us (inc/volunteer-messages.php) */
 
 .kop-vol-messages {

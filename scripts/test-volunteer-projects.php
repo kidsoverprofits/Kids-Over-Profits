@@ -38,6 +38,8 @@ $wanted = array(
     'wpdl_options', 'wpdl_kop_operators', 'wpdl_kop_operator_facilities', 'wpdl_kop_glossary_feedback',
     'wpdl_kop_woodbury_facts', 'wpdl_kop_woodbury_mentions', 'wpdl_kop_gdoc_links', 'wpdl_kop_fornits_items',
     'wpdl_kop_fornits_topics', 'wpdl_posts', 'wpdl_postmeta', 'wpdl_kop_review_tags', 'wpdl_fbv', 'wpdl_fbv_attachment_folder',
+    // The weekly roundup's cards read these too.
+    'inspection_highlight_summaries', 'news_featured',
 );
 foreach ($wanted as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();
@@ -97,6 +99,11 @@ $GLOBALS['kop_test_options']['kop_vol_practice_db'] = KOP_VOLPR_DB_VERSION;
 $pdo->exec("CREATE TABLE wpdl_kop_vol_practice (id INTEGER PRIMARY KEY AUTOINCREMENT, volunteer_id INTEGER NOT NULL, round_no INTEGER NOT NULL DEFAULT 1,
     source TEXT NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '', answer TEXT NOT NULL, verdict TEXT NOT NULL DEFAULT '',
     position INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, answered_at TEXT, UNIQUE (volunteer_id, source, item_key))");
+$GLOBALS['kop_test_options']['kop_vol_social_db'] = KOP_VSOC_DB_VERSION;
+$pdo->exec("CREATE TABLE wpdl_kop_vol_social (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, item_key TEXT NOT NULL, volunteer_id INTEGER NOT NULL,
+    title TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'taken', caption TEXT, image_url TEXT NOT NULL DEFAULT '', note TEXT, owner_note TEXT,
+    decided_by TEXT NOT NULL DEFAULT '', decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
+foreach (array('highlight-summaries', 'featured-reporting', 'news-images', 'federal-funding') as $lib) require_once dirname(__DIR__) . "/inc/$lib.php";
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -423,6 +430,98 @@ $new = kop_volf_save($Q, '', array('q' => 'Is a missed meal a yes?', 'a' => 'Rec
 $check('an admin can add their own', in_array($new, array_column(kop_volf_list($Q), 'id'), true) && count(kop_volf_live($Q)) === 1);
 $check('a question needs its answer', $throws(function () use ($Q) { kop_volf_save($Q, '', array('q' => 'Half', 'a' => '')); }) !== '');
 kop_volp_set_status($pfaq, 'closed');
+
+echo "\nSocial media roundup\n";
+$at = function ($days) { return gmdate('Y-m-d H:i:s', time() - (int) round($days * 86400)); };
+$log = function ($source, $action, $key, $days, $undone = false) use ($wpdb, $at) {
+    $wpdb->insert(kop_rinbox_log_table(), array('source' => $source, 'item_key' => (string) $key, 'title' => "t $key", 'action' => $action, 'style' => 'approve',
+        'user_login' => 'owner', 'created_at' => $at($days), 'undone_at' => $undone ? $at($days - 0.1) : null));
+};
+$one = function ($sql) use ($pdo) { return $pdo->query($sql)->fetchColumn(); };
+$cl = $one("SELECT r.id FROM facility_closure_reports r JOIN facilities_v2 f ON f.id = r.facility_id WHERE r.status = 'applied' ORDER BY r.id DESC LIMIT 1");
+$ls = $one("SELECT id FROM lawsuits WHERE publication_status = 'published' ORDER BY id DESC LIMIT 1");
+$ls_old = $one("SELECT id FROM lawsuits WHERE publication_status = 'published' ORDER BY id DESC LIMIT 1 OFFSET 1");
+$bill = $one("SELECT id FROM legislation WHERE publication_status = 'published' ORDER BY id DESC LIMIT 1");
+$hs = $one("SELECT s.highlight_id FROM inspection_highlight_summaries s JOIN inspection_highlights h ON h.id = s.highlight_id JOIN inspection_facilities f ON f.id = h.facility_id
+    WHERE s.status = 'approved' AND h.status = 'approved' ORDER BY s.highlight_id DESC LIMIT 1");
+$feat = $one("SELECT f.news_id FROM news_featured f JOIN news_submissions n ON n.id = f.news_id WHERE n.status IN ('approved', 'published') ORDER BY f.news_id DESC LIMIT 1");
+$log('closure', 'apply', $cl, 2);
+$log('lawsuit', 'approve', $ls, 3);
+$log('lawsuit', 'approve', $ls_old, 10);           // the week before
+$log('legislation', 'approve', $bill, 1);
+$log('legislation', 'approve', $bill + 100000, 1); // gone
+$log('highlight-summaries', 'approved', $hs, 2);
+$log('featured-nominations', 'feature', $feat, 4);
+$log('news', 'approve', 'n1', 1);
+$log('news', 'approve', 'n2', 2);
+$log('news', 'approve', 'n3', 2, true);           // undone
+$log('drive-docs', 'auto', 'd1', 1);              // bulk work
+$from = $at(7);
+$to = $at(0);
+$cards = kop_vsoc_cards($from, $to);
+$angles = array_column($cards, 'angle');
+$check('one card per item worth a post, in angle order, the week in numbers last', $angles === array('closure', 'lawsuit', 'bill', 'finding', 'reporting', 'numbers'), json_encode($angles));
+$byk = array_column($cards, null, 'angle');
+$check('nothing from the week before, nothing gone, no bulk work', !in_array('lawsuit:' . $ls_old, array_column($cards, 'key'), true) && count($cards) === 6);
+$check('every card has the fact and a public page', !array_filter($cards, function ($c) { return trim($c['fact']) === '' || strpos($c['url'], 'https://example.test/') !== 0; }), json_encode(array_column($cards, 'url')));
+$check('no card links an admin screen', !array_filter($cards, function ($c) { return preg_match('#wp-admin|admin-ajax|nonce#', json_encode($c)); }));
+$sum = $one("SELECT summary FROM inspection_highlight_summaries WHERE highlight_id = " . (int) $hs);
+$check('a finding carries its approved plain summary and the state\'s words', $byk['finding']['summary'] === trim($sum) && $byk['finding']['quote'] !== ''
+    && strpos($byk['finding']['url'], '#finding-' . $hs) !== false);
+$check('a closure links the facility page', strpos($byk['closure']['url'], 'example.test/') !== false && strpos($byk['closure']['fact'], 'has closed') !== false, $byk['closure']['url']);
+$check('the week in numbers counts, leaving out what was undone', strpos($byk['numbers']['summary'], '2 news stories added') !== false, $byk['numbers']['summary']);
+$check('a quiet week makes no cards', kop_vsoc_cards($at(40), $at(33)) === array());
+
+$check('a roundup is always one person\'s', strpos($throws(function () { kop_vsoc_make_roundup(0); }), 'Pick who') !== false);
+list($ps1) = kop_vsoc_make_roundup($sam_id, 7);
+$PS1 = kop_volp_get($ps1);
+$check('the roundup is a social project of the cards', $PS1['source'] === KOP_VSOC_SOURCE && count($keys_of($ps1)) === 6 && (int) $PS1['volunteer_id'] === $sam_id);
+$check('Sam sees it, Alex does not', in_array($ps1, $ids($sam_id), true) && !in_array($ps1, $ids($alex_id), true));
+$res = kop_volp_items($sam_id, $ps1, 1);
+$it = $res['items'][0];
+$check('the page gets a social card: the idea, no draft yet', $res['project']['kind'] === 'social' && $it['angle'] === 'closure' && $it['fact'] !== '' && $it['post'] === null
+    && $res['project']['caption_max'] === KOP_VSOC_CAPTION_MAX && $res['project']['faq'] === array());
+$check('the message says nothing is posted before approval', strpos(kop_volp_message($PS1, 'https://x.test'), 'nothing is posted until I approve it') !== false);
+$check('Alex cannot draft on Sam\'s ideas', $throws(function () use ($alex, $ps1, $it) { kop_vsoc_save($alex, $ps1, $it['key'], 'take'); }) !== '');
+$check('Taking this starts a draft', kop_vsoc_save($sam, $ps1, $it['key'], 'take')['status'] === 'taken');
+$check('no caption, not sent', strpos($throws(function () use ($sam, $ps1, $it) { kop_vsoc_save($sam, $ps1, $it['key'], 'ready'); }), 'caption') !== false);
+$check('no picture of theirs or ours, not sent', strpos($throws(function () use ($sam, $ps1, $it) { kop_vsoc_save($sam, $ps1, $it['key'], 'ready', array('caption' => 'Closed.')); }), 'picture') !== false);
+$check('a picture link must be a link', $throws(function () use ($sam, $ps1, $it) { kop_vsoc_save($sam, $ps1, $it['key'], 'draft', array('image_url' => 'javascript:alert(1)')); }) !== '');
+$sent = kop_vsoc_save($sam, $ps1, $it['key'], 'ready', array('caption' => 'It closed.', 'image_url' => 'https://www.canva.com/design/x'));
+$check('Send for review', $sent['status'] === 'ready' && $sent['caption'] === 'It closed.');
+$prog = kop_volp_progress($PS1);
+$check('it waits for the admin and counts as done for Sam', $prog['open'] === 1 && $prog['done'] === 1 && kop_volp_public($PS1, $sam_id)['done'] === 1, json_encode($prog));
+$check('and leaves his list', kop_volp_items($sam_id, $ps1, 1)['items'][0]['key'] !== $it['key']);
+$check('he can take it back', kop_vsoc_save($sam, $ps1, $it['key'], 'back')['status'] === 'taken' && kop_vsoc_save($sam, $ps1, $it['key'], 'ready')['status'] === 'ready');
+$post = $wpdb->get_row('SELECT * FROM ' . kop_vsoc_table() . " WHERE project_id = $ps1 AND item_key = '" . $it['key'] . "'", ARRAY_A);
+$check('Send back needs a note', strpos($throws(function () use ($post) { kop_vsoc_decide($post['id'], 'sent_back', ''); }), 'what to change') !== false);
+kop_volp_set_status($ps1, 'closed', 'finished');
+kop_vsoc_decide($post['id'], 'sent_back', 'Name the state in the first line.');
+$back = kop_volp_items($sam_id, $ps1, 1)['items'][0];
+$check('a sent-back post opens the batch again and comes back with the note', kop_volp_get($ps1)['status'] === 'open' && $back['key'] === $it['key']
+    && $back['post']['status'] === 'sent_back' && $back['post']['owner_note'] === 'Name the state in the first line.');
+$check('a draft saved while sent back stays sent back', kop_vsoc_save($sam, $ps1, $it['key'], 'draft', array('caption' => 'Utah: it closed.'))['status'] === 'sent_back');
+kop_vsoc_save($sam, $ps1, $it['key'], 'ready');
+kop_vsoc_decide($post['id'], 'approved');
+$check('approved is final for the volunteer', strpos($throws(function () use ($sam, $ps1, $it) { kop_vsoc_save($sam, $ps1, $it['key'], 'draft', array('caption' => 'x')); }), 'approved') !== false
+    && kop_volp_progress(kop_volp_get($ps1))['decided'] === 1);
+$numbers = 'numbers:' . substr($from, 0, 10);
+$check('Pass on this one counts as done', kop_vsoc_save($sam, $ps1, $numbers, 'pass')['status'] === 'passed' && kop_volp_public(kop_volp_get($ps1), $sam_id)['done'] === 2);
+// The sweep: four quiet days hand the untouched ideas back and keep the ones he worked on.
+$wpdb->update(kop_volp_table(), array('created_at' => $at(5)), array('id' => $ps1));
+$wpdb->query('UPDATE ' . kop_vsoc_table() . " SET updated_at = '" . $at(4) . "' WHERE project_id = $ps1");
+$swept = $sweep_ids(kop_volp_sweep());
+$check('a quiet roundup hands back the ideas nobody took', ($swept[$ps1]['released'] ?? 0) === 4 && count($keys_of($ps1)) === 2, json_encode($swept[$ps1] ?? null));
+
+// Monday's run.
+unset($GLOBALS['kop_test_options']['kop_vsoc_designer'], $GLOBALS['kop_test_options']['kop_vsoc_last_week']);
+$check('with nobody picked, Monday makes nothing', kop_vsoc_weekly_run() === null);
+kop_vsoc_admin_post('social_designer', array('kop_vsoc_designer' => $alex_id));
+$made = kop_vsoc_weekly_run();
+$check('with someone picked, Monday makes their roundup', $made && (int) kop_volp_get($made[0])['volunteer_id'] === $alex_id && kop_volp_get($made[0])['created_by'] === 'weekly roundup');
+$check('once a week', kop_vsoc_weekly_run() === null);
+kop_volp_set_status($made[0], 'closed');
+$wpdb->query('DELETE FROM ' . kop_rinbox_log_table() . " WHERE user_login = 'owner'");
 
 echo "\nWhat volunteers can open\n";
 $check('admin screens are not links for volunteers', kop_vol_admin_only_url('https://example.test/wp-admin/admin-ajax.php?action=kop_wb_view&key=x&nonce=y')

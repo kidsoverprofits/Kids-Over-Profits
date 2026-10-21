@@ -498,6 +498,7 @@ function kop_volp_create_research(array $in) {
 /** What a project's items are, in words: the brief's title for a queue, or the research kind. */
 function kop_volp_source_label(array $p) {
     if (kop_volr_is($p)) return 'Research: ' . kop_volr_kind_of($p)['title'];
+    if (kop_vsoc_is($p)) return 'Social media: post ideas';
     $all = kop_rinbox_sources();
     return (string) ($all[$p['source']]['label'] ?? $p['source']);
 }
@@ -562,6 +563,7 @@ function kop_volp_recs(array $p, array $keys = null) {
 /** {total, done (recommended or handled elsewhere), open (recommended, waiting on you), decided} for a project. */
 function kop_volp_progress(array $p) {
     if (kop_volr_is($p)) return kop_volr_progress($p);
+    if (kop_vsoc_is($p)) return kop_vsoc_progress($p);
     $rows = kop_volp_item_rows($p['id']);
     $recs = kop_volp_recs($p, array_column($rows, 'item_key'));
     $out = array('total' => count($rows), 'done' => 0, 'open' => 0, 'decided' => 0, 'last' => '');
@@ -613,8 +615,11 @@ function kop_volp_public(array $p, $vid) {
     $rows = kop_volp_item_rows($p['id']);
     $mine = array();
     $research = kop_volr_is($p);
+    $social = kop_vsoc_is($p);
     if ($research) {
         if ($vid) $mine = kop_volr_answered_keys($p['id'], $vid);
+    } elseif ($social) {
+        if ($vid) $mine = kop_vsoc_done_keys($p['id'], $vid);
     } elseif ($vid) {
         global $wpdb;
         $keys = array_column($rows, 'item_key');
@@ -630,8 +635,9 @@ function kop_volp_public(array $p, $vid) {
         'id' => (int) $p['id'], 'title' => (string) $p['title'], 'question' => (string) $p['question'],
         'yes' => (string) $p['yes_example'], 'no' => (string) $p['no_example'], 'note' => (string) $p['note'],
         'minutes' => (int) $p['minutes'], 'total' => count($rows), 'done' => $done, 'mine' => (int) $p['volunteer_id'] === (int) $vid && $vid,
-        'kind' => $research ? 'research' : 'review', 'link_kinds' => $research ? kop_volr_link_kinds() : null,
-        'faq' => $research ? array() : kop_volf_live((string) $p['source']),
+        'kind' => $research ? 'research' : ($social ? 'social' : 'review'), 'link_kinds' => $research ? kop_volr_link_kinds() : null,
+        'faq' => $research || $social ? array() : kop_volf_live((string) $p['source']),
+        'caption_max' => $social ? KOP_VSOC_CAPTION_MAX : null,
     );
 }
 
@@ -649,6 +655,9 @@ function kop_volp_items($vid, $id, $limit = 3, array $skip = array()) {
     if (kop_volr_is($p)) {
         $items = kop_volr_items($p, $vid, $limit, $skip);
         return array('project' => kop_volp_public(kop_volp_get($id), $vid), 'items' => $items);
+    }
+    if (kop_vsoc_is($p)) {
+        return array('project' => kop_volp_public($p, $vid), 'items' => kop_vsoc_items($p, $vid, $limit, $skip));
     }
     $src = kop_rinbox_sources()[$p['source']] ?? null;
     if (!$src) throw new RuntimeException('That queue is gone.');
@@ -818,7 +827,7 @@ function kop_volp_sweep($now = null) {
         $quiet = $now - strtotime($act['last'] . ' UTC');
         $prog = $act['progress'];
         if ($prog['done'] < $prog['total'] && !$act['waiting'] && $quiet >= $rules['stall_days'] * DAY_IN_SECONDS) {
-            $answered = kop_volr_is($p) ? kop_volr_answered_keys((int) $p['id'], 0) : kop_volp_recs($p);
+            $answered = kop_volr_is($p) ? kop_volr_answered_keys((int) $p['id'], 0) : (kop_vsoc_is($p) ? kop_vsoc_touched_keys((int) $p['id']) : kop_volp_recs($p));
             $released = 0;
             foreach (kop_volp_item_rows($p['id']) as $r) {
                 if ((int) $r['gone'] || isset($answered[$r['item_key']])) continue;
@@ -977,6 +986,7 @@ function kop_volp_admin_post() {
     $in = wp_unslash($_POST);
     try {
         if ($faq = kop_volf_admin_post($do, $in)) return $faq;
+        if ($social = kop_vsoc_admin_post($do, $in)) return $social;
         if ($do === 'create') {
             $who = (string) ($in['kop_volp_who'] ?? '0');
             if ($who === 'new' && trim((string) ($in['kop_volp_new_name'] ?? '')) === '') throw new RuntimeException('Give the new person a name.');
@@ -1022,9 +1032,11 @@ function kop_volp_message(array $p, $link, $name = '') {
     $prog = kop_volp_progress($p);
     $hi = $name !== '' ? 'Hi ' . $name . ', c' : 'C';
     return $hi . 'ould you do a small task for Kids Over Profits? "' . $p['title'] . '": ' . $prog['total'] . ' items, about ' . (int) $p['minutes'] . " minutes.\n\n"
-        . 'For each one there is one question: ' . $p['question'] . "\n\n"
-        . (kop_volr_is($p) ? "Nothing changes on the site until I read your answer, so it is fine to say you could not find it (and where you looked).\n\n"
-            : "You only recommend; nothing changes on the site until I check it, so it is fine to say \"not sure\".\n\n")
+        . (kop_vsoc_is($p) ? 'What to do: ' : 'For each one there is one question: ') . $p['question'] . "\n\n"
+        . (kop_vsoc_is($p) ? "Each one is a post idea with the facts and the page to point to. Take the ones you want, make the picture and write the caption; nothing is posted until I approve it.\n\n"
+            : '')
+        . (kop_vsoc_is($p) ? '' : (kop_volr_is($p) ? "Nothing changes on the site until I read your answer, so it is fine to say you could not find it (and where you looked).\n\n"
+            : "You only recommend; nothing changes on the site until I check it, so it is fine to say \"not sure\".\n\n"))
         . "If anything is unclear, ask me on the page (\"Ask a question\"); my answer shows up there.\n\n"
         . 'Start here: ' . $link;
 }
@@ -1060,6 +1072,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
     <?php endif; ?>
 
     <?php kop_volf_admin_summary(); ?>
+    <?php kop_vsoc_admin_settings($nonce, $vols); ?>
 
     <h3>Start a project</h3>
     <form method="post" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px 16px;max-width:900px;align-items:end">
@@ -1129,7 +1142,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
             . esc_html(kop_volp_source_label($p) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' . $why : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
             . (int) $prog['done'] . ' of ' . (int) $prog['total'] . '</td><td>' . ($prog['open'] ? '<strong>' . (int) $prog['open'] . '</strong>' : '0') . '</td><td>'
             . ($prog['last'] ? esc_html(get_date_from_gmt($prog['last'], 'M j g:i a')) : 'not started') . '</td><td>'
-            . '<a class="button' . ($prog['open'] ? ' button-primary' : '') . '" href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '">' . (kop_volr_is($p) ? 'Read their answers' : 'Check their calls') . '</a> '
+            . '<a class="button' . ($prog['open'] ? ' button-primary' : '') . '" href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '">' . (kop_volr_is($p) ? 'Read their answers' : (kop_vsoc_is($p) ? 'Read their posts' : 'Check their calls')) . '</a> '
             . '<form method="post" style="display:inline">' . $nonce . '<input type="hidden" name="kop_volp_do" value="' . ($closed ? 'reopen' : 'close') . '"><input type="hidden" name="kop_volp_id" value="' . (int) $p['id'] . '">'
             . '<button type="submit" class="button-link">' . ($closed ? 'Reopen' : 'Close') . '</button></form></td></tr>';
     }
@@ -1146,7 +1159,8 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
     $src = array('label' => kop_volp_source_label($p));
     $inbox = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-admin-submissions.php') : '';
     $research = kop_volr_is($p);
-    $rows = $research ? array() : kop_volp_review_rows($p);
+    $social = kop_vsoc_is($p);
+    $rows = $research || $social ? array() : kop_volp_review_rows($p);
     $prog = kop_volp_progress($p);
     $labels = kop_vol_verdicts();
     $state_words = array(
@@ -1166,7 +1180,7 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
 
     <?php kop_volp_admin_project_messages($p, $names); ?>
 
-    <?php if ($research) : kop_volr_admin_project($p, $nonce, $names); else : ?>
+    <?php if ($research) : kop_volr_admin_project($p, $nonce, $names); elseif ($social) : kop_vsoc_admin_project($p, $nonce, $names); else : ?>
     <h3>Their calls</h3>
     <form method="post">
         <?php echo $nonce; ?><input type="hidden" name="kop_volp_do" value="apply"><input type="hidden" name="kop_volp_id" value="<?php echo (int) $p['id']; ?>">
@@ -1197,7 +1211,7 @@ function kop_volp_admin_project($id, $nonce, array $vols) {
     <?php endif; ?>
 
     <h3>The brief they see</h3>
-    <?php if (!$research) : ?>
+    <?php if (!$research && !$social) : ?>
         <p><a href="<?php echo esc_url(kop_volf_admin_url($p['source'])); ?>">Questions others asked</a>: <?php echo count(kop_volf_live($p['source'])); ?> live on every brief of this queue.</p>
     <?php endif; ?>
     <form method="post" style="max-width:900px">
@@ -1230,4 +1244,5 @@ function kop_volp_admin_project_messages(array $p, array $names) {
 
 require_once __DIR__ . '/volunteer-research.php';
 require_once __DIR__ . '/volunteer-faq.php';
+require_once __DIR__ . '/volunteer-social.php';
 require_once __DIR__ . '/volunteer-messages.php';

@@ -103,6 +103,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # Brief FAQ (inc/volunteer-faq.php, option kop_volf): per queue, live entries show on every brief as "Questions others asked" (kop_volf_live() via
 # kop_volp_public()); edited at Volunteer Reviewers > Brief FAQ (?faq=<source>). kop_volf_seed() drafts are added once, never live until published;
 # each has an admin-only 'from' (what it rests on, what goes the other way). A new seed = one entry there with a new id
+# Social media projects (inc/volunteer-social.php, source 'social:roundup', {prefix}kop_vol_social, REST volunteer/post): Monday cron kop_vsoc_weekly
+# makes a roundup of the 7 days before for the volunteer in option kop_vsoc_designer (none = no roundup; never "anyone"); Taking this -> caption +
+# picture link -> Send for review; the admin approves or sends back with a note on the project page (a send-back reopens a closed batch). No AI
+# captions, nothing posted yet (plan 4.4 10d). Cards: kop_vsoc_cards() in inc/volunteer-social-cards.php, one kop_vsoc_card_<angle>() per angle
+# in kop_vsoc_angles() (closure, lawsuit, bill, finding with a plain summary, reporting, money) + the week in numbers; only public facts and URLs
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
 # 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);
