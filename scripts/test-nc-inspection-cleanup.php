@@ -33,6 +33,27 @@ $before = array(
 );
 $deleted_ids = array_map(function ($d) { return (int) $d['id']; }, $plan['delete']);
 
+// Applied on the site (2026-10-06): no row the plan deletes or drops is left. Check what it left instead.
+$dropped_ids = array_map(function ($m) { return (int) $m['drop']; }, $plan['merge']);
+if ((int) one($pdo, 'SELECT COUNT(*) FROM inspection_facilities WHERE id IN (' . implode(',', array_merge($deleted_ids, $dropped_ids)) . ')') === 0) {
+    echo "The plan ran on the site; checking what it left\n";
+    $keep_ids = array_unique(array_map(function ($m) { return (int) $m['keep']; }, $plan['merge']));
+    check((int) one($pdo, 'SELECT COUNT(*) FROM inspection_facilities WHERE id IN (' . implode(',', $keep_ids) . ')') === count($keep_ids), 'every row the merges keep is there');
+    check((int) one($pdo, 'SELECT COUNT(*) FROM inspection_reports WHERE facility_id NOT IN (SELECT id FROM inspection_facilities)') === 0, 'no orphan reports');
+    check((int) one($pdo, 'SELECT COUNT(*) FROM inspection_highlights WHERE report_id NOT IN (SELECT id FROM inspection_reports)') === 0, 'no orphan findings');
+    check((int) one($pdo, 'SELECT COUNT(*) FROM inspection_highlights h JOIN inspection_reports r ON r.id = h.report_id WHERE h.facility_id <> r.facility_id') === 0, 'findings follow their report');
+    check((int) one($pdo, "SELECT COUNT(*) FROM inspection_facilities WHERE facility_name = 'Alexander Youth Network - Charlotte Day Treatment'") === 1, 'Charlotte Day Treatment once');
+    check((int) one($pdo, 'SELECT COUNT(*) FROM (SELECT facility_id, report_id FROM inspection_reports GROUP BY 1, 2 HAVING COUNT(*) > 1)') === 0, 'no report twice on one row');
+    $again = kop_ncclean_run($pdo, $plan, false);
+    check($again['stats']['deleted'] + $again['stats']['merged'] + $again['stats']['relabelled'] === 0, 'a second run: nothing left to do');
+    $merged = array();
+    foreach ($plan['merge'] as $m) $merged[(int) $m['drop']] = (int) $m['keep'];
+    list($links, $changed) = kop_ncclean_remap_links(array('links' => array(1 => array($deleted_ids[0], 6582, (int) $plan['merge'][0]['drop'])), 'rejected' => array()), $deleted_ids, $merged);
+    check($links['links'][1] === array(6582, (int) $plan['merge'][0]['keep']), 'inspection links follow merges, drop deleted rows');
+    echo $fail ? "$fail failed\n" : "all passed\n";
+    exit($fail ? 1 : 0);
+}
+
 $dry = kop_ncclean_run($pdo, $plan, false);
 check(!$dry['skipped'], 'dry run: every plan row matches the mirror (' . implode('; ', $dry['skipped']) . ')');
 check((int) one($pdo, 'SELECT COUNT(*) FROM inspection_facilities') === $before['facilities'], 'dry run writes nothing');

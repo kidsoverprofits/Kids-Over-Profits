@@ -131,7 +131,12 @@ $mem = new PDO('sqlite::memory:');
 $mem->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // Unqualified names resolve to the in-memory database first, so the counts table is written there.
 $mem->exec('ATTACH DATABASE ' . $mem->quote(realpath($db_path)) . ' AS m');
-$mirror_has_counts = (bool) $pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE name = 'inspection_report_counts'")->fetchColumn();
+// Production has the table since the roll-up shipped, so a synced mirror holds it too: what it holds must not change.
+$mirror_counts = function () use ($pdo) {
+    if (!$pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE name = 'inspection_report_counts'")->fetchColumn()) return '';
+    return md5(json_encode($pdo->query('SELECT * FROM inspection_report_counts ORDER BY 1')->fetchAll(PDO::FETCH_NUM)));
+};
+$mirror_counts_before = $mirror_counts();
 
 $t0 = microtime(true);
 $total_counted = 0;
@@ -143,7 +148,7 @@ $secs = round(microtime(true) - $t0, 1);
 $reports = (int) $mem->query('SELECT COUNT(*) FROM m.inspection_reports')->fetchColumn();
 echo "     counted $total_counted reports in {$secs}s\n";
 $check('every report counted', $r['remaining'] === 0 && $total_counted === $reports, "counted $total_counted of $reports, {$r['remaining']} left");
-$check('nothing written to the mirror', !$mirror_has_counts && !(bool) $pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE name = 'inspection_report_counts'")->fetchColumn());
+$check('nothing written to the mirror', $mirror_counts() === $mirror_counts_before);
 $again = kop_irl_count_batch($mem, 100, 5);
 $check('a second run counts nothing', $again['counted'] === 0);
 

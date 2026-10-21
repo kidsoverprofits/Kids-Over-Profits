@@ -105,6 +105,9 @@ foreach ($pdo->query('SELECT id, name, unique_name, json_data FROM facilities_v2
 /* ---- Woodbury Reports pages ---- */
 echo "-- Woodbury Reports --\n";
 if ($has('wpdl_kop_woodbury_mentions')) {
+    // The site's hourly pass has filed every page it could; put the last 20 it filed back to waiting.
+    $pdo->exec("UPDATE wpdl_kop_woodbury_mentions SET status = 'pending', reviewed_by = '', reviewed_at = NULL
+        WHERE id IN (SELECT id FROM wpdl_kop_woodbury_mentions WHERE status = 'filed' AND reviewed_by = 'auto' ORDER BY reviewed_at DESC LIMIT 20)");
     $picks = kop_autoconn_woodbury_rows(100000);
     $waiting = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_woodbury_mentions WHERE status = 'pending'")->fetchColumn();
     $check('woodbury: some waiting pages connect themselves, the rest wait', $picks && count($picks) < $waiting, count($picks) . ' of ' . $waiting);
@@ -238,6 +241,13 @@ if ($has('wpdl_kop_gdoc_links')) {
     $check('drive docs: a company collection drops "HQ"', $prog('SCIAD NET: Tennessee / Acadia Healthcare HQ / News') === array('Acadia Healthcare', 'TN'));
     $check('drive docs: general collections name no program', $prog('SCIAD NET: General Non-Program Specific / News') === null && $prog('SCIAD NET: Not in a collection') === null);
     $check('drive docs: a wiki page names its program without its years', $prog('r/troubledteens wiki: page "Synanon (1958-1991)" (as of 2026-01-07)', 'wiki') === array('Synanon', ''));
+    // The site has tied every link it could; untie 50 of its exact-name ties so there is something to tie.
+    $pdo->exec("UPDATE wpdl_kop_gdoc_links SET facility_id = 0, facility_how = ''
+        WHERE id IN (SELECT id FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_how = 'SCIAD collection name (exact)' ORDER BY id LIMIT 50)");
+    // Rite of Passage's two company records were merged on the site: a second one with the same name, for the shared-name check.
+    $pdo->exec('CREATE TEMP TABLE rop AS SELECT * FROM wpdl_kop_operators WHERE id = (SELECT MIN(id) FROM wpdl_kop_operators WHERE name = \'Rite of Passage, Inc.\')');
+    $pdo->exec('UPDATE rop SET id = (SELECT MAX(id) + 1 FROM wpdl_kop_operators)');
+    $pdo->exec('INSERT INTO wpdl_kop_operators SELECT * FROM rop');
     $before = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0")->fetchColumn();
     $tied = kop_autoconn_drive_rematch();
     $check('drive docs: links with no record are tied to the record their collection or page names exactly', $tied > 0 && $tied < $before, "$tied of $before");
