@@ -64,10 +64,14 @@ function kadence_child_enqueue_styles() {
         );
     }
 
-    // Primary sidebar tweaks (newsletter embed spacing)
+    // Primary sidebar tweaks (newsletter embed spacing) + desktop float (sidebar-float.js)
     $sidebar_css = get_stylesheet_directory() . '/css/sidebar.css';
     if (is_active_sidebar('sidebar-primary') && file_exists($sidebar_css)) {
         wp_enqueue_style('kop-sidebar', get_stylesheet_directory_uri() . '/css/sidebar.css', array('kadence-parent-style'), filemtime($sidebar_css));
+        $sidebar_js = get_stylesheet_directory() . '/js/sidebar-float.js';
+        if (file_exists($sidebar_js)) {
+            wp_enqueue_script('kop-sidebar-float', get_stylesheet_directory_uri() . '/js/sidebar-float.js', array(), filemtime($sidebar_js), true);
+        }
     }
 
     // Homepage widget styles (loaded whenever the homepage sidebar has active widgets)

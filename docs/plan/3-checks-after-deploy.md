@@ -94,3 +94,7 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
     `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
     Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
+28. **Desktop sidebar float** (2026-10-20, docs/plan/4.7 item 16): at 1280+ wide, https://kidsoverprofits.org/ and
+    https://kidsoverprofits.org/open-data/ show the newsletter and Donate in the panel's top-left corner with the page full width
+    below; https://kidsoverprofits.org/ca-reports/ keeps the old side column; narrowing the window under 1025 puts the sidebar
+    after the content. Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.

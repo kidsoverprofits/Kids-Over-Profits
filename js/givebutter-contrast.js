@@ -25,11 +25,25 @@
         return true;
     }
 
+    // Moving a widget (js/sidebar-float.js floats the sidebar on desktop)
+    // makes it rebuild its button without the rule: watch each widget's
+    // shadow root and look again (the new button draws its own a moment later).
+    function watch(outer) {
+        if (outer.__kopWatch || !window.MutationObserver) {
+            return;
+        }
+        outer.__kopWatch = true;
+        new MutationObserver(restart).observe(outer, { childList: true, subtree: true });
+    }
+
     function run() {
         var widgets = document.querySelectorAll('givebutter-widget');
         var pending = 0;
         for (var i = 0; i < widgets.length; i++) {
             var outer = widgets[i].shadowRoot;
+            if (outer) {
+                watch(outer);
+            }
             var inner = outer && outer.querySelector('givebutter-button');
             if (!inner || !inner.shadowRoot || !inner.shadowRoot.querySelector('button')) {
                 pending++;
@@ -46,6 +60,10 @@
         if (run() > 0 && tries++ < 30) {
             setTimeout(tick, 500);
         }
+    }
+    function restart() {
+        tries = 0;
+        tick();
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', tick);

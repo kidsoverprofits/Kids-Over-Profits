@@ -6,3 +6,37 @@
 .primary-sidebar .ml-embedded {
     padding-top: 1.5rem;
 }
+
+/* Desktop: js/sidebar-float.js moves the sidebar into the content panel and
+   floats it, so the page runs full width below it instead of staying in a
+   narrow grid column the whole way down. Without the script Kadence's grid
+   stays as it was. Kadence's grid rule (.has-left-sidebar .content-container)
+   loads after this file, so the override needs body. to win. */
+@media (min-width: 1025px) {
+    body.kop-sidebar-float .content-container {
+        display: block;
+    }
+    .kop-sidebar-float #secondary.primary-sidebar {
+        width: 340px;
+        margin: 0 0 1.5rem;
+        padding: 0;
+    }
+    .kop-sidebar-float-left #secondary.primary-sidebar {
+        float: left;
+        margin-right: 2rem;
+    }
+    .kop-sidebar-float-right #secondary.primary-sidebar {
+        float: right;
+        margin-left: 2rem;
+    }
+    /* Inside a float, sticky has nowhere to travel; keep it in place. */
+    .kop-sidebar-float .sidebar-inner-wrap {
+        position: static;
+    }
+    .kop-sidebar-panel {
+        display: flow-root;
+    }
+    .kop-beside-float {
+        display: flow-root;
+    }
+}
