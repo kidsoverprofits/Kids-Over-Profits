@@ -315,7 +315,11 @@ foreach (glob(sys_get_temp_dir() . '/kop-*.sqlite*') ?: array() as $old) {
     @unlink($old);
 }
 // And this run's copy: a detached PowerShell deletes it once this process has exited and let go of the file.
-if (PHP_OS_FAMILY === 'Windows') {
+// Only a kop-* copy in %TEMP%: many tests read tmp/prod.sqlite itself as $db_path, and deleting that wiped the
+// mirror on 2026-10-20 (the junction carried the delete into kop-pipeline/tmp).
+$kop_scratch_copy = basename($db_path) !== '' && strpos(basename($db_path), 'kop-') === 0
+    && realpath(dirname($db_path)) === realpath(sys_get_temp_dir());
+if (PHP_OS_FAMILY === 'Windows' && $kop_scratch_copy) {
     register_shutdown_function(function () use ($db_path) {
         if (!file_exists($db_path)) return;
         $p = str_replace("'", "''", $db_path);
