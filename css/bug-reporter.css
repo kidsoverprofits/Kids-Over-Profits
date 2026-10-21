@@ -33,6 +33,11 @@
     font-weight: 600;
     line-height: 1;
     opacity: 0.6;
+    /* Navy at rest as in every other state. Kadence's
+       .button-style-outline:not(.has-text-color) (0,2,0, loads later) paints
+       the text and its currentColor border from this variable; its teal-ink
+       faded by the opacity (0.85 on phones) fell to 3.97:1 on white. */
+    --global-palette-btn-out: var(--kop-navy-blue, #000080);
 }
 
 /* Inside a "Submit info" row the flag sits inline, right of the button. */
