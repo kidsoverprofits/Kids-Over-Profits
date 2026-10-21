@@ -70,6 +70,8 @@ function check($label, $ok, $detail = '') {
     echo "FAIL $label" . ($detail !== '' ? "\n     $detail" : '') . "\n";
 }
 
+// Rows the site's own import made (it ran there on deploy); the test's run adds to them.
+$site_imported = (int) $pdo->query("SELECT COUNT(*) FROM news_submissions WHERE submitted_by = 'wp-news-import'")->fetchColumn();
 $dry = kop_news_post_import($pdo, $posts, ['dry' => true, 'link_facilities' => false]);
 check('a dry run writes nothing', (int) $pdo->query("SELECT COUNT(*) FROM news_submissions")->fetchColumn() === $before);
 
@@ -79,7 +81,7 @@ printf("scanned %d, imported %d, duplicate url %d, not an article %d\n",
 check('the dry run predicted the real one', $dry['imported'] === $stats['imported']);
 check('every news post is accounted for', $stats['scanned'] === count($posts)
     && $stats['imported'] + $stats['duplicate_url'] + $stats['not_article'] + $stats['already_imported'] === count($posts));
-check('at least 70 of the posts reach the feed', $stats['imported'] >= 70, 'imported ' . $stats['imported']);
+check('at least 70 of the posts reach the feed', $stats['imported'] + $site_imported >= 70, 'imported ' . $stats['imported'] . ", $site_imported on the site already");
 check('the 2024 index yields its dated entries', count($entries) >= 35, count($entries) . ' entries');
 $indexUrls = array_map(function ($e) { return kop_npi_url_key($e['meta']['source_url']); }, $entries);
 $feedUrls  = array_map('kop_npi_url_key', $pdo->query("SELECT article_url FROM news_submissions")->fetchAll(PDO::FETCH_COLUMN));
@@ -93,7 +95,7 @@ foreach ($entries as $e) {
 check('every entry of the index is in the feed afterwards, by URL or headline', !$lost, implode(', ', $lost));
 
 $rows = $pdo->query("SELECT * FROM news_submissions WHERE submitted_by = 'wp-news-import'")->fetchAll(PDO::FETCH_ASSOC);
-check('the table holds what the stats say', count($rows) === $stats['imported']);
+check('the table holds what the stats say', count($rows) === $stats['imported'] + $site_imported, count($rows) . ' rows');
 $noUrl = $noDate = $noSummary = $labelled = $badJson = [];
 foreach ($rows as $r) {
     $jd = json_decode($r['json_data'], true);
