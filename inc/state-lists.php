@@ -177,6 +177,8 @@ function kop_sl_import(PDO $pdo, array $data) {
                     $cands[] = array('id' => (int) $c['id'], 'why' => mb_substr((string) ($c['why'] ?? ''), 0, 200));
                 }
             }
+            // A record merged since the list was built is offered as the one it went into.
+            if (function_exists('kop_facility_merge_follow_candidates')) $cands = kop_facility_merge_follow_candidates($cands);
             $vals = array(
                 $list, strtoupper(substr((string) ($r['state'] ?? $list), 0, 2)), mb_substr($name, 0, 255), mb_substr((string) ($r['name_key'] ?? ''), 0, 255),
                 mb_substr((string) ($r['city'] ?? ''), 0, 120), mb_substr((string) ($r['county'] ?? ''), 0, 120), mb_substr((string) ($r['address'] ?? ''), 0, 255),

@@ -79,6 +79,12 @@ require_once $root . '/inc/facility-finder.php';
 require_once $root . '/inc/closure-reports.php';
 require_once $root . '/inc/facility-discovery.php';
 require_once $root . '/inc/state-lists.php';
+require_once $root . '/inc/facility-merge.php';
+// The live merge map (the harness's get_option() does not read the options table), so the import
+// follows records merged since the list was built, as on the site.
+$raw = $pdo->query("SELECT option_value FROM prod.wpdl_options WHERE option_name = 'kop_facility_merged_into'")->fetchColumn();
+if ($raw !== false) $GLOBALS['kop_test_options']['kop_facility_merged_into'] = unserialize($raw);
+unset($raw);
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -106,9 +112,12 @@ foreach ($export['rows'] as $r) {
 }
 $check('every exported name key equals kop_project_facility_name_key() (' . count($export['rows']) . ' rows)', !$bad, implode('; ', array_slice($bad, 0, 3)));
 $cids = array();
-foreach ($export['rows'] as $r) foreach ($r['candidates'] as $c) $cids[(int) $c['id']] = true;
+$moved = array();
+foreach ($export['rows'] as $r) foreach (kop_facility_merge_follow_candidates($r['candidates']) as $c) $cids[(int) $c['id']] = true;
+foreach ($export['rows'] as $r) foreach ($r['candidates'] as $c) if (kop_facility_merge_resolve((int) $c['id']) !== (int) $c['id']) $moved[] = (int) $c['id'];
 $have = kop_sl_records($pdo, array_keys($cids));
-$check('every candidate is a facilities_v2 record', count($have) === count($cids), count($have) . ' of ' . count($cids));
+$check('every candidate is a facilities_v2 record, once merges are followed', count($have) === count($cids),
+    count($have) . ' of ' . count($cids) . ($moved ? '; merged since the list was built: #' . implode(', #', array_unique($moved)) : ''));
 $keys = array_column($export['rows'], 'key');
 $check('row keys are unique', count($keys) === count(array_unique($keys)));
 $by_state = array();
