@@ -485,6 +485,13 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
             return array('message' => 'Rejected. Nothing was added' . ($same ? '; ' . count($same) . ' other item' . (count($same) === 1 ? '' : 's')
                 . ' giving the same fact from another source went with it' : '') . '. "Back to review" on the Rejected tab brings ' . ($same ? 'them all' : 'it') . ' back.');
         case 'undo':
+            if ($r['status'] === 'gone') {
+                // No longer proposed by the build: waiting again, and kept there by the next load (kop_wbf_sync() keeps "kept_by").
+                $extra = json_decode((string) $r['extra'], true) ?: array();
+                $extra['kept_by'] = $user;
+                $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'extra' => wp_json_encode($extra)), array('pkey' => $r['pkey']));
+                return array('message' => 'Waiting for review again. The next Woodbury build will not take it off the list.');
+            }
             if (!in_array($r['status'], array('applied', 'rejected', 'held'), true)) throw new RuntimeException('Nothing to undo.');
             $was = $r['status'];
             if ($was === 'rejected') {

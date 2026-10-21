@@ -575,6 +575,83 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
 }
 
 /**
+ * Woodbury Facts items the 2026-09-30 move left "added" with no fact of
+ * theirs on the program (kop_ya_move_facility() kept a fact's key only when
+ * it was the item's own; the rest went in under the record's keys, or into
+ * the program's fields). Each is pointed at the program's fact that says the
+ * same (its label, the same or the fact's label at its start), so Undo takes
+ * that off; an item nothing on the program says is added now as its own
+ * fact (kop_wbf_ya_fact(), filling empty fields as filing does). Returns
+ * [pkey => 'linked <fact key>' | 'added' | why not].
+ */
+function kop_ya_relink_moved_items(PDO $pdo) {
+    global $wpdb;
+    if (!function_exists('kop_wbf_table') || !function_exists('kop_wbf_ya_fact')) {
+        return array();
+    }
+    $table = kop_wbf_table();
+    $rows = (array) $wpdb->get_results("SELECT * FROM {$table} WHERE status = 'applied' AND ya = 1 AND applied LIKE '%\"filed\":\"young_adult\"%'", ARRAY_A);
+    $out = array();
+    foreach ($rows as $r) {
+        $applied = json_decode((string) $r['applied'], true);
+        if (!is_array($applied) || ($applied['done']['key'] ?? null) !== '') {
+            continue;
+        }
+        $yid = (int) ($applied['done']['id'] ?? ($applied['id'] ?? 0));
+        $p = $yid ? kop_ya_get($pdo, $yid) : null;
+        if (!$p) {
+            $out[$r['pkey']] = 'program ' . $yid . ' is gone';
+            continue;
+        }
+        $label = kop_ya_key($r['label']);
+        $match = '';
+        foreach (kop_ya_facts($p) as $f) {
+            $fl = kop_ya_key($f['label'] ?? '');
+            if ($fl !== '' && ($fl === $label || strpos($label, $fl . ' ') === 0)) {
+                $match = (string) $f['key'];
+                break;
+            }
+        }
+        if ($match !== '') {
+            $applied['done'] = array('id' => $yid, 'key' => $match, 'filled' => array());
+            $out[$r['pkey']] = 'linked ' . $match;
+        } else {
+            list($fact, $fill) = kop_wbf_ya_fact($r);
+            $fact['by'] = (string) $r['reviewed_by'];
+            $fact['at'] = (string) $r['reviewed_at'];
+            try {
+                $applied['done'] = kop_ya_add_fact($pdo, $yid, $fact, $fill);
+            } catch (RuntimeException $e) {
+                $out[$r['pkey']] = $e->getMessage();
+                continue;
+            }
+            $out[$r['pkey']] = 'added';
+        }
+        $wpdb->update($table, array('applied' => wp_json_encode($applied)), array('pkey' => $r['pkey']));
+    }
+    return $out;
+}
+
+/** Run kop_ya_relink_moved_items() once (2026-10-21); what it did is kept in kop_ya_relink_log. */
+function kop_ya_maybe_relink() {
+    $version = '1';
+    if (get_option('kop_ya_relinked') === $version) {
+        return;
+    }
+    $pdo = kop_ya_pdo();
+    if (!$pdo || !function_exists('kop_wbf_table') || !kop_ya_ready($pdo)) {
+        return;
+    }
+    update_option('kop_ya_relinked', $version, false);
+    try {
+        update_option('kop_ya_relink_log', kop_ya_relink_moved_items($pdo), false);
+    } catch (Throwable $e) {
+        update_option('kop_ya_relink_log', array('error' => $e->getMessage()), false);
+    }
+}
+add_action('admin_init', 'kop_ya_maybe_relink', 21);
+
+/**
  * The facility records the owner asked to move on 2026-09-30: every one
  * whose age range starts at 17 or older (checked on production that day).
  * Each is moved only if it is still there under this name and its ages

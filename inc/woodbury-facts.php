@@ -119,7 +119,8 @@ function kop_wbf_sync($force = false) {
         if (strpos((string) $r['extra'], '"edited_by"') !== false) {
             $edited[$r['pkey']] = true;
         }
-        if (strpos((string) $r['extra'], '"manual"') !== false) {
+        // A person added by hand (kop_wbf_add_person), or an item put back from "No longer proposed".
+        if (strpos((string) $r['extra'], '"manual"') !== false || strpos((string) $r['extra'], '"kept_by"') !== false) {
             $manual[$r['pkey']] = true;
         }
     }
@@ -180,7 +181,7 @@ function kop_wbf_sync($force = false) {
     }
     $gone = 0;
     foreach ($existing as $pkey => $status) {
-        // A person added by hand (kop_wbf_add_person) is never in the build: it stays.
+        // A person added by hand (kop_wbf_add_person) is never in the build, and one put back stays put back: they stay.
         if ($status === 'pending' && !isset($seen[$pkey]) && !isset($manual[$pkey])) {
             $gone += (int) $wpdb->update($table, array('status' => 'gone'), array('pkey' => $pkey));
         }
@@ -2559,6 +2560,8 @@ function kop_wbf_tabs() {
         'applied'  => array('label' => 'Added', 'where' => "status = 'applied'"),
         'auto'     => array('label' => 'Approved automatically', 'where' => "status IN ('applied', 'held') AND reviewed_by = 'auto'"),
         'rejected' => array('label' => 'Rejected', 'where' => "status = 'rejected'"),
+        // Items the latest build no longer makes (kop_wbf_sync()); "Back to review" keeps one waiting.
+        'gone'     => array('label' => 'No longer proposed', 'where' => "status = 'gone'"),
     );
 }
 

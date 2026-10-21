@@ -121,7 +121,7 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     // Items the record holds already wait under "Already on file", out of every waiting tab.
     $on_file = kop_rinbox_on_file_keys('woodbury-facts');
     $all_pending = (int) $pdo->query("SELECT COUNT(*) FROM $t WHERE status = 'pending'")->fetchColumn();
-    $check('woodbury-facts: every tab has its count', count($counts) === 9 && $counts['pending'] + count($on_file) + count(kop_rinbox_conflict_keys('woodbury-facts')) === $all_pending,
+    $check('woodbury-facts: every tab has its count', count($counts) === 10 && $counts['pending'] + count($on_file) + count(kop_rinbox_conflict_keys('woodbury-facts')) === $all_pending,
         json_encode($counts) . ' + ' . count($on_file) . ' on file + ' . count(kop_rinbox_conflict_keys('woodbury-facts')) . ' in conflict');
     $keys = array_keys($on_file);
     $states = $keys ? $pdo->query("SELECT DISTINCT status FROM $t WHERE pkey IN ('" . implode("','", array_slice($keys, 0, 500)) . "')")->fetchAll(PDO::FETCH_COLUMN) : array();

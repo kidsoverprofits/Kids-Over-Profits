@@ -50,6 +50,39 @@ function kop_rinbox_test_ya_moved(callable $check) {
     call_user_func(kop_rinbox_source('woodbury-facts')['act'], $pkey, 'undo', array());
     $check('ya-moved: Undo takes it off again', !$has($pkey) && kop_wbf_rows(array($pkey))[0]['status'] === 'pending');
 
+    // Items the move left "added" with no fact of theirs (an empty fact key): each is pointed at the fact saying the same, or added.
+    $empty = function () use ($pdo, $t) {
+        return $pdo->query("SELECT pkey, applied FROM $t WHERE status = 'applied' AND ya = 1 AND applied LIKE '%\"filed\":\"young_adult\"%' AND applied LIKE '%\"key\":\"\"%'")->fetchAll(PDO::FETCH_KEY_PAIR);
+    };
+    $was = $empty();
+    $res = kop_ya_relink_moved_items($ya);
+    $bad = array_filter($res, function ($v) { return $v !== 'added' && strpos($v, 'linked ') !== 0; });
+    $check('ya-moved: every moved item left without a fact key is linked to its fact or added', count($was) === count($res) && !$bad && !$empty(),
+        count($was) . ' empty, ' . count(array_filter($res, function ($v) { return $v === 'added'; })) . ' added, ' . json_encode($bad));
+    $lost = array();
+    foreach (array_keys($res) as $pk) {
+        $a = json_decode((string) $pdo->query("SELECT applied FROM $t WHERE pkey = " . $pdo->quote($pk))->fetchColumn(), true);
+        $keys = array_column(kop_ya_facts(kop_ya_get($ya, (int) $a['done']['id'])), 'key');
+        if (!in_array($a['done']['key'], $keys, true)) $lost[] = $pk;
+    }
+    $check('ya-moved: and each one\'s fact is on its program, so Undo can take it off', !$lost, json_encode($lost));
+    $check('ya-moved: running it again changes nothing', kop_ya_relink_moved_items($ya) === array());
+
+    // "Back to review" on an item no longer proposed: it waits again, and the next load keeps it.
+    $gone = (string) $pdo->query("SELECT pkey FROM $t WHERE status = 'gone' ORDER BY id LIMIT 1")->fetchColumn();
+    if ($gone !== '') {
+        $back = call_user_func(kop_rinbox_source('woodbury-facts')['act'], $gone, 'undo', array());
+        $row = kop_wbf_rows(array($gone))[0];
+        $check('ya-moved: "Back to review" puts a no-longer-proposed item back in the waiting list', $row['status'] === 'pending'
+            && strpos((string) $row['extra'], '"kept_by"') !== false, $back['message'] ?? '');
+        if (is_readable(kop_wbf_path())) {
+            kop_wbf_sync(true);
+            $check('ya-moved: the next load of the facts file leaves it waiting', kop_wbf_rows(array($gone))[0]['status'] === 'pending');
+        } else {
+            echo "  (no facts file here: the reload check is not run)\n";
+        }
+    }
+
     // Fornits: "Add to <program>" files a fact citing the post.
     $row = $pdo->query("SELECT * FROM wpdl_kop_fornits_items WHERE status = 'pending' AND kind <> 'testimony' AND facility_id IN ($ids) ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
     if (!$row) { echo "  (no Fornits item on a moved record in the mirror)\n"; return; }
