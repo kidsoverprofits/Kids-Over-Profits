@@ -1817,3 +1817,163 @@ button.btn-refile-undo, button.btn-refile-undo:hover, button.btn-refile-undo:foc
     color: var(--kop-navy, #000080);
     text-decoration: underline;
 }
+
+/* Data suggestions: what changed, not the whole record (js/admin-submissions.js renderChanges()). */
+.sugg-changes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--kop-midnight-blue);
+    font-size: 14px;
+}
+
+.sugg-from,
+.sugg-note,
+.sugg-same {
+    margin: 0;
+    color: var(--kop-text-muted);
+    font-size: 13px;
+}
+
+.sugg-note {
+    color: var(--kop-midnight-blue);
+    background: var(--rv-subtle);
+    border-left: 3px solid var(--rv-line-strong);
+    padding: 6px 10px;
+}
+
+.sugg-from code {
+    background: var(--rv-subtle);
+    color: var(--kop-midnight-blue);
+    padding: 0 4px;
+    border-radius: var(--rv-radius);
+}
+
+.sugg-same .kop-icon {
+    color: var(--kop-teal-ink);
+}
+
+.sugg-entry h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    color: var(--kop-midnight-blue);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.sugg-entry h4 a {
+    color: var(--kop-navy-blue);
+}
+
+.sugg-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kop-orange-ink);
+    border: 1px solid var(--kop-orange-ink);
+    border-radius: var(--rv-radius);
+    padding: 1px 6px;
+    background: var(--kop-white);
+}
+
+.sugg-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+}
+
+.sugg-table th,
+.sugg-table td {
+    border: 1px solid var(--rv-line);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    color: var(--kop-midnight-blue);
+    background: var(--kop-white);
+}
+
+.sugg-table thead th {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kop-text-muted);
+    background: var(--rv-subtle);
+}
+
+.sugg-table thead th:first-child {
+    width: 9.5em;
+}
+
+.sugg-table th[scope="row"] {
+    font-weight: 600;
+}
+
+.sugg-table td.sugg-before {
+    background: #ffe2e2;
+}
+
+.sugg-table td.sugg-after {
+    background: #e2f6e3;
+}
+
+/* "3 on file": a count of what stays, not something taken away. */
+.sugg-table td.sugg-count,
+.sugg-table td.sugg-blank {
+    background: var(--kop-white);
+    color: var(--kop-text-muted);
+    font-style: italic;
+}
+
+.sugg-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sugg-items .sugg-del {
+    text-decoration: line-through;
+    background: #ffe2e2;
+}
+
+.sugg-sign {
+    font-weight: 700;
+}
+
+.sugg-raw summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-navy-blue);
+    margin-bottom: 8px;
+}
+
+/* Phones: one row per field, stacked: label, what is on file, what was sent. */
+@media (max-width: 600px) {
+    .sugg-table,
+    .sugg-table tbody,
+    .sugg-table tr,
+    .sugg-table th,
+    .sugg-table td {
+        display: block;
+        width: auto;
+    }
+    .sugg-table thead {
+        display: none;
+    }
+    .sugg-table tr + tr {
+        margin-top: 8px;
+    }
+    .sugg-table td.sugg-before::before {
+        content: "On file now: ";
+        font-style: normal;
+        font-weight: 600;
+    }
+    .sugg-table td.sugg-after::before {
+        content: "Suggested: ";
+        font-weight: 600;
+    }
+}

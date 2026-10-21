@@ -67,6 +67,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php 
 # Woodbury Facts, Fornits and Data audit (approved over a changed 'from') take part. A new queue with conflicts adds both keys
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-on-file.php [--list] [--db=...]
 python scripts/test-review-inbox-ui.py           # the page in a browser against fixtures: tabs, card edits, tags, AI, actions, phone width
+# Data suggestions (suggested_edits, the "Data" queue) show "What changed" on the card, not the record sent: api/lib-suggestion-changes.php
+# finds the record (facility_id, the /facility/<slug>/ or /<state>/ page named in the reason, name + state, the one record with that name),
+# normalizes both sides and lists only fields whose sent value differs; empty, "Unknown" and unticked flags are no information. Dropped
+# list items and emptied fields show only for whole-record edits (facility_id sent), which Approve writes over the record. Raw JSON is folded
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-suggestion-changes.php
 # KOP Tools screens share one look (docs/ADMIN-UI.md: inc/admin-kit.php, css/admin-kit.css, js/admin-kit.js): decisions are buttons
 # (primary first, three at most), the rest in More or a fold, a dropdown never acts, one filter toolbar per list, Undo after every action.
 # A screen opts in with the kop_admin_kit_pages filter; Drive Docs, Fornits and Woodbury Facts are on it

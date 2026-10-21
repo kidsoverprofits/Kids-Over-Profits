@@ -995,9 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3>${escapeHtml(submission.program_name)}</h3>
                         <span class="status-badge ${statusClass}">${submission.status}</span>
                     </div>
-                    <div class="submission-meta">
-                        <span>${kopIcon('refresh')} Data Update</span>
-                    </div>
+                    ${renderChanges(submission)}
                     ${footer}
                 `;
             } else if (currentType === 'legislation' || currentType === 'lawsuit') {
@@ -1050,6 +1048,66 @@ document.addEventListener('DOMContentLoaded', () => {
             submissionsList.appendChild(card);
         });
         updateSelectionState();
+    }
+
+    /**
+     * "What changed" for a data suggestion (api/lib-suggestion-changes.php):
+     * only the fields whose sent value differs from the record, as
+     * now -> suggested, and the submitter's own note. The whole record sent
+     * stays under "View details".
+     */
+    function renderChanges(submission) {
+        const c = submission.changes;
+        const reason = String(submission.submission_notes || '').trim();
+        // The mini-form's automatic note only says where it was sent from.
+        const from = reason.match(/^Public mini-form submission[^"]*"[^"]*" from (\S+?)\.?(?:\s|$)/);
+        const note = from
+            ? `<p class="sugg-from">Sent from the "Submit info" button on <code>${escapeHtml(from[1])}</code></p>`
+            : (reason ? `<p class="sugg-note"><strong>Their note:</strong> ${escapeHtml(reason)}</p>` : '');
+        if (!c) {
+            return `<div class="submission-meta"><span>${kopIcon('refresh')} Data Update</span></div>${note}`;
+        }
+        const cell = (text, cls) => text === ''
+            ? `<td class="sugg-${cls} sugg-blank">(empty)</td>`
+            : `<td class="sugg-${cls}">${escapeHtml(text)}</td>`;
+        const items = (list, cls, sign) => (list || []).map(t =>
+            `<li class="sugg-${cls}"><span class="sugg-sign" aria-hidden="true">${sign}</span>${escapeHtml(t)}</li>`).join('');
+        const row = ch => {
+            if (ch.kind === 'list') {
+                const had = ch.had ? `${ch.had} on file` : '(empty)';
+                return `<tr><th scope="row">${escapeHtml(ch.label)}</th>`
+                    + `<td class="sugg-before sugg-count${ch.had ? '' : ' sugg-blank'}">${had}</td>`
+                    + `<td class="sugg-after"><ul class="sugg-items">${items(ch.added, 'ins', '+ ')}${items(ch.dropped, 'del', '- ')}</ul></td></tr>`;
+            }
+            const after = ch.kind === 'removed' ? '' : ch.after;
+            return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before')}${cell(after, 'after')}</tr>`;
+        };
+        let html = '';
+        (c.entries || []).forEach(e => {
+            const href = e.url ? safeUrl(e.url) : '';
+            const name = href
+                ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(e.name)}</a>`
+                : escapeHtml(e.name);
+            const badge = e.is_new
+                ? `<span class="sugg-badge">No record found: Approve adds a new facility</span>`
+                : '';
+            html += `<div class="sugg-entry"><h4>${name}${badge}</h4>`
+                + `<table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">On file now</th><th scope="col">Suggested</th></tr></thead>`
+                + `<tbody>${e.changes.map(row).join('')}</tbody></table></div>`;
+        });
+        if ((c.other || []).length) {
+            html += `<div class="sugg-entry"><table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">Sent</th></tr></thead><tbody>`
+                + c.other.map(o => `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after">${escapeHtml(o.after)}</td></tr>`).join('')
+                + `</tbody></table></div>`;
+        }
+        if ((c.unchanged || []).length) {
+            const names = c.unchanged.map(escapeHtml).join(', ');
+            html += html
+                ? `<p class="sugg-same">Also sent, with nothing new: ${names}</p>`
+                : `<p class="sugg-same">${kopIcon('check-circle')} Nothing new: everything sent for ${names} is already on the record.</p>`;
+        }
+        if (!html) html = `<p class="sugg-same">Nothing filled in to compare. Open the details to see what was sent.</p>`;
+        return `<div class="sugg-changes">${note}${html}</div>`;
     }
 
     /**
@@ -1245,7 +1303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         console.log('Parsed jsonData:', jsonData);
 
-        // Basic info
+        // Basic info (a data suggestion hides the three rows it has nothing for)
+        document.querySelectorAll('.submission-info .info-row').forEach((r, i) => {
+            r.style.display = currentType === 'data' && i >= 3 ? 'none' : '';
+        });
         modalStatus.textContent = submission.status;
         modalStatus.className = `status-badge status-${submission.status}`;
         modalSubmittedDate.textContent = formatDateTime(submission.created_at);
@@ -1359,8 +1420,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDiffHighlighting();
         }
 
-        // Submitter notes
-        if (submission.submission_notes) {
+        // Submitter notes (a data card already shows them above its changes)
+        if (submission.submission_notes && currentType !== 'data') {
             submitterNotesSection.style.display = 'block';
             submitterNotes.textContent = submission.submission_notes;
         } else {
@@ -2055,9 +2116,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 formLink.style.marginBottom = '10px';
                 wrap.appendChild(formLink);
             }
-            wrap.appendChild(label);
-            wrap.appendChild(ta);
-            wrap.appendChild(hint);
+            // The card shows what changed; the whole record sent is here for the rare hand edit.
+            const fold = document.createElement('details');
+            fold.className = 'sugg-raw';
+            const summary = document.createElement('summary');
+            summary.textContent = 'Everything they sent (raw data, editable)';
+            fold.appendChild(summary);
+            fold.appendChild(label);
+            fold.appendChild(ta);
+            fold.appendChild(hint);
+            wrap.appendChild(fold);
             structuredEditorBody.appendChild(wrap);
             return;
         }

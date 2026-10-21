@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/sync-wiki-facilities.php';
 require_once __DIR__ . '/lib-suggested-edits.php';
+require_once __DIR__ . '/lib-suggestion-changes.php';   // "What changed" on data cards
 require_once __DIR__ . '/news-mentions.php';
 require_once __DIR__ . '/lib-record-resync.php';
 require_once dirname(__DIR__) . '/inc/choice-lists.php'; // news article types, lawsuit and bill statuses (KOP Tools > Dropdown Lists)
@@ -259,6 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $submission['program_name'] = $submission['master_id'];
             $submission['submitted_by'] = $submission['submitter_ip'] ?? 'Anonymous';
             $submission['submission_notes'] = $submission['reason'] ?? '';
+            $submission['changes'] = kop_suggestion_changes_safe($pdo, $submission['json_data'], $submission['reason'] ?? '');
         }
 
         echo json_encode(['success' => true, 'data' => $submission]);
@@ -411,6 +413,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if ($renamed !== '') {
                 $row['program_name'] = $renamed;
             }
+        }
+        if ($type === 'data') {
+            $row['changes'] = kop_suggestion_changes_safe($pdo, $row['json_data'], $row['submission_notes'] ?? '');
         }
     }
     unset($row);
