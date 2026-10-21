@@ -385,6 +385,7 @@ register_shutdown_function(function () use ($pdo, $prefix) {
 require_once dirname(__DIR__) . '/inc/facility-store.php';
 require_once dirname(__DIR__) . '/inc/facility-v2-readers.php';
 require_once dirname(__DIR__) . '/inc/database.php';
+require_once dirname(__DIR__) . '/inc/utilities.php';
 require_once dirname(__DIR__) . '/inc/rest-api.php';
 
 $out = array('search' => array(), 'autocomplete' => array(), 'state_pins' => array(), 'state_map' => array(), 'name_ids' => array(), 'links' => array());
