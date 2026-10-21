@@ -74,6 +74,17 @@ if (!file_exists($db_path)) {
     $pdo->exec('DETACH DATABASE src');
     $opts = array('pdo' => $pdo, 'prefix' => '');
     $GLOBALS['kop_test_wpdb_writes'] = true;   // update_option() keeps the pass's log
+    // The pass has run on the site; its Undo, from the site's log, puts the
+    // roles it changed back on the copy so there is something to change.
+    $pdo->exec('ATTACH DATABASE ' . $pdo->quote($db_path) . ' AS src');
+    $site_log = $pdo->query("SELECT option_value FROM src.wpdl_options WHERE option_name = 'kop_staff_former_log'")->fetchColumn();
+    $pdo->exec('DETACH DATABASE src');
+    $site_log = $site_log ? @unserialize($site_log) : null;
+    if (is_array($site_log) && $site_log) {
+        $GLOBALS['kop_test_options']['kop_staff_former_log'] = $site_log;
+        echo count(kop_staff_former_pass($opts, true, true, 2026)) . " roles the site's pass changed put back on the copy\n";
+        unset($GLOBALS['kop_test_options']['kop_staff_former_log']);
+    }
     $before = array();
     foreach ($pdo->query('SELECT id, json_data FROM facilities_v2')->fetchAll(PDO::FETCH_ASSOC) as $r) $before[(int) $r['id']] = json_decode($r['json_data'], true);
 
@@ -140,6 +151,7 @@ if (!file_exists($db_path)) {
         }
         if (count($cand) >= 4) break;
     }
+    $cand = array_slice($cand, 0, 4);
     if (count($cand) < 4) {
         $check('four staff entries to try the clean-up on', false);
     } else {
