@@ -65,30 +65,22 @@ if ($hit) {
 
 echo "-- Past/other-name hits (the v2-switch regression) --\n";
 
-// "Copper Canyon" is both a separate record's own name (Copper Canyon Academy,
-// #12155) AND a past name on Sedona Sky Academy (#12161, renamed from it).
-// The 3.7 name-era rule: the separate record's own name match must still
-// win the top spot; the alias hit on the other record is additional, not a
-// replacement.
+// "Copper Canyon" is a past name on Sedona Sky Academy (#12161). Copper Canyon
+// Academy's own record (#12155) was merged into it as a rename on the site, so
+// only the alias hit is left; the direct-before-alias ranking is checked with
+// Bethel Boys Academy below.
 $r = $search_with_ids('Copper Canyon', 10);
-$cc = $find($r, 12155);
 $sedona = $find($r, 12161);
-$check('"Copper Canyon" finds Copper Canyon Academy (its own record)', $cc !== null);
-if ($cc) $check('...with no alias hint (it is a direct name match)', empty($cc['matched_name']));
-$check('"Copper Canyon" also finds Sedona Sky Academy (renamed from it)', $sedona !== null, $sedona ? $sedona['display'] : implode(', ', array_column($r, 'display')));
+$check('"Copper Canyon" finds Sedona Sky Academy (renamed from it)', $sedona !== null, $sedona ? $sedona['display'] : implode(', ', array_column($r, 'display')));
 if ($sedona) {
     $check('...flagged as a past-name hit', $sedona['matched_kind'] === 'past' && stripos($sedona['matched_name'], 'Copper Canyon') !== false, json_encode($sedona['matched_name']) . ' / ' . json_encode($sedona['matched_kind']));
 }
-if ($cc && $sedona) {
-    $ccPos = array_search(12155, array_column($r, '_id'), true);
-    $sedonaPos = array_search(12161, array_column($r, '_id'), true);
-    $check('the direct name match ranks before the alias match', $ccPos < $sedonaPos, "cc@$ccPos sedona@$sedonaPos");
-}
+$check('...and not the merged-away record', $find($r, 12155) === null);
 
 // "Bethel Boys Academy" is both the name_key match of a separate record
 // (Bethel Boys' Academy, #100180 - the apostrophe is stripped by
 // kop_facility_name_key()) AND a curated otherName on Eagle Point Christian
-// Academy (#13927). Same name-era shape as Copper Canyon above: the direct
+// Academy (#13927), a past name there since 2026-10. The direct
 // match must still outrank the alias hit on the other record.
 $r = $search_with_ids('Bethel Boys Academy', 10);
 $bethel = $find($r, 100180);
@@ -97,7 +89,7 @@ $check('"Bethel Boys Academy" finds Bethel Boys\' Academy (its own record)', $be
 if ($bethel) $check('...with no alias hint (it is a direct name match)', empty($bethel['matched_name']));
 $check('"Bethel Boys Academy" also finds Eagle Point Christian Academy', $eagle !== null, implode(', ', array_column($r, 'display')));
 if ($eagle) {
-    $check('...flagged as an other-name hit', $eagle['matched_kind'] === 'other' && $eagle['matched_name'] === 'Bethel Boys Academy');
+    $check('...flagged as a past-name hit', $eagle['matched_kind'] === 'past' && $eagle['matched_name'] === 'Bethel Boys Academy', json_encode($eagle['matched_kind']));
 }
 if ($bethel && $eagle) {
     $bethelPos = array_search(100180, array_column($r, '_id'), true);
@@ -194,10 +186,16 @@ if ($vp) $check('...with "Formerly Aspen Institute..."', strpos(kop_v2_search_al
 $check('...after the direct name matches', $r && empty($r[0]['matched_name']));
 
 // identification.currentName: the record carries the old name.
-$r = $search_with_ids('Kissimmee Youth', 10);
-$osc = $find($r, 9653);
-$check('"Kissimmee Youth" finds Three Springs of Osceola (now that name)', $osc !== null, implode(', ', array_column($r, 'display')));
-if ($osc) $check('...worded "Now known as"', kop_v2_search_alias_hint($osc) === 'Now known as Kissimmee Youth Academy');
+$r = $search_with_ids('Silver Springs Youth', 10);
+$marion = $find($r, 11095);
+$check('"Silver Springs Youth" finds Marion Youth Academy (now that name)', $marion !== null, implode(', ', array_column($r, 'display')));
+if ($marion) $check('...worded "Now known as"', kop_v2_search_alias_hint($marion) === 'Now known as Silver Springs Youth Academy', kop_v2_search_alias_hint($marion));
+
+// otherNames: Kissimmee Youth Academy (#11129) is also "Three Springs of Kissimmee School".
+$r = $search_with_ids('Three Springs of Kissimmee', 10);
+$kya = $find($r, 11129);
+$check('"Three Springs of Kissimmee" finds Kissimmee Youth Academy', $kya !== null, implode(', ', array_column($r, 'display')));
+if ($kya) $check('...flagged as an other-name hit', $kya['matched_kind'] === 'other', json_encode($kya['matched_kind']));
 
 // Operators match their other names too.
 $ops = kop_v2_search('Eckerd Youth Alternatives', 0, 5, 0)['operators'];
