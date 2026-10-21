@@ -3035,14 +3035,14 @@ if (!function_exists('kop_facility_pages_summary_sentence')) {
      * "Provo Canyon School is a residential treatment center in Provo, Utah,
      * operated by Universal Health Services. It has operated since 1971."
      */
-    function kop_facility_pages_summary_sentence($name, $type, $place, $operator, $status, $start, $end, $years_text) {
+    function kop_facility_pages_summary_sentence($name, $type, $place, $operator, $status, $start, $end, $years_text, $operator_past = false) {
         $closed = in_array($status, array('Closed', 'Transferred'), true) || ($end !== '' && $end !== null);
         $verb = $closed ? 'was' : 'is';
         $noun = $type !== '' ? kop_facility_pages_type_phrase($type) : 'program';
         $article = preg_match('/^[aeiou]/i', $noun) ? 'an' : 'a';
         $first = $name . ' ' . $verb . ' ' . $article . ' ' . $noun;
         if ($place !== '') $first .= ' in ' . $place;
-        if ($operator !== '') $first .= ', operated by ' . $operator;
+        if ($operator !== '') $first .= ($operator_past ? ', formerly run by ' : ', operated by ') . $operator;
         if (substr($first, -1) !== '.') $first .= '.';   // "Three Springs Inc." already ends the sentence
 
         $second = '';
@@ -3133,7 +3133,12 @@ if (!function_exists('kop_facility_page_data')) {
             $ops = kop_v2_operators_for_facilities(array($facility_id));
             if (isset($ops[$facility_id])) $operator_row = $ops[$facility_id];
         }
-        if ($operator_name === '' && $operator_row) $operator_name = trim((string) $operator_row['name']);
+        // No currentOperator and every company link is 'past': the company ran it before, and the page says so.
+        $operator_past = false;
+        if ($operator_name === '' && $operator_row) {
+            $operator_name = trim((string) $operator_row['name']);
+            $operator_past = ($operator_row['relationship'] ?? '') === 'past';
+        }
         $siblings = array();
         if ($operator_row) {
             $rows = $wpdb->get_results($wpdb->prepare(
@@ -3258,10 +3263,16 @@ if (!function_exists('kop_facility_page_data')) {
             if ($r_name !== '') $registrants[] = $r_role !== '' ? $r_name . ' (' . $r_role . ')' : $r_name;
         }
         $add_fact('Registrants', $registrants);
-        $add_fact('Operator', $operator_name);
+        $past_operators = kop_facility_pages_text_items($ident['pastOperators'] ?? null);
+        if ($operator_past) {
+            $past_operators = array_values(array_filter($past_operators, static function ($p) use ($operator_name) {
+                return kop_facility_pages_name_key($p) !== kop_facility_pages_name_key($operator_name);
+            }));
+        }
+        $add_fact($operator_past ? 'Former operator' : 'Operator', $operator_name);
         $add_fact('Owners', kop_facility_pages_text_items($ident['currentOwners'] ?? null));
         $add_fact('Other operators', kop_facility_pages_text_items($ident['otherOperators'] ?? null));
-        $add_fact('Past operators', kop_facility_pages_text_items($ident['pastOperators'] ?? null));
+        $add_fact($operator_past ? 'Other past operators' : 'Past operators', $past_operators);
         // Linked investors, its companies' too (inc/investors.php), then free-text entries no link holds.
         $add_fact('Investors', function_exists('kop_inv_fact_items')
             ? kop_inv_fact_items('facility', array($facility_id), kop_facility_pages_text_items($ident['investors'] ?? null))
@@ -3407,7 +3418,7 @@ if (!function_exists('kop_facility_page_data')) {
         }
 
         // ---- Copy ----------------------------------------------------------------
-        $summary = kop_facility_pages_summary_sentence($name, $type, $place, $operator_name, $status, $start, $end, $years_text);
+        $summary = kop_facility_pages_summary_sentence($name, $type, $place, $operator_name, $status, $start, $end, $years_text, $operator_past);
         $seo_title = $name . ($place !== '' ? ' (' . $place . ')' : '') . ' | Kids Over Profits';
         $seo_description = $summary;
         // A merged profile post's content is printed on the page; its excerpt is the description it had.
@@ -3476,6 +3487,8 @@ if (!function_exists('kop_facility_page_data')) {
             'operator'      => array(
                 'name' => $operator_name,
                 'url'  => kop_facility_pages_operator_url($operator_row, $operator_name),
+                // It ran the program before; nobody is on file as running it now.
+                'past' => $operator_past,
             ),
             'siblings'      => $siblings,
             'program_homes' => $program_homes,

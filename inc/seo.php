@@ -597,7 +597,8 @@ if (!function_exists('kop_seo_facility_pieces')) {
         if ($start !== '') $org['foundingDate'] = $start;
         if ($end !== '' && ($closed || $end <= gmdate('Y'))) $org['dissolutionDate'] = $end;
         $operator = (array) ($page['operator'] ?? array());
-        if (trim((string) ($operator['name'] ?? '')) !== '') {
+        // A company that only ran it in the past is not its parent organization.
+        if (trim((string) ($operator['name'] ?? '')) !== '' && empty($operator['past'])) {
             $parent = array('@type' => 'Organization', 'name' => (string) $operator['name']);
             if (!empty($operator['url'])) $parent['url'] = (string) $operator['url'];
             $org['parentOrganization'] = $parent;

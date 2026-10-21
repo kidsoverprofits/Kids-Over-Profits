@@ -2841,7 +2841,7 @@ function kop_state_merge_program_fields(array &$existing, array $incoming) {
     $existing['record_updated_at'] = kop_state_newer_timestamp($existing['record_updated_at'] ?? '', $incoming['record_updated_at'] ?? '');
 
     $list_keys = array('additional_addresses','former_locations','operating_notes','current_owners','past_owners',
-                       'other_names','past_names','known_referrers','other_operators','administrator','notable_staff',
+                       'other_names','past_names','known_referrers','other_operators','past_operators','administrator','notable_staff',
                        'past_tti_jobs','profile_links','accreditations_current','accreditations_past','memberships',
                        'certifications','licensing','resource_flags','treatment_types','philosophy_flags',
                        'critical_incidents','notes');
@@ -3056,6 +3056,13 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
     $is_location_aggregate = strcasecmp($project_operator_type, 'Location Aggregate') === 0
         || !empty($meta['location_aggregate'])
         || kop_state_is_location_aggregate_operator($project_operator_name, $project_name);
+    // A company the facility is linked to only as 'past' (kop_v2_collect_programs()) ran it before:
+    // it goes under Past operators, never in the Operator line.
+    $past_company = '';
+    if ($facility_operator === '' && !$is_location_aggregate && !empty($data['operator_past'])) {
+        $past_company = $project_operator_name;
+        $project_operator_name = '';
+    }
     $resolved_operator = $facility_operator !== ''
         ? $facility_operator
         : ($is_location_aggregate ? '' : $project_operator_name);
@@ -3122,7 +3129,11 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
     $current_owners   = $scrub_list($as_array($identification['currentOwners'] ?? null));
     $past_owners      = $scrub_list($as_array($identification['pastOwners'] ?? null));
     $other_operators  = $scrub_list($as_array($facility['otherOperators'] ?? null));
-    $status = $as_string($operating['status'] ?? '');
+    $past_operators   = $scrub_list($as_array($identification['pastOperators'] ?? null));
+    if ($past_company !== '' && !in_array(mb_strtolower($past_company), array_map('mb_strtolower', $past_operators), true)) {
+        array_unshift($past_operators, $past_company);
+    }
+    $status =$as_string($operating['status'] ?? '');
     if ($closed_marker && ($status === '' || strcasecmp($status, 'open') === 0)) {
         $status = 'Closed';
     }
@@ -3234,6 +3245,7 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
         'past_names'       => $as_array($identification['pastNames'] ?? null),
         'known_referrers'  => $as_array($identification['knownReferrers'] ?? null),
         'other_operators'  => $other_operators,
+        'past_operators'   => $past_operators,
         'administrator'    => $as_array($facility['staff']['administrator'] ?? null),
         'notable_staff'    => $as_array($facility['staff']['notableStaff'] ?? null),
         'past_tti_jobs'    => $as_array($facility['staff']['pastTTIJobs'] ?? null),
@@ -4947,7 +4959,7 @@ function kop_state_merge_programs_and_inspections(array $programs, array $inspec
             $existing['record_updated_at'] = kop_state_newer_timestamp($existing['record_updated_at'] ?? '', $p['record_updated_at'] ?? '');
             // Array fields: union (dedup of scalars; objects pass through).
             foreach (array('former_locations','operating_notes','current_owners','past_owners','other_names','past_names',
-                           'known_referrers','other_operators','administrator','notable_staff',
+                           'known_referrers','other_operators','past_operators','administrator','notable_staff',
                            'past_tti_jobs','profile_links','accreditations_current','accreditations_past',
                            'memberships','certifications','licensing','resource_flags',
                            'treatment_types','philosophy_flags','critical_incidents','notes') as $ak) {
@@ -5050,6 +5062,7 @@ function kop_state_merge_programs_and_inspections(array $programs, array $inspec
                 'past_names'        => $p['past_names'] ?? array(),
                 'known_referrers'   => $p['known_referrers'] ?? array(),
                 'other_operators'   => $p['other_operators'] ?? array(),
+                'past_operators'    => $p['past_operators'] ?? array(),
                 'administrator'     => $p['administrator'] ?? array(),
                 'notable_staff'     => $p['notable_staff'] ?? array(),
                 'past_tti_jobs'     => $p['past_tti_jobs'] ?? array(),
@@ -5202,6 +5215,7 @@ function kop_state_merge_programs_and_inspections(array $programs, array $inspec
                 'past_names'        => array(),
                 'known_referrers'   => array(),
                 'other_operators'   => array(),
+                'past_operators'    => array(),
                 'administrator'     => array(),
                 'notable_staff'     => array(),
                 'past_tti_jobs'     => array(),

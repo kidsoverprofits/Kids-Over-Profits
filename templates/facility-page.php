@@ -31,7 +31,7 @@ $kop_fp_edit = static function ($group, $label) use ($page) {
 $kop_fp_fact_groups = array(
     'Type' => 'details', 'Serves' => 'details', 'Capacity' => 'details', 'Current census' => 'details', 'Ownership' => 'details',
     'Operated' => 'status',
-    'Operator' => 'people', 'Owners' => 'people', 'Other operators' => 'people', 'Past operators' => 'people', 'Investors' => 'people', 'Known referrers' => 'people',
+    'Operator' => 'people', 'Former operator' => 'people', 'Other past operators' => 'people', 'Owners' => 'people', 'Other operators' => 'people', 'Past operators' => 'people', 'Investors' => 'people', 'Known referrers' => 'people',
     'Legal name' => 'filing', 'Doing business as' => 'filing', 'Registrants' => 'filing',
     'Accreditation' => 'credentials', 'Past accreditation' => 'credentials', 'Memberships' => 'credentials', 'Certifications' => 'credentials', 'Licensing' => 'credentials',
 );
@@ -588,7 +588,7 @@ get_header();
                         <dt><?php echo esc_html($fact['label']); ?></dt>
                         <?php if (is_array($fact['value'])) : ?>
                             <?php foreach ($fact['value'] as $v) : ?><dd><?php echo esc_html($v); ?></dd><?php endforeach; ?>
-                        <?php elseif ($fact['label'] === 'Operator' && $page['operator']['url'] !== '') : ?>
+                        <?php elseif (($fact['label'] === 'Operator' || $fact['label'] === 'Former operator') && $page['operator']['url'] !== '') : ?>
                             <dd><a href="<?php echo esc_url($page['operator']['url']); ?>"><?php echo esc_html($fact['value']); ?></a></dd>
                         <?php else : ?>
                             <dd><?php echo esc_html($fact['value']); ?></dd>
@@ -1225,7 +1225,11 @@ get_header();
 
             <?php if ($kop_fp_has_siblings) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('related'); ?>">
+                <?php if (!empty($page['operator']['past'])) : ?>
+                <h2>Other programs of its former operator, <?php echo esc_html($page['operator']['name']); ?></h2>
+                <?php else : ?>
                 <h2>Other programs run by <?php echo esc_html($page['operator']['name'] !== '' ? $page['operator']['name'] : 'the same operator'); ?></h2>
+                <?php endif; ?>
                 <ul class="kop-fp-records kop-fp-siblings">
                     <?php foreach ($page['siblings'] as $s) :
                         $bits = array_filter(array($s['place'], ($s['status'] !== '' && $s['status'] !== 'Unknown') ? $s['status'] : ''), 'strlen');

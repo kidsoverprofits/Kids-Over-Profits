@@ -1580,6 +1580,7 @@
             ownerRow,
             sameName(facility.operator_name) ? '' : renderScalarRow('Operator', facility.operator_name),
             renderListSection('Other operators', facility.other_operators),
+            renderListSection('Past operators', facility.past_operators),
             renderListSection('Past owners', facility.past_owners),
             (facility.country && !isUsCountry(facility.country)) ? renderScalarRow('Country', facility.country) : '',
             // Where it operated before moving (locationDetails.formerLocations).

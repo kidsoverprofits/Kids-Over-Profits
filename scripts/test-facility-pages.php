@@ -422,6 +422,31 @@ $check('the program index feed lists a tagged facility\'s report with its pages'
 $pdo->exec('DROP TABLE temp.wpdl_postmeta');
 kop_facility_pages_index(true);
 
+// A company linked only as 'past', with no currentOperator, ran the program before: never "operated by".
+echo "-- Past-only operator --\n";
+$past_only = $wpdb->get_col(
+    "SELECT ofc.facility_id FROM wpdl_kop_operator_facilities ofc JOIN facilities_v2 f ON f.id = ofc.facility_id
+      GROUP BY ofc.facility_id HAVING SUM(CASE WHEN ofc.relationship = 'past' THEN 0 ELSE 1 END) = 0 ORDER BY ofc.facility_id"
+);
+$past_checked = 0;
+foreach ($past_only as $pid) {
+    $pdoc = json_decode((string) $wpdb->get_var($wpdb->prepare('SELECT json_data FROM facilities_v2 WHERE id = %d', (int) $pid)), true);
+    if (trim((string) ($pdoc['identification']['currentOperator'] ?? '')) !== '') continue;
+    $pp = kop_facility_page_data((int) $pid);
+    if (!$pp || $pp['operator']['name'] === '') continue;
+    $plabels = array_column($pp['facts'], 'label');
+    $check('#' . $pid . ' ' . $pp['name'] . ': a past-only company reads as former',
+        !empty($pp['operator']['past']) && strpos($pp['summary'], ', formerly run by ' . $pp['operator']['name']) !== false
+            && strpos($pp['summary'], 'operated by') === false && in_array('Former operator', $plabels, true) && !in_array('Operator', $plabels, true),
+        $pp['summary']);
+    if (++$past_checked >= 5) break;
+}
+$check('past-only records were found to check', $past_checked > 0, $past_checked . ' checked');
+$cur = (int) $wpdb->get_var("SELECT facility_id FROM wpdl_kop_operator_facilities WHERE relationship = 'current' ORDER BY facility_id LIMIT 1");
+$cp = $cur ? kop_facility_page_data($cur) : null;
+$check('a current company still reads as the operator', $cp && empty($cp['operator']['past']) && $cp['operator']['name'] !== ''
+    && in_array('Operator', array_column($cp['facts'], 'label'), true), $cp ? $cp['summary'] : 'no record');
+
 // Sources: a staff entry names where it came from, and a fact the notes cite links to its page.
 echo "-- Sources --\n";
 $src_doc_staff = array('notableStaff' => array(

@@ -771,7 +771,7 @@ function kop_wiki_upd_gaps(array $entry, array $page, PDO $pdo = null) {
         $core = trim(preg_replace('/\s+/', ' ', $core), ' ,&');
         if (!kop_wiki_upd_mentions($words, $short) && ($core === '' || !kop_wiki_upd_mentions($words, $core))
             && ($acr === '' || !kop_wiki_upd_mentions($words, $acr))) {
-            $add('operator', 'Operated by ' . $op_name . '.', kop_wiki_upd_live_url($page['operator']['url'] ?? '') ?: $kop_page,
+            $add('operator', (!empty($page['operator']['past']) ? 'Formerly run by ' : 'Operated by ') . $op_name . '.', kop_wiki_upd_live_url($page['operator']['url'] ?? '') ?: $kop_page,
                 'KOP company page', '', array('operator' => $op_name));
         }
     }

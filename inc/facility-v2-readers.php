@@ -299,7 +299,11 @@ if (!function_exists('kop_v2_collect_programs')) {
             $legacy = kop_facility_to_legacy($doc);
             $data = array('facilities' => array($legacy));
             $fid = (int)$row['id'];
-            if (isset($operators[$fid])) $data['operator'] = $operators[$fid]['operator'];
+            if (isset($operators[$fid])) {
+                $data['operator'] = $operators[$fid]['operator'];
+                // Only past links: the card lists the company under Past operators (kop_state_build_program_record()).
+                if ($operators[$fid]['relationship'] === 'past') $data['operator_past'] = true;
+            }
 
             $meta = array('master_id' => $fid, 'facility_count' => 1, 'updated_at' => (string)$row['updated_at']);
             if ($kind === 'country') {
@@ -325,7 +329,9 @@ if (!function_exists('kop_v2_collect_programs')) {
 
 if (!function_exists('kop_v2_operators_for_facilities')) {
     /**
-     * First operator of each facility: facility id => {id, name, operator}.
+     * First operator of each facility: facility id => {id, name, operator, relationship}.
+     * A 'current' link comes before a 'past' one, so relationship 'past' means
+     * every company the facility is linked to ran it in the past.
      *
      * @param int[] $ids
      */
@@ -335,11 +341,11 @@ if (!function_exists('kop_v2_operators_for_facilities')) {
         $ids = array_values(array_filter(array_map('intval', $ids)));
         if (!$ids) return $out;
         $rows = $wpdb->get_results(
-            "SELECT ofc.facility_id, o.id, o.name, o.json_data
+            "SELECT ofc.facility_id, ofc.relationship, o.id, o.name, o.json_data
                FROM {$wpdb->prefix}kop_operator_facilities ofc
                JOIN {$wpdb->prefix}kop_operators o ON o.id = ofc.operator_id
               WHERE ofc.facility_id IN (" . implode(',', $ids) . ")
-              ORDER BY ofc.sort_order, o.id",
+              ORDER BY CASE WHEN ofc.relationship = 'past' THEN 1 ELSE 0 END, ofc.sort_order, o.id",
             ARRAY_A
         );
         foreach ((array)$rows as $r) {
@@ -350,6 +356,7 @@ if (!function_exists('kop_v2_operators_for_facilities')) {
                 'id'       => (int)$r['id'],
                 'name'     => (string)$r['name'],
                 'operator' => (is_array($decoded) && isset($decoded['operator']) && is_array($decoded['operator'])) ? $decoded['operator'] : array(),
+                'relationship' => (string)$r['relationship'] === 'past' ? 'past' : 'current',
             );
         }
         return $out;
