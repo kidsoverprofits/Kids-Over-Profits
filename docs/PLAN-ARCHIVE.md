@@ -3144,3 +3144,20 @@ kop-*.sqlite* in %TEMP% untouched for 2 hours (a peer's running test keeps its c
 detached PowerShell at shutdown that deletes this run's copy and its -journal once the process has let go of it.
 Checked with test-investors: before, each run left its copy; after, none is left. The 2.3 GB left by finished runs
 that evening was deleted (only copies whose PHP process had ended).
+
+## 5. Tests failing on main, rerun (finished 2026-10-21)
+
+1. test-media-subfolders: stale samples fixed (9493a271): the fixes' folders exist, documents 9609/9610/7600/8162... were deleted on the site, and subfolders with nothing left to file are not expected. **Still fails, on real data**: 36 of the 74 planned subfolders exist twice on production (consecutive ids, e.g. Evidence 7929/7930, Charles Britt Academy 7943/7944 under 252), with the same documents filed in both; the one-time subfolder pass ran twice at once before kop_maybe_apply_template_assignments() took its lock. Owner step: approve a clean-up on production that keeps the lower id of each pair and drops the empty copy's filings (back up wpdl_fbv and wpdl_fbv_attachment_folder first); the test then passes.
+2. **Confirm the full rerun.** A rerun of all 126 on main at b697895a was started at the 2026-10-20 handoff; check
+   that only test-media-subfolders and the five tests needing inputs (item 3) exit non-zero.
+
+Done 2026-10-21. Item 1: on the owner's go-ahead, wpdl_fbv and wpdl_fbv_attachment_folder were backed up on the server
+(~/backups/fbv-before-subfolder-dedupe-20261020.sql), then the 36 higher ids were deleted in one transaction with their
+filings; every higher copy held only documents the lower one also held and had no child folders, so no document lost
+a folder. test-media-subfolders passes on the fresh mirror.
+Item 2: the rerun lost the mirror two thirds through: the harness change 314c4642 deleted $db_path at shutdown on
+Windows, and about 30 tests use tmp/prod.sqlite itself as $db_path, so each run wiped the mirror (through the junction
+into kop-pipeline/tmp). Fixed in 5f5977f1 (only a kop-* copy in %TEMP% is deleted); mirror rebuilt 2026-10-21 14:01.
+The 18 tests that had failed were rerun: 17 pass; test-seo-drafts was stale (the site stored its 236 rule drafts)
+and now undoes them on the copy first (3002693b). test-name-under-operator's earlier exit was Windows running out
+of paging file, not the code; it passes alone.
