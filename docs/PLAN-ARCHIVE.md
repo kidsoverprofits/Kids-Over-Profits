@@ -3181,3 +3181,14 @@ at its own width and the email field taking the rest (css/sidebar.css); under 40
 Checked live after deploy: check-mobile-overflow.py --widths 1100,1360 is clean, with no sideways scroll, on the Cedar Crest,
 Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more facility pages and an operator page, and at
 390/768); check-contrast.py --local passes; hovering a preview in the rail and in the body shows it inside the screen.
+
+## 5. Tests failing on main, lawsuit 24 on a record v2 does not hold (finished 2026-10-21)
+
+- **Lawsuit 24 (Struble v. Fountain, Bethel Boys Academy, Lucedale MS) was linked to facility 13930**, which is
+  only in the frozen facilities_master, not in facilities_v2 or the merge map (link made 2026-09-24 by the
+  4ba00597 seed). The live record is 100180 "Bethel Boys' Academy" (created 2026-09-29, Closed, holds lawsuit 185
+  and 4 news links), which had no state or city. Found by test-facility-v2-readers on a copy of 2026-10-21. The
+  owner confirmed 100180 is the same program; 7490219d2f95127018a3bbbe885f5efc242bbefd moved the link
+  (seeds/lawsuit-updates.json version 2026-10-21, new `move_facility_links`) and gave 100180 Lucedale, MS
+  (seeds/facility-records.json, template assignments 134). Checked live: the link is on 100180, the record is on the
+  MISSISSIPPI page with no review flag, and https://kidsoverprofits.org/facility/bethel-boys-academy-ms/ shows the case.

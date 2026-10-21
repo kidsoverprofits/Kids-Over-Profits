@@ -35,12 +35,11 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      (removed 492 rows in the copy).
 
    Still open:
-   - **Lawsuit 24 (Struble v. Fountain, Bethel Boys Academy, Lucedale MS) is linked to facility 13930**, which is
-     only in the frozen facilities_master, not in facilities_v2 or the merge map (link made 2026-09-24 by the
-     4ba00597 seed). The live record looks like 100180 "Bethel Boys' Academy" (created 2026-09-29, Closed, holds
-     lawsuit 185 and 4 news links), which has **no state or city** (its facility_locations row is UNKNOWN, needs
-     review). Owner: confirm 100180 is the same program, then repoint lawsuit 24 and set 100180 to Lucedale, MS
-     (a seed, or the editor). Found by the readers test on today's copy.
+   - Owner: the frozen legacy record 13930 "Bethel Academy" also has an address (2147 Mill St Ext, Lucedale, MS
+     39452), years 1978-2008 and past names Eagle Point Christian Academy, Gulf Coast Academy and Bethel Baptist
+     Children's Home. None of it was carried to 100180 (Bethel Boys' Academy, live since 2026-10-21 in Lucedale, MS)
+     because each name needs its own era and operator. Say which belong to 100180 (or to 13926 Bethel Girls Academy /
+     Eagle Point Christian Academy) and they go in by seed.
    - Readers test on the pre-switch copy: 3 checks fail, against none at the switch (DATA-MODEL-MIGRATION.md
      phase 4: "no search result, autocomplete value, resolved name or link is lost"). Search "academy" loses CALO
      Programs (capped compare, maybe only ranking at the cap); "wilderness" loses Outback Therapeutic Expeditions
