@@ -687,7 +687,9 @@ if (!function_exists('kop_facility_eras_build')) {
                 }
                 foreach ((array) ($lists[$kind] ?? array()) as $item) {
                     $key = kop_facility_eras_item_key($kind, $item);
-                    if (isset($seen[$key])) continue;
+                    // The same item on two records of the line shows once; two lines of one record with
+                    // the same words (cited to two sources) both show, as on a page with one name.
+                    if (isset($seen[$key]) && $seen[$key] !== $fid) continue;
                     $year = $dated ? kop_facility_eras_item_year($kind, $item) : 0;
                     $text = kop_facility_eras_item_text($kind, $item);
                     // Filed under one name (before a merge, or on that name's own record): it stays there.
@@ -696,7 +698,7 @@ if (!function_exists('kop_facility_eras_build')) {
                     if ($at < 0) $at = kop_facility_eras_named($chain, $text);
                     // Another record's undated item with no name to stand under is not this page's.
                     if ($at < 0 && $fid !== $facility_id) continue;
-                    $seen[$key] = true;
+                    $seen[$key] = $fid;
                     $item['_fid'] = $fid;
                     if ($at >= 0) $list[$at][$kind][] = $item;
                     else $rest[$kind][] = $item;
