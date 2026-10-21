@@ -38,6 +38,9 @@ $GLOBALS['kop_test_legacy'] = $legacy;
 
 error_reporting(E_ALL);
 set_error_handler(function ($no, $str, $file, $line) {
+    if (!(error_reporting() & $no)) {
+        return false; // @-silenced, as on the site
+    }
     throw new ErrorException($str, 0, $no, $file, $line);
 });
 
@@ -112,6 +115,7 @@ function wp_list_pluck($list, $field) {
 function is_wp_error($t) { return $t instanceof WP_Error; }
 function current_time($type = 'mysql') { return $type === 'timestamp' ? time() : gmdate('Y-m-d H:i:s'); }
 function absint($v) { return abs((int) $v); }
+function wp_upload_dir() { return array('basedir' => sys_get_temp_dir() . '/kop-no-uploads', 'baseurl' => 'https://kidsoverprofits.org/wp-content/uploads'); }
 function wp_cache_get() { return false; }
 function wp_cache_set() { return true; }
 function get_transient($k) { return $GLOBALS['kop_test_transients'][$k] ?? false; }
@@ -233,6 +237,7 @@ require_once $theme . '/inc/facility-v2-readers.php';
 require_once $theme . '/inc/database.php';
 require_once $theme . '/inc/rest-api.php';
 require_once $theme . '/inc/country-rest-api.php';
+require_once $theme . '/inc/heal-archive.php';
 require_once $theme . '/inc/facility-pages.php';
 
 // ---------------------------------------------------------------------------

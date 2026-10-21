@@ -67,6 +67,9 @@ function kop_tools_parent_slug() {
     return 'kop-tools';
 }
 function kop_find_template_page_url($template) {
+    if (!empty($GLOBALS['kop_test_no_pages'])) {
+        return '';
+    }
     $map = array(
         'page-news-processor.php'     => 'https://example.org/news-processor/',
         'page-admin-submissions.php'  => 'https://example.org/submissions-review/',
@@ -111,8 +114,8 @@ check('lawsuit: subject names the type and title',
     $mail && strpos($mail['subject'], 'New lawsuit suggestion: Doe v. Provo Canyon School') !== false, $mail ? $mail['subject'] : '');
 check('lawsuit: body lists fields', $mail && strpos($mail['body'], 'Submitted by: jamie@example.com') !== false);
 check('lawsuit: array field flattened', $mail && strpos($mail['body'], 'Facilities: Provo Canyon School, Aspen Education Group') !== false);
-check('lawsuit: links the review screen',
-    $mail && strpos($mail['body'], 'https://example.org/lawsuit-admin/') !== false);
+check('lawsuit: links Submissions Review on the lawsuit tab',
+    $mail && strpos($mail['body'], 'https://example.org/submissions-review/?type=lawsuit') !== false);
 
 // --- Suggested edits link the wp-admin approval screen ----------------------
 
@@ -201,6 +204,14 @@ check('wiki: links Submissions Review on the wiki tab',
 
 reset_mail();
 kop_notify_admins('legislation', 'HB 1234');
+$mail = last_mail();
+check('legislation: links Submissions Review on the legislation tab',
+    $mail && strpos($mail['body'], 'https://example.org/submissions-review/?type=legislation') !== false, $mail ? $mail['body'] : '');
+
+reset_mail();
+$GLOBALS['kop_test_no_pages'] = true;
+kop_notify_admins('legislation', 'HB 1234');
+$GLOBALS['kop_test_no_pages'] = false;
 $mail = last_mail();
 check('legislation: no review page, falls back to the tools menu',
     $mail && strpos($mail['body'], 'wp-admin/admin.php?page=kop-tools') !== false, $mail ? $mail['body'] : '');
