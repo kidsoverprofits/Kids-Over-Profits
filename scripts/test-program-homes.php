@@ -167,12 +167,14 @@ $opts = array('pdo' => $pdo, 'prefix' => 'wpdl_', 'skip_memberships' => true);
 $homes = array();
 foreach ($newport['homes'] as $h) $homes[$h['id']] = $h['home_name'];
 $before = (int) $wpdb->get_var('SELECT COUNT(*) FROM facilities_v2');
-$pid = kop_program_homes_group($homes, $newport['existing']['id'] ?? 0, 'Newport Academy', $opts);
+// A name no record has, so the tool makes the record and Undo can be seen to remove it (the site made
+// #100284 Newport Academy on 2026-10-03, which the tool would reuse; that case is checked below).
+$pid = kop_program_homes_group($homes, 0, 'Newport Academy Test Homes', $opts);
 $check('grouping returns a program record', $pid > 0, "#$pid");
 $created = (int) $wpdb->get_var('SELECT COUNT(*) FROM facilities_v2') === $before + 1;
-$check('a new program record was made (none existed)', $created || !empty($newport['existing']));
+$check('a new program record was made', $created);
 $prow = $wpdb->get_row("SELECT name, state, status FROM facilities_v2 WHERE id = $pid", ARRAY_A);
-$check('the program record is in California, named for the program', $prow && $prow['state'] === 'CA' && $prow['name'] === 'Newport Academy', json_encode($prow));
+$check('the program record is in California, named for the program', $prow && $prow['state'] === 'CA' && $prow['name'] === 'Newport Academy Test Homes', json_encode($prow));
 $check('the company that runs the homes runs the program', (int) $wpdb->get_var("SELECT COUNT(*) FROM wpdl_kop_operator_facilities WHERE facility_id = $pid") === 1);
 $check('every home points at the program', count(kop_program_homes_homes_of($pid)) === count($homes));
 $first_home = (int) array_key_first($homes);
