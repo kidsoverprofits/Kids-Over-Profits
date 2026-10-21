@@ -449,6 +449,21 @@ Two records hold "Three Springs of North Carolina" as a past name: #11903 (Seque
 claiming it, neither page lists it under Three Springs Inc. To do: find which program carried the name and when
 (NC DHHS licence records, Woodbury Reports), then take it off the other record or give each its own years.
 
+### Who ran these programs last (found 2026-10-21, kop_facility_pages_latest_operator())
+
+Records whose company links are all 'past' name the latest company KOP knows of; for these the records give no
+years and no buyout that orders the companies, so the page falls back to the first link. The answer goes in as
+years on the companies (pastOperators "Name (1999-2002)", or the network map's "operated 1999-2004" line), or as
+currentOperator if one runs it now.
+
+| Record | Page names (first link) | Also on file | To do |
+|---|---|---|---|
+| Austin Oaks Hospital (10644) | The Brown Schools | Universal Health Services (pastOperators, map "past operator") | Years each ran it; UHS likely took it after Brown (the map has UHS as Brown's parent) |
+| Texas NeuroRehab Center (10943) | The Brown Schools | Psychiatric Solutions, Universal Health Services | Years each ran it (UHS bought PSI in 2010 per the map, so UHS follows PSI) |
+| Benchmark, Hill Crest RTC (10395, 13661) | Psychiatric Solutions | Ramsay Youth Services | Years; the map only says "affiliated" between them (PSI bought Ramsay in 2003?) |
+| Brooksville Youth Academy (11145), Okeechobee YDC (11201) | Eckerd Connects | Youth Opportunity Investments; G4S Youth Services | Years each ran it |
+| Alldredge Wilderness Journey (14017) | InnerChange | Solacium Holdings | Years each ran it |
+
 ---
 
 ## Settled
