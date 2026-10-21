@@ -202,6 +202,14 @@ if (function_exists('add_action')) {
         update_option('kop_q_box_version', KOP_Q_BOX_VERSION, false);
         do_action('litespeed_purge_all');
     }, 40);
+    // /questions/ itself is never cached (kop_q_no_page_cache()), but it was
+    // until 2026-10-20 and LiteSpeed serves a cached copy without asking PHP:
+    // drop that copy once.
+    add_action('init', function () {
+        if (get_option('kop_q_page_purged') === '1') return;
+        update_option('kop_q_page_purged', '1', false);
+        do_action('litespeed_purge_url', home_url('/questions/'));
+    }, 40);
 }
 
 /** The box's script and styles, on facility and company pages. */
@@ -1039,7 +1047,7 @@ if (function_exists('add_action')) {
     add_action('template_redirect', function () {
         if (!kop_q_is_page()) return;
         status_header(200);
-        nocache_headers();
+        kop_q_no_page_cache();
     }, 0);
     add_filter('template_include', function ($t) {
         if (!kop_q_is_page()) return $t;
@@ -1112,6 +1120,17 @@ if (function_exists('add_action')) {
                 return kop_q_answer((array) $r->get_json_params() + (array) $r->get_body_params());
             })));
     });
+}
+
+/**
+ * The page text changes with the code, so it is never cached. nocache_headers()
+ * alone is not enough: the LiteSpeed Cache plugin sends its own
+ * "public,max-age=604800" later, which wins (see kop_vol_no_page_cache()).
+ */
+function kop_q_no_page_cache() {
+    if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+    do_action('litespeed_control_set_nocache', 'kop questions page');
+    nocache_headers();
 }
 
 function kop_q_is_page() {
