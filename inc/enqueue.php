@@ -131,6 +131,19 @@ function kadence_child_enqueue_styles() {
 add_action('wp_enqueue_scripts', 'kadence_child_enqueue_styles');
 
 /**
+ * LiteSpeed caches pages whole, so cached copies keep their old script tags:
+ * when the sidebar float first ships (or changes how it loads), clear the
+ * cache once so every page with a sidebar carries js/sidebar-float.js.
+ * Bump KOP_SIDEBAR_FLOAT_VERSION with any such change.
+ */
+if (!defined('KOP_SIDEBAR_FLOAT_VERSION')) define('KOP_SIDEBAR_FLOAT_VERSION', '1');
+add_action('init', function () {
+    if (get_option('kop_sidebar_float_version') === KOP_SIDEBAR_FLOAT_VERSION) return;
+    update_option('kop_sidebar_float_version', KOP_SIDEBAR_FLOAT_VERSION, false);
+    do_action('litespeed_purge_all');
+}, 40);
+
+/**
  * Enqueue admin submissions page scripts and styles
  */
 function kop_enqueue_admin_submissions() {
