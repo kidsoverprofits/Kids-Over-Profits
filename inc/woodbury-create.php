@@ -35,7 +35,9 @@
  * has a record is filed from the row's search box instead
  * (kop_wbc_find_records, kop_wbc_existing_target): a consultant firm is also
  * found by the name of anyone in it, and a record with no document folder
- * gets one where the create would have made it.
+ * gets one where the create would have made it. A young adult program
+ * (inc/young-adult-programs.php) is found and filed under the same way; its
+ * folder goes under "Young Adult Programs".
  */
 
 if (!defined('ABSPATH')) {
@@ -53,6 +55,15 @@ function kop_wbc_kinds() {
         'marketer'    => 'Marketing company',
         'tradeorg'    => 'Trade organization',
     );
+}
+
+/**
+ * The kinds pages can be filed under: those, and a young adult program
+ * (inc/young-adult-programs.php; made at KOP Tools > Young Adult Programs or
+ * Woodbury Facts, not here).
+ */
+function kop_wbc_target_kinds() {
+    return kop_wbc_kinds() + array('ya' => 'Young adult program (18+)');
 }
 
 /** "TELOS RESIDENTIAL TREATMENT, LLC" -> "Telos Residential Treatment, LLC". */
@@ -501,7 +512,13 @@ function kop_wbc_marketer_url($id, $template = 'templates/page-marketer-index.ph
 
 /* ---- Existing company, consultant, provider or transporter ----------- */
 
-/** The tables behind the non-facility kinds, and the folder their own folders go under. */
+/**
+ * The tables behind the non-facility kinds, and the folder their own folders
+ * go under. Young adult programs are not here (a table of columns, not
+ * json_data, in the records DB): kop_wbc_existing_target() and
+ * kop_wbc_find_records() have a 'ya' branch of their own, the folder under
+ * KOP_YA_FOLDER_PARENT.
+ */
 function kop_wbc_record_tables() {
     return array(
         'consultant'  => array('table' => 'referrers_master', 'parent' => 'Educational Consultants'),
@@ -683,6 +700,25 @@ function kop_wbc_find_records(PDO $pdo, $q, $limit = 15, $only = '') {
                 'detail' => implode(' · ', array_filter(array($hit, $place))));
         }
     }
+
+    // Young adult programs, by name or other name (the records DB).
+    $ya = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
+    if ($ya && kop_ya_ready($ya)) {
+        $stmt = $ya->prepare('SELECT id, name, other_names, city, state, review FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT 20');
+        $stmt->execute(array($like, $like));
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $p) {
+            $other = '';
+            if (mb_stripos((string) $p['name'], $q) === false) {
+                foreach (kop_ya_lines($p['other_names']) as $n) {
+                    if (mb_stripos($n, $q) !== false) { $other = $n; break; }
+                }
+            }
+            $out[] = array('kind' => 'ya', 'id' => (int) $p['id'], 'name' => (string) $p['name'], 'label' => kop_wbc_target_kinds()['ya'],
+                'detail' => implode(' · ', array_filter(array($other, implode(', ', array_filter(array($p['city'], $p['state']))),
+                    $p['review'] === 'pending' ? 'not shown yet' : ''))),
+                'url' => kop_ya_url((int) $p['id']));
+        }
+    }
     // Names that start with the search first.
     usort($out, function ($a, $b) use ($q) {
         $sa = mb_stripos($a['name'], $q) === 0 ? 0 : 1;
@@ -706,8 +742,25 @@ function kop_wbc_live_folder($id) {
  */
 function kop_wbc_existing_target($kind, $id) {
     global $wpdb;
-    $pdo = kop_wbc_pdo();
     $id = (int) $id;
+    if ($kind === 'ya') {
+        // Young adult programs live in the records DB, their folder in a column (inc/young-adult-programs.php).
+        $ya = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
+        $p = $ya ? kop_ya_get($ya, $id) : null;
+        if (!$p) {
+            throw new RuntimeException('Young adult program #' . $id . ' not found.');
+        }
+        if (!array_key_exists('document_folder_id', $p)) {
+            throw new RuntimeException('The young adult programs table has no folder column yet: open any admin screen once to add it.');
+        }
+        $folder = kop_wbc_live_folder($p['document_folder_id']);
+        if (!$folder) {
+            $folder = kop_wbc_folder($p['name'], kop_wbc_folder(KOP_YA_FOLDER_PARENT, 0));
+            $ya->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ?')->execute(array($folder, $id));
+        }
+        return array('kind' => 'ya', 'id' => $id, 'name' => (string) $p['name'], 'folder' => $folder, 'url' => kop_ya_url($id));
+    }
+    $pdo = kop_wbc_pdo();
     if ($kind === 'company') {
         $ops = $wpdb->prefix . 'kop_operators';
         $stmt = $pdo->prepare("SELECT id, name, unique_name, json_data, document_folder_id FROM `{$ops}` WHERE id = ?");
@@ -739,7 +792,7 @@ function kop_wbc_existing_target($kind, $id) {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
     }
     if (!$row) {
-        throw new RuntimeException(kop_wbc_kinds()[$kind] . ' #' . $id . ' not found.');
+        throw new RuntimeException(kop_wbc_target_kinds()[$kind] . ' #' . $id . ' not found.');
     }
     $payload = json_decode((string) $row['json_data'], true);
     $payload = is_array($payload) ? $payload : array();
@@ -784,8 +837,8 @@ add_action('wp_ajax_kop_wb_file_record', function () {
         wp_send_json_error('Already filed.');
     }
     $kind = sanitize_key($_POST['kind'] ?? '');
-    if ($kind === 'facility' || !isset(kop_wbc_kinds()[$kind])) {
-        wp_send_json_error('Choose a company, consultant, provider, transporter or marketing company.');
+    if ($kind === 'facility' || !isset(kop_wbc_target_kinds()[$kind])) {
+        wp_send_json_error('Choose a company, consultant, provider, transporter, marketing company or young adult program.');
     }
     try {
         $target = kop_wbc_existing_target($kind, (int) ($_POST['id'] ?? 0));
@@ -793,7 +846,7 @@ add_action('wp_ajax_kop_wb_file_record', function () {
     } catch (Throwable $e) {
         wp_send_json_error($e->getMessage());
     }
-    wp_send_json_success(array('record' => $target, 'label' => kop_wbc_kinds()[$kind], 'filed' => $filed));
+    wp_send_json_success(array('record' => $target, 'label' => kop_wbc_target_kinds()[$kind], 'filed' => $filed));
 });
 
 /**
@@ -816,7 +869,7 @@ function kop_wbc_file_with_ticked(array $r, array $target) {
 
 /** The search box for filing a pending row under an existing non-facility record. */
 function kop_wbc_render_finder() {
-    echo '<div class="kop-wb-add kop-wbr">Or a consultant, company, provider, transporter, marketing company or trade organization: '
+    echo '<div class="kop-wb-add kop-wbr">Or a consultant, company, provider, transporter, marketing company, trade organization or young adult program: '
         . '<input type="search" class="kop-wbr-q" placeholder="Name of the firm or person" autocomplete="off">'
         . '<ul class="kop-wbr-hits" hidden></ul></div>';
 }

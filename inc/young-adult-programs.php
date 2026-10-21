@@ -18,7 +18,12 @@
  * Table, in the records database (kop_seed_pdo(), where news_submissions is):
  *   young_adult_programs  one row per program; review = 'approved' (listed)
  *                         or 'pending'; facts = JSON list of
- *                         {key, group, label, cites: [{label, number, page, url}], by, at}
+ *                         {key, group, label, cites: [{label, number, page, url}], by, at};
+ *                         document_folder_id = its FileBird folder, made the
+ *                         first time something is filed under it
+ *                         (kop_wbc_existing_target('ya', id), under "Young
+ *                         Adult Programs"), or the facility-era folder of a
+ *                         program moved out of the facility records
  *
  * Notes are written in the page-text format (inc/page-text.php).
  */
@@ -27,8 +32,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KOP_YA_DB_VERSION', '1');
+define('KOP_YA_DB_VERSION', '2');
 define('KOP_YA_PAGE', 'young-adult-programs');
+// The media library folder each program's own folder is made under.
+define('KOP_YA_FOLDER_PARENT', 'Young Adult Programs');
 
 function kop_ya_pdo() {
     return function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
@@ -61,11 +68,21 @@ function kop_ya_install(PDO $pdo) {
         created_by VARCHAR(100) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL,
+        document_folder_id BIGINT UNSIGNED NULL,
         PRIMARY KEY (id),
         UNIQUE KEY name_key (name_key),
         KEY review (review)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    // Version 2: the document folder, on a table made before it.
+    if (!$pdo->query("SHOW COLUMNS FROM young_adult_programs LIKE 'document_folder_id'")->fetch()) {
+        $pdo->exec('ALTER TABLE young_adult_programs ADD COLUMN document_folder_id BIGINT UNSIGNED NULL');
+    }
     update_option('kop_ya_db', KOP_YA_DB_VERSION);
+}
+
+/** The program's card on /young-adult-programs/. */
+function kop_ya_url($id) {
+    return home_url('/' . KOP_YA_PAGE . '/#kop-ya-program-' . (int) $id);
 }
 
 function kop_ya_ready(PDO $pdo) {
@@ -516,11 +533,18 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '') {
         'source'       => 'Moved from facility record ' . $fid,
     );
 
+    // The folder its /facility/ page showed becomes the program's, unless the program has one.
+    $index = function_exists('kop_facility_pages_index') ? kop_facility_pages_index() : array();
+    $folder = (int) ($index['ids'][$fid]['folder'] ?? 0) ?: (int) ($doc['documentFolderId'] ?? 0);
+
     kop_ya_install($pdo);
     $t = kop_migration_tables($prefix);
-    $yid = kop_v2_with_write_lock($pdo, function () use ($pdo, $t, $fid, $fields, $facts, $name, $by, $prefix) {
+    $yid = kop_v2_with_write_lock($pdo, function () use ($pdo, $t, $fid, $fields, $facts, $name, $by, $prefix, $folder) {
         $have = kop_ya_find_by_name($pdo, $name);
         $yid = $have ? (int) $have['id'] : kop_ya_save($pdo, $fields, 0, $by);
+        if ($folder > 0) {
+            $pdo->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ? AND (document_folder_id IS NULL OR document_folder_id = 0)')->execute(array($folder, $yid));
+        }
         $all = kop_ya_facts(kop_ya_get($pdo, $yid));
         $keys = array_column($all, 'key');
         foreach ($facts as $f) {

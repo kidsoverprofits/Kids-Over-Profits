@@ -255,6 +255,8 @@ class wpdb {
                 if (!in_array($db['name'], array('main', 'temp'), true)) $masters[] = '"' . $db['name'] . '".sqlite_master';
             }
             $sql = implode(' UNION ', array_map(function ($t) use ($m) { return "SELECT name FROM $t WHERE type = 'table' AND name LIKE $m[1]"; }, $masters));
+        } elseif (preg_match('/^\s*SHOW COLUMNS FROM\s+`?(\w+)`?\s*$/i', $sql, $m)) {
+            $sql = "SELECT name AS Field FROM pragma_table_info('$m[1]')";
         }
         try {
             $st = $this->pdo->query($sql);

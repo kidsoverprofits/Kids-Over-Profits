@@ -271,9 +271,9 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 **Purpose:** Indian boarding, residential and mission schools, kept out of the facility tables; `indigenous_school_news` (`school_id`, `news_id`, ...) lists their articles (`inc/indigenous-schools.php`, /indian-boarding-schools/).
 
 ### young_adult_programs
-**Columns:** `id`, `name`, `name_key`, `other_names`, `city`, `state`, `country`, `ages`, `program_type`, `run_by`, `opened`, `closed`, `status`, `notes`, `links`, `facts`, `review`, `source`, `created_by`, `created_at`, `updated_at`
+**Columns:** `id`, `name`, `name_key`, `other_names`, `city`, `state`, `country`, `ages`, `program_type`, `run_by`, `opened`, `closed`, `status`, `notes`, `links`, `facts`, `review`, `source`, `created_by`, `created_at`, `updated_at`, `document_folder_id`
 
-**Purpose:** Programs for people 18 and older, kept apart from `facilities_v2`; `facts` is a JSON list of cited Woodbury items (`inc/young-adult-programs.php`, /young-adult-programs/).
+**Purpose:** Programs for people 18 and older, kept apart from `facilities_v2`; `facts` is a JSON list of cited Woodbury items (`inc/young-adult-programs.php`, /young-adult-programs/). `document_folder_id` is the program's FileBird folder (made under "Young Adult Programs" the first time something is filed under it, `kop_wbc_existing_target('ya', id)`; a moved facility brings its own).
 
 ### bug_reports
 **Columns:** `id`, `feature`, `category`, `description`, `steps`, `contact`, `notify_updates`, `page_url`, `page_title`, `user_agent`, `viewport`, `console_errors`, `context_json`, `ip_hash`, `status`, `admin_note`, `created_at`, `updated_at`
