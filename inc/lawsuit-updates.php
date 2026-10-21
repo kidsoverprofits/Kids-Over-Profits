@@ -5,7 +5,8 @@
  * kop_apply_lawsuit_seeds() only inserts new cases and runs with the template
  * assignments, so a case's later status (settled, dismissed, a new ruling) lands
  * here instead: each update matches a row by id AND its current case_name, sets
- * only the fields it lists, adds 'add_source_urls' to the row's source_urls and
+ * only the fields it lists, adds 'add_source_urls' to the row's source_urls,
+ * moves the case's facility links listed in 'move_facility_links' and
  * appends its note to reviewer_notes. The whole file runs once per 'version';
  * new cases in seeds/lawsuits.json are inserted in the same pass and linked to
  * their facilities by name.
@@ -99,18 +100,42 @@ function kop_apply_lawsuit_updates() {
                 $set[] = '`source_urls` = ?';
                 $args[] = $encode($merged);
             }
-            if (!$set) {
+            // 'move_facility_links': [{from, to}] moves the case's link off a record that is gone (or wrong)
+            // onto the live one, keeping its link_type; never onto an id facilities_v2 does not hold.
+            $moved = 0;
+            foreach ((array) ($u['move_facility_links'] ?? array()) as $move) {
+                $from = (int) ($move['from'] ?? 0);
+                $to = (int) ($move['to'] ?? 0);
+                if ($from <= 0 || $to <= 0 || $from === $to) {
+                    continue;
+                }
+                $has_to = $pdo->prepare('SELECT 1 FROM facilities_v2 WHERE id = ?');
+                $has_to->execute(array($to));
+                if (!$has_to->fetchColumn()) {
+                    continue;
+                }
+                $pdo->prepare('UPDATE IGNORE lawsuit_facility_links SET facility_id = ? WHERE lawsuit_id = ? AND facility_id = ?')
+                    ->execute(array($to, $id, $from));
+                $drop = $pdo->prepare('DELETE FROM lawsuit_facility_links WHERE lawsuit_id = ? AND facility_id = ?');   // left when the case was already on $to
+                $drop->execute(array($id, $from));
+                $moved++;
+            }
+            if (!$set && !$moved) {
                 continue;
             }
             if (!empty($u['note'])) {
                 $set[] = "reviewer_notes = CONCAT(COALESCE(reviewer_notes, ''), ?)";
                 $args[] = "\n[claude " . (string) ($spec['version'] ?? '') . '] ' . (string) $u['note'];
             }
+            if (!$set) {
+                $done['updated'][] = $id;
+                continue;
+            }
             $args[] = $id;
             $args[] = $name;
             $stmt = $pdo->prepare('UPDATE lawsuits SET ' . implode(', ', $set) . ' WHERE id = ? AND case_name = ?');
             $stmt->execute($args);
-            if ($stmt->rowCount()) {
+            if ($stmt->rowCount() || $moved) {
                 $done['updated'][] = $id;
             } else {
                 $done['skipped'][] = $id;

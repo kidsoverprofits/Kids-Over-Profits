@@ -11030,5 +11030,24 @@
         ]
       }
     }
+  },
+  {
+    "id": 100180,
+    "unique_name": "Bethel Boys' Academy",
+    "version": 1,
+    "top": {
+      "city": "Lucedale",
+      "state": "MS",
+      "displayName": "Bethel Boys' Academy"
+    },
+    "facility": {
+      "locationDetails": {
+        "city": "Lucedale",
+        "state": "MS",
+        "country": "United States",
+        "additionalLocations": []
+      },
+      "location": "Lucedale, MS"
+    }
   }
 ]

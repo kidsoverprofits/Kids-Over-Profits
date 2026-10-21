@@ -1861,7 +1861,10 @@ function kop_apply_operator_alias_seeds() {
  * locations_master by id and unique_name and carries a full facility object.
  * The facility is appended to that profile's data.facilities unless an entry
  * with the same name is already there, and gets a __facility_ref row through
- * the same promotion path the data form uses. Idempotent by name.
+ * the same promotion path the data form uses. Idempotent by name. A name
+ * that is a young adult program's (kop_ya_find_by_name()) is never added: it
+ * was moved out of the facility records, and on 2026-09-30 this seed put two
+ * moved programs back as facilities the same night.
  */
 function kop_apply_new_facility_seeds() {
     $done = array();
@@ -1883,10 +1886,15 @@ function kop_apply_new_facility_seeds() {
         // was undone at the next deploy. Corrections go in facility-records.
         $t = kop_migration_tables($v2_prefix);
         $exists = $pdo->prepare("SELECT id FROM `{$t['facilities']}` WHERE name_key = ? AND (? = '' OR state IS NULL OR state = '' OR state = ?) LIMIT 1");
+        $ya = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
+        $ya = $ya && kop_ya_ready($ya) ? $ya : null;
         foreach ($entries as $entry) {
             $facility = $entry['facility'] ?? null;
             if (empty($entry['location_name']) || !is_array($facility) || trim((string) ($facility['identification']['name'] ?? '')) === '') {
                 continue;
+            }
+            if ($ya && kop_ya_find_by_name($ya, (string) $facility['identification']['name'])) {
+                continue; // a young adult program now
             }
             $state = strtoupper(trim((string) ($facility['locationDetails']['state'] ?? '')));
             $exists->execute(array(kop_facility_name_key((string) $facility['identification']['name']), $state, $state));
@@ -2645,7 +2653,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '133';
+    $version = '134';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -339,7 +339,7 @@ when its version moves, and most never change a record that is already on file.
 | --- | --- | --- |
 | Marketing companies | `seeds/marketers.json` | its `version` |
 | Trade organizations | `seeds/tradeorgs.json` | its `version` |
-| Lawsuits | `seeds/lawsuits.json`, `seeds/lawsuit-updates.json` | the updates version (re-runs every listed update; give each case `facility_links`) |
+| Lawsuits | `seeds/lawsuits.json`, `seeds/lawsuit-updates.json` | the updates version (re-runs every listed update; give each case `facility_links`; an update's `move_facility_links` [{from, to}] moves an existing case's link to another record) |
 | Bills, bill corrections | `seeds/legislation.json`, `seeds/legislation-updates.json` | `version` |
 | Company histories | `seeds/operator-histories.json` | `KOP_OPERATOR_HISTORY_SEED_VERSION` (replaces only drafts nobody edited) |
 | Essential reporting nominations | `js/data/featured/nominations.json` | `version` |
