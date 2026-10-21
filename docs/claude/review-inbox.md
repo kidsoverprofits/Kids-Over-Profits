@@ -89,6 +89,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # Self-assign (kop_volp_self_status()/kop_volp_self_assign(), REST volunteer/selfassign, 'self' in volunteer/projects): a volunteer with 10+ calls the admin decided,
 # 80%+ agreeing (filters kop_volp_self_min_decided / _min_rate / _size) sees "Pick your next batch": a queue open to everyone, 10 items, created_by 'self-assigned';
 # one unfinished self-assigned batch at a time. Turn a volunteer off with Revoke
+# Hourly sweep (kop_volp_sweep(), cron kop_volp_sweep_hourly): a batch with no call, answer or question for 3 days (kop_volp_stall_days) hands
+# its unanswered items back (gone = KOP_VOLP_RELEASED: out of the project, free for the next) and closes, closed_why 'stalled'; never while the
+# last message about it is the volunteer's. A finished batch closes a day after its last answer (kop_volp_finished_close_hours), 'finished'.
+# Calls stay open to check; the Projects list keeps closed batches with calls waiting up with the open ones
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
 # 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);

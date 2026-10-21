@@ -82,7 +82,7 @@ $pdo->exec("CREATE TABLE wpdl_kop_volunteer_recs (id INTEGER PRIMARY KEY AUTOINC
 $GLOBALS['kop_test_options']['kop_vol_projects_db'] = KOP_VOLP_DB_VERSION;
 $pdo->exec("CREATE TABLE wpdl_kop_vol_projects (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, source TEXT NOT NULL, search TEXT NOT NULL DEFAULT '',
     question TEXT, yes_example TEXT, no_example TEXT, note TEXT, minutes INTEGER NOT NULL DEFAULT 20, volunteer_id INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'open', created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, closed_at TEXT)");
+    status TEXT NOT NULL DEFAULT 'open', created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, closed_at TEXT, closed_why TEXT NOT NULL DEFAULT '')");
 $pdo->exec("CREATE TABLE wpdl_kop_vol_project_items (project_id INTEGER NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '',
     position INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT '', gone INTEGER NOT NULL DEFAULT 0, detail TEXT, PRIMARY KEY (project_id, item_key))");
 $GLOBALS['kop_test_options']['kop_vol_messages_db'] = KOP_VOLM_DB_VERSION;
@@ -350,6 +350,53 @@ list($pall) = kop_volp_create(array('source' => $Q, 'size' => 0, 'volunteer_id' 
 $nall = count($keys_of($pall));
 $check('size 0 takes every waiting item, no cap', $nall >= $n50 && $nall > 30, "$nall vs $n50");
 kop_volp_set_status($pall, 'closed');
+
+echo "\nStalled and finished batches\n";
+$ago = function ($days) { return gmdate('Y-m-d H:i:s', time() - (int) round($days * 86400)); };
+$age = function ($pid, $days) use ($wpdb, $ago) {
+    $wpdb->update(kop_volp_table(), array('created_at' => $ago($days)), array('id' => (int) $pid));
+    $keys = array_column(kop_volp_item_rows($pid), 'item_key');
+    foreach ($keys as $k) $wpdb->update(kop_vol_recs_table(), array('updated_at' => $ago($days)), array('item_key' => (string) $k, 'source' => kop_volp_get($pid)['source']));
+};
+$sweep_ids = function (array $res) { $o = array(); foreach ($res as $r) $o[$r['id']] = $r; return $o; };
+// Stalled: Sam answers 1 of 4, then nothing for 4 days.
+list($ps) = kop_volp_create(array('source' => $Q, 'size' => 4, 'volunteer_id' => $sam_id));
+$ks = $keys_of($ps);
+kop_vol_recommend($sam, $Q, $ks[0], 'approve', '');
+$age($ps, 4);
+// Waiting on us: Alex asked a question nobody has answered yet.
+list($pw) = kop_volp_create(array('source' => $Q, 'size' => 3, 'volunteer_id' => $alex_id));
+$age($pw, 4);
+$wpdb->insert(kop_volm_table(), array('volunteer_id' => $alex_id, 'project_id' => $pw, 'sender' => 'vol', 'body' => 'Is a missed meal a yes?', 'created_at' => $ago(4)));
+// Finished two days ago, and finished an hour ago.
+list($pf) = kop_volp_create(array('source' => $Q, 'size' => 2, 'volunteer_id' => $sam_id));
+foreach ($keys_of($pf) as $k) kop_vol_recommend($sam, $Q, $k, 'reject', '');
+$age($pf, 2);
+list($pn) = kop_volp_create(array('source' => $Q, 'size' => 2, 'volunteer_id' => $sam_id));
+foreach ($keys_of($pn) as $k) kop_vol_recommend($sam, $Q, $k, 'reject', '');
+$age($pn, 1 / 24);
+// Untouched for a day only.
+list($pq) = kop_volp_create(array('source' => $Q, 'size' => 2, 'volunteer_id' => $alex_id));
+$age($pq, 1);
+$swept = $sweep_ids(kop_volp_sweep());
+$PS = kop_volp_get($ps);
+$check('a batch quiet for 3+ days closes as handed back', $PS['status'] === 'closed' && $PS['closed_why'] === 'stalled' && ($swept[$ps]['released'] ?? 0) === 3, json_encode($swept[$ps] ?? null));
+$check('...keeping only the answered item', $keys_of($ps) === array($ks[0]) && kop_volp_released_count($ps) === 3);
+$check('...and Sam\'s call on it still waits for the admin', kop_volp_progress($PS)['open'] === 1);
+$check('the handed-back items are free for the next project', !array_intersect(array_slice($ks, 1), array_keys(kop_volp_claimed_keys($Q))));
+list($pnext) = kop_volp_create(array('source' => $Q, 'size' => 3, 'volunteer_id' => $alex_id));
+$check('...and a new project takes them', !array_diff(array_slice($ks, 1), $keys_of($pnext)), json_encode($keys_of($pnext)));
+$check('Sam\'s link says it was handed back', strpos($throws(function () use ($sam_id, $ps) { kop_volp_items($sam_id, $ps, 1); }), 'handed back') !== false);
+$check('...and his page lists it to explain a link', in_array($ps, array_column(kop_volp_set_aside_for($sam_id), 'id'), true));
+$check('reopening does not take the items back', kop_volp_released_count($ps) === 3 && (kop_volp_set_status($ps, 'open') || true) && $keys_of($ps) === array($ks[0]));
+kop_volp_set_status($ps, 'closed');
+$check('a batch waiting on our answer is never handed back', kop_volp_get($pw)['status'] === 'open' && !isset($swept[$pw]));
+$check('a batch finished two days ago closes as finished', kop_volp_get($pf)['status'] === 'closed' && kop_volp_get($pf)['closed_why'] === 'finished');
+$check('one finished an hour ago stays open a day', kop_volp_get($pn)['status'] === 'open');
+$check('one untouched for a day stays open', kop_volp_get($pq)['status'] === 'open');
+$check('an admin close has no reason', (kop_volp_set_status($pq, 'closed') || true) && kop_volp_get($pq)['closed_why'] === '');
+foreach (array($pw, $pn, $pnext) as $x) kop_volp_set_status($x, 'closed');
+$wpdb->query('DELETE FROM ' . kop_volm_table() . ' WHERE project_id = ' . (int) $pw);
 
 echo "\nWhat volunteers can open\n";
 $check('admin screens are not links for volunteers', kop_vol_admin_only_url('https://example.test/wp-admin/admin-ajax.php?action=kop_wb_view&key=x&nonce=y')

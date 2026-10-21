@@ -936,7 +936,9 @@
         else if (wanted === '_mine') openMine();
         else if (state.queues.some(function (q) { return q.key === wanted; })) openQueue(wanted);
         else if (wantedProject) {
-            body.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'That project is finished or closed. Thank you!' + (state.projects.length ? ' Your other projects are above.' : '') })]));
+            var handedBack = (res[1].set_aside || []).some(function (p) { return p.id === wantedProject; });
+            body.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: (handedBack ? res[1].set_aside_words : 'That project is finished or closed. Thank you!')
+                + (state.projects.length ? ' Your other projects are above.' : '') })]));
         } else if (state.projects.length) {
             // Straight to work: their own projects come first.
             if (unfinished.length) openProject(unfinished[0].id);

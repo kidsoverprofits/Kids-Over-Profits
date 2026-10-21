@@ -34,7 +34,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_VOLP_DB_VERSION = '2';
+const KOP_VOLP_DB_VERSION = '3';
+
+/** An item handed back from a stalled batch (kop_vol_project_items.gone): out of the project, free for another. */
+const KOP_VOLP_RELEASED = 2;
 
 /* ---- Tables --------------------------------------------------------------- */
 
@@ -70,6 +73,7 @@ function kop_volp_ensure_tables() {
         created_by VARCHAR(60) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
         closed_at DATETIME NULL,
+        closed_why VARCHAR(12) NOT NULL DEFAULT '',
         PRIMARY KEY  (id),
         KEY status (status),
         KEY volunteer (volunteer_id)
@@ -343,7 +347,7 @@ function kop_volp_claimed_keys($source) {
     global $wpdb;
     kop_volp_ensure_tables();
     $rows = $wpdb->get_col($wpdb->prepare('SELECT i.item_key FROM ' . kop_volp_items_table() . ' i JOIN ' . kop_volp_table()
-        . " p ON p.id = i.project_id WHERE p.source = %s AND p.status = 'open'", (string) $source));
+        . " p ON p.id = i.project_id WHERE p.source = %s AND p.status = 'open' AND i.gone < %d", (string) $source, KOP_VOLP_RELEASED));
     return array_fill_keys(array_map('strval', (array) $rows), true);
 }
 
@@ -498,11 +502,13 @@ function kop_volp_source_label(array $p) {
     return (string) ($all[$p['source']]['label'] ?? $p['source']);
 }
 
-function kop_volp_set_status($id, $status) {
+/** Open or close a project. $why on a close: '' (an admin), 'finished' or 'stalled' (kop_volp_sweep()). */
+function kop_volp_set_status($id, $status, $why = '') {
     if (!in_array($status, array('open', 'closed'), true)) throw new RuntimeException('Unknown status.');
     global $wpdb;
     kop_volp_ensure_tables();
-    $wpdb->update(kop_volp_table(), array('status' => $status, 'closed_at' => $status === 'closed' ? current_time('mysql', true) : null), array('id' => (int) $id));
+    $wpdb->update(kop_volp_table(), array('status' => $status, 'closed_at' => $status === 'closed' ? current_time('mysql', true) : null,
+        'closed_why' => $status === 'closed' ? (string) $why : ''), array('id' => (int) $id));
 }
 
 /** Change the words of a project's brief. */
@@ -518,12 +524,19 @@ function kop_volp_update_brief($id, array $in) {
     if ($row) $wpdb->update(kop_volp_table(), $row, array('id' => (int) $id));
 }
 
-/** A project's items in order: [{item_key, title, status (when the project was made), gone}]. */
+/** A project's items in order: [{item_key, title, status (when the project was made), gone}], handed-back ones left out. */
 function kop_volp_item_rows($id, $detail = false) {
     global $wpdb;
     kop_volp_ensure_tables();
     return (array) $wpdb->get_results($wpdb->prepare('SELECT item_key, title, status, gone' . ($detail ? ', detail' : '') . ' FROM ' . kop_volp_items_table()
-        . ' WHERE project_id = %d ORDER BY position', (int) $id), ARRAY_A);
+        . ' WHERE project_id = %d AND gone < %d ORDER BY position', (int) $id, KOP_VOLP_RELEASED), ARRAY_A);
+}
+
+/** How many items were handed back from this project after it went quiet. */
+function kop_volp_released_count($id) {
+    global $wpdb;
+    kop_volp_ensure_tables();
+    return (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_volp_items_table() . ' WHERE project_id = %d AND gone = %d', (int) $id, KOP_VOLP_RELEASED));
 }
 
 /** Recommendations on a project's items: [item_key => [rows]], the project's volunteer only when it has one. */
@@ -575,7 +588,7 @@ function kop_volp_allows($vid, $source, $key) {
     global $wpdb;
     kop_volp_ensure_tables();
     $rows = $wpdb->get_results($wpdb->prepare('SELECT p.* FROM ' . kop_volp_table() . ' p JOIN ' . kop_volp_items_table()
-        . " i ON i.project_id = p.id WHERE p.source = %s AND i.item_key = %s AND p.status = 'open'", (string) $source, (string) $key), ARRAY_A);
+        . " i ON i.project_id = p.id WHERE p.source = %s AND i.item_key = %s AND p.status = 'open' AND i.gone < %d", (string) $source, (string) $key, KOP_VOLP_RELEASED), ARRAY_A);
     foreach ((array) $rows as $p) if (kop_volp_for_volunteer($p, $vid)) return true;
     return false;
 }
@@ -628,7 +641,10 @@ function kop_volp_public(array $p, $vid) {
  */
 function kop_volp_items($vid, $id, $limit = 3, array $skip = array()) {
     $p = kop_volp_get($id);
-    if (!$p || ($vid && !kop_volp_for_volunteer($p, $vid))) throw new RuntimeException('This project is finished or not yours. Thank you!');
+    if (!$p || ($vid && !kop_volp_for_volunteer($p, $vid))) {
+        throw new RuntimeException($p && ($p['closed_why'] ?? '') === 'stalled' ? kop_volp_stalled_words()
+            : 'This project is finished or not yours. Thank you!');
+    }
     if (kop_volr_is($p)) {
         $items = kop_volr_items($p, $vid, $limit, $skip);
         return array('project' => kop_volp_public(kop_volp_get($id), $vid), 'items' => $items);
@@ -749,6 +765,90 @@ function kop_volp_apply(array $p, array $keys) {
     return $results;
 }
 
+/* ---- Stalled and finished batches (hourly) ---------------------------------------------- */
+
+/** Days without a call, an answer or a question before a batch's unanswered items are handed back; hours a finished batch stays open. */
+function kop_volp_sweep_rules() {
+    return array(
+        'stall_days'     => max(1, (int) apply_filters('kop_volp_stall_days', 3)),
+        'finished_hours' => max(0, (int) apply_filters('kop_volp_finished_close_hours', 24)),
+    );
+}
+
+/** What a volunteer reads on a batch that was handed back. */
+function kop_volp_stalled_words() {
+    return 'This batch was handed back after ' . kop_volp_sweep_rules()['stall_days'] . ' days without answers, so others can pick its items up. '
+        . 'The answers you gave on it are kept. Thank you!';
+}
+
+/**
+ * The last time anything happened on a project: made, a call or an answer on
+ * one of its items, or a question about it. 'waiting' is true when the last
+ * message about it is the volunteer's: the batch is waiting on us, not on
+ * them, so it is never handed back then.
+ */
+function kop_volp_activity(array $p) {
+    $prog = kop_volp_progress($p);
+    $last = max((string) $p['created_at'], (string) $prog['last']);
+    $waiting = false;
+    if (function_exists('kop_volm_for_project')) {
+        $msgs = kop_volm_for_project((int) $p['id']);   // oldest first
+        foreach ($msgs as $m) if ((string) $m['created_at'] > $last) $last = (string) $m['created_at'];
+        if ($msgs) $waiting = end($msgs)['sender'] === 'vol';
+    }
+    return array('last' => $last, 'waiting' => $waiting, 'progress' => $prog);
+}
+
+/**
+ * Hand back a quiet batch's unanswered items (they leave the project and are
+ * free for the next one) and close it; close every finished batch (every item
+ * answered or handled elsewhere) once it has been quiet 'finished_hours'. The
+ * calls stay open for the admin under "Check their calls" and "Volunteers
+ * recommend". Returns [{id, title, why, released}].
+ */
+function kop_volp_sweep($now = null) {
+    global $wpdb;
+    kop_volp_ensure_tables();
+    $now = $now ?? time();
+    $rules = kop_volp_sweep_rules();
+    $out = array();
+    foreach ((array) $wpdb->get_results('SELECT * FROM ' . kop_volp_table() . " WHERE status = 'open' ORDER BY id", ARRAY_A) as $p) {
+        $act = kop_volp_activity($p);
+        $quiet = $now - strtotime($act['last'] . ' UTC');
+        $prog = $act['progress'];
+        if ($prog['done'] < $prog['total'] && !$act['waiting'] && $quiet >= $rules['stall_days'] * DAY_IN_SECONDS) {
+            $answered = kop_volr_is($p) ? kop_volr_answered_keys((int) $p['id'], 0) : kop_volp_recs($p);
+            $released = 0;
+            foreach (kop_volp_item_rows($p['id']) as $r) {
+                if ((int) $r['gone'] || isset($answered[$r['item_key']])) continue;
+                $wpdb->update(kop_volp_items_table(), array('gone' => KOP_VOLP_RELEASED), array('project_id' => (int) $p['id'], 'item_key' => (string) $r['item_key']));
+                $released++;
+            }
+            kop_volp_set_status($p['id'], 'closed', 'stalled');
+            $out[] = array('id' => (int) $p['id'], 'title' => (string) $p['title'], 'why' => 'stalled', 'released' => $released);
+        } elseif ($prog['done'] >= $prog['total'] && $quiet >= $rules['finished_hours'] * HOUR_IN_SECONDS) {
+            kop_volp_set_status($p['id'], 'closed', 'finished');
+            $out[] = array('id' => (int) $p['id'], 'title' => (string) $p['title'], 'why' => 'finished', 'released' => 0);
+        }
+    }
+    return $out;
+}
+
+add_action('init', function () {
+    if (!wp_next_scheduled('kop_volp_sweep_hourly')) wp_schedule_event(time() + 900, 'hourly', 'kop_volp_sweep_hourly');
+});
+add_action('kop_volp_sweep_hourly', function () { kop_volp_sweep(); });
+
+/** The volunteer's own batches handed back in the last two weeks: [{id, title}] (the page explains a link to one). */
+function kop_volp_set_aside_for($vid) {
+    if (!(int) $vid) return array();
+    global $wpdb;
+    kop_volp_ensure_tables();
+    $rows = $wpdb->get_results($wpdb->prepare('SELECT id, title FROM ' . kop_volp_table() . " WHERE status = 'closed' AND closed_why = 'stalled' AND volunteer_id = %d AND closed_at >= %s ORDER BY id",
+        (int) $vid, gmdate('Y-m-d H:i:s', time() - 14 * DAY_IN_SECONDS)), ARRAY_A);
+    return array_map(function ($r) { return array('id' => (int) $r['id'], 'title' => (string) $r['title']); }, (array) $rows);
+}
+
 /* ---- Self-assign (volunteers with a track record) ---------------------------------- */
 
 const KOP_VOLP_SELF_CREATED_BY = 'self-assigned';
@@ -851,7 +951,8 @@ function kop_volp_rest_projects(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $who = kop_vol_rest_who($req);
         $vid = isset($who['vol']) ? (int) $who['vol']['id'] : 0;
-        return array('projects' => kop_volp_list_for($vid), 'self' => kop_volp_self_status($vid));
+        return array('projects' => kop_volp_list_for($vid), 'self' => kop_volp_self_status($vid), 'set_aside' => kop_volp_set_aside_for($vid),
+            'set_aside_words' => kop_volp_stalled_words());
     });
 }
 
@@ -889,7 +990,10 @@ function kop_volp_admin_post() {
             return array('Saved. They see it under "Your answers".', '', null);
         }
         if ($do === 'close') { kop_volp_set_status($id, 'closed'); return array('Project closed. Its items go back to being free for other projects.', '', null); }
-        if ($do === 'reopen') { kop_volp_set_status($id, 'open'); return array('Project reopened.', '', null); }
+        if ($do === 'reopen') {
+            kop_volp_set_status($id, 'open');
+            return array('Project reopened.' . (kop_volp_released_count($id) ? ' The items it handed back stay out of it; make a new project for them.' : ''), '', null);
+        }
         if ($do === 'brief') {
             kop_volp_update_brief($id, array('title' => $in['kop_volp_title'] ?? '', 'question' => $in['kop_volp_question'] ?? '',
                 'yes' => $in['kop_volp_yes'] ?? '', 'no' => $in['kop_volp_no'] ?? '', 'note' => $in['kop_volp_note'] ?? ''));
@@ -1002,15 +1106,23 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
     <h3>Open projects</h3>
     <?php
     global $wpdb;
-    $projects = $wpdb->get_results('SELECT * FROM ' . kop_volp_table() . " ORDER BY status = 'closed', id DESC LIMIT 60", ARRAY_A);
+    $projects = (array) $wpdb->get_results('SELECT * FROM ' . kop_volp_table() . ' ORDER BY id DESC LIMIT 60', ARRAY_A);
     if (!$projects) { echo '<p>None yet.</p>'; return; }
+    // A batch that closed by itself with calls still waiting on you stays up with the open ones.
+    $progs = array();
+    foreach ($projects as $p) $progs[(int) $p['id']] = kop_volp_progress($p);
+    $down = function ($p) use ($progs) { return $p['status'] === 'closed' && !$progs[(int) $p['id']]['open'] ? 1 : 0; };
+    usort($projects, function ($a, $b) use ($down) { return $down($a) <=> $down($b) ?: (int) $b['id'] <=> (int) $a['id']; });
+    echo '<p class="description" style="max-width:760px">A batch closes by itself a day after its last item is answered. One with no answers for ' . (int) kop_volp_sweep_rules()['stall_days']
+        . ' days hands its unanswered items back (free for the next project) and closes; a question the volunteer is waiting on holds it open. Their calls stay here to check.</p>';
     echo '<table class="widefat striped" style="max-width:1100px"><thead><tr><th>Project</th><th>Who</th><th>Done</th><th>Waiting on you</th><th>Last activity</th><th></th></tr></thead><tbody>';
     foreach ($projects as $p) {
-        $prog = kop_volp_progress($p);
+        $prog = $progs[(int) $p['id']];
         $closed = $p['status'] === 'closed';
         $who = (int) $p['volunteer_id'] ? ($names[(int) $p['volunteer_id']] ?? '(gone)') : 'Anyone';
+        $why = array('finished' => ', finished', 'stalled' => ', handed back ' . kop_volp_released_count($p['id']) . ' unanswered')[$p['closed_why'] ?? ''] ?? '';
         echo '<tr' . ($closed ? ' style="opacity:.65"' : '') . '><td><a href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '"><strong>' . esc_html($p['title']) . '</strong></a><br><span class="description">'
-            . esc_html(kop_volp_source_label($p) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
+            . esc_html(kop_volp_source_label($p) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' . $why : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
             . (int) $prog['done'] . ' of ' . (int) $prog['total'] . '</td><td>' . ($prog['open'] ? '<strong>' . (int) $prog['open'] . '</strong>' : '0') . '</td><td>'
             . ($prog['last'] ? esc_html(get_date_from_gmt($prog['last'], 'M j g:i a')) : 'not started') . '</td><td>'
             . '<a class="button' . ($prog['open'] ? ' button-primary' : '') . '" href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '">' . (kop_volr_is($p) ? 'Read their answers' : 'Check their calls') . '</a> '
