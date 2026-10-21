@@ -42,5 +42,5 @@ harness is wrong; *?* = not looked at yet):
 - test-state-lists: "every candidate is a facilities_v2 record" (108 of 109). ?
 - test-submission-notify: stale expectations. f97643ac moved lawsuits and bills onto Submissions Review tabs; the fallback check hides the pages instead (aa527fa0). Passes.
 - test-wiki-staff: stale. The Former pass ran on the site; the test runs the pass's own undo on the copy first (557 put back, 551 rewritten again) (df2b0293). Passes.
-- test-woodbury-facts: test wrong. The corrected-staff check picked a record merged away since the facts file was built; it now skips those, as the main loop does (this commit). Passes.
+- test-woodbury-facts: test wrong. The corrected-staff check picked a record merged away since the facts file was built; it now skips those, as the main loop does (d8126f68). Passes.
 - test-young-adult-move: stale. The move ran on the site 2026-10-01 and production has the ya columns; the test checks what the real move left (86e9bc8b). Passes.
