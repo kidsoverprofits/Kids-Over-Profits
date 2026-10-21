@@ -4,6 +4,18 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-10-21
+
+### 4.7 Pages and templates
+
+12. **"Report a problem" link contrast** (found 2026-10-20, already live before the home page phone trim):
+    `python -u scripts/check-contrast.py --mobile /` flags `.kop-bug-report-link__text` at 3.97:1 on white
+    (needs 4.5). css/bug-reporter.css:58 and its :hover/:focus rules; use `--kop-teal-ink` or navy.
+    Done 2026-10-21 (e6e5c856, https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e6e5c856): Kadence's
+    `.button-style-outline:not(.has-text-color)` tied our rule and painted the link from `--global-palette-btn-out`
+    (teal-ink), faded by the 0.85 phone opacity; the link now sets that variable to navy. check-contrast.py passes
+    on / live, mobile and desktop.
+
 ## Moved 2026-10-20 (reorganisation)
 
 PLAN.md had grown to 2,900 lines in which finished work, background and open steps were mixed. Its whole
