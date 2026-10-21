@@ -97,6 +97,13 @@ $check('a name with no record is marked new, with what was sent (not its name ag
 $c = kop_suggestion_changes($pdo, array('referrerConsultants' => array(array('firstName' => 'Ann', 'lastName' => 'Lee', 'role' => '', 'affiliations' => array()))), '', 'wpdl_');
 $check('other kinds show what was sent, blanks left out', $c['other'] === array(array('label' => 'Referrer consultants', 'after' => 'Ann, Lee')), json_encode($c['other']));
 
+// Form notes (#56): a note on a list item is kept under a random key that names no field.
+$note = array('id' => 'field-1791173405434-9s6b0bg7v_note_1791173405434', 'text' => 'A field note from a reader.', 'timestamp' => '2026-10-05T04:12:42.215Z');
+$c = kop_suggestion_changes($pdo, $mini(array('fieldNotes' => array('field-1791173405434-9s6b0bg7v' => array($note), 'ttiPractices.hasRestraint' => array($note)))), 'from /' . $state_name . '/', 'wpdl_');
+$labels = array_column($c['entries'][0]['changes'] ?? array(), 'added', 'label');
+$check('a note under a random key reads "Field notes" with only its text', ($labels['Field notes'] ?? null) === array('A field note from a reader.'), json_encode($labels));
+$check('a note under a field\'s path names the field', isset($labels['Field notes: has restraint']), json_encode(array_keys($labels)));
+
 // Approve: a note and a gender, sent with Submit info (no state, no facility_id).
 $opts = array('pdo' => $pdo, 'prefix' => 'wpdl_');
 $sent = $mini(array('notes' => array('A note sent with Submit info.'), 'facilityDetails' => array('gender' => 'Girls')));

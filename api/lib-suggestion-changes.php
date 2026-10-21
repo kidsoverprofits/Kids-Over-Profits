@@ -158,6 +158,12 @@ if (!function_exists('kop_suggestion_label')) {
             'ttiPractices' => 'TTI practices', 'federalFunding' => 'Federal funding',
         );
         if (isset($labels[$path])) return $labels[$path];
+        // fieldNotes keys are the field's own path ("ttiPractices.hasRestraint") or, for a note on a
+        // list item, a random "field-<time>-<random>" (js/data-form/notes.js) that names no field.
+        if (strpos((string) $path, 'fieldNotes.') === 0) {
+            $rest = substr($path, strlen('fieldNotes.'));
+            return preg_match('/^field-\d+-[a-z0-9]+$/i', $rest) ? 'Field notes' : 'Field notes: ' . strtolower(kop_suggestion_label($rest));
+        }
         $parts = explode('.', (string) $path);
         $last = array_pop($parts);
         $words = strtolower($last) === 'custom' ? 'Other' : ucfirst(strtolower(trim(preg_replace('/(?<=[a-z])(?=[A-Z])|_/', ' ', $last))));
@@ -169,9 +175,11 @@ if (!function_exists('kop_suggestion_label')) {
 }
 
 if (!function_exists('kop_suggestion_item_text')) {
-    /** One list item as a line: a link's title and address, else its filled values joined. */
+    /** One list item as a line: a note's text, a link's title and address, else its filled values joined. */
     function kop_suggestion_item_text($item) {
         if (!is_array($item)) return trim((string) $item);
+        // A form note ({id, text, timestamp}): its id and time are bookkeeping.
+        if (isset($item['text']) && !array_diff(array_keys($item), array('id', 'text', 'timestamp'))) return trim((string) $item['text']);
         if (!empty($item['url'])) {
             $title = trim((string) ($item['title'] ?? $item['label'] ?? $item['name'] ?? ''));
             return $title !== '' && $title !== $item['url'] ? $title . ' (' . $item['url'] . ')' : (string) $item['url'];
