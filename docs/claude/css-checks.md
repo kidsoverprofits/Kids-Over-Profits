@@ -11,7 +11,9 @@ python -u scripts/check-contrast.py [--local]   # WCAG AA, text and icons; --loc
 python scripts/test-colour-contrast.py          # static: inks, fills, no accent text or white-on-accent in any stylesheet
 # ...and nothing runs out of its box at phone/tablet width: a grid column is minmax(0, 1fr), never a bare 1fr (it grows to a
 # long link or a select's longest option), a fixed-width input gets width:100% under 768px, a form's "input { width:100% }"
-# never reaches checkboxes. The admin review page is checked by scripts/test-review-inbox-ui.py (1280/768/390)
+# never reaches checkboxes. A hidden popup or tooltip is display:none until shown, never only visibility/opacity: an
+# invisible box still counts toward scroll width, and the checker skips it, so it reports "page scrolls sideways" with no
+# element named (the source-preview tooltip did this on facility pages, 2026-10-21). The admin review page is checked by scripts/test-review-inbox-ui.py (1280/768/390)
 python -u scripts/check-mobile-overflow.py [--local] [--widths 390,768] [paths]   # WIDE / SPILL / TEXT out of its box, live site
 ```
 
