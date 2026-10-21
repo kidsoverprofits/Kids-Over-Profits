@@ -36,6 +36,16 @@
 }
 
 /* Inside a "Submit info" row the flag sits inline, right of the button. */
+/* A page with a guided tour has its ? button fixed in the lower-right corner
+   (css/tutorial-overlay.css, 42-45px at right 15-20px); the flag would scroll
+   under it, and on a short page rest there. Keep it clear of that corner:
+   68px for the button, plus 16px because on phones Kadence pulls
+   article.entry.content-bg 16px past the screen edge and the flag is often
+   that article's last child. */
+body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-row > *) {
+    margin-right: 84px;
+}
+
 .kop-submit-info-row .button.kop-bug-report-link {
     display: inline-flex;
     width: auto;
