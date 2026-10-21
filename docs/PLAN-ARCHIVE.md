@@ -3192,3 +3192,56 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
   (seeds/lawsuit-updates.json version 2026-10-21, new `move_facility_links`) and gave 100180 Lucedale, MS
   (seeds/facility-records.json, template assignments 134). Checked live: the link is on 100180, the record is on the
   MISSISSIPPI page with no review flag, and https://kidsoverprofits.org/facility/bethel-boys-academy-ms/ shows the case.
+
+## 4.3 Records, names and data quality, item 13: document folders for young adult programs (finished 2026-10-21)
+
+13. **Document folders for young adult programs** (owner, 2026-10-21): the `young_adult_programs` table (made
+    2026-09-30, `inc/young-adult-programs.php`) never got a document folder, so nothing can be filed under one and
+    Woodbury Reports' "File under" leaves them out (`kop_rinbox_wb_record_kinds()`, `kop_rinbox_wb_record()` in
+    `inc/review-inbox/woodbury-mentions.php`). Build:
+    a. A `document_folder_id` column (bump `KOP_YA_DB_VERSION`; `kop_ya_install()` is a CREATE, so add an ALTER), made
+       on demand as a company's is (`kop_wbc_existing_target()` / `kop_wbc_folder()` in `inc/woodbury-create.php`):
+       add a `ya` branch there and to `kop_wbc_record_tables()` or beside it.
+    b. The seven moved programs (Homelines, OPI, Legacy Outdoor Adventures, Fulshear, Cottonwood Tucson, Four
+       Circles, Dragonfly Transitions; old facility ids in `kop_ya_moved_from_map()`, log in option
+       `kop_ya_migration_log`) may still have their facility-era FileBird folders ("Woodbury Reports Mentions" and
+       others). Find them on production (see the FileBird duplicate-folders memory: prefer the copy holding live
+       files) and link them as each program's folder; nothing is moved or copied.
+    c. Each program's documents on https://kidsoverprofits.org/young-adult-programs/ (its card, under "More about
+       this program"), as facility pages list theirs; CSS checks per `docs/claude/css-checks.md`.
+    d. Let every document filing screen take a young adult program: Woodbury Reports "File under" and "File under
+       that record", Drive Docs, Media library document tagging (`docs/claude/documents.md`), and the "ya:<id>"
+       token everywhere `kop_wb_clean_token()` / `kop_wb_file_many()` read tokens. Drop the "has no document folder"
+       refusal.
+    e. `docs/ADDING-CONTENT.md` (a table holding record ids) and `docs/DATA-FLOWS.md` for the new store; tests in
+       `scripts/test-young-adult-programs.php` and `scripts/review-inbox-tests/woodbury-reports.php`.
+    Progress (2026-10-21): a is done (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/de58d1ed; the
+    column is added the first time an admin screen loads after deploy). d is done: Woodbury
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/2b0d2eee; Woodbury Reports cards also lose the generic
+    "File under a young adult program" action, which added a fact line, not the pages; the one OPI card filed that way
+    on 2026-10-13 keeps its Undo), the document pencil's "Move to"
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/6b669e24), Drive Docs already took a program (check
+    in https://github.com/kidsoverprofits/Kids-Over-Profits/commit/f006036a). c is done
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/a38c8055), e is done
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7852214c). Check after deploy: an admin screen loads
+    once (adds the column), then file one Woodbury page under a program and see it on
+    https://kidsoverprofits.org/young-adult-programs/; run `python -u scripts/check-contrast.py young-adult-programs/`
+    and `scripts/check-mobile-overflow.py young-adult-programs/` once a card has documents (checked so far with the
+    block injected). b: production looked up read-only and
+    waiting for the owner's go-ahead. Eight programs were moved, not seven: Austin Sendero Recovery (program 11, from
+    facility 100441) too; it has no folder. Proposed links (program: folder): Homelines 3136 (IDAHO, empty), OPI 258
+    (under Sequel TSI, 5 NATSAP profiles; 2403/2671/3546 are empty copies), Legacy Outdoor Adventures 3888 (UTAH, its
+    Woodbury subfolder 8101 holds 2), Fulshear - The Ranch 4163 (3 NATSAP profiles + Woodbury 8085), Cottonwood Tucson
+    5687 (ARIZONA, 2 NATSAP profiles; 2380 is an empty copy), Four Circles 193, Dragonfly Transitions 8228.
+    **Owner question**: three moved programs still have a live facility record of the same name and place, and two of
+    those pages show the folder the program would get: Four Circles Recovery Center 100254 (page shows 193),
+    Dragonfly Transitions 100255 (Klamath Falls, page shows 8228), Fulshear Treatment to Transition 10612 (Needville,
+    page shows 4162, its own Woodbury folder 8344; "Fulshear" 7789 under Embark holds its 2015-2017 NATSAP profiles).
+    Are the three the same programs (move them too, `kop_ya_move_facility()`), or do the folders stay shared?
+    Done 2026-10-21: a de58d1ed, d 2b0d2eee + 6b669e24 + f006036a + 2c448b78 (a best match that moved files on its
+    program), c a38c8055, e 7852214c, b 525cd678 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/525cd678).
+    The owner approved all seven folder links and moving the three second copies (Four Circles 100254, Dragonfly
+    100255, Fulshear 10612, the last with its Treatment Magazine article as a program link); the pass ran on
+    production 2026-10-21 (option kop_ya_twins_log): seven folders linked, three copies moved, 4162 linked to 4163.
+    Six cards on https://kidsoverprofits.org/young-adult-programs/ list documents; contrast, phone width and bare
+    text pass live. seeds/new-facilities.json can no longer re-add a moved program (the guard went in with 7490219d).
