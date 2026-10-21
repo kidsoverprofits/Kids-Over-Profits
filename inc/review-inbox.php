@@ -880,6 +880,8 @@ function kop_rinbox_after($source, $key) {
  * program", ...) and their Undo; null when $action is the queue's own.
  */
 function kop_rinbox_cross_act($source, $key, $action, array $params) {
+    // A young adult program picked where the queue takes programs only (inc/review-inbox/_ya-file-action.php).
+    if (function_exists('kop_rinbox_ya_file_picked') && ($res = kop_rinbox_ya_file_picked($source, $key, $action, $params)) !== null) return $res;
     foreach (kop_rinbox_addons() as $a) {
         if (!is_callable($a['act']) || !in_array($action, (array) $a['actions'], true)) continue;
         $res = call_user_func($a['act'], $source, $key, $action, $params);

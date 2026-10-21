@@ -31,6 +31,10 @@ function kop_rinbox_test_ya_file_action(callable $check) {
     $GLOBALS['kop_rinbox_yaf'] = array(
         'a' => array('key' => 'a', 'title' => 'Filing Test Ranch', 'url' => 'https://example.test/news/ranch-closes', 'text' => 'The ranch closed.'),
         'b' => array('key' => 'b', 'title' => 'Staff list for a program nobody has', 'url' => ''),
+        // A program picker on the queue's own Approve (a queue whose pickers find programs only).
+        'c' => array('key' => 'c', 'title' => 'Filing Test Ranch (FTR)', 'url' => 'https://example.test/news/ftr-staff', 'actions' => array(array('id' => 'approve', 'label' => 'Approve',
+            'style' => 'approve', 'params' => array(array('name' => 'facility_id', 'label' => 'Program', 'type' => 'facility', 'value' => 0))))),
+        'd' => array('key' => 'd', 'title' => 'FTR', 'url' => ''),
     );
     kop_rinbox_register('zz-yaf', function () {
         $get = function ($k) {
@@ -74,6 +78,14 @@ function kop_rinbox_test_ya_file_action(callable $check) {
     $check('ya-file: a card with a link can file only the link', $a && isset($param($a, 'ya_group')['options']['link']));
     $b = $find(kop_rinbox_get_item('zz-yaf', 'b'), 'ya_file');
     $check('ya-file: a card without a link cannot', $b && !isset($param($b, 'ya_group')['options']['link']));
+    $c = kop_rinbox_get_item('zz-yaf', 'c');
+    $check('ya-file: a name with its initials in brackets picks its program', $param($find($c, 'ya_file'), 'ya_id')['value'] === (string) $yid);
+    $check('ya-file: the initials alone pick it', $param($find(kop_rinbox_get_item('zz-yaf', 'd'), 'ya_file'), 'ya_id')['value'] === (string) $yid);
+    $check('ya-file: kop_ya_find_by_name() takes the initials', (int) (kop_ya_find_by_name($ya, 'FTR')['id'] ?? 0) === $yid
+        && (int) (kop_ya_find_by_name($ya, 'Filing Test Ranch (FTR)')['id'] ?? 0) === $yid && kop_ya_find_by_name($ya, 'XYZ') === null);
+    $pick = $param($find($c, 'approve'), 'facility_id');
+    $check('ya-file: a programs-only picker finds young adult programs too', ($pick['type'] ?? '') === 'record' && in_array('ya', (array) ($pick['kinds'] ?? array()), true)
+        && in_array('facility', (array) ($pick['kinds'] ?? array()), true), json_encode($pick));
     $wbf = kop_rinbox_finish_items('woodbury-facts', array(array('key' => 'x', 'title' => 'x')));
     $check('ya-file: Woodbury Facts keeps its own young adult filing', $find($wbf[0], 'ya_file') === null);
 
@@ -98,6 +110,15 @@ function kop_rinbox_test_ya_file_action(callable $check) {
         // (The waiting list itself is read once a request, kop_rinbox_on_file_keys(); the next request lists the card again.)
         $check('ya-file: Undo takes the fact off and puts the card back', $facts($yid) === array() && !isset(kop_rinbox_ya_filed()['zz-yaf']['a'])
             && $find(kop_rinbox_get_item('zz-yaf', 'a'), 'ya_file') !== null, $u['message']);
+
+        $res = $act('c', 'approve', array('facility_id' => 'ya:' . $yid));
+        $f = $facts($yid);
+        $check('ya-file: a young adult program picked there files the card on it, not the queue Approve', count($f) === 1 && $f[0]['label'] === 'Filing Test Ranch (FTR)'
+            && $f[0]['cites'][0]['url'] === 'https://example.test/news/ftr-staff' && isset(kop_rinbox_ya_filed()['zz-yaf']['c']), json_encode($res) . ' ' . json_encode($f));
+        $row = $last_log();
+        $check('ya-file: with an Undo in Recently done', $row['undo_action'] === 'ya_unfile', json_encode($row));
+        kop_rinbox_log_undo((int) $row['id']);
+        $check('ya-file: and the Undo takes it off', $facts($yid) === array() && !isset(kop_rinbox_ya_filed()['zz-yaf']['c']));
 
         $res = $act('b', 'ya_file', array('ya_id' => '0', 'ya_name' => 'Brand New Transition House', 'ya_group' => 'staff', 'ya_text' => ''));
         $p = kop_ya_find_by_name($ya, 'Brand New Transition House');

@@ -92,6 +92,33 @@ function kop_ya_key($name) {
     return trim(preg_replace('/[^a-z0-9]+/', ' ', $name));
 }
 
+/** The initials of a name's words, small words left out: "Optimum Performance Institute" -> "opi". */
+function kop_ya_initials($name) {
+    $words = array_diff(explode(' ', kop_ya_key($name)), array('', 'the', 'of', 'and', 'at', 'for', 'a', 'to', 'in'));
+    return implode('', array_map(function ($w) { return $w[0]; }, $words));
+}
+
+/**
+ * The forms a name may be written in to find its program: as written, without
+ * a bracketed part, and the bracketed part alone ("Optimum Performance
+ * Institute (OPI)" gives all three).
+ */
+function kop_ya_name_forms($name) {
+    $name = kop_ya_clean_name($name);
+    $out = array($name);
+    if (preg_match('/^(.*?)\s*\(([^)]*)\)\s*(.*)$/', $name, $m)) {
+        $out[] = trim($m[1] . ' ' . $m[3]);
+        $out[] = trim($m[2]);
+    }
+    return array_values(array_unique(array_filter($out, 'strlen')));
+}
+
+/** Is $name (one word of 3 to 6 letters, "OPI") the initials of $p's name? */
+function kop_ya_is_initials_of($name, array $p) {
+    $k = kop_ya_key($name);
+    return (bool) preg_match('/^[a-z]{3,6}$/', $k) && strlen(kop_ya_initials($p['name'])) >= 3 && kop_ya_initials($p['name']) === $k;
+}
+
 function kop_ya_lines($text) {
     return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text)), 'strlen'));
 }
@@ -131,20 +158,34 @@ function kop_ya_get(PDO $pdo, $id) {
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
-/** The program a name belongs to (its name or one of its other names), or null. */
+/**
+ * The program a name belongs to (its name or one of its other names, also
+ * with a bracketed part left off or alone), or null. Initials ("OPI") count
+ * when they belong to one program only.
+ */
 function kop_ya_find_by_name(PDO $pdo, $name) {
-    $key = kop_ya_key($name);
-    if ($key === '' || !kop_ya_ready($pdo)) {
+    if (kop_ya_key($name) === '' || !kop_ya_ready($pdo)) {
         return null;
     }
-    foreach (kop_ya_all($pdo, null) as $p) {
-        if ($p['name_key'] === $key) {
-            return $p;
-        }
-        foreach (kop_ya_lines($p['other_names']) as $other) {
-            if (kop_ya_key($other) === $key) {
+    $all = kop_ya_all($pdo, null);
+    $forms = kop_ya_name_forms($name);
+    foreach ($forms as $form) {
+        $key = kop_ya_key($form);
+        foreach ($all as $p) {
+            if ($p['name_key'] === $key) {
                 return $p;
             }
+            foreach (kop_ya_lines($p['other_names']) as $other) {
+                if (kop_ya_key($other) === $key) {
+                    return $p;
+                }
+            }
+        }
+    }
+    foreach ($forms as $form) {
+        $hits = array_values(array_filter($all, function ($p) use ($form) { return kop_ya_is_initials_of($form, $p); }));
+        if (count($hits) === 1) {
+            return $hits[0];
         }
     }
     return null;

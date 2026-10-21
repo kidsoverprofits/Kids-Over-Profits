@@ -181,7 +181,13 @@ add_action('wp_ajax_kop_facility_finder', function () {
                 $like = '%' . addcslashes($q, '\\%_') . '%';
                 $st = $ypdo->prepare('SELECT id, name, city, state FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT 8');
                 $st->execute(array($like, $like));
-                foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $y) {
+                $ya_rows = $st->fetchAll(PDO::FETCH_ASSOC);
+                // Initials find a program too ("OPI" for Optimum Performance Institute).
+                $have = array_column($ya_rows, 'id');
+                foreach (kop_ya_all($ypdo, null) as $y) {
+                    if (!in_array($y['id'], $have) && kop_ya_is_initials_of($q, $y)) $ya_rows[] = $y;
+                }
+                foreach ($ya_rows as $y) {
                     $results[] = array('id' => (int) $y['id'], 'token' => 'ya:' . (int) $y['id'], 'kind' => 'ya', 'name' => (string) $y['name'],
                         'label' => 'Young adult program (18+)', 'detail' => implode(', ', array_filter(array((string) $y['city'], (string) $y['state']))),
                         'url' => home_url('/young-adult-programs/#kop-ya-program-' . (int) $y['id']));

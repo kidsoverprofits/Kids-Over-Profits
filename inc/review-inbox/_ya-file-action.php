@@ -68,12 +68,19 @@ function kop_rinbox_ya_file_programs($reset = false) {
     $memo = array('options' => array('0' => 'A new program (name it below)'), 'keys' => array());
     $pdo = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
     if (!$pdo || !kop_ya_ready($pdo)) return $memo;
+    $initials = array();
     foreach (kop_ya_all($pdo, null) as $p) {
         $memo['options'][(string) (int) $p['id']] = (string) $p['name'] . ($p['review'] === 'pending' ? ' (hidden)' : '');
         foreach (array_merge(array($p['name']), kop_ya_lines($p['other_names'])) as $n) {
             $k = kop_ya_key($n);
             if ($k !== '' && !isset($memo['keys'][$k])) $memo['keys'][$k] = (int) $p['id'];
         }
+        $i = kop_ya_initials($p['name']);
+        if (strlen($i) >= 3) $initials[$i][] = (int) $p['id'];
+    }
+    // Initials ("OPI") that belong to one program only, as kop_ya_find_by_name() takes them.
+    foreach ($initials as $i => $ids) {
+        if (count($ids) === 1 && !isset($memo['keys'][$i])) $memo['keys'][$i] = $ids[0];
     }
     return $memo;
 }
@@ -107,9 +114,12 @@ function kop_rinbox_ya_file_action($source, array $item) {
     $progs = kop_rinbox_ya_file_programs();
     $title = trim((string) ($item['title'] ?? ''));
     $pick = '';
+    // "Optimum Performance Institute (OPI)" picks it by the name, or by the bracketed initials.
     foreach (array($title, (string) ($item['facility']['name'] ?? '')) as $n) {
-        $k = $n !== '' ? kop_ya_key($n) : '';
-        if ($k !== '' && isset($progs['keys'][$k])) { $pick = (string) $progs['keys'][$k]; break; }
+        foreach ($n !== '' ? kop_ya_name_forms($n) : array() as $form) {
+            $k = kop_ya_key($form);
+            if ($k !== '' && isset($progs['keys'][$k])) { $pick = (string) $progs['keys'][$k]; break 2; }
+        }
     }
     $url = trim((string) ($item['url'] ?? ''));
     $has_url = (bool) preg_match('#^https?://#i', $url);
@@ -214,6 +224,37 @@ function kop_rinbox_ya_file_act($source, $key, $action, array $params) {
         'item'    => null,
         'undo'    => array('action' => 'ya_unfile', 'params' => array('done' => $done, 'group' => $group, 'created' => $created)),
     );
+}
+
+/**
+ * A queue whose pickers find programs only (no 'record_kinds') finds young
+ * adult programs in its actions' pickers too, on a card that offers "File
+ * under a young adult program" (kop_rinbox_card_fields_apply() asks here).
+ */
+function kop_rinbox_ya_picker_ok($source, array $item) {
+    if (function_exists('kop_rinbox_source_record_kinds') && kop_rinbox_source_record_kinds($source)) return false;
+    foreach ((array) ($item['actions'] ?? array()) as $a) {
+        if (($a['id'] ?? '') === 'ya_file' && !empty($a['ask'])) return true;
+    }
+    return false;
+}
+
+/**
+ * A young adult program ("ya:<id>") picked in such a picker: the card is
+ * filed on it as "File under a young adult program" does (its title as the
+ * line, citing its link), instead of the queue's own action. Null when no
+ * param is one. Run from kop_rinbox_cross_act() before the queue's act.
+ */
+function kop_rinbox_ya_file_picked($source, $key, $action, array $params) {
+    if ($action === 'move' || in_array($action, KOP_RINBOX_YA_FILE_ACTIONS, true)) return null;
+    if (function_exists('kop_rinbox_source_record_kinds') && kop_rinbox_source_record_kinds($source)) return null; // the queue files it itself
+    $ya = 0;
+    foreach ($params as $v) {
+        if (is_scalar($v) && preg_match('/^ya:(\d+)$/', trim((string) $v), $m)) { $ya = (int) $m[1]; break; }
+    }
+    if (!$ya) return null;
+    if (in_array($source, kop_rinbox_ya_file_skip_sources(), true)) throw new RuntimeException('This queue does not file on young adult programs: pick a program.');
+    return kop_rinbox_ya_file_act($source, $key, 'ya_file', array('ya_id' => $ya, 'ya_group' => 'details', 'ya_text' => ''));
 }
 
 /**

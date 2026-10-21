@@ -132,13 +132,15 @@ function kop_rinbox_card_fields_apply($source, array $it, array &$seen) {
         }
         $it['details'] = $keep;
     }
-    if ($kinds) {
-        foreach (array('actions', 'moves') as $list) {
-            foreach ((array) $it[$list] as $a => $act) {
-                if (!is_array($act) || empty($act['params'])) continue;
-                foreach ((array) $act['params'] as $p => $param) {
-                    if (is_array($param)) $it[$list][$a]['params'][$p] = kop_rinbox_card_record_param($param, $kinds);
-                }
+    // A queue whose pickers find programs only: its actions' pickers find young adult programs too where the
+    // card can be filed on one, and picking one files it there (kop_rinbox_ya_file_picked()).
+    $act_kinds = $kinds ?: (function_exists('kop_rinbox_ya_picker_ok') && kop_rinbox_ya_picker_ok($source, $it) ? array('facility', 'ya') : array());
+    foreach ($act_kinds ? array('actions', 'moves') : array() as $list) {
+        if ($list === 'moves' && !$kinds) continue;
+        foreach ((array) $it[$list] as $a => $act) {
+            if (!is_array($act) || empty($act['params'])) continue;
+            foreach ((array) $act['params'] as $p => $param) {
+                if (is_array($param)) $it[$list][$a]['params'][$p] = kop_rinbox_card_record_param($param, $act_kinds);
             }
         }
     }
