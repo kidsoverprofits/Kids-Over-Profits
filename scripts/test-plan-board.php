@@ -12,6 +12,7 @@ set_error_handler(function ($no, $str, $file, $line) { throw new ErrorException(
 
 $theme = dirname(__DIR__);
 define('ABSPATH', sys_get_temp_dir() . '/');
+define('DAY_IN_SECONDS', 86400);
 function add_action() {}
 function add_filter() {}
 function get_stylesheet_directory() { return $GLOBALS['theme']; }

@@ -222,9 +222,12 @@ function kop_pb_card_html(array $it, $open, $folded, $auto = null) {
     $ask = (string) ($it['ask'] ?? '');
     $chip = $state !== '' ? '<span class="kop-pb-chip is-' . esc_attr($state) . '">' . esc_html($kinds[$state] ?? $state) . '</span>' : '';
     $out = '<article class="kop-pb-card" id="' . esc_attr('pb-' . $it['id']) . '" data-id="' . esc_attr($it['id']) . '" data-section="' . esc_attr($it['section'] ?? '') . '"'
-        . ' data-group="' . esc_attr($it['group'] ?? '') . '" data-needs="' . ($ask !== '' ? '1' : '') . '"'
+        . ' data-group="' . esc_attr($it['group'] ?? '') . '" data-needs="' . ($ask !== '' ? '1' : '') . '" data-date="' . esc_attr($it['date'] ?? '') . '"'
         . ' data-state="' . esc_attr($state) . '" data-search="' . esc_attr(strtolower($it['id'] . ' ' . $ask . ' ' . $it['text'])) . '">';
-    $out .= '<div class="kop-pb-meta"><span class="kop-pb-where">' . esc_html($it['where'] ?? '') . '</span>' . $chip . '</div>';
+    // "New": dated within the last two days (the item's newest date, scripts/plan-board/build.py).
+    $new = !empty($it['date']) && $it['date'] >= wp_date('Y-m-d', time() - 2 * DAY_IN_SECONDS);
+    $out .= '<div class="kop-pb-meta"><span class="kop-pb-where">' . esc_html($it['where'] ?? '') . '</span>'
+        . ($new ? '<span class="kop-pb-chip is-new">New</span>' : '') . $chip . '</div>';
     $details = '<div class="kop-pb-text">' . kop_pb_md($it['text']) . '</div><p class="kop-pb-id">' . esc_html($it['id']) . '</p>';
     if ($ask !== '') {
         $out .= '<p class="kop-pb-ask">' . kop_pb_md($ask) . '</p>';
@@ -428,6 +431,8 @@ function kop_pb_page() {
         }
         echo '</section>';
     }
+    // Needs you shows its cards here as one list, newest first (js/plan-board.js moves them in and back).
+    echo '<div class="kop-pb-flat" hidden></div>';
     echo '<p class="kop-pb-none" hidden>Nothing matches.</p>';
     echo '</div>';
 }

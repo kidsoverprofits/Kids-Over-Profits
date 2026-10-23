@@ -1,5 +1,5 @@
 {
- "built": "2026-10-23 20:51 UTC",
+ "built": "2026-10-23 21:04 UTC",
  "source": "7e704c91d4c287752e00a8643cee71048a6d77f3",
  "sections": [
   {
@@ -24,6 +24,7 @@
        "lead": "Share the inspection report folder",
        "text": "**Share the inspection report folder** (2026-10-17). Share `My Drive/KOP Inspection Reports` as \"Anyone with the link\", then `php api/sync-inspection-archive.php apply` on the server and check the dry run lists index entries for every state. Until then the nightly sync drops the archive index of every scraper folder (old 3.3 item 6).",
        "ask": "Have you shared \"KOP Inspection Reports\" by link and run the archive sync?",
+       "date": "2026-10-17",
        "hash": "579eef2f40fb"
       },
       {
@@ -31,6 +32,7 @@
        "lead": "Severe findings scan cron",
        "text": "**Severe findings scan cron** (2026-09-29). Add the line in `docs/state-inspection-reports/README.md` in cPanel > Cron Jobs; send the first lines of `/home/kidsover/logs/inspection-highlights-scan.log`.",
        "ask": "Is the severe findings scan cron in? Paste the first lines of its log.",
+       "date": "2026-09-29",
        "hash": "210b4efa00c0"
       },
       {
@@ -38,6 +40,7 @@
        "lead": "Monthly Unsilenced check cron",
        "text": "**Monthly Unsilenced check cron** (2026-09-30). Add as is: `0 4 1 * * cd /home/kidsover/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php api/list-unsilenced-files.php restart --check --minutes=120 >> /home/kidsover/logs/unsilenced-check.log 2>&1`. On its mail, ask a session for the rebuild (old 2, item 10).",
        "ask": "Is the monthly Unsilenced check cron line added?",
+       "date": "2026-09-30",
        "hash": "2e9759b3432d"
       },
       {
@@ -45,6 +48,7 @@
        "lead": "News discovery crontab",
        "text": "**News discovery crontab** (2026-10-13). (a) the 13:30 line loses `--no-facilities`; (b) the 01:30 line gets `--recency 30d` for one night, then loses it; (c) optional: drop `AI_PROVIDER=groq` from both; (d) optional: a third line at 07:30 (old 3.8, old 3.16). Read 2026-10-23: (a) and (c) are done, but the 01:30 line still has `--recency 30d`, weeks after its one night.",
        "ask": "Have you taken `--recency 30d` off the 01:30 discovery line, and do you want (d)?",
+       "date": "2026-10-23",
        "hash": "3860accb98ff"
       },
       {
@@ -52,6 +56,7 @@
        "lead": "Drive Sync schedule",
        "text": "**Drive Sync schedule** (2026-10-17). Keep the nightly `15 3 * * *`, or `*/15 * * * *` for documents within 15 minutes.",
        "ask": "Drive Sync: keep it nightly, or every 15 minutes?",
+       "date": "2026-10-17",
        "hash": "0b9d63fcb706"
       },
       {
@@ -59,6 +64,7 @@
        "lead": "PDF covers",
        "text": "**PDF covers** (2026-09-29: 177 left). [regenerate-pdf-previews.php?apply=1](https://kidsoverprofits.org/wp-content/themes/child/api/regenerate-pdf-previews.php?apply=1) until it reports 0.",
        "ask": "Has the PDF covers tool reported 0 left?",
+       "date": "2026-09-29",
        "hash": "ce95e3e5e666"
       },
       {
@@ -66,6 +72,7 @@
        "lead": "Staff \"Former\" passes",
        "text": "**Staff \"Former\" passes** (2026-10-17, both with exact undo, dry runs done): on the server `php api/fix-staff-unconfirmed.php apply` (2,651 entries on 226 open programs) and `php api/fix-wiki-staff-former.php apply` (29 wiki entries on 21 records).",
        "ask": "Have you run the two staff \"Former\" passes on the server (dry runs are done)?",
+       "date": "2026-10-17",
        "hash": "d8b20cd4679a"
       },
       {
@@ -73,6 +80,7 @@
        "lead": "Search Console",
        "text": "**Search Console** (2026-10-15). Grant Site Kit the Search Console permission (Settings > Connected services), or export Performance and \"Why pages aren't indexed\" to Sheets. Then delete `~/kop-gsc.json` and `~/kop-gsc.err` on the server.",
        "ask": "Search Console: grant Site Kit the permission, or export the two reports to Sheets?",
+       "date": "2026-10-15",
        "hash": "e974d1b6e621"
       },
       {
@@ -80,6 +88,7 @@
        "lead": "Small cleanups",
        "text": "**Small cleanups.** Delete the two tokens made under the old GitHub account (github.com/settings/personal-access-tokens); remove the duplicate `public_html/.env`; delete comment 453 on [/hyde/](https://kidsoverprofits.org/hyde/) (a staging pingback); clear the leftover `wpdl_anonymous_submissions` row or drop the table; optional: ask NixiHost to purge `SUB-2025-YLVUY0CL` from backups. Read 2026-10-23: comment 453 is in the trash; `public_html/.env` and the one `wpdl_anonymous_submissions` row are still there.",
        "ask": "Which of the five small cleanups are done?",
+       "date": "2026-10-23",
        "hash": "30496a74fb03"
       },
       {
@@ -87,6 +96,7 @@
        "lead": "State Lists upload",
        "text": "**State Lists upload** (2026-10-05). Ask a session for `tmp/state-lists/state-lists.json`, upload it to `~/kop-import/state-lists/` (make the folder beside `kop-import/gdocs`), then review at [KOP Tools > State Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-state-lists).",
        "ask": "Ready to upload the State Lists file? Say so and a session prepares it.",
+       "date": "2026-10-05",
        "hash": "23d2342513f4"
       },
       {
@@ -94,6 +104,7 @@
        "lead": "Google Docs export, last two sheets",
        "text": "**Google Docs export, last two sheets** (2026-10-01). Ask a session for a fresh `tmp/gdocs/export.gs`, paste it at script.google.com and Run once more (\"TTI Database - Master\" and the 2014 analysis sheet hit Google's rate limit).",
        "ask": "Want a fresh export script to rerun the last two Google Sheets?",
+       "date": "2026-10-01",
        "hash": "13b511682e2c"
       },
       {
@@ -101,6 +112,7 @@
        "lead": "Folders on no page",
        "text": "**Folders on no page** (2026-10-14). Link \"Hyde\" (19) to Hyde School (297), \"ANASAZI\" (214) to Anasazi Foundation (5659) and \"Agape Boarding School\" (7815) to Agape Baptist Academy (4819) with `api/link-folders.php`, or move the files with the tile pencil.",
        "ask": "Link the Hyde, ANASAZI and Agape folders to their records?",
+       "date": "2026-10-14",
        "hash": "312e706de23c"
       },
       {
@@ -108,6 +120,7 @@
        "lead": "Billings Clinic testimony",
        "text": "**Billings Clinic testimony** (2026-09-30). In the [admin data form](https://kidsoverprofits.org/admin-data/), providers tab, MONTANA PROVIDERS > Survivor Testimony: delete the stray paragraph \"Medication\", tick \"OK to publish\", save.",
        "ask": "Have you removed \"Medication\" and published the Billings Clinic testimony?",
+       "date": "2026-09-30",
        "hash": "08649fd7c24a"
       },
       {
@@ -115,6 +128,7 @@
        "lead": "Featured report notes",
        "text": "**Featured report notes** (2026-09-18). Add a `featured_note` to the two featured UHS of Provo Canyon reports in [manage-featured-inspections.php](https://kidsoverprofits.org/wp-content/themes/child/api/manage-featured-inspections.php). Read 2026-10-23: no inspection report is marked featured any more (`inspection_reports.featured = 1` matches none).",
        "ask": "No report is featured now: feature the two UHS of Provo Canyon reports again with notes, or drop this?",
+       "date": "2026-10-23",
        "hash": "86b80ce01120"
       }
      ]
@@ -129,6 +143,7 @@
        "lead": "PA rerun with OCR version 2",
        "text": "**PA rerun with OCR version 2**: `python pa_scraper.py --full` (~5,750 documents, ~5.5 s a page, needs 1.5 GB free). Replaces the 164 waiting 2012-17 PA findings (old 3.3 item 5).",
        "ask": "Have you rerun the PA scraper with OCR version 2 (--full)?",
+       "date": "",
        "hash": "8ccc4f813d23"
       },
       {
@@ -136,6 +151,7 @@
        "lead": "Backfills",
        "text": "**Backfills**: MN with Chrome closed (`py -3 scrapers/mn_scraper.py --backfill-pdfs`, ~20 min); CA is the owner's call (30,885 reports: sync the mirror, then `py -3.14 ca_scraper.py --backfill-pdfs`). Fixed 2026-10-20 in kop-pipeline `c228130`: CCL's end-of-list answer (HTTP 400 \"Index out of range\") had made every facility count as unfinished, so each run started over. CCL now takes ~1 minute a report page, so the whole walk is closer to 3 weeks than 3-5 days; it resumes, so it can run in evening stretches. GA, TX and CT were started 2026-10-17: confirm they finished.",
        "ask": "Did GA, TX and CT finish, is MN done, and do you want the three-week CA backfill?",
+       "date": "2026-10-20",
        "hash": "c79f475909c2"
       },
       {
@@ -143,6 +159,7 @@
        "lead": "First posts, then publish the page",
        "text": "**First posts, then publish the page** (run from the launcher): New Hampshire, Wyoming, Idaho, Maine, Ohio, Iowa, Maryland, South Dakota, Virginia (run VDSS again first, and `va_scraper.py --no-post --source dbhds` once from cache), Hawaii, West Virginia (after 2.4's decisions). Colorado: blocked (2026-10-20). The dashboard's View Data command (`get-view-data-dialog-tab-pres-model`) never answers, though every other call answers in under 2 s; it is the only way to the lists and the citation text. See `plans/colorado.md` Status. Next: one View Data try in real Chrome on an evening, or a Colorado Open Records Act request to CDPHE for the inspection and citation data.",
        "ask": "Which of these states have you run, and should Colorado get a records request?",
+       "date": "2026-10-20",
        "hash": "686c17c24145"
       },
       {
@@ -150,6 +167,7 @@
        "lead": "Regular runs",
        "text": "**Regular runs**: Oklahoma at least monthly; New Hampshire, Wyoming and Ohio monthly; Hawaii quarterly; WA once with `wa_scraper.py --full` and `KOP_DATA_API_KEY`.",
        "ask": "Are the regular scraper runs up to date (OK, NH, WY, OH, HI, WA)?",
+       "date": "",
        "hash": "418dd0d6334d"
       },
       {
@@ -157,6 +175,7 @@
        "lead": "Unsilenced backup",
        "text": "**Unsilenced backup** (once I: has room, ~2.5 days, 118 GB): start `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline; keep C: above 4 GB. Then ask a session for the titles and rebuild (old 3.11).",
        "ask": "Does I: have room for the 118 GB Unsilenced backup yet, and has it started?",
+       "date": "",
        "hash": "68b3de291661"
       },
       {
@@ -164,6 +183,7 @@
        "lead": "Document finder retries",
        "text": "**Document finder retries**: `py tti_doc_finder.py upload --retry-failed` (1,783 failed, 383 waiting).",
        "ask": "Have you run the document finder retries?",
+       "date": "",
        "hash": "406d311e05af"
       },
       {
@@ -171,6 +191,7 @@
        "lead": "Scraper launcher window",
        "text": "**Scraper launcher window**: open it and confirm the size and Output pane look right.",
        "ask": "Do the launcher window's size and Output pane look right?",
+       "date": "",
        "hash": "af45252dd119"
       },
       {
@@ -178,6 +199,7 @@
        "lead": "MN report filed under two licences",
        "text": "**MN report filed under two licences** (2026-10-20): the 2026-10-18 MN run filed the 2024-12-02 correction order `LLO_471879` (licence 1074484, 180 Degrees Inc) under 180 Degrees Hope House (1086169) too, as `MN-1086169-002`. Check whether DHS lists it on both licence pages; if not, fix `mn_scraper.py`'s matching and take the copy off Hope House on /mn-reports/.",
        "ask": "Does DHS list order LLO_471879 on both licence pages, or only 180 Degrees Inc?",
+       "date": "2026-10-20",
        "hash": "fcb944d2f7cf"
       },
       {
@@ -185,6 +207,7 @@
        "lead": "`scrapers/test_scrapers.py` has 5 stale failures",
        "text": "**`scrapers/test_scrapers.py` has 5 stale failures** (2026-10-20, all from before the CA/PA fixes in kop-pipeline `f22040c`): the CA payload test unpacks two values from `scrape()` (it returns three now), the Oregon date format, `smart_title_case` (two cases) and the data structure check. Bring the tests up to the code. Run them with `py -3`; plain `python` lacks `requests` and `pymupdf`.",
        "ask": "OK for a session to bring the five stale scraper tests up to the code?",
+       "date": "2026-10-20",
        "hash": "6d61efe4fac9"
       }
      ]
@@ -201,6 +224,7 @@
        "lead": "Wiki links",
        "text": "**Wiki links**: \"Link every clear match\", then pick the 25 (old 3.12 step 1).",
        "ask": "Have you linked every clear wiki match and picked the 25?",
+       "date": "",
        "hash": "208bfa2a742e"
       },
       {
@@ -208,6 +232,7 @@
        "lead": "Data audit",
        "text": "**Data audit**: the high-confidence button first, then the rest; the card `clearview-horizon-2026-10-14`; open a source before approving `status_years-10371` or `person_common-34`. By-hand steps it lists: split Jenny Jones off person #181, two Glenn Bender role dates, the Kelly Cole consultant record, map line p0439 in `network-overrides.json`, the record merges (old 3.13).",
        "ask": "How far are you through the data audit queue?",
+       "date": "2026-10-14",
        "hash": "7b400026b1cc"
       },
       {
@@ -215,6 +240,7 @@
        "lead": "Record cleanup",
        "text": "**Record cleanup**: check Alternative Youth Adventures, Canyon State Academy and Boulder Creek Academy before tidying many; merge people with two ids at Merge People first (old 3.36).",
        "ask": "Have you checked the three records and merged the two-id people?",
+       "date": "",
        "hash": "0a543147db70"
       },
       {
@@ -222,6 +248,7 @@
        "lead": "Write-ups to approve",
        "text": "**Write-ups to approve**: approve the first few by hand to judge the drafts (see 2.4).",
        "ask": "After approving a few write-ups by hand, are the drafts good enough?",
+       "date": "",
        "hash": "6d505c77718d"
       },
       {
@@ -229,6 +256,7 @@
        "lead": "Rules from documents",
        "text": "**Rules from documents** (359 cards), **Company milestones** (114; \"Check\" lines carry caveats), **Federal funding** (\"Add every high-confidence match\" first), **Nonprofit tax filings** and **Business filings** (bulk link first, then \"Check the match\").",
        "ask": "How far are you through these five queues?",
+       "date": "",
        "hash": "db3b218a1f7c"
       },
       {
@@ -236,6 +264,7 @@
        "lead": "Map Years",
        "text": "**Map Years** (250 sourced years) and **Map Renames** (50 with a sourced year) at KOP Data Tools.",
        "ask": "Have you worked through Map Years and Map Renames?",
+       "date": "",
        "hash": "2d62c0a1acd7"
       },
       {
@@ -243,6 +272,7 @@
        "lead": "Woodbury Reports",
        "text": "**Woodbury Reports** pages ([2,208 candidates](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-woodbury-reports)): Articles first, then News items; \"No record yet\" is a lead list.",
        "ask": "How far are you through the Woodbury Reports pages?",
+       "date": "",
        "hash": "73494f4b4cab"
       },
       {
@@ -250,6 +280,7 @@
        "lead": "Records made from descriptions",
        "text": "**Records made from descriptions**: Facilities from News created these from a description, not a name (it no longer does, 2026-10-20). Remove each or give it its real name: #100554 \"youth treatment facility\" (UT), #100610 \"girls' boot camp at Plankinton\" (SD; State Training School in Plankinton is #100424), #100383 \"private home in South Hobart, Tasmania\", #100401 \"group home in Centre Wellington\", #100508 \"People\" (OK). Open each at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-facilities-from-news or its facility page.",
        "ask": "For each of the five records: remove it, or what is its real name?",
+       "date": "2026-10-20",
        "hash": "c1c7eb19fbf2"
       },
       {
@@ -257,6 +288,7 @@
        "lead": "Program Homes",
        "text": "**Program Homes**: 139 suggested programs and the [Companies that are one program](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-program-homes&tab=companies) tab (keep NeuroRestorative with \"It is a real company\").",
        "ask": "Have you worked through Program Homes and its Companies tab?",
+       "date": "",
        "hash": "31debc0abc83"
       },
       {
@@ -264,6 +296,7 @@
        "lead": "Merge Duplicates, Three Springs/Sequel",
        "text": "**Merge Duplicates, Three Springs/Sequel** (keep first, earlier name second, as a rename): #100076 <- #9656 (or \"Program and its academic program\"), #100078 <- #9657, #13640 <- #100077, #11098 <- #9654. Check first: #9648 vs #9639 (Duck River); \"Three Springs New Directions\" on #100076 and #13678; \"Three Springs of North Carolina\" on #9637 and #11903 (old 3.7).",
        "ask": "Have you merged the four Three Springs/Sequel pairs as renames?",
+       "date": "",
        "hash": "b99eb13c5128"
       },
       {
@@ -271,6 +304,7 @@
        "lead": "Inspection Links",
        "text": "**Inspection Links**: PA (30 records, 48 same-town pairs ticked), then the near misses named for MI, OK, NH, WY, ID, ME and OH (old 3.3 item 6).",
        "ask": "How far are you through Inspection Links (PA, then the near misses)?",
+       "date": "",
        "hash": "24d6cf305385"
       },
       {
@@ -278,6 +312,7 @@
        "lead": "Serious findings",
        "text": "**Serious findings**: the North Carolina queue (782 pending, none approved), then [13 approved findings to recheck](https://kidsoverprofits.org/wp-content/themes/child/api/review-inspection-highlights.php?status=approved&ids=230,1285,1123,1306,561,1307,616,859,875,114,199,408,894).",
        "ask": "How far are you through the NC findings and the 13 to recheck?",
+       "date": "",
        "hash": "8ed10e69f3f5"
       },
       {
@@ -285,6 +320,7 @@
        "lead": "News clippings trial",
        "text": "**News clippings trial**: articles #10491-#10500 at [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/?type=news); untick places that are not programs. Then say go for the other 44 (3.6).",
        "ask": "Do the 10 trial clippings look right, and should the other 44 go ahead?",
+       "date": "",
        "hash": "0715fe9eaa79"
       },
       {
@@ -292,6 +328,7 @@
        "lead": "Industry PR refiling",
        "text": "**Industry PR refiling**: 148 rejected news items (4 done).",
        "ask": "How far are you through the 148 rejected industry PR items?",
+       "date": "",
        "hash": "f3ed87cc127a"
       },
       {
@@ -299,6 +336,7 @@
        "lead": "Research library",
        "text": "**Research library**: rate relevance tiers in the [research library](https://kidsoverprofits.org/researchreports/) editor. (Research tag proposals wait for the review screen in 3.6.)",
        "ask": "Have you rated the research library's relevance tiers?",
+       "date": "",
        "hash": "e1a23f73363a"
       },
       {
@@ -306,6 +344,7 @@
        "lead": "Directory Editor, \"Same name or no name\" tab",
        "text": "**Directory Editor, \"Same name or no name\" tab**: company records whose card another record of the same name holds; merge them one by one.",
        "ask": "Have you merged the \"Same name or no name\" company records?",
+       "date": "",
        "hash": "c7e363de4726"
       },
       {
@@ -313,6 +352,7 @@
        "lead": "Card Add-ons",
        "text": "**Card Add-ons**: tick the add-ons per queue at [KOP Tools > Card Add-ons](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-card-addons).",
        "ask": "Have you picked the add-ons for each queue?",
+       "date": "",
        "hash": "8531a901a311"
       }
      ]
@@ -327,6 +367,7 @@
        "lead": "Held facts",
        "text": "**Held facts**: raise the write-up batch (3 drafts an hour; AI budget `KOP_AI_BACKGROUND_SHARE`) or not; and which other writers count as \"facts\" for the hold rule (company/consultant filings, young adult facts, wiki staff on approval, Rules from documents, federal funding, Drive Docs links, data audit) (old 3.31).",
        "ask": "Raise the write-up batch above 3 an hour? Which other writers count as facts?",
+       "date": "",
        "hash": "061fdda3ead3"
       },
       {
@@ -334,6 +375,7 @@
        "lead": "Wiki updates for entries with no exported draft",
        "text": "**Wiki updates for entries with no exported draft** (~170 of 296): should the site draft their old gaps too (one switch: drop the baseline for entries `update-drafts.json` lacks) (old 3.12 step 6).",
        "ask": "Should the site draft old gaps for the ~170 entries with no exported draft?",
+       "date": "",
        "hash": "8e430df5978b"
       },
       {
@@ -341,6 +383,7 @@
        "lead": "Family Foundation School lawsuits",
        "text": "**Family Foundation School lawsuits** (~33 federal suits, 2026): one lawsuit record per case, or one for the litigation listing every docket (old 3.23).",
        "ask": "Family Foundation School: one lawsuit record per case, or one for all of it?",
+       "date": "",
        "hash": "e17892e16de6"
       },
       {
@@ -348,6 +391,7 @@
        "lead": "Scraper privacy and scope",
        "text": "**Scraper privacy and scope**: NH, The Ridge RTC 2025-12-15 statement; WY, Meadowlark 2024-04-04 notice (false positive); MD, post the 15 summaries with initials cut out?; WV, the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`; CO, the 9 unsure facilities; NV, go-ahead to delete the junk reports \"1\", \"2\", \"3\", \"...\" on /nv-reports/; OR, a records request for complaint investigations and licensing actions.",
        "ask": "Your call on each of the seven state questions (NH, WY, MD, WV, CO, NV, OR)?",
+       "date": "2025-12-15",
        "hash": "0d9b4c889d1d"
       },
       {
@@ -355,6 +399,7 @@
        "lead": "Site content",
        "text": "**Site content** (old 2, items 11-15): hub editor content (the five recommendations); unpublish the dev posts `facility-form-test`, `data-organizer`, `data`, `data-analysis`, `arizona-adhs-inspections`; 301 the 75 News posts to their feed entries; per lawsuit post, 301 or keep; deactivate Code Snippets snippet 6 (OG Image).",
        "ask": "Your call on each of the five site content items?",
+       "date": "",
        "hash": "3634fa76edd4"
       },
       {
@@ -362,6 +407,7 @@
        "lead": "Provo Canyon School profile",
        "text": "**Provo Canyon School profile** ([post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)): suspended or Closed? Then publish.",
        "ask": "Provo Canyon School: suspended or Closed?",
+       "date": "",
        "hash": "45f5d1f90555"
       },
       {
@@ -369,6 +415,7 @@
        "lead": "Article type labels",
        "text": "**Article type labels**: print the list's labels (\"Lawsuit Article\") on /news/, state and country pages instead of the raw value?",
        "ask": "Show readable labels (\"Lawsuit Article\") instead of the raw value?",
+       "date": "",
        "hash": "70ea1f5af7b2"
       },
       {
@@ -376,6 +423,7 @@
        "lead": "Network map judgement calls",
        "text": "**Network map judgement calls** in `tmp/network-qa.md` (rebuilt by every build); the six curated aliases naming another era (#13927, #10602, #11361, #11462, #11355, #12621); investors as their own map kind reading the Investors table, or added by hand.",
        "ask": "Your calls on the map QA list, the six aliases, and how investors get on the map?",
+       "date": "",
        "hash": "bdeef6ad31da"
       },
       {
@@ -383,6 +431,7 @@
        "lead": "The misplaced 1933 line",
        "text": "**The misplaced 1933 line** on /idd-timeline/ (\"Initially served 'mental defectives'\"): Devereux or the Southard School.",
        "ask": "The 1933 line on /idd-timeline/: Devereux or the Southard School?",
+       "date": "",
        "hash": "8057c3fd7f9e"
       },
       {
@@ -390,6 +439,7 @@
        "lead": "Not built, the owner's call",
        "text": "**Not built, the owner's call**: an AI pass smoothing the About prose; tighten the Rules-from-documents cap if long cards bother.",
        "ask": "Want an AI pass smoothing the About prose, or a tighter Rules cap?",
+       "date": "",
        "hash": "3ca69db75b61"
       },
       {
@@ -397,6 +447,7 @@
        "lead": "SEO keyphrase wording",
        "text": "**SEO keyphrase wording**: which words people search for. Facility name alone, or with \"abuse\" / \"reviews\"; \"troubled teen\" vs \"residential treatment\" for state hubs. Blocks 4.7 item 9. Answer it in the \"Keyphrase wording\" box at KOP Tools > SEO Descriptions (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts), e.g. `{name} abuse`. (People are settled: name + role or employer.)",
        "ask": "Facility keyphrase: name alone, or with \"abuse\" / \"reviews\"? State hubs: \"troubled teen\" or \"residential treatment\"?",
+       "date": "",
        "hash": "5eab39c3e564"
       },
       {
@@ -404,6 +455,7 @@
        "lead": "Linden Oaks (IL, #100402): reject data submissions #56, #57 and #58",
        "text": "**Linden Oaks (IL, #100402): reject data submissions #56, #57 and #58** at https://kidsoverprofits.org/admin-submissions/?type=data (note: \"done by hand 2026-10-21\"). Never approve them: #56 would put the three notes back, #57 would add its request as a note, #58 would write its sentence into the operator field. What they asked is done (2026-10-21, checked live): the three group-therapy and level-system notes are off, the Arabella House line is out of \"Also known as\" (it stays in the history note), the Charter link is dropped (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/227d22eeb19ba2573518daf5269a48b6ff622386), and Arabella House is young adult program #12, run by Linden Oaks, closed 2012 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54511cf3afa48cafd5864bea35933c95906fcf7c). #52 was approved from the admin account on 2026-10-05; nothing skipped review. The \"operated by\" wording for past-only companies is fixed (2026-10-21, checked live on https://kidsoverprofits.org/facility/lakeside-behavioral-health-system-tn/ and the Tennessee feed): 36 records with no currentOperator and only 'past' links now read \"formerly run by X\", \"Former operator\", \"Other programs of its former operator, X\", no parentOrganization, and the state/country cards list X under Past operators (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/5d3d7ba294c04509f6fa4216f23501bca59b0b85). Only the rejections above are left.",
        "ask": "Have you rejected data submissions #56, #57 and #58?",
+       "date": "2026-10-21",
        "hash": "bc2ef45f2775"
       }
      ]
@@ -418,6 +470,7 @@
        "lead": "Parent company histories",
        "text": "**Parent company histories**: 35 drafts on their [/operator/](https://kidsoverprofits.org/operator/) pages (Sequel TSI rewritten 2026-10-14, seed v11). Read against the sources, fix with the pencil, Publish. Record questions they raised are in old 2, item 19 and RESEARCH-TASKS.md.",
        "ask": "How many of the 35 company histories have you read and published?",
+       "date": "2026-10-14",
        "hash": "5f58accb6982"
       },
       {
@@ -425,6 +478,7 @@
        "lead": "Related industries pages",
        "text": "**Related industries pages** (5 drafts): check for older Page Text edits overriding the new sections, read, publish. Owner checks: the 13-year-old who died after leaving ResCare's Woodward Children's Home (March 15, 2017) is not in the memorial; Christy Scheck's memorial date may be two days early (old 2, item 21).",
        "ask": "Have you read and published the five related industries pages?",
+       "date": "",
        "hash": "615026951c5b"
       },
       {
@@ -432,6 +486,7 @@
        "lead": "The Brochure and the Record",
        "text": "**The Brochure and the Record** (seed v7): read and publish (old 3.4).",
        "ask": "Have you read and published The Brochure and the Record?",
+       "date": "",
        "hash": "8b8d3357c762"
       },
       {
@@ -439,6 +494,7 @@
        "lead": "Long-form articles",
        "text": "**Long-form articles**: which sections to wrap in `[kop_section]` (15B); summaries, \"Why this matters\", era tags (15C-E); Advocacy History, Corporatization, Lawsuits (18A-C) (old 3.4).",
        "ask": "Which long-form article sections should be wrapped, summarised and tagged?",
+       "date": "",
        "hash": "e2ef5c346f1a"
       }
      ]
@@ -453,6 +509,7 @@
        "lead": "Try the app on a phone",
        "text": "**Try the app on a phone** (Expo Go, `npx expo start` in `kids-over-profits-mobile`): a facility with incidents and staff, the Map tab (search, Back, the drawer, Key/List/Timeline), Send (each kind once, check it reaches the Review inbox), Donate, a search for \"Copper Canyon\".",
        "ask": "Have you tried the app on a phone? What broke?",
+       "date": "",
        "hash": "107bf0113e54"
       },
       {
@@ -460,6 +517,7 @@
        "lead": "Accounts and builds",
        "text": "**Accounts and builds**: an Expo account and `eas build --profile preview --platform android`; Apple Developer (99 USD a year) and Google Play (25 USD) only to publish; ship an EAS update or store build.",
        "ask": "Make an Expo account and a test build now, and the paid store accounts later?",
+       "date": "",
        "hash": "742dcb37ddfd"
       },
       {
@@ -467,6 +525,7 @@
        "lead": "Artwork and listing",
        "text": "**Artwork and listing**: icon, splash, adaptive icon; short and long descriptions, screenshots, age rating; check `/privacy-policy/` covers the app.",
        "ask": "Who makes the icon, splash and store listing, and does the privacy policy cover the app?",
+       "date": "",
        "hash": "d37c851e9284"
       },
       {
@@ -474,6 +533,7 @@
        "lead": "Site links that open the app",
        "text": "**Site links that open the app**: after the first real build, the Apple Team ID and the Android signing SHA-256, for a session to ship the two `/.well-known/` files.",
        "ask": "After the first build: what are the Apple Team ID and the Android signing SHA-256?",
+       "date": "",
        "hash": "554838d8b957"
       },
       {
@@ -481,6 +541,7 @@
        "lead": "Send to KOP extension",
        "text": "**Send to KOP extension**: load it unpacked and send one page; publish `dist/send-to-kop-<version>.zip` to the Chrome Web Store (5 USD) and Firefox add-ons; then a session puts the store links on `/send/`. Safari needs a Mac with Xcode.",
        "ask": "Have you tried the extension, and should it go on the Chrome and Firefox stores?",
+       "date": "",
        "hash": "6e2efa15f475"
       }
      ]
@@ -503,6 +564,7 @@
        "lead": "Review inbox",
        "text": "**Review inbox**: the page and dropdowns up in a second or two, counts filling in after; cron `kop_review_inbox_counts_cron` in WP-Cron. Page and post drafts: Preview, Publish then Back to draft, Schedule.",
        "ask": "",
+       "date": "",
        "hash": "87556a60de88"
       },
       {
@@ -510,6 +572,7 @@
        "lead": "Record cleanup",
        "text": "**Record cleanup**: the first open of [Record cleanup](https://kidsoverprofits.org/admin-submissions/) works out the cards (~30 s).",
        "ask": "",
+       "date": "",
        "hash": "5ce7eb26237e"
       },
       {
@@ -517,6 +580,7 @@
        "lead": "Write-ups",
        "text": "**Write-ups**: approve one Woodbury Facts item; it shows under \"Approved, held for the write-up\" and in the admin-only box on its facility page (not logged out); \"Write it with AI\", edit, Approve, Undo.",
        "ask": "",
+       "date": "",
        "hash": "612da6408ae9"
       },
       {
@@ -524,6 +588,7 @@
        "lead": "Records reach pages at once",
        "text": "**Records reach pages at once**: approve one article, its facility page shows it; option `kop_resync_keep_underived` is 1.",
        "ask": "",
+       "date": "",
        "hash": "ca317995ef43"
       },
       {
@@ -531,6 +596,7 @@
        "lead": "Wiki auto updates",
        "text": "**Wiki auto updates**: option `kop_wiki_auto_last` shows ~296 baselines, `left` 0, no `errors`; a card appears after the next change to a linked program.",
        "ask": "",
+       "date": "",
        "hash": "0287e90591ec"
       },
       {
@@ -538,6 +604,7 @@
        "lead": "Status columns",
        "text": "**Status columns**: over SSH, `SHOW COLUMNS FROM lawsuits LIKE 'status'` is varchar(40) and option `kop_status_columns_varchar` is '1'. [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists) at 390 and 1280 px: add a test choice, see it, Undo.",
        "ask": "",
+       "date": "",
        "hash": "7fa0317e2d31"
       },
       {
@@ -545,6 +612,7 @@
        "lead": "Card Fields and filing on any record",
        "text": "**Card Fields and filing on any record**: open the inbox once, then [Card Fields](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-card-fields); on a Websites sent in card, Move to Materials and links on a company, Undo. On a News card, \"Connect a record\" to a consultant (see it on [/referrers-educational-consultants/](https://kidsoverprofits.org/referrers-educational-consultants/)), Take off. At [/admin-submissions/](https://kidsoverprofits.org/admin-submissions/): Website as a consultant's, Resource for a company, each with Undo move.",
        "ask": "",
+       "date": "",
        "hash": "1a88ab6ae1f4"
       },
       {
@@ -552,6 +620,7 @@
        "lead": "Card add-ons",
        "text": "**Card add-ons**: on a Nonprofit tax filings card, \"Link to a company\", pick \"New company named ...\", check its note and folder, Undo from the Linked tab.",
        "ask": "",
+       "date": "",
        "hash": "357823e4f188"
       },
       {
@@ -559,6 +628,7 @@
        "lead": "Admin kit screens",
        "text": "**Admin kit screens**: [Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-drive-docs), [Fornits](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-fornits), [Woodbury Facts](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-woodbury-facts): add one, Undo, cards stack on a phone.",
        "ask": "",
+       "date": "",
        "hash": "2015daa8e825"
       },
       {
@@ -566,6 +636,7 @@
        "lead": "Volunteer project",
        "text": "**Volunteer project**: at [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers) a 10-item serious-findings project for yourself; answer three in a private window, \"Check their calls\", Apply one; turn the test volunteer off.",
        "ask": "",
+       "date": "",
        "hash": "e283a85b7f06"
       },
       {
@@ -573,6 +644,7 @@
        "lead": "Pencils",
        "text": "**Pencils**: at [San Marcos Treatment Center](https://kidsoverprofits.org/facility/san-marcos-treatment-center-tx/), the era pencil, \"Renamed, not closed\" then Undo, a Fornits thread retitled, an Unsilenced file's title and type. At [Provo Canyon School documents](https://kidsoverprofits.org/facility/provo-canyon-school-ut/#documents): no stray pencils, \"Select documents\", move a few, Undo; the same on a company page.",
        "ask": "",
+       "date": "",
        "hash": "95bdf0a23507"
       },
       {
@@ -580,6 +652,7 @@
        "lead": "Lighter pages",
        "text": "**Lighter pages**: [Provo Canyon School](https://kidsoverprofits.org/facility/provo-canyon-school-ut/) in a private window: open \"more articles\" and the Unsilenced groups, pick a document type, print preview.",
        "ask": "",
+       "date": "",
        "hash": "cc65b757d353"
       },
       {
@@ -587,6 +660,7 @@
        "lead": "Timelines",
        "text": "**Timelines**: [Sequel TSI](https://kidsoverprofits.org/operator/sequel-tsi/), [UHS](https://kidsoverprofits.org/operator/universal-health-services/) (filters, hover and tap cards) and [Sedona Sky Academy](https://kidsoverprofits.org/facility/sedona-sky-academy-az/). Sequel TSI's history draft shows its tables, at 390 px too.",
        "ask": "",
+       "date": "",
        "hash": "3462668320d9"
       },
       {
@@ -594,6 +668,7 @@
        "lead": "Names then on company pages",
        "text": "**Names then on company pages**: [Three Springs](https://kidsoverprofits.org/operator/three-springs-inc/) lists \"Three Springs of Courtland\" (now Brighter Path Courtland); Sequel TSI lists \"Sequel TSI Courtland\".",
        "ask": "",
+       "date": "",
        "hash": "f89104995998"
       },
       {
@@ -601,6 +676,7 @@
        "lead": "Investors",
        "text": "**Investors**: [Investors](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors) lists the five imported (check each guessed role and years: Patriot Capital's start, Pine Tree's role); the Investors line on Sequel TSI and one of its programs; link one, Undo; \"Altamont\" in the header search and at [/?s=altamont](https://kidsoverprofits.org/?s=altamont).",
        "ask": "",
+       "date": "",
        "hash": "210f5ef9cd50"
       },
       {
@@ -608,6 +684,7 @@
        "lead": "Directory Editor",
        "text": "**Directory Editor**: [the screen](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-directory-editor): hide a company, it leaves [/tti-program-index/](https://kidsoverprofits.org/tti-program-index/), Undo; \"Every field\" and \"Edit program\" open. Hide one, save it in the admin data form, check `operator.directoryHidden` survives. On the directory: fold two alternate names, Undo; Set company on a row, check the listing and the facility page, Undo.",
        "ask": "",
+       "date": "",
        "hash": "88a4e155cb3e"
       },
       {
@@ -615,6 +692,7 @@
        "lead": "Drive Sync",
        "text": "**Drive Sync**: [Sync now](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-drive-sync) turns to \"Reading the Drive folder...\" then a report. If it never starts, see `~/logs/drive-sync.log` and fall back to a WP-Cron single event.",
        "ask": "",
+       "date": "",
        "hash": "c14662e21013"
       },
       {
@@ -622,6 +700,7 @@
        "lead": "People",
        "text": "**People**: open KOP Tools > People once (makes the tables); after the hourly sync, a person on two programs shows the same \"Also worked at\" on both; tick \"Became an educational consultant\" on one, check the facility page; add a relationship between two map people, check both pages and the next map build draws it.",
        "ask": "",
+       "date": "",
        "hash": "a8f7ce68f8f2"
       },
       {
@@ -629,6 +708,7 @@
        "lead": "Data entry changes of 2026-10-14 and 10-17",
        "text": "**Data entry changes of 2026-10-14 and 10-17**: KOP Tools > Document Types shows the 7 staff-ideology documents and the editor's notes, retype waiting AI guesses; paste court-order text at /submit-lawsuit/, KOP Tools > Lawsuits and a pending lawsuit card; \"Mark as lawsuit news\" then Undo; Review inbox > Conflicts (Kind: Type) \"Both are right\" then Undo; tick two types on a Facilities from News card.",
        "ask": "",
+       "date": "2026-10-14",
        "hash": "0f1872134940"
       },
       {
@@ -636,6 +716,7 @@
        "lead": "Discovery and AI",
        "text": "**Discovery and AI**: the nightly discovery log shows \"daily list: N records\", no 503s and no cron \"failed\" line on a quota night; [AI Usage](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-ai-usage) names every job (unnamed ones go in `kop_ai_usage_jobs()`). Data audit Waiting and the Conflicts section counted again.",
        "ask": "",
+       "date": "",
        "hash": "b988e737bf51"
       },
       {
@@ -643,6 +724,7 @@
        "lead": "Inspections",
        "text": "**Inspections**: a VA card at Review inbox > Serious violations opens a Drive PDF.",
        "ask": "",
+       "date": "",
        "hash": "f8aca3e526ec"
       },
       {
@@ -650,6 +732,7 @@
        "lead": "Rich Results Test",
        "text": "**Rich Results Test** on a facility and a company page once Google recrawls them.",
        "ask": "",
+       "date": "",
        "hash": "212a4860d934"
       },
       {
@@ -657,6 +740,7 @@
        "lead": "Volunteer messages and research projects",
        "text": "**Volunteer messages and research projects**: open [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers) once (makes `kop_vol_messages`, `kop_vol_answers` and the projects' new `detail` column); make a small \"When did these programs close?\" project for yourself with a state, open its link in a private window, answer one with a link (it appears waiting in Submissions Review > News), ask a question, answer it under Messages (the menu shows a count, an email arrives), and see the reply marked New on the volunteer page. Mark the answer Used, then close the project.",
        "ask": "",
+       "date": "",
        "hash": "21995a4e5a82"
       },
       {
@@ -664,6 +748,7 @@
        "lead": "\"+ Add new...\" in dropdowns",
        "text": "**\"+ Add new...\" in dropdowns**: on [Investors](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-investors) pick Kind > \"+ Add new...\", type a test kind, Add: it is selected and appears at [Dropdown Lists](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-choice-lists&list=investor-kinds); Undo it there. Also the Status dropdown on the admin lawsuits and legislation pages and the Type dropdowns on Woodbury Facts. Selects not fed by a registered list (publication status, jurisdiction, filters) deliberately have no such option.",
        "ask": "",
+       "date": "",
        "hash": "bc99f1d16bb1"
       },
       {
@@ -671,6 +756,7 @@
        "lead": "Links to our own pages in the text",
        "text": "**Links to our own pages in the text** (inc/content-links.php): logged out, a news post (e.g. [Provo probation](https://kidsoverprofits.org/man-on-probation-after-hitting-student-at-provo-residential-treatment-center/)) links its facility and state in the text and ends with \"Related on Kids Over Profits\" on a sand panel; the [Sequel TSI](https://kidsoverprofits.org/operator/sequel-tsi/) history and a facility page's About link other records; [Wiki feed](https://kidsoverprofits.org/wiki-feed/) titles link to facility pages with an \"Also on\" box under each. First load after deploy builds the name list (~5-10 s, once per 6 h); `check-contrast.py` on one post and the wiki feed; `check-mobile-overflow.py` at 390. Look for a wrong link on 10 posts; report any to the session for a rule.",
        "ask": "",
+       "date": "",
        "hash": "901baaf5b756"
       },
       {
@@ -678,6 +764,7 @@
        "lead": "Volunteers' agreed calls switch",
        "text": "**Volunteers' agreed calls switch**: [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers#kop-vol-auto) shows \"Let agreed calls go through on their own\" as Off; the Volunteers table's agreement rates are unchanged. Turn it On only when you want it; the first ones show under \"Gone through on their own\" with Undo in Recently done.",
        "ask": "",
+       "date": "",
        "hash": "ad70a15b928d"
       },
       {
@@ -685,6 +772,7 @@
        "lead": "Drive Docs news waits for review",
        "text": "**Drive Docs news waits for review** (2026-10-20, [587a4532](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/587a4532)): in [Review inbox > Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox) Add one news link; it shows waiting in [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/), not on the site; within an hour or two the reader fills its summary and date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by \"undo of auto news (2026-10-20)\"). Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.",
        "ask": "The 8,561 taken-back Drive Docs news links: work through them again, or skip them in bulk?",
+       "date": "2026-10-20",
        "hash": "ac2b612c309f"
       },
       {
@@ -692,6 +780,7 @@
        "lead": "Desktop sidebar sticky column",
        "text": "**Desktop sidebar sticky column** (2026-10-21, docs/plan/4.7 item 16): at 1280+ wide, open a post (any https://kidsoverprofits.org/ blog post), https://kidsoverprofits.org/ and a facility page: the newsletter and Donate sit in the side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom. https://kidsoverprofits.org/wp-content/themes/child/js/sidebar-float.js should 404 (deleted by .cpanel.yml). Under 1025 the sidebar follows the content. Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`. On https://kidsoverprofits.org/facility/provo-canyon-school-ut/ at 1100+, the About text runs full width once the At a glance rail ends (it was a 381px strip the whole way down), and About comes before Survivor testimony and History as before.",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "59a6168af56f"
       }
      ]
@@ -720,6 +809,7 @@
        "lead": "News discovery after a week",
        "text": "**News discovery after a week** (from 2026-10-20): approved vs rejected for `auto-discovery via google-news` against the 45 / 109 baseline, `batch-unconfirmed` rows in Scraper finds (any real story?), the cursor and \"AI confirmations\" lines in `~/logs/discovery-2026-10.log`. Then tune `AI_CONFIRM_PER_RUN`, `GN_SUBMIT_EVERY` and the blacklist. If real stories sit in batch-unconfirmed, add \"It is about <name>\" to Scraper finds (old 3.16). Seen 2026-10-21 (from item 3): most batched hits stall before the AI. Each sweep submit step hits `GN resolve: page HTTP 429` after the first resolve or two (01:30 run: 4 of 5 awaiting hits deferred), so they are carried over and only get read on a later run, if they get read at all. Pages that never read (\"Could not fetch article content\") come back every run until PENDING_MAX_ATTEMPTS: ktvb.com (twice, including \"former Lincoln County youth center coordinator accused\", a likely real story), whnt.com (Pathway, Madison County AL), kentucky.com, idahostatesman.com, calmatters.org, georgetown.edu. At the week check: do the 429s ease with a smaller `GN_SUBMIT_EVERY`, and should a page that fails the fetch be sent to the inbox with its headline (or to Scraper finds) instead of being dropped after 4 tries? Also re-read the \"not about ... (AI: ...)\" lines for a turn-down on place once there are more than 3. Checked 2026-10-21 (runs to 18:30 UTC): approved vs rejected since the Oct 13 sweep change is 37 / 24 (+1 waiting), 61%, against 45 / 109 (29%) before. The 429s cost a run's delay, not the story: every link deferred as unresolved resolved at the start of the next run; 1 to 9 a run, and on Oct 21 the first resolve of a step was refused after 50 sweep requests, once after only the 28 topic requests. AI confirmations peak at 18 a run, so `AI_CONFIRM_PER_RUN` = 30 stays. Scraper finds holds 18 batch-unconfirmed rows; one real story (Baltimore Sun, ex-DJS worker, Hickey School, Oct 14, old code) is already held as #10367, so no \"It is about <name>\" is needed yet. 10 of the 18 came from the bare name \"Child and Family Services\" and the Canada base fire from \"Royal Alexandra Hospital\": both are now in `genericQueryNames`. The unreadable pages are blocked for good to the server IP (whnt and calmatters 403 bot wall, georgetown 403, kentucky.com and idahostatesman time out), and about 8 of the 12 are real. Owner's call: they go to Scraper finds (\"Passed, but the page would not open from the server\"), on the first failure, not retried. `GN_SUBMIT_EVERY` 50 -> 25. Sent by hand to the inbox, since they were at attempt 4 and would be dropped before the new path: whnt Pathway escapes, KTVB Lincoln County Youth Center theft, the GAO survey typeform (website). Open: after a few runs, do the 429s ease at 25 (count \"GN resolve: page HTTP 429\" per run against the table above: 1-9)? Read the new `unreadable` rows in Scraper finds and send the real ones (whnt Pathway history, KTVB hearing delay, Oak Creek settlement on archive.ph, Georgetown graves, CalMatters, the Bevin story should land there on the next run).",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "4dcd4a8dab49"
       },
       {
@@ -727,6 +817,7 @@
        "lead": "AI budget",
        "text": "**AI budget**: read AI Usage for each provider's real daily ceiling and set `KOP_AI_DAILY_GEMINI` / `_GROQ`.",
        "ask": "",
+       "date": "",
        "hash": "4f04ad53f659"
       },
       {
@@ -734,6 +825,7 @@
        "lead": "Batch confirmation check",
        "text": "**Batch confirmation check** (from 2026-10-20, d7577bd3): read the \"not about ... (AI: {...})\" lines in `~/logs/discovery-2026-10.log` after two nightly runs. Is discoveryCheck there on every hit (a missing one turns the hit down)? Did a real story get turned down for its place (record with the wrong state, or a program the AI named differently)? Not yet run against the real AI: the eval harness needs the server's internal key, and copying it to `~/tmp` was refused in auto mode. Baseline: 27 batched hits Oct 8 to 20, owner approved 8, rejected 19. Checked 2026-10-20 17:10 Central: too early. The 13:30 run still logged the old \"not about\" line with no \"(AI: ...)\", so the first run with the new code is Oct 21 01:30 Central (06:30 UTC); two runs = after Oct 21 13:30. Batched submissions are `news_submissions` (WordPress DB) rows with `submission_notes LIKE 'auto-discovery via google-news%' AND submission_notes LIKE '%query=% | % | %'` (the batch query is the names joined by \" | \"); `created_at` is server time (Central), so new-code rows are `created_at >= '2026-10-21 01:30'`. That filter gives 12 approved / 12 rejected / 4 waiting for Oct 8 to 20 today (the 27/8/19 baseline was counted differently). Watch: confirm_batch_attribution() turns a hit down when the record has a state and neither discoveryCheck.place nor location names it, so an AI that leaves place empty turns real stories down. Checked again 2026-10-20 17:21 Central: still before the first new-code run; next look after Oct 21 13:30 Central (still not run at 12:55 Central Oct 21). Done 2026-10-21 (no code change): the two new-code runs (06:30 and 18:30 UTC) put 3 batched hits through the AI, and discoveryCheck was there on all 3. Turned down, rightly: abc7news \"Tommy\" rock opera in San Jose (`{\"program\":\"\",\"aboutProgram\":false,\"place\":\"\"}`, the San Jose center batch) and kivitv's Caldwell shooting (`{\"program\":\"Southwest Idaho Juvenile Detention Center\",\"aboutProgram\":false,\"place\":\"Caldwell, ID\"}`, the suspect only booked there). Confirmed: #10536, voz.us on the $40 million cut to Southwest Key Programs (TX record, location \"Washington, D.C.\", so the place came from discoveryCheck.place); it waits in the inbox. No real story was turned down for its place or its name. Counts with the query above (the table is the unprefixed `news_submissions`): since 01:30 Oct 21, 0 approved / 0 rejected / 1 waiting; Oct 8 to 21 01:30 is now 12 approved / 16 rejected / 0 waiting (the 4 waiting, the Royal Alexandra Hospital fire stories from the last old-code run, were all rejected). The sample is small because most batched hits never reach the AI; the follow-ups for that are in item 1.",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "94cb3de4a1d0"
       },
       {
@@ -741,6 +833,7 @@
        "lead": "Closure queue after the re-sort",
        "text": "**Closure queue after the re-sort** (from 2026-10-20): the first hourly scan after deploy writes `kop closure resettle: {...}` to the PHP error log and sets option `kop_closure_resettled` to `2026-10-20b` (the first pass, 22:00 UTC, left 54 of 113 waiting; the second re-matches name-matched ones). On the mirror it took the waiting list from 110 to 55 (30 already recorded, 13 old news, 9 no program named). Read the \"Already recorded / duplicate / no program named\" tab for wrong matches; the looser match is kop_closure_name_candidates(). Done 2026-10-20 (bd7b9923): the first pass logged `{\"old\":14,\"pending\":6,\"already\":31,\"unmatched\":1, \"duplicate\":3,\"vague\":11}` at 22:00 UTC. The line goes to `~/public_html/error_log`, not `wp-content/debug.log` (WP_DEBUG is off). The 'b' pass only looked at waiting rows, so what the first pass had filed stayed wrong: \"girls program\" (#46) on Provo Canyon School, Pompano Youth Treatment Center (#68, #87, #105) and St. Johns Youth Academy (#174) as already recorded while their records are Open, Dundee Ranch (#286, #303, #361, #362) on Pillars of Hope instead of Academy at Dundee Ranch, Okaloosa (#297) as a duplicate. The 'c' pass settles every status the scan set itself (reviewed_at empty) again. Checked 2026-10-20 23:05 UTC: the 'c' pass ran at 23:00 (`{\"vague\":3,\"pending\":3,\"duplicate\":2,\"old\":1, \"unmatched\":3}`; the 'b' code never ran, since 'c' was deployed before the next scan). Pompano #68 waits, #87 and #105 are duplicates, St. Johns #174 waits, \"girls program\" #46 is vague. Still wrong: Dundee Ranch (#286, #303, #361, #362) on Pillars of Hope #14111, which lists \"Academy at Dundee Ranch (2000-2003)\" among its names, and \"Youth Rehabilitation and Treatment Center (YRTC)\" in Geneva, NE (#326) waiting on the Kearney record #100189. Fixed in 6493db13 (pass `2026-10-20d`): a record's own name beats another's old name, and a name of descriptor words alone goes by its place. The test had missed both: on the mirror the alias index came from the frozen facilities_master (SHOW TABLES fails on SQLite), so it now reads the write switch. Checked 2026-10-21 02:00 UTC: the 'd' pass ran at 00:01 (`{\"unmatched\":1,\"already\":6}`); Dundee Ranch is on #14109, #323/#326 already recorded on #100619. New finding: #228 \"Embark Behavioral Health (formerly Shelterwood Academy)\" had gone to pending on Embark #10433 (Open): kop_facdisc_rematch_closure_reports() in inc/facility-discovery.php re-matched unmatched reports by bare name after each discovery scan, skipping the closure rules. It now goes through kop_closure_settle_report() (pass `2026-10-20e`). Done 2026-10-21 (8290f3f6): the 'e' pass ran at 03:00 UTC (`{\"unmatched\":1}`), #228 is unmatched again, and the item-4 reports all sit where they should. Owner's call, not a matching bug: #297 \"Okaloosa Youth Development Center\" waits on Okaloosa Youth Academy #11120 because the model picked the article's only link; #174 and #300 (both \"St. Johns Youth Academy\", St. Augustine) wait on two records, St. Augustine Youth Academy #11130 and St. Johns Juvenile Correctional Facility #100552, which may be one place. By design, \"CEDU\" and \"Brown Schools\" stay unmatched under the v2 index (several campuses, not all one status). Done (600857eb): /network-map/ draws Utah Boys Ranch rebranded. The served store.js only overrides names drawn open or blank, and the node `utah-boys-ranch` stays `rebranded` although its id 10579 is in statusOverrides. 2026-10-21 (8fe45611): a volunteer had to dismiss \"CEDU\" cards one by one (#399, #400, #401; #333, #337 still waited), and \"Sequel\" (#415) kept coming back. Company names match no single record, so the facility duplicate check never saw them. Now an unmatched report with the same name and change as one that waits or was dismissed for the same closure year is a duplicate, and \"Sequel\" in Madison, AL is Sequel TSI Madison #100076 (the only Sequel record in that town). Pass `2026-10-21`; on the mirror it moved 10 (8 duplicate, 1 already, 1 vague). Check after the next hourly scan: the error_log line `kop closure resettle:` and that #333, #337, #415 and the unmatched Okaloosa #260 left \"To review\". Ascent #343 (West Memphis, AR) now duplicates #322 Ascent Children's Health Services (Batesville, AR): right if both stories are the 2024 shutdown of the whole company; confirm on the \"duplicate\" tab. Owner's call: #100624 \"CEDU Mountain\" is an Open record with no place, made by the news scan on 2026-10-19 from one 1993 Woodbury line; it keeps \"CEDU\" from counting as already recorded (all other CEDU records are Closed). Mark it Closed or merge it, and a bare \"CEDU\" files itself as already recorded.",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "8c322679f73c"
       }
      ]
@@ -755,6 +848,7 @@
        "lead": "CA and TX onto the shared viewer",
        "text": "**CA and TX onto the shared viewer**, CA first (9,100 reports held twice under two id schemes; many rows named by facility number). jsdom harness, before/after snapshot; `severe-flags.js` still lands (old 3.3 item 2).",
        "ask": "",
+       "date": "",
        "hash": "35e476ee4de2"
       },
       {
@@ -762,6 +856,7 @@
        "lead": "Poor-scan flag",
        "text": "**Poor-scan flag**: show \"read from a poor scan: check dates against the PDF\" for `categories.ocr_poor_pages` on the Serious violations card and the PA viewer. No plain summaries from PA OCR version 1 text; after the rerun, check a few 2013-16 findings.",
        "ask": "",
+       "date": "",
        "hash": "c9488aede2fc"
       },
       {
@@ -769,6 +864,7 @@
        "lead": "VA VDSS PDFs",
        "text": "**VA VDSS PDFs**: `va_scraper.py` saves each VDSS inspection page into `va_pdfs/` with its `archive_name`. **Utah cards**: rows carry no checklist id, so \"Archived copy\" finds none.",
        "ask": "",
+       "date": "",
        "hash": "54c07f094354"
       },
       {
@@ -776,6 +872,7 @@
        "lead": "Serious-findings scan coverage",
        "text": "**Serious-findings scan coverage**: confirm MI and PA have their extractor rules (plan steps 10 and 11); WA, OR and NV are out for now. Oregon extension (abuse cases, restraint reports) per `plans/oregon.md`.",
        "ask": "",
+       "date": "",
        "hash": "406c02a9b72c"
       },
       {
@@ -783,6 +880,7 @@
        "lead": "Inspection rankings",
        "text": "**Inspection rankings**: look at the screen once prod has counted; a public page ranked within each state; a block on facility and company pages; per-bed rates (old 3.3 item 7).",
        "ask": "",
+       "date": "",
        "hash": "263e91ed9e37"
       }
      ]
@@ -797,6 +895,7 @@
        "lead": "Name eras",
        "text": "**Name eras**: rename years into the records (`identification.renamedFrom` / `renamedTo`) so the map draws from them; dated items follow the years (articles, lawsuits, inspections, closures); a name never resolves through another record's names, and Facilities from News offers \"Create this name's record\" (old 3.7, steps 2-4). Hand-set eras (`kop_name_eras`): into the map build, its sync and `inc/network-rebuild.php`'s fingerprint, and cutting the facility page; company names have no column yet. About 150 past names not on the map have no rename year.",
        "ask": "",
+       "date": "",
        "hash": "ab3f5ed1d7c2"
       },
       {
@@ -804,6 +903,7 @@
        "lead": "Data flows",
        "text": "**Data flows** (DATA-FLOWS.md section 4): the operator/company-link writers, the people sync, the memorial, approved highlights and Map Renames/Years fire `kop_record_changed()`; drop the dead `kop_facility_v2_request_sync()` calls, then the 10-minute flush; a nightly drift check screen and `scripts/test-record-events.php`; the smaller items in its section 3 (old 3.17).",
        "ask": "",
+       "date": "",
        "hash": "c989381a83e6"
       },
       {
@@ -811,6 +911,7 @@
        "lead": "Duplicated fields",
        "text": "**Duplicated fields**: fold note lines repeating a filled field from a second source (171 on 91 records) into one line with both sources; Fornits and Drive Docs auto links still write without a click (old 3.36).",
        "ask": "",
+       "date": "",
        "hash": "4cb4e0cccc06"
       },
       {
@@ -818,6 +919,7 @@
        "lead": "Held facts",
        "text": "**Held facts**: a record created from a Woodbury card is still public at once; companies' About still comes from notes (needs the same write-up on `kop_operator_page_data()`) (old 3.31).",
        "ask": "",
+       "date": "",
        "hash": "c1dba5c0f8d3"
       },
       {
@@ -825,6 +927,7 @@
        "lead": "Staff",
        "text": "**Staff**: ~400 wiki staff at open programs whose write-up says \"is the ...\" (check against each program's staff page, perhaps a Data audit kind); confirm `kop_staff_former_yearly()` ran in early 2027; write past jobs straight to `kop_person_jobs` from Woodbury Facts, the wiki and the data forms, and company people's jobs.",
        "ask": "",
+       "date": "",
        "hash": "714e31a52657"
       },
       {
@@ -832,6 +935,7 @@
        "lead": "Wiki staff not merged",
        "text": "**Wiki staff not merged**: 14 entries whose record is gone, 7 linked to the wrong company, 8 unlinked.",
        "ask": "",
+       "date": "",
        "hash": "95bf87ec91b3"
       },
       {
@@ -839,6 +943,7 @@
        "lead": "Data research",
        "text": "**Data research** (old 3.5): alternate names (4,334 records with none); years that disagree (New Dominion School of Virginia, Withlacoochee JRF, CEDU Middle School, Elevations RTC, Marion Youth Academy, Bartow Youth Training Center, Lexington Academy, Auldern Academy, Three Springs of Englishton Park, Three Springs Paint Rock Valley, Three Springs School of Madison, Oakley School, New Leaf Academy of Oregon); unplaced records (New Directions Home for Boys; \"Aspen Education Group #2\" 100001, an operator filed as a facility).",
        "ask": "",
+       "date": "",
        "hash": "ef209500c4c5"
       },
       {
@@ -846,6 +951,7 @@
        "lead": "Single records",
        "text": "**Single records**: Renaissance Center, Fresno (100134: sources, folder, status; empty folders 7765 and 7766 can go); Chicago Lakeshore Hospital (13461) is empty (ProPublica 2018-19, the CMS termination, ALJ CR5480); Newport Academy Alberca's address (10087) reads \"1850 Calle Alberc,.\"; Psychiatric Solutions should list #10370 as Rivendell of Utah; \"ClearView Communities LLC\" folder (FileBird 92), another company name to look into.",
        "ask": "",
+       "date": "",
        "hash": "717d98af4b73"
       },
       {
@@ -853,6 +959,7 @@
        "lead": "Provider saves",
        "text": "**Provider saves**: a provider project named after a bare state is still filed as a location profile (`saveProjectToCloud` in `js/data-form-modules/api.js`, the state-name override in `api/save-master.php`).",
        "ask": "",
+       "date": "",
        "hash": "d5d2a54547eb"
       },
       {
@@ -860,6 +967,7 @@
        "lead": "Program types",
        "text": "**Program types**: the directory, search and map show the joined string; no per-type filter. **Program homes**: the directory, the map and search still list each home of a grouped program on its own.",
        "ask": "",
+       "date": "",
        "hash": "f59ee73c0846"
       },
       {
@@ -867,6 +975,7 @@
        "lead": "Data model phase 5",
        "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit.",
        "ask": "Go ahead with data model phase 5 (remove the old model, backup first)?",
+       "date": "",
        "hash": "7189fab169d2"
       },
       {
@@ -874,6 +983,7 @@
        "lead": "Business filing fields",
        "text": "**Business filing fields** (`identification.legalName`, `dbaNames`, `registrants`, added 2026-10-20): empty on every record. Fill them from the state business searches the filings research reads (`inc/nonprofit-filings.php`, `docs/claude/filings-research.md`) as a review queue, never unreviewed. Then: registrants who are people get person ids (`kop_people_named_sources()` in `inc/people.php`); a registrant company that is a KOP operator links to it; legal names and DBAs join the name index (`kop_v2_alias_index()`, a \"Legal name\" / \"Doing business as\" label in `kop_alias_label()`) so search and the merge matcher find them.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "849ea2fc2625"
       },
       {
@@ -881,6 +991,7 @@
        "lead": "test-auto-connect.php: 3 checks fail on the 2026-10-20 mirror, before and after 587a4532",
        "text": "**test-auto-connect.php: 3 checks fail on the 2026-10-20 mirror, before and after 587a4532** (found 2026-10-20): \"woodbury: some waiting pages connect themselves\" (0 of 375), \"drive docs: links with no record are tied ...\" (0 of 2866) and \"a name two company records share finds none\" (Rite of Passage, Inc.). Likely the mirror's data moved under the checks (pages already connected, links already tied, a company merged); confirm and fix the checks or the code.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "008b261beb81"
       },
       {
@@ -888,6 +999,7 @@
        "lead": "Young adult programs: what is left after the document folders",
        "text": "**Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in docs/PLAN-ARCHIVE.md, \"4.3 ... item 13\"): a. The 11 moved facility records' old /facility/ pages 404 (e.g. https://kidsoverprofits.org/facility/dragonfly-transitions-or/): redirect each old slug to its card, `kop_ya_url()`, from `kop_ya_moved_from_map()` (the slugs are no longer in the facility index). b. Owner: folder 7789 \"Fulshear\" (under Embark) holds Fulshear Treatment to Transition's 2015-2017 NATSAP profiles and shows on no page. Link it to 4163 (KOP Tools > Folder Links, or a line in `kop_ya_twin_moves()`'s pass)?",
        "ask": "Link folder 7789 \"Fulshear\" to young adult program 4163?",
+       "date": "2026-10-21",
        "hash": "d648e476076f"
       },
       {
@@ -895,6 +1007,7 @@
        "lead": "Latest operator of past-only records",
        "text": "**Latest operator of past-only records** (2026-10-21, kop_facility_pages_latest_operator(), https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b9ae164899402f5413f97a8873adda4be0e4e4d0): live. Open: (a) seven records can't be ordered from what's on file (docs/RESEARCH-TASKS.md \"Who ran these programs last\"): add years to their pastOperators or map lines and the pages follow; (b) AMIkids Polk (11135) and Victor Cullen (13737) now read \"operated by\" because the map marks AMIkids / Maryland DJS current while every company link is 'past': owner check, then set currentOperator on the record or fix the map line. (c) done 2026-10-21: scripts/test-state-feed-names.php loads inc/profile-timeline.php + inc/network-map.php and checks the North Spring (12896) and AMIkids Polk (11135) cards; full run passes.",
        "ask": "Who runs AMIkids Polk (11135) and Victor Cullen (13737) now, if anyone?",
+       "date": "2026-10-21",
        "hash": "f5d64ce55ebd"
       },
       {
@@ -902,6 +1015,7 @@
        "lead": "In Loving Memory vs the \"Death Toll\" sheet",
        "text": "**In Loving Memory vs the \"Death Toll\" sheet** (2026-10-23; owner's private Google Sheet https://docs.google.com/spreadsheets/d/1gH0q_Z1yrIgv2RyUfSSbCdSOu6iizaHVwoMuLqCqTSE/edit, 466 rows; the page has 230 rows in `memorial_victims`). Snapshot, diff and the matching script are in `tmp/memorial-sheet-2026-10-23.json`, `tmp/memorial-sheet-diff.json`, `tmp/memorial-sheet-diff.py` (not in git; the sheet's CSV export is off, so it was read through gviz in the owner's browser). 220 match, 246 rows are only in the sheet, 10 only on the page. a. Owner decisions first: (1) scope: 95 sheet rows died before 1971 (Dozier School 88 with the undated ones, the 1959 Arkansas Negro Boys' Industrial School fire 19, Whittier State School...); the page starts at 1971. In, or a separate historical section? (2) foster care and in-home cases (Roberta Evers, row 237, \"therapy in the home\"; Amari Boone, row 421, kinship foster; Darvell Gulley, row 283, foster home), against the industry-scope rule; the page already has Lancaster foster home (id 164) and Diane Ramirez (id 47). (3) which one is kept up from now on: proposal is the page, with the sheet frozen as an archive. b. Build: a KOP Tools > Memorial sheet screen fed from the diff, three tabs: Add (sheet-only rows with name, program, date, cause and the sheet's source; approve writes a row, skip remembers), Conflicts (one line per field, pick sheet / page / type a value), Only on the page (for the record). Writes go through the same path as inline edit and fire `kop_record_changed()` (DATA-FLOWS item 2 above says the memorial does not yet). c. Done 2026-10-23 (owner: \"every new entry that has a source should be seeded\"): the 24 sheet-only rows with a source go in on deploy from `seeds/memorial.json` via `kop_apply_memorial_seeds()` (template pass v136), pre-1971 Dozier rows and the two the sheet flags (Roberta Evers, Amari Boone) included. Marshall Wheeler (row 168) is left out: his link was Robby Lynn Peay's FamilySearch page, so Peay (row 162) went in with it. Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 254 remembered. A new sourced sheet row reaches the page only when it is added to seeds/memorial.json (the sheet is private, the server can't read it). Still open: 222 sheet-only rows with no source. Additions: 104 sheet-only deaths from 1971 on, only 13 with a source; 47 undated. A research agent finds a source for each (submitting what it finds under the sources rule) before the owner approves; a row with no source stays out. Sheet-internal duplicates to fold: George Owen Smith rows 12 and 112; Canyon State Academy rows 40, 42 and 449 (449 says \"Canyon River Academy\" but is the page's id 22); blank-name rows 461-462. d. Conflicts to settle (each needs the source checked, not a pick by vote): - Names (40): most are the sheet's full middle names (take them); spellings to check: Roger/Robert Doyle Erwin, Prinkley/Prinkey, Wauketta/Waketta, Johnathan/Jonathan Avila, Contreraz/Contreras, Neil/Niel Rider, Herron/Heron, Meyers/Meyer, Mangham/Mangum, Dysheka/Dyskeha, Rolf/Rolph-Jackson, Bobby Joe/Jo Randolph, Cory/Corey Baines, Wiltsie/Ibarra-Wiltsie. Page id 118 \"(Unknown from Virginia)\" is Thomas Robert Malkowski. - Dates (51): most one or two days apart (incident vs death; the page keeps the death date, the incident goes in the cause). Wrong year on one side: Bobby Joe Randolph 1998/1996, Maria Mendoza 2003/2002, Shirley Arciszewski 2005/2004, Alana Richardson 2020/2023, Arianna Duenez 2024/2023; other big gaps: Earl Smith Jan/Nov 1995, Willie Wright Mar/Feb 2000, Shanice Nibbs Jul 16/Aug 18 2010, Angel Rolf-Jackson May 1/19 2021. Page rows stored as an exact day on the 1st where the sheet has another day or only a month: Connie Munson (226), ids 92 and 89. - Ages (8): Paul Choy, Cory Baines, Levi Snyder, Del'Quan Seagers, Joshua Hancey, Asheville id 3, id 89. - Locations (24): the page files 11 VisionQuest deaths under Pennsylvania (the company's home) where the sheet has where they died (Baja coast, Tucson, Tracy CA, New Mexico...); the column should be where the death happened. Plain mismatches: Munson Missouri/Hattiesburg MS, Roxanna Gray Indiana/La Crosse WI, Erica Harvey Nevada/Oregon, Cory Baines Utah/Oregon, Carey Dunn California/Jay FL, Levi Snyder SC/NC, Kevin Rider Utah/Bend OR, Caleb Jensen Utah/Montrose CO, Christy Scheck PA/Chula Vista CA, Dawn Birnbaum PA/Poland ME. - Programs (77): mostly spelling of one name (keep the page's or, better, link to the facility record). Different places: Katherine Lank (Red Rock Canyon School / Redrock Ranch Academy), Joshua Sharpe (Oconomowoc DTC / Wisconsin Treatment Center), Jared Camacho (Steps Academy / Rose-Mary Center), Naomi Wood (Lakeland Girls Academy / Lakeland Teen Challenge), Dillon Peak (Peace River / De Soto Outward Bound); the sheet names the home where the page is generic: Sabrina Day, Shirley Arciszewski, Roger Benson. - Causes (182 differ, 24 in a different category): keep the page's longer text and add facts the sheet adds. Real disagreements: Kevin Rider (perforated ulcer / suicide), Thomas Malkowski (suicide / fall from balcony), Nicholaus Contreraz (lung infection / restraint: stays restraint, the infection goes in the text), Joy Evans, Shinaul McGraw, Anthony Parker, Sitlalli Avelar. - Sources (23): the page has one source_url; the sheet's go in as a second source (needs a column or a sources list), with `?utm_source=chatgpt.com` stripped. e. Only on the page (10, add to the sheet if it stays in use): Tulsa Boys Home 2025 (1), Owen at Thompson's RTC (4), North Central Kansas JDC (6), Cleveland Dodd (13), Addison Manson (16), Loyce Tucker (24), Cameron Dail (43), Catherine Freer 2002 (127), Aaron Albert Grey (137), Paul Choy (51). Paul Choy is on the page twice (51 dated 2017, 195 dated 1992): fold into one row dated 2017 with the 1992 restraint in the cause.",
        "ask": "Death Toll sheet: include the 95 pre-1971 deaths (or a separate section), and the foster care and in-home cases?",
+       "date": "2026-10-23",
        "hash": "8c4b350dce90"
       },
       {
@@ -909,6 +1023,7 @@
        "lead": "In Loving Memory vs the news archive",
        "text": "**In Loving Memory vs the news archive** (2026-10-23 scan of `news_submissions` approved + submitted in the tmp/prod.sqlite mirror of that morning: 376 articles match a death word, 81 name someone already on the page, agents read the other 295). Deaths in the archive that are on neither the page nor `seeds/memorial.json` (news id in brackets; https://kidsoverprofits.org/wp-admin/ news editor): a. Done 2026-10-23 (owner: yes): these 12 go in on deploy from `seeds/memorial.json` (the entries with `news_ids`; template pass v140). Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 266 remembered (230 + 24 sheet + 12). Dates: Aswad 1981-07-17 and Milletich 1985-07-23 from Boston Magazine; Diaz 2023-05-09; Cornerstone 2026-03-15 (WSOC); Payne's day from the sheet; Canyon State, Toppi and Brown, and Bailey are month only; Kreimeyer year only (the NYT page can't be fetched here). Gina Score, 14, SD State Training School boot camp, Plankinton SD, 1999-07-21, heatstroke on a forced run [1075] (sheet row 249, no source there); Monique Payne, 14, Westwood Lodge, Westwood MA, 2006, untreated brain tumour [701] (sheet row 322 says Wadesboro NC: wrong); Unnamed 17M, Canyon State Academy, AZ, 2020-01-21/22, cause not released [999, 1000, 1054, 1061] (sheet row 40; not the 2022 overdose, page id 22); Mystie Kreimeyer, 15, Forest Ridge Youth Services (YSI), IA, 1995, embolism after delayed care [931]; Vincent Milletich, 22, Behavior Research Institute (JRC), MA, 1985, asphyxiated in restraint [781, 573, 564, 556]; Danny Aswad, 14, BRI Northridge CA, 1981, held face-down [556, 564, 958]; Bryan Diaz, 18, Barry J. Nidorf juvenile hall, CA, May 2023, fentanyl overdose [112, 450]; Nicholas Walter Brown, 16, Midlands Center (SC DDSN), 2025-05-25, hyperthermia in a canvas wrap restraint [905, 906, 10469]; Unnamed teen girl, Cornerstone Treatment Facility, Wadesboro NC, March 2026 [70]; Matt Toppi and Christopher Brown, Robert Land Academy, Ontario, 1998, died running away [419]; De'Vonte Bailey, 11, Turning Point group home (Lucas County placement), Toledo OH, 2025, hit while riding his bike unsupervised [10458]. b. Need a check first: Linda Cornelison, BRI Attleboro MA, 1990 (age not in the article) [556]; daughter of Karly Briscoe-Vega, Florida Youth Challenge Academy, Starke, 2024-25, no name or date [9]; Antonio Martinez, 17, Starr Commonwealth MI, 2016-01-01, hit on I-94, ran away? [695]; Steve Matthews, Straight Inc, suicide soon after leaving, year unknown [1587]; \"Jimmy\", San Marcos Treatment Center TX, seclusion-room death before 1991 (source page gone) [10546]; Bryan Alexander, 18, YSI boot camp TX, ~2002 vs sheet row 265 (Bryan Dale Alexander, Tarrant County CCC, 2001-01-09, pneumonia) [656, 657]; Carlisle Indian School children returned to Alaska in 2026: Tummassak (d. 1900-04-08, TB), Edward Angalook, a third [10485]; unnamed restraint death, JRC or FINR [954]; KLTV group home wrongful death, no details [10555]; #1373 clipping titled \"died\", empty. c. Scope calls (industry-scope rule): Kanaiyah Ward, 16, Maryland DHS hotel placement, suicide [6, 10545, 10549]; Xavia Butler, 15, Manitoba CFS [10344]; Tarsha Golightly, 18, died in adult prison days after Parkville youth justice, Victoria AU, 2026-07-27 [279]. d. Article ages differ from the page: the Asheville Academy girls are 13 and 12 in [119, 446, 456] (page id 3 says 14; already in 15d). Brad Glickman likely the subject of [1452, 1456] (Elan, empty clippings). e. Also in [419] (The Walrus) and not on the page: Donald MacNeil, Robert Land Academy, 2010, suicide while being taken back to the school after a term break.",
        "ask": "Add Donald MacNeil (Robert Land Academy, 2010, suicide on the way back to the school) to In Loving Memory?",
+       "date": "2026-10-23",
        "hash": "4dbb1f1670e4"
       }
      ]
@@ -923,6 +1038,7 @@
        "lead": "Lawsuits from CourtListener",
        "text": "**Lawsuits from CourtListener**: build `inc/lawsuit-discovery.php` + `api/discover-lawsuits.php` per the plan in old 3.16 item 3 (crontab 03:00 Central; `scripts/test-lawsuit-discovery.php`).",
        "ask": "",
+       "date": "",
        "hash": "8b83fc1c7443"
       },
       {
@@ -930,6 +1046,7 @@
        "lead": "Admin kit",
        "text": "**Admin kit**: the Review inbox (one primary decision, the rest in More; `rinbox-btn-undo` reused for Cancel/Rename/Close); Data Manager and the merge screens; search and paging for Bug Reports, Closure Reports, Facilities from News, Glossary Feedback, Young Adult Programs, Indigenous Schools; the old wp-admin screens; last the `api/*` pages (old 3.25).",
        "ask": "",
+       "date": "",
        "hash": "a61e4897d9ee"
       },
       {
@@ -937,6 +1054,7 @@
        "lead": "Record pickers",
        "text": "**Record pickers**: Drive Docs and Fornits finders take programs only (`js/admin-kit.js` refuses a non-number); Wiki links, Woodbury Reports and Woodbury Facts still have their own create forms (move onto `kop_record_field_param()` with optional city/state/type); a \"Run by a company\" add-on, off by default; Facilities from News does not follow articles filed on a company; check notes filed on consultants and the other kinds read well on their list pages; podcasts link programs and companies only (old 3.19, 3.30).",
        "ask": "",
+       "date": "",
        "hash": "fac703d9a39d"
       },
       {
@@ -944,6 +1062,7 @@
        "lead": "Volunteers",
        "text": "**Volunteers**: route the five submission queues (`api/manage-submissions.php`) through the same apply so \"Apply ticked\" runs them; a per-link volunteer view for Drive Docs (old 3.26).",
        "ask": "",
+       "date": "",
        "hash": "4ea220fd8b51"
       },
       {
@@ -951,6 +1070,7 @@
        "lead": "Pencils still missing",
        "text": "**Pencils still missing**: survivor-site archive lists (the `unsil` treatment keyed by url), the operator page's research and Unsilenced lists, the summary lines under Materials and links (old 3.27).",
        "ask": "",
+       "date": "",
        "hash": "e5bc044d30e5"
       },
       {
@@ -958,6 +1078,7 @@
        "lead": "Dropdown Lists",
        "text": "**Dropdown Lists**: `js/data-form-modules/data-page.js` should read `window.KOP_CHOICE_LISTS`; an added status can only borrow a built-in badge colour.",
        "ask": "",
+       "date": "",
        "hash": "d7d0e4ae2ea9"
       },
       {
@@ -965,6 +1086,7 @@
        "lead": "Self-service volunteering",
        "text": "**Self-service volunteering** (audit 2026-10-20; the owner finds the back-and-forth overwhelming, so the default becomes \"a volunteer can start, learn, pick work and get answers without the owner\"). Today the owner makes every link, picks every project, answers every question and applies every call. In order: a. **Sign-up makes the link**: a form on /volunteer/ (name, optional email) calls `kop_vol_create()` and shows the link at once; the old `volunteer_projects` listing (`templates/page-volunteers.php`) points to it. b. **Practice round instead of the owner's first 10 calls**: 10 known-answer items drawn from the owner's past approve/reject log for the chosen queue; passing opens self-assign (`kop_volp_self_min_decided` gate in `inc/volunteer-projects.php:752-824` counts practice). c. **Next batch on Done**: \"Done. Thank you!\" (`js/volunteer-review.js:568`) offers the next 10 from the same queue; finished projects close themselves; research kinds can be self-assigned too. d. **Lost link / new device without the owner**: if an email was given, \"Send me my link\" mails a fresh one; replies to their questions can mail them (opt-in). e. **Questions answer themselves**: each brief shows \"Questions others asked\" (answers the owner marks \"Add to the brief's FAQ\"); trusted volunteers can answer; the owner gets one daily digest, not per message. f. **Research answers become one-click edits**: a year/status answer with a link becomes a proposed change card (Apply = writes the field + Undo) instead of the owner editing the record by hand. g. **Briefs for the open queues that lack one**: wiki-staff, young-adult-programs, wiki-updates, wiki-changes, the quote-check half of data-audit and conflicts. Record cleanup: open it or bulk-apply. h. **Close two gaps first**: bar `drive-docs` (quotes the owner's private Docs) and `podcasts` (statements attributed to named people) in `kop_vol_never_sources()`; the data form's \"a volunteer checks every suggestion\" (`js/tutorial-overlay.js:1172`, `js/data-form/data-wizard.js:610`) is untrue while `data` is barred. Done: agreed calls going through on their own, behind the owner's On/Off switch (`inc/volunteer-auto.php`). Done 2026-10-20: h (drive-docs + podcasts barred; the data form says \"we check every suggestion\") and a (sign-up form on /volunteer/, `inc/volunteer-signup.php`; email stored on the volunteer row for d). After deploy: open https://kidsoverprofits.org/volunteer/, sign up once in a private window, check the link opens /volunteer-review/ and the person shows in KOP Tools > Volunteer Reviewers as \"Signed up on the Volunteer page\"; run check-contrast.py and check-mobile-overflow.py on /volunteer/. Owner: the /volunteer/ page text (editor content) may want a line pointing to the form. Checked 2026-10-20 after deploy: a sign-up in a fresh browser showed the link once, set the cookie and opened /volunteer-review/ signed in; the row is volunteer id 11 \"Claude sign-up test 2026-10-20\", note \"Signed up on the Volunteer page\", created_by sign-up. Owner: turn that test link off at KOP Tools > Volunteer Reviewers. check-contrast.py and check-mobile-overflow.py (390 + 768) on /volunteer/: 0 problems. Done 2026-10-20: b (practice round, `inc/volunteer-practice.php`; passing opens self-assign for that queue until there are 10 real checked calls). Today it is offered in news, closure, facilities-from-news and woodbury-reports (lawsuit has 2 rejects, under the 3 a round needs; scraper-finds items are deleted once decided). After deploy: open https://kidsoverprofits.org/volunteer-review/ as a fresh volunteer and play one round in News, check every card reads without its answer (other queues' decided items may show a fact kop_volpr_hidden_fact() misses: add its label there), then check the Volunteers table line. Next: c (next batch on Done). **Usage audit 2026-10-21** (production DB): 10 real volunteers (owner-made links, 10-17 to 10-19), 18 projects (13 owner-made inspection-highlights, 5 self-assigned by mission_eris), 252 calls on 252 distinct items; mission_eris made 120. Of 149 clear calls the admin decided, 149 agreed, 0 overturned; 20 Not sure; 74 calls wait for the owner (23 inspection-highlights, 31 scraper-finds, 10 woodbury-reports, 10 closure). Practice round and sign-up: no real use yet. Found, in order of value: i. **Agreed calls can never go through on their own**: `kop_vol_auto_try()` needs 2+ volunteers on one item, but `kop_volp_create()` (`inc/volunteer-projects.php:383`) skips items already in a project or recommended on, so every item reaches one person. Either hand each item in a `kop_vol_auto_allowed()` queue to two people, or let one volunteer with a strong record (e.g. 30 checked, 95%) go through alone with a random 1-in-5 spot check. Dropped by the owner 2026-10-21: neither is built. The On/Off switch (`inc/volunteer-auto.php`) stays off and can never fire as projects stand. j. **Stalled batches hold ~150 inspection findings**: Dragon's 50 (project 3, never started, last seen 10-18), Prestigious_Dot134's 50 (project 13, 1 done), projects 6/7/8 (1, 6, 2 of 20). Release items after ~3 days without activity; close finished projects by themselves (projects 1, 2, 4, 5, 9-12 are 100% answered and still open). Part of c. Done 2026-10-21: `kop_volp_sweep()` (hourly) hands back after 3 quiet days and closes finished batches a day after the last answer. After deploy: the first sweep runs within the hour; at KOP Tools > Volunteer Reviewers > Projects expect projects 3, 6, 7, 8 and 13 to read \"closed, handed back N unanswered\" (13 only once its question is answered: Prestigious_Dot134's message holds it open) and 1, 2, 4, 5, 9-12 \"closed, finished\", still listed at the top while their calls wait for you. k. **Brief FAQ from the Not sure notes** (feeds e): unsubstantiated \"allegations of suspected abuse\"; failure to report or investigate abuse / obstructing an investigation (greenfionn42 asked 10 times; the owner approved them); excerpts that are client background, not the program; paywalled articles in scraper-finds; staff refusing to call an ambulance (Prestigious_Dot134's message on project 13, unanswered since 2026-10-21 00:27). Done 2026-10-21: `inc/volunteer-faq.php`. 8 drafts (6 inspection-highlights, 2 scraper-finds) written from the notes, none live. Owner: open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers&faq=inspection-highlights and Publish, edit or delete each; every draft shows the items it rests on. Two need your call more than the rest: \"allegations\" and \"failed to investigate\" both have #2830 going the other way (a staff member slamming a child into a seat, rejected on mission_eris's word). Also reply to Prestigious_Dot134's ambulance question (message 1); the \"medical care\" draft answers it on the brief once published. Next for e: \"Add to the brief's FAQ\" on an answered message, and trusted volunteers answering. l. **Trust per queue**: a record earned in inspection-highlights opened closure, woodbury-reports and scraper-finds batches to mission_eris without practice there; require a passed practice round or 10 checked calls in each new queue (closure changes a status). m. **Identical findings in one batch**: greenfionn42 got the same \"obstructed an investigation\" finding 8 times; group same-text items. n. **Old `volunteer_projects` listing** (`templates/page-volunteers.php`): its table has 0 rows, so the page is empty; retire it or list the open queues. Owner: turn off test link 11 (\"Claude sign-up test 2026-10-20\"). o. **Onboarding walk-through 2026-10-23** (a fresh browser on the live site, as a newcomer; stopped at practice item 3 when the session lost permission to drive production). Found: 1. On /volunteer/ the sign-up box is the last thing on the page, under \"reach out to us at action@kidsoverprofits.org\": a newcomer emails instead. Owner: in the page text, swap that paragraph for a line pointing down to the form (or move the module up). 2. A signed-in device back on /volunteer/ still sees the empty form; only after typing a name does it say \"This device already has a volunteer link\". The page is cached, so this needs a small JS check (a GET that says signed in, then hide the form and show \"Open your volunteer page\"). 3. A new sign-up lands on /volunteer-review/?q=news with 10 live cards and every queue's tab, under a small \"Start here\" box: the practice round is optional and easy to miss. Owner to decide: should a sign-up see live queues before passing a practice round? 4. Practice cards can be undecidable from the card: item 1 was an archive.md link (CAPTCHA) with no summary or outlet text. 5. Done the same day: a round drew the same story twice (\"A death is a tragedy - regardless who the victim is\", two keys, both rejected); `kop_volpr_draw()` now skips a title already in the round (test in test-volunteer-projects.php). Not walked yet: finishing a round, \"Pick a batch\" / self-assign, a project via ?project=, Done -> next batch, messages. Done 2026-10-23 (owner's three calls below; findings 1-3 fixed with them: \"Start reviewing now\" button at the top of /volunteer/ jumping to the form, the form says you start at once, a signed-in device gets \"Open your volunteer page\"; the volunteer page opens on \"Start now\" instead of a live queue). After deploy: sign up in a private window at https://kidsoverprofits.org/volunteer/, check \"Start now\" offers the violation findings, play the round (cards readable, none repeated), and that passing opens 10 real findings; open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers&practice=inspection-highlights and take out any card you find tricky; check the existing volunteers still see their queues; run check-contrast.py and check-mobile-overflow.py on /volunteer/ and /volunteer-review/. Open: finding 4's archive.md cards are now left out of practice, but live queues still show them. Done 2026-10-23, owner's follow-up: the volunteer page now says what the work is (checking the scanner's possible violations against the report), with a content warning, \"How this works\" (getting started, choosing next work, taking a break or stopping), \"Hand this batch back\", \"Stop volunteering\", and other work offered to anyone who would rather not read the reports. Owner after deploy: read the intro at https://kidsoverprofits.org/volunteer-review/ (admin preview) and the form at https://kidsoverprofits.org/volunteer/ and say what to change in the wording. Done 2026-10-23: /volunteer/ has its own template (templates/page-volunteer.php) in place of the editor copy, with \"Answer our questions\" linked from it and from the volunteer page. After deploy: open https://kidsoverprofits.org/volunteer/, check the three buttons, the form, the tool links; edit any section in place while signed in. The page's photo is not shown any more (say if you want it back). Run check-contrast.py and check-mobile-overflow.py on /volunteer/. Owner decided 2026-10-23: (a) one \"Start now\" button: a practice round of violation findings (inspection-highlights, the top priority), and on passing the first 10 real findings open at once; (b) a volunteer sees only the queues they have earned: violations to start, another queue after passing its practice round; the volunteers already on the site keep the queues they have worked in (any recommendation there); no free browsing of every queue; (c) practice cards chosen automatically (none a volunteer disagreed on or said Not sure about, none an FAQ entry rests on, none 2+ people got wrong in practice, none with no text or an archive.* link, no repeated titles), with a Practice cards list where the owner can strike any. Owner: turn off test volunteer \"Claude onboarding test 2026-10-23\" at KOP Tools > Volunteer Reviewers (its practice round is unfinished, 0 of 2 so far).",
        "ask": "Have you turned off the two test volunteer links and read the new /volunteer/ intro?",
+       "date": "2026-10-23",
        "hash": "7ccf784432e0"
       },
       {
@@ -972,6 +1094,7 @@
        "lead": "Social media and design assignments for volunteers",
        "text": "**Social media and design assignments for volunteers** (owner, 2026-10-21; a new graphic design / social media person): a. **Weekly roundup**: a Monday cron reads the last 7 days of `kop_review_log` (14 days on 2026-10-21: 545 inspection findings approved, 67 plain summaries, 347 news approved, 22 promo, 15 closures, 56 federal funding, 104 wiki updates posted, 21 featured) and makes one card per post idea: the fact in a line, the facility / operator page link, the plain summary or a pull quote, a picture we hold, an angle (closure, state finding, new lawsuit, public money, the week in numbers). Closures, lawsuits, bills, findings with plain summaries, featured reporting and funding first; bulk work (doc-types, drive-docs auto, fornits) left out. No AI captions: the owner decided the designer writes every caption. Cards carry only what public pages show; findings about children keep the report's wording. b. **A 'social' project kind** on /volunteer-review/: Taking this -> draft (image + caption) -> Ready for review; the owner gets one list with Approve / Send back. Done 2026-10-21 (a + b): `inc/volunteer-social.php` + `inc/volunteer-social-cards.php`. The picture is a link (Canva, Drive) until d's upload question is answered; up to 8 cards per angle. Owner after deploy: at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers#projects pick the designer under \"Weekly social media roundup\" (they need a volunteer link first: Invite someone) and press \"Make the last 7 days' roundup now\" to see this week's cards; Monday 14:00 UTC makes the next. Then run check-contrast.py and check-mobile-overflow.py on /volunteer-review/ with that project open. Open questions: should operator pages be the link when a facility has none (today the card falls back to the list page); and should plain-summary findings be the only findings (today the 470 other approved findings only reach the numbers card). Fixed 2026-10-21 (owner: the roundup pulled in items years old): a card needs the item's own date (closure, filing, bill's last action, finding, article) within 60 days of the roundup's end (kop_vsoc_recent(), filter kop_vsoc_max_age_days); undated items and public money (years only) make no card. The week-in-numbers card still counts the week's approvals, old items included. 2026-10-23 (owner: the roundup came up empty): approved news from the last two months is now a card (\"In the news\", linking the facility page the story is linked to, else the story), and so is a page published from Drafts (\"New on our site\"); the site-updates card (\"This week on the site\", now also counting pages, websites, rules and practices, Woodbury facts and status updates) comes every week, even with no other card. Owner after deploy: press \"Make the last 7 days' roundup now\" again and check no card is older than two months; delete the earlier roundup project. 2026-10-23 later (owner: ideas \"really stupid\", rolled-up stories twice, the only site news was approved inspection reports): one card per story (same story group, same program, or the same headline words; the card names the other outlets and links the program its headline names); the one counts card is now five named cards: programs added to the directory, records brought up to date (closures + applied lawsuit/bill status checks), documents added, serious findings added (by program, with the reports' years), and \"Also this week\". Checked against the live Oct 16-22 log: Kingston and Maryland/Marriott now appear once. Owner after deploy: delete project 24 (\"Post ideas: Oct 16 to Oct 22\") and make the roundup again. Open: news links to facility records that look wrong (Texas Tribune school-policing story -> \"Central Middle School (Galveston)\" record; ACT youth detention is Australian); the news cards are only as good as the news queue's facility links. c. **A 'design' project kind**: the owner types briefs, the volunteer answers with a link + note; unlike research answers, these links must never go to the review inbox as sources. d. **Posting on approve** (asked 2026-10-21, platforms not chosen yet; KOP's own accounts are not linked anywhere in the theme): recommended Instagram + Facebook Page through a Meta developer app the owner owns (Page token in `config.local.php`; Instagram reads the image from a public URL, so the final image is hosted here), plus Bluesky (app password). Threads uses the same Meta app; X is paid or tightly capped; TikTok (posts stay private until audit) and LinkedIn (app approval) are hard; Zapier / Make is the fallback for anything else. Approve schedules the post a few minutes out with Cancel; a post log on the card (platform, time, live link, error, retry without double posting). Needs an image upload on the volunteer card (images only, size cap, private until approved, then into the media library). Owner to answer: which platforms, and is an upload by an accountless volunteer link acceptable. Owner 2026-10-21: uploads yes. Done the same day: the upload on the social card (private until approved, metadata stripped, into the media library on Approve). After deploy: upload a phone photo on a social idea, check the admin preview shows it and that https://kidsoverprofits.org/wp-content/uploads/kop-private/social/ answers 403. Posting itself is parked (owner 2026-10-21): automatic posting is not wired up on the owner's side yet, so nothing posts from the site; approved posts are copied to the accounts by hand. Pick it up when the owner has the platforms and accounts ready.",
        "ask": "After \"Make the last 7 days' roundup now\" again, is every card under two months old?",
+       "date": "2026-10-23",
        "hash": "6409fff8835a"
       },
       {
@@ -979,6 +1102,7 @@
        "lead": "Research tag proposals from document text",
        "text": "**Research tag proposals from document text**: a one-page review screen proposing facilities and operators from documents' contents, with acronyms guarded; replaces the JSON file of `api/propose-research-facility-tags.php` (old 3.8 item 6).",
        "ask": "",
+       "date": "",
        "hash": "b5f9cb5a3838"
       },
       {
@@ -986,6 +1110,7 @@
        "lead": "Data suggestions: \"What changed\" cards",
        "text": "**Data suggestions: \"What changed\" cards** (done 2026-10-21, `api/lib-suggestion-changes.php`, `renderChanges()` in `js/admin-submissions.js`). After deploy: open Submissions Review > Data at https://kidsoverprofits.org/admin-submissions/?type=data (the Review inbox's Data dropdown) and check the six waiting cards read as in the test: #58 Operator, #57/#55/#54 one note each, #53 \"Incidents: other\", #56 \"Nothing new\"; run `python -u scripts/check-contrast.py` on the page. Open, needs the owner: a. Fixed 2026-10-21: Approve on a mini-form suggestion made a duplicate facility (no state or facility_id sent, so the save could not find the record). `kop_suggestion_resolve_entries()` (called in `kop_apply_suggested_edit()`) now matches each entry to its record as the card does and merges only its filled fields (lists gain items, nothing is emptied); when every entry is on file only those facilities are saved, so no company named after the facility is made. A name with no record still makes a new facility (the card says so). Undo puts the records back since the same day (below). After deploy: approve #55 (the Jackson-Feild Homes note) and check https://kidsoverprofits.org/facility/jackson-feild-homes-va/ shows the note and nothing else changed, and no second \"Jackson-Feild Homes\" appears in the directory. d. Done 2026-10-21: **Undo of a data approval puts the records back** (`api/lib-suggestion-undo.php`). Approve keeps a copy (option `kop_sugg_undo_<id>`) of each facility it changes, the links it adds or drops, the company row and the state profile; Undo (Recently done, or setting the status back on the Submissions Review page) restores those exactly, deletes a facility or company the approval made, and sets the suggestion pending. Something edited since is never written over: Undo refuses and names it. Approvals from before this change have no copy: Undo says so (fix by hand). After deploy: approve #55, check the note is on https://kidsoverprofits.org/facility/jackson-feild-homes-va/, Undo it from Recently done, check the note is gone and #55 waits again; then approve it for real if it should stay. b. #58 typed a note into the Operator box (\"This is not a Charter Behavioral Health program.\"): reject, it is a correction note. c. #56: reject (2.4 item 12). Checked live 2026-10-21 (server-side dump of the card data): #58, #57, #55, #54, #53 read as listed above, but #56 no longer says \"Nothing new\": since 227d22ee took the three notes #57 asked for off Linden Oaks and moved the Arabella House line out of other names, the card lists those four as additions, so approving #56 would put them back. The card is right; reject it. e. Fixed 2026-10-21, waiting for deploy: form notes saved under a random key (`field-<time>-<random>` from `getFieldIdentifier()` in js/data-form/notes.js, which names no field) showed the raw key as the label and the note's id, text and timestamp run together. Now `kop_suggestion_label()` reads them \"Field notes\" (a note under a field's own path reads \"Field notes: has restraint\") and `kop_suggestion_item_text()` gives a note's text only. After deploy: the #56 card at https://kidsoverprofits.org/admin-submissions/?type=data shows three \"Field notes\" rows of plain text. f. Still to do: the browser check of the six cards, `check-contrast.py` on the page, and the #55 approve -> facility page -> Undo round trip need an admin session in Chrome (Claude in Chrome was signed out on 2026-10-21).",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "4765d3e598bc"
       },
       {
@@ -993,6 +1118,7 @@
        "lead": "Filing to young adult programs (OPI)",
        "text": "**Filing to young adult programs (OPI)** (fixed 2026-10-21, waiting for deploy). Server-side filing worked (every pending OPI Woodbury item files through \"Add to that young adult program\" and the Record box on a copy); what failed was finding the program: Record boxes on queues that take programs only (News, Lawsuits, Woodbury Reports' \"File under\"...) searched TTI facilities only, so OPI (moved off facilities_v2 on 2026-09-30) never came up, and \"OPI\" matched nothing anywhere. Now: initials (\"OPI\") and \"Name (OPI)\" find a young adult program (`kop_ya_find_by_name()`, the record finder, the \"File under a young adult program\" pick); a programs-only picker on a card offering that action finds young adult programs too, and picking one files the card there (`kop_rinbox_ya_file_picked()`). Checks after deploy: a. https://kidsoverprofits.org/admin-submissions/?type=news : type \"OPI\" in a card's program box; Optimum Performance Institute shows; picking it and approving puts the card on https://kidsoverprofits.org/young-adult-programs/ (Undo in Recently done). b. Woodbury Reports \"File under\" (the pages' PDF filing) still leaves young adult programs out on purpose (they have no document folder); use \"File under a young adult program\" there. c. Fixed the same day, waiting for deploy: Woodbury Facts has a \"No longer proposed\" tab, and \"Back to review\" there puts an item back in the waiting list for good (extra \"kept_by\", which kop_wbf_sync() keeps). The 32 items the 2026-09-30 move left \"added\" with an empty fact key (OPI's were on the program under the record's own keys, so nothing was lost) are re-linked once on the first admin load after deploy (kop_ya_maybe_relink(), log in the option kop_ya_relink_log): 30 point at the fact that says the same, 2 are added as their own fact. Check: the log option has no entry other than \"linked ...\" or \"added\".",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "40548166d8da"
       },
       {
@@ -1000,6 +1126,7 @@
        "lead": "Free-text answers from /questions/ read into lines",
        "text": "**Free-text answers from /questions/ read into lines** (owner, 2026-10-23). The \"What rules do you remember\" answers and the notes on tap answers (9 + 5 on the live site that day) are settled as one pasted quote, or never read. Decided: each answer is read like a handbook page (AI split into lines with topic, the reader's exact words, year, checklist boxes), the lines wait on the Rules from documents card, and Add puts them in a **separate section** on the facility page (\"What people who were there remember\"), each as our plain line with the reader's words under it (spelling fixed, garbles left), cited by who they are (\"A former resident (2010-2012), answering on Kids Over Profits' questions page, October 2026\"). Opinions and experiences that are not rules stay admin-only; emails, phones and names are stripped before anything shows; contact offers and court cases go to an admin-only **leads** list. A note that hedges or qualifies (\"not sure\", \"not physically\") stops its answer settling on its own. Built 2026-10-23 (`inc/reader-accounts.php`, `inc/review-inbox/reader-accounts.php`; test `scripts/test-review-inbox.php --source=reader-accounts`). Still open: a. **After deploy** (deployed 2026-10-23 at [345dab8a](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/345dab8a6170ded1602834b0a015b5f01328d65e); `answer_id` is on the live table, kop_pp_db 3): after the next hourly run open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox&source=reader-accounts and read the 14 live answers' lines against their words: is the AI splitting well, are the plain lines faithful, did the email in the answer on f11250 stay off every line? Tune `kop_ra_prompt()` from what is wrong. b. **Owner**: the Leads tab will hold at least one reader who says they went to court with their program and asks to be contacted (answer on f11250, 2026-10-23): a lawsuit lead. c. **App and wiki**: `kop_pp_for_app()` and the wiki's rules gaps (`inc/wiki-updates.php`) read documents' lines only; readers' lines are on the facility page alone. Add them to the app's facility screen (a \"What people remember\" block) and offer them to wiki drafts as accounts, once the owner has seen a few on pages. d. Company answers' notes (o<id>) are not read: a company has no lines section. Revisit if notes there carry facts.",
        "ask": "",
+       "date": "2026-10-23",
        "hash": "f41410f450fb"
       },
       {
@@ -1007,6 +1134,7 @@
        "lead": "Plan Board is stale and hard to use",
        "text": "**Plan Board is stale and hard to use** (2026-10-23, owner: \"the plan board kinda sucks\"). The screen (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board, `inc/plan-board.php`) only changes when a session runs `python scripts/plan-board/build.py` and commits `seeds/plan-board.json`; sessions forget (4.3 item 15 was missing until https://github.com/kidsoverprofits/Kids-Over-Profits/commit/06801c2530ef954f2a01e5d426b85f88edad2875). a. Rebuild: shipped 2026-10-23. The seed carries a `source` hash of the plan files; `build.py --check` and `scripts/test-plan-board.php` fail when it is behind; `.github/workflows/plan-board.yml` rebuilds + commits it on pushes touching `docs/plan/**` and dispatches `deploy.yml`. Open: watch the first run that has to rebuild (https://github.com/kidsoverprofits/Kids-Over-Profits/actions/workflows/plan-board.yml) push the seed and start a deploy; if the push is refused, the org caps the workflow token at read and needs Settings > Actions > General > Workflow permissions set to read and write. b. Hard to use (owner, 2026-10-23: 177 cards in one list, dense paragraphs with no question, their steps mixed with session notes, clunky answering). Built 2026-10-23: an item waiting on the owner ends with an `Ask: <one-line question>` line (all 61 of section 2, plus 8 elsewhere; the test fails on a section 2 item without one); the screen opens on **Needs you** (unanswered items with a question), with Waiting for Claude and Everything beside it, a section dropdown by subsection, the question as the card's headline, the item's text under Details, and Done / Not now in one click (Answer opens the box, Ctrl+Enter saves). Open: after deploy, open the board, answer one card in Needs you and Withdraw it; tune any question the owner finds unclear. c. Checked off by the site (owner, 2026-10-23: auto, with an undo): `inc/plan-board-checks.php` runs hourly (WP-Cron `kop_pb_checks_cron`, option `kop_pb_checks`), 21 read-only checks: crontab lines, the archive sync log, Review inbox counts at 0, posts published, records gone or renamed, submissions no longer pending. A passing item shows \"Checked: done\" under Waiting for Claude with its evidence and a Not done button (option `kop_pb_check_overrides`, holds until the item is reworded); the export lists it as kind `auto`. Sweep of 2026-10-23 (read-only over SSH) found done: the inspection report folder share (every state but CO indexed), the monthly Unsilenced cron, the Three Springs/Sequel merges (all four dropped records gone); comment 453 trashed. Open: after deploy and the first hourly run, check the board's \"checked off\" count is 3 or so and nothing obviously open is among them; whether WP-Cron's CLI PHP can read `crontab -l` (if not, the three crontab checks stay unknown; only the scan check falls back to its log). Not checked yet, worth adding: PDF covers left, the 35 company histories published (`historyStatus` in `kop_operators.json_data`; the JSON path I tried matched nothing), the wiki half of the staff \"Former\" passes.",
        "ask": "",
+       "date": "2026-10-23",
        "hash": "583a200adf71"
       }
      ]
@@ -1021,6 +1149,7 @@
        "lead": "Wiki editor badge",
        "text": "**Wiki editor badge**: \"KOP has new information\" on entries whose record changed.",
        "ask": "",
+       "date": "",
        "hash": "225ddd461515"
       },
       {
@@ -1028,6 +1157,7 @@
        "lead": "Staff line split",
        "text": "**Staff line split**: `kop_wiki_auto_staff_line()` does not split a \"was also\" role pair as `also_roles()` does.",
        "ask": "",
+       "date": "",
        "hash": "2ee2cc9c2962"
       },
       {
@@ -1035,6 +1165,7 @@
        "lead": "Stub and missing pages",
        "text": "**Stub and missing pages** (827 stubs, 724 index slugs) in \"new entry\" mode, after the existing entries.",
        "ask": "",
+       "date": "",
        "hash": "8c76f0b0edc0"
       },
       {
@@ -1042,6 +1173,7 @@
        "lead": "Rules sections",
        "text": "**Rules sections**: after Rules from documents lines are added: sync the mirror, rerun `scripts/wiki-gaps.php`, draft the sections.",
        "ask": "",
+       "date": "",
        "hash": "38edd3f99463"
       },
       {
@@ -1049,6 +1181,7 @@
        "lead": "Family Foundation School",
        "text": "**Family Foundation School**: once 2.4 item 3 is decided, read the complaints, add named staff (Doe and initials plaintiffs stay so), seed through `seeds/lawsuits.json` with docket numbers, then the wiki line for entry 533 (old 3.23).",
        "ask": "",
+       "date": "",
        "hash": "951ec196f06b"
       },
       {
@@ -1056,6 +1189,7 @@
        "lead": "Reddit wiki watch",
        "text": "**Reddit wiki watch** (daily task \"KOP Reddit Wiki Watch\", 03:00, kop-pipeline `scripts/watch-reddit-wiki.ps1`, built 2026-10-20): re-reads the 341 non-stub pages and writes kop-data `reddit-wiki/live-changes.json`. Open: (a) check `tmp/reddit-wiki-live/watch.log` after the first night and that kop-data pushed; (b) the Review inbox screen for those changes (page, before/after samples, link to the Reddit page and its edit link; ADDING-CONTENT.md \"review queue\"). \"Accept\" cannot write Reddit's text into KOP's copy yet: the page read is plain text, not markdown. It needs the markdown from Reddit's edit page, which requires a logged-in mod session in the watch Chrome profile (now logged out).",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "16c7a5a79835"
       }
      ]
@@ -1070,6 +1204,7 @@
        "lead": "Business filings PDFs",
        "text": "**Business filings PDFs**: once companies are linked, copy kop-pipeline `tmp/colorado-sos/pdfs/` (and Florida's) to `~/kop-import/business-filings/co/` (`fl/`), run `api/import-business-filings.php` (dry run first); rebuild Florida after its download. Then Utah (old 3.20 item 3), quarterly refreshes, the app, open data, officers into people ids.",
        "ask": "",
+       "date": "",
        "hash": "acb37bc494f6"
       },
       {
@@ -1077,6 +1212,7 @@
        "lead": "Nonprofit filings",
        "text": "**Nonprofit filings**: the app section; Form 990 Part VII officers and Schedule R into people and the map; monthly rerun; an open data dataset (old 3.19).",
        "ask": "",
+       "date": "",
        "hash": "405659ca205f"
       },
       {
@@ -1084,6 +1220,7 @@
        "lead": "News clippings",
        "text": "**News clippings**: the other 44 (`clippings-ocr.py run` + `upload`, then `api/import-clippings.php apply` with the owner's go).",
        "ask": "",
+       "date": "",
        "hash": "283688bba6cf"
       },
       {
@@ -1091,6 +1228,7 @@
        "lead": "Program documents",
        "text": "**Program documents**: find and import the six handbooks held only as JPG thumbnails (Gateway Academy 2013 and 2014, Caribe Vista 1999, Cherokee Creek x3, GCTC 2021 x3); `--types reading`; operator libraries into the inventory (old 3.21).",
        "ask": "",
+       "date": "",
        "hash": "dbad342917e9"
       },
       {
@@ -1098,6 +1236,7 @@
        "lead": "Podcasts",
        "text": "**Podcasts**: pilot episodes 221, 115 and 116 for the owner; read every batch as transcripts finish; copy each `proposals.json` to `~/kop-import/podcasts/`; write person and program facts onto records with Undo; `attended` facts draw the survivor-category map line (old 3.18).",
        "ask": "",
+       "date": "",
        "hash": "52e89665df08"
       },
       {
@@ -1105,6 +1244,7 @@
        "lead": "Google Docs",
        "text": "**Google Docs**: the facts pass (staff, owners, years, names, addresses, closures, every fact quoted) and the sheets (a column map per sheet); `resourceLinks` in the open data downloads (old 3.9).",
        "ask": "",
+       "date": "",
        "hash": "047c3b3d2dfd"
       },
       {
@@ -1112,6 +1252,7 @@
        "lead": "Survivor archives",
        "text": "**Survivor archives**: the name-by-name privacy pass for ssi, wwasp, straights and nhym (SCIAD NET is done).",
        "ask": "",
+       "date": "",
        "hash": "1ea6e36cec28"
       },
       {
@@ -1119,6 +1260,7 @@
        "lead": "HEAL citations",
        "text": "**HEAL citations**: ~76 have no Wayback address; have `woodbury-facts.py --also tmp/heal` write the capture address from `tmp/heal/cdx.txt`, rerun the facts load (old 3.22).",
        "ask": "",
+       "date": "",
        "hash": "54ab035582f0"
       },
       {
@@ -1126,6 +1268,7 @@
        "lead": "Federal funding",
        "text": "**Federal funding**: years for Bernalillo Academy and Evoke Cascades and the 62 records with none; the rosters not read (Montana, Maine, Alaska, Oregon, TRICARE, SBA PPP FOIA, USAspending/TAGGS) (old 3.15).",
        "ask": "",
+       "date": "",
        "hash": "8475bac9b6f9"
       },
       {
@@ -1133,6 +1276,7 @@
        "lead": "Unsent sources",
        "text": "**Unsent sources** (12-an-hour cap): rerun `tmp/send-milestone-sources.py` until done, then it sends `tmp/other-sources.json`; the Royal Commission summary needs its Wayback address and PDF; the 14 youth sources of the nursing homes draft; https://www.fox13now.com/2019/08/14/employee-at-treatment-center-in-southern-utah-facing-felony-child-abuse-charge; lawsuits #54 Parker and #55 Bence need source_urls (CourtListener gov.uscourts.oknd.78072, docket 73624806).",
        "ask": "",
+       "date": "",
        "hash": "681680b69d24"
       },
       {
@@ -1140,6 +1284,7 @@
        "lead": "Our copies",
        "text": "**Our copies**: reprint the Vive FAQ, Maple Lake FAQ + Emotional Health and Asheville Academy FAQ with the answers opened; perhaps a PDF of New Lifehouse's hidden AI text.",
        "ask": "",
+       "date": "",
        "hash": "45fd140bcdd1"
       },
       {
@@ -1147,6 +1292,7 @@
        "lead": "Old /lawsuits/ page",
        "text": "**Old /lawsuits/ page**: the Dimple Dell canyon suit and the cases behind two Salt Lake Tribune stories on revision 926, through the lawsuit form path.",
        "ask": "",
+       "date": "",
        "hash": "8dae5cf88e25"
       },
       {
@@ -1154,6 +1300,7 @@
        "lead": "Network map undated names",
        "text": "**Network map undated names**: rerun the year research for the 81 with none, with a raised search cap.",
        "ask": "",
+       "date": "",
        "hash": "1260508f3900"
       },
       {
@@ -1161,6 +1308,7 @@
        "lead": "Company pages",
        "text": "**Company pages** for Bain Capital, CRC Health Group and Keystone Education and Youth Services (they carry 4 approved milestones).",
        "ask": "",
+       "date": "",
        "hash": "2189e50770f0"
       }
      ]
@@ -1177,6 +1325,7 @@
        "lead": "Visual QA of all hubs",
        "text": "**Visual QA of all hubs** at 390, 768 and 1440 (`scripts/preview-hub-pages.py`); only Law & Policy, History, Survivors and Support were checked. Fix in `css/hub.css` under `.kop-hub*`.",
        "ask": "",
+       "date": "",
        "hash": "3741d307fbe9"
       },
       {
@@ -1184,6 +1333,7 @@
        "lead": "Post classification",
        "text": "**Post classification**: refresh the mirror, rerun `scripts/inventory-posts.py`, write `docs/POST-CLASSIFICATION.md`; confirm `in_news_feed` for every News post before 2.4 item 5 is acted on.",
        "ask": "",
+       "date": "",
        "hash": "d890bf3d2901"
       },
       {
@@ -1191,6 +1341,7 @@
        "lead": "\"Where are the kids?\" posts",
        "text": "**\"Where are the kids?\" posts**: recommend `single-facility-profile.php` where a facility page covers the same facility. Then act on the owner's decisions in 2.4 item 5.",
        "ask": "",
+       "date": "",
        "hash": "1d4c10230d42"
       },
       {
@@ -1198,6 +1349,7 @@
        "lead": "Category archive layout",
        "text": "**Category archive layout** on a solid panel, with search and hub links.",
        "ask": "",
+       "date": "",
        "hash": "64cf256a93da"
       },
       {
@@ -1205,6 +1357,7 @@
        "lead": "\"In this article\" / \"In this section\"",
        "text": "**\"In this article\" / \"In this section\"** on the history pages (spec at the end of PAGE-TEMPLATE-DESIGN-PLAN.md).",
        "ask": "",
+       "date": "",
        "hash": "9ce541bcaf59"
       },
       {
@@ -1212,6 +1365,7 @@
        "lead": "Advocacy History and Survivors hub writing",
        "text": "**Advocacy History and Survivors hub writing**: Key Milestones, \"Submit your story\", the Survivors hub's thesis line and link descriptions; drafted in the page body for the owner.",
        "ask": "",
+       "date": "",
        "hash": "9793abfc89ae"
       },
       {
@@ -1219,6 +1373,7 @@
        "lead": "Admin stylesheets",
        "text": "**Admin stylesheets** still use about fifty accent colours as text (16B).",
        "ask": "",
+       "date": "",
        "hash": "7c37fc242e0a"
       },
       {
@@ -1226,6 +1381,7 @@
        "lead": "SEO audit (read-only, first)",
        "text": "**SEO audit (read-only, first)**: crawl the Yoast sitemaps on https://kidsoverprofits.org and list, per URL, the live title, meta description, canonical and BreadcrumbList. Then compare against the stored `_yoast_wpseo_metadesc` / `_yoast_wpseo_focuskw` in tmp/prod.sqlite. Flag missing or generic descriptions (template text, sparse facility records that say only name + state) and duplicates. Output: a review page, not a file. inc/seo.php, scripts/test-seo.php. Model: Sonnet. Done 2026-10-20: screen = KOP Tools > SEO Audit (inc/seo-audit.php, commit 32e2a0ec); crawler = (kop-pipeline) scripts/seo-audit.py; audit.json copied to wp-content/uploads/kop-seo-audit/ on the server. Review it at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-audit. Findings (3,753 URLs): 1,838 sparse + 147 thin facility descriptions (item 10); 1,762 titles over 65 chars (1,637 facility, 81 posts: news posts carry the full headline + site name; decide whether to clip); 296 posts/pages with no stored Yoast description and 292 with no keyphrase (items 9, 10); 95 with no live description (58 pages, 36 category pages, author page); 53 template descriptions; 12 duplicate descriptions (posts that appear twice, e.g. the two Jane/June Doe v. Trails summaries); 5 admin tool pages in the sitemap but noindex (take out of the sitemap); 2 pages with no breadcrumb. Open: 19 facility pages took 20+ s to answer (mount-bachelor-academy-or, family-foundation-school-ny, ...; a slow page query to find); re-crawl after items 10-11 with `python scripts/seo-audit.py` and re-upload audit.json.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "52d78a93a6f2"
       },
       {
@@ -1233,6 +1389,7 @@
        "lead": "Focus keyphrases",
        "text": "**Focus keyphrases**, built 2026-10-20 with item 10 (same screen, KOP Tools > SEO Descriptions, https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts). One rule per kind in `kop_seo_drafts_keyphrase()` (inc/seo-drafts.php): lawsuit post = case name, spotlight = its subject (\"John Santa Montana Academy\"), person = name (owner adds role/employer), state report page = \"<State> inspection reports\", document folder = \"<subject> documents\", hubs and articles hand-written in seeds/seo-descriptions.json. Generated /facility/ and /operator/ routes get none (no post). Open: - Owner: set the facility and state wording in the screen's \"Keyphrase wording\" box (this is 2.4 item 11); until then state hubs, country pages, facility profile posts and news posts show an empty keyphrase box marked as waiting. - Done 2026-10-20: news posts draft one once the facility wording is set, the program read from news_facility_links (kop_seo_drafts_news_program(): the post's news_submissions row by json_data.source_post_id, else its article link; a program named in the title, else the only one of the strongest link kind). 49 of 63 news posts get a draft on the mirror; the other 14 have no linked program or several (the card names them) and the owner types one.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "3d24c7eddc65"
       },
       {
@@ -1240,6 +1397,7 @@
        "lead": "Meta descriptions Yoast sees",
        "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: set the keyphrase wording (stores about 118 more keyphrases at once), then approve the hand-written cards. - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Owner: posts 470 and 786 are the same Walrus article (Robert Land Academy) posted twice; their cards say so. Keep one, redirect the other. - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
        "ask": "Unpublish post 13312 (\"Research draft\"), and which of the duplicate Walrus posts 470 / 786 goes?",
+       "date": "2026-10-20",
        "hash": "809d6115b30c"
       },
       {
@@ -1247,6 +1405,7 @@
        "lead": "Breadcrumbs on facility, operator and state pages",
        "text": "**Breadcrumbs on facility, operator and state pages**: visible trail plus the same trail in Yoast's BreadcrumbList through `wpseo_breadcrumb_links`. Reuse `kop_article_breadcrumbs()` / `kop_article_yoast_breadcrumbs()` (inc/article-parts.php:244-290). Check what inc/seo.php's added breadcrumb on these routes currently emits so the two never disagree. CSS rules in docs/claude/css-checks.md. Model: Sonnet, Opus checks. Built 2026-10-20: the steps come from one builder each in inc/seo.php (kop_seo_facility_steps(), kop_seo_operator_steps(), kop_seo_place_steps()); the template hands them to kop_page_trail_set() before get_header() and prints kop_page_trail_html() (inc/article-parts.php, css/trail.css) at the top of its header. /facility/ and hand-built profiles: Home > Programs by location > state or country > page; /operator/: Home > Parent companies > page; state and country hubs: Home > Programs by location > page. /facility/ and /operator/ take the list in inc/seo.php's BreadcrumbList; the post-backed pages give it to Yoast (kop_page_trail_yoast(), wpseo_breadcrumb_links 20). Test: scripts/test-seo.php \"Breadcrumbs\". Open, after deploy: - Look at one /facility/, one /operator/, /utah/ and one hand-built profile at 390, 768 and 1440; run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py` on them. - View source on /utah/ and one profile post: Yoast's BreadcrumbList has the \"Programs by location\" step. - The \"Facility profile · <state>\" eyebrow under the trail now names the state twice; drop its state link if the owner finds it repetitive.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "c2f11ea80d90"
       },
       {
@@ -1254,6 +1413,7 @@
        "lead": "Home page on phones, after deploy",
        "text": "**Home page on phones, after deploy**: trimmed 2026-10-20 (11,638px -> about 8,300px at 390 wide). Check https://kidsoverprofits.org/ on a phone: the inspection box says \"Trackers for N states\" and the state sentence is hidden; Essential reporting cards have no thumbnail; one headline per Ongoing Story. Still the tallest blocks: Essential reporting (~1,100px) and Ongoing Stories (~1,250px); if the owner wants it shorter, show two cards of each on phones.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "856eed050b6c"
       },
       {
@@ -1261,6 +1421,7 @@
        "lead": "We have questions (/questions/, built 2026-10-20)",
        "text": "**We have questions (/questions/, built 2026-10-20)**, open after the first deploy: - Done 2026-10-20: live route 200, the Utah deck serves real conflicts first, check-contrast and check-mobile-overflow pass on the start panel (run with MSYS_NO_PATHCONV=1 from Git Bash), every card type screenshotted at 390 on the live layout. Still to do by hand: swipe a yes/no card on a real phone (touch, not a mouse), and look at it at 1440. - Answer one question as a test and see it at Review inbox > Answers to our questions; Dismiss it again. - Optional email added 2026-10-20 (owner: make it clear it is optional and only to hear when it is done): one email per reader's set of answers. After deploy, answer a question on the live page, leave an address, and check the receipt arrives. - Guided tour built 2026-10-20 (js/tool-tutorials.js, 7 steps: search, state + Start, the card, skip, how do you know, what happens next; kop_enqueue_tool_tutorials() now loads it on the route). Walked through at 390 on the live page with the local scripts injected, from the start panel and with a deck open. The tour launcher is now hidden while any tour runs (css/tutorial-overlay.css): on phones it covered the card's Next button on every tour. After deploy: press ? on https://kidsoverprofits.org/questions/ on a phone and step through. Menu entry: owner said yes 2026-10-20; \"We Have Questions\" under Get Involved (kop_nav_item_specs() 'url' entry, a custom link; template assignments version 131). After deploy: it shows at the end of Get Involved in the Header (categories) menu; drag it where it reads best in Appearance > Menus. - Link from the data form (2026-10-20): \"Short on time? Answer a few questions instead\" on the wizard's steps 1-2 and under the full-form bar; a picked facility or company links /questions/#find=<name>. Checked with the working tree on the live pages (scripts/test-data-wizard.py; #find on /questions/ at 390). Deployed 2026-10-20: both scripts are live and an uncached load carries window.kopWizardConfig with the full https://kidsoverprofits.org/questions/, but the cached /tti-data-submission/ (X-LiteSpeed-Cache: hit) still serves the old HTML and old script version. Once it refreshes (or after a LiteSpeed purge of that page), check the link shows and clicking it from a picked record opens the search. Checked live 2026-10-20 (Playwright, 390): the page is still the cached copy (no kopWizardConfig), but the old ?ver= URL serves the new data-wizard.js, so \"Short on time? Answer a few questions instead\" shows, linking the relative /questions/ fallback; /questions/#find=Turn-About%20Ranch fills the search and lists Turn-About Ranch (Escalante, UT). Left: once the cache turns over (max-age 7 days), check a picked record's link carries #find=<name>. Still the cached copy at 22:57 UTC 2026-10-20 (X-LiteSpeed-Cache: hit, no kopWizardConfig in the source). - Questions on record pages (2026-10-20, live): \"We have questions about <name>\" on /facility/, hand-built facility profiles and /operator/ (kop_q_box_html(), js/questions-box.js, filled when the page opens). Checked live on Havenwood North and Psychiatric Solutions. A one-time LiteSpeed purge ships with it (KOP_Q_BOX_VERSION): bump it whenever kop_q_box_html() changes, or cached pages keep the old markup. scripts/test-facility-pages.php and test-operator-pages.php do not load inc/questions.php, so they never render the box; their current failures are data (3 seeded facility ids missing from the mirror; 9 drafted histories for companies with no page), not this. - Merges: answers keep the old facility id in their key; a merged-away record's answers show \"No longer asked\" with Dismiss. Register {prefix}kop_question_answers in kop_fmerge_ref_tables() with a key rewrite if this happens often. - Done 2026-10-20: facility values settled here (Woodbury Facts rows with extra.via 'questions', kop_wbf_origin()) are badged \"Questions page\" on Review inbox > Woodbury Facts (new From filter: Woodbury Reports / Questions page) and in Conflicts (From gains \"Questions page\"; picking Woodbury Facts leaves them out); the card says \"From the questions page\" instead of \"Added by hand by\", and no longer says 'Woodbury calls it \"\"' or \"these words were not found\" (they have no Woodbury name or quote). The old KOP Tools > Woodbury Facts screen shows the same line but has no From filter. After deploy: open Woodbury Facts > Approved, held for the write-up with From = Questions page and check the badge. Checked 2026-10-20: the code is live, but production has 0 answers and 0 Woodbury Facts rows from the questions page, so there is nothing to badge until the test answer above is settled (or 3 readers agree). - Ideas not built: more company questions (founders, programs it ran), \"was this program in <town> in <year>?\" for moved programs, survivor-only questions (length of stay, how they were transported) that would need the owner's rules on what is published.",
        "ask": "",
+       "date": "2026-10-20",
        "hash": "71ea95979e78"
       },
       {
@@ -1268,6 +1429,7 @@
        "lead": "Desktop sidebar: sticky side column",
        "text": "**Desktop sidebar: sticky side column** (2026-10-21, replaces the 2026-10-20 float): the owner found the float pulled the newsletter + donate sidebar into every post's body. js/sidebar-float.js is gone (`.cpanel.yml` deletes it on the server, KOP_SIDEBAR_FLOAT_VERSION 2 purges LiteSpeed once); at 1025px and up the sidebar is back in Kadence's own column and its `.sidebar-inner-wrap` is `position: sticky; top: 7rem` (css/sidebar.css). js/givebutter-contrast.js still watches each widget; harmless now that nothing moves it. Not checked in a browser (the Chrome extension was not connected). What the owner wanted (2026-10-21): text wrapping under the At a glance rail on profiles. The rail already floated, but pages without their own content made `.kop-fp-body` a flex column (`kop-fp-reorder`, CSS `order`), which never wraps under a float: the body measured 381px wide all the way down at 1100. templates/facility-page.php now prints About, homes/campus, testimony, then company history in that order itself (output buffers) and the flex rules are gone; test-facility-pages.php checks it.",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "a89f3720aa71"
       }
      ]
@@ -1282,6 +1444,7 @@
        "lead": "Accessibility pass",
        "text": "**Accessibility pass**: VoiceOver and TalkBack, the largest font and a tablet (colours in `src/theme/colors.ts` follow `css/colors.css`).",
        "ask": "",
+       "date": "",
        "hash": "76acbc46bd0b"
       },
       {
@@ -1289,6 +1452,7 @@
        "lead": "Deep links",
        "text": "**Deep links** on a device (`npx uri-scheme open kidsoverprofits://facility/<slug>`); site addresses after 2.6 item 4.",
        "ask": "",
+       "date": "",
        "hash": "bf446e41c0cd"
       },
       {
@@ -1296,6 +1460,7 @@
        "lead": "Essential reporting",
        "text": "**Essential reporting**: the strip above the news tab, the flag and note on a card, a list for `?featured=1`.",
        "ask": "",
+       "date": "",
        "hash": "aa1ba386708e"
       },
       {
@@ -1303,6 +1468,7 @@
        "lead": "News tab filters",
        "text": "**News tab filters**: the story and month filters reset when it unmounts.",
        "ask": "",
+       "date": "",
        "hash": "95e9c551cfae"
       },
       {
@@ -1310,6 +1476,7 @@
        "lead": "Payload notes",
        "text": "**Payload notes**: the app payload's `notes` list still carries the Woodbury wording and raw addresses (both readers clean them when they print).",
        "ask": "",
+       "date": "",
        "hash": "ca06a80f4b75"
       },
       {
@@ -1317,6 +1484,7 @@
        "lead": "Map tab coupling",
        "text": "**Map tab coupling** (a standing caution): the map page's class names and button ids are read by the app (`mapPage.ts`, `mapBridge.ts`): renaming one on the website breaks the Map tab.",
        "ask": "",
+       "date": "",
        "hash": "559b64bd8e3f"
       }
      ]
@@ -1341,6 +1509,7 @@
        "lead": "Need inputs, not failures",
        "text": "**Need inputs, not failures** (exit 2 with a usage line). Three of the five were run with inputs on 2026-10-21 and pass: - test-drive-docs: all passed after `python scripts/gdocs-extract.py --export \"G:/My Drive/KOP Doc Export\"` (kop-pipeline, 25 s, writes tmp/gdocs/links.json) and `--python=C:/Python313/python.exe`: 1306 links on 437 records, 100 added, 1183 refused as already there. It prints \"#id missing\" for 9 records named by tmp/sciad/sciad-links.json (built 2026-10-07) that were merged since (e.g. 11132 -> 11213, 100090 -> 10380, in `kop_facility_merged_into['ids']`) and skips them. Follow-up: have the test follow the merge map the way test-fornits does, and check that the Drive Docs screen moves SCIAD rows for a merged record to the record it was merged into rather than dropping them. - test-fornits: all passed on `~/kop-import/fornits/batch-20261002-192403.jsonl.gz` scp'd from the server into a scratchpad (438 links on 173 records, plus staff/incident/testimony/closed/note on 40). - test-inspection-links: all 8 checks pass, but only with the fixture units in the file. A plain `--limit 15` scrape fails the Benet and Sarah Reed checks because those rows are not in it. The fixture run: `PA_STATE_FILE=<scratch copy of .pa_state.json> python pa_scraper.py --full --no-post --since 2024 --unit 474850 --unit 410750 --unit 417340 --unit 450120 --unit 445320 --unit 144800 --unit 120280 --unit 120260 --unit 149720 --unit 407960 --unit 407510 --unit 458090 --out <scratch>/pa-fixtures.json` (needs a Python with pdfplumber, e.g. C:\\Python313; the state-file override keeps the real `.pa_state.json` untouched).",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "636aaabbef11"
       },
       {
@@ -1348,6 +1517,7 @@
        "lead": "test-review-inbox.php --source=news: \"Take off removes the consultant's note exactly\" fails",
        "text": "**test-review-inbox.php --source=news: \"Take off removes the consultant's note exactly\" fails** (found 2026-10-21, also with the session's own changes set aside, so it predates them). The run also prints \"kop extension: lawsuit facility links failed: ... near \"COMMENT\"\" (a MySQL column COMMENT in a CREATE on the SQLite copy). Look at `kop_rinbox_native_unconnect()` in `inc/review-inbox/native.php` for consultant notes.",
        "ask": "",
+       "date": "2026-10-21",
        "hash": "1f249549196e"
       }
      ]
@@ -1368,6 +1538,7 @@
        "lead": "Network map",
        "text": "**Network map**: chain hulls and group-by-network (2d.4); \"Suggest a correction\" from the map (Phase 3); new person nodes for relationships to people not on the map.",
        "ask": "",
+       "date": "",
        "hash": "bf13233f49d6"
       },
       {
@@ -1375,6 +1546,7 @@
        "lead": "Investors",
        "text": "**Investors**: a data form tab, a public page, site map, open data, people ids for partners, filing cards on an investor.",
        "ask": "",
+       "date": "",
        "hash": "99e5b77cca58"
       },
       {
@@ -1382,6 +1554,7 @@
        "lead": "Discovery",
        "text": "**Discovery**: grouping short names by state; a weekly GDELT pass and Bing News (declined 2026-10-13).",
        "ask": "",
+       "date": "2026-10-13",
        "hash": "f42b18967ba7"
       },
       {
@@ -1389,6 +1562,7 @@
        "lead": "App",
        "text": "**App**: other outlets' coverage of a story, paging through every inspection report, an offline index, notifications.",
        "ask": "",
+       "date": "",
        "hash": "b8dc9b8fa085"
       },
       {
@@ -1396,6 +1570,7 @@
        "lead": "Directory Editor",
        "text": "**Directory Editor**: reordering programs within a card; editing the location tab's place groups.",
        "ask": "",
+       "date": "",
        "hash": "95849a49da24"
       },
       {
@@ -1403,6 +1578,7 @@
        "lead": "Lighter pages",
        "text": "**Lighter pages**: Provo's staff list and the timeline's later years, if pages are still heavy.",
        "ask": "",
+       "date": "",
        "hash": "6104bc988501"
       },
       {
@@ -1410,6 +1586,7 @@
        "lead": "Unchecked",
        "text": "**Unchecked**: no real upload through the anonymous portal since it began sealing files; no live call to the Claude, Gemini or Hugging Face models in the AI helpers.",
        "ask": "",
+       "date": "",
        "hash": "b7cfa52c05e2"
       }
      ]
@@ -1424,6 +1601,7 @@
        "lead": "Data model and notify settings",
        "text": "**Data model and notify settings**: which mode production's `kop_data_model` / `kop_data_model_areas` options use for the `program_index` read area, and the value of `kop_submission_notify_emails` (no admin screen; default `admin_email`).",
        "ask": "",
+       "date": "",
        "hash": "c80d08192a7e"
       }
      ]

@@ -31,6 +31,31 @@
         return true;
     }
 
+    // Needs you is one list, newest first (data-date; undated last, in plan order); the other views put each card
+    // back in its section. A placeholder marks every card's home.
+    var flat = root.querySelector('.kop-pb-flat');
+    function layout() {
+        var cards = Array.prototype.slice.call(root.querySelectorAll('.kop-pb-card'));
+        cards.forEach(function (card, i) {
+            if (!card.kopHome) {
+                card.kopHome = document.createComment('pb');
+                card.kopOrder = i;
+                card.parentNode.insertBefore(card.kopHome, card);
+            }
+        });
+        if (!flat) return;
+        if (state.view === 'needs') {
+            cards.sort(function (a, b) {
+                var da = a.dataset.date || '', db = b.dataset.date || '';
+                return da === db ? a.kopOrder - b.kopOrder : (da < db ? 1 : -1);
+            });
+            cards.forEach(function (card) { flat.appendChild(card); });
+        } else {
+            cards.forEach(function (card) { card.kopHome.parentNode.insertBefore(card, card.kopHome.nextSibling); });
+        }
+        flat.hidden = state.view !== 'needs';
+    }
+
     function filter() {
         var shown = 0, counts = { needs: 0, waiting: 0, all: 0 };
         root.classList.toggle('is-view-needs', state.view === 'needs');
@@ -50,7 +75,7 @@
             g.hidden = !g.querySelector('.kop-pb-card:not([hidden])');
         });
         root.querySelectorAll('.kop-pb-section').forEach(function (s) {
-            s.hidden = !s.querySelector('.kop-pb-card:not([hidden])');
+            s.hidden = state.view === 'needs' || !s.querySelector('.kop-pb-card:not([hidden])');
         });
         var none = root.querySelector('.kop-pb-none');
         if (none) {
@@ -114,8 +139,9 @@
         post(data).then(function (d) {
             if (!d || !d.success) { btn.disabled = false; say(card, (d && d.data && d.data.message) || 'Could not save.', true); return; }
             setDraft(id, '');
+            var home = card.kopHome, order = card.kopOrder;
             var fresh = replaceCard(card, d.data.html || '');
-            if (fresh) { fresh.dataset.keep = '1'; say(fresh, d.data.message || 'Saved.'); }
+            if (fresh) { fresh.kopHome = home; fresh.kopOrder = order; fresh.dataset.keep = '1'; say(fresh, d.data.message || 'Saved.'); }
             var c = root.querySelector('.kop-pb-open-count');
             if (c && typeof d.data.open === 'number') c.textContent = d.data.open;
             filter();
@@ -128,6 +154,7 @@
         try { localStorage.setItem('kop-pb-view', view); } catch (e) {}
         root.querySelectorAll('.kop-pb-tab').forEach(function (t) { t.setAttribute('aria-pressed', t.dataset.view === view ? 'true' : 'false'); });
         unkeep();
+        layout();
         filter();
     }
 

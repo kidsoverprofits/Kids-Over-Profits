@@ -29,6 +29,7 @@ PLAN_DIR = ROOT / 'docs' / 'plan'
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
 LEAD = re.compile(r'^\*\*(.+?)\*\*')
 ASK = re.compile(r'^Ask:\s*')
+DATE = re.compile(r'\b(20\d\d-[01]\d-[0-3]\d)\b')
 
 
 def slug(text, limit=60):
@@ -116,7 +117,9 @@ def parse(md):
                 while iid in seen:
                     iid, n = f'{base}-{n}', n + 1
                 seen.add(iid)
-                items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask})
+                # The newest date in the item: when it was written or last brought up to date. Needs you sorts by it.
+                dates = DATE.findall(text)
+                items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask, 'date': max(dates) if dates else ''})
             if items or g['intro']:
                 groups.append({'key': g['key'], 'title': g['title'], 'intro': g['intro'], 'items': items})
         out.append({'key': s['key'], 'title': s['title'], 'groups': groups})
