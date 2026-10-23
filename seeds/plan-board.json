@@ -1,5 +1,5 @@
 {
- "built": "2026-10-23 20:05 UTC",
+ "built": "2026-10-23 20:07 UTC",
  "sections": [
   {
    "key": "2",
@@ -861,6 +861,18 @@
        "lead": "Filing to young adult programs (OPI)",
        "text": "**Filing to young adult programs (OPI)** (fixed 2026-10-21, waiting for deploy). Server-side filing worked (every pending OPI Woodbury item files through \"Add to that young adult program\" and the Record box on a copy); what failed was finding the program: Record boxes on queues that take programs only (News, Lawsuits, Woodbury Reports' \"File under\"...) searched TTI facilities only, so OPI (moved off facilities_v2 on 2026-09-30) never came up, and \"OPI\" matched nothing anywhere. Now: initials (\"OPI\") and \"Name (OPI)\" find a young adult program (`kop_ya_find_by_name()`, the record finder, the \"File under a young adult program\" pick); a programs-only picker on a card offering that action finds young adult programs too, and picking one files the card there (`kop_rinbox_ya_file_picked()`). Checks after deploy: a. https://kidsoverprofits.org/admin-submissions/?type=news : type \"OPI\" in a card's program box; Optimum Performance Institute shows; picking it and approving puts the card on https://kidsoverprofits.org/young-adult-programs/ (Undo in Recently done). b. Woodbury Reports \"File under\" (the pages' PDF filing) still leaves young adult programs out on purpose (they have no document folder); use \"File under a young adult program\" there. c. Fixed the same day, waiting for deploy: Woodbury Facts has a \"No longer proposed\" tab, and \"Back to review\" there puts an item back in the waiting list for good (extra \"kept_by\", which kop_wbf_sync() keeps). The 32 items the 2026-09-30 move left \"added\" with an empty fact key (OPI's were on the program under the record's own keys, so nothing was lost) are re-linked once on the first admin load after deploy (kop_ya_maybe_relink(), log in the option kop_ya_relink_log): 30 point at the fact that says the same, 2 are added as their own fact. Check: the log option has no entry other than \"linked ...\" or \"added\".",
        "hash": "40548166d8da"
+      },
+      {
+       "id": "4.4:free-text-answers-from-questions-read-into-lines",
+       "lead": "Free-text answers from /questions/ read into lines",
+       "text": "**Free-text answers from /questions/ read into lines** (owner, 2026-10-23). The \"What rules do you remember\" answers and the notes on tap answers (9 + 5 on the live site that day) are settled as one pasted quote, or never read. Decided: each answer is read like a handbook page (AI split into lines with topic, the reader's exact words, year, checklist boxes), the lines wait on the Rules from documents card, and Add puts them in a **separate section** on the facility page (\"What people who were there remember\"), each as our plain line with the reader's words under it (spelling fixed, garbles left), cited by who they are (\"A former resident (2010-2012), answering on Kids Over Profits' questions page, October 2026\"). Opinions and experiences that are not rules stay admin-only; emails, phones and names are stripped before anything shows; contact offers and court cases go to an admin-only **leads** list. A note that hedges or qualifies (\"not sure\", \"not physically\") stops its answer settling on its own. Building in `inc/program-practices.php` + `inc/questions.php`.",
+       "hash": "93fe5b9fb7dd"
+      },
+      {
+       "id": "4.4:plan-board-is-stale-and-hard-to-use",
+       "lead": "Plan Board is stale and hard to use",
+       "text": "**Plan Board is stale and hard to use** (2026-10-23, owner: \"the plan board kinda sucks\"). The screen (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board, `inc/plan-board.php`) only changes when a session runs `python scripts/plan-board/build.py` and commits `seeds/plan-board.json`; sessions forget (4.3 item 15 was missing until https://github.com/kidsoverprofits/Kids-Over-Profits/commit/06801c2530ef954f2a01e5d426b85f88edad2875). a. Rebuild without a session remembering: a GitHub Action on pushes touching `docs/plan/**` that runs build.py and commits the seed, or a check in `scripts/test-plan-board.php` that fails when the seed is behind the files. b. Ask the owner what else is wrong (not yet said). Candidates: 175 cards in one long list; each card is a dense paragraph with no clear question for the owner; owner steps mixed in with session notes; answering is clunky. Likely fixes: show only items that need the owner first (a \"needs you\" view), one-line question per card, filters by section, collapse long text.",
+       "hash": "b2f6ce4aa79c"
       }
      ]
     },
