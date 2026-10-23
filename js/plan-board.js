@@ -1,12 +1,16 @@
 /**
- * KOP Tools > Plan Board (inc/plan-board.php): filters the cards in the page, saves and withdraws answers,
- * keeps an unsent answer per item in the browser, and copies the open answers for a Claude session.
+ * KOP Tools > Plan Board (inc/plan-board.php): the views (Needs you, Waiting for Claude, Everything), the section
+ * and search filters and their counts; saves and withdraws answers, keeps an unsent answer per item in the
+ * browser, and copies the open answers for a Claude session. A card answered in this view stays in sight until
+ * the view or filter changes, so its Change and Withdraw stay at hand.
  */
 (function () {
     var cfg = window.KOP_PLAN_BOARD || {};
     var root = document.querySelector('.kop-pb');
     if (!root) return;
-    var state = { section: '', q: '', hide: false };
+    var VIEWS = ['needs', 'waiting', 'all'];
+    var state = { view: 'needs', group: '', q: '' };
+    try { var v = localStorage.getItem('kop-pb-view'); if (VIEWS.indexOf(v) !== -1) state.view = v; } catch (e) {}
 
     function draftKey(id) { return 'kop-pb-draft:' + id; }
     function getDraft(id) { try { return localStorage.getItem(draftKey(id)) || ''; } catch (e) { return ''; } }
@@ -14,20 +18,33 @@
 
     function restoreDrafts(scope) {
         scope.querySelectorAll('.kop-pb-card').forEach(function (card) {
-            var ta = card.querySelector(':scope > .kop-pb-answer > .kop-pb-ta');
+            var form = card.querySelector('.kop-pb-form');
+            var ta = form && form.querySelector('.kop-pb-ta');
             var d = getDraft(card.dataset.id);
-            if (ta && d && !ta.value) ta.value = d;
+            if (ta && d && !ta.value) { ta.value = d; form.hidden = false; }
         });
     }
 
+    function inView(card, view) {
+        if (view === 'needs') return card.dataset.needs === '1' && !card.dataset.state;
+        if (view === 'waiting') return !!card.dataset.state;
+        return true;
+    }
+
     function filter() {
-        var shown = 0;
+        var shown = 0, counts = { needs: 0, waiting: 0, all: 0 };
+        root.classList.toggle('is-view-needs', state.view === 'needs');
         root.querySelectorAll('.kop-pb-card').forEach(function (card) {
-            var ok = (!state.section || card.dataset.section === state.section)
-                && (!state.hide || !card.dataset.state)
+            var match = (!state.group || card.dataset.group === state.group)
                 && (!state.q || card.dataset.search.indexOf(state.q) !== -1);
+            if (match) VIEWS.forEach(function (v) { if (inView(card, v)) counts[v]++; });
+            var ok = match && (inView(card, state.view) || card.dataset.keep === '1');
             card.hidden = !ok;
             if (ok) shown++;
+        });
+        VIEWS.forEach(function (v) {
+            var n = root.querySelector('[data-count="' + v + '"]');
+            if (n) n.textContent = counts[v];
         });
         root.querySelectorAll('.kop-pb-group').forEach(function (g) {
             g.hidden = !g.querySelector('.kop-pb-card:not([hidden])');
@@ -36,7 +53,14 @@
             s.hidden = !s.querySelector('.kop-pb-card:not([hidden])');
         });
         var none = root.querySelector('.kop-pb-none');
-        if (none) none.hidden = shown > 0;
+        if (none) {
+            none.hidden = shown > 0;
+            none.textContent = state.view === 'needs' && !state.q && !state.group ? 'Nothing is waiting on you.' : 'Nothing matches.';
+        }
+    }
+
+    function unkeep() {
+        root.querySelectorAll('.kop-pb-card[data-keep]').forEach(function (c) { delete c.dataset.keep; });
     }
 
     function post(data) {
@@ -65,28 +89,23 @@
 
     root.addEventListener('click', function (e) {
         var tab = e.target.closest('.kop-pb-tab');
-        if (tab) {
-            state.section = tab.dataset.section;
-            root.querySelectorAll('.kop-pb-tab').forEach(function (t) { t.setAttribute('aria-pressed', t === tab ? 'true' : 'false'); });
-            filter();
-            return;
-        }
+        if (tab) { setView(tab.dataset.view); return; }
         if (e.target.closest('.kop-pb-copy')) { copyOpen(e.target.closest('.kop-pb-copy')); return; }
         var btn = e.target.closest('button[data-act]');
         if (!btn) return;
         var card = btn.closest('.kop-pb-card');
         if (!card) return;
         var act = btn.dataset.act, id = card.dataset.id;
-        if (act === 'edit' || act === 'cancel') {
-            var edit = card.querySelector('.kop-pb-edit');
-            if (edit) edit.hidden = act === 'cancel';
-            if (act === 'edit' && edit) { var t = edit.querySelector('textarea'); if (t) t.focus(); }
+        if (act === 'edit' || act === 'open' || act === 'cancel') {
+            var box = btn.closest('.kop-pb-edit, .kop-pb-form') || card.querySelector(act === 'edit' ? '.kop-pb-edit' : '.kop-pb-form');
+            if (box) box.hidden = act === 'cancel';
+            if (act !== 'cancel' && box) { var t = box.querySelector('textarea'); if (t) t.focus(); }
             return;
         }
         var data = { act: act, item: id };
         if (act === 'answer' || act === 'done' || act === 'later') {
-            var form = btn.closest('.kop-pb-edit') || card.querySelector('.kop-pb-answer');
-            var ta = form.querySelector('textarea');
+            var form = btn.closest('.kop-pb-edit') || card.querySelector('.kop-pb-form');
+            var ta = form && form.querySelector('textarea');
             data.text = ta ? ta.value.trim() : '';
             if (act === 'answer' && !data.text) { say(card, 'Type an answer first, or use Done or Not now.', true); if (ta) ta.focus(); return; }
         }
@@ -96,22 +115,38 @@
             if (!d || !d.success) { btn.disabled = false; say(card, (d && d.data && d.data.message) || 'Could not save.', true); return; }
             setDraft(id, '');
             var fresh = replaceCard(card, d.data.html || '');
-            if (fresh) { restoreDrafts(fresh.parentNode); say(fresh, d.data.message || 'Saved.'); }
+            if (fresh) { fresh.dataset.keep = '1'; say(fresh, d.data.message || 'Saved.'); }
             var c = root.querySelector('.kop-pb-open-count');
             if (c && typeof d.data.open === 'number') c.textContent = d.data.open;
             filter();
         }).catch(function () { btn.disabled = false; say(card, 'Could not reach the site. Try again.', true); });
     });
 
+    function setView(view) {
+        if (VIEWS.indexOf(view) === -1) return;
+        state.view = view;
+        try { localStorage.setItem('kop-pb-view', view); } catch (e) {}
+        root.querySelectorAll('.kop-pb-tab').forEach(function (t) { t.setAttribute('aria-pressed', t.dataset.view === view ? 'true' : 'false'); });
+        unkeep();
+        filter();
+    }
+
+    // Ctrl+Enter (Cmd+Enter) in an answer box saves it.
+    root.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey) || !e.target.classList.contains('kop-pb-ta')) return;
+        var save = e.target.parentNode.querySelector('button[data-act="answer"]');
+        if (save) { e.preventDefault(); save.click(); }
+    });
+
     root.addEventListener('input', function (e) {
-        if (e.target.classList.contains('kop-pb-search')) { state.q = e.target.value.trim().toLowerCase(); filter(); return; }
+        if (e.target.classList.contains('kop-pb-search')) { state.q = e.target.value.trim().toLowerCase(); unkeep(); filter(); return; }
         if (e.target.classList.contains('kop-pb-ta') && !e.target.closest('.kop-pb-edit')) {
             var card = e.target.closest('.kop-pb-card');
             if (card) setDraft(card.dataset.id, e.target.value);
         }
     });
     root.addEventListener('change', function (e) {
-        if (e.target.classList.contains('kop-pb-hide-box')) { state.hide = e.target.checked; filter(); }
+        if (e.target.classList.contains('kop-pb-group-select')) { state.group = e.target.value; unkeep(); filter(); }
     });
 
     function copyOpen(btn) {
@@ -126,5 +161,5 @@
     }
 
     restoreDrafts(root);
-    filter();
+    setView(state.view);
 })();

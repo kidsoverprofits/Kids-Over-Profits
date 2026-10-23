@@ -9,7 +9,9 @@ scripts/test-plan-board.php makes the same check, so a session no longer has to 
 docs/PLAN.md is the index; the items are in docs/plan/*.md, read in name order. A file of a numbered subsection
 repeats its section heading ("## 4. ..."), which joins the section already read.
 Every list item in sections 2 and up becomes a card with a stable id
-("<section>:<slug of its bold lead>") and a hash of its text. The owner's answers are kept on the site
+("<section>:<slug of its bold lead>") and a hash of its text. An item that waits on the owner ends with a line
+"Ask: <one-line question>" (every item of section 2 does); it becomes the card's "ask" and puts the card in the
+screen's "Needs you" view. The owner's answers are kept on the site
 ({prefix}kop_plan_answers, inc/plan-board.php), never in these files. docs/PLAN.md section "Plan Board" says how a
 session folds them in. docs/ is not deployed, so this file is how the server sees the plan.
 """
@@ -26,6 +28,7 @@ PLAN_DIR = ROOT / 'docs' / 'plan'
 
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
 LEAD = re.compile(r'^\*\*(.+?)\*\*')
+ASK = re.compile(r'^Ask:\s*')
 
 
 def slug(text, limit=60):
@@ -83,11 +86,15 @@ def parse(md):
         if ITEM_START.match(line):
             flush_para()
             body = ITEM_START.sub('', line, count=1)
-            item = {'body': [body]}
+            item = {'body': [body], 'ask': []}
             grp['items'].append(item)
             continue
         if item is not None and raw[:1] in (' ', '\t'):
-            item['body'].append(line.strip())
+            # "Ask: <question>" (its own line, last in the item) is the one-line question for the owner.
+            if item['ask'] or ASK.match(line.strip()):
+                item['ask'].append(ASK.sub('', line.strip(), count=1))
+            else:
+                item['body'].append(line.strip())
             continue
         close_item()
         para.append(line)
@@ -101,6 +108,7 @@ def parse(md):
             items = []
             for it in g['items']:
                 text = ' '.join(it['body'])
+                ask = ' '.join(it['ask'])
                 lm = LEAD.match(text)
                 lead = lm.group(1).rstrip(':.') if lm else ' '.join(text.split()[:8])
                 base = g['key'] + ':' + slug(lead)
@@ -108,7 +116,7 @@ def parse(md):
                 while iid in seen:
                     iid, n = f'{base}-{n}', n + 1
                 seen.add(iid)
-                items.append({'id': iid, 'lead': lead, 'text': text})
+                items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask})
             if items or g['intro']:
                 groups.append({'key': g['key'], 'title': g['title'], 'intro': g['intro'], 'items': items})
         out.append({'key': s['key'], 'title': s['title'], 'groups': groups})
@@ -150,7 +158,8 @@ def main():
     for s in sections:
         for g in s['groups']:
             for it in g['items']:
-                it['hash'] = hashlib.sha1(it['text'].encode('utf-8')).hexdigest()[:12]
+                full = it['text'] + ('\n' + it['ask'] if it['ask'] else '')
+                it['hash'] = hashlib.sha1(full.encode('utf-8')).hexdigest()[:12]
     data = {'built': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'source': src, 'sections': sections}
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)

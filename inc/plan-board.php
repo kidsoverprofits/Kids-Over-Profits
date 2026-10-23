@@ -79,7 +79,8 @@ function kop_pb_kinds() {
     return array('answer' => 'Answered', 'done' => 'Done', 'later' => 'Not now');
 }
 
-/** seeds/plan-board.json: {built, sections: [{key, title, groups: [{key, title, intro, items: [{id, lead, text, hash}]}]}]}. */
+/** seeds/plan-board.json: {built, source, sections: [{key, title, groups: [{key, title, intro, items: [{id, lead, text, ask, hash}]}]}]}.
+ * "ask" is the item's one-line question for the owner (its "Ask:" line); an item with one waits on the owner. */
 function kop_pb_plan($path = null) {
     static $cache = array();
     $path = $path ?? get_stylesheet_directory() . '/seeds/plan-board.json';
@@ -90,18 +91,27 @@ function kop_pb_plan($path = null) {
     return $cache[$path];
 }
 
-/** Every item of the plan by id. */
+/** Every item of the plan by id, with its section, its group and where it sits ("2.4 Decisions waiting"). */
 function kop_pb_items(array $plan) {
     $out = array();
     foreach ($plan['sections'] as $s) {
         foreach ($s['groups'] as $g) {
             foreach ($g['items'] as $it) {
                 $it['section'] = $s['key'];
+                $it['group'] = $g['key'];
+                $it['where'] = kop_pb_group_label($s, $g);
+                $it['ask'] = (string) ($it['ask'] ?? '');
                 $out[$it['id']] = $it;
             }
         }
     }
     return $out;
+}
+
+/** A group's name: "2.4 Decisions waiting", or the section's title for a section with no subsections. */
+function kop_pb_group_label(array $s, array $g) {
+    if ($g['title'] === '') return $s['key'] . '. ' . preg_replace('/^Owner: .*/', 'Owner', $s['title']);
+    return (preg_match('/^\d+\.\d+$/', $g['key']) ? $g['key'] . ' ' : '') . $g['title'];
 }
 
 /** seeds/plan-board-passes.json as answer id => {at, result}, plus the passes themselves (newest first). */
@@ -154,6 +164,7 @@ function kop_pb_open_export(array $open, array $items) {
             'answer' => (int) $r['id'],
             'itemId' => $item_id,
             'lead' => $r['item_lead'],
+            'ask' => $it['ask'] ?? '',
             'kind' => $r['kind'],
             'text' => (string) $r['body'],
             'savedAt' => $r['saved_at'],
@@ -191,15 +202,29 @@ function kop_pb_when($datetime) {
     return $t ? wp_date('M j, g:i a', $t) : '';
 }
 
-/** One card: the item, then its answer (saved, folded in) or the box to answer it. */
+/**
+ * One card: its question (or its lead) on top, the item's text folded under Details when it is long, then its answer
+ * (saved, folded in) or the buttons to answer it. $it comes from kop_pb_items().
+ */
 function kop_pb_card_html(array $it, $open, $folded) {
     $kinds = kop_pb_kinds();
     $state = $open ? $open['kind'] : '';
+    $ask = (string) ($it['ask'] ?? '');
     $chip = $open ? '<span class="kop-pb-chip is-' . esc_attr($state) . '">' . esc_html($kinds[$state] ?? $state) . '</span>' : '';
     $out = '<article class="kop-pb-card" id="' . esc_attr('pb-' . $it['id']) . '" data-id="' . esc_attr($it['id']) . '" data-section="' . esc_attr($it['section'] ?? '') . '"'
-        . ' data-state="' . esc_attr($state) . '" data-search="' . esc_attr(strtolower($it['id'] . ' ' . $it['text'])) . '">';
-    $out .= '<div class="kop-pb-meta"><span class="kop-pb-id">' . esc_html($it['id']) . '</span>' . $chip . '</div>';
-    $out .= '<div class="kop-pb-text">' . kop_pb_md($it['text']) . '</div>';
+        . ' data-group="' . esc_attr($it['group'] ?? '') . '" data-needs="' . ($ask !== '' ? '1' : '') . '"'
+        . ' data-state="' . esc_attr($state) . '" data-search="' . esc_attr(strtolower($it['id'] . ' ' . $ask . ' ' . $it['text'])) . '">';
+    $out .= '<div class="kop-pb-meta"><span class="kop-pb-where">' . esc_html($it['where'] ?? '') . '</span>' . $chip . '</div>';
+    $details = '<div class="kop-pb-text">' . kop_pb_md($it['text']) . '</div><p class="kop-pb-id">' . esc_html($it['id']) . '</p>';
+    if ($ask !== '') {
+        $out .= '<p class="kop-pb-ask">' . kop_pb_md($ask) . '</p>';
+        $out .= '<details class="kop-pb-details"><summary>Details: ' . esc_html($it['lead']) . '</summary>' . $details . '</details>';
+    } elseif (mb_strlen($it['text']) > 260) {
+        $out .= '<p class="kop-pb-ask">' . esc_html($it['lead']) . '</p>';
+        $out .= '<details class="kop-pb-details"><summary>Details</summary>' . $details . '</details>';
+    } else {
+        $out .= $details;
+    }
     $out .= '<div class="kop-pb-answer">';
     if ($open) {
         $changed = $open['item_hash'] !== '' && $open['item_hash'] !== ($it['hash'] ?? '');
@@ -215,19 +240,22 @@ function kop_pb_card_html(array $it, $open, $folded) {
                 . ($folded['body'] !== '' && $folded['body'] !== null ? ': ' . esc_html(wp_trim_words((string) $folded['body'], 30)) : '')
                 . '. Folded in ' . esc_html($folded['pass']['at']) . ($folded['pass']['result'] !== '' ? ': ' . kop_pb_md($folded['pass']['result']) : '') . '</p>';
         }
-        $out .= kop_pb_form_html($it, '', false);
+        // One click for Done or Not now; Answer opens the box (so does a saved draft, js/plan-board.js).
+        $out .= '<div class="kop-pb-buttons kop-pb-quick">' . kop_ak_button('Answer', 'primary', 'data-act="open"')
+            . kop_ak_button('Done', 'secondary', 'data-act="done"') . kop_ak_button('Not now', 'secondary', 'data-act="later"') . '</div>';
+        $out .= '<div class="kop-pb-form" hidden>' . kop_pb_form_html($it, '', false) . '</div>';
     }
     $out .= '<div class="kop-pb-msg" role="status" aria-live="polite"></div></div></article>';
     return $out;
 }
 
 function kop_pb_form_html(array $it, $value, $editing) {
-    $id = 'kop-pb-ta-' . md5($it['id']);
+    $id = 'kop-pb-ta-' . md5($it['id']) . ($editing ? '-edit' : '');
     return '<label class="screen-reader-text" for="' . esc_attr($id) . '">Your answer</label>'
-        . '<textarea id="' . esc_attr($id) . '" class="kop-pb-ta" rows="2" placeholder="Your answer, a decision, a correction, or what happened">' . esc_textarea($value) . '</textarea>'
+        . '<textarea id="' . esc_attr($id) . '" class="kop-pb-ta" rows="3" placeholder="Your answer, a decision, a correction, or what happened">' . esc_textarea($value) . '</textarea>'
         . '<div class="kop-pb-buttons">' . kop_ak_button('Save answer', 'primary', 'data-act="answer"')
-        . kop_ak_button('Done', 'secondary', 'data-act="done"') . kop_ak_button('Not now', 'secondary', 'data-act="later"')
-        . ($editing ? kop_ak_button('Cancel', 'quiet', 'data-act="cancel"') : '') . '</div>';
+        . ($editing ? kop_ak_button('Done', 'secondary', 'data-act="done"') . kop_ak_button('Not now', 'secondary', 'data-act="later"') : '')
+        . kop_ak_button('Cancel', 'quiet', 'data-act="cancel"') . '<span class="kop-pb-hint">Ctrl+Enter saves</span></div>';
 }
 
 /** Saves an answer for an item: withdraws the item's standing open answer and adds this one. Returns the new row id or an error string. */
@@ -307,13 +335,13 @@ function kop_pb_page() {
 
     echo '<div class="wrap kop-ak kop-pb">';
     echo kop_ak_header('Plan Board', array(
-        'lede' => 'Every open item in the work plan. Answer one, or mark it Done or Not now; Claude folds the answers into the plan on its next pass.',
+        'lede' => 'The work plan as cards. <em>Needs you</em> lists only the items waiting on you, each with its question; Claude folds your answers into the plan on its next pass.',
         'steps' => array(
-            'Type an answer under an item (a decision, a correction, what happened) and press <em>Save answer</em>; or press <em>Done</em> or <em>Not now</em>.',
+            'Under a question press <em>Done</em> or <em>Not now</em>, or <em>Answer</em> to type a decision, a correction or what happened (Ctrl+Enter saves). <em>Details</em> opens the full item.',
             'Say "next pass" to Claude. It reads every open answer, changes the plan to match (a done item is archived, a not-now item is parked), and does the work an answer unblocks.',
             'Once its changes are deployed, each answer shows here as folded in, with what Claude did. An answer stays yours to change or withdraw until then.',
         ),
-        'help' => '<p>The cards come from the plan files in the theme repository (docs/plan/), rebuilt with each pass. Claude never writes your answers or this screen: it reads them and commits what it did.</p>',
+        'help' => '<p>The cards come from the plan files in the theme repository (docs/plan/), rebuilt on every push that changes them. An item is yours when it carries a question ("Ask:" in the file); <em>Everything</em> shows the session work too. Claude never writes your answers or this screen: it reads them and commits what it did.</p>',
     ));
 
     $status = '<strong>' . count($items) . '</strong> items &middot; <strong class="kop-pb-open-count">' . count($open) . '</strong> answers waiting for Claude'
@@ -341,17 +369,24 @@ function kop_pb_page() {
         echo kop_ak_fold('Answers to items no longer on the plan (' . count($lost) . ')', '<ul class="kop-pb-pass">' . $list . '</ul><p>Claude still reads these on its next pass.</p>', true);
     }
 
-    // The filter toolbar: a section, the search box, hide answered. Applied in the page (js/plan-board.js).
-    echo '<div class="kop-pb-toolbar"><div class="kop-pb-tabs" role="toolbar" aria-label="Sections">';
-    echo '<button type="button" class="kop-pb-tab" data-section="" aria-pressed="true">All</button>';
-    foreach ($plan['sections'] as $s) {
-        $n = 0;
-        foreach ($s['groups'] as $g) $n += count($g['items']);
-        $label = preg_replace('/^Owner: .*/', 'Owner', $s['title']);
-        echo '<button type="button" class="kop-pb-tab" data-section="' . esc_attr($s['key']) . '" aria-pressed="false">' . esc_html($s['key'] . '. ' . $label) . ' <span class="kop-pb-n">' . $n . '</span></button>';
+    // The toolbar: the view (Needs you / Waiting for Claude / Everything), a section, the search box. Applied in
+    // the page (js/plan-board.js), which also keeps the counts.
+    $needs = count(array_filter($items, function ($it) use ($open) { return $it['ask'] !== '' && !isset($open[$it['id']]); }));
+    $views = array('needs' => array('Needs you', $needs), 'waiting' => array('Waiting for Claude', count(array_intersect_key($open, $items))), 'all' => array('Everything', count($items)));
+    echo '<div class="kop-pb-toolbar"><div class="kop-pb-tabs" role="toolbar" aria-label="View">';
+    foreach ($views as $key => $v) {
+        echo '<button type="button" class="kop-pb-tab" data-view="' . esc_attr($key) . '" aria-pressed="' . ($key === 'needs' ? 'true' : 'false') . '">'
+            . esc_html($v[0]) . ' <span class="kop-pb-n" data-count="' . esc_attr($key) . '">' . (int) $v[1] . '</span></button>';
     }
-    echo '</div><div class="kop-pb-row"><input type="search" class="kop-pb-search" placeholder="Find an item" aria-label="Find an item">'
-        . '<label class="kop-pb-hide"><input type="checkbox" class="kop-pb-hide-box"> Hide answered</label></div></div>';
+    echo '</div><div class="kop-pb-row"><label class="screen-reader-text" for="kop-pb-group">Section</label><select id="kop-pb-group" class="kop-pb-group-select">'
+        . '<option value="">All sections</option>';
+    foreach ($plan['sections'] as $s) {
+        foreach ($s['groups'] as $g) {
+            if (!$g['items']) continue;
+            echo '<option value="' . esc_attr($g['key']) . '">' . esc_html(kop_pb_group_label($s, $g)) . '</option>';
+        }
+    }
+    echo '</select><input type="search" class="kop-pb-search" placeholder="Find an item" aria-label="Find an item"></div></div>';
 
     if (!$items) {
         echo kop_ak_empty('The plan file seeds/plan-board.json is missing or empty. Run python scripts/plan-board/build.py and deploy.');
@@ -360,11 +395,10 @@ function kop_pb_page() {
         echo '<section class="kop-pb-section" data-section="' . esc_attr($s['key']) . '"><h2>' . esc_html($s['key'] . '. ' . $s['title']) . '</h2>';
         foreach ($s['groups'] as $g) {
             echo '<div class="kop-pb-group">';
-            if ($g['title'] !== '') echo '<h3>' . esc_html((preg_match('/^\d+\.\d+$/', $g['key']) ? $g['key'] . ' ' : '') . $g['title']) . '</h3>';
+            if ($g['title'] !== '') echo '<h3>' . esc_html(kop_pb_group_label($s, $g)) . '</h3>';
             foreach ($g['intro'] as $p) echo '<p class="kop-pb-intro">' . kop_pb_md($p) . '</p>';
             foreach ($g['items'] as $it) {
-                $it['section'] = $s['key'];
-                echo kop_pb_card_html($it, $open[$it['id']] ?? null, $folded[$it['id']] ?? null);
+                echo kop_pb_card_html($items[$it['id']], $open[$it['id']] ?? null, $folded[$it['id']] ?? null);
             }
             echo '</div>';
         }

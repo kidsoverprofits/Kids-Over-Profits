@@ -43,6 +43,25 @@ $check('every item has an id, a lead and a hash', !$bad, implode(', ', array_key
 $nolead = array_filter($items, function ($it) { return strpos($it['text'], '**') !== 0; });
 $check('every item starts with a bold lead (its id)', !$nolead, implode(', ', array_slice(array_keys($nolead), 0, 5)));
 
+// Needs you: every owner item (section 2) carries its one-line question; other sections may.
+$noask = array_filter($items, function ($it) { return $it['section'] === '2' && $it['ask'] === ''; });
+$check('every section 2 item has an "Ask:" question', !$noask, implode(', ', array_slice(array_keys($noask), 0, 5)));
+$asks = array_filter($items, function ($it) { return $it['ask'] !== ''; });
+$check('no "Ask:" text left inside an item', !array_filter($items, function ($it) { return preg_match('/(^|\s)Ask:\s/', $it['text']); }));
+$long = array_filter($asks, function ($it) { return mb_strlen($it['ask']) > 140; });
+$check('every question is one line (140 characters at most)', !$long, implode(', ', array_keys($long)));
+$a = reset($asks);
+$c = kop_pb_card_html($a, null, null);
+$check('a card with a question leads with it, folds the text under Details and is marked as needing the owner',
+    strpos($c, '<p class="kop-pb-ask">') !== false && strpos($c, '<details class="kop-pb-details"><summary>Details: ') !== false && strpos($c, 'data-needs="1"') !== false
+    && strpos($c, 'data-act="open"') !== false && strpos($c, 'data-group="' . $a['group'] . '"') !== false, $c);
+$plain = array_filter($items, function ($it) { return $it['ask'] === '' && mb_strlen($it['text']) <= 260; });
+if ($plain) {
+    $c = kop_pb_card_html(reset($plain), null, null);
+    $check('a short item without a question shows its text, not folded', strpos($c, 'kop-pb-details') === false && strpos($c, 'data-needs=""') !== false);
+}
+$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:provo-canyon-school-profile']['where'] ?? '') === '2.4 Decisions waiting', $items['2.4:provo-canyon-school-profile']['where'] ?? 'missing');
+
 // The seed is built from the plan files as they are (build.py's source_text(): name order, LF, joined by a blank
 // line). docs/ is not deployed, so this only runs in a checkout.
 $files = glob($theme . '/docs/plan/*.md');

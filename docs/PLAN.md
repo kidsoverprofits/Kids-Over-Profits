@@ -55,7 +55,11 @@ or Not now. The server sees the plan as `seeds/plan-board.json` (`python scripts
 deployed). The workflow `.github/workflows/plan-board.yml` rebuilds and commits the seed on every push touching
 `docs/plan/` and then starts the deploy, and `php scripts/test-plan-board.php` fails while the seed is behind, so a
 forgotten rebuild fixes itself a minute after the push. Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
-files. Item ids are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead. A session never
+files. Item ids are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead.
+**An item that waits on the owner ends with `Ask: <one-line question>`** on its own line (every item in section 2
+does, and `php scripts/test-plan-board.php` fails without it; add one to any other item that needs the owner's word,
+and drop it once it no longer does). The board's default view, Needs you, lists exactly these, the question as
+the headline; write it so it can be answered without opening the item. A session never
 writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
 listed there as folded in. A pass (when the owner asks, or at the start of any plan work):
 1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:

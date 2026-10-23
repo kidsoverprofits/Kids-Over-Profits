@@ -94,6 +94,7 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
     `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
     Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
+    Ask: The 8,561 taken-back Drive Docs news links: work through them again, or skip them in bulk?
 28. **Desktop sidebar sticky column** (2026-10-21, docs/plan/4.7 item 16): at 1280+ wide, open a post (any
     https://kidsoverprofits.org/ blog post), https://kidsoverprofits.org/ and a facility page: the newsletter and Donate sit in the
     side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom.
