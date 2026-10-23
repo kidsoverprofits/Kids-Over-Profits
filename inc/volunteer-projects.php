@@ -465,7 +465,8 @@ function kop_volp_create_research(array $in) {
         kop_vol_ensure_tables();
         if (!$wpdb->get_var($wpdb->prepare('SELECT id FROM ' . kop_vol_table() . ' WHERE id = %d AND revoked_at IS NULL', $vid))) throw new RuntimeException('That volunteer is turned off or gone.');
     }
-    $picked = kop_volr_pick($kind_key, $search, $size, (string) ($in['questions'] ?? ''));
+    // Research Tasks (inc/research-tasks.php) hands its questions over ready-made: key => [title, detail].
+    $picked = !empty($in['items']) && is_array($in['items']) ? $in['items'] : kop_volr_pick($kind_key, $search, $size, (string) ($in['questions'] ?? ''));
     $invite = '';
     if ($new_name !== '') list($vid, $invite) = kop_vol_create($new_name, 'Made for a project');
 

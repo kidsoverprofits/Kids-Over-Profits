@@ -141,6 +141,15 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # "Could not find it" + where they looked ({prefix}kop_vol_answers); each new link goes to the review inbox at once (kop_ext_insert_*, same
 # duplicate rules as mobile/submit, submitter "<name> (volunteer)"). Nothing changes a record: the admin reads answers on the project page, Used /
 # Not needed ("not needed" frees the record for a later project). A new kind = one entry in kop_volr_kinds() with its 'where'
+# Research Tasks (inc/research-tasks.php, KOP Tools > Research Tasks, {prefix}kop_research_tasks + _log): the open research questions (what
+# docs/RESEARCH-TASKS.md held until 2026-10-23), one card each, given to the owner, Claude or a volunteer; Answered -> Settled / Dropped, every
+# change with exact Undo (the log keeps the rows as they were). Sessions add, answer and settle through seeds/research-tasks.json
+# (python scripts/research-tasks/tasks.py add | answer <key> | settle <key> | list --open), imported on admin_init when the file changes
+# (kop_rt_import_seed(): a new key inserts once; an entry's answer/settled line applies once by its hash, never over an answer already there,
+# and an Undo of it sticks). Ticked tasks -> one volunteer: a 'research:custom' project via kop_volp_create_research(['items' => ...]), item key
+# 'rt<id>', facility_id when the task names one record; kop_rt_sync_volunteer_answers() copies their answer + links onto the task (Answered),
+# settling marks their answer Used; Undo of the send closes the project. Claude's list: php api/research-tasks.php --claude (over SSH, read-only)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-research-tasks.php [--page=out.html]   # seed import, Undo, volunteer round trip, cards
 # Messages (inc/volunteer-messages.php, {prefix}kop_vol_messages): one conversation per volunteer, "Ask a question" on a brief or card names the
 # project/item; answered at Volunteer Reviewers > Messages (menu count bubble), shown on their page marked New; volunteers are never mailed, the
 # notification list is (every 15 min per volunteer at most, option kop_volm_email)

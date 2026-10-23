@@ -324,6 +324,7 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 | `{prefix}kop_review_log` | Every review inbox action, with its Undo | `inc/review-inbox-log.php` |
 | `{prefix}kop_review_holds` | Snoozed items and items handed to one admin | `inc/review-inbox-log.php` |
 | `{prefix}kop_review_tags` | Tags on review inbox items | `inc/review-inbox.php` |
+| `{prefix}kop_research_tasks` / `{prefix}kop_research_task_log` | Open research questions: title, details, facility ids (`records`, JSON `[{"id": n}]`), status, assignee (owner, claude, volunteer + project), answer, settled line; the log holds each change's rows as they were (Undo) | `inc/research-tasks.php` |
 | `{prefix}kop_volunteers` / `{prefix}kop_volunteer_recs` | Volunteer reviewers (hash of their link's token only) and their approve/reject/not sure recommendations | `inc/review-volunteers.php` |
 | `{prefix}kop_auto_connect` | Exact-name connections made without a click, so an undone one is never redone | `inc/auto-connect.php` |
 | `{prefix}kop_submission_followups` | "Email me when this has been reviewed" requests (address blanked once sent) | `inc/submission-followup.php` |

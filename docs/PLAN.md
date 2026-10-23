@@ -8,8 +8,9 @@ section, so a session reads only the file for the work at hand. Background lives
   old sections 2 and 3, as they stood before the 2026-10-20 reorganisation, is there under "Moved 2026-10-20":
   an item marked "(old 3.12)" has its background in section 3.12 there, and so does a code comment or doc that
   cites "docs/PLAN.md 3.12".
-- [RESEARCH-TASKS.md](RESEARCH-TASKS.md): open research questions (sources that disagree, records that look
-  wrong). Add one whenever it comes up; take it off when settled.
+- Research tasks: open research questions (sources that disagree, records that look wrong) live at
+  [KOP Tools > Research Tasks](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks) since 2026-10-23.
+  Add one whenever it comes up with `python scripts/research-tasks/tasks.py add` (how: [RESEARCH-TASKS.md](RESEARCH-TASKS.md)).
 - [DATA-FLOWS.md](DATA-FLOWS.md), [ADDING-CONTENT.md](ADDING-CONTENT.md), [ADMIN-UI.md](ADMIN-UI.md),
   [NETWORK-MAP.md](NETWORK-MAP.md), [PAGE-TEMPLATE-DESIGN-PLAN.md](PAGE-TEMPLATE-DESIGN-PLAN.md),
   [FIX-PLAN-2026-09.md](FIX-PLAN-2026-09.md) and the area READMEs in [README.md](README.md).

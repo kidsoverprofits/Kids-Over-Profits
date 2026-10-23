@@ -1,0 +1,38 @@
+/* KOP Tools > Research Tasks (inc/research-tasks.php). The kit (css/admin-kit.css) draws the header, tabs, filters, folds and buttons. */
+.kop-rt { max-width: 960px; }
+.kop-rt-group > h2 { font-size: 1.25em; margin: 24px 0 8px; color: #000435; }
+.kop-rt-card { background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #c3c4c7; border-radius: 6px; padding: 12px 14px; margin: 0 0 10px; min-width: 0; }
+.kop-rt-card.is-answered { border-left-color: #1e6f79; }
+.kop-rt-card.is-settled { border-left-color: #2f6b2a; }
+.kop-rt-card.is-dropped { border-left-color: #8a5a12; }
+.kop-rt-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 12px; color: #4A5568; }
+.kop-rt-section { font-weight: 600; }
+.kop-rt-chip { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; background: #f0ece0; color: #000435; }
+.kop-rt-chip.is-answered { color: #1e6f79; } .kop-rt-chip.is-settled { color: #2f6b2a; } .kop-rt-chip.is-dropped { color: #8a5a12; }
+.kop-rt-chip.is-who { background: #e6f4f1; color: #0f4f57; }
+.kop-rt-title { margin: 6px 0; font-size: 15.5px; line-height: 1.45; color: #000435; overflow-wrap: anywhere; }
+.kop-rt-records, .kop-rt-found { margin: 4px 0; font-size: 13px; color: #3c434a; overflow-wrap: anywhere; }
+.kop-rt-records a, .kop-rt-found a, .kop-rt-body a { color: #1e6f79; }
+.kop-rt-body { font-size: 14px; line-height: 1.55; color: #1d2327; overflow-wrap: anywhere; }
+.kop-rt-body p { margin: 4px 0 8px; }
+.kop-rt-body ul { list-style: disc; margin: 4px 0 8px 20px; }
+.kop-rt-body li.is-sub { margin-left: 18px; list-style: circle; }
+.kop-rt-body code { font-size: 12px; }
+.kop-rt-more > summary { cursor: pointer; font-size: 13px; color: #1e6f79; padding: 3px 0; }
+.kop-rt-more > summary:focus-visible { outline: 2px solid #1e6f79; outline-offset: 2px; }
+.kop-rt-answer { margin: 8px 0; padding: 8px 10px; background: #f3faf8; border: 1px solid #b6e3d4; border-radius: 4px; color: #1d2327; }
+.kop-rt-answer.is-settled { background: #f6f7f7; border-color: #dcdcde; }
+.kop-rt-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; align-items: center; }
+.kop-rt-settle, .kop-rt-edit { margin-top: 6px; }
+.kop-rt-settle label, .kop-rt-edit label, .kop-rt-add label { display: block; font-size: 13px; font-weight: 600; margin: 8px 0 3px; color: #1d2327; }
+.kop-rt-settle textarea, .kop-rt-edit textarea, .kop-rt-edit input[type="text"], .kop-rt-add input[type="text"], .kop-rt-add textarea { width: 100%; max-width: 100%; box-sizing: border-box; }
+.kop-rt-recs { border: 0; padding: 0; margin: 8px 0 0; }
+.kop-rt-recs legend { font-size: 13px; font-weight: 600; }
+.kop-rt-recs label { font-weight: 400; }
+.kop-rt-bar { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.kop-rt-volpick { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.kop-rt-volpick input, .kop-rt-volpick select { max-width: 100%; min-width: 0; }
+.kop-rt-link input { width: min(520px, 100%); }
+.kop-rt-copy { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 12px; }
+.kop-rt-log li { margin: 4px 0; }
+.kop-rt-pick input { margin: 0; }

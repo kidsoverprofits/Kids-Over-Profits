@@ -280,6 +280,8 @@ require_once get_stylesheet_directory() . '/inc/drive-docs.php';
 require_once get_stylesheet_directory() . '/inc/drive-sync.php';
 // The work plan as answerable cards (seeds/plan-board.json from docs/plan/), KOP Tools > Plan Board
 require_once get_stylesheet_directory() . '/inc/plan-board.php';
+// Open research questions assigned to the owner, Claude or a volunteer (seeds/research-tasks.json), KOP Tools > Research Tasks
+require_once get_stylesheet_directory() . '/inc/research-tasks.php';
 // What the old Fornits survivor forum says about each facility (scripts/fornits-crawl.py, fornits-process.py), reviewed at KOP Tools > Fornits
 require_once get_stylesheet_directory() . '/inc/fornits.php';
 // Which job spent the shared Groq/Gemini free quota, and "Check now" (KOP Tools > AI Usage)

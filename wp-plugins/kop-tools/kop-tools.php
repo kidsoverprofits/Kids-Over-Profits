@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.11
+ * Version: 2.5.12
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -132,6 +132,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-volunteer-reviewers',
                 'requires' => 'kop_vol_admin_page',
+            ),
+            array(
+                'title'    => 'Research Tasks',
+                'desc'     => 'Open research questions (sources disagree, a record looks wrong): give each to yourself, to Claude or to a volunteer as a project, read the answers and settle them, with Undo.',
+                'type'     => 'screen',
+                'screen'   => 'kop-research-tasks',
+                'requires' => 'kop_rt_page',
             ),
         ),
         'Records & editors' => array(
