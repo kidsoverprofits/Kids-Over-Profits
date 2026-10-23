@@ -1,6 +1,6 @@
 {
- "built": "2026-10-23 21:21 UTC",
- "source": "2318a554d48801cc9ad874e344fa46cc78e040b1",
+ "built": "2026-10-23 21:24 UTC",
+ "source": "f57a7fabf8efecc683f0803a818875b349858f72",
  "sections": [
   {
    "key": "2",
@@ -782,6 +782,14 @@
        "ask": "",
        "date": "2026-10-21",
        "hash": "59a6168af56f"
+      },
+      {
+       "id": "3:research-tasks-screen",
+       "lead": "Research Tasks screen",
+       "text": "**Research Tasks screen** (2026-10-23, [1ecf8452](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/1ecf8452)): open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks (the first visit makes the tables and imports seeds/research-tasks.json): 140 open tasks in 23 sections, KOP Tools lists it under Review queue, a record finder on Add a task and Edit. Then give one task to a test volunteer (Send to a volunteer), answer it on their page, reload: the card is Answered with the answer and links; Undo of the send closes the project.",
+       "ask": "Research Tasks is up with the old list's 140 questions; give some to Claude or a volunteer to try it?",
+       "date": "2026-10-23",
+       "hash": "957f33702545"
       }
      ]
     }
@@ -1136,6 +1144,14 @@
        "ask": "",
        "date": "2026-10-23",
        "hash": "3470941dd04a"
+      },
+      {
+       "id": "4.4:research-tasks-follow-ups",
+       "lead": "Research Tasks follow-ups",
+       "text": "**Research Tasks follow-ups** (2026-10-23, [1ecf8452](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/1ecf8452), `inc/research-tasks.php`). Open: (a) a task added on the screen (key `site:...`) cannot be answered through the seed; if sessions need to, give `api/research-tasks.php` an `answer` that writes (needs the owner's OK: writes over SSH are blocked in auto mode). (b) Review inbox \"Needs research\" items stay in the inbox; the screen only counts and links them: a \"Make it a research task\" button on the inbox card would bring them in. (c) The 140 imported titles come from the old file's bullets and table rows; some read as notes (\"Rename year: settled, 2020.\" under Clearview) and may already be settled: a pass over them with the owner. (d) A volunteer's question is the task's title + details unless \"Question for a volunteer\" is filled; the imported details are written for us, so fill it before sending.",
+       "ask": "",
+       "date": "2026-10-23",
+       "hash": "142ece0b4c8b"
       }
      ]
     },
