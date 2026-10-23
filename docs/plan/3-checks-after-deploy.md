@@ -102,3 +102,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     Run `python scripts/check-bare-text.py` and `python -u scripts/check-contrast.py`.
     On https://kidsoverprofits.org/facility/provo-canyon-school-ut/ at 1100+, the About text runs full width once the At a glance
     rail ends (it was a 381px strip the whole way down), and About comes before Survivor testimony and History as before.
+29. **Research Tasks screen** (2026-10-23, [1ecf8452](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/1ecf8452)):
+    open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks (the first visit makes the tables and imports
+    seeds/research-tasks.json): 140 open tasks in 23 sections, KOP Tools lists it under Review queue, a record finder on
+    Add a task and Edit. Then give one task to a test volunteer (Send to a volunteer), answer it on their page, reload:
+    the card is Answered with the answer and links; Undo of the send closes the project.
+    Ask: Research Tasks is up with the old list's 140 questions; give some to Claude or a volunteer to try it?
