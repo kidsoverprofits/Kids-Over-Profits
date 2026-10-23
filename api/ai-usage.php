@@ -33,6 +33,7 @@ if (!function_exists('kop_ai_usage_record')) {
             'doc-types-admin.php'          => 'Document types',
             'fornits.php'                  => 'Fornits reading',
             'highlight-summaries.php'      => 'Plain summaries',
+            'reader-accounts.php'          => 'Readers\' answers read into lines',
             'closure-reports.php'          => 'Closure scan',
             'facility-discovery.php'       => 'Facilities from News',
             'status-checks.php'            => 'Bill and lawsuit updates',

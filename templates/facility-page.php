@@ -345,6 +345,8 @@ if ($kop_fp_campus) $kop_fp_sections['campus'] = $kop_fp_school_only ? ($kop_fp_
 // Rules and practices read from the program's own handbooks (inc/program-practices.php), read at render time.
 $kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
 $kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
+// What readers who were there told the questions page, read into lines (inc/reader-accounts.php): its own section.
+$kop_fp_remember = function_exists('kop_ra_section_html') ? kop_pp_for_facility((int) $page['id'], 'account') : array();
 $kop_fp_has_staff = !empty($page['staff']);
 $kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']);
 $kop_fp_has_videos = !empty($page['videos']);
@@ -459,6 +461,7 @@ if ($kop_fp_has_news) $kop_fp_sections['news'] = 'News coverage';
 if ($kop_fp_has_videos && !isset($kop_fp_psec['videos'])) $kop_fp_sections['videos'] = 'Videos';
 if ($kop_fp_has_staff) $kop_fp_sections['staff'] = 'Staff';
 if ($kop_fp_has_practices) $kop_fp_sections['practices'] = 'Rules and practices';
+if ($kop_fp_remember) $kop_fp_sections['remember'] = 'What people remember';
 if ($kop_fp_has_inspections) $kop_fp_sections['inspections'] = 'Licensing';
 if ($kop_fp_has_network) $kop_fp_sections['network'] = 'Network';
 if ($kop_fp_has_docs) $kop_fp_sections['documents'] = 'Documents';
@@ -1058,6 +1061,14 @@ get_header();
                     <p class="kop-fp-count"><?php echo esc_html(kop_pp_sources_line($kop_fp_rules)); ?></p>
                     <?php echo kop_pp_section_html($kop_fp_rules); // Escaped inside. ?>
                 <?php endif; ?>
+            </section>
+            <?php endif; ?>
+
+            <?php if ($kop_fp_remember) : ?>
+            <section class="kop-fp-section kop-ra-section" id="<?php echo $kop_fp_id('remember'); ?>">
+                <h2>What people who were there remember</h2>
+                <p class="kop-fp-count">What people who were at <?php echo esc_html($page['name']); ?>, or had a child there, told us on our questions page. Under each line are their own words.</p>
+                <?php echo kop_ra_section_html($kop_fp_remember); // Escaped inside. ?>
             </section>
             <?php endif; ?>
 

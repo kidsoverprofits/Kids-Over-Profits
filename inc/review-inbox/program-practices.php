@@ -40,7 +40,9 @@ function kop_rinbox_pp_cards() {
     if (function_exists('kop_pp_import')) kop_pp_import();
     if (!kop_pp_ready()) return array();
     global $wpdb;
-    $rows = $wpdb->get_results('SELECT facility_id, topic, status, COUNT(*) AS n FROM ' . kop_pp_table() . ' GROUP BY facility_id, topic, status', ARRAY_A);
+    // Readers' answers have their own cards (inc/review-inbox/reader-accounts.php).
+    $rows = $wpdb->get_results('SELECT facility_id, topic, status, COUNT(*) AS n FROM ' . kop_pp_table()
+        . (kop_pp_has_accounts() ? ' WHERE answer_id = 0' : '') . ' GROUP BY facility_id, topic, status', ARRAY_A);
     $cards = array();
     foreach ((array) $rows as $r) {
         $key = (int) $r['facility_id'] . ':' . $r['topic'];
@@ -89,7 +91,7 @@ function kop_rinbox_pp_list(array $q) {
 function kop_rinbox_pp_item($fid, $topic) {
     $topics = kop_pp_topics();
     if (!isset($topics[$topic])) return null;
-    $all = kop_pp_rows(array('facility_id' => (int) $fid, 'topic' => $topic));
+    $all = kop_pp_rows(array('facility_id' => (int) $fid, 'topic' => $topic, 'kind' => 'doc'));
     if (!$all) return null;
     $c = array('pending' => 0, 'added' => 0, 'left' => 0);
     foreach ($all as $r) $c[$r['status']] = ($c[$r['status']] ?? 0) + 1;

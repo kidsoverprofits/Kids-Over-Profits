@@ -250,6 +250,31 @@
     margin-bottom: 0.3rem;
 }
 
+/* What people who were there remember (inc/reader-accounts.php): our line, their words under it, then who they are. */
+.kop-ra-lines li {
+    margin-bottom: 0.6rem;
+}
+
+.kop-ra-words {
+    display: block;
+    margin: 0.15rem 0 0.1rem;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--kop-mint-green, #b6e3d4);
+    font-style: italic;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-ra-cite {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--kop-text-muted, #4a5568);
+}
+
+.kop-fp-generated-body .kop-ra-cite a {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
 .kop-fp-list {
     margin: 0;
     padding: 0;

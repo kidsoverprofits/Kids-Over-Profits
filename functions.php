@@ -308,6 +308,8 @@ require_once get_stylesheet_directory() . '/inc/news-clippings.php'; // OCR text
 require_once get_stylesheet_directory() . '/inc/doc-types-admin.php';
 // Rules and practices read from programs' own handbooks (kop-pipeline scripts/doc-text.py), reviewed in the review inbox, on facility pages
 require_once get_stylesheet_directory() . '/inc/program-practices.php';
+// Readers' free-text answers on /questions/ read into lines the same way, on facility pages under "What people who were there remember"
+require_once get_stylesheet_directory() . '/inc/reader-accounts.php';
 // What industry professionals say on their own podcasts (kop-pipeline scripts/podcast-facts.py), reviewed in the review inbox, admins only
 require_once get_stylesheet_directory() . '/inc/podcast-statements.php';
 

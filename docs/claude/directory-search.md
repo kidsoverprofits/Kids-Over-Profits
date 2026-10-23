@@ -32,7 +32,8 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # operating?, owner) and Review inbox > Conflicts as multiple choice. Yes/no cards swipe (right yes, left no). Found by search or a
 # state deck; #f<id> / #o<id> / #q=<key> open a record. Answers: {prefix}kop_question_answers, one per person (keyed hash of address +
 # browser), 60 an hour. KOP_Q_AGREE (3) people agreeing with nobody disagreeing settles it on its own through Review inbox > Answers
-# to our questions ('settle', reviewer "questions page", Undo in Recently done); staff and rules always wait. Facility values go in as
+# to our questions ('settle', reviewer "questions page", Undo in Recently done); staff years always wait, and so does an answer whose note
+# is hedged (kop_q_hedged(): "not sure", "I think", "not physically"...). Facility values go in as
 # Woodbury Facts rows (extra.via 'questions', badged "Questions page" there and in Conflicts, kop_wbf_origin()) through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
 # name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act().
 # Email is optional and only for "tell me when my answers are checked" (the page says so): kop_q_notify() puts the reader's answers
@@ -48,6 +49,15 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # Guided tour: the /questions/ block in js/tool-tutorials.js (card steps point at '#kop-q-deck ...' and show centred when no deck is open)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php                         # questions, answers, agreement, every real record
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
+# Free text (owner, 2026-10-23; inc/reader-accounts.php): remembered rules (f<id>.rules) and every note on a facility answer are read hourly
+# (cron kop_ra_hourly, KOP_RA_BATCH 8, kop_ai_generate_alternating(), job "Readers' answers read into lines") into rows of
+# kop_program_practices with answer_id = the answer: topic, our plain line, the reader's words (must be in the answer, else dropped;
+# spelling fixed; names -> [name]), year, checklist boxes. Emails, phones and links are cut before the AI sees it (kop_ra_redact()).
+# Reviewed one card per answer at Review inbox > What readers remember (never volunteers): Add -> facility page section "What people
+# who were there remember" (kop_ra_section_html(), cited "A former resident (2010-2012), answering on Kids Over Profits' questions page,
+# October 2026" from their How do you know? or the AI's role); opinions stay on the card; contact offers, court cases and other
+# programs named are the Leads tab. A reader's new answer drops their old one's waiting lines (kop_ra_forget()). Not in the app or wiki yet
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=reader-accounts   # reading, redaction, card, section, Undo, leads, hedging
 # Admin facility id boxes: always kop_facility_finder_field() (inc/facility-finder.php), never a bare id input
 php scripts/test-facility-finder.php              # search by name/past name/id against tmp/prod.sqlite, no bare id boxes left
 # Facility directory (/tti-program-index/, both tabs) loads in steps: lists from kop/v1/facilities?view=index (each facility

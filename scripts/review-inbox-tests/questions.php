@@ -30,7 +30,8 @@ if (!function_exists('sanitize_key')) {
     $pdo = $GLOBALS['pdo'];
     $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_question_answers (id INTEGER PRIMARY KEY AUTOINCREMENT, qkey TEXT NOT NULL DEFAULT '',
         record_kind TEXT NOT NULL DEFAULT '', record_id INTEGER NOT NULL DEFAULT 0, answer_key TEXT NOT NULL DEFAULT '', answer TEXT, value TEXT,
-        how TEXT NOT NULL DEFAULT '', source_url TEXT, note TEXT, who TEXT NOT NULL DEFAULT '', batch INTEGER NOT NULL DEFAULT 0, created_at TEXT)");
+        how TEXT NOT NULL DEFAULT '', source_url TEXT, note TEXT, who TEXT NOT NULL DEFAULT '', batch INTEGER NOT NULL DEFAULT 0, created_at TEXT,
+        read_status TEXT NOT NULL DEFAULT '', read_json TEXT)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_question_batches (id INTEGER PRIMARY KEY AUTOINCREMENT, who TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL DEFAULT 'pending', title TEXT NOT NULL DEFAULT '', created_at TEXT)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_submission_followups (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, item_id INTEGER NOT NULL,

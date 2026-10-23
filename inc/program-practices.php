@@ -28,6 +28,11 @@
  * a decided one. Decisions: option kop_pp_log, batch => {facility_id, topic,
  * added, left, ticks, by, at}.
  *
+ * Readers' answers on the questions page are read into rows of the same table
+ * (inc/reader-accounts.php): answer_id > 0, doc_id 0, doc_title who they are.
+ * Every documents path here keeps to answer_id = 0 ('kind' => 'doc'); those
+ * rows have their own card, section and decisions there.
+ *
  * @package KidsOverProfits
  */
 
@@ -35,7 +40,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_PP_DB_VERSION = '2';
+const KOP_PP_DB_VERSION = '3';
 
 function kop_pp_table() {
     global $wpdb;
@@ -72,9 +77,20 @@ function kop_pp_install($force = false) {
     if (!$wpdb->get_var($wpdb->prepare('SHOW COLUMNS FROM ' . kop_pp_table() . ' LIKE %s', 'why'))) {
         $wpdb->query('ALTER TABLE ' . kop_pp_table() . " ADD COLUMN why VARCHAR(500) NOT NULL DEFAULT '' AFTER quote");
     }
+    // 3: the questions-page answer a line was read from (inc/reader-accounts.php); 0 = a document's line.
+    if (!$wpdb->get_var($wpdb->prepare('SHOW COLUMNS FROM ' . kop_pp_table() . ' LIKE %s', 'answer_id'))) {
+        $wpdb->query('ALTER TABLE ' . kop_pp_table() . ' ADD COLUMN answer_id BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER doc_id, ADD KEY answer_id (answer_id)');
+    }
     update_option('kop_pp_db', KOP_PP_DB_VERSION, false);
 }
 add_action('admin_init', 'kop_pp_install');
+
+/** Has the table its answer_id column yet? Until then every row is a document's line. */
+function kop_pp_has_accounts() {
+    static $has = null;
+    if ($has === null) $has = get_option('kop_pp_db') === KOP_PP_DB_VERSION;
+    return $has;
+}
 
 function kop_pp_ready() {
     static $ready = null;
@@ -180,14 +196,20 @@ function kop_pp_import($force = false) {
 
 /* ---- Rows ----------------------------------------------------------------- */
 
-/** Rows matching $where (column => value), in page order: document, page, id. */
+/**
+ * Rows matching $where (column => value), in page order: document, page, id.
+ * 'kind' => 'doc' keeps to documents' lines, 'account' to readers' answers.
+ */
 function kop_pp_rows(array $where) {
     if (!kop_pp_ready()) return array();
     global $wpdb;
     $sql = array();
     $args = array();
+    $kind = (string) ($where['kind'] ?? '');
+    if ($kind === 'account' && !kop_pp_has_accounts()) return array();
+    if ($kind !== '' && kop_pp_has_accounts()) $sql[] = $kind === 'account' ? 'answer_id > 0' : 'answer_id = 0';
     foreach ($where as $col => $val) {
-        if (!in_array($col, array('id', 'facility_id', 'topic', 'status', 'batch', 'doc_id'), true)) continue;
+        if (!in_array($col, array('id', 'facility_id', 'topic', 'status', 'batch', 'doc_id', 'answer_id'), true)) continue;
         $sql[] = "{$col} = %s";
         $args[] = (string) $val;
     }
@@ -273,8 +295,16 @@ function kop_pp_doc_set(array &$doc, array $keys, $on) {
  * show. Returns the message.
  */
 function kop_pp_apply($fid, $topic, array $picked, $reviewer) {
+    $waiting = kop_pp_rows(array('facility_id' => (int) $fid, 'topic' => $topic, 'status' => 'pending', 'kind' => 'doc'));
+    return kop_pp_decide($fid, $waiting, $picked, $reviewer, array('topic' => (string) $topic));
+}
+
+/**
+ * Add the $picked ones of a card's waiting rows, leave the rest off; $about
+ * names the card in its kop_pp_log() entry ({topic}, or {topic: '', answer_id}).
+ */
+function kop_pp_decide($fid, array $waiting, array $picked, $reviewer, array $about) {
     $fid = (int) $fid;
-    $waiting = kop_pp_rows(array('facility_id' => $fid, 'topic' => $topic, 'status' => 'pending'));
     if (!$waiting) throw new RuntimeException('No lines of this card are waiting any more.');
     $picked = array_flip(array_map('intval', $picked));
     $add = array();
@@ -294,8 +324,8 @@ function kop_pp_apply($fid, $topic, array $picked, $reviewer) {
     kop_pp_set_status($add, 'added', $batch);
     kop_pp_set_status($left, 'left', $batch);
     $log = kop_pp_log();
-    $log[$batch] = array('facility_id' => $fid, 'topic' => (string) $topic, 'added' => $add, 'left' => $left, 'ticks' => $ticks,
-        'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s'));
+    $log[$batch] = array_merge(array('facility_id' => $fid), $about, array('added' => $add, 'left' => $left, 'ticks' => $ticks,
+        'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s')));
     kop_pp_save_log($log);
     kop_pp_purge($fid);
     if (function_exists('kop_record_changed')) kop_record_changed('facility', array($fid));
@@ -308,14 +338,19 @@ function kop_pp_apply($fid, $topic, array $picked, $reviewer) {
 
 /** Leave every waiting line of the card off the page. */
 function kop_pp_leave($fid, $topic, $reviewer) {
-    $waiting = kop_pp_rows(array('facility_id' => (int) $fid, 'topic' => $topic, 'status' => 'pending'));
+    $waiting = kop_pp_rows(array('facility_id' => (int) $fid, 'topic' => $topic, 'status' => 'pending', 'kind' => 'doc'));
+    return kop_pp_leave_rows($fid, $waiting, $reviewer, array('topic' => (string) $topic));
+}
+
+/** Leave a card's waiting rows off; $about as kop_pp_decide(). */
+function kop_pp_leave_rows($fid, array $waiting, $reviewer, array $about) {
     if (!$waiting) throw new RuntimeException('No lines of this card are waiting any more.');
     $batch = 'pp' . gmdate('YmdHis') . substr(md5(uniqid('', true)), 0, 6);
     $ids = array_map('intval', array_column($waiting, 'id'));
     kop_pp_set_status($ids, 'left', $batch);
     $log = kop_pp_log();
-    $log[$batch] = array('facility_id' => (int) $fid, 'topic' => (string) $topic, 'added' => array(), 'left' => $ids, 'ticks' => array(),
-        'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s'));
+    $log[$batch] = array_merge(array('facility_id' => (int) $fid), $about, array('added' => array(), 'left' => $ids, 'ticks' => array(),
+        'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s')));
     kop_pp_save_log($log);
     return 'Left ' . count($ids) . ' line' . (count($ids) === 1 ? '' : 's') . ' off. No page changed.';
 }
@@ -324,6 +359,7 @@ function kop_pp_leave($fid, $topic, $reviewer) {
 function kop_pp_last_batch($fid, $topic) {
     $found = null;
     foreach (kop_pp_log() as $id => $b) {
+        if (!empty($b['answer_id'])) continue; // A reader's answer (inc/reader-accounts.php).
         if ((int) $b['facility_id'] === (int) $fid && (string) $b['topic'] === (string) $topic) $found = $id;
     }
     return $found;
@@ -337,8 +373,15 @@ function kop_pp_last_batch($fid, $topic) {
 function kop_pp_undo($fid, $topic) {
     $batch = kop_pp_last_batch($fid, $topic);
     if (!$batch) throw new RuntimeException('Nothing to undo.');
+    return kop_pp_undo_batch($batch);
+}
+
+/** Undo one kop_pp_log() decision (kop_pp_undo()). */
+function kop_pp_undo_batch($batch) {
     $log = kop_pp_log();
+    if (!isset($log[$batch])) throw new RuntimeException('Nothing to undo.');
     $b = $log[$batch];
+    $fid = (int) $b['facility_id'];
     $ids = array_merge((array) $b['added'], (array) $b['left']);
     $back = array();
     foreach ($ids as $id) {
@@ -367,10 +410,10 @@ function kop_pp_undo($fid, $topic) {
 
 /* ---- Pages ------------------------------------------------------------------ */
 
-/** The added lines of a record, topic => [rows], in kop_pp_topics() order. */
-function kop_pp_for_facility($fid) {
+/** The added lines of a record, topic => [rows], in kop_pp_topics() order; $kind 'account' = readers' (inc/reader-accounts.php). */
+function kop_pp_for_facility($fid, $kind = 'doc') {
     $by = array();
-    foreach (kop_pp_rows(array('facility_id' => (int) $fid, 'status' => 'added')) as $r) $by[$r['topic']][] = $r;
+    foreach (kop_pp_rows(array('facility_id' => (int) $fid, 'status' => 'added', 'kind' => $kind)) as $r) $by[$r['topic']][] = $r;
     $out = array();
     foreach (kop_pp_topics() as $t => $label) {
         if (!empty($by[$t])) $out[$t] = $by[$t];
@@ -440,9 +483,11 @@ function kop_pp_sources_line(array $groups) {
 function kop_pp_ie_load(array $p) {
     $r = kop_pp_rows(array('id' => (int) ($p[0] ?? 0)))[0] ?? null;
     if (!$r) throw new RuntimeException('That line is gone.');
+    $reader = (int) ($r['answer_id'] ?? 0) > 0;
     return array(
-        'title'  => 'A line from ' . $r['doc_title'],
-        'help'   => 'What the document says, in plain words. The quote it rests on: "' . $r['quote'] . '" (page ' . (int) $r['page'] . ').',
+        'title'  => $reader ? 'A line from a reader\'s answer' : 'A line from ' . $r['doc_title'],
+        'help'   => $reader ? 'What ' . lcfirst(strtok((string) $r['doc_title'], ',')) . ' remembers, in plain words. Their words it rests on: "' . $r['quote'] . '".'
+            : 'What the document says, in plain words. The quote it rests on: "' . $r['quote'] . '" (page ' . (int) $r['page'] . ').',
         'fields' => array(
             kop_ie_field('value', 'The line', 'textarea', (string) $r['value'], array('rows' => 3)),
             kop_ie_field('off', 'Take this line off the page', 'bool', false),
@@ -458,7 +503,8 @@ function kop_pp_ie_save(array $p, array $v) {
     if ($off === true || $off === 'true' || $off === 1 || $off === '1') {
         $wpdb->update(kop_pp_table(), array('status' => 'left'), array('id' => (int) $r['id']));
         kop_pp_purge($r['facility_id']);
-        return array('message' => 'Taken off the page. It is listed under Left off in Review inbox > Rules from documents.');
+        return array('message' => 'Taken off the page. It is listed under Left off in Review inbox > '
+            . ((int) ($r['answer_id'] ?? 0) > 0 ? 'What readers remember.' : 'Rules from documents.'));
     }
     $value = trim((string) ($v['value'] ?? ''));
     if ($value === '') throw new RuntimeException('The line is empty: tick "Take this line off the page" instead.');

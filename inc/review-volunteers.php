@@ -106,8 +106,9 @@ function kop_vol_ensure_tables() {
 /** Queues volunteers can never see: readers' contact details, unpublished survivor material, nothing to judge. */
 function kop_vol_never_sources() {
     return array('anonymous-docs', 'bug-reports', 'glossary-feedback', 'fornits', 'data', 'publish-approved', 'drafts', 'record-cleanup', 'questions',
-        // drive-docs quotes the owner's private Google Docs; podcasts attributes statements to named people.
-        'drive-docs', 'podcasts');
+        // drive-docs quotes the owner's private Google Docs; podcasts attributes statements to named people;
+        // reader-accounts shows readers' whole answers, contact details and all.
+        'drive-docs', 'podcasts', 'reader-accounts');
 }
 
 /** Ticked when nobody has chosen yet: things a careful reader can judge from the page itself. */

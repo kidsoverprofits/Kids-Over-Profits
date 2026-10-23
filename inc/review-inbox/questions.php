@@ -5,7 +5,10 @@
  * asked, each answer with how many people gave it, how they know, their
  * links and notes. A clear majority settles a question on its own (through
  * 'settle' here, as reviewer "questions page"); the rest wait here: staff
- * years and remembered rules always, and anything people disagree on.
+ * years always, anything people disagree on, and an answer whose note says
+ * they are not sure (kop_q_hedged()). Remembered rules are not here: each
+ * answer is read into lines on Review inbox > What readers remember
+ * (inc/review-inbox/reader-accounts.php), and so is every note.
  *
  *   Use this answer   writes it to the record (facility facts are held for
  *                     the record's write-up; companies and name years at once)
@@ -27,7 +30,8 @@ kop_rinbox_register('questions', function () {
         'group'       => 'Sent in by readers',
         'help'        => 'What readers answered on the questions page (/questions/): when a program opened or closed, its town, ages, practices, staff, rules, '
             . 'company facts, and which source is right where sources disagree. When ' . KOP_Q_AGREE . ' different people give the same answer and nobody says otherwise, '
-            . 'it goes through on its own and is listed under Settled with Undo. Staff years and remembered rules always wait here. '
+            . 'it goes through on its own and is listed under Settled with Undo. Staff years always wait here, and so does an answer whose note says they are not sure. '
+            . 'Remembered rules and the notes are read into lines under What readers remember. '
             . 'Use this answer writes it to the record (a program\'s facts wait for its next write-up); Dismiss stops asking.',
         'views'       => array('waiting' => 'Waiting', 'settled' => 'Settled', 'dismissed' => 'Dismissed'),
         'count'       => function () { return kop_rinbox_q_view_counts()['waiting']; },
@@ -44,6 +48,8 @@ function kop_rinbox_q_keys() {
     global $wpdb;
     $out = array();
     foreach ((array) $wpdb->get_results('SELECT qkey, COUNT(DISTINCT who) AS n, MAX(created_at) AS last FROM ' . kop_q_table() . ' GROUP BY qkey', ARRAY_A) as $r) {
+        // Remembered rules wait under What readers remember, one card per answer; one settled before that still shows here.
+        if (function_exists('kop_ra_is_account_key') && kop_ra_is_account_key($r['qkey'])) continue;
         $out[$r['qkey']] = array('n' => (int) $r['n'], 'last' => (string) $r['last'], 'status' => 'waiting');
     }
     foreach ((array) $wpdb->get_results('SELECT qkey, status, reviewed_at FROM ' . kop_q_state_table(), ARRAY_A) as $r) {
@@ -101,6 +107,11 @@ function kop_rinbox_q_item($key) {
     $actions = array();
     $status = $state ? ($state['status'] === 'settled' ? 'settled' : 'dismissed') : 'waiting';
     if ($status === 'waiting') {
+        $hedged = kop_q_hedged_rows($rows);
+        if ($hedged) {
+            $details[] = array('label' => 'Not settled on its own', 'value' => 'A note qualifies the answer: "'
+                . implode('" / "', array_map(function ($r) { return mb_substr((string) $r['note'], 0, 200); }, $hedged)) . '"');
+        }
         if (!$question) {
             $details[] = array('label' => 'No longer asked', 'value' => 'The record has an answer now, or the question was settled another way.');
         } elseif ($options) {

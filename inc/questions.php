@@ -52,7 +52,7 @@ if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
     exit;
 }
 
-if (!defined('KOP_Q_DB_VERSION')) define('KOP_Q_DB_VERSION', '2'); // 2: answers.batch, kop_question_batches
+if (!defined('KOP_Q_DB_VERSION')) define('KOP_Q_DB_VERSION', '3'); // 2: answers.batch, kop_question_batches; 3: answers.read_status, read_json (inc/reader-accounts.php)
 if (!defined('KOP_Q_REWRITE_VERSION')) define('KOP_Q_REWRITE_VERSION', '1');
 if (!defined('KOP_Q_AGREE')) define('KOP_Q_AGREE', 3);
 if (!defined('KOP_Q_HOURLY_CAP')) define('KOP_Q_HOURLY_CAP', 60);
@@ -95,10 +95,13 @@ function kop_q_ensure_tables() {
         who CHAR(24) NOT NULL DEFAULT '',
         batch BIGINT UNSIGNED NOT NULL DEFAULT 0,
         created_at DATETIME NULL,
+        read_status VARCHAR(10) NOT NULL DEFAULT '',
+        read_json LONGTEXT NULL,
         PRIMARY KEY  (id),
         KEY qkey (qkey),
         KEY who (who),
-        KEY batch (batch)
+        KEY batch (batch),
+        KEY read_status (read_status)
     ) {$charset};");
     dbDelta('CREATE TABLE ' . kop_q_batch_table() . " (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -700,6 +703,21 @@ function kop_q_normalize(array $q, array $in) {
     throw new RuntimeException('Unknown question.');
 }
 
+/**
+ * Does a note take back or qualify its answer ("not sure what year", "not
+ * physically")? Such an answer never settles on its own (owner, 2026-10-23).
+ */
+function kop_q_hedged($note) {
+    return (bool) preg_match('/\b(?:not (?:sure|certain|positive|physically|really|exactly|always|officially)|unsure|i (?:think|believe|guess)|maybe|probably|perhaps|'
+        . 'don\'?t (?:know|remember|recall)|can\'?t (?:remember|recall)|do not (?:know|remember)|not that i (?:know|remember)|if i remember|guessing|my best guess)\b/iu',
+        str_replace(array("\u{2019}", "\u{2018}"), "'", (string) $note));
+}
+
+/** The answer rows whose note is hedged (kop_q_hedged()). */
+function kop_q_hedged_rows(array $rows) {
+    return array_values(array_filter($rows, function ($r) { return kop_q_hedged($r['note'] ?? ''); }));
+}
+
 function kop_q_rows($qkey) {
     kop_q_ensure_tables();
     global $wpdb;
@@ -731,6 +749,10 @@ function kop_q_answer(array $p) {
     global $wpdb;
     kop_q_ensure_tables();
     $who = kop_q_who();
+    // The lines read from their earlier answer that nobody has decided go with it (inc/reader-accounts.php).
+    if (function_exists('kop_ra_forget')) {
+        kop_ra_forget((array) $wpdb->get_col($wpdb->prepare('SELECT id FROM ' . kop_q_table() . ' WHERE qkey = %s AND who = %s', $key, $who)));
+    }
     $wpdb->delete(kop_q_table(), array('qkey' => $key, 'who' => $who));
     $wpdb->insert(kop_q_table(), array(
         'qkey' => $key, 'record_kind' => $q['record']['kind'], 'record_id' => (int) $q['record']['id'],
@@ -741,7 +763,8 @@ function kop_q_answer(array $p) {
     set_transient(kop_q_rate_key(), (int) get_transient(kop_q_rate_key()) + 1, HOUR_IN_SECONDS);
     if (function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
 
-    $agreed = $q['auto'] ? kop_q_agreed(kop_q_tally(kop_q_rows($key))) : null;
+    $rows = kop_q_rows($key);
+    $agreed = $q['auto'] && !kop_q_hedged_rows($rows) ? kop_q_agreed(kop_q_tally($rows)) : null;
     if ($agreed && function_exists('kop_rinbox_apply_action')) {
         $GLOBALS['kop_rinbox_reviewer_as'] = KOP_Q_BY;
         try {
