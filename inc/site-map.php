@@ -280,6 +280,7 @@ if (!function_exists('kop_site_map_template_sections')) {
             'page-submit-lawsuit.php'          => 'take-part',
             'page-submit-legislation.php'      => 'take-part',
             'page-volunteers.php'              => 'take-part',
+            'page-volunteer.php'               => 'take-part',
             'page-utility.php'                 => 'take-part',
             'page-privacy-policy.php'          => 'about',
             'page-terms-of-service.php'        => 'about',

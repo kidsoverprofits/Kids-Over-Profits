@@ -15,8 +15,9 @@
  * day per address + browser, KOP_VOLS_PER_DAY in all, and a device that is
  * already signed in is sent to its page instead of getting a second name.
  *
- * Page: the 'volunteer' hub module (kop_hub_modules, templates/page-hub.php),
- * js/volunteer-signup.js, css/volunteer-signup.css.
+ * Page: kop_vols_module(), printed first by templates/page-volunteer.php (the
+ * /volunteer/ page since 2026-10-23; still registered as the 'volunteer' hub
+ * module), js/volunteer-signup.js, css/volunteer-signup.css.
  * REST (public): POST kop/v1/volunteer/signup; GET on it says whether this
  * device is signed in, so the cached page swaps the form for "Open your volunteer page".
  * Tested by the "Sign-up" section of scripts/test-review-volunteers.php.

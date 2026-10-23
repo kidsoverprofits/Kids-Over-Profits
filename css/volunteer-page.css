@@ -1,0 +1,50 @@
+/* /volunteer/ (templates/page-volunteer.php): the sections under the sign-up form. */
+
+.kop-volpage-section {
+    margin: 2rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 2px solid var(--kop-teal, #33A7B5);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-volpage-section p {
+    margin: 0 0 0.75rem;
+}
+
+.kop-volpage .kop-volpage-section h2.kop-hub-h {
+    font-size: 1.4rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-volpage-list {
+    margin: 0 0 0.75rem 1.25rem;
+    padding: 0;
+}
+
+.kop-volpage-list li {
+    margin: 0 0 0.4rem;
+}
+
+/* Kadence colours every a and its states directly: the button sets its own. */
+.kop-volpage a.kop-volpage-btn,
+.kop-volpage a.kop-volpage-btn:visited {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    border-radius: 6px;
+    background: var(--kop-teal-ink, #24757F);
+    color: var(--kop-white, #fff);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.kop-volpage a.kop-volpage-btn:hover,
+.kop-volpage a.kop-volpage-btn:focus-visible,
+.kop-volpage a.kop-volpage-btn:active {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #fff);
+}
+
+/* The sign-up form leads the page, straight under the buttons. */
+.kop-volpage .kop-vols {
+    margin-top: 1.5rem;
+}

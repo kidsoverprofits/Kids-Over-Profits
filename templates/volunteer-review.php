@@ -45,6 +45,8 @@ get_header();
                 <h2>Choosing your next work</h2>
                 <p>When a batch is done, <em>Give me 10 more</em> starts the next one. Under <em>Learn another queue</em>, a practice round
                     opens other work: news stories, court cases, program closures and more. Each opens to you once you pass its round.</p>
+                <p>Only a few minutes? <a href="<?php echo esc_url(function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/')); ?>">Answer our
+                    questions</a>: one short question at a time about what our records are missing.</p>
                 <h2>Taking a break or stopping</h2>
                 <p>A break needs nothing from you. A batch with no answers for <?php echo (int) $kop_vol_stall; ?> days goes back so others can
                     pick it up, and your link keeps working. <em>Hand this batch back</em>, on any batch, returns it at once.</p>

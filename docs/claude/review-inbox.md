@@ -104,6 +104,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # Opting out: "Start now" offers other work under "Rather not read the inspection reports?"; REST volunteer/leave (kop_volp_leave()) with
 # project_id = "Hand this batch back" (closed_why 'handed-back'), without = "Stop volunteering" (every open batch back, closed_why 'left',
 # link revoked). Both go through kop_volp_release(), as the hourly sweep does; answers already given stay
+# /volunteer/ is templates/page-volunteer.php (2026-10-23, kop_template_assignments; the page's old editor copy is unused): the sign-up form,
+# "Answer our questions" (/questions/, kop_q_url()), "Send us what you have" (the submission tools), "Skills we need"; each an in-place
+# editable block (kop_ie_html_start keys volunteer:questions / :send / :skills); the standfirst and buttons are kop_hub_config('volunteer')
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
 # Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>

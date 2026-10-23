@@ -834,7 +834,8 @@ function kop_template_assignments() {
         'where-are-the-kids'   => 'page-hub.php',
         'advocates'            => 'page-hub.php',
         'journalists'          => 'page-hub.php',
-        'volunteer'            => 'page-hub.php',
+        // Its own template since 2026-10-23: the ways to help, written in code (editable in place), not editor copy.
+        'volunteer'            => 'page-volunteer.php',
         'law-policy'           => 'page-hub.php',
         'resources'            => 'page-hub.php',
         // Category landing pages that were a bare query block (2026-09-25):
@@ -2653,7 +2654,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '134';
+    $version = '135';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
