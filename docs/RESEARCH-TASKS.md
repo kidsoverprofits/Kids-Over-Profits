@@ -413,6 +413,12 @@ KOP Tools > Map Renames (the record's note already says March 2000, per HEAL).
 - The Fernald Center's town (Waltham, MA) came from outside KOP's articles.
 - AdvoServ/Bellwether (12145, Bear, DE) is a bare record.
 
+### Facility records that are not programs (found 2026-10-23, social roundup preview)
+
+- "Chicago National Archives" (IL) and "National Archives at San Francisco" (CA) were made as facilities_v2 records between
+  Oct 16 and 22, no facility type, status Suspended. They look like document sources (archive locations), not programs: find what
+  made them and remove or fold them. The weekly roundup lists programs with a type first, so they no longer lead its directory card.
+
 ### Three Points Center's earlier names (found 2026-10-18, record 10545)
 
 Record 10545 (Three Points Center, LLC, Hurricane, UT) holds two rename merges, and its page cuts in this order:

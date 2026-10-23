@@ -465,6 +465,11 @@ $hs = $one("SELECT s.highlight_id FROM inspection_highlight_summaries s JOIN ins
 $feat = $one("SELECT f.news_id FROM news_featured f JOIN news_submissions n ON n.id = f.news_id WHERE n.status IN ('approved', 'published') ORDER BY f.news_id DESC LIMIT 1");
 // Only news makes a card: give these their own recent dates, and keep one old closure approved this week.
 $recent = gmdate('Y-m-d', time() - 10 * 86400);
+// The copy's own programs and documents are old, so the site-update cards count only what the test adds.
+$pdo->exec("UPDATE facilities_v2 SET created_at = '2000-01-01 00:00:00'");
+$pdo->exec("UPDATE wpdl_posts SET post_date_gmt = '2000-01-01 00:00:00' WHERE post_type = 'attachment'");
+$pdo->exec('CREATE TABLE IF NOT EXISTS record_status_proposals (id INTEGER PRIMARY KEY, kind TEXT, record_id INTEGER, changes TEXT, change_hash TEXT, quote TEXT,
+    quote_found INTEGER DEFAULT 0, source_url TEXT, source_label TEXT, status TEXT, previous TEXT, reviewed_by TEXT, reviewed_at TEXT, created_at TEXT)');
 $cl_old = $one("SELECT r.id FROM facility_closure_reports r JOIN facilities_v2 f ON f.id = r.facility_id WHERE r.status = 'applied' AND r.id <> " . (int) $cl . " ORDER BY r.id DESC LIMIT 1");
 $pdo->exec("UPDATE facility_closure_reports SET closure_date = '$recent' WHERE id = " . (int) $cl);
 $pdo->exec("UPDATE facility_closure_reports SET closure_date = '1998-09' WHERE id = " . (int) $cl_old);
@@ -488,9 +493,14 @@ $from = $at(7);
 $to = $at(0);
 $cards = kop_vsoc_cards($from, $to);
 $angles = array_column($cards, 'angle');
-$check('one card per item worth a post, in angle order, the week in numbers last', $angles === array('closure', 'lawsuit', 'bill', 'finding', 'reporting', 'numbers'), json_encode($angles));
+$check('one card per item worth a post, in angle order, then the site updates', array_slice($angles, 0, 5) === array('closure', 'lawsuit', 'bill', 'finding', 'reporting')
+    && in_array('records', $angles, true) && end($angles) === 'numbers', json_encode($angles));
 $byk = array_column($cards, null, 'angle');
-$check('nothing from the week before, nothing gone, no bulk work', !in_array('lawsuit:' . $ls_old, array_column($cards, 'key'), true) && count($cards) === 6);
+$check('nothing from the week before, nothing gone, no bulk work', !in_array('lawsuit:' . $ls_old, array_column($cards, 'key'), true)
+    && !preg_grep('/^(news|drive)/', array_column($cards, 'key')), json_encode(array_column($cards, 'key')));
+$old_name = kop_vsoc_facility($one('SELECT facility_id FROM facility_closure_reports WHERE id = ' . (int) $cl_old))[0];
+$check('an old closure approved this week is a record brought up to date, not news', strpos($byk['records']['summary'], 'Now recorded as closed: ' . $old_name) === 0
+    && strpos($byk['records']['fact'], '1 program now recorded as closed') !== false, json_encode($byk['records']));
 $check('every card has the fact and a public page', !array_filter($cards, function ($c) { return trim($c['fact']) === '' || strpos($c['url'], 'https://example.test/') !== 0; }), json_encode(array_column($cards, 'url')));
 $check('no card links an admin screen', !array_filter($cards, function ($c) { return preg_match('#wp-admin|admin-ajax|nonce#', json_encode($c)); }));
 $sum = $one("SELECT summary FROM inspection_highlight_summaries WHERE highlight_id = " . (int) $hs);
@@ -509,34 +519,69 @@ $news_fac = $one("SELECT n.id FROM news_submissions n JOIN news_facility_links l
 $news_bare = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (SELECT news_id FROM news_facility_links) AND id <> " . (int) $feat . " ORDER BY id DESC LIMIT 1");
 $news_old = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (" . (int) $feat . ', ' . (int) $news_fac . ', ' . (int) $news_bare . ") ORDER BY id DESC LIMIT 1");
 $page = $one("SELECT ID FROM wpdl_posts WHERE post_type = 'page' AND post_status = 'publish' AND post_title <> '' AND post_name <> '' ORDER BY ID DESC LIMIT 1");
-$pdo->exec("UPDATE news_submissions SET publication_date = '$recent' WHERE id IN (" . (int) $news_fac . ', ' . (int) $news_bare . ')');
+// The same story twice: once in news_fac's story group, once with the same headline words as news_bare.
+$news_grp = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (" . implode(',', array_map('intval', array($feat, $news_fac, $news_bare, $news_old))) . ") ORDER BY id DESC LIMIT 1");
+$news_same = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (SELECT news_id FROM news_facility_links) AND id NOT IN ("
+    . implode(',', array_map('intval', array($feat, $news_fac, $news_bare, $news_old, $news_grp))) . ") ORDER BY id DESC LIMIT 1");
+$pdo->exec("UPDATE news_submissions SET publication_date = '$recent' WHERE id IN (" . implode(',', array_map('intval', array($news_fac, $news_bare, $news_grp, $news_same))) . ')');
 $pdo->exec("UPDATE news_submissions SET publication_date = '2019-05-02' WHERE id = " . (int) $news_old);
+$pdo->exec("UPDATE news_submissions SET article_title = '\$4.5 million settlement reached after a death at Waycross youth detention center', story_group_id = " . (int) $news_fac . " WHERE id = " . (int) $news_fac);
+$pdo->exec("UPDATE news_submissions SET story_group_id = " . (int) $news_fac . ", publication_name = 'Second Outlet', article_title = 'Unrelated words entirely' WHERE id = " . (int) $news_grp);
+$pdo->exec("UPDATE news_submissions SET story_group_id = NULL, publication_name = 'First Paper', article_title = 'The Family of a Teen Who Died in Foster Care Is Suing Maryland, Marriott' WHERE id = " . (int) $news_bare);
+$pdo->exec("UPDATE news_submissions SET story_group_id = NULL, publication_name = 'Third Outlet', article_title = 'Mother of teen who died in foster care to sue state of Maryland and Marriott' WHERE id = " . (int) $news_same);
+$pdo->exec("DELETE FROM news_facility_links WHERE news_id = " . (int) $news_grp);
 $pdo->exec("UPDATE wpdl_posts SET post_date_gmt = '" . $at(21) . "' WHERE ID = " . (int) $page);
 $log('news', 'approve', $news_fac, 21);
+$log('news', 'approve', $news_grp, 21.5);
 $log('news', 'approve', $news_bare, 22);
+$log('news', 'approve', $news_same, 22.5);
 $log('news', 'approve', $news_old, 22);
 $log('news', 'approve', $feat, 23);
 $log('featured-nominations', 'feature', $feat, 23);
 $log('drafts', 'publish', $page, 21);
+// The site that week: two programs added, three documents, one finding, one lawsuit brought up to date.
+$new_fac = $pdo->query("SELECT id, name FROM facilities_v2 WHERE name <> '' AND name <> LOWER(name) ORDER BY id DESC LIMIT 2")->fetchAll(PDO::FETCH_ASSOC);
+$pdo->exec("UPDATE facilities_v2 SET created_at = '" . $at(21) . "' WHERE id IN (" . (int) $new_fac[0]['id'] . ', ' . (int) $new_fac[1]['id'] . ')');
+$docs = $pdo->query("SELECT ID FROM wpdl_posts WHERE post_type = 'attachment' AND post_mime_type = 'application/pdf' ORDER BY ID DESC LIMIT 3")->fetchAll(PDO::FETCH_COLUMN);
+foreach (array('123-14-003_insp-20250101-unannounced-inspection', 'Woodbury Reports, May 2007 (#153), p. 31', 'A court filing') as $n => $title) {
+    $pdo->exec("UPDATE wpdl_posts SET post_date_gmt = '" . $at(21) . "', post_title = " . $pdo->quote($title) . ' WHERE ID = ' . (int) $docs[$n]);
+}
+$log('inspection-highlights', 'approved', $hs, 21);
+$ls_name = $one('SELECT case_name FROM lawsuits WHERE id = ' . (int) $ls);
+$pdo->exec("INSERT INTO record_status_proposals (id, kind, record_id, changes, change_hash, status, created_at) VALUES (900001, 'lawsuit', " . (int) $ls . ", '{\"status\":[\"open\",\"settled\"]}', 'x', 'applied', '" . $at(21) . "')");
+$log('status_checks', 'apply', 900001, 21);
 $cards3 = kop_vsoc_cards($at(27), $at(20));
 $keys3 = array_column($cards3, 'key');
-$check('approved news from the last two months makes a card, after the essential reporting and new pages',
-    $keys3 === array('reporting:' . $feat, 'page:' . $page, 'news:' . $news_fac, 'news:' . $news_bare, 'numbers:' . substr($at(27), 0, 10)), json_encode($keys3));
+$wk = substr($at(27), 0, 10);
+$check('one card per story, after the essential reporting and new pages, then the site updates',
+    $keys3 === array('reporting:' . $feat, 'page:' . $page, 'news:' . $news_fac, 'news:' . $news_bare, 'directory:' . $wk, 'records:' . $wk, 'documents:' . $wk, 'findings:' . $wk, 'numbers:' . $wk), json_encode($keys3));
 $by3 = array_column($cards3, null, 'key');
 $check('a story links the facility page it is linked to, else the story itself', strpos($by3['news:' . $news_fac]['url'], 'https://example.test/facility/') === 0
     && strpos($by3['news:' . $news_bare]['url'], 'https://example.test/') !== 0 && strpos($by3['news:' . $news_bare]['url_label'], 'The story') === 0, json_encode(array_column($cards3, 'url')));
+$check('a rolled-up story names the other outlets', substr($by3['news:' . $news_fac]['summary'], -30) === 'Also covered by Second Outlet.'
+    && substr($by3['news:' . $news_bare]['summary'], -29) === 'Also covered by Third Outlet.', $by3['news:' . $news_bare]['summary']);
+$check('the same story told in other words is the same story; two stories about detention centres are not',
+    kop_vsoc_same_story('Children’s Home of Kingston to close, officials say', "Children's Home of Kingston plans to close programs in January")
+    && !kop_vsoc_same_story('Juveniles assault staff and seize keys at Cabarrus Juvenile Detention Center', "\$4.5 million settlement reached after teen's death at Waycross youth detention center"));
 $check('a page of ours links its page', strpos($by3['page:' . $page]['url'], 'https://example.test/') === 0 && strpos($by3['page:' . $page]['fact'], 'New on our site: ') === 0);
-$check('the site-updates card counts the week\'s work, old items too', strpos($by3['numbers:' . substr($at(27), 0, 10)]['summary'], '4 news stories added') !== false
-    && strpos($by3['numbers:' . substr($at(27), 0, 10)]['summary'], '1 new page published') !== false, $by3['numbers:' . substr($at(27), 0, 10)]['summary'] ?? '');
+$check('programs added to the directory are named', $by3['directory:' . $wk]['fact'] === '2 programs added to our directory.'
+    && strpos($by3['directory:' . $wk]['summary'], $new_fac[0]['name']) !== false && strpos($by3['directory:' . $wk]['url'], 'view=location') !== false, json_encode($by3['directory:' . $wk]));
+$check('a lawsuit brought up to date is named with its new status', strpos($by3['records:' . $wk]['summary'], $ls_name . ' (now settled)') !== false
+    && strpos($by3['records:' . $wk]['url'], '/lawsuits/') !== false, $by3['records:' . $wk]['summary']);
+$check('documents added say what they are', $by3['documents:' . $wk]['fact'] === '3 documents added to our library.'
+    && $by3['documents:' . $wk]['summary'] === 'Among them: 1 state inspection report, 1 Woodbury Reports page and 1 other.', $by3['documents:' . $wk]['summary']);
+$check('findings added name the program', strpos($by3['findings:' . $wk]['fact'], '1 serious finding from state inspection reports added, at 1 program in 1 state.') === 0, $by3['findings:' . $wk]['fact']);
+$check('the last card counts the rest of the week\'s work, old items too', strpos($by3['numbers:' . $wk]['summary'], '6 news stories added') !== false
+    && strpos($by3['numbers:' . $wk]['summary'], '1 new page published') !== false && strpos($by3['numbers:' . $wk]['fact'], 'Also this week: ') === 0, $by3['numbers:' . $wk]['summary']);
 $log('closure', 'apply', $cl_old, 30);
 $cards4 = kop_vsoc_cards($at(31), $at(28));
-$check('a week of only old items still has its site-updates card', array_column($cards4, 'angle') === array('numbers')
-    && strpos($cards4[0]['fact'], 'This week on kidsoverprofits.org: 1 closure recorded') === 0, json_encode($cards4));
+$check('a week of only old items still says what changed on the site', array_column($cards4, 'angle') === array('records')
+    && $cards4[0]['fact'] === 'Records brought up to date: 1 program now recorded as closed.', json_encode($cards4));
 
 $check('a roundup is always one person\'s', strpos($throws(function () { kop_vsoc_make_roundup(0); }), 'Pick who') !== false);
 list($ps1) = kop_vsoc_make_roundup($sam_id, 7);
 $PS1 = kop_volp_get($ps1);
-$check('the roundup is a social project of the cards', $PS1['source'] === KOP_VSOC_SOURCE && count($keys_of($ps1)) === 6 && (int) $PS1['volunteer_id'] === $sam_id);
+$check('the roundup is a social project of the cards', $PS1['source'] === KOP_VSOC_SOURCE && count($keys_of($ps1)) === count($cards) && (int) $PS1['volunteer_id'] === $sam_id);
 $check('Sam sees it, Alex does not', in_array($ps1, $ids($sam_id), true) && !in_array($ps1, $ids($alex_id), true));
 $res = kop_volp_items($sam_id, $ps1, 1);
 $it = $res['items'][0];
@@ -618,7 +663,7 @@ $check('Pass on this one counts as done', kop_vsoc_save($sam, $ps1, $numbers, 'p
 $wpdb->update(kop_volp_table(), array('created_at' => $at(5)), array('id' => $ps1));
 $wpdb->query('UPDATE ' . kop_vsoc_table() . " SET updated_at = '" . $at(4) . "' WHERE project_id = $ps1");
 $swept = $sweep_ids(kop_volp_sweep());
-$check('a quiet roundup hands back the ideas nobody took', ($swept[$ps1]['released'] ?? 0) === 3 && count($keys_of($ps1)) === 3, json_encode($swept[$ps1] ?? null));
+$check('a quiet roundup hands back the ideas nobody took', ($swept[$ps1]['released'] ?? 0) === count($cards) - 3 && count($keys_of($ps1)) === 3, json_encode($swept[$ps1] ?? null));
 
 // Monday's run.
 unset($GLOBALS['kop_test_options']['kop_vsoc_designer'], $GLOBALS['kop_test_options']['kop_vsoc_last_week']);

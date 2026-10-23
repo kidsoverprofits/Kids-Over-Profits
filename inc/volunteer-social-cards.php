@@ -13,19 +13,27 @@
  *   reporting (featured-nominations)     the article, its picture, the featured note
  *   page (drafts / publish)              a page of ours published that week
  *   news (news / approve)                a facility page the story is linked to (else the
- *                                        story), its summary and picture
- *   numbers                              one card, every week: what was added to the site
+ *                                        story), its summary and picture; one card per story
  *
- * Only news makes a card: the item's own date (the closure, else its article;
- * the filing; the bill's last action, else its introduction; the finding; the
- * article) must fall within kop_vsoc_max_age_days (60) of the roundup's end,
- * and an item with no date makes none (owner, 2026-10-21: approving a 1986
- * closure this week is not news). So public money, which has only years,
- * makes no card. The site-updates card counts the week's work whatever its
- * age: that the site grew is this week's news (owner, 2026-10-23: a week is
- * never empty). Bulk work (drive-docs, doc-types, fornits, woodbury, merges)
- * never makes a card. At most kop_vsoc_per_angle (8) cards per angle, newest first. A card
- * key is '<angle>:<id>', so a week's cards never repeat an item.
+ * Only news makes those cards: the item's own date (the closure, else its
+ * article; the filing; the bill's last action, else its introduction; the
+ * finding; the article) must fall within kop_vsoc_max_age_days (60) of the
+ * roundup's end, and an item with no date makes none (owner, 2026-10-21:
+ * approving a 1986 closure this week is not news). So public money, which has
+ * only years, makes none. A story covered by several outlets is one card
+ * (kop_vsoc_one_per_story(): the same story group, the same program, or the
+ * same headline words), naming the other outlets (owner, 2026-10-23).
+ *
+ * Then the site updates (kop_vsoc_site_cards()), each its own card naming
+ * what changed, whatever its age, since that the site grew is this week's
+ * news: programs added to the directory, records brought up to date (closures,
+ * lawsuit and bill updates), documents added to the library, serious state
+ * findings added, and one card of everything else counted. A week with
+ * anything done is never empty (owner, 2026-10-23).
+ *
+ * Bulk work (drive-docs, doc-types, fornits, woodbury, merges) never makes a
+ * card of its own. At most kop_vsoc_per_angle (8) cards per angle, newest
+ * first. A card key is '<angle>:<id>', so a week's cards never repeat an item.
  * Tested by scripts/test-volunteer-projects.php ("Social media roundup").
  */
 
@@ -46,13 +54,14 @@ function kop_vsoc_angles() {
     );
 }
 
-/** What the site-updates card counts: [source, action, words for one, words for many]. */
+/**
+ * What the "Also this week" card counts: [source, action, words for one, words
+ * for many]. Findings, closures and status updates have cards of their own.
+ */
 function kop_vsoc_number_lines() {
     return array(
-        array('inspection-highlights', 'approved', 'serious state inspection finding added', 'serious state inspection findings added'),
-        array('highlight-summaries', 'approved', 'finding explained in plain words', 'findings explained in plain words'),
         array('news', 'approve', 'news story added', 'news stories added'),
-        array('closure', 'apply', 'closure recorded', 'closures recorded'),
+        array('highlight-summaries', 'approved', 'finding explained in plain words', 'findings explained in plain words'),
         array('lawsuit', 'approve', 'lawsuit added', 'lawsuits added'),
         array('legislation', 'approve', 'bill added', 'bills added'),
         array('federal-funding', 'add', 'program\'s public money recorded', 'programs\' public money recorded'),
@@ -62,7 +71,7 @@ function kop_vsoc_number_lines() {
         array('websites', 'publish', 'website about a program added', 'websites about programs added'),
         array('program-practices', 'add', 'section of a program\'s rules and practices added', 'sections of programs\' rules and practices added'),
         array('woodbury-facts', 'apply', 'fact from Woodbury Reports added to a record', 'facts from Woodbury Reports added to records'),
-        array('status_checks', 'apply', 'program\'s status brought up to date', 'programs\' statuses brought up to date'),
+        array('facilities-from-news', 'link', 'news story linked to the program it is about', 'news stories linked to the programs they are about'),
     );
 }
 
@@ -120,7 +129,7 @@ function kop_vsoc_cards($from, $to) {
     $per = max(1, (int) apply_filters('kop_vsoc_per_angle', 8));
     $cards = array();
     foreach (kop_vsoc_angles() as $angle => $a) {
-        $n = 0;
+        $found = array();
         foreach (kop_vsoc_log_rows($a['source'], $a['actions'], $from, $to) as $row) {
             try {
                 $c = call_user_func('kop_vsoc_card_' . $angle, (string) $row['item_key']);
@@ -134,13 +143,69 @@ function kop_vsoc_cards($from, $to) {
             $c['key'] = $angle . ':' . $row['item_key'];
             $c['angle'] = $angle;
             $c['angle_label'] = $a['label'];
-            $cards[$c['key']] = $c;
-            if (++$n >= $per) break;
+            $found[] = $c;
+            if ($angle !== 'news' && count($found) >= $per) break;   // news is cut after its stories are rolled up
         }
+        if ($angle === 'news') $found = kop_vsoc_one_per_story($found);
+        foreach (array_slice($found, 0, $per) as $c) $cards[$c['key']] = $c;
     }
-    $numbers = kop_vsoc_card_numbers($from, $to);
-    if ($numbers) $cards[$numbers['key']] = $numbers;
+    foreach (kop_vsoc_site_cards($from, $to, $cards) as $c) $cards[$c['key']] = $c;
     return array_values($cards);
+}
+
+/** A headline's telling words: lower case, four letters or more, without the words every story in the field shares. */
+function kop_vsoc_story_words($title) {
+    static $common = null;
+    if ($common === null) {
+        $common = array_flip(explode(' ', 'about after again also amid been before being center centre child children childrens could detention during facility '
+            . 'former from group have home homes into juvenile lawsuit lawsuits more news officials over plans said says school schools staff state '
+            . 'states teen teens than that their them they this treatment under will with were what when where which while youth residential abuse '
+            . 'alleged allege alleges report reports county city years year week'));
+    }
+    $t = mb_strtolower(str_replace(array("\u{2019}", "'"), '', (string) $title));
+    $out = array();
+    foreach (preg_split('/[^\p{L}\p{N}]+/u', $t, -1, PREG_SPLIT_NO_EMPTY) as $w) {
+        if (mb_strlen($w) >= 4 && !isset($common[$w])) $out[$w] = true;
+    }
+    return array_keys($out);
+}
+
+/** Whether two headlines tell the same story: three telling words shared, or two that are half of either. */
+function kop_vsoc_same_story($a, $b) {
+    $wa = kop_vsoc_story_words($a);
+    $wb = kop_vsoc_story_words($b);
+    $shared = count(array_intersect($wa, $wb));
+    return $shared >= 3 || ($shared >= 2 && $shared * 2 >= min(count($wa), count($wb)));
+}
+
+/**
+ * One card per story: news cards in the same story group, linked to the same
+ * program or with the same headline words roll up into one. The card kept is
+ * the first linked to a facility page (else the newest), and names the other
+ * outlets; stories with a page of ours and wider coverage come first.
+ */
+function kop_vsoc_one_per_story(array $found) {
+    $stories = array();
+    foreach ($found as $c) {
+        $hit = null;
+        foreach ($stories as $i => $s) {
+            foreach ($s as $o) {
+                if ($o['_group'] === $c['_group'] || ($c['_fac'] && $o['_fac'] === $c['_fac']) || kop_vsoc_same_story($o['_title'], $c['_title'])) { $hit = $i; break 2; }
+            }
+        }
+        if ($hit === null) $stories[] = array($c); else $stories[$hit][] = $c;
+    }
+    $out = array();
+    foreach ($stories as $n => $s) {
+        $lead = $s[0];   // the one whose headline names its program, else the first with a page of ours, else the newest
+        foreach ($s as $o) if ($o['_named'] > $lead['_named'] || ($o['_named'] === $lead['_named'] && $o['_fac'] && !$lead['_fac'])) $lead = $o;
+        $others = array();
+        foreach ($s as $o) if ($o['key'] !== $lead['key'] && $o['_outlet'] !== '' && $o['_outlet'] !== $lead['_outlet']) $others[$o['_outlet']] = true;
+        if ($others) $lead['summary'] = trim($lead['summary'] . ' Also covered by ' . implode(', ', array_keys($others)) . '.');
+        $out[] = array('rank' => array($lead['_fac'] ? 0 : 1, -count($s), $n), 'card' => $lead);
+    }
+    usort($out, function ($x, $y) { return $x['rank'] <=> $y['rank']; });
+    return array_map(function ($x) { return array_diff_key($x['card'], array('_group' => 1, '_fac' => 1, '_title' => 1, '_outlet' => 1, '_named' => 1)); }, $out);
 }
 
 function kop_vsoc_card_closure($id) {
@@ -254,18 +319,20 @@ function kop_vsoc_card_page($id) {
 /** An approved news story: the facility page it is linked to (else the story itself), its summary and picture. */
 function kop_vsoc_card_news($news_id) {
     $pdo = kop_rinbox_pdo();
-    $st = $pdo->prepare("SELECT id, article_title, publication_name, publication_date, article_url, summary FROM news_submissions WHERE id = ? AND status IN ('approved', 'published')");
+    $st = $pdo->prepare("SELECT id, article_title, publication_name, publication_date, article_url, summary, story_group_id FROM news_submissions WHERE id = ? AND status IN ('approved', 'published')");
     $st->execute(array((int) $news_id));
     $r = $st->fetch(PDO::FETCH_ASSOC);
     if (!$r || !preg_match('#^https?://#', (string) $r['article_url'])) return null;
     $outlet = trim((string) $r['publication_name']);
     $url = (string) $r['article_url'];
     $label = 'The story' . ($outlet !== '' ? ' at ' . $outlet : '');
+    $fac = 0;
+    $fac_name = '';
     $st = $pdo->prepare("SELECT facility_id FROM news_facility_links WHERE news_id = ? ORDER BY link_type = 'mentioned' DESC, facility_id");
     $st->execute(array((int) $r['id']));
     foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $fid) {
         $f = kop_vsoc_facility((int) $fid);
-        if ($f && $f[2] !== '') { $url = $f[2]; $label = 'Our page on ' . $f[0]; break; }
+        if ($f && $f[2] !== '') { $url = $f[2]; $label = 'Our page on ' . $f[0]; $fac = (int) $fid; $fac_name = $f[0]; break; }
     }
     $img = function_exists('kop_news_image') ? kop_news_image((int) $r['id'], (string) $r['article_url']) : null;
     $when = kop_vsoc_date($r['publication_date']);
@@ -274,20 +341,153 @@ function kop_vsoc_card_news($news_id) {
         'fact' => '"' . trim((string) $r['article_title']) . '"' . ($outlet !== '' ? ', ' . $outlet : '') . ($when !== '' ? ', ' . $when : '') . '.',
         'url' => $url, 'url_label' => $label, 'summary' => kop_vsoc_cut((string) $r['summary'], 600),
         'image' => is_array($img) && ($img['kind'] ?? '') === 'photo' ? (string) $img['src'] : '', 'when' => $when,
+        // For kop_vsoc_one_per_story(); taken off before the card is kept.
+        '_group' => (int) ($r['story_group_id'] ?: $r['id']), '_fac' => $fac, '_title' => (string) $r['article_title'], '_outlet' => $outlet,
+        '_named' => $fac && array_intersect(kop_vsoc_story_words($fac_name), kop_vsoc_story_words($r['article_title'])) ? 1 : 0,
     );
 }
 
-/** The site updates: one card of what was added that week, or null when nothing counted happened. */
-function kop_vsoc_card_numbers($from, $to) {
+/** "A, B and C", with "and N more" past $max. */
+function kop_vsoc_list(array $names, $max = 8) {
+    $names = array_values(array_unique(array_filter(array_map('trim', $names), 'strlen')));
+    $more = count($names) - $max;
+    if ($more > 0) { $names = array_slice($names, 0, $max); $names[] = number_format($more) . ' more'; }
+    if (count($names) < 2) return (string) ($names[0] ?? '');
+    $last = array_pop($names);
+    return implode(', ', $names) . ' and ' . $last;
+}
+
+/** The site updates, each a card naming what changed that week; $cards = the news cards made already. */
+function kop_vsoc_site_cards($from, $to, array $cards) {
+    $out = array();
+    foreach (array('directory', 'records', 'documents', 'findings', 'numbers') as $kind) {
+        try {
+            $c = call_user_func('kop_vsoc_site_' . $kind, $from, $to, $cards);
+        } catch (Throwable $e) {
+            $c = null;   // the records database unreachable
+        }
+        if (!$c) continue;
+        $out[] = $c + array('key' => $kind . ':' . substr($from, 0, 10), 'angle' => $kind, 'angle_label' => 'This week on the site',
+            'url' => home_url('/'), 'url_label' => 'kidsoverprofits.org', 'summary' => '', 'quote' => '', 'image' => '', 'when' => '');
+    }
+    return $out;
+}
+
+/** Programs added to the directory that week, those with a type first (a lower-case placeholder name is not a program to show). */
+function kop_vsoc_site_directory($from, $to) {
+    global $wpdb;
+    $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT id, name, city, state FROM facilities_v2 WHERE created_at >= %s AND created_at < %s
+        ORDER BY COALESCE(facility_type, '') = '', created_at DESC, id DESC", $from, $to), ARRAY_A);
+    $names = array();
+    foreach ($rows as $r) {
+        $name = trim((string) $r['name']);
+        if ($name === '' || mb_strtolower($name) === $name) continue;
+        $names[] = $name . (trim((string) $r['state']) !== '' ? ' (' . trim((string) $r['state']) . ')' : '');
+    }
+    if (!$names) return null;
+    $n = count($names);
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' program added' : ' programs added') . ' to our directory.',
+        'url' => function_exists('kop_location_index_url') ? kop_location_index_url() : home_url('/tti-program-index/?view=location'), 'url_label' => 'Our directory, by location',
+        'summary' => 'New: ' . kop_vsoc_list($names, 12) . '.',
+    );
+}
+
+/** Records brought up to date: programs now recorded as closed, lawsuits and bills whose status changed. */
+function kop_vsoc_site_records($from, $to, array $cards) {
+    $pdo = kop_rinbox_pdo();
+    $closed = array();
+    $url = '';
+    foreach (kop_vsoc_log_rows('closure', array('apply'), $from, $to) as $row) {
+        if (isset($cards['closure:' . $row['item_key']])) continue;   // a card of its own already
+        $st = $pdo->prepare("SELECT facility_id FROM facility_closure_reports WHERE id = ? AND status = 'applied'");
+        $st->execute(array((int) $row['item_key']));
+        $f = kop_vsoc_facility((int) $st->fetchColumn());
+        if (!$f) continue;
+        $closed[] = $f[0];
+        if ($url === '' && $f[2] !== '') $url = $f[2];
+    }
+    $changed = array();
+    foreach (kop_vsoc_log_rows('status_checks', array('apply'), $from, $to) as $row) {
+        $st = $pdo->prepare("SELECT kind, record_id, changes FROM record_status_proposals WHERE id = ? AND status = 'applied'");
+        $st->execute(array((int) $row['item_key']));
+        $p = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$p) continue;
+        $bill = $p['kind'] === 'bill';
+        $st = $pdo->prepare($bill ? "SELECT jurisdiction, bill_number FROM legislation WHERE id = ? AND publication_status = 'published'"
+            : "SELECT case_name FROM lawsuits WHERE id = ? AND publication_status = 'published'");
+        $st->execute(array((int) $p['record_id']));
+        // A case name pasted with its docket site's title ("... | Justia") keeps only the name.
+        $name = trim(preg_replace('/\s+\|.*$/s', '', implode(' ', array_map('trim', (array) $st->fetch(PDO::FETCH_NUM)))));
+        if ($name === '') continue;
+        $ch = json_decode((string) $p['changes'], true);
+        $now = is_array($ch['status'] ?? null) ? trim((string) ($ch['status'][1] ?? '')) : '';
+        $changed[] = $name . ($now !== '' ? ' (now ' . $now . ')' : ' (outcome updated)');
+    }
+    if (!$closed && !$changed) return null;
+    $facts = array();
+    if ($closed) $facts[] = number_format(count($closed)) . (count($closed) === 1 ? ' program' : ' programs') . ' now recorded as closed';
+    if ($changed) $facts[] = number_format(count($changed)) . (count($changed) === 1 ? ' lawsuit or bill' : ' lawsuits and bills') . ' brought up to date';
+    $summary = array();
+    if ($closed) $summary[] = 'Now recorded as closed: ' . kop_vsoc_list($closed) . '.';
+    if ($changed) $summary[] = 'Updated from the court docket or the legislature: ' . kop_vsoc_list($changed) . '.';
+    $c = array('fact' => 'Records brought up to date: ' . implode('; ', $facts) . '.', 'summary' => implode(' ', $summary));
+    if ($changed) $c += array('url' => home_url('/lawsuits/'), 'url_label' => 'Our lawsuits page');
+    elseif ($url !== '') $c += array('url' => $url, 'url_label' => 'Our page on ' . $closed[0]);
+    return $c;
+}
+
+/** Documents (PDFs) added to the media library that week. */
+function kop_vsoc_site_documents($from, $to) {
+    global $wpdb;
+    $t = $wpdb->prefix . 'posts';
+    $base = "FROM $t WHERE post_type = 'attachment' AND post_mime_type = 'application/pdf' AND post_date_gmt >= %s AND post_date_gmt < %s";
+    $n = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base", $from, $to));
+    if (!$n) return null;
+    $insp = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base AND post_title LIKE %s", $from, $to, '%insp-%'));
+    $wood = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base AND post_title LIKE %s", $from, $to, 'Woodbury Reports%'));
+    $parts = array();
+    if ($insp) $parts[] = number_format($insp) . ($insp === 1 ? ' state inspection report' : ' state inspection reports');
+    if ($wood) $parts[] = number_format($wood) . ($wood === 1 ? ' Woodbury Reports page' : ' Woodbury Reports pages');
+    $rest = $n - $insp - $wood;
+    if ($parts && $rest > 0) $parts[] = number_format($rest) . ($rest === 1 ? ' other' : ' others');
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' document' : ' documents') . ' added to our library.',
+        'url' => function_exists('kop_dt_url') ? kop_dt_url() : home_url('/documents/'), 'url_label' => 'Our documents',
+        'summary' => $parts ? 'Among them: ' . kop_vsoc_list($parts) . '.' : '',
+    );
+}
+
+/** Serious state inspection findings added that week, with the programs that have the most. */
+function kop_vsoc_site_findings($from, $to) {
+    $rows = kop_vsoc_log_rows('inspection-highlights', array('approved'), $from, $to);
+    if (!$rows) return null;
+    $ids = implode(',', array_map('intval', array_column($rows, 'item_key')));
+    $pdo = kop_rinbox_pdo();
+    $by = $pdo->query("SELECT f.facility_name, f.state, COUNT(*) AS n, MIN(h.finding_date) AS first, MAX(h.finding_date) AS last FROM inspection_highlights h
+        JOIN inspection_facilities f ON f.id = h.facility_id WHERE h.id IN ($ids) AND h.status = 'approved' GROUP BY f.id, f.facility_name, f.state ORDER BY n DESC, f.facility_name")->fetchAll(PDO::FETCH_ASSOC);
+    if (!$by) return null;
+    $n = (int) array_sum(array_column($by, 'n'));
+    $names = array();
+    foreach (array_slice($by, 0, 5) as $r) $names[] = trim((string) $r['facility_name']) . ' (' . trim((string) $r['state']) . ', ' . (int) $r['n'] . ')';
+    $states = count(array_unique(array_column($by, 'state')));
+    $years = array_filter(array_merge(array_column($by, 'first'), array_column($by, 'last')));
+    $span = $years ? substr(min($years), 0, 4) . (substr(min($years), 0, 4) !== substr(max($years), 0, 4) ? ' to ' . substr(max($years), 0, 4) : '') : '';
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' serious finding' : ' serious findings') . ' from state inspection reports added, at ' . number_format(count($by))
+            . (count($by) === 1 ? ' program' : ' programs') . ' in ' . $states . ($states === 1 ? ' state' : ' states') . '.',
+        'url' => function_exists('kop_ih_severe_page_url') ? kop_ih_severe_page_url() : home_url('/severe-reports/'), 'url_label' => 'Our serious findings page',
+        'summary' => 'Most at ' . kop_vsoc_list($names, 5) . '.' . ($span !== '' ? ' The reports date from ' . $span . '.' : ''),
+    );
+}
+
+/** Everything else counted that week, in one card. */
+function kop_vsoc_site_numbers($from, $to) {
     $lines = array();
     foreach (kop_vsoc_number_lines() as $l) {
         $n = count(kop_vsoc_log_rows($l[0], array($l[1]), $from, $to));
         if ($n) $lines[] = number_format($n) . ' ' . ($n === 1 ? $l[2] : $l[3]);
     }
     if (!$lines) return null;
-    return array(
-        'key' => 'numbers:' . substr($from, 0, 10), 'angle' => 'numbers', 'angle_label' => 'This week on the site',
-        'fact' => 'This week on kidsoverprofits.org: ' . $lines[0] . '.', 'url' => home_url('/'), 'url_label' => 'kidsoverprofits.org',
-        'summary' => implode('; ', $lines) . '.', 'quote' => '', 'image' => '', 'when' => '',
-    );
+    return array('fact' => 'Also this week: ' . kop_vsoc_list(array_slice($lines, 0, 2)) . '.', 'summary' => implode('; ', $lines) . '.');
 }
