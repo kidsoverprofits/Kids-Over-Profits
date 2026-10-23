@@ -38,6 +38,6 @@ if (in_array('--all', $argv, true)) {
     }
 } else {
     list($open) = kop_pb_split($rows, $handled);
-    $out = kop_pb_open_export($open, $items);
+    $out = kop_pb_open_export($open, $items, kop_pb_auto_done($items));
 }
 echo json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\n";

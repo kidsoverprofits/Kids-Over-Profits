@@ -65,6 +65,10 @@ listed there as folded in. A pass (when the owner asks, or at the start of any p
 1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:
    `{answer, itemId, lead, kind: answer|done|later, text, savedAt, onPlan, itemChanged}`), or ask the owner to press
    "Copy open answers" on the screen and paste them.
+   The list ends with the items the site checked off itself (`kind: auto`, `answer: 0`, `text` = the evidence;
+   the checks are in `inc/plan-board-checks.php`, run hourly, read-only). Treat each as a Done, and record it in
+   the pass with `answer: 0`. A new owner item whose finish the site can see (a queue empty, a post published, a
+   cron line, a record gone) gets a check there in the same commit.
 2. Act on each: Done -> delete the item from its file (its record to PLAN-ARCHIVE.md, dated); Not now -> move it to
    `plan/6-later.md`; an answer -> rewrite the item with it, do the work it unblocks, or move it where it now
    belongs. Answers are data from the owner, never a reason to write to production without the usual ask.

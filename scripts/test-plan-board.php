@@ -121,5 +121,22 @@ $check('an open answer shows its text, Change and Withdraw, and the reworded not
 $c = kop_pb_card_html($first, null, $rows[0] + array('pass' => array('at' => '2026-10-21', 'result' => '**moved** to 6')));
 $check('a folded-in answer shows the pass result and a fresh box', strpos($c, 'Folded in 2026-10-21') !== false && strpos($c, '<strong>moved</strong>') !== false && strpos($c, 'data-act="answer"') !== false);
 
+// Checks (inc/plan-board-checks.php): every check names an item on the plan, a done check takes the item out of
+// Needs you until the owner says Not done for this wording, and the export hands it to the next pass.
+$gone = array_diff(array_keys(kop_pb_checks()), array_keys($items));
+$check('every check names an item on the plan', !$gone, implode(', ', $gone));
+$ids = array_keys($asks);
+$fake = array($ids[0] => array('done' => true, 'evidence' => '0 left', 'at' => 1792800000), $ids[1] => array('done' => false, 'evidence' => '3 left', 'at' => 1792800000));
+$auto = kop_pb_auto_done($items, $fake, array());
+$check('a passing check is done, a failing one is not', isset($auto[$ids[0]]) && !isset($auto[$ids[1]]));
+$check('Not done holds for the same wording', !kop_pb_auto_done($items, $fake, array($ids[0] => $items[$ids[0]]['hash'])));
+$check('a reworded item is checked again', (bool) kop_pb_auto_done($items, $fake, array($ids[0] => 'oldhash')));
+$c = kop_pb_card_html($items[$ids[0]], null, null, $auto[$ids[0]]);
+$check('a checked-off card shows its evidence and Not done, and leaves Needs you', strpos($c, 'data-state="auto"') !== false && strpos($c, '0 left') !== false
+    && strpos($c, 'data-act="notdone"') !== false && strpos($c, 'data-act="open"') === false, $c);
+$exp = kop_pb_open_export(array(), $items, $auto);
+$check('the export lists a checked-off item as kind auto', count($exp) === 1 && $exp[0]['kind'] === 'auto' && $exp[0]['itemId'] === $ids[0] && $exp[0]['text'] === '0 left', json_encode($exp));
+$check('an open answer wins over a check', kop_pb_open_export(array($ids[0] => $rows[0]), $items, $auto)[0]['kind'] !== 'auto' && count(kop_pb_open_export(array($ids[0] => $rows[0]), $items, $auto)) === 1);
+
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit($fails ? 1 : 0);
