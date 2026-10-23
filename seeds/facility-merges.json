@@ -26,5 +26,13 @@
     "drop": 100396,
     "drop_name": "Solacium Sunrise, LLC",
     "note": "The company name Sunrise RTC is registered under (NPI registry), an empty record. Merged 2026-10-14 with the InnerChange cleanup; Undo on the Merged tab."
+  },
+  {
+    "keep": 100180,
+    "keep_name": "Bethel Boys' Academy",
+    "drop": 13927,
+    "drop_name": "Eagle Point Christian Academy",
+    "as_duplicate": true,
+    "note": "One program at 2147 Mill St, Lucedale, MS under several names (Bethel Baptist Children's Home, Bethel Boys Academy, Gulf Coast Academy, Eagle Point Christian Academy); the owner said it is the same program and the page keeps Bethel Boys' Academy, 2026-10-23. Merged as one program, not a rename (no years per name). Undo on the Merged tab."
   }
 ]

@@ -1625,6 +1625,9 @@ function kop_apply_name_correction_seeds() {
  * Merge Duplicates screen never offers. Each runs once: only while both
  * records are on file under the names given and the dropped one was never
  * merged; logged like a merge from the screen, so its Merged tab can undo it.
+ * 'as_duplicate': true merges a pair whose names read as a rename as one
+ * program (the owner says it is the same place, no years per name); 'alias'
+ * files the dropped name as an other name (kop_fmerge_do_merge()).
  */
 function kop_apply_facility_merge_seeds() {
     $done = array();
@@ -1658,7 +1661,8 @@ function kop_apply_facility_merge_seeds() {
             continue;
         }
         try {
-            $done[] = kop_fmerge_do_merge($pdo, $prefix, $keep, $drop, 'seed');
+            $dup = $e['as_duplicate'] ?? false;
+            $done[] = kop_fmerge_do_merge($pdo, $prefix, $keep, $drop, 'seed', null, $dup === 'alias' ? 'alias' : !empty($dup));
         } catch (Throwable $ex) {
             error_log('kop_apply_facility_merge_seeds: ' . $ex->getMessage());
         }
@@ -2719,7 +2723,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '137';
+    $version = '138';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
