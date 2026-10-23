@@ -3245,3 +3245,15 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
     production 2026-10-21 (option kop_ya_twins_log): seven folders linked, three copies moved, 4162 linked to 4163.
     Six cards on https://kidsoverprofits.org/young-adult-programs/ list documents; contrast, phone width and bare
     text pass live. seeds/new-facilities.json can no longer re-add a moved program (the guard went in with 7490219d).
+
+## 5. Tests failing on main, Bethel Boys' Academy names and the Eagle Point merge (finished 2026-10-23)
+
+- Owner, 2026-10-23: Bethel Boys' Academy, Eagle Point Christian Academy, Gulf Coast Academy, Bethel Baptist
+  Children's Home and Bethel Academy are one program at 2147 Mill St, Lucedale, MS; past names need no years or
+  operator; the page keeps Bethel Boys' Academy. Shipped: e5d297467b4449229a02a508773f59eadf351b25 (past names,
+  address, 1978-2008 on 100180), c0d00c600becd18d01716db24c56fd8afa0131b9 (seeds/facility-merges.json merges 13927
+  into 100180; the merge seed gained `as_duplicate` for a pair whose names read as a rename),
+  281b2a265c2296acf19bab16934367f825de3c37 (Eagle Point moved from other names to past names). Checked live:
+  13927 gone, 38 news links and lawsuits 24 and 185 on 100180, /facility/eagle-point-christian-academy-ms/ redirects
+  (301) to https://kidsoverprofits.org/facility/bethel-boys-academy-ms/. Undo is on Merge Duplicates > Merged.
+  13926 Bethel Girls Academy (Petal, MS) was left alone.
