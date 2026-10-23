@@ -52,7 +52,9 @@ every file in `docs/plan/` in name order.
 **Plan Board** ([KOP Tools > Plan Board](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board),
 `inc/plan-board.php`): the plan files as cards, one per item, where the owner types an answer or marks an item Done
 or Not now. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
-deployed). Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
+deployed). The workflow `.github/workflows/plan-board.yml` rebuilds and commits the seed on every push touching
+`docs/plan/` and then starts the deploy, and `php scripts/test-plan-board.php` fails while the seed is behind, so a
+forgotten rebuild fixes itself a minute after the push. Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
 files. Item ids are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead. A session never
 writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
 listed there as folded in. A pass (when the owner asks, or at the start of any plan work):

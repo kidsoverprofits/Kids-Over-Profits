@@ -43,6 +43,15 @@ $check('every item has an id, a lead and a hash', !$bad, implode(', ', array_key
 $nolead = array_filter($items, function ($it) { return strpos($it['text'], '**') !== 0; });
 $check('every item starts with a bold lead (its id)', !$nolead, implode(', ', array_slice(array_keys($nolead), 0, 5)));
 
+// The seed is built from the plan files as they are (build.py's source_text(): name order, LF, joined by a blank
+// line). docs/ is not deployed, so this only runs in a checkout.
+$files = glob($theme . '/docs/plan/*.md');
+if ($files) {
+    usort($files, function ($a, $b) { return strcmp(basename($a), basename($b)); });
+    $src = implode("\n\n", array_map(function ($f) { return str_replace(array("\r\n", "\r"), "\n", file_get_contents($f)); }, $files));
+    $check('the seed is current with docs/plan/ (else: python scripts/plan-board/build.py)', ($plan['source'] ?? '') === sha1($src), ($plan['source'] ?? 'no source hash') . ' vs ' . sha1($src));
+}
+
 // Markdown.
 $h = kop_pb_md('**Lead**: run `php a.php --x` at [KOP Tools](https://kidsoverprofits.org/wp-admin/) and see [the file](plan/x.md), also https://example.org/a.b.');
 $check('bold', strpos($h, '<strong>Lead</strong>') !== false, $h);

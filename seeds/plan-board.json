@@ -1,5 +1,6 @@
 {
- "built": "2026-10-23 20:07 UTC",
+ "built": "2026-10-23 20:16 UTC",
+ "source": "16a258b3cb1e3e0d65942e0bc21d52494a1a5cfa",
  "sections": [
   {
    "key": "2",
@@ -871,8 +872,8 @@
       {
        "id": "4.4:plan-board-is-stale-and-hard-to-use",
        "lead": "Plan Board is stale and hard to use",
-       "text": "**Plan Board is stale and hard to use** (2026-10-23, owner: \"the plan board kinda sucks\"). The screen (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board, `inc/plan-board.php`) only changes when a session runs `python scripts/plan-board/build.py` and commits `seeds/plan-board.json`; sessions forget (4.3 item 15 was missing until https://github.com/kidsoverprofits/Kids-Over-Profits/commit/06801c2530ef954f2a01e5d426b85f88edad2875). a. Rebuild without a session remembering: a GitHub Action on pushes touching `docs/plan/**` that runs build.py and commits the seed, or a check in `scripts/test-plan-board.php` that fails when the seed is behind the files. b. Ask the owner what else is wrong (not yet said). Candidates: 175 cards in one long list; each card is a dense paragraph with no clear question for the owner; owner steps mixed in with session notes; answering is clunky. Likely fixes: show only items that need the owner first (a \"needs you\" view), one-line question per card, filters by section, collapse long text.",
-       "hash": "b2f6ce4aa79c"
+       "text": "**Plan Board is stale and hard to use** (2026-10-23, owner: \"the plan board kinda sucks\"). The screen (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board, `inc/plan-board.php`) only changes when a session runs `python scripts/plan-board/build.py` and commits `seeds/plan-board.json`; sessions forget (4.3 item 15 was missing until https://github.com/kidsoverprofits/Kids-Over-Profits/commit/06801c2530ef954f2a01e5d426b85f88edad2875). a. Rebuild: shipped 2026-10-23. The seed carries a `source` hash of the plan files; `build.py --check` and `scripts/test-plan-board.php` fail when it is behind; `.github/workflows/plan-board.yml` rebuilds + commits it on pushes touching `docs/plan/**` and dispatches `deploy.yml`. Open: watch the first run that has to rebuild (https://github.com/kidsoverprofits/Kids-Over-Profits/actions/workflows/plan-board.yml) push the seed and start a deploy; if the push is refused, the org caps the workflow token at read and needs Settings > Actions > General > Workflow permissions set to read and write. b. Ask the owner what else is wrong (their 2026-10-23 message cut off before the list). Candidates: 175 cards in one long list; each card is a dense paragraph with no clear question for the owner; owner steps mixed in with session notes; answering is clunky. Likely fixes: show only items that need the owner first (a \"needs you\" view), one-line question per card, filters by section, collapse long text.",
+       "hash": "99f8a3b0a3d9"
       }
      ]
     },

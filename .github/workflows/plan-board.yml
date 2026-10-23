@@ -1,0 +1,57 @@
+name: Plan Board seed
+
+# KOP Tools > Plan Board reads seeds/plan-board.json; docs/ is not deployed. On every push to main that touches
+# docs/plan/, rebuild the seed with scripts/plan-board/build.py when it is behind (its "source" hash differs) and
+# commit it. A push made with the workflow token starts no other workflow, so this one then starts deploy.yml
+# itself. scripts/test-plan-board.php makes the same check locally.
+on:
+  push:
+    branches: [main]
+    paths: ['docs/plan/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: plan-board-seed
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild and commit the seed when it is behind
+        id: build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Start from the newest main each try, so a push that lands meanwhile is rebuilt on, never conflicted with.
+          for attempt in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            if python3 scripts/plan-board/build.py --check; then
+              echo "changed=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            python3 scripts/plan-board/build.py
+            git add seeds/plan-board.json
+            git commit -q -m "chore(plan board): rebuild the seed from docs/plan/"
+            if git push -q origin HEAD:main; then
+              echo "changed=1" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push attempt ${attempt} lost a race, trying again"
+            sleep 10
+          done
+          echo "Could not push the rebuilt seed after 3 attempts"
+          exit 1
+
+      - name: Deploy the rebuilt seed
+        if: steps.build.outputs.changed == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

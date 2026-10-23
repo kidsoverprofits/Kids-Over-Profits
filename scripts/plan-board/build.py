@@ -1,6 +1,10 @@
 """Build seeds/plan-board.json, the plan the KOP Tools > Plan Board screen shows, from docs/plan/*.md.
 
-    python scripts/plan-board/build.py [--out seeds/plan-board.json] [--json]
+    python scripts/plan-board/build.py [--out seeds/plan-board.json] [--json] [--check]
+
+--check writes nothing and exits 1 when the seed is behind docs/plan/ (its "source" hash differs). The workflow
+.github/workflows/plan-board.yml runs this on every push touching docs/plan/ and commits the rebuilt seed, and
+scripts/test-plan-board.php makes the same check, so a session no longer has to remember the rebuild.
 
 docs/PLAN.md is the index; the items are in docs/plan/*.md, read in name order. A file of a numbered subsection
 repeats its section heading ("## 4. ..."), which joins the section already read.
@@ -111,13 +115,35 @@ def parse(md):
     return out
 
 
+def source_text(files):
+    """The plan files as one text; "source" is its sha1. Newlines are LF (read_text translates CRLF), and
+    scripts/test-plan-board.php joins the files the same way to tell whether the seed is behind."""
+    return '\n\n'.join(p.read_text(encoding='utf-8') for p in files)
+
+
+def source_hash(files):
+    return hashlib.sha1(source_text(files).encode('utf-8')).hexdigest()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default=str(ROOT / 'seeds' / 'plan-board.json'))
     ap.add_argument('--json', action='store_true', help='print the parsed items instead')
+    ap.add_argument('--check', action='store_true', help='exit 1 when the seed is behind docs/plan/, write nothing')
     a = ap.parse_args()
     files = sorted(PLAN_DIR.glob('*.md'))
-    sections = parse('\n\n'.join(p.read_text(encoding='utf-8') for p in files))
+    src = source_hash(files)
+    if a.check:
+        try:
+            have = json.loads(Path(a.out).read_text(encoding='utf-8')).get('source')
+        except (OSError, ValueError):
+            have = None
+        if have != src:
+            print(f'{a.out} is behind docs/plan/: run python scripts/plan-board/build.py')
+            sys.exit(1)
+        print('plan board seed is current')
+        return
+    sections = parse(source_text(files))
     if a.json:
         json.dump(sections, sys.stdout, indent=1, ensure_ascii=False)
         return
@@ -125,7 +151,7 @@ def main():
         for g in s['groups']:
             for it in g['items']:
                 it['hash'] = hashlib.sha1(it['text'].encode('utf-8')).hexdigest()[:12]
-    data = {'built': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'sections': sections}
+    data = {'built': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'source': src, 'sections': sections}
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
