@@ -697,6 +697,24 @@ p.kop-vol-newreply {
 .kop-vol-self { margin-top: 1rem; }
 .kop-vol-self select { max-width: 100%; margin: 0 .25rem .5rem 0; }
 
+/* The intro: the content warning and "How this works" (templates/volunteer-review.php). */
+.kop-vol-warning {
+    margin: 1rem 0;
+    padding: .75rem 1rem;
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    border-left: 5px solid var(--kop-orange, #EF9034);
+    color: var(--kop-midnight-blue, #000435);
+}
+.kop-vol-warning p { margin: 0 0 .5rem; }
+.kop-vol-warning p:last-child { margin-bottom: 0; }
+.kop-vol-howto summary { cursor: pointer; font-weight: 700; color: var(--kop-midnight-blue, #000435); }
+.kop-vol-page .kop-vol-howto h2 { font-size: 1.05rem; margin: 1rem 0 .35rem; color: var(--kop-midnight-blue, #000435); }
+.kop-vol-howto p { margin: 0 0 .6rem; }
+.kop-vol-other { margin-top: 1rem; }
+.kop-vol-other summary { cursor: pointer; color: var(--kop-midnight-blue, #000435); }
+.kop-vol-other select { max-width: 100%; margin: .5rem .25rem .5rem 0; }
+.kop-vol-handback { margin: .75rem 0 0; }
+
 /* "Start now": a new volunteer's one button (practice, then the first real batch). */
 .kop-vol-start > p:first-child { font-size: 1.05rem; margin-top: 0; }
 .kop-vol-steps { margin: 0 0 1rem 1.25rem; padding: 0; }

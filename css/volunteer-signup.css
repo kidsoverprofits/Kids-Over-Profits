@@ -25,6 +25,14 @@
     margin-bottom: 1rem;
 }
 
+.kop-vols p.kop-vols-warning {
+    margin: 0 0 1rem;
+    padding: .6rem .9rem;
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    border-left: 5px solid var(--kop-orange, #EF9034);
+    color: var(--kop-midnight-blue, #000435);
+}
+
 .kop-vols-field {
     margin: 0 0 1rem;
 }

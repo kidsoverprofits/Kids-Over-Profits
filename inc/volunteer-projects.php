@@ -811,6 +811,49 @@ function kop_volp_activity(array $p) {
 }
 
 /**
+ * Hand back a batch's unanswered items (they leave the project, free for the next one) and close it, closed_why
+ * $why: 'stalled' (the sweep), 'handed-back' (the volunteer's button), 'left' (they stopped volunteering).
+ * The calls already made stay. Returns how many went back.
+ */
+function kop_volp_release(array $p, $why) {
+    global $wpdb;
+    $answered = kop_volr_is($p) ? kop_volr_answered_keys((int) $p['id'], 0) : (kop_vsoc_is($p) ? kop_vsoc_touched_keys((int) $p['id']) : kop_volp_recs($p));
+    $released = 0;
+    foreach (kop_volp_item_rows($p['id']) as $r) {
+        if ((int) $r['gone'] || isset($answered[$r['item_key']])) continue;
+        $wpdb->update(kop_volp_items_table(), array('gone' => KOP_VOLP_RELEASED), array('project_id' => (int) $p['id'], 'item_key' => (string) $r['item_key']));
+        $released++;
+    }
+    kop_volp_set_status($p['id'], 'closed', (string) $why);
+    return $released;
+}
+
+/**
+ * A volunteer hands back one batch of their own ($project_id), or stops volunteering ($project_id 0): every open
+ * batch of theirs goes back, and their link is turned off (they can sign up again). Returns {message}.
+ */
+function kop_volp_leave(array $vol, $project_id = 0) {
+    global $wpdb;
+    kop_volp_ensure_tables();
+    $vid = (int) $vol['id'];
+    $sql = 'SELECT * FROM ' . kop_volp_table() . " WHERE status = 'open' AND volunteer_id = %d" . ($project_id ? ' AND id = %d' : '');
+    $rows = (array) $wpdb->get_results($project_id ? $wpdb->prepare($sql, $vid, (int) $project_id) : $wpdb->prepare($sql, $vid), ARRAY_A);
+    if ($project_id && !$rows) throw new RuntimeException('That batch is not open in your name.');
+    foreach ($rows as $p) kop_volp_release($p, $project_id ? 'handed-back' : 'left');
+    if ($project_id) return array('message' => 'Handed back. Anything you already answered is kept. Thank you!');
+    kop_vol_revoke($vid);
+    return array('message' => 'Done: your link is turned off and your open batches went back. Thank you for everything you did.');
+}
+
+function kop_volp_rest_leave(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $who = kop_vol_rest_who($req);
+        if (empty($who['vol'])) throw new RuntimeException('Admins see this page as a preview.');
+        return kop_volp_leave($who['vol'], (int) $req->get_param('project_id'));
+    });
+}
+
+/**
  * Hand back a quiet batch's unanswered items (they leave the project and are
  * free for the next one) and close it; close every finished batch (every item
  * answered or handled elsewhere) once it has been quiet 'finished_hours'. The
@@ -828,14 +871,7 @@ function kop_volp_sweep($now = null) {
         $quiet = $now - strtotime($act['last'] . ' UTC');
         $prog = $act['progress'];
         if ($prog['done'] < $prog['total'] && !$act['waiting'] && $quiet >= $rules['stall_days'] * DAY_IN_SECONDS) {
-            $answered = kop_volr_is($p) ? kop_volr_answered_keys((int) $p['id'], 0) : (kop_vsoc_is($p) ? kop_vsoc_touched_keys((int) $p['id']) : kop_volp_recs($p));
-            $released = 0;
-            foreach (kop_volp_item_rows($p['id']) as $r) {
-                if ((int) $r['gone'] || isset($answered[$r['item_key']])) continue;
-                $wpdb->update(kop_volp_items_table(), array('gone' => KOP_VOLP_RELEASED), array('project_id' => (int) $p['id'], 'item_key' => (string) $r['item_key']));
-                $released++;
-            }
-            kop_volp_set_status($p['id'], 'closed', 'stalled');
+            $released = kop_volp_release($p, 'stalled');
             $out[] = array('id' => (int) $p['id'], 'title' => (string) $p['title'], 'why' => 'stalled', 'released' => $released);
         } elseif ($prog['done'] >= $prog['total'] && $quiet >= $rules['finished_hours'] * HOUR_IN_SECONDS) {
             kop_volp_set_status($p['id'], 'closed', 'finished');
@@ -950,7 +986,7 @@ function kop_volp_rest_selfassign(WP_REST_Request $req) {
 /* ---- REST (volunteer page) --------------------------------------------------------- */
 
 add_action('rest_api_init', function () {
-    foreach (array('projects' => 'kop_volp_rest_projects', 'project' => 'kop_volp_rest_project', 'selfassign' => 'kop_volp_rest_selfassign') as $path => $cb) {
+    foreach (array('projects' => 'kop_volp_rest_projects', 'project' => 'kop_volp_rest_project', 'selfassign' => 'kop_volp_rest_selfassign', 'leave' => 'kop_volp_rest_leave') as $path => $cb) {
         register_rest_route('kop/v1', '/volunteer/' . $path, array(
             'methods' => 'POST', 'callback' => $cb,
             'permission_callback' => function (WP_REST_Request $req) {
@@ -1143,7 +1179,9 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
         $prog = $progs[(int) $p['id']];
         $closed = $p['status'] === 'closed';
         $who = (int) $p['volunteer_id'] ? ($names[(int) $p['volunteer_id']] ?? '(gone)') : 'Anyone';
-        $why = array('finished' => ', finished', 'stalled' => ', handed back ' . kop_volp_released_count($p['id']) . ' unanswered')[$p['closed_why'] ?? ''] ?? '';
+        $back = kop_volp_released_count($p['id']);
+        $why = array('finished' => ', finished', 'stalled' => ', handed back ' . $back . ' unanswered',
+            'handed-back' => ', the volunteer handed back ' . $back . ' unanswered', 'left' => ', the volunteer stopped volunteering; ' . $back . ' unanswered went back')[$p['closed_why'] ?? ''] ?? '';
         echo '<tr' . ($closed ? ' style="opacity:.65"' : '') . '><td><a href="' . esc_url(add_query_arg('project', (int) $p['id'], $base)) . '"><strong>' . esc_html($p['title']) . '</strong></a><br><span class="description">'
             . esc_html(kop_volp_source_label($p) . ', about ' . (int) $p['minutes'] . ' min' . ($closed ? ', closed' . $why : '')) . '</span></td><td>' . esc_html($who) . '</td><td>'
             . (int) $prog['done'] . ' of ' . (int) $prog['total'] . '</td><td>' . ($prog['open'] ? '<strong>' . (int) $prog['open'] . '</strong>' : '0') . '</td><td>'

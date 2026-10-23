@@ -617,7 +617,7 @@
                 msg.textContent = e.message;
             });
         } });
-        return el('div', { class: 'kop-vol-self kop-vol-start' }, [
+        var box = el('div', { class: 'kop-vol-self kop-vol-start' }, [
             el('p', { text: 'Your first job: ' + (first.title || first.label) + '. ' + (first.blurb || '') }),
             el('ol', { class: 'kop-vol-steps' }, [
                 el('li', null, [el('strong', { text: 'Practice: ' }), pr.size + ' items we have already decided. After each one you see what we decided. About 10 minutes.']),
@@ -625,6 +625,25 @@
             ]),
             go, msg
         ]);
+        // Someone who would rather not read the reports starts with other work.
+        var others = pr.queues.slice(1);
+        if (others.length) {
+            var pick = el('select', { id: 'kop-vol-start-other' }, others.map(function (q) { return el('option', { value: q.key, text: q.title || q.label }); }));
+            var omsg = el('p', { class: 'kop-vol-msg', role: 'status' });
+            var ogo = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Start with this instead', onclick: function () {
+                ogo.disabled = true;
+                startPractice(pick.value).catch(function (e) {
+                    ogo.disabled = false;
+                    omsg.className = 'kop-vol-msg is-error';
+                    omsg.textContent = e.message;
+                });
+            } });
+            box.appendChild(el('details', { class: 'kop-vol-other' }, [
+                el('summary', { text: 'Rather not read the inspection reports? Start with other work' }),
+                el('label', { for: 'kop-vol-start-other', text: 'Work ' }), pick, ' ', ogo, omsg
+            ]));
+        }
+        return box;
     }
 
     // learn: true once they can already pick a batch (another queue to learn), false before the first one.
@@ -893,7 +912,59 @@
             : p.kind === 'social' ? 'Use only what the card says. Nothing is posted until an admin approves it; one sent back says what to change.'
             : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
         projBrief.appendChild(askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'));
+        if (p.mine && !cfg.preview && p.done < p.total) projBrief.appendChild(handBackButton(p));
         state.projects.forEach(function (x) { if (x.id === p.id) { x.done = p.done; x.total = p.total; } });
+    }
+
+    // Too much, or not for them: the unanswered items go back for someone else; the answers stay.
+    function handBackButton(p) {
+        var msg = el('span', { class: 'kop-vol-msg', role: 'status' });
+        var b = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Hand this batch back', onclick: function () {
+            if (!window.confirm('Hand this batch back? The ones you have not answered go to someone else. Your answers are kept.')) return;
+            b.disabled = true;
+            api('leave', { project_id: p.id }).then(function (res) {
+                return api('projects').then(function (data) {
+                    state.projects = data.projects || [];
+                    state.self = data.self;
+                    state.project = null;
+                    rememberProject(0);
+                    renderProjects();
+                    if (!projectsPanel.parentNode) app.insertBefore(projectsPanel, app.firstChild);
+                    body.innerHTML = '';
+                    body.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: res.message })]));
+                    bringToTop(projectsPanel);
+                });
+            }).catch(function (e) {
+                b.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = ' ' + e.message;
+            });
+        } });
+        return el('p', { class: 'kop-vol-handback' }, [b, msg]);
+    }
+
+    // At the foot of the page: stop for good (the link is turned off; signing up again starts afresh).
+    function stopPanel() {
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+        var b = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Stop volunteering', onclick: function () {
+            if (!window.confirm('Stop volunteering? Your link will stop working and your open batches go back. Your answers are kept.')) return;
+            b.disabled = true;
+            api('leave', {}).then(function (res) {
+                app.innerHTML = '';
+                app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: res.message }),
+                    el('p', null, ['To come back, ', el('a', { href: cfg.signup || '/volunteer/', text: 'sign up again' }), '.'])]));
+                bringToTop(app);
+            }).catch(function (e) {
+                b.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+            });
+        } });
+        return el('section', { class: 'kop-vol-panel kop-vol-stop' }, [
+            el('h2', { text: 'Taking a break or stopping' }),
+            el('p', { text: 'A break needs nothing from you: an untouched batch goes back on its own after a few days. To stop for good, this turns your link off and returns your open batches.' }),
+            b, msg
+        ]);
     }
 
     function nextProjectItem() {
@@ -1120,6 +1191,7 @@
         // The conversation is always last on the page, under whatever they are working on.
         var startMessages = function () {
             app.appendChild(msgPanel);
+            if (!cfg.preview) app.appendChild(stopPanel());
             loadMessages(false);
             // A reply may come while the page is open: look again every two minutes while it is in view.
             window.setInterval(function () { if (!document.hidden) loadMessages(false); }, 120000);

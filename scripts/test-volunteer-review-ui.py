@@ -75,7 +75,8 @@ def practice(width, shots, check):
     def status():
         return {"size": 2, "pass": 1, "open": round_now() if st["started"] and len(st["calls"]) < 2 else None, "last": None,
                 "passed": ["news"] if st["passed"] else [], "queues": [] if st["passed"] else [
-                    {"key": "news", "label": "News", "title": "News articles sent in", "blurb": "Most take about a minute."}]}
+                    {"key": "news", "label": "News", "title": "News articles sent in", "blurb": "Most take about a minute."},
+                    {"key": "closure", "label": "Closure reports", "title": "Program closures", "blurb": ""}]}
 
     BATCH = {"id": 31, "title": "News articles sent in", "question": "Is it about a program?", "yes": "Abuse at a ranch.", "no": "Sports scores.", "note": "",
              "minutes": 10, "total": 2, "done": 0, "mine": True, "kind": "review", "link_kinds": None, "faq": [], "source": "news"}
@@ -103,6 +104,9 @@ def practice(width, shots, check):
         elif name == "selfassign":
             st["batch"] = True
             out = {"id": BATCH["id"], "link": ""}
+        elif name == "leave":
+            st["batch"] = False
+            out = {"message": "Handed back. Anything you already answered is kept. Thank you!"}
         elif name == "project":
             out = {"project": BATCH, "items": [dict(PRACTICE_ITEMS[0], practice=False, key="201", title="Real story")]}
         elif name == "projects":
@@ -141,6 +145,11 @@ def practice(width, shots, check):
               and "Your first job: News articles sent in" in panel.inner_text() and "get 1 of 2 the same as us" in panel.inner_text()
               and panel.locator("button", has_text="Start now").count() == 1, panel.inner_text())
         check("...and no live queue open under it", page.locator(".kop-vol-card").count() == 0 and "nothing to review" not in page.locator("#kop-vol-app").inner_text())
+        other = panel.locator("details.kop-vol-other")
+        check("someone who would rather not read the reports can start with other work", other.count() == 1
+              and "Rather not read the inspection reports" in other.locator("summary").inner_text()
+              and other.locator("option").all_text_contents() == ["Program closures"], other.locator("option").all_text_contents())
+        check("Stop volunteering is at the foot of the page", page.locator(".kop-vol-stop button", has_text="Stop volunteering").count() == 1)
         if shots:
             page.screenshot(path=str(shots / ("start-now-%d.png" % width)), full_page=True)
         panel.locator("button", has_text="Start now").click()
@@ -170,6 +179,11 @@ def practice(width, shots, check):
         page.wait_for_function("document.querySelector('.kop-vol-card h3') && document.querySelector('.kop-vol-card h3').textContent.indexOf('Real story') >= 0")
         check("passing opens the first real batch at once", [n for n, b in st["posts"] if n == "selfassign"] == ["selfassign"]
               and "Item 1 of 2" in page.locator(".kop-vol-position").inner_text())
+        check("the batch can be handed back", page.locator(".kop-vol-brief button", has_text="Hand this batch back").count() == 1)
+        page.once("dialog", lambda d: d.accept())
+        page.locator(".kop-vol-brief button", has_text="Hand this batch back").click()
+        page.wait_for_function("document.body.innerText.indexOf('Handed back') >= 0")
+        check("...and handing it back says so", [b for n, b in st["posts"] if n == "leave"] == [{"project_id": 31}])
         check("no practice call was sent as a recommendation", not [n for n, b in st["posts"] if n == "recommend"])
         check("the practice answers went to the practice route", [b.get("verdict") for n, b in st["posts"] if n == "practice" and b.get("do") == "answer"] == ["reject", "reject"])
         wide = page.evaluate("""() => {

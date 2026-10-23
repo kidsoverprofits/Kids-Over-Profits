@@ -99,6 +99,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # struck at Volunteer Reviewers > Practice cards ?practice=<source>, option kop_volpr_struck) and kop_volpr_unclear() (nothing to read, an
 # archive.md-family link); a round never repeats a title. /volunteer/: "Start reviewing now" hub action -> #kop-vol-signup; GET
 # kop/v1/volunteer/signup tells the cached page the device is signed in (form swapped for "Open your volunteer page")
+# The page intro (templates/volunteer-review.php) says what the work is, carries the content warning (also on the /volunteer/ form) and a
+# "How this works" fold (open until kop_vol_has_started()): getting started, choosing next work, taking a break or stopping, questions.
+# Opting out: "Start now" offers other work under "Rather not read the inspection reports?"; REST volunteer/leave (kop_volp_leave()) with
+# project_id = "Hand this batch back" (closed_why 'handed-back'), without = "Stop volunteering" (every open batch back, closed_why 'left',
+# link revoked). Both go through kop_volp_release(), as the hourly sweep does; answers already given stay
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
 # Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>

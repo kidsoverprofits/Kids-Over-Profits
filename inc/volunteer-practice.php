@@ -224,8 +224,8 @@ function kop_volpr_draw($vid, $source) {
 /** What a queue's work is, in a line, for "Start now" on the volunteer page ('' = the title says enough). */
 function kop_volpr_blurb($source) {
     $b = array(
-        'inspection-highlights' => 'Each one is a few lines from a state inspector\'s report on a program. You say whether a young person was hurt or put at risk, '
-            . 'or whether it is paperwork. Most take about a minute, and they are the work we most need help with.',
+        'inspection-highlights' => 'Each one is a passage our scanner pulled out of a state inspection report. You say whether it is a serious violation '
+            . '(harm or danger to a young person) or paperwork. Most take about a minute, and this is the work we most need help with.',
     );
     return (string) apply_filters('kop_volpr_blurb', $b[$source] ?? '', $source);
 }

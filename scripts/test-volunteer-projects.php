@@ -720,5 +720,24 @@ $check('an unread answer can be taken back', kop_volr_get_answer($r3, 'q1', $sam
 $check('the message for a research project says so', strpos(kop_volp_message(kop_volp_get($r3), 'https://x.test'), 'could not find it') !== false
     && strpos(kop_volp_message(kop_volp_get($r3), 'https://x.test'), 'Ask a question') !== false);
 
+echo "\nHanding back and stopping\n";
+list($quit_id, $quit_url) = kop_vol_create('Quinn Example');
+$quinn = kop_vol_by_token(substr($quit_url, -48));
+$check('a new volunteer has not started yet', !kop_vol_has_started($quinn['id']));
+list($hb) = kop_volp_create(array('source' => $Q, 'size' => 3, 'volunteer_id' => $quinn['id']));
+list($hb2) = kop_volp_create(array('source' => $Q, 'size' => 2, 'volunteer_id' => $quinn['id']));
+$hb_keys = $keys_of($hb);
+kop_vol_recommend($quinn, $Q, $hb_keys[0], 'approve', 'A child was hurt.');
+$check('...and has once they make a call', kop_vol_has_started($quinn['id']));
+$check('someone else\'s batch cannot be handed back', strpos($throws(function () use ($alex, $hb) { kop_volp_leave($alex, $hb); }), 'not open in your name') !== false);
+$res = kop_volp_leave($quinn, $hb);
+$row = kop_volp_get($hb);
+$check('handing a batch back closes it, the unanswered go back, the answer stays', $row['status'] === 'closed' && $row['closed_why'] === 'handed-back'
+    && kop_volp_released_count($hb) === 2 && (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_volunteer_recs WHERE volunteer_id = {$quinn['id']}")->fetchColumn() === 1, json_encode($res));
+$check('...and the link still works', kop_vol_by_token(substr($quit_url, -48)) !== null && kop_volp_get($hb2)['status'] === 'open');
+kop_volp_leave($quinn, 0);
+$check('stopping turns the link off and hands back every open batch', kop_vol_by_token(substr($quit_url, -48)) === null
+    && kop_volp_get($hb2)['status'] === 'closed' && kop_volp_get($hb2)['closed_why'] === 'left' && kop_volp_released_count($hb2) === 2);
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

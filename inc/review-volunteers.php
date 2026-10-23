@@ -177,6 +177,14 @@ function kop_vol_sources_for($vid) {
     return array_intersect_key($pool, $earned);
 }
 
+/** Has this volunteer made a call or played a practice round? (The page keeps "How this works" open until they have.) */
+function kop_vol_has_started($vid) {
+    global $wpdb;
+    kop_vol_ensure_tables();
+    if ((int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_vol_recs_table() . ' WHERE volunteer_id = %d', (int) $vid))) return true;
+    return function_exists('kop_volpr_rounds') && (bool) kop_volpr_rounds((int) $vid);
+}
+
 function kop_vol_source_for($vid, $key) {
     $all = kop_vol_sources_for($vid);
     if (!isset($all[$key])) throw new InvalidArgumentException('That queue opens to you once you pass its practice round.');
@@ -864,6 +872,7 @@ add_action('wp_enqueue_scripts', function () {
         'nonce'   => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
         'name'    => $vol ? (string) $vol['name'] : '',
         'preview' => $admin,
+        'signup'  => home_url('/volunteer/#kop-vol-signup'),
     ));
 }, 20);
 
