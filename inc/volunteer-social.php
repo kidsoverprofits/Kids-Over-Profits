@@ -11,7 +11,9 @@
  * Monday) reads the last 7 days of {prefix}kop_review_log and makes one card
  * per post idea (kop_vsoc_cards(), inc/volunteer-social-cards.php): the fact
  * in a line, the public page, the plain summary or a quote, a picture we
- * hold, an angle. Only items whose own date is within two months make a card. It goes to the volunteer picked at Volunteer Reviewers >
+ * hold, an angle. Only items whose own date is within two months make a
+ * card, plus one card every week of what was added to the site. It goes to
+ * the volunteer picked at Volunteer Reviewers >
  * Projects ("Weekly roundup goes to"); with nobody picked, no roundup is made.
  * A social project is always one person's: never "anyone with a link".
  *
@@ -105,7 +107,7 @@ function kop_vsoc_make_roundup($vid, $days = 7, $now = null, $created_by = null)
     $from = gmdate('Y-m-d H:i:s', $now - (int) $days * DAY_IN_SECONDS);
     $to = gmdate('Y-m-d H:i:s', $now);
     $cards = kop_vsoc_cards($from, $to);
-    if (!$cards) throw new RuntimeException('Nothing that week makes a post: no closures, lawsuits, bills, plain summaries or featured reporting from the last two months.');
+    if (!$cards) throw new RuntimeException('Nothing happened that week: nothing was added to the site, and no news from the last two months was approved.');
     kop_volp_ensure_tables();
     $brief = kop_vsoc_brief();
     $title = 'Post ideas: ' . gmdate('M j', $now - (int) $days * DAY_IN_SECONDS) . ' to ' . gmdate('M j', $now - DAY_IN_SECONDS);
@@ -499,7 +501,7 @@ function kop_vsoc_admin_settings($nonce, array $vols) {
     $cur = kop_vsoc_designer();
     ?>
     <h3>Weekly social media roundup</h3>
-    <p style="max-width:760px">Every Monday, the week's closures, lawsuits, bills, plain summaries and featured reporting from the last two months become post ideas
+    <p style="max-width:760px">Every Monday, the week's closures, lawsuits, bills, plain summaries, news and new pages from the last two months, and one card of what was added to the site, become post ideas
         for one person. They write the captions and make the pictures (no AI captions); you approve each one on the project's page.</p>
     <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;max-width:900px">
         <?php echo $nonce; ?>

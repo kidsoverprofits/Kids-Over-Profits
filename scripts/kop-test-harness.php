@@ -166,7 +166,7 @@ function get_post_meta($id, $key = '', $single = false) {
 }
 function get_post($id) {
     global $wpdb;
-    return $wpdb->get_row($wpdb->prepare('SELECT ID, post_title, post_excerpt, post_name, post_content, post_modified FROM wpdl_posts WHERE ID = %d', $id)) ?: null;
+    return $wpdb->get_row($wpdb->prepare('SELECT ID, post_title, post_excerpt, post_name, post_content, post_modified, post_status, post_type, post_date_gmt FROM wpdl_posts WHERE ID = %d', $id)) ?: null;
 }
 // A post printed inside another template (a merged Facility Profile on its facility page).
 if (!function_exists('setup_postdata')) { function setup_postdata($post) { $GLOBALS['post'] = $post; $GLOBALS['page'] = 1; $GLOBALS['pages'] = array((string) ($post->post_content ?? '')); return true; } }

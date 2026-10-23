@@ -503,6 +503,36 @@ $check('a date reads as its last day; no date is not recent', kop_vsoc_recent(gm
     && !kop_vsoc_recent(gmdate('Y-m-d', time() - 70 * 86400), $to) && kop_vsoc_recent(gmdate('Y-m-d', time() - 50 * 86400), $to));
 $check('a quiet week makes no cards', kop_vsoc_cards($at(40), $at(33)) === array());
 
+// Three weeks back: news, a page of ours, and the essential-reporting story approved as news too.
+$news_fac = $one("SELECT n.id FROM news_submissions n JOIN news_facility_links l ON l.news_id = n.id JOIN facilities_v2 f ON f.id = l.facility_id
+    WHERE n.status = 'approved' AND n.article_url LIKE 'https://%' AND n.id <> " . (int) $feat . " ORDER BY n.id DESC LIMIT 1");
+$news_bare = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (SELECT news_id FROM news_facility_links) AND id <> " . (int) $feat . " ORDER BY id DESC LIMIT 1");
+$news_old = $one("SELECT id FROM news_submissions WHERE status = 'approved' AND article_url LIKE 'https://%' AND id NOT IN (" . (int) $feat . ', ' . (int) $news_fac . ', ' . (int) $news_bare . ") ORDER BY id DESC LIMIT 1");
+$page = $one("SELECT ID FROM wpdl_posts WHERE post_type = 'page' AND post_status = 'publish' AND post_title <> '' AND post_name <> '' ORDER BY ID DESC LIMIT 1");
+$pdo->exec("UPDATE news_submissions SET publication_date = '$recent' WHERE id IN (" . (int) $news_fac . ', ' . (int) $news_bare . ')');
+$pdo->exec("UPDATE news_submissions SET publication_date = '2019-05-02' WHERE id = " . (int) $news_old);
+$pdo->exec("UPDATE wpdl_posts SET post_date_gmt = '" . $at(21) . "' WHERE ID = " . (int) $page);
+$log('news', 'approve', $news_fac, 21);
+$log('news', 'approve', $news_bare, 22);
+$log('news', 'approve', $news_old, 22);
+$log('news', 'approve', $feat, 23);
+$log('featured-nominations', 'feature', $feat, 23);
+$log('drafts', 'publish', $page, 21);
+$cards3 = kop_vsoc_cards($at(27), $at(20));
+$keys3 = array_column($cards3, 'key');
+$check('approved news from the last two months makes a card, after the essential reporting and new pages',
+    $keys3 === array('reporting:' . $feat, 'page:' . $page, 'news:' . $news_fac, 'news:' . $news_bare, 'numbers:' . substr($at(27), 0, 10)), json_encode($keys3));
+$by3 = array_column($cards3, null, 'key');
+$check('a story links the facility page it is linked to, else the story itself', strpos($by3['news:' . $news_fac]['url'], 'https://example.test/facility/') === 0
+    && strpos($by3['news:' . $news_bare]['url'], 'https://example.test/') !== 0 && strpos($by3['news:' . $news_bare]['url_label'], 'The story') === 0, json_encode(array_column($cards3, 'url')));
+$check('a page of ours links its page', strpos($by3['page:' . $page]['url'], 'https://example.test/') === 0 && strpos($by3['page:' . $page]['fact'], 'New on our site: ') === 0);
+$check('the site-updates card counts the week\'s work, old items too', strpos($by3['numbers:' . substr($at(27), 0, 10)]['summary'], '4 news stories added') !== false
+    && strpos($by3['numbers:' . substr($at(27), 0, 10)]['summary'], '1 new page published') !== false, $by3['numbers:' . substr($at(27), 0, 10)]['summary'] ?? '');
+$log('closure', 'apply', $cl_old, 30);
+$cards4 = kop_vsoc_cards($at(31), $at(28));
+$check('a week of only old items still has its site-updates card', array_column($cards4, 'angle') === array('numbers')
+    && strpos($cards4[0]['fact'], 'This week on kidsoverprofits.org: 1 closure recorded') === 0, json_encode($cards4));
+
 $check('a roundup is always one person\'s', strpos($throws(function () { kop_vsoc_make_roundup(0); }), 'Pick who') !== false);
 list($ps1) = kop_vsoc_make_roundup($sam_id, 7);
 $PS1 = kop_volp_get($ps1);

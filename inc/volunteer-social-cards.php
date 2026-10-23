@@ -11,14 +11,19 @@
  *   finding (highlight-summaries)        /severe-reports/#finding-<id>, the plain summary
  *                                        and the state's own words, uncut in meaning
  *   reporting (featured-nominations)     the article, its picture, the featured note
- *   numbers                              one card: the week's counts by queue
+ *   page (drafts / publish)              a page of ours published that week
+ *   news (news / approve)                a facility page the story is linked to (else the
+ *                                        story), its summary and picture
+ *   numbers                              one card, every week: what was added to the site
  *
  * Only news makes a card: the item's own date (the closure, else its article;
  * the filing; the bill's last action, else its introduction; the finding; the
  * article) must fall within kop_vsoc_max_age_days (60) of the roundup's end,
  * and an item with no date makes none (owner, 2026-10-21: approving a 1986
  * closure this week is not news). So public money, which has only years,
- * makes no card. Bulk work (drive-docs, doc-types, fornits, woodbury, merges)
+ * makes no card. The site-updates card counts the week's work whatever its
+ * age: that the site grew is this week's news (owner, 2026-10-23: a week is
+ * never empty). Bulk work (drive-docs, doc-types, fornits, woodbury, merges)
  * never makes a card. At most kop_vsoc_per_angle (8) cards per angle, newest first. A card
  * key is '<angle>:<id>', so a week's cards never repeat an item.
  * Tested by scripts/test-volunteer-projects.php ("Social media roundup").
@@ -36,10 +41,12 @@ function kop_vsoc_angles() {
         'bill'      => array('label' => 'Bill', 'source' => 'legislation', 'actions' => array('approve')),
         'finding'   => array('label' => 'State finding', 'source' => 'highlight-summaries', 'actions' => array('approved')),
         'reporting' => array('label' => 'Essential reporting', 'source' => 'featured-nominations', 'actions' => array('feature')),
+        'page'      => array('label' => 'New on our site', 'source' => 'drafts', 'actions' => array('publish')),
+        'news'      => array('label' => 'In the news', 'source' => 'news', 'actions' => array('approve')),
     );
 }
 
-/** What the week-in-numbers card counts: [source, action, words for one, words for many]. */
+/** What the site-updates card counts: [source, action, words for one, words for many]. */
 function kop_vsoc_number_lines() {
     return array(
         array('inspection-highlights', 'approved', 'serious state inspection finding added', 'serious state inspection findings added'),
@@ -51,6 +58,11 @@ function kop_vsoc_number_lines() {
         array('federal-funding', 'add', 'program\'s public money recorded', 'programs\' public money recorded'),
         array('featured-nominations', 'feature', 'story added to Essential reporting', 'stories added to Essential reporting'),
         array('wiki-updates', 'posted', 'wiki entry updated', 'wiki entries updated'),
+        array('drafts', 'publish', 'new page published', 'new pages published'),
+        array('websites', 'publish', 'website about a program added', 'websites about programs added'),
+        array('program-practices', 'add', 'section of a program\'s rules and practices added', 'sections of programs\' rules and practices added'),
+        array('woodbury-facts', 'apply', 'fact from Woodbury Reports added to a record', 'facts from Woodbury Reports added to records'),
+        array('status_checks', 'apply', 'program\'s status brought up to date', 'programs\' statuses brought up to date'),
     );
 }
 
@@ -103,7 +115,7 @@ function kop_vsoc_date($d) {
     return $t ? gmdate('F j, Y', $t) : '';
 }
 
-/** One card per item worth a post, between two UTC times ('Y-m-d H:i:s'), then the week in numbers. */
+/** One card per item worth a post, between two UTC times ('Y-m-d H:i:s'), then the site updates. */
 function kop_vsoc_cards($from, $to) {
     $per = max(1, (int) apply_filters('kop_vsoc_per_angle', 8));
     $cards = array();
@@ -116,18 +128,19 @@ function kop_vsoc_cards($from, $to) {
                 $c = null;   // the records database unreachable, or the item gone
             }
             if (!$c || !kop_vsoc_recent($c['dated'] ?? '', $to)) continue;   // old news approved this week is still old
+            if ($angle === 'news' && isset($cards['reporting:' . $row['item_key']])) continue;   // already a card as essential reporting
             unset($c['dated']);
             $c += array('url' => '', 'url_label' => '', 'summary' => '', 'quote' => '', 'image' => '', 'when' => '');
             $c['key'] = $angle . ':' . $row['item_key'];
             $c['angle'] = $angle;
             $c['angle_label'] = $a['label'];
-            $cards[] = $c;
+            $cards[$c['key']] = $c;
             if (++$n >= $per) break;
         }
     }
     $numbers = kop_vsoc_card_numbers($from, $to);
-    if ($numbers && $cards) $cards[] = $numbers;
-    return $cards;
+    if ($numbers) $cards[$numbers['key']] = $numbers;
+    return array_values($cards);
 }
 
 function kop_vsoc_card_closure($id) {
@@ -223,7 +236,48 @@ function kop_vsoc_card_reporting($news_id) {
     );
 }
 
-/** The week in numbers: one card of counts, or null when nothing counted happened. */
+/** A page of ours published from the drafts queue, still published. */
+function kop_vsoc_card_page($id) {
+    $p = get_post((int) $id);
+    if (!$p || $p->post_status !== 'publish' || !in_array($p->post_type, array('page', 'post'), true)) return null;
+    $url = (string) get_permalink($p);
+    $title = trim((string) $p->post_title);
+    if ($title === '' || !preg_match('#^https?://#', $url)) return null;
+    return array(
+        'dated' => (string) $p->post_date_gmt,
+        'fact' => 'New on our site: ' . $title . '.',
+        'url' => $url, 'url_label' => $title,
+        'summary' => kop_vsoc_cut(trim((string) $p->post_excerpt) !== '' ? (string) $p->post_excerpt : wp_strip_all_tags((string) $p->post_content), 400),
+    );
+}
+
+/** An approved news story: the facility page it is linked to (else the story itself), its summary and picture. */
+function kop_vsoc_card_news($news_id) {
+    $pdo = kop_rinbox_pdo();
+    $st = $pdo->prepare("SELECT id, article_title, publication_name, publication_date, article_url, summary FROM news_submissions WHERE id = ? AND status IN ('approved', 'published')");
+    $st->execute(array((int) $news_id));
+    $r = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$r || !preg_match('#^https?://#', (string) $r['article_url'])) return null;
+    $outlet = trim((string) $r['publication_name']);
+    $url = (string) $r['article_url'];
+    $label = 'The story' . ($outlet !== '' ? ' at ' . $outlet : '');
+    $st = $pdo->prepare("SELECT facility_id FROM news_facility_links WHERE news_id = ? ORDER BY link_type = 'mentioned' DESC, facility_id");
+    $st->execute(array((int) $r['id']));
+    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $fid) {
+        $f = kop_vsoc_facility((int) $fid);
+        if ($f && $f[2] !== '') { $url = $f[2]; $label = 'Our page on ' . $f[0]; break; }
+    }
+    $img = function_exists('kop_news_image') ? kop_news_image((int) $r['id'], (string) $r['article_url']) : null;
+    $when = kop_vsoc_date($r['publication_date']);
+    return array(
+        'dated' => (string) $r['publication_date'],
+        'fact' => '"' . trim((string) $r['article_title']) . '"' . ($outlet !== '' ? ', ' . $outlet : '') . ($when !== '' ? ', ' . $when : '') . '.',
+        'url' => $url, 'url_label' => $label, 'summary' => kop_vsoc_cut((string) $r['summary'], 600),
+        'image' => is_array($img) && ($img['kind'] ?? '') === 'photo' ? (string) $img['src'] : '', 'when' => $when,
+    );
+}
+
+/** The site updates: one card of what was added that week, or null when nothing counted happened. */
 function kop_vsoc_card_numbers($from, $to) {
     $lines = array();
     foreach (kop_vsoc_number_lines() as $l) {
@@ -232,8 +286,8 @@ function kop_vsoc_card_numbers($from, $to) {
     }
     if (!$lines) return null;
     return array(
-        'key' => 'numbers:' . substr($from, 0, 10), 'angle' => 'numbers', 'angle_label' => 'The week in numbers',
-        'fact' => 'Our week: ' . $lines[0] . '.', 'url' => home_url('/'), 'url_label' => 'kidsoverprofits.org',
+        'key' => 'numbers:' . substr($from, 0, 10), 'angle' => 'numbers', 'angle_label' => 'This week on the site',
+        'fact' => 'This week on kidsoverprofits.org: ' . $lines[0] . '.', 'url' => home_url('/'), 'url_label' => 'kidsoverprofits.org',
         'summary' => implode('; ', $lines) . '.', 'quote' => '', 'image' => '', 'when' => '',
     );
 }
