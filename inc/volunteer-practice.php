@@ -143,6 +143,8 @@ function kop_volpr_draw($vid, $source) {
     $want = array('reject' => (int) floor($rules['size'] / 2));
     $want['approve'] = $rules['size'] - $want['reject'];
     $got = array('approve' => array(), 'reject' => array());
+    // The same story sent in twice (one approved, its copy rejected as a duplicate) would show the same card twice.
+    $titles = array();
     foreach (array('reject', 'approve') as $style) {
         // Fewer rejects than half: the approves make up the rest.
         if ($style === 'approve') $want['approve'] = $rules['size'] - count($got['reject']);
@@ -154,7 +156,11 @@ function kop_volpr_draw($vid, $source) {
             if (count($got[$style]) >= $want[$style]) break;
             $it = kop_volpr_fetch($source, (string) $k);
             if (!$it) continue;
-            $got[$style][] = array((string) $k, (string) (($it['title'] ?? '') ?: $pool[$k]), $style);
+            $title = (string) (($it['title'] ?? '') ?: $pool[$k]);
+            $same = strtolower(trim(preg_replace('/\s+/', ' ', $title)));
+            if ($same !== '' && isset($titles[$same])) continue;
+            $titles[$same] = true;
+            $got[$style][] = array((string) $k, $title, $style);
         }
     }
     if (count($got['approve']) < $rules['each'] || count($got['reject']) < $rules['each'] || count($got['approve']) + count($got['reject']) < $rules['size']) {

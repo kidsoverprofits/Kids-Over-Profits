@@ -274,6 +274,8 @@ $ps = kop_volpr_start($alex, $P);
 $round = $pdo->query("SELECT item_key, answer FROM wpdl_kop_vol_practice WHERE volunteer_id = $alex_id ORDER BY position")->fetchAll(PDO::FETCH_KEY_PAIR);
 $counts = array_count_values($round);
 $check('a round of 10, half of them rejects', count($round) === 10 && ($counts['reject'] ?? 0) === 5 && ($counts['approve'] ?? 0) === 5, json_encode($counts));
+$titles = $pdo->query("SELECT LOWER(TRIM(title)) FROM wpdl_kop_vol_practice WHERE volunteer_id = $alex_id")->fetchAll(PDO::FETCH_COLUMN);
+$check('...no two cards with the same title', count($titles) === count(array_unique($titles)), json_encode(array_diff_assoc($titles, array_unique($titles))));
 $check('...shown as the open round', $ps['open'] && $ps['open']['total'] === 10 && $ps['open']['done'] === 0 && $ps['open']['source'] === $P);
 $check('...never items from rules filing things or volunteers\' word', !isset($round[(string) $auto_key]) && !isset($round['voltest-auto']));
 $logged = $pdo->query("SELECT item_key, style FROM wpdl_kop_review_log WHERE source = 'news' AND undone_at IS NULL AND user_login = 'admin'")->fetchAll(PDO::FETCH_ASSOC);
