@@ -11034,7 +11034,7 @@
   {
     "id": 100180,
     "unique_name": "Bethel Boys' Academy",
-    "version": 2,
+    "version": 3,
     "top": {
       "city": "Lucedale",
       "state": "MS",
@@ -11048,8 +11048,10 @@
         "investors": [],
         "legalName": "",
         "pastNames": [
+          "Eagle Point Christian Academy",
           "Gulf Coast Academy",
-          "Bethel Baptist Children’s Home"
+          "Bethel Baptist Children’s Home",
+          "Bethel Academy"
         ],
         "otherNames": [],
         "currentName": "",
@@ -11058,24 +11060,7 @@
         "pastOperators": [],
         "knownReferrers": [],
         "otherOperators": [],
-        "currentOperator": ""
-      },
-      "locationDetails": {
-        "city": "Lucedale",
-        "state": "MS",
-        "country": "United States",
-        "additionalLocations": []
-      },
-      "location": "Lucedale, MS",
-      "address": "2147 Mill St Ext, Lucedale, MS 39452",
-      "operatingPeriod": {
-        "startYear": 1978,
-        "endYear": 2008,
-        "status": "Closed",
-        "yearsOfOperation": "1978-2008",
-        "notes": [
-          "Closed (2008) per news report: The US Sun, \"I was abandoned 2.5k miles from home at ‘Lord of the Flies’ troubled teen school – I thought I’d die any day from abuse\", 2024-07-27 https://www.the-sun.com/news/12011792/bethel-boys-academy-abusive-trouble-teen-school-hbo-documentary/"
-        ]
+        "currentOperator": "World Wide Association of Specialty Programs and Schools (WWASPS)"
       }
     }
   }
