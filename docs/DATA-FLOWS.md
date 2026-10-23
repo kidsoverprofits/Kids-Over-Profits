@@ -423,6 +423,12 @@ scripts/test-record-resync.php):
   ETag read them too. The state, directory and mobile caches build on the
   facility fingerprint.
 
+The memorial (`memorial_victims`) fires `kop_record_changed('memorial')`
+since 2026-10-23 from all three of its writers: the pencil's
+`kop_ie_row_save()`, `kop_apply_memorial_seeds()` and KOP Tools > Memorial
+sheet (inc/memorial-sheet.php, which saves through `kop_ie_row_save()`), and
+each purges /in-loving-memory/.
+
 Open: the operator and link writers firing the event, the drift check (6),
 and the rest of the no-bypass test (7). The wiki listener (step 4) is done
 (2026-10-14) but for its badge.

@@ -14,7 +14,8 @@
  *     the records changed (a news article or case: the facilities it is
  *     linked to).
  *
- * Kinds: facility, operator, news, lawsuit, bill, wiki. Outside WordPress
+ * Kinds: facility, operator, news, lawsuit, bill, wiki, memorial (In Loving
+ * Memory: kop_ie_row_save(), the memorial seeds, KOP Tools > Memorial sheet). Outside WordPress
  * (the CLI tests) it does nothing.
  */
 

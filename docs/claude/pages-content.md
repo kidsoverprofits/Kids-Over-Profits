@@ -9,6 +9,11 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 (kop-pipeline) node scripts/verify-reporting-links.js          # slow, hits every agency site
 (kop-pipeline) node scripts/pull-childusa-sol.js               # monthly: CHILD USA sexual-abuse deadlines, review the diff, then rebuild
 php scripts/test-reporting-directory.php        # renders the page offline
+# In Loving Memory (memorial_victims) against the owner's private "Death Toll" sheet: KOP Tools > Memorial sheet
+# (inc/memorial-sheet.php; decisions + exact Undo in option kop_memorial_sheet_log). The site can't read the sheet: a new
+# snapshot (read through gviz in the owner's browser) -> kop-pipeline tmp/memorial-sheet-diff.py -> the seed below -> deploy
+(kop-pipeline) python scripts/build-memorial-sheet-seed.py   # writes seeds/memorial-sheet.json (sheet side only; the page side is read live)
+php scripts/test-memorial-sheet.php             # seed vs tmp/prod.sqlite, tabs render, settle/add/skip + Undo, restraint guard
 # The glossary is in SQL tables (inc/glossary-store.php), edited at KOP Tools > Glossary Editor; both tests import
 # js/data/glossary/glossary.md into an in-memory SQLite copy (scripts/lib-glossary-test-db.php)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-glossary.php         # renders /glossary/ offline, checks every #link

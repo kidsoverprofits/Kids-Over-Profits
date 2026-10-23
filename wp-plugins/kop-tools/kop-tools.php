@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.9
+ * Version: 2.5.11
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -260,6 +260,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-indigenous-schools',
                 'requires' => 'kop_render_ischools_admin',
+            ),
+            array(
+                'title'    => 'Memorial sheet',
+                'desc'     => 'In Loving Memory against the owner\'s "Death Toll" sheet: settle each field where they differ (sheet, page or a typed value), add the sheet\'s sourced rows the page lacks, see what only the page has; with Undo.',
+                'type'     => 'screen',
+                'screen'   => 'kop-memorial-sheet',
+                'requires' => 'kop_ms_page',
             ),
             array(
                 'title' => 'Manage Addresses',

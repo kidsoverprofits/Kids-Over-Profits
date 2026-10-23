@@ -1,0 +1,133 @@
+/* KOP Tools > Memorial sheet (inc/memorial-sheet.php). Colours come from the admin kit (css/admin-kit.css). */
+
+.kop-ms .kop-ms-lines {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.kop-ms .kop-ms-lines th,
+.kop-ms .kop-ms-lines td {
+    vertical-align: top;
+    padding: 10px 8px;
+    color: var(--ak-ink);
+    overflow-wrap: anywhere;
+}
+
+.kop-ms .kop-ms-lines thead th {
+    width: 26%;
+    font-weight: 600;
+}
+
+.kop-ms .kop-ms-lines thead th:first-child {
+    width: 16%;
+}
+
+.kop-ms .kop-ms-lines tbody th {
+    font-weight: 600;
+}
+
+.kop-ms .kop-ms-lines tr.is-gone td,
+.kop-ms .kop-ms-lines tr.is-gone th {
+    opacity: .45;
+}
+
+.kop-ms .kop-ms-notes {
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+.kop-ms .kop-ms-check {
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--ak-ink);
+    border: 1px solid var(--ak-warn);
+}
+
+.kop-ms .kop-ms-pick label {
+    display: inline-block;
+    margin: 0 10px 4px 0;
+    color: var(--ak-ink);
+    white-space: nowrap;
+}
+
+.kop-ms .kop-ms-typed {
+    margin-top: 4px;
+}
+
+.kop-ms .kop-ms-typed[hidden] {
+    display: none;
+}
+
+.kop-ms .kop-ms-typed input[type=text],
+.kop-ms .kop-ms-typed textarea {
+    width: 100%;
+    max-width: 100%;
+    color: var(--ak-ink);
+    background: #fff;
+}
+
+.kop-ms .kop-ms-typed input[type=text][placeholder="YYYY-MM-DD"] {
+    width: 9.5em;
+}
+
+.kop-ms .kop-ms-form {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+.kop-ms .kop-ms-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--ak-muted);
+}
+
+.kop-ms .kop-ms-field.is-wide {
+    grid-column: span 2;
+}
+
+.kop-ms .kop-ms-field input,
+.kop-ms .kop-ms-field select,
+.kop-ms .kop-ms-field textarea {
+    width: 100%;
+    max-width: 100%;
+    font-size: 13px;
+    color: var(--ak-ink);
+    background: #fff;
+}
+
+.kop-ms .kop-ms-add.is-done .kop-ms-form {
+    opacity: .45;
+}
+
+.kop-ms .kop-ms-only td {
+    vertical-align: top;
+    color: var(--ak-ink);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 782px) {
+    .kop-ms .kop-ms-lines,
+    .kop-ms .kop-ms-lines tbody,
+    .kop-ms .kop-ms-lines tr,
+    .kop-ms .kop-ms-lines th,
+    .kop-ms .kop-ms-lines td {
+        display: block;
+        width: auto;
+    }
+    .kop-ms .kop-ms-lines thead {
+        display: none;
+    }
+    .kop-ms .kop-ms-lines td.kop-ms-val::before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+    }
+    .kop-ms .kop-ms-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .kop-ms .kop-ms-field.is-wide {
+        grid-column: auto;
+    }
+}

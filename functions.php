@@ -268,6 +268,8 @@ require_once get_stylesheet_directory() . '/inc/nonprofit-filings.php';
 require_once get_stylesheet_directory() . '/inc/business-filings.php';
 // Investors (private equity, lenders) and their stakes in companies and programs: KOP Tools > Investors, the pages' Investors line
 require_once get_stylesheet_directory() . '/inc/investors.php';
+// In Loving Memory against the owner's "Death Toll" sheet (seeds/memorial-sheet.json), settled at KOP Tools > Memorial sheet
+require_once get_stylesheet_directory() . '/inc/memorial-sheet.php';
 // The directory's parent company cards: edit, take off, merge, move programs (KOP Tools > Directory Editor), exact Undo
 require_once get_stylesheet_directory() . '/inc/directory-editor.php';
 // Move or remove a document from the page it shows on (the document tile's pencil)

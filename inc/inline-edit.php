@@ -1755,7 +1755,8 @@ function kop_ie_row_load(array $p) {
     return array('title' => (string) $row[$t[1]], 'fields' => $fields);
 }
 
-function kop_ie_row_save(array $p, array $v) {
+/** Also the KOP Tools > Memorial sheet screen's save ($info: {source}); a memorial change fires kop_record_changed(). */
+function kop_ie_row_save(array $p, array $v, array $info = array()) {
     list($pdo, $t, $row) = kop_ie_row_get($p[0] ?? '', $p[1] ?? 0);
     $set = array();
     $params = array();
@@ -1805,12 +1806,16 @@ function kop_ie_row_save(array $p, array $v) {
     if ($set) {
         $params[] = (int) $row['id'];
         $pdo->prepare('UPDATE `' . $t[0] . '` SET ' . implode(', ', $set) . ' WHERE id = ?')->execute($params);
+        if ($t[0] === 'memorial_victims' && function_exists('kop_record_changed')) {
+            kop_record_changed('memorial', array((int) $row['id']), $info + array('source' => 'inline-edit'));
+            kop_ie_purge_url(home_url('/in-loving-memory/'));
+        }
     }
     $page = get_page_by_path($t[2]);
     if ($page) {
         kop_ie_purge_post($page->ID);
     }
-    return array('message' => 'Saved.');
+    return array('message' => 'Saved.', 'changed' => count($set));
 }
 
 /* ---- Text written in the templates --------------------------------------------- */
