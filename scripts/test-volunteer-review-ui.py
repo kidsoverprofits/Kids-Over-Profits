@@ -74,7 +74,11 @@ def practice(width, shots, check):
 
     def status():
         return {"size": 2, "pass": 1, "open": round_now() if st["started"] and len(st["calls"]) < 2 else None, "last": None,
-                "passed": ["news"] if st["passed"] else [], "queues": [] if st["passed"] else [{"key": "news", "label": "News"}]}
+                "passed": ["news"] if st["passed"] else [], "queues": [] if st["passed"] else [
+                    {"key": "news", "label": "News", "title": "News articles sent in", "blurb": "Most take about a minute."}]}
+
+    BATCH = {"id": 31, "title": "News articles sent in", "question": "Is it about a program?", "yes": "Abuse at a ranch.", "no": "Sports scores.", "note": "",
+             "minutes": 10, "total": 2, "done": 0, "mine": True, "kind": "review", "link_kinds": None, "faq": [], "source": "news"}
 
     def handle(route):
         req = route.request
@@ -92,14 +96,20 @@ def practice(width, shots, check):
         st["posts"].append((name, body))
         out = {}
         if name == "queues":
-            out = {"queues": [{"key": "news", "label": "News", "count": 3, "guidance": "Is it about a program?"}]}
+            # A new volunteer has no queue of their own until a practice round.
+            out = {"queues": [{"key": "news", "label": "News", "count": 3, "guidance": "Is it about a program?"}] if st["passed"] else []}
         elif name == "items":
             out = {"items": [], "next_offset": -1, "total": 0}
+        elif name == "selfassign":
+            st["batch"] = True
+            out = {"id": BATCH["id"], "link": ""}
+        elif name == "project":
+            out = {"project": BATCH, "items": [dict(PRACTICE_ITEMS[0], practice=False, key="201", title="Real story")]}
         elif name == "projects":
-            self_ = ({"eligible": True, "via": "practice", "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10, "open": 0,
-                      "queues": [{"key": "news", "label": "News", "count": 3}]} if st["passed"]
+            self_ = ({"eligible": True, "via": "practice", "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10, "open": BATCH["id"] if st.get("batch") else 0,
+                      "queues": [{"key": "news", "label": "News", "count": 3}], "practice": status()} if st["passed"]
                      else {"eligible": False, "decided": 0, "agreed": 0, "need_decided": 10, "need_rate": 80, "size": 10, "open": 0, "queues": [], "practice": status()})
-            out = {"projects": [], "self": self_}
+            out = {"projects": [BATCH] if st.get("batch") else [], "self": self_}
         elif name == "practice":
             do = body.get("do")
             if do == "start":
@@ -127,9 +137,13 @@ def practice(width, shots, check):
         page.goto(BASE + "volunteer-review/")
         page.wait_for_selector(".kop-vol-projects")
         panel = page.locator(".kop-vol-projects")
-        check("a new volunteer sees Start here with a practice round", panel.locator("h2").inner_text() == "Start here"
-              and "Practice round" in panel.inner_text() and "Get 1 of 2 right" in panel.inner_text())
-        panel.locator("button", has_text="Start practice").click()
+        check("a new volunteer sees Start now: the first job, the two steps, one button", panel.locator("h2").inner_text() == "Start now"
+              and "Your first job: News articles sent in" in panel.inner_text() and "get 1 of 2 the same as us" in panel.inner_text()
+              and panel.locator("button", has_text="Start now").count() == 1, panel.inner_text())
+        check("...and no live queue open under it", page.locator(".kop-vol-card").count() == 0 and "nothing to review" not in page.locator("#kop-vol-app").inner_text())
+        if shots:
+            page.screenshot(path=str(shots / ("start-now-%d.png" % width)), full_page=True)
+        panel.locator("button", has_text="Start now").click()
         page.wait_for_selector(".kop-vol-card h3")
         check("the round opens with its brief", "Practice: News stories" in page.locator(".kop-vol-brief").inner_text()
               and "nothing you say here changes anything" in page.locator(".kop-vol-brief").inner_text())
@@ -149,12 +163,13 @@ def practice(width, shots, check):
         page.locator(".kop-vol-card.is-done button", has_text="See how you did").click()
         page.wait_for_selector(".kop-vol-finished")
         fin = page.locator(".kop-vol-finished").inner_text()
-        check("the result: 1 of 2, passed", "You got 1 of 2" in fin and "You passed" in fin, fin)
+        check("the result: 1 of 2, passed", "You got 1 of 2" in fin and "You passed" in fin and "first real batch" in fin, fin)
         if shots:
             page.screenshot(path=str(shots / ("practice-done-%d.png" % width)), full_page=True)
-        page.locator(".kop-vol-finished button", has_text="Pick a batch").click()
-        page.wait_for_selector(".kop-vol-projects .kop-vol-self h3:has-text('Pick your next batch')")
-        check("passing opens Pick your next batch", "You passed the practice round" in page.locator(".kop-vol-projects").inner_text())
+        page.locator(".kop-vol-finished button", has_text="Start my first batch").click()
+        page.wait_for_function("document.querySelector('.kop-vol-card h3') && document.querySelector('.kop-vol-card h3').textContent.indexOf('Real story') >= 0")
+        check("passing opens the first real batch at once", [n for n, b in st["posts"] if n == "selfassign"] == ["selfassign"]
+              and "Item 1 of 2" in page.locator(".kop-vol-position").inner_text())
         check("no practice call was sent as a recommendation", not [n for n, b in st["posts"] if n == "recommend"])
         check("the practice answers went to the practice route", [b.get("verdict") for n, b in st["posts"] if n == "practice" and b.get("do") == "answer"] == ["reject", "reject"])
         wide = page.evaluate("""() => {

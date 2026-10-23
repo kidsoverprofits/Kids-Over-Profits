@@ -73,6 +73,21 @@
                 });
         });
 
+        // A device that already has a link goes to its page instead of filling the form in again.
+        const back = box.querySelector('.kop-vols-back');
+        if (back) {
+            fetch(form.dataset.rest, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+                .then(function (res) { return res.ok ? res.json() : {}; })
+                .then(function (data) {
+                    if (!data || !data.signed_in || !done.hidden) return;
+                    back.querySelector('.kop-vols-back-h').textContent = 'You are signed in on this device' + (data.name ? ' as ' + data.name : '') + '.';
+                    if (data.page) back.querySelector('.kop-vols-start').href = data.page;
+                    form.hidden = true;
+                    back.hidden = false;
+                })
+                .catch(function () { /* the form stays */ });
+        }
+
         box.querySelector('.kop-vols-copy').addEventListener('click', function () {
             const input = done.querySelector('.kop-vols-link input');
             const button = this;

@@ -217,8 +217,10 @@ function kop_hub_config($slug) {
         ),
 
         'volunteer' => array(
-            'standfirst' => 'Help us document the troubled teen industry: submit facility data, documents, news, lawsuits and legislation, or join the team.',
+            'standfirst' => 'Help us document the troubled teen industry: start reviewing findings from state inspection reports today, or submit facility data, documents, news, lawsuits and legislation.',
             'actions'    => array(
+                // The sign-up form (inc/volunteer-signup.php) is at the foot of the page, under the editor text.
+                array('label' => 'Start reviewing now', 'url' => '#kop-vol-signup'),
                 array('label' => 'Submit facility data', 'template' => 'page-data.php', 'path' => '/tti-data-submission/'),
                 array('label' => 'Upload documents anonymously', 'slug' => 'anon-submit'),
             ),

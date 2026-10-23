@@ -635,6 +635,7 @@ function kop_volp_public(array $p, $vid) {
         'id' => (int) $p['id'], 'title' => (string) $p['title'], 'question' => (string) $p['question'],
         'yes' => (string) $p['yes_example'], 'no' => (string) $p['no_example'], 'note' => (string) $p['note'],
         'minutes' => (int) $p['minutes'], 'total' => count($rows), 'done' => $done, 'mine' => (int) $p['volunteer_id'] === (int) $vid && $vid,
+        'source' => (string) $p['source'],
         'kind' => $research ? 'research' : ($social ? 'social' : 'review'), 'link_kinds' => $research ? kop_volr_link_kinds() : null,
         'faq' => $research || $social ? array() : kop_volf_live((string) $p['source']),
         'caption_max' => $social ? KOP_VSOC_CAPTION_MAX : null,
@@ -899,7 +900,8 @@ function kop_volp_self_status($vid) {
         $out['eligible'] = true;
         $out['via'] = 'practice';
     }
-    if (function_exists('kop_volpr_status') && !$out['eligible']) $out['practice'] = kop_volpr_status((int) $vid);
+    // Before they can pick a batch: the round to start with. After: the queues they can still learn ("Learn another queue").
+    if (function_exists('kop_volpr_status')) $out['practice'] = kop_volpr_status((int) $vid);
     if (!$out['eligible']) return $out;
 
     kop_volp_ensure_tables();
@@ -910,7 +912,8 @@ function kop_volp_self_status($vid) {
         if ($pub['done'] < $pub['total']) { $out['open'] = (int) $p['id']; break; }
     }
     $counts = function_exists('kop_rinbox_counts') ? kop_rinbox_counts() : array();
-    foreach (kop_vol_sources() as $key => $src) {
+    // Only the queues they have earned (kop_vol_sources_for()); before a record, only the ones they passed in practice.
+    foreach (kop_vol_sources_for((int) $vid) as $key => $src) {
         if (empty($src['list']) || empty($src['get'])) continue;
         if ($practiced && !in_array($key, $practiced, true)) continue;
         $n = isset($counts[$key]) ? (int) $counts[$key] : null;
@@ -927,8 +930,9 @@ function kop_volp_self_assign(array $vol, $source) {
     if (!$st['eligible']) throw new RuntimeException('Picking your own batch opens after you pass a practice round, or after ' . $st['need_decided'] . ' of your calls have been checked by an admin, agreeing ' . $st['need_rate'] . '% of the time.');
     if ($st['open']) throw new RuntimeException('Finish the batch you have open first. Thank you!');
     $source = sanitize_key((string) $source);
-    if (!isset(kop_vol_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
+    if (!isset(kop_vol_earnable_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
     if (($st['via'] ?? '') === 'practice' && !in_array($source, array_column($st['queues'], 'key'), true)) throw new RuntimeException('Pick one of the queues listed: the ones you passed a practice round in.');
+    if (!in_array($source, array_column($st['queues'], 'key'), true)) throw new RuntimeException('That queue opens to you once you pass its practice round.');
     kop_vol_rate_check($vid);
     list($id, $link) = kop_volp_create(array('source' => $source, 'size' => $st['size'], 'volunteer_id' => $vid,
         'note' => 'Picked by ' . $vol['name'] . '.', 'created_by' => KOP_VOLP_SELF_CREATED_BY));
@@ -986,6 +990,7 @@ function kop_volp_admin_post() {
     $in = wp_unslash($_POST);
     try {
         if ($faq = kop_volf_admin_post($do, $in)) return $faq;
+        if ($practice = kop_volpr_admin_post($do, $in)) return $practice;
         if ($social = kop_vsoc_admin_post($do, $in)) return $social;
         if ($do === 'create') {
             $who = (string) ($in['kop_volp_who'] ?? '0');
@@ -1072,6 +1077,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
     <?php endif; ?>
 
     <?php kop_volf_admin_summary(); ?>
+    <?php kop_volpr_admin_summary(); ?>
     <?php kop_vsoc_admin_settings($nonce, $vols); ?>
 
     <h3>Start a project</h3>

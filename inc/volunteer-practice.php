@@ -3,7 +3,9 @@
  * Practice round: a new volunteer's first 10 calls are on items an admin has
  * already decided, instead of waiting for an admin to check 10 real ones.
  *
- * The volunteer picks a queue open to everyone (kop_vol_sources()); the round
+ * A new volunteer starts with the starter queue (kop_vol_starter_source(), the
+ * violation findings); passing a round opens that queue to them
+ * (kop_vol_sources_for()), and each other queue opens after its own round. The round
  * is 10 items drawn from the admins' own approve / reject rows in
  * {prefix}kop_review_log for it (not undone, not 'auto' or the volunteers'
  * own calls going through, one clear answer per item), about half of them
@@ -89,6 +91,52 @@ function kop_volpr_decided($source, $style, $limit = 300) {
     return $out;
 }
 
+/**
+ * Decided items too tricky to practise on: [item_key => why]. A volunteer said Not sure or called it the other way, two
+ * or more people got it wrong in practice, a Brief FAQ entry rests on it (its "#123" or "#123-130" in 'from'), or an admin
+ * struck it on the Practice cards list (option kop_volpr_struck: [source => [key => true]]).
+ */
+function kop_volpr_tricky($source) {
+    global $wpdb;
+    $source = (string) $source;
+    $out = array();
+    kop_vol_ensure_tables();
+    foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_vol_recs_table() . " WHERE source = %s AND (verdict = 'unsure'
+        OR (outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject') AND verdict <> outcome))", $source)) as $k) $out[(string) $k] = 'a volunteer disagreed or was not sure';
+    kop_volpr_ensure_tables();
+    foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_volpr_table() . " WHERE source = %s AND verdict IN ('approve', 'reject', 'unsure')
+        AND verdict <> answer GROUP BY item_key HAVING COUNT(*) >= 2", $source)) as $k) $out[(string) $k] = 'two or more got it wrong in practice';
+    if (function_exists('kop_volf_list')) {
+        foreach (kop_volf_list($source) as $e) {
+            preg_match_all('/#(\d+)(?:\s*-\s*(\d+))?/', (string) ($e['from'] ?? ''), $m, PREG_SET_ORDER);
+            foreach ($m as $hit) {
+                $to = isset($hit[2]) && $hit[2] !== '' ? min((int) $hit[2], (int) $hit[1] + 50) : (int) $hit[1];
+                for ($n = (int) $hit[1]; $n <= $to; $n++) $out[(string) $n] = 'a Brief FAQ answer rests on it';
+            }
+        }
+    }
+    foreach (array_keys((array) (get_option('kop_volpr_struck', array())[$source] ?? array())) as $k) $out[(string) $k] = 'struck by an admin';
+    return $out;
+}
+
+/** What a card gives to read: its text, or else a summary-like line (news keeps its summary in the facts). '' = nothing. */
+function kop_volpr_readable(array $card) {
+    $text = trim((string) ($card['text'] ?? ''));
+    if ($text !== '') return $text;
+    foreach ((array) ($card['facts'] ?? array()) as $f) {
+        $v = trim((string) ($f['value'] ?? ''));
+        if (mb_strlen($v) >= 40 && preg_match('/summary|quote|excerpt|finding|description|what it says/i', (string) ($f['label'] ?? ''))) return $v;
+    }
+    return '';
+}
+
+/** A practice card a newcomer cannot judge from the card: nothing to read, or a link that sits behind a CAPTCHA. */
+function kop_volpr_unclear(array $card) {
+    if (kop_volpr_readable($card) === '') return true;
+    $host = strtolower((string) parse_url((string) ($card['url'] ?? ''), PHP_URL_HOST));
+    return (bool) preg_match('/(^|\.)archive\.(md|ph|is|li|today|vn|fo)$/', $host);
+}
+
 /** Details and links that say how an item was decided ("Reviewed by", "Filed PDF", the record it was linked to). */
 function kop_volpr_hidden_fact($label) {
     return (bool) preg_match('/reviewed|decided|handled|\bfiled\b|listed on|facility now|^facility$|^status$|applied|approved|rejected|dismissed/i', (string) $label);
@@ -121,7 +169,8 @@ function kop_volpr_fetch($source, $key) {
 function kop_volpr_queues() {
     $rules = kop_volpr_rules();
     $out = array();
-    foreach (kop_vol_sources() as $key => $src) {
+    // The starter queue (violations) first: the page offers it as the one to begin with.
+    foreach (kop_vol_earnable_sources() as $key => $src) {
         if (empty($src['get'])) continue;
         $yes = count(kop_volpr_decided($key, 'approve', $rules['size']));
         $no = count(kop_volpr_decided($key, 'reject', $rules['size']));
@@ -140,6 +189,7 @@ function kop_volpr_draw($vid, $source) {
     $seen = array();
     foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_volpr_table() . ' WHERE volunteer_id = %d AND source = %s', (int) $vid, $source)) as $k) $seen[(string) $k] = true;
     foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_vol_recs_table() . ' WHERE volunteer_id = %d AND source = %s', (int) $vid, $source)) as $k) $seen[(string) $k] = true;
+    $seen += kop_volpr_tricky($source);
     $want = array('reject' => (int) floor($rules['size'] / 2));
     $want['approve'] = $rules['size'] - $want['reject'];
     $got = array('approve' => array(), 'reject' => array());
@@ -152,10 +202,10 @@ function kop_volpr_draw($vid, $source) {
         $keys = array_keys($pool);
         shuffle($keys);
         // Reading items is the slow part: stop after a few times what is needed.
-        foreach (array_slice($keys, 0, 4 * $want[$style] + 4) as $k) {
+        foreach (array_slice($keys, 0, 8 * $want[$style] + 8) as $k) {
             if (count($got[$style]) >= $want[$style]) break;
             $it = kop_volpr_fetch($source, (string) $k);
-            if (!$it) continue;
+            if (!$it || kop_volpr_unclear(kop_volpr_copy($source, $it))) continue;
             $title = (string) (($it['title'] ?? '') ?: $pool[$k]);
             $same = strtolower(trim(preg_replace('/\s+/', ' ', $title)));
             if ($same !== '' && isset($titles[$same])) continue;
@@ -169,6 +219,15 @@ function kop_volpr_draw($vid, $source) {
     $round = array_merge($got['approve'], $got['reject']);
     shuffle($round);
     return $round;
+}
+
+/** What a queue's work is, in a line, for "Start now" on the volunteer page ('' = the title says enough). */
+function kop_volpr_blurb($source) {
+    $b = array(
+        'inspection-highlights' => 'Each one is a few lines from a state inspector\'s report on a program. You say whether a young person was hurt or put at risk, '
+            . 'or whether it is paperwork. Most take about a minute, and they are the work we most need help with.',
+    );
+    return (string) apply_filters('kop_volpr_blurb', $b[$source] ?? '', $source);
 }
 
 /** Every round of this volunteer's, oldest first: [{round, source, label, total, done, right, finished, passed}]. Gone items do not count. */
@@ -220,7 +279,8 @@ function kop_volpr_status($vid) {
     }
     $out['passed'] = array_values(array_unique($out['passed']));
     foreach (kop_volpr_queues() as $key => $label) {
-        if (!in_array($key, $out['passed'], true)) $out['queues'][] = array('key' => $key, 'label' => $label);
+        if (!in_array($key, $out['passed'], true)) $out['queues'][] = array('key' => $key, 'label' => $label,
+            'title' => (string) (kop_volp_kinds()[$key]['title'] ?? $label), 'blurb' => kop_volpr_blurb($key));
     }
     return $out;
 }
@@ -232,7 +292,7 @@ function kop_volpr_start(array $vol, $source) {
     $st = kop_volpr_status($vid);
     if ($st['open']) return $st;
     $source = sanitize_key((string) $source);
-    if (!isset(kop_vol_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
+    if (!isset(kop_vol_earnable_sources()[$source])) throw new RuntimeException('Pick one of the queues listed.');
     if (in_array($source, $st['passed'], true)) throw new RuntimeException('You passed the practice round for this queue already.');
     kop_vol_rate_check($vid);
     $round = kop_volpr_draw($vid, $source);
@@ -315,4 +375,88 @@ function kop_volpr_rest(WP_REST_Request $req) {
         if ($do === 'answer') return kop_volpr_answer($vol, (string) $req->get_param('key'), (string) $req->get_param('verdict'));
         return kop_volpr_status((int) $vol['id']);
     });
+}
+
+/* ---- KOP Tools > Volunteer Reviewers > Practice cards ------------------------------------ */
+
+function kop_volpr_admin_url($source) {
+    return add_query_arg('practice', rawurlencode((string) $source), admin_url('admin.php?page=kop-volunteer-reviewers'));
+}
+
+/** Strike a card from practice, or put it back (called from kop_volp_admin_post()): [notice, error, null] or null when not ours. */
+function kop_volpr_admin_post($do, array $in) {
+    if (!in_array($do, array('practice_strike', 'practice_unstrike'), true)) return null;
+    $source = sanitize_key((string) ($in['kop_volpr_source'] ?? ''));
+    $key = sanitize_text_field((string) ($in['kop_volpr_key'] ?? ''));
+    if ($source === '' || $key === '') return array('', 'Pick a card.', null);
+    $struck = (array) get_option('kop_volpr_struck', array());
+    if ($do === 'practice_strike') $struck[$source][$key] = true;
+    else unset($struck[$source][$key]);
+    update_option('kop_volpr_struck', $struck, false);
+    return array($do === 'practice_strike' ? 'Taken out of practice rounds.' : 'Back in practice rounds.', '', null);
+}
+
+/** One line for the Projects section: a link to each queue's practice cards, the starter queue first. */
+function kop_volpr_admin_summary() {
+    $parts = array();
+    foreach (kop_volpr_queues() as $key => $label) {
+        $title = (string) (kop_volp_kinds()[$key]['title'] ?? $label);
+        $parts[] = '<a href="' . esc_url(kop_volpr_admin_url($key)) . '">' . esc_html($title) . '</a>';
+    }
+    if (!$parts) return;
+    echo '<p style="max-width:900px"><strong>Practice cards</strong> (chosen for you: the clear cases; strike any you think is tricky): ' . implode(' · ', $parts) . '</p>';
+}
+
+/** The cards a practice round in this queue can draw, newest first, each with Take out; the struck ones below with Put back. */
+function kop_volpr_admin_page($source, $nonce) {
+    $source = sanitize_key((string) $source);
+    $base = admin_url('admin.php?page=kop-volunteer-reviewers');
+    $title = (string) (kop_volp_kinds()[$source]['title'] ?? (kop_rinbox_sources()[$source]['label'] ?? $source));
+    $tricky = kop_volpr_tricky($source);
+    $struck = (array) (get_option('kop_volpr_struck', array())[$source] ?? array());
+    ?>
+    <p><a href="<?php echo esc_url($base . '#projects'); ?>">&larr; All projects</a></p>
+    <h2>Practice cards: <?php echo esc_html($title); ?></h2>
+    <p style="max-width:760px">A practice round draws from these: items you decided, minus any a volunteer disagreed on or was not sure about,
+        any two people got wrong in practice, any a Brief FAQ answer rests on, and any with no text to read. Nothing here waits for you;
+        take out any card you think is tricky and it never comes up again.</p>
+    <?php
+    foreach (array('approve' => 'You approved these', 'reject' => 'You rejected these') as $style => $heading) {
+        echo '<h3>' . esc_html($heading) . '</h3>';
+        $shown = 0;
+        $left_out = 0;
+        foreach (kop_volpr_decided($source, $style, 200) as $key => $t) {
+            if ($shown >= 25) break;
+            if (isset($tricky[(string) $key])) { $left_out++; continue; }
+            $it = kop_volpr_fetch($source, (string) $key);
+            if (!$it) continue;
+            $card = kop_volpr_copy($source, $it);
+            if (kop_volpr_unclear($card)) { $left_out++; continue; }
+            $shown++;
+            kop_volpr_admin_card($source, (string) $key, $card, $nonce, 'practice_strike', 'Take out of practice');
+        }
+        if (!$shown) echo '<p>None yet.</p>';
+        if ($left_out) echo '<p class="description">' . (int) $left_out . ' more left out on their own (tricky or no text) among the newest.</p>';
+    }
+    if ($struck) {
+        echo '<h3>Taken out by you</h3>';
+        foreach (array_keys($struck) as $key) {
+            $it = kop_volpr_fetch($source, (string) $key);
+            $card = $it ? kop_volpr_copy($source, $it) : array('title' => '#' . $key . ' (no longer on file)', 'text' => '');
+            kop_volpr_admin_card($source, (string) $key, $card, $nonce, 'practice_unstrike', 'Put back');
+        }
+    }
+}
+
+function kop_volpr_admin_card($source, $key, array $card, $nonce, $do, $button) {
+    $text = kop_volpr_readable($card);
+    ?>
+    <form method="post" style="max-width:900px;margin:0 0 10px;padding:10px 14px;background:#fff;border:1px solid #c3c4c7">
+        <?php echo $nonce; ?><input type="hidden" name="kop_volp_do" value="<?php echo esc_attr($do); ?>">
+        <input type="hidden" name="kop_volpr_source" value="<?php echo esc_attr($source); ?>"><input type="hidden" name="kop_volpr_key" value="<?php echo esc_attr($key); ?>">
+        <p style="margin:0 0 4px"><strong><?php echo esc_html((string) ($card['title'] ?? '')); ?></strong> <span class="description">#<?php echo esc_html($key); ?></span></p>
+        <?php if ($text !== '') : ?><p style="margin:0 0 6px"><?php echo esc_html(mb_strimwidth($text, 0, 400, '...')); ?></p><?php endif; ?>
+        <button type="submit" class="button button-small"><?php echo esc_html($button); ?></button>
+    </form>
+    <?php
 }

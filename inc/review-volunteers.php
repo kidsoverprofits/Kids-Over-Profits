@@ -133,6 +133,56 @@ function kop_vol_source($key) {
     return $all[$key];
 }
 
+/** The queue every new volunteer starts in: serious findings from state inspection reports, the owner's top priority. */
+function kop_vol_starter_source() {
+    return (string) apply_filters('kop_vol_starter_source', 'inspection-highlights');
+}
+
+/** Queues a volunteer can earn, the starter first: [key => source spec]. */
+function kop_vol_earnable_sources() {
+    $all = function_exists('kop_rinbox_sources') ? kop_rinbox_sources() : array();
+    $first = kop_vol_starter_source();
+    $out = (isset($all[$first]) && !in_array($first, kop_vol_never_sources(), true)) ? array($first => $all[$first]) : array();
+    return $out + kop_vol_sources();
+}
+
+/**
+ * The queues this volunteer may open by themselves (tabs, self-assigned batches): the ones they passed a practice
+ * round in, the ones where their own record earned it (10 calls an admin decided, agreeing 80%, as for self-assign),
+ * and the ones they recommended in before this rule (option kop_vol_earned_before, set the first time it runs: the
+ * volunteers from before 2026-10-23 keep theirs). A new volunteer has none until a practice round; projects made
+ * for them open their own items whatever this says. $vid 0 = an admin's preview: all of them.
+ */
+function kop_vol_sources_for($vid) {
+    $pool = kop_vol_earnable_sources();
+    if (!(int) $vid) return $pool;
+    global $wpdb;
+    kop_vol_ensure_tables();
+    $before = (string) get_option('kop_vol_earned_before', '');
+    if ($before === '') {
+        $before = current_time('mysql', true);
+        update_option('kop_vol_earned_before', $before, false);
+    }
+    $rules = function_exists('kop_volp_self_rules') ? kop_volp_self_rules() : array('decided' => 10, 'rate' => 0.8);
+    $rows = $wpdb->get_results($wpdb->prepare("SELECT source, MIN(created_at) AS first_at,
+            SUM(outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject') AND outcome_by <> %s) AS decided,
+            SUM(outcome IN ('approve', 'reject') AND verdict = outcome AND outcome_by <> %s) AS agreed
+        FROM " . kop_vol_recs_table() . ' WHERE volunteer_id = %d GROUP BY source', KOP_VOL_AUTO_BY, KOP_VOL_AUTO_BY, (int) $vid), ARRAY_A);
+    $earned = array();
+    foreach ((array) $rows as $r) {
+        $record = (int) $r['decided'] >= $rules['decided'] && (int) $r['agreed'] >= $rules['rate'] * (int) $r['decided'];
+        if ($record || (string) $r['first_at'] < $before) $earned[(string) $r['source']] = true;
+    }
+    if (function_exists('kop_volpr_passed')) $earned += array_fill_keys(kop_volpr_passed((int) $vid), true);
+    return array_intersect_key($pool, $earned);
+}
+
+function kop_vol_source_for($vid, $key) {
+    $all = kop_vol_sources_for($vid);
+    if (!isset($all[$key])) throw new InvalidArgumentException('That queue opens to you once you pass its practice round.');
+    return $all[$key];
+}
+
 /** What to look for, per queue, in plain words. Falls back to the queue's own help. */
 function kop_vol_guidance($key) {
     $g = array(
@@ -146,7 +196,8 @@ function kop_vol_guidance($key) {
         'woodbury-reports' => 'Does this Woodbury Reports page really talk about the program it is filed under? Reject when the name only matches by chance.',
     );
     if (isset($g[$key])) return $g[$key];
-    $src = kop_vol_sources()[$key] ?? null;
+    if (function_exists('kop_volp_kinds') && isset(kop_volp_kinds()[$key])) return (string) kop_volp_kinds()[$key]['question'];
+    $src = kop_vol_earnable_sources()[$key] ?? null;
     return $src ? (string) ($src['help'] ?? '') : '';
 }
 
@@ -290,8 +341,8 @@ function kop_vol_recommend(array $vol, $source, $key, $verdict, $note) {
     if ($verdict === 'unsure' && $note === '') throw new RuntimeException('Say in the note what you are not sure about.');
     // A project (inc/volunteer-projects.php) opens its own items to its volunteer, even in a queue not open to everyone.
     $all = kop_rinbox_sources();
-    $src = (!isset(kop_vol_sources()[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
-        && function_exists('kop_volp_allows') && kop_volp_allows((int) $vol['id'], $source, $key)) ? $all[$source] : kop_vol_source($source);
+    $src = (!isset(kop_vol_sources_for((int) $vol['id'])[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
+        && function_exists('kop_volp_allows') && kop_volp_allows((int) $vol['id'], $source, $key)) ? $all[$source] : kop_vol_source_for((int) $vol['id'], $source);
     $item = kop_vol_raw_item($src, $source, $key);
     if (!$item || !kop_vol_actionable($source, $item)) throw new RuntimeException('Someone has already dealt with this one. Thanks anyway.');
     if (isset(kop_vol_held_keys($source)[(string) $key])) throw new RuntimeException('An admin has set this one aside.');
@@ -566,7 +617,7 @@ function kop_vol_item($source, array $it) {
  * recommended by them, still actionable. Pages through the queue's own list.
  */
 function kop_vol_items($vid, $source, $offset, $limit, $search = '') {
-    $src = kop_vol_source($source);
+    $src = kop_vol_source_for($vid, $source);
     $skip = kop_vol_held_keys($source);
     if ($vid) {
         global $wpdb;
@@ -643,9 +694,10 @@ add_action('rest_api_init', function () {
 
 function kop_vol_rest_queues(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
+        $who = kop_vol_rest_who($req);
         $counts = kop_rinbox_counts();
         $out = array();
-        foreach (kop_vol_sources() as $key => $src) {
+        foreach (kop_vol_sources_for(is_array($who) && isset($who['vol']) ? (int) $who['vol']['id'] : 0) as $key => $src) {
             $out[] = array('key' => $key, 'label' => $src['label'], 'count' => isset($counts[$key]) ? (int) $counts[$key] : null,
                 'guidance' => kop_vol_guidance($key));
         }
@@ -670,9 +722,10 @@ function kop_vol_rest_fulltext(WP_REST_Request $req) {
         $key = (string) $req->get_param('key');
         $all = kop_rinbox_sources();
         // A project's own items are open to its volunteer, as in kop_vol_recommend().
-        $src = (!isset(kop_vol_sources()[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
-            && !empty($who['vol']) && function_exists('kop_volp_allows') && kop_volp_allows((int) $who['vol']['id'], $source, $key))
-            ? $all[$source] : kop_vol_source($source);
+        $vid = is_array($who) && isset($who['vol']) ? (int) $who['vol']['id'] : 0;
+        $src = (!isset(kop_vol_sources_for($vid)[$source]) && isset($all[$source]) && !in_array($source, kop_vol_never_sources(), true)
+            && $vid && function_exists('kop_volp_allows') && kop_volp_allows($vid, $source, $key))
+            ? $all[$source] : kop_vol_source_for($vid, $source);
         if (empty($src['vol_text'])) throw new InvalidArgumentException('This queue has no full text to read.');
         $text = call_user_func($src['vol_text'], $key);
         if ($text === null) throw new RuntimeException('That report is not on file any more.');
@@ -906,6 +959,7 @@ function kop_vol_admin_page() {
 
         <?php if ($project) : kop_volp_admin_project($project, $nonce, $vols); ?></div><?php return; endif; ?>
         <?php if (isset($_GET['faq'])) : kop_volf_admin_page(sanitize_key(wp_unslash($_GET['faq'])), $nonce); ?></div><?php return; endif; ?>
+        <?php if (isset($_GET['practice'])) : kop_volpr_admin_page(sanitize_key(wp_unslash($_GET['practice'])), $nonce); ?></div><?php return; endif; ?>
         <?php $thread = (int) ($_GET['messages'] ?? 0);
         if ($thread) : kop_volm_admin_thread($thread, $nonce); ?></div><?php return; endif; ?>
         <?php kop_volm_admin_section($nonce); ?>

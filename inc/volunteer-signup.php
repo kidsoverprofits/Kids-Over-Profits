@@ -17,7 +17,8 @@
  *
  * Page: the 'volunteer' hub module (kop_hub_modules, templates/page-hub.php),
  * js/volunteer-signup.js, css/volunteer-signup.css.
- * REST (public, POST): kop/v1/volunteer/signup.
+ * REST (public): POST kop/v1/volunteer/signup; GET on it says whether this
+ * device is signed in, so the cached page swaps the form for "Open your volunteer page".
  * Tested by the "Sign-up" section of scripts/test-review-volunteers.php.
  */
 
@@ -90,10 +91,18 @@ function kop_vols_rest_signup(WP_REST_Request $req) {
     return new WP_REST_Response(array('name' => $made['name'], 'url' => $made['url'], 'page' => kop_vol_page_url()), 200);
 }
 
+/** GET: is this device signed in already? The page is cached for everyone, so the form asks on load: {signed_in, name, page}. */
+function kop_vols_rest_status() {
+    nocache_headers();
+    if (!headers_sent()) header('X-LiteSpeed-Cache-Control: no-cache');
+    $vol = kop_vol_current();
+    return new WP_REST_Response($vol ? array('signed_in' => true, 'name' => (string) $vol['name'], 'page' => kop_vol_page_url()) : array('signed_in' => false), 200);
+}
+
 add_action('rest_api_init', function () {
     register_rest_route('kop/v1', '/volunteer/signup', array(
-        'methods' => 'POST', 'callback' => 'kop_vols_rest_signup',
-        'permission_callback' => '__return_true',
+        array('methods' => 'POST', 'callback' => 'kop_vols_rest_signup', 'permission_callback' => '__return_true'),
+        array('methods' => 'GET', 'callback' => 'kop_vols_rest_status', 'permission_callback' => '__return_true'),
     ));
 });
 
@@ -118,10 +127,15 @@ function kop_vols_module() {
     }
     ?>
     <section class="kop-hub-module kop-vols" id="kop-vol-signup" aria-labelledby="kop-vols-h">
-        <h2 class="kop-hub-h" id="kop-vols-h">Review what people send in</h2>
-        <p class="kop-vols-lead">Volunteers read what comes in (news stories, court cases, bills, findings from state reports) and
-            say whether it belongs on the site. You only recommend: nothing changes until we check it. Each queue says what
-            to look for, and most items take a minute or two.</p>
+        <h2 class="kop-hub-h" id="kop-vols-h">Start reviewing now</h2>
+        <p class="kop-vols-lead">No interview and no waiting: sign up here and start straight away. Your first job is reading
+            findings from state inspection reports and saying whether a young person was hurt or put at risk, the work we most
+            need help with. A 10-minute practice round shows you how, then your first 10 real findings open at once. You only
+            recommend: nothing changes on the site until we check it.</p>
+        <div class="kop-vols-back" hidden>
+            <p class="kop-vols-back-h"></p>
+            <a class="kop-vols-btn kop-vols-start" href="<?php echo esc_url(kop_vol_page_url()); ?>">Open your volunteer page</a>
+        </div>
         <form class="kop-vols-form" data-rest="<?php echo esc_url(rest_url('kop/v1/volunteer/signup')); ?>" novalidate>
             <div class="kop-vols-field">
                 <label for="kop-vols-name">Your name or a nickname</label>
@@ -138,7 +152,7 @@ function kop_vols_module() {
                 <input type="text" id="kop-vols-website" name="website" tabindex="-1" autocomplete="off">
             </div>
             <p class="kop-vols-error" role="alert" hidden></p>
-            <button type="submit" class="kop-vols-btn">Get my link</button>
+            <button type="submit" class="kop-vols-btn">Get my link and start</button>
         </form>
         <div class="kop-vols-done" hidden tabindex="-1">
             <p class="kop-vols-done-h"></p>

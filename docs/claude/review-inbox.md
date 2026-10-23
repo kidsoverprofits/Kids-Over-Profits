@@ -90,6 +90,15 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # email in the volunteers row, admin-only); shows the link once and sets the cookie. Hidden bot field, 3 a day per address+browser, 30 a day
 # in all (filters kop_vols_per_day_each / kop_vols_per_day); a signed-in device is sent to its page. The volunteer_projects listing (templates/page-volunteers.php) links to it.
 # kop_vol_never_sources() also bars drive-docs (the owner's private Docs) and podcasts (statements by named people)
+# Queues are earned (owner, 2026-10-23): kop_vol_sources_for($vid) = the queues a volunteer may open themselves (tabs, items, self-assign):
+# passed its practice round, a record there (10 admin-decided, 80%), or recommended there before option kop_vol_earned_before (set on first
+# run, so the earlier volunteers keep theirs). kop_vol_earnable_sources() = kop_vol_starter_source() ('inspection-highlights', the owner's
+# top priority) + the ticked queues. A new sign-up sees "Start now": practice in the starter queue, and passing self-assigns the first 10 at
+# once; a finished batch offers "Give me 10 more"; "Learn another queue" practises the rest. Projects still open their own items to anyone
+# Practice cards are curated by kop_volpr_tricky() (a volunteer disagreed / Not sure, 2+ wrong in practice, a Brief FAQ 'from' #id or #a-b,
+# struck at Volunteer Reviewers > Practice cards ?practice=<source>, option kop_volpr_struck) and kop_volpr_unclear() (nothing to read, an
+# archive.md-family link); a round never repeats a title. /volunteer/: "Start reviewing now" hub action -> #kop-vol-signup; GET
+# kop/v1/volunteer/signup tells the cached page the device is signed in (form swapped for "Open your volunteer page")
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
 # Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>

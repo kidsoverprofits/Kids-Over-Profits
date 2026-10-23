@@ -696,3 +696,9 @@ p.kop-vol-newreply {
 
 .kop-vol-self { margin-top: 1rem; }
 .kop-vol-self select { max-width: 100%; margin: 0 .25rem .5rem 0; }
+
+/* "Start now": a new volunteer's one button (practice, then the first real batch). */
+.kop-vol-start > p:first-child { font-size: 1.05rem; margin-top: 0; }
+.kop-vol-steps { margin: 0 0 1rem 1.25rem; padding: 0; }
+.kop-vol-steps li { margin: 0 0 .35rem; }
+.kop-vol-page .kop-vol-btn-big { font-size: 1.1rem; padding: .7rem 1.6rem; }

@@ -81,6 +81,18 @@ $pdo->exec("CREATE TABLE wpdl_kop_volunteers (id INTEGER PRIMARY KEY AUTOINCREME
 $pdo->exec("CREATE TABLE wpdl_kop_volunteer_recs (id INTEGER PRIMARY KEY AUTOINCREMENT, volunteer_id INTEGER NOT NULL, source TEXT NOT NULL,
     item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '', verdict TEXT NOT NULL, note TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
     outcome TEXT NOT NULL DEFAULT '', outcome_by TEXT NOT NULL DEFAULT '', outcome_at TEXT, UNIQUE (volunteer_id, source, item_key))");
+$GLOBALS['kop_test_options']['kop_vol_practice_db'] = KOP_VOLPR_DB_VERSION;
+$pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_vol_practice (id INTEGER PRIMARY KEY AUTOINCREMENT, volunteer_id INTEGER NOT NULL, round_no INTEGER NOT NULL DEFAULT 1,
+    source TEXT NOT NULL, item_key TEXT NOT NULL, title TEXT NOT NULL DEFAULT '', answer TEXT NOT NULL, verdict TEXT NOT NULL DEFAULT '',
+    position INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, answered_at TEXT, UNIQUE (volunteer_id, source, item_key))");
+// A passed practice round (one right card is a pass) in each queue: what opens a queue to a volunteer (kop_vol_sources_for()).
+$earn = function ($vid, array $sources) use ($pdo) {
+    foreach ($sources as $s) {
+        $no = 1 + (int) $pdo->query('SELECT COALESCE(MAX(round_no), 0) FROM wpdl_kop_vol_practice WHERE volunteer_id = ' . (int) $vid)->fetchColumn();
+        $pdo->prepare("INSERT OR IGNORE INTO wpdl_kop_vol_practice (volunteer_id, round_no, source, item_key, answer, verdict, created_at) VALUES (?, ?, ?, ?, 'approve', 'approve', '2026-01-01')")
+            ->execute(array((int) $vid, $no, $s, 'earned-' . $s));
+    }
+};
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -128,6 +140,19 @@ foreach (kop_vol_never_sources() as $never) {
 }
 unset($GLOBALS['kop_test_options']['kop_volunteer_sources']);
 $check('a closed queue is refused', $throws(function () { kop_vol_items(0, 'bug-reports', 0, 5); }) !== '');
+
+echo "\nQueues are earned\n";
+$check('a new volunteer has no queue of their own', kop_vol_sources_for($id) === array(), implode(', ', array_keys(kop_vol_sources_for($id))));
+$check('...so a queue refuses them', strpos($throws(function () use ($id) { kop_vol_items($id, 'news', 0, 5); }), 'practice') !== false);
+$check('the violations queue is the one to start in', array_keys(kop_vol_earnable_sources())[0] === 'inspection-highlights');
+$earn($id, array('news'));
+$check('a passed practice round opens that queue only', array_keys(kop_vol_sources_for($id)) === array('news'));
+$pdo->prepare("INSERT INTO wpdl_kop_volunteer_recs (volunteer_id, source, item_key, verdict, created_at, updated_at) VALUES (?, 'lawsuit', 'earlier', 'approve', '2026-01-01', '2026-01-01')")->execute(array($id2));
+$check('a queue they recommended in before stays open', array_keys(kop_vol_sources_for($id2)) === array('lawsuit'));
+$pdo->exec("DELETE FROM wpdl_kop_volunteer_recs WHERE item_key = 'earlier'");
+$check('an admin preview sees them all', isset(kop_vol_sources_for(0)['inspection-highlights']) && isset(kop_vol_sources_for(0)['news']));
+$earn($id, array_keys(kop_vol_earnable_sources()));
+$earn($id2, array_keys(kop_vol_earnable_sources()));
 
 $forbidden = array('fields', 'actions', 'moves', 'tags', 'hold', 'recs', 'details');
 $first = null;
@@ -219,7 +244,7 @@ if ($it) {
     $rid = (int) $pdo->query('SELECT report_id FROM inspection_highlights WHERE id = ' . (int) $it['key'])->fetchColumn();
     $raw = trim((string) $pdo->query('SELECT raw_content FROM inspection_reports WHERE id = ' . $rid)->fetchColumn());
     $got = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'inspection-highlights', 'key' => $it['key'])))->data;
-    $check('fulltext returns the report as scraped', isset($got['text']) && ($raw === '' || strpos($got['text'], substr(kop_vol_scrub($raw), 0, 200)) !== false), strlen($got['text'] ?? '') . ' chars');
+    $check('fulltext returns the report as scraped', isset($got['text']) && ($raw === '' || strpos($got['text'], substr(kop_vol_scrub($raw), 0, 200)) !== false), strlen($got['text'] ?? '') . ' chars' . (isset($got['error']) ? ': ' . $got['error'] : ''));
     $bad = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'news', 'key' => '1')))->data;
     $check('fulltext is refused for a queue without it', !empty($bad['error']));
     $closed = kop_vol_rest_fulltext(new WP_REST_Request(array('source' => 'fornits', 'key' => '1')))->data;
@@ -255,6 +280,7 @@ $GLOBALS['kop_test_options']['kop_volunteer_sources'] = array('folder-links');
 $va = kop_vol_by_token(substr($url2 = kop_vol_create('Trusted A')[1], strpos($url2, 'invite=') + 7));
 $vb = kop_vol_by_token(substr($url3 = kop_vol_create('Trusted B')[1], strpos($url3, 'invite=') + 7));
 $vc = kop_vol_by_token(substr($url4 = kop_vol_create('New C')[1], strpos($url4, 'invite=') + 7));
+$earn($vc['id'], array('folder-links'));
 $past = $pdo->prepare("INSERT INTO wpdl_kop_volunteer_recs (volunteer_id, source, item_key, verdict, created_at, updated_at, outcome, outcome_by)
     VALUES (?, 'folder-links', ?, 'approve', '2026-01-01', '2026-01-01', ?, ?)");
 foreach (array($va, $vb) as $v) for ($i = 0; $i < 20; $i++) $past->execute(array($v['id'], 'past-' . $i, $i < 19 ? 'approve' : 'reject', 'admin'));
@@ -369,6 +395,10 @@ $_COOKIE[KOP_VOL_COOKIE] = $token;
 $again = kop_vols_rest_signup(new WP_REST_Request(array('name' => 'Sam again')));
 $check('a device already signed in is sent to its page', $again->status === 409 && !empty($again->data['signed_in'])
     && !$pdo->query("SELECT COUNT(*) FROM wpdl_kop_volunteers WHERE name = 'Sam again'")->fetchColumn());
+$st = kop_vols_rest_status()->data;
+$check('the cached page asks first and is told who is signed in', !empty($st['signed_in']) && $st['name'] === 'Sam Example' && !empty($st['page']), json_encode($st));
+$made_new = kop_vol_by_token($made['token']);
+$check('a new sign-up starts with no queue of their own (practice first)', $made_new && kop_vol_sources_for((int) $made_new['id']) === array());
 $check('the form is the /volunteer/ hub module', (kop_vols_hub_modules(array())['volunteer'] ?? '') === 'kop_vols_module');
 $check('never-open queues include drive-docs and podcasts', !array_diff(array('drive-docs', 'podcasts'), kop_vol_never_sources()));
 

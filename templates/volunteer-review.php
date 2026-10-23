@@ -20,9 +20,9 @@ get_header();
         <h1>Help review submissions</h1>
         <?php if ($kop_vol || $kop_vol_preview) : ?>
             <p><?php echo $kop_vol ? 'Hi ' . esc_html($kop_vol['name']) . ', thank you for helping.' : 'Admin preview: this is what volunteers see. Recommending is turned off for you here.'; ?></p>
-            <p>People and our news scanners send in articles, court cases, bills and program details. Read each one, open its link,
-                and tell us whether it belongs on the site. <strong>Your answer is a recommendation:</strong> nothing changes on the site until an admin looks at it too,
-                so it is fine to be unsure. Say so, and why, in the note.</p>
+            <p>Work comes in batches of 10: findings from state inspection reports first, then news stories, court cases and more once you
+                have learned each one with a short practice round. <strong>Your answer is a recommendation:</strong> nothing changes on the site
+                until an admin looks at it too, so it is fine to be unsure. Say so, and why, in the note.</p>
         <?php elseif (!empty($GLOBALS['kop_vol_bad_invite'])) : ?>
             <p>This link does not work any more. It may have been replaced with a new one. Ask the person who sent it for a fresh link.</p>
         <?php else : ?>

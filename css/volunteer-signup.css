@@ -83,6 +83,7 @@
     color: var(--kop-navy, #000080);
 }
 
+.kop-vols p.kop-vols-back-h,
 .kop-vols p.kop-vols-done-h {
     font-size: 1.1rem;
     font-weight: 700;

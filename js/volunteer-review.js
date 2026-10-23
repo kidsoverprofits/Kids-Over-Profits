@@ -574,7 +574,9 @@
 
     function renderProjects() {
         projectsPanel.innerHTML = '';
-        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : (canPractice() ? 'Start here' : 'Your next batch')) }));
+        var self = state.self;
+        var starting = !state.projects.length && !(self && self.eligible) && canPractice();
+        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : (starting ? 'Start now' : 'Your next batch')) }));
         var ul = el('ul', { class: 'kop-vol-project-list' });
         state.projects.forEach(function (p) {
             var finished = p.done >= p.total;
@@ -588,24 +590,49 @@
             ]));
         });
         if (state.projects.length) projectsPanel.appendChild(ul);
-        var self = state.self;
         if (self && self.eligible && !self.open && self.queues.length) projectsPanel.appendChild(selfAssignForm(self));
-        if (canPractice()) projectsPanel.appendChild(practiceForm(self.practice));
+        if (canPractice()) projectsPanel.appendChild(self.eligible || state.projects.length ? practiceForm(self.practice, true) : startNow(self.practice));
     }
 
     /* ---- Practice round (inc/volunteer-practice.php) ------------------------------------ */
 
-    // Not able to pick a batch yet, and a practice round to start or carry on.
+    // A practice round to start or carry on (before the first batch, or to learn another queue).
     function canPractice() {
         var self = state.self;
-        return !!(self && !self.eligible && self.practice && (self.practice.open || self.practice.queues.length)) && !cfg.preview;
+        return !!(self && self.practice && (self.practice.open || self.practice.queues.length)) && !cfg.preview;
     }
 
-    function practiceForm(pr) {
+    // A new volunteer's one button: the practice round in the first queue offered (the violation findings), then the real batch.
+    function startNow(pr) {
+        if (pr.open || (pr.last && !pr.last.passed)) return practiceForm(pr, false);
+        var first = pr.queues[0];
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+        var go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve kop-vol-btn-big', text: 'Start now', onclick: function () {
+            go.disabled = true;
+            msg.className = 'kop-vol-msg';
+            msg.textContent = 'Setting it up…';
+            startPractice(first.key).catch(function (e) {
+                go.disabled = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+            });
+        } });
+        return el('div', { class: 'kop-vol-self kop-vol-start' }, [
+            el('p', { text: 'Your first job: ' + (first.title || first.label) + '. ' + (first.blurb || '') }),
+            el('ol', { class: 'kop-vol-steps' }, [
+                el('li', null, [el('strong', { text: 'Practice: ' }), pr.size + ' items we have already decided. After each one you see what we decided. About 10 minutes.']),
+                el('li', null, [el('strong', { text: 'Then the real thing: ' }), 'get ' + pr.pass + ' of ' + pr.size + ' the same as us and your first ' + pr.size + ' real ones open straight away.'])
+            ]),
+            go, msg
+        ]);
+    }
+
+    // learn: true once they can already pick a batch (another queue to learn), false before the first one.
+    function practiceForm(pr, learn) {
         var box = el('div', { class: 'kop-vol-self' }, [
-            el('h3', { text: 'Practice round' }),
+            el('h3', { text: learn ? 'Learn another queue' : 'Practice round' }),
             el('p', { class: 'kop-vol-meta', text: pr.size + ' items the admins have already decided. After each one you see what they decided. Get ' + pr.pass + ' of ' + pr.size
-                + ' right and you can pick your own batches from that queue.' })
+                + ' right and that queue opens to you.' })
         ]);
         if (pr.last && !pr.last.passed && !pr.open) {
             box.appendChild(el('p', { class: 'kop-vol-meta', text: 'Last round: ' + pr.last.right + ' of ' + pr.last.total + ' right in ' + pr.last.label + '.' }));
@@ -711,18 +738,25 @@
         projSlot.innerHTML = '';
         var panel = el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
             el('h3', { text: 'You got ' + round.right + ' of ' + round.total + ' the same as the admins.' }),
-            el('p', { text: round.passed ? 'You passed. You can pick your own batches from ' + round.label + ' now.'
+            el('p', { text: round.passed ? 'You passed. Your first real batch from ' + round.label + ' is ready.'
                 : 'Read the question and the examples again, then try another round: it has different items.' })
         ]);
         var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
-        var btn = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: round.passed ? 'Pick a batch' : 'Try another round', onclick: function () {
+        var btn = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: round.passed ? 'Start my first batch' : 'Try another round', onclick: function () {
             btn.disabled = true;
-            (round.passed ? Promise.resolve() : api('practice', { do: 'start', source: round.source })).then(function () {
+            var made = null;
+            // Passing goes straight to real work: a batch of their own from the queue they practised.
+            (round.passed ? api('selfassign', { source: round.source }).then(function (res) { made = res; }, function () { /* nothing waiting: the panel offers what there is */ })
+                : api('practice', { do: 'start', source: round.source })).then(function () {
                 return api('projects');
             }).then(function (data) {
                 state.projects = data.projects || [];
                 state.self = data.self;
-                if (round.passed) {
+                if (round.passed && made && made.id) {
+                    state.practice = false;
+                    if (!projectsPanel.parentNode) app.insertBefore(projectsPanel, app.firstChild);
+                    openProject(made.id);
+                } else if (round.passed) {
                     state.practice = false;
                     renderProjects();
                     if (!projectsPanel.parentNode) app.insertBefore(projectsPanel, app.firstChild);
@@ -770,6 +804,37 @@
             el('label', { for: 'kop-vol-self-queue', text: 'Queue ' }),
             pick, ' ', go, msg
         ]);
+    }
+
+    // A finished batch: when they can pick their own, the next one from the same queue is one click away.
+    function offerMore(panel, source) {
+        if (cfg.preview || !source) return;
+        api('projects').then(function (data) {
+            state.projects = data.projects || [];
+            state.self = data.self;
+            renderProjects();
+            var self = state.self;
+            if (!self || !self.eligible || self.open || !self.queues.some(function (q) { return q.key === source; })) return;
+            var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+            var more = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Give me ' + self.size + ' more', onclick: function () {
+                more.disabled = true;
+                msg.className = 'kop-vol-msg';
+                msg.textContent = 'Setting it up…';
+                api('selfassign', { source: source }).then(function (res) {
+                    return api('projects').then(function (d) {
+                        state.projects = d.projects || [];
+                        state.self = d.self;
+                        openProject(res.id);
+                    });
+                }).catch(function (e) {
+                    more.disabled = false;
+                    msg.className = 'kop-vol-msg is-error';
+                    msg.textContent = e.message;
+                });
+            } });
+            panel.appendChild(more);
+            panel.appendChild(msg);
+        }).catch(function () { /* the panel above still offers a batch */ });
     }
 
     function rememberProject(id) {
@@ -847,13 +912,15 @@
             var it = (data.items || [])[0];
             if (!it) {
                 var skipped = state.skip.length;
-                projSlot.appendChild(el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
+                var finished = el('section', { class: 'kop-vol-panel kop-vol-finished' }, [
                     el('h3', { text: skipped ? 'That is all but the ones you skipped.' : 'Done. Thank you!' }),
                     el('p', { text: skipped ? 'You skipped ' + skipped + '. Go through them again, or leave them: that is fine too.'
                         : 'Every item in this project has an answer. An admin will check them; "Your past answers" shows what they decide.' }),
                     skipped ? el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Go through the skipped ones', onclick: function () { state.skip = []; nextProjectItem(); } }) : null
-                ]));
+                ]);
+                projSlot.appendChild(finished);
                 bringToTop(projSlot);
+                if (!skipped) offerMore(finished, p.source);
                 return;
             }
             projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : p.kind === 'social' ? 'Idea ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
@@ -1057,18 +1124,18 @@
             // A reply may come while the page is open: look again every two minutes while it is in view.
             window.setInterval(function () { if (!document.hidden) loadMessages(false); }, 120000);
         };
-        if (!state.queues.length && !state.projects.length) {
+        var canSelf = state.self && state.self.eligible && !state.self.open && state.self.queues.length;
+        if (!state.queues.length && !state.projects.length && !canSelf && !canPractice()) {
             app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'There is nothing to review right now. Thank you for checking!' })]));
             startMessages();
             return;
         }
-        var canSelf = state.self && state.self.eligible && !state.self.open && state.self.queues.length;
         if (state.projects.length || canSelf || canPractice()) {
             renderProjects();
             app.appendChild(projectsPanel);
         }
-        // With a project, the open queues are a fold: the project is the thing to do.
-        app.appendChild(state.projects.length
+        // With a project, or no queue of their own yet, the queues are a fold: the panel above is the thing to do.
+        app.appendChild(state.projects.length || !state.queues.length
             ? el('details', { class: 'kop-vol-panel kop-vol-browse' }, [el('summary', { text: state.queues.length ? 'Your past answers, or a whole queue' : 'Your past answers' }), tabs])
             : el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [tabs]));
         app.appendChild(body);
@@ -1088,7 +1155,7 @@
             // Straight to work: their own projects come first.
             if (unfinished.length) openProject(unfinished[0].id);
         } else if (canPractice() && state.self.practice.open) openPractice();
-        else openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
+        else if (state.queues.length && !canSelf && !canPractice()) openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
     }).catch(function (e) {
         app.innerHTML = '';
         app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));

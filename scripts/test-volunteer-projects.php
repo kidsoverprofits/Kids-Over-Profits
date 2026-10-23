@@ -230,7 +230,7 @@ for ($i = 0; $i < 10; $i++) {
 }
 $st = kop_volp_self_status($sam_id);
 $check('10+ decided at 80%+ agreement: eligible', $st['eligible'] && $st['decided'] === 12 && $st['agreed'] === 10 && $st['open'] === 0, json_encode($st));
-$check('the choices are the queues open to everyone', $st['queues'] && !array_diff(array_column($st['queues'], 'key'), array_keys(kop_vol_sources())), json_encode(array_column($st['queues'], 'key')));
+$check('the choices are the queues he earned: news (his record there), not the findings he did in a project', array_column($st['queues'], 'key') === array('news'), json_encode(array_column($st['queues'], 'key')));
 $S = $st['queues'][0]['key'];
 $err = '';
 try { $mine = kop_volp_self_assign($sam, $S); } catch (Throwable $e) { $err = $e->getMessage(); $mine = null; }
@@ -244,8 +244,10 @@ if ($mine) {
 } else {
     $check('self-assign made a batch', false, $err);
 }
-$check('a queue not open to everyone is refused', strpos($throws(function () use ($sam, $Q) { kop_volp_self_assign($sam, $Q); }), 'Pick one') !== false);
-$check('a never-for-volunteers queue is refused', strpos($throws(function () use ($sam) { kop_volp_self_assign($sam, 'bug-reports'); }), 'Pick one') !== false);
+$check('a queue he has not earned is refused', strpos($throws(function () use ($sam, $Q) { kop_volp_self_assign($sam, $Q); }), 'practice') !== false,
+    $throws(function () use ($sam, $Q) { kop_volp_self_assign($sam, $Q); }));
+$check('a never-for-volunteers queue is refused', strpos($throws(function () use ($sam) { kop_volp_self_assign($sam, 'bug-reports'); }), 'Pick one') !== false,
+    $throws(function () use ($sam) { kop_volp_self_assign($sam, 'bug-reports'); }));
 $wpdb->query('DELETE FROM ' . kop_vol_recs_table() . " WHERE item_key LIKE 'selftest-%'");
 
 echo "\nPractice round\n";
@@ -267,13 +269,26 @@ $track_before = kop_vol_auto_track(array($alex_id));
 $st = kop_volp_self_status($alex_id);
 $check('Alex is not eligible yet, and is offered a practice round', !$st['eligible'] && isset($st['practice']) && in_array($P, array_column($st['practice']['queues'], 'key'), true),
     json_encode($st['practice']['queues'] ?? null));
-$check('...only in queues open to everyone', !array_diff(array_column($st['practice']['queues'], 'key'), array_keys(kop_vol_sources())));
-$check('a queue not open to everyone is refused', strpos($throws(function () use ($alex, $Q) { kop_volpr_start($alex, $Q); }), 'Pick one') !== false);
+$check('...only in queues a volunteer can earn, the violations first', !array_diff(array_column($st['practice']['queues'], 'key'), array_keys(kop_vol_earnable_sources()))
+    && (!in_array($Q, array_column($st['practice']['queues'], 'key'), true) || $st['practice']['queues'][0]['key'] === $Q), json_encode(array_column($st['practice']['queues'], 'key')));
+$check('a queue volunteers never see is refused', strpos($throws(function () use ($alex) { kop_volpr_start($alex, 'bug-reports'); }), 'Pick one') !== false);
 $check('answering before starting says so', strpos($throws(function () use ($alex) { kop_volpr_answer($alex, 'x', 'approve'); }), 'Start') !== false);
 $ps = kop_volpr_start($alex, $P);
 $round = $pdo->query("SELECT item_key, answer FROM wpdl_kop_vol_practice WHERE volunteer_id = $alex_id ORDER BY position")->fetchAll(PDO::FETCH_KEY_PAIR);
 $counts = array_count_values($round);
 $check('a round of 10, half of them rejects', count($round) === 10 && ($counts['reject'] ?? 0) === 5 && ($counts['approve'] ?? 0) === 5, json_encode($counts));
+$check('...every card has something to read and no CAPTCHA link', !array_filter(array_keys($round), function ($k) use ($P) {
+    $it = kop_volpr_fetch($P, (string) $k);
+    return !$it || kop_volpr_unclear(kop_volpr_copy($P, $it));
+}));
+$check('a card with nothing to read, or an archive.md link, is left out', kop_volpr_unclear(array('text' => '', 'facts' => array(array('label' => 'Outlet', 'value' => 'The Paper'))))
+    && kop_volpr_unclear(array('text' => 'A long enough summary of the story.', 'url' => 'https://archive.md/NraFd'))
+    && !kop_volpr_unclear(array('text' => '', 'url' => 'https://news.test/a', 'facts' => array(array('label' => 'Summary', 'value' => 'Two staff at a ranch program were charged after a teen was hurt.')))));
+$tricky = kop_volpr_tricky('inspection-highlights');
+$check('the findings a Brief FAQ answer rests on are left out (#2967, the range #3257-3263)', isset($tricky['2967']) && isset($tricky['3260']) && !isset($tricky['3264']));
+$GLOBALS['kop_test_options']['kop_volpr_struck'] = array($P => array('struck-1' => true));
+$check('a card the admin struck is left out', isset(kop_volpr_tricky($P)['struck-1']) && kop_volpr_admin_post('practice_unstrike', array('kop_volpr_source' => $P, 'kop_volpr_key' => 'struck-1'))
+    && !isset(kop_volpr_tricky($P)['struck-1']));
 $titles = $pdo->query("SELECT LOWER(TRIM(title)) FROM wpdl_kop_vol_practice WHERE volunteer_id = $alex_id")->fetchAll(PDO::FETCH_COLUMN);
 $check('...no two cards with the same title', count($titles) === count(array_unique($titles)), json_encode(array_diff_assoc($titles, array_unique($titles))));
 $check('...shown as the open round', $ps['open'] && $ps['open']['total'] === 10 && $ps['open']['done'] === 0 && $ps['open']['source'] === $P);
