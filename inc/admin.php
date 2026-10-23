@@ -2215,6 +2215,70 @@ function kop_apply_lawsuit_seeds() {
     return $done;
 }
 /**
+ * In Loving Memory entries assembled offline (seeds/memorial.json). Each is
+ * inserted once as a published row, skipped when memorial_victims already has
+ * the same name, program and date, so edits made on the page persist.
+ */
+function kop_apply_memorial_seeds() {
+    $done = array();
+    $path = trailingslashit(get_stylesheet_directory()) . 'seeds/memorial.json';
+    if (!file_exists($path)) {
+        return $done;
+    }
+    $spec = json_decode((string) file_get_contents($path), true);
+    if (!is_array($spec) || empty($spec['entries']) || !is_array($spec['entries'])) {
+        return $done;
+    }
+    $pdo = kop_seed_pdo();
+    if (!$pdo) {
+        return $done;
+    }
+    $causes = array_keys(kop_memorial_causes('all'));   // KOP Tools > Dropdown Lists
+    try {
+        $exists = $pdo->prepare('SELECT id FROM memorial_victims WHERE name = ? AND COALESCE(program, \'\') = ? AND COALESCE(date_of_death, \'\') = ? LIMIT 1');
+        $insert = $pdo->prepare(
+            'INSERT INTO memorial_victims
+                (name, age, program, date_of_death, date_precision, cause_of_death, cause_category,
+                 location, source_name, source_url, kop_url, notes, publication_status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'published\')'
+        );
+        foreach ($spec['entries'] as $e) {
+            $name = trim((string) ($e['name'] ?? '')) ?: 'Unknown';
+            $program = trim((string) ($e['program'] ?? ''));
+            $date = !empty($e['date_of_death']) ? (string) $e['date_of_death'] : '';
+            $exists->execute(array($name, $program, $date));
+            if ($exists->fetchColumn()) {
+                continue;
+            }
+            $precision = in_array($e['date_precision'] ?? '', array('day', 'month', 'year', 'unknown'), true) ? $e['date_precision'] : ($date !== '' ? 'day' : 'unknown');
+            $insert->execute(array(
+                $name,
+                isset($e['age']) && $e['age'] !== null ? (int) $e['age'] : null,
+                $program !== '' ? $program : null,
+                $date !== '' ? $date : null,
+                $precision,
+                ($e['cause_of_death'] ?? '') !== '' ? (string) $e['cause_of_death'] : null,
+                in_array($e['cause_category'] ?? '', $causes, true) ? $e['cause_category'] : null,
+                ($e['location'] ?? '') !== '' ? (string) $e['location'] : null,
+                ($e['source_name'] ?? '') !== '' ? (string) $e['source_name'] : null,
+                ($e['source_url'] ?? '') !== '' ? (string) $e['source_url'] : null,
+                ($e['kop_url'] ?? '') !== '' ? (string) $e['kop_url'] : null,
+                ($e['notes'] ?? '') !== '' ? (string) $e['notes'] : null,
+            ));
+            $done[] = (int) $pdo->lastInsertId();
+        }
+        if ($done) {
+            if (function_exists('kop_record_changed')) {
+                kop_record_changed('memorial', $done, array('source' => 'seed'));
+            }
+            do_action('litespeed_purge_url', home_url('/in-loving-memory/'));
+        }
+    } catch (Throwable $e) {
+        error_log('kop_apply_memorial_seeds: ' . $e->getMessage());
+    }
+    return $done;
+}
+/**
  * Bill statuses the legislation table accepts. 'proposed' covers a bill
  * released as a discussion draft that has no bill number yet.
  */
@@ -2586,7 +2650,8 @@ function kop_apply_template_assignments() {
     }
     $summary['lawsuits']     = kop_apply_lawsuit_seeds();
     $summary['legislation']  = kop_apply_legislation_seeds();
-    $summary['media']        = kop_apply_media_folder_fixes();
+    $summary['memorial']     = kop_apply_memorial_seeds();
+    $summary['media']       = kop_apply_media_folder_fixes();
     $summary['research_tags'] = kop_apply_research_facility_tags();
     $summary['subfolders']   = kop_apply_media_subfolders();
     $summary['text']         = kop_apply_text_fixes();
@@ -2654,7 +2719,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '135';
+    $version = '136';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
