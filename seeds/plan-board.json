@@ -1,6 +1,6 @@
 {
- "built": "2026-10-23 21:24 UTC",
- "source": "f57a7fabf8efecc683f0803a818875b349858f72",
+ "built": "2026-10-24 15:54 UTC",
+ "source": "c4d32989e9a38712b90a6956532cdae50206e4b5",
  "sections": [
   {
    "key": "2",
@@ -1033,6 +1033,14 @@
        "ask": "Add Donald MacNeil (Robert Land Academy, 2010, suicide on the way back to the school) to In Loving Memory?",
        "date": "2026-10-23",
        "hash": "4dbb1f1670e4"
+      },
+      {
+       "id": "4.3:form-and-suggestions-in-the-v2-shape",
+       "lead": "Form and suggestions in the v2 shape",
+       "text": "**Form and suggestions in the v2 shape** (2026-10-24, owner: all three). Stored facilities are already v2 (`kop_v2_save_facility_entries()` normalizes, `inc/facility-v2-writer.php:471`), but the old shape is left in three places, in this order: a. Download JSON / Copy JSON on the data forms dump `window.formData`, the form's legacy working copy (`js/data-form/utilities.js` `copyToClipboard()` / `downloadJSON()`); a blank form also lacks the fields added since (resourceLinks, federalFunding, pastNames, sourced notes). Export each facility through `KOP_DataNormalizer.facilityToV2()` (never called in the browser today; only `scripts/check-facility-normalizer-parity.js` uses it), leaving provenance and legacy out. b. `api/save-suggestion.php` stores the submission in `suggested_edits` as sent; it is normalized only on approval (`api/lib-suggestion-changes.php:39, 304`). Run `kop_facility_normalize()` before the insert, then check approval, the inbox before/after view and conflict detection still read it (DATA-FLOWS.md first; old rows stay legacy, so the readers take both shapes). c. The form itself edits the legacy shape: `facilityFromV2()` on load, the server's normalize on save (comment at `js/data-form-modules/data-normalizer.js:816`). Moving every form module to v2 is a rewrite; plan it with data model phase 5 (item 11), one module per commit, the parity test green after each.",
+       "ask": "",
+       "date": "2026-10-24",
+       "hash": "69346b052cb9"
       }
      ]
     },
