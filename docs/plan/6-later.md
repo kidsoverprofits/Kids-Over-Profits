@@ -7,6 +7,8 @@
 - **Discovery**: grouping short names by state; a weekly GDELT pass and Bing News (declined 2026-10-13).
 - **App**: other outlets' coverage of a story, paging through every inspection report, an offline index, notifications.
 - **Directory Editor**: reordering programs within a card; editing the location tab's place groups.
+- **Sensitivity readers**: once there are drafts, a way to send one to the readers who ticked "Ask me to read drafts later"
+  (KOP Tools > Sensitivity Survey has their emails) and collect their notes; email only until then.
 - **Lighter pages**: Provo's staff list and the timeline's later years, if pages are still heavy.
 - **Unchecked**: no real upload through the anonymous portal since it began sealing files; no live call to the
   Claude, Gemini or Hugging Face models in the AI helpers.

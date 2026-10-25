@@ -113,3 +113,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     signed in as admin, open https://kidsoverprofits.org/volunteer-review/ : "Choose your work" shows four cards
     (inspection findings marked Most needed, research questions, social media posts, photos), buttons off in the
     preview, and no queue opens by itself. The queue fold lists only Violations.
+
+31. **Sensitivity reader survey** (2026-10-25, [1ddb756f](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/1ddb756fdf7ca7dd170b6daae0db4ecc88207514)):
+    open https://kidsoverprofits.org/volunteer/#kop-sens-survey : "Be a sensitivity reader" lists the seven communities
+    and the survey opens by itself. Send a test answer, then open
+    https://kidsoverprofits.org/wp-admin/admin.php?page=kop-sensitivity-survey (KOP Tools lists it): the answer is under New;
+    Mark read, Undo, then Delete it. Run `python -u scripts/check-contrast.py` on /volunteer/ with the survey open.
