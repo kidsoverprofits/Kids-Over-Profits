@@ -13,13 +13,13 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), "Needs research" on every card
 # (holds.research = 1: off every queue into Your inbox > Needs research until "Back to the queue" or a decision; review-inbox/research), Preview
 # (review-inbox/preview: framed where allowed, else a reading copy)
-# Tabs (owner, 2026-10-25: no dropdowns, the daily news scans always their own tab): Just in / Sent in by people / Daily news scans /
-# Found by imports and inspections / Checks and cleanup / Your inbox / All tools (js/review-inbox.js renderTabs()); the open tab's queues
-# are a row of buttons under it, "Find a queue" searches every tab. A queue's tab is kop_rinbox_area() (inc/review-inbox-recent.php), read
-# from its 'group' or its own 'area' ('people' | 'scans' | 'found' | 'checks'). News shows twice: under people on its "Came from" origin
-# 'people', under Daily news scans on 'scans' (Google News + Reddit), and what imports sent (SCIAD NET, Google Docs, the wiki, Scraper finds...)
-# as "<Queue> (imports)" under Found by imports on 'imports' (since 2026-10-25; before that, 51 imported articles showed in no tab),
-# counts from kop_rinbox_native_split_counts(). The page's own five
+# Tabs (owner, 2026-10-25: no dropdowns, the daily news scans always their own tab, News one top-level tab of its own): Just in / News /
+# Sent in by people / Daily news scans / Found by imports and inspections / Checks and cleanup / Your inbox / All tools (js/review-inbox.js
+# renderTabs()); the open tab's queues are a row of buttons under it, "Find a queue" searches every tab. A queue's tab is kop_rinbox_area()
+# (inc/review-inbox-recent.php), read from its 'group' or its own 'area' ('people' | 'scans' | 'found' | 'checks'). News is in no other tab:
+# its tab opens the one list on every origin ("Came from" narrows it: 'people', 'scans' = Google News + Reddit, 'imports' = SCIAD NET,
+# Google Docs, the wiki, Scraper finds...). Other native queues' imports show as "<Queue> (imports)" under Found by imports; counts from
+# kop_rinbox_native_split_counts(). The page's own five
 # type tabs stay hidden. ?type= takes a queue, a special list (_new, _done...) or an area (people, scans, found, checks, _yours)
 # Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
 # (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'

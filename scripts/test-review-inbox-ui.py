@@ -218,6 +218,10 @@ def main():
         pg.locator("button.rinbox-area", has_text=area).click()
         pg.locator("button.rinbox-q", has_text=label).first.click()
 
+    def open_news(pg):
+        """News is a tab of its own: the tab opens the list, on every origin."""
+        pg.locator("button.rinbox-area", has_text="News").first.click()
+
     def route(r):
         url = r.request.url
         if url.startswith(REST):
@@ -328,7 +332,7 @@ def main():
             pg.goto(BASE, wait_until="load")
             pg.wait_for_selector("button.rinbox-area")
             areas = [t.replace("\n", " ") for t in pg.locator("button.rinbox-area").all_inner_texts()]
-            want = ["Just in", "Sent in by people", "Daily news scans", "Found by imports and inspections", "Checks and cleanup", "Your inbox", "All tools"]
+            want = ["Just in", "News", "Sent in by people", "Daily news scans", "Found by imports and inspections", "Checks and cleanup", "Your inbox", "All tools"]
             check(pg.locator(".type-tabs").is_hidden() and [a.split(" ")[0] for a in areas] == [w.split(" ")[0] for w in want]
                   and all(any(a.startswith(w) for a in areas) for w in want), f"@{width} the queues are in area tabs, the page's own type tabs hidden", " | ".join(areas))
             check("is-current" in (pg.locator("button.rinbox-area", has_text="Just in").get_attribute("class") or ""), f"@{width} the page opens on Just in")
@@ -350,11 +354,16 @@ def main():
             check(wide["page"] <= width and not wide["out"], f"@{width} Just in fits the screen", f"{wide}")
             pg.screenshot(path=str(shots / f"just-in-{width}.png"), full_page=True)
 
-            # The daily news scans have a tab of their own; News shows there on its scan origin.
+            # The daily news scans have a tab of their own; News is in its own tab, never here.
             pg.locator("button.rinbox-area", has_text="Daily news scans").click()
             rows = pg.locator(".rinbox-area-row").all_inner_texts()
-            check(any("Closure reports" in r for r in rows) and any("News articles" in r and "3" in r for r in rows),
-                  f"@{width} Daily news scans lists its queues and the scans' News articles", " | ".join(r.replace(chr(10), " ") for r in rows))
+            check(any("Closure reports" in r for r in rows) and not any("News" in r for r in rows),
+                  f"@{width} Daily news scans lists its queues, without News", " | ".join(r.replace(chr(10), " ") for r in rows))
+            pg.locator("button.rinbox-area", has_text="Sent in by people").click()
+            rows = pg.locator(".rinbox-area-row").all_inner_texts()
+            check(any("Nominated" in r for r in rows) and not any(r.startswith("News") for r in rows),
+                  f"@{width} Sent in by people leaves News out", " | ".join(r.replace(chr(10), " ") for r in rows))
+            pg.locator("button.rinbox-area", has_text="Daily news scans").click()
             qs = pg.locator("button.rinbox-q").all_inner_texts()
             check(any("Closure reports" in q for q in qs), f"@{width} the open tab's queues stay in view as buttons", " | ".join(q.replace(chr(10), " ") for q in qs))
             wide = pg.evaluate(WIDTH_JS)
@@ -371,9 +380,11 @@ def main():
             pg.wait_for_function("() => [...document.querySelectorAll('button.rinbox-area')].some(b => /imports/.test(b.textContent) && /5/.test(b.textContent))")
             check(any(c[0] == "counts" and "sources=drive" in c[2] for c in calls), f"@{width} a stale count is recounted after the page draws")
 
-            # The page's own News list, from "Sent in by people" (on the 'people' origin).
-            open_queue(pg, "Sent in by people", "News")
+            # The page's own News list: its own tab, every origin.
+            open_news(pg)
             check("type=news" in pg.url, f"@{width} the News list is in the address", pg.url)
+            check("is-current" in (pg.locator("button.rinbox-area", has_text="News").first.get_attribute("class") or "")
+                  and pg.locator("button.rinbox-q").count() == 0, f"@{width} the News tab is current, with no queue row under it")
             pg.wait_for_selector(".submission-card .rinbox-native")
             check(pg.locator(".submission-card .rinbox-native select").count() >= 1, f"@{width} the page's own card gets the quick row")
             ev = pg.locator(".submission-card .rinbox-native-evidence")
@@ -596,7 +607,7 @@ def main():
             if width == 1280:
                 pg.screenshot(path=str(shots / f"done-{width}.png"), full_page=True)
 
-            open_queue(pg, "Sent in by people", "News")
+            open_news(pg)
             check(pg.locator(".rinbox-panel").is_hidden() and pg.locator(".submissions-list-container").is_visible(), f"@{width} the page's own tab brings its list back")
             check(not errors, f"@{width} no script errors", "; ".join(errors))
             pg.close()

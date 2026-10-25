@@ -127,11 +127,12 @@
      * name, each with its count; "Find a queue" lists every queue whose name
      * matches, whatever its tab. The page's own five type tabs are hidden; their
      * queues open by clicking the hidden tab, so js/admin-submissions.js still
-     * draws them. News shows twice: under "Sent in by people" on the origin
-     * filter 'people', under "Daily news scans" on 'scans'.
+     * draws them. News is a tab of its own (owner, 2026-10-25): every waiting
+     * article in one list, wherever it came from; the other tabs leave it out.
      */
     var AREAS = [
         { key: '_new', label: 'Just in', help: 'What arrived in the last few days, newest first.' },
+        { key: 'news', label: 'News', help: 'Every news article waiting for review, wherever it came from: people, the daily news scans and the imports.' },
         { key: 'people', label: 'Sent in by people', help: 'What readers, volunteers, the app and the browser extension sent in, and what admins added by hand.' },
         { key: 'scans', label: 'Daily news scans', help: 'What the daily news scans (Google News and Reddit) found: articles, closures, status changes and new facilities.' },
         { key: 'found', label: 'Found by imports and inspections', help: 'What the imports (Drive Docs, Fornits, Woodbury, write-ups, ...) and the state inspection scans found.' },
@@ -178,6 +179,10 @@
             return { key: s.key, label: s.label, group: s.group, area: s.area, help: s.help || '', count: s.count,
                 active: state.source === s.key, open: function () { openSource(s.key); } };
         }
+        if (s.key === 'news') {
+            return { key: 'news', label: 'News', group: '', area: 'news', help: 'Every news article waiting for review.', count: nativeCount(s),
+                active: nativeShowing() === 'news', open: function () { openNative(s, '', 'news'); } };
+        }
         // "Sent in by people" shows what people sent: News without the scans' finds and the imports.
         var split = state.split[s.key] || {};
         var people = split.people !== null && split.people !== undefined;
@@ -194,19 +199,14 @@
                 return { key: k, label: SPECIAL[k].label, group: '', count: SPECIAL[k].count(), active: state.special === k, open: function () { openSpecial(k); } };
             });
         }
-        var out = state.sources.filter(function (s) { return s.area === area; }).map(queueEntry);
-        var news = state.byKey.news;
-        if (area === 'scans' && news && state.split.news) {
-            // The articles the scans found wait in the News queue: it opens there on their origin.
-            out.push({ key: 'news-scans', label: 'News articles', group: 'Found by the news scans',
-                help: 'Articles the daily Google News and Reddit scans found, in the News queue.', count: state.split.news.scans,
-                active: nativeShowing() === 'news' && state.nativeArea === 'scans', open: function () { openNative(news, 'scans', 'scans'); } });
-        }
+        // News has its own tab and is in no other.
+        if (area === 'news') return state.byKey.news ? [queueEntry(state.byKey.news)] : [];
+        var out = state.sources.filter(function (s) { return s.area === area && s.key !== 'news'; }).map(queueEntry);
         if (area === 'found') {
             // What imports (Google Docs, SCIAD NET, ...) sent to the page's own lists is neither people's nor the scans':
             // without this entry no tab would show it.
             state.sources.forEach(function (s) {
-                var n = s.native && state.split[s.key] ? state.split[s.key].imports : 0;
+                var n = s.native && s.key !== 'news' && state.split[s.key] ? state.split[s.key].imports : 0;
                 if (!n) return;
                 out.push({ key: s.key + '-imports', label: s.label + ' (imports)', group: 'Sent to the review lists by imports',
                     help: s.label + ' items that imports (Google Docs, SCIAD NET, the wiki, Scraper finds...) sent in.', count: n,
@@ -255,6 +255,7 @@
         if (state.special === '_new' || state.special === '_tools') return state.special;
         if (state.special) return '_yours';
         if (state.source && state.byKey[state.source]) return state.byKey[state.source].area;
+        if (nativeShowing() === 'news') return 'news'; // News is always its own tab
         return state.nativeArea || 'people';
     }
 
@@ -287,7 +288,7 @@
                 : el('p', { class: 'rinbox-help', text: 'No queue has that in its name.' }));
             return;
         }
-        if (cur === '_new' || cur === '_tools') return;
+        if (cur === '_new' || cur === '_tools' || cur === 'news') return;
         var current = null, box = null;
         var entries = areaEntries(cur);
         var named = oneGroup(entries) ? '' : null; // one group: the tab's name says it already
@@ -306,6 +307,7 @@
     /** An area's own page: every queue in it with its count and what it holds. */
     function openArea(key) {
         if (key === '_new' || key === '_tools') { openSpecial(key); return; }
+        if (key === 'news') { if (state.byKey.news) openNative(state.byKey.news, '', 'news'); return; }
         state.areaPage = key;
         state.source = null;
         state.special = null;
@@ -1526,12 +1528,12 @@
             }
             if (r && r.scans) {
                 countLine(scansFold, s, r.scans, s.native ? s.label + ' (articles)' : '', s.native
-                    ? function () { openNative(s, 'scans', 'scans'); }
+                    ? function () { openNative(s, 'scans', s.key === 'news' ? 'news' : 'scans'); }
                     : function () { openSource(s.key); });
             }
             if (r && r.others) {
                 countLine(otherFold, s, r.others, s.native ? s.label + ' (imports)' : '', s.native
-                    ? function () { openNative(s, 'imports', 'found'); }
+                    ? function () { openNative(s, 'imports', s.key === 'news' ? 'news' : 'found'); }
                     : function () { openSource(s.key); });
             }
             state.newCount = people;
@@ -1604,7 +1606,7 @@
             el('button', { type: 'button', class: 'rinbox-btn rinbox-btn-reject', text: 'Reject', onclick: function (e) { go('reject', e.currentTarget); } }),
             el('button', { type: 'button', class: 'rinbox-pv-btn', text: 'Open in ' + item.source_label, onclick: function () {
                 var s = state.byKey[item.source];
-                if (s) openNative(s, '', 'people');
+                if (s) openNative(s, '', s.key === 'news' ? 'news' : 'people');
             } })
         ]);
         if (item.approve_help) row.appendChild(el('p', { class: 'rinbox-help', text: 'Approve: ' + item.approve_help }));
@@ -2437,6 +2439,7 @@
         if (wanted && (SPECIAL[wanted] || wanted === '_tools' || wanted === '_new')) openSpecial(wanted);
         else if (wanted && ['people', 'scans', 'found', 'checks', '_yours'].indexOf(wanted) !== -1) openArea(wanted);
         else if (wanted && state.byKey[wanted] && !state.byKey[wanted].native) openSource(wanted);
+        else if (wanted === 'news') { state.nativeArea = 'news'; renderTabs(); }
         else if (!wanted) openSpecial('_new'); // the page opens on what just came in
     });
 })();
