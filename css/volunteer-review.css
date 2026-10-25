@@ -710,6 +710,16 @@ button.kop-vol-btn-small:focus {
     color: var(--kop-text-muted, #4A5568);
 }
 
+/* Photos for our pages (inc/volunteer-images.php): the spot, search links, then the picture's details. Inputs as on post ideas. */
+
+.kop-vol-image {
+    border-left-color: var(--kop-teal, #33A7B5);
+}
+
+.kop-vol-image .kop-vol-links li {
+    line-height: 1.7;
+}
+
 /* Questions? Ask us (inc/volunteer-messages.php) */
 
 .kop-vol-messages {

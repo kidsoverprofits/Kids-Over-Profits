@@ -104,6 +104,11 @@ $pdo->exec("CREATE TABLE wpdl_kop_vol_social (id INTEGER PRIMARY KEY AUTOINCREME
     title TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'taken', caption TEXT, image_url TEXT NOT NULL DEFAULT '', image_file TEXT NOT NULL DEFAULT '',
     attachment_id INTEGER NOT NULL DEFAULT 0, note TEXT, owner_note TEXT,
     decided_by TEXT NOT NULL DEFAULT '', decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
+$GLOBALS['kop_test_options']['kop_vol_images_db'] = KOP_VIMG_DB_VERSION;
+$pdo->exec("CREATE TABLE wpdl_kop_vol_images (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, item_key TEXT NOT NULL, volunteer_id INTEGER NOT NULL,
+    title TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'draft', page_url TEXT NOT NULL DEFAULT '', file_url TEXT NOT NULL DEFAULT '', author TEXT NOT NULL DEFAULT '',
+    license TEXT NOT NULL DEFAULT '', alt TEXT NOT NULL DEFAULT '', note TEXT, owner_note TEXT, attachment_id INTEGER NOT NULL DEFAULT 0,
+    decided_by TEXT NOT NULL DEFAULT '', decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
 foreach (array('highlight-summaries', 'featured-reporting', 'news-images', 'federal-funding') as $lib) require_once dirname(__DIR__) . "/inc/$lib.php";
 
 $failures = 0;
@@ -813,6 +818,112 @@ $check('...and the link still works', kop_vol_by_token(substr($quit_url, -48)) !
 kop_volp_leave($quinn, 0);
 $check('stopping turns the link off and hands back every open batch', kop_vol_by_token(substr($quit_url, -48)) === null
     && kop_volp_get($hb2)['status'] === 'closed' && kop_volp_get($hb2)['closed_why'] === 'left' && kop_volp_released_count($hb2) === 2);
+
+echo "\nPhoto projects\n";
+// Placing a picture: just enough of WordPress's post functions, on the scratch copy.
+if (!function_exists('set_post_thumbnail')) {
+    function set_post_thumbnail($post, $att) {
+        $GLOBALS['pdo']->exec('DELETE FROM wpdl_postmeta WHERE post_id = ' . (int) $post . " AND meta_key = '_thumbnail_id'");
+        $GLOBALS['pdo']->exec('INSERT INTO wpdl_postmeta (post_id, meta_key, meta_value) VALUES (' . (int) $post . ", '_thumbnail_id', '" . (int) $att . "')");
+        return true;
+    }
+    function get_post_thumbnail_id($post) { return (int) $GLOBALS['pdo']->query('SELECT meta_value FROM wpdl_postmeta WHERE post_id = ' . (int) (is_object($post) ? $post->ID : $post) . " AND meta_key = '_thumbnail_id'")->fetchColumn(); }
+    function delete_post_thumbnail($post) { $GLOBALS['pdo']->exec('DELETE FROM wpdl_postmeta WHERE post_id = ' . (int) $post . " AND meta_key = '_thumbnail_id'"); return true; }
+}
+if (!function_exists('has_filter')) { function has_filter($tag, $fn = false) { return false; } }
+// wp_update_post() is the stand-in in review-inbox-tests/websites.php, which stores what it is given: no slashes to undo.
+if (!function_exists('wp_slash')) { function wp_slash($v) { return $v; } }
+if (!function_exists('wp_get_attachment_image_url')) { function wp_get_attachment_image_url($id, $size = '') { return 'https://example.test/photo-' . (int) $id . '.jpg'; } }
+if (!function_exists('wp_get_attachment_caption')) { function wp_get_attachment_caption($id) { return (string) $GLOBALS['pdo']->query('SELECT post_excerpt FROM wpdl_posts WHERE ID = ' . (int) $id)->fetchColumn(); } }
+$spots = kop_vimg_spots();
+$check('every spot in the seed is read, keyed by page and heading', count($spots) >= 20 && isset($spots['reputation-management#header'])
+    && isset($spots['new-names-same-programs#sequel-bought-itself-back']), (string) count($spots));
+foreach ($spots as $k => $sp) if (kop_vimg_spot_state($sp) !== 'open') echo "    (not open now: $k = " . kop_vimg_spot_state($sp) . ")\n";
+$check('a page with a featured image is filled', kop_vimg_spot_state(array('page' => 'history', 'heading' => '')) === 'filled');
+$check('a heading followed by a picture is filled', kop_vimg_spot_state(array('page' => 'tti-history-part-one', 'heading' => 'Guided Group Interaction comes home from the war')) === 'filled');
+$check('a heading with no picture after it is open', kop_vimg_spot_state(array('page' => 'tti-history-part-one', 'heading' => 'Federal money and the first chains')) === 'open');
+$check('a heading the page lacks is not offered', kop_vimg_spot_state(array('page' => 'tti-history-part-one', 'heading' => 'No such heading')) === 'no-heading'
+    && kop_vimg_spot_state(array('page' => 'no-such-page', 'heading' => '')) === 'no-page');
+list($open_spots) = kop_vimg_open_spots();
+list($img_p) = kop_vimg_make_project(0, 'Try the history ones first.');
+$IP = kop_volp_get($img_p);
+$check('the photo project holds every open spot, for anyone', count(kop_volp_item_rows($img_p)) === count($open_spots) && count($open_spots) > 0 && (int) $IP['volunteer_id'] === 0);
+$check('no second project of the same spots', strpos($throws(function () { kop_vimg_make_project(0); }), 'Every spot') !== false);
+$pub = kop_volp_public($IP, $sam_id);
+$check('it reaches the volunteer page as kind image, with no FAQ', $pub['kind'] === 'image' && $pub['faq'] === array() && in_array($img_p, $ids($sam_id), true));
+$its = kop_volp_items($sam_id, $img_p, 2);
+$it1 = $its['items'][0];
+$check('a spot says what it is about, the page and ideas to search', $it1['source'] === 'image' && $it1['about'] !== '' && $it1['ideas'] && strpos($it1['page_url'], '/' . explode('#', $it1['key'])[0] . '/') !== false);
+$k1 = $it1['key'];
+$k2 = $its['items'][1]['key'];
+$check('licenses: open ones yes, NC / ND / all rights reserved no', kop_vimg_license_ok('CC BY-SA 4.0') && kop_vimg_license_ok('Public domain') && kop_vimg_license_ok('CC0')
+    && kop_vimg_license_ok('Pexels License') && !kop_vimg_license_ok('CC BY-NC 2.0') && !kop_vimg_license_ok('CC BY-ND 4.0') && !kop_vimg_license_ok('All rights reserved') && !kop_vimg_license_ok('cool'));
+$good = array('page_url' => 'https://www.flickr.com/photos/someone/123', 'file_url' => 'https://live.staticflickr.com/1/123_b.jpg', 'author' => 'foot fingers',
+    'license' => 'CC BY 2.0', 'alt' => 'Protesters outside a hotel holding signs');
+$check('no page link, not sent', strpos($throws(function () use ($sam, $img_p, $k1) { kop_vimg_save($sam, $img_p, $k1, 'ready', array()); }), 'page') !== false);
+$check('outside Commons, the file link is needed', strpos($throws(function () use ($sam, $img_p, $k1, $good) { kop_vimg_save($sam, $img_p, $k1, 'ready', array('file_url' => '') + $good); }), 'file') !== false);
+$check('an NC license is refused', strpos($throws(function () use ($sam, $img_p, $k1, $good) { kop_vimg_save($sam, $img_p, $k1, 'ready', array('license' => 'CC BY-NC 2.0') + $good); }), 'cannot use') !== false);
+$check('no line for people who cannot see it, not sent', strpos($throws(function () use ($sam, $img_p, $k1, $good) { kop_vimg_save($sam, $img_p, $k1, 'ready', array('alt' => '') + $good); }), 'cannot see') !== false);
+$check('a link must be a link', $throws(function () use ($sam, $img_p, $k1) { kop_vimg_save($sam, $img_p, $k1, 'draft', array('page_url' => 'javascript:alert(1)')); }) !== '');
+$cm = kop_vimg_save($sam, $img_p, $k1, 'ready', array('page_url' => '', 'file_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Capitol_Building_Full_View.jpg',
+    'author' => 'Noclip', 'license' => 'Public domain', 'alt' => 'The U.S. Capitol'));
+$check('a Commons file link alone is enough, and becomes its Commons page', $cm['status'] === 'ready' && $cm['page_url'] === 'https://commons.wikimedia.org/wiki/File:Capitol_Building_Full_View.jpg', $cm['page_url']);
+$check('Commons page links come out the same however they are written', kop_vimg_commons_page(kop_vimg_commons_title('https://commons.m.wikimedia.org/wiki/File:Capitol_Building_Full_View.jpg?uselang=de')) === $cm['page_url']);
+$check('a sent spot leaves his list', !in_array($k1, array_column(kop_volp_items($sam_id, $img_p, 5)['items'], 'key'), true));
+$check('could not find one needs where they looked', strpos($throws(function () use ($sam, $img_p, $k2) { kop_vimg_save($sam, $img_p, $k2, 'not_found', array('note' => '')); }), 'where you looked') !== false);
+$check('...and with it, it is saved', kop_vimg_save($sam, $img_p, $k2, 'not_found', array('note' => 'Commons, Openverse: nothing from the 1960s'))['status'] === 'not_found');
+$check('he can take a sent one back', kop_vimg_save($sam, $img_p, $k2, 'back')['status'] === 'draft');
+$alex_pick = kop_vimg_save($alex, $img_p, $k1, 'ready', $good);
+$check('another volunteer can send a pick for the same spot', $alex_pick['status'] === 'ready');
+$prog = kop_vimg_progress($IP);
+$check('progress: two waiting for the admin', $prog['open'] === 2 && $prog['done'] === 1, json_encode($prog));
+$sam_row = $wpdb->get_row('SELECT * FROM ' . kop_vimg_table() . " WHERE project_id = $img_p AND item_key = '$k1' AND volunteer_id = $sam_id", ARRAY_A);
+$alex_row = $wpdb->get_row('SELECT * FROM ' . kop_vimg_table() . " WHERE project_id = $img_p AND item_key = '$k1' AND volunteer_id = $alex_id", ARRAY_A);
+$check('Send back needs a note', strpos($throws(function () use ($sam_row) { kop_vimg_decide($sam_row['id'], 'sent_back', ''); }), 'what to change') !== false);
+kop_vimg_decide($sam_row['id'], 'sent_back', 'Find one from the 2000s.');
+$check('sent back: he sees the note, and a draft stays sent back', kop_volp_items($sam_id, $img_p, 1)['items'][0]['pick']['owner_note'] === 'Find one from the 2000s.'
+    && kop_vimg_save($sam, $img_p, $k1, 'draft', array('alt' => 'The Capitol at dusk'))['status'] === 'sent_back');
+kop_vimg_save($sam, $img_p, $k1, 'ready');
+// Already in the media library from the same page: Approve reuses it rather than downloading again.
+$pdo->exec("INSERT INTO wpdl_posts (ID, post_title, post_excerpt, post_status, post_type, post_mime_type, post_content) VALUES (990001, 'Capitol', 'Noclip, Public domain, via Wikimedia Commons', 'inherit', 'attachment', 'image/jpeg', '')");
+$pdo->exec("INSERT INTO wpdl_postmeta (post_id, meta_key, meta_value) VALUES (990001, '_kop_source_url', 'https://commons.wikimedia.org/wiki/File:Capitol_Building_Full_View.jpg')");
+$spot1 = kop_vimg_spot_of($sam_row);
+$att1 = kop_vimg_decide($sam_row['id'], 'approved');
+$check('Approve reuses the library copy and fills the spot', $att1 === 990001 && kop_vimg_spot_state($spot1) === 'filled', $att1 . ' ' . kop_vimg_spot_state($spot1));
+$check('the credit line reads like the earlier rounds', kop_vimg_credit(array('author' => 'Noclip', 'license' => 'Public domain', 'page_url' => $cm['page_url'])) === 'Noclip, Public domain, via Wikimedia Commons');
+$check('a second pick for a filled spot cannot be approved', strpos($throws(function () use ($alex_row) { kop_vimg_decide($alex_row['id'], 'approved'); }), 'Another picture') !== false);
+$check('...nor changed by its volunteer, and the spot is done for everyone', strpos($throws(function () use ($alex, $img_p, $k1) { kop_vimg_save($alex, $img_p, $k1, 'draft', array('alt' => 'x')); }), 'approved for this spot already') !== false
+    && isset(kop_vimg_done_keys($img_p, $alex_id)[$k1]) && isset(kop_vimg_done_keys($img_p, $sam_id)[$k1]));
+$check('a filled spot is not offered to a new project', !isset(kop_vimg_open_spots()[0][$k1]));
+kop_vimg_decide($sam_row['id'], 'ready');
+$check('Undo approve takes it off the page', kop_vimg_spot_state($spot1) === 'open');
+kop_vimg_decide($sam_row['id'], 'approved');
+// A section spot: the picture goes in as a block right after its heading.
+$sec = null;
+foreach (kop_volp_item_rows($img_p, true) as $r) { $d = json_decode($r['detail'], true); if ($d['heading'] !== '') { $sec = $r; break; } }
+if ($sec) {
+    $sk = $sec['item_key'];
+    $sp = kop_vimg_save($sam, $img_p, $sk, 'ready', array('page_url' => 'https://commons.wikimedia.org/wiki/File:Charles_and_Betty_Dederich_in_1964.jpg',
+        'author' => 'San Francisco Chronicle', 'license' => 'Public domain', 'alt' => 'Charles and Betty Dederich in 1964'));
+    $pdo->exec("INSERT INTO wpdl_posts (ID, post_title, post_excerpt, post_status, post_type, post_mime_type, post_content) VALUES (990002, 'Dederich', 'San Francisco Chronicle, Public domain, via Wikimedia Commons', 'inherit', 'attachment', 'image/jpeg', '')");
+    $pdo->exec("INSERT INTO wpdl_postmeta (post_id, meta_key, meta_value) VALUES (990002, '_kop_source_url', 'https://commons.wikimedia.org/wiki/File:Charles_and_Betty_Dederich_in_1964.jpg')");
+    $row = $wpdb->get_row('SELECT * FROM ' . kop_vimg_table() . " WHERE project_id = $img_p AND item_key = '$sk' AND volunteer_id = $sam_id", ARRAY_A);
+    $spot = kop_vimg_spot_of($row);
+    kop_vimg_decide($row['id'], 'approved');
+    $content = (string) $pdo->query('SELECT post_content FROM wpdl_posts WHERE post_name = ' . $pdo->quote($spot['page']) . " AND post_type = 'page' AND post_status = 'publish'")->fetchColumn();
+    $check('a section picture goes in right after its heading, captioned', kop_vimg_spot_state($spot) === 'filled' && substr_count($content, 'wp-image-990002"') === 1
+        && strpos($content, 'San Francisco Chronicle, Public domain, via Wikimedia Commons') !== false, $sk);
+    kop_vimg_decide($row['id'], 'ready');
+    $content = (string) $pdo->query('SELECT post_content FROM wpdl_posts WHERE post_name = ' . $pdo->quote($spot['page']) . " AND post_type = 'page' AND post_status = 'publish'")->fetchColumn();
+    $check('...and Undo approve takes the block out again', strpos($content, 'wp-image-990002"') === false && kop_vimg_spot_state($spot) === 'open');
+}
+$check('the message for a photo project says what to do', strpos(kop_volp_message($IP, 'https://x.test'), 'pictures for our pages') !== false && strpos(kop_volp_message($IP, 'https://x.test'), 'could not find one') !== false);
+$before = (int) $pdo->query('SELECT COUNT(*) FROM news_submissions')->fetchColumn();
+kop_vimg_save($alex, $img_p, $k2, 'ready', $good);
+$check('picture links never go to the review inbox', (int) $pdo->query('SELECT COUNT(*) FROM news_submissions')->fetchColumn() === $before);
+$rel = kop_volp_release($IP, 'handed-back');
+$check('handing back keeps every spot someone sent a picture for', in_array($k1, array_column(kop_volp_item_rows($img_p), 'item_key'), true)
+    && $rel === count($open_spots) - 3, (string) $rel);
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

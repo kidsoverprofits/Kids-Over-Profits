@@ -148,6 +148,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # Picture uploads (REST volunteer/upload, multipart 'image'; kop_vsoc_store_upload()): checked by getimagesize, PNG/JPEG/WebP/GIF, 10 MB
 # (kop_vsoc_upload_max), re-encoded by GD (no EXIF/location), kept in uploads/kop-private/social/ (.htaccess denies all); admins preview through
 # admin-post.php?action=kop_vsoc_image; Approve copies it into the media library once (kop_vsoc_to_media(), meta _kop_vsoc_post)
+# Photo projects (inc/volunteer-images.php, source 'images:pages', {prefix}kop_vol_images, REST volunteer/image do=draft|ready|not_found|pass|back):
+# spots = seeds/image-spots.json ({page, heading|null, about, ideas}; key page#header or page#<heading slug>); kop_vimg_open_spots() leaves out a
+# spot already showing a picture (featured image, or wp:image right after the heading), whose page/heading changed, or in an open photo project.
+# "Make the photo project" (Projects > Photos for pages) = every open spot, for anyone or one volunteer. A pick = page link (+ file link unless
+# Commons; Commons links are normalized to wiki/File:), author, license (kop_vimg_license_ok(): PD/CC0/CC BY/CC BY-SA/Pexels..., never NC/ND), alt;
+# never sent to the inbox. Approve: kop_vimg_to_media() (reuses an attachment with the same _kop_source_url; Commons via its API at <=2000 px;
+# caption = "Author, License, via Wikimedia Commons"; FileBird Site Photos) + kop_vimg_place() (inc/page-images.php helpers); Undo approve unplaces.
+# The first approved pick fills the spot for every volunteer. A new spot = one line in the seed (no deploy step: it is read when a project is made)
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
 # 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);

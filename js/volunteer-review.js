@@ -551,6 +551,95 @@
         return node;
     }
 
+    // A spot on one of our pages with no picture (photo project): what it is about, where to search, then the picture's
+    // page, file, maker, license and a line for people who cannot see it -> Send for review, or Could not find one.
+    var IMAGE_SEARCH = [
+        ['Wikimedia Commons', 'https://commons.wikimedia.org/w/index.php?title=Special:MediaSearch&type=image&search='],
+        ['Openverse', 'https://openverse.org/search/image?license_type=commercial,modification&q='],
+        ['Flickr (open licenses)', 'https://www.flickr.com/search/?license=4%2C5%2C7%2C8%2C9%2C10&text='],
+        ['Library of Congress', 'https://www.loc.gov/photos/?q=']
+    ];
+    function imageCard(it, p, onDone) {
+        var node = el('article', { class: 'kop-vol-card kop-vol-panel kop-vol-social kop-vol-image' });
+        var pick = it.pick || {};
+        node.appendChild(el('p', { class: 'kop-vol-angle', text: it.heading ? 'A section' : 'Top of the page' }));
+        node.appendChild(el('h3', { class: 'kop-vol-title' }, [safe(it.page_url) ? link(it.page_url, it.page_title || it.title) : (it.page_title || it.title)]));
+        if (it.heading) node.appendChild(el('p', { class: 'kop-vol-meta', text: 'After the heading "' + it.heading + '"' }));
+        if (it.about) node.appendChild(el('p', { class: 'kop-vol-text' }, [el('strong', { text: 'What it is about: ' }), it.about]));
+        if (it.ideas && it.ideas.length) {
+            var ideas = el('ul', { class: 'kop-vol-links' });
+            it.ideas.forEach(function (q) {
+                var li = el('li', null, [el('strong', { text: q }), ': ']);
+                IMAGE_SEARCH.forEach(function (s, i) { if (i) li.appendChild(document.createTextNode(' · ')); li.appendChild(link(s[1] + encodeURIComponent(q), s[0])); });
+                ideas.appendChild(li);
+            });
+            node.appendChild(el('p', { class: 'kop-vol-label', text: 'Ideas to search for (anything else that fits is fine)' }));
+            node.appendChild(ideas);
+        }
+        if (pick.status === 'sent_back' && pick.owner_note) {
+            node.appendChild(el('p', { class: 'kop-vol-sentback' }, [el('strong', { text: 'Sent back: ' }), pick.owner_note]));
+        }
+        var id = 'kop-vol-img-' + Math.random().toString(36).slice(2);
+        var f = {};
+        function field(k, label, attrs, value) {
+            attrs.id = id + '-' + k;
+            f[k] = el(attrs.rows ? 'textarea' : 'input', attrs);
+            f[k].value = value || '';
+            return [el('label', { for: attrs.id, text: label }), f[k]];
+        }
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
+        var looked = el('textarea', { id: id + '-looked', rows: '3', maxlength: '2000', placeholder: 'The searches you tried and the sites you checked' });
+        if (pick.status === 'not_found') looked.value = pick.note || '';
+        var buttons, notFound;
+        function send(doing, btn) {
+            var body = { project_id: it.project_id, key: it.key, do: doing };
+            Object.keys(f).forEach(function (k) { body[k] = f[k].value.trim(); });
+            if (doing === 'not_found') body.note = looked.value.trim();
+            var all = buttons.concat([notFound]);
+            all.forEach(function (b) { b.disabled = true; });
+            msg.hidden = true;
+            api('image', body).then(function (res) {
+                if (doing === 'draft') {
+                    all.forEach(function (b) { b.disabled = false; });
+                    msg.hidden = false;
+                    msg.className = 'kop-vol-msg';
+                    msg.textContent = res.message || 'Saved.';
+                    return;
+                }
+                onDone(it, doing);
+            }).catch(function (e) {
+                all.forEach(function (b) { b.disabled = false; });
+                msg.hidden = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+                if (btn) btn.focus();
+            });
+        }
+        buttons = [
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Send for review', disabled: cfg.preview ? true : null, onclick: function () { send('ready', this); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Save for later', disabled: cfg.preview ? true : null, onclick: function () { send('draft', this); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Pass on this one', disabled: cfg.preview ? true : null, onclick: function () { send('pass', this); } }),
+            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } })
+        ];
+        notFound = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Send: could not find one', disabled: cfg.preview ? true : null, onclick: function () { send('not_found', this); } });
+        node.appendChild(el('div', { class: 'kop-vol-decide' }, [].concat(
+            field('page_url', 'Link to the picture\'s page (where its license is shown)', { type: 'url', maxlength: '500', placeholder: 'https://commons.wikimedia.org/wiki/File:...' }, pick.page_url),
+            field('file_url', 'Link to the picture file (right-click it, "Copy image address"; not needed for Wikimedia Commons)', { type: 'url', maxlength: '500', placeholder: 'https://...' }, pick.file_url),
+            field('author', 'Who made it, as the page names them', { type: 'text', maxlength: '255', placeholder: 'e.g. Harris & Ewing, or Unknown author' }, pick.author),
+            field('license', 'License, as the page names it', { type: 'text', maxlength: '100', placeholder: 'e.g. CC BY-SA 4.0, CC0, Public domain' }, pick.license),
+            field('alt', 'What the picture shows, in one line (for people who cannot see it)', { type: 'text', maxlength: '300', placeholder: 'e.g. A 1960s Senate hearing room with senators at a long desk' }, pick.alt),
+            field('note', 'Anything for the reviewer (optional)', { rows: '2', maxlength: '2000', placeholder: 'Why it fits, other good choices you saw' }, pick.status === 'not_found' ? '' : pick.note),
+            [el('div', { class: 'kop-vol-buttons' }, buttons),
+            el('details', { class: 'kop-vol-notfound' + (pick.status === 'not_found' ? ' is-open' : ''), open: pick.status === 'not_found' ? true : null }, [
+                el('summary', { text: 'Could not find one?' }),
+                el('label', { for: id + '-looked', text: 'Where did you look?' }), looked,
+                el('div', { class: 'kop-vol-buttons' }, [notFound])
+            ]), msg]
+        )));
+        node.appendChild(askButton({ project_id: it.project_id, item_key: 'image:' + it.project_id + ':' + it.key, item_title: it.title, label: it.title }));
+        return node;
+    }
+
     var SAID = { approve: 'approve', reject: 'reject', unsure: 'not sure' };
 
     // After a card shrinks or is swapped for the next one, the reader is left far below it: bring its top back to
@@ -1109,13 +1198,14 @@
         if (p.note) projBrief.appendChild(el('p', { class: 'kop-vol-note', text: p.note }));
         var research = p.kind === 'research';
         var social = p.kind === 'social';
-        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: social ? 'What to do: ' : 'The question: ' }), p.question]));
+        var image = p.kind === 'image';
+        projBrief.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: social || image ? 'What to do: ' : 'The question: ' }), p.question]));
         if (p.yes || p.no) {
             var dl = el('dl', { class: 'kop-vol-examples' });
-            if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : social ? 'A good post' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
-            if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : social ? 'Keep out of it' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
+            if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : social ? 'A good post' : image ? 'A good pick' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
+            if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : social ? 'Keep out of it' : image ? 'We cannot use' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
             projBrief.appendChild(el('details', { class: 'kop-vol-examples-fold' }, [
-                el('summary', { text: research ? 'What a good answer looks like' : social ? 'What a good post looks like' : 'What a yes and a no look like' }), dl]));
+                el('summary', { text: research ? 'What a good answer looks like' : social ? 'What a good post looks like' : image ? 'What we can and cannot use' : 'What a yes and a no look like' }), dl]));
         }
         if (p.faq && p.faq.length) {
             var faq = el('dl', { class: 'kop-vol-examples' });
@@ -1124,6 +1214,7 @@
         }
         if (!research) projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: p.kind === 'social'
             ? 'Use only what the card says. Nothing is posted until an admin approves it; one sent back says what to change.'
+            : image ? 'Open the page first to see what it is about. Nothing goes on the page until an admin approves it; one sent back says what to change.'
             : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
         projBrief.appendChild(el('div', { class: 'kop-vol-brief-actions' }, [
             askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'),
@@ -1209,7 +1300,7 @@
                 if (!skipped) offerMore(finished, p.source);
                 return;
             }
-            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : p.kind === 'social' ? 'Idea ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
+            projSlot.appendChild(el('p', { class: 'kop-vol-position', text: (p.kind === 'research' ? 'Question ' : p.kind === 'social' ? 'Idea ' : p.kind === 'image' ? 'Spot ' : 'Item ') + Math.min(p.total, p.done + 1) + ' of ' + p.total }));
             if (p.kind === 'social') {
                 projSlot.appendChild(socialCard(it, p, function (item, doing) {
                     var li = el('li', null, [doing === 'pass' ? 'Passed on: ' : 'Sent for review: ', el('strong', { text: item.fact || item.title || '(no title)' }), '. ']);
@@ -1218,6 +1309,26 @@
                             var b = this;
                             b.disabled = true;
                             api('post', { project_id: item.project_id, key: item.key, do: 'back' }).then(function () {
+                                li.remove();
+                                nextProjectItem();
+                            }).catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });
+                        } }));
+                    }
+                    projSaved.insertBefore(li, projSaved.firstChild);
+                    while (projSaved.childNodes.length > 5) projSaved.removeChild(projSaved.lastChild);
+                    nextProjectItem();
+                }));
+                bringToTop(projSlot);
+                return;
+            }
+            if (p.kind === 'image') {
+                projSlot.appendChild(imageCard(it, p, function (item, doing) {
+                    var li = el('li', null, [{ pass: 'Passed on: ', not_found: 'Could not find one: ', ready: 'Sent for review: ' }[doing] || 'Saved: ', el('strong', { text: item.title || '(no title)' }), '. ']);
+                    if (doing === 'ready' || doing === 'not_found') {
+                        li.appendChild(el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Take it back', onclick: function () {
+                            var b = this;
+                            b.disabled = true;
+                            api('image', { project_id: item.project_id, key: item.key, do: 'back' }).then(function () {
                                 li.remove();
                                 nextProjectItem();
                             }).catch(function (e) { b.disabled = false; li.appendChild(el('span', { class: 'kop-vol-msg is-error', text: ' ' + e.message })); });

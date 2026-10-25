@@ -1,0 +1,128 @@
+[
+ {
+  "page": "deceptive-marketing-then-and-now",
+  "heading": null,
+  "about": "How teen programs were sold to parents: the 2008 congressional hearing on deceptive marketing, the toll-free help lines and magazine ads of the 1990s and 2000s, and the same pitch on websites today.",
+  "ideas": ["2008 House Education and Labor Committee hearing", "Rayburn House Office Building hearing room", "vintage telephone", "1990s magazine advertisements"]
+ },
+ {
+  "page": "free-help-paid-by-programs",
+  "heading": null,
+  "about": "Referral services, parent \"advocates\" and directories that look like free, neutral help for worried parents but are paid by the programs they recommend.",
+  "ideas": ["call center", "person on a phone headset", "parent searching on a laptop at night"]
+ },
+ {
+  "page": "how-troubled-teen-programs-market-themselves-online",
+  "heading": null,
+  "about": "What a worried parent finds when they search for help online: pages built for every town, directories run by one marketing company, and badges that look like seals of approval.",
+  "ideas": ["search engine results on a screen", "laptop with a search page", "searching on a phone"]
+ },
+ {
+  "page": "manipulation-watch-2026-10",
+  "heading": null,
+  "about": "A follow-up on programs that publish hidden instructions for AI chatbots: in October 2026 we read their websites again and found the instructions rewritten.",
+  "ideas": ["AI chatbot on a phone", "chatbot screen", "computer code on a screen"]
+ },
+ {
+  "page": "telling-ai-what-to-say",
+  "heading": null,
+  "about": "Troubled teen programs publish files written for AI chatbots (ChatGPT, Claude, Gemini, Copilot), telling them what to say about the program and which news outlets to ignore.",
+  "ideas": ["AI chatbot", "person asking a chatbot on a laptop", "website source code"]
+ },
+ {
+  "page": "natsap-reputation-plans",
+  "heading": null,
+  "about": "The industry's largest trade group, NATSAP, wrote down its own plans for protecting its image: newsletters and yearly strategic plans that name critics as a threat and answer them with public relations.",
+  "ideas": ["conference meeting room", "strategic planning meeting", "public relations", "conference name badges"]
+ },
+ {
+  "page": "new-names-same-programs",
+  "heading": null,
+  "about": "Programs that change their names after scandals, deaths and closures, while the same people and buildings carry on.",
+  "ideas": ["sign being replaced", "old sign painted over", "covered business sign", "new sign over an old one"]
+ },
+ {
+  "page": "new-names-same-programs",
+  "heading": "Sequel bought itself back",
+  "about": "After Sequel Youth and Family Services lost five states' children and a 16-year-old died in Michigan, its co-founder formed a new company and bought 13 of Sequel's facilities. The U.S. Senate Finance Committee reported on it.",
+  "ideas": ["Senate Finance Committee hearing room", "Dirksen Senate Office Building", "U.S. Senate committee hearing"]
+ },
+ {
+  "page": "reputation-management",
+  "heading": null,
+  "about": "The front page of a series on how the troubled teen industry manages its reputation: search results, AI chatbots, paid referral services, research and lawsuits against critics.",
+  "ideas": ["public relations", "press conference podium", "newspaper headlines", "smartphone search"]
+ },
+ {
+  "page": "research-shows",
+  "heading": null,
+  "about": "Programs tell parents their treatment is \"proven effective\". Much of that research is paid for, edited and published by the industry itself, and the studies' own tables often say less than their summaries.",
+  "ideas": ["stack of academic journals", "research paper with tables", "statistics printout", "library journal shelves"]
+ },
+ {
+  "page": "silencing-critics-and-survivors",
+  "heading": null,
+  "about": "For decades the industry has sued survivors, parents and reporters who post warnings about programs, and tried to discredit former residents. Several of the suits were filed in Utah.",
+  "ideas": ["courthouse", "Utah courthouse", "court documents", "Matheson Courthouse Salt Lake City"]
+ },
+ {
+  "page": "what-states-publish",
+  "heading": null,
+  "about": "Which states let the public read what their inspectors found at youth residential programs, which publish only part, and which publish nothing.",
+  "ideas": ["filing cabinets", "public records office", "state archives", "government records boxes"]
+ },
+ {
+  "page": "researchreports",
+  "heading": null,
+  "about": "Our collection of research and government reports showing the harm done by troubled teen programs, each summarized.",
+  "ideas": ["library stacks", "government reports", "Library of Congress reading room", "stack of reports"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "Who got sent away: the juvenile court",
+  "about": "The first juvenile court (Chicago, 1899) and the reform schools it sent children to: the start of sending young people away by court order.",
+  "ideas": ["Cook County Juvenile Court", "juvenile court 1910s", "reform school boys early 1900s", "juvenile court judge Ben Lindsey"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "Who was called unfit: disability institutions and behaviorism",
+  "about": "The state institutions for disabled children of the early 1900s and the behaviorist methods used on them.",
+  "ideas": ["state school for the feeble-minded", "Vineland Training School", "institution for disabled children 1920s", "Willowbrook State School"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "How it was done: from the Oxford Group to the Synanon Game",
+  "about": "The group methods (public confession, peer pressure, attack therapy) that run from the Oxford Group of the 1930s to Synanon's \"Game\" in the 1960s.",
+  "ideas": ["Synanon", "Oxford Group house party", "Synanon Santa Monica", "encounter group 1960s"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "Who answered to no one: the fundamentalist homes",
+  "about": "Fundamentalist Christian homes for troubled youth, such as Lester Roloff's in Texas, that fought off state licensing for decades.",
+  "ideas": ["Lester Roloff", "Rebekah Home for Girls", "Corpus Christi 1970s", "revival tent meeting"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "Where it was done: camps and the wilderness",
+  "about": "Therapeutic summer camps and the first wilderness programs, the roots of today's wilderness therapy.",
+  "ideas": ["1920s summer camp", "1940s camp tents", "Camp Ahmek", "Outward Bound 1960s"]
+ },
+ {
+  "page": "birth-of-the-tti",
+  "heading": "Who paid for it: the war on drugs",
+  "about": "Federal money from the war on drugs paid for the teen drug programs of the 1970s and 1980s.",
+  "ideas": ["Nixon drug abuse 1971", "Just Say No rally", "Nancy Reagan Just Say No", "1970s anti-drug poster"]
+ },
+ {
+  "page": "tti-history-part-one",
+  "heading": "Fundamentalism and the Oxford Group",
+  "about": "In the 1920s and 1930s, fundamentalist preachers and Frank Buchman's Oxford Group shaped the confession and group-pressure methods later programs used.",
+  "ideas": ["Oxford Group 1930s", "Frank Buchman", "1920s revival meeting", "tent revival 1920s"]
+ },
+ {
+  "page": "tti-history-part-one",
+  "heading": "Federal money and the first chains",
+  "about": "In the 1960s, federal programs began paying for youth treatment, and the first chains of programs grew from that money.",
+  "ideas": ["Lyndon Johnson signing Medicare and Medicaid 1965", "1960s federal office building", "Juvenile Delinquency Act 1961"]
+ }
+]
