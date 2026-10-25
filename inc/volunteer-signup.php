@@ -109,6 +109,17 @@ add_action('rest_api_init', function () {
 
 /* ---- The form on /volunteer/ ---------------------------------------------------- */
 
+/**
+ * LiteSpeed keeps /volunteer/ whole: when its layout changes (templates/page-volunteer.php), its cached copy goes
+ * once. Bump KOP_VOLPAGE_VERSION with any such change (2: the four cards, 2026-10-25).
+ */
+if (!defined('KOP_VOLPAGE_VERSION')) define('KOP_VOLPAGE_VERSION', '2');
+add_action('init', function () {
+    if (get_option('kop_volpage_version') === KOP_VOLPAGE_VERSION) return;
+    update_option('kop_volpage_version', KOP_VOLPAGE_VERSION, false);
+    do_action('litespeed_purge_url', home_url('/volunteer/'));
+}, 40);
+
 /** The /volunteer/ hub page shows the form (templates/page-hub.php, kop_hub_module_for()). */
 function kop_vols_hub_modules($modules) {
     $modules['volunteer'] = 'kop_vols_module';
