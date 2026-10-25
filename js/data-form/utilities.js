@@ -6,7 +6,7 @@
  * - Data manipulation (deepClone, nested value getters/setters)
  * - String utilities (escapeHtmlForAttr, case conversion, city/state parsing)
  * - UI utilities (showUploadStatus)
- * - Export utilities (copyToClipboard, downloadJSON, buildProjectExport)
+ * - Export utilities (buildFormExport, copyToClipboard, downloadJSON, buildProjectExport)
  */
 
 // ============================================
@@ -399,10 +399,31 @@ function showUploadStatus(message, type) {
 // ============================================
 
 /**
+ * The form data as exported: each facility as its canonical document
+ * (KOP_DataNormalizer.facilityToV2, docs/FACILITY-SCHEMA.md) without
+ * provenance or legacy; the rest of window.formData as it is.
+ * @returns {Object}
+ */
+function buildFormExport() {
+    const data = JSON.parse(JSON.stringify(window.formData || {}));
+    const normalizer = window.KOP_DataNormalizer;
+    if (normalizer && typeof normalizer.facilityToV2 === 'function') {
+        const facilities = Array.isArray(data.facilities) && data.facilities.length ? data.facilities : [{}];
+        data.facilities = facilities.map((facility) => {
+            const doc = normalizer.facilityToV2(facility);
+            delete doc.provenance;
+            delete doc.legacy;
+            return doc;
+        });
+    }
+    return data;
+}
+
+/**
  * Copy current form data to clipboard as JSON
  */
 function copyToClipboard() {
-    navigator.clipboard.writeText(JSON.stringify(window.formData, null, 2)).then(() => {
+    navigator.clipboard.writeText(JSON.stringify(buildFormExport(), null, 2)).then(() => {
         showUploadStatus('JSON copied to clipboard!', 'success');
     });
 }
@@ -411,7 +432,7 @@ function copyToClipboard() {
  * Download current form data as JSON file
  */
 function downloadJSON() {
-    const jsonString = JSON.stringify(window.formData, null, 2);
+    const jsonString = JSON.stringify(buildFormExport(), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -605,6 +626,7 @@ window.showToast = showToast;
 window.showUploadStatus = showUploadStatus;
 window.copyToClipboard = copyToClipboard;
 window.downloadJSON = downloadJSON;
+window.buildFormExport = buildFormExport;
 window.buildProjectExport = buildProjectExport;
 
 // Auto-initialize when DOM is ready

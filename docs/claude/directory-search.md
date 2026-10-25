@@ -26,6 +26,10 @@ node scripts/test-testimony-move.js
 # through submitSuggestion(). Topic -> section ids in TOPICS there; ?find=<name>, ?add=<type>, ?full=1. Its text inputs need
 # data-growing-text-field="true" or ui-events.js swaps them for textareas
 python scripts/test-data-wizard.py               # live page + working-tree wizard, 1280 and 390 px
+# The data forms' Download JSON / Copy JSON (buildFormExport() in js/data-form/utilities.js) export each facility as its v2
+# document (KOP_DataNormalizer.facilityToV2(), docs/FACILITY-SCHEMA.md) without provenance or legacy; the rest of formData as is.
+# A blank form exports the full field set; the file loads back through normalizeProjectData() (facilityFromV2())
+node scripts/test-data-form-export.js
 # /questions/ ("We have questions", inc/questions.php + templates/questions.php + js/questions.js + css/questions.css): one short
 # question at a time, phone first, about what a record lacks (open?, opened, closed, town, boys/girls, ages, until when an earlier
 # name was used, each unticked practice, "was <staff> there when you were? year", remembered rules; companies: founded, based,
