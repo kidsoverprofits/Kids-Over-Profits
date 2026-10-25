@@ -140,6 +140,8 @@ $notq = array_filter($seed['tasks'], function ($t) { return empty($t['settled'])
 $check('every open task is phrased as a question', !$notq, implode(' | ', array_column($notq, 'title')));
 $long = array_filter($seed['tasks'], function ($t) { return empty($t['settled']) && str_word_count($t['title']) > 30; });
 $check('every question is short (30 words at most)', !$long, implode(' | ', array_column($long, 'title')));
+$inside = array_filter($seed['tasks'], function ($t) { return empty($t['settled']) && preg_match(kop_rt_inside_words(), $t['title']); });
+$check('no open question points inside our files (rows, record numbers, "in scope")', !$inside, implode(' | ', array_column($inside, 'title')));
 $nodir = array_filter($seed['tasks'], function ($t) { return !is_array($t['directions'] ?? null); });
 $check('every task carries a where-to-look list', !$nodir);
 $with = count(array_filter($seed['tasks'], function ($t) { return $t['directions'] || $t['records'] || $t['companies']; }));
@@ -213,6 +215,7 @@ $check('an edited card keeps the owner\'s wording', $row($k3)['title'] === 'The 
 
 echo "\nQuestions and where to look\n";
 $check('a task must be a question', strpos($throws(function () { kop_rt_add(array('title' => 'Norris Academy town')); }), '"?"') !== false);
+$check('a question naming a sheet row is sent back', strpos($throws(function () { kop_rt_add(array('title' => 'Lee Underwood (memorial sheet row 93) died 1931 or 1932?')); }), 'only means something to us') !== false);
 $dirs = kop_rt_parse_directions("TN licence list | https://example.org/a.pdf\nhttps://example.org/b");
 $check('"what it is | address" lines read as directions', count($dirs) === 2 && $dirs[0]['label'] === 'TN licence list' && $dirs[1]['url'] === 'https://example.org/b');
 $check('a line with no address is refused', $throws(function () { kop_rt_parse_directions('just words'); }) !== '');

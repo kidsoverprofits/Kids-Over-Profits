@@ -239,7 +239,18 @@ function kop_rt_check_question($title) {
     $title = trim((string) $title);
     if ($title === '') throw new RuntimeException('Type the question to answer.');
     if (substr($title, -1) !== '?') throw new RuntimeException('Phrase it as a simple question, ending with "?" (for example "What year did Rocky Mountain Academy close?").');
+    if (preg_match(kop_rt_inside_words(), $title, $m)) {
+        throw new RuntimeException('"' . $m[0] . '" only means something to us. Name the program, place, person and year instead, so the question makes sense on its own.');
+    }
     return $title;
+}
+
+/**
+ * Words that point inside our own files (sheet rows, record or entry numbers, "in scope"): a question carrying them
+ * can't be followed by anyone who hasn't opened that file. Same pattern as tasks.py's INSIDE_WORDS.
+ */
+function kop_rt_inside_words() {
+    return '/\brows?\s+\d+|\bsheet\b|\b(?:record|entry|memorial id|page id)\s+#?\d+|#\d+|\bin scope\b/i';
 }
 
 /** "What it is | https://..." lines (or bare addresses) as directions. */

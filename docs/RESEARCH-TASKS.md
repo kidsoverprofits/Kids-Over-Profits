@@ -20,7 +20,11 @@ It writes `seeds/research-tasks.json`; the task shows on the screen after the de
 
 - **The title is one simple question**, in plain words a volunteer with no background can follow, ending with "?":
   name the program (and town and state), company or person in full; no record ids, file paths or words like "era",
-  "rename merge" or "operator link". `add` refuses a title without "?". A job for us rather than a fact to find
+  "rename merge" or "operator link". The title must make sense with the Details folded shut, so it never leans on
+  them ("the second phase at Chrysalis" names Chrysalis Therapeutic Boarding School in Eureka, Montana; "Dr. Kuri's
+  other program" names it). `add`, `questions` and the screen's Edit refuse a title without "?" or one that points
+  inside our files (a sheet row, a record or entry number, "#605", "in scope"); write "Should KOP's memorial include
+  ...?" for a scope question. A job for us rather than a fact to find
   (fix a draft, link reports, make records) is not a research task: it goes in `docs/plan/`.
 - **It points to what we already have.** `add` fills "where to look" from `tmp/prod.sqlite`: the records' news
   articles, court cases, Woodbury Reports issues (our copies) and archived links, the links in `--text`; the

@@ -37,6 +37,20 @@ import sys
 THEME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SEED = os.path.join(THEME, 'seeds', 'research-tasks.json')
 MIRROR = os.path.join(THEME, 'tmp', 'prod.sqlite')
+# Words that point inside our own files (sheet rows, record or entry numbers, "in scope"): nobody who hasn't opened
+# that file can follow the question. Same pattern as kop_rt_inside_words() in inc/research-tasks.php.
+INSIDE_WORDS = re.compile(r'\brows?\s+\d+|\bsheet\b|\b(?:record|entry|memorial id|page id)\s+#?\d+|#\d+|\bin scope\b', re.I)
+
+
+def check_question(title):
+    """The title as a plain question that stands on its own, or exits saying what is wrong."""
+    title = title.strip()
+    if not title.endswith('?'):
+        sys.exit('--title is the question itself, in plain words, ending with "?" ("What year did X in Town, ST close?").')
+    m = INSIDE_WORDS.search(title)
+    if m:
+        sys.exit('"%s" only means something to us: name the program, place, person and year instead.\n  %s' % (m.group(0), title))
+    return title
 
 
 def load():
@@ -286,6 +300,7 @@ def cmd_questions(a):
     for t in data['tasks']:
         new = (q.get(t['key']) or '').strip()
         if new and new != t['title']:
+            check_question(new)
             t['title'] = new[:255]
             n += 1
     save(data)
@@ -397,9 +412,7 @@ def cmd_add(a):
     bad = [r for r in recs if known is not None and r not in known]
     if bad:
         sys.exit('Not facilities_v2 ids: %s' % bad)
-    title = a.title.strip()
-    if not title.endswith('?'):
-        sys.exit('--title is the question itself, in plain words, ending with "?" ("What year did X in Town, ST close?").')
+    title = check_question(a.title)
     taken = {t['key'] for t in data['tasks']}
     key = new_key(a.section, title, taken)
     task = {'key': key, 'section': a.section, 'title': title[:255], 'text': a.text or '', 'context': '',
