@@ -270,3 +270,34 @@ function kop_rinbox_test_news_details(callable $check) {
         array('plaintiffs', 'legalRep', 'pressReleases', 'relatedCoverage', 'staffMemberName', 'caseStatus', 'closureContext', 'ownership'))) === 8);
     $check('news: "by date" sorts on the publication date', strpos(kop_rinbox_native_list_order('news', 'date'), 'publication_date DESC') !== false);
 }
+
+/**
+ * Every item sits under one Review inbox tab: people, the daily scans or imports.
+ * SCIAD NET and Google Docs news once fell between the tabs (2026-10-25).
+ * Called from the "recent" checks in scripts/test-review-inbox.php.
+ */
+function kop_rinbox_test_news_origins(callable $check) {
+    $pdo = kop_rinbox_pdo();
+    $rows = array(
+        'people'  => array('Reader', ''),
+        'scans'   => array('auto-discovery', 'auto-discovery via google-news-topic | score=5'),
+        'imports' => array('admin (SCIAD NET import)', 'Found in SCIAD NET'),
+        'gdocs'   => array('admin (Google Docs import)', 'Google Doc: Example'),
+    );
+    $ids = array();
+    $ins = $pdo->prepare("INSERT INTO news_submissions (article_title, json_data, status, submitted_by, submission_notes) VALUES (?, '{}', 'draft', ?, ?)");
+    foreach ($rows as $k => $r) {
+        $ins->execute(array('Origin test ' . $k, $r[0], $r[1]));
+        $ids[$k] = (int) $pdo->lastInsertId();
+    }
+    $in = implode(',', $ids);
+    $under = function ($origin) use ($pdo, $in) {
+        return array_map('intval', $pdo->query("SELECT id FROM news_submissions WHERE id IN ($in) AND " . kop_rinbox_native_origin_where('news', $origin) . ' ORDER BY id')->fetchAll(PDO::FETCH_COLUMN));
+    };
+    $people = $under('people');
+    $scans = $under('scans');
+    $imports = $under('imports');
+    $check('news origins: people, scans and imports each get their own', $people === array($ids['people']) && $scans === array($ids['scans'])
+        && $imports === array($ids['imports'], $ids['gdocs']), json_encode(compact('ids', 'people', 'scans', 'imports')));
+    $pdo->exec("DELETE FROM news_submissions WHERE id IN ($in)");
+}

@@ -202,6 +202,17 @@
                 help: 'Articles the daily Google News and Reddit scans found, in the News queue.', count: state.split.news.scans,
                 active: nativeShowing() === 'news' && state.nativeArea === 'scans', open: function () { openNative(news, 'scans', 'scans'); } });
         }
+        if (area === 'found') {
+            // What imports (Google Docs, SCIAD NET, ...) sent to the page's own lists is neither people's nor the scans':
+            // without this entry no tab would show it.
+            state.sources.forEach(function (s) {
+                var n = s.native && state.split[s.key] ? state.split[s.key].imports : 0;
+                if (!n) return;
+                out.push({ key: s.key + '-imports', label: s.label + ' (imports)', group: 'Sent to the review lists by imports',
+                    help: s.label + ' items that imports (Google Docs, SCIAD NET, the wiki, Scraper finds...) sent in.', count: n,
+                    active: nativeShowing() === s.key && state.nativeArea === 'found', open: function () { openNative(s, 'imports', 'found'); } });
+            });
+        }
         return out.sort(function (a, b) { return byLabel(a.group, b.group) || byLabel(a.label, b.label); });
     }
 
@@ -1520,7 +1531,7 @@
             }
             if (r && r.others) {
                 countLine(otherFold, s, r.others, s.native ? s.label + ' (imports)' : '', s.native
-                    ? function () { openNative(s, '', s.area); }
+                    ? function () { openNative(s, 'imports', 'found'); }
                     : function () { openSource(s.key); });
             }
             state.newCount = people;

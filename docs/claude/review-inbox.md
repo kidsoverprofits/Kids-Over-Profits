@@ -17,7 +17,9 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # Found by imports and inspections / Checks and cleanup / Your inbox / All tools (js/review-inbox.js renderTabs()); the open tab's queues
 # are a row of buttons under it, "Find a queue" searches every tab. A queue's tab is kop_rinbox_area() (inc/review-inbox-recent.php), read
 # from its 'group' or its own 'area' ('people' | 'scans' | 'found' | 'checks'). News shows twice: under people on its "Came from" origin
-# 'people', under Daily news scans on 'scans' (Google News + Reddit), counts from kop_rinbox_native_split_counts(). The page's own five
+# 'people', under Daily news scans on 'scans' (Google News + Reddit), and what imports sent (SCIAD NET, Google Docs, the wiki, Scraper finds...)
+# as "<Queue> (imports)" under Found by imports on 'imports' (since 2026-10-25; before that, 51 imported articles showed in no tab),
+# counts from kop_rinbox_native_split_counts(). The page's own five
 # type tabs stay hidden. ?type= takes a queue, a special list (_new, _done...) or an area (people, scans, found, checks, _yours)
 # Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
 # (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'

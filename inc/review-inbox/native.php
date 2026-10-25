@@ -677,8 +677,14 @@ function kop_rinbox_native_origins($type) {
     }
     if ($type === 'data') return array();
     $others = array();
-    foreach ($all as $o) $others[] = '(' . $o[1] . ')';
+    $imports = array();
+    foreach ($all as $key => $o) {
+        $others[] = '(' . $o[1] . ')';
+        if ($key !== 'scraper-google' && $key !== 'scraper-reddit') $imports[] = '(' . $o[1] . ')';
+    }
     $all['people'] = array('People and admins', 'NOT (' . implode(' OR ', $others) . ')');
+    // Neither people nor the daily scans: the Review inbox's "Found by imports" tab opens the queue on this.
+    $all['imports'] = array('Imports (Google Docs, SCIAD NET, Fornits, ...)', '(' . implode(' OR ', $imports) . ')');
     if ($has_notes) {
         // Both daily news scans together: the Review inbox's "Daily news scans" tab opens News on this.
         $all['scans'] = array('Daily news scans (Google News and Reddit)', '(' . $all['scraper-google'][1] . ' OR ' . $all['scraper-reddit'][1] . ')');
@@ -714,25 +720,28 @@ function kop_rinbox_native_recent($type, $since_ts, $limit) {
 }
 
 /**
- * Waiting rows per native queue that people sent ('people') and that the daily
- * news scans found ('scans'), for the Review inbox tabs: [type => [people, scans]].
+ * Waiting rows per native queue that people sent ('people'), that the daily
+ * news scans found ('scans') and that came from an import ('imports'), for the
+ * Review inbox tabs: [type => [people, scans, imports]].
  * Kept five minutes; kop_rinbox_flush_counts() drops it.
  */
 function kop_rinbox_native_split_counts() {
     $cached = get_transient('kop_rinbox_native_split');
-    if (is_array($cached)) return $cached;
+    if (is_array($cached) && array_key_exists('imports', (array) reset($cached))) return $cached;
     $out = array();
     foreach (kop_rinbox_native_types() as $type => $t) {
         try {
-            $out[$type] = array('people' => null, 'scans' => 0);
+            $out[$type] = array('people' => null, 'scans' => 0, 'imports' => 0);
             $people = kop_rinbox_native_origin_where($type, 'people');
             if ($people === '') continue;
             $scans = kop_rinbox_native_origin_where($type, 'scans');
+            $imports = kop_rinbox_native_origin_where($type, 'imports');
             $st = kop_rinbox_pdo()->prepare("SELECT SUM(CASE WHEN $people THEN 1 ELSE 0 END) AS p, "
-                . ($scans !== '' ? "SUM(CASE WHEN $scans THEN 1 ELSE 0 END)" : '0') . " AS s FROM {$t['table']} WHERE {$t['status_col']} = ?");
+                . ($scans !== '' ? "SUM(CASE WHEN $scans THEN 1 ELSE 0 END)" : '0') . ' AS s, '
+                . "SUM(CASE WHEN $imports THEN 1 ELSE 0 END) AS i FROM {$t['table']} WHERE {$t['status_col']} = ?");
             $st->execute(array($t['pending']));
             $row = $st->fetch(PDO::FETCH_ASSOC) ?: array();
-            $out[$type] = array('people' => (int) ($row['p'] ?? 0), 'scans' => (int) ($row['s'] ?? 0));
+            $out[$type] = array('people' => (int) ($row['p'] ?? 0), 'scans' => (int) ($row['s'] ?? 0), 'imports' => (int) ($row['i'] ?? 0));
         } catch (Throwable $e) {
             // The tab shows the queue's whole count instead.
         }

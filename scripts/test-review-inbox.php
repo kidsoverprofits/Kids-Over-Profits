@@ -399,6 +399,15 @@ if ($only === '' || $only === 'recent') {
         $scan = (string) $pdo->lastInsertId();
         $ins->execute(array('ZZ old reader link', 'https://example.org/zz-old-' . $now, 'A reader', '', gmdate('Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS)));
         $old = (string) $pdo->lastInsertId();
+        kop_rinbox_test_news_origins($check);
+        $before = kop_rinbox_native_split_counts();
+        $ins->execute(array('ZZ from an import', 'https://example.org/zz-import-' . $now, 'admin (SCIAD NET import)', 'Found in SCIAD NET', gmdate('Y-m-d H:i:s', $now - 600)));
+        $import = (string) $pdo->lastInsertId();
+        delete_transient('kop_rinbox_native_split');
+        $after = kop_rinbox_native_split_counts();
+        $check('recent: an imported article counts under imports, not people or scans', ($after['news']['imports'] ?? 0) === ($before['news']['imports'] ?? 0) + 1
+            && ($after['news']['people'] ?? 0) === ($before['news']['people'] ?? 0), json_encode(array($before['news'] ?? null, $after['news'] ?? null)));
+        $pdo->prepare('DELETE FROM news_submissions WHERE id = ?')->execute(array($import));
         $news = kop_rinbox_recent_items('news', $now - 2 * DAY_IN_SECONDS);
         $by = array();
         foreach ($news as $it) $by[$it['key']] = $it;
