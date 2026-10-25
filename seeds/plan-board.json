@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 18:36 UTC",
- "source": "11cb985a178389ea71a3f739325be5e9ade11f7d",
+ "built": "2026-10-25 18:50 UTC",
+ "source": "30a9d04cbef3ff290c043cde120f94f4fa5f525a",
  "sections": [
   {
    "key": "2",
@@ -1518,6 +1518,14 @@
        "ask": "",
        "date": "",
        "hash": "559b64bd8e3f"
+      },
+      {
+       "id": "4.8:volunteer-sign-in-placement",
+       "lead": "Volunteer sign-in placement",
+       "text": "**Volunteer sign-in placement** (2026-10-25, kids-over-profits-mobile `e6c0893`): a Volunteers tile on Home, a \"Volunteer? Sign in\" button at the top of Send, and the About section moved up. Open: check it on a phone after the next build or update; three suites (`documents`, `network`, `resources`) were already failing before this change and still need a look.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "438c8fe3d1b1"
       }
      ]
     }
