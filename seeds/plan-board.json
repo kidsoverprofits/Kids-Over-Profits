@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 17:20 UTC",
- "source": "697c845b73fc937035d5b9d4d7564e6e20025727",
+ "built": "2026-10-25 17:23 UTC",
+ "source": "9d596c4093e48089e86c13def11fdff82e954e5e",
  "sections": [
   {
    "key": "2",
@@ -543,6 +543,14 @@
        "ask": "Have you tried the extension, and should it go on the Chrome and Firefox stores?",
        "date": "",
        "hash": "6e2efa15f475"
+      },
+      {
+       "id": "2.6:admin-mode-on-the-phone",
+       "lead": "Admin mode on the phone",
+       "text": "**Admin mode on the phone** (update published 2026-10-25, app [41eb247](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/41eb247cad580eccc2a2ad2ce8a4ca5e59e33437)): close and reopen the app twice, then About > Reviewer sign-in > Sign in with WordPress > log in > Approve. The Admin tab appears with \"Open the Review inbox\". If the app still has no Map controls or Donate button after two reopens, the phone holds the 2026-10-07 APK: install the 2026-10-13 one (https://expo.dev/artifacts/eas/KakogI4zyflHk-87uGmOFzB61iMWbP8DSJJZZri_5Bk.apk) once.",
+       "ask": "Did Sign in with WordPress work, and do the review queues work on the phone?",
+       "date": "2026-10-25",
+       "hash": "ef16dd85f40a"
       }
      ]
     }
