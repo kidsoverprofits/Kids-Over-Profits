@@ -558,6 +558,93 @@ button.kop-vol-btn-small:focus {
     margin-top: 10px;
 }
 
+/* Cite every piece of information (2026-10-25): the instructions, one box per fact with its link, "Could not find it". */
+.kop-vol-cite {
+    margin: 12px 0;
+    padding: 10px 14px;
+    border: 1px solid var(--kop-orange, #EF9034);
+    border-left-width: 6px;
+    border-radius: 6px;
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-cite-head {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-cite ol {
+    margin: 0;
+    padding-left: 1.3em;
+}
+
+.kop-vol-cite li {
+    margin: 3px 0;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-claims {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 8px;
+}
+
+.kop-vol-claim {
+    margin: 0;
+    padding: 8px 12px 10px;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    min-width: 0;
+}
+
+.kop-vol-claim legend {
+    padding: 0 4px;
+}
+
+.kop-vol-claim-n {
+    margin: 0;
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-claim textarea,
+.kop-vol-notfound textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 9px;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1A202C);
+    font: inherit;
+}
+
+.kop-vol-claim textarea::placeholder,
+.kop-vol-notfound textarea::placeholder {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-vol-claim .kop-vol-btn-small {
+    margin-top: 6px;
+}
+
+.kop-vol-notfound {
+    margin-top: 12px;
+}
+
+.kop-vol-notfound summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-start {
+    margin-top: 0;
+}
+
 /* Post ideas (inc/volunteer-social.php): the idea, then the caption and the picture link. */
 
 .kop-vol-social {
@@ -720,3 +807,7 @@ p.kop-vol-newreply {
 .kop-vol-steps { margin: 0 0 1rem 1.25rem; padding: 0; }
 .kop-vol-steps li { margin: 0 0 .35rem; }
 .kop-vol-page .kop-vol-btn-big { font-size: 1.1rem; padding: .7rem 1.6rem; }
+
+.kop-vol-claim label {
+    margin-top: 8px;
+}

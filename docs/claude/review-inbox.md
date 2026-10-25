@@ -157,6 +157,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # tasks.py directions from the mirror: news, court cases, Woodbury issues with our PDF, archived links, links in the notes; records and companies
 # named in full are matched by name). A volunteer gets the question + where to start, never the staff notes (Details). A seed entry whose hash
 # moved rewords a card nobody edited (edited_at empty; records only gain ids); staff jobs go to docs/plan, not here
+# Every piece of information is cited (owner, 2026-10-25): a research answer is facts, each with its link (and the sentence that says it).
+# The volunteer card says so on top and has one box per fact (js/volunteer-review.js claimRow()); REST volunteer/answer sends 'claims' and
+# kop_volr_clean_claims() refuses a fact without a link by its number; links store {claim, url, kind, quote, sent}, the answer text is
+# kop_volr_claims_text() ("- fact ([source](url))"); one page backing several facts goes to the inbox once. tasks.py answer needs --claim
+# "fact | url | quote" per fact (kop_rt_seed_answer_text()). Old answers (text + loose links) still read as before
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-research-tasks.php [--page=out.html]   # seed import, Undo, volunteer round trip, cards
 # Messages (inc/volunteer-messages.php, {prefix}kop_vol_messages): one conversation per volunteer, "Ask a question" on a brief or card names the
 # project/item; answered at Volunteer Reviewers > Messages (menu count bubble), shown on their page marked New; volunteers are never mailed, the

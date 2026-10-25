@@ -281,24 +281,70 @@
     var SENT = { 'news review': 'sent to the news queue', 'lawsuit review': 'sent to the court cases queue', 'legislation review': 'sent to the bills queue',
         'website review': 'sent to the websites queue', 'already held': 'we already have it', 'not sent': 'saved with your answer' };
 
-    function linkRow(kinds, l) {
-        var url = el('input', { type: 'url', class: 'kop-vol-link-url', placeholder: 'https://', value: l.url || '', 'aria-label': 'Link' });
+    // One fact the volunteer found and the page that says it (owner, 2026-10-25: every piece of information is cited).
+    function claimRow(kinds, c, n) {
+        var uid = 'kop-vol-claim-' + Math.random().toString(36).slice(2);
+        var fact = el('textarea', { id: uid + '-f', class: 'kop-vol-claim-fact', rows: '2', maxlength: '1000',
+            placeholder: 'One fact, in your words: "It closed in June 2009."' });
+        fact.value = c.claim || '';
+        var url = el('input', { id: uid + '-u', type: 'url', class: 'kop-vol-link-url', placeholder: 'https://', value: c.url || '' });
         var kind = el('select', { class: 'kop-vol-link-kind', 'aria-label': 'What kind of page' });
         Object.keys(kinds).forEach(function (k) {
             var o = el('option', { value: k, text: kinds[k] });
-            if (k === l.kind) o.selected = true;
+            if (k === c.kind) o.selected = true;
             kind.appendChild(o);
         });
-        var row = el('div', { class: 'kop-vol-link-row' }, [url, kind]);
-        row.read = function () { return { url: url.value.trim(), kind: kind.value }; };
+        var quote = el('textarea', { id: uid + '-q', class: 'kop-vol-claim-quote', rows: '2', maxlength: '1000',
+            placeholder: 'Copy the sentence from the page that says it' });
+        quote.value = c.quote || '';
+        var head = el('p', { class: 'kop-vol-claim-n' });
+        var remove = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Remove' });
+        var row = el('fieldset', { class: 'kop-vol-claim' }, [
+            el('legend', null, [head]),
+            el('label', { for: uid + '-f', text: 'What you found' }), fact,
+            el('label', { for: uid + '-u', text: 'Link to the page that says it (needed)' }), el('div', { class: 'kop-vol-link-row' }, [url, kind]),
+            el('label', { for: uid + '-q', text: 'The sentence that says it (if you can copy it)' }), quote,
+            remove
+        ]);
+        row.number = function (i) { head.textContent = 'Fact ' + i; };
+        row.number(n);
+        row.read = function () { return { claim: fact.value.trim(), url: url.value.trim(), kind: kind.value, quote: quote.value.trim() }; };
+        row.fields = { fact: fact, url: url };
+        row.removeBtn = remove;
         return row;
+    }
+
+    // The question text, with its "Where to start" lines ("- label: https://...") as links.
+    function questionBlock(text) {
+        var parts = String(text || '').split(/\n\s*\n/);
+        var out = [];
+        parts.forEach(function (part, i) {
+            var lines = part.split('\n');
+            var items = lines.filter(function (l) { return /^- .*https?:\/\/\S+$/.test(l); });
+            if (items.length) {
+                var headLine = lines[0] && !/^- /.test(lines[0]) ? lines[0] : '';
+                if (headLine) out.push(el('p', { class: 'kop-vol-label', text: headLine }));
+                var ul = el('ul', { class: 'kop-vol-links kop-vol-start' });
+                items.forEach(function (l) {
+                    var m = l.match(/^- (.*): (https?:\/\/\S+)$/);
+                    if (m && safe(m[2])) ul.appendChild(el('li', null, [link(m[2], m[1])]));
+                });
+                out.push(ul);
+            } else if (i === 0) {
+                out.push(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'Find out: ' }), part]));
+            } else {
+                out.push(el('p', { class: 'kop-vol-meta', text: part }));
+            }
+        });
+        return out;
     }
 
     function researchCard(it, p, onDone) {
         var node = el('article', { class: 'kop-vol-card kop-vol-panel kop-vol-research' });
         var kinds = p.link_kinds || { article: 'News story', website: 'Other page' };
         node.appendChild(el('h3', { class: 'kop-vol-title', text: it.title || '(no title)' }));
-        if (it.question && it.question !== it.title) node.appendChild(el('p', { class: 'kop-vol-question' }, [el('strong', { text: 'Find out: ' }), it.question]));
+        if (it.question && it.question !== it.title) questionBlock(it.question.indexOf(it.title) === 0 ? it.question.slice(it.title.length).trim() || it.question : it.question)
+            .forEach(function (n) { node.appendChild(n); });
         if (it.record && it.record.name) {
             node.appendChild(el('ul', { class: 'kop-vol-links' }, [el('li', null, [safe(it.record.url) ? link(it.record.url, 'What our page says about ' + it.record.name) : it.record.name])]));
         }
@@ -307,49 +353,91 @@
             it.facts.forEach(function (f) { dl.appendChild(el('dt', { text: f.label })); dl.appendChild(el('dd', { text: f.value })); });
             node.appendChild(dl);
         }
-        var id = 'kop-vol-answer-' + Math.random().toString(36).slice(2);
+        node.appendChild(el('div', { class: 'kop-vol-cite' }, [
+            el('p', { class: 'kop-vol-cite-head', text: 'Cite every piece of information' }),
+            el('ol', null, [
+                el('li', { text: 'Put each fact you found in its own box below: one fact per box. "Add another fact" makes a new box.' }),
+                el('li', { text: 'Give every fact the link to the page that says it. A fact with no link cannot be used, so leave out anything you cannot link to, even if you are sure of it.' }),
+                el('li', { text: 'One page can back up several facts: paste the same link under each. Never let one link stand for a fact the page does not say.' }),
+                el('li', { text: 'Copy the sentence that says it if you can. It lets us check your answer quickly.' }),
+                el('li', { text: 'Found nothing? Open "Could not find it" at the bottom and say where you looked.' })
+            ])
+        ]));
         var prev = it.answer || {};
-        var answer = el('textarea', { id: id, rows: '4', maxlength: '4000', placeholder: 'What did you find? Quote the sentence that says it if you can.' });
-        answer.value = prev.answer || '';
-        var links = el('div', { class: 'kop-vol-link-rows' });
-        (prev.links && prev.links.length ? prev.links : [{ kind: it.link_kind }]).forEach(function (l) { links.appendChild(linkRow(kinds, l)); });
-        var add = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Add another link', onclick: function () {
-            if (links.childNodes.length >= 6) return;
-            var r = linkRow(kinds, { kind: it.link_kind });
-            links.appendChild(r);
-            r.firstChild.focus();
+        var prevLinks = prev.links || [];
+        var rows = el('div', { class: 'kop-vol-claims' });
+        function renumber() {
+            Array.prototype.forEach.call(rows.childNodes, function (r, i) { r.number(i + 1); r.removeBtn.hidden = rows.childNodes.length < 2; });
+        }
+        function addRow(c) {
+            var r = claimRow(kinds, c, rows.childNodes.length + 1);
+            r.removeBtn.addEventListener('click', function () { r.remove(); renumber(); });
+            rows.appendChild(r);
+            renumber();
+            return r;
+        }
+        var start = prev.found !== false ? prevLinks.filter(function (l) { return l.claim || l.url; }) : [];
+        (start.length ? start : [{ kind: it.link_kind }]).forEach(function (c) { addRow(c); });
+        var add = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Add another fact', onclick: function () {
+            if (rows.childNodes.length >= 15) return;
+            addRow({ kind: it.link_kind }).fields.fact.focus();
         } });
+        var noteId = 'kop-vol-note-' + Math.random().toString(36).slice(2);
+        var note = el('textarea', { id: noteId, rows: '2', maxlength: '2000', placeholder: 'Sources that disagree, how sure you are, anything we should check' });
+        var lookId = 'kop-vol-looked-' + Math.random().toString(36).slice(2);
+        var looked = el('textarea', { id: lookId, rows: '3', maxlength: '4000', placeholder: 'The searches you tried and the sites you checked' });
+        if (prev.found === false) looked.value = prev.answer || '';
         var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
-        var buttons = [
-            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Save my answer', disabled: cfg.preview ? true : null, onclick: function () { send(false, this); } }),
-            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Could not find it', disabled: cfg.preview ? true : null, onclick: function () { send(true, this); } }),
-            el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } })
-        ];
-        function send(notFound, btn) {
-            var list = Array.prototype.map.call(links.childNodes, function (r) { return r.read(); }).filter(function (l) { return l.url; });
-            if (notFound && !answer.value.trim()) {
-                msg.hidden = false;
-                msg.className = 'kop-vol-msg is-error';
-                msg.textContent = 'Say where you looked first, so nobody searches the same places again.';
-                answer.focus();
-                return;
+        var save = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Save my answer', disabled: cfg.preview ? true : null, onclick: function () { send(false, this); } });
+        var notFound = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Send: could not find it', disabled: cfg.preview ? true : null, onclick: function () { send(true, this); } });
+        var skip = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Skip for now', onclick: function () { state.skip.push(it.key); nextProjectItem(); } });
+        var buttons = [save, notFound, skip];
+        // An error goes once they change what it was about.
+        rows.addEventListener('input', function () { msg.hidden = true; });
+        looked.addEventListener('input', function () { msg.hidden = true; });
+        function fail(text, field) {
+            msg.hidden = false;
+            msg.className = 'kop-vol-msg is-error';
+            msg.textContent = text;
+            if (field) field.focus();
+        }
+        function send(isNotFound, btn) {
+            var claims = [];
+            if (isNotFound) {
+                if (!looked.value.trim()) return fail('Say where you looked first, so nobody searches the same places again.', looked);
+            } else {
+                var bad = null;
+                Array.prototype.forEach.call(rows.childNodes, function (r, i) {
+                    var c = r.read();
+                    if (!c.claim && !c.url && !c.quote) return;
+                    if (!bad && !c.claim) bad = ['Fact ' + (i + 1) + ' has a link but no fact: write what that page says.', r.fields.fact];
+                    if (!bad && !c.url) bad = ['Fact ' + (i + 1) + ' has no link. Every fact needs the link to the page where you read it; if you cannot find one, remove the fact.', r.fields.url];
+                    if (!bad && !safe(c.url)) bad = ['The link for fact ' + (i + 1) + ' should start with https://', r.fields.url];
+                    claims.push(c);
+                });
+                if (bad) return fail(bad[0], bad[1]);
+                if (!claims.length) return fail('Add at least one fact with its link, or open "Could not find it" below.', rows.firstChild && rows.firstChild.fields.fact);
             }
             buttons.forEach(function (b) { b.disabled = true; });
             msg.hidden = true;
-            api('answer', { project_id: it.project_id, key: it.key, answer: answer.value, links: list, not_found: notFound ? 1 : 0 }).then(function (res) {
+            api('answer', { project_id: it.project_id, key: it.key, answer: isNotFound ? looked.value : note.value, claims: claims, links: [],
+                not_found: isNotFound ? 1 : 0 }).then(function (res) {
                 onDone(it, res.answer || {});
             }).catch(function (e) {
                 buttons.forEach(function (b) { b.disabled = false; });
-                msg.hidden = false;
-                msg.className = 'kop-vol-msg is-error';
-                msg.textContent = e.message;
-                btn.focus();
+                fail(e.message, btn);
             });
         }
         node.appendChild(el('div', { class: 'kop-vol-decide' }, [
-            el('label', { for: id, text: 'Your answer' }), answer,
-            el('p', { class: 'kop-vol-label', text: 'Where you found it (each link goes to our review queue too)' }), links, add,
-            el('div', { class: 'kop-vol-buttons' }, buttons), msg
+            el('p', { class: 'kop-vol-label', text: 'What you found, fact by fact (each link goes to our review queue too)' }), rows, add,
+            el('label', { for: noteId, text: 'Anything else (optional)' }), note,
+            el('div', { class: 'kop-vol-buttons' }, [save, skip]),
+            el('details', { class: 'kop-vol-notfound' + (prev.found === false ? ' is-open' : ''), open: prev.found === false ? true : null }, [
+                el('summary', { text: 'Could not find it?' }),
+                el('label', { for: lookId, text: 'Where did you look?' }), looked,
+                el('div', { class: 'kop-vol-buttons' }, [notFound])
+            ]),
+            msg
         ]));
         node.appendChild(askButton({ project_id: it.project_id, item_key: 'research:' + it.project_id + ':' + it.key, item_title: it.title, label: it.title }));
         return node;

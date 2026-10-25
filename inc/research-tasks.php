@@ -420,7 +420,10 @@ function kop_rt_sync_volunteer_answers() {
         if (!$tid) continue;
         $r['id'] = $tid;
         $text = ((int) $r['found'] ? '' : 'Could not find it. ') . trim((string) $r['answer']);
-        foreach (kop_volr_links_of($r) as $l) $text .= "\n- " . ($l['title'] !== '' ? $l['title'] . ': ' : '') . $l['url'];
+        // Cited facts already carry their links in the text ("- fact ([source](url))"); older answers list theirs under it.
+        foreach (kop_volr_links_of($r) as $l) {
+            if (($l['claim'] ?? '') === '') $text .= "\n- " . (($l['title'] ?? '') !== '' ? $l['title'] . ': ' : '') . $l['url'];
+        }
         $wpdb->update(kop_rt_table(), array('status' => 'answered', 'answer' => $text, 'answer_by' => mb_substr(($r['name'] ?: 'A volunteer') . ' (volunteer)', 0, 100),
             'answer_at' => $r['updated_at'], 'updated_at' => kop_rt_now()), array('id' => (int) $r['id']));
         $n++;
@@ -478,7 +481,7 @@ function kop_rt_import_seed($path = null, $force = false) {
                 'found' => mb_substr((string) ($e['found'] ?? ''), 0, 255),
                 'directions' => wp_json_encode(array_values((array) ($e['directions'] ?? array()))), 'companies' => kop_rt_records_json((array) ($e['companies'] ?? array())),
                 'status' => $set ? 'settled' : ($ans ? 'answered' : 'open'),
-                'answer' => $ans ? (string) ($ans['text'] ?? '') : null, 'answer_by' => $ans ? mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100) : '',
+                'answer' => $ans ? kop_rt_seed_answer_text($ans) : null, 'answer_by' => $ans ? mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100) : '',
                 'answer_at' => $ans ? $now : null, 'settled' => $set ? (string) ($set['text'] ?? '') : null, 'settled_at' => $set ? $now : null,
                 'seed_hash' => $hash, 'created_by' => 'seed', 'created_at' => $now, 'updated_by' => 'seed', 'updated_at' => $now,
             ));
@@ -499,7 +502,7 @@ function kop_rt_import_seed($path = null, $force = false) {
             }
         }
         if ($ans && $row['status'] === 'open' && trim((string) $row['answer']) === '') {
-            $up += array('status' => 'answered', 'answer' => (string) ($ans['text'] ?? ''), 'answer_by' => mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100), 'answer_at' => $now);
+            $up += array('status' => 'answered', 'answer' => kop_rt_seed_answer_text($ans), 'answer_by' => mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100), 'answer_at' => $now);
             $answered++;
         }
         if ($set && in_array($row['status'], array('open', 'answered'), true)) {
@@ -515,6 +518,22 @@ function kop_rt_import_seed($path = null, $force = false) {
     }
     update_option('kop_rt_seed_sha', $sha, false);
     return array($added, $answered, $settled, $reworded);
+}
+
+/**
+ * A session's answer from the seed as the card shows it: each cited fact on its own line with its source link
+ * ("- fact ([source](url))", the sentence under it), then any other text. Same form as a volunteer's answer.
+ */
+function kop_rt_seed_answer_text(array $ans) {
+    $lines = array();
+    foreach ((array) ($ans['claims'] ?? array()) as $c) {
+        $url = (string) ($c['url'] ?? '');
+        if (trim((string) ($c['claim'] ?? '')) === '' || !preg_match('#^https?://\S+$#', $url)) continue;
+        $lines[] = '- ' . preg_replace('/\s+/', ' ', trim($c['claim'])) . ' ([source](' . $url . '))';
+        if (trim((string) ($c['quote'] ?? '')) !== '') $lines[] = '  - It says: "' . preg_replace('/\s+/', ' ', trim($c['quote'], " \"")) . '"';
+    }
+    $text = trim((string) ($ans['text'] ?? ''));
+    return trim(implode("\n", $lines) . ($text !== '' ? "\n\n" . $text : ''));
 }
 
 /* ---- What sessions read (api/research-tasks.php) ---------------------------------------------- */
@@ -814,7 +833,7 @@ function kop_rt_page_body() {
     }
     if ($view === 'claude' && $rows) {
         echo kop_ak_fold('For Claude: what a session reads', '<p>A session lists these with <code>php api/research-tasks.php --claude</code> on the server, works them, and sends each answer back with '
-            . '<code>python scripts/research-tasks/tasks.py answer &lt;key&gt; --text "..."</code>. Or copy this into the chat:</p><textarea readonly rows="8" class="kop-rt-copy" onclick="this.select()">'
+            . '<code>python scripts/research-tasks/tasks.py answer &lt;key&gt; --claim "fact | link | the sentence that says it"</code>, one claim per fact: every piece of information is cited. Or copy this into the chat:</p><textarea readonly rows="8" class="kop-rt-copy" onclick="this.select()">'
             . esc_textarea(wp_json_encode(kop_rt_export($rows), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '</textarea>', false);
     }
     if (!$rows) {

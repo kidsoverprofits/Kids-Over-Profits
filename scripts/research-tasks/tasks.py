@@ -15,7 +15,10 @@ key and then belongs to the screen (owner edits, assignments, Undo). An entry th
 Every task's title is the question itself, in plain words, ending with "?". Its "directions" are where to look among
 what KOP already holds: the records' news, court cases, Woodbury Reports issues (our copies) and archived websites,
 the links in its notes, and anything added with --look. The screen adds each record's KOP page.
-    python scripts/research-tasks/tasks.py answer <key> --text "Andersonville (TN DCS licence 2015)" --by "Claude session"
+
+An answer cites every piece of information: one --claim per fact, each with the page that says it (and the sentence).
+    python scripts/research-tasks/tasks.py answer <key> --by "Claude session" \
+        --claim "Norris Academy is in Andersonville, TN | https://... | the sentence on that page that says it"
     python scripts/research-tasks/tasks.py settle <key> --text "Record fixed in commit <url>"
     python scripts/research-tasks/tasks.py list [--open]
     python scripts/research-tasks/tasks.py import-md      # done once, 2026-10-23: docs/RESEARCH-TASKS.md "Open" -> tasks (the file has no Open list since)
@@ -423,10 +426,21 @@ def find(data, key):
     sys.exit('No task ' + key + ' in the seed (a task added on the screen has no key here: answer it there).')
 
 
+def parse_claim(s):
+    """ "fact | https://... | the sentence that says it" -> {claim, url, quote}. Every fact is cited (owner, 2026-10-25)."""
+    parts = [x.strip() for x in s.split(' | ')]
+    if len(parts) < 2 or not parts[0] or not re.match(r'https?://\S+$', parts[1]):
+        sys.exit('--claim needs "the fact | https://the page that says it" (and optionally " | the sentence that says it"): ' + s)
+    return {'claim': parts[0], 'url': parts[1], 'quote': ' | '.join(parts[2:])}
+
+
 def cmd_answer(a):
     data = load()
     t = find(data, a.key)
-    t['answer'] = {'text': a.text, 'by': a.by, 'at': datetime.date.today().isoformat()}
+    claims = [parse_claim(c) for c in a.claim or []]
+    if not claims:
+        sys.exit('An answer cites every piece of information: give each fact with --claim "fact | https://... | quote".')
+    t['answer'] = {'text': a.text or '', 'claims': claims, 'by': a.by, 'at': datetime.date.today().isoformat()}
     save(data)
     print('answered ' + a.key)
 
@@ -471,7 +485,8 @@ def main():
     s.set_defaults(fn=cmd_questions)
     s = sub.add_parser('answer')
     s.add_argument('key')
-    s.add_argument('--text', required=True)
+    s.add_argument('--claim', action='append', help='"the fact | https://the page that says it | the sentence that says it" (one per fact, repeatable, needed)')
+    s.add_argument('--text', default='', help='anything else: sources that disagree, how sure, what to check')
     s.add_argument('--by', default='Claude session')
     s.set_defaults(fn=cmd_answer)
     s = sub.add_parser('settle')

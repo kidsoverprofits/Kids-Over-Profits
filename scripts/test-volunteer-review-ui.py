@@ -3,8 +3,8 @@ Browser test for the volunteer page (/volunteer-review/: js/volunteer-review.js,
 css/volunteer-review.css), with kop/v1/volunteer/* answered from fixtures.
 
 Checks: a research project opens on its first question (record link, facts,
-link rows), "Save my answer" posts the answer with its links and moves on,
-"Could not find it" without a word says where to look, "Ask a question about
+"Cite every piece of information" and one fact box), a fact without its link is refused, "Save my answer" posts
+each fact with its link, kind and quote and moves on, "Could not find it" without a word says where to look, "Ask a question about
 this project" names the project in the message box, a sent message shows in
 the conversation, a reply waiting is marked New with a line at the top and is
 marked read once on screen, the review project still shows its card with
@@ -370,7 +370,7 @@ def main():
                     out = {"message": "Taken back."}
                 else:
                     st["answered"].append(body["key"])
-                    links = [dict(l, title="", sent="news review") for l in body.get("links", [])]
+                    links = [dict(l, title="", sent="news review") for l in (body.get("claims") or body.get("links") or [])]
                     out = {"answer": {"answer": body.get("answer", ""), "found": not body.get("not_found"), "links": links, "status": ""}, "message": "Saved."}
             elif name == "messages":
                 if body.get("read"):
@@ -401,8 +401,10 @@ def main():
             check("the research project opens on its first question", card.locator("h3").inner_text() == "A Dream Called Hope LLC")
             check("...with the record's page and what we hold", card.locator("a", has_text="What our page says").count() == 1
                   and "Laveen, AZ" in card.inner_text())
-            check("...one link row, news story picked", card.locator(".kop-vol-link-row").count() == 1
-                  and card.locator(".kop-vol-link-kind").input_value() == "article")
+            check("...one fact box with its link row, news story picked", card.locator(".kop-vol-claim").count() == 1
+                  and card.locator(".kop-vol-link-row").count() == 1 and card.locator(".kop-vol-link-kind").input_value() == "article")
+            check("...and says to cite every piece of information", "Cite every piece of information" in card.locator(".kop-vol-cite").inner_text()
+                  and "A fact with no link cannot be used" in card.locator(".kop-vol-cite").inner_text())
             check("the brief words the examples for research", "A good answer looks like" in page.locator(".kop-vol-brief").inner_text())
             check("question 1 of 3", "Question 1 of 3" in page.locator(".kop-vol-position").inner_text())
             # On a tall screen the conversation is in view at once, so the reply is read and the line goes straight away.
@@ -411,19 +413,32 @@ def main():
             if shots:
                 page.screenshot(path=str(shots / ("research-%d.png" % width)), full_page=True)
 
-            card.locator("button", has_text="Could not find it").click()
+            card.locator("summary", has_text="Could not find it?").click()
+            card.locator("button", has_text="Send: could not find it").click()
             check('"Could not find it" with no words asks where they looked', "Say where you looked" in card.locator(".kop-vol-msg").inner_text())
 
-            card.locator("textarea").fill("Closed in June 2009, per the Arizona Republic.")
+            card.locator("button", has_text="Save my answer").click()
+            check("saving with no fact asks for one with its link", "at least one fact" in card.locator(".kop-vol-msg").inner_text())
+            card.locator(".kop-vol-claim-fact").fill("It closed in June 2009.")
+            card.locator("button", has_text="Save my answer").click()
+            check("a fact without its link is refused, naming the fact", "Fact 1 has no link" in card.locator(".kop-vol-msg").inner_text()
+                  and not [b for n, b in st["posts"] if n == "answer"])
             card.locator(".kop-vol-link-url").fill("https://example-news.test/closes")
-            card.locator("button", has_text="Add another link").click()
+            card.locator("button", has_text="Add another fact").click()
+            check("a second fact box, numbered", card.locator(".kop-vol-claim").count() == 2 and "Fact 2" in card.locator(".kop-vol-claim").nth(1).inner_text())
+            card.locator(".kop-vol-claim-fact").nth(1).fill("A former student sued it in 2008.")
             card.locator(".kop-vol-link-url").nth(1).fill("https://court.test/case")
             card.locator(".kop-vol-link-kind").nth(1).select_option("lawsuit")
+            card.locator(".kop-vol-claim-quote").nth(1).fill("Plaintiff attended the Academy from 2006 to 2007.")
+            if shots:
+                page.screenshot(path=str(shots / ("research-facts-%d.png" % width)), full_page=True)
             card.locator("button", has_text="Save my answer").click()
             page.wait_for_function("document.querySelector('.kop-vol-research h3') && document.querySelector('.kop-vol-research h3').textContent.indexOf('Very Long') >= 0")
             sent = [b for n, b in st["posts"] if n == "answer"][-1]
-            check("the answer went with both links and their kinds", sent["links"] == [{"url": "https://example-news.test/closes", "kind": "article"},
-                                                                               {"url": "https://court.test/case", "kind": "lawsuit"}], json.dumps(sent))
+            check("each fact went with its own link, kind and quote", sent["claims"] == [
+                {"claim": "It closed in June 2009.", "url": "https://example-news.test/closes", "kind": "article", "quote": ""},
+                {"claim": "A former student sued it in 2008.", "url": "https://court.test/case", "kind": "lawsuit",
+                 "quote": "Plaintiff attended the Academy from 2006 to 2007."}] and not sent.get("not_found"), json.dumps(sent))
             check("saved line says where the links went", "sent to the news queue" in page.locator(".kop-vol-saved").inner_text())
             check("on to question 2", "Question 2 of 3" in page.locator(".kop-vol-position").inner_text())
 

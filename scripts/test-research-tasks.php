@@ -258,11 +258,34 @@ $check('a task about one record carries it (Sam sees its facts)', (int) ($d['fac
 $check('the tasks show as Sam\'s', kop_rt_get($pick[0])['assignee'] === 'volunteer' && (int) kop_rt_get($pick[0])['project_id'] === $pid);
 $seen = kop_volp_items($sam_id, $pid, 5);
 $check('Sam\'s page opens the questions', count($seen['items']) >= 2 && $seen['items'][0]['source'] === 'research', json_encode(array_column($seen['items'], 'key')));
-kop_volr_answer($sam, $pid, 'rt' . $plain, 'Andersonville, per the 2015 licence.', array(array('url' => 'https://example.org/licence', 'title' => 'Licence', 'kind' => 'website')));
+// Every piece of information is cited: each fact with the link that says it.
+$check('a fact with no link is refused, by its number', strpos($throws(function () use ($sam, $pid, $plain) {
+    kop_volr_answer($sam, $pid, 'rt' . $plain, '', array(), true, array(array('claim' => 'In Andersonville.', 'url' => 'https://example.org/licence'), array('claim' => 'Opened 1998.')));
+}), 'Fact 2 has no link') !== false);
+$check('a link with no fact is refused', strpos($throws(function () use ($sam, $pid, $plain) {
+    kop_volr_answer($sam, $pid, 'rt' . $plain, '', array(), true, array(array('url' => 'https://example.org/licence')));
+}), 'no fact') !== false);
+$check('a found answer with no facts is refused', $throws(function () use ($sam, $pid, $plain) { kop_volr_answer($sam, $pid, 'rt' . $plain, 'Andersonville.', array(), true, array()); }) !== '');
+$sent_notes = array();
+$GLOBALS['kop_test_sent'] = &$sent_notes;
+$ans = kop_volr_answer($sam, $pid, 'rt' . $plain, 'The 2010 directory still says Norris.', array(), true, array(
+    array('claim' => 'Norris Academy is in Andersonville, TN.', 'url' => 'https://example.org/licence', 'kind' => 'website', 'quote' => 'Norris Academy, Andersonville TN 37705'),
+    array('claim' => 'It was licensed in 2015.', 'url' => 'https://example.org/licence', 'kind' => 'website'),
+));
+$check('each fact is kept with its link and quote', count($ans['links']) === 2 && $ans['links'][0]['claim'] === 'Norris Academy is in Andersonville, TN.'
+    && $ans['links'][0]['quote'] === 'Norris Academy, Andersonville TN 37705' && $ans['links'][1]['url'] === 'https://example.org/licence', json_encode($ans));
+$check('one page backing two facts is sent to the inbox once', $ans['links'][0]['sent'] === $ans['links'][1]['sent']);
 $n = kop_rt_sync_volunteer_answers();
 $t = kop_rt_get($plain);
-$check('an answer moves the task to Answered, with its link', $n === 1 && $t['status'] === 'answered' && strpos($t['answer'], 'Andersonville') !== false
-    && strpos($t['answer'], 'https://example.org/licence') !== false && $t['answer_by'] === 'Sam Example (volunteer)', json_encode($t));
+$check('the answer moves the task to Answered, each fact with its source', $n === 1 && $t['status'] === 'answered'
+    && strpos($t['answer'], "- Norris Academy is in Andersonville, TN. ([source](https://example.org/licence))") === 0
+    && strpos($t['answer'], 'It says: "Norris Academy, Andersonville TN 37705"') !== false && strpos($t['answer'], 'The 2010 directory still says Norris.') !== false
+    && substr_count($t['answer'], 'https://example.org/licence') === 2 && $t['answer_by'] === 'Sam Example (volunteer)', $t['answer']);
+$h = kop_rt_card_html($t, array(), array());
+$check('the card shows each fact with a source link', substr_count($h, '>source</a>') === 2, $h);
+$check('a session answer from the seed cites each fact the same way', kop_rt_seed_answer_text(array('claims' => array(
+    array('claim' => 'Closed March 2009.', 'url' => 'https://example.org/n', 'quote' => 'shut its doors in March'), array('claim' => 'No link', 'url' => ''))))
+    === "- Closed March 2009. ([source](https://example.org/n))\n  - It says: \"shut its doors in March\"");
 kop_rt_change(array($plain), array('status' => 'settled', 'settled' => 'Record fixed.'), 'settle', 'test');
 kop_rt_mark_volunteer_used($t);
 $check('settling marks Sam\'s answer Used', $wpdb->get_var("SELECT status FROM wpdl_kop_vol_answers WHERE item_key = 'rt$plain'") === 'used');

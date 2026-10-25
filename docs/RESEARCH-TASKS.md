@@ -36,10 +36,19 @@ sync). Use an existing section name when one fits (`tasks.py list` shows them).
 
 "Work the research tasks" means: list them on the server (`php api/research-tasks.php --claude`, read-only, over
 SSH from `~/public_html/wp-content/themes/child` with `/opt/cpanel/ea-php82/root/usr/bin/php`, or ask the owner to
-copy them from the screen's Claude tab), research each, submit every new source per CLAUDE.md, then send the answer:
+copy them from the screen's Claude tab), research each, submit every new source per CLAUDE.md, then send the answer.
+
+**Cite every piece of information** (owner, 2026-10-25), the same rule volunteers answer under: each fact is its own
+`--claim`, with the link to the page that says it and, when you can, the sentence that says it. A fact you cannot link
+stays out of the answer; one page can back several facts (repeat its link), but never stands for a fact it does not
+say. `answer` refuses an answer without a claim; `--text` is only for what is not a fact (sources that disagree, how
+sure, what to check).
 
 ```bash
-python scripts/research-tasks/tasks.py answer <key> --text "Closed March 2009: Iowa DHS notice <url>" --by "Claude session"
+python scripts/research-tasks/tasks.py answer <key> --by "Claude session" \
+    --claim "Rocky Mountain Academy closed in March 2009 | https://... | the academy shut its doors in March" \
+    --claim "Its licence was surrendered the same month | https://... | licence surrendered 3/2009" \
+    --text "The 2010 directory still lists it; it was printed before the closure."
 python scripts/research-tasks/tasks.py settle <key> --text "Fixed on record 9614, commit <url>"   # when the session also made the fix
 ```
 

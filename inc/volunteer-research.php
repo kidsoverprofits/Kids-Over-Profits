@@ -30,6 +30,7 @@ if (!defined('ABSPATH')) {
 
 const KOP_VOLR_DB_VERSION = '1';
 const KOP_VOLR_MAX_LINKS = 6;
+const KOP_VOLR_MAX_CLAIMS = 15;
 
 function kop_volr_table() {
     global $wpdb;
@@ -106,9 +107,9 @@ function kop_volr_kinds() {
         ),
         'custom' => array(
             'title'    => 'Research questions',
-            'question' => 'Find the answer to each question and give the link where you found it.',
-            'yes'      => 'An answer and the page that says it.',
-            'no'       => 'An answer with no link. If you cannot find it, say where you looked.',
+            'question' => 'Find the answer to each question. Cite every piece of information: write each fact on its own line with the link to the page that says it.',
+            'yes'      => 'Each fact on its own line, each with its own link: "Closed in June 2009" with the newspaper story that says so, "Renamed Pine View in 2006" with the state licence record.',
+            'no'       => 'A fact with no link, one link meant to cover several facts it does not say, or what you remember or guess. If you cannot find it, say where you looked.',
             'minutes'  => 5, 'link_kind' => 'website',
             'where'    => '',
         ),
@@ -298,11 +299,49 @@ function kop_volr_clean_links($links, $default_kind) {
 }
 
 /**
+ * The facts a volunteer found, each with the link that says it (owner, 2026-10-25: every piece of information is
+ * cited): [{claim, url, kind, quote}]. A fact without a link, or a link without its fact, is refused by its number.
+ */
+function kop_volr_clean_claims($claims, $default_kind) {
+    $out = array();
+    $kinds = kop_volr_link_kinds();
+    $n = 0;
+    foreach ((array) $claims as $c) {
+        if (!is_array($c)) continue;
+        $claim = trim(mb_substr(str_replace("\r\n", "\n", (string) ($c['claim'] ?? '')), 0, 1000));
+        $url = trim((string) ($c['url'] ?? ''));
+        $quote = trim(mb_substr(str_replace("\r\n", "\n", (string) ($c['quote'] ?? '')), 0, 1000));
+        if ($claim === '' && $url === '' && $quote === '') continue;
+        $n++;
+        if ($claim === '') throw new RuntimeException('Fact ' . $n . ' has a link but no fact: write what that page says.');
+        if ($url === '') throw new RuntimeException('Fact ' . $n . ' has no link. Every fact needs the link to the page where you read it; if you cannot find one, leave the fact out.');
+        if (!preg_match('#^https?://[^\s/$.?\#][^\s]*$#i', $url)) throw new RuntimeException('The link for fact ' . $n . ' is not a web address (it should start with https://).');
+        $kind = (string) ($c['kind'] ?? '');
+        $out[] = array('claim' => $claim, 'url' => esc_url_raw($url, array('http', 'https')), 'kind' => isset($kinds[$kind]) ? $kind : $default_kind,
+            'quote' => $quote, 'title' => '');
+        if (count($out) >= KOP_VOLR_MAX_CLAIMS) break;
+    }
+    return $out;
+}
+
+/** Cited facts as the answer text admins read: one line each, "- fact ([source](url))", the quote under it. */
+function kop_volr_claims_text(array $claims) {
+    $lines = array();
+    foreach ($claims as $c) {
+        $lines[] = '- ' . preg_replace('/\s+/', ' ', $c['claim']) . ' ([source](' . $c['url'] . '))';
+        if (($c['quote'] ?? '') !== '') $lines[] = '  - It says: "' . preg_replace('/\s+/', ' ', trim($c['quote'], " \"\xE2\x80\x9C\xE2\x80\x9D")) . '"';
+    }
+    return implode("\n", $lines);
+}
+
+/**
  * Save (or change) a volunteer's answer to one question. $found false = they
  * could not find it ($answer says where they looked). New links go to the
  * review inbox now. Returns the answer as the page shows it.
+ * $claims (the volunteer page always sends them): the facts found, each with its link; the answer text is built
+ * from them and each link is stored with its fact. Without $claims, $answer + $links as before.
  */
-function kop_volr_answer(array $vol, $pid, $key, $answer, $links, $found = true) {
+function kop_volr_answer(array $vol, $pid, $key, $answer, $links, $found = true, $claims = null) {
     $p = kop_volp_get($pid);
     if (!$p || !kop_volr_is($p) || !kop_volp_for_volunteer($p, (int) $vol['id'])) throw new RuntimeException('This project is finished or not yours. Thank you!');
     $row = null;
@@ -310,7 +349,13 @@ function kop_volr_answer(array $vol, $pid, $key, $answer, $links, $found = true)
     if (!$row || (int) $row['gone']) throw new RuntimeException('That question is not in this project any more.');
     $answer = trim(mb_substr(str_replace("\r\n", "\n", (string) $answer), 0, 4000));
     $kind = kop_volr_kind_of($p);
-    $links = kop_volr_clean_links($links, $kind['link_kind']);
+    if ($found && $claims !== null) {
+        $links = kop_volr_clean_claims($claims, $kind['link_kind']);
+        if (!$links) throw new RuntimeException('Add each fact you found with the link where it says it, or press "Could not find it".');
+        $answer = trim(mb_substr(kop_volr_claims_text($links) . ($answer !== '' ? "\n\n" . $answer : ''), 0, 8000));
+    } else {
+        $links = kop_volr_clean_links($links, $kind['link_kind']);
+    }
     if ($found && $answer === '' && !$links) throw new RuntimeException('Write what you found, or press "Could not find it".');
     if (!$found && $answer === '') throw new RuntimeException('Say where you looked, so nobody searches the same places again.');
     kop_vol_rate_check((int) $vol['id']);
@@ -325,8 +370,15 @@ function kop_volr_answer(array $vol, $pid, $key, $answer, $links, $found = true)
     $sent = array();
     foreach ($old ? kop_volr_links_of($old) : array() as $l) $sent[$l['url']] = $l['sent'] ?? '';
     $item = kop_volr_item($p, $row, 0);
+    // A cited link goes to the inbox once, its note naming the facts it supports.
+    $supports = array();
+    foreach ($links as $l) if (($l['claim'] ?? '') !== '') $supports[$l['url']][] = $l['claim'] . (($l['quote'] ?? '') !== '' ? ' ("' . $l['quote'] . '")' : '');
     foreach ($links as &$l) {
-        $l['sent'] = $sent[$l['url']] ?? kop_volr_send_source($vol, $p, $item ?: array('title' => $row['title'], 'question' => $p['question']), $l, $answer);
+        if (!isset($sent[$l['url']])) {
+            $sent[$l['url']] = kop_volr_send_source($vol, $p, $item ?: array('title' => $row['title'], 'question' => $p['question']), $l,
+                isset($supports[$l['url']]) ? 'This page says: ' . implode('; ', $supports[$l['url']]) : $answer);
+        }
+        $l['sent'] = $sent[$l['url']];
     }
     unset($l);
     $data = array('title' => mb_substr((string) $row['title'], 0, 255), 'answer' => $answer, 'found' => $found ? 1 : 0,
@@ -456,13 +508,31 @@ function kop_volr_rest_answer(WP_REST_Request $req) {
         $key = (string) $req->get_param('key');
         if ($req->get_param('withdraw')) return kop_volr_withdraw($who['vol'], $pid, $key);
         $links = $req->get_param('links');
+        $claims = $req->get_param('claims');
+        $found = !$req->get_param('not_found');
+        // The page sends each fact with its link; a found answer without them is refused (every fact is cited).
         $answer = kop_volr_answer($who['vol'], $pid, $key, wp_unslash((string) $req->get_param('answer')), is_array($links) ? wp_unslash($links) : array(),
-            !$req->get_param('not_found'));
+            $found, $found ? (is_array($claims) ? wp_unslash($claims) : array()) : null);
         return array('answer' => $answer, 'message' => 'Thanks. Your answer is saved; an admin reads every one.');
     });
 }
 
 /* ---- Admin: one research project ------------------------------------------------------- */
+
+/** An answer for the admin: each cited fact with its source link, what kind of page and where it went, and the quote; else the text. */
+function kop_volr_admin_answer_html(array $a, array $links, array $kinds) {
+    $cited = array_values(array_filter($links, function ($l) { return ($l['claim'] ?? '') !== ''; }));
+    if (!$cited) return '<span style="white-space:pre-wrap">' . esc_html((string) $a['answer']) . '</span>';
+    $out = '<ul style="margin:4px 0 0 18px;list-style:disc">';
+    foreach ($cited as $l) {
+        $out .= '<li>' . esc_html($l['claim']) . ' (<a href="' . esc_url($l['url']) . '" target="_blank" rel="noopener noreferrer">source</a>, <span class="description">'
+            . esc_html(($kinds[$l['kind']] ?? $l['kind']) . (($l['sent'] ?? '') !== '' ? ', ' . $l['sent'] : '')) . '</span>)'
+            . (($l['quote'] ?? '') !== '' ? '<br><span class="description">It says: "' . esc_html($l['quote']) . '"</span>' : '') . '</li>';
+    }
+    $out .= '</ul>';
+    $rest = trim(substr((string) $a['answer'], strlen(kop_volr_claims_text($cited))));
+    return $out . ($rest !== '' ? '<span style="white-space:pre-wrap">' . esc_html($rest) . '</span>' : '');
+}
 
 function kop_volr_admin_project(array $p, $nonce, array $names) {
     global $wpdb;
@@ -500,7 +570,9 @@ function kop_volr_admin_project(array $p, $nonce, array $names) {
                         <div style="margin:0 0 8px">
                             <?php echo (int) $p['volunteer_id'] ? '' : '<strong>' . esc_html((string) $a['name']) . ':</strong> '; ?>
                             <?php echo (int) $a['found'] ? '' : '<em>Could not find it.</em> '; ?>
-                            <span style="white-space:pre-wrap"><?php echo esc_html((string) $a['answer']); ?></span>
+                            <?php echo kop_volr_admin_answer_html($a, $links, $kinds);
+                            // Cited facts carry their own links; only an older answer's loose links are listed under it.
+                            $links = array_values(array_filter($links, function ($l) { return ($l['claim'] ?? '') === ''; })); ?>
                             <?php if ($links) : ?><ul style="margin:4px 0 0 18px;list-style:disc">
                                 <?php foreach ($links as $l) : ?>
                                     <li><a href="<?php echo esc_url($l['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($l['title'] !== '' ? $l['title'] : $l['url']); ?></a>
