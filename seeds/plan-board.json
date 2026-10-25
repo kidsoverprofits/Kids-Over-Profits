@@ -1,6 +1,6 @@
 {
  "built": "2026-10-25 18:50 UTC",
- "source": "30a9d04cbef3ff290c043cde120f94f4fa5f525a",
+ "source": "24755341a6d31577b8ba75e4ad9d5503c3981b21",
  "sections": [
   {
    "key": "2",
@@ -1049,6 +1049,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "bdf48766cb1e"
+      },
+      {
+       "id": "4.3:staff-jobs-that-were-filed-as-research-tasks",
+       "lead": "Staff jobs that were filed as research tasks",
+       "text": "**Staff jobs that were filed as research tasks** (2026-10-25, moved off KOP Tools > Research Tasks when every task became a plain question; each card there is settled with a pointer here and keeps its details): - In Sequel's draft company history, fix the APM Reports wording and name the Tuskegee program Brighter Path Tuskegee (Vivant) at Connor Bennett's death. (`more-sequel-and-three-springs-er:sequel-s-draft-company-history-operator-20-opera`) - Go through the Sequel research's 56 source disagreements and 61 unchecked facts and add any still unsettled to the open list. (`more-sequel-and-three-springs-er:tmp-sequel-conflicts-md`) - Research the rename year for each of the 55 renamed-program pairs waiting in the data audit. (`renames-that-may-be-wrong:data-audit-renamed-pairs`) - Add Mansfield Juvenile Treatment Center (Arkansas), run by Rite of Passage since June 2020, to the Rite of Passage page. (`company-histories:mansfield-juvenile-treatment-center-ar`) - Make records for approved wiki entries that have none (Red Rock Springs, InnerRoads and others) and fix 21 entries linked to missing or wrong records. (`wiki-update-drafts-kop-pipeline:approved-wiki-entries-with-no-record`) - Link the unmatched state inspection reports (Newport Academy in California, Sequel TSI Kissimmee, Auldern Academy, Georgia psychiatric programs, New Hope names) to their programs. (`woodbury-facts-and-inspection-li:inspection-rows-left-unlinked`) - Make records for the 18 federally funded programs KOP lacks (ORR shelters, Senate report programs, Holly Hill, Old Vineyard and others). (`federal-funding:18-funded-programs-with-no-kop-record`) - Check whether Hallmark Youthcare, whose Virginia licence was revoked in August 2026, has a record, and add one if not. (`federal-funding:hallmark-youthcare`) - Read the old TRICARE lists, the full Montana and Maine Medicaid rosters, Alaska's out-of-state list and the SBA PPP data. (`federal-funding:not-read-yet`) - Find what created the \"Chicago National Archives\" and \"National Archives at San Francisco\" facility records, then remove them or fold them into document sources. (`facility-records-that-are-not-pr:chicago-national-archives-il-and-national-archiv`)",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "15726358761a"
       }
      ]
     },
