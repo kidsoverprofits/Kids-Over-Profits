@@ -3319,3 +3319,40 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
   75 News posts to their feed entries; per lawsuit post, 301 or keep; deactivate Code Snippets snippet 6
   (OG Image).
   Ask: Your call on each of the five site content items?
+
+## Plan Board pass 2026-10-25, second (finished 2026-10-25)
+
+- 2.1, Answered "yes", done 2026-10-25: the three links made on the server through `kop_folder_links_link()`
+  (undo: Unlink on api/link-folders.php):
+  7. **Folders on no page** (2026-10-14). Link "Hyde" (19) to Hyde School (297), "ANASAZI" (214) to Anasazi
+     Foundation (5659) and "Agape Boarding School" (7815) to Agape Baptist Academy (4819) with
+     `api/link-folders.php`, or move the files with the tile pencil.
+     Ask: Link the Hyde, ANASAZI and Agape folders to their records?
+- 2.2, Answered "yes", done 2026-10-25 in kop-pipeline
+  [576a699](https://github.com/kidsoverprofits/kop-pipeline/commit/576a6999fb18908236a30ce5298164250d95279c) (26 pass):
+  8. **`scrapers/test_scrapers.py` has 5 stale failures** (2026-10-20, all from before the CA/PA fixes in kop-pipeline
+     `f22040c`): the CA payload test unpacks two values from `scrape()` (it returns three now), the Oregon date
+     format, `smart_title_case` (two cases) and the data structure check. Bring the tests up to the code.
+     Run them with `py -3`; plain `python` lacks `requests` and `pymupdf`.
+     Ask: OK for a session to bring the five stale scraper tests up to the code?
+- 2.4, Answered "yes", done 2026-10-25 in
+  [e7cc3f1](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e7cc3f1e28ea16976989676aa3362db20d11cc66):
+  5. **Article type labels**: print the list's labels ("Lawsuit Article") on /news/, state and country pages
+     instead of the raw value?
+     Ask: Show readable labels ("Lawsuit Article") instead of the raw value?
+- 2.4, Answered "reviews, residential treatment", done 2026-10-25 (wording saved, 118 pages; 4.7 item 9):
+  9. **SEO keyphrase wording**: which words people search for. Facility name alone, or with "abuse" / "reviews";
+     "troubled teen" vs "residential treatment" for state hubs. Blocks 4.7 item 9. Answer it in the "Keyphrase wording" box at
+     KOP Tools > SEO Descriptions (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts), e.g. `{name} abuse`. (People are settled: name +
+     role or employer.)
+     Ask: Facility keyphrase: name alone, or with "abuse" / "reviews"? State hubs: "troubled teen" or "residential treatment"?
+- 2.4, Answered "one per case": moved to 4.6 item 15 as session work:
+  3. **Family Foundation School lawsuits** (~33 federal suits, 2026): one lawsuit record per case, or one for
+     the litigation listing every docket (old 3.23).
+     Ask: Family Foundation School: one lawsuit record per case, or one for all of it?
+- 2.4, Answered "investors as their own map kind, leave the other stuff pending": investors to 4.3 item 19, the rest
+  to 4.3 item 20 (a review screen first):
+  6. **Network map judgement calls** in `tmp/network-qa.md` (rebuilt by every build); the six curated aliases
+     naming another era (#13927, #10602, #11361, #11462, #11355, #12621); investors as their own map kind
+     reading the Investors table, or added by hand.
+     Ask: Your calls on the map QA list, the six aliases, and how investors get on the map?

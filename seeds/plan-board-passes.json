@@ -1,6 +1,67 @@
 {
  "passes": [
   {
+   "at": "2026-10-25 22:59",
+   "entries": [
+    {
+     "answer": 13,
+     "itemId": "2.2:scrapers-test-scrapers-py-has-5-stale-failures",
+     "lead": "`scrapers/test_scrapers.py` has 5 stale failures",
+     "kind": "answer",
+     "result": "Done: the five and the three they hid brought up to the code, 26 pass (kop-pipeline 576a699). Archived."
+    },
+    {
+     "answer": 14,
+     "itemId": "2.1:folders-on-no-page",
+     "lead": "Folders on no page",
+     "kind": "answer",
+     "result": "Done: Hyde, ANASAZI and Agape Boarding School linked to Hyde School, Anasazi Foundation and Agape Baptist Academy on the server. Archived."
+    },
+    {
+     "answer": 15,
+     "itemId": "2.2:unsilenced-backup",
+     "lead": "Unsilenced backup",
+     "kind": "answer",
+     "result": "Checked: it ran 2026-10-02 to 10-06 and stopped on Google's rate limit at 4,188 of 58,961 files. Item now asks you to restart it."
+    },
+    {
+     "answer": 16,
+     "itemId": "2.4:family-foundation-school-lawsuits",
+     "lead": "Family Foundation School lawsuits",
+     "kind": "answer",
+     "result": "One record per case: now session work, 4.6 item 15."
+    },
+    {
+     "answer": 17,
+     "itemId": "2.4:article-type-labels",
+     "lead": "Article type labels",
+     "kind": "answer",
+     "result": "Done: /news/, state and country pages show the labels (e7cc3f1). Archived."
+    },
+    {
+     "answer": 18,
+     "itemId": "2.4:network-map-judgement-calls",
+     "lead": "Network map judgement calls",
+     "kind": "answer",
+     "result": "Investors as their own map kind: 4.3 item 19. The rest needs a review screen first (it pointed at a file you cannot open): 4.3 item 20."
+    },
+    {
+     "answer": 19,
+     "itemId": "2.4:seo-keyphrase-wording",
+     "lead": "SEO keyphrase wording",
+     "kind": "answer",
+     "result": "Done: wording '{name} reviews' and '{name} residential treatment' saved; 118 pages took their keyphrase (Undo on the SEO Descriptions Done tab). Archived."
+    },
+    {
+     "answer": 20,
+     "itemId": "4.3:data-model-phase-5",
+     "lead": "Data model phase 5",
+     "kind": "answer",
+     "result": "Go already recorded on the item (backup taken); the removal is under way one step per commit."
+    }
+   ]
+  },
+  {
    "at": "2026-10-25 21:55",
    "entries": [
     {
