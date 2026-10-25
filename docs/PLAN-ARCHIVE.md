@@ -4,6 +4,39 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-10-25
+
+### 4.7 Pages and templates
+
+2. **Post classification**: refresh the mirror, rerun `scripts/inventory-posts.py`, write
+   `docs/POST-CLASSIFICATION.md`; confirm `in_news_feed` for every News post before item 17 (c) is acted on.
+   Done 2026-10-25: docs/POST-CLASSIFICATION.md written from the 2026-10-25 mirror; 74 of 75 News posts have one
+   approved feed row each, the 75th (470) is the duplicate of 786. Open: the mirror sync built
+   kop-pipeline/tmp/prod.sqlite.building but could not replace tmp/prod.sqlite (file held open, WinError 5); close
+   whatever holds it and rename, or rerun the sync. (kop-pipeline) inventory-posts.py lacked `import os`; fixed.
+3. **"Where are the kids?" posts**: recommend `single-facility-profile.php` where a facility page covers the same
+   facility. Then do item 17. Done 2026-10-25: nothing left; the only published one (Discovery Ranch, 10800) already
+   uses it. Provo Canyon School (10796) was still a draft in the 2026-10-25 mirror though the Plan Board says published.
+17. **Site content, go-ahead given** (owner, Plan Board 2026-10-25: "please do all of that"; background in
+    PLAN-ARCHIVE.md, old 2 items 11-15). Do all five, after items 2 and 3 here:
+    (a) hub editor content, the five recommendations, through `kop_apply_text_fixes()` in `inc/admin.php`;
+    (b) unpublish to draft `facility-form-test`, `data-organizer`, `data`, `data-analysis`,
+    `arizona-adhs-inspections`, after checking no link or redirect depends on them;
+    (c) 301 the 75 News posts to their feed entries (confirm `in_news_feed` for each first);
+    (d) per lawsuit post, 301 to `/lawsuits/#lawsuit-<id>` when the row covers it, otherwise keep it and link it
+    from the row; (e) deactivate Code Snippets snippet 6 (OG Image).
+    Done 2026-10-25, owner's go-ahead on the change list, commit
+    https://github.com/kidsoverprofits/Kids-Over-Profits/commit/db8e0b07dd60c222dc5511ef988f2d057b918a3b. (a) four
+    seeds/text-fixes.json page entries (Where Are the Kids + Advocates link the location tab, Advocates h6 -> h2, Survivors'
+    lists -> one line to Resources, Research & Reports' hidden grid deleted; History was already h2/h3); /11-12-2024/ 301s to
+    /survivor-resources-nature/. (b)+(e) one-time pass kop_apply_site_content_cleanup() (template assignments 141, log in option
+    kop_site_content_cleanup): the five posts are drafts (404 live), snippet 6 off (front page has one og:image/og:title).
+    (c)+(d) seeds/post-redirects.json read by kop_post_redirects(): 75 News posts -> /tti-news-feed/?item=<row> (new one-article
+    view, cards carry id="news-<row>"), 8 lawsuit posts -> /lawsuits/#lawsuit-<id>; all 84 checked live. Kept: 2962, 1084, 1909
+    ("Our write-up" on rows 2, 43, 44, kop_lawsuit_writeups() in templates/page-lawsuits.php; links to redirected posts dropped);
+    2837 (Whetstone Academy) kept, its WSPA article sent to lawsuit review. Checked live: contrast, bare text, overflow on the
+    item view, /lawsuits/, /survivors/, /advocates/; screenshots at 390/768/1440.
+
 ## Moved 2026-10-21
 
 ### 4.7 Pages and templates
