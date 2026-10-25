@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 23:10 UTC",
- "source": "10a28b97a977181edb9f838c5c3e29a2c255ca5e",
+ "built": "2026-10-25 23:12 UTC",
+ "source": "424059430e6762bc06a27da74fff73f55c7e9417",
  "sections": [
   {
    "key": "2",
@@ -1275,26 +1275,10 @@
       {
        "id": "4.7:visual-qa-of-all-hubs",
        "lead": "Visual QA of all hubs",
-       "text": "**Visual QA of all hubs** at 390, 768 and 1440 (`scripts/preview-hub-pages.py`); only Law & Policy, History, Survivors and Support were checked. Fix in `css/hub.css` under `.kop-hub*`.",
-       "ask": "",
-       "date": "",
-       "hash": "3741d307fbe9"
-      },
-      {
-       "id": "4.7:post-classification",
-       "lead": "Post classification",
-       "text": "**Post classification**: refresh the mirror, rerun `scripts/inventory-posts.py`, write `docs/POST-CLASSIFICATION.md`; confirm `in_news_feed` for every News post before item 17 (c) is acted on. Done 2026-10-25: docs/POST-CLASSIFICATION.md written from the 2026-10-25 mirror; 74 of 75 News posts have one approved feed row each, the 75th (470) is the duplicate of 786. Open: the mirror sync built kop-pipeline/tmp/prod.sqlite.building but could not replace tmp/prod.sqlite (file held open, WinError 5); close whatever holds it and rename, or rerun the sync. (kop-pipeline) inventory-posts.py lacked `import os`; fixed.",
+       "text": "**Visual QA of all hubs** at 390, 768 and 1440 (`scripts/preview-hub-pages.py`); only Law & Policy, History, Survivors and Support were checked. Fix in `css/hub.css` under `.kop-hub*`. Found 2026-10-25: on /survivors/ the \"TTI Survivors: Common Experiences\" link-preview card (visual-link-preview plugin, `.vlp-link-container.vlp-layout-hmm`) runs 240-300px past its box at 390 and 768 (check-mobile-overflow.py). Leftovers from item 17's prep (2026-10-25): the mirror sync built kop-pipeline/tmp/prod.sqlite.building but could not replace tmp/prod.sqlite (held open, WinError 5): rename it or rerun the sync. Provo Canyon School (10796) was still a draft in that mirror though the Plan Board says published; check it live.",
        "ask": "",
        "date": "2026-10-25",
-       "hash": "48e03416bcfc"
-      },
-      {
-       "id": "4.7:where-are-the-kids-posts",
-       "lead": "\"Where are the kids?\" posts",
-       "text": "**\"Where are the kids?\" posts**: recommend `single-facility-profile.php` where a facility page covers the same facility. Then do item 17. Done 2026-10-25: nothing left; the only published one (Discovery Ranch, 10800) already uses it. Provo Canyon School (10796) was still a draft in the 2026-10-25 mirror though the Plan Board says published.",
-       "ask": "",
-       "date": "2026-10-25",
-       "hash": "32f296a36929"
+       "hash": "ceb8df636a0b"
       },
       {
        "id": "4.7:category-archive-layout",
@@ -1347,10 +1331,10 @@
       {
        "id": "4.7:meta-descriptions-yoast-sees",
        "lead": "Meta descriptions Yoast sees",
-       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: approve the hand-written cards (the keyphrase wording is set, 2026-10-25). - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Owner: posts 470 and 786 are the same Walrus article (Robert Land Academy) posted twice; their cards say so. Keep one, redirect the other. - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
-       "ask": "Unpublish post 13312 (\"Research draft\"), and which of the duplicate Walrus posts 470 / 786 goes?",
+       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: approve the hand-written cards (the keyphrase wording is set, 2026-10-25). - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Done 2026-10-25: posts 470 and 786 (the same Walrus article) both 301 to its feed row 419 (item 17 (c), archived). - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
+       "ask": "Unpublish post 13312 (\"Research draft\")?",
        "date": "2026-10-25",
-       "hash": "d7438038a86f"
+       "hash": "dbfd3e11cb80"
       },
       {
        "id": "4.7:breadcrumbs-on-facility-operator-and-state-pages",
@@ -1383,14 +1367,6 @@
        "ask": "",
        "date": "2026-10-21",
        "hash": "a89f3720aa71"
-      },
-      {
-       "id": "4.7:site-content-go-ahead-given",
-       "lead": "Site content, go-ahead given",
-       "text": "**Site content, go-ahead given** (owner, Plan Board 2026-10-25: \"please do all of that\"; background in PLAN-ARCHIVE.md, old 2 items 11-15). Do all five, after items 2 and 3 here: (a) hub editor content, the five recommendations, through `kop_apply_text_fixes()` in `inc/admin.php`; (b) unpublish to draft `facility-form-test`, `data-organizer`, `data`, `data-analysis`, `arizona-adhs-inspections`, after checking no link or redirect depends on them; (c) 301 the 75 News posts to their feed entries (confirm `in_news_feed` for each first); (d) per lawsuit post, 301 to `/lawsuits/#lawsuit-<id>` when the row covers it, otherwise keep it and link it from the row; (e) deactivate Code Snippets snippet 6 (OG Image). 2026-10-25: change list drafted and shown to the owner; waiting for their go-ahead before anything is pushed.",
-       "ask": "",
-       "date": "2026-10-25",
-       "hash": "c3ac58fd0169"
       }
      ]
     },
