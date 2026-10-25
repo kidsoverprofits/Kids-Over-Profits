@@ -112,6 +112,10 @@ $check('v2 row: every facility stored in the canonical shape', array_keys($store
 $check('v2 row: providers and other kinds keep the shape their tables read',
     kop_suggestion_normalize_facilities(array('facilities' => array(array('providerDetails' => array('x' => 1)))), 'providers') === array('facilities' => array(array('providerDetails' => array('x' => 1))))
     && kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'referrers') === array('facilities' => array(array('a' => 1))));
+$kept_ids = kop_suggestion_normalize_facilities(array('facilities' => array(array('identification' => array('name' => 'X', 'pastOwners' => array('P'), 'websites' => array('https://example.org'), 'currentOwner' => 'C')))), 'companies');
+$check('v2 row: identification fields the schema lacks are kept under legacy, not dropped',
+    ($kept_ids['facilities'][0]['legacy']['identification'] ?? null) === array('pastOwners' => array('P'), 'websites' => array('https://example.org')),
+    json_encode($kept_ids['facilities'][0]['legacy'] ?? null));
 $same = true;
 $cases = array(
     array('notes' => array('A new note from a reader.')),

@@ -283,7 +283,16 @@ if (!function_exists('kop_suggestion_normalize_facilities')) {
             require_once dirname(__DIR__) . '/inc/facility-store.php';
         }
         foreach ($data['facilities'] as $i => $facility) {
-            if (is_array($facility)) $data['facilities'][$i] = kop_facility_normalize($facility);
+            if (!is_array($facility)) continue;
+            $doc = kop_facility_normalize($facility);
+            // The normalizer drops identification keys the schema lacks (the forms' pastOwners, websites);
+            // the row keeps them under legacy, as it does unknown top-level keys, so nothing sent is lost.
+            $ident = kop_facility_unwrap($facility)['facility']['identification'] ?? null;
+            if (is_array($ident)) {
+                $extra = array_diff_key($ident, $doc['identification'], array('currentOwner' => true));
+                if ($extra) $doc['legacy']['identification'] = $extra;
+            }
+            $data['facilities'][$i] = $doc;
         }
         return $data;
     }
