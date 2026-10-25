@@ -11,10 +11,9 @@
  * the closure reports and the new-facility scan stopped recognising those
  * names.
  *
- * Sources, all read-only: the frozen facilities_master and locations_master
- * rows (data.matchAliases beside a __facility_ref facility, and
- * matchAliases / identification.matchAliases on nested facilities, by
- * facility_id), and api/match-aliases-seed.json. Each alias goes into the
+ * Source: api/match-aliases-seed.json (new curated aliases go there; the
+ * frozen facilities_master / locations_master copies were read on 2026-09-29,
+ * and those tables are retired in data model phase 5). Each alias goes into the
  * v2 document's legacy.matchAliases, where kop_facility_to_legacy() hands it
  * to the name index (api/facility-aliases.php). Only records whose id still
  * exists in facilities_v2 are touched, and an alias already present is not
@@ -77,27 +76,8 @@ $add = static function ($id, $list) use (&$found) {
         if (is_string($name) && trim($name) !== '') $found[$id][] = trim($name);
     }
 };
-$nested = static function (array $record) use ($add) {
-    $list = $record['facilities'] ?? ($record['data']['facilities'] ?? null);
-    foreach (is_array($list) ? $list : array() as $f) {
-        if (!is_array($f) || empty($f['facility_id'])) continue;
-        $add($f['facility_id'], $f['matchAliases'] ?? null);
-        $add($f['facility_id'], $f['identification']['matchAliases'] ?? null);
-    }
-};
-foreach ($pdo->query("SELECT id, json_data FROM facilities_master WHERE json_data LIKE '%matchAliases%'") as $r) {
-    $d = json_decode((string) $r['json_data'], true);
-    if (!is_array($d)) continue;
-    if (!empty($d['__facility_ref']) || isset($d['data']['facility'])) {
-        $add($r['id'], $d['data']['matchAliases'] ?? ($d['matchAliases'] ?? null));
-        $add($r['id'], $d['data']['facility']['identification']['matchAliases'] ?? null);
-    }
-    $nested($d);
-}
-foreach ($pdo->query("SELECT id, json_data FROM locations_master WHERE json_data LIKE '%matchAliases%'") as $r) {
-    $d = json_decode((string) $r['json_data'], true);
-    if (is_array($d)) $nested($d);
-}
+// The frozen facilities_master / locations_master copies were read on 2026-09-29 (48 aliases on 33
+// records); those tables are retired in data model phase 5, so the seed is the only source now.
 $seed = json_decode((string) @file_get_contents(__DIR__ . '/match-aliases-seed.json'), true);
 foreach ((array) ($seed['aliases'] ?? array()) as $e) {
     $add($e['id'] ?? 0, $e['names'] ?? null);

@@ -102,7 +102,7 @@ if (!function_exists('kop_v2_exit_if_legacy_frozen')) {
     function kop_v2_exit_if_legacy_frozen($pdo, $tool) {
         if (!($pdo instanceof PDO)) return;
         if (!kop_v2_writes_active($pdo, kop_v2_detect_prefix($pdo))) return;
-        $message = $tool . ' writes the old facility tables, which are frozen: admin saves go to the new facility tables (api/migrate-facility-model.php?action=writes).';
+        $message = $tool . ' writes the old facility tables, which are retired: admin saves go to the new facility tables (data model phase 5, docs/DATA-MODEL-MIGRATION.md).';
         if (PHP_SAPI === 'cli') {
             fwrite(STDERR, $message . "\n");
             exit(1);

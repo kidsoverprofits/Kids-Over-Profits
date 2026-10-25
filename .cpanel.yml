@@ -36,6 +36,8 @@ deployment:
     - /bin/rm -f $DEPLOYPATH/js/sidebar-float.js
     # KOP_FacilityFields lives at the end of data-normalizer.js (pages cached without the new script tag still get it).
     - /bin/rm -f $DEPLOYPATH/js/data-form-modules/facility-fields.js
+    # Data model phase 5 (2026-10-25): the tools that only worked on the retired facilities_master / locations_master.
+    - /bin/rm -f $DEPLOYPATH/api/promote-facilities-to-rows.php $DEPLOYPATH/api/backfill-location-facility-ids.php $DEPLOYPATH/api/backfill-referrers.php $DEPLOYPATH/api/import-state-pages.php $DEPLOYPATH/api/diagnose-oregon.php $DEPLOYPATH/api/backup-data-tables.php $DEPLOYPATH/api/migrate-facility-model.php
     # wiki-stubs.php reads markdown_output/empty_files_updated.md server-side to
     # know which wiki pages are still stubs. Ship that one file (the full
     # markdown_output/ dir is large and not otherwise needed in the theme).
