@@ -949,7 +949,7 @@ function kop_volp_self_status($vid) {
         $out['eligible'] = true;
         $out['via'] = 'practice';
     }
-    // Before they can pick a batch: the round to start with. After: the queues they can still learn ("Learn another queue").
+    // The practice rounds to start or carry on (a card each under "Choose your work").
     if (function_exists('kop_volpr_status')) $out['practice'] = kop_volpr_status((int) $vid);
     if (!$out['eligible']) return $out;
 
@@ -967,7 +967,8 @@ function kop_volp_self_status($vid) {
         if ($practiced && !in_array($key, $practiced, true)) continue;
         $n = isset($counts[$key]) ? (int) $counts[$key] : null;
         if ($n === 0) continue;
-        $out['queues'][] = array('key' => $key, 'label' => (string) $src['label'], 'count' => $n);
+        $out['queues'][] = array('key' => $key, 'label' => (string) $src['label'], 'count' => $n,
+            'title' => (string) (kop_volp_kinds()[$key]['title'] ?? $src['label']), 'blurb' => function_exists('kop_volpr_blurb') ? kop_volpr_blurb($key) : '');
     }
     return $out;
 }

@@ -37,15 +37,15 @@ get_header();
             <details class="kop-vol-howto"<?php echo $kop_vol_new || $kop_vol_preview ? ' open' : ''; ?>>
                 <summary>How this works</summary>
                 <h2>Getting started</h2>
-                <p>Under <em>Choose your work</em>, pick one. The inspection findings start with a practice round: 10 findings an admin has
-                    already decided, with the decision shown after each one. Get 8 of them the same and your first 10 real ones open straight
-                    away. On each, choose <em>Recommend approve</em>, <em>Recommend reject</em> or <em>Not sure</em>; not sure is a good answer
-                    when the note says why.</p>
-                <p>Research questions need no practice round: tick the ones you want and take them. Pictures start straight away: five pages
-                    at a time. For social media posts, press <em>Ask for this work</em> and we set you up; the work then shows up on this page.</p>
+                <p>Under <em>Choose your work</em>, pick any of the four. Research questions: tick the ones you want and take them.
+                    Pictures: five pages at a time. Social media posts: press <em>Ask for this work</em> and we set you up; the work then
+                    shows up on this page.</p>
+                <p>Inspection findings start with a practice round: 10 findings an admin has already decided, with the decision shown after
+                    each one. Get 8 of them the same and your first 10 real ones open. On each, choose <em>Recommend approve</em>,
+                    <em>Recommend reject</em> or <em>Not sure</em>; not sure is a good answer when the note says why.</p>
                 <h2>Choosing your next work</h2>
-                <p>When a batch is done, <em>Give me 10 more</em> starts the next one. The other kinds of work stay one click away under
-                    <em>Other work</em>.</p>
+                <p>The four kinds of work stay on this page under <em>Choose more work</em> while you have something going. When a batch
+                    is done, <em>Give me 10 more</em> starts the next one.</p>
                 <p>Only a few minutes? <a href="<?php echo esc_url(function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/')); ?>">Answer our
                     questions</a>: one short question at a time about what our records are missing.</p>
                 <h2>Taking a break or stopping</h2>

@@ -225,7 +225,7 @@ function kop_volpr_draw($vid, $source) {
 function kop_volpr_blurb($source) {
     $b = array(
         'inspection-highlights' => 'Each one is a passage our scanner pulled out of a state inspection report. You say whether it is a serious violation '
-            . '(harm or danger to a young person) or paperwork. This is the work we most need help with.',
+            . '(harm or danger to a young person) or paperwork.',
     );
     $fallback = function_exists('kop_volp_kinds') ? (string) (kop_volp_kinds()[$source]['question'] ?? '') : '';
     return (string) apply_filters('kop_volpr_blurb', $b[$source] ?? $fallback, $source);

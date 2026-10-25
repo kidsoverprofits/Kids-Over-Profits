@@ -830,10 +830,6 @@ p.kop-vol-newreply {
     border-left: 5px solid var(--kop-teal, #33A7B5);
     border-radius: 6px;
 }
-.kop-vol-choice.is-first {
-    border-left-color: var(--kop-orange, #EF9034);
-    background: var(--kop-soft-pastel-yellow, #FFF5CB);
-}
 .kop-vol-page .kop-vol-choice h3 {
     margin: 0 0 .35rem;
     font-size: 1.05rem;
@@ -841,19 +837,6 @@ p.kop-vol-newreply {
 }
 .kop-vol-choice p { margin: 0 0 .5rem; overflow-wrap: anywhere; }
 .kop-vol-choice .kop-vol-btn { margin-top: auto; }
-.kop-vol-otherwork summary { cursor: pointer; font-weight: 600; color: var(--kop-midnight-blue, #000435); }
-.kop-vol-otherwork[open] summary { margin-bottom: .75rem; }
-.kop-vol-choice-tag {
-    display: inline-block;
-    margin-left: .5rem;
-    padding: .05rem .5rem;
-    border-radius: 999px;
-    background: var(--kop-midnight-blue, #000435);
-    color: #fff;
-    font-size: .75rem;
-    font-weight: 600;
-    vertical-align: middle;
-}
 
 .kop-vol-claim label {
     margin-top: 8px;
