@@ -28,6 +28,19 @@ if (!defined('ABSPATH')) {
 
 const KOP_MSUB_HOURLY_CAP = 12;
 
+/**
+ * Claude research sessions send many sources an hour from one address. A request whose X-KOP-Research-Key
+ * header hashes to this skips the hourly cap (nothing else changes: it still lands in review). Only the hash
+ * is here, the repo is public; the key is in C:\Users\daniu\kop-research-key.txt. To rotate, put a new random
+ * key there and its sha256 here.
+ */
+const KOP_MSUB_RESEARCH_KEY_SHA256 = '2dc073145045bae50947c9844888cd2ec4fcdd1b7bfc9c2a014e9683763855d1';
+
+function kop_msub_is_research(WP_REST_Request $req) {
+    $key = trim((string) $req->get_header('x_kop_research_key'));
+    return $key !== '' && hash_equals(KOP_MSUB_RESEARCH_KEY_SHA256, hash('sha256', $key));
+}
+
 function kop_msub_link_types() {
     return array('article', 'lawsuit', 'legislation', 'website');
 }
@@ -202,7 +215,8 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
     if (!empty($p['website_hp'])) {
         return new WP_REST_Response(array('ok' => true, 'type' => 'website', 'queue' => 'review'), 201);
     }
-    if (kop_msub_rate_limited()) {
+    $research = kop_msub_is_research($req);
+    if (!$research && kop_msub_rate_limited()) {
         return new WP_Error('kop_rate_limited', 'That is a lot of sending for one hour. Please try again later.', array('status' => 429));
     }
     $type = sanitize_key((string) ($p['type'] ?? ''));
@@ -275,7 +289,9 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
     if (is_wp_error($id)) {
         return $id;
     }
-    kop_msub_rate_count();
+    if (!$research) {
+        kop_msub_rate_count();
+    }
 
     // "Email me when this has been reviewed" and the newsletter box (inc/submission-followup.php).
     if ($kind !== '' && function_exists('kop_followup_register')) {

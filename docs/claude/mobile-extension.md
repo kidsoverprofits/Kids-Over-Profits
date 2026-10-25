@@ -36,6 +36,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-eras.php
 php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an in-memory copy of tmp/prod.sqlite
 # The app's "Send" tab (inc/mobile-submit.php): public kop/v1/mobile/submit + /mobile/check, the extension's inserts for links,
 # suggested_edits for facility_new/facility_correction; duplicates come back as {type, status} only (never ids/titles); 12 an hour per sender.
+# Research sessions skip the cap with an X-KOP-Research-Key header whose sha256 is KOP_MSUB_RESEARCH_KEY_SHA256 (the key is in
+# C:\Users\daniu\kop-research-key.txt, never in git; rotate by writing a new key there and its hash in the constant).
+# (kop-pipeline) python scripts/send-sources.py <not-sent files> sends a backlog with it.
 # Signed-in reviewers in the app use kop/v1/extension/* with an application password, like the Chrome extension
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-submit.php [--db=...]
 # The same route serves the browser extension without an account (via=extension; Chrome/Edge/Firefox from one folder, Safari via

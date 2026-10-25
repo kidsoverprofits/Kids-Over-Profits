@@ -49,9 +49,10 @@ class WP_REST_Response {
     public function __construct($data = null, $status = 200) { $this->data = $data; $this->status = $status; }
 }
 class WP_REST_Request implements ArrayAccess {
-    private $params; private $json;
-    public function __construct(array $params = array(), $json = null) { $this->params = $params; $this->json = $json; }
+    private $params; private $json; private $headers;
+    public function __construct(array $params = array(), $json = null, array $headers = array()) { $this->params = $params; $this->json = $json; $this->headers = $headers; }
     public function get_json_params() { return $this->json; }
+    public function get_header($k) { return $this->headers[$k] ?? null; }
     public function offsetExists($k): bool { return isset($this->params[$k]); }
     #[\ReturnTypeWillChange] public function offsetGet($k) { return $this->params[$k] ?? null; }
     public function offsetSet($k, $v): void { $this->params[$k] = $v; }
@@ -284,6 +285,26 @@ check(is_err($r, 'kop_rate_limited', 429), 'the next submit -> 429 kop_rate_limi
 new_sender();
 $r = submit(array('type' => 'article', 'url' => 'https://example-news.test/rate/other-sender', 'title' => 'Other'));
 check(is_resp($r, 201), 'a different sender is not limited');
+
+// Research key: a sender at the cap gets through with the key (the key's hash stands in for the real one),
+// the send does not use up the hour, and a wrong key is still limited.
+new_sender();
+for ($i = 1; $i <= KOP_MSUB_HOURLY_CAP; $i++) {
+    submit(array('type' => 'article', 'url' => "https://example-news.test/rate2/$i", 'title' => "Rate2 $i"));
+}
+$keyed = function ($key, $n) {
+    return kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => "https://example-news.test/research/$n", 'title' => "Research $n"), array('x_kop_research_key' => $key)));
+};
+$real = trim((string) @file_get_contents('C:/Users/daniu/kop-research-key.txt'));
+if ($real !== '') {
+    $before_count = get_transient(kop_msub_rate_key());
+    check(is_resp($keyed($real, 1), 201), 'research key -> 201 past the hourly cap');
+    check(get_transient(kop_msub_rate_key()) === $before_count, 'a research send does not count toward the hour');
+} else {
+    echo "  (skipped: C:/Users/daniu/kop-research-key.txt not here)\n";
+}
+check(is_err($keyed('not-the-key', 2), 'kop_rate_limited', 429), 'wrong research key -> still 429');
+check(is_err($keyed('', 3), 'kop_rate_limited', 429), 'empty research key -> still 429');
 
 // The check route.
 $r = kop_msub_rest_check(new WP_REST_Request(array('url' => $news['article_url'], 'type' => 'article')));
