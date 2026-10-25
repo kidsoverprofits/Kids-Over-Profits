@@ -291,7 +291,7 @@ if (!function_exists('kop_feat_items')) {
      * Every picked article, ready to print: {id, title, url, archive, outlet,
      * byline, date, date_label, type, summary, note, featured_at, image,
      * facilities: [{name, url}]}. $order 'picked' = newest pick first (the
-     * strips), 'published' = newest article first (the page). $limit 0 = all.
+     * app), 'published' = newest article first (the strips, the page). $limit 0 = all.
      */
     function kop_feat_items($order = 'published', $limit = 0) {
         static $memo = array();
@@ -489,13 +489,13 @@ if (!function_exists('kop_feat_card_html')) {
 
 if (!function_exists('kop_feat_strip_html')) {
     /**
-     * The newest picks as a short strip (top of the news feed, home page):
+     * The newest picked articles (by publication date) as a short strip (under the news feed, home page):
      * heading, a line, up to $limit cards and a link to the whole list. '' when
      * nothing is picked.
      */
     function kop_feat_strip_html($args = array()) {
         $args = array_merge(array('limit' => 3, 'heading' => kop_feat_label(), 'text_key' => 'feat:strip'), (array) $args);
-        $items = kop_feat_items('picked', max(1, min(12, (int) $args['limit'])));
+        $items = kop_feat_items('published', max(1, min(12, (int) $args['limit'])));
         if (!$items) return '';
         kop_feat_enqueue_style();
         $total = count(kop_feat_map());
