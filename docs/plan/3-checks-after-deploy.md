@@ -119,3 +119,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     and the survey opens by itself. Send a test answer, then open
     https://kidsoverprofits.org/wp-admin/admin.php?page=kop-sensitivity-survey (KOP Tools lists it): the answer is under New;
     Mark read, Undo, then Delete it. Run `python -u scripts/check-contrast.py` on /volunteer/ with the survey open.
+32. **Research questions reworded** (2026-10-25, [7ea7491e](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7ea7491e)):
+    open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks (the visit imports the seed): the log says
+    about 117 reworded, and In Loving Memory titles name the person, program and year with no "sheet row". Cards the
+    owner edited on the screen keep their old wording (the import never overwrites an edit), and tasks added on the
+    screen were not in the seed: reword any that still read unclearly with Edit, which now refuses sheet rows,
+    record numbers and "in scope".
