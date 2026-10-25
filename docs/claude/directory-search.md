@@ -31,7 +31,7 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # A blank form exports the full field set; the file loads back through normalizeProjectData() (facilityFromV2())
 node scripts/test-data-form-export.js
 # The form modules move to v2 one per commit (docs/plan 4.3 item 17 c): facility fields through kopFacilityField() /
-# KOP_FacilityFields (js/data-form-modules/facility-fields.js), by v2 path on either shape. Each commit: the live public form with
+# KOP_FacilityFields (end of js/data-form-modules/data-normalizer.js), by v2 path on either shape. Each commit: the live public form with
 # the working-tree js/ against the live js/, every field and window.formData the same, and the moved functions giving the same on a
 # facility and its v2 document
 python scripts/test-data-form-equivalence.py [--projects 30]

@@ -460,7 +460,7 @@ needed:
 ```bash
 php -d memory_limit=4G -d extension=pdo_sqlite -d extension=mbstring scripts/normalize-dump.php --sqlite tmp/prod.sqlite --emit copies.jsonl
 node scripts/check-facility-normalizer-parity.js copies.jsonl
-node scripts/test-facility-fields.js copies.jsonl   # js/data-form-modules/facility-fields.js, both shapes, every record
+node scripts/test-facility-fields.js copies.jsonl   # KOP_FacilityFields (data-normalizer.js), both shapes, every record
 ```
 
 It holds each `facilities_v2` document, its legacy projection, and every

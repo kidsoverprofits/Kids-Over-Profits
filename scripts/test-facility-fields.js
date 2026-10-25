@@ -1,5 +1,5 @@
 /**
- * Offline checks for js/data-form-modules/facility-fields.js: a facility field
+ * Offline checks for KOP_FacilityFields (end of js/data-form-modules/data-normalizer.js): a facility field
  * read by its v2 path gives the same value on the v2 document and on its legacy
  * projection (what the form edited, and what the server still sends), and a
  * write lands where each shape keeps it.
@@ -26,7 +26,7 @@ const check = (label, condition, detail) => {
 const sandbox = { console };
 sandbox.window = sandbox;
 vm.createContext(sandbox);
-for (const file of ['js/data-form-modules/data-normalizer.js', 'js/data-form-modules/facility-fields.js']) {
+for (const file of ['js/data-form-modules/data-normalizer.js']) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), sandbox, { filename: file });
 }
 const N = sandbox.KOP_DataNormalizer;

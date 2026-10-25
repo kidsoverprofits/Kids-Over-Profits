@@ -2,9 +2,7 @@
 The data form's move to v2 (docs/plan 4.3 item 17 c) is done one module per
 commit, each with no change in behaviour. This checks that on the live public
 form (/tti-data-submission/): one run with the live assets, one with the
-working tree's js/ served in their place (and js/data-form-modules/
-facility-fields.js added after the normalizer, for pages that do not list it
-yet). In each run a set of real projects is opened facility by facility and
+working tree's js/ served in their place. In each run a set of real projects is opened facility by facility and
 the form is read back: every field's value, every list's items, the private
 ownership toggle, the facility the toolbar search finds, and window.formData.
 Both runs must give the same.
@@ -17,12 +15,11 @@ from playwright.sync_api import sync_playwright
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace(os.sep, "/") + "/"
 URL = "https://kidsoverprofits.org/tti-data-submission/"
-FIELDS_JS = REPO + "js/data-form-modules/facility-fields.js"
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--projects", type=int, default=12)
 ap.add_argument("--show", action="store_true")
-ap.add_argument("--v2-probes", default="private,keyword,operator,location",
+ap.add_argument("--v2-probes", default="private,keyword,operator,location,lockey",
                 help="probes that must give the same on a facility and on its v2 document")
 args = ap.parse_args()
 
@@ -63,6 +60,7 @@ SHOW = r"""async (i) => {
     const probe = (fac) => {
         const out = {};
         if (window.resolvePrivateOwnership) out.private = window.resolvePrivateOwnership(fac);
+        if (window.buildLocationFacilityKey) out.lockey = window.buildLocationFacilityKey(fac);
         if (window.extractDataPointsForSearch) {
             const id = fac.identification || {};
             const terms = [String(id.name || '').split(' ')[0], 'Utah', 'UT', 'Provo', 'Academy', 'Ranch',
@@ -97,8 +95,6 @@ def run(live_only, names=None):
             if not os.path.isfile(path):
                 return route.continue_()
             body = open(path, "rb").read()
-            if rel.endswith("js/data-form-modules/data-normalizer.js"):
-                body += b"\n" + open(FIELDS_JS, "rb").read()
             route.fulfill(body=body, content_type="application/javascript")
 
         if not live_only:

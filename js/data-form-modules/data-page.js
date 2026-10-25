@@ -1,17 +1,3 @@
-/**
- * A facility field by its v2 path, on either shape (js/data-form-modules/facility-fields.js):
- * the form's own facilities and the other projects' facilities the server still sends legacy.
- */
-function kopFacilityField(facility, path) {
-    if (window.KOP_FacilityFields) return window.KOP_FacilityFields.read(facility, path);
-    return path.split('.').reduce((node, key) => (node && typeof node === 'object' ? node[key] : undefined), facility);
-}
-
-/** Set a facility field by its v2 path, where the facility's shape keeps it. */
-function kopSetFacilityField(facility, path, value) {
-    if (window.KOP_FacilityFields) window.KOP_FacilityFields.write(facility, path, value);
-}
-
 // ============================================
 // VIEW MANAGEMENT SYSTEM
 // ============================================

@@ -983,16 +983,6 @@ function enqueue_data_form_script() {
 
         );
 
-        // A facility field by its v2 path on either shape (the form is moving to v2, docs/plan 4.3 item 17)
-        $facility_fields_path = '/js/data-form-modules/facility-fields.js';
-        wp_enqueue_script(
-            'kop-facility-fields-script',
-            get_stylesheet_directory_uri() . $facility_fields_path,
-            array('kop-data-normalizer-script'),
-            file_exists(get_stylesheet_directory() . $facility_fields_path) ? filemtime(get_stylesheet_directory() . $facility_fields_path) : time(),
-            true
-        );
-
     
 
         // Enqueue the new API module
@@ -1011,7 +1001,7 @@ function enqueue_data_form_script() {
 
             $api_module_uri,
 
-            array('jquery', 'kop-form-config-script', 'kop-data-normalizer-script', 'kop-facility-fields-script', 'autocomplete-module-script'),
+            array('jquery', 'kop-form-config-script', 'kop-data-normalizer-script', 'autocomplete-module-script'),
 
             file_exists($api_module_file_path) ? filemtime($api_module_file_path) : time(),
 
