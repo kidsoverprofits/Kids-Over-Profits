@@ -6,7 +6,7 @@
  * findings and research a question (both through the one sign-up form under the cards, inc/volunteer-signup.php;
  * research questions are inc/research-tasks.php, picked on the volunteer's page), answer from experience
  * (/questions/, inc/questions.php, no sign-up), send what you have (the submission tools, folded). The skills we
- * need sit at the foot. Each card's words are a block admins edit in place (kop_ie_html_start(),
+ * need sit at the foot, then the call for sensitivity readers (2026-10-25; by email, so no one's identity is stored). Each card's words are a block admins edit in place (kop_ie_html_start(),
  * inc/inline-edit.php). The opening line is kop_hub_config('volunteer') (inc/hub-shell.php).
  */
 
@@ -132,6 +132,25 @@ while (have_posts()) :
                     <li><strong>Data organization:</strong> keeping our records in order.</li>
                     <li><strong>Translation:</strong> our materials for survivors who speak little or no English.</li>
                 </ul>
+            <?php kop_ie_html_end(); ?>
+        </section>
+
+        <section class="kop-volpage-section" id="kop-volpage-sensitivity" aria-labelledby="kop-volpage-sensitivity-h">
+            <?php kop_ie_html_start('volunteer:sensitivity', 'Volunteer page: sensitivity readers'); ?>
+            <h2 class="kop-volpage-way-h" id="kop-volpage-sensitivity-h">Be a sensitivity reader</h2>
+                <p>Much of what we report happened to young people from communities the industry, and the systems that feed it,
+                    treat worst. If you belong to one of them, you can read our articles before they are published and tell us where
+                    the wording is wrong, flattens what happened or repeats the industry's language. We are looking for:</p>
+                <ul class="kop-volpage-list">
+                    <li>Black survivors of the troubled teen industry</li>
+                    <li>Indigenous survivors, including people whose families went through the boarding schools</li>
+                    <li>Survivors of foster care placements</li>
+                    <li>Adoptees</li>
+                    <li>Immigrant survivors, including young people held in ORR shelters</li>
+                </ul>
+                <p>You choose what to read and how much. Write to us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>
+                    and say which group you would read for; you do not have to tell us anything else about yourself. We name readers
+                    only if they ask to be named.</p>
             <?php kop_ie_html_end(); ?>
         </section>
 
