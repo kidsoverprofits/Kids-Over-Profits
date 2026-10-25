@@ -6,7 +6,7 @@
  * findings and research a question (both through the one sign-up form under the cards, inc/volunteer-signup.php;
  * research questions are inc/research-tasks.php, picked on the volunteer's page), answer from experience
  * (/questions/, inc/questions.php, no sign-up), send what you have (the submission tools, folded). The skills we
- * need fold at the foot. Each card's words are a block admins edit in place (kop_ie_html_start(),
+ * need sit at the foot. Each card's words are a block admins edit in place (kop_ie_html_start(),
  * inc/inline-edit.php). The opening line is kop_hub_config('volunteer') (inc/hub-shell.php).
  */
 
@@ -118,9 +118,7 @@ while (have_posts()) :
 
         <section class="kop-volpage-section" id="kop-volpage-skills" aria-labelledby="kop-volpage-skills-h">
             <?php kop_ie_html_start('volunteer:skills', 'Volunteer page: skills we need'); ?>
-            <details class="kop-volpage-more">
-                <summary><h2 class="kop-volpage-way-h" id="kop-volpage-skills-h">Have a skill to give?</h2>
-                    <span class="kop-volpage-meta">Legal, design, fundraising, research, transcription, translation and more</span></summary>
+            <h2 class="kop-volpage-way-h" id="kop-volpage-skills-h">Have a skill to give?</h2>
                 <p>Kids Over Profits is a nonprofit documenting the troubled teen industry. If you have one of these skills, write to
                     us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>, even if you only have a few hours.</p>
                 <ul class="kop-volpage-list">
@@ -134,7 +132,6 @@ while (have_posts()) :
                     <li><strong>Data organization:</strong> keeping our records in order.</li>
                     <li><strong>Translation:</strong> our materials for survivors who speak little or no English.</li>
                 </ul>
-            </details>
             <?php kop_ie_html_end(); ?>
         </section>
 

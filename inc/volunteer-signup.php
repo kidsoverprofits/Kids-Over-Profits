@@ -111,9 +111,9 @@ add_action('rest_api_init', function () {
 
 /**
  * LiteSpeed keeps /volunteer/ whole: when its layout changes (templates/page-volunteer.php), its cached copy goes
- * once. Bump KOP_VOLPAGE_VERSION with any such change (2: the four cards, 2026-10-25).
+ * once. Bump KOP_VOLPAGE_VERSION with any such change (2: the four cards, 2026-10-25; 3: skills unfolded).
  */
-if (!defined('KOP_VOLPAGE_VERSION')) define('KOP_VOLPAGE_VERSION', '2');
+if (!defined('KOP_VOLPAGE_VERSION')) define('KOP_VOLPAGE_VERSION', '3');
 add_action('init', function () {
     if (get_option('kop_volpage_version') === KOP_VOLPAGE_VERSION) return;
     update_option('kop_volpage_version', KOP_VOLPAGE_VERSION, false);

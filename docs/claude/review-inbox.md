@@ -13,7 +13,18 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), "Needs research" on every card
 # (holds.research = 1: off every queue into Your inbox > Needs research until "Back to the queue" or a decision; review-inbox/research), Preview
 # (review-inbox/preview: framed where allowed, else a reading copy)
-# The queues are one dropdown per group (js/review-inbox.js dropdown(); the page's own five type tabs hidden, in the Submissions menu).
+# Tabs (owner, 2026-10-25: no dropdowns, the daily news scans always their own tab): Just in / Sent in by people / Daily news scans /
+# Found by imports and inspections / Checks and cleanup / Your inbox / All tools (js/review-inbox.js renderTabs()); the open tab's queues
+# are a row of buttons under it, "Find a queue" searches every tab. A queue's tab is kop_rinbox_area() (inc/review-inbox-recent.php), read
+# from its 'group' or its own 'area' ('people' | 'scans' | 'found' | 'checks'). News shows twice: under people on its "Came from" origin
+# 'people', under Daily news scans on 'scans' (Google News + Reddit), counts from kop_rinbox_native_split_counts(). The page's own five
+# type tabs stay hidden. ?type= takes a queue, a special list (_new, _done...) or an area (people, scans, found, checks, _yours)
+# Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
+# (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'
+# and the imports' are counts per queue in two folds. A source answers with 'recent' (native: by created_at) or 'recent_count'
+# (Drive Docs, Fornits, Woodbury Facts: SQL count, their cards are slow; Program practices: 0, undated); else its waiting view is read
+# 20 then 100 at a time up to 300, stopping once a newest-first page passes the cutoff. Undated items never show
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=recent   # areas, window, people vs scans, every queue timed
 # Counts never block the page: review-inbox/sources returns the saved counts (option kop_review_inbox_counts) + 'stale', the page
 # recounts those after drawing (review-inbox/counts?sources=a,b, slow counters alone), a 10-minute cron keeps them warm;
 # kop_rinbox_flush_counts() only marks them stale. A queue whose count scans goes in SLOW_COUNTS there
@@ -110,7 +121,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # /volunteer/ is templates/page-volunteer.php (2026-10-23, kop_template_assignments; the page's old editor copy is unused). Since
 # 2026-10-25 (owner: cluttered, too much scrolling) four cards, two across: Review inspection findings and Research a question (both
 # -> the one sign-up form, #kop-vol-signup; the research card shows kop_rt_counts()['unassigned'] open), Answer from experience
-# (/questions/, no sign-up), Send us what you have (the tools folded under "Choose what to send"); "Have a skill to give?" folds at the
+# (/questions/, no sign-up), Send us what you have (the tools folded under "Choose what to send"); "Have a skill to give?" sits open at the
 # foot. Card words are in-place blocks (kop_ie_html_start keys volunteer:review / :research / :questions / :send / :skills); the
 # standfirst is kop_hub_config('volunteer') (its buttons are no longer printed). Check a template change offline by rendering it with
 # stubs into the live page (route-intercept), then scripts/check-contrast.py --local /volunteer/ (MSYS_NO_PATHCONV=1 in Git Bash)
