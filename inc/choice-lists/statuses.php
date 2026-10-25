@@ -135,7 +135,7 @@ kop_choice_register('sensitivity-groups', array(
         'black'              => 'Black survivors',
         'indigenous'         => 'Indigenous survivors, including people whose families went through the boarding schools',
         'foster_care'        => 'Survivors of foster care placements',
-        'adoptee'            => 'Adoptees',
+        'adoptee'            => 'Adopted survivors',
         'maternity_home'     => 'Maternity home survivors: girls placed while pregnant or parenting',
         'immigrant'          => 'Immigrant survivors, including young people held in ORR shelters',
         'religious_minority' => 'Survivors from religious minorities, above all Jewish and Muslim survivors',
