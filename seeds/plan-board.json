@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 22:31 UTC",
- "source": "af4ff48fd7bede65dd236b82cd0c420fe1e0fe57",
+ "built": "2026-10-25 22:59 UTC",
+ "source": "2531191a260e7318b6a53b42abf541d807d745c1",
  "sections": [
   {
    "key": "2",
@@ -68,14 +68,6 @@
        "hash": "13b511682e2c"
       },
       {
-       "id": "2.1:folders-on-no-page",
-       "lead": "Folders on no page",
-       "text": "**Folders on no page** (2026-10-14). Link \"Hyde\" (19) to Hyde School (297), \"ANASAZI\" (214) to Anasazi Foundation (5659) and \"Agape Boarding School\" (7815) to Agape Baptist Academy (4819) with `api/link-folders.php`, or move the files with the tile pencil.",
-       "ask": "Link the Hyde, ANASAZI and Agape folders to their records?",
-       "date": "2026-10-14",
-       "hash": "312e706de23c"
-      },
-      {
        "id": "2.1:billings-clinic-testimony",
        "lead": "Billings Clinic testimony",
        "text": "**Billings Clinic testimony** (2026-09-30). In the [admin data form](https://kidsoverprofits.org/admin-data/), providers tab, MONTANA PROVIDERS > Survivor Testimony: delete the stray paragraph \"Medication\", tick \"OK to publish\", save.",
@@ -125,10 +117,10 @@
       {
        "id": "2.2:unsilenced-backup",
        "lead": "Unsilenced backup",
-       "text": "**Unsilenced backup** (once I: has room, ~2.5 days, 118 GB): start `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline; keep C: above 4 GB. Then ask a session for the titles and rebuild (old 3.11).",
-       "ask": "Does I: have room for the 118 GB Unsilenced backup yet, and has it started?",
-       "date": "",
-       "hash": "68b3de291661"
+       "text": "**Unsilenced backup** (~118 GB; owner 2026-10-25: I: has room). It ran 2026-10-02 to 2026-10-06 and stopped there: 4,188 of 58,961 files copied to `I:\\My Drive\\Unsilenced archive backup`, 1,450 failed, the last lines Google's rate limit (`tmp/unsilenced-titles/run.log` in kop-pipeline); nothing has run since. Restart it with `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline: it resumes, retries the failed ones, and pauses on its own when a disk runs low (on 2026-10-25 this computer showed 11 GB free on I: and 12 GB on C:; keep C: above 4 GB). Then ask a session for the titles and rebuild (old 3.11).",
+       "ask": "Have you restarted the Unsilenced backup (stopped 2026-10-06 at 4,188 of 58,961 files)?",
+       "date": "2026-10-25",
+       "hash": "887bb19cff08"
       },
       {
        "id": "2.2:document-finder-retries",
@@ -145,14 +137,6 @@
        "ask": "Does DHS list order LLO_471879 on both licence pages, or only 180 Degrees Inc?",
        "date": "2026-10-20",
        "hash": "fcb944d2f7cf"
-      },
-      {
-       "id": "2.2:scrapers-test-scrapers-py-has-5-stale-failures",
-       "lead": "`scrapers/test_scrapers.py` has 5 stale failures",
-       "text": "**`scrapers/test_scrapers.py` has 5 stale failures** (2026-10-20, all from before the CA/PA fixes in kop-pipeline `f22040c`): the CA payload test unpacks two values from `scrape()` (it returns three now), the Oregon date format, `smart_title_case` (two cases) and the data structure check. Bring the tests up to the code. Run them with `py -3`; plain `python` lacks `requests` and `pymupdf`.",
-       "ask": "OK for a session to bring the five stale scraper tests up to the code?",
-       "date": "2026-10-20",
-       "hash": "6d61efe4fac9"
       }
      ]
     },
@@ -315,36 +299,12 @@
        "hash": "8e430df5978b"
       },
       {
-       "id": "2.4:family-foundation-school-lawsuits",
-       "lead": "Family Foundation School lawsuits",
-       "text": "**Family Foundation School lawsuits** (~33 federal suits, 2026): one lawsuit record per case, or one for the litigation listing every docket (old 3.23).",
-       "ask": "Family Foundation School: one lawsuit record per case, or one for all of it?",
-       "date": "",
-       "hash": "e17892e16de6"
-      },
-      {
        "id": "2.4:scraper-privacy-and-scope",
        "lead": "Scraper privacy and scope",
        "text": "**Scraper privacy and scope**: NH, The Ridge RTC 2025-12-15 statement; WY, Meadowlark 2024-04-04 notice (false positive); MD, post the 15 summaries with initials cut out?; WV, the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`; CO, the 9 unsure facilities; NV, go-ahead to delete the junk reports \"1\", \"2\", \"3\", \"...\" on /nv-reports/; OR, a records request for complaint investigations and licensing actions.",
        "ask": "Your call on each of the seven state questions (NH, WY, MD, WV, CO, NV, OR)?",
        "date": "2025-12-15",
        "hash": "0d9b4c889d1d"
-      },
-      {
-       "id": "2.4:article-type-labels",
-       "lead": "Article type labels",
-       "text": "**Article type labels**: print the list's labels (\"Lawsuit Article\") on /news/, state and country pages instead of the raw value?",
-       "ask": "Show readable labels (\"Lawsuit Article\") instead of the raw value?",
-       "date": "",
-       "hash": "70ea1f5af7b2"
-      },
-      {
-       "id": "2.4:network-map-judgement-calls",
-       "lead": "Network map judgement calls",
-       "text": "**Network map judgement calls** in `tmp/network-qa.md` (rebuilt by every build); the six curated aliases naming another era (#13927, #10602, #11361, #11462, #11355, #12621); investors as their own map kind reading the Investors table, or added by hand.",
-       "ask": "Your calls on the map QA list, the six aliases, and how investors get on the map?",
-       "date": "",
-       "hash": "bdeef6ad31da"
       },
       {
        "id": "2.4:the-misplaced-1933-line",
@@ -361,14 +321,6 @@
        "ask": "Want an AI pass smoothing the About prose, or a tighter Rules cap?",
        "date": "",
        "hash": "3ca69db75b61"
-      },
-      {
-       "id": "2.4:seo-keyphrase-wording",
-       "lead": "SEO keyphrase wording",
-       "text": "**SEO keyphrase wording**: which words people search for. Facility name alone, or with \"abuse\" / \"reviews\"; \"troubled teen\" vs \"residential treatment\" for state hubs. Blocks 4.7 item 9. Answer it in the \"Keyphrase wording\" box at KOP Tools > SEO Descriptions (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts), e.g. `{name} abuse`. (People are settled: name + role or employer.)",
-       "ask": "Facility keyphrase: name alone, or with \"abuse\" / \"reviews\"? State hubs: \"troubled teen\" or \"residential treatment\"?",
-       "date": "",
-       "hash": "5eab39c3e564"
       },
       {
        "id": "2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58",
@@ -977,6 +929,22 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "ae2f623cf54b"
+      },
+      {
+       "id": "4.3:investors-on-the-network-map",
+       "lead": "Investors on the network map",
+       "text": "**Investors on the network map** (owner, Plan Board 2026-10-25: \"investors as their own map kind\"). The map build (kop-pipeline `scripts/build-network-graph.js`) reads the Investors table (KOP Tools > Investors) and draws each investor as its own node kind, linked to the companies it held with the years on its row; the legend, filters and `docs/claude/network-map.md` name the new kind, and the hourly rebuild fingerprint (`inc/network-rebuild.php`) moves when an investor row changes.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "d2939c5b9cf4"
+      },
+      {
+       "id": "4.3:network-map-judgement-calls-need-a-review-screen",
+       "lead": "Network map judgement calls need a review screen",
+       "text": "**Network map judgement calls need a review screen** (owner, 2026-10-25: did not know what the old 2.4 item meant; it pointed at a build file nobody can open). Two lists wait for the owner's word: (a) the rows the map build had to guess at (`tmp/network-qa.md`, written by kop-pipeline's build in Actions, gitignored); (b) six curated aliases that may name another era of their record: Bethel Boys Academy (#13927, since merged into 100180), Laurel Ridge Treatment Center (#10602), Agape Boarding School (#11361), Refuge of Grace (#11462), Change Academy at Lake of the Ozarks (#11355), Cleo Wallace Academy (#12621) (background: PLAN-ARCHIVE.md \"Owner pass on curated aliases\"). Put both on one KOP Tools review screen, a card per question in plain words (\"Is X a past name of Y, or its own program?\") with the evidence and a button per answer, then add an `Ask:` item in 2.3 pointing at it.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "264c3fc4253d"
       }
      ]
     },
@@ -1286,6 +1254,14 @@
        "ask": "",
        "date": "",
        "hash": "2189e50770f0"
+      },
+      {
+       "id": "4.6:family-foundation-school-lawsuits-one-record-per-case",
+       "lead": "Family Foundation School lawsuits, one record per case",
+       "text": "**Family Foundation School lawsuits, one record per case** (owner, Plan Board 2026-10-25). The ~33 federal suits against Education Plus Corporation (2026; background PLAN-ARCHIVE.md 3.23): one lawsuit record per docket, each linked to record 12050 and to NATSAP, seeded through `seeds/lawsuits.json` with docket numbers and full court names so the nightly status check follows them (a `KOP_COURTLISTENER_TOKEN` for 30+ dockets). Plaintiffs filed under initials or as Doe stay that way everywhere. Then 3.23's steps 2-5: read each complaint, staff named as defendants onto the record's staff list cited to the complaint, and the wiki line for entry 533.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "f77e8caf34a1"
       }
      ]
     },
@@ -1363,18 +1339,18 @@
       {
        "id": "4.7:focus-keyphrases",
        "lead": "Focus keyphrases",
-       "text": "**Focus keyphrases**, built 2026-10-20 with item 10 (same screen, KOP Tools > SEO Descriptions, https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts). One rule per kind in `kop_seo_drafts_keyphrase()` (inc/seo-drafts.php): lawsuit post = case name, spotlight = its subject (\"John Santa Montana Academy\"), person = name (owner adds role/employer), state report page = \"<State> inspection reports\", document folder = \"<subject> documents\", hubs and articles hand-written in seeds/seo-descriptions.json. Generated /facility/ and /operator/ routes get none (no post). Open: - Owner: set the facility and state wording in the screen's \"Keyphrase wording\" box (this is 2.4 item 9); until then state hubs, country pages, facility profile posts and news posts show an empty keyphrase box marked as waiting. - Done 2026-10-20: news posts draft one once the facility wording is set, the program read from news_facility_links (kop_seo_drafts_news_program(): the post's news_submissions row by json_data.source_post_id, else its article link; a program named in the title, else the only one of the strongest link kind). 49 of 63 news posts get a draft on the mirror; the other 14 have no linked program or several (the card names them) and the owner types one.",
+       "text": "**Focus keyphrases**, built 2026-10-20 with item 10 (same screen, KOP Tools > SEO Descriptions, https://kidsoverprofits.org/wp-admin/admin.php?page=kop-seo-drafts). One rule per kind in `kop_seo_drafts_keyphrase()` (inc/seo-drafts.php): lawsuit post = case name, spotlight = its subject (\"John Santa Montana Academy\"), person = name (owner adds role/employer), state report page = \"<State> inspection reports\", document folder = \"<subject> documents\", hubs and articles hand-written in seeds/seo-descriptions.json. Generated /facility/ and /operator/ routes get none (no post). Open: - Done 2026-10-25 (owner's Plan Board answer \"reviews, residential treatment\"): wording `{name} reviews` for facility pages and the posts about one program, `{name} residential treatment` for state hubs and country pages, saved through the screen's own functions; 118 pages took their keyphrase (Done tab, Undo). - Done 2026-10-20: news posts draft one once the facility wording is set, the program read from news_facility_links (kop_seo_drafts_news_program(): the post's news_submissions row by json_data.source_post_id, else its article link; a program named in the title, else the only one of the strongest link kind). 49 of 63 news posts get a draft on the mirror; the other 14 have no linked program or several (the card names them) and the owner types one.",
        "ask": "",
-       "date": "2026-10-20",
-       "hash": "119f53ea0099"
+       "date": "2026-10-25",
+       "hash": "6ea59a1ca0d4"
       },
       {
        "id": "4.7:meta-descriptions-yoast-sees",
        "lead": "Meta descriptions Yoast sees",
-       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: set the keyphrase wording (stores about 118 more keyphrases at once), then approve the hand-written cards. - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Owner: posts 470 and 786 are the same Walrus article (Robert Land Academy) posted twice; their cards say so. Keep one, redirect the other. - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
+       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: approve the hand-written cards (the keyphrase wording is set, 2026-10-25). - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Owner: posts 470 and 786 are the same Walrus article (Robert Land Academy) posted twice; their cards say so. Keep one, redirect the other. - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
        "ask": "Unpublish post 13312 (\"Research draft\"), and which of the duplicate Walrus posts 470 / 786 goes?",
-       "date": "2026-10-20",
-       "hash": "809d6115b30c"
+       "date": "2026-10-25",
+       "hash": "d7438038a86f"
       },
       {
        "id": "4.7:breadcrumbs-on-facility-operator-and-state-pages",
