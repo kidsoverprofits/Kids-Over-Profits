@@ -293,6 +293,41 @@ kop_rt_undo($vlog);
 $check('Undo of the send closes the project and frees the tasks', kop_volp_get($pid)['status'] === 'closed' && kop_rt_get($pick[0])['assignee'] === '' && (int) kop_rt_get($pick[0])['project_id'] === 0);
 $check('sending nothing is refused', $throws(function () use ($sam_id) { kop_rt_assign_volunteer(array(), $sam_id); }) !== '');
 
+echo "\nVolunteers pick their own\n";
+list($kim_id, $kim_url) = kop_vol_create('Kim Example');
+$kim = kop_vol_by_token(substr($kim_url, -48));
+$pick = kop_rt_pickable();
+$owner_one = (int) $pick[0]['id'];
+kop_rt_change(array($owner_one), array('assignee' => 'owner'), 'assign', 'test');
+$claude_one = (int) $pick[1]['id'];
+kop_rt_change(array($claude_one), array('assignee' => 'claude'), 'assign', 'test');
+$pick = kop_rt_pickable();
+$pids = array_column($pick, 'id');
+$check('the list offers open questions given to nobody', count($pick) === kop_rt_counts()['unassigned'] && count($pick) > 50, count($pick) . ' offered');
+$check('...never one given to the owner or to Claude', !in_array($owner_one, $pids, true) && !in_array($claude_one, $pids, true));
+$check('...each with its question, topic and how many places to start', $pick[0]['title'] !== '' && isset($pick[0]['section'], $pick[0]['start']));
+$six = array_slice($pids, 0, 6);
+$check('taking more than the hold is refused, saying how many fit', strpos($throws(function () use ($kim, $six) { kop_rt_volunteer_take($kim, $six); }), 'room for 5') !== false);
+list($kp, $kn) = kop_rt_volunteer_take($kim, array_slice($pids, 0, 3));
+$kproj = kop_volp_get($kp);
+$check('Kim takes 3: one research project of hers, one question each', $kn === 3 && (int) $kproj['volunteer_id'] === $kim_id && count(kop_volp_item_rows($kp)) === 3
+    && kop_rt_get($pids[0])['assignee'] === 'volunteer' && (int) kop_rt_get($pids[0])['volunteer_id'] === $kim_id, json_encode($kproj));
+$check('...they leave the list for everyone else', !array_intersect(array_slice($pids, 0, 3), array_column(kop_rt_pickable(), 'id')));
+$check('...and the log says who picked them', strpos((string) $wpdb->get_var('SELECT label FROM wpdl_kop_research_task_log ORDER BY id DESC LIMIT 1'), 'Kim Example picked 3 questions') === 0);
+$check('Kim\'s page opens them', count(kop_volp_items($kim_id, $kp, 5)['items']) === 3);
+$check('a question someone else took is refused', strpos($throws(function () use ($sam, $pids) { kop_rt_volunteer_take($sam, array($pids[0])); }), 'Someone else has just taken') === 0);
+$check('Kim has room for 2 more, not 3', strpos($throws(function () use ($kim, $pids) { kop_rt_volunteer_take($kim, array_slice($pids, 3, 3)); }), 'room for 2') !== false);
+kop_volp_leave($kim, $kp);
+kop_rt_free_released();
+$check('handing the batch back puts the questions back on the list', in_array($pids[0], array_column(kop_rt_pickable(), 'id'), true)
+    && kop_rt_get($pids[0])['assignee'] === '' && (int) kop_rt_get($pids[0])['project_id'] === 0 && kop_rt_held_by($kim_id) === 0);
+list($kp2) = kop_rt_volunteer_take($kim, array($pids[4]));
+kop_volr_answer($kim, $kp2, 'rt' . $pids[4], '', array(), true, array(array('claim' => 'It opened in 2002.', 'url' => 'https://example.org/opened')));
+kop_volp_leave($kim, $kp2);
+kop_rt_sync_volunteer_answers();
+kop_rt_free_released();
+$check('an answered question stays answered after the batch closes', kop_rt_get($pids[4])['status'] === 'answered' && kop_rt_get($pids[4])['assignee'] === 'volunteer');
+
 echo "\nMerges and cards\n";
 $reg = array_values(array_filter(kop_rt_merge_tables(kop_fmerge_json_tables('wpdl_'), 'wpdl_'), function ($x) { return $x['t'] === 'wpdl_kop_research_tasks'; }));
 $check('the merge tool moves the ids a task names', count($reg) === 1 && $reg[0]['c'] === 'records' && $reg[0]['key'] === 'id', json_encode($reg));

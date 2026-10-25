@@ -162,6 +162,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # kop_volr_clean_claims() refuses a fact without a link by its number; links store {claim, url, kind, quote, sent}, the answer text is
 # kop_volr_claims_text() ("- fact ([source](url))"); one page backing several facts goes to the inbox once. tasks.py answer needs --claim
 # "fact | url | quote" per fact (kop_rt_seed_answer_text()). Old answers (text + loose links) still read as before
+# Volunteers pick their own (2026-10-25): the volunteer page's "Research questions you can pick" (js/volunteer-review.js pickBox, REST
+# volunteer/research {do: list|take}) offers open tasks given to nobody (kop_rt_pickable(); the owner's and Claude's stay off), topic + search,
+# tick and Take -> kop_rt_volunteer_take(): one research project of theirs, up to kop_rt_volunteer_hold() (5) unanswered at once, a task someone
+# else just took refused. No practice round needed. kop_rt_free_released() puts questions from a closed project with no answer back on the
+# list. Volunteer Reviewers > Projects says how many are on offer
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-research-tasks.php [--page=out.html]   # seed import, Undo, volunteer round trip, cards
 # Messages (inc/volunteer-messages.php, {prefix}kop_vol_messages): one conversation per volunteer, "Ask a question" on a brief or card names the
 # project/item; answered at Volunteer Reviewers > Messages (menu count bubble), shown on their page marked New; volunteers are never mailed, the

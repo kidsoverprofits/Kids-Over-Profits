@@ -332,6 +332,12 @@ def main():
         if not ok:
             failures.append(label)
 
+    PICKABLE = [
+        {"id": 41, "title": "What year did Rocky Mountain Academy in Bonners Ferry, Idaho close?", "section": "Closures", "about": "Rocky Mountain Academy (Bonners Ferry, ID)", "start": 4},
+        {"id": 42, "title": "Is Norris Academy in Norris or in Andersonville, Tennessee?", "section": "Places", "about": "Norris Academy (Andersonville, TN)", "start": 2},
+        {"id": 43, "title": "Who ran Austin Oaks Hospital before Universal Health Services?", "section": "Companies", "about": "", "start": 0},
+    ]
+
     for width in (1280, 390):
         print("\nAt %d px" % width)
         st = {"answered": [], "posts": [], "read": 0,
@@ -359,6 +365,11 @@ def main():
                 out = {"queues": []}
             elif name == "projects":
                 out = {"projects": [dict(RESEARCH, done=len(st["answered"])), REVIEW]}
+            elif name == "research":
+                if body.get("do") == "take":
+                    out = {"id": 7, "taken": len(body.get("ids", [])), "message": "They are yours."}
+                else:
+                    out = {"questions": PICKABLE, "hold": 5, "held": 1}
             elif name == "project":
                 if body.get("id") == 7:
                     left = [q for q in QUESTIONS if q["key"] not in st["answered"] and q["key"] not in body.get("skip", [])]
@@ -406,6 +417,29 @@ def main():
             check("...and says to cite every piece of information", "Cite every piece of information" in card.locator(".kop-vol-cite").inner_text()
                   and "A fact with no link cannot be used" in card.locator(".kop-vol-cite").inner_text())
             check("the brief words the examples for research", "A good answer looks like" in page.locator(".kop-vol-brief").inner_text())
+            picker = page.locator(".kop-vol-pickq")
+            picker.wait_for()
+            check("research questions to pick are listed, each with where to start", picker.locator("h3").inner_text() == "Research questions you can pick"
+                  and picker.locator(".kop-vol-pickq-list li").count() == 3 and "4 places to start" in picker.inner_text()
+                  and "start with a web search" in picker.inner_text() and "you have 1 now" in picker.inner_text())
+            picker.locator("#kop-vol-pickq-section").select_option("Places")
+            check("a topic narrows the list", picker.locator(".kop-vol-pickq-list li").count() == 1 and "Norris" in picker.locator(".kop-vol-pickq-list").inner_text())
+            picker.locator("#kop-vol-pickq-section").select_option("")
+            picker.locator("#kop-vol-pickq-find").fill("austin")
+            check("the search box finds by words", picker.locator(".kop-vol-pickq-list li").count() == 1)
+            picker.locator("#kop-vol-pickq-find").fill("")
+            check("nothing ticked: Take is off", picker.locator("button", has_text="Take").is_disabled())
+            picker.locator("#kop-vol-pickq-41").check()
+            picker.locator("#kop-vol-pickq-42").check()
+            check("ticking two: Take these 2 questions", picker.locator("button", has_text="Take these 2 questions").is_enabled())
+            if shots:
+                page.screenshot(path=str(shots / ("pick-%d.png" % width)), full_page=True)
+            picker.locator("button", has_text="Take these 2 questions").click()
+            page.wait_for_function("window.__kopTook = window.__kopTook || 0, true")
+            page.wait_for_timeout(400)
+            took = [b for n, b in st["posts"] if n == "research" and b.get("do") == "take"]
+            check("Take sends the ticked questions", took and took[-1]["ids"] == [41, 42], json.dumps(took))
+            card = page.locator(".kop-vol-research")
             check("question 1 of 3", "Question 1 of 3" in page.locator(".kop-vol-position").inner_text())
             # On a tall screen the conversation is in view at once, so the reply is read and the line goes straight away.
             check("a reply waiting: marked New, with the line at the top until it is on screen",

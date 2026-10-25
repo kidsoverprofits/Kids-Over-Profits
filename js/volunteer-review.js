@@ -680,6 +680,124 @@
         if (state.projects.length) projectsPanel.appendChild(ul);
         if (self && self.eligible && !self.open && self.queues.length) projectsPanel.appendChild(selfAssignForm(self));
         if (canPractice()) projectsPanel.appendChild(self.eligible || state.projects.length ? practiceForm(self.practice, true) : startNow(self.practice));
+        // Research questions anyone may pick (no practice round needed: an admin reads every cited answer).
+        projectsPanel.appendChild(pickBox);
+        if (!pickState.loaded || Date.now() - pickState.at > 30000) loadPickable(); else renderPicker();
+    }
+
+    /* ---- Research questions to pick (inc/research-tasks.php, REST volunteer/research) ------------- */
+
+    // Every open question nobody has yet: tick the ones you want, they become your own project.
+    var pickBox = el('div', { class: 'kop-vol-self kop-vol-pickq' });
+    var pickState = { loaded: false, at: 0, questions: [], hold: 5, held: 0, section: '', search: '', shown: 20, ticked: {} };
+
+    function loadPickable() {
+        return api('research', { do: 'list' }).then(function (data) {
+            pickState.loaded = true;
+            pickState.at = Date.now();
+            pickState.questions = data.questions || [];
+            pickState.hold = data.hold || 5;
+            pickState.held = data.held || 0;
+            renderPicker();
+        }).catch(function () { pickBox.hidden = true; });
+    }
+
+    function renderPicker() {
+        pickBox.innerHTML = '';
+        var qs = pickState.questions;
+        pickBox.hidden = !qs.length;
+        if (!qs.length) return;
+        var room = Math.max(0, pickState.hold - pickState.held);
+        pickBox.appendChild(el('h3', { text: 'Research questions you can pick' }));
+        pickBox.appendChild(el('p', { class: 'kop-vol-meta', text: 'Questions we need answered about programs, companies and people. Tick the ones you want to find out and press "Take". '
+            + 'Each one lists where to start, and every fact in your answer needs the link to the page that says it. You can hold ' + pickState.hold + ' at a time'
+            + (pickState.held ? ' (you have ' + pickState.held + ' now)' : '') + '.' }));
+        if (!room) {
+            pickBox.appendChild(el('p', { class: 'kop-vol-msg', text: 'You have ' + pickState.hold + ' questions to answer already. Answer or hand back some of them, then pick more.' }));
+            return;
+        }
+        var sections = [];
+        qs.forEach(function (q) { if (q.section && sections.indexOf(q.section) < 0) sections.push(q.section); });
+        sections.sort();
+        var sec = el('select', { id: 'kop-vol-pickq-section', onchange: function () { pickState.section = sec.value; pickState.shown = 20; drawList(); } },
+            [el('option', { value: '', text: 'Every topic (' + qs.length + ')' })].concat(sections.map(function (s) {
+                var n = qs.filter(function (q) { return q.section === s; }).length;
+                var o = el('option', { value: s, text: s + ' (' + n + ')' });
+                if (s === pickState.section) o.selected = true;
+                return o;
+            })));
+        var find = el('input', { id: 'kop-vol-pickq-find', type: 'search', placeholder: 'A program, a town, a name', value: pickState.search,
+            oninput: function () { pickState.search = find.value; pickState.shown = 20; drawList(); } });
+        pickBox.appendChild(el('div', { class: 'kop-vol-pickq-filters' }, [
+            el('label', { for: 'kop-vol-pickq-section', text: 'Topic' }), sec,
+            el('label', { for: 'kop-vol-pickq-find', text: 'Find' }), find
+        ]));
+        var list = el('ul', { class: 'kop-vol-pickq-list' });
+        var more = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Show more', onclick: function () { pickState.shown += 20; drawList(); } });
+        var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
+        var take = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Take the ticked questions', disabled: true, onclick: function () {
+            var ids = Array.prototype.map.call(list.querySelectorAll('input:checked'), function (c) { return Number(c.value); });
+            take.disabled = true;
+            msg.hidden = false;
+            msg.className = 'kop-vol-msg';
+            msg.textContent = 'Setting them up…';
+            api('research', { do: 'take', ids: ids }).then(function (res) {
+                pickState.ticked = {};
+                return api('projects').then(function (data) {
+                    state.projects = data.projects || [];
+                    state.self = data.self;
+                    loadPickable();
+                    openProject(res.id);
+                });
+            }).catch(function (e) {
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = e.message;
+                loadPickable();
+            });
+        } });
+        var ticked = pickState.ticked;
+        // A question someone else took since is no longer on the list: drop its tick.
+        Object.keys(ticked).forEach(function (k) { if (!qs.some(function (q) { return String(q.id) === k; })) delete ticked[k]; });
+        function count() {
+            var n = Object.keys(ticked).length;
+            take.disabled = !n || n > room || cfg.preview ? true : false;
+            take.textContent = n ? 'Take ' + (n === 1 ? 'this question' : 'these ' + n + ' questions') : 'Take the ticked questions';
+            if (n > room) {
+                msg.hidden = false;
+                msg.className = 'kop-vol-msg is-error';
+                msg.textContent = 'You have room for ' + room + ' more: untick ' + (n - room) + '.';
+            } else if (msg.className.indexOf('is-error') >= 0) {
+                msg.hidden = true;
+            }
+        }
+        function drawList() {
+            list.innerHTML = '';
+            var words = pickState.search.toLowerCase().split(/\s+/).filter(Boolean);
+            var match = qs.filter(function (q) {
+                if (pickState.section && q.section !== pickState.section) return false;
+                var hay = (q.title + ' ' + q.about + ' ' + q.section).toLowerCase();
+                return words.every(function (w) { return hay.indexOf(w) >= 0; });
+            });
+            match.slice(0, pickState.shown).forEach(function (q) {
+                var id = 'kop-vol-pickq-' + q.id;
+                var box = el('input', { type: 'checkbox', id: id, value: String(q.id), checked: ticked[q.id] ? true : null, onchange: function () {
+                    if (box.checked) ticked[q.id] = true; else delete ticked[q.id];
+                    count();
+                } });
+                list.appendChild(el('li', null, [box, el('label', { for: id }, [
+                    el('span', { class: 'kop-vol-pickq-q', text: q.title }),
+                    el('span', { class: 'kop-vol-meta', text: [q.about, q.start ? q.start + (q.start === 1 ? ' place to start' : ' places to start') : 'start with a web search'].filter(Boolean).join(' · ') })
+                ])]));
+            });
+            if (!match.length) list.appendChild(el('li', { class: 'kop-vol-meta', text: 'No question matches.' }));
+            more.hidden = match.length <= pickState.shown;
+        }
+        drawList();
+        count();
+        pickBox.appendChild(list);
+        pickBox.appendChild(more);
+        pickBox.appendChild(el('div', { class: 'kop-vol-buttons' }, [take]));
+        pickBox.appendChild(msg);
     }
 
     /* ---- Practice round (inc/volunteer-practice.php) ------------------------------------ */

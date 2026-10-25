@@ -32,6 +32,13 @@ draft, page), who found it. `--records` takes `facilities_v2` ids (checked again
 the question names in full are found by name too (`tasks.py directions` rebuilds every task's list after a mirror
 sync). Use an existing section name when one fits (`tasks.py list` shows them).
 
+## Who works them
+
+The owner gives a task to themselves, to Claude, or to one volunteer (ticked on the screen, "Send to a volunteer").
+Every task given to nobody is also on every volunteer's page under "Research questions you can pick": a volunteer
+ticks the ones they want (up to 5 unanswered at a time) and they become that volunteer's project. A question handed
+back returns to the list. Give a task to yourself or Claude to keep it off the volunteers' list.
+
 ## Working the ones given to Claude
 
 "Work the research tasks" means: list them on the server (`php api/research-tasks.php --claude`, read-only, over

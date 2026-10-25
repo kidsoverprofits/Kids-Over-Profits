@@ -377,7 +377,7 @@ function kop_rt_volunteer_question(array $t) {
  * Sends the tasks to one volunteer as a research project ($vid, or $new_name makes a volunteer).
  * Returns [log id, project id, project link, invite link or ''].
  */
-function kop_rt_assign_volunteer(array $ids, $vid, $new_name = '', $note = '', $title = '') {
+function kop_rt_assign_volunteer(array $ids, $vid, $new_name = '', $note = '', $title = '', $by = '') {
     if (!function_exists('kop_volp_create_research')) throw new RuntimeException('Volunteer projects are not loaded.');
     $items = array();
     $tasks = array();
@@ -397,8 +397,106 @@ function kop_rt_assign_volunteer(array $ids, $vid, $new_name = '', $note = '', $
     ));
     $p = kop_volp_get($pid);
     $log = kop_rt_change(array_column($tasks, 'id'), array('assignee' => 'volunteer', 'volunteer_id' => (int) ($p['volunteer_id'] ?? $vid), 'project_id' => (int) $pid),
-        'volunteer', 'Sent ' . count($tasks) . ' to a volunteer', $pid);
+        'volunteer', $by !== '' ? $by . ' ' . count($tasks) . ' question' . (count($tasks) === 1 ? '' : 's') . ' on their volunteer page' : 'Sent ' . count($tasks) . ' to a volunteer', $pid);
     return array($log, $pid, $link, $invite);
+}
+
+/* ---- Volunteers pick their own questions (the volunteer page's "Research questions you can pick") ---- */
+
+/** How many unanswered questions one volunteer may hold at a time (filter kop_rt_volunteer_hold). */
+function kop_rt_volunteer_hold() {
+    return max(1, (int) apply_filters('kop_rt_volunteer_hold', 5));
+}
+
+/** The questions a volunteer may pick: open and given to nobody (the owner's and Claude's stay off it). */
+function kop_rt_pickable() {
+    kop_rt_free_released();
+    $out = array();
+    $rows = kop_rt_list('unassigned');
+    $ids = array();
+    foreach ($rows as $t) $ids = array_merge($ids, kop_rt_record_ids($t));
+    $names = kop_rt_record_names($ids);
+    foreach ($rows as $t) {
+        $places = array();
+        foreach (kop_rt_record_ids($t) as $rid) if (isset($names[$rid])) $places[] = $names[$rid];
+        $out[] = array('id' => (int) $t['id'], 'title' => (string) $t['title'], 'section' => (string) $t['section'],
+            'about' => implode('; ', array_slice($places, 0, 3)), 'start' => count(kop_rt_where_to_look($t, $names, array())) + count(kop_rt_company_ids($t)));
+    }
+    return $out;
+}
+
+/** The questions a volunteer holds now (given to them, not answered yet). */
+function kop_rt_held_by($vid) {
+    global $wpdb;
+    return (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_rt_table() . " WHERE assignee = 'volunteer' AND volunteer_id = %d AND status = 'open'", (int) $vid));
+}
+
+/**
+ * A volunteer takes the questions they ticked: those still given to nobody become one research project of
+ * theirs (the same as an admin's "Send to a volunteer"), up to kop_rt_volunteer_hold() held at once.
+ * Returns [project id, how many taken].
+ */
+function kop_rt_volunteer_take(array $vol, array $ids) {
+    $vid = (int) $vol['id'];
+    $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+    if (!$ids) throw new RuntimeException('Tick the questions you want to research first.');
+    kop_rt_free_released();
+    $room = kop_rt_volunteer_hold() - kop_rt_held_by($vid);
+    if ($room <= 0) throw new RuntimeException('You already have ' . kop_rt_volunteer_hold() . ' questions to answer. Answer or hand back some of them first, then pick more.');
+    $free = array();
+    foreach ($ids as $id) {
+        $t = kop_rt_get($id);
+        if ($t && $t['status'] === 'open' && $t['assignee'] === '') $free[] = $id;
+    }
+    if (!$free) throw new RuntimeException('Someone else has just taken ' . (count($ids) === 1 ? 'that question' : 'those questions') . '. Pick another.');
+    if (count($free) > $room) throw new RuntimeException('You can hold ' . kop_rt_volunteer_hold() . ' questions at a time and have room for ' . $room . ' more: untick ' . (count($free) - $room) . '.');
+    list(, $pid) = kop_rt_assign_volunteer($free, $vid, '', '', count($free) === 1 ? '' : 'Research questions you picked', $vol['name'] . ' picked');
+    return array($pid, count($free));
+}
+
+/**
+ * Questions whose volunteer project closed without an answer (handed back, left, set aside after a long wait)
+ * go back to nobody, so the list offers them again.
+ */
+function kop_rt_free_released() {
+    global $wpdb;
+    if (!function_exists('kop_volp_get')) return 0;
+    $n = 0;
+    foreach ((array) $wpdb->get_results('SELECT id, project_id FROM ' . kop_rt_table() . " WHERE status = 'open' AND assignee = 'volunteer' AND project_id > 0", ARRAY_A) as $t) {
+        $p = kop_volp_get((int) $t['project_id']);
+        if ($p && $p['status'] === 'open') continue;
+        $wpdb->update(kop_rt_table(), array('assignee' => '', 'volunteer_id' => 0, 'project_id' => 0, 'updated_at' => kop_rt_now()), array('id' => (int) $t['id']));
+        $n++;
+    }
+    return $n;
+}
+
+add_action('rest_api_init', function () {
+    if (!function_exists('kop_vol_rest_who')) return;
+    register_rest_route('kop/v1', '/volunteer/research', array(
+        'methods' => 'POST', 'callback' => 'kop_rt_rest_volunteer',
+        'permission_callback' => function (WP_REST_Request $req) {
+            $who = kop_vol_rest_who($req);
+            return is_wp_error($who) ? $who : true;
+        },
+    ));
+});
+
+/** POST volunteer/research: {do: 'list'} the questions to pick from; {do: 'take', ids: [...]} takes them. */
+function kop_rt_rest_volunteer(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        kop_rt_install();
+        kop_rt_sync_volunteer_answers();
+        $who = kop_vol_rest_who($req);
+        $vid = isset($who['vol']) ? (int) $who['vol']['id'] : 0;
+        if ($req->get_param('do') === 'take') {
+            if (!$vid) throw new RuntimeException('Admins see this page as a preview; picking questions is for volunteers.');
+            $ids = $req->get_param('ids');
+            list($pid, $n) = kop_rt_volunteer_take($who['vol'], is_array($ids) ? $ids : array());
+            return array('id' => $pid, 'taken' => $n, 'message' => $n === 1 ? 'It is yours: it opens below.' : 'They are yours: they open below, one at a time.');
+        }
+        return array('questions' => kop_rt_pickable(), 'hold' => kop_rt_volunteer_hold(), 'held' => $vid ? kop_rt_held_by($vid) : 0);
+    });
 }
 
 /** A volunteer's answer moves its task to Answered (the answer and its links copied onto the task). */
@@ -762,6 +860,7 @@ function kop_rt_page_body() {
         }
     }
     kop_rt_sync_volunteer_answers();
+    kop_rt_free_released();
 
     $view = sanitize_key($_GET['view'] ?? 'open');
     $section = sanitize_text_field(wp_unslash($_GET['section'] ?? ''));
@@ -792,7 +891,7 @@ function kop_rt_page_body() {
             'An answer from a volunteer or from Claude moves the card to <em>Answered</em>. Read it, change the record if it holds, then <em>Settled</em> with what settled it. <em>Drop it</em> when it is not worth finding.',
             'Every change has Undo in the green line after it and under <em>Recent changes</em>.',
         ),
-        'help' => '<p>Claude sessions add tasks as they find them (seeds/research-tasks.json, imported after each deploy) and answer the ones given to Claude the same way. Every link a volunteer gives is already in the review inbox.</p>',
+        'help' => '<p>Volunteers pick their own questions on their page from <em>Nobody yet</em> (up to ' . kop_rt_volunteer_hold() . ' held at a time); a question given to you or to Claude stays off their list, and one they hand back returns to it.</p><p>Claude sessions add tasks as they find them (seeds/research-tasks.json, imported after each deploy) and answer the ones given to Claude the same way. Every link a volunteer gives is already in the review inbox.</p>',
         'notices' => $notice,
     ));
     $holds = function_exists('kop_rinbox_held_counts') ? (int) (kop_rinbox_held_counts()['research'] ?? 0) : 0;

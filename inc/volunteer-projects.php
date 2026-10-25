@@ -1096,6 +1096,18 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
     <p style="max-width:760px">A project is a batch from one queue (as many items as you like; 10 to 30 is a good first try) with one question per item, an example of a yes and a no,
         and a finish line. Send the link to one person. When they are done, <em>Check their calls</em> lists what they said and applies the ones you tick,
         each with its Undo in Recently done.</p>
+    <?php if (function_exists('kop_rt_pickable')) :
+        // Research questions: volunteers pick their own on their page; this says how many are on offer and who holds some.
+        kop_rt_install();
+        kop_rt_free_released();
+        $offer = kop_rt_counts()['unassigned'];
+        $held = kop_rt_counts()['volunteer'];
+        ?>
+        <div class="notice notice-info inline" style="padding:8px 12px;max-width:900px"><p><strong>Research questions:</strong>
+            <?php echo (int) $offer; ?> open question<?php echo $offer === 1 ? '' : 's'; ?> volunteers can pick themselves on their page (under
+            <em>Research questions you can pick</em>, up to <?php echo (int) kop_rt_volunteer_hold(); ?> each at a time)<?php echo $held ? '; ' . (int) $held . ' held by volunteers now' : ''; ?>.
+            <a href="<?php echo esc_url(admin_url('admin.php?page=kop-research-tasks')); ?>">Research Tasks</a> lists them all and sends a set to one person.</p></div>
+    <?php endif; ?>
     <?php if ($notice_made) :
         list($pid, $link, $invite) = $notice_made;
         $p = kop_volp_get($pid);
