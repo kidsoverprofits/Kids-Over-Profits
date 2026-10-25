@@ -27,7 +27,11 @@
  * another, the question settles on its own through the Review inbox's own
  * action path (Review inbox > Answers to our questions, 'settle'), so it is
  * in Recently done with Undo. Staff years and rules never settle on their
- * own: they wait for the owner. What settling writes:
+ * own: they wait for the owner. Neither does a "No" to a practice or a staff
+ * member (owner, 2026-10-25: a practice can start or stop over time, and one
+ * person not seeing it is not proof): only-no answers are collected out of
+ * the owner's way and wait for review once KOP_Q_AGREE people say no
+ * (kop_q_is_no()). What settling writes:
  *   facility fields  a row in the Woodbury Facts table (extra.via
  *                    'questions', its source "Answers on the questions
  *                    page"), approved through kop_wbf_apply(): held for the
@@ -291,6 +295,14 @@ function kop_q_tally(array $rows) {
 function kop_q_agreed(array $tally) {
     if (count($tally) !== 1) return null;
     return $tally[0]['count'] >= KOP_Q_AGREE ? $tally[0] : null;
+}
+
+/**
+ * Is this answer a "No" to a practice or a staff member? It never settles on
+ * its own; the Review inbox collects it until KOP_Q_AGREE people say no.
+ */
+function kop_q_is_no($qkey, $answer_key) {
+    return (string) $answer_key === 'no' && (bool) preg_match('/^f\d+\.(?:practice|staff)\./', (string) $qkey);
 }
 
 /* ---- Questions ---------------------------------------------------------- */
@@ -765,6 +777,7 @@ function kop_q_answer(array $p) {
 
     $rows = kop_q_rows($key);
     $agreed = $q['auto'] && !kop_q_hedged_rows($rows) ? kop_q_agreed(kop_q_tally($rows)) : null;
+    if ($agreed && kop_q_is_no($key, $agreed['key'])) $agreed = null;
     if ($agreed && function_exists('kop_rinbox_apply_action')) {
         $GLOBALS['kop_rinbox_reviewer_as'] = KOP_Q_BY;
         try {

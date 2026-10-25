@@ -6,7 +6,11 @@
  * links and notes. A clear majority settles a question on its own (through
  * 'settle' here, as reviewer "questions page"); the rest wait here: staff
  * years always, anything people disagree on, and an answer whose note says
- * they are not sure (kop_q_hedged()). Remembered rules are not here: each
+ * they are not sure (kop_q_hedged()). A "No" to a practice or a staff member
+ * never settles on its own (kop_q_is_no()): while nobody says otherwise and
+ * fewer than KOP_Q_AGREE people say no, the question is under Collecting
+ * no answers, out of Waiting; at KOP_Q_AGREE it waits here, flagged.
+ * Remembered rules are not here: each
  * answer is read into lines on Review inbox > What readers remember
  * (inc/review-inbox/reader-accounts.php), and so is every note.
  *
@@ -31,9 +35,11 @@ kop_rinbox_register('questions', function () {
         'help'        => 'What readers answered on the questions page (/questions/): when a program opened or closed, its town, ages, practices, staff, rules, '
             . 'company facts, and which source is right where sources disagree. When ' . KOP_Q_AGREE . ' different people give the same answer and nobody says otherwise, '
             . 'it goes through on its own and is listed under Settled with Undo. Staff years always wait here, and so does an answer whose note says they are not sure. '
+            . 'A No to a practice or a staff member never goes through on its own (practices change over time): it is collected under Collecting no answers '
+            . 'and comes to Waiting, flagged, once ' . KOP_Q_AGREE . ' people say no. '
             . 'Remembered rules and the notes are read into lines under What readers remember. '
             . 'Use this answer writes it to the record (a program\'s facts wait for its next write-up); Dismiss stops asking.',
-        'views'       => array('waiting' => 'Waiting', 'settled' => 'Settled', 'dismissed' => 'Dismissed'),
+        'views'       => array('waiting' => 'Waiting', 'collecting' => 'Collecting no answers', 'settled' => 'Settled', 'dismissed' => 'Dismissed'),
         'count'       => function () { return kop_rinbox_q_view_counts()['waiting']; },
         'view_counts' => 'kop_rinbox_q_view_counts',
         'list'        => 'kop_rinbox_q_list',
@@ -42,15 +48,19 @@ kop_rinbox_register('questions', function () {
     );
 });
 
-/** [qkey => {n, last, status}] for every question with answers. */
+/** [qkey => {n, last, status, no}] for every question with answers ('no': how many said a kop_q_is_no() No, when nobody said otherwise). */
 function kop_rinbox_q_keys() {
     kop_q_ensure_tables();
     global $wpdb;
     $out = array();
-    foreach ((array) $wpdb->get_results('SELECT qkey, COUNT(DISTINCT who) AS n, MAX(created_at) AS last FROM ' . kop_q_table() . ' GROUP BY qkey', ARRAY_A) as $r) {
+    // One row per person and question (kop_q_answer() replaces a person's earlier answer).
+    foreach ((array) $wpdb->get_results('SELECT qkey, COUNT(DISTINCT who) AS n, MAX(created_at) AS last, COUNT(DISTINCT answer_key) AS answers, '
+        . "SUM(answer_key = 'no') AS nos FROM " . kop_q_table() . ' GROUP BY qkey', ARRAY_A) as $r) {
         // Remembered rules wait under What readers remember, one card per answer; one settled before that still shows here.
         if (function_exists('kop_ra_is_account_key') && kop_ra_is_account_key($r['qkey'])) continue;
-        $out[$r['qkey']] = array('n' => (int) $r['n'], 'last' => (string) $r['last'], 'status' => 'waiting');
+        $no = (int) $r['answers'] === 1 && (int) $r['nos'] > 0 && kop_q_is_no($r['qkey'], 'no') ? (int) $r['nos'] : 0;
+        $out[$r['qkey']] = array('n' => (int) $r['n'], 'last' => (string) $r['last'], 'no' => $no,
+            'status' => $no && $no < KOP_Q_AGREE ? 'collecting' : 'waiting');
     }
     foreach ((array) $wpdb->get_results('SELECT qkey, status, reviewed_at FROM ' . kop_q_state_table(), ARRAY_A) as $r) {
         if (!isset($out[$r['qkey']])) $out[$r['qkey']] = array('n' => 0, 'last' => (string) $r['reviewed_at']);
@@ -60,7 +70,7 @@ function kop_rinbox_q_keys() {
 }
 
 function kop_rinbox_q_view_counts() {
-    $c = array('waiting' => 0, 'settled' => 0, 'dismissed' => 0);
+    $c = array('waiting' => 0, 'collecting' => 0, 'settled' => 0, 'dismissed' => 0);
     foreach (kop_rinbox_q_keys() as $k) $c[$k['status']]++;
     return $c;
 }
@@ -106,7 +116,13 @@ function kop_rinbox_q_item($key) {
 
     $actions = array();
     $status = $state ? ($state['status'] === 'settled' ? 'settled' : 'dismissed') : 'waiting';
+    $nos = count($tally) === 1 && kop_q_is_no($key, $tally[0]['key']) ? (int) $tally[0]['count'] : 0;
     if ($status === 'waiting') {
+        if ($nos) {
+            $details[] = array('label' => $nos >= KOP_Q_AGREE ? 'Flagged: ' . $nos . ' people say no' : 'Collecting: ' . $nos . ' of ' . KOP_Q_AGREE . ' say no',
+                'value' => 'A No never goes through on its own: a practice can start or stop over time, and someone not seeing it does not mean it never happened. '
+                    . 'Using No writes nothing and stops the question; Dismiss also stops it.');
+        }
         $hedged = kop_q_hedged_rows($rows);
         if ($hedged) {
             $details[] = array('label' => 'Not settled on its own', 'value' => 'A note qualifies the answer: "'
@@ -137,7 +153,7 @@ function kop_rinbox_q_item($key) {
         'key'          => $key,
         'title'        => $ask !== '' ? $ask : $key,
         'subtitle'     => $total . ' ' . ($total === 1 ? 'answer' : 'answers') . ($tally ? ' · most say ' . mb_substr($tally[0]['label'], 0, 60) : '')
-            . ($question && empty($question['auto']) ? ' · always waits for you' : ''),
+            . ($nos >= KOP_Q_AGREE ? ' · ' . $nos . ' say no, check it' : ($question && empty($question['auto']) ? ' · always waits for you' : '')),
         'url'          => kop_q_url($key, $question ?: ($fac ? array('kind' => 'facility', 'id' => (int) $fac['id']) : null)),
         'text'         => (string) ($question['sub'] ?? ''),
         'details'      => $details,
@@ -145,7 +161,7 @@ function kop_rinbox_q_item($key) {
         'fields'       => array(),
         'facility'     => $fac,
         'status'       => $status,
-        'status_label' => array('waiting' => 'Waiting', 'settled' => 'Settled', 'dismissed' => 'Dismissed')[$status],
+        'status_label' => array('waiting' => 'Waiting', 'settled' => 'Settled', 'dismissed' => 'Dismissed')[$status] . ($status === 'waiting' && $nos ? ($nos >= KOP_Q_AGREE ? ' · flagged No' : ' · collecting No') : ''),
         'created'      => $rows ? (string) end($rows)['created_at'] : '',
         'actions'      => $actions,
         'selected'     => false,

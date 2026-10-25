@@ -37,7 +37,9 @@ node scripts/test-data-form-export.js
 # state deck; #f<id> / #o<id> / #q=<key> open a record. Answers: {prefix}kop_question_answers, one per person (keyed hash of address +
 # browser), 60 an hour. KOP_Q_AGREE (3) people agreeing with nobody disagreeing settles it on its own through Review inbox > Answers
 # to our questions ('settle', reviewer "questions page", Undo in Recently done); staff years always wait, and so does an answer whose note
-# is hedged (kop_q_hedged(): "not sure", "I think", "not physically"...). Facility values go in as
+# is hedged (kop_q_hedged(): "not sure", "I think", "not physically"...). A "No" to a practice or a staff member never settles
+# (kop_q_is_no(), owner 2026-10-25: practices change over time): only-no questions sit under Collecting no answers and come to Waiting,
+# flagged, at KOP_Q_AGREE people. Facility values go in as
 # Woodbury Facts rows (extra.via 'questions', badged "Questions page" there and in Conflicts, kop_wbf_origin()) through kop_wbf_apply(), so they are held for the write-up and conflicts wait as usual;
 # name years through kop_name_eras_save(); companies through kop_dired_edit(); conflicts through kop_rinbox_conflicts_act().
 # Email is optional and only for "tell me when my answers are checked" (the page says so): kop_q_notify() puts the reader's answers

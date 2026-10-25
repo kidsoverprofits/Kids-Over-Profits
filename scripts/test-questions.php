@@ -98,6 +98,9 @@ check('one other answer stops it', kop_q_agreed(kop_q_tally(array($row(1, 'a', '
 check('one person answering three times counts once', kop_q_agreed(kop_q_tally(array($row(1, 'a', '1998'), $row(2, 'a', '1998'), $row(3, 'a', '1998')))) === null);
 $t = kop_q_tally(array($row(1, 'a', '1996'), $row(2, 'a', '1998'), $row(3, 'b', '1998'), $row(4, 'c', '1998')));
 check('a person\'s latest answer replaces their earlier one', count($t) === 1 && $t[0]['count'] === 3 && kop_q_agreed($t) !== null);
+check('a No to a practice never settles on its own', kop_q_is_no('f7.practice.hasLevelSystem', 'no') && kop_q_is_no('f7.staff.ab12cd34', 'no'));
+check('a Yes to a practice can settle', !kop_q_is_no('f7.practice.hasLevelSystem', 'yes'));
+check('"No, it closed" is not a practice No', !kop_q_is_no('f7.status', 'Closed') && !kop_q_is_no('o3.status', 'no'));
 
 // ---- Words ----
 check('a conflict about an opening year is asked as one', kop_q_conflict_ask('dates', 'operatingPeriod.startYear', 'X') === 'What year did X open?');
