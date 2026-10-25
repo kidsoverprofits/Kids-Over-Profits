@@ -1822,7 +1822,7 @@
                 ${news.map(n => `
                     <li class="news-item"${kopEdit(n.id ? `rec:news:${parseInt(n.id, 10)}` : '', 'this article')}>
                         <div class="news-item-header">
-                            <span class="news-type-badge type-${escapeHtml(n.article_type)}">${escapeHtml(n.article_type)}</span>
+                            <span class="news-type-badge type-${escapeHtml(n.article_type)}">${escapeHtml(choicePill('news-article-types', n.article_type).label)}</span>
                             <a href="${escapeHtml(newsHref(n))}" target="_blank" rel="noopener" class="news-title">
                                 ${escapeHtml(n.display_title || n.article_title)}
                             </a>${newsArchiveHtml(n)}

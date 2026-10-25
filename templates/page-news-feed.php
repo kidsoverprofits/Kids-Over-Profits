@@ -363,7 +363,7 @@ try {
                     <button class="filter-btn active" data-filter-type="all">All</button>
                     <?php foreach ($allTypes as $type => $count): ?>
                         <button class="filter-btn" data-filter-type="<?php echo esc_attr($type); ?>">
-                            <?php echo esc_html(ucfirst($type)); ?> (<?php echo $count; ?>)
+                            <?php echo esc_html(function_exists('kop_news_article_type_label') ? kop_news_article_type_label($type) : ucfirst($type)); ?> (<?php echo $count; ?>)
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -659,7 +659,7 @@ try {
                     <?php endif; ?>
                     <div class="news-card-header">
                         <span class="news-type-badge type-<?php echo esc_attr($item['article_type']); ?>">
-                            <?php echo esc_html(ucfirst($item['article_type'])); ?>
+                            <?php echo esc_html(function_exists('kop_news_article_type_label') ? kop_news_article_type_label($item['article_type']) : ucfirst($item['article_type'])); ?>
                         </span>
                         <?php if ($card_arc): ?>
                             <a class="arc-badge" href="<?php echo esc_url('?story=' . rawurlencode($card_arc['slug'])); ?>" title="Part of an ongoing story — view all coverage">
