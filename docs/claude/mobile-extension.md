@@ -16,6 +16,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-api.php [-
 # The app's admin mode (inc/mobile-admin.php): kop/v1/app/session trades an administrator's application password for a one-use
 # 2-minute token, /app-login/ spends it (remember-me cookie, same-site redirect); /app/tools lists KOP Tools, /app/signout ends every
 # session; a session ends when its application password is revoked
+# The app gets that application password from WordPress's own Authorize Application page ("Sign in with WordPress",
+# app src/lib/wpAuthorize.ts: wp-admin/authorize-application.php -> kidsoverprofits://reviewer-auth?user_login=&password=),
+# so it stays signed in until revoked; nothing on the theme side. The Admin tab shows once the login is known to be an admin's
+# Ship app code to installed builds (no new native module since the build): (app repo) npx eas-cli update --channel preview
+# --environment preview --platform android --message "..." ; the phone downloads it on one launch and runs it on the next
 # A renamed program's page is cut into one section per name, earliest first ("As Copper Canyon Academy", "As Sedona Sky
 # Academy"; inc/facility-eras.php): names from the map's rename lines, years from Map Renames; each holds the deaths, serious
 # findings, lawsuits, incidents, news and staff of its years, another name's record included (both pages print every name).
