@@ -44,7 +44,7 @@
             const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
             if (typeof array[index] !== 'object' || array[index] === null) {
                 if (isPastTTIJobs) array[index] = { role: '', organization: '', employer: '' };
-                else if (isAdditionalLocation) array[index] = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
+                else if (isAdditionalLocation) array[index] = window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
                 else array[index] = { role: '', name: '' };
             }
             if (isPastTTIJobs && field === 'employer') {

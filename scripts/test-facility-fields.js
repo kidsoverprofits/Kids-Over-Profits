@@ -93,6 +93,21 @@ check('path map both ways', F.toV2Path('locationDetails.city') === 'location.cit
     && F.toV2Path('locationDetails.additionalLocations') === 'location.additionalLocations' && F.toV2Path('identification.name') === 'identification.name'
     && F.toLegacyPath('location.formerLocations') === 'locationDetails.formerLocations' && F.toLegacyPath('notes') === 'notes');
 
+// Both spellings in, the right one out, and a path already in the target spelling unchanged.
+const SPELLINGS = [
+    ['address', 'location.raw'], ['location', 'location.text'], ['locationDetails.city', 'location.city'],
+    ['locationDetails.state', 'location.state'], ['locationDetails.country', 'location.country'], ['locationDetails.zip', 'location.zip'],
+    ['locationDetails.additionalLocations', 'location.additionalLocations'], ['locationDetails.formerLocations.0.city', 'location.formerLocations.0.city'],
+    ['otherOperators', 'identification.otherOperators'], ['isPrivatelyOwned', 'facilityDetails.isPrivatelyOwned'],
+    ['identification.name', 'identification.name'], ['operatingPeriod.status', 'operatingPeriod.status'], ['notes', 'notes']
+];
+for (const [legacyPath, v2Path] of SPELLINGS) {
+    check(`toV2Path(${legacyPath})`, F.toV2Path(legacyPath) === v2Path, F.toV2Path(legacyPath));
+    check(`toV2Path(${v2Path}) unchanged`, F.toV2Path(v2Path) === v2Path, F.toV2Path(v2Path));
+    check(`toLegacyPath(${v2Path})`, F.toLegacyPath(v2Path) === legacyPath, F.toLegacyPath(v2Path));
+    check(`toLegacyPath(${legacyPath}) unchanged`, F.toLegacyPath(legacyPath) === legacyPath, F.toLegacyPath(legacyPath));
+}
+
 // Every stored record: its v2 document against its legacy projection.
 const input = process.argv[2];
 let records = 0;

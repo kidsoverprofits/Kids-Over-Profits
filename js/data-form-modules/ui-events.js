@@ -524,7 +524,10 @@
                     if (path && window.formData) {
                         const facilityIndex = window.currentFacilityIndex || 0;
                         ensureCurrentFacility();
-                        setValueAtPath(window.formData, `facilities.${facilityIndex}.${path}`, value);
+                        // Either spelling in the template; the facility's own when written (KOP_FacilityFields).
+                        const facility = window.formData.facilities[facilityIndex];
+                        const own = window.kopFacilityPath ? window.kopFacilityPath(facility, path) : path;
+                        setValueAtPath(window.formData, `facilities.${facilityIndex}.${own}`, value);
 
                         if (typeof window.updateJSON === 'function') window.updateJSON();
                         if (typeof window.autoSave === 'function') window.autoSave();
@@ -545,7 +548,9 @@
                 if (path && window.formData) {
                     const facilityIndex = window.currentFacilityIndex || 0;
                     ensureCurrentFacility();
-                    setValueAtPath(window.formData, `facilities.${facilityIndex}.${path}`, checkbox.checked);
+                    const facility = window.formData.facilities[facilityIndex];
+                    const own = window.kopFacilityPath ? window.kopFacilityPath(facility, path) : path;
+                    setValueAtPath(window.formData, `facilities.${facilityIndex}.${own}`, checkbox.checked);
                 }
 
                 const controlledElement = checkbox.dataset.controls ? document.getElementById(checkbox.dataset.controls) : null;

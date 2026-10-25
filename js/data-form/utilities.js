@@ -488,11 +488,18 @@ function resolvePathTarget(path) {
         
         if (isLocationProject && window.formData.facilities && window.formData.facilities[window.currentFacilityIndex]) {
             const currentFacility = window.formData.facilities[window.currentFacilityIndex];
+            scope = 'operator';
+            normalizedPath = path.replace('operator.', '');
+            // A v2 document keeps the synced operator copy in provenance.
+            if (window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(currentFacility)) {
+                currentFacility.provenance = currentFacility.provenance || {};
+                if (!currentFacility.provenance.sourceOperator) currentFacility.provenance.sourceOperator = {};
+                target = currentFacility.provenance.sourceOperator;
+                return { scope, normalizedPath, target };
+            }
             if (!currentFacility.sourceOperator) {
                 currentFacility.sourceOperator = {};
             }
-            scope = 'operator';
-            normalizedPath = path.replace('operator.', '');
             target = currentFacility.sourceOperator;
             return { scope, normalizedPath, target };
         }
@@ -608,6 +615,8 @@ function resolvePathTarget(path) {
     }
 
     target = window.formData.facilities[window.currentFacilityIndex];
+    // The form's paths come in either spelling; each facility is written in its own (KOP_FacilityFields).
+    if (typeof window.kopFacilityPath === 'function') normalizedPath = window.kopFacilityPath(target, path);
     return { scope, normalizedPath, target };
 }
 

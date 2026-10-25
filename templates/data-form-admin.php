@@ -1149,34 +1149,34 @@ get_header();
 
                 <div class="form-group">
                     <label>Address</label>
-                    <textarea class="facility-field" data-field="address" rows="3" placeholder="Street address, suite/unit number..."></textarea>
+                    <textarea class="facility-field" data-field="location.raw" rows="3" placeholder="Street address, suite/unit number..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>City</label>
-                        <input type="text" class="facility-field" data-field="locationDetails.city" placeholder="e.g., Salt Lake City">
+                        <input type="text" class="facility-field" data-field="location.city" placeholder="e.g., Salt Lake City">
                     </div>
                     <div class="form-group" id="state-field-group">
                         <label>State</label>
-                        <input type="text" class="facility-field" data-field="locationDetails.state" data-autocomplete-category="location" placeholder="e.g., UT">
+                        <input type="text" class="facility-field" data-field="location.state" data-autocomplete-category="location" placeholder="e.g., UT">
                     </div>
                     <div class="form-group" id="country-field-group" style="display: none;">
                         <label>Country</label>
-                        <input type="text" class="facility-field" data-field="locationDetails.country" data-autocomplete-category="country" placeholder="e.g., Mexico">
+                        <input type="text" class="facility-field" data-field="location.country" data-autocomplete-category="country" placeholder="e.g., Mexico">
                     </div>
                     <div class="form-group">
                         <label>ZIP</label>
-                        <input type="text" class="facility-field" data-field="locationDetails.zip" placeholder="e.g., 84101">
+                        <input type="text" class="facility-field" data-field="location.zip" placeholder="e.g., 84101">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Full Location (Legacy)</label>
-                    <input type="text" class="facility-field" data-field="location" placeholder="City, State or City, Country">
+                    <input type="text" class="facility-field" data-field="location.text" placeholder="City, State or City, Country">
                 </div>
                 <div class="form-group">
                     <label>Additional Locations</label>
                     <div style="color: #4A5568; font-size: 13px; margin-bottom: 6px;">Add other site addresses (address, city, state, ZIP).</div>
-                    <div class="array-container" data-path="locationDetails.additionalLocations"></div>
+                    <div class="array-container" data-path="location.additionalLocations"></div>
                 </div>
                 <div class="form-group" id="former-locations-group">
                     <label>Former Locations <small style="font-weight:400;color:#4A5568;">(relocation history)</small></label>
@@ -1185,7 +1185,7 @@ get_header();
                         It will appear in both the old and new state directories. Use the button below to move it
                         without retyping — that snapshots the current location here, then clear &amp; re-enter the new one above.
                     </div>
-                    <div class="array-container" data-path="locationDetails.formerLocations"></div>
+                    <div class="array-container" data-path="location.formerLocations"></div>
                     <button type="button" id="move-to-new-state-btn" class="btn-secondary" style="margin-top: 8px;">
                         <?php echo kop_icon('map-pin'); ?> Move this facility to a new state…
                     </button>
@@ -1202,7 +1202,7 @@ get_header();
             <div class="section-content">
                 <div class="form-group">
                     <label>Other Parent Companies</label>
-                    <div class="array-container" data-path="otherOperators"></div>
+                    <div class="array-container" data-path="identification.otherOperators"></div>
                 </div>
                 
                 <h3 style="margin: 20px 0 15px 0; color: #1f2937; font-size: 15px;">Facility Operating Dates</h3>

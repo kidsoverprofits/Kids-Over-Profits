@@ -1190,7 +1190,7 @@
 
             if (!operationsSection) return;
 
-            const otherOperatorsContainer = operationsSection.querySelector('.array-container[data-path="otherOperators"]');
+            const otherOperatorsContainer = operationsSection.querySelector('.array-container[data-path="identification.otherOperators"], .array-container[data-path="otherOperators"]');
             const otherOperatorsGroup = otherOperatorsContainer ? otherOperatorsContainer.closest('.form-group') : null;
             if (otherOperatorsGroup) {
                 otherOperatorsGroup.style.display = isPrivate ? 'none' : 'block';
@@ -2834,7 +2834,7 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
             const operationsSection = document.getElementById('operations-section');
             if (!operationsSection) return;
             
-            const otherOperatorsGroup = operationsSection.querySelector('.array-container[data-path="otherOperators"]');
+            const otherOperatorsGroup = operationsSection.querySelector('.array-container[data-path="identification.otherOperators"], .array-container[data-path="otherOperators"]');
             const otherOperatorsLabel = otherOperatorsGroup ? otherOperatorsGroup.previousElementSibling : null;
             
             if (isPrivate) {

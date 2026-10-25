@@ -2072,6 +2072,8 @@
 
     /** A form path in either spelling as its v2 path ('locationDetails.city' -> 'location.city'). */
     function toV2Path(path) {
+        // Already spelled the v2 way (a legacy location is a string, so nothing legacy sits under location.).
+        if (path.startsWith('location.') || Object.keys(V2_TO_LEGACY).some((k) => path === k || path.startsWith(k + '.'))) return path;
         if (LEGACY_TO_V2[path]) return LEGACY_TO_V2[path];
         for (const legacy of Object.keys(LEGACY_TO_V2)) {
             if (path.startsWith(legacy + '.')) return LEGACY_TO_V2[legacy] + path.slice(legacy.length);
@@ -2088,12 +2090,18 @@
         return path;
     }
 
+    /** A form path in either spelling as the given facility's shape spells it. */
+    function pathFor(facility, path) {
+        return isV2(facility) ? toV2Path(path) : toLegacyPath(path);
+    }
+
     window.KOP_FacilityFields = {
         read: read,
         write: write,
         isV2: isV2,
         toV2Path: toV2Path,
         toLegacyPath: toLegacyPath,
+        pathFor: pathFor,
         V2_TO_LEGACY: V2_TO_LEGACY
     };
 
@@ -2101,4 +2109,5 @@
     // projects' facilities (which the server still sends in the legacy shape).
     window.kopFacilityField = read;
     window.kopSetFacilityField = write;
+    window.kopFacilityPath = pathFor;
 })();

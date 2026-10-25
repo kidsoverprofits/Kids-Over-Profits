@@ -35,7 +35,7 @@
                 newItem = { role: '', name: '' };
             } else if (isAdditionalLocation) {
                 // A v2 location item keeps the address as typed in raw.
-                newItem = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
+                newItem = window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
             }
             workingArray.push(newItem);
             // A legacy facility keeps the single currentOwner copy in step; a v2 document has only the list.

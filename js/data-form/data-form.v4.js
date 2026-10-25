@@ -529,7 +529,7 @@ function updateArrayObjectItemValue(path, index, field, value) {
                 array[index] = { role: '', organization: '', employer: '' };
             } else if (isAdditionalLocation) {
                 // A v2 location item keeps the address as typed in raw.
-                array[index] = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
+                array[index] = window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
             } else {
                 array[index] = { role: '', name: '' };
             }
@@ -646,7 +646,7 @@ function loadOperatorData() {
  */
 function facilityValueAt(facility, path) {
     const F = window.KOP_FacilityFields;
-    return F && F.isV2(facility) ? F.read(facility, F.toV2Path(path)) : getNestedValue(facility, path);
+    return F && F.isV2(facility) ? F.read(facility, F.toV2Path(path)) : getNestedValue(facility, F ? F.toLegacyPath(path) : path);
 }
 
 function loadFacilityData() {
@@ -712,13 +712,15 @@ function loadFacilityData() {
     const facilityType = document.getElementById('facility-type');
     if (facilityType) facilityType.value = facility.facilityDetails?.type || '';
 
-    const arrayPaths = ['identification.otherNames', 'identification.dbaNames', 'identification.registrants', 'identification.knownReferrers', 'otherOperators', 'operatingPeriod.notes', 'staff.administrator', 'staff.notableStaff', 'staff.pastTTIJobs', 'profileLinks', 'accreditations.current', 'accreditations.past', 'memberships', 'certifications', 'licensing', 'resources.notes', 'notes', 'locationDetails.additionalLocations', 'locationDetails.formerLocations',
+    const arrayPaths = ['identification.otherNames', 'identification.dbaNames', 'identification.registrants', 'identification.knownReferrers', 'identification.otherOperators', 'operatingPeriod.notes', 'staff.administrator', 'staff.notableStaff', 'staff.pastTTIJobs', 'profileLinks', 'accreditations.current', 'accreditations.past', 'memberships', 'certifications', 'licensing', 'resources.notes', 'notes', 'location.additionalLocations', 'location.formerLocations',
         // Mental health provider lists; renderArray skips them outside the providers view.
         'providerDetails.otherCareTypes', 'providerDetails.otherTtiPractices', 'providerDetails.ttiReferrals', 'providerDetails.transportersUsed', 'providerDetails.ttiAffiliations'];
     arrayPaths.forEach(path => {
-        const container = document.querySelector(`[data-path="${path}"]`);
+        // A page cached before the templates moved to v2 paths still has the legacy spelling.
+        const legacyPath = window.KOP_FacilityFields ? window.KOP_FacilityFields.toLegacyPath(path) : path;
+        const container = document.querySelector(`[data-path="${path}"]`) || document.querySelector(`[data-path="${legacyPath}"]`);
         if (container) {
-            renderArray(container, path, facilityValueAt(facility, path));
+            renderArray(container, container.dataset.path, facilityValueAt(facility, container.dataset.path));
         }
     });
 }
@@ -1698,7 +1700,8 @@ function attachFieldListeners_DEPRECATED_LOCAL() {
             field.addEventListener('input', () => {
                 const path = field.dataset.field;
                 let value = field.type === 'number' ? (field.value === '' ? null : parseInt(field.value)) : field.value;
-                setNestedValue(window.formData.facilities[window.currentFacilityIndex], path, value);
+                const facility = window.formData.facilities[window.currentFacilityIndex];
+                setNestedValue(facility, window.kopFacilityPath ? window.kopFacilityPath(facility, path) : path, value);
 
                 // Custom values are saved by custom value recorder on blur/change
                 // No need to add them here on every keystroke
@@ -1716,7 +1719,8 @@ function attachFieldListeners_DEPRECATED_LOCAL() {
             const changeHandler = () => {
                 const path = checkbox.dataset.field;
                 if (path) {
-                    setNestedValue(window.formData.facilities[window.currentFacilityIndex], path, checkbox.checked);
+                    const facility = window.formData.facilities[window.currentFacilityIndex];
+                    setNestedValue(facility, window.kopFacilityPath ? window.kopFacilityPath(facility, path) : path, checkbox.checked);
                 }
 
                 const controlledElementId = checkbox.dataset.controls;

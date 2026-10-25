@@ -19,6 +19,9 @@ URL = "https://kidsoverprofits.org/tti-data-submission/"
 ap = argparse.ArgumentParser()
 ap.add_argument("--projects", type=int, default=12)
 ap.add_argument("--show", action="store_true")
+ap.add_argument("--html", choices=("live", "v2"), default="live",
+                help="v2: the working-tree run gets the page with the templates' v2 field paths "
+                     "(as templates/data-form-*.php now write them); live: the page as served")
 ap.add_argument("--v2-render", action="store_true",
                 help="report (not fail) the form fields that read differently when the facility is its v2 document")
 ap.add_argument("--v2-probes", default="private,keyword,operator,location,lockey",
@@ -81,6 +84,52 @@ SHOW = r"""async (i) => {
 
 
 v2_checks = []
+edit_checks = []
+
+# Type into the place fields and the first other-operator box, in either spelling of their paths.
+EDIT = r"""async (asV2) => {
+    const i = window.currentFacilityIndex = 0;
+    if (asV2) window.formData.facilities[0] = window.KOP_DataNormalizer.facilityToV2(JSON.parse(JSON.stringify(window.formData.facilities[0])));
+    if (window.updateAllUI) window.updateAllUI();
+    await new Promise((r) => setTimeout(r, 150));
+    const typed = {};
+    const type = (sel, value) => {
+        const el = document.querySelector(sel);
+        if (!el) return;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        typed[sel] = value;
+    };
+    type('.facility-field[data-field="address"], .facility-field[data-field="location.raw"]', '9 Test Rd, Testville, UT 84000');
+    type('.facility-field[data-field="locationDetails.city"], .facility-field[data-field="location.city"]', 'Testville');
+    type('.facility-field[data-field="locationDetails.state"], .facility-field[data-field="location.state"]', 'UT');
+    type('.facility-field[data-field="location"], .facility-field[data-field="location.text"]', 'Testville, UT');
+    type('[data-path="otherOperators"] .array-input, [data-path="identification.otherOperators"] .array-input', 'Test Operator Co');
+    await new Promise((r) => setTimeout(r, 100));
+    return { typed: Object.keys(typed).length, facility: JSON.parse(JSON.stringify(window.formData.facilities[0])) };
+}"""
+
+# The form templates' field paths, legacy -> v2 (templates/data-form-admin.php, data-form-public.php).
+V2_PATHS = [
+    ('class="facility-field" data-field="address"', 'class="facility-field" data-field="location.raw"'),
+    ('data-field="locationDetails.city"', 'data-field="location.city"'),
+    ('data-field="locationDetails.state"', 'data-field="location.state"'),
+    ('data-field="locationDetails.country"', 'data-field="location.country"'),
+    ('data-field="locationDetails.zip"', 'data-field="location.zip"'),
+    ('class="facility-field" data-field="location"', 'class="facility-field" data-field="location.text"'),
+    ('data-path="locationDetails.additionalLocations"', 'data-path="location.additionalLocations"'),
+    ('data-path="locationDetails.formerLocations"', 'data-path="location.formerLocations"'),
+    ('data-path="otherOperators"', 'data-path="identification.otherOperators"'),
+]
+
+
+def v2_page(route, request):
+    response = route.fetch()
+    html = response.text()
+    for old, new in V2_PATHS:
+        html = html.replace(old, new)
+    route.fulfill(response=response, body=html)
+
 render_gaps = {}
 
 RENDER_V2 = r"""async (i) => {
@@ -118,6 +167,8 @@ def run(live_only, names=None):
 
         if not live_only:
             pg.route(re.compile(r"/themes/child/js/.*\.js"), serve)
+            if args.html == "v2":
+                pg.route(URL, v2_page)
         pg.goto(URL, wait_until="domcontentloaded", timeout=90000)
         pg.wait_for_function("window.formReady === true", timeout=180000)
         if names is None:
@@ -135,6 +186,12 @@ def run(live_only, names=None):
                     v2_checks.append((f"{name} [{i}]", extra["probe"], v2))
                 result[f"{name} [{i}]"] = {"form": pg.evaluate(READ_FORM), **extra}
             result[f"{name} formData"] = pg.evaluate("JSON.parse(JSON.stringify(window.formData))")
+            if count and names.index(name) < 4:
+                pg.evaluate(OPEN, name)
+                result[f"{name} edit"] = pg.evaluate(EDIT, False)
+                if not live_only:
+                    pg.evaluate(OPEN, name)
+                    edit_checks.append((name, pg.evaluate(EDIT, True)))
             # updateAllUI() writes into formData on a second pass (sourceOperator fields), so the report comes after.
             for i in range(min(count, 6) if args.v2_render and not live_only else 0):
                 as_v2 = pg.evaluate(RENDER_V2, i)
@@ -164,11 +221,32 @@ ac = live.get("autocomplete") or {}
 print(f"{len(names)} projects, {sum(1 for k in live if '[' in k)} facilities; autocomplete: "
       f"{len(ac.get('operators') or [])} operators, {len(ac.get('locations') or [])} places")
 diffs = []
+def canon_form(form):
+    """Form keys in the legacy spelling, so a page with v2 field paths compares with the live one."""
+    out = {}
+    for k, v in form.items():
+        for old, new in V2_PATHS:
+            o = re.search(r'data-(?:field|path)="([^"]+)"', old).group(1)
+            n = re.search(r'data-(?:field|path)="([^"]+)"', new).group(1)
+            if k == n or k.startswith(n + "|") or k == "list:" + n:
+                k = k.replace(n, o, 1)
+                break
+        out[k] = v
+    return out
+
+
+def same(a, b):
+    if isinstance(a, dict) and isinstance(b, dict) and "form" in a and "form" in (b or {}):
+        a = {**a, "form": canon_form(a["form"])}
+        b = {**b, "form": canon_form(b["form"])}
+    return json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+
+
 for key in live:
     a, b = live[key], tree.get(key)
-    if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True):
+    if not same(a, b):
         if isinstance(a, dict) and isinstance(b, dict) and "form" in a:
-            fa, fb = a["form"], b["form"]
+            fa, fb = canon_form(a["form"]), canon_form(b["form"])
             keys = sorted(set(fa) | set(fb))
             bad = [k for k in keys if fa.get(k) != fb.get(k)]
             extra = [("toggle", a["toggle"], b["toggle"])] if a["toggle"] != b["toggle"] else []
@@ -184,6 +262,16 @@ for key, a, b in v2_checks:
         kind = probe.split(":")[0]
         if kind in args.v2_probes and json.dumps(a[probe]) != json.dumps(b.get(probe)):
             diffs.append((key + " as v2 (legacy= / v2=)", [(probe, a[probe], b.get(probe))]))
+# On a v2 document the same typing lands in its v2 fields.
+for name, e in edit_checks:
+    f = e["facility"]
+    loc = f.get("location") or {}
+    want = {"raw": "9 Test Rd, Testville, UT 84000", "city": "Testville", "state": "UT", "text": "Testville, UT"}
+    got = {k: loc.get(k) for k in want}
+    ops = (f.get("identification") or {}).get("otherOperators") or []
+    if e["typed"] < 5 or got != want or "Test Operator Co" not in ops or any(k in f for k in ("locationDetails", "address", "otherOperators")):
+        diffs.append((name + " edit as v2", [("typed", e["typed"], 5), ("location", want, got), ("otherOperators", ["Test Operator Co"], ops),
+                                              ("legacy keys", [], [k for k in ("locationDetails", "address", "otherOperators") if k in f])]))
 new_errors = [e for e in tree_errors if e not in live_errors]
 if new_errors:
     print("New page errors:", *new_errors[:10], sep="\n  ")

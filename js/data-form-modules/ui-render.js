@@ -612,9 +612,12 @@
             // The form's path for the list, or its v2 path (location.*).
             const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
             const isFormerLocation = /(?:locationDetails|location)\.formerLocations$/.test(path);
-            // A v2 location item keeps the address as typed in raw, a legacy one in address.
-            const v2ListPath = /^location\./.test(path);
-            const addressKeyOf = (it) => (it && typeof it === 'object' && it.raw !== undefined && it.address === undefined) || (v2ListPath && !(it && it.address !== undefined)) ? 'raw' : 'address';
+            // A v2 location item keeps the address as typed in raw, a legacy one in address
+            // (an item's own key wins; a new item follows the facility's shape).
+            // Only for the location lists: resolvePathTarget() sets up referrer data for other paths.
+            const listOwner = (isAdditionalLocation || isFormerLocation) && typeof window.resolvePathTarget === 'function' ? window.resolvePathTarget(path).target : null;
+            const v2Owner = !!(window.KOP_FacilityFields && listOwner && window.KOP_FacilityFields.isV2(listOwner));
+            const addressKeyOf = (it) => (it && typeof it === 'object' && it.raw !== undefined && it.address === undefined) || (v2Owner && !(it && typeof it === 'object' && it.address !== undefined)) ? 'raw' : 'address';
 
             // Determine autocomplete category based on path
             let defaultCategory = null;
