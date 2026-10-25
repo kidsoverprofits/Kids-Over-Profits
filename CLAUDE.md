@@ -144,7 +144,7 @@ The rest are in the area files above.
 ## Architecture
 
 ### Dual-Workflow Data System
-1. **Admin workflow**: Direct writes via `api/save-master.php` (to `facilities_v2` through `inc/facility-v2-writer.php` since the 2026-09-18 write switch)
+1. **Admin workflow**: Direct writes via `api/save-master.php` (to `facilities_v2` through `inc/facility-v2-writer.php`; the old `facilities_master` was retired in data model phase 5, 2026-10-25)
 2. **Public workflow**: Writes to `suggested_edits` table for approval via `api/save-suggestion.php`
 
 ### Database Tables

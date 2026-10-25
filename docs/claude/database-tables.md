@@ -2,9 +2,10 @@
 
 What each table holds and which file owns it. A new table goes here (and in `DATABASE-COLUMNS.md`).
 
-- `facilities_v2` (+ `{prefix}kop_operators`, `kop_operator_facilities`, `kop_facility_locations`) - Facility records, one JSON document per facility (`docs/FACILITY-SCHEMA.md`); `facilities_master` is the frozen legacy copy
+- `facilities_v2` (+ `{prefix}kop_operators`, `kop_operator_facilities`, `kop_facility_locations`) - Facility records, one JSON document per facility (`docs/FACILITY-SCHEMA.md`). `facilities_master` was retired in data model phase 5 (2026-10-25): renamed `retired_facilities_master_20261025`, read by nothing
 - `suggested_edits` - Public submissions pending approval
-- `locations_master` / `referrers_master` - Related data
+- `locations_master` - One row per state or country: its state-level data (referrerConsultants, fieldNotes); no facilities since phase 5 (a place's facilities are `kop_facility_locations` memberships)
+- `referrers_master` - Referrer projects
 - `providers_master` - Mental health providers outside the TTI (psychiatric wards, PHP/IOP, day schools, respite, outpatient) that use TTI practices or refer to TTI facilities; the data form's "providers" category (`js/data-form/provider-form.js`), kept out of the facility tables
 - `marketers_master` - Marketing companies that sell programs to parents (websites, "independent" directories, help lines, sold inquiries, reputation work, instructions for AI chatbots): the data forms' Marketers tab (`js/data-form/marketer-form.js`, `templates/data-form-marketer.php`), stored as `{marketerCompany}` only (`api/lib-marketers.php`), listed on /marketing-companies/ (`inc/marketers.php`); seeded once per version from `seeds/marketers.json` (adds missing records, never changes one)
 - `tradeorgs_master` - Trade organizations (NATSAP, the OBH Council, IECA, ISPA, NATC, NIPSA, SBSA, YATA, AMATS, AEE, EAGALA): the data forms' Trade Organizations tab (`js/data-form/tradeorg-form.js`, `templates/data-form-tradeorg.php`), stored as `{tradeOrg}` only (`api/lib-tradeorgs.php`), listed on /trade-organizations/ (`inc/tradeorgs.php`) with the programs whose records name it under memberships/accreditations (`kop_tradeorg_membership_match()`: name, acronym or other name; "former" in the entry = former member), and transport companies whose records list it among affiliations (`kop_tradeorgs_transport_members()`); seeded from `seeds/tradeorgs.json` like marketers. Record kind `tradeorg` in Woodbury, wiki links, the finder and People
