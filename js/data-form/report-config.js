@@ -19,7 +19,7 @@ class ReportConfig {
                 facilities: {
                     include: ['identification.name', 'identification.currentName',
                              'identification.currentOperator',
-                             'location', 'city', 'state', 'address',
+                             'location', 'city', 'state', 'address', 'schema_version',
                              'facilityDetails.type', 'facilityDetails.status',
                              'operatingPeriod.status', 'operatingPeriod.startYear',
                              'operatingPeriod.endYear'],

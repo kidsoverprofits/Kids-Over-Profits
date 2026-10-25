@@ -36,6 +36,7 @@ node scripts/test-data-form-export.js
 # facility and its v2 document
 python scripts/test-data-form-equivalence.py [--projects 30]
 node scripts/test-move-to-new-state.js        # admin form's Move to a new state, legacy as before, v2 as its normalized form
+node scripts/test-report-generator-v2.js copies.jsonl   # the form's report: legacy as before, v2 the same, 400 real facilities
 # /questions/ ("We have questions", inc/questions.php + templates/questions.php + js/questions.js + css/questions.css): one short
 # question at a time, phone first, about what a record lacks (open?, opened, closed, town, boys/girls, ages, until when an earlier
 # name was used, each unticked practice, "was <staff> there when you were? year", remembered rules; companies: founded, based,

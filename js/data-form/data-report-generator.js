@@ -479,29 +479,51 @@ function generateFacilityBasicInfo(facility) {
     `;
 }
 
+/**
+ * The place fields the report shows: a v2 document's location block (KOP_FacilityFields,
+ * data-normalizer.js), or the fields a legacy facility has always been read from. The
+ * top-level city/state/country belong to an old shape no record has now, so a v2
+ * document gives the same three a legacy one does.
+ */
+function reportFacilityPlace(facility) {
+    const F = window.KOP_FacilityFields;
+    if (F && F.isV2(facility)) {
+        const loc = facility.location || {};
+        return {
+            location: loc.text || '', address: loc.raw || '', city: '', state: '', country: '',
+            otherOperators: (facility.identification || {}).otherOperators || []
+        };
+    }
+    return {
+        location: facility.location, address: facility.address, city: facility.city, state: facility.state,
+        country: facility.country, otherOperators: facility.otherOperators
+    };
+}
+
 function generateFacilityLocation(facility) {
+    const place = reportFacilityPlace(facility);
     // Check for location data in various formats
-    const hasLocation = facility.location || facility.address || facility.city || facility.state || 
-                        facility.country || (facility.otherOperators && facility.otherOperators.length > 0);
+    const hasLocation = place.location || place.address || place.city || place.state || 
+                        place.country || (place.otherOperators && place.otherOperators.length > 0);
     
     if (!hasLocation) {
         return '';
     }
 
     // Build location string from city/state if location isn't already set
-    let locationDisplay = safeString(facility.location);
-    if (!locationDisplay && (facility.city || facility.state)) {
-        locationDisplay = [safeString(facility.city), safeString(facility.state)].filter(Boolean).join(', ');
+    let locationDisplay = safeString(place.location);
+    if (!locationDisplay && (place.city || place.state)) {
+        locationDisplay = [safeString(place.city), safeString(place.state)].filter(Boolean).join(', ');
     }
 
     return `
         <div class="subsection-title">Location & Operations</div>
         <div class="info-grid">
             ${locationDisplay ? `<div class="info-item"><span class="info-label">Location:</span><span class="info-value">${escapeHtml(locationDisplay)}</span></div>` : ''}
-            ${facility.address ? `<div class="info-item"><span class="info-label">Address:</span><span class="info-value">${escapeHtml(facility.address)}</span></div>` : ''}
-            ${facility.country ? `<div class="info-item"><span class="info-label">Country:</span><span class="info-value">${escapeHtml(facility.country)}</span></div>` : ''}
+            ${place.address ? `<div class="info-item"><span class="info-label">Address:</span><span class="info-value">${escapeHtml(place.address)}</span></div>` : ''}
+            ${place.country ? `<div class="info-item"><span class="info-label">Country:</span><span class="info-value">${escapeHtml(place.country)}</span></div>` : ''}
         </div>
-        ${renderList('Other Operators', facility.otherOperators)}
+        ${renderList('Other Operators', place.otherOperators)}
     `;
 }
 
@@ -1337,7 +1359,7 @@ function formatWebsiteLink(url) {
             }
         } catch (e) {
             // If URL parsing fails, use original but clean up common prefixes
-            displayText = urlStr
+            displayText = rawHref
                 .replace(/^https?:\/\//, '')
                 .replace(/^www\./, '');
             // Truncate if too long
@@ -1571,8 +1593,8 @@ function renderReportHTMLFromGenerator(data, skipHeader = false) {
                     <div class="info-grid">
                         ${renderField('Current Name', id.currentName)}
                         ${renderField('Current Operator', id.currentOperator)}
-                        ${renderField('Location', facility.location)}
-                        ${renderField('Address', facility.address)}
+                        ${renderField('Location', reportFacilityPlace(facility).location)}
+                        ${renderField('Address', reportFacilityPlace(facility).address)}
                         ${renderField('Type', details.type)}
                         ${renderField('Capacity', details.capacity)}
                         ${renderField('Current Census', details.currentCensus)}
@@ -1584,7 +1606,7 @@ function renderReportHTMLFromGenerator(data, skipHeader = false) {
                     </div>
                     
                     ${renderList('Other Names', id.otherNames)}
-                    ${renderList('Other Operators', facility.otherOperators)}
+                    ${renderList('Other Operators', reportFacilityPlace(facility).otherOperators)}
                     ${renderList('Administrators', staff.administrator)}
                     ${renderList('Notable Staff', staff.notableStaff)}
                     ${renderList('Current Accreditations', acc.current)}
