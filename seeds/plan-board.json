@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 22:28 UTC",
- "source": "751de6e639f90ce45e0cc0e952310144de692a79",
+ "built": "2026-10-25 22:31 UTC",
+ "source": "af4ff48fd7bede65dd236b82cd0c420fe1e0fe57",
  "sections": [
   {
    "key": "2",
@@ -909,10 +909,10 @@
       {
        "id": "4.3:data-model-phase-5",
        "lead": "Data model phase 5",
-       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit.",
-       "ask": "Go ahead with data model phase 5 (remove the old model, backup first)?",
-       "date": "",
-       "hash": "7189fab169d2"
+       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit. Owner: go (2026-10-25). Backup taken 2026-10-25 17:30 server time: `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server (facilities_master, locations_master, the six `_bak_2026091x` tables, facilities_v2; 4.3 MB) and a copy in `tmp/backups/`. Client side of the form's step 6 done ([aab73af](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/aab73afde3a1b65971461fb3e21c8f782df60995)).",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "d887817fd1f4"
       },
       {
        "id": "4.3:business-filing-fields",
