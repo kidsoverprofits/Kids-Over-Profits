@@ -148,6 +148,7 @@ while (have_posts()) :
                     <li>Adoptees</li>
                     <li>Maternity home survivors: girls placed while pregnant or parenting</li>
                     <li>Immigrant survivors, including young people held in ORR shelters</li>
+                    <li>Survivors from religious minorities, above all Jewish and Muslim survivors</li>
                 </ul>
                 <p>You choose what to read and how much. Write to us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>
                     and say which group you would read for; you do not have to tell us anything else about yourself. We name readers
