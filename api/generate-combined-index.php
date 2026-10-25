@@ -33,10 +33,9 @@ if (!function_exists('current_user_can') || !(current_user_can('manage_options')
 require_once __DIR__ . '/config.php';
 
 try {
-    // 1. Fetch TTI Program Index Data (facilities_master)
-    $stmt = $pdo->prepare("SELECT unique_name, json_data FROM facilities_master");
-    $stmt->execute();
-    $facilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 1. The facility records (facilities_v2, kop_operators) in the old row shapes
+    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+    $facilities = kop_v2_pdo_master_rows($pdo, kop_v2_detect_prefix($pdo));
 
     // 2. Fetch Wiki Data (wiki_master)
     $stmtWiki = $pdo->prepare("SELECT slug, program_name, city_state, program_type, organization, years_active FROM wiki_master");

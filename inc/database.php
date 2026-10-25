@@ -691,12 +691,11 @@ function kop_get_facilities_projects_from_database($only_tables = null, $attach 
         return new WP_Error('kop_facilities_invalid_connection', __('Facilities database connection is invalid.', 'kadence-child'));
     }
 
-    // All master tables to query
+    // The master tables still read here. Facilities and places come from the v2 tables
+    // (kop_v2_get_facilities_projects(), which calls this for referrers and transporters).
     $master_tables = array(
-        'facilities_master',
         'referrers_master',
         'transporters_master',
-        'locations_master',
     );
     if (is_array($only_tables)) {
         $master_tables = array_values(array_intersect($master_tables, $only_tables));

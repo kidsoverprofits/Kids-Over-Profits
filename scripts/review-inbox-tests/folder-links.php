@@ -12,7 +12,7 @@ require_once __DIR__ . '/_shared.php';
 require_once dirname(__DIR__, 2) . '/inc/folder-links.php';
 
 if (kop_rinbox_test_wants('folder-links')) {
-    kop_rinbox_test_copy_tables(array('facilities_master', 'wpdl_kop_folder_links', 'wpdl_kop_folder_link_dismissals', 'wpdl_kop_media_folder_tags'));
+    kop_rinbox_test_copy_tables(array('facilities_v2', 'wpdl_kop_operators', 'wpdl_kop_operator_facilities', 'wpdl_kop_folder_links', 'wpdl_kop_folder_link_dismissals', 'wpdl_kop_media_folder_tags'));
 }
 
 function kop_rinbox_test_folder_links(array $src, array $item, callable $check) {

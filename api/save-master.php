@@ -1366,10 +1366,10 @@ if ($action === 'inspect-project') {
             exit;
         }
         
-        // Try case-insensitive match
-        $stmt = $pdo->prepare("SELECT unique_name, json_data, updated_at FROM facilities_master WHERE UPPER(unique_name) = UPPER(:projectName)");
-        $stmt->execute([':projectName' => $projectName]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Try case-insensitive match: the record in its old row shape, from the v2 tables
+        require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+        $row = kop_v2_pdo_master_row_by_name($pdo, kop_v2_detect_prefix($pdo), $projectName);
+        if ($row) $row['updated_at'] = null;
         
         if (!$row) {
             // Try referrers table

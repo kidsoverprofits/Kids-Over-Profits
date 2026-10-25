@@ -48,11 +48,8 @@ function kop_register_facilities_rest_routes() {
                     return is_wp_error($out) ? $out : rest_ensure_response($out);
                 }
 
-                // Public directory feed. The admin form loads kop/v1/projects,
-                // which stays on the legacy tables it edits.
-                $data = (function_exists('kop_v2_active') && kop_v2_active('program_index'))
-                    ? kop_v2_get_facilities_projects()
-                    : kop_get_facilities_projects_from_database();
+                // Public directory feed, from the v2 tables.
+                $data = kop_v2_get_facilities_projects();
 
                 if (is_wp_error($data)) {
                     return $data;
@@ -70,7 +67,8 @@ function kop_register_facilities_rest_routes() {
         array(
             'methods'  => WP_REST_Server::READABLE,
             'callback' => function () {
-                $projects = kop_get_facilities_projects_from_database();
+                // The same projects as kop/v1/facilities (the v2 tables; facilities_master is retired).
+                $projects = kop_v2_get_facilities_projects();
 
                 if (is_wp_error($projects)) {
                     return $projects;
@@ -1045,8 +1043,10 @@ function kop_autocomplete_rest_callback($request) {
     $value_set = array();
     
     foreach ($master_tables as $table_name) {
-        // Check if table exists
-        $table_exists = $wpdb->get_var($wpdb->prepare(
+        // facilities_master / locations_master name the facility records, which come from the v2 rows
+        // below (the old tables are retired in data model phase 5); the other tables must exist.
+        $v2_names = $table_name === 'facilities_master' || $table_name === 'locations_master';
+        $table_exists = $v2_names || $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
             DB_NAME,
             $table_name
@@ -1059,7 +1059,7 @@ function kop_autocomplete_rest_callback($request) {
         // Get JSON data from the table. facilities_master is frozen once admin
         // saves write the v2 tables, and locations_master then keeps only
         // state-level referrer data, so both come from the v2 rows.
-        if (kop_v2_writes_on() && ($table_name === 'facilities_master' || $table_name === 'locations_master')) {
+        if ($v2_names) {
             if ($table_name === 'locations_master' && in_array('facilities_master', $master_tables, true)) {
                 continue;   // the v2 rows already cover every facility
             }
@@ -1866,36 +1866,10 @@ function kop_search_database_rest_callback($request) {
     $all_results = array();
 
     if ($has_facility_query) {
-        $table_base = 'facilities_master';
-
-        // Check if table exists
-        $table_exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
-            DB_NAME,
-            $table_base
-        ));
-
-        if (!$table_exists) {
-            return rest_ensure_response(array(
-                'success' => false,
-                'results' => array(),
-                'count' => 0,
-                'error' => 'Database table not found',
-            ));
-        }
-
-        $rows = $wpdb->get_results("SELECT unique_name, json_data FROM {$table_base}", ARRAY_A);
-        if (!is_array($rows)) {
-            $rows = array();
-        }
-
-        // Once admin saves write the v2 tables, facilities_master is frozen:
-        // search the v2 rows instead, in the same two shapes.
-        if (kop_v2_writes_on()) {
-            $rows = array();
-            foreach (kop_v2_legacy_shaped_rows() as $v2_row) {
-                $rows[] = array('unique_name' => $v2_row['unique_name'], 'json_data' => $v2_row['payload']);
-            }
+        // The facility records (v2 tables) in the old row shapes; facilities_master is retired.
+        $rows = array();
+        foreach (kop_v2_legacy_shaped_rows() as $v2_row) {
+            $rows[] = array('unique_name' => $v2_row['unique_name'], 'json_data' => $v2_row['payload']);
         }
 
         // facilities_master holds two kinds of rows: operator/company projects

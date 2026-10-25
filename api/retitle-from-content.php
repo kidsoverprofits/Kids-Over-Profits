@@ -329,7 +329,9 @@ function kop_rtc_program_names() {
     global $wpdb;
     $raw = [];
 
-    $fm = $wpdb->get_results("SELECT unique_name, json_data FROM facilities_master");
+    // The facility records (facilities_v2, kop_operators) in the old row shapes.
+    require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
+    $fm = kop_v2_master_row_objects();
     foreach ($fm ?: [] as $r) {
         $raw[] = $r->unique_name;
         $decoded = json_decode((string) $r->json_data, true);

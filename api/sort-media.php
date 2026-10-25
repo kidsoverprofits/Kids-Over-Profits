@@ -251,7 +251,9 @@ function kop_sm_alias_matchable($folders, $generic, $live = []) {
     }
 
     $entries = [];
-    $rows = $wpdb->get_results('SELECT unique_name, json_data FROM facilities_master');
+    // The facility records (facilities_v2, kop_operators) in the old row shapes.
+    require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
+    $rows = kop_v2_master_row_objects();
     foreach ((array)$rows as $row) {
         $names = [(string)$row->unique_name];
         $decoded = json_decode($row->json_data ?: '', true);

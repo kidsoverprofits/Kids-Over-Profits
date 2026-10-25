@@ -525,8 +525,11 @@ try {
         // Flood cap for anonymous creates: at most 15 public stubs per hour
         // site-wide. Admin creates are uncapped.
         if (!$kop_is_admin) {
+            // Stubs are kop_operators rows since the v2 write switch (their markers sit in the stored JSON).
+            require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+            $capTable = kop_migration_tables(kop_v2_detect_prefix($pdo))['operators'];
             $capStmt = $pdo->prepare(
-                "SELECT COUNT(*) FROM facilities_master
+                "SELECT COUNT(*) FROM `{$capTable}`
                  WHERE created_at > (NOW() - INTERVAL 1 HOUR)
                    AND json_data LIKE '%\"_source\":\"wiki-picker%'"
             );

@@ -618,6 +618,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $action = $_GET['action'] ?? 'status';
+    // The facility records live in the v2 tables (facilities_v2, kop_operators).
+    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+    $v2_prefix = kop_v2_detect_prefix($pdo);
 
     if ($action === 'status') {
         try {
@@ -625,15 +628,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $wikiPublished = (int)$pdo->query(
                 "SELECT COUNT(*) FROM wiki_submissions WHERE status IN ('approved','published')"
             )->fetchColumn();
-            $facTotal      = (int)$pdo->query(
-                "SELECT COUNT(*) FROM facilities_master WHERE JSON_SEARCH(json_data,'one','__facility_ref') IS NULL"
-            )->fetchColumn();
+            // Companies are {prefix}kop_operators rows since the facility data model moved to v2.
+            $kopOperators = kop_migration_tables($v2_prefix)['operators'];
+            $facTotal      = (int)$pdo->query("SELECT COUNT(*) FROM `{$kopOperators}`")->fetchColumn();
 
-            // Facilities that already have a matching (non-rejected/deleted) wiki submission
+            // Companies that already have a matching (non-rejected/deleted) wiki submission
             $covered = (int)$pdo->query(
                 "SELECT COUNT(DISTINCT ws.organization)
                  FROM wiki_submissions ws
-                 JOIN facilities_master fm ON LOWER(fm.unique_name) = LOWER(ws.organization)
+                 JOIN `{$kopOperators}` fm ON LOWER(fm.unique_name) = LOWER(ws.organization)
                  WHERE ws.status NOT IN ('rejected','deleted')"
             )->fetchColumn();
 
@@ -699,9 +702,8 @@ try {
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT json_data FROM facilities_master WHERE unique_name = ? LIMIT 1");
-        $stmt->execute([$uniqueName]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        // The record in its old row shape, built from the v2 tables.
+        $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $uniqueName);
 
         if (!$row) {
             http_response_code(404);
@@ -794,20 +796,16 @@ try {
     if ($action === 'bulk_facility_to_wiki') {
         $limit = min((int)($input['limit'] ?? 50), 200);
 
-        // Fetch facilities whose unique_name has no matching wiki_submissions org
-        $stmt = $pdo->prepare(
-            "SELECT unique_name, json_data
-             FROM facilities_master
-             WHERE JSON_SEARCH(json_data, 'one', '__facility_ref') IS NULL
-               AND unique_name NOT IN (
-                   SELECT DISTINCT organization FROM wiki_submissions
-                   WHERE status NOT IN ('rejected','deleted')
-               )
-             LIMIT :lim"
-        );
-        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Companies (old row shape, from the v2 tables) whose unique_name has no matching wiki_submissions org
+        $have = array_flip(array_map('strval', $pdo->query(
+            "SELECT DISTINCT organization FROM wiki_submissions WHERE status NOT IN ('rejected','deleted')"
+        )->fetchAll(PDO::FETCH_COLUMN)));
+        $rows = array();
+        foreach (kop_v2_pdo_master_rows($pdo, $v2_prefix) as $r) {
+            if (count($rows) >= $limit) break;
+            if (strpos((string) $r['json_data'], '"__facility_ref":true') !== false || isset($have[$r['unique_name']])) continue;
+            $rows[] = array('unique_name' => $r['unique_name'], 'json_data' => $r['json_data']);
+        }
 
         $totalCreated = 0;
         $totalSkipped = 0;

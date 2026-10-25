@@ -2,7 +2,7 @@
 /**
  * Link Wiki Entry ↔ Facility API
  *
- * Links a wiki_submissions or wiki_master row to a specific facilities_master
+ * Links a wiki_submissions or wiki_master row to a specific facility record (facilities_v2 / kop_operators;
  * record (identified by unique_name) with a two-step review flow:
  *
  *   status NULL        = unlinked
@@ -15,7 +15,7 @@
  *      Return the current link info for one wiki row.
  *
  * GET  ?action=suggest&type=submission|master&wiki_id=N
- *      Return ranked facility candidates from facilities_master.
+ *      Return ranked facility candidates from the companies (kop_operators).
  *
  * GET  ?action=list_unlinked&type=submission|master&limit=N&offset=N
  *      List wiki rows that have no confirmed facility link.
@@ -205,13 +205,16 @@ function kop_suggest_facilities(PDO $pdo, array $wiki): array {
             $row['match_reason'] = $reason;
             // Try to extract a human-friendly name from json_data
             $jd = json_decode($row['json_data'] ?? '', true);
-            $row['display_name'] = $jd['name'] ?? $jd['data']['operator']['name'] ?? $row['unique_name'];
+            $row['display_name'] = $jd['operator']['name'] ?? $jd['name'] ?? $jd['data']['operator']['name'] ?? $row['unique_name'];
             $add($row, $score);
         }
     };
 
-    $baseSql = "SELECT unique_name, json_data FROM facilities_master
-                WHERE JSON_SEARCH(json_data,'one','__facility_ref') IS NULL";
+    // Companies: {prefix}kop_operators since the facility data model moved to v2 (the old
+    // facilities_master operator rows, which this searched, are retired in phase 5).
+    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+    $kopOperators = kop_migration_tables(kop_v2_detect_prefix($pdo))['operators'];
+    $baseSql = "SELECT unique_name, json_data FROM `{$kopOperators}` WHERE 1 = 1";
 
     if ($org) {
         // Exact org match
@@ -428,15 +431,19 @@ try {
             exit;
         }
 
-        // Verify the facility exists
+        // Verify the record exists: a facility (facilities_v2) or a company (kop_operators). The old
+        // facilities_master check refused every record made after the 2026-09-18 write switch.
+        require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+        $v2t = kop_migration_tables(kop_v2_detect_prefix($pdo));
         $facCheck = $pdo->prepare(
-            "SELECT unique_name FROM facilities_master WHERE unique_name = ? LIMIT 1"
+            "SELECT unique_name FROM `{$v2t['facilities']}` WHERE unique_name = ?
+             UNION SELECT unique_name FROM `{$v2t['operators']}` WHERE unique_name = ? LIMIT 1"
         );
-        $facCheck->execute([$facilityUniqueName]);
+        $facCheck->execute([$facilityUniqueName, $facilityUniqueName]);
         if (!$facCheck->fetchColumn()) {
             http_response_code(404);
             echo json_encode(['success' => false,
-                'error' => "Facility '$facilityUniqueName' not found in facilities_master"]);
+                'error' => "No facility or company named '$facilityUniqueName'"]);
             exit;
         }
 

@@ -285,6 +285,18 @@ if (!function_exists('kop_v2_pdo_master_rows')) {
     }
 }
 
+if (!function_exists('kop_v2_master_row_objects')) {
+    /**
+     * kop_v2_pdo_master_rows() as $wpdb-style row objects (id, unique_name,
+     * json_data), for the readers that scanned facilities_master with $wpdb
+     * (data model phase 5 retires that table).
+     */
+    function kop_v2_master_row_objects() {
+        global $wpdb;
+        return array_map(function ($r) { return (object) $r; }, kop_v2_pdo_master_rows(kop_seed_pdo(), $wpdb->prefix));
+    }
+}
+
 if (!function_exists('kop_v2_pdo_master_row_by_name')) {
     /**
      * One legacy-shaped row by unique_name, for the lookups that fetched a

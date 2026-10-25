@@ -140,9 +140,7 @@ function kop_directory_feed_slim_project($project) {
 
 /** The full feed the directory reads, before it is split. */
 function kop_directory_feed_build_full() {
-    return (function_exists('kop_v2_active') && kop_v2_active('program_index'))
-        ? kop_v2_get_facilities_projects()
-        : kop_get_facilities_projects_from_database();
+    return kop_v2_get_facilities_projects();
 }
 
 /**

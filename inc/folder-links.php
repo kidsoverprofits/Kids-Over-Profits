@@ -212,7 +212,9 @@ if (!function_exists('kop_folder_links_suggestions')) {
             }, $scopes);
         };
 
-        $master_rows = $wpdb->get_results('SELECT unique_name, json_data FROM facilities_master');
+        // The facility records (facilities_v2, kop_operators) in the old row shapes.
+        require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
+        $master_rows = kop_v2_master_row_objects();
         foreach ((array) $master_rows as $row) {
             $decoded = json_decode((string) $row->json_data, true);
             if (!is_array($decoded)) continue;
