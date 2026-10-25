@@ -122,3 +122,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     owner edited on the screen keep their old wording (the import never overwrites an edit), and tasks added on the
     screen were not in the seed: reword any that still read unclearly with Edit, which now refuses sheet rows,
     record numbers and "in scope".
+32. **Top story on /news/** (2026-10-25, [baca99a7](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/baca99a7)):
+    on an approved article's headline at https://kidsoverprofits.org/news/ use the pencil, tick "Top story": it shows
+    first, big, and drops out of the list below; Essential reporting now sits under the feed. Untick it (the earlier pick
+    comes back, or none). In the News Processor submit popup the "Top story" box shows only signed in. Then
+    `python -u scripts/check-contrast.py /news/` and `python -u scripts/check-mobile-overflow.py /news/`. Owner to say
+    whether the home page strip should move down too (only /news/ changed).
