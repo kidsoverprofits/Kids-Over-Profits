@@ -265,7 +265,10 @@
                 kopFacilityField(facility, 'location.country'),
                 kopFacilityField(facility, 'location.additionalLocations'),
                 kopFacilityField(facility, 'identification.otherOperators'),
-                facility.operatingPeriod,
+                // "Unknown" is the status a blank v2 document carries, so it says nothing.
+                facility.operatingPeriod && facility.operatingPeriod.status === 'Unknown'
+                    ? { ...facility.operatingPeriod, status: '' }
+                    : facility.operatingPeriod,
                 facility.staff,
                 facility.profileLinks,
                 facility.facilityDetails,

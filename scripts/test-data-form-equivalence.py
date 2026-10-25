@@ -19,6 +19,8 @@ URL = "https://kidsoverprofits.org/tti-data-submission/"
 ap = argparse.ArgumentParser()
 ap.add_argument("--projects", type=int, default=12)
 ap.add_argument("--show", action="store_true")
+ap.add_argument("--flip", action="store_true",
+                help="the working tree edits v2 documents (step 4): facilities compare as their v2 documents, the rest exactly")
 ap.add_argument("--html", choices=("live", "v2"), default="live",
                 help="v2: the working-tree run gets the page with the templates' v2 field paths "
                      "(as templates/data-form-*.php now write them); live: the page as served")
@@ -84,6 +86,19 @@ SHOW = r"""async (i) => {
 
 
 v2_checks = []
+
+# formData with each facility as its v2 document (the load time left out): the same on both sides once the
+# form edits v2 documents and live still edits legacy ones.
+CANON = r"""(data) => {
+    const N = window.KOP_DataNormalizer;
+    const out = JSON.parse(JSON.stringify(data || {}));
+    out.facilities = (out.facilities || []).map((f) => {
+        const d = N.facilityToV2(JSON.parse(JSON.stringify(f)));
+        if (d.provenance) delete d.provenance.migratedAt;
+        return d;
+    });
+    return out;
+}"""
 edit_checks = []
 
 # Type into the place fields and the first other-operator box, in either spelling of their paths.
@@ -185,10 +200,12 @@ def run(live_only, names=None):
                 if v2 is not None and not live_only:
                     v2_checks.append((f"{name} [{i}]", extra["probe"], v2))
                 result[f"{name} [{i}]"] = {"form": pg.evaluate(READ_FORM), **extra}
-            result[f"{name} formData"] = pg.evaluate("JSON.parse(JSON.stringify(window.formData))")
+            result[f"{name} formData"] = pg.evaluate("(" + CANON + ")(window.formData)" if args.flip else "JSON.parse(JSON.stringify(window.formData))")
             if count and names.index(name) < 4:
                 pg.evaluate(OPEN, name)
                 result[f"{name} edit"] = pg.evaluate(EDIT, False)
+                if args.flip:
+                    result[f"{name} edit"]["facility"] = pg.evaluate("(f) => (" + CANON + ")({facilities: [f]}).facilities[0]", result[f"{name} edit"]["facility"])
                 if not live_only:
                     pg.evaluate(OPEN, name)
                     edit_checks.append((name, pg.evaluate(EDIT, True)))
@@ -221,10 +238,16 @@ ac = live.get("autocomplete") or {}
 print(f"{len(names)} projects, {sum(1 for k in live if '[' in k)} facilities; autocomplete: "
       f"{len(ac.get('operators') or [])} operators, {len(ac.get('locations') or [])} places")
 diffs = []
+PLACEHOLDER_NOTE = re.compile(r"^migration: unparsed [\w.]+: (present|current|ongoing|now|n/a|na|unknown|none|tbd)?[ .?-]*$", re.I)
+
+
 def canon_form(form):
     """Form keys in the legacy spelling, so a page with v2 field paths compares with the live one."""
     out = {}
     for k, v in form.items():
+        if args.flip and k.startswith("operatingPeriod.notes") and isinstance(v, str):
+            # The normalizer drops placeholder notes left by an earlier pass; a v2 document no longer has them.
+            v = "\n".join(line for line in v.split("\n") if not PLACEHOLDER_NOTE.match(line.strip()))
         for old, new in V2_PATHS:
             o = re.search(r'data-(?:field|path)="([^"]+)"', old).group(1)
             n = re.search(r'data-(?:field|path)="([^"]+)"', new).group(1)
@@ -241,6 +264,16 @@ def same(a, b):
         b = {**b, "form": canon_form(b["form"])}
     return json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
 
+
+fixed = []
+if args.flip:
+    # The legacy form's typed city/state/zip lose to the addressParts copy the server sends (the normalizer reads
+    # addressParts first), so live keeps the old place; a v2 document takes what was typed (checked below).
+    for key in [k for k in live if k.endswith(" edit")]:
+        a, b = live[key], tree.get(key) or {}
+        la, lb = (a.get("facility") or {}).pop("location", None), (b.get("facility") or {}).pop("location", None)
+        if json.dumps(la, sort_keys=True) != json.dumps(lb, sort_keys=True):
+            fixed.append(f"{key}: live kept city {json.dumps((la or {}).get('city'))}, v2 has {json.dumps((lb or {}).get('city'))}")
 
 for key in live:
     a, b = live[key], tree.get(key)
@@ -282,6 +315,8 @@ for key, d in diffs[:20]:
             print(f"   {k}: live={json.dumps(x)[:120]} tree={json.dumps(y)[:120]}")
     else:
         print("  ", d)
+if fixed:
+    print(f"Fixed by editing v2 ({len(fixed)}):", *fixed[:6], sep="\n  ")
 if args.show:
     print("names:", names)
 if args.v2_render:

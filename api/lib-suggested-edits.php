@@ -266,6 +266,89 @@ if (!function_exists('kop_rename_placeholder_provider_suggestion')) {
     }
 }
 
+if (!function_exists('kop_value_is_meaningful')) {
+    /** Something typed or ticked anywhere in a value (api/save-suggestion.php's checks). */
+    function kop_value_is_meaningful($value) {
+        if (is_string($value)) {
+            return trim($value) !== '';
+        }
+
+        if (is_bool($value)) {
+            return $value === true;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return true;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (kop_value_is_meaningful($item)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return !empty($value);
+    }
+}
+
+if (!function_exists('kop_facility_has_meaningful_data')) {
+    /** A facility entry that says anything besides its name, in either shape (save-suggestion.php refuses it unnamed). */
+    function kop_facility_has_meaningful_data($facility) {
+        if (!is_array($facility)) {
+            return false;
+        }
+
+        $identification = is_array($facility['identification'] ?? null) ? $facility['identification'] : [];
+        $location_details = is_array($facility['locationDetails'] ?? null) ? $facility['locationDetails'] : [];
+        // A v2 document (the form sends v2 since 2026-10-25) carries "Unknown" as its blank status
+        // and keeps the place in location and the other operators in identification.
+        $operating_period = $facility['operatingPeriod'] ?? null;
+        if (is_array($operating_period) && ($operating_period['status'] ?? '') === 'Unknown') {
+            $operating_period['status'] = '';
+        }
+
+        return kop_value_is_meaningful([
+            $identification['currentName'] ?? null,
+            $identification['currentOperator'] ?? null,
+            $identification['currentOwner'] ?? null,
+            $identification['currentOwners'] ?? null,
+            $identification['otherNames'] ?? null,
+            $identification['pastNames'] ?? null,
+            $identification['knownReferrers'] ?? null,
+            $identification['otherOperators'] ?? null,
+            $identification['pastOwners'] ?? null,
+            $facility['location'] ?? null,
+            $facility['address'] ?? null,
+            $location_details['city'] ?? null,
+            $location_details['state'] ?? null,
+            $location_details['country'] ?? null,
+            $location_details['additionalLocations'] ?? null,
+            $facility['otherOperators'] ?? null,
+            $operating_period,
+            $facility['staff'] ?? null,
+            $facility['profileLinks'] ?? null,
+            $facility['facilityDetails'] ?? null,
+            $facility['accreditations'] ?? null,
+            $facility['memberships'] ?? null,
+            $facility['certifications'] ?? null,
+            $facility['licensing'] ?? null,
+            $facility['resources'] ?? null,
+            $facility['treatmentTypes'] ?? null,
+            $facility['targetedDiagnoses'] ?? null,
+            $facility['targetedBehaviors'] ?? null,
+            $facility['ttiPractices'] ?? null,
+            $facility['philosophy'] ?? null,
+            $facility['criticalIncidents'] ?? null,
+            $facility['notes'] ?? null,
+            $facility['fieldNotes'] ?? null,
+            $facility['isPrivatelyOwned'] ?? null,
+        ]);
+    }
+}
+
 if (!function_exists('kop_suggestion_normalize_facilities')) {
     /**
      * A facility suggestion is stored in the canonical v2 shape: each entry of

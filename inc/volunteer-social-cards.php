@@ -24,13 +24,12 @@
  * (kop_vsoc_one_per_story(): the same story group, the same program, or the
  * same headline words), naming the other outlets (owner, 2026-10-23).
  *
- * Then the site's own work as post ideas (kop_vsoc_site_cards(),
- * kop_vsoc_site_kinds()), each about one program or case with something to
- * say, never a tally (owner, 2026-10-25): a program's rules in its own
- * handbook's words, a program the state cited again and again, a ruling or a
- * bill's fate dated within two months, a new program that already has news or
- * lawsuits; then one recap card of the week's counts, so a week with anything
- * done is never empty (owner, 2026-10-23).
+ * Then the site updates (kop_vsoc_site_cards()), each its own card naming
+ * what changed, whatever its age, since that the site grew is this week's
+ * news: programs added to the directory, records brought up to date (closures,
+ * lawsuit and bill updates), documents added to the library, serious state
+ * findings added, and one card of everything else counted. A week with
+ * anything done is never empty (owner, 2026-10-23).
  *
  * Bulk work (drive-docs, doc-types, fornits, woodbury, merges) never makes a
  * card of its own. At most kop_vsoc_per_angle (8) cards per angle, newest
@@ -56,8 +55,8 @@ function kop_vsoc_angles() {
 }
 
 /**
- * What the recap card counts besides programs, findings, closures, status
- * updates and documents: [source, action, words for one, words for many].
+ * What the "Also this week" card counts: [source, action, words for one, words
+ * for many]. Findings, closures and status updates have cards of their own.
  */
 function kop_vsoc_number_lines() {
     return array(
@@ -358,366 +357,137 @@ function kop_vsoc_list(array $names, $max = 8) {
     return implode(', ', $names) . ' and ' . $last;
 }
 
-
-/**
- * The site's own work that week as post ideas (kop_vsoc_site_kinds()), each
- * about one program or case and saying something worth reading (owner,
- * 2026-10-25: "38 programs added to our directory" is not a post), then one
- * recap card of the week's counts. $cards = the news cards made already.
- */
+/** The site updates, each a card naming what changed that week; $cards = the news cards made already. */
 function kop_vsoc_site_cards($from, $to, array $cards) {
-    $per = max(1, (int) apply_filters('kop_vsoc_site_per_kind', 3));
     $out = array();
-    foreach (kop_vsoc_site_kinds() as $kind => $label) {
+    foreach (array('directory', 'records', 'documents', 'findings', 'numbers') as $kind) {
         try {
-            $made = (array) call_user_func('kop_vsoc_site_' . $kind, $from, $to, $cards);
+            $c = call_user_func('kop_vsoc_site_' . $kind, $from, $to, $cards);
         } catch (Throwable $e) {
-            $made = array();   // the records database unreachable
+            $c = null;   // the records database unreachable
         }
-        foreach (array_slice($made, 0, $per) as $c) {
-            $c += array('url' => home_url('/'), 'url_label' => 'kidsoverprofits.org', 'summary' => '', 'quote' => '', 'image' => '', 'when' => '');
-            $c['key'] = $kind . ':' . $c['key'];
-            $c['angle'] = $kind;
-            $c['angle_label'] = $label;
-            $out[] = $c;
-        }
+        if (!$c) continue;
+        $out[] = $c + array('key' => $kind . ':' . substr($from, 0, 10), 'angle' => $kind, 'angle_label' => 'This week on the site',
+            'url' => home_url('/'), 'url_label' => 'kidsoverprofits.org', 'summary' => '', 'quote' => '', 'image' => '', 'when' => '');
     }
     return $out;
 }
 
-/**
- * The site cards in order:
- *   rules       a program's rules in its own handbook's words (program-practices / add)
- *   pattern     a program cited again and again in the findings added that week
- *   outcome     a ruling, settlement or verdict dated within two months, or a bill
- *               signed, vetoed or dead, from the status checks applied that week
- *   newprogram  a program new to the directory that already has news or lawsuits
- *   recap       the week's counts, for a weekly recap post
- */
-function kop_vsoc_site_kinds() {
-    return array(
-        'rules'      => 'In their own words',
-        'pattern'    => 'Inspection record',
-        'outcome'    => 'Case or bill update',
-        'newprogram' => 'New in our directory',
-        'recap'      => 'Weekly recap',
-    );
-}
-
-/** Topics in the order a line of them makes the strongest post. */
-function kop_vsoc_rule_order() {
-    return array('restraint', 'searches', 'rules', 'consequences', 'communication', 'levels', 'therapy', 'family', 'daily_life', 'education', 'admission');
-}
-
-/**
- * How hard a rule line hits as a post: the control it names (strip searches,
- * isolation, silence, letters opened, being sent away, unpaid work, consent
- * signed away), one point each; a line too long for a first line loses one,
- * and so does one about the parents (what they were told, what they paid).
- */
-function kop_vsoc_rule_bite($line, $topic = '') {
-    $n = preg_match_all('/strip|cavit|restrain|isolat|\balone\b|silen|not allowed|could not|no (?:contact|visits?|calls?|talking)|forbid|barred|opened|read by staff|monitor|'
-        . 'march|attention|bathroom|out loud|sent (?:\w+ ){0,6}to|expense|demot|cut off|terminat|punish|seminar|confront|hot ?seat|unpaid|labou?r|consent|sole discretion|'
-        . 'at any time|whenever/i', (string) $line);
-    return (int) $n - (mb_strlen((string) $line) > 240 ? 1 : 0) - (in_array($topic, array('family', 'admission'), true) ? 1 : 0);
-}
-
-/** Programs whose rules and practices were added that week, the most lines first: the strongest line, quoted, and a few more. */
-function kop_vsoc_site_rules($from, $to) {
-    if (!function_exists('kop_pp_rows')) return array();
-    $topics = array();
-    foreach (kop_vsoc_log_rows('program-practices', array('add'), $from, $to) as $row) {
-        list($fid, $topic) = array_pad(explode(':', (string) $row['item_key'], 2), 2, '');
-        if ((int) $fid) $topics[(int) $fid][$topic] = true;
-    }
-    $rank = array_flip(kop_vsoc_rule_order());
-    $found = array();
-    foreach ($topics as $fid => $t) {
-        $f = kop_vsoc_facility($fid);
-        if (!$f || $f[2] === '') continue;
-        $lines = array();
-        foreach (kop_pp_rows(array('facility_id' => $fid, 'status' => 'added', 'kind' => 'doc')) as $r) {
-            if (isset($t[$r['topic']]) && trim((string) $r['value']) !== '') $lines[] = $r;
-        }
-        if (!$lines) continue;
-        usort($lines, function ($a, $b) use ($rank) {
-            return kop_vsoc_rule_bite($b['value'], $b['topic']) <=> kop_vsoc_rule_bite($a['value'], $a['topic']) ?: ($rank[$a['topic']] ?? 99) <=> ($rank[$b['topic']] ?? 99);
-        });
-        $lead = array_shift($lines);
-        // A line from each other topic first, then the rest.
-        $seen = array($lead['topic'] => true);
-        $more = array();
-        foreach ($lines as $r) if (!isset($seen[$r['topic']])) { $seen[$r['topic']] = true; $more[] = $r; }
-        foreach ($lines as $r) if (!in_array($r, $more, true)) $more[] = $r;
-        $more = array_slice($more, 0, 3);
-        $doc = trim((string) $lead['doc_title']) . ((int) $lead['page'] > 0 ? ', page ' . (int) $lead['page'] : '');
-        $found[] = array('n' => count($lines) + 1, 'card' => array(
-            'key' => (string) $fid,
-            'fact' => $f[0] . ($f[1] !== '' ? ' (' . $f[1] . ')' : '') . ', from its own papers: ' . kop_vsoc_cut((string) $lead['value'], 300),
-            'url' => $f[2], 'url_label' => 'Rules and practices on our page on ' . $f[0],
-            'summary' => $more ? 'Also from its papers: ' . implode(' ', array_map(function ($r) { return kop_vsoc_cut((string) $r['value'], 220); }, $more)) : '',
-            'quote' => trim((string) $lead['quote']) !== '' ? '"' . kop_vsoc_cut((string) $lead['quote'], 400) . '"' . ($doc !== '' ? ' (' . $doc . ')' : '') : '',
-            'when' => (int) $lead['year'] > 0 ? (string) (int) $lead['year'] : '',
-        ));
-    }
-    usort($found, function ($a, $b) { return $b['n'] <=> $a['n']; });
-    return array_column($found, 'card');
-}
-
-/** A finding category counted: [one, many]. */
-function kop_vsoc_finding_words($cat) {
-    $words = array(
-        'death'            => array('death', 'deaths'),
-        'physical_abuse'   => array('staff assault', 'staff assaults'),
-        'sexual_abuse'     => array('sexual abuse finding', 'sexual abuse findings'),
-        'restraint_injury' => array('restraint injury', 'restraint injuries'),
-        'suicide_attempt'  => array('suicide attempt', 'suicide attempts'),
-        'self_harm'        => array('self-harm finding', 'self-harm findings'),
-        'medical_neglect'  => array('medical neglect finding', 'medical neglect findings'),
-        'hospitalization'  => array('hospitalization', 'hospitalizations'),
-        'missing'          => array('missing child', 'missing children'),
-    );
-    return $words[$cat] ?? array('other serious finding', 'other serious findings');
-}
-
-/**
- * Programs with two or more of the serious findings added that week, the most
- * first: how many, of what kind, over which years, and the state's own words
- * of the gravest one (a child's harm is never reworded). The same finding
- * under two inspection rows of one program counts once.
- */
-function kop_vsoc_site_pattern($from, $to) {
-    $rows = kop_vsoc_log_rows('inspection-highlights', array('approved'), $from, $to);
-    if (!$rows) return array();
-    $ids = implode(',', array_map('intval', array_column($rows, 'item_key')));
-    $pdo = kop_rinbox_pdo();
-    $hits = $pdo->query("SELECT h.id, h.category, h.score, h.finding_date, h.excerpt, h.text_hash, f.facility_name, f.state FROM inspection_highlights h
-        JOIN inspection_facilities f ON f.id = h.facility_id WHERE h.id IN ($ids) AND h.status = 'approved'")->fetchAll(PDO::FETCH_ASSOC);
-    $by = array();
-    foreach ($hits as $h) {
-        $name = trim((string) $h['facility_name']);
-        $g = mb_strtolower($name) . '|' . $h['state'];
-        $hash = (string) $h['text_hash'] !== '' ? (string) $h['text_hash'] : 'id' . $h['id'];
-        if (!isset($by[$g])) $by[$g] = array('name' => $name, 'state' => trim((string) $h['state']), 'f' => array());
-        if (!isset($by[$g]['f'][$hash]) || (string) $h['finding_date'] !== '') $by[$g]['f'][$hash] = $h;
-    }
-    $by = array_filter($by, function ($g) { return count($g['f']) >= 2; });
-    uasort($by, function ($a, $b) { return count($b['f']) <=> count($a['f']) ?: strcmp($a['name'], $b['name']); });
-    $out = array();
-    foreach ($by as $g) {
-        $f = array_values($g['f']);
-        $kinds = array();
-        foreach ($f as $h) $kinds[(string) $h['category']] = ($kinds[(string) $h['category']] ?? 0) + 1;
-        arsort($kinds);
-        $parts = array();
-        foreach ($kinds as $cat => $n) { $w = kop_vsoc_finding_words($cat); $parts[] = $n . ' ' . ($n === 1 ? $w[0] : $w[1]); }
-        $dates = array_filter(array_column($f, 'finding_date'));
-        $y1 = $dates ? substr(min($dates), 0, 4) : '';
-        $y2 = $dates ? substr(max($dates), 0, 4) : '';
-        $span = $y1 === '' ? '' : ($y1 === $y2 ? ' in ' . $y1 : ' from ' . $y1 . ' to ' . $y2);
-        usort($f, function ($a, $b) { return (int) $b['score'] <=> (int) $a['score'] ?: strcmp((string) $b['finding_date'], (string) $a['finding_date']); });
-        $state = $g['state'] !== '' && function_exists('kop_state_canonical_name') ? (string) kop_state_canonical_name($g['state']) : '';
-        $page = function_exists('kop_facility_page_url_for_name') ? (string) kop_facility_page_url_for_name($g['name']) : '';
-        $sev = function_exists('kop_ih_severe_page_url') ? kop_ih_severe_page_url((int) $f[0]['id']) : home_url('/severe-reports/#finding-' . (int) $f[0]['id']);
-        $when = kop_vsoc_date($f[0]['finding_date']);
-        $out[] = array(
-            'key' => substr(md5($g['name'] . '|' . $g['state']), 0, 12),
-            'fact' => ($state !== '' ? $state : $g['state']) . ' inspectors recorded ' . count($f) . ' serious findings at ' . $g['name'] . $span . ': ' . kop_vsoc_list($parts) . '.',
-            'url' => preg_match('#^https?://#', $page) ? $page : $sev,
-            'url_label' => preg_match('#^https?://#', $page) ? 'Our page on ' . $g['name'] : 'The findings on our serious findings page',
-            'summary' => 'The state\'s own words' . ($when !== '' ? ', ' . $when : '') . ', below; every finding is on our serious findings page.',
-            'quote' => kop_vsoc_cut((string) $f[0]['excerpt'], 600),
-            'when' => trim($y1 . ($y2 !== $y1 ? '-' . $y2 : '')),
-        );
-    }
-    return $out;
-}
-
-/**
- * The newest dated sentence ("On October 5, 2026, ...") of $text that is within
- * two months of $to and says how a case went: [sentence, Y-m-d, strength], 2 for
- * a verdict, settlement, judgment, sentence or the Supreme Court, 1 for a
- * dismissal, appeal or ruling; never a scheduling order or a lawyer leaving.
- */
-function kop_vsoc_news_sentence($text, $to) {
-    $best = array('', '', 0);
-    foreach (preg_split('/(?<=[.!?])\s+(?=[A-Z])/', trim((string) $text)) as $s) {
-        $strong = preg_match('/\b(settle|verdict|jury|judgment|judgement|certiorari|supreme court|sentenc|guilty|plea|award|damages)|\$\d/i', $s);
-        if (!$strong && !preg_match('/\b(dismiss|appeal|ruled|ruling|class certification|injunction)/i', $s)) continue;
-        if (preg_match('/\b(withdraw|counsel|extend|extension|scheduling order|protective order|amended complaint|summons|service of process|notice of compliance)/i', $s)) continue;
-        if (!preg_match_all('/\b(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (\d{4})\b/', $s, $m, PREG_SET_ORDER)) continue;
-        foreach ($m as $d) {
-            $at = gmdate('Y-m-d', strtotime($d[0] . ' UTC'));
-            if ($at <= substr($to, 0, 10) && kop_vsoc_recent($at, $to) && $at > $best[1]) $best = array(trim($s), $at, $strong ? 2 : 1);
-        }
-    }
-    return $best;
-}
-
-/**
- * Status checks applied that week that are news: a ruling, settlement or
- * verdict dated within two months that the check added to a case's outcome,
- * or a bill now signed, enacted, vetoed or dead whose last action is that
- * recent. An old case brought up to date is only counted in the recap.
- */
-function kop_vsoc_site_outcome($from, $to, array $cards) {
-    $pdo = kop_rinbox_pdo();
-    $bill_words = array('signed' => 'signed into law', 'enacted' => 'enacted', 'vetoed' => 'vetoed', 'dead' => 'dead');
-    $out = array();
-    foreach (kop_vsoc_log_rows('status_checks', array('apply'), $from, $to) as $row) {
-        $st = $pdo->prepare("SELECT kind, record_id, changes FROM record_status_proposals WHERE id = ? AND status = 'applied'");
-        $st->execute(array((int) $row['item_key']));
-        $p = $st->fetch(PDO::FETCH_ASSOC);
-        if (!$p) continue;
-        $ch = json_decode((string) $p['changes'], true);
-        $ch = is_array($ch) ? $ch : array();
-        $id = (int) $p['record_id'];
-        $key = $p['kind'] . '-' . $id;
-        if (isset($out[$key])) continue;   // the newest check of a record that is news
-        if ($p['kind'] === 'bill') {
-            $now = is_array($ch['status'] ?? null) ? (string) ($ch['status'][1] ?? '') : '';
-            if (!isset($bill_words[$now]) || isset($cards['bill:' . $id])) continue;
-            $st = $pdo->prepare("SELECT * FROM legislation WHERE id = ? AND publication_status = 'published'");
-            $st->execute(array($id));
-            $r = $st->fetch(PDO::FETCH_ASSOC);
-            if (!$r || !kop_vsoc_recent((string) ($r['last_action_date'] ?: $r['introduced_date']), $to)) continue;
-            $name = trim(trim((string) $r['jurisdiction']) . ' ' . trim((string) $r['bill_number']));
-            $out[$key] = array(
-                'key' => $key,
-                'fact' => $name . ', ' . trim((string) $r['bill_title']) . ', is now ' . $bill_words[$now] . '.',
-                'url' => home_url('/legislation/#bill-' . $id), 'url_label' => 'The bill on our legislation page',
-                'summary' => kop_vsoc_cut((string) $r['summary'], 600), 'when' => kop_vsoc_date($r['last_action_date']),
-                '_rank' => array(2, (string) $r['last_action_date']),
-            );
-            continue;
-        }
-        if ($p['kind'] !== 'lawsuit' || isset($cards['lawsuit:' . $id])) continue;
-        $old = is_array($ch['outcome'] ?? null) ? trim((string) ($ch['outcome'][0] ?? '')) : '';
-        $new = is_array($ch['outcome'] ?? null) ? trim((string) ($ch['outcome'][1] ?? '')) : '';
-        if ($new === '') continue;
-        $added = $old !== '' && strpos($new, $old) === 0 ? substr($new, strlen($old)) : $new;
-        list($s, $at, $strength) = kop_vsoc_news_sentence($added, $to);
-        if ($s === '') continue;
-        $st = $pdo->prepare("SELECT case_name, summary FROM lawsuits WHERE id = ? AND publication_status = 'published'");
-        $st->execute(array($id));
-        $r = $st->fetch(PDO::FETCH_ASSOC);
-        $name = $r ? trim(preg_replace('/\s+\|.*$/s', '', (string) $r['case_name'])) : '';
-        if ($name === '') continue;
-        $out[$key] = array(
-            'key' => $key,
-            'fact' => $name . ': ' . $s,
-            'url' => home_url('/lawsuits/#lawsuit-' . $id), 'url_label' => 'The case on our lawsuits page',
-            'summary' => kop_vsoc_cut((string) $r['summary'], 600), 'when' => kop_vsoc_date($at),
-            '_rank' => array($strength, $at),
-        );
-    }
-    // Verdicts, settlements and bills signed first, then the newest.
-    usort($out, function ($a, $b) { return $b['_rank'] <=> $a['_rank']; });
-    return array_map(function ($c) { unset($c['_rank']); return $c; }, $out);
-}
-
-/** Programs new to the directory that week that already have news stories or lawsuits on record, the most first. */
-function kop_vsoc_site_newprogram($from, $to) {
+/** Programs added to the directory that week, those with a type first (a lower-case placeholder name is not a program to show). */
+function kop_vsoc_site_directory($from, $to) {
     global $wpdb;
-    $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT id FROM facilities_v2 WHERE created_at >= %s AND created_at < %s ORDER BY created_at DESC, id DESC', $from, $to), ARRAY_A);
-    if (!$rows) return array();
-    $pdo = kop_rinbox_pdo();
-    $news = $pdo->prepare("SELECT n.article_title, n.publication_name, n.publication_date FROM news_facility_links l JOIN news_submissions n ON n.id = l.news_id
-        WHERE l.facility_id = ? AND n.status IN ('approved', 'published') ORDER BY n.publication_date DESC");
-    $suits = $pdo->prepare("SELECT s.case_name FROM lawsuit_facility_links l JOIN lawsuits s ON s.id = l.lawsuit_id WHERE l.facility_id = ? AND s.publication_status = 'published'
-        ORDER BY s.filing_date DESC");
-    $found = array();
+    $rows = (array) $wpdb->get_results($wpdb->prepare("SELECT id, name, city, state FROM facilities_v2 WHERE created_at >= %s AND created_at < %s
+        ORDER BY COALESCE(facility_type, '') = '', created_at DESC, id DESC", $from, $to), ARRAY_A);
+    $names = array();
     foreach ($rows as $r) {
-        $f = kop_vsoc_facility((int) $r['id']);
-        if (!$f || $f[2] === '' || mb_strtolower($f[0]) === $f[0]) continue;   // no page, or a lower-case placeholder name
-        $news->execute(array((int) $r['id']));
-        $stories = $news->fetchAll(PDO::FETCH_ASSOC);
-        $suits->execute(array((int) $r['id']));
-        $cases = array_map(function ($n) { return trim(preg_replace('/\s+\|.*$/s', '', (string) $n)); }, $suits->fetchAll(PDO::FETCH_COLUMN));
-        if (!$stories && !$cases) continue;
-        $has = array();
-        if ($stories) $has[] = count($stories) . (count($stories) === 1 ? ' news story' : ' news stories');
-        if ($cases) $has[] = count($cases) . (count($cases) === 1 ? ' lawsuit' : ' lawsuits');
-        // The newest story from the press, before the industry's own newsletters.
-        $press = array_values(array_filter($stories, function ($s) { return !preg_match("/woodbury|seen 'n heard/i", $s['publication_name'] . ' ' . $s['article_title']); }));
-        $latest = $press ? $press[0] : ($stories ? $stories[0] : null);
-        $summary = array();
-        if ($cases) $summary[] = 'On record: ' . kop_vsoc_list($cases, 3) . '.';
-        if ($latest) $summary[] = 'The latest story: "' . trim((string) $latest['article_title']) . '"'
-            . (trim((string) $latest['publication_name']) !== '' ? ', ' . trim((string) $latest['publication_name']) : '')
-            . (kop_vsoc_date($latest['publication_date']) !== '' ? ', ' . kop_vsoc_date($latest['publication_date']) : '') . '.';
-        $found[] = array('n' => count($press) + 3 * count($cases), 'card' => array(
-            'key' => (string) (int) $r['id'],
-            'fact' => 'Now in our directory: ' . $f[0] . ($f[1] !== '' ? ' (' . $f[1] . ')' : '') . ', with ' . kop_vsoc_list($has) . ' on record.',
-            'url' => $f[2], 'url_label' => 'Our page on ' . $f[0],
-            'summary' => implode(' ', $summary),
-        ));
+        $name = trim((string) $r['name']);
+        if ($name === '' || mb_strtolower($name) === $name) continue;
+        $names[] = $name . (trim((string) $r['state']) !== '' ? ' (' . trim((string) $r['state']) . ')' : '');
     }
-    usort($found, function ($a, $b) { return $b['n'] <=> $a['n']; });
-    return array_column($found, 'card');
+    if (!$names) return null;
+    $n = count($names);
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' program added' : ' programs added') . ' to our directory.',
+        'url' => function_exists('kop_location_index_url') ? kop_location_index_url() : home_url('/tti-program-index/?view=location'), 'url_label' => 'Our directory, by location',
+        'summary' => 'New: ' . kop_vsoc_list($names, 12) . '.',
+    );
 }
 
-/**
- * The week's counts in one card, for a weekly recap post: programs added,
- * findings added, records brought up to date (closures, lawsuit and bill
- * updates), documents and the rest (kop_vsoc_number_lines()), old items too,
- * with the programs and records named. A week with anything done is never
- * empty (owner, 2026-10-23).
- */
-function kop_vsoc_site_recap($from, $to, array $cards) {
-    global $wpdb;
+/** Records brought up to date: programs now recorded as closed, lawsuits and bills whose status changed. */
+function kop_vsoc_site_records($from, $to, array $cards) {
     $pdo = kop_rinbox_pdo();
-    $lines = array();
-    $named = array();
-    $progs = array();
-    foreach ((array) $wpdb->get_results($wpdb->prepare("SELECT name, state FROM facilities_v2 WHERE created_at >= %s AND created_at < %s
-        ORDER BY COALESCE(facility_type, '') = '', created_at DESC, id DESC", $from, $to), ARRAY_A) as $r) {
-        $name = trim((string) $r['name']);
-        if ($name !== '' && mb_strtolower($name) !== $name) $progs[] = $name . (trim((string) $r['state']) !== '' ? ' (' . trim((string) $r['state']) . ')' : '');
-    }
-    if ($progs) {
-        $lines[] = number_format(count($progs)) . (count($progs) === 1 ? ' program added to our directory' : ' programs added to our directory');
-        $named[] = 'New in the directory: ' . kop_vsoc_list($progs, 12) . '.';
-    }
-    $fi = kop_vsoc_log_rows('inspection-highlights', array('approved'), $from, $to);
-    if ($fi) {
-        $ids = implode(',', array_map('intval', array_column($fi, 'item_key')));
-        $s = $pdo->query("SELECT COUNT(*) AS n, COUNT(DISTINCT f.facility_name || '|' || f.state) AS p, COUNT(DISTINCT f.state) AS st FROM inspection_highlights h
-            JOIN inspection_facilities f ON f.id = h.facility_id WHERE h.id IN ($ids) AND h.status = 'approved'")->fetch(PDO::FETCH_ASSOC);
-        if ((int) $s['n']) $lines[] = number_format((int) $s['n']) . ((int) $s['n'] === 1 ? ' serious finding' : ' serious findings') . ' from state inspections at '
-            . number_format((int) $s['p']) . ((int) $s['p'] === 1 ? ' program' : ' programs') . ' in ' . (int) $s['st'] . ((int) $s['st'] === 1 ? ' state' : ' states');
-    }
     $closed = array();
+    $url = '';
     foreach (kop_vsoc_log_rows('closure', array('apply'), $from, $to) as $row) {
         if (isset($cards['closure:' . $row['item_key']])) continue;   // a card of its own already
         $st = $pdo->prepare("SELECT facility_id FROM facility_closure_reports WHERE id = ? AND status = 'applied'");
         $st->execute(array((int) $row['item_key']));
         $f = kop_vsoc_facility((int) $st->fetchColumn());
-        if ($f) $closed[] = $f[0];
+        if (!$f) continue;
+        $closed[] = $f[0];
+        if ($url === '' && $f[2] !== '') $url = $f[2];
     }
-    if ($closed) {
-        $lines[] = number_format(count($closed)) . (count($closed) === 1 ? ' program now recorded as closed' : ' programs now recorded as closed');
-        $named[] = 'Now recorded as closed: ' . kop_vsoc_list($closed) . '.';
-    }
-    $checked = array();
+    $changed = array();
     foreach (kop_vsoc_log_rows('status_checks', array('apply'), $from, $to) as $row) {
-        $st = $pdo->prepare("SELECT kind, record_id FROM record_status_proposals WHERE id = ? AND status = 'applied'");
+        $st = $pdo->prepare("SELECT kind, record_id, changes FROM record_status_proposals WHERE id = ? AND status = 'applied'");
         $st->execute(array((int) $row['item_key']));
         $p = $st->fetch(PDO::FETCH_ASSOC);
-        if ($p) $checked[$p['kind'] . '-' . (int) $p['record_id']] = true;
+        if (!$p) continue;
+        $bill = $p['kind'] === 'bill';
+        $st = $pdo->prepare($bill ? "SELECT jurisdiction, bill_number FROM legislation WHERE id = ? AND publication_status = 'published'"
+            : "SELECT case_name FROM lawsuits WHERE id = ? AND publication_status = 'published'");
+        $st->execute(array((int) $p['record_id']));
+        // A case name pasted with its docket site's title ("... | Justia") keeps only the name.
+        $name = trim(preg_replace('/\s+\|.*$/s', '', implode(' ', array_map('trim', (array) $st->fetch(PDO::FETCH_NUM)))));
+        if ($name === '') continue;
+        $ch = json_decode((string) $p['changes'], true);
+        $now = is_array($ch['status'] ?? null) ? trim((string) ($ch['status'][1] ?? '')) : '';
+        $changed[] = $name . ($now !== '' ? ' (now ' . $now . ')' : ' (outcome updated)');
     }
-    if ($checked) $lines[] = number_format(count($checked)) . (count($checked) === 1 ? ' lawsuit or bill brought up to date' : ' lawsuits and bills brought up to date');
+    if (!$closed && !$changed) return null;
+    $facts = array();
+    if ($closed) $facts[] = number_format(count($closed)) . (count($closed) === 1 ? ' program' : ' programs') . ' now recorded as closed';
+    if ($changed) $facts[] = number_format(count($changed)) . (count($changed) === 1 ? ' lawsuit or bill' : ' lawsuits and bills') . ' brought up to date';
+    $summary = array();
+    if ($closed) $summary[] = 'Now recorded as closed: ' . kop_vsoc_list($closed) . '.';
+    if ($changed) $summary[] = 'Updated from the court docket or the legislature: ' . kop_vsoc_list($changed) . '.';
+    $c = array('fact' => 'Records brought up to date: ' . implode('; ', $facts) . '.', 'summary' => implode(' ', $summary));
+    if ($changed) $c += array('url' => home_url('/lawsuits/'), 'url_label' => 'Our lawsuits page');
+    elseif ($url !== '') $c += array('url' => $url, 'url_label' => 'Our page on ' . $closed[0]);
+    return $c;
+}
+
+/** Documents (PDFs) added to the media library that week. */
+function kop_vsoc_site_documents($from, $to) {
+    global $wpdb;
     $t = $wpdb->prefix . 'posts';
-    $docs = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $t WHERE post_type = 'attachment' AND post_mime_type = 'application/pdf' AND post_date_gmt >= %s AND post_date_gmt < %s", $from, $to));
-    if ($docs) $lines[] = number_format($docs) . ($docs === 1 ? ' document added to our library' : ' documents added to our library');
+    $base = "FROM $t WHERE post_type = 'attachment' AND post_mime_type = 'application/pdf' AND post_date_gmt >= %s AND post_date_gmt < %s";
+    $n = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base", $from, $to));
+    if (!$n) return null;
+    $insp = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base AND post_title LIKE %s", $from, $to, '%insp-%'));
+    $wood = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) $base AND post_title LIKE %s", $from, $to, 'Woodbury Reports%'));
+    $parts = array();
+    if ($insp) $parts[] = number_format($insp) . ($insp === 1 ? ' state inspection report' : ' state inspection reports');
+    if ($wood) $parts[] = number_format($wood) . ($wood === 1 ? ' Woodbury Reports page' : ' Woodbury Reports pages');
+    $rest = $n - $insp - $wood;
+    if ($parts && $rest > 0) $parts[] = number_format($rest) . ($rest === 1 ? ' other' : ' others');
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' document' : ' documents') . ' added to our library.',
+        'url' => function_exists('kop_dt_url') ? kop_dt_url() : home_url('/documents/'), 'url_label' => 'Our documents',
+        'summary' => $parts ? 'Among them: ' . kop_vsoc_list($parts) . '.' : '',
+    );
+}
+
+/** Serious state inspection findings added that week, with the programs that have the most. */
+function kop_vsoc_site_findings($from, $to) {
+    $rows = kop_vsoc_log_rows('inspection-highlights', array('approved'), $from, $to);
+    if (!$rows) return null;
+    $ids = implode(',', array_map('intval', array_column($rows, 'item_key')));
+    $pdo = kop_rinbox_pdo();
+    $by = $pdo->query("SELECT f.facility_name, f.state, COUNT(*) AS n, MIN(h.finding_date) AS first, MAX(h.finding_date) AS last FROM inspection_highlights h
+        JOIN inspection_facilities f ON f.id = h.facility_id WHERE h.id IN ($ids) AND h.status = 'approved' GROUP BY f.id, f.facility_name, f.state ORDER BY n DESC, f.facility_name")->fetchAll(PDO::FETCH_ASSOC);
+    if (!$by) return null;
+    $n = (int) array_sum(array_column($by, 'n'));
+    $names = array();
+    foreach (array_slice($by, 0, 5) as $r) $names[] = trim((string) $r['facility_name']) . ' (' . trim((string) $r['state']) . ', ' . (int) $r['n'] . ')';
+    $states = count(array_unique(array_column($by, 'state')));
+    $years = array_filter(array_merge(array_column($by, 'first'), array_column($by, 'last')));
+    $span = $years ? substr(min($years), 0, 4) . (substr(min($years), 0, 4) !== substr(max($years), 0, 4) ? ' to ' . substr(max($years), 0, 4) : '') : '';
+    return array(
+        'fact' => number_format($n) . ($n === 1 ? ' serious finding' : ' serious findings') . ' from state inspection reports added, at ' . number_format(count($by))
+            . (count($by) === 1 ? ' program' : ' programs') . ' in ' . $states . ($states === 1 ? ' state' : ' states') . '.',
+        'url' => function_exists('kop_ih_severe_page_url') ? kop_ih_severe_page_url() : home_url('/severe-reports/'), 'url_label' => 'Our serious findings page',
+        'summary' => 'Most at ' . kop_vsoc_list($names, 5) . '.' . ($span !== '' ? ' The reports date from ' . $span . '.' : ''),
+    );
+}
+
+/** Everything else counted that week, in one card. */
+function kop_vsoc_site_numbers($from, $to) {
+    $lines = array();
     foreach (kop_vsoc_number_lines() as $l) {
         $n = count(kop_vsoc_log_rows($l[0], array($l[1]), $from, $to));
         if ($n) $lines[] = number_format($n) . ' ' . ($n === 1 ? $l[2] : $l[3]);
     }
-    if (!$lines) return array();
-    return array(array(
-        'key' => substr($from, 0, 10),
-        'fact' => 'This week at Kids Over Profits: ' . kop_vsoc_list(array_slice($lines, 0, 3)) . '.',
-        'summary' => ucfirst(implode('; ', $lines)) . '.' . ($named ? ' ' . implode(' ', $named) : ''),
-    ));
+    if (!$lines) return null;
+    return array('fact' => 'Also this week: ' . kop_vsoc_list(array_slice($lines, 0, 2)) . '.', 'summary' => implode('; ', $lines) . '.');
 }

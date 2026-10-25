@@ -976,7 +976,8 @@
                     if (typeof normalized !== 'object' || normalized === null) {
                         normalized = { state: item || '', city: '', [addrKey]: '', zip: '', fromYear: '', toYear: '' };
                         data[index] = normalized;
-                    } else {
+                    } else if (addrKey === 'address') {
+                        // A legacy item is all text; a v2 one keeps its years as numbers (the inputs show either).
                         ['state', 'city', addrKey, 'zip', 'fromYear', 'toYear'].forEach(k => {
                             if (typeof normalized[k] !== 'string') normalized[k] = normalized[k] != null ? String(normalized[k]) : '';
                         });
@@ -990,7 +991,7 @@
                         inp.placeholder = placeholder;
                         if (opts.maxWidth) inp.style.maxWidth = opts.maxWidth;
                         if (opts.category) inp.setAttribute('data-autocomplete-category', opts.category);
-                        inp.value = normalized[field] || '';
+                        inp.value = normalized[field] ?? '';
                         inp.oninput = (e) => {
                             if (typeof window.updateArrayObjectItemValue === 'function') {
                                 window.updateArrayObjectItemValue(path, index, field, e.target.value);

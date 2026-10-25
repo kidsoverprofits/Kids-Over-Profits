@@ -22,31 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-function kop_value_is_meaningful($value) {
-    if (is_string($value)) {
-        return trim($value) !== '';
-    }
-
-    if (is_bool($value)) {
-        return $value === true;
-    }
-
-    if (is_int($value) || is_float($value)) {
-        return true;
-    }
-
-    if (is_array($value)) {
-        foreach ($value as $item) {
-            if (kop_value_is_meaningful($item)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    return !empty($value);
-}
-
 function kop_normalize_submission_category($value) {
     $normalized = strtolower(trim((string) $value));
     if ($normalized === 'states') {
@@ -175,50 +150,6 @@ function kop_strip_provider_submission_data(&$data) {
             }
         }
     }
-}
-
-function kop_facility_has_meaningful_data($facility) {
-    if (!is_array($facility)) {
-        return false;
-    }
-
-    $identification = is_array($facility['identification'] ?? null) ? $facility['identification'] : [];
-    $location_details = is_array($facility['locationDetails'] ?? null) ? $facility['locationDetails'] : [];
-
-    return kop_value_is_meaningful([
-        $identification['currentName'] ?? null,
-        $identification['currentOperator'] ?? null,
-        $identification['currentOwner'] ?? null,
-        $identification['currentOwners'] ?? null,
-        $identification['otherNames'] ?? null,
-        $identification['pastNames'] ?? null,
-        $identification['knownReferrers'] ?? null,
-        $facility['location'] ?? null,
-        $facility['address'] ?? null,
-        $location_details['city'] ?? null,
-        $location_details['state'] ?? null,
-        $location_details['country'] ?? null,
-        $location_details['additionalLocations'] ?? null,
-        $facility['otherOperators'] ?? null,
-        $facility['operatingPeriod'] ?? null,
-        $facility['staff'] ?? null,
-        $facility['profileLinks'] ?? null,
-        $facility['facilityDetails'] ?? null,
-        $facility['accreditations'] ?? null,
-        $facility['memberships'] ?? null,
-        $facility['certifications'] ?? null,
-        $facility['licensing'] ?? null,
-        $facility['resources'] ?? null,
-        $facility['treatmentTypes'] ?? null,
-        $facility['targetedDiagnoses'] ?? null,
-        $facility['targetedBehaviors'] ?? null,
-        $facility['ttiPractices'] ?? null,
-        $facility['philosophy'] ?? null,
-        $facility['criticalIncidents'] ?? null,
-        $facility['notes'] ?? null,
-        $facility['fieldNotes'] ?? null,
-        $facility['isPrivatelyOwned'] ?? null,
-    ]);
 }
 
 function kop_get_first_named_facility($facilities) {
