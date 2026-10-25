@@ -975,12 +975,18 @@
         });
     }
 
+    // Queues whose items describe abuse plainly: the warning sits on that card, not over the whole page.
+    var HARD_READING = {
+        'inspection-highlights': 'Hard reading: the findings describe abuse, restraint, injuries, self-harm and deaths, in the inspectors\' plain words. '
+            + 'Skip any item, hand a batch back, or switch to other work whenever you want.'
+    };
+
     // A card for each review queue: the batch to carry on, the next batch to take, or the practice round that opens it.
     function reviewCards(self) {
         var pr = self.practice || { queues: [] };
         var cards = [];
         var shown = {};
-        function card(title, blurb, meta, label, onGo, isCarryOn) {
+        function card(title, blurb, meta, label, onGo, isCarryOn, key) {
             var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
             var go = el('button', { type: 'button', class: 'kop-vol-btn ' + (isCarryOn ? 'kop-vol-btn-approve' : 'kop-vol-btn-plain'), text: label,
                 'aria-label': label + ': ' + title, disabled: cfg.preview ? true : null, onclick: function () {
@@ -996,6 +1002,7 @@
                     });
                 } });
             cards.push(el('li', { class: 'kop-vol-choice' }, [el('h3', { text: title }), blurb ? el('p', { text: blurb }) : null,
+                HARD_READING[key] ? el('p', { class: 'kop-vol-choice-note', text: HARD_READING[key] }) : null,
                 meta ? el('p', { class: 'kop-vol-meta', text: meta }) : null, go, msg]));
         }
         // Queues they can take batches from.
@@ -1013,14 +1020,14 @@
                             openProject(res.id);
                         });
                     });
-                }, !!open);
+                }, !!open, q.key);
         });
         // A practice round already going.
         if (pr.open) {
             shown[pr.open.source] = true;
             var q0 = (pr.queues || []).filter(function (q) { return q.key === pr.open.source; })[0] || {};
             card(q0.title || pr.open.label, q0.blurb, 'Practice round: ' + pr.open.done + ' of ' + pr.open.total + ' done.',
-                state.practice ? 'Working on it below' : 'Carry on', function () { openPractice(); return null; }, true);
+                state.practice ? 'Working on it below' : 'Carry on', function () { openPractice(); return null; }, true, pr.open.source);
         }
         // Queues that open after a practice round.
         (pr.queues || []).forEach(function (q) {
@@ -1029,7 +1036,7 @@
             card(q.title || q.label, q.blurb, 'Starts with a practice round: ' + pr.size + ' items we have already decided, with our answer after each one. Get '
                 + pr.pass + ' of ' + pr.size + ' the same as us and your first real ones open straight away.'
                 + (q.minutes ? ' About ' + q.minutes + (q.minutes === 1 ? ' minute' : ' minutes') + ' an item.' : '') + last,
-                'Start practice', function () { return startPractice(q.key); }, false);
+                'Start practice', function () { return startPractice(q.key); }, false, q.key);
         });
         return cards;
     }
@@ -1037,7 +1044,8 @@
     // The kinds of work to choose from, all on the same footing.
     function chooseWork(self) {
         var ul = el('ul', { class: 'kop-vol-choices' });
-        reviewCards(self).concat(otherWorkCards()).forEach(function (li) { ul.appendChild(li); });
+        // The calm work first, so nobody takes the hard reading for the price of helping.
+        otherWorkCards().concat(reviewCards(self)).forEach(function (li) { ul.appendChild(li); });
         return el('div', { class: 'kop-vol-self kop-vol-start' }, [
             el('p', { text: 'Choose the kind of work you want. You can do more than one, and change any time.' }), ul
         ]);

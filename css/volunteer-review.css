@@ -837,6 +837,14 @@ p.kop-vol-newreply {
 }
 .kop-vol-choice p { margin: 0 0 .5rem; overflow-wrap: anywhere; }
 .kop-vol-choice .kop-vol-btn { margin-top: auto; }
+/* The hard-reading note on a card whose items describe abuse plainly (HARD_READING in js/volunteer-review.js). */
+.kop-vol-choice .kop-vol-choice-note {
+    padding: .4rem .6rem;
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    border-left: 3px solid var(--kop-orange, #EF9034);
+    font-size: .9rem;
+    color: #1A202C;
+}
 
 .kop-vol-claim label {
     margin-top: 8px;

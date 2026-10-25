@@ -21,19 +21,14 @@ get_header();
 ?>
 <div class="kop-vol-page">
     <section class="kop-vol-panel kop-vol-intro">
-        <h1>Volunteer review</h1>
+        <h1>Volunteer work</h1>
         <?php if ($kop_vol || $kop_vol_preview) : ?>
             <p><?php echo $kop_vol ? 'Hi ' . esc_html($kop_vol['name']) . ', thank you for helping.' : 'Admin preview: this is what volunteers see. Recommending is turned off for you here.'; ?></p>
-            <p>There are four kinds of work here, and you choose below: checking serious violations our scanner pulls out of state inspection
-                reports, answering research questions about programs, making social media posts from what we add to the site, and finding
-                pictures for our pages. An admin checks everything before it changes the site or goes out.</p>
-            <div class="kop-vol-warning" role="note">
-                <p><strong>Before you start: this is hard reading.</strong> Much of this work describes what was done to children in these programs:
-                    physical and sexual abuse, restraint, injuries, self-harm, neglect and deaths. The inspection findings are the most direct:
-                    inspectors write it plainly, and the full reports give more detail.</p>
-                <p>Take breaks. Skip any item with <em>Skip for now</em>, hand a batch back, or choose other work. You never
-                    have to finish anything.</p>
-            </div>
+            <p>There are four kinds of work, and every one of them helps: answering research questions about programs, finding pictures for
+                our pages, making social media posts from what we add to the site, and checking findings from state inspection reports. Pick
+                any of them below, and switch whenever you like. An admin checks everything before it changes the site or goes out.</p>
+            <p class="kop-vol-meta">The inspection findings are the hard reading: they describe abuse in plain words, and their card says so.
+                Take breaks; you never have to finish anything.</p>
             <details class="kop-vol-howto"<?php echo $kop_vol_new || $kop_vol_preview ? ' open' : ''; ?>>
                 <summary>How this works</summary>
                 <h2>Getting started</h2>
