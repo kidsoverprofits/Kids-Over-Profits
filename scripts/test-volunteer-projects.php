@@ -890,6 +890,15 @@ $check('a heading followed by a picture is filled', kop_vimg_spot_state(array('p
 $check('a heading with no picture after it is open', kop_vimg_spot_state(array('page' => 'tti-history-part-one', 'heading' => 'Federal money and the first chains')) === 'open');
 $check('a heading the page lacks is not offered', kop_vimg_spot_state(array('page' => 'tti-history-part-one', 'heading' => 'No such heading')) === 'no-heading'
     && kop_vimg_spot_state(array('page' => 'no-such-page', 'heading' => '')) === 'no-page');
+// "Start" on the volunteer page's photo card: a project of his own, the next five spots.
+$open_before = kop_volp_self_status($sam_id)['open'];
+$self_img = kop_vimg_self_start($sam);
+$SI = kop_volp_get($self_img['id']);
+$check('Start makes him a photo project of five spots, his own', (int) $SI['volunteer_id'] === $sam_id && $SI['source'] === KOP_VIMG_SOURCE
+    && count(kop_volp_item_rows($self_img['id'])) === min(KOP_VIMG_SELF_SIZE, count($spots)), json_encode($SI));
+$check('Start again opens the same one', kop_vimg_self_start($sam)['id'] === $self_img['id']);
+$check('...and it does not hold up his next review batch', kop_volp_self_status($sam_id)['open'] === $open_before);
+$wpdb->update(kop_volp_table(), array('status' => 'closed'), array('id' => $self_img['id']));   // the spots go back for the rest of this test
 list($open_spots) = kop_vimg_open_spots();
 list($img_p) = kop_vimg_make_project(0, 'Try the history ones first.');
 $IP = kop_volp_get($img_p);

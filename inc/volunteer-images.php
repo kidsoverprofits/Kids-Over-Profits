@@ -172,8 +172,8 @@ function kop_vimg_open_spots() {
 
 /* ---- Making a project ------------------------------------------------------------------- */
 
-/** A photo project of every open spot, for one volunteer or ($vid 0) anyone with a link. Returns [id, link, '']. */
-function kop_vimg_make_project($vid = 0, $note = '') {
+/** A photo project of every open spot (or the first $limit), for one volunteer or ($vid 0) anyone with a link. Returns [id, link, '']. */
+function kop_vimg_make_project($vid = 0, $note = '', $limit = 0, $created_by = null) {
     $vid = (int) $vid;
     global $wpdb;
     if ($vid) {
@@ -182,6 +182,7 @@ function kop_vimg_make_project($vid = 0, $note = '') {
     }
     list($spots) = kop_vimg_open_spots();
     if (!$spots) throw new RuntimeException('Every spot in seeds/image-spots.json has a picture already or is in an open photo project.');
+    if ((int) $limit > 0) $spots = array_slice($spots, 0, (int) $limit, true);
     kop_volp_ensure_tables();
     $brief = kop_vimg_brief();
     $u = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
@@ -189,7 +190,7 @@ function kop_vimg_make_project($vid = 0, $note = '') {
         'title' => $brief['title'], 'source' => KOP_VIMG_SOURCE, 'search' => '',
         'question' => $brief['question'], 'yes_example' => $brief['yes'], 'no_example' => $brief['no'], 'note' => trim(mb_substr((string) $note, 0, 1000)),
         'minutes' => count($spots) * 10, 'volunteer_id' => $vid, 'status' => 'open',
-        'created_by' => $u && $u->exists() ? $u->user_login : '', 'created_at' => current_time('mysql', true),
+        'created_by' => $created_by ?? ($u && $u->exists() ? $u->user_login : ''), 'created_at' => current_time('mysql', true),
     ));
     $id = (int) $wpdb->insert_id;
     $n = 0;
@@ -199,6 +200,28 @@ function kop_vimg_make_project($vid = 0, $note = '') {
             'status' => '', 'position' => $n++, 'detail' => wp_json_encode($s)));
     }
     return array($id, kop_volp_url($id), '');
+}
+
+/** Spots in a photo project a volunteer starts by themselves ("Photos for our pages" on the volunteer page). */
+const KOP_VIMG_SELF_SIZE = 5;
+
+/**
+ * A volunteer starts photo work by themselves: their own open photo project if they have one, else a new one of the
+ * next KOP_VIMG_SELF_SIZE open spots. Returns {id, link}.
+ */
+function kop_vimg_self_start(array $vol) {
+    global $wpdb;
+    $vid = (int) $vol['id'];
+    kop_volp_ensure_tables();
+    $open = (int) $wpdb->get_var($wpdb->prepare('SELECT id FROM ' . kop_volp_table() . " WHERE source = %s AND status = 'open' AND volunteer_id = %d ORDER BY id LIMIT 1", KOP_VIMG_SOURCE, $vid));
+    if ($open) return array('id' => $open, 'link' => kop_volp_url($open));
+    kop_vol_rate_check($vid);
+    try {
+        list($id, $link) = kop_vimg_make_project($vid, 'Picked by ' . $vol['name'] . '.', KOP_VIMG_SELF_SIZE, 'self-started photos');   // not KOP_VOLP_SELF_CREATED_BY: that would hold up their next review batch
+    } catch (RuntimeException $e) {
+        throw new RuntimeException('Every page on our list has a picture or someone looking for one right now. Thank you! Look again in a few days.');
+    }
+    return array('id' => (int) $id, 'link' => $link);
 }
 
 /* ---- What the volunteer sees ------------------------------------------------------------- */
@@ -554,6 +577,7 @@ function kop_vimg_rest_save(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $who = kop_vol_rest_who($req);
         if (empty($who['vol'])) throw new RuntimeException('Admins see this page as a preview; picking pictures is for the volunteer.');
+        if ((string) $req->get_param('do') === 'start') return kop_vimg_self_start($who['vol']);
         $in = array();
         foreach (array('page_url', 'file_url', 'author', 'license', 'alt', 'note') as $k) if ($req->get_param($k) !== null) $in[$k] = wp_unslash((string) $req->get_param($k));
         $do = sanitize_key((string) $req->get_param('do'));

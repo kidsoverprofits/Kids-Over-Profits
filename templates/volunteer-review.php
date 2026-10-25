@@ -41,8 +41,8 @@ get_header();
                     already decided, with the decision shown after each one. Get 8 of them the same and your first 10 real ones open straight
                     away. On each, choose <em>Recommend approve</em>, <em>Recommend reject</em> or <em>Not sure</em>; not sure is a good answer
                     when the note says why.</p>
-                <p>Research questions need no practice round: tick the ones you want and take them. For social media posts or pictures, press
-                    <em>Ask for this work</em> and we set you up; the work then shows up on this page.</p>
+                <p>Research questions need no practice round: tick the ones you want and take them. Pictures start straight away: five pages
+                    at a time. For social media posts, press <em>Ask for this work</em> and we set you up; the work then shows up on this page.</p>
                 <h2>Choosing your next work</h2>
                 <p>When a batch is done, <em>Give me 10 more</em> starts the next one. The other kinds of work stay one click away under
                     <em>Other work</em>.</p>

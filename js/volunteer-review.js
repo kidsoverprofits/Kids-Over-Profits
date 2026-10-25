@@ -918,15 +918,15 @@
         return !!(cfg.preview && state.self && state.self.practice);
     }
 
-    // The work besides review queues: research questions (the box below), post ideas and photos (an admin sets those up,
-    // so the card asks for them, or carries on one already made).
+    // The work besides review queues: research questions (the box below), photos (Start makes a project of five spots),
+    // and post ideas (an admin sets those up, so the card asks for them, or carries on one already made).
     var OTHER_WORK = [
         { kind: 'research', title: 'Research questions', blurb: 'Look up one thing our records are missing: when a program opened, who ran it, where it moved. '
             + 'Every fact you send needs its link. No practice round: an admin reads every answer.' },
         { kind: 'social', title: 'Social media posts', blurb: 'Turn what we added to the site this week into posts: a picture and a short caption from the facts on the card. '
             + 'Nothing is posted until an admin approves it.', ask: 'I would like to make social media posts. Could you set me up with post ideas?' },
         { kind: 'image', title: 'Photos for our pages', blurb: 'Find openly licensed pictures (Wikimedia Commons, the Library of Congress and others) for pages that have none, '
-            + 'and send the link, who made it and the license. Nothing goes on a page until an admin approves it.', ask: 'I would like to find photos for your pages. Could you set me up?' }
+            + 'and send the link, who made it and the license. Five pages at a time. Nothing goes on a page until an admin approves it.' }
     ];
 
     function otherWorkCards() {
@@ -943,6 +943,24 @@
                 } });
             } else if (mine) {
                 go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: mine.done ? 'Carry on' : 'Start', onclick: function () { openProject(mine.id); } });
+            } else if (w.kind === 'image') {
+                // Photos start by themselves: a project of the next few spots with no picture.
+                go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Start', disabled: cfg.preview ? true : null, onclick: function () {
+                    go.disabled = true;
+                    msg.className = 'kop-vol-msg';
+                    msg.textContent = 'Setting it up…';
+                    api('image', { do: 'start' }).then(function (res) {
+                        return api('projects').then(function (data) {
+                            state.projects = data.projects || [];
+                            state.self = data.self;
+                            openProject(res.id);
+                        });
+                    }).catch(function (e) {
+                        go.disabled = false;
+                        msg.className = 'kop-vol-msg is-error';
+                        msg.textContent = e.message;
+                    });
+                } });
             } else {
                 go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Ask for this work', disabled: cfg.preview ? true : null, onclick: function () {
                     go.disabled = true;
