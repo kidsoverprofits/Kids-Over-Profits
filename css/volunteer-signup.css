@@ -162,3 +162,59 @@ button.kop-vols-copy:active {
     background: var(--kop-sand, #f2eedf);
     border: 1px solid var(--kop-navy, #000080);
 }
+
+/* The sensitivity reader survey on /volunteer/ (inc/sensitivity-survey.php): the same panel and fields. */
+.kop-vols textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem 0.65rem;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--kop-text-primary, #1a202c);
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--kop-text-muted, #4a5568);
+    border-radius: 6px;
+    margin-top: 0.35rem;
+}
+
+.kop-vols textarea:focus,
+.kop-vols input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--kop-focus-color, #000080);
+    outline-offset: 1px;
+}
+
+.kop-vols fieldset.kop-vols-field {
+    border: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.kop-vols fieldset.kop-vols-field legend {
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+    padding: 0;
+    margin: 0 0 0.4rem;
+}
+
+.kop-vols .kop-vols-field label.kop-sens-check {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-weight: 400;
+    color: var(--kop-text-primary, #1a202c);
+    margin: 0 0 0.35rem;
+}
+
+.kop-vols label.kop-sens-check input {
+    margin-top: 0.25rem;
+    flex: none;
+}
+
+.kop-vols .kop-vols-field label.kop-sens-sub {
+    margin-top: 0.6rem;
+}
+
+.kop-sens-done:focus {
+    outline: none;
+}

@@ -152,6 +152,8 @@ require_once get_stylesheet_directory() . '/inc/site-map.php';
 require_once get_stylesheet_directory() . '/inc/how-to-use.php';
 // /questions/: "We have questions about..." one short question at a time about what records lack; answers settle by agreement or in the Review inbox
 require_once get_stylesheet_directory() . '/inc/questions.php';
+// Sensitivity reader survey on /volunteer/: answers read at KOP Tools > Sensitivity Survey
+require_once get_stylesheet_directory() . '/inc/sensitivity-survey.php';
 // Cite and print on /facility/ and /operator/ pages, and the press desk on /journalists/
 require_once get_stylesheet_directory() . '/inc/press-tools.php';
 

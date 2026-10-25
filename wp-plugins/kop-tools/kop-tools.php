@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.13
+ * Version: 2.5.14
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -126,6 +126,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-state-lists',
                 'requires' => 'kop_sl_page',
+            ),
+            array(
+                'title'    => 'Sensitivity Survey',
+                'desc'     => 'Answers from the sensitivity reader survey on the Volunteer page: gaps in our coverage, harmful wording, history and culture we may not know, and who would read drafts later. Mark read or delete, with Undo.',
+                'type'     => 'screen',
+                'screen'   => 'kop-sensitivity-survey',
+                'requires' => 'kop_sens_admin_page',
             ),
             array(
                 'title'    => 'Volunteer Reviewers',

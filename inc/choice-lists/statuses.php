@@ -1,6 +1,7 @@
 <?php
 /**
- * Lawsuit and bill statuses, our position on a bill, volunteer project types
+ * Lawsuit and bill statuses, our position on a bill, volunteer project types,
+ * the sensitivity reader communities (inc/sensitivity-survey.php)
  * and the memorial's causes of death (KOP Tools > Dropdown Lists). No
  * WordPress needed: the api/ save endpoints read them without it.
  *
@@ -123,6 +124,21 @@ kop_choice_register('volunteer-project-types', array(
         'tech'       => 'Tech',
         'outreach'   => 'Outreach',
         'other'      => 'Other',
+    ),
+));
+
+kop_choice_register('sensitivity-groups', array(
+    'label'    => 'Sensitivity reader communities',
+    'group'    => 'Lawsuits, bills and volunteers',
+    'where'    => 'The communities the "Be a sensitivity reader" section of the Volunteer page asks for (its list and the survey\'s "Which community are you answering for?" boxes), and the community shown on each answer at KOP Tools > Sensitivity Survey.',
+    'defaults' => array(
+        'black'              => 'Black survivors of the troubled teen industry',
+        'indigenous'         => 'Indigenous survivors, including people whose families went through the boarding schools',
+        'foster_care'        => 'Survivors of foster care placements',
+        'adoptee'            => 'Adoptees',
+        'maternity_home'     => 'Maternity home survivors: girls placed while pregnant or parenting',
+        'immigrant'          => 'Immigrant survivors, including young people held in ORR shelters',
+        'religious_minority' => 'Survivors from religious minorities, above all Jewish and Muslim survivors',
     ),
 ));
 
@@ -269,6 +285,10 @@ if (!function_exists('kop_bill_position_badge')) {
 
 if (!function_exists('kop_volunteer_project_types')) {
     function kop_volunteer_project_types($mode = 'all') { return kop_status_choice_labels('volunteer-project-types', $mode); }
+}
+
+if (!function_exists('kop_sensitivity_groups')) {
+    function kop_sensitivity_groups($mode = 'all') { return kop_status_choice_labels('sensitivity-groups', $mode); }
 }
 
 if (!function_exists('kop_memorial_causes')) {

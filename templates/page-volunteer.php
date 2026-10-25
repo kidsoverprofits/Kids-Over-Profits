@@ -6,7 +6,7 @@
  * findings and research a question (both through the one sign-up form under the cards, inc/volunteer-signup.php;
  * research questions are inc/research-tasks.php, picked on the volunteer's page), answer from experience
  * (/questions/, inc/questions.php, no sign-up), send what you have (the submission tools, folded). The skills we
- * need sit at the foot, then the call for sensitivity readers (2026-10-25; by email, so no one's identity is stored). Each card's words are a block admins edit in place (kop_ie_html_start(),
+ * need sit at the foot, then the call for sensitivity readers with its survey (2026-10-25, inc/sensitivity-survey.php). Each card's words are a block admins edit in place (kop_ie_html_start(),
  * inc/inline-edit.php). The opening line is kop_hub_config('volunteer') (inc/hub-shell.php).
  */
 
@@ -135,25 +135,92 @@ while (have_posts()) :
             <?php kop_ie_html_end(); ?>
         </section>
 
+        <?php
+        // Sensitivity readers: the communities are Dropdown Lists 'sensitivity-groups'; the survey goes to
+        // KOP Tools > Sensitivity Survey (inc/sensitivity-survey.php). No drafts to read yet, so the survey comes first.
+        $kop_vp_groups = function_exists('kop_sensitivity_groups') ? kop_sensitivity_groups('offered') : array();
+        $kop_vp_js = get_stylesheet_directory() . '/js/sensitivity-survey.js';
+        if (file_exists($kop_vp_js)) {
+            wp_enqueue_script('kop-sensitivity-survey', get_stylesheet_directory_uri() . '/js/sensitivity-survey.js', array(), filemtime($kop_vp_js), true);
+        }
+        ?>
         <section class="kop-volpage-section" id="kop-volpage-sensitivity" aria-labelledby="kop-volpage-sensitivity-h">
-            <?php kop_ie_html_start('volunteer:sensitivity', 'Volunteer page: sensitivity readers'); ?>
             <h2 class="kop-volpage-way-h" id="kop-volpage-sensitivity-h">Be a sensitivity reader</h2>
+            <?php kop_ie_html_start('volunteer:sensitivity-intro', 'Volunteer page: sensitivity readers'); ?>
                 <p>Much of what we report happened to young people from communities the industry, and the systems that feed it,
-                    treat worst. If you belong to one of them, you can read our articles before they are published and tell us where
-                    the wording is wrong, flattens what happened or repeats the industry's language. We are looking for:</p>
-                <ul class="kop-volpage-list">
-                    <li>Black survivors of the troubled teen industry</li>
-                    <li>Indigenous survivors, including people whose families went through the boarding schools</li>
-                    <li>Survivors of foster care placements</li>
-                    <li>Adoptees</li>
-                    <li>Maternity home survivors: girls placed while pregnant or parenting</li>
-                    <li>Immigrant survivors, including young people held in ORR shelters</li>
-                    <li>Survivors from religious minorities, above all Jewish and Muslim survivors</li>
-                </ul>
-                <p>You choose what to read and how much. Write to us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>
-                    and say which group you would read for; you do not have to tell us anything else about yourself. We name readers
-                    only if they ask to be named.</p>
+                    treat worst. If you belong to one of them, tell us where our reporting falls short: what we have missed, what we
+                    get wrong, and what we would need to know to write about it well. We are looking for:</p>
             <?php kop_ie_html_end(); ?>
+            <ul class="kop-volpage-list">
+                <?php foreach ($kop_vp_groups as $kop_vp_label) : ?>
+                    <li><?php echo esc_html($kop_vp_label); ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <?php kop_ie_html_start('volunteer:sensitivity-how', 'Volunteer page: sensitivity readers, how it works'); ?>
+                <p>Start with the survey below. Later we will ask readers who want to keep going to read articles before they are
+                    published. Only the Kids Over Profits team reads your answers, and we name readers only if they ask to be named.</p>
+            <?php kop_ie_html_end(); ?>
+
+            <details class="kop-volpage-more kop-sens" id="kop-sens-survey">
+                <summary>Take the survey</summary>
+                <form class="kop-vols kop-sens-form" data-rest="<?php echo esc_url(rest_url('kop/v1/volunteer/sensitivity-survey')); ?>" novalidate>
+                    <p class="kop-vols-help">Answer as much or as little as you like: one question is enough.</p>
+                    <fieldset class="kop-vols-field">
+                        <legend>Which community are you answering for?</legend>
+                        <?php foreach ($kop_vp_groups as $kop_vp_value => $kop_vp_label) : ?>
+                            <label class="kop-sens-check"><input type="checkbox" name="groups" value="<?php echo esc_attr($kop_vp_value); ?>"> <?php echo esc_html($kop_vp_label); ?></label>
+                        <?php endforeach; ?>
+                        <label for="kop-sens-other" class="kop-sens-sub">Another community</label>
+                        <input type="text" id="kop-sens-other" name="group_other" maxlength="200">
+                    </fieldset>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-gaps">What is missing from our coverage of your community?</label>
+                        <p class="kop-vols-help">Programs, cases, people or patterns we have not written about, or have written about too little.</p>
+                        <textarea id="kop-sens-gaps" name="gaps" rows="5"></textarea>
+                    </div>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-harm">Is anything offensive or harmful that nobody has dealt with?</label>
+                        <p class="kop-vols-help">On our site, or said and done widely among survivors and advocates.</p>
+                        <textarea id="kop-sens-harm" name="harm" rows="5"></textarea>
+                    </div>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-context">What history or culture should we know?</label>
+                        <p class="kop-vols-help">For example, a practice that means something different inside your community than it looks
+                            from outside, or older history that explains what is happening now.</p>
+                        <textarea id="kop-sens-context" name="context" rows="5"></textarea>
+                    </div>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-pages">Pages on our site that got it wrong <span class="kop-vols-opt">(optional)</span></label>
+                        <p class="kop-vols-help">Links or page names, and what is wrong with them.</p>
+                        <textarea id="kop-sens-pages" name="pages" rows="3"></textarea>
+                    </div>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-more">Anything else? <span class="kop-vols-opt">(optional)</span></label>
+                        <p class="kop-vols-help">Including people, groups or writing we should talk to or read.</p>
+                        <textarea id="kop-sens-more" name="more" rows="3"></textarea>
+                    </div>
+                    <div class="kop-vols-field">
+                        <label for="kop-sens-name">Your name or a nickname <span class="kop-vols-opt">(optional)</span></label>
+                        <input type="text" id="kop-sens-name" name="name" maxlength="100" autocomplete="nickname">
+                    </div>
+                    <div class="kop-vols-field">
+                        <label class="kop-sens-check"><input type="checkbox" name="read_later" value="1"> Ask me to read drafts later</label>
+                        <label for="kop-sens-email" class="kop-sens-sub">Email <span class="kop-vols-opt">(needed only to be asked later)</span></label>
+                        <input type="email" id="kop-sens-email" name="email" maxlength="190" autocomplete="email">
+                        <p class="kop-vols-help">Never shown to anyone else.</p>
+                    </div>
+                    <div class="kop-vols-trap" aria-hidden="true">
+                        <label for="kop-sens-website">Leave this empty</label>
+                        <input type="text" id="kop-sens-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p class="kop-vols-error" role="alert" hidden></p>
+                    <button type="submit" class="kop-vols-btn">Send my answers</button>
+                </form>
+                <div class="kop-vols kop-sens-done" hidden tabindex="-1">
+                    <p class="kop-vols-done-h">Thank you. Your answers reached us.</p>
+                    <p>We read every one. If you asked to read drafts, we will write when there is something to read.</p>
+                </div>
+            </details>
         </section>
 
         <footer class="kop-hub-footer">

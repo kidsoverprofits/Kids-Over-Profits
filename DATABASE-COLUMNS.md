@@ -229,6 +229,14 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 
 ---
 
+### {prefix}kop_sensitivity_survey (admins only)
+**Columns:** `id`, `groups_json` (values from Dropdown Lists `sensitivity-groups`), `group_other`, `gaps`, `harm`, `context`, `pages`, `more`, `read_later` (1 = ask them to read drafts), `name`, `email`, `status` (new, read, deleted), `created_at`, `updated_by`, `updated_at`
+
+**Purpose:** Answers to the sensitivity reader survey on /volunteer/, read at KOP Tools > Sensitivity Survey (`inc/sensitivity-survey.php`); never published, no address or browser stored
+**Primary Key:** `id`
+
+---
+
 ## Records Tables (records DB)
 
 ### lawsuits / legislation
