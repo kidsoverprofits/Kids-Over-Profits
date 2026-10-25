@@ -4735,7 +4735,767 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "in-loving-memory:is-chaim-weiss-yeshiva-of-long-beach-1986-in-sco",
+   "section": "In Loving Memory",
+   "title": "Is Chaim Weiss (Yeshiva of Long Beach, 1986) in scope?",
+   "text": "Sheet row 170 lists Chaim Weiss, 15, stabbed Nov. 1, 1986 at 'Torah High School', Long Beach NY. JTA (2015) and Wikipedia describe an ordinary yeshiva with a dormitory, killed Halloween night (Oct. 31) with a hatchet-like weapon; the 1986 JTA report says a heavy knife. Nothing found calls it a program for troubled youth. Decide whether it belongs on the memorial. [memorial sheet row 170; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Murder_of_Chaim_Weiss",
+     "kind": "note"
+    },
+    {
+     "label": "JTA 2015",
+     "url": "https://www.jta.org/2015/10/30/united-states/1986-yeshiva-murder-still-unsolved-detectives-believe-culprit-was-faculty-or-student",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:oceanquest-1980-how-many-died-and-are-all-on-the",
+   "section": "In Loving Memory",
+   "title": "OceanQuest 1980, how many died and are all on the sheet?",
+   "text": "Row 157 (John Moran) is one of eight teens the Salt Lake Tribune lists as dead on VisionQuest's OceanQuest expedition off Baja, Nov. 24, 1980 (Reefer, Zimmerman, Lucas, Lamb, Schibley, Erwin, Moran, Foodroy). NTSB-MAR-81-13 says the sailboat MR. B grounded Nov. 25 with 3 dead and 6 missing, so the counts and the date differ. Check the other names are on the sheet or page and settle the date. [memorial sheet row 157; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "NTSB MAR-81-13",
+     "url": "https://trid.trb.org/View/387956",
+     "kind": "note"
+    },
+    {
+     "label": "Salt Lake Tribune (Wayback)",
+     "url": "https://web.archive.org/web/20260810164103/https://archive.sltrib.com/story.php?ref=%2Fnews%2Fci_7139316",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:southwest-outward-bound-1978-memorial-sheet-rows",
+   "section": "In Loving Memory",
+   "title": "Southwest Outward Bound 1978 (memorial sheet rows 148-149): what was the date, and should David Schwimmer be added as a third death?",
+   "text": "Rows 148-149 (Brenda Herman, Tim Breidegam) give Jan. 22, 1978 and Santa Fe NM. The Viristar account has the storm on Jan. 24, 1978 off Baja California Sur, bodies recovered Jan. 28 at Isla Carmen, and a third student, David Schwimmer, 18, never found. Check the date (the Washington Post, Nov. 23-24, 1979, is the primary source) and whether Schwimmer is on the sheet. [memorial sheet rows 148, 149; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Viristar",
+     "url": "https://www.viristar.com/?p=19851",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:did-cindy-gilbert-sohappy-memorial-sheet-row-308",
+   "section": "In Loving Memory",
+   "title": "Did Cindy Gilbert Sohappy (memorial sheet row 308) die in 2003 rather than 2004?",
+   "text": "Sheet row 308 gives Dec. 6, 2004. Indianz.com (Dec. 12, 2003) reports her death at Chemawa on Saturday Dec. 6, 2003, and a March 2004 follow-up says the FBI was investigating her 'death on December 6'. Name is Gilbert, not Gilber. [memorial sheet row 308; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Indianz Mar 2004",
+     "url": "https://indianz.com/News/archive/000754.asp",
+     "kind": "note"
+    },
+    {
+     "label": "Indianz Dec 2003",
+     "url": "https://indianz.com/News/archives/002986.asp",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:john-mccloskey-memorial-sheet-row-215-which-west",
+   "section": "In Loving Memory",
+   "title": "John McCloskey (memorial sheet row 215): which Western State Hospital, and what age and year?",
+   "text": "Sheet row 215: 19, Feb. 24, 1996, Western State Hospital, Lakewood WA. The CCHR list says 18, Feb. 24, 1996, Western State Hospital in Virginia; Unsilenced says 18, 1994. Both states have a Western State Hospital. Needs a news source to settle the state, age and year. [memorial sheet row 215; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Unsilenced source",
+     "url": "https://archive.ph/ADbbk",
+     "kind": "note"
+    },
+    {
+     "label": "CCHR list",
+     "url": "https://www.cchr.org/sites/default/files/The_Silent_Death_of_Americas_Children.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:kenneth-mcclain-1998-age-11-or-2001-age-15",
+   "section": "In Loving Memory",
+   "title": "Kenneth McClain, 1998 age 11 or 2001 age 15?",
+   "text": "Sheet row 274: 15, Sept. 15, 2001, Alexander Youth Services Center AR, suicide. Unsilenced lists the same name and place as 1998, age 11. One of them is wrong; the Unsilenced source is an archive.today capture that needs a person to open it. [memorial sheet row 274; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Unsilenced source",
+     "url": "https://archive.md/ATrGS",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:walter-brown-at-northwestern-academy-2005-or-200",
+   "section": "In Loving Memory",
+   "title": "Walter Brown at Northwestern Academy, 2005 or 2009?",
+   "text": "Sheet row 310 gives Jan. 27, 2005; Unsilenced lists Walter Brown, Northwestern Academy, restraint, 2009, 18. Settle the year from its source. [memorial sheet row 310; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Unsilenced source",
+     "url": "https://archive.ph/7EOmv",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:what-source-documents-the-restraint-in-adora-gra",
+   "section": "In Loving Memory",
+   "title": "What source documents the restraint in Adora Grae Stout's death (memorial sheet row 252)?",
+   "text": "Sheet row 252 says she was restrained after running away (cardiac arrest, positional asphyxia). The Salt Lake Tribune list only says 'cardiac arrest during a camping trip' at Buffalo Mountain Camp (Omni Visions). The restraint label stays, but a source describing the restraint is needed for the page. [memorial sheet row 252; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Salt Lake Tribune (Wayback)",
+     "url": "https://web.archive.org/web/20260810164103/https://archive.sltrib.com/story.php?ref=%2Fnews%2Fci_7139316",
+     "kind": "note"
+    },
+    {
+     "label": "Unsilenced source",
+     "url": "https://archive.md/ZsJz6",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:was-charlotte-holliman-memorial-sheet-row-196-at",
+   "section": "In Loving Memory",
+   "title": "Was Charlotte Holliman (memorial sheet row 196) at Truckee Meadows Hospital in Reno NV, not Truckee CA?",
+   "text": "Sheet row 196 gives Truckee, California. Truckee Meadows Hospital is in Reno, Nevada (CCHR: 'Truckee Meadows Hospital, Nevada'). The only sources found are uncited lists, so the row still needs a news source. [memorial sheet row 196; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "CCHR list",
+     "url": "https://www.cchr.org/sites/default/files/The_Silent_Death_of_Americas_Children.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:what-do-unsilenced-s-archive-today-sources-say-f",
+   "section": "In Loving Memory",
+   "title": "What do Unsilenced's archive.today sources say for the 22 unsourced A1 memorial rows?",
+   "text": "For most unsourced rows in batch A1 (1971 on), Unsilenced's facility-deaths table links a source on archive.today, which shows a CAPTCHA to agents. A person opening them would settle about 20 rows. Rows and links: 190 Swenson archive.md/ALjq; 202 Jamison archive.md/VNYm3; 215 McCloskey archive.ph/ADbbk; 218 Wagener archive.md/3Ggg1; 230 Maloney archive.ph/F568h; 246 Timithy Thomas archive.ph/tDLE3; 247 Dandridge archive.ph/XiSMC; 248 McLarin archive.md/JzVpA; 259 Winston archive.ph/tE9Bd; 274 McClain archive.md/ATrGS; 275 Tillman archive.ph/m17tv; 276 Shawn Smith archive.ph/9zCMM; 281 Chloe Cohen archive.md/5EVyc; 283 Gulley archive.md/cvPFB; 284 Cleo Wallace girl archive.ph/8RlTE; 287 Donderey Rogers archive.md/MPH9B; 307 Alain Garcia archive.md/2hZxP; 310 Walter Brown archive.ph/7EOmv; 311 Ogonowski archive.md/S4mmt; 314 Alex Harris archive.md/vuvRf. Also 189 Aaron Owen: Nick Bryant, The Franklin Scandal (2009), Google Books PT400; 176 Lance Schwart: Instagram post. [memorial sheet rows 176, 189, 190, 202, 215, 218, 230, 246, 247, 248, 259, 274, 275, 276, 281, 283, 284, 287, 307, 310, 311, 314; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A1",
+   "directions": [
+    {
+     "label": "Instagram (Schwart)",
+     "url": "https://www.instagram.com/p/Bur3roclk7_/",
+     "kind": "note"
+    },
+    {
+     "label": "Franklin Scandal (Google Books)",
+     "url": "https://books.google.com/books?id=3foBBAAAQBAJ&pg=PT400",
+     "kind": "note"
+    },
+    {
+     "label": "Unsilenced facility deaths",
+     "url": "https://archive.unsilenced.org/facility-deaths/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:chase-dakota-bridges-died-dec-28-2016-not-2013",
+   "section": "In Loving Memory",
+   "title": "Chase Dakota Bridges died Dec 28, 2016, not 2013?",
+   "text": "The sheet dates Chase Dakota Bridges' death (Realation Group Home, Tulsa) to 2013-12-28. Tulsa World (2017-05-01) puts it on Dec. 28 the winter before, crossing I-244, and calls it the second runaway traffic death in four years after Christopher Seaton (April 2013). That makes it 2016-12-28. Confirm the year before the row goes on the page. [memorial sheet row 376; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "Public Radio Tulsa",
+     "url": "https://www.publicradiotulsa.org/local-regional/2017-05-01/trouble-tulsa-group-home-to-close",
+     "kind": "note"
+    },
+    {
+     "label": "KOP copy",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/tw-realation-2017.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Tulsa World (Wayback)",
+     "url": "https://web.archive.org/web/20170924231247/http://www.tulsaworld.com/news/local/troubled-group-home-where-two-runaways-died-in-traffic-to/article_dd98e499-cecf-5de6-bbc7-d70212b35537.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-timothy-gage-westerfield-the-unnamed-boy-who",
+   "section": "In Loving Memory",
+   "title": "Is Timothy Gage Westerfield the unnamed boy who died at IYC St. Charles in Sept 2008?",
+   "text": "No source names Timothy Gage Westerfield (sheet: IYC Chicago, 15, 2008-09-29, suicide). The Daily Herald reported an unnamed 16-year-old who died of a 'self-inflicted injury' at the Illinois Youth Center St. Charles in September 2008. Check whether it is the same death (facility and age differ). [memorial sheet row 346; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "Daily Herald",
+     "url": "https://www.dailyherald.com/?p=1037705",
+     "kind": "note"
+    },
+    {
+     "label": "Daily Herald",
+     "url": "https://www.dailyherald.com/?p=1043549",
+     "kind": "note"
+    },
+    {
+     "label": "Daily Herald",
+     "url": "https://www.dailyherald.com/?p=1043066",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:was-dawaun-lewis-taylor-memorial-sheet-row-429-a",
+   "section": "In Loving Memory",
+   "title": "Was Dawaun Lewis-Taylor (memorial sheet row 429) at Maryhaven when he was shot?",
+   "text": "Dawaun Lewis-Taylor, 15, was shot Sept 29, 2020 on Heatherton Drive, Columbus (unsolved). No source read ties him to Maryhaven Residential Treatment Center or an escape. Where does the Maryhaven link come from? [memorial sheet row 429; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "Ohio AG cold case",
+     "url": "https://ohioattorneygeneral.gov/Files/Law-Enforcement/Investigator/Cold-Case/Homicides/Lewis-Taylor",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-nathaniel-valenzuela-memorial-sheet-row-414-t",
+   "section": "In Loving Memory",
+   "title": "Is Nathaniel Valenzuela (memorial sheet row 414) the Albuquerque man in the obituary, and was he in Santa Fe County youth detention?",
+   "text": "An obituary for Nathaniel Lee Valenzuela of Albuquerque gives Sept 6, 2019, matching the sheet's date, but names no facility or cause. Sheet: 17, suicide, Santa Fe County Youth Development Program. Need a news or OMI source tying him to the detention center. [memorial sheet row 414; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "Gabaldon Mortuary",
+     "url": "https://www.gabaldonmortuaryinc.com/obituaries/nathaniel-valenzuela",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:where-is-the-milwaukee-journal-sentinel-story-na",
+   "section": "In Loving Memory",
+   "title": "Where is the Milwaukee Journal Sentinel story naming Maricella Chairez (memorial sheet row 407), Racine County detention?",
+   "text": "WPR (2020-11-11) says a trafficked teen, Maricella, died by suicide at the Racine County Juvenile Detention Center about three years earlier and cites a Milwaukee Journal Sentinel investigation. Find that article for full name, age and date (sheet: Maricella Chairez, 16, 2017-12-10). [memorial sheet row 407; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "WPR",
+     "url": "https://www.wpr.org/how-criminal-justice-system-failed-maricella",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:what-are-the-full-names-of-the-tallapoosa-county",
+   "section": "In Loving Memory",
+   "title": "What are the full names of the Tallapoosa County Girls Ranch crash victims Tia, Makenzie and Dana Norman (memorial sheet rows 435, 437, 438)?",
+   "text": "Sources name only first names (Dana, Haley, Mackenzie/Makenzie, Tia); the ranch and DHR withheld full names. Haley Marie Logan is identified by The Imprint. 'Dana Norman' surname not found anywhere. Sheet rows 435-438. [memorial sheet rows 435, 437, 438; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "WTVM bench",
+     "url": "https://www.wtvm.com/2022/08/04/ala-trooper-dedicates-bench-ranch-girls-killed-2021-i-65-crash/",
+     "kind": "note"
+    },
+    {
+     "label": "The Imprint",
+     "url": "https://imprintnews.org/featured/alabama-youth-ranch-celebrates-the-lives-of-eight-children-killed-in-fiery-traffic-crash/56962",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:luis-ferreiro-northwest-academy-excelsior-pa-nor",
+   "section": "In Loving Memory",
+   "title": "Luis Ferreiro, 'Northwest Academy, Excelsior PA' = Northwestern Academy, Coal Township?",
+   "text": "No source found for Luis Ferreiro (18, 2009-04-07). 'Northwest Academy, Excelsior PA' looks like Northwestern Academy (NHS Youth Services / Merakey) in Coal Township, where Excelsior is a village. Check the Shamokin News-Item for April 2009. [memorial sheet row 349; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch A2",
+   "directions": [
+    {
+     "label": "Northwestern Academy suits",
+     "url": "https://www.levylaw.com/northwestern-academy-sexual-abuse-lawsuits/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:which-djj-program-was-andre-sheffield-memorial-s",
+   "section": "In Loving Memory",
+   "title": "Which DJJ program was Andre Sheffield (memorial sheet row 36) in: Brevard Juvenile Detention or Melbourne Center for Personal Growth?",
+   "text": "News4Jax (2015-02-24) says Andre Sheffield, 14, died of bacterial meningitis in DJJ custody while at the Brevard Juvenile Detention Center (Cocoa). The sheet and Breaking Code Silence say Melbourne Center for Personal Growth. Find out where he was held when he fell ill (DJJ incident report, Florida Today). [memorial sheet row 36; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "BCS In Memoriam",
+     "url": "https://www.breakingcodesilence.org/about-us/in-memoriam/",
+     "kind": "note"
+    },
+    {
+     "label": "News4Jax",
+     "url": "https://news4jax.com/news/2015/02/24/family-blames-djj-after-teen-dies-in-custody",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:oak-plains-academy-nov-2022-memorial-sheet-row-4",
+   "section": "In Loving Memory",
+   "title": "Oak Plains Academy, Nov 2022 (memorial sheet row 41): two girls died; is the second on the sheet, and what are their names?",
+   "text": "Two 15-year-old girls died at Oak Plains Academy (Ashland City TN) on 2022-11-29 and 2022-11-30 after taking Benadryl from the nurse's station. The sheet has one row, cause 'Suicide'; the coverage calls it an overdose. Check whether the second girl is on the sheet or the page, and whether any record calls it suicide. [memorial sheet row 41; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "Gray/WSMV via KBTX",
+     "url": "https://www.kbtx.com/2022/12/01/two-teens-die-benadryl-overdoes-treatment-facility-sheriffs-office-says/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:memorial-sheet-row-40-vs-42-canyon-state-academy",
+   "section": "In Loving Memory",
+   "title": "Memorial sheet row 40 vs 42 Canyon State Academy: same death?",
+   "text": "Rows 40 (boy, 17, no cause) and 42 (boy, 16, overdose) are flagged as the same death as row 449. The only Canyon State death found is a 16-year-old's suspected overdose on 2022-10-03. Confirm row 40 is a duplicate and not a separate 17-year-old. [memorial sheet row 40; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "azfamily",
+     "url": "https://www.azfamily.com/2022/10/05/queen-creek-student-reportedly-got-drugs-family-that-led-overdose-death/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:memorial-sheet-row-33-jamal-damerco-miller-is-he",
+   "section": "In Loving Memory",
+   "title": "Memorial sheet row 33 Jamal Damerco Miller: is he the IYC St. Charles boy (Sept 2009)?",
+   "text": "A 16-year-old boy from Chicago's South Side died by suicide at Illinois Youth Center St. Charles on 2009-09-01; the Daily Herald did not name him. The sheet says Jamal Damerco Miller, 16, Illinois Youth Center, Chicago. Find a named source (Kane County coroner, Chicago Tribune/Sun-Times, John Howard Association). [memorial sheet row 33; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "Daily Herald",
+     "url": "https://www.dailyherald.com/?p=1050451",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:memorial-sheet-row-35-jake-spencer-the-2013-diam",
+   "section": "In Loving Memory",
+   "title": "Memorial sheet row 35 Jake Spencer: the 2013 Diamond Ranch suicide?",
+   "text": "Diamond Ranch Academy had an unnamed 16-year-old boy's suicide in 2013 (lawsuit: left unsupervised; BCS: hanged with a belt). The sheet says Jake Spencer, suicide, no age or date. Find a named source (the lawsuit, Utah DHS/OL records, St. George News) before linking them. [memorial sheet row 35; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "BCS DRA page",
+     "url": "https://www.breakingcodesilence.org/diamond-ranch-academy/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:memorial-sheet-row-38-aaron-groome-died-after-es",
+   "section": "In Loving Memory",
+   "title": "Memorial sheet row 38 Aaron Groome: died after escaping, does he fit the memorial?",
+   "text": "Aaron Groome, 16, escaped Newport News Behavioral Health Center on 2019-03-23 and was killed by a train in Chesterfield County on 2019-05-08. Owner decision: does a death six weeks after leaving a facility go on the page? [memorial sheet row 38; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "WTKR",
+     "url": "https://wtkr.com/2019/05/16/missing-newport-news-teen-hit-killed-by-train-in-chesterfield-co",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:where-is-the-original-investigation-of-lakeisha",
+   "section": "In Loving Memory",
+   "title": "Where is the original investigation of LaKeisha Brown's death (memorial sheet row 27)?",
+   "text": "An IRE resource-centre abstract (now 404) says LaKeisha Brown died in custody at Alexander Youth Services Center (Arkansas) of blood clots in her lungs after staff and nurses dismissed her pleas; she got Advil and an inhaler puff the day she died. Find the outlet, the date and her age. [memorial sheet row 27; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "IRE (dead link)",
+     "url": "https://www.ire.org/?p=111104",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:memorial-sheet-rows-11-and-13-whittier-state-sch",
+   "section": "In Loving Memory",
+   "title": "Memorial sheet rows 11 and 13 Whittier State School: which boy died in 1939, which in 1940?",
+   "text": "Kathleen W. Jones (JHCY 2015) covers the 1939 and 1940 suicides of Benny Moreno and Edward Leiva at Whittier State School. The abstract does not say which death was which year, or give ages. Read the article or the 1939-40 Los Angeles papers for dates and ages. [memorial sheet row 11, 13; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch C",
+   "directions": [
+    {
+     "label": "Project MUSE",
+     "url": "https://muse.jhu.edu/article/596179",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:robert-stephens-row-10-and-robert-seinous-row-11",
+   "section": "In Loving Memory",
+   "title": "Robert Stephens (row 10) and Robert Seinous (row 110) are one death?",
+   "text": "USF says Robert Seinous on the death certificate and Robert Stephens in the ledger, indictment and DNA ID are the same boy, stabbed by Leroy Taylor on 1937-07-15. The sheet has him twice: row 10 (no date, 'stabbed 10 times by fellow students') and row 110 (1935-07-15, knife wounds). Merge, and fix the year to 1937? The '10 times' detail has no source yet. [memorial sheet rows 10 and 110; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "WUSF 2015",
+     "url": "https://wusf.org/law-order/2015-08-05/sixth-set-of-dozier-remains-idd-usfs-site-access-extended",
+     "kind": "note"
+    },
+    {
+     "label": "USF interim report p.93",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:george-owen-smith-rows-12-and-112-which-cause",
+   "section": "In Loving Memory",
+   "title": "George Owen Smith rows 12 and 112, which cause?",
+   "text": "Same death twice. Row 12 says 'Pneumonia/Suspected Neglect'; USF says he ran away on 1940-11-23 and was found dead under a house in Marianna on 1941-01-24, cause and manner unknown, no autopsy. Keep row 112 and drop row 12? Where did 'pneumonia' come from? [memorial sheet rows 12 and 112; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "CBS 2014",
+     "url": "https://www.cbsnews.com/news/dozier-school-deaths-boys-remains-identified-from-shuttered-florida-reform-school",
+     "kind": "note"
+    },
+    {
+     "label": "USF interim report p.58",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:lee-underwood-died-1931-or-1932",
+   "section": "In Loving Memory",
+   "title": "Lee Underwood died 1931 or 1932?",
+   "text": "Sheet row 93 says 1931-04-21; every USF table puts him on 1932-04-21 with the April 1932 influenza deaths. [memorial sheet row 93; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "USF interim report Table 10 p.54 and Table 14 p.89",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:which-unnamed-dozier-death-is-sheet-row-2",
+   "section": "In Loving Memory",
+   "title": "Which unnamed Dozier death is sheet row 2?",
+   "text": "Row 2 is 'Unknown', no date, cause unknown. USF lists one unnamed death (a colored boy, 1911) and counts 11 unidentified colored boys who died of influenza in Nov-Dec 1918. Which one does the sheet mean, or is it a placeholder for the unidentified Boot Hill burials? [memorial sheet row 2; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "USF final report p.116",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-dozier-final-report-2016.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "USF interim report Table 10 p.54",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:1914-dozier-fire-memorial-sheet-rows-49-58-which",
+   "section": "In Loving Memory",
+   "title": "1914 Dozier fire (memorial sheet rows 49-58): which names and ages are right where the two USF reports differ?",
+   "text": "Joseph Wethersby is 17 in the 2012 interim (= sheet) but 'Joseph Weathersby, 13' in the 2016 final; S. Barnett is 'S. Bennett' in final Table 8 but 'S. Barnett' in its text; Clarence Parrot/Parrott; Waldo Drew is 8 in the final; Clifford Jeffords 15 vs unknown. The coroner's report omits Parrot and Haffin. Which spelling and age does the page use? [memorial sheet rows 49-58; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "USF interim report Table 8 p.52",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "USF final report Table 8 p.97 and p.63",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-dozier-final-report-2016.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:should-james-c-ansley-memorial-sheet-row-92-be-l",
+   "section": "In Loving Memory",
+   "title": "Should James C. Ansley (memorial sheet row 92) be listed as a 1929 work accident rather than the fire?",
+   "text": "Sheet says 'Fire' for 1929-10-19. USF: toxemia from burns over 35% of his body 'during a work related accident'. Reword the cause? [memorial sheet row 92; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch D (Dozier)",
+   "directions": [
+    {
+     "label": "USF interim report p.91",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/usf-boot-hill-interim-report-2012.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:wrightsville-1959-fire-who-is-william-jones-memo",
+   "section": "In Loving Memory",
+   "title": "Wrightsville 1959 fire: who is William Jones (memorial sheet row 137)?",
+   "text": "The sheet lists William Jones, 17, as a victim of the March 5, 1959 Negro Boys Industrial School fire. Neither the Encyclopedia of Arkansas list of 21 nor the 2018 Democrat-Gazette marker list names him. Find a 1959 casualty list (Arkansas Gazette 1959-03-06, UPI in the NYT 1959-03-06, Jet, Stockley's Black Boys Burning) and settle whether he died or whether the name stands for another boy. [memorial sheet row 137; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch E (1959 Arkansas fire)",
+   "directions": [
+    {
+     "label": "NYT 1959-03-06 UPI",
+     "url": "https://timesmachine.nytimes.com/timesmachine/1959/03/06/83674689.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "ADG marker list",
+     "url": "https://www.arkansasonline.com/news/2018/apr/22/marker-placed-at-last-for-lost-boys-201-1/",
+     "kind": "note"
+    },
+    {
+     "label": "Encyclopedia of Arkansas",
+     "url": "https://encyclopediaofarkansas.net/entries/negro-boys-industrial-school-fire-of-1959-5500/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:should-roy-hegwood-willie-piggee-and-willie-lee",
+   "section": "In Loving Memory",
+   "title": "Should Roy Hegwood, Willie Piggee and Willie Lee Williams be added as Wrightsville 1959 fire victims missing from the sheet?",
+   "text": "The sheet has 18 of the 21 boys plus William Jones. Not on it: Roy Hegwood, Willie Piggee (ADG: Willie Piggie; reportedly William Loyd Piggee, 13, of DeWitt) and Willie Lee Williams, all named as dead by the Encyclopedia of Arkansas and the 2018 marker list. Find their ages and add them to the sheet if pre-1971 deaths stay in. [memorial sheet rows 119-137; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch E (1959 Arkansas fire)",
+   "directions": [
+    {
+     "label": "ADG marker list",
+     "url": "https://www.arkansasonline.com/news/2018/apr/22/marker-placed-at-last-for-lost-boys-201-1/",
+     "kind": "note"
+    },
+    {
+     "label": "Encyclopedia of Arkansas",
+     "url": "https://encyclopediaofarkansas.net/entries/negro-boys-industrial-school-fire-of-1959-5500/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:wrightsville-1959-fire-o-t-or-o-f-meadows-memori",
+   "section": "In Loving Memory",
+   "title": "Wrightsville 1959 fire: O.T. or O.F. Meadows (memorial sheet row 119)?",
+   "text": "EoA names the dead boy O. T. Meadows; the 2018 ADG marker list has O.F. Meadows; Wikipedia (from Stockley) names a survivor, O. F. 'Charley' Meadows, 16, night sergeant, who helped break a window. Settle whether the dead boy is O.T. Meadows (sheet age 13) and whether the marker's initials are wrong. [memorial sheet row 119; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch E (1959 Arkansas fire)",
+   "directions": [
+    {
+     "label": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Arkansas_Negro_Boys%27_Industrial_School",
+     "kind": "note"
+    },
+    {
+     "label": "ADG marker list",
+     "url": "https://www.arkansasonline.com/news/2018/apr/22/marker-placed-at-last-for-lost-boys-201-1/",
+     "kind": "note"
+    },
+    {
+     "label": "Encyclopedia of Arkansas",
+     "url": "https://encyclopediaofarkansas.net/entries/negro-boys-industrial-school-fire-of-1959-5500/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:what-ages-do-sources-give-for-the-seven-identifi",
+   "section": "In Loving Memory",
+   "title": "What ages do sources give for the seven identified Wrightsville 1959 fire victims?",
+   "text": "Sources give ages only for the 14 buried at Haven of Rest. The sheet's ages for O.T. Meadows (13), Henry Daniels (15), John Alfred George (15) and Amos Gyce (16) are unsourced; 1959 coverage or death certificates should have them. [memorial sheet rows 119, 126, 127, 128; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch E (1959 Arkansas fire)",
+   "directions": [
+    {
+     "label": "Encyclopedia of Arkansas",
+     "url": "https://encyclopediaofarkansas.net/entries/negro-boys-industrial-school-fire-of-1959-5500/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:levi-snyder-memorial-id-81-which-age-state-and-c",
+   "section": "In Loving Memory",
+   "title": "Levi Snyder (memorial id 81): which age, state and cause?",
+   "text": "The page says Levi Snyder, 15, South Carolina, cause unknown, died 2010-06-12 at New Hope Carolinas. The owner's sheet says Levi Chase Snyder, 17, North Carolina, 'Chest Congestion'. The only source found is a virtual Find a Grave memorial (Rock Hill, SC, found dead June 12, 2010) that cites nothing. Look for a York County coroner statement, a Rock Hill Herald story from June 2010, or a SC DSS/DHEC licensing record. [memorial page id 81; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch F (on the page)",
+   "directions": [
+    {
+     "label": "Find a Grave",
+     "url": "https://www.findagrave.com/memorial/248996628/levi-snyder",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-there-any-source-for-the-red-rock-canyon-scho",
+   "section": "In Loving Memory",
+   "title": "Is there any source for the Red Rock Canyon School boy who died in Dec 2007 (memorial id 89)?",
+   "text": "No news, police or licensing record found of a 16-year-old boy found hanging at Red Rock Canyon School, St. George UT, in December 2007. Try the St. George Spectrum archive and Utah DHS Office of Licensing records for 2007-08. [memorial page id 89; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch F (on the page)",
+   "directions": [
+    {
+     "label": "KOP facility page",
+     "url": "https://kidsoverprofits.org/facility/red-rock-canyon-school-ut/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:catherine-freer-heart-defect-death-memorial-id-1",
+   "section": "In Loving Memory",
+   "title": "Catherine Freer heart-defect death (memorial id 127): what date, place and name?",
+   "text": "GAO-08-146T confirms a second Catherine Freer death 'shortly after' Erica Harvey's (May 2002) from 'a previously unknown heart defect', but gives no name, date or age. The page says 15, Utah, 2002-10-20, unknown reason. Catherine Freer ran its programs in Oregon and Nevada, so 'Utah' looks wrong. Find a Nevada or Oregon news report or coroner record for October 2002. [memorial page id 127; also 132 (Erica Harvey); results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch F (on the page)",
+   "directions": [
+    {
+     "label": "Fornits thread",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=654.0",
+     "kind": "note"
+    },
+    {
+     "label": "GAO-08-146T",
+     "url": "https://www.gao.gov/assets/gao-08-146t.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:james-tomas-roman-memorial-id-212-what-was-his-c",
+   "section": "In Loving Memory",
+   "title": "James Tomas Roman (memorial id 212): what was his cause of death and age?",
+   "text": "Hyde's tournament write-ups say he 'passed away suddenly during a pickup game of basketball at Hyde School in February of 1988'. They name no cause (page says brain aneurysm) and give no age (page says 14; he enrolled in 1986 and played varsity in 1988). Find a February 1988 obituary or Times Record story. [memorial page id 212; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch F (on the page)",
+   "directions": [
+    {
+     "label": "Find a Grave",
+     "url": "https://www.findagrave.com/memorial/249323084/james-tomas-roman",
+     "kind": "note"
+    },
+    {
+     "label": "Putnam Town Crier",
+     "url": "https://putnamtowncrier.com/index.php/past-issues-new/7064-hyde-pg-9-12-2-10",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:can-we-get-the-2003-alberta-fatality-inquiry-rep",
+   "section": "In Loving Memory",
+   "title": "Can we get the 2003 Alberta fatality inquiry report on Aaron Albert Grey (memorial id 137)?",
+   "text": "The Daily Herald-Tribune (2003-06-23) reports Judge Allen Lefever's fatality inquiry into the death of Aaron Albert Grey, 16, an Alberta Children's Services ward who went AWOL from his Grande Prairie group home and froze in a snowbank (found Dec. 21, 2001). The page's cause, 'exposure during an attempt to escape', simplifies this. The inquiry report itself would be the primary record. [memorial page id 137; results in kop-pipeline tmp/memorial-sources/found/]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, memorial source hunt, batch F (on the page)",
+   "directions": [
+    {
+     "label": "Archived article (KOP media 16937)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Grey-report-released-Daily-Herald-Tribune-2003-06-23.pdf",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-10-25 18:46"
+ "built": "2026-10-25 19:07"
 }
