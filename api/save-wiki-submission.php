@@ -316,42 +316,10 @@ try {
         && $documentFolderIdRaw !== null && $documentFolderIdRaw !== ''
         && (int)$documentFolderIdRaw > 0) {
         try {
-            // Once admin saves write the v2 tables, the folder is stored there:
-            // on the operator row, or on the facility's own document.
+            // The folder is stored in the v2 tables: on the operator row, or on the facility's own document.
             require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
             $facV2Prefix = kop_v2_detect_prefix($pdo);
-            if (kop_v2_writes_active($pdo, $facV2Prefix)) {
-                kop_v2_set_document_folder($pdo, $facV2Prefix, $facilityUniqueNameForDb, $documentFolderIdRaw);
-                $facJson = false;   // nothing further to do below
-            } else {
-            $facStmt = $pdo->prepare("SELECT json_data FROM facilities_master WHERE unique_name = ? LIMIT 1");
-            $facStmt->execute([$facilityUniqueNameForDb]);
-            $facJson = $facStmt->fetchColumn();
-            if ($facJson !== false) {
-                $facProject = json_decode($facJson ?: '{}', true);
-                if (!is_array($facProject)) {
-                    $facProject = [];
-                }
-                if (!isset($facProject['data']) || !is_array($facProject['data'])) {
-                    $facProject['data'] = [];
-                }
-                // Store inside data (passed through by the REST layer) and at root.
-                $facProject['documentFolderId'] = (int)$documentFolderIdRaw;
-                $facProject['data']['documentFolderId'] = (int)$documentFolderIdRaw;
-                $facUpd = $pdo->prepare(
-                    "UPDATE facilities_master
-                     SET json_data = ?, updated_at = CURRENT_TIMESTAMP
-                     WHERE unique_name = ?"
-                );
-                $facUpd->execute([
-                    json_encode($facProject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                    $facilityUniqueNameForDb
-                ]);
-                if (function_exists('kop_facility_v2_request_sync')) {
-                    kop_facility_v2_request_sync();
-                }
-            }
-            }
+            kop_v2_set_document_folder($pdo, $facV2Prefix, $facilityUniqueNameForDb, $documentFolderIdRaw);
         } catch (Throwable $docEx) {
             // Non-fatal: the wiki submission still saves even if the doc-folder
             // write fails. Surface in logs only.

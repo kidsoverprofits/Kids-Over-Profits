@@ -90,13 +90,6 @@ try {
 
                 $data = $normalizePayload($data);
 
-                // Skip per-facility reference rows in facilities_master. These are
-                // created by api/promote-facilities-to-rows.php to give each
-                // individual facility a stable ID for foreign-key linking, and are
-                // explicitly marked so loaders can hide them from the company list.
-                if ($sourceLabel === 'facilities' && is_array($data) && !empty($data['__facility_ref'])) {
-                    continue;
-                }
 
                 // Standardize the project object (normalize old-format records)
                 $has_data_wrapper = isset($data['data']) && is_array($data['data']);
@@ -177,21 +170,12 @@ try {
     // 2d. Trade organizations (own table, api/lib-tradeorgs.php)
     $processTable('tradeorgs_master', 'tradeorgs');
 
-    // 3-4. Operator projects and location profiles. Once admin saves write the
-    // v2 tables (inc/facility-v2-writer.php), they are built from there.
+    // 3-4. Operator projects and location profiles, built from the v2 tables
+    // (inc/facility-v2-writer.php; the old facilities_master is retired).
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
-    if ($pdo instanceof PDO && kop_v2_writes_active($pdo, $prefix)) {
+    if ($pdo instanceof PDO) {
         foreach (kop_v2_form_projects($pdo, $prefix) as $key => $project) {
             $projects[$key] = $project;
-        }
-    } else {
-        $processTable('facilities_master', 'facilities');
-        if (!empty($prefix)) {
-            $processTable($prefix . 'facilities_master', 'facilities');
-        }
-        $processTable('locations_master', 'locations');
-        if (!empty($prefix)) {
-            $processTable($prefix . 'locations_master', 'locations');
         }
     }
 

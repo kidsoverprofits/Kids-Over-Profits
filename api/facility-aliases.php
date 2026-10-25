@@ -168,13 +168,10 @@ if (!function_exists('kop_build_facility_alias_index')) {
             $addTokens((string)$alias, $toId);
         };
 
-        // Once admin saves write the v2 tables, facilities_master is frozen:
-        // the same rows come from there instead (inc/facility-v2-writer.php).
+        // The facility records (v2 tables) in the old row shapes (inc/facility-v2-writer.php).
         require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
         $v2_prefix = kop_v2_detect_prefix($pdo);
-        $rows = kop_v2_writes_active($pdo, $v2_prefix)
-            ? kop_v2_pdo_master_rows($pdo, $v2_prefix)
-            : $pdo->query("SELECT id, unique_name, json_data FROM facilities_master")->fetchAll();
+        $rows = kop_v2_pdo_master_rows($pdo, $v2_prefix);
         foreach ($rows as $r) {
             $id    = (int)$r['id'];
             $uname = trim((string)$r['unique_name']);
