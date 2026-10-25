@@ -100,16 +100,20 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # once; a finished batch offers "Give me 10 more"; "Learn another queue" practises the rest. Projects still open their own items to anyone
 # Practice cards are curated by kop_volpr_tricky() (a volunteer disagreed / Not sure, 2+ wrong in practice, a Brief FAQ 'from' #id or #a-b,
 # struck at Volunteer Reviewers > Practice cards ?practice=<source>, option kop_volpr_struck) and kop_volpr_unclear() (nothing to read, an
-# archive.md-family link); a round never repeats a title. /volunteer/: "Start reviewing now" hub action -> #kop-vol-signup; GET
+# archive.md-family link); a round never repeats a title. /volunteer/: the review and research cards -> #kop-vol-signup; GET
 # kop/v1/volunteer/signup tells the cached page the device is signed in (form swapped for "Open your volunteer page")
 # The page intro (templates/volunteer-review.php) says what the work is, carries the content warning (also on the /volunteer/ form) and a
 # "How this works" fold (open until kop_vol_has_started()): getting started, choosing next work, taking a break or stopping, questions.
 # Opting out: "Start now" offers other work under "Rather not read the inspection reports?"; REST volunteer/leave (kop_volp_leave()) with
 # project_id = "Hand this batch back" (closed_why 'handed-back'), without = "Stop volunteering" (every open batch back, closed_why 'left',
 # link revoked). Both go through kop_volp_release(), as the hourly sweep does; answers already given stay
-# /volunteer/ is templates/page-volunteer.php (2026-10-23, kop_template_assignments; the page's old editor copy is unused): the sign-up form,
-# "Answer our questions" (/questions/, kop_q_url()), "Send us what you have" (the submission tools), "Skills we need"; each an in-place
-# editable block (kop_ie_html_start keys volunteer:questions / :send / :skills); the standfirst and buttons are kop_hub_config('volunteer')
+# /volunteer/ is templates/page-volunteer.php (2026-10-23, kop_template_assignments; the page's old editor copy is unused). Since
+# 2026-10-25 (owner: cluttered, too much scrolling) four cards, two across: Review inspection findings and Research a question (both
+# -> the one sign-up form, #kop-vol-signup; the research card shows kop_rt_counts()['unassigned'] open), Answer from experience
+# (/questions/, no sign-up), Send us what you have (the tools folded under "Choose what to send"); "Have a skill to give?" folds at the
+# foot. Card words are in-place blocks (kop_ie_html_start keys volunteer:review / :research / :questions / :send / :skills); the
+# standfirst is kop_hub_config('volunteer') (its buttons are no longer printed). Check a template change offline by rendering it with
+# stubs into the live page (route-intercept), then scripts/check-contrast.py --local /volunteer/ (MSYS_NO_PATHCONV=1 in Git Bash)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers.php [--list]   # links, copies, recommend, resolve, holds
 # Volunteer projects (inc/volunteer-projects.php, KOP Tools > Volunteer Reviewers > Projects): a fixed batch of any size (0 = all waiting) from one queue,
 # one question + a yes and a no example (kop_volp_kinds(), a ready-made brief per queue), sent to one person as /volunteer-review/?project=<id>

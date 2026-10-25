@@ -128,14 +128,12 @@ function kop_vols_module() {
     }
     ?>
     <section class="kop-hub-module kop-vols" id="kop-vol-signup" aria-labelledby="kop-vols-h">
-        <h2 class="kop-hub-h" id="kop-vols-h">Start reviewing now</h2>
-        <p class="kop-vols-lead">No interview and no waiting: sign up here and start straight away. Our scanner pulls passages that
-            may be serious violations out of state inspection reports on troubled teen programs. Your first job is checking them: is
-            each one harm or danger to a young person, or paperwork? A 10-minute practice round shows you how, then your first 10 real
-            ones open at once. An admin makes every final call.</p>
-        <p class="kop-vols-warning" role="note"><strong>A warning first:</strong> the reports describe what was done to children,
-            including physical and sexual abuse, restraint, injuries and deaths. You can skip any item, start with other work, hand a
-            batch back or stop at any time.</p>
+        <h2 class="kop-hub-h" id="kop-vols-h">Sign up to review or research</h2>
+        <p class="kop-vols-lead">No interview and no waiting. Give a name and you get your own link: your page opens straight away,
+            with a short practice round for reviewing and the research questions to pick from. An admin checks everything you send.</p>
+        <p class="kop-vols-warning" role="note"><strong>A warning first:</strong> the reports and questions describe what was done to
+            children, including physical and sexual abuse, restraint, injuries and deaths. You can skip anything, hand work back or stop
+            at any time.</p>
         <div class="kop-vols-back" hidden>
             <p class="kop-vols-back-h"></p>
             <a class="kop-vols-btn kop-vols-start" href="<?php echo esc_url(kop_vol_page_url()); ?>">Open your volunteer page</a>
