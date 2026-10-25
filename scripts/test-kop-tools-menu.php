@@ -134,6 +134,14 @@ add_action('admin_menu', function () use ($stub_screens) {
     foreach ($stub_screens as $tool) {
         add_submenu_page(kop_tools_parent_slug(), $tool['title'], $tool['title'], 'manage_options', $tool['screen']);
     }
+    // Screens at another wp-admin address (a post type's list, put under the menu by register_post_type).
+    foreach (kop_tools_registry() as $tools) {
+        foreach ($tools as $tool) {
+            if (!empty($tool['admin_path']) && kop_tools_resolve($tool)['available']) {
+                add_submenu_page(kop_tools_parent_slug(), $tool['title'], $tool['title'], 'manage_options', $tool['admin_path']);
+            }
+        }
+    }
 }, 21);
 add_action('admin_menu', function () {
     add_submenu_page(kop_tools_parent_slug(), 'Glossary Editor', 'Glossary Editor', 'manage_options', 'kop-glossary-editor');
@@ -212,11 +220,34 @@ foreach (kop_tools_sidebar_categories() as $cat) {
             continue;
         }
         // A batch tool ('action') opens the dashboard at its Run button.
-        $key = $tool['type'] === 'screen' ? $tool['screen']
+        $key = $tool['type'] === 'screen' ? (!empty($tool['admin_path']) ? $tool['admin_path'] : $tool['screen'])
             : ($tool['type'] === 'action' ? admin_url('admin.php?page=kop-tools#' . kop_tools_row_id($tool)) : $where['url']);
         check(in_array($key, $slugs, true), "sidebar is missing {$tool['title']}");
     }
 }
+
+// Every screen a theme file hangs on the KOP Tools menu is in the registry, so the
+// dashboard, the admin bar, the Review Inbox's All tools tab and the app list it too.
+$registry_titles = array();
+foreach ($registry as $tools) {
+    foreach ($tools as $tool) {
+        $registry_titles[] = $tool['title'];
+    }
+}
+foreach ($theme_src as $i => $src) {
+    preg_match_all('/add_submenu_page\(\s*kop_tools_parent_slug\(\)\s*,\s*[\'"][^\'"]*[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]/', $src, $m);
+    foreach ($m[1] as $menu_title) {
+        check(in_array($menu_title, $registry_titles, true),
+            "$menu_title (" . basename($theme_files[$i]) . ') is on the sidebar but not in kop_tools_registry()');
+    }
+}
+
+// Sidebar, dashboard and dropdown in A-to-Z order by the name shown (owner, 2026-10-17).
+$labels = array_map(function ($i) { return trim(strip_tags((string) $i[0])); }, array_slice($side, 1));
+$sorted = $labels;
+usort($sorted, 'strcasecmp');
+check($labels === $sorted, 'sidebar is not A to Z: ' . implode(', ', $labels));
+check(array_keys($registry) === (function ($k) { usort($k, 'strcasecmp'); return $k; })(array_keys($registry)), 'categories are not A to Z');
 
 // Dropdown: every available tool once.
 $bar_links = array();

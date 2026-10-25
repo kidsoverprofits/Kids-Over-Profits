@@ -93,18 +93,19 @@ function kop_find_template_page_url($template) {
 }
 
 /**
- * The KOP tool pages, keyed by their page template. Order = menu order.
+ * The KOP tool pages, keyed by their page template. Order = menu order, A to Z
+ * like the KOP Tools plugin's menu.
  */
 function kop_data_tool_pages() {
     return array(
-        'page-admin-data-manager.php' => 'Data Manager',
-        'page-wiki-editor.php'        => 'Wiki Editor',
         'page-admin-data.php'         => 'Admin Data Form',
-        'page-admin-submissions.php'  => 'Submissions Review',
-        'page-news-processor.php'     => 'News Processor',
+        'page-admin-data-manager.php' => 'Data Manager',
         'page-admin-lawsuits.php'     => 'Lawsuit Admin',
         'page-admin-legislation.php'  => 'Legislation Admin',
+        'page-news-processor.php'     => 'News Processor',
+        'page-admin-submissions.php'  => 'Review Inbox',
         'page-admin-volunteers.php'   => 'Volunteer Admin',
+        'page-wiki-editor.php'        => 'Wiki Editor',
     );
 }
 

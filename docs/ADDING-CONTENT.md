@@ -223,6 +223,9 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
 - Register it with `add_submenu_page()` under KOP Tools.
 - `wp-plugins/kop-tools/kop-tools.php`: an entry in the tools registry with a
   one-line description of what the screen does (bump the plugin version).
+  A screen at another wp-admin address (a post type's list) gives its
+  `admin_path`. `scripts/test-kop-tools-menu.php` fails when a screen is on
+  the sidebar but not in the registry, or when the sidebar is not A to Z.
 - Every tool is on the sidebar (every registry category is a sidebar
   category) and in the Review Inbox's **All tools** tab, both read from the
   registry, so the registry entry is all it takes. Never hide a screen with

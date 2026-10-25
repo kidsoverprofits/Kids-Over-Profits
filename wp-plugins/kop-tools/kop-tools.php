@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.12
+ * Version: 2.5.13
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -20,9 +20,10 @@ if (!defined('ABSPATH')) {
  *             kop_find_template_page_url() when it is loaded so the menu,
  *             the dashboard and the notification emails pick the same page
  *             when several pages share one template.
- *   'screen'  A wp-admin screen the theme registers (admin.php?page=<screen>).
- *             'requires' names the function or class that renders it; the
- *             entry is hidden when that is not loaded.
+ *   'screen'  A wp-admin screen the theme registers (admin.php?page=<screen>,
+ *             or 'admin_path' for one at another wp-admin address, such as a
+ *             post type's list). 'requires' names the function or class that
+ *             renders it; the entry is hidden when that is not loaded.
  *   'page'    A self-contained HTML tool in the theme's api/ directory
  *             ('path', relative to the active child theme; optional 'query'
  *             for the tools that need ?run=1 and default to a dry run).
@@ -37,8 +38,8 @@ function kop_tools_registry() {
     $tools = array(
         'Review queue' => array(
             array(
-                'title'    => 'Submissions Review',
-                'desc'     => 'The Review Inbox: every approval queue in one place (news, data, wiki, lawsuits, legislation, the news scans, imports, merges, map years and renames, inspection findings, conflicts...), with Recently done and Undo, Later, Preview and volunteer recommendations.',
+                'title'    => 'Review Inbox',
+                'desc'     => 'Every approval queue in one place (news, data, wiki, lawsuits, legislation, the news scans, imports, merges, map years and renames, inspection findings, conflicts...), with Recently done and Undo, Later, Preview and volunteer recommendations.',
                 'type'     => 'wp-page',
                 'template' => 'page-admin-submissions.php',
             ),
@@ -139,6 +140,21 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-research-tasks',
                 'requires' => 'kop_rt_page',
+            ),
+            array(
+                'title'    => 'Plan Board',
+                'desc'     => 'The work plan (docs/plan/) as cards, one per item: type an answer or mark an item Done or Not now; a Claude session folds the answers into the plan and each card then shows what it did.',
+                'type'     => 'screen',
+                'screen'   => 'kop-plan-board',
+                'requires' => 'kop_pb_page',
+            ),
+            array(
+                'title'      => 'Websites Sent In',
+                'desc'       => 'Forum posts, blogs, program pages, directories and other websites sent through Send to KOP, the app and /send/, waiting to be reviewed.',
+                'type'       => 'screen',
+                'screen'     => 'kop_source',
+                'admin_path' => 'edit.php?post_type=kop_source',
+                'requires'   => 'kop_ext_register_source_type',
             ),
         ),
         'Records & editors' => array(
@@ -566,7 +582,7 @@ function kop_tools_resolve(array $tool) {
         $req = isset($tool['requires']) ? $tool['requires'] : '';
         $ok = $req === '' || function_exists($req) || class_exists($req);
         return array(
-            'url'       => $ok ? admin_url('admin.php?page=' . $tool['screen']) : '',
+            'url'       => $ok ? admin_url(!empty($tool['admin_path']) ? $tool['admin_path'] : 'admin.php?page=' . $tool['screen']) : '',
             'available' => $ok,
             'external'  => false,
             'missing'   => 'screen not loaded by the theme',
@@ -723,7 +739,7 @@ function kop_tools_render_dashboard() {
             if ($type === 'wp-page') {
                 $where_label = $where['available'] ? wp_make_link_relative($where['url']) : $tool['template'];
             } elseif ($type === 'screen') {
-                $where_label = 'admin.php?page=' . $tool['screen'];
+                $where_label = !empty($tool['admin_path']) ? $tool['admin_path'] : 'admin.php?page=' . $tool['screen'];
             } else {
                 $where_label = $tool['path'] . (!empty($tool['query']) ? '?' . $tool['query'] : '');
             }
