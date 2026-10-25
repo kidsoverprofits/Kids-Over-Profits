@@ -272,6 +272,12 @@ get_header();
             <label for="newsSubmissionNotes">Notes (optional):</label>
             <textarea id="newsSubmissionNotes" rows="3" placeholder="Any additional context or notes..."></textarea>
         </div>
+        <?php if (current_user_can('manage_options')) : // inc/news-top-story.php ?>
+        <div class="news-submit-form-group news-submit-top-story">
+            <label><input type="checkbox" id="newsTopStory"> Top story: show it first on the news page</label>
+            <p class="news-submit-hint">Replaces the current top story once this article is approved.</p>
+        </div>
+        <?php endif; ?>
         <div class="news-submit-modal-actions">
             <button type="button" id="newsCancelSubmitBtn" class="news-btn news-btn-clear">Cancel</button>
             <button type="button" id="newsConfirmSubmitBtn" class="news-btn news-btn-primary">Submit</button>

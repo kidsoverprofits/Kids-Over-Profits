@@ -56,10 +56,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 # Essential reporting (inc/featured-reporting.php): news articles the owner picks as especially good journalism, each with an
 # optional note on why. Table news_featured (records DB); picked with the pencil on any article's headline ('feat:<id>') or at
 # KOP Tools > Essential Reporting (search, notes, Recent changes with exact Undo; log in the kop_featured_log option). Shown on
-# /essential-reporting/ (a route, templates/featured-reporting.php), a strip on /news/ and the home page ([kop_featured_reporting]),
+# /essential-reporting/ (a route, templates/featured-reporting.php), a strip under the feed on /news/ (since 2026-10-25) and on the home page ([kop_featured_reporting]),
 # flagged with the note and listed first on facility and company pages, 'featured' in the app's news payloads. Read at render time,
 # never baked into cached page data. Byline = the article's author field, left out when it is only the outlet's name
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-featured-reporting.php [--db=...] [--out=tmp/featured-reporting]
+# Top story (inc/news-top-story.php): one article shown first on /news/ (page 1, unfiltered; left out of the list below it). Picked with the
+# admin-only "Top story" box in the News Processor's submit popup (api/save-news-submission.php, topStory) or the same pencil ('feat:<id>');
+# a new pick replaces the old. Option kop_news_top_story keeps the last 20 picks: the newest approved/published one shows, so a pick sent in
+# with a new article waits for approval while the old one stays up, and unticking one brings the one before it back. Tested in test-featured-reporting.php
 # Nominations wait at Submissions Review > Nominated (inc/featured-nominations.php, table news_featured_nominations): each has a draft
 # note and a reason; Feature picks it with the note as edited in its box (Undo = kop_feat_undo of that pick), Pass over changes nothing.
 # New ones go in js/data/featured/nominations.json with a higher 'version' (adds missing ones only, never changes a decided one)

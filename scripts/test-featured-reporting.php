@@ -185,6 +185,29 @@ $rec->exec("UPDATE news_featured SET featured_at = '2026-01-03 10:00:00' WHERE n
 kop_feat_map(true);
 
 // ---------------------------------------------------------------------------
+echo "-- Top story (inc/news-top-story.php) --\n";
+require_once dirname(__DIR__) . '/inc/news-top-story.php';
+$check('nothing picked: no top story', kop_top_story_id() === 0 && kop_top_story_html() === '');
+$check('dialog: top story box, unticked', ($form['fields'][2]['name'] ?? '') === 'top_story' && $form['fields'][2]['value'] === false);
+$r = kop_feat_ie_save(array((string) $b), array('featured' => true, 'note' => '', 'top_story' => true));
+$check('ticking makes it the top story', strpos($r['message'], 'top story') !== false && kop_top_story_id() === $b);
+$top = kop_top_story_html();
+$check('the card: label and headline', strpos($top, 'kop-top-story') !== false && strpos($top, 'Top story') !== false && strpos($top, 'kop-top-story__title') !== false);
+kop_top_story_set($linked, 'Owner');
+$check('a new pick replaces it', kop_top_story_id() === $linked && strpos(kop_top_story_html(), 'About ') !== false);
+$check('the new pick carries its essential-reporting note', strpos(kop_top_story_html(), 'what the state knew') !== false);
+$pending = (int) $rec->query("SELECT id FROM news_submissions WHERE status NOT IN ('approved','published') LIMIT 1")->fetchColumn();
+if ($pending) {
+    kop_top_story_set($pending, 'Owner');
+    $check('an unapproved pick waits; the last one stays up', kop_top_story_id() === $linked && kop_top_story_is_picked($pending));
+    kop_top_story_unset($pending);
+}
+$r = kop_feat_ie_save(array((string) $linked), array('featured' => true, 'note' => $note_a, 'top_story' => false));
+$check('unticking brings the one before back', strpos($r['message'], 'Taken off as top story') === 0 && kop_top_story_id() === $b);
+kop_top_story_unset($b);
+$check('none left: no top story', kop_top_story_id() === 0 && kop_top_story_picks() === array());
+
+// ---------------------------------------------------------------------------
 echo "-- A facility page --\n";
 $GLOBALS['kop_test_wpdb_writes'] = false;   // the page code reads the mirror only
 $data = kop_facility_page_data($linked_facility);

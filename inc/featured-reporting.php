@@ -12,7 +12,7 @@
  *             news feed, facility and company pages, the page below) or
  *             KOP Tools > Essential Reporting (inc/featured-reporting-admin.php)
  *   readers   /essential-reporting/ (a route, templates/featured-reporting.php),
- *             a strip at the top of the news feed and on the home page
+ *             a strip under the news feed and on the home page
  *             ([kop_featured_reporting]), a flag and the note on the article
  *             wherever facility and company pages list it (picks first), and
  *             'featured' in the app's news payloads (inc/mobile-api.php).
@@ -568,12 +568,16 @@ if (!function_exists('kop_feat_ie_load')) {
         $row = kop_feat_row($pdo, $id);
         return array(
             'title'  => kop_feat_label() . ': ' . $article['title'],
-            'help'   => 'Picked articles are listed on the Essential Reporting page, at the top of the news feed and on the home page, and flagged with the note wherever the article is listed. Every pick can be undone under KOP Tools > Essential Reporting.',
+            'help'   => 'Picked articles are listed on the Essential Reporting page, under the news feed and on the home page, and flagged with the note wherever the article is listed. Every pick can be undone under KOP Tools > Essential Reporting.',
             'fields' => array(
                 kop_ie_field('featured', 'Feature this article as essential reporting', 'bool', (bool) $row),
                 kop_ie_field('note', 'Why it matters (optional)', 'textarea', $row ? (string) $row['note'] : '', array(
                     'rows' => 4,
                     'help' => 'A sentence or two: what it uncovered, or what changed after it ran. Plain text; a blank line starts a new paragraph.',
+                )),
+                kop_ie_field('top_story', 'Top story: show it first on the news page (replaces the current one)', 'bool',
+                    function_exists('kop_top_story_is_picked') && kop_top_story_is_picked($id), array(
+                    'help' => 'Unticking it brings back the top story picked before it. Shows once the article is approved.',
                 )),
             ),
         );
@@ -586,14 +590,23 @@ if (!function_exists('kop_feat_ie_save')) {
         if (!$pdo) throw new RuntimeException('No database connection.');
         $id = (int) ($p[0] ?? 0);
         $who = function_exists('kop_ie_who') ? kop_ie_who() : '';
-        $f = $v['featured'] ?? false;
-        $on = $f === true || $f === 'true' || $f === 1 || $f === '1';
-        if ($on) {
-            $e = kop_feat_set($pdo, $id, (string) ($v['note'] ?? ''), $who);
-            return array('message' => $e ? ($e['action'] === 'feature' ? 'Featured. It is on the Essential Reporting page now.' : 'Note saved.') : 'No change.');
+        $truthy = static function ($f) { return $f === true || $f === 'true' || $f === 1 || $f === '1'; };
+        $said = array();
+        if (array_key_exists('top_story', $v) && function_exists('kop_top_story_set')) {
+            if ($truthy($v['top_story'])) {
+                if (kop_top_story_set($id, $who)) $said[] = 'It is the top story on the news page now.';
+            } elseif (kop_top_story_unset($id)) {
+                $said[] = 'Taken off as top story.';
+            }
         }
-        $e = kop_feat_remove($pdo, $id, $who);
-        return array('message' => $e ? 'Taken off the essential reporting list.' : 'No change.');
+        if ($truthy($v['featured'] ?? false)) {
+            $e = kop_feat_set($pdo, $id, (string) ($v['note'] ?? ''), $who);
+            if ($e) $said[] = $e['action'] === 'feature' ? 'Featured. It is on the Essential Reporting page now.' : 'Note saved.';
+        } else {
+            $e = kop_feat_remove($pdo, $id, $who);
+            if ($e) $said[] = 'Taken off the essential reporting list.';
+        }
+        return array('message' => $said ? implode(' ', $said) : 'No change.');
     }
 }
 

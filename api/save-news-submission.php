@@ -434,10 +434,15 @@ try {
             kop_followup_register('news', $newId, $data);
         }
 
+        // "Top story" in the submit popup (admins only; inc/news-top-story.php).
+        $topStory = $kopTrusted && !empty($data['topStory']) && function_exists('kop_top_story_set')
+            && kop_top_story_set($newId, function_exists('wp_get_current_user') ? wp_get_current_user()->user_login : '');
+
         echo json_encode([
             'success' => true,
             'message' => 'Submission saved successfully',
-            'id' => $newId
+            'id' => $newId,
+            'top_story' => (bool) $topStory
         ]);
     }
     

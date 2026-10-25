@@ -254,9 +254,11 @@ try {
     <?php endif; ?>
 
     <?php
-    // Essential reporting (inc/featured-reporting.php): the newest picks, on the unfiltered first page only.
-    if (function_exists('kop_feat_strip_html') && !$current_arc && $story_slug === '' && !$archive_month && $current_page === 1) {
-        echo kop_feat_strip_html(array('limit' => 3, 'text_key' => 'feat:news'));
+    // The top story (inc/news-top-story.php), first on the unfiltered first page; the list below leaves it out there.
+    $is_front_view = !$current_arc && $story_slug === '' && !$archive_month && $current_page === 1;
+    $top_story_id = $is_front_view && function_exists('kop_top_story_id') ? kop_top_story_id() : 0;
+    if ($top_story_id) {
+        echo kop_top_story_html();
     }
     ?>
 
@@ -577,6 +579,7 @@ try {
 
         <div class="news-feed-grid" data-kop-bug-feature="news-feed/grid" data-kop-bug-label="News Feed">
             <?php foreach ($submissions as $item):
+                if ($top_story_id && (int) $item['id'] === $top_story_id) continue;
                 // Decode JSON fields
                 $facilities = kop_facility_mention_names($item['facilities_mentioned'] ?? '[]');
                 $staff = json_decode($item['staff_mentioned'], true) ?: [];
@@ -798,6 +801,13 @@ try {
         </nav>
         <?php endif; ?>
     <?php endif; ?>
+
+    <?php
+    // Essential reporting (inc/featured-reporting.php): the newest picks, under the feed on the unfiltered first page.
+    if (function_exists('kop_feat_strip_html') && $is_front_view) {
+        echo kop_feat_strip_html(array('limit' => 3, 'text_key' => 'feat:news'));
+    }
+    ?>
 </div>
 
 <script>

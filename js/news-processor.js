@@ -1539,6 +1539,7 @@
                 // Submission metadata
                 submittedBy: document.getElementById('newsSubmitterEmail') && document.getElementById('newsSubmitterEmail').value || '',
                 submissionNotes: document.getElementById('newsSubmissionNotes') && document.getElementById('newsSubmissionNotes').value || '',
+                topStory: !!(document.getElementById('newsTopStory') && document.getElementById('newsTopStory').checked),
                 notify_email: followup.email,
                 newsletter_email: followup.newsletterEmail || ''
             };
@@ -1559,7 +1560,10 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    statusEl.innerHTML = `<span class="success">${kopIcon('check-circle')} Submitted successfully! (ID: ${result.id})</span>`;
+                    const topBox = document.getElementById('newsTopStory');
+                    if (topBox) topBox.checked = false;
+                    const topNote = result.top_story ? ' Set as the top story; it shows once approved.' : '';
+                    statusEl.innerHTML = `<span class="success">${kopIcon('check-circle')} Submitted successfully! (ID: ${result.id})${topNote}</span>`;
                     setTimeout(() => {
                         modal.style.display = 'none';
                     }, 2000);
