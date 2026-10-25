@@ -74,7 +74,7 @@ with sync_playwright() as p:
         pg.click(".kop-wiz-form button[type=submit]")
         pg.click("button[data-act=go]")
         pg.wait_for_selector(".kop-wiz-bar", timeout=20000); time.sleep(1.5)
-        print(" new: project", pg.evaluate("window.currentProjectName"), "| facility", pg.evaluate("JSON.stringify([window.formData.facilities[window.currentFacilityIndex].identification.name, window.formData.facilities[window.currentFacilityIndex].locationDetails])"),
+        print(" new: project", pg.evaluate("window.currentProjectName"), "| facility", pg.evaluate("JSON.stringify([window.formData.facilities[window.currentFacilityIndex].identification.name, (f => f.location && typeof f.location === 'object' ? f.location : f.locationDetails)(window.formData.facilities[window.currentFacilityIndex])])"),
               "| name field:", pg.evaluate("document.getElementById('facility-name').value"), "| visible:", visible_sections(pg))
         # new referrer person
         pg.click("button[data-act=restart]"); pg.click("button[data-act=restart-yes]")

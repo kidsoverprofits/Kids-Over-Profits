@@ -37,17 +37,9 @@
         return 'companies';
     }
     
-    function createNewProjectData() {
-        const project = {
-            operator: {
-                name: "", currentName: "", otherNames: [],
-                location: "", locationCity: "", locationState: "",
-                headquarters: "", headquartersCity: "", headquartersState: "",
-                founded: "", operatingPeriod: "", status: "", parentCompanies: [],
-                websites: [], investors: [], owners: [], keyStaff: { ceo: "", founders: [], keyExecutives: [] },
-                notes: [], fieldNotes: {}
-            },
-            facilities: [{
+    // The blank facility, as the form has always laid it out (every resource box unticked).
+    function blankFacilityFields() {
+        return {
                 identification: { name: "", currentName: "", currentOperator: "", currentOwner: "", currentOwners: [], otherNames: [], knownReferrers: [] },
                 locationDetails: { city: "", state: "", country: "", zip: "", additionalLocations: [] },
                 location: "", address: "", otherOperators: [],
@@ -67,7 +59,26 @@
                     hasOther: false, notes: []
                 },
                 treatmentTypes: {}, philosophy: {}, criticalIncidents: {}, notes: [], fieldNotes: {}
-            }],
+        };
+    }
+
+    // A new facility is a blank v2 document (docs/FACILITY-SCHEMA.md).
+    function blankFacility() {
+        const N = window.KOP_DataNormalizer;
+        return N && typeof N.facilityToV2 === 'function' ? N.facilityToV2(blankFacilityFields()) : blankFacilityFields();
+    }
+
+    function createNewProjectData() {
+        const project = {
+            operator: {
+                name: "", currentName: "", otherNames: [],
+                location: "", locationCity: "", locationState: "",
+                headquarters: "", headquartersCity: "", headquartersState: "",
+                founded: "", operatingPeriod: "", status: "", parentCompanies: [],
+                websites: [], investors: [], owners: [], keyStaff: { ceo: "", founders: [], keyExecutives: [] },
+                notes: [], fieldNotes: {}
+            },
+            facilities: [blankFacility()],
             referrer: [],
             referrerAgency: typeof window.createDefaultReferrerGroup === 'function' ? window.createDefaultReferrerGroup() : { name: "", affiliations: [], keyPersonnel: [], notes: "", fieldNotes: {} },
             referrerConsultants: [typeof window.createDefaultReferrerIndividual === 'function' ? window.createDefaultReferrerIndividual() : { firstName: "", lastName: "", knownReferrals: [], facilitiesReferred: [], affiliations: [], pastTTIJobs: [], schoolDistricts: [], fieldNotes: {} }],
