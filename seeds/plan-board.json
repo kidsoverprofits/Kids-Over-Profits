@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 22:59 UTC",
- "source": "2531191a260e7318b6a53b42abf541d807d745c1",
+ "built": "2026-10-25 23:01 UTC",
+ "source": "7bc617d0c99d67287bf7896efdcd4e1b661d987b",
  "sections": [
   {
    "key": "2",
@@ -861,10 +861,10 @@
       {
        "id": "4.3:data-model-phase-5",
        "lead": "Data model phase 5",
-       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit. Owner: go (2026-10-25). Backup taken 2026-10-25 17:30 server time: `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server (facilities_master, locations_master, the six `_bak_2026091x` tables, facilities_v2; 4.3 MB) and a copy in `tmp/backups/`. Client side of the form's step 6 done ([aab73af](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/aab73afde3a1b65971461fb3e21c8f782df60995)).",
+       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit. Owner: go (2026-10-25). Backup taken 2026-10-25 17:30 server time: `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server (facilities_master, locations_master, the six `_bak_2026091x` tables, facilities_v2; 4.3 MB) and a copy in `tmp/backups/`. Client side of the form's step 6 done ([aab73af](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/aab73afde3a1b65971461fb3e21c8f782df60995)). Step 1 done 2026-10-25: every live reader and writer of facilities_master / locations_master facility arrays reads the v2 tables ([4297942](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4297942a965086b2435d61fcc021ab6312acaae0), [abffd0c](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/abffd0c64d531410a71eddd3c6e6db20736d1264), [961ea19](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/961ea19544efce38fad7f9cec62889baa080d3ac)); fixed on the way: Link wiki facility refused every record made since the write switch. Next: delete the old-table tools, then on production strip locations_master's facility arrays, rename facilities_master to facilities_master_retired_20261025 (dropped later), drop the six `_bak_2026091x` tables; then the dead legacy branches (the survey's list: get-master-data, get-autocomplete, facility-search, facility-picker, facility-aliases, data-manager, link-news-to-facility, lawsuit-facility-links, lib-suggested-edits, save-wiki-submission, sync-wiki-facilities merge, save-master companies/locations, page-news-feed, page-lawsuits, inc/database.php attachers, rest-api state map / name map / state collector, country-rest-api, single-facility-profile, page-home, widgets, search, global-search, ajax-search-lite, admin.php seed branches), then docs (DATABASE-COLUMNS.md, CLAUDE.md, the three-copies memory note).",
        "ask": "",
        "date": "2026-10-25",
-       "hash": "d887817fd1f4"
+       "hash": "f089fb10a403"
       },
       {
        "id": "4.3:business-filing-fields",
