@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 20:42 UTC",
- "source": "4c86f79085170cc1c12edcccef77c5e98f1f8221",
+ "built": "2026-10-25 20:46 UTC",
+ "source": "7095f298b3f99b642a7aa708487e77d659ef2e39",
  "sections": [
   {
    "key": "2",
@@ -806,6 +806,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "280cb2029fb5"
+      },
+      {
+       "id": "3:sensitivity-reader-survey",
+       "lead": "Sensitivity reader survey",
+       "text": "**Sensitivity reader survey** (2026-10-25, [1ddb756f](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/1ddb756fdf7ca7dd170b6daae0db4ecc88207514)): open https://kidsoverprofits.org/volunteer/#kop-sens-survey : \"Be a sensitivity reader\" lists the seven communities and the survey opens by itself. Send a test answer, then open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-sensitivity-survey (KOP Tools lists it): the answer is under New; Mark read, Undo, then Delete it. Run `python -u scripts/check-contrast.py` on /volunteer/ with the survey open.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "6e4d1b67d599"
       }
      ]
     }
@@ -1652,6 +1660,14 @@
        "ask": "",
        "date": "",
        "hash": "95849a49da24"
+      },
+      {
+       "id": "6:sensitivity-readers",
+       "lead": "Sensitivity readers",
+       "text": "**Sensitivity readers**: once there are drafts, a way to send one to the readers who ticked \"Ask me to read drafts later\" (KOP Tools > Sensitivity Survey has their emails) and collect their notes; email only until then.",
+       "ask": "",
+       "date": "",
+       "hash": "7dc57b163861"
       },
       {
        "id": "6:lighter-pages",
