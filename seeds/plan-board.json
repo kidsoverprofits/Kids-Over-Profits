@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 21:28 UTC",
- "source": "1523180814735fe3928b373ab240dbffe7a6f83f",
+ "built": "2026-10-25 21:34 UTC",
+ "source": "365bbbc144445c1f8b6f8ff619df9a9266b8a7de",
  "sections": [
   {
    "key": "2",
@@ -814,6 +814,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "6e4d1b67d599"
+      },
+      {
+       "id": "3:research-questions-reworded",
+       "lead": "Research questions reworded",
+       "text": "**Research questions reworded** (2026-10-25, [7ea7491e](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7ea7491e)): open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks (the visit imports the seed): the log says about 117 reworded, and In Loving Memory titles name the person, program and year with no \"sheet row\". Cards the owner edited on the screen keep their old wording (the import never overwrites an edit), and tasks added on the screen were not in the seed: reword any that still read unclearly with Edit, which now refuses sheet rows, record numbers and \"in scope\".",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "921c2f30f3b6"
       }
      ]
     }
