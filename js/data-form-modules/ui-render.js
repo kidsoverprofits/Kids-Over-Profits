@@ -442,7 +442,9 @@
                 if (window.currentFacilityIndex === index) item.classList.add('active');
 
                 const name = fac.identification?.name || fac.identification?.currentName || `Facility #${index + 1}`;
-                const location = fac.location || (fac.locationDetails?.city ? `${fac.locationDetails.city}, ${fac.locationDetails.state || ''}` : '');
+                // By v2 path on either shape (KOP_FacilityFields, data-normalizer.js).
+                const facCity = kopFacilityField(fac, 'location.city');
+                const location = kopFacilityField(fac, 'location.text') || (facCity ? `${facCity}, ${kopFacilityField(fac, 'location.state') || ''}` : '');
 
                 item.innerHTML = `
                     <div class="facility-quick-number">${index + 1}</div>
@@ -607,12 +609,16 @@
             const isStaffRoleName = /^staff\./.test(path) || /^operator\.keyStaff\./.test(path);
             // Who is named on the state business filing: {role, name}, no details box.
             const isRegistrant = /identification\.registrants$/.test(path);
-            const isAdditionalLocation = /locationDetails\.additionalLocations$/.test(path);
-            const isFormerLocation = /locationDetails\.formerLocations$/.test(path);
+            // The form's path for the list, or its v2 path (location.*).
+            const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
+            const isFormerLocation = /(?:locationDetails|location)\.formerLocations$/.test(path);
+            // A v2 location item keeps the address as typed in raw, a legacy one in address.
+            const v2ListPath = /^location\./.test(path);
+            const addressKeyOf = (it) => (it && typeof it === 'object' && it.raw !== undefined && it.address === undefined) || (v2ListPath && !(it && it.address !== undefined)) ? 'raw' : 'address';
 
             // Determine autocomplete category based on path
             let defaultCategory = null;
-            if (path.includes('parentCompanies') || path === 'otherOperators') defaultCategory = 'operator';
+            if (path.includes('parentCompanies') || path === 'otherOperators' || path === 'identification.otherOperators') defaultCategory = 'operator';
             else if (path.includes('Owners') || path.includes('founders') || path.includes('keyExecutives') || path.includes('investors') || path.includes('keyPersonnel')) defaultCategory = 'human';
             else if (path.includes('Referrers') || path.includes('knownReferrers')) defaultCategory = 'referrer';
             // Facility names: suggests real facility records from the server as you type
@@ -631,9 +637,9 @@
                 } else if (isStaffRoleName || isRegistrant) {
                     data.push({ role: '', name: '' });
                 } else if (isAdditionalLocation) {
-                    data.push({ address: '', city: '', state: '', zip: '' });
+                    data.push({ [addressKeyOf(null)]: '', city: '', state: '', zip: '' });
                 } else if (isFormerLocation) {
-                    data.push({ state: '', city: '', address: '', zip: '', fromYear: '', toYear: '' });
+                    data.push({ state: '', city: '', [addressKeyOf(null)]: '', zip: '', fromYear: '', toYear: '' });
                 } else {
                     data.push('');
                 }
@@ -889,8 +895,9 @@
                     row.appendChild(detailsDiv);
                 } else if (isAdditionalLocation) {
                     let normalized = item;
+                    const addrKey = addressKeyOf(item);
                     if (typeof normalized !== 'object' || normalized === null) {
-                        normalized = { address: item || '', city: '', state: '', zip: '' };
+                        normalized = { [addrKey]: item || '', city: '', state: '', zip: '' };
                         data[index] = normalized;
                     } else {
                         if (typeof normalized.state !== 'string') normalized.state = '';
@@ -901,12 +908,12 @@
                     addressInp.rows = 1;
                     addressInp.className = 'array-input array-input-name';
                     addressInp.placeholder = 'Address';
-                    addressInp.value = normalized.address || '';
+                    addressInp.value = normalized[addrKey] || '';
                     addressInp.oninput = (e) => {
                         if (typeof window.updateArrayObjectItemValue === 'function') {
-                            window.updateArrayObjectItemValue(path, index, 'address', e.target.value);
+                            window.updateArrayObjectItemValue(path, index, addrKey, e.target.value);
                         } else {
-                            normalized.address = e.target.value;
+                            normalized[addrKey] = e.target.value;
                             if (window.updateJSON) window.updateJSON();
                         }
                     };
@@ -962,11 +969,12 @@
                     row.appendChild(zipInp);
                 } else if (isFormerLocation) {
                     let normalized = item;
+                    const addrKey = addressKeyOf(item);
                     if (typeof normalized !== 'object' || normalized === null) {
-                        normalized = { state: item || '', city: '', address: '', zip: '', fromYear: '', toYear: '' };
+                        normalized = { state: item || '', city: '', [addrKey]: '', zip: '', fromYear: '', toYear: '' };
                         data[index] = normalized;
                     } else {
-                        ['state', 'city', 'address', 'zip', 'fromYear', 'toYear'].forEach(k => {
+                        ['state', 'city', addrKey, 'zip', 'fromYear', 'toYear'].forEach(k => {
                             if (typeof normalized[k] !== 'string') normalized[k] = normalized[k] != null ? String(normalized[k]) : '';
                         });
                     }
@@ -994,7 +1002,7 @@
                     // Order: State, City, Address, From Year, To Year
                     row.appendChild(makeInput('state', 'State', { cls: 'array-input-role', maxWidth: '90px', category: 'location' }));
                     row.appendChild(makeInput('city', 'City'));
-                    row.appendChild(makeInput('address', 'Address'));
+                    row.appendChild(makeInput(addrKey, 'Address'));
                     row.appendChild(makeInput('fromYear', 'From yr', { type: 'number', cls: 'array-input-role', maxWidth: '80px' }));
                     row.appendChild(makeInput('toYear', 'To yr', { type: 'number', cls: 'array-input-role', maxWidth: '80px' }));
                 } else if (typeof item === 'object' && item !== null) {
@@ -1119,8 +1127,9 @@
                     if (isAdditionalLocation) {
                         const existing = (typeof liveArray[rowIndex] === 'object' && liveArray[rowIndex] !== null)
                             ? liveArray[rowIndex] : {};
+                        const addrKey = addressKeyOf(existing);
                         liveArray[rowIndex] = {
-                            address: inputs[0] ? inputs[0].value : (existing.address || ''),
+                            [addrKey]: inputs[0] ? inputs[0].value : (existing[addrKey] || ''),
                             city: inputs[1] ? inputs[1].value : (existing.city || ''),
                             state: inputs[2] ? inputs[2].value : (existing.state || ''),
                             zip: inputs[3] ? inputs[3].value : (existing.zip || '')
@@ -1128,10 +1137,11 @@
                     } else if (isFormerLocation) {
                         const existing = (typeof liveArray[rowIndex] === 'object' && liveArray[rowIndex] !== null)
                             ? liveArray[rowIndex] : {};
+                        const addrKey = addressKeyOf(existing);
                         liveArray[rowIndex] = {
                             state: inputs[0] ? inputs[0].value : (existing.state || ''),
                             city: inputs[1] ? inputs[1].value : (existing.city || ''),
-                            address: inputs[2] ? inputs[2].value : (existing.address || ''),
+                            [addrKey]: inputs[2] ? inputs[2].value : (existing[addrKey] || ''),
                             zip: existing.zip || '',
                             fromYear: inputs[3] ? inputs[3].value : (existing.fromYear || ''),
                             toYear: inputs[4] ? inputs[4].value : (existing.toYear || '')
@@ -1171,9 +1181,9 @@
                 } else if (isStaffRoleName || isRegistrant) {
                     liveArray.push({ role: '', name: '' });
                 } else if (isAdditionalLocation) {
-                    liveArray.push({ address: '', city: '', state: '', zip: '' });
+                    liveArray.push({ [addressKeyOf(null)]: '', city: '', state: '', zip: '' });
                 } else if (isFormerLocation) {
-                    liveArray.push({ state: '', city: '', address: '', zip: '', fromYear: '', toYear: '' });
+                    liveArray.push({ state: '', city: '', [addressKeyOf(null)]: '', zip: '', fromYear: '', toYear: '' });
                 } else {
                     liveArray.push('');
                 }

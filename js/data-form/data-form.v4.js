@@ -523,12 +523,13 @@ function updateArrayObjectItemValue(path, index, field, value) {
 
     if (Array.isArray(array) && index >= 0 && index < array.length) {
         const isPastTTIJobs = /pastTTIJobs$/.test(path);
-        const isAdditionalLocation = /locationDetails\.additionalLocations$/.test(path);
+        const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
         if (typeof array[index] !== 'object' || array[index] === null) {
             if (isPastTTIJobs) {
                 array[index] = { role: '', organization: '', employer: '' };
             } else if (isAdditionalLocation) {
-                array[index] = { city: '', address: '', zip: '' };
+                // A v2 location item keeps the address as typed in raw.
+                array[index] = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
             } else {
                 array[index] = { role: '', name: '' };
             }

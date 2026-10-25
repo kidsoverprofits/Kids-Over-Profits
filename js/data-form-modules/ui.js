@@ -21,7 +21,8 @@
         if (Array.isArray(array)) {
             while (array.length <= index) array.push('');
             array[index] = value;
-            if (path === 'identification.currentOwners') {
+            // A legacy facility keeps the single currentOwner copy in step; a v2 document has only the list.
+            if (path === 'identification.currentOwners' && !(window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target))) {
                 const firstOwner = array[0] || '';
                 window.setNestedValue(target, 'identification.currentOwner', firstOwner || '');
             }
@@ -40,10 +41,10 @@
         }
         if (Array.isArray(array) && index >= 0 && index < array.length) {
             const isPastTTIJobs = /pastTTIJobs$/.test(path);
-            const isAdditionalLocation = /locationDetails\.additionalLocations$/.test(path);
+            const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
             if (typeof array[index] !== 'object' || array[index] === null) {
                 if (isPastTTIJobs) array[index] = { role: '', organization: '', employer: '' };
-                else if (isAdditionalLocation) array[index] = { city: '', address: '', zip: '' };
+                else if (isAdditionalLocation) array[index] = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
                 else array[index] = { role: '', name: '' };
             }
             if (isPastTTIJobs && field === 'employer') {

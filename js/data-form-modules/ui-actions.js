@@ -27,17 +27,19 @@
         if (Array.isArray(workingArray)) {
             const isPastTTIJobs = /pastTTIJobs$/.test(path);
             const isStaff = /^staff\./.test(path) || /^operator\.keyStaff\./.test(path);
-            const isAdditionalLocation = /locationDetails\.additionalLocations$/.test(path);
+            const isAdditionalLocation = /(?:locationDetails|location)\.additionalLocations$/.test(path);
             let newItem = '';
             if (isPastTTIJobs) {
                 newItem = { role: '', organization: '', employer: '' };
             } else if (isStaff) {
                 newItem = { role: '', name: '' };
             } else if (isAdditionalLocation) {
-                newItem = { city: '', address: '', zip: '' };
+                // A v2 location item keeps the address as typed in raw.
+                newItem = /^location\./.test(path) ? { city: '', raw: '', zip: '' } : { city: '', address: '', zip: '' };
             }
             workingArray.push(newItem);
-            if (path === 'identification.currentOwners') {
+            // A legacy facility keeps the single currentOwner copy in step; a v2 document has only the list.
+            if (path === 'identification.currentOwners' && !(window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target))) {
                 const firstOwner = workingArray[0] || '';
                 window.setNestedValue(target, 'identification.currentOwner', firstOwner || '');
             }
@@ -57,7 +59,8 @@
         const array = window.getNestedValue(target, normalizedPath);
         if (Array.isArray(array) && index >= 0 && index < array.length) {
             array.splice(index, 1);
-            if (path === 'identification.currentOwners') {
+            // A legacy facility keeps the single currentOwner copy in step; a v2 document has only the list.
+            if (path === 'identification.currentOwners' && !(window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target))) {
                 const firstOwner = array[0] || '';
                 window.setNestedValue(target, 'identification.currentOwner', firstOwner || '');
             }
@@ -89,7 +92,7 @@
             const isPrivatelyOwned = confirm('Is this a privately owned facility (not part of a chain)?\n\nClick OK for Yes (privately owned)\nClick Cancel for No (part of a chain/corporate owned)');
 
             // Set the private ownership flag
-            newFacility.isPrivatelyOwned = isPrivatelyOwned;
+            kopSetFacilityField(newFacility, 'facilityDetails.isPrivatelyOwned', isPrivatelyOwned);
         }
 
         window.formData.facilities.push(newFacility);
@@ -100,7 +103,7 @@
         if (inLocationsView) {
             const privateToggle = document.getElementById('private-ownership-toggle');
             if (privateToggle) {
-                privateToggle.checked = newFacility.isPrivatelyOwned;
+                privateToggle.checked = kopFacilityField(newFacility, 'facilityDetails.isPrivatelyOwned') === true;
                 // Trigger the toggle change event to update visibility
                 const event = new Event('change', { bubbles: true });
                 privateToggle.dispatchEvent(event);
