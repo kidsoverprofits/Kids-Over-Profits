@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 23:03 UTC",
- "source": "b006d8e0cdb975a31582e2229f6a16868761000b",
+ "built": "2026-10-25 23:06 UTC",
+ "source": "5a2c0e4e360794e20c052ffcb601cb238fe479d2",
  "sections": [
   {
    "key": "2",
@@ -117,10 +117,10 @@
       {
        "id": "2.2:unsilenced-backup",
        "lead": "Unsilenced backup",
-       "text": "**Unsilenced backup** (~118 GB; owner 2026-10-25: I: has room). It ran 2026-10-02 to 2026-10-06 and stopped there: 4,188 of 58,961 files copied to `I:\\My Drive\\Unsilenced archive backup`, 1,450 failed, the last lines Google's rate limit (`tmp/unsilenced-titles/run.log` in kop-pipeline); nothing has run since. Restart it with `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline: it resumes, retries the failed ones, and pauses on its own when a disk runs low (on 2026-10-25 this computer showed 11 GB free on I: and 12 GB on C:; keep C: above 4 GB). Then ask a session for the titles and rebuild (old 3.11).",
+       "text": "**Unsilenced backup** (~118 GB, into the owner's Google Drive, which has room). It ran 2026-10-02 to 2026-10-06 and stopped there: 4,188 of 58,961 files copied to `I:\\My Drive\\Unsilenced archive backup`, 1,450 failed, the last lines Google's rate limit (`tmp/unsilenced-titles/run.log` in kop-pipeline); nothing has run since. Restart it with `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline: it resumes, retries the failed ones, and pauses on its own if C: drops under 4 GB (Drive for desktop stages uploads there; 12 GB free on 2026-10-25). The local free-space figure for I: is not the Drive quota. Then ask a session for the titles and rebuild (old 3.11).",
        "ask": "Have you restarted the Unsilenced backup (stopped 2026-10-06 at 4,188 of 58,961 files)?",
        "date": "2026-10-25",
-       "hash": "887bb19cff08"
+       "hash": "723b07577529"
       },
       {
        "id": "2.2:document-finder-retries",
