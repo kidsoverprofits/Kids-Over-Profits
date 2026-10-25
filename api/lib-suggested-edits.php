@@ -213,14 +213,16 @@ if (!function_exists('kop_provider_project_name')) {
             if (!is_array($facility)) {
                 continue;
             }
-            $state = strtoupper(trim((string) ($facility['locationDetails']['state'] ?? $facility['addressParts']['state'] ?? '')));
+            // A v2 document keeps the place in location (state as its code), a legacy one in locationDetails.
+            $place = is_array($facility['location'] ?? null) ? $facility['location'] : (array) ($facility['locationDetails'] ?? array());
+            $state = strtoupper(trim((string) ($place['state'] ?? $facility['addressParts']['state'] ?? '')));
             if (isset($states[$state])) {
                 return kop_provider_location_project_name($states[$state]);
             }
             if (in_array($state, $states, true)) {
                 return kop_provider_location_project_name($state);
             }
-            $country = strtoupper(trim((string) ($facility['locationDetails']['country'] ?? '')));
+            $country = strtoupper(trim((string) ($place['country'] ?? '')));
             if ($country !== '' && !in_array($country, ['US', 'USA', 'UNITED STATES', 'UNITED STATES OF AMERICA'], true)) {
                 return kop_provider_location_project_name($country);
             }
@@ -353,13 +355,14 @@ if (!function_exists('kop_suggestion_normalize_facilities')) {
     /**
      * A facility suggestion is stored in the canonical v2 shape: each entry of
      * facilities[] through kop_facility_normalize() (docs/FACILITY-SCHEMA.md).
-     * Only for the kinds whose facilities become facilities_v2 records
-     * ('companies', 'locations'); providers and the other kinds keep the
-     * legacy shape their own *_master tables and pages read. Rows saved before
-     * 2026-10-25 are legacy; approval and the cards normalize either.
+     * For the kinds whose facilities are facility documents: TTI facilities
+     * ('companies', 'locations') and mental health providers ('providers',
+     * stored in providers_master as v2 since 2026-10-25). Referrers,
+     * transporters, marketers and trade orgs keep their own shapes. Rows saved
+     * before are legacy; approval and the cards read either.
      */
     function kop_suggestion_normalize_facilities(array $data, $category) {
-        if (!in_array($category, array('companies', 'locations'), true) || !is_array($data['facilities'] ?? null)) {
+        if (!in_array($category, array('companies', 'locations', 'providers'), true) || !is_array($data['facilities'] ?? null)) {
             return $data;
         }
         if (!function_exists('kop_facility_normalize')) {
@@ -555,6 +558,15 @@ if (!function_exists('kop_build_location_facility_key')) {
             : array();
 
         $name = trim((string) ($identification['name'] ?? $facility['name'] ?? ''));
+        if (is_array($facility['location'] ?? null)) {
+            // A v2 document: the same key from its location block.
+            $loc = $facility['location'];
+            $address = trim((string) ($loc['raw'] ?? ''));
+            $location = trim((string) ($loc['text'] ?? ''));
+            $city = trim((string) ($loc['city'] ?? ''));
+            $state = trim((string) ($loc['state'] ?? ''));
+            return strtolower($name . '|' . $address . '|' . $location . '|' . $city . '|' . $state);
+        }
         $address = trim((string) ($facility['address'] ?? ''));
         $location = trim((string) ($facility['location'] ?? ''));
         $city = trim((string) ($location_details['city'] ?? $facility['locationCity'] ?? ''));

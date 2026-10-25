@@ -19,6 +19,7 @@ URL = "https://kidsoverprofits.org/tti-data-submission/"
 ap = argparse.ArgumentParser()
 ap.add_argument("--projects", type=int, default=12)
 ap.add_argument("--show", action="store_true")
+ap.add_argument("--extra", action="append", default=[], help="a project to open as well (e.g. MONTANA PROVIDERS)")
 ap.add_argument("--flip", action="store_true",
                 help="the working tree edits v2 documents (step 4): facilities compare as their v2 documents, the rest exactly")
 ap.add_argument("--html", choices=("live", "v2"), default="live",
@@ -194,6 +195,7 @@ def run(live_only, names=None):
         pg.wait_for_function("window.formReady === true", timeout=180000)
         if names is None:
             names = pg.evaluate(PICK, args.projects)
+            names += [n for n in args.extra if n not in names and pg.evaluate("(n) => !!(window.projects || {})[n]", n)]
         # The autocomplete lists built from every project's facilities.
         result["autocomplete"] = pg.evaluate("""() => { const A = window.KOP_Autocomplete || {};
             if (typeof window.invalidateAggregatedData === 'function') window.invalidateAggregatedData();
@@ -254,6 +256,9 @@ def canon_form(form):
         # The public form's Websites box shows the record's profileLinks since the flip (it was identification.websites).
         if args.flip and k in ("list:identification.websites", "list:profileLinks"):
             continue
+        # The normalizer fills a US place's country ("United States"), which a legacy provider record left empty.
+        if args.flip and k.startswith(("locationDetails.country|", "location.country|")) and v == "United States":
+            v = ""
         if args.flip and k.startswith("operatingPeriod.notes") and isinstance(v, str):
             # The normalizer drops placeholder notes left by an earlier pass; a v2 document no longer has them.
             v = "\n".join(line for line in v.split("\n") if not PLACEHOLDER_NOTE.match(line.strip()))
@@ -273,7 +278,7 @@ def canon_probe(probe, tree_side):
         return probe
     out = {}
     for k, v in probe.items():
-        if tree_side and k.startswith("location:") and isinstance(v, list):
+        if k.startswith("location:") and isinstance(v, list):
             v = [m for m in v if not (isinstance(m, str) and (m.startswith("City: ") or m.startswith("State: ")))]
         out[k] = v
     return out

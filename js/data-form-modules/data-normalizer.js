@@ -231,15 +231,12 @@
             data.facilities = Array.isArray(data.facilities) ? data.facilities : facilitiesCandidate;
         }
 
-        // Normalize facilities array. TTI facilities are edited as v2 documents (docs/FACILITY-SCHEMA.md):
-        // a v2 one stays as it is, a legacy one is cleaned up below and then converted. Mental health
-        // providers keep the legacy shape until their records move to v2 (docs/plan 4.3 item 17, 4b).
+        // Normalize facilities array. Facilities and mental health providers are edited as v2 documents
+        // (docs/FACILITY-SCHEMA.md): a v2 one stays as it is, a legacy one is cleaned up below and then converted.
         if (Array.isArray(data.facilities)) {
-            const keepLegacy = String(data.category || '').toLowerCase() === 'providers'
-                || data.facilities.some((f) => f && typeof f === 'object' && (f.providerDetails || (f.legacy && f.legacy.providerDetails)));
             data.facilities = data.facilities.map(facility => {
-                if (!keepLegacy && isV2Facility(facility)) return facilityToV2(facility);
-                const normalized = isV2Facility(facility) ? facilityFromV2(facility) : { ...facility };
+                if (isV2Facility(facility)) return facilityToV2(facility);
+                const normalized = { ...facility };
 
                 // Normalize identification
                 if (normalized.identification) {
@@ -488,7 +485,7 @@
                     normalizeFieldNotesEntries(normalized.fieldNotes);
                 }
 
-                return keepLegacy ? normalized : facilityToV2(normalized);
+                return facilityToV2(normalized);
             });
         }
 
@@ -817,9 +814,8 @@
     // agree field for field; scripts/check-facility-normalizer-parity.js runs
     // both over a database dump and diffs the output.
     //
-    // The form edits TTI facilities as v2 documents (since 2026-10-25): normalizeProjectData()
-    // converts a legacy one on load with facilityToV2. Providers are still edited in the legacy
-    // shape (facilityFromV2) until their records move to v2 (docs/plan 4.3 item 17, 4b).
+    // The form edits facilities and providers as v2 documents (since 2026-10-25): normalizeProjectData()
+    // converts a legacy one on load with facilityToV2.
 
     const MIN_V2_SCHEMA_VERSION = 2;
     const FACILITY_SCHEMA_VERSION = 3;

@@ -382,19 +382,22 @@ function kop_wbc_create_provider(array $r, array $f, PDO $pdo) {
     }
     $parent = kop_wbc_folder('Mental Health Providers', 0);
     $folder = kop_wbc_folder($f['name'], $parent);
+    // The provider as a v2 document (docs/FACILITY-SCHEMA.md; providerDetails holds its provider fields).
+    $provider = kop_facility_normalize(array(
+        'identification'  => array('name' => $f['name']),
+        'locationDetails' => array('city' => $f['city'], 'state' => $f['state'],
+            'country' => $f['country'] !== '' ? $f['country'] : ($f['state'] !== '' ? 'United States' : '')),
+        'facilityDetails' => array('type' => trim((string) ($f['type'] ?? ''))),
+        'providerDetails' => array('careTypes' => array(), 'otherCareTypes' => array(), 'ttiPractices' => array(),
+            'otherTtiPractices' => array(), 'ttiReferrals' => array(), 'transportersUsed' => array(),
+            'ttiAffiliations' => array(), 'referralNotes' => ''),
+        'notes'           => array_merge(array(kop_wbc_source_note($r)), kop_wbc_extra_notes($f)),
+    ));
+    $provider['provenance']['source'] = 'woodbury';
     $data = array(
         'category'   => 'providers',
         'operator'   => array('name' => ''),
-        'facilities' => array(array(
-            'identification'  => array('name' => $f['name']),
-            'locationDetails' => array('city' => $f['city'], 'state' => $f['state'],
-                'country' => $f['country'] !== '' ? $f['country'] : ($f['state'] !== '' ? 'United States' : '')),
-            'facilityDetails' => array('type' => trim((string) ($f['type'] ?? ''))),
-            'providerDetails' => array('careTypes' => new stdClass(), 'otherCareTypes' => array(), 'ttiPractices' => new stdClass(),
-                'otherTtiPractices' => array(), 'ttiReferrals' => array(), 'transportersUsed' => array(),
-                'ttiAffiliations' => array(), 'referralNotes' => ''),
-            'notes'           => array_merge(array(kop_wbc_source_note($r)), kop_wbc_extra_notes($f)),
-        )),
+        'facilities' => array(json_decode(kop_facility_json_encode($provider), true)),
         'documentFolderId' => $folder,
     );
     $payload = kop_build_project_payload(array('data' => $data), $f['name'], 'providers');
@@ -601,7 +604,9 @@ function kop_wbc_record_place($kind, array $payload) {
             $p = $d['referrerConsultants'][0];
         }
     } elseif ($kind === 'provider') {
-        $p = (array) ($d['facilities'][0]['locationDetails'] ?? array());
+        // A v2 document keeps the place in location, a legacy record in locationDetails.
+        $first = (array) ($d['facilities'][0] ?? array());
+        $p = is_array($first['location'] ?? null) ? $first['location'] : (array) ($first['locationDetails'] ?? array());
     } elseif ($kind === 'marketer') {
         $p = (array) ($d['marketerCompany'] ?? array());
     } elseif ($kind === 'tradeorg') {

@@ -37,6 +37,7 @@ node scripts/test-data-form-export.js
 python scripts/test-data-form-equivalence.py [--projects 30] [--html v2] [--v2-render]   # --html v2: the page with the templates' v2 paths
 # (run both: LiteSpeed serves cached HTML with the old paths for a while after a deploy); it also types into the place fields
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-form-v2-save.php   # the server stores the same from a v2 entry as from its legacy copy
+python scripts/test-provider-index-v2.py      # /mental-health-providers/ reads providers in either shape
 node scripts/test-move-to-new-state.js        # admin form's Move to a new state, legacy as before, v2 as its normalized form
 node scripts/test-report-generator-v2.js copies.jsonl   # the form's report: legacy as before, v2 the same, 400 real facilities
 # /questions/ ("We have questions", inc/questions.php + templates/questions.php + js/questions.js + css/questions.css): one short

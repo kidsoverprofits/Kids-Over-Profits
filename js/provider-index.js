@@ -38,13 +38,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return clean(s.identification && s.identification.name) || clean(s.name) || clean(p.db_name);
     }
 
+    // A provider's place: a v2 document keeps it in location (state as its code), a legacy record in locationDetails.
+    function sitePlaceFields(s) {
+        if (s.location && typeof s.location === 'object') return s.location;
+        return s.locationDetails || {};
+    }
+
     function siteState(s) {
-        const st = clean((s.locationDetails && s.locationDetails.state) || s.locationState).toUpperCase();
+        const st = clean(sitePlaceFields(s).state || s.locationState).toUpperCase();
         return STATE_CODES.indexOf(st) !== -1 ? st : '';
     }
 
     function sitePlace(s) {
-        const loc = s.locationDetails || {};
+        const loc = sitePlaceFields(s);
         return [clean(loc.city || s.locationCity), clean(loc.state || s.locationState), clean(loc.country) === 'United States' ? '' : clean(loc.country)]
             .filter(Boolean).join(', ');
     }
@@ -246,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${renderNotes('Referral notes', d.referralNotes)}
                 ${renderNotes('Notes', s.notes)}
                 ${renderTestimony(s.survivorTestimony)}
-                ${renderField('Website', s.website || (s.identification && s.identification.website))}
+                ${renderField('Website', s.website || (s.identification && s.identification.website) || (Array.isArray(s.profileLinks) && s.profileLinks.find(Boolean)) || '')}
             </div>`;
     }
 

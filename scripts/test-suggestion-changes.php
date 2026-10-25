@@ -109,9 +109,9 @@ $check('a note under a field\'s path names the field', isset($labels['Field note
 $v2 = function (array $payload) { return kop_suggestion_normalize_facilities($payload, 'companies'); };
 $stored = $v2($mini(array('notes' => array('A new note from a reader.'))));
 $check('v2 row: every facility stored in the canonical shape', array_keys($stored['facilities'][0]) === kop_facility_top_level_keys(), json_encode(array_keys($stored['facilities'][0])));
-$check('v2 row: providers and other kinds keep the shape their tables read',
-    kop_suggestion_normalize_facilities(array('facilities' => array(array('providerDetails' => array('x' => 1)))), 'providers') === array('facilities' => array(array('providerDetails' => array('x' => 1))))
-    && kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'referrers') === array('facilities' => array(array('a' => 1))));
+$check('v2 row: referrers, transporters, marketers and trade orgs keep the shape their tables read',
+    kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'referrers') === array('facilities' => array(array('a' => 1)))
+    && kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'transporters') === array('facilities' => array(array('a' => 1))));
 $kept_ids = kop_suggestion_normalize_facilities(array('facilities' => array(array('identification' => array('name' => 'X', 'pastOwners' => array('P'), 'websites' => array('https://example.org'), 'currentOwner' => 'C', 'nickname' => 'N')))), 'companies');
 $f0 = $kept_ids['facilities'][0];
 $check('v2 row: past owners and websites land in the record (pastOwners, profileLinks)',
@@ -123,6 +123,18 @@ $stash = kop_facility_normalize(array('schema_version' => KOP_FACILITY_SCHEMA_VE
 $check('a row stashed before the field existed moves into the record on approval',
     $stash['identification']['pastOwners'] === array('Q') && in_array('https://example.net', $stash['profileLinks'], true) && !isset($stash['legacy']['identification']),
     json_encode(array($stash['identification']['pastOwners'], $stash['legacy'])));
+// Providers are facility documents too (providers_master holds v2 since 2026-10-25): approval's naming and merge key read either shape.
+$prov_legacy = array('category' => 'providers', 'facilities' => array(array('identification' => array('name' => 'Zzq Clinic'),
+    'locationDetails' => array('city' => 'Billings', 'state' => 'MT'), 'location' => 'Billings, MT', 'address' => '1 Main St, Billings, MT',
+    'providerDetails' => array('careTypes' => array('hasInpatient' => true), 'ttiReferrals' => array('Zzq Ranch')))));
+$prov_v2 = kop_suggestion_normalize_facilities($prov_legacy, 'providers');
+$check('providers: stored as v2, provider details at the top', array_keys($prov_v2['facilities'][0]) === kop_facility_top_level_keys()
+    && ($prov_v2['facilities'][0]['providerDetails']['ttiReferrals'] ?? null) === array('Zzq Ranch'), json_encode(array_keys($prov_v2['facilities'][0])));
+$check('providers: filed under the same state from either shape', kop_provider_project_name($prov_legacy) === kop_provider_project_name($prov_v2)
+    && kop_provider_project_name($prov_v2) !== '', kop_provider_project_name($prov_v2));
+$merged = kop_merge_location_facilities(array($prov_legacy['facilities'][0]), $prov_v2['facilities']);
+$check('providers: a v2 entry for the same provider is keyed by its own place', count(kop_merge_location_facilities($prov_v2['facilities'], $prov_v2['facilities'])) === 1
+    && kop_build_location_facility_key($prov_v2['facilities'][0]) === 'zzq clinic|1 main st, billings, mt|billings, mt|billings|mt', kop_build_location_facility_key($prov_v2['facilities'][0]));
 $same = true;
 $cases = array(
     array('notes' => array('A new note from a reader.')),
