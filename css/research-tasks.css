@@ -36,3 +36,10 @@
 .kop-rt-copy { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 12px; }
 .kop-rt-log li { margin: 4px 0; }
 .kop-rt-pick input { margin: 0; }
+.kop-rt-look { margin: 6px 0 4px; padding: 8px 10px; background: #f7f5ee; border: 1px solid #e6dfc8; border-radius: 4px; }
+.kop-rt-look__head { margin: 0 0 4px; font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: #3c434a; }
+.kop-rt-look ul { margin: 0; padding: 0 0 0 18px; list-style: disc; }
+.kop-rt-look li { margin: 2px 0; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+.kop-rt-look a { color: #1e6f79; }
+.kop-rt-look li.is-record > a, .kop-rt-look li.is-company > a { font-weight: 600; }
+.kop-rt-look__none { margin: 6px 0; font-size: 13px; font-style: italic; color: #4A5568; }

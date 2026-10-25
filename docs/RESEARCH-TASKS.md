@@ -9,13 +9,28 @@ owner gives each to themselves, to Claude or to a volunteer, reads the answers a
 ## Adding one (every session, unprompted, in the same commit as the work that found it)
 
 ```bash
-python scripts/research-tasks/tasks.py add --section "Sequel renames"     --title "Which town was Norris Academy in?"     --text "The Sequel draft says Norris, TN; record 9614 says Andersonville, TN. The answer goes on 9614 and wiki draft 82."     --records 9614 --found-by "Sequel audit session"
+python scripts/research-tasks/tasks.py add --section "Sequel renames" \
+    --title "Is Norris Academy in Norris or in Andersonville, Tennessee?" \
+    --text "The Sequel draft says Norris, TN; record 9614 says Andersonville, TN. The answer goes on 9614 and wiki draft 82." \
+    --records 9614 --found-by "Sequel audit session" \
+    --look "Tennessee DCS licence list, 2015 (our copy) | https://kidsoverprofits.org/wp-content/uploads/..."
 ```
 
-It writes `seeds/research-tasks.json`; the task shows on the screen after the deploy. Say what is in doubt, what
-each source says (with links), where the answer goes (record id, wiki draft, page), and who found it. `--records`
-takes `facilities_v2` ids (checked against `tmp/prod.sqlite`); a record named gets its page linked on the card and
-its facts shown to a volunteer. Use an existing section name when one fits (`tasks.py list` shows them).
+It writes `seeds/research-tasks.json`; the task shows on the screen after the deploy. Two rules (owner, 2026-10-25):
+
+- **The title is one simple question**, in plain words a volunteer with no background can follow, ending with "?":
+  name the program (and town and state), company or person in full; no record ids, file paths or words like "era",
+  "rename merge" or "operator link". `add` refuses a title without "?". A job for us rather than a fact to find
+  (fix a draft, link reports, make records) is not a research task: it goes in `docs/plan/`.
+- **It points to what we already have.** `add` fills "where to look" from `tmp/prod.sqlite`: the records' news
+  articles, court cases, Woodbury Reports issues (our copies) and archived links, the links in `--text`; the
+  screen adds each record's and company's KOP page. Add with `--look "What it is | https://..."` anything else KOP
+  holds about it (a media library PDF, an archived page, a Drive document); it prints what it found, so read it.
+
+`--text` is for us: what is in doubt, what each source says (with links), where the answer goes (record id, wiki
+draft, page), who found it. `--records` takes `facilities_v2` ids (checked against the mirror); records and companies
+the question names in full are found by name too (`tasks.py directions` rebuilds every task's list after a mirror
+sync). Use an existing section name when one fits (`tasks.py list` shows them).
 
 ## Working the ones given to Claude
 

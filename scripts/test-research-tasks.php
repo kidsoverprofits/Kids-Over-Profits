@@ -104,17 +104,17 @@ $pdo->exec("CREATE TABLE wpdl_kop_vol_social (id INTEGER PRIMARY KEY AUTOINCREME
     decided_by TEXT NOT NULL DEFAULT '', decided_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (project_id, item_key, volunteer_id))");
 foreach (array('highlight-summaries', 'featured-reporting', 'news-images', 'federal-funding') as $lib) require_once dirname(__DIR__) . "/inc/$lib.php";
 
-$GLOBALS['kop_test_options']['kop_rt_db'] = '1';
 $pdo->exec("CREATE TABLE wpdl_kop_research_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task_key TEXT NOT NULL UNIQUE, section TEXT NOT NULL DEFAULT '',
     title TEXT NOT NULL DEFAULT '', body TEXT, context TEXT, records TEXT, found TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'open',
     assignee TEXT NOT NULL DEFAULT '', volunteer_id INTEGER NOT NULL DEFAULT 0, project_id INTEGER NOT NULL DEFAULT 0, question TEXT, answer TEXT,
-    answer_by TEXT NOT NULL DEFAULT '', answer_at TEXT, settled TEXT, settled_at TEXT, seed_hash TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
+    answer_by TEXT NOT NULL DEFAULT '', answer_at TEXT, settled TEXT, settled_at TEXT, directions TEXT, companies TEXT, edited_at TEXT, seed_hash TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL, updated_by TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)");
 $pdo->exec("CREATE TABLE wpdl_kop_research_task_log (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, label TEXT NOT NULL DEFAULT '',
     before_rows TEXT, project_id INTEGER NOT NULL DEFAULT 0, user_login TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, undone_at TEXT)");
 require_once dirname(__DIR__) . '/inc/plan-board.php';   // kop_pb_md(), the inline markdown the cards share
 require_once dirname(__DIR__) . '/inc/facility-merge.php';
 require_once dirname(__DIR__) . '/inc/research-tasks.php';
+$GLOBALS['kop_test_options']['kop_rt_db'] = KOP_RT_DB_VERSION;
 if (!function_exists('esc_textarea')) { function esc_textarea($s) { return htmlspecialchars((string) $s, ENT_QUOTES); } }
 
 $failures = 0;
@@ -136,18 +136,30 @@ $check('the seed has the tasks from docs/RESEARCH-TASKS.md', count(array_filter(
 $check('every key is unique', count($keys) === count(array_unique($keys)));
 $bad = array_filter($seed['tasks'], function ($t) { return trim((string) ($t['title'] ?? '')) === '' || mb_strlen($t['title']) > 255 || !is_array($t['records'] ?? null); });
 $check('every task has a title (255 at most) and a records list', !$bad, implode(', ', array_column($bad, 'key')));
+$notq = array_filter($seed['tasks'], function ($t) { return empty($t['settled']) && substr(trim($t['title']), -1) !== '?'; });
+$check('every open task is phrased as a question', !$notq, implode(' | ', array_column($notq, 'title')));
+$long = array_filter($seed['tasks'], function ($t) { return empty($t['settled']) && str_word_count($t['title']) > 30; });
+$check('every question is short (30 words at most)', !$long, implode(' | ', array_column($long, 'title')));
+$nodir = array_filter($seed['tasks'], function ($t) { return !is_array($t['directions'] ?? null); });
+$check('every task carries a where-to-look list', !$nodir);
+$with = count(array_filter($seed['tasks'], function ($t) { return $t['directions'] || $t['records'] || $t['companies']; }));
+$check('most tasks point somewhere we hold (records, companies or links)', $with >= 90, "$with of " . count($keys));
+$badurl = array();
+foreach ($seed['tasks'] as $t) foreach ($t['directions'] as $d) if (!preg_match('#^https?://\S+$#', $d['url']) || trim($d['label']) === '') $badurl[] = $t['key'];
+$check('every direction has a label and a web address', !$badurl, implode(', ', array_unique($badurl)));
 $ids = array();
 foreach ($seed['tasks'] as $t) foreach ($t['records'] as $id) $ids[$id] = true;
 $known = $ids ? array_map('intval', $wpdb->get_col('SELECT id FROM facilities_v2 WHERE id IN (' . implode(',', array_keys($ids)) . ')')) : array();
 $missing = array_diff(array_keys($ids), $known);
 // A record merged or deleted after its task came in is moved (or shown as gone) on the site; only say so here.
-if ($missing) echo '  note record ids no longer in the mirror: ' . implode(', ', $missing) . "
-";
+if ($missing) echo '  note record ids no longer in the mirror: ' . implode(', ', $missing) . "\n";
 $check('the seed names records', count($known) > 40, count($known) . ' records');
 
 list($a, $b, $c) = kop_rt_import_seed($seed_path, true);
 $check('importing adds every task once', $a === count($keys) && $b === 0 && $c === 0, "$a added");
-$check('a second import adds nothing', kop_rt_import_seed($seed_path, true) === array(0, 0, 0));
+$check('a second import adds nothing', kop_rt_import_seed($seed_path, true) === array(0, 0, 0, 0));
+$seeded_settled = count(array_filter($seed['tasks'], function ($t) { return !empty($t['settled']); }));
+$check('tasks the seed settles come in settled', kop_rt_counts()['done'] === $seeded_settled, "$seeded_settled settled in the seed");
 $withrec = null;
 foreach ($seed['tasks'] as $t) if ($t['records']) { $withrec = $row($t['key']); break; }
 $check('a task comes in open, nobody\'s, with its records stored for the merge tool', $withrec['status'] === 'open' && $withrec['assignee'] === ''
@@ -158,13 +170,13 @@ $tmp = sys_get_temp_dir() . '/kop-rt-seed-' . getmypid() . '.json';
 $s2 = $seed;
 $s2['tasks'][0]['answer'] = array('text' => 'Closed in 2021 (Iowa DHS notice).', 'by' => 'Claude session', 'at' => '2026-10-23');
 $s2['tasks'][1]['settled'] = array('text' => 'Merged as a rename.', 'at' => '2026-10-23');
-$s2['tasks'][] = array('key' => 'test:new-one', 'section' => 'Test', 'title' => 'A new question', 'text' => '', 'records' => array(), 'found' => 'found today');
+$s2['tasks'][] = array('key' => 'test:new-one', 'section' => 'Test', 'title' => 'A new question?', 'text' => '', 'records' => array(), 'found' => 'found today');
 file_put_contents($tmp, json_encode($s2));
 $res = kop_rt_import_seed($tmp, true);
-$check('a new key, an answer and a settled line come over once each', $res === array(1, 1, 1), json_encode($res));
+$check('a new key, an answer and a settled line come over once each', $res === array(1, 1, 1, 0), json_encode($res));
 $check('the answered task is Answered, from the session', $row($keys[0])['status'] === 'answered' && $row($keys[0])['answer_by'] === 'Claude session');
 $check('the settled task is Settled with its line', $row($keys[1])['status'] === 'settled' && $row($keys[1])['settled'] === 'Merged as a rename.');
-$check('the same file again changes nothing', kop_rt_import_seed($tmp, true) === array(0, 0, 0));
+$check('the same file again changes nothing', kop_rt_import_seed($tmp, true) === array(0, 0, 0, 0));
 $l = $last_log();
 kop_rt_undo($l);
 $check('a session\'s change has Undo too', $row($keys[1])['status'] === 'open');
@@ -178,6 +190,40 @@ kop_rt_import_seed($tmp, true);
 @unlink($tmp);
 $check('a seed answer never replaces one already there', $row($keys[0])['answer'] === 'Owner knows.');
 kop_rt_undo($last_log());
+
+// A session rewords a task: it reaches a card nobody edited, never one the owner edited.
+$k3 = $keys[3];
+$s3 = $seed;
+$s3['tasks'][3]['title'] = 'A reworded question?';
+$s3['tasks'][3]['directions'] = array(array('label' => 'Our copy', 'url' => 'https://kidsoverprofits.org/wp-content/uploads/x.pdf', 'kind' => 'note'));
+$s3['tasks'][3]['records'] = array();
+file_put_contents($tmp, json_encode($s3));
+$before = kop_rt_record_ids($row($k3));
+$res = kop_rt_import_seed($tmp, true);
+$check('a reworded entry reaches an unedited card', $res[3] === 1 && $row($k3)['title'] === 'A reworded question?' && kop_rt_directions($row($k3))[0]['label'] === 'Our copy', json_encode($res));
+$check('rewording never takes a record away (the merge tool may have moved it)', kop_rt_record_ids($row($k3)) === $before);
+kop_rt_undo($last_log());
+$check('Undo puts the old wording back', $row($k3)['title'] === $seed['tasks'][3]['title']);
+kop_rt_change(array((int) $row($k3)['id']), array('title' => 'The owner\'s own wording?'), 'edit', 'test');
+$s3['tasks'][3]['title'] = 'A third wording?';
+file_put_contents($tmp, json_encode($s3));
+kop_rt_import_seed($tmp, true);
+@unlink($tmp);
+$check('an edited card keeps the owner\'s wording', $row($k3)['title'] === 'The owner\'s own wording?');
+
+echo "\nQuestions and where to look\n";
+$check('a task must be a question', strpos($throws(function () { kop_rt_add(array('title' => 'Norris Academy town')); }), '"?"') !== false);
+$dirs = kop_rt_parse_directions("TN licence list | https://example.org/a.pdf\nhttps://example.org/b");
+$check('"what it is | address" lines read as directions', count($dirs) === 2 && $dirs[0]['label'] === 'TN licence list' && $dirs[1]['url'] === 'https://example.org/b');
+$check('a line with no address is refused', $throws(function () { kop_rt_parse_directions('just words'); }) !== '');
+$check('directions write back as lines', kop_rt_directions_text($dirs) === "TN licence list | https://example.org/a.pdf\nhttps://example.org/b | https://example.org/b");
+$wd = null;
+foreach ($seed['tasks'] as $t) if (count($t['directions']) >= 2 && empty($t['settled']) && $t['key'] !== $k3) { $wd = $row($t['key']); break; }
+$look = kop_rt_where_to_look($wd, kop_rt_record_names(kop_rt_record_ids($wd)), array());
+$check('a card lists where to look', count($look) >= 2 && strpos(kop_rt_card_html($wd, array(), array()), 'Where to look (what we already have)') !== false);
+$vq = kop_rt_volunteer_question($wd);
+$check('a volunteer gets the question and where to start, not our notes', strpos($vq, $wd['title']) === 0 && strpos($vq, 'Where to start') !== false
+    && strpos($vq, $look[0]['url']) !== false && (trim((string) $wd['body']) === '' || strpos($vq, trim((string) $wd['body'])) === false), $vq);
 
 echo "\nAssigning, settling, Undo\n";
 $t2 = $row($keys[2]);

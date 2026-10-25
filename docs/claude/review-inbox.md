@@ -152,6 +152,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # and an Undo of it sticks). Ticked tasks -> one volunteer: a 'research:custom' project via kop_volp_create_research(['items' => ...]), item key
 # 'rt<id>', facility_id when the task names one record; kop_rt_sync_volunteer_answers() copies their answer + links onto the task (Answered),
 # settling marks their answer Used; Undo of the send closes the project. Claude's list: php api/research-tasks.php --claude (over SSH, read-only)
+# Each title is one plain question ending with "?" (kop_rt_check_question(), tasks.py add refuses others); the card leads with "Where to look":
+# kop_rt_where_to_look() = each record's and company's KOP page (live URLs from records/companies) + the task's directions (JSON, built by
+# tasks.py directions from the mirror: news, court cases, Woodbury issues with our PDF, archived links, links in the notes; records and companies
+# named in full are matched by name). A volunteer gets the question + where to start, never the staff notes (Details). A seed entry whose hash
+# moved rewords a card nobody edited (edited_at empty; records only gain ids); staff jobs go to docs/plan, not here
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-research-tasks.php [--page=out.html]   # seed import, Undo, volunteer round trip, cards
 # Messages (inc/volunteer-messages.php, {prefix}kop_vol_messages): one conversation per volunteer, "Ask a question" on a brief or card names the
 # project/item; answered at Volunteer Reviewers > Messages (menu count bubble), shown on their page marked New; volunteers are never mailed, the

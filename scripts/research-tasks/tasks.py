@@ -6,8 +6,15 @@ The site's table is the open list; this file only carries what sessions send it.
 key and then belongs to the screen (owner edits, assignments, Undo). An entry that later gains an "answer" or a
 "settled" line hands that to the screen once (the import keeps each entry's hash), never over an owner's own.
 
-    python scripts/research-tasks/tasks.py add --section "Sequel renames" --title "Which town was Norris Academy in" \
-        --text "Norris, TN (draft) or Andersonville, TN (record 9614)?" --records 9614 --found-by "Sequel audit session"
+    python scripts/research-tasks/tasks.py add --section "Sequel renames" --title "Was Norris Academy in Norris, TN or Andersonville, TN?" \
+        --text "The Sequel draft says Norris; record 9614 says Andersonville." --records 9614 --found-by "Sequel audit session" \
+        --look "Tennessee DCS licence list (our copy) | https://kidsoverprofits.org/wp-content/uploads/..."
+    python scripts/research-tasks/tasks.py directions [--key <key>]   # rebuild "where to look" from tmp/prod.sqlite
+    python scripts/research-tasks/tasks.py questions <file.json>      # retitle from {key: question}
+
+Every task's title is the question itself, in plain words, ending with "?". Its "directions" are where to look among
+what KOP already holds: the records' news, court cases, Woodbury Reports issues (our copies) and archived websites,
+the links in its notes, and anything added with --look. The screen adds each record's KOP page.
     python scripts/research-tasks/tasks.py answer <key> --text "Andersonville (TN DCS licence 2015)" --by "Claude session"
     python scripts/research-tasks/tasks.py settle <key> --text "Record fixed in commit <url>"
     python scripts/research-tasks/tasks.py list [--open]
@@ -80,6 +87,206 @@ def ids_in(text, known):
         if n not in out:
             out.append(n)
     return out
+
+
+def mirror():
+    if not os.path.exists(MIRROR):
+        return None
+    return sqlite3.connect('file:%s?mode=ro' % MIRROR.replace('\\', '/'), uri=True)
+
+
+def archived(url):
+    """Program and industry websites are linked as their archived copy (never live)."""
+    if not url or 'web.archive.org' in url or 'kidsoverprofits.org' in url:
+        return url
+    return 'https://web.archive.org/web/2*/' + url
+
+
+def site_of(url):
+    """The site a link goes to, by name: "strugglingteens.com"; for a Wayback copy, the site it archived; "our copy" for KOP's own files."""
+    if 'kidsoverprofits.org/wp-content/uploads/' in url:
+        return 'our copy'
+    m = re.match(r'https?://web\.archive\.org/web/[^/]+/(?:https?://)?([^/]+)', url)
+    host = m.group(1) if m else re.sub(r'^https?://', '', url).split('/')[0]
+    host = re.sub(r'^www\.', '', host.split(':')[0])
+    return ('archived ' + host) if m else host
+
+
+def directions_for(task, con):
+    """
+    Where to look for the answer, from what KOP already holds: per record, its news articles, court cases,
+    Woodbury Reports issues (our PDF copies) and archived websites; then the links in the task's own notes.
+    The record's KOP page is added by the screen (its address can change), not here.
+    [{label, url, kind}], newest first within a kind, a few of each.
+    """
+    out, seen = [], set()
+
+    def add(label, url, kind):
+        url = (url or '').strip()
+        if not url or url in seen or not re.match(r'https?://', url):
+            return
+        seen.add(url)
+        out.append({'label': re.sub(r'\s+', ' ', label).strip()[:200], 'url': url, 'kind': kind})
+
+    for fid in (task.get('records') or []) if con else []:
+        for title, pub, date, arch, url in con.execute(
+                "SELECT n.article_title, n.publication_name, n.publication_date, n.archive_url, n.article_url FROM news_facility_links l"
+                " JOIN news_submissions n ON n.id = l.news_id WHERE l.facility_id = ? AND n.status IN ('approved', 'submitted')"
+                " ORDER BY l.link_type = 'mentioned', n.publication_date DESC LIMIT 5", (fid,)):
+            bits = ', '.join(x for x in (pub, (date or '')[:10]) if x)
+            add('News: %s%s' % (title or 'article', ' (%s)' % bits if bits else ''), url or arch, 'news')
+        for name, court, filed, src, docs in con.execute(
+                "SELECT s.case_name, s.court, s.filing_date, s.source_urls, s.document_urls FROM lawsuit_facility_links l"
+                " JOIN lawsuits s ON s.id = l.lawsuit_id WHERE l.facility_id = ? AND s.publication_status <> 'rejected'"
+                " ORDER BY s.filing_date DESC LIMIT 4", (fid,)):
+            urls = []
+            for col in (src, docs):
+                try:
+                    urls += [u for u in json.loads(col or '[]') if isinstance(u, str)]
+                except ValueError:
+                    pass
+            ours = [u for u in urls if 'kidsoverprofits.org' in u]
+            bits = ', '.join(x for x in (court, ('filed ' + filed[:10]) if filed else '') if x)
+            add('Court case: %s%s' % (name or 'case', ' (%s)' % bits if bits else ''), (ours or urls or [''])[0], 'court')
+        for label, pages, guid in con.execute(
+                "SELECT m.issue_label, m.pages, p.guid FROM wpdl_kop_woodbury_mentions m JOIN wpdl_posts p ON p.ID = m.attachment_id"
+                " WHERE m.facility_id = ? AND m.status <> 'skipped' ORDER BY m.issue_date DESC LIMIT 4", (fid,)):
+            add('Woodbury Reports, %s%s (our copy)' % (label, ', p. %s' % pages if pages else ''), guid, 'woodbury')
+        row = con.execute('SELECT json_data FROM facilities_v2 WHERE id = ?', (fid,)).fetchone()
+        try:
+            j = json.loads(row[0]) if row else {}
+        except ValueError:
+            j = {}
+        sites = list(j.get('profileLinks') or [])
+        for k in ('website', 'websites'):
+            v = (j.get('resources') or {}).get(k) or j.get(k)
+            sites += v if isinstance(v, list) else ([v] if isinstance(v, str) else [])
+        for u in [s for s in sites if isinstance(s, str)][:3]:
+            add('Linked from its record (%s)' % site_of(archived(u)), archived(u), 'website')
+
+    text = '\n'.join((task.get('text') or '', task.get('context') or ''))
+    for label, url in re.findall(r'\[([^\]]+)\]\((https?://[^)\s]+)\)', text):
+        site = site_of(url)
+        add('From the notes: ' + (label if site.lower() in label.lower() else '%s (%s)' % (label, site)), url, 'note')
+    for url in re.findall(r'(?<![(\[])\bhttps?://[^\s<)"\]]+[^\s<).,;:"\]]', text):
+        add('From the notes: ' + re.sub(r'^https?://(www\.)?', '', url)[:80], url, 'note')
+    return out
+
+
+def name_index(con):
+    """Record names that belong to exactly one record (two words, 10+ letters), lower-cased -> id."""
+    by = {}
+    for fid, name in con.execute("SELECT id, name FROM facilities_v2 WHERE name IS NOT NULL"):
+        n = re.sub(r'\s+', ' ', name).strip().lower()
+        if len(n) >= 10 and ' ' in n:
+            by.setdefault(n, set()).add(fid)
+    return {n: next(iter(ids)) for n, ids in by.items() if len(ids) == 1}
+
+
+GENERIC = set('the a of and for at in youth academy academies behavioral behavioural health center centre boys girls ranch '
+               'school schools home homes treatment residential program programs services healthcare hospital camp '
+               'mountain mountains valley ridge new life house inc llc group'.split())
+
+
+STATES = {
+    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut',
+    'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan',
+    'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire',
+    'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma',
+    'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
+    'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+}
+
+
+def states_in(text):
+    """The US states a text names, by code ("Hurricane, UT") or in full."""
+    out = set(re.findall(r'\b(' + '|'.join(STATES) + r')\b', text))
+    return out | {c for c, n in STATES.items() if re.search(r'\b' + n + r'\b', text)}
+
+
+def named_records(task, names, con=None):
+    """
+    Ids of the records whose whole name the task's title or notes spell out: the name stands on its own (no
+    capitalised word right before or after it, so "Youth Academy" never matches inside "Columbus Youth Academy"),
+    it is not made only of generic words, and when the task names states the record is in one of them.
+    """
+    text = ' '.join((task.get('title') or '', plain(task.get('text') or '')))
+    low = text.lower()
+    states = states_in(text)
+    found = []
+    for n, fid in names.items():
+        if n not in low or fid in found or set(n.replace('-', ' ').split()) <= GENERIC:
+            continue
+        if states and con is not None:
+            st = (con.execute('SELECT state FROM facilities_v2 WHERE id = ?', (fid,)).fetchone() or [''])[0]
+            if st and st not in states:
+                continue
+        if stands_alone(text, low, n):
+            found.append(fid)
+    return found
+
+
+def stands_alone(text, low, n):
+    """The name appears whole: no capitalised word right before or after it."""
+    for m in re.finditer(r'(?<![\w-])' + re.escape(n) + r'(?![\w-])', low):
+        before = re.search(r'([\w&.\'-]+)\s*$', text[:m.start()])
+        after = re.match(r'\s*([\w&\'-]+)', text[m.end():])
+        if before and before.group(1)[:1].isupper() or after and after.group(1)[:1].isupper():
+            continue
+        return True
+    return False
+
+
+def named_companies(task, con):
+    """kop_operators ids whose name (or short name) the task spells out whole; names of one company only, 4+ letters."""
+    by = {}
+    for oid, short, name in con.execute('SELECT id, unique_name, name FROM wpdl_kop_operators'):
+        for n in {re.sub(r'\s+', ' ', x or '').strip().lower() for x in (short, name)}:
+            if len(n) >= 4 and not set(n.split()) <= GENERIC:
+                by.setdefault(n, set()).add(oid)
+    text = ' '.join((task.get('title') or '', plain(task.get('text') or ''), plain(task.get('context') or '')))
+    low = text.lower()
+    found = []
+    for n, ids in by.items():
+        if len(ids) == 1 and n in low and stands_alone(text, low, n) and next(iter(ids)) not in found:
+            found.append(next(iter(ids)))
+    return found
+
+
+def cmd_directions(a):
+    con = mirror()
+    if con is None:
+        sys.exit('No tmp/prod.sqlite (python ../kop-pipeline/scripts/sync-prod-sqlite.py).')
+    data = load()
+    names = name_index(con)
+    n = 0
+    for t in data['tasks']:
+        if a.key and t['key'] not in a.key:
+            continue
+        for fid in named_records(t, names, con):
+            if fid not in t['records']:
+                t['records'].append(fid)
+        t['companies'] = named_companies(t, con)
+        t['directions'] = directions_for(t, con)
+        n += bool(t['directions'] or t['records'] or t['companies'])
+    save(data)
+    print('%d of %d tasks have somewhere to look' % (n, len(data['tasks'])))
+
+
+def cmd_questions(a):
+    """Retitles tasks from a JSON {key: question} file (a session's rewording pass)."""
+    with open(a.file, encoding='utf-8') as f:
+        q = json.load(f)
+    data = load()
+    n = 0
+    for t in data['tasks']:
+        new = (q.get(t['key']) or '').strip()
+        if new and new != t['title']:
+            t['title'] = new[:255]
+            n += 1
+    save(data)
+    print('%d retitled' % n)
 
 
 def plain(s):
@@ -187,13 +394,26 @@ def cmd_add(a):
     bad = [r for r in recs if known is not None and r not in known]
     if bad:
         sys.exit('Not facilities_v2 ids: %s' % bad)
+    title = a.title.strip()
+    if not title.endswith('?'):
+        sys.exit('--title is the question itself, in plain words, ending with "?" ("What year did X in Town, ST close?").')
     taken = {t['key'] for t in data['tasks']}
-    key = new_key(a.section, a.title, taken)
-    data['tasks'].append({'key': key, 'section': a.section, 'title': a.title[:255], 'text': a.text or '', 'context': '',
-                          'records': recs, 'found': 'found %s, %s' % (datetime.date.today().isoformat(), a.found_by) if a.found_by else
-                          'found ' + datetime.date.today().isoformat()})
+    key = new_key(a.section, title, taken)
+    task = {'key': key, 'section': a.section, 'title': title[:255], 'text': a.text or '', 'context': '',
+            'records': recs, 'found': 'found %s, %s' % (datetime.date.today().isoformat(), a.found_by) if a.found_by else
+            'found ' + datetime.date.today().isoformat()}
+    con = mirror()
+    task['directions'] = directions_for(task, con) if con else []
+    for d in a.look or []:
+        label, _, url = d.rpartition('|')
+        task['directions'].insert(0, {'label': label.strip() or url.strip(), 'url': url.strip(), 'kind': 'note'})
+    data['tasks'].append(task)
     save(data)
     print(key)
+    for d in task['directions']:
+        print('  look: %s  %s' % (d['label'], d['url']))
+    if not task['directions']:
+        print('  nothing to point to: add --look "Label | https://..." for each document or page KOP holds about it')
 
 
 def find(data, key):
@@ -241,7 +461,14 @@ def main():
     s.add_argument('--text', default='')
     s.add_argument('--records', default='')
     s.add_argument('--found-by', default='')
+    s.add_argument('--look', action='append', help='"Label | https://..." a document or page KOP holds about it (repeatable)')
     s.set_defaults(fn=cmd_add)
+    s = sub.add_parser('directions', help='rebuild "where to look" from tmp/prod.sqlite (every task, or --key)')
+    s.add_argument('--key', action='append')
+    s.set_defaults(fn=cmd_directions)
+    s = sub.add_parser('questions', help='retitle tasks from a JSON {key: question} file')
+    s.add_argument('file')
+    s.set_defaults(fn=cmd_questions)
     s = sub.add_parser('answer')
     s.add_argument('key')
     s.add_argument('--text', required=True)

@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/admin-kit.php';
 
-const KOP_RT_DB_VERSION = '1';
+const KOP_RT_DB_VERSION = '2'; // 2: directions, companies, edited_at
 
 add_filter('kop_admin_kit_pages', function ($pages) {
     $pages[] = 'kop-research-tasks';
@@ -85,6 +85,9 @@ function kop_rt_install() {
         answer_at DATETIME NULL,
         settled TEXT NULL,
         settled_at DATETIME NULL,
+        directions TEXT NULL,
+        companies TEXT NULL,
+        edited_at DATETIME NULL,
         seed_hash VARCHAR(40) NOT NULL DEFAULT '',
         created_by VARCHAR(60) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
@@ -219,6 +222,7 @@ function kop_rt_change(array $ids, array $set, $action, $label, $project_id = 0)
         if ($row) $before[] = $row;
     }
     if (!$before) throw new RuntimeException('Those tasks are gone. Reload the page.');
+    if ($action === 'edit') $set['edited_at'] = kop_rt_now();   // a session's rewording never overwrites it after this
     $set['updated_by'] = kop_rt_user();
     $set['updated_at'] = kop_rt_now();
     foreach ($before as $row) $wpdb->update(kop_rt_table(), $set, array('id' => (int) $row['id']));
@@ -228,15 +232,42 @@ function kop_rt_change(array $ids, array $set, $action, $label, $project_id = 0)
 }
 
 /** A new task from the screen. Returns its id. */
+/** A task's title is the question itself: there, and ending with "?". Returns it trimmed. */
+function kop_rt_check_question($title) {
+    $title = trim((string) $title);
+    if ($title === '') throw new RuntimeException('Type the question to answer.');
+    if (substr($title, -1) !== '?') throw new RuntimeException('Phrase it as a simple question, ending with "?" (for example "What year did Rocky Mountain Academy close?").');
+    return $title;
+}
+
+/** "What it is | https://..." lines (or bare addresses) as directions. */
+function kop_rt_parse_directions($text) {
+    $out = array();
+    foreach (preg_split('/\R/', (string) $text) as $line) {
+        $line = trim($line);
+        if ($line === '') continue;
+        $bar = strrpos($line, '|');
+        $label = $bar === false ? '' : trim(substr($line, 0, $bar));
+        $url = trim($bar === false ? $line : substr($line, $bar + 1));
+        if (!preg_match('#^https?://\S+$#', $url)) throw new RuntimeException('Each "where to look" line needs a web address: "What it is | https://...". This one has none: ' . $line);
+        $out[] = array('label' => mb_substr($label !== '' ? $label : $url, 0, 200), 'url' => $url, 'kind' => 'note');
+    }
+    return $out;
+}
+
+function kop_rt_directions_text(array $dirs) {
+    return implode("\n", array_map(function ($d) { return $d['label'] . ' | ' . $d['url']; }, $dirs));
+}
+
 function kop_rt_add(array $in) {
     global $wpdb;
-    $title = trim(mb_substr((string) ($in['title'] ?? ''), 0, 255));
-    if ($title === '') throw new RuntimeException('Give the task a title: the question to answer.');
+    $title = mb_substr(kop_rt_check_question($in['title'] ?? ''), 0, 255);
     $now = kop_rt_now();
     $wpdb->insert(kop_rt_table(), array(
         'task_key' => 'site:' . bin2hex(random_bytes(8)),
         'section' => trim(mb_substr((string) ($in['section'] ?? ''), 0, 191)), 'title' => $title,
         'body' => trim((string) ($in['body'] ?? '')), 'context' => '', 'records' => kop_rt_records_json((array) ($in['records'] ?? array())),
+        'directions' => wp_json_encode(array_values((array) ($in['directions'] ?? array()))),
         'found' => 'added ' . gmdate('Y-m-d') . ' by ' . kop_rt_user(), 'status' => 'open', 'assignee' => '',
         'created_by' => kop_rt_user(), 'created_at' => $now, 'updated_by' => kop_rt_user(), 'updated_at' => $now,
     ));
@@ -276,12 +307,70 @@ function kop_rt_recent_log($limit = 10) {
 
 /* ---- Volunteers ---------------------------------------------------------------------------- */
 
-/** What a volunteer reads for a task: its own question when one is set, else the title and the details in plain words. */
+/** The kop_operators ids a task names (companies column, same shape as records). */
+function kop_rt_company_ids(array $t) {
+    return kop_rt_record_ids(array('records' => $t['companies'] ?? ''));
+}
+
+/** The task's own "where to look" list: [{label, url, kind}]. */
+function kop_rt_directions(array $t) {
+    $d = json_decode((string) ($t['directions'] ?? ''), true);
+    return array_values(array_filter(is_array($d) ? $d : array(), function ($x) {
+        return is_array($x) && preg_match('#^https?://#', (string) ($x['url'] ?? ''));
+    }));
+}
+
+/** Company names by id. */
+function kop_rt_company_names(array $ids) {
+    global $wpdb;
+    $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+    if (!$ids) return array();
+    $out = array();
+    foreach ((array) $wpdb->get_results('SELECT id, name FROM ' . $wpdb->prefix . 'kop_operators WHERE id IN (' . implode(',', $ids) . ')', ARRAY_A) as $r) {
+        $out[(int) $r['id']] = (string) $r['name'];
+    }
+    return $out;
+}
+
+/**
+ * Where to look, among what KOP already holds: each record's KOP page (its news, court records, documents and
+ * inspections), each company's page, then the task's own list (news, court cases, Woodbury issues, archived
+ * websites, links from the notes). [{label, url, kind}]; a record or company with no page is left out.
+ */
+function kop_rt_where_to_look(array $t, array $names, array $companies) {
+    $out = array();
+    foreach (kop_rt_record_ids($t) as $rid) {
+        $url = isset($names[$rid]) && function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($rid) : '';
+        if (preg_match('#^https?://#', $url)) {
+            $out[] = array('label' => 'KOP page: ' . $names[$rid] . ' (its news, court records, documents and inspections)', 'url' => $url, 'kind' => 'record');
+        }
+    }
+    foreach (kop_rt_company_ids($t) as $cid) {
+        $url = isset($companies[$cid]) && function_exists('kop_operator_page_url') ? (string) kop_operator_page_url($cid) : '';
+        if (preg_match('#^https?://#', $url)) $out[] = array('label' => 'KOP company page: ' . $companies[$cid], 'url' => $url, 'kind' => 'company');
+    }
+    $seen = array_column($out, 'url');
+    foreach (kop_rt_directions($t) as $d) {
+        if (in_array($d['url'], $seen, true)) continue;
+        $seen[] = $d['url'];
+        $out[] = array('label' => (string) ($d['label'] ?? $d['url']), 'url' => (string) $d['url'], 'kind' => (string) ($d['kind'] ?? 'note'));
+    }
+    return $out;
+}
+
+/**
+ * What a volunteer reads for a task: the question (its own wording for volunteers when one is set), then where to
+ * look with each address. The details stay ours: they are written for staff.
+ */
 function kop_rt_volunteer_question(array $t) {
     $q = trim((string) ($t['question'] ?? ''));
-    if ($q !== '') return $q;
-    $body = trim(preg_replace(array('/\*\*(.+?)\*\*/', '/\[([^\]]+)\]\([^)]+\)/', '/`/'), array('$1', '$1', ''), (string) $t['body']));
-    return trim($t['title'] . ($body !== '' && $body !== $t['title'] ? "\n\n" . $body : ''));
+    $q = $q !== '' ? $q : trim((string) $t['title']);
+    $look = kop_rt_where_to_look($t, kop_rt_record_names(kop_rt_record_ids($t)), kop_rt_company_names(kop_rt_company_ids($t)));
+    if ($look) {
+        $q .= "\n\nWhere to start (what we already have):";
+        foreach (array_slice($look, 0, 12) as $l) $q .= "\n- " . $l['label'] . ': ' . $l['url'];
+    }
+    return $q;
 }
 
 /**
@@ -359,18 +448,21 @@ function kop_rt_seed($path = null) {
 
 /**
  * New keys in the seed become tasks; an entry whose hash moved hands over its answer (an open task becomes
- * Answered) and its settled line (an open or answered task becomes Settled). Runs when the file changes.
- * Returns [added, answered, settled].
+ * Answered) and its settled line (an open or answered task becomes Settled), and its wording (title, details,
+ * where to look, records and companies named) when nobody has edited the task on the screen (edited_at empty).
+ * Records only ever gain ids that way: one the merge tool moved stays moved. Runs when the file changes.
+ * Returns [added, answered, settled, reworded].
  */
 function kop_rt_import_seed($path = null, $force = false) {
     global $wpdb;
     $path = $path ?? get_stylesheet_directory() . '/seeds/research-tasks.json';
-    if (!is_readable($path) || get_option('kop_rt_db') !== KOP_RT_DB_VERSION) return array(0, 0, 0);
+    if (!is_readable($path) || get_option('kop_rt_db') !== KOP_RT_DB_VERSION) return array(0, 0, 0, 0);
     $sha = sha1_file($path);
-    if (!$force && get_option('kop_rt_seed_sha') === $sha) return array(0, 0, 0);
+    if (!$force && get_option('kop_rt_seed_sha') === $sha) return array(0, 0, 0, 0);
     $have = array();
-    foreach ((array) $wpdb->get_results('SELECT id, task_key, status, seed_hash, answer FROM ' . kop_rt_table(), ARRAY_A) as $r) $have[$r['task_key']] = $r;
-    $added = $answered = $settled = 0;
+    foreach ((array) $wpdb->get_results('SELECT id, task_key, status, seed_hash, answer, title, body, context, records, directions, companies, edited_at FROM '
+        . kop_rt_table(), ARRAY_A) as $r) $have[$r['task_key']] = $r;
+    $added = $answered = $settled = $reworded = 0;
     $now = kop_rt_now();
     foreach (kop_rt_seed($path)['tasks'] as $e) {
         $key = (string) ($e['key'] ?? '');
@@ -384,6 +476,7 @@ function kop_rt_import_seed($path = null, $force = false) {
                 'task_key' => mb_substr($key, 0, 191), 'section' => mb_substr((string) ($e['section'] ?? ''), 0, 191), 'title' => mb_substr((string) $e['title'], 0, 255),
                 'body' => (string) ($e['text'] ?? ''), 'context' => (string) ($e['context'] ?? ''), 'records' => kop_rt_records_json((array) ($e['records'] ?? array())),
                 'found' => mb_substr((string) ($e['found'] ?? ''), 0, 255),
+                'directions' => wp_json_encode(array_values((array) ($e['directions'] ?? array()))), 'companies' => kop_rt_records_json((array) ($e['companies'] ?? array())),
                 'status' => $set ? 'settled' : ($ans ? 'answered' : 'open'),
                 'answer' => $ans ? (string) ($ans['text'] ?? '') : null, 'answer_by' => $ans ? mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100) : '',
                 'answer_at' => $ans ? $now : null, 'settled' => $set ? (string) ($set['text'] ?? '') : null, 'settled_at' => $set ? $now : null,
@@ -394,6 +487,17 @@ function kop_rt_import_seed($path = null, $force = false) {
         }
         if ($row['seed_hash'] === $hash) continue;
         $up = array('seed_hash' => $hash);
+        if (empty($row['edited_at']) && in_array($row['status'], array('open', 'answered'), true)) {
+            $words = array('title' => mb_substr((string) $e['title'], 0, 255), 'body' => (string) ($e['text'] ?? ''), 'context' => (string) ($e['context'] ?? ''),
+                'directions' => wp_json_encode(array_values((array) ($e['directions'] ?? array()))),
+                'records' => kop_rt_records_json(array_merge(kop_rt_record_ids($row), (array) ($e['records'] ?? array()))),
+                'companies' => kop_rt_records_json(array_merge(kop_rt_company_ids($row), (array) ($e['companies'] ?? array()))));
+            $changed = array_filter($words, function ($v, $k) use ($row) { return (string) $v !== (string) $row[$k]; }, ARRAY_FILTER_USE_BOTH);
+            if ($changed) {
+                $up += $changed;
+                $reworded++;
+            }
+        }
         if ($ans && $row['status'] === 'open' && trim((string) $row['answer']) === '') {
             $up += array('status' => 'answered', 'answer' => (string) ($ans['text'] ?? ''), 'answer_by' => mb_substr((string) ($ans['by'] ?? 'Claude session'), 0, 100), 'answer_at' => $now);
             $answered++;
@@ -403,13 +507,14 @@ function kop_rt_import_seed($path = null, $force = false) {
             $settled++;
         }
         if (count($up) > 1) {
-            kop_rt_change(array((int) $row['id']), $up, 'seed', 'From a session: ' . (isset($up['settled']) ? 'settled' : 'answered'));
+            kop_rt_change(array((int) $row['id']), $up, 'seed', 'From a session: ' . (isset($up['settled']) ? 'settled' : (isset($up['answer']) ? 'answered' : 'reworded'))
+                . ' "' . mb_substr((string) $e['title'], 0, 100) . '"');
         } else {
             $wpdb->update(kop_rt_table(), $up, array('id' => (int) $row['id']));
         }
     }
     update_option('kop_rt_seed_sha', $sha, false);
-    return array($added, $answered, $settled);
+    return array($added, $answered, $settled, $reworded);
 }
 
 /* ---- What sessions read (api/research-tasks.php) ---------------------------------------------- */
@@ -420,7 +525,7 @@ function kop_rt_export(array $rows) {
         $out[] = array('id' => (int) $t['id'], 'key' => $t['task_key'], 'section' => $t['section'], 'title' => $t['title'], 'text' => (string) $t['body'],
             'context' => (string) $t['context'], 'records' => kop_rt_record_ids($t), 'status' => $t['status'], 'assignee' => $t['assignee'],
             'answer' => (string) $t['answer'], 'answerBy' => $t['answer_by'], 'settled' => (string) $t['settled'],
-            'fromSeed' => strpos((string) $t['task_key'], 'site:') !== 0);
+            'directions' => kop_rt_directions($t), 'companies' => kop_rt_company_ids($t), 'fromSeed' => strpos((string) $t['task_key'], 'site:') !== 0);
     }
     return $out;
 }
@@ -475,7 +580,7 @@ function kop_rt_submit($label, $act, $variant = 'secondary', $extra = '') {
     return '<button type="submit" name="rt_act" value="' . esc_attr($act) . '" class="button kop-ak-btn kop-ak-btn--' . esc_attr($variant) . '"' . $extra . '>' . esc_html($label) . '</button>';
 }
 
-function kop_rt_card_html(array $t, array $names, array $vols) {
+function kop_rt_card_html(array $t, array $names, array $vols, array $companies = array()) {
     $id = (int) $t['id'];
     $st = $t['status'];
     $statuses = kop_rt_statuses();
@@ -489,24 +594,24 @@ function kop_rt_card_html(array $t, array $names, array $vols) {
     $out .= '<h3 class="kop-rt-title">' . esc_html($t['title']) . '</h3>';
 
     $recs = kop_rt_record_ids($t);
-    if ($recs) {
-        $links = array();
-        foreach ($recs as $rid) {
-            $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($rid) : '';
-            $label = ($names[$rid] ?? 'Record') . ' #' . $rid;
-            $links[] = isset($names[$rid]) && preg_match('#^https?://#', $url) ? '<a href="' . esc_url($url) . '" target="_blank" rel="noopener">' . esc_html($label) . '</a>'
-                : esc_html($label . (isset($names[$rid]) ? '' : ' (gone: merged or deleted)'));
+    // Where to look: what KOP already holds about it.
+    $look = kop_rt_where_to_look($t, $names, $companies);
+    if ($look) {
+        $out .= '<div class="kop-rt-look"><p class="kop-rt-look__head">Where to look (what we already have)</p><ul>';
+        foreach ($look as $l) {
+            $out .= '<li class="is-' . esc_attr($l['kind']) . '"><a href="' . esc_url($l['url']) . '" target="_blank" rel="noopener">' . esc_html($l['label']) . '</a></li>';
         }
-        $out .= '<p class="kop-rt-records">Records: ' . implode(', ', $links) . '</p>';
+        $out .= '</ul></div>';
+    } else {
+        $out .= '<p class="kop-rt-look__none">Nothing on file about this yet: start with a web search, then add what you find with Edit.</p>';
     }
+    $gone = array_filter($recs, function ($rid) use ($names) { return !isset($names[$rid]); });
+    if ($gone) $out .= '<p class="kop-rt-found">Record' . (count($gone) > 1 ? 's' : '') . ' #' . esc_html(implode(', #', $gone)) . ' gone since (merged or deleted).</p>';
+    // The notes behind it, written for staff.
     $body = trim((string) $t['body']);
-    if ($body !== '' && $body !== $t['title']) {
-        $out .= mb_strlen($body) > 420 ? '<details class="kop-rt-more"><summary>Details</summary><div class="kop-rt-body">' . kop_rt_md($body) . '</div></details>'
-            : '<div class="kop-rt-body">' . kop_rt_md($body) . '</div>';
-    }
-    if (trim((string) $t['context']) !== '') {
-        $out .= '<details class="kop-rt-more"><summary>Background for this section</summary><div class="kop-rt-body">' . kop_rt_md($t['context']) . '</div></details>';
-    }
+    $notes = ($body !== '' && $body !== $t['title'] ? kop_rt_md($body) : '')
+        . (trim((string) $t['context']) !== '' ? '<p class="kop-rt-look__head">Background for this section</p>' . kop_rt_md($t['context']) : '');
+    if ($notes !== '') $out .= '<details class="kop-rt-more"><summary>Details</summary><div class="kop-rt-body">' . $notes . '</div></details>';
     $foot = array();
     if ($t['found'] !== '') $foot[] = ucfirst($t['found']);
     if ((int) $t['project_id']) {
@@ -540,10 +645,12 @@ function kop_rt_card_html(array $t, array $names, array $vols) {
         . kop_rt_submit('Settled', 'settle:' . $id, 'primary') . kop_rt_submit('Drop it (not worth finding)', 'drop:' . $id, 'danger')
         . ($st === 'answered' ? kop_rt_submit('The answer does not settle it', 'reopen:' . $id, 'quiet') : '') . '</div></details>';
     $out .= '<details class="kop-rt-more kop-rt-edit"><summary>Edit</summary>'
-        . '<label for="rt-title-' . $id . '">Title</label><input type="text" id="rt-title-' . $id . '" name="rt_title[' . $id . ']" value="' . esc_attr($t['title']) . '">'
-        . '<label for="rt-body-' . $id . '">Details</label><textarea id="rt-body-' . $id . '" name="rt_body[' . $id . ']" rows="5">' . esc_textarea((string) $t['body']) . '</textarea>'
-        . '<label for="rt-q-' . $id . '">Question for a volunteer (plain words; left empty, they get the title and the details)</label>'
-        . '<textarea id="rt-q-' . $id . '" name="rt_question[' . $id . ']" rows="3">' . esc_textarea((string) $t['question']) . '</textarea>';
+        . '<label for="rt-title-' . $id . '">The question (plain words, ending with ?)</label><input type="text" id="rt-title-' . $id . '" name="rt_title[' . $id . ']" value="' . esc_attr($t['title']) . '">'
+        . '<label for="rt-look-' . $id . '">Where to look: one per line, "What it is | https://..." (the records&#39; and companies&#39; KOP pages are added by themselves)</label>'
+        . '<textarea id="rt-look-' . $id . '" name="rt_look[' . $id . ']" rows="4">' . esc_textarea(kop_rt_directions_text(kop_rt_directions($t))) . '</textarea>'
+        . '<label for="rt-body-' . $id . '">Details (for us: what each source says, where the answer goes)</label><textarea id="rt-body-' . $id . '" name="rt_body[' . $id . ']" rows="5">' . esc_textarea((string) $t['body']) . '</textarea>'
+        . '<label for="rt-q-' . $id . '">Different wording for a volunteer (optional; they always get the question and where to look)</label>'
+        . '<textarea id="rt-q-' . $id . '" name="rt_question[' . $id . ']" rows="2">' . esc_textarea((string) $t['question']) . '</textarea>';
     if ($recs) {
         $out .= '<fieldset class="kop-rt-recs"><legend>Records (untick to take one off)</legend>';
         foreach ($recs as $rid) {
@@ -572,7 +679,8 @@ function kop_rt_handle_post() {
         case 'add':
             $recs = array_filter(array((int) ($_POST['rt_new_record'] ?? 0)));
             $nid = kop_rt_add(array('title' => wp_unslash($_POST['rt_new_title'] ?? ''), 'body' => wp_unslash($_POST['rt_new_body'] ?? ''),
-                'section' => wp_unslash($_POST['rt_new_section'] ?? ''), 'records' => $recs));
+                'section' => wp_unslash($_POST['rt_new_section'] ?? ''), 'records' => $recs,
+                'directions' => kop_rt_parse_directions((string) wp_unslash($_POST['rt_new_look'] ?? ''))));
             global $wpdb;
             return array('Added.', (int) $wpdb->get_var('SELECT MAX(id) FROM ' . kop_rt_log_table()), '<a href="#rt-' . $nid . '">Go to it</a>');
         case 'assign-owner': case 'assign-claude': case 'assign-none':
@@ -592,13 +700,12 @@ function kop_rt_handle_post() {
         case 'edit':
             $t = kop_rt_get($id);
             if (!$t) throw new RuntimeException('That task is gone.');
-            $title = $text('rt_title');
-            if ($title === '') throw new RuntimeException('A task needs a title.');
+            $title = kop_rt_check_question($text('rt_title'));
             $keep = array_map('intval', (array) ($_POST['rt_keep'][$id] ?? array()));
             $add = (int) ($_POST['rt_addrec'][$id] ?? 0);
             if ($add) $keep[] = $add;
             return array('Saved.', kop_rt_change(array($id), array('title' => mb_substr($title, 0, 255), 'body' => $text('rt_body'), 'question' => $text('rt_question'),
-                'records' => kop_rt_records_json($keep)), 'edit', 'Edited task #' . $id), '');
+                'directions' => wp_json_encode(kop_rt_parse_directions($text('rt_look'))), 'records' => kop_rt_records_json($keep)), 'edit', 'Edited task #' . $id), '');
         case 'bulk-owner': case 'bulk-claude': case 'bulk-none':
             $ids = array_map('intval', (array) ($_POST['rt_pick'] ?? array()));
             if (!$ids) throw new RuntimeException('Tick the tasks first.');
@@ -653,6 +760,9 @@ function kop_rt_page_body() {
     $ids = array();
     foreach ($rows as $t) $ids = array_merge($ids, kop_rt_record_ids($t));
     $names = kop_rt_record_names($ids);
+    $cids = array();
+    foreach ($rows as $t) $cids = array_merge($cids, kop_rt_company_ids($t));
+    $companies = kop_rt_company_names($cids);
 
     echo '<div class="wrap kop-ak kop-rt">';
     echo kop_ak_header('Research Tasks', array(
@@ -684,8 +794,9 @@ function kop_rt_page_body() {
 
     // Add a task (its own form, so the list's form below stays one).
     $add = '<form method="post" class="kop-rt-add">' . wp_nonce_field('kop_rt', '_wpnonce', true, false)
-        . '<label for="rt-new-title">The question</label><input type="text" id="rt-new-title" name="rt_new_title" required placeholder="When did Rocky Mountain Academy close?">'
+        . '<label for="rt-new-title">The question, in plain words, ending with ?</label><input type="text" id="rt-new-title" name="rt_new_title" required placeholder="When did Rocky Mountain Academy close?">'
         . '<label for="rt-new-body">What each source says, and where the answer goes</label><textarea id="rt-new-body" name="rt_new_body" rows="4"></textarea>'
+        . '<label for="rt-new-look">Where to look: what we already have about it, one per line, "What it is | https://..."</label><textarea id="rt-new-look" name="rt_new_look" rows="3"></textarea>'
         . '<label for="rt-new-section">Section</label><input type="text" id="rt-new-section" name="rt_new_section" list="rt-sections" value="' . esc_attr($section) . '">'
         . '<datalist id="rt-sections">' . implode('', array_map(function ($s) { return '<option value="' . esc_attr($s) . '">'; }, $secs)) . '</datalist>'
         . '<label>Record it is about (optional)</label>' . kop_facility_finder_field('rt_new_record')
@@ -716,7 +827,7 @@ function kop_rt_page_body() {
             echo '<section class="kop-rt-group"><h2>' . esc_html($t['section'] !== '' ? $t['section'] : 'No section') . '</h2>';
             $last = $t['section'];
         }
-        echo kop_rt_card_html($t, $names, $vols);
+        echo kop_rt_card_html($t, $names, $vols, $companies);
     }
     if ($last !== null) echo '</section>';
 
