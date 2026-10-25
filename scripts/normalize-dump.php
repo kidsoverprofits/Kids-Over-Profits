@@ -24,7 +24,12 @@
  *   php scripts/normalize-dump.php --dump /path/to/dump --rule status.vocabulary
  *   php scripts/normalize-dump.php --dump /path/to/dump --emit copies.jsonl
  *
+ *   php scripts/normalize-dump.php --sqlite tmp/prod.sqlite --emit copies.jsonl
+ *
  * --emit writes {raw, opts, doc} per copy for scripts/check-facility-normalizer-parity.js.
+ * --sqlite reads the production mirror instead of a dump: each facilities_v2
+ * document, its legacy projection (kop_facility_to_legacy(), what the form
+ * edits), and every facility in suggested_edits and providers_master as sent.
  */
 
 require_once __DIR__ . '/../inc/facility-store.php';
@@ -39,10 +44,11 @@ if (PHP_SAPI !== 'cli') {
 // Arguments
 // ---------------------------------------------------------------------------
 
-$opts = array('dump' => null, 'samples' => 4, 'out' => null, 'rule' => null, 'emit' => null);
+$opts = array('dump' => null, 'sqlite' => null, 'samples' => 4, 'out' => null, 'rule' => null, 'emit' => null);
 for ($i = 1; $i < $argc; $i++) {
     switch ($argv[$i]) {
         case '--dump':    $opts['dump'] = $argv[++$i]; break;
+        case '--sqlite':  $opts['sqlite'] = $argv[++$i]; break;
         case '--samples': $opts['samples'] = max(0, (int)$argv[++$i]); break;
         case '--out':     $opts['out'] = $argv[++$i]; break;
         case '--rule':    $opts['rule'] = $argv[++$i]; break;
@@ -56,8 +62,8 @@ for ($i = 1; $i < $argc; $i++) {
             exit(2);
     }
 }
-if (!$opts['dump'] || !is_dir($opts['dump'])) {
-    fwrite(STDERR, "--dump <directory containing facilities_master.tsv and locations_master.tsv> is required\n");
+if ($opts['sqlite'] ? !is_file($opts['sqlite']) : (!$opts['dump'] || !is_dir($opts['dump']))) {
+    fwrite(STDERR, "--dump <directory containing facilities_master.tsv and locations_master.tsv> or --sqlite <mirror> is required\n");
     exit(2);
 }
 
@@ -183,9 +189,35 @@ $inspect = function (array $facility, array $ctx) use (&$stats, $opts, $sample, 
     }
 };
 
-kop_dump_walk_facilities($opts['dump'], $inspect, function ($message) use (&$stats) {
-    $stats['json_errors'][] = $message;
-});
+if ($opts['sqlite']) {
+    $db = new PDO('sqlite:' . $opts['sqlite']);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    foreach ($db->query('SELECT id, json_data FROM facilities_v2 ORDER BY id') as $r) {
+        $doc = json_decode((string)$r['json_data'], true);
+        if (!is_array($doc)) { $stats['json_errors'][] = 'facilities_v2 #' . $r['id']; continue; }
+        $ctx = array('row_id' => $r['id'], 'index' => null, 'opts' => array('facility_id' => (int)$r['id']));
+        $inspect($doc, array('source' => 'facilities_v2') + $ctx);
+        $inspect(kop_facility_to_legacy($doc), array('source' => 'facilities_v2 legacy') + $ctx);
+    }
+    foreach (array('suggested_edits' => 'edited_json_data', 'providers_master' => 'json_data') as $table => $col) {
+        try {
+            $rows = $db->query("SELECT id, $col AS j FROM $table ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            continue; // not in this mirror
+        }
+        foreach ($rows as $r) {
+            $data = json_decode((string)$r['j'], true);
+            for ($depth = 0; is_array($data) && !isset($data['facilities']) && isset($data['data']) && $depth < 3; $depth++) $data = $data['data'];
+            foreach ((is_array($data['facilities'] ?? null) ? $data['facilities'] : array()) as $i => $f) {
+                if (is_array($f)) $inspect($f, array('source' => $table, 'row_id' => $r['id'], 'index' => $i, 'opts' => array()));
+            }
+        }
+    }
+} else {
+    kop_dump_walk_facilities($opts['dump'], $inspect, function ($message) use (&$stats) {
+        $stats['json_errors'][] = $message;
+    });
+}
 if ($emit_handle) fclose($emit_handle);
 
 // ---------------------------------------------------------------------------

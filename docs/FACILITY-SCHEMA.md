@@ -452,6 +452,21 @@ As of 2026-09-16, all 10,199 copies match exactly, and the round trip
 v2 -> legacy -> v2 is lossless in both languages. Run the check after any
 change to either normalizer.
 
+Since 2026-10-25 the copies file comes from the production mirror, no dump
+needed:
+
+```bash
+php -d memory_limit=4G -d extension=pdo_sqlite -d extension=mbstring scripts/normalize-dump.php --sqlite tmp/prod.sqlite --emit copies.jsonl
+node scripts/check-facility-normalizer-parity.js copies.jsonl
+node scripts/test-facility-fields.js copies.jsonl   # js/data-form-modules/facility-fields.js, both shapes, every record
+```
+
+It holds each `facilities_v2` document, its legacy projection, and every
+facility in `suggested_edits` and `providers_master` as sent (10,673 copies on
+2026-10-25, all matching). The form modules read and write facility fields
+through `KOP_FacilityFields` (by v2 path, on either shape) while they move to
+v2 (docs/plan 4.3 item 17).
+
 Since the legacy tables were frozen, the copies file is built from
 `facilities_v2` itself: each stored document, and its legacy projection
 (`kop_facility_to_legacy`, what the form sends), each with the PHP result.
