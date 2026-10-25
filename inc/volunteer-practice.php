@@ -221,13 +221,14 @@ function kop_volpr_draw($vid, $source) {
     return $round;
 }
 
-/** What a queue's work is, in a line, for "Start now" on the volunteer page ('' = the title says enough). */
+/** What a queue's work is, in a line, for "Choose your work" on the volunteer page (its brief's one question when none is written). */
 function kop_volpr_blurb($source) {
     $b = array(
         'inspection-highlights' => 'Each one is a passage our scanner pulled out of a state inspection report. You say whether it is a serious violation '
-            . '(harm or danger to a young person) or paperwork. Most take about a minute, and this is the work we most need help with.',
+            . '(harm or danger to a young person) or paperwork. This is the work we most need help with.',
     );
-    return (string) apply_filters('kop_volpr_blurb', $b[$source] ?? '', $source);
+    $fallback = function_exists('kop_volp_kinds') ? (string) (kop_volp_kinds()[$source]['question'] ?? '') : '';
+    return (string) apply_filters('kop_volpr_blurb', $b[$source] ?? $fallback, $source);
 }
 
 /** Every round of this volunteer's, oldest first: [{round, source, label, total, done, right, finished, passed}]. Gone items do not count. */
@@ -271,8 +272,9 @@ function kop_volpr_passed($vid) {
 function kop_volpr_status($vid) {
     $rules = kop_volpr_rules();
     $out = array('size' => $rules['size'], 'pass' => $rules['pass'], 'open' => null, 'last' => null, 'passed' => array(), 'queues' => array());
-    if (!(int) $vid) return $out;
-    foreach (kop_volpr_rounds($vid) as $r) {
+    // An admin's preview lists the queues a new volunteer chooses from (its buttons are off).
+    if (!(int) $vid && !current_user_can('manage_options')) return $out;
+    foreach ((int) $vid ? kop_volpr_rounds($vid) : array() as $r) {
         if (!$r['finished']) $out['open'] = $r;
         else $out['last'] = $r;
         if ($r['passed']) $out['passed'][] = $r['source'];
@@ -280,7 +282,8 @@ function kop_volpr_status($vid) {
     $out['passed'] = array_values(array_unique($out['passed']));
     foreach (kop_volpr_queues() as $key => $label) {
         if (!in_array($key, $out['passed'], true)) $out['queues'][] = array('key' => $key, 'label' => $label,
-            'title' => (string) (kop_volp_kinds()[$key]['title'] ?? $label), 'blurb' => kop_volpr_blurb($key));
+            'title' => (string) (kop_volp_kinds()[$key]['title'] ?? $label), 'blurb' => kop_volpr_blurb($key),
+            'minutes' => (int) (kop_volp_kinds()[$key]['minutes'] ?? 0));
     }
     return $out;
 }

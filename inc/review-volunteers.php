@@ -144,6 +144,9 @@ function kop_vol_earnable_sources() {
     $all = function_exists('kop_rinbox_sources') ? kop_rinbox_sources() : array();
     $first = kop_vol_starter_source();
     $out = (isset($all[$first]) && !in_array($first, kop_vol_never_sources(), true)) ? array($first => $all[$first]) : array();
+    // The other queues' practice rounds are not ready yet (owner, 2026-10-25): volunteers get the starter queue only,
+    // plus whatever projects an admin makes for them (kop_volp_allows()). Turn the rest back on with this filter.
+    if (!apply_filters('kop_vol_more_queues', false)) return $out;
     return $out + kop_vol_sources();
 }
 

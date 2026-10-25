@@ -928,7 +928,11 @@ function kop_volp_self_status($vid) {
     $rules = kop_volp_self_rules();
     $out = array('eligible' => false, 'decided' => 0, 'agreed' => 0, 'need_decided' => $rules['decided'], 'need_rate' => (int) round($rules['rate'] * 100),
         'size' => $rules['size'], 'open' => 0, 'queues' => array());
-    if (!(int) $vid) return $out;
+    if (!(int) $vid) {
+        // An admin's preview: what a new volunteer chooses from.
+        if (function_exists('kop_volpr_status') && current_user_can('manage_options')) $out['practice'] = kop_volpr_status(0);
+        return $out;
+    }
     global $wpdb;
     kop_vol_ensure_tables();
     $r = kop_vol_recs_table();

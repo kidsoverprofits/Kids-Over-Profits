@@ -53,6 +53,8 @@ register_shutdown_function(function () use ($db_path) { $GLOBALS['pdo'] = null; 
 
 $GLOBALS['kop_test_wpdb_writes'] = true;
 require __DIR__ . '/kop-test-harness.php';
+// Every queue open to volunteers, as when the other practice rounds are ready (off on the site: only the inspection findings).
+$GLOBALS['kop_test_filters']['kop_vol_more_queues'] = true;
 $pdo->sqliteCreateFunction('UTC_TIMESTAMP', function () { return gmdate('Y-m-d H:i:s'); }, 0);
 $pdo->sqliteCreateFunction('NOW', function () { return gmdate('Y-m-d H:i:s'); }, 0);
 if (!function_exists('kop_seed_pdo')) { function kop_seed_pdo() { return $GLOBALS['pdo']; } }

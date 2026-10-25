@@ -24,27 +24,28 @@ get_header();
         <h1>Volunteer review</h1>
         <?php if ($kop_vol || $kop_vol_preview) : ?>
             <p><?php echo $kop_vol ? 'Hi ' . esc_html($kop_vol['name']) . ', thank you for helping.' : 'Admin preview: this is what volunteers see. Recommending is turned off for you here.'; ?></p>
-            <p>Our scanner reads state inspection reports on troubled teen programs and pulls out passages that may be serious violations.
-                It cannot tell who did what to whom, or whether a child was hurt. You read each passage, open the full report when it is
-                unclear, and tell us whether it is a serious violation: harm or danger to a young person, not paperwork. An admin makes every
-                final call. Approved violations are published on the site, and the most serious on our home page and the inspection reports hub.</p>
+            <p>There are four kinds of work here, and you choose below: checking serious violations our scanner pulls out of state inspection
+                reports, answering research questions about programs, making social media posts from what we add to the site, and finding
+                pictures for our pages. An admin checks everything before it changes the site or goes out.</p>
             <div class="kop-vol-warning" role="note">
-                <p><strong>Before you start: this is hard reading.</strong> The reports describe what was done to children in these programs:
-                    physical and sexual abuse, restraint, injuries, self-harm, neglect and deaths. Inspectors write it plainly, and the full
-                    reports give more detail.</p>
-                <p>Take breaks. Skip any item with <em>Skip for now</em>, hand a batch back, or start with other work instead. You never
+                <p><strong>Before you start: this is hard reading.</strong> Much of this work describes what was done to children in these programs:
+                    physical and sexual abuse, restraint, injuries, self-harm, neglect and deaths. The inspection findings are the most direct:
+                    inspectors write it plainly, and the full reports give more detail.</p>
+                <p>Take breaks. Skip any item with <em>Skip for now</em>, hand a batch back, or choose other work. You never
                     have to finish anything.</p>
             </div>
             <details class="kop-vol-howto"<?php echo $kop_vol_new || $kop_vol_preview ? ' open' : ''; ?>>
                 <summary>How this works</summary>
                 <h2>Getting started</h2>
-                <p>Press <em>Start now</em>. You get a practice round: 10 findings an admin has already decided, with the decision shown after
-                    each one. Get 8 of them the same and your first 10 real findings open straight away.</p>
-                <p>On each one, choose <em>Recommend approve</em>, <em>Recommend reject</em> or <em>Not sure</em>. Not sure is a good answer
-                    when the note says why. Nothing changes on the site until an admin checks your call.</p>
+                <p>Under <em>Choose your work</em>, pick one. The inspection findings start with a practice round: 10 findings an admin has
+                    already decided, with the decision shown after each one. Get 8 of them the same and your first 10 real ones open straight
+                    away. On each, choose <em>Recommend approve</em>, <em>Recommend reject</em> or <em>Not sure</em>; not sure is a good answer
+                    when the note says why.</p>
+                <p>Research questions need no practice round: tick the ones you want and take them. For social media posts or pictures, press
+                    <em>Ask for this work</em> and we set you up; the work then shows up on this page.</p>
                 <h2>Choosing your next work</h2>
-                <p>When a batch is done, <em>Give me 10 more</em> starts the next one. Under <em>Learn another queue</em>, a practice round
-                    opens other work: news stories, court cases, program closures and more. Each opens to you once you pass its round.</p>
+                <p>When a batch is done, <em>Give me 10 more</em> starts the next one. The other kinds of work stay one click away under
+                    <em>Other work</em>.</p>
                 <p>Only a few minutes? <a href="<?php echo esc_url(function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/')); ?>">Answer our
                     questions</a>: one short question at a time about what our records are missing.</p>
                 <h2>Taking a break or stopping</h2>

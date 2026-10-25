@@ -47,7 +47,8 @@ function add_filter() {}
 function remove_filter() {}
 function has_action() { return false; }
 function do_action() {}
-function apply_filters($tag, $value) { return $value; }
+// A test sets $GLOBALS['kop_test_filters'][tag] to what that filter returns.
+function apply_filters($tag, $value) { return array_key_exists($tag, $GLOBALS['kop_test_filters'] ?? array()) ? $GLOBALS['kop_test_filters'][$tag] : $value; }
 function register_rest_route() {}
 function rest_ensure_response($v) { return $v; }
 function rest_url($path = '') { return 'https://example.test/wp-json/' . ltrim($path, '/'); }

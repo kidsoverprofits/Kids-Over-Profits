@@ -145,6 +145,9 @@ echo "\nQueues are earned\n";
 $check('a new volunteer has no queue of their own', kop_vol_sources_for($id) === array(), implode(', ', array_keys(kop_vol_sources_for($id))));
 $check('...so a queue refuses them', strpos($throws(function () use ($id) { kop_vol_items($id, 'news', 0, 5); }), 'practice') !== false);
 $check('the violations queue is the one to start in', array_keys(kop_vol_earnable_sources())[0] === 'inspection-highlights');
+$check('until the other practice rounds are ready, it is the only one', array_keys(kop_vol_earnable_sources()) === array('inspection-highlights'));
+// The rest of this test is the machinery for when the other queues are turned back on.
+$GLOBALS['kop_test_filters']['kop_vol_more_queues'] = true;
 $earn($id, array('news'));
 $check('a passed practice round opens that queue only', array_keys(kop_vol_sources_for($id)) === array('news'));
 $pdo->prepare("INSERT INTO wpdl_kop_volunteer_recs (volunteer_id, source, item_key, verdict, created_at, updated_at) VALUES (?, 'lawsuit', 'earlier', 'approve', '2026-01-01', '2026-01-01')")->execute(array($id2));

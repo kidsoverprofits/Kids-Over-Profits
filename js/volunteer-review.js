@@ -756,8 +756,10 @@
     function renderProjects() {
         projectsPanel.innerHTML = '';
         var self = state.self;
-        var starting = !state.projects.length && !(self && self.eligible) && canPractice();
-        projectsPanel.appendChild(el('h2', { text: state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : (starting ? 'Start now' : 'Your next batch')) }));
+        // Nothing on their plate yet (or an admin's preview): the four kinds of work to choose from.
+        var starting = !!(self && self.practice) && (cfg.preview || (!state.projects.length && !self.eligible));
+        projectsPanel.appendChild(el('h2', { text: starting && !state.projects.length ? 'Choose your work'
+            : (state.projects.length === 1 ? 'Your project' : (state.projects.length ? 'Your projects' : 'Your next batch')) }));
         var ul = el('ul', { class: 'kop-vol-project-list' });
         state.projects.forEach(function (p) {
             var finished = p.done >= p.total;
@@ -772,7 +774,13 @@
         });
         if (state.projects.length) projectsPanel.appendChild(ul);
         if (self && self.eligible && !self.open && self.queues.length) projectsPanel.appendChild(selfAssignForm(self));
-        if (canPractice()) projectsPanel.appendChild(self.eligible || state.projects.length ? practiceForm(self.practice, true) : startNow(self.practice));
+        if (starting) {
+            if (state.projects.length) projectsPanel.appendChild(el('h2', { text: 'Choose your work' }));
+            projectsPanel.appendChild(startNow(self.practice));
+        } else if (self) {
+            if (canPractice()) projectsPanel.appendChild(practiceForm(self.practice, true));
+            projectsPanel.appendChild(otherWorkFold());
+        }
         // Research questions anyone may pick (no practice round needed: an admin reads every cited answer).
         projectsPanel.appendChild(pickBox);
         if (!pickState.loaded || Date.now() - pickState.at > 30000) loadPickable(); else renderPicker();
@@ -905,47 +913,96 @@
         return !!(self && self.practice && (self.practice.open || self.practice.queues.length)) && !cfg.preview;
     }
 
-    // A new volunteer's one button: the practice round in the first queue offered (the violation findings), then the real batch.
+    // An admin's preview shows the choices a new volunteer starts from, with the buttons off.
+    function previewChoices() {
+        return !!(cfg.preview && state.self && state.self.practice);
+    }
+
+    // The work besides review queues: research questions (the box below), post ideas and photos (an admin sets those up,
+    // so the card asks for them, or carries on one already made).
+    var OTHER_WORK = [
+        { kind: 'research', title: 'Research questions', blurb: 'Look up one thing our records are missing: when a program opened, who ran it, where it moved. '
+            + 'Every fact you send needs its link. No practice round: an admin reads every answer.' },
+        { kind: 'social', title: 'Social media posts', blurb: 'Turn what we added to the site this week into posts: a picture and a short caption from the facts on the card. '
+            + 'Nothing is posted until an admin approves it.', ask: 'I would like to make social media posts. Could you set me up with post ideas?' },
+        { kind: 'image', title: 'Photos for our pages', blurb: 'Find openly licensed pictures (Wikimedia Commons, the Library of Congress and others) for pages that have none, '
+            + 'and send the link, who made it and the license. Nothing goes on a page until an admin approves it.', ask: 'I would like to find photos for your pages. Could you set me up?' }
+    ];
+
+    function otherWorkCards() {
+        return OTHER_WORK.map(function (w) {
+            var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+            var go;
+            var mine = state.projects.filter(function (p) { return p.kind === w.kind && p.done < p.total; })[0];
+            if (w.kind === 'research') {
+                go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'See the questions', onclick: function () {
+                    if (pickBox.hidden) { msg.textContent = 'No research questions are open right now. Look again soon.'; return; }
+                    pickBox.open = true;
+                    pickOpened = true;
+                    pickBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } });
+            } else if (mine) {
+                go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: mine.done ? 'Carry on' : 'Start', onclick: function () { openProject(mine.id); } });
+            } else {
+                go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Ask for this work', disabled: cfg.preview ? true : null, onclick: function () {
+                    go.disabled = true;
+                    msg.className = 'kop-vol-msg';
+                    msg.textContent = 'Sending…';
+                    api('message', { body: w.ask }).then(function (res) {
+                        msgs = res.messages || msgs;
+                        drawMessages();
+                        msg.textContent = 'Sent. We will set it up and it will show up on this page; our answer is in "Questions? Ask us" below.';
+                    }).catch(function (e) {
+                        go.disabled = false;
+                        msg.className = 'kop-vol-msg is-error';
+                        msg.textContent = e.message;
+                    });
+                } });
+            }
+            return el('li', { class: 'kop-vol-choice' }, [el('h3', { text: w.title }), el('p', { text: w.blurb }), go, msg]);
+        });
+    }
+
+    // Already working: the other kinds of work, one line until opened.
+    function otherWorkFold() {
+        return el('details', { class: 'kop-vol-self kop-vol-otherwork' }, [
+            el('summary', { text: 'Other work: research questions, social media posts, photos' }),
+            el('ul', { class: 'kop-vol-choices' }, otherWorkCards())
+        ]);
+    }
+
+    // A new volunteer chooses the work to begin with: the inspection findings (a practice round first, marked as the
+    // most needed), research questions, social media posts or photos.
     function startNow(pr) {
         if (pr.open || (pr.last && !pr.last.passed)) return practiceForm(pr, false);
-        var first = pr.queues[0];
-        var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
-        var go = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve kop-vol-btn-big', text: 'Start now', onclick: function () {
-            go.disabled = true;
-            msg.className = 'kop-vol-msg';
-            msg.textContent = 'Setting it up…';
-            startPractice(first.key).catch(function (e) {
-                go.disabled = false;
-                msg.className = 'kop-vol-msg is-error';
-                msg.textContent = e.message;
-            });
-        } });
         var box = el('div', { class: 'kop-vol-self kop-vol-start' }, [
-            el('p', { text: 'Your first job: ' + (first.title || first.label) + '. ' + (first.blurb || '') }),
-            el('ol', { class: 'kop-vol-steps' }, [
-                el('li', null, [el('strong', { text: 'Practice: ' }), pr.size + ' items we have already decided. After each one you see what we decided. About 10 minutes.']),
-                el('li', null, [el('strong', { text: 'Then the real thing: ' }), 'get ' + pr.pass + ' of ' + pr.size + ' the same as us and your first ' + pr.size + ' real ones open straight away.'])
-            ]),
-            go, msg
+            el('p', { text: 'Choose the kind of work you want. You can do more than one, and change any time.' })
         ]);
-        // Someone who would rather not read the reports starts with other work.
-        var others = pr.queues.slice(1);
-        if (others.length) {
-            var pick = el('select', { id: 'kop-vol-start-other' }, others.map(function (q) { return el('option', { value: q.key, text: q.title || q.label }); }));
-            var omsg = el('p', { class: 'kop-vol-msg', role: 'status' });
-            var ogo = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain', text: 'Start with this instead', onclick: function () {
-                ogo.disabled = true;
-                startPractice(pick.value).catch(function (e) {
-                    ogo.disabled = false;
-                    omsg.className = 'kop-vol-msg is-error';
-                    omsg.textContent = e.message;
-                });
-            } });
-            box.appendChild(el('details', { class: 'kop-vol-other' }, [
-                el('summary', { text: 'Rather not read the inspection reports? Start with other work' }),
-                el('label', { for: 'kop-vol-start-other', text: 'Work ' }), pick, ' ', ogo, omsg
+        var ul = el('ul', { class: 'kop-vol-choices' });
+        pr.queues.forEach(function (q, i) {
+            var msg = el('p', { class: 'kop-vol-msg', role: 'status' });
+            var go = el('button', { type: 'button', class: 'kop-vol-btn ' + (i ? 'kop-vol-btn-plain' : 'kop-vol-btn-approve'), text: 'Start practice',
+                'aria-label': 'Start practice: ' + (q.title || q.label), disabled: cfg.preview ? true : null, onclick: function () {
+                    go.disabled = true;
+                    msg.className = 'kop-vol-msg';
+                    msg.textContent = 'Setting it up…';
+                    startPractice(q.key).catch(function (e) {
+                        go.disabled = false;
+                        msg.className = 'kop-vol-msg is-error';
+                        msg.textContent = e.message;
+                    });
+                } });
+            ul.appendChild(el('li', { class: 'kop-vol-choice' + (i ? '' : ' is-first') }, [
+                el('h3', null, [q.title || q.label, i ? null : el('span', { class: 'kop-vol-choice-tag', text: 'Most needed' })]),
+                q.blurb ? el('p', { text: q.blurb }) : null,
+                el('p', { class: 'kop-vol-meta', text: 'Starts with a practice round: ' + pr.size + ' items we have already decided, with our answer after each one. Get '
+                    + pr.pass + ' of ' + pr.size + ' the same as us and your first real ones open straight away.'
+                    + (q.minutes ? ' About ' + q.minutes + (q.minutes === 1 ? ' minute' : ' minutes') + ' an item.' : '') }),
+                go, msg
             ]));
-        }
+        });
+        otherWorkCards().forEach(function (li) { ul.appendChild(li); });
+        box.appendChild(ul);
         return box;
     }
 
@@ -1526,19 +1583,25 @@
             window.setInterval(function () { if (!document.hidden) loadMessages(false); }, 120000);
         };
         var canSelf = state.self && state.self.eligible && !state.self.open && state.self.queues.length;
-        if (!state.queues.length && !state.projects.length && !canSelf && !canPractice()) {
+        if (!state.queues.length && !state.projects.length && !canSelf && !canPractice() && !state.self) {
             app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: 'There is nothing to review right now. Thank you for checking!' })]));
             startMessages();
             return;
         }
-        if (state.projects.length || canSelf || canPractice()) {
+        var choosing = previewChoices();
+        if (state.projects.length || canSelf || canPractice() || choosing || state.self) {
             renderProjects();
             app.appendChild(projectsPanel);
         }
         // With a project, or no queue of their own yet, the queues are a fold: the panel above is the thing to do.
-        app.appendChild(state.projects.length || !state.queues.length
-            ? el('details', { class: 'kop-vol-panel kop-vol-browse' }, [el('summary', { text: state.queues.length ? 'Your past answers, or a whole queue' : 'Your past answers' }), tabs])
-            : el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [tabs]));
+        // Otherwise they are the choice itself, under a heading that says so.
+        app.appendChild(state.projects.length || !state.queues.length || choosing || state.self
+            ? el('details', { class: 'kop-vol-panel kop-vol-browse' }, [el('summary', { text: choosing ? 'Admin preview: open a whole queue as a volunteer sees it'
+                : (state.queues.length ? 'Your past answers, or a whole queue' : 'Your past answers') }), tabs])
+            : el('section', { class: 'kop-vol-panel kop-vol-tabs-panel' }, [
+                el('h2', { text: 'Choose what to review' }),
+                el('p', { class: 'kop-vol-meta', text: 'Each button is a different kind of work; the number is how many are waiting. Pick one to see its items and what to check.' }),
+                tabs]));
         app.appendChild(body);
         startMessages();
         renderTabs();
@@ -1556,7 +1619,8 @@
             // Straight to work: their own projects come first.
             if (unfinished.length) openProject(unfinished[0].id);
         } else if (canPractice() && state.self.practice.open) openPractice();
-        else if (state.queues.length && !canSelf && !canPractice()) openQueue((state.queues.filter(function (q) { return q.count; })[0] || state.queues[0]).key);
+        // Only one queue to give them: open it. With more, the buttons above are the choice; nothing opens by itself.
+        else if (state.queues.length === 1 && !canSelf && !canPractice() && !choosing) openQueue(state.queues[0].key);
     }).catch(function (e) {
         app.innerHTML = '';
         app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: e.message })]));
