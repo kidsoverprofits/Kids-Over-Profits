@@ -353,8 +353,10 @@
             it.facts.forEach(function (f) { dl.appendChild(el('dt', { text: f.label })); dl.appendChild(el('dd', { text: f.value })); });
             node.appendChild(dl);
         }
-        node.appendChild(el('div', { class: 'kop-vol-cite' }, [
-            el('p', { class: 'kop-vol-cite-head', text: 'Cite every piece of information' }),
+        var citeSeen = false;
+        try { citeSeen = window.localStorage.getItem('kopVolCiteSeen') === '1'; } catch (e) { /* private window: open each time */ }
+        node.appendChild(el('details', { class: 'kop-vol-cite', open: citeSeen ? null : true }, [
+            el('summary', { class: 'kop-vol-cite-head', text: 'Cite every piece of information: one fact per box, each with its link' }),
             el('ol', null, [
                 el('li', { text: 'Put each fact you found in its own box below: one fact per box. "Add another fact" makes a new box.' }),
                 el('li', { text: 'Give every fact the link to the page that says it. A fact with no link cannot be used, so leave out anything you cannot link to, even if you are sure of it.' }),
@@ -422,6 +424,8 @@
             msg.hidden = true;
             api('answer', { project_id: it.project_id, key: it.key, answer: isNotFound ? looked.value : note.value, claims: claims, links: [],
                 not_found: isNotFound ? 1 : 0 }).then(function (res) {
+                // Once they have sent an answer the instructions fold to one line on the next questions.
+                try { window.localStorage.setItem('kopVolCiteSeen', '1'); } catch (e) { /* not remembered */ }
                 onDone(it, res.answer || {});
             }).catch(function (e) {
                 buttons.forEach(function (b) { b.disabled = false; });
@@ -688,8 +692,10 @@
     /* ---- Research questions to pick (inc/research-tasks.php, REST volunteer/research) ------------- */
 
     // Every open question nobody has yet: tick the ones you want, they become your own project.
-    var pickBox = el('div', { class: 'kop-vol-self kop-vol-pickq' });
-    var pickState = { loaded: false, at: 0, questions: [], hold: 5, held: 0, section: '', search: '', shown: 20, ticked: {} };
+    var pickBox = el('details', { class: 'kop-vol-self kop-vol-pickq' });
+    var pickOpened = false;
+    pickBox.addEventListener('toggle', function () { pickOpened = pickBox.open; });
+    var pickState = { loaded: false, at: 0, questions: [], hold: 5, held: 0, section: '', search: '', shown: 8, ticked: {} };
 
     function loadPickable() {
         return api('research', { do: 'list' }).then(function (data) {
@@ -708,10 +714,12 @@
         pickBox.hidden = !qs.length;
         if (!qs.length) return;
         var room = Math.max(0, pickState.hold - pickState.held);
-        pickBox.appendChild(el('h3', { text: 'Research questions you can pick' }));
-        pickBox.appendChild(el('p', { class: 'kop-vol-meta', text: 'Questions we need answered about programs, companies and people. Tick the ones you want to find out and press "Take". '
-            + 'Each one lists where to start, and every fact in your answer needs the link to the page that says it. You can hold ' + pickState.hold + ' at a time'
-            + (pickState.held ? ' (you have ' + pickState.held + ' now)' : '') + '.' }));
+        pickBox.appendChild(el('summary', null, [el('span', { class: 'kop-vol-pickq-title', text: 'Research questions you can pick' }),
+            el('span', { class: 'kop-vol-meta', text: ' ' + qs.length + ' open' + (pickState.held ? ' · you hold ' + pickState.held : '') })]));
+        // Open when they have nothing else to do, or when they opened it themselves; one line otherwise.
+        pickBox.open = pickOpened || !state.projects.some(function (p) { return p.done < p.total; });
+        pickBox.appendChild(el('p', { class: 'kop-vol-meta', text: 'Tick the ones you want to find out, then Take. Each lists where to start; every fact you send needs its link. '
+            + pickState.hold + ' at a time' + (pickState.held ? ' (you have ' + pickState.held + ' now)' : '') + '.' }));
         if (!room) {
             pickBox.appendChild(el('p', { class: 'kop-vol-msg', text: 'You have ' + pickState.hold + ' questions to answer already. Answer or hand back some of them, then pick more.' }));
             return;
@@ -719,7 +727,7 @@
         var sections = [];
         qs.forEach(function (q) { if (q.section && sections.indexOf(q.section) < 0) sections.push(q.section); });
         sections.sort();
-        var sec = el('select', { id: 'kop-vol-pickq-section', onchange: function () { pickState.section = sec.value; pickState.shown = 20; drawList(); } },
+        var sec = el('select', { id: 'kop-vol-pickq-section', onchange: function () { pickState.section = sec.value; pickState.shown = 8; drawList(); } },
             [el('option', { value: '', text: 'Every topic (' + qs.length + ')' })].concat(sections.map(function (s) {
                 var n = qs.filter(function (q) { return q.section === s; }).length;
                 var o = el('option', { value: s, text: s + ' (' + n + ')' });
@@ -727,13 +735,13 @@
                 return o;
             })));
         var find = el('input', { id: 'kop-vol-pickq-find', type: 'search', placeholder: 'A program, a town, a name', value: pickState.search,
-            oninput: function () { pickState.search = find.value; pickState.shown = 20; drawList(); } });
+            oninput: function () { pickState.search = find.value; pickState.shown = 8; drawList(); } });
         pickBox.appendChild(el('div', { class: 'kop-vol-pickq-filters' }, [
             el('label', { for: 'kop-vol-pickq-section', text: 'Topic' }), sec,
             el('label', { for: 'kop-vol-pickq-find', text: 'Find' }), find
         ]));
         var list = el('ul', { class: 'kop-vol-pickq-list' });
-        var more = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Show more', onclick: function () { pickState.shown += 20; drawList(); } });
+        var more = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small', text: 'Show more', onclick: function () { pickState.shown += 8; drawList(); } });
         var msg = el('p', { class: 'kop-vol-msg', role: 'status', hidden: true });
         var take = el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-approve', text: 'Take the ticked questions', disabled: true, onclick: function () {
             var ids = Array.prototype.map.call(list.querySelectorAll('input:checked'), function (c) { return Number(c.value); });
@@ -1106,19 +1114,20 @@
             var dl = el('dl', { class: 'kop-vol-examples' });
             if (p.yes) { dl.appendChild(el('dt', { text: research ? 'A good answer looks like' : social ? 'A good post' : 'A yes looks like' })); dl.appendChild(el('dd', { text: p.yes })); }
             if (p.no) { dl.appendChild(el('dt', { text: research ? 'Not enough' : social ? 'Keep out of it' : 'A no looks like' })); dl.appendChild(el('dd', { text: p.no })); }
-            projBrief.appendChild(dl);
+            projBrief.appendChild(el('details', { class: 'kop-vol-examples-fold' }, [
+                el('summary', { text: research ? 'What a good answer looks like' : social ? 'What a good post looks like' : 'What a yes and a no look like' }), dl]));
         }
         if (p.faq && p.faq.length) {
             var faq = el('dl', { class: 'kop-vol-examples' });
             p.faq.forEach(function (f) { faq.appendChild(el('dt', { text: f.q })); faq.appendChild(el('dd', { text: f.a })); });
             projBrief.appendChild(el('details', { class: 'kop-vol-faq' }, [el('summary', { text: 'Questions others asked (' + p.faq.length + ')' }), faq]));
         }
-        projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: research
-            ? 'Could not find it? Say where you looked: that helps too. An admin reads every answer before anything changes.'
-            : p.kind === 'social' ? 'Use only what the card says. Nothing is posted until an admin approves it; one sent back says what to change.'
+        if (!research) projBrief.appendChild(el('p', { class: 'kop-vol-meta', text: p.kind === 'social'
+            ? 'Use only what the card says. Nothing is posted until an admin approves it; one sent back says what to change.'
             : 'Not sure? Say so and why: an admin checks every answer before anything changes.' }));
-        projBrief.appendChild(askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'));
-        if (p.mine && !cfg.preview && p.done < p.total) projBrief.appendChild(handBackButton(p));
+        projBrief.appendChild(el('div', { class: 'kop-vol-brief-actions' }, [
+            askButton({ project_id: p.id, label: 'this project' }, 'Ask a question about this project'),
+            p.mine && !cfg.preview && p.done < p.total ? handBackButton(p) : null]));
         state.projects.forEach(function (x) { if (x.id === p.id) { x.done = p.done; x.total = p.total; } });
     }
 
@@ -1166,11 +1175,11 @@
                 msg.textContent = e.message;
             });
         } });
-        return el('section', { class: 'kop-vol-panel kop-vol-stop' }, [
-            el('h2', { text: 'Taking a break or stopping' }),
+        return el('section', { class: 'kop-vol-panel kop-vol-stop' }, [el('details', null, [
+            el('summary', { text: 'Taking a break or stopping' }),
             el('p', { text: 'A break needs nothing from you: an untouched batch goes back on its own after a few days. To stop for good, this turns your link off and returns your open batches.' }),
             b, msg
-        ]);
+        ])]);
     }
 
     function nextProjectItem() {
@@ -1282,7 +1291,7 @@
         msgPanel.appendChild(el('h2', { id: 'kop-vol-messages-h', text: 'Questions? Ask us' }));
         msgPanel.appendChild(el('p', { text: cfg.preview
             ? 'Admin preview: volunteers write to you here, and you answer at KOP Tools > Volunteer Reviewers > Messages.'
-            : 'Ask about a project, one item, or anything else. We answer here: open this page again later to see the reply.' }));
+            : 'Ask about a project, one item, or anything else. We answer here.' }));
         msgPanel.appendChild(msgList);
         msgPanel.appendChild(el('div', { class: 'kop-vol-decide' }, [
             msgCtx, el('label', { for: 'kop-vol-msg-body', text: 'Your message' }), msgBox,
@@ -1316,7 +1325,10 @@
         if (!msgs.length) {
             msgList.appendChild(el('li', { class: 'kop-vol-meta', text: 'No messages yet.' }));
         }
-        msgs.forEach(function (m) {
+        var hidden = msgs.length > 3 && !state.msgAll ? msgs.length - 3 : 0;
+        if (hidden) msgList.appendChild(el('li', { class: 'kop-vol-msg-more' }, [el('button', { type: 'button', class: 'kop-vol-btn kop-vol-btn-plain kop-vol-btn-small',
+            text: 'Show ' + hidden + ' earlier message' + (hidden === 1 ? '' : 's'), onclick: function () { state.msgAll = true; drawMessages(); } })]));
+        msgs.slice(hidden).forEach(function (m) {
             var about = [m.project, m.item].filter(Boolean).join(' · ');
             msgList.appendChild(el('li', { class: 'kop-vol-msg-row ' + (m.from === 'vol' ? 'is-mine' : 'is-theirs') }, [
                 el('p', { class: 'kop-vol-meta' }, [el('strong', { text: m.author }), ' · ' + fmtDate(m.at), m.unread ? el('span', { class: 'kop-vol-new', text: 'New' }) : null]),

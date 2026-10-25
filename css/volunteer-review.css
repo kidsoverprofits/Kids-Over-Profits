@@ -876,3 +876,78 @@ p.kop-vol-newreply {
     color: var(--kop-midnight-blue, #000435);
     overflow-wrap: anywhere;
 }
+
+/* Tidier page (2026-10-25): folds that read as one line until opened. */
+.kop-vol-brief-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.kop-vol-brief-actions .kop-vol-ask,
+.kop-vol-brief-actions .kop-vol-handback {
+    margin: 0;
+}
+
+.kop-vol-pickq > summary,
+.kop-vol-stop summary,
+.kop-vol-cite > summary {
+    cursor: pointer;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-vol-pickq > summary {
+    padding: 2px 0;
+}
+
+.kop-vol-pickq-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.kop-vol-pickq[open] > summary {
+    margin-bottom: 6px;
+}
+
+.kop-vol-stop summary {
+    font-weight: 700;
+}
+
+.kop-vol-stop {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.kop-vol-cite > summary {
+    font-weight: 700;
+}
+
+.kop-vol-cite[open] > summary {
+    margin-bottom: 4px;
+}
+
+.kop-vol-cite:not([open]) {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.kop-vol-msg-more {
+    list-style: none;
+    text-align: center;
+}
+
+.kop-vol-examples-fold {
+    margin: 0 0 10px;
+}
+
+.kop-vol-examples-fold summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-navy, #000080);
+}
+
+.kop-vol-examples-fold[open] summary {
+    margin-bottom: 8px;
+}
