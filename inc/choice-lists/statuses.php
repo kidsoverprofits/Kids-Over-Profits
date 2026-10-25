@@ -132,7 +132,7 @@ kop_choice_register('sensitivity-groups', array(
     'group'    => 'Lawsuits, bills and volunteers',
     'where'    => 'The communities the "Be a sensitivity reader" section of the Volunteer page asks for (its list and the survey\'s "Which community are you answering for?" boxes), and the community shown on each answer at KOP Tools > Sensitivity Survey.',
     'defaults' => array(
-        'black'              => 'Black survivors of the troubled teen industry',
+        'black'              => 'Black survivors',
         'indigenous'         => 'Indigenous survivors, including people whose families went through the boarding schools',
         'foster_care'        => 'Survivors of foster care placements',
         'adoptee'            => 'Adoptees',
