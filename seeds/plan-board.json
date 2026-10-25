@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 21:52 UTC",
- "source": "c06103a5e4a1611a12854494a33a2be0a6bb0cc6",
+ "built": "2026-10-25 22:03 UTC",
+ "source": "fc514fff50ba020ed13b355aa062a71317ce74f0",
  "sections": [
   {
    "key": "2",
@@ -718,6 +718,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "921c2f30f3b6"
+      },
+      {
+       "id": "3:top-story-on-news",
+       "lead": "Top story on /news/",
+       "text": "**Top story on /news/** (2026-10-25, [baca99a7](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/baca99a7)): on an approved article's headline at https://kidsoverprofits.org/news/ use the pencil, tick \"Top story\": it shows first, big, and drops out of the list below; Essential reporting now sits under the feed. Untick it (the earlier pick comes back, or none). In the News Processor submit popup the \"Top story\" box shows only signed in. Then `python -u scripts/check-contrast.py /news/` and `python -u scripts/check-mobile-overflow.py /news/`. Owner to say whether the home page strip should move down too (only /news/ changed).",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "c6694f6e68cf"
       }
      ]
     }
