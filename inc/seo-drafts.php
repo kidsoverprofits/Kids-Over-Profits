@@ -12,7 +12,7 @@
  *                document folders, lawsuit posts, news posts, everything else by its own opening words
  *                (kop_seo_post_description(), what the live page already prints)
  *   keyphrases   one rule per kind of page (kop_seo_drafts_keyphrase()). Facility and state wording waits
- *                on the owner (docs/plan/2.4 item 11): those boxes stay empty until the wording is set in
+ *                on the owner (docs/plan/2.4 item 9): those boxes stay empty until the wording is set in
  *                this screen's "Keyphrase wording" box (option kop_seo_kw_wording)
  *   stored       option kop_seo_drafts_log (newest first, 500 kept) and kop_seo_drafts_skipped
  *
@@ -229,7 +229,7 @@ function kop_seo_drafts_description($post) {
 
 /**
  * [keyphrase, how it was drafted, waits] for one post. People (owner, 2026-10-20): the person's name and
- * their role or employer. Facility and state pages wait on the owner's wording (docs/plan/2.4 item 11).
+ * their role or employer. Facility and state pages wait on the owner's wording (docs/plan/2.4 item 9).
  */
 function kop_seo_drafts_keyphrase($post) {
     $seed = kop_seo_drafts_seed();
@@ -575,7 +575,7 @@ function kop_seo_drafts_screen() {
             '<em>Skip</em> takes a page off the list without storing anything. <em>Done</em> lists every approval with Undo.',
         ),
         'help' => '<p>Yoast\'s dashboard and its check in the editor read the description and keyphrase stored in the post, not the description the site prints for it, so a page can be fine in Google and still warn in Yoast. Once stored, the description here is also the one the live page prints.</p>'
-            . '<p>Drafts: some were written for the page; the rest come from a rule for their kind of page (shown under each box). Facility and state keyphrases wait on the wording you choose below (plan 2.4 item 11).</p>'
+            . '<p>Drafts: some were written for the page; the rest come from a rule for their kind of page (shown under each box). Facility and state keyphrases wait on the wording you choose below (plan 2.4 item 9).</p>'
             . '<p>Facility and company pages built from the records have no post and are not listed: their descriptions come from the record.</p>',
     ));
 
@@ -608,7 +608,7 @@ function kop_seo_drafts_screen() {
     if ($tab === '') {
         $w = kop_seo_drafts_wording();
         echo kop_ak_fold('Keyphrase wording for facility and state pages' . ($w['facility'] === '' || $w['state'] === '' ? ' (not set yet)' : ''),
-            '<p>Which words people search for (plan 2.4 item 11). <code>{name}</code> is the program\'s or state\'s name. Leave a box empty to keep those keyphrases waiting.</p>'
+            '<p>Which words people search for (plan 2.4 item 9). <code>{name}</code> is the program\'s or state\'s name. Leave a box empty to keep those keyphrases waiting.</p>'
             . '<p><label>Facility pages and the posts about one program <input type="text" form="kop-seod-wording" name="wording[facility]" value="' . esc_attr($w['facility']) . '" placeholder="{name}, or {name} abuse"></label></p>'
             . '<p><label>State hubs and country pages <input type="text" form="kop-seod-wording" name="wording[state]" value="' . esc_attr($w['state']) . '" placeholder="troubled teen programs {name}"></label></p>'
             . '<p>' . kop_seo_drafts_submit('Save wording', 'secondary', 'form="kop-seod-wording"') . '</p>',

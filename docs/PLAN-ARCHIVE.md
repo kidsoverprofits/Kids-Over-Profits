@@ -3257,3 +3257,65 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
   13927 gone, 38 news links and lawsuits 24 and 185 on 100180, /facility/eagle-point-christian-academy-ms/ redirects
   (301) to https://kidsoverprofits.org/facility/bethel-boys-academy-ms/. Undo is on Merge Duplicates > Merged.
   13926 Bethel Girls Academy (Petal, MS) was left alone.
+
+## Plan Board pass 2026-10-25 (finished 2026-10-25)
+
+- 2.1, Done (owner):
+  **Share the inspection report folder** (2026-10-17). Share `My Drive/KOP Inspection Reports` as "Anyone
+  with the link", then `php api/sync-inspection-archive.php apply` on the server and check the dry run lists
+  index entries for every state. Until then the nightly sync drops the archive index of every scraper folder
+  (old 3.3 item 6).
+  Ask: Have you shared "KOP Inspection Reports" by link and run the archive sync?
+- 2.1, Done (site check: the crontab runs list-unsilenced-files.php):
+  **Monthly Unsilenced check cron** (2026-09-30). Add as is:
+  `0 4 1 * * cd /home/kidsover/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php api/list-unsilenced-files.php restart --check --minutes=120 >> /home/kidsover/logs/unsilenced-check.log 2>&1`.
+  On its mail, ask a session for the rebuild (old 2, item 10).
+  Ask: Is the monthly Unsilenced check cron line added?
+- 2.1, Done (owner):
+  **News discovery crontab** (2026-10-13). (a) the 13:30 line loses `--no-facilities`; (b) the 01:30 line
+  gets `--recency 30d` for one night, then loses it; (c) optional: drop `AI_PROVIDER=groq` from both;
+  (d) optional: a third line at 07:30 (old 3.8, old 3.16). Read 2026-10-23: (a) and (c) are done, but the
+  01:30 line still has `--recency 30d`, weeks after its one night.
+  Ask: Have you taken `--recency 30d` off the 01:30 discovery line, and do you want (d)?
+- 2.1, Done (owner):
+  **PDF covers** (2026-09-29: 177 left).
+  [regenerate-pdf-previews.php?apply=1](https://kidsoverprofits.org/wp-content/themes/child/api/regenerate-pdf-previews.php?apply=1)
+  until it reports 0.
+  Ask: Has the PDF covers tool reported 0 left?
+- 2.2, Done (owner):
+  **Scraper launcher window**: open it and confirm the size and Output pane look right.
+  Ask: Do the launcher window's size and Output pane look right?
+- 2.3, Done (site check: the four records to drop are merged away):
+  **Merge Duplicates, Three Springs/Sequel** (keep first, earlier name second, as a rename):
+  #100076 <- #9656 (or "Program and its academic program"), #100078 <- #9657, #13640 <- #100077,
+  #11098 <- #9654. Check first: #9648 vs #9639 (Duck River); "Three Springs New Directions" on #100076 and
+  #13678; "Three Springs of North Carolina" on #9637 and #11903 (old 3.7).
+  Ask: Have you merged the four Three Springs/Sequel pairs as renames?
+- 2.4, Done (owner: status set and published):
+  **Provo Canyon School profile** ([post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)):
+  suspended or Closed? Then publish.
+  Ask: Provo Canyon School: suspended or Closed?
+- 2.6, Done (owner):
+  **Accounts and builds**: an Expo account and `eas build --profile preview --platform android`; Apple
+  Developer (99 USD a year) and Google Play (25 USD) only to publish; ship an EAS update or store build.
+  Ask: Make an Expo account and a test build now, and the paid store accounts later?
+- 2.6, Done (owner):
+  **Admin mode on the phone** (update published 2026-10-25, app
+  [41eb247](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/41eb247cad580eccc2a2ad2ce8a4ca5e59e33437)):
+  close and reopen the app twice, then About > Reviewer sign-in > Sign in with WordPress > log in > Approve. The Admin
+  tab appears with "Open the Review inbox". If the app still has no Map controls or Donate button after two reopens,
+  the phone holds the 2026-10-07 APK: install the 2026-10-13 one
+  (https://expo.dev/artifacts/eas/KakogI4zyflHk-87uGmOFzB61iMWbP8DSJJZZri_5Bk.apk) once.
+  Ask: Did Sign in with WordPress work, and do the review queues work on the phone?
+- 3, Done (owner):
+  **Volunteer project**: at [Volunteer Reviewers](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-volunteer-reviewers)
+   a 10-item serious-findings project for yourself; answer three in a private window, "Check their calls",
+   Apply one; turn the test volunteer off.
+- 4.1, Done (owner):
+  **AI budget**: read AI Usage for each provider's real daily ceiling and set `KOP_AI_DAILY_GEMINI` / `_GROQ`.
+- 2.4, Answered "please do all of that": moved to 4.7 item 17 as session work:
+  **Site content** (old 2, items 11-15): hub editor content (the five recommendations); unpublish the dev
+  posts `facility-form-test`, `data-organizer`, `data`, `data-analysis`, `arizona-adhs-inspections`; 301 the
+  75 News posts to their feed entries; per lawsuit post, 301 or keep; deactivate Code Snippets snippet 6
+  (OG Image).
+  Ask: Your call on each of the five site content items?

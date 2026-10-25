@@ -12,6 +12,12 @@
 - **Lighter pages**: Provo's staff list and the timeline's later years, if pages are still heavy.
 - **Unchecked**: no real upload through the anonymous portal since it began sealing files; no live call to the
   Claude, Gemini or Hugging Face models in the AI helpers.
+- **Drive Sync schedule** (owner: Not now, 2026-10-25): keep the nightly `15 3 * * *`, or `*/15 * * * *` for
+  documents within 15 minutes (was 2.1).
+- **Featured report notes** (owner: Not now, 2026-10-25): no inspection report is featured any more; feature the two
+  UHS of Provo Canyon reports again with a `featured_note` in
+  [manage-featured-inspections.php](https://kidsoverprofits.org/wp-content/themes/child/api/manage-featured-inspections.php),
+  or drop it (was 2.1).
 
 ### Unconfirmed settings
 

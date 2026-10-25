@@ -83,38 +83,12 @@ function kop_pb_records($sql, array $args = array()) {
 function kop_pb_checks() {
     $home = dirname(rtrim(ABSPATH, '/'));
     return array(
-        '2.1:share-the-inspection-report-folder' => function () use ($home) {
-            $log = @file_get_contents($home . '/logs/inspection-archive.log');
-            $pos = $log ? strrpos($log, "\n{") : false;
-            $run = $pos !== false ? json_decode(substr($log, $pos + 1), true) : null;
-            if (!is_array($run) || empty($run['counts'])) return null;
-            $ok = array_filter($run['counts'], function ($v) { return strpos((string) $v, 'index entries written') !== false; });
-            $bad = array_filter($run['counts'], function ($v) { $v = (string) $v; return strpos($v, 'index entries written') === false && $v !== 'no Drive folder'; });
-            if ($bad) return array(false, 'The last archive sync could not index ' . implode(', ', array_map('strtoupper', array_keys($bad))));
-            return count($ok) >= 10 ? array(true, 'The nightly archive sync indexed ' . count($ok) . ' state folders') : null;
-        },
         '2.1:severe-findings-scan-cron' => function () use ($home) {
             $line = kop_pb_cron_line('scan-inspection-highlights.php');
             if ($line) return array(true, 'The crontab runs scan-inspection-highlights.php');
             $log = $home . '/logs/inspection-highlights-scan.log';
             if (file_exists($log) && filemtime($log) > time() - 3 * DAY_IN_SECONDS) return array(true, 'Its log was written ' . human_time_diff(filemtime($log)) . ' ago');
             return $line === null ? null : array(false, 'No scan line in the crontab');
-        },
-        '2.1:monthly-unsilenced-check-cron' => function () {
-            $line = kop_pb_cron_line('list-unsilenced-files.php');
-            return $line === null ? null : ($line !== '' ? array(true, 'The crontab runs list-unsilenced-files.php') : array(false, 'No Unsilenced line in the crontab'));
-        },
-        '2.1:news-discovery-crontab' => function () {
-            $tab = kop_pb_crontab();
-            if ($tab === null) return null;
-            $lines = array_filter(preg_split('/\R/', $tab), function ($l) { return $l !== '' && $l[0] !== '#' && strpos($l, 'discover-articles.php') !== false; });
-            $left = array();
-            foreach ($lines as $l) {
-                if (strpos($l, '--no-facilities') !== false) $left[] = 'a line still has --no-facilities';
-                if (strpos($l, '--recency') !== false) $left[] = 'a line still has --recency (meant for one night)';
-            }
-            if (!$lines) return array(false, 'No discovery line in the crontab');
-            return $left ? array(false, implode('; ', $left)) : array(true, 'Both discovery lines are as planned');
         },
         '2.1:search-console' => function () use ($home) {
             $left = array_filter(array('kop-gsc.json', 'kop-gsc.err'), function ($f) use ($home) { return file_exists($home . '/' . $f); });
@@ -139,15 +113,6 @@ function kop_pb_checks() {
             if ($rows === null) return null;
             $left = array_filter($rows, function ($r) use ($names) { return trim((string) $r['name']) === $names[(int) $r['id']]; });
             return $left ? array(false, count($left) . ' of 5 still carry the description as a name') : array(true, 'All five are renamed or removed');
-        },
-        '2.3:merge-duplicates-three-springs-sequel' => function () {
-            $rows = kop_pb_records('SELECT id FROM facilities_v2 WHERE id IN (9656, 9657, 100077, 9654)');
-            if ($rows === null) return null;
-            return $rows ? array(false, count($rows) . ' of the 4 records to drop are still there') : array(true, 'The four records to drop are merged away');
-        },
-        '2.4:provo-canyon-school-profile' => function () {
-            $s = kop_pb_post_status(10796);
-            return $s === 'publish' ? array(true, 'Post 10796 is published') : array(false, 'Post 10796 is ' . $s);
         },
         '2.4:seo-keyphrase-wording' => function () {
             $w = array_filter((array) get_option('kop_seo_kw_wording', array()));

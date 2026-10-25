@@ -1,3 +1,107 @@
 {
- "passes": []
+ "passes": [
+  {
+   "at": "2026-10-25 21:55",
+   "entries": [
+    {
+     "answer": 1,
+     "itemId": "2.1:share-the-inspection-report-folder",
+     "lead": "Share the inspection report folder",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 2,
+     "itemId": "2.1:drive-sync-schedule",
+     "lead": "Drive Sync schedule",
+     "kind": "later",
+     "result": "Moved to 6. Later."
+    },
+    {
+     "answer": 3,
+     "itemId": "2.1:pdf-covers",
+     "lead": "PDF covers",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 4,
+     "itemId": "2.1:featured-report-notes",
+     "lead": "Featured report notes",
+     "kind": "later",
+     "result": "Moved to 6. Later."
+    },
+    {
+     "answer": 5,
+     "itemId": "2.2:scraper-launcher-window",
+     "lead": "Scraper launcher window",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 6,
+     "itemId": "2.4:provo-canyon-school-profile",
+     "lead": "Provo Canyon School profile",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 7,
+     "itemId": "3:volunteer-project",
+     "lead": "Volunteer project",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 8,
+     "itemId": "4.1:ai-budget",
+     "lead": "AI budget",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 9,
+     "itemId": "2.6:admin-mode-on-the-phone",
+     "lead": "Admin mode on the phone",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 10,
+     "itemId": "2.1:news-discovery-crontab",
+     "lead": "News discovery crontab",
+     "kind": "done",
+     "result": "Archived; no 07:30 line added."
+    },
+    {
+     "answer": 11,
+     "itemId": "2.4:site-content",
+     "lead": "Site content",
+     "kind": "answer",
+     "result": "Go-ahead recorded: all five are now session work, 4.7 item 17."
+    },
+    {
+     "answer": 12,
+     "itemId": "2.6:accounts-and-builds",
+     "lead": "Accounts and builds",
+     "kind": "done",
+     "result": "Archived."
+    },
+    {
+     "answer": 0,
+     "itemId": "2.1:monthly-unsilenced-check-cron",
+     "lead": "Monthly Unsilenced check cron",
+     "kind": "auto",
+     "result": "Archived (site check: the crontab runs it)."
+    },
+    {
+     "answer": 0,
+     "itemId": "2.3:merge-duplicates-three-springs-sequel",
+     "lead": "Merge Duplicates, Three Springs/Sequel",
+     "kind": "auto",
+     "result": "Archived (site check: the four records are merged away)."
+    }
+   ]
+  }
+ ]
 }
