@@ -1011,7 +1011,7 @@ get_header();
                     <div class="sub-section-content">
                         <div class="form-group">
                             <label>Websites</label>
-                            <div class="array-container" data-path="identification.websites"></div>
+                            <div class="array-container" data-path="profileLinks"></div>
                         </div>
                     </div>
                 </div>

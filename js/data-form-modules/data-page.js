@@ -2267,11 +2267,13 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                         if (placeRaw && typeof placeRaw === 'string' && placeRaw.toLowerCase().includes(searchLower)) {
                             matches.push(`Address: ${placeRaw}`);
                         }
-                        if (facility.locationCity && typeof facility.locationCity === 'string' && facility.locationCity.toLowerCase().includes(searchLower)) {
-                            matches.push(`City: ${facility.locationCity}`);
+                        const placeCity = kopFacilityField(facility, 'location.city');
+                        if (placeCity && typeof placeCity === 'string' && placeCity.toLowerCase().includes(searchLower)) {
+                            matches.push(`City: ${placeCity}`);
                         }
-                        if (facility.locationState && typeof facility.locationState === 'string' && facility.locationState.toLowerCase().includes(searchLower)) {
-                            matches.push(`State: ${facility.locationState}`);
+                        const placeState = kopFacilityField(facility, 'location.state');
+                        if (placeState && typeof placeState === 'string' && placeState.toLowerCase().includes(searchLower)) {
+                            matches.push(`State: ${placeState}`);
                         }
                         // Check project-level operator location/headquarters
                         if (projectOperator) {
@@ -2841,55 +2843,14 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
             const otherOperatorsLabel = otherOperatorsGroup ? otherOperatorsGroup.previousElementSibling : null;
             
             if (isPrivate) {
-                // Hide "Other Operators" and add "Owners" and "Other Owners" as proper autocomplete inputs
+                // Hide "Other Operators" for a privately owned facility
                 if (otherOperatorsGroup) otherOperatorsGroup.style.display = 'none';
                 if (otherOperatorsLabel && otherOperatorsLabel.textContent === 'Other Operators') {
                     otherOperatorsLabel.style.display = 'none';
                 }
                 
-                // Add owners fields if they don't exist - as proper autocomplete inputs
-                if (!document.getElementById('owners-group')) {
-                    const ownersHTML = `
-                        <div class="form-group" id="owners-group">
-                            <label>Current Owner</label>
-                            <div class="autocomplete-wrapper">
-                                <input type="text" class="facility-field" data-field="owner" data-field-type="human-name" placeholder="Type owner name..." style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                            </div>
-                        </div>
-                        <div class="form-group" id="other-owners-group">
-                            <label>Previous/Other Owners</label>
-                            <div class="autocomplete-wrapper">
-                                <input type="text" class="facility-field" data-field="otherOwners" data-field-type="human-name" placeholder="Type owner name..." style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Insert after the existing content in operations section
-                    const sectionContent = operationsSection.querySelector('.section-content');
-                    sectionContent.insertAdjacentHTML('beforeend', ownersHTML);
-                    
-                    // Initialize the autocomplete functionality
-                    setTimeout(() => {
-                        const ownerInput = document.querySelector('[data-field="owner"]');
-                        const otherOwnersContainer = document.querySelector('.array-container[data-path="otherOwners"]');
-                        
-                        // Initialize autocomplete for the other owners input
-                        if (ownerInput && window.attachAutocompleteToInput) {
-                            window.attachAutocompleteToInput(ownerInput, window.getHumanNames, 'human', function(selectedValue) {
-                                ownerInput.value = selectedValue;
-                                ownerInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            });
-                        }
-                        
-                        const otherOwnersInput = document.querySelector('[data-field="otherOwners"]');
-                        if (otherOwnersInput && window.attachAutocompleteToInput) {
-                            window.attachAutocompleteToInput(otherOwnersInput, window.getHumanNames, 'human', function(selectedValue) {
-                                otherOwnersInput.value = selectedValue;
-                                otherOwnersInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            });
-                        }
-                    }, 100);
-                }
+                // Owners are the template's Current Owner and Past Owners boxes
+                // (identification.currentOwners / pastOwners), shown by applyPrivateOwnershipFormState().
             } else {
                 // Show "Other Operators" and hide owners fields
                 if (otherOperatorsGroup) otherOperatorsGroup.style.display = 'block';

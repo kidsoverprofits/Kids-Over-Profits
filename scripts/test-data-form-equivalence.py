@@ -32,9 +32,14 @@ args = ap.parse_args()
 
 READ_FORM = r"""() => {
     const out = {};
+    const seen = {};
     document.querySelectorAll('.container input, .container textarea, .container select').forEach((el, i) => {
-        if (el.type === 'file' || el.type === 'password' || el.closest('#kop-wizard')) return;
-        const key = (el.dataset.path || el.dataset.field || el.name || el.id || ('#' + i)) + '|' + i;
+        // List items are read with their list below.
+        if (el.type === 'file' || el.type === 'password' || el.closest('#kop-wizard') || el.closest('.array-container[data-path]')) return;
+        // The n-th input with that path, so extra list items elsewhere never shift the keys.
+        const base = el.dataset.path || el.dataset.field || el.name || el.id || ('#' + i);
+        seen[base] = (seen[base] || 0) + 1;
+        const key = base + '|' + seen[base];
         out[key] = el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value;
     });
     document.querySelectorAll('.container .array-container[data-path]').forEach((c) => {
@@ -135,6 +140,7 @@ V2_PATHS = [
     ('data-path="locationDetails.additionalLocations"', 'data-path="location.additionalLocations"'),
     ('data-path="locationDetails.formerLocations"', 'data-path="location.formerLocations"'),
     ('data-path="otherOperators"', 'data-path="identification.otherOperators"'),
+    ('data-path="identification.websites"', 'data-path="profileLinks"'),
 ]
 
 
@@ -245,6 +251,9 @@ def canon_form(form):
     """Form keys in the legacy spelling, so a page with v2 field paths compares with the live one."""
     out = {}
     for k, v in form.items():
+        # The public form's Websites box shows the record's profileLinks since the flip (it was identification.websites).
+        if args.flip and k in ("list:identification.websites", "list:profileLinks"):
+            continue
         if args.flip and k.startswith("operatingPeriod.notes") and isinstance(v, str):
             # The normalizer drops placeholder notes left by an earlier pass; a v2 document no longer has them.
             v = "\n".join(line for line in v.split("\n") if not PLACEHOLDER_NOTE.match(line.strip()))
@@ -258,10 +267,22 @@ def canon_form(form):
     return out
 
 
+def canon_probe(probe, tree_side):
+    """In --flip, the location search also matches a facility's city and state (it read two fields nothing sets)."""
+    if not args.flip or not isinstance(probe, dict):
+        return probe
+    out = {}
+    for k, v in probe.items():
+        if tree_side and k.startswith("location:") and isinstance(v, list):
+            v = [m for m in v if not (isinstance(m, str) and (m.startswith("City: ") or m.startswith("State: ")))]
+        out[k] = v
+    return out
+
+
 def same(a, b):
     if isinstance(a, dict) and isinstance(b, dict) and "form" in a and "form" in (b or {}):
-        a = {**a, "form": canon_form(a["form"])}
-        b = {**b, "form": canon_form(b["form"])}
+        a = {**a, "form": canon_form(a["form"]), "probe": canon_probe(a.get("probe"), False)}
+        b = {**b, "form": canon_form(b["form"]), "probe": canon_probe(b.get("probe"), True)}
     return json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
 
 
@@ -283,8 +304,9 @@ for key in live:
             keys = sorted(set(fa) | set(fb))
             bad = [k for k in keys if fa.get(k) != fb.get(k)]
             extra = [("toggle", a["toggle"], b["toggle"])] if a["toggle"] != b["toggle"] else []
-            extra += [("probe " + k, a["probe"].get(k), b["probe"].get(k)) for k in sorted(set(a["probe"]) | set(b["probe"]))
-                      if json.dumps(a["probe"].get(k)) != json.dumps(b["probe"].get(k))]
+            pa, pb = canon_probe(a["probe"], False), canon_probe(b["probe"], True)
+            extra += [("probe " + k, pa.get(k), pb.get(k)) for k in sorted(set(pa) | set(pb))
+                      if json.dumps(pa.get(k)) != json.dumps(pb.get(k))]
             diffs.append((key, [(k, fa.get(k), fb.get(k)) for k in bad[:6]] + extra))
         else:
             diffs.append((key, "formData differs at " + first_diff(a, b)))
