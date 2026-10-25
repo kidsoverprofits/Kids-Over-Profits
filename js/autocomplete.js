@@ -294,11 +294,13 @@ function getAllOperators() {
                 if (facility.identification && facility.identification.currentOperator) {
                     operators.add(facility.identification.currentOperator);
                 }
-                // Also collect sourceOperator from location project facilities
-                if (facility.sourceOperator && facility.sourceOperator.name) {
-                    operators.add(facility.sourceOperator.name);
+                // Also collect sourceOperator from location project facilities (a v2 document keeps it in provenance)
+                const sourceOperator = facility.sourceOperator || (facility.provenance && facility.provenance.sourceOperator);
+                if (sourceOperator && sourceOperator.name) {
+                    operators.add(sourceOperator.name);
                 }
-                facility.otherOperators && facility.otherOperators.forEach(op => operators.add(op));
+                const otherOperators = facilityFieldOr(facility, 'identification.otherOperators', facility.otherOperators);
+                Array.isArray(otherOperators) && otherOperators.forEach(op => operators.add(op));
             });
         });
 
@@ -627,6 +629,14 @@ function getAllMemberships() {
 }
 
 /**
+ * A facility field by its v2 path on either shape where the data form's normalizer is on the
+ * page (KOP_FacilityFields, data-normalizer.js); elsewhere the value the caller read itself.
+ */
+function facilityFieldOr(facility, v2Path, fallback) {
+    return typeof window.kopFacilityField === 'function' ? window.kopFacilityField(facility, v2Path) : fallback;
+}
+
+/**
  * Get all locations from projects and custom storage
  */
 function getAllLocations() {
@@ -637,7 +647,8 @@ function getAllLocations() {
 
         Object.values(projects).forEach(project => {
             project.data?.facilities?.forEach(facility => {
-                if (facility.location) locations.add(facility.location);
+                const place = facilityFieldOr(facility, 'location.text', facility.location);
+                if (typeof place === 'string' && place) locations.add(place);
             });
         });
 

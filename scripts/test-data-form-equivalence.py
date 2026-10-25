@@ -122,6 +122,10 @@ def run(live_only, names=None):
         pg.wait_for_function("window.formReady === true", timeout=180000)
         if names is None:
             names = pg.evaluate(PICK, args.projects)
+        # The autocomplete lists built from every project's facilities.
+        result["autocomplete"] = pg.evaluate("""() => { const A = window.KOP_Autocomplete || {};
+            if (typeof window.invalidateAggregatedData === 'function') window.invalidateAggregatedData();
+            return { operators: A.getAllOperators ? A.getAllOperators() : null, locations: A.getAllLocations ? A.getAllLocations() : null }; }""")
         for name in names:
             count = pg.evaluate(OPEN, name)
             for i in range(min(count, 6)):
@@ -156,7 +160,9 @@ def first_diff(a, b, where=""):
 
 names, live, live_errors = run(True)
 _, tree, tree_errors = run(False, names)
-print(f"{len(names)} projects, {sum(1 for k in live if not k.endswith('formData'))} facilities")
+ac = live.get("autocomplete") or {}
+print(f"{len(names)} projects, {sum(1 for k in live if '[' in k)} facilities; autocomplete: "
+      f"{len(ac.get('operators') or [])} operators, {len(ac.get('locations') or [])} places")
 diffs = []
 for key in live:
     a, b = live[key], tree.get(key)

@@ -593,9 +593,9 @@ class OrganizerModal {
                 const esc = (v) => modalSystem.escapeHtml(v);
                 modalMatches.innerHTML = results.map((result, resultIndex) => {
                     const facilityName = result.facilityName || 'Unnamed Facility';
-                    const facilityLocation = result.facility.locationDetails || {};
-                    const location = result.facility.location
-                        || [facilityLocation.city, facilityLocation.state].filter(Boolean).join(', ');
+                    // By v2 path on either shape (KOP_FacilityFields, data-normalizer.js).
+                    const location = kopFacilityField(result.facility, 'location.text')
+                        || [kopFacilityField(result.facility, 'location.city'), kopFacilityField(result.facility, 'location.state')].filter(Boolean).join(', ');
                     const operatorLine = result.operator && result.operator !== result.projectLabel ? result.operator : '';
                     return `
                         <div style="padding: 15px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s;"
