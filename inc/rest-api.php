@@ -779,10 +779,9 @@ function kop_save_project_rest_callback($request) {
         ));
     }
 
-    // Determine which table to use based on category
+    // Determine which table to use based on category. Companies and places live in the v2 tables
+    // (handled above); facilities_master is retired (data model phase 5), so nothing falls back to it.
     $table_map = array(
-        'company' => 'facilities_master',
-        'companies' => 'facilities_master',
         'referrers' => 'referrers_master',
         'referrer' => 'referrers_master',
         'transporters' => kop_transporters_table(),
@@ -793,11 +792,14 @@ function kop_save_project_rest_callback($request) {
         'marketer' => 'marketers_master',
         'tradeorgs' => 'tradeorgs_master',
         'tradeorg' => 'tradeorgs_master',
-        'locations' => 'locations_master',
-        'location' => 'locations_master',
     );
 
-    $table_name = isset($table_map[$category]) ? $table_map[$category] : 'facilities_master';
+    if (!isset($table_map[$category])) {
+        return new WP_Error('unknown_category', in_array($category, array('company', 'companies', 'locations', 'location'), true)
+            ? 'Companies and places save to the facility tables, which are not reachable right now.'
+            : 'Unknown category: ' . $category, array('status' => 409));
+    }
+    $table_name = $table_map[$category];
 
     // Transporter and provider tables are created on first save.
     if (in_array($table_name, array(kop_transporters_table(), 'providers_master', 'marketers_master', 'tradeorgs_master'), true)) {
@@ -903,10 +905,9 @@ function kop_delete_project_rest_callback($request) {
         return rest_ensure_response(array('success' => true, 'message' => 'Project deleted successfully', 'projectName' => $project_name));
     }
 
-    // Determine which table to use based on category
+    // Determine which table to use based on category. Companies and places live in the v2 tables
+    // (handled above); facilities_master is retired (data model phase 5), so nothing falls back to it.
     $table_map = array(
-        'company' => 'facilities_master',
-        'companies' => 'facilities_master',
         'referrers' => 'referrers_master',
         'referrer' => 'referrers_master',
         'transporters' => kop_transporters_table(),
@@ -917,11 +918,14 @@ function kop_delete_project_rest_callback($request) {
         'marketer' => 'marketers_master',
         'tradeorgs' => 'tradeorgs_master',
         'tradeorg' => 'tradeorgs_master',
-        'locations' => 'locations_master',
-        'location' => 'locations_master',
     );
 
-    $table_name = isset($table_map[$category]) ? $table_map[$category] : 'facilities_master';
+    if (!isset($table_map[$category])) {
+        return new WP_Error('unknown_category', in_array($category, array('company', 'companies', 'locations', 'location'), true)
+            ? 'Companies and places save to the facility tables, which are not reachable right now.'
+            : 'Unknown category: ' . $category, array('status' => 409));
+    }
+    $table_name = $table_map[$category];
 
     // Use unique_name column which matches actual DB schema
     $result = $wpdb->delete(
