@@ -112,10 +112,17 @@ $check('v2 row: every facility stored in the canonical shape', array_keys($store
 $check('v2 row: providers and other kinds keep the shape their tables read',
     kop_suggestion_normalize_facilities(array('facilities' => array(array('providerDetails' => array('x' => 1)))), 'providers') === array('facilities' => array(array('providerDetails' => array('x' => 1))))
     && kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'referrers') === array('facilities' => array(array('a' => 1))));
-$kept_ids = kop_suggestion_normalize_facilities(array('facilities' => array(array('identification' => array('name' => 'X', 'pastOwners' => array('P'), 'websites' => array('https://example.org'), 'currentOwner' => 'C')))), 'companies');
+$kept_ids = kop_suggestion_normalize_facilities(array('facilities' => array(array('identification' => array('name' => 'X', 'pastOwners' => array('P'), 'websites' => array('https://example.org'), 'currentOwner' => 'C', 'nickname' => 'N')))), 'companies');
+$f0 = $kept_ids['facilities'][0];
+$check('v2 row: past owners and websites land in the record (pastOwners, profileLinks)',
+    $f0['identification']['pastOwners'] === array('P') && in_array('https://example.org', $f0['profileLinks'], true), json_encode(array($f0['identification']['pastOwners'], $f0['profileLinks'])));
 $check('v2 row: identification fields the schema lacks are kept under legacy, not dropped',
-    ($kept_ids['facilities'][0]['legacy']['identification'] ?? null) === array('pastOwners' => array('P'), 'websites' => array('https://example.org')),
-    json_encode($kept_ids['facilities'][0]['legacy'] ?? null));
+    ($f0['legacy']['identification'] ?? null) === array('nickname' => 'N'), json_encode($f0['legacy'] ?? null));
+$stash = kop_facility_normalize(array('schema_version' => KOP_FACILITY_SCHEMA_VERSION, 'identification' => array('name' => 'X'),
+    'legacy' => array('identification' => array('pastOwners' => array('Q'), 'websites' => array('https://example.net')))));
+$check('a row stashed before the field existed moves into the record on approval',
+    $stash['identification']['pastOwners'] === array('Q') && in_array('https://example.net', $stash['profileLinks'], true) && !isset($stash['legacy']['identification']),
+    json_encode(array($stash['identification']['pastOwners'], $stash['legacy'])));
 $same = true;
 $cases = array(
     array('notes' => array('A new note from a reader.')),

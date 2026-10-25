@@ -1262,7 +1262,7 @@
             identification: {
                 name: '', nameKey: '', currentName: '', otherNames: [], pastNames: [],
                 legalName: '', dbaNames: [], registrants: [],
-                currentOperator: '', currentOwners: [], otherOperators: [], pastOperators: [],
+                currentOperator: '', currentOwners: [], pastOwners: [], otherOperators: [], pastOperators: [],
                 knownReferrers: [], investors: []
             },
             location: {
@@ -1296,7 +1296,7 @@
         'certifications', 'licensing', 'profileLinks', 'resourceLinks', 'federalFunding', 'resources', 'treatmentTypes',
         'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices',
         'philosophy', 'conditions', 'criticalIncidents', 'notes', 'fieldNotes',
-        'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors',
+        'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
         'isPrivatelyOwned', 'sourceProject', 'sourceProjectId', 'sourceCategory',
         'sourceOperator', 'linkedFromRef', 'kopProfileVersion', 'facility_id',
         'name', 'displayName', 'city', 'state', 'timestamp',
@@ -1570,6 +1570,10 @@
         const singleOwner = v2Str(ident.currentOwner);
         if (singleOwner !== '') owners.push(singleOwner);
         doc.identification.currentOwners = v2List(owners);
+        // Past owners: the forms' "Past Owners" box, the older top-level otherOwners ("Previous/Other Owners"),
+        // and what a stored suggestion kept under legacy.identification before the field existed.
+        const stashed = isV2 && isPlainObject(f.legacy) && isPlainObject(f.legacy.identification) ? f.legacy.identification : {};
+        doc.identification.pastOwners = v2List(v2List(ident.pastOwners).concat(v2List(f.otherOwners), v2List(stashed.pastOwners)));
         doc.identification.knownReferrers = v2List(ident.knownReferrers);
         doc.identification.otherOperators = v2List(f.otherOperators !== undefined ? f.otherOperators : ident.otherOperators);
         doc.identification.pastOperators = v2List(f.pastOperators !== undefined ? f.pastOperators : ident.pastOperators);
@@ -1735,7 +1739,12 @@
         doc.memberships = v2List(f.memberships);
         doc.certifications = v2List(f.certifications);
         doc.licensing = v2List(f.licensing);
-        doc.profileLinks = v2LinkList(f.profileLinks);
+        // The public form's identification.websites are the facility's own pages, as profileLinks.
+        doc.profileLinks = v2LinkList([].concat(
+            Array.isArray(f.profileLinks) ? f.profileLinks : [],
+            Array.isArray(ident.websites) ? ident.websites : [],
+            Array.isArray(stashed.websites) ? stashed.websites : []
+        ));
         doc.resourceLinks = v2ResourceLinkList(f.resourceLinks);
         doc.federalFunding = v2FederalFundingList(f.federalFunding);
         doc.notes = v2List(f.notes);
@@ -1782,6 +1791,15 @@
         });
         if (isV2 && isPlainObject(f.legacy)) {
             doc.legacy = { ...f.legacy, ...doc.legacy };
+            // Read into pastOwners and profileLinks above.
+            delete doc.legacy.otherOwners;
+            if (isPlainObject(doc.legacy.identification)) {
+                const rest = { ...doc.legacy.identification };
+                delete rest.pastOwners;
+                delete rest.websites;
+                if (Object.keys(rest).length) doc.legacy.identification = rest;
+                else delete doc.legacy.identification;
+            }
         }
 
         rejected.forEach((note) => doc.operatingPeriod.notes.push(`migration: unparsed ${note}`));
@@ -1810,6 +1828,7 @@
                 currentOperator: ident.currentOperator || '',
                 currentOwner: (ident.currentOwners && ident.currentOwners[0]) || '',
                 currentOwners: ident.currentOwners || [],
+                pastOwners: ident.pastOwners || [],
                 knownReferrers: ident.knownReferrers || []
             },
             otherOperators: ident.otherOperators || [],

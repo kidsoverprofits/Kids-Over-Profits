@@ -719,7 +719,7 @@ if (!function_exists('kop_facility_blank_document')) {
                 'name' => '', 'nameKey' => '', 'currentName' => '',
                 'otherNames' => array(), 'pastNames' => array(),
                 'legalName' => '', 'dbaNames' => array(), 'registrants' => array(),
-                'currentOperator' => '', 'currentOwners' => array(),
+                'currentOperator' => '', 'currentOwners' => array(), 'pastOwners' => array(),
                 'otherOperators' => array(), 'pastOperators' => array(),
                 'knownReferrers' => array(), 'investors' => array(),
             ),
@@ -875,6 +875,14 @@ if (!function_exists('kop_facility_normalize')) {
         $single_owner = kop_facility_str($ident['currentOwner'] ?? '');
         if ($single_owner !== '') $owners[] = $single_owner;
         $doc['identification']['currentOwners'] = kop_facility_list($owners);
+        // Past owners: the forms' "Past Owners" box, the older top-level otherOwners ("Previous/Other Owners"),
+        // and what a stored suggestion kept under legacy.identification before the field existed.
+        $stashed = $is_v2 && is_array($f['legacy']['identification'] ?? null) ? $f['legacy']['identification'] : array();
+        $doc['identification']['pastOwners'] = kop_facility_list(array_merge(
+            kop_facility_list($ident['pastOwners'] ?? array()),
+            kop_facility_list($f['otherOwners'] ?? array()),
+            kop_facility_list($stashed['pastOwners'] ?? array())
+        ));
 
         $doc['identification']['knownReferrers'] = kop_facility_list($ident['knownReferrers'] ?? array());
         $doc['identification']['otherOperators'] = kop_facility_list(
@@ -1079,7 +1087,12 @@ if (!function_exists('kop_facility_normalize')) {
         $doc['memberships']    = kop_facility_list($f['memberships'] ?? array());
         $doc['certifications'] = kop_facility_list($f['certifications'] ?? array());
         $doc['licensing']      = kop_facility_list($f['licensing'] ?? array());
-        $doc['profileLinks']   = kop_facility_link_list($f['profileLinks'] ?? array());
+        // The public form's identification.websites are the facility's own pages, as profileLinks.
+        $doc['profileLinks']   = kop_facility_link_list(array_merge(
+            is_array($f['profileLinks'] ?? null) ? $f['profileLinks'] : array(),
+            is_array($ident['websites'] ?? null) ? $ident['websites'] : array(),
+            is_array($stashed['websites'] ?? null) ? $stashed['websites'] : array()
+        ));
         $doc['resourceLinks']  = kop_facility_resource_link_list($f['resourceLinks'] ?? array());
         $doc['federalFunding'] = kop_facility_federal_funding_list($f['federalFunding'] ?? array());
         $doc['notes']          = kop_facility_list($f['notes'] ?? array());
@@ -1133,7 +1146,7 @@ if (!function_exists('kop_facility_normalize')) {
             'certifications', 'licensing', 'profileLinks', 'resourceLinks', 'federalFunding', 'resources', 'treatmentTypes',
             'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices',
             'philosophy', 'conditions', 'criticalIncidents', 'notes', 'fieldNotes',
-            'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors',
+            'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
             'isPrivatelyOwned', 'sourceProject', 'sourceProjectId', 'sourceCategory',
             'sourceOperator', 'linkedFromRef', 'kopProfileVersion', 'facility_id',
             'name', 'displayName', 'city', 'state', 'timestamp',
@@ -1145,6 +1158,12 @@ if (!function_exists('kop_facility_normalize')) {
         }
         if ($is_v2 && isset($f['legacy']) && is_array($f['legacy'])) {
             $doc['legacy'] = array_merge($f['legacy'], $doc['legacy']);
+            // Read into pastOwners and profileLinks above.
+            unset($doc['legacy']['otherOwners']);
+            if (isset($doc['legacy']['identification']) && is_array($doc['legacy']['identification'])) {
+                unset($doc['legacy']['identification']['pastOwners'], $doc['legacy']['identification']['websites']);
+                if (!$doc['legacy']['identification']) unset($doc['legacy']['identification']);
+            }
         }
         foreach ((array)($wrapper['row_extras'] ?? array()) as $key => $value) {
             if (!array_key_exists($key, $doc['legacy']) && !in_array($key, $known, true)) {
@@ -1767,6 +1786,7 @@ if (!function_exists('kop_facility_to_legacy')) {
                 'currentOperator' => $ident['currentOperator'],
                 'currentOwner'    => $ident['currentOwners'] ? $ident['currentOwners'][0] : '',
                 'currentOwners'   => $ident['currentOwners'],
+                'pastOwners'      => $ident['pastOwners'] ?? array(),
                 'knownReferrers'  => $ident['knownReferrers'],
             ),
             'otherOperators' => $ident['otherOperators'],

@@ -56,6 +56,7 @@ The three filing fields are written by the data forms (facility Identification s
 |---|---|---|
 | `currentOperator` | string | |
 | `currentOwners` | string[] | Legacy single `currentOwner` is merged in. |
+| `pastOwners` | string[] | Earlier owners (the forms' Past Owners box). Since 2026-10-25; the legacy top-level `otherOwners` (Previous/Other Owners) and a suggestion's `legacy.identification.pastOwners` are merged in. |
 | `otherOperators` | string[] | Was top-level `otherOperators`. |
 | `pastOperators` | string[] | Was top-level `pastOperators`. |
 | `knownReferrers` | string[] | |
@@ -166,7 +167,7 @@ a `migration: original status "..."` note.
 | `staff` | `{administrator[], notableStaff[], pastTTIJobs[]}` | `administrator` and `notableStaff` entries are `{name, role, pastJobs}`, plus `{source, sourceUrl}` when the entry was added from a cited source (Woodbury Facts, Fornits: the citation and its link, shown on the facility page; kept only when given), and `personId`, the person's id in `{prefix}kop_people` (stamped by the hourly people sync, `inc/people.php`; kept only when set); `pastTTIJobs` entries are `{role, organization, employer}`. |
 | `accreditations` | `{current[], past[]}` | |
 | `memberships`, `certifications`, `licensing`, `notes` | string[] | |
-| `profileLinks` | string[] | URLs. |
+| `profileLinks` | string[] | URLs. The public form's `identification.websites` are merged in (since 2026-10-25). |
 | `resourceLinks` | `{url, label, kind, source}[]` | Outside pages about the facility (licensing reports, court records, survivor posts, staff profiles, reference). One entry per address. `kind` is one of `licensing`, `court`, `government`, `news`, `social`, `people`, `advertising` (the program's ads and paid listings: Woodbury Reports, AllKindsOfTherapy, press releases), `reference`, `archive`, `other`. `source` says where the link came from (a Drive Docs source, a submission, a Fornits thread, a state list). Shown on the facility page under "Materials and links" and in the app payload (`resource_links`); links whose `source` starts with "Fornits" are listed with the page's forum section instead. Written by KOP Tools > Drive Docs (`kop_gdl_save()`), the review inbox's "Move to" a facility record (`inc/review-destinations.php`; also Submissions Review "refile" in `api/manage-submissions.php`, source "Sent in as news (#N)"), Fornits (kind `social`, `inc/fornits.php`, which also retitles the label from the thread's headline unless a person changed it), and a new record made by `kop_facdisc_create()` for KOP Tools > State Lists (the state list's page, kind `licensing`). |
 | `federalFunding` | `{stream, detail, years, sources[], ref, source}[]` | Federal money the facility received. `stream` is a key of `kop_facility_federal_funding_streams()`: `medicaid`, `medicaid_child_welfare`, `child_welfare`, `orr`, `tricare`, `ppp`, `education`, `other`. `years` is free text. `sources` entries are `{url, label}`. `ref` names the entry so Undo takes off exactly what it added; `source` is who found it ("Federal funding research, October 2026"). Added at Review inbox > Federal funding (`inc/federal-funding.php`, from `js/data/federal-funding/proposals.json`); listed on the facility page grouped by stream (`kop_facility_pages_federal_funding()`) and in the app payload (`federal_funding`). |
 | `resources` | map | Every standard key is present (see Standard shapes): `hasX` booleans, `xDetails` strings, `customResources[]` and `notes[]`. Keys the form adds later are typed by the same naming rule. |
@@ -371,6 +372,7 @@ campus; the identity split gave it its own row:
     "pastNames": [],
     "currentOperator": "",
     "currentOwners": [],
+    "pastOwners": [],
     "otherOperators": [],
     "pastOperators": [],
     "knownReferrers": [],
