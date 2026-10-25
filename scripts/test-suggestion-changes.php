@@ -188,6 +188,13 @@ $check('approve: the record keeps its type and staff and has the note',
     $after['facilityDetails']['type'] === $doc['facilityDetails']['type'] && count($after['staff']['notableStaff']) === count($doc['staff']['notableStaff'])
     && in_array('A note sent with Submit info.', $after['notes'], true) && $after['facilityDetails']['gender'] === $girls);
 
+// An app correction names its record (legacy.facilityId): the record is found by it, and the entry is merged, not written over it.
+$app = kop_suggestion_normalize_facilities(array('facilities' => array(array('identification' => array('name' => 'A different name entirely'),
+    'facilityId' => (int) $row['id'], 'notes' => array('From the app.')))), 'companies');
+$res = kop_suggestion_resolve_entries($pdo, $app['facilities'], 'Correction, sent from the app.', 'wpdl_');
+$check('app correction: found by the id it names, merged as a partial', (int) ($res['facilities'][0]['facility_id'] ?? 0) === (int) $row['id']
+    && $res['facilities'][0]['identification']['name'] === $after['identification']['name'] && in_array('From the app.', $res['facilities'][0]['notes'], true));
+
 // A name with no record still makes a new facility, as the card says.
 $res = kop_suggestion_resolve_entries($pdo, array(array('identification' => array('name' => 'Zzq No Such Program Anywhere'))), '', 'wpdl_');
 $check('approve: a name with no record is left to become a new facility', empty($res['facilities'][0]['facility_id']) && !$res['all_on_file']);

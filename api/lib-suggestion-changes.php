@@ -95,6 +95,10 @@ if (!function_exists('kop_suggestion_find_facility')) {
     function kop_suggestion_find_facility(array $entry, array $sent, $reason, array $opts) {
         $fid = (int) ($entry['facility_id'] ?? 0);
         if ($fid > 0 && kop_facility_load($fid, $opts)) return $fid;
+        // The app's and extension's corrections name the record they are about (inc/mobile-submit.php),
+        // kept under legacy in the stored document: only a hint, the entry is still merged as a partial.
+        $hint = (int) ($entry['facilityId'] ?? ($entry['legacy']['facilityId'] ?? 0));
+        if ($hint > 0 && kop_facility_load($hint, $opts)) return $hint;
 
         if (preg_match('#from\s+/facility/([a-z0-9-]+)/?#i', $reason, $m) && function_exists('kop_facility_pages_index')) {
             try {

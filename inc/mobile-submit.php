@@ -101,9 +101,12 @@ function kop_msub_year($value) {
 }
 
 /**
- * The suggested_edits document for a facility the app sends: the data form's
- * shape (facilities[].identification / locationDetails / operatingPeriod),
- * so the Submissions Review screen reads it like any other suggestion.
+ * The suggested_edits document for a facility the app sends, stored as a v2
+ * facility document like the data form's (kop_suggestion_normalize_facilities(),
+ * docs/FACILITY-SCHEMA.md), so Submissions Review and Approve read it like any
+ * other suggestion. A correction's facilityId is kept (under legacy) but never
+ * becomes facility_id: that would make Approve treat the few fields sent as the
+ * whole record.
  */
 function kop_msub_facility_document(array $p, $type) {
     $name = kop_ext_text($type === 'facility_new' ? ($p['name'] ?? '') : ($p['facility'] ?? ''), 255);
@@ -142,11 +145,11 @@ function kop_msub_facility_document(array $p, $type) {
         }
         $website = esc_url_raw(trim((string) ($p['website'] ?? '')), array('http', 'https'));
         if ($website !== '') {
-            $facility['website'] = $website;
+            $facility['profileLinks'] = array($website);
         }
         $kind = kop_ext_text($p['program_type'] ?? '', 120);
         if ($kind !== '') {
-            $facility['type'] = $kind;
+            $facility['facilityDetails'] = array('type' => $kind);
         }
     }
     $data = array(
@@ -158,7 +161,10 @@ function kop_msub_facility_document(array $p, $type) {
     if (!empty($facility['identification']['currentOperator'])) {
         $data['operator'] = array('name' => $facility['identification']['currentOperator']);
     }
-    return $data;
+    if (!function_exists('kop_suggestion_normalize_facilities')) {
+        require_once get_stylesheet_directory() . '/api/lib-suggested-edits.php';
+    }
+    return kop_suggestion_normalize_facilities($data, 'companies');
 }
 
 function kop_msub_insert_facility(array $p, $type, $submitter, $note) {

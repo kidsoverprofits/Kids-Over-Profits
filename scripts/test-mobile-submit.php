@@ -237,8 +237,11 @@ $e = $pdo->query("SELECT * FROM suggested_edits ORDER BY id DESC LIMIT 1")->fetc
 $fac = json_decode($e['edited_json_data'], true)['facilities'][0] ?? array();
 check($e['status'] === 'pending' && ($fac['identification']['name'] ?? '') === 'Mobile Test Academy', 'facility_new writes a pending suggested_edits row with identification.name');
 check(($fac['identification']['otherNames'] ?? null) === array('Old Mobile Ranch', 'Mobile Camp') && ($fac['identification']['currentOperator'] ?? '') === 'Mobile Holdings LLC', 'otherNames and currentOperator stored');
-check(($fac['locationDetails']['city'] ?? '') === 'Provo' && ($fac['locationDetails']['state'] ?? '') === 'UT', 'locationDetails stored');
-check(($fac['operatingPeriod'] ?? null) === array('startYear' => '1998'), 'operatingPeriod keeps the 4-digit start year and drops "soon"');
+// Stored as a v2 facility document (kop_suggestion_normalize_facilities(), docs/FACILITY-SCHEMA.md).
+check(($fac['location']['city'] ?? '') === 'Provo' && ($fac['location']['state'] ?? '') === 'UT', 'the place stored in location');
+$op = (array) ($fac['operatingPeriod'] ?? array());
+check(($op['startYear'] ?? null) === 1998 && array_key_exists('endYear', $op) && $op['endYear'] === null, 'operatingPeriod keeps the 4-digit start year and drops "soon"');
+check(in_array('https://mobile-academy.test', $fac['profileLinks'] ?? array(), true), 'the website is a profile link');
 $f = last_followup();
 check($f['kind'] === 'suggested_edit' && $f['email'] === 'd@example.test' && $f['id'] === (int) $e['id'], 'follow-up registered as suggested_edit with the email');
 check(strpos($e['reason'], '(mobile app)') !== false, 'facility reason names the mobile app as sender');
@@ -246,7 +249,8 @@ check(strpos($e['reason'], '(mobile app)') !== false, 'facility reason names the
 $r = submit(array('type' => 'facility_new', 'name' => 'Years Only Academy', 'start_year' => '98', 'end_year' => '20x5'));
 $e = $pdo->query("SELECT * FROM suggested_edits ORDER BY id DESC LIMIT 1")->fetch();
 $fac = json_decode($e['edited_json_data'], true)['facilities'][0] ?? array();
-check(is_resp($r, 201) && !isset($fac['operatingPeriod']), 'years that are not 4-digit years are dropped entirely');
+$op = (array) ($fac['operatingPeriod'] ?? array());
+check(is_resp($r, 201) && array_key_exists('startYear', $op) && $op['startYear'] === null && $op['endYear'] === null, 'years that are not 4-digit years are dropped entirely');
 
 $r = submit(array('type' => 'facility_correction', 'facility' => 'Mobile Test Academy', 'facility_id' => 4321));
 check(is_err($r, 'kop_no_notes', 400), 'facility_correction without notes -> 400 kop_no_notes');
@@ -255,7 +259,7 @@ $r = submit(array('type' => 'facility_correction', 'facility' => 'Mobile Test Ac
 check(is_resp($r, 201) && $r->data['queue'] === 'facility review', 'facility_correction with notes -> 201');
 $e = $pdo->query("SELECT * FROM suggested_edits ORDER BY id DESC LIMIT 1")->fetch();
 $fac = json_decode($e['edited_json_data'], true)['facilities'][0] ?? array();
-check(($fac['facilityId'] ?? null) === 4321 && strpos($e['reason'], 'It closed in 2019.') !== false && strpos($e['reason'], 'Source: https://example-news.test/closure') !== false, 'correction row has facilityId, the notes and "Source: <url>" in reason');
+check(($fac['legacy']['facilityId'] ?? null) === 4321 && empty($fac['facility_id']) && strpos($e['reason'], 'It closed in 2019.') !== false && strpos($e['reason'], 'Source: https://example-news.test/closure') !== false, 'correction row has facilityId, the notes and "Source: <url>" in reason');
 check(last_followup()['kind'] === 'suggested_edit', 'correction follow-up registered as suggested_edit');
 
 // Rejections.
