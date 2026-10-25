@@ -119,6 +119,8 @@ foreach (array_keys(kop_rinbox_native_types()) as $kop_rinbox_native_key) {
                 $c->execute(array($t['pending']));
                 return array('items' => array_map(function ($r) use ($type) { return kop_rinbox_native_item($type, $r); }, $st->fetchAll(PDO::FETCH_ASSOC)), 'total' => (int) $c->fetchColumn());
             },
+            // "Just in" (inc/review-inbox-recent.php): pending rows since a date, 'people' for those sent by a person.
+            'recent' => function ($since_ts, $limit) use ($type) { return kop_rinbox_native_recent($type, $since_ts, $limit); },
             'get'    => function ($key) use ($type) {
                 $r = kop_rinbox_native_row($type, $key);
                 return $r ? kop_rinbox_native_item($type, $r) : null;
@@ -240,6 +242,7 @@ function kop_rinbox_native_item($type, array $r) {
         'text'         => $type === 'wiki' ? kop_rinbox_excerpt($r['generated_markdown'] ?? '', 3000) : '',
         'status'       => (string) $r[$t['status_col']],
         'status_label' => (string) $r[$t['status_col']],
+        'created'      => (string) ($r['created_at'] ?? ''),
         'fields'       => $fields,
         'moves'        => $moves,
         'actions'      => $actions,
@@ -676,7 +679,66 @@ function kop_rinbox_native_origins($type) {
     $others = array();
     foreach ($all as $o) $others[] = '(' . $o[1] . ')';
     $all['people'] = array('People and admins', 'NOT (' . implode(' OR ', $others) . ')');
+    if ($has_notes) {
+        // Both daily news scans together: the Review inbox's "Daily news scans" tab opens News on this.
+        $all['scans'] = array('Daily news scans (Google News and Reddit)', '(' . $all['scraper-google'][1] . ' OR ' . $all['scraper-reddit'][1] . ')');
+    }
     return $all;
+}
+
+/**
+ * Pending rows created on or after $since_ts, newest first, without those
+ * already on file or held off my list; 'people' when the row came from a
+ * person (origin "People and admins"; every data suggestion does), 'scan'
+ * when a daily news scan found it.
+ */
+function kop_rinbox_native_recent($type, $since_ts, $limit) {
+    $t = kop_rinbox_native_types()[$type];
+    $pdo = kop_rinbox_pdo();
+    $people = kop_rinbox_native_origin_where($type, 'people');
+    $scans = kop_rinbox_native_origin_where($type, 'scans');
+    $st = $pdo->prepare('SELECT *, ' . ($people !== '' ? "CASE WHEN $people THEN 1 ELSE 0 END" : '1') . ' AS kop_people, '
+        . ($scans !== '' ? "CASE WHEN $scans THEN 1 ELSE 0 END" : '0') . " AS kop_scan FROM {$t['table']}"
+        . " WHERE {$t['status_col']} = ? AND created_at >= ? ORDER BY created_at DESC, id DESC LIMIT " . (int) $limit);
+    $st->execute(array($t['pending'], gmdate('Y-m-d H:i:s', (int) $since_ts)));
+    $skip = array_fill_keys(array_map('strval', kop_on_file_ids($pdo, $type)), true) + kop_rinbox_hidden_keys($type);
+    $out = array();
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (isset($skip[(string) (int) $r['id']])) continue;
+        $item = kop_rinbox_native_item($type, $r);
+        $item['people'] = (bool) (int) $r['kop_people'];
+        $item['scan'] = (bool) (int) $r['kop_scan'];
+        $out[] = $item;
+    }
+    return $out;
+}
+
+/**
+ * Waiting rows per native queue that people sent ('people') and that the daily
+ * news scans found ('scans'), for the Review inbox tabs: [type => [people, scans]].
+ * Kept five minutes; kop_rinbox_flush_counts() drops it.
+ */
+function kop_rinbox_native_split_counts() {
+    $cached = get_transient('kop_rinbox_native_split');
+    if (is_array($cached)) return $cached;
+    $out = array();
+    foreach (kop_rinbox_native_types() as $type => $t) {
+        try {
+            $out[$type] = array('people' => null, 'scans' => 0);
+            $people = kop_rinbox_native_origin_where($type, 'people');
+            if ($people === '') continue;
+            $scans = kop_rinbox_native_origin_where($type, 'scans');
+            $st = kop_rinbox_pdo()->prepare("SELECT SUM(CASE WHEN $people THEN 1 ELSE 0 END) AS p, "
+                . ($scans !== '' ? "SUM(CASE WHEN $scans THEN 1 ELSE 0 END)" : '0') . " AS s FROM {$t['table']} WHERE {$t['status_col']} = ?");
+            $st->execute(array($t['pending']));
+            $row = $st->fetch(PDO::FETCH_ASSOC) ?: array();
+            $out[$type] = array('people' => (int) ($row['p'] ?? 0), 'scans' => (int) ($row['s'] ?? 0));
+        } catch (Throwable $e) {
+            // The tab shows the queue's whole count instead.
+        }
+    }
+    set_transient('kop_rinbox_native_split', $out, 5 * MINUTE_IN_SECONDS);
+    return $out;
 }
 
 /** The SQL condition for one origin, or '' for none / unknown. */

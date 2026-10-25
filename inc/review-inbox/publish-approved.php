@@ -20,6 +20,7 @@ kop_rinbox_register('publish-approved', function () {
     return array(
         'label'    => 'Approved, not published',
         'group'    => 'Submissions',
+        'area'     => 'checks',   // approved already: nothing new sent in
         'help'     => 'Lawsuits and bills that were approved before approving also published them, so they are still off the site. Publish puts one on the site; Publish all does every one.',
         'views'    => array('approved' => 'Waiting to publish'),
         'tool_url' => '',

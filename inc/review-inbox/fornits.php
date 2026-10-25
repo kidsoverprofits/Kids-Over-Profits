@@ -65,6 +65,13 @@ kop_rinbox_register('fornits', function () {
             return (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_fornits_items_table() . ' i WHERE ' . kop_rinbox_fornits_where('pending', array()));
         },
         'list'     => 'kop_rinbox_fornits_list',
+        // "Just in" counts the new items in SQL: drawing 300 cards to count them took 20 seconds.
+        'recent_count' => function ($since_ts) {
+            global $wpdb;
+            kop_fornits_ensure_tables();
+            return (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_fornits_items_table() . ' i WHERE ' . kop_rinbox_fornits_where('pending', array())
+                . ' AND i.created_at >= %s', gmdate('Y-m-d H:i:s', (int) $since_ts)));
+        },
         'on_file'  => 'kop_rinbox_fornits_on_file',
         'conflicts' => 'kop_rinbox_fornits_conflicts',
         'resolve'  => function ($key, $how, $typed) {

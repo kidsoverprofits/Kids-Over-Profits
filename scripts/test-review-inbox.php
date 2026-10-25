@@ -354,6 +354,87 @@ if ($only === '' || $only === 'counts') {
     }
 }
 
+if ($only === '' || $only === 'recent') {
+    echo "-- Tabs and \"Just in\": areas, what came in lately, people vs the daily news scans --\n";
+    try {
+        $check('recent: the news scans have a tab of their own', kop_rinbox_area(array('group' => 'Found by the news scans')) === 'scans'
+            && kop_rinbox_area(array('group' => 'Imports to review')) === 'found' && kop_rinbox_area(array('group' => 'Sent in by readers')) === 'people'
+            && kop_rinbox_area(array('group' => 'Suggestions to check')) === 'checks' && kop_rinbox_area(array('group' => 'Submissions', 'area' => 'checks')) === 'checks');
+        // A queue listed oldest first, with one undated item: the cutoff still finds every recent one.
+        $now = time();
+        $GLOBALS['kop_rinbox_rc'] = array(
+            'old' => gmdate('Y-m-d H:i:s', $now - 9 * DAY_IN_SECONDS), 'new1' => gmdate('Y-m-d H:i:s', $now - 3600),
+            'nodate' => '', 'new2' => gmdate('Y-m-d\TH:i:s', $now - DAY_IN_SECONDS), 'edge' => gmdate('Y-m-d H:i:s', $now - 3 * DAY_IN_SECONDS),
+        );
+        foreach (array('zz-rc-people' => 'Sent in by readers', 'zz-rc-scan' => 'Found by the news scans') as $k => $group) {
+            kop_rinbox_register($k, function () use ($group) {
+                return array('label' => 'Recent ' . $group, 'group' => $group, 'views' => array('waiting' => 'Waiting'),
+                    'count' => function () { return 5; },
+                    'list' => function (array $q) {
+                        $items = array();
+                        foreach ($GLOBALS['kop_rinbox_rc'] as $key => $c) $items[] = array('key' => $key, 'title' => $key, 'created' => $c);
+                        return array('items' => array_slice($items, $q['offset'], $q['limit']), 'total' => count($items));
+                    });
+            });
+        }
+        kop_rinbox_sources(true);
+        $got = kop_rinbox_recent_items('zz-rc-people', $now - 2 * DAY_IN_SECONDS);
+        $check('recent: only items from the window, newest first, undated ones left out', array_column($got, 'key') === array('new1', 'new2'), json_encode(array_column($got, 'key')));
+        $check('recent: a readers\' queue counts as sent by people, with its queue named', $got && $got[0]['people'] && !$got[0]['scan'] && $got[0]['source_label'] === 'Recent Sent in by readers');
+        $req = new WP_REST_Request();
+        $req->set_param('sources', 'zz-rc-people,zz-rc-scan,no-such-queue');
+        $req->set_param('days', '2');
+        $data = kop_rinbox_rest_recent($req)->get_data();
+        $r = $data['recent'] ?? array();
+        $check('recent: REST gives people\'s cards, counts the scans\' finds, and names a queue it could not read',
+            count($r['zz-rc-people']['people'] ?? array()) === 2 && ($r['zz-rc-scan']['scans'] ?? null) === 2 && empty($r['zz-rc-scan']['people'])
+            && !empty($r['no-such-queue']['error']), json_encode($r));
+
+        // News: what a person sent is a card, what the Google News scan found is counted with the scans.
+        $pdo = kop_rinbox_pdo();
+        $ins = $pdo->prepare("INSERT INTO news_submissions (article_title, article_url, status, submitted_by, submission_notes, created_at) VALUES (?, ?, 'submitted', ?, ?, ?)");
+        $ins->execute(array('ZZ sent by a reader', 'https://example.org/zz-reader-' . $now, 'A reader', '', gmdate('Y-m-d H:i:s', $now - 600)));
+        $reader = (string) $pdo->lastInsertId();
+        $ins->execute(array('ZZ found by the scan', 'https://example.org/zz-scan-' . $now, 'scraper', 'auto-discovery via google-news: test', gmdate('Y-m-d H:i:s', $now - 600)));
+        $scan = (string) $pdo->lastInsertId();
+        $ins->execute(array('ZZ old reader link', 'https://example.org/zz-old-' . $now, 'A reader', '', gmdate('Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS)));
+        $old = (string) $pdo->lastInsertId();
+        $news = kop_rinbox_recent_items('news', $now - 2 * DAY_IN_SECONDS);
+        $by = array();
+        foreach ($news as $it) $by[$it['key']] = $it;
+        $check('recent: News sent by a person is a card, the scan\'s find is a scan, the old one is left out',
+            !empty($by[$reader]['people']) && isset($by[$scan]) && empty($by[$scan]['people']) && !empty($by[$scan]['scan']) && !isset($by[$old]),
+            json_encode(array_map(function ($it) { return array($it['key'], $it['people'], $it['scan']); }, $news)));
+        delete_transient('kop_rinbox_native_split');
+        $split = kop_rinbox_native_split_counts();
+        $check('recent: the News tab counts split people from the daily news scans', ($split['news']['people'] ?? 0) >= 1 && ($split['news']['scans'] ?? 0) >= 1
+            && array_key_exists('people', $split['data'] ?? array()), json_encode($split));
+        $pdo->prepare('DELETE FROM news_submissions WHERE id IN (?, ?, ?)')->execute(array($reader, $scan, $old));
+
+        // Every real queue answers "Just in" (a week back on the mirror), and says how long it took.
+        $slow = array();
+        foreach (array_keys(kop_rinbox_sources()) as $k) {
+            if (strpos($k, 'zz-') === 0) continue;
+            $t0 = microtime(true);
+            try {
+                $req = new WP_REST_Request();
+                $req->set_param('sources', $k);
+                $req->set_param('days', '7');
+                $r = kop_rinbox_rest_recent($req)->get_data()['recent'][$k] ?? array();
+                $check("recent: $k answers", empty($r['error']), $r['error'] ?? '');
+                $ms = (int) ((microtime(true) - $t0) * 1000);
+                if ($ms > 3000) $slow[] = "$k {$ms}ms";
+                echo "  $k: " . count($r['people'] ?? array()) . ' people, ' . (int) ($r['scans'] ?? 0) . ' scans, ' . (int) ($r['others'] ?? 0) . " other in the last 7 days ({$ms} ms)\n";
+            } catch (Throwable $e) {
+                $check("recent: $k answers", false, $e->getMessage());
+            }
+        }
+        if ($slow) echo '  slow: ' . implode(', ', $slow) . "\n";
+    } catch (Throwable $e) {
+        $check('recent: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 if ($only === '' || $only === 'ya-moved') {
     echo "-- Items of records moved to the young adult programs --\n";
     try {

@@ -27,6 +27,7 @@ kop_rinbox_register('program-practices', function () {
         },
         'view_counts' => 'kop_rinbox_pp_view_counts',
         'list'        => 'kop_rinbox_pp_list',
+        'recent_count' => function () { return 0; },   // its cards carry no date: never in "Just in"
         'get'         => function ($key) {
             list($fid, $topic) = array_pad(explode(':', (string) $key, 2), 2, '');
             return kop_rinbox_pp_item((int) $fid, $topic);

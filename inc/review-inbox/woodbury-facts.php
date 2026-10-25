@@ -55,6 +55,13 @@ kop_rinbox_register('woodbury-facts', function () {
             return (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_wbf_table() . ' WHERE ' . kop_rinbox_wbf_where('pending', array()));
         },
         'list'     => 'kop_rinbox_wbf_list',
+        // "Just in" counts the new items in SQL: drawing 300 cards to count them took 19 seconds.
+        'recent_count' => function ($since_ts) {
+            global $wpdb;
+            kop_wbf_ensure_table();
+            return (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_wbf_table() . ' WHERE ' . kop_rinbox_wbf_where('pending', array())
+                . ' AND created_at >= %s', gmdate('Y-m-d H:i:s', (int) $since_ts)));
+        },
         'on_file'  => 'kop_rinbox_wbf_on_file',
         'conflicts' => 'kop_rinbox_wbf_conflicts',
         'resolve'  => function ($key, $how, $typed) {

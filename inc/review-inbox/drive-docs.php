@@ -74,6 +74,12 @@ kop_rinbox_register('drive-docs', function () {
             return (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_gdl_table() . " WHERE status = 'pending'");
         },
         'list'     => 'kop_rinbox_gdl_list',
+        // "Just in" counts the new links in SQL: drawing 300 cards to count them took 40 seconds.
+        'recent_count' => function ($since_ts) {
+            global $wpdb;
+            return (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_gdl_table() . ' WHERE ' . kop_rinbox_gdl_where('pending', array())
+                . ' AND created_at >= %s', gmdate('Y-m-d H:i:s', (int) $since_ts)));
+        },
         'get'      => function ($key) {
             if (strncmp((string) $key, 'g:', 2) === 0) return kop_rinbox_gdl_group_item($key);
             $rows = kop_gdl_rows(array($key));

@@ -68,6 +68,16 @@
  *   'lookup'   fn(string $name, string $q): [{value, label}]  optional; a
  *              text field or param with 'lookup' => name suggests values as
  *              the reviewer types (a company "c12", a consultant...)
+ *   'area'     'people' | 'scans' | 'found' | 'checks'  optional; the page tab the queue
+ *              sits in, else read from 'group' (kop_rinbox_area(),
+ *              inc/review-inbox-recent.php)
+ *   'recent'   fn(int $since_ts, int $limit): items  optional; "Just in": waiting
+ *              items created since then, each with 'people' (sent by a person)
+ *              and 'scan' (found by a daily news scan). Without it the
+ *              waiting view is read for items whose 'created' is recent enough
+ *   'recent_count' fn(int $since_ts): int  optional, for a queue nobody sends
+ *              to: how many waiting items are that new, counted without
+ *              drawing them (its cards are slow)
  *   'addons'   [add-on id]  optional; card add-ons this queue has unless the
  *              owner switches them off (an add-on that is on everywhere needs
  *              no entry here)
@@ -180,6 +190,8 @@ require_once __DIR__ . '/review-volunteers.php';
 require_once __DIR__ . '/review-inbox-addons.php';
 // KOP Tools > Card Fields: what each queue's cards show, and what kinds of record its pickers offer
 require_once __DIR__ . '/review-inbox-fields.php';
+// The page's tabs (sent in by people, daily news scans, imports and inspections, checks) and "Just in".
+require_once __DIR__ . '/review-inbox-recent.php';
 
 foreach (glob(__DIR__ . '/review-inbox/*.php') ?: array() as $kop_rinbox_file) {
     require_once $kop_rinbox_file;
@@ -557,6 +569,7 @@ function kop_rinbox_counts_stale() {
 
 /** Something was approved, rejected or undone: every count is stale (kept on show until recounted). */
 function kop_rinbox_flush_counts() {
+    delete_transient('kop_rinbox_native_split'); // News "sent by people" / "daily news scans" counts
     $stored = kop_rinbox_counts_stored();
     if (!$stored) return;
     foreach ($stored as &$c) $c['at'] = 0;
@@ -735,7 +748,7 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
         $out = array();
         foreach (kop_rinbox_sources() as $key => $src) {
             $out[] = array(
-                'key' => $key, 'label' => $src['label'], 'group' => $src['group'], 'views' => $src['views'],
+                'key' => $key, 'label' => $src['label'], 'group' => $src['group'], 'area' => kop_rinbox_area($src), 'views' => $src['views'],
                 'count' => kop_rinbox_count_for_me($key, $counts[$key] ?? null), 'native' => (bool) $src['native'], 'tool_url' => (string) $src['tool_url'],
                 'help' => (string) ($src['help'] ?? ''), 'can_save' => !empty($src['save']),
                 'can_ai' => (!empty($src['save']) && empty($src['no_ai'])) || !empty($src['ai_fill']),
@@ -744,7 +757,8 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
                 'filters' => array_values((array) ($src['filters'] ?? array())),
             );
         }
-        return array('sources' => $out, 'stale' => kop_rinbox_counts_stale(), 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
+        return array('sources' => $out, 'split' => function_exists('kop_rinbox_native_split_counts') ? kop_rinbox_native_split_counts() : array(),
+            'stale' => kop_rinbox_counts_stale(), 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
             'me' => get_current_user_id(), 'held' => kop_rinbox_held_counts() + array('volunteers' => function_exists('kop_vol_open_count') ? kop_vol_open_count() : 0));
     });
 }

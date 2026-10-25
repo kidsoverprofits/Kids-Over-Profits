@@ -49,3 +49,9 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    with the session's own changes set aside, so it predates them). The run also prints "kop extension: lawsuit facility
    links failed: ... near "COMMENT"" (a MySQL column COMMENT in a CREATE on the SQLite copy). Look at
    `kop_rinbox_native_unconnect()` in `inc/review-inbox/native.php` for consultant notes.
+3. **test-review-inbox.php: reader-accounts and wiki-updates fail in the full run** (found 2026-10-25 on a clean copy of
+   main at 3f179304 against the 2026-10-23 mirror, so they predate the Review inbox tabs work). reader-accounts: "a reply
+   that is not JSON gets one more try", "a line ... is dropped (0 lines, 2 dropped)", "a name is taken out ...", and
+   "Undefined array key 0" at `scripts/review-inbox-tests/reader-accounts.php:111`; wiki-updates: the three "site builds
+   the script's draft" / "bold names line" / "names carry the years" checks find 0 drafts. `--source=reader-accounts`
+   alone passes, so something earlier in the full run changes what it reads (order-dependent); start there.

@@ -246,6 +246,14 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
   `kop_rinbox_register()` with the queue's own apply and undo functions.
 - Every approve/reject action carries `help`: one sentence saying what the
   click does.
+- Its tab: a `group` already mapped in `kop_rinbox_area()`
+  (`inc/review-inbox-recent.php`), or an explicit `area` (`people` for what
+  people send in, `scans` for the daily news scans, `found` for imports and
+  inspection scans, `checks` for the rest).
+- "Just in": items carry `created` (a date), or the queue never shows there.
+  If its cards are slow to draw, give it `recent_count` (a SQL count of
+  waiting items created since a time); a queue people send to gets `recent`
+  instead (its new items, in SQL).
 - Undo: the item's `undo` action, so Recently done can reverse it.
 - Items already on file: an `on_file` callback
   (`kop_rinbox_on_file_keys()`), so they leave the waiting list.
