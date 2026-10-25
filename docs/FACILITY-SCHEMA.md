@@ -23,7 +23,7 @@ inside each facility's JSON document, so no SQL columns are added.
    `federalFunding`, `resources`,
    `treatmentTypes`, `targetedDiagnoses`, `targetedBehaviors`, `ttiPractices`,
    `philosophy`, `conditions`, `criticalIncidents`, `notes`, `fieldNotes`,
-   `survivorTestimony`, `documentFolderId`, `provenance`, `legacy`. The set is
+   `survivorTestimony`, `providerDetails`, `documentFolderId`, `provenance`, `legacy`. The set is
    `kop_facility_top_level_keys()`, the keys of `kop_facility_blank_document()`. Sections are always present,
    even when empty, so readers never need to check for them.
 2. **Lists are always arrays** and **maps are always objects**. An empty map is
@@ -174,6 +174,7 @@ a `migration: original status "..."` note.
 | `treatmentTypes`, `targetedDiagnoses`, `targetedBehaviors`, `ttiPractices`, `philosophy`, `conditions`, `criticalIncidents` | maps | Open-ended checklists. `targetedDiagnoses` and `targetedBehaviors` hold selected `hasX` booleans; `ttiPractices` holds selected `hasX` booleans and an optional `other` string list. A legacy array becomes `{"_legacy": [...]}`. |
 | `fieldNotes` | map | A legacy array becomes `{"_legacy": [...]}`. |
 | `survivorTestimony` | `{id, text, source, date, movedFrom, publish}[]` | Survivor accounts. `publish` is false until an admin ticks "OK to publish"; only `publish: true` entries reach the facility page, the open data files, and every kop/v1 response and `api/get-master-data.php` for anyone but an admin (`kop_facility_testimony_redact()`), and a public suggestion keeps the record's hidden entries (`kop_preserve_hidden_testimony()` in `api/lib-suggested-edits.php`). Written by the admin form's Survivor Testimony section (`js/data-form/testimony.js`, "Move to testimony"), the pencil on the facility page (`inc/inline-edit.php`) and Fornits (unpublished). |
+| `providerDetails` | map | A mental health provider's details (`careTypes`, `ttiPractices` maps; `otherCareTypes`, `otherTtiPractices`, `ttiReferrals`, `transportersUsed`, `ttiAffiliations` lists; `referralNotes`), written by the provider form (`js/data-form/provider-form.js`). Empty for a TTI facility. Since 2026-10-25; a document stored before kept them under `legacy.providerDetails`, which the normalizer moves here. |
 | `documentFolderId` | int or null | FileBird folder. |
 
 ### Identity and provenance

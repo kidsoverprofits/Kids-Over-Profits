@@ -756,6 +756,7 @@ if (!function_exists('kop_facility_blank_document')) {
             'notes'         => array(),
             'fieldNotes'    => array(),
             'survivorTestimony' => array(),
+            'providerDetails' => array(),
             'documentFolderId' => null,
             'provenance'    => array(
                 'sourceProject' => '', 'sourceProjectId' => null, 'sourceCategory' => '',
@@ -1111,6 +1112,10 @@ if (!function_exists('kop_facility_normalize')) {
         $doc['criticalIncidents'] = kop_facility_map($f['criticalIncidents'] ?? array());
         $doc['fieldNotes']        = kop_facility_map($f['fieldNotes'] ?? array());
         $doc['survivorTestimony'] = kop_facility_testimony_list($f['survivorTestimony'] ?? array());
+        // A mental health provider's details (js/data-form/provider-form.js); empty for a TTI facility.
+        // A document stored before the field existed kept them under legacy.
+        $doc['providerDetails'] = kop_facility_map($f['providerDetails']
+            ?? ($is_v2 && is_array($f['legacy']['providerDetails'] ?? null) ? $f['legacy']['providerDetails'] : array()));
 
         $doc['documentFolderId'] = kop_facility_int($f['documentFolderId'] ?? null);
 
@@ -1146,7 +1151,7 @@ if (!function_exists('kop_facility_normalize')) {
             'certifications', 'licensing', 'profileLinks', 'resourceLinks', 'federalFunding', 'resources', 'treatmentTypes',
             'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices',
             'philosophy', 'conditions', 'criticalIncidents', 'notes', 'fieldNotes',
-            'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
+            'survivorTestimony', 'providerDetails', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
             'isPrivatelyOwned', 'sourceProject', 'sourceProjectId', 'sourceCategory',
             'sourceOperator', 'linkedFromRef', 'kopProfileVersion', 'facility_id',
             'name', 'displayName', 'city', 'state', 'timestamp',
@@ -1158,8 +1163,8 @@ if (!function_exists('kop_facility_normalize')) {
         }
         if ($is_v2 && isset($f['legacy']) && is_array($f['legacy'])) {
             $doc['legacy'] = array_merge($f['legacy'], $doc['legacy']);
-            // Read into pastOwners and profileLinks above.
-            unset($doc['legacy']['otherOwners']);
+            // Read into pastOwners, profileLinks and providerDetails above.
+            unset($doc['legacy']['otherOwners'], $doc['legacy']['providerDetails']);
             if (isset($doc['legacy']['identification']) && is_array($doc['legacy']['identification'])) {
                 unset($doc['legacy']['identification']['pastOwners'], $doc['legacy']['identification']['websites']);
                 if (!$doc['legacy']['identification']) unset($doc['legacy']['identification']);
@@ -1495,7 +1500,7 @@ if (!function_exists('kop_facility_json_encode')) {
      * JSON objects even when empty, or every reader has to handle [] as well.
      */
     function kop_facility_json_encode(array $doc) {
-        $object_fields = array('resources', 'treatmentTypes', 'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices', 'philosophy', 'conditions', 'criticalIncidents', 'fieldNotes', 'legacy');
+        $object_fields = array('resources', 'treatmentTypes', 'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices', 'philosophy', 'conditions', 'criticalIncidents', 'fieldNotes', 'providerDetails', 'legacy');
         foreach ($object_fields as $field) {
             if (isset($doc[$field]) && is_array($doc[$field]) && $doc[$field] === array()) {
                 $doc[$field] = new stdClass();
@@ -1842,6 +1847,7 @@ if (!function_exists('kop_facility_to_legacy')) {
             'fieldNotes'     => $doc['fieldNotes'],
             'survivorTestimony' => $doc['survivorTestimony'] ?? array(),
         );
+        if (!empty($doc['providerDetails'])) $legacy['providerDetails'] = $doc['providerDetails'];
 
         if ($doc['facility_id'] !== null) $legacy['facility_id'] = $doc['facility_id'];
         if ($doc['documentFolderId'] !== null) $legacy['documentFolderId'] = $doc['documentFolderId'];

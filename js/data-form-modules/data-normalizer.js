@@ -1283,7 +1283,7 @@
             memberships: [], certifications: [], licensing: [], profileLinks: [], resourceLinks: [], federalFunding: [],
             resources: {}, treatmentTypes: {}, targetedDiagnoses: {}, targetedBehaviors: {}, ttiPractices: {},
             philosophy: {}, conditions: {}, criticalIncidents: {},
-            notes: [], fieldNotes: {}, survivorTestimony: [],
+            notes: [], fieldNotes: {}, survivorTestimony: [], providerDetails: {},
             documentFolderId: null,
             provenance: {
                 sourceProject: '', sourceProjectId: null, sourceCategory: '', sourceOperator: null,
@@ -1300,7 +1300,7 @@
         'certifications', 'licensing', 'profileLinks', 'resourceLinks', 'federalFunding', 'resources', 'treatmentTypes',
         'targetedDiagnoses', 'targetedBehaviors', 'ttiPractices',
         'philosophy', 'conditions', 'criticalIncidents', 'notes', 'fieldNotes',
-        'survivorTestimony', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
+        'survivorTestimony', 'providerDetails', 'documentFolderId', 'otherOperators', 'pastOperators', 'investors', 'otherOwners',
         'isPrivatelyOwned', 'sourceProject', 'sourceProjectId', 'sourceCategory',
         'sourceOperator', 'linkedFromRef', 'kopProfileVersion', 'facility_id',
         'name', 'displayName', 'city', 'state', 'timestamp',
@@ -1765,6 +1765,11 @@
         doc.criticalIncidents = v2Map(f.criticalIncidents);
         doc.fieldNotes = v2Map(f.fieldNotes);
         doc.survivorTestimony = v2TestimonyList(f.survivorTestimony);
+        // A mental health provider's details (js/data-form/provider-form.js); empty for a TTI facility.
+        // A document stored before the field existed kept them under legacy.
+        doc.providerDetails = v2Map(f.providerDetails !== undefined && f.providerDetails !== null
+            ? f.providerDetails
+            : (isV2 && isPlainObject(f.legacy) && isPlainObject(f.legacy.providerDetails) ? f.legacy.providerDetails : {}));
         doc.documentFolderId = v2Int(f.documentFolderId);
 
         const prov = isV2 && isPlainObject(f.provenance) ? f.provenance : {};
@@ -1795,8 +1800,9 @@
         });
         if (isV2 && isPlainObject(f.legacy)) {
             doc.legacy = { ...f.legacy, ...doc.legacy };
-            // Read into pastOwners and profileLinks above.
+            // Read into pastOwners, profileLinks and providerDetails above.
             delete doc.legacy.otherOwners;
+            delete doc.legacy.providerDetails;
             if (isPlainObject(doc.legacy.identification)) {
                 const rest = { ...doc.legacy.identification };
                 delete rest.pastOwners;
@@ -1883,6 +1889,7 @@
             fieldNotes: doc.fieldNotes || {},
             survivorTestimony: doc.survivorTestimony || []
         };
+        if (doc.providerDetails && Object.keys(doc.providerDetails).length) legacy.providerDetails = doc.providerDetails;
         delete legacy.operatingPeriod.schema_version;
 
         if (doc.facility_id !== null && doc.facility_id !== undefined) legacy.facility_id = doc.facility_id;
