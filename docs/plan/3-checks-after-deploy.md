@@ -108,3 +108,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     Add a task and Edit. Then give one task to a test volunteer (Send to a volunteer), answer it on their page, reload:
     the card is Answered with the answer and links; Undo of the send closes the project.
     Ask: Research Tasks is up with the old list's 140 questions; give some to Claude or a volunteer to try it?
+
+30. **Volunteer page chooser** (2026-10-25, [b5acfd97](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b5acfd97)):
+    signed in as admin, open https://kidsoverprofits.org/volunteer-review/ : "Choose your work" shows four cards
+    (inspection findings marked Most needed, research questions, social media posts, photos), buttons off in the
+    preview, and no queue opens by itself. The queue fold lists only Violations.
