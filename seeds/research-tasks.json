@@ -4834,7 +4834,29 @@
      "url": "https://www.cchr.org/sites/default/files/The_Silent_Death_of_Americas_Children.pdf",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "Western State Hospital in Staunton, Virginia (not Lakewood, Washington)",
+      "url": "https://gcjt.org/content/who-killed-john-mccloskey",
+      "quote": "he was committed to Western State Hospital, a mental institution in Staunton"
+     },
+     {
+      "claim": "Injured Dec. 1994, three days after he was committed on Dec. 15",
+      "url": "https://gcjt.org/content/who-killed-john-mccloskey",
+      "quote": "On Dec. 15, 1994, John slipped out the back door ... Three days later, he was rushed to the University of Virginia Medical Center"
+     },
+     {
+      "claim": "Died Feb. 24, 1996",
+      "url": "https://gcjt.org/content/who-killed-john-mccloskey?section=3",
+      "quote": "On Feb. 24, 1996, John McCloskey died."
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:kenneth-mcclain-1998-age-11-or-2001-age-15",
@@ -4850,7 +4872,19 @@
      "url": "https://archive.md/ATrGS",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "Sept. 15, 2001, age 15 (as the sheet has it; Unsilenced's 1998/11 is wrong)",
+      "url": "https://www.prisonlegalnews.org/news/2002/may/15/suicides-staff-negligence-plague-private-arkansas-juvenile-prison",
+      "quote": "The latest suicide occurred on September 15, 2001, when 15 year old Kenneth McClain hanged himself in his cell"
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:walter-brown-at-northwestern-academy-2005-or-200",
@@ -4981,7 +5015,19 @@
      "url": "https://www.dailyherald.com/?p=1043066",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "No: the unnamed 16-year-old the Daily Herald reported at IYC St. Charles is Jamal Miller, who died Sept. 1, 2009 (sheet row 33), not Westerfield (15, Sept. 29, 2008)",
+      "url": "https://www.chicagotribune.com/lifestyles/health/ct-met-juvenile-suicide--20100525-story.html",
+      "quote": "Sometime before 3:09 a.m. on Sept. 1, 2009, Jamal Miller began to tear the bedsheet in his room at the Illinois Youth Center in St. Charles."
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:was-dawaun-lewis-taylor-memorial-sheet-row-429-a",
@@ -5103,7 +5149,24 @@
      "url": "https://www.kbtx.com/2022/12/01/two-teens-die-benadryl-overdoes-treatment-facility-sheriffs-office-says/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "The other girl is Raiden Toms-Moonin, 15, of Alaska; still to check whether she is on the page or the sheet. Row 41's girl remains unnamed",
+      "url": "https://www.alaskasnewssource.com/2023/01/12/its-just-damn-roller-coaster-its-freaking-nightmare-alaskan-mother-wants-justice-after-daughters-death-treatment-center-outside/",
+      "quote": "Raiden Toms-Moonin, 15, who was getting treatment at the Oak Plains Academy in Tennessee, was having a hard time being away from her family in Alaska so she spoke to her mother, Margaret Moonin by phone. ... Days later Raiden and another 15-year-old girl would die."
+     },
+     {
+      "claim": "Both died of an overdose of Benadryl stolen from the nurse's station (the sheet says suicide for row 41)",
+      "url": "https://www.kbtx.com/2022/12/01/two-teens-die-benadryl-overdoes-treatment-facility-sheriffs-office-says/",
+      "quote": "The sheriff's office said the teens stole several packs and a bottle of Benadryl from the nurse's station at the center the night before"
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:memorial-sheet-row-40-vs-42-canyon-state-academy",
@@ -5119,7 +5182,24 @@
      "url": "https://www.azfamily.com/2022/10/05/queen-creek-student-reportedly-got-drugs-family-that-led-overdose-death/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "There was a separate Canyon State death of a 17-year-old boy on Tuesday Jan. 21, 2020, which fits row 40, so row 40 is likely not the 2022 death; our copy is media 16952",
+      "url": "https://www.azcentral.com/story/news/local/pinal/2020/01/23/17-year-old-canyon-state-academy-student-dies/4558938002/",
+      "quote": "A 17-year-old student at Canyon State Academy died Tuesday after he was found unresponsive"
+     },
+     {
+      "claim": "The medical examiner ruled the January 2020 death a drug overdose",
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "quote": "In January 2020 ... Maricopa County Sheriff's deputies investigated the death of a 17-year-old boy at CSA. The medical examiner ruled his death was caused by a drug overdose."
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:memorial-sheet-row-33-jamal-damerco-miller-is-he",
@@ -5135,7 +5215,19 @@
      "url": "https://www.dailyherald.com/?p=1050451",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "Yes: the Tribune names Jamal Miller as the Sept. 1, 2009 suicide at IYC St. Charles (not Chicago); the middle name Damerco is not in the source; our copy is media 16950",
+      "url": "https://www.chicagotribune.com/lifestyles/health/ct-met-juvenile-suicide--20100525-story.html",
+      "quote": "Sometime before 3:09 a.m. on Sept. 1, 2009, Jamal Miller began to tear the bedsheet in his room at the Illinois Youth Center in St. Charles."
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:memorial-sheet-row-35-jake-spencer-the-2013-diam",
@@ -5436,7 +5528,19 @@
      "url": "https://kidsoverprofits.org/facility/red-rock-canyon-school-ut/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "",
+    "claims": [
+     {
+      "claim": "None found. Unsilenced's only source for the row is the Oct. 10, 2007 House hearing, which describes no suicide at Red Rock Canyon School (it names the school only as Red Rock Ranch Academy's parent, GAO case 7), and a Dec. 2007 death could not be in an October hearing",
+      "url": "https://www.govinfo.gov/content/pkg/CHRG-110hhrg38055/html/CHRG-110hhrg38055.htm",
+      "quote": "House Education and Labor Committee hearing, Oct. 10, 2007"
+     }
+    ],
+    "by": "Claude session (memorial second pass, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:catherine-freer-heart-defect-death-memorial-id-1",
@@ -5495,7 +5599,378 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "in-loving-memory:is-john-mccloskey-western-state-hospital-virgini",
+   "section": "In Loving Memory",
+   "title": "Is John McCloskey (Western State Hospital, Virginia, 1996) in scope?",
+   "text": "Sheet row 215 (batch A1-1971-on). The Roanoke Times series (1999) confirms the death but puts it at Western State Hospital in Staunton, Virginia (sheet says Lakewood, Washington). He was 18 when he was committed by deputies and injured (Dec 1994) and 19 when he died (Feb 24, 1996). It is an adult state psychiatric hospital. Keep or drop under the 18-stays-in / no-adult-facilities rule? [memorial sheet row 215; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Death date section",
+     "url": "https://gcjt.org/content/who-killed-john-mccloskey?section=3",
+     "kind": "note"
+    },
+    {
+     "label": "Roanoke Times series (GCJT)",
+     "url": "https://gcjt.org/content/who-killed-john-mccloskey",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-lee-jackson-gossett-center-injured-1996-died",
+   "section": "In Loving Memory",
+   "title": "Is Lee Jackson (Gossett Center, injured 1996, died 2003 at 21) in scope?",
+   "text": "Sheet row 301 (batch A1-1971-on). A federal suit, Jackson v. Johnson, 118 F. Supp. 2d 278 (N.D.N.Y. 2000), was brought for 'her minor Lee Jackson' against Louis Gossett Jr. Residential Center staff, so the name Jackson is confirmed (the sheet's own text also says 'Lee Johnson'). The restraint was in 1996 when he was a youth; the sheet says he died in 2003 at 21. Only the caption could be read here: please open the opinion for the facts. Keep on the memorial (injured as a child in a youth facility) or drop (21 at death)? [memorial sheet row 301; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Jackson v. Johnson (CourtListener)",
+     "url": "https://www.courtlistener.com/opinion/2357480/jackson-v-johnson/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-darvell-gulley-s-lincoln-placement-a-foster-h",
+   "section": "In Loving Memory",
+   "title": "Is Darvell Gulley's Lincoln placement a foster home or a group home?",
+   "text": "Sheet row 283 (batch A1-1971-on) says foster home; Unsilenced says 'Unknown Lincoln Group Home'. Foster homes are out of scope by the 2026-10-25 rule. No source found in two passes; Unsilenced's only source is archive.today (CAPTCHA). Open it in a browser and decide. [memorial sheet row 283; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced source (archive.today)",
+     "url": "https://archive.md/cvPFB",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:where-did-alex-harris-die-hope-youth-ranch-in-lo",
+   "section": "In Loving Memory",
+   "title": "Where did Alex Harris die, Hope Youth Ranch in Louisiana or Hudson, Florida?",
+   "text": "Sheet row 314 (batch A1-1971-on) says Hope Youth Ranch, Hudson FL, age 12. KSLA (May 2006) says Hope Youth Ranch in Webster Parish (Minden), Louisiana, age 13; another headline says 12; eight staff indicted for negligent homicide after he was denied water. Confirm the place (and age) for the entry; the Florida location looks wrong. [memorial sheet row 314; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced: 8 indicted (archive.today)",
+     "url": "https://archive.is/Qs5z2",
+     "kind": "note"
+    },
+    {
+     "label": "KSLA via nospank (Wayback)",
+     "url": "http://web.archive.org/web/20210426130537/http://www.nospank.net/n-q09r.htm",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:should-timothy-gage-westerfield-row-346-stay-wit",
+   "section": "In Loving Memory",
+   "title": "Should Timothy Gage Westerfield (row 346) stay without any source?",
+   "text": "Sheet row 346 (batch A2-1971-on). The suggested lead (an unnamed 16-year-old at IYC St. Charles) is Jamal Miller, Sept 1, 2009 (Miller v. Harbaugh, 7th Cir. 2012), not Westerfield (15, IYC Chicago, Sept 29, 2008). Nothing names Westerfield in two passes. Do you know where this row came from? Also: should Jamal Miller get his own memorial entry? [memorial sheet row 346; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Courthouse News",
+     "url": "https://www.courthousenews.com/?p=273509",
+     "kind": "note"
+    },
+    {
+     "label": "Miller v. Harbaugh",
+     "url": "https://www.courtlistener.com/opinion/810541/cheryl-miller-v-dr-jolene-harbaug/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:should-james-daniel-baumbach-alexander-youth-ser",
+   "section": "In Loving Memory",
+   "title": "Should James Daniel Baumbach (Alexander Youth Services Center, May 2001) get an entry?",
+   "text": "Found while checking sheet row 274 (Kenneth McClain, batch A1-1971-on): Baumbach, 16, of Baxter County, hanged himself at the Alexander Youth Services Center (Arkansas) in May 2001, in the same cell where McClain died that September (Prison Legal News; Baxter Bulletin clippings on Unsilenced's program page). He is not on the sheet as far as this pass saw. [memorial sheet row 274; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Baxter Bulletin clipping (Drive)",
+     "url": "https://drive.google.com/file/d/1Qzy-F5k2dcmSG-lH3QoX1ybd4zGrtHFN/view",
+     "kind": "note"
+    },
+    {
+     "label": "Prison Legal News May 2002",
+     "url": "https://www.prisonlegalnews.org/news/2002/may/15/suicides-staff-negligence-plague-private-arkansas-juvenile-prison",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:can-you-open-the-archive-today-copies-for-rows-2",
+   "section": "In Loving Memory",
+   "title": "Can you open the archive.today copies for rows 287 and 310 (Pennsylvania restraint deaths)?",
+   "text": "Sheet rows 287 Donderey Rogers and 310 Walter Brown (batch A1-1971-on). Neither name turns up anywhere outside Unsilenced. Unsilenced files a Sept 20, 2005 article 'In Harm's Way: Use of physical force on troublesome kids unchecked' under both New Directions/Pressley Ridge Ohiopyle and Northwestern Academy (Coal Township PA); it probably names both boys and settles Walter Brown's year (sheet 2005, Unsilenced 2009). archive.today only (CAPTCHA). Please open it and note the outlet so the original can be found. [memorial sheet rows 287, 310; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Walter Brown source",
+     "url": "https://archive.ph/7EOmv",
+     "kind": "note"
+    },
+    {
+     "label": "Donderey Rogers person entry",
+     "url": "https://archive.is/ihNK8",
+     "kind": "note"
+    },
+    {
+     "label": "In Harm's Way (archive.today)",
+     "url": "https://archive.is/MPH9B",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:are-the-two-public-school-restraint-deaths-rows",
+   "section": "In Loving Memory",
+   "title": "Are the two public-school restraint deaths (rows 282, 299) in scope?",
+   "text": "Sheet rows 282 Cedric Napoleon (Manor Middle School, Killeen TX, 2002) and 299 Michael Renner-Lewis III (Parchment High School, MI, 2003), batch A1-1971-on. Both are now named and sourced (Texas Tribune; Inclusion Daily). Both were restraint deaths in public schools, not programs. Keep them? [memorial sheet rows 282, 299; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Inclusion Daily (Wayback)",
+     "url": "http://web.archive.org/web/20160401055532/http://www.inclusiondaily.com/archives/03/08/28.htm",
+     "kind": "note"
+    },
+    {
+     "label": "Texas Tribune",
+     "url": "https://www.texastribune.org/2009/11/05/restraints-a-gut-wrenching-case/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:when-did-ricky-wagener-die-nov-1995-or-nov-1996",
+   "section": "In Loving Memory",
+   "title": "When did Ricky Wagener die, Nov 1995 or Nov 1996?",
+   "text": "Sheet row 218 (batch A1-1971-on) says Nov 6, 1996. A former roommate's blog (Pinehaven Abuse, 2011), quoting the death certificate, says he ran away Nov 6, 1995 and was found dead May 30, 1996 in an RV at Pinehaven's St. Ignatius office; the certificate's death date is 'estimated' and the manner 'could not be determined'. Which date should the entry carry, and is escape_attempt the right tag? [memorial sheet row 218; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced: The Mystery of Ricky Wagener (archive.today)",
+     "url": "https://archive.md/qqto7",
+     "kind": "note"
+    },
+    {
+     "label": "Pinehaven Abuse blog (Wayback)",
+     "url": "https://web.archive.org/web/20120713083859/http://www.pinehavenabuse.org:80/2011/09/o-ricky-where-art-thou.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:should-row-357-austin-wallace-move-to-chattanoog",
+   "section": "In Loving Memory",
+   "title": "Should row 357 (Austin Wallace) move to Chattanooga, Tennessee, cause suicide?",
+   "text": "Sheet row 357 (A2) says Hamilton County Juvenile Detention Center, Cincinnati, Ohio, cause Illness. The Knoxville News Sentinel (July 6, 2010) says Austin Wallace, 15, of Halls TN, was found hanged July 1, 2010 at the Hamilton County Juvenile Detention Center in Chattanooga, Tennessee; the ME ruled it suicide. Confirm the place and cause change. [memorial sheet row 357; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Knoxville News Sentinel (Wayback)",
+     "url": "https://web.archive.org/web/20161017215735/http://archive.knoxnews.com/news/local/teens-hanging-in-juvenile-detention-facility-being-probed-ep-408117686-358644861.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:does-charles-collins-jr-camp-oakland-died-1998-b",
+   "section": "In Loving Memory",
+   "title": "Does Charles Collins Jr. (Camp Oakland, died 1998) belong, and under which cause?",
+   "text": "Sheet row 20 (C-undated-other). AP (Battle Creek Enquirer, Jan. 22, 2001): his mother's lawsuit says Camp Oakland (now Crossroads for Youth) made him exercise on his first day despite an enlarged heart; he collapsed Jan. 13, 1998 and died about five months later of heart failure. Crossroads says he was never enrolled. Unsilenced lists 2001 (the year of the suit). Drafted as medical_neglect; decide the category and whether a death months later in hospital counts. The same item mentions an Indiana mother's suit over her son's suicide after a 1997 Camp Oakland stay (unnamed, a death after leaving). [memorial sheet row 20; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "newspapers.com page (Wayback)",
+     "url": "https://web.archive.org/web/20250511162028/https://www.newspapers.com/newspage/204441624/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-amanda-mead-1991-in-scope-with-no-program-nam",
+   "section": "In Loving Memory",
+   "title": "Is Amanda Mead (1991) in scope with no program named?",
+   "text": "Sheet row 16 (C-undated-other). The only source (via Unsilenced) is CCHR's uncited list: died 1991, age 18, of two undiagnosed brain tumors after a California school counselor and psychiatrist labeled her manic-depressive. No facility or program is named. Keep or drop? [memorial sheet row 16; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "CCHR booklet (Wayback)",
+     "url": "https://web.archive.org/web/20201112013323/https://www.cchr.org/sites/default/files/The_Silent_Death_of_Americas_Children.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-lola-kunthung-montana-state-hospital-2006-18",
+   "section": "In Loving Memory",
+   "title": "Is Lola Kunthung (Montana State Hospital, 2006, 18) in scope?",
+   "text": "Sheet row 28 (C-undated-other). Unsilenced lists her (suicide, 2006, 18) with no source link. Montana State Hospital is the state's adult psychiatric hospital (Warm Springs; the Galen campus is near Anaconda). Nothing found. Keep, drop, or hold until a source turns up? [memorial sheet row 28; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced table",
+     "url": "https://archive.unsilenced.org/facility-deaths/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-row-47-texas-boy-17-stomach-pain-2024-a-garbl",
+   "section": "In Loving Memory",
+   "title": "Is row 47 (Texas boy, 17, stomach pain, 2024) a garbled copy of Owen R. (11)?",
+   "text": "Sheet row 47 (C-undated-other). Unsilenced lists 'Unknown Boy, Texas, Stomach Pain leading to death from neglect, 2024, 17' with no source, beside 'Owen R., Thompson Residential Treatment Center, 2024, 11'. The Texas Tribune says no child in a Texas residential treatment center had died since 2021 before O.R. (Nov. 27, 2024, stomach pain). No 17-year-old found. Drop row 47, or keep it until a source turns up? [memorial sheet row 47; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced table",
+     "url": "https://archive.unsilenced.org/facility-deaths/",
+     "kind": "note"
+    },
+    {
+     "label": "Texas Tribune 2025-02-11",
+     "url": "https://www.texastribune.org/2025/02/11/texas-foster-care-deaths-treatment-center-greenville",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:is-ruben-gonzalez-the-january-2007-six-point-res",
+   "section": "In Loving Memory",
+   "title": "Is Ruben Gonzalez the January 2007 six-point restraint death in the DOJ letter?",
+   "text": "Sheet row 30 (C-undated-other): Ruben Gonzalez, 15, Mexia State School, restraint. Unsilenced lists 2007; its source is archive.today only. The DOJ's Dec. 1, 2008 findings on 12 Texas state schools (Mexia among them) describe a teenage resident who died in six-point restraints in January 2007, three staff fired, facility unnamed. Please open the archive.today link in a browser to confirm the name and facility. [memorial sheet row 30; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "Unsilenced source (archive.today)",
+     "url": "https://archive.ph/IlY02",
+     "kind": "note"
+    },
+    {
+     "label": "DOJ findings letter",
+     "url": "https://www.justice.gov/crt/about/spl/documents/TexasStateSchools_findlet_12-1-08.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "in-loving-memory:can-you-open-the-archive-today-sources-unsilence",
+   "section": "In Loving Memory",
+   "title": "Can you open the archive.today sources Unsilenced cites for these rows?",
+   "text": "These rows have only an archive.today link in Unsilenced's table, behind a CAPTCHA I did not try to get past. Opening each in a browser would give the outlet, date and text: row 389 Edgar Morey, row 395 Lane Lesko (Unsilenced says escape attempt, 2019; the death notice says 2016), row 407 Maricella Chairez, row 414 Nathaniel Valenzuela, row 429 Dawaun Lewis-Taylor (is Maryhaven named?), row 14 Eduardo Facha Garcia, row 17 Our Lady of Victory boy, row 18 Vincent E. Harris Jr, row 27 LaKeisha Brown, row 31 Miguel Padilla Jr, row 32 Crossroads boy, row 35 Jake Spencer, page id 81 Levi Snyder, page id 212 James Tomas Roman. [memorial sheet rows 389, 395, 407, 414, 429, 14, 17, 18, 27, 31, 32, 35; page ids 81, 212; results in kop-pipeline tmp/memorial-sources/found/G-second-pass.json]",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-25, found 2026-10-25, memorial source hunt, second pass",
+   "directions": [
+    {
+     "label": "James Tomas Roman",
+     "url": "https://archive.md/xgbOW",
+     "kind": "note"
+    },
+    {
+     "label": "Levi Snyder",
+     "url": "https://archive.md/xwxxX",
+     "kind": "note"
+    },
+    {
+     "label": "Jake Spencer",
+     "url": "https://archive.md/QxuIR",
+     "kind": "note"
+    },
+    {
+     "label": "Crossroads boy",
+     "url": "https://archive.ph/575YY",
+     "kind": "note"
+    },
+    {
+     "label": "Miguel Padilla Jr",
+     "url": "https://archive.ph/46dVP",
+     "kind": "note"
+    },
+    {
+     "label": "LaKeisha Brown",
+     "url": "https://archive.ph/lxT2Y",
+     "kind": "note"
+    },
+    {
+     "label": "Vincent E. Harris Jr",
+     "url": "https://archive.ph/1MfTK",
+     "kind": "note"
+    },
+    {
+     "label": "Our Lady of Victory boy",
+     "url": "https://archive.ph/02IXY",
+     "kind": "note"
+    },
+    {
+     "label": "Eduardo Facha Garcia",
+     "url": "https://archive.md/BhAeu",
+     "kind": "note"
+    },
+    {
+     "label": "Dawaun Lewis-Taylor",
+     "url": "https://archive.md/3gmmZ",
+     "kind": "note"
+    },
+    {
+     "label": "Nathaniel Valenzuela",
+     "url": "https://archive.ph/b0Pw2",
+     "kind": "note"
+    },
+    {
+     "label": "Maricella Chairez",
+     "url": "https://archive.ph/Wc0DL",
+     "kind": "note"
+    },
+    {
+     "label": "Lane Lesko",
+     "url": "https://archive.ph/tsrKK",
+     "kind": "note"
+    },
+    {
+     "label": "Edgar Morey",
+     "url": "https://archive.md/pBstx",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-10-25 19:07"
+ "built": "2026-10-25 19:49"
 }
