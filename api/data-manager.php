@@ -323,10 +323,40 @@ function kop_dm_best_wiki(PDO $pdo, array $names): ?array {
     return null;
 }
 
+/**
+ * The location profiles (locations_master rows, which keep a state's referrer
+ * data) with their facilities from the v2 tables, in the rows' own shape
+ * {id, unique_name, json_data, updated_at}. The rows' own facility arrays are
+ * frozen since the write switch and stripped in data model phase 5.
+ */
+function kop_dm_v2_location_rows(PDO $pdo): array {
+    static $rows = null;
+    if ($rows !== null) return $rows;
+    $rows = [];
+    $projects = kop_v2_form_projects($pdo, kop_dm_v2_prefix($pdo));
+    foreach (kop_v2_location_profile_rows($pdo) as $key => $profile) {
+        $project = $projects['locations_' . $key] ?? null;
+        $data = $project ? $project['data'] : ($profile['data'] + ['facilities' => []]);
+        $rows[] = [
+            'id'          => (int)$profile['id'],
+            'unique_name' => (string)$profile['unique_name'],
+            'json_data'   => json_encode(['name' => $profile['unique_name'], 'category' => 'locations', 'data' => $data], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'updated_at'  => null,
+        ];
+    }
+    return $rows;
+}
+
 /** Find a record by unique_name across the given tables. Skips tables that
  *  don't exist on this install (e.g. transporters_master may be absent). */
 function kop_dm_find_record(PDO $pdo, array $tables, string $uniqueName): ?array {
     foreach ($tables as $table) {
+        if ($table === 'locations_master' && kop_dm_v2_writes($pdo)) {
+            foreach (kop_dm_v2_location_rows($pdo) as $row) {
+                if ($row['unique_name'] === $uniqueName) return $row + ['table' => 'locations_master'];
+            }
+            continue;
+        }
         if ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
             $row = kop_v2_pdo_master_row_by_name($pdo, kop_dm_v2_prefix($pdo), $uniqueName);
             if ($row) {
@@ -390,6 +420,12 @@ function kop_dm_master_rows(PDO $pdo): array {
 /** Write an edited record back to whichever model holds it. */
 function kop_dm_save_project(PDO $pdo, array $rec, array $project): void {
     if (kop_dm_v2_writes($pdo) && ($rec['table'] ?? '') === 'facilities_master') {
+        kop_v2_save_legacy_row($pdo, kop_dm_v2_prefix($pdo), (string)$rec['unique_name'], $project);
+        return;
+    }
+    // A location profile: its facilities are memberships in the v2 tables, its state-level data stays in the row.
+    if (kop_dm_v2_writes($pdo) && ($rec['table'] ?? '') === 'locations_master') {
+        $project['category'] = 'locations';
         kop_v2_save_legacy_row($pdo, kop_dm_v2_prefix($pdo), (string)$rec['unique_name'], $project);
         return;
     }
@@ -871,7 +907,12 @@ try {
             unset($it);
 
             foreach ($tables as $cat => $table) {
-                if ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
+                if ($table === 'locations_master' && kop_dm_v2_writes($pdo)) {
+                    $rows = array_values(array_filter(kop_dm_v2_location_rows($pdo), static function ($row) use ($q) {
+                        return $q === '' || mb_stripos($row['unique_name'], $q) !== false || mb_stripos((string)$row['json_data'], $q) !== false;
+                    }));
+                    usort($rows, static function ($a, $b) { return strcasecmp($a['unique_name'], $b['unique_name']); });
+                } elseif ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
                     $rows = kop_dm_master_rows($pdo);
                     if ($q !== '') {
                         // Past and other names find a record too.
