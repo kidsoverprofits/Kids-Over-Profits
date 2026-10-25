@@ -234,7 +234,7 @@ kop_rt_undo($l1);
 $check('Undo puts it back with nobody', $row($keys[2])['assignee'] === '' && kop_rt_list('claude') === array());
 $check('undoing twice is refused', $throws(function () use ($l1) { kop_rt_undo($l1); }) === 'Already undone.');
 $counts = kop_rt_counts();
-$check('the counts add up', $counts['all'] === count($keys) + 1 && $counts['open'] + $counts['done'] === $counts['all'] && $counts['unassigned'] === $counts['open'], json_encode($counts));
+$check('the counts add up', $counts['all'] === count($keys) + 1 && $counts['open'] + $counts['done'] === $counts['all'] && $counts['unassigned'] + $counts['answered'] === $counts['open'], json_encode($counts));
 $nid = kop_rt_add(array('title' => 'Which town was Norris Academy in?', 'body' => 'Norris or Andersonville', 'section' => 'Test', 'records' => array($known[0])));
 $check('a task added on the screen', kop_rt_record_ids(kop_rt_get($nid)) === array($known[0]) && count(kop_rt_list('open', 'Test', 'Andersonville')) === 1);
 kop_rt_undo($last_log());
@@ -303,8 +303,15 @@ $claude_one = (int) $pick[1]['id'];
 kop_rt_change(array($claude_one), array('assignee' => 'claude'), 'assign', 'test');
 $pick = kop_rt_pickable();
 $pids = array_column($pick, 'id');
-$check('the list offers open questions given to nobody', count($pick) === kop_rt_counts()['unassigned'] && count($pick) > 50, count($pick) . ' offered');
+$check('the list offers open questions given to nobody', count($pick) === kop_rt_counts()['pickable'] && count($pick) > 50, count($pick) . ' offered');
 $check('...never one given to the owner or to Claude', !in_array($owner_one, $pids, true) && !in_array($claude_one, $pids, true));
+$memorial = (int) $wpdb->get_var("SELECT id FROM wpdl_kop_research_tasks WHERE section = 'In Loving Memory' AND status = 'open' AND assignee = '' LIMIT 1");
+$check('...never an In Loving Memory one (they check the memorial sheet)', $memorial > 0 && !in_array('In Loving Memory', array_column($pick, 'section'), true)
+    && kop_rt_counts()['pickable'] < kop_rt_counts()['unassigned']);
+$check('...and taking one anyway is refused', strpos($throws(function () use ($kim, $memorial) { kop_rt_volunteer_take($kim, array($memorial)); }), 'Someone else') === 0
+    && kop_rt_get($memorial)['assignee'] === '');
+$check('...as is an admin sending one to a volunteer', strpos($throws(function () use ($kim_id, $memorial) { kop_rt_assign_volunteer(array($memorial), $kim_id); }), 'memorial sheet') !== false
+    && kop_rt_get($memorial)['assignee'] === '');
 $check('...each with its question, topic and how many places to start', $pick[0]['title'] !== '' && isset($pick[0]['section'], $pick[0]['start']));
 $six = array_slice($pids, 0, 6);
 $check('taking more than the hold is refused, saying how many fit', strpos($throws(function () use ($kim, $six) { kop_rt_volunteer_take($kim, $six); }), 'room for 5') !== false);

@@ -193,14 +193,16 @@ function kop_rt_list($view = 'open', $section = '', $search = '') {
 
 function kop_rt_counts() {
     global $wpdb;
-    $out = array('open' => 0, 'unassigned' => 0, 'owner' => 0, 'claude' => 0, 'volunteer' => 0, 'answered' => 0, 'done' => 0, 'all' => 0);
-    foreach ((array) $wpdb->get_results('SELECT status, assignee, COUNT(*) AS n FROM ' . kop_rt_table() . ' GROUP BY status, assignee', ARRAY_A) as $r) {
+    // pickable: unassigned outside kop_rt_volunteer_off_sections(), what the volunteer page offers.
+    $out = array('open' => 0, 'unassigned' => 0, 'pickable' => 0, 'owner' => 0, 'claude' => 0, 'volunteer' => 0, 'answered' => 0, 'done' => 0, 'all' => 0);
+    foreach ((array) $wpdb->get_results('SELECT status, assignee, section, COUNT(*) AS n FROM ' . kop_rt_table() . ' GROUP BY status, assignee, section', ARRAY_A) as $r) {
         $n = (int) $r['n'];
         $out['all'] += $n;
         if (in_array($r['status'], array('settled', 'dropped'), true)) { $out['done'] += $n; continue; }
         $out['open'] += $n;
         if ($r['status'] === 'answered') $out['answered'] += $n;
         if ($r['assignee'] === '' && $r['status'] === 'open') $out['unassigned'] += $n;
+        if ($r['assignee'] === '' && $r['status'] === 'open' && kop_rt_for_volunteers($r)) $out['pickable'] += $n;
         if (isset($out[$r['assignee']]) && $r['assignee'] !== '') $out[$r['assignee']] += $n;
     }
     return $out;
@@ -384,6 +386,9 @@ function kop_rt_assign_volunteer(array $ids, $vid, $new_name = '', $note = '', $
     foreach ($ids as $id) {
         $t = kop_rt_get($id);
         if (!$t || !in_array($t['status'], array('open', 'answered'), true)) continue;
+        if (!kop_rt_for_volunteers($t)) {
+            throw new RuntimeException('Task #' . (int) $t['id'] . ' is in ' . $t['section'] . ': ' . kop_rt_volunteer_off_sections()[$t['section']] . '. Untick it, or give it to yourself or to Claude.');
+        }
         $tasks[] = $t;
         $detail = array('question' => mb_substr(kop_rt_volunteer_question($t), 0, 2000));
         $recs = kop_rt_record_ids($t);
@@ -403,16 +408,28 @@ function kop_rt_assign_volunteer(array $ids, $vid, $new_name = '', $note = '', $
 
 /* ---- Volunteers pick their own questions (the volunteer page's "Research questions you can pick") ---- */
 
+/**
+ * Sections volunteers never get, section => why (filter kop_rt_volunteer_off_sections): In Loving Memory's questions
+ * check the memorial sheet, which volunteers cannot open.
+ */
+function kop_rt_volunteer_off_sections() {
+    return (array) apply_filters('kop_rt_volunteer_off_sections', array('In Loving Memory' => 'they check the memorial sheet, which volunteers cannot open'));
+}
+
+function kop_rt_for_volunteers(array $t) {
+    return !isset(kop_rt_volunteer_off_sections()[(string) ($t['section'] ?? '')]);
+}
+
 /** How many unanswered questions one volunteer may hold at a time (filter kop_rt_volunteer_hold). */
 function kop_rt_volunteer_hold() {
     return max(1, (int) apply_filters('kop_rt_volunteer_hold', 5));
 }
 
-/** The questions a volunteer may pick: open and given to nobody (the owner's and Claude's stay off it). */
+/** The questions a volunteer may pick: open and given to nobody (the owner's and Claude's stay off it), outside the off sections. */
 function kop_rt_pickable() {
     kop_rt_free_released();
     $out = array();
-    $rows = kop_rt_list('unassigned');
+    $rows = array_values(array_filter(kop_rt_list('unassigned'), 'kop_rt_for_volunteers'));
     $ids = array();
     foreach ($rows as $t) $ids = array_merge($ids, kop_rt_record_ids($t));
     $names = kop_rt_record_names($ids);
@@ -446,7 +463,7 @@ function kop_rt_volunteer_take(array $vol, array $ids) {
     $free = array();
     foreach ($ids as $id) {
         $t = kop_rt_get($id);
-        if ($t && $t['status'] === 'open' && $t['assignee'] === '') $free[] = $id;
+        if ($t && $t['status'] === 'open' && $t['assignee'] === '' && kop_rt_for_volunteers($t)) $free[] = $id;
     }
     if (!$free) throw new RuntimeException('Someone else has just taken ' . (count($ids) === 1 ? 'that question' : 'those questions') . '. Pick another.');
     if (count($free) > $room) throw new RuntimeException('You can hold ' . kop_rt_volunteer_hold() . ' questions at a time and have room for ' . $room . ' more: untick ' . (count($free) - $room) . '.');

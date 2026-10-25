@@ -1121,7 +1121,7 @@ function kop_volp_admin_section($nonce, array $vols, $notice_made = null) {
         // Research questions: volunteers pick their own on their page; this says how many are on offer and who holds some.
         kop_rt_install();
         kop_rt_free_released();
-        $offer = kop_rt_counts()['unassigned'];
+        $offer = kop_rt_counts()['pickable'];
         $held = kop_rt_counts()['volunteer'];
         ?>
         <div class="notice notice-info inline" style="padding:8px 12px;max-width:900px"><p><strong>Research questions:</strong>
