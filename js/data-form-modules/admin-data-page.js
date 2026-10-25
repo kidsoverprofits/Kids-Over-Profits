@@ -22,12 +22,14 @@
             return;
         }
 
-        facility.locationDetails = facility.locationDetails || {};
-        const ld = facility.locationDetails;
+        // A v2 document keeps the place in location (state as its code); a legacy facility in locationDetails.
+        const isV2 = !!(window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(facility));
+        if (!isV2) facility.locationDetails = facility.locationDetails || {};
+        const ld = isV2 ? (facility.location = facility.location || {}) : facility.locationDetails;
 
         const currentState = String(ld.state || '').trim();
         const currentCity = String(ld.city || '').trim();
-        const currentAddress = String(facility.address || '').trim();
+        const currentAddress = String((isV2 ? ld.raw : facility.address) || '').trim();
         const currentZip = String(ld.zip || '').trim();
 
         if (!currentState && !currentCity && !currentAddress) {
@@ -46,21 +48,36 @@
         const toYear = (prompt('Year it LEFT the old state (optional):', '') || '').trim();
 
         if (!Array.isArray(ld.formerLocations)) ld.formerLocations = [];
-        ld.formerLocations.push({
-            state: currentState,
-            city: currentCity,
-            address: currentAddress,
-            zip: currentZip,
-            fromYear: fromYear,
-            toYear: toYear
-        });
+        if (isV2) {
+            const year = (y) => (/^\d{4}$/.test(y) ? parseInt(y, 10) : null);
+            ld.formerLocations.push({
+                raw: currentAddress,
+                city: currentCity,
+                state: currentState || null,
+                fromYear: year(fromYear),
+                toYear: year(toYear)
+            });
+        } else {
+            ld.formerLocations.push({
+                state: currentState,
+                city: currentCity,
+                address: currentAddress,
+                zip: currentZip,
+                fromYear: fromYear,
+                toYear: toYear
+            });
+        }
 
         // Clear the primary location so the new state can be entered fresh.
-        facility.address = '';
-        ld.city = '';
-        ld.state = '';
-        ld.zip = '';
-        if (typeof facility.location === 'string') facility.location = '';
+        if (isV2) {
+            Object.assign(ld, { raw: '', text: '', street: '', city: '', state: null, zip: '' });
+        } else {
+            facility.address = '';
+            ld.city = '';
+            ld.state = '';
+            ld.zip = '';
+            if (typeof facility.location === 'string') facility.location = '';
+        }
 
         if (typeof window.updateAllUI === 'function') window.updateAllUI();
         if (typeof window.autoSave === 'function') window.autoSave();
@@ -68,7 +85,7 @@
         notify(`Recorded former location in ${stateLabel}. Now enter the new state above.`, 'success');
 
         // Focus the (now empty) State field so the user can type the new state.
-        const stateField = document.querySelector('.facility-field[data-field="locationDetails.state"]');
+        const stateField = document.querySelector('.facility-field[data-field="locationDetails.state"], .facility-field[data-field="location.state"]');
         if (stateField) {
             stateField.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => stateField.focus(), 300);
