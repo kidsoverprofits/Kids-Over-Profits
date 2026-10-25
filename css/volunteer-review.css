@@ -68,10 +68,10 @@ button.kop-vol-tab:active {
     align-items: center;
     gap: 6px;
     padding: 7px 14px;
-    border: 2px solid var(--kop-navy, #000080);
+    border: 2px solid var(--kop-teal-fill, #24757F);
     border-radius: 999px;
-    background: var(--kop-white, #fff);
-    color: var(--kop-navy, #000080);
+    background: var(--kop-teal-fill, #24757F);
+    color: var(--kop-white, #fff);
     font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.2;
@@ -81,8 +81,9 @@ button.kop-vol-tab:active {
 
 button.kop-vol-tab:hover,
 button.kop-vol-tab:focus {
-    background: var(--kop-sand, #F2EEDF);
-    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-midnight-blue, #000435);
+    border-color: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
 }
 
 button.kop-vol-tab:focus-visible {
@@ -94,6 +95,7 @@ button.kop-vol-tab.is-active,
 button.kop-vol-tab.is-active:hover,
 button.kop-vol-tab.is-active:focus {
     background: var(--kop-navy, #000080);
+    border-color: var(--kop-navy, #000080);
     color: var(--kop-white, #fff);
 }
 
@@ -300,15 +302,16 @@ button.kop-vol-btn-plain,
 button.kop-vol-btn-plain:hover,
 button.kop-vol-btn-plain:focus,
 button.kop-vol-btn-plain:active {
-    background: var(--kop-white, #fff);
+    background: var(--kop-navy, #000080);
     border-color: var(--kop-navy, #000080);
-    color: var(--kop-navy, #000080);
+    color: var(--kop-white, #fff);
 }
 
 button.kop-vol-btn-plain:hover,
 button.kop-vol-btn-plain:focus {
-    background: var(--kop-sand, #F2EEDF);
-    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-midnight-blue, #000435);
+    border-color: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
 }
 
 button.kop-vol-btn[disabled],
@@ -990,8 +993,8 @@ p.kop-vol-newreply {
     margin-bottom: 8px;
 }
 
-/* Every fold opens from a button, never a bare line of text: the same white, navy-bordered look as
-   kop-vol-btn-plain, with an arrow that turns when it is open. Two classes beat each fold's own summary rule. */
+/* Every fold opens from a button, never a bare line of text: a teal fill like /volunteer/'s fold buttons, navy
+   while open, with an arrow that turns when it is open. Two classes beat each fold's own summary rule. */
 .kop-vol-page details > summary {
     display: flex;
     align-items: center;
@@ -1001,10 +1004,10 @@ p.kop-vol-newreply {
     box-sizing: border-box;
     list-style: none;
     padding: 9px 16px;
-    border: 2px solid var(--kop-navy, #000080);
+    border: 2px solid var(--kop-teal-fill, #24757F);
     border-radius: 8px;
-    background: var(--kop-white, #fff);
-    color: var(--kop-navy, #000080);
+    background: var(--kop-teal-fill, #24757F);
+    color: var(--kop-white, #fff);
     font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.2;
@@ -1025,12 +1028,13 @@ p.kop-vol-newreply {
 .kop-vol-page details > summary:hover,
 .kop-vol-page details > summary:focus,
 .kop-vol-page details[open] > summary {
-    background: var(--kop-sand, #F2EEDF);
-    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-navy, #000080);
+    border-color: var(--kop-navy, #000080);
+    color: var(--kop-white, #fff);
 }
 .kop-vol-page details > summary:focus-visible {
     outline: 3px solid var(--kop-focus-color, #33A7B5);
     outline-offset: 2px;
 }
-.kop-vol-page details > summary .kop-vol-meta { color: var(--kop-text-muted, #4A5568); font-weight: 400; }
+.kop-vol-page details > summary .kop-vol-meta { color: var(--kop-white, #fff); font-weight: 400; }
 .kop-vol-page details[open] > summary { margin-bottom: 10px; }
