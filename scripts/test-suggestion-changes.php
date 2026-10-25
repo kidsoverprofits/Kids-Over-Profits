@@ -104,6 +104,43 @@ $labels = array_column($c['entries'][0]['changes'] ?? array(), 'added', 'label')
 $check('a note under a random key reads "Field notes" with only its text', ($labels['Field notes'] ?? null) === array('A field note from a reader.'), json_encode($labels));
 $check('a note under a field\'s path names the field', isset($labels['Field notes: has restraint']), json_encode(array_keys($labels)));
 
+// Rows saved since 2026-10-25 hold the v2 shape (save-suggestion.php, kop_suggestion_normalize_facilities()); older rows are legacy.
+// The card and Approve give the same answer for either.
+$v2 = function (array $payload) { return kop_suggestion_normalize_facilities($payload, 'companies'); };
+$stored = $v2($mini(array('notes' => array('A new note from a reader.'))));
+$check('v2 row: every facility stored in the canonical shape', array_keys($stored['facilities'][0]) === kop_facility_top_level_keys(), json_encode(array_keys($stored['facilities'][0])));
+$check('v2 row: providers and other kinds keep the shape their tables read',
+    kop_suggestion_normalize_facilities(array('facilities' => array(array('providerDetails' => array('x' => 1)))), 'providers') === array('facilities' => array(array('providerDetails' => array('x' => 1))))
+    && kop_suggestion_normalize_facilities(array('facilities' => array(array('a' => 1))), 'referrers') === array('facilities' => array(array('a' => 1))));
+$same = true;
+$cases = array(
+    array('notes' => array('A new note from a reader.')),
+    array('facilityDetails' => array('type' => 'Wilderness program')),
+    array('facilityDetails' => array('type' => mb_strtoupper($doc['facilityDetails']['type']))),
+    array('fieldNotes' => array('field-1791173405434-9s6b0bg7v' => array($note), 'ttiPractices.hasRestraint' => array($note))),
+);
+foreach ($cases as $over) {
+    $reason = 'Public mini-form submission (facility) for "' . $name . '" from /' . $state_name . '/';
+    $a = kop_suggestion_changes($pdo, $mini($over), $reason, 'wpdl_');
+    $b = kop_suggestion_changes($pdo, $v2($mini($over)), $reason, 'wpdl_');
+    if ($a !== $b) { $same = false; echo '  legacy ' . json_encode($a) . "
+  v2     " . json_encode($b) . "
+"; }
+}
+$check('v2 row: the card shows the same changes as for the legacy row', $same);
+$c = kop_suggestion_changes($pdo, $v2(array('facilities' => array(array('identification' => array('name' => 'Zzq No Such Program Anywhere'), 'facilityDetails' => array('type' => 'RTC'))))), '', 'wpdl_');
+$e = $c['entries'][0] ?? null;
+$check('v2 row: a name with no record is new, with only what was sent', $e && $e['is_new'] && count($e['changes']) === 1 && $e['changes'][0]['label'] === 'Program type', json_encode($e));
+$sent_l = $mini(array('notes' => array('Same either way.'), 'facilityDetails' => array('gender' => 'Girls')));
+$reason = 'Public mini-form submission (facility) for "' . $name . '" from /' . $state_name . '/';
+$ra = kop_suggestion_resolve_entries($pdo, $sent_l['facilities'], $reason, 'wpdl_');
+$rb = kop_suggestion_resolve_entries($pdo, $v2($sent_l)['facilities'], $reason, 'wpdl_');
+$check('v2 row: Approve merges the same document onto the record', $ra === $rb && $rb['all_on_file'] && (int) $rb['facilities'][0]['facility_id'] === (int) $row['id']);
+$hidden = array(array('id' => 'h1', 'text' => 'Hidden account.', 'source' => '', 'date' => '', 'movedFrom' => '', 'publish' => false));
+$kept = kop_preserve_hidden_testimony($v2(array('facilities' => array(array('facility_id' => (int) $row['id'], 'identification' => array('name' => $name)))))['facilities'],
+    array(array('facility_id' => (int) $row['id'], 'identification' => array('name' => $name), 'survivorTestimony' => $hidden)));
+$check('v2 row: Approve still puts back testimony the submitter never saw', ($kept[0]['survivorTestimony'][0]['id'] ?? '') === 'h1', json_encode($kept[0]['survivorTestimony'] ?? null));
+
 // Approve: a note and a gender, sent with Submit info (no state, no facility_id).
 $opts = array('pdo' => $pdo, 'prefix' => 'wpdl_');
 $sent = $mini(array('notes' => array('A note sent with Submit info.'), 'facilityDetails' => array('gender' => 'Girls')));

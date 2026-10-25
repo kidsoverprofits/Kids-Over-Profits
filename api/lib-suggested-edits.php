@@ -266,6 +266,29 @@ if (!function_exists('kop_rename_placeholder_provider_suggestion')) {
     }
 }
 
+if (!function_exists('kop_suggestion_normalize_facilities')) {
+    /**
+     * A facility suggestion is stored in the canonical v2 shape: each entry of
+     * facilities[] through kop_facility_normalize() (docs/FACILITY-SCHEMA.md).
+     * Only for the kinds whose facilities become facilities_v2 records
+     * ('companies', 'locations'); providers and the other kinds keep the
+     * legacy shape their own *_master tables and pages read. Rows saved before
+     * 2026-10-25 are legacy; approval and the cards normalize either.
+     */
+    function kop_suggestion_normalize_facilities(array $data, $category) {
+        if (!in_array($category, array('companies', 'locations'), true) || !is_array($data['facilities'] ?? null)) {
+            return $data;
+        }
+        if (!function_exists('kop_facility_normalize')) {
+            require_once dirname(__DIR__) . '/inc/facility-store.php';
+        }
+        foreach ($data['facilities'] as $i => $facility) {
+            if (is_array($facility)) $data['facilities'][$i] = kop_facility_normalize($facility);
+        }
+        return $data;
+    }
+}
+
 if (!function_exists('kop_preserve_hidden_testimony')) {
     /**
      * The public form never sees unpublished survivor testimony (it is

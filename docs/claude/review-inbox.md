@@ -75,6 +75,9 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # all on file = those facilities saved alone, no company made from a mini-form's facility name
 # Undo of a data approval (Recently done 'restore', or the status set back on Submissions Review) puts the records back:
 # api/lib-suggestion-undo.php (copy taken by kop_apply_suggested_edit(), option kop_sugg_undo_<id>; refuses over later edits)
+# Since 2026-10-25 api/save-suggestion.php stores a facility suggestion's facilities[] in the v2 shape (kop_suggestion_normalize_facilities()
+# in api/lib-suggested-edits.php, companies and locations only: providers, referrers, transporters, marketers and trade orgs keep the
+# legacy shape their *_master tables read). Older rows stay legacy; the card, Approve and the autocompletes read either shape
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-suggestion-changes.php
 # KOP Tools screens share one look (docs/ADMIN-UI.md: inc/admin-kit.php, css/admin-kit.css, js/admin-kit.js): decisions are buttons
 # (primary first, three at most), the rest in More or a fold, a dropdown never acts, one filter toolbar per list, Undo after every action.

@@ -1382,6 +1382,7 @@ function kop_collect_operator_values($data, &$set) {
             $identification = isset($facility['identification']) ? $facility['identification'] : array();
             if (is_array($identification)) {
                 kop_add_autocomplete_value($set, isset($identification['currentOperator']) ? $identification['currentOperator'] : null);
+                kop_add_autocomplete_values($set, isset($identification['otherOperators']) ? $identification['otherOperators'] : array()); // v2 shape
             }
             kop_add_autocomplete_values($set, isset($facility['otherOperators']) ? $facility['otherOperators'] : array());
         }

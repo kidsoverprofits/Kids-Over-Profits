@@ -454,7 +454,8 @@ try {
         $submitter_ip = $_SERVER['HTTP_X_REAL_IP'];
     }
     
-    // Prepare the JSON data for storage
+    // Prepare the JSON data for storage: facilities in the v2 shape (the checks above read the form's).
+    $data = kop_suggestion_normalize_facilities($data, $effective_category);
     $json_data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     
     // Insert into suggested_edits table

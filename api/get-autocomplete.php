@@ -238,6 +238,7 @@ function collect_operator_values(array $data, array &$set)
             $identification = $facility['identification'] ?? [];
             if (is_array($identification)) {
                 add_value($set, $identification['currentOperator'] ?? null);
+                add_values($set, $identification['otherOperators'] ?? []); // v2 shape
             }
             add_values($set, $facility['otherOperators'] ?? []);
         }
