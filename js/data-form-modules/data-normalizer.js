@@ -2055,6 +2055,10 @@
     function write(facility, v2Path, value) {
         if (!isPlainObject(facility)) return;
         if (isV2(facility)) {
+            // A v2 document holds the state as its code and the country by name, as the normalizer writes them.
+            const N = window.KOP_DataNormalizer;
+            if (v2Path === 'location.state' && N) value = str(value) === '' ? null : (N.facilityStateCode(value) || str(value));
+            if (v2Path === 'location.country' && N) value = str(value) === '' ? null : (N.facilityCountryName(value) || str(value));
             setPath(facility, v2Path, value);
             return;
         }

@@ -84,6 +84,9 @@ check('write legacy: normalizer reads what was written', N.facilityToV2(l2).iden
 const d2 = JSON.parse(JSON.stringify(doc));
 F.write(d2, 'location.city', 'Lehi');
 F.write(d2, 'identification.otherOperators', ['New Co']);
+F.write(d2, 'location.state', 'Utah');
+F.write(d2, 'location.country', 'USA');
+check('write v2: a state is stored as its code, a country by name', d2.location.state === 'UT' && d2.location.country === 'United States', json(d2.location));
 check('write v2: plain path', d2.location.city === 'Lehi' && d2.identification.otherOperators[0] === 'New Co' && !('otherOperators' in d2));
 
 check('path map both ways', F.toV2Path('locationDetails.city') === 'location.city' && F.toV2Path('otherOperators') === 'identification.otherOperators'

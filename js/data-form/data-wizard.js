@@ -209,11 +209,11 @@
     }
 
     function facilityPlace(facility) {
-        const details = facility.locationDetails || {};
-        const city = String(details.city || '').trim();
-        const st = String(details.state || details.country || '').trim();
+        // By v2 path on either shape (KOP_FacilityFields, data-normalizer.js).
+        const city = String(kopFacilityField(facility, 'location.city') || '').trim();
+        const st = String(kopFacilityField(facility, 'location.state') || kopFacilityField(facility, 'location.country') || '').trim();
         if (city || st) return [city, st].filter(Boolean).join(', ');
-        return String(facility.location || '').trim();
+        return String(kopFacilityField(facility, 'location.text') || '').trim();
     }
 
     function setBodyMode(mode) {
@@ -792,14 +792,13 @@
     function placeFields(facility, place) {
         if (!place) return;
         const lower = place.toLowerCase();
-        facility.locationDetails = facility.locationDetails || {};
         if ((window.COUNTRY_NAMES || []).includes(lower) && lower !== 'united states') {
-            facility.locationDetails.country = titleCase(lower);
+            kopSetFacilityField(facility, 'location.country', titleCase(lower));
             facility.isInternational = true;
         } else {
-            facility.locationDetails.state = (window.US_STATE_NAMES || []).includes(lower) ? titleCase(lower) : place;
+            kopSetFacilityField(facility, 'location.state', (window.US_STATE_NAMES || []).includes(lower) ? titleCase(lower) : place);
         }
-        facility.location = place;
+        kopSetFacilityField(facility, 'location.text', place);
     }
 
     function locationProjectKey(place) {
@@ -821,7 +820,7 @@
         if (t.type === 'facility') {
             const facility = newTemplate().facilities[0];
             facility.identification.name = t.name;
-            facility.isPrivatelyOwned = true;
+            kopSetFacilityField(facility, 'facilityDetails.isPrivatelyOwned', true);
             placeFields(facility, t.place);
             const locKey = locationProjectKey(t.place);
             if (locKey) {
@@ -848,7 +847,7 @@
         if (t.type === 'provider') {
             const facility = data.facilities[0];
             facility.identification.name = t.name;
-            facility.isPrivatelyOwned = true;
+            kopSetFacilityField(facility, 'facilityDetails.isPrivatelyOwned', true);
             placeFields(facility, t.place);
             data.category = 'providers';
             await load(t.name, { data, category: 'providers' });
