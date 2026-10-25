@@ -64,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/facility-promotion.php'; // kop_promote_single_nested_facility()
 
 // Ensure the full WordPress API is loaded so we can check capabilities.
 if (!function_exists('current_user_can')) {

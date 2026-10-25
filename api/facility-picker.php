@@ -45,21 +45,12 @@ function kop_picker_unique_name(PDO $pdo, string $name): string {
 
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
     $v2_prefix = kop_v2_detect_prefix($pdo);
-    $v2_writes = kop_v2_writes_active($pdo, $v2_prefix);
-    $check = $v2_writes ? null : $pdo->prepare("SELECT 1 FROM facilities_master WHERE LOWER(unique_name) = LOWER(?) LIMIT 1");
 
     $candidate = $base;
     $n = 1;
     while (true) {
-        if ($v2_writes) {
-            if (!kop_v2_name_taken($pdo, $v2_prefix, $candidate)) {
-                return $candidate;
-            }
-        } else {
-            $check->execute([$candidate]);
-            if (!$check->fetchColumn()) {
-                return $candidate;
-            }
+        if (!kop_v2_name_taken($pdo, $v2_prefix, $candidate)) {
+            return $candidate;
         }
         $n++;
         $candidate = $base . ' (' . $n . ')';
@@ -191,39 +182,22 @@ function kop_picker_find_duplicates(PDO $pdo, string $name): array {
     // Only project rows are probed, never the per-facility rows.
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
     $v2_prefix = kop_v2_detect_prefix($pdo);
-    if (kop_v2_writes_active($pdo, $v2_prefix)) {
-        $projects = array_filter(kop_v2_pdo_master_rows($pdo, $v2_prefix), static function ($row) {
-            return strpos($row['json_data'], '"__facility_ref"') === false;
-        });
-        foreach ($terms as $term) {
-            $hits = 0;
-            foreach ($projects as $row) {
-                if (mb_stripos($row['unique_name'], $term) === false && mb_stripos($row['json_data'], $term) === false) {
-                    continue;
-                }
-                $rows[$row['unique_name']] = $row;
-                if (++$hits >= 25) {
-                    break;
-                }
+    $projects = array_filter(kop_v2_pdo_master_rows($pdo, $v2_prefix), static function ($row) {
+        return strpos($row['json_data'], '"__facility_ref"') === false;
+    });
+    foreach ($terms as $term) {
+        $hits = 0;
+        foreach ($projects as $row) {
+            if (mb_stripos($row['unique_name'], $term) === false && mb_stripos($row['json_data'], $term) === false) {
+                continue;
             }
-            if (count($rows) >= 80) {
+            $rows[$row['unique_name']] = $row;
+            if (++$hits >= 25) {
                 break;
             }
         }
-    } else {
-        $stmt = $pdo->prepare(
-            "SELECT id, unique_name, json_data FROM facilities_master
-             WHERE JSON_SEARCH(json_data,'one','__facility_ref') IS NULL
-               AND (unique_name LIKE :t1 OR json_data LIKE :t2) LIMIT 25"
-        );
-        foreach ($terms as $term) {
-            $stmt->execute([':t1' => '%' . $term . '%', ':t2' => '%' . $term . '%']);
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $rows[$row['unique_name']] = $row;
-            }
-            if (count($rows) >= 80) {
-                break;
-            }
+        if (count($rows) >= 80) {
+            break;
         }
     }
 
@@ -342,49 +316,10 @@ function kop_picker_find_duplicates(PDO $pdo, string $name): array {
  * Returns the normalized folder id (int) or null when cleared.
  */
 function kop_picker_set_doc_folder(PDO $pdo, string $uniqueName, $folderIdRaw) {
-    // facilities_master is frozen once admin saves write the v2 tables: the
-    // folder is stored on the operator row or on the facility document.
+    // The folder is stored on the operator row or on the facility document (v2 tables).
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
     $v2_prefix = kop_v2_detect_prefix($pdo);
-    if (kop_v2_writes_active($pdo, $v2_prefix)) {
-        return kop_v2_set_document_folder($pdo, $v2_prefix, $uniqueName, $folderIdRaw);
-    }
-
-    $stmt = $pdo->prepare("SELECT json_data FROM facilities_master WHERE unique_name = ? LIMIT 1");
-    $stmt->execute([$uniqueName]);
-    $jsonText = $stmt->fetchColumn();
-    if ($jsonText === false) {
-        throw new RuntimeException("Program '$uniqueName' not found");
-    }
-
-    $project = json_decode($jsonText ?: '{}', true);
-    if (!is_array($project)) {
-        $project = [];
-    }
-
-    // Store inside `data` (which the REST layer passes through verbatim) and also
-    // at the root for any direct json_data consumers.
-    if (!isset($project['data']) || !is_array($project['data'])) {
-        $project['data'] = [];
-    }
-
-    $folderId = null;
-    if ($folderIdRaw !== null && $folderIdRaw !== '' && (int)$folderIdRaw > 0) {
-        $folderId = (int)$folderIdRaw;
-        $project['documentFolderId'] = $folderId;
-        $project['data']['documentFolderId'] = $folderId;
-    } else {
-        unset($project['documentFolderId'], $project['data']['documentFolderId']);
-    }
-
-    $upd = $pdo->prepare(
-        "UPDATE facilities_master
-         SET json_data = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE unique_name = ?"
-    );
-    $upd->execute([json_encode($project, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $uniqueName]);
-
-    return $folderId;
+    return kop_v2_set_document_folder($pdo, $v2_prefix, $uniqueName, $folderIdRaw);
 }
 
 try {
@@ -404,13 +339,7 @@ try {
         }
         require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
         $v2_prefix = kop_v2_detect_prefix($pdo);
-        if (kop_v2_writes_active($pdo, $v2_prefix)) {
-            $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $uniqueName);
-        } else {
-            $stmt = $pdo->prepare("SELECT id, json_data FROM facilities_master WHERE unique_name = ? LIMIT 1");
-            $stmt->execute([$uniqueName]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        }
+        $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $uniqueName);
         if (!$row) {
             http_response_code(404);
             echo json_encode(['success' => false, 'error' => 'Program not found']);
@@ -443,7 +372,7 @@ try {
         exit;
     }
 
-    // POST actions edit facilities_master; re-derive v2 after the request.
+    // POST actions edit the facility records; re-derive v2 after the request.
     if (function_exists('kop_facility_v2_request_sync')) {
         kop_facility_v2_request_sync();
     }
@@ -590,39 +519,21 @@ try {
         // with the stub markers kept alongside its other project keys.
         require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
         $v2_prefix = kop_v2_detect_prefix($pdo);
-        if (kop_v2_writes_active($pdo, $v2_prefix)) {
-            $data = $project['data'];
-            foreach (['_stub', '_source', '_created_by', 'documentFolderId'] as $marker) {
-                if (isset($project[$marker])) {
-                    $data[$marker] = $project[$marker];
-                }
+        $data = $project['data'];
+        foreach (['_stub', '_source', '_created_by', 'documentFolderId'] as $marker) {
+            if (isset($project[$marker])) {
+                $data[$marker] = $project[$marker];
             }
-            $result = kop_v2_save_form_project($pdo, $v2_prefix, $uniqueName, $data, 'companies', [
-                'timestamp' => gmdate('c'),
-            ]);
-            echo json_encode([
-                'success'            => true,
-                'created'            => true,
-                'unique_name'        => $uniqueName,
-                'name'               => $name,
-                'id'                 => (int)$result['operator_id'],
-                'document_folder_id' => $project['documentFolderId'] ?? null,
-            ]);
-            exit;
         }
-
-        $ins = $pdo->prepare(
-            "INSERT INTO facilities_master (unique_name, json_data, created_at, updated_at)
-             VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
-        );
-        $ins->execute([$uniqueName, json_encode($project, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
-
+        $result = kop_v2_save_form_project($pdo, $v2_prefix, $uniqueName, $data, 'companies', [
+            'timestamp' => gmdate('c'),
+        ]);
         echo json_encode([
             'success'            => true,
             'created'            => true,
             'unique_name'        => $uniqueName,
             'name'               => $name,
-            'id'                 => (int)$pdo->lastInsertId(),
+            'id'                 => (int)$result['operator_id'],
             'document_folder_id' => $project['documentFolderId'] ?? null,
         ]);
         exit;

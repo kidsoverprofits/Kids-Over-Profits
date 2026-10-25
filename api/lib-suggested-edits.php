@@ -849,54 +849,51 @@ if (!function_exists('kop_apply_suggested_edit')) {
                 return ['success' => false, 'projectName' => null, 'error' => 'Approved suggestion is missing a usable project name', 'httpCode' => 400];
             }
 
-            // v2 facility model: once admin saves write the v2 tables
-            // (inc/facility-v2-writer.php), operator and location suggestions
-            // go there too. A suggestion lists only what it changes, so it is
+            // Operator and location suggestions save to the v2 tables
+            // (inc/facility-v2-writer.php). A suggestion lists only what it changes, so it is
             // saved as a partial: nothing unlisted is removed.
             if ($category === 'companies' || $category === 'locations') {
                 require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
                 $v2_prefix = $wp_prefix !== '' ? $wp_prefix : (isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '');
-                if (kop_v2_writes_active($pdo, $v2_prefix)) {
-                    // An entry sent without its facility_id (the "Submit info" mini-form sends none, and no
-                    // state) is matched to its record and only its filled fields merged in; without this the
-                    // save could not find the record and made a second, mostly blank facility.
-                    if (!empty($project_data['facilities']) && is_array($project_data['facilities'])) {
-                        $resolved = kop_suggestion_resolve_entries($pdo, $project_data['facilities'], (string) ($submission['reason'] ?? ''), $v2_prefix);
-                        $project_data['facilities'] = $resolved['facilities'];
-                        if ($resolved['all_on_file'] && empty($project_data['operator'])) {
-                            // Only facilities already on file: save them, and make no company named after one.
-                            $undo = kop_sugg_undo_snapshot($pdo, $v2_prefix, $project_data['facilities'], null, null);
-                            kop_v2_with_write_lock($pdo, function () use ($pdo, $v2_prefix, $project_data) {
-                                return kop_v2_save_facility_entries($pdo, $v2_prefix, $project_data['facilities'], array());
-                            });
-                            $undo = kop_sugg_undo_finish($pdo, $v2_prefix, $undo);
-                            kop_mark_suggested_edit_status($pdo, $suggested_edits_table, $id, 'approved');
-                            $pdo->commit();
-                            kop_sugg_undo_store($id, $undo);
-                            $names = array_map(function ($f) { return (string) ($f['identification']['name'] ?? ''); }, $project_data['facilities']);
-                            return ['success' => true, 'projectName' => implode(', ', array_filter($names)), 'error' => null, 'httpCode' => 200];
-                        }
+                // An entry sent without its facility_id (the "Submit info" mini-form sends none, and no
+                // state) is matched to its record and only its filled fields merged in; without this the
+                // save could not find the record and made a second, mostly blank facility.
+                if (!empty($project_data['facilities']) && is_array($project_data['facilities'])) {
+                    $resolved = kop_suggestion_resolve_entries($pdo, $project_data['facilities'], (string) ($submission['reason'] ?? ''), $v2_prefix);
+                    $project_data['facilities'] = $resolved['facilities'];
+                    if ($resolved['all_on_file'] && empty($project_data['operator'])) {
+                        // Only facilities already on file: save them, and make no company named after one.
+                        $undo = kop_sugg_undo_snapshot($pdo, $v2_prefix, $project_data['facilities'], null, null);
+                        kop_v2_with_write_lock($pdo, function () use ($pdo, $v2_prefix, $project_data) {
+                            return kop_v2_save_facility_entries($pdo, $v2_prefix, $project_data['facilities'], array());
+                        });
+                        $undo = kop_sugg_undo_finish($pdo, $v2_prefix, $undo);
+                        kop_mark_suggested_edit_status($pdo, $suggested_edits_table, $id, 'approved');
+                        $pdo->commit();
+                        kop_sugg_undo_store($id, $undo);
+                        $names = array_map(function ($f) { return (string) ($f['identification']['name'] ?? ''); }, $project_data['facilities']);
+                        return ['success' => true, 'projectName' => implode(', ', array_filter($names)), 'error' => null, 'httpCode' => 200];
                     }
-                    $v2_name = $resolved_master_id;
-                    $raw_name = trim((string) $master_id);
-                    if ($category === 'companies' && $raw_name !== '' && $raw_name !== $v2_name) {
-                        // The sanitized name drops punctuation; prefer the exact operator name.
-                        $op_tables = kop_migration_tables($v2_prefix);
-                        $op_check = $pdo->prepare("SELECT COUNT(*) FROM `{$op_tables['operators']}` WHERE unique_name = ?");
-                        $op_check->execute([$raw_name]);
-                        if ((int) $op_check->fetchColumn() > 0) {
-                            $v2_name = $raw_name;
-                        }
-                    }
-                    $undo = kop_sugg_undo_snapshot($pdo, $v2_prefix, is_array($project_data['facilities'] ?? null) ? $project_data['facilities'] : [],
-                        $category === 'companies' ? $v2_name : null, $category === 'locations' ? mb_strtoupper(trim($v2_name)) : null);
-                    kop_v2_save_form_project($pdo, $v2_prefix, $v2_name, $project_data, $category, ['partial' => true, 'timestamp' => date('c')]);
-                    $undo = kop_sugg_undo_finish($pdo, $v2_prefix, $undo);
-                    kop_mark_suggested_edit_status($pdo, $suggested_edits_table, $id, 'approved');
-                    $pdo->commit();
-                    kop_sugg_undo_store($id, $undo);
-                    return ['success' => true, 'projectName' => $v2_name, 'error' => null, 'httpCode' => 200];
                 }
+                $v2_name = $resolved_master_id;
+                $raw_name = trim((string) $master_id);
+                if ($category === 'companies' && $raw_name !== '' && $raw_name !== $v2_name) {
+                    // The sanitized name drops punctuation; prefer the exact operator name.
+                    $op_tables = kop_migration_tables($v2_prefix);
+                    $op_check = $pdo->prepare("SELECT COUNT(*) FROM `{$op_tables['operators']}` WHERE unique_name = ?");
+                    $op_check->execute([$raw_name]);
+                    if ((int) $op_check->fetchColumn() > 0) {
+                        $v2_name = $raw_name;
+                    }
+                }
+                $undo = kop_sugg_undo_snapshot($pdo, $v2_prefix, is_array($project_data['facilities'] ?? null) ? $project_data['facilities'] : [],
+                    $category === 'companies' ? $v2_name : null, $category === 'locations' ? mb_strtoupper(trim($v2_name)) : null);
+                kop_v2_save_form_project($pdo, $v2_prefix, $v2_name, $project_data, $category, ['partial' => true, 'timestamp' => date('c')]);
+                $undo = kop_sugg_undo_finish($pdo, $v2_prefix, $undo);
+                kop_mark_suggested_edit_status($pdo, $suggested_edits_table, $id, 'approved');
+                $pdo->commit();
+                kop_sugg_undo_store($id, $undo);
+                return ['success' => true, 'projectName' => $v2_name, 'error' => null, 'httpCode' => 200];
             }
 
             $checkStmt = $pdo->prepare("SELECT id, json_data FROM `{$tableName}` WHERE unique_name = ? LIMIT 1");

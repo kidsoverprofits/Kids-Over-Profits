@@ -2,14 +2,14 @@
 /**
  * Wiki ↔ Facilities Sync API
  *
- * Bidirectional sync between wiki_master / wiki_submissions and facilities_master.
+ * Bidirectional sync between wiki_master / wiki_submissions and the facility records (v2 tables).
  * Can be required as a library (exposes kop_merge_wiki_into_facility and
  * kop_facility_to_wiki_json) or called directly as an HTTP endpoint.
  *
  * Directions:
  *   facility_to_wiki   – Push a facility record into wiki_submissions for review.
  *   wiki_to_facility   – Merge an approved wiki_master entry into the matching
- *                        facilities_master record (blank-field-only, no overwrite).
+ *                        facility record (blank-field-only, no overwrite).
  *
  * Actions:
  *   GET  ?action=status                               Overview of sync coverage.
@@ -362,14 +362,14 @@ function kop_wiki_staff_former_pass(PDO $pdo, bool $apply = false, bool $undo = 
 }
 
 /**
- * Merge wiki data into the matching facility in facilities_master.
+ * Merge wiki data into the matching facility in the facility records.
  * Only fills fields that are blank / null / empty – never overwrites.
  *
  * Target resolution:
  *   1. If the wiki row carries a facility_unique_name link (set via the Data
  *      Manager / picker / auto-link), resolve the target by that link.
  *   2. Otherwise (no link yet), fall back to matching the organization name
- *      against facilities_master.unique_name (legacy behavior).
+ *      against the record's unique_name.
  *
  * Within the matched record the fill target is:
  *   - the sub-facility matching program_name (or the only one) for operator
@@ -384,28 +384,17 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
     $programName = trim($wiki['program_name'] ?? '');
     $linkName    = trim($wiki['facility_unique_name'] ?? '');
 
-    // 1. Resolve the target row — prefer the explicit link. Once admin saves
-    // write the v2 tables, the row comes from there and is saved back there.
+    // 1. Resolve the target row (v2 tables, old row shape), preferring the explicit link; saved back there.
     require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
     $v2_prefix = kop_v2_detect_prefix($pdo);
-    $v2_writes = kop_v2_writes_active($pdo, $v2_prefix);
     $row = null;
     $matchedBy = '';
     if ($linkName !== '') {
-        if ($v2_writes) {
-            $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $linkName);
-        } else {
-            $stmt = $pdo->prepare(
-                "SELECT id, unique_name, json_data FROM facilities_master
-                 WHERE LOWER(unique_name) = LOWER(:u) LIMIT 1"
-            );
-            $stmt->execute([':u' => $linkName]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        }
+        $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $linkName);
         if (!$row) {
             // A link is set but points nowhere — don't silently name-match to a
             // different record; surface it instead.
-            return ['merged' => false, 'reason' => "linked record '$linkName' not found in facilities_master"];
+            return ['merged' => false, 'reason' => "linked record '$linkName' not found"];
         }
         $matchedBy = 'link';
     } else {
@@ -413,25 +402,16 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
         if (!$orgName || !$programName) {
             return ['merged' => false, 'reason' => 'no facility link, and missing organization/program_name to match by name'];
         }
-        if ($v2_writes) {
-            $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $orgName);
-        } else {
-            $stmt = $pdo->prepare(
-                "SELECT id, unique_name, json_data FROM facilities_master
-                 WHERE LOWER(unique_name) = LOWER(:org) LIMIT 1"
-            );
-            $stmt->execute([':org' => $orgName]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        }
+        $row = kop_v2_pdo_master_row_by_name($pdo, $v2_prefix, $orgName);
         if (!$row) {
-            return ['merged' => false, 'reason' => "no facilities_master row for organization '$orgName' (and no link)"];
+            return ['merged' => false, 'reason' => "no record for organization '$orgName' (and no link)"];
         }
         $matchedBy = 'name';
     }
 
     $project = json_decode($row['json_data'], true);
     if (!is_array($project)) {
-        return ['merged' => false, 'reason' => 'facilities_master json_data malformed'];
+        return ['merged' => false, 'reason' => 'record json_data malformed'];
     }
     if (!isset($project['data']) || !is_array($project['data'])) {
         $project['data'] = [];
@@ -572,28 +552,13 @@ function kop_merge_wiki_into_facility(PDO $pdo, array $wiki): array {
         return ['merged' => false, 'reason' => "matched '{$row['unique_name']}' by $matchedBy; no blank fields to fill"];
     }
 
-    if ($v2_writes) {
-        kop_v2_save_legacy_row($pdo, $v2_prefix, (string)$row['unique_name'], $project);
-        if ($subId && $addedStaff) {
-            $log = kop_wiki_staff_log();
-            $log[$subId] = ['record' => (string)$row['unique_name'], 'program' => $programName, 'staff' => $addedStaff, 'at' => gmdate('c')];
-            kop_wiki_staff_log_save($log);
-        }
-        return ['merged' => true, 'staff_added' => count($addedStaff), 'reason' => "blank fields filled, " . count($addedStaff) . " staff added (matched by $matchedBy)"];
+    kop_v2_save_legacy_row($pdo, $v2_prefix, (string)$row['unique_name'], $project);
+    if ($subId && $addedStaff) {
+        $log = kop_wiki_staff_log();
+        $log[$subId] = ['record' => (string)$row['unique_name'], 'program' => $programName, 'staff' => $addedStaff, 'at' => gmdate('c')];
+        kop_wiki_staff_log_save($log);
     }
-
-    $updateStmt = $pdo->prepare(
-        "UPDATE facilities_master SET json_data = :json, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
-    );
-    $updateStmt->execute([
-        ':json' => json_encode($project, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-        ':id'   => $row['id'],
-    ]);
-    if (function_exists('kop_facility_v2_request_sync')) {
-        kop_facility_v2_request_sync();
-    }
-
-    return ['merged' => true, 'reason' => "blank fields filled (matched by $matchedBy)"];
+    return ['merged' => true, 'staff_added' => count($addedStaff), 'reason' => "blank fields filled, " . count($addedStaff) . " staff added (matched by $matchedBy)"];
 }
 
 // ---------------------------------------------------------------------------
@@ -671,7 +636,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Every POST action mass-writes wiki_submissions and/or facilities_master —
+// Every POST action mass-writes wiki_submissions and/or the facility records —
 // strictly an admin tool. (config.php boots WordPress, so the check works;
 // fail closed if it somehow didn't.)
 if (!function_exists('current_user_can') || !current_user_can('manage_options')) {
@@ -765,7 +730,7 @@ try {
                     (program_name, city_state, organization, program_type, years_active,
                      json_data, status, submitted_by, submission_notes, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, ?, 'draft', 'facility_sync',
-                         'Auto-generated from facilities_master record.',
+                         'Auto-generated from the facility record.',
                          CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
             );
             $insertStmt->execute([
@@ -848,7 +813,7 @@ try {
                         (program_name, city_state, organization, program_type, years_active,
                          json_data, status, submitted_by, submission_notes, created_at, updated_at)
                      VALUES (?, ?, ?, ?, ?, ?, 'draft', 'facility_sync',
-                             'Auto-generated from facilities_master record.',
+                             'Auto-generated from the facility record.',
                              CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
                 );
                 $insertStmt->execute([
@@ -872,7 +837,7 @@ try {
     }
 
     // -----------------------------------------------------------------------
-    // wiki_to_facility – merge one wiki_master entry into facilities_master
+    // wiki_to_facility – merge one wiki_master entry into the facility records
     // -----------------------------------------------------------------------
     if ($action === 'wiki_to_facility') {
         $wikiId = (int)($input['wiki_id'] ?? 0);
