@@ -19,6 +19,8 @@ URL = "https://kidsoverprofits.org/tti-data-submission/"
 ap = argparse.ArgumentParser()
 ap.add_argument("--projects", type=int, default=12)
 ap.add_argument("--show", action="store_true")
+ap.add_argument("--v2-render", action="store_true",
+                help="report (not fail) the form fields that read differently when the facility is its v2 document")
 ap.add_argument("--v2-probes", default="private,keyword,operator,location,lockey",
                 help="probes that must give the same on a facility and on its v2 document")
 args = ap.parse_args()
@@ -79,6 +81,23 @@ SHOW = r"""async (i) => {
 
 
 v2_checks = []
+render_gaps = {}
+
+RENDER_V2 = r"""async (i) => {
+    // Rendering may write into formData; put all of it back afterwards.
+    const snap = JSON.stringify(window.formData);
+    const keep = window.formData.facilities[i];
+    window.formData.facilities[i] = window.KOP_DataNormalizer.facilityToV2(JSON.parse(JSON.stringify(keep)));
+    window.currentFacilityIndex = i;
+    if (window.updateAllUI) window.updateAllUI();
+    await new Promise((r) => setTimeout(r, 150));
+    const out = (""" + READ_FORM + """)();
+    const back = JSON.parse(snap);
+    Object.keys(window.formData).forEach((k) => { delete window.formData[k]; });
+    Object.assign(window.formData, back);
+    if (window.updateAllUI) window.updateAllUI();
+    return out;
+}"""
 
 
 def run(live_only, names=None):
@@ -112,8 +131,27 @@ def run(live_only, names=None):
                     v2_checks.append((f"{name} [{i}]", extra["probe"], v2))
                 result[f"{name} [{i}]"] = {"form": pg.evaluate(READ_FORM), **extra}
             result[f"{name} formData"] = pg.evaluate("JSON.parse(JSON.stringify(window.formData))")
+            # updateAllUI() writes into formData on a second pass (sourceOperator fields), so the report comes after.
+            for i in range(min(count, 6) if args.v2_render and not live_only else 0):
+                as_v2 = pg.evaluate(RENDER_V2, i)
+                form = result[f"{name} [{i}]"]["form"]
+                for k in sorted(set(form) | set(as_v2)):
+                    if json.dumps(form.get(k)) != json.dumps(as_v2.get(k)):
+                        render_gaps.setdefault(re.sub(r"\|\d+$", "", k), []).append((f"{name} [{i}]", form.get(k), as_v2.get(k)))
         b.close()
     return names, result, errors
+
+
+def first_diff(a, b, where=""):
+    if isinstance(a, dict) and isinstance(b, dict):
+        for k in sorted(set(a) | set(b)):
+            if json.dumps(a.get(k), sort_keys=True) != json.dumps(b.get(k), sort_keys=True):
+                return first_diff(a.get(k), b.get(k), f"{where}.{k}")
+    if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+        for i, (x, y) in enumerate(zip(a, b)):
+            if json.dumps(x, sort_keys=True) != json.dumps(y, sort_keys=True):
+                return first_diff(x, y, f"{where}[{i}]")
+    return f"{where or '(root)'}: live={json.dumps(a)[:100]} tree={json.dumps(b)[:100]}"
 
 
 names, live, live_errors = run(True)
@@ -132,7 +170,7 @@ for key in live:
                       if json.dumps(a["probe"].get(k)) != json.dumps(b["probe"].get(k))]
             diffs.append((key, [(k, fa.get(k), fb.get(k)) for k in bad[:6]] + extra))
         else:
-            diffs.append((key, "formData differs"))
+            diffs.append((key, "formData differs at " + first_diff(a, b)))
 # A module moved onto KOP_FacilityFields must say the same about a facility in either shape (ready for the flip).
 # --v2-modules lists the probes that must already agree (the moved modules' functions).
 for key, a, b in v2_checks:
@@ -152,6 +190,11 @@ for key, d in diffs[:20]:
         print("  ", d)
 if args.show:
     print("names:", names)
+if args.v2_render:
+    print(f"v2 rendering: {len(render_gaps)} fields read differently (to cover in steps 3-4)")
+    for k, rows in sorted(render_gaps.items(), key=lambda kv: -len(kv[1])):
+        where, a, b = rows[0]
+        print(f"  {len(rows):4}  {k}   e.g. {where}: legacy={json.dumps(a)[:60]} v2={json.dumps(b)[:60]}")
 ok = not diffs and not new_errors
 print("OK, same form and data on both" if ok else f"FAIL: {len(diffs)} differ, {len(new_errors)} new errors")
 sys.exit(0 if ok else 1)

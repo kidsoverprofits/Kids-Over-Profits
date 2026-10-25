@@ -499,7 +499,8 @@ function updateArrayItemValue(path, index, value) {
             array.push('');
         }
         array[index] = value;
-        if (path === 'identification.currentOwners') {
+        // A legacy facility keeps the single currentOwner copy in step; a v2 document has only the list.
+        if (path === 'identification.currentOwners' && !(window.KOP_FacilityFields && window.KOP_FacilityFields.isV2(target))) {
             const firstOwner = array[0] || '';
             setNestedValue(target, 'identification.currentOwner', firstOwner || '');
         }
@@ -569,7 +570,8 @@ function loadOperatorData() {
     if (isLocationProject && window.formData.facilities && window.formData.facilities[window.currentFacilityIndex]) {
         // For location projects, use the current facility's sourceOperator
         const currentFacility = window.formData.facilities[window.currentFacilityIndex];
-        operator = currentFacility.sourceOperator || {};
+        // A v2 document keeps it in provenance.
+        operator = currentFacility.sourceOperator || (currentFacility.provenance && currentFacility.provenance.sourceOperator) || {};
         debugLog('Location project: loading operator from facility.sourceOperator:', operator.name);
     } else {
         // For company/referrer projects, use the project-level operator
@@ -637,6 +639,15 @@ function loadOperatorData() {
     });
 }
 
+/**
+ * A form field's value on a facility: a v2 document by the field's v2 path, a legacy
+ * facility by the path as the form spells it (KOP_FacilityFields, data-normalizer.js).
+ */
+function facilityValueAt(facility, path) {
+    const F = window.KOP_FacilityFields;
+    return F && F.isV2(facility) ? F.read(facility, F.toV2Path(path)) : getNestedValue(facility, path);
+}
+
 function loadFacilityData() {
     if (!window.formData.facilities || window.formData.facilities.length === 0) {
         window.formData.facilities = createNewProjectData().facilities;
@@ -647,7 +658,7 @@ function loadFacilityData() {
     document.querySelectorAll('.facility-field').forEach(field => {
         const path = field.dataset.field;
         if (path) {
-            const value = getNestedValue(facility, path);
+            const value = facilityValueAt(facility, path);
             if (field.type === 'checkbox') {
                 field.checked = !!value;
             } else {
@@ -658,7 +669,7 @@ function loadFacilityData() {
 
     document.querySelectorAll('.facility-checkbox').forEach(checkbox => {
         const path = checkbox.dataset.field;
-        checkbox.checked = !!getNestedValue(facility, path);
+        checkbox.checked = !!facilityValueAt(facility, path);
     });
 
     renderCustomCheckboxLists(facility);
@@ -706,7 +717,7 @@ function loadFacilityData() {
     arrayPaths.forEach(path => {
         const container = document.querySelector(`[data-path="${path}"]`);
         if (container) {
-            renderArray(container, path, getNestedValue(facility, path));
+            renderArray(container, path, facilityValueAt(facility, path));
         }
     });
 }
@@ -816,7 +827,7 @@ function getProjectStates(projectData = {}) {
 
     // Facilities states
     (projectData.facilities || []).forEach((facility = {}) => {
-        const parsed = parseCityState(facility.location || '');
+        const parsed = parseCityState(kopFacilityField(facility, 'location.text') || '');
         const state = (facility.locationState || parsed.state || '').trim();
         if (state) {
             states.add(state.toUpperCase());
