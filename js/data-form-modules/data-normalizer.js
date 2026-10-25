@@ -1814,94 +1814,6 @@
         return doc;
     }
 
-    /**
-     * Canonical document to the legacy facility shape the form edits. Mirrors
-     * kop_facility_to_legacy() in inc/facility-store.php.
-     */
-    function facilityFromV2(doc) {
-        const loc = doc.location || {};
-        const ident = doc.identification || {};
-        const stateCode = loc.state && V2_STATES[loc.state] ? loc.state : '';
-        const legacy = {
-            identification: {
-                name: ident.name || '',
-                currentName: ident.currentName || '',
-                otherNames: ident.otherNames || [],
-                pastNames: ident.pastNames || [],
-                legalName: ident.legalName || '',
-                dbaNames: ident.dbaNames || [],
-                registrants: ident.registrants || [],
-                currentOperator: ident.currentOperator || '',
-                currentOwner: (ident.currentOwners && ident.currentOwners[0]) || '',
-                currentOwners: ident.currentOwners || [],
-                pastOwners: ident.pastOwners || [],
-                knownReferrers: ident.knownReferrers || []
-            },
-            otherOperators: ident.otherOperators || [],
-            pastOperators: ident.pastOperators || [],
-            investors: ident.investors || [],
-            address: loc.raw || '',
-            addressParts: { street: loc.street || '', city: loc.city || '', state: stateCode, zip: loc.zip || '' },
-            location: loc.text || '',
-            locationDetails: {
-                city: loc.city || '',
-                state: stateCode,
-                country: loc.country || '',
-                zip: loc.zip || '',
-                additionalLocations: (loc.additionalLocations || []).map((alt) => ({
-                    address: alt.raw || '', city: alt.city || '', state: alt.state || '', zip: alt.zip || '', country: alt.country || ''
-                })),
-                formerLocations: (loc.formerLocations || []).map((fl) => ({
-                    state: fl.state || '', city: fl.city || '', address: fl.raw || '', zip: '',
-                    fromYear: fl.fromYear === null || fl.fromYear === undefined ? '' : String(fl.fromYear),
-                    toYear: fl.toYear === null || fl.toYear === undefined ? '' : String(fl.toYear)
-                }))
-            },
-            operatingPeriod: { ...(doc.operatingPeriod || {}) },
-            facilityDetails: {
-                type: (doc.facilityDetails || {}).type || '',
-                capacity: (doc.facilityDetails || {}).capacity ?? null,
-                currentCensus: (doc.facilityDetails || {}).currentCensus ?? null,
-                ageRange: (doc.facilityDetails || {}).ageRange || { min: null, max: null },
-                gender: (doc.facilityDetails || {}).gender || ''
-            },
-            staff: doc.staff || { administrator: [], notableStaff: [], pastTTIJobs: [] },
-            accreditations: doc.accreditations || { current: [], past: [] },
-            memberships: doc.memberships || [],
-            certifications: doc.certifications || [],
-            licensing: doc.licensing || [],
-            profileLinks: doc.profileLinks || [],
-            resourceLinks: doc.resourceLinks || [],
-            federalFunding: doc.federalFunding || [],
-            resources: doc.resources || {},
-            treatmentTypes: doc.treatmentTypes || {},
-            targetedDiagnoses: doc.targetedDiagnoses || {},
-            targetedBehaviors: doc.targetedBehaviors || {},
-            ttiPractices: doc.ttiPractices || {},
-            philosophy: doc.philosophy || {},
-            conditions: doc.conditions || {},
-            criticalIncidents: doc.criticalIncidents || {},
-            notes: doc.notes || [],
-            fieldNotes: doc.fieldNotes || {},
-            survivorTestimony: doc.survivorTestimony || []
-        };
-        if (doc.providerDetails && Object.keys(doc.providerDetails).length) legacy.providerDetails = doc.providerDetails;
-        delete legacy.operatingPeriod.schema_version;
-
-        if (doc.facility_id !== null && doc.facility_id !== undefined) legacy.facility_id = doc.facility_id;
-        if (doc.documentFolderId !== null && doc.documentFolderId !== undefined) legacy.documentFolderId = doc.documentFolderId;
-        const privatelyOwned = (doc.facilityDetails || {}).isPrivatelyOwned;
-        if (privatelyOwned !== null && privatelyOwned !== undefined) legacy.isPrivatelyOwned = privatelyOwned;
-        const prov = doc.provenance || {};
-        if (prov.sourceProject) legacy.sourceProject = prov.sourceProject;
-        if (prov.sourceCategory) legacy.sourceCategory = prov.sourceCategory;
-        if (prov.sourceOperator) legacy.sourceOperator = prov.sourceOperator;
-        Object.keys(doc.legacy || {}).forEach((key) => {
-            if (!(key in legacy)) legacy[key] = doc.legacy[key];
-        });
-        return legacy;
-    }
-
     /** True when the page runs the v2 data model (set by PHP from phase 3). */
     function isV2DataModel() {
         const config = window.KOP_DATA_FORM_CONFIG || {};
@@ -1912,7 +1824,6 @@
     window.KOP_DataNormalizer = {
         normalizeProjectData: normalizeProjectData,
         facilityToV2: facilityToV2,
-        facilityFromV2: facilityFromV2,
         isV2Facility: isV2Facility,
         isV2DataModel: isV2DataModel,
         facilityNameKey: facilityNameKey,

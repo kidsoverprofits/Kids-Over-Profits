@@ -77,7 +77,7 @@ for (const f of facilities) {
     const a = report(before, f);
     const b = report(tree, f);
     if (a !== b) { failures.push(`${name}: legacy report changed`); continue; }
-    const v2 = report(tree, N.facilityFromV2 ? N.facilityToV2(JSON.parse(JSON.stringify(f))) : f);
+    const v2 = report(tree, N.facilityToV2(JSON.parse(JSON.stringify(f))));
     if (v2 !== b) {
         let i = 0;
         while (i < v2.length && v2[i] === b[i]) i++;

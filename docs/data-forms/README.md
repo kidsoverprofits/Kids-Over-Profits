@@ -37,7 +37,7 @@ Plain scripts (not ES modules), ordered by WordPress dependencies.
 - `js/data-form-modules/`: `config.js` -> `data-normalizer.js` -> `api.js` -> `project.js`, then the UI modules `ui-render.js`, `ui-state.js`, `ui-events.js`, `ui-actions.js`, and the page modules `data-page.js` (both forms) and `admin-data-page.js` (admin only). `ui.js` is not enqueued.
 - `js/data-form/`: the `data-form.v4.js` orchestrator (loads after the modules above), the sub-forms `location-form.js`, `referrer-form.js`, `transporter-form.js`, `provider-form.js`, `marketer-form.js`, `tradeorg-form.js`, plus `notes.js`, `data-search.js`, `data-toolbar.js`, `custom-modals.js`, `report-config.js` and `data-report-generator.js`. Admin form only: `testimony.js` and `submission-editor.js`. Public form only: `data-wizard.js` (with `css/data-wizard.css`), the guided start.
 - Supporting scripts: `js/autocomplete.js`, `js/field-tooltips.js`, `js/tutorial-overlay.js`, and on the admin form `js/admin-news-links.js` (linked news articles panel).
-- `data-normalizer.js` holds `facilityToV2` / `facilityFromV2`, a port of the PHP normalizer; keep them in step with `scripts/check-facility-normalizer-parity.js`.
+- `data-normalizer.js` holds `facilityToV2`, a port of the PHP normalizer (the form edits v2 documents), and `KOP_FacilityFields` (a field by its v2 path on either shape); keep it in step with `scripts/check-facility-normalizer-parity.js`.
 
 ### Backend Endpoints
 - `api/get-master-data.php` loads the master dataset (built from the v2 tables once the write switch is on)

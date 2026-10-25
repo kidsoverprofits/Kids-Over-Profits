@@ -9,8 +9,8 @@
  *   php scripts/normalize-dump.php --dump <dir> --emit copies.jsonl
  *   node scripts/check-facility-normalizer-parity.js copies.jsonl [--show 5]
  *
- * It also round-trips each PHP document through facilityFromV2 and back
- * through facilityToV2, which must be lossless for the fields the form edits.
+ * It also round-trips each stored document through its PHP legacy projection
+ * (the copy that follows it) and back through facilityToV2, which must be lossless.
  *
  * Exit code 0 when every copy matches.
  */
@@ -82,6 +82,8 @@ async function main() {
     let roundTripMismatches = 0;
     const byPath = {};
     const examples = [];
+    const storedDocs = new Map();
+    let roundTrips = 0;
 
     for await (const line of rl) {
         if (!line.trim()) continue;
@@ -97,11 +99,15 @@ async function main() {
             if (examples.length < SHOW) examples.push({ source: row.source, ...diff });
         }
 
-        // Round trip: v2 -> legacy (form) -> v2 must give the same document.
-        const back = canonical(JSON.parse(JSON.stringify(
-            N.facilityToV2(N.facilityFromV2(row.doc), { facility_id: row.doc.facility_id })
-        )));
-        const expected = JSON.parse(JSON.stringify(php));
+        // Round trip: a stored document, through its legacy projection (kop_facility_to_legacy(), the
+        // "facilities_v2 legacy" row that follows it), back to v2 in JS must give the same document.
+        const id = String(row.source).replace(/^facilities_v2(?: legacy)? #/, '');
+        if (/^facilities_v2 #/.test(row.source)) { storedDocs.set(id, php); continue; }
+        if (!/^facilities_v2 legacy #/.test(row.source) || !storedDocs.has(id)) continue;
+        const back = JSON.parse(JSON.stringify(js));
+        const expected = JSON.parse(JSON.stringify(storedDocs.get(id)));
+        storedDocs.delete(id);
+        roundTrips++;
         // Row-context fields are not part of the facility and do not round trip.
         for (const doc of [back, expected]) {
             doc.provenance.source = '';
@@ -122,7 +128,7 @@ async function main() {
 
     console.log(`Copies compared:        ${total}`);
     console.log(`PHP vs JS mismatches:   ${mismatches}`);
-    console.log(`Round-trip mismatches:  ${roundTripMismatches}`);
+    console.log(`Round-trip mismatches:  ${roundTripMismatches} of ${roundTrips}`);
     const paths = Object.entries(byPath).sort((a, b) => b[1] - a[1]);
     if (paths.length) {
         console.log('\nBy first differing path:');

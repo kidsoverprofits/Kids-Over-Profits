@@ -8,8 +8,9 @@ inside each facility's JSON document, so no SQL columns are added.
 - Implementation: `inc/facility-store.php` (`kop_facility_normalize`,
   `kop_facility_validate`, `kop_facility_save`). Everything that writes a
   facility goes through these.
-- Admin form port: `js/data-form-modules/data-normalizer.js` (`facilityToV2`,
-  `facilityFromV2`). It must stay identical to the PHP. Check with
+- Data form port: `js/data-form-modules/data-normalizer.js` (`facilityToV2`; the
+  form edits v2 documents since 2026-10-25, so there is no JS projection back to the
+  legacy shape). It must stay identical to the PHP. Check with
   `scripts/check-facility-normalizer-parity.js` (see "Keeping PHP and JS in
   step" below).
 - Based on the `facilities[0]` template in `js/data-form-modules/project.js`.

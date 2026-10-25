@@ -77,9 +77,9 @@ check('filled: same as facilityToV2 minus provenance/legacy', (() => {
 check('filled: form data untouched', sandbox.formData.facilities[0].someOddKey === 'kept out'
     && sandbox.formData.facilities[0].operatingPeriod.startYear === '1998');
 
-// A v2 document loaded into the form exports the same document.
+// A v2 document in the form exports the same document.
 const stored = N.facilityToV2(form.facilities[0]);
-sandbox.formData = { facilities: [N.facilityFromV2(stored)] };
+sandbox.formData = { facilities: [JSON.parse(JSON.stringify(stored))] };
 out = exportNow();
 const want = JSON.parse(JSON.stringify(stored));
 delete want.provenance; delete want.legacy;
