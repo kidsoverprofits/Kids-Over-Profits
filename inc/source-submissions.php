@@ -28,6 +28,17 @@ if (!defined('ABSPATH')) {
 
 const KOP_EXT_SOURCE_CPT = 'kop_source';
 
+/** True for the extension's routes and the app's kop/v1/app/ routes. */
+function kop_ext_is_own_route() {
+    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+    foreach (array('/kop/v1/extension/', '/kop/v1/app/') as $prefix) {
+        if (strpos($uri, $prefix) !== false || strpos(rawurldecode($uri), $prefix) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Some CGI/LiteSpeed setups drop the Authorization header before PHP sees it,
  * which leaves application passwords with nothing to check. The extension
@@ -39,12 +50,7 @@ function kop_ext_restore_basic_auth() {
     if (!empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['HTTP_X_KOP_AUTHORIZATION'])) {
         return;
     }
-    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
-    $ours = false;
-    foreach (array('/kop/v1/extension/', '/kop/v1/app/') as $prefix) {
-        $ours = $ours || strpos($uri, $prefix) !== false || strpos(rawurldecode($uri), $prefix) !== false;
-    }
-    if (!$ours) {
+    if (!kop_ext_is_own_route()) {
         return;
     }
     $header = (string) $_SERVER['HTTP_X_KOP_AUTHORIZATION'];
@@ -63,6 +69,18 @@ add_filter('determine_current_user', function ($user_id) {
     kop_ext_restore_basic_auth();
     return $user_id;
 }, 5);
+
+/**
+ * The application password comes before a login cookie on these routes. On Android the app's requests share
+ * the admin web view's cookies, and WordPress checks the logged_in cookie first (priority 20), then drops the
+ * user for having no nonce, so a valid application password got a 401.
+ */
+add_filter('determine_current_user', function ($user_id) {
+    if ($user_id || empty($_SERVER['PHP_AUTH_USER']) || !kop_ext_is_own_route() || !function_exists('wp_validate_application_password')) {
+        return $user_id;
+    }
+    return wp_validate_application_password($user_id);
+}, 15);
 
 /* ---------- Websites queue ---------- */
 
