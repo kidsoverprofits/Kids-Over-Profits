@@ -41,11 +41,11 @@ function buildLocationFacilityKey(facility) {
 
     const identification = facility.identification || {};
     const name = String(identification.name || facility.name || '').trim().toLowerCase();
-    const locationDetails = facility.locationDetails || {};
-    const address = String(facility.address || '').trim().toLowerCase();
-    const location = String(facility.location || '').trim().toLowerCase();
-    const city = String(locationDetails.city || facility.locationCity || '').trim().toLowerCase();
-    const state = String(locationDetails.state || facility.locationState || '').trim().toLowerCase();
+    // By v2 path on either shape (KOP_FacilityFields, data-normalizer.js).
+    const address = String(kopFacilityField(facility, 'location.raw') || '').trim().toLowerCase();
+    const location = String(kopFacilityField(facility, 'location.text') || '').trim().toLowerCase();
+    const city = String(kopFacilityField(facility, 'location.city') || facility.locationCity || '').trim().toLowerCase();
+    const state = String(kopFacilityField(facility, 'location.state') || facility.locationState || '').trim().toLowerCase();
     return `${name}|${address}|${location}|${city}|${state}`;
 }
 
@@ -126,8 +126,9 @@ function getAllLocations() {
 
             // Collect from facilities in all projects
             project.data?.facilities?.forEach(facility => {
-                if (facility.location) {
-                    locations.add(facility.location);
+                const placeText = kopFacilityField(facility, 'location.text');
+                if (placeText) {
+                    locations.add(placeText);
                 }
                 if (facility.locationState) {
                     locations.add(facility.locationState);
@@ -222,9 +223,10 @@ function syncLocationProjectsFromSources(projectsObj) {
             let state = facility.locationState || '';
 
             // If no explicit state, try to parse from location field
-            if (!state && facility.location) {
+            const placeText = kopFacilityField(facility, 'location.text');
+            if (!state && placeText) {
                 // Parse "City, STATE" or "City, ST" format
-                const locationParts = facility.location.split(',').map(p => p.trim());
+                const locationParts = placeText.split(',').map(p => p.trim());
                 if (locationParts.length >= 2) {
                     state = locationParts[locationParts.length - 1];
                 }
@@ -295,12 +297,12 @@ function syncLocationProjectsFromSources(projectsObj) {
 
             // Merge facilities: keep existing + add new unique ones
             const existingFacilities = existingProject.data.facilities || [];
-            const existingIds = new Set(existingFacilities.map(f => f.id || `${f.name}-${f.location}`));
+            const existingIds = new Set(existingFacilities.map(f => f.id || `${f.name}-${kopFacilityField(f, 'location.text')}`));
 
             // Add new facilities that don't already exist
             let addedCount = 0;
             facilities.forEach(facility => {
-                const facilityId = facility.id || `${facility.name}-${facility.location}`;
+                const facilityId = facility.id || `${facility.name}-${kopFacilityField(facility, 'location.text')}`;
                 if (!existingIds.has(facilityId)) {
                     existingFacilities.push(facility);
                     existingIds.add(facilityId);
@@ -367,7 +369,7 @@ function updateLocationFacilitiesOverview() {
     facilities.forEach((facility, index) => {
         const facilityName = facility.identification?.name || `Facility ${index + 1}`;
         // Check for privately owned facilities - use isPrivatelyOwned flag
-        const isPrivate = facility.isPrivatelyOwned === true;
+        const isPrivate = kopFacilityField(facility, 'facilityDetails.isPrivatelyOwned') === true;
         const operator = facility.identification?.currentOperator || (isPrivate ? 'Privately Owned' : 'Unknown Operator');
         const programType = facility.facilityDetails?.type || '';
         const status = facility.operatingPeriod?.status || '';
@@ -450,7 +452,8 @@ function updateLocationFacilitiesOverview() {
             badge.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent selecting the facility
                 // Toggle private ownership status
-                window.formData.facilities[index].isPrivatelyOwned = !window.formData.facilities[index].isPrivatelyOwned;
+                const badgeFacility = window.formData.facilities[index];
+                kopSetFacilityField(badgeFacility, 'facilityDetails.isPrivatelyOwned', !kopFacilityField(badgeFacility, 'facilityDetails.isPrivatelyOwned'));
 
                 // Update form UI if this is the current facility
                 if (index === window.currentFacilityIndex) {

@@ -108,7 +108,7 @@ def run(live_only, names=None):
             for i in range(min(count, 6)):
                 extra = pg.evaluate(SHOW, i)
                 v2 = extra.pop("probeV2")
-                if v2 is not None:
+                if v2 is not None and not live_only:
                     v2_checks.append((f"{name} [{i}]", extra["probe"], v2))
                 result[f"{name} [{i}]"] = {"form": pg.evaluate(READ_FORM), **extra}
             result[f"{name} formData"] = pg.evaluate("JSON.parse(JSON.stringify(window.formData))")
@@ -139,7 +139,7 @@ for key, a, b in v2_checks:
     for probe in a:
         kind = probe.split(":")[0]
         if kind in args.v2_probes and json.dumps(a[probe]) != json.dumps(b.get(probe)):
-            diffs.append((key + " as v2", [(probe, a[probe], b.get(probe))]))
+            diffs.append((key + " as v2 (legacy= / v2=)", [(probe, a[probe], b.get(probe))]))
 new_errors = [e for e in tree_errors if e not in live_errors]
 if new_errors:
     print("New page errors:", *new_errors[:10], sep="\n  ")
