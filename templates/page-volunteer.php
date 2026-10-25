@@ -146,6 +146,7 @@ while (have_posts()) :
                     <li>Indigenous survivors, including people whose families went through the boarding schools</li>
                     <li>Survivors of foster care placements</li>
                     <li>Adoptees</li>
+                    <li>Maternity home survivors: girls placed while pregnant or parenting</li>
                     <li>Immigrant survivors, including young people held in ORR shelters</li>
                 </ul>
                 <p>You choose what to read and how much. Write to us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>
