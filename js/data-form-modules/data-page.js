@@ -1,3 +1,17 @@
+/**
+ * A facility field by its v2 path, on either shape (js/data-form-modules/facility-fields.js):
+ * the form's own facilities and the other projects' facilities the server still sends legacy.
+ */
+function kopFacilityField(facility, path) {
+    if (window.KOP_FacilityFields) return window.KOP_FacilityFields.read(facility, path);
+    return path.split('.').reduce((node, key) => (node && typeof node === 'object' ? node[key] : undefined), facility);
+}
+
+/** Set a facility field by its v2 path, where the facility's shape keeps it. */
+function kopSetFacilityField(facility, path, value) {
+    if (window.KOP_FacilityFields) window.KOP_FacilityFields.write(facility, path, value);
+}
+
 // ============================================
 // VIEW MANAGEMENT SYSTEM
 // ============================================
@@ -251,20 +265,20 @@
             }
 
             return hasMeaningfulFacilityValue([
-                facility.identification?.currentName,
-                facility.identification?.currentOperator,
-                facility.identification?.currentOwner,
-                facility.identification?.currentOwners,
-                facility.identification?.otherNames,
-                facility.identification?.pastNames,
-                facility.identification?.knownReferrers,
-                facility.location,
-                facility.address,
-                facility.locationDetails?.city,
-                facility.locationDetails?.state,
-                facility.locationDetails?.country,
-                facility.locationDetails?.additionalLocations,
-                facility.otherOperators,
+                kopFacilityField(facility, 'identification.currentName'),
+                kopFacilityField(facility, 'identification.currentOperator'),
+                kopFacilityField(facility, 'identification.currentOwners'),
+                kopFacilityField(facility, 'identification.pastOwners'),
+                kopFacilityField(facility, 'identification.otherNames'),
+                kopFacilityField(facility, 'identification.pastNames'),
+                kopFacilityField(facility, 'identification.knownReferrers'),
+                kopFacilityField(facility, 'location.text'),
+                kopFacilityField(facility, 'location.raw'),
+                kopFacilityField(facility, 'location.city'),
+                kopFacilityField(facility, 'location.state'),
+                kopFacilityField(facility, 'location.country'),
+                kopFacilityField(facility, 'location.additionalLocations'),
+                kopFacilityField(facility, 'identification.otherOperators'),
                 facility.operatingPeriod,
                 facility.staff,
                 facility.profileLinks,
@@ -279,7 +293,7 @@
                 facility.criticalIncidents,
                 facility.notes,
                 facility.fieldNotes,
-                facility.isPrivatelyOwned
+                kopFacilityField(facility, 'facilityDetails.isPrivatelyOwned')
             ]);
         }
 
@@ -298,8 +312,8 @@
                 }
 
                 const summaryParts = [
-                    facility?.locationDetails?.city,
-                    facility?.locationDetails?.state,
+                    kopFacilityField(facility, 'location.city'),
+                    kopFacilityField(facility, 'location.state'),
                     facility?.facilityDetails?.type,
                     facility?.identification?.currentName
                 ].filter(part => typeof part === 'string' && part.trim() !== '');
@@ -566,7 +580,7 @@
                 });
                 const resolvePrivate = typeof window.resolvePrivateOwnership === 'function'
                     ? window.resolvePrivateOwnership
-                    : (facility) => facility && facility.isPrivatelyOwned === true;
+                    : (facility) => kopFacilityField(facility, 'facilityDetails.isPrivatelyOwned') === true;
 
                 let clearedCount = 0;
                 let anyChainFacility = false;
@@ -1092,8 +1106,11 @@
 
         function facilityHasOperatorData(facility) {
             if (!facility) return false;
-            const operatorName = facility.operator && facility.operator.name;
-            const sourceOperatorName = facility.sourceOperator && facility.sourceOperator.name;
+            // A v2 document keeps the synced operator copy in provenance, an old operator block in legacy.
+            const operatorBlock = facility.operator || (facility.legacy && facility.legacy.operator);
+            const sourceOperator = facility.sourceOperator || (facility.provenance && facility.provenance.sourceOperator);
+            const operatorName = operatorBlock && operatorBlock.name;
+            const sourceOperatorName = sourceOperator && sourceOperator.name;
             const currentOperator = facility.identification && facility.identification.currentOperator;
             return [operatorName, sourceOperatorName, currentOperator].some(value => value && String(value).trim());
         }
@@ -1102,8 +1119,9 @@
         // wins; otherwise a facility that already carries operator data is treated
         // as part of a chain so nothing gets hidden or cleared unexpectedly.
         function resolvePrivateOwnership(facility) {
-            if (facility && typeof facility.isPrivatelyOwned === 'boolean') {
-                return facility.isPrivatelyOwned;
+            const owned = facility ? kopFacilityField(facility, 'facilityDetails.isPrivatelyOwned') : null;
+            if (typeof owned === 'boolean') {
+                return owned;
             }
             return !facilityHasOperatorData(facility);
         }
@@ -1203,7 +1221,7 @@
                 const isPrivate = !!privateOwnershipToggle.checked;
 
                 if (window.formData && window.formData.facilities && window.formData.facilities[window.currentFacilityIndex]) {
-                    window.formData.facilities[window.currentFacilityIndex].isPrivatelyOwned = isPrivate;
+                    kopSetFacilityField(window.formData.facilities[window.currentFacilityIndex], 'facilityDetails.isPrivatelyOwned', isPrivate);
                     console.log(`Set isPrivatelyOwned = ${isPrivate} for facility ${window.currentFacilityIndex}`);
                 }
 
@@ -1422,13 +1440,15 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                         }
                         
                         // Location
-                        reportWindow.document.write(renderField('Location', facility.location));
-                        if (hasValue(facility.address)) {
-                            reportWindow.document.write('<div class="detail-row"><div class="detail-label">Address</div><div class="detail-value">' + escapeHtml(facility.address).replace(/\n/g, '<br>') + '</div></div>');
+                        reportWindow.document.write(renderField('Location', kopFacilityField(facility, 'location.text')));
+                        const facilityAddress = kopFacilityField(facility, 'location.raw');
+                        if (hasValue(facilityAddress)) {
+                            reportWindow.document.write('<div class="detail-row"><div class="detail-label">Address</div><div class="detail-value">' + escapeHtml(facilityAddress).replace(/\n/g, '<br>') + '</div></div>');
                         }
                         
                         // Other Operators
-                        if (facility.otherOperators && facility.otherOperators.length > 0) reportWindow.document.write(renderArray(facility.otherOperators, 'Other Operators'));
+                        const otherOperators = kopFacilityField(facility, 'identification.otherOperators') || [];
+                        if (otherOperators.length > 0) reportWindow.document.write(renderArray(otherOperators, 'Other Operators'));
                         
                         // Operating Period
                         if (facility.operatingPeriod) {
@@ -2078,8 +2098,8 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                         if (facility.identification?.currentOperator && facility.identification.currentOperator.toLowerCase().includes(searchLower)) {
                             matches.push(`Operator: ${facility.identification.currentOperator}`);
                         }
-                        if (facility.otherOperators && Array.isArray(facility.otherOperators)) {
-                            facility.otherOperators.forEach(op => {
+                        if (Array.isArray(kopFacilityField(facility, 'identification.otherOperators'))) {
+                            kopFacilityField(facility, 'identification.otherOperators').forEach(op => {
                                 const opStr = typeof op === 'string' ? op : (op?.name || '');
                                 if (opStr && opStr.toLowerCase().includes(searchLower)) {
                                     matches.push(`Other Operator: ${opStr}`);
@@ -2088,14 +2108,17 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                         }
 
                         // Location
-                        if (facility.location && typeof facility.location === 'string' && facility.location.toLowerCase().includes(searchLower)) {
-                            matches.push(`Location: ${facility.location}`);
+                        const locText = kopFacilityField(facility, 'location.text');
+                        if (locText && typeof locText === 'string' && locText.toLowerCase().includes(searchLower)) {
+                            matches.push(`Location: ${locText}`);
                         }
-                        if (facility.locationDetails?.city && facility.locationDetails.city.toLowerCase().includes(searchLower)) {
-                            matches.push(`City: ${facility.locationDetails.city}`);
+                        const locCity = kopFacilityField(facility, 'location.city');
+                        if (locCity && locCity.toLowerCase().includes(searchLower)) {
+                            matches.push(`City: ${locCity}`);
                         }
-                        if (facility.locationDetails?.state && facility.locationDetails.state.toLowerCase().includes(searchLower)) {
-                            matches.push(`State: ${facility.locationDetails.state}`);
+                        const locState = kopFacilityField(facility, 'location.state');
+                        if (locState && locState.toLowerCase().includes(searchLower)) {
+                            matches.push(`State: ${locState}`);
                         }
 
                         // Staff
@@ -2216,8 +2239,8 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                             matches.push(`Current Operator: ${facility.identification.currentOperator}`);
                         }
                         // Check facility's other/past operators
-                        if (facility.otherOperators && Array.isArray(facility.otherOperators)) {
-                            facility.otherOperators.forEach(op => {
+                        if (Array.isArray(kopFacilityField(facility, 'identification.otherOperators'))) {
+                            kopFacilityField(facility, 'identification.otherOperators').forEach(op => {
                                 const opStr = typeof op === 'string' ? op : (op?.name || '');
                                 if (opStr && opStr.toLowerCase().includes(searchLower)) {
                                     matches.push(`Other Operator: ${opStr}`);
@@ -2247,11 +2270,13 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                         
                     case 'location':
                         // Check facility location fields
-                        if (facility.location && typeof facility.location === 'string' && facility.location.toLowerCase().includes(searchLower)) {
-                            matches.push(facility.location);
+                        const placeText = kopFacilityField(facility, 'location.text');
+                        if (placeText && typeof placeText === 'string' && placeText.toLowerCase().includes(searchLower)) {
+                            matches.push(placeText);
                         }
-                        if (facility.address && typeof facility.address === 'string' && facility.address.toLowerCase().includes(searchLower)) {
-                            matches.push(`Address: ${facility.address}`);
+                        const placeRaw = kopFacilityField(facility, 'location.raw');
+                        if (placeRaw && typeof placeRaw === 'string' && placeRaw.toLowerCase().includes(searchLower)) {
+                            matches.push(`Address: ${placeRaw}`);
                         }
                         if (facility.locationCity && typeof facility.locationCity === 'string' && facility.locationCity.toLowerCase().includes(searchLower)) {
                             matches.push(`City: ${facility.locationCity}`);
@@ -2361,9 +2386,9 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                     results.forEach(result => {
                         const facilityName = result.facility.identification?.name || 'Unnamed Facility';
                         // Facilities default to privately owned unless flagged otherwise
-                        const isPrivate = result.facility.isPrivatelyOwned !== false;
+                        const isPrivate = kopFacilityField(result.facility, 'facilityDetails.isPrivatelyOwned') !== false;
                         const operator = result.operator || result.facility.identification?.currentOperator || (isPrivate ? 'Privately Owned' : 'Unknown Operator');
-                        const location = result.facility.location || 'Unknown Location';
+                        const location = kopFacilityField(result.facility, 'location.text') || 'Unknown Location';
                         
                         const resultDiv = document.createElement('div');
                         resultDiv.style.cssText = "border-bottom: 1px solid #e2e8f0; padding: 15px; cursor: pointer; transition: background-color 0.2s;";
@@ -2757,7 +2782,7 @@ window.resolvePrivateOwnership = resolvePrivateOwnership;
                 
                 // Save the private ownership flag to the current facility
                 if (window.formData && window.formData.facilities && window.formData.facilities[window.currentFacilityIndex]) {
-                    window.formData.facilities[window.currentFacilityIndex].isPrivatelyOwned = isPrivate;
+                    kopSetFacilityField(window.formData.facilities[window.currentFacilityIndex], 'facilityDetails.isPrivatelyOwned', isPrivate);
                     console.log(`Set isPrivatelyOwned = ${isPrivate} for facility ${window.currentFacilityIndex}`);
                 }
                 

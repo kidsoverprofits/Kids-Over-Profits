@@ -30,6 +30,11 @@ python scripts/test-data-wizard.py               # live page + working-tree wiza
 # document (KOP_DataNormalizer.facilityToV2(), docs/FACILITY-SCHEMA.md) without provenance or legacy; the rest of formData as is.
 # A blank form exports the full field set; the file loads back through normalizeProjectData() (facilityFromV2())
 node scripts/test-data-form-export.js
+# The form modules move to v2 one per commit (docs/plan 4.3 item 17 c): facility fields through kopFacilityField() /
+# KOP_FacilityFields (js/data-form-modules/facility-fields.js), by v2 path on either shape. Each commit: the live public form with
+# the working-tree js/ against the live js/, every field and window.formData the same, and the moved functions giving the same on a
+# facility and its v2 document
+python scripts/test-data-form-equivalence.py [--projects 30]
 # /questions/ ("We have questions", inc/questions.php + templates/questions.php + js/questions.js + css/questions.css): one short
 # question at a time, phone first, about what a record lacks (open?, opened, closed, town, boys/girls, ages, until when an earlier
 # name was used, each unticked practice, "was <staff> there when you were? year", remembered rules; companies: founded, based,
