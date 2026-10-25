@@ -98,10 +98,53 @@
     margin: 0.2rem 0 0.6rem;
 }
 
+/* A fold opens from a button like the page's others (owner, 2026-10-25: a bare line is too easy to miss),
+   with an arrow that turns when it is open. */
 .kop-volpage-more > summary {
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    list-style: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 6px;
+    background: var(--kop-teal-ink, #24757F);
+    color: var(--kop-white, #fff);
     font-weight: 700;
-    color: var(--kop-navy-blue, #000080);
+    cursor: pointer;
+}
+
+.kop-volpage-more > summary::-webkit-details-marker {
+    display: none;
+}
+
+.kop-volpage-more > summary::before {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.15s;
+}
+
+.kop-volpage-more[open] > summary::before {
+    transform: rotate(45deg);
+}
+
+.kop-volpage-more > summary:hover,
+.kop-volpage-more > summary:focus,
+.kop-volpage-more[open] > summary {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #fff);
+}
+
+.kop-volpage-more > summary:focus-visible {
+    outline: 3px solid var(--kop-focus-color, #33A7B5);
+    outline-offset: 2px;
 }
 
 .kop-volpage-more > summary h2.kop-volpage-way-h {
@@ -113,6 +156,7 @@
     display: block;
     margin: 0.2rem 0 0 1.1rem;
     font-weight: 400;
+    color: var(--kop-white, #fff);
 }
 
 .kop-volpage-more[open] > summary {
