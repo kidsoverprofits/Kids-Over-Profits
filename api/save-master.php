@@ -66,7 +66,6 @@ if (!$request) {
 // Use PDO connection from config.php
 // Load this BEFORE extracting variables to avoid WordPress variable conflicts
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/facility-promotion.php';
 require_once __DIR__ . '/lib-marketers.php';
 require_once __DIR__ . '/lib-tradeorgs.php';
 
@@ -505,27 +504,6 @@ function parseCityState($location) {
 }
 
 /**
- * Resolve a facilities_master.id by its unique_name. Returns null if not found.
- * Uses a per-request static cache so repeated lookups during a single save
- * don't re-query the database.
- */
-function kop_resolve_facility_id_by_name($pdo, $name) {
-    static $cache = [];
-    $key = is_string($name) ? strtolower(trim($name)) : '';
-    if ($key === '') return null;
-    if (array_key_exists($key, $cache)) return $cache[$key];
-    try {
-        $stmt = $pdo->prepare("SELECT id FROM facilities_master WHERE LOWER(unique_name) = ? LIMIT 1");
-        $stmt->execute([$key]);
-        $id = $stmt->fetchColumn();
-        $cache[$key] = ($id !== false && $id !== null) ? (int)$id : null;
-    } catch (PDOException $e) {
-        $cache[$key] = null;
-    }
-    return $cache[$key];
-}
-
-/**
  * Normalize a state value - convert abbreviation to full name if needed
  */
 function normalizeStateName($state) {
@@ -797,9 +775,8 @@ function updateLocationProjectsFromSave($pdo, $sourceProjectName, $data, $source
     // Get the source project's operator info to attach to cloned facilities
     $sourceOperator = isset($data['operator']) ? $data['operator'] : null;
 
-    // Resolve the source project's facilities_master.id so nested clones can
-    // be back-linked to their parent operator row.
-    $sourceProjectId = kop_resolve_facility_id_by_name($pdo, $sourceProjectName);
+    // Only TTI company projects had a facilities_master row to back-link to; they save through v2 now.
+    $sourceProjectId = null;
 
     // Local helper: extract a facility's display name (preferring identification.name)
     $facilityName = function($facility) {
@@ -835,12 +812,6 @@ function updateLocationProjectsFromSave($pdo, $sourceProjectName, $data, $source
                 $clone['sourceCategory'] = $sourceCategory;
                 if ($sourceProjectId !== null) {
                     $clone['sourceProjectId'] = $sourceProjectId;
-                }
-                // Stamp the matching facilities_master.id when this nested facility
-                // also exists as a top-level row, so the two records share an ID.
-                $resolvedFacilityId = kop_resolve_facility_id_by_name($pdo, $facilityName($facility));
-                if ($resolvedFacilityId !== null) {
-                    $clone['facility_id'] = $resolvedFacilityId;
                 }
                 // Include source operator info so facility knows its parent company
                 if ($sourceOperator) {
@@ -1204,19 +1175,9 @@ if ($action === 'save') {
         exit;
     }
 
-    // Auto-promote nested facilities: ensure every entry in $data['facilities']
-    // has a facility_id, creating __facility_ref rows for any that don't yet.
-    // Mutates $data in place so updateLocationProjectsFromSave() (called later)
-    // gets the same stamped entries when it clones into state buckets.
-    // Provider sites are not TTI facilities: no __facility_ref rows for them.
-    $autoPromotedCount = 0;
-    if (is_array($data) && $category !== 'wiki' && $category !== 'providers' && $category !== 'marketers' && $category !== 'tradeorgs') {
-        try {
-            $autoPromotedCount = kop_ensure_facility_ids_in_data($pdo, $data);
-        } catch (Exception $e) {
-            error_log('Facility auto-promotion failed for project "' . $projectName . '": ' . $e->getMessage());
-        }
-    }
+    // Facilities are saved through the v2 branch above (companies, locations); the other kinds saved
+    // here (referrers, transporters, ...) no longer promote nested facilities into facilities_master,
+    // which data model phase 5 retires.
 
     // Create the complete project structure with metadata
     $projectStructure = [
@@ -1307,47 +1268,22 @@ if ($action === 'save') {
             $stmt->execute();
         }
         
-        // Auto-duplicate to location projects if this is a companies/referrers project
+        // Copy a referrer project's consultants into their states' location profiles (state-level
+        // referrer data, kept in locations_master). Its facilities are not copied: places' facilities
+        // are memberships in the v2 tables.
         $locationUpdates = [];
         if ($category === 'companies' || $category === 'referrers') {
-            $locationUpdates = updateLocationProjectsFromSave($pdo, $projectName, $data, $category);
-        }
-
-        // Reverse link: any __facility_ref row (including the ones promoted a
-        // moment ago) whose state is known but which no location profile
-        // references yet gets appended to that state's profile. Keeps the
-        // location index and facilities_master in step without a manual
-        // backfill.
-        $refLinkStats = [];
-        if ($category !== 'wiki' && $category !== 'providers' && $category !== 'marketers' && $category !== 'tradeorgs' && function_exists('kop_link_refs_to_locations')) {
-            try {
-                $refLinkStats = kop_link_refs_to_locations($pdo);
-                foreach ($refLinkStats['locations_updated'] ?? [] as $loc) {
-                    if (!in_array($loc, $locationUpdates, true)) $locationUpdates[] = $loc;
-                }
-            } catch (Throwable $e) {
-                error_log('Ref-to-location linking failed after saving "' . $projectName . '": ' . $e->getMessage());
-            }
+            $locationUpdates = updateLocationProjectsFromSave($pdo, $projectName, array_diff_key($data, ['facilities' => true]), $category);
         }
 
         $message = "Project '$projectName' saved to {$tableName}";
         if (!empty($locationUpdates)) {
             $message .= ". Location projects updated: " . implode(', ', $locationUpdates);
         }
-        if ($autoPromotedCount > 0) {
-            $message .= ". Promoted $autoPromotedCount new facility row(s) to facilities_master.";
-        }
-        $refLinked = (int)($refLinkStats['appended'] ?? 0) + (int)($refLinkStats['stamped'] ?? 0);
-        if ($refLinked > 0) {
-            $message .= ". Linked $refLinked facility row(s) into their state profiles.";
-        }
-
         echo json_encode([
             'success' => true,
             'message' => $message,
             'locationProjectsUpdated' => $locationUpdates,
-            'autoPromotedFacilities' => $autoPromotedCount,
-            'refsLinkedToLocations' => $refLinked
         ]);
     } catch (PDOException $e) {
         echo json_encode([
