@@ -2631,6 +2631,45 @@ function kop_apply_news_post_import() {
 }
 
 /**
+ * Site content clean-up the owner approved on 2026-10-25 (plan 4.7 item 17): the development posts go back to
+ * draft (no link, menu or redirect points at them), Code Snippets snippet 6 ("OG Image", a second set of og: tags
+ * on the front page after Yoast's) is turned off, and the cache is cleared once so cached copies of the posts in
+ * seeds/post-redirects.json stop answering in place of the redirect. Once; what it did is in option
+ * kop_site_content_cleanup (republish a post or turn the snippet back on to undo).
+ */
+function kop_apply_site_content_cleanup() {
+    if (get_option('kop_site_content_cleanup')) {
+        return array();
+    }
+    global $wpdb;
+    $done = array('drafted' => array(), 'snippet' => '', 'at' => gmdate('c'));
+    $dev_posts = array(5634 => 'facility-form-test', 5702 => 'data-organizer', 3866 => 'data', 5659 => 'data-analysis', 3195 => 'arizona-adhs-inspections');
+    foreach ($dev_posts as $id => $slug) {
+        $post = get_post($id);
+        if ($post && $post->post_type === 'post' && $post->post_name === $slug && $post->post_status === 'publish'
+            && !is_wp_error(wp_update_post(array('ID' => $id, 'post_status' => 'draft'), true))) {
+            $done['drafted'][] = $id . ':' . $slug;
+        }
+    }
+    $table = $wpdb->prefix . 'snippets';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table
+        && $wpdb->get_var("SELECT name FROM {$table} WHERE id = 6 AND active = 1") === 'OG Image') {
+        if (function_exists('Code_Snippets\deactivate_snippet')) {
+            \Code_Snippets\deactivate_snippet(6);
+        } else {
+            $wpdb->update($table, array('active' => 0), array('id' => 6));
+        }
+        if (function_exists('Code_Snippets\clean_snippets_cache')) {
+            \Code_Snippets\clean_snippets_cache($table);
+        }
+        $done['snippet'] = (int) $wpdb->get_var("SELECT active FROM {$table} WHERE id = 6") === 0 ? 'off' : 'still on';
+    }
+    update_option('kop_site_content_cleanup', $done, false);
+    do_action('litespeed_purge_all');
+    return $done;
+}
+
+/**
  * Apply kop_slug_renames(), kop_template_assignments(), then
  * kop_pages_to_trash(). Idempotent. Returns a summary array for manual runs.
  */
@@ -2661,6 +2700,7 @@ function kop_apply_template_assignments() {
     $summary['subfolders']   = kop_apply_media_subfolders();
     $summary['text']         = kop_apply_text_fixes();
     $summary['news_import']  = kop_apply_news_post_import();
+    $summary['site_content'] = kop_apply_site_content_cleanup();
 
     foreach (kop_pages_to_trash() as $slug => $post_type) {
         $page = get_page_by_path($slug, OBJECT, $post_type);
@@ -2724,7 +2764,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '140';
+    $version = '141';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 function kop_redirect_map() {
-    return apply_filters('kop_redirect_map', array(
+    return apply_filters('kop_redirect_map', kop_post_redirects() + array(
         // Renamed (phase 1): the country template derives the name from the slug.
         'uk'            => '/united-kingdom/',
         // The facility data files the country under "Czech Republic", and the
@@ -58,6 +58,25 @@ function kop_redirect_map() {
         'a-survivors-guide-to-legal-action-against-troubled-teen-industry-programs'      => 'https://kidsoverprofits.org/wp-content/uploads/2024/08/Survivors-Guide-to-Legal-Action-Against-Troubled-Teen-Industry-Programs.pdf',
         'overt-and-covert-conversion-therapy-practices-in-therapeutic-boarding-schools'  => 'https://kidsoverprofits.org/wp-content/uploads/2024/08/Overt-Covert-Conversion-Therapy.pdf',
     ));
+}
+
+/**
+ * Retired posts (seeds/post-redirects.json, plan 4.7 item 17, 2026-10-25): each News post to its own article in
+ * the news feed (/tti-news-feed/?item=<row>), lawsuit posts whose row on /lawsuits/ covers them to that row, a
+ * post that copies a page to the page. Slug => target; the posts stay published, so kop_redirected_post_ids()
+ * keeps them out of the sitemap.
+ */
+function kop_post_redirects() {
+    static $map = null;
+    if ($map !== null) return $map;
+    $map = array();
+    $rows = json_decode((string) @file_get_contents(get_stylesheet_directory() . '/seeds/post-redirects.json'), true);
+    foreach (is_array($rows) ? $rows : array() as $row) {
+        if (!empty($row['slug']) && !empty($row['to'])) {
+            $map[(string) $row['slug']] = (string) $row['to'];
+        }
+    }
+    return $map;
 }
 
 function kop_apply_redirect_map() {

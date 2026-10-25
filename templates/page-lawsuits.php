@@ -12,6 +12,29 @@ require_once get_stylesheet_directory() . '/api/config.php';
 require_once dirname(__DIR__) . '/inc/choice-lists.php';   // KOP Tools > Dropdown Lists
 require_once get_stylesheet_directory() . '/api/facility-aliases.php';  // kop_normalize_name_key, kop_collect_self_names
 
+/**
+ * Lawsuit posts kept for their longer write-up (plan 4.7 item 17d, 2026-10-25): lawsuit id => post slug. The
+ * row links the post as "Our write-up"; the shorter posts redirect to their row (seeds/post-redirects.json).
+ */
+function kop_lawsuit_writeups() {
+    return array(
+        2  => 'lawsuit-fuller-vs-hyde-school-2025',
+        43 => 'john-doe-mdy-v-trails-academy-et-al',
+        44 => 'jane-june-doe-v-trails-et-al-summary',
+    );
+}
+
+/** $urls without links to our own posts that redirect back to this page (they would only reload it). */
+function kop_lawsuit_drop_self_links(array $urls) {
+    $redirects = function_exists('kop_post_redirects') ? kop_post_redirects() : array();
+    return array_values(array_filter($urls, static function ($url) use ($redirects) {
+        $host = strtolower((string) wp_parse_url((string) $url, PHP_URL_HOST));
+        if (preg_replace('/^www\./', '', $host) !== 'kidsoverprofits.org') return true;
+        $slug = trim((string) wp_parse_url((string) $url, PHP_URL_PATH), '/');
+        return !isset($redirects[$slug]) || strpos($redirects[$slug], '/lawsuits/') !== 0;
+    }));
+}
+
 $status_filter  = isset($_GET['status'])       ? sanitize_text_field($_GET['status'])       : '';
 $jurisdiction   = isset($_GET['jurisdiction']) ? sanitize_text_field($_GET['jurisdiction']) : '';
 $claim_filter   = isset($_GET['claim'])        ? sanitize_text_field($_GET['claim'])        : '';
@@ -255,6 +278,11 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             $facilities   = json_decode($case['facilities_mentioned'] ?? '[]', true) ?: [];
             $claims       = json_decode($case['claims']       ?? '[]', true) ?: [];
             $source_urls  = json_decode($case['source_urls']  ?? '[]', true) ?: [];
+            $writeup_slug = kop_lawsuit_writeups()[(int) $case['id']] ?? '';
+            $writeup_url  = $writeup_slug !== '' ? home_url('/' . $writeup_slug . '/') : '';
+            $source_urls  = array_values(array_filter(kop_lawsuit_drop_self_links($source_urls), static function ($url) use ($writeup_slug) {
+                return $writeup_slug === '' || trim((string) wp_parse_url((string) $url, PHP_URL_PATH), '/') !== $writeup_slug;
+            }));
             $doc_urls     = json_decode($case['document_urls'] ?? '[]', true) ?: [];
             $tags         = json_decode($case['tags']         ?? '[]', true) ?: [];
             $filing_date  = $case['filing_date'] ? date('M j, Y', strtotime($case['filing_date'])) : '';
@@ -386,8 +414,11 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             </div>
             <?php endif; ?>
 
-            <?php if ($source_urls || $doc_urls): ?>
+            <?php if ($writeup_url || $source_urls || $doc_urls): ?>
             <div class="kop-card-links">
+                <?php if ($writeup_url): ?>
+                    <a class="kop-card-link" href="<?php echo esc_url($writeup_url); ?>">Our write-up &rarr;</a>
+                <?php endif; ?>
                 <?php foreach (array_slice($source_urls, 0, 2) as $url): ?>
                     <a class="kop-card-link" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener">Source &rarr;</a>
                 <?php endforeach; ?>

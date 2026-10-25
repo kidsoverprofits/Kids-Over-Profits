@@ -32,6 +32,9 @@ $archive_month = isset($_GET['archive']) ? sanitize_text_field($_GET['archive'])
 $story_slug = isset($_GET['story']) ? sanitize_title($_GET['story']) : '';
 $current_arc = null;
 
+// One article (?item=<id>): where each retired WordPress news post redirects (seeds/post-redirects.json).
+$item_id = isset($_GET['item']) ? absint($_GET['item']) : 0;
+
 // Fetch approved submissions
 $status_filter = ['approved', 'published'];
 $placeholders = implode(',', array_fill(0, count($status_filter), '?'));
@@ -46,6 +49,11 @@ try {
     if ($archive_month && preg_match('/^\d{4}-\d{2}$/', $archive_month)) {
         $where .= " AND DATE_FORMAT(publication_date, '%Y-%m') = ?";
         $params[] = $archive_month;
+    }
+
+    if ($item_id) {
+        $where .= " AND id = ?";
+        $params[] = $item_id;
     }
 
     if ($story_slug !== '') {
@@ -163,7 +171,7 @@ try {
         // Latest development per featured arc (front page only). One headline
         // keeps the section short so the feed starts near the top of the
         // screen; "Full story" lists the rest.
-        $show_ongoing = !$current_arc && $story_slug === '' && !$archive_month && $current_page === 1;
+        $show_ongoing = !$current_arc && !$item_id && $story_slug === '' && !$archive_month && $current_page === 1;
         if ($ongoing_arcs && $show_ongoing) {
             $dev_stmt = $pdo->prepare(
                 "SELECT article_title, alternate_title, publication_name, publication_date, article_url, archive_url
@@ -212,6 +220,9 @@ try {
             <?php $facility = function_exists('kop_news_arc_facility_link') ? kop_news_arc_facility_link($current_arc) : null; if ($facility): ?>
                 <p><a class="ongoing-card-facility-btn" href="<?php echo esc_url($facility['url']); ?>">Learn more about <?php echo esc_html($facility['label']); ?></a></p>
             <?php endif; ?>
+        <?php elseif ($item_id): ?>
+            <a class="story-arc-back" href="<?php echo esc_url(strtok($_SERVER['REQUEST_URI'], '?')); ?>">&laquo; All news</a>
+            <h1>Troubled Teen Industry News</h1>
         <?php else: ?>
             <h1>Troubled Teen Industry News</h1>
             <p>Latest updates, investigations, and reports monitored by our team.</p>
@@ -221,7 +232,7 @@ try {
         // The month picker renders inside the filter panel with the other
         // filters; it stays here only when there is no panel (empty feed).
         ob_start();
-        if (!empty($archive_months) && !$current_arc): ?>
+        if (!empty($archive_months) && !$current_arc && !$item_id): ?>
         <div class="news-archive-picker">
             <form method="get" action="">
                 <label for="archive-select">Browse by month:</label>
@@ -255,7 +266,7 @@ try {
 
     <?php
     // The top story (inc/news-top-story.php), first on the unfiltered first page; the list below leaves it out there.
-    $is_front_view = !$current_arc && $story_slug === '' && !$archive_month && $current_page === 1;
+    $is_front_view = !$current_arc && !$item_id && $story_slug === '' && !$archive_month && $current_page === 1;
     $top_story_id = $is_front_view && function_exists('kop_top_story_id') ? kop_top_story_id() : 0;
     if ($top_story_id) {
         echo kop_top_story_html();
@@ -355,7 +366,7 @@ try {
         ksort($allTypes);
         ?>
 
-        <div class="news-filters" data-kop-bug-feature="news-feed/filters" data-kop-bug-label="News Filters">
+        <div class="news-filters"<?php echo $item_id ? ' hidden style="display:none"' : ''; ?> data-kop-bug-feature="news-feed/filters" data-kop-bug-label="News Filters">
             <?php echo $archive_picker_html; ?>
             <div class="filter-group">
                 <label class="filter-label">Filter by Type:</label>
@@ -646,7 +657,7 @@ try {
             ?>
                 <?php // Delimit tags with '|' — facility names contain commas ("Excel Academy, Conroe"). ?>
                 <?php $card_feat = function_exists('kop_feat_flag_html') ? kop_feat_flag_html((int) $item['id']) : ''; ?>
-                <article class="news-card<?php echo $card_feat !== '' ? ' is-featured' : ''; ?>"<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('rec:news:' . (int) $item['id'], 'this article') : ''; ?> data-type="<?php echo esc_attr($item['article_type']); ?>" data-tags="<?php echo esc_attr(implode('|', $tags)); ?>">
+                <article id="news-<?php echo (int) $item['id']; ?>" class="news-card<?php echo $card_feat !== '' ? ' is-featured' : ''; ?>"<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('rec:news:' . (int) $item['id'], 'this article') : ''; ?> data-type="<?php echo esc_attr($item['article_type']); ?>" data-tags="<?php echo esc_attr(implode('|', $tags)); ?>">
                     <?php if ($organization_logo_url !== ''): ?>
                         <figure class="news-card-brand">
                             <img src="<?php echo esc_url($organization_logo_url, ['https']); ?>"

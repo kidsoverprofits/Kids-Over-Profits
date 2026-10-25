@@ -201,9 +201,12 @@ $e = kop_seo_drafts_approve($id, 'First words for the test, long enough to be a 
 update_post_meta($id, '_yoast_wpseo_metadesc', 'Changed in the editor afterwards.');
 $check('Undo is refused once the field changed since', kop_seo_drafts_undo($e['token']) === false && get_post_meta($id, '_yoast_wpseo_metadesc', true) === 'Changed in the editor afterwards.');
 delete_post_meta($id, '_yoast_wpseo_metadesc');
-$GLOBALS['kop_test_options']['kop_seo_drafts_skipped'] = array(2301 => time());
-$check('a skipped page moves to the Skipped tab', !in_array(2301, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(false)), true)
-    && in_array(2301, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(true)), true));
+// Any page still listed (2301 was used until it became a redirected news post, 2026-10-25).
+$listed = kop_seo_drafts_candidates(false);
+$skip_id = $listed ? (int) $listed[0][0]->ID : 0;
+$GLOBALS['kop_test_options']['kop_seo_drafts_skipped'] = array($skip_id => time());
+$check('a skipped page moves to the Skipped tab', $skip_id > 0 && !in_array($skip_id, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(false)), true)
+    && in_array($skip_id, array_map(function ($c) { return (int) $c[0]->ID; }, kop_seo_drafts_candidates(true)), true));
 
 echo "-- Rule drafts stored --\n";
 // The site stored its rule drafts (236 on 2026-10-21): undo them on the copy first, so the store has its pages again.
