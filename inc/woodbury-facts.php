@@ -114,9 +114,10 @@ function kop_wbf_sync($force = false) {
     $existing = array();
     $edited = array();
     $manual = array();
-    foreach ((array) $wpdb->get_results("SELECT pkey, status, extra FROM {$table}", ARRAY_A) as $r) {
+    foreach ((array) $wpdb->get_results("SELECT pkey, status, extra, match_kind FROM {$table}", ARRAY_A) as $r) {
         $existing[$r['pkey']] = $r['status'];
-        if (strpos((string) $r['extra'], '"edited_by"') !== false) {
+        // Matched or noted by the AI reader (api/apply-woodbury-agent-verdicts.php): kept like a hand correction.
+        if (strpos((string) $r['extra'], '"edited_by"') !== false || strpos((string) $r['extra'], '"ai_note"') !== false || $r['match_kind'] === 'ai') {
             $edited[$r['pkey']] = true;
         }
         // A person added by hand (kop_wbf_add_person), or an item put back from "No longer proposed".
@@ -2858,6 +2859,9 @@ function kop_wbf_render_row(array $r, $tab) {
     }
     if (!empty($extra['manual'])) {
         echo '<div class="kop-ak-muted">' . esc_html(kop_wbf_manual_line($r, $extra)) . '</div>';
+    }
+    if (!empty($extra['ai_note'])) {
+        echo '<div class="kop-ak-muted">AI reader: ' . esc_html(preg_replace('/^Added by the AI reader: /', '', $extra['ai_note'])) . '</div>';
     }
     if ($r['conflict'] !== '') {
         echo '<div class="kop-ak-warn">' . esc_html($r['conflict']) . '</div>';

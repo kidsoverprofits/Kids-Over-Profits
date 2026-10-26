@@ -221,6 +221,7 @@ function kop_rinbox_wbf_item(array $r) {
     }
     if (isset($extra['original'])) $lines[] = 'Corrected by ' . ($extra['edited_by'] ?? 'a reviewer') . '.';
     if (!empty($extra['manual'])) $lines[] = kop_wbf_manual_line($r, $extra);
+    if (!empty($extra['ai_note'])) $lines[] = (strpos($extra['ai_note'], 'Added by the AI reader') === 0 ? '' : 'AI reader: ') . $extra['ai_note'];
     if ($r['status'] === 'applied' && kop_wbf_filed_on($r) !== '') {
         $done = json_decode((string) $r['applied'], true);
         $lines[] = (($done['filed'] ?? '') === 'young_adult' ? 'Added to ' : 'Filed in the notes of ') . kop_wbf_filed_on($r) . '.';
