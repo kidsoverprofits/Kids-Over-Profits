@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:45 UTC",
- "source": "d0684e3c4b9cc6ae110befb139def223dba49723",
+ "built": "2026-10-26 00:47 UTC",
+ "source": "ef1dfc1ffd11e3551dab8b68c24ce16969973bac",
  "sections": [
   {
    "key": "2",
@@ -1275,10 +1275,10 @@
       {
        "id": "4.7:visual-qa-of-all-hubs",
        "lead": "Visual QA of all hubs",
-       "text": "**Visual QA of all hubs** at 390, 768 and 1440 (`scripts/preview-hub-pages.py`). Done 2026-10-25: all 11 hub-frame hubs screenshotted (/volunteer/ left the frame for templates/page-volunteer.php and was dropped from the preview list); check-mobile-overflow.py --local is clean on all 12 at all three widths. Fixed: the /survivors/ link-preview card ran 270-630px off the page (css/hub.css, plugin flex zone min-width); /editorials/, /investigatory-spotlight/ and /resources/ printed an empty editor box plus a second teal divider (templates/page-hub.php now leaves out an editor box with no words). Preview script: `KOP_PHP=<php.exe>` override (Local's PHP is gone); the offline render now uses _wp_attached_file for thumbnails (guids say /staging/). Mirror: tmp/prod.sqlite is the 2026-10-25 18:07 build (swapped in by hand). Open: - After deploy: `python -u scripts/check-mobile-overflow.py /survivors/` and `python scripts/check-bare-text.py` on the live site; https://kidsoverprofits.org/editorials/ and /investigatory-spotlight/ show one divider. - Owner: Provo Canyon School ([post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)) is still a **draft** in the live database (checked 2026-10-25, last modified 2026-09-18), though the Plan Board answer (2.4) says \"status set and published\". Publish it, or say if the /facility/provo-canyon-school-ut/ page replaced it. - Full-page previews leave lazy cover images blank (Research & Reports); covers are fine live (33 of 33 return 200).",
+       "text": "**Visual QA of all hubs** at 390, 768 and 1440 (`scripts/preview-hub-pages.py`). Done 2026-10-25: all 11 hub-frame hubs screenshotted (/volunteer/ left the frame for templates/page-volunteer.php and was dropped from the preview list); check-mobile-overflow.py --local is clean on all 12 at all three widths. Fixed: the /survivors/ link-preview card ran 270-630px off the page (css/hub.css, plugin flex zone min-width); /editorials/, /investigatory-spotlight/ and /resources/ printed an empty editor box plus a second teal divider (templates/page-hub.php now leaves out an editor box with no words). Preview script: `KOP_PHP=<php.exe>` override (Local's PHP is gone); the offline render now uses _wp_attached_file for thumbnails (guids say /staging/). Mirror: tmp/prod.sqlite is the 2026-10-25 18:07 build (swapped in by hand). Open: - Checked live after deploy (commit 05f292c1): overflow clean on /survivors/ and /editorials/, the three hubs lead with the module, check-bare-text.py 0 of 30. - Owner: Provo Canyon School ([post 10796](https://kidsoverprofits.org/wp-admin/post.php?post=10796&action=edit)) is still a **draft** in the live database (checked 2026-10-25, last modified 2026-09-18), though the Plan Board answer (2.4) says \"status set and published\". Publish it, or say if the /facility/provo-canyon-school-ut/ page replaced it. - Full-page previews leave lazy cover images blank (Research & Reports); covers are fine live (33 of 33 return 200).",
        "ask": "",
        "date": "2026-10-25",
-       "hash": "fd123c48b803"
+       "hash": "dd49d24374e3"
       },
       {
        "id": "4.7:category-archive-layout",
