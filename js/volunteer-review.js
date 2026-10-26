@@ -1294,7 +1294,7 @@
             api('leave', {}).then(function (res) {
                 app.innerHTML = '';
                 app.appendChild(el('section', { class: 'kop-vol-panel' }, [el('p', { text: res.message }),
-                    el('p', null, ['To come back, ', el('a', { href: cfg.signup || '/volunteer/', text: 'sign up again' }), '.'])]));
+                    el('p', null, ['To come back, ', el('a', { href: cfg.signup || '/volunteer/', text: 'get a new link' }), '.'])]));
                 bringToTop(app);
             }).catch(function (e) {
                 b.disabled = false;

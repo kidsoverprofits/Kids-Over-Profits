@@ -50,7 +50,7 @@ try {
         <h1>Volunteer Opportunities</h1>
         <?php kop_db_unavailable_notice(!empty($kop_db_error)); ?>
         <p>Help us track and expose the Troubled Teen Industry. All skill levels welcome.</p>
-        <p><strong>Want to start today?</strong> <a href="<?php echo esc_url(home_url('/volunteer/#kop-vol-signup')); ?>">Sign up to review what people send in</a>:
+        <p><strong>Want to start today?</strong> <a href="<?php echo esc_url(home_url('/volunteer/#kop-vol-signup')); ?>">Get a link to review what people send in</a>:
             you get your own link at once and can begin right away.</p>
     </div>
 

@@ -47,7 +47,7 @@ get_header();
                 <p>A break needs nothing from you. A batch with no answers for <?php echo (int) $kop_vol_stall; ?> days goes back so others can
                     pick it up, and your link keeps working. <em>Hand this batch back</em>, on any batch, returns it at once.</p>
                 <p><em>Stop volunteering</em>, at the bottom of this page, turns your link off and returns your open batches. To come back,
-                    <a href="<?php echo esc_url($kop_vol_signup); ?>">sign up again</a>.</p>
+                    <a href="<?php echo esc_url($kop_vol_signup); ?>">get a new link</a>.</p>
                 <h2>Questions</h2>
                 <p>Every item and batch has <em>Ask a question</em>. We answer at the bottom of this page.</p>
             </details>

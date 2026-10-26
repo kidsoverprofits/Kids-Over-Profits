@@ -69,7 +69,7 @@
                 })
                 .finally(function () {
                     send.disabled = false;
-                    send.textContent = 'Get my link';
+                    send.textContent = 'Get my link and start';
                 });
         });
 

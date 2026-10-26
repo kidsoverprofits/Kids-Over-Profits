@@ -139,7 +139,7 @@ function kop_vols_module() {
     }
     ?>
     <section class="kop-hub-module kop-vols" id="kop-vol-signup" aria-labelledby="kop-vols-h">
-        <h2 class="kop-hub-h" id="kop-vols-h">Sign up to review or research</h2>
+        <h2 class="kop-hub-h" id="kop-vols-h">Get your link to review or research</h2>
         <p class="kop-vols-lead">No interview and no waiting. Give a name and you get your own link: your page opens straight away,
             with a short practice round for reviewing and the research questions to pick from. An admin checks everything you send.</p>
         <p class="kop-vols-warning" role="note"><strong>A warning first:</strong> the reports and questions describe what was done to
