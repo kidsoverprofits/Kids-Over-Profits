@@ -251,7 +251,8 @@ if (!function_exists('kop_news_error_page_summary')) {
     function kop_news_error_page_summary($summary) {
         $s = trim(preg_replace('/\s+/u', ' ', (string) $summary));
         if ($s === '') return false;
-        if (preg_match('/\berror (?:page|notice)\b|\bpage[- ]not[- ]found\b|\b404 (?:error|page|missing)\b|\bconnection time(?:d)? ?out\b/iu', $s)) return true;
+        if (preg_match('/\berror (?:page|notice)\b|\bpage[- ]not[- ]found\b|\b404 (?:error|page|missing)\b|\bconnection time(?:d)? ?out\b'
+            . '|\b(?:not contained|not included|not available) (?:with)?in the (?:archived|provided|extracted|available) (?:text|content|page)\b/iu', $s)) return true;
         // Otherwise only when it opens on the page itself, so "the boy could not be found" stays an article.
         // "The article describes..." is an article; "The article content is restricted" is not.
         return (bool) (preg_match('/^(?:(?:the|this) (?:requested|provided|retrieved|original) (?:article|web ?page|page|url|link|content|source)'

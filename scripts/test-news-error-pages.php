@@ -60,6 +60,7 @@ foreach (array(
     "The retrieved webpage is a generic '404 Missing Page' error notice from the Grande Prairie Daily Herald Tribune website.",
     'The requested page returned a 404 error and no article content was available.',
     'This webpage is a "Page Not Found" error page for KTVZ and does not contain any article.',
+    'This article references archived content regarding public testimony provided by Paris Hilton. Specific details regarding allegations or facility practices are not contained within the archived text.',
 ) as $s) {
     $check('error summary "' . mb_substr($s, 0, 50) . '"', kop_news_error_page_summary($s), true);
 }
