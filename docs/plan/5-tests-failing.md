@@ -55,3 +55,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    "Undefined array key 0" at `scripts/review-inbox-tests/reader-accounts.php:111`; wiki-updates: the three "site builds
    the script's draft" / "bold names line" / "names carry the years" checks find 0 drafts. `--source=reader-accounts`
    alone passes, so something earlier in the full run changes what it reads (order-dependent); start there.
+4. **kop-pipeline test-ocr-repair.py: 2 of the fax lines fail** (found 2026-10-25; the same on the committed
+   `pa_scraper.py`, so it predates OCR version 3). `scrapers/ocr_repair.py` leaves "klesing" and "unclolhed" instead of
+   "kissing" and "unclothed" (fax page lines 2 and 5). Check whether `scrapers/pa_ocr_vocab.json` (rebuilt 2026-10-18
+   by `scripts/build-pa-ocr-vocab.py`) lost those words or the swap rules changed.
