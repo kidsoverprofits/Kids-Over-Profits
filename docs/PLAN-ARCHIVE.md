@@ -3468,3 +3468,13 @@ Map Years (2.3 item 6).
     kop-data `network/years-candidates.json`), check it with `php scripts/test-network-years.php` in the theme, commit +
     push it in kop-data; the new years then wait at KOP Tools > Map Years (2.3 item 6). Jemison Group Home's 1999 rests
     on KOP's own Three Springs timeline only.
+
+## 2.4 item 1: held facts (finished 2026-10-26)
+
+1. **Held facts**: raise the write-up batch (3 drafts an hour; AI budget `KOP_AI_BACKGROUND_SHARE`) or not;
+   and which other writers count as "facts" for the hold rule (company/consultant filings, young adult facts,
+   wiki staff on approval, Rules from documents, federal funding, Drive Docs links, data audit) (old 3.31).
+   Ask: Raise the write-up batch above 3 an hour? Which other writers count as facts?
+   Decided 2026-10-26 (owner): direct edits stay on the page at once and also feed the write-up; only records that
+   change get write-ups; 6 drafts an hour. Built in commit 74f4fb46175791a352033ebea850609529af82bc
+   (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/74f4fb46175791a352033ebea850609529af82bc).
