@@ -11184,7 +11184,19 @@
      "url": "https://web.archive.org/web/2*/https://scinsu.com/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The owner says Second Chances is often called SCISU (Second Chances in Southern Utah), which KOP holds as its own record (Second Chances in Southern Utah, La Verkin, UT, 2014-2022). The 43 Woodbury/HEAL items were moved onto that record and held for its write-up. Left open: the 'Second Chances' record at 209 N Main St, Granada, MN links scinsu.com; either it is a stray copy of SCISU with a wrong address (merge into SCISU) or a separate Minnesota program with a wrong link.",
+    "claims": [
+     {
+      "claim": "Second Chances in LaVerkin, UT is the WWASPS program on the Cross Creek campus",
+      "url": "https://web.archive.org/web/20250711180611/https://heal-online.org/horizon.html",
+      "quote": "Cross Creek Programs, and Youth Foundation Success Academy, Inc. in LaVerkin, UT"
+     }
+    ],
+    "by": "Claude (owner's answer, 2026-10-25)",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "records-matched-to-the-wrong-pro:does-the-2019-marcel-chappuis-criminal-charge-on",
@@ -11400,5 +11412,5 @@
    ]
   }
  ],
- "built": "2026-10-26 00:16"
+ "built": "2026-10-26 00:25"
 }
