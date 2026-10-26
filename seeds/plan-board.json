@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 19:27 UTC",
- "source": "b85be777455b4ba76caf7f321066671413161595",
+ "built": "2026-10-26 19:32 UTC",
+ "source": "837a28263d4b9b97007ea2c48be4834c14d13525",
  "sections": [
   {
    "key": "2",
@@ -167,9 +167,9 @@
        "id": "2.3:write-ups-to-approve",
        "lead": "Write-ups to approve",
        "text": "**Write-ups to approve**: approve the first few by hand to judge the drafts (see 2.4).",
-       "ask": "After approving a few write-ups by hand, are the drafts good enough? Found 2026-10-26: there are no drafts to approve. `wpdl_kop_record_writeups` is empty and the AI usage log has no write-up call since 2026-10-15, while 3,776 facts on 413 records are held (217 of them from /questions/ answers, 33 records), so nothing approved since 10-15 is on a public page. Run by hand over SSH the prompts build (32-40k characters for the top records), and `kop_ai_turn_order()` comes back empty from the PHP command line: the hourly `kop_wu_hourly` (run by the server cron's `php wp-cron.php`) most likely has no AI keys (`kop_wu_ai()` loads only api/ai-providers.php, never the .env), and kop_ai_generate_alternating's \"No AI key configured\" is never logged. Fixed 2026-10-26: `kop_ai_secret()` reads the .env itself when nothing has (every AI job, not only write-ups), and the hourly run's result (\"Last hourly run, ...: N drafts written; stopped on: ...\") is at the end of the queue's help text. After deploy: in an hour or two open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (Write-ups to approve) and check the line says drafts were written; at 3 an hour the 413 records take about 6 days (2.4 item 1 asks whether to raise it). `test-review-inbox.php --source=writeups` fails 6 checks on the current mirror, with or without this change (data-dependent: \"25 held\", \"Facts are still held for this page\"); not looked into. Added 2026-10-26: \"Send to Claude\" on a write-up card; then tell a Claude session \"write the write-ups sent to Claude\" (steps in docs/claude/review-inbox.md). Owner: try it on one big record (e.g. #11021, 134 facts).",
+       "ask": "After approving a few write-ups by hand, are the drafts good enough? Found 2026-10-26: there are no drafts to approve. `wpdl_kop_record_writeups` is empty and the AI usage log has no write-up call since 2026-10-15, while 3,776 facts on 413 records are held (217 of them from /questions/ answers, 33 records), so nothing approved since 10-15 is on a public page. Run by hand over SSH the prompts build (32-40k characters for the top records), and `kop_ai_turn_order()` comes back empty from the PHP command line: the hourly `kop_wu_hourly` (run by the server cron's `php wp-cron.php`) most likely has no AI keys (`kop_wu_ai()` loads only api/ai-providers.php, never the .env), and kop_ai_generate_alternating's \"No AI key configured\" is never logged. Fixed 2026-10-26: `kop_ai_secret()` reads the .env itself when nothing has (every AI job, not only write-ups), and the hourly run's result (\"Last hourly run, ...: N drafts written; stopped on: ...\") is at the end of the queue's help text. After deploy: in an hour or two open https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (Write-ups to approve) and check the line says drafts were written; drafts are written 6 an hour since 2026-10-26 (owner). `test-review-inbox.php --source=writeups` fails 6 checks on the current mirror, with or without this change (data-dependent: \"25 held\", \"Facts are still held for this page\"); not looked into. Added 2026-10-26: \"Send to Claude\" on a write-up card; then tell a Claude session \"write the write-ups sent to Claude\" (steps in docs/claude/review-inbox.md). Owner: try it on one big record (e.g. #11021, 134 facts). Added 2026-10-26 (owner: everything coming in goes into the write-ups): a direct change to a record (data form, inline edit, research fix, approved suggestion, closure, merge, news or lawsuit link) stays on the page and puts the record in this queue; every draft is written from what the record says now as well as the held facts. After deploy: in a day, check https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (Write-ups to approve) has \"Changed ...\" cards and the last hourly run line shows 6 written. Open: a company (operator) change does not mark its facilities yet; writes that skip kop_record_changed() are missed; inspection findings are not in the record list the draft reads.",
        "date": "",
-       "hash": "a2a9442a85f0"
+       "hash": "ce9e2c0a00ec"
       },
       {
        "id": "2.3:rules-from-documents",
@@ -293,10 +293,10 @@
       {
        "id": "2.4:held-facts",
        "lead": "Held facts",
-       "text": "**Held facts**: raise the write-up batch (3 drafts an hour; AI budget `KOP_AI_BACKGROUND_SHARE`) or not; and which other writers count as \"facts\" for the hold rule (company/consultant filings, young adult facts, wiki staff on approval, Rules from documents, federal funding, Drive Docs links, data audit) (old 3.31).",
-       "ask": "Raise the write-up batch above 3 an hour? Which other writers count as facts?",
-       "date": "",
-       "hash": "061fdda3ead3"
+       "text": "**Held facts**: decided 2026-10-26, archived (PLAN-ARCHIVE.md, \"2.4 item 1: held facts\"): every change to a record feeds its write-up (direct edits stay on the page at once), 6 drafts an hour.",
+       "ask": "",
+       "date": "2026-10-26",
+       "hash": "c814600ed581"
       },
       {
        "id": "2.4:wiki-updates-for-entries-with-no-exported-draft",
