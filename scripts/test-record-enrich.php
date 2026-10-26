@@ -174,3 +174,17 @@ if ($still['status'] !== 'submitted' || $still['article_title'] !== 'news.exampl
 }
 echo "PASS an error-page read leaves the row waiting with its title, on the daily retry
 ";
+
+// A row an older read left with an error-page summary gets the article's summary on a rerun.
+$add(7, array('status' => 'approved', 'submitted_by' => 'admin (SCIAD NET import)',
+    'summary' => 'The requested page returned a 404 error and no article content was available.'));
+$GLOBALS['kop_enrich_saved_payload'] = null;
+$re = kop_enrich_news_row($pdo, 7, true);
+if (empty($re['ok']) || ($GLOBALS['kop_enrich_saved_payload']['summary'] ?? '') !== 'A factual summary.'
+    || ($GLOBALS['kop_enrich_saved_payload']['status'] ?? '') !== 'approved') {
+    fwrite(STDERR, 'FAIL an error-page summary is replaced on a rerun: ' . json_encode($re) . "
+");
+    exit(1);
+}
+echo "PASS an older error-page summary is replaced by the article's
+";

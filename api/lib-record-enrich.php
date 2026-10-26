@@ -365,7 +365,8 @@ function kop_enrich_news_row(PDO $pdo, $id, $apply, $text = '') {
         'staff'           => $pick('staff', $old_list('staff_mentioned'), $list($d['staff'] ?? array())),
         'survivors'       => $pick('survivors', $old_list('survivors_mentioned'), $list($d['survivors'] ?? array())),
         'contentWarnings' => $pick('content warnings', $old_list('content_warnings'), (array) ($d['contentWarnings'] ?? array())),
-        'summary'         => $pick('summary', $row['summary'], (string) ($d['summary'] ?? '')),
+        // An older read's error-page summary ("The requested article could not be retrieved") counts as empty.
+        'summary'         => $pick('summary', kop_news_error_page_summary($row['summary']) ? '' : $row['summary'], (string) ($d['summary'] ?? '')),
         'generatedOutput' => (string) $row['generated_output'],
         'status'          => $row['status'],
         'submittedBy'     => $row['submitted_by'],
