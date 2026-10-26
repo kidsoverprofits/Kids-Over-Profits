@@ -3389,3 +3389,9 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
      naming another era (#13927, #10602, #11361, #11462, #11355, #12621); investors as their own map kind
      reading the Investors table, or added by hand.
      Ask: Your calls on the map QA list, the six aliases, and how investors get on the map?
+- 2.1, Answered "no, give me a full link"; nothing left to run, archived 2026-10-25: the server shows both passes
+  already applied (option kop_staff_unconfirmed_log holds 226 records; both dry runs find 0 entries to change).
+  2. **Staff "Former" passes** (2026-10-17, both with exact undo, dry runs done): on the server
+     `php api/fix-staff-unconfirmed.php apply` (2,651 entries on 226 open programs) and
+     `php api/fix-wiki-staff-former.php apply` (29 wiki entries on 21 records).
+     Ask: Have you run the two staff "Former" passes on the server (dry runs are done)?

@@ -1,6 +1,6 @@
 {
- "built": "2026-10-25 23:29 UTC",
- "source": "629bde6e6c108fa40d7905b9fd2fdff4d84a9cf4",
+ "built": "2026-10-26 00:00 UTC",
+ "source": "c10135771776ce5b0e11078799675b413a5cb5b7",
  "sections": [
   {
    "key": "2",
@@ -22,18 +22,10 @@
       {
        "id": "2.1:severe-findings-scan-cron",
        "lead": "Severe findings scan cron",
-       "text": "**Severe findings scan cron** (2026-09-29). Add the line in `docs/state-inspection-reports/README.md` in cPanel > Cron Jobs; send the first lines of `/home/kidsover/logs/inspection-highlights-scan.log`.",
-       "ask": "Is the severe findings scan cron in? Paste the first lines of its log.",
-       "date": "2026-09-29",
-       "hash": "210b4efa00c0"
-      },
-      {
-       "id": "2.1:staff-former-passes",
-       "lead": "Staff \"Former\" passes",
-       "text": "**Staff \"Former\" passes** (2026-10-17, both with exact undo, dry runs done): on the server `php api/fix-staff-unconfirmed.php apply` (2,651 entries on 226 open programs) and `php api/fix-wiki-staff-former.php apply` (29 wiki entries on 21 records).",
-       "ask": "Have you run the two staff \"Former\" passes on the server (dry runs are done)?",
-       "date": "2026-10-17",
-       "hash": "d8b20cd4679a"
+       "text": "**Severe findings scan cron** (2026-10-25: marked Done on the Plan Board, but `crontab -l` on the server has no `scan-inspection-highlights` line and `/home/kidsover/logs/inspection-highlights-scan.log` does not exist; it was likely added under another account or not saved). In cPanel > Cron Jobs, \"Add New Cron Job\", minute 15, hour 4, the rest `*`, command: `cd /home/kidsover/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php api/scan-inspection-highlights.php apply >> /home/kidsover/logs/inspection-highlights-scan.log 2>&1` The site check marks it done once the line is in.",
+       "ask": "Severe findings scan cron: added in cPanel > Cron Jobs (the server's crontab still lacks it)?",
+       "date": "2026-10-25",
+       "hash": "8d165ffe5f25"
       },
       {
        "id": "2.1:search-console",
@@ -885,10 +877,10 @@
       {
        "id": "4.3:young-adult-programs-what-is-left-after-the-document-folders",
        "lead": "Young adult programs: what is left after the document folders",
-       "text": "**Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in docs/PLAN-ARCHIVE.md, \"4.3 ... item 13\"): a. The 11 moved facility records' old /facility/ pages 404 (e.g. https://kidsoverprofits.org/facility/dragonfly-transitions-or/): redirect each old slug to its card, `kop_ya_url()`, from `kop_ya_moved_from_map()` (the slugs are no longer in the facility index). b. Owner: folder 7789 \"Fulshear\" (under Embark) holds Fulshear Treatment to Transition's 2015-2017 NATSAP profiles and shows on no page. Link it to 4163 (KOP Tools > Folder Links, or a line in `kop_ya_twin_moves()`'s pass)?",
-       "ask": "Link folder 7789 \"Fulshear\" to young adult program 4163?",
-       "date": "2026-10-21",
-       "hash": "d648e476076f"
+       "text": "**Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in docs/PLAN-ARCHIVE.md, \"4.3 ... item 13\"): a. The 11 moved facility records' old /facility/ pages 404 (e.g. https://kidsoverprofits.org/facility/dragonfly-transitions-or/): redirect each old slug to its card, `kop_ya_url()`, from `kop_ya_moved_from_map()` (the slugs are no longer in the facility index). b. Done 2026-10-25 (owner said yes): folder 7789 \"Fulshear\" is linked to 4163 in kop_folder_links, so its 2015-2017 NATSAP profiles show on the program's card. After deploy: check the card lists them.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "e95e7997ab69"
       },
       {
        "id": "4.3:latest-operator-of-past-only-records",
@@ -1331,10 +1323,10 @@
       {
        "id": "4.7:meta-descriptions-yoast-sees",
        "lead": "Meta descriptions Yoast sees",
-       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: approve the hand-written cards (the keyphrase wording is set, 2026-10-25). - Owner: /boyd-and-stephanie-householder/ (post 13312) is published and in the sitemap but its text opens \"Research draft - not for publication\". Unpublish it, or confirm it is meant to be public before approving its description. - Done 2026-10-25: posts 470 and 786 (the same Walrus article) both 301 to its feed row 419 (item 17 (c), archived). - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
-       "ask": "Unpublish post 13312 (\"Research draft\")?",
+       "text": "**Meta descriptions Yoast sees**, built 2026-10-20: screen above lists the 295 published posts/pages with an empty Yoast field (tool pages left out), each with an editable draft; Approve stores it (exact Undo, refused once the field changed since), Skip sets it aside. Live fixes in inc/seo.php: sparse facility descriptions now say what the record holds (\"On record: 1 death, 2 lawsuits ...\") or what is not on file (0 of 3,133 still name + kind + place only); company descriptions keep their counts instead of being cut to one sentence; state hubs give their program count (were 49 copies of one template); news posts drop byline/trigger lines; lawsuit posts read \"X sued Y in Utah on March 23, 2022.\"; clips no longer end at \"St.\" or leave only the \"Formerly ...\" lead; tool pages left Yoast's sitemap. Tests: scripts/test-seo.php, scripts/test-seo-drafts.php. Open: - Owner, 2026-10-20: store the rule drafts, with Undo. kop_seo_drafts_store_rule_drafts() runs once on the first admin page load after deploy (option kop_seo_drafts_rules_v; bump the version in kop_seo_drafts_maybe_store_rule_drafts() to run it again) and again each time the keyphrase wording is saved. On the mirror it stores 236 pages; the Done tab marks them \"stored by rule\", each with Undo. Left for the owner: the hand-written seeds (approve or edit), pages with nothing drafted, the person page's keyphrase, and news posts linked to several programs. - Owner: approve the hand-written cards (the keyphrase wording is set, 2026-10-25). - Done 2026-10-25 (owner said yes): /boyd-and-stephanie-householder/ (post 13312, text opens \"Research draft - not for publication\") is a draft now. Check https://kidsoverprofits.org/post-sitemap.xml no longer lists it. - Done 2026-10-25: posts 470 and 786 (the same Walrus article) both 301 to its feed row 419 (item 17 (c), archived). - After deploy: check one facility page and one state hub's live meta description; after approvals, re-crawl (`python scripts/seo-audit.py` in kop-pipeline) and re-upload audit.json. - Done 2026-10-20: /support/, /news/, /news-2/, /international/ (and /location-index/) were published pages that kop_redirect_map() (inc/redirects.php) redirects at template_redirect, so Yoast kept listing them. Every published top-level post/page whose slug is a redirect key now leaves the sitemap and the SEO Descriptions list (kop_redirected_post_ids()). After deploy: https://kidsoverprofits.org/page-sitemap.xml no longer lists them (purge LiteSpeed if it does). - Long titles (1,637 facility, 81 posts) not touched: clip or not is still the owner's call (item 8).",
+       "ask": "",
        "date": "2026-10-25",
-       "hash": "dbfd3e11cb80"
+       "hash": "fefc125982b7"
       },
       {
        "id": "4.7:breadcrumbs-on-facility-operator-and-state-pages",

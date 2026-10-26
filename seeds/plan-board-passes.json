@@ -1,6 +1,39 @@
 {
  "passes": [
   {
+   "at": "2026-10-25 23:10",
+   "entries": [
+    {
+     "answer": 21,
+     "itemId": "4.3:young-adult-programs-what-is-left-after-the-document-folders",
+     "lead": "Young adult programs: what is left after the document folders",
+     "kind": "answer",
+     "result": "Folder 7789 linked to 4163 on the server; (b) done, (a) the old-slug redirects stays open."
+    },
+    {
+     "answer": 22,
+     "itemId": "4.7:meta-descriptions-yoast-sees",
+     "lead": "Meta descriptions Yoast sees",
+     "kind": "answer",
+     "result": "Post 13312 set to draft on the server; the item's other open steps stay."
+    },
+    {
+     "answer": 23,
+     "itemId": "2.1:staff-former-passes",
+     "lead": "Staff \"Former\" passes",
+     "kind": "answer",
+     "result": "Nothing to run: both passes were already applied (dry runs find 0 left). Archived."
+    },
+    {
+     "answer": 24,
+     "itemId": "2.1:severe-findings-scan-cron",
+     "lead": "Severe findings scan cron",
+     "kind": "done",
+     "result": "Kept open: the server's crontab has no scan line and no log; the item now carries the exact cPanel fields."
+    }
+   ]
+  },
+  {
    "at": "2026-10-25 22:59",
    "entries": [
     {
