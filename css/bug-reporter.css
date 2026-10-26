@@ -17,6 +17,7 @@
     /* Sits in the lower-right corner of its feature section: the link is the
        container's last child, and flex display + auto left margin right-align
        it in block, flex, and grid parents alike. */
+    position: relative;
     display: flex;
     width: fit-content;
     height: auto;
@@ -70,13 +71,37 @@ body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-
     display: block;
 }
 
+/* The label overlays its neighbours instead of widening the link: in a
+   wrapping row a wider pill jumped to the next line, left the cursor,
+   collapsed and jumped back. It opens leftward, or rightward
+   (--open-right, set by bug-reporter.js) when the left has no room, and is
+   painted with the panel's own colour (--kop-bug-ground, set by the script). */
 .kop-bug-report-link__text {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    right: 100%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
     max-width: 0;
-    margin-left: 0;
+    padding: 0;
     overflow: hidden;
     white-space: nowrap;
     opacity: 0;
-    transition: max-width 0.2s ease, opacity 0.2s ease, margin-left 0.2s ease;
+    background: var(--kop-bug-ground, #FFFFFF);
+    border: 1px solid transparent;
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    transition: max-width 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+}
+
+.kop-bug-report-link--open-right .kop-bug-report-link__text {
+    right: auto;
+    left: 100%;
+    border-right: 1px solid transparent;
+    border-left: 0;
+    border-radius: 0 999px 999px 0;
 }
 
 .button.kop-bug-report-link:hover,
@@ -90,7 +115,7 @@ body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-
 .button.kop-bug-report-link:hover,
 .button.kop-bug-report-link:focus,
 .button.kop-bug-report-link:active {
-    background: transparent;
+    background: var(--kop-bug-ground, transparent);
     color: var(--kop-navy-blue, #000080);
     border-color: var(--kop-navy-blue, #000080);
     box-shadow: none;
@@ -103,7 +128,7 @@ body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-
 .button.kop-bug-report-link.kop-bug-report-link--on-dark:hover,
 .button.kop-bug-report-link.kop-bug-report-link--on-dark:focus,
 .button.kop-bug-report-link.kop-bug-report-link--on-dark:active {
-    background: transparent;
+    background: var(--kop-bug-ground, transparent);
     color: #FFFFFF;
     border-color: #FFFFFF;
 }
@@ -112,8 +137,26 @@ body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-
 .kop-bug-report-link:focus-visible .kop-bug-report-link__text {
     /* Generous cap — only paces the slide-out; must never clip the label. */
     max-width: 16em;
-    margin-left: 5px;
+    padding: 0 0.15em 0 0.6em;
+    border-color: currentColor;
     opacity: 1;
+}
+
+.kop-bug-report-link--open-right:hover .kop-bug-report-link__text,
+.kop-bug-report-link--open-right:focus-visible .kop-bug-report-link__text {
+    padding: 0 0.6em 0 0.15em;
+}
+
+/* The pill's open side is squared off where the label joins it. */
+.button.kop-bug-report-link:hover,
+.button.kop-bug-report-link:focus-visible {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.button.kop-bug-report-link--open-right:hover,
+.button.kop-bug-report-link--open-right:focus-visible {
+    border-radius: 0 999px 999px 0;
 }
 
 /* Small screens / touch: hover can't reveal the label, so show it always
@@ -125,9 +168,23 @@ body:has(.tutorial-toggle-btn) .button.kop-bug-report-link:not(.kop-submit-info-
         opacity: 0.85;
     }
 
-    .kop-bug-report-link__text {
+    .button.kop-bug-report-link:hover,
+    .button.kop-bug-report-link:focus-visible {
+        border-radius: 999px;
+    }
+
+    .kop-bug-report-link .kop-bug-report-link__text,
+    .kop-bug-report-link:hover .kop-bug-report-link__text,
+    .kop-bug-report-link:focus-visible .kop-bug-report-link__text,
+    .kop-bug-report-link--open-right:hover .kop-bug-report-link__text,
+    .kop-bug-report-link--open-right:focus-visible .kop-bug-report-link__text {
+        position: static;
         max-width: none;
         margin-left: 6px;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: none;
         opacity: 1;
         transition: none;
     }

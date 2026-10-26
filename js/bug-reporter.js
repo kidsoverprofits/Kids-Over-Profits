@@ -191,27 +191,51 @@
         } else {
             container.appendChild(link);
         }
-        if (onDarkGround(link)) {
-            link.classList.add('kop-bug-report-link--on-dark');
+        var ground = groundColor(link);
+        if (ground) {
+            // The hover label overlays its neighbours, so it is painted with
+            // the panel's own colour (css/bug-reporter.css).
+            link.style.setProperty('--kop-bug-ground', 'rgb(' + ground.slice(0, 3).join(',') + ')');
+            if (isDark(ground)) link.classList.add('kop-bug-report-link--on-dark');
         }
         return link;
     }
 
-    /**
-     * True when the first solid background behind `node` is dark (navy
-     * section headers, operator cards): the navy outline would vanish there,
-     * so the link switches to white (css/bug-reporter.css).
-     */
-    function onDarkGround(node) {
+    /** The first solid background behind `node`, as [r, g, b], or null. */
+    function groundColor(node) {
         for (var n = node.parentElement; n && n !== document.documentElement; n = n.parentElement) {
             var m = (getComputedStyle(n).backgroundColor || '').match(/rgba?\(([^)]+)\)/);
             if (!m) continue;
             var p = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);
             if (p.length > 3 && p[3] < 0.5) continue;
-            var lum = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-            return (0.2126 * lum(p[0]) + 0.7152 * lum(p[1]) + 0.0722 * lum(p[2])) < 0.18;
+            return p;
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * True for a dark ground (navy section headers, operator cards): the navy
+     * outline would vanish there, so the link switches to white.
+     */
+    function isDark(p) {
+        var lum = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+        return (0.2126 * lum(p[0]) + 0.7152 * lum(p[1]) + 0.0722 * lum(p[2])) < 0.18;
+    }
+
+    // The label opens leftward (the flag usually sits at the right edge);
+    // rightward only when the left has less room than it needs and the
+    // right has more.
+    function pickSide(e) {
+        var link = e.target && e.target.closest ? e.target.closest('.kop-bug-report-link') : null;
+        if (!link || link.contains(e.relatedTarget)) return;
+        var text = link.querySelector('.kop-bug-report-link__text');
+        if (!text) return;
+        var b = link.getBoundingClientRect();
+        var c = link.parentElement.getBoundingClientRect();
+        var need = text.scrollWidth + 16;
+        var left = b.left - Math.max(c.left, 0);
+        var right = Math.min(c.right, window.innerWidth) - b.right;
+        link.classList.toggle('kop-bug-report-link--open-right', left < need && right > left);
     }
 
     // Auto-attach to any markup tagged with data-kop-bug-feature.
@@ -606,6 +630,8 @@
     function init() {
         scanForFeatures();
         watchForFeatures();
+        document.addEventListener('mouseover', pickSide);
+        document.addEventListener('focusin', pickSide);
     }
 
     if (document.readyState === 'loading') {
