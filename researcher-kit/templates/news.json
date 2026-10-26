@@ -1,0 +1,23 @@
+{
+  "kit_version": 1,
+  "kind": "news",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "articles": [
+    {
+      "article_title": "",
+      "author": "",
+      "publication_name": "",
+      "publication_date": null,
+      "article_url": "",
+      "archive_url": "",
+      "article_type": "general",
+      "facilities_mentioned": [],
+      "staff_mentioned": [],
+      "content_warnings": [],
+      "tags": [],
+      "summary": ""
+    }
+  ]
+}

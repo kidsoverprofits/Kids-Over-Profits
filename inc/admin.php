@@ -469,6 +469,8 @@ function kop_tool_page_specs() {
         array('template' => 'page-glossary.php',           'title' => 'TTI Glossary',        'slug' => 'glossary',           'status' => 'publish'),
         // Bulk downloads of every public dataset, built daily by inc/open-data.php.
         array('template' => 'page-open-data.php',          'title' => 'Open Data',           'slug' => 'open-data',          'status' => 'publish'),
+        // The record shapes and blank templates for outside researchers (files in researcher-kit/).
+        array('template' => 'page-researcher-kit.php',     'title' => 'Researcher Data Kit', 'slug' => 'researcher-kit',     'status' => 'publish'),
         // Youth transport companies, from transporters_master (records made in the data
         // form or from a Woodbury report), with each one's documents on file.
         array('template' => 'page-transporter-index.php',  'title' => 'Youth Transport Companies', 'slug' => 'youth-transport-companies', 'status' => 'publish'),
@@ -748,7 +750,7 @@ add_action('after_switch_theme', 'kop_ensure_tool_pages');
  * guarded by the same option, so the work still happens once.
  */
 function kop_maybe_ensure_tool_pages() {
-    $version = '28';
+    $version = '29';
     if (get_option('kop_tool_pages_ensured') === $version) {
         return;
     }

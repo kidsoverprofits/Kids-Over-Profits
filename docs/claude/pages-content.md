@@ -64,6 +64,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-tradeorgs.php [--
 # Every dataset names its columns; a new public table or column is added there, never via SELECT *
 php scripts/test-open-data.php [--skip-fulltext]  # builds from tmp/prod.sqlite into tmp/kop-open-data/, privacy checks
 php scripts/build-open-data.php                   # on the server (ea-php82), rebuild now
+# Researcher Data Kit (/researcher-kit/, templates/page-researcher-kit.php): record shapes + blank templates for outside
+# researchers. Static files in researcher-kit/ (copied by .cpanel.yml; ?download=zip bundles them); allowed values come
+# from the Dropdown Lists. A facility field change (docs/FACILITY-SCHEMA.md) updates researcher-kit/templates/ too.
 # SVG icons that replace emojis (inc/icons.php: kop_icon() / kopIcon(), and the
 # render filter for emojis in post content, widgets and the ACF facility-key field)
 php scripts/test-icons.php

@@ -1,0 +1,37 @@
+{
+  "kit_version": 1,
+  "kind": "inspections",
+  "submitted_by": "Kids Over Profits (example)",
+  "collected_on": "2026-10-26",
+  "method": "Copied from KOP's Connecticut DCF scraper output",
+  "state": "CT",
+  "scraped_timestamp": "2026-10-26T00:00:00Z",
+  "source_site": "https://licensefacilities.dcf.ct.gov/listing_CCF.asp",
+  "facilities": [
+    {
+      "facility_info": {
+        "facility_name": "Adelbrook Community Services Benny Drive",
+        "program_name": "Benny Drive",
+        "full_address": "60 Hicksville Road Cromwell, CT 06416-Phone: (860) 635-6010",
+        "phone": "(860) 635-6010",
+        "program_category": "Group Home",
+        "executive_director": "Alyssa Godutti",
+        "bed_capacity": "4",
+        "license_number": "",
+        "license_exp_date": "10/16/2026",
+        "relicense_visit_date": "",
+        "action": ""
+      },
+      "reports": [
+        {
+          "report_id": "6614",
+          "report_date": "12/11/2025",
+          "report_url": "",
+          "raw_content": "DCF-3034\r\n1/2013 (Revised)\t\t\t\t\t\t\t\t\t\t\t\r\nDepartment of Children and Families\r\n505 Hudson Street\r\nHartford, CT 06106\r\n\r\nField Visit Reporting Form\r\n\r\nThis form is used to summarize field visits to a licensed facility or program other than the bi-annual licensing inspection. The visit may be announced or unannounced and is intended to highlight the specific items reviewed / discussed and indicate if there are specific areas where corrective action has been taken or must be taken.\r\n                                                                                 \r\nNAME OF FACILITY / PROGRAM: Adelbrook/Benny Drive Group Home\r\n\r\nTIME OF VISIT (FROM - TO): 10:00am -11:20am     DATE: December 11, 2025\r\n \r\n AGENCY PERSONNEL WHO PARTICIPATED: \r\n\r\nJob Title\r\nClinical Therapist\r\nProgram Supervisor\r\n        \r\nAreas / Topics covered during visit:\r\n \r\n•\tCensus: The group home had two youths at the facility during the quarterly visit and the current license bed capacity is four.\r\n•\tAdmissions: There were no new admissions in the last quarter.\r\n•\tDischarges: There was one discharge in the last quarter.\r\n•\tStaff: The group home staffing consisted of seven full-timers and five per-diem employees. \r\n•\tStaff vacancies: The program reported that it has two full-time direct care staff openings. \r\n•\tStaff hires: The group home has hired a new clinician, and her start date was October 20, 2025.\r\n•\tMedication: The program reported that it has eight medication-certified employees, and they are able to administer medication to residents across all three shifts, seven days a week. \r\n•\tPhysical plant: A walkthrough of the facility was conducted with the supervisor to confirm the group home's compliance with regulatory standards.\r\n•\tPersonnel files: An audit of personnel records was not conducted in this quarter.\r\n•\tSIU Reports: There were no reports in this quarter.\r\n\r\nCorrections implemented as a result of previous visit: \r\nN/A\r\n\r\nRecommendations: (The following areas were not identified as regulatory non-compliance, but are recommended to be addressed in order to enhance program functioning) \r\nN/A\r\n\r\nAreas of regulatory non-compliance identified during this visit:\r\nN/A\r\n\r\nPlease submit a plan of correction to address the above referenced areas of non-compliance within 30 days of receipt of this report. The plan of correction must be submitted to the attention of the undersigned at the address listed above. \r\n\r\nPenny Woodward, LCSW                                   December 22, 2025\r\nRegulatory Consultant                                                      Date\r\n            \r\nA COPY OF THIS SUMMARY SHOULD BE SENT TO THE EXECUTIVE DIRECTOR OF THE FACILITY / PROGRAM|",
+          "content_length": 2683,
+          "summary": "Visit conducted on December 11, 2025. Visit covered 14 main areas/topics. No compliance issues identified."
+        }
+      ]
+    }
+  ]
+}

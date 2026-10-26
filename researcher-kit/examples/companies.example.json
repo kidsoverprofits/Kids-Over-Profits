@@ -1,0 +1,64 @@
+{
+  "kit_version": 1,
+  "kind": "companies",
+  "submitted_by": "Kids Over Profits (example)",
+  "collected_on": "2026-09-16",
+  "method": "SEC 10-K filings",
+  "companies": [
+    {
+      "name": "Psychiatric Solutions, Inc.",
+      "operator": {
+        "currentName": "",
+        "otherNames": [
+          "Psychiatric Solutions"
+        ],
+        "status": "Acquired",
+        "founded": "1988 (incorporated in Delaware)",
+        "operatingPeriod": "1988 to 2010",
+        "headquarters": "113 Seaboard Lane, Franklin, Tennessee",
+        "headquartersCity": "Franklin",
+        "headquartersState": "TN",
+        "location": "Franklin, TN",
+        "locationCity": "",
+        "locationState": "",
+        "websites": [],
+        "parentCompanies": [],
+        "owners": [],
+        "investors": [],
+        "keyStaff": {
+          "ceo": "",
+          "founders": [
+            {
+              "name": "",
+              "role": "",
+              "pastJobs": ""
+            }
+          ],
+          "keyExecutives": [
+            {
+              "name": "",
+              "role": "",
+              "pastJobs": ""
+            }
+          ]
+        },
+        "notes": [
+          "Incorporated in Delaware in 1988; headquartered at 113 Seaboard Lane, Franklin, Tennessee (Psychiatric Solutions, Inc., Form 10-K for 2003, filed March 2004: https://www.sec.gov/Archives/edgar/data/829608/000095014404003028/g87995e10vk.htm)",
+          "April 2003: bought six inpatient behavioral health facilities from The Brown Schools, Inc. for $63.0 million: 895 licensed beds in Austin, San Antonio and San Marcos, Texas; Charlottesville, Virginia; Colorado Springs, Colorado; and Tulsa, Oklahoma (Form 10-K for 2003: https://www.sec.gov/Archives/edgar/data/829608/000095014404003028/g87995e10vk.htm; FTC premerger notice 20030407, Psychiatric Solutions / McCown De Leeuw & Co. III: https://www.ftc.gov/node/10021)",
+          "June 30, 2003: bought Ramsay Youth Services, Inc. (Nasdaq: RYOU) for about $81.3 million (Form 10-K for 2003: https://www.sec.gov/Archives/edgar/data/829608/000095014404003028/g87995e10vk.htm)"
+        ],
+        "fieldNotes": []
+      },
+      "facilities": [
+        {
+          "name": "San Marcos Treatment Center",
+          "city": "San Marcos",
+          "state": "TX",
+          "relationship": "past",
+          "years": "2003-2010",
+          "source": "https://www.sec.gov/Archives/edgar/data/829608/000095014404003028/g87995e10vk.htm"
+        }
+      ]
+    }
+  ]
+}

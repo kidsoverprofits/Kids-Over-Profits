@@ -1,0 +1,220 @@
+{
+  "kit_version": 1,
+  "kind": "facilities",
+  "submitted_by": "Kids Over Profits (example)",
+  "collected_on": "2026-09-16",
+  "method": "Program website, read by hand",
+  "facilities": [
+    {
+      "identification": {
+        "name": "Mountain Valley Treatment Center",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "Mountain Valley Treatment Center",
+        "currentOwners": [],
+        "pastOwners": [],
+        "otherOperators": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "investors": []
+      },
+      "location": {
+        "raw": "703 River Road, Plainfield, NH 03781",
+        "text": "Plainfield, NH",
+        "street": "703 River Road",
+        "city": "Plainfield",
+        "state": "NH",
+        "zip": "03781",
+        "country": "United States",
+        "additionalLocations": [],
+        "formerLocations": [
+          {
+            "raw": "2056 Mt. Moosilauke Highway, Pike, NH 03780",
+            "city": "Pike",
+            "state": "NH",
+            "country": "United States",
+            "fromYear": 2011,
+            "toYear": null
+          }
+        ]
+      },
+      "operatingPeriod": {
+        "startYear": 2011,
+        "endYear": null,
+        "status": "Open",
+        "yearsOfOperation": "2011-present",
+        "notes": [
+          "Founded 2011 in Pike, NH; Plainfield campus (former Home Hill Inn) opened January 2018."
+        ]
+      },
+      "facilityDetails": {
+        "type": "Residential Treatment Center",
+        "capacity": null,
+        "currentCensus": null,
+        "ageRange": {
+          "min": 13,
+          "max": 20
+        },
+        "gender": "Co-ed",
+        "isPrivatelyOwned": null
+      },
+      "staff": {
+        "administrator": [],
+        "notableStaff": [],
+        "pastTTIJobs": []
+      },
+      "accreditations": {
+        "current": [],
+        "past": []
+      },
+      "memberships": [],
+      "certifications": [],
+      "licensing": [],
+      "profileLinks": [
+        "https://mountainvalleytreatment.org",
+        "https://mountainvalleytreatment.org/programs/mountain-valley-treatment-center/"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://mountainvalleytreatment.org/mountain-valley-treatment-center-announces-plan-to-operate-on-two-campuses/",
+          "label": "Mountain Valley announces plan to operate on two campuses",
+          "kind": "advertising",
+          "source": "Program website"
+        }
+      ],
+      "federalFunding": [],
+      "resources": {
+        "hasNews": false,
+        "newsDetails": "",
+        "hasPressReleases": false,
+        "pressReleasesDetails": "",
+        "hasInspections": false,
+        "hasStateReports": false,
+        "hasRegulatoryFilings": false,
+        "hasViolations": false,
+        "hasSettlements": false,
+        "hasLawsuits": false,
+        "hasPoliceReports": false,
+        "hasArticlesOfOrganization": false,
+        "hasPropertyRecords": false,
+        "hasPromotionalMaterials": false,
+        "hasEnrollmentDocuments": false,
+        "hasResearch": false,
+        "hasFinancial": false,
+        "hasStudent": false,
+        "studentDetails": "",
+        "hasStaff": false,
+        "hasParent": false,
+        "hasWebsite": true,
+        "hasSocialMedia": false,
+        "hasAudio": false,
+        "hasVideo": false,
+        "hasNATSAP": false,
+        "hasSurvivorStories": false,
+        "hasOther": false,
+        "customResources": [],
+        "notes": []
+      },
+      "treatmentTypes": {
+        "hasABA": false,
+        "hasEquineTherapy": false,
+        "hasWorkTherapy": false,
+        "hasWildernessTherapy": false,
+        "hasRealityTherapy": false,
+        "hasLGATSeminars": false,
+        "hasFeedbackHotseatGroups": false,
+        "hasPrimalScreamTherapy": false,
+        "hasRepressedMemoryTherapy": false,
+        "hasBehaviorModification": false,
+        "hasKetamineTherapy": false,
+        "hasExposureTherapy": false,
+        "hasUnlicensedProvider": false,
+        "hasConversionTherapy": false,
+        "hasAttachmentTherapy": false,
+        "hasRebirthingTherapy": false,
+        "hasTappingTherapy": false,
+        "hasPsychoanalysis": false,
+        "hasEMDR": false,
+        "hasHypnosis": false
+      },
+      "targetedDiagnoses": {
+        "hasADHD": false,
+        "hasAnxiety": true,
+        "hasAutismSpectrumDisorder": false,
+        "hasBehavioralDisorders": false,
+        "hasBipolarDisorder": false,
+        "hasBorderlinePersonalityDisorder": false,
+        "hasCoOccurringDisorders": false,
+        "hasConductDisorder": false,
+        "hasDepression": false,
+        "hasEatingDisorder": false,
+        "hasEmotionalDisorders": false,
+        "hasOCD": true,
+        "hasOppositionalDefiantDisorder": false,
+        "hasPTSD": false,
+        "hasPersonalityDisorders": false,
+        "hasPsychiatricDisorders": false,
+        "hasReactiveAttachmentDisorder": false,
+        "hasSubstanceAbuse": false
+      },
+      "targetedBehaviors": {
+        "hasAcademicStruggles": false,
+        "hasAdoption": false,
+        "hasAggression": false,
+        "hasAttachment": false,
+        "hasDefiance": false,
+        "hasEmotionalDysregulation": false,
+        "hasFamilyConflict": false,
+        "hasImpulsiveBehavior": false,
+        "hasLying": false,
+        "hasManipulation": false,
+        "hasRunningAway": false,
+        "hasSelfHarm": false,
+        "hasSexuallyInappropriateBehavior": false,
+        "hasSocialProblems": false,
+        "hasStealing": false,
+        "hasTrafficking": false,
+        "hasTruancy": false
+      },
+      "ttiPractices": {
+        "hasBehaviorContracts": false,
+        "hasCommunicationRestrictions": false,
+        "hasConfrontationGroups": false,
+        "hasForcedMedication": false,
+        "hasLevelSystem": false,
+        "hasRestraint": false,
+        "hasSeclusion": false,
+        "hasStripSearches": false,
+        "other": []
+      },
+      "philosophy": {
+        "hasPositivePeerCulture": false,
+        "has12Steps": false,
+        "hasFundamentalistBaptist": false,
+        "hasPentecostal": false,
+        "hasScientology": false,
+        "hasTherapeuticCommunity": false,
+        "hasWildernessRoad": false,
+        "hasPsychoanalytic": false,
+        "hasLawOfAttraction": false,
+        "hasHumanPotentialMovement": false
+      },
+      "conditions": {},
+      "criticalIncidents": {
+        "hasDeaths": false,
+        "hasStaffArrests": false,
+        "hasStudentHospitalizations": false,
+        "hasRiots": false
+      },
+      "notes": [
+        "Residential treatment for anxiety and OCD, ages 13-20 (source: https://mountainvalleytreatment.org/programs/mountain-valley-treatment-center/)."
+      ],
+      "fieldNotes": {},
+      "survivorTestimony": []
+    }
+  ]
+}

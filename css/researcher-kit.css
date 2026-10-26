@@ -1,0 +1,145 @@
+/*
+ * Researcher Data Kit (templates/page-researcher-kit.php).
+ *
+ * Built on the open data page's card, downloads and tables (css/open-data.css,
+ * loaded first); this adds the contents bar, the numbered rules, the field
+ * tables and the allowed-value chips. Bright accents stay on borders.
+ */
+
+.kop-rk-page > section {
+    margin-bottom: 2.25rem;
+    scroll-margin-top: 5rem;
+}
+
+.kop-rk-page p {
+    max-width: 50rem;
+    line-height: 1.6;
+}
+
+.kop-rk-page code {
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+}
+
+/* ---- Contents ------------------------------------------------------------ */
+
+.kop-rk-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.5rem;
+    margin: 0 0 2rem;
+}
+
+.kop-rk-toc a {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.92rem;
+    color: var(--kop-midnight-blue, #000435);
+    text-decoration: none;
+    background: var(--kop-white, #fff);
+    border: 1px solid rgba(0, 4, 53, 0.25);
+    border-radius: 999px;
+}
+
+.kop-rk-toc a:hover,
+.kop-rk-toc a:focus-visible {
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    border-color: var(--kop-teal, #33A7B5);
+}
+
+.kop-rk-downloads {
+    margin-top: 1.25rem;
+}
+
+/* ---- Rules --------------------------------------------------------------- */
+
+.kop-rk-rules {
+    max-width: 50rem;
+    margin: 0;
+    padding-left: 1.4rem;
+    line-height: 1.6;
+}
+
+.kop-rk-rules li + li {
+    margin-top: 0.75rem;
+}
+
+.kop-rk-rules strong {
+    color: var(--kop-navy-blue, #000080);
+}
+
+/* ---- Field tables -------------------------------------------------------- */
+
+.kop-rk-sub {
+    margin: 1.5rem 0 0.4rem;
+    font-size: 1.05rem;
+    color: var(--kop-navy-blue, #000080);
+}
+
+.kop-rk-fields tbody th {
+    white-space: nowrap;
+}
+
+.kop-rk-fields tbody th code {
+    color: var(--kop-midnight-blue, #000435);
+    font-weight: 700;
+    overflow-wrap: normal;
+}
+
+.kop-rk-required {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    border: 1px solid var(--kop-orange, #EF9034);
+    border-radius: 4px;
+}
+
+.kop-rk-note {
+    padding: 0.8rem 1rem;
+    background: var(--kop-sand, #F2EEDF);
+    border-left: 4px solid var(--kop-orange, #EF9034);
+    border-radius: 0 6px 6px 0;
+}
+
+/* ---- Allowed values ------------------------------------------------------ */
+
+.kop-rk-values-title {
+    margin: 1rem 0 0.4rem;
+    font-weight: 700;
+    color: var(--kop-navy-blue, #000080);
+}
+
+.kop-rk-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-rk-values li {
+    max-width: 100%;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.88rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    border: 1px solid rgba(0, 4, 53, 0.15);
+    border-radius: 4px;
+}
+
+.kop-rk-values li span {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+@media (max-width: 600px) {
+    .kop-rk-fields tbody th {
+        white-space: normal;
+    }
+}

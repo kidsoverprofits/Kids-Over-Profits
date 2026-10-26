@@ -1,0 +1,37 @@
+{
+  "kit_version": 1,
+  "kind": "inspections",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "state": "",
+  "scraped_timestamp": "",
+  "source_site": "",
+  "facilities": [
+    {
+      "facility_info": {
+        "facility_name": "",
+        "program_name": "",
+        "full_address": "",
+        "phone": "",
+        "program_category": "",
+        "executive_director": "",
+        "bed_capacity": "",
+        "license_number": "",
+        "license_exp_date": "",
+        "relicense_visit_date": "",
+        "action": ""
+      },
+      "reports": [
+        {
+          "report_id": "",
+          "report_date": "",
+          "report_url": "",
+          "raw_content": "",
+          "content_length": 0,
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

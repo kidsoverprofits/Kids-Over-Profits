@@ -274,6 +274,7 @@ if (!function_exists('kop_site_map_template_sections')) {
             'page-glossary.php'                => 'reference',
             'page-faq.php'                     => 'reference',
             'page-open-data.php'               => 'reference',
+            'page-researcher-kit.php'          => 'reference',
             'single-facility-profile.php'      => 'profiles',
             'single-person-profile.php'        => 'profiles',
             'page-data.php'                    => 'take-part',

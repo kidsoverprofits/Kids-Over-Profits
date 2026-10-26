@@ -1,0 +1,21 @@
+{
+  "kit_version": 1,
+  "kind": "people",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "people": [
+    {
+      "name": "",
+      "otherNames": [],
+      "pool": "industry",
+      "jobs": [
+        { "place": "", "placeCity": "", "placeState": "", "role": "", "years": "", "source": "", "sourceUrl": "" }
+      ],
+      "relations": [
+        { "otherName": "", "kind": "", "detail": "", "source": "", "sourceUrl": "" }
+      ],
+      "notes": []
+    }
+  ]
+}

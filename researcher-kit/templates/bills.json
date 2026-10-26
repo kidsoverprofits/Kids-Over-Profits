@@ -1,0 +1,28 @@
+{
+  "kit_version": 1,
+  "kind": "bills",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "legislation": [
+    {
+      "bill_title": "",
+      "bill_number": "",
+      "jurisdiction": "",
+      "chamber": "unknown",
+      "session_year": "",
+      "bill_type": "",
+      "sponsors": [],
+      "status": "unknown",
+      "introduced_date": null,
+      "last_action_date": null,
+      "last_action_text": "",
+      "subject_tags": [],
+      "summary": "",
+      "full_text_url": "",
+      "official_url": "",
+      "facilities_affected": [],
+      "tags": []
+    }
+  ]
+}

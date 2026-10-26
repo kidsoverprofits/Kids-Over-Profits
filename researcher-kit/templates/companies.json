@@ -1,0 +1,39 @@
+{
+  "kit_version": 1,
+  "kind": "companies",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "companies": [
+    {
+      "name": "",
+      "operator": {
+        "currentName": "",
+        "otherNames": [],
+        "status": "",
+        "founded": "",
+        "operatingPeriod": "",
+        "headquarters": "",
+        "headquartersCity": "",
+        "headquartersState": "",
+        "location": "",
+        "locationCity": "",
+        "locationState": "",
+        "websites": [],
+        "parentCompanies": [],
+        "owners": [],
+        "investors": [],
+        "keyStaff": {
+          "ceo": "",
+          "founders": [ { "name": "", "role": "", "pastJobs": "" } ],
+          "keyExecutives": [ { "name": "", "role": "", "pastJobs": "" } ]
+        },
+        "notes": [],
+        "fieldNotes": []
+      },
+      "facilities": [
+        { "name": "", "city": "", "state": "", "relationship": "current", "years": "", "source": "" }
+      ]
+    }
+  ]
+}

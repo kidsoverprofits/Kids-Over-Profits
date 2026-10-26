@@ -1,0 +1,29 @@
+{
+  "kit_version": 1,
+  "kind": "lawsuits",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "lawsuits": [
+    {
+      "case_name": "",
+      "case_number": "",
+      "court": "",
+      "jurisdiction": "",
+      "filing_date": null,
+      "status": "unknown",
+      "plaintiffs": [],
+      "defendants": [],
+      "facilities_mentioned": [],
+      "staff_mentioned": [],
+      "organizations_mentioned": [],
+      "claims": [],
+      "outcome": "",
+      "settlement_amount": "",
+      "summary": "",
+      "source_urls": [],
+      "document_urls": [],
+      "tags": []
+    }
+  ]
+}

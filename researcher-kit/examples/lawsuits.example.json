@@ -1,0 +1,61 @@
+{
+  "kit_version": 1,
+  "kind": "lawsuits",
+  "submitted_by": "Kids Over Profits (example)",
+  "collected_on": "2026-09-16",
+  "method": "Court opinion and news coverage",
+  "lawsuits": [
+    {
+      "case_name": "Milonas and Rice v. Williams (Provo Canyon School)",
+      "case_number": "691 F.2d 931 (10th Cir. 1982)",
+      "court": "U.S. District Court for the District of Utah; Tenth Circuit Court of Appeals",
+      "jurisdiction": "Federal",
+      "filing_date": "1979-01-01",
+      "status": "ruling",
+      "plaintiffs": [
+        "Timothy Milonas (Nevada)",
+        "Kenneth Rice (Alaska)",
+        "Class of boys placed at Provo Canyon School"
+      ],
+      "defendants": [
+        "Provo Canyon School",
+        "Jack Williams",
+        "Robert H. Crist"
+      ],
+      "facilities_mentioned": [
+        "Provo Canyon School (Provo, Utah)"
+      ],
+      "staff_mentioned": [
+        "Jack Williams",
+        "Robert H. Crist"
+      ],
+      "organizations_mentioned": [],
+      "claims": [
+        "Cruel and unusual punishment through isolation and physical force",
+        "Denial of due process for boys placed by state juvenile justice systems",
+        "Censorship of mail and use of polygraph examinations",
+        "Anti-therapeutic and inhumane treatment"
+      ],
+      "outcome": "Jury found for the school in 1980, but the district court entered a permanent injunction barring Provo Canyon School from opening, reading or censoring boys' mail, administering polygraphs, placing boys in isolation except to contain physical violence, and using physical force except to restrain a boy who is an immediate danger to himself or others. Affirmed as Milonas v. Williams, 691 F.2d 931 (10th Cir. 1982).",
+      "settlement_amount": "",
+      "summary": "Two teenagers sent to Provo Canyon School by their home states' juvenile justice systems escaped and brought a federal class action challenging the school's confinement, education and treatment methods. The case produced the 1980 injunction that still defines the limits on isolation, restraint, polygraphs and mail censorship at the school.",
+      "source_urls": [
+        "https://kidsoverprofits.org/wp-content/uploads/milonas-et-al-v-provo-canyon-school-et-al.pdf",
+        "https://www.courtlistener.com/opinion/410235/milonas-v-williams/",
+        "https://www.reddit.com/r/troubledteens/wiki/index/provocanyon/"
+      ],
+      "document_urls": [
+        "https://kidsoverprofits.org/wp-content/uploads/milonas-et-al-v-provo-canyon-school-et-al.pdf",
+        "https://kidsoverprofits.org/wp-content/uploads/milonasmemo.pdf"
+      ],
+      "tags": [
+        "Utah",
+        "injunction",
+        "isolation",
+        "restraint",
+        "civil rights",
+        "class action"
+      ]
+    }
+  ]
+}

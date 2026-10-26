@@ -8,6 +8,8 @@ deployment:
     - /bin/cp -R images $DEPLOYPATH
     - /bin/cp -R templates $DEPLOYPATH
     - /bin/cp -R seeds $DEPLOYPATH
+    # Researcher Data Kit downloads (templates/page-researcher-kit.php).
+    - /bin/cp -R researcher-kit $DEPLOYPATH
     # docs/ is read by people, never by the site; it used to be copied here.
     - /bin/rm -rf $DEPLOYPATH/docs
     # The discovery cron's rejected log used to be tracked as

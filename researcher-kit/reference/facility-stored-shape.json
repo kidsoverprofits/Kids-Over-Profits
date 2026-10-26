@@ -1,0 +1,97 @@
+{
+  "schema_version": 3,
+  "facility_id": 14182,
+  "identification": {
+    "name": "Hyde School",
+    "nameKey": "hyde school",
+    "currentName": "",
+    "otherNames": [],
+    "pastNames": [],
+    "legalName": "",
+    "dbaNames": [],
+    "registrants": [],
+    "currentOperator": "",
+    "currentOwners": [],
+    "pastOwners": [],
+    "otherOperators": [],
+    "pastOperators": [],
+    "knownReferrers": [],
+    "investors": []
+  },
+  "location": {
+    "raw": "Woodstock, CT",
+    "text": "Woodstock, CT",
+    "street": "",
+    "city": "Woodstock",
+    "state": "CT",
+    "zip": "",
+    "country": "United States",
+    "additionalLocations": [],
+    "formerLocations": []
+  },
+  "operatingPeriod": {
+    "startYear": null,
+    "endYear": null,
+    "status": "Closed",
+    "yearsOfOperation": "",
+    "notes": []
+  },
+  "facilityDetails": {
+    "type": "",
+    "capacity": null,
+    "currentCensus": null,
+    "ageRange": {
+      "min": null,
+      "max": null
+    },
+    "gender": "",
+    "isPrivatelyOwned": null
+  },
+  "staff": {
+    "administrator": [],
+    "notableStaff": [],
+    "pastTTIJobs": []
+  },
+  "accreditations": {
+    "current": [],
+    "past": []
+  },
+  "memberships": [],
+  "certifications": [],
+  "licensing": [],
+  "profileLinks": [],
+  "resourceLinks": [],
+  "federalFunding": [],
+  "resources": {
+    "hasNews": false,
+    "hasLawsuits": false,
+    "customResources": []
+  },
+  "treatmentTypes": {},
+  "targetedDiagnoses": {},
+  "targetedBehaviors": {},
+  "ttiPractices": {},
+  "philosophy": {},
+  "conditions": {},
+  "criticalIncidents": {},
+  "notes": [],
+  "fieldNotes": {},
+  "survivorTestimony": [],
+  "providerDetails": {},
+  "documentFolderId": null,
+  "provenance": {
+    "sourceProject": "",
+    "sourceProjectId": null,
+    "sourceCategory": "",
+    "sourceOperator": null,
+    "legacyIds": [
+      11021
+    ],
+    "linkedFromRef": false,
+    "kopProfileVersion": null,
+    "migratedAt": "2026-09-16T19:58:45+00:00",
+    "uniqueName": "Hyde School (CT)",
+    "source": ""
+  },
+  "legacy": {}
+}

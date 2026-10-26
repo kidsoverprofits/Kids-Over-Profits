@@ -1,0 +1,209 @@
+{
+  "kit_version": 1,
+  "kind": "facilities",
+  "submitted_by": "",
+  "collected_on": "YYYY-MM-DD",
+  "method": "",
+  "facilities": [
+    {
+      "identification": {
+        "name": "",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [
+          { "name": "", "role": "", "source": "", "sourceUrl": "" }
+        ],
+        "currentOperator": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "otherOperators": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "investors": []
+      },
+      "location": {
+        "raw": "",
+        "text": "",
+        "street": "",
+        "city": "",
+        "state": null,
+        "zip": "",
+        "country": null,
+        "additionalLocations": [
+          { "raw": "", "street": "", "city": "", "state": null, "zip": "", "country": null }
+        ],
+        "formerLocations": [
+          { "raw": "", "city": "", "state": null, "country": null, "fromYear": null, "toYear": null }
+        ]
+      },
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "yearsOfOperation": "",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "capacity": null,
+        "currentCensus": null,
+        "ageRange": { "min": null, "max": null },
+        "gender": "",
+        "isPrivatelyOwned": null
+      },
+      "staff": {
+        "administrator": [
+          { "name": "", "role": "", "pastJobs": "", "source": "", "sourceUrl": "" }
+        ],
+        "notableStaff": [
+          { "name": "", "role": "", "pastJobs": "", "source": "", "sourceUrl": "" }
+        ],
+        "pastTTIJobs": [
+          { "role": "", "organization": "", "employer": "" }
+        ]
+      },
+      "accreditations": { "current": [], "past": [] },
+      "memberships": [],
+      "certifications": [],
+      "licensing": [],
+      "profileLinks": [],
+      "resourceLinks": [
+        { "url": "", "label": "", "kind": "other", "source": "" }
+      ],
+      "federalFunding": [
+        { "stream": "other", "detail": "", "years": "", "sources": [ { "url": "", "label": "" } ], "source": "" }
+      ],
+      "resources": {
+        "hasNews": false,
+        "newsDetails": "",
+        "hasPressReleases": false,
+        "pressReleasesDetails": "",
+        "hasInspections": false,
+        "hasStateReports": false,
+        "hasRegulatoryFilings": false,
+        "hasViolations": false,
+        "hasSettlements": false,
+        "hasLawsuits": false,
+        "hasPoliceReports": false,
+        "hasArticlesOfOrganization": false,
+        "hasPropertyRecords": false,
+        "hasPromotionalMaterials": false,
+        "hasEnrollmentDocuments": false,
+        "hasResearch": false,
+        "hasFinancial": false,
+        "hasStudent": false,
+        "studentDetails": "",
+        "hasStaff": false,
+        "hasParent": false,
+        "hasWebsite": false,
+        "hasSocialMedia": false,
+        "hasAudio": false,
+        "hasVideo": false,
+        "hasNATSAP": false,
+        "hasSurvivorStories": false,
+        "hasOther": false,
+        "customResources": [],
+        "notes": []
+      },
+      "treatmentTypes": {
+        "hasABA": false,
+        "hasEquineTherapy": false,
+        "hasWorkTherapy": false,
+        "hasWildernessTherapy": false,
+        "hasRealityTherapy": false,
+        "hasLGATSeminars": false,
+        "hasFeedbackHotseatGroups": false,
+        "hasPrimalScreamTherapy": false,
+        "hasRepressedMemoryTherapy": false,
+        "hasBehaviorModification": false,
+        "hasKetamineTherapy": false,
+        "hasExposureTherapy": false,
+        "hasUnlicensedProvider": false,
+        "hasConversionTherapy": false,
+        "hasAttachmentTherapy": false,
+        "hasRebirthingTherapy": false,
+        "hasTappingTherapy": false,
+        "hasPsychoanalysis": false,
+        "hasEMDR": false,
+        "hasHypnosis": false
+      },
+      "targetedDiagnoses": {
+        "hasADHD": false,
+        "hasAnxiety": false,
+        "hasAutismSpectrumDisorder": false,
+        "hasBehavioralDisorders": false,
+        "hasBipolarDisorder": false,
+        "hasBorderlinePersonalityDisorder": false,
+        "hasCoOccurringDisorders": false,
+        "hasConductDisorder": false,
+        "hasDepression": false,
+        "hasEatingDisorder": false,
+        "hasEmotionalDisorders": false,
+        "hasOCD": false,
+        "hasOppositionalDefiantDisorder": false,
+        "hasPTSD": false,
+        "hasPersonalityDisorders": false,
+        "hasPsychiatricDisorders": false,
+        "hasReactiveAttachmentDisorder": false,
+        "hasSubstanceAbuse": false
+      },
+      "targetedBehaviors": {
+        "hasAcademicStruggles": false,
+        "hasAdoption": false,
+        "hasAggression": false,
+        "hasAttachment": false,
+        "hasDefiance": false,
+        "hasEmotionalDysregulation": false,
+        "hasFamilyConflict": false,
+        "hasImpulsiveBehavior": false,
+        "hasLying": false,
+        "hasManipulation": false,
+        "hasRunningAway": false,
+        "hasSelfHarm": false,
+        "hasSexuallyInappropriateBehavior": false,
+        "hasSocialProblems": false,
+        "hasStealing": false,
+        "hasTrafficking": false,
+        "hasTruancy": false
+      },
+      "ttiPractices": {
+        "hasBehaviorContracts": false,
+        "hasCommunicationRestrictions": false,
+        "hasConfrontationGroups": false,
+        "hasForcedMedication": false,
+        "hasLevelSystem": false,
+        "hasRestraint": false,
+        "hasSeclusion": false,
+        "hasStripSearches": false,
+        "other": []
+      },
+      "philosophy": {
+        "hasPositivePeerCulture": false,
+        "has12Steps": false,
+        "hasFundamentalistBaptist": false,
+        "hasPentecostal": false,
+        "hasScientology": false,
+        "hasTherapeuticCommunity": false,
+        "hasWildernessRoad": false,
+        "hasPsychoanalytic": false,
+        "hasLawOfAttraction": false,
+        "hasHumanPotentialMovement": false
+      },
+      "conditions": {},
+      "criticalIncidents": {
+        "hasDeaths": false,
+        "hasStaffArrests": false,
+        "hasStudentHospitalizations": false,
+        "hasRiots": false
+      },
+      "notes": [],
+      "fieldNotes": {},
+      "survivorTestimony": [
+        { "text": "", "source": "", "date": "", "publish": false }
+      ]
+    }
+  ]
+}
