@@ -3319,7 +3319,214 @@
    "companies": [
     20
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "None of the 18 listed programs closed outright. Alachua, Duval, Columbus and Palm Beach Youth Academy (FL), Falcon Ridge Ranch, Lava Heights (UT) and Norris Academy (TN) are Rite of Passage; Marion Youth Academy is Youth Opportunity Investments' Silver Springs Youth Academy; Mingus Mountain is now Mingus Mountain Youth Treatment Center and Casa Grande stays under the same Vivant-linked company; Owens Cross Roads is Pathway of Madison County, LLC; Courtland, Montgomery and Tuskegee are Brighter Path Alabama (Courtland's town licence revoked April 2025, status since unknown); Sioux Falls is Brighter Transition; Woodward Academy (IA) is open; Capital Academy (NJ) has nothing after 2023. Handover dates are mostly unconfirmed; Woodward Community Based Services is outpatient, not residential. Full results: kop-pipeline tmp/research-sources/sequel-open-programs.json.",
+    "claims": [
+     {
+      "claim": "Alachua Academy (Gainesville, FL): Florida DJJ names Rite of Passage as provider",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/alachua-academy",
+      "quote": "Provider: Rite of Passage, Inc. ... Operating capacity: 28, Ages 12-18 ... 3430 NE 39th Avenue, Gainesville, FL 32609"
+     },
+     {
+      "claim": "Duval Academy (Jacksonville, FL): Florida DJJ names Rite of Passage as provider",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/duval-academy",
+      "quote": "Provider: Rite of Passage, Inc. ... 28, Ages 13-18 ... 7500 Ricker Road, Jacksonville, FL 32244-5052"
+     },
+     {
+      "claim": "Columbus Youth Academy (Tampa, FL): Florida DJJ names Rite of Passage as provider",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/columbus-youth-academy",
+      "quote": "Provider: Rite of Passage, Inc. ... Columbus Youth Academy is a moderate risk residential commitment program for male youth up to age 19."
+     },
+     {
+      "claim": "Columbus Youth Academy (Tampa, FL): CARF lists it as a Rite of Passage Florida location",
+      "url": "https://carf.org/provider/rite-of-passage-inc-florida-316899/",
+      "quote": "Rite of Passage, Inc. - Florida (ROP) ... Columbus Youth Academy 9502 East Columbus Drive Tampa, FL 33619"
+     },
+     {
+      "claim": "Palm Beach Youth Academy (West Palm Beach, FL): Florida DJJ names Rite of Passage as provider",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/palm-beach-youth-academy",
+      "quote": "Provider: Rite of Passage, Inc. ... 78, Ages 15-21 ... 9680 Weisman Way, West Palm Beach, FL 33411"
+     },
+     {
+      "claim": "Palm Beach Youth Academy (West Palm Beach, FL): PREA audit Jan 2025 lists Rite of Passage as the agency",
+      "url": "https://www.prearesourcecenter.org/audit/directory/29450",
+      "quote": "Palm Beach Youth Academy/ Palm Beach Youth Academy Substance Abuse Program ... Rite of Passage, Inc. ... Onsite audit Jan 27, 2025 to Jan 29, 2025"
+     },
+     {
+      "claim": "Marion Youth Academy (Ocala, FL): DJJ's marion-youth-academy page now carries Silver Springs Youth Academy with YOI as provider",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/marion-youth-academy",
+      "quote": "Silver Springs Youth Academy / Florida Department of Juvenile Justice ... Provider: Youth Opportunity Investments ... 40, Ages 14-18 ... 10420 NW Gainesville Road, Ocala, FL 34482-1446"
+     },
+     {
+      "claim": "Capital Academy (Sequel of New Jersey) (Camden, NJ): Controlled by Willow Grove LLC, not Vivant",
+      "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "is now controlled by a local company called Willow Grove LLC ... was not part of Vivant"
+     },
+     {
+      "claim": "Capital Academy (Sequel of New Jersey) (Camden, NJ): Operating in Dec 2023: three teens reported missing from it",
+      "url": "https://nj1015.com/ixp/564/p/capital-academy-camden-nj-missing-teenagers/",
+      "quote": "3 Teens Missing From Psychiatric Treatment Facility in Camden"
+     },
+     {
+      "claim": "Capital Academy (Sequel of New Jersey) (Camden, NJ): NPPES record (not updated since 2018) still names Sequel of New Jersey",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&number=1821210501",
+      "quote": "SEQUEL OF NEW JERSEY, INC. ... other name CAPITAL ACADEMY ... 1770 MOUNT EPHRAIM AVE CAMDEN NJ"
+     },
+     {
+      "claim": "Casa Grande Academy (Casa Grande, AZ): NPPES record updated June 2025 names the Mingus Mountain entity",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&number=1891324711",
+      "quote": "MINGUS MOUNTAIN ESTATE RESIDENCIAL CENTER, INC. ... other name CASA GRANDE ACADEMY ... 1120 E 6TH ST CASA GRANDE AZ ... last updated 2025-06-06 ... Regional Executive Director"
+     },
+     {
+      "claim": "Casa Grande Academy (Casa Grande, AZ): Hiring in October 2026",
+      "url": "https://www.glassdoor.co.uk/Job/casa-grande-casa-grande-academy-jobs-SRCH_IL.0,11_IC1133875_KO12,31.htm",
+      "quote": "10 casa grande academy jobs in Casa Grande, AZ, October 2026"
+     },
+     {
+      "claim": "Mingus Mountain Academy (Prescott Valley, AZ): Current name and address on its own site",
+      "url": "https://www.mmytc.com/",
+      "quote": "Mingus Mountain Youth Treatment Center ... 15801 E Don Carlos Drive, Prescott Valley, AZ 86315"
+     },
+     {
+      "claim": "Mingus Mountain Academy (Prescott Valley, AZ): Alleged owner Ripley in 2025 lawsuit by 13 former residents",
+      "url": "https://www.kjzz.org/business/2025-09-29/alleged-owner-could-still-face-liability-in-mingus-mountain-youth-treatment-center-lawsuit",
+      "quote": "Alleged owner could still face liability in Mingus Mountain Youth Treatment Center lawsuit ... between 2011 and 2022"
+     },
+     {
+      "claim": "Mingus Mountain Academy (Prescott Valley, AZ): NPPES records for the Mingus Mountain entity updated 2025",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&organization_name=mingus*",
+      "quote": "MINGUS MOUNTAIN ESTATE RESIDENTIAL CENTER INC. ... other name MINGUS MOUNTAIN ACADEMY ... last updated 2025-09-11 ... Executive Director"
+     },
+     {
+      "claim": "Mingus Mountain Academy (Prescott Valley, AZ): Sister site Woodward Academy's site books visits through a Vivant system; MMYTC uses the same web vendor (Willetts Tech)",
+      "url": "https://www.wwacademy.com/woodward-academy/",
+      "quote": "https://vivant.pupsehr.com/add-visitation?slug=woodward-academy"
+     },
+     {
+      "claim": "Falcon Ridge Ranch (Virgin, UT): CARF lists Falcon Ridge Ranch under Rite of Passage",
+      "url": "https://carf.org/provider/willard-peak-312289",
+      "quote": "Parent Company: Rite of Passage, Inc. ... Falcon Ridge Ranch 750 East SR 9, Virgin, UT 84779"
+     },
+     {
+      "claim": "Falcon Ridge Ranch (Virgin, UT): APM: UT/TN former Sequel sites now run by Rite of Passage",
+      "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "Websites for three former Sequel facilities in Utah and Tennessee indicate that they are now run by Rite of Passage"
+     },
+     {
+      "claim": "Falcon Ridge Ranch (Virgin, UT): Rite of Passage job posting",
+      "url": "https://veterans.usnlx.com/toquerville-ut/youth-mentor-falcon-ridge-ranch/E4C60227484349C395B00C618BD0B11C/job/",
+      "quote": "Falcon Ridge Ranch is a residential treatment program for young women"
+     },
+     {
+      "claim": "Lava Heights Academy (Toquerville, UT): CARF lists Lava Heights under Rite of Passage",
+      "url": "https://carf.org/provider/willard-peak-312289",
+      "quote": "Parent Company: Rite of Passage, Inc. ... Lava Heights Academy 730 East Spring Drive, Toquerville, UT 84774"
+     },
+     {
+      "claim": "Norris Academy (Andersonville, TN): CARF lists it under Rite of Passage, first accredited 2025",
+      "url": "https://carf.org/provider/rite-of-passage-inc-norris-academy-397440/",
+      "quote": "Rite of Passage, Inc. - Norris Academy (NOR) 101 First Quality Drive Andersonville, TN 37705 ... First Accredited: 2025"
+     },
+     {
+      "claim": "Sequel Transition Academy / Brighter Transition (Sioux Falls, SD): NPPES record",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&organization_name=brighter*&state=SD",
+      "quote": "BRIGHTER TRANSITION YTC, LLC ... other name BRIGHTER TRANSITION YOUTH TREATMENT CENTER ... 46560 264TH ST SIOUX FALLS SD ... last updated 2022-05-25 ... AO JON ST. PIERRE Executive Director"
+     },
+     {
+      "claim": "Sequel Transition Academy / Brighter Transition (Sioux Falls, SD): KELOLAND profile (about 2024) of the open centre",
+      "url": "https://www.keloland.com/news/eye-on-keloland/brighter-transition-ytc-prepares-youth-for-the-next-step/amp",
+      "quote": "Brighter Transition YTC prepares youth for the next step"
+     },
+     {
+      "claim": "Sequel TSI of Courtland / Brighter Path Courtland (Courtland, AL): Alabama DHR intended to contract with it in July 2024",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2024/07/Intent-to-Negotiate-Sexual-Rehabilitation-Services-for-Children-RFP-GB2024-100-12.pdf",
+      "quote": "intends to negotiate with the following vendors to provide Sexual Rehabilitation for Youth: Alabama Clinical Schools, Brighter Path - Courtland"
+     },
+     {
+      "claim": "Sequel TSI of Courtland / Brighter Path Courtland (Courtland, AL): Town voted to revoke business licence, April 2025",
+      "url": "https://www.waff.com/2025/04/15/courtland-town-council-begins-process-revoke-business-license-troubled-teen-facility/",
+      "quote": "Brighter Path's attorneys have a chance to appeal this decision, and a public hearing will be held to decide its fate. A date hasn't been set for that yet."
+     },
+     {
+      "claim": "Sequel TSI of Courtland / Brighter Path Courtland (Courtland, AL): Brighter Path sued the town, May 2025",
+      "url": "https://www.waff.com/2025/05/14/lawsuit-filed-against-town-courtlands-mayor-council/",
+      "quote": "Lawsuit filed against town of Courtland's mayor and council"
+     },
+     {
+      "claim": "Sequel TSI of Montgomery / Brighter Path Montgomery (Montgomery, AL): DHR intended to contract with it, July 2024",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2024/07/Intent-to-Negotiate-Intensive-Residential-Services-RFP-GB2024-100-10.pdf",
+      "quote": "intends to negotiate with the following vendors to provide Intensive Residential Services: AltaPointe, Brighter Path - Courtland, Brighter Path - Tuskgee, Brighter Path - Montgomery"
+     },
+     {
+      "claim": "Sequel TSI of Montgomery / Brighter Path Montgomery (Montgomery, AL): NPPES shows the former Sequel name",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&number=1811321052",
+      "quote": "BRIGHTER PATH ALABAMA, LLC ... other names BRIGHTER PATH MONTGOMERY, SEQUEL OF MONTGOMERY ... 135 MILDRED ST MONTGOMERY AL"
+     },
+     {
+      "claim": "Sequel TSI of Tuskegee / Brighter Path Tuskegee (Tuskegee, AL): DHR intended to contract, July 2024",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2024/07/Intent-to-Negotiate-Intensive-Residential-Services-RFP-GB2024-100-10.pdf",
+      "quote": "Brighter Path - Tuskgee"
+     },
+     {
+      "claim": "Sequel TSI of Tuskegee / Brighter Path Tuskegee (Tuskegee, AL): Aug 2024 lawsuit names the facility, formerly Sequel Tuskegee",
+      "url": "https://www.aboutlawsuits.com/brighter-path-tuskegee-youth-facility-child-abuse-lawsuit",
+      "quote": "formerly known as Sequel Tuskegee"
+     },
+     {
+      "claim": "Sequel TSI of Tuskegee / Brighter Path Tuskegee (Tuskegee, AL): NPPES",
+      "url": "https://npiregistry.cms.hhs.gov/api/?version=2.1&number=1316278336",
+      "quote": "BRIGHTER PATH ALABAMA, LLC ... other name BRIGHTER PATH TUSKEGEE ... 4280 US HIGHWAY 29 S TUSKEGEE AL"
+     },
+     {
+      "claim": "Sequel TSI of Owens Cross Roads / Pathway of Madison County (Owens Cross Roads, AL): Open in Oct 2026; operator and owner named; conditional 2026 licence",
+      "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+      "quote": "Pathway of Madison County, LLC ... its owner, Richard White ... conditional 2026 business license ... scheduled to begin on May 3, 2027"
+     },
+     {
+      "claim": "Sequel TSI of Owens Cross Roads / Pathway of Madison County (Owens Cross Roads, AL): City nuisance suit, Dec 2025",
+      "url": "https://www.yahoo.com/news/articles/owens-cross-roads-city-attorney-021538252.html",
+      "quote": "has allowed 'criminal, violent and life-threatening activity' to occur"
+     },
+     {
+      "claim": "Sequel TSI of Owens Cross Roads / Pathway of Madison County (Owens Cross Roads, AL): DHR named both Brighter Path and Pathway for North Alabama, Jan 2024",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2024/01/Announcement-Intent-to-Negotiate-Form-Intensive-RFP-GB2023-100-08.pdf",
+      "quote": "intends to negotiate with the following vendors to provide Intensive Residential Services in North Alabama area: Brighter Path, Pathway"
+     },
+     {
+      "claim": "Woodward Academy (Woodward, IA): Its own site books visits through Vivant",
+      "url": "https://www.wwacademy.com/woodward-academy/",
+      "quote": "https://vivant.pupsehr.com/add-visitation?slug=woodward-academy ... Five dormitories for boys comprehensive community residential treatment"
+     },
+     {
+      "claim": "Woodward Academy (Woodward, IA): Hiring (Paylocity)",
+      "url": "https://recruiting.paylocity.com/recruiting/jobs/Details/4467604/Woodward-Academy/Youth-Counselor",
+      "quote": "Woodward Academy - Youth Counselor"
+     },
+     {
+      "claim": "Woodward Community Based Services (Urbandale, IA (6200 Aurora Ave)): Directory listing",
+      "url": "https://recovered.org/rehabs/woodward-community-based-servs-urbandale-ia",
+      "quote": "Woodward Community Based Servs Woodward Youth Corporation"
+     },
+     {
+      "claim": "Sequel TSI Kissimmee (not on the list) (Kissimmee, FL): Florida DJJ",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/kissimmee-youth-academy",
+      "quote": "Kissimmee Youth Academy ... Provider: Youth Opportunity Investments, LLC ... 95, Ages 14-21 ... 2330 New Beginnings Road, Kissimmee, FL 34744"
+     },
+     {
+      "claim": "Union Juvenile Residential Facility (not on the list) (Raiford, FL): Sequel's Union facility counted among closures",
+      "url": "https://news4jax.com/news/local/2022/10/28/i-team-closer-look-at-recent-facility-closures-in-florida-following-st-johns-youth-academys-sudden-shutdown",
+      "quote": "four facilities in Union, St. Johns, St. Petersburg and Pompano counties privately contracted under Sequel Youth and Family Services have closed"
+     },
+     {
+      "claim": "St. Johns Youth Academy (not on the list) (St. Augustine, FL): DJJ shut it down",
+      "url": "https://news4jax.com/news/local/2022/10/28/i-team-closer-look-at-recent-facility-closures-in-florida-following-st-johns-youth-academys-sudden-shutdown",
+      "quote": "Since closing on Wednesday, the boys were taken to other facilities across Florida."
+     }
+    ],
+    "by": "Claude session (research agent)",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "wiki-update-drafts-kop-pipeline:approved-wiki-entries-with-no-record",
@@ -5411,6 +5618,10 @@
     ],
     "by": "Claude session",
     "at": "2026-10-25"
+   },
+   "settled": {
+    "text": "Keisha Brown (17, April 9, 2005, Alexander Youth Services Center, run by Cornell Companies) is live on https://kidsoverprofits.org/in-loving-memory/ (checked 2026-10-26).",
+    "at": "2026-10-26"
    }
   },
   {
@@ -6682,6 +6893,10 @@
      }
     ],
     "by": "Claude session",
+    "at": "2026-10-26"
+   },
+   "settled": {
+    "text": "InnerChange draft history replaced on its company record (history seed 14, checked on production 2026-10-26); from https://github.com/kidsoverprofits/Kids-Over-Profits/commit/0f4ef71f",
     "at": "2026-10-26"
    }
   },
@@ -11680,5 +11895,5 @@
    "directions": []
   }
  ],
- "built": "2026-10-26 18:30"
+ "built": "2026-10-26 18:37"
 }
