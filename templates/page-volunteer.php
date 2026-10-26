@@ -64,7 +64,7 @@ while (have_posts()) :
                 <?php kop_ie_html_start('volunteer:review', 'Volunteer page: review inspection findings'); ?>
                 <h2 class="kop-volpage-way-h" id="kop-volpage-review-h">Review inspection findings</h2>
                 <p>Our scanner pulls passages out of state inspection reports. You decide: harm or danger to a young person, or paperwork?</p>
-                <p class="kop-volpage-meta">Give a name to get your own link (no account). A 10-minute practice round first.</p>
+                <p class="kop-volpage-meta">Needs your own link (no account). A 10-minute practice round first.</p>
                 <?php kop_ie_html_end(); ?>
                 <p class="kop-volpage-go"><a class="kop-volpage-btn" href="#kop-vol-signup">Get a link and start</a></p>
             </section>
@@ -73,7 +73,7 @@ while (have_posts()) :
                 <?php kop_ie_html_start('volunteer:research', 'Volunteer page: research a question'); ?>
                 <h2 class="kop-volpage-way-h" id="kop-volpage-research-h">Research a question</h2>
                 <p>Pick a question our records cannot answer yet, such as when a program closed or who ran it, and look it up. Each one says where to start.</p>
-                <p class="kop-volpage-meta">Give a name to get your own link (no account). Every fact you send needs the link to where you found it.</p>
+                <p class="kop-volpage-meta">Needs your own link (no account). Every fact you send needs the link to where you found it.</p>
                 <?php kop_ie_html_end(); ?>
                 <p class="kop-volpage-go"><a class="kop-volpage-btn" href="#kop-vol-signup">Get a link and pick one</a><?php
                     if ($kop_vp_open > 0) echo ' <span class="kop-volpage-count">' . esc_html(number_format_i18n($kop_vp_open)) . ' open</span>'; ?></p>
