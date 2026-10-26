@@ -128,3 +128,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     comes back, or none). In the News Processor submit popup the "Top story" box shows only signed in. Then
     `python -u scripts/check-contrast.py /news/` and `python -u scripts/check-mobile-overflow.py /news/`. Owner to say
     whether the home page strip should move down too (only /news/ changed).
+33. **Submission emails cut back** (2026-10-26, [5b0764db](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/5b0764db248019af868e793c5c3ca7e6e2e64f07)):
+    only a person's submission (form, /send/, app, extension as a non-admin, volunteer, anonymous portal) mails at once;
+    scans, discovery, research-key sends and the owner's own sends wait for the 7am digest (ten titles per kind, then
+    "and N more"). After a day, the inbox should hold one "[Kids Over Profits] N new submissions today" mail plus the
+    person-sent ones. If something a person sent landed only in the digest, or a bot still mails one by one, say which.
