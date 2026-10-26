@@ -11063,5 +11063,25 @@
         "currentOperator": "World Wide Association of Specialty Programs and Schools (WWASPS)"
       }
     }
+  },
+  {
+    "id": 12251,
+    "unique_name": "Mingus Mountain Estate Residential Center, Inc.",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Mingus Mountain Estate Residential Center, Inc.",
+        "nameKey": "mingus mountain estate residential center",
+        "investors": [],
+        "pastNames": [],
+        "otherNames": [],
+        "currentName": "",
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": ""
+      }
+    }
   }
 ]
