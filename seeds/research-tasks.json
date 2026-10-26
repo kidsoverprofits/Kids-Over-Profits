@@ -2790,7 +2790,49 @@
      "url": "https://kidsoverprofits.org/operator/eosis/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The seller is named only in EOSIS's own release (eosisrecovery.com, In the News). The program pages name no seller, and KOP's notes say the sale was in July 2026; the release puts the announcement at June 23, 2026, so 'June 2026' is the right month, and the program pages came out June 26 to July 22. No closing date, price or advisers appear anywhere public; Renovus's EOSIS page and Trinity Hunt (FHW's owner since 2014) say nothing about it. The dates on the program pages come from each page's published-time metadata (ViewPoint also shows '26 Jun' on the page). Utah licensing (cclapi.dlbc.utah.gov, licenses 93443 and 93639) shows only routine annual pre-inspections on July 7, 2026 and no licensee name, so it neither confirms nor dates a change of owner. famhelp.com is still up (pages edited May 2026) but no longer names any programs. Sent to news review: the EOSIS release and the Seven Stars and Elevations announcements.",
+    "claims": [
+     {
+      "claim": "Family Help & Wellness sold EOSIS the five Utah programs (Elevations, Seven Stars, Solstice West, The Approach and ViewPoint)",
+      "url": "https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/",
+      "quote": "EOSIS, a leading behavioral health provider headquartered in Minnesota, today announced the acquisition of five Utah-based behavioral health programs from Family Help & Wellness: Elevations, Seven Stars, Solstice West, The Approach, and ViewPoint."
+     },
+     {
+      "claim": "EOSIS announced the purchase on June 23, 2026, as an acquisition already made; the release gives no separate closing date and no price",
+      "url": "https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/",
+      "quote": "ST. PAUL, Minn., June 23, 2026 – EOSIS ... today announced the acquisition of five Utah-based behavioral health programs"
+     },
+     {
+      "claim": "The five programs run as EOSIS Utah under their own names",
+      "url": "https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/",
+      "quote": "The programs will collectively operate as EOSIS Utah while maintaining their individual program names."
+     },
+     {
+      "claim": "ViewPoint Center posted its announcement on June 26, 2026",
+      "url": "https://www.viewpointcenter.com/viewpoint-center-joins-eosis-utah/",
+      "quote": "ViewPoint Center Joins EOSIS Utah ... 26 Jun ... has joined EOSIS, a behavioral health organization based in Minnesota, as part of a broader acquisition of five Utah-based behavioral health programs"
+     },
+     {
+      "claim": "Seven Stars posted its announcement on July 6, 2026",
+      "url": "https://discoversevenstars.com/blog/seven-stars-joins-eosis-utah/",
+      "quote": "Seven Stars Joins EOSIS Utah: Neurodevelopmental Specialty Care Continues Under New Organizational Partnership"
+     },
+     {
+      "claim": "Elevations RTC posted its announcement on July 7, 2026",
+      "url": "https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/",
+      "quote": "Elevations ... has joined EOSIS, a behavioral health organization based in Minnesota, as part of a broader acquisition of five Utah-based behavioral health programs now operating together as EOSIS Utah."
+     },
+     {
+      "claim": "Solstice West posted its announcement on July 22, 2026",
+      "url": "https://solsticertc.com/solstice-west-joins-eosis-utah/",
+      "quote": "Solstice West ... has joined EOSIS, a behavioral health organization based in Minnesota, as part of a broader acquisition of five Utah-based behavioral health programs"
+     }
+    ],
+    "by": "claude",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "company-histories:innerchange",
@@ -11412,5 +11454,5 @@
    ]
   }
  ],
- "built": "2026-10-26 00:25"
+ "built": "2026-10-26 01:56"
 }
