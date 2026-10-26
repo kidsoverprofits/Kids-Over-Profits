@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 21:38 UTC",
- "source": "fb112650887fea535b403cb83a29c549a4151940",
+ "built": "2026-10-26 21:39 UTC",
+ "source": "a4ba141699398a71ed16dcaf03a8652e59ed97e8",
  "sections": [
   {
    "key": "2",
@@ -415,6 +415,14 @@
        "ask": "Have you tried the extension, and should it go on the Chrome and Firefox stores?",
        "date": "",
        "hash": "6e2efa15f475"
+      },
+      {
+       "id": "2.6:store-accounts-as-the-nonprofit-2026-10-26",
+       "lead": "Store accounts as the nonprofit (2026-10-26)",
+       "text": "**Store accounts as the nonprofit (2026-10-26)**: KOP is in the IRS master file as a 501(c)(3) (EIN 99-4823769, PO Box 893, Bath ME 04530-0893, ruling 2025-01). Apple waives the 99 USD a year for recognized nonprofits that sell no digital goods (the app sells none; Donate links out to /donate/). Google Play has no waiver: 25 USD once. Steps, all the owner's (legal attestation, Apple and Google sign-in): a) a D-U-N-S number for Kids Over Profits, free through Apple's lookup at https://developer.apple.com/enroll/duns-lookup/ (D&B wants a street address, not the PO box; up to about 5 business days); b) enroll at https://developer.apple.com/programs/enroll/ as an Organization, \"Nonprofit\", tick the fee waiver, with an Apple Account on a @kidsoverprofits.org address, 2FA on, and the IRS determination letter ready (Apple phones to check authority); c) Play Console https://play.google.com/console/signup as an Organization with the same D-U-N-S (organization accounts skip the 12-tester, 14-day closed test that personal accounts need). Each renewal the Apple Account Holder confirms eligibility again. Then item 3 (Team ID, SHA-256).",
+       "ask": "Do you have a D-U-N-S number yet, and which @kidsoverprofits.org address should own the store accounts?",
+       "date": "2026-10-26",
+       "hash": "d4b9437c4d9d"
       }
      ]
     }
