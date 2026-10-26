@@ -481,6 +481,13 @@ writer to say so, once, in one place, and for every reader to listen.
    - Each new gap becomes a written line, waiting at Review inbox > Wiki
      updates from record changes. Open: the "KOP has new information"
      badge in the editor (PLAN 3.12 step 6).
+   - Write-ups listen too (2026-10-26, `kop_wu_on_change()` in
+     `inc/record-writeups.php`): a facility event, or a news or lawsuit
+     event's linked facilities, marks the record changed (option
+     `kop_wu_changed`) and puts it in Review inbox > Write-ups to approve; its
+     draft is written from what the record says now. The write-up's own save
+     (`'source' => 'writeup'`) does not mark it. Not yet: operator events
+     (a company's facilities) and writes that skip the event.
 5. **Wiki approval writes staff the way the record holds them.** Done
    2026-10-13, straight to the record with a log and Undo (owner's choice).
    `kop_v2_pdo_master_rows()` no longer keeps a stale copy after a save, so
