@@ -176,7 +176,7 @@ if (!function_exists('kop_network_years_page')) {
         $decisions = kop_network_years_decisions();
         $map = function_exists('kop_network_map_page_url') ? kop_network_map_page_url() : home_url('/network-map/');
         $kinds = array('facility' => 'Program', 'parent' => 'Company', 'association' => 'Trade group',
-            'church' => 'Church', 'government' => 'Government body', 'other' => 'Other');
+            'church' => 'Church', 'government' => 'Government body', 'investor' => 'Investor', 'other' => 'Other');
         $rows = array();
         foreach ($candidates as $id => $c) {
             $d = $decisions[$id] ?? array();

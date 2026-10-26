@@ -109,6 +109,7 @@ Tabs are grouped under headings (the source's `'group'`). Each tab's own help li
 - **Inspection links:** a facility record and a state licensing entry whose names differ; Same facility puts that entry's reports on the facility page.
 - **Map renames:** programs that changed their name; give the rename year (or leave it blank), Swap order if the arrow points the wrong way.
 - **Map years:** opening and closing years researched for map places and companies, with the sentence and link each came from.
+- **Map questions:** the map build's judgement calls (what a name is, who bought whom, which record, which closed name came first, which map name a memorial program is) and six curated aliases that may be another era of their record; one button per answer, on the map after the next hourly rebuild (alias answers change the record at once), Undo on the Answered tab.
 - **Program homes:** records that may be the separate licensed homes of one program; Group ties them to one program record.
 - **Wiki links:** each r/troubledteens wiki entry tied to the KOP record it describes (or a new record made for it), so it can be brought up to date.
 - **Wiki updates:** wiki entries with what KOP has learned since they were written; Approve writes KOP's copy, then Ready for Reddit has the text to paste with Copy and the Reddit edit link.

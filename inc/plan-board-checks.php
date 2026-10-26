@@ -102,6 +102,13 @@ function kop_pb_checks() {
                 'federal-funding' => 'Federal funding', 'nonprofit-filings' => 'Nonprofit tax filings', 'business-filings' => 'Business filings'));
         },
         '2.3:map-years' => function () { return kop_pb_queues_empty(array('map-years' => 'Map Years', 'map-renames' => 'Map Renames')); },
+        '2.3:map-questions' => function () {
+            if (!function_exists('kop_network_questions_open')) return null;
+            $open = kop_network_questions_open();
+            $aliases = array_filter($open, function ($q) { return $q['section'] === 'alias'; });
+            if ($aliases) return array(false, count($aliases) . ' of the six alias questions and ' . (count($open) - count($aliases)) . ' build questions still open');
+            return array(true, 'All six alias questions answered; ' . count($open) . ' build questions open (they return with each rebuild)');
+        },
         '2.3:woodbury-reports' => function () { return kop_pb_queues_empty(array('woodbury-reports' => 'Woodbury Reports')); },
         '2.3:program-homes' => function () { return kop_pb_queues_empty(array('program-homes' => 'Program Homes')); },
         '2.3:inspection-links' => function () { return kop_pb_queues_empty(array('inspection-links' => 'Inspection Links')); },

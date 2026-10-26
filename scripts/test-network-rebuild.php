@@ -98,6 +98,14 @@ $cases = array(
         if (strpos($sql, 'referrers_master') !== false) $row['json_data'] .= ' ';
         return $row;
     }),
+    'an investor stake change moves it'  => array(true, function ($sql, $row) {
+        if (strpos($sql, 'kop_investor_links') !== false && isset($row['role'])) $row['role'] .= ' ';
+        return $row;
+    }),
+    'an investor rename moves it'        => array(true, function ($sql, $row) {
+        if (strpos($sql, 'kop_investors ') !== false && isset($row['name'])) $row['name'] .= ' ';
+        return $row;
+    }),
 );
 foreach ($cases as $label => $case) {
     $GLOBALS['edit'] = $case[1];

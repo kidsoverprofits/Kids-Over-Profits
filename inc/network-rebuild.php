@@ -67,6 +67,26 @@ if (!function_exists('kop_network_rebuild_fingerprint')) {
             'consultants'         => 'SELECT json_data FROM referrers_master ORDER BY id',
             'memorial'            => "SELECT program, COUNT(*) AS n FROM memorial_victims WHERE publication_status = 'published' GROUP BY program ORDER BY program",
         );
+        // Investors (inc/investors.php): each is a name of its own kind on the map, its stakes the lines.
+        // Answers from KOP Tools > Map Questions (inc/network-questions.php) are overrides the build reads.
+        // Both tables are absent before their screens are first opened.
+        $optional = array(
+            'investors'       => "SELECT id, name, kind FROM {$prefix}kop_investors ORDER BY id",
+            'investor_links'  => "SELECT investor_id, operator_id, facility_id, role, start_year, end_year, detail FROM {$prefix}kop_investor_links ORDER BY id",
+            'network_answers' => "SELECT question_id, section, subject, answer FROM {$prefix}kop_network_answers ORDER BY id",
+        );
+        foreach ($optional as $label => $sql) {
+            try {
+                $rows = $query($sql);
+            } catch (Throwable $e) {
+                continue;
+            }
+            if (!$rows) continue;   // none yet: the fingerprint is as before
+            hash_update($ctx, '#' . $label . "
+");
+            foreach ($rows as $row) hash_update($ctx, json_encode(array_values($row)) . "
+");
+        }
         foreach ($whole as $label => $sql) {
             hash_update($ctx, '#' . $label . "\n");
             foreach ($query($sql) as $row) {

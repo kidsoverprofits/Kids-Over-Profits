@@ -272,7 +272,7 @@
      */
     var KIND_WORDS = {
         parent: 'COMPANY', association: 'TRADE GROUP',
-        government: 'GOVERNMENT', church: 'CHURCH'
+        government: 'GOVERNMENT', church: 'CHURCH', investor: 'INVESTOR'
     };
 
     /** The word under this node (or kind), or '' for the unmarked kinds. */

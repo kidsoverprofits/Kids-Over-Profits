@@ -280,7 +280,8 @@
                 { kind: 'parent', label: 'Company' },
                 { kind: 'association', label: 'Trade group' },
                 { kind: 'government', label: 'Government body' },
-                { kind: 'church', label: 'Church' }
+                { kind: 'church', label: 'Church' },
+                { kind: 'investor', label: 'Investor' }
             ].forEach(function (entry) {
                 var word = painter.kindWord ? painter.kindWord(entry.kind) : '';
                 if (!word) return;

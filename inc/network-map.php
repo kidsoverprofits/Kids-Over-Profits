@@ -23,6 +23,7 @@ if (!defined('ABSPATH')) {
 // Map Years); loaded here so everything that reads the map has them.
 require_once __DIR__ . '/network-years.php';
 require_once __DIR__ . '/network-renames.php';
+require_once __DIR__ . '/network-questions.php';
 
 if (!function_exists('kop_network_map_file')) {
     /** Absolute path to one of the network data files. */
@@ -361,6 +362,7 @@ if (!function_exists('kop_network_map_label')) {
             'association' => 'Trade groups',
             'government'  => 'Government bodies',
             'church'      => 'Churches',
+            'investor'    => 'Investors',
             'other'       => 'Other',
         );
         $categories = array(

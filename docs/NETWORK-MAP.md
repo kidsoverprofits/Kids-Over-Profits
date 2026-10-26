@@ -50,7 +50,7 @@ Key facts the map depends on:
   ownership is the `chain` column plus corporate edges. Chain is sparse, so
   the cross-network view uses `crossesRegion`.
 - Node kinds: person, facility, parent, association, government, church,
-  other. Edge categories: corporate, family, survivor, referral, board,
+  investor (2026-10-25, from the Investors table), other. Edge categories: corporate, family, survivor, referral, board,
   leadership, clinical, admissions, staff, membership, other, unknown.
 - An unlabelled line between two organisations is the board's shorthand for
   "part of the same group", and is read as corporate - unless one end is a

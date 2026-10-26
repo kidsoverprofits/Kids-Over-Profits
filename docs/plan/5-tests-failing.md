@@ -59,3 +59,11 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    `pa_scraper.py`, so it predates OCR version 3). `scrapers/ocr_repair.py` leaves "klesing" and "unclolhed" instead of
    "kissing" and "unclothed" (fax page lines 2 and 5). Check whether `scrapers/pa_ocr_vocab.json` (rebuilt 2026-10-18
    by `scripts/build-pa-ocr-vocab.py`) lost those words or the swap rules changed.
+5. **test-network-embed.js: 5 of 703 slices differ from the map** (found 2026-10-25, the same on the graph.json before
+   that day's investor build, so not new): aspen-education-group, suws-of-the-carolinas, provo-canyon-school,
+   aspen-achievement-academy, asheville-academy-for-girls. Each embed is missing Aspen-side names the map shows
+   (aspiro-group, boulder-creek-academy, bain-capital, passages-to-recovery...) and draws fewer lines (145 against 176
+   for Provo), so the PHP slice (`kop_network_map_slice_opened()` in inc/network-map.php) and focus.js have drifted,
+   most likely on how the cap's dropped connections or an owner's step are treated for names joined through a folded
+   line. Run with `--only=aspen-education-group,provo-canyon-school` against the portable PHP; fix the PHP to match
+   focus.js (never the other way), then the full run.

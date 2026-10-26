@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 18:16 UTC",
- "source": "ba839c29729a2e63fd8e5e1d7f377034e930a9bf",
+ "built": "2026-10-26 18:20 UTC",
+ "source": "aa90e0b64173b4574cc71124fa4f2578445168ee",
  "sections": [
   {
    "key": "2",
@@ -274,6 +274,14 @@
        "ask": "Do the AI reader's adds and rejects in Woodbury Facts look right (spot-check a few cards)?",
        "date": "2026-10-25",
        "hash": "3d08f559b785"
+      },
+      {
+       "id": "2.3:map-questions",
+       "lead": "Map Questions",
+       "text": "**Map Questions** ([KOP Tools > Map Questions](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-network-questions), live 2026-10-25, also a Review inbox tab): first the six \"Past name or own program\" cards (Bethel Boys Academy, Laurel Ridge Treatment Center, Agape Boarding School, Refuge of Grace, Change Academy at Lake of the Ozarks, Cleo Wallace Academy; \"a past name\" goes onto the record at once, \"its own program\" comes off its match aliases and a session then makes the record), then the build's tabs (What is it, Who bought whom, Which record, Same place?, Which name came first, Memorial deaths; on the map after the next hourly rebuild). Undo on the Answered tab.",
+       "ask": "Have you answered the six alias cards on Map Questions (the build's tabs can wait)?",
+       "date": "2026-10-25",
+       "hash": "8109c48069e3"
       }
      ]
     },
@@ -939,28 +947,20 @@
        "hash": "ae2f623cf54b"
       },
       {
-       "id": "4.3:investors-on-the-network-map",
-       "lead": "Investors on the network map",
-       "text": "**Investors on the network map** (owner, Plan Board 2026-10-25: \"investors as their own map kind\"). The map build (kop-pipeline `scripts/build-network-graph.js`) reads the Investors table (KOP Tools > Investors) and draws each investor as its own node kind, linked to the companies it held with the years on its row; the legend, filters and `docs/claude/network-map.md` name the new kind, and the hourly rebuild fingerprint (`inc/network-rebuild.php`) moves when an investor row changes.",
-       "ask": "",
-       "date": "2026-10-25",
-       "hash": "d2939c5b9cf4"
-      },
-      {
-       "id": "4.3:network-map-judgement-calls-need-a-review-screen",
-       "lead": "Network map judgement calls need a review screen",
-       "text": "**Network map judgement calls need a review screen** (owner, 2026-10-25: did not know what the old 2.4 item meant; it pointed at a build file nobody can open). Two lists wait for the owner's word: (a) the rows the map build had to guess at (`tmp/network-qa.md`, written by kop-pipeline's build in Actions, gitignored); (b) six curated aliases that may name another era of their record: Bethel Boys Academy (#13927, since merged into 100180), Laurel Ridge Treatment Center (#10602), Agape Boarding School (#11361), Refuge of Grace (#11462), Change Academy at Lake of the Ozarks (#11355), Cleo Wallace Academy (#12621) (background: PLAN-ARCHIVE.md \"Owner pass on curated aliases\"). Put both on one KOP Tools review screen, a card per question in plain words (\"Is X a past name of Y, or its own program?\") with the evidence and a button per answer, then add an `Ask:` item in 2.3 pointing at it.",
-       "ask": "",
-       "date": "2026-10-25",
-       "hash": "264c3fc4253d"
-      },
-      {
        "id": "4.3:research-tasks-worked-2026-10-26-claude-tab-7-tasks",
        "lead": "Research tasks worked 2026-10-26 (Claude tab, 7 tasks)",
        "text": "**Research tasks worked 2026-10-26 (Claude tab, 7 tasks)**: answers sent for 6, record fixes still open: - G4S Youth Services became TrueCore in 2017 (sale closed April 3, 2017; name announced June 30, 2017, PR Newswire). Fix every copy that says 2013 or 2016: grep seeds/ for \"TrueCore\" (operator-records.json G4S + TrueCore notes, operator-histories.json drafts + reviewer notes, company-milestones.json, history/juvenile-justice-timeline.html \"sale to 2016\"), bump the seed versions, then `tasks.py settle company-histories:g4s-youth-services`. - Three Strands Wilderness (record 100175, Oak Creek, CO): closed late 2020 (site live 2020-11-27, ranch sold mid-December 2020 after the program ended, Steamboat Pilot 2020-12-26). Set endYear 2020, status Closed, yearsOfOperation 2019-2020 through seeds/facility-records.json + template pass bump; then settle its task. - Devereux's Westminster, CO refugee children's shelter: licensed 2019-12-05, empty Sept 2020, open April 2021; end year not found (grant to June 2022, campus closed 2023). Task left answered-partial for the owner. - Sequel's open programs (wiki entry 82 table): the research agent hit the usage limit before reporting; its partial work is lost with this session. Redo with a fresh agent. - Archive rule: Wayback captures relied on still need PDFs in the media library (InnerChange Vive page 20160325163743, InnerChange homepages 20151114185811 / 20190122133357, Three Strands 20201127021205, the G4S 2009 and 2017 announcements, CPR 2023-05-11). - Sources found but not yet sent (`send-sources.py`): scratchpad files sources-brown-fernald, sources-innerchange- threestrands and sources-g4s-devereux `.not-sent.json` (25 links); copied to kop-pipeline tmp/research-sources/. - Settle after deploy: Keisha Brown on https://kidsoverprofits.org/in-loving-memory/ (template pass v144), InnerChange draft history replaced (history seed v13), then settle both tasks.",
        "ask": "",
        "date": "2026-10-26",
        "hash": "1ba03b5d3a9c"
+      },
+      {
+       "id": "4.3:investors-and-map-questions-the-kop-data-half-is-not-pushed",
+       "lead": "Investors and Map Questions: the kop-data half is not pushed yet",
+       "text": "**Investors and Map Questions: the kop-data half is not pushed yet** (2026-10-26). The build changes are in kop-pipeline https://github.com/kidsoverprofits/kop-pipeline/commit/945a6a6 and the theme half is on main, but the rebuilt `network/graph.json`, `layout.json`, `network-overrides.json` (the four Sequel investors retyped `\"kind\": \"investor\"`) and the new `network-qa.json` are not committed in kop-data. Until they are, the map draws no investor and Map Questions shows only the six alias cards. Steps: (a) `node scripts/test-network-modules.js` failed 5 checks on the new graph (best-connected node lost its label; WWASPS has no drawn label; opening view puts 9 names off the stage; Provo lines long, median 674px; David Gilcrease has 6 connections, not 5). Run it on the previous graph to see which are new: in kop-data `git show HEAD:network/graph.json > network/graph.json` (and the same for layout.json), run the suite in the theme (about 12 minutes), then rebuild as in (c). (b) Fix any failure the investor nodes caused (the 7 new nodes and lines near Sequel, Paradigm, InnerChange are the only graph change). (c) From kop-pipeline: `node scripts/build-network-graph.js && node scripts/build-network-layout.js && node scripts/test-network-graph.js && node scripts/test-network-layout.js`, then commit + push the four files in kop-data (or press Rebuild now at KOP Tools > Map Rebuild, which does the same in Actions now that the workflow syncs the investor and answer tables).",
+       "ask": "",
+       "date": "2026-10-26",
+       "hash": "9a2742caa031"
       }
      ]
     },
@@ -1266,10 +1266,10 @@
       {
        "id": "4.6:network-map-undated-names",
        "lead": "Network map undated names",
-       "text": "**Network map undated names**: rerun the year research for the 81 with none, with a raised search cap.",
+       "text": "**Network map undated names** (rerun 2026-10-26 on the 64 still undated in graph.json, a larger search budget): the results are in kop-pipeline `tmp/years-research/result-9.json` to `result-12.json` (gitignored; batches `batch-9` to `batch-12`); about 19 got an opening year, 4 a closing year, about 41 are open today with no opening year found. 140 sources found on the way were sent (9 already held, 1 refused). Left to do: from kop-pipeline, with kop-data's real graph.json in place, `node scripts/build-years-candidates.js` (writes kop-data `network/years-candidates.json`), check it with `php scripts/test-network-years.php` in the theme, commit + push it in kop-data; the new years then wait at KOP Tools > Map Years (2.3 item 6). Jemison Group Home's 1999 rests on KOP's own Three Springs timeline only.",
        "ask": "",
-       "date": "",
-       "hash": "1260508f3900"
+       "date": "2026-10-26",
+       "hash": "17fb4dfbb226"
       },
       {
        "id": "4.6:company-pages",
@@ -1527,6 +1527,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "7ce50a1d8b8b"
+      },
+      {
+       "id": "5:test-network-embed-js-5-of-703-slices-differ-from-the-map",
+       "lead": "test-network-embed.js: 5 of 703 slices differ from the map",
+       "text": "**test-network-embed.js: 5 of 703 slices differ from the map** (found 2026-10-25, the same on the graph.json before that day's investor build, so not new): aspen-education-group, suws-of-the-carolinas, provo-canyon-school, aspen-achievement-academy, asheville-academy-for-girls. Each embed is missing Aspen-side names the map shows (aspiro-group, boulder-creek-academy, bain-capital, passages-to-recovery...) and draws fewer lines (145 against 176 for Provo), so the PHP slice (`kop_network_map_slice_opened()` in inc/network-map.php) and focus.js have drifted, most likely on how the cap's dropped connections or an owner's step are treated for names joined through a folded line. Run with `--only=aspen-education-group,provo-canyon-school` against the portable PHP; fix the PHP to match focus.js (never the other way), then the full run.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "748a88c14ff2"
       }
      ]
     }

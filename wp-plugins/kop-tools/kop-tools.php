@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.14
+ * Version: 2.5.15
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -365,6 +365,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-network-rebuild',
                 'requires' => 'kop_network_rebuild_page',
+            ),
+            array(
+                'title'    => 'Map Questions',
+                'desc'     => 'The map build\'s judgement calls (what a name is, who bought whom, which record, which was the earlier name) and six curated aliases, one card each with the evidence and a button per answer; answers reach the map at the next hourly rebuild, with Undo.',
+                'type'     => 'screen',
+                'screen'   => 'kop-network-questions',
+                'requires' => 'kop_network_questions_page',
             ),
         ),
         'Inspections' => array(

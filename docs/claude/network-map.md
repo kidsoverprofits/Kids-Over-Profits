@@ -24,6 +24,14 @@ node scripts/test-network-timeline.js           # the timeline (store years, tim
 php scripts/test-network-years.php && python scripts/check-network-years-page.py
 # Renamed programs reviewed at KOP Tools > Map Renames (inc/network-renames.php): the rename year splits the two names' years on the map at once
 php scripts/test-network-renames.php
+# The build's judgement calls (what a name is, who bought whom, which record, which closed name came first, which map name a
+# memorial program is) and six curated aliases, answered at KOP Tools > Map Questions (inc/network-questions.php; also a Review
+# inbox tab). The build writes them to js/data/network/network-qa.json (kop-data) beside graph.json; an answer is a row of
+# {prefix}kop_network_answers, which the build reads as overrides (readAnswers) at the next hourly rebuild, so a question leaves
+# the screen once a rebuild has run. An alias answer changes the record at once (past name -> identification.pastNames; own
+# program -> off legacy.matchAliases) with Undo. Add a question kind in writeQaQuestions() (build), readAnswers() (build) and
+# kop_network_questions_sections() (theme) together.
+php scripts/test-network-questions.php
 
 # See the working tree's map in a browser before pushing it
 python scripts/preview-network-map.py --shots tmp/map-preview
@@ -32,7 +40,7 @@ python scripts/preview-network-map.py --shots tmp/map-preview
 ## Network map data
 
 `js/data/network/` (the kop-data repo) holds the Miro board export (`tti_nodes.csv`, `tti_edges.csv`)
-and the generated `graph.json` that the network map reads. Corrections go in
+and the generated `graph.json` that the network map reads (and `network-qa.json`, the build's open questions). Corrections go in
 `network-overrides.json`, never in the CSVs, so the next board export does not
 undo them. `staff-movement.csv` holds the reviewed staff moves the build adds
 as edges; `node scripts/extract-staff-movement.js` (kop-pipeline) drafts it from the profile
@@ -42,3 +50,12 @@ Facility links are resolved against
 `facilities_v2` in `tmp/prod.sqlite` when that mirror is present, and fall back
 to the program aggregate otherwise. The build reads `js/network-map/store.js` and
 `js/vendor/d3-force.bundle.min.js` from this repo, so a change there is a map change too.
+
+Node kinds: person, facility, parent, association, government, church, investor, other. `investor` (2026-10-25) is a row
+of KOP Tools > Investors (`{prefix}kop_investors`, `_links`): the build (addInvestors) draws each as its own name, linked
+to every company and program it held, the stake's role and years on the line (edge `provenance: 'investors'`, `years`);
+an investor the board already drew by hand (the four behind Sequel, `kind: "investor"` in `network-overrides.json`'s
+`nodes`) keeps its node. The kind word under the name is INVESTOR (`canvas.js` KIND_WORDS), the legend row and the
+drawer label follow it (`filters.js`, `drawer.js`, `kop_network_map_label()`), and a new kind goes in all four plus
+the build's KINDS and `scripts/test-network-graph.js`. The hourly fingerprint covers the two investor tables and
+`{prefix}kop_network_answers`.

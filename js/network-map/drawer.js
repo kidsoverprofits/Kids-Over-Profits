@@ -24,7 +24,8 @@
 
     var KIND_WORDS = {
         facility: 'Program', parent: 'Company', person: 'Person',
-        association: 'Trade group', church: 'Church', government: 'Government body'
+        association: 'Trade group', church: 'Church', government: 'Government body',
+        investor: 'Investor'
     };
     var STATUS_WORDS = {
         open: 'Operating', closed: 'Closed', rebranded: 'Rebranded',

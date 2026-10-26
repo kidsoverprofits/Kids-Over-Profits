@@ -3404,3 +3404,33 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
          https://kidsoverprofits.org/facility/dragonfly-transitions-or/ lands on the Dragonfly card.
       b. Done 2026-10-25 (owner said yes): folder 7789 "Fulshear" is linked to 4163 in kop_folder_links (the server
          now counts 7789 among the program's folders).
+
+## 4.3 Records, names and data quality, items 19 and 20: investors on the map and Map Questions (finished 2026-10-25)
+
+Done 2026-10-25. Item 19: kop-pipeline's `scripts/build-network-graph.js` reads `wpdl_kop_investors` + `_links`
+(addInvestors) and draws each investor as kind `investor`, linked to the companies and programs it held with the
+stake's role and years on the line; the four investors drawn by hand behind Sequel keep their nodes and take the kind
+(kop-data `network-overrides.json`). The theme shows INVESTOR under the name, a legend row, the drawer label and the
+filter label (`canvas.js`, `filters.js`, `drawer.js`, `kop_network_map_label()`), and the hourly fingerprint
+(`inc/network-rebuild.php`) covers the two investor tables; `build-network-map.yml` syncs them. Item 20: the build
+writes its judgement calls (kind guesses, who bought whom, which record, loose matches, unplaced wording, rebrands with
+both ends closed, memorial programs matching two names) to kop-data `network/network-qa.json` (writeQaQuestions), and
+KOP Tools > Map Questions (`inc/network-questions.php`, also the Review inbox tab `map-questions`) shows them with the
+six curated alias questions, a button per answer; answers are rows of `{prefix}kop_network_answers`, which the build
+reads as overrides (readAnswers) and the fingerprint watches, and an alias answer changes the record at once with Undo.
+Tests: `scripts/test-network-questions.php`, `test-network-rebuild.php` (investor cases), `test-kop-tools-menu.php`;
+kop-pipeline `test-network-graph.js`. The owner's step is 2.3 item 18.
+
+19. **Investors on the network map** (owner, Plan Board 2026-10-25: "investors as their own map kind"). The map build
+    (kop-pipeline `scripts/build-network-graph.js`) reads the Investors table (KOP Tools > Investors) and draws each
+    investor as its own node kind, linked to the companies it held with the years on its row; the legend, filters and
+    `docs/claude/network-map.md` name the new kind, and the hourly rebuild fingerprint (`inc/network-rebuild.php`) moves
+    when an investor row changes.
+20. **Network map judgement calls need a review screen** (owner, 2026-10-25: did not know what the old 2.4 item meant;
+    it pointed at a build file nobody can open). Two lists wait for the owner's word: (a) the rows the map build had to
+    guess at (`tmp/network-qa.md`, written by kop-pipeline's build in Actions, gitignored); (b) six curated aliases that
+    may name another era of their record: Bethel Boys Academy (#13927, since merged into 100180), Laurel Ridge Treatment
+    Center (#10602), Agape Boarding School (#11361), Refuge of Grace (#11462), Change Academy at Lake of the Ozarks
+    (#11355), Cleo Wallace Academy (#12621) (background: PLAN-ARCHIVE.md "Owner pass on curated aliases"). Put both on
+    one KOP Tools review screen, a card per question in plain words ("Is X a past name of Y, or its own program?") with
+    the evidence and a button per answer, then add an `Ask:` item in 2.3 pointing at it.
