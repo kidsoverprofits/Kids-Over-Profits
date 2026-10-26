@@ -2698,6 +2698,10 @@
     ],
     "by": "Claude session",
     "at": "2026-10-26"
+   },
+   "settled": {
+    "text": "2017 (sale closed April 3, 2017; TrueCore name announced June 30, 2017). Milestone, both draft histories and the Juvenile Justice Timeline fixed in https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e92bf949acffd860c409248db2c1547dfbe2f7bc",
+    "at": "2026-10-26"
    }
   },
   {
@@ -6317,7 +6321,24 @@
     23,
     500008
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "April 16, 2009 (Sunshine Youth Services) and April 3, 2017 (sale to BHSB Holdings), from G4S's own announcements, now in the media library.",
+    "claims": [
+     {
+      "claim": "G4S bought substantially all the assets of Sunshine Youth Services on April 16, 2009",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/G4S-Acquisition-of-Sunshine-Youth-Services-Inc-g4s.com-2009-04-16-Wayback-2020-12-10.pdf",
+      "quote": "G4S, the international security solutions group, announces that it has acquired substantially all the assets of Sunshine Youth Services, Inc."
+     },
+     {
+      "claim": "G4S completed the sale of G4S Youth Services to BHSB Holdings for US$56.5 million on April 3, 2017",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/G4S-sells-G4S-Youth-Services-LLC-g4s.com-2017-04-03-Wayback-2021-01-17.pdf",
+      "quote": "announces that it has completed the sale of G4S Youth Services in the USA to BHSB Holdings, Inc."
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "company-histories:what-sources-show-that-g4s-youth-services-ran-cy",
@@ -11113,6 +11134,10 @@
     ],
     "by": "Claude session",
     "at": "2026-10-26"
+   },
+   "settled": {
+    "text": "Closed late 2020; record set to 2019-2020, Closed in https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54b49421b89c2938d38813940e174c10056b5bb2",
+    "at": "2026-10-26"
    }
   },
   {
@@ -11655,5 +11680,5 @@
    "directions": []
   }
  ],
- "built": "2026-10-26 18:00"
+ "built": "2026-10-26 18:30"
 }
