@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:50 UTC",
- "source": "115acd4bb2d3ab66d097d8e85ab063937758fe8e",
+ "built": "2026-10-26 00:51 UTC",
+ "source": "880af1bd9cbce333641865ab59f3301d294a4621",
  "sections": [
   {
    "key": "2",
@@ -1375,6 +1375,14 @@
        "ask": "",
        "date": "2026-10-21",
        "hash": "a89f3720aa71"
+      },
+      {
+       "id": "4.7:operator-year-by-year-timeline-runs-under-the-rail",
+       "lead": "Operator year-by-year timeline runs under the rail",
+       "text": "**Operator year-by-year timeline runs under the rail** (found 2026-10-25, live, https://kidsoverprofits.org/operator/universal-health-services/ at 1536 wide): `ol.kop-ptl-years` is a block box, so it spans the full 805px body under the floated rail (item 16's wrap) instead of stopping at it like the text. The axis line and its 2026 dot cross the rail's \"Know something we do not?\" text, and the list sits on top of the rail's Submit info button (elementFromPoint at the button's centre is the `ol`, so it can't be clicked there). Fix: give the timeline its own block formatting context (`display: flow-root` / `overflow: hidden` on `.kop-ptl`) so it narrows beside the float, or start it below the rail (`clear: both`); then check facility pages, which use the same rail.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "52d27908ff95"
       }
      ]
     },
