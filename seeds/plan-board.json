@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:47 UTC",
- "source": "ef1dfc1ffd11e3551dab8b68c24ce16969973bac",
+ "built": "2026-10-26 00:50 UTC",
+ "source": "115acd4bb2d3ab66d097d8e85ab063937758fe8e",
  "sections": [
   {
    "key": "2",
@@ -1262,6 +1262,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "f77e8caf34a1"
+      },
+      {
+       "id": "4.6:imports-approve-error-pages",
+       "lead": "Imports approve error pages",
+       "text": "**Imports approve error pages**: the SCIAD NET and Google Docs imports approved articles whose fetch came back as an error page (\"Page Not Found\", \"522: Connection timed out\"), so the error text became the headline and summary on /news/. The 14 found were rejected on 2026-10-25 (#1174, 1316, 1324, 1463, 1464, 1466, 1500, 1521, 1588, 1633, 1652, 1663, 1664, 1665; reviewer note says why, Undo in Recently done). Make both importers (and any other path that fetches a page title) leave an error-page title or summary in the queue unapproved, and check the other import origins' approved rows for the same titles. Most had a Wayback copy in submission_notes, so they could come back with real headlines if the owner ever wants them.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "1fbae80cacd6"
       }
      ]
     },
