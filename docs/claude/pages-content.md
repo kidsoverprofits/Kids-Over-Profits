@@ -70,6 +70,16 @@ php scripts/build-open-data.php                   # on the server (ea-php82), re
 # Researcher upload links (inc/researcher-uploads.php, KOP Tools > Researcher Uploads): a personal link
 # /researcher-upload/?key=<token> per trusted researcher (hash stored, expiry, Turn off / New link / More time);
 # files (.json/.csv/.tsv/.xlsx/.zip) wait in uploads/kop-private/researcher/<link id>/, never loaded automatically.
+# No size cap (owner, 2026-10-26): js/researcher-upload.js sends every file in pieces through REST
+# kop/v1/researcher-upload/start|chunk|finish|cancel|sent (inc/researcher-documents.php; kop_rup_chunk_bytes() under PHP's
+# per-request limit, 409 = "the server holds this much", pieces in .../incoming/, swept after 2 days by the daily
+# kop_rup_incoming_sweep). Only kop_rup_room() stops a file (keeps KOP_RUP_KEEP_FREE of disk free). Without JS the data form
+# still posts plainly up to wp_max_upload_size().
+# Documents ("Send documents" on the same page, files, folders or drag and drop; about + source per batch, source per file):
+# {prefix}kop_researcher_docs, files in .../docs/; one the media library holds (md5) is marked 'held', not kept.
+# KOP Tools > Researcher Documents: title, facility folder (kop_dp_target f:<id>, else the "Researcher uploads" folder),
+# document type (kop_dt_change, source 'researcher-upload') -> kop_rdoc_add(); "Take back out" = kop_rdoc_undo_add() (exact:
+# attachment deleted, folder entry off, file waiting again). One admin email per batch (the 'sent' route).
 # Test: php -d extension=pdo_sqlite -d extension=mbstring -d extension=zip scripts/test-researcher-uploads.php
 # SVG icons that replace emojis (inc/icons.php: kop_icon() / kopIcon(), and the
 # render filter for emojis in post content, widgets and the ACF facility-key field)

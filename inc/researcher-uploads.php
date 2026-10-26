@@ -9,9 +9,11 @@
  * hash of the token is stored, so a lost link is replaced ("New link"), never
  * shown again; "Turn off" stops one link without touching the others.
  *
- * The page takes many files at once (.json, .csv, .tsv, .xlsx, .zip), each as
- * a multipart file part (the host's firewall refuses markup in form fields,
- * never in files). Every file is checked on the way in: a JSON file must
+ * The page takes many files at once (.json, .csv, .tsv, .xlsx, .zip). With
+ * JavaScript each goes up in pieces (inc/researcher-documents.php, which also
+ * takes documents), so no file is too big; without it, one multipart post
+ * (the host's firewall refuses markup in form fields, never in files) up to
+ * what PHP takes in one request. Every file is checked on the way in: a JSON file must
  * parse, and its kit wrapper (kind, kit_version, the record list) is read so
  * the admin screen can say "facilities, 214 records"; a zip lists what it
  * holds. Files wait in uploads/kop-private/researcher/<link id>/ (no web
@@ -22,8 +24,9 @@
  *
  * Guardrails: the page is noindex, never cached, sends no referrer; a link
  * stops at its expiry date or when turned off; each link takes at most
- * KOP_RUP_HOURLY_FILES files an hour and KOP_RUP_LINK_BYTES in all; the form
- * carries a value derived from the token (kop_rup_csrf()).
+ * KOP_RUP_HOURLY_FILES files an hour; there is no size cap (owner,
+ * 2026-10-26), only the disk's room (kop_rup_room()); the form carries a
+ * value derived from the token (kop_rup_csrf()).
  *
  * Tested by scripts/test-researcher-uploads.php.
  */
@@ -36,8 +39,7 @@ const KOP_RUP_DB_VERSION = '1';
 const KOP_RUP_PATH = 'researcher-upload';
 const KOP_RUP_REWRITE_VERSION = '1';
 const KOP_RUP_HOURLY_FILES = 200;
-const KOP_RUP_LINK_BYTES = 1073741824; // 1 GB per link
-const KOP_RUP_FILE_BYTES = 104857600;  // 100 MB per file, or less when PHP's own limit is lower
+const KOP_RUP_JSON_READ_BYTES = 268435456; // a bigger JSON file is kept without being read through
 
 /* ---- Tables --------------------------------------------------------------- */
 
@@ -224,9 +226,10 @@ function kop_rup_allowed_types() {
     return array('json', 'csv', 'tsv', 'xlsx', 'zip');
 }
 
+/** What one plain form post takes (PHP's own limit); the page's script sends bigger files in pieces. */
 function kop_rup_file_max() {
     $php = function_exists('wp_max_upload_size') ? (int) wp_max_upload_size() : 0;
-    return $php > 0 ? min($php, KOP_RUP_FILE_BYTES) : KOP_RUP_FILE_BYTES;
+    return $php > 0 ? $php : 2097152;
 }
 
 /** The kit's record list for each kind: [kind => key holding the records]. */
@@ -297,6 +300,9 @@ function kop_rup_inspect($path, $name) {
     }
     $base = array('type' => $ext, 'kind' => '', 'kit_version' => '', 'records' => 0, 'summary' => '');
     if ($ext === 'json') {
+        if ((int) @filesize($path) > KOP_RUP_JSON_READ_BYTES) {
+            return array_merge($base, array('summary' => 'JSON, ' . size_format((int) filesize($path)) . ', too big to check here'));
+        }
         return array('type' => 'json') + kop_rup_read_json(file_get_contents($path));
     }
     if ($ext === 'csv' || $ext === 'tsv') {
@@ -353,17 +359,17 @@ function kop_rup_safe_name($name) {
 
 /**
  * Keep one file for a link. $tmp is a file on disk (an upload's tmp_name, or any path in tests);
- * $move = true moves an HTTP upload. Returns the stored row, or throws.
+ * $move = true moves an HTTP upload, 'rename' moves a file on disk (a finished
+ * chunked upload), false copies. Returns the stored row, or throws.
  */
 function kop_rup_store(array $link, $tmp, $name, $note = '', $move = true) {
     if (kop_rup_link_state($link) !== 'on') throw new RuntimeException('This link has stopped working.');
     $name = mb_substr(wp_basename((string) $name), 0, 255);
     $size = (int) @filesize($tmp);
     if ($size <= 0) throw new RuntimeException('This file is empty.');
-    if ($size > kop_rup_file_max()) throw new RuntimeException('This file is larger than ' . size_format(kop_rup_file_max()) . '. Split it, or zip it.');
-    list($used, $hour) = kop_rup_usage((int) $link['id']);
+    list(, $hour) = kop_rup_usage((int) $link['id']);
     if ($hour >= KOP_RUP_HOURLY_FILES) throw new RuntimeException('This link has sent ' . KOP_RUP_HOURLY_FILES . ' files in the last hour. Try again later.');
-    if ($used + $size > KOP_RUP_LINK_BYTES) throw new RuntimeException('This link has used its ' . size_format(KOP_RUP_LINK_BYTES) . '. Ask whoever sent it for more room.');
+    if ($move !== 'rename' && function_exists('kop_rup_room')) kop_rup_room($size);
     $info = kop_rup_inspect($tmp, $name);
     $sha = hash_file('sha256', $tmp);
     global $wpdb;
@@ -372,7 +378,11 @@ function kop_rup_store(array $link, $tmp, $name, $note = '', $move = true) {
     if ($dup !== null) throw new RuntimeException('You already sent this file (as ' . $dup . ').');
     $stored = gmdate('Ymd-His') . '-' . substr(bin2hex(random_bytes(4)), 0, 8) . '-' . kop_rup_safe_name($name);
     $dest = kop_rup_private_dir((int) $link['id']) . '/' . $stored;
-    $ok = $move && is_uploaded_file($tmp) ? @move_uploaded_file($tmp, $dest) : @copy($tmp, $dest);
+    if ($move === 'rename') {
+        $ok = @rename($tmp, $dest);
+    } else {
+        $ok = $move && is_uploaded_file($tmp) ? @move_uploaded_file($tmp, $dest) : @copy($tmp, $dest);
+    }
     if (!$ok) throw new RuntimeException('The file could not be saved. Try again in a minute.');
     $now = current_time('mysql', true);
     $row = array(
@@ -427,7 +437,7 @@ function kop_rup_files_from_request($field = 'kop_rup_files') {
 function kop_rup_upload_error($code) {
     switch ((int) $code) {
         case UPLOAD_ERR_INI_SIZE:
-        case UPLOAD_ERR_FORM_SIZE: return 'This file is larger than ' . size_format(kop_rup_file_max()) . '. Split it, or zip it.';
+        case UPLOAD_ERR_FORM_SIZE: return 'This file is larger than one plain post takes (' . size_format(kop_rup_file_max()) . '). Turn JavaScript on and send it again: the page then sends it in pieces, whatever its size.';
         case UPLOAD_ERR_PARTIAL: return 'Only part of this file arrived. Try again.';
         case UPLOAD_ERR_NO_FILE: return 'No file arrived.';
         default: return 'The server could not take this file (error ' . (int) $code . ').';
@@ -493,7 +503,7 @@ add_action('template_redirect', function () {
             $state['error'] = 'This link has stopped working.';
         } elseif (!$files) {
             // A post bigger than post_max_size arrives with no files at all.
-            $state['error'] = empty($_POST) ? 'That was more than the server takes in one go (' . size_format(kop_rup_file_max()) . '). Send fewer files at a time.' : 'Choose at least one file.';
+            $state['error'] = empty($_POST) ? 'That was more than the server takes in one plain post (' . size_format(kop_rup_file_max()) . '). Turn JavaScript on, or send fewer files at a time.' : 'Choose at least one file.';
         } else {
             $note = trim((string) wp_unslash($_POST['kop_rup_note'] ?? ''));
             $sent = array();
@@ -645,7 +655,9 @@ function kop_rup_admin_page() {
         <h1>Researcher Uploads</h1>
         <p>Make a personal upload link for a researcher you trust. They open it, choose their files (the shapes on the
             <a href="<?php echo esc_url(home_url('/researcher-kit/')); ?>" target="_blank" rel="noopener">Researcher Data Kit</a>, a spreadsheet or a zip) and send them.
-            Nothing goes into the records from here: download a file, load it, then mark it Loaded.</p>
+            Nothing goes into the records from here: download a file, load it, then mark it Loaded.
+            Documents they send (PDFs, Word files, pictures, recordings) wait at
+            <a href="<?php echo esc_url(admin_url('admin.php?page=kop-researcher-docs')); ?>">Researcher Documents</a>.</p>
 
         <?php if ($notice) : ?><div class="notice notice-success"><p><?php echo esc_html($notice); ?>
             <?php if ($undo) echo $btn('status', 'Undo', array('id' => $undo['id'], 'status' => $undo['status'])); ?></p></div><?php endif; ?>

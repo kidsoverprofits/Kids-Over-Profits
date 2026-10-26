@@ -48,7 +48,9 @@
 }
 
 .kop-rup-form button.kop-rup-send:hover,
-.kop-rup-form button.kop-rup-send:focus-visible {
+.kop-rup-form button.kop-rup-send:focus,
+.kop-rup-form button.kop-rup-send:focus-visible,
+.kop-rup-form button.kop-rup-send:active {
     color: var(--kop-white, #fff);
     background: var(--kop-navy, #000080);
 }
@@ -103,4 +105,177 @@
 
 .kop-rup-table th {
     background: var(--kop-sand, #F2EEDF);
+}
+
+/* Documents form and the per-file list (js/researcher-upload.js). */
+
+.kop-rup-form[hidden],
+.kop-rup-queue[hidden] {
+    display: none;
+}
+
+.kop-rup-form input[type="text"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border: 1px solid rgba(0, 4, 53, 0.3);
+    border-radius: 6px;
+}
+
+.kop-rup-form .kop-rup-label {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-drop {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+    padding: 1.1rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border: 2px dashed rgba(0, 4, 53, 0.35);
+    border-radius: 8px;
+}
+
+.kop-rup-drop.kop-rup-over {
+    border-color: var(--kop-teal, #33A7B5);
+}
+
+.kop-rup-drop p {
+    margin: 0;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-form label.kop-rup-pick {
+    position: relative;
+    margin: 0;
+    padding: 0.4rem 0.9rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    border: 1px solid rgba(0, 4, 53, 0.35);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.kop-rup-form label.kop-rup-pick:focus-within {
+    outline: 2px solid var(--kop-navy, #000080);
+    outline-offset: 2px;
+}
+
+.kop-rup-form label.kop-rup-pick input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.kop-rup-queue {
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-rup-item {
+    margin: 0 0 0.4rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border-left: 4px solid rgba(0, 4, 53, 0.25);
+    overflow-wrap: anywhere;
+}
+
+.kop-rup-item.kop-rup-sending {
+    border-left-color: var(--kop-navy, #000080);
+}
+
+.kop-rup-item.kop-rup-ok {
+    border-left-color: var(--kop-teal, #33A7B5);
+}
+
+.kop-rup-item.kop-rup-bad {
+    border-left-color: var(--kop-coral-pink, #FE8088);
+}
+
+.kop-rup-item-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+}
+
+.kop-rup-item-name {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-item-size {
+    font-size: 0.9rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-form label.kop-rup-item-source {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.kop-rup-form button.kop-rup-item-remove {
+    margin-left: auto;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border: 1px solid rgba(0, 4, 53, 0.35);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.kop-rup-form button.kop-rup-item-remove:hover,
+.kop-rup-form button.kop-rup-item-remove:focus,
+.kop-rup-form button.kop-rup-item-remove:focus-visible,
+.kop-rup-form button.kop-rup-item-remove:active {
+    color: var(--kop-white, #fff);
+    background: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-form button.kop-rup-send:disabled,
+.kop-rup-form button.kop-rup-send:disabled:hover {
+    color: var(--kop-white, #fff);
+    background: var(--kop-midnight-blue, #000435);
+    opacity: 0.55;
+    cursor: default;
+}
+
+.kop-rup-bar {
+    display: block;
+    width: 100%;
+    height: 0.6rem;
+    margin-top: 0.35rem;
+    accent-color: var(--kop-teal, #33A7B5);
+}
+
+.kop-rup-bar[hidden] {
+    display: none;
+}
+
+.kop-rup-item-status {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-summary a,
+.kop-rup-summary a:visited {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
 }

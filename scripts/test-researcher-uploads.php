@@ -3,7 +3,10 @@
  * Researcher upload links (inc/researcher-uploads.php): making, replacing,
  * turning off and running out of links; what each kind of file is read as;
  * the refusals (bad JSON, wrong type, duplicates, a dead link); statuses with
- * Undo. Runs on an in-memory SQLite database and a scratch folder, no mirror.
+ * Undo. Chunked uploads and documents (inc/researcher-documents.php): pieces
+ * put back together, a wrong offset, the sweep, documents kept / refused /
+ * already in the library, adding one to the library and Undo.
+ * Runs on an in-memory SQLite database and a scratch folder, no mirror.
  *
  *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-researcher-uploads.php
  */
@@ -36,7 +39,21 @@ function wp_salt() { return 'test-salt'; }
 function home_url($p = '') { return 'https://example.test' . ($p === '' ? '' : '/' . ltrim($p, '/')); }
 function add_query_arg($k, $v, $url) { return $url . (strpos($url, '?') === false ? '?' : '&') . $k . '=' . rawurlencode($v); }
 function current_time() { return gmdate('Y-m-d H:i:s'); }
-function wp_upload_dir() { return array('basedir' => $GLOBALS['scratch']); }
+function wp_upload_dir() { @mkdir($GLOBALS['scratch'] . '/2026/10', 0755, true); return array('basedir' => $GLOBALS['scratch'], 'path' => $GLOBALS['scratch'] . '/2026/10', 'error' => false); }
+function wp_json_encode($v) { return json_encode($v); }
+function sanitize_key($k) { return preg_replace('/[^a-z0-9_\-]/', '', strtolower((string) $k)); }
+function sanitize_file_name($n) { return preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) $n); }
+function wp_unique_filename($dir, $n) { return is_file("$dir/$n") ? 'x-' . $n : $n; }
+function wp_check_filetype($n) { $e = strtolower(pathinfo((string) $n, PATHINFO_EXTENSION)); return array('ext' => $e, 'type' => $e === 'pdf' ? 'application/pdf' : ($e === 'png' ? 'image/png' : false)); }
+function is_wp_error($v) { return false; }
+function wp_insert_attachment($a, $file) { global $wpdb; $wpdb->insert('wpdl_posts', array('post_type' => 'attachment', 'post_title' => $a['post_title'], 'file' => $file)); return $wpdb->insert_id; }
+function wp_generate_attachment_metadata($id, $file) { return array(); }
+function wp_update_attachment_metadata($id, $m) { return true; }
+function update_post_meta($id, $k, $v) { global $wpdb; $wpdb->insert('wpdl_postmeta', array('post_id' => $id, 'meta_key' => $k, 'meta_value' => (string) $v)); }
+function get_attached_file($id) { global $wpdb; return (string) $wpdb->get_var('SELECT file FROM wpdl_posts WHERE ID = ' . (int) $id); }
+function wp_delete_attachment($id, $force) { global $wpdb; $f = get_attached_file($id); @unlink($f); $wpdb->pdo->exec('DELETE FROM wpdl_posts WHERE ID = ' . (int) $id); $wpdb->pdo->exec('DELETE FROM wpdl_postmeta WHERE post_id = ' . (int) $id); }
+function kop_dp_child_folder($name, $parent) { return 900; }
+function kop_dp_target($v) { return array(500 + (int) substr($v, 2), 'Facility', true); }
 function wp_basename($p) { return basename(str_replace('\\', '/', (string) $p)); }
 function size_format($b) { return round($b / 1048576) . ' MB'; }
 function wp_max_upload_size() { return 0; }
@@ -45,6 +62,8 @@ function wp_get_current_user() { return new class { public $user_login = 'tester
 /** Just enough of $wpdb over SQLite for the module. */
 class KOP_Test_WPDB {
     public $prefix = 'wpdl_';
+    public $posts = 'wpdl_posts';
+    public $postmeta = 'wpdl_postmeta';
     public $insert_id = 0;
     public $pdo;
     public function __construct() {
@@ -73,6 +92,7 @@ class KOP_Test_WPDB {
         $st->execute(array_merge(array_values($set), array_values($where)));
         return $st->rowCount();
     }
+    public function query($sql) { return $this->pdo->exec($sql); }
     public function get_var($sql) { $v = $this->pdo->query($sql)->fetchColumn(); return $v === false ? null : $v; }
     public function get_row($sql) { $r = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC); return $r ?: null; }
     public function get_results($sql) { return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC); }
@@ -86,8 +106,20 @@ $wpdb->pdo->exec("CREATE TABLE wpdl_kop_researcher_uploads (id INTEGER PRIMARY K
     kind TEXT NOT NULL DEFAULT '', kit_version TEXT NOT NULL DEFAULT '', records INTEGER NOT NULL DEFAULT 0, summary TEXT NOT NULL DEFAULT '',
     note TEXT, status TEXT NOT NULL DEFAULT 'new', status_by TEXT NOT NULL DEFAULT '', status_at TEXT, uploaded_at TEXT NOT NULL)");
 
+$wpdb->pdo->exec("CREATE TABLE wpdl_kop_researcher_docs (id INTEGER PRIMARY KEY AUTOINCREMENT, link_id INTEGER NOT NULL, file_name TEXT NOT NULL,
+    rel_path TEXT NOT NULL DEFAULT '', stored_name TEXT NOT NULL DEFAULT '', bytes INTEGER NOT NULL DEFAULT 0, sha256 TEXT NOT NULL DEFAULT '',
+    md5 TEXT NOT NULL DEFAULT '', file_type TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '', about TEXT NOT NULL DEFAULT '', note TEXT,
+    status TEXT NOT NULL DEFAULT 'new', attachment_id INTEGER NOT NULL DEFAULT 0, att_made INTEGER NOT NULL DEFAULT 0, folder_id INTEGER NOT NULL DEFAULT 0,
+    rel_added INTEGER NOT NULL DEFAULT 0, facility_id INTEGER NOT NULL DEFAULT 0, doc_type TEXT NOT NULL DEFAULT '', title TEXT NOT NULL DEFAULT '',
+    uploaded_at TEXT NOT NULL, status_by TEXT NOT NULL DEFAULT '', status_at TEXT)");
+$wpdb->pdo->exec("CREATE TABLE wpdl_posts (ID INTEGER PRIMARY KEY AUTOINCREMENT, post_type TEXT, post_title TEXT, file TEXT)");
+$wpdb->pdo->exec("CREATE TABLE wpdl_postmeta (meta_id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, meta_key TEXT, meta_value TEXT)");
+$wpdb->pdo->exec("CREATE TABLE wpdl_fbv_attachment_folder (folder_id INTEGER, attachment_id INTEGER)");
+
 require ABSPATH . 'inc/researcher-uploads.php';
+require ABSPATH . 'inc/researcher-documents.php';
 $GLOBALS['kop_test_options']['kop_researcher_uploads_db'] = KOP_RUP_DB_VERSION;
+$GLOBALS['kop_test_options']['kop_researcher_docs_db'] = KOP_RDOC_DB_VERSION;
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -187,6 +219,82 @@ $check('mark loaded returns the old status for Undo', $old === 'new' && $wpdb->g
 kop_rup_set_status($fid, $old);
 $check('Undo puts it back', $wpdb->get_var("SELECT status FROM wpdl_kop_researcher_uploads WHERE id = $fid") === 'new');
 $check('unknown status refused', $throws(function () use ($fid) { kop_rup_set_status($fid, 'gone'); }) !== '');
+
+echo "\nChunked uploads (no size cap)\n";
+$link = kop_rup_by_token($token2);
+$big = json_encode(array('kit_version' => 1, 'kind' => 'people', 'people' => array_fill(0, 400, array('name' => str_repeat('x', 40)))));
+list($uid, $piece) = kop_rup_chunk_start($link, array('kind' => 'data', 'name' => 'people-big.json', 'size' => strlen($big), 'note' => 'in pieces'));
+$check('start gives an upload id and a piece size', strlen($uid) === 32 && $piece >= 524288);
+$parts = str_split($big, 5000);
+$off = 0;
+foreach ($parts as $i => $p) {
+    if ($i === 1) {
+        $check('a wrong offset adds nothing and says where the file stands', kop_rup_chunk_append($link, $uid, $off + 7, $file('p', $p)) === $off);
+    }
+    $off = kop_rup_chunk_append($link, $uid, $off, $file('p', $p));
+}
+$check('a piece sent twice (lost answer) is not added twice', kop_rup_chunk_append($link, $uid, $off - strlen(end($parts)), $file('p', end($parts))) === $off);
+$check('all pieces in', $off === strlen($big));
+$r = kop_rup_chunk_finish($link, $uid);
+$check('a finished data file goes through the data checks', $r['kind'] === 'data' && $r['row']['records'] === 400 && $r['row']['note'] === 'in pieces', $r['message']);
+$check('the pieces are gone after finishing', !glob($scratch . '/kop-private/researcher/' . $id . '/incoming/*'));
+$check('a finished upload cannot be finished twice', strpos($throws(function () use ($link, $uid) { kop_rup_chunk_finish($link, $uid); }), 'gone') !== false);
+list($uid2) = kop_rup_chunk_start($link, array('kind' => 'data', 'name' => 'short.json', 'size' => 100));
+kop_rup_chunk_append($link, $uid2, 0, $file('p', '[1,2]'));
+$check('finishing short is refused', strpos($throws(function () use ($link, $uid2) { kop_rup_chunk_finish($link, $uid2); }), 'Only 5 of 100') !== false);
+$check('more than the file holds is refused', $throws(function () use ($link, $uid2, $file) { kop_rup_chunk_append($link, $uid2, 5, $file('p', str_repeat('y', 200))); }) !== '');
+$m = $throws(function () use ($link) { kop_rup_chunk_start($link, array('kind' => 'doc', 'name' => 'scan.pdf', 'size' => 300 * 1048576)); });
+$check('a 300 MB document starts (no cap; only a full disk stops it)', $m === '' || strpos($m, 'short of room') !== false, $m);
+$check('a document in the data form is refused', strpos($throws(function () use ($link) { kop_rup_chunk_start($link, array('kind' => 'data', 'name' => 'a.pdf', 'size' => 10)); }), 'Send documents') !== false);
+$check('a script as a document is refused', $throws(function () use ($link) { kop_rup_chunk_start($link, array('kind' => 'doc', 'name' => 'a.php', 'size' => 10)); }) !== '');
+$check('a bad upload id is refused', $throws(function () use ($link) { kop_rup_chunk_append($link, '../../x', 0, __FILE__); }) !== '');
+foreach (glob($scratch . '/kop-private/researcher/*/incoming/*') as $f) touch($f, time() - 3 * 86400);
+$check('the sweep drops files nobody finished', kop_rup_incoming_sweep() >= 1 && !glob($scratch . '/kop-private/researcher/*/incoming/*'));
+
+echo "\nDocuments\n";
+$pdf = "%PDF-1.4\n" . str_repeat('scan ', 3000);
+$send_doc = function ($name, $body, $meta = array()) use ($link, $file) {
+    list($u) = kop_rup_chunk_start($link, array('kind' => 'doc', 'name' => $name, 'size' => strlen($body)) + $meta);
+    kop_rup_chunk_append($link, $u, 0, $file('d', $body));
+    return kop_rup_chunk_finish($link, $u);
+};
+$r = $send_doc('Red_Rock-handbook_1998.pdf', $pdf, array('about' => 'Red Rock Ranch, Kanab UT', 'source_url' => 'example.org/handbook.pdf', 'rel_path' => 'Utah/Red_Rock-handbook_1998.pdf'));
+$d = $r['row'];
+$check('a document waits, with what it is about and its source', $r['kind'] === 'doc' && $d['status'] === 'new' && $d['about'] === 'Red Rock Ranch, Kanab UT' && $d['source_url'] === 'https://example.org/handbook.pdf', $d['source_url']);
+$check('kept in the private docs folder', is_file(kop_rdoc_path($d)) && strpos(kop_rdoc_path($d), '/kop-private/researcher/' . $id . '/docs/') !== false);
+$check('the folder path is kept', $d['rel_path'] === 'Utah/Red_Rock-handbook_1998.pdf');
+$check('the same document twice is refused', strpos($throws(function () use ($send_doc, $pdf) { $send_doc('copy.pdf', $pdf); }), 'already sent') !== false);
+$check('markup named .pdf is refused', strpos($throws(function () use ($send_doc) { $send_doc('x.pdf', '<html><script>alert(1)</script>'); }), 'not really') !== false);
+$check('a title from the file name', kop_rdoc_default_title('Red_Rock-handbook_1998.pdf') === 'Red Rock handbook 1998');
+
+$a = kop_rdoc_add($d['id'], array('title' => 'Red Rock Ranch student handbook (1998)', 'facility_id' => 12, 'doc_type' => ''));
+$att = (int) $a['attachment_id'];
+$check('added: an attachment in the facility folder', $a['status'] === 'added' && $att > 0 && (int) $a['folder_id'] === 512 && (int) $a['att_made'] === 1
+    && (int) $wpdb->get_var("SELECT COUNT(*) FROM wpdl_fbv_attachment_folder WHERE attachment_id = $att AND folder_id = 512") === 1);
+$check('the file moved into the library', is_file(get_attached_file($att)) && !is_file(kop_rdoc_dir($id) . '/' . $d['stored_name']));
+$check('source and md5 on the attachment', $wpdb->get_var("SELECT meta_value FROM wpdl_postmeta WHERE post_id = $att AND meta_key = '_kop_source_url'") === 'https://example.org/handbook.pdf'
+    && $wpdb->get_var("SELECT meta_value FROM wpdl_postmeta WHERE post_id = $att AND meta_key = '_kop_import_md5'") === md5($pdf));
+$check('added twice is refused', $throws(function () use ($d) { kop_rdoc_add($d['id'], array()); }) !== '');
+kop_rdoc_undo_add($d['id']);
+$u = kop_rdoc_row($d['id']);
+$check('Undo: attachment gone, folder entry gone, file waiting again', $u['status'] === 'new' && !$wpdb->get_var("SELECT COUNT(*) FROM wpdl_posts WHERE ID = $att")
+    && !$wpdb->get_var("SELECT COUNT(*) FROM wpdl_fbv_attachment_folder WHERE attachment_id = $att") && is_file(kop_rdoc_path($u)));
+$a = kop_rdoc_add($d['id'], array('facility_id' => 0));
+$check('no facility: the Researcher uploads folder, title from the file', (int) $a['folder_id'] === 900 && $a['title'] === 'Red Rock handbook 1998');
+$wpdb->pdo->exec('DELETE FROM wpdl_kop_researcher_docs WHERE id = ' . (int) $d['id']); // forget the row; the library copy stays
+$r3 = $send_doc('same scan, new name.pdf', $pdf);
+$check('a document the library holds is marked, not kept twice', $r3['row']['status'] === 'held' && (int) $r3['row']['attachment_id'] === (int) $a['attachment_id'] && $r3['row']['stored_name'] === '');
+
+$r4 = $send_doc('photo.png', "\x89PNG\r\n\x1a\n" . str_repeat("\0", 64));
+$old = kop_rdoc_set_status($r4['row']['id'], 'aside');
+$check('set aside returns the old status', $old === 'new' && kop_rdoc_row($r4['row']['id'])['status'] === 'aside');
+$check('an already-held document cannot be set aside', $throws(function () use ($r3) { kop_rdoc_set_status($r3['row']['id'], 'aside'); }) !== '');
+$p4 = kop_rdoc_path(kop_rdoc_row($r4['row']['id']));
+kop_rdoc_delete_file($r4['row']['id']);
+$check('delete for good removes the file', !is_file($p4) && kop_rdoc_row($r4['row']['id'])['status'] === 'gone');
+$check('only a set-aside document can be deleted', $throws(function () use ($r3) { kop_rdoc_delete_file($r3['row']['id']); }) !== '');
+kop_rup_revoke($id);
+$check('a turned-off link starts nothing', strpos($throws(function () use ($id) { kop_rup_chunk_start(kop_rup_link($id), array('kind' => 'doc', 'name' => 'a.pdf', 'size' => 9)); }), 'stopped') !== false);
 
 // Clean up the scratch folder.
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($scratch, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
