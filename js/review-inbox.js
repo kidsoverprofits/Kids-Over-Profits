@@ -116,7 +116,8 @@
         _research: { label: 'Needs research', count: function () { return state.held.research || 0; } },
         _snoozed: { label: 'Snoozed', count: function () { return state.held.snoozed; } },
         _volunteers: { label: 'Volunteers recommend', count: function () { return state.held.volunteers || 0; } },
-        _done: { label: 'Recently done', count: function () { return 0; } }
+        _done: { label: 'Recently done', count: function () { return 0; } },
+        _record: { label: 'One record', count: function () { return 0; } }
     };
 
     /*
@@ -433,6 +434,7 @@
             var u = new URL(window.location.href);
             var t = state.special || state.source || state.areaPage || nativeKey;
             if (t) u.searchParams.set('type', t); else u.searchParams.delete('type');
+            if (state.special === '_record' && state.record) u.searchParams.set('record', state.record.kind + ':' + state.record.id); else u.searchParams.delete('record');
             window.history.replaceState(null, '', u.toString());
         } catch (e) { /* old browser: the tab just is not remembered */ }
     }
@@ -1349,6 +1351,7 @@
         setUrl();
         if (k === '_tools') renderAllTools();
         else if (k === '_new') renderJustIn();
+        else if (k === '_record') renderRecord();
         else if (k === '_done') renderDone(); else renderHeld(k === '_mine' ? 'mine' : k === '_volunteers' ? 'volunteers' : k === '_research' ? 'research' : 'snoozed');
     }
 
@@ -1649,6 +1652,61 @@
         }).catch(function (e) { statusEl.textContent = 'Could not load: ' + e.message; });
     }
 
+    /*
+     * One record (inc/review-inbox-record.php): every waiting card about a
+     * facility, or a company and its facilities, from every queue, grouped by
+     * queue, the write-up first. The cards act as in their own queue.
+     */
+    function renderRecord() {
+        panel.innerHTML = '';
+        panel.appendChild(el('div', { class: 'rinbox-head' }, [
+            el('h2', { text: 'One record' }),
+            el('p', { class: 'rinbox-help', text: 'Everything waiting about one facility or company, from every queue: the write-up (held facts and draft) first, then each queue’s cards. Approve or reject here as in the queue. A company shows its own cards and its programs’.' })
+        ]));
+        var find = el('input', { type: 'search', class: 'rinbox-search', placeholder: 'Find a facility or company…', 'aria-label': 'Find a facility or company' });
+        var hits = el('div', { class: 'rinbox-record-hits' });
+        var timer = null;
+        find.addEventListener('input', function () {
+            clearTimeout(timer);
+            var q = find.value.trim();
+            if (q.length < 2) { hits.innerHTML = ''; return; }
+            timer = setTimeout(function () {
+                api('record-find', null, { q: q }).then(function (data) {
+                    hits.innerHTML = '';
+                    (data.results || []).forEach(function (r) {
+                        hits.appendChild(el('button', { type: 'button', class: 'rinbox-pv-btn',
+                            text: (r.kind === 'operator' ? 'Company: ' : '') + r.name + (r.place ? ' (' + r.place + ')' : ''),
+                            onclick: function () { state.record = { kind: r.kind, id: r.id }; setUrl(); renderRecord(); } }));
+                    });
+                    if (!hits.firstChild) hits.appendChild(el('p', { class: 'rinbox-help', text: 'No record by that name.' }));
+                }).catch(function (e) { hits.textContent = 'Could not search: ' + e.message; });
+            }, 250);
+        });
+        panel.appendChild(el('div', { class: 'rinbox-record-find' }, [find, hits]));
+        statusEl = el('p', { class: 'rinbox-status', role: 'status', text: state.record ? 'Gathering every queue’s cards about this record (up to a minute)…' : 'Find a record to see everything waiting about it.' });
+        listEl = el('div', { class: 'rinbox-list' });
+        bulkEl = el('div', { class: 'rinbox-bulk' });
+        pagerEl = el('div', { class: 'rinbox-pager' });
+        panel.appendChild(statusEl);
+        panel.appendChild(listEl);
+        if (!state.record) return;
+        var want = state.record;
+        api('record', null, { kind: want.kind, id: want.id }).then(function (data) {
+            if (state.record !== want) return;
+            var rec = data.record || {};
+            var n = 0;
+            (data.groups || []).forEach(function (g) { n += (g.items || []).length; });
+            statusEl.textContent = '';
+            statusEl.appendChild(el('span', { text: (rec.kind === 'operator' ? 'Company: ' : '') + (rec.name || '') + ': ' + (n ? n + (n === 1 ? ' card waiting' : ' cards waiting') + ' in ' + data.groups.length + (data.groups.length === 1 ? ' queue' : ' queues') : 'nothing waiting') + '. ' }));
+            if (rec.url) statusEl.appendChild(el('a', { href: rec.url, target: '_blank', rel: 'noopener', text: rec.kind === 'operator' ? 'Company page' : 'Facility page' }));
+            if ((data.skipped || []).length) statusEl.appendChild(el('span', { text: ' Not searched (too slow or failed): ' + data.skipped.join(', ') + '.' }));
+            (data.groups || []).forEach(function (g) {
+                listEl.appendChild(el('h3', { class: 'rinbox-record-group', text: g.label + ' (' + g.items.length + ')' }));
+                g.items.forEach(function (it) { listEl.appendChild(card(it)); });
+            });
+        }).catch(function (e) { statusEl.textContent = 'Could not load: ' + e.message; });
+    }
+
     function renderDone() {
         panel.innerHTML = '';
         var q = { mine: '', source: '', search: '', offset: 0, limit: 50 };
@@ -1761,6 +1819,10 @@
         if (item.facility) {
             if (item.facility.url) addLink(item.facility.url, 'Facility page: ' + item.facility.name);
             else links.appendChild(el('span', { text: item.facility.name }));
+            if (item.facility.id && !(state.special === '_record' && state.record && state.record.kind === 'facility' && +state.record.id === +item.facility.id)) {
+                links.appendChild(el('button', { type: 'button', class: 'rinbox-pv-btn', text: 'Everything waiting for this record',
+                    onclick: function () { state.record = { kind: 'facility', id: item.facility.id }; openSpecial('_record'); } }));
+            }
         }
         (item.links || []).forEach(function (l) {
             if (safeHref(l.url)) addLink(l.url, l.label);
@@ -2435,7 +2497,12 @@
     loadSources().then(function () {
         decorateNative();
         var wanted = null;
-        try { wanted = new URL(window.location.href).searchParams.get('type'); } catch (e) { wanted = null; }
+        try {
+            var su = new URL(window.location.href).searchParams;
+            wanted = su.get('type');
+            var rec = /^(facility|operator):(\d+)$/.exec(su.get('record') || '');
+            if (rec) state.record = { kind: rec[1], id: +rec[2] };
+        } catch (e) { wanted = null; }
         if (wanted && (SPECIAL[wanted] || wanted === '_tools' || wanted === '_new')) openSpecial(wanted);
         else if (wanted && ['people', 'scans', 'found', 'checks', '_yours'].indexOf(wanted) !== -1) openArea(wanted);
         else if (wanted && state.byKey[wanted] && !state.byKey[wanted].native) openSource(wanted);

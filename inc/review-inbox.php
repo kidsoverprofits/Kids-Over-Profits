@@ -192,6 +192,8 @@ require_once __DIR__ . '/review-inbox-addons.php';
 require_once __DIR__ . '/review-inbox-fields.php';
 // The page's tabs (sent in by people, daily news scans, imports and inspections, checks) and "Just in".
 require_once __DIR__ . '/review-inbox-recent.php';
+// "One record": every waiting card about one facility or company, from every queue.
+require_once __DIR__ . '/review-inbox-record.php';
 
 foreach (glob(__DIR__ . '/review-inbox/*.php') ?: array() as $kop_rinbox_file) {
     require_once $kop_rinbox_file;

@@ -1773,3 +1773,8 @@ button.rinbox-pv-btn:focus-visible {
     padding: 10px;
     font-size: 12px;
 }
+
+/* One record (renderRecord()): the record search and the queue headings over each group of cards. */
+.rinbox-record-find { margin: 8px 0 12px; }
+.rinbox-record-hits { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.rinbox-record-group { margin: 18px 0 6px; font-size: 15px; color: var(--kop-midnight-blue, #000435); }

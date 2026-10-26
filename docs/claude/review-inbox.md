@@ -258,3 +258,11 @@ curl -s -X POST -H "X-KOP-Research-Key: $K" -H "Content-Type: application/json" 
 
 Follow the prompt's rules and docs/WRITING-STYLE.md; never pass the key in a prompt or a report. The last hourly AI run's result
 is at the end of the queue's help text; a record whose AI draft failed is skipped 6 hours, prompts over 18,000 characters go to Gemini only.
+
+## One record
+
+Review inbox > Your inbox > One record (`?type=_record&record=facility:<id>` or `operator:<id>`; inc/review-inbox-record.php,
+js/review-inbox.js renderRecord()): every waiting card about one facility, or a company and its programs, from every queue,
+write-up first. Each queue's waiting view is searched by the record's names and kept where the card's `facility` is the record
+(or, with no facility, its text has the name). Queues past 40 s or 70% of memory are skipped and named. Every card that names a
+facility has "Everything waiting for this record". Tested in `test-review-inbox.php --source=writeups`.

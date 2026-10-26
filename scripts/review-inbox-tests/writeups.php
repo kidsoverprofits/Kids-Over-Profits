@@ -118,6 +118,13 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
     // The queue lists the record; no draft yet, so no Approve.
     $ids = kop_rinbox_wu_ids('waiting', '');
     $check('writeups: the record waits in the queue', in_array($fid, $ids, true), count($ids) . ' records');
+    // "One record" gathers the write-up card with the record's other waiting cards, write-up first.
+    // Every queue's waiting view is read: about 160 MB at its peak on the mirror (the server allows 512 MB).
+    @ini_set('memory_limit', '512M');
+    $rec = kop_rinbox_record_items('facility', $fid, 120);
+    $check('writeups: "One record" lists the record\'s write-up first', ($rec['groups'][0]['source'] ?? '') === 'writeups'
+        && (string) ($rec['groups'][0]['items'][0]['key'] ?? '') === (string) $fid && ($rec['groups'][0]['items'][0]['source'] ?? '') === 'writeups',
+        json_encode(array_map(function ($g) { return $g['source'] . ':' . count($g['items']); }, $rec['groups'])) . ' skipped: ' . implode(', ', $rec['skipped']));
     $card = kop_rinbox_get_item('writeups', (string) $fid);
     $check('writeups: with no draft the card offers "Write it with AI" and "Send to Claude"', array_values(array_diff(array_column($card['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS)) === array('write', 'claude'), implode(',', array_column($card['actions'], 'id')));
     try {
