@@ -726,6 +726,30 @@ $check('once a week', kop_vsoc_weekly_run() === null);
 kop_volp_set_status($made[0], 'closed');
 $wpdb->query('DELETE FROM ' . kop_rinbox_log_table() . " WHERE user_login = 'owner'");
 
+echo "\nSuggested posts\n";
+unset($GLOBALS['kop_test_options']['kop_vsoc_designer']);
+$fact = array('url' => 'https://example.test/severe-reports/#finding-12', 'title' => 'Serious findings | Kids Over Profits', 'text' => 'Staff held the boy face down for 20 minutes.');
+$check('with nobody picked, a suggestion is refused', strpos($throws(function () use ($fact) { kop_vsoc_suggest($fact); }), 'Nobody gets post ideas') !== false);
+kop_vsoc_admin_post('social_designer', array('kop_vsoc_designer' => $alex_id));
+$check('a suggestion needs words or a note', strpos($throws(function () { kop_vsoc_suggest(array('url' => 'https://example.test/x/')); }), 'Select the words') !== false);
+$check('a suggestion needs a link', $throws(function () { kop_vsoc_suggest(array('url' => 'javascript:alert(1)', 'text' => 'x')); }) !== '');
+list($sp, $sc) = kop_vsoc_suggest($fact);
+$SP = kop_volp_get($sp);
+$check('it starts the designer\'s "Suggested posts" project', $SP && $SP['source'] === 'social:suggested' && (int) $SP['volunteer_id'] === $alex_id && kop_vsoc_is($SP));
+$check('the selected words are the fact, the page is the link', $sc['fact'] === $fact['text'] && $sc['url'] === $fact['url'] && $sc['url_label'] === 'Serious findings' && $sc['quote'] === '', json_encode($sc));
+list($sp2, $sc2) = kop_vsoc_suggest(array('url' => 'https://example.test/facility/x/', 'title' => 'X Ranch', 'text' => 'Closed in 2023.', 'note' => 'Utah closed it after a death.'));
+$check('a second one joins the same open project', $sp2 === $sp && count(kop_volp_item_rows($sp)) === 2);
+$check('with a note, the note is the fact and the words are the quote', $sc2['fact'] === 'Utah closed it after a death.' && $sc2['quote'] === 'Closed in 2023.');
+$check('the same idea twice is refused', strpos($throws(function () use ($fact) { kop_vsoc_suggest($fact); }), 'already') !== false);
+$items = kop_vsoc_items($SP, $alex_id, 10, array());
+$check('the designer sees both as cards', count($items) === 2 && $items[0]['angle_label'] === 'Suggested by us' && $items[0]['source'] === 'social', json_encode($items));
+$check('...and can draft and send one', kop_vsoc_save($alex, $sp, $items[0]['key'], 'ready', array('caption' => 'Face down for 20 minutes.', 'image_url' => 'https://www.canva.com/design/y'))['status'] === 'ready');
+$check('Sam cannot draft on Alex\'s suggestions', $throws(function () use ($sam, $sp, $items) { kop_vsoc_save($sam, $sp, $items[1]['key'], 'take'); }) !== '');
+kop_volp_set_status($sp, 'closed');
+list($sp3) = kop_vsoc_suggest(array('url' => 'https://example.test/news/', 'text' => 'A new lawsuit.'));
+$check('after the project closes, the next suggestion starts a new one', $sp3 !== $sp && kop_volp_get($sp3)['status'] === 'open');
+kop_volp_set_status($sp3, 'closed');
+
 echo "\nWhat volunteers can open\n";
 $check('admin screens are not links for volunteers', kop_vol_admin_only_url('https://example.test/wp-admin/admin-ajax.php?action=kop_wb_view&key=x&nonce=y')
     && kop_vol_admin_only_url('https://example.test/theme/api/review-inspection-highlights.php?report=1') && !kop_vol_admin_only_url('https://example.test/wp-content/uploads/2024/12/woodbury-1108.pdf#page=20'));

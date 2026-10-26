@@ -1,0 +1,111 @@
+/* "Suggest as a post" panel (js/social-suggest.js, admins only). A solid white panel; the heading, links, fields and
+   buttons name their colours in every state (docs/claude/css-checks.md, Kadence colour traps). */
+
+.kop-sugg {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 100000;
+    box-sizing: border-box;
+    width: min(420px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--kop-border-primary, #d8d2bd);
+    border-top: 4px solid var(--kop-teal, #33A7B5);
+    border-radius: 8px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1a202c);
+    box-shadow: 0 8px 24px rgba(0, 4, 53, 0.25);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.kop-sugg h2.kop-sugg-h {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-sugg p {
+    margin: 0 0 0.6rem;
+    color: var(--kop-text-primary, #1a202c);
+}
+
+.kop-sugg p.kop-sugg-help {
+    color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-sugg label {
+    display: block;
+    margin: 0.5rem 0 0.2rem;
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-sugg textarea,
+.kop-sugg input[type="url"] {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--kop-text-muted, #4A5568);
+    border-radius: 4px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-primary, #1a202c);
+    font: inherit;
+}
+
+.kop-sugg-row {
+    display: flex;
+    gap: 8px;
+    margin: 0.8rem 0 0.4rem;
+}
+
+.kop-sugg button.kop-sugg-send,
+.kop-sugg button.kop-sugg-send:focus {
+    padding: 0.45rem 1rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--kop-teal-ink, #24757F);
+    color: var(--kop-white, #fff);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.kop-sugg button.kop-sugg-send:hover,
+.kop-sugg button.kop-sugg-send:focus-visible,
+.kop-sugg button.kop-sugg-send:active {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #fff);
+}
+
+.kop-sugg button.kop-sugg-send:disabled {
+    background: var(--kop-text-muted, #4A5568);
+    color: var(--kop-white, #fff);
+}
+
+.kop-sugg button.kop-sugg-cancel,
+.kop-sugg button.kop-sugg-cancel:focus {
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--kop-midnight-blue, #000435);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    cursor: pointer;
+}
+
+.kop-sugg button.kop-sugg-cancel:hover,
+.kop-sugg button.kop-sugg-cancel:focus-visible,
+.kop-sugg button.kop-sugg-cancel:active {
+    background: var(--kop-sand, #F2EEDF);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-sugg a,
+.kop-sugg a:visited,
+.kop-sugg a:hover,
+.kop-sugg a:focus {
+    color: var(--kop-navy-blue, #000080);
+    text-decoration: underline;
+}

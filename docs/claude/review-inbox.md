@@ -154,6 +154,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # Picture uploads (REST volunteer/upload, multipart 'image'; kop_vsoc_store_upload()): checked by getimagesize, PNG/JPEG/WebP/GIF, 10 MB
 # (kop_vsoc_upload_max), re-encoded by GD (no EXIF/location), kept in uploads/kop-private/social/ (.htaccess denies all); admins preview through
 # admin-post.php?action=kop_vsoc_image; Approve copies it into the media library once (kop_vsoc_to_media(), meta _kop_vsoc_post)
+# Suggest as a post (inc/volunteer-social-suggest.php, js/social-suggest.js, REST volunteer/suggest-post, admins only): an admin-bar item on the
+# public site; selected words + note + the page (nearest #anchor) become a card in the designer's open 'social:suggested' project
+# ("Suggested posts", made when none is open); keys 'suggested:<hash>', so a repeat is refused; nobody picked = refused
 # Photo projects (inc/volunteer-images.php, source 'images:pages', {prefix}kop_vol_images, REST volunteer/image do=draft|ready|not_found|pass|back):
 # spots = seeds/image-spots.json ({page, heading|null, about, ideas}; key page#header or page#<heading slug>); kop_vimg_open_spots() leaves out a
 # spot already showing a picture (featured image, or wp:image right after the heading), whose page/heading changed, or in an open photo project.

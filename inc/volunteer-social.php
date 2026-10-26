@@ -15,6 +15,8 @@
  * card, plus one card every week of what was added to the site. It goes to
  * the volunteer picked at Volunteer Reviewers >
  * Projects ("Weekly roundup goes to"); with nobody picked, no roundup is made.
+ * Admins add their own ideas from any public page ("Suggest as a post",
+ * inc/volunteer-social-suggest.php), to the same person.
  * A social project is always one person's: never "anyone with a link".
  *
  * The picture is a link (Canva, Drive) or an upload (owner, 2026-10-21):
@@ -503,6 +505,8 @@ function kop_vsoc_admin_settings($nonce, array $vols) {
     <h3>Weekly social media roundup</h3>
     <p style="max-width:760px">Every Monday, the week's closures, lawsuits, bills, plain summaries, news and new pages from the last two months, and one card of what was added to the site, become post ideas
         for one person. They write the captions and make the pictures (no AI captions); you approve each one on the project's page.</p>
+    <p style="max-width:760px">Anything else worth a post (a news story, a fact, a facility, an inspection finding): on that page of the public site, select the words and
+        press <strong>Suggest as a post</strong> in the black bar at the top. It goes to the same person, in their "Suggested posts" project.</p>
     <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;max-width:900px">
         <?php echo $nonce; ?>
         <label>Goes to<br><select name="kop_vsoc_designer">
@@ -569,3 +573,4 @@ function kop_vsoc_admin_project(array $p, $nonce, array $names) {
 }
 
 require_once __DIR__ . '/volunteer-social-cards.php';
+require_once __DIR__ . '/volunteer-social-suggest.php';
