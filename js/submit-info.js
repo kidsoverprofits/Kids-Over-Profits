@@ -247,15 +247,23 @@
         // pattern as the bug-report flag). The icon's stroke and the label
         // span's color are set directly, so the theme's global button text
         // color (which varies per page) can't produce a low-contrast pill.
-        '.kop-submit-info-btn{display:inline-flex;align-items:center;vertical-align:middle;background:#000080;border:1px solid #000080;border-radius:999px;',
+        // The label overlays instead of widening the button: in a wrapping
+        // row (state page card actions) a wider pill jumped to the next line,
+        // left the cursor, collapsed and jumped back. It opens to the right,
+        // or to the left (.kop-si-open-left) when the card has no room.
+        '.kop-submit-info-btn{position:relative;display:inline-flex;align-items:center;vertical-align:middle;background:#000080;border:1px solid #000080;border-radius:999px;',
         'padding:0.35em 0.6em;cursor:pointer;line-height:1;}',
         '.kop-submit-info-btn__icon{display:inline-flex;align-items:center;}',
         '.kop-submit-info-btn__icon svg{display:block;}',
-        '.kop-submit-info-btn__text{max-width:0;margin-left:0;overflow:hidden;white-space:nowrap;color:#fff;',
-        'font-size:0.85em;font-weight:600;transition:max-width 0.2s ease,margin-left 0.2s ease;}',
-        '.kop-submit-info-btn:hover,.kop-submit-info-btn:focus{background:#24757F;border-color:#24757F;}',
+        '.kop-submit-info-btn__text{position:absolute;top:-1px;bottom:-1px;left:100%;z-index:2;display:flex;align-items:center;',
+        'max-width:0;padding:0;overflow:hidden;white-space:nowrap;color:#fff;background:inherit;border-radius:0 999px 999px 0;',
+        'font-size:0.85em;font-weight:600;transition:max-width 0.2s ease,padding 0.2s ease;}',
+        '.kop-submit-info-btn.kop-si-open-left .kop-submit-info-btn__text{left:auto;right:100%;border-radius:999px 0 0 999px;}',
+        '.kop-submit-info-btn:hover,.kop-submit-info-btn:focus{background:#24757F;border-color:#24757F;border-top-right-radius:0;border-bottom-right-radius:0;}',
+        '.kop-submit-info-btn.kop-si-open-left:hover,.kop-submit-info-btn.kop-si-open-left:focus{border-radius:0 999px 999px 0;}',
         '.kop-submit-info-btn:hover .kop-submit-info-btn__text,.kop-submit-info-btn:focus .kop-submit-info-btn__text,',
-        '.kop-submit-info-btn:focus-visible .kop-submit-info-btn__text{max-width:280px;margin-left:6px;}',
+        '.kop-submit-info-btn:focus-visible .kop-submit-info-btn__text{max-width:280px;padding:0 0.7em 0 0.15em;}',
+        '.kop-submit-info-btn.kop-si-open-left:hover .kop-submit-info-btn__text,.kop-submit-info-btn.kop-si-open-left:focus .kop-submit-info-btn__text{padding:0 0.15em 0 0.7em;}',
         '.kop-si-overlay{position:fixed;inset:0;background:rgba(0,4,53,0.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;}',
         '.kop-si-modal{background:#fff;color:#1f2937;border-radius:12px;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,0.35);}',
         '.kop-si-header{background:#000435;color:#fff;border-radius:12px 12px 0 0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;}',
@@ -282,8 +290,10 @@
         // makes the field look dead. Top-align the modal so the first fields
         // stay visible above the on-screen keyboard.
         '@media (hover:none),(max-width:640px){',
-        '.kop-submit-info-btn{padding:7px 12px;min-height:32px;}',
-        '.kop-submit-info-btn__text{max-width:none;margin-left:6px;transition:none;}',
+        '.kop-submit-info-btn,.kop-submit-info-btn:hover,.kop-submit-info-btn:focus,.kop-submit-info-btn.kop-si-open-left:hover,.kop-submit-info-btn.kop-si-open-left:focus{padding:7px 12px;min-height:32px;border-radius:999px;}',
+        '.kop-submit-info-btn .kop-submit-info-btn__text,.kop-submit-info-btn:hover .kop-submit-info-btn__text,.kop-submit-info-btn:focus .kop-submit-info-btn__text,',
+        '.kop-submit-info-btn.kop-si-open-left:hover .kop-submit-info-btn__text,.kop-submit-info-btn.kop-si-open-left:focus .kop-submit-info-btn__text{',
+        'position:static;max-width:none;margin-left:6px;padding:0;background:none;border-radius:0;transition:none;}',
         '.kop-si-overlay{align-items:flex-start;padding:12px;}',
         '.kop-si-modal{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);}',
         '.kop-si-field input,.kop-si-field textarea{font-size:16px;}',
@@ -326,6 +336,24 @@
     function initEnhance() {
         enhanceAll();
         new MutationObserver(enhanceAll).observe(document.body, { childList: true, subtree: true });
+        document.addEventListener('mouseover', pickSide);
+        document.addEventListener('focusin', pickSide);
+    }
+
+    // Open the label leftward when it would run past the card (or the
+    // window) on the right and there is more room on the left.
+    function pickSide(e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.kop-submit-info-btn') : null;
+        if (!btn || btn.contains(e.relatedTarget)) return;
+        var text = btn.querySelector('.kop-submit-info-btn__text');
+        if (!text) return;
+        var box = btn.closest('.facility-card, .kop-submit-info-row') || btn.parentElement;
+        var b = btn.getBoundingClientRect();
+        var c = box.getBoundingClientRect();
+        var need = text.scrollWidth + 16;
+        var right = Math.min(c.right, window.innerWidth) - b.right;
+        var left = b.left - Math.max(c.left, 0);
+        btn.classList.toggle('kop-si-open-left', right < need && left > right);
     }
 
     // Style the buttons as soon as the module loads, not on first click.
