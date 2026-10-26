@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 18:38 UTC",
- "source": "c1ac790ad806f204cd9e24cbc97d938e2ef25c88",
+ "built": "2026-10-26 18:44 UTC",
+ "source": "d7380393f2d1236b2b2d09c952da5b1c3b3fbe8b",
  "sections": [
   {
    "key": "2",
@@ -949,10 +949,10 @@
       {
        "id": "4.3:research-tasks-worked-2026-10-26-claude-tab-7-tasks",
        "lead": "Research tasks worked 2026-10-26 (Claude tab, 7 tasks)",
-       "text": "**Research tasks worked 2026-10-26 (Claude tab, 7 tasks)**: finished the same day (TrueCore 2017 fix https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e92bf949acffd860c409248db2c1547dfbe2f7bc, Three Strands 2019-2020 https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54b49421b89c2938d38813940e174c10056b5bb2, 66 sources sent, 7 Wayback PDFs in the media library as attachments 17112-17118; G4S, Three Strands, Keisha Brown and InnerChange tasks settled). Still open: - Check after the deploy that https://kidsoverprofits.org/juvenile-justice-timeline/ says \"2017 – G4S Youth Services Becomes TrueCore\" (template pass 146 runs the timeline seed v2; it applies only while the page's modified stamp is still 2026-10-16 17:39:16, so a wp-admin edit before then means the fix has to be made by hand there). - Juvenile Justice Timeline still dates the DJJ contract loss to 2023 (the news says June 2024), and the TrueCore operator record says 2001-present. Both are in the TrueCore reviewer notes; not fixed, since neither was asked for. - Sequel open programs: answered (wiki-entry-82, 40 claims, results in kop-pipeline tmp/research-sources/sequel-open-programs.json). The wiki entry 82 \"Open Sequel Programs\" table still has to be rewritten from it (operators and names now: Rite of Passage for the FL/UT/TN rows, Silver Springs Youth Academy, Mingus Mountain Youth Treatment Center, Pathway of Madison County, Brighter Path Alabama). Unconfirmed: handover dates, Courtland after April 2025, Capital Academy after 2023, Kissimmee Youth Academy = Sequel TSI Kissimmee. - Devereux's Westminster, CO refugee children's shelter: licensed 2019-12-05, empty Sept 2020, open April 2021; end year not found (grant to June 2022, campus closed 2023). Task left answered-partial for the owner. - Three Strands Wilderness served men 18-27, so it may belong with the young adult programs instead of the facility records; owner's call.",
+       "text": "**Research tasks worked 2026-10-26 (Claude tab, 7 tasks)**: finished the same day (TrueCore 2017 fix https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e92bf949acffd860c409248db2c1547dfbe2f7bc, Three Strands 2019-2020 https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54b49421b89c2938d38813940e174c10056b5bb2, 66 sources sent, 7 Wayback PDFs in the media library as attachments 17112-17118; G4S, Three Strands, Keisha Brown and InnerChange tasks settled). Still open: - Juvenile Justice Timeline still dates the DJJ contract loss to 2023 (the news says June 2024), and the TrueCore operator record says 2001-present. Both are in the TrueCore reviewer notes; not fixed, since neither was asked for. - Sequel open programs: answered (wiki-entry-82, 40 claims, results in kop-pipeline tmp/research-sources/sequel-open-programs.json). The wiki entry 82 \"Open Sequel Programs\" table still has to be rewritten from it (operators and names now: Rite of Passage for the FL/UT/TN rows, Silver Springs Youth Academy, Mingus Mountain Youth Treatment Center, Pathway of Madison County, Brighter Path Alabama). Unconfirmed: handover dates, Courtland after April 2025, Capital Academy after 2023, Kissimmee Youth Academy = Sequel TSI Kissimmee. - Devereux's Westminster, CO refugee children's shelter: licensed 2019-12-05, empty Sept 2020, open April 2021; end year not found (grant to June 2022, campus closed 2023). Task left answered-partial for the owner. - Three Strands Wilderness served men 18-27, so it may belong with the young adult programs instead of the facility records; owner's call.",
        "ask": "",
        "date": "2026-10-26",
-       "hash": "242d0401a698"
+       "hash": "47a877eedb95"
       },
       {
        "id": "4.3:investors-and-map-questions-the-kop-data-half-is-not-pushed",
