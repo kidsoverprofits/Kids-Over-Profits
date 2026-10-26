@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 02:06 UTC",
- "source": "c5f9e0520947d8b82f5095d37c7e0d9a47e80eb6",
+ "built": "2026-10-26 16:55 UTC",
+ "source": "feb478815b6db30e93e09311cb2fff410f37b0f0",
  "sections": [
   {
    "key": "2",
@@ -678,6 +678,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "c6694f6e68cf"
+      },
+      {
+       "id": "3:submission-emails-cut-back",
+       "lead": "Submission emails cut back",
+       "text": "**Submission emails cut back** (2026-10-26, [5b0764db](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/5b0764db248019af868e793c5c3ca7e6e2e64f07)): only a person's submission (form, /send/, app, extension as a non-admin, volunteer, anonymous portal) mails at once; scans, discovery, research-key sends and the owner's own sends wait for the 7am digest (ten titles per kind, then \"and N more\"). After a day, the inbox should hold one \"[Kids Over Profits] N new submissions today\" mail plus the person-sent ones. If something a person sent landed only in the digest, or a bot still mails one by one, say which.",
+       "ask": "",
+       "date": "2026-10-26",
+       "hash": "016d3b333a6f"
       }
      ]
     }
