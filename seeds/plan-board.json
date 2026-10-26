@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:03 UTC",
- "source": "bd068ea965af5c788b296cccaf9c36100ffbcef2",
+ "built": "2026-10-26 00:06 UTC",
+ "source": "c57d5427cd434f31d46c9e39370b0b93d8efcf09",
  "sections": [
   {
    "key": "2",
@@ -266,6 +266,14 @@
        "ask": "Have you picked the add-ons for each queue?",
        "date": "",
        "hash": "8531a901a311"
+      },
+      {
+       "id": "2.3:woodbury-facts-read-by-ai-agents-2026-10-25-in-progress",
+       "lead": "Woodbury Facts read by AI agents (2026-10-25, in progress)",
+       "text": "**Woodbury Facts read by AI agents (2026-10-25, in progress)**: 11,535 items were waiting. Phase A agents matched the 6,489 no-record items (2,454 program groups): 301 groups to a record (1,239 items moved onto it, still waiting), the rest got an \"AI reader:\" note on the card (new program to create, not a facility and what it is, or which records it could be). Phase B agents decide every item on a record: add (held for the write-up), reject, already on the record, trim, duplicate, or a note for you. Session steps: merge with `C:/tmp/wbf-agents/merge.py`, copy `agent-verdicts.json` + `same-info.json` to `~/kop-import/woodbury/`, run `php api/apply-woodbury-agent-verdicts.php apply` then `php api/apply-woodbury-same-info.php apply` (both have `undo apply`). Not covered: the 1,122 young adult items and the consultant item.",
+       "ask": "Do the AI reader's adds and rejects in Woodbury Facts look right (spot-check a few cards)?",
+       "date": "2026-10-25",
+       "hash": "b38f4b7caec5"
       }
      ]
     },
