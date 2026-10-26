@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 18:01 UTC",
- "source": "de7a80f58df4c3e7fee44f4729771524d2040966",
+ "built": "2026-10-26 18:05 UTC",
+ "source": "066e37a967abc54f6cc3d67b3487fe018a16acfe",
  "sections": [
   {
    "key": "2",
@@ -167,9 +167,9 @@
        "id": "2.3:write-ups-to-approve",
        "lead": "Write-ups to approve",
        "text": "**Write-ups to approve**: approve the first few by hand to judge the drafts (see 2.4).",
-       "ask": "After approving a few write-ups by hand, are the drafts good enough?",
+       "ask": "After approving a few write-ups by hand, are the drafts good enough? Found 2026-10-26: there are no drafts to approve. `wpdl_kop_record_writeups` is empty and the AI usage log has no write-up call since 2026-10-15, while 3,776 facts on 413 records are held (217 of them from /questions/ answers, 33 records), so nothing approved since 10-15 is on a public page. Run by hand over SSH the prompts build (32-40k characters for the top records), and `kop_ai_turn_order()` comes back empty from the PHP command line: the hourly `kop_wu_hourly` (run by the server cron's `php wp-cron.php`) most likely has no AI keys (`kop_wu_ai()` loads only api/ai-providers.php, never the .env), and kop_ai_generate_alternating's \"No AI key configured\" is never logged. Fix: load the keys in `kop_wu_ai()` the way the jobs that work do, log a failed hourly batch somewhere visible, then check drafts appear at Review inbox > Write-ups to approve.",
        "date": "",
-       "hash": "6d505c77718d"
+       "hash": "863b766b3349"
       },
       {
        "id": "2.3:rules-from-documents",
