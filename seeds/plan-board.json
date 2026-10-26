@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 01:32 UTC",
- "source": "5d7aba1ec68e2d1b3d726c6f91ddd20b0b131ef5",
+ "built": "2026-10-26 01:49 UTC",
+ "source": "6bb86c5a749ef0d4ed87abd9d2eda571af1ae2b0",
  "sections": [
   {
    "key": "2",
@@ -1080,6 +1080,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "3f904ccb1817"
+      },
+      {
+       "id": "4.4:submissions-come-in-linked",
+       "lead": "Submissions come in linked",
+       "text": "**Submissions come in linked** (owner, 2026-10-25: \"a lot of submissions with a very obvious corresponding facility but they're not coming in pre-linked\"; [4ee30cac](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4ee30cac18ab084be65c5d7b235af83f14f7fdb7)). Websites sent in now pre-pick 51 of the 71 waiting. Open: (a) after the next hourly auto-connect run, the ~31 waiting news and 3 lawsuits sent with no facility should show their records under Facilities mentioned at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox (the 'submissions' pass in inc/auto-connect.php). (b) scripts/test-auto-connect.php has one failure that predates this: \"drive docs: every tie is an exact name of its record (SCIAD NET: Utah / Walkabout / News)\".",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "4f8d0f9d18ca"
       }
      ]
     },
