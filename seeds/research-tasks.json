@@ -4305,7 +4305,29 @@
    "found": "found 2026-10-08",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Neither the Disability Group Homes page nor the IDD timeline names the town now, so no page needed a change.",
+    "claims": [
+     {
+      "claim": "Yes: the Fernald Development Center stood at 200 Trapelo Road, Waltham",
+      "url": "https://www.city.waltham.ma.us/DocumentCenter/View/317/History-of-the-Fernald-Center",
+      "quote": "The Fernald Development Center, located at 200 Trapelo Road, is the oldest institution that serves people with developmental disabilities in the Western Hemisphere."
+     },
+     {
+      "claim": "It was founded in South Boston in 1848 and moved to Waltham from 1888",
+      "url": "https://www.city.waltham.ma.us/DocumentCenter/View/317/History-of-the-Fernald-Center",
+      "quote": "Founded by Samuel Gridley Howe as the Massachusetts School for the Feeble-Minded in 1848, the school was originally located in South Boston. ... in 1888, construction began for the school campus in Waltham."
+     },
+     {
+      "claim": "It closed in 2014, when the state sold the campus to the City of Waltham",
+      "url": "https://www.bostonglobe.com/2024/01/10/opinion/shameful-afterlife-fernald-school-waltham",
+      "quote": "When the state sold the Fernald to the City of Waltham in 2014"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "related-industry-pages:advoserv-bellwether-12145-bear-de-is-a-bare-reco",
@@ -5321,7 +5343,44 @@
      "url": "https://www.ire.org/?p=111104",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Which outlet wrote the story the IRE abstract describes is still not proven: the Democrat-Gazette is likely, but no 2005 piece was found and the Wayback Machine was down. Added to the memorial as Keisha Brown (seeds/memorial.json).",
+    "claims": [
+     {
+      "claim": "The Arkansas Democrat-Gazette covered her death (Amy Upshaw, March 26, 2007); the press calls her Keisha Brown",
+      "url": "https://www.arkansasonline.com/news/2007/mar/26/resolution-still-awaited-05-youth-center--20070326/",
+      "quote": "Almost two years after Keisha Brown died at the former Alexander Youth Services Center, nurses responsible for her care have not faced state Board of Nursing allegations"
+     },
+     {
+      "claim": "She died April 9, 2005, of blood clots in her lungs",
+      "url": "https://www.arkansasonline.com/news/2007/mar/26/resolution-still-awaited-05-youth-center--20070326/",
+      "quote": "Keisha died April 9, 2005, from blood clots to her lungs"
+     },
+     {
+      "claim": "She was 17",
+      "url": "https://encyclopediaofarkansas.net/entries/alexander-pulaski-and-saline-counties-6419/",
+      "quote": "On April 9, 2005, seventeen-year-old Keisha Brown died from blood clots in her lungs"
+     },
+     {
+      "claim": "A nurse gave her two puffs of her inhaler and bed rest",
+      "url": "https://www.arkansasonline.com/news/2007/mar/26/resolution-still-awaited-05-youth-center--20070326/",
+      "quote": "One of the nurses gave Keisha two puffs from her asthma inhaler, put her on bed rest and left."
+     },
+     {
+      "claim": "Cornell Companies ran the center from 2001 until it was fired in November 2006",
+      "url": "https://encyclopediaofarkansas.net/entries/alexander-pulaski-and-saline-counties-6419/",
+      "quote": "On September 1, 2001, Cornell Companies Inc., ... started running the center."
+     },
+     {
+      "claim": "Her mother sued Cornell Interventions, its doctor and six nurses in federal court in 2006",
+      "url": "https://www.courtlistener.com/docket/5188984/brown-v-cornell-interventions-inc/",
+      "quote": "COMPLAINT with jury demand against all defendants ... filed by Juana Michelle Brown"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-25"
+   }
   },
   {
    "key": "in-loving-memory:memorial-sheet-rows-11-and-13-whittier-state-sch",
@@ -11458,5 +11517,5 @@
    ]
   }
  ],
- "built": "2026-10-26 02:03"
+ "built": "2026-10-26 02:28"
 }
