@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 20:38 UTC",
- "source": "423f76b78e22a982427712a4ef12efe18fb5d32d",
+ "built": "2026-10-26 21:35 UTC",
+ "source": "95d7a7ad7033384e35b1662c314a2b866593fbf4",
  "sections": [
   {
    "key": "2",
@@ -957,10 +957,10 @@
       {
        "id": "4.3:researcher-data-kit-2026-10-26",
        "lead": "Researcher data kit (2026-10-26)",
-       "text": "**Researcher data kit (2026-10-26)**: a guide and blank templates for outside researchers to scrape into, sent by the owner (page https://claude.ai/artifact/CfJ2hFUMYSbvwoH1pvXCGf, zip `C:\\Users\\daniu\\Downloads\\kop-researcher-kit.zip`; not in the repo). Shapes: facilities (the v3 document minus the fields KOP fills, `docs/FACILITY-SCHEMA.md`), companies (the operator block + facilities by name), people (jobs + relations, as `kop_person_jobs` / `kop_person_relations`), lawsuits and bills (the `seeds/lawsuits.json` / `legislation.json` record shape), news (`news_submissions` columns + `archive_url`, `tags`), inspections (the `api/inspections-write.php` / state scraper shape + `license_number`, `source_site`), source links (`send-sources.py` input). Each file has a wrapper: `kit_version`, `kind`, `submitted_by`, `collected_on`, `method`. Still open: - Write a loader (kop-pipeline) for returned files: facilities and companies into the review inbox as new-record / add-on cards (never straight writes), people into People, lawsuits/bills/news into their queues as drafts, inspections through `api/inspections-write.php`, source links through `send-sources.py`. Companies and people name facilities by name + city + state, so the loader resolves them with `kop_facility_resolve_identity()`. - When a facility field, choice list (types, statuses, article types, content warnings) or checklist box changes, bump `kit_version` and republish the page (scratchpad build script; rebuild from this item if lost).",
+       "text": "**Researcher data kit (2026-10-26)**: the record shapes and blank templates for outside researchers to scrape into, public at https://kidsoverprofits.org/researcher-kit/ (`templates/page-researcher-kit.php`, files in `researcher-kit/`, `?download=zip` bundles them; the allowed values are read live from the Dropdown Lists). The owner asked for no claude.ai artifacts: the first artifact copy was deleted. Shapes: facilities (the v3 document minus the fields KOP fills, `docs/FACILITY-SCHEMA.md`), companies (the operator block + facilities by name), people (jobs + relations, as `kop_person_jobs` / `kop_person_relations`), lawsuits and bills (the `seeds/lawsuits.json` / `legislation.json` record shape), news (`news_submissions` columns + `archive_url`, `tags`), inspections (the `api/inspections-write.php` / state scraper shape + `license_number`, `source_site`), source links (`send-sources.py` input). Each file has a wrapper: `kit_version`, `kind`, `submitted_by`, `collected_on`, `method`. Still open: - After deploy: open https://kidsoverprofits.org/researcher-kit/ (page made by the tool-pages pass, version 29), check a template download and the zip, and run `check-contrast.py` / `check-mobile-overflow.py` on `/researcher-kit/`. - Write a loader (kop-pipeline) for returned files: facilities and companies into the review inbox as new-record / add-on cards (never straight writes), people into People, lawsuits/bills/news into their queues as drafts, inspections through `api/inspections-write.php`, source links through `send-sources.py`. Companies and people name facilities by name + city + state, so the loader resolves them with `kop_facility_resolve_identity()`. - When a facility field or checklist box changes, update `researcher-kit/templates/facilities.json` and bump `kit_version` in every template (the allowed-value lists on the page follow the Dropdown Lists by themselves).",
        "ask": "",
        "date": "2026-10-26",
-       "hash": "7c9352be96d5"
+       "hash": "c53a64e58b04"
       }
      ]
     },
