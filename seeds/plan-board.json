@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 19:01 UTC",
- "source": "c5f80b2043030c312a67bcce81387c2b2db69c78",
+ "built": "2026-10-26 19:04 UTC",
+ "source": "62e8467c2b8efbc1046ca4afeed427d2463f8819",
  "sections": [
   {
    "key": "2",
@@ -949,10 +949,10 @@
       {
        "id": "4.3:research-tasks-worked-2026-10-26-claude-tab-7-tasks",
        "lead": "Research tasks worked 2026-10-26 (Claude tab, 7 tasks)",
-       "text": "**Research tasks worked 2026-10-26 (Claude tab, 7 tasks)**: finished the same day (TrueCore 2017 fix https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e92bf949acffd860c409248db2c1547dfbe2f7bc, Three Strands 2019-2020 https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54b49421b89c2938d38813940e174c10056b5bb2, 66 sources sent, 7 Wayback PDFs in the media library as attachments 17112-17118; G4S, Three Strands, Keisha Brown and InnerChange tasks settled). Still open: - After the next deploy (template pass 147, young adult pass kop_ya_maybe_later_moves v1, which runs on the first wp-admin or admin-ajax.php?action=... request): check that https://kidsoverprofits.org/juvenile-justice-timeline/ says \"2024 – Florida Department of Juvenile Justice Ends Contract with TrueCore\" (seed v3, stamped against the page's 2026-10-26 18:38:33 edit), that the TrueCore company page says 2017 to present (operator-records.json fix_fields), and that Three Strands Wilderness is on /young-adult-programs/ (ages 18-27, 2019 to 2020; log in the option kop_ya_later_log), its Steamboat Pilot article a link there, and /facility/three-strands-wilderness/ gone. - Sequel wiki entry 82: the draft now adds a \"now run by\" line per program under the Open Sequel Programs table (kop-data https://github.com/kidsoverprofits/kop-data/commit/a9900bca32325be92d032250245437925b45a71c); the table rows themselves stay as they are, since drafts only add lines. Waits for the owner at Review inbox > Wiki updates. Unconfirmed: handover dates, Courtland after April 2025, Capital Academy after 2023, Kissimmee Youth Academy = Sequel TSI Kissimmee. - Lake Academy death: the timeline and the TrueCore draft say 17, a later ABC Action News story says 15 (TrueCore reviewer notes); check the IG report. - Devereux's Westminster, CO refugee children's shelter: licensed 2019-12-05, empty Sept 2020, open April 2021; end year still not found (searched again 2026-10-26; grant to June 2022, campus closed 2023). Answered-partial.",
+       "text": "**Research tasks worked 2026-10-26 (Claude tab, 7 tasks)**: finished the same day (TrueCore 2017 fix https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e92bf949acffd860c409248db2c1547dfbe2f7bc, Three Strands 2019-2020 https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54b49421b89c2938d38813940e174c10056b5bb2, 66 sources sent, 7 Wayback PDFs in the media library as attachments 17112-17118; G4S, Three Strands, Keisha Brown and InnerChange tasks settled; then TrueCore 2017 to present and the timeline's June 2024 contract loss https://github.com/kidsoverprofits/Kids-Over-Profits/commit/95ffd92e549cc300b45eaf968167a306667d7dc4, Three Strands moved to /young-adult-programs/ https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7054ac6ae16ea308cc9c7b40445bac3b53fef37f, all checked live). Still open: - Sequel wiki entry 82: the draft now adds a \"now run by\" line per program under the Open Sequel Programs table (kop-data https://github.com/kidsoverprofits/kop-data/commit/a9900bca32325be92d032250245437925b45a71c); the table rows themselves stay as they are, since drafts only add lines. Waits for the owner at Review inbox > Wiki updates. Unconfirmed: handover dates, Courtland after April 2025, Capital Academy after 2023, Kissimmee Youth Academy = Sequel TSI Kissimmee. - Lake Academy death: the timeline and the TrueCore draft say 17, a later ABC Action News story says 15 (TrueCore reviewer notes); check the IG report. - Devereux's Westminster, CO refugee children's shelter: licensed 2019-12-05, empty Sept 2020, open April 2021; end year still not found (searched again 2026-10-26; grant to June 2022, campus closed 2023). Answered-partial.",
        "ask": "",
        "date": "2026-10-26",
-       "hash": "964536bd59f4"
+       "hash": "de9555033687"
       },
       {
        "id": "4.3:investors-and-map-questions-the-kop-data-half-is-not-pushed",
