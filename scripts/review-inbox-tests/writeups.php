@@ -119,13 +119,39 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
     $ids = kop_rinbox_wu_ids('waiting', '');
     $check('writeups: the record waits in the queue', in_array($fid, $ids, true), count($ids) . ' records');
     $card = kop_rinbox_get_item('writeups', (string) $fid);
-    $check('writeups: with no draft the card offers only "Write it with AI"', array_values(array_diff(array_column($card['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS)) === array('write'), implode(',', array_column($card['actions'], 'id')));
+    $check('writeups: with no draft the card offers "Write it with AI" and "Send to Claude"', array_values(array_diff(array_column($card['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS)) === array('write', 'claude'), implode(',', array_column($card['actions'], 'id')));
     try {
         kop_wu_publish($fid, 'tester');
         $check('writeups: nothing to approve without a draft', false);
     } catch (RuntimeException $e) {
         $check('writeups: nothing to approve without a draft', strpos($e->getMessage(), 'no write-up') !== false, $e->getMessage());
     }
+
+    // Send to Claude: the hourly run leaves it alone; the session reads the prompt and sends back the JSON.
+    call_user_func($src['act'], (string) $fid, 'claude', array());
+    $card = kop_rinbox_get_item('writeups', (string) $fid);
+    $check('writeups: a record sent to Claude says so and can be taken back', strpos($card['subtitle'], 'Sent to Claude') !== false
+        && in_array('unclaude', array_column($card['actions'], 'id'), true), $card['subtitle']);
+    $asked = array();
+    $GLOBALS['kop_wu_ai'] = function ($p) use (&$asked) { $asked[] = $p; throw new RuntimeException('stub'); };
+    kop_wu_run_batch(500);
+    $check('writeups: the hourly run skips a record sent to Claude', !array_filter($asked, function ($p) use ($names) { return strpos($p, $names[0]) !== false; }));
+    $listed = array_values(array_filter(kop_wu_claude_list(), function ($r) use ($fid) { return $r['facility_id'] === $fid; }));
+    $check('writeups: Claude\'s list carries the record\'s prompt', $listed && strpos($listed[0]['prompt'], 'New facts approved for this page') !== false && $listed[0]['held'] >= 2);
+    preg_match_all('/^\[(\d+)\] Staff: /m', $listed[0]['prompt'] ?? '', $nums);
+    kop_wu_claude_save($fid, array('paragraphs' => array('Two people worked there. [' . implode('][', $nums[1]) . ']'), 'check' => ''));
+    $wu = kop_wu_get($fid);
+    $check('writeups: Claude\'s answer is the cited draft, by Claude, off the list', ($wu['draft']['provider'] ?? '') === 'claude'
+        && substr_count($wu['draft']['paragraphs'][0] ?? '', '[source](') >= 1 && !isset(kop_wu_claude_queue()[$fid]), json_encode($wu['draft']));
+    try {
+        kop_wu_claude_save($fid, '{"paragraphs":["x"]}');
+        $check('writeups: an answer for a record not on the list is refused', false);
+    } catch (RuntimeException $e) {
+        $check('writeups: an answer for a record not on the list is refused', strpos($e->getMessage(), 'not sent to Claude') !== false);
+    }
+    $wu0 = kop_wu_get($fid);
+    kop_wu_put($fid, array(), $wu0['published']);
+    update_option('kop_wu_failed', array(), false);
 
     // A made-up AI: one sentence per new fact, citing its number.
     $seen = '';

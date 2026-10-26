@@ -239,3 +239,22 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # tmp/data-audit/audit-links.json, copied to ~/kop-import/gdocs/; reviewed at Drive Docs (source "Data audit") as news/court/resource links
 (kop-pipeline) python scripts/data-audit-links.py
 ```
+
+## Write-ups sent to Claude
+
+Review inbox > Write-ups to approve: "Send to Claude" on a card puts the record on Claude's list (option `kop_wu_claude`,
+inc/record-writeups.php); the hourly AI run leaves it alone. When the owner says "write the write-ups sent to Claude":
+
+```bash
+K=$(cat /c/Users/daniu/kop-research-key.txt)
+# Each record: facility_id, name, url, held, prompt (the same prompt Groq/Gemini get: the page's About and the held facts, numbered)
+curl -s -H "X-KOP-Research-Key: $K" https://kidsoverprofits.org/wp-json/kop/v1/writeups/claude
+# Answer each prompt exactly as it asks ({"paragraphs": [...], "check": "..."}, [n] after each sentence) and send it back;
+# it becomes the card's draft (by Claude, cited), off the list. Nothing is on the page until the owner approves.
+curl -s -X POST -H "X-KOP-Research-Key: $K" -H "Content-Type: application/json" \
+  -d '{"facility_id": 11021, "answer": {"paragraphs": ["..."], "check": ""}}' \
+  https://kidsoverprofits.org/wp-json/kop/v1/writeups/claude
+```
+
+Follow the prompt's rules and docs/WRITING-STYLE.md; never pass the key in a prompt or a report. The last hourly AI run's result
+is at the end of the queue's help text; a record whose AI draft failed is skipped 6 hours, prompts over 18,000 characters go to Gemini only.

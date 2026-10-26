@@ -433,10 +433,74 @@ function kop_wu_write($fid, $by = 'ai') {
     } catch (RuntimeException $e) {
         $out = kop_wu_read_answer(kop_wu_ai($prompt . "\n\nYour last answer was refused: " . $e->getMessage() . ' Answer again with the JSON only.'), $urls);
     }
+    return kop_wu_store_draft($fid, $out, $held, (string) ($GLOBALS['kop_ai_last_provider'] ?? ''), $by);
+}
+
+/** Store a read answer ({paragraphs, check}) as the record's draft, replacing any. Returns the draft. */
+function kop_wu_store_draft($fid, array $out, array $held, $provider, $by) {
     $wu = kop_wu_get($fid);
     $draft = array('paragraphs' => $out['paragraphs'], 'check' => $out['check'], 'held' => array_map('kop_wu_item_key', $held),
-        'provider' => (string) ($GLOBALS['kop_ai_last_provider'] ?? ''), 'by' => $by, 'at' => gmdate('Y-m-d H:i:s'));
+        'provider' => (string) $provider, 'by' => $by, 'at' => gmdate('Y-m-d H:i:s'));
     kop_wu_put($fid, $draft, $wu['published']);
+    return $draft;
+}
+
+/* ---- Sent to Claude ---------------------------------------------------------- */
+
+/**
+ * Records the owner sent to a Claude session to write (Review inbox card
+ * "Send to Claude"), option kop_wu_claude [fid => {at, by}]. The hourly run
+ * leaves them alone. A session reads them with GET kop/v1/writeups/claude and
+ * sends each draft back with POST (header X-KOP-Research-Key, the research
+ * key): the same prompt the AI gets, answered with the same JSON, stored as
+ * the draft (provider 'claude'). Nothing goes on the page until the owner approves.
+ */
+function kop_wu_claude_queue() {
+    $q = function_exists('get_option') ? get_option('kop_wu_claude', array()) : array();
+    return is_array($q) ? $q : array();
+}
+
+function kop_wu_send_to_claude($fid, $by) {
+    $q = kop_wu_claude_queue();
+    $q[(int) $fid] = array('at' => gmdate('Y-m-d H:i:s'), 'by' => (string) $by);
+    update_option('kop_wu_claude', $q, false);
+}
+
+function kop_wu_take_from_claude($fid) {
+    $q = kop_wu_claude_queue();
+    unset($q[(int) $fid]);
+    update_option('kop_wu_claude', $q, false);
+}
+
+/** What a Claude session needs for each record sent to it: [{facility_id, name, url, sent, held, prompt}], oldest first. */
+function kop_wu_claude_list() {
+    $out = array();
+    $q = kop_wu_claude_queue();
+    uasort($q, function ($a, $b) { return strcmp((string) $a['at'], (string) $b['at']); });
+    foreach ($q as $fid => $s) {
+        $held = kop_wu_held_rows((int) $fid);
+        try {
+            list($prompt) = kop_wu_prompt((int) $fid, null, array_map('kop_wu_fact', $held));
+        } catch (Throwable $e) {
+            continue;
+        }
+        $out[] = array('facility_id' => (int) $fid, 'name' => function_exists('kop_rinbox_facility') ? (string) (kop_rinbox_facility((int) $fid)['name'] ?? '') : '',
+            'url' => function_exists('kop_facility_pages_url_for_id') ? (string) kop_facility_pages_url_for_id((int) $fid) : '',
+            'sent' => (string) $s['at'], 'held' => count($held), 'prompt' => $prompt);
+    }
+    return $out;
+}
+
+/** Store a Claude session's answer (the prompt's JSON, [n] markers and all) as the draft and take the record off the list. */
+function kop_wu_claude_save($fid, $answer) {
+    $fid = (int) $fid;
+    if (!isset(kop_wu_claude_queue()[$fid])) throw new RuntimeException("Record #{$fid} was not sent to Claude (or was taken back).");
+    $held = kop_wu_held_rows($fid);
+    if (!$held) throw new RuntimeException('No approved facts are waiting for this record.');
+    list(, $urls) = kop_wu_prompt($fid, null, array_map('kop_wu_fact', $held));
+    $draft = kop_wu_store_draft($fid, kop_wu_read_answer(is_string($answer) ? $answer : wp_json_encode($answer), $urls), $held, 'claude', 'Claude');
+    kop_wu_take_from_claude($fid);
+    if (function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
     return $draft;
 }
 
@@ -595,9 +659,10 @@ function kop_wu_run_batch($limit = 3) {
     $out = array('written' => 0, 'errors' => array(), 'left' => 0);
     $failed = function_exists('get_option') ? (array) get_option('kop_wu_failed', array()) : array();
     $failed = array_filter($failed, function ($t) { return (int) $t > time() - KOP_WU_RETRY_AFTER; });
+    $claude = kop_wu_claude_queue();
     $todo = array();
     foreach (array_keys(kop_wu_held_counts()) as $fid) {
-        if (isset($failed[$fid])) continue;
+        if (isset($failed[$fid]) || isset($claude[$fid])) continue;
         $wu = kop_wu_get($fid);
         if (!empty($wu['draft']['edited_by'])) continue;
         if (empty($wu['draft']['paragraphs']) || kop_wu_new_since_draft($fid, $wu['draft'])) $todo[] = $fid;
@@ -644,6 +709,30 @@ if (function_exists('add_action')) {
         }
         // Shown on Review inbox > Write-ups to approve, so a run that fails every hour is seen (kop_wu_last_run_line()).
         update_option('kop_wu_last_run', array('at' => time()) + $r, false);
+    });
+
+    add_action('rest_api_init', function () {
+        $is_claude = function (WP_REST_Request $r) {
+            return function_exists('kop_msub_is_research') && kop_msub_is_research($r);
+        };
+        register_rest_route('kop/v1', '/writeups/claude', array(
+            array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function () {
+                kop_wu_ensure_tables();
+                $res = rest_ensure_response(array('records' => kop_wu_claude_list()));
+                $res->header('Cache-Control', 'no-store');
+                return $res;
+            }),
+            array('methods' => 'POST', 'permission_callback' => $is_claude, 'callback' => function (WP_REST_Request $r) {
+                $p = (array) $r->get_json_params();
+                try {
+                    kop_wu_ensure_tables();
+                    $d = kop_wu_claude_save((int) ($p['facility_id'] ?? 0), $p['answer'] ?? '');
+                    return array('ok' => true, 'paragraphs' => count($d['paragraphs']));
+                } catch (Throwable $e) {
+                    return new WP_Error('kop_writeups', $e->getMessage(), array('status' => 400));
+                }
+            }),
+        ));
     });
 }
 

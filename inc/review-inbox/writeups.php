@@ -96,6 +96,7 @@ function kop_rinbox_wu_item($fid) {
     $pub = (array) ($wu['published']['paragraphs'] ?? array());
     $waiting = $held || $draft;
     $new = $draft ? kop_wu_new_since_draft($fid, $wu['draft'], $held) : array();
+    $claude = function_exists('kop_wu_claude_queue') ? (kop_wu_claude_queue()[$fid] ?? null) : null;
 
     $lines = array();
     if ($facts) {
@@ -125,6 +126,11 @@ function kop_rinbox_wu_item($fid) {
             'help' => 'The ' . count($held) . ' held fact' . (count($held) === 1 ? '' : 's') . ' go onto the record of ' . $fac['name'] . ' (staff, incidents, names, closure...) and the write-up becomes its About section, in one save. Undo in Recently done takes it all back.');
         $actions[] = array('id' => 'write', 'label' => $draft ? 'Write it again with AI' : 'Write it with AI', 'style' => 'neutral',
             'help' => 'Asks the AI for a new draft from the page\'s About and the held facts. What is in the box now is replaced.');
+        if ($held) $actions[] = $claude
+            ? array('id' => 'unclaude', 'label' => 'Take back from Claude', 'style' => 'neutral',
+                'help' => 'Takes this record off Claude\'s list; the hourly AI run may draft it again.')
+            : array('id' => 'claude', 'label' => 'Send to Claude', 'style' => 'neutral',
+                'help' => 'Puts this record on Claude\'s list: the next Claude session asked to "write the write-ups sent to Claude" drafts it and the draft lands here for you to approve. The hourly AI run leaves it alone meanwhile.');
         if ($draft && !$held) $actions[] = array('id' => 'drop', 'label' => 'Drop the draft', 'style' => 'reject',
             'help' => 'No facts are held for this page any more: the draft is thrown away and the page stays as it is.');
     }
@@ -140,6 +146,7 @@ function kop_rinbox_wu_item($fid) {
             count($held) . ' approved fact' . (count($held) === 1 ? '' : 's') . ' held',
             $draft ? 'Draft by ' . (!empty($wu['draft']['edited_by']) ? $wu['draft']['edited_by'] : ucfirst((string) ($wu['draft']['provider'] ?? '') ?: 'the AI')) : ($waiting ? 'No draft yet' : ''),
             $pub ? 'An approved write-up is on the page' : '',
+            $claude ? 'Sent to Claude ' . substr((string) $claude['at'], 0, 10) : '',
         ))),
         'url'          => function_exists('kop_facility_pages_url_for_id') ? (string) kop_facility_pages_url_for_id($fid) : '',
         'text'         => implode("\n", $lines),
@@ -180,6 +187,15 @@ function kop_rinbox_wu_act($key, $action, array $params) {
         $msg = kop_wu_undo($log, $user);
         kop_rinbox_flush_counts();
         return array('message' => $msg);
+    }
+    if ($action === 'claude') {
+        kop_wu_send_to_claude($fid, $user);
+        return array('message' => 'On Claude\'s list. Ask a Claude session to "write the write-ups sent to Claude"; the draft comes back here.',
+            'undo' => array('action' => 'unclaude', 'params' => array()));
+    }
+    if ($action === 'unclaude') {
+        kop_wu_take_from_claude($fid);
+        return array('message' => 'Taken off Claude\'s list.');
     }
     if ($action === 'drop') {
         if (kop_wu_held_rows($fid)) throw new RuntimeException('Facts are still held for this page: approve the write-up, or send them back from their queues first.');
