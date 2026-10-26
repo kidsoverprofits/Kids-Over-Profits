@@ -607,13 +607,31 @@ function kop_wu_run_batch($limit = 3) {
     return $out;
 }
 
+/** The last hourly run in words ("Last hourly run, 3:05 pm: 0 drafts written; stopped on: ..."), or ''. */
+function kop_wu_last_run_line() {
+    $r = get_option('kop_wu_last_run');
+    if (!is_array($r) || empty($r['at'])) return '';
+    $when = function_exists('wp_date') ? wp_date('M j, g:i a', (int) $r['at']) : gmdate('M j, H:i', (int) $r['at']) . ' UTC';
+    $n = (int) ($r['written'] ?? 0);
+    $errors = (array) ($r['errors'] ?? array());
+    return 'Last hourly run, ' . $when . ': ' . $n . ' draft' . ($n === 1 ? '' : 's') . ' written'
+        . ($errors ? '; stopped on: ' . implode(' | ', array_map(function ($e) { return mb_substr((string) $e, 0, 200); }, array_slice($errors, 0, 2))) : '')
+        . ((int) ($r['left'] ?? 0) ? '; ' . (int) $r['left'] . ' more still to write' : '') . '.';
+}
+
 if (function_exists('add_action')) {
     add_action('init', function () {
         if (!wp_next_scheduled('kop_wu_hourly')) wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly');
     });
     add_action('kop_wu_hourly', function () {
         kop_wu_ensure_tables();
-        kop_wu_run_batch(3);
+        try {
+            $r = kop_wu_run_batch(3);
+        } catch (Throwable $e) {
+            $r = array('written' => 0, 'errors' => array($e->getMessage()), 'left' => 0);
+        }
+        // Shown on Review inbox > Write-ups to approve, so a run that fails every hour is seen (kop_wu_last_run_line()).
+        update_option('kop_wu_last_run', array('at' => time()) + $r, false);
     });
 }
 

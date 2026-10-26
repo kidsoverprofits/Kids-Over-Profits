@@ -22,7 +22,8 @@ kop_rinbox_register('writeups', function () {
         'help'     => 'Facts approved in Woodbury Facts and Fornits do not go on the public page by themselves: they wait here, one card per record, until they are written up well. '
             . 'Each card lists the approved facts with their words and sources, and a draft of the page\'s About section that takes them in (the AI writes one within the hour; "Write it with AI" asks now). '
             . 'Read the draft against the facts, fix it in the box (cite as ([source](link))), then approve: the facts go on the record and the text becomes the About, at once. Undo in Recently done takes it all back. '
-            . 'To take one fact out, use Undo on it in its own queue ("Approved, held for the write-up").',
+            . 'To take one fact out, use Undo on it in its own queue ("Approved, held for the write-up").'
+            . (function_exists('kop_wu_last_run_line') && ($last = kop_wu_last_run_line()) !== '' ? ' ' . $last : ''),
         'views'    => array('waiting' => 'Waiting', 'published' => 'Approved'),
         'view_counts' => function (array $q = array()) {
             return array('waiting' => count(kop_rinbox_wu_ids('waiting', '')), 'published' => count(kop_rinbox_wu_ids('published', '')));

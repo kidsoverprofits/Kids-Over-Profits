@@ -18,12 +18,50 @@
 if (!function_exists('kop_ai_api_keys')) {
 
     function kop_ai_secret(string $name): string {
-        $v = getenv($name);
-        if ($v !== false && $v !== '') return $v;
-        if (!empty($_ENV[$name])) return (string) $_ENV[$name];
-        if (!empty($_SERVER[$name])) return (string) $_SERVER[$name];
-        if (defined($name) && constant($name)) return (string) constant($name);
+        for ($try = 0; $try < 2; $try++) {
+            $v = getenv($name);
+            if ($v !== false && $v !== '') return $v;
+            if (!empty($_ENV[$name])) return (string) $_ENV[$name];
+            if (!empty($_SERVER[$name])) return (string) $_SERVER[$name];
+            if (defined($name) && constant($name)) return (string) constant($name);
+            if ($try === 0 && !kop_ai_load_env()) break;
+        }
         return '';
+    }
+
+    /**
+     * Read the .env the way api/config.php does (nearest one above api/, unset
+     * names only), once a request. The hourly jobs run from the server cron's
+     * `php wp-cron.php`, where nothing may have loaded config.php yet: without
+     * this they found no key and failed without a word (2026-10-26, no
+     * write-up drafted for 12 days). Returns whether it read anything new.
+     */
+    function kop_ai_load_env(): bool {
+        static $done = false;
+        if ($done) return false;
+        $done = true;
+        $dir = !empty($GLOBALS['kop_ai_env_dir']) ? (string) $GLOBALS['kop_ai_env_dir'] : __DIR__; // tests
+        $path = null;
+        for ($i = 0; $i < 6; $i++) {
+            $dir = dirname($dir);
+            if (is_readable($dir . '/.env')) { $path = $dir . '/.env'; break; }
+        }
+        if ($path === null) return false;
+        $set = false;
+        foreach ((array) @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            if (strpos(trim($line), '#') === 0 || strpos($line, '=') === false) continue;
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            if ($key === '') continue;
+            if (strlen($value) > 1 && ($value[0] === '"' || $value[0] === "'") && substr($value, -1) === $value[0]) $value = substr($value, 1, -1);
+            if (getenv($key) === false) {
+                putenv("$key=$value");
+                $_ENV[$key] = $value;
+                $set = true;
+            }
+        }
+        return $set;
     }
 
     function kop_ai_api_keys(): array {

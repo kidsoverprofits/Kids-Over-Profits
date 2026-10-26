@@ -25,6 +25,17 @@ $check = function ($name, $ok, $detail = '') use (&$fails) {
 require_once $theme . '/api/ai-usage.php';
 require_once $theme . '/api/ai-providers.php';
 
+// Keys from the .env when nothing loaded config.php (the server cron's php wp-cron.php).
+@mkdir($tmp . '/theme/api', 0755, true);
+file_put_contents($tmp . '/theme/.env', "# keys\nKOP_TEST_ENV_KEY=\"abc123\"\nKOP_TEST_ENV_PLAIN = xyz\n");
+$GLOBALS['kop_ai_env_dir'] = $tmp . '/theme/api';
+$check('a key only in the .env is found', kop_ai_secret('KOP_TEST_ENV_KEY') === 'abc123');
+$check('unquoted, spaced .env value read', kop_ai_secret('KOP_TEST_ENV_PLAIN') === 'xyz');
+$check('a name in no .env is empty', kop_ai_secret('KOP_TEST_ENV_MISSING') === '');
+putenv('KOP_TEST_ENV_KEY');
+putenv('KOP_TEST_ENV_PLAIN');
+unset($_ENV['KOP_TEST_ENV_KEY'], $_ENV['KOP_TEST_ENV_PLAIN'], $GLOBALS['kop_ai_env_dir']);
+
 // Job from the first file outside the AI libraries: a stand-in doc-types.php.
 @mkdir($tmp . '/inc', 0755, true);
 file_put_contents($tmp . '/inc/doc-types.php', "<?php\nfunction kop_test_doc_call() { kop_ai_usage_record('gemini', 'gemini-x', 'Gemini rate limit exceeded (HTTP 429): You exceeded your current quota key=SECRET123'); }\n");
