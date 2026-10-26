@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:51 UTC",
- "source": "880af1bd9cbce333641865ab59f3301d294a4621",
+ "built": "2026-10-26 01:32 UTC",
+ "source": "5d7aba1ec68e2d1b3d726c6f91ddd20b0b131ef5",
  "sections": [
   {
    "key": "2",
@@ -75,12 +75,12 @@
      "intro": [],
      "items": [
       {
-       "id": "2.2:pa-rerun-with-ocr-version-2",
-       "lead": "PA rerun with OCR version 2",
-       "text": "**PA rerun with OCR version 2**: `python pa_scraper.py --full` (~5,750 documents, ~5.5 s a page, needs 1.5 GB free). Replaces the 164 waiting 2012-17 PA findings (old 3.3 item 5).",
-       "ask": "Have you rerun the PA scraper with OCR version 2 (--full)?",
-       "date": "",
-       "hash": "8ccc4f813d23"
+       "id": "2.2:pa-rerun-with-ocr-version-3",
+       "lead": "PA rerun with OCR version 3",
+       "text": "**PA rerun with OCR version 3**: in kop-pipeline, `C:\\Python313\\python scrapers/pa_scraper.py --reocr-before 2019-07-01` (or `--full`; ~5,750 documents, ~5.5 s a page, needs 1.5 GB free). Version 3 (committed 2026-10-25 at [ab3e896](https://github.com/kidsoverprofits/kop-pipeline/commit/ab3e896a460dc8bcce482233619dee8180139488)) also reads the old faxes whose PDF says it has no pages, and `--reocr-before` re-posts every listed report before the date and resumes after an interruption. It needs `pikepdf` (`pip install -r requirements.txt`; the `python` on PATH in the theme checkout is the theme's `.venv`, which has none of the scraper packages). Replaces the 164 waiting 2012-17 PA findings (old 3.3 item 5). After it: check a few 2012-17 reports on /pa-reports/.",
+       "ask": "Have you rerun the PA scraper with OCR version 3 (--reocr-before 2019-07-01)?",
+       "date": "2026-10-25",
+       "hash": "2f45e6549083"
       },
       {
        "id": "2.2:backfills",
@@ -1487,6 +1487,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "115bb81f3f12"
+      },
+      {
+       "id": "5:kop-pipeline-test-ocr-repair-py-2-of-the-fax-lines-fail",
+       "lead": "kop-pipeline test-ocr-repair.py: 2 of the fax lines fail",
+       "text": "**kop-pipeline test-ocr-repair.py: 2 of the fax lines fail** (found 2026-10-25; the same on the committed `pa_scraper.py`, so it predates OCR version 3). `scrapers/ocr_repair.py` leaves \"klesing\" and \"unclolhed\" instead of \"kissing\" and \"unclothed\" (fax page lines 2 and 5). Check whether `scrapers/pa_ocr_vocab.json` (rebuilt 2026-10-18 by `scripts/build-pa-ocr-vocab.py`) lost those words or the swap rules changed.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "7ce50a1d8b8b"
       }
      ]
     }
