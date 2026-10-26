@@ -61,7 +61,7 @@ if ($plain) {
     $c = kop_pb_card_html(reset($plain), null, null);
     $check('a short item without a question shows its text, not folded', strpos($c, 'kop-pb-details') === false && strpos($c, 'data-needs=""') !== false);
 }
-$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:seo-keyphrase-wording']['where'] ?? '') === '2.4 Decisions waiting', $items['2.4:seo-keyphrase-wording']['where'] ?? 'missing');
+$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:held-facts']['where'] ?? '') === '2.4 Decisions waiting', $items['2.4:held-facts']['where'] ?? 'missing');
 
 // The seed is built from the plan files as they are (build.py's source_text(): name order, LF, joined by a blank
 // line). docs/ is not deployed, so this only runs in a checkout.

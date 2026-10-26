@@ -114,10 +114,6 @@ function kop_pb_checks() {
             $left = array_filter($rows, function ($r) use ($names) { return trim((string) $r['name']) === $names[(int) $r['id']]; });
             return $left ? array(false, count($left) . ' of 5 still carry the description as a name') : array(true, 'All five are renamed or removed');
         },
-        '2.4:seo-keyphrase-wording' => function () {
-            $w = array_filter((array) get_option('kop_seo_kw_wording', array()));
-            return $w ? array(true, 'The keyphrase wording is set') : array(false, 'No keyphrase wording yet');
-        },
         '2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58' => function () {
             $rows = kop_pb_records('SELECT id, status FROM suggested_edits WHERE id IN (56, 57, 58)');
             if ($rows === null) return null;
