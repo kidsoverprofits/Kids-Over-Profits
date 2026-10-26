@@ -978,6 +978,90 @@ if (!function_exists('kop_dt_page_items')) {
     }
 }
 
+if (!function_exists('kop_dt_resource_flags')) {
+    /**
+     * Document type => the data form's resources.* checkbox it proves
+     * (templates/data-form-admin.php, js/shared/facility-resources.js). A
+     * business record is either kind, told apart by its title. Types with no
+     * matching box (Woodbury pages, directories, editor's notes...) are left out.
+     */
+    function kop_dt_resource_flags() {
+        return array(
+            'student-handbook'  => 'hasStudent',
+            'parent-handbook'   => 'hasParent',
+            'staff-manual'      => 'hasStaff',
+            'enrollment'        => 'hasEnrollmentDocuments',
+            'marketing'         => 'hasPromotionalMaterials',
+            'newsletter'        => 'hasPressReleases',
+            'website-capture'   => 'hasWebsite',
+            'inspection-report' => 'hasInspections',
+            'incident-report'   => 'hasPoliceReports',
+            'government-report' => 'hasStateReports',
+            'legal-filing'      => 'hasLawsuits',
+            'deposition'        => 'hasLawsuits',
+            'news-clipping'     => 'hasNews',
+            'research'          => 'hasResearch',
+            'survivor-account'  => 'hasSurvivorStories',
+            'business-record'   => array('hasPropertyRecords' => '/\b(deed|parcel|propert|assess|lien|plat|easement|mortgage|title)/i',
+                                         'hasArticlesOfOrganization' => '/\b(articles|incorporat|organi[sz]ation|registration|certificate|annual report|registered agent|LLC|corporat|business entity)/i'),
+            'tax-filing'        => 'hasFinancial',
+            'natsap-profile'    => 'hasNATSAP',
+        );
+    }
+}
+
+if (!function_exists('kop_dt_facility_resources')) {
+    /**
+     * facility id => [resources flag => documents in its library proving it],
+     * from the public documents filed on each facility page (kop_dt_page_items()).
+     * The data form ticks and locks these boxes; the facility page lists them
+     * under materials on file. Cached like the /documents/ pages.
+     */
+    function kop_dt_facility_resources() {
+        static $memo = null;
+        if ($memo !== null) return $memo;
+        $index_built = function_exists('kop_facility_pages_index') ? (string) (kop_facility_pages_index()['built'] ?? '') : '';
+        $key = 'kop_dt_fres_' . md5(kop_dt_rev() . '|' . $index_built);
+        if (function_exists('get_transient')) {
+            $hit = get_transient($key);
+            if (is_array($hit)) return $memo = $hit;
+        }
+        $types = kop_dt_types();
+        $out = array();
+        foreach (kop_dt_resource_flags() as $type => $flag) {
+            if (!isset($types[$type])) continue;
+            foreach (kop_dt_page_items($type) as $it) {
+                if (($it['place']['kind'] ?? '') !== 'facility' || empty($it['place']['id'])) continue;
+                $fid = (int) $it['place']['id'];
+                $flags = is_array($flag) ? array() : array($flag);
+                if (is_array($flag)) {
+                    foreach ($flag as $f => $re) if (preg_match($re, (string) $it['title'])) $flags[] = $f;
+                }
+                foreach (array_unique($flags) as $f) $out[$fid][$f] = ($out[$fid][$f] ?? 0) + 1;
+            }
+        }
+        if (function_exists('set_transient')) set_transient($key, $out, 12 * HOUR_IN_SECONDS);
+        return $memo = $out;
+    }
+}
+
+if (!function_exists('kop_dt_rest_facility_resources')) {
+    /** GET kop/v1/library-resources[?facility_id=N]: {facilities: {id: {flag: count}}}. */
+    function kop_dt_rest_facility_resources($request) {
+        $all = kop_dt_facility_resources();
+        $one = (int) $request->get_param('facility_id');
+        if ($one > 0) $all = isset($all[$one]) ? array($one => $all[$one]) : array();
+        return array('facilities' => (object) $all, 'documentsUrl' => function_exists('home_url') ? home_url('/' . kop_dt_base() . '/') : '');
+    }
+    add_action('rest_api_init', function () {
+        register_rest_route('kop/v1', '/library-resources', array(
+            'methods'             => 'GET',
+            'callback'            => 'kop_dt_rest_facility_resources',
+            'permission_callback' => '__return_true',
+        ));
+    });
+}
+
 // ---------------------------------------------------------------------------
 // Route: /documents/ and /documents/<type>/
 // ---------------------------------------------------------------------------

@@ -21,6 +21,10 @@ python scripts/test-doc-select.py [--shots tmp/doc-select]   # pencils of closed
 # facility/company libraries (js/doc-type-filter.js), 'types' in the app's document payloads; set with the pencil on a tile or at KOP Tools >
 # Document Types (counts, tag many, Recent changes with Undo; log in the kop_doc_types_log option)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-types.php [--list] [--untyped]   # rules, run + undo, pencil, AI stand-in, inbox, pages
+# Data form "Available Resources & Documentation" boxes follow the library: kop_dt_resource_flags() maps a type to its resources.*
+# box, kop_dt_facility_resources() counts each facility page's public documents per box (cached with the /documents/ pages),
+# GET kop/v1/library-resources serves it and js/data-form/library-resources.js ticks + locks those boxes ("N in the library").
+# The stored flag is not written; a new type that proves a box gets an entry in kop_dt_resource_flags()
 # News clippings by OCR (docs/PLAN.md 3.35, inc/news-clippings.php): documents typed news-clipping get an ocrmypdf text layer (picture
 # unchanged, original kept in uploads/kop-clipping-originals/<id>/), their text in {prefix}kop_doc_text (the header search finds words inside
 # documents) and one waiting article each in Submissions Review > News (the processor's AI read; linked to the printed web address, else our scan)

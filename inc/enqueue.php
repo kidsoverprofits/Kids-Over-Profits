@@ -1577,6 +1577,12 @@ function enqueue_data_form_script() {
 
             );
 
+            // Both forms: resources.* boxes the media library proves are ticked and locked (js/data-form/library-resources.js).
+            $library_resources_js = get_stylesheet_directory() . '/js/data-form/library-resources.js';
+            if (file_exists($library_resources_js)) {
+                wp_enqueue_script('kop-library-resources', get_stylesheet_directory_uri() . '/js/data-form/library-resources.js', array('data-form-legacy'), filemtime($library_resources_js), true);
+            }
+
             // Public form only: the guided start in front of the full form.
             if (!$is_admin_template) {
                 $wizard_js = get_stylesheet_directory() . '/js/data-form/data-wizard.js';

@@ -289,6 +289,26 @@ $insp = kop_dt_page_items('inspection-report');
 $check('state report folders read as "XX state reports"', (bool) array_filter($insp, function ($i) { return preg_match('/^[A-Z]{2} state reports$/', $i['place']['name']); }));
 $check('a year is found in titles', (bool) array_filter($items, function ($i) { return $i['year'] !== ''; }));
 
+echo "Data form boxes from the library\n";
+$fres = kop_dt_facility_resources();
+$enr_fids = array();
+foreach ($items as $i) if ($i['place']['kind'] === 'facility') $enr_fids[(int) $i['place']['id']] = ($enr_fids[(int) $i['place']['id']] ?? 0) + 1;
+$check('every facility with an enrollment document gets Enrollment Documents, counted', $enr_fids && !array_filter($enr_fids, function ($n, $fid) use ($fres) {
+    return ($fres[$fid]['hasEnrollmentDocuments'] ?? 0) !== $n;
+}, ARRAY_FILTER_USE_BOTH), count($enr_fids) . ' facilities');
+$known = array_keys(kop_facility_resource_catalog());
+$flags = array();
+foreach ($fres as $f) foreach ($f as $k => $n) $flags[$k] = true;
+$check('only the form\'s own boxes are set', !array_diff(array_keys($flags), $known), implode(', ', array_diff(array_keys($flags), $known)));
+printf("  %d facilities get boxes ticked; flags used: %s\n", count($fres), implode(', ', array_keys($flags)));
+$form = file_get_contents(dirname(__DIR__) . '/templates/data-form-admin.php');
+foreach (kop_dt_resource_flags() as $type => $flag) {
+    foreach ((array) (is_array($flag) ? array_keys($flag) : $flag) as $f) {
+        if (strpos($form, 'data-field="resources.' . $f . '"') === false) $check("$type maps to a box on the form", false, $f);
+    }
+}
+$check('every mapped type is a document type', !array_diff(array_keys(kop_dt_resource_flags()), array_keys(kop_dt_types())));
+
 $render = function ($type) {
     $GLOBALS['kop_doc_types_page'] = kop_dt_page_data($type);
     ob_start();
