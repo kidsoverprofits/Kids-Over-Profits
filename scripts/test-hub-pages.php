@@ -78,6 +78,8 @@ function comments_open() { return false; }
 function get_comments_number() { return 0; }
 function has_post_thumbnail() { return false; }
 function is_singular($type = '') { return true; }
+function is_page() { return true; }
+function get_queried_object_id() { return (int) $GLOBALS['kop_test_post']->ID; }
 function get_page_template_slug() { return 'templates/page-hub.php'; }
 
 /** Pages by slug from the mirror. */
@@ -125,13 +127,17 @@ function get_category_by_slug($slug) {
     return $stmt->fetch(PDO::FETCH_OBJ) ?: false;
 }
 function get_the_post_thumbnail($p, $size = 'post-thumbnail', $attr = array()) {
+    // From _wp_attached_file as WordPress builds it; the guid of an attachment
+    // uploaded on the old staging copy still says /staging/ and 404s.
     $stmt = $GLOBALS['kop_db']->prepare(
-        "SELECT a.guid FROM wpdl_postmeta m
+        "SELECT f.meta_value AS file, a.guid FROM wpdl_postmeta m
          JOIN wpdl_posts a ON a.ID = CAST(m.meta_value AS INTEGER)
+         LEFT JOIN wpdl_postmeta f ON f.post_id = a.ID AND f.meta_key = '_wp_attached_file'
          WHERE m.post_id = ? AND m.meta_key = '_thumbnail_id' LIMIT 1"
     );
     $stmt->execute(array((int) $p->ID));
-    $src = $stmt->fetchColumn();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $src = !$row ? '' : ($row['file'] ? home_url('/wp-content/uploads/' . ltrim($row['file'], '/')) : $row['guid']);
     return $src ? '<img src="' . esc_url($src) . '" alt="' . esc_attr($attr['alt'] ?? '') . '" loading="lazy">' : '';
 }
 function strip_shortcodes($text) { return preg_replace('/\[[^\]]+\]/', '', (string) $text); }
@@ -202,7 +208,18 @@ function kop_test_ez_toc($c) {
 }
 add_filter('the_content', 'kop_test_ez_toc', 100);
 function the_content() {
-    $html = preg_replace('/<!--.*?-->/s', '', $GLOBALS['kop_test_post']->post_content);
+    // Each core/query block goes through pre_render_block as render_block()
+    // sends it (inc/hub-posts.php skips the category query there).
+    $html = preg_replace_callback(
+        '#<!-- wp:query (\{.*?\}) -->.*?<!-- /wp:query -->#s',
+        function ($m) {
+            $block = array('blockName' => 'core/query', 'attrs' => json_decode($m[1], true) ?: array());
+            $pre = apply_filters('pre_render_block', null, $block);
+            return $pre === null ? $m[0] : $pre;
+        },
+        $GLOBALS['kop_test_post']->post_content
+    );
+    $html = preg_replace('/<!--.*?-->/s', '', $html);
     echo kop_test_run_shortcodes(apply_filters('the_content', $html));
 }
 
@@ -388,8 +405,19 @@ echo "every hub's settings\n";
 foreach ($rendered as $slug => $html) {
     $config = kop_hub_config($slug);
     $keeps  = !isset($config['content']) || $config['content'] !== false;
-    check("$slug " . ($keeps ? 'prints' : 'leaves out') . ' its editor content',
-        (strpos($html, 'entry-content single-content') !== false) === $keeps);
+    // A page with no words of its own (Resources' one empty paragraph; the
+    // category query on Editorials and Investigatory Spotlight, which the
+    // module replaces) gets no empty editor box and no divider above it.
+    $stored = preg_replace('#<!-- wp:query .*?<!-- /wp:query -->#s', '', kop_test_page($slug)->post_content);
+    $words  = trim(strip_tags(preg_replace('/<!--.*?-->/s', '', $stored), '<img><iframe>')) !== '';
+    if ($keeps && !$words) {
+        check("$slug leaves out its empty editor box",
+            strpos($html, 'entry-content single-content') === false
+            && (kop_hub_module_for($slug) === null || strpos($html, 'kop-hub-modules kop-hub-modules--lead') !== false));
+    } else {
+        check("$slug " . ($keeps ? 'prints' : 'leaves out') . ' its editor content',
+            (strpos($html, 'entry-content single-content') !== false) === $keeps);
+    }
     if (!empty($config['standfirst']) || in_array($slug, array('editorials', 'investigatory-spotlight'), true)) {
         check("$slug has a standfirst", strpos($html, 'kop-hub-standfirst') !== false);
     }

@@ -95,6 +95,31 @@
     object-fit: cover;
 }
 
+/* Link-preview cards (visual-link-preview plugin) in the editor text. The
+   plugin lays the card out as a flex row whose main zone is flex:1 with the
+   default min-width:auto, so a full-size image (inline max-width:2560px)
+   held the column 2560px wide and the card ran off the page on phones
+   (/survivors/, 2026-10-25). Let the zone shrink and keep the image a
+   short banner inside it. */
+.kop-hub .entry-content .vlp-link-container .vlp-layout-zone-main,
+.kop-hub .entry-content .vlp-link-container .vlp-layout-zone-side {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.kop-hub .entry-content .vlp-link-container .vlp-block-0 img {
+    display: block;
+    width: 100%;
+    max-width: 100% !important;
+    height: auto;
+    max-height: 16rem;
+    object-fit: cover;
+}
+
+.kop-hub .entry-content .vlp-link-container .vlp-link-summary {
+    overflow-wrap: anywhere;
+}
+
 /* ---- Modules ----------------------------------------------------------- */
 
 .kop-hub-modules {

@@ -302,19 +302,30 @@ while (have_posts()) :
             </div>
         <?php endif; ?>
 
+        <?php
+        // Rendered first: a page whose only block is skipped (the category
+        // query on Editorials and Investigatory Spotlight, inc/hub-posts.php)
+        // comes out empty, and an empty box would still draw the divider
+        // above the module.
+        $kop_hub_content_html = '';
+        if ($kop_hub_content) {
+            ob_start();
+            if (function_exists('kop_hub_the_content')) {
+                kop_hub_the_content();
+            } else {
+                the_content();
+            }
+            wp_link_pages(array(
+                'before' => '<div class="page-links">',
+                'after'  => '</div>',
+            ));
+            $kop_hub_content_html = ob_get_clean();
+            $kop_hub_content      = trim(strip_tags($kop_hub_content_html, '<img><iframe><video><audio><embed><object><svg><form><input><hr>')) !== '';
+        }
+        ?>
         <?php if ($kop_hub_content) : ?>
             <div class="entry-content single-content">
-                <?php
-                if (function_exists('kop_hub_the_content')) {
-                    kop_hub_the_content();
-                } else {
-                    the_content();
-                }
-                wp_link_pages(array(
-                    'before' => '<div class="page-links">',
-                    'after'  => '</div>',
-                ));
-                ?>
+                <?php echo $kop_hub_content_html; ?>
             </div>
         <?php endif; ?>
 

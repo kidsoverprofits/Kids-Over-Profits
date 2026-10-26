@@ -18,10 +18,11 @@ import subprocess
 import sys
 
 REPO = Path(__file__).resolve().parent.parent
+# /volunteer/ left the hub frame for templates/page-volunteer.php (2026-10-23); check it with check-mobile-overflow.py.
 HUBS = (
     'history', 'survivors', 'researchreports', 'families',
     'where-are-the-kids', 'advocates', 'journalists',
-    'volunteer', 'law-policy', 'resources', 'editorials',
+    'law-policy', 'resources', 'editorials',
     'investigatory-spotlight',
 )
 USER_AGENT = (
@@ -135,7 +136,10 @@ def splice_article(harness_html, live_html, slug):
         inner_end = harness_content['close_start'] - harness_article['start']
         changes.append((inner_start, inner_end, live_content_html))
     elif harness_content or live_content:
-        raise RuntimeError('%s: live and test output disagree about editor content' % slug)
+        # The working tree decides whether the editor box prints (an empty
+        # page leaves it out); keep its side and say so.
+        print('%s: editor content only in the %s output; previewing the working tree'
+              % (slug, 'test' if harness_content else 'live'))
 
     # These modules have independent tests rather than the DB stubs needed by
     # the hub harness. Use production-rendered module HTML with the working-
@@ -144,10 +148,17 @@ def splice_article(harness_html, live_html, slug):
         harness_modules = find_descendant(harness_parser, harness_article, 'kop-hub-modules')
         live_modules = find_descendant(live_parser, live_article, 'kop-hub-modules')
         if not harness_modules and live_modules:
-            if not harness_content:
-                raise RuntimeError('%s: cannot place its live module without editor content' % slug)
             module_html = live_html[live_modules['start']:live_modules['end']]
-            insertion = harness_content['end'] - harness_article['start']
+            anchor = harness_content
+            if not anchor:
+                # No editor box: the module leads, right under the photo or the header.
+                anchor = next((find_descendant(harness_parser, harness_article, name)
+                               for name in ('kop-hub-thumbnail', 'kop-hub-header')
+                               if find_descendant(harness_parser, harness_article, name)), None)
+                if not anchor:
+                    raise RuntimeError('%s: cannot place its live module' % slug)
+                module_html = module_html.replace('class="kop-hub-modules"', 'class="kop-hub-modules kop-hub-modules--lead"', 1)
+            insertion = anchor['end'] - harness_article['start']
             changes.append((insertion, insertion, '\n' + module_html + '\n'))
     harness_fragment = replace_ranges(harness_fragment, changes)
 
@@ -173,6 +184,13 @@ def splice_article(harness_html, live_html, slug):
 
 
 def local_php():
+    # Local's PHP is gone on this machine; KOP_PHP points at a portable PHP 8.2 php.exe.
+    override = os.environ.get('KOP_PHP')
+    if override:
+        php = Path(override)
+        if not php.is_file():
+            raise RuntimeError('KOP_PHP does not point at a file: %s' % php)
+        return php
     local_app_data = os.environ.get('LOCALAPPDATA')
     if not local_app_data:
         raise RuntimeError('LOCALAPPDATA is not set; expected Local PHP 8.2.')
