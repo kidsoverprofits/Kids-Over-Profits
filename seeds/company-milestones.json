@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "about": "Dated milestones of parent companies (buyouts, private equity owners, investigations, settlements, closures), each quoted from its sources. Read by inc/profile-timeline.php; each waits at Review inbox > Company milestones and shows on company and facility timelines only once approved. Researched 2026-10-14.",
   "milestones": [
     {
@@ -1989,24 +1989,29 @@
         "G4S Youth Services"
       ],
       "year": 2017,
-      "date": "",
+      "date": "2017-04-03",
       "kind": "rename",
       "title": "G4S sold its U.S. youth services business for $56.5 million; it became TrueCore",
-      "detail": "G4S sold G4S Youth Services, which ran juvenile programs in Florida, Texas and Tennessee, for $56.5 million in 2017. The business was renamed TrueCore Behavioral Solutions.",
+      "detail": "G4S sold G4S Youth Services, which ran juvenile programs in Florida, Texas and Tennessee, to BHSB Holdings, an investment group that included several of its managers, for $56.5 million; the sale closed on April 3, 2017. On June 30, 2017 the company announced its new name, TrueCore Behavioral Solutions.",
       "programs": [],
       "sources": [
         {
-          "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
-          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
-          "quote": "The company was purchased for $56.5 million in 2017 by an investment fund."
+          "label": "G4S regulatory announcement, 2017-04-03 (Kids Over Profits copy of the Wayback capture)",
+          "url": "https://kidsoverprofits.org/wp-content/uploads/G4S-sells-G4S-Youth-Services-LLC-g4s.com-2017-04-03-Wayback-2021-01-17.pdf",
+          "quote": "G4S ... announces that it has completed the sale of G4S Youth Services in the USA to BHSB Holdings, Inc. (\"BHSB\") for US$56.5 million paid in cash."
+        },
+        {
+          "label": "PR Newswire, 2017-06-30",
+          "url": "https://www.prnewswire.com/news-releases/truecore-behavioral-solutions-announces-new-name-and-corporate-ownership-300482755.html",
+          "quote": "TrueCore Behavioral Solutions, formerly G4S Youth Services, announces today the formal change of name and ownership"
         },
         {
           "label": "ABC Action News / Tampa Bay 28 I-Team, 2024",
           "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
-          "quote": "Former G4S Youth Services LLC becomes TrueCore Behavioral Solutions"
+          "quote": "The company was purchased for $56.5 million in 2017 by an investment fund."
         }
       ],
-      "note": "G4S's own regulatory announcement (g4s.com, URL dated 2017-04-03) names the buyer as BHSB Holdings, Inc., per search summaries; the page is behind bot protection and was not read. A search summary also gives April 1, 2017 for the sale."
+      "note": "G4S announcement read through its Wayback capture (https://web.archive.org/web/20210117164319/https://www.g4s.com/investors/regulatory-announcements/2017/04/03/g4s-sells-g4s-youth-services-llc). ABC Action News (2024) dates the rename to 2013 (\"that same year\"), but the release it links is the June 2017 one; 2017 is right."
     },
     {
       "key": "truecore-behavioral-solutions-2017-7290fcff",
