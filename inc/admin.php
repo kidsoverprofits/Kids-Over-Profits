@@ -1683,7 +1683,8 @@ function kop_apply_facility_merge_seeds() {
  * facility keeps its own current company first. Idempotent: an existing
  * company of that name is reused and existing links are left alone; a listed
  * facility is linked only when its unique_name still matches; one marked
- * 'drop' has its link taken off instead.
+ * 'drop' has its link taken off instead. An entry's 'drop_notes' takes those
+ * notes off an existing company (a seeded note later found wrong).
  *
  * A company named like one of its programs (Three Points Center) gives its
  * own 'unique_name' ("Three Points Center (company)"): the record key must
@@ -1735,8 +1736,11 @@ function kop_apply_operator_record_seeds() {
                 $json = json_decode((string) $read->fetchColumn(), true);
                 if (is_array($json) && isset($json['operator']) && is_array($json['operator'])) {
                     $notes = array_values((array) ($json['operator']['notes'] ?? array()));
-                    $add = array_values(array_diff((array) ($entry['operator']['notes'] ?? array()), $notes));
-                    if ($add) {
+                    // "drop_notes": notes an earlier seed wrote that turned out wrong; they come off before the new ones go in.
+                    $kept = array_values(array_diff($notes, (array) ($entry['drop_notes'] ?? array())));
+                    $add = array_values(array_diff((array) ($entry['operator']['notes'] ?? array()), $kept));
+                    if ($add || count($kept) !== count($notes)) {
+                        $notes = $kept;
                         // In the seed's (date) order, notes added by hand after them.
                         $seed = array_values((array) $entry['operator']['notes']);
                         $json['operator']['notes'] = array_merge($seed, array_values(array_diff($notes, $seed)));
@@ -2764,7 +2768,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '142';
+    $version = '143';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

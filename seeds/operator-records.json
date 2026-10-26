@@ -732,7 +732,7 @@
   },
   {
     "name": "EOSIS",
-    "note": "Company record created 2026-10-13 from the company's own releases, Behavioral Health Business, court dockets and Utah licensing records. Formerly Meridian Behavioral Health (renamed 2025-02-17). Facilities: the four KOP records among the five Utah programs that announced in June-July 2026 they had joined EOSIS Utah; The Approach (Elevations' transition program) has no record. Not the Tennessee company Meridian Behavioral Health Systems (Brentwood), which bought Highland Hospital (WV).",
+    "note": "Company record created 2026-10-13 from the company's own releases, Behavioral Health Business, court dockets and Utah licensing records. Formerly Meridian Behavioral Health (renamed 2025-02-17). Facilities: the four KOP records among the five Utah programs EOSIS bought from Family Help & Wellness (announced June 23, 2026); The Approach (Elevations' transition program) has no record. Not the Tennessee company Meridian Behavioral Health Systems (Brentwood), which bought Highland Hospital (WV).",
     "operator": {
       "currentName": "",
       "otherNames": [
@@ -762,10 +762,13 @@
         "October 2023: Renovus Capital bought Meridian Behavioral Health from Audax (Provident Healthcare Partners, Q4 2023 newsletter: https://providenthp.com/wp-content/uploads/2024/01/Q4-2023-SUD-Newsletter.pdf)",
         "January 2025: 654 beds across 13 inpatient and eight outpatient addiction treatment facilities, all in Minnesota, about 90% of patients on Medicaid (Behavioral Health Business: https://bhbusiness.com/2025/01/29/sud-treatment-provider-meridian-behavioral-health-acquires-20th-facility-plans-future-growth/)",
         "February 17, 2025: Meridian Behavioral Health renamed itself EOSIS: \"EOSIS signals a new beginning, with new leadership, therapeutic approaches, services, partnerships and growth\" (PR Newswire: https://www.prnewswire.com/news-releases/meridian-behavioral-health-is-now-eosis-302377969.html)",
-        "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West, Family Help & Wellness programs in Utah, announced they had joined EOSIS Utah, \"a broader acquisition of five Utah-based behavioral health programs\"; none named a seller or a price, and each said it would keep its clinical model and day-to-day care (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/; Solstice West: https://solsticertc.com/solstice-west-joins-eosis-utah/; ViewPoint Center: https://www.viewpointcenter.com/viewpoint-center-joins-eosis-utah/)",
+        "June 23, 2026: announced it had bought five Utah programs from Family Help & Wellness, Elevations RTC, Seven Stars, Solstice West, The Approach and ViewPoint Center, to run together as EOSIS Utah under their own names; it gave no price or closing date (EOSIS: https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/). The programs posted their own announcements from June 26 to July 22, 2026, each saying it would keep its clinical model and day-to-day care (ViewPoint Center, June 26, 2026: https://www.viewpointcenter.com/viewpoint-center-joins-eosis-utah/; Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/)",
         "EOSIS UTAH, LLC is a Delaware company registered in Utah at 2650 W. 2700 S., Syracuse, the Elevations RTC campus (OpenCorporates: https://opencorporates.com/companies/us_de/10557203; https://opencorporates.com/companies/us_ut/14676896-0161)"
       ]
     },
+    "drop_notes": [
+      "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West, Family Help & Wellness programs in Utah, announced they had joined EOSIS Utah, \"a broader acquisition of five Utah-based behavioral health programs\"; none named a seller or a price, and each said it would keep its clinical model and day-to-day care (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/; Solstice West: https://solsticertc.com/solstice-west-joins-eosis-utah/; ViewPoint Center: https://www.viewpointcenter.com/viewpoint-center-joins-eosis-utah/)"
+    ],
     "facilities": [
       {
         "id": 10356,
@@ -791,12 +794,15 @@
   },
   {
     "name": "Family Help & Wellness",
-    "note": "2026-10-13: its four Utah programs on file passed to EOSIS Utah in June-July 2026; links set to past.",
+    "note": "2026-10-13: its four Utah programs on file passed to EOSIS Utah; links set to past. 2026-10-25: EOSIS's June 23, 2026 release names Family Help & Wellness as the seller.",
     "operator": {
       "notes": [
-        "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West announced they had joined EOSIS Utah (formerly Meridian Behavioral Health); the announcements do not name the seller (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/)"
+        "June 23, 2026: EOSIS (formerly Meridian Behavioral Health) announced it had bought five of the company's Utah programs, Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West, to run as EOSIS Utah; no price or closing date was given (EOSIS: https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/)"
       ]
     },
+    "drop_notes": [
+      "June-July 2026: Elevations RTC, ViewPoint Center, Seven Stars, The Approach and Solstice West announced they had joined EOSIS Utah (formerly Meridian Behavioral Health); the announcements do not name the seller (Elevations RTC, July 7, 2026: https://www.elevationsrtc.com/elevations-rtc-joins-eosis-utah-clinician-driven-residential-care-continues-under-new-organizational-partnership/)"
+    ],
     "facilities": [
       {
         "id": 10356,

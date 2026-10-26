@@ -2832,6 +2832,10 @@
     ],
     "by": "claude",
     "at": "2026-10-25"
+   },
+   "settled": {
+    "text": "Family Help & Wellness sold the five programs; EOSIS announced it June 23, 2026 (no price or closing date public). Fixed on the EOSIS and Family Help & Wellness company notes and history drafts (seeds/operator-records.json with drop_notes for the old 'no seller' lines; seeds/operator-histories.json) and in the article New Names for the Same Programs (seed version 12). Live after the deploy: template assignments 143, history seed 12 (applies on the first admin page load).",
+    "at": "2026-10-25"
    }
   },
   {
@@ -11454,5 +11458,5 @@
    ]
   }
  ],
- "built": "2026-10-26 01:56"
+ "built": "2026-10-26 02:03"
 }

@@ -358,6 +358,7 @@ when its version moves, and most never change a record that is already on file.
 | Facility records, merges, names | `seeds/facility-records.json` and the other `seeds/*.json` read by `kop_apply_template_assignments()` | the template assignments version |
 | Young adult programs (18+) | `seeds/young-adult-programs.json` (`kop_ya_apply_seeds()`, added once by name) | the template assignments version |
 | Taking a seeded company link off | `"drop": true` on the facility in `seeds/operator-records.json` | the template assignments version |
+| Correcting a seeded company note | new wording in the entry's `operator.notes`, the old wording in its `drop_notes` (`seeds/operator-records.json`) | the template assignments version |
 
 ---
 
