@@ -169,6 +169,16 @@ if (!function_exists('kop_facility_pages_route')) {
             }
         }
 
+        // A record moved to the young adult programs page (inc/young-adult-programs.php).
+        if (function_exists('kop_ya_moved_facility_target')) {
+            $old = ctype_digit($slug) ? (int) $slug : (preg_match('/-(\d+)$/', $slug, $m) ? (int) $m[1] : 0);
+            $ya = kop_ya_moved_facility_target($slug, $old) ?: ($old > 0 ? kop_ya_moved_facility_target($slug) : '');
+            if ($ya !== '') {
+                wp_safe_redirect($ya, 301);
+                exit;
+            }
+        }
+
         global $wp_query;
         $wp_query->set_404();
         status_header(404);

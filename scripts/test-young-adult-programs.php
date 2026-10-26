@@ -215,5 +215,16 @@ $check('the build says why, "described as" only when it is not ages or a name',
     strpos(kop_wbf_ya_panel(array('program' => 'X', 'program_as_written' => 'X', 'place' => '', 'ya_why' => 'transition program for young adults')), 'value="transition program for young adults"') !== false);
 $check('a choice made by hand wins over the build', kop_wbf_ya_for('Nobody', true) === 1 && kop_wbf_ya_for('Nobody', false) === 0);
 
+echo "-- Old /facility/ addresses of moved records --\n";
+require_once dirname(__DIR__) . '/inc/facility-pages.php';
+$moved = kop_ya_save($ya, array('name' => 'Dragonfly Transitions', 'state' => 'OR', 'other_names' => 'Dragonfly Transitions Lodge'), 0, 'tester');
+$ya->prepare('UPDATE young_adult_programs SET source = ? WHERE id = ?')->execute(array('Moved from facility record 100165', $moved));
+$card = kop_ya_url($moved);
+$check('the old slug goes to the card', kop_ya_moved_facility_target('dragonfly-transitions-or', 0, $ya) === $card);
+$check('an other name\'s slug goes to the card', kop_ya_moved_facility_target('dragonfly-transitions-lodge-or', 0, $ya) === $card);
+$check('the old record id goes to the card', kop_ya_moved_facility_target('100165', 100165, $ya) === $card);
+$check('another state\'s slug does not', kop_ya_moved_facility_target('dragonfly-transitions-wa', 0, $ya) === '');
+$check('another record id does not', kop_ya_moved_facility_target('100166', 100166, $ya) === '');
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed.\n";
 exit($failures ? 1 : 0);

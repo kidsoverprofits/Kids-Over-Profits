@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:17 UTC",
- "source": "7bde11fbc38bfb183ca860aaa12fa6b4e27fa499",
+ "built": "2026-10-26 00:22 UTC",
+ "source": "89fd758757051c803e6cbaaf2cf0f4f806ca656f",
  "sections": [
   {
    "key": "2",
@@ -885,10 +885,10 @@
       {
        "id": "4.3:young-adult-programs-what-is-left-after-the-document-folders",
        "lead": "Young adult programs: what is left after the document folders",
-       "text": "**Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in docs/PLAN-ARCHIVE.md, \"4.3 ... item 13\"): a. The 11 moved facility records' old /facility/ pages 404 (e.g. https://kidsoverprofits.org/facility/dragonfly-transitions-or/): redirect each old slug to its card, `kop_ya_url()`, from `kop_ya_moved_from_map()` (the slugs are no longer in the facility index). b. Done 2026-10-25 (owner said yes): folder 7789 \"Fulshear\" is linked to 4163 in kop_folder_links, so its 2015-2017 NATSAP profiles show on the program's card. After deploy: check the card lists them.",
+       "text": "**Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in docs/PLAN-ARCHIVE.md, \"4.3 ... item 13\"): a. Done 2026-10-25: the moved records' old /facility/ addresses (name + state slug, other names, twin names, or the old record id) 301 to the program's card (`kop_ya_moved_facility_target()`, called by `kop_facility_pages_route()` before its 404; checks in scripts/test-young-adult-programs.php). After deploy: https://kidsoverprofits.org/facility/dragonfly-transitions-or/ lands on the Dragonfly card. b. Done 2026-10-25 (owner said yes): folder 7789 \"Fulshear\" is linked to 4163 in kop_folder_links (the server now counts 7789 among the program's folders).",
        "ask": "",
        "date": "2026-10-25",
-       "hash": "e95e7997ab69"
+       "hash": "039c4e4bf1b8"
       },
       {
        "id": "4.3:latest-operator-of-past-only-records",

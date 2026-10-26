@@ -1136,3 +1136,33 @@ function kop_ya_moved_from_map(PDO $pdo = null) {
     }
     return $memo;
 }
+
+/**
+ * The card a moved facility record's old /facility/ address goes to, or ''.
+ * $id is the record id the address carried (a bare id or a "-<id>" slug end),
+ * else the old slug is matched against the program's name and state, its
+ * other names and the twin records' names (kop_ya_twin_moves()), the way
+ * kop_facility_page_slug_candidate() built it.
+ */
+function kop_ya_moved_facility_target($slug, $id = 0, PDO $pdo = null) {
+    $pdo = $pdo ?: kop_ya_pdo();
+    if (!$pdo) return '';
+    $moved = kop_ya_moved_from_map($pdo);
+    if ($id > 0) return isset($moved[$id]) ? kop_ya_url($moved[$id]['id']) : '';
+    $slug = strtolower((string) $slug);
+    if ($slug === '' || !$moved || !function_exists('kop_facility_page_slug_candidate')) return '';
+    $twins = kop_ya_twin_moves();
+    $seen = array();
+    foreach ($moved as $fid => $m) {
+        if (isset($seen[$m['id']])) continue;
+        $seen[$m['id']] = true;
+        $p = kop_ya_get($pdo, $m['id']);
+        if (!$p) continue;
+        $names = array_merge(array((string) $p['name']), kop_ya_lines($p['other_names']));
+        foreach ($twins as $t) if ((int) $t[2] === (int) $p['id']) $names[] = $t[0];
+        foreach ($names as $n) {
+            if (kop_facility_page_slug_candidate($n, $p['state'], $p['country']) === $slug) return kop_ya_url($p['id']);
+        }
+    }
+    return '';
+}
