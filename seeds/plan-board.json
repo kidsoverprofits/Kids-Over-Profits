@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 16:55 UTC",
- "source": "feb478815b6db30e93e09311cb2fff410f37b0f0",
+ "built": "2026-10-26 17:52 UTC",
+ "source": "3a6c8b467328f821c23b8c410d1b3b1016c7b630",
  "sections": [
   {
    "key": "2",
@@ -1286,6 +1286,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "0a00bbf96c67"
+      },
+      {
+       "id": "4.6:research-tasks-run-started-2026-10-25-stopped-by-the-usage-l",
+       "lead": "Research tasks run (started 2026-10-25, stopped by the usage limit)",
+       "text": "**Research tasks run (started 2026-10-25, stopped by the usage limit)**: the owner asked to work every open research task (332 on the server: 316 given to nobody, 5 to Claude). The open list is split into 43 batch files of up to 10 tasks in kop-pipeline `tmp/research-tasks-run/batches/` with a shared agent brief (`BRIEF.md`: cite every fact, at most 2 web searches a task, sources listed for sending) and `apply-answers.py` (agent output -> `tasks.py answer` per task, `sources/*.not-sent.json` for `send-sources.py`, `fixes.json` for the record changes). 16 agents started; the usage limit stopped all of them before any wrote an answer, so nothing is answered, sent or fixed yet. Next: refresh `tasks-open.json` (`php api/research-tasks.php` over SSH), run the batches in waves of about 8 agents, apply, send sources, seed every fix into its record (facility, operator, memorial seeds, version bumps), deploy, verify live, then `tasks.py settle`.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "9b4be3a1aecd"
       }
      ]
     },
