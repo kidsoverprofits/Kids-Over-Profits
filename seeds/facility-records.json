@@ -11083,5 +11083,33 @@
         "currentOperator": ""
       }
     }
+  },
+  {
+    "id": 100175,
+    "unique_name": "Three Strands Wilderness",
+    "version": 1,
+    "top": {
+      "city": "Oak Creek",
+      "state": "CO",
+      "displayName": "Three Strands Wilderness"
+    },
+    "facility": {
+      "notes": [
+        "Opened 2019 on a 1,378-acre ranch off Routt County Road 16 near Lynx Pass in South Routt; 90 days of ranch work and therapy with a 30-day wilderness expedition; young men 18-27; president Hans Aschinger (Steamboat Pilot, Aug 27 2019).",
+        "Patrick Hawkins was Operational Director from July 2019 to August 2020 (Bold.pro resume).",
+        "Closed late 2020: its website was last captured advertising on 2020-11-27 (https://web.archive.org/web/20201127021205/https://www.threestrandswilderness.com/), and the ranch (Lost Elk Ranch) sold in mid-December 2020 after the treatment program had ended (Steamboat Pilot, 2020-12-26, https://www.steamboatpilot.com/news/south-routt-ranch-sells-for-over-6m-as-area-continues-to-be-prime-market-for-high-end-ranch-properties/). Its company, Three Strands, Ltd, went delinquent June 1, 2021 (Colorado Secretary of State).",
+        "Added 2026-09-23 from the research network map (seeds/new-facilities.json).",
+        "Note: listed as closed, year given: 2019 (r/troubledteens wiki, page \"Active Programs in Colorado\" (as of 2025-12-18))"
+      ],
+      "operatingPeriod": {
+        "startYear": 2019,
+        "endYear": 2020,
+        "status": "Closed",
+        "yearsOfOperation": "2019-2020",
+        "notes": [
+          "Closed (2020) per news report: Steamboat Pilot, \"South Routt ranch sells for over $6M as area continues to be prime market for high-end ranch properties\", 2020-12-26 https://www.steamboatpilot.com/news/south-routt-ranch-sells-for-over-6m-as-area-continues-to-be-prime-market-for-high-end-ranch-properties/ (the ranch's treatment program \"reportedly ended prior to the sale\")"
+        ]
+      }
+    }
   }
 ]
