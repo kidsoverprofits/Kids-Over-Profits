@@ -85,7 +85,7 @@ while (have_posts()) :
                 <div class="kop-volpage-way">
                     <?php kop_ie_html_start('volunteer:social', 'Volunteer page: social media posts'); ?>
                     <h3 class="kop-volpage-way-h" id="kop-volpage-social-h">Make social media posts</h3>
-                    <p>Turn what we added to the site this week into posts: a picture and a short caption from the facts we give you.</p>
+                    <p>Turn our work into posts: news stories, inspection findings, a facility worth a closer look, a fact that should be better known. Each post is a picture and a short caption.</p>
                     <p class="kop-volpage-meta">Ask for this work on your page and we set you up. Nothing is posted until we approve it.</p>
                     <?php kop_ie_html_end(); ?>
                 </div>

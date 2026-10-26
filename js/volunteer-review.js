@@ -917,7 +917,8 @@
     var OTHER_WORK = [
         { kind: 'research', title: 'Research questions', blurb: 'Look up one thing our records are missing: when a program opened, who ran it, where it moved. '
             + 'Every fact you send needs its link. No practice round: an admin reads every answer.' },
-        { kind: 'social', title: 'Social media posts', blurb: 'Turn what we added to the site this week into posts: a picture and a short caption from the facts on the card. '
+        { kind: 'social', title: 'Social media posts', blurb: 'Turn our work into posts: news stories, inspection findings, a facility worth a closer look, a fact that should be better known. '
+            + 'Each post is a picture and a short caption. '
             + 'Nothing is posted until an admin approves it.', ask: 'I would like to make social media posts. Could you set me up with post ideas?' },
         { kind: 'image', title: 'Photos for our pages', blurb: 'Find openly licensed pictures (Wikimedia Commons, the Library of Congress and others) for pages that have none, '
             + 'and send the link, who made it and the license. Five pages at a time. Nothing goes on a page until an admin approves it.' }
