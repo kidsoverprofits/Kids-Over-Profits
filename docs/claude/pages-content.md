@@ -67,6 +67,10 @@ php scripts/build-open-data.php                   # on the server (ea-php82), re
 # Researcher Data Kit (/researcher-kit/, templates/page-researcher-kit.php): record shapes + blank templates for outside
 # researchers. Static files in researcher-kit/ (copied by .cpanel.yml; ?download=zip bundles them); allowed values come
 # from the Dropdown Lists. A facility field change (docs/FACILITY-SCHEMA.md) updates researcher-kit/templates/ too.
+# Researcher upload links (inc/researcher-uploads.php, KOP Tools > Researcher Uploads): a personal link
+# /researcher-upload/?key=<token> per trusted researcher (hash stored, expiry, Turn off / New link / More time);
+# files (.json/.csv/.tsv/.xlsx/.zip) wait in uploads/kop-private/researcher/<link id>/, never loaded automatically.
+# Test: php -d extension=pdo_sqlite -d extension=mbstring -d extension=zip scripts/test-researcher-uploads.php
 # SVG icons that replace emojis (inc/icons.php: kop_icon() / kopIcon(), and the
 # render filter for emojis in post content, widgets and the ACF facility-key field)
 php scripts/test-icons.php

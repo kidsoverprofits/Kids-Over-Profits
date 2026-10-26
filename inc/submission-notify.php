@@ -135,6 +135,11 @@ function kop_submission_types() {
             'template' => 'page-admin-submissions.php',
             'tab'      => 'websites',
         ),
+        // Files a trusted researcher sent through their upload link (inc/researcher-uploads.php).
+        'researcher_upload' => array(
+            'label'      => 'researcher file upload',
+            'admin_page' => 'kop-researcher-uploads',
+        ),
     );
 }
 

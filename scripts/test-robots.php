@@ -61,8 +61,9 @@ ok('stock file: wp-admin rule kept', in_array('Disallow: /wp-admin/', $g, true))
 ok('stock file: data form disallowed', in_array('Disallow: /tti-data-submission', $g, true));
 // The staging copy is gone: Google may recrawl its old addresses and see the 404s and redirects.
 ok('stock file: /staging/ is not disallowed', !in_array('Disallow: /staging/', $g, true));
+ok('stock file: researcher upload page disallowed', in_array('Disallow: /researcher-upload', $g, true));
 
-ok('an empty file gets a group', array_values(array_filter(star_group(kop_robots_txt('')))) === array('Disallow: /tti-data-submission'));
+ok('an empty file gets a group', array_values(array_filter(star_group(kop_robots_txt('')))) === array('Disallow: /tti-data-submission', 'Disallow: /researcher-upload'));
 
 $hooked = array();
 foreach ($GLOBALS['kop_test_filters']['robots_txt'] as $f) $hooked[$f[0]] = $f[1];

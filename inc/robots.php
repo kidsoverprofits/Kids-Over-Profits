@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 /** Paths every crawler is asked to leave alone, besides the ones other files add. */
 function kop_robots_disallow_paths() {
-    return array('/tti-data-submission');
+    return array('/tti-data-submission', '/researcher-upload');
 }
 
 function kop_robots_txt($output) {

@@ -1,0 +1,106 @@
+/*
+ * Researcher upload page (templates/researcher-upload.php).
+ *
+ * Built on the open data card (css/open-data.css) and the kit page
+ * (css/researcher-kit.css), loaded first; this adds the form, the results
+ * list and the table of files sent. Bright accents stay on borders.
+ */
+
+.kop-rup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 40rem;
+    padding: 1.25rem;
+    background: var(--kop-sand, #F2EEDF);
+    border: 1px solid rgba(0, 4, 53, 0.15);
+    border-radius: 10px;
+}
+
+.kop-rup-form label {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-rup-form input[type="file"],
+.kop-rup-form textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border: 1px solid rgba(0, 4, 53, 0.3);
+    border-radius: 6px;
+}
+
+.kop-rup-form button.kop-rup-send {
+    align-self: flex-start;
+    margin-top: 0.9rem;
+    padding: 0.55rem 1.6rem;
+    font-weight: 600;
+    color: var(--kop-white, #fff);
+    background: var(--kop-midnight-blue, #000435);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.kop-rup-form button.kop-rup-send:hover,
+.kop-rup-form button.kop-rup-send:focus-visible {
+    color: var(--kop-white, #fff);
+    background: var(--kop-navy, #000080);
+}
+
+.kop-rup-msg {
+    max-width: 50rem;
+    padding: 0.75rem 1rem;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border-left: 4px solid var(--kop-coral-pink, #FE8088);
+}
+
+.kop-rup-results {
+    max-width: 50rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-rup-results li {
+    margin: 0 0 0.4rem;
+    padding: 0.5rem 0.9rem;
+    overflow-wrap: anywhere;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-white, #fff);
+    border-left: 4px solid var(--kop-teal, #33A7B5);
+}
+
+.kop-rup-results li.kop-rup-bad {
+    border-left-color: var(--kop-coral-pink, #FE8088);
+}
+
+.kop-rup-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.kop-rup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.kop-rup-table th,
+.kop-rup-table td {
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    color: var(--kop-midnight-blue, #000435);
+    border-bottom: 1px solid rgba(0, 4, 53, 0.12);
+    overflow-wrap: anywhere;
+}
+
+.kop-rup-table th {
+    background: var(--kop-sand, #F2EEDF);
+}

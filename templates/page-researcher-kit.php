@@ -218,7 +218,8 @@ $kop_rk_contact = get_page_by_path('contact');
             array('kit_version, kind', 'fixed', 'Leave as they are. They tell the importer which shape it is reading.'),
         )); ?>
         <p>
-            Name the file after what it covers (<code>facilities-utah-licensing-2026-10.json</code>) and send it to
+            Name the file after what it covers (<code>facilities-utah-licensing-2026-10.json</code>). If KOP gave you a personal upload link,
+            send your files there, as many at a time as you like (a .zip is fine). Otherwise send them to
             <?php if ($kop_rk_contact) : ?>
                 us through the <a href="<?php echo esc_url(get_permalink($kop_rk_contact)); ?>">contact page</a>, or to whoever sent you here.
             <?php else : ?>

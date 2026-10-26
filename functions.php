@@ -253,6 +253,8 @@ require_once get_stylesheet_directory() . '/inc/name-variants.php';
 require_once get_stylesheet_directory() . '/inc/facility-discovery.php';
 // Facilities a state's published list names that our records do not: link, create or dismiss (KOP Tools > State Lists)
 require_once get_stylesheet_directory() . '/inc/state-lists.php';
+// Personal upload links for trusted researchers sending files of records (KOP Tools > Researcher Uploads, /researcher-upload/)
+require_once get_stylesheet_directory() . '/inc/researcher-uploads.php';
 // Woodbury Reports pages about a program, cut by scripts/woodbury-scan.py, reviewed and filed in its doc library
 // PDF first-page covers drawn by the gs program (regenerate tools, Woodbury extracts)
 require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
