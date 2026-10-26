@@ -65,6 +65,10 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # tied by an exact name (Add publishes them), and in its own run Woodbury Facts items at an exact or past name with the quote found, no
 # conflict (any source: Woodbury, HEAL, wiki; kop_wbf_auto_where()). A name of only common words counts if it has 3+ words and a place word
 # ("Lake House Academy"; kop_autoconn_distinctive()). Close names, shared names, board/title-only, "Wilderness Treatment Center" wait. Each shows in its queue's done tab by 'auto' and in Recently done with Undo; an undone one is never redone
+# Submissions come in linked (2026-10-25): kop_autoconn_submission_records() reads the sender's "about", a KOP id in the notes ("(#14110)",
+# "KOP #10608") and exact one-record names in the title and notes (one word 8+ letters or several 9+, not generic or everyday words,
+# kop_autoconn_text_distinctive()). Websites sent in pre-pick it on the Approve card; news and lawsuits sent with no facility get it in
+# facilities_mentioned at insert (inc/source-submissions.php) and, for ones already waiting, in the hourly 'submissions' pass. The item still waits
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php [--list]   # every pick is exact, wiki link + log + undo, on a scratch copy
 # Pending items already in our records leave the waiting list: news/lawsuits/bills (inc/review-inbox/_on-file.php: same link on a kept
 # record or in a facility's resourceLinks, same headline+outlet, case number, bill) go to the Submissions Review "Already on file" tab

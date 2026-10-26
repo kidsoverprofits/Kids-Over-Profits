@@ -116,7 +116,8 @@ function kop_rinbox_websites_item($p) {
         $actions[] = array('id' => 'attach', 'label' => 'Approve: put on a record\'s page', 'style' => 'approve',
             'help' => 'Puts the link on the page of the program, company or other record you pick (its Materials and links, or its own website), then takes it off this list. Undo move on the Trashed tab takes it back off the record.',
             'params' => array(
-                array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => kop_rinbox_websites_guess_record($meta['facility']) ?: ''),
+                array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => kop_rinbox_websites_guess_record($meta['facility'], implode("
+", array($p->post_title, $p->post_content, $meta['description'], $meta['selection']))) ?: ''),
                 array('name' => 'as', 'label' => 'Put it under', 'type' => 'select', 'value' => $kind === 'program' ? 'website' : 'resource',
                     'options' => array('resource' => 'Materials and links', 'website' => 'Its own website')),
                 array('name' => 'kind', 'label' => 'Kind (Materials and links)', 'type' => 'select', 'options' => $res_kinds,
@@ -175,16 +176,15 @@ function kop_rinbox_websites_item($p) {
     );
 }
 
-/** The record the sender's "About" names, when that name is exactly one record's (else 0: the reviewer picks). */
-function kop_rinbox_websites_guess_record($about) {
-    $about = trim((string) $about);
-    if ($about === '' || !function_exists('kop_autoconn_name_index')) return 0;
+/** The record the sender's "About", a KOP id in the note or an exact name in the text names (kop_autoconn_submission_records(); else 0: the reviewer picks). */
+function kop_rinbox_websites_guess_record($about, $text = '') {
+    if (!function_exists('kop_autoconn_submission_records')) return 0;
     try {
-        $holders = kop_autoconn_name_index(kop_rinbox_pdo())[kop_autoconn_key($about)] ?? array();
+        $found = kop_autoconn_submission_records(kop_rinbox_pdo(), $about, $text);
     } catch (Throwable $e) {
         return 0;
     }
-    return count($holders) === 1 ? (int) key($holders) : 0;
+    return $found ? (int) key($found) : 0;
 }
 
 /** The "Materials and links" kind a website of this kind goes under on a facility. */

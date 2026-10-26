@@ -544,6 +544,12 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
         if (($full['status'] ?? '') === 'approved') $status = 'approved';
     }
     $facilities = kop_normalize_facility_mentions($names);
+    // Sent with no facility: the records the title and notes name, so the card comes in linked.
+    if (!$facilities && function_exists('kop_autoconn_submission_mentions')) {
+        $facilities = kop_autoconn_submission_mentions($pdo, '', $title . "
+" . $note . "
+" . $summary);
+    }
     $approved   = $status === 'approved';
 
     $json = array(
@@ -614,6 +620,12 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
     return $id;
 }
 
+/** A lawsuit's facilities_mentioned: the name sent, else the records its title and notes name. */
+function kop_ext_lawsuit_mentions(PDO $pdo, $facility, $text) {
+    if ($facility !== '') return array($facility);
+    return function_exists('kop_autoconn_submission_mentions') ? kop_autoconn_submission_mentions($pdo, '', $text) : array();
+}
+
 function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note) {
     $url      = esc_url_raw((string) $p['url']);
     $facility = kop_ext_text($p['facility'] ?? '', 255);
@@ -628,7 +640,9 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note) {
         'status'               => 'unknown',
         'plaintiffs'           => '[]',
         'defendants'           => '[]',
-        'facilities_mentioned' => $list($facility !== '' ? array($facility) : array()),
+        'facilities_mentioned' => $list(kop_ext_lawsuit_mentions($pdo, $facility, (string) ($p['title'] ?? '') . "
+" . $note . "
+" . (string) ($p['description'] ?? ''))),
         'staff_mentioned'      => '[]',
         'organizations_mentioned' => '[]',
         'claims'               => '[]',

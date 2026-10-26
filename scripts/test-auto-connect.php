@@ -30,7 +30,8 @@ $copy->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $copy->exec('ATTACH DATABASE ' . $copy->quote($mirror) . ' AS src');
 foreach (array('facilities_v2', 'wiki_submissions', 'wpdl_options', 'wpdl_kop_operators', 'wpdl_kop_woodbury_mentions', 'wpdl_kop_fornits_items',
         'wpdl_kop_fornits_topics', 'wpdl_kop_state_list_rows', 'wpdl_kop_gdoc_links', 'referrers_master', 'wpdl_referrers_master', 'providers_master',
-        'wpdl_providers_master', 'transporters_master', 'wpdl_transporters_master') as $t) {
+        'wpdl_providers_master', 'transporters_master', 'wpdl_transporters_master', 'news_submissions', 'lawsuits', 'news_facility_links',
+        'lawsuit_facility_links') as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();
     if (!$sql) continue;
     $copy->exec($sql);
@@ -333,6 +334,51 @@ foreach (array('nonprofit-filings' => kop_npf_candidates(), 'business-filings' =
     $logged = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_review_log WHERE action = 'auto' AND source = " . $pdo->quote($src))->fetchColumn();
     $check("$src: each shows in Recently done with Undo", $logged === $n, "$logged logged");
     $check("$src: one undone is never linked again", !kop_autoconn_filing_picks($src, $entries, $decisions));
+}
+
+/* ---- Submissions: the record a sent link is about ---- */
+echo "-- Submissions --\n";
+$names = kop_autoconn_record_names($pdo);
+$some = array_slice(array_keys($names), 40, 1)[0];
+$found = kop_autoconn_submission_records($pdo, '', 'Some program (KOP #' . $some . '): a note about it.');
+$check('submissions: a KOP id in the notes is the record', key($found) === $some, json_encode($found));
+$check('submissions: generic words and short names find nothing', !kop_autoconn_submission_records($pdo, '', 'The children\'s home and the academy, from day one, in the residential treatment center.'));
+$check('submissions: an id that is no record is ignored', !kop_autoconn_submission_records($pdo, '', 'Reference #1 and case #99999999.'));
+// The waiting websites in the mirror: the id each note gives first is the card's pick.
+$mirror_pdo = new PDO('sqlite:' . $mirror);
+$sites = $mirror_pdo->query("SELECT p.ID, p.post_title, p.post_content, (SELECT meta_value FROM wpdl_postmeta WHERE post_id = p.ID AND meta_key = '_kop_facility') AS about
+    FROM wpdl_posts p WHERE p.post_type = 'kop_source' AND p.post_status = 'pending'")->fetchAll(PDO::FETCH_ASSOC);
+$mirror_pdo = null;
+$with_id = 0; $right = 0; $guessed = 0;
+foreach ($sites as $w) {
+    $g = kop_autoconn_submission_records($pdo, (string) $w['about'], $w['post_title'] . "\n" . $w['post_content']);
+    if ($g) $guessed++;
+    if (preg_match('/#\s?(\d{4,6})\b/', (string) $w['post_content'], $m) && isset($names[(int) $m[1]]) && trim((string) $w['about']) === '') {
+        $with_id++;
+        if ($g && key($g) === (int) $m[1]) $right++;
+    }
+    if ($list) echo '  #' . $w['ID'] . ' ' . mb_substr($w['post_title'], 0, 60) . ' => ' . ($g ? key($g) . ' ' . reset($g) : '-') . "\n";
+}
+$check('submissions: every waiting website whose note gives a KOP id comes in on that record', $with_id === 0 || $right === $with_id, "$right of $with_id");
+$check('submissions: most waiting websites come in linked', !$sites || $guessed * 2 > count($sites), $guessed . ' of ' . count($sites));
+// Waiting news and lawsuits sent with no facility get theirs filled.
+$empty_news = "SELECT COUNT(*) FROM news_submissions WHERE status = 'submitted' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]'))";
+$before = (int) $pdo->query($empty_news)->fetchColumn();
+$n = kop_autoconn_submissions(microtime(true) + 120);
+$after = (int) $pdo->query($empty_news)->fetchColumn();
+$check('submissions: waiting news and lawsuits with no facility get the records their notes name', $before === 0 || ($n > 0 && $after < $before), "$n filled, news empty $before -> $after");
+$bad = 0;
+foreach ($pdo->query("SELECT facilities_mentioned FROM news_submissions WHERE status = 'submitted'")->fetchAll(PDO::FETCH_COLUMN) as $fm) {
+    foreach ((array) json_decode((string) $fm, true) as $m) {
+        if (is_array($m) && !empty($m['facility_id']) && !isset($names[(int) $m['facility_id']])) $bad++;
+    }
+}
+$check('submissions: every filled mention is a real record', $bad === 0, "$bad bad");
+$check('submissions: a second run fills nothing again', kop_autoconn_submissions(microtime(true) + 60) === 0);
+if ($list) {
+    foreach ($pdo->query("SELECT item_key, target FROM wpdl_kop_auto_connect WHERE source = 'submissions' AND outcome = 'done'") as $r) {
+        echo '  ' . $r['item_key'] . ' => ' . implode(', ', array_map(function ($id) use ($names) { return $id . ' ' . ($names[(int) $id] ?? '?'); }, explode(',', $r['target']))) . "\n";
+    }
 }
 
 echo $failures ? "\n$failures failed\n" : "\nAll passed\n";

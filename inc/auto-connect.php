@@ -592,6 +592,132 @@ function kop_autoconn_drive_companies($deadline) {
     return $n;
 }
 
+/* ---- Submissions: the record a sent link is about ---------------------------- */
+
+/** facility id => display name. */
+function kop_autoconn_record_names(PDO $pdo) {
+    static $names = null;
+    if ($names !== null) return $names;
+    $names = array();
+    foreach ($pdo->query('SELECT id, name FROM facilities_v2') as $f) $names[(int) $f['id']] = (string) $f['name'];
+    return $names;
+}
+
+/**
+ * The records a submission is about, most likely first: [facility id => name].
+ * Research sends say which in their notes ("New Summit Academy Costa Rica
+ * (#14110)", "KOP #10608"), so in order: the sender's "about" name when it is
+ * exactly one record's, a KOP id written in the text, then names found in the
+ * text that are exactly one record's (one word of eight letters or more, several words of
+ * nine, more than generic or everyday words; the longest name wins, so "Canyon State Academy" is not "Canyon State").
+ * Only a suggestion: the card shows it and a person approves.
+ */
+function kop_autoconn_submission_records(PDO $pdo, $about, $text) {
+    $index = kop_autoconn_name_index($pdo);
+    $names = kop_autoconn_record_names($pdo);
+    $out = array();
+    $about = trim((string) $about);
+    if ($about !== '') {
+        $holders = $index[kop_autoconn_key($about)] ?? array();
+        if (count($holders) === 1) $out[(int) key($holders)] = true;
+    }
+    $text = (string) $text;
+    if (preg_match_all('/#\s?(\d{4,6})\b/', $text, $m)) {
+        foreach ($m[1] as $id) {
+            if (isset($names[(int) $id])) $out[(int) $id] = true;
+        }
+    }
+    $words = explode(' ', kop_autoconn_key($text));
+    $count = count($words);
+    for ($i = 0; $i < $count; $i++) {
+        for ($n = min(8, $count - $i); $n >= 1; $n--) {
+            $k = implode(' ', array_slice($words, $i, $n));
+            if (strlen($k) < ($n === 1 ? 8 : 9) || !isset($index[$k]) || count($index[$k]) !== 1) continue;
+            $fid = (int) key($index[$k]);
+            if (!kop_autoconn_distinctive($k) || !kop_autoconn_text_distinctive($k)) continue;
+            $out[$fid] = true;
+            $i += $n - 1;
+            break;
+        }
+    }
+    $res = array();
+    foreach (array_keys($out) as $fid) {
+        if (isset($names[$fid])) $res[$fid] = $names[$fid];
+    }
+    return $res;
+}
+
+/**
+ * True when a name found in running text has a word beyond everyday ones:
+ * "Industrial School", "Day One", "State Training School" are prose before
+ * they are a program's name.
+ */
+function kop_autoconn_text_distinctive($key) {
+    if (!function_exists('kop_wiki_upd_tokens')) return true;
+    $everyday = array('industrial', 'state', 'county', 'city', 'training', 'reform', 'day', 'one', 'two', 'first', 'second',
+        'chance', 'hope', 'people', 'way', 'view', 'development', 'detention', 'justice', 'regional', 'correctional',
+        'assessment', 'bridge', 'pathways', 'path', 'journey', 'safe', 'place', 'haven', 'star', 'light', 'point');
+    return (bool) array_diff(kop_wiki_upd_tokens($key), $everyday);
+}
+
+/** facilities_mentioned entries ({name, facility_id}) for a submission's guessed records. */
+function kop_autoconn_submission_mentions(PDO $pdo, $about, $text) {
+    $out = array();
+    foreach (kop_autoconn_submission_records($pdo, $about, $text) as $fid => $name) {
+        $out[] = array('name' => $name, 'facility_id' => $fid);
+    }
+    return $out;
+}
+
+/**
+ * Waiting news and lawsuit submissions sent with no facility get the records
+ * their title and notes name (kop_autoconn_submission_records()), so the card
+ * comes in linked. Each item once; the item still waits for a person.
+ */
+function kop_autoconn_submissions($deadline) {
+    foreach (array('news-mentions.php', 'lawsuit-facility-links.php') as $file) {
+        if (is_file(dirname(__DIR__) . '/api/' . $file)) require_once dirname(__DIR__) . '/api/' . $file;
+    }
+    $pdo = kop_seed_pdo();
+    if (!$pdo || !function_exists('kop_sync_news_facility_links') || !function_exists('kop_sync_lawsuit_facility_links')) return 0;
+    $tried = kop_autoconn_tried('submissions');
+    $n = 0;
+    $sets = array(
+        'news' => "SELECT id, article_title AS title, submission_notes AS notes, summary FROM news_submissions
+            WHERE status = 'submitted' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]')) ORDER BY id DESC LIMIT 300",
+        'lawsuit' => "SELECT id, case_name AS title, reviewer_notes AS notes, summary FROM lawsuits
+            WHERE publication_status = 'pending' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]')) ORDER BY id DESC LIMIT 300",
+    );
+    foreach ($sets as $kind => $sql) {
+        foreach ($pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            if (microtime(true) > $deadline) return $n;
+            $key = $kind . ':' . $r['id'];
+            if (isset($tried[$key])) continue;
+            $mentions = kop_autoconn_submission_mentions($pdo, '', $r['title'] . "\n" . $r['notes'] . "\n" . $r['summary']);
+            if (!$mentions) {
+                kop_autoconn_mark('submissions', $key, '', 'none');
+                continue;
+            }
+            $json = wp_json_encode($mentions, JSON_UNESCAPED_UNICODE);
+            if ($kind === 'news') {
+                $pdo->prepare('UPDATE news_submissions SET facilities_mentioned = ? WHERE id = ?')->execute(array($json, (int) $r['id']));
+            } else {
+                $pdo->prepare('UPDATE lawsuits SET facilities_mentioned = ? WHERE id = ?')->execute(array($json, (int) $r['id']));
+            }
+            // The row is saved by now; a failed link sync is logged, the next save of the item syncs again.
+            try {
+                if ($kind === 'news') kop_sync_news_facility_links($pdo, (int) $r['id'], $mentions, 'auto');
+                else kop_sync_lawsuit_facility_links($pdo, (int) $r['id'], $json, 'auto');
+            } catch (Throwable $e) {
+                error_log('kop auto connect: ' . $key . ' facility links failed: ' . $e->getMessage());
+            }
+            kop_autoconn_mark('submissions', $key, implode(',', array_column($mentions, 'facility_id')), 'done');
+            $n++;
+        }
+    }
+    return $n;
+}
+
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -602,7 +728,7 @@ function kop_autoconn_run($seconds = 120) {
     $done = array();
     try {
         kop_autoconn_ensure_table();
-        foreach (array('wiki-links' => 'kop_autoconn_wiki', 'state-lists' => 'kop_autoconn_state_lists',
+        foreach (array('submissions' => 'kop_autoconn_submissions', 'wiki-links' => 'kop_autoconn_wiki','state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
                 'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury',
                 'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies') as $source => $fn) {
