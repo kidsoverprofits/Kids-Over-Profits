@@ -3395,3 +3395,12 @@ Kolob Canyon, /ca-reports/ and /open-data/ pages (with --local also on 6 more fa
      `php api/fix-staff-unconfirmed.php apply` (2,651 entries on 226 open programs) and
      `php api/fix-wiki-staff-former.php apply` (29 wiki entries on 21 records).
      Ask: Have you run the two staff "Former" passes on the server (dry runs are done)?
+- 4.3, done 2026-10-25 (redirects live in https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e0e2ad9b2bbf1fc2eca57ab360388d3da06a6c06; folder link made on the server):
+  13. **Young adult programs: what is left after the document folders** (2026-10-21; the finished item is in
+      docs/PLAN-ARCHIVE.md, "4.3 ... item 13"):
+      a. Done 2026-10-25: the moved records' old /facility/ addresses (name + state slug, other names, twin names, or
+         the old record id) 301 to the program's card (`kop_ya_moved_facility_target()`, called by
+         `kop_facility_pages_route()` before its 404; checks in scripts/test-young-adult-programs.php). After deploy:
+         https://kidsoverprofits.org/facility/dragonfly-transitions-or/ lands on the Dragonfly card.
+      b. Done 2026-10-25 (owner said yes): folder 7789 "Fulshear" is linked to 4163 in kop_folder_links (the server
+         now counts 7789 among the program's folders).

@@ -125,12 +125,6 @@ function kop_pb_checks() {
             if (!$p) return null;
             return $p->post_status === 'publish' ? array(true, 'The page is published') : array(false, 'The page is ' . $p->post_status);
         },
-        '4.3:young-adult-programs-what-is-left-after-the-document-folders' => function () {
-            global $wpdb;
-            $n = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}kop_folder_links WHERE (folder_a = 7789 AND folder_b = 4163) OR (folder_a = 4163 AND folder_b = 7789)");
-            if ($n === null) return null;
-            return (int) $n ? array(true, 'Folder 7789 is linked to 4163') : array(false, 'Folder 7789 is not linked yet');
-        },
         '4.7:meta-descriptions-yoast-sees' => function () {
             $a = kop_pb_post_status(13312);
             $walrus = array_filter(array(470, 786), function ($id) { return kop_pb_post_status($id) === 'publish'; });
