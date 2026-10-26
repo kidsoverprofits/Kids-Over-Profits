@@ -2,8 +2,9 @@
 /**
  * Template Name: Volunteer
  * Description: /volunteer/ (2026-10-23, replacing the hub page's editor copy).
- * Four sections (regrouped 2026-10-26, owner: the copy felt off and oddly organized): review state inspection
- * findings and research a question, with the one sign-up form right under them (inc/volunteer-signup.php; research
+ * Four sections (regrouped 2026-10-26, owner: the copy felt off and oddly organized): the four kinds of work on the
+ * volunteer's own page (inspection findings, research questions, social media posts, photos for pages: the chooser in
+ * js/volunteer-review.js), with the one sign-up form right under them (inc/volunteer-signup.php; research
  * questions are inc/research-tasks.php, picked on the volunteer's page); answer from experience (/questions/,
  * inc/questions.php) and send what you have (the submission tools, folded), neither needing a sign-up; sensitivity
  * readers with their survey (inc/sensitivity-survey.php); the skills we need. Each card's words are a block admins edit in place (kop_ie_html_start(),
@@ -58,9 +59,9 @@ while (have_posts()) :
             <?php endif; ?>
         </header>
 
-        <?php // Reviewing and research happen on the volunteer's own page, so the sign-up sits right under them. ?>
+        <?php // The four kinds of work on the volunteer's own page (the chooser in js/volunteer-review.js), with the sign-up right under them. ?>
         <section class="kop-volpage-section" id="kop-volpage-own" aria-labelledby="kop-volpage-own-h">
-            <h2 class="kop-hub-h" id="kop-volpage-own-h">Review or research from your own page</h2>
+            <h2 class="kop-hub-h" id="kop-volpage-own-h">Work from your own page</h2>
             <div class="kop-volpage-ways">
                 <div class="kop-volpage-way">
                     <?php kop_ie_html_start('volunteer:review', 'Volunteer page: review inspection findings'); ?>
@@ -79,6 +80,22 @@ while (have_posts()) :
                     <?php if ($kop_vp_open > 0) : ?>
                         <p class="kop-volpage-go"><span class="kop-volpage-count"><?php echo esc_html(number_format_i18n($kop_vp_open)); ?> questions open</span></p>
                     <?php endif; ?>
+                </div>
+
+                <div class="kop-volpage-way">
+                    <?php kop_ie_html_start('volunteer:social', 'Volunteer page: social media posts'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-social-h">Make social media posts</h3>
+                    <p>Turn what we added to the site this week into posts: a picture and a short caption from the facts we give you.</p>
+                    <p class="kop-volpage-meta">Ask for this work on your page and we set you up. Nothing is posted until we approve it.</p>
+                    <?php kop_ie_html_end(); ?>
+                </div>
+
+                <div class="kop-volpage-way">
+                    <?php kop_ie_html_start('volunteer:photos', 'Volunteer page: photos for our pages'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-photos-h">Find photos for our pages</h3>
+                    <p>Some of our pages have no pictures. Find openly licensed ones, from Wikimedia Commons, the Library of Congress and others, and send the link, who made it and the license.</p>
+                    <p class="kop-volpage-meta">Five pages at a time. Nothing goes on a page until we approve it.</p>
+                    <?php kop_ie_html_end(); ?>
                 </div>
             </div>
 
@@ -224,7 +241,7 @@ while (have_posts()) :
                     <li><strong>Fundraising:</strong> finding funders and planning campaigns.</li>
                     <li><strong>In-depth research:</strong> programs, owners, licensing and incidents, beyond single questions.</li>
                     <li><strong>Transcription:</strong> interviews, survivor stories and legal documents.</li>
-                    <li><strong>Social media:</strong> writing posts and running our accounts.</li>
+                    <li><strong>Social media:</strong> running our accounts.</li>
                     <li><strong>Data organization:</strong> keeping our records in order.</li>
                     <li><strong>Translation:</strong> our materials, for survivors who speak little or no English.</li>
                 </ul>
