@@ -153,6 +153,33 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
     kop_wu_put($fid, array(), $wu0['published']);
     update_option('kop_wu_failed', array(), false);
 
+    // A record changed straight away (no held facts) waits for a write-up too; the write-up's own save does not count.
+    $held_ids = kop_wu_held_counts();
+    $other = 0;
+    foreach ($GLOBALS['pdo']->query('SELECT id FROM facilities_v2 ORDER BY id LIMIT 400')->fetchAll(PDO::FETCH_COLUMN) as $id) {
+        if (!isset($held_ids[(int) $id]) && (int) $id !== $fid) { $other = (int) $id; break; }
+    }
+    update_option('kop_wu_changed', array(), false);
+    kop_wu_on_change('facility', array($other), array('source' => 'writeup'));
+    $check('writeups: the write-up\'s own save is not a change', !isset(kop_wu_changed()[$other]));
+    kop_wu_on_change('facility', array($other), array());
+    $check('writeups: a direct change puts a record with no held facts in the queue', isset(kop_wu_changed()[$other]) && in_array($other, kop_rinbox_wu_ids('waiting', ''), true));
+    $card = kop_rinbox_get_item('writeups', (string) $other);
+    $check('writeups: its card says the record changed and offers a draft', strpos($card['text'], 'The record changed on') !== false
+        && in_array('write', array_column($card['actions'], 'id'), true), $card['subtitle']);
+    $seen = '';
+    $GLOBALS['kop_wu_ai'] = function ($p) use (&$seen) { $seen = $p; return '{"paragraphs":["It is a program. [1]"],"check":""}'; };
+    kop_wu_write($other);
+    $check('writeups: the draft of a changed record is written from what the record says now', strpos($seen, 'What the record says now') !== false
+        && strpos($seen, 'None: the record itself changed.') !== false, mb_substr($seen, -400));
+    $wu = kop_wu_get($other);
+    $check('writeups: a draft written after the change is not stale', !kop_wu_changed_since_draft($other, $wu['draft']));
+    kop_wu_publish($other, 'tester');
+    $check('writeups: approving takes the record off the changed list', !isset(kop_wu_changed()[$other]) && !in_array($other, kop_rinbox_wu_ids('waiting', ''), true));
+    $log = (int) (kop_wu_get($other)['published']['log'] ?? 0);
+    if ($log) kop_wu_undo($log, 'tester');
+    update_option('kop_wu_changed', array(), false);
+
     // A made-up AI: one sentence per new fact, citing its number.
     $seen = '';
     $GLOBALS['kop_wu_ai'] = function ($prompt) use (&$seen) {

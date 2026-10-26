@@ -22,7 +22,8 @@ kop_rinbox_register('writeups', function () {
         'help'     => 'Facts approved in Woodbury Facts and Fornits do not go on the public page by themselves: they wait here, one card per record, until they are written up well. '
             . 'Each card lists the approved facts with their words and sources, and a draft of the page\'s About section that takes them in (the AI writes one within the hour; "Write it with AI" asks now). '
             . 'Read the draft against the facts, fix it in the box (cite as ([source](link))), then approve: the facts go on the record and the text becomes the About, at once. Undo in Recently done takes it all back. '
-            . 'To take one fact out, use Undo on it in its own queue ("Approved, held for the write-up").'
+            . 'To take one fact out, use Undo on it in its own queue ("Approved, held for the write-up"). '
+            . 'A record changed straight away (the data form, inline edit, a research fix, an approved suggestion, a news or lawsuit link) waits here too: the change is on the page already, and its draft takes in what the record says now.'
             . (function_exists('kop_wu_last_run_line') && ($last = kop_wu_last_run_line()) !== '' ? ' ' . $last : ''),
         'views'    => array('waiting' => 'Waiting', 'published' => 'Approved'),
         'view_counts' => function (array $q = array()) {
@@ -30,7 +31,7 @@ kop_rinbox_register('writeups', function () {
         },
         'count'    => function () {
             kop_wu_ensure_tables();
-            return count(kop_wu_held_counts());
+            return count(kop_wu_todo_ids());
         },
         'list'     => function (array $q) {
             $view = $q['view'] === 'published' ? 'published' : 'waiting';
@@ -68,7 +69,7 @@ function kop_rinbox_wu_ids($view, $search) {
     if ($view === 'published') {
         $ids = array_map('intval', (array) $wpdb->get_col('SELECT facility_id FROM ' . kop_wu_table() . " WHERE published IS NOT NULL AND published <> '' ORDER BY updated_at DESC, id DESC"));
     } else {
-        $ids = array_keys(kop_wu_held_counts());
+        $ids = kop_wu_todo_ids();
         // A draft with no facts left (all sent back) still shows, so it can be approved or dropped.
         foreach ((array) $wpdb->get_col('SELECT facility_id FROM ' . kop_wu_table() . " WHERE draft IS NOT NULL AND draft <> ''") as $f) {
             if (!in_array((int) $f, $ids, true)) $ids[] = (int) $f;
@@ -94,7 +95,8 @@ function kop_rinbox_wu_item($fid) {
     $facts = array_map('kop_wu_fact', $held);
     $draft = (array) ($wu['draft']['paragraphs'] ?? array());
     $pub = (array) ($wu['published']['paragraphs'] ?? array());
-    $waiting = $held || $draft;
+    $changed = (int) (kop_wu_changed()[$fid] ?? 0);
+    $waiting = $held || $draft || $changed;
     $new = $draft ? kop_wu_new_since_draft($fid, $wu['draft'], $held) : array();
     $claude = function_exists('kop_wu_claude_queue') ? (kop_wu_claude_queue()[$fid] ?? null) : null;
 
@@ -104,6 +106,10 @@ function kop_rinbox_wu_item($fid) {
         foreach ($facts as $f) {
             $lines[] = '- ' . $f['where'] . ': ' . $f['what'] . ($f['quote'] !== '' ? ' ("' . kop_rinbox_excerpt($f['quote'], 300) . '")' : '') . ' (' . $f['cite'] . ')';
         }
+    }
+    if ($changed) {
+        if ($lines) $lines[] = '';
+        $lines[] = 'The record changed on ' . gmdate('M j, Y', $changed) . ' (an edit, a link or a fix made straight to it): it is on the page already, and the write-up takes in what the record says now.';
     }
     if ($draft) {
         $lines[] = '';
@@ -123,16 +129,17 @@ function kop_rinbox_wu_item($fid) {
     $actions = array();
     if ($waiting) {
         if ($draft) $actions[] = array('id' => 'publish', 'label' => 'Approve: put it on the page', 'style' => 'approve', 'with_fields' => true,
-            'help' => 'The ' . count($held) . ' held fact' . (count($held) === 1 ? '' : 's') . ' go onto the record of ' . $fac['name'] . ' (staff, incidents, names, closure...) and the write-up becomes its About section, in one save. Undo in Recently done takes it all back.');
+            'help' => ($held ? 'The ' . count($held) . ' held fact' . (count($held) === 1 ? '' : 's') . ' go onto the record of ' . $fac['name'] . ' (staff, incidents, names, closure...) and the write-up becomes its About section, in one save.'
+                : 'The write-up becomes the About section of ' . $fac['name'] . '.') . ' Undo in Recently done takes it all back.');
         $actions[] = array('id' => 'write', 'label' => $draft ? 'Write it again with AI' : 'Write it with AI', 'style' => 'neutral',
-            'help' => 'Asks the AI for a new draft from the page\'s About and the held facts. What is in the box now is replaced.');
-        if ($held) $actions[] = $claude
+            'help' => 'Asks the AI for a new draft from the page\'s About, the held facts and what the record says now. What is in the box now is replaced.');
+        if ($held || $changed) $actions[] = $claude
             ? array('id' => 'unclaude', 'label' => 'Take back from Claude', 'style' => 'neutral',
                 'help' => 'Takes this record off Claude\'s list; the hourly AI run may draft it again.')
             : array('id' => 'claude', 'label' => 'Send to Claude', 'style' => 'neutral',
                 'help' => 'Puts this record on Claude\'s list: the next Claude session asked to "write the write-ups sent to Claude" drafts it and the draft lands here for you to approve. The hourly AI run leaves it alone meanwhile.');
         if ($draft && !$held) $actions[] = array('id' => 'drop', 'label' => 'Drop the draft', 'style' => 'reject',
-            'help' => 'No facts are held for this page any more: the draft is thrown away and the page stays as it is.');
+            'help' => 'No facts are held for this page: the draft is thrown away, the record leaves this list and the page stays as it is.');
     }
     if (!empty($wu['published']['log']) && !$waiting) {
         $actions[] = array('id' => 'undo_publish', 'label' => 'Undo', 'style' => 'undo', 'params' => array(),
@@ -143,7 +150,8 @@ function kop_rinbox_wu_item($fid) {
         'key'          => (string) $fid,
         'title'        => $fac['name'],
         'subtitle'     => implode(' · ', array_filter(array(
-            count($held) . ' approved fact' . (count($held) === 1 ? '' : 's') . ' held',
+            $held ? count($held) . ' approved fact' . (count($held) === 1 ? '' : 's') . ' held' : '',
+            $changed ? 'Changed ' . gmdate('M j', $changed) : '',
             $draft ? 'Draft by ' . (!empty($wu['draft']['edited_by']) ? $wu['draft']['edited_by'] : ucfirst((string) ($wu['draft']['provider'] ?? '') ?: 'the AI')) : ($waiting ? 'No draft yet' : ''),
             $pub ? 'An approved write-up is on the page' : '',
             $claude ? 'Sent to Claude ' . substr((string) $claude['at'], 0, 10) : '',
@@ -201,6 +209,7 @@ function kop_rinbox_wu_act($key, $action, array $params) {
         if (kop_wu_held_rows($fid)) throw new RuntimeException('Facts are still held for this page: approve the write-up, or send them back from their queues first.');
         $wu = kop_wu_get($fid);
         kop_wu_put($fid, array(), $wu['published']);
+        kop_wu_clear_changed($fid);
         kop_rinbox_flush_counts();
         return array('message' => 'Draft dropped. The page is as it was.');
     }

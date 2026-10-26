@@ -25,9 +25,20 @@
  * note added to the record after the write-up was approved is still printed
  * under it until the next write-up takes it in (kop_wu_page_about()).
  *
+ * Every other change reaches the write-up too (owner, 2026-10-26: everything
+ * coming in goes into the write-ups). A direct write (the admin form, inline
+ * edit, research-task fixes, approved suggestions, closures, merges, news and
+ * lawsuit links) is on the page at once as before, and marks the record
+ * changed (kop_wu_on_change(), on 'kop_record_changed'; option kop_wu_changed,
+ * [fid => time]). A changed record waits in the same queue, and its draft is
+ * written from the page's About, the held facts and what the record says now
+ * (kop_wu_record_facts(): names, operator, years, staff, incidents, practices,
+ * news, lawsuits, deaths), so nothing on the record is left out of the text.
+ * Approving clears the mark; the write-up's own save never sets it.
+ *
  * Tables: {prefix}kop_record_writeups (one row per record: the draft and the
  * published text, JSON) and {prefix}kop_record_writeup_log (each approval,
- * with what it wrote, for Undo). Tested by scripts/test-record-writeups.php.
+ * with what it wrote, for Undo). Tested by scripts/test-review-inbox.php --source=writeups.
  */
 
 if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
@@ -49,6 +60,7 @@ define('KOP_RECORD_WRITEUPS_LOADED', 1);
 define('KOP_RECORD_WRITEUPS_DB_VERSION', '1');
 if (!defined('KOP_WU_GROQ_MAX_CHARS')) define('KOP_WU_GROQ_MAX_CHARS', 18000); // about 5,000 tokens: with the 2,500 answer, under Groq's 8,000
 if (!defined('KOP_WU_RETRY_AFTER')) define('KOP_WU_RETRY_AFTER', 6 * 3600); // a record whose draft failed waits this long before the hourly run tries it again
+if (!defined('KOP_WU_HOURLY')) define('KOP_WU_HOURLY', 6); // drafts the hourly run writes (owner, 2026-10-26: 6, up from 3)
 
 function kop_wu_table() {
     global $wpdb;
@@ -162,6 +174,86 @@ function kop_wu_held_counts() {
     }
     arsort($n);
     return $n;
+}
+
+/* ---- Records changed since their write-up ---------------------------------- */
+
+/** [fid => time of the latest change not yet in a write-up]. */
+function kop_wu_changed() {
+    $c = function_exists('get_option') ? get_option('kop_wu_changed', array()) : array();
+    $c = is_array($c) ? $c : array();
+    foreach ((array) ($GLOBALS['kop_wu_changed_buffer'] ?? array()) as $fid => $t) $c[$fid] = $t;
+    return $c;
+}
+
+/** Mark records changed (written to the option once, at the end of the request: a bulk pass changes hundreds). */
+function kop_wu_mark_changed(array $fids) {
+    $buf = &$GLOBALS['kop_wu_changed_buffer'];
+    if (!is_array($buf)) {
+        $buf = array();
+        if (function_exists('add_action')) add_action('shutdown', 'kop_wu_flush_changed', 4);
+    }
+    foreach ($fids as $fid) if ((int) $fid > 0) $buf[(int) $fid] = time();
+}
+
+function kop_wu_flush_changed() {
+    $buf = (array) ($GLOBALS['kop_wu_changed_buffer'] ?? array());
+    $GLOBALS['kop_wu_changed_buffer'] = array();
+    if (!$buf || !function_exists('update_option')) return;
+    $c = get_option('kop_wu_changed', array());
+    $c = is_array($c) ? $c : array();
+    foreach ($buf as $fid => $t) $c[$fid] = $t;
+    update_option('kop_wu_changed', $c, false);
+}
+
+/** The record's changes are in its write-up now (approved, or nothing left to write). */
+function kop_wu_clear_changed($fid) {
+    unset($GLOBALS['kop_wu_changed_buffer'][(int) $fid]);
+    if (!function_exists('update_option')) return;
+    $c = get_option('kop_wu_changed', array());
+    if (is_array($c) && isset($c[(int) $fid])) {
+        unset($c[(int) $fid]);
+        update_option('kop_wu_changed', $c, false);
+    }
+}
+
+/**
+ * 'kop_record_changed': a facility, or a news article or case linked to one,
+ * changed. The write-up's own save ('source' => 'writeup') is not a change.
+ */
+function kop_wu_on_change($kind, $ids, $info = array()) {
+    if (($info['source'] ?? '') === 'writeup' || !empty($GLOBALS['kop_wu_publishing'])) return;
+    $ids = array_values(array_filter(array_map('intval', (array) $ids)));
+    if (!$ids) return;
+    if ($kind === 'facility') {
+        kop_wu_mark_changed($ids);
+    } elseif (in_array($kind, array('news', 'lawsuit'), true) && function_exists('kop_record_changed_facility_ids')) {
+        try {
+            kop_wu_mark_changed(kop_record_changed_facility_ids(array($kind => array_fill_keys($ids, true))));
+        } catch (Throwable $e) {
+            // The link tables are not there (tests): nothing to mark.
+        }
+    }
+}
+
+/**
+ * The records waiting for a write-up: held facts (most first), then records
+ * changed since their write-up (oldest change first).
+ */
+function kop_wu_todo_ids() {
+    $ids = array_keys(kop_wu_held_counts());
+    $changed = kop_wu_changed();
+    asort($changed);
+    foreach (array_keys($changed) as $fid) if (!in_array((int) $fid, $ids, true)) $ids[] = (int) $fid;
+    return $ids;
+}
+
+/** Does the record's draft miss a change made after it was written? */
+function kop_wu_changed_since_draft($fid, array $draft) {
+    $t = (int) (kop_wu_changed()[(int) $fid] ?? 0);
+    if (!$t) return false;
+    $at = !empty($draft['at']) ? strtotime($draft['at'] . ' UTC') : 0;
+    return $t > (int) $at;
 }
 
 /** A held item's key: "wbf:<pkey>" or "fornits:<pkey>". */
@@ -354,8 +446,54 @@ function kop_wu_ai($prompt) {
 }
 
 /**
+ * What the record says now, as facts the write-up can cite (kop_wu_fact()'s
+ * shape, less key/label): names, operator, years, place, type, practices,
+ * staff, incidents, news, lawsuits and deaths, from kop_facility_page_data().
+ * Long lists are cut (the newest news first) so a big record's prompt stays readable.
+ */
+function kop_wu_record_facts(array $page) {
+    $out = array();
+    $add = function ($where, $what, $url = '', $cite = '') use (&$out) {
+        $what = trim(preg_replace('/\s+/u', ' ', (string) $what));
+        if ($what !== '') $out[] = array('where' => $where, 'what' => mb_substr($what, 0, 400), 'quote' => '', 'cite' => $cite !== '' ? $cite : 'the record', 'url' => (string) $url);
+    };
+    $names = array_filter(array_merge((array) ($page['formerly'] ?? array()), (array) ($page['aka'] ?? array()), (array) ($page['later'] ?? array())), 'is_string');
+    if ($names) $add('Names', 'Also known as ' . implode('; ', array_unique($names)));
+    if (!empty($page['operator']['name'])) $add('Operator', ($page['operator']['past'] ? 'Run in the past by ' : 'Run by ') . $page['operator']['name']);
+    foreach ((array) ($page['facts'] ?? array()) as $f) {
+        if (is_array($f) && !empty($f['label'])) $add('Fact box', $f['label'] . ': ' . (is_scalar($f['value'] ?? null) ? $f['value'] : ''));
+    }
+    if (!empty($page['status'])) $add('Fact box', 'Status: ' . $page['status']);
+    if (!empty($page['place'])) $add('Fact box', 'Place: ' . $page['place']);
+    foreach ((array) ($page['practices'] ?? array()) as $p) {
+        if (is_array($p) && !empty($p['items'])) $add('Practices', ($p['label'] ?? 'Practices') . ': ' . implode(', ', array_filter((array) $p['items'], 'is_string')));
+    }
+    $staff = array();
+    foreach ((array) ($page['staff'] ?? array()) as $list) foreach ((array) $list as $s) if (is_array($s)) $staff[] = $s;
+    foreach (array_slice($staff, 0, 40) as $s) {
+        $add('Staff', trim(($s['name'] ?? '') . (!empty($s['role']) ? ': ' . $s['role'] : '')), $s['url'] ?? '', $s['cite'] ?? '');
+    }
+    foreach (array_slice((array) ($page['incidents'] ?? array()), 0, 40) as $i) {
+        if (is_array($i)) $add('Incident' . (!empty($i['when']) ? ', ' . $i['when'] : ''), $i['text'] ?? '', $i['url'] ?? '', $i['cite'] ?? '');
+    }
+    $news = array_filter((array) ($page['news'] ?? array()), 'is_array');
+    usort($news, function ($a, $b) { return strcmp((string) ($b['date'] ?? ''), (string) ($a['date'] ?? '')); });
+    foreach (array_slice($news, 0, 25) as $n) {
+        $add('News, ' . trim(($n['outlet'] ?? '') . ' ' . ($n['date_label'] ?? ($n['date'] ?? ''))), trim(($n['title'] ?? '') . (!empty($n['summary']) ? '. ' . mb_substr((string) $n['summary'], 0, 300) : '')), $n['url'] ?? '', (string) ($n['outlet'] ?? ''));
+    }
+    foreach (array_slice(array_filter((array) ($page['lawsuits'] ?? array()), 'is_array'), 0, 15) as $l) {
+        $add('Lawsuit', trim(($l['title'] ?? ($l['name'] ?? ($l['case_name'] ?? ''))) . (!empty($l['summary']) ? '. ' . mb_substr((string) $l['summary'], 0, 300) : '')), $l['url'] ?? '');
+    }
+    foreach (array_slice(array_filter((array) ($page['memorials'] ?? array()), 'is_array'), 0, 15) as $m) {
+        $add('Death', trim(($m['name'] ?? '') . (!empty($m['year']) ? ', ' . $m['year'] : '') . (!empty($m['summary']) ? '. ' . mb_substr((string) $m['summary'], 0, 300) : (!empty($m['text']) ? '. ' . mb_substr((string) $m['text'], 0, 300) : ''))), $m['url'] ?? '');
+    }
+    return $out;
+}
+
+/**
  * The prompt: the page's About as it is (each sentence numbered with its
- * source) and the held facts (numbered on). Returns [prompt, urls by number].
+ * source), the held facts and what the record says now (numbered on).
+ * Returns [prompt, urls by number].
  */
 function kop_wu_prompt($fid, array $page = null, array $facts = null) {
     $page = $page ?: (function_exists('kop_facility_page_data') ? kop_facility_page_data($fid) : null);
@@ -383,6 +521,12 @@ function kop_wu_prompt($fid, array $page = null, array $facts = null) {
         $new[] = '[' . $n . '] ' . $f['where'] . ': ' . $f['what'] . ($f['quote'] !== '' ? ' (the source\'s words: "' . mb_substr($f['quote'], 0, 600) . '")' : '')
             . ' (' . $f['cite'] . ')';
     }
+    $record = array();
+    foreach (kop_wu_record_facts($page) as $f) {
+        $n++;
+        $urls[$n] = (string) $f['url'];
+        $record[] = '[' . $n . '] ' . $f['where'] . ': ' . $f['what'] . ' (' . $f['cite'] . ')';
+    }
     $status = trim((string) ($page['status'] ?? ''));
     $years = trim(implode(' to ', array_filter(array((string) ($page['start_year'] ?? ''), (string) ($page['end_year'] ?? '')))));
     $prompt = 'You are writing the "About" section of the Kids Over Profits page on ' . $page['name']
@@ -390,7 +534,7 @@ function kop_wu_prompt($fid, array $page = null, array $facts = null) {
         . ($status !== '' ? ' Status on the record: ' . $status . ($years !== '' ? ', ' . $years : '') . '.' : '') . "\n\n"
         . "Rules:\n"
         . "- Use only the numbered facts below. Never add anything they do not say. Attribute allegations to who made them (\"a former resident wrote on the Fornits forum\").\n"
-        . "- Take in every new fact that matters to the program's story; keep what the section already says unless a new fact corrects it.\n"
+        . "- Take in every new fact that matters to the program's story, and what the record says now that the section does not cover yet (staff, incidents, news, lawsuits, deaths, names, owners); keep what the section already says unless a fact corrects it.\n"
         . "- Follow the program's life in order: what it was and who ran it, changes of name, owner or place, notable staff, what happened inside, the closing. Group conditions by kind.\n"
         . "- Plain, direct sentences, one claim each, under 25 words. American spelling. No headings, no lists, no emojis, no filler openers, no advice to the reader, no explaining what the reader can see.\n"
         . "- Restraint is restraint (held down, zipped into a bag, strapped): never soften the word.\n"
@@ -399,7 +543,8 @@ function kop_wu_prompt($fid, array $page = null, array $facts = null) {
         . "- After each sentence put the numbers of the facts it rests on, in brackets: [3] or [3][7]. Every sentence needs at least one.\n"
         . "- 1 to 5 short paragraphs; fewer when the facts are few. Leave out what only repeats the page's fact box (ages, size, type) unless it matters to the story.\n\n"
         . ($now ? "What the About section says now:\n" . implode("\n", $now) . "\n\n" : "The page has no About section yet.\n\n")
-        . "New facts approved for this page:\n" . implode("\n", $new) . "\n\n"
+        . "New facts approved for this page:\n" . ($new ? implode("\n", $new) : 'None: the record itself changed.') . "\n\n"
+        . ($record ? "What the record says now:\n" . implode("\n", $record) . "\n\n" : '')
         . 'Answer with JSON only: {"paragraphs": ["...", "..."], "check": "anything the reviewer should check against the sources (a doubtful reading, facts that disagree), or an empty string"}';
     return array($prompt, $urls);
 }
@@ -426,7 +571,7 @@ function kop_wu_read_answer($answer, array $urls) {
  */
 function kop_wu_write($fid, $by = 'ai') {
     $held = kop_wu_held_rows($fid);
-    if (!$held) throw new RuntimeException('No approved facts are waiting for this record.');
+    if (!$held && !isset(kop_wu_changed()[(int) $fid])) throw new RuntimeException('No approved facts or changes are waiting for this record.');
     list($prompt, $urls) = kop_wu_prompt($fid, null, array_map('kop_wu_fact', $held));
     try {
         $out = kop_wu_read_answer(kop_wu_ai($prompt), $urls);
@@ -496,7 +641,7 @@ function kop_wu_claude_save($fid, $answer) {
     $fid = (int) $fid;
     if (!isset(kop_wu_claude_queue()[$fid])) throw new RuntimeException("Record #{$fid} was not sent to Claude (or was taken back).");
     $held = kop_wu_held_rows($fid);
-    if (!$held) throw new RuntimeException('No approved facts are waiting for this record.');
+    if (!$held && !isset(kop_wu_changed()[$fid])) throw new RuntimeException('No approved facts or changes are waiting for this record.');
     list(, $urls) = kop_wu_prompt($fid, null, array_map('kop_wu_fact', $held));
     $draft = kop_wu_store_draft($fid, kop_wu_read_answer(is_string($answer) ? $answer : wp_json_encode($answer), $urls), $held, 'claude', 'Claude');
     kop_wu_take_from_claude($fid);
@@ -552,6 +697,9 @@ function kop_wu_publish($fid, $reviewer, $text = null) {
     if (!$paras) throw new RuntimeException('There is no write-up to approve yet. Use "Write it with AI", or type it in the box and save.');
     $opts = kop_wbf_opts();
     $result = array('added' => 0, 'already' => 0, 'conflicts' => 0, 'log' => 0, 'closed' => false);
+    // The write-up's own save is not a change to write up again (kop_wu_on_change()).
+    $GLOBALS['kop_wu_publishing'] = true;
+    try {
     kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $reviewer, $paras, $wu, $opts, $wpdb, &$result) {
         $stored = kop_facility_load($fid, $opts);
         if (!$stored) throw new RuntimeException("Facility #{$fid} does not exist.");
@@ -595,6 +743,10 @@ function kop_wu_publish($fid, $reviewer, $text = null) {
         $result['added'] = count($items);
         $result['log'] = $log;
     });
+    } finally {
+        unset($GLOBALS['kop_wu_publishing']);
+    }
+    kop_wu_clear_changed($fid);
     if ($result['closed']) do_action('kop_facility_status_changed', $fid);
     if (function_exists('kop_record_changed')) kop_record_changed('facility', array($fid), array('source' => 'writeup'));
     $bits = array('The write-up is the page\'s About now' . ($result['added'] ? ', and ' . $result['added'] . ' held fact' . ($result['added'] === 1 ? ' is' : 's are') . ' on the record' : ''));
@@ -661,11 +813,11 @@ function kop_wu_run_batch($limit = 3) {
     $failed = array_filter($failed, function ($t) { return (int) $t > time() - KOP_WU_RETRY_AFTER; });
     $claude = kop_wu_claude_queue();
     $todo = array();
-    foreach (array_keys(kop_wu_held_counts()) as $fid) {
+    foreach (kop_wu_todo_ids() as $fid) {
         if (isset($failed[$fid]) || isset($claude[$fid])) continue;
         $wu = kop_wu_get($fid);
         if (!empty($wu['draft']['edited_by'])) continue;
-        if (empty($wu['draft']['paragraphs']) || kop_wu_new_since_draft($fid, $wu['draft'])) $todo[] = $fid;
+        if (empty($wu['draft']['paragraphs']) || kop_wu_new_since_draft($fid, $wu['draft']) || kop_wu_changed_since_draft($fid, $wu['draft'])) $todo[] = $fid;
     }
     $out['left'] = max(0, count($todo) - $limit);
     $fails = 0;
@@ -700,10 +852,11 @@ if (function_exists('add_action')) {
     add_action('init', function () {
         if (!wp_next_scheduled('kop_wu_hourly')) wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly');
     });
+    add_action('kop_record_changed', 'kop_wu_on_change', 20, 3);
     add_action('kop_wu_hourly', function () {
         kop_wu_ensure_tables();
         try {
-            $r = kop_wu_run_batch(3);
+            $r = kop_wu_run_batch(KOP_WU_HOURLY);
         } catch (Throwable $e) {
             $r = array('written' => 0, 'errors' => array($e->getMessage()), 'left' => 0);
         }
