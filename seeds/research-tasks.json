@@ -11099,7 +11099,306 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "records-matched-to-the-wrong-pro:which-program-is-the-record-named-only-behaviora",
+   "section": "Records matched to the wrong program",
+   "title": "Which program is the record named only \"Behavioral Health\" in Fairview, UT?",
+   "text": "Every waiting Woodbury/HEAL item on it was about a different organization (UHS, Norton Sound, Wasatch, Charter, Confluence); all 12 were rejected.",
+   "context": "",
+   "records": [
+    10394
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": []
+  },
+  {
+   "key": "records-matched-to-the-wrong-pro:is-legacy-academy-adventures-in-jericho-springs",
+   "section": "Records matched to the wrong program",
+   "title": "Is Legacy Academy Adventures in Jericho Springs, MO holding facts about Legacy Outdoor Adventures in Loa, UT?",
+   "text": "Every waiting item was about the Utah young adult wilderness program; the record's own note 'Opened 2011 per Woodbury' probably came from the same wrong match.",
+   "context": "",
+   "records": [
+    11414
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": [
+    {
+     "label": "News: ‘Missouri is becoming a safer place.’ Third boarding school closes, former students say (The Kansas City Star, 2022-08-08)",
+     "url": "https://archive.ph/eAlyh",
+     "kind": "news"
+    },
+    {
+     "label": "News: Missouri doctor groomed Agape student for sex: court records | The Kansas City Star (The Kansas City Star, 2021-12-27)",
+     "url": "https://archive.is/WgI4J",
+     "kind": "news"
+    },
+    {
+     "label": "News: Two charged Agape staffers list another school as their home (The Kansas City Star, 2021-10-27)",
+     "url": "https://archive.md/UEEei",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "records-matched-to-the-wrong-pro:is-the-florence-crittenton-home-record-the-littl",
+   "section": "Records matched to the wrong program",
+   "title": "Is the Florence Crittenton Home record the Little Rock, AR home or the Helena, MT home?",
+   "text": "The address is Little Rock, but its Woodbury data and the waiting items are about Helena.",
+   "context": "",
+   "records": [
+    11496
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": [
+    {
+     "label": "Woodbury Reports, July 2008, p. 7,8,9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-7-9-florence-crittenton-home/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 25 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-p-25-florence-crittenton-home/",
+     "kind": "woodbury"
+    }
+   ]
+  },
+  {
+   "key": "records-matched-to-the-wrong-pro:is-the-second-chances-record-the-granada-mn-prog",
+   "section": "Records matched to the wrong program",
+   "title": "Is the Second Chances record the Granada, MN program or the WWASPS program in LaVerkin, UT?",
+   "text": "43 waiting items describe the LaVerkin program on the Cross Creek campus and were rejected by the AI reader; if the record is meant to be the Utah one, they go back to review.",
+   "context": "",
+   "records": [
+    13067
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": [
+    {
+     "label": "Woodbury Reports, February 2009, p. 3 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2009-174-p-3-second-chances/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived scinsu.com)",
+     "url": "https://web.archive.org/web/2*/https://scinsu.com/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "records-matched-to-the-wrong-pro:does-the-2019-marcel-chappuis-criminal-charge-on",
+   "section": "Records matched to the wrong program",
+   "title": "Does the 2019 Marcel Chappuis criminal charge on Northwest Academy in Idaho belong to Northwest Academy in Amargosa Valley, NV?",
+   "text": "The charge came from the Tranquility Bay wiki page; the NV program (Chappuis owners) is a different program. 12 waiting NV items were rejected.",
+   "context": "",
+   "records": [
+    9691
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": [
+    {
+     "label": "News: Universal Health Services, Inc. Announces Acquisition Of KEYS Group Holdings, LLC And Five Additional Behavioral Health Facilities As Well As Board Authorization For Additional Securities Repurc",
+     "url": "https://www.biospace.com/b-universal-health-services-inc-b-announces-acquisition-of-b-keys-group-holdings-llc-b-and-five-additional-behavioral-health-facilities-as-we",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen and Heard - October 2001 (Woodbury Reports, 2001-10-01)",
+     "url": "http://www.strugglingteens.com/artman/publish/SnHOct01_011001.shtml",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen 'n Heard, 8/2000 (Woodbury Reports, 2000-08-01)",
+     "url": "http://www.strugglingteens.com/archives/2000/8/seen01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Teen Sues North Idaho Therapy Camps Family Says Boy Was Abused (The Spokesman-Review, 1996-07-11)",
+     "url": "https://www.spokesman.com/stories/1996/jul/11/teen-sues-north-idaho-therapy-cs-family-says/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Boulder Creek Academy, Northwest Academy and Ascent Program Profile at PracticeLink (PracticeLink)",
+     "url": "https://www.practicelink.com/facility/Boulder-Creek-Academy-Northwest-Academy-and-Ascent-Program/universal-health-services-inc",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: State of Nevada v. Patricia Chappuis, et al. (Justice Court of Beatty Township, Nye County, Nevada, filed 2019-08-06)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/PATRICIA-CHAPPUIS-19CR00069B.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, February 2014, p. 11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2014-p-11-northwest-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-10-northwest-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2013, p. 1 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2013-p-1-northwest-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, February 2013, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2013-p-12-northwest-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived cedu.com)",
+     "url": "https://web.archive.org/web/20000818124303/http://www.cedu.com/boarding/nwacademy.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "duplicate-records:are-redcliff-ascent-sagewalk-kolob-canyon-rtc-an",
+   "section": "Duplicate records",
+   "title": "Are RedCliff Ascent, SageWalk, Kolob Canyon RTC and Appalachian Wilderness Camp each held twice?",
+   "text": "Pairs: RedCliff Ascent 10338/10511, SageWalk 12324/100615, Kolob Canyon RTC 10342/10414, Appalachian Wilderness Camp 12501 / Camp Appalachian Wilderness 100550. Woodbury Facts items naming them were left unsure. Merge at Merge Duplicates if they are the same.",
+   "context": "",
+   "records": [
+    10338,
+    10511,
+    12324,
+    100615,
+    10342,
+    10414,
+    12501,
+    100550
+   ],
+   "found": "found 2026-10-25, Woodbury Facts AI readers, 2026-10-25",
+   "directions": [
+    {
+     "label": "Court case: complaints (United States District Court for the District of Utah)",
+     "url": "https://ecf.utd.uscourts.gov/doc1/18313041267",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: dismissed",
+     "url": "https://storage.courtlistener.com/recap/gov.uscourts.utd.13754/gov.uscourts.utd.13754.30.0.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, June 2012, p. 13 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2012-p-13-redcliff-ascent/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2011, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2011-p-15-redcliff-ascent/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-15-redcliff-ascent/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2010, p. 3 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2010-p-3-redcliff-ascent/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived rcmedicinewheel.com)",
+     "url": "https://web.archive.org/web/2*/http://rcmedicinewheel.com/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/rcaspringvillepdcalls.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/redcliff.htm",
+     "kind": "website"
+    },
+    {
+     "label": "News: Nine former students sue over alleged abuse at defunct 'tough love' Mount Bachelor Academy near Prineville (The Oregonian/OregonLive, 2011-07-07)",
+     "url": "https://www.oregonlive.com/pacific-northwest-news/2011/07/nine_former_students_sue_over_treatment_at_defunct_tough_love_mount_bachelor_academy_near_prineville.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Oregon “Tough Love” School Sued For Child Abuse: Nine Students File $14 Million Suit - July 6, 2011 (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-07-05)",
+     "url": "http://www.cafety.org/press/110-press-release/840--media-advisory-oregon-tough-love-academy-to-face-lawsuit-july-5-2011-",
+     "kind": "news"
+    },
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: School Using Lap Dances to Treat ADD Closed, Your Tax $ Involved, But Will It Re-Open? (Mother Jones, 2009-11-04)",
+     "url": "https://www.motherjones.com/politics/2009/11/school-using-lap-dances-treat-add-closed-your-tax-involved-will-it-re-open/",
+     "kind": "news"
+    },
+    {
+     "label": "News: School poses a threat to children, say investigators (The Bulletin, 2009-11-04)",
+     "url": "https://bendbulletin.com/?p=204458",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/20130908140806/http://www.heal-online.org/aspen091509.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/20210901201404/http://www.heal-online.org/teen102209.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/20210901201512/http://www.heal-online.org/aspen102109.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "News: New Abuse Allegations Arise at Drug Treatment Programs Owned by Bain Capital (TIME, 2012-07-20)",
+     "url": "https://healthland.time.com/2012/07/20/new-abuse-allegations-arise-at-drug-treatment-programs-owned-by-bain-capital/",
+     "kind": "news"
+    },
+    {
+     "label": "News: New Efforts to Crack Down on Residential Programs for Troubled Teens (TIME, 2011-10-07)",
+     "url": "https://healthland.time.com/2011/10/07/new-efforts-to-crack-down-on-residential-programs-for-troubled-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, October 2010, p. 5,6 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2010-pp-5-6-kolob-canyon-rtc-2/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, October 2010, p. 1 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2010-p-1-kolob-canyon-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, September 2010, p. 4 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2010-p-4-kolob-canyon-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2006, p. 29 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2006-147-p-29-kolob-canyon-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "News: Facility Deaths - Unsilenced (Unsilenced)",
+     "url": "https://www.unsilenced.org/facility-deaths/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, December 2007, p. 28 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-december-2007-160-p-28-appalachian-wilderness-camp/",
+     "kind": "woodbury"
+    }
+   ]
   }
  ],
- "built": "2026-10-26 00:02"
+ "built": "2026-10-26 00:16"
 }
