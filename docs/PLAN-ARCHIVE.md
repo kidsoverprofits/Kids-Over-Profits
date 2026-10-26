@@ -3434,3 +3434,37 @@ kop-pipeline `test-network-graph.js`. The owner's step is 2.3 item 18.
     (#11355), Cleo Wallace Academy (#12621) (background: PLAN-ARCHIVE.md "Owner pass on curated aliases"). Put both on
     one KOP Tools review screen, a card per question in plain words ("Is X a past name of Y, or its own program?") with
     the evidence and a button per answer, then add an `Ask:` item in 2.3 pointing at it.
+
+## 4.3 Records, names and data quality, item 20, and 4.6 item 13: the kop-data half of investors, map years rerun (finished 2026-10-26)
+
+Done 2026-10-26. kop-data https://github.com/kidsoverprofits/kop-data/commit/9086719 (merged onto the bot's three
+hourly rebuilds, then https://github.com/kidsoverprofits/kop-data/commit/8d8af9a onto its next one): graph.json 2075
+nodes with 7 investors, layout.json, network-overrides.json (the four Sequel investors `"kind": "investor"`) and
+network-qa.json (218 questions for Map Questions); test-network-graph.js and test-network-layout.js pass. The module
+suite's failures were compared against the last graph without investors (kop-data f649268): none comes from the
+investors; they moved to 5-tests-failing.md item 6. Years: https://github.com/kidsoverprofits/kop-data/commit/f360397,
+`years-candidates.json` from results 1-12, 215 names (116 dated on the map since dropped; 142 opening years, 44 closing,
+61 nothing found; 18 of the 64 rerun names changed), `scripts/test-network-years.php` passes. They wait at KOP Tools >
+Map Years (2.3 item 6).
+
+20. **Investors and Map Questions: the kop-data half is not pushed yet** (2026-10-26). The build changes are in
+    kop-pipeline https://github.com/kidsoverprofits/kop-pipeline/commit/945a6a6 and the theme half is on main, but the
+    rebuilt `network/graph.json`, `layout.json`, `network-overrides.json` (the four Sequel investors retyped
+    `"kind": "investor"`) and the new `network-qa.json` are not committed in kop-data. Until they are, the map draws no
+    investor and Map Questions shows only the six alias cards. Steps: (a) `node scripts/test-network-modules.js` failed 5
+    checks on the new graph (best-connected node lost its label; WWASPS has no drawn label; opening view puts 9 names off
+    the stage; Provo lines long, median 674px; David Gilcrease has 6 connections, not 5). Run it on the previous graph
+    to see which are new: in kop-data `git show HEAD:network/graph.json > network/graph.json` (and the same for
+    layout.json), run the suite in the theme (about 12 minutes), then rebuild as in (c). (b) Fix any failure the investor nodes caused (the 7 new nodes and lines
+    near Sequel, Paradigm, InnerChange are the only graph change). (c) From kop-pipeline: `node
+    scripts/build-network-graph.js && node scripts/build-network-layout.js && node scripts/test-network-graph.js && node
+    scripts/test-network-layout.js`, then commit + push the four files in kop-data (or press Rebuild now at KOP Tools >
+    Map Rebuild, which does the same in Actions now that the workflow syncs the investor and answer tables).
+13. **Network map undated names** (rerun 2026-10-26 on the 64 still undated in graph.json, a larger search budget):
+    the results are in kop-pipeline `tmp/years-research/result-9.json` to `result-12.json` (gitignored; batches
+    `batch-9` to `batch-12`); about 19 got an opening year, 4 a closing year, about 41 are open today with no
+    opening year found. 140 sources found on the way were sent (9 already held, 1 refused). Left to do: from
+    kop-pipeline, with kop-data's real graph.json in place, `node scripts/build-years-candidates.js` (writes
+    kop-data `network/years-candidates.json`), check it with `php scripts/test-network-years.php` in the theme, commit +
+    push it in kop-data; the new years then wait at KOP Tools > Map Years (2.3 item 6). Jemison Group Home's 1999 rests
+    on KOP's own Three Springs timeline only.
