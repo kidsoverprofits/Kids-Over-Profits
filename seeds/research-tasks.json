@@ -2671,7 +2671,34 @@
     23,
     500008
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "ABC Action News's 2013 is its own error: its 'that same year' links to the June 2017 release, and it says next that the company was bought in 2017. No source gives 2016 (likely G4S's early-2016 plan to sell).",
+    "claims": [
+     {
+      "claim": "2017: TrueCore announced its new name on June 30, 2017",
+      "url": "https://www.prnewswire.com/news-releases/truecore-behavioral-solutions-announces-new-name-and-corporate-ownership-300482755.html",
+      "quote": "TrueCore Behavioral Solutions, formerly G4S Youth Services, announces today the formal change of name and ownership"
+     },
+     {
+      "claim": "G4S sold the business to BHSB Holdings for US$56.5 million on April 3, 2017",
+      "url": "https://web.archive.org/web/20210117164319/https://www.g4s.com/investors/regulatory-announcements/2017/04/03/g4s-sells-g4s-youth-services-llc",
+      "quote": "G4S ... announces that it has completed the sale of G4S Youth Services in the USA to BHSB Holdings, Inc. (\"BHSB\") for US$56.5 million paid in cash."
+     },
+     {
+      "claim": "The buyers included the company's own managers",
+      "url": "https://www.prnewswire.com/news-releases/truecore-behavioral-solutions-announces-new-name-and-corporate-ownership-300482755.html",
+      "quote": "G4S Secure Solutions sold its Youth Services subsidiary to an investment group which includes several members of Youth Services' management"
+     },
+     {
+      "claim": "G4S bought Sunshine Youth Services in April 2009",
+      "url": "https://web.archive.org/web/20201210171140/https://www.g4s.com/investors/regulatory-announcements/2009/04/16/acquisition-of-sunshine-youth-services-inc",
+      "quote": "G4S ... announces that it has acquired substantially all the assets of Sunshine Youth Services, Inc. (SYS)"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "company-histories:ramsay-youth-services",
@@ -6603,7 +6630,39 @@
      "url": "https://web.archive.org/web/2*/http://www.heal-online.org/oakley.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Dragonfly never joined InnerChange in an announcement of its own; it first shows in InnerChange's footer between the Aug 15, 2018 and Jan 22, 2019 homepage captures. Written into the InnerChange company notes and history draft.",
+    "claims": [
+     {
+      "claim": "Vive Family Support Program joined InnerChange on October 1 (2015)",
+      "url": "https://web.archive.org/web/20160325163743/http://innerchange.com/content/vive-joins-innerchange-family",
+      "quote": "As of October 1st, Vive Family Support Program has joined the InnerChange \"One Family.\""
+     },
+     {
+      "claim": "The year is 2015: InnerChange's homepage first lists the news in November 2015",
+      "url": "https://web.archive.org/web/20151114185811/http://innerchange.com/",
+      "quote": "Headlines Vive Joins the InnerChange Family! New Haven at Hobble Creek is Open!"
+     },
+     {
+      "claim": "Optimum Performance Institute (OPI) joined in March 2016",
+      "url": "https://strugglingteens.com/artman/publish/printer_OPI-BN_160309.shtml",
+      "quote": "InnerChange is excited to announce that Optimum Performance Institute, or OPI, has officially joined the InnerChange \"One Family\" of programs."
+     },
+     {
+      "claim": "Calo Programs, not InnerChange, bought Dragonfly Transitions in summer 2018",
+      "url": "https://www.heraldandnews.com/news/local_news/community/dragonfly-transitions-under-new-ownership/article_f615c677-6bc1-51b3-bb0b-a1d89c32c3e1.html",
+      "quote": "Dragonfly Transitions, a therapeutic program for young adults, was sold by previous owners Glen White and Mona Treadway to Calo Programs"
+     },
+     {
+      "claim": "By October 31, 2018 Dragonfly was listed under InnerChange in the Embark announcement",
+      "url": "https://strugglingteens.com/artman/publish/printer_EmbarkBH_BN10312018.shtml",
+      "quote": "INNERCHANGE PROGRAMS OPI ... Dragonfly Mona Treadway, Glenn White, Travis Slagle"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "company-histories:what-was-potomac-pathways-a-program-of-innerchan",
@@ -7325,7 +7384,29 @@
    "companies": [
     8
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "End year not found. The six-state shelter grant 90ZU0277 ran to June 30, 2022 (USAspending, not site-specific); Devereux Cleo Wallace in Westminster closed in 2023 (CPR). Likely end 2022-2023, unproven; next try ORR facility lists or a Colorado licensing records request. Partial answer.",
+    "claims": [
+     {
+      "claim": "Colorado licensed the shelter on December 5, 2019",
+      "url": "https://www.westword.com/news/devereux-receives-license-for-migrant-children-shelter-in-westminster-11562469",
+      "quote": "On December 5, the Colorado Department of Human Services approved Pennsylvania-based Devereux Advanced Behavioral Health's license to run the shelter."
+     },
+     {
+      "claim": "In September 2020 no children were there yet",
+      "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+      "quote": "Devereux had no migrant children in its care at the Colorado and Connecticut facilities, according to a Sept. 14 email from ORR."
+     },
+     {
+      "claim": "It was running in April 2021 and planned to grow from 18 to 30 beds",
+      "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+      "quote": "Devereux ... plans to expand its Westminster shelter for unaccompanied migrant children from eighteen to thirty beds"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "federal-funding:has-shenandoah-valley-juvenile-center-in-virgini",
@@ -11005,7 +11086,34 @@
      "url": "https://web.archive.org/web/2*/https://us.bold.pro/my/patrick-hawkins",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "So it closed in late 2020, between November 27 and mid-December. The December 2020 story calls the ranch Lost Elk Ranch and does not name Three Strands; the acreage, road and late-summer-2019 program match. No exact closing day found.",
+    "claims": [
+     {
+      "claim": "It opened in summer 2019",
+      "url": "https://www.steamboatpilot.com/news/new-treatment-center-in-south-routt-utilizes-ranch-work-wilderness-experience-to-fight-addiction/",
+      "quote": "The newly opened Three Strands ranch on Routt County Road 16 provides a unique approach for young men struggling with addiction"
+     },
+     {
+      "claim": "Its website was still advertising on November 27, 2020, the last capture",
+      "url": "https://web.archive.org/web/20201127021205/https://www.threestrandswilderness.com/",
+      "quote": "Three Strands treats young adult men, ages 18-27, suffering with substance use disorder and co-occurring mental health disorders."
+     },
+     {
+      "claim": "The ranch (1,378 acres off County Road 16 near Lynx Pass) sold in mid-December 2020, and the treatment program had ended before the sale",
+      "url": "https://www.steamboatpilot.com/news/south-routt-ranch-sells-for-over-6m-as-area-continues-to-be-prime-market-for-high-end-ranch-properties/",
+      "quote": "In late summer 2019, Lost Elk Ranch was to be transformed into a residential treatment program for young men struggling with addiction. That venture reportedly ended prior to the sale, according to Smith."
+     },
+     {
+      "claim": "Its company, Three Strands, Ltd, at 17905 CR 16, went delinquent on June 1, 2021",
+      "url": "https://data.colorado.gov/resource/4ykn-tg5h.json?entityid=20171850438",
+      "quote": "Three Strands, Ltd, Delinquent June 1, 2021"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-10-26"
+   }
   },
   {
    "key": "facility-place-conflicts:what-year-did-northern-illinois-academy-open-at",
@@ -11515,7 +11623,37 @@
      "kind": "woodbury"
     }
    ]
+  },
+  {
+   "key": "network-map:is-journey-home-in-attleboro-ma-really-tied-to-f",
+   "section": "Network map",
+   "title": "Is Journey Home in Attleboro, MA really tied to Family Help & Wellness, as the map draws it?",
+   "text": "Journey Home in Attleboro is Justice Resource Institute's boys' group home under a state child welfare contract. The board's line to Family Help & Wellness looks wrong; if so, fix it in network-overrides.json lines.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-26, map years research 2026-10-26",
+   "directions": []
+  },
+  {
+   "key": "network-map:which-program-is-the-map-s-laurel-hills-behavior",
+   "section": "Network map",
+   "title": "Which program is the map's \"Laurel Hills Behavioral Health\"?",
+   "text": "No trace of a Laurel Hills Behavioral Health was found. It is probably UHS's Laurel Oaks (Dothan, AL, formerly Ramsay Youth Services) or Laurel Heights (Atlanta). Add an alias or rename on the board once known.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-26, map years research 2026-10-26",
+   "directions": []
+  },
+  {
+   "key": "network-map:is-deep-creek-youth-academy-the-program-once-cal",
+   "section": "Network map",
+   "title": "Is Deep Creek Youth Academy the program once called Hastings Youth Academy (Hastings, FL)?",
+   "text": "News under G4S and TrueCore calls the Hastings campus Hastings Youth Academy; the board has Deep Creek Youth Academy. No source states a rename. If one place, record the rename year at Map Renames.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-26, map years research 2026-10-26",
+   "directions": []
   }
  ],
- "built": "2026-10-26 02:28"
+ "built": "2026-10-26 18:00"
 }

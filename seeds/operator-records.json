@@ -832,7 +832,7 @@
   },
   {
     "name": "InnerChange",
-    "note": "Company record created 2026-10-14. Solacium Holdings (2006-2008), renamed InnerChange on November 3, 2008, part of Embark Behavioral Health from October 2018. It had been facility record 10455, made from an empty wiki entry; that record left the facility table (seeds/record-to-company.json) and its staff are the company's executives here. Programs on file linked as past: New Haven RTC, Sunrise RTC, Alldredge Wilderness Journey, Fulshear (2006-2018), Chrysalis (2013-2018), Lake House Academy (about 2014-2018), the Oakley School (a 2013 'partnership' until it closed in 2017), Dragonfly Transitions (by 2018). Not linked: Wilderness Quest (letter of intent in 2007, purchase not confirmed); Vive (no record matches with certainty: 'Vive Adolescent Care', St. George, may be it); OPI (a young adult program).",
+    "note": "Company record created 2026-10-14. Solacium Holdings (2006-2008), renamed InnerChange on November 3, 2008, part of Embark Behavioral Health from October 2018. It had been facility record 10455, made from an empty wiki entry; that record left the facility table (seeds/record-to-company.json) and its staff are the company's executives here. Programs on file linked as past: New Haven RTC, Sunrise RTC, Alldredge Wilderness Journey, Fulshear (2006-2018), Chrysalis (2013-2018), Lake House Academy (about 2014-2018), the Oakley School (a 2013 'partnership' until it closed in 2017), Dragonfly Transitions (by 2018). Not linked: Wilderness Quest (letter of intent in 2007, purchase not confirmed); Vive (joined October 2015; no record matches with certainty: 'Vive Adolescent Care', St. George, may be it); OPI (a young adult program, joined March 2016).",
     "operator": {
       "currentName": "",
       "otherNames": [
@@ -967,7 +967,10 @@
         "January 2, 2013: InnerChange bought Chrysalis (Eureka, MT), \"the fourth facility to join the InnerChange family of treatment programs\", all for adolescent girls or young women (Woodbury Reports, February 2013, p. 12: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0213.pdf#page=12; press release: https://strugglingteens.com/artman/publish/printer_InnerChangeBN_130102.shtml)",
         "August 2013: \"InnerChange, a clinical and operational consulting organization supporting residential treatment centers\", announced a partnership with the Oakley School (Oakley, UT; closed 2017); Paul Taylor, from Copper Canyon Academy, became Oakley's executive director (Woodbury Reports, September 2013, pp. 10-11: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0913.pdf#page=10; https://strugglingteens.com/artman/publish/printer_OakleySchoolBN130802.shtml)",
         "About 2014: InnerChange bought Lake House Academy (Flat Rock, NC) (r/troubledteens wiki, Lake House Academy: https://www.reddit.com/r/troubledteens/wiki/index/lakehouse)",
-        "October 31, 2018: Embark Behavioral Health was announced as the umbrella name for Calo Programs, InnerChange Programs, New Vision Wilderness Programs and Potomac Pathways. InnerChange's programs then: Optimum Performance Institute (OPI), Chrysalis, New Haven, Sunrise, Vive and Dragonfly Transitions; Lake House and Fulshear were listed under Calo (https://strugglingteens.com/artman/publish/EmbarkBH_BN10312018.shtml). Cressey & Company left in August 2018 (Preqin). OPI and Dragonfly Transitions are young adult programs; when OPI, Vive and Dragonfly joined InnerChange is not on record",
+        "October 1, 2015: Vive Family Support Program joined: \"As of October 1st, Vive Family Support Program has joined the InnerChange 'One Family.'\" (InnerChange, archived: https://web.archive.org/web/20160325163743/http://innerchange.com/content/vive-joins-innerchange-family; the year from the homepage captures of October 15 and November 14, 2015)",
+        "March 2016: \"Optimum Performance Institute, or OPI, has officially joined the InnerChange 'One Family' of programs\", a residential treatment center for young men and women 17-28 in Southern California (Woodbury Reports, March 9, 2016: https://strugglingteens.com/artman/publish/printer_OPI-BN_160309.shtml)",
+        "August 2018: Calo Programs bought Dragonfly Transitions, a program for young adults in Oregon, from Glen White and Mona Treadway (Herald and News, August 5, 2018: https://www.heraldandnews.com/news/local_news/community/dragonfly-transitions-under-new-ownership/article_f615c677-6bc1-51b3-bb0b-a1d89c32c3e1.html); by the October 31, 2018 Embark announcement it was listed under InnerChange",
+        "October 31, 2018: Embark Behavioral Health was announced as the umbrella name for Calo Programs, InnerChange Programs, New Vision Wilderness Programs and Potomac Pathways. InnerChange's programs then: Optimum Performance Institute (OPI), Chrysalis, New Haven, Sunrise, Vive and Dragonfly Transitions; Lake House and Fulshear were listed under Calo (https://strugglingteens.com/artman/publish/EmbarkBH_BN10312018.shtml). Cressey & Company left in August 2018 (Preqin). OPI and Dragonfly Transitions are young adult programs",
         "After 2018 \"InnerChange\" was used as the name of a division of Embark (staff lines on the r/troubledteens wiki), and Sunrise RTC's company is still registered as Solacium Sunrise, LLC (NPI registry: https://npiindex.com/npi/1023865656)"
       ]
     },
@@ -1012,6 +1015,9 @@
         "unique_name": "Dragonfly Transitions",
         "relationship": "past"
       }
+    ],
+    "drop_notes": [
+      "October 31, 2018: Embark Behavioral Health was announced as the umbrella name for Calo Programs, InnerChange Programs, New Vision Wilderness Programs and Potomac Pathways. InnerChange's programs then: Optimum Performance Institute (OPI), Chrysalis, New Haven, Sunrise, Vive and Dragonfly Transitions; Lake House and Fulshear were listed under Calo (https://strugglingteens.com/artman/publish/EmbarkBH_BN10312018.shtml). Cressey & Company left in August 2018 (Preqin). OPI and Dragonfly Transitions are young adult programs; when OPI, Vive and Dragonfly joined InnerChange is not on record"
     ]
   },
   {
