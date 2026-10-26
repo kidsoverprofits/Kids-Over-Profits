@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 00:43 UTC",
- "source": "227bc5efb280465457b925672adff57aff322f99",
+ "built": "2026-10-26 00:45 UTC",
+ "source": "d0684e3c4b9cc6ae110befb139def223dba49723",
  "sections": [
   {
    "key": "2",
@@ -770,6 +770,14 @@
        "ask": "",
        "date": "",
        "hash": "263e91ed9e37"
+      },
+      {
+       "id": "4.2:slow-state-report-pages",
+       "lead": "Slow state report pages",
+       "text": "**Slow state report pages** (2026-10-25): \"All\" is gone above 150 facilities (`ALL_LETTER_MAX_FACILITIES` in `js/inspections/report-page.js`; TX in `tx_reports.js`). /ca-reports/ never had it and is still slow because it fetches all ~30,900 reports before drawing; the fix is to load one letter at a time (`?lite=1` / per-letter fetch), best done with item 1.",
+       "ask": "",
+       "date": "2026-10-25",
+       "hash": "5b47d58073a8"
       }
      ]
     },
