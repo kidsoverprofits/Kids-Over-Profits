@@ -105,8 +105,8 @@ The form captures:
 
 ### Admin Notifications
 - each new row calls `kop_notify_admins()` in `inc/submission-notify.php`
-- a person's submission (type `news`) is mailed at once; rows from the discovery run (type `news_auto`, recognized by `auto-discovery` in `submitted_by` or the notes) are queued for a daily digest
-- recipients come from the `kop_submission_notify_emails` option, falling back to the site admin email; `KOP_SUBMISSION_DIGEST_TYPES` changes which types are digested
+- only a person's submission is mailed at once (`kop_submission_from_person()`: a visitor, volunteer, the app, /send/, a signed-in non-admin). Everything else is queued for the one 7am digest: discovery rows (type `news_auto`, recognized by `auto-discovery` in `submitted_by` or the notes), the scans' `status_update` / `closure_report` / `new_facility`, research-key sends (`$GLOBALS['kop_notify_sender'] = 'system'` in `inc/mobile-submit.php`), an admin's own sends, bot-named senders, cron and CLI runs. The digest lists ten titles per type and counts the rest
+- recipients come from the `kop_submission_notify_emails` option, falling back to the site admin email; `KOP_SUBMISSION_DIGEST_TYPES` changes which types are always digested
 
 ### The Real Link and the Archived Copy
 - Every article keeps two links: `article_url`, the article itself, and `archive_url`, an archived copy (Wayback Machine, archive.today, Ghostarchive, perma.cc and the other hosts listed in `kop_news_is_archive_url()`). The form has an optional "Archived copy" box under the URL.

@@ -58,6 +58,9 @@ function wp_schedule_event($timestamp, $recurrence, $hook) {
     $GLOBALS['kop_test_cron']['scheduled'][$hook] = array('at' => $timestamp, 'every' => $recurrence);
     return true;
 }
+function current_user_can($cap) {
+    return !empty($GLOBALS['kop_test_is_admin']);
+}
 function wp_mail($to, $subject, $body) {
     $GLOBALS['kop_test_mail'][] = array('to' => (array) $to, 'subject' => $subject, 'body' => $body);
     return true;
@@ -98,6 +101,9 @@ function last_mail() {
 function reset_mail() {
     $GLOBALS['kop_test_mail'] = array();
 }
+
+// The test runs on the CLI, which counts as unattended: say a person sent these.
+$GLOBALS['kop_notify_sender'] = 'person';
 
 // --- A plain submission sends one mail --------------------------------------
 
@@ -193,6 +199,39 @@ check('digest: queue cleared', get_option('kop_submission_notify_queue', array()
 reset_mail();
 check('digest: empty queue sends nothing', kop_submission_send_digest() === false);
 check('digest: really nothing sent', count($GLOBALS['kop_test_mail']) === 0);
+
+// --- Only a person's submission is mailed at once ---------------------------
+
+reset_mail();
+foreach (array('status_update', 'closure_report', 'new_facility') as $scan_type) {
+    kop_notify_admins($scan_type, '2 things to review');
+}
+check('scans: digested even when a person is set', count($GLOBALS['kop_test_mail']) === 0);
+
+$GLOBALS['kop_notify_sender'] = 'system';
+kop_notify_admins('website', 'Research send');
+check('research key (system): digested', count($GLOBALS['kop_test_mail']) === 0);
+
+unset($GLOBALS['kop_notify_sender']);
+$GLOBALS['kop_test_is_admin'] = true;
+kop_notify_admins('news', 'Owner sent this', '', array('Submitted by' => 'Dani (browser extension)'));
+check('admin own send: digested', count($GLOBALS['kop_test_mail']) === 0);
+$GLOBALS['kop_test_is_admin'] = false;
+check('bot-named sender: not a person',
+    kop_submission_from_person('website', array('Submitted by' => 'Claude research agent (web)')) === false);
+kop_notify_admins('lawsuit', 'CLI import');
+check('cli run: digested', count($GLOBALS['kop_test_mail']) === 0);
+check('six held for the digest', count(get_option('kop_submission_notify_queue', array())) === 6);
+
+for ($i = 1; $i <= 14; $i++) {
+    kop_notify_admins('closure_report', 'Closure ' . $i);
+}
+kop_submission_send_digest();
+$mail = last_mail();
+check('digest: lists only the first ten of a type',
+    $mail && strpos($mail['body'], 'Closure 9') !== false && strpos($mail['body'], 'Closure 10') === false, $mail ? $mail['body'] : '');
+check('digest: counts the rest', $mail && strpos($mail['body'], '... and 5 more') !== false, $mail ? $mail['body'] : '');
+$GLOBALS['kop_notify_sender'] = 'person';
 
 // --- A type whose review page does not exist falls back to the tools menu ---
 

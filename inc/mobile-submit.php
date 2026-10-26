@@ -222,6 +222,10 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
         return new WP_REST_Response(array('ok' => true, 'type' => 'website', 'queue' => 'review'), 201);
     }
     $research = kop_msub_is_research($req);
+    // Research sends go into the daily digest, not one mail each (inc/submission-notify.php).
+    if ($research) {
+        $GLOBALS['kop_notify_sender'] = 'system';
+    }
     if (!$research && kop_msub_rate_limited()) {
         return new WP_Error('kop_rate_limited', 'That is a lot of sending for one hour. Please try again later.', array('status' => 429));
     }

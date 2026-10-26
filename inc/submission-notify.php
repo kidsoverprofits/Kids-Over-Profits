@@ -26,8 +26,11 @@
  * truncated, so a form can never relay markup or a wall of text through the
  * notification.
  *
- * High-volume types are queued instead of sent one by one: see
- * KOP_SUBMISSION_DIGEST_TYPES below.
+ * Only a person's submission is mailed at once (a visitor, a volunteer, the
+ * app, the /send/ page, a signed-in non-admin). Everything else goes into the
+ * one daily digest: the scans' and discovery's types (KOP_SUBMISSION_DIGEST_TYPES
+ * below), anything an admin sends in themselves, Claude research sends (the
+ * research key), cron and CLI runs. See kop_submission_from_person().
  */
 
 if (!defined('ABSPATH')) {
@@ -46,8 +49,13 @@ if (!defined('ABSPATH')) {
  * straight away; the two are separate types for exactly this reason.
  */
 if (!defined('KOP_SUBMISSION_DIGEST_TYPES')) {
-    define('KOP_SUBMISSION_DIGEST_TYPES', 'news_auto');
+    // The hourly closure / facility scans and the nightly status check are
+    // never a person either, and each one used to send its own mail.
+    define('KOP_SUBMISSION_DIGEST_TYPES', 'news_auto,status_update,closure_report,new_facility');
 }
+
+/** Titles listed per type in the digest; the rest are counted. */
+const KOP_SUBMISSION_DIGEST_LIST_MAX = 10;
 
 const KOP_SUBMISSION_NOTIFY_RECIPIENTS_OPTION = 'kop_submission_notify_emails';
 const KOP_SUBMISSION_NOTIFY_QUEUE_OPTION      = 'kop_submission_notify_queue';
@@ -221,6 +229,35 @@ function kop_submission_type_is_digested($type) {
 }
 
 /**
+ * True when a person sent this in and it is worth a mail of its own.
+ *
+ * A caller that knows sets $GLOBALS['kop_notify_sender'] to 'person' or
+ * 'system' (inc/mobile-submit.php sets 'system' for the research key).
+ * Otherwise: an admin's own sends, cron, CLI scripts and bot-named senders
+ * ("auto-discovery", "Claude research agent") are not a person.
+ */
+function kop_submission_from_person($type, $fields = array()) {
+    if (kop_submission_type_is_digested($type)) {
+        return false;
+    }
+    $sender = isset($GLOBALS['kop_notify_sender']) ? (string) $GLOBALS['kop_notify_sender'] : '';
+    if ($sender !== '') {
+        return $sender === 'person';
+    }
+    if (function_exists('current_user_can') && current_user_can('manage_options')) {
+        return false;
+    }
+    $by = isset($fields['Submitted by']) ? (string) $fields['Submitted by'] : '';
+    if ($by !== '' && preg_match('/auto-discovery|research agent|\bclaude\b|\bbot\b/i', $by)) {
+        return false;
+    }
+    if (PHP_SAPI === 'cli' || (function_exists('wp_doing_cron') && wp_doing_cron())) {
+        return false;
+    }
+    return true;
+}
+
+/**
  * Tell the admins about a new public submission.
  *
  * Never throws and never blocks the caller: a failed send is reported as
@@ -261,7 +298,7 @@ function kop_notify_admins($type, $title, $admin_url = '', $fields = array()) {
         $admin_url = kop_submission_review_url($type);
     }
 
-    if (kop_submission_type_is_digested($type)) {
+    if (!kop_submission_from_person($type, $clean_fields)) {
         return kop_submission_queue_for_digest($type, $title, $clean_fields);
     }
 
@@ -305,8 +342,8 @@ function kop_submission_queue_for_digest($type, $title, $fields) {
         'fields' => $fields,
         'time'   => time(),
     );
-    if (count($queue) > 500) {
-        $queue = array_slice($queue, -500);
+    if (count($queue) > 2000) {
+        $queue = array_slice($queue, -2000);
     }
     update_option(KOP_SUBMISSION_NOTIFY_QUEUE_OPTION, $queue, false);
     return true;
@@ -336,21 +373,25 @@ function kop_submission_send_digest() {
     $site = kop_submission_site_name();
     $total = count($queue);
     $subject = '[' . $site . '] ' . $total . ' new submission' . ($total === 1 ? '' : 's') . ' today';
-    $body = 'Submissions logged on ' . $site . " since the last digest.\n";
+    $body = 'Submissions logged on ' . $site . " since the last digest that no person sent in"
+        . " (scans, discovery, research sends, your own). Submissions from people are mailed as they come.\n";
 
     foreach ($by_type as $type => $items) {
         $label = isset($types[$type]) ? $types[$type]['label'] : $type;
         $body .= "\n" . strtoupper($label) . ' (' . count($items) . ")\n";
-        foreach ($items as $item) {
+        foreach (array_slice($items, 0, KOP_SUBMISSION_DIGEST_LIST_MAX) as $item) {
             $body .= '  - ' . $item['title'];
             if (!empty($item['fields'])) {
                 $bits = array();
                 foreach ($item['fields'] as $flabel => $value) {
                     $bits[] = $flabel . ': ' . $value;
                 }
-                $body .= ' (' . implode('; ', $bits) . ')';
+                $body .= ' (' . kop_submission_flatten_value(implode('; ', $bits)) . ')';
             }
             $body .= "\n";
+        }
+        if (count($items) > KOP_SUBMISSION_DIGEST_LIST_MAX) {
+            $body .= '  ... and ' . (count($items) - KOP_SUBMISSION_DIGEST_LIST_MAX) . " more\n";
         }
         $url = kop_submission_review_url($type);
         if ($url !== '') {
