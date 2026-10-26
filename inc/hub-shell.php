@@ -218,7 +218,7 @@ function kop_hub_config($slug) {
 
         'volunteer' => array(
             // The page is templates/page-volunteer.php (2026-10-23); these are its opening line and the buttons under the title.
-            'standfirst' => 'Help us document the troubled teen industry. Pick one way to help: most take a few minutes, and you can start today.',
+            'standfirst' => 'Much of what we know about the troubled teen industry came from survivors, families and volunteers. Here is how to add to it, from one answer to a few hours a week.',
             'actions'    => array(
                 array('label' => 'Start reviewing now', 'url' => '#kop-vol-signup'),
                 array('label' => 'Answer our questions', 'url' => function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/')),

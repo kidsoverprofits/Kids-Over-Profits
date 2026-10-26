@@ -139,9 +139,9 @@ function kop_vols_module() {
     }
     ?>
     <section class="kop-hub-module kop-vols" id="kop-vol-signup" aria-labelledby="kop-vols-h">
-        <h2 class="kop-hub-h" id="kop-vols-h">Get your link to review or research</h2>
-        <p class="kop-vols-lead">No interview and no waiting. Give a name and you get your own link: your page opens straight away,
-            with a short practice round for reviewing and the research questions to pick from. An admin checks everything you send.</p>
+        <h3 class="kop-hub-h" id="kop-vols-h">Get your link</h3>
+        <p class="kop-vols-lead">No account, no interview and no waiting. Give a name and your page opens straight away. We check
+            everything you send before it goes on the site.</p>
         <p class="kop-vols-warning" role="note"><strong>A warning first:</strong> the reports and questions describe what was done to
             children, including physical and sexual abuse, restraint, injuries and deaths. You can skip anything, hand work back or stop
             at any time.</p>

@@ -12,7 +12,7 @@
     max-width: 44rem;
 }
 
-.kop-vols h2.kop-hub-h {
+.kop-vols .kop-hub-h {
     color: var(--kop-midnight-blue, #000435);
 }
 

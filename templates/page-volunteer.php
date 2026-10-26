@@ -2,11 +2,11 @@
 /**
  * Template Name: Volunteer
  * Description: /volunteer/ (2026-10-23, replacing the hub page's editor copy).
- * Four ways to help as cards (2026-10-25, owner: the page was cluttered and long): review state inspection
- * findings and research a question (both through the one sign-up form under the cards, inc/volunteer-signup.php;
- * research questions are inc/research-tasks.php, picked on the volunteer's page), answer from experience
- * (/questions/, inc/questions.php, no sign-up), send what you have (the submission tools, folded). The skills we
- * need sit at the foot, then the call for sensitivity readers with its survey (2026-10-25, inc/sensitivity-survey.php). Each card's words are a block admins edit in place (kop_ie_html_start(),
+ * Four sections (regrouped 2026-10-26, owner: the copy felt off and oddly organized): review state inspection
+ * findings and research a question, with the one sign-up form right under them (inc/volunteer-signup.php; research
+ * questions are inc/research-tasks.php, picked on the volunteer's page); answer from experience (/questions/,
+ * inc/questions.php) and send what you have (the submission tools, folded), neither needing a sign-up; sensitivity
+ * readers with their survey (inc/sensitivity-survey.php); the skills we need. Each card's words are a block admins edit in place (kop_ie_html_start(),
  * inc/inline-edit.php). The opening line is kop_hub_config('volunteer') (inc/hub-shell.php).
  */
 
@@ -58,81 +58,70 @@ while (have_posts()) :
             <?php endif; ?>
         </header>
 
-        <?php // Four ways to help, one card each: what it is in a sentence, how long, one button. Details fold. ?>
-        <div class="kop-volpage-ways">
-            <section class="kop-volpage-way" aria-labelledby="kop-volpage-review-h">
-                <?php kop_ie_html_start('volunteer:review', 'Volunteer page: review inspection findings'); ?>
-                <h2 class="kop-volpage-way-h" id="kop-volpage-review-h">Review inspection findings</h2>
-                <p>Our scanner pulls passages out of state inspection reports. You decide: harm or danger to a young person, or paperwork?</p>
-                <p class="kop-volpage-meta">Needs your own link (no account). A 10-minute practice round first.</p>
-                <?php kop_ie_html_end(); ?>
-                <p class="kop-volpage-go"><a class="kop-volpage-btn" href="#kop-vol-signup">Get a link and start</a></p>
-            </section>
+        <?php // Reviewing and research happen on the volunteer's own page, so the sign-up sits right under them. ?>
+        <section class="kop-volpage-section" id="kop-volpage-own" aria-labelledby="kop-volpage-own-h">
+            <h2 class="kop-hub-h" id="kop-volpage-own-h">Review or research from your own page</h2>
+            <div class="kop-volpage-ways">
+                <div class="kop-volpage-way">
+                    <?php kop_ie_html_start('volunteer:review', 'Volunteer page: review inspection findings'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-review-h">Review inspection findings</h3>
+                    <p>Our scanner flags passages in state inspection reports. You read each one and decide: was a young person harmed or put in danger, or is it a paperwork violation?</p>
+                    <p class="kop-volpage-meta">A 10-minute practice round comes first.</p>
+                    <?php kop_ie_html_end(); ?>
+                </div>
 
-            <section class="kop-volpage-way" aria-labelledby="kop-volpage-research-h">
-                <?php kop_ie_html_start('volunteer:research', 'Volunteer page: research a question'); ?>
-                <h2 class="kop-volpage-way-h" id="kop-volpage-research-h">Research a question</h2>
-                <p>Pick a question our records cannot answer yet, such as when a program closed or who ran it, and look it up. Each one says where to start.</p>
-                <p class="kop-volpage-meta">Needs your own link (no account). Every fact you send needs the link to where you found it.</p>
-                <?php kop_ie_html_end(); ?>
-                <p class="kop-volpage-go"><a class="kop-volpage-btn" href="#kop-vol-signup">Get a link and pick one</a><?php
-                    if ($kop_vp_open > 0) echo ' <span class="kop-volpage-count">' . esc_html(number_format_i18n($kop_vp_open)) . ' open</span>'; ?></p>
-            </section>
+                <div class="kop-volpage-way">
+                    <?php kop_ie_html_start('volunteer:research', 'Volunteer page: research a question'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-research-h">Research a question</h3>
+                    <p>Our records cannot yet say when some programs closed or who ran them. Pick a question and look it up: each one says where to start.</p>
+                    <p class="kop-volpage-meta">Send the link to wherever you found each fact.</p>
+                    <?php kop_ie_html_end(); ?>
+                    <?php if ($kop_vp_open > 0) : ?>
+                        <p class="kop-volpage-go"><span class="kop-volpage-count"><?php echo esc_html(number_format_i18n($kop_vp_open)); ?> questions open</span></p>
+                    <?php endif; ?>
+                </div>
+            </div>
 
-            <section class="kop-volpage-way" id="kop-volpage-questions" aria-labelledby="kop-volpage-questions-h">
-                <?php kop_ie_html_start('volunteer:questions', 'Volunteer page: answer our questions'); ?>
-                <h2 class="kop-volpage-way-h" id="kop-volpage-questions-h">Answer from experience</h2>
-                <p>Were you in a program, did you work at one or send a child to one? Answer short questions about it, one at a time.</p>
-                <p class="kop-volpage-meta">No link needed. Stop after one answer if you like.</p>
-                <?php kop_ie_html_end(); ?>
-                <p class="kop-volpage-go"><a class="kop-volpage-btn" href="<?php echo esc_url($kop_vp_questions); ?>">Answer our questions</a></p>
-            </section>
+            <?php
+            // The one sign-up for reviewing and research: the form, its content warning and the link it makes.
+            if (function_exists('kop_vols_module')) {
+                kop_vols_module();
+            }
+            ?>
+        </section>
 
-            <section class="kop-volpage-way" id="kop-volpage-send" aria-labelledby="kop-volpage-send-h">
-                <?php kop_ie_html_start('volunteer:send', 'Volunteer page: send us what you have'); ?>
-                <h2 class="kop-volpage-way-h" id="kop-volpage-send-h">Send us what you have</h2>
-                <p>Records, letters, photos, news stories, court cases or corrections. Much of our archive came from survivors and families.</p>
-                <p class="kop-volpage-meta">No link needed. Uploads can be anonymous.</p>
-                <details class="kop-volpage-more">
-                    <summary>Choose what to send</summary>
-                    <ul class="kop-volpage-list">
-                        <li><a href="<?php echo esc_url($kop_vp_links['upload']); ?>">Upload documents anonymously</a>: encrypted as soon as they reach our server.</li>
-                        <li><a href="<?php echo esc_url($kop_vp_links['data']); ?>">Tell us about a program</a>: add or correct what we hold.</li>
-                        <li><a href="<?php echo esc_url($kop_vp_links['news']); ?>">Send a news story</a></li>
-                        <li><a href="<?php echo esc_url($kop_vp_links['lawsuit']); ?>">Send a lawsuit</a></li>
-                        <li><a href="<?php echo esc_url($kop_vp_links['legislation']); ?>">Send a bill or law</a></li>
-                        <li><a href="<?php echo esc_url($kop_vp_links['wiki']); ?>">Write for the r/troubledteens wiki</a></li>
-                    </ul>
-                    <p>Each tool has a tutorial: the &ldquo;?&rdquo; button in the lower left corner. A mistake on the site? The flag button beside it tells us.</p>
-                </details>
-                <?php kop_ie_html_end(); ?>
-            </section>
-        </div>
+        <?php // Two ways that need no sign-up. ?>
+        <section class="kop-volpage-section" id="kop-volpage-share" aria-labelledby="kop-volpage-share-h">
+            <h2 class="kop-hub-h" id="kop-volpage-share-h">Tell us what you know</h2>
+            <div class="kop-volpage-ways">
+                <div class="kop-volpage-way" id="kop-volpage-questions">
+                    <?php kop_ie_html_start('volunteer:questions', 'Volunteer page: answer our questions'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-questions-h">Answer from experience</h3>
+                    <p>If you were in a program, worked at one or sent a child to one, you know things no record holds. Our questions come one at a time, and one answer is enough.</p>
+                    <?php kop_ie_html_end(); ?>
+                    <p class="kop-volpage-go"><a class="kop-volpage-btn" href="<?php echo esc_url($kop_vp_questions); ?>">Answer our questions</a></p>
+                </div>
 
-        <?php
-        // The one sign-up for reviewing and research: the form, its content warning and the link it makes.
-        if (function_exists('kop_vols_module')) {
-            kop_vols_module();
-        }
-        ?>
-
-        <section class="kop-volpage-section" id="kop-volpage-skills" aria-labelledby="kop-volpage-skills-h">
-            <?php kop_ie_html_start('volunteer:skills', 'Volunteer page: skills we need'); ?>
-            <h2 class="kop-volpage-way-h" id="kop-volpage-skills-h">Have a skill to give?</h2>
-                <p>Kids Over Profits is a nonprofit documenting the troubled teen industry. If you have one of these skills, write to
-                    us at <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>, even if you only have a few hours.</p>
-                <ul class="kop-volpage-list">
-                    <li><strong>Legal advice:</strong> legal questions, case law research and compliance in our advocacy.</li>
-                    <li><strong>Web design:</strong> improving how the site looks and works.</li>
-                    <li><strong>Graphic design:</strong> visuals for our campaigns.</li>
-                    <li><strong>Fundraising:</strong> finding funding and planning campaigns.</li>
-                    <li><strong>Research:</strong> programs, licensing and incidents.</li>
-                    <li><strong>Transcription:</strong> interviews, survivor stories and legal documents.</li>
-                    <li><strong>Social media:</strong> making posts and running our accounts.</li>
-                    <li><strong>Data organization:</strong> keeping our records in order.</li>
-                    <li><strong>Translation:</strong> our materials for survivors who speak little or no English.</li>
-                </ul>
-            <?php kop_ie_html_end(); ?>
+                <div class="kop-volpage-way" id="kop-volpage-send">
+                    <?php kop_ie_html_start('volunteer:send', 'Volunteer page: send us what you have'); ?>
+                    <h3 class="kop-volpage-way-h" id="kop-volpage-send-h">Send us what you have</h3>
+                    <p>Records, letters, photos, news stories, court cases or corrections. Much of our archive came from survivors and families this way.</p>
+                    <p class="kop-volpage-meta">Uploads can be anonymous.</p>
+                    <details class="kop-volpage-more">
+                        <summary>Choose what to send</summary>
+                        <ul class="kop-volpage-list">
+                            <li><a href="<?php echo esc_url($kop_vp_links['upload']); ?>">Upload documents anonymously</a>: encrypted as soon as they reach our server.</li>
+                            <li><a href="<?php echo esc_url($kop_vp_links['data']); ?>">Tell us about a program</a>: add or correct what we hold.</li>
+                            <li><a href="<?php echo esc_url($kop_vp_links['news']); ?>">Send a news story</a></li>
+                            <li><a href="<?php echo esc_url($kop_vp_links['lawsuit']); ?>">Send a lawsuit</a></li>
+                            <li><a href="<?php echo esc_url($kop_vp_links['legislation']); ?>">Send a bill or law</a></li>
+                            <li><a href="<?php echo esc_url($kop_vp_links['wiki']); ?>">Write for the r/troubledteens wiki</a></li>
+                        </ul>
+                        <p>Each tool has a tutorial behind the &ldquo;?&rdquo; button in the lower left corner. The flag button beside it reports a mistake on the site.</p>
+                    </details>
+                    <?php kop_ie_html_end(); ?>
+                </div>
+            </div>
         </section>
 
         <?php
@@ -145,11 +134,11 @@ while (have_posts()) :
         }
         ?>
         <section class="kop-volpage-section" id="kop-volpage-sensitivity" aria-labelledby="kop-volpage-sensitivity-h">
-            <h2 class="kop-volpage-way-h" id="kop-volpage-sensitivity-h">Be a sensitivity reader</h2>
+            <h2 class="kop-hub-h" id="kop-volpage-sensitivity-h">Read for your community</h2>
             <?php kop_ie_html_start('volunteer:sensitivity-intro', 'Volunteer page: sensitivity readers'); ?>
-                <p>Much of what we report happened to young people from communities the industry, and the systems that feed it,
-                    treat worst. If you belong to one of them, tell us where our reporting falls short: what we have missed, what we
-                    get wrong, and what we would need to know to write about it well. We are looking for:</p>
+                <p>The industry, and the systems that feed it, treat some young people worse than others. If you belong to one
+                    of these communities, tell us where our reporting falls short: what we have missed, what we get wrong, and what
+                    we need to know to write about it well.</p>
             <?php kop_ie_html_end(); ?>
             <ul class="kop-volpage-list">
                 <?php foreach ($kop_vp_groups as $kop_vp_label) : ?>
@@ -157,8 +146,8 @@ while (have_posts()) :
                 <?php endforeach; ?>
             </ul>
             <?php kop_ie_html_start('volunteer:sensitivity-how', 'Volunteer page: sensitivity readers, how it works'); ?>
-                <p>Start with the survey below. Later we will ask readers who want to keep going to read articles before they are
-                    published. Only the Kids Over Profits team reads your answers, and we name readers only if they ask to be named.</p>
+                <p>Start with the survey. Readers who want to keep going can later read our articles before they are published.
+                    Only our team reads your answers, and we name a reader only if they ask us to.</p>
             <?php kop_ie_html_end(); ?>
 
             <details class="kop-volpage-more kop-sens" id="kop-sens-survey">
@@ -221,6 +210,25 @@ while (have_posts()) :
                     <p>We read every one. If you asked to read drafts, we will write when there is something to read.</p>
                 </div>
             </details>
+        </section>
+
+        <section class="kop-volpage-section" id="kop-volpage-skills" aria-labelledby="kop-volpage-skills-h">
+            <?php kop_ie_html_start('volunteer:skills', 'Volunteer page: skills we need'); ?>
+            <h2 class="kop-hub-h" id="kop-volpage-skills-h">Give a skill</h2>
+                <p>If you can give a few hours of any of these, write to us at
+                    <a href="mailto:action@kidsoverprofits.org">action@kidsoverprofits.org</a>.</p>
+                <ul class="kop-volpage-list">
+                    <li><strong>Legal:</strong> answering legal questions, researching case law, keeping our advocacy within the law.</li>
+                    <li><strong>Web design:</strong> how the site looks and works.</li>
+                    <li><strong>Graphic design:</strong> visuals for our campaigns.</li>
+                    <li><strong>Fundraising:</strong> finding funders and planning campaigns.</li>
+                    <li><strong>In-depth research:</strong> programs, owners, licensing and incidents, beyond single questions.</li>
+                    <li><strong>Transcription:</strong> interviews, survivor stories and legal documents.</li>
+                    <li><strong>Social media:</strong> writing posts and running our accounts.</li>
+                    <li><strong>Data organization:</strong> keeping our records in order.</li>
+                    <li><strong>Translation:</strong> our materials, for survivors who speak little or no English.</li>
+                </ul>
+            <?php kop_ie_html_end(); ?>
         </section>
 
         <footer class="kop-hub-footer">

@@ -1,4 +1,4 @@
-/* /volunteer/ (templates/page-volunteer.php): the sections under the sign-up form. */
+/* /volunteer/ (templates/page-volunteer.php): four sections, each a teal rule and an h2; cards inside have h3s. */
 
 .kop-volpage-section {
     margin: 2rem 0 0;
@@ -74,8 +74,8 @@
     padding-top: 0.4rem;
 }
 
-/* Kadence colours h1-h6 directly: the headings set their own. */
-.kop-volpage h2.kop-volpage-way-h {
+/* Kadence colours h1-h6 directly: the card headings set their own (class + class outranks its element rules). */
+.kop-volpage .kop-volpage-way-h {
     margin: 0 0 0.5rem;
     font-size: 1.2rem;
     line-height: 1.3;
@@ -147,7 +147,7 @@
     outline-offset: 2px;
 }
 
-.kop-volpage-more > summary h2.kop-volpage-way-h {
+.kop-volpage-more > summary .kop-volpage-way-h {
     display: inline;
     margin: 0;
 }
@@ -167,7 +167,7 @@
     margin-top: 0.4rem;
 }
 
-/* The sign-up form under the cards. */
+/* The sign-up form under the review and research cards. */
 .kop-volpage .kop-vols {
     margin-top: 1.25rem;
 }
