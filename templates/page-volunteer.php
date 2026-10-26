@@ -93,7 +93,7 @@ while (have_posts()) :
                 <div class="kop-volpage-way">
                     <?php kop_ie_html_start('volunteer:photos', 'Volunteer page: photos for our pages'); ?>
                     <h3 class="kop-volpage-way-h" id="kop-volpage-photos-h">Find photos for our pages</h3>
-                    <p>Some of our pages have no pictures. Find openly licensed ones, from Wikimedia Commons, the Library of Congress and others, and send the link, who made it and the license.</p>
+                    <p>Many of our pages are a wall of text. A picture makes a page easier to take in and more likely to be shared. Find pictures we are free to use, on sites like Wikimedia Commons and the Library of Congress, and send us the link, who made each one and its license so we can credit it.</p>
                     <p class="kop-volpage-meta">Five pages at a time. Nothing goes on a page until we approve it.</p>
                     <?php kop_ie_html_end(); ?>
                 </div>

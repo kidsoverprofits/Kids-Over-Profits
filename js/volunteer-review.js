@@ -920,8 +920,9 @@
         { kind: 'social', title: 'Social media posts', blurb: 'Turn our work into posts: news stories, inspection findings, a facility worth a closer look, a fact that should be better known. '
             + 'Each post is a picture and a short caption. '
             + 'Nothing is posted until an admin approves it.', ask: 'I would like to make social media posts. Could you set me up with post ideas?' },
-        { kind: 'image', title: 'Photos for our pages', blurb: 'Find openly licensed pictures (Wikimedia Commons, the Library of Congress and others) for pages that have none, '
-            + 'and send the link, who made it and the license. Five pages at a time. Nothing goes on a page until an admin approves it.' }
+        { kind: 'image', title: 'Photos for our pages', blurb: 'Many of our pages are a wall of text. A picture makes a page easier to take in and more likely to be shared. '
+            + 'Find pictures we are free to use, on sites like Wikimedia Commons and the Library of Congress, and send us the link, '
+            + 'who made each one and its license so we can credit it. Five pages at a time. Nothing goes on a page until an admin approves it.' }
     ];
 
     function otherWorkCards() {
