@@ -71,6 +71,11 @@
     var KOP = global.KOP = global.KOP || {};
 
     var NEW_REPORT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+    // A state with more facilities than this has no "All" letter: drawing
+    // every facility at once made the big states (PA, NC, OR, GA, FL, VA, UT)
+    // slow to open. The page opens on the first letter instead; search still
+    // reaches every facility.
+    var ALL_LETTER_MAX_FACILITIES = 150;
     var ARCHIVE_BASE = '/wp-content/uploads/inspection-reports/';
 
     /**
@@ -290,6 +295,7 @@
         var lazyFacilities    = [];
         var filterValues      = {};
         var currentLetter     = null;
+        var offerAll          = true;
         var isSearching       = false;
         var scrapedTimestamp  = '';
 
@@ -410,11 +416,12 @@
                     renderLastUpdated();
 
                     allFacilitiesData = groupFacilities(facilities);
+                    offerAll = facilities.length <= ALL_LETTER_MAX_FACILITIES;
                     renderAlphabetFilter();
                     // A term typed (or pre-filled from ?search=) while the data
                     // was loading applies now, however long the load took.
                     if (searchInput && searchInput.value.trim()) filterAndSort();
-                    else renderFacilitiesForLetter('ALL');
+                    else renderFacilitiesForLetter(defaultLetter());
                 })
                 .catch(function (error) {
                     console.error('Failed to load ' + adapter.state + ' report data:', error);
@@ -438,13 +445,20 @@
         function renderAlphabetFilter() {
             if (!alphabetFilter) return;
             var letters = Object.keys(allFacilitiesData).sort();
-            alphabetFilter.innerHTML = ['<a href="#" data-letter="ALL">All</a>']
+            alphabetFilter.innerHTML = (offerAll ? ['<a href="#" data-letter="ALL">All</a>'] : [])
                 .concat(letters.map(function (l) { return '<a href="#" data-letter="' + l + '">' + l + '</a>'; }))
                 .join('');
             alphabetFilter.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (e.target.tagName === 'A') renderFacilitiesForLetter(e.target.dataset.letter);
             });
+        }
+
+        function defaultLetter() {
+            if (offerAll) return 'ALL';
+            // '#' (names starting with a number) sorts first; open on A-Z.
+            var letters = Object.keys(allFacilitiesData).sort();
+            return letters.filter(function (l) { return l !== '#'; })[0] || letters[0] || 'ALL';
         }
 
         function getFacilitiesForSelection(letter) {
@@ -490,7 +504,7 @@
             } else {
                 isSearching = false;
                 if (clearButton) clearButton.style.display = 'none';
-                renderFacilitiesForLetter(currentLetter || 'ALL');
+                renderFacilitiesForLetter(currentLetter || defaultLetter());
             }
         }
 

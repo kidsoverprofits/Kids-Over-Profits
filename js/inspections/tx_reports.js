@@ -119,10 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Group facilities by first letter
             allFacilitiesData = groupFacilitiesByLetter(facilitiesArray);
 
-            // Render alphabet filter and show first letter
+            // Render alphabet filter and show first letter. Texas has no "All":
+            // drawing its 300+ facilities at once made the page slow to open.
             renderAlphabetFilter();
             if (Object.keys(allFacilitiesData).length) {
-                renderFacilitiesForLetter('ALL');
+                renderFacilitiesForLetter(firstLetter());
             }
 
         } catch (error) {
@@ -259,10 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!alphabetFilter) return;
         
         const letters = Object.keys(allFacilitiesData).sort();
-        alphabetFilter.innerHTML = [
-            `<a href="#" data-letter="ALL">All</a>`,
-            ...letters.map(letter => `<a href="#" data-letter="${letter}">${letter}</a>`)
-        ].join('');
+        alphabetFilter.innerHTML = letters.map(letter => `<a href="#" data-letter="${letter}">${letter}</a>`).join('');
         
         alphabetFilter.addEventListener('click', (e) => {
             e.preventDefault();
@@ -289,11 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFilteredFacilities(sortedFacilities, letter);
     }
 
+    function firstLetter() {
+        // '#' (names starting with a number) sorts first; open on A-Z.
+        const letters = Object.keys(allFacilitiesData).sort();
+        return letters.find(l => l !== '#') || letters[0];
+    }
+
     function getFacilitiesForSelection(letter) {
-        if (letter === 'ALL') {
-            return Object.keys(allFacilitiesData).sort()
-                .reduce((all, l) => all.concat(allFacilitiesData[l] || []), []);
-        }
         return allFacilitiesData[letter] || [];
     }
 
@@ -331,10 +331,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (clearButton) clearButton.style.display = 'none';
             
             // Return to letter view
-            if (currentLetter && (currentLetter === 'ALL' || allFacilitiesData[currentLetter])) {
+            if (currentLetter && allFacilitiesData[currentLetter]) {
                 renderFacilitiesForLetter(currentLetter);
             } else {
-                renderFacilitiesForLetter('ALL');
+                renderFacilitiesForLetter(firstLetter());
             }
         }
     }
