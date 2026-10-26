@@ -905,6 +905,65 @@ function kop_ya_maybe_link_and_move() {
 add_action('admin_init', 'kop_ya_maybe_link_and_move', 22);
 
 /**
+ * Facility records found later to be young adult programs (the owner,
+ * 2026-10-26): [facility id => [name, state, ages from its own site]]. The
+ * record has no age range, so the ages go on the program after the move.
+ * A linked article becomes a link on the program (it stays published).
+ */
+function kop_ya_later_moves() {
+    return array(
+        // threestrandswilderness.com (Wayback 2020-11-27): "young adult men, ages 18-27".
+        100175 => array('Three Strands Wilderness', 'CO', '18-27'),
+    );
+}
+
+/** Version 1: move the records above, each only if it is still there under that name and state; log in kop_ya_later_log. */
+function kop_ya_maybe_later_moves() {
+    $version = '1';
+    if (get_option('kop_ya_later_done') === $version) {
+        return;
+    }
+    $pdo = kop_ya_pdo();
+    if (!$pdo || !function_exists('kop_wbf_ensure_table')) {
+        return;
+    }
+    update_option('kop_ya_later_done', $version);
+    global $wpdb;
+    $log = array();
+    try {
+        kop_ya_install($pdo);
+        kop_wbf_ensure_table();
+        require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
+        foreach (kop_ya_later_moves() as $fid => $move) {
+            list($want, $state, $ages) = $move;
+            try {
+                $stored = kop_facility_load($fid, array('pdo' => $pdo, 'prefix' => $wpdb->prefix));
+                $name = $stored ? kop_ya_clean_name(($stored['doc']['identification']['name'] ?? '') ?: $stored['unique_name']) : '';
+                $at = $stored ? strtoupper((string) ($stored['doc']['location']['state'] ?? '')) : '';
+                if (!$stored || kop_ya_key($name) !== kop_ya_key($want) || $at !== $state) {
+                    $log[] = "Facility record $fid was not there as $want ($state); left alone.";
+                    continue;
+                }
+                $yid = kop_ya_move_facility($pdo, $fid, 'migration', array('articles' => 'links'));
+                $pdo->prepare("UPDATE young_adult_programs SET ages = ? WHERE id = ? AND ages = ''")->execute(array($ages, $yid));
+                $log[] = "Moved facility record $fid ($name) to young adult program $yid.";
+            } catch (Throwable $e) {
+                $log[] = "Facility record $fid ($want) not moved: " . $e->getMessage();
+            }
+        }
+        if (function_exists('kop_facility_pages_flush_index')) {
+            kop_facility_pages_flush_index();
+        }
+        do_action('litespeed_purge_all');
+    } catch (Throwable $e) {
+        $log[] = 'Stopped: ' . $e->getMessage();
+        update_option('kop_ya_later_done', '');
+    }
+    update_option('kop_ya_later_log', array('time' => time(), 'lines' => $log), false);
+}
+add_action('admin_init', 'kop_ya_maybe_later_moves', 23);
+
+/**
  * Programs added offline (seeds/young-adult-programs.json), run with the
  * template assignments. Each is added once: a program already on file under
  * that name or one of its other names is left as it is. Returns the new ids.

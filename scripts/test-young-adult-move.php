@@ -3,7 +3,8 @@
  * Offline check of the first move of young adult programs out of the
  * facility data (kop_ya_maybe_migrate() in inc/young-adult-programs.php), and
  * of the second pass (kop_ya_maybe_link_and_move(): the moved programs'
- * folders, and the second copies of three of them moved in).
+ * folders, and the second copies of three of them moved in), and of the later
+ * moves (kop_ya_maybe_later_moves(): Three Strands Wilderness, 2026-10-26).
  *
  *   php scripts/test-young-adult-move.php [--db=tmp/prod.sqlite]
  *
@@ -194,6 +195,7 @@ if ($site_moved) {
     check(substr_count($html, 'class="kop-ya-program"') === 7, 'seven programs on the page');
     check(strpos($html, 'Woodbury Reports, July 2009, p. 7') !== false, 'with their Woodbury sources');
     kop_ya_test_second_pass($pdo);
+    kop_ya_test_later_moves($pdo);
     echo $failed ? "\n$failed failed\n" : "\nAll checks passed\n";
     exit($failed ? 1 : 0);
 }
@@ -245,6 +247,43 @@ function kop_ya_test_second_pass(PDO $pdo) {
     update_option('kop_ya_twins_log', null);
     kop_ya_maybe_link_and_move();
     check(get_option('kop_ya_twins_log') === null, 'the pass runs only once');
+}
+/** kop_ya_maybe_later_moves() on the copy: records found later to be young adult programs. */
+function kop_ya_test_later_moves(PDO $pdo) {
+    echo "Later moves (kop_ya_maybe_later_moves)\n";
+    $moves = kop_ya_later_moves();
+    $there = array();
+    foreach ($moves as $fid => $m) {
+        $there[$fid] = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2 WHERE id = ?', array($fid)) > 0;
+    }
+    if (!array_filter($there)) {
+        echo "  (the mirror has none of them: the pass ran on the site already)\n";
+        return;
+    }
+    $programs = rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs');
+    $total = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2');
+    kop_ya_maybe_later_moves();
+    $log = get_option('kop_ya_later_log');
+    echo '       ' . implode("\n       ", (array) ($log['lines'] ?? array())) . "\n";
+    check(get_option('kop_ya_later_done') === '1', 'marked done');
+    foreach ($moves as $fid => $m) {
+        if (!$there[$fid]) continue;
+        check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2 WHERE id = ?', array($fid)) === 0
+            && rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_facility_locations WHERE facility_id = ?', array($fid)) === 0
+            && rows($pdo, 'SELECT COUNT(*) FROM wpdl_kop_facility_identity WHERE facility_id = ?', array($fid)) === 0, "#$fid ($m[0]) is out of the facility tables");
+        $p = null;
+        foreach (kop_ya_all($pdo, 'approved') as $row) {
+            if ($row['name_key'] === kop_ya_key($m[0])) $p = $row;
+        }
+        check($p && $p['ages'] === $m[2] && $p['state'] === $m[1], "  it is a program, ages {$m[2]}, in {$m[1]}");
+        echo '       opened ' . ($p['opened'] ?? '') . ', closed ' . ($p['closed'] ?? '') . ', status ' . ($p['status'] ?? '') . "\n";
+        check($p && strpos(implode(' ', array_column(kop_ya_facts($p), 'label')) . ' ' . $p['notes'], 'Patrick Hawkins') !== false, '  and its staff');
+    }
+    check(rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs') === $programs + count(array_filter($there)), 'one new program each');
+    check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2') === $total - count(array_filter($there)), 'every other facility is untouched');
+    update_option('kop_ya_later_log', null);
+    kop_ya_maybe_later_moves();
+    check(get_option('kop_ya_later_log') === null, 'the pass runs only once');
 }
 $docs = array();
 foreach ($pdo->query("SELECT id, json_data FROM facilities_v2 WHERE id IN ($in)")->fetchAll(PDO::FETCH_ASSOC) as $r) {
@@ -341,6 +380,8 @@ kop_ya_render_public();
 $html = ob_get_clean();
 check(substr_count($html, 'class="kop-ya-program"') === 7, 'seven programs on the page');
 check(strpos($html, 'Woodbury Reports, July 2009, p. 7') !== false, 'with their Woodbury sources');
+
+kop_ya_test_later_moves($pdo);
 
 echo $failed ? "\n$failed failed\n" : "\nAll checks passed\n";
 exit($failed ? 1 : 0);
