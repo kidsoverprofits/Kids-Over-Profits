@@ -23,7 +23,9 @@ if (!function_exists('fetchArticleContent')) {
         $original = fetchUrlAsText($url);
         $originalText = $original['text'];
 
-        if (looksPaywalled($originalText, $original['httpCode'])) {
+        // A dead link (404, a host's 522) may still have its archived copy.
+        $dead = kopLooksDeadLink($originalText, $original['httpCode']);
+        if ($dead || looksPaywalled($originalText, $original['httpCode'])) {
             error_log(sprintf(
                 "Paywall/blocked content detected for %s (httpCode=%d, textLen=%d) — trying archive.org",
                 $url, $original['httpCode'], strlen($originalText)
@@ -35,7 +37,8 @@ if (!function_exists('fetchArticleContent')) {
             }
             // A CAPTCHA or block page is not the article: handing it on let
             // the AI write a summary from the headline alone.
-            if (kopLooksBotWalled($originalText, $original['httpCode'])) {
+            // Nor is an error page: its title became the headline on /news/ (plan 4.6 #16).
+            if ($dead || kopLooksBotWalled($originalText, $original['httpCode'])) {
                 return '';
             }
         }
@@ -198,6 +201,71 @@ if (!function_exists('kopLooksBotWalled')) {
             if (strpos($lower, $needle) !== false) return true;
         }
         return false;
+    }
+}
+
+if (!function_exists('kopLooksDeadLink')) {
+    /**
+     * True for a page that is gone (404, 410), a server error (500-599,
+     * Cloudflare's 520-530) or a "Page not found" page served with 200.
+     */
+    function kopLooksDeadLink($text, $httpCode) {
+        $code = (int) $httpCode;
+        if ($code === 404 || $code === 410 || $code >= 500) return true;
+        $head = trim(mb_substr(preg_replace('/\s+/u', ' ', (string) $text), 0, 300));
+        return $head !== '' && mb_strlen(trim((string) $text)) < 3000 && kop_news_error_page_title($head);
+    }
+}
+
+if (!function_exists('kop_news_error_page_title')) {
+    /**
+     * Is this headline an error page's title? "Page Not Found | The Bulletin",
+     * "404 / Page Not Found", "aambookclub.com | 522: Connection timed out",
+     * "Wayback Machine" (its block page). Each part between " | ", " - ", " – "
+     * is tried, so "Page not found - KTVZ" counts and "Forbidden love" does not.
+     */
+    function kop_news_error_page_title($title) {
+        $title = trim(preg_replace('/\s+/u', ' ', (string) $title));
+        if ($title === '') return false;
+        // Starts the part: "Page not found", "404", "Error 404", "522: Connection timed out".
+        $starts = '/^(?:(?:error\s*)?\d{3}\s*(?:error)?\s*[-:\/|]?\s*)?(?:(?:the\s+)?page\s+(?:was\s+)?not\s+found|not\s+found\b)'
+            . '|^(?:error\s+)?[45]\d\d(?:\s*error)?(?:\s*[-:\/|]?\s*(?:not\s+found|forbidden|gone|bad\s+gateway|service\s+unavailable'
+            . '|gateway\s+time-?out|internal\s+server\s+error|connection\s+timed\s+out|web\s+server\s+is\s+down|origin\s+is\s+unreachable|missing\s+page))?\s*$/iu';
+        // The whole part: words a real headline could open with ("Forbidden love").
+        $whole = '/^(?:access\s+denied|forbidden|just\s+a\s+moment\.*|attention\s+required!?|website\s+disabled|site\s+not\s+found'
+            . '|account\s+suspended|this\s+site\s+can\S?t\s+be\s+reached|wayback\s+machine|page\s+unavailable|content\s+not\s+available)$/iu';
+        foreach (preg_split('/\s+[|\-\x{2013}\x{2014}\x{00B7}\x{2022}\x{FFFD}\/]\s+/u', $title) as $part) {
+            $part = trim($part, " \t.:");
+            if ($part !== '' && (preg_match($starts, $part) || preg_match($whole, $part))) return true;
+        }
+        return false;
+    }
+}
+
+if (!function_exists('kop_news_error_page_summary')) {
+    /**
+     * Is this summary the reader saying it had no article ("The requested
+     * article URL returned a 404 error...", "The provided webpage is an error
+     * page...", "...redirected to an automated traffic verification page")?
+     */
+    function kop_news_error_page_summary($summary) {
+        $s = trim(preg_replace('/\s+/u', ' ', (string) $summary));
+        if ($s === '') return false;
+        if (preg_match('/\berror (?:page|notice)\b|\bpage[- ]not[- ]found\b|\b404 (?:error|page|missing)\b|\bconnection time(?:d)? ?out\b/iu', $s)) return true;
+        // Otherwise only when it opens on the page itself, so "the boy could not be found" stays an article.
+        // "The article describes..." is an article; "The article content is restricted" is not.
+        return (bool) (preg_match('/^(?:(?:the|this) (?:requested|provided|retrieved|original) (?:article|web ?page|page|url|link|content|source)'
+                . '|(?:the|this) (?:article (?:url|content|text)|web ?page|page|url|link)\b)/iu', $s)
+            && preg_match('/\b(?:could not be (?:found|retrieved|accessed|displayed|loaded|read)|was not found|returned an? (?:\d{3}|error)|(?:is|was) (?:unavailable|restricted|blocked)'
+                . '|no (?:article )?content (?:was|is) available|(?:does|did) not contain (?:the|any) (?:referenced |requested )?article|no longer (?:active|available)'
+                . '|traffic verification|captcha|bot traffic|automated traffic)\b/iu', $s));
+    }
+}
+
+/** Is a news read an error page, by its headline or its summary? */
+if (!function_exists('kop_news_error_page')) {
+    function kop_news_error_page($title, $summary = '') {
+        return kop_news_error_page_title($title) || kop_news_error_page_summary($summary);
     }
 }
 

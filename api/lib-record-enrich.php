@@ -24,6 +24,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/lib-article-fetch.php'; // kop_news_error_page()
+
 /**
  * Rows from these senders are ones that skipped the AI step: every Drive Docs
  * source ("admin (Google Docs import)", "admin (SCIAD NET import)", "admin
@@ -77,7 +79,7 @@ function kop_enrich_rate_limited($why) {
 function kop_enrich_placeholder_title($title, $url = '') {
     $t = trim((string) $title);
     return $t === '' || $t === trim((string) $url) || preg_match('#^https?://#i', $t)
-        || preg_match('/^[a-z0-9.-]+\.[a-z]{2,}(?::|$)/i', $t);
+        || preg_match('/^[a-z0-9.-]+\.[a-z]{2,}(?::|$)/i', $t) || kop_news_error_page_title($t);
 }
 
 /** True for a site name that is only a domain ("sltrib.com", "archive.ph (archived)"). */
@@ -282,6 +284,15 @@ function kop_enrich_news_row(PDO $pdo, $id, $apply, $text = '') {
         return array('ok' => false, 'id' => $id, 'error' => 'AI: ' . mb_substr($why, 0, 200));
     }
     $d = $ai['body']['data'];
+    // An error page's title and summary never go on the row; it waits for a person or a later read (plan 4.6 #16).
+    // "no article text" keeps it on the once-a-day retry (kop_enrich_due()): a 522 may load tomorrow.
+    if (kop_news_error_page($d['title'] ?? '', $d['summary'] ?? '')) {
+        $why = 'error page, no article text: ' . mb_substr((string) ($d['title'] ?? ''), 0, 120);
+        if ($apply) {
+            kop_enrich_mark_failed('news:' . $id, $why);
+        }
+        return array('ok' => false, 'id' => $id, 'error' => $why);
+    }
     if ($apply) {
         $latestStmt = $pdo->prepare('SELECT * FROM news_submissions WHERE id = ?');
         $latestStmt->execute(array((int) $id));

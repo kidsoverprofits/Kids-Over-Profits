@@ -10,6 +10,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 define('ABSPATH', __DIR__ . '/../');
+define('DAY_IN_SECONDS', 86400);
 function get_option($name, $default = false) { return $default; }
 function update_option($name, $value, $autoload = null) { return true; }
 function get_stylesheet_directory_uri() { return 'https://kidsoverprofits.org/wp-content/themes/child'; }
@@ -18,6 +19,13 @@ function is_wp_error($value) { return false; }
 function wp_remote_retrieve_body($response) { return $response['body'] ?? ''; }
 function wp_remote_retrieve_response_code($response) { return $response['response']['code'] ?? 200; }
 function wp_remote_post($url, $args) {
+    if (strpos($url, 'process-news-ai.php') !== false && !empty($GLOBALS['kop_enrich_ai_error_page'])) {
+        // An old reader that let an error page through (plan 4.6 #16).
+        return array('body' => json_encode(array('success' => true, 'data' => array(
+            'title' => 'Page Not Found | The Bulletin',
+            'summary' => "The requested article URL returned a 'Page Not Found' error on the publication's website.",
+        ))));
+    }
     if (strpos($url, 'process-news-ai.php') !== false) {
         return array('body' => json_encode(array(
             'success' => true,
@@ -138,3 +146,31 @@ if (empty($saved['ok']) || ($payload['title'] ?? '') !== 'Correct published head
     exit(1);
 }
 echo "PASS save payload includes the corrected title, one-time marker and preserved reviewer notes\n";
+
+// Error pages (plan 4.6 #16): a row titled with one is read again, and a read that comes back as one is never saved.
+if (!kop_enrich_placeholder_title('Page not found - KTVZ') || kop_enrich_placeholder_title('Published article headline')) {
+    fwrite(STDERR, "FAIL an error-page title counts as a placeholder
+");
+    exit(1);
+}
+echo "PASS a row titled \"Page not found - KTVZ\" is read again
+";
+
+$GLOBALS['kop_enrich_saved_payload'] = null;
+$GLOBALS['kop_enrich_ai_error_page'] = true;
+$err = kop_enrich_news_row($pdo, 5, true);
+$GLOBALS['kop_enrich_ai_error_page'] = false;
+if (!empty($err['ok']) || $GLOBALS['kop_enrich_saved_payload'] !== null || stripos((string) ($err['error'] ?? ''), 'error page') === false
+    || !kop_enrich_due(array('n' => 2, 'why' => $err['error'], 'at' => gmdate('c', time() - 2 * 86400)))) {
+    fwrite(STDERR, 'FAIL an error-page read is not saved and is retried once a day: ' . json_encode($err) . "
+");
+    exit(1);
+}
+$still = $pdo->query('SELECT status, article_title FROM news_submissions WHERE id = 5')->fetch(PDO::FETCH_ASSOC);
+if ($still['status'] !== 'submitted' || $still['article_title'] !== 'news.example') {
+    fwrite(STDERR, "FAIL the row keeps waiting with its old title
+");
+    exit(1);
+}
+echo "PASS an error-page read leaves the row waiting with its title, on the daily retry
+";

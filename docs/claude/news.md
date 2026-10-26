@@ -6,6 +6,13 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 ```bash
 # The legacy news posts + 2024 index going into news_submissions (against tmp/prod.sqlite)
 php scripts/test-news-post-import.php
+# Error pages are never a headline (plan 4.6 #16, 2026-10-25): kop_news_error_page() (api/lib-article-fetch.php) tells a
+# "Page Not Found" / "522: Connection timed out" title or a "The requested article could not be retrieved" summary from an
+# article. A dead link (404, 410, 5xx, a short 200 error page) tries the Wayback copy, else reads as no text;
+# api/process-news-ai.php refuses an error-page read, and the hourly reader (api/lib-record-enrich.php) never writes one, so
+# the row waits with its title on the once-a-day retry. Any new path that fetches a news title runs it too.
+php -d extension=mbstring scripts/test-news-error-pages.php [--mirror]   # --mirror: approved/waiting rows in tmp/prod.sqlite that read as error pages
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-enrich.php
 # Facility closures reported in the news (inc/closure-reports.php): hourly WP-Cron scan of saved
 # articles -> KOP Tools > Closure Reports; confirming one sets the facility's status, which the
 # /facility/ page and the network map (kop_network_map_status_overrides) follow at once

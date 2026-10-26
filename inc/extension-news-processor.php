@@ -138,6 +138,11 @@ function kop_ext_rest_news_process(WP_REST_Request $req) {
             : 'The AI could not read this article. Fill the fields by hand, or try again.';
         return new WP_Error('kop_ai_failed', $msg, array('status' => 502));
     }
+    // An error page read as the article must not fill the form a publish goes out from (plan 4.6 #16).
+    require_once $dir . 'lib-article-fetch.php';
+    if (kop_news_error_page($data['title'] ?? '', $data['summary'] ?? '')) {
+        return new WP_Error('kop_error_page', 'This page is an error page ("' . mb_substr((string) ($data['title'] ?? ''), 0, 120) . '"), not the article. Open the article itself or its Wayback copy, or paste its text into the notes box.', array('status' => 422));
+    }
     return array('fields' => kop_ext_news_ai_fields($data));
 }
 

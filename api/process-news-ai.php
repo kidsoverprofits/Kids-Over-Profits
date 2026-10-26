@@ -135,6 +135,11 @@ try {
     if ($result === null) {
         throw new Exception(implode(' | ', $errors));
     }
+    // A "Page Not Found" or "522: Connection timed out" page read as if it were the article (plan 4.6 #16).
+    if (kop_news_error_page($result['title'] ?? '', $result['summary'] ?? '')) {
+        throw new Exception('The page at this URL is an error page ("' . mb_substr((string) ($result['title'] ?? ''), 0, 120)
+            . '"), with no article text; paste the article text instead');
+    }
 
     echo json_encode([
         'success' => true,
