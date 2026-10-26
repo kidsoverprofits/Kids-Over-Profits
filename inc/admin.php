@@ -1684,7 +1684,10 @@ function kop_apply_facility_merge_seeds() {
  * company of that name is reused and existing links are left alone; a listed
  * facility is linked only when its unique_name still matches; one marked
  * 'drop' has its link taken off instead. An entry's 'drop_notes' takes those
- * notes off an existing company (a seeded note later found wrong).
+ * notes off an existing company (a seeded note later found wrong). Its
+ * 'fix_fields' ({field: {from, to}}) corrects one of an existing company's
+ * operator fields, only while it still holds exactly the wrong value, so a
+ * hand edit made since is never overwritten.
  *
  * A company named like one of its programs (Three Points Center) gives its
  * own 'unique_name' ("Three Points Center (company)"): the record key must
@@ -1739,13 +1742,24 @@ function kop_apply_operator_record_seeds() {
                     // "drop_notes": notes an earlier seed wrote that turned out wrong; they come off before the new ones go in.
                     $kept = array_values(array_diff($notes, (array) ($entry['drop_notes'] ?? array())));
                     $add = array_values(array_diff((array) ($entry['operator']['notes'] ?? array()), $kept));
-                    if ($add || count($kept) !== count($notes)) {
-                        $notes = $kept;
-                        // In the seed's (date) order, notes added by hand after them.
-                        $seed = array_values((array) $entry['operator']['notes']);
-                        $json['operator']['notes'] = array_merge($seed, array_values(array_diff($notes, $seed)));
+                    $fixed = false;
+                    foreach ((array) ($entry['fix_fields'] ?? array()) as $field => $fix) {
+                        if (is_array($fix) && array_key_exists('to', $fix)
+                            && (string) ($json['operator'][$field] ?? '') === (string) ($fix['from'] ?? '')) {
+                            $json['operator'][$field] = $fix['to'];
+                            $fixed = true;
+                        }
+                    }
+                    if ($add || $fixed || count($kept) !== count($notes)) {
+                        if ($add || count($kept) !== count($notes)) {
+                            $notes = $kept;
+                            // In the seed's (date) order, notes added by hand after them.
+                            $seed = array_values((array) ($entry['operator']['notes'] ?? array()));
+                            $json['operator']['notes'] = array_merge($seed, array_values(array_diff($notes, $seed)));
+                        }
                         $pdo->prepare("UPDATE `{$prefix}kop_operators` SET json_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
                             ->execute(array(json_encode($json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $id));
+                        if ($fixed && function_exists('kop_record_changed')) kop_record_changed('operator', array($id));
                     }
                 }
             }
@@ -2768,7 +2782,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '146';
+    $version = '147';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -1057,5 +1057,18 @@
         "update": true
       }
     ]
+  },
+  {
+    "name": "TrueCore Behavioral Solutions",
+    "note": "Correction 2026-10-26: the company has gone by TrueCore since the April 3, 2017 sale of G4S Youth Services (name announced June 30, 2017, PR Newswire); the G4S era (2002 to 2017) is the G4S Youth Services record. '2001-Present' had no source.",
+    "fix_fields": {
+      "operatingPeriod": {
+        "from": "2001-Present",
+        "to": "2017 to present"
+      }
+    },
+    "operator": {
+      "notes": []
+    }
   }
 ]

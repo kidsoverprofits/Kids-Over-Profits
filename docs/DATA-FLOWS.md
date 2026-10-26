@@ -106,6 +106,9 @@ request.
   - data audit `operator_field` / `operator_link`
   - inline operator save, woodbury-create (:1175),
     `kop_v2_add_operator_other_names()`, standardize-facilities (:135)
+  - `kop_apply_operator_record_seeds()` (seeds/operator-records.json, template pass): new companies, notes, and
+    `fix_fields` (one field corrected only while it still holds the wrong value; sets `updated_at` and calls
+    `kop_record_changed('operator')`)
 - **Readers:** facility page (live), operator page, state feed cards,
   directory feed, mobile, search, network map.
 - **Fresh by:**
