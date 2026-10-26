@@ -10709,7 +10709,397 @@
     26
    ],
    "directions": []
+  },
+  {
+   "key": "facility-place-conflicts:where-in-paxton-ma-is-devereux-s-starr-program-a",
+   "section": "Facility place conflicts",
+   "title": "Where in Paxton, MA is Devereux's STARR program, and was it ever at 364 Thompson Rd, Webster?",
+   "text": "Devereux job postings put STARR in Webster in October 2024 and in Paxton in 2025-26 (now taken down). Nothing ties 364 Thompson Rd to Devereux; Webster also had a 'Webster House'. Mass. EEC residential licensing would settle it.",
+   "context": "",
+   "records": [
+    11998
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": []
+  },
+  {
+   "key": "facility-place-conflicts:which-two-forest-ridge-locations-did-sequel-clos",
+   "section": "Facility place conflicts",
+   "title": "Which two Forest Ridge locations did Sequel close in December 2021, and where were the Estherville and Wallingford sites?",
+   "text": "The main campus and school were at 200 Sixth St, Gruver, IA. A California out-of-state list also names Ellinwood (Estherville) and cottages under Wallingford. APM Reports says Sequel closed 'both locations'.",
+   "context": "",
+   "records": [
+    13379
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "News: fake shell of a company that John Ripley (Founder) used to buy out Sequel (APM Reports, 2022-04-26)",
+     "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+     "kind": "news"
+    },
+    {
+     "label": "News: Six staff members injured, four juveniles arrested after alleged assault at Forest Ridge Youth Services (KEYC, 2020-01-16)",
+     "url": "https://www.keyc.com/2020/01/16/six-staff-members-injured-four-juveniles-arrested-after-alleged-assault-forest-ridge-youth-services/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Sent to For-Profit Home for Aid, Girl Dies at 15 (The New York Times, 1997-05-04)",
+     "url": "https://www.nytimes.com/1997/05/04/us/sent-to-for-profit-home-for-aid-girl-dies-at-15.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: injured six staff members (archive.ph)",
+     "url": "https://archive.ph/dGuad",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived youthservices.com)",
+     "url": "https://web.archive.org/web/19970209105016/http://www.youthservices.com/fr.htm",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:is-innercept-still-running-and-is-the-hayden-hou",
+   "section": "Facility place conflicts",
+   "title": "Is Innercept still running, and is the Hayden house at 5033 E Dodd Rd still one of its homes?",
+   "text": "One directory calls Innercept closed; the Dodd Rd house was listed for sale in August 2026. Idaho's licensing search is behind a captcha.",
+   "context": "",
+   "records": [
+    9684
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Pine Tree Equity Invests in Innercept (PrivSource, 2021-02-01)",
+     "url": "https://www.privsource.com/acquisitions/deal/ZoSgRn",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:is-havenwood-north-still-at-5088-n-veterans-memo",
+   "section": "Facility place conflicts",
+   "title": "Is Havenwood North still at 5088 N Veterans Memorial Dr, Enoch, or has it moved to Havenwood's ranch at 8097 W 2000 S, Cedar City?",
+   "text": "No source ties the 5088 street number to the program directly; Havenwood planned to move all its houses to the ranch.",
+   "context": "",
+   "records": [
+    10364
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "News: ‘State-sponsored Abandonment’ No More: California Stops Paying for Adoptees Sent to Out-of-State Treatment Centers (The Imprint, 2025-07-22)",
+     "url": "https://imprintnews.org/top-stories/state-sponsored-abandonment-no-more-california-stops-paying-for-adoptees-sent-to-out-of-state-treatment-centers/262649",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:is-new-hope-boys-home-in-kerrville-tx-licensed-b",
+   "section": "Facility place conflicts",
+   "title": "Is New Hope Boys Home in Kerrville, TX licensed by Texas HHSC, and when did it move there from Bastrop?",
+   "text": "Not found in Texas child care licensing data under either address. Its site said Bastrop in September 2024 and Kerrville by June 2025. The Harper Rd camp is listed for sale.",
+   "context": "",
+   "records": [
+    10614
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Home page, Kerrville (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/new-hope-boys-home-2025.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Home page, Bastrop (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/new-hope-boys-home-2024.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:where-was-lone-star-expeditions-base-camp-near-g",
+   "section": "Facility place conflicts",
+   "title": "Where was Lone Star Expeditions' base camp near Groveton / Apple Springs, Texas?",
+   "text": "Its site said 'located in Groveton, Texas'; a 2004 Houston Chronicle excerpt says near Apple Springs in Trinity County. The street address on the record is a placeholder. Texas DFPS licensing history may give the real one.",
+   "context": "",
+   "records": [
+    10608
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Contact page 2002 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/lone-star-expeditions-contact-2002.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Woodbury Reports, October 2009, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2009-182-p-14-lone-star-expeditions/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2009, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2009-179-p-10-lone-star-expeditions/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, December 2008, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-december-2008-172-p-18-lone-star-expeditions/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2008, p. 23 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2008-171-p-23-lone-star-expeditions/",
+     "kind": "woodbury"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:what-was-spring-creek-community-s-address-near-t",
+   "section": "Facility place conflicts",
+   "title": "What was Spring Creek Community's address near Thompson Falls, MT, and did it close around 1991 before the 1996 sale?",
+   "text": "Founded 1979 by Steve and Nancy Cawdrey; sold with 35 of its 80 acres in fall 1996 and reopened as Spring Creek Lodge. A 1996 Spokesman-Review article says it 'closed five years ago'.",
+   "context": "",
+   "records": [
+    100634
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": []
+  },
+  {
+   "key": "facility-place-conflicts:when-did-three-strands-wilderness-in-oak-creek-c",
+   "section": "Facility place conflicts",
+   "title": "When did Three Strands Wilderness in Oak Creek, CO close?",
+   "text": "Its site was still captured in September 2020. Address on its 2019 contact page: 17905 CR 16, Oak Creek, CO 80467.",
+   "context": "",
+   "records": [
+    100175
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Contact page 2019 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/three-strands-wilderness-contact-2019.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Linked from its record (archived steamboatpilot.com)",
+     "url": "https://web.archive.org/web/2*/https://www.steamboatpilot.com/news/new-treatment-center-in-south-routt-utilizes-ranch-work-wilderness-experience-to-fight-addiction/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived us.bold.pro)",
+     "url": "https://web.archive.org/web/2*/https://us.bold.pro/my/patrick-hawkins",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:what-year-did-northern-illinois-academy-open-at",
+   "section": "Facility place conflicts",
+   "title": "What year did Northern Illinois Academy open at 998 Corporate Blvd, Aurora, IL?",
+   "text": "Sequel gave up its license in May 2021; opening year not found.",
+   "context": "",
+   "records": [
+    13447
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "News: Northern Illinois Academy — Private School Demographics — ProPublica (ProPublica, 2026-01-01)",
+     "url": "https://projects.propublica.org/private-school-demographics/schools/northern-illinois-academy-BB120651/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Sequel to close New Mexico youth facility amid more abuse allegations | APM Reports (APM Reports, 2021-12-03)",
+     "url": "https://www.apmreports.org/story/2021/12/03/sequel-bernalillo-academy-abuse-allegations",
+     "kind": "news"
+    },
+    {
+     "label": "News: Federal Watchdogs Find Abuse at For-Profit Youth Residential Programs in 18 States (The Imprint, 2021-11-02)",
+     "url": "https://imprintnews.org/top-stories/federal-watchdogs-find-widespread-abuse-at-youth-residential-programs/60071",
+     "kind": "news"
+    },
+    {
+     "label": "News: Report Details Abuse & Neglect At Aurora Residential School For Students With Disabilities (Northern Public Radio, 2021-06-09)",
+     "url": "https://www.northernpublicradio.org/education/2021-06-09/report-details-abuse-neglect-at-aurora-residential-school-for-students-with-disabilities",
+     "kind": "news"
+    },
+    {
+     "label": "News: State pulling all students in its care from Northern Illinois Academy following reports of abuse (WCIA, 2021-05-18)",
+     "url": "https://www.wcia.com/news/state-pulling-all-students-from-northern-illinois-academy-following-reports-of-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: John Doe, father of Jane Doe, a minor, v. Sequel Schools, LLC d/b/a Northern Illinois Academy, et al. (Circuit Court of Kane County, Illinois, filed 2019-10-15)",
+     "url": "https://corboydemetrio.com/newsroom-news-lawsuit-rape-school-field-trip",
+     "kind": "court"
+    },
+    {
+     "label": "Linked from its record (archived sequelyouthservices.com)",
+     "url": "https://web.archive.org/web/20170606112355/http://sequelyouthservices.com/html/autism-northernillinois.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:when-did-the-bridge-inc-close-its-mitchell-progr",
+   "section": "Facility place conflicts",
+   "title": "When did The Bridge, Inc. close its Mitchell program in Gadsden, AL?",
+   "text": "Mitchell, a 24-bed unit for boys from the juvenile justice system, is on The Bridge's site in 2009-2012 but not in 2022. The record still says Open.",
+   "context": "",
+   "records": [
+    13701
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Mitchell program page 2009 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/the-bridge-inc-mitchell-program-2009.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:where-in-samoa-was-coral-reef-academy-earlier-a",
+   "section": "Facility place conflicts",
+   "title": "Where in Samoa was Coral Reef Academy (earlier A Better Way Youth Academy), and when did Paradise Cove close?",
+   "text": "KOP says Vaitele, but a 2002 visit report puts Coral Reef on the north shore about 12 miles from Apia, and Vaitele is about 5 km from Apia. Paradise Cove's end year is given as 2000 or 2002.",
+   "context": "",
+   "records": [
+    100000,
+    14147
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "News: Therapeutic Child Abuse and the Need for Change (US Represented, 2014-12-01)",
+     "url": "https://www.usrepresented.com/2014/12/01/therapeutic-child-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Founder's Passion Is Helping Youths (The Salt Lake Tribune, 2003-05-25)",
+     "url": "http://insidecostarica.com/dailynews/2003/may/25/founders_passion.htm",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived paradise-cove.com)",
+     "url": "https://web.archive.org/web/19970702074318/http://www.paradise-cove.com/",
+     "kind": "website"
+    },
+    {
+     "label": "Woodbury Reports, June 2012, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2012-p-14-coral-reef-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2009, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2009-183-p-15-coral-reef-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 16 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-p-16-coral-reef-academy/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, February 2009, p. 22 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2009-174-p-22-coral-reef-academy/",
+     "kind": "woodbury"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:was-new-lifehouse-academy-s-2015-2018-address-on",
+   "section": "Facility place conflicts",
+   "title": "Was New Lifehouse Academy's 2015-2018 address on Brush Creek Rd, Jay, OK a different campus from Eucha?",
+   "text": "Its own site gave 'Brush Creek Rd, Jay, OK' in 2015-2018; it is now at 36649 S 510 Rd, Eucha. Brush Creek Academy, also tied to Teen Challenge Oklahoma, is at 43074 County Rd 608, Jay.",
+   "context": "",
+   "records": [
+    13541
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Home page 2017 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/new-lifehouse-academy-2017.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: How a private Christian program for “troubled” and “depressed” girls operates with little state oversight (The Frontier, 2026-09-29)",
+     "url": "https://www.readfrontier.org/stories/how-a-private-christian-program-for-troubled-and-depressed-girls-operates-with-little-state-oversight/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Rural Oklahoma Girls Academy Accused Of Starving, Restraining Teens For Years (Hoodline, 2026-09-18)",
+     "url": "https://hoodline.com/2026/09/rural-oklahoma-girls-academy-accused-of-starving-restraining-teens-for-years/",
+     "kind": "news"
+    },
+    {
+     "label": "News: What The Frontier found at an Oklahoma boarding school for troubled teens (The Frontier, 2026-09-18)",
+     "url": "https://www.readfrontier.org/stories/what-the-frontier-found-at-an-oklahoma-boarding-school-for-troubled-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "News: An Oklahoma boarding school promised help for troubled girls. Students say they got punishment instead. (The Frontier)",
+     "url": "https://www.readfrontier.org/an-oklahoma-boarding-school-promised-help-for-troubled-girls-students-say-they-got-punishment-instead/",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:where-did-ozarks-teen-challenge-s-boys-program-r",
+   "section": "Facility place conflicts",
+   "title": "Where did Ozarks Teen Challenge's boys' program run before its 2016 nonprofit?",
+   "text": "Press releases say it has run 'nearly 20 years'; the current nonprofit dates from 2016. It may have run under Teen Challenge of Missouri.",
+   "context": "",
+   "records": [
+    11357
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": []
+  },
+  {
+   "key": "facility-place-conflicts:which-summers-did-wellspring-wisconsin-run-at-uw",
+   "section": "Facility place conflicts",
+   "title": "Which summers did Wellspring Wisconsin run at UW-Platteville and at Carthage College?",
+   "text": "Platteville about 2008-2011, Carthage College (Kenosha) from 2012, confirmed through 2013; Wellspring camps reportedly closed in January 2014.",
+   "context": "",
+   "records": [
+    12569
+   ],
+   "found": "found 2026-10-25, Facility place research session (2026-10-25)",
+   "directions": [
+    {
+     "label": "Location page 2013 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/wellspring-wisconsin-location-2013.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Location page 2011 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/wellspring-wisconsin-location-2011.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Linked from its record (archived wellspringcamps.com)",
+     "url": "https://web.archive.org/web/2*/http://www.wellspringcamps.com/wisconsin/",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-10-25 22:07"
+ "built": "2026-10-26 00:02"
 }
