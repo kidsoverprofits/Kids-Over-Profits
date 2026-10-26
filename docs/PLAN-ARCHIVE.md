@@ -3478,3 +3478,30 @@ Map Years (2.3 item 6).
    Decided 2026-10-26 (owner): direct edits stay on the page at once and also feed the write-up; only records that
    change get write-ups; 6 drafts an hour. Built in commit 74f4fb46175791a352033ebea850609529af82bc
    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/74f4fb46175791a352033ebea850609529af82bc).
+
+## 5. Tests failing on main, item 6: test-network-modules.js on kop-data 8d8af9a (finished 2026-10-26)
+
+6. **`node scripts/test-network-modules.js` fails 5 checks on today's graph** (2026-10-26, kop-data 8d8af9a; the
+   suite takes ~50 minutes on the laptop, not 12). None come from the investor nodes: the same run on the last graph
+   without them (kop-data f649268) fails the same way, except where noted. (a) WWASPS's label is not drawn in the opening
+   fit (zoom 0.19, 34 labels; Cross Creek Programs, Bell Academy or Dace Goulding wins the spot). It fails on both graphs
+   in a probe that stops at the check, but passed in one full run, so it depends on timing. (b) The opening view puts 9
+   names more than a row off the stage (Youth Services International, Correctional Services Corporation, Rite of
+   Passage...), and the WWASPS 28-connections check prints a failure for "0 of 28". (c) Provo Canyon School's view lines
+   are long: median 674px, 15% within 260px (bound 600px, 12%). On f649268 it was 571px: the only change in that view is
+   the staff line Galumalemana Alema S. Fitisemanu II - Provo Canyon School leaving the live records, so it is data
+   drift on a bound written for 504px. (d) David Gilcrease has 6 connections; the check expects the report's five.
+   (e) On f649268 only: "the typical line turns 3 times" (2 on today's graph). Decide per check whether the data or the
+   layout is right and fix the other; for (a) make the check not depend on frame timing.
+
+Done 2026-10-26: the full suite passes on 8d8af9a (exit 0, ~50 min). Per check: (a) the renderer is right. WWASPS (32)
+gives way to Cross Creek Programs (34), and WWASPS is not the best-connected name, so the check now asks that every dot on
+the stage lost its room to a name at least as connected. The tap-a-name check taps the best-connected label drawn
+instead of WWASPS. The probe was not timing-dependent: the first frame draws the same each time. (b) Data growth: the
+opening view went from 32 names (ce810fa, 2026-10-12, passing) to 47 in 15 rows, which cannot fit 700px at full size.
+The check now allows rows straight below the stage with no gap, the owner's 2026-09-23 rule. The WWASPS "0 of 28"
+failure was the 0.75-width distance bound from the day before full-width rows. All 28 are on the stage, 844px corner to
+corner, so the bound is now the stage width (as its comment said) and the message names which bound failed.
+(c) Data drift: bound 600 -> 720px, written down above the check. Follow-up: plan item 5.6. (d) The data is right:
+the sixth is a staff line at Cross Creek Manor for Girls from its staff list, so the check asks for the report's five
+by name. (e) f649268 only, passes on 8d8af9a.

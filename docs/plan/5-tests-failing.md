@@ -67,15 +67,10 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    most likely on how the cap's dropped connections or an owner's step are treated for names joined through a folded
    line. Run with `--only=aspen-education-group,provo-canyon-school` against the portable PHP; fix the PHP to match
    focus.js (never the other way), then the full run.
-6. **`node scripts/test-network-modules.js` fails 5 checks on today's graph** (2026-10-26, kop-data 8d8af9a; the
-   suite takes ~50 minutes on the laptop, not 12). None come from the investor nodes: the same run on the last graph
-   without them (kop-data f649268) fails the same way, except where noted. (a) WWASPS's label is not drawn in the opening
-   fit (zoom 0.19, 34 labels; Cross Creek Programs, Bell Academy or Dace Goulding wins the spot). It fails on both graphs
-   in a probe that stops at the check, but passed in one full run, so it depends on timing. (b) The opening view puts 9
-   names more than a row off the stage (Youth Services International, Correctional Services Corporation, Rite of
-   Passage...), and the WWASPS 28-connections check prints a failure for "0 of 28". (c) Provo Canyon School's view lines
-   are long: median 674px, 15% within 260px (bound 600px, 12%). On f649268 it was 571px: the only change in that view is
-   the staff line Galumalemana Alema S. Fitisemanu II - Provo Canyon School leaving the live records, so it is data
-   drift on a bound written for 504px. (d) David Gilcrease has 6 connections; the check expects the report's five.
-   (e) On f649268 only: "the typical line turns 3 times" (2 on today's graph). Decide per check whether the data or the
-   layout is right and fix the other; for (a) make the check not depend on frame timing.
+6. **Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in
+   PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 ->
+   8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on
+   654px; the run before the fix printed 674px, unexplained). The bound in
+   `scripts/test-network-modules.js` is now 720px with the reason written above it. Look at why the row order in
+   focus.js is that sensitive (a stable tie-break, or ordering rows by what they connect to), and whether the 674px run
+   points to state carried over from earlier checks.
