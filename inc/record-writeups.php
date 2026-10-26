@@ -47,6 +47,8 @@ if (defined('KOP_RECORD_WRITEUPS_LOADED')) {
 }
 define('KOP_RECORD_WRITEUPS_LOADED', 1);
 define('KOP_RECORD_WRITEUPS_DB_VERSION', '1');
+if (!defined('KOP_WU_GROQ_MAX_CHARS')) define('KOP_WU_GROQ_MAX_CHARS', 18000); // about 5,000 tokens: with the 2,500 answer, under Groq's 8,000
+if (!defined('KOP_WU_RETRY_AFTER')) define('KOP_WU_RETRY_AFTER', 6 * 3600); // a record whose draft failed waits this long before the hourly run tries it again
 
 function kop_wu_table() {
     global $wpdb;
@@ -345,7 +347,10 @@ function kop_wu_page_about($fid, array $notes, $about, callable $build = null) {
 function kop_wu_ai($prompt) {
     if (!empty($GLOBALS['kop_wu_ai']) && is_callable($GLOBALS['kop_wu_ai'])) return (string) call_user_func($GLOBALS['kop_wu_ai'], $prompt);
     require_once get_stylesheet_directory() . '/api/ai-providers.php';
-    return kop_ai_generate_alternating($prompt, array('maxTokens' => 2500, 'temperature' => 0.3));
+    $opts = array('maxTokens' => 2500, 'temperature' => 0.3);
+    // Groq's free tier takes 8,000 tokens a minute, answer included: a long prompt goes to Gemini only (HTTP 413 otherwise).
+    if (strlen($prompt) > KOP_WU_GROQ_MAX_CHARS) $opts['providers'] = array('gemini');
+    return kop_ai_generate_alternating($prompt, $opts);
 }
 
 /**
@@ -582,12 +587,17 @@ function kop_wu_undo($log_id, $reviewer) {
 /**
  * Draft write-ups for up to $limit records with held facts that have no draft,
  * or whose AI draft predates facts approved since (a draft a person edited is
- * left alone). Returns {written, errors, left}.
+ * left alone). A record whose draft failed is skipped for KOP_WU_RETRY_AFTER
+ * (option kop_wu_failed, [fid => time]), so one record the AI cannot take does
+ * not stop every hourly run. Returns {written, errors, left}.
  */
 function kop_wu_run_batch($limit = 3) {
     $out = array('written' => 0, 'errors' => array(), 'left' => 0);
+    $failed = function_exists('get_option') ? (array) get_option('kop_wu_failed', array()) : array();
+    $failed = array_filter($failed, function ($t) { return (int) $t > time() - KOP_WU_RETRY_AFTER; });
     $todo = array();
     foreach (array_keys(kop_wu_held_counts()) as $fid) {
+        if (isset($failed[$fid])) continue;
         $wu = kop_wu_get($fid);
         if (!empty($wu['draft']['edited_by'])) continue;
         if (empty($wu['draft']['paragraphs']) || kop_wu_new_since_draft($fid, $wu['draft'])) $todo[] = $fid;
@@ -601,9 +611,11 @@ function kop_wu_run_batch($limit = 3) {
             $fails = 0;
         } catch (Throwable $e) {
             $out['errors'][] = '#' . $fid . ': ' . $e->getMessage();
+            $failed[$fid] = time();
             if (++$fails >= 2) break;
         }
     }
+    if (function_exists('update_option')) update_option('kop_wu_failed', $failed, false);
     return $out;
 }
 
