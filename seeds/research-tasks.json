@@ -11929,8 +11929,70 @@
      "url": "https://teenchallenge-network.netlify.app",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Sent 2026-10-28 to the Review inbox: 11 lawsuit cards (7 of Amber's matters plus 4 more Teen Challenge federal cases found on GovInfo: Nashville HQ v. Metro Nashville 3:07-cv-00668, Couch v. Chad's Hope 6:23-cv-00115, Candlehouse v. Vestal 3:11-cv-00093, Robinson v. Adult & Teen Challenge 4:23-cv-02248; Teen Challenge v. Elleson 1:05-cv-00463 already held), 3 news, 2 websites. NOT FOUND: Bence 4:26-cv-00440 (#55 still has no source; open its Justia or CourtListener docket by hand), Watson 3:22-cv-08060, Jones 9:22-cv-81932, Korich 4:17-cv-00227 (that number in N.D. Fla. is Alexis v. Johnson, so the district is wrong), Rasheed 4:21-cv-00274 (only on a Justia listing page), Autin, Brotherhood Mutual v. TC Nevada, Herrera, TC PNW v. Lane County, Stidum v. Marco, TC Fredericksburg v. Stafford County, all 7 LA Superior Court cases (portal only; no stable per-case links), Santa Barbara Channelkeeper (Teen Challenge's role not shown), ACTSAS/licensing/FMCSA leads. CourtListener's API needs a token (none configured locally) and its site and Justia block automated reading: with a CourtListener token in .env most of the federal misses can be looked up by number.",
+    "claims": [
+     {
+      "claim": "Parker v. Teen Challenge of Oklahoma, Inc. et al, N.D. Okla. 4:26-cv-00526 (KOP lawsuit #54, add as its source): defendants Teen Challenge of Oklahoma d/b/a New Lifehouse Girls Academy and a John Doe, filed 2026-08-25",
+      "url": "https://dockets.justia.com/docket/oklahoma/okndce/4:2026cv00526/78072",
+      "quote": "Parker v. Teen Challenge of Oklahoma, Inc. et al (Justia Dockets listing, seen in search results; page blocks automated reading)"
+     },
+     {
+      "claim": "Jones v. Teen Challenge of Florida, Inc., S.D. Fla. 2:22-cv-14419, nature of suit 440 Other Civil Rights; orders 2023-04-17 to 2023-08-07",
+      "url": "https://www.govinfo.gov/app/details/USCOURTS-flsd-2_22-cv-14419",
+      "quote": "Jones v. Teen Challenge of Florida, Inc. (United States District Court Southern District of Florida)"
+     },
+     {
+      "claim": "Teen Challenge of Oklahoma Inc v. Philadelphia Indemnity Insurance Company, W.D. Okla. 5:25-cv-00648 (insurance)",
+      "url": "https://www.law360.com/cases/684c274cd7596b5ac9052c5c",
+      "quote": "Law360 case tracker, title and number only (paywalled)"
+     },
+     {
+      "claim": "Jeffries v. Teen Challenge Training Center, E.D. Pa. 5:14-cv-07117; its docket carries the docket report of the companion case Jeffries v. Dorbransky, 5:14-cv-05755, as an exhibit",
+      "url": "https://www.courtlistener.com/docket/4527903/jeffries-v-teen-challenge-training-center/",
+      "quote": "Jeffries v. Teen Challenge Training Center (CourtListener docket)"
+     },
+     {
+      "claim": "Teen Challenge Referral Center, Inc. v. Walker, M.D. Ga. 7:05-cv-00097: the program and its director sued a Bank of America manager and the bank pro se in Tift County Superior Court (2005-08-15); removed to federal court",
+      "url": "https://www.govinfo.gov/app/details/USCOURTS-gamd-7_05-cv-00097",
+      "quote": "Teen Challenge Referral Center, Inc., et als. v. Walker et al (United States District Court Middle District of Georgia)"
+     },
+     {
+      "claim": "Teen Challenge of New England v. United States (D. Mass. 1:05-cv-30167) arose when USDA cut food stamps to residents of unlicensed Teen Challenge centers; settled administratively when USDA/HHS told governors on 2005-08-26 that state licensure is not required (no docket page found)",
+      "url": "https://wng.org/articles/stamp-of-approval-1620663135",
+      "quote": "WORLD, 2005-09-10, Stamp of approval"
+     },
+     {
+      "claim": "Wells Fargo Vendor Financial Services, LLC v. Teen Challenge New England, Inc., D. Mass. 1:16-cv-11183-NMG (equipment lease collection, 2016)",
+      "url": "https://www.courtlistener.com/docket/4512058/wells-fargo-vendor-financial-services-llc-v-teen-challenge-new-england/",
+      "quote": "Wells Fargo Vendor Financial Services, LLC v. Teen Challenge New England (CourtListener docket)"
+     },
+     {
+      "claim": "Spivey v. Teen Challenge of Florida, Inc., Fla. 1st DCA 1D12-4377, decided 2013-10-11: wrongful-death suit over an adult resident's overdose death; the court affirmed compelling Christian conciliation arbitration. A different case from KOP's 1D04-0847 (2005)",
+      "url": "http://opinions.1dca.org/written/opinions2013/10-11-2013/12-4377.pdf",
+      "quote": "1st DCA written opinion, 10-11-2013, case 12-4377"
+     },
+     {
+      "claim": "Massachusetts AG Fair Labor Division cited Adult & Teen Challenge, Northeast, Inc. for $1.15 million (about $850,000 restitution) over unpaid work by 200+ men at Brockton and Worcester, 2026-09-01 (matters 28 and 29)",
+      "url": "https://www.mass.gov/news/ag-campbell-issues-115-million-in-citations-against-addiction-treatment-centers-for-having-participants-perform-unpaid-labor-under-the-guise-of-rehabilitation",
+      "quote": "AG Campbell Issues $1.15 Million in Citations Against Addiction Treatment Centers for Having Participants Perform Unpaid Labor Under the Guise of Rehabilitation"
+     },
+     {
+      "claim": "Polk County suit against pastor M. Wayne Blackburn and the Assemblies of God Peninsular Florida District, filed 2025-03-05 in the 10th Judicial Circuit; no case number in the reporting and no tie to Teen Challenge shown (KOP already holds the article)",
+      "url": "https://www.bishop-accountability.org/?p=317972",
+      "quote": "Lawsuit alleges Lakeland pastor and church district failed to ..."
+     },
+     {
+      "claim": "2022 Seminole County probation case: a woman ordered into Teen Challenge's Davie women's program was dismissed and sentenced to 120 days in jail after a 2022-04-06 hearing; no case number in the reporting (KOP already holds the article)",
+      "url": "https://www.orlandoweekly.com/news/a-seminole-county-woman-was-kicked-out-of-a-christian-rehab-for-kissing-another-woman-31715802",
+      "quote": "A Seminole County woman was kicked out of a Christian rehab for kissing another woman"
+     }
+    ],
+    "by": "Claude session (2026-10-28)",
+    "at": "2026-10-28"
+   }
   }
  ],
- "built": "2026-10-28 17:17"
+ "built": "2026-10-28 17:56"
 }
