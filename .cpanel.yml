@@ -55,6 +55,7 @@ deployment:
     - /bin/cp -R inc $DEPLOYPATH
     - /bin/cp functions.php $DEPLOYPATH
     - /bin/cp search.php $DEPLOYPATH
+    - /bin/cp category.php $DEPLOYPATH
     - /bin/cp style.css $DEPLOYPATH
     - /bin/cp .htaccess $DEPLOYPATH
     - /bin/cp .env.example $DEPLOYPATH
