@@ -87,7 +87,7 @@ if ($kop_records_pdo instanceof PDO) {
 // By the numbers: live counts from the inspection database and the facility
 // directory, cached for six hours so the home page doesn't re-run COUNT
 // queries on every visit. A failed or empty result hides the whole strip.
-// inspection_reports, inspection_facilities and facilities_master are
+// inspection_reports and inspection_facilities are
 // WordPress-side tables, so $wpdb is correct here.
 global $wpdb;
 $kop_numbers = get_transient('kop_home_numbers');
@@ -99,13 +99,8 @@ if (!is_array($kop_numbers)) {
         'licensed'   => (int) $wpdb->get_var("SELECT COUNT(*) FROM inspection_facilities"),
         'directory'  => 0,
     );
-    if (function_exists('kop_v2_active') && kop_v2_active('homepage_stats')) {
+    if (function_exists('kop_v2_facility_count')) {
         $kop_numbers['directory'] = kop_v2_facility_count();
-    } elseif (function_exists('kop_get_facilities_database_connection') && function_exists('kop_discover_facilities_master_table')) {
-        $kop_master = kop_discover_facilities_master_table(kop_get_facilities_database_connection());
-        if ($kop_master) {
-            $kop_numbers['directory'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$kop_master}`");
-        }
     }
     $wpdb->suppress_errors($kop_suppress);
     if ($kop_numbers['reports'] > 0 || $kop_numbers['directory'] > 0) {

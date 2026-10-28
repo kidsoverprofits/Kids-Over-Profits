@@ -3,7 +3,7 @@
  * Homepage Sidebar Widgets
  *
  * Registers the "Homepage Dynamic Sidebar" widget area and three custom
- * widgets that pull live data from facilities_master and news_submissions.
+ * widgets that pull live data from the v2 facility tables and news_submissions.
  */
 
 if (!defined('ABSPATH')) {
@@ -165,8 +165,8 @@ class KOP_Recent_Facilities_Widget extends WP_Widget {
             echo $args['before_title'] . esc_html($title) . $args['after_title'];
         }
 
-        if (function_exists('kop_v2_active') && kop_v2_active('homepage_stats')) {
-            // v2: real facilities only, one row each.
+        if (function_exists('kop_v2_recent_facilities')) {
+            // Real facilities only, one row each.
             $recent = kop_v2_recent_facilities($limit);
             if (empty($recent)) {
                 echo '<p class="kop-widget-empty">No facility records found.</p>';
@@ -185,50 +185,7 @@ class KOP_Recent_Facilities_Widget extends WP_Widget {
             return;
         }
 
-        $facilities = $this->fetch_facilities($limit);
-
-        if (empty($facilities)) {
-            echo '<p class="kop-widget-empty">No facility records found.</p>';
-        } else {
-            echo '<ul class="kop-recent-facilities-list">';
-            foreach ($facilities as $row) {
-                $data     = json_decode($row['json_data'], true);
-                $inner    = (isset($data['data']) && is_array($data['data'])) ? $data['data'] : $data;
-                $operator = isset($inner['operator']['name']) ? $inner['operator']['name'] : '';
-                $fac_count = (isset($inner['facilities']) && is_array($inner['facilities']))
-                    ? count($inner['facilities']) : 0;
-                $name = $operator ?: $row['unique_name'];
-                ?>
-                <li class="kop-recent-facility-item">
-                    <span class="kop-recent-facility-name"><?php echo esc_html($name); ?></span>
-                    <?php if ($fac_count > 0): ?>
-                        <span class="kop-recent-facility-meta">
-                            <?php echo $fac_count; ?> facilit<?php echo $fac_count === 1 ? 'y' : 'ies'; ?>
-                        </span>
-                    <?php endif; ?>
-                </li>
-                <?php
-            }
-            echo '</ul>';
-        }
-
         echo $args['after_widget'];
-    }
-
-    private function fetch_facilities($limit) {
-        $connection = kop_get_facilities_database_connection();
-        $table      = kop_discover_facilities_master_table($connection);
-        if (!$table) return array();
-
-        global $wpdb;
-        $rows = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT unique_name, json_data FROM `{$table}` ORDER BY updated_at DESC LIMIT %d",
-                $limit
-            ),
-            ARRAY_A
-        );
-        return (array) $rows;
     }
 
     public function form($instance) {
@@ -303,18 +260,9 @@ class KOP_Stats_Widget extends WP_Widget {
         global $wpdb;
         $stats = array();
 
-        $connection = kop_get_facilities_database_connection();
-        $table      = kop_discover_facilities_master_table($connection);
-
-        if (function_exists('kop_v2_active') && kop_v2_active('homepage_stats')) {
+        if (function_exists('kop_v2_facility_count')) {
             $stats[] = array(
                 'value' => number_format(kop_v2_facility_count()),
-                'label' => 'Facilities Tracked',
-            );
-        } elseif ($table) {
-            $count = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`");
-            $stats[] = array(
-                'value' => number_format($count),
                 'label' => 'Facilities Tracked',
             );
         }
