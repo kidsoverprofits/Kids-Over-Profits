@@ -4,6 +4,18 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-10-28
+
+### 4.3 Records, names and data quality
+
+- **test-auto-connect.php: 3 checks fail on the 2026-10-20 mirror, before and after 587a4532** (found 2026-10-20):
+    "woodbury: some waiting pages connect themselves" (0 of 375), "drive docs: links with no record are tied ..." (0 of 2866)
+    and "a name two company records share finds none" (Rite of Passage, Inc.). Likely the mirror's data moved under the
+    checks (pages already connected, links already tied, a company merged); confirm and fix the checks or the code.
+    Done 2026-10-28: f07f18f1 had already made the three checks build their own data; three more data-bound
+    checks fixed in https://github.com/kidsoverprofits/Kids-Over-Profits/commit/03dca696045d325c560a57ee3e907308fcf1f565
+    (0 FAIL on the 2026-10-27 mirror). Open: refresh the mirror once kop-pipeline/tmp/prod.sqlite is not held open.
+
 ## Moved 2026-10-25
 
 ### 4.7 Pages and templates
