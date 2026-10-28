@@ -3505,3 +3505,53 @@ corner, so the bound is now the stage width (as its comment said) and the messag
 (c) Data drift: bound 600 -> 720px, written down above the check. Follow-up: plan item 5.6. (d) The data is right:
 the sixth is a staff line at Cross Creek Manor for Girls from its staff list, so the check asks for the report's five
 by name. (e) f649268 only, passes on 8d8af9a.
+
+## 5. Tests failing on main, 2026-10-28 (finished 2026-10-28)
+
+### Item 1, test-drive-docs follow-up
+Follow-up: have the test follow the merge map the way
+     test-fornits does, and check that the Drive Docs screen moves SCIAD rows for a merged record to the record it
+     was merged into rather than dropping them.
+Done 2026-10-28 (d32e03c6): the test resolves ids through kop_facility_merge_resolve() with the copied
+`kop_facility_merged_into` option, as test-fornits does; "#id missing" went from 9 to 2 (#100255, #9660, deleted, not
+merged). The real Drive Docs path does not drop merged rows: kop_fmerge_follow_waiting() moves pending rows after each
+sync in the Review inbox queue and hourly. Two gaps went into the plan file's item 3.
+
+### 2. **test-review-inbox.php --source=news: "Take off removes the consultant's note exactly" fails** (found 2026-10-21, also
+   with the session's own changes set aside, so it predates them). The run also prints "kop extension: lawsuit facility
+   links failed: ... near "COMMENT"" (a MySQL column COMMENT in a CREATE on the SQLite copy). Look at
+   `kop_rinbox_native_unconnect()` in `inc/review-inbox/native.php` for consultant notes.
+   Done 2026-10-28 (1a5f1180): not the theme code. The mirror stores Upwell Advisors' consultant notes with bare
+   slashes and kop_wbc_change_notes() re-saves through wp_json_encode(), which escapes them, so the byte compare
+   failed with the notes unchanged. The check now compares decoded JSON. The COMMENT error is separate (plan item 3).
+
+### 3. **test-review-inbox.php: reader-accounts and wiki-updates fail in the full run** (found 2026-10-25 on a clean copy of
+   main at 3f179304 against the 2026-10-23 mirror, so they predate the Review inbox tabs work). reader-accounts: "a reply
+   that is not JSON gets one more try", "a line ... is dropped (0 lines, 2 dropped)", "a name is taken out ...", and
+   "Undefined array key 0" at `scripts/review-inbox-tests/reader-accounts.php:111`; wiki-updates: the three "site builds
+   the script's draft" / "bold names line" / "names carry the years" checks find 0 drafts. `--source=reader-accounts`
+   alone passes, so something earlier in the full run changes what it reads (order-dependent); start there.
+   Closed 2026-10-28: not reproduced. A full run on HEAD against the 2026-10-27 mirror passes every reader-accounts and
+   wiki-updates check (123 same, 63 named, 22 with years). Likely cause of the old run: on a clean copy of main
+   js/data/ is a gitignored junction to kop-data, so kop_wiki_drafts_all() found no update-drafts.json (0 drafts).
+
+### 4. **kop-pipeline test-ocr-repair.py: 2 of the fax lines fail** (found 2026-10-25; the same on the committed
+   `pa_scraper.py`, so it predates OCR version 3). `scrapers/ocr_repair.py` leaves "klesing" and "unclolhed" instead of
+   "kissing" and "unclothed" (fax page lines 2 and 5). Check whether `scrapers/pa_ocr_vocab.json` (rebuilt 2026-10-18
+   by `scripts/build-pa-ocr-vocab.py`) lost those words or the swap rules changed.
+   Done 2026-10-28 (kop-pipeline 5d7dbc17): not the vocab or the rules. wordfreq was not installed in C:\Python313,
+   and ocr_repair.py's ImportError fallback gave every word zero frequency in silence. Installed it (it was already in
+   requirements.txt); ocr_repair.py now warns on stderr without it and the test exits 2. 15 of 15 pass.
+
+### 5. **test-network-embed.js: 5 of 703 slices differ from the map** (found 2026-10-25, the same on the graph.json before
+   that day's investor build, so not new): aspen-education-group, suws-of-the-carolinas, provo-canyon-school,
+   aspen-achievement-academy, asheville-academy-for-girls. Each embed is missing Aspen-side names the map shows
+   (aspiro-group, boulder-creek-academy, bain-capital, passages-to-recovery...) and draws fewer lines (145 against 176
+   for Provo), so the PHP slice (`kop_network_map_slice_opened()` in inc/network-map.php) and focus.js have drifted,
+   most likely on how the cap's dropped connections or an owner's step are treated for names joined through a folded
+   line. Run with `--only=aspen-education-group,provo-canyon-school` against the portable PHP; fix the PHP to match
+   focus.js (never the other way), then the full run.
+   Done 2026-10-28 (390880b1): the PHP had a rule focus.js lacks. kop_network_map_slice_opened() kept the 40 most
+   important direct connections and dropped everything they brought; visibleIds() has no cap. Only those five names
+   have over 40 connections. The slice no longer trims, `more` stays 0 (the caption said "N more on the full map"),
+   and the test's size bound went from 120 to 150 KB (Provo is 135 KB). 702 of 702 slices match.
