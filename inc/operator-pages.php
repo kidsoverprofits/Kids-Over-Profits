@@ -973,6 +973,8 @@ if (!function_exists('kop_operator_page_data')) {
             'subsidiaries'  => $subsidiaries,
             'facilities'    => $facilities,
             'program_tree'  => $program_tree,
+            // Its programs in the categories related to the TTI (inc/related-facilities.php), listed apart.
+            'related'       => function_exists('kop_related_for_operators') ? kop_related_for_operators($members) : array(),
             'open_count'    => $open,
             'place_count'   => $k,
             'news'          => $news,

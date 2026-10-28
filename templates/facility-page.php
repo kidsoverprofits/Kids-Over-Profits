@@ -496,8 +496,14 @@ get_header();
     <header class="kop-fp-header">
         <?php echo function_exists('kop_page_trail_html') ? kop_page_trail_html($page['name']) : ''; ?>
         <p class="kop-fp-eyebrow">
+            <?php if (!empty($page['related'])) : // A related-category record (inc/related-facilities.php): never a TTI facility. ?>
+                <a href="<?php echo esc_url($page['related']['url']); ?>"><?php echo esc_html($page['related']['label']); ?></a>
+                <span aria-hidden="true">&middot;</span>
+                Not a troubled teen program
+            <?php else : ?>
             Facility profile
-            <?php if ($page['hub_name'] !== '') : ?>
+            <?php endif; ?>
+            <?php if (empty($page['related']) && $page['hub_name'] !== '') : ?>
                 <span aria-hidden="true">&middot;</span>
                 <?php if ($page['hub_url'] !== '') : ?>
                     <a href="<?php echo esc_url($page['hub_url']); ?>"><?php echo esc_html($page['hub_name']); ?></a>

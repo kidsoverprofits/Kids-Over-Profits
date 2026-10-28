@@ -197,6 +197,17 @@ add_action('wp_ajax_kop_facility_finder', function () {
             // The other kinds still come back.
         }
     }
+    // The other related categories (inc/related-facilities.php), "cra:<id>".
+    foreach (function_exists('kop_related_kinds') ? kop_related_kinds() : array() as $rkind => $rcat) {
+        if ($rkind === 'ya' || !($kinds === array('all') || in_array($rkind, $kinds, true))) continue;
+        $rlabel = kop_related_category($rcat)['label'];
+        foreach (kop_related_search($rcat, $q, 8) as $y) {
+            $results[] = array('id' => $y['id'], 'token' => $rkind . ':' . $y['id'], 'kind' => $rkind, 'name' => $y['name'],
+                'label' => $rlabel, 'detail' => implode(', ', array_filter(array($y['city'], $y['state'], $y['review'] === 'pending' ? 'not shown yet' : ''))),
+                'url' => kop_related_url($y['id']));
+        }
+        $others = array_values(array_diff($others, array($rkind)));
+    }
     $others = array_values(array_diff($others, array('ya')));
     if ($others && function_exists('kop_wbc_find_records')) {
         try {

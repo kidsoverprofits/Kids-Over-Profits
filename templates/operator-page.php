@@ -31,6 +31,7 @@ if ($kop_op_has_history) $kop_op_sections['history'] = 'History';
 $kop_op_about = !empty($page['about']['paragraphs']) || !empty($page['about']['also']) ? (array) $page['about'] : null;
 if ($kop_op_about) $kop_op_sections['about'] = 'About';
 if ($page['facilities']) $kop_op_sections['programs'] = 'Programs';
+if (!empty($page['related'])) $kop_op_sections['related'] = 'Related programs';
 if ($kop_op_has_people) $kop_op_sections['people'] = 'People';
 if ($page['parents'] || $page['subsidiaries']) $kop_op_sections['ownership'] = 'Ownership';
 if ($page['news']) $kop_op_sections['news'] = 'News coverage';
@@ -231,6 +232,23 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                                     </ul>
                                 </details>
                             <?php endif; ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
+            <?php endif; ?>
+
+            <?php if (!empty($page['related'])) : ?>
+            <section class="kop-fp-section" id="related">
+                <h2>Related programs</h2>
+                <p class="kop-fp-count">Programs it runs or ran that are not troubled teen programs, by the category they are listed under.</p>
+                <ul class="kop-fp-records kop-fp-siblings">
+                    <?php foreach ($page['related'] as $r) :
+                        $bits = array_filter(array($r['label'], $r['place'], ($r['status'] !== '' && $r['status'] !== 'Unknown') ? $r['status'] : '', $r['past'] ? 'Ran it in the past' : ''), 'strlen');
+                        ?>
+                        <li<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('facility:' . (int) $r['id'] . ':all', $r['name']) : ''; ?>>
+                            <a href="<?php echo esc_url($r['url']); ?>"><?php echo esc_html($r['name']); ?></a>
+                            <?php if ($bits) : ?><span class="meta"><?php echo esc_html(implode(' | ', $bits)); ?></span><?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>

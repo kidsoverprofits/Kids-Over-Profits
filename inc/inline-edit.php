@@ -550,7 +550,7 @@ function kop_ie_facility_groups() {
     );
 }
 
-function kop_ie_facility_opts() {
+function kop_ie_facility_opts($fid = 0) {
     global $wpdb;
     $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
     if (!$pdo) {
@@ -561,7 +561,9 @@ function kop_ie_facility_opts() {
     if (!kop_v2_writes_active($pdo, $wpdb->prefix)) {
         throw new RuntimeException('Facility saves are not on facilities_v2 yet.');
     }
-    return array('pdo' => $pdo, 'prefix' => $wpdb->prefix);
+    $opts = array('pdo' => $pdo, 'prefix' => $wpdb->prefix);
+    // A related-category record (inc/related-facilities.php): its own table, no TTI location rows.
+    return kop_facility_is_related_id($fid) && function_exists('kop_related_opts') ? kop_related_opts($opts) : $opts;
 }
 
 /** Checklist options for a section: the form's labels plus any other true/false keys the record holds. */
@@ -854,7 +856,7 @@ function kop_ie_facility_group_fields(array $doc, $group) {
 function kop_ie_facility_load(array $p) {
     $fid = (int) ($p[0] ?? 0);
     $group = (string) ($p[1] ?? 'all');
-    $opts = kop_ie_facility_opts();
+    $opts = kop_ie_facility_opts($fid);
     $stored = kop_facility_load($fid, $opts);
     if (!$stored) {
         throw new RuntimeException("Facility #{$fid} does not exist.");
@@ -879,7 +881,7 @@ function kop_ie_facility_load(array $p) {
 function kop_ie_facility_save(array $p, array $v) {
     $fid = (int) ($p[0] ?? 0);
     $group = (string) ($p[1] ?? 'all');
-    $opts = kop_ie_facility_opts();
+    $opts = kop_ie_facility_opts($fid);
     $status_changed = false;
     kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $group, $opts, $v, &$status_changed) {
         $stored = kop_facility_load($fid, $opts);
@@ -942,7 +944,7 @@ function kop_ie_fstatus_save(array $p, array $v) {
     if (!in_array($status, array('Open', 'Closed', 'Suspended', 'Transferred', 'Unknown'), true)) {
         throw new RuntimeException('Unknown status.');
     }
-    $stored = kop_facility_load($fid, kop_ie_facility_opts());
+    $stored = kop_facility_load($fid, kop_ie_facility_opts($fid));
     if (!$stored) {
         throw new RuntimeException("Facility #{$fid} does not exist.");
     }
@@ -972,7 +974,7 @@ function kop_ie_era_entry(array $doc, $i) {
 function kop_ie_era_load(array $p) {
     $fid = (int) ($p[0] ?? 0);
     $i = (int) ($p[1] ?? -1);
-    $stored = kop_facility_load($fid, kop_ie_facility_opts());
+    $stored = kop_facility_load($fid, kop_ie_facility_opts($fid));
     if (!$stored) {
         throw new RuntimeException("Facility #{$fid} does not exist.");
     }
@@ -999,7 +1001,7 @@ function kop_ie_era_load(array $p) {
 function kop_ie_era_save(array $p, array $v) {
     $fid = (int) ($p[0] ?? 0);
     $i = (int) ($p[1] ?? -1);
-    $opts = kop_ie_facility_opts();
+    $opts = kop_ie_facility_opts($fid);
     kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $i, $opts, $v) {
         $stored = kop_facility_load($fid, $opts);
         if (!$stored) {
@@ -1123,7 +1125,7 @@ function kop_ie_erarename_load(array $p) {
 function kop_ie_erarename_save(array $p, array $v) {
     $fid = (int) ($p[0] ?? 0);
     $i = (int) ($p[1] ?? -1);
-    $opts = kop_ie_facility_opts();
+    $opts = kop_ie_facility_opts($fid);
     $token = '';
     kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $i, $opts, &$token) {
         $stored = kop_facility_load($fid, $opts);
@@ -1160,7 +1162,7 @@ function kop_ie_eraundo_save(array $p, array $v) {
         throw new RuntimeException('There is nothing to undo.');
     }
     $fid = (int) $e['fid'];
-    $opts = kop_ie_facility_opts();
+    $opts = kop_ie_facility_opts($fid);
     kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $e, $opts) {
         $stored = kop_facility_load($fid, $opts);
         if (!$stored) {

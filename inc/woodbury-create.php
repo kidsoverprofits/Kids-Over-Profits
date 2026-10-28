@@ -63,7 +63,7 @@ function kop_wbc_kinds() {
  * Woodbury Facts, not here).
  */
 function kop_wbc_target_kinds() {
-    return kop_wbc_kinds() + array('ya' => 'Young adult program (18+)');
+    return kop_wbc_kinds() + array('ya' => 'Young adult program (18+)', 'cra' => 'Christian rehab for adults');
 }
 
 /** "TELOS RESIDENTIAL TREATMENT, LLC" -> "Telos Residential Treatment, LLC". */
@@ -154,7 +154,9 @@ function kop_wbc_pdo() {
  */
 function kop_wbc_create(array $r, array $f) {
     $kind = (string) ($f['kind'] ?? '');
-    if (!isset(kop_wbc_kinds()[$kind])) {
+    // A related category other than young adult programs (inc/related-facilities.php): kop_wbc_create_related().
+    $related = $kind !== 'ya' && function_exists('kop_related_kinds') ? (kop_related_kinds()[$kind] ?? '') : '';
+    if (!isset(kop_wbc_kinds()[$kind]) && $related === '') {
         throw new RuntimeException('Choose what kind of record to create.');
     }
     $f['name'] = trim(preg_replace('/\s+/', ' ', (string) ($f['name'] ?? '')));
@@ -168,8 +170,34 @@ function kop_wbc_create(array $r, array $f) {
     if ($f['name'] === '') {
         throw new RuntimeException('A name is needed.');
     }
+    if ($related !== '') return kop_wbc_create_related($related, $r, $f, kop_wbc_pdo());
     $fn = 'kop_wbc_create_' . $kind;
     return $fn($r, $f, kop_wbc_pdo());
+}
+
+/**
+ * A record of a related category: the same facility document, in
+ * related_facilities, its notes citing where it came from. A name already in
+ * the category (in that state) is refused, as for a program.
+ */
+function kop_wbc_create_related($category, array $r, array $f, PDO $pdo) {
+    global $wpdb;
+    $opts = array('pdo' => $pdo, 'prefix' => $wpdb->prefix);
+    $kind = kop_related_category($category)['kind'];
+    $found = kop_related_find($category, $f['name'], $f['state'] ?: null, $opts);
+    if ($found) {
+        throw new RuntimeException('Already a record: ' . kop_related_category($category)['one'] . ' #' . $found . '. Pick it in the finder instead.');
+    }
+    $country = $f['country'] !== '' ? $f['country'] : 'United States';
+    $id = kop_related_save($category, array(
+        'identification'  => array('name' => $f['name'], 'currentOperator' => '', 'otherNames' => array()),
+        'locationDetails' => array('city' => $f['city'], 'state' => $f['state'], 'country' => $country),
+        'location'        => trim(implode(', ', array_filter(array($f['city'], $f['state'] ?: $country)))),
+        'operatingPeriod' => array('startYear' => null, 'endYear' => null, 'status' => 'Unknown', 'notes' => array()),
+        'facilityDetails' => array('type' => trim((string) ($f['type'] ?? '')), 'gender' => ''),
+        'notes'           => array(kop_wbc_source_note($r)),
+    ), 0, $opts);
+    return array('kind' => $kind, 'id' => $id, 'name' => $f['name'], 'folder' => 0, 'url' => kop_related_url($id));
 }
 
 /* ---- Program --------------------------------------------------------- */
@@ -750,6 +778,24 @@ function kop_wbc_live_folder($id) {
 function kop_wbc_existing_target($kind, $id) {
     global $wpdb;
     $id = (int) $id;
+    $related = $kind !== 'ya' && function_exists('kop_related_kinds') ? (kop_related_kinds()[$kind] ?? '') : '';
+    if ($related !== '') {
+        // A related-category record (inc/related-facilities.php): its folder is the document's
+        // documentFolderId, as a facility's, made under its category's folder.
+        $rec = kop_related_get($id);
+        if (!$rec || $rec['category'] !== $related) {
+            throw new RuntimeException(kop_wbc_target_kinds()[$kind] . ' #' . $id . ' not found.');
+        }
+        $name = (string) $rec['doc']['identification']['name'];
+        $folder = kop_wbc_live_folder($rec['doc']['documentFolderId'] ?? 0);
+        if (!$folder) {
+            $folder = kop_wbc_folder($name, kop_wbc_folder(kop_related_category($related)['label'], 0));
+            $doc = $rec['doc'];
+            $doc['documentFolderId'] = $folder;
+            kop_related_save($related, $doc, $id);
+        }
+        return array('kind' => $kind, 'id' => $id, 'name' => $name, 'folder' => $folder, 'url' => kop_related_url($id));
+    }
     if ($kind === 'ya') {
         // Young adult programs live in the records DB, their folder in a column (inc/young-adult-programs.php).
         $ya = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;

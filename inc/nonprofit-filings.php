@@ -162,6 +162,10 @@ function kop_npf_record_name($kind, $id) {
         $name = $wpdb->get_var($wpdb->prepare('SELECT name FROM ' . $wpdb->prefix . 'kop_operators WHERE id = %d', (int) $id));
         return $name ? (string) $name : 'company #' . (int) $id;
     }
+    if (kop_facility_is_related_id($id)) {   // a related-category record (inc/related-facilities.php)
+        $r = function_exists('kop_related_get') ? kop_related_get((int) $id) : null;
+        return $r ? (string) $r['doc']['identification']['name'] : 'record #' . (int) $id;
+    }
     $f = function_exists('kop_rinbox_facility') ? kop_rinbox_facility((int) $id) : null;
     return $f ? (string) $f['name'] : 'facility #' . (int) $id;
 }
@@ -169,6 +173,9 @@ function kop_npf_record_name($kind, $id) {
 /** Does the record exist? */
 function kop_npf_record_exists($kind, $id) {
     global $wpdb;
+    if ($kind !== 'operator' && kop_facility_is_related_id($id)) {   // a related-category record (inc/related-facilities.php)
+        return function_exists('kop_related_get') && kop_related_get((int) $id) !== null;
+    }
     $table = $kind === 'operator' ? $wpdb->prefix . 'kop_operators' : 'facilities_v2';
     return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE id = %d", (int) $id)) > 0;
 }

@@ -80,6 +80,9 @@ require_once get_stylesheet_directory() . '/inc/survivor-archives.php';
 require_once get_stylesheet_directory() . '/inc/news-images.php';
 require_once get_stylesheet_directory() . '/inc/record-events.php';   // kop_record_changed(): one event for every record write
 require_once get_stylesheet_directory() . '/inc/facility-pages.php';
+// Categories related to the TTI (Christian Rehabs for Adults, Young Adult Programs): facility-shaped records in
+// related_facilities, never TTI facilities; pages at /related/<category>/<slug>/
+require_once get_stylesheet_directory() . '/inc/related-facilities.php';
 // Research notes read as prose with their sources (the About section of facility and company pages)
 require_once get_stylesheet_directory() . '/inc/profile-notes.php';
 // A renamed program's page cut into one section per name

@@ -2550,6 +2550,7 @@ if (!function_exists('kop_facility_page_url')) {
     function kop_facility_page_url($facility_id) {
         $facility_id = (int) $facility_id;
         if ($facility_id <= 0) return '';
+        if (kop_facility_is_related_id($facility_id)) return function_exists('kop_related_url') ? kop_related_url($facility_id) : '';
         $index = kop_facility_pages_index();
         if (!isset($index['ids'][$facility_id])) return '';
         $entry = $index['ids'][$facility_id];
@@ -3205,8 +3206,11 @@ if (!function_exists('kop_facility_page_data')) {
     function kop_facility_page_data($facility_id) {
         global $wpdb;
         $facility_id = (int) $facility_id;
+        // A related-category record (inc/related-facilities.php) is the same document in its own table.
+        $related = kop_facility_is_related_id($facility_id) && function_exists('kop_related_page_info') ? kop_related_page_info($facility_id) : null;
+        if (kop_facility_is_related_id($facility_id) && !$related) return null;
         $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT id, unique_name, name, state, city, country, status, updated_at, json_data FROM facilities_v2 WHERE id = %d',
+            'SELECT id, unique_name, name, state, city, country, status, updated_at, json_data FROM ' . ($related ? 'related_facilities' : 'facilities_v2') . ' WHERE id = %d',
             $facility_id
         ), ARRAY_A);
         if (!$row) return null;
@@ -3240,7 +3244,8 @@ if (!function_exists('kop_facility_page_data')) {
         }
         $place = implode(', ', $place_bits);
         $hub_name = $state_name !== '' ? $state_name : (($country !== '' && strcasecmp($country, 'United States') !== 0) ? $country : '');
-        $hub_url = function_exists('kop_v2_place_page_url') ? kop_v2_place_page_url($state_code ?: null, $country ?: null) : '';
+        // A related record is on no TTI place page: the trail goes to its category's list.
+        $hub_url = $related ? '' : (function_exists('kop_v2_place_page_url') ? kop_v2_place_page_url($state_code ?: null, $country ?: null) : '');
 
         $status = trim((string) ($op['status'] ?? ''));
         if ($status === '' ) $status = 'Unknown';
@@ -3301,6 +3306,16 @@ if (!function_exists('kop_facility_page_data')) {
                     'place'  => $s_place,
                     'status' => (string) $r['status'],
                     'url'    => kop_facility_page_url((int) $r['id']),
+                );
+            }
+            // The company's records in the related categories, named as such.
+            foreach (function_exists('kop_related_for_operators') ? kop_related_for_operators(array((int) $operator_row['id'])) : array() as $r) {
+                if ($r['id'] === $facility_id) continue;
+                $siblings[] = array(
+                    'name'   => $r['name'],
+                    'place'  => trim($r['label'] . ($r['place'] !== '' ? ' | ' . $r['place'] : '')),
+                    'status' => $r['status'],
+                    'url'    => $r['url'],
                 );
             }
         }
@@ -3558,6 +3573,7 @@ if (!function_exists('kop_facility_page_data')) {
 
         // ---- Copy ----------------------------------------------------------------
         $summary = kop_facility_pages_summary_sentence($name, $type, $place, $operator_name, $status, $start, $end, $years_text, $operator_past);
+        if ($related) $summary = trim($summary . ' It is not a troubled teen program; it is listed under ' . $related['label'] . '.');
         $seo_title = $name . ($place !== '' ? ' (' . $place . ')' : '') . ' | Kids Over Profits';
         $seo_description = $summary;
         // A merged profile post's content is printed on the page; its excerpt is the description it had.
@@ -3570,7 +3586,7 @@ if (!function_exists('kop_facility_page_data')) {
             $seo_description = rtrim(mb_substr($seo_description, 0, 152), " ,;:") . '...';
         }
 
-        $slug = $entry ? $entry['slug'] : kop_facility_page_slug_candidate($name, $state_code, $country);
+        $slug = $related ? $related['slug'] : ($entry ? $entry['slug'] : kop_facility_page_slug_candidate($name, $state_code, $country));
         $updated = (string) $row['updated_at'];
 
         // ---- One section per name of a renamed program (inc/facility-eras.php) ----
@@ -3604,7 +3620,9 @@ if (!function_exists('kop_facility_page_data')) {
         return array(
             'id'            => $facility_id,
             'slug'          => $slug,
-            'url'           => kop_facility_pages_url_for_slug($slug),
+            'url'           => $related ? kop_related_url($facility_id) : kop_facility_pages_url_for_slug($slug),
+            // {category, label, one, url} for a related-category record, else null.
+            'related'       => $related,
             'name'          => $name,
             'unique_name'   => $unique_name,
             'current_name'  => $current_name,

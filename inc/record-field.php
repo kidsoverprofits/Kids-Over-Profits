@@ -45,6 +45,7 @@ function kop_record_field_kind_words() {
         'marketer'    => 'marketing company',
         'tradeorg'    => 'trade organization',
         'ya'          => 'young adult program',
+        'cra'         => 'Christian rehab for adults',   // inc/related-facilities.php
     );
 }
 
@@ -100,6 +101,11 @@ function kop_record_field_name($kind, $id) {
     if ($kind === 'facility') return (string) $wpdb->get_var($wpdb->prepare('SELECT name FROM facilities_v2 WHERE id = %d', $id));
     if ($kind === 'company') {
         return (string) $wpdb->get_var($wpdb->prepare('SELECT COALESCE(NULLIF(name, \'\'), unique_name) FROM ' . $wpdb->prefix . 'kop_operators WHERE id = %d', $id));
+    }
+    if (function_exists('kop_related_kinds') && $kind !== 'ya' && isset(kop_related_kinds()[$kind])) {
+        // A related-category record (inc/related-facilities.php).
+        $r = kop_related_get($id);
+        return $r && $r['category'] === kop_related_kinds()[$kind] ? (string) $r['doc']['identification']['name'] : '';
     }
     if ($kind === 'ya') {
         // Young adult programs (18+) live in the records DB (inc/young-adult-programs.php).

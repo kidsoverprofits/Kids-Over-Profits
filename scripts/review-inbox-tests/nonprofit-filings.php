@@ -28,7 +28,9 @@ function kop_rinbox_test_nonprofit_filings(array $src, array $item, callable $ch
     foreach ($cands as $ein => $e) {
         if (!preg_match('/^\d{9}$/', (string) $ein)) $bad[] = $ein . ': EIN';
         if (!in_array($e['match'] ?? '', array('matched', 'check'), true)) $bad[] = $ein . ': match ' . json_encode($e['match'] ?? null);
-        if (empty($e['candidates'])) $bad[] = $ein . ': no records';
+        // One a researcher sent in by EIN (kop-pipeline scripts/nonprofit-990-extra.json) may name no record yet.
+        $sent_in = (bool) preg_grep('/^Sent in by /', (array) ($e['flags'] ?? array()));
+        if (empty($e['candidates']) && !$sent_in) $bad[] = $ein . ': no records';
         foreach ((array) ($e['candidates'] ?? array()) as $c) {
             if (!in_array($c['kind'] ?? '', array('facility', 'operator'), true)) $bad[] = $ein . ': kind ' . json_encode($c['kind'] ?? null);
             elseif (!kop_npf_record_exists($c['kind'], (int) $c['id'])) $bad[] = $ein . ': no ' . $c['kind'] . ' #' . $c['id'];

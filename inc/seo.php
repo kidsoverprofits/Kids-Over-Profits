@@ -559,6 +559,8 @@ if (!function_exists('kop_seo_place_steps')) {
 
 if (!function_exists('kop_seo_facility_steps')) {
     function kop_seo_facility_steps(array $page) {
+        // A related-category record: Home > its category's list (inc/related-facilities.php).
+        if (!empty($page['related'])) return array(array('title' => (string) $page['related']['label'], 'url' => (string) $page['related']['url']));
         return kop_seo_place_steps((string) ($page['hub_name'] ?? ''), (string) ($page['hub_url'] ?? ''));
     }
 }

@@ -25,6 +25,19 @@ if (!defined('KOP_FACILITY_SCHEMA_VERSION')) {
     define('KOP_FACILITY_SCHEMA_VERSION', 3);
 }
 
+// Records of the categories related to the TTI (inc/related-facilities.php) live in
+// related_facilities with ids above this one; troubled teen facilities stay far below it.
+if (!defined('KOP_RELATED_FIRST_ID')) {
+    define('KOP_RELATED_FIRST_ID', 900000);
+}
+
+if (!function_exists('kop_facility_is_related_id')) {
+    /** True for a related-category record's id (never a TTI facility). */
+    function kop_facility_is_related_id($id) {
+        return (int)$id > KOP_RELATED_FIRST_ID;
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Vocabularies
 // ---------------------------------------------------------------------------
@@ -1886,7 +1899,8 @@ if (!function_exists('kop_facility_table')) {
         switch ($base) {
             case 'facilities':
                 // The v2 documents. Phase 5 renames the table to facilities_master.
-                return 'facilities_v2';
+                // $opts['related']: a related-category record (inc/related-facilities.php), same shape, its own table.
+                return !empty($opts['related']) ? 'related_facilities' : 'facilities_v2';
             case 'identity':
                 return $prefix . 'kop_facility_identity';
             case 'locations':
@@ -2095,6 +2109,13 @@ if (!function_exists('kop_facility_allocate_id')) {
      */
     function kop_facility_allocate_id($unique_name, array $opts = array()) {
         $facilities = kop_facility_table('facilities', $opts);
+        // Related records are numbered from KOP_RELATED_FIRST_ID up, so the shared link tables
+        // (operators, news, lawsuits, filings, documents) tell them apart by id alone.
+        if (!empty($opts['related'])) {
+            $rows = kop_facility_db_rows("SELECT MAX(id) AS m FROM {$facilities}", array(), $opts);
+            $max = ($rows && $rows[0]['m'] !== null) ? (int)$rows[0]['m'] : 0;
+            return max($max, KOP_RELATED_FIRST_ID) + 1;
+        }
         $identity = kop_facility_table('identity', $opts);
         $max = 99999;
         foreach (array("SELECT MAX(id) AS m FROM {$facilities}", "SELECT MAX(facility_id) AS m FROM {$identity}") as $sql) {

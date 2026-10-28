@@ -178,6 +178,14 @@ function kop_rinbox_npf_item($ein, array $e) {
             'submit' => 'Link it to the company',
             'params' => array(kop_record_field_param('operator_id', 'Company', array('kinds' => array('company'), 'value' => $op ? kop_record_field_token('company', $op['id']) : ''))),
             'help' => 'Lists this organization\'s yearly returns on the company\'s page, at once. A company not on file yet can be named in the finder: it is made when you click, citing this IRS listing. Undo on the Linked tab takes the link off (and the new company, if nothing else uses it).');
+        // An organization that runs only adult programs (an Adult & Teen Challenge center): a record of
+        // Christian Rehabs for Adults, never a TTI facility (inc/related-facilities.php).
+        if (function_exists('kop_related_kinds')) {
+            $actions[] = array('id' => 'link_related', 'label' => 'Link to a Christian rehab for adults…', 'style' => 'neutral', 'ask' => true,
+                'submit' => 'Link it to the rehab',
+                'params' => array(kop_record_field_param('related_id', 'Christian rehab for adults', array('kinds' => array('cra')))),
+                'help' => 'For an organization that runs adult programs only. Lists its yearly returns on the rehab\'s page (listed under Christian Rehabs for Adults, not as a troubled teen program), at once. A rehab not on file yet can be named in the finder: it is made when you click, citing this IRS listing. Undo on the Linked tab takes the link off; a rehab made here stays.');
+        }
     }
     if ($open) {
         $actions[] = array('id' => 'reject', 'label' => 'Not this program', 'style' => 'reject',
@@ -222,6 +230,14 @@ function kop_rinbox_npf_act($key, $action, array $params) {
                 'url' => 'https://projects.propublica.org/nonprofits/organizations/' . $key,
                 'city' => (string) ($e['city'] ?? ''), 'state' => (string) ($e['state'] ?? ''), 'by' => kop_rinbox_reviewer(),
             ), function ($oid) use ($key) { return kop_npf_apply($key, 'operator', $oid, kop_rinbox_reviewer()); }));
+        case 'link_related':
+            $e = kop_npf_candidates()[(string) $key] ?? array();
+            return array('message' => kop_record_field_link((string) ($params['related_id'] ?? ''), array(
+                'kinds' => array('cra'),
+                'cite' => 'the IRS listing of "' . ($e['name'] ?? $key) . '" (EIN ' . kop_npf_ein_label($key) . ')',
+                'url' => 'https://projects.propublica.org/nonprofits/organizations/' . $key,
+                'city' => (string) ($e['city'] ?? ''), 'state' => (string) ($e['state'] ?? ''), 'by' => kop_rinbox_reviewer(),
+            ), function ($rid) use ($key) { return kop_npf_apply($key, 'facility', $rid, kop_rinbox_reviewer()); }));
         case 'reject':
             return array('message' => kop_npf_reject($key, kop_rinbox_reviewer()));
         case 'undo':
