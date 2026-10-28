@@ -250,10 +250,13 @@ if ($has('wpdl_kop_gdoc_links')) {
     $pdo->exec('UPDATE rop SET id = (SELECT MAX(id) + 1 FROM wpdl_kop_operators)');
     $pdo->exec('INSERT INTO wpdl_kop_operators SELECT * FROM rop');
     $before = (int) $pdo->query("SELECT COUNT(*) FROM wpdl_kop_gdoc_links WHERE status = 'pending' AND facility_id = 0")->fetchColumn();
+    // Ties the site made earlier were exact under the names the record had then; only this run's ties are held to today's names.
+    $site_ties = $pdo->query("SELECT id FROM wpdl_kop_gdoc_links WHERE facility_id > 0 AND facility_how IN ('SCIAD collection name (exact)', 'wiki page title (exact)')")->fetchAll(PDO::FETCH_COLUMN);
     $tied = kop_autoconn_drive_rematch();
     $check('drive docs: links with no record are tied to the record their collection or page names exactly', $tied > 0 && $tied < $before, "$tied of $before");
     $bad = array();
-    foreach ($pdo->query("SELECT source, source_doc, facility_id FROM wpdl_kop_gdoc_links WHERE facility_how IN ('SCIAD collection name (exact)', 'wiki page title (exact)') AND status = 'pending' GROUP BY source_doc") as $r) {
+    foreach ($pdo->query("SELECT id, source, source_doc, facility_id FROM wpdl_kop_gdoc_links WHERE facility_how IN ('SCIAD collection name (exact)', 'wiki page title (exact)') AND status = 'pending'") as $r) {
+        if (in_array($r['id'], $site_ties)) continue;
         $p = kop_autoconn_drive_program($r);
         if (!$p) continue;
         $hit = false;
@@ -361,19 +364,24 @@ foreach ($sites as $w) {
 }
 $check('submissions: every waiting website whose note gives a KOP id comes in on that record', $with_id === 0 || $right === $with_id, "$right of $with_id");
 $check('submissions: most waiting websites come in linked', !$sites || $guessed * 2 > count($sites), $guessed . ' of ' . count($sites));
-// Waiting news and lawsuits sent with no facility get theirs filled.
-$empty_news = "SELECT COUNT(*) FROM news_submissions WHERE status = 'submitted' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]'))";
-$before = (int) $pdo->query($empty_news)->fetchColumn();
+// Waiting news and lawsuits sent with no facility get theirs filled. Two fixtures of its own, each naming a record by KOP id
+// (the site's own pass has already filed every real one it could, so what is left waiting in the mirror names nothing).
+$pdo->exec("INSERT INTO news_submissions (article_title, submission_notes, status, facilities_mentioned) VALUES ('Fixture article', 'About KOP #$some.', 'submitted', '[]')");
+$fixture_news = (int) $pdo->lastInsertId();
+$pdo->exec("INSERT INTO lawsuits (case_name, reviewer_notes, publication_status, facilities_mentioned) VALUES ('Fixture v. Fixture', 'About KOP #$some.', 'pending', '[]')");
+$fixture_suit = (int) $pdo->lastInsertId();
 $n = kop_autoconn_submissions(microtime(true) + 120);
-$after = (int) $pdo->query($empty_news)->fetchColumn();
-$check('submissions: waiting news and lawsuits with no facility get the records their notes name', $before === 0 || ($n > 0 && $after < $before), "$n filled, news empty $before -> $after");
+$news_fm = (string) $pdo->query('SELECT facilities_mentioned FROM news_submissions WHERE id = ' . $fixture_news)->fetchColumn();
+$suit_fm = (string) $pdo->query('SELECT facilities_mentioned FROM lawsuits WHERE id = ' . $fixture_suit)->fetchColumn();
+$check('submissions: waiting news and lawsuits with no facility get the records their notes name',
+    $n >= 2 && !in_array($news_fm, array('', '[]'), true) && !in_array($suit_fm, array('', '[]'), true), "$n filled, news $news_fm");
 $bad = 0;
-foreach ($pdo->query("SELECT facilities_mentioned FROM news_submissions WHERE status = 'submitted'")->fetchAll(PDO::FETCH_COLUMN) as $fm) {
-    foreach ((array) json_decode((string) $fm, true) as $m) {
-        if (is_array($m) && !empty($m['facility_id']) && !isset($names[(int) $m['facility_id']])) $bad++;
+foreach (array($news_fm, $suit_fm) as $fm) {
+    foreach ((array) json_decode($fm, true) as $m) {
+        if (is_array($m) && (empty($m['facility_id']) || !isset($names[(int) $m['facility_id']]))) $bad++;
     }
 }
-$check('submissions: every filled mention is a real record', $bad === 0, "$bad bad");
+$check('submissions: every filled mention is a real record', $bad === 0 && $news_fm !== '', "$bad bad");
 $check('submissions: a second run fills nothing again', kop_autoconn_submissions(microtime(true) + 60) === 0);
 if ($list) {
     foreach ($pdo->query("SELECT item_key, target FROM wpdl_kop_auto_connect WHERE source = 'submissions' AND outcome = 'done'") as $r) {
