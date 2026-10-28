@@ -1352,7 +1352,7 @@ button.btn-quick-unmove, button.btn-quick-unmove:hover, button.btn-quick-unmove:
     text-align: center;
 }
 
-.url-safety-item.clean .url-safety-icon   { color: #16a34a; }
+.url-safety-item.clean .url-safety-icon   { color: #1b7e3c; }
 .url-safety-item.flagged .url-safety-icon { color: #b91c1c; }
 .url-safety-item.unknown .url-safety-icon { color: #b45309; }
 

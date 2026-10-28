@@ -163,7 +163,7 @@ a.dm-page-link:hover, a.dm-page-link:focus { color: var(--kop-midnight-blue, #00
 .dm-desig-chosen { margin: 6px 0 10px; }
 
 .dm-wiki-confirmed { color: #1b7e3c; font-weight: 600; }
-.dm-wiki-suggested { color: #b8860b; font-weight: 600; }
+.dm-wiki-suggested { color: #7a5b15; font-weight: 600; }
 
 /* Row actions */
 .dm-actions { white-space: nowrap; }
