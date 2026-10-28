@@ -628,7 +628,8 @@ function kop_ext_lawsuit_mentions(PDO $pdo, $facility, $text) {
 
 /**
  * The Lawsuit Processor's fields from the app's admin mode (reviewer route only):
- * every lawsuits column the form shows. Every other send arrives with the basics.
+ * every lawsuits column the form shows, and source_urls: more sources after the
+ * link sent. Every other send arrives with the basics.
  * 'status' is the case status (a Dropdown Lists value, else 'unknown'); 'published'
  * is set by kop_ext_rest_submit() from publish=1 and manage_options.
  */
@@ -641,11 +642,14 @@ function kop_ext_lawsuit_full_fields(array $p) {
         $ts = strtotime($filing);
         $filing = $ts ? gmdate('Y-m-d', $ts) : '';
     }
-    $urls = array();
-    foreach ((array) ($p['document_urls'] ?? array()) as $u) {
-        $u = esc_url_raw(trim((string) $u), array('http', 'https'));
-        if ($u !== '') $urls[] = $u;
-    }
+    $clean = function ($items) {
+        $out = array();
+        foreach ((array) $items as $u) {
+            $u = esc_url_raw(trim((string) $u), array('http', 'https'));
+            if ($u !== '') $out[] = $u;
+        }
+        return array_values(array_unique($out));
+    };
     return array(
         'case_name'         => kop_ext_text($p['case_name'] ?? ($p['title'] ?? ''), 500),
         'case_number'       => kop_ext_text($p['case_number'] ?? '', 255),
@@ -663,7 +667,9 @@ function kop_ext_lawsuit_full_fields(array $p) {
         'organizations_mentioned' => kop_ext_list($p['organizations_mentioned'] ?? array()),
         'claims'            => kop_ext_list($p['claims'] ?? array()),
         'tags'              => kop_ext_list($p['tags'] ?? array()),
-        'document_urls'     => array_values(array_unique($urls)),
+        'document_urls'     => $clean($p['document_urls'] ?? array()),
+        // More sources after the link sent (the CourtListener docket the processor found).
+        'source_urls'       => $clean($p['source_urls'] ?? array()),
         'published'         => false,
     );
 }
@@ -715,6 +721,7 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note, $full = n
         }
         if ($full['tags']) $fields['tags'] = $list($full['tags']);
         $fields['document_urls'] = $list($full['document_urls']);
+        if ($full['source_urls']) $fields['source_urls'] = $list(array_values(array_unique(array_merge(array($url), $full['source_urls']))));
         // The full list when given (plus the facility sent); else the records the text names, as before.
         $named = array_values(array_unique(array_merge($facility !== '' ? array($facility) : array(), $full['facilities_mentioned'])));
         if ($full['facilities_mentioned']) $fields['facilities_mentioned'] = $list($named);

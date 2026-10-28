@@ -261,6 +261,10 @@ check(($GLOBALS['kop_rinbox_logged'][0] ?? null) === array('lawsuit', array((int
 $r = submit(array_merge($full_lawsuit, array('url' => 'https://www.courtlistener.com/docket/666666/no-publish/')));
 $l = row($pdo, 'lawsuits', $r->data['id']);
 check($l['publication_status'] === 'pending' && empty($r->data['published']), 'full without publish stays pending');
+$r = submit(array_merge($full_lawsuit, array('url' => 'https://example-court.test/roe-complaint.pdf',
+    'source_urls' => array('https://www.courtlistener.com/docket/555555/roe/', 'https://example-court.test/roe-complaint.pdf', 'javascript:alert(1)'))));
+$l = row($pdo, 'lawsuits', $r->data['id']);
+check(json_decode($l['source_urls'], true) === array('https://example-court.test/roe-complaint.pdf', 'https://www.courtlistener.com/docket/555555/roe/'), 'full lawsuit: extra source_urls after the link, deduped, bad scheme dropped');
 $GLOBALS['kop_notified'] = $notifiedBefore;
 
 // Lawsuit Processor text read with a stubbed AI: field shaping.
@@ -283,6 +287,57 @@ check(is_array($f) && array_keys($f) === array('case_name', 'case_number', 'cour
 check(($f['filing_date'] ?? '') === '2025-03-04' && ($f['status'] ?? '') === 'settled' && ($f['jurisdiction'] ?? '') === 'Federal' && ($f['outcome'] ?? 'x') === ''
     && ($f['plaintiffs'] ?? null) === array('A', 'B') && ($f['defendants'] ?? null) === array('X') && ($f['staff_mentioned'] ?? null) === array(), 'lawsuit-process: date, status, jurisdiction normalised; lists cleaned');
 check(count($GLOBALS['kop_ai_calls']) === 4 && strpos($GLOBALS['kop_ai_calls'][0], 'focus on the staff') !== false && strpos($GLOBALS['kop_ai_calls'][1], 'focus on the staff') === false, 'lawsuit-process: capped at 4 chunks, instructions on the first');
+
+// CourtListener prefill (api/lib-courtlistener.php) with a stubbed API.
+require_once $root . '/api/lib-courtlistener.php';
+if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags($s) { return strip_tags((string) $s); } }
+$GLOBALS['kop_cl_requests'] = array();
+$GLOBALS['kop_cl_http_stub'] = function ($url) {
+    $GLOBALS['kop_cl_requests'][] = $url;
+    $docket = array('id' => 4242, 'court_id' => 'utd', 'docket_number' => '2:24-cv-00077', 'case_name' => 'Roe v. Stub Academy, LLC',
+        'date_filed' => '2024-02-01', 'date_terminated' => null, 'cause' => '42:1983 Civil Rights Act', 'absolute_url' => '/docket/4242/roe-v-stub-academy/');
+    if (preg_match('#/dockets/4242/$#', $url)) return $docket;
+    if (strpos($url, '/dockets/?') !== false && (strpos($url, 'docket_number=3%3A24-cv-1') !== false || strpos($url, 'pacer_case_id=777') !== false)) return array('results' => array($docket));
+    if (strpos($url, '/dockets/?') !== false) return array('results' => array());
+    if (strpos($url, '/courts/utd/') !== false) return array('full_name' => 'District Court, D. Utah');
+    if (strpos($url, '/parties/?') !== false) return array('results' => array(
+        array('name' => 'Jane Roe', 'party_types' => array(array('name' => 'Plaintiff'))),
+        array('name' => 'Stub Academy, LLC', 'party_types' => array(array('name' => 'Defendant'))),
+        array('name' => 'Interested Person', 'party_types' => array(array('name' => 'Interested Party'))),
+    ));
+    return null;
+};
+check(kop_cl_docket_ref_from_url('https://www.courtlistener.com/docket/4242/12/roe-v-stub-academy/') === array('id' => '4242')
+    && kop_cl_docket_ref_from_url('https://storage.courtlistener.com/recap/gov.uscourts.utd.777/gov.uscourts.utd.777.1.0.pdf') === array('court' => 'utd', 'pacer_case_id' => '777')
+    && kop_cl_docket_ref_from_url('https://example.test/docket/4242/') === null && kop_cl_docket_ref_from_url('') === null, 'courtlistener: docket, filing and RECAP PDF links read; others not');
+$lk = kop_cl_lookup_case('3:24-cv-1', '', 'tok');
+check(!empty($lk['success']) && $lk['data']['court'] === 'District Court, D. Utah' && $lk['data']['plaintiffs'] === array('Jane Roe') && $lk['data']['defendants'] === array('Stub Academy, LLC')
+    && $lk['data']['status'] === 'in_progress' && $lk['data']['source_urls'] === array('https://www.courtlistener.com/docket/4242/roe-v-stub-academy/'), 'courtlistener: the admin auto-fill payload is unchanged');
+$lk = kop_cl_lookup_case('9:99-cv-9', '', 'tok');
+check(empty($lk['success']) && strpos($lk['error'], "No federal docket found matching case number '9:99-cv-9'") === 0, 'courtlistener: no match -> the old message');
+
+// The AI read a federal case number: the docket's facts win, its parties first.
+$GLOBALS['kop_ai_calls'] = array();
+$p = kop_ext_rest_lawsuit_process(new WP_REST_Request(array(), array('url' => 'https://example.test/complaint', 'text' => str_repeat('The complaint alleges things. ', 40))));
+check(is_array($p) && $p['fields']['case_name'] === 'Roe v. Stub Academy, LLC' && $p['fields']['case_number'] === '2:24-cv-00077' && $p['fields']['court'] === 'District Court, D. Utah'
+    && $p['fields']['filing_date'] === '2024-02-01' && $p['fields']['status'] === 'settled' && $p['fields']['summary'] === 'A summary.'
+    && $p['fields']['plaintiffs'] === array('Jane Roe', 'A', 'B') && $p['fields']['defendants'] === array('Stub Academy, LLC', 'X')
+    && $p['courtlistener'] === array('url' => 'https://www.courtlistener.com/docket/4242/roe-v-stub-academy/', 'by' => 'case_number'), 'lawsuit-process: federal case number -> docket merged, AI status and summary kept');
+check(array_keys($p['fields']) === array_keys($f), 'lawsuit-process: merged answer keeps exactly the contract fields');
+
+// A CourtListener link with no readable text: the docket alone, no AI call.
+$GLOBALS['kop_ai_calls'] = array();
+$p = kop_ext_rest_lawsuit_process(new WP_REST_Request(array(), array('url' => 'https://www.courtlistener.com/docket/4242/roe-v-stub-academy/', 'text' => 'short')));
+check(is_array($p) && $p['fields']['case_name'] === 'Roe v. Stub Academy, LLC' && $p['fields']['status'] === 'in_progress' && $p['fields']['summary'] === '42:1983 Civil Rights Act'
+    && $p['fields']['facilities_mentioned'] === array() && $p['courtlistener']['by'] === 'link' && $GLOBALS['kop_ai_calls'] === array(), 'lawsuit-process: CourtListener link + too little text -> filled from the docket');
+
+// A state case: no lookup at all; nothing found: the AI fields as before.
+$GLOBALS['kop_cl_requests'] = array();
+$state = kop_ext_lawsuit_courtlistener('', array('case_number' => '3:24-cv-1', 'jurisdiction' => 'Utah'));
+check($state === null && $GLOBALS['kop_cl_requests'] === array(), 'lawsuit-process: state case -> CourtListener not asked');
+$p = kop_ext_lawsuit_answer($f, kop_ext_lawsuit_courtlistener('', array('case_number' => '9:99-cv-9', 'jurisdiction' => 'Federal')));
+check($p === array('fields' => $f), 'lawsuit-process: no docket -> the AI fields unchanged, no courtlistener key');
+$GLOBALS['kop_cl_http_stub'] = null;
 
 $r = submit(array('type' => 'legislation', 'url' => 'https://www.congress.gov/bill/119th-congress/house-bill/9999', 'title' => 'Stop Institutional Child Abuse Act',
     'bill_number' => 'HR 9999', 'jurisdiction' => 'US', 'session' => '119th Congress'));

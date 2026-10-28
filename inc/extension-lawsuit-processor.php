@@ -8,6 +8,11 @@
  *   POST /wp-json/kop/v1/extension/lawsuit-process  {url, text, instructions}
  *        The lawsuit AI read (api/lawsuit-extraction-lib.php), Groq and Gemini in
  *        turn (kop_ai_generate_alternating), over the page or PDF text; returns {fields}.
+ *        Federal dockets are then looked up on CourtListener (api/lib-courtlistener.php),
+ *        from a CourtListener link or the case number the AI read: the docket's name,
+ *        number, court and filing date replace the AI's, its parties come first, and
+ *        {courtlistener: {url, by}} says it was used. A CourtListener link with too
+ *        little text, or one the AI cannot read, still fills from the docket alone.
  *
  * Saving goes through /extension/submit with type=lawsuit and full=1
  * (inc/source-submissions.php, kop_ext_lawsuit_full_fields()); publish=1 files
@@ -128,6 +133,74 @@ function kop_ext_lawsuit_read_text($text, $url, $instructions) {
     return kop_ext_lawsuit_ai_fields(kop_normalize_lawsuit_extraction(kop_merge_chunk_extractions($extractions)));
 }
 
+/** The form's fields, all empty. */
+function kop_ext_lawsuit_blank_fields() {
+    return kop_ext_lawsuit_ai_fields(array());
+}
+
+/**
+ * The CourtListener docket for this case, as {fields, url, by}, or null: from the
+ * address when it is a CourtListener docket or RECAP filing, else from a federal
+ * case number. Short timeouts, since the AI read already takes most of a minute.
+ */
+function kop_ext_lawsuit_courtlistener($url, array $fields = array()) {
+    require_once get_stylesheet_directory() . '/api/lib-courtlistener.php';
+    $token = kop_cl_token();
+    $err = null;
+    $ref = $url !== '' ? kop_cl_docket_ref_from_url($url) : null;
+    if ($ref) {
+        $docket = kop_cl_fetch_docket_ref($ref, $token, $err, 10);
+        $by = 'link';
+    } else {
+        $number = trim((string) ($fields['case_number'] ?? ''));
+        if ($number === '' || strcasecmp((string) ($fields['jurisdiction'] ?? ''), 'Federal') !== 0) return null;
+        $found = kop_cl_find_docket($number, (string) ($fields['court'] ?? ''), $token, 10);
+        $docket = $found['ok'] ? $found['docket'] : null;
+        $by = 'case_number';
+    }
+    if (!is_array($docket) || empty($docket['id'])) return null;
+    $data = kop_cl_docket_fields($docket, $token, '', (string) ($fields['court'] ?? ''), 10);
+    return array('fields' => $data, 'url' => (string) ($data['source_urls'][0] ?? ''), 'by' => $by);
+}
+
+/**
+ * The AI's fields with the docket's: the court record's name, number, court,
+ * jurisdiction and filing date win; status and summary fill only blanks; the
+ * docket's parties come first, then any the AI read that it lacks.
+ */
+function kop_ext_lawsuit_merge_docket(array $fields, array $docket) {
+    foreach (array('case_name', 'case_number', 'court', 'jurisdiction', 'filing_date') as $k) {
+        $v = trim((string) ($docket[$k] ?? ''));
+        if ($v !== '') $fields[$k] = $v;
+    }
+    foreach (array('status', 'summary') as $k) {
+        $v = trim((string) ($docket[$k] ?? ''));
+        if ($v !== '' && trim((string) ($fields[$k] ?? '')) === '') $fields[$k] = $v;
+    }
+    foreach (array('plaintiffs', 'defendants') as $k) {
+        $out = array();
+        $seen = array();
+        foreach (array_merge((array) ($docket[$k] ?? array()), (array) ($fields[$k] ?? array())) as $name) {
+            $name = trim((string) $name);
+            $key = strtolower(preg_replace('/\s+/', ' ', $name));
+            if ($name === '' || isset($seen[$key])) continue;
+            $seen[$key] = true;
+            $out[] = $name;
+        }
+        $fields[$k] = $out;
+    }
+    return $fields;
+}
+
+/** The process answer: the fields, with the docket merged in when there is one. */
+function kop_ext_lawsuit_answer(array $fields, $cl) {
+    if (!$cl) return array('fields' => $fields);
+    return array(
+        'fields'        => kop_ext_lawsuit_merge_docket($fields, $cl['fields']),
+        'courtlistener' => array('url' => $cl['url'], 'by' => $cl['by']),
+    );
+}
+
 function kop_ext_rest_lawsuit_process(WP_REST_Request $req) {
     $p = $req->get_json_params();
     if (!is_array($p)) $p = array();
@@ -153,12 +226,21 @@ function kop_ext_rest_lawsuit_process(WP_REST_Request $req) {
             // fall through to the length check
         }
     }
+    // A CourtListener link names its docket outright: look it up before the AI, so
+    // a page the reader could not get (or the AI could not read) still fills.
+    require_once $dir . 'lib-courtlistener.php';
+    $cl = kop_cl_docket_ref_from_url($url) ? kop_ext_lawsuit_courtlistener($url) : null;
     if (mb_strlen($text) < 300) {
+        if ($cl) return kop_ext_lawsuit_answer(kop_ext_lawsuit_blank_fields(), $cl);
         return new WP_Error('kop_no_text', 'The page has too little text to read (' . mb_strlen($text) . ' characters). Open the filing itself, or paste its text into the notes box and try again.', array('status' => 422));
     }
     $fields = kop_ext_lawsuit_read_text($text, $url, $instructions);
-    if (is_wp_error($fields)) return $fields;
-    return array('fields' => $fields);
+    if (is_wp_error($fields)) {
+        if ($cl) return kop_ext_lawsuit_answer(kop_ext_lawsuit_blank_fields(), $cl);
+        return $fields;
+    }
+    if (!$cl) $cl = kop_ext_lawsuit_courtlistener('', $fields);
+    return kop_ext_lawsuit_answer($fields, $cl);
 }
 
 add_action('rest_api_init', function () {

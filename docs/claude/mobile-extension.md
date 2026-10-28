@@ -46,8 +46,13 @@ php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an i
 # outcome, settlement_amount, summary + string lists plaintiffs, defendants, facilities_mentioned, staff_mentioned,
 # organizations_mentioned, claims, tags). Text under 300 chars + url: a PDF is saved to a temp file and read with kop_extract_pdf_text(),
 # else fetchArticleContent(); max 4 chunks through kop_lawsuit_ai_call (kop_ai_generate_alternating); 422 too little text, 502 AI failed.
-# CourtListener prefill is not wired: api/fetch-lawsuit-details.php is a script, not a function.
-# extension/submit type=lawsuit with full=1 (kop_ext_lawsuit_full_fields()) writes every field above + document_urls; publish=1 and
+# CourtListener (api/lib-courtlistener.php, shared with the admin auto-fill api/fetch-lawsuit-details.php; key KOP_COURTLISTENER_TOKEN or
+# COURTLISTENER_API_KEY, constant / env / .env): a courtlistener.com/docket/<id>/ or storage.courtlistener.com/recap/ link is looked up
+# before the AI (too little text or an AI failure still fills from the docket alone); else a Federal case number the AI read is searched.
+# The docket's case_name, case_number, court, jurisdiction, filing_date win, status/summary fill blanks, its parties come first;
+# the answer adds {courtlistener:{url, by:'link'|'case_number'}}, which the app sends back as source_urls (after the link) on submit.
+# Tests stub the API with $GLOBALS['kop_cl_http_stub'] (scripts/test-source-submissions.php).
+# extension/submit type=lawsuit with full=1 (kop_ext_lawsuit_full_fields()) writes every field above + document_urls + extra source_urls; publish=1 and
 # manage_options files it publication_status 'published' (+ published_at, kop_resync_after_status, logged for Recently done: Undo restores 'pending')
 # and answers {published:true, queue:'the published lawsuits'}; otherwise it waits as 'pending'. Without full=1 nothing changes.
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-submit.php [--db=...]
