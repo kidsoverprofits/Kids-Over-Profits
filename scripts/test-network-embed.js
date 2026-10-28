@@ -162,7 +162,7 @@ function run() {
         check(slice.nodes.every((n) => full.node(n.id)) && slice.edges.every((e) => full.edgeById[e.id]),
             id + ': the slice names something graph.json does not have');
         check(slice.nodes.every((n) => slice.layout.positions[n.id]), id + ': a name in the slice has no position');
-        check((slice.more > 0) === (full.neighbours(id).length > 40), id + ': the cap note does not match the cap');
+        check(!slice.more, id + ': the slice says ' + slice.more + ' names were left out, but focus.js leaves none out');
 
         compare(id, slice);
     });
@@ -213,7 +213,7 @@ function run() {
     check(moved.length === 0,
         moved.length + ' slices settle to other positions than the map: ' + moved.slice(0, 8).join(', '));
     notes.push(same + ' of ' + (roots.length + viewKeys.length) + ' slices draw the board the map draws, name for name and place for place');
-    check(biggest.bytes < 120 * 1024, 'the largest slice, ' + biggest.id + ', is ' + Math.round(biggest.bytes / 1024) + ' KB',
+    check(biggest.bytes < 150 * 1024, 'the largest slice, ' + biggest.id + ', is ' + Math.round(biggest.bytes / 1024) + ' KB',
         'largest slice: ' + biggest.id + ', ' + Math.round(biggest.bytes / 1024) + ' KB');
 
     /* ------------------------------------------------------ the page path -- */

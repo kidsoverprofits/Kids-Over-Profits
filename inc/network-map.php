@@ -522,9 +522,11 @@ if (!function_exists('kop_network_map_slice_opened')) {
      * js/network-map/focus.js for a trail of one, every filter at its
      * default (all on). The root and everything it touches; everyone a
      * person among those touches; every place those people connect to; and
-     * the company that owns each program on it. With more than $cap direct
-     * connections, only the $cap most important stay and $more says how
-     * many went. id => true.
+     * the company that owns each program on it. Nothing is trimmed:
+     * visibleIds() has no cap, so $cap is not applied and $more (the
+     * caption's "N more on the full map") stays 0. Trimming here dropped
+     * Aspen's owners from the five names with over 40 connections
+     * (2026-10-28). id => true.
      */
     function kop_network_map_slice_opened(array $nodes, array $adjacent, $root, $cap, &$more) {
         $kind = static function ($id) use ($nodes) {
@@ -535,16 +537,6 @@ if (!function_exists('kop_network_map_slice_opened')) {
             $first[$link['other']] = true;
         }
         $more = 0;
-        if (count($first) > $cap) {
-            $ranked = array_keys($first);
-            usort($ranked, static function ($a, $b) use ($nodes) {
-                $ia = (float) ($nodes[$a]['importance'] ?? 0);
-                $ib = (float) ($nodes[$b]['importance'] ?? 0);
-                return $ib <=> $ia ?: strcmp($a, $b);
-            });
-            $more = count($ranked) - $cap;
-            $first = array_fill_keys(array_slice($ranked, 0, $cap), true);
-        }
 
         $asked = array($root => true) + $first;
         // People open out by one step (a snapshot, so a person brought by a
@@ -566,13 +558,6 @@ if (!function_exists('kop_network_map_slice_opened')) {
                 if ($kind($link['other']) !== 'parent' || ($edge['category'] ?? '') !== 'corporate' || $direction === 'renamed') continue;
                 if ($link['outgoing'] && $direction !== 'none') continue;
                 $asked[$link['other']] = true;
-            }
-        }
-        if ($more) {
-            // A capped root's dropped connections stay off the stage even
-            // where a person or an owner would have brought them.
-            foreach ($adjacent[$root] as $link) {
-                if (!isset($first[$link['other']])) unset($asked[$link['other']]);
             }
         }
         return $asked;
