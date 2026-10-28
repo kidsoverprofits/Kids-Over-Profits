@@ -1055,6 +1055,8 @@ function kop_render_drive_docs_page() {
     global $wpdb;
     kop_gdl_ensure_table();
     $sync = kop_gdl_sync(isset($_GET['gdl_resync']));
+    // Links of a merged-away record go to the record it was merged into (links.json carries the old id).
+    if ($sync && function_exists('kop_fmerge_follow_waiting')) kop_fmerge_follow_waiting();
     $table = kop_gdl_table();
     $tabs = kop_gdl_tabs();
     $kinds = kop_gdl_kinds();

@@ -194,6 +194,7 @@ function kop_rinbox_gdl_tool($id, array $params) {
     if ($id === 'resync') {
         $sync = kop_gdl_sync(true);
         delete_transient('kop_rinbox_gdl_synced');
+        if ($sync && function_exists('kop_fmerge_follow_waiting')) kop_fmerge_follow_waiting();
         if (!$sync) return array('message' => kop_gdl_paths() ? 'The links files could not be read (one may be half copied). Try again in a minute.' : 'No links files are uploaded yet.');
         return array('message' => 'Loaded the links files: ' . (int) $sync['added'] . ' new, ' . (int) $sync['updated'] . ' updated, ' . (int) $sync['gone'] . ' no longer offered.');
     }

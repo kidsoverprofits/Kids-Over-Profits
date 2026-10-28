@@ -20,6 +20,17 @@ if (!function_exists('kop_lawsuit_links_ensure_table')) {
     function kop_lawsuit_links_ensure_table(PDO $pdo): void {
         static $done = false;
         if ($done) return;
+        // The offline tests run on SQLite (tmp/prod.sqlite), which has no COMMENT, enum, KEY or ENGINE.
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lawsuit_facility_links (
+              lawsuit_id INTEGER NOT NULL, facility_id INTEGER NOT NULL,
+              link_type TEXT NOT NULL DEFAULT 'mentioned', created_by TEXT,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (lawsuit_id, facility_id))");
+            $pdo->exec("CREATE INDEX IF NOT EXISTS by_facility ON lawsuit_facility_links (facility_id, lawsuit_id)");
+            $done = true;
+            return;
+        }
         $pdo->exec("CREATE TABLE IF NOT EXISTS `lawsuit_facility_links` (
           `lawsuit_id` int(11) NOT NULL COMMENT 'FK -> lawsuits.id',
           `facility_id` int(11) NOT NULL COMMENT 'FK -> facilities_master.id',
@@ -85,8 +96,9 @@ if (!function_exists('kop_sync_lawsuit_facility_links')) {
             );
             $stmt->execute(array_merge([$lawsuitId], $desiredIds));
 
+            $ignore = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? 'OR IGNORE' : 'IGNORE';
             $ins = $pdo->prepare(
-                "INSERT IGNORE INTO lawsuit_facility_links (lawsuit_id, facility_id, link_type, created_by)
+                "INSERT $ignore INTO lawsuit_facility_links (lawsuit_id, facility_id, link_type, created_by)
                  VALUES (?, ?, 'mentioned', ?)"
             );
             foreach ($desiredIds as $fid) {
