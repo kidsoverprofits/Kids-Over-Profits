@@ -6,7 +6,7 @@ Two databases are involved. Tables written `{prefix}...` (`wpdl_` on the live si
 
 ## Facility Model (v2, canonical)
 
-Since the 2026-09-18 write switch every reader and writer uses these tables; `facilities_master` is the frozen legacy copy. Schema: `docs/FACILITY-SCHEMA.md`; migration history: `docs/DATA-MODEL-MIGRATION.md`. Table names come from `kop_facility_table()` (`inc/facility-store.php`), created by `kop_migration_create_tables()` (`inc/facility-migration.php`).
+Since the 2026-09-18 write switch every reader and writer uses these tables; `facilities_master` was retired in data model phase 5 (2026-10-25). Schema: `docs/FACILITY-SCHEMA.md`; migration history: `docs/DATA-MODEL-MIGRATION.md`. Table names come from `kop_facility_table()` (`inc/facility-store.php`), created by `kop_migration_create_tables()` (`inc/facility-migration.php`).
 
 ### facilities_v2
 **Columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`, plus stored generated columns read from the document: `schema_version`, `name`, `name_key`, `state`, `city`, `country`, `status`, `facility_type`, `start_year`, `end_year`
@@ -66,13 +66,8 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### facilities_master
 **Columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`
 
-**Purpose:** The pre-2026-09-18 master facility database - stores all projects as JSON. Frozen: saves go to `facilities_v2` (a legacy write gets a 409 from `kop_v2_exit_if_legacy_frozen`).
-**Primary Key:** `id`
-**Unique Keys:** `unique_name`
-
-**Row kinds:**
-- **Project rows** - operator/company/standalone-facility projects. These power the TTI Program Index directory.
-- **`__facility_ref` rows** - identity-only rows created by `api/promote-facilities-to-rows.php` so nested facilities inside other projects can have a stable `facility_id` for foreign-key references (e.g., `news_facility_links`). Identified by `json_data.__facility_ref === true`. These are skipped by `kop_get_facilities_projects_from_database()` and don't appear in the public directory.
+**Purpose:** Retired. The pre-2026-09-18 master facility database (all projects as JSON). On 2026-10-25 production renamed it `retired_facilities_master_20261025` (4,591 rows, last changed 2026-09-16; also in the backup `~/backups/phase5-legacy-tables-20261025.sql.gz`) and nothing reads or writes it. Facility records are `facilities_v2`, operators `{prefix}kop_operators`. The name `facilities_master` survives only as the old category name in the Data Manager and the autocomplete routes, served from the v2 tables, and as the `source_table` tag on rows `kop_v2_legacy_shaped_rows()` builds.
+**Former columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`. Its ids are the facility ids in `facilities_v2`, `news_facility_links`, `lawsuit_facility_links` and the other id stores.
 
 ---
 
@@ -130,7 +125,7 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### locations_master
 **Columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`
 
-**Purpose:** Location aggregate database - stores state/country facility collections
+**Purpose:** State-level data with no v2 home (referrer consultants, field notes). Its facility arrays were emptied on 2026-10-25; a state's or country's facilities come from the v2 tables.
 **Primary Key:** `id`
 **Unique Keys:** `unique_name`
 

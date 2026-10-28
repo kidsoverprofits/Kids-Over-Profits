@@ -54,7 +54,7 @@ The v2 write switch has been on since 2026-09-18. The legacy facility tables are
 - `inc/facility-v2-writer.php` translates between the form's project shape and the v2 tables (`facilities_v2`, operators, joins, location memberships). `kop_v2_save_form_project()` splits a project into one `kop_facility_save()` per facility; `kop_v2_form_projects()` builds the projects the form loads.
 - `api/save-master.php`: saves of parent-company and location projects, renames and deletes go through the v2 writer when `kop_v2_writes_active()` is true. Referrer, transporter and provider projects still save to `referrers_master` / the transporter table / `providers_master`. The transporter table is `wpdl_transporters_master` on the live site (`transporters_master` on older copies); PHP that reads or writes it asks `kop_transporters_table()` (`inc/utilities.php`) for the name rather than hard-coding it. Location rebuild/cleanup actions return 409.
 - Approving a suggestion applies it with `kop_v2_save_form_project()` in partial mode, so a suggestion only changes the fields it lists.
-- `facilities_master` takes no writes. `locations_master` keeps only state-level data with no v2 home (referrer consultants, field notes).
+- `facilities_master` was retired (2026-10-25) and nothing reads it. `locations_master` keeps only state-level data with no v2 home (referrer consultants, field notes).
 - Tools that still write the legacy tables must call `kop_v2_exit_if_legacy_frozen()`.
 
 ### Facility targeting and common TTI practices

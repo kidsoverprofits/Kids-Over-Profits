@@ -33,7 +33,7 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 ## Major Subsystems
 
 ### Facility records
-- Facilities live in `facilities_v2` (one JSON document per facility, schema in `docs/FACILITY-SCHEMA.md`) with parent companies in `{prefix}kop_operators`. The legacy `facilities_master` table is frozen.
+- Facilities live in `facilities_v2` (one JSON document per facility, schema in `docs/FACILITY-SCHEMA.md`) with parent companies in `{prefix}kop_operators`. The legacy `facilities_master` table was retired in data model phase 5 (2026-10-25).
 - Admins edit through the admin data form (`api/save-master.php`); the public suggests through `/tti-data-submission/` (guided start, `api/save-suggestion.php` into `suggested_edits`).
 - Other record categories: referrers/educational consultants, transporters, mental health providers (`providers_master`), marketing companies (`marketers_master`), trade organizations (`tradeorgs_master`), young adult programs (`young_adult_programs`) and Indigenous residential schools (`indigenous_schools`), each kept out of the facility tables. See `docs/data-forms/README.md`.
 - Every named person has an id (`{prefix}kop_people`, `inc/people.php`). Duplicates are merged (Merge Duplicates, Merge People), homes grouped under programs (Program Homes), renamed programs kept by name era (`inc/facility-eras.php`).

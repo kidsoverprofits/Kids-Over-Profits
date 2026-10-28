@@ -38,7 +38,7 @@ Read `docs/WRITING-STYLE.md` every time you write something a paragraph or longe
 ## Recent Important Changes
 
 ### September-October 2026
-- **Facility model v2**: since 2026-09-18 every facility is one JSON document in `facilities_v2` (parent companies in `{prefix}kop_operators`); `facilities_master` is frozen. Schema in `docs/FACILITY-SCHEMA.md`.
+- **Facility model v2**: since 2026-09-18 every facility is one JSON document in `facilities_v2` (parent companies in `{prefix}kop_operators`); `facilities_master` was retired (data model phase 5, 2026-10-25). Schema in `docs/FACILITY-SCHEMA.md`.
 - **Generated pages**: `/facility/<slug>/` and `/operator/<slug>/` for every qualifying record, with names by era, staff careers, serious findings, lawsuits, news, federal funding and document libraries. `/tti-program-index/` is one directory with company and location tabs.
 - **Review inbox**: every approval queue on the Submissions Review page (`inc/review-inbox.php` + `inc/review-inbox/<source>.php`) with Undo, conflicts, "already on file", volunteer reviewers and follow-up emails.
 - **Imports**: Woodbury Reports, Fornits, HEAL, the r/troubledteens wiki, Google Docs (Drive Docs), SCIAD NET, Unsilenced and other survivor archives, state-published facility lists, the data audit and federal funding all feed the review inbox; exact names connect themselves (`inc/auto-connect.php`).
@@ -67,7 +67,7 @@ Read `docs/WRITING-STYLE.md` every time you write something a paragraph or longe
 
 ### Data Stores (overview; columns in `DATABASE-COLUMNS.md`)
 - `facilities_v2` stores the facility records; `{prefix}kop_operators` / `kop_operator_facilities` the parent companies and their programs; `{prefix}kop_facility_locations` which state/country pages list each.
-- `facilities_master` is the frozen legacy copy; `suggested_edits` stores public submissions awaiting review.
+- `facilities_master` was retired in phase 5 (renamed `retired_facilities_master_20261025`); `suggested_edits` stores public submissions awaiting review.
 - `locations_master`, `referrers_master`, `{prefix}transporters_master` (`kop_transporters_table()`), `providers_master`, `marketers_master`, `tradeorgs_master` store the other record categories.
 - `young_adult_programs` and `indigenous_schools` hold programs kept apart from the TTI facility tables.
 - `wiki_submissions`, `news_submissions`, `lawsuits`, `legislation`, `memorial_victims`, `news_featured` (+ `news_featured_nominations`) are records tables in the records database.

@@ -59,7 +59,7 @@ Approve, reject, publish and PR on these five types are logged to Recently done 
 
 ### Facility data (v2 model)
 
-Since 2026-09-18 facility writes go to the v2 tables (`facilities_v2` and related; `inc/facility-v2-writer.php`, `inc/facility-store.php`) and the legacy `facilities_master` / `locations_master` tables are frozen. When v2 writes are active (`kop_v2_writes_active()`), an approved operator or location suggestion is saved into v2 as a partial update: only the fields the suggestion lists change, nothing is removed. Referrer and transporter suggestions still write `referrers_master` / `transporters_master`; provider, marketing company and trade organization suggestions merge into `providers_master`, `marketers_master` and `tradeorgs_master`. The wiki facility merge also reads and writes v2 when active. See `docs/DATA-MODEL-MIGRATION.md`.
+Since 2026-09-18 facility writes go to the v2 tables (`facilities_v2` and related; `inc/facility-v2-writer.php`, `inc/facility-store.php`) and the legacy `facilities_master` table was retired (2026-10-25, data model phase 5) while `locations_master` keeps only state-level data. An approved operator or location suggestion is saved into v2 as a partial update: only the fields the suggestion lists change, nothing is removed. Referrer and transporter suggestions still write `referrers_master` / `transporters_master`; provider, marketing company and trade organization suggestions merge into `providers_master`, `marketers_master` and `tradeorgs_master`. The wiki facility merge also reads and writes v2 when active. See `docs/DATA-MODEL-MIGRATION.md`.
 
 ## The review inbox queues
 
