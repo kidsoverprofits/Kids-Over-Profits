@@ -983,7 +983,13 @@ if (!function_exists('kop_operator_page_data')) {
             'resource_links' => function_exists('kop_facility_pages_resource_links') ? (array) kop_facility_pages_resource_links($op['resourceLinks'] ?? null) : array(),
             'notes'         => $notes,
             // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
-            'about'         => function_exists('kop_pnotes_build') ? kop_pnotes_build($notes) : null,
+            'about'         => (function () use ($notes, $operator_id) {
+                $about = function_exists('kop_pnotes_build') ? kop_pnotes_build($notes) : null;
+                // An approved write-up (inc/record-writeups.php) takes its place, as on a facility page.
+                if (!function_exists('kop_wu_page_about') || !function_exists('kop_pnotes_build')) return $about;
+                $build = static function (array $lines) { return kop_pnotes_build($lines); };
+                return kop_wu_page_about(kop_wu_operator_key($operator_id), $notes, $about, $build);
+            })(),
             'documents'     => $documents,
             'research'      => $research,
             'unsilenced'    => $unsilenced,

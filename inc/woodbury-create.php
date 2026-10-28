@@ -234,6 +234,8 @@ function kop_wbc_create_facility(array $r, array $f, PDO $pdo) {
     if (function_exists('kop_facdisc_rematch_closure_reports')) {
         kop_facdisc_rematch_closure_reports($pdo);
     }
+    // Held like approved facts: no public page until its write-up is approved (inc/record-writeups.php).
+    if (function_exists('kop_wu_hold_new_record')) kop_wu_hold_new_record($fid);
     do_action('kop_facility_status_changed', $fid);
     return array('kind' => 'facility', 'id' => $fid, 'name' => $f['name'], 'folder' => 0,
         'url' => function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '');

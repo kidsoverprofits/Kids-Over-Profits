@@ -77,6 +77,12 @@ request.
     on when the record's write-up is approved (`kop_wu_publish()`,
     inc/record-writeups.php), whose text replaces the notes-built About in
     `kop_facility_page_data()`
+  - a record made by a Woodbury card's Create (`kop_wbc_create_facility()`) is unlisted until its write-up is
+    approved: `kop_wu_hold_new_record()` adds it to option `kop_wu_unlisted` (no page in
+    `kop_facility_pages_index()`, so none in links or the sitemap; the fingerprint carries the list) and queues
+    its write-up; `kop_wu_publish()` releases it. The directory, search, API and open data do not read the
+    option yet. A company's write-up (`kop_wu_operator_key()`, row key 2e9 + operator id) replaces the
+    notes-built About in `kop_operator_page_data()`; nothing drafts company write-ups yet
   - closure reports, Drive Docs, State Lists, Facilities from News,
     program homes, seeds, and the Data Manager
 

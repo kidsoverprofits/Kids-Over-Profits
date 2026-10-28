@@ -442,7 +442,9 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
             $parts[] = 'people:' . (int) get_option('kop_people_version', 0);
             $parts[] = 'map-review:' . md5(serialize(array(get_option('kop_network_rename_review'), get_option('kop_network_years_review'))));
         }
-        $parts[] = 'v:6';
+        // New records held until their write-up is approved (inc/record-writeups.php).
+        $parts[] = 'unlisted:' . (function_exists('kop_wu_unlisted_key') ? kop_wu_unlisted_key() : '-');
+        $parts[] = 'v:7';
         return md5(implode(';', $parts));
     }
 }
@@ -517,6 +519,7 @@ if (!function_exists('kop_facility_pages_build_index')) {
         $editorial = kop_facility_pages_editorial_map();
         $merged = kop_facility_pages_merged_profile_posts();
 
+        $unlisted = function_exists('kop_wu_unlisted_ids') ? array_flip(kop_wu_unlisted_ids()) : array();
         $entries = array();
         $groups = array();
         foreach ((array) $rows as $row) {
@@ -526,6 +529,7 @@ if (!function_exists('kop_facility_pages_build_index')) {
             $name = trim((string) $row['name']);
             if ($name === '') $name = trim((string) ($doc['identification']['name'] ?? ''));
             if ($name === '') continue;
+            if (isset($unlisted[$id])) continue;
             $state = strtoupper(trim((string) $row['state']));
             $country = trim((string) $row['country']);
             $candidate = kop_facility_page_slug_candidate($name, $state, $country);

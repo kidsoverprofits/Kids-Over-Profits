@@ -434,6 +434,55 @@ function kop_wu_page_about($fid, array $notes, $about, callable $build = null) {
     return $out;
 }
 
+/* ---- New records held until their write-up is approved ----------------------- */
+
+/**
+ * Records made without a write-up (a Woodbury card's "Create", owner 2026-10-15
+ * rule: nothing is public until its About is written up and approved) have no
+ * public page until kop_wu_publish() approves one. Option kop_wu_unlisted,
+ * [fid => time]. Records already public are never put here.
+ */
+function kop_wu_unlisted_ids() {
+    $c = function_exists('get_option') ? get_option('kop_wu_unlisted', array()) : array();
+    return is_array($c) ? array_map('intval', array_keys($c)) : array();
+}
+
+function kop_wu_unlisted_key() {
+    $c = function_exists('get_option') ? get_option('kop_wu_unlisted', array()) : array();
+    return is_array($c) && $c ? md5(implode(',', array_keys($c))) : '-';
+}
+
+/** Hold a new record off the public site and queue its write-up. */
+function kop_wu_hold_new_record($fid) {
+    $fid = (int) $fid;
+    if ($fid <= 0 || !function_exists('update_option')) return;
+    $c = get_option('kop_wu_unlisted', array());
+    $c = is_array($c) ? $c : array();
+    if (!isset($c[$fid])) {
+        $c[$fid] = time();
+        update_option('kop_wu_unlisted', $c, false);
+    }
+    kop_wu_mark_changed(array($fid));
+    if (function_exists('kop_facility_pages_flush_index')) kop_facility_pages_flush_index();
+}
+
+/** The record's write-up is approved: it goes public. */
+function kop_wu_release_record($fid) {
+    $fid = (int) $fid;
+    if (!function_exists('update_option')) return;
+    $c = get_option('kop_wu_unlisted', array());
+    if (is_array($c) && isset($c[$fid])) {
+        unset($c[$fid]);
+        update_option('kop_wu_unlisted', $c, false);
+        if (function_exists('kop_facility_pages_flush_index')) kop_facility_pages_flush_index();
+    }
+}
+
+/** Write-up rows for a company sit beside the facility ones, under this key (facility ids stay far below it). */
+function kop_wu_operator_key($operator_id) {
+    return 2000000000 + (int) $operator_id;
+}
+
 /* ---- The AI's draft ------------------------------------------------------- */
 
 function kop_wu_ai($prompt) {
@@ -747,6 +796,7 @@ function kop_wu_publish($fid, $reviewer, $text = null) {
         unset($GLOBALS['kop_wu_publishing']);
     }
     kop_wu_clear_changed($fid);
+    kop_wu_release_record($fid);
     if ($result['closed']) do_action('kop_facility_status_changed', $fid);
     if (function_exists('kop_record_changed')) kop_record_changed('facility', array($fid), array('source' => 'writeup'));
     $bits = array('The write-up is the page\'s About now' . ($result['added'] ? ', and ' . $result['added'] . ' held fact' . ($result['added'] === 1 ? ' is' : 's are') . ' on the record' : ''));
