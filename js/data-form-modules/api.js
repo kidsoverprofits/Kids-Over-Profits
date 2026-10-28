@@ -366,7 +366,11 @@
             
             const normalizedName = projectName.toLowerCase().trim();
             let category;
-            if (window.US_STATE_SET?.has(normalizedName) || window.COUNTRY_SET?.has(normalizedName)) {
+            // A provider project named after a state ("Montana") stays a provider; only
+            // projects that are not providers fall into location profiles by name.
+            const savedCategory = window.projects?.[projectName]?.category;
+            const isProviderProject = savedCategory === 'providers' || window.formData?.category === 'providers';
+            if (!isProviderProject && (window.US_STATE_SET?.has(normalizedName) || window.COUNTRY_SET?.has(normalizedName))) {
                 category = 'locations';
             } else {
                 category = window.projects?.[projectName]?.category;

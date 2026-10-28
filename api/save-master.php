@@ -235,7 +235,7 @@ $STATE_ABBREVIATIONS = [
 $category = $requestedCategory; // Start with requested category
 if ($projectName) {
     $projectNameUpper = strtoupper(trim($projectName));
-    if (in_array($projectNameUpper, $US_STATE_NAMES) || in_array($projectNameUpper, $COUNTRY_NAMES)) {
+    if ($requestedCategory !== 'providers' && (in_array($projectNameUpper, $US_STATE_NAMES) || in_array($projectNameUpper, $COUNTRY_NAMES))) {
         $category = 'locations';
         $projectName = $projectNameUpper;
         // Log if frontend sent wrong category (helps debug issues)
