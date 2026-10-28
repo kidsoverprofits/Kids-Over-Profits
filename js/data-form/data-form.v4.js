@@ -831,7 +831,7 @@ function getProjectStates(projectData = {}) {
     // Facilities states
     (projectData.facilities || []).forEach((facility = {}) => {
         const parsed = parseCityState(kopFacilityField(facility, 'location.text') || '');
-        const state = (facility.locationState || parsed.state || '').trim();
+        const state = (kopFacilityField(facility, 'location.state') || facility.locationState || parsed.state || '').trim();
         if (state) {
             states.add(state.toUpperCase());
         }
