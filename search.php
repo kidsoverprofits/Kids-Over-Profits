@@ -167,12 +167,10 @@ global $wpdb;
     // -------------------------------------------------------------------------
     // 1. Master tables: facilities, referrers, transporters, locations
     // -------------------------------------------------------------------------
-    $facilities_table = kop_discover_facilities_master_table(kop_get_facilities_database_connection());
-
     $master_sections = array(
         array(
             'title'    => 'Facilities & Parent Companies',
-            'table'    => $facilities_table,
+            'table'    => '', // facilities and companies come from kop_v2_search() only
             'template' => 'page-tti-program-index.php',
             'linkable' => true, // program index JS supports ?search= deep links
             'results'  => array(),
@@ -236,7 +234,7 @@ global $wpdb;
         } elseif ($kop_v2_search !== null && $section['table'] === 'locations_master') {
             $master_sections[$i]['results'] = $kop_v2_search['places'];
         } else {
-            $master_sections[$i]['results'] = kop_search_master_table($section['table'], $search_query, $limit, $section['table'] === $facilities_table);
+            $master_sections[$i]['results'] = kop_search_master_table($section['table'], $search_query, $limit);
         }
         $master_sections[$i]['url']     = $section['template'] !== '' ? kop_search_page_url_by_template($section['template']) : '';
         if (!empty($master_sections[$i]['results'])) {

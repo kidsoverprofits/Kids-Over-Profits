@@ -88,16 +88,7 @@ function kop_global_search_collect($phrase) {
     $groups = array();
 
     // --- Master tables -----------------------------------------------------
-    $facilities_table = null;
-    if (function_exists('kop_discover_facilities_master_table') && function_exists('kop_get_facilities_database_connection')) {
-        $facilities_table = kop_discover_facilities_master_table(kop_get_facilities_database_connection());
-    }
-    if (!$facilities_table) {
-        $facilities_table = 'facilities_master';
-    }
-
     $master_tables = array(
-        array('key' => 'facilities',   'label' => 'Facilities & programs', 'table' => $facilities_table,     'template' => 'page-tti-program-index.php', 'limit' => 6),
         array('key' => 'referrers',    'label' => 'Referrers',             'table' => 'referrers_master',    'template' => 'page-referrer-index.php',    'limit' => 4),
         array('key' => 'transporters', 'label' => 'Transporters',          'table' => (function_exists('kop_transporters_table') ? kop_transporters_table() : 'transporters_master'), 'template' => 'page-transporter-index.php', 'limit' => 4),
         array('key' => 'marketers',    'label' => 'Marketing companies',   'table' => 'marketers_master',    'template' => 'page-marketer-index.php',    'limit' => 4),
@@ -185,9 +176,6 @@ function kop_global_search_collect($phrase) {
             if ($cfg['key'] === 'marketers' && $index_url) {
                 // The company's own entry on /marketing-companies/ (inc/marketers.php)
                 $profile_url = $index_url . '#kop-mkt-' . (int) $row['id'];
-            }
-            if ($cfg['key'] === 'facilities') {
-                $profile_url = kop_search_record_page_url($operator === '' ? $row['unique_name'] : $operator);
             }
             $items[] = array(
                 'title' => $display,

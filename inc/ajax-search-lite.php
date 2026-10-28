@@ -57,13 +57,7 @@ function kop_asl_collect_database_matches($phrase) {
     $like  = '%' . $wpdb->esc_like($phrase) . '%';
 
     // --- Master tables -----------------------------------------------------
-    $facilities_table = null;
-    if (function_exists('kop_discover_facilities_master_table') && function_exists('kop_get_facilities_database_connection')) {
-        $facilities_table = kop_discover_facilities_master_table(kop_get_facilities_database_connection());
-    }
-
     $master_tables = array(
-        array('table' => $facilities_table,      'label' => 'Facility record',    'template' => 'page-tti-program-index.php', 'limit' => 4),
         array('table' => 'referrers_master',     'label' => 'Referrer',           'template' => 'page-referrer-index.php',    'limit' => 2),
         array('table' => (function_exists('kop_transporters_table') ? kop_transporters_table() : 'transporters_master'), 'label' => 'Transporter',        'template' => 'page-transporter-index.php', 'limit' => 2),
         array('table' => 'marketers_master',     'label' => 'Marketing company',  'template' => 'page-marketer-index.php',    'limit' => 2),
@@ -111,9 +105,7 @@ function kop_asl_collect_database_matches($phrase) {
             $operator = isset($inner['operator']['name']) && is_string($inner['operator']['name']) ? $inner['operator']['name'] : '';
             $display  = $operator !== '' ? $operator : $row['unique_name'];
             $profile_url = '';
-            if ($cfg['table'] === $facilities_table) {
-                $profile_url = kop_search_record_page_url($operator === '' ? $row['unique_name'] : $operator);
-            } elseif ($cfg['table'] === 'tradeorgs_master' && $index_url) {
+            if ($cfg['table'] === 'tradeorgs_master' && $index_url) {
                 // The organization's own entry on /trade-organizations/ (inc/tradeorgs.php)
                 $profile_url = $index_url . '#kop-tro-' . (int) $row['id'];
             } elseif ($cfg['table'] === 'marketers_master' && $index_url) {
