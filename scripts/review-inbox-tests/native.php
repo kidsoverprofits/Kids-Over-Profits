@@ -148,7 +148,8 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
                 $check('news: connecting a consultant adds a note citing the article', $json() !== $before
                     && strpos($json(), str_replace('/', '\\/', kop_rinbox_native_url('news', kop_rinbox_native_row('news', $nid)))) !== false, $res['message']);
                 call_user_func($src['act'], $nid, 'unconnect:consultant:' . $cid, array());
-                $check('news: Take off removes the consultant\'s note exactly', $json() === $before);
+                // Compared as data: the stored text may escape slashes differently from wp_json_encode().
+                $check('news: Take off removes the consultant\'s note exactly', json_decode($json(), true) === json_decode($before, true));
             }
         });
     }
