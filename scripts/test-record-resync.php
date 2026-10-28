@@ -87,7 +87,7 @@ $pdo->exec("ATTACH DATABASE 'file:" . str_replace('\\', '/', $mirror) . "?mode=r
 $tables = array('news_submissions', 'lawsuits', 'legislation', 'news_facility_links', 'lawsuit_facility_links', 'lawsuit_news_links',
     'legislation_news_links', 'news_featured', 'news_story_arcs', 'journalists', 'journalist_articles', 'facilities_master', 'facilities_v2');
 foreach ($pdo->query("SELECT name FROM prod.sqlite_master WHERE type = 'table' AND name LIKE 'wpdl_kop_%'")->fetchAll(PDO::FETCH_COLUMN) as $t) {
-    if (preg_match('/^wpdl_kop_(operators|operator_facilities|facility_locations|facility_identity|migration_state)$/', $t)) $tables[] = $t;
+    if (preg_match('/^wpdl_kop_(operators|operator_facilities|operator_links|facility_locations|facility_identity|migration_state)$/', $t)) $tables[] = $t;
 }
 foreach ($tables as $t) {
     $sql = $pdo->query("SELECT sql FROM prod.sqlite_master WHERE type = 'table' AND name = '$t'")->fetchColumn();
@@ -101,6 +101,7 @@ foreach (array('story_group_id INTEGER', 'story_group_manual INTEGER DEFAULT 0',
     try { $pdo->rawExec('ALTER TABLE news_submissions ADD COLUMN ' . $col); } catch (Throwable $e) { /* already there */ }
 }
 
+$GLOBALS['table_prefix'] = 'wpdl_';   // the v2 facility and operator tables (kop_v2_detect_prefix())
 require $root . '/api/lib-record-resync.php';
 
 $links = function ($table, $col, $id) use ($pdo) {
@@ -130,7 +131,23 @@ $r1 = kop_resync_lawsuit($pdo, $cases, 'test');
 $r2 = kop_resync_news($pdo, $live_news, 'test');
 $secs = round(microtime(true) - $t0, 1);
 $after = $all_links();
-$lost = array_keys(array_diff_key($before, $after));
+// A company's name used to land in news_facility_links under its operator id,
+// where no page reads it; the sync now moves those to kop_operator_links.
+$is_operator = array_flip(array_map('intval', $pdo->query('SELECT id FROM wpdl_kop_operators')->fetchAll(PDO::FETCH_COLUMN)));
+$moved_off = array();
+$lost = array();
+foreach (array_keys(array_diff_key($before, $after)) as $k) {
+    list($t, $rid, $fid) = explode(':', $k);
+    if (isset($is_operator[(int) $fid])) $moved_off[] = array($t === 'news_facility_links' ? 'news' : 'lawsuit', (int) $rid, (int) $fid);
+    else $lost[] = $k;
+}
+$on_op = $pdo->prepare('SELECT 1 FROM wpdl_kop_operator_links WHERE link_kind = ? AND link_id = ? AND operator_id = ?');
+$not_moved = array_filter($moved_off, function ($m) use ($on_op) { $on_op->execute($m); return !$on_op->fetchColumn(); });
+echo count($moved_off) . " operator-id links taken out of the facility link tables\n";
+check(!$not_moved, "each of them is on its operator's page (kop_operator_links)", json_encode(array_slice(array_values($not_moved), 0, 3)));
+$left = $pdo->query("SELECT COUNT(*) FROM news_facility_links l JOIN wpdl_kop_operators o ON o.id = l.facility_id JOIN news_submissions n ON n.id = l.news_id
+    WHERE l.link_type = 'mentioned' AND n.status IN ('approved', 'published')")->fetchColumn();
+check(!(int) $left, 'no live article keeps a mentioned link to an operator id', "$left left");
 $gained = count(array_diff_key($after, $before));
 check(!$lost, 'resyncing every case and live article afterwards takes no facility link off a page', implode(', ', array_slice($lost, 0, 5)));
 echo count($cases) . ' cases, ' . count($live_news) . " live articles resynced in {$secs}s; $gained links added (mentions that resolve now)\n";

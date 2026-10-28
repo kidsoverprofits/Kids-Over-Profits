@@ -751,6 +751,19 @@ function kop_facdisc_apply_entry(PDO $pdo, array $entry, array $news, $write) {
     } else {
         $decision = $entry['kind'] === 'provider' ? 'provider' : 'not_facility';
         $fid = null;
+        // "Laurel Heights" (a hospital) or "Looking Glass Community Services"
+        // (the agency) when the AI found the record we hold for it: we track
+        // it, so the article links. Remove on Facilities from News puts the
+        // name back where it was (linked_from, as kop_facdisc_link_by_hand()).
+        if (!empty($entry['sameAs']) && (!isset($entry['quoted']) || $entry['quoted'])) {
+            $is_facility = $pdo->prepare('SELECT 1 FROM facilities_v2 WHERE id = ?');
+            $is_facility->execute(array((int) $entry['sameAs']));
+            if ($is_facility->fetchColumn()) {
+                $detail['linked_from'] = array('decision' => $decision, 'facility_id' => null);
+                $decision = 'matched';
+                $fid = (int) $entry['sameAs'];
+            }
+        }
     }
     if ($write) {
         if ($fid && !in_array($decision, array('possible_duplicate', 'other_era', 'unquoted'), true)) {

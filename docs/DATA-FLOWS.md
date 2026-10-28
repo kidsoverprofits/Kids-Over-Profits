@@ -169,7 +169,12 @@ request.
   | duplicate merge (`api/manage-duplicate-articles.php:73`) | the dropped copies' facility, case, bill and featured links do not move |
   | hard deletes (`manage-submissions.php:850`, `manage-duplicate-articles.php:111`) | orphan link rows |
 - **Tied to facilities by:** `news_facility_links` only. There is **no name
-  fallback**, so a mention that didn't resolve when saved never links later.
+  fallback**, so a mention that didn't resolve when saved never links later
+  (except through the hourly Facilities from News scan, which links a name
+  the AI matched to a record we hold, provider and agency names included).
+  A company's name resolves to its operator id, which the sync writes to
+  `kop_operator_links` (link_kind 'news'; lawsuits the same), never to
+  `news_facility_links` (2026-10-28; before that 382 such rows sat there, read by no page).
   The state hub JS matches by stored name instead (js/state-page.js:837).
 - **Readers:** facility and operator pages, mobile, state hub, search
   (`facilities_mentioned LIKE`), story groups, featured reporting, news

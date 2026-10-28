@@ -57,18 +57,21 @@ if (!function_exists('kop_sync_lawsuit_facility_links')) {
             }
         }
 
-        if (!empty($unresolvedNames)) {
-            static $aliasIndex = null;
-            if ($aliasIndex === null) {
-                $aliasIndex = kop_build_facility_alias_index($pdo);
-            }
-            foreach (array_keys($unresolvedNames) as $name) {
-                $fid = kop_resolve_mention_to_facility((string)$name, $aliasIndex);
-                if ($fid !== null) {
-                    $desiredIds[$fid] = true;
-                }
+        static $aliasIndex = null;
+        if ($aliasIndex === null && ($desiredIds || $unresolvedNames)) {
+            $aliasIndex = kop_build_facility_alias_index($pdo);
+        }
+        foreach (array_keys($unresolvedNames) as $name) {
+            $fid = kop_resolve_mention_to_facility((string)$name, $aliasIndex);
+            if ($fid !== null) {
+                $desiredIds[$fid] = true;
             }
         }
+
+        // An operator's id goes in kop_operator_links (api/facility-aliases.php).
+        $operatorIds = $aliasIndex ? array_keys(array_intersect_key($desiredIds, $aliasIndex['operators'] ?? [])) : [];
+        foreach ($operatorIds as $oid) unset($desiredIds[$oid]);
+        if ($operatorIds) kop_link_mentioned_operators($pdo, $aliasIndex, 'lawsuit', $lawsuitId, $operatorIds, $createdBy);
 
         $desiredIds = array_keys($desiredIds);
 

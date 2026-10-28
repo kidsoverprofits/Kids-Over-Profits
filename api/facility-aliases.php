@@ -172,6 +172,7 @@ if (!function_exists('kop_build_facility_alias_index')) {
         require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
         $v2_prefix = kop_v2_detect_prefix($pdo);
         $rows = kop_v2_pdo_master_rows($pdo, $v2_prefix);
+        $operators = []; // operator id => true: operator rows, not facilities
         foreach ($rows as $r) {
             $id    = (int)$r['id'];
             $uname = trim((string)$r['unique_name']);
@@ -184,6 +185,7 @@ if (!function_exists('kop_build_facility_alias_index')) {
             }
 
             $decoded = json_decode((string)$r['json_data'], true);
+            if (empty($decoded['__facility_ref'])) $operators[$id] = true;
 
             $addAlias = static function ($alias, int $toId) use (&$aliasTo, &$aliasAmbiguous, $addTokens) {
                 $akey = kop_normalize_name_key((string)$alias);
@@ -272,7 +274,35 @@ if (!function_exists('kop_build_facility_alias_index')) {
             'ambiguous' => array_diff_key($aliasAmbiguous, $curatedTo, $exactUnique),
             'tokens'    => $tokens,
             'names'     => $names,
+            // A name can resolve to an operator (its id is in its own id space,
+            // KOP_V2_FIRST_NEW_OPERATOR_ID). The link syncs put those in
+            // kop_operator_links, which the /operator/ pages read; a row in
+            // news_facility_links with an operator id shows nowhere.
+            'operators'      => $operators,
+            'operator_links' => $v2_prefix . 'kop_operator_links',
         ];
+    }
+}
+
+if (!function_exists('kop_link_mentioned_operators')) {
+    /**
+     * Put an article or case on the /operator/ pages of the operators its
+     * mentions named (link_kind 'news' or 'lawsuit', link_type 'mentioned',
+     * as the data model migration did). Only adds: a link to a company stays
+     * until someone takes it off.
+     */
+    function kop_link_mentioned_operators(PDO $pdo, array $index, string $kind, int $recordId, array $operatorIds, ?string $createdBy = null): void {
+        if (!$operatorIds || empty($index['operator_links'])) return;
+        $table = $index['operator_links'];
+        try {
+            $ins = $pdo->prepare("INSERT IGNORE INTO `{$table}` (operator_id, link_kind, link_id, link_type, created_by, created_at)
+                                  VALUES (?, ?, ?, 'mentioned', ?, ?)");
+            foreach (array_keys(array_flip(array_map('intval', $operatorIds))) as $oid) {
+                $ins->execute([$oid, $kind, $recordId, $createdBy ?? 'auto', gmdate('Y-m-d H:i:s')]);
+            }
+        } catch (Throwable $e) {
+            error_log("kop_link_mentioned_operators($kind #$recordId): " . $e->getMessage());
+        }
     }
 }
 

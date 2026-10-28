@@ -98,20 +98,24 @@ if (!function_exists('kop_sync_news_facility_links')) {
             }
         }
 
-        if (!empty($unresolvedNames)) {
-            // Built once per request and cached; the index decodes facilities_master
-            // so we avoid rebuilding it if this runs again in the same save.
-            static $aliasIndex = null;
-            if ($aliasIndex === null) {
-                $aliasIndex = kop_build_facility_alias_index($pdo);
-            }
-            foreach (array_keys($unresolvedNames) as $name) {
-                $fid = kop_resolve_mention_to_facility((string)$name, $aliasIndex);
-                if ($fid !== null) {
-                    $desiredIds[$fid] = true;
-                }
+        // Built once per request and cached; the index reads every facility and
+        // operator record, so we avoid rebuilding it if this runs again in the same save.
+        static $aliasIndex = null;
+        if ($aliasIndex === null && ($desiredIds || $unresolvedNames)) {
+            $aliasIndex = kop_build_facility_alias_index($pdo);
+        }
+        foreach (array_keys($unresolvedNames) as $name) {
+            $fid = kop_resolve_mention_to_facility((string)$name, $aliasIndex);
+            if ($fid !== null) {
+                $desiredIds[$fid] = true;
             }
         }
+
+        // A company's name resolves to its operator id: that goes on the
+        // operator's page, never into news_facility_links.
+        $operatorIds = $aliasIndex ? array_keys(array_intersect_key($desiredIds, $aliasIndex['operators'] ?? [])) : [];
+        foreach ($operatorIds as $oid) unset($desiredIds[$oid]);
+        if ($operatorIds) kop_link_mentioned_operators($pdo, $aliasIndex, 'news', $newsId, $operatorIds, $createdBy);
 
         $desiredIds = array_keys($desiredIds);
 

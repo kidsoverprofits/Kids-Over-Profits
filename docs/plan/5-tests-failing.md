@@ -74,3 +74,6 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    `scripts/test-network-modules.js` is now 720px with the reason written above it. Look at why the row order in
    focus.js is that sensitive (a stable tie-break, or ordering rows by what they connect to), and whether the 674px run
    points to state carried over from earlier checks.
+7. **test-facility-discovery.php: 3 checks fail on main** (found 2026-10-28, the same on unchanged HEAD): "known
+   names ... closure programs are added" (Three Points Ranch), "a name decided before is not asked again", "a name held
+   for want of a place is asked again". Likely mirror drift (Three Points Ranch now resolves); fix the fixtures.

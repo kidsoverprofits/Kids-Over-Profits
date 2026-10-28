@@ -171,6 +171,18 @@ $check('punctuation and case do not matter', kop_facdisc_in_source('Sequel TSI -
 $unq = kop_facdisc_apply_entry($pdo, array('name' => 'Osceola Youth Ranch', 'kind' => 'facility', 'sameAs' => 11129, 'renameOf' => null, 'officialName' => 'Osceola Youth Ranch',
     'state' => 'FL', 'country' => '', 'city' => 'Kissimmee', 'quoted' => false), array('id' => 628), false);
 $check('a name not in the article is held, not linked', $unq === array('unquoted', 11129), json_encode($unq));
+$lh = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE unique_name LIKE 'Laurel Heights Hospital%' ORDER BY id LIMIT 1")->fetchColumn();
+if ($lh) {
+    $prov = kop_facdisc_apply_entry($pdo, array('name' => 'Laurel Heights', 'kind' => 'provider', 'sameAs' => $lh, 'renameOf' => null, 'officialName' => 'Laurel Heights',
+        'state' => 'GA', 'country' => 'US', 'city' => 'Atlanta', 'quoted' => true), array('id' => 10601), false);
+    $check('a hospital or agency the AI found a record for links to that record', $prov === array('matched', $lh), json_encode($prov));
+    $prov2 = kop_facdisc_apply_entry($pdo, array('name' => 'Laurel Heights', 'kind' => 'provider', 'sameAs' => $lh, 'renameOf' => null, 'officialName' => 'Laurel Heights',
+        'state' => 'GA', 'country' => 'US', 'city' => 'Atlanta', 'quoted' => false), array('id' => 10601), false);
+    $check('...but not when the name is not in the article', $prov2 === array('provider', null), json_encode($prov2));
+}
+$op = kop_facdisc_apply_entry($pdo, array('name' => 'Sequel Youth & Family Services', 'kind' => 'organization', 'sameAs' => 20, 'renameOf' => null,
+    'officialName' => 'Sequel Youth & Family Services', 'state' => '', 'country' => '', 'city' => '', 'quoted' => true), array('id' => 10601), false);
+$check('a same-as id that is not a facility record links nothing', $op === array('not_facility', null), json_encode($op));
 
 echo "-- Town names are never a match --\n";
 // Sequel's site list on article #628: each town was offered as the record that shares its name.
