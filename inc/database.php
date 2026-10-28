@@ -127,66 +127,6 @@ function kop_get_facilities_database_connection() {
 }
 
 /**
- * Discover the facilities master table that stores JSON exports.
- *
- * @param wpdb  $connection Database connection that should be inspected.
- * @param string $prefix    Optional table prefix to try during discovery.
- *
- * @return string|null Fully qualified table name when found, otherwise null.
- */
-function kop_discover_facilities_master_table($connection, $prefix = '') {
-    // Accept the {db, prefix} array returned by kop_get_facilities_database_connection()
-    // so callers can pass its result straight in without unwrapping it themselves.
-    if (is_array($connection)) {
-        if ($prefix === '' && isset($connection['prefix']) && is_string($connection['prefix'])) {
-            $prefix = $connection['prefix'];
-        }
-        $connection = isset($connection['db']) ? $connection['db'] : null;
-    }
-
-    if (!($connection instanceof wpdb)) {
-        return null;
-    }
-
-    $candidate_tables = array(
-        'facilities_master',
-        'kop_facilities_master',
-        'facility_projects',
-        'kop_facility_projects',
-        'facility_json_exports',
-        'kop_facility_json_exports',
-    );
-
-    $prefixes_to_try = array('');
-
-    if (is_string($prefix) && $prefix !== '') {
-        $prefixes_to_try[] = $prefix;
-    }
-
-    if ($connection->prefix !== null && $connection->prefix !== '') {
-        $prefixes_to_try[] = $connection->prefix;
-    }
-
-    foreach ($prefixes_to_try as $prefix_candidate) {
-        foreach ($candidate_tables as $table) {
-            $table_name = $prefix_candidate . $table;
-
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Trusted table name from candidate list above.
-            $table_exists = $connection->get_var($connection->prepare(
-                'SHOW TABLES LIKE %s',
-                $table_name
-            ));
-
-            if ($table_exists === $table_name) {
-                return $table_name;
-            }
-        }
-    }
-
-    return null;
-}
-
-/**
  * Fetch all projects from the database (facilities, referrers, and locations).
  *
  * @return array|WP_Error Array of projects on success, WP_Error on failure.
@@ -215,18 +155,8 @@ function kop_attach_linked_news_to_projects($db_connection, array &$projects) {
     // row, including __facility_ref identity rows that were skipped earlier.
     // Promoted rows are what most nested facility entries match against.
     $name_to_id = array();
-    if (function_exists('kop_v2_writes_on') && kop_v2_writes_on()) {
+    if (function_exists('kop_v2_name_id_map')) {
         $name_to_id = kop_v2_name_id_map();
-    } else {
-        $name_rows = $db_connection->get_results("SELECT id, unique_name FROM facilities_master", ARRAY_A);
-        if (is_array($name_rows)) {
-            foreach ($name_rows as $r) {
-                $k = strtolower(trim((string)$r['unique_name']));
-                if ($k !== '' && !isset($name_to_id[$k])) {
-                    $name_to_id[$k] = (int)$r['id'];
-                }
-            }
-        }
     }
 
     // Collect every facility_id that we want news for:
@@ -340,18 +270,8 @@ function kop_attach_linked_lawsuits_to_projects($db_connection, array &$projects
     if ($link_table !== 'lawsuit_facility_links') return;
 
     $name_to_id = array();
-    if (function_exists('kop_v2_writes_on') && kop_v2_writes_on()) {
+    if (function_exists('kop_v2_name_id_map')) {
         $name_to_id = kop_v2_name_id_map();
-    } else {
-        $name_rows = $db_connection->get_results("SELECT id, unique_name FROM facilities_master", ARRAY_A);
-        if (is_array($name_rows)) {
-            foreach ($name_rows as $r) {
-                $k = strtolower(trim((string)$r['unique_name']));
-                if ($k !== '' && !isset($name_to_id[$k])) {
-                    $name_to_id[$k] = (int)$r['id'];
-                }
-            }
-        }
     }
 
     $facility_ids = array();
