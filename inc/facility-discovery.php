@@ -1185,6 +1185,80 @@ function kop_facdisc_create_by_hand(PDO $pdo, $candidate_id, array $fields, $rev
     return array($decision, $fid);
 }
 
+/* ---- One-time link fix (2026-10-28) --------------------------------- */
+
+/**
+ * Fix the links made before 9e06642d: (1) rows in news_facility_links and
+ * lawsuit_facility_links holding an operator id (a company's name in the
+ * article) move to kop_operator_links with their link type; (2) a provider or
+ * agency name the scan matched to a record we hold ('sameAs') links the
+ * article, as kop_facdisc_apply_entry() does now. Returns what it did, with
+ * every row, so it can be undone by hand.
+ */
+function kop_facdisc_fix_links(PDO $pdo, $prefix, $write = true) {
+    $ops = $prefix . 'kop_operators';
+    $op_links = $prefix . 'kop_operator_links';
+    $log = array('moved' => array(), 'linked' => array());
+    $changed = array('news' => array(), 'lawsuit' => array(), 'company' => array());
+    foreach (array('news' => array('news_facility_links', 'news_id'), 'lawsuit' => array('lawsuit_facility_links', 'lawsuit_id')) as $kind => $t) {
+        list($table, $col) = $t;
+        $rows = $pdo->query("SELECT l.$col AS rid, l.facility_id, l.link_type, l.created_by FROM $table l JOIN `$ops` o ON o.id = l.facility_id")->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $r) {
+            $log['moved'][] = array($kind, (int) $r['rid'], (int) $r['facility_id'], (string) $r['link_type'], (string) $r['created_by']);
+            $changed[$kind][(int) $r['rid']] = true;
+            $changed['company'][(int) $r['facility_id']] = true;
+            if (!$write) continue;
+            $pdo->prepare("INSERT IGNORE INTO `$op_links` (operator_id, link_kind, link_id, link_type, created_by, created_at) VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())")
+                ->execute(array((int) $r['facility_id'], $kind, (int) $r['rid'], $r['link_type'] !== '' ? $r['link_type'] : 'mentioned', $r['created_by'] !== '' ? $r['created_by'] : 'link fix'));
+            $pdo->prepare("DELETE FROM $table WHERE $col = ? AND facility_id = ?")->execute(array((int) $r['rid'], (int) $r['facility_id']));
+        }
+    }
+    if (kop_facdisc_tables_exist($pdo)) {
+        $rows = $pdo->query("SELECT c.* FROM news_facility_candidates c JOIN news_submissions n ON n.id = c.news_id
+                              WHERE c.decision IN ('provider', 'not_facility') AND n.status NOT IN ('rejected', 'deleted')")->fetchAll(PDO::FETCH_ASSOC);
+        $is_facility = $pdo->prepare('SELECT 1 FROM facilities_v2 WHERE id = ?');
+        foreach ($rows as $c) {
+            $detail = json_decode((string) $c['detail'], true) ?: array();
+            $entry = (array) ($detail['entry'] ?? array());
+            $fid = (int) ($entry['sameAs'] ?? 0);
+            if ($fid <= 0 || (isset($entry['quoted']) && !$entry['quoted'])) continue;
+            // Checked by hand: "Holley Child Care" in a New Jersey case is not Holly Hill Children's Home (KY).
+            if ((int) $c['id'] === 217) continue;
+            $is_facility->execute(array($fid));
+            if (!$is_facility->fetchColumn()) continue;
+            $log['linked'][] = array((int) $c['id'], (int) $c['news_id'], (string) $c['mention'], $fid, (string) $c['decision']);
+            $changed['news'][(int) $c['news_id']] = true;
+            if (!$write) continue;
+            kop_facdisc_link($pdo, $c['news_id'], $fid);
+            $detail['linked_from'] = array('decision' => $c['decision'], 'facility_id' => null);
+            $pdo->prepare("UPDATE news_facility_candidates SET decision = 'matched', facility_id = ?, detail = ?, updated_at = UTC_TIMESTAMP() WHERE id = ?")
+                ->execute(array($fid, wp_json_encode($detail), (int) $c['id']));
+        }
+    }
+    if ($write && function_exists('kop_record_changed')) {
+        foreach ($changed as $kind => $ids) {
+            if ($ids) kop_record_changed($kind, array_keys($ids));
+        }
+    }
+    return $log;
+}
+
+/** Run kop_facdisc_fix_links() once; what it did is kept in kop_facdisc_link_fix_log. */
+function kop_facdisc_maybe_fix_links() {
+    $version = '1';
+    if (get_option('kop_facdisc_link_fix') === $version) return;
+    global $wpdb;
+    $pdo = kop_closure_pdo();
+    if (!$pdo) return;
+    update_option('kop_facdisc_link_fix', $version, false);
+    try {
+        update_option('kop_facdisc_link_fix_log', kop_facdisc_fix_links($pdo, $wpdb->prefix), false);
+    } catch (Throwable $e) {
+        update_option('kop_facdisc_link_fix_log', array('error' => $e->getMessage()), false);
+    }
+}
+add_action('admin_init', 'kop_facdisc_maybe_fix_links', 22);
+
 /* ---- Hourly scan ---------------------------------------------------- */
 
 add_action('init', function () {
