@@ -10,7 +10,9 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # (solve Reddit's human check when it asks; resumable), compare pairs entries by the page they were imported from, never by name
 # -> js/data/reddit-wiki/live-compare.json (commit it) -> editor index badge + /wiki-feed/ note; no result = no mark
 (kop-pipeline) python scripts/reddit-wiki-live.py fetch [--pages a b] [--refresh] && python scripts/reddit-wiki-live.py compare [--list]   # sync tmp/prod.sqlite first
-# Daily watch (Task Scheduler "KOP Reddit Wiki Watch" 03:00 -> scripts/watch-reddit-wiki.ps1): re-reads every page that exists on Reddit and is not
+# Watch, on demand since 2026-10-28 (owner: the daily run was too often): desktop shortcut "KOP Reddit Wiki Resync" runs
+# scripts/watch-reddit-wiki.ps1; the Task Scheduler task "KOP Reddit Wiki Watch" (daily 03:00) is Disabled, not deleted
+# (Enable-ScheduledTask to bring it back). It re-reads every page that exists on Reddit and is not
 # a stub (empty-slugs.json), logs words/revision date that moved in js/data/reddit-wiki/live-changes.json, reruns compare, pushes kop-data.
 # Reddit has no readable feed (403/Blocked for scripts, the sitewide revisions list is login-only); only a real Chrome window works
 (kop-pipeline) python scripts/reddit-wiki-live.py watch [--push] [--limit 3]   # --limit = trial; log: tmp/reddit-wiki-live/watch.log
