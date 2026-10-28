@@ -11931,10 +11931,10 @@
     }
    ],
    "answer": {
-    "text": "Sent 2026-10-28 to the Review inbox: 11 lawsuit cards (7 of Amber's matters plus 4 more Teen Challenge federal cases found on GovInfo: Nashville HQ v. Metro Nashville 3:07-cv-00668, Couch v. Chad's Hope 6:23-cv-00115, Candlehouse v. Vestal 3:11-cv-00093, Robinson v. Adult & Teen Challenge 4:23-cv-02248; Teen Challenge v. Elleson 1:05-cv-00463 already held), 3 news, 2 websites. NOT FOUND: Bence 4:26-cv-00440 (#55 still has no source; open its Justia or CourtListener docket by hand), Watson 3:22-cv-08060, Jones 9:22-cv-81932, Korich 4:17-cv-00227 (that number in N.D. Fla. is Alexis v. Johnson, so the district is wrong), Rasheed 4:21-cv-00274 (only on a Justia listing page), Autin, Brotherhood Mutual v. TC Nevada, Herrera, TC PNW v. Lane County, Stidum v. Marco, TC Fredericksburg v. Stafford County, all 7 LA Superior Court cases (portal only; no stable per-case links), Santa Barbara Channelkeeper (Teen Challenge's role not shown), ACTSAS/licensing/FMCSA leads. CourtListener's API needs a token (none configured locally) and its site and Justia block automated reading: with a CourtListener token in .env most of the federal misses can be looked up by number.",
+    "text": "Sent 2026-10-28 to the Review inbox: 24 lawsuit cards (20 of Amber's matters, every federal one, found by docket number on CourtListener or GovInfo, plus 4 more Teen Challenge federal cases from GovInfo: Nashville HQ v. Metro Nashville 3:07-cv-00668, Couch v. Chad's Hope 6:23-cv-00115, Candlehouse v. Vestal 3:11-cv-00093, Robinson v. Adult & Teen Challenge 4:23-cv-02248; Teen Challenge v. Elleson 1:05-cv-00463 already held), 3 news, 2 websites. Lawsuit #54 Parker and #55 Bence: add the CourtListener dockets above as their sources. Korich is in M.D. Ga., not Florida. NOT FOUND: the 7 Los Angeles Superior Court cases (portal only, no per-case links; 19STCP01176 Teen Challenge's role not shown), and the ACTSAS / licensing / FMCSA leads.",
     "claims": [
      {
-      "claim": "Parker v. Teen Challenge of Oklahoma, Inc. et al, N.D. Okla. 4:26-cv-00526 (KOP lawsuit #54, add as its source): defendants Teen Challenge of Oklahoma d/b/a New Lifehouse Girls Academy and a John Doe, filed 2026-08-25",
+      "claim": "Parker v. Teen Challenge of Oklahoma, Inc. et al, N.D. Okla. 4:26-cv-00526 (KOP lawsuit #54, add as its source): defendants Teen Challenge of Oklahoma d/b/a New Lifehouse Girls Academy and a John Doe, filed 2026-08-25 (better link: https://www.courtlistener.com/docket/74698541/parker-v-teen-challenge-of-oklahoma-inc/ )",
       "url": "https://dockets.justia.com/docket/oklahoma/okndce/4:2026cv00526/78072",
       "quote": "Parker v. Teen Challenge of Oklahoma, Inc. et al (Justia Dockets listing, seen in search results; page blocks automated reading)"
      },
@@ -11944,7 +11944,7 @@
       "quote": "Jones v. Teen Challenge of Florida, Inc. (United States District Court Southern District of Florida)"
      },
      {
-      "claim": "Teen Challenge of Oklahoma Inc v. Philadelphia Indemnity Insurance Company, W.D. Okla. 5:25-cv-00648 (insurance)",
+      "claim": "Teen Challenge of Oklahoma Inc v. Philadelphia Indemnity Insurance Company, W.D. Okla. 5:25-cv-00648 (insurance) (better link: https://www.courtlistener.com/docket/70530545/teen-challenge-of-oklahoma-inc-v-philadelphia-indemnity-insurance-company/ , filed 2025-06-12)",
       "url": "https://www.law360.com/cases/684c274cd7596b5ac9052c5c",
       "quote": "Law360 case tracker, title and number only (paywalled)"
      },
@@ -11987,6 +11987,71 @@
       "claim": "2022 Seminole County probation case: a woman ordered into Teen Challenge's Davie women's program was dismissed and sentenced to 120 days in jail after a 2022-04-06 hearing; no case number in the reporting (KOP already holds the article)",
       "url": "https://www.orlandoweekly.com/news/a-seminole-county-woman-was-kicked-out-of-a-christian-rehab-for-kissing-another-woman-31715802",
       "quote": "A Seminole County woman was kicked out of a Christian rehab for kissing another woman"
+     },
+     {
+      "claim": "Bence v. Teen Challenge of Oklahoma, Inc., oknd 4:26-cv-00440 (KOP lawsuit #55, add as its source): filed 2026-07-15, open; nature of suit 360 P.I.: Other",
+      "url": "https://www.courtlistener.com/docket/73624806/bence-v-teen-challenge-of-oklahoma-inc/",
+      "quote": "Bence v. Teen Challenge of Oklahoma, Inc. (CourtListener docket, 4:26-cv-00440)"
+     },
+     {
+      "claim": "WATSON v. TEEN CHALLENGE OF FLORIDA INC, flnd 3:22-cv-08060: filed 2022-06-13, closed 2022-12-20; nature of suit 442 Civil Rights: Jobs",
+      "url": "https://www.courtlistener.com/docket/63381930/watson-v-teen-challenge-of-florida-inc/",
+      "quote": "WATSON v. TEEN CHALLENGE OF FLORIDA INC (CourtListener docket, 3:22-cv-08060)"
+     },
+     {
+      "claim": "Jones v. Teen Challenge of Florida, Inc., flsd 9:22-cv-81932: filed 2022-12-15, closed 2022-12-16",
+      "url": "https://www.courtlistener.com/docket/66654021/jones-v-teen-challenge-of-florida-inc/",
+      "quote": "Jones v. Teen Challenge of Florida, Inc. (CourtListener docket, 9:22-cv-81932)"
+     },
+     {
+      "claim": "KORICH v. TEEN CHALLENGE OF FLORIDA INC, gamd 4:17-cv-00227: filed 2017-11-22, closed 2018-08-20; nature of suit 445 Civil Rights: Americans with Disabilities - Employment",
+      "url": "https://www.courtlistener.com/docket/7248795/korich-v-teen-challenge-of-florida-inc/",
+      "quote": "KORICH v. TEEN CHALLENGE OF FLORIDA INC (CourtListener docket, 4:17-cv-00227)"
+     },
+     {
+      "claim": "Rasheed v. Teen Challenge of Oklahoma, Inc., oknd 4:21-cv-00274: filed 2021-07-06, closed 2021-10-20; nature of suit 360 P.I.: Other",
+      "url": "https://www.courtlistener.com/docket/60056270/rasheed-v-teen-challenge-of-oklahoma-inc/",
+      "quote": "Rasheed v. Teen Challenge of Oklahoma, Inc. (CourtListener docket, 4:21-cv-00274)"
+     },
+     {
+      "claim": "Autin v. Teen Challenge Intl, laed 2:03-cv-02309: filed 2003-08-15, closed 2004-11-19; nature of suit 440 Civil Rights: Other",
+      "url": "https://www.courtlistener.com/docket/4606496/autin-v-teen-challenge-intl/",
+      "quote": "Autin v. Teen Challenge Intl (CourtListener docket, 2:03-cv-02309)"
+     },
+     {
+      "claim": "Brotherhood Mutual Insurance Company v. Teen Challenge of Nevada, Inc., nvd 3:16-cv-00243: filed 2016-05-06, closed 2017-05-03; nature of suit 110 Insurance",
+      "url": "https://www.courtlistener.com/docket/6102101/brotherhood-mutual-insurance-company-v-teen-challenge-of-nevada-inc/",
+      "quote": "Brotherhood Mutual Insurance Company v. Teen Challenge of Nevada, Inc. (CourtListener docket, 3:16-cv-00243)"
+     },
+     {
+      "claim": "Herrera v. Teen Challenge International Pacific Northwest Centers, ord 6:17-cv-01359: filed 2017-08-30, closed 2018-03-20; nature of suit 442 Civil Rights: Employment",
+      "url": "https://www.courtlistener.com/docket/7248370/herrera-v-teen-challenge-international-pacific-northwest-centers/",
+      "quote": "Herrera v. Teen Challenge International Pacific Northwest Centers (CourtListener docket, 6:17-cv-01359)"
+     },
+     {
+      "claim": "Teen Challenge International Pacific Northwest Centers v. Lane County, ord 6:13-cv-00567: filed 2013-04-02, closed 2013-10-21; nature of suit 443 Civil Rights: Accommodations",
+      "url": "https://www.courtlistener.com/docket/4527317/teen-challenge-international-pacific-northwest-centers-v-lane-county/",
+      "quote": "Teen Challenge International Pacific Northwest Centers v. Lane County (CourtListener docket, 6:13-cv-00567)"
+     },
+     {
+      "claim": "JEFFRIES v. DORBRANSKY, paed 5:14-cv-05755: filed 2014-10-06, closed 2015-08-26; nature of suit 440 Civil Rights: Other",
+      "url": "https://www.courtlistener.com/docket/4527897/jeffries-v-dorbransky/",
+      "quote": "JEFFRIES v. DORBRANSKY (CourtListener docket, 5:14-cv-05755)"
+     },
+     {
+      "claim": "Stidum v. Marco, ctd 3:08-cv-00993: filed 2008-07-02, closed 2008-11-13; nature of suit 350 Motor Vehicle",
+      "url": "https://www.courtlistener.com/docket/4497612/stidum-v-marco/",
+      "quote": "Stidum v. Marco (CourtListener docket, 3:08-cv-00993)"
+     },
+     {
+      "claim": "Teen Challenge of Fredricksburg, Inc v. Board of Supervisors of Stafford County, Virginia, vaed 1:08-cv-00690: filed 2008-07-03, closed 2009-02-05; nature of suit 443 Civil Rights: Accommodations",
+      "url": "https://www.courtlistener.com/docket/4535941/teen-challenge-of-fredricksburg-inc-v-board-of-supervisors-of-stafford/",
+      "quote": "Teen Challenge of Fredricksburg, Inc v. Board of Supervisors of Stafford County, Virginia (CourtListener docket, 1:08-cv-00690)"
+     },
+     {
+      "claim": "Teen Challenge of New England, Inc. v. United States, mad 1:05-cv-30167: filed 2005-07-19, closed 2005-10-04; nature of suit 891 Agriculture Acts",
+      "url": "https://www.courtlistener.com/docket/4282963/teen-challenge-of-new-england-inc-v-united-states/",
+      "quote": "Teen Challenge of New England, Inc. v. United States (CourtListener docket, 1:05-cv-30167)"
      }
     ],
     "by": "Claude session (2026-10-28)",
@@ -11994,5 +12059,5 @@
    }
   }
  ],
- "built": "2026-10-28 17:56"
+ "built": "2026-10-28 19:09"
 }
