@@ -11893,7 +11893,44 @@
    "records": [],
    "found": "found 2026-10-26, map years research 2026-10-26",
    "directions": []
+  },
+  {
+   "key": "company-histories:does-heartland-academy-llc-of-columbus-georgia-f",
+   "section": "Company histories",
+   "title": "Does Heartland Academy LLC of Columbus, Georgia, formed in December 2025 with Teen Challenge of Florida as its only member, run the youth campuses now sold under the Heartland name?",
+   "text": "Amber Foster's Teen Challenge research map (https://teenchallenge-network.netlify.app) sent in the Georgia filing: articles of organization 2025-12-17, control no. 25243527, sole member Teen Challenge of Florida, Inc. (renamed Global Teen Challenge, Inc. in 2026), manager Martin Tate (CFO of Teen Challenge of Florida), registered agent Brice Maddock (its president and CEO). Several former Teen Challenge youth campuses now market themselves as Heartland, but she found nothing showing the LLC itself operates them. Look for licenses, program sites or state filings naming Heartland Academy LLC as the operator.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-28, Amber Foster (researcher upload, 2026-10-27)",
+   "directions": [
+    {
+     "label": "Heartland Academy LLC on the research map",
+     "url": "https://teenchallenge-network.netlify.app/#/profile/heartland-academy-llc",
+     "kind": "note"
+    },
+    {
+     "label": "Georgia Secretary of State business search",
+     "url": "https://ecorp.sos.ga.gov/BusinessSearch",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "news-records-and-reporting-kop-l:where-can-the-court-records-be-found-for-the-49",
+   "section": "News records and reporting KOP lacks",
+   "title": "Where can the court records be found for the 49 Teen Challenge lawsuits and agency actions Amber Foster sent in without a link?",
+   "text": "Her researcher upload of 2026-10-27 lists 76 court and agency matters; 49 came with no usable link (federal dockets such as Bence v. Teen Challenge of Oklahoma, 4:26-cv-00440, Los Angeles Superior Court cases against Teen Challenge of Southern California, Massachusetts wage citations against Adult & Teen Challenge Northeast). The list with case numbers and courts is in kop-pipeline tmp/researcher-kit/amber-2026-10/lawsuits-no-link.json. Find a CourtListener or court docket page for each and send it as a lawsuit (kop/v1/mobile/submit, type lawsuit). Leave out anything naming a minor or a pseudonymous plaintiff.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-10-28, Amber Foster (researcher upload, 2026-10-27)",
+   "directions": [
+    {
+     "label": "Teen Challenge Network research map",
+     "url": "https://teenchallenge-network.netlify.app",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-10-26 18:37"
+ "built": "2026-10-28 17:17"
 }
