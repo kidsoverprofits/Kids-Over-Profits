@@ -8,7 +8,7 @@
  * the page already agrees with is settled by itself. Three tabs:
  *   Conflicts      one line per field that differs: keep the page's, take the sheet's, or type a value. Saved
  *                  through the inline edit's row save (kop_ie_row_save()), which fires kop_record_changed().
- *   Add            sheet rows the page doesn't have: Add writes a published row (only with a source: a sheet
+ *   Add            sheet rows the page doesn't have (prefilled from the research finds in the seed: source, our copy, cause draft, notes): Add writes a published row (only with a source: a sheet
  *                  row with no source stays out), Skip remembers.
  *   Only on the page   the page's rows the sheet lacks, for the record.
  * Every decision is an entry in option kop_memorial_sheet_log (key c:<row>:<field> or a:<row>) holding the
@@ -51,7 +51,8 @@ function kop_ms_seed() {
         $path = get_stylesheet_directory() . '/seeds/memorial-sheet.json';
         $seed = file_exists($path) ? json_decode((string) file_get_contents($path), true) : null;
         $seed = is_array($seed) ? $seed : array();
-        $seed += array('conflicts' => array(), 'add' => array(), 'page_only' => array(), 'page_only_notes' => array(), 'seeded_rows' => array());
+        $seed += array('conflicts' => array(), 'add' => array(), 'page_only' => array(), 'page_only_notes' => array(), 'seeded_rows' => array(),
+            'add_skipped' => array(), 'add_folded' => array(), 'page_found' => array());
     }
     return $seed;
 }
@@ -526,6 +527,19 @@ function kop_ms_add_view(array $adds) {
     $kind = sanitize_key($_GET['kind'] ?? '');
     $q = sanitize_text_field(wp_unslash($_GET['q'] ?? ''));
     $paged = max(1, (int) ($_GET['paged'] ?? 1));
+    $seed = kop_ms_seed();
+    if ($seg === 'open' && $paged === 1) {
+        if ($seed['add_folded']) {
+            echo '<div class="kop-ak-muted"><strong>Folded into another row:</strong> ';
+            echo esc_html(implode('; ', array_map(function ($f) {
+                return 'sheet row ' . (int) $f['row'] . ' (' . $f['name'] . ') ' . (isset($f['into_page']) ? 'is the page\'s id ' . (int) $f['into_page'] : 'is sheet row ' . (int) $f['into_row']) . ': ' . $f['why'];
+            }, $seed['add_folded']))) . '</div>';
+        }
+        if ($seed['add_skipped']) {
+            echo '<div class="kop-ak-muted"><strong>Left out as out of scope:</strong> ';
+            echo esc_html(implode('; ', array_map(function ($f) { return 'row ' . (int) $f['row'] . ' ' . $f['name'] . ' (' . $f['why'] . ')'; }, $seed['add_skipped']))) . '</div>';
+        }
+    }
     $counts = array_fill_keys(array_keys($segs), 0);
     foreach ($adds as $x) if (isset($counts[$x['state']])) $counts[$x['state']]++;
     $tabs = array();
@@ -584,11 +598,37 @@ function kop_ms_guess_cause($text) {
     return trim((string) $text) === '' || stripos((string) $text, 'unknown') !== false ? 'unknown' : 'other';
 }
 
+/** The research find for a row, as lines under the card head: status, our copy, the archive, more links, the quote, the agent's notes. */
+function kop_ms_found_html(array $a) {
+    $f = $a['found'] ?? null;
+    if (!$f) return '';
+    $status = array('found' => 'Source found', 'partial' => 'Partial find: read it before trusting it', 'none' => 'Research found nothing');
+    $st = (string) ($f['status'] ?? 'none');
+    $h = '<div><span class="kop-ak-tag">' . esc_html($status[$st] ?? $st) . '</span>';
+    if (!empty($f['source_name'])) $h .= ' <span class="kop-ak-muted">' . esc_html($f['source_name']) . (!empty($f['source_date']) ? ' (' . esc_html($f['source_date']) . ')' : '') . '</span>';
+    $h .= '</div>';
+    if (!empty($a['sheet_source']) && $a['sheet_source'] !== $a['source_url']) $h .= '<div>Sheet link: ' . kop_ms_link($a['sheet_source']) . '</div>';
+    if (!empty($f['media_id'])) {
+        $copy = function_exists('wp_get_attachment_url') ? wp_get_attachment_url((int) $f['media_id']) : '';
+        $h .= '<div>Our copy: ' . ($copy ? kop_ms_link($copy, 'media library file ' . (int) $f['media_id']) : 'media library file ' . (int) $f['media_id']) . '</div>';
+    }
+    if (!empty($f['archive_url'])) $h .= '<div>Archive: ' . kop_ms_link($f['archive_url']) . '</div>';
+    foreach (($f['more_sources'] ?? array()) as $m) $h .= '<div>Also: ' . kop_ms_link($m['url'], (string) ($m['name'] ?? '')) . '</div>';
+    if (!empty($f['quote'])) $h .= '<div class="kop-ak-muted">Quote: ' . esc_html($f['quote']) . '</div>';
+    if (!empty($f['notes'])) $h .= '<div class="kop-ak-muted">Research notes: ' . esc_html($f['notes']) . '</div>';
+    if (!empty($f['year_found'])) $h .= '<div class="kop-ak-muted">Year per the source: ' . esc_html($f['year_found']) . '</div>';
+    foreach (($f['disagrees'] ?? array()) as $k => $v) $h .= '<div class="kop-ak-warn">The source differs on ' . esc_html($k) . ': ' . esc_html(is_array($v) ? wp_json_encode($v) : $v) . '</div>';
+    return $h;
+}
+
 function kop_ms_add_card(array $x, array $causes) {
     $a = $x['a'];
+    $f = $a['found'] ?? array();
+    $cause_text = !empty($f['cause_draft']) ? $f['cause_draft'] : $a['cause'];
     $title = esc_html($a['name']) . ' <span class="kop-ak-muted">sheet row ' . (int) $a['row'] . '</span>';
     $sub = '<div>' . implode(' &middot; ', array_map('esc_html', array_filter(array($a['program'], $a['location_raw'], $a['date_raw'] !== '' ? $a['date_raw'] : 'no date')))) . '</div>'
-        . '<div>Source: ' . ($a['source_url'] !== '' ? kop_ms_link($a['source_url']) : '<em>none on the sheet</em>') . '</div>'
+        . '<div>Source: ' . ($a['source_url'] !== '' ? kop_ms_link($a['source_url']) : '<em>none on the sheet, none found yet</em>') . '</div>'
+        . kop_ms_found_html($a)
         . ($a['note'] !== '' ? '<div>Sheet note: ' . esc_html($a['note']) . '</div>' : '');
     foreach ($a['flags'] as $f) $sub .= '<div class="kop-ak-warn">' . esc_html($f) . '</div>';
     if ($x['maybe']) {
@@ -607,7 +647,7 @@ function kop_ms_add_card(array $x, array $causes) {
             . ($type === 'textarea' ? '<textarea name="' . esc_attr($name) . '" rows="2">' . esc_textarea((string) $value) . '</textarea>'
                 : '<input type="text" name="' . esc_attr($name) . '" value="' . esc_attr((string) $value) . '">') . '</label>';
     };
-    $guess = kop_ms_guess_cause($a['cause']);
+    $guess = !empty($f['category_draft']) && isset($causes[$f['category_draft']]) ? $f['category_draft'] : kop_ms_guess_cause($a['cause']);
     $cat = '<label class="kop-ms-field"><span>Cause, for the filter</span><select name="cause_category">';
     foreach ($causes as $k => $l) $cat .= '<option value="' . esc_attr($k) . '"' . selected($guess, $k, false) . '>' . esc_html($l) . '</option>';
     $cat .= '</select></label>';
@@ -622,13 +662,22 @@ function kop_ms_add_card(array $x, array $causes) {
         . $input('location', 'State, or region outside the US', $a['location'])
         . $input('date_of_death', 'Date of death (YYYY-MM-DD)', $a['date_of_death'] ?? '')
         . $prec
-        . $input('cause_of_death', 'Cause, as reported', $a['cause'], 'textarea', true)
+        . $input('cause_of_death', 'Cause, as reported' . (!empty($f['cause_draft']) && $a['cause'] !== '' ? ' (the sheet said: ' . $a['cause'] . ')' : ''), $cause_text, 'textarea', true)
         . $cat
         . $input('source_url', 'Source link (needed)', $a['source_url'], 'text', true)
-        . $input('source_name', 'Source name', preg_replace('/^www\./', '', $host))
-        . $input('notes', 'Internal notes (not shown)', 'From the Death Toll sheet, row ' . (int) $a['row'] . ($a['note'] !== '' ? '. Sheet note: ' . $a['note'] : '') . '.', 'textarea', true)
+        . $input('source_name', 'Source name', !empty($f['source_name']) && $a['source_url'] === ($f['source_url'] ?? '') ? $f['source_name'] : preg_replace('/^www\./', '', $host))
+        . $input('notes', 'Internal notes (not shown)', 'From the Death Toll sheet, row ' . (int) $a['row'] . ($a['note'] !== '' ? '. Sheet note: ' . $a['note'] : '') . '.'
+            . (!empty($f['notes']) ? ' Research (' . ($f['status'] ?? '') . '): ' . $f['notes'] : ''), 'textarea', true)
         . '</div>';
     return $out . kop_ak_card_actions(kop_ak_button('Add to the page', 'primary', 'data-ms-act="add"') . kop_ak_button('Skip', 'danger', 'data-ms-act="skip"')) . '</section>';
+}
+
+/** A research find offered for a page row with no link (the Only-on-the-page table; the person cards get a source line instead). */
+function kop_ms_page_found_html(array $f) {
+    $st = (string) ($f['status'] ?? '');
+    return '<div><span class="kop-ak-tag">Found by research' . ($st === 'partial' ? ' (partial)' : '') . '</span> ' . kop_ms_link((string) $f['source_url'], (string) ($f['source_name'] ?? ''))
+        . (!empty($f['media_id']) && function_exists('wp_get_attachment_url') && wp_get_attachment_url((int) $f['media_id']) ? ' &middot; ' . kop_ms_link(wp_get_attachment_url((int) $f['media_id']), 'our copy') : '')
+        . (!empty($f['notes']) ? '<div class="kop-ak-muted">' . esc_html($f['notes']) . '</div>' : '') . '</div>';
 }
 
 function kop_ms_page_only_view() {
@@ -646,7 +695,8 @@ function kop_ms_page_only_view() {
         echo '<tr><td>' . (int) $id . '</td><td>' . esc_html($r['name']) . ($note !== '' ? '<div class="kop-ak-warn">' . esc_html($note) . '</div>' : '') . '</td>'
             . '<td>' . esc_html((string) $r['program']) . '</td><td>' . esc_html(kop_ms_date_label($r['date_of_death'], $r['date_precision'])) . '</td>'
             . '<td>' . esc_html((string) $r['location']) . '</td><td>' . esc_html((string) $r['cause_of_death']) . '</td>'
-            . '<td>' . kop_ms_link((string) $r['source_url'], (string) ($r['source_name'] ?: '')) . '</td></tr>';
+            . '<td>' . kop_ms_link((string) $r['source_url'], (string) ($r['source_name'] ?: ''))
+            . (!empty($seed['page_found'][(string) $id]) && (string) $r['source_url'] === '' ? kop_ms_page_found_html($seed['page_found'][(string) $id]) : '') . '</td></tr>';
     }
     echo '</tbody></table>';
 }

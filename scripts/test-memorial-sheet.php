@@ -162,6 +162,54 @@ if ($restraint) {
     $check('a restraint row with a non-restraint sheet cause exists to test', false);
 }
 
+echo "-- Research finds on the Add rows --\n";
+$by_row = array();
+foreach ($seed['add'] as $a) $by_row[(int) $a['row']] = $a;
+$check('out-of-scope rows (adult prison/jail/care home, foster, 21+) are not Add rows', !array_intersect(array(8, 350, 382, 393, 398, 412, 417), array_keys($by_row)) && count($seed['add_skipped']) === 7);
+$check('duplicates are folded: rows 12 and 42 are gone, 112 and 40 stay', !isset($by_row[12]) && !isset($by_row[42]) && isset($by_row[112], $by_row[40]) && count($seed['add_folded']) === 2);
+$check('row 112 says row 12 was folded in', (bool) array_filter($by_row[112]['flags'], function ($f) { return strpos($f, 'row 12') !== false; }));
+$bad_cat = array();
+$causes_all = kop_memorial_causes('all');
+$n = array('found' => 0, 'partial' => 0, 'none' => 0);
+foreach ($seed['add'] as $a) {
+    if (empty($a['found'])) continue;
+    $n[$a['found']['status']]++;
+    if (!empty($a['found']['category_draft']) && !isset($causes_all[$a['found']['category_draft']])) $bad_cat[] = $a['row'];
+    if (in_array($a['found']['status'], array('found', 'partial'), true) && !empty($a['found']['source_url']) && empty($a['sheet_source']) && $a['source_url'] === '') $bad_cat[] = 'nosrc' . $a['row'];
+}
+$check('every cause_draft category is a real filter key, every find source is on its row', !$bad_cat, implode(',', $bad_cat));
+$check('rows prefilled: ' . json_encode($n), $n['found'] > 100 && $n['partial'] > 0 && $n['none'] > 0);
+$check('second pass overrides the first (row 33: Chicago Tribune, media 16950)', strpos($by_row[33]['source_url'], 'chicagotribune.com') !== false && $by_row[33]['found']['media_id'] === 16950);
+$check('a none row has no source but keeps its drafts and notes', $by_row[146]['source_url'] === '' && $by_row[146]['found']['status'] === 'none' && $by_row[146]['found']['cause_draft'] !== '' && $by_row[146]['found']['notes'] !== '');
+$pf_ok = true;
+foreach ($seed['page_found'] as $id => $f) {
+    $in_conf = false;
+    foreach ($seed['conflicts'] as $c) if ((int) $c['id'] === (int) $id) $in_conf = (bool) array_filter($c['lines'], function ($l) { return $l['field'] === 'source'; });
+    if (!$in_conf && !in_array((int) $id, array_map('intval', $seed['page_only']), true)) $pf_ok = false;
+}
+$check(count($seed['page_found']) . ' page rows with a found link are shown (source line or Only-on-the-page)', $seed['page_found'] && $pf_ok);
+$_GET = array('tab' => 'add', 'seg' => 'open', 'kind' => 'source', 'q' => $by_row[33]['name']);
+ob_start();
+kop_ms_add_view(kop_ms_add_rows());
+$html = ob_get_clean();
+$_GET = array();
+$check('the Add card shows source, drafts, status and notes', strpos($html, 'chicagotribune.com') !== false && strpos($html, 'Source found') !== false
+    && strpos($html, esc_html($by_row[33]['found']['cause_draft'])) !== false && strpos($html, 'media library file 16950') !== false && strpos($html, 'Research notes') !== false);
+$check('the source box and the cause box are prefilled', strpos($html, 'name="source_url" value="' . esc_attr($by_row[33]['source_url']) . '"') !== false
+    && strpos($html, 'selected="selected">' . $causes_all[$by_row[33]['found']['category_draft']]) !== false);
+ob_start();
+kop_ms_page_only_view();
+$html = ob_get_clean();
+$check('Only on the page offers a found link where the page has none', strpos($html, 'Found by research') !== false || !array_intersect(array_map('strval', $seed['page_only']), array_keys($seed['page_found'])));
+$prefilled = null;
+foreach (kop_ms_add_rows() as $x) if ($x['state'] === 'open' && $x['a']['source_url'] !== '' && !empty($x['a']['found']['source_url'])) { $prefilled = $x; break; }
+$f = $prefilled['a'];
+$pid = kop_ms_add($prefilled['key'], array('name' => $f['name'], 'program' => $f['program'], 'date_of_death' => (string) $f['date_of_death'], 'date_precision' => $f['date_precision'],
+    'cause_of_death' => $f['found']['cause_draft'], 'cause_category' => $f['found']['category_draft'] ?: 'unknown', 'location' => $f['location'], 'source_url' => $f['source_url']));
+$check('a prefilled row saves with the found source and draft', ($g = $get($pid)) && $g['source_url'] === $f['source_url'] && $g['cause_of_death'] === $f['found']['cause_draft']);
+kop_ms_undo($prefilled['key']);
+$check('and its Undo removes it', !$get($pid));
+
 echo "-- Add, Skip, Undo --\n";
 $adds = kop_ms_add_rows();
 $no_src = $with_src = null;
