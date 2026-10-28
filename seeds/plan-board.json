@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 17:58 UTC",
- "source": "21042846011a6f18324370c7dd568505cc1bf552",
+ "built": "2026-10-28 18:48 UTC",
+ "source": "2aee79e84ecc2972a01e274a85d88b14aa4e8b44",
  "sections": [
   {
    "key": "2",
@@ -1498,10 +1498,10 @@
       {
        "id": "4.8:news-and-lawsuit-processors-in-admin-mode",
        "lead": "News and Lawsuit processors in admin mode",
-       "text": "**News and Lawsuit processors in admin mode** (2026-10-28; theme [888e1d9d](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/888e1d9dbe483c0b149d8ea3a528f8634fb25e89), app [306153cf](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/306153cfb0a99d2adb65993bad5e833b7fe7f638), EAS preview update out): Admin tab buttons \"Process a news article\" / \"Process a lawsuit\" (`src/app/news-processor.tsx`, `src/app/lawsuit-processor.tsx`, `src/api/processor.ts`) on `kop/v1/extension/news-form`, `/process`, `/archive`, and the new `/lawsuit-form`, `/lawsuit-process` (`inc/extension-lawsuit-processor.php`) and full lawsuit submit (`full=1`, `publish=1` = `published` + Recently done Undo, `inc/source-submissions.php`). Send tab offers \"Open in ... Processor\" to admins. Open: - check on a phone: AI read of a news link and of a court PDF, publish one, Undo it from Recently done; layout never seen; - CourtListener prefill: `api/fetch-lawsuit-details.php` is a standalone script, needs a reusable function first; - the Send to KOP extension could get the same Lawsuit panel; - app suites `tab-screens`, `resources`, `network` fail (failed before this change too).",
+       "text": "**News and Lawsuit processors in admin mode** (2026-10-28; theme [888e1d9d](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/888e1d9dbe483c0b149d8ea3a528f8634fb25e89), app [306153cf](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/306153cfb0a99d2adb65993bad5e833b7fe7f638), EAS preview update out): Admin tab buttons \"Process a news article\" / \"Process a lawsuit\" (`src/app/news-processor.tsx`, `src/app/lawsuit-processor.tsx`, `src/api/processor.ts`) on `kop/v1/extension/news-form`, `/process`, `/archive`, and the new `/lawsuit-form`, `/lawsuit-process` (`inc/extension-lawsuit-processor.php`) and full lawsuit submit (`full=1`, `publish=1` = `published` + Recently done Undo, `inc/source-submissions.php`). Send tab offers \"Open in ... Processor\" to admins. Open: - check on a phone: AI read of a news link and of a court PDF, publish one, Undo it from Recently done; layout never seen; - CourtListener prefill done 2026-10-28 (`api/lib-courtlistener.php`, shared with `api/fetch-lawsuit-details.php`; app [7f3a890c](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/7f3a890c72e51dd063a8e807eb4534a30dd3c760)): a CourtListener docket/RECAP link, or a federal case number the AI read, fills name, number, court, filing date and parties from the docket and keeps the docket page as a second source. Open after deploy: process a CourtListener docket link in the app and check the note under Read names CourtListener (if it never does, the REST side is not finding the key: `kop_cl_token()`); Fetch details on the admin lawsuit form should work as before; ship the app part with an EAS update (`npx eas-cli update --channel preview ...`); - the Send to KOP extension could get the same Lawsuit panel; - app suites `tab-screens`, `resources`, `network` fail (failed before this change too).",
        "ask": "Do the two processors work on your phone?",
        "date": "2026-10-28",
-       "hash": "792e0762ac3b"
+       "hash": "83cf3c7179d5"
       }
      ]
     }
