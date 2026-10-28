@@ -90,7 +90,7 @@ try {
     $jurisdictions = $statuses = $all_claims = [];
 }
 
-// Facilities each case is linked to (lawsuit_facility_links -> facilities_master)
+// Facilities each case is linked to (lawsuit_facility_links -> the v2 facility records)
 // and the news coverage of each case (lawsuit_news_links -> news_submissions).
 // Both tables are optional; a missing one just leaves the card without links.
 $facility_links = [];   // lawsuit_id => [ ['name' => unique_name, 'keys' => set of normalized names] ]
@@ -99,48 +99,35 @@ $lawsuit_ids    = array_map(static function ($r) { return (int)$r['id']; }, $law
 if ($lawsuit_ids) {
     $ph = implode(',', array_fill(0, count($lawsuit_ids), '?'));
     try {
-        // facilities_master is frozen once admin saves write the v2 tables;
-        // the linked rows then come from there, by id.
+        // The linked rows come from the v2 tables, by id.
         require_once get_stylesheet_directory() . '/inc/facility-v2-writer.php';
         $v2_prefix = kop_v2_detect_prefix($pdo);
-        if (kop_v2_writes_active($pdo, $v2_prefix)) {
-            $stmt = $pdo->prepare(
-                "SELECT lawsuit_id, facility_id FROM lawsuit_facility_links
-                 WHERE lawsuit_id IN ($ph) ORDER BY lawsuit_id"
-            );
-            $stmt->execute($lawsuit_ids);
-            $link_rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $by_id = [];
-            foreach (kop_v2_pdo_master_rows($pdo, $v2_prefix) as $row) {
-                $by_id[(int)$row['id']] = $row;
-            }
-            $rows = [];
-            foreach ($link_rows as $link) {
-                $row = $by_id[(int)$link['facility_id']] ?? null;
-                if (!$row) continue;
-                $rows[] = [
-                    'lawsuit_id' => $link['lawsuit_id'],
-                    'facility_id' => (int)$link['facility_id'],
-                    'unique_name' => $row['unique_name'],
-                    'json_data' => $row['json_data'],
-                ];
-            }
-            usort($rows, static function ($a, $b) {
-                return (int)$a['lawsuit_id'] === (int)$b['lawsuit_id']
-                    ? strcasecmp($a['unique_name'], $b['unique_name'])
-                    : (int)$a['lawsuit_id'] - (int)$b['lawsuit_id'];
-            });
-        } else {
-            $stmt = $pdo->prepare(
-                "SELECT lf.lawsuit_id, lf.facility_id, fm.unique_name, fm.json_data
-                 FROM lawsuit_facility_links lf
-                 JOIN facilities_master fm ON fm.id = lf.facility_id
-                 WHERE lf.lawsuit_id IN ($ph)
-                 ORDER BY lf.lawsuit_id, fm.unique_name"
-            );
-            $stmt->execute($lawsuit_ids);
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare(
+            "SELECT lawsuit_id, facility_id FROM lawsuit_facility_links
+             WHERE lawsuit_id IN ($ph) ORDER BY lawsuit_id"
+        );
+        $stmt->execute($lawsuit_ids);
+        $link_rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $by_id = [];
+        foreach (kop_v2_pdo_master_rows($pdo, $v2_prefix) as $row) {
+            $by_id[(int)$row['id']] = $row;
         }
+        $rows = [];
+        foreach ($link_rows as $link) {
+            $row = $by_id[(int)$link['facility_id']] ?? null;
+            if (!$row) continue;
+            $rows[] = [
+                'lawsuit_id' => $link['lawsuit_id'],
+                'facility_id' => (int)$link['facility_id'],
+                'unique_name' => $row['unique_name'],
+                'json_data' => $row['json_data'],
+            ];
+        }
+        usort($rows, static function ($a, $b) {
+            return (int)$a['lawsuit_id'] === (int)$b['lawsuit_id']
+                ? strcasecmp($a['unique_name'], $b['unique_name'])
+                : (int)$a['lawsuit_id'] - (int)$b['lawsuit_id'];
+        });
         foreach ($rows as $r) {
             $decoded = json_decode((string)$r['json_data'], true);
             $keys = [kop_normalize_name_key((string)$r['unique_name']) => true];
@@ -187,7 +174,7 @@ $facility_profile_url = static function (string $name, int $facility_id = 0) use
 };
 
 /**
- * Pair a case's mentioned facility names with its linked facilities_master rows.
+ * Pair a case's mentioned facility names with its linked facility rows.
  * A mention links when one of its spellings (kop_facility_name_variants) matches
  * the linked row's unique_name or an alias; a lone mention pairs with a lone
  * link regardless.

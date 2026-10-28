@@ -4,7 +4,7 @@
  * Template Post Type: post, page
  * Description: Wide layout for Facility Profile posts. The editor content is
  * printed exactly as stored through the_content(); the template only adds a
- * facts rail built from the post's custom fields, the facilities_master
+ * facts rail built from the post's custom fields, the facility record
  * record with the same name, and the lawsuits linked to that record.
  *
  * Nothing here reads or rewrites post_content, so switching a post to this
@@ -118,29 +118,9 @@ if (!function_exists('kop_fp_staff_connections')) {
     }
 }
 
-if (!function_exists('kop_fp_facility_node')) {
-    /**
-     * facilities_master rows come in two shapes: {facility: ...} and the
-     * per-facility {__facility_ref: true, data: {facility: ...}} rows. Return
-     * the facility object either way.
-     */
-    function kop_fp_facility_node($decoded) {
-        if (!is_array($decoded)) {
-            return array();
-        }
-        if (isset($decoded['facility']) && is_array($decoded['facility'])) {
-            return $decoded['facility'];
-        }
-        if (isset($decoded['data']['facility']) && is_array($decoded['data']['facility'])) {
-            return $decoded['data']['facility'];
-        }
-        return array();
-    }
-}
-
 if (!function_exists('kop_facility_profile_record_names')) {
     /**
-     * Post/page slug => facilities_master unique_name, for profiles whose
+     * Post/page slug => facility record unique_name, for profiles whose
      * title is not spelled the way the database record is.
      */
     function kop_facility_profile_record_names() {
@@ -180,7 +160,7 @@ $kop_fp_transfers     = array_values(array_filter(array(
     kop_fp_strip_label(kop_fp_meta($kop_fp_post_id, 'staff_transfers_3')),
 ), 'strlen'));
 
-// ---- facilities_master record and linked lawsuits -------------------------
+// ---- facility record (v2 tables) and linked lawsuits -----------------------
 $kop_fp_record_id = 0;
 $kop_fp_facility  = array();
 $kop_fp_lawsuits  = array();
@@ -190,20 +170,12 @@ if (file_exists($kop_fp_config)) {
 }
 if (isset($pdo) && $pdo instanceof PDO) {
     try {
-        if (function_exists('kop_v2_active') && kop_v2_active('facility_profiles')) {
-            // v2: one merged record per facility, projected to the shape below.
+        if (function_exists('kop_v2_profile_record')) {
+            // One merged record per facility, projected to the shape below.
             $v2_record = kop_v2_profile_record($pdo, $kop_fp_name);
             if ($v2_record) {
                 $kop_fp_record_id = $v2_record['id'];
                 $kop_fp_facility  = $v2_record['facility'];
-            }
-        } else {
-            $stmt = $pdo->prepare('SELECT id, json_data FROM facilities_master WHERE unique_name = ? LIMIT 1');
-            $stmt->execute(array($kop_fp_name));
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row) {
-                $kop_fp_record_id = (int) $row['id'];
-                $kop_fp_facility  = kop_fp_facility_node(json_decode((string) $row['json_data'], true));
             }
         }
         if ($kop_fp_record_id) {
