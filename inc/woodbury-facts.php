@@ -121,7 +121,9 @@ function kop_wbf_sync($force = false) {
             $edited[$r['pkey']] = true;
         }
         // A person added by hand (kop_wbf_add_person), or an item put back from "No longer proposed".
-        if (strpos((string) $r['extra'], '"manual"') !== false || strpos((string) $r['extra'], '"kept_by"') !== false) {
+        // The news reader's rows (inc/news-facts.php) are never in facts.json either.
+        if (strpos((string) $r['extra'], '"manual"') !== false || strpos((string) $r['extra'], '"kept_by"') !== false
+            || strpos((string) $r['extra'], '"via":"news"') !== false) {
             $manual[$r['pkey']] = true;
         }
     }
@@ -261,17 +263,20 @@ function kop_wbf_ev_label(array $e) {
  */
 function kop_wbf_origin(array $r) {
     $extra = is_array($r['extra'] ?? null) ? $r['extra'] : (json_decode((string) ($r['extra'] ?? ''), true) ?: array());
-    return ($extra['via'] ?? '') === 'questions' ? 'questions' : 'woodbury';
+    $via = $extra['via'] ?? '';
+    return in_array($via, array('questions', 'news'), true) ? $via : 'woodbury';
 }
 
+/** 'news': facts the news reader proposed about a program its article is linked to (inc/news-facts.php). */
 function kop_wbf_origins() {
-    return array('woodbury' => 'Woodbury Reports', 'questions' => 'Questions page');
+    return array('woodbury' => 'Woodbury Reports', 'questions' => 'Questions page', 'news' => 'News articles');
 }
 
 /** SQL for one origin's rows (the questions page writes extra as {"manual":1,"via":"questions",...}). */
 function kop_wbf_origin_where($origin) {
     if ($origin === 'questions') return " AND extra LIKE '%\"via\":\"questions\"%'";
-    if ($origin === 'woodbury') return " AND (extra IS NULL OR extra NOT LIKE '%\"via\":\"questions\"%')";
+    if ($origin === 'news') return " AND extra LIKE '%\"via\":\"news\"%'";
+    if ($origin === 'woodbury') return " AND (extra IS NULL OR (extra NOT LIKE '%\"via\":\"questions\"%' AND extra NOT LIKE '%\"via\":\"news\"%'))";
     return '';
 }
 

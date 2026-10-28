@@ -79,6 +79,16 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # the list ('storycov:<id>', inc/story-coverage.php: untick a wrong article, paste a link or #id to add one, exact Undo). Every row it
 # touches gets story_group_manual = 1, which the automatic grouping (each save, the rebuild) never changes or joins to another story
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-story-coverage.php   # take off, add, move, rebuild keeps it, undo; made-up table
+# Facts from news articles (inc/news-facts.php, 2026-10-28; owner's rules in docs/plan/4.6 item 17): hourly WP-Cron, 6 approved articles
+# a run, newest first (publication_date), one AI call each (kop_ai_generate_alternating, job "News facts"). A fact counts when it is about a named
+# program/company/person, rests on a quote found in the article and lands somewhere; closures are left to the closure scan. Survivors' names come
+# out of every line (kop_nf_scrub_survivors(): survivors_mentioned names and their surnames; a young person who died keeps theirs). Facts about a
+# linked program become {prefix}kop_woodbury_facts rows (extra.via = 'news', match_kind 'id', origin "News articles" on Woodbury Facts) with
+# the same Add/Undo/conflicts/write-up hold; everything else waits at Review inbox > Facts from news (Keep/Drop) until its record kind has an Add.
+# Automatic approval (staff, opened, capacity, ages, gender, type; quote found, no name taken out) is the option kop_news_facts_auto, off until
+# the owner turns it on with that queue's tool; "Pause the reader" there sets kop_news_facts_paused. KOP_NEWS_FACTS_READER bumps re-read everything
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-news-facts.php   # offline: order, prompt, reply, survivors, routing, rows apply to 25 real records
+php api/scan-news-facts.php [--ids=10553] [--limit=5]   # on the server (ea-php82): dry run, calls the AI, stores nothing; "apply" stores
 # Journalist extraction from news bylines (api/lib-journalists.php), against tmp/prod.sqlite
 php scripts/test-journalists.php [--list]
 ```

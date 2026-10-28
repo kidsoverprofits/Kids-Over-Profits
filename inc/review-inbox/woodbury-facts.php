@@ -221,6 +221,7 @@ function kop_rinbox_wbf_item(array $r) {
     }
     if (isset($extra['original'])) $lines[] = 'Corrected by ' . ($extra['edited_by'] ?? 'a reviewer') . '.';
     if (!empty($extra['manual'])) $lines[] = kop_wbf_manual_line($r, $extra);
+    if (!empty($extra['names_removed'])) $lines[] = 'A survivor\'s name was taken out of these words (survivors are never named on a record). Check the line reads right before adding.';
     if (!empty($extra['ai_note'])) $lines[] = (strpos($extra['ai_note'], 'Added by the AI reader') === 0 ? '' : 'AI reader: ') . $extra['ai_note'];
     if ($r['status'] === 'applied' && kop_wbf_filed_on($r) !== '') {
         $done = json_decode((string) $r['applied'], true);
@@ -348,8 +349,8 @@ function kop_rinbox_wbf_item(array $r) {
         'rejected' => 'Rejected', 'gone' => 'No longer proposed');
     return array(
         'key'          => (string) $r['pkey'],
-        // Only the questions page's rows get a badge: everything else here is Woodbury's.
-        'source_label' => kop_wbf_origin($r) === 'questions' ? kop_wbf_origins()['questions'] : '',
+        // The questions page's and the news reader's rows get a badge: everything else here is Woodbury's.
+        'source_label' => kop_wbf_origin($r) !== 'woodbury' ? kop_wbf_origins()[kop_wbf_origin($r)] : '',
         'title'        => (string) $r['label'],
         'subtitle'     => implode(' · ', array_filter(array(
             $groups[$r['grp']] ?? $r['grp'],

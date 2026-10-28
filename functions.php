@@ -265,6 +265,8 @@ require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-mentions.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-create.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-facts.php';
+// Facts from news articles: an hourly reader proposes what each approved article says that belongs on a record (Woodbury Facts cards + Review inbox > Facts from news)
+require_once get_stylesheet_directory() . '/inc/news-facts.php';
 // Copies earlier approvals and merges left on facility records (one person twice, a name twice, one event twice), tidied in the review inbox
 require_once get_stylesheet_directory() . '/inc/record-cleanup.php';
 // Corrections found by checking KOP's data against outside sources (scripts/data-audit.py), approved in the review inbox
