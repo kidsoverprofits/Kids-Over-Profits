@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 18:51 UTC",
- "source": "1262498a6b054951ea218cd89c7db41722b9a714",
+ "built": "2026-10-28 18:52 UTC",
+ "source": "a8f97537797eeaacb42d486ba2ecb4f7c114fac9",
  "sections": [
   {
    "key": "2",
@@ -1371,10 +1371,10 @@
       {
        "id": "4.7:advocacy-history-and-survivors-hub-writing",
        "lead": "Advocacy History and Survivors hub writing",
-       "text": "**Advocacy History and Survivors hub writing**: Key Milestones, \"Submit your story\", the Survivors hub's thesis line and link descriptions. Drafted 2026-10-28 in docs/drafts/hub-writing-2026-10-28.md (ff596336afdb03cdfb78eaebeb6b9d5a8daeeee8), every milestone with its source. Open: - Owner: approve or edit. Seeds skip both pages (edited in wp-admin since), so publishing is a paste into https://kidsoverprofits.org/wp-admin/post.php?post=2102&action=edit and post=2082, or a one-time seeds/text-fixes.json entry plus seeds/history/advocacy-history.html. - Owner said fix (2026-10-28), in progress: on the live Advocacy History page the 2007 and 2008 hearing witnesses are swapped (parents + NATSAP on 2007-10-10, survivors Martin-Crawford and Whitehead on 2008-04-24), and the Straight-Sarasota report is dated September 1983 though ISAC has the program closing July 19, 1983 after it. - https://kidsoverprofits.org/sicaa/ (updated 2025-01-06) describes both the introduced bill's nine-member \"Federal Work Group\" and the National Academies study. The signed law (P.L. 118-194, S. 1351) has no work group: its 16 study topics took over the work group's duties. The page also says the House passed H.R. 2955; it passed S. 1351 on 2024-12-18. Waiting on the owner's wording.",
+       "text": "**Advocacy History and Survivors hub writing**: Key Milestones, \"Submit your story\", the Survivors hub's thesis line and link descriptions. Drafted 2026-10-28 in docs/drafts/hub-writing-2026-10-28.md (ff596336afdb03cdfb78eaebeb6b9d5a8daeeee8), every milestone with its source. Open: - Owner: approve or edit. Seeds skip both pages (edited in wp-admin since), so publishing is a paste into https://kidsoverprofits.org/wp-admin/post.php?post=2102&action=edit and post=2082, or a one-time seeds/text-fixes.json entry plus seeds/history/advocacy-history.html. - Done 2026-10-28, live (829379ad70e473081af0bc461fe49b13ed8b32f9, applied by template assignments 148): the 2007 and 2008 hearing witnesses are in their right years, and the Sarasota report reads 1983 (the Sembler Report gives September 1983 for the report but July 19, 1983 for the closing). \"Failed to pass\" stays: the bill never became law. - https://kidsoverprofits.org/sicaa/ (updated 2025-01-06) describes both the introduced bill's nine-member \"Federal Work Group\" and the National Academies study. The signed law (P.L. 118-194, S. 1351) has no work group: its 16 study topics took over the work group's duties. The page also says the House passed H.R. 2955; it passed S. 1351 on 2024-12-18. Waiting on the owner's wording.",
        "ask": "",
        "date": "2026-10-28",
-       "hash": "6ba60c5278ab"
+       "hash": "440f61937617"
       },
       {
        "id": "4.7:seo-audit-read-only-first",
