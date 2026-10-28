@@ -130,11 +130,13 @@ function getAllLocations() {
                 if (placeText) {
                     locations.add(placeText);
                 }
-                if (facility.locationState) {
-                    locations.add(facility.locationState);
+                const placeState = kopFacilityField(facility, 'location.state') || facility.locationState;
+                if (placeState) {
+                    locations.add(placeState);
                 }
-                if (facility.locationCity) {
-                    locations.add(facility.locationCity);
+                const placeCity = kopFacilityField(facility, 'location.city') || facility.locationCity;
+                if (placeCity) {
+                    locations.add(placeCity);
                 }
             });
         });
@@ -220,7 +222,7 @@ function syncLocationProjectsFromSources(projectsObj) {
         const facilities = project.data?.facilities || [];
         facilities.forEach(facility => {
             // Try to determine the state from the facility
-            let state = facility.locationState || '';
+            let state = kopFacilityField(facility, 'location.state') || facility.locationState || '';
 
             // If no explicit state, try to parse from location field
             const placeText = kopFacilityField(facility, 'location.text');
