@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 17:36 UTC",
- "source": "a324725b0169d15a4e289ec43a8fb478e2cd4799",
+ "built": "2026-10-28 17:42 UTC",
+ "source": "ad2bfef627006cbef48901714332709f0e466874",
  "sections": [
   {
    "key": "2",
@@ -1128,6 +1128,14 @@
        "ask": "",
        "date": "2026-10-25",
        "hash": "4f8d0f9d18ca"
+      },
+      {
+       "id": "4.4:questions-answers-fill-the-profile-s-fields",
+       "lead": "Questions answers fill the profile's fields",
+       "text": "**Questions answers fill the profile's fields** (owner, 2026-10-28: \"it should be filling in the profiles directly instead of printing raw labels\"; [37922245](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/3792224587271dbaa7e4b96f3390392eb1ac356d)). Settled answers now go straight onto the record (no hold for the write-up, no label line in the notes); staff years go into the person's role (\"Director (2003)\", Woodbury Facts op `staff_years`); rules answers only feed reader-accounts. Open: (a) **after deploy**, the first wp-admin page load runs `kop_q_release_held()` once for the 230 answers held before; check the option `kop_q_released_held` (counts applied / staff / conflict / already / dropped, no `error`) and that `wpdl_kop_woodbury_facts` has no `held` rows with `\"via\":\"questions\"`. Spot-check https://kidsoverprofits.org/facility/spring-ridge-academy/ (Jeannie Courtney's role should read \"... (2003)\") and a practice tick on Falcon Ridge Ranch. (b) Records whose write-up drafts were made from those held facts still list them in the draft's `held` keys; the next draft run rewrites them.",
+       "ask": "",
+       "date": "2026-10-28",
+       "hash": "a56fc1c06a4f"
       }
      ]
     },
