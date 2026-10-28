@@ -257,6 +257,8 @@ require_once get_stylesheet_directory() . '/inc/state-lists.php';
 require_once get_stylesheet_directory() . '/inc/researcher-uploads.php';
 // Documents and chunked uploads on those links (KOP Tools > Researcher Documents)
 require_once get_stylesheet_directory() . '/inc/researcher-documents.php';
+// Where kop-pipeline's load-researcher-kit.py sends kit records (research key, pending review items only)
+require_once get_stylesheet_directory() . '/inc/researcher-kit-intake.php';
 // Woodbury Reports pages about a program, cut by scripts/woodbury-scan.py, reviewed and filed in its doc library
 // PDF first-page covers drawn by the gs program (regenerate tools, Woodbury extracts)
 require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
