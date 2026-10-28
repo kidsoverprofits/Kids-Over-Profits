@@ -748,7 +748,7 @@ function kop_article_names_section(array $slugs) {
         $weight[(string) $node['id']] = (float) (isset($node['importance']) ? $node['importance'] : 0);
     }
     foreach ($slugs as $slug) {
-        $page = kop_article_page($slug);
+        $page = kop_article_page($slug) ? get_page_by_path($slug) : null;
         if (!$page) {
             continue;
         }

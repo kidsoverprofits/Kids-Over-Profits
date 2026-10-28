@@ -50,7 +50,7 @@ function get_page_by_path($slug) {
     if ($slug === $GLOBALS['kop_test_missing']) {
         return null;
     }
-    return (object) array('post_name' => $slug, 'post_status' => 'publish');
+    return (object) array('post_name' => $slug, 'post_status' => 'publish', 'ID' => 100 + strlen($slug));
 }
 function get_the_title($page) {
     return ucwords(str_replace('-', ' ', $page->post_name));
@@ -60,6 +60,13 @@ function is_singular() { return true; }
 function get_the_ID() { return 7; }
 function get_post_field($field, $id) { return $GLOBALS['kop_test_slug']; }
 
+function get_post($id) { return (object) array('ID' => $id, 'post_name' => 'x', 'post_modified_gmt' => '2026-01-01', 'post_content' => $GLOBALS['kop_test_text']); }
+function get_transient($k) { return false; }
+function set_transient($k, $v, $t) {}
+function strip_shortcodes($t) { return $t; }
+function wp_strip_all_tags($t) { return strip_tags($t); }
+function kop_network_map_graph() { return array('nodes' => $GLOBALS['kop_test_nodes']); }
+define('DAY_IN_SECONDS', 86400);
 function sanitize_title($t) { return trim(preg_replace('/[^a-z0-9]+/', '-', strtolower((string) $t)), '-'); }
 function add_query_arg($k, $v, $url) { return $url . (strpos($url, '?') === false ? '?' : '&') . $k . '=' . $v; }
 require ABSPATH . 'inc/admin.php';
@@ -289,6 +296,10 @@ contains('on the hub the rest fold under "all N"', ob_get_clean(), '<summary>all
 ob_start();
 kop_article_names_box($many, array('heading' => 'In this article'));
 contains('on an article they fold under "and N more"', ob_get_clean(), '<summary>and 3 more</summary>');
+$GLOBALS['kop_test_nodes'] = $nodes;
+$GLOBALS['kop_test_text']  = $text;
+$sect = kop_article_names_section(array('corporatization', 'overview'));
+check('the section reads each existing article (a missing page is skipped) and merges by id', kop_article_names_total($sect), 5);
 check('the hub sentence', kop_article_names_section_intro($found), '2 programs, 2 people and 1 company from these pages are on the network map.');
 
 echo $failures ? "\n$failures FAILURES\n" : "\narticle parts: PASS\n";
