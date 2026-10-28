@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 16:55 UTC",
- "source": "b565b08a3d24cb4b85fdb2dc5e8ecf26b568605d",
+ "built": "2026-10-28 17:06 UTC",
+ "source": "1f5108ab73350185d9515304bfabe4843d394142",
  "sections": [
   {
    "key": "2",
@@ -973,10 +973,10 @@
       {
        "id": "4.3:news-articles-not-linking-to-facilities-2026-10-28",
        "lead": "News articles not linking to facilities (2026-10-28)",
-       "text": "**News articles not linking to facilities (2026-10-28)**: two causes fixed in code. (a) A company's name in an article or case resolved to its operator id and was written to `news_facility_links`, which no page reads (382 news rows, 21 lawsuit rows on the 2026-10-27 mirror; 32 approved articles linked to nothing else). The syncs now write those to `kop_operator_links` (`kop_link_mentioned_operators()`, api/facility-aliases.php). (b) The hourly Facilities from News scan dropped the record the AI matched when it called the name a provider or agency (\"Laurel Heights\", \"Looking Glass Community Services\"); it now links them as 'matched' (27 articles on the mirror). Open: - **Owner step: backfill the existing rows.** New saves are right; old rows change only when each article is saved again. A one-time pass would run `kop_resync_news()` / `kop_resync_lawsuit()` on the rows holding an operator id (moves them to the company pages) and re-apply the 27 provider/agency candidates with a `sameAs` record. Waiting for the owner's go-ahead (admin_init pass rule). - After deploy: open a new article naming a company (e.g. Sequel, UHS) and check it lists on /operator/ and that `news_facility_links` holds no operator id for it. - Still unlinked by design: about 90 approved articles whose names match no record exactly and that the scan judged not a facility, or held as 'unquoted' (8). Facilities from News is where those are linked by hand.",
+       "text": "**News articles not linking to facilities (2026-10-28)**: two causes fixed in code. (a) A company's name in an article or case resolved to its operator id and was written to `news_facility_links`, which no page reads (382 news rows, 21 lawsuit rows on the 2026-10-27 mirror; 32 approved articles linked to nothing else). The syncs now write those to `kop_operator_links` (`kop_link_mentioned_operators()`, api/facility-aliases.php). (b) The hourly Facilities from News scan dropped the record the AI matched when it called the name a provider or agency (\"Laurel Heights\", \"Looking Glass Community Services\"); it now links them as 'matched' (27 articles on the mirror). Open: - **Backfill (owner approved 2026-10-28)**: `kop_facdisc_maybe_fix_links()` (admin_init, option `kop_facdisc_link_fix` = 1) moves every operator-id row in the two facility link tables to `kop_operator_links` with its link type (417 on the mirror) and links 24 provider/agency names to their `sameAs` record (candidate 217, \"Holley Child Care\" -> Holly Hill KY, left out as a wrong match). Every row is in the option `kop_facdisc_link_fix_log` for an Undo by hand. Check after deploy: that option holds counts, no error. - After deploy: open a new article naming a company (e.g. Sequel, UHS) and check it lists on /operator/ and that `news_facility_links` holds no operator id for it. - Still unlinked by design: about 90 approved articles whose names match no record exactly and that the scan judged not a facility, or held as 'unquoted' (8). Facilities from News is where those are linked by hand.",
        "ask": "",
        "date": "2026-10-28",
-       "hash": "8d03bc50df68"
+       "hash": "a28579c0d830"
       }
      ]
     },
