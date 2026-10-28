@@ -356,7 +356,7 @@ function kop_dm_find_record(PDO $pdo, array $tables, string $uniqueName): ?array
             }
             continue;
         }
-        if ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
+        if ($table === 'facilities_master') {
             $row = kop_v2_pdo_master_row_by_name($pdo, kop_dm_v2_prefix($pdo), $uniqueName);
             if ($row) {
                 $row['table'] = 'facilities_master';
@@ -381,9 +381,9 @@ function kop_dm_find_record(PDO $pdo, array $tables, string $uniqueName): ?array
 
 /**
  * The v2 facility tables (inc/facility-v2-writer.php) are where operator
- * projects and facilities live once the write switch is on; facilities_master
- * is frozen from then on. These three keep the rest of this file unaware of
- * which model is active.
+ * projects and facilities live; the 'facilities_master' name here is only the
+ * old category table name, served from them (the physical table was retired
+ * on 2026-10-25).
  */
 function kop_dm_v2_prefix(PDO $pdo): string {
     static $prefix = null;
@@ -401,24 +401,14 @@ function kop_dm_v2_writes(PDO $pdo): bool {
     return $on;
 }
 
-/** Legacy-shaped rows of facilities_master, from whichever model is active. */
+/** Legacy-shaped rows of the operator projects, built from the v2 tables. */
 function kop_dm_master_rows(PDO $pdo): array {
-    if (kop_dm_v2_writes($pdo)) {
-        return kop_v2_pdo_master_rows($pdo, kop_dm_v2_prefix($pdo));
-    }
-    $rows = [];
-    try {
-        $stmt = $pdo->query("SELECT id, unique_name, json_data, updated_at FROM `facilities_master`");
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // table missing on this install
-    }
-    return $rows;
+    return kop_v2_pdo_master_rows($pdo, kop_dm_v2_prefix($pdo));
 }
 
 /** Write an edited record back to whichever model holds it. */
 function kop_dm_save_project(PDO $pdo, array $rec, array $project): void {
-    if (kop_dm_v2_writes($pdo) && ($rec['table'] ?? '') === 'facilities_master') {
+    if (($rec['table'] ?? '') === 'facilities_master') {
         kop_v2_save_legacy_row($pdo, kop_dm_v2_prefix($pdo), (string)$rec['unique_name'], $project);
         return;
     }
@@ -448,14 +438,8 @@ function kop_dm_assign_facility_id(PDO $pdo, array $rec, array $project, string 
 
 /** A facility row's unique_name by id, for the wiki link target. */
 function kop_dm_facility_unique_name(PDO $pdo, int $facilityId): ?string {
-    if (kop_dm_v2_writes($pdo)) {
-        $names = kop_v2_pdo_names_by_id($pdo, kop_dm_v2_prefix($pdo), [$facilityId]);
-        return $names[$facilityId] ?? null;
-    }
-    $stmt = $pdo->prepare("SELECT unique_name FROM facilities_master WHERE id = ? LIMIT 1");
-    $stmt->execute([$facilityId]);
-    $name = $stmt->fetchColumn();
-    return $name === false ? null : (string)$name;
+    $names = kop_v2_pdo_names_by_id($pdo, kop_dm_v2_prefix($pdo), [$facilityId]);
+    return $names[$facilityId] ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -911,7 +895,7 @@ try {
                         return $q === '' || mb_stripos($row['unique_name'], $q) !== false || mb_stripos((string)$row['json_data'], $q) !== false;
                     }));
                     usort($rows, static function ($a, $b) { return strcasecmp($a['unique_name'], $b['unique_name']); });
-                } elseif ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
+                } elseif ($table === 'facilities_master') {
                     $rows = kop_dm_master_rows($pdo);
                     if ($q !== '') {
                         // Past and other names find a record too.
@@ -1033,13 +1017,8 @@ try {
                 if (is_array($f) && !empty($f['facility_id'])) $facIds[] = (int)$f['facility_id'];
             }
             $idToUnique = [];
-            if ($facIds && kop_dm_v2_writes($pdo)) {
+            if ($facIds) {
                 $idToUnique = kop_v2_pdo_names_by_id($pdo, kop_dm_v2_prefix($pdo), $facIds);
-            } elseif ($facIds) {
-                $in = implode(',', array_map('intval', array_unique($facIds)));
-                foreach ($pdo->query("SELECT id, unique_name FROM facilities_master WHERE id IN ($in)")->fetchAll(PDO::FETCH_ASSOC) as $r) {
-                    $idToUnique[(int)$r['id']] = $r['unique_name'];
-                }
             }
             // Wiki link counts keyed by facility unique_name.
             $wikiCounts = [];
@@ -1472,7 +1451,7 @@ try {
         }
 
         // Collision check in the target table.
-        if (kop_dm_v2_writes($pdo) && $targetTable === 'facilities_master') {
+        if ($targetTable === 'facilities_master') {
             $collides = kop_v2_name_taken($pdo, kop_dm_v2_prefix($pdo), $uniqueName);
         } else {
             $collide = $pdo->prepare("SELECT 1 FROM `$targetTable` WHERE unique_name = ? LIMIT 1");
@@ -1507,7 +1486,7 @@ try {
 
         $pdo->beginTransaction();
         try {
-            if (kop_dm_v2_writes($pdo) && $targetTable === 'facilities_master') {
+            if ($targetTable === 'facilities_master') {
                 kop_v2_save_legacy_row($pdo, kop_dm_v2_prefix($pdo), $uniqueName, $project);
             } else {
                 $ins = $pdo->prepare(
@@ -1517,7 +1496,7 @@ try {
                 $ins->execute([$uniqueName, $newJson]);
             }
 
-            if (kop_dm_v2_writes($pdo) && $sourceTable === 'facilities_master') {
+            if ($sourceTable === 'facilities_master') {
                 // The project leaves the facility index; its facilities stay.
                 kop_v2_delete_form_project($pdo, kop_dm_v2_prefix($pdo), $uniqueName, false);
             } else {
@@ -1670,7 +1649,7 @@ try {
         $table = $rec['table'];
 
         // Collision check in the same table.
-        if (kop_dm_v2_writes($pdo) && $table === 'facilities_master') {
+        if ($table === 'facilities_master') {
             $taken = kop_v2_name_taken($pdo, kop_dm_v2_prefix($pdo), $newName);
         } else {
             $collide = $pdo->prepare("SELECT 1 FROM `$table` WHERE unique_name = ? LIMIT 1");
@@ -1693,7 +1672,7 @@ try {
 
         $pdo->beginTransaction();
         try {
-            if (kop_dm_v2_writes($pdo) && $table === 'facilities_master') {
+            if ($table === 'facilities_master') {
                 // Renames the operator project and the facilities that name it
                 // as their source project.
                 $renamed = kop_v2_rename_operator($pdo, kop_dm_v2_prefix($pdo), $uniqueName, $newName);
@@ -1786,7 +1765,7 @@ try {
 
         $pdo->beginTransaction();
         try {
-            if (kop_dm_v2_writes($pdo) && $table === 'facilities_master') {
+            if ($table === 'facilities_master') {
                 // The operator project goes; its facilities stay and keep
                 // their state pages.
                 $deleted = kop_v2_delete_form_project($pdo, kop_dm_v2_prefix($pdo), $uniqueName, false);
@@ -1948,17 +1927,9 @@ try {
         $facility = $facs[$idx];
         $fid = !empty($facility['facility_id']) ? (int)$facility['facility_id'] : null;
 
-        // Give the facility a stable id + unique_name if it has none. Under v2
-        // saving the project assigns them; before that, promotion does.
-        if (!$fid && kop_dm_v2_writes($pdo)) {
+        // Give the facility a stable id + unique_name if it has none: saving the project assigns them.
+        if (!$fid) {
             $fid = kop_dm_assign_facility_id($pdo, $rec, $project, $path, $idx);
-        } elseif (!$fid && function_exists('kop_promote_single_nested_facility')) {
-            $fid = kop_promote_single_nested_facility($pdo, $facility);
-            if ($fid) {
-                $facs[$idx] = $facility; // promotion stamped facility_id
-                kop_dm_set_facilities($project, $path, $facs);
-                kop_dm_save_project($pdo, $rec, $project);
-            }
         }
         if (!$fid) {
             http_response_code(422);
@@ -2000,7 +1971,7 @@ try {
         // Build the ordered work list (cheap: id + unique_name only).
         $work = [];
         foreach (['facilities_master', 'referrers_master', $CATEGORY_TABLE['transporters']] as $table) {
-            if ($table === 'facilities_master' && kop_dm_v2_writes($pdo)) {
+            if ($table === 'facilities_master') {
                 foreach (kop_dm_master_rows($pdo) as $r) {
                     $work[] = ['table' => $table, 'id' => (int)$r['id'], 'unique_name' => $r['unique_name'],
                                'json_data' => $r['json_data']];
@@ -2140,20 +2111,14 @@ try {
             }
         }
 
-        // Ensure the facility has a stable record. Under v2 it always has one
-        // (saving the project assigns it); before that, promotion creates it.
+        // Ensure the facility has a stable record (saving the project assigns it).
         $fid = !empty($facs[$idx]['facility_id']) ? (int)$facs[$idx]['facility_id'] : null;
-        if (!$fid && !kop_dm_v2_writes($pdo) && function_exists('kop_promote_single_nested_facility')) {
-            $tmp = $facs[$idx];
-            $fid = kop_promote_single_nested_facility($pdo, $tmp);
-            if ($fid) { $facs[$idx] = $tmp; $dirty = true; }
-        }
 
         if ($dirty) {
             kop_dm_set_facilities($project, $path, $facs);
             kop_dm_save_project($pdo, $rec, $project);
         }
-        if (!$fid && kop_dm_v2_writes($pdo)) {
+        if (!$fid) {
             $fid = kop_dm_assign_facility_id($pdo, $rec, $project, $path, $idx);
         }
 
