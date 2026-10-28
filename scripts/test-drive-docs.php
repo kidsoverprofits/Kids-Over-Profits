@@ -43,6 +43,13 @@ if (!file_exists($db_path) || !file_exists($links_path)) {
 
 require __DIR__ . '/kop-test-harness.php';
 require_once dirname(__DIR__) . '/inc/drive-docs.php';
+require_once dirname(__DIR__) . '/inc/facility-merge.php';
+// The live merge map, from the copied options table (the harness's get_option() does not read it): the links
+// files name the records as they were when built, and kop_facility_merge_resolve() moves each to the record it
+// was merged into since (the same helper scripts/test-fornits.php uses).
+$raw = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_facility_merged_into'")->fetchColumn();
+if ($raw !== false) $GLOBALS['kop_test_options']['kop_facility_merged_into'] = unserialize($raw);
+unset($raw);
 
 $failures = 0;
 $check = function ($label, $ok, $detail = '') use (&$failures) {
@@ -109,7 +116,7 @@ foreach ($files as $source => $path) {
         if (!kop_gdl_needs_facility($target)) {
             continue;
         }
-        $by[(int) $it['facility']['id']][] = array(
+        $by[kop_facility_merge_resolve((int) $it['facility']['id'])][] = array(
             'pkey' => kop_gdl_pkey($it['key']), 'url' => $it['url'], 'label' => (string) ($it['label'] ?? ''),
             'kind' => $it['category'], 'source_doc' => (string) ($it['seen'][0]['doc'] ?? ''), 'target' => $target,
             'source' => (string) ($it['source'] ?? $source),
