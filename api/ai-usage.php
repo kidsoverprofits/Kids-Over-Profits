@@ -29,6 +29,7 @@ if (!function_exists('kop_ai_usage_record')) {
         return [
             'process-news-ai.php'          => 'News processor (by hand)',
             'extension-news-processor.php' => 'News processor (browser extension)',
+            'extension-lawsuit-processor.php' => 'Lawsuit processor (extension and app)',
             'doc-types.php'                => 'Document types',
             'doc-types-admin.php'          => 'Document types',
             'fornits.php'                  => 'Fornits reading',

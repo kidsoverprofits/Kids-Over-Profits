@@ -626,7 +626,53 @@ function kop_ext_lawsuit_mentions(PDO $pdo, $facility, $text) {
     return function_exists('kop_autoconn_submission_mentions') ? kop_autoconn_submission_mentions($pdo, '', $text) : array();
 }
 
-function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note) {
+/**
+ * The Lawsuit Processor's fields from the app's admin mode (reviewer route only):
+ * every lawsuits column the form shows. Every other send arrives with the basics.
+ * 'status' is the case status (a Dropdown Lists value, else 'unknown'); 'published'
+ * is set by kop_ext_rest_submit() from publish=1 and manage_options.
+ */
+function kop_ext_lawsuit_full_fields(array $p) {
+    $statuses = function_exists('kop_lawsuit_status_values') ? kop_lawsuit_status_values('all')
+        : array('filed', 'in_progress', 'settled', 'dismissed', 'ruling', 'appeal', 'closed', 'unknown');
+    $status = strtolower(str_replace(array(' ', '-'), '_', trim((string) ($p['status'] ?? ''))));
+    $filing = trim((string) ($p['filing_date'] ?? ''));
+    if ($filing !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $filing)) {
+        $ts = strtotime($filing);
+        $filing = $ts ? gmdate('Y-m-d', $ts) : '';
+    }
+    $urls = array();
+    foreach ((array) ($p['document_urls'] ?? array()) as $u) {
+        $u = esc_url_raw(trim((string) $u), array('http', 'https'));
+        if ($u !== '') $urls[] = $u;
+    }
+    return array(
+        'case_name'         => kop_ext_text($p['case_name'] ?? ($p['title'] ?? ''), 500),
+        'case_number'       => kop_ext_text($p['case_number'] ?? '', 255),
+        'court'             => kop_ext_text($p['court'] ?? '', 255),
+        'jurisdiction'      => kop_ext_jurisdiction_name($p['jurisdiction'] ?? ''),
+        'filing_date'       => $filing,
+        'status'            => in_array($status, $statuses, true) ? $status : 'unknown',
+        'outcome'           => kop_ext_textarea($p['outcome'] ?? '', 2000),
+        'settlement_amount' => kop_ext_text($p['settlement_amount'] ?? '', 255),
+        'summary'           => kop_ext_textarea($p['summary'] ?? ($p['description'] ?? ''), 5000),
+        'plaintiffs'        => kop_ext_list($p['plaintiffs'] ?? array()),
+        'defendants'        => kop_ext_list($p['defendants'] ?? array()),
+        'facilities_mentioned'    => kop_ext_list($p['facilities_mentioned'] ?? array()),
+        'staff_mentioned'         => kop_ext_list($p['staff_mentioned'] ?? array()),
+        'organizations_mentioned' => kop_ext_list($p['organizations_mentioned'] ?? array()),
+        'claims'            => kop_ext_list($p['claims'] ?? array()),
+        'tags'              => kop_ext_list($p['tags'] ?? array()),
+        'document_urls'     => array_values(array_unique($urls)),
+        'published'         => false,
+    );
+}
+
+/**
+ * $full: kop_ext_lawsuit_full_fields() plus 'published' (admin publish); null for
+ * every public and quick send.
+ */
+function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note, $full = null) {
     $url      = esc_url_raw((string) $p['url']);
     $facility = kop_ext_text($p['facility'] ?? '', 255);
     $list     = function (array $items) {
@@ -656,6 +702,28 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note) {
         'submitted_by'         => $submitter,
         'reviewer_notes'       => $note !== '' ? '[submitter] ' . $note : '',
     );
+    $published = false;
+    if (is_array($full)) {
+        if ($full['case_name'] !== '') $fields['case_name'] = $full['case_name'];
+        foreach (array('case_number', 'court', 'jurisdiction', 'status', 'outcome', 'settlement_amount') as $k) {
+            $fields[$k] = $full[$k];
+        }
+        if ($full['summary'] !== '') $fields['summary'] = $full['summary'];
+        if ($full['filing_date'] !== '') $fields['filing_date'] = $full['filing_date'];
+        foreach (array('plaintiffs', 'defendants', 'staff_mentioned', 'organizations_mentioned', 'claims') as $k) {
+            $fields[$k] = $list($full[$k]);
+        }
+        if ($full['tags']) $fields['tags'] = $list($full['tags']);
+        $fields['document_urls'] = $list($full['document_urls']);
+        // The full list when given (plus the facility sent); else the records the text names, as before.
+        $named = array_values(array_unique(array_merge($facility !== '' ? array($facility) : array(), $full['facilities_mentioned'])));
+        if ($full['facilities_mentioned']) $fields['facilities_mentioned'] = $list($named);
+        $published = !empty($full['published']);
+        if ($published) {
+            $fields['publication_status'] = 'published';
+            $fields['published_at'] = current_time('mysql');
+        }
+    }
     $cols = array_keys($fields);
     $pdo->prepare('INSERT INTO lawsuits (`' . implode('`,`', $cols) . '`) VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')')
         ->execute(array_values($fields));
@@ -665,6 +733,21 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note) {
         kop_sync_lawsuit_facility_links($pdo, $id, $fields['facilities_mentioned'], 'browser-extension');
     } catch (Throwable $e) {
         error_log('kop extension: lawsuit facility links failed: ' . $e->getMessage());
+    }
+    if ($published) {
+        // Published from the app: the follow-ups approving it on the review page runs, then Recently done with its Undo.
+        try {
+            if (!function_exists('kop_resync_after_status') && is_readable(get_stylesheet_directory() . '/api/lib-record-resync.php')) {
+                require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+            }
+            if (function_exists('kop_resync_after_status')) kop_resync_after_status($pdo, 'lawsuit', array($id), 'published', $submitter);
+        } catch (Throwable $e) {
+            error_log('kop extension: lawsuit #' . $id . ' resync failed: ' . $e->getMessage());
+        }
+        if (function_exists('kop_rinbox_log_native')) {
+            kop_rinbox_log_native('lawsuit', array($id => array('status' => 'pending', 'title' => $fields['case_name'])), 'approve');
+        }
+        return $id;
     }
     if (function_exists('kop_notify_admins')) {
         kop_notify_admins('lawsuit', $fields['case_name'], '', array(
@@ -811,8 +894,14 @@ function kop_ext_rest_submit(WP_REST_Request $req) {
                 $queue = $full && $full['status'] === 'approved' ? 'news_published' : 'news';
                 break;
             case 'lawsuit':
-                $id = kop_ext_insert_lawsuit($pdo, $p, $submitter, $note);
-                $queue = 'lawsuit';
+                // The app's admin mode (inc/extension-lawsuit-processor.php) sends the processor's fields.
+                $full = null;
+                if (!empty($p['full'])) {
+                    $full = kop_ext_lawsuit_full_fields($p);
+                    $full['published'] = !empty($p['publish']) && current_user_can('manage_options');
+                }
+                $id = kop_ext_insert_lawsuit($pdo, $p, $submitter, $note, $full);
+                $queue = $full && $full['published'] ? 'lawsuit_published' : 'lawsuit';
                 break;
             case 'legislation':
                 $id = kop_ext_insert_legislation($pdo, $p, $submitter, $note);
@@ -837,6 +926,15 @@ function kop_ext_rest_submit(WP_REST_Request $req) {
             'published'  => true,
             'queue'      => 'the published news',
             'review_url' => kop_ext_review_url('news'),
+        ), 201);
+    }
+    if ($queue === 'lawsuit_published') {
+        return new WP_REST_Response(array(
+            'id'         => $id,
+            'type'       => 'lawsuit',
+            'published'  => true,
+            'queue'      => 'the published lawsuits',
+            'review_url' => kop_ext_review_url('lawsuit'),
         ), 201);
     }
     return new WP_REST_Response(array(

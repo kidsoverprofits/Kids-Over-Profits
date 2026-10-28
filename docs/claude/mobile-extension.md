@@ -40,6 +40,16 @@ php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an i
 # C:\Users\daniu\kop-research-key.txt, never in git; rotate by writing a new key there and its hash in the constant).
 # (kop-pipeline) python scripts/send-sources.py <not-sent files> sends a backlog with it.
 # Signed-in reviewers in the app use kop/v1/extension/* with an application password, like the Chrome extension
+# Lawsuit Processor for the app's admin mode (inc/extension-lawsuit-processor.php, loaded from extension-news-processor.php; edit_posts):
+# GET extension/lawsuit-form -> {statuses:[{value,label}] (kop_lawsuit_extract_statuses()), can_publish, user};
+# POST extension/lawsuit-process {url,text,instructions} -> {fields} (case_name, case_number, court, jurisdiction, filing_date, status,
+# outcome, settlement_amount, summary + string lists plaintiffs, defendants, facilities_mentioned, staff_mentioned,
+# organizations_mentioned, claims, tags). Text under 300 chars + url: a PDF is saved to a temp file and read with kop_extract_pdf_text(),
+# else fetchArticleContent(); max 4 chunks through kop_lawsuit_ai_call (kop_ai_generate_alternating); 422 too little text, 502 AI failed.
+# CourtListener prefill is not wired: api/fetch-lawsuit-details.php is a script, not a function.
+# extension/submit type=lawsuit with full=1 (kop_ext_lawsuit_full_fields()) writes every field above + document_urls; publish=1 and
+# manage_options files it publication_status 'published' (+ published_at, kop_resync_after_status, logged for Recently done: Undo restores 'pending')
+# and answers {published:true, queue:'the published lawsuits'}; otherwise it waits as 'pending'. Without full=1 nothing changes.
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-submit.php [--db=...]
 # The same route serves the browser extension without an account (via=extension; Chrome/Edge/Firefox from one folder, Safari via
 # xcrun safari-web-extension-converter; package.ps1 zips it for the stores) and the /send/ page + bookmarklet for any browser (via=web;

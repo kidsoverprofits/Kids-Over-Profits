@@ -227,6 +227,63 @@ $l = row($pdo, 'lawsuits', $r->data['id']);
 check($l['publication_status'] === 'pending' && $l['case_number'] === '2:26-cv-01234' && $l['jurisdiction'] === 'Utah', 'lawsuit pending, case number, jurisdiction spelled out');
 check(json_decode($l['source_urls'], true) === array('https://www.courtlistener.com/docket/999999/doe-v-example/'), 'lawsuit link in source_urls');
 
+// Lawsuit Processor (full=1): every field written; publish needs manage_options; Undo logged.
+$notifiedBefore = $GLOBALS['kop_notified'] ?? array();
+$full_lawsuit = array('type' => 'lawsuit', 'full' => 1, 'url' => 'https://www.courtlistener.com/docket/888888/roe-v-sample/',
+    'case_name' => 'Roe v. Sample Ranch', 'case_number' => '1:25-cv-00042', 'court' => 'U.S. District Court for the District of Idaho',
+    'jurisdiction' => 'Idaho', 'filing_date' => '2025-03-04', 'status' => 'settled', 'outcome' => 'Settled; dismissed with prejudice',
+    'settlement_amount' => '$1.5 million', 'summary' => 'Former residents allege abuse.',
+    'plaintiffs' => array('Jane Roe', 'John Roe'), 'defendants' => array('Sample Ranch LLC'), 'facilities_mentioned' => array('Sample Ranch'),
+    'staff_mentioned' => array('Pat Doe'), 'organizations_mentioned' => array('Sample Holdings'), 'claims' => array('negligence', 'physical_abuse'),
+    'tags' => array('restraint'), 'document_urls' => array('https://example-court.test/complaint.pdf', 'javascript:alert(1)'), 'notes' => 'from the app');
+$GLOBALS['kop_rinbox_logged'] = array();
+$GLOBALS['kop_is_admin'] = false;
+$r = submit($full_lawsuit + array('publish' => 1));
+check($r instanceof WP_REST_Response && $r->status === 201 && empty($r->data['published']) && $r->data['type'] === 'lawsuit', 'full lawsuit + publish without manage_options -> queued, not published');
+$l = row($pdo, 'lawsuits', $r->data['id']);
+check($l['publication_status'] === 'pending' && empty($GLOBALS['kop_rinbox_logged']), 'it stays pending, nothing in Recently done');
+check($l['case_name'] === 'Roe v. Sample Ranch' && $l['case_number'] === '1:25-cv-00042' && $l['court'] === 'U.S. District Court for the District of Idaho'
+    && $l['jurisdiction'] === 'Idaho' && $l['filing_date'] === '2025-03-04' && $l['status'] === 'settled' && $l['outcome'] === 'Settled; dismissed with prejudice'
+    && $l['settlement_amount'] === '$1.5 million' && $l['summary'] === 'Former residents allege abuse.', 'full lawsuit: scalar columns written');
+check(json_decode($l['plaintiffs'], true) === array('Jane Roe', 'John Roe') && json_decode($l['defendants'], true) === array('Sample Ranch LLC')
+    && json_decode($l['facilities_mentioned'], true) === array('Sample Ranch') && json_decode($l['staff_mentioned'], true) === array('Pat Doe')
+    && json_decode($l['organizations_mentioned'], true) === array('Sample Holdings') && json_decode($l['claims'], true) === array('negligence', 'physical_abuse')
+    && json_decode($l['tags'], true) === array('restraint'), 'full lawsuit: list columns JSON-encoded');
+check(json_decode($l['document_urls'], true) === array('https://example-court.test/complaint.pdf')
+    && json_decode($l['source_urls'], true) === array('https://www.courtlistener.com/docket/888888/roe-v-sample/'), 'document_urls kept (bad scheme dropped), source_urls = the link');
+
+$GLOBALS['kop_is_admin'] = true;
+$r = submit(array_merge($full_lawsuit, array('url' => 'https://www.courtlistener.com/docket/777777/poe-v-sample/', 'publish' => 1, 'case_name' => 'Poe v. Sample Ranch', 'status' => 'bogus', 'filing_date' => 'not a date')));
+check($r instanceof WP_REST_Response && $r->status === 201 && !empty($r->data['published']) && $r->data['type'] === 'lawsuit' && $r->data['queue'] === 'the published lawsuits', 'full lawsuit + publish as admin -> published response');
+$l = row($pdo, 'lawsuits', $r->data['id']);
+check($l['publication_status'] === 'published' && !empty($l['published_at']) && $l['status'] === 'unknown' && ($l['filing_date'] === null || $l['filing_date'] === ''), 'published row: publication_status, published_at, bad status -> unknown, bad date blank');
+check(($GLOBALS['kop_rinbox_logged'][0] ?? null) === array('lawsuit', array((int) $r->data['id']), 'approve'), 'published lawsuit is logged for Recently done (Undo restores pending)');
+$r = submit(array_merge($full_lawsuit, array('url' => 'https://www.courtlistener.com/docket/666666/no-publish/')));
+$l = row($pdo, 'lawsuits', $r->data['id']);
+check($l['publication_status'] === 'pending' && empty($r->data['published']), 'full without publish stays pending');
+$GLOBALS['kop_notified'] = $notifiedBefore;
+
+// Lawsuit Processor text read with a stubbed AI: field shaping.
+if (!defined('ABSPATH')) define('ABSPATH', __DIR__ . '/');
+// api/ai-providers.php skips its whole body when kop_ai_api_keys exists: stub the three calls the lawsuit library uses.
+function kop_ai_api_keys() { return array(); }
+function kop_ai_extract_json(string $t): ?array { $d = json_decode($t, true); return is_array($d) ? $d : null; }
+function kop_ai_generate_alternating(string $prompt, array $opts = []): string {
+    $GLOBALS['kop_ai_calls'][] = $prompt;
+    return json_encode(array('case_name' => 'Doe v. Stub', 'case_number' => '3:24-cv-1', 'court' => 'Stub Court', 'jurisdiction' => 'federal',
+        'filing_date' => 'March 4, 2025', 'status' => 'Settled', 'outcome' => 'null', 'settlement_amount' => '$2 million', 'summary' => 'A summary.',
+        'plaintiffs' => array('A', ' B '), 'defendants' => array('X', 'X', ' '), 'facilities_mentioned' => array('Stub Academy'), 'tags' => array('class action'),
+        'junk' => 'dropped'));
+}
+require_once $root . '/inc/extension-lawsuit-processor.php';
+$GLOBALS['kop_ai_calls'] = array();
+$f = kop_ext_lawsuit_read_text(str_repeat('The complaint alleges things. ', 1500), 'https://example.test/doc.pdf', 'focus on the staff');
+check(is_array($f) && array_keys($f) === array('case_name', 'case_number', 'court', 'jurisdiction', 'filing_date', 'status', 'outcome', 'settlement_amount', 'summary',
+    'plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned', 'claims', 'tags'), 'lawsuit-process: exactly the contract fields');
+check(($f['filing_date'] ?? '') === '2025-03-04' && ($f['status'] ?? '') === 'settled' && ($f['jurisdiction'] ?? '') === 'Federal' && ($f['outcome'] ?? 'x') === ''
+    && ($f['plaintiffs'] ?? null) === array('A', 'B') && ($f['defendants'] ?? null) === array('X') && ($f['staff_mentioned'] ?? null) === array(), 'lawsuit-process: date, status, jurisdiction normalised; lists cleaned');
+check(count($GLOBALS['kop_ai_calls']) === 4 && strpos($GLOBALS['kop_ai_calls'][0], 'focus on the staff') !== false && strpos($GLOBALS['kop_ai_calls'][1], 'focus on the staff') === false, 'lawsuit-process: capped at 4 chunks, instructions on the first');
+
 $r = submit(array('type' => 'legislation', 'url' => 'https://www.congress.gov/bill/119th-congress/house-bill/9999', 'title' => 'Stop Institutional Child Abuse Act',
     'bill_number' => 'HR 9999', 'jurisdiction' => 'US', 'session' => '119th Congress'));
 check($r instanceof WP_REST_Response && $r->status === 201 && $r->data['type'] === 'legislation', 'new bill -> 201 in legislation');

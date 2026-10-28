@@ -141,6 +141,7 @@ request.
 
   | Path | Skipped |
   |---|---|
+  | `kop_ext_insert_lawsuit()` (inc/source-submissions.php; the extension, the app, full=1 + publish=1 as admin files it published, resynced and logged for Undo) | none when published; the admin email when pending |
   | `api/lib-publish-approved.php:47` (one-click "publish approved") | every sync and the document filing |
   | `manage-submissions.php:895` update_status | every sync |
   | `lib-record-enrich.php:514` (AI fills case name, number, plaintiffs) | the news sync |

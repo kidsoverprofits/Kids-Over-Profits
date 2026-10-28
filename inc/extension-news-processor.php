@@ -186,3 +186,6 @@ add_action('rest_api_init', function () {
         'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'kop_ext_rest_news_form',
     ));
 });
+
+// The Lawsuit Processor routes (same reviewers, same panel family).
+require_once __DIR__ . '/extension-lawsuit-processor.php';
