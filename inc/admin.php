@@ -1322,7 +1322,7 @@ function kop_seed_v2_prefix(PDO $pdo) {
     return kop_v2_writes_active($pdo, $wpdb->prefix) ? $wpdb->prefix : null;
 }
 /**
- * facilities_master records filled in offline (seeds/facility-records.json).
+ * facility records filled in offline (seeds/facility-records.json).
  * Each entry names a row by id and unique_name and carries the facility
  * object fields to merge in. The merge replaces each listed top-level field
  * of data.facility (identification, staff, ...) and leaves the rest of the
@@ -1401,115 +1401,7 @@ function kop_apply_facility_record_seeds() {
         }
         return $done;
     }
-    try {
-        $read  = $pdo->prepare('SELECT unique_name, json_data FROM facilities_master WHERE id = ?');
-        $write = $pdo->prepare('UPDATE facilities_master SET json_data = ?, updated_at = NOW() WHERE id = ?');
-        foreach ($entries as $entry) {
-            if (empty($entry['id']) || empty($entry['facility']) || !is_array($entry['facility'])) {
-                continue;
-            }
-            $read->execute(array((int) $entry['id']));
-            $row = $read->fetch(PDO::FETCH_ASSOC);
-            if (!$row || (!empty($entry['unique_name']) && $row['unique_name'] !== $entry['unique_name'])) {
-                continue; // wrong row: never write into a record we did not mean
-            }
-            $record = json_decode((string) $row['json_data'], true);
-            if (!is_array($record)) {
-                continue;
-            }
-            $version = (int) ($entry['version'] ?? 1);
-            $is_ref  = !empty($record['__facility_ref']) || isset($record['data']['facility']);
-            $current = $is_ref ? ($record['data']['facility'] ?? array()) : ($record['facility'] ?? array());
-            if ((int) ($current['kopProfileVersion'] ?? 0) >= $version) {
-                continue;
-            }
-            $merged = array_replace(is_array($current) ? $current : array(), $entry['facility']);
-            $merged['kopProfileVersion'] = $version;
-            if ($is_ref) {
-                $record['data']['facility'] = $merged;
-            } else {
-                $record['facility'] = $merged;
-            }
-            if (!empty($entry['top']) && is_array($entry['top'])) {
-                foreach ($entry['top'] as $k => $v) {
-                    $record[$k] = $v;
-                }
-            }
-            $record['timestamp'] = gmdate('c');
-            $write->execute(array(wp_json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int) $entry['id']));
-            $done[] = (int) $entry['id'];
-
-            // The same facility also lives as a nested entry inside parent
-            // records (an operator project in facilities_master, the state
-            // aggregate in locations_master). The state hub reads those first,
-            // so merge the same fields into every nested copy that matches.
-            foreach ((array) ($entry['apply_to'] ?? array()) as $target) {
-                kop_apply_facility_seed_to_nested($pdo, $target, $entry['facility'], $version);
-            }
-        }
-    } catch (Throwable $e) {
-        // Leave the records alone; the data form can fill them by hand.
-    }
     return $done;
-}
-/**
- * Merge seed facility fields into the nested facility entries of one parent
- * row. $target = array('table' => facilities_master|locations_master,
- * 'id' => row id, 'match' => array('facility_id' => N) or array('name' => S)).
- * The facilities array sits at ->facilities or ->data->facilities depending
- * on the row's age. Every matching entry below $version is updated.
- */
-function kop_apply_facility_seed_to_nested(PDO $pdo, array $target, array $fields, $version) {
-    $table = ($target['table'] ?? '') === 'locations_master' ? 'locations_master' : 'facilities_master';
-    $id    = (int) ($target['id'] ?? 0);
-    $match = is_array($target['match'] ?? null) ? $target['match'] : array();
-    if (!$id || !$match) {
-        return 0;
-    }
-    $read = $pdo->prepare("SELECT json_data FROM {$table} WHERE id = ?");
-    $read->execute(array($id));
-    $record = json_decode((string) $read->fetchColumn(), true);
-    if (!is_array($record)) {
-        return 0;
-    }
-    $nested = false;
-    if (isset($record['facilities']) && is_array($record['facilities'])) {
-        $list =& $record['facilities'];
-    } elseif (isset($record['data']['facilities']) && is_array($record['data']['facilities'])) {
-        $list =& $record['data']['facilities'];
-        $nested = true;
-    } else {
-        return 0;
-    }
-    $changed = 0;
-    foreach ($list as $i => $facility) {
-        if (!is_array($facility)) {
-            continue;
-        }
-        $hit = false;
-        if (isset($match['facility_id'])) {
-            $hit = (int) ($facility['facility_id'] ?? 0) === (int) $match['facility_id'];
-        } elseif (isset($match['name'])) {
-            $hit = trim((string) ($facility['identification']['name'] ?? '')) === trim((string) $match['name']);
-        }
-        if (!$hit || (int) ($facility['kopProfileVersion'] ?? 0) >= (int) $version) {
-            continue;
-        }
-        $merged = array_replace($facility, $fields);
-        $merged['kopProfileVersion'] = (int) $version;
-        if (isset($facility['facility_id'])) {
-            $merged['facility_id'] = $facility['facility_id']; // keep the link to the ref row
-        }
-        $list[$i] = $merged;
-        $changed++;
-    }
-    unset($list);
-    if ($changed) {
-        $record['timestamp'] = gmdate('c');
-        $write = $pdo->prepare("UPDATE {$table} SET json_data = ?, updated_at = NOW() WHERE id = ?");
-        $write->execute(array(wp_json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $id));
-    }
-    return $changed;
 }
 
 /**
@@ -1562,7 +1454,7 @@ function kop_apply_directory_folder_links() {
 }
 /**
  * Alternate names for operator (company) projects (seeds/operator-aliases.json).
- * Each entry names a facilities_master row by id and unique_name and lists
+ * Each entry names a facilities_v2 row by id and unique_name and lists
  * names to add to operator.otherNames. Names already present (any case) are
  * skipped, so the step is idempotent and never removes a name.
  */
@@ -1830,54 +1722,6 @@ function kop_apply_operator_alias_seeds() {
             }
         }
         return $done;
-    }
-    try {
-        $read  = $pdo->prepare('SELECT unique_name, json_data FROM facilities_master WHERE id = ?');
-        $write = $pdo->prepare('UPDATE facilities_master SET json_data = ?, updated_at = NOW() WHERE id = ?');
-        foreach ($entries as $entry) {
-            if (empty($entry['id']) || empty($entry['unique_name']) || empty($entry['add_other_names'])) {
-                continue;
-            }
-            $read->execute(array((int) $entry['id']));
-            $row = $read->fetch(PDO::FETCH_ASSOC);
-            if (!$row || $row['unique_name'] !== $entry['unique_name']) {
-                continue;
-            }
-            $record = json_decode((string) $row['json_data'], true);
-            if (!is_array($record)) {
-                continue;
-            }
-            // Older rows keep the operator at the top level, newer ones under data.
-            if (isset($record['data']['operator']) && is_array($record['data']['operator'])) {
-                $operator =& $record['data']['operator'];
-            } elseif (isset($record['operator']) && is_array($record['operator'])) {
-                $operator =& $record['operator'];
-            } else {
-                continue;
-            }
-            $names = is_array($operator['otherNames'] ?? null) ? $operator['otherNames'] : array();
-            $have  = array_map('strtolower', array_map('strval', $names));
-            $have[] = strtolower((string) ($operator['name'] ?? ''));
-            $added = 0;
-            foreach ((array) $entry['add_other_names'] as $name) {
-                $name = trim((string) $name);
-                if ($name === '' || in_array(strtolower($name), $have, true)) {
-                    continue;
-                }
-                $names[] = $name;
-                $have[]  = strtolower($name);
-                $added++;
-            }
-            if ($added) {
-                $operator['otherNames'] = $names;
-                $record['timestamp']    = gmdate('c');
-                $write->execute(array(wp_json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int) $entry['id']));
-                $done[] = (int) $entry['id'];
-            }
-            unset($operator);
-        }
-    } catch (Throwable $e) {
-        // Leave the records alone; the data form can add the names by hand.
     }
     return $done;
 }
