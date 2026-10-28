@@ -22,6 +22,9 @@
     --ptl-press-fill: var(--kop-bubblegum-pink-fill, #A3236B);
     --ptl-line: var(--kop-mint-green, #B6E3D4);
     position: relative;
+    /* Its own formatting context: narrows beside the floated At a glance rail
+       instead of running under it and covering its Submit info button. */
+    display: flow-root;
     margin: 0.75rem 0 1.5rem;
     color: var(--kop-midnight-blue, #000435);
 }
