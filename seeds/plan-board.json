@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 19:24 UTC",
- "source": "6fbca4d8d8c02f2cef81bc86ecd9293ec2a1f038",
+ "built": "2026-10-28 19:31 UTC",
+ "source": "a38022289958973b005a5889970761c12414a0b5",
  "sections": [
   {
    "key": "2",
@@ -905,14 +905,6 @@
        "ask": "",
        "date": "2026-10-20",
        "hash": "849ea2fc2625"
-      },
-      {
-       "id": "4.3:test-auto-connect-php-3-checks-fail-on-the-2026-10-20-mirror",
-       "lead": "test-auto-connect.php: 3 checks fail on the 2026-10-20 mirror, before and after 587a4532",
-       "text": "**test-auto-connect.php: 3 checks fail on the 2026-10-20 mirror, before and after 587a4532** (found 2026-10-20): \"woodbury: some waiting pages connect themselves\" (0 of 375), \"drive docs: links with no record are tied ...\" (0 of 2866) and \"a name two company records share finds none\" (Rite of Passage, Inc.). Likely the mirror's data moved under the checks (pages already connected, links already tied, a company merged); confirm and fix the checks or the code.",
-       "ask": "",
-       "date": "2026-10-20",
-       "hash": "008b261beb81"
       },
       {
        "id": "4.3:latest-operator-of-past-only-records",
