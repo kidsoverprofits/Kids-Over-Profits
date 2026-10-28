@@ -34,9 +34,16 @@
  * (kop_q_is_no()). What settling writes:
  *   facility fields  a row in the Woodbury Facts table (extra.via
  *                    'questions', its source "Answers on the questions
- *                    page"), approved through kop_wbf_apply(): held for the
- *                    record's write-up like every approved fact, conflicts
- *                    marked and waiting like any other
+ *                    page"), approved through kop_wbf_apply() straight onto
+ *                    the record's own field (owner, 2026-10-28: answers fill
+ *                    the profile, never held for a write-up, never a label
+ *                    line in the notes): status, years, town, boys/girls,
+ *                    ages, practice ticks; staff years go into that person's
+ *                    role ("Director (2003)", op 'staff_years'). Conflicts
+ *                    are marked and wait like any other. A rules answer
+ *                    writes nothing here: inc/reader-accounts.php reads it
+ *                    into the page's "What people who were there remember".
+ *                    kop_q_release_held() moved the answers held before then.
  *   earlier names    kop_name_eras_save() (end year), Undo kop_name_eras_undo()
  *   companies        kop_dired_edit(), Undo kop_dired_undo()
  *   conflicts        each member through Review inbox > Conflicts
@@ -876,7 +883,10 @@ function kop_q_set_state($qkey, $status, $ask, $answer, $done, $by) {
 /**
  * Write one facility value the way an approved Woodbury fact is written: a
  * row in that table citing the questions page, approved through
- * kop_wbf_apply() (held for the record's write-up). Returns what Undo needs.
+ * kop_wbf_apply(). It goes straight onto the record's own field (owner,
+ * 2026-10-28: answers fill the profile, they are not held for a write-up);
+ * the record is marked changed, so its next write-up still takes it in.
+ * Returns what Undo needs.
  */
 function kop_q_wbf_write(array $q, $op, $path, $value, $label, $count, $by) {
     if (!function_exists('kop_wbf_apply')) throw new RuntimeException('Facility facts cannot be written here.');
@@ -886,7 +896,8 @@ function kop_q_wbf_write(array $q, $op, $path, $value, $label, $count, $by) {
     $pkey = md5('questions|' . $q['key'] . '|' . microtime(true));
     // The citation never says how many readers agreed (owner, 2026-10-20); the count stays in extra.
     $cite = 'Answers on Kids Over Profits\' questions page';
-    $grp = in_array($path, array('facilityDetails.gender', 'facilityDetails.ageRange'), true) || strpos($path, 'ttiPractices.') === 0 ? 'details' : 'history';
+    $grp = $op === 'staff_years' ? 'staff'
+        : (in_array($path, array('facilityDetails.gender', 'facilityDetails.ageRange'), true) || strpos($path, 'ttiPractices.') === 0 ? 'details' : 'history');
     $wpdb->insert(kop_wbf_table(), array(
         'pkey' => $pkey, 'facility_id' => $fid, 'program' => mb_substr($q['record']['name'], 0, 255), 'place' => mb_substr($q['record']['place'], 0, 120),
         'match_kind' => 'id', 'grp' => $grp, 'op' => $op, 'path' => $path, 'value' => wp_json_encode($value), 'label' => $label,
@@ -896,7 +907,7 @@ function kop_q_wbf_write(array $q, $op, $path, $value, $label, $count, $by) {
     ));
     $rows = kop_wbf_rows(array($pkey));
     if (!$rows) throw new RuntimeException('Could not save the answer as a fact.');
-    $res = kop_wbf_apply($rows, $fid, $by)[$pkey] ?? array();
+    $res = kop_wbf_apply($rows, $fid, $by, false)[$pkey] ?? array();
     if (!empty($res['conflict'])) return array('wbf' => $pkey, 'conflict' => (string) $res['conflict']);
     if (empty($res['ok'])) {
         $wpdb->delete(kop_wbf_table(), array('pkey' => $pkey));
@@ -978,19 +989,20 @@ function kop_q_settle($qkey, $answer_key, $by, $typed = '') {
             $years = array();
             foreach ($tally as $t) if (($t['value']['yes'] ?? false) && !empty($t['value']['year'])) $years[] = (int) $t['value']['year'];
             $yes = array_sum(array_map(function ($t) { return !empty($t['value']['yes']) ? $t['count'] : 0; }, $tally));
-            if ($value === 'no' || empty($value['yes'])) {
+            if ($value === 'no' || empty($value['yes']) || !$years) {
+                // Already on the staff list; a "yes" with no year has nothing to add to the entry.
                 $done = array('nothing' => 1);
             } else {
-                $who = $q['person']['name'] . ($q['person']['role'] !== '' ? ' (' . $q['person']['role'] . ')' : '');
+                // The years go into the person's own staff entry ("Director (2003)"), never a line in the notes.
                 $years = array_values(array_unique($years));
                 sort($years);
-                $line = sprintf('%d %s who %s at %s say %s was there%s.', $yes, $yes === 1 ? 'person' : 'people', $yes === 1 ? 'was' : 'were', $n, $who,
-                    $years ? ' in ' . implode(', ', $years) : '');
-                $done = kop_q_wbf_write($q, 'add_list', 'notes', $line, $line, $yes, $by);
+                $done = kop_q_wbf_write($q, 'staff_years', 'staff', array('name' => $q['person']['name'], 'years' => $years),
+                    $q['person']['name'] . ': there in ' . implode(', ', $years), $yes, $by);
             }
         } elseif ($what === 'rules') {
-            $line = 'Someone who was at ' . $n . ' remembers: "' . $pick['label'] . '"';
-            $done = kop_q_wbf_write($q, 'add_list', 'notes', $line, 'Rules remembered', 1, $by);
+            // The answer's words are read into lines for the page's "What people who were there remember"
+            // (inc/reader-accounts.php, Review inbox > What readers remember); nothing else is written.
+            $done = array('nothing' => 1);
         } elseif (strpos($what, 'renamed.') === 0) {
             if (!function_exists('kop_name_eras_save')) throw new RuntimeException('Name years cannot be written here.');
             $era = kop_name_eras_for((int) $q['record']['id'])[kop_name_eras_key($q['name'])] ?? null;
@@ -1000,7 +1012,7 @@ function kop_q_settle($qkey, $answer_key, $by, $typed = '') {
             $done = array('era_token' => (string) $r['token']);
         }
         $msg = !empty($done['conflict']) ? 'Saved, but the record says something else now: it waits in Conflicts. ' . $done['conflict']
-            : (!empty($done['nothing']) ? 'Settled: ' . $pick['label'] . ' (nothing to add to the record).' : 'Settled: ' . $pick['label'] . '. It goes on ' . $n . ' with its next write-up.');
+            : (!empty($done['nothing']) ? 'Settled: ' . $pick['label'] . ' (nothing to add to the record).' : 'Settled: ' . $pick['label'] . '. It is on ' . $n . '\'s page now.');
     } elseif (preg_match('/^o(\d+)\.(founded|hq|status|owner)$/', $key, $m)) {
         if (!function_exists('kop_dired_edit')) throw new RuntimeException('Companies cannot be edited here.');
         $in = array();
@@ -1059,9 +1071,83 @@ function kop_q_dismiss($qkey, $ask, $by) {
     return 'Dismissed. Nothing changed and the question is no longer asked.';
 }
 
+/**
+ * Answers settled before 2026-10-28 were held for the record's write-up, and
+ * staff years were note lines. Put each onto its record's field now: a held
+ * value is approved again with no hold; a staff line becomes the years in that
+ * person's role (op 'staff_years') and the line goes. Once, on admin_init
+ * (option kop_q_released_held keeps what it did). Returns the counts.
+ */
+function kop_q_release_held() {
+    if (!function_exists('kop_wbf_apply')) return array('error' => 'no woodbury facts');
+    global $wpdb;
+    $t = kop_wbf_table();
+    $rows = (array) $wpdb->get_results("SELECT * FROM {$t} WHERE status = 'held'" . kop_wbf_origin_where('questions') . ' ORDER BY id', ARRAY_A);
+    $out = array('rows' => count($rows), 'applied' => 0, 'staff' => 0, 'conflict' => 0, 'already' => 0, 'dropped' => 0);
+    $by_fid = array();
+    foreach ($rows as $r) {
+        $extra = json_decode((string) $r['extra'], true) ?: array();
+        $qkey = (string) ($extra['qkey'] ?? '');
+        $fid = (int) $r['applied_fid'];
+        if ($r['path'] !== 'notes') {
+            $wpdb->update($t, array('status' => 'pending', 'applied' => null), array('pkey' => $r['pkey']));
+            $r['status'] = 'pending';
+            $by_fid[$fid][] = $r;
+            continue;
+        }
+        // A note line: staff years go into the person's entry; anything else (a rules line) is dropped.
+        $done = array('nothing' => 1);
+        if (preg_match('/^f\d+\.staff\.([0-9a-f]{8})$/', $qkey, $m) && ($stored = kop_facility_load($fid, kop_wbf_opts()))) {
+            $doc = $stored['doc'];
+            $person = null;
+            foreach (array('administrator', 'notableStaff') as $list) {
+                foreach ((array) ($doc['staff'][$list] ?? array()) as $s) {
+                    if (is_array($s) && substr(md5(kop_q_text_key((string) ($s['name'] ?? ''))), 0, 8) === $m[1]) $person = $s;
+                }
+            }
+            $years = array();
+            $yes = 0;
+            foreach (kop_q_tally(kop_q_rows($qkey)) as $tv) {
+                if (empty($tv['value']['yes'])) continue;
+                $yes += $tv['count'];
+                if (!empty($tv['value']['year'])) $years[] = (int) $tv['value']['year'];
+            }
+            if ($person && $years) {
+                $q = array('key' => $qkey, 'record' => kop_q_facility_ref($fid, $doc));
+                try {
+                    $done = kop_q_wbf_write($q, 'staff_years', 'staff', array('name' => (string) $person['name'], 'years' => array_values(array_unique($years))),
+                        $person['name'] . ': there in ' . implode(', ', array_unique($years)), $yes, (string) $r['reviewed_by']);
+                    $out[!empty($done['conflict']) ? 'conflict' : 'staff']++;
+                } catch (RuntimeException $e) {
+                    $out['already']++;
+                }
+            }
+        }
+        if (!empty($done['nothing'])) $out['dropped']++;
+        $wpdb->delete($t, array('pkey' => $r['pkey']));
+        if ($qkey !== '') $wpdb->update(kop_q_state_table(), array('done' => wp_json_encode($done)), array('qkey' => $qkey));
+    }
+    foreach ($by_fid as $fid => $list) {
+        try {
+            foreach (kop_wbf_apply($list, $fid, (string) $list[0]['reviewed_by'], false) as $res) {
+                $out[!empty($res['ok']) ? 'applied' : (!empty($res['conflict']) ? 'conflict' : 'already')]++;
+            }
+        } catch (RuntimeException $e) {
+            $out['error'][] = "#$fid: " . $e->getMessage();
+        }
+    }
+    kop_q_state_changed();
+    return $out;
+}
+
 /* ---- Route -------------------------------------------------------------- */
 
 if (function_exists('add_action')) {
+    add_action('admin_init', function () {
+        if (get_option('kop_q_released_held')) return;
+        update_option('kop_q_released_held', array('at' => gmdate('c'), 'running' => 1), false);
+        update_option('kop_q_released_held', array('at' => gmdate('c')) + kop_q_release_held(), false);
+    });
     add_action('init', function () {
         add_rewrite_rule('^questions/?$', 'index.php?kop_questions=1', 'top');
         if (get_option('kop_questions_rewrite') !== KOP_Q_REWRITE_VERSION) {

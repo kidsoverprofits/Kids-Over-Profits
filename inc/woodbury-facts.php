@@ -907,6 +907,34 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         return $done;
     }
 
+    if ($r['op'] === 'staff_years') {
+        // Readers on the questions page saying when someone was there (kop_q_settle()): the years go into that
+        // person's role, "Director (2003)", the way HEAL and the wiki give them. Undone like an overwrite.
+        $key = kop_wbf_person_key($value['name'] ?? '');
+        $years = array_values(array_unique(array_filter(array_map('intval', (array) ($value['years'] ?? array())))));
+        sort($years);
+        if ($key === '' || !$years) throw new RuntimeException('No name or year to add.');
+        foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
+            $list = &kop_wbf_ref($doc, $path);
+            foreach ((array) $list as $i => $s) {
+                if (!is_array($s) || kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
+                $role = trim((string) ($s['role'] ?? ''));
+                if (preg_match('/\b(1[89]\d\d|20\d\d)\b/', $role)) throw new RuntimeException('The record already gives years for ' . $s['name'] . '.');
+                $new = ($role !== '' ? $role : 'Staff') . ' (' . implode(', ', $years) . ')';
+                $list[$i]['role'] = $new;
+                unset($list);
+                return array('op' => 'overwrite', 'path' => $path, 'notes' => array(),
+                    'slots' => array(array('at' => $path, 'name' => (string) $s['name'], 'value' => $new, 'before' => array('role' => $s['role'] ?? null))));
+            }
+            unset($list);
+        }
+        throw new RuntimeException('That person is not on the record\'s staff list any more.');
+    }
+
+    // A value readers settled on the questions page fills its field and nothing else: no label line in the notes
+    // (the row in this table is the record of where it came from, and our own page is never cited on the profile).
+    $note = kop_wbf_origin($r) !== 'questions';
+
     if ($r['op'] === 'set_if_empty') {
         // A type is only ever the agreed types (one or several, "A, B"), the list the discovery form and "Create a record" use.
         if ($r['path'] === 'facilityDetails.type' && function_exists('kop_facdisc_types_value')) {
@@ -921,7 +949,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         $slot = $value;
         unset($slot);
         $done['value'] = $value;
-        $add_note('operatingPeriod.notes', kop_wbf_source_line($r));
+        if ($note) $add_note('operatingPeriod.notes', kop_wbf_source_line($r));
         return $done;
     }
 
@@ -932,7 +960,7 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         if (!empty($value['endYear']) && $done['before_end'] === null) {
             $doc['operatingPeriod']['endYear'] = (int) $value['endYear'];
         }
-        $add_note('operatingPeriod.notes', kop_wbf_source_line($r));
+        if ($note) $add_note('operatingPeriod.notes', kop_wbf_source_line($r));
         return $done;
     }
     throw new RuntimeException('Unknown change.');

@@ -378,5 +378,28 @@ $filed = array('applied' => json_encode(array('filed' => 'consultant', 'who' => 
 $check('an item filed on a consultant says where it went', kop_wbf_filed_on($filed) === 'the educational consultant record "Aldrich & Co" (#12)');
 $check('an item added to a facility is not "filed"', kop_wbf_filed_on(array('applied' => json_encode(array('op' => 'add_staff')))) === '');
 
+echo "-- Answers settled on the questions page fill fields, nothing else --\n";
+$qextra = json_encode(array('manual' => 1, 'via' => 'questions', 'qkey' => 'f1.staff.x'));
+$qdoc = array('operatingPeriod' => array('status' => 'Unknown', 'startYear' => null, 'notes' => array()), 'notes' => array(),
+    'staff' => array('administrator' => array(array('name' => 'Jane Doe', 'role' => 'Director', 'pastJobs' => '')), 'notableStaff' => array()));
+$qbefore = $qdoc;
+kop_wbf_doc_apply($qdoc, array('op' => 'set_if_empty', 'path' => 'operatingPeriod.startYear', 'value' => '1999', 'label' => 'Opened in 1999', 'extra' => $qextra, 'evidence' => '[]'));
+$check('a settled answer fills its field', $qdoc['operatingPeriod']['startYear'] === 1999);
+$check('and leaves no label line in the notes', $qdoc['operatingPeriod']['notes'] === array() && $qdoc['notes'] === array());
+$qdoc = $qbefore;
+$done = kop_wbf_doc_apply($qdoc, array('op' => 'staff_years', 'path' => 'staff', 'value' => json_encode(array('name' => 'Jane Doe', 'years' => array(2005, 2003, 2005))),
+    'label' => '', 'extra' => $qextra, 'evidence' => '[]'));
+$check('staff years go into the person\'s role', $qdoc['staff']['administrator'][0]['role'] === 'Director (2003, 2005)' && $qdoc['notes'] === array());
+$again = $qdoc;
+try {
+    kop_wbf_doc_apply($again, array('op' => 'staff_years', 'path' => 'staff', 'value' => json_encode(array('name' => 'Jane Doe', 'years' => array(2010))), 'label' => '', 'extra' => '{}', 'evidence' => '[]'));
+    $more = true;
+} catch (RuntimeException $e) {
+    $more = false;
+}
+$check('a role with years is not given more', !$more);
+kop_wbf_doc_undo($qdoc, $done);
+$check('undo gives the role back', $qdoc === $qbefore);
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed.\n";
 exit($failures ? 1 : 0);
