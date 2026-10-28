@@ -1297,6 +1297,19 @@ if (!function_exists('kop_facility_pages_staff_items')) {
             }
             if ($items) $out[$k] = $items;
         }
+        // One person entered twice (both lists, or two spellings under one person id): the first entry stays.
+        $seen = array();
+        foreach (array('administrator', 'notableStaff') as $k) {
+            if (empty($out[$k])) continue;
+            $out[$k] = array_values(array_filter($out[$k], static function ($e) use (&$seen) {
+                if (!isset($e['name'])) return true;
+                $key = kop_facility_pages_group_key($e['name'], (int) $e['personId']);
+                if ($key === '') return true;
+                if (isset($seen[$key])) return false;
+                return $seen[$key] = true;
+            }));
+            if (!$out[$k]) unset($out[$k]);
+        }
         return $out;
     }
 }
