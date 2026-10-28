@@ -248,5 +248,32 @@
         ""
       ]
     ]
+  },
+  {
+    "post": "advocacy-history",
+    "fix": "2026-10-28-hearing-witnesses-sarasota-date",
+    "note": "The 2007 and 2008 hearing witnesses were swapped (Serial No. 110-68 and 110-89); the Sarasota state attorney's report is dated 1983 only, because ISAC's Sembler Report says September 1983 for the report but July 19, 1983 for the closing and Fager gives no month.",
+    "replace": [
+      [
+        "Congress holds the first of two hearings on abusive teen programs.",
+        "The House Committee on Education and Labor holds the first of two hearings on abusive teen programs (Serial No. 110-68)."
+      ],
+      [
+        "Survivors Jon Martin Crawford (Family Foundation School) and Kathryn Whitehead (Mission Mountain School) testify about their experiences.",
+        "Witnesses include the Government Accountability Office, parents Bob Bacon (Aaron Bacon), Paul Lewis (Ryan Lewis) and Cynthia Clark Harvey (Erica Harvey), Jan Moss of NATSAP, and researcher Allison Pinto."
+      ],
+      [
+        "A second congressional hearing is held on April 24.",
+        "The House Committee on Education and Labor holds a second hearing on April 24 (Serial No. 110-89)."
+      ],
+      [
+        "Grieving parents testified about the deaths of their children in residential programs.",
+        "Survivors Jon Martin-Crawford (Family Foundation School) and Kathryn Whitehead (Mission Mountain School; founder of CAFETY) testify about their experiences."
+      ],
+      [
+        "<strong>September 1983</strong>",
+        "<strong>1983</strong>"
+      ]
+    ]
   }
 ]
