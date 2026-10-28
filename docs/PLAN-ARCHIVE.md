@@ -3555,3 +3555,20 @@ sync in the Review inbox queue and hourly. Two gaps went into the plan file's it
    important direct connections and dropped everything they brought; visibleIds() has no cap. Only those five names
    have over 40 connections. The slice no longer trims, `more` stays 0 (the caption said "N more on the full map"),
    and the test's size bound went from 120 to 150 KB (Provo is 135 KB). 702 of 702 slices match.
+
+## 4.7 Pages and templates, items 7 and 17 (finished 2026-10-28)
+
+7. **Admin stylesheets** still use about fifty accent colours as text (16B).
+   Done 2026-10-28 (0979c0d272ef98a60b055c7abb47e0a5d1018446): every brand accent used as text was already an -ink token
+   (likely a20373d0); two non-brand 3.3:1 text colours fixed (admin-data-manager.css .dm-wiki-suggested #7a5b15,
+   admin-submissions.css .url-safety-icon #1b7e3c). plugin-contrast.css:147 chartreuse text is on the dark drawer, kept.
+17. **Operator year-by-year timeline runs under the rail** (found 2026-10-25, live,
+    https://kidsoverprofits.org/operator/universal-health-services/ at 1536 wide): `ol.kop-ptl-years` is a block box,
+    so it spans the full 805px body under the floated rail (item 16's wrap) instead of stopping at it like the text.
+    The axis line and its 2026 dot cross the rail's "Know something we do not?" text, and the list sits on top of the
+    rail's Submit info button (elementFromPoint at the button's centre is the `ol`, so it can't be clicked there).
+    Fix: give the timeline its own block formatting context (`display: flow-root` / `overflow: hidden` on `.kop-ptl`)
+    so it narrows beside the float, or start it below the rail (`clear: both`); then check facility pages, which use the same rail.
+    Done 2026-10-28 (5db4bb70f19bc07866ee7507e128c79bd20806da): `display: flow-root` on `.kop-ptl`. Checked live with the
+    file injected on UHS and san-marcos-treatment-center-tx at 1536/1100/768/390: Submit info is clickable, no overlap,
+    no overflow; UHS timeline 517px at 1536. check-contrast and check-bare-text clean.
