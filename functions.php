@@ -306,6 +306,7 @@ require_once get_stylesheet_directory() . '/inc/hub-posts.php';
 
 // The frame a hub page is assembled in, and each hub's settings
 require_once get_stylesheet_directory() . '/inc/hub-shell.php';
+require_once get_stylesheet_directory() . '/inc/category-archive.php';
 
 // Utility page presentation and legal document metadata
 require_once get_stylesheet_directory() . '/inc/utility-pages.php';
