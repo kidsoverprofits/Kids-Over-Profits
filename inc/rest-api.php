@@ -3251,159 +3251,9 @@ function kop_state_build_program_record($project_name, $facility, $data, $state_
 }
 
 function kop_state_collect_programs($state_name) {
-    global $wpdb;
-
-    // v2 data model (?model=v2 or the kop_data_model option): one join, no copies.
-    if (function_exists('kop_v2_model_requested') && kop_v2_model_requested()) {
-        return kop_v2_collect_programs($state_name, 'state');
-    }
-
-    $abbrev_map = array_flip(kop_state_abbrev_to_name());
-    $abbrev = isset($abbrev_map[$state_name]) ? $abbrev_map[$state_name] : '';
-    $state_lower = strtolower($state_name);
-    $abbrev_lower = strtolower($abbrev);
-
-    $append_program = static function (&$programs, &$seen_names, $project_name, $facility, $data, $state_name, $meta = array()) {
-        $built = kop_state_build_program_record($project_name, $facility, $data, $state_name, $meta);
-        if ($built === null) return;
-        $program   = $built['program'];
-        $dedup_key = $built['dedup_key'];
-
-        // The same facility usually exists more than once: as a directly
-        // imported entry in the state aggregate, as the clone synced from its
-        // operator project, and in the operator project itself. Each copy may
-        // hold fields the others lack, so MERGE same-named entries instead of
-        // keeping only the first one seen. Matching is by name only (as the
-        // old first-wins dedup was): copies often disagree on the city by an
-        // adjacent town, and a second distinct address is kept as an extra
-        // campus address rather than becoming a second tile.
-        if ($dedup_key !== '' && isset($seen_names[$dedup_key])) {
-            $existing = &$programs[$seen_names[$dedup_key]];
-            // The address travels as a unit (street + city + zip) so a merge
-            // never pairs one copy's street with another copy's city.
-            $addr_keys = array('street', 'city', 'state', 'zip', 'raw_address');
-            $existing_has_street = ($existing['street'] !== '' || ($existing['city'] === '' && $existing['raw_address'] !== ''));
-            $incoming_has_street = ($program['street'] !== '' || ($program['city'] === '' && $program['raw_address'] !== ''));
-            if (!$existing_has_street && $incoming_has_street) {
-                foreach ($addr_keys as $ak) $existing[$ak] = $program[$ak];
-            } elseif ($existing_has_street && $incoming_has_street) {
-                $fmt = static function ($p) {
-                    return $p['street'] !== ''
-                        ? implode(', ', array_filter(array($p['street'], $p['city'], $p['state'], $p['zip'])))
-                        : $p['raw_address'];
-                };
-                $incoming_line = $fmt($program);
-                if (kop_normalize_address_for_match($incoming_line) !== kop_normalize_address_for_match($fmt($existing))) {
-                    $known = array_map('strtolower', $existing['additional_addresses']);
-                    if (!in_array(strtolower($incoming_line), $known, true)) {
-                        $existing['additional_addresses'][] = $incoming_line;
-                    }
-                }
-            }
-            kop_state_merge_program_fields($existing, $program);
-            unset($existing);
-            return;
-        }
-        if ($dedup_key !== '') {
-            $seen_names[$dedup_key] = count($programs);
-        }
-        $programs[] = $program;
-    };
-
-    $programs = array();
-    $seen_names = array();
-
-    // Source 1: locations_master.<STATE> — canonical state aggregate. Take all
-    // its facilities verbatim, no state filter required.
-    $loc_table = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", 'locations_master'));
-    if ($loc_table === 'locations_master') {
-        $loc_row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT unique_name, json_data, updated_at FROM locations_master WHERE UPPER(unique_name) = %s LIMIT 1",
-                strtoupper($state_name)
-            ),
-            ARRAY_A
-        );
-        if ($loc_row && !empty($loc_row['json_data'])) {
-            $loc_data = kop_normalize_project_payload($loc_row['json_data']);
-            if (is_array($loc_data) && !empty($loc_data['facilities']) && is_array($loc_data['facilities'])) {
-                $loc_meta = array(
-                    'updated_at'         => (string)($loc_row['updated_at'] ?? ''),
-                    'location_aggregate' => true,
-                );
-                foreach ($loc_data['facilities'] as $facility) {
-                    $append_program($programs, $seen_names, $loc_row['unique_name'], $facility, $loc_data, $state_name, $loc_meta);
-                }
-            }
-        }
-    }
-
-    // Source 2: facilities_master — operator/company projects with facilities in this state.
-    $rows = $wpdb->get_results("SELECT id, unique_name, json_data, updated_at FROM facilities_master", ARRAY_A);
-    if (is_array($rows)) {
-        foreach ($rows as $row) {
-            $data = kop_normalize_project_payload($row['json_data']);
-            if (!is_array($data) || empty($data['facilities']) || !is_array($data['facilities'])) {
-                continue;
-            }
-            $row_meta = array(
-                'master_id'      => (int)($row['id'] ?? 0),
-                'facility_count' => count($data['facilities']),
-                'updated_at'     => (string)($row['updated_at'] ?? ''),
-            );
-
-            foreach ($data['facilities'] as $facility) {
-                if (!is_array($facility)) continue;
-
-                $address = isset($facility['address']) && is_array($facility['address']) ? $facility['address'] : array();
-                $facility_state_lower = strtolower(trim((string)($address['state'] ?? '')));
-
-                $location_details = isset($facility['locationDetails']) && is_array($facility['locationDetails']) ? $facility['locationDetails'] : array();
-                $locdet_state_lower = strtolower(trim((string)($location_details['state'] ?? '')));
-
-                $location_text = (string)($facility['location'] ?? '');
-
-                // Match priority:
-                //   1. address.state or locationDetails.state equals the state name or 2-letter abbrev
-                //   2. the free-text location names this state as a place ("Provo, UT",
-                //      "Viera, FL / Rutland, MA", "Southern Utah"). Parsed by
-                //      kop_facility_location_text_places(), not substring matched:
-                //      "La Verne, CA" is not Louisiana, "Mt. Pleasant" is not Montana,
-                //      "Kansas City, MO" is not Kansas.
-                $matched = false;
-                if ($state_lower !== '' && ($facility_state_lower === $state_lower || $locdet_state_lower === $state_lower)) {
-                    $matched = true;
-                } elseif ($abbrev_lower !== '' && ($facility_state_lower === $abbrev_lower || $locdet_state_lower === $abbrev_lower)) {
-                    $matched = true;
-                } elseif ($abbrev !== '' && trim($location_text) !== '' && kop_facility_location_text_names_state($location_text, $abbrev)) {
-                    $matched = true;
-                }
-
-                // Relocation: a facility that used to operate in this state (and has
-                // since moved) still belongs in this state's directory, flagged as
-                // relocated. Match on any locationDetails.formerLocations[].state.
-                if (!$matched && !empty($location_details['formerLocations']) && is_array($location_details['formerLocations'])) {
-                    foreach ($location_details['formerLocations'] as $fl) {
-                        if (!is_array($fl)) continue;
-                        $fl_canon = strtolower(kop_state_canonical_name($fl['state'] ?? ''));
-                        if ($fl_canon !== '' && $fl_canon === $state_lower) {
-                            $matched = true;
-                            break;
-                        }
-                    }
-                }
-                if (!$matched) continue;
-
-                $append_program($programs, $seen_names, $row['unique_name'], $facility, $data, $state_name, $row_meta);
-            }
-        }
-    }
-
-    usort($programs, static function ($a, $b) {
-        return strnatcasecmp($a['facility_name'] ?: $a['project_name'], $b['facility_name'] ?: $b['project_name']);
-    });
-
-    return $programs;
+    // The facility records are the v2 tables (data model phase 5 retired facilities_master
+    // and emptied locations_master's facility arrays): one join, no copies.
+    return kop_v2_collect_programs($state_name, 'state');
 }
 
 /**
@@ -3744,7 +3594,7 @@ function kop_derive_state_from_address($address) {
 
 /**
  * Map every master facility NAME (normalized) to the set of state abbreviations
- * it appears in, from facilities_master. This is the authoritative per-facility
+ * it appears in, from the v2 facility tables. This is the authoritative per-facility
  * location source for deciding which state page an inspection row belongs on —
  * far more reliable than the inspection's scraped address, which is sometimes
  * the operator's HQ rather than the facility.
@@ -3754,55 +3604,7 @@ function kop_derive_state_from_address($address) {
 function kop_master_facility_state_map() {
     static $map = null;
     if ($map !== null) return $map;
-
-    global $wpdb;
-    $map = array();
-    $abbr_to_name = kop_state_abbrev_to_name();          // ABBR => Name
-    $name_to_abbr = array();
-    foreach ($abbr_to_name as $ab => $name) $name_to_abbr[strtolower($name)] = $ab;
-
-    $facility_abbr = static function ($f) use ($abbr_to_name, $name_to_abbr) {
-        $addr = isset($f['address']) && is_array($f['address']) ? $f['address'] : array();
-        $ld   = isset($f['locationDetails']) && is_array($f['locationDetails']) ? $f['locationDetails'] : array();
-        foreach (array($addr['state'] ?? '', $ld['state'] ?? '') as $cand) {
-            $cand = trim((string)$cand);
-            if ($cand === '') continue;
-            if (isset($abbr_to_name[strtoupper($cand)])) return strtoupper($cand);
-            if (isset($name_to_abbr[strtolower($cand)])) return $name_to_abbr[strtolower($cand)];
-        }
-        $loc = (string)($f['location'] ?? '');
-        if (preg_match_all('/,\s*([A-Za-z]{2})\b/', $loc, $m)) {
-            $c = strtoupper(end($m[1]));
-            if (isset($abbr_to_name[$c])) return $c;
-        }
-        foreach ($name_to_abbr as $lname => $ab) {
-            if ($loc !== '' && preg_match('/\b' . preg_quote($lname, '/') . '\b/i', $loc)) return $ab;
-        }
-        return '';
-    };
-
-    if (kop_v2_writes_on()) {
-        return $map = kop_v2_facility_state_map();
-    }
-
-    $sets = array();  // name_key => [ABBR => true]
-    $rows = $wpdb->get_results("SELECT json_data FROM facilities_master", ARRAY_A);
-    foreach ((array)$rows as $row) {
-        $data = kop_normalize_project_payload($row['json_data'] ?? '');
-        if (!is_array($data) || empty($data['facilities']) || !is_array($data['facilities'])) continue;
-        foreach ($data['facilities'] as $f) {
-            if (!is_array($f)) continue;
-            $ident = isset($f['identification']) && is_array($f['identification']) ? $f['identification'] : array();
-            $name  = $ident['name'] ?? $ident['currentName'] ?? '';
-            $nk    = kop_normalize_facility_name($name);
-            if ($nk === '') continue;
-            $ab = $facility_abbr($f);
-            if ($ab === '') continue;
-            $sets[$nk][$ab] = true;
-        }
-    }
-    foreach ($sets as $nk => $abset) $map[$nk] = array_keys($abset);
-    return $map;
+    return $map = kop_v2_facility_state_map();
 }
 
 /**
@@ -5418,8 +5220,7 @@ function kop_state_attach_v2_names(array &$facilities, $page_name) {
 }
 
 /**
- * Case-insensitive facilities_master name => id map (every row, including the
- * promoted __facility_ref rows), keyed both by the raw lowercase unique_name
+ * Case-insensitive facility name => id map (every v2 row), keyed both by the raw lowercase unique_name
  * and by kop_normalize_facility_name() so directory names with punctuation or
  * "The"/"Inc." differences still resolve.
  *
@@ -5428,22 +5229,7 @@ function kop_state_attach_v2_names(array &$facilities, $page_name) {
 function kop_state_master_name_id_map() {
     static $map = null;
     if ($map !== null) return $map;
-    global $wpdb;
-    if (kop_v2_writes_on()) {
-        return $map = kop_v2_name_id_map();
-    }
-    $map = array();
-    $rows = $wpdb->get_results("SELECT id, unique_name FROM facilities_master", ARRAY_A);
-    foreach ((array)$rows as $r) {
-        $id = (int)($r['id'] ?? 0);
-        $name = trim((string)($r['unique_name'] ?? ''));
-        if ($id <= 0 || $name === '') continue;
-        $raw = strtolower($name);
-        if (!isset($map[$raw])) $map[$raw] = $id;
-        $norm = kop_normalize_facility_name($name);
-        if ($norm !== '' && !isset($map[$norm])) $map[$norm] = $id;
-    }
-    return $map;
+    return $map = kop_v2_name_id_map();
 }
 
 /**
