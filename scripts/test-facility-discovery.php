@@ -45,16 +45,17 @@ foreach ($pdo->query("SELECT id, facilities_mentioned FROM news_submissions WHER
 printf("  %d articles carry %d distinct names with no record\n", $articles, count($names));
 $check('there are names to ask about', count($names) > 0);
 
+// A made-up program: Silver Oak Academy, used here first, has had a record since the scan created it (#100185).
 $news = array('facilities_mentioned' => json_encode(array(
     array('name' => 'Provo Canyon School', 'facility_id' => null),
-    array('name' => 'Silver Oak Academy', 'facility_id' => null),
-    array('name' => 'silver oak academy', 'facility_id' => null),
+    array('name' => 'Larkspur Hollow Academy', 'facility_id' => null),
+    array('name' => 'larkspur hollow academy', 'facility_id' => null),
     array('name' => 'Linked Already', 'facility_id' => 12),
 )), 'closure_programs' => array('Three Points Ranch'), 'known' => array());
 $u = kop_facdisc_unresolved($pdo, $news, $index);
 $check('known names, linked names and repeats are left out; closure programs are added',
-    $u === array('Silver Oak Academy', 'Three Points Ranch'), implode(', ', $u));
-$news['known'] = array(kop_normalize_name_key('Silver Oak Academy') => array('decision' => 'created', 'facility_id' => 5));
+    $u === array('Larkspur Hollow Academy', 'Three Points Ranch'), implode(', ', $u));
+$news['known'] = array(kop_normalize_name_key('Larkspur Hollow Academy') => array('decision' => 'created', 'facility_id' => 5));
 $decided = array();
 $u = kop_facdisc_unresolved($pdo, $news, $index, $decided);
 $check('a name decided before is not asked again, and its decision comes back', $u === array('Three Points Ranch') && count($decided) === 1);
@@ -91,8 +92,8 @@ $check('agencies, police, courts, colleges and jails are decided without Groq',
     && kop_facdisc_obvious_kind('Sheppard Pratt Hospital') === 'provider');
 $check('programs still go to the model', kop_facdisc_obvious_kind('Silver Oak Academy') === null
     && kop_facdisc_obvious_kind('Knox County Juvenile Detention Center') === null && kop_facdisc_obvious_kind('Hillsborough Residential Hospital for Youth') === null);
-$news['known'] = array(kop_normalize_name_key('Silver Oak Academy') => array('decision' => 'needs_place', 'facility_id' => null));
-$check('a name held for want of a place is asked again', in_array('Silver Oak Academy', kop_facdisc_unresolved($pdo, $news, $index), true));
+$news['known'] = array(kop_normalize_name_key('Larkspur Hollow Academy') => array('decision' => 'needs_place', 'facility_id' => null));
+$check('a name held for want of a place is asked again', in_array('Larkspur Hollow Academy', kop_facdisc_unresolved($pdo, $news, $index), true));
 
 // ---------------------------------------------------------------------------
 echo "-- Reading the model's reply --\n";

@@ -1259,6 +1259,81 @@ function kop_facdisc_maybe_fix_links() {
 }
 add_action('admin_init', 'kop_facdisc_maybe_fix_links', 22);
 
+/**
+ * Live articles naming a record they are not linked to. Links are worked out
+ * only when an article is saved, so a record created later (by this scan, by
+ * hand) or a name added to one never reached the articles saved before it, and
+ * the scan counts such a name as known. Each article found is resynced
+ * (kop_resync_news()), the same as a save. At most $limit a call, oldest
+ * first. Returns news id => the facility or operator ids it gains.
+ *
+ * Left out: a record whose name is another record's without its "(...)"
+ * ("Lakeside Academy", Clearfield UT, beside "Lakeside Academy (MI)"): the
+ * exact match always picks the bare one, and the 2026-10-28 mirror had 26
+ * articles on the Kalamazoo death that would have gone to Utah.
+ */
+function kop_facdisc_relink_resolved(PDO $pdo, $write = true, $limit = 100) {
+    require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+    $index = kop_facdisc_alias_index($pdo);
+    $operators = $index['operators'] ?? array();
+    $shadowed = array();
+    foreach ($index['names'] ?? array() as $name) {
+        if (preg_match('/^(.*?)\s*\([^()]*\)\s*$/', (string) $name, $m) && ($k = kop_normalize_name_key($m[1])) !== '') {
+            $shadowed[$k] = true;
+        }
+    }
+    $linked = array();
+    foreach ($pdo->query('SELECT news_id, facility_id FROM news_facility_links') as $r) {
+        $linked[(int) $r['news_id']][(int) $r['facility_id']] = true;
+    }
+    if (!empty($index['operator_links'])) {
+        try {
+            foreach ($pdo->query("SELECT link_id, operator_id FROM `{$index['operator_links']}` WHERE link_kind = 'news'") as $r) {
+                $linked[(int) $r['link_id']][(int) $r['operator_id']] = true;
+            }
+        } catch (Throwable $e) {
+            // No operator links table here: companies count as unlinked.
+        }
+    }
+    $out = array();
+    foreach ($pdo->query("SELECT id, facilities_mentioned FROM news_submissions WHERE status IN ('approved', 'published') ORDER BY id") as $r) {
+        $nid = (int) $r['id'];
+        $gain = array();
+        $unsure = false;
+        foreach (kop_normalize_facility_mentions($r['facilities_mentioned']) as $m) {
+            if (!empty($m['facility_id'])) continue;
+            $fid = kop_resolve_mention_to_facility((string) $m['name'], $index);
+            if ($fid === null || isset($linked[$nid][$fid])) continue;
+            // The resync links every name the article holds, so one such name holds the whole article back.
+            $unsure = $unsure || isset($shadowed[kop_normalize_name_key((string) ($index['names'][$fid] ?? ''))]);
+            $gain[$fid] = isset($operators[$fid]) ? 'operator' : 'facility';
+        }
+        if ($gain && !$unsure) {
+            $out[$nid] = $gain;
+            if (count($out) >= $limit) break;
+        }
+    }
+    if ($write && $out) {
+        kop_resync_news($pdo, array_keys($out), 'news-discovery');
+    }
+    return $out;
+}
+
+/** Run kop_facdisc_relink_resolved() once over every live article; what it did is kept in kop_facdisc_relink_log. */
+function kop_facdisc_maybe_relink() {
+    $version = '1';
+    if (get_option('kop_facdisc_relink') === $version) return;
+    $pdo = kop_closure_pdo();
+    if (!$pdo) return;
+    update_option('kop_facdisc_relink', $version, false);
+    try {
+        update_option('kop_facdisc_relink_log', kop_facdisc_relink_resolved($pdo, true, 5000), false);
+    } catch (Throwable $e) {
+        update_option('kop_facdisc_relink_log', array('error' => $e->getMessage()), false);
+    }
+}
+add_action('admin_init', 'kop_facdisc_maybe_relink', 23);
+
 /* ---- Hourly scan ---------------------------------------------------- */
 
 add_action('init', function () {
@@ -1292,6 +1367,8 @@ function kop_facdisc_cron() {
             $n = count($result['created']);
             kop_notify_admins('new_facility', $n . ' new ' . ($n === 1 ? 'facility' : 'facilities') . ' added from the news', '', $fields);
         }
+        // A record created since (by this run, by hand) links the older articles naming it.
+        kop_facdisc_relink_resolved($pdo);
     } catch (Throwable $e) {
         error_log('kop facility discovery: ' . $e->getMessage());
     } finally {

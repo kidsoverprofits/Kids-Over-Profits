@@ -50,10 +50,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    `scripts/test-network-modules.js` is now 720px with the reason written above it. Look at why the row order in
    focus.js is that sensitive (a stable tie-break, or ordering rows by what they connect to), and whether the 674px run
    points to state carried over from earlier checks.
-3. **test-facility-discovery.php: 3 checks fail on main** (found 2026-10-28, the same on unchanged HEAD): "known
-   names ... closure programs are added" (Three Points Ranch), "a name decided before is not asked again", "a name held
-   for want of a place is asked again". Likely mirror drift (Three Points Ranch now resolves); fix the fixtures.
-4. **Found 2026-10-28 while fixing items 2-5 of that day** (archive, "5. Tests failing on main, 2026-10-28"):
+3. **Found 2026-10-28 while fixing items 2-5 of that day** (archive, "5. Tests failing on main, 2026-10-28"):
    - Drive Docs: kop_render_drive_docs_page() (inc/drive-docs.php, the old screen) and the Review inbox resync tool call
      kop_gdl_sync() without kop_fmerge_follow_waiting(), so rows for a merged record sit on the old id until the
      queue is opened or the hourly run; and the follow moves only 'pending' rows, never 'gone' ones. Two test-drive-docs

@@ -124,8 +124,32 @@ echo 'retyped to related: ' . json_encode($kept) . "\n";
 check(array_sum($kept) > 0, 'the one-time step retypes the links the sync could not give again');
 check(!array_diff_key($before, $all_links()) && !array_diff_key($all_links(), $before), 'it adds and removes no link');
 
+// ---- A record created after the article links it (inc/facility-discovery.php) ----
+// Links are worked out when an article is saved; the hourly Facilities from News run
+// resyncs live articles naming a record they are not linked to.
+define('ABSPATH', $root . '/');
+function add_action() {}
+function get_stylesheet_directory() { return dirname(__DIR__); }
+require $root . '/inc/facility-discovery.php';
+$found = kop_facdisc_relink_resolved($pdo, false, 5000);
+$kinds = array_count_values(array_merge(array(), ...array_map('array_values', array_values($found ?: array(array())))));
+echo count($found) . ' live articles name a record they are not linked to: ' . json_encode($kinds) . "\n";
+check(count($found) > 0, 'some live articles name a record created or renamed after they were saved');
+check(count(kop_facdisc_relink_resolved($pdo, false, 2)) === min(2, count($found)), 'a run takes at most its limit');
+$relinked = kop_facdisc_relink_resolved($pdo, true, 5000);
+check($relinked == $found, 'the dry run finds what the run links');
+$left = kop_facdisc_relink_resolved($pdo, false, 5000);
+check(!$left, 'afterwards none is left, so the next hourly run resyncs nothing again', json_encode(array_slice($left, 0, 3, true)));
+$is_op = array_flip(array_map('intval', $pdo->query('SELECT id FROM wpdl_kop_operators')->fetchAll(PDO::FETCH_COLUMN)));
+$dropped = array_filter(array_keys(array_diff_key($before, $all_links())), function ($k) use ($is_op) { return !isset($is_op[(int) explode(':', $k)[2]]); });
+check(!$dropped, 'it takes no facility link off a page', implode(', ', array_slice($dropped, 0, 5)));
+// "Lakeside Academy" is the Clearfield, UT record by exact name, beside "Lakeside Academy (MI)", Kalamazoo.
+$utah = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE unique_name = 'Lakeside Academy' AND state = 'UT'")->fetchColumn();
+$wrong = array_filter(array_keys($found), function ($nid) use ($found, $utah) { return isset($found[$nid][$utah]); });
+check($utah && !$wrong, 'a bare name beside a record named "<it> (MI)" links nothing (the Kalamazoo articles stay off the Utah record)', implode(', ', array_slice($wrong, 0, 5)));
+
 $live_news = $pdo->query("SELECT id FROM news_submissions WHERE status IN ('approved', 'published')")->fetchAll(PDO::FETCH_COLUMN);
-$cases = $pdo->query('SELECT id FROM lawsuits')->fetchAll(PDO::FETCH_COLUMN);
+$cases =$pdo->query('SELECT id FROM lawsuits')->fetchAll(PDO::FETCH_COLUMN);
 $t0 = microtime(true);
 $r1 = kop_resync_lawsuit($pdo, $cases, 'test');
 $r2 = kop_resync_news($pdo, $live_news, 'test');

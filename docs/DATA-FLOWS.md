@@ -176,9 +176,15 @@ request.
   | duplicate merge (`api/manage-duplicate-articles.php:73`) | the dropped copies' facility, case, bill and featured links do not move |
   | hard deletes (`manage-submissions.php:850`, `manage-duplicate-articles.php:111`) | orphan link rows |
 - **Tied to facilities by:** `news_facility_links` only. There is **no name
-  fallback**, so a mention that didn't resolve when saved never links later
-  (except through the hourly Facilities from News scan, which links a name
-  the AI matched to a record we hold, provider and agency names included).
+  fallback** at read time. A mention that didn't resolve when saved links
+  later two ways, both hourly with the Facilities from News run: the scan
+  links a name the AI matched to a record we hold (provider and agency names
+  included), and `kop_facdisc_relink_resolved()` resyncs live articles whose
+  names now resolve exactly to a record or company they are not linked to
+  (one created or renamed since). It holds back an article naming a record
+  that another record repeats with a "(...)" ("Lakeside Academy" beside
+  "Lakeside Academy (MI)"), because the exact match always takes the bare
+  one; a save still links it (open, plan 4.3 item 22).
   A company's name resolves to its operator id, which the sync writes to
   `kop_operator_links` (link_kind 'news'; lawsuits the same), never to
   `news_facility_links` (2026-10-28; before that 382 such rows sat there, read by no page).

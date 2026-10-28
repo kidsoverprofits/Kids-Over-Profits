@@ -3556,6 +3556,13 @@ sync in the Review inbox queue and hourly. Two gaps went into the plan file's it
    have over 40 connections. The slice no longer trims, `more` stays 0 (the caption said "N more on the full map"),
    and the test's size bound went from 120 to 150 KB (Provo is 135 KB). 702 of 702 slices match.
 
+### Second list, item 3. **test-facility-discovery.php: 3 checks fail on main** (found 2026-10-28, the same on unchanged HEAD): "known
+   names ... closure programs are added" (Three Points Ranch), "a name decided before is not asked again", "a name held
+   for want of a place is asked again". Likely mirror drift (Three Points Ranch now resolves); fix the fixtures.
+   Done 2026-10-28: not Three Points Ranch. The fixture's "Silver Oak Academy" has had a record since the scan created
+   it (#100185), so it resolved and dropped out of the list. The three checks use a made-up name (Larkspur Hollow
+   Academy); all pass.
+
 ## 4.7 Pages and templates, items 7 and 17 (finished 2026-10-28)
 
 7. **Admin stylesheets** still use about fifty accent colours as text (16B).
