@@ -59,6 +59,9 @@ php scripts/discover-articles.php --dry-run --max-facilities 40 --no-topics   # 
 # saved, so each hourly run then resyncs (kop_resync_news()) up to 100 live articles naming a record or company by exact name
 # that they are not linked to. An article is held back whole when one such name is a record's that another record repeats with a
 # "(...)" ("Lakeside Academy", UT, beside "Lakeside Academy (MI)"): the exact match always takes the bare one. Checked in test-record-resync.php
+# The worklist for vetting names in live articles that link to no facility (plan 4.3 item 22): each article, its names, the scan's
+# decision and up to 5 look-alikes, in batches for the sorting agents; --extra adds names pulled from articles that list none
+php scripts/news-name-vetting.php [--db=tmp/prod.sqlite] [--out=tmp/news-name-vetting] [--batch=20] [--extra=names.json]
 php scripts/test-facility-discovery.php           # offline, against tmp/prod.sqlite, no Groq calls
 php api/scan-new-facilities.php --ids=502         # on the server: dry run; "apply" creates records
 # Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
