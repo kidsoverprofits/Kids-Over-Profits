@@ -1,6 +1,6 @@
 {
- "built": "2026-10-26 22:35 UTC",
- "source": "c9d6cb1b7497fc3efed2beea393c6faae33add78",
+ "built": "2026-10-28 16:55 UTC",
+ "source": "b565b08a3d24cb4b85fdb2dc5e8ecf26b568605d",
  "sections": [
   {
    "key": "2",
@@ -969,6 +969,14 @@
        "ask": "",
        "date": "2026-10-26",
        "hash": "df2670bef3be"
+      },
+      {
+       "id": "4.3:news-articles-not-linking-to-facilities-2026-10-28",
+       "lead": "News articles not linking to facilities (2026-10-28)",
+       "text": "**News articles not linking to facilities (2026-10-28)**: two causes fixed in code. (a) A company's name in an article or case resolved to its operator id and was written to `news_facility_links`, which no page reads (382 news rows, 21 lawsuit rows on the 2026-10-27 mirror; 32 approved articles linked to nothing else). The syncs now write those to `kop_operator_links` (`kop_link_mentioned_operators()`, api/facility-aliases.php). (b) The hourly Facilities from News scan dropped the record the AI matched when it called the name a provider or agency (\"Laurel Heights\", \"Looking Glass Community Services\"); it now links them as 'matched' (27 articles on the mirror). Open: - **Owner step: backfill the existing rows.** New saves are right; old rows change only when each article is saved again. A one-time pass would run `kop_resync_news()` / `kop_resync_lawsuit()` on the rows holding an operator id (moves them to the company pages) and re-apply the 27 provider/agency candidates with a `sameAs` record. Waiting for the owner's go-ahead (admin_init pass rule). - After deploy: open a new article naming a company (e.g. Sequel, UHS) and check it lists on /operator/ and that `news_facility_links` holds no operator id for it. - Still unlinked by design: about 90 approved articles whose names match no record exactly and that the scan judged not a facility, or held as 'unquoted' (8). Facilities from News is where those are linked by hand.",
+       "ask": "",
+       "date": "2026-10-28",
+       "hash": "8d03bc50df68"
       }
      ]
     },
@@ -1543,6 +1551,14 @@
        "ask": "",
        "date": "2026-10-26",
        "hash": "3f9ec93f3cad"
+      },
+      {
+       "id": "5:test-facility-discovery-php-3-checks-fail-on-main",
+       "lead": "test-facility-discovery.php: 3 checks fail on main",
+       "text": "**test-facility-discovery.php: 3 checks fail on main** (found 2026-10-28, the same on unchanged HEAD): \"known names ... closure programs are added\" (Three Points Ranch), \"a name decided before is not asked again\", \"a name held for want of a place is asked again\". Likely mirror drift (Three Points Ranch now resolves); fix the fixtures.",
+       "ask": "",
+       "date": "2026-10-28",
+       "hash": "555adcb8a4f5"
       }
      ]
     }
