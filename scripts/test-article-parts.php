@@ -60,6 +60,8 @@ function is_singular() { return true; }
 function get_the_ID() { return 7; }
 function get_post_field($field, $id) { return $GLOBALS['kop_test_slug']; }
 
+function sanitize_title($t) { return trim(preg_replace('/[^a-z0-9]+/', '-', strtolower((string) $t)), '-'); }
+function add_query_arg($k, $v, $url) { return $url . (strpos($url, '?') === false ? '?' : '&') . $k . '=' . $v; }
 require ABSPATH . 'inc/admin.php';
 require ABSPATH . 'inc/article-parts.php';
 
@@ -245,6 +247,49 @@ check('a page the map does not place is left alone',
     kop_article_yoast_breadcrumbs($yoast_in), $yoast_in);
 
 check('and so is a list with nothing in it', kop_article_yoast_breadcrumbs(array()), array());
+
+echo "\n-- In this article / In this section --\n";
+
+$nodes = array(
+    array('id' => 'seedling-prog', 'name' => 'The Seed', 'aliases' => array(), 'kind' => 'facility', 'importance' => 5, 'facilityId' => 0),
+    array('id' => 'straight', 'name' => 'Straight Incorporated', 'aliases' => array('Straight Inc'), 'kind' => 'facility', 'importance' => 50, 'facilityId' => 0),
+    array('id' => 'synanon', 'name' => 'Synanon', 'aliases' => array(), 'kind' => 'facility', 'importance' => 90, 'facilityId' => 0),
+    array('id' => 'p-miller', 'name' => 'Mel Miller', 'aliases' => array(), 'kind' => 'person', 'importance' => 10, 'facilityId' => 0),
+    array('id' => 'p-dederich', 'name' => 'Charles Dederich', 'aliases' => array(), 'kind' => 'person', 'importance' => 70, 'facilityId' => 0),
+    array('id' => 'uhs', 'name' => 'Universal Health Services', 'aliases' => array('UHS Inc'), 'kind' => 'parent', 'importance' => 30, 'facilityId' => 0),
+    array('id' => 'gov', 'name' => 'Department of Justice', 'aliases' => array(), 'kind' => 'government', 'importance' => 99, 'facilityId' => 0),
+);
+$text = 'Seedling schools came first. Straight Inc opened in 1976; synanon, run by Charles Dederich and Mel Miller, '
+    . 'preceded it. Universal Health Services bought in. The Department of Justice looked on.';
+$found = kop_article_names_find($text, $nodes);
+check('Seed inside Seedling is not a hit, an alias is; programs run by importance', array_column($found['programs'], 'id'), array('synanon', 'straight'));
+check('people run by importance', array_column($found['people'], 'id'), array('p-dederich', 'p-miller'));
+check('a company is found', array_column($found['companies'], 'id'), array('uhs'));
+check('a government body is in none of the lists', kop_article_names_total($found), 5);
+$pinned = kop_article_names_find($text, $nodes, array('pin' => array('Straight Incorporated')));
+check('a pinned name leads its list', array_column($pinned['programs'], 'id'), array('straight', 'synanon'));
+$skipped = kop_article_names_find($text, $nodes, array('skip' => array('Synanon', 'p-miller')));
+check('skipped names (by name or id) never print', array(array_column($skipped['programs'], 'id'), array_column($skipped['people'], 'id')), array(array('straight'), array('p-dederich')));
+$short = kop_article_names_find('Mel Miller and Synanon', $nodes);
+ob_start();
+kop_article_names_box($short, array('heading' => 'In this article'));
+check('the box does not print below three names', ob_get_clean(), '');
+ob_start();
+kop_article_names_box($found, array('heading' => 'In this article'));
+$box = ob_get_clean();
+contains('the article box has its heading', $box, '>In this article</h2>');
+contains('a person links to the map opened on them', $box, '#open=p-dederich');
+contains('a program with no page links to the map when no index exists', $box, '#open=synanon');
+lacks('no more-list when eight or fewer', $box, 'kop-names__more');
+$many = array('programs' => array(), 'people' => array(), 'companies' => array());
+for ($i = 1; $i <= 11; $i++) { $many['people'][] = array('id' => "p$i", 'name' => "Person $i", 'kind' => 'person', 'facilityId' => 0); }
+ob_start();
+kop_article_names_box($many, array('heading' => 'In this section', 'more' => 'all %d'));
+contains('on the hub the rest fold under "all N"', ob_get_clean(), '<summary>all 11</summary>');
+ob_start();
+kop_article_names_box($many, array('heading' => 'In this article'));
+contains('on an article they fold under "and N more"', ob_get_clean(), '<summary>and 3 more</summary>');
+check('the hub sentence', kop_article_names_section_intro($found), '2 programs, 2 people and 1 company from these pages are on the network map.');
 
 echo $failures ? "\n$failures FAILURES\n" : "\narticle parts: PASS\n";
 exit($failures ? 1 : 0);

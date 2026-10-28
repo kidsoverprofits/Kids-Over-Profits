@@ -280,3 +280,124 @@
         padding: 0.9rem 1rem;
     }
 }
+
+/* ---- In this article / In this section ---------------------------------- */
+
+/* The programs, people and companies a history page names
+ * (kop_article_names_box(), inc/article-parts.php). A solid sand panel, so
+ * nothing sits on the page gradient. Kadence colours h2/h3, a and summary
+ * directly, so each is set here, in every state. */
+.kop-article-aids {
+    margin: 0 0 2rem;
+}
+
+.kop-article-aids .kop-article-toc {
+    margin: 0;
+}
+
+.kop-article-aids--pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .kop-article-aids--pair {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+}
+
+.kop-names {
+    margin: 0;
+    padding: 0.9rem 1.25rem 1.1rem;
+    background: var(--kop-sand, #f2eedf);
+    border-left: 4px solid var(--kop-orange, #ef9034);
+    color: var(--kop-text-primary, #000435);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.kop-names .kop-names__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-names .kop-names__intro {
+    margin: 0 0 0.75rem;
+    color: var(--kop-text-muted, #4a5568);
+}
+
+.kop-names__lists {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem 1.5rem;
+}
+
+@media (min-width: 600px) {
+    .kop-names__lists {
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    }
+}
+
+.kop-names .kop-names__label {
+    margin: 0 0 0.35rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--kop-orange-ink, #a3570d);
+}
+
+.kop-names .kop-names__count {
+    color: var(--kop-text-muted, #4a5568);
+    font-weight: 400;
+}
+
+.kop-names__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-names__list li {
+    margin: 0 0 0.25rem;
+    overflow-wrap: anywhere;
+}
+
+.kop-names a,
+.kop-names a:visited {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
+.kop-names a:hover,
+.kop-names a:focus,
+.kop-names a:active {
+    color: var(--kop-midnight-blue, #000435);
+    text-decoration: underline;
+}
+
+.kop-names__more {
+    margin: 0.25rem 0 0;
+}
+
+.kop-names__more summary,
+.kop-names__more summary:hover,
+.kop-names__more summary:focus {
+    cursor: pointer;
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
+.kop-names__more[open] summary {
+    margin-bottom: 0.35rem;
+}
+
+@media (max-width: 600px) {
+    .kop-names {
+        padding: 0.9rem 1rem 1rem;
+    }
+}

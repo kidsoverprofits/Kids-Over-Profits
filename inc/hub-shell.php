@@ -99,6 +99,7 @@ function kop_hub_config($slug) {
         // The editor text links four of the five articles under History, so
         // there is no reading list; the one it leaves out is the action.
         'history' => array(
+            'names_from' => 'section',
             'standfirst' => 'How the troubled teen industry grew out of centuries of institutions for controlling children, and how survivors and families have fought back.',
             'actions'    => array(
                 array('label' => 'Start with 1919 to 1969', 'slug' => 'tti-history-part-one'),

@@ -587,3 +587,286 @@ function kop_article_timeline($entries) {
 
     echo '</div></nav>';
 }
+
+/* ------------------------------------------------------------ names boxes --
+ *
+ * "In this article" and "In this section" (specified 2026-09-29 in
+ * docs/PAGE-TEMPLATE-DESIGN-PLAN.md): the programs, people and companies a
+ * history page names, found by matching the network map's names against the
+ * page's own words, so no editor types a list. A history article prints the
+ * box beside its Contents; the History hub prints the same three lists
+ * across all of its articles.
+ */
+
+/** Names an article must mention, in total, before its box prints. */
+define('KOP_ARTICLE_NAMES_FLOOR', 3);
+
+/** Shortest name or alias the matcher will look for ("The Seed" is ordinary prose). */
+define('KOP_ARTICLE_NAMES_MIN_LENGTH', 6);
+
+/** Names printed per list before the rest are folded away. */
+define('KOP_ARTICLE_NAMES_SHOWN', 8);
+
+/**
+ * A hand on the matcher: article slug => array('pin' => [names], 'skip' =>
+ * [names or map ids]). Pinned names lead their list; skipped names never
+ * print. Filled from what the first offline renders show; filterable.
+ */
+function kop_article_features() {
+    $features = array();
+    $filtered = apply_filters('kop_article_features', $features);
+    return is_array($filtered) ? $filtered : $features;
+}
+
+/** Which of the three lists a map node belongs in, or '' for none (government, association, church...). */
+function kop_article_names_group($kind) {
+    switch ((string) $kind) {
+        case 'facility':
+            return 'programs';
+        case 'person':
+            return 'people';
+        case 'parent':
+        case 'investor':
+            return 'companies';
+    }
+    return '';
+}
+
+/**
+ * The names in a text. Pure: nodes are the map's nodes (id, name, aliases,
+ * kind, importance, facilityId), $features is one article's pin/skip entry.
+ * Whole word, case-insensitive, names of six characters or more. Returns
+ * array('programs' => [...], 'people' => [...], 'companies' => [...]),
+ * each item array(id, name, kind, facilityId), pinned names first, then by
+ * the map's importance.
+ */
+function kop_article_names_find($text, array $nodes, array $features = array()) {
+    $out  = array('programs' => array(), 'people' => array(), 'companies' => array());
+    $hay  = mb_strtolower((string) $text);
+    $skip = array();
+    foreach ((array) (isset($features['skip']) ? $features['skip'] : array()) as $s) {
+        $skip[mb_strtolower((string) $s)] = true;
+    }
+    $pin = array();
+    foreach ((array) (isset($features['pin']) ? $features['pin'] : array()) as $i => $p) {
+        $pin[mb_strtolower((string) $p)] = $i;
+    }
+    $rank = array('programs' => array(), 'people' => array(), 'companies' => array());
+
+    foreach ($nodes as $node) {
+        $group = kop_article_names_group(isset($node['kind']) ? $node['kind'] : '');
+        $name  = trim((string) (isset($node['name']) ? $node['name'] : ''));
+        if ($group === '' || $name === '') {
+            continue;
+        }
+        if (isset($skip[mb_strtolower($name)]) || isset($skip[mb_strtolower((string) (isset($node['id']) ? $node['id'] : ''))])) {
+            continue;
+        }
+        $terms = array_merge(array($name), array_map('strval', (array) (isset($node['aliases']) ? $node['aliases'] : array())));
+        $hit   = false;
+        foreach ($terms as $term) {
+            $term = mb_strtolower(trim($term));
+            if (mb_strlen($term) < KOP_ARTICLE_NAMES_MIN_LENGTH || strpos($hay, $term) === false) {
+                continue;
+            }
+            if (preg_match('/(?<![\p{L}\p{N}])' . preg_quote($term, '/') . '(?![\p{L}\p{N}])/u', $hay)) {
+                $hit = true;
+                break;
+            }
+        }
+        if (!$hit) {
+            continue;
+        }
+        $id  = (string) $node['id'];
+        $key = mb_strtolower($name);
+        $out[$group][] = array(
+            'id'         => $id,
+            'name'       => $name,
+            'kind'       => (string) $node['kind'],
+            'facilityId' => (int) (isset($node['facilityId']) ? $node['facilityId'] : 0),
+        );
+        $rank[$group][$id] = array(
+            isset($pin[$key]) ? 0 : 1,
+            isset($pin[$key]) ? $pin[$key] : 0,
+            -1 * (float) (isset($node['importance']) ? $node['importance'] : 0),
+        );
+    }
+    foreach ($out as $group => $items) {
+        usort($items, function ($a, $b) use ($rank, $group) {
+            return $rank[$group][$a['id']] <=> $rank[$group][$b['id']];
+        });
+        $out[$group] = $items;
+    }
+    return $out;
+}
+
+/** Total names across the three lists. */
+function kop_article_names_total(array $names) {
+    $n = 0;
+    foreach (array('programs', 'people', 'companies') as $group) {
+        $n += count(isset($names[$group]) ? (array) $names[$group] : array());
+    }
+    return $n;
+}
+
+/**
+ * The names one article mentions. Cached per article, per map build and per
+ * edit (a new map build or an edit to the page refreshes it). An empty array
+ * when the map is missing.
+ */
+function kop_article_names($post_id) {
+    $post_id = (int) $post_id;
+    $post    = $post_id > 0 ? get_post($post_id) : null;
+    if (!$post || !function_exists('kop_network_map_graph')) {
+        return array();
+    }
+    $features = kop_article_features();
+    $feat     = isset($features[$post->post_name]) ? $features[$post->post_name] : array();
+    $key      = 'kop_names_' . $post_id . '_' . substr(md5(
+        $post->post_modified_gmt . '|' . (function_exists('kop_network_map_cache_key') ? kop_network_map_cache_key() : '') . '|' . wp_json_encode($feat)
+    ), 0, 12);
+    $cached   = get_transient($key);
+    if (is_array($cached)) {
+        return $cached;
+    }
+    $graph = kop_network_map_graph();
+    if (!$graph) {
+        return array();
+    }
+    $text  = wp_strip_all_tags(strip_shortcodes((string) $post->post_content));
+    $names = kop_article_names_find($text, (array) $graph['nodes'], $feat);
+    set_transient($key, $names, 7 * DAY_IN_SECONDS);
+    return $names;
+}
+
+/** The names across a set of article slugs (the History hub), merged by map id, most important first. */
+function kop_article_names_section(array $slugs) {
+    $merged = array('programs' => array(), 'people' => array(), 'companies' => array());
+    $graph  = function_exists('kop_network_map_graph') ? kop_network_map_graph() : null;
+    $weight = array();
+    foreach ($graph ? (array) $graph['nodes'] : array() as $node) {
+        $weight[(string) $node['id']] = (float) (isset($node['importance']) ? $node['importance'] : 0);
+    }
+    foreach ($slugs as $slug) {
+        $page = kop_article_page($slug);
+        if (!$page) {
+            continue;
+        }
+        $names = kop_article_names($page->ID);
+        foreach (array_keys($merged) as $group) {
+            foreach ((array) (isset($names[$group]) ? $names[$group] : array()) as $item) {
+                $merged[$group][$item['id']] = $item;
+            }
+        }
+    }
+    foreach ($merged as $group => $items) {
+        $items = array_values($items);
+        usort($items, function ($a, $b) use ($weight) {
+            $wa = isset($weight[$a['id']]) ? $weight[$a['id']] : 0;
+            $wb = isset($weight[$b['id']]) ? $weight[$b['id']] : 0;
+            return $wb <=> $wa;
+        });
+        $merged[$group] = $items;
+    }
+    return $merged;
+}
+
+/** Where one found name links: its page when it has one, else the facility index search or the map. */
+function kop_article_names_url($group, array $item) {
+    $map     = function_exists('kop_network_map_page_url') ? kop_network_map_page_url() : home_url('/network-map/');
+    $map_url = $map . '#open=' . rawurlencode($item['id']);
+    if ($group === 'programs') {
+        $url = ($item['facilityId'] > 0 && function_exists('kop_facility_page_url')) ? kop_facility_page_url($item['facilityId']) : '';
+        if ($url === '' && function_exists('kop_facility_page_url_for_name')) {
+            $url = kop_facility_page_url_for_name($item['name']);
+        }
+        if ($url === '' && function_exists('kop_location_index_url')) {
+            $url = add_query_arg('search', rawurlencode($item['name']), kop_location_index_url());
+        }
+        return $url !== '' ? $url : $map_url;
+    }
+    if ($group === 'companies') {
+        $url = function_exists('kop_operator_page_url_for_name') ? kop_operator_page_url_for_name($item['name']) : '';
+        return $url !== '' ? $url : $map_url;
+    }
+    return $map_url;
+}
+
+/** "1 program", "9 people", "17 companies". */
+function kop_article_names_count_label($group, $n) {
+    $one  = array('programs' => 'program', 'people' => 'person', 'companies' => 'company');
+    $many = array('programs' => 'programs', 'people' => 'people', 'companies' => 'companies');
+    return (int) $n . ' ' . ((int) $n === 1 ? $one[$group] : $many[$group]);
+}
+
+/**
+ * The box, for either place. $args: heading ('In this article' or 'In this
+ * section'), more ('and %d more' folds away the names past 'shown'; 'all %d'
+ * opens the whole list), shown, intro (an optional sentence under the
+ * heading), class. Prints nothing below the floor.
+ */
+function kop_article_names_box(array $names, array $args = array()) {
+    if (kop_article_names_total($names) < KOP_ARTICLE_NAMES_FLOOR) {
+        return;
+    }
+    $heading = isset($args['heading']) ? $args['heading'] : 'In this article';
+    $args    = array_merge(array(
+        'heading' => $heading,
+        'more'    => 'and %d more',
+        'shown'   => KOP_ARTICLE_NAMES_SHOWN,
+        'intro'   => '',
+        'class'   => '',
+        'id'      => 'kop-names-' . sanitize_title($heading),
+    ), $args);
+    $labels = array('programs' => 'Programs', 'people' => 'People', 'companies' => 'Companies');
+
+    echo '<aside class="kop-names ' . esc_attr($args['class']) . '" aria-labelledby="' . esc_attr($args['id']) . '">';
+    echo '<h2 class="kop-names__title" id="' . esc_attr($args['id']) . '">' . esc_html($args['heading']) . '</h2>';
+    if ($args['intro'] !== '') {
+        echo '<p class="kop-names__intro">' . esc_html($args['intro']) . '</p>';
+    }
+    echo '<div class="kop-names__lists">';
+    foreach ($labels as $group => $label) {
+        $items = (array) (isset($names[$group]) ? $names[$group] : array());
+        if (!$items) {
+            continue;
+        }
+        $head = array_slice($items, 0, (int) $args['shown']);
+        $rest = array_slice($items, (int) $args['shown']);
+        echo '<section class="kop-names__group kop-names__group--' . esc_attr($group) . '">';
+        echo '<h3 class="kop-names__label">' . esc_html($label) . ' <span class="kop-names__count">' . count($items) . '</span></h3>';
+        echo '<ul class="kop-names__list">';
+        foreach ($head as $item) {
+            echo '<li><a href="' . esc_url(kop_article_names_url($group, $item)) . '">' . esc_html($item['name']) . '</a></li>';
+        }
+        echo '</ul>';
+        if ($rest) {
+            // "all N" opens the whole list, "and N more" only what is left.
+            $n = strpos($args['more'], 'all') === 0 ? count($items) : count($rest);
+            echo '<details class="kop-names__more"><summary>' . esc_html(sprintf($args['more'], $n)) . '</summary><ul class="kop-names__list">';
+            foreach ($rest as $item) {
+                echo '<li><a href="' . esc_url(kop_article_names_url($group, $item)) . '">' . esc_html($item['name']) . '</a></li>';
+            }
+            echo '</ul></details>';
+        }
+        echo '</section>';
+    }
+    echo '</div></aside>';
+}
+
+/** The hub box's sentence: "59 programs, 24 people and 27 companies from these pages are on the network map." */
+function kop_article_names_section_intro(array $names) {
+    $parts = array();
+    foreach (array('programs', 'people', 'companies') as $group) {
+        $n = count((array) (isset($names[$group]) ? $names[$group] : array()));
+        if ($n > 0) {
+            $parts[] = kop_article_names_count_label($group, $n);
+        }
+    }
+    if (!$parts) {
+        return '';
+    }
+    $last = array_pop($parts);
+    $list = $parts ? implode(', ', $parts) . ' and ' . $last : $last;
+    return $list . ' from these pages are on the network map.';
+}

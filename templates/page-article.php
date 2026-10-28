@@ -242,15 +242,38 @@ while (have_posts()) :
             </div>
         <?php endif; ?>
 
-        <?php if ($kop_art['toc']) : ?>
-            <details class="kop-article-toc" open>
-                <summary>Contents</summary>
-                <ol>
-                    <?php foreach ($kop_art['toc'] as $item) : ?>
-                        <li class="kop-toc-l<?php echo (int) $item[2]; ?>"><a href="#<?php echo esc_attr($item[0]); ?>"><?php echo esc_html($item[1]); ?></a></li>
-                    <?php endforeach; ?>
-                </ol>
-            </details>
+        <?php
+        // "In this article": the programs, people and companies the page
+        // names, found by matching the network map's names against it.
+        // Only the history pages print it, and only with three names or
+        // more. inc/article-parts.php.
+        $kop_art_names = array();
+        if (function_exists('kop_article_names')) {
+            $kop_art_trail = kop_article_trail(get_post_field('post_name', get_the_ID()));
+            if ($kop_art_trail && $kop_art_trail[0]['slug'] === 'history') {
+                $kop_art_names = kop_article_names(get_the_ID());
+            }
+        }
+        $kop_art_has_names = $kop_art_names && kop_article_names_total($kop_art_names) >= KOP_ARTICLE_NAMES_FLOOR;
+        ?>
+        <?php if ($kop_art['toc'] || $kop_art_has_names) : ?>
+            <div class="kop-article-aids<?php echo ($kop_art['toc'] && $kop_art_has_names) ? ' kop-article-aids--pair' : ''; ?>">
+                <?php if ($kop_art['toc']) : ?>
+                    <details class="kop-article-toc" open>
+                        <summary>Contents</summary>
+                        <ol>
+                            <?php foreach ($kop_art['toc'] as $item) : ?>
+                                <li class="kop-toc-l<?php echo (int) $item[2]; ?>"><a href="#<?php echo esc_attr($item[0]); ?>"><?php echo esc_html($item[1]); ?></a></li>
+                            <?php endforeach; ?>
+                        </ol>
+                    </details>
+                <?php endif; ?>
+                <?php
+                if ($kop_art_has_names) {
+                    kop_article_names_box($kop_art_names, array('heading' => 'In this article'));
+                }
+                ?>
+            </div>
         <?php endif; ?>
 
         <?php

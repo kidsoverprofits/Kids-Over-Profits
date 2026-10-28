@@ -329,6 +329,21 @@ while (have_posts()) :
             </div>
         <?php endif; ?>
 
+        <?php
+        // "In this section": the programs, people and companies the
+        // section's articles name (history hub; inc/article-parts.php).
+        if (!empty($kop_hub_config['names_from']) && $kop_hub_config['names_from'] === 'section'
+            && function_exists('kop_article_names_section')) {
+            $kop_hub_names = kop_article_names_section(kop_article_sequence($kop_hub_slug));
+            kop_article_names_box($kop_hub_names, array(
+                'heading' => 'In this section',
+                'more'    => 'all %d',
+                'intro'   => kop_article_names_section_intro($kop_hub_names),
+                'class'   => 'kop-names--hub',
+            ));
+        }
+        ?>
+
         <?php if ($kop_hub_module) : ?>
             <div class="kop-hub-modules<?php echo $kop_hub_content ? '' : ' kop-hub-modules--lead'; ?>">
                 <?php call_user_func($kop_hub_module); ?>
