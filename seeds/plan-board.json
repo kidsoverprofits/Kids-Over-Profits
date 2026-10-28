@@ -1,6 +1,6 @@
 {
- "built": "2026-10-28 18:49 UTC",
- "source": "c8b91a9c3a8c7a99e1b8e97c73bb4434b86acb75",
+ "built": "2026-10-28 18:51 UTC",
+ "source": "1262498a6b054951ea218cd89c7db41722b9a714",
  "sections": [
   {
    "key": "2",
@@ -1535,14 +1535,6 @@
        "ask": "",
        "date": "2026-10-26",
        "hash": "3f9ec93f3cad"
-      },
-      {
-       "id": "5:test-facility-discovery-php-3-checks-fail-on-main",
-       "lead": "test-facility-discovery.php: 3 checks fail on main",
-       "text": "**test-facility-discovery.php: 3 checks fail on main** (found 2026-10-28, the same on unchanged HEAD): \"known names ... closure programs are added\" (Three Points Ranch), \"a name decided before is not asked again\", \"a name held for want of a place is asked again\". Likely mirror drift (Three Points Ranch now resolves); fix the fixtures.",
-       "ask": "",
-       "date": "2026-10-28",
-       "hash": "555adcb8a4f5"
       },
       {
        "id": "5:found-2026-10-28-while-fixing-items-2-5-of-that-day",
