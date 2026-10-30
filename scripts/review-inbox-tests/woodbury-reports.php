@@ -113,7 +113,7 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
         && kop_wb_parse_target('ya:0') === null && kop_wb_clean_token('ya:x') === '' && kop_wb_target_token('ya', 6) === 'ya:6'
         && kop_wb_target_token('consultant', 6) === '');
     $place = kop_wb_place(6, 'Test Program', 0, false, 'ya');
-    $check('woodbury-reports: a young adult program place links its card', $place['key'] === 'ya:6' && strpos($place['page'], '/young-adult-programs/#kop-ya-program-6') !== false,
+    $check('woodbury-reports: a young adult program place links its page', $place['key'] === 'ya:6' && $place['page'] === kop_ya_url(6) && strpos($place['page'], '/related/young-adult-programs/') !== false,
         wp_json_encode($place));
     $consultant = kop_wb_place(0, 'A Consultant', 0, true, 'consultant');
     $check('woodbury-reports: a consultant place still has no page or key', $consultant['page'] === '' && $consultant['key'] === '');
@@ -135,7 +135,7 @@ function kop_rinbox_test_woodbury_reports(array $src, array $item, callable $che
             ($mya['value'] ?? '') === 'ya:' . $prog['id'] && $mfile['params'][0]['value'] === array()
             && strpos($mit['text'], 'now the young adult program ' . $prog['name']) !== false, wp_json_encode($mya));
         $mp = kop_wb_place((int) $mr['facility_id'], $mr['facility_name'], 0, true, 'facility');
-        $check('woodbury-reports: pages filed under it before it moved link the program\'s card', strpos($mp['page'], '#kop-ya-program-' . $prog['id']) !== false, $mp['page']);
+        $check('woodbury-reports: pages filed under it before it moved link the program\'s page', $mp['page'] === kop_ya_url($prog['id']), $mp['page']);
     }
     $check('woodbury-reports: names say which are young adult programs', kop_rinbox_wb_names(array($place, kop_wb_place(4, 'Co', 0, false, 'company')))
         === 'Test Program (young adult program), Co (company)');

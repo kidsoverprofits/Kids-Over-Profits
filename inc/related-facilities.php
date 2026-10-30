@@ -46,6 +46,38 @@ function kop_related_categories() {
             'one'   => 'young adult program',
             'intro' => 'Programs for people 18 and older. They are not troubled teen programs, but many are run by the same companies, take graduates of teen programs, or market themselves to the same parents.',
         ),
+        'psychiatric-hospitals' => array(
+            'kind'  => 'psych',
+            'label' => 'Acute Psychiatric Inpatient',
+            'one'   => 'psychiatric hospital or ward',
+            'intro' => 'Psychiatric hospitals and inpatient psych wards that hold people for short stays in a crisis. They are not troubled teen programs, but companies that run teen residential treatment run many of them too, and teenagers are sent on from them to programs.',
+        ),
+        'nursing-homes' => array(
+            'kind'  => 'nursing',
+            'label' => 'Nursing Homes',
+            'one'   => 'nursing home',
+            'intro' => 'Long-term care homes for elderly and disabled adults. They are not troubled teen programs; they are listed where the same companies, owners or investors run both.',
+        ),
+        'disability-group-homes' => array(
+            'kind'  => 'idd',
+            'label' => 'I/DD Group Homes',
+            'one'   => 'group home for adults with intellectual or developmental disabilities',
+            'intro' => 'Group homes for adults with intellectual and developmental disabilities. They are not troubled teen programs; they are listed where the same companies, owners or staff run both.',
+        ),
+        'indian-boarding-schools' => array(
+            'kind'  => 'ibs',
+            'label' => 'Indian Boarding Schools',
+            'one'   => 'Indian boarding school',
+            'intro' => 'Federal and church-run boarding schools that Native children were sent to, many of them by force.',
+            // Its records are still in indigenous_schools (inc/indigenous-schools.php): the list goes to that page until they move here.
+            'page'  => '/indian-boarding-schools/',
+        ),
+        'foster-care' => array(
+            'kind'  => 'foster',
+            'label' => 'Foster Care',
+            'one'   => 'foster care agency or home',
+            'intro' => 'Foster homes and the agencies that place children in them. Foster care is not the troubled teen industry, but the same agencies often run both, and children in foster care are sent to its programs.',
+        ),
     );
 }
 
@@ -54,10 +86,22 @@ function kop_related_category($slug) {
     return isset($all[$slug]) ? $all[$slug] : null;
 }
 
-/** finder kind => category slug ('cra' => 'christian-adult-rehabs'). */
+/**
+ * finder kind => category slug ('cra' => 'christian-adult-rehabs'). A
+ * category whose records are still on a page of their own has no kind yet.
+ */
 function kop_related_kinds() {
     $out = array();
-    foreach (kop_related_categories() as $slug => $c) $out[$c['kind']] = $slug;
+    foreach (kop_related_categories() as $slug => $c) {
+        if (empty($c['page'])) $out[$c['kind']] = $slug;
+    }
+    return $out;
+}
+
+/** finder kind => what one record is called in a sentence ("nursing home"), for the record finder and filing. */
+function kop_related_kind_words() {
+    $out = array();
+    foreach (kop_related_kinds() as $kind => $slug) $out[$kind] = kop_related_category($slug)['one'];
     return $out;
 }
 
@@ -160,12 +204,38 @@ function kop_related_save($category, array $raw, $id = 0, array $opts = array())
 function kop_related_get($id, array $opts = array()) {
     if (!kop_facility_is_related_id($id) || (empty($opts['pdo']) && !kop_related_ready())) return null;
     $opts = kop_related_opts($opts);
-    $rows = kop_facility_db_rows('SELECT id, category, review, unique_name, json_data FROM related_facilities WHERE id = ?', array((int) $id), $opts);
+    $rows = kop_facility_db_rows('SELECT id, category, review, unique_name, json_data, created_at, updated_at FROM related_facilities WHERE id = ?', array((int) $id), $opts);
     if (!$rows) return null;
-    $doc = json_decode((string) $rows[0]['json_data'], true);
+    return kop_related_rec($rows[0]);
+}
+
+/** A table row as {id, category, review, unique_name, doc, created_at, updated_at}, or null when its document does not read. */
+function kop_related_rec(array $row) {
+    $doc = json_decode((string) $row['json_data'], true);
     if (!is_array($doc)) return null;
-    return array('id' => (int) $rows[0]['id'], 'category' => (string) $rows[0]['category'], 'review' => (string) $rows[0]['review'],
-        'unique_name' => (string) $rows[0]['unique_name'], 'doc' => $doc);
+    return array('id' => (int) $row['id'], 'category' => (string) $row['category'], 'review' => (string) ($row['review'] ?? 'approved'),
+        'unique_name' => (string) ($row['unique_name'] ?? ''), 'doc' => $doc,
+        'created_at' => (string) ($row['created_at'] ?? ''), 'updated_at' => (string) ($row['updated_at'] ?? ''));
+}
+
+/**
+ * Write a record at a given id (a move from another table that keeps its
+ * numbers, kop_ya_move_to_related()). Refuses an id that is taken.
+ */
+function kop_related_insert_at($category, array $raw, $id, $review = 'approved', array $opts = array()) {
+    $opts = kop_related_opts($opts);
+    $id = (int) $id;
+    if (!kop_facility_is_related_id($id) || !kop_related_category($category)) throw new RuntimeException('Not a related record id or category.');
+    if (kop_facility_db_rows('SELECT id FROM related_facilities WHERE id = ?', array($id), $opts)) throw new RuntimeException('Record #' . $id . ' is taken.');
+    $doc = kop_facility_normalize($raw, $opts);
+    $doc['facility_id'] = $id;
+    $doc['identification']['nameKey'] = kop_facility_name_key($doc['identification']['name']);
+    $unique = kop_facility_allocate_unique_name($doc, $opts);
+    $doc['provenance']['uniqueName'] = $unique;
+    kop_facility_db_exec('INSERT INTO related_facilities (id, category, review, unique_name, json_data) VALUES (?, ?, ?, ?, ?)',
+        array($id, $category, $review === 'pending' ? 'pending' : 'approved', $unique, kop_facility_json_encode($doc)), $opts);
+    kop_related_flush();
+    return $id;
 }
 
 /**
@@ -176,7 +246,7 @@ function kop_related_get($id, array $opts = array()) {
 function kop_related_all($category = '', array $opts = array(), $review = 'approved') {
     if (empty($opts['pdo']) && !kop_related_ready()) return array();
     $opts = kop_related_opts($opts);
-    $sql = 'SELECT id, category, review, name, city, state, country, status, start_year, end_year, json_data FROM related_facilities';
+    $sql = 'SELECT id, category, review, unique_name, name, city, state, country, status, start_year, end_year, json_data, created_at, updated_at FROM related_facilities';
     $where = array();
     $params = array();
     if ($category !== '') {
@@ -250,8 +320,7 @@ function kop_related_delete($id, array $opts = array()) {
     if (!kop_facility_is_related_id($id)) return false;
     $opts = kop_related_opts($opts);
     kop_facility_db_exec('DELETE FROM related_facilities WHERE id = ?', array((int) $id), $opts);
-    kop_facility_db_exec('DELETE FROM ' . kop_facility_table('operator_facilities', $opts) . ' WHERE facility_id = ?', array((int) $id), $opts);
-    foreach (array('news_facility_links', 'lawsuit_facility_links') as $t) {
+    foreach (array(kop_facility_table('operator_facilities', $opts), 'news_facility_links', 'lawsuit_facility_links') as $t) {
         try { kop_facility_db_exec("DELETE FROM {$t} WHERE facility_id = ?", array((int) $id), $opts); } catch (Throwable $e) {}
     }
     kop_related_flush();
@@ -388,6 +457,10 @@ function kop_related_route() {
     list($cat, $slug) = kop_related_requested();
     if ($cat === '') return;
     $category = kop_related_category($cat);
+    if ($category && !empty($category['page'])) {   // records still on their own page (see kop_related_categories())
+        wp_safe_redirect(home_url($category['page']), 302);
+        exit;
+    }
     if ($category && $slug === '') {
         $GLOBALS['kop_related_list'] = array('category' => $cat) + $category;
         status_header(200);

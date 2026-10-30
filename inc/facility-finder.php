@@ -173,24 +173,19 @@ add_action('wp_ajax_kop_facility_finder', function () {
     unset($r);
     // "Any record": companies, consultants, providers and transporters too, each as "<kind>:<id>".
     $others = array_values(array_diff($kinds, array('facility')));
-    // Young adult programs (18+): their own table in the records DB, "ya:<id>".
+    // Young adult programs (18+): their records in related_facilities (inc/young-adult-programs.php), "ya:<id>".
     if (($kinds === array('all') || in_array('ya', $kinds, true)) && function_exists('kop_ya_pdo') && mb_strlen($q) >= 2) {
         try {
             $ypdo = kop_ya_pdo();
             if ($ypdo && kop_ya_ready($ypdo)) {
-                $like = '%' . addcslashes($q, '\\%_') . '%';
-                $st = $ypdo->prepare('SELECT id, name, city, state FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT 8');
-                $st->execute(array($like, $like));
-                $ya_rows = $st->fetchAll(PDO::FETCH_ASSOC);
-                // Initials find a program too ("OPI" for Optimum Performance Institute).
-                $have = array_column($ya_rows, 'id');
-                foreach (kop_ya_all($ypdo, null) as $y) {
-                    if (!in_array($y['id'], $have) && kop_ya_is_initials_of($q, $y)) $ya_rows[] = $y;
-                }
+                // By name, other name or initials ("OPI" for Optimum Performance Institute).
+                $ya_rows = array_slice(array_values(array_filter(kop_ya_all($ypdo, null), function ($y) use ($q) {
+                    return mb_stripos($y['name'], $q) !== false || mb_stripos($y['other_names'], $q) !== false || kop_ya_is_initials_of($q, $y);
+                })), 0, 8);
                 foreach ($ya_rows as $y) {
                     $results[] = array('id' => (int) $y['id'], 'token' => 'ya:' . (int) $y['id'], 'kind' => 'ya', 'name' => (string) $y['name'],
                         'label' => 'Young adult program (18+)', 'detail' => implode(', ', array_filter(array((string) $y['city'], (string) $y['state']))),
-                        'url' => home_url('/young-adult-programs/#kop-ya-program-' . (int) $y['id']));
+                        'url' => kop_ya_url((int) $y['id']));
                 }
             }
         } catch (Throwable $e) {
@@ -291,8 +286,8 @@ function kop_facility_finder_print_assets() {
             var kinds = (box.getAttribute('data-kop-record-kinds') || '').trim();
             var anyKind = kinds !== '';
             var create = (box.getAttribute('data-kop-record-create') || '').split(',').map(function (k) { return k.trim(); }).filter(Boolean);
-            var words = { facility: 'program', company: 'company', consultant: 'educational consultant', provider: 'mental health provider',
-                transporter: 'transporter', marketer: 'marketing company', tradeorg: 'trade organization', ya: 'young adult program' };
+            // What each kind is called (kop_record_field_kind_words(), the related categories' kinds too).
+            var words = <?php echo wp_json_encode(function_exists('kop_record_field_kind_words') ? kop_record_field_kind_words() : array('facility' => 'program', 'company' => 'company')); ?>;
             var named = kinds === '' || kinds === 'all' ? '' : kinds.split(',').map(function (k) { return words[k.trim()] || k.trim(); }).join(' or ');
             q.placeholder = named ? 'Find a ' + named + (create.length ? ', or type a new name' : '') + '…'
                 : anyKind ? 'Find a program, company, consultant…' : 'Find by name…';

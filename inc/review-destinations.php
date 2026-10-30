@@ -139,8 +139,7 @@ function kop_rdest_take_back_young_adult(array $done) {
         kop_ya_delete($pdo, (int) $prog['id']);
         return;
     }
-    $pdo->prepare('UPDATE young_adult_programs SET links = ?, updated_at = ? WHERE id = ?')->execute(array(implode("
-", $left), kop_ya_now(), (int) $prog['id']));
+    kop_ya_write($pdo, (int) $prog['id'], array('links' => implode("\n", $left)));
 }
 
 /** Choices for "Indian boarding schools": a school on file, or the schools in general (0). */

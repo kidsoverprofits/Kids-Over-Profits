@@ -4,10 +4,14 @@
  * college support and treatment programs for people 18 and older, kept
  * apart from the troubled teen industry's facility records.
  *
- * They are not in facilities_v2, so they appear on no facility page,
- * directory, hub, map, search or open-data download. They are listed on
- * /young-adult-programs/ (templates/page-young-adult-programs.php) and
- * managed at KOP Tools > Young Adult Programs (inc/young-adult-programs-admin.php).
+ * Since 2026-10-28 each is a record of the Young Adult Programs category in
+ * related_facilities (inc/related-facilities.php): a facility document, never
+ * in facilities_v2, so on no TTI directory, hub, map, state list or count. Its
+ * page is the facility page at /related/young-adult-programs/<slug>/, with its
+ * company, news, lawsuits, filings and documents linked as a facility's; that
+ * list replaces /young-adult-programs/. Managed at KOP Tools > Young Adult
+ * Programs (inc/young-adult-programs-admin.php). The functions below keep the
+ * old row shape (kop_ya_row()) for the code that files things on a program.
  *
  * Most come from Woodbury Reports: the "Young adult programs (18+)" tab of
  * KOP Tools > Woodbury Facts creates a record here, or adds to one, and the
@@ -15,15 +19,12 @@
  * also fill an empty field (opened, closed, ages, other names, run by,
  * described as); Undo on Woodbury Facts takes back exactly that.
  *
- * Table, in the records database (kop_seed_pdo(), where news_submissions is):
- *   young_adult_programs  one row per program; review = 'approved' (listed)
- *                         or 'pending'; facts = JSON list of
- *                         {key, group, label, cites: [{label, number, page, url}], by, at};
- *                         document_folder_id = its FileBird folder, made the
- *                         first time something is filed under it
- *                         (kop_wbc_existing_target('ya', id), under "Young
- *                         Adult Programs"), or the facility-era folder of a
- *                         program moved out of the facility records
+ * Each program's row from the old young_adult_programs table (still in the
+ * records database, read by nothing after the move, kop_ya_move_to_related())
+ * is kept on its record under legacy.ya; facts = list of
+ * {key, group, label, cites: [{label, number, page, url}], by, at}, each also
+ * placed on the document where a facility's would be (kop_ya_fact_entry()).
+ * Ids: KOP_RELATED_FIRST_ID + the old id (kop_ya_id() takes either).
  *
  * Notes are written in the page-text format (inc/page-text.php).
  */
@@ -34,6 +35,8 @@ if (!defined('ABSPATH')) {
 
 define('KOP_YA_DB_VERSION', '2');
 define('KOP_YA_PAGE', 'young-adult-programs');
+// Its records' category in related_facilities (kop_related_categories()).
+define('KOP_YA_CATEGORY', 'young-adult-programs');
 // The media library folder each program's own folder is made under.
 define('KOP_YA_FOLDER_PARENT', 'Young Adult Programs');
 
@@ -41,57 +44,33 @@ function kop_ya_pdo() {
     return function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
 }
 
-/** The table, created once per version (MySQL). */
-function kop_ya_install(PDO $pdo) {
-    if (get_option('kop_ya_db') === KOP_YA_DB_VERSION) {
-        return;
-    }
-    $pdo->exec("CREATE TABLE IF NOT EXISTS young_adult_programs (
-        id INT NOT NULL AUTO_INCREMENT,
-        name VARCHAR(255) NOT NULL,
-        name_key VARCHAR(191) NOT NULL,
-        other_names TEXT NULL,
-        city VARCHAR(100) NOT NULL DEFAULT '',
-        state VARCHAR(100) NOT NULL DEFAULT '',
-        country VARCHAR(100) NOT NULL DEFAULT '',
-        ages VARCHAR(100) NOT NULL DEFAULT '',
-        program_type VARCHAR(255) NOT NULL DEFAULT '',
-        run_by VARCHAR(255) NOT NULL DEFAULT '',
-        opened SMALLINT NULL,
-        closed SMALLINT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'Unknown',
-        notes TEXT NULL,
-        links TEXT NULL,
-        facts LONGTEXT NULL,
-        review VARCHAR(20) NOT NULL DEFAULT 'approved',
-        source VARCHAR(255) NOT NULL DEFAULT '',
-        created_by VARCHAR(100) NOT NULL DEFAULT '',
-        created_at DATETIME NOT NULL,
-        updated_at DATETIME NOT NULL,
-        document_folder_id BIGINT UNSIGNED NULL,
-        PRIMARY KEY (id),
-        UNIQUE KEY name_key (name_key),
-        KEY review (review)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    // Version 2: the document folder, on a table made before it.
-    if (!$pdo->query("SHOW COLUMNS FROM young_adult_programs LIKE 'document_folder_id'")->fetch()) {
-        $pdo->exec('ALTER TABLE young_adult_programs ADD COLUMN document_folder_id BIGINT UNSIGNED NULL');
-    }
-    update_option('kop_ya_db', KOP_YA_DB_VERSION);
+/** The store's options for a program, on $pdo (inc/related-facilities.php). */
+function kop_ya_opts(PDO $pdo = null) {
+    return kop_related_opts($pdo ? array('pdo' => $pdo) : array());
 }
 
-/** The program's card on /young-adult-programs/. */
+/**
+ * A program's id: its related_facilities id. A number from before the move
+ * (1 to 999, the young_adult_programs id still held by Woodbury Facts, Fornits,
+ * folder links and moved-record maps) is that plus KOP_RELATED_FIRST_ID.
+ */
+function kop_ya_id($id) {
+    $id = (int) $id;
+    return ($id > 0 && $id < 1000) ? KOP_RELATED_FIRST_ID + $id : $id;
+}
+
+/** The table (related_facilities); the old young_adult_programs table is no longer made. */
+function kop_ya_install(PDO $pdo = null) {
+    if (function_exists('kop_related_install')) kop_related_install();
+}
+
 function kop_ya_url($id) {
-    return home_url('/' . KOP_YA_PAGE . '/#kop-ya-program-' . (int) $id);
+    $url = function_exists('kop_related_url') ? kop_related_url(kop_ya_id($id)) : '';
+    return $url !== '' ? $url : home_url('/' . kop_related_base() . '/' . KOP_YA_CATEGORY . '/');
 }
 
-function kop_ya_ready(PDO $pdo) {
-    try {
-        $pdo->query('SELECT 1 FROM young_adult_programs LIMIT 1');
-        return true;
-    } catch (PDOException $e) {
-        return false;
-    }
+function kop_ya_ready(PDO $pdo = null) {
+    return function_exists('kop_related_ready') && kop_related_ready();
 }
 
 function kop_ya_now() {
@@ -154,6 +133,242 @@ function kop_ya_parse_links($text) {
     return $out;
 }
 
+/* ---- The record and its row ------------------------------------------- */
+
+/**
+ * A record as the row the rest of the code reads (the columns the old
+ * young_adult_programs table had): name, other_names, city, state, country,
+ * ages, program_type, run_by, opened, closed, status, notes, links, facts
+ * (JSON), review, source, created_by, created_at, updated_at,
+ * document_folder_id. What has no field of its own on a facility document
+ * (the ages as written, the free notes and links, the facts with their
+ * citations) is kept in the document's legacy.ya.
+ */
+function kop_ya_row(array $rec) {
+    $doc = $rec['doc'];
+    $ya = (array) ($doc['legacy']['ya'] ?? array());
+    $ident = (array) ($doc['identification'] ?? array());
+    $loc = (array) ($doc['location'] ?? array());
+    $op = (array) ($doc['operatingPeriod'] ?? array());
+    $country = (string) ($loc['country'] ?? '');
+    $name = (string) ($ident['name'] ?? '');
+    return array(
+        'id'                 => (int) $rec['id'],
+        'name'               => $name,
+        'name_key'           => kop_ya_key($name),
+        'other_names'        => implode("\n", array_map('strval', (array) ($ident['otherNames'] ?? array()))),
+        'city'               => (string) ($loc['city'] ?? ''),
+        'state'              => (string) ($loc['state'] ?? ''),
+        'country'            => strcasecmp($country, 'United States') === 0 ? '' : $country,
+        'ages'               => (string) ($ya['ages'] ?? ''),
+        'program_type'       => (string) ($ya['program_type'] ?? ($doc['facilityDetails']['type'] ?? '')),
+        'run_by'             => (string) ($ident['currentOperator'] ?? ''),
+        'opened'             => isset($op['startYear']) && $op['startYear'] !== null ? (int) $op['startYear'] : null,
+        'closed'             => isset($op['endYear']) && $op['endYear'] !== null ? (int) $op['endYear'] : null,
+        'status'             => in_array($op['status'] ?? '', array('Open', 'Closed'), true) ? $op['status'] : 'Unknown',
+        'notes'              => (string) ($ya['notes'] ?? ''),
+        'links'              => (string) ($ya['links'] ?? ''),
+        'facts'              => wp_json_encode(array_values((array) ($ya['facts'] ?? array()))),
+        'review'             => (string) ($rec['review'] ?? 'approved'),
+        'source'             => (string) ($ya['source'] ?? ''),
+        'created_by'         => (string) ($ya['created_by'] ?? ''),
+        'created_at'         => (string) ($ya['created_at'] ?? ($rec['created_at'] ?? '')),
+        'updated_at'         => (string) ($rec['updated_at'] ?? ''),
+        'document_folder_id' => !empty($doc['documentFolderId']) ? (int) $doc['documentFolderId'] : null,
+    );
+}
+
+/** A fact's citation as a facility note writes it: "Woodbury Reports, March 2009 (#175), p. 18". */
+function kop_ya_cite_text(array $c) {
+    if (!empty($c['cite'])) return (string) $c['cite'];
+    return 'Woodbury Reports, ' . trim((string) ($c['label'] ?? '')) . (!empty($c['number']) ? ' (' . $c['number'] . ')' : '') . ', p. ' . (int) ($c['page'] ?? 0);
+}
+
+/**
+ * Where a fact goes on the facility document, so the record's page prints it
+ * as a facility's: a person under staff.notableStaff with its source, an
+ * incident under criticalIncidents.customIncidents and history or details
+ * under notes, each line ending with its first citation ("(Woodbury Reports,
+ * March 2009 (#175), p. 18: https://...)"). Returns {path, entry}.
+ */
+function kop_ya_fact_entry(array $f) {
+    $cite = (array) (($f['cites'] ?? array())[0] ?? array());
+    $src = $cite ? kop_ya_cite_text($cite) : '';
+    $url = preg_match('#^https?://#i', (string) ($cite['url'] ?? '')) ? (string) $cite['url'] : '';
+    $label = trim(preg_replace('/ \(sets [^()]*\)$/', '', (string) ($f['label'] ?? '')));
+    if (($f['group'] ?? '') === 'staff') {
+        $jobs = '';
+        if (preg_match('/^(.*?)\. Earlier: (.+)$/s', $label, $m)) {
+            $label = $m[1];
+            $jobs = trim($m[2]);
+        }
+        $parts = array_map('trim', explode(',', $label, 2));
+        $entry = array('name' => $parts[0], 'role' => $parts[1] ?? '', 'pastJobs' => $jobs);
+        if ($src !== '') $entry['source'] = $src;
+        if ($url !== '') $entry['sourceUrl'] = $url;
+        return array('path' => 'staff.notableStaff', 'entry' => $entry);
+    }
+    if ($src !== '') $label = kop_ya_fact_text($label) . ' (' . $src . ($url !== '' ? ': ' . $url : '') . ')';
+    return array('path' => ($f['group'] ?? '') === 'incident' ? 'criticalIncidents.customIncidents' : 'notes', 'entry' => $label);
+}
+
+/** The list at a dotted path of the document, by reference. */
+function &kop_ya_doc_list(array &$doc, $path) {
+    $ref = &$doc;
+    foreach (explode('.', $path) as $k) {
+        if (!isset($ref[$k]) || !is_array($ref[$k])) $ref[$k] = array();
+        $ref = &$ref[$k];
+    }
+    return $ref;
+}
+
+/** Take one entry off a list: the same one, else (a person merged with another copy) the same name and role. */
+function kop_ya_doc_take(array &$doc, array $placed) {
+    $list = &kop_ya_doc_list($doc, $placed['path']);
+    $want = $placed['entry'];
+    foreach ($list as $i => $have) {
+        if (kop_facility_same_document(is_array($have) ? $have : array($have), is_array($want) ? $want : array($want))) {
+            array_splice($list, $i, 1);
+            return true;
+        }
+    }
+    if (is_array($want)) {
+        foreach ($list as $i => $have) {
+            if (is_array($have) && kop_ya_key($have['name'] ?? '') === kop_ya_key($want['name'] ?? '') && kop_ya_key($have['role'] ?? '') === kop_ya_key($want['role'] ?? '')) {
+                array_splice($list, $i, 1);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/** Free notes as the facility document's note lines: one per paragraph. */
+function kop_ya_note_paragraphs($text) {
+    return array_values(array_filter(array_map('trim', preg_split('/\n\s*\n/', str_replace("\r", '', (string) $text))), 'strlen'));
+}
+
+/**
+ * Set row columns on a facility document (kop_ya_row() the other way). Notes,
+ * links and facts change only what they put there before: an entry added on
+ * the record's page by hand stays.
+ */
+function kop_ya_doc_set(array $doc, array $set) {
+    $ya = (array) ($doc['legacy']['ya'] ?? array());
+    $str = static function ($v) { return trim((string) $v); };
+    foreach ($set as $col => $v) {
+        switch ($col) {
+            case 'name':
+                $doc['identification']['name'] = kop_ya_clean_name($v);
+                break;
+            case 'other_names':
+                $doc['identification']['otherNames'] = array_values(array_unique(array_map('kop_ya_clean_name', kop_ya_lines($v))));
+                break;
+            case 'city':
+                $doc['location']['city'] = $str($v);
+                break;
+            case 'state':
+                $code = $str($v) !== '' && function_exists('kop_facility_state_code') ? kop_facility_state_code($v) : null;
+                $doc['location']['state'] = $code;
+                break;
+            case 'country':
+                $doc['location']['country'] = $str($v) !== '' ? $str($v) : null;
+                break;
+            case 'ages':
+                $ya['ages'] = $str($v);
+                $min = $max = null;
+                if (preg_match('/^(\d{2})\s*(?:-|to|–)\s*(\d{2})$/u', $ya['ages'], $m)) {
+                    $min = (int) $m[1];
+                    $max = (int) $m[2];
+                } elseif (preg_match('/^(\d{2})\s*(?:\+|and older|and up|or older)/i', $ya['ages'], $m)) {
+                    $min = (int) $m[1];
+                }
+                $doc['facilityDetails']['ageRange'] = array('min' => $min, 'max' => $max);
+                break;
+            case 'program_type':
+                $ya['program_type'] = $str($v);
+                $doc['facilityDetails']['type'] = mb_strlen($ya['program_type']) <= 120 ? $ya['program_type'] : '';
+                break;
+            case 'run_by':
+                $doc['identification']['currentOperator'] = $str($v);
+                break;
+            case 'opened':
+            case 'closed':
+                $doc['operatingPeriod'][$col === 'opened' ? 'startYear' : 'endYear'] = ($v === null || $v === '') ? null : (int) $v;
+                break;
+            case 'status':
+                $doc['operatingPeriod']['status'] = in_array($v, array('Open', 'Closed'), true) ? $v : 'Unknown';
+                break;
+            case 'notes':
+                $old = kop_ya_note_paragraphs($ya['notes'] ?? '');
+                $doc['notes'] = array_values(array_filter((array) ($doc['notes'] ?? array()), static function ($l) use ($old) { return !in_array($l, $old, true); }));
+                $ya['notes'] = (string) $v;
+                foreach (kop_ya_note_paragraphs($v) as $p) $doc['notes'][] = $p;
+                break;
+            case 'links':
+                $ya['links'] = implode("\n", kop_ya_lines($v));
+                $doc['resourceLinks'] = array_values(array_filter((array) ($doc['resourceLinks'] ?? array()), static function ($l) {
+                    return ($l['source'] ?? '') !== 'young adult programs list';
+                }));
+                foreach (kop_ya_parse_links($ya['links']) as $l) {
+                    $doc['resourceLinks'][] = array('url' => $l[1], 'label' => $l[0], 'kind' => 'other', 'source' => 'young adult programs list');
+                }
+                break;
+            case 'facts':
+                $new = is_array($v) ? $v : (json_decode((string) $v, true) ?: array());
+                $placed = (array) ($ya['placed'] ?? array());
+                $keep = array();
+                foreach ($new as $f) if (isset($f['key'])) $keep[(string) $f['key']] = true;
+                foreach ($placed as $key => $p) {
+                    if (!isset($keep[(string) $key])) {
+                        kop_ya_doc_take($doc, $p);
+                        unset($placed[$key]);
+                    }
+                }
+                foreach ($new as $f) {
+                    $key = (string) ($f['key'] ?? '');
+                    if ($key === '' || isset($placed[$key])) continue;
+                    $p = kop_ya_fact_entry($f);
+                    $list = &kop_ya_doc_list($doc, $p['path']);
+                    $list[] = $p['entry'];
+                    unset($list);
+                    $placed[$key] = $p;
+                }
+                $ya['facts'] = array_values($new);
+                $ya['placed'] = $placed;
+                break;
+            case 'source':
+            case 'created_by':
+            case 'created_at':
+                $ya[$col] = (string) $v;
+                break;
+            case 'document_folder_id':
+                $doc['documentFolderId'] = (int) $v > 0 ? (int) $v : null;
+                break;
+        }
+    }
+    $loc = $doc['location'];
+    $doc['location']['text'] = implode(', ', array_filter(array((string) $loc['city'], (string) ($loc['state'] ?: $loc['country']))));
+    $doc['legacy']['ya'] = $ya;
+    return $doc;
+}
+
+/**
+ * Write row columns ($set, as kop_ya_row() names them; 'review' too) to
+ * program $id, or make a new one ($id 0). Returns the id.
+ */
+function kop_ya_write(PDO $pdo, $id, array $set) {
+    $id = kop_ya_id($id);
+    $opts = kop_ya_opts($pdo);
+    $rec = $id ? kop_related_get($id, $opts) : null;
+    if ($id && (!$rec || $rec['category'] !== KOP_YA_CATEGORY)) {
+        throw new RuntimeException('There is no young adult program ' . (int) $id . '.');
+    }
+    $doc = kop_ya_doc_set($rec ? $rec['doc'] : kop_facility_blank_document(), $set);
+    if (isset($set['review'])) $opts['review'] = $set['review'] === 'pending' ? 'pending' : 'approved';
+    return kop_related_save(KOP_YA_CATEGORY, $doc, $rec ? $id : 0, $opts);
+}
+
 /* ---- Reading --------------------------------------------------------- */
 
 /** Every program, by name. $review: 'approved', 'pending' or null for all. */
@@ -161,18 +376,17 @@ function kop_ya_all(PDO $pdo, $review = 'approved') {
     if (!kop_ya_ready($pdo)) {
         return array();
     }
-    if ($review === null) {
-        return $pdo->query('SELECT * FROM young_adult_programs ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
+    $out = array();
+    foreach (kop_related_all(KOP_YA_CATEGORY, kop_ya_opts($pdo), $review) as $row) {
+        $rec = kop_related_rec($row);
+        if ($rec) $out[] = kop_ya_row($rec);
     }
-    $stmt = $pdo->prepare('SELECT * FROM young_adult_programs WHERE review = ? ORDER BY name');
-    $stmt->execute(array($review));
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $out;
 }
 
 function kop_ya_get(PDO $pdo, $id) {
-    $stmt = $pdo->prepare('SELECT * FROM young_adult_programs WHERE id = ?');
-    $stmt->execute(array((int) $id));
-    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $rec = kop_ya_ready($pdo) ? kop_related_get(kop_ya_id($id), kop_ya_opts($pdo)) : null;
+    return $rec && $rec['category'] === KOP_YA_CATEGORY ? kop_ya_row($rec) : null;
 }
 
 /**
@@ -236,10 +450,11 @@ function kop_ya_save(PDO $pdo, array $f, $id = 0, $by = '') {
         throw new RuntimeException('A program needs a name.');
     }
     $key = kop_ya_key($name);
-    $same = $pdo->prepare('SELECT name FROM young_adult_programs WHERE name_key = ? AND id <> ?');
-    $same->execute(array($key, (int) $id));
-    if ($taken = $same->fetchColumn()) {
-        throw new RuntimeException('There is already a young adult program called "' . $taken . '".');
+    $id = kop_ya_id($id);
+    foreach (kop_ya_all($pdo, null) as $p) {
+        if ($p['name_key'] === $key && (int) $p['id'] !== $id) {
+            throw new RuntimeException('There is already a young adult program called "' . $p['name'] . '".');
+        }
     }
     $year = static function ($v) {
         $y = is_numeric($v) ? (int) $v : 0;
@@ -248,13 +463,18 @@ function kop_ya_save(PDO $pdo, array $f, $id = 0, $by = '') {
     $str = static function ($v, $max) {
         return mb_substr(trim(preg_replace('/[ \t]+/', ' ', (string) $v)), 0, $max);
     };
-    $row = array(
+    $state = kop_ya_state($f['state'] ?? '');
+    $country = $str($f['country'] ?? '', 100);
+    if ($state !== '' && strlen($state) !== 2 && $country === '') {
+        $country = $state;   // a place outside the US given as the state
+        $state = '';
+    }
+    $set = array(
         'name'         => mb_substr($name, 0, 255),
-        'name_key'     => mb_substr($key, 0, 191),
         'other_names'  => implode("\n", array_map('kop_ya_clean_name', kop_ya_lines($f['other_names'] ?? ''))),
         'city'         => $str($f['city'] ?? '', 100),
-        'state'        => $str(kop_ya_state($f['state'] ?? ''), 100),
-        'country'      => $str($f['country'] ?? '', 100),
+        'state'        => strlen($state) === 2 ? $state : '',
+        'country'      => $country !== '' ? $country : 'United States',
         'ages'         => $str($f['ages'] ?? '', 100),
         'program_type' => $str($f['program_type'] ?? '', 255),
         'run_by'       => $str($f['run_by'] ?? '', 255),
@@ -263,29 +483,23 @@ function kop_ya_save(PDO $pdo, array $f, $id = 0, $by = '') {
         'status'       => in_array($f['status'] ?? '', array('Open', 'Closed'), true) ? $f['status'] : 'Unknown',
         'notes'        => function_exists('kop_page_text_clean') ? kop_page_text_clean($f['notes'] ?? '') : trim((string) ($f['notes'] ?? '')),
         'links'        => implode("\n", kop_ya_lines($f['links'] ?? '')),
-        'updated_at'   => kop_ya_now(),
     );
     if (isset($f['review'])) {
-        $row['review'] = $f['review'] === 'pending' ? 'pending' : 'approved';
+        $set['review'] = $f['review'] === 'pending' ? 'pending' : 'approved';
     }
     if ($id) {
-        $sets = implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($row)));
-        $pdo->prepare("UPDATE young_adult_programs SET $sets WHERE id = ?")->execute(array_merge(array_values($row), array((int) $id)));
-        return (int) $id;
+        return kop_ya_write($pdo, $id, $set);
     }
-    $row['review'] = $row['review'] ?? 'approved';
-    $row['facts'] = '[]';
-    $row['source'] = mb_substr((string) ($f['source'] ?? ''), 0, 255);
-    $row['created_by'] = mb_substr((string) $by, 0, 100);
-    $row['created_at'] = $row['updated_at'];
-    $cols = array_keys($row);
-    $pdo->prepare('INSERT INTO young_adult_programs (' . implode(', ', $cols) . ') VALUES (' . implode(', ', array_fill(0, count($cols), '?')) . ')')
-        ->execute(array_values($row));
-    return (int) $pdo->lastInsertId();
+    $set['review'] = $set['review'] ?? 'approved';
+    $set['facts'] = array();
+    $set['source'] = mb_substr((string) ($f['source'] ?? ''), 0, 255);
+    $set['created_by'] = mb_substr((string) $by, 0, 100);
+    $set['created_at'] = kop_ya_now();
+    return kop_ya_write($pdo, 0, $set);
 }
 
 function kop_ya_delete(PDO $pdo, $id) {
-    $pdo->prepare('DELETE FROM young_adult_programs WHERE id = ?')->execute(array((int) $id));
+    kop_related_delete(kop_ya_id($id), kop_ya_opts($pdo));
 }
 
 /** The fields a fact may fill when they are empty; other_names takes a new line instead. */
@@ -311,8 +525,8 @@ function kop_ya_add_fact(PDO $pdo, $id, array $fact, array $fill = array()) {
         }
     }
     $facts[] = $fact;
-    $done = array('id' => (int) $id, 'key' => $fact['key'], 'filled' => array());
-    $set = array('facts' => wp_json_encode($facts), 'updated_at' => kop_ya_now());
+    $done = array('id' => (int) $p['id'], 'key' => $fact['key'], 'filled' => array());
+    $set = array('facts' => $facts);
     foreach ($fill as $col => $value) {
         if (!in_array($col, kop_ya_fillable(), true) || $value === null || $value === '') {
             continue;
@@ -331,8 +545,7 @@ function kop_ya_add_fact(PDO $pdo, $id, array $fact, array $fill = array()) {
             $done['filled'][$col] = array('before' => $p[$col], 'value' => $value);
         }
     }
-    $sets = implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($set)));
-    $pdo->prepare("UPDATE young_adult_programs SET $sets WHERE id = ?")->execute(array_merge(array_values($set), array((int) $id)));
+    kop_ya_write($pdo, $p['id'], $set);
     return $done;
 }
 
@@ -342,8 +555,7 @@ function kop_ya_remove_fact(PDO $pdo, array $done) {
     if (!$p) {
         return;
     }
-    $facts = array_values(array_filter(kop_ya_facts($p), function ($f) use ($done) { return ($f['key'] ?? '') !== $done['key']; }));
-    $set = array('facts' => wp_json_encode($facts), 'updated_at' => kop_ya_now());
+    $set = array('facts' => array_values(array_filter(kop_ya_facts($p), function ($f) use ($done) { return ($f['key'] ?? '') !== $done['key']; })));
     foreach ((array) ($done['filled'] ?? array()) as $col => $d) {
         if ($col === 'other_names') {
             $set['other_names'] = implode("\n", array_values(array_filter(kop_ya_lines($p['other_names']), function ($l) use ($d) {
@@ -353,8 +565,7 @@ function kop_ya_remove_fact(PDO $pdo, array $done) {
             $set[$col] = $d['before'];
         }
     }
-    $sets = implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($set)));
-    $pdo->prepare("UPDATE young_adult_programs SET $sets WHERE id = ?")->execute(array_merge(array_values($set), array((int) $done['id'])));
+    kop_ya_write($pdo, $p['id'], $set);
 }
 
 /** Take one fact off by its key (the admin screen). Returns the fact, or null. */
@@ -372,10 +583,96 @@ function kop_ya_drop_fact(PDO $pdo, $id, $key) {
             $keep[] = $f;
         }
     }
-    $pdo->prepare('UPDATE young_adult_programs SET facts = ?, updated_at = ? WHERE id = ?')
-        ->execute(array(wp_json_encode($keep), kop_ya_now(), (int) $id));
+    kop_ya_write($pdo, $p['id'], array('facts' => $keep));
     return $gone;
 }
+
+/* ---- The move into related_facilities (2026-10-28) ---------------------- */
+
+/**
+ * Each young_adult_programs row as a record of the Young Adult Programs
+ * category at id KOP_RELATED_FIRST_ID + its id: its fields, its facts placed
+ * where a facility's go (kop_ya_fact_entry()), the row itself under
+ * legacy.ya, and, when its "run by" is a company on file by that exact name,
+ * that company's link (as a facility's). A row already moved is left alone.
+ * The old table is not changed (read by nothing after this). Returns the log.
+ */
+function kop_ya_move_to_related(PDO $pdo) {
+    global $wpdb;
+    $log = array();
+    try {
+        $rows = $pdo->query('SELECT * FROM young_adult_programs ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return array('No young_adult_programs table: nothing to move.');
+    }
+    $opts = kop_ya_opts($pdo);
+    $ops = array();
+    try {
+        $st = $pdo->query('SELECT id, name, unique_name FROM ' . (isset($wpdb->prefix) ? $wpdb->prefix : 'wpdl_') . 'kop_operators');
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $o) {
+            foreach (array($o['name'], $o['unique_name']) as $n) if (trim((string) $n) !== '') $ops[mb_strtolower(trim($n))] = (int) $o['id'];
+        }
+    } catch (PDOException $e) {
+        // No company table here.
+    }
+    foreach ($rows as $r) {
+        $id = KOP_RELATED_FIRST_ID + (int) $r['id'];
+        if ((int) $r['id'] >= 1000) {
+            $log[] = "Program {$r['id']} ({$r['name']}): its id is past the reserved range; not moved.";
+            continue;
+        }
+        if (kop_related_get($id, $opts)) {
+            $log[] = "Program {$r['id']} ({$r['name']}) is record $id already.";
+            continue;
+        }
+        $doc = kop_facility_blank_document();
+        $doc['location']['country'] = 'United States';
+        $set = $r;
+        unset($set['id'], $set['name_key'], $set['updated_at'], $set['review']);
+        if (trim((string) $r['country']) === '' && trim((string) $r['state']) !== '' && strlen(trim((string) $r['state'])) !== 2) {
+            $set['country'] = $r['state'];
+            $set['state'] = '';
+        } elseif (trim((string) $r['country']) === '') {
+            unset($set['country']);
+        }
+        $set['facts'] = json_decode((string) $r['facts'], true) ?: array();
+        $doc = kop_ya_doc_set($doc, $set);
+        $doc['provenance']['source'] = 'young_adult_programs';
+        $doc['provenance']['legacyIds'] = array((int) $r['id']);
+        kop_related_insert_at(KOP_YA_CATEGORY, $doc, $id, (string) $r['review'], $opts);
+        $line = "Program {$r['id']} ({$r['name']}) is record $id.";
+        $op = $ops[mb_strtolower(trim((string) $r['run_by']))] ?? 0;
+        if ($op) {
+            kop_related_link_operator($id, $op, $r['status'] === 'Closed' ? 'past' : 'current', $opts);
+            $line .= " Linked to company $op ({$r['run_by']}).";
+        }
+        $log[] = $line;
+    }
+    return $log;
+}
+
+/** Version 1, once (the owner, 2026-10-28): the move above; log in kop_ya_related_log. */
+function kop_ya_maybe_move_to_related() {
+    $version = '1';
+    if (get_option('kop_ya_related_moved') === $version || !function_exists('kop_related_install')) {
+        return;
+    }
+    $pdo = kop_ya_pdo();
+    if (!$pdo) {
+        return;
+    }
+    update_option('kop_ya_related_moved', $version);
+    try {
+        kop_related_install();
+        $log = kop_ya_move_to_related($pdo);
+        do_action('litespeed_purge_all');
+    } catch (Throwable $e) {
+        $log = array('Stopped: ' . $e->getMessage());
+        update_option('kop_ya_related_moved', '');
+    }
+    update_option('kop_ya_related_log', array('time' => time(), 'lines' => $log), false);
+}
+add_action('admin_init', 'kop_ya_maybe_move_to_related', 19);
 
 /* ---- Moving a facility record here ------------------------------------ */
 
@@ -580,14 +877,13 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '', array $o = array
             foreach ($article_lines as $line) {
                 if (!in_array($line, $links, true)) $links[] = $line;
             }
-            $pdo->prepare('UPDATE young_adult_programs SET other_names = ?, links = ?, updated_at = ? WHERE id = ?')
-                ->execute(array(implode("\n", $others), implode("\n", $links), kop_ya_now(), $yid));
+            kop_ya_write($pdo, $yid, array('other_names' => implode("\n", $others), 'links' => implode("\n", $links)));
         } elseif ($article_lines) {
-            $pdo->prepare('UPDATE young_adult_programs SET links = ?, updated_at = ? WHERE id = ?')
-                ->execute(array(implode("\n", $article_lines), kop_ya_now(), $yid));
+            kop_ya_write($pdo, $yid, array('links' => implode("\n", $article_lines)));
         }
         if ($folder > 0) {
-            $pdo->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ? AND (document_folder_id IS NULL OR document_folder_id = 0)')->execute(array($folder, $yid));
+            $now = kop_ya_get($pdo, $yid);
+            if ($now && !(int) $now['document_folder_id']) kop_ya_write($pdo, $yid, array('document_folder_id' => $folder));
         }
         $all = kop_ya_facts(kop_ya_get($pdo, $yid));
         $keys = array_column($all, 'key');
@@ -596,7 +892,7 @@ function kop_ya_move_facility(PDO $pdo, $facility_id, $by = '', array $o = array
                 $all[] = $f;
             }
         }
-        $pdo->prepare('UPDATE young_adult_programs SET facts = ?, updated_at = ? WHERE id = ?')->execute(array(wp_json_encode($all), kop_ya_now(), $yid));
+        kop_ya_write($pdo, $yid, array('facts' => $all));
 
         foreach (array($t['facility_locations'], $t['operator_facilities'], $t['identity']) as $table) {
             $pdo->prepare("DELETE FROM `{$table}` WHERE facility_id = ?")->execute(array($fid));
@@ -858,7 +1154,7 @@ function kop_ya_maybe_link_and_move() {
             } elseif (!$live($link[1])) {
                 $log[] = "Folder {$link[1]} is gone; program $yid gets a new one when something is filed.";
             } else {
-                $pdo->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ?')->execute(array((int) $link[1], $yid));
+                kop_ya_write($pdo, $yid, array('document_folder_id' => (int) $link[1]));
                 $log[] = "Program $yid ({$p['name']}) has folder {$link[1]}.";
             }
         }
@@ -945,7 +1241,8 @@ function kop_ya_maybe_later_moves() {
                     continue;
                 }
                 $yid = kop_ya_move_facility($pdo, $fid, 'migration', array('articles' => 'links'));
-                $pdo->prepare("UPDATE young_adult_programs SET ages = ? WHERE id = ? AND ages = ''")->execute(array($ages, $yid));
+                $now = kop_ya_get($pdo, $yid);
+                if ($now && $now['ages'] === '') kop_ya_write($pdo, $yid, array('ages' => $ages));
                 $log[] = "Moved facility record $fid ($name) to young adult program $yid.";
             } catch (Throwable $e) {
                 $log[] = "Facility record $fid ($want) not moved: " . $e->getMessage();
@@ -1161,13 +1458,20 @@ function kop_ya_render_public() {
     echo "</div>\n";
 }
 
+/** /young-adult-programs/ is the category's list now (/related/young-adult-programs/); a card's #anchor rides along. */
+add_action('template_redirect', function () {
+    if (is_admin() || !function_exists('is_page') || !is_page(KOP_YA_PAGE) || !function_exists('kop_related_category_url')) return;
+    wp_safe_redirect(kop_related_category_url(KOP_YA_CATEGORY), 301);
+    exit;
+}, 5);
+
 add_action('admin_init', function () {
     $pdo = kop_ya_pdo();
     if ($pdo) {
         try {
             kop_ya_install($pdo);
         } catch (Throwable $e) {
-            error_log('young_adult_programs install: ' . $e->getMessage());
+            error_log('related_facilities install: ' . $e->getMessage());
         }
     }
 });
@@ -1185,7 +1489,8 @@ function kop_ya_moved_from_map(PDO $pdo = null) {
     $memo = array();
     $pdo = $pdo ?: kop_ya_pdo();
     if (!$pdo || !kop_ya_ready($pdo)) return $memo;
-    foreach ($pdo->query("SELECT id, name, source FROM young_adult_programs WHERE source LIKE 'Moved from facility record %'")->fetchAll(PDO::FETCH_ASSOC) as $p) {
+    foreach (kop_ya_all($pdo, null) as $p) {
+        if (strpos((string) $p['source'], 'Moved from facility record ') !== 0) continue;
         if (preg_match('/facility record (\d+)/', (string) $p['source'], $m)) $memo[(int) $m[1]] = array('id' => (int) $p['id'], 'name' => (string) $p['name']);
     }
     // Records moved into a program they did not make (kop_ya_move_facility()).

@@ -355,6 +355,10 @@ require_once dirname(__DIR__) . '/inc/inspection-highlights.php';
 require_once dirname(__DIR__) . '/inc/news-images.php';
 require_once dirname(__DIR__) . '/inc/heal-archive.php';   // facility pages route heal-online.org links to Wayback
 require_once dirname(__DIR__) . '/inc/facility-pages.php';
+// Related-category records (related_facilities; kop_test_related_table(), scripts/kop-test-related.php, makes the table).
+if (!function_exists('add_rewrite_rule')) { function add_rewrite_rule() {} }
+if (!function_exists('flush_rewrite_rules')) { function flush_rewrite_rules() {} }
+require_once dirname(__DIR__) . '/inc/related-facilities.php';
 require_once dirname(__DIR__) . '/inc/profile-notes.php';
 require_once dirname(__DIR__) . '/inc/facility-eras.php';
 require_once dirname(__DIR__) . '/inc/operator-pages.php';
@@ -369,3 +373,6 @@ require_once dirname(__DIR__) . '/inc/network-map.php';
 require_once dirname(__DIR__) . '/inc/reporting-directory.php';
 // Facility and company prose links its first mentions to our pages.
 require_once dirname(__DIR__) . '/inc/content-links.php';
+
+// kop_test_related_table(): the related_facilities table for a test (and the young adult programs moved in).
+require_once __DIR__ . '/kop-test-related.php';

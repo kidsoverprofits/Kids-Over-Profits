@@ -658,11 +658,9 @@ function kop_dp_ya_search($q, $limit = 5) {
     if (!$pdo || mb_strlen($q) < 2 || !kop_ya_ready($pdo)) {
         return array();
     }
-    $like = '%' . str_replace(array('\\', '%', '_'), array('\\\\', '\%', '\_'), $q) . '%';
-    $stmt = $pdo->prepare('SELECT id, name, city, state FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT ' . (int) $limit);
-    $stmt->execute(array($like, $like));
     $out = array();
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $p) {
+    // Their records in related_facilities (inc/related-facilities.php).
+    foreach (kop_related_search(KOP_YA_CATEGORY, $q, $limit, kop_ya_opts($pdo)) as $p) {
         $out[] = array('value' => 'y:' . (int) $p['id'], 'kind' => 'Young adult program', 'label' => (string) $p['name'],
             'meta' => implode(' · ', array_filter(array(implode(', ', array_filter(array($p['city'], $p['state']))), '#' . (int) $p['id']))));
     }

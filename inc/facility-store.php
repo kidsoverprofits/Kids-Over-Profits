@@ -2109,12 +2109,13 @@ if (!function_exists('kop_facility_allocate_id')) {
      */
     function kop_facility_allocate_id($unique_name, array $opts = array()) {
         $facilities = kop_facility_table('facilities', $opts);
-        // Related records are numbered from KOP_RELATED_FIRST_ID up, so the shared link tables
-        // (operators, news, lawsuits, filings, documents) tell them apart by id alone.
+        // Related records are numbered above KOP_RELATED_FIRST_ID, so the shared link tables
+        // (operators, news, lawsuits, filings, documents) tell them apart by id alone. The first
+        // thousand keep the young adult programs' old numbers (inc/young-adult-programs.php, kop_ya_id()).
         if (!empty($opts['related'])) {
             $rows = kop_facility_db_rows("SELECT MAX(id) AS m FROM {$facilities}", array(), $opts);
             $max = ($rows && $rows[0]['m'] !== null) ? (int)$rows[0]['m'] : 0;
-            return max($max, KOP_RELATED_FIRST_ID) + 1;
+            return max($max, KOP_RELATED_FIRST_ID + 1000) + 1;
         }
         $identity = kop_facility_table('identity', $opts);
         $max = 99999;

@@ -65,7 +65,11 @@ $pdo->exec('CREATE TEMP TABLE wpdl_kop_nonprofit_links (id INTEGER PRIMARY KEY A
     operator_id INTEGER NOT NULL DEFAULT 0, created_by TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL)');
 
 echo "-- Records --\n";
-$check('two categories, each with its finder kind', kop_related_kinds() === array('cra' => 'christian-adult-rehabs', 'ya' => 'young-adult-programs'));
+$check('seven categories; each but Indian boarding schools (still on their page) has its finder kind', count(kop_related_categories()) === 7
+    && kop_related_kinds() === array('cra' => 'christian-adult-rehabs', 'ya' => 'young-adult-programs', 'psych' => 'psychiatric-hospitals',
+        'nursing' => 'nursing-homes', 'idd' => 'disability-group-homes', 'foster' => 'foster-care'), wp_json_encode(kop_related_kinds()));
+$check('the record finder and filing name each kind', kop_record_field_kind_words()['cra'] === 'Christian rehab for adults'
+    && kop_record_field_kind_words()['nursing'] === 'nursing home');
 $id = kop_related_save('christian-adult-rehabs', array(
     'identification'  => array('name' => 'Test Adult Teen Challenge Men\'s Center', 'currentOperator' => 'Teen Challenge', 'otherNames' => array('Test ATC Men')),
     'locationDetails' => array('city' => 'Springfield', 'state' => 'MO', 'country' => 'United States'),
@@ -147,6 +151,35 @@ unset($GLOBALS['kop_related_list']);
 $check('the category list has both approved records by state', strpos($lhtml, 'Missouri') !== false && strpos($lhtml, 'Colorado') !== false
     && strpos($lhtml, 'Test Pending Rehab') === false && strpos($lhtml, '2 on record.') !== false);
 $check('the list names the company with its page', strpos($lhtml, 'Run by <a href=') !== false);
+
+echo "-- Young adult programs moved in --\n";
+require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
+$old = $pdo->query('SELECT * FROM main.young_adult_programs ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$log = kop_ya_move_to_related($pdo);
+$moved = kop_ya_all($pdo, null);
+$want = array_map(function ($r) { return KOP_RELATED_FIRST_ID + (int) $r['id']; }, $old);
+$have = array_column($moved, 'id');
+sort($want);
+sort($have);
+$check('every program is a record at its old id + ' . KOP_RELATED_FIRST_ID, $have === $want, implode(' | ', array_slice($log, 0, 3)));
+$same = 0;
+$diff = array();
+foreach ($old as $r) {
+    $p = kop_ya_get($pdo, (int) $r['id']);
+    $ok = $p && $p['name'] === $r['name'] && $p['other_names'] === (string) $r['other_names'] && $p['city'] === $r['city'] && $p['ages'] === $r['ages']
+        && $p['program_type'] === $r['program_type'] && $p['run_by'] === $r['run_by'] && $p['status'] === $r['status'] && $p['notes'] === (string) $r['notes']
+        && $p['links'] === (string) $r['links'] && $p['review'] === $r['review'] && (int) $p['opened'] === (int) $r['opened'] && (int) $p['closed'] === (int) $r['closed']
+        && json_decode($p['facts'], true) == (json_decode((string) $r['facts'], true) ?: array()) && (int) $p['document_folder_id'] === (int) $r['document_folder_id'];
+    if ($ok) $same++; else $diff[] = $r['id'] . ' ' . $r['name'];
+}
+$check('each reads back as its old row (old ids still find it)', $same === count($old), implode('; ', $diff));
+$opi = kop_ya_find_by_name($pdo, 'OPI');
+$orec = $opi ? kop_related_get($opi['id']) : null;
+$check('its facts are on the document where a facility\'s go', $orec && count($orec['doc']['staff']['notableStaff']) >= 10 && $orec['doc']['notes']);
+$data = $opi ? kop_facility_page_data((int) $opi['id']) : null;
+$check('its page is the facility page, under Young Adult Programs', $data && $data['related']['label'] === 'Young Adult Programs' && count($data['staff']) > 0);
+$check('a program run by a company on file is linked to it (Embark Behavioral Health)', (bool) preg_grep('/Linked to company \d+ \(Embark/', $log));
+$check('the move runs once', count(preg_grep('/is record \d+ already/', kop_ya_move_to_related($pdo))) === count($old));
 
 echo "-- Delete --\n";
 kop_related_delete($id2);

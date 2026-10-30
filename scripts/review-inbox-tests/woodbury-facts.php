@@ -377,7 +377,7 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
             kop_rinbox_test_skip('woodbury-facts: Undo of a young adult pick', $e->getMessage());
         }
     });
-    $ya->prepare('DELETE FROM young_adult_programs WHERE id = ?')->execute(array($yid));
+    kop_ya_delete($ya, $yid);
 }
 
 /**

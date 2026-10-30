@@ -81,6 +81,8 @@ function kop_seed_pdo() { return $GLOBALS['pdo']; }
 require_once dirname(__DIR__) . '/inc/woodbury-mentions.php';
 require_once dirname(__DIR__) . '/inc/woodbury-create.php';
 require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
+// Their records: related_facilities, the mirror's programs moved in as on the site (kop_ya_move_to_related()).
+kop_test_related_table($pdo, true);
 require_once dirname(__DIR__) . '/inc/inline-edit.php';
 require_once dirname(__DIR__) . '/inc/doc-placement.php';
 
@@ -199,7 +201,9 @@ $yp = $pdo->query("SELECT id, name FROM young_adult_programs WHERE review = 'app
 if (!$yp) {
     echo "SKIP no young adult program in the mirror\n";
 } else {
-    $yid = (int) $yp['id'];
+    // Its record (old id + KOP_RELATED_FIRST_ID), with no folder yet, as the old copy started.
+    $yid = kop_ya_id((int) $yp['id']);
+    kop_ya_write($pdo, $yid, array('document_folder_id' => 0));
     $hits = kop_dp_ya_search($yp['name']);
     $check('"Move to" finds a young adult program by name', in_array('y:' . $yid, array_column($hits, 'value'), true)
         && ($hits[0]['kind'] ?? '') === 'Young adult program', wp_json_encode($hits[0] ?? null));
@@ -207,7 +211,7 @@ if (!$yp) {
     $parent = (string) $pdo->query('SELECT p.name FROM wpdl_fbv f JOIN wpdl_fbv p ON p.id = f.parent WHERE f.id = ' . (int) $t[0])->fetchColumn();
     $check('its folder is made under "Young Adult Programs" and kept on the program', $t[0] > 0 && $t[2] === true && $parent === KOP_YA_FOLDER_PARENT
         && (int) kop_ya_get($pdo, $yid)['document_folder_id'] === $t[0], $parent);
-    $check('the move links its card', strpos(kop_dp_target_url('y:' . $yid), '#kop-ya-program-' . $yid) !== false);
+    $check('the move links its page', kop_dp_target_url('y:' . $yid) === kop_ya_url($yid) && strpos(kop_ya_url($yid), '/related/young-adult-programs/') !== false);
     $before = $filed($woodbury_doc);
     $res = kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'move', 'dp_rows' => array('r:' . $sub['sub']), 'dp_target' => 'y:' . $yid, 'dp_keep_sub' => true));
     $now = $filed($woodbury_doc);

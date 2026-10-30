@@ -25,6 +25,7 @@ if (!file_exists($db_path) || !file_exists($facts_path)) {
 
 require __DIR__ . '/kop-test-harness.php';
 require_once dirname(__DIR__) . '/inc/facility-finder.php';
+require_once dirname(__DIR__) . '/inc/related-facilities.php';
 require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
 require_once dirname(__DIR__) . '/inc/woodbury-facts.php';
 require_once dirname(__DIR__) . '/inc/woodbury-mentions.php';
@@ -38,11 +39,8 @@ $check = function ($label, $ok, $detail = '') use (&$failures) {
 
 $ya = new PDO('sqlite::memory:');
 $ya->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$ya->exec("CREATE TABLE young_adult_programs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, name_key TEXT NOT NULL UNIQUE,
-    other_names TEXT, city TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT '', country TEXT NOT NULL DEFAULT '', ages TEXT NOT NULL DEFAULT '',
-    program_type TEXT NOT NULL DEFAULT '', run_by TEXT NOT NULL DEFAULT '', opened INTEGER, closed INTEGER, status TEXT NOT NULL DEFAULT 'Unknown',
-    notes TEXT, links TEXT, facts TEXT, review TEXT NOT NULL DEFAULT 'approved', source TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '',
-    created_at TEXT NOT NULL, updated_at TEXT NOT NULL, document_folder_id INTEGER)");
+// Programs are records of the Young Adult Programs category (inc/related-facilities.php).
+kop_test_related_table($ya);
 function kop_seed_pdo() { return $GLOBALS['kop_test_ya_pdo']; }
 $GLOBALS['kop_test_ya_pdo'] = $ya;
 $strip = function ($row) { unset($row['updated_at']); return $row; };
@@ -95,11 +93,11 @@ $made = $fb->query('SELECT f.name, p.name AS parent, p.parent AS top FROM wpdl_f
 $check('filing under a program makes its folder, under "Young Adult Programs"', $t['kind'] === 'ya' && $made
     && $made['name'] === 'Echo Springs Transition Study Center' && $made['parent'] === KOP_YA_FOLDER_PARENT && (int) $made['top'] === 0, wp_json_encode($made));
 $check('the folder is kept on the program', (int) kop_ya_get($ya, $id)['document_folder_id'] === $t['folder']);
-$check('the target links the program\'s card', $t['url'] === kop_ya_url($id) && strpos($t['url'], '#kop-ya-program-' . $id) !== false, $t['url']);
+$check('the target links the program\'s page', $t['url'] === kop_ya_url($id) && strpos($t['url'], '/related/young-adult-programs/') !== false, $t['url']);
 $n = $folders();
 $again = kop_wbc_existing_target('ya', $id);
 $check('the next filing uses the same folder', $again['folder'] === $t['folder'] && $folders() === $n);
-$ya->prepare('UPDATE young_adult_programs SET document_folder_id = 9999 WHERE id = ?')->execute(array($id));
+kop_ya_write($ya, $id, array('document_folder_id' => 9999));
 $gone = kop_wbc_existing_target('ya', $id);
 $check('a folder that is gone is replaced (by the one of its name)', $gone['folder'] === $t['folder'] && (int) kop_ya_get($ya, $id)['document_folder_id'] === $t['folder']);
 $refused = '';
@@ -160,10 +158,17 @@ foreach ($card as $r) {
     }
 }
 $check("a whole card goes on a program ($program, " . count($card) . ' items)', count(kop_ya_facts(kop_ya_get($ya, $id2))) === count($card) && !$refused);
+$rdoc = kop_related_get(kop_ya_id($id2))['doc'];
+$placed = count($rdoc['staff']['notableStaff']) + count($rdoc['notes']) + count((array) ($rdoc['criticalIncidents']['customIncidents'] ?? array()));
+$check('each fact is on the record\'s document where a facility\'s goes (people, notes, incidents)', $placed > 0 && $placed <= count($card)
+    && count($rdoc['legacy']['ya']['placed']) === count($card), $placed . ' placed of ' . count($card));
 foreach (array_reverse($dones) as $d) {
     kop_ya_remove_fact($ya, $d);
 }
 $check('and undoing every item gives back the program exactly', $strip(kop_ya_get($ya, $id2)) == $before);
+$rdoc = kop_related_get($id2)['doc'];
+$check('and leaves nothing on the record\'s document', !$rdoc['staff']['notableStaff'] && !$rdoc['notes'] && empty($rdoc['criticalIncidents']['customIncidents']),
+    wp_json_encode(array($rdoc['staff']['notableStaff'], $rdoc['notes'])));
 
 echo "-- The page --\n";
 $closed = array('pkey' => 'c1', 'grp' => 'history', 'op' => 'set_closed', 'path' => 'operatingPeriod', 'value' => json_encode(array('endYear' => 2011)),
@@ -178,9 +183,9 @@ function kop_filebird_folder_shortcode($atts) {
     return (int) $atts['folder_id'] === 78 ? '<p class="no-documents">No documents found in this folder.</p>'
         : '<div class="kop-document-folder" data-test-folder="' . (int) $atts['folder_id'] . '"><ul class="doc-list doc-layout-grid"><li class="doc-item">A document</li></ul></div>';
 }
-$ya->prepare('UPDATE young_adult_programs SET document_folder_id = 77 WHERE id = ?')->execute(array($id));
+kop_ya_write($ya, $id, array('document_folder_id' => 77));
 $empty = kop_ya_save($ya, array('name' => 'Empty Folder Program', 'state' => 'UT'), 0, 'tester');
-$ya->prepare('UPDATE young_adult_programs SET document_folder_id = 78 WHERE id = ?')->execute(array($empty));
+kop_ya_write($ya, $empty, array('document_folder_id' => 78));
 ob_start();
 kop_ya_render_public();
 $html = ob_get_clean();
@@ -218,7 +223,7 @@ $check('a choice made by hand wins over the build', kop_wbf_ya_for('Nobody', tru
 echo "-- Old /facility/ addresses of moved records --\n";
 require_once dirname(__DIR__) . '/inc/facility-pages.php';
 $moved = kop_ya_save($ya, array('name' => 'Dragonfly Transitions', 'state' => 'OR', 'other_names' => 'Dragonfly Transitions Lodge'), 0, 'tester');
-$ya->prepare('UPDATE young_adult_programs SET source = ? WHERE id = ?')->execute(array('Moved from facility record 100165', $moved));
+kop_ya_write($ya, $moved, array('source' => 'Moved from facility record 100165'));
 $card = kop_ya_url($moved);
 $check('the old slug goes to the card', kop_ya_moved_facility_target('dragonfly-transitions-or', 0, $ya) === $card);
 $check('an other name\'s slug goes to the card', kop_ya_moved_facility_target('dragonfly-transitions-lodge-or', 0, $ya) === $card);

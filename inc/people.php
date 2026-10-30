@@ -598,7 +598,7 @@ if (!function_exists('kop_people_record_label')) {
             'tradeorg'   => 'SELECT id, unique_name AS name FROM tradeorgs_master',
             'lawsuit'    => 'SELECT id, case_name AS name FROM lawsuits',
             'memorial'   => 'SELECT id, name, program AS extra FROM memorial_victims',
-            'youngadult' => 'SELECT id, name, state AS extra FROM young_adult_programs',
+            'youngadult' => "SELECT id, name, state AS extra FROM related_facilities WHERE category = 'young-adult-programs'",
             'wiki'       => 'SELECT id, program_name AS name FROM wiki_submissions',
             'journalist' => 'SELECT id, name, outlet AS extra FROM journalists',
         );
@@ -778,7 +778,8 @@ if (!function_exists('kop_people_named_sources')) {
             $add('memorial', $r['id'], 'victim', (string) $r['name'], (string) $r['program'], 'harmed', true);
         }
         // Young adult programs: the staff their Woodbury items name ("Karen Armstrong, Owner (2009)").
-        foreach (kop_people_source_rows("SELECT id, facts FROM young_adult_programs WHERE review = 'approved' ORDER BY id", $opts) as $r) {
+        // Their facts are kept on the record under legacy.ya (inc/young-adult-programs.php, kop_ya_row()).
+        foreach (kop_people_source_rows("SELECT id, JSON_EXTRACT(json_data, '$.legacy.ya.facts') AS facts FROM related_facilities WHERE category = 'young-adult-programs' AND review = 'approved' ORDER BY id", $opts) as $r) {
             foreach ((array) json_decode((string) $r['facts'], true) as $f) {
                 if (is_array($f) && ($f['group'] ?? '') === 'staff') $line('youngadult', $r['id'], 'staff', (string) ($f['label'] ?? ''));
             }

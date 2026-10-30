@@ -73,8 +73,8 @@ function kop_rinbox_test_nonprofit_filings(array $src, array $item, callable $ch
         return;
     }
     $card = kop_rinbox_npf_item($ein, $cands[$ein]);
-    $check('nonprofit-filings: a matched card offers Link with its record filled in, Link to a company, Not this program, each with its help',
-        array_column($card['actions'], 'id') === array('link', 'link_company', 'reject') && (int) $card['actions'][0]['params'][0]['value'] === $fid
+    $check('nonprofit-filings: a matched card offers Link with its record filled in, Link to a company, Link to a Christian rehab for adults, Not this program, each with its help',
+        array_column($card['actions'], 'id') === array('link', 'link_company', 'link_related', 'reject') && (int) $card['actions'][0]['params'][0]['value'] === $fid
         && !array_filter($card['actions'], function ($a) { return empty($a['help']); }), json_encode(array_column($card['actions'], 'id')));
 
     // The checks below start from no links and no decision on the sample: earlier queues' checks in the same run

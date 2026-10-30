@@ -171,6 +171,9 @@ $shape_ok = function (array $it) {
     return '';
 };
 
+// Young adult programs are records in related_facilities: the table, and the copied rows moved in as on the site.
+if (function_exists('kop_ya_move_to_related')) kop_test_related_table($pdo, true);
+
 $sources = kop_rinbox_sources(true);
 $check('sources are registered', count($sources) > 0, implode(', ', array_keys($sources)));
 

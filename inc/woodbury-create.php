@@ -63,7 +63,8 @@ function kop_wbc_kinds() {
  * Woodbury Facts, not here).
  */
 function kop_wbc_target_kinds() {
-    return kop_wbc_kinds() + array('ya' => 'Young adult program (18+)', 'cra' => 'Christian rehab for adults');
+    return kop_wbc_kinds() + array('ya' => 'Young adult program (18+)')
+        + (function_exists('kop_related_kind_words') ? array_map('ucfirst', kop_related_kind_words()) : array());   // the other related categories
 }
 
 /** "TELOS RESIDENTIAL TREATMENT, LLC" -> "Telos Residential Treatment, LLC". */
@@ -736,12 +737,13 @@ function kop_wbc_find_records(PDO $pdo, $q, $limit = 15, $only = '') {
         }
     }
 
-    // Young adult programs, by name or other name (the records DB).
+    // Young adult programs, by name or other name (their records in related_facilities).
     $ya = function_exists('kop_ya_pdo') ? kop_ya_pdo() : null;
     if ($ya && kop_ya_ready($ya)) {
-        $stmt = $ya->prepare('SELECT id, name, other_names, city, state, review FROM young_adult_programs WHERE name LIKE ? OR other_names LIKE ? ORDER BY name LIMIT 20');
-        $stmt->execute(array($like, $like));
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $p) {
+        $hits = array_filter(kop_ya_all($ya, null), function ($p) use ($q) {
+            return mb_stripos($p['name'], $q) !== false || mb_stripos($p['other_names'], $q) !== false;
+        });
+        foreach (array_slice($hits, 0, 20) as $p) {
             $other = '';
             if (mb_stripos((string) $p['name'], $q) === false) {
                 foreach (kop_ya_lines($p['other_names']) as $n) {
@@ -809,9 +811,9 @@ function kop_wbc_existing_target($kind, $id) {
         $folder = kop_wbc_live_folder($p['document_folder_id']);
         if (!$folder) {
             $folder = kop_wbc_folder($p['name'], kop_wbc_folder(KOP_YA_FOLDER_PARENT, 0));
-            $ya->prepare('UPDATE young_adult_programs SET document_folder_id = ? WHERE id = ?')->execute(array($folder, $id));
+            kop_ya_write($ya, $id, array('document_folder_id' => $folder));
         }
-        return array('kind' => 'ya', 'id' => $id, 'name' => (string) $p['name'], 'folder' => $folder, 'url' => kop_ya_url($id));
+        return array('kind' => 'ya', 'id' => (int) $p['id'], 'name' => (string) $p['name'], 'folder' => $folder, 'url' => kop_ya_url($id));
     }
     $pdo = kop_wbc_pdo();
     if ($kind === 'company') {

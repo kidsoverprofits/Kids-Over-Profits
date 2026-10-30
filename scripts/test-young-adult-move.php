@@ -135,7 +135,13 @@ $GLOBALS['wpdb'] = new KOP_YA_Test_Wpdb($pdo);
 
 require_once dirname(__DIR__) . '/inc/facility-store.php';
 require_once dirname(__DIR__) . '/inc/facility-migration.php';
+// Programs are records in related_facilities (inc/related-facilities.php).
+if (!function_exists('add_rewrite_rule')) { function add_rewrite_rule() {} }
+if (!function_exists('flush_rewrite_rules')) { function flush_rewrite_rules() {} }
+require_once dirname(__DIR__) . '/inc/related-facilities.php';
 require_once dirname(__DIR__) . '/inc/young-adult-programs.php';
+require_once __DIR__ . '/kop-test-related.php';
+kop_test_related_table($pdo);
 require_once dirname(__DIR__) . '/inc/woodbury-facts.php';
 update_option('kop_ya_db', KOP_YA_DB_VERSION);
 
@@ -164,6 +170,8 @@ if ($site_moved) {
         $pdo->prepare('INSERT INTO young_adult_programs (' . implode(',', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')')
             ->execute(array_values($row));
     }
+    // And the move into related_facilities (2026-10-28), as on the site.
+    kop_ya_move_to_related($pdo);
     update_option('kop_ya_migration_log', $site_log);
     update_option('kop_ya_migrated', '1');
     $log = $site_log;
@@ -212,7 +220,7 @@ function kop_ya_test_second_pass(PDO $pdo) {
         echo "  (the mirror has none of the second copies: the pass ran on the site already)\n";
         return;
     }
-    $programs = rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs');
+    $programs = rows($pdo, "SELECT COUNT(*) FROM related_facilities WHERE category = 'young-adult-programs'");
     $total = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2');
     $article = $pdo->query("SELECT n.id, n.article_url, n.status FROM news_facility_links l JOIN news_submissions n ON n.id = l.news_id
         WHERE l.facility_id = 10612 AND n.status <> 'deleted' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
@@ -232,7 +240,7 @@ function kop_ya_test_second_pass(PDO $pdo) {
             && rows($pdo, 'SELECT COUNT(*) FROM news_facility_links WHERE facility_id = ?', array($fid)) === 0, "#$fid ($t[0]) is out of the facility tables");
         check((int) (kop_ya_moved_from_map()[$fid]['id'] ?? 0) === $t[2], "  and its Woodbury and Fornits items find program $t[2]");
     }
-    check(rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs') === $programs, 'no new program: each copy joined its program');
+    check(rows($pdo, "SELECT COUNT(*) FROM related_facilities WHERE category = 'young-adult-programs'") === $programs, 'no new program: each copy joined its program');
     check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2') === $total - count(array_filter($there)), 'every other facility is untouched');
     $fulshear = kop_ya_get($pdo, 4);
     check(in_array('Fulshear Treatment to Transition', kop_ya_lines($fulshear['other_names']), true), 'Fulshear: the copy\'s name is one of the program\'s other names');
@@ -260,7 +268,7 @@ function kop_ya_test_later_moves(PDO $pdo) {
         echo "  (the mirror has none of them: the pass ran on the site already)\n";
         return;
     }
-    $programs = rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs');
+    $programs = rows($pdo, "SELECT COUNT(*) FROM related_facilities WHERE category = 'young-adult-programs'");
     $total = rows($pdo, 'SELECT COUNT(*) FROM facilities_v2');
     kop_ya_maybe_later_moves();
     $log = get_option('kop_ya_later_log');
@@ -279,7 +287,7 @@ function kop_ya_test_later_moves(PDO $pdo) {
         echo '       opened ' . ($p['opened'] ?? '') . ', closed ' . ($p['closed'] ?? '') . ', status ' . ($p['status'] ?? '') . "\n";
         check($p && strpos(implode(' ', array_column(kop_ya_facts($p), 'label')) . ' ' . $p['notes'], 'Patrick Hawkins') !== false, '  and its staff');
     }
-    check(rows($pdo, 'SELECT COUNT(*) FROM young_adult_programs') === $programs + count(array_filter($there)), 'one new program each');
+    check(rows($pdo, "SELECT COUNT(*) FROM related_facilities WHERE category = 'young-adult-programs'") === $programs + count(array_filter($there)), 'one new program each');
     check(rows($pdo, 'SELECT COUNT(*) FROM facilities_v2') === $total - count(array_filter($there)), 'every other facility is untouched');
     update_option('kop_ya_later_log', null);
     kop_ya_maybe_later_moves();

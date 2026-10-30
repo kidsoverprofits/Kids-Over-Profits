@@ -45,8 +45,8 @@ function kop_record_field_kind_words() {
         'marketer'    => 'marketing company',
         'tradeorg'    => 'trade organization',
         'ya'          => 'young adult program',
-        'cra'         => 'Christian rehab for adults',   // inc/related-facilities.php
-    );
+    // The other categories related to the TTI ("cra" Christian rehab for adults...), inc/related-facilities.php.
+    ) + (function_exists('kop_related_kind_words') ? array_diff_key(kop_related_kind_words(), array('ya' => 1)) : array());
 }
 
 /** 'operator' (the filings' word) and 'company' are one kind. */

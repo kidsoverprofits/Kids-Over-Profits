@@ -22,8 +22,8 @@ kop_rinbox_register('young-adult-programs', function () {
         'views'    => array('hidden' => 'Hidden from the page', 'listed' => 'On the page'),
         'view_counts' => function (array $q = array()) {
             $out = array('hidden' => 0, 'listed' => 0);
-            foreach (kop_rinbox_ya_pdo()->query('SELECT review, COUNT(*) AS n FROM young_adult_programs GROUP BY review') as $r) {
-                $out[$r['review'] === 'pending' ? 'hidden' : 'listed'] += (int) $r['n'];
+            foreach (kop_ya_all(kop_rinbox_ya_pdo(), null) as $r) {
+                $out[$r['review'] === 'pending' ? 'hidden' : 'listed']++;
             }
             return $out;
         },
@@ -40,7 +40,7 @@ kop_rinbox_register('young-adult-programs', function () {
         'count'    => function () {
             $pdo = kop_ya_pdo();
             if (!$pdo || !kop_ya_ready($pdo)) return 0;
-            return (int) $pdo->query("SELECT COUNT(*) FROM young_adult_programs WHERE review = 'pending'")->fetchColumn();
+            return count(kop_ya_all($pdo, 'pending'));
         },
         'list'     => 'kop_rinbox_ya_list',
         'get'      => function ($key) {
@@ -66,20 +66,17 @@ function kop_rinbox_ya_columns() {
 }
 
 function kop_rinbox_ya_list(array $q) {
-    $pdo = kop_rinbox_ya_pdo();
-    $where = 'review ' . ($q['view'] === 'listed' ? "<> 'pending'" : "= 'pending'");
-    $params = array();
+    // Their records in related_facilities, as rows (kop_ya_row()).
+    $rows = kop_ya_all(kop_rinbox_ya_pdo(), $q['view'] === 'listed' ? 'approved' : 'pending');
     if ($q['search'] !== '') {
-        $where .= ' AND (name LIKE ? OR other_names LIKE ? OR state LIKE ? OR city LIKE ? OR run_by LIKE ?)';
-        $like = '%' . $q['search'] . '%';
-        $params = array($like, $like, $like, $like, $like);
+        $rows = array_values(array_filter($rows, function ($p) use ($q) {
+            foreach (array('name', 'other_names', 'state', 'city', 'run_by') as $c) {
+                if (mb_stripos((string) $p[$c], $q['search']) !== false) return true;
+            }
+            return false;
+        }));
     }
-    $st = $pdo->prepare("SELECT COUNT(*) FROM young_adult_programs WHERE $where");
-    $st->execute($params);
-    $total = (int) $st->fetchColumn();
-    $st = $pdo->prepare("SELECT * FROM young_adult_programs WHERE $where ORDER BY name LIMIT " . (int) $q['limit'] . ' OFFSET ' . (int) $q['offset']);
-    $st->execute($params);
-    return array('items' => array_map('kop_rinbox_ya_item', $st->fetchAll(PDO::FETCH_ASSOC)), 'total' => $total);
+    return array('items' => array_map('kop_rinbox_ya_item', array_slice($rows, (int) $q['offset'], (int) $q['limit'])), 'total' => count($rows));
 }
 
 function kop_rinbox_ya_item(array $p) {

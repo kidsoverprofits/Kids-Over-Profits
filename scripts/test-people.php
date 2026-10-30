@@ -78,6 +78,14 @@ foreach (array('facilities_v2', $prefix . 'kop_operators', $prefix . 'kop_operat
     $pdo->exec("INSERT INTO main.`$t` SELECT * FROM src.`$t`");
 }
 $pdo->exec('DETACH DATABASE src');
+// Young adult programs are records in related_facilities: the table, and the copied rows moved in as on the site.
+require_once $root . '/inc/related-facilities.php';
+require_once $root . '/inc/young-adult-programs.php';
+require_once __DIR__ . '/kop-test-related.php';
+if (!function_exists('kop_seed_pdo')) { function kop_seed_pdo() { return $GLOBALS['pdo']; } }
+if (!function_exists('wp_json_encode')) { function wp_json_encode($v, $f = 0) { return json_encode($v, $f); } }
+$GLOBALS['pdo'] = $pdo;
+kop_test_related_table($pdo, true);
 // The MySQL tables of kop_people_install(), in SQLite.
 $pdo->exec("CREATE TABLE {$prefix}kop_people (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, name_key TEXT NOT NULL,
     aliases TEXT, merged_into INTEGER, notes TEXT, pool TEXT NOT NULL DEFAULT 'industry', created_at TEXT, updated_at TEXT)");
