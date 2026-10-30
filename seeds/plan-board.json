@@ -1,6 +1,6 @@
 {
- "built": "2026-10-30 19:30 UTC",
- "source": "565bb428fde4b06727ff8ed9ae39d3fc9adcfd73",
+ "built": "2026-10-30 19:33 UTC",
+ "source": "ab2c5b6b1658082e80bc24848873dcae44c8e055",
  "sections": [
   {
    "key": "2",
@@ -981,10 +981,18 @@
       {
        "id": "4.3:spring-ridge-academy-profile-cleanup-2026-10-28-owner-a-mess",
        "lead": "Spring Ridge Academy profile cleanup (2026-10-28, owner: \"a mess\", Jeannie listed twice, \"Second Chances 2020\")",
-       "text": "**Spring Ridge Academy profile cleanup (2026-10-28, owner: \"a mess\", Jeannie listed twice, \"Second Chances 2020\")**. Done: one person entered twice on a record now prints once ([f004620b](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/f004620bfec324dd905f403461fab25e08ca4a3d)). Open: the data fixes, blocked by auto mode for production writes. The script is on the server (`~/tmp-fix-sra.php`; dry run without `apply`). The owner runs: `ssh -i ~/.ssh/kop_nixihost -p 1157 kidsover@dfw-s07.nixihost.com 'cd ~/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php ~/tmp-fix-sra.php apply'` It hides person jobs 2012/2013/2011 (Jeannie's misread HEAL \"staff list for ... Second Chances\" lines), 3200 (Suzanne's \"a Parent Liason at SRA\") and 1787/1788/3137 (Tammy Prince Behrmann's jobs dated 2025, the wiki's copy date), all undoable at KOP Tools > People > Past jobs. It merges people 1289 Suzie Courtney into 2640 Suzanne Courtney and 2160 Patty Bowman into 6917 Patti Bowman (Undo on Merge People). It rewrites the 12293 notes, giving the WWASP ties as the wiki states them: not a WWASP program, but the founder ran Lifespring seminars at WWASP programs and worked at Cross Creek. It drops the duplicate staff entries, gives Jan Moss Courtney's role as Executive Director 1998-2004 and sets the opening to 1997 (wiki + Woodbury June 2012 \"15th anniversary\"). It fixes Jeannie's entry on Cross Creek Programs (10420). After it runs: check https://kidsoverprofits.org/facility/spring-ridge-academy-az/ and then delete `~/tmp-fix-sra.php`. Still open after that: the record change queues a write-up at Review inbox > Write-ups to approve. Roles across records carry the wiki/HEAL copy date as a job year (\"(2025, r/troubledteens wiki)\", \"Second Chances (2020)\"), a pattern from the import, not one record; worth a pass over every staff list.",
+       "text": "**Spring Ridge Academy profile cleanup (2026-10-28, owner: \"a mess\", Jeannie listed twice, \"Second Chances 2020\")**. Done: one person entered twice on a record now prints once ([f004620b](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/f004620bfec324dd905f403461fab25e08ca4a3d)). Owner (subject matter expert on SRA), 2026-10-28: SRA was WWASP-affiliated; Jeannie ran Lifespring seminars at Cross Creek only, at no other WWASP program. The owner's word beats the wiki here. Open: the data fixes, blocked by auto mode for production writes. The script is on the server (`~/tmp-fix-sra.php`; dry run without `apply`). The owner runs: `ssh -i ~/.ssh/kop_nixihost -p 1157 kidsover@dfw-s07.nixihost.com 'cd ~/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php ~/tmp-fix-sra.php apply'` It hides Jeannie's person jobs 2009 (\"Wwasp\" seminars), 2011, 2012 and 2013 (the misread HEAL \"staff list for ... Second Chances\" lines), 3200 (Suzanne's \"a Parent Liason at SRA\") and Tammy Prince Behrmann's 1787/1788/3137, all undoable at KOP Tools > People > Past jobs. Her Cross Creek Programs (10420) entry becomes \"Lifespring seminar administrator (until 1995)\". It merges people 1289 Suzie Courtney into 2640 Suzanne Courtney and 2160 Patty Bowman into 6917 Patti Bowman (Undo on Merge People). It rewrites the 12293 notes: WWASP-affiliated, with Jeannie's Cross Creek seminars. It drops the duplicate staff entries, gives Jan Moss Courtney's role as Executive Director 1998-2004 and sets the opening to 1997 (wiki + Woodbury June 2012 \"15th anniversary\"). After it runs: check https://kidsoverprofits.org/facility/spring-ridge-academy-az/, delete `~/tmp-fix-sra.php`, and approve the write-up it queues at Review inbox > Write-ups to approve.",
        "ask": "",
        "date": "2026-10-28",
-       "hash": "27da15d11e96"
+       "hash": "367b76cde02a"
+      },
+      {
+       "id": "4.3:staff-years-that-were-only-a-wiki-page-s-copy-date-2026-10-3",
+       "lead": "Staff years that were only a wiki page's copy date (2026-10-30, owner: \"fix the wider problem\")",
+       "text": "**Staff years that were only a wiki page's copy date (2026-10-30, owner: \"fix the wider problem\")**. The facts build read each r/troubledteens wiki page as an issue dated by its copy (\"as of 2025-12-18\") and gave that year to everyone on it: \"Former Therapist (2025, r/troubledteens wiki)\", \"before 2025\", and past jobs dated 2025. Fixed in the build (kop-pipeline `scripts/woodbury-facts.py`: a wiki copy gives no year; HEAL's years are read from each page and stay). The one-time pass `kop_apply_staff_copy_years()` (inc/staff-copy-years.php) runs with the deploy seeds (template version 149). On the mirror it fixed 485 roles on 184 records, cleared the years of 347 past jobs and hid 34 that repeated another job at the same place. Ranges (\"2019-2025\") and HEAL years stay. Undo: roles via `kop_scy_undo()` (log in option kop_staff_copy_years_log), jobs at KOP Tools > People > Past jobs. Check after deploy: `SELECT option_value FROM wpdl_options WHERE option_name='kop_staff_copy_years_version'` = 1, and https://kidsoverprofits.org/facility/spring-ridge-academy-az/ shows Belle Shook as \"Former Therapist\". Not covered: \"Second Chances (2020)\"-type years. Those came from HEAL pages, whose years are read from the page text, so they can be real. They need the HEAL page in hand to judge.",
+       "ask": "",
+       "date": "2026-10-30",
+       "hash": "e69fde800bdf"
       }
      ]
     },
