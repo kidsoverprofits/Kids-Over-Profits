@@ -919,10 +919,20 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
         $years = array_values(array_unique(array_filter(array_map('intval', (array) ($value['years'] ?? array())))));
         sort($years);
         if ($key === '' || !$years) throw new RuntimeException('No name or year to add.');
+        // The entry with this exact name first: one person can be listed twice under names that share a key
+        // ("Trina Quinney-Packard" and "Trina Packard"), and the question asked about one of them.
+        $exact = strtolower(trim((string) ($value['name'] ?? '')));
+        $has_exact = false;
+        foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
+            foreach ((array) kop_wbf_get($doc, $path) as $s) {
+                if (is_array($s) && strtolower(trim((string) ($s['name'] ?? ''))) === $exact) $has_exact = true;
+            }
+        }
         foreach (array('staff.administrator', 'staff.notableStaff') as $path) {
             $list = &kop_wbf_ref($doc, $path);
             foreach ((array) $list as $i => $s) {
                 if (!is_array($s) || kop_wbf_person_key($s['name'] ?? '') !== $key) continue;
+                if ($has_exact && strtolower(trim((string) ($s['name'] ?? ''))) !== $exact) continue;
                 $role = trim((string) ($s['role'] ?? ''));
                 if (preg_match('/\b(1[89]\d\d|20\d\d)\b/', $role)) throw new RuntimeException('The record already gives years for ' . $s['name'] . '.');
                 $new = ($role !== '' ? $role : 'Staff') . ' (' . implode(', ', $years) . ')';

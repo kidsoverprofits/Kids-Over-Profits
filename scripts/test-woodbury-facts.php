@@ -400,6 +400,12 @@ try {
 $check('a role with years is not given more', !$more);
 kop_wbf_doc_undo($qdoc, $done);
 $check('undo gives the role back', $qdoc === $qbefore);
+$twice = array('staff' => array('administrator' => array(array('name' => 'Trina Quinney-Packard', 'role' => 'CEO (2005-2011)')),
+    'notableStaff' => array(array('name' => 'Trina Packard', 'role' => 'CEO'))), 'notes' => array());
+kop_wbf_doc_apply($twice, array('op' => 'staff_years', 'path' => 'staff', 'value' => json_encode(array('name' => 'Trina Packard', 'years' => array(2026))),
+    'label' => '', 'extra' => $qextra, 'evidence' => '[]'));
+$check('one person listed under two names: the years go to the name asked about',
+    $twice['staff']['notableStaff'][0]['role'] === 'CEO (2026)' && $twice['staff']['administrator'][0]['role'] === 'CEO (2005-2011)');
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed.\n";
 exit($failures ? 1 : 0);

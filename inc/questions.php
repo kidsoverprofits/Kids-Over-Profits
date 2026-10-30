@@ -1140,6 +1140,51 @@ function kop_q_release_held() {
     return $out;
 }
 
+/**
+ * Staff answers settled with a "yes" and a year that wrote nothing: the release
+ * on 2026-10-28 matched Trina Packard at Youth Care of Utah to her other entry
+ * ("Trina Quinney-Packard", years already given) and dropped it. Write each one
+ * again now that staff_years tries the exact name first. Once, on admin_init
+ * (option kop_q_staff_redone). Returns the counts.
+ */
+function kop_q_redo_staff() {
+    global $wpdb;
+    $out = array('rows' => 0, 'staff' => 0, 'conflict' => 0, 'failed' => array());
+    $rows = (array) $wpdb->get_results("SELECT qkey, reviewed_by FROM " . kop_q_state_table() . " WHERE status = 'settled' AND qkey LIKE '%.staff.%' AND done = '{\"nothing\":1}'", ARRAY_A);
+    foreach ($rows as $r) {
+        if (!preg_match('/^f(\d+)\.staff\.([0-9a-f]{8})$/', $r['qkey'], $m)) continue;
+        $years = array();
+        $yes = 0;
+        foreach (kop_q_tally(kop_q_rows($r['qkey'])) as $tv) {
+            if (empty($tv['value']['yes'])) continue;
+            $yes += $tv['count'];
+            if (!empty($tv['value']['year'])) $years[] = (int) $tv['value']['year'];
+        }
+        if (!$years || !($stored = kop_facility_load((int) $m[1], kop_wbf_opts()))) continue;
+        $person = null;
+        foreach (array('administrator', 'notableStaff') as $list) {
+            foreach ((array) ($stored['doc']['staff'][$list] ?? array()) as $s) {
+                if (is_array($s) && substr(md5(kop_q_text_key((string) ($s['name'] ?? ''))), 0, 8) === $m[2]) $person = $s;
+            }
+        }
+        if (!$person) continue;
+        $out['rows']++;
+        $years = array_values(array_unique($years));
+        sort($years);
+        $q = array('key' => $r['qkey'], 'record' => kop_q_facility_ref((int) $m[1], $stored['doc']));
+        try {
+            $done = kop_q_wbf_write($q, 'staff_years', 'staff', array('name' => (string) $person['name'], 'years' => $years),
+                $person['name'] . ': there in ' . implode(', ', $years), $yes, (string) $r['reviewed_by']);
+            $out[!empty($done['conflict']) ? 'conflict' : 'staff']++;
+            $wpdb->update(kop_q_state_table(), array('done' => wp_json_encode($done)), array('qkey' => $r['qkey']));
+        } catch (RuntimeException $e) {
+            $out['failed'][] = $r['qkey'] . ': ' . $e->getMessage();
+        }
+    }
+    kop_q_state_changed();
+    return $out;
+}
+
 /* ---- Route -------------------------------------------------------------- */
 
 if (function_exists('add_action')) {
@@ -1147,6 +1192,11 @@ if (function_exists('add_action')) {
         if (get_option('kop_q_released_held')) return;
         update_option('kop_q_released_held', array('at' => gmdate('c'), 'running' => 1), false);
         update_option('kop_q_released_held', array('at' => gmdate('c')) + kop_q_release_held(), false);
+    });
+    add_action('admin_init', function () {
+        if (get_option('kop_q_staff_redone')) return;
+        update_option('kop_q_staff_redone', array('at' => gmdate('c'), 'running' => 1), false);
+        update_option('kop_q_staff_redone', array('at' => gmdate('c')) + kop_q_redo_staff(), false);
     });
     add_action('init', function () {
         add_rewrite_rule('^questions/?$', 'index.php?kop_questions=1', 'top');
