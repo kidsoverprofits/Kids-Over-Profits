@@ -315,6 +315,9 @@
             try {
                 showUploadStatus(`Deleting "${projectName}"...`, 'info');
                 const payload = { projectName: projectName, action: 'delete' };
+                // The server files a state-named delete as a location profile unless told otherwise.
+                const deleteCategory = window.projects?.[projectName]?.category;
+                if (deleteCategory) payload.category = deleteCategory;
 
                 const response = await fetch(API_ENDPOINTS.SAVE_PROJECT, {
                     method: 'POST',

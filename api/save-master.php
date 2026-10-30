@@ -311,8 +311,13 @@ if (kop_v2_writes_active($pdo, $kop_v2_prefix)) {
             exit;
         }
         if ($action === 'delete') {
-            $is_location = in_array(strtoupper($projectName), array_merge($US_STATE_NAMES, $COUNTRY_NAMES), true);
-            $result = kop_v2_delete_form_project($pdo, $kop_v2_prefix, $projectName, $is_location);
+            // The override above already turned a state or country name into
+            // 'locations' unless the form said providers, so a provider project
+            // named "Montana" never deletes the Montana location profile.
+            $is_location = $category === 'locations';
+            $result = $kop_v2_facility_project
+                ? kop_v2_delete_form_project($pdo, $kop_v2_prefix, $projectName, $is_location)
+                : ['deleted' => false];
             $deleted = $result['deleted'];
             $message = $deleted ? "Project '$projectName' deleted" : '';
             if ($deleted && !empty($result['facilities_kept'])) {
