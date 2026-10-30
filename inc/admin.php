@@ -1374,6 +1374,30 @@ function kop_apply_staff_dedupe() {
     return $done;
 }
 
+/**
+ * Once per KOP_STAFF_COPY_YEARS_VERSION: take off the staff years that are only the
+ * date a wiki page was copied (inc/staff-copy-years.php, kop_scy_pass(); undo with kop_scy_undo()).
+ */
+define('KOP_STAFF_COPY_YEARS_VERSION', 1);
+function kop_apply_staff_copy_years() {
+    if ((int) get_option('kop_staff_copy_years_version', 0) >= KOP_STAFF_COPY_YEARS_VERSION || !function_exists('kop_scy_pass')) {
+        return array();
+    }
+    $pdo = kop_seed_pdo();
+    $prefix = $pdo ? kop_seed_v2_prefix($pdo) : null;
+    if (!$pdo || $prefix === null) {
+        return array();
+    }
+    try {
+        $done = kop_scy_pass(array('pdo' => $pdo, 'prefix' => $prefix));
+        update_option('kop_staff_copy_years_version', KOP_STAFF_COPY_YEARS_VERSION, false);
+        return $done;
+    } catch (Throwable $e) {
+        error_log('kop_apply_staff_copy_years: ' . $e->getMessage());
+        return array();
+    }
+}
+
 function kop_apply_facility_record_seeds() {
     $done = array();
     $path = trailingslashit(get_stylesheet_directory()) . 'seeds/facility-records.json';
@@ -2553,6 +2577,7 @@ function kop_apply_template_assignments() {
     $summary['new_facilities'] = kop_apply_new_facility_seeds();
     $summary['young_adult']  = function_exists('kop_ya_apply_seeds') ? kop_ya_apply_seeds() : array();
     $summary['staff_dedupe'] = kop_apply_staff_dedupe();
+    $summary['staff_copy_years'] = kop_apply_staff_copy_years();
     if (function_exists('kop_facility_v2_request_sync')) {
         kop_facility_v2_request_sync();   // before the write switch the seeds above edit the legacy tables
     }
@@ -2628,7 +2653,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '148';
+    $version = '149';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

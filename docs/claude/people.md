@@ -28,4 +28,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php  
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-relations.php   # details + undo, the tick through merges, relationships both sides + undo
 # kop_facility_save() folds a person listed twice under one role (kop_facility_staff_dedupe()); the one-time pass is kop_apply_staff_dedupe()
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]
+# Years that were only a wiki page's copy date ("Former Therapist (2025, r/troubledteens wiki)", jobs "before 2025") came off
+# once (inc/staff-copy-years.php, kop_apply_staff_copy_years(); kop_scy_undo() puts roles back, jobs undo at People > Past jobs)
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-copy-years.php [--list]   # rules, the pass + undo on a copy of the mirror
 ```
