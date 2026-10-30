@@ -63,7 +63,9 @@ php scripts/test-send-page.php
 (kop-send-to-kop) npx web-ext lint --source-dir .   # 1 expected warning: Firefox ignores background.service_worker
 # Signed-in reviewers get the News Processor in the extension's popup (inc/extension-news-processor.php): AI fill from the tab's text
 # (buildPrompt in api/lib-news-ai.php through kop_ai_generate_alternating), every processor field, "Publish on the site now" (admins,
-# filed approved, Undo in Recently done) or the review queue
+# filed approved, Undo in Recently done) or the review queue. A Lawsuit gets the Lawsuit Processor there too (lawsuit-form,
+# lawsuit-process, full=1 submit; CourtListener-matched, the docket page sent as source_urls); its popup is tested by the
+# Playwright harness described in kop-send-to-kop's README (no test file in either repo yet)
 # Articles keep two links: article_url = the article itself, archive_url = its archived copy (Wayback / archive.today). A Wayback link
 # given as the article splits into both (api/lib-news-archive.php == js/news-archive-links.js == the extension's archive.js); readers
 # print the title linked to the original and "(archived copy)" beside it. archive.today short links hide the address, so they stay alone
