@@ -36,7 +36,15 @@ $check('"before" the copy year comes off', kop_scy_role('Former Staff (before 20
 $check('a bare copy year comes off', kop_scy_role('Former Founder (2025)', $wiki) === 'Former Founder');
 $check('a year the source gave stays', kop_scy_role('Former Staff (before 2001, r/troubledteens wiki)', $wiki) === 'Former Staff (before 2001, r/troubledteens wiki)');
 $check('a range ending in the copy year stays', kop_scy_role('CEO (2021-2025, r/troubledteens wiki)', $wiki) === 'CEO (2021-2025, r/troubledteens wiki)');
-$check('a HEAL year stays', kop_scy_role('Therapist (2025, HEAL)', 'HEAL, staff list for X (archived 2025-07-16)') === 'Therapist (2025, HEAL)');
+$heal = 'HEAL, staff list for X (archived 2025-07-16)';
+$check('a HEAL year comes off (a retrieval date)', kop_scy_role('Therapist (2025, HEAL)', $heal) === 'Therapist');
+$check('a HEAL range comes off', kop_scy_role('Former CEO (2021-2025, HEAL)', 'r/troubledteens wiki') === 'Former CEO');
+$check('"before" a HEAL year comes off', kop_scy_role('Former Staff (before 2020, HEAL)', $heal) === 'Former Staff');
+$check('a bare year on a HEAL entry comes off', kop_scy_role('Former Psychiatrist (2021)', $heal) === 'Former Psychiatrist');
+$check('a Woodbury year stays', kop_scy_role('Former Admissions (2011, Woodbury Reports)', 'Woodbury Reports, July 2011, p. 7') === 'Former Admissions (2011, Woodbury Reports)');
+$hj = array('id' => 7, 'years' => '2020', 'source' => $heal);
+$check('a HEAL job loses its years', kop_scy_job_action($hj, array($hj)) === 'clear');
+$check('a HEAL job with no years is left', kop_scy_job_action(array('id' => 8, 'years' => '', 'source' => $heal), array()) === '');
 $job = array('id' => 1, 'years' => '2025', 'source' => $wiki);
 $check('a job dated only by the copy loses its years', kop_scy_job_action($job, array($job)) === 'clear');
 $check('...or goes when another job at that place says it', kop_scy_job_action($job, array($job, array('id' => 2, 'years' => '1998-2008', 'source' => 'Woodbury'))) === 'hide');
@@ -97,7 +105,8 @@ if (!file_exists($db_path)) {
         }
         if (kop_scy_role($a[1], $a[2]) !== $a[1]) $left++;
     }
-    $check('the pass changed roles (folded entries aside)', $changed > 0 && $changed <= $res['roles'] && $res['roles'] - $changed <= count($folded), "$changed changed, reported {$res['roles']}");
+    $in_folded = count(array_filter((array) ($GLOBALS['kop_test_options']['kop_staff_copy_years_log'] ?? array()), function ($e) use ($folded) { return isset($e['fid'], $folded[(string) $e['fid']]); }));
+    $check('the pass changed roles (folded records counted from its log)', $changed > 0 && $changed + $in_folded === $res['roles'], "$changed changed + $in_folded in folded records, reported {$res['roles']}");
     $check('every role kept its name, and only its copy year changed', !$wrong, implode('; ', array_slice($wrong, 0, 5)));
     $check('no role keeps a copy year', $left === 0, "$left left");
     $dropped = count($before_roles) - count($after_roles);
@@ -110,12 +119,16 @@ if (!file_exists($db_path)) {
         if (array_keys($nb) != array_keys($na)) $names_ok = false;
     }
     $check('a folded record still names everyone it did', $names_ok);
-    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND source LIKE '%troubledteens wiki%(as of %' AND (years = substr(source, instr(source, '(as of ') + 7, 4) OR years = 'before ' || substr(source, instr(source, '(as of ') + 7, 4))")->fetchColumn();
+    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND ((source LIKE '%troubledteens wiki%(as of %' AND (years = substr(source, instr(source, '(as of ') + 7, 4) OR years = 'before ' || substr(source, instr(source, '(as of ') + 7, 4))) OR (source LIKE 'HEAL%' AND years <> ''))")->fetchColumn();
     $check('no shown job keeps a copy year', (int) $j === 0, "$j left");
     $check('jobs were cleared and hidden', $res['jobs_cleared'] > 0 && $res['jobs_hidden'] > 0);
     $sra = json_decode((string) $pdo->query('SELECT json_data FROM facilities_v2 WHERE id = 12293')->fetchColumn(), true);
     $belle = array_values(array_filter((array) $sra['staff']['notableStaff'], function ($p) { return ($p['name'] ?? '') === 'Belle Shook'; }));
     $check('Spring Ridge: Belle Shook is "Former Therapist"', ($belle[0]['role'] ?? '') === 'Former Therapist', $belle[0]['role'] ?? 'missing');
+    $moore = array_values(array_filter((array) $sra['staff']['notableStaff'], function ($p) { return ($p['name'] ?? '') === 'Gayle L. Gregory'; }));
+    $check('Spring Ridge: a HEAL entry has no year ("Former Psychiatrist")', ($moore[0]['role'] ?? '') === 'Former Psychiatrist', $moore[0]['role'] ?? 'missing');
+    $jc = $pdo->query("SELECT years FROM kop_person_jobs WHERE id = 2012")->fetchColumn();
+    $check('Jeannie Courtney\'s Second Chances job has no "2020"', $jc === '' || $jc === false, (string) $jc);
     $check('a second pass changes nothing', kop_scy_pass($opts) === array('records' => 0, 'roles' => 0, 'jobs_cleared' => 0, 'jobs_hidden' => 0));
     $n = kop_scy_undo($opts);
     $back = array_filter($roles(), function ($k) use ($folded) { return !isset($folded[strtok($k, '|')]); }, ARRAY_FILTER_USE_KEY);

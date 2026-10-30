@@ -6,8 +6,12 @@
  * dated by its copy ("as of 2025-12-18") and gave that date to every person on it: "Former Therapist (2025,
  * r/troubledteens wiki)", "Former Staff (before 2025, r/troubledteens wiki)", and in their past jobs
  * "Founder - Copper Canyon Academy (2025)". The copy date says nothing about when anyone worked anywhere
- * (the build no longer does it). HEAL's years are read from each page and are left alone; so are ranges
- * ("2019-2025": a year the source gave, then the copy).
+ * (the build no longer does it). Ranges ("2019-2025": a year the source gave, then the copy) stay.
+ *
+ * HEAL's years are retrieval dates too (owner, 2026-10-30: "the heal years are just retrieval years like the
+ * others"; HEAL never said Jeannie Courtney worked at Second Chances in 2020). Version 2 of the pass takes every
+ * year off a role tagged ", HEAL)" (ranges too) or whose source is a HEAL page, and off every past job a HEAL
+ * page gave.
  *
  * kop_scy_pass() takes those years off once: the role's "(2025, r/troubledteens wiki)" or "(before 2025, ...)"
  * when the entry's source is a wiki copy of that year, and the job's "2025" / "before 2025" when its source
@@ -27,18 +31,32 @@ if (!function_exists('kop_scy_copy_year')) {
         return preg_match('#r/troubledteens wiki\b.*\(as of ((?:19|20)\d{2})-#i', (string) $source, $m) ? (int) $m[1] : 0;
     }
 
-    /** $role without a year that is only its source's copy date: "Former Therapist (2025, r/troubledteens wiki)" -> "Former Therapist". */
+    /** Is this source a HEAL page (whose years are when it was retrieved)? */
+    function kop_scy_is_heal($source) {
+        return (bool) preg_match('/^HEAL\b/', trim((string) $source));
+    }
+
+    /**
+     * $role without a year that is only its source's copy date: "Former Therapist (2025, r/troubledteens wiki)"
+     * -> "Former Therapist"; "Therapist (2019-2025, HEAL)" -> "Therapist".
+     */
     function kop_scy_role($role, $source) {
+        $role = (string) $role;
+        $years = '(?:before\s+)?(?:19|20)\d{2}(?:\s*-\s*(?:19|20)\d{2})?';
+        $role = preg_replace('#\s*\(' . $years . ',\s*HEAL\)\s*$#', '', $role);
+        if (kop_scy_is_heal($source)) $role = preg_replace('#\s*\(' . $years . '\)\s*$#', '', $role);
         $y = kop_scy_copy_year($source);
-        if (!$y) return (string) $role;
-        return trim(preg_replace('#\s*\((?:before\s+)?' . $y . '(?:,\s*r/troubledteens wiki)?\)\s*$#i', '', (string) $role));
+        if ($y) $role = preg_replace('#\s*\((?:before\s+)?' . $y . '(?:,\s*r/troubledteens wiki)?\)\s*$#i', '', $role);
+        return trim($role);
     }
 
     /** What to do with one job: 'clear' (its years go), 'hide' (another job at the place says it), or '' (leave it). */
     function kop_scy_job_action(array $job, array $same_place_jobs) {
         $y = kop_scy_copy_year($job['source'] ?? '');
         $years = trim((string) ($job['years'] ?? ''));
-        if (!$y || ($years !== (string) $y && strcasecmp($years, 'before ' . $y) !== 0)) return '';
+        if ($years === '') return '';
+        $copy = kop_scy_is_heal($job['source'] ?? '') || ($y && ($years === (string) $y || strcasecmp($years, 'before ' . $y) === 0));
+        if (!$copy) return '';
         foreach ($same_place_jobs as $o) {
             if ((int) $o['id'] !== (int) $job['id']) return 'hide';
         }

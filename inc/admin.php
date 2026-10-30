@@ -1378,7 +1378,7 @@ function kop_apply_staff_dedupe() {
  * Once per KOP_STAFF_COPY_YEARS_VERSION: take off the staff years that are only the
  * date a wiki page was copied (inc/staff-copy-years.php, kop_scy_pass(); undo with kop_scy_undo()).
  */
-define('KOP_STAFF_COPY_YEARS_VERSION', 1);
+define('KOP_STAFF_COPY_YEARS_VERSION', 2);   // 2: HEAL years too (owner, 2026-10-30)
 function kop_apply_staff_copy_years() {
     if ((int) get_option('kop_staff_copy_years_version', 0) >= KOP_STAFF_COPY_YEARS_VERSION || !function_exists('kop_scy_pass')) {
         return array();
@@ -2653,7 +2653,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '149';
+    $version = '150';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
