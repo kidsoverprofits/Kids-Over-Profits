@@ -582,6 +582,7 @@ try {
             <div class="filter-status" id="filter-status"></div>
         </div>
 
+        <?php $mention_links = kop_news_mention_links($pdo, $submissions); // names under each card, linked to their record pages ?>
         <div class="news-feed-grid" data-kop-bug-feature="news-feed/grid" data-kop-bug-label="News Feed">
             <?php foreach ($submissions as $item):
                 if ($top_story_id && (int) $item['id'] === $top_story_id) continue;
@@ -748,21 +749,18 @@ try {
                         </div>
                     </div>
 
-                    <?php if (!empty($facilities) || !empty($staff)): ?>
-                        <div class="news-entities">
-                            <?php if (!empty($facilities)): ?>
-                                <div class="entity-group">
-                                    <span class="entity-label">Facilities:</span>
-                                    <span class="entity-value"><?php echo esc_html(implode(', ', $facilities)); ?></span>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($staff)): ?>
-                                <div class="entity-group">
-                                    <span class="entity-label">Key Figures:</span>
-                                    <span class="entity-value"><?php echo esc_html(implode(', ', $staff)); ?></span>
-                                </div>
-                            <?php endif; ?>
+                    <?php
+                    // The records this article is linked to, each a link to its page. The names
+                    // themselves are the tags above; this replaces the "Facilities" / "Key Figures"
+                    // text lists, which the stylesheet had hidden since 2026-01.
+                    $record_links = array_values(array_filter($mention_links[(int) $item['id']] ?? array(), static function ($e) { return $e['url'] !== ''; }));
+                    ?>
+                    <?php if (!empty($record_links)): ?>
+                        <div class="news-entities news-record-links">
+                            <span class="news-record-links-label">On KOP:</span>
+                            <?php foreach ($record_links as $e): ?>
+                                <a class="entity-value entity-link" href="<?php echo esc_url($e['url']); ?>"><?php echo esc_html($e['name']); ?></a>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
 

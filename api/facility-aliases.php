@@ -339,6 +339,12 @@ if (!function_exists('kop_facility_name_variants')) {
             // Three or more words and no comma: a name, not "City, State".
             if ($inner !== '' && strpos($inner, ',') === false && str_word_count($inner) >= 3) $out[] = $inner;
         }
+        // A company's legal suffix: "Teen Challenge Inc." -> "Teen Challenge",
+        // "Three Springs, LLC" -> "Three Springs". Tried after the name as given.
+        foreach ($out as $v) {
+            $bare = trim((string) preg_replace('/[\s,]+(inc|incorporated|llc|l\.l\.c|corp|corporation|ltd|co)\.?$/i', '', $v));
+            if ($bare !== '' && $bare !== $v && str_word_count($bare) >= 1) $out[] = $bare;
+        }
         return array_values(array_unique($out));
     }
 }

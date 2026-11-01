@@ -142,3 +142,103 @@ if (!function_exists('kop_sync_news_facility_links')) {
         }
     }
 }
+
+if (!function_exists('kop_news_mention_links')) {
+    /**
+     * The names to show under each news card, linked to the record pages the
+     * article is linked to: news id => [['name' => ..., 'url' => ...|''], ...].
+     *
+     * Reads the stored links (news_facility_links, kop_operator_links), never
+     * resolves a name afresh, so the feed links exactly what the facility and
+     * operator pages list. A mention links when it is a linked record's name
+     * (or its own facility_id, or the record Facilities from News matched it
+     * to); a linked record no mention names is added under its own name, so
+     * every link shows. Names with no link stay text.
+     *
+     * @param array $rows news_submissions rows (id, facilities_mentioned)
+     */
+    function kop_news_mention_links(PDO $pdo, array $rows): array {
+        $ids = array_values(array_unique(array_filter(array_map(static function ($r) { return (int) ($r['id'] ?? 0); }, $rows))));
+        if (!$ids) return [];
+        $in = implode(',', $ids);
+        $key = static function ($s) {
+            return function_exists('kop_facility_pages_name_key') ? kop_facility_pages_name_key($s) : kop_normalize_name_key((string) $s);
+        };
+
+        // news id => [url => ['name' => record name, 'keys' => [name keys]]]
+        $linked = [];
+        try {
+            $q = $pdo->query("SELECT l.news_id, f.id, f.name FROM news_facility_links l JOIN facilities_v2 f ON f.id = l.facility_id
+                               WHERE l.news_id IN ($in) ORDER BY f.name");
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $l) {
+                $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url((int) $l['id']) : '';
+                if ($url === '') continue; // no page: the name stays text
+                $nid = (int) $l['news_id'];
+                $linked[$nid][$url]['name'] = trim((string) $l['name']);
+                $linked[$nid][$url]['keys'][$key($l['name'])] = true;
+                $linked[$nid][$url]['ids'][(int) $l['id']] = true;
+            }
+        } catch (Throwable $e) {
+            // no link table: names stay text
+        }
+        try {
+            $prefix = function_exists('kop_v2_detect_prefix') ? kop_v2_detect_prefix($pdo) : (isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '');
+            $q = $pdo->query("SELECT o.link_id, op.id, op.name FROM `{$prefix}kop_operator_links` o JOIN `{$prefix}kop_operators` op ON op.id = o.operator_id
+                               WHERE o.link_kind = 'news' AND o.link_id IN ($in) ORDER BY op.name");
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $l) {
+                $url = function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $l['id']) : '';
+                if ($url === '') continue;
+                $nid = (int) $l['link_id'];
+                $linked[$nid][$url]['name'] = $linked[$nid][$url]['name'] ?? trim((string) $l['name']);
+                $linked[$nid][$url]['keys'][$key($l['name'])] = true;
+            }
+        } catch (Throwable $e) {
+            // no operator links: company names stay text
+        }
+
+        // The record Facilities from News matched a mention to ("Laurel Heights").
+        $matched = []; // news id => lower(mention) => facility id
+        try {
+            $q = $pdo->query("SELECT news_id, mention, facility_id FROM news_facility_candidates
+                               WHERE news_id IN ($in) AND facility_id IS NOT NULL AND facility_id > 0");
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $c) {
+                $matched[(int) $c['news_id']][strtolower(trim((string) $c['mention']))] = (int) $c['facility_id'];
+            }
+        } catch (Throwable $e) {
+            // no candidates table
+        }
+
+        $out = [];
+        foreach ($rows as $r) {
+            $nid = (int) ($r['id'] ?? 0);
+            $links = $linked[$nid] ?? [];
+            $shown = [];
+            $list = [];
+            foreach (kop_normalize_facility_mentions($r['facilities_mentioned'] ?? '[]') as $m) {
+                $name = $m['name'];
+                $fids = array_filter([(int) $m['facility_id'], $matched[$nid][strtolower($name)] ?? 0]);
+                $keys = [];
+                foreach (kop_facility_name_variants($name) as $v) $keys[$key($v)] = true;
+                $opId = ($links && function_exists('kop_operator_page_id_for_name')) ? (int) kop_operator_page_id_for_name($name) : 0;
+                $opUrl = $opId > 0 ? (string) kop_operator_page_url($opId) : '';
+                $hit = '';
+                foreach ($links as $url => $l) {
+                    if (array_intersect_key($keys, $l['keys'] ?? [])
+                        || array_intersect_key(array_flip($fids), $l['ids'] ?? [])
+                        || ($opUrl !== '' && $opUrl === $url)) {
+                        $hit = $url;
+                        break;
+                    }
+                }
+                if ($hit !== '' && isset($shown[$hit])) continue; // two spellings of one record: name it once
+                if ($hit !== '') $shown[$hit] = true;
+                $list[] = ['name' => $name, 'url' => $hit];
+            }
+            foreach ($links as $url => $l) {
+                if (!isset($shown[$url])) $list[] = ['name' => $l['name'], 'url' => $url];
+            }
+            $out[$nid] = $list;
+        }
+        return $out;
+    }
+}

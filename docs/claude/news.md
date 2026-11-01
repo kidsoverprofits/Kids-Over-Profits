@@ -67,6 +67,12 @@ php api/scan-new-facilities.php --ids=502         # on the server: dry run; "app
 # Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
 # kop_record_changed() (inc/record-events.php) moves the page caches and purges the facility pages. docs/DATA-FLOWS.md is the map
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php   # every path calls it, no link lost, reject/undo, deletes, duplicates
+# The feed's record links (2026-11-01): each /tti-news-feed/ card ends with "On KOP:" pills to the facility and operator pages the
+# article is linked to (kop_news_mention_links(), api/news-mentions.php): read from news_facility_links + kop_operator_links, never
+# resolved afresh, so the feed links what the record pages list; a linked record no mention names shows under its own name. The
+# pills replace the "Facilities" / "Key Figures" text lists, hidden by css/news-feed.css since 2026-01 (the names are the tags). A company's
+# legal suffix ("Teen Challenge Inc.", "Three Springs, LLC") is tried without it at save time (kop_facility_name_variants())
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-news-feed-links.php   # every stored link shows once, nothing else links; the suffix
 # Essential reporting (inc/featured-reporting.php): news articles the owner picks as especially good journalism, each with an
 # optional note on why. Table news_featured (records DB); picked with the pencil on any article's headline ('feat:<id>') or at
 # KOP Tools > Essential Reporting (search, notes, Recent changes with exact Undo; log in the kop_featured_log option). Shown on

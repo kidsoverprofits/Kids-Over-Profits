@@ -251,6 +251,32 @@
     color: var(--kop-white);
 }
 
+/* The records an article links to, under its summary: pills that go to the facility or operator page.
+   Kadence colours every a, a:hover and a:focus, so each state names both colours. */
+.news-record-links {
+    align-items: center;
+}
+
+.news-record-links-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--kop-text-muted);
+}
+
+.news-entities a.entity-link,
+.news-entities a.entity-link:visited,
+.news-entities a.entity-link:focus {
+    color: var(--kop-midnight-blue);
+    background-color: var(--kop-soft-pastel-yellow);
+    text-decoration: none;
+}
+
+.news-entities a.entity-link:hover,
+.news-entities a.entity-link:active {
+    color: var(--kop-white);
+    background-color: var(--kop-orange-fill, #A3570D);
+}
+
 .entity-group {
     display: none;
 }
