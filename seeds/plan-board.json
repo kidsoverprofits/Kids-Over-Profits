@@ -1,6 +1,6 @@
 {
- "built": "2026-11-01 18:37 UTC",
- "source": "897ddd4779e4a216e680a867b9af42abb1d66270",
+ "built": "2026-11-01 18:45 UTC",
+ "source": "001e9a7a8a2f46c7d181ba494e8f746abd5c5052",
  "sections": [
   {
    "key": "2",
@@ -68,12 +68,12 @@
        "hash": "08649fd7c24a"
       },
       {
-       "id": "2.1:new-computer-research-key-and-gh-login",
-       "lead": "New computer: research key and gh login",
-       "text": "**New computer: research key and gh login** (2026-11-01; the old computer died). Done the same day: tools, paths, a new SSH key `~/.ssh/kop_nixihost` authorized in cPanel (the old key stays, the map rebuild may use it), both local `.env` files filled from the server theme `.env` (all but the DB login), `tmp/prod.sqlite` synced. - Research key: the old `kop-research-key.txt` is lost and the server holds only its sha256. A new key goes in `C:\\Users\\dani\\kop-research-key.txt` and its sha256 in `KOP_MSUB_RESEARCH_KEY_SHA256` (inc/mobile-submit.php), which deploys; until then research sends hit the 12-an-hour cap. - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).",
-       "ask": "Make a new research key (one push to main)? Run gh auth login?",
+       "id": "2.1:new-computer-gh-login",
+       "lead": "New computer: gh login",
+       "text": "**New computer: gh login** (2026-11-01; the old computer died). Done the same day: tools, paths, a new SSH key `~/.ssh/kop_nixihost` authorized in cPanel (the old key stays, the map rebuild may use it), both local `.env` files filled from the server theme `.env` (all but the DB login), `tmp/prod.sqlite` synced, a new research key (`~/kop-research-key.txt`, its sha256 in inc/mobile-submit.php; the old key no longer works). - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).",
+       "ask": "Run gh auth login?",
        "date": "2026-11-01",
-       "hash": "f62205566aa8"
+       "hash": "379b385f6905"
       }
      ]
     },
