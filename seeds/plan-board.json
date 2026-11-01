@@ -1,6 +1,6 @@
 {
- "built": "2026-11-01 18:45 UTC",
- "source": "001e9a7a8a2f46c7d181ba494e8f746abd5c5052",
+ "built": "2026-11-01 19:05 UTC",
+ "source": "93c8c1a245217c483f1e80b4e78b237e2316ad46",
  "sections": [
   {
    "key": "2",
@@ -68,12 +68,12 @@
        "hash": "08649fd7c24a"
       },
       {
-       "id": "2.1:new-computer-gh-login",
-       "lead": "New computer: gh login",
-       "text": "**New computer: gh login** (2026-11-01; the old computer died). Done the same day: tools, paths, a new SSH key `~/.ssh/kop_nixihost` authorized in cPanel (the old key stays, the map rebuild may use it), both local `.env` files filled from the server theme `.env` (all but the DB login), `tmp/prod.sqlite` synced, a new research key (`~/kop-research-key.txt`, its sha256 in inc/mobile-submit.php; the old key no longer works). - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).",
-       "ask": "Run gh auth login?",
+       "id": "2.1:deploys-now-and-then-meet-the-host-s-bot-check",
+       "lead": "Deploys now and then meet the host's bot check",
+       "text": "**Deploys now and then meet the host's bot check** (found 2026-11-01). 2 of the last 30 deploy.yml runs failed at \"Pull latest commit on server\": cPanel's API on port 2083 answered the GitHub runner with the \"One moment, please...\" challenge page instead of JSON (runs 41338180817, 41338193179). The next push or a rerun deploys it. To stop it, allow the GitHub Actions runners past the challenge for port 2083 (NixiHost support or the firewall/Imunify whitelist), or leave it and rerun when a deploy fails.",
+       "ask": "Ask NixiHost to let the GitHub runners past the bot check on cPanel (port 2083), or leave it?",
        "date": "2026-11-01",
-       "hash": "379b385f6905"
+       "hash": "77019e8957b0"
       }
      ]
     },
