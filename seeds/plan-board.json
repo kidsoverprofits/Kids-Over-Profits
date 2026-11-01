@@ -1,6 +1,6 @@
 {
- "built": "2026-11-01 23:29 UTC",
- "source": "a2bcabba8133b4f0ab9031465031082b79d78a2c",
+ "built": "2026-11-01 23:35 UTC",
+ "source": "5d85a6d1414825ee9d37ece62a70d9f81fc44956",
  "sections": [
   {
    "key": "2",
@@ -714,10 +714,10 @@
       {
        "id": "3:record-links-on-the-news-feed",
        "lead": "Record links on the news feed",
-       "text": "**Record links on the news feed** (2026-11-01): logged out, [the feed](https://kidsoverprofits.org/tti-news-feed/): most cards end with \"On KOP:\" pills (on the 2026-11-01 mirror 234 of the newest 300 approved); the Kearney YRTC lawsuit card links /facility/ for YRTC-Kearney; a pill goes to its page. `python -u scripts/check-contrast.py /tti-news-feed/` (hover forced), `python scripts/check-bare-text.py`, `python -u scripts/check-mobile-overflow.py /tti-news-feed/`. Within an hour the relink gives #10997 (\"Teen Challenge Inc.\") its Teen Challenge company link (it shows on /operator/ and as a pill).",
+       "text": "**Record links on the news feed** (2026-11-01, [da6ceb5c](https://github.com/carlygaejepsen/Kids-Over-Profits/commit/da6ceb5c33ffa81f0f5f66e3e6a161ef1c63b8c2)): live on deploy: cards end with \"On KOP:\" pills to /facility/ pages; contrast (1360 and 390), bare text and overflow (390, 768) pass on /tti-news-feed/. Open: after the next hourly Facilities from News run, #10997 (\"Teen Challenge Inc.\") is on [Teen Challenge's operator page](https://kidsoverprofits.org/operator/) list and shows a pill on the feed (the relink, no resave).",
        "ask": "",
        "date": "2026-11-01",
-       "hash": "384f1e0ba14c"
+       "hash": "206e1a195223"
       }
      ]
     }
