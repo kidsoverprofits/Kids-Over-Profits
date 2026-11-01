@@ -34,7 +34,7 @@ const KOP_MSUB_HOURLY_CAP = 12;
  * is here, the repo is public; the key is in C:\Users\daniu\kop-research-key.txt. To rotate, put a new random
  * key there and its sha256 here.
  */
-const KOP_MSUB_RESEARCH_KEY_SHA256 = '2dc073145045bae50947c9844888cd2ec4fcdd1b7bfc9c2a014e9683763855d1';
+const KOP_MSUB_RESEARCH_KEY_SHA256 = 'e40e145dbf09ba6b289797052480e21e6d91ec3ed03e8e7c5006bf3d009aff3e';
 
 function kop_msub_is_research(WP_REST_Request $req) {
     $key = trim((string) $req->get_header('x_kop_research_key'));
