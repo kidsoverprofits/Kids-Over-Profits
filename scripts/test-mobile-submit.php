@@ -299,7 +299,8 @@ for ($i = 1; $i <= KOP_MSUB_HOURLY_CAP; $i++) {
 $keyed = function ($key, $n) {
     return kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => "https://example-news.test/research/$n", 'title' => "Research $n"), array('x_kop_research_key' => $key)));
 };
-$real = trim((string) @file_get_contents(rtrim((string) (getenv('USERPROFILE') ?: getenv('HOME')), '/\\') . '/kop-research-key.txt'));
+$key_file = rtrim((string) (getenv('USERPROFILE') ?: getenv('HOME')), '/\\') . '/kop-research-key.txt';
+$real = is_file($key_file) ? trim((string) file_get_contents($key_file)) : '';
 if ($real !== '') {
     $before_count = get_transient(kop_msub_rate_key());
     check(is_resp($keyed($real, 1), 201), 'research key -> 201 past the hourly cap');
