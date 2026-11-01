@@ -133,8 +133,7 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     scans, discovery, research-key sends and the owner's own sends wait for the 7am digest (ten titles per kind, then
     "and N more"). After a day, the inbox should hold one "[Kids Over Profits] N new submissions today" mail plus the
     person-sent ones. If something a person sent landed only in the digest, or a bot still mails one by one, say which.
-34. **Record links on the news feed** (2026-11-01): logged out, [the feed](https://kidsoverprofits.org/tti-news-feed/): most cards end
-    with "On KOP:" pills (on the 2026-11-01 mirror 234 of the newest 300 approved); the Kearney YRTC lawsuit card links
-    /facility/ for YRTC-Kearney; a pill goes to its page. `python -u scripts/check-contrast.py /tti-news-feed/` (hover forced),
-    `python scripts/check-bare-text.py`, `python -u scripts/check-mobile-overflow.py /tti-news-feed/`. Within an hour the relink gives
-    #10997 ("Teen Challenge Inc.") its Teen Challenge company link (it shows on /operator/ and as a pill).
+34. **Record links on the news feed** (2026-11-01, [da6ceb5c](https://github.com/carlygaejepsen/Kids-Over-Profits/commit/da6ceb5c33ffa81f0f5f66e3e6a161ef1c63b8c2)):
+    live on deploy: cards end with "On KOP:" pills to /facility/ pages; contrast (1360 and 390), bare text and overflow (390, 768)
+    pass on /tti-news-feed/. Open: after the next hourly Facilities from News run, #10997 ("Teen Challenge Inc.") is on
+    [Teen Challenge's operator page](https://kidsoverprofits.org/operator/) list and shows a pill on the feed (the relink, no resave).
