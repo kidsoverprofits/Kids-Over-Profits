@@ -173,15 +173,13 @@
         return hasJunkPlaceholderName(facility);
     };
 
-    // CCL batch rows carry source_url pointing at the CA transparency API,
-    // which returns raw JSON if opened in a browser. Rewrite those to the
-    // human-readable facility-detail page; leave any other URL untouched.
+    // CCL batch rows carry source_url pointing at the CA transparency API.
+    // The whole CCL site has been offline since October 2026 (the API answers
+    // 503, the facility-detail page renders blank), so drop those links until
+    // the reports reappear on CDSS's new portal; leave any other URL untouched.
     const toCaFacilityDetailUrl = (sourceUrl, facilityNumber) => {
         const url = normalizeText(sourceUrl);
-        if (!/transparencyapi/i.test(url)) return url;
-        const num = normalizeText(facilityNumber).replace(/\D+/g, '')
-            || (url.match(/(\d{6,})/) || [])[1] || '';
-        return num ? `https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/${num}` : '';
+        return /ccld\.dss\.ca\.gov/i.test(url) ? '' : url;
     };
 
     const normalizeCaliforniaDetailedReport = raw => {

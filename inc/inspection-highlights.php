@@ -2621,10 +2621,13 @@ if (!function_exists('kop_ih_scanner_version')) {
         if (stripos($url, 'dss.virginia.gov/licensed-care/search-licensing-programs/') !== false) {
             return kop_ih_archived_copy_url('VA', (int) ($row['report_id'] ?? 0));
         }
-        if ($url !== '') return $url;
-        if (($row['state'] ?? '') === 'CA' && preg_match('/^(\d{6,})-/', (string) ($row['source_report_id'] ?? ''), $m)) {
-            return 'https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/' . $m[1];
+        // California's CCL site has been offline since October 2026 (its report
+        // API answers 503 and the facility page renders blank): no CA link
+        // until the reports reappear on CDSS's new portal.
+        if (($row['state'] ?? '') === 'CA' && ($url === '' || stripos($url, 'ccld.dss.ca.gov') !== false)) {
+            return '';
         }
+        if ($url !== '') return $url;
         return '';
     }
 

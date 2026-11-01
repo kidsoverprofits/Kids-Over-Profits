@@ -940,10 +940,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const narrative = escapeHtml(inspection.narrative || '').replace(/\n/g, '<br>');
     const findings = escapeHtml(inspection.investigation_findings || '').replace(/\n/g, '<br>');
 
-    // Create facility detail link using facility number
+    // The CCL facility search has been offline since October 2026 (see the page notice),
+    // so name the source without linking to a blank page.
     const facilityNumber = isValidFacilityNumber(inspection.facility_number) ? inspection.facility_number : '';
     const facilityDetailLink = facilityNumber ?
-        `<a href="https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/${encodeURIComponent(facilityNumber)}" target="_blank" rel="noopener noreferrer">View Facility Details</a>` :
+        `California Community Care Licensing, facility ${escapeHtml(facilityNumber)}` :
         'N/A';
 
         return `

@@ -911,6 +911,16 @@ RESPONSIVE
     margin: 0 0 20px;
 }
 
+/* A state's own site is down (ca-reports, templates/page-state-reports.php). */
+.facility-report-container .state-reports-notice {
+    margin: 0 0 20px;
+    padding: 0.65em 1em;
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    color: var(--kop-text-primary, #1A202C);
+    border-left: 4px solid var(--kop-orange-ink, #B35C00);
+    border-radius: 4px;
+}
+
 /* AR report tag chips */
 .facility-report-container .ar-tags {
     display: inline-flex;

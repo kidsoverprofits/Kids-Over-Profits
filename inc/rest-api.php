@@ -4262,10 +4262,9 @@ function kop_state_collect_inspection_summaries($state_name) {
                 // which returns raw JSON — useless opened in a browser. Link
                 // humans to the CCL facility-detail page instead; the report
                 // content itself is already rendered inline on our page.
-                $ccl_fac_num = preg_replace('/\D+/', '', (string)($report['facility_number'] ?? ''));
-                $ccl_detail_url = $ccl_fac_num !== ''
-                    ? 'https://www.ccld.dss.ca.gov/carefacilitysearch/FacDetail/' . $ccl_fac_num
-                    : '';
+                // The CCL site has been offline since October 2026, so no link
+                // until the reports reappear on CDSS's new portal.
+                $ccl_detail_url = '';
 
                 $deficiencies = isset($report['deficiencies']) && is_array($report['deficiencies']) ? array_values($report['deficiencies']) : array();
                 if ($finding_count === 0 && $deficiencies) {

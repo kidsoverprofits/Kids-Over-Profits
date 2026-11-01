@@ -42,6 +42,15 @@ get_header();
 
 								<?php the_content(); ?>
 
+								<?php if ($report_slug === 'ca-reports') : ?>
+									<?php // CCL's report API has answered 503 since October 2026; CDSS is moving reports to its new portal. ?>
+									<p class="state-reports-notice">
+										California's own facility search has been offline since October 2026, while the state moves its
+										inspection reports to a new public portal. Until it returns, the reports on this page are our copies
+										of what the state published, and no new California reports are being added.
+									</p>
+								<?php endif; ?>
+
 								<div id="last-updated" class="last-updated"></div>
 
 								<nav id="alphabet-filter" class="alphabet-filter">

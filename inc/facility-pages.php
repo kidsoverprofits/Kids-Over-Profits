@@ -4089,12 +4089,15 @@ if (!function_exists('kop_facility_pages_inspections')) {
             ), ARRAY_A);
             $total = count((array) $rows);
             foreach ((array) $rows as $r) {
+                $url = trim((string) $r['report_url']);
+                // California's CCL site has been offline since October 2026 (kop_ih_source_url()).
+                if (stripos($url, 'ccld.dss.ca.gov') !== false) $url = '';
                 $reports[] = array(
                     'id'         => (int) $r['id'],
                     'ts'         => kop_facility_pages_parse_date($r['report_date']),
                     'date'       => trim((string) $r['report_date']),
                     'date_label' => kop_facility_pages_date_label($r['report_date']),
-                    'url'        => trim((string) $r['report_url']),
+                    'url'        => $url,
                     'summary'    => trim((string) $r['summary']),
                     'report_id'  => trim((string) $r['report_id']),
                     'licensed_as' => trim((string) ($matched[(int) $r['facility_id']]['facility_name'] ?? '')),
