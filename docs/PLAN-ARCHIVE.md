@@ -4,6 +4,17 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-01
+
+### 2.1 cPanel, server and accounts
+
+7. **New computer: gh login** (2026-11-01; the old computer died). Done the same day: tools, paths,
+   a new SSH key `~/.ssh/kop_nixihost` authorized in cPanel (the old key stays, the map rebuild may use it), both
+   local `.env` files filled from the server theme `.env` (all but the DB login), `tmp/prod.sqlite` synced, a new research key
+   (`~/kop-research-key.txt`, its sha256 in inc/mobile-submit.php; the old key no longer works).
+   - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).
+   Done 2026-11-01: gh logged in as kidsoverprofits; the key rotation deployed (the server repo at a59a495c).
+
 ## Moved 2026-10-28
 
 ### 4.3 Records, names and data quality
