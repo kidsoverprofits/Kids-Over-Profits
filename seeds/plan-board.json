@@ -1,6 +1,6 @@
 {
- "built": "2026-11-01 22:44 UTC",
- "source": "a40b6acac6437b7276ece33be83f193145a63138",
+ "built": "2026-11-01 23:29 UTC",
+ "source": "a2bcabba8133b4f0ab9031465031082b79d78a2c",
  "sections": [
   {
    "key": "2",
@@ -710,6 +710,14 @@
        "ask": "",
        "date": "2026-10-26",
        "hash": "016d3b333a6f"
+      },
+      {
+       "id": "3:record-links-on-the-news-feed",
+       "lead": "Record links on the news feed",
+       "text": "**Record links on the news feed** (2026-11-01): logged out, [the feed](https://kidsoverprofits.org/tti-news-feed/): most cards end with \"On KOP:\" pills (on the 2026-11-01 mirror 234 of the newest 300 approved); the Kearney YRTC lawsuit card links /facility/ for YRTC-Kearney; a pill goes to its page. `python -u scripts/check-contrast.py /tti-news-feed/` (hover forced), `python scripts/check-bare-text.py`, `python -u scripts/check-mobile-overflow.py /tti-news-feed/`. Within an hour the relink gives #10997 (\"Teen Challenge Inc.\") its Teen Challenge company link (it shows on /operator/ and as a pill).",
+       "ask": "",
+       "date": "2026-11-01",
+       "hash": "384f1e0ba14c"
       }
      ]
     }
