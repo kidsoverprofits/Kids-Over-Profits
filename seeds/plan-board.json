@@ -1,6 +1,6 @@
 {
- "built": "2026-11-01 18:25 UTC",
- "source": "f3446f7a09cd087ed28a20a6ed66c65213712b54",
+ "built": "2026-11-01 18:37 UTC",
+ "source": "897ddd4779e4a216e680a867b9af42abb1d66270",
  "sections": [
   {
    "key": "2",
@@ -68,12 +68,12 @@
        "hash": "08649fd7c24a"
       },
       {
-       "id": "2.1:new-computer-keys-and-secrets",
-       "lead": "New computer: keys and secrets",
-       "text": "**New computer: keys and secrets** (2026-11-01; the old computer died, tools and paths are set up again). - SSH key: copy `kop_nixihost` + `.pub` from a backup into `C:\\Users\\dani\\.ssh\\`, or make a new one (`ssh-keygen -t ed25519 -f ~/.ssh/kop_nixihost`), add the `.pub` in cPanel > SSH Access > Manage SSH Keys and Authorize it. Then a session runs `python ../kop-pipeline/scripts/sync-prod-sqlite.py` for `tmp/prod.sqlite`. If the key is new, also update the `KOP_SSH_KEY` secret of kop-pipeline (the map rebuild workflow) only if the old key is removed from cPanel. - Research key: put `kop-research-key.txt` in `C:\\Users\\dani\\`. Lost: write a new key there and its sha256 in the theme constant (docs/claude/mobile-extension.md). - `kop-pipeline/.env`: fill `KOP_DATA_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY` (the copy here is the blank template). - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).",
-       "ask": "SSH key, research key and pipeline .env back on the new computer?",
+       "id": "2.1:new-computer-research-key-and-gh-login",
+       "lead": "New computer: research key and gh login",
+       "text": "**New computer: research key and gh login** (2026-11-01; the old computer died). Done the same day: tools, paths, a new SSH key `~/.ssh/kop_nixihost` authorized in cPanel (the old key stays, the map rebuild may use it), both local `.env` files filled from the server theme `.env` (all but the DB login), `tmp/prod.sqlite` synced. - Research key: the old `kop-research-key.txt` is lost and the server holds only its sha256. A new key goes in `C:\\Users\\dani\\kop-research-key.txt` and its sha256 in `KOP_MSUB_RESEARCH_KEY_SHA256` (inc/mobile-submit.php), which deploys; until then research sends hit the 12-an-hour cap. - `gh auth login` once in a terminal (GitHub CLI is installed; `git` itself already signs in).",
+       "ask": "Make a new research key (one push to main)? Run gh auth login?",
        "date": "2026-11-01",
-       "hash": "a32c675297f3"
+       "hash": "f62205566aa8"
       }
      ]
     },
