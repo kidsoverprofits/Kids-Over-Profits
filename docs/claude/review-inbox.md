@@ -246,7 +246,7 @@ Review inbox > Write-ups to approve: "Send to Claude" on a card puts the record 
 inc/record-writeups.php); the hourly AI run leaves it alone. When the owner says "write the write-ups sent to Claude":
 
 ```bash
-K=$(cat /c/Users/daniu/kop-research-key.txt)
+K=$(cat ~/kop-research-key.txt)
 # Each record: facility_id, name, url, held, prompt (the same prompt Groq/Gemini get: the page's About and the held facts, numbered)
 curl -s -H "X-KOP-Research-Key: $K" https://kidsoverprofits.org/wp-json/kop/v1/writeups/claude
 # Answer each prompt exactly as it asks ({"paragraphs": [...], "check": "..."}, [n] after each sentence) and send it back;

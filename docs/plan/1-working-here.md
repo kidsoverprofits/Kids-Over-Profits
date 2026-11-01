@@ -30,7 +30,7 @@ The owner's rules:
   behaves (a rule it set, what a tool does) stays in its plan file; a finished step whose leftovers are
   open keeps those leftovers there.
 
-The checkout at `C:\Users\daniu\source\repos\Kids-Over-Profits` is shared with
+The checkout at `C:\Users\dani\source\repos\Kids-Over-Profits` is shared with
 other sessions that commit and push to `main` at the same time:
 
 - Stage files by path. Never `git add -A`, `git add .`, `git stash`,
@@ -62,7 +62,8 @@ Mechanics:
   a file and run the file, or use the Edit tool. A Python script containing
   `unlink` was refused as destructive where the same Edit went through.
 - **PHP**: none on PATH. Use
-  `$LOCALAPPDATA/Programs/Local/resources/extraResources/lightning-services/php-8.2.27+1/bin/win64/php.exe`
+  `$LOCALAPPDATA/Programs/Local/resources/extraResources/lightning-services/php-8.2.*/bin/win64/php.exe` (8.2.29+0 since the
+  2026-11-01 machine move; the version folder changes when Local updates)
   with `-n -l` to lint, and `-n -d extension_dir=<that bin>/ext -d
   extension=pdo_sqlite -d extension=mbstring` (plus `sodium`, `fileinfo`,
   `zip` where a test needs them) for the harnesses.

@@ -194,10 +194,10 @@ def local_php():
     local_app_data = os.environ.get('LOCALAPPDATA')
     if not local_app_data:
         raise RuntimeError('LOCALAPPDATA is not set; expected Local PHP 8.2.')
-    php = Path(local_app_data) / 'Programs/Local/resources/extraResources/lightning-services/php-8.2.27+1/bin/win32/php.exe'
-    if not php.is_file():
-        raise RuntimeError('Local PHP was not found at %s' % php)
-    return php
+    found = sorted((Path(local_app_data) / 'Programs/Local/resources/extraResources/lightning-services').glob('php-8.2.*/bin/win32/php.exe'))
+    if not found:
+        raise RuntimeError('Local PHP 8.2 was not found under %s' % local_app_data)
+    return found[-1]
 
 
 def run_hub_test():

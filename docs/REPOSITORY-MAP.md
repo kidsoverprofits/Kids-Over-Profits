@@ -32,7 +32,7 @@ Kids-Over-Profits-archive (old account): the history before the split
 
 ## Web Repository
 
-Location: `c:\Users\daniu\source\repos\Kids-Over-Profits`
+Location: `c:\Users\dani\source\repos\Kids-Over-Profits`
 
 Purpose: standalone Kadence child theme for kidsoverprofits.org. It is not a
 complete WordPress installation; WordPress and the Kadence parent theme are
@@ -155,7 +155,7 @@ its own template.
 
 ## Pipeline Repository
 
-Location: `c:\Users\daniu\source\repos\kop-pipeline` (private). Its `scripts/`
+Location: `c:\Users\dani\source\repos\kop-pipeline` (private). Its `scripts/`
 holds the builders, importers and research tools that were this repository's
 `scripts/*.js` and `*.py` (see its `CLAUDE.md`); `scrapers/` is the former
 Kids-Over-Profits-Tools repository, described below. It does not render

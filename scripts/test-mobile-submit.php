@@ -299,13 +299,13 @@ for ($i = 1; $i <= KOP_MSUB_HOURLY_CAP; $i++) {
 $keyed = function ($key, $n) {
     return kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => "https://example-news.test/research/$n", 'title' => "Research $n"), array('x_kop_research_key' => $key)));
 };
-$real = trim((string) @file_get_contents('C:/Users/daniu/kop-research-key.txt'));
+$real = trim((string) @file_get_contents(rtrim((string) (getenv('USERPROFILE') ?: getenv('HOME')), '/\\') . '/kop-research-key.txt'));
 if ($real !== '') {
     $before_count = get_transient(kop_msub_rate_key());
     check(is_resp($keyed($real, 1), 201), 'research key -> 201 past the hourly cap');
     check(get_transient(kop_msub_rate_key()) === $before_count, 'a research send does not count toward the hour');
 } else {
-    echo "  (skipped: C:/Users/daniu/kop-research-key.txt not here)\n";
+    echo "  (skipped: ~/kop-research-key.txt not here)\n";
 }
 check(is_err($keyed('not-the-key', 2), 'kop_rate_limited', 429), 'wrong research key -> still 429');
 check(is_err($keyed('', 3), 'kop_rate_limited', 429), 'empty research key -> still 429');

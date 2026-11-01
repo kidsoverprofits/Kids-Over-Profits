@@ -68,7 +68,7 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    archive or other (kop_ext_website_kinds(); guessed from the address when left out). Nothing is published: it all waits in Review inbox. Never send the user's email.
 3. Wayback-only sources still follow the archive rule below (PDF into the media library); submit the original URL with the
    archive link in `notes`.
-4. Send with the header `X-KOP-Research-Key: <key>` (key in `C:\Users\daniu\kop-research-key.txt`, never pasted into a
+4. Send with the header `X-KOP-Research-Key: <key>` (key in `%USERPROFILE%\kop-research-key.txt`, never pasted into a
    prompt, a commit or a report): it skips the public route's 12-an-hour cap. Agents without the key write the links
    (type, url, title, notes) to a not-sent JSON file, and the lead sends them with `(kop-pipeline) python scripts/send-sources.py <files>`.
    409 = duplicate (fine). A 429 means the key was missing or wrong.

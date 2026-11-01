@@ -119,7 +119,10 @@ def render_offline():
     app_data = __import__('os').environ.get('LOCALAPPDATA')
     if not app_data:
         raise RuntimeError('LOCALAPPDATA is not set; expected Local PHP 8.2.')
-    php = Path(app_data) / 'Programs/Local/resources/extraResources/lightning-services/php-8.2.27+1/bin/win32/php.exe'
+    found = sorted((Path(app_data) / 'Programs/Local/resources/extraResources/lightning-services').glob('php-8.2.*/bin/win32/php.exe'))
+    if not found:
+        raise RuntimeError('Local PHP 8.2 was not found under %s' % app_data)
+    php = found[-1]
     command = [str(php), '-n', str(REPO / 'scripts' / 'test-utility-pages.php')]
     result = subprocess.run(command, cwd=str(REPO), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(result.stdout, end='')
