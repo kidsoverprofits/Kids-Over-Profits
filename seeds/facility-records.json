@@ -11111,5 +11111,76 @@
         ]
       }
     }
+  },
+  {
+    "id": 11720,
+    "unique_name": "Cape Fear Teen Challenge",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Cape Fear Teen Challenge",
+        "nameKey": "cape fear teen challenge",
+        "investors": [],
+        "pastNames": [],
+        "otherNames": [
+          "Sandhills Adult and Teen Challenge"
+        ],
+        "currentName": "",
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Teen Challenge"
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": "Male",
+        "ageRange": {
+          "max": null,
+          "min": 18
+        },
+        "capacity": null,
+        "currentCensus": null,
+        "isPrivatelyOwned": null
+      },
+      "notes": [
+        "Takes men 18 and older: the Adult & Teen Challenge national program finder lists 1456 Lula Long Road, Elizabethtown as a men's (18+) residential center (https://teenchallengeusa.org/centers/tcnc108/, checked 2026-11-02). Sandhills Adult & Teen Challenge says it was founded in 1987 as a residential recovery program for men (https://sandhillstc.org/about/). No source found yet that it ever took minors; the record earlier said only that it no longer admits them."
+      ]
+    }
+  },
+  {
+    "id": 14004,
+    "unique_name": "Teen Challenge of South Carolina",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Teen Challenge of South Carolina",
+        "nameKey": "teen challenge of south carolina",
+        "investors": [],
+        "pastNames": [],
+        "otherNames": [],
+        "currentName": "",
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Teen Challenge"
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": "Male",
+        "ageRange": {
+          "max": null,
+          "min": 18
+        },
+        "capacity": null,
+        "currentCensus": null,
+        "isPrivatelyOwned": null
+      },
+      "notes": [
+        "Described as: referral/placement service that places children in Teen Challenge programs in other states (HEAL, staff list for Teen Challenge of South Carolina (archived 2012-05-17))",
+        "Takes men 18 and older: the Adult & Teen Challenge national program finder lists 20515 N. Fraser St, Georgetown as a men's (18+) residential center (https://teenchallengeusa.org/centers/tcsc101/, checked 2026-11-02). Its nonprofit (EIN 57-1101736) once gave its mission as helping \"teenagers and young adults\" overcome substance abuse; no source found yet that minors lived at the Georgetown center."
+      ]
+    }
   }
 ]

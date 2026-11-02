@@ -137,3 +137,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     live on deploy: cards end with "On KOP:" pills to /facility/ pages; contrast (1360 and 390), bare text and overflow (390, 768)
     pass on /tti-news-feed/. Open: after the next hourly Facilities from News run, #10997 ("Teen Challenge Inc.") is on
     [Teen Challenge's operator page](https://kidsoverprofits.org/operator/) list and shows a pill on the feed (the relink, no resave).
+
+- **Teen Challenge adult programs (template 151, 2026-11-02).** https://kidsoverprofits.org/facility/cape-fear-teen-challenge-nc/
+  and https://kidsoverprofits.org/facility/teen-challenge-of-south-carolina-sc/ say "operated by Teen Challenge" (not
+  "NO LONGER ADMITS MINORS"), show men 18+ and the new note, and both appear on
+  https://kidsoverprofits.org/operator/teen-challenge/. If a page still shows the old text, purge LiteSpeed.
