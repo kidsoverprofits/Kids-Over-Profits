@@ -37,11 +37,14 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      mirror that is exactly those two, to #900013. After deploy, check on production: option
      `kop_fmerge_links_follow_log` says `news_facility_links: 100175 -> 900013 (2 moved, 0 already there)`, and the
      readers test's "every linked news and lawsuit id resolves to a name" passes on a fresh dump.
+     Done 2026-11-02 (deploy checked on a fresh mirror): the log says exactly that; news 10763 and 10764 are on
+     #900013 and nothing is on #100175. Still open: rerun the readers test on a fresh dump.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
      `wpdl_kop_operator_facilities` still has operator 10 -> 900002 and 900007 (both were there in the 2026-11-01
      dump; an admin save of Embark before the fix would have removed them).
+     Done 2026-11-02 (deploy checked on a fresh mirror): both rows are there, 900002 current and 900007 past.
    - Known, not a bug: the first save of an older document rewrites it in the current shape (about 4,550 of 5,067
      on a full round trip: empty fields filled in, schema_version 2 -> 3, placeholder flags "migration: unparsed
      endYear: Present" dropped, an old project label such as "ROP" replaced by the name it is filed under). The
