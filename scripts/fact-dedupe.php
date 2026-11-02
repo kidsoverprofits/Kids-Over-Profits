@@ -205,7 +205,7 @@ if (!empty($opt['recheck-cleared'])) {
         $val = (string) kop_wbf_row_value($r);
         $matched = preg_replace('/^Already on the record:\s*/', '', (string) ($ap['reason'] ?? ''));
         if (preg_match('/:\s*https?:\/\/\S+\)/', $val . ' ' . $matched)) $tot['link_in_bracket']++;
-        $ex[] = array('fid' => $fid, 'name' => $docs[$fid]['name'], 'path' => $r['path'], 'item' => $val, 'matched' => $matched);
+        $ex[] = array('id' => (int) $r['id'], 'marked' => $marked, 'fid' => $fid, 'name' => $docs[$fid]['name'], 'path' => $r['path'], 'item' => $val, 'matched' => $matched);
     }
     echo "=== Auto-cleared add_list items re-checked with the current kop_wbf_on_record() (read only) ===\n";
     echo "Auto-rejected add_list rows: {$tot['rows']} (with cleared=on_record: {$tot['marked']}; record missing: {$tot['no_doc']})\n";
@@ -215,8 +215,9 @@ if (!empty($opt['recheck-cleared'])) {
     $step = max(1, (int) floor(count($ex) / max(1, $N_EX)));
     foreach ($ex as $i => $e) {
         if ($i % $step !== 0 || $i / $step >= $N_EX) continue;
-        echo sprintf("\n  #%d %s [%s]\n     item:    %s\n     matched: %s\n", $e['fid'], cut($e['name'], 50), $e['path'], cut($e['item'], 260), cut($e['matched'], 260));
+        echo sprintf("\n  row %d%s  #%d %s [%s]\n     item:    %s\n     matched: %s\n", $e['id'], $e['marked'] ? '' : ' (unmarked)', $e['fid'], cut($e['name'], 50), $e['path'], cut($e['item'], 260), cut($e['matched'], 260));
     }
+    echo "\nRow ids: " . implode(',', array_column($ex, 'id')) . "\n";
     exit(0);
 }
 

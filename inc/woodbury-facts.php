@@ -1849,6 +1849,29 @@ function kop_wbf_clear_on_record($apply = false, $seconds = 60) {
     return $out;
 }
 
+/**
+ * Once: the items the hourly clear filed as "already on the record" on the
+ * kop_wbf_text_core() bug (fixed 2026-11-02; each matched an unrelated note
+ * citing the same article; found by scripts/fact-dedupe.php --recheck-cleared)
+ * wait for review again. Only rows still holding that clear's rejection move;
+ * reviewed_by stays empty, so they count as never reviewed.
+ */
+function kop_wbf_restore_wrongly_cleared() {
+    global $wpdb;
+    if (get_option('kop_wbf_restored_1102')) return;
+    $pkeys = array('63c5143d7aec0d6d100f1c64de7629d0', '03bc1ed200e643cd31645dbbb289ff74', '70ed3d3c3861e403e4919bd4a4b23edc',
+        '86d54c5fad78349d3c33ebd29c1c8938', '20e74cf1ff8eb654c4df5101bc1b4c1c', '67e827a4b3bd0e071a3960aa06bdd36a',
+        '7e29b16b988e5bdca54c5eeca0f54dff', 'd542a883e29c483202f2f27b56da4ae4', '2654c320970827aed52a59796dbdde58',
+        '556147f850b1370585ac2d3e1752b620', '47d6593bb72fcda8421e9d7f441b1eaa');
+    $n = 0;
+    foreach ($pkeys as $pk) {
+        $n += (int) $wpdb->query($wpdb->prepare('UPDATE ' . kop_wbf_table() . " SET status = 'pending', applied = NULL, reviewed_by = NULL, reviewed_at = NULL
+            WHERE pkey = %s AND status = 'rejected' AND reviewed_by = 'auto' AND applied LIKE %s", $pk, '%"cleared":"on_record"%'));
+    }
+    update_option('kop_wbf_restored_1102', array('restored' => $n, 'at' => current_time('mysql', true)), false);
+    if ($n && function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
+}
+
 add_action('init', function () {
     if (!wp_next_scheduled('kop_wbf_auto_hourly')) {
         wp_schedule_event(time() + 300, 'hourly', 'kop_wbf_auto_hourly');
@@ -1859,6 +1882,7 @@ add_action('kop_wbf_auto_hourly', function () {
     kop_wbf_sync();
     kop_wbf_moved_to_ya();
     kop_wbf_auto_run(120);
+    kop_wbf_restore_wrongly_cleared();
     // What a new load or another source's Add made redundant leaves the waiting list.
     kop_wbf_clear_on_record(true, 90);
 });
