@@ -43,6 +43,10 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    - Decide what these two tests are for now: keep them as switch rehearsals that need the September copy, or
      rebase them on v2 only. Writer on today's copy: 73 of 77 pass; the 4 failures come from the opening resync.
      Run it on the pre-switch copy next.
+   - New machine (checked 2026-11-02): no MySQL installed (no mysqld on PATH), and `tmp/prod-app-dump.sql` (the
+     2026-09-17 pre-switch copy the readers test needs) is not in tmp/ or anywhere under sourceepos; only
+     `tmp/prod-dump.sql` (2026-11-01, 1.09 GB) is. Find the September dump on the old machine or a backup before the
+     pre-switch reruns; the today's-copy runs need only the portable MySQL above.
 2. **Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in
    PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 ->
    8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on
