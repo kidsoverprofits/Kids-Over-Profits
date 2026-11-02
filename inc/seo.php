@@ -268,8 +268,9 @@ if (!function_exists('kop_seo_operator_description')) {
         if (mb_strlen($text) > KOP_SEO_DESC_MAX) $text = $first;
         $n = count((array) ($page['facilities'] ?? array()));
         $k = (int) ($page['place_count'] ?? 0);
+        $places = kop_operator_place_phrase((int) ($page['state_count'] ?? 0), (int) ($page['country_count'] ?? 0));
         $phrases = array();
-        if ($n > 0) $phrases[] = kop_seo_count($n, 'program', 'programs') . ($k > 1 ? ' in ' . $k . ' states' : '');
+        if ($n > 0) $phrases[] = kop_seo_count($n, 'program', 'programs') . ($k > 1 && $places !== '' ? ' in ' . $places : '');
         $deaths = count((array) ($page['memorials'] ?? array()));
         $suits = count((array) ($page['lawsuits'] ?? array()));
         if ($deaths) $phrases[] = kop_seo_count($deaths, 'death', 'deaths');

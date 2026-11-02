@@ -287,6 +287,16 @@ if (!function_exists('kop_operator_pages_robots')) {
 // Index
 // ---------------------------------------------------------------------------
 
+if (!function_exists('kop_operator_place_phrase')) {
+    /** "3 states", "1 country", "4 states and 2 countries": US states and other countries counted apart. */
+    function kop_operator_place_phrase($states, $countries) {
+        $bits = array();
+        if ($states > 0) $bits[] = $states . ' ' . ($states === 1 ? 'state' : 'states');
+        if ($countries > 0) $bits[] = $countries . ' ' . ($countries === 1 ? 'country' : 'countries');
+        return implode(' and ', $bits);
+    }
+}
+
 if (!function_exists('kop_operator_program_status')) {
     /**
      * A program's status as one company's page shows it. A program still
@@ -642,6 +652,7 @@ if (!function_exists('kop_operator_page_data')) {
         $facilities = array();
         $facility_ids = array();
         $states = array();
+        $countries = array();
         $open = 0;
         if (kop_facility_pages_table_exists($ofc)) {
             $frows = $wpdb->get_results(
@@ -685,8 +696,9 @@ if (!function_exists('kop_operator_page_data')) {
                 $state = ($r['state'] && function_exists('kop_state_canonical_name')) ? (string) kop_state_canonical_name($r['state']) : (string) $r['state'];
                 $country = (string) $r['country'];
                 $place = trim(($r['city'] ? $r['city'] . ', ' : '') . ($state !== '' ? $state : ($country !== '' && $country !== 'United States' ? $country : '')), ', ');
-                if ($state !== '') $states[$state] = true;
-                elseif ($country !== '' && $country !== 'United States') $states[$country] = true;
+                // Outside the US the state column holds a province or region, so the country is the place counted.
+                if ($country !== '' && $country !== 'United States') $countries[$country] = true;
+                elseif ($state !== '') $states[$state] = true;
                 $fstatus = kop_operator_program_status((string) $r['status'], (string) ($r['relationship'] ?? ''));
                 if (strcasecmp($fstatus, 'Open') === 0) $open++;
                 $years = '';
@@ -943,14 +955,14 @@ if (!function_exists('kop_operator_page_data')) {
 
         // ---- Summary ---------------------------------------------------------
         $n = count($facilities);
-        $k = count($states);
+        $k = count($states) + count($countries);
         $first = $name . ' is a parent company'
             . ($status !== '' && strcasecmp($status, 'Active') !== 0 ? ' (' . strtolower($status) . ')' : '')
             . ($hq !== '' ? ' based in ' . $hq : ($loc !== '' ? ' based in ' . $loc : ''))
             . '.';
         if ($n > 0) {
             $second = 'Kids Over Profits has records of ' . $n . ' ' . ($n === 1 ? 'program' : 'programs') . ' it has run'
-                . ($k > 1 ? ' in ' . $k . ' states and countries' : ($k === 1 ? ' in ' . array_keys($states)[0] : ''))
+                . ($k > 1 ? ' in ' . kop_operator_place_phrase(count($states), count($countries)) : ($k === 1 ? ' in ' . array_keys($states + $countries)[0] : ''))
                 . ($open > 0 ? ', ' . $open . ' of them open' : '')
                 . '.';
         } else {
@@ -977,6 +989,8 @@ if (!function_exists('kop_operator_page_data')) {
             'related'       => function_exists('kop_related_for_operators') ? kop_related_for_operators($members) : array(),
             'open_count'    => $open,
             'place_count'   => $k,
+            'state_count'   => count($states),
+            'country_count' => count($countries),
             'news'          => $news,
             'lawsuits'      => $lawsuits,
             'memorials'     => $memorials,

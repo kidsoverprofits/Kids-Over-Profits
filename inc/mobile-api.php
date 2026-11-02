@@ -304,7 +304,7 @@ if (!function_exists('kop_mobile_operator_payload')) {
     function kop_mobile_operator_payload(array $page) {
         $keep = array(
             'id', 'name', 'full_name', 'url', 'aka', 'current_name', 'status', 'facts', 'parents', 'subsidiaries',
-            'facilities', 'program_tree', 'open_count', 'place_count', 'lawsuits', 'memorials', 'websites', 'notes', 'about',
+            'facilities', 'program_tree', 'open_count', 'place_count', 'state_count', 'country_count', 'lawsuits', 'memorials', 'websites', 'notes', 'about',
             'timeline', 'people', 'summary', 'index_url', 'network_url', 'updated', 'updated_label',
         );
         $out = array('api_version' => KOP_MOBILE_API_VERSION);

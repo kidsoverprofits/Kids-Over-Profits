@@ -573,7 +573,7 @@ if (!function_exists('kop_operator_history_is_major')) {
 
 if (!function_exists('kop_operator_history_index_rows')) {
     /**
-     * Every company page: [{id, name, slug, url, programs, open, states, places,
+     * Every company page: [{id, name, slug, url, programs, open, states, countries, places,
      * years, status, has_history, lede, map_degree, major}], majors first by size. Read
      * from the tables in two queries, so the index never builds whole pages.
      */
@@ -610,12 +610,17 @@ if (!function_exists('kop_operator_history_index_rows')) {
             }
             $open = 0;
             $places = array();
+            $countries = 0;
             $first = 0;
             $last = 0;
             foreach ($programs as $f) {
                 if (strcasecmp(trim((string) $f['status']), 'Open') === 0) $open++;
-                $place = trim((string) ($f['state'] ?: ($f['country'] !== 'United States' ? $f['country'] : '')));
-                if ($place !== '') $places[strtoupper($place)] = $place;
+                $abroad = (string) $f['country'] !== '' && $f['country'] !== 'United States';
+                $place = trim((string) ($abroad ? $f['country'] : $f['state']));
+                if ($place !== '' && !isset($places[strtoupper($place)])) {
+                    $places[strtoupper($place)] = $place;
+                    if ($abroad) $countries++;
+                }
                 if ((int) $f['start_year'] > 0 && (!$first || (int) $f['start_year'] < $first)) $first = (int) $f['start_year'];
                 foreach (array($f['start_year'], $f['end_year']) as $y) if ((int) $y > $last) $last = (int) $y;
             }
@@ -629,7 +634,8 @@ if (!function_exists('kop_operator_history_index_rows')) {
                 'url'         => kop_operator_pages_url_for_slug($entry['slug']),
                 'programs'    => count($programs),
                 'open'        => $open,
-                'states'      => count($places),
+                'states'      => count($places) - $countries,
+                'countries'   => $countries,
                 'places'      => array_values($places),   // state codes, or countries outside the US
                 'years'       => $founded ? 'Founded ' . $founded : ($first ? 'Programs from ' . $first : ''),
                 'status'      => trim((string) ($op['status'] ?? '')),

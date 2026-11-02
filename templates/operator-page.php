@@ -122,8 +122,11 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($page['place_count'] > 0) : ?>
-                    <div><dt>States and countries</dt><dd><?php echo (int) $page['place_count']; ?></dd></div>
+                <?php if ($page['state_count'] > 0) : ?>
+                    <div><dt><?php echo $page['state_count'] === 1 ? 'State' : 'States'; ?></dt><dd><?php echo (int) $page['state_count']; ?></dd></div>
+                <?php endif; ?>
+                <?php if ($page['country_count'] > 0) : ?>
+                    <div><dt><?php echo $page['country_count'] === 1 ? 'Country outside the US' : 'Countries outside the US'; ?></dt><dd><?php echo (int) $page['country_count']; ?></dd></div>
                 <?php endif; ?>
             </dl>
 

@@ -23,7 +23,7 @@ foreach ($kop_oi['rows'] as $r) {
 $kop_oi_bits = static function (array $r) {
     $bits = array();
     if ($r['programs'] > 0) $bits[] = $r['programs'] . ' ' . ($r['programs'] === 1 ? 'program' : 'programs') . ($r['open'] ? ', ' . $r['open'] . ' open' : '');
-    if ($r['states'] > 1) $bits[] = $r['states'] . ' states and countries';
+    if ($r['states'] + $r['countries'] > 1) $bits[] = kop_operator_place_phrase($r['states'], $r['countries']);
     if ($r['years'] !== '') $bits[] = $r['years'];
     if ($r['status'] !== '' && strcasecmp($r['status'], 'Active') !== 0) $bits[] = $r['status'];
     return $bits;
