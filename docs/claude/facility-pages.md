@@ -15,7 +15,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-profile-notes.php
 # this site; kop_facility_pages_is_own_source()) is not shown, and the Woodbury Reports wording ("Woodbury Reports, May 2007, p. 20") is
 # not printed or put in a preview, only the link to our copy of the issue (kop_facility_pages_woodbury_clean(), _tidy_citations(), _cited_html())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-citation-cleanup.php [--no-db] [--id=9607]   # functions, then real pages from tmp/prod.sqlite
-# On every front-end page js/citation-previews.js turns each link reading "source" / "source 2" into a Wikipedia-style superscript
+# On every front-end page js/citation-previews.js turns each link reading "source" / "source 2", and each link in a bracket that
+# holds only links (the company histories' "([Form 10-K for 2011, SEC](url); [NBC News](url))", bracketGroup()), into a Wikipedia-style superscript
 # [n] that jumps to a "Sources" list it adds at the foot of the main column (#kop-sources; on facility/operator pages a
 # .kop-fp-section, so it folds like the rest), each entry with ^ / ^ a b backlinks that open a folded section first. Same address,
 # same number; "(source; source)." -> ".[1][2]"; a span.kop-fp-src of only citations goes inline (.kop-cite-group) and a rail

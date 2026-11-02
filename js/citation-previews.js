@@ -25,7 +25,9 @@
     /*
      * Numbered citations, as on Wikipedia. Every in-text link reading "source"
      * (the writers' "([source](url))", kop_citation_link(..., 'source', ...),
-     * the relationship and write-up "source" links, and pages drawn in JS) is
+     * the relationship and write-up "source" links, and pages drawn in JS), and
+     * every link in a bracket holding only links (the company histories'
+     * "([Form 10-K for 2011, SEC](url); [NBC News, 2024](url))", see bracketGroup()) is
      * shown as a superscript [n] that jumps to entry n of a "Sources" list at the
      * foot of the page; the entry is a proper citation (author, date, title,
      * publication: inc/citation-lookup.php, or the citation text the page gave)
@@ -283,7 +285,8 @@
         var ref = refs[key];
         var isNew = !ref;
         if (isNew) {
-            var label = (link.getAttribute('data-kop-citation-preview') || link.getAttribute('title') || '').trim();
+            var text = (link.textContent || '').trim();
+            var label = (link.getAttribute('data-kop-citation-preview') || link.getAttribute('title') || (SOURCE_TEXT.test(text) ? '' : text)).trim();
             var fromCite = label !== '' && !SOURCE_TEXT.test(label);
             if (!fromCite) label = fallbackPreview(link) || link.href;
             ref = refs[key] = { n: ++count, url: link.href, label: label, fromCite: fromCite, cite: null, backs: [], anchors: [], back: null, li: null, link: null };
@@ -379,12 +382,48 @@
         if (isText(wrap.previousSibling)) wrap.previousSibling.data = wrap.previousSibling.data.replace(/\s+$/, '');
     }
 
+    /* A link that can stand as a citation: a plain-text link to a page, not "(PDF)" or "(here)". */
+    function citeLink(node) {
+        if (!node || node.nodeType !== 1 || node.tagName !== 'A' || node.children.length) return false;
+        var href = node.getAttribute('href') || '';
+        if (!/^(?:https?:)?\/\//i.test(href) && href.charAt(0) !== '/') return false;
+        var text = (node.textContent || '').trim();
+        return text.length >= 3 && !/^(?:pdf|docx?|video|audio|map|photo|image|here|link|archived?)$/i.test(text);
+    }
+
+    /*
+     * The links of a bracket that holds nothing but links: "([Form 10-K for 2011, SEC](url))" or
+     * "([A](a); [B](b))", the way the company histories cite. Null for a link that is part of a
+     * sentence ("according to the [r/troubledteens wiki](url)").
+     */
+    function bracketGroup(link) {
+        var first = link;
+        while (isText(first.previousSibling) && /^\s*;\s*$/.test(first.previousSibling.data) && citeLink(first.previousSibling.previousSibling)) {
+            first = first.previousSibling.previousSibling;
+        }
+        if (!isText(first.previousSibling) || !/\(\s*$/.test(first.previousSibling.data)) return null;
+        var group = [first];
+        var last = first;
+        while (isText(last.nextSibling) && /^\s*;\s*$/.test(last.nextSibling.data) && citeLink(last.nextSibling.nextSibling)) {
+            last = last.nextSibling.nextSibling;
+            group.push(last);
+        }
+        if (!isText(last.nextSibling) || !/^\s*\)/.test(last.nextSibling.data)) return null;
+        return group.every(citeLink) ? group : null;
+    }
+
     function numberSources(root) {
         var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link)');
         var made = [];
+        var named = [];
+        Array.prototype.forEach.call(links, function (link) {
+            if (named.indexOf(link) !== -1 || SOURCE_TEXT.test((link.textContent || '').trim())) return;
+            var group = bracketGroup(link);
+            if (group) named.push.apply(named, group);
+        });
         Array.prototype.forEach.call(links, function (link) {
             var text = (link.textContent || '').trim();
-            if (!SOURCE_TEXT.test(text)) return;
+            if (!SOURCE_TEXT.test(text) && named.indexOf(link) === -1) return;
             if (link.children.length || link.closest(SKIP)) return;
             var cell = link.closest('td');
             if (cell && cell.textContent.trim() === text) return;
