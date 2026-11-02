@@ -167,11 +167,13 @@ foreach ($index['ids'] as $id => $e) {
         // UHS bought hospitals that opened decades before it, and no years of its own are on
         // record: none of their openings or deaths may land on its timeline (owner, 2026-11-02:
         // nothing from before the company ran the program).
-        // Provo Canyon School lists Charter until 2000 and then UHS: no deal says UHS took it in 2000.
+        // Its PSI programs count from 2010; Provo Canyon School from 2000, when UHS bought it from
+        // Charter (the record says "Universal Health Services (since 2000)", UHS 10-Ks).
         $early = array();
         $psi = false;
         foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) {
-            if ($y['year'] < 2010 && in_array($ev['kind'], array('opened', 'death', 'incident', 'takeover', 'began'), true)) $early[] = $y['year'] . ' ' . $ev['title'];
+            $from = strpos($ev['title'], 'Provo Canyon School') !== false ? 2000 : 2010;
+            if ($y['year'] < $from && in_array($ev['kind'], array('opened', 'death', 'incident', 'takeover', 'began'), true)) $early[] = $y['year'] . ' ' . $ev['title'];
             if ($y['year'] === 2010 && $ev['kind'] === 'deal' && strpos($ev['title'], 'Psychiatric Solutions') !== false && count($ev['items']) > 0) $psi = true;
         }
         $check('the UHS timeline has no program years from before it owned them', !$early, implode(' | ', $early));
@@ -194,10 +196,17 @@ foreach ($index['ids'] as $id => $e) {
         $check('the Aspen timeline has Youth Care of Utah going to Acadia with the 2015 deal', $on_deal, implode(' | ', $handovers));
     }
     if ($e['slug'] === 'charter-behavioral-health-systems') {
-        // Provo Canyon School lists Charter until 2000, then UHS with no year: no handover to UHS in 2000.
+        // Provo Canyon School lists Charter until 2000, then UHS from 2000: UHS bought it from Charter.
         $titles = array();
         foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) $titles[] = $y['year'] . ' ' . $ev['title'] . ' / ' . $ev['lead'];
-        $check('the Charter timeline does not hand Provo Canyon School straight to UHS', !preg_grep('/passed to Universal Health/', $titles) && (bool) preg_grep('/^2000 Stopped running Provo Canyon School \/ Next on record: Universal Health Services/', $titles), implode(' | ', $titles));
+        $check('the Charter timeline hands Provo Canyon School to UHS in 2000', (bool) preg_grep('/^2000 Provo Canyon School passed to Universal Health Services/', $titles) && !preg_grep('/Next on record/', $titles), implode(' | ', $titles));
+    }
+    if ($e['slug'] === 'sequel-tsi') {
+        // Capital Academy lists Sequel TSI until 2021, then Willow Grove with no year (only "by 2022-04-26"
+        // in the sources): the timeline must not name Willow Grove as the buyer.
+        $titles = array();
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) $titles[] = $y['year'] . ' ' . $ev['title'] . ' / ' . $ev['lead'];
+        $check('the Sequel timeline does not hand Capital Academy straight to Willow Grove', !preg_grep('/passed to Willow Grove/', $titles) && (bool) preg_grep('/^2021 Stopped running .* \/ Next on record: Willow Grove/', $titles), implode(' | ', $titles));
     }
     if ($e['slug'] === 'psychiatric-solutions-inc') {
         // Its programs went to UHS in 2010: on the approved deal (the milestone above) or as a handover.
