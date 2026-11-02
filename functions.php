@@ -275,6 +275,8 @@ require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-mentions.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-create.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-facts.php';
+// One shape for every fact (docs/claude/fact-shape.md): rows of every queue and the record's own lines compared like with like; read only
+require_once get_stylesheet_directory() . '/inc/fact-shape.php';
 // Facts from news articles: an hourly reader proposes what each approved article says that belongs on a record (Woodbury Facts cards + Review inbox > Facts from news)
 require_once get_stylesheet_directory() . '/inc/news-facts.php';
 // Copies earlier approvals and merges left on facility records (one person twice, a name twice, one event twice), tidied in the review inbox

@@ -470,6 +470,19 @@ function kop_wbf_record_orgs(array $doc) {
 }
 
 /**
+ * Whether the record lists this person in that part: $as 'founder' = a staff entry whose role (or past jobs) says found,
+ * 'owner' = one that says own / found / ceo / president. A person counts only in the part the record gives them.
+ */
+function kop_wbf_person_role_on_record(array $doc, $name, $as) {
+    $re = $as === 'founder' ? '/found/i' : '/\bown|found|ceo|president/i';
+    foreach (kop_wbf_staff_all($doc) as $s) {
+        if (!preg_match($re, (string) ($s['role'] ?? '') . ' ' . (string) ($s['pastJobs'] ?? ''))) continue;
+        if (kop_wbf_same_person($name, $s['name'] ?? '')) return true;
+    }
+    return false;
+}
+
+/**
  * Why a list item adds nothing the record does not hold already, in other
  * words ('' when it adds something): a line that says the same, or a note
  * whose fact is in the record's own fields.
@@ -595,15 +608,9 @@ function kop_wbf_list_covers(array $doc, $path, $value) {
                 }
             }
             // A person counts only when the record has them in that part: a founder as a founder, an owner as an owner.
-            $as = $label === 'founded by' ? '/found/i' : '/\bown|found|ceo|president/i';
-            $staff = array_values(array_filter(kop_wbf_staff_all($doc), function ($s) use ($as) {
-                return (bool) preg_match($as, (string) ($s['role'] ?? '') . ' ' . (string) ($s['pastJobs'] ?? ''));
-            }));
             foreach (preg_split('/\s*(?:,|;|&|\band\b|\bwith\b)\s*/', trim(preg_replace('/\s*\([^)]*\)/', '', $rest))) as $part) {
                 if (!preg_match('/^(?:(?:Dr|Rev|Mr|Mrs|Ms)\.?\s+)?[A-Z][\w\'.-]*(?:\s+[A-Z][\w\'.-]*){1,3}$/', trim($part))) continue;
-                foreach ($staff as $s) {
-                    if (kop_wbf_same_person($part, $s['name'] ?? '')) { $rest = str_replace($part, ' ', $rest); $said = true; break; }
-                }
+                if (kop_wbf_person_role_on_record($doc, $part, $label === 'founded by' ? 'founder' : 'owner')) { $rest = str_replace($part, ' ', $rest); $said = true; }
             }
             $rest = preg_replace('/\b(?:Inc|LLC|Corp)\b\.?/i', ' ', $rest);
             if ($said && $only($rest, array('acquired', 'bought', 'purchased', 'sold', 'taken', 'over', 'since', 'in', 'president', 'director', 'ceo', 'partnered'))) {

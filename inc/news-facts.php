@@ -234,6 +234,20 @@ function kop_nf_linked(PDO $pdo, $news_id) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * The record a news fact is about, by the exact-name rule (docs/claude/fact-shape.md 7): array(record id, how) as
+ * kop_autoconn_exact_record() gives it, plus 'own' (the fact has its record), 'person' and 'agency' (those subjects are
+ * never linked by name). $fact is a news_facts row (subject_name) or a parsed fact (subject). Reads only.
+ */
+function kop_nf_record_for(PDO $pdo, array $fact) {
+    if ((int) ($fact['facility_id'] ?? 0) > 0) return array((int) $fact['facility_id'], 'own');
+    $kind = (string) ($fact['subject_kind'] ?? 'facility');
+    if ($kind === 'person' || $kind === 'agency') return array(0, $kind);
+    $ids = array();
+    foreach (kop_nf_linked($pdo, (int) ($fact['news_id'] ?? 0)) as $f) $ids[] = (int) $f['id'];
+    return kop_autoconn_exact_record($pdo, (string) ($fact['subject_name'] ?? ($fact['subject'] ?? '')), $ids);
+}
+
 /* ---- Asking the AI --------------------------------------------------- */
 
 function kop_nf_build_prompt(array $news, array $linked, $text) {
@@ -291,7 +305,7 @@ function kop_nf_clean_date($raw) {
 }
 
 /** The model's reply as clean facts, or null when it cannot be read. */
-function kop_nf_parse_reply($reply, array $linked) {
+function kop_nf_parse_reply($reply, array $linked, ?PDO $pdo = null) {
     $reply = preg_replace('/^\s*```(?:json)?\s*|\s*```\s*$/i', '', trim((string) $reply));
     $data = json_decode($reply, true);
     if (!is_array($data) && preg_match('/\{.*\}/s', $reply, $m)) {
@@ -306,6 +320,7 @@ function kop_nf_parse_reply($reply, array $linked) {
         $ids[(int) $f['id']] = $f;
     }
     $standings = kop_nf_standings();
+    $linked_index = null;
     $out = array();
     $seen = array();
     foreach ($data['facts'] as $f) {
@@ -318,6 +333,13 @@ function kop_nf_parse_reply($reply, array $linked) {
         $fid = (int) ($f['facilityId'] ?? 0);
         $kind = strtolower(trim((string) ($f['subjectKind'] ?? '')));
         $standing = strtolower(trim((string) ($f['standing'] ?? '')));
+        // facilityId left empty (or not one of the linked ids) although the subject is exactly the name of a program the
+        // article is linked to: that program (docs/claude/fact-shape.md 7.3). Only a linked one; a person or agency never.
+        if (!isset($ids[$fid]) && $pdo && $ids && !in_array($kind, array('person', 'agency'), true) && function_exists('kop_autoconn_exact_record')) {
+            if ($linked_index === null) $linked_index = kop_autoconn_name_index_of($pdo, array_keys($ids));
+            $hit = kop_autoconn_exact_record($pdo, $subject, array_keys($ids), $linked_index);
+            $fid = isset($ids[$hit[0]]) ? $hit[0] : 0;
+        }
         $fact = array(
             'category'     => $cat,
             'subject'      => mb_substr($subject, 0, 255),
@@ -565,7 +587,7 @@ function kop_nf_read_article(PDO $pdo, array $news, $write, $ai = null) {
         }
         return array('error', array(), $e->getMessage());
     }
-    $facts = kop_nf_parse_reply($raw, $linked);
+    $facts = kop_nf_parse_reply($raw, $linked, $pdo);
     if ($facts === null) {
         if ($write) {
             kop_nf_record_scan($pdo, $news['id'], $news['hash'], 'error', 0, 'Unreadable reply: ' . mb_substr((string) $raw, 0, 300));

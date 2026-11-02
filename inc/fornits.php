@@ -934,12 +934,7 @@ function kop_fornits_doc_apply(array &$doc, array $r, $target) {
             'pastJobs' => ''), 'Staff: ' . $v['person']);
     }
     if ($r['kind'] === 'incident') {
-        $labels = array('death' => 'Death', 'abuse' => 'Abuse', 'sexual_abuse' => 'Sexual abuse', 'restraint' => 'Restraint',
-            'seclusion' => 'Seclusion', 'neglect' => 'Neglect', 'runaway' => 'Runaway', 'injury' => 'Injury',
-            'lawsuit' => 'Lawsuit', 'investigation' => 'Investigation', 'other' => 'Incident');
-        $when = $v['year'] !== '' ? $v['year'] : 'Reported ' . kop_fornits_month($r['post_date']);
-        $line = $when . ': ' . ($labels[$v['category']] ?? 'Incident') . ': ' . rtrim($v['summary'], '.') . '. (' . kop_fornits_cite($r) . ')';
-        return $wbf('add_list', 'criticalIncidents.customIncidents', $line, 'Incident');
+        return $wbf('add_list', 'criticalIncidents.customIncidents', kop_fornits_incident_line($r), 'Incident');
     }
     if ($r['kind'] === 'testimony') {
         $id = 'fornits-' . (int) $r['topic_id'] . '-' . (int) $r['post_n'];
@@ -957,8 +952,23 @@ function kop_fornits_doc_apply(array &$doc, array $r, $target) {
         return $wbf('set_closed', 'operatingPeriod.status', array('endYear' => $v['year'] !== '' ? (int) $v['year'] : null),
             'Reported closed on Fornits: ' . $v['summary']);
     }
-    $line = 'Fornits lead (' . $v['type'] . '): ' . rtrim($v['summary'], '.') . '.' . ($v['url'] !== '' ? ' ' . $v['url'] : '') . ' (' . kop_fornits_cite($r) . ')';
-    return $wbf('add_list', 'notes', $line, 'Lead');
+    return $wbf('add_list', 'notes', kop_fornits_lead_line($r), 'Lead');
+}
+
+/** The incident line a Fornits incident adds to the record: "2004: Abuse: <summary>. (Fornits forum, post by X, March 2005: <url>)". */
+function kop_fornits_incident_line(array $r) {
+    $v = json_decode((string) $r['value'], true) ?: array();
+    $labels = array('death' => 'Death', 'abuse' => 'Abuse', 'sexual_abuse' => 'Sexual abuse', 'restraint' => 'Restraint',
+        'seclusion' => 'Seclusion', 'neglect' => 'Neglect', 'runaway' => 'Runaway', 'injury' => 'Injury',
+        'lawsuit' => 'Lawsuit', 'investigation' => 'Investigation', 'other' => 'Incident');
+    $when = $v['year'] !== '' ? $v['year'] : 'Reported ' . kop_fornits_month($r['post_date']);
+    return $when . ': ' . ($labels[$v['category']] ?? 'Incident') . ': ' . rtrim($v['summary'], '.') . '. (' . kop_fornits_cite($r) . ')';
+}
+
+/** The note line a Fornits lead adds to the record: "Fornits lead (news): <summary>. <url> (Fornits forum, ...)". */
+function kop_fornits_lead_line(array $r) {
+    $v = json_decode((string) $r['value'], true) ?: array();
+    return 'Fornits lead (' . $v['type'] . '): ' . rtrim($v['summary'], '.') . '.' . ($v['url'] !== '' ? ' ' . $v['url'] : '') . ' (' . kop_fornits_cite($r) . ')';
 }
 
 /** A staff item or a closure lead as the Woodbury change it makes (kop_wbf_doc_apply()), citing the post; null for other kinds. */

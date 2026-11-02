@@ -116,19 +116,33 @@ function kop_autoconn_name_index(PDO $pdo) {
     static $index = null;
     if ($index !== null) return $index;
     $index = array();
-    foreach ($pdo->query('SELECT id, name, json_data FROM facilities_v2') as $f) {
-        $d = json_decode((string) $f['json_data'], true);
-        $ident = is_array($d) ? (array) ($d['identification'] ?? array()) : array();
-        $all = array($f['name'], $ident['name'] ?? '', $ident['currentName'] ?? '');
-        foreach (array('otherNames', 'pastNames') as $k) {
-            foreach ((array) ($ident[$k] ?? array()) as $n) $all[] = is_array($n) ? ($n['name'] ?? '') : $n;
-        }
-        foreach ($all as $n) {
-            $k = kop_autoconn_key($n);
-            if ($k !== '') $index[$k][(int) $f['id']] = true;
-        }
-    }
+    foreach ($pdo->query('SELECT id, name, json_data FROM facilities_v2') as $f) kop_autoconn_index_add($index, $f);
     return $index;
+}
+
+/** The name index of only these records (a reader that may pick only among them needs no other). */
+function kop_autoconn_name_index_of(PDO $pdo, array $ids) {
+    $ids = array_values(array_filter(array_map('intval', $ids)));
+    $index = array();
+    if (!$ids) return $index;
+    $stmt = $pdo->prepare('SELECT id, name, json_data FROM facilities_v2 WHERE id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')');
+    $stmt->execute($ids);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $f) kop_autoconn_index_add($index, $f);
+    return $index;
+}
+
+/** One record's names (name, current, other and past) into a name key => [record id => true] index. */
+function kop_autoconn_index_add(array &$index, array $f) {
+    $d = json_decode((string) $f['json_data'], true);
+    $ident = is_array($d) ? (array) ($d['identification'] ?? array()) : array();
+    $all = array($f['name'], $ident['name'] ?? '', $ident['currentName'] ?? '');
+    foreach (array('otherNames', 'pastNames') as $k) {
+        foreach ((array) ($ident[$k] ?? array()) as $n) $all[] = is_array($n) ? ($n['name'] ?? '') : $n;
+    }
+    foreach ($all as $n) {
+        $k = kop_autoconn_key($n);
+        if ($k !== '') $index[$k][(int) $f['id']] = true;
+    }
 }
 
 /**
@@ -174,6 +188,27 @@ function kop_autoconn_distinctive($name) {
     $place = array('mountain', 'mountains', 'valley', 'river', 'creek', 'springs', 'spring', 'lake', 'canyon', 'ridge',
         'pines', 'oaks', 'north', 'south', 'east', 'west');
     return count($words) >= 3 && (bool) array_intersect($words, $place);
+}
+
+/**
+ * The one record a name is, by its exact key and nothing looser (docs/claude/fact-shape.md 7.1): no partial name, no
+ * distinctive-word guess. Returns array(record id, how), id 0 unless how is 'exact' or 'article':
+ * exact (one record holds the key), article (several do and exactly one of $prefer_ids is among them), ambiguous (several,
+ * no tie-break), generic (the name says only generic words, kop_autoconn_distinctive()), none.
+ * $index is for tests: a name key => [record id => true] map in place of kop_autoconn_name_index().
+ */
+function kop_autoconn_exact_record(PDO $pdo, $name, array $prefer_ids = array(), $index = null) {
+    $key = kop_autoconn_key($name);
+    if ($key === '') return array(0, 'none');
+    $holders = ($index !== null ? $index : kop_autoconn_name_index($pdo))[$key] ?? array();
+    if (!$holders) return array(0, 'none');
+    if (!kop_autoconn_distinctive($name)) return array(0, 'generic');
+    if (count($holders) === 1) return array((int) key($holders), 'exact');
+    $hit = array();
+    foreach ($prefer_ids as $id) {
+        if (isset($holders[(int) $id])) $hit[(int) $id] = true;
+    }
+    return count($hit) === 1 ? array((int) key($hit), 'article') : array(0, 'ambiguous');
 }
 
 /* ---- Woodbury Reports pages ------------------------------------------------- */

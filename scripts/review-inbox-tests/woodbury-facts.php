@@ -419,6 +419,9 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
             }
         });
     }
+
+    // One shape for every fact (inc/fact-shape.php), on fixtures.
+    kop_test_fact_shape($check);
 }
 
 /**
