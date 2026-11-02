@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 $kop_vol = kop_vol_current();
 $kop_vol_preview = !$kop_vol && current_user_can('manage_options');
 $kop_vol_projects = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-volunteers.php') : '';
-// "How this works" is open until they have made a call or played a practice round.
+// "How this works" is open until they have made a call.
 $kop_vol_new = $kop_vol && function_exists('kop_vol_has_started') && !kop_vol_has_started((int) $kop_vol['id']);
 $kop_vol_stall = function_exists('kop_volp_sweep_rules') ? (int) kop_volp_sweep_rules()['stall_days'] : 3;
 $kop_vol_signup = home_url('/volunteer/#kop-vol-signup');
@@ -35,9 +35,8 @@ get_header();
                 <p>Under <em>Choose your work</em>, pick any of the four. Research questions: tick the ones you want and take them.
                     Pictures: five pages at a time. Social media posts: press <em>Ask for this work</em> and we set you up; the work then
                     shows up on this page.</p>
-                <p>Inspection findings start with a practice round: 10 findings an admin has already decided, with the decision shown after
-                    each one. Get 8 of them the same and your first 10 real ones open. On each, choose <em>Recommend approve</em>,
-                    <em>Recommend reject</em> or <em>Not sure</em>; not sure is a good answer when the note says why.</p>
+                <p>Inspection findings come 10 at a time. On each, choose <em>Recommend approve</em>, <em>Recommend reject</em> or
+                    <em>Not sure</em>; not sure is a good answer when the note says why. An admin checks every call before it changes anything.</p>
                 <h2>Choosing your next work</h2>
                 <p>The four kinds of work stay on this page under <em>Choose more work</em> while you have something going. When a batch
                     is done, <em>Give me 10 more</em> starts the next one.</p>

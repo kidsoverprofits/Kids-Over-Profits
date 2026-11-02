@@ -119,18 +119,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # email in the volunteers row, admin-only); shows the link once and sets the cookie. Hidden bot field, 3 a day per address+browser, 30 a day
 # in all (filters kop_vols_per_day_each / kop_vols_per_day); a signed-in device is sent to its page. The volunteer_projects listing (templates/page-volunteers.php) links to it.
 # kop_vol_never_sources() also bars drive-docs (the owner's private Docs) and podcasts (statements by named people)
-# Queues are earned (owner, 2026-10-23): kop_vol_sources_for($vid) = the queues a volunteer may open themselves (tabs, items, self-assign):
-# passed its practice round, a record there (10 admin-decided, 80%), or recommended there before option kop_vol_earned_before (set on first
-# run, so the earlier volunteers keep theirs). kop_vol_earnable_sources() = kop_vol_starter_source() ('inspection-highlights', the owner's
-# top priority) + the ticked queues. A new sign-up sees "Start now": practice in the starter queue, and passing self-assigns the first 10 at
-# once; a finished batch offers "Give me 10 more"; "Learn another queue" practises the rest. Projects still open their own items to anyone
-# Practice cards are curated by kop_volpr_tricky() (a volunteer disagreed / Not sure, 2+ wrong in practice, a Brief FAQ 'from' #id or #a-b,
-# struck at Volunteer Reviewers > Practice cards ?practice=<source>, option kop_volpr_struck) and kop_volpr_unclear() (nothing to read, an
-# archive.md-family link); a round never repeats a title. The owner picks cards too: "Use as a practice question" on a decided card in the
-# Review inbox (card add-on 'practice', inc/review-inbox/_practice-action.php; queues volunteers practise in; the admin's logged Approve/Reject
-# is the answer) -> option kop_volpr_picked, drawn first, never left out as tricky; listed with Unpick under "Picked by you" on Practice cards.
-# A decided card is told from a waiting one by its status and the queue's first view (kop_volpr_waiting()), since a decided finding still
-# offers the other button; until 2026-11-02 that made every inspection finding look waiting, so practice there drew nothing. /volunteer/: the review and research cards -> #kop-vol-signup; GET
+# No practice round (owner, 2026-11-02: "let volunteers get straight to work"; the owner turns off anyone whose calls are no good).
+# kop_vol_sources_for($vid) = kop_vol_earnable_sources() for everyone = kop_vol_starter_source() ('inspection-highlights', the owner's top
+# priority) + the ticked queues when filter kop_vol_more_queues is on (off on the site). A new sign-up's "Give me 10" self-assigns a batch at
+# once; a finished batch offers "Give me 10 more". kop_volp_self_status() closes self-assign only once 10 calls are admin-checked agreeing
+# under 80%. Projects still open their own items in queues not open to volunteers. /volunteer/: the review and research cards -> #kop-vol-signup; GET
 # kop/v1/volunteer/signup tells the cached page the device is signed in (form swapped for "Open your volunteer page")
 # The page intro (templates/volunteer-review.php) says what the work is, carries the content warning (also on the /volunteer/ form) and a
 # "How this works" fold (open until kop_vol_has_started()): getting started, choosing next work, taking a break or stopping, questions.
@@ -178,13 +171,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # never sent to the inbox. Approve: kop_vimg_to_media() (reuses an attachment with the same _kop_source_url; Commons via its API at <=2000 px;
 # caption = "Author, License, via Wikimedia Commons"; FileBird Site Photos) + kop_vimg_place() (inc/page-images.php helpers); Undo approve unplaces.
 # The first approved pick fills the spot for every volunteer. A new spot = one line in the seed (no deploy step: it is read when a project is made)
-# Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
-# 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item;
-# items decided before the log began, 2026-10-05, by their own status: kop_volpr_unlogged(), inspection findings, filter kop_volpr_unlogged,
-# half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);
-# each call says what the admin decided; 8 of 10 passes (filters kop_volpr_size / _pass / _min_each). A pass opens self-assign for that queue
-# ('via' 'practice') until the volunteer has 10 admin-checked calls, which then decide. Practice never writes kop_volunteer_recs, so it never
-# closes anything or counts toward agreement, self-assign by record or volunteer-auto. The Volunteers table shows "Practice: News 9 of 10, passed"
+# The practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, "Use as a practice question", Practice cards) was removed
+# 2026-11-02; its code is in git history before that date. The table and options kop_vol_practice_db / kop_volpr_struck / kop_volpr_picked /
+# kop_vol_earned_before stay on the server, unread.
 # Research projects (inc/volunteer-research.php): source 'research:<kind>' (kop_volr_kinds(): closing-year, opening-year, status, news = facilities_v2
 # records lacking it, narrowed by a state or a word; custom = typed questions, one per line). The volunteer writes what they found + links, or
 # "Could not find it" + where they looked ({prefix}kop_vol_answers); each new link goes to the review inbox at once (kop_ext_insert_*, same
@@ -280,3 +269,15 @@ js/review-inbox.js renderRecord()): every waiting card about one facility, or a 
 write-up first. Each queue's waiting view is searched by the record's names and kept where the card's `facility` is the record
 (or, with no facility, its text has the name). Queues past 40 s or 70% of memory are skipped and named. Every card that names a
 facility has "Everything waiting for this record". Tested in `test-review-inbox.php --source=writeups`.
+
+## Clear and fold (Woodbury Facts, Fornits, Facts from news)
+
+Hourly, after the Woodbury clear, `kop_fold_hourly()` (inc/fact-fold.php) files what is already on hand and folds the same fact told
+several times into one card; there is no sample and no confirm step, Undo is the check (owner, 2026-11-02). **Cleared** items sit on
+each queue's Rejected / Skipped tab (news facts: Dropped) with the reason ("Already on the record: ...", "Held for the write-up:
+..."). **Folded** items sit on "Folded together" (every status filter of the three queues has it), and the kept card lists them under
+its text and cites every source; each has "Undo the fold" (card and Recently done), which puts it back and takes its citations off the
+kept card, for good. A different number, date, name or campus never joins, and a different value on the record is a conflict, never
+cleared. Items a person edited or sent back are left alone. News facts that name one record exactly are linked to it first (Recently
+done, source Facts from news; Undo unlinks). Count mode on the mirror: `php scripts/fold-dry-run.php` (also `fact-dedupe.php --engine`).
+Tests: `scripts/review-inbox-tests/fact-fold.php`. The AI step is the hook `kop_fold_ai_pairs()`, not written yet.

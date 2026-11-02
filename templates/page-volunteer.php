@@ -67,7 +67,7 @@ while (have_posts()) :
                     <?php kop_ie_html_start('volunteer:review', 'Volunteer page: review inspection findings'); ?>
                     <h3 class="kop-volpage-way-h" id="kop-volpage-review-h">Review inspection findings</h3>
                     <p>Our scanner flags passages in state inspection reports. You read each one and decide: was a young person harmed or put in danger, or is it a paperwork violation?</p>
-                    <p class="kop-volpage-meta">A 10-minute practice round comes first.</p>
+                    <p class="kop-volpage-meta">Ten at a time. An admin checks every call.</p>
                     <?php kop_ie_html_end(); ?>
                 </div>
 

@@ -144,55 +144,42 @@ function kop_vol_earnable_sources() {
     $all = function_exists('kop_rinbox_sources') ? kop_rinbox_sources() : array();
     $first = kop_vol_starter_source();
     $out = (isset($all[$first]) && !in_array($first, kop_vol_never_sources(), true)) ? array($first => $all[$first]) : array();
-    // The other queues' practice rounds are not ready yet (owner, 2026-10-25): volunteers get the starter queue only,
-    // plus whatever projects an admin makes for them (kop_volp_allows()). Turn the rest back on with this filter.
+    // Volunteers get the starter queue only (owner, 2026-10-25), plus whatever projects an admin makes for them
+    // (kop_volp_allows()). Turn the rest back on with this filter.
     if (!apply_filters('kop_vol_more_queues', false)) return $out;
     return $out + kop_vol_sources();
 }
 
 /**
- * The queues this volunteer may open by themselves (tabs, self-assigned batches): the ones they passed a practice
- * round in, the ones where their own record earned it (10 calls an admin decided, agreeing 80%, as for self-assign),
- * and the ones they recommended in before this rule (option kop_vol_earned_before, set the first time it runs: the
- * volunteers from before 2026-10-23 keep theirs). A new volunteer has none until a practice round; projects made
- * for them open their own items whatever this says. $vid 0 = an admin's preview: all of them.
+ * The queues this volunteer may open by themselves (tabs, self-assigned batches): every queue a volunteer can earn,
+ * from their first visit. There is no practice round (owner, 2026-11-02: "let volunteers get straight to work"); an
+ * admin turns off a volunteer whose calls are no good. Projects made for them open their own items whatever this says.
  */
 function kop_vol_sources_for($vid) {
-    $pool = kop_vol_earnable_sources();
-    if (!(int) $vid) return $pool;
-    global $wpdb;
-    kop_vol_ensure_tables();
-    $before = (string) get_option('kop_vol_earned_before', '');
-    if ($before === '') {
-        $before = current_time('mysql', true);
-        update_option('kop_vol_earned_before', $before, false);
-    }
-    $rules = function_exists('kop_volp_self_rules') ? kop_volp_self_rules() : array('decided' => 10, 'rate' => 0.8);
-    $rows = $wpdb->get_results($wpdb->prepare("SELECT source, MIN(created_at) AS first_at,
-            SUM(outcome IN ('approve', 'reject') AND verdict IN ('approve', 'reject') AND outcome_by <> %s) AS decided,
-            SUM(outcome IN ('approve', 'reject') AND verdict = outcome AND outcome_by <> %s) AS agreed
-        FROM " . kop_vol_recs_table() . ' WHERE volunteer_id = %d GROUP BY source', KOP_VOL_AUTO_BY, KOP_VOL_AUTO_BY, (int) $vid), ARRAY_A);
-    $earned = array();
-    foreach ((array) $rows as $r) {
-        $record = (int) $r['decided'] >= $rules['decided'] && (int) $r['agreed'] >= $rules['rate'] * (int) $r['decided'];
-        if ($record || (string) $r['first_at'] < $before) $earned[(string) $r['source']] = true;
-    }
-    if (function_exists('kop_volpr_passed')) $earned += array_fill_keys(kop_volpr_passed((int) $vid), true);
-    return array_intersect_key($pool, $earned);
+    return kop_vol_earnable_sources();
 }
 
-/** Has this volunteer made a call or played a practice round? (The page keeps "How this works" open until they have.) */
+/** Has this volunteer made a call? (The page keeps "How this works" open until they have.) */
 function kop_vol_has_started($vid) {
     global $wpdb;
     kop_vol_ensure_tables();
-    if ((int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_vol_recs_table() . ' WHERE volunteer_id = %d', (int) $vid))) return true;
-    return function_exists('kop_volpr_rounds') && (bool) kop_volpr_rounds((int) $vid);
+    return (bool) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_vol_recs_table() . ' WHERE volunteer_id = %d', (int) $vid));
 }
 
 function kop_vol_source_for($vid, $key) {
     $all = kop_vol_sources_for($vid);
-    if (!isset($all[$key])) throw new InvalidArgumentException('That queue opens to you once you pass its practice round.');
+    if (!isset($all[$key])) throw new InvalidArgumentException('That queue is not open to volunteers.');
     return $all[$key];
+}
+
+/** A queue's one-line description on the volunteer's "Choose your work" card. */
+function kop_vol_blurb($source) {
+    $b = array(
+        'inspection-highlights' => 'Each one is a passage our scanner pulled out of a state inspection report. You say whether it is a serious violation '
+            . '(harm or danger to a young person) or paperwork.',
+    );
+    $fallback = function_exists('kop_volp_kinds') ? (string) (kop_volp_kinds()[$source]['question'] ?? '') : '';
+    return (string) apply_filters('kop_vol_blurb', $b[$source] ?? $fallback, $source);
 }
 
 /** What to look for, per queue, in plain words. Falls back to the queue's own help. */
@@ -972,7 +959,6 @@ function kop_vol_admin_page() {
 
         <?php if ($project) : kop_volp_admin_project($project, $nonce, $vols); ?></div><?php return; endif; ?>
         <?php if (isset($_GET['faq'])) : kop_volf_admin_page(sanitize_key(wp_unslash($_GET['faq'])), $nonce); ?></div><?php return; endif; ?>
-        <?php if (isset($_GET['practice'])) : kop_volpr_admin_page(sanitize_key(wp_unslash($_GET['practice'])), $nonce); ?></div><?php return; endif; ?>
         <?php $thread = (int) ($_GET['messages'] ?? 0);
         if ($thread) : kop_volm_admin_thread($thread, $nonce); ?></div><?php return; endif; ?>
         <?php kop_volm_admin_section($nonce); ?>
@@ -1004,9 +990,7 @@ function kop_vol_admin_page() {
                     <td><?php echo esc_html($v['note']);
                         if (!empty($v['email'])) echo '<br><a href="mailto:' . esc_attr($v['email']) . '">' . esc_html($v['email']) . '</a>'; ?></td>
                     <td><?php echo (int) $v['recs']; ?></td>
-                    <td><?php echo esc_html($rate);
-                        $practice = function_exists('kop_volpr_summary') ? kop_volpr_summary((int) $v['id']) : '';
-                        if ($practice !== '') echo '<br><span class="description">' . esc_html($practice) . '</span>'; ?></td>
+                    <td><?php echo esc_html($rate); ?></td>
                     <td><?php echo kop_vol_auto_mark_cell($v, $nonce); ?></td>
                     <td><?php echo $v['last_seen'] ? esc_html(get_date_from_gmt($v['last_seen'], 'M j, Y g:i a')) : 'never opened'; ?></td>
                     <td><?php echo esc_html(get_date_from_gmt($v['link_at'], 'M j, Y')); ?></td>
@@ -1075,6 +1059,5 @@ function kop_vol_admin_recent($inbox, $nonce) {
 }
 
 require_once __DIR__ . '/volunteer-projects.php';
-require_once __DIR__ . '/volunteer-practice.php';
 require_once __DIR__ . '/volunteer-auto.php';
 require_once __DIR__ . '/volunteer-signup.php';
