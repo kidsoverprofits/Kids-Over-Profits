@@ -12,6 +12,10 @@ php scripts/test-reporting-directory.php        # renders the page offline
 # In Loving Memory (memorial_victims) against the owner's private "Death Toll" sheet: KOP Tools > Memorial sheet
 # (inc/memorial-sheet.php; decisions + exact Undo in option kop_memorial_sheet_log). The site can't read the sheet: a new
 # snapshot (read through gviz in the owner's browser) -> kop-pipeline tmp/memorial-sheet-diff.py -> the seed below -> deploy
+# The sheet was submitted by Christina Vandercar: every entry that came from it (seeds/memorial.json entries with a
+# sheet_row, and every Add) has memorial_victims.sheet_row set (kop_ms_mark_sheet_rows(), run by the seed pass and by
+# Add; it adds the column) and shows a thorn (þ) by the name, explained at the foot of /in-loving-memory/. Rows only
+# corrected from the sheet (Conflicts) came from the original list, so they get no thorn.
 (kop-pipeline) python scripts/build-memorial-sheet-seed.py   # writes seeds/memorial-sheet.json (sheet side only; the page side is read live)
 php scripts/test-memorial-sheet.php             # seed vs tmp/prod.sqlite, tabs render, settle/add/skip + Undo, restraint guard
 # The glossary is in SQL tables (inc/glossary-store.php), edited at KOP Tools > Glossary Editor; both tests import

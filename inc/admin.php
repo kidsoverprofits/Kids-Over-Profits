@@ -2160,8 +2160,10 @@ function kop_apply_memorial_seeds() {
             ));
             $done[] = (int) $pdo->lastInsertId();
         }
-        if ($done) {
-            if (function_exists('kop_record_changed')) {
+        // The Death Toll sheet's rows get their thorn on /in-loving-memory/ (inc/memorial-sheet.php).
+        $sheet_marked = function_exists('kop_ms_mark_sheet_rows') ? kop_ms_mark_sheet_rows($pdo) : 0;
+        if ($done || $sheet_marked) {
+            if ($done && function_exists('kop_record_changed')) {
                 kop_record_changed('memorial', $done, array('source' => 'seed'));
             }
             do_action('litespeed_purge_url', home_url('/in-loving-memory/'));
@@ -2653,7 +2655,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '151';
+    $version = '152';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -256,23 +256,53 @@ function kop_ms_clean_add(array $in) {
     return $v;
 }
 
+/**
+ * memorial_victims.sheet_row: the Death Toll sheet row a page entry came from (the sheet was submitted by
+ * Christina Vandercar; the page marks these with a thorn and a note at the bottom). Adds the column when it is
+ * missing, then marks the rows seeds/memorial.json put in from the sheet and the ones Add put in. Idempotent.
+ */
+function kop_ms_mark_sheet_rows(PDO $pdo) {
+    try {
+        $pdo->query('SELECT sheet_row FROM memorial_victims LIMIT 0');
+    } catch (Throwable $e) {
+        $pdo->exec('ALTER TABLE memorial_victims ADD COLUMN sheet_row INT NULL');
+    }
+    $marked = 0;
+    $path = dirname(__DIR__) . '/seeds/memorial.json';
+    $spec = file_exists($path) ? json_decode((string) file_get_contents($path), true) : null;
+    $by_key = $pdo->prepare('UPDATE memorial_victims SET sheet_row = ? WHERE sheet_row IS NULL AND name = ? AND COALESCE(program, \'\') = ? AND COALESCE(date_of_death, \'\') = ?');
+    foreach (($spec['entries'] ?? array()) as $e) {
+        if (empty($e['sheet_row'])) continue;
+        $by_key->execute(array((int) $e['sheet_row'], trim((string) ($e['name'] ?? '')) ?: 'Unknown', trim((string) ($e['program'] ?? '')), (string) ($e['date_of_death'] ?? '')));
+        $marked += $by_key->rowCount();
+    }
+    $by_id = $pdo->prepare('UPDATE memorial_victims SET sheet_row = ? WHERE sheet_row IS NULL AND id = ?');
+    foreach (kop_ms_log() as $key => $e) {
+        if (($e['act'] ?? '') !== 'added' || strpos($key, 'a:') !== 0) continue;
+        $by_id->execute(array((int) substr($key, 2), (int) $e['id']));
+        $marked += $by_id->rowCount();
+    }
+    return $marked;
+}
+
 function kop_ms_add($key, array $in) {
     $rows = kop_ms_add_rows();
     if (!isset($rows[$key])) throw new RuntimeException('That row is no longer on the list. Reload the page.');
     if ($rows[$key]['state'] !== 'open') throw new RuntimeException('Already decided.');
     $v = kop_ms_clean_add($in);
     $pdo = kop_ie_referrer_pdo();
+    kop_ms_mark_sheet_rows($pdo);
     $dup = $pdo->prepare('SELECT id FROM memorial_victims WHERE name = ? AND COALESCE(program, \'\') = ? AND COALESCE(date_of_death, \'\') = ? LIMIT 1');
     $dup->execute(array($v['name'], $v['program'], $v['date_of_death']));
     if ($id = $dup->fetchColumn()) throw new RuntimeException('The page already has this row (id ' . (int) $id . ').');
     $nul = function ($x) { return $x === '' ? null : $x; };
     $pdo->prepare('INSERT INTO memorial_victims
             (name, age, program, date_of_death, date_precision, cause_of_death, cause_category,
-             location, source_name, source_url, notes, publication_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'published\')')->execute(array(
+             location, source_name, source_url, notes, sheet_row, publication_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'published\')')->execute(array(
         $v['name'], $v['age'] === '' ? null : (int) $v['age'], $nul($v['program']), $nul($v['date_of_death']), $v['date_precision'],
         $nul($v['cause_of_death']), $nul($v['cause_category']), $nul($v['location']), $nul($v['source_name']), $v['source_url'],
-        $nul($v['notes']),
+        $nul($v['notes']), (int) substr($key, 2),
     ));
     $id = (int) $pdo->lastInsertId();
     kop_ms_changed($id);

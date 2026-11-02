@@ -126,7 +126,7 @@ function kop_memorial_date($date, $precision) {
 
             <div class="kop-card-header">
                 <h2 class="kop-card-title<?php echo $name_unknown ? ' kop-memorial-name-unknown' : ''; ?>">
-                    <?php echo esc_html($name !== '' ? $name : 'Name not released'); ?>
+                    <?php echo esc_html($name !== '' ? $name : 'Name not released'); ?><?php if (!empty($v['sheet_row'])): ?><sup class="kop-memorial-thorn"><a href="#memorial-thorn-note" aria-label="From Christina Vandercar's list, see the note at the bottom of the page">&thorn;</a></sup><?php endif; ?>
                 </h2>
                 <?php if ($v['age'] !== null && $v['age'] !== ''): ?>
                     <span class="kop-badge kop-badge-age">Age <?php echo (int) $v['age']; ?></span>
@@ -175,6 +175,13 @@ function kop_memorial_date($date, $precision) {
         <?php endforeach; ?>
         <?php endif; ?>
     </div>
+
+    <?php if (array_filter(array_column($victims, 'sheet_row'))): ?>
+    <p class="kop-memorial-credit" id="memorial-thorn-note">
+        <span class="kop-memorial-thorn">&thorn;</span>
+        Entries marked with a thorn come from a list of deaths compiled and submitted by Christina Vandercar.
+    </p>
+    <?php endif; ?>
 
     <p class="kop-memorial-credit">
         Original source:
