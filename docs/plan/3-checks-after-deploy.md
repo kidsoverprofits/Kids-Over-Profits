@@ -164,3 +164,13 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    Lakeland, Treasure Coast and Refuge closings, the Kansas City Girls Academy and Indiana suits, and no "Provo Canyon
    School Closure". Acadia, Devereux and Straight no longer show that story either; Aspen, Family Help & Wellness and
    CEDU gain their programs' openings, closings and deaths.
+37. **Company timelines: the owner's minimum** (inc/profile-timeline.php, inc/operator-pages.php, 2026-11-02): every
+   program's opening and closing, critical incidents, deaths, leadership changes, ownership and lawsuits. After deploy
+   (LiteSpeed may hold the old page until it is purged), logged out:
+   https://kidsoverprofits.org/operator/aspen-education-group/ starts in 1961 with "Camp Huntington opened" / "Before Aspen
+   Education Group was founded in 1997", has "Elliot Sainer became chief executive" (2006), "15 incidents at Mount
+   Bachelor Academy" (2009) as one event whose card lists them, and Brandon Hoffman's death once, not again as an
+   incident. https://kidsoverprofits.org/operator/sequel-tsi/ has "Chris Roussos succeeded John Stupak as chief
+   executive" (2019). https://kidsoverprofits.org/operator/universal-health-services/ shows "Provo Canyon School opened"
+   (1971) with no "Opened ..." of its own. The filter button reads "Ownership and leadership". Review inbox > Company
+   milestones > Add offers the Leadership kind.

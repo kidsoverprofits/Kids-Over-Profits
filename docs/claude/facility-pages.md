@@ -40,6 +40,12 @@ php scripts/test-operator-pages.php               # renders every /operator/<slu
 # a large map node); each page has a written history (operator.history, draft = admins only, published with the pencil;
 # drafts come from seeds/operator-histories.json, which fills only empty records), a year-by-year timeline from the map's
 # "operated" years + programs' years + lawsuits + deaths, the map's people, and the documents filed under its programs
+# Company timeline minimum (owner, 2026-11-02; kop_ptl_operator() in inc/profile-timeline.php): every program's opening and
+# closing year on record, critical incidents (programs' criticalIncidents, one event per program and year, Fornits left out),
+# deaths, leadership changes (top titles with a span of years from {prefix}kop_person_jobs at the company's names + the map's
+# lines; one year alone is a sighting), ownership (deals, milestones, investor links with years) and lawsuits. Outside the
+# company's known years an opening or closing reads "X opened" + who ran it then, never "Opened X"; deaths, incidents and
+# lawsuits there stay off. Review inbox > Company milestones has a Leadership kind for a change no past job dates
 (kop-pipeline) python scripts/build-operator-histories.py <slug> ...   # merges those drafts into seeds/operator-histories.json, which is the
                                                 # source of truth (--export refreshes kop-pipeline's tmp/ drafts from it); bump
                                                 # KOP_OPERATOR_HISTORY_SEED_VERSION to apply (replaces only drafts nobody edited)

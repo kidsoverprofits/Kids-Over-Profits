@@ -60,6 +60,7 @@ function kop_rinbox_ms_kinds() {
     return array(
         'deal'          => 'Ownership: bought, sold, merged, a new owner',
         'founded'       => 'Founded',
+        'leadership'    => 'Leadership: a new chief executive, president, chair or owner',
         'rename'        => 'New name',
         'opened'        => 'Opened programs',
         'closure'       => 'Closed programs',

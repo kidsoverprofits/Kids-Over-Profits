@@ -651,6 +651,7 @@ if (!function_exists('kop_operator_page_data')) {
         // ---- Facilities ----------------------------------------------------
         $facilities = array();
         $facility_ids = array();
+        $incidents = array();
         $states = array();
         $countries = array();
         $open = 0;
@@ -696,6 +697,15 @@ if (!function_exists('kop_operator_page_data')) {
                 // company's own name among the past operators is not an earlier one.
                 $fdoc = json_decode((string) $r['json_data'], true);
                 $ident = is_array($fdoc['identification'] ?? null) ? $fdoc['identification'] : array();
+                // Its critical incidents (a riot, an escape) for the timeline, read as the facility page reads
+                // them; what was posted on Fornits is testimony, not the record's, and stays off.
+                if (!empty($fdoc['criticalIncidents']) && function_exists('kop_facility_pages_incidents')) {
+                    $lines = kop_facility_pages_incidents(kop_facility_pages_checklist_items($fdoc['criticalIncidents'], 'criticalIncidents'));
+                    if (function_exists('kop_facility_pages_tidy_citations')) $lines = kop_facility_pages_tidy_citations($lines);
+                    foreach ($lines as $inc) {
+                        if (stripos((string) ($inc['cite'] ?? ''), 'Fornits') !== 0) $incidents[] = array('facility_id' => $fid, 'incident' => $inc);
+                    }
+                }
                 $then_names[$fid] = function_exists('kop_facility_eras_name_under') && is_array($fdoc)
                     ? kop_facility_eras_name_under($fid, $fdoc, $company_names, (string) $r['relationship'])
                     : null;
@@ -729,6 +739,7 @@ if (!function_exists('kop_operator_page_data')) {
                     'start_year' => (int) $r['start_year'],
                     'end_year'   => (int) $r['end_year'],
                     'own_years'  => $own_years,
+                    'relationship' => (string) $r['relationship'],
                 );
             }
             if (function_exists('kop_facility_eras_name_under_settle')) $then_names = kop_facility_eras_name_under_settle($then_names);
@@ -945,6 +956,49 @@ if (!function_exists('kop_operator_page_data')) {
             ? kop_operator_history_map_node(array_merge(array($entry['name'], $name, $abbr), $aka))
             : null;
         $map_links = $map_node ? kop_operator_history_map_links((string) $map_node['id']) : array();
+        // Its leaders' years: past jobs held at the company under any of its names, and the map's
+        // leadership lines (the timeline keeps only top titles with a span of years).
+        $leaders = array();
+        $jobs_table = $wpdb->prefix . 'kop_person_jobs';
+        $people_table = $wpdb->prefix . 'kop_people';
+        if (kop_facility_pages_table_exists($jobs_table) && kop_facility_pages_table_exists($people_table)) {
+            $jrows = $wpdb->get_results(
+                "SELECT COALESCE(m.id, p.id) AS person_id, COALESCE(m.name, p.name) AS name, j.place, j.role, j.years
+                   FROM `{$jobs_table}` j JOIN `{$people_table}` p ON p.id = j.person_id
+                   LEFT JOIN `{$people_table}` m ON m.id = p.merged_into
+                  WHERE j.hidden = 0 AND j.years <> ''",
+                ARRAY_A
+            );
+            foreach ((array) $jrows as $j) {
+                if (!isset($my_keys[kop_facility_pages_name_key($j['place'])]) || !function_exists('kop_ptl_leader_title') || kop_ptl_leader_title($j['role']) === '') continue;
+                $leaders[] = array(
+                    'name'  => trim((string) $j['name']),
+                    'url'   => function_exists('kop_prel_person_url') ? kop_prel_person_url((int) $j['person_id']) : '',
+                    'role'  => trim((string) $j['role']),
+                    'years' => (string) $j['years'],
+                );
+            }
+        }
+        foreach ($map_links as $l) {
+            if (($l['node']['kind'] ?? '') !== 'person') continue;
+            $leaders[] = array(
+                'name'  => trim((string) $l['node']['name']),
+                'url'   => !empty($l['node']['personId']) && function_exists('kop_prel_person_url') ? kop_prel_person_url((int) $l['node']['personId']) : '',
+                'role'  => preg_replace('/\s*\([^)]*\)\s*$/', '', $l['role']),
+                'years' => $l['role'],
+            );
+        }
+        // Investors' stakes with years (inc/investors.php).
+        $investors = array();
+        if (function_exists('kop_inv_links') && function_exists('kop_inv_get')) {
+            foreach ($members as $mid) {
+                foreach (kop_inv_links(array('operator_id' => $mid)) as $il) {
+                    if (!(int) $il['start_year'] && !(int) $il['end_year']) continue;
+                    $inv = kop_inv_get((int) $il['investor_id']);
+                    if ($inv) $investors[] = array('name' => trim((string) $inv['name']), 'url' => '') + $il;
+                }
+            }
+        }
         $timeline_ctx = array(
             'founded'      => $op['founded'] ?? '',
             'name'         => $name,
@@ -956,8 +1010,12 @@ if (!function_exists('kop_operator_page_data')) {
             'news'         => $news,
             'news_facilities' => $news_facilities,
             'lawsuits_url' => $lawsuits_url,
+            'incidents'    => $incidents,
+            'leaders'      => $leaders,
+            'investors'    => $investors,
         );
-        // The year-by-year timeline (inc/profile-timeline.php): deals, takeovers, milestones, harm, courts, the press.
+        // The year-by-year timeline (inc/profile-timeline.php): deals, takeovers, leaders, openings and
+        // closings, milestones, harm (deaths, incidents), courts, the press.
         $timeline = function_exists('kop_ptl_operator') ? kop_ptl_operator($timeline_ctx)
             : (function_exists('kop_operator_history_timeline') ? kop_operator_history_timeline($timeline_ctx) : array());
         $people = function_exists('kop_operator_history_people')

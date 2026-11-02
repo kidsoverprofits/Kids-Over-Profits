@@ -9,18 +9,28 @@
  *   - ownership: the year a company was founded, the companies it bought and
  *     sold, the programs it took over from another company (the network map's
  *     "operated 2009-2021" lines: a program one company stopped running the
- *     year another began is a takeover, named as such), the programs it opened
- *     and closed; on a facility page the companies that ran it and the deals
- *     that moved it from one to the next.
+ *     year another began is a takeover, named as such), its investors' stakes
+ *     (inc/investors.php, when the link has years); on a facility page the
+ *     companies that ran it and the deals that moved it from one to the next.
+ *   - programs: on a company page every program's opening and closing year on
+ *     record. Inside the company's years they are its own ("Opened X"); an
+ *     opening from before it ran the program, or a closing after it let go,
+ *     reads "X opened" with who ran it then, so it is never the company's doing.
+ *   - leadership: a chief executive, president, executive director, chair or
+ *     owner of the company starting or leaving, from past jobs
+ *     ({prefix}kop_person_jobs) and the map's leadership lines, only where the
+ *     years are a span ("2010-2015"): one year alone is when a source saw them.
  *   - company milestones (seeds/company-milestones.json): buyouts, private
  *     equity owners, investigations, settlements, mass closures, each with its
  *     sources. They wait at Review inbox > Company milestones
  *     (inc/review-inbox/company-milestones.php) and appear only once approved;
  *     an admin can add more there (option kop_company_milestones_added).
  *   - what the records hold: lawsuits (with outcome and settlement), deaths
- *     (with cause), approved serious findings by state inspectors, incidents,
- *     renames, and the press: story arcs, a story several outlets covered,
- *     Essential Reporting picks, each with the article's picture.
+ *     (with cause), approved serious findings by state inspectors, critical
+ *     incidents (a riot, an escape, a death: the programs' criticalIncidents,
+ *     on company pages too), renames, and the press: story arcs, a story
+ *     several outlets covered, Essential Reporting picks, each with the
+ *     article's picture.
  * A program's events count on its company's timeline only inside the years
  * the company is known to have run it (a death at Provo Canyon School in 1990
  * is not UHS history).
@@ -52,6 +62,7 @@ if (!function_exists('kop_ptl_kinds')) {
             'takeover'      => array('shuffle', 'company', 'Ownership'),
             'handover'      => array('shuffle', 'company', 'Ownership'),
             'operator'      => array('building', 'company', 'Ownership'),
+            'leadership'    => array('user', 'company', 'Leadership'),
             'rename'        => array('tag', 'company', 'New name'),
             'began'         => array('home', 'programs', 'Programs'),
             'opened'        => array('home', 'programs', 'Opened'),
@@ -74,7 +85,7 @@ if (!function_exists('kop_ptl_groups')) {
     /** Filter buttons, in order. */
     function kop_ptl_groups() {
         return array(
-            'company'   => 'Ownership',
+            'company'   => 'Ownership and leadership',
             'programs'  => 'Programs',
             'harm'      => 'Deaths and incidents',
             'oversight' => 'Inspections and investigations',
@@ -583,7 +594,9 @@ if (!function_exists('kop_ptl_operator')) {
     /**
      * The company's timeline. $ctx: founded, name, facilities (operator page
      * rows), links (map links, kop_operator_history_map_links()), map_node,
-     * lawsuits, memorials, news, lawsuits_url.
+     * lawsuits, memorials, news, lawsuits_url, incidents ([facility_id,
+     * incident line]), leaders ([name, url, role, years]), investors
+     * ([name, url, role, start_year, end_year, detail, source_url]).
      */
     function kop_ptl_operator(array $ctx) {
         $now = (int) gmdate('Y');
@@ -671,6 +684,9 @@ if (!function_exists('kop_ptl_operator')) {
             // A line without years leaves the program's own years in charge.
             if ($from) $map_years[$nk] = true;
             $span_id = isset($by_key[$nk]) ? (int) $by_key[$nk]['id'] : $fid;
+            $f = $by_id[$span_id] ?? null;
+            // "operated (2009)" on a program that has since closed: the company ran it to the end.
+            if ($from && !$to && $f && strcasecmp((string) $f['status'], 'Closed') === 0 && (int) $f['end_year'] >= $from) $to = (int) $f['end_year'];
             if ($from && $span_id > 0) $spans[$span_id] = array($from, $to ?: $now);
             if (!$from) continue;
             // Who ran it before and after: another company whose years end as ours begin.
@@ -683,18 +699,17 @@ if (!function_exists('kop_ptl_operator')) {
                     if ($to && $r['from'] >= $to && $r['from'] <= $to + 1) $next = (string) $r['node']['name'];
                 }
             }
-            $began[$from][$prev][] = $program($fname, $fid);
+            // Began running it the year it opened: the opening below says so.
+            if ($prev !== '' || !$f || (int) $f['start_year'] !== $from) $began[$from][$prev][] = $program($fname, $fid);
             if ($to) $ended[$to][$next][] = $program($fname, $fid);
         }
         foreach ($by_key as $k => $f) {
             if (isset($map_years[$k]) || empty($f['own_years'])) continue;
-            $it = $program($f['name'], (int) $f['id']);
-            if (!empty($f['start_year'])) $add(kop_ptl_event((int) $f['start_year'], 'opened', 'Opened ' . $f['name'], array('items' => array($it))));
-            if (!empty($f['end_year'])) $add(kop_ptl_event((int) $f['end_year'], 'closed', 'Closed ' . $f['name'], array('items' => array($it))));
             // With no opening year on record, all of the program's years up to its closing are the company's.
             if (!isset($spans[(int) $f['id']])) $spans[(int) $f['id']] = array((int) $f['start_year'], (int) $f['end_year'] ?: $now);
         }
         $count_words = static function ($n) { return $n === 1 ? 'a program' : $n . ' programs'; };
+        $closed_fids = array();
         foreach ($began as $year => $by_prev) {
             foreach ($by_prev as $prev => $items) {
                 $n = count($items);
@@ -742,6 +757,7 @@ if (!function_exists('kop_ptl_operator')) {
                         $f = $by_key[kop_facility_pages_name_key($it['name'])] ?? null;
                         if ($f && (int) ($f['end_year'] ?? 0) === (int) $year) {
                             $closed++;
+                            $closed_fids[(int) $f['id']] = true;
                             $it['meta'] = trim($it['meta'] . ($it['meta'] !== '' ? ', ' : '') . 'closed');
                         }
                     }
@@ -750,6 +766,57 @@ if (!function_exists('kop_ptl_operator')) {
                         ? ($closed ? 'Closed ' . $items[0]['name'] : 'Stopped running ' . $items[0]['name'])
                         : ($closed === $n ? 'Closed ' . $n . ' programs' : 'Stopped running ' . $n . ' programs' . ($closed ? ', ' . $closed . ' of which closed that year' : ''));
                     $add(kop_ptl_event((int) $year, $closed ? 'closed' : 'ended', $title, array('items' => $items, 'major' => $closed >= 3)));
+                }
+            }
+        }
+
+        // ---- Every program's opening and closing on record ------------------------
+        // Inside the company's years they are its own ("Opened X"). An opening before it ran the
+        // program, a closing after it let go, or one in years the records do not tie to it is the
+        // program's ("X opened"), saying who ran it then. A program linked to it now that has
+        // closed closed under it. Nothing the company could not have done counts as its own:
+        // none before its founding year.
+        $who = $name !== '' ? $name : 'the company';
+        $opens = array();   // year => [mine|before|unknown => [items]]
+        $shuts = array();   // year => [mine|after|unknown => [items]]
+        foreach ($by_id as $fid => $f) {
+            $span = $spans[$fid] ?? null;
+            $s = (int) $f['start_year'];
+            $e = strcasecmp((string) $f['status'], 'Closed') === 0 ? (int) $f['end_year'] : 0;
+            if ($s) {
+                $as = !$span ? 'unknown' : ($s >= $span[0] && $s <= $span[1] ? 'mine' : ($s < $span[0] ? 'before' : 'unknown'));
+                $it = $program($f['name'], $fid);
+                if ($as === 'before') $it['meta'] = trim($it['meta'] . ($it['meta'] !== '' ? '; ' : '') . 'run by ' . $who . ' from ' . $span[0]);
+                $opens[$s][$as][] = $it;
+            }
+            if ($e && !isset($closed_fids[$fid])) {
+                $as = !$span ? (($f['relationship'] ?? '') === 'current' ? 'mine' : 'unknown') : ($e >= $span[0] && $e <= $span[1] ? 'mine' : ($e > $span[1] ? 'after' : 'unknown'));
+                $it = $program($f['name'], $fid);
+                if ($as === 'after') $it['meta'] = trim($it['meta'] . ($it['meta'] !== '' ? '; ' : '') . 'run by ' . $who . ' until ' . $span[1]);
+                $shuts[$e][$as][] = $it;
+            }
+        }
+        $push = static function (array $e) use (&$events, $now) {
+            if ($e['year'] >= 1800 && $e['year'] <= $now + 1) $events[] = $e;
+        };
+        $them = static function ($n) { return $n === 1 ? 'it' : 'them'; };
+        foreach (array('opened' => $opens, 'closed' => $shuts) as $kind => $by_year) {
+            foreach ($by_year as $year => $by_as) {
+                if ($founded && $year < $founded && isset($by_as['mine'])) {
+                    $by_as['unknown'] = array_merge($by_as['unknown'] ?? array(), $by_as['mine']);
+                    unset($by_as['mine']);
+                }
+                foreach ($by_as as $as => $items) {
+                    $n = count($items);
+                    if ($as === 'mine') {
+                        $add(kop_ptl_event((int) $year, $kind, ($kind === 'opened' ? 'Opened ' : 'Closed ') . ($n === 1 ? $items[0]['name'] : $n . ' programs'), array('items' => $items, 'major' => $n >= 3)));
+                        continue;
+                    }
+                    $lead = $founded && $year < $founded ? 'Before ' . $who . ' was founded in ' . $founded . '.'
+                        : ($as === 'before' ? 'Before ' . $who . ' ran ' . $them($n) . '.'
+                        : ($as === 'after' ? 'After ' . $who . ' stopped running ' . $them($n) . '.'
+                        : 'The records do not say whether ' . $who . ' ran ' . $them($n) . ' then.'));
+                    $push(kop_ptl_event((int) $year, $kind, ($n <= 2 ? kop_ptl_list_words(array_column($items, 'name'), 2) : $n . ' programs') . ' ' . $kind, array('items' => $items, 'lead' => $lead)));
                 }
             }
         }
@@ -771,11 +838,57 @@ if (!function_exists('kop_ptl_operator')) {
         }
 
         // ---- Deaths -------------------------------------------------------------
+        $deaths_at = array();   // facility id => [year => true]: a death already on the timeline
         foreach ((array) ($ctx['memorials'] ?? array()) as $m) {
             if (!preg_match('/\b(1[89]\d\d|20\d\d)\b/', $m['date_label'], $y)) continue;
             if (!$in_span(array((int) ($m['facility_id'] ?? 0)), (int) $y[1])) continue;
             $add(kop_ptl_death_event($m, (int) $y[1], $program($m['program'], (int) ($m['facility_id'] ?? 0))));
+            $deaths_at[(int) ($m['facility_id'] ?? 0)][(int) $y[1]] = true;
         }
+
+        // ---- Critical incidents at its programs (riots, escapes, ...) ------------
+        // One event per program and year: an investigation is often a dozen lines from as many sources.
+        // A "Death" line where the memorial's death is already on the timeline says it twice.
+        $inc_by = array();
+        foreach ((array) ($ctx['incidents'] ?? array()) as $row) {
+            $fid = (int) ($row['facility_id'] ?? 0);
+            $inc = (array) $row['incident'];
+            $y = kop_ptl_incident_year($inc);
+            if (!$y || !isset($by_id[$fid]) || !$in_span(array($fid), $y)) continue;
+            if (isset($deaths_at[$fid][$y]) && strcasecmp(trim((string) ($inc['kind'] ?? '')), 'Death') === 0) continue;
+            $inc_by[$fid][$y][] = $inc;
+        }
+        foreach ($inc_by as $fid => $by_year) {
+            $it = $program($by_id[$fid]['name'], $fid);
+            foreach ($by_year as $y => $list) {
+                $evs = array_values(array_filter(array_map(static function ($inc) use ($it) { return kop_ptl_incident_event($inc, '', $it); }, $list)));
+                if (!$evs) continue;
+                if (count($evs) === 1) {
+                    $add($evs[0]);
+                    continue;
+                }
+                $labels = array();
+                $sources = array();
+                $major = false;
+                foreach ($evs as $e) {
+                    $l = preg_replace('/ at .*$/', '', $e['title']);
+                    $labels[strtolower($l)] = true;
+                    foreach ($e['sources'] as $s) $sources[$s['url'] . '|' . $s['cite']] = $s;
+                    if ($e['major']) $major = true;
+                }
+                $add(kop_ptl_event((int) $y, 'incident', count($evs) . ' incidents at ' . $it['name'], array(
+                    'lead'    => ucfirst(kop_ptl_list_words(array_keys($labels), 5)) . '.',
+                    'detail'  => array_map(static function ($e) { return ($e['when'] !== '' ? $e['when'] . ': ' : '') . $e['lead']; }, array_slice($evs, 0, 8)),
+                    'items'   => $it['url'] !== '' ? array($it) : array(),
+                    'sources' => array_slice(array_values($sources), 0, 8),
+                    'major'   => $major,
+                )));
+            }
+        }
+
+        // ---- Leadership and investors ------------------------------------------------
+        foreach (kop_ptl_leadership_events((array) ($ctx['leaders'] ?? array()), $who) as $e) $add($e);
+        foreach (kop_ptl_investor_events((array) ($ctx['investors'] ?? array())) as $e) $add($e);
 
         // ---- Serious findings by state inspectors --------------------------------
         foreach (kop_ptl_findings_by_year(array_keys($spans)) as $year => $per) {
@@ -879,6 +992,164 @@ if (!function_exists('kop_ptl_death_event')) {
             'more'    => ($m['kop_url'] ?? '') !== '' ? array('label' => 'In the memorial', 'url' => (string) $m['kop_url']) : null,
             'major'   => true,
         ));
+    }
+}
+
+if (!function_exists('kop_ptl_incident_year')) {
+    /** The year a critical incident line (kop_facility_pages_incidents()) happened, or 0. */
+    function kop_ptl_incident_year(array $inc) {
+        return preg_match('/\b(1[89]\d\d|20\d\d)\b/', (string) ($inc['when'] ?? ''), $m) ? (int) $m[1] : 0;
+    }
+}
+
+if (!function_exists('kop_ptl_incident_event')) {
+    /**
+     * A critical incident line as an event, or null without a year or words.
+     * $program (company pages): the program it happened at, named in the title.
+     * A riot, an escape, a fire, a death or a sexual assault is a major event.
+     */
+    function kop_ptl_incident_event(array $inc, $lead_prefix = '', array $program = null) {
+        $y = kop_ptl_incident_year($inc);
+        if (!$y) return null;
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags((string) $inc['text'])));
+        if ($text === '') return null;
+        $first = preg_match('/^(.{20,180}?[.!?])(\s|$)/u', $text, $s) ? $s[1] : kop_ptl_short($text, 160);
+        $sources = array();
+        if (($inc['source'] ?? '') !== '' || ($inc['url'] ?? '') !== '') $sources[] = array('url' => (string) ($inc['url'] ?? ''), 'cite' => (string) ($inc['cite'] ?? $inc['source'] ?? ''));
+        $label = ($inc['kind'] ?? '') !== '' ? (string) $inc['kind'] : 'Incident';
+        return kop_ptl_event($y, 'incident', $program ? $label . ' at ' . $program['name'] : $label, array(
+            'when'    => trim((string) $inc['when']) !== (string) $y ? (string) $inc['when'] : '',
+            'lead'    => trim($lead_prefix . $first),
+            'detail'  => $first !== $text ? array(kop_ptl_short($text, 600)) : array(),
+            'items'   => $program && $program['url'] !== '' ? array($program) : array(),
+            'sources' => $sources,
+            'major'   => (bool) preg_match('/\b(riots?|uprising|escaped?|runaways?|fires?|arson|died|death|killed|suicide|murder(ed)?|shot|stabbed|raped?|sexual(ly)? assault(ed)?)\b/i', $label . ' ' . $first),
+        ));
+    }
+}
+
+if (!function_exists('kop_ptl_leader_title')) {
+    /**
+     * The top title in a job's words ("President and Chief Clinical Officer,
+     * then CEO" => "chief executive"), or '' for anything below the top (a vice
+     * president, a director of marketing) or a founder alone (the founding is
+     * its own event).
+     */
+    function kop_ptl_leader_title($role) {
+        $role = (string) $role;
+        if (preg_match('/vice[- ]president|\bvp\b|\bassistant\b|\bdeputy\b/i', $role) && !preg_match('/\b(ceo|chief executive)\b/i', $role)) return '';
+        $titles = array(
+            '/\b(ceo|chief executive( officer)?)\b/i' => 'chief executive',
+            '/\bpresident\b/i'                         => 'president',
+            '/\bexecutive director\b/i'                => 'executive director',
+            '/\bchair(man|woman|person)?\b/i'          => 'chair',
+            '/\b(co-?)?owners?\b/i'                    => 'owner',
+        );
+        foreach ($titles as $re => $title) {
+            if (preg_match($re, $role)) return $title;
+        }
+        return '';
+    }
+}
+
+if (!function_exists('kop_ptl_leadership_events')) {
+    /**
+     * Who led the company, as events: [{name, url, role, years}] (company
+     * pages: past jobs and map lines at the company). Only spans count
+     * ("2010-2015", "2010-present"); an end in this year or later is "still".
+     * One leaving and another starting in one title the same year is one
+     * event ("A succeeded B as chief executive").
+     */
+    function kop_ptl_leadership_events(array $leaders, $company) {
+        $now = (int) gmdate('Y');
+        $starts = array();
+        $ends = array();
+        $seen = array();
+        foreach ($leaders as $l) {
+            $title = kop_ptl_leader_title($l['role'] ?? '');
+            $years = str_replace(array("\xE2\x80\x93", "\xE2\x80\x94", "\xEF\xBF\xBD"), '-', (string) ($l['years'] ?? ''));
+            if ($title === '' || !preg_match('/\b(1[89]\d\d|20\d\d)\s*-\s*(1[89]\d\d|20\d\d|present|now|current)\b/i', $years, $m)) continue;
+            $from = (int) $m[1];
+            $to = ctype_digit($m[2]) ? (int) $m[2] : 0;
+            if ($to && ($to < $from || $to >= $now)) $to = 0;
+            $key = kop_facility_pages_name_key($l['name']) . '|' . $title;
+            if (isset($seen[$key])) continue;
+            $seen[$key] = true;
+            $who = array('name' => (string) $l['name'], 'url' => (string) ($l['url'] ?? ''), 'meta' => '');
+            $starts[$from][$title][] = array('who' => $who, 'to' => $to, 'role' => trim((string) $l['role']));
+            if ($to) $ends[$to][$title][] = array('who' => $who, 'from' => $from, 'role' => trim((string) $l['role']));
+        }
+        $events = array();
+        $as = static function ($title) use ($company) {
+            return $title === 'owner' ? 'an owner of ' . $company : $title . ' of ' . $company;
+        };
+        foreach ($starts as $year => $by_title) {
+            foreach ($by_title as $title => $list) {
+                $left = $ends[$year][$title] ?? (isset($ends[$year - 1][$title]) && count($ends[$year - 1][$title]) === 1 ? $ends[$year - 1][$title] : array());
+                foreach ($list as $i => $s) {
+                    $prev = $i === 0 && count($left) === 1 && kop_facility_pages_name_key($left[0]['who']['name']) !== kop_facility_pages_name_key($s['who']['name']) ? $left[0] : null;
+                    $title_words = $prev
+                        ? $s['who']['name'] . ' succeeded ' . $prev['who']['name'] . ' as ' . $title
+                        : $s['who']['name'] . ' became ' . $as($title);
+                    $lead = $s['to'] ? 'Until ' . $s['to'] . '.' : 'Still ' . $title . ' as far as the records show.';
+                    if ($prev) $lead = $prev['who']['name'] . ' had held it since ' . $prev['from'] . '. ' . $lead;
+                    $events[] = kop_ptl_event((int) $year, 'leadership', $title_words, array(
+                        'lead'  => $lead,
+                        'items' => array_values(array_filter(array($s['who'], $prev ? $prev['who'] : null))),
+                        'facts' => $s['role'] !== '' ? array(array('Role', $s['role'])) : array(),
+                        'major' => $title === 'chief executive' || $title === 'owner',
+                    ));
+                    if ($prev) {
+                        foreach ($ends as $ey => &$et) {
+                            if (($ey === $year || $ey === $year - 1) && isset($et[$title])) {
+                                $et[$title] = array_values(array_filter($et[$title], static function ($x) use ($prev) { return $x !== $prev; }));
+                            }
+                        }
+                        unset($et);
+                    }
+                }
+            }
+        }
+        foreach ($ends as $year => $by_title) {
+            foreach ($by_title as $title => $list) {
+                foreach ($list as $e) {
+                    $events[] = kop_ptl_event((int) $year, 'leadership', $e['who']['name'] . ' left as ' . $title, array(
+                        'lead'  => $title === 'owner' ? 'An owner since ' . $e['from'] . '.' : ucfirst($title) . ' since ' . $e['from'] . '.',
+                        'items' => array($e['who']),
+                        'facts' => $e['role'] !== '' ? array(array('Role', $e['role'])) : array(),
+                    ));
+                }
+            }
+        }
+        return $events;
+    }
+}
+
+if (!function_exists('kop_ptl_investor_events')) {
+    /** Investors' stakes with years (inc/investors.php links: name, url, role, start_year, end_year) as ownership events. */
+    function kop_ptl_investor_events(array $stakes) {
+        $events = array();
+        foreach ($stakes as $s) {
+            $role = trim((string) ($s['role'] ?? ''));
+            $r = $role !== '' && strcasecmp($role, 'Investor') !== 0 ? strtolower($role) : '';
+            $owner = (bool) preg_match('/\bowner\b|controlling|majority/i', $role);
+            $who = array('name' => (string) $s['name'], 'url' => (string) ($s['url'] ?? ''), 'meta' => '');
+            $facts = ($s['detail'] ?? '') !== '' ? array(array('Stake', (string) $s['detail'])) : array();
+            $sources = ($s['source_url'] ?? '') !== '' ? array(array('url' => (string) $s['source_url'], 'cite' => '')) : array();
+            if ((int) ($s['start_year'] ?? 0)) {
+                $events[] = kop_ptl_event((int) $s['start_year'], 'deal', $r !== '' ? $s['name'] . ' became ' . (preg_match('/^[aeiou]/', $r) ? 'an ' : 'a ') . $r : $s['name'] . ' invested', array(
+                    'lead' => (int) ($s['end_year'] ?? 0) ? 'Until ' . (int) $s['end_year'] . '.' : '',
+                    'items' => array($who), 'facts' => $facts, 'sources' => $sources, 'major' => $owner,
+                ));
+            }
+            if ((int) ($s['end_year'] ?? 0)) {
+                $events[] = kop_ptl_event((int) $s['end_year'], 'deal', $s['name'] . ' sold its stake', array(
+                    'lead' => (int) ($s['start_year'] ?? 0) ? ($r !== '' ? ucfirst($r) : 'An investor') . ' since ' . (int) $s['start_year'] . '.' : '',
+                    'items' => array($who), 'facts' => $facts, 'sources' => $sources, 'major' => $owner,
+                ));
+            }
+        }
+        return $events;
     }
 }
 
@@ -1050,19 +1321,8 @@ if (!function_exists('kop_ptl_facility')) {
             ));
         }
         foreach ($lists['incidents'] as $inc) {
-            $y = preg_match('/\b(1[89]\d\d|20\d\d)\b/', (string) ($inc['when'] ?? ''), $m) ? (int) $m[1] : 0;
-            if (!$y) continue;
-            $text = trim(preg_replace('/\s+/', ' ', strip_tags((string) $inc['text'])));
-            if ($text === '') continue;
-            $first = preg_match('/^(.{20,180}?[.!?])(\s|$)/u', $text, $s) ? $s[1] : kop_ptl_short($text, 160);
-            $sources = array();
-            if (($inc['source'] ?? '') !== '' || ($inc['url'] ?? '') !== '') $sources[] = array('url' => (string) ($inc['url'] ?? ''), 'cite' => (string) ($inc['cite'] ?? $inc['source'] ?? ''));
-            $events[] = kop_ptl_event($y, 'incident', ($inc['kind'] ?? '') !== '' ? (string) $inc['kind'] : 'Incident', array(
-                'when'    => trim((string) $inc['when']) !== (string) $y ? (string) $inc['when'] : '',
-                'lead'    => trim($as($inc) . $first),
-                'detail'  => $first !== $text ? array(kop_ptl_short($text, 600)) : array(),
-                'sources' => $sources,
-            ));
+            $e = kop_ptl_incident_event($inc, $as($inc));
+            if ($e) $events[] = $e;
         }
         foreach (kop_ptl_press_events($lists['news']) as $e) $events[] = $e;
 
@@ -1080,7 +1340,7 @@ if (!function_exists('kop_ptl_facility')) {
 if (!function_exists('kop_ptl_years')) {
     /** Events into years, oldest first; in a year ownership first, then programs, harm, courts, the press. */
     function kop_ptl_years(array $events) {
-        $order = array_flip(array('founded', 'deal', 'takeover', 'handover', 'operator', 'rename', 'opened', 'began', 'investigation',
+        $order = array_flip(array('founded', 'deal', 'takeover', 'handover', 'operator', 'leadership', 'rename', 'opened', 'began', 'investigation',
             'death', 'incident', 'finding', 'lawsuit', 'settlement', 'scandal', 'story', 'featured', 'ended', 'closed'));
         $by = array();
         foreach ($events as $e) $by[(int) $e['year']][] = $e;

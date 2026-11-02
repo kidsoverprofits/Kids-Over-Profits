@@ -102,3 +102,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    - The network embed is now uncapped: Provo Canyon School's slice is 135 KB (was 102 KB). Look at the live
      /facility/provo-canyon-school-ut/ after deploy: it should paint, now with the Aspen owners, and the caption no
      longer says "N more on the full map".
+4. **test-operator-pages: "embark-behavioral-health lists its programs"** (found 2026-11-02): the check counts
+   `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261)
+   has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the
+   first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.
