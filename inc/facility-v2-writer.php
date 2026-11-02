@@ -316,9 +316,11 @@ if (!function_exists('kop_v2_pdo_master_row_by_name')) {
 
 if (!function_exists('kop_v2_pdo_names_by_id')) {
     /**
-     * Row id => unique_name, for the link tables that join facilities_master
-     * to show what a news item or lawsuit is about. Operator ids resolve too:
-     * an article can be about an operator rather than one facility.
+     * Row id => unique_name, for the link tables that show what a news item
+     * or lawsuit is about. Operator ids resolve too (an article can be about
+     * an operator rather than one facility), and so do related records
+     * (related_facilities, ids above KOP_RELATED_FIRST_ID: young adult
+     * programs, Christian adult rehabs), which the same link tables hold.
      *
      * @param int[] $ids empty for every row
      * @return array<int,string>
@@ -327,9 +329,21 @@ if (!function_exists('kop_v2_pdo_names_by_id')) {
         $t = kop_migration_tables($prefix);
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
         $where = $ids ? ' WHERE id IN (' . implode(',', $ids) . ')' : '';
+        $tables = array($t['facilities'], $t['operators']);
+        $first_related = defined('KOP_RELATED_FIRST_ID') ? KOP_RELATED_FIRST_ID : 900000;
+        if (!$ids || max($ids) > $first_related) $tables[] = 'related_facilities';
         $out = array();
-        foreach (array($t['facilities'], $t['operators']) as $table) {
-            foreach ($pdo->query("SELECT id, unique_name FROM `{$table}`{$where}")->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        foreach ($tables as $table) {
+            try {
+                $stmt = $pdo->query("SELECT id, unique_name FROM `{$table}`{$where}");
+                if ($stmt === false) throw new PDOException("No {$table}");
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                // related_facilities is made on the first admin page after deploy (kop_related_install()).
+                if ($table !== 'related_facilities') throw $e;
+                $rows = array();
+            }
+            foreach ($rows as $row) {
                 $out[(int)$row['id']] = (string)$row['unique_name'];
             }
         }

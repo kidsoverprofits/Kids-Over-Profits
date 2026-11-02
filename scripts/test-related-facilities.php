@@ -103,6 +103,10 @@ $check('linked to Teen Challenge (company 22)', kop_related_link_operator($id, 2
 $wpdb->query("INSERT INTO news_facility_links (news_id, facility_id, link_type) SELECT id, $id, 'primary' FROM news_submissions WHERE status IN ('approved','published') ORDER BY id LIMIT 1");
 $check('a filing can be linked to it', kop_npf_record_exists('facility', $id) && kop_npf_add_link('112510315', 'facility', $id, 'tester') > 0);
 $check('the filing names the record', kop_npf_record_name('facility', $id) === 'Test Adult Teen Challenge Men\'s Center');
+// The news and lawsuit link screens (api/link-news-to-facility.php, api/lawsuit-facility-links.php) and the data manager name links by this.
+require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+$linked = kop_v2_pdo_names_by_id($pdo, $wpdb->prefix, array($id, 22));
+$check('the link name lookup names it, beside a company', ($linked[$id] ?? '') === $rec['unique_name'] && isset($linked[22]), json_encode($linked));
 
 echo "-- Pages --\n";
 $url = kop_related_url($id);

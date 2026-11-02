@@ -53,6 +53,11 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      for one; api/data-manager.php shows no name. The public pages are fine (Three Strands and Grace House show
      their links). Open: teach the name lookup (or those callers) about related_facilities, then the test passes as
      written; decide whether the data manager should list related records at all.
+     Fixed 2026-11-02: `kop_v2_pdo_names_by_id()` also reads related_facilities when an id is above
+     KOP_RELATED_FIRST_ID (or no ids are given), and skips it while the table is not made yet; so the three callers
+     above name related records. test-related-facilities checks it ("the link name lookup names it, beside a
+     company"). Rerun on the 2026-11-02 12:51 dump, test unchanged: readers 37 of 37 (1282 linked ids), writer all
+     pass. Still open (owner): should the data manager list related records at all.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
