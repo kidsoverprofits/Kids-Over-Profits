@@ -63,6 +63,9 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      Rename works on them (rename_record kind=related). Checked in test-related-facilities. After deploy, check on
      production: the Data Manager's "Related, not TTI" lists Cape Fear Teen Challenge (#901001) and Grace House
      Teen Challenge (#901002) with their category and a View page link.
+     Rerun again 2026-11-02 13:40 by a second session at d6520999, on a fresh portable MySQL load of the same dump
+     (162 tables, 5069 facilities, `SET SESSION sql_mode=''` at the top of the load file): readers 37 of 37, "every
+     linked news and lawsuit id resolves to a name" passes with 1282 linked ids, 900013 / 901001 / 901002 named.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
