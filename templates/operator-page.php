@@ -306,7 +306,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <?php endif; ?>
                 <?php if ($kop_op_people['others']) : ?>
                     <details class="kop-fp-more"<?php echo count($kop_op_people['others']) <= 40 ? ' open' : ''; ?>>
-                        <summary><?php echo esc_html(count($kop_op_people['others']) . ' other staff on record'); ?></summary>
+                        <summary><?php echo esc_html(count($kop_op_people['others']) . (count($kop_op_people['others']) === 1 ? ' other person connected to the company' : ' other people connected to the company')); ?></summary>
                         <ul class="kop-fp-people">
                             <?php foreach ($kop_op_people['others'] as $person) : ?>
                                 <li><?php echo esc_html($person['name'] . ($person['role'] !== '' ? ', ' . $person['role'] : '')); ?></li>
