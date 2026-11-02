@@ -62,6 +62,19 @@
     }
 
     /**
+     * Whether a finding is kept to its own facility: it is when its name is
+     * among the page's facility names (`pageNames`, keys from nameKey; the
+     * report-page.js states send them). A long needle otherwise matches under
+     * any name, for the trackers that spell names their own way (California),
+     * but a state's standard opening ("Based on documentation review, ...")
+     * can then flag another facility's report.
+     */
+    function elsewhere(f, key, pageNames) {
+        var own = nameKey(f.facility);
+        return !!(pageNames && pageNames[own] && own !== key);
+    }
+
+    /**
      * The approved finding a report belongs to, or null. Pure. A report is
      * the finding's when one of its links is the finding's document (the
      * states whose lists load the text only when a report is opened: North
@@ -71,7 +84,7 @@
      * finding already claimed by another report (ids in `taken`) yields to
      * an unclaimed one that also matches.
      */
-    function find(findings, facilityName, text, taken, links) {
+    function find(findings, facilityName, text, taken, links, pageNames) {
         var hay = squash(text);
         var key = nameKey(facilityName);
         if (!hay && !(links && links.length)) return null;
@@ -83,6 +96,7 @@
                 if (!hay || !f.needle || f.needle.length < SHORTEST_NEEDLE) continue;
                 // The cheap test first: most findings belong to another facility.
                 if (f.needle.length < UNIQUE_NEEDLE && nameKey(f.facility) !== key) continue;
+                if (elsewhere(f, key, pageNames)) continue;
                 if (hay.indexOf(f.needle) === -1) continue;
             }
             if (!taken || !taken[f.id]) return f;
@@ -99,7 +113,7 @@
         return out;
     }
 
-    KOP.severeFlags = { find: find, squash: squash, nameKey: nameKey, linked: linked };
+    KOP.severeFlags = { find: find, squash: squash, nameKey: nameKey, linked: linked, elsewhere: elsewhere };
 
     var doc = global.document;
     var config = global.KOP_SEVERE_FLAGS;
@@ -107,6 +121,18 @@
 
     var findings = [];
     var pending = false;
+    var pageNames = null;
+
+    /** The engine's facility names (all letters), asked once it has them; null on the legacy viewers. */
+    function namesOnPage(container) {
+        if (pageNames) return pageNames;
+        var ask = new global.CustomEvent('kop-rp-names', { detail: { names: [] } });
+        container.dispatchEvent(ask);
+        if (!ask.detail.names.length) return null;
+        pageNames = {};
+        ask.detail.names.forEach(function (n) { pageNames[nameKey(n)] = true; });
+        return pageNames;
+    }
 
     function el(tag, className, text) {
         var node = doc.createElement(tag);
@@ -133,12 +159,13 @@
             if (!f) return false;
             if (f.url) return true;
             return f.needle && f.needle.length >= SHORTEST_NEEDLE
-                && (f.needle.length >= UNIQUE_NEEDLE || nameKey(f.facility) === key);
+                && (f.needle.length >= UNIQUE_NEEDLE || nameKey(f.facility) === key)
+                && !elsewhere(f, key, pageNames);
         });
     }
 
     function markReport(report, facilityName, candidates, taken) {
-        var found = find(candidates, facilityName, report.textContent, taken, linksIn(report));
+        var found = find(candidates, facilityName, report.textContent, taken, linksIn(report), pageNames);
         report.setAttribute('data-kop-severe', found ? 'yes' : 'no');
         if (!found) return false;
         taken[found.id] = true;
@@ -230,6 +257,8 @@
 
     function scan() {
         pending = false;
+        var container = doc.getElementById('report-container');
+        if (container) namesOnPage(container);
         var started = Date.now();
         var facilities = doc.querySelectorAll(UNCHECKED);
         for (var i = 0; i < facilities.length; i++) {

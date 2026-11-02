@@ -690,6 +690,14 @@
         reportContainer.addEventListener('kop-rp-render', function (e) {
             fillFacilityReports(e.target.closest && e.target.closest('.kop-rp-facility'));
         });
+        // "kop-rp-names" puts every facility's name in event.detail.names,
+        // shown under the current letter or not.
+        reportContainer.addEventListener('kop-rp-names', function (e) {
+            if (!e.detail || !Array.isArray(e.detail.names)) return;
+            Object.keys(allFacilitiesData).forEach(function (letter) {
+                allFacilitiesData[letter].forEach(function (f) { e.detail.names.push(safeString(adapter.facilityName(f))); });
+            });
+        });
         // "kop-rp-bodies" also fills its reports' bodies, which are otherwise
         // built on open: a finding matched by its text needs the text there.
         reportContainer.addEventListener('kop-rp-bodies', function (e) {

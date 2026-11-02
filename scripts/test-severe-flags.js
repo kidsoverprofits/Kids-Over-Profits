@@ -81,6 +81,15 @@ check('two findings with one opening: the first report takes the first', (find(t
 check('and the second report takes the one still unclaimed', (find(twins, 'Example Ranch', longText, { 7: true }) || {}).id === 8);
 check('a claimed finding is still better than none', (find(twins, 'Example Ranch', longText, { 7: true, 8: true }) || {}).id === 7);
 
+// Arizona: a long needle that is a standard opening also sits in another
+// facility's report. When the finding's facility is on the page, only it is flagged.
+const onPage = { [nameKey('HMIH Cedar Crest, LLC')]: true, [nameKey('New Hope Inc')]: true };
+check('a long finding stays with its own facility when that facility is on the page',
+    find(findings, 'New Hope Inc', 'Deficiency Narrative: ' + longText, {}, [], onPage) === null);
+check('and is still flagged there', (find(findings, 'HMIH Cedar Crest, LLC', longText, {}, [], onPage) || {}).id === 2);
+check('a long finding whose facility is not on the page still matches under another name',
+    (find(findings, 'Cedar Crest Hospital & RTC', longText, {}, [], { [nameKey('Cedar Crest Hospital & RTC')]: true }) || {}).id === 2);
+
 if (failures.length) {
     console.error(failures.map(f => 'FAIL  ' + f).join('\n'));
 }
