@@ -706,6 +706,7 @@ if (!function_exists('kop_ptl_operator')) {
         }
         // Where the map has no years, the program's own record of its operators ("Aspen Education Group
         // (2000-2014)", the current operator after it): the takeover, and the sale or transfer away.
+        $unvouched = array();   // year => [next on record => [items]]
         // One spelling per company ("Three Springs Inc." / "Three Springs, Inc."): the first one met.
         $spelled = array();
         foreach (array($began, $ended) as $list) foreach ($list as $by) foreach (array_keys($by) as $c) {
@@ -739,7 +740,32 @@ if (!function_exists('kop_ptl_operator')) {
                 $spans[$fid] = array($from, $to ?: $now);
                 if ($run['prev'] !== '' || (int) $f['start_year'] !== $from) $began[$from][$spell($run['prev'])][] = $program($f['name'], $fid);
             }
-            if ($to) $ended[$to][$spell($run['next'])][] = $program($f['name'], $fid);
+            if ($to) {
+                $next = (string) $run['next'];
+                $it = $program($f['name'], $fid);
+                $after = (string) ($run['after'] ?? '');
+                if ($next === '' && $after !== '') {
+                    $ak = kop_ptl_company_key($after);
+                    if (isset($ms_pairs[$ak][$to]) || isset($ms_pairs[$ak][$to + 1]) || isset($ms_pairs[$ak][$to - 1])) {
+                        $next = $after;
+                    } elseif (!(strcasecmp((string) $f['status'], 'Closed') === 0 && (int) $f['end_year'] === $to)) {
+                        // Not a handover we can vouch for: who came next, without the year it came.
+                        $unvouched[$to][$spell($after)][] = $it;
+                        continue;
+                    }
+                }
+                $ended[$to][$spell($next)][] = $it;
+            }
+        }
+        foreach ($unvouched as $year => $by_after) {
+            foreach ($by_after as $after => $items) {
+                $n = count($items);
+                $add(kop_ptl_event((int) $year, 'ended', 'Stopped running ' . ($n === 1 ? $items[0]['name'] : $n . ' programs'), array(
+                    'items' => $items,
+                    'lead'  => 'Next on record: ' . $after . ', from a year the records do not give. Who ran ' . ($n === 1 ? 'it' : 'them') . ' in between, if anyone, is not on record.',
+                    'major' => $n >= 3,
+                )));
+            }
         }
         foreach ($by_key as $k => $f) {
             if (isset($map_years[$k]) || empty($f['own_years'])) continue;
@@ -1074,12 +1100,21 @@ if (!function_exists('kop_ptl_run_years')) {
         }
         $prev = '';
         $next = '';
+        $after = '';
         foreach ($others as $e) {
             if ($from && $e['to'] && $e['to'] >= $from - 1 && $e['to'] <= $from) $prev = $e['name'];
             if ($to && $e['from'] && $e['from'] >= $to && $e['from'] <= $to + 1) $next = $e['name'];
         }
-        if ($to && $next === '' && $cur && (!$cur['from'] || ($cur['from'] >= $to && $cur['from'] <= $to + 1))) $next = $cur['name'];
-        return array('from' => $from, 'to' => $to, 'prev' => $prev, 'next' => $next, 'last' => $last);
+        // An operator with a start year as ours ends took it from us. One with no year of its own (the
+        // current one, usually) is only the next on record: it may have come years later, with owners
+        // between that the record leaves out (Provo Canyon School: Charter until 2000, then UHS, and
+        // nothing of Ardent and Psychiatric Solutions). 'after' names it for the timeline, which calls
+        // it a handover only where a dated deal between the two says so.
+        if ($to && $next === '' && $cur) {
+            if ($cur['from'] >= $to && $cur['from'] <= $to + 1) $next = $cur['name'];
+            elseif (!$cur['from']) $after = $cur['name'];
+        }
+        return array('from' => $from, 'to' => $to, 'prev' => $prev, 'next' => $next, 'after' => $after, 'last' => $last);
     }
 }
 
