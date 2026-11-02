@@ -52,6 +52,18 @@ a review queue, a table holding facility ids, a state inspection page, a public 
 When changing how an existing record is written (a new save, approve, undo or delete path), read `docs/DATA-FLOWS.md`:
 what each store's readers are and what keeps them fresh (link syncs, fingerprints, LiteSpeed), and the known drift.
 
+## KOP's own holdings first (standing rule for every research agent, owner 2026-11-02)
+
+Before any general web search, every research task (and every research agent prompt) checks what KOP already holds:
+1. **Production**: the mirror `tmp/prod.sqlite` (refresh with `python ../kop-pipeline/scripts/sync-prod-sqlite.py`):
+   media library `wpdl_posts` (post_type `attachment`, `kop_source`; titles like "(Wayback YYYY-MM-DD)" date a page),
+   `wpdl_kop_doc_text`, `news_submissions`, `lawsuits`, `inspection_reports` (licensee on a dated report),
+   `facilities_v2` / `wpdl_kop_operators` json, `wpdl_kop_research_tasks`; plus `seeds/company-milestones.json` and
+   kop-pipeline's `markdown_output/` archived pages. The library's PDFs are public under `/wp-content/uploads/`.
+2. **Google Drive**: the owner's Drive (the claude.ai Google Drive connector: `search_files`, `read_file_content`), which
+   holds documents not yet synced to the media library (Drive Sync, `docs/claude/documents.md`).
+Only then the open web, for what neither holds. Reports cite KOP's own copy beside the original URL.
+
 ## Sources found during research (standing rule for every agent)
 
 Any time background research turns up a relevant source that KOP does not hold yet (news article, court record, bill,
