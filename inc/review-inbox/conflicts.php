@@ -282,7 +282,7 @@ function kop_rinbox_conflicts_act($key, $action, array $params) {
 /** The cached lists a settled conflict changes (and the request's own copy, emptied here). */
 function kop_rinbox_conflicts_caches() {
     $GLOBALS['kop_rinbox_conflict_memo'] = array();
-    return array('wbf_conflicts', 'wbf_conflicts_v2', 'wbf_conflicts_v3', 'wbf_conflicts_v4', 'wbf_conflicts_v5', 'wbf_conflicts_v6', 'fornits_conflicts', 'fornits_conflicts_v2', 'fornits_conflicts_v3', 'fornits_conflicts_v4', 'wbf', 'wbf_v2', 'wbf_v3', 'fornits', 'fornits_v2', 'fornits_v3');
+    return array('wbf_conflicts', 'wbf_conflicts_v2', 'wbf_conflicts_v3', 'wbf_conflicts_v4', 'wbf_conflicts_v5', 'wbf_conflicts_v6', 'wbf_conflicts_v7', 'wbf_conflicts_v8', 'fornits_conflicts', 'fornits_conflicts_v2', 'fornits_conflicts_v3', 'fornits_conflicts_v4', 'wbf', 'wbf_v2', 'wbf_v3', 'wbf_v4', 'fornits', 'fornits_v2', 'fornits_v3');
 }
 
 /** Kinds where a record holds one value: several different ones cannot all be used. */

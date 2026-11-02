@@ -12,6 +12,8 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
     $pdo = $GLOBALS['pdo'];
     $t = 'wpdl_kop_woodbury_facts';
     $seeded = kop_rinbox_test_conflicts_seed($pdo, $t);
+    // The conflict lists were read for the request before the seeds went in (the harness opens the first card).
+    if ($seeded) kop_rinbox_conflicts_caches();
     try {
         kop_rinbox_test_conflicts_run($src, $item, $check, $pdo, $t);
     } finally {
@@ -26,8 +28,8 @@ function kop_rinbox_test_conflicts(array $src, array $item, callable $check) {
 
 /**
  * The mirror's waiting items change as the owner works through them: seed what the checks need into the scratch
- * copy. A second capacity item for the record of a waiting capacity conflict, giving another value (a one-value
- * roll-up whose rows disagree), and a waiting staff item for a person the record lists already, under another
+ * copy. A second capacity (or start year) item for the record of a waiting conflict of that kind, giving another
+ * value (a one-value roll-up whose rows disagree), a waiting type the record lacks, and a waiting staff item for a person the record lists already, under another
  * role. Returns the seeded pkeys (removed after, so Woodbury Facts' own checks see the mirror's rows).
  */
 function kop_rinbox_test_conflicts_seed(PDO $pdo, $t) {
@@ -38,15 +40,38 @@ function kop_rinbox_test_conflicts_seed(PDO $pdo, $t) {
         $pdo->prepare("INSERT INTO $t (" . implode(', ', array_keys($r)) . ') VALUES (' . implode(', ', array_fill(0, count($r), '?')) . ')')->execute(array_values($r));
         $made[] = $r['pkey'];
     };
-    foreach ($pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'set_if_empty' AND path = 'facilityDetails.capacity' AND facility_id > 0 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC) as $r) {
-        $f = kop_on_file_doc($r['facility_id']);
-        $now = $f ? (int) kop_wbf_get($f['doc'], 'facilityDetails.capacity') : 0;
-        if ($now <= 0 || !kop_rinbox_wbf_conflict($r)) continue;
-        $v = (int) json_decode((string) $r['value'], true) + 5;
-        if ($v === $now) $v++;
-        $copy($r, array('pkey' => substr(md5('conflicts-test|capacity|' . $r['pkey']), 0, 16), 'value' => (string) $v,
-            'label' => 'Capacity: ' . $v, 'conflict' => 'The record has ' . $now . '; this says ' . $v . '.'));
-        break;
+    // A start year when no capacity conflict is waiting (none on the 2026-11-01 mirror).
+    $rollup = array('facilityDetails.capacity' => array('Capacity: ', 5), 'operatingPeriod.startYear' => array('Start year: ', -3));
+    foreach ($rollup as $path => list($label, $step)) {
+        foreach ($pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'set_if_empty' AND path = " . $pdo->quote($path) . " AND facility_id > 0 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $f = kop_on_file_doc($r['facility_id']);
+            $now = $f ? (int) kop_wbf_get($f['doc'], $path) : 0;
+            if ($now <= 0 || !kop_rinbox_wbf_conflict($r)) continue;
+            $v = (int) json_decode((string) $r['value'], true) + $step;
+            if ($v === $now) $v += $step;
+            $copy($r, array('pkey' => substr(md5('conflicts-test|' . $path . '|' . $r['pkey']), 0, 16), 'value' => (string) $v,
+                'label' => $label . $v, 'conflict' => 'The record has ' . $now . '; this says ' . $v . '.'));
+            break 2;
+        }
+    }
+    // A waiting type the record does not have, when the owner has settled every type conflict.
+    $types = $pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'set_if_empty' AND path = 'facilityDetails.type' AND facility_id > 0")->fetchAll(PDO::FETCH_ASSOC);
+    if (!array_filter($types, 'kop_rinbox_wbf_conflict')) {
+        foreach ($pdo->query("SELECT * FROM $t WHERE op = 'set_if_empty' AND path = 'facilityDetails.type' AND facility_id > 0 ORDER BY id DESC LIMIT 200")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $f = kop_on_file_doc($r['facility_id']);
+            $now = $f ? trim((string) kop_wbf_get($f['doc'], 'facilityDetails.type')) : '';
+            if ($now === '') continue;
+            $have = array_map('strtolower', kop_facility_types_split($now));
+            $v = '';
+            foreach (array('Wilderness Therapy', 'Therapeutic Boarding School', 'Residential Treatment Center') as $type) {
+                if (!in_array(strtolower($type), $have, true)) { $v = $type; break; }
+            }
+            if ($v === '') continue;
+            $copy($r, array('pkey' => substr(md5('conflicts-test|type|' . $r['pkey']), 0, 16), 'value' => json_encode($v), 'status' => 'pending',
+                'label' => 'Type: ' . $v, 'conflict' => 'The record has ' . $now . '; this says ' . $v . '.', 'current_val' => '',
+                'applied' => null, 'applied_fid' => 0, 'reviewed_by' => null, 'reviewed_at' => null));
+            break;
+        }
     }
     foreach ($pdo->query("SELECT * FROM $t WHERE op = 'add_staff' AND facility_id > 0 AND status IN ('applied', 'rejected') ORDER BY id DESC LIMIT 400")->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $f = kop_on_file_doc($r['facility_id']);
@@ -241,7 +266,14 @@ function kop_rinbox_test_conflicts_elsewhere(callable $check) {
     // Add the ticked rows to another record, then Undo.
     $gid = explode('|', $group, 2)[1];
     $keys = array_map('strval', array_keys(kop_rinbox_conflicts_group_members('woodbury-facts', $gid)));
-    $other = (int) $GLOBALS['pdo']->query('SELECT id FROM facilities_v2 WHERE id <> ' . (int) reset($units[$group])['facility_id'] . ' ORDER BY id LIMIT 1')->fetchColumn();
+    // A record with the field empty, so the rows are added rather than refused as conflicting there too.
+    $path = (string) (kop_wbf_rows(array($keys[0]))[0]['path'] ?? '');
+    $other = 0;
+    foreach ($GLOBALS['pdo']->query('SELECT id FROM facilities_v2 WHERE id <> ' . (int) reset($units[$group])['facility_id'] . ' ORDER BY id LIMIT 200')->fetchAll(PDO::FETCH_COLUMN) as $id) {
+        $f = kop_on_file_doc((int) $id);
+        if (!$other) $other = (int) $id;
+        if ($f && kop_wbf_slot_empty($path, kop_wbf_get($f['doc'], $path))) { $other = (int) $id; break; }
+    }
     $status = function () use ($keys) { return array_count_values(array_column(kop_wbf_rows($keys), 'status')); };
     $where = function () use ($keys) { return array_unique(array_map('intval', array_column(kop_wbf_rows($keys), 'facility_id'))); };
     try {

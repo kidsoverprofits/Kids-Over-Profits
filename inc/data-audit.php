@@ -798,8 +798,10 @@ function kop_daudit_check(array $p, array $opts, $over = false) {
                 $why[] = 'The rename year ' . (int) $op['year'] . ' is not a year.';
             }
         } elseif ($op['type'] === 'links_move') {
+            // A record merged since the audit: its links went to the one it went into (Starr Albion Prep, #13090 -> #13209).
             foreach (array('from_facility', 'to_facility') as $k) {
-                if (!kop_facility_load((int) ($op[$k] ?? 0), $opts)) $why[] = 'Record #' . (int) ($op[$k] ?? 0) . ' is gone (merged or deleted).';
+                $op[$k] = kop_daudit_resolve((int) ($op[$k] ?? 0));
+                if (!kop_facility_load($op[$k], $opts)) $why[] = 'Record #' . $op[$k] . ' is gone (merged or deleted).';
             }
             $lost = array();
             foreach (kop_daudit_move_ids($op) as $x) {
@@ -1126,6 +1128,8 @@ function kop_daudit_apply($key, $reviewer, $over_changes = false, $picked = null
                 'json' => $created ? $json : '');
             kop_daudit_operator_flush($oid);
         } elseif ($op['type'] === 'links_move') {
+            $op['from_facility'] = kop_daudit_resolve((int) $op['from_facility']);
+            $op['to_facility'] = kop_daudit_resolve((int) $op['to_facility']);
             $moved = array();
             foreach (kop_daudit_move_ids($op) as $x) {
                 $row = kop_daudit_item_link($opts['pdo'], $x[0], $x[1], $op['from_facility']);

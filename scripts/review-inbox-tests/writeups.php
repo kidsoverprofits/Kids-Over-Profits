@@ -78,6 +78,8 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
             AND (conflict IS NULL OR conflict = '') GROUP BY facility_id HAVING n >= 2 ORDER BY facility_id LIMIT 60")->fetchAll(PDO::FETCH_ASSOC) as $c) {
         $stored = kop_facility_load((int) $c['facility_id'], $opts);
         if (!$stored) continue;
+        // A record with nothing held yet: the checks below count exactly the two this test holds.
+        if (kop_wu_held_rows((int) $c['facility_id'])) continue;
         $rows = array();
         foreach ($pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'add_staff' AND facility_id = " . (int) $c['facility_id'] . ' ORDER BY id')->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $trial = $stored['doc'];
@@ -218,7 +220,8 @@ function kop_rinbox_test_writeups_from_empty(array $src, callable $check) {
         && strpos(json_encode($doc1['staff'] ?? null), trim(json_encode($names[1]), '"')) !== false, $m['message']);
     $check('writeups: ...files them as added, tied to the approval', $after[0]['status'] === 'applied' && (int) (json_decode($after[0]['applied'], true)['writeup'] ?? 0) === (int) $wu['published']['log']);
     $check('writeups: ...and the edited text is the published About', ($wu['published']['paragraphs'][0] ?? '') === 'Edited by the reviewer ([source](https://example.test/edit)).' && !$wu['draft']
-        && $wu['published']['covered']);
+        // The notes on the record when it was approved (none on some records): the page prints only notes added since.
+        && $wu['published']['covered'] === array_values(array_unique(array_map('kop_wu_note_key', kop_wu_doc_notes($doc1)))), json_encode(array($wu['published']['paragraphs'][0] ?? null, (bool) $wu['draft'], $wu['published']['covered'] ?? null)));
     $check('writeups: the approval says how to undo it', !empty($m['undo']['action']) && $m['undo']['action'] === 'undo_publish' && (int) $m['undo']['params']['log'] === (int) $wu['published']['log']);
     $check('writeups: nothing is held for the record any more', !kop_wu_held_rows($fid) && !in_array($fid, kop_rinbox_wu_ids('waiting', ''), true)
         && in_array($fid, kop_rinbox_wu_ids('published', ''), true));

@@ -101,6 +101,7 @@ function kop_bizf_candidates() {
     static $memo = null;
     if ($memo !== null) return $memo;
     $memo = array();
+    $moved = function_exists('kop_ya_moved_from_map') ? kop_ya_moved_from_map() : array();
     foreach (array_keys(kop_bizf_states()) as $st) {
         $file = kop_bizf_dir($st) . '/candidates.json';
         $data = is_readable($file) ? json_decode((string) file_get_contents($file), true) : null;
@@ -109,6 +110,13 @@ function kop_bizf_candidates() {
             $e['state'] = $st;
             // Records merged since the file was built: the one each went into.
             if (function_exists('kop_facility_merge_follow_candidates')) $e['candidates'] = kop_facility_merge_follow_candidates($e['candidates'] ?? array());
+            // Records moved to the young adult programs since: no facility to link any more (Three Strands, #100175).
+            if ($moved) {
+                $e['candidates'] = array_values(array_filter((array) ($e['candidates'] ?? array()), function ($c) use ($moved) {
+                    return ($c['kind'] ?? 'facility') !== 'facility' || !isset($moved[(int) ($c['id'] ?? 0)]);
+                }));
+                if (!$e['candidates']) continue;
+            }
             $memo[$st . ':' . $e['doc']] = $e;
         }
     }

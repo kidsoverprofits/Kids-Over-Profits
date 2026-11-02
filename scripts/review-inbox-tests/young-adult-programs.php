@@ -31,7 +31,9 @@ $GLOBALS['kop_test_options']['kop_ya_db'] = KOP_YA_DB_VERSION;
 
 function kop_rinbox_test_young_adult_programs(array $src, array $item, callable $check) {
     $pdo = kop_ya_pdo();
-    $id = (int) $item['key'];
+    // The mirror's own hidden programs may come first in the list: open the test program by its id.
+    $id = (int) $pdo->query("SELECT id FROM young_adult_programs WHERE name = 'Inbox Test Transition House' ORDER BY id DESC LIMIT 1")->fetchColumn();
+    $item = $id ? kop_rinbox_get_item('young-adult-programs', (string) $id) : array('key' => '0', 'title' => '', 'status' => '');
     $check('young-adult-programs: the hidden test program waits', $item['title'] === 'Inbox Test Transition House' && $item['status'] === 'hidden', $item['title']);
 
     call_user_func($src['save'], $item['key'], array('ages' => '18 and older', 'closed' => '2012', 'status' => 'Closed', 'other_names' => array('Inbox Test House')));

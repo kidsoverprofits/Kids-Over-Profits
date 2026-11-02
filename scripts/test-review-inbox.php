@@ -403,6 +403,8 @@ if ($only === '' || $only === 'recent') {
         $ins->execute(array('ZZ old reader link', 'https://example.org/zz-old-' . $now, 'A reader', '', gmdate('Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS)));
         $old = (string) $pdo->lastInsertId();
         kop_rinbox_test_news_origins($check);
+        // Counted fresh: a split cached before the rows above went in would credit them to the import.
+        delete_transient('kop_rinbox_native_split');
         $before = kop_rinbox_native_split_counts();
         $ins->execute(array('ZZ from an import', 'https://example.org/zz-import-' . $now, 'admin (SCIAD NET import)', 'Found in SCIAD NET', gmdate('Y-m-d H:i:s', $now - 600)));
         $import = (string) $pdo->lastInsertId();

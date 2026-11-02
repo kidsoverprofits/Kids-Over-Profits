@@ -47,6 +47,17 @@ if (!function_exists('kop_lawsuit_news_links_ensure_table')) {
     function kop_lawsuit_news_links_ensure_table(PDO $pdo): void {
         static $done = false;
         if ($done) return;
+        // The offline tests run on SQLite (tmp/prod.sqlite), which has no COMMENT, enum, KEY or ENGINE.
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS lawsuit_news_links (
+              lawsuit_id INTEGER NOT NULL, news_id INTEGER NOT NULL,
+              link_type TEXT NOT NULL DEFAULT 'auto', match_reason TEXT, created_by TEXT,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (lawsuit_id, news_id))");
+            $pdo->exec("CREATE INDEX IF NOT EXISTS by_news ON lawsuit_news_links (news_id, lawsuit_id)");
+            $done = true;
+            return;
+        }
         $pdo->exec("CREATE TABLE IF NOT EXISTS `lawsuit_news_links` (
           `lawsuit_id` int(11) NOT NULL COMMENT 'FK -> lawsuits.id',
           `news_id` int(11) NOT NULL COMMENT 'FK -> news_submissions.id',
@@ -401,10 +412,12 @@ if (!function_exists('kop_lawsuit_news_write_links')) {
                 ->execute(array_merge([$ownId], $ids));
 
             // Keep the reason current on auto rows; never touch a manual row.
+            $upsert = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+                ? "ON CONFLICT (lawsuit_id, news_id) DO UPDATE SET match_reason = CASE WHEN link_type = 'auto' THEN excluded.match_reason ELSE match_reason END"
+                : "ON DUPLICATE KEY UPDATE match_reason = IF(link_type = 'auto', VALUES(match_reason), match_reason)";
             $ins = $pdo->prepare(
                 "INSERT INTO lawsuit_news_links (`$ownCol`, `$otherCol`, link_type, match_reason, created_by)
-                 VALUES (?, ?, 'auto', ?, ?)
-                 ON DUPLICATE KEY UPDATE match_reason = IF(link_type = 'auto', VALUES(match_reason), match_reason)"
+                 VALUES (?, ?, 'auto', ?, ?) $upsert"
             );
             foreach ($desired as $otherId => $reason) {
                 $ins->execute([$ownId, (int)$otherId, $reason, $createdBy]);

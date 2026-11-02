@@ -21,6 +21,9 @@ function kop_rinbox_test_wiki_updates(array $src, array $item, callable $check) 
 
     // The PHP assembler == the script's, on every local draft.
     $dir = dirname(__DIR__, 2) . '/tmp/wiki-updates/drafts';
+    // The drafts are the pipeline's local files (kop-pipeline scripts/wiki-drafts.py); a checkout without them
+    // (a new machine, a wiped tmp/) skips the comparisons instead of failing them.
+    $local = (bool) glob("$dir/*/entry.md");
     $same = $diff = array();
     foreach (kop_wiki_drafts_all() as $id => $d) {
         if (!is_file("$dir/$id/entry.md") || !is_file("$dir/$id/draft.md")) continue;
@@ -37,7 +40,8 @@ function kop_rinbox_test_wiki_updates(array $src, array $item, callable $check) 
                 : ' (line ' . ($k + 1) . ': site ' . json_encode(mb_substr($g[$k] ?? '', 0, 60)) . ', script ' . json_encode(mb_substr($w[$k] ?? '', 0, 60)) . ')');
         }
     }
-    $check('wiki-updates: the site builds exactly the script\'s draft for every local draft', $same && !$diff, count($same) . ' same; differ: ' . implode(', ', $diff));
+    if (!$local) kop_rinbox_test_skip('wiki-updates: the site builds exactly the script\'s draft for every local draft', 'no local drafts in ' . $dir);
+    else $check('wiki-updates: the site builds exactly the script\'s draft for every local draft', $same && !$diff, count($same) . ' same; differ: ' . implode(', ', $diff));
 
     // Previous & alternate names: one bold line right under the header, above the type line, kept as it is for
     // Reddit, never the entry's own name, years after the names that have them; building again from that text
@@ -60,8 +64,12 @@ function kop_rinbox_test_wiki_updates(array $src, array $item, callable $check) 
         else $bad[] = $id;
         if (preg_match('/\(\D*\d{4}/', $lines[1])) $dated[$id] = $lines[1];
     }
-    $check('wiki-updates: drafts with other names get one bold names line under the header', $named && !$bad, count($named) . ' named; wrong: ' . implode(', ', $bad));
-    $check('wiki-updates: names carry the years they were used where known', (bool) $dated, count($dated) . ' with years, e.g. ' . implode(' | ', array_slice($dated, 0, 3)));
+    if (!$local) {
+        kop_rinbox_test_skip('wiki-updates: drafts with other names get one bold names line under the header', 'no local drafts');
+    } else {
+        $check('wiki-updates: drafts with other names get one bold names line under the header', $named && !$bad, count($named) . ' named; wrong: ' . implode(', ', $bad));
+        $check('wiki-updates: names carry the years they were used where known', (bool) $dated, count($dated) . ' with years, e.g. ' . implode(' | ', array_slice($dated, 0, 3)));
+    }
 
     // A licence name ("Gateway Academy, LLC – Draper") is one name, never cut at its comma into "LLC – Draper", and
     // is not listed as another name of the program it licenses.

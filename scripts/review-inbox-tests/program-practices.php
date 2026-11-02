@@ -38,14 +38,17 @@ function kop_rinbox_test_program_practices(array $src, array $item, callable $ch
     $export = json_decode((string) file_get_contents($file), true);
     $n = count((array) ($export['items'] ?? array()));
     $count = function ($where = '') use ($wpdb, $table) { return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}" . ($where ? " WHERE {$where}" : '')); };
-    $check('program-practices: the import holds every exported line once', $count() === $n, $count() . ' rows, ' . $n . ' in the file');
-    $check('program-practices: a second import adds nothing', kop_pp_import(true) === 0 && $count() === $n);
+    // Documents' lines only: in a full run the merge checks have copied in the mirror's table, readers' lines
+    // (answer_id, from the questions page, no document) included.
+    $check('program-practices: the import holds every exported line once', $count('answer_id = 0') === $n, $count('answer_id = 0') . ' rows, ' . $n . ' in the file');
+    $check('program-practices: a second import adds nothing', kop_pp_import(true) === 0 && $count('answer_id = 0') === $n);
 
     // Every line: a record that exists, a known topic, a link to its page of the document, the quote.
     $topics = kop_pp_topics();
     $bad = array();
     $exists = $pdo->prepare('SELECT COUNT(*) FROM facilities_v2 WHERE id = ?');
     foreach (kop_pp_rows(array()) as $r) {
+        if ((int) ($r['answer_id'] ?? 0) > 0) continue;
         $exists->execute(array((int) $r['facility_id']));
         if (!$exists->fetchColumn()) $bad[] = $r['id'] . ': no record #' . $r['facility_id'];
         if (!isset($topics[$r['topic']])) $bad[] = $r['id'] . ': topic ' . $r['topic'];

@@ -276,7 +276,15 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     $notpre = $pick("SELECT pkey FROM $t WHERE status = 'pending' AND preselect = 0 AND facility_id > 0 ORDER BY id LIMIT 1");
     $check('woodbury-facts: a checked quote at a sure match starts ticked, others do not',
         ($pre === '' || kop_rinbox_get_item('woodbury-facts', $pre)['selected'] === true) && ($notpre === '' || kop_rinbox_get_item('woodbury-facts', $notpre)['selected'] === false));
-    $alt = $pick("SELECT pkey FROM $t WHERE status = 'pending' AND facility_id > 0 AND alternatives LIKE '%\"id\"%' ORDER BY id LIMIT 1");
+    // An item whose close names include another record (a merge can leave the item's own record as its only one).
+    $alt = '';
+    foreach ($pdo->query("SELECT pkey, facility_id, alternatives FROM $t WHERE status = 'pending' AND facility_id > 0 AND alternatives LIKE '%\"id\"%' ORDER BY id LIMIT 200")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $others = array_filter((array) json_decode((string) $r['alternatives'], true), function ($a) use ($r) {
+            return is_array($a) && (int) ($a['id'] ?? 0) > 0 && kop_facility_merge_resolve((int) $a['id']) !== kop_facility_merge_resolve((int) $r['facility_id'])
+                && kop_on_file_doc(kop_facility_merge_resolve((int) $a['id']));
+        });
+        if ($others) { $alt = (string) $r['pkey']; break; }
+    }
     if ($alt !== '') {
         $ids = array_column(kop_rinbox_get_item('woodbury-facts', $alt)['actions'], 'id');
         $check('woodbury-facts: the other close names are one-click adds', (bool) preg_grep('/^apply_to_\d+$/', $ids), implode(',', $ids));

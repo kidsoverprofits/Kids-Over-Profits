@@ -97,12 +97,13 @@ function kop_rinbox_test_questions(array $src, array $item, callable $check) {
     $check('questions: the emailed set reads as added once its answer was used', $bstatus() === 'added');
     $done = $state ? (json_decode($state['done'], true) ?: array()) : array();
     $wbf = !empty($done['wbf']) ? (kop_wbf_rows(array($done['wbf']))[0] ?? null) : null;
-    // The citation never says how many agreed (owner, 2026-10-20); the count is kept in extra.
-    $check('questions: it waits for the record write-up as an approved fact citing the page', $wbf && $wbf['status'] === 'held'
+    // The citation never says how many agreed (owner, 2026-10-20); the count is kept in extra. It goes straight onto
+    // the record, not held for the write-up (owner, 2026-10-28, kop_q_wbf_write()).
+    $check('questions: it is on the record at once as an approved fact citing the page', $wbf && $wbf['status'] === 'applied'
         && $wbf['path'] === 'operatingPeriod.startYear' && json_decode($wbf['value'], true) === 1998
         && strpos($wbf['evidence'], 'questions page') !== false && strpos($wbf['evidence'], 'agreed') === false
         && (json_decode($wbf['extra'], true)['answers'] ?? 0) === 3, json_encode($wbf));
-    // In Woodbury Facts (Held tab) and Conflicts it is named as the questions page, never as Woodbury.
+    // In Woodbury Facts (Added tab) and Conflicts it is named as the questions page, never as Woodbury.
     if ($wbf) {
         $card = kop_rinbox_get_item('woodbury-facts', $wbf['pkey']);
         $check('questions: its Woodbury Facts card is badged "Questions page" and says where it came from', $card && $card['source_label'] === 'Questions page'
@@ -110,7 +111,7 @@ function kop_rinbox_test_questions(array $src, array $item, callable $check) {
             && strpos($card['text'], 'Added by hand by') === false && strpos($card['text'], 'these words were not found') === false, json_encode(array($card['source_label'] ?? null, $card['text'] ?? null)));
         $wsrc = kop_rinbox_sources()['woodbury-facts'];
         $in = function ($origin) use ($wsrc, $wbf) {
-            $l = call_user_func($wsrc['list'], array('view' => 'held', 'search' => '', 'offset' => 0, 'limit' => 500, 'filters' => array('origin' => $origin)));
+            $l = call_user_func($wsrc['list'], array('view' => 'applied', 'search' => '', 'offset' => 0, 'limit' => 500, 'filters' => array('origin' => $origin)));
             return in_array($wbf['pkey'], array_column($l['items'], 'key'), true);
         };
         $check('questions: the Woodbury Facts "From" filter keeps it under Questions page, not Woodbury Reports', $in('questions') && !$in('woodbury') && $in(''));
