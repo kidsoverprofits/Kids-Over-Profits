@@ -12057,7 +12057,61 @@
     "by": "Claude session (2026-10-28)",
     "at": "2026-10-28"
    }
+  },
+  {
+   "key": "who-ran-these-programs-last:is-rite-of-passage-s-pompano-youth-academy-the-s",
+   "section": "Who ran these programs last",
+   "title": "Is Rite of Passage's Pompano Youth Academy the same program as Sequel's Pompano Youth Treatment Center, which closed in 2021?",
+   "text": "Sequel TSI ran Pompano Youth Treatment Center (Pompano Beach, FL; Florida DJJ contract) from 2016 until it failed a state inspection in August 2021 and closed the next month (APM Reports; DJJ Comprehensive Accountability Report footnote). In 2026 Florida DJJ lists a Pompano Youth Academy run by Rite of Passage (DJJ facility page captured 2026-05-18; NBC6, 2026-05-20). No DJJ accountability report for FY2023-24 or FY2024-25 lists it, and nothing found so far ties the two to the same street address, campus or contract. Settle whether it is the same site and program (then the record gets Rite of Passage with its start year), a new program (a new record), or a program on another site. Look for: the street address of each, the DJJ contract number and start date for Rite of Passage, and Broward County or local news on the reopening. Also check Pompano Academy (1997-2000), an earlier program in the same city.",
+   "context": "",
+   "records": [
+    11096,
+    100157
+   ],
+   "found": "found 2026-11-02, Claude session 2026-11-02 (company timeline operator gaps, plan 4.7 item 17)",
+   "directions": [
+    {
+     "label": "DJJ Pompano Youth Academy page (Wayback 2026-05-18)",
+     "url": "https://kidsoverprofits.org/djj-state-fl-us-programs-facilities-residential-facilities-pompano-youth-academy-wayback-2026-05-18/",
+     "kind": "note"
+    },
+    {
+     "label": "Sequel website, Pompano YTC (2017)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Sequel-Website-Pompano-YTC-2017.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: fake shell of a company that John Ripley (Founder) used to buy out Sequel (APM Reports, 2022-04-26)",
+     "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+     "kind": "news"
+    },
+    {
+     "label": "News: Funding, Oversight Next Questions for Florida’s Private Youth Prison System (Juvenile Justice Information Exchange, 2016-08-29)",
+     "url": "https://jjie.org/2016/08/29/funding-oversight-next-questions-for-floridas-private-youth-prison-system/",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived sequelyouthservices.com)",
+     "url": "https://web.archive.org/web/20170606135542/http://sequelyouthservices.com/html/staffsecure-pompano.html",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived sec.gov)",
+     "url": "https://web.archive.org/web/2*/https://www.sec.gov/Archives/edgar/data/914670/0000914670-00-000010.txt",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived sec.gov)",
+     "url": "https://web.archive.org/web/2*/https://www.sec.gov/Archives/edgar/data/914670/0000914670-01-000001.txt",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived youthservices.com)",
+     "url": "https://web.archive.org/web/20000416230654/http://www.youthservices.com/pa.htm",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-10-28 19:09"
+ "built": "2026-11-02 19:52"
 }
