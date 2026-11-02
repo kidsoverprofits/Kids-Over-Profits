@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 20:49 UTC",
- "source": "86bcf34ce6091afc35aebe471616b35f1902f3ed",
+ "built": "2026-11-02 21:51 UTC",
+ "source": "fa7dbb1c80fc4c9047219726c242527ed57ba630",
  "sections": [
   {
    "key": "2",
@@ -384,6 +384,14 @@
        "ask": "Which long-form article sections should be wrapped, summarised and tagged?",
        "date": "",
        "hash": "e2ef5c346f1a"
+      },
+      {
+       "id": "2.5:rewrite-of-generated-prose-by-claude-agents",
+       "lead": "Rewrite of generated prose by Claude agents",
+       "text": "**Rewrite of generated prose by Claude agents** (owner, 2026-11-02): the rule-built \"About\" on facility and company pages (inc/profile-notes.php), the company histories and the timeline event text read badly. Decided: Claude agents write offline from a packet of each record's facts (kop-pipeline `scripts/about-rewrite/`, brief in BRIEF.md there); the text goes live as soon as it deploys, fixed with the pencil, the rule-built prose kept as the fallback. A 20-record pilot (before/after) comes first, then the full run (about 1,100 records). Open: the pilot; an apply path that writes kop_record_writeups.published WITHOUT releasing held facts (kop_wu_publish() releases them); company histories and timeline text after the About. Citations (owner, same day): cite the source a research note names, never the note. About 100 citations in 30 seeded company histories point at KOP material (research-notes Google Docs, the research spreadsheet, the glossary, /corporatization/, /three-springs-inc/; Straight Inc. 16, Three Springs 14, Teen Challenge 5); the history rewrite traces each to the source behind it. Pilot (2026-11-02): https://claude.ai/artifact/4feUz655wtt6zshbvg3kDm (20 Abouts + the Teen Challenge history; packets from scripts/export-about-packets.php, page from kop-pipeline scripts/about-rewrite/compare.py). Teen Challenge follow-ups: the research-notes Doc's Texas timeline is copied from the Texas Freedom Network's 2002 report (now cited); Henry Lozano's Teen Challenge role rests on a 2005 Rockefeller Institute interview only on the Wayback Machine (archive it as a PDF, then cite it); founding year 1958 (its own history page, Woodbury) vs 1960 on the fact box. The writer swapped the New Yorker, FOX 13, FOX4 and Kokomo Tribune citations for other outlets only because its fetches failed: put the originals back beside the new ones. Five new sources it found were sent to the review inbox.",
+       "ask": "Does the pilot's before/after read right, so the full run can go?",
+       "date": "2026-11-02",
+       "hash": "7fa51c6c4722"
       }
      ]
     },
@@ -1065,6 +1073,14 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "a888e50bfa14"
+      },
+      {
+       "id": "4.3:record-problems-the-about-rewrite-pilot-found-2026-11-02-20",
+       "lead": "Record problems the About-rewrite pilot found (2026-11-02, 20 records; 2.5 item 5)",
+       "text": "**Record problems the About-rewrite pilot found (2026-11-02, 20 records; 2.5 item 5)**. The writers left these out of the text and flagged them; each needs a look at the record: - Misfiled items: Paul Anthony Nichols' 2023 sentencing (St. George News) is on Falcon Ridge Ranch but names the Toquerville campus (Lava Heights Academy). Mount Bachelor holds Bend Bulletin pages not about it, The House / Steve Izenstark and a Provo Canyon news cluster. Provo Canyon holds Nebraska placements, 60 Minutes, Utah care-facility deaths and Lichfield v. Netflix. Midwest Academy and Cross Creek hold Elan School / Reason on Romney items. Family Foundation School holds an Elan School item and a Pennsylvania zoning dispute. Aspen Education Group's timeline carries a Provo Canyon School closure cluster. Aspen Ranch lists \"Aspen Education Group\" as an also-known-as name. - Years that disagree: Family Foundation closing 2013 vs 2014 (NYT says 2014); Provo Canyon injunction 1979 vs 1980; Mount Bachelor opening 1998 on the record, staff dated from 1988; Eagle Ranch 1995 vs about 2005; Cross Creek 1987 vs 1988 and possibly running into 2013 as Youth Foundation Inc.; Aspen Education Group 1997 vs 1998; Highlands Youth Academy is Open on the record, but a 2019 story says it closed when its contract ended. - Other: capacity \"as of\" dates after the program closed (Midwest, Cross Creek, Aspen Ranch); Canyon State victim spelled Contreraz and Contreras, settlement \"more than $1 million\" (AP) vs $3 million; SLS clinical director Prichard vs Pritchard; Straight Cincinnati mixes Straight's branch (1982-1987) and Kids Helping Kids / Pathway (1993-2008) at one address. HEAL-sourced incidents and many staff and lawsuit facts carry no link, so their sentences print without a number (WBNG / NYT links exist for Family Foundation's 120-128). - Company packets are thin: Rite of Passage and InnerChange have deaths and lawsuits only in their written history, not as record facts, so their About cannot carry them.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "7135efa5bc5f"
       }
      ]
     },
