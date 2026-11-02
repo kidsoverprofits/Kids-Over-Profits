@@ -1070,5 +1070,19 @@
     "operator": {
       "notes": []
     }
+  },
+  {
+    "name": "Sequel TSI",
+    "operator": {
+      "notes": []
+    },
+    "facilities": [
+      {
+        "id": 13209,
+        "unique_name": "Starr Commonwealth",
+        "relationship": "past",
+        "update": true
+      }
+    ]
   }
 ]

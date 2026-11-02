@@ -11754,5 +11754,76 @@
         "Sequel TSI (2009-2019)"
       ]
     }
+  },
+  {
+    "id": 13209,
+    "unique_name": "Starr Commonwealth",
+    "version": 2,
+    "note": "Current operator 'Sequel TSI' -> 'Starr Commonwealth' (2026-11-02): Starr Commonwealth's board ended the Sequel management partnership in July 2020 and Starr runs its campus again (Starr CEO statement; WILX), so Starr is the current operator, not Sequel TSI. Identification copied from production 2026-11-02.",
+    "facility": {
+      "identification": {
+        "name": "Starr Commonwealth",
+        "nameKey": "starr commonwealth",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [],
+        "otherNames": [
+          "Albion Academy",
+          "Starr Albion Prep"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [
+          "Starr Commonwealth (1913-2014)",
+          "Sequel TSI (2014-2020)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Starr Commonwealth"
+      }
+    }
+  },
+  {
+    "id": 13641,
+    "unique_name": "Brighter Path Tuskegee",
+    "version": 3,
+    "note": "Current operator '' -> 'Brighter Path Alabama, LLC' (2026-11-02): Sequel TSI of Alabama became Brighter Path Alabama, LLC (Brantz affidavit, M.D. Ala. 3:22-cv-00190; Alabama SOS), as on Brighter Path Courtland and Montgomery. Identification copied from production 2026-11-02.",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Tuskegee",
+        "nameKey": "brighter path tuskegee",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Tuskegee",
+          "Three Springs School of Tuskegee",
+          "Sequel TSI of Tuskegee"
+        ],
+        "otherNames": [
+          "Tuskegee Secure Program",
+          "Sequel TSI Tuskegee"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [
+          "Three Springs Inc. (2001-2009)",
+          "Sequel TSI (2009-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [
+          "Sequel TSI",
+          "Vivant Behavioral Health"
+        ],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      }
+    }
   }
 ]
