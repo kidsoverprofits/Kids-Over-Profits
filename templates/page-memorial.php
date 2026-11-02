@@ -47,6 +47,10 @@ foreach ($victims as $v) {
         $decades[$decade] = true;
     }
 }
+// Program pill -> the facility's page, when the name (and state) pins one record.
+$program_urls = function_exists('kop_facility_link_resolve_placed')
+    ? kop_facility_link_resolve_placed(array_map(function ($v) { return array($v['program'], $v['location']); }, $victims))
+    : array();
 ksort($locations);
 krsort($decades);
 // Keep cause dropdown in the label-map order so "Other"/"Unknown" sit last.
@@ -144,7 +148,12 @@ function kop_memorial_date($date, $precision) {
 
             <?php if ($v['program']): ?>
             <div class="kop-card-tags">
+                <?php $program_url = $program_urls[trim((string) $v['program']) . '|' . trim((string) $v['location'])] ?? ''; ?>
+                <?php if ($program_url !== ''): ?>
+                <a class="kop-tag kop-tag-facility" href="<?php echo esc_url($program_url); ?>" title="Open this facility's page"><?php echo esc_html($v['program']); ?></a>
+                <?php else: ?>
                 <span class="kop-tag kop-tag-facility"><?php echo esc_html($v['program']); ?></span>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
 

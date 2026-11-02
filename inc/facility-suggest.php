@@ -303,6 +303,69 @@ if (!function_exists('kop_facility_link_resolve')) {
     }
 }
 
+if (!function_exists('kop_facility_link_resolve_placed')) {
+    /**
+     * Facility page URLs for free-text names that come with a state, as the
+     * memorial's program + location do. $pairs = [[name, place], ...];
+     * returns "name|place" => url for the pairs that resolve. A name carried
+     * by exactly one record with a page links; carried by several, the one
+     * in the same state; carried by none, the one record in the same state
+     * whose name starts with it ("Spring Creek Lodge" -> "Spring Creek Lodge
+     * Academy", 8+ characters). Anything still ambiguous stays unlinked.
+     * Cached a day on the page index's fingerprint, like the resolver above.
+     */
+    function kop_facility_link_resolve_placed(array $pairs) {
+        global $wpdb;
+        $want = array();
+        foreach ($pairs as $p) {
+            $name = trim((string) ($p[0] ?? ''));
+            if ($name === '') continue;
+            $want[$name . '|' . trim((string) ($p[1] ?? ''))] = array($name, trim((string) ($p[1] ?? '')));
+        }
+        if (!$want) return array();
+        ksort($want);
+        $fingerprint = function_exists('kop_facility_pages_fingerprint') ? kop_facility_pages_fingerprint() : '';
+        $cache_key = 'kop_flrp_' . md5($fingerprint . '|' . implode("\n", array_keys($want)));
+        $cached = $fingerprint !== '' ? get_transient($cache_key) : false;
+        if (is_array($cached)) return $cached;
+
+        $index = kop_facility_pages_index();
+        $map = kop_facility_link_name_ids();
+        $states = array();
+        foreach ((array) $wpdb->get_results('SELECT id, state FROM facilities_v2', ARRAY_A) as $r) {
+            $states[(int) $r['id']] = strtoupper(trim((string) $r['state']));
+        }
+        $codes = array_flip(kop_state_abbrev_to_name());
+        $out = array();
+        foreach ($want as $k => list($name, $place)) {
+            $code = $codes[kop_state_canonical_name($place)] ?? '';
+            $key = kop_facility_link_key($name);
+            $ids = array();
+            foreach ($map[$key] ?? array() as $id) {
+                if (isset($index['ids'][$id])) $ids[] = (int) $id;
+            }
+            if (count($ids) > 1 && $code !== '') {
+                $ids = array_values(array_filter($ids, function ($id) use ($states, $code) { return $states[$id] === $code; }));
+            } elseif (!$ids && $code !== '' && mb_strlen($key) >= 8) {
+                $found = array();
+                foreach ($map as $mk => $mids) {
+                    if (strpos($mk . ' ', $key . ' ') !== 0) continue;
+                    foreach ($mids as $id) {
+                        if (isset($index['ids'][$id]) && $states[$id] === $code) $found[(int) $id] = true;
+                    }
+                }
+                $ids = array_keys($found);
+            }
+            if (count($ids) === 1) {
+                $url = kop_facility_page_url($ids[0]);
+                if ($url !== '') $out[$k] = $url;
+            }
+        }
+        if ($fingerprint !== '') set_transient($cache_key, $out, DAY_IN_SECONDS);
+        return $out;
+    }
+}
+
 if (!function_exists('kop_facility_links_rest')) {
     function kop_facility_links_rest($request) {
         $body = $request->get_json_params();
