@@ -9,7 +9,9 @@
  *
  * Loaded on every page (inc/enqueue.php). Only paragraphs and lists of running
  * text are capped, never a container, so a page's grid or table layout is
- * untouched. Articles (css/article.css) and pull quotes read the same token.
+ * untouched. Record summaries in news and lawsuit lists (.kop-fp-record-summary)
+ * are two- to four-sentence blurbs, so they take the full row width; capped, they
+ * left half the row empty. Articles (css/article.css) and pull quotes read the same token.
  * A new kind of long text page adds its paragraphs here.
  */
 
@@ -38,7 +40,6 @@
 /* Facility pages' running text. */
 .kop-fp-section > p,
 .kop-fp-reporting p,
-.kop-fp-record-summary,
 /* The glossary. */
 .kop-gl-intro p,
 .kop-gl-def p,

@@ -335,6 +335,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 // Celebrity or Viral tag (kop_news_is_aside()): collapsed, after the rest.
                 $kop_op_news_row = static function (array $n) {
                     $bits = array_filter(array($n['outlet'], $n['date_label'], $n['type']), 'strlen');
+                    // One meta span, so a wrapped line doesn't start with a second span's indent.
+                    $meta = implode(' | ', $bits);
+                    if ($n['about'] === 'facility') $meta .= ($meta !== '' ? ' · ' : '') . 'About one of its programs';
                     // Picked as essential reporting (inc/featured-reporting.php): flagged, with the note.
                     $feat = function_exists('kop_feat_flag_html') ? kop_feat_flag_html((int) $n['id']) : '';
                     ?>
@@ -345,8 +348,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                         <?php else : ?>
                             <span><?php echo esc_html($n['title']); ?></span>
                         <?php endif; ?>
-                        <?php if ($bits) : ?><span class="meta"><?php echo esc_html(implode(' | ', $bits)); ?></span><?php endif; ?>
-                        <?php if ($n['about'] === 'facility') : ?><span class="meta">About one of its programs</span><?php endif; ?>
+                        <?php if ($meta !== '') : ?><span class="meta"><?php echo esc_html($meta); ?></span><?php endif; ?>
                         <?php if ($n['summary'] !== '') : ?><p class="kop-fp-record-summary"><?php echo esc_html($n['summary']); ?></p><?php endif; ?>
                     </li>
                     <?php
