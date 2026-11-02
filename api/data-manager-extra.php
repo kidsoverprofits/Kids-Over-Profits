@@ -133,6 +133,73 @@ function kop_dm_years($start, $end): string {
 }
 
 // ---------------------------------------------------------------------------
+// Related records (inc/related-facilities.php): Christian adult rehabs and the
+// other categories that are not TTI, approved and waiting. Young adult programs
+// are related records too but keep their own category here (kop_dm_side_items()).
+// ---------------------------------------------------------------------------
+
+/** List rows for related records whose name or other names hold $q, with their companies. */
+function kop_dm_related_items(string $q, array $opts = []): array {
+    if (!function_exists('kop_related_all')) return [];
+    $rows = [];
+    foreach (kop_related_all('', $opts, null) as $r) {
+        if ($r['category'] === (defined('KOP_YA_CATEGORY') ? KOP_YA_CATEGORY : 'young-adult-programs')) continue;
+        $doc = json_decode((string)$r['json_data'], true);
+        $doc = is_array($doc) ? $doc : [];
+        $name = (string)($r['name'] !== '' && $r['name'] !== null ? $r['name'] : $r['unique_name']);
+        $aka = null;
+        if ($q !== '' && mb_stripos($name, $q) === false) {
+            foreach (['pastNames' => 'past', 'otherNames' => 'other'] as $k => $kind) {
+                foreach ((array)($doc['identification'][$k] ?? []) as $n) {
+                    if (is_array($n)) $n = $n['name'] ?? '';
+                    if (is_string($n) && trim($n) !== '' && mb_stripos($n, $q) !== false) { $aka = [trim($n), $kind]; break 2; }
+                }
+            }
+            if (!$aka) continue;
+        }
+        $rows[(int)$r['id']] = [$r, $doc, $name, $aka];
+    }
+    if (!$rows) return [];
+
+    $companies = [];
+    if (isset($GLOBALS['wpdb'])) {
+        $wpdb = $GLOBALS['wpdb'];
+        $found = $wpdb->get_results("SELECT j.facility_id, o.name, o.unique_name FROM {$wpdb->prefix}kop_operator_facilities j
+                                       JOIN {$wpdb->prefix}kop_operators o ON o.id = j.operator_id
+                                      WHERE j.facility_id IN (" . implode(',', array_keys($rows)) . ') ORDER BY j.sort_order', ARRAY_A);
+        foreach ((array)$found as $c) $companies[(int)$c['facility_id']][] = (string)($c['name'] ?: $c['unique_name']);
+    }
+
+    $items = [];
+    foreach ($rows as $id => list($r, $doc, $name, $aka)) {
+        $cat = kop_related_category((string)$r['category']);
+        $pending = $r['review'] === 'pending';
+        $items[] = [
+            'id'                 => $id,
+            'unique_name'        => (string)$r['unique_name'],
+            'category'           => 'related',
+            'kind'               => 'related',
+            'table'              => 'related_facilities',
+            'display_name'       => $name,
+            'place'              => trim(implode(', ', array_filter([(string)$r['city'], (string)($r['state'] ?: $r['country'])]))),
+            'status'             => (string)$r['status'],
+            'years'              => kop_dm_years($r['start_year'], $r['end_year']),
+            'facility_type'      => (string)($doc['facilityDetails']['type'] ?? ''),
+            'companies'          => $companies[$id] ?? [],
+            'review'             => (string)$r['review'],
+            'designation'        => ($cat ? $cat['label'] : (string)$r['category']) . ($pending ? ' · waiting for review' : ''),
+            'facility_count'     => 0,
+            'document_folder_id' => !empty($doc['documentFolderId']) ? (int)$doc['documentFolderId'] : null,
+            'is_stub'            => false,
+            'page_url'           => $pending ? '' : kop_related_url($id),
+            'matched_name'       => $aka ? $aka[0] : null,
+            'matched_kind'       => $aka ? $aka[1] : null,
+        ];
+    }
+    return $items;
+}
+
+// ---------------------------------------------------------------------------
 // Merged records and converted companies
 // ---------------------------------------------------------------------------
 

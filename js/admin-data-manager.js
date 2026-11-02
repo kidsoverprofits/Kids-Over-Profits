@@ -31,6 +31,7 @@
         program_homes: 'Facility',
         young_adult: 'Young adult program (18+)',
         indigenous_schools: 'Indian boarding school',
+        related: 'Related, not TTI',
         referrers: 'Referrer',
         transporters: 'Transporter',
         providers: 'Mental Health Provider',
@@ -151,7 +152,7 @@
     // Name cell: name, stub/designation tags, place, companies, alias hit, page link.
     function nameCellHtml(it) {
         var sub = [];
-        if (it.kind === 'facility' || it.kind === 'young_adult' || it.kind === 'indigenous_school') {
+        if (it.kind === 'facility' || it.kind === 'young_adult' || it.kind === 'indigenous_school' || it.kind === 'related') {
             sub.push([it.place, it.status && it.status !== 'Unknown' ? it.status : '', it.years, it.facility_type, '#' + it.id].filter(Boolean).join(' · '));
             if (it.companies && it.companies.length) sub.push('Company: ' + it.companies.join(', '));
         } else if (it.kind === 'news' || it.kind === 'lawsuit' || it.kind === 'bill' || it.kind === 'merged' || it.kind === 'converted') {
@@ -259,6 +260,8 @@
                 );
             } else if (it.kind === 'young_adult' || it.kind === 'indigenous_school') {
                 actionDefs.push(['Rename', 'rename'], ['Edit details', 'edit']);
+            } else if (it.kind === 'related') {
+                actionDefs.push(['Rename', 'rename']);
             } else if (it.kind === 'news') {
                 actionDefs.push(['Facilities', 'links'], ['Reclassify', 'file_news'], ['Edit', 'edit']);
                 if (it.source_url) actionDefs.push(['Read it', 'source']);

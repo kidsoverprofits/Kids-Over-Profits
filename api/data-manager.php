@@ -25,9 +25,10 @@
  *
  *      list also takes category=facilities (each facilities_v2 record),
  *      program_homes (programs and their homes), young_adult,
- *      indigenous_schools and people (person ids, inc/people.php; in "All"
+ *      indigenous_schools, related (the other related_facilities records,
+ *      kop_dm_related_items()) and people (person ids, inc/people.php; in "All"
  *      only for a search); every row carries a 'kind' (operator, legacy,
- *      facility, young_adult, indigenous_school, person).
+ *      facility, young_adult, indigenous_school, related, person).
  *
  * GET  ?action=get_person&id=   one person: details, where named, likely same-person picks
  * POST {action:"person_save", id, name, aliases, notes}
@@ -455,6 +456,7 @@ $EXTRA_CATEGORIES = [
     'program_homes'      => 'facility',
     'young_adult'        => 'young_adult',
     'indigenous_schools' => 'indigenous_school',
+    'related'            => 'related',
 ];
 
 /** facilities_v2 id => name. */
@@ -860,6 +862,9 @@ try {
                 if ($category === '' || $category === 'indigenous_schools') {
                     $items = array_merge($items, kop_dm_side_items('indigenous_school', $q));
                 }
+                if ($category === '' || $category === 'related') {
+                    $items = array_merge($items, kop_dm_related_items($q));
+                }
                 // People and news/lawsuits/bills join "All categories" only for a
                 // search: thousands of rows would bury the records otherwise.
                 if ($category === 'people' || ($category === '' && $q !== '')) {
@@ -879,7 +884,7 @@ try {
                 }
             }
             foreach ($items as &$it) {
-                if (!in_array($it['kind'], ['facility', 'young_adult', 'indigenous_school'], true)) {
+                if (!in_array($it['kind'], ['facility', 'young_adult', 'indigenous_school', 'related'], true)) {
                     $it['wiki_links'] = ['suggested' => 0, 'confirmed' => 0, 'total' => 0];
                     $it['name_match_unlinked'] = 0;
                     continue;
@@ -1360,7 +1365,8 @@ try {
 
     // ---- rename_record / set_record_doc_folder ----
     // For rows that are not operator projects: one facility record
-    // (facilities_v2), a young adult program or an Indian boarding school.
+    // (facilities_v2), a young adult program, an Indian boarding school or
+    // another related record (related_facilities).
     if ($action === 'rename_record' || $action === 'set_record_doc_folder') {
         $kind = (string)($input['kind'] ?? '');
         $id = (int)($input['id'] ?? 0);
@@ -1393,6 +1399,11 @@ try {
                 // The save functions write every column, so start from what is stored.
                 $row['name'] = $newName;
                 $ya ? kop_ya_save($xpdo, $row, $id, kop_dm_by()) : kop_ischools_save($xpdo, $row, $id, kop_dm_by());
+            } elseif ($kind === 'related') {
+                $rec = function_exists('kop_related_get') ? kop_related_get($id) : null;
+                if (!$rec) throw new RuntimeException('That record is gone.');
+                $rec['doc']['identification']['name'] = $newName;
+                kop_related_save($rec['category'], $rec['doc'], $id);
             } else {
                 throw new RuntimeException('Unknown record kind "' . $kind . '".');
             }

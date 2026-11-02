@@ -132,6 +132,7 @@
 .dm-cat-facilities { background: var(--kop-midnight-blue, #000435); }
 .dm-cat-young_adult { background: var(--kop-chartreuse-ink, #5C7401); }
 .dm-cat-indigenous_schools { background: var(--kop-text-muted, #4A5568); }
+.dm-cat-related { background: var(--kop-orange-fill, #A3570D); }
 .dm-cat-people { background: var(--kop-coral-pink-fill, #B3404A); }
 .dm-cat-news { background: var(--kop-teal-fill, #24757F); }
 .dm-cat-lawsuits { background: var(--kop-navy, #000080); }

@@ -107,6 +107,14 @@ $check('the filing names the record', kop_npf_record_name('facility', $id) === '
 require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
 $linked = kop_v2_pdo_names_by_id($pdo, $wpdb->prefix, array($id, 22));
 $check('the link name lookup names it, beside a company', ($linked[$id] ?? '') === $rec['unique_name'] && isset($linked[22]), json_encode($linked));
+// The data manager's list (category=related): found by another name, with its company, page and category; a waiting one says so.
+require_once dirname(__DIR__) . '/api/data-manager-extra.php';
+$dm = array_column(kop_dm_related_items('ATC Men'), null, 'id');
+$check('the data manager lists it by another name', isset($dm[$id]) && $dm[$id]['matched_name'] === 'Test ATC Men' && $dm[$id]['kind'] === 'related'
+    && in_array('Teen Challenge', $dm[$id]['companies'], true) && $dm[$id]['page_url'] === kop_related_url($id) && $dm[$id]['designation'] === 'Christian Rehabs for Adults',
+    json_encode($dm[$id] ?? null));
+$dm = array_column(kop_dm_related_items('Test Pending'), null, 'id');
+$check('a waiting record is listed as waiting, with no page', isset($dm[$pending]) && $dm[$pending]['page_url'] === '' && strpos($dm[$pending]['designation'], 'waiting for review') !== false);
 
 echo "-- Pages --\n";
 $url = kop_related_url($id);
@@ -184,6 +192,7 @@ $data = $opi ? kop_facility_page_data((int) $opi['id']) : null;
 $check('its page is the facility page, under Young Adult Programs', $data && $data['related']['label'] === 'Young Adult Programs' && count($data['staff']) > 0);
 $check('a program run by a company on file is linked to it (Embark Behavioral Health)', (bool) preg_grep('/Linked to company \d+ \(Embark/', $log));
 $check('the move runs once', count(preg_grep('/is record \d+ already/', kop_ya_move_to_related($pdo))) === count($old));
+$check('the data manager leaves young adult programs to their own category', !array_filter(kop_dm_related_items('OPI'), function ($it) use ($opi) { return $it['id'] === (int) ($opi['id'] ?? 0); }) && $opi);
 
 echo "-- Delete --\n";
 kop_related_delete($id2);

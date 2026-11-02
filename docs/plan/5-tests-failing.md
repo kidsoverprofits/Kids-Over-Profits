@@ -57,7 +57,12 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      KOP_RELATED_FIRST_ID (or no ids are given), and skips it while the table is not made yet; so the three callers
      above name related records. test-related-facilities checks it ("the link name lookup names it, beside a
      company"). Rerun on the 2026-11-02 12:51 dump, test unchanged: readers 37 of 37 (1282 linked ids), writer all
-     pass. Still open (owner): should the data manager list related records at all.
+     pass. Owner 2026-11-02: yes, the data manager lists them. Done: category "Related, not TTI" (and "All") lists
+     every related record but young adult programs (still their own category), approved and waiting, with its
+     category, companies and page, found by other names too (kop_dm_related_items(), api/data-manager-extra.php);
+     Rename works on them (rename_record kind=related). Checked in test-related-facilities. After deploy, check on
+     production: the Data Manager's "Related, not TTI" lists Cape Fear Teen Challenge (#901001) and Grace House
+     Teen Challenge (#901002) with their category and a View page link.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
