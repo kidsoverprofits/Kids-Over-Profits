@@ -297,6 +297,35 @@ $check('the findings a Brief FAQ answer rests on are left out (#2967, the range 
 $GLOBALS['kop_test_options']['kop_volpr_struck'] = array($P => array('struck-1' => true));
 $check('a card the admin struck is left out', isset(kop_volpr_tricky($P)['struck-1']) && kop_volpr_admin_post('practice_unstrike', array('kop_volpr_source' => $P, 'kop_volpr_key' => 'struck-1'))
     && !isset(kop_volpr_tricky($P)['struck-1']));
+
+// A decided inspection finding still offers the other button (Reject on an approved one): it is decided all the same.
+$ih_id = (string) $pdo->query("SELECT id FROM inspection_highlights WHERE status = 'approved' AND LENGTH(excerpt) > 80 ORDER BY id DESC LIMIT 1")->fetchColumn();
+$ih_it = $ih_id !== '' ? kop_vol_raw_item(kop_rinbox_sources()['inspection-highlights'], 'inspection-highlights', $ih_id) : null;
+$check('an approved finding is not waiting, though it offers Reject', $ih_it && kop_vol_actionable('inspection-highlights', $ih_it) && !kop_volpr_waiting('inspection-highlights', $ih_it)
+    && kop_volpr_fetch('inspection-highlights', $ih_id), $ih_id);
+$pend = (string) $pdo->query("SELECT id FROM inspection_highlights WHERE status = 'pending' LIMIT 1")->fetchColumn();
+$check('...a pending one is', $pend === '' || kop_volpr_waiting('inspection-highlights', kop_vol_raw_item(kop_rinbox_sources()['inspection-highlights'], 'inspection-highlights', $pend)));
+
+// "Use as a practice question": the admin's own picks, drawn first, even ones the rules leave out.
+$pick_key = (string) array_keys(array_filter($round, function ($a) { return $a === 'reject'; }))[0];
+$pick_item = kop_rinbox_get_item($P, $pick_key);
+$pick_act = array_values(array_filter($pick_item['actions'], function ($a) { return in_array($a['id'], array('practice_pick', 'practice_unpick'), true); }));
+$check('a decided card offers "Use as a practice question"', $pick_act && $pick_act[0]['id'] === 'practice_pick' && $pick_act[0]['style'] === 'neutral', json_encode(array_column($pick_item['actions'], 'id')));
+$GLOBALS['kop_test_options']['kop_volpr_struck'] = array($P => array($pick_key => true));
+$res = kop_rinbox_apply_action($P, $pick_key, 'practice_pick', array());
+$check('...picking it unstrikes it and logs Undo', isset(kop_volpr_picked($P)[$pick_key]) && !isset(kop_volpr_tricky($P)[$pick_key])
+    && (string) $pdo->query("SELECT undo_action FROM wpdl_kop_review_log WHERE source = 'news' AND item_key = " . $pdo->quote($pick_key) . " ORDER BY id DESC LIMIT 1")->fetchColumn() === 'practice_unpick', $res['message']);
+$check('...the card now offers taking it out', in_array('practice_unpick', array_column(kop_rinbox_get_item($P, $pick_key)['actions'], 'id'), true));
+$check('...it is not a decision: the practice answer stays Reject', kop_volpr_answer_of($P, $pick_key) === 'reject');
+$fresh = kop_volpr_draw(987654, $P);
+$check('...and a new volunteer\'s round has it, answer Reject', (bool) array_filter($fresh, function ($r) use ($pick_key) { return $r[0] === $pick_key && $r[2] === 'reject'; }));
+$check('...but not for one who practised it already', !array_filter(kop_volpr_draw($alex_id, $P), function ($r) use ($pick_key) { return $r[0] === $pick_key; }));
+$waiting_key = (string) $pdo->query("SELECT id FROM news_submissions WHERE status = 'pending' ORDER BY id DESC LIMIT 1")->fetchColumn();
+$check('a waiting card offers no practice button', $waiting_key === '' || !array_filter(kop_rinbox_get_item($P, $waiting_key)['actions'], function ($a) { return strpos($a['id'], 'practice_') === 0; }));
+$check('picking an undecided card is refused', strpos($throws(function () use ($P) { kop_rinbox_practice_act($P, 'no-such-key', 'practice_pick', array()); }), 'first') !== false);
+kop_volpr_admin_post('practice_unpick', array('kop_volpr_source' => $P, 'kop_volpr_key' => $pick_key));
+$check('Unpick on the Practice cards page takes it out', !isset(kop_volpr_picked($P)[$pick_key]));
+$GLOBALS['kop_test_options']['kop_volpr_struck'] = array();
 $titles = $pdo->query("SELECT LOWER(TRIM(title)) FROM wpdl_kop_vol_practice WHERE volunteer_id = $alex_id")->fetchAll(PDO::FETCH_COLUMN);
 $check('...no two cards with the same title', count($titles) === count(array_unique($titles)), json_encode(array_diff_assoc($titles, array_unique($titles))));
 $check('...shown as the open round', $ps['open'] && $ps['open']['total'] === 10 && $ps['open']['done'] === 0 && $ps['open']['source'] === $P);

@@ -15,7 +15,8 @@
  *   - company milestones (seeds/company-milestones.json): buyouts, private
  *     equity owners, investigations, settlements, mass closures, each with its
  *     sources. They wait at Review inbox > Company milestones
- *     (inc/review-inbox/company-milestones.php) and appear only once approved.
+ *     (inc/review-inbox/company-milestones.php) and appear only once approved;
+ *     an admin can add more there (option kop_company_milestones_added).
  *   - what the records hold: lawsuits (with outcome and settlement), deaths
  *     (with cause), approved serious findings by state inspectors, incidents,
  *     renames, and the press: story arcs, a story several outlets covered,
@@ -149,9 +150,9 @@ if (!function_exists('kop_ptl_ms_file')) {
     }
 }
 
-if (!function_exists('kop_ptl_ms_all')) {
-    /** key => milestone, as the file has it (the reviewer's wording not applied). */
-    function kop_ptl_ms_all($reset = false) {
+if (!function_exists('kop_ptl_ms_seed')) {
+    /** key => milestone, as the file has it. */
+    function kop_ptl_ms_seed($reset = false) {
         static $memo = null;
         if ($reset) $memo = null;
         if ($memo !== null) return $memo;
@@ -166,6 +167,32 @@ if (!function_exists('kop_ptl_ms_all')) {
     }
 }
 
+if (!function_exists('kop_ptl_ms_added')) {
+    /** key => milestone an admin added at Review inbox > Company milestones (option kop_company_milestones_added; keys "added-..."). */
+    function kop_ptl_ms_added() {
+        $saved = function_exists('get_option') ? get_option('kop_company_milestones_added', array()) : array();
+        $out = array();
+        foreach ((array) $saved as $key => $m) {
+            if (is_array($m) && !empty($m['company']) && !empty($m['year']) && trim((string) ($m['title'] ?? '')) !== '') $out[(string) $key] = array('key' => (string) $key) + $m;
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_ptl_ms_all')) {
+    /** key => milestone, the file's and the admins' (the reviewer's wording not applied). */
+    function kop_ptl_ms_all($reset = false) {
+        return kop_ptl_ms_seed($reset) + kop_ptl_ms_added();
+    }
+}
+
+if (!function_exists('kop_ptl_ms_edit_fields')) {
+    /** The fields a reviewer's edit can change. */
+    function kop_ptl_ms_edit_fields() {
+        return array('company', 'kind', 'title', 'sentence', 'detail', 'date', 'also', 'programs', 'sources');
+    }
+}
+
 if (!function_exists('kop_ptl_ms_decisions')) {
     /** key => {decision: approved|rejected, by, at}. */
     function kop_ptl_ms_decisions() {
@@ -175,7 +202,7 @@ if (!function_exists('kop_ptl_ms_decisions')) {
 }
 
 if (!function_exists('kop_ptl_ms_edits')) {
-    /** key => {title, sentence, detail, date}: the reviewer's wording. */
+    /** key => {title, sentence, detail, date, company, kind, also, programs, sources}: the reviewer's changes. */
     function kop_ptl_ms_edits() {
         $saved = function_exists('get_option') ? get_option('kop_company_milestones_edits', array()) : array();
         return is_array($saved) ? $saved : array();
@@ -188,7 +215,8 @@ if (!function_exists('kop_ptl_ms_get')) {
         $m = kop_ptl_ms_all()[(string) $key] ?? null;
         if (!$m) return null;
         foreach ((array) (kop_ptl_ms_edits()[(string) $key] ?? array()) as $f => $v) {
-            if (in_array($f, array('title', 'sentence', 'detail', 'date'), true)) $m[$f] = (string) $v;
+            if (!in_array($f, kop_ptl_ms_edit_fields(), true)) continue;
+            $m[$f] = is_array($v) ? $v : (string) $v;
         }
         if (!empty($m['date'])) {
             $d = kop_ptl_date($m['date']);

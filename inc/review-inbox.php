@@ -41,9 +41,11 @@
  *   'origins'  fn(array $q): [{key, label, count}]   optional; the "Came from"
  *              filter (scraper, import, extension, people...); 'list' then
  *              gets the chosen key as $q['origin']
- *   'tools'    [{id, label, help, style, confirm, params [field...]}]  optional;
+ *   'tools'    [{id, label, help, style, confirm, fold, params [field...]}]  optional;
  *              buttons over the queue that are not about one item (scan now,
- *              read now, add every sure match for a facility)
+ *              read now, add every sure match for a facility). 'fold' => true
+ *              folds a long form under its label (Add a milestone); a link with
+ *              ?tool=<id>&p_<param>=<value> opens it filled in
  *   'tool'     fn(string $id, array $params): ['message' => ...]
  *   'tool_url' the queue's full screen, for what this one does not do
  *   'native'   true for the five types the page already draws itself

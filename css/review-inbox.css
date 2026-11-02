@@ -1088,6 +1088,47 @@ button.rinbox-tag-x:focus-visible {
     color: var(--kop-midnight-blue, #000435);
 }
 
+/* A tool with a long form (Add a milestone): folded, one field a line when open. */
+details.rinbox-tool-fold {
+    flex-basis: 100%;
+    min-width: 0;
+}
+
+details.rinbox-tool-fold > summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--kop-navy, #000080);
+}
+
+.rinbox-tool-fold .rinbox-help {
+    max-width: 720px;
+}
+
+.rinbox-tools .rinbox-tool-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 720px;
+}
+
+.rinbox-tool-form .rinbox-param {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rinbox-tool-form .rinbox-param input,
+.rinbox-tool-form .rinbox-param select,
+.rinbox-tool-form .rinbox-param textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.rinbox-tool-form > .rinbox-btn {
+    align-self: flex-start;
+}
+
 .rinbox-bulk-count {
     font-size: 13px;
     color: var(--kop-text-muted, #4A5568);

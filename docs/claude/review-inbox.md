@@ -39,6 +39,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Trashed, Preview in the card, Publish, Schedule, Trash; the status and dates before are kept in _kop_rinbox_was, so Back to draft (the Undo)
 # restores them exactly. Volunteers never see it
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=drafts
+# Company milestones (inc/review-inbox/company-milestones.php; seeds/company-milestones.json + option kop_company_milestones_added, merged by
+# kop_ptl_ms_all() in inc/profile-timeline.php): "Add a milestone" (a folded tool: company with lookup, kind, date, wording, also, programs,
+# sources as "link | label | quote" lines, one source required) goes on the timelines at once, approved by the adder; Undo on its card, Delete
+# (added ones only) with Undo in Recently done. Every field of any card is editable (option kop_company_milestones_edits). An admin on an
+# /operator/ page gets "Add a milestone to this timeline" (templates/operator-page.php), opening the form with the company filled in
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=company-milestones
 # One person, one name, one event per record (api/lib-record-dedupe.php): every approval (kop_wbf_doc_apply(), wiki approve) and every Merge
 # Duplicates join asks kop_dd_same_person() (nickname, other spelling one letter off, maiden name in brackets; a different middle initial or
 # "X and Y" stays two), kop_dd_name_key() ("X (AYA)" = X) and kop_dd_same_event() (same kind and month; two exact days or two ages stay two)
@@ -117,7 +123,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/preview-admin-kit.php 
 # once; a finished batch offers "Give me 10 more"; "Learn another queue" practises the rest. Projects still open their own items to anyone
 # Practice cards are curated by kop_volpr_tricky() (a volunteer disagreed / Not sure, 2+ wrong in practice, a Brief FAQ 'from' #id or #a-b,
 # struck at Volunteer Reviewers > Practice cards ?practice=<source>, option kop_volpr_struck) and kop_volpr_unclear() (nothing to read, an
-# archive.md-family link); a round never repeats a title. /volunteer/: the review and research cards -> #kop-vol-signup; GET
+# archive.md-family link); a round never repeats a title. The owner picks cards too: "Use as a practice question" on a decided card in the
+# Review inbox (card add-on 'practice', inc/review-inbox/_practice-action.php; queues volunteers practise in; the admin's logged Approve/Reject
+# is the answer) -> option kop_volpr_picked, drawn first, never left out as tricky; listed with Unpick under "Picked by you" on Practice cards.
+# A decided card is told from a waiting one by its status and the queue's first view (kop_volpr_waiting()), since a decided finding still
+# offers the other button; until 2026-11-02 that made every inspection finding look waiting, so practice there drew nothing. /volunteer/: the review and research cards -> #kop-vol-signup; GET
 # kop/v1/volunteer/signup tells the cached page the device is signed in (form swapped for "Open your volunteer page")
 # The page intro (templates/volunteer-review.php) says what the work is, carries the content warning (also on the /volunteer/ form) and a
 # "How this works" fold (open until kop_vol_has_started()): getting started, choosing next work, taking a break or stopping, questions.

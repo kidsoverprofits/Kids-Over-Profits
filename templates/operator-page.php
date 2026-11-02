@@ -203,6 +203,14 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     }
                     ?>
                 <?php endif; ?>
+                <?php
+                // Admins only: add a dated event to this company's timeline (Review inbox > Company milestones, the form open with the company filled in).
+                if (function_exists('kop_ie_can') && kop_ie_can() && function_exists('kop_find_template_page_url')) :
+                    $kop_op_ms_url = (string) kop_find_template_page_url('page-admin-submissions.php');
+                    $kop_op_ms_url = add_query_arg(array('type' => 'company-milestones', 'tool' => 'add', 'p_company' => rawurlencode($page['name'])), $kop_op_ms_url !== '' ? $kop_op_ms_url : home_url('/admin-submissions/'));
+                    ?>
+                    <p class="kop-op-draft"><a href="<?php echo esc_url($kop_op_ms_url); ?>">Add a milestone to this timeline</a> (admins only): a buyout, a new owner, an investigation, a settlement, with its source.</p>
+                <?php endif; ?>
             </section>
             <?php endif; ?>
 

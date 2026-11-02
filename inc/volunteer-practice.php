@@ -116,7 +116,59 @@ function kop_volpr_tricky($source) {
         }
     }
     foreach (array_keys((array) (get_option('kop_volpr_struck', array())[$source] ?? array())) as $k) $out[(string) $k] = 'struck by an admin';
-    return $out;
+    // A card an admin picked as a practice question is used whatever the rules above say.
+    return array_diff_key($out, kop_volpr_picked($source));
+}
+
+/**
+ * Cards an admin picked as practice questions ("Use as a practice question" on a decided card in the review inbox,
+ * inc/review-inbox/_practice-action.php): [item_key => true]. A round draws them before the ones chosen on their own.
+ * Option kop_volpr_picked: [source => [key => true]].
+ */
+function kop_volpr_picked($source) {
+    return (array) (get_option('kop_volpr_picked', array())[(string) $source] ?? array());
+}
+
+/** Pick a card as a practice question, or take it back out. Picking takes it off the struck list, striking unpicks it. */
+function kop_volpr_set_picked($source, $key, $on) {
+    $source = (string) $source;
+    $key = (string) $key;
+    $picked = (array) get_option('kop_volpr_picked', array());
+    $struck = (array) get_option('kop_volpr_struck', array());
+    if ($on) {
+        $picked[$source][$key] = true;
+        unset($struck[$source][$key]);
+        update_option('kop_volpr_struck', $struck, false);
+    } else {
+        unset($picked[$source][$key]);
+    }
+    if (empty($picked[$source])) unset($picked[$source]);
+    update_option('kop_volpr_picked', $picked, false);
+}
+
+/** How an admin decided this item ('approve' | 'reject'), as kop_volpr_decided() reads it; '' when undecided or decided both ways. */
+function kop_volpr_answer_of($source, $key) {
+    global $wpdb;
+    if (function_exists('kop_rinbox_ensure_tables')) kop_rinbox_ensure_tables();
+    $not = kop_volpr_not_people();
+    $styles = (array) $wpdb->get_col($wpdb->prepare('SELECT DISTINCT style FROM ' . kop_rinbox_log_table() . "
+        WHERE source = %s AND item_key = %s AND style IN ('approve', 'reject') AND undone_at IS NULL AND user_login NOT IN (" . implode(', ', array_fill(0, count($not), '%s')) . ')',
+        array_merge(array((string) $source, (string) $key), $not)));
+    return count($styles) === 1 ? (string) $styles[0] : '';
+}
+
+/**
+ * Still waiting on a decision? A queue whose item says its view ('status' one of 'views') is waiting only in the first
+ * view: a decided inspection finding still offers the other button (Reject on an approved one), which is not waiting.
+ * Else as kop_vol_actionable().
+ */
+function kop_volpr_waiting($source, array $it) {
+    $src = function_exists('kop_rinbox_sources') ? (kop_rinbox_sources()[$source] ?? array()) : array();
+    $views = array_keys((array) ($src['views'] ?? array()));
+    $status = (string) ($it['status'] ?? '');
+    $native = function_exists('kop_rinbox_native_types') && isset(kop_rinbox_native_types()[$source]);
+    if (!$native && $views && $status !== '' && in_array($status, $views, true)) return $status === (string) $views[0];
+    return kop_vol_actionable($source, $it);
 }
 
 /** What a card gives to read: its text, or else a summary-like line (news keeps its summary in the facts). '' = nothing. */
@@ -161,7 +213,7 @@ function kop_volpr_fetch($source, $key) {
     $all = function_exists('kop_rinbox_sources') ? kop_rinbox_sources() : array();
     if (!isset($all[$source])) return null;
     $it = kop_vol_raw_item($all[$source], $source, $key);
-    if (!$it || kop_vol_actionable($source, $it)) return null;
+    if (!$it || kop_volpr_waiting($source, $it)) return null;
     return $it;
 }
 
@@ -189,7 +241,14 @@ function kop_volpr_draw($vid, $source) {
     $seen = array();
     foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_volpr_table() . ' WHERE volunteer_id = %d AND source = %s', (int) $vid, $source)) as $k) $seen[(string) $k] = true;
     foreach ((array) $wpdb->get_col($wpdb->prepare('SELECT item_key FROM ' . kop_vol_recs_table() . ' WHERE volunteer_id = %d AND source = %s', (int) $vid, $source)) as $k) $seen[(string) $k] = true;
+    $mine = $seen;
     $seen += kop_volpr_tricky($source);
+    // The admins' picks come first, each with the way it was decided.
+    $picked = array('approve' => array(), 'reject' => array());
+    foreach (array_keys(array_diff_key(kop_volpr_picked($source), $mine)) as $k) {
+        $answer = kop_volpr_answer_of($source, (string) $k);
+        if (isset($picked[$answer])) $picked[$answer][(string) $k] = '';
+    }
     $want = array('reject' => (int) floor($rules['size'] / 2));
     $want['approve'] = $rules['size'] - $want['reject'];
     $got = array('approve' => array(), 'reject' => array());
@@ -198,11 +257,14 @@ function kop_volpr_draw($vid, $source) {
     foreach (array('reject', 'approve') as $style) {
         // Fewer rejects than half: the approves make up the rest.
         if ($style === 'approve') $want['approve'] = $rules['size'] - count($got['reject']);
-        $pool = array_diff_key(kop_volpr_decided($source, $style), $seen);
+        $pool = array_diff_key(kop_volpr_decided($source, $style), $seen, $picked[$style]);
         $keys = array_keys($pool);
         shuffle($keys);
+        $first = array_keys($picked[$style]);
+        shuffle($first);
+        $pool += $picked[$style];
         // Reading items is the slow part: stop after a few times what is needed.
-        foreach (array_slice($keys, 0, 8 * $want[$style] + 8) as $k) {
+        foreach (array_merge($first, array_slice($keys, 0, 8 * $want[$style] + 8)) as $k) {
             if (count($got[$style]) >= $want[$style]) break;
             $it = kop_volpr_fetch($source, (string) $k);
             if (!$it || kop_volpr_unclear(kop_volpr_copy($source, $it))) continue;
@@ -388,10 +450,15 @@ function kop_volpr_admin_url($source) {
 
 /** Strike a card from practice, or put it back (called from kop_volp_admin_post()): [notice, error, null] or null when not ours. */
 function kop_volpr_admin_post($do, array $in) {
-    if (!in_array($do, array('practice_strike', 'practice_unstrike'), true)) return null;
+    if (!in_array($do, array('practice_strike', 'practice_unstrike', 'practice_unpick'), true)) return null;
     $source = sanitize_key((string) ($in['kop_volpr_source'] ?? ''));
     $key = sanitize_text_field((string) ($in['kop_volpr_key'] ?? ''));
     if ($source === '' || $key === '') return array('', 'Pick a card.', null);
+    if ($do === 'practice_unpick') {
+        kop_volpr_set_picked($source, $key, false);
+        return array('No longer picked: it comes up only if the rules choose it.', '', null);
+    }
+    if ($do === 'practice_strike') kop_volpr_set_picked($source, $key, false);
     $struck = (array) get_option('kop_volpr_struck', array());
     if ($do === 'practice_strike') $struck[$source][$key] = true;
     else unset($struck[$source][$key]);
@@ -407,7 +474,7 @@ function kop_volpr_admin_summary() {
         $parts[] = '<a href="' . esc_url(kop_volpr_admin_url($key)) . '">' . esc_html($title) . '</a>';
     }
     if (!$parts) return;
-    echo '<p style="max-width:900px"><strong>Practice cards</strong> (chosen for you: the clear cases; strike any you think is tricky): ' . implode(' · ', $parts) . '</p>';
+    echo '<p style="max-width:900px"><strong>Practice cards</strong> (chosen for you: the clear cases; strike any you think is tricky, or pick your own with "Use as a practice question" on a decided card in the Review inbox): ' . implode(' · ', $parts) . '</p>';
 }
 
 /** The cards a practice round in this queue can draw, newest first, each with Take out; the struck ones below with Put back. */
@@ -424,12 +491,31 @@ function kop_volpr_admin_page($source, $nonce) {
         any two people got wrong in practice, any a Brief FAQ answer rests on, and any with no text to read. Nothing here waits for you;
         take out any card you think is tricky and it never comes up again.</p>
     <?php
+    $inbox = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-admin-submissions.php') : '';
+    $inbox = add_query_arg('type', rawurlencode($source), $inbox !== '' ? $inbox : home_url('/admin-submissions/'));
+    ?>
+    <h3>Picked by you</h3>
+    <p style="max-width:760px">To pick a card yourself, open it in the <a href="<?php echo esc_url($inbox); ?>">Review inbox</a> (its
+        Approved or Rejected tab, or Recently done) and click <strong>Use as a practice question</strong>. Your decision is the right answer.
+        Picked cards come up before the ones chosen on their own, even if the rules above would leave them out.</p>
+    <?php
+    $picked = kop_volpr_picked($source);
+    if (!$picked) echo '<p>None yet.</p>';
+    foreach (array_keys($picked) as $key) {
+        $it = kop_volpr_fetch($source, (string) $key);
+        $answer = kop_volpr_answer_of($source, (string) $key);
+        $card = $it ? kop_volpr_copy($source, $it) : array('title' => '#' . $key . ' (waiting for a decision again, or no longer on file: not used)', 'text' => '');
+        if ($it && $answer === '') $card['title'] .= ' (no decision of yours on record: not used)';
+        elseif ($it) $card['title'] .= ' (answer: ' . ($answer === 'approve' ? 'Approve' : 'Reject') . ')';
+        kop_volpr_admin_card($source, (string) $key, $card, $nonce, 'practice_unpick', 'Unpick');
+    }
     foreach (array('approve' => 'You approved these', 'reject' => 'You rejected these') as $style => $heading) {
         echo '<h3>' . esc_html($heading) . '</h3>';
         $shown = 0;
         $left_out = 0;
         foreach (kop_volpr_decided($source, $style, 200) as $key => $t) {
             if ($shown >= 25) break;
+            if (isset($picked[(string) $key])) continue;
             if (isset($tricky[(string) $key])) { $left_out++; continue; }
             $it = kop_volpr_fetch($source, (string) $key);
             if (!$it) continue;

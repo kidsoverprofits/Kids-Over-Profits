@@ -123,7 +123,12 @@ SOURCES = {"sources": [
      "views": {"pending": "To review", "applied": "Confirmed"}, "count": 6, "native": False,
      "tool_url": "https://inbox.test/wp-admin/admin.php?page=kop-closure-reports",
      "help": "Articles that say a facility closed.", "can_save": True, "can_ai": True, "has_origins": True,
-     "tools": [{"id": "scan", "label": "Scan the next articles now", "params": [{"name": "count", "label": "How many", "type": "number", "value": 10}]}]},
+     "tools": [{"id": "scan", "label": "Scan the next articles now", "params": [{"name": "count", "label": "How many", "type": "number", "value": 10}]},
+               # A long form folded away (Add a milestone): opened by its name, or by ?tool=add&p_company=... from another page.
+               {"id": "add", "label": "Add one by hand", "style": "approve", "fold": True, "help": "Adds one by hand.",
+                "params": [{"name": "company", "label": "Company", "type": "text", "value": ""},
+                           {"name": "kind", "label": "Kind", "type": "select", "value": "deal", "options": {"deal": "Ownership", "founded": "Founded"}},
+                           {"name": "sources", "label": "Sources, one per line: link | label | quote", "type": "textarea", "value": ""}]}]},
     {"key": "drive", "label": "Drive Docs", "group": "Imports to review", "area": "found", "views": {"pending": "Waiting", "applied": "Added"}, "count": 2,
      "native": False, "tool_url": "", "help": "", "can_save": True, "can_ai": True,
      "filters": [{"name": "kind", "label": "Kind", "options": {"news": "News article", "court": "Court record"}}]},
@@ -432,9 +437,21 @@ def main():
             pg.locator(".rinbox-card").first.locator(".rinbox-preview-toggle").click()
             check(pg.locator(".rinbox-card").first.locator(".rinbox-preview iframe").is_visible(), f"@{width} the preview opens inside the card")
             pg.locator(".rinbox-tools input[data-field='count']").fill("5")
-            pg.locator(".rinbox-tools button").click()
+            pg.locator(".rinbox-tools button", has_text="Scan the next").click()
             pg.wait_for_function("() => /Scanned/.test(document.querySelector('.rinbox-status').textContent)")
             check(any(c[0] == "tool" and c[1]["tool"] == "scan" and c[1]["params"] == {"count": "5"} for c in calls), f"@{width} a queue tool runs with its value")
+            fold = pg.locator("details.rinbox-tool-fold")
+            check(fold.count() == 1 and fold.get_attribute("open") is None and not pg.locator(".rinbox-tool-form input[data-field='company']").is_visible(),
+                  f"@{width} a tool with a long form starts folded")
+            fold.locator("summary").click()
+            pg.locator(".rinbox-tool-form input[data-field='company']").fill("Acme Youth")
+            pg.locator(".rinbox-tool-form textarea[data-field='sources']").fill("https://a.test/x | A | \"q\"")
+            wide = pg.evaluate(WIDTH_JS)
+            check(wide["page"] <= width and not wide["out"], f"@{width} the open form fits the screen", f"{wide}")
+            pg.locator(".rinbox-tool-form button", has_text="Add one by hand").click()
+            pg.wait_for_timeout(300)
+            check(any(c[0] == "tool" and c[1]["tool"] == "add" and c[1]["params"].get("company") == "Acme Youth" and c[1]["params"].get("kind") == "deal"
+                      and c[1]["params"].get("sources", "").startswith("https://a.test/x") for c in calls), f"@{width} the folded tool sends its form")
             pg.wait_for_selector(".rinbox-card")
             pg.locator(".rinbox-bulk input[type='checkbox']").check()
             pg.locator(".rinbox-bulk button", has_text="Dismiss (2)").click()
@@ -611,6 +628,14 @@ def main():
             check(pg.locator(".rinbox-panel").is_hidden() and pg.locator(".submissions-list-container").is_visible(), f"@{width} the page's own tab brings its list back")
             check(not errors, f"@{width} no script errors", "; ".join(errors))
             pg.close()
+        # A link from another page ("Add a milestone" on a company page) opens the queue with the tool's form open and filled in.
+        pg = b.new_page(viewport={"width": 390, "height": 900})
+        pg.route("https://inbox.test/**", route)
+        pg.goto(BASE + "?type=closure&tool=add&p_company=Acme%20Youth%20Inc.", wait_until="load")
+        pg.wait_for_selector("details.rinbox-tool-fold")
+        check(pg.locator("details.rinbox-tool-fold").get_attribute("open") is not None
+              and pg.locator(".rinbox-tool-form input[data-field='company']").input_value() == "Acme Youth Inc.", "?tool=add&p_company= opens the form filled in")
+        pg.close()
         b.close()
     print("\n" + (f"{len(fails)} FAILED" if fails else "All passed") + f"; screenshots in {shots}")
     sys.exit(1 if fails else 0)

@@ -11,7 +11,7 @@ require_once dirname(__DIR__, 2) . '/inc/profile-timeline.php';
 
 function kop_rinbox_test_company_milestones(array $src, array $item, callable $check) {
     $file = json_decode(file_get_contents(kop_ptl_ms_file()), true);
-    $all = kop_ptl_ms_all(true);
+    $all = kop_ptl_ms_seed(true);
     $check('company-milestones: every milestone in the file is read', count($all) === count($file['milestones']), count($all) . ' of ' . count($file['milestones']));
     $bad = array();
     foreach ($all as $key => $m) {
@@ -63,4 +63,56 @@ function kop_rinbox_test_company_milestones(array $src, array $item, callable $c
     $check('company-milestones: Leave it off changes nothing on the site', !kop_ptl_ms_approved() && $after['status'] === 'rejected' && $after['actions'][0]['id'] === 'undo');
     call_user_func($src['act'], $key, 'undo', array());
     $check('company-milestones: Back to waiting', kop_rinbox_ms_view($key) === 'pending');
+
+    // Every field can be edited, sources too.
+    $kind_was = $all[$key]['kind'];
+    call_user_func($src['save'], $key, array('kind' => 'settlement', 'sources' => "https://example.test/a | Example | \"the quote\"\nhttps://example.test/b"));
+    $m = kop_ptl_ms_get($key);
+    $check('company-milestones: kind and sources can be edited', $m['kind'] === 'settlement' && count($m['sources']) === 2
+        && $m['sources'][1]['label'] === 'example.test' && $m['sources'][0]['quote'] === '"the quote"', json_encode($m['sources']));
+    try {
+        call_user_func($src['save'], $key, array('sources' => 'no link here'));
+        $check('company-milestones: a source line without a link is refused', false);
+    } catch (RuntimeException $ex) {
+        $check('company-milestones: a source line without a link is refused', true, $ex->getMessage());
+    }
+    call_user_func($src['save'], $key, array('kind' => $kind_was, 'sources' => kop_rinbox_ms_sources_text($all[$key]['sources'])));
+    $check('company-milestones: sources set back to the file\'s are no edit', !isset(kop_ptl_ms_edits()[$key]), json_encode(kop_ptl_ms_edits()[$key] ?? null));
+
+    // Add a milestone by hand: on the timelines at once, Undo, Delete and its Undo.
+    $check('company-milestones: the Add tool is folded and asks for company, date and sources',
+        ($src['tools'][0]['id'] ?? '') === 'add' && !empty($src['tools'][0]['fold'])
+        && !array_diff(array('company', 'kind', 'date', 'title', 'sources'), array_column($src['tools'][0]['params'], 'name')));
+    $new = array('company' => 'Test Behavioral Holdings', 'kind' => 'deal', 'date' => '2019-06', 'title' => 'Bought by Example Capital',
+        'detail' => 'A test.', 'also' => array('Example Capital'), 'programs' => array(), 'sources' => 'https://example.test/deal | Deal story | "bought"');
+    try {
+        call_user_func($src['tool'], 'add', array('company' => 'X', 'date' => '2019', 'title' => 'No source', 'kind' => 'deal', 'sources' => ''));
+        $check('company-milestones: a milestone with no source is refused', false);
+    } catch (RuntimeException $ex) {
+        $check('company-milestones: a milestone with no source is refused', true, $ex->getMessage());
+    }
+    $res = call_user_func($src['tool'], 'add', $new);
+    $added = array_keys(kop_ptl_ms_added());
+    $akey = (string) end($added);
+    $check('company-milestones: Add puts it on the timelines at once', $akey !== '' && isset(kop_ptl_ms_approved()[$akey])
+        && kop_ptl_ms_approved()[$akey]['year'] === 2019 && kop_ptl_ms_approved()[$akey]['also'] === array('Example Capital'), $res['message']);
+    $card = call_user_func($src['get'], $akey);
+    $check('company-milestones: its card offers Undo and Delete', array_column($card['actions'], 'id') === array('undo', 'delete'), json_encode(array_column($card['actions'], 'id')));
+    try {
+        call_user_func($src['tool'], 'add', $new);
+        $check('company-milestones: the same milestone twice is refused', false);
+    } catch (RuntimeException $ex) {
+        $check('company-milestones: the same milestone twice is refused', true, $ex->getMessage());
+    }
+    $del = call_user_func($src['act'], $akey, 'delete', array());
+    $check('company-milestones: Delete takes it off and out of the queue', !isset(kop_ptl_ms_all()[$akey]) && !isset(kop_ptl_ms_approved()[$akey]) && !empty($del['undo']));
+    call_user_func($src['act'], $akey, $del['undo']['action'], json_decode(json_encode($del['undo']['params']), true));
+    $check('company-milestones: Undo of Delete brings it back on the timelines', isset(kop_ptl_ms_approved()[$akey]));
+    try {
+        call_user_func($src['act'], $key, 'delete', array());
+        $check('company-milestones: a milestone from the file cannot be deleted', false);
+    } catch (RuntimeException $ex) {
+        $check('company-milestones: a milestone from the file cannot be deleted', true);
+    }
+    call_user_func($src['act'], $akey, 'delete', array());
 }

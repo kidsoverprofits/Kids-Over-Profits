@@ -512,8 +512,20 @@
         var tools = null;
         if (s.tools && s.tools.length) {
             tools = el('div', { class: 'rinbox-tools' });
+            // ?tool=<id>&p_<param>=<value> (a link from another page, e.g. "Add a milestone" on a company page) opens that tool filled in.
+            var asked = {}, askedTool = '';
+            try {
+                var tu = new URL(window.location.href).searchParams;
+                askedTool = tu.get('tool') || '';
+                tu.forEach(function (v, k) { if (k.indexOf('p_') === 0) asked[k.slice(2)] = v; });
+            } catch (e) { /* old browser: nothing filled in */ }
             s.tools.forEach(function (t) {
-                tools.appendChild(paramButton(t, 'rinbox-tool-', function (params, btn) {
+                if (t.id === askedTool && t.params) {
+                    t = Object.assign({}, t, { params: t.params.map(function (p) {
+                        return Object.prototype.hasOwnProperty.call(asked, p.name) ? Object.assign({}, p, { value: asked[p.name] }) : p;
+                    }) });
+                }
+                var btnWrap = paramButton(t, 'rinbox-tool-', function (params, btn) {
                     btn.disabled = true;
                     statusEl.textContent = 'Working…';
                     api('tool', { source: state.source, tool: t.id, params: params }).then(function (res) {
@@ -524,7 +536,15 @@
                         btn.disabled = false;
                         statusEl.textContent = e.message;
                     });
-                }));
+                });
+                if (!t.fold) { tools.appendChild(btnWrap); return; }
+                // A tool with a long form (Add a milestone) is folded: its name opens it, its help sits on top.
+                btnWrap.classList.add('rinbox-tool-form');
+                tools.appendChild(el('details', { class: 'rinbox-tool-fold', open: t.id === askedTool || null }, [
+                    el('summary', { text: t.label }),
+                    t.help ? el('p', { class: 'rinbox-help', text: t.help }) : null,
+                    btnWrap
+                ]));
             });
         }
         statusEl = el('p', { class: 'rinbox-status', role: 'status' });
