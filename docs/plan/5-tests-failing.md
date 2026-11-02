@@ -41,12 +41,28 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      facility data is September's, so the change is in code since (candidates: ce5fb501 renames, 82a49850
      alternate names, fb7271f0 past names) or in the swapped-in record tables. Find which side moved.
    - Decide what these two tests are for now: keep them as switch rehearsals that need the September copy, or
-     rebase them on v2 only. Writer on today's copy: 73 of 77 pass; the 4 failures come from the opening resync.
+     rebase them on v2 only. Writer on the 10-21 copy: 73 of 77 pass; the 4 failures come from the opening resync.
      Run it on the pre-switch copy next.
-   - New machine (checked 2026-11-02): no MySQL installed (no mysqld on PATH), and `tmp/prod-app-dump.sql` (the
-     2026-09-17 pre-switch copy the readers test needs) is not in tmp/ or anywhere under sourceepos; only
-     `tmp/prod-dump.sql` (2026-11-01, 1.09 GB) is. Find the September dump on the old machine or a backup before the
-     pre-switch reruns; the today's-copy runs need only the portable MySQL above.
+   - Rerun 2026-11-02 on the new machine, today's copy (`tmp/prod-dump.sql` of 2026-11-01; portable MySQL 8.4.13 again,
+     MD5 checked, 127.0.0.1:3399, unpacked into that session's scratchpad). That dump is post-phase-5: it has no
+     `facilities_master`, so the load renames `retired_facilities_master_20261025` back (the documented undo, in the
+     local copy only); wpdl_users, wpdl_usermeta and wpdl_options left out (the tests stub get_option). Readers: all
+     checks pass. Writer: 66 of 73, 7 fail:
+     - from the opening rebuild (v2 rebuilt from the frozen legacy table, 607 rows removed; 492 on 10-21): "final sync
+       found v2 up to date", "round trip: no facility ... unlinked" (1 unlinked), "round trip: op_join table unchanged"
+       (642 -> 641 rows), "taking it off UTAH keeps it" (still_on_page also lists "10489": Newport Academy, merged on
+       production, keeps an address membership on UTAH in the rebuilt copy but has no v2 row), and "re-running the
+       new-facility seeds creates nothing" (the 48 seeds' records were made after 2026-09-16, so the rebuild dropped them).
+     - from phase 5 itself: "profile: frozen legacy facilities array left alone" (phase 5 emptied locations_master's
+       facility arrays, so it fails on any copy after 2026-10-25; the check is obsolete).
+     - from the test's fixture: "seeds: fields merged and version recorded" expects notes === ['seed test note'], but
+       seed record 0 (#10371 Provo Canyon School) has gender "boys (Provo campus; girls at ...)", and
+       kop_facility_gender() (since 0afffc3d, 2026-09-18) keeps that as a "Gender as recorded: ..." note. Same seed
+       and code on 10-21, so this was probably one of that day's 4.
+   - Blocked: the pre-switch reruns (both tests on the September copy, then finding which side moved for the readers
+     test's 3 failures above). `tmp/prod-app-dump.sql` (2026-09-17 15:03) is only on the owner's old, broken PC
+     (owner, 2026-11-02). Recover it from that PC's drive first. Nothing else holds that pre-switch state: today's
+     dump has the legacy table but not September's v2 tables, alias data or record tables.
 2. **Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in
    PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 ->
    8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on
