@@ -76,13 +76,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      news resync in the tests, as lawsuit-facility-links did). Still logged in test runs: api/news-mentions.php's
      `INSERT IGNORE` ("near IGNORE", SQLite wants `OR IGNORE`) and two missing tables in the scratch copy
      (news_story_arcs, journalists). news-mentions.php was being edited by another session that day, so left alone.
-   - **New machine: CRLF checkout.** Git for Windows' system gitconfig sets `core.autocrlf=true`, so every repo
-     checked out with CRLF; a PHP string holding a literal line break then holds `\r\n` (the reader-accounts stub
-     never matched). Fixed in this checkout only (local `core.autocrlf=false`, files back to LF). Owner: kop-data,
-     kop-pipeline and kop-send-to-kop are still CRLF; either the same there, or `git config --global core.autocrlf
-     false` and a fresh checkout of each. A `.gitattributes` `* text=auto eol=lf` in each repo would pin it for any
-     machine.
-     (The 10-28 Drive Docs and lawsuit-links items were fixed in e163d779. A 'gone' Drive Docs row needs no follow: a
+   - (The 10-28 Drive Docs and lawsuit-links items were fixed in e163d779. A 'gone' Drive Docs row needs no follow: a
      revived one takes the build's id again as 'pending' and the follow after every sync moves it.)
    - Production: check that the PA scraper's Python has `wordfreq` (`python -c "import wordfreq"`). Without it
      ocr_repair.py now prints a warning; before 2026-10-28 it repaired with zero word frequencies and said nothing.

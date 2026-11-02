@@ -3602,3 +3602,19 @@ sync in the Review inbox queue and hourly. Two gaps went into the plan file's it
     Done 2026-10-28 (5db4bb70f19bc07866ee7507e128c79bd20806da): `display: flow-root` on `.kop-ptl`. Checked live with the
     file injected on UHS and san-marcos-treatment-center-tx at 1536/1100/768/390: Submit info is clickable, no overlap,
     no overflow; UHS timeline 517px at 1536. check-contrast and check-bare-text clean.
+
+## 5. Tests failing on main: new machine CRLF checkout (finished 2026-11-02)
+
+   - **New machine: CRLF checkout.** Git for Windows' system gitconfig sets `core.autocrlf=true`, so every repo
+     checked out with CRLF; a PHP string holding a literal line break then holds `\r\n` (the reader-accounts stub
+     never matched). Fixed in this checkout only (local `core.autocrlf=false`, files back to LF). Owner: kop-data,
+     kop-pipeline and kop-send-to-kop are still CRLF; either the same there, or `git config --global core.autocrlf
+     false` and a fresh checkout of each. A `.gitattributes` `* text=auto eol=lf` in each repo would pin it for any
+     machine.
+     Done 2026-11-02: `git config --global core.autocrlf false` and `core.eol lf` (global overrides the system file;
+     `core.eol` is needed too because kop-data's `.gitattributes` marks `*.json`/`*.csv`/`*.md` as `text`, which
+     checks out as the native CRLF on Windows otherwise). Trailing CRs stripped from the files each index holds as
+     LF (kop-data 1059, kop-pipeline 1205, kop-send-to-kop 15), then `git add` on the content-identical ones to
+     refresh their stat. No commits: every index was already LF. The in-progress edits (kop-data mn_reports.json,
+     kop-pipeline ut_reports_with_ocr.json) kept their content. No `.gitattributes` added: one machine, and the
+     global setting covers every repo, new clones included.
