@@ -88,7 +88,43 @@ function kop_volpr_decided($source, $style, $limit = 300) {
         array_merge(array((string) $source), $not, array((string) $style, (int) $limit))), ARRAY_A);
     $out = array();
     foreach ((array) $rows as $r) $out[(string) $r['item_key']] = (string) $r['title'];
+    // Then the ones decided before Recently done began (2026-10-05), by the item's own status.
+    foreach (kop_volpr_unlogged($source) as $k => $s) {
+        if (count($out) >= $limit) break;
+        if ($s === $style && !isset($out[$k])) $out[$k] = '';
+    }
     return $out;
+}
+
+/**
+ * Items a person decided before {prefix}kop_review_log began, so with no row there: [item_key => 'approve' | 'reject'],
+ * read from the queue's own status. The inspection findings (half of them were decided before the log); another
+ * queue adds its own through the filter kop_volpr_unlogged. An item with any approve or reject in the log is left to it.
+ */
+function kop_volpr_unlogged($source) {
+    static $memo = array();
+    $source = (string) $source;
+    if (isset($memo[$source])) return $memo[$source];
+    $out = array();
+    if ($source === 'inspection-highlights' && function_exists('kop_rinbox_pdo')) {
+        try {
+            $st = kop_rinbox_pdo()->query("SELECT id, status, reviewed_by FROM inspection_highlights WHERE status IN ('approved', 'rejected') ORDER BY reviewed_at DESC, id DESC");
+            foreach ($st ? $st->fetchAll(PDO::FETCH_ASSOC) : array() as $r) {
+                if (in_array((string) $r['reviewed_by'], kop_volpr_not_people(), true)) continue;
+                $out[(string) $r['id']] = $r['status'] === 'approved' ? 'approve' : 'reject';
+            }
+        } catch (Throwable $e) {
+            $out = array();
+        }
+    }
+    $out = (array) apply_filters('kop_volpr_unlogged', $out, $source);
+    if ($out) {
+        global $wpdb;
+        if (function_exists('kop_rinbox_ensure_tables')) kop_rinbox_ensure_tables();
+        $logged = (array) $wpdb->get_col($wpdb->prepare('SELECT DISTINCT item_key FROM ' . kop_rinbox_log_table() . " WHERE source = %s AND style IN ('approve', 'reject')", $source));
+        $out = array_diff_key($out, array_flip(array_map('strval', $logged)));
+    }
+    return $memo[$source] = $out;
 }
 
 /**
@@ -154,6 +190,7 @@ function kop_volpr_answer_of($source, $key) {
     $styles = (array) $wpdb->get_col($wpdb->prepare('SELECT DISTINCT style FROM ' . kop_rinbox_log_table() . "
         WHERE source = %s AND item_key = %s AND style IN ('approve', 'reject') AND undone_at IS NULL AND user_login NOT IN (" . implode(', ', array_fill(0, count($not), '%s')) . ')',
         array_merge(array((string) $source, (string) $key), $not)));
+    if (!$styles) return (string) (kop_volpr_unlogged($source)[(string) $key] ?? '');
     return count($styles) === 1 ? (string) $styles[0] : '';
 }
 

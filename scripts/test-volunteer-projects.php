@@ -305,6 +305,14 @@ $check('an approved finding is not waiting, though it offers Reject', $ih_it && 
     && kop_volpr_fetch('inspection-highlights', $ih_id), $ih_id);
 $pend = (string) $pdo->query("SELECT id FROM inspection_highlights WHERE status = 'pending' LIMIT 1")->fetchColumn();
 $check('...a pending one is', $pend === '' || kop_volpr_waiting('inspection-highlights', kop_vol_raw_item(kop_rinbox_sources()['inspection-highlights'], 'inspection-highlights', $pend)));
+// Findings decided before Recently done began have no log row (none here: the log holds news only): their own status is the answer.
+$check('a finding approved before the log has Approve as its practice answer, and the button', $ih_id !== '' && kop_volpr_answer_of('inspection-highlights', $ih_id) === 'approve'
+    && in_array('practice_pick', array_column(kop_rinbox_get_item('inspection-highlights', $ih_id)['actions'], 'id'), true), $ih_id);
+$ih_rej = (string) $pdo->query("SELECT id FROM inspection_highlights WHERE status = 'rejected' AND reviewed_by <> '' ORDER BY id DESC LIMIT 1")->fetchColumn();
+$check('...a rejected one Reject', $ih_rej === '' || kop_volpr_answer_of('inspection-highlights', $ih_rej) === 'reject', $ih_rej);
+$ih_round = kop_volpr_draw(987650, 'inspection-highlights');
+$check('...and a round of 10 findings draws from them, half rejects', count($ih_round) === 10 && count(array_filter($ih_round, function ($r) { return $r[2] === 'reject'; })) === 5,
+    json_encode(array_count_values(array_column($ih_round, 2))));
 
 // "Use as a practice question": the admin's own picks, drawn first, even ones the rules leave out.
 $pick_key = (string) array_keys(array_filter($round, function ($a) { return $a === 'reject'; }))[0];

@@ -179,7 +179,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # caption = "Author, License, via Wikimedia Commons"; FileBird Site Photos) + kop_vimg_place() (inc/page-images.php helpers); Undo approve unplaces.
 # The first approved pick fills the spot for every volunteer. A new spot = one line in the seed (no deploy step: it is read when a project is made)
 # Practice round (inc/volunteer-practice.php, {prefix}kop_vol_practice, REST volunteer/practice do=start|next|answer, 'practice' in 'self' while not eligible):
-# 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item,
+# 10 items an admin already decided in one queue open to everyone, from kop_review_log (not undone, not 'auto' or 'volunteers', one answer per item;
+# items decided before the log began, 2026-10-05, by their own status: kop_volpr_unlogged(), inspection findings, filter kop_volpr_unlogged,
 # half rejects, never one waiting again), shown as kop_volpr_copy() (facts naming the decision, the linked facility and the button lines taken out);
 # each call says what the admin decided; 8 of 10 passes (filters kop_volpr_size / _pass / _min_each). A pass opens self-assign for that queue
 # ('via' 'practice') until the volunteer has 10 admin-checked calls, which then decide. Practice never writes kop_volunteer_recs, so it never
