@@ -2,6 +2,9 @@
 /**
  * End-to-end test of the admin data form on the v2 model
  * (inc/facility-v2-writer.php, docs/DATA-MODEL-MIGRATION.md phase 4 step 5).
+ * Until 2026-11-02 it began by turning the write switch on, which rebuilt v2
+ * from the frozen facilities_master; that table was retired in phase 5, so it
+ * now runs on the copy as production has it, write switch already on.
  *
  * DESTRUCTIVE: runs against a throwaway MySQL 8 loaded with a copy of the
  * production facility tables, never against production. It refuses to run on
@@ -11,9 +14,9 @@
  *   php -d memory_limit=2G scripts/test-facility-v2-writer.php \
  *       --dsn "mysql:host=127.0.0.1;port=3399;dbname=kop;charset=utf8mb4" --user root [--password x] [--prefix wpdl_]
  *
- * Load the copy first (tables: facilities_master, locations_master,
- * facilities_v2, news_facility_links, lawsuit_facility_links and the
- * {prefix}kop_* tables), e.g. with mysqldump --single-transaction over SSH.
+ * Load a fresh copy for every run (tables: facilities_v2, locations_master,
+ * news_facility_links, lawsuit_facility_links and the {prefix}kop_* tables),
+ * e.g. from a local mysqldump; the test edits it.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -54,6 +57,30 @@ function table_sum(PDO $pdo, $table, $columns) {
 function via_json($value) {
     return json_decode(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), true);
 }
+/** A decoded value with empty strings, nulls and empty arrays left out, all the way down. */
+function without_empty($v) {
+    if (!is_array($v)) return $v;
+    $out = array();
+    foreach ($v as $k => $x) {
+        $x = without_empty($x);
+        if ($x === null || $x === '' || $x === array()) continue;
+        $out[$k] = $x;
+    }
+    return $out;
+}
+/** Where two decoded values differ: 'path: before -> after', at most $max lines. */
+function diff_paths($a, $b, $path = '', $max = 20) {
+    if ($a === $b) return array();
+    if (!is_array($a) || !is_array($b)) {
+        return array($path . ': ' . substr(json_encode($a), 0, 80) . ' -> ' . substr(json_encode($b), 0, 80));
+    }
+    $out = array();
+    foreach (array_unique(array_merge(array_keys($a), array_keys($b))) as $k) {
+        $out = array_merge($out, diff_paths($a[$k] ?? null, $b[$k] ?? null, $path . '/' . $k, $max));
+        if (count($out) >= $max) break;
+    }
+    return $out;
+}
 function state_of(PDO $pdo) {
     global $t;
     return array(
@@ -70,16 +97,10 @@ function save_project(PDO $pdo, $prefix, array $project) {
 }
 
 // --- 0. Write switch -----------------------------------------------------------
-check('write switch starts off', !kop_v2_writes_active($pdo, $prefix, true));
-$legacy_before = kop_migration_fingerprint($pdo);
-$switch = kop_v2_set_writes($pdo, $prefix, 'v2');
-check('write switch turns on', kop_v2_writes_active($pdo, $prefix, true), json_encode($switch['final_sync']));
-// A dump reload can shift updated_at (time zone), so the fingerprint may not
-// match and the sync runs; it must still find nothing to write.
-check('final sync found v2 up to date', !empty($switch['final_sync']['skipped'])
-    || ((int)$switch['final_sync']['written'] === 0 && (int)$switch['final_sync']['removed'] === 0));
-check('link repoints applied', $switch['link_repoints']['moved'] + $switch['link_repoints']['already'] === count(kop_migration_state_get($pdo, $prefix, 'link_repoints', array())), json_encode($switch['link_repoints']));
-check('link repoints idempotent', kop_v2_apply_link_repoints($pdo, $prefix)['moved'] === 0);
+if (!kop_v2_writes_active($pdo, $prefix, true)) {
+    fwrite(STDERR, "The write switch is off in this copy; load a copy of production, where it is on.\n");
+    exit(2);
+}
 $sync = kop_migration_sync($pdo, $prefix, true);
 check('sync refuses once writes go to v2', !empty($sync['skipped']) && $sync['reason'] === 'admin saves write the v2 tables');
 
@@ -114,11 +135,42 @@ foreach ($projects as $key => $p) {
 }
 $after = state_of($pdo);
 $after['locations_master'] = table_sum($pdo, 'locations_master', 'id, unique_name, json_data, updated_at');
-check('round trip: no facility created, updated, unlinked or moved',
-    $totals['created'] + $totals['updated'] + $totals['unlinked'] + $totals['placed'] + $totals['removed_from_page'] === 0,
+// A document stored at an older schema is rewritten in the current shape on
+// its first save (empty fields filled in, schema_version raised, placeholder
+// flags dropped), so 'updated' may be non-zero; what the form shows may not move.
+check('round trip: no facility created, unlinked or moved',
+    $totals['created'] + $totals['unlinked'] + $totals['placed'] + $totals['removed_from_page'] === 0,
     json_encode($totals) . ', ' . round(microtime(true) - $started, 1) . 's total, slowest ' . round($slowest, 2) . 's');
-foreach ($before as $k => $v) check("round trip: $k table unchanged", $after[$k] === $v, $v . ' -> ' . $after[$k]);
-check('round trip: legacy tables untouched except profile extras', scalar($pdo, "SELECT COUNT(*) FROM facilities_master") > 0);
+// Empty and missing values are the same to the form, a project's label
+// follows the name it is filed under on save (an old label such as "ROP" goes),
+// and the save drops placeholder flags an earlier pass wrote ("migration:
+// unparsed endYear: Present"), by the store's own rule.
+$shown = function ($all) {
+    $out = array();
+    foreach (via_json($all) as $k => $p) {
+        unset($p['name']);
+        foreach ((array)($p['data']['facilities'] ?? array()) as $i => $f) {
+            if (!isset($f['operatingPeriod']['notes']) || !is_array($f['operatingPeriod']['notes'])) continue;
+            $p['data']['facilities'][$i]['operatingPeriod']['notes'] = array_values(array_filter($f['operatingPeriod']['notes'], function ($n) {
+                return !(is_string($n) && preg_match('/^migration: unparsed [\w.]+: (.*)$/s', $n, $m) && kop_facility_is_int_placeholder($m[1]));
+            }));
+        }
+        $out[$k] = without_empty($p);
+    }
+    return $out;
+};
+$reloaded = $shown(kop_v2_form_projects($pdo, $prefix));
+check('round trip: the form loads the same projects afterwards', $reloaded === $shown($projects), implode(' | ', array_slice(diff_paths($shown($projects), $reloaded), 0, 6)));
+foreach ($before as $k => $v) {
+    if ($k === 'facilities') continue;
+    check("round trip: $k table unchanged", $after[$k] === $v, $v . ' -> ' . $after[$k]);
+}
+$again = array('created' => 0, 'updated' => 0, 'unlinked' => 0);
+foreach ($projects as $p) {
+    $r = save_project($pdo, $prefix, $p);
+    foreach ($again as $k => $v) $again[$k] += (int)($r[$k] ?? 0);
+}
+check('round trip: a second save writes nothing', array_sum($again) === 0 && state_of($pdo) === array_diff_key($after, array('locations_master' => 1)), json_encode($again));
 
 // Pick an operator with several facilities for the edit tests.
 $op_key = null;
@@ -216,7 +268,6 @@ save_project($pdo, $prefix, $extra);
 $profiles = kop_v2_location_profile_rows($pdo);
 $names = array_map(function ($c) { return is_array($c) ? ($c['name'] ?? '') : $c; }, (array)$profiles['UTAH']['data']['referrerConsultants']);
 check('profile: referrer consultants saved to locations_master', in_array('Writer Test Consultant', $names, true));
-check('profile: frozen legacy facilities array left alone', count($profiles['UTAH']['data']['facilities']) > 0);
 
 // --- 7. New operator, rename, delete -----------------------------------------------
 $r = kop_v2_save_form_project($pdo, $prefix, 'Writer Test Holdings', array(
@@ -270,7 +321,10 @@ $seed['version'] = 99;
 $seed['facility']['notes'] = array('seed test note');
 check('seeds: a newer record seed is applied', kop_v2_apply_facility_record_seed($pdo, $prefix, $seed));
 $seeded = kop_facility_load((int)$seed['id'], array('pdo' => $pdo, 'prefix' => $prefix))['doc'];
-check('seeds: fields merged and version recorded', $seeded['notes'] === array('seed test note') && $seeded['provenance']['kopProfileVersion'] === 99);
+// The seed's notes replace the record's; a gender value saying more than the
+// one word adds its own "Gender as recorded: ..." note (kop_facility_gender()).
+$seed_notes = array_values(array_filter((array)$seeded['notes'], function ($n) { return strpos((string)$n, 'Gender as recorded: ') !== 0; }));
+check('seeds: fields merged and version recorded', $seed_notes === array('seed test note') && $seeded['provenance']['kopProfileVersion'] === 99, json_encode($seeded['notes']));
 check('seeds: the same version is not applied twice', !kop_v2_apply_facility_record_seed($pdo, $prefix, $seed));
 $wrong = $seed;
 $wrong['version'] = 100;
@@ -282,11 +336,16 @@ check('seeds: a new operator alias is added once', kop_v2_add_operator_other_nam
     && kop_v2_add_operator_other_names($pdo, $prefix, $aliases[0]['id'], $aliases[0]['unique_name'], array('seed test alias')) === 0);
 $new_seeds = json_decode((string)file_get_contents($seeds_dir . 'new-facilities.json'), true);
 $before_new = state_of($pdo);
+// The deploy runner (kop_apply_new_facility_seeds()) never saves a seed that is
+// a young adult program now; those moved to related_facilities by name.
+$moved = array_flip(array_map('mb_strtolower', $pdo->query("SELECT name FROM related_facilities")->fetchAll(PDO::FETCH_COLUMN)));
 foreach ($new_seeds as $entry) {
+    if (isset($moved[mb_strtolower(trim((string)($entry['facility']['identification']['name'] ?? '')))])) continue;
     $r = kop_v2_save_form_project($pdo, $prefix, $entry['location_name'], array('facilities' => array($entry['facility'])), 'locations', array('partial' => true));
 }
 check('seeds: re-running the new-facility seeds creates nothing', state_of($pdo)['memberships'] === $before_new['memberships']
-    && (int)scalar($pdo, "SELECT COUNT(*) FROM `{$t['facilities']}`") === (int)explode(':', $before_new['facilities'])[0]);
+    && (int)scalar($pdo, "SELECT COUNT(*) FROM `{$t['facilities']}`") === (int)explode(':', $before_new['facilities'])[0],
+    'memberships ' . $before_new['memberships'] . ' -> ' . state_of($pdo)['memberships'] . ', facilities ' . $before_new['facilities'] . ' -> ' . state_of($pdo)['facilities']);
 
 // --- 8c. The row shape the Data Manager, picker and wiki merge edit ------------------
 $master_rows = kop_v2_pdo_master_rows($pdo, $prefix);
@@ -341,14 +400,6 @@ try {
 } catch (RuntimeException $e) {
     check('rollback: a failed save leaves no trace', state_of($pdo) === $before);
 }
-
-// --- 10. Switch back -------------------------------------------------------------------
-check('facilities_master frozen through every test', kop_v2_frozen_fingerprint($pdo) === $switch['frozen_fingerprint']);
-$edits = kop_v2_edits_since_switch($pdo, $prefix);
-check('switch back: edits since the switch are counted', $edits >= 3, "$edits");
-kop_v2_set_writes($pdo, $prefix, 'legacy');
-check('switch back: writes go to the old tables again', !kop_v2_writes_active($pdo, $prefix, true));
-check('legacy facility rows never written', scalar($pdo, "SELECT COUNT(*) FROM facilities_master WHERE updated_at > NOW() - INTERVAL 1 HOUR") == 0);
 
 echo $failures === 0 ? "\nAll checks passed.\n" : "\n{$failures} check(s) FAILED.\n";
 exit($failures === 0 ? 0 : 1);

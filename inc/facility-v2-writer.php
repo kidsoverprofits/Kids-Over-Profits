@@ -579,11 +579,16 @@ if (!function_exists('kop_v2_save_operator_project')) {
         ));
 
         // Join rows follow the form's order; a facility dropped from the list
-        // leaves this operator but stays a facility.
+        // leaves this operator but stays a facility. Related-category records
+        // (ids above KOP_RELATED_FIRST_ID) share the join table but are never
+        // in the form's list, so their rows are left alone.
         $existing = array();
         $q = $pdo->prepare("SELECT facility_id, relationship FROM `{$t['operator_facilities']}` WHERE operator_id = ? ORDER BY sort_order, facility_id");
         $q->execute(array($operator_id));
-        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) $existing[(int)$r['facility_id']] = $r['relationship'];
+        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            if (kop_facility_is_related_id($r['facility_id'])) continue;
+            $existing[(int)$r['facility_id']] = $r['relationship'];
+        }
 
         $keep = array();
         foreach ($saved['ids'] as $index => $fid) {

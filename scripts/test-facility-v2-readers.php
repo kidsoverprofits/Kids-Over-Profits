@@ -1,29 +1,30 @@
 <?php
 /**
- * Compare the readers that scan facilities_master against their v2 versions
- * (docs/DATA-MODEL-MIGRATION.md phase 4 step 5): the data form's search and
+ * The readers of the facility records (facilities_v2 and its side tables),
+ * checked against the records themselves: the data form's search and
  * autocomplete, the state page's inspection placement and related-records
- * name map, and the program index's news and lawsuit attachers.
+ * name map, the alias index for news and lawsuit linking, and the program
+ * index's news and lawsuit attachers.
+ *
+ * Until 2026-11-02 this diffed the legacy facilities_master readers against
+ * v2 (the phase 4 switch rehearsal). facilities_master was retired in phase 5
+ * (docs/DATA-MODEL-MIGRATION.md), so each reader is now held to what the v2
+ * tables say instead.
  *
  * WordPress is stubbed and $wpdb is backed by PDO, so the real SQL runs
  * against a throwaway MySQL 8 loaded with a copy of the production tables -
- * never against production.
- *
- * Read-only: it sets the write switch in its own process only (an override
- * the stub answers), and writes nothing.
+ * never against production. Read-only.
  *
  * Usage:
  *   php -d memory_limit=3G scripts/test-facility-v2-readers.php \
  *       --dsn "mysql:host=127.0.0.1;port=3399;dbname=kop;charset=utf8mb4" --user root [--password x] [--prefix wpdl_]
- *
- * It runs itself once per model (legacy, v2) and diffs the two results.
  */
 
 if (PHP_SAPI !== 'cli') {
     exit("CLI only.\n");
 }
 
-$args = getopt('', array('dsn:', 'user:', 'password::', 'prefix::', 'mode::', 'out::'));
+$args = getopt('', array('dsn:', 'user:', 'password::', 'prefix::'));
 if (empty($args['dsn']) || !isset($args['user'])) {
     fwrite(STDERR, "Usage: --dsn <pdo dsn> --user <user> [--password <pw>] [--prefix wpdl_]\n");
     exit(2);
@@ -36,7 +37,7 @@ if (stripos($args['dsn'], 'kidsover_production') !== false) {
 define('KOP_SEARCH_LIMIT', 100);          // the endpoint's own maximum
 define('KOP_AUTOCOMPLETE_LIMIT', 200);    // same
 
-/** What the two runs compare: search terms, and autocomplete category/query pairs. */
+/** Search terms, and autocomplete category/query pairs. */
 function kop_reader_search_terms() {
     return array('academy', 'ranch', 'provo', 'hope house', 'wilderness', 'Utah', 'canyon school', 'red rock', 'elevations');
 }
@@ -49,178 +50,15 @@ function kop_reader_autocomplete_cases() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// Driver: run both models in their own process (the readers cache in statics)
-// ---------------------------------------------------------------------------
-
-if (empty($args['mode'])) {
-    $tmp = sys_get_temp_dir() . '/kop-readers-';
-    $results = array();
-    foreach (array('legacy', 'v2') as $mode) {
-        $out = $tmp . $mode . '.json';
-        $cmd = escapeshellarg(PHP_BINARY);
-        foreach (array('extension_dir' => ini_get('extension_dir'), 'memory_limit' => ini_get('memory_limit')) as $k => $v) {
-            $cmd .= ' -d ' . escapeshellarg($k . '=' . $v);
-        }
-        foreach (array('mbstring', 'pdo_mysql') as $ext) {
-            if (extension_loaded($ext)) $cmd .= ' -d ' . escapeshellarg('extension=' . $ext);
-        }
-        $cmd .= ' ' . escapeshellarg(__FILE__);
-        foreach (array('dsn', 'user', 'password', 'prefix') as $k) {
-            if (isset($args[$k])) $cmd .= ' --' . $k . '=' . escapeshellarg((string)$args[$k]);
-        }
-        $cmd .= ' --mode=' . $mode . ' --out=' . escapeshellarg($out);
-        $started = microtime(true);
-        passthru($cmd, $code);
-        if ($code !== 0) {
-            fwrite(STDERR, "The $mode run failed.\n");
-            exit(1);
-        }
-        printf("  %s run: %.1fs\n", $mode, microtime(true) - $started);
-        $results[$mode] = json_decode((string)file_get_contents($out), true);
-        @unlink($out);
-    }
-
-    $failures = 0;
-    $check = function ($label, $ok, $detail = '') use (&$failures) {
-        if (!$ok) $failures++;
-        echo ($ok ? 'PASS ' : 'FAIL ') . $label . ($detail !== '' ? "  ($detail)" : '') . "\n";
-    };
-    $old = $results['legacy'];
-    $new = $results['v2'];
-
-    echo "\n-- Data form search (kop/v1/search) --\n";
-    foreach ($old['search'] as $term => $rows) {
-        $new_rows = $new['search'][$term] ?? array();
-        // Results are sorted by name and cut at the limit, so a capped search
-        // can only be compared up to the last name both runs reached.
-        $capped = count($rows) >= KOP_SEARCH_LIMIT || count($new_rows) >= KOP_SEARCH_LIMIT;
-        $old_names = array_keys($rows);
-        $new_names = array_keys($new_rows);
-        if ($capped) {
-            $edge = min(end($old_names), end($new_names));
-            $old_names = array_values(array_filter($old_names, function ($n) use ($edge) { return strnatcasecmp($n, $edge) <= 0; }));
-            $new_names = array_values(array_filter($new_names, function ($n) use ($edge) { return strnatcasecmp($n, $edge) <= 0; }));
-        }
-        $lost = array_values(array_diff($old_names, $new_names));
-        $added = array_values(array_diff($new_names, $old_names));
-        $check("search \"$term\": every result still found",
-            count($lost) === 0,
-            count($rows) . ' old, ' . count($new_rows) . ' new' . ($capped ? ', capped: compared ' . count($old_names) : '')
-            . ($lost ? ', lost: ' . implode(' | ', array_slice($lost, 0, 5)) : ''));
-        if ($added) echo "     (new: " . implode(' | ', array_slice($added, 0, 5)) . ")\n";
-    }
-
-    echo "\n-- Autocomplete (kop/v1/autocomplete) --\n";
-    foreach ($old['autocomplete'] as $key => $values) {
-        $new_values = $new['autocomplete'][$key] ?? array();
-        if (count($values) >= KOP_AUTOCOMPLETE_LIMIT || count($new_values) >= KOP_AUTOCOMPLETE_LIMIT) {
-            echo "     (autocomplete $key: capped at " . KOP_AUTOCOMPLETE_LIMIT . ", not compared)\n";
-            continue;
-        }
-        $lost = array_values(array_diff($values, $new_values));
-        // "Adults Only" is not a status: the migration maps it to Unknown and
-        // keeps the original in the facility's notes (section 9 of the spec).
-        $lost = array_values(array_diff($lost, array('Adults Only')));
-        $check("autocomplete $key: no value lost", count($lost) === 0,
-            count($values) . ' old, ' . count($new_values) . ' new' . ($lost ? ', lost: ' . implode(' | ', array_slice($lost, 0, 4)) : ''));
-    }
-
-    echo "\n-- State pages --\n";
-    $pin_old = $old['state_pins'];
-    $pin_new = $new['state_pins'];
-    $gained = $lost_pin = $moved = 0;
-    foreach ($pin_old as $name => $pin) {
-        $after = $pin_new[$name] ?? '';
-        if ($after === $pin) continue;
-        if ($pin === '') $gained++;
-        elseif ($after === '') $lost_pin++;
-        else $moved++;
-    }
-    echo "     (name pins: $gained gained, $lost_pin no longer certain, $moved changed state)\n";
-    $check('no inspection name is pinned to a different state', $moved === 0);
-
-    // The pins only matter through the page each inspection row lands on. A
-    // row may stop being relocated - a name shared by facilities in several
-    // states can no longer pin it, so it stays with the authority that
-    // inspected it - but it must never be relocated somewhere new.
-    $page_moves = array();
-    $relocations = array();
-    foreach ($old['inspection_home'] as $id => $row) {
-        $after = $new['inspection_home'][$id][0] ?? '';
-        if ($after === $row[0]) continue;
-        $line = $row[1] . ': ' . ($row[0] ?: '-') . ' -> ' . ($after ?: '-');
-        $page_moves[] = $line;
-        if ($after !== ($row[2] ?? '')) $relocations[] = $line;
-    }
-    $check('no inspection row is relocated to a new state page', count($relocations) === 0,
-        count($page_moves) . ' of ' . count($old['inspection_home']) . ' rows go back to the state that inspected them'
-        . ($page_moves ? ': ' . implode(', ', array_unique($page_moves)) : ''));
-
-    // Dropped names are fine only when the facility is not in a US state in
-    // v2: the old map gave a US state to facilities in Mexico and Canada.
-    $missing_names = array_diff(array_keys($old['state_map']), array_keys($new['state_map']));
-    $still_us = array_values(array_filter($missing_names, function ($n) use ($new) {
-        return !isset($new['non_us_names'][$n]);
-    }));
-    $check('inspection placement map keeps every name that is in a US state', count($still_us) === 0,
-        count($old['state_map']) . ' old, ' . count($new['state_map']) . ' new, '
-        . count($missing_names) . ' dropped (not in a US state)'
-        . ($still_us ? '; missing: ' . implode(' | ', array_slice($still_us, 0, 6)) : ''));
-
-    $dropped = array();
-    $repointed = array();
-    foreach ($old['name_ids'] as $name => $id) {
-        if (!isset($new['name_ids'][$name])) $dropped[] = $name;
-        elseif ($new['name_ids'][$name] !== $id) $repointed[] = "$name ($id -> {$new['name_ids'][$name]})";
-    }
-    $check('related-records name map still resolves every name', count($dropped) === 0,
-        count($old['name_ids']) . ' old, ' . count($new['name_ids']) . ' new'
-        . ($dropped ? '; dropped: ' . implode(' | ', array_slice($dropped, 0, 6)) : ''));
-    // A name can point at a different row of the same facility group: the old
-    // map's tie-breaks came from the name index, not from meaning. What must
-    // not change is any record actually linked today, checked below.
-    echo '     (' . count($repointed) . " names resolve to a different row"
-        . ($repointed ? ': ' . implode(', ', array_slice($repointed, 0, 4)) : '') . ")\n";
-
-    echo "\n-- News and lawsuit linking --\n";
-    $lost_aliases = array();
-    foreach ($old['alias_exact'] as $key => $id) {
-        if (!isset($new['alias_exact'][$key]) && !in_array($key, $new['alias_ambiguous'], true)) $lost_aliases[] = $key;
-    }
-    $check('every name the alias index resolved is still resolved', count($lost_aliases) === 0,
-        count($old['alias_exact']) . ' old, ' . count($new['alias_exact']) . ' new'
-        . ($lost_aliases ? '; lost: ' . implode(' | ', array_slice($lost_aliases, 0, 6)) : ''));
-
-    $missing_links = array();
-    foreach ($old['linked_names'] as $id => $name) {
-        if (!isset($new['linked_names'][$id])) $missing_links[] = "$id ($name)";
-    }
-    $check('every linked news and lawsuit id still resolves to a name', count($missing_links) === 0,
-        count($old['linked_names']) . ' linked ids'
-        . ($missing_links ? '; missing: ' . implode(', ', array_slice($missing_links, 0, 6)) : ''));
-
-    echo "\n-- Program index links --\n";
-    foreach (array('news', 'lawsuits') as $kind) {
-        $lost = array_values(array_diff($old['links'][$kind], $new['links'][$kind]));
-        $added = array_values(array_diff($new['links'][$kind], $old['links'][$kind]));
-        $check("$kind attached to the same projects", count($lost) === 0,
-            count($old['links'][$kind]) . ' old, ' . count($new['links'][$kind]) . ' new'
-            . ($lost ? '; lost: ' . implode(' | ', array_slice($lost, 0, 5)) : ''));
-        if ($added) echo "     (new: " . implode(' | ', array_slice($added, 0, 5)) . ")\n";
-    }
-
-    echo $failures === 0 ? "\nAll checks passed.\n" : "\n{$failures} check(s) FAILED.\n";
-    exit($failures === 0 ? 0 : 1);
-}
-
-// ---------------------------------------------------------------------------
-// Worker: one model
-// ---------------------------------------------------------------------------
-
-$mode = $args['mode'] === 'v2' ? 'v2' : 'legacy';
 $pdo = new PDO($args['dsn'], $args['user'], $args['password'] ?? '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 $prefix = $args['prefix'] ?? 'wpdl_';
+
+$failures = 0;
+function check($label, $ok, $detail = '') {
+    global $failures;
+    if (!$ok) $failures++;
+    echo ($ok ? 'PASS ' : 'FAIL ') . $label . ($detail !== '' ? "  ($detail)" : '') . "\n";
+}
 
 define('ABSPATH', dirname(__DIR__) . '/');
 define('ARRAY_A', 'ARRAY_A');
@@ -230,7 +68,6 @@ define('HOUR_IN_SECONDS', 3600);
 define('DAY_IN_SECONDS', 86400);
 preg_match('/dbname=([^;]+)/', $args['dsn'], $m);
 define('DB_NAME', $m[1] ?? 'kop');
-define('KOP_TEST_MODEL', $mode);
 
 /** Minimal $wpdb over PDO: the readers' SQL runs for real. */
 class wpdb {
@@ -324,10 +161,10 @@ function get_transient() { return false; }
 function set_transient() { return true; }
 function delete_transient() { return true; }
 function get_option($name, $default = false) {
-    // The write switch is the only option these readers consult; the v2 run
-    // answers as if it were on, without touching the database.
-    if ($name === 'kop_data_model') return KOP_TEST_MODEL === 'v2' ? 'v2' : 'v1';
-    if ($name === 'kop_data_model_areas') return KOP_TEST_MODEL === 'v2' ? array_keys(kop_v2_areas()) : array();
+    // The model switches are the only options these readers consult. Every
+    // area reads v2, as on production since phase 5.
+    if ($name === 'kop_data_model') return 'v2';
+    if ($name === 'kop_data_model_areas') return array_keys(kop_v2_areas());
     return $default;
 }
 function update_option() { return true; }
@@ -368,123 +205,181 @@ class WP_REST_Request {
     public function get_params() { return $this->params; }
 }
 
-// The write switch, set in this throwaway copy for the v2 run only. The
-// readers read it the same way production does, and it is cleared on the way
-// out so the copy is left as it was found.
-$switch_row = $pdo->prepare("INSERT INTO `{$prefix}kop_migration_state` (state_key, state_value) VALUES ('writes', ?)
-    ON DUPLICATE KEY UPDATE state_value = VALUES(state_value)");
-if ($mode === 'v2') {
-    $switch_row->execute(array(json_encode(array('mode' => 'v2', 'at' => gmdate('c')))));
-} else {
-    $pdo->exec("DELETE FROM `{$prefix}kop_migration_state` WHERE state_key = 'writes'");
-}
-register_shutdown_function(function () use ($pdo, $prefix) {
-    $pdo->exec("DELETE FROM `{$prefix}kop_migration_state` WHERE state_key = 'writes'");
-});
-
 require_once dirname(__DIR__) . '/inc/facility-store.php';
 require_once dirname(__DIR__) . '/inc/facility-v2-readers.php';
 require_once dirname(__DIR__) . '/inc/database.php';
 require_once dirname(__DIR__) . '/inc/utilities.php';
 require_once dirname(__DIR__) . '/inc/rest-api.php';
+require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
+require_once dirname(__DIR__) . '/api/facility-aliases.php';
 
-$out = array('search' => array(), 'autocomplete' => array(), 'state_pins' => array(), 'state_map' => array(), 'name_ids' => array(), 'links' => array());
+$lower = function ($s) { return mb_strtolower(trim((string)$s)); };
+$facilities = $pdo->query("SELECT id, unique_name, name, state FROM facilities_v2 ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+$facility_ids = array_flip(array_map('intval', array_column($facilities, 'id')));
+$operator_ids = array_flip(array_map('intval', $pdo->query("SELECT id FROM `{$prefix}kop_operators`")->fetchAll(PDO::FETCH_COLUMN)));
+check('the copy has facility records', count($facilities) > 0, count($facilities) . ' facilities, ' . count($operator_ids) . ' operators');
+check('the copy has the write switch on, as production does', kop_v2_writes_active($pdo, $prefix, true));
 
-// -- kop/v1/search ----------------------------------------------------------
+/** Facilities whose own name or row name contains $q, as lowercase names. */
+$named = function ($q) use ($facilities, $lower) {
+    $out = array();
+    $q = $lower($q);
+    foreach ($facilities as $f) {
+        foreach (array('name', 'unique_name') as $k) {
+            if ($q !== '' && mb_strpos($lower($f[$k]), $q) !== false) $out[(int)$f['id']] = array($lower($f['name']), $lower($f['unique_name']));
+        }
+    }
+    return $out;
+};
+
+echo "\n-- Data form search (kop/v1/search) --\n";
 foreach (kop_reader_search_terms() as $term) {
     $response = kop_search_database_rest_callback(new WP_REST_Request(array('keyword' => $term, 'limit' => KOP_SEARCH_LIMIT)));
-    $rows = array();
+    $found = array();
+    $found_ids = array();
     foreach ((array)($response['results'] ?? array()) as $r) {
-        $rows[strtolower((string)$r['name'])] = $r['matchType'] ?? '';
+        $found[$lower($r['name'] ?? '')] = true;
+        // A facility of a matched operator is listed inside that result, not again on its own.
+        foreach ((array)($r['data']['facilities'] ?? array()) as $nested) {
+            if (!empty($nested['facility_id'])) $found_ids[(int)$nested['facility_id']] = true;
+        }
     }
-    $out['search'][$term] = $rows;
+    $want = $named($term);
+    // Results are sorted by name and cut at the limit, so a capped search is
+    // checked up to the last name it reached.
+    $capped = count($found) >= KOP_SEARCH_LIMIT;
+    $edge = $capped ? array_key_last($found) : null;
+    $missing = array();
+    $compared = 0;
+    foreach ($want as $id => $names) {
+        // A facility's own result is named by its row name (unique_name).
+        if ($capped && strnatcasecmp($names[1], $edge) > 0) continue;
+        $compared++;
+        if (!isset($found[$names[0]]) && !isset($found[$names[1]]) && !isset($found_ids[$id])) $missing[] = "$id {$names[1]}";
+    }
+    check("search \"$term\": finds every facility named so", count($missing) === 0,
+        count($found) . ' results, ' . count($want) . ' named so' . ($capped ? ", capped: compared $compared up to \"$edge\"" : '')
+        . ($missing ? '; missing: ' . implode(' | ', array_slice($missing, 0, 5)) : ''));
 }
 
-// -- kop/v1/autocomplete ----------------------------------------------------
+echo "\n-- Autocomplete (kop/v1/autocomplete) --\n";
 foreach (kop_reader_autocomplete_cases() as $key => $query) {
     $category = strtok($key, '|');
     $response = kop_autocomplete_rest_callback(new WP_REST_Request(array(
         'category' => $category, 'q' => $query, 'limit' => KOP_AUTOCOMPLETE_LIMIT,
     )));
-    $values = (array)($response['values'] ?? array());
-    sort($values, SORT_STRING);
-    $out['autocomplete'][$key] = $values;
+    $values = array_map($lower, (array)($response['values'] ?? array()));
+    $capped = count($values) >= KOP_AUTOCOMPLETE_LIMIT;
+    if ($category === 'facility' && $query !== '' && !$capped) {
+        $offered = array_flip($values);
+        $missing = array();
+        foreach ($named($query) as $id => $names) {
+            if (!isset($offered[$names[0]]) && !isset($offered[$names[1]])) $missing[] = "$id {$names[1]}";
+        }
+        check("autocomplete $key: offers every facility named so", count($missing) === 0,
+            count($values) . ' values' . ($missing ? '; missing: ' . implode(' | ', array_slice($missing, 0, 5)) : ''));
+        continue;
+    }
+    check("autocomplete $key: offers values", count($values) > 0, count($values) . ($capped ? ' (capped)' : ''));
 }
 
-// -- state pages ------------------------------------------------------------
-$out['state_map'] = kop_master_facility_state_map();
-$names = $pdo->query("SELECT DISTINCT facility_name FROM inspection_facilities")->fetchAll(PDO::FETCH_COLUMN);
-foreach ((array)$names as $name) {
+echo "\n-- State pages --\n";
+// Which US state page an inspection row lands on: the name pin, decided from
+// the facilities' own states (kop_master_facility_state_map()).
+$state_map = kop_master_facility_state_map();
+$unmapped = array();
+foreach ($facilities as $f) {
+    $st = strtoupper(trim((string)$f['state']));
+    if ($st === '') continue;
+    $key = kop_normalize_facility_name((string)$f['name']);
+    if ($key !== '' && !in_array($st, $state_map[$key] ?? array(), true)) $unmapped[] = "{$f['id']} {$f['name']} ($st)";
+}
+check('inspection placement map has every facility in its own state', count($unmapped) === 0,
+    count($state_map) . ' names' . ($unmapped ? '; missing: ' . implode(' | ', array_slice($unmapped, 0, 6)) : ''));
+
+$pins = $wrong_pins = 0;
+$wrong = array();
+foreach ($pdo->query("SELECT DISTINCT facility_name FROM inspection_facilities")->fetchAll(PDO::FETCH_COLUMN) as $name) {
     $key = kop_normalize_facility_name((string)$name);
     if ($key === '') continue;
-    $out['state_pins'][$key] = kop_master_state_pin($key);
-}
-
-// What the pins actually do: the state page each inspection row lands on,
-// decided exactly as kop_state_collect_inspection_summaries() decides it.
-$out['inspection_home'] = array();
-$rows = $pdo->query("SELECT id, facility_name, full_address, state FROM inspection_facilities")->fetchAll(PDO::FETCH_ASSOC);
-foreach ($rows as $row) {
-    $stored = strtoupper(trim((string)$row['state']));
-    $pin = kop_master_state_pin(kop_normalize_facility_name($row['facility_name'] ?? ''));
-    $addr_state = kop_derive_state_from_address($row['full_address'] ?? '');
-    $home = $stored;
-    if ($pin !== '' && $pin !== $stored && ($addr_state === '' || $addr_state === $pin)) {
-        $home = $pin;
+    $pin = kop_master_state_pin($key);
+    if ($pin === '') continue;
+    $pins++;
+    // A pin found through a stripped state suffix has no entry of its own.
+    if (isset($state_map[$key]) && $state_map[$key] !== array($pin)) {
+        $wrong_pins++;
+        $wrong[] = "$name -> $pin (" . implode('/', $state_map[$key]) . ')';
     }
-    $out['inspection_home'][(int)$row['id']] = array($home, (string)$row['facility_name'], $stored);
 }
-$out['name_ids'] = kop_state_master_name_id_map();
+check('an inspection name is pinned only to the one state its facilities are in', $wrong_pins === 0,
+    "$pins names pinned" . ($wrong ? '; wrong: ' . implode(' | ', array_slice($wrong, 0, 5)) : ''));
 
-// Names that are not in a US state at all in v2 (foreign or unknown): the
-// placement map is allowed to drop them, since it only decides which US state
-// page an inspection row belongs on.
-$out['non_us_names'] = array();
-foreach ((array)$pdo->query("SELECT name FROM facilities_v2 WHERE state IS NULL OR state = ''")->fetchAll(PDO::FETCH_COLUMN) as $name) {
-    $key = kop_normalize_facility_name((string)$name);
-    if ($key !== '') $out['non_us_names'][$key] = true;
+$name_ids = kop_state_master_name_id_map();
+$unresolved = $dangling = array();
+foreach ($facilities as $f) {
+    if (!isset($name_ids[$lower($f['unique_name'])])) $unresolved[] = "{$f['id']} {$f['unique_name']}";
 }
+foreach ($name_ids as $name => $id) {
+    if (!isset($facility_ids[$id]) && !isset($operator_ids[$id])) $dangling[] = "$name ($id)";
+}
+check('related-records name map resolves every facility by its row name', count($unresolved) === 0,
+    count($name_ids) . ' names' . ($unresolved ? '; unresolved: ' . implode(' | ', array_slice($unresolved, 0, 6)) : ''));
+check('related-records name map points only at existing records', count($dangling) === 0,
+    $dangling ? implode(' | ', array_slice($dangling, 0, 6)) : '');
 
-// -- name resolution for news and lawsuit linking ----------------------------
-require_once dirname(__DIR__) . '/api/facility-aliases.php';
+echo "\n-- News and lawsuit linking --\n";
 $index = kop_build_facility_alias_index($pdo);
-$out['alias_exact'] = $index['exact'];
-$out['alias_names'] = $index['names'];
-$out['alias_ambiguous'] = array_keys($index['ambiguous']);
+$ambiguous = $index['ambiguous'];
+$unresolved = $dangling = array();
+foreach ($facilities as $f) {
+    $key = kop_normalize_name_key((string)$f['unique_name']);
+    if ($key !== '' && !isset($index['exact'][$key]) && !isset($ambiguous[$key])) $unresolved[] = "{$f['id']} {$f['unique_name']}";
+}
+foreach ($index['exact'] as $key => $id) {
+    if (!isset($facility_ids[(int)$id]) && !isset($operator_ids[(int)$id])) $dangling[] = "$key ($id)";
+}
+check('alias index resolves every facility by its row name', count($unresolved) === 0,
+    count($index['exact']) . ' names, ' . count($ambiguous) . ' ambiguous' . ($unresolved ? '; unresolved: ' . implode(' | ', array_slice($unresolved, 0, 6)) : ''));
+check('alias index points only at existing records', count($dangling) === 0, $dangling ? implode(' | ', array_slice($dangling, 0, 6)) : '');
 
-// The ids the link tables actually hold must still resolve to a name.
-$linked_ids = array_map('intval', array_merge(
+$linked_ids = array_values(array_unique(array_map('intval', array_merge(
     (array)$pdo->query("SELECT DISTINCT facility_id FROM news_facility_links")->fetchAll(PDO::FETCH_COLUMN),
     (array)$pdo->query("SELECT DISTINCT facility_id FROM lawsuit_facility_links")->fetchAll(PDO::FETCH_COLUMN)
-));
-$out['linked_names'] = array();
-if ($mode === 'v2') {
-    require_once dirname(__DIR__) . '/inc/facility-v2-writer.php';
-    $out['linked_names'] = kop_v2_pdo_names_by_id($pdo, $prefix, $linked_ids);
-} else {
-    $in = implode(',', array_map('intval', $linked_ids));
-    foreach ((array)$pdo->query("SELECT id, unique_name FROM facilities_master WHERE id IN ($in)")->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $out['linked_names'][(int)$row['id']] = (string)$row['unique_name'];
-    }
-}
+))));
+$linked_names = kop_v2_pdo_names_by_id($pdo, $prefix, $linked_ids);
+$missing = array_values(array_diff($linked_ids, array_map('intval', array_keys($linked_names))));
+check('every linked news and lawsuit id resolves to a name', count($missing) === 0,
+    count($linked_ids) . ' linked ids' . ($missing ? '; missing: ' . implode(', ', array_slice($missing, 0, 8)) : ''));
 
-// -- program index attachers -------------------------------------------------
-$projects = kop_v2_active('program_index') ? kop_v2_get_facilities_projects() : kop_get_facilities_projects_from_database();
+echo "\n-- Program index links --\n";
+$projects = kop_v2_get_facilities_projects();
 $projects = isset($projects['projects']) ? $projects['projects'] : $projects;
 kop_attach_linked_news_to_projects($wpdb, $projects);
 kop_attach_linked_lawsuits_to_projects($wpdb, $projects);
-$news = array();
-$lawsuits = array();
-foreach ($projects as $key => $project) {
-    foreach ((array)($project['linked_news'] ?? array()) as $item) {
-        $news[] = $key . ' #' . (int)($item['id'] ?? $item['news_id'] ?? 0);
+check('program index lists projects', count($projects) > 0, count($projects) . ' projects');
+$sql = array(
+    'news'     => array('linked_news', "SELECT l.facility_id, l.news_id FROM news_facility_links l JOIN news_submissions n ON n.id = l.news_id WHERE n.status IN ('approved','published')"),
+    'lawsuits' => array('linked_lawsuits', "SELECT lf.facility_id, lf.lawsuit_id FROM lawsuit_facility_links lf JOIN lawsuits l ON l.id = lf.lawsuit_id WHERE l.publication_status = 'published'"),
+);
+foreach ($sql as $kind => $spec) {
+    list($field, $query) = $spec;
+    $by_facility = array();
+    foreach ($pdo->query($query)->fetchAll(PDO::FETCH_NUM) as $row) $by_facility[(int)$row[0]][(int)$row[1]] = true;
+    $want = $got = array();
+    foreach ($projects as $key => $project) {
+        foreach ((array)($project['data']['facilities'] ?? array()) as $nested) {
+            if (!is_array($nested) || empty($nested['facility_id'])) continue;
+            $fid = (int)$nested['facility_id'];
+            foreach (array_keys($by_facility[$fid] ?? array()) as $item) $want[] = "$key #$fid/$item";
+            foreach ((array)($nested[$field] ?? array()) as $item) $got[] = "$key #$fid/" . (int)($item['id'] ?? 0);
+        }
     }
-    foreach ((array)($project['linked_lawsuits'] ?? array()) as $item) {
-        $lawsuits[] = $key . ' #' . (int)($item['id'] ?? $item['lawsuit_id'] ?? 0);
-    }
+    $lost = array_values(array_diff($want, $got));
+    $extra = array_values(array_diff($got, $want));
+    check("$kind: every published link shows on its program", count($lost) === 0,
+        count(array_unique($want)) . ' links on listed facilities' . ($lost ? '; not shown: ' . implode(' | ', array_slice($lost, 0, 5)) : ''));
+    check("$kind: nothing shown that is not a published link", count($extra) === 0, $extra ? implode(' | ', array_slice($extra, 0, 5)) : '');
 }
-sort($news, SORT_STRING);
-sort($lawsuits, SORT_STRING);
-$out['links'] = array('news' => $news, 'lawsuits' => $lawsuits);
 
-file_put_contents($args['out'], json_encode($out));
+echo $failures === 0 ? "\nAll checks passed.\n" : "\n{$failures} check(s) FAILED.\n";
+exit($failures === 0 ? 0 : 1);

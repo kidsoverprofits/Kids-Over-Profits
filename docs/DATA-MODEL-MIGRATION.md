@@ -750,6 +750,14 @@ is; the server translates between its project shape and v2.
   projects writes nothing, edits, new facilities without duplicates, removal
   from operators and pages, partial approvals, seeds, rename, delete,
   rollback, sync refusal, link repoints, switch back).
+- Since 2026-11-02 (after phase 5 retired facilities_master) both tests run
+  on v2 alone, on a production copy as it is: the readers test holds each
+  reader to what the v2 tables say (search and autocomplete find every
+  facility named so, placement and name maps, alias index, linked ids, the
+  program index's links), and the writer test no longer switches or switches
+  back. Its round trip allows a first save to bring an older document up to
+  the current schema, as long as the form shows the same projects and a
+  second save writes nothing.
 
 ### Phase 5: Remove the old model
 
