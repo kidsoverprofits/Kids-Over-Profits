@@ -690,6 +690,15 @@
         reportContainer.addEventListener('kop-rp-render', function (e) {
             fillFacilityReports(e.target.closest && e.target.closest('.kop-rp-facility'));
         });
+        // "kop-rp-bodies" also fills its reports' bodies, which are otherwise
+        // built on open: a finding matched by its text needs the text there.
+        reportContainer.addEventListener('kop-rp-bodies', function (e) {
+            var facility = e.target.closest && e.target.closest('.kop-rp-facility');
+            if (!facility) return;
+            fillFacilityReports(facility);
+            var reports = facility.querySelectorAll('.kop-rp-report[data-kop-rp-body]');
+            for (var i = 0; i < reports.length; i++) fillLazyBody(reports[i]);
+        });
         reportContainer.addEventListener('kop-rp-links', function (e) {
             var reports = pendingReports(e.target.closest && e.target.closest('.kop-rp-facility'));
             if (!reports || !e.detail || !Array.isArray(e.detail.links)) return;

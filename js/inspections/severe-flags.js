@@ -166,9 +166,21 @@
      * one of the facility's reports, which the engine names without building.
      */
     function buildIfNeeded(facility, name) {
-        if (!facility.hasAttribute('data-kop-rp-reports')) return;
         var key = nameKey(name);
         var candidates = candidatesFor(name);
+        // A report body the engine builds on open (Arizona and most states on
+        // report-page.js) holds the text a finding is matched on, so a
+        // facility with a text finding under its own name has them built now.
+        // Only under its own name: every facility's bodies would be the whole
+        // state, and some bodies are fetched.
+        if (facility.querySelector('.kop-rp-report[data-kop-rp-body]') || facility.hasAttribute('data-kop-rp-reports')) {
+            var own = candidates.some(function (f) { return !f.url && nameKey(f.facility) === key; });
+            if (own) {
+                facility.dispatchEvent(new global.CustomEvent('kop-rp-bodies', { bubbles: true }));
+                return;
+            }
+        }
+        if (!facility.hasAttribute('data-kop-rp-reports')) return;
         var needed = candidates.some(function (f) { return !f.url || nameKey(f.facility) === key; });
         if (!needed && candidates.length) {
             var ask = new global.CustomEvent('kop-rp-links', { bubbles: true, detail: { links: [] } });
