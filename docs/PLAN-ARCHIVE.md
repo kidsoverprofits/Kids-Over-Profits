@@ -3618,3 +3618,18 @@ sync in the Review inbox queue and hourly. Two gaps went into the plan file's it
      refresh their stat. No commits: every index was already LF. The in-progress edits (kop-data mn_reports.json,
      kop-pipeline ut_reports_with_ocr.json) kept their content. No `.gitattributes` added: one machine, and the
      global setting covers every repo, new clones included.
+
+## Done 2026-11-02 (from 2.4 Decisions waiting)
+
+- **Teen Challenge Research Map links** (https://teenchallenge-network.netlify.app/, a reader's project built partly on
+  KOP open data). Live 2026-11-02 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e2e3b205188ed84396272fab65a551da4f2b81e9,
+  inc/outside-research.php): boxed note + "Also see" on /operator/teen-challenge/ and the 30 program pages it matches
+  (10 to its full profiles), and Resources > Research and reading. Credited to "an independent researcher", as the
+  site says it is published anonymously. Not done: the glossary's Adult & Teen Challenge entry (the glossary has no
+  links yet), the David Wilkerson wiki entry (map page #/person/p-david-wilkerson) and the marketing essays
+  (free-help-paid-by-programs, how-troubled-teen-programs-market-themselves-online, deceptive-marketing-then-and-now
+  -> #/profile/marketing-and-placement-network).
+  Ask: Does the creator want her name on the credit, and should the wiki entry and the three essays get the link?
+  Answered 2026-11-02: no name in the credit; the David Wilkerson draft and the three essays got the link
+  (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/d86a71d571f1d4983529f0a94b026e1c91438c15, seeds/text-fixes.json).
+  Left out: the glossary, which shows no links anywhere.
