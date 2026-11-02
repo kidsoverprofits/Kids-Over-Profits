@@ -145,6 +145,11 @@ $template = dirname(__DIR__) . '/templates/operator-page.php';
 $with = array('timeline' => 0, 'people' => 0, 'program_docs' => 0, 'facilities' => 0, 'news' => 0, 'lawsuits' => 0, 'memorials' => 0, 'network' => 0, 'parents' => 0, 'subsidiaries' => 0);
 $facility_links = 0;
 $facility_pages = 0;
+// Teen Challenge's founding year is only in its milestone (Review inbox > Company milestones): approve it here.
+$GLOBALS['kop_test_options']['kop_company_milestones_review'] = array(
+    'teen-challenge-1958-72a6ec1b' => array('decision' => 'approved'),
+    'teen-challenge-2026-4d311033' => array('decision' => 'approved'),
+);
 foreach ($index['ids'] as $id => $e) {
     $data = kop_operator_page_data($id);
     $check("page data for {$e['slug']}", is_array($data));
@@ -160,6 +165,16 @@ foreach ($index['ids'] as $id => $e) {
         $kinds = array();
         foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) $kinds[$ev['kind']] = true;
         $check('the UHS timeline has no program years from before it owned them', !isset($kinds['opened']) && !isset($kinds['closed']) && !isset($kinds['death']), implode(',', array_keys($kinds)));
+    }
+    if ($e['slug'] === 'teen-challenge') {
+        // No founding year and no opening years on record, but it is the only operator its
+        // programs have had: their lawsuits and closings are its history. One article naming
+        // it in passing must not bring in the Provo Canyon School story.
+        $kinds = array();
+        $titles = array();
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) { $kinds[$ev['kind']] = ($kinds[$ev['kind']] ?? 0) + 1; $titles[] = $ev['title']; }
+        $check('the Teen Challenge timeline has its programs\' lawsuits and closings', ($kinds['lawsuit'] ?? 0) > 1 && isset($kinds['closed']), json_encode($kinds));
+        $check('the Teen Challenge timeline has no Provo Canyon story', !preg_grep('/Provo Canyon/i', $titles));
     }
     if (!empty($data['people']['leaders'])) $with['people']++;
     if (!empty($data['program_docs']['programs'])) $with['program_docs']++;

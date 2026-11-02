@@ -368,7 +368,7 @@ if (!function_exists('kop_ptl_company_deals')) {
 // ---------------------------------------------------------------------------
 
 if (!function_exists('kop_ptl_news_meta')) {
-    /** news id => {group, arc, arc_title, arc_text} for the given ids. */
+    /** news id => {group, arc, arc_title, arc_text, arc_facility} for the given ids. */
     function kop_ptl_news_meta(array $ids) {
         global $wpdb;
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
@@ -377,17 +377,18 @@ if (!function_exists('kop_ptl_news_meta')) {
         $rows = $wpdb->get_results('SELECT id, story_group_id, story_arc_id FROM news_submissions WHERE id IN (' . implode(',', $ids) . ')', ARRAY_A);
         $arcs = array();
         foreach ((array) $rows as $r) {
-            $out[(int) $r['id']] = array('group' => (string) ($r['story_group_id'] ?? ''), 'arc' => (int) ($r['story_arc_id'] ?? 0), 'arc_title' => '', 'arc_text' => '');
+            $out[(int) $r['id']] = array('group' => (string) ($r['story_group_id'] ?? ''), 'arc' => (int) ($r['story_arc_id'] ?? 0), 'arc_title' => '', 'arc_text' => '', 'arc_facility' => '');
             if ((int) ($r['story_arc_id'] ?? 0) > 0) $arcs[(int) $r['story_arc_id']] = true;
         }
         if ($arcs && kop_facility_pages_table_exists('news_story_arcs')) {
-            $arows = $wpdb->get_results("SELECT id, title, description FROM news_story_arcs WHERE status = 'active' AND id IN (" . implode(',', array_keys($arcs)) . ')', ARRAY_A);
+            $arows = $wpdb->get_results("SELECT id, title, description, facility_label FROM news_story_arcs WHERE status = 'active' AND id IN (" . implode(',', array_keys($arcs)) . ')', ARRAY_A);
             $by = array();
             foreach ((array) $arows as $a) $by[(int) $a['id']] = $a;
             foreach ($out as &$m) {
                 if ($m['arc'] && isset($by[$m['arc']])) {
                     $m['arc_title'] = trim((string) $by[$m['arc']]['title']);
                     $m['arc_text'] = trim((string) $by[$m['arc']]['description']);
+                    $m['arc_facility'] = trim((string) ($by[$m['arc']]['facility_label'] ?? ''));
                 } else {
                     $m['arc'] = 0;
                 }
@@ -406,8 +407,8 @@ if (!function_exists('kop_ptl_press_events')) {
      * The press as events: a story arc (the newsroom's named stories), a story
      * three or more outlets covered, an Essential Reporting pick. Ordinary
      * single articles stay in the News section. $news: the page's news rows
-     * (id, title, outlet, date, url, summary, image); $in_years(year, row)
-     * says whether an article counts here.
+     * (id, title, outlet, date, url, summary, image); $in_years(year, row, meta)
+     * says whether an article counts here (meta: its kop_ptl_news_meta() row).
      */
     function kop_ptl_press_events(array $news, $in_years = null) {
         $news = array_values(array_filter($news, static function ($n) { return empty($n['aside']) && !empty($n['id']) && !empty($n['date']); }));
@@ -442,7 +443,7 @@ if (!function_exists('kop_ptl_press_events')) {
         foreach ($arcs as $arc => $rows) {
             $m = $meta[(int) $rows[0]['id']];
             list($y, $sort, $label) = kop_ptl_date($rows[0]['date']);
-            if (!$y || ($in_years && !$in_years($y, $rows[0]))) continue;
+            if (!$y || ($in_years && !$in_years($y, $rows[0], $m))) continue;
             $last = kop_ptl_date($rows[count($rows) - 1]['date'])[0];
             $outlets = array_values(array_unique(array_filter(array_column($rows, 'outlet'))));
             $detail = array();
@@ -466,7 +467,7 @@ if (!function_exists('kop_ptl_press_events')) {
                 if (isset($featured[(int) $r['id']])) { $lead_row = $r; break; }
             }
             list($y, $sort, $label) = kop_ptl_date($rows[0]['date']);
-            if (!$y || ($in_years && !$in_years($y, $rows[0]))) continue;
+            if (!$y || ($in_years && !$in_years($y, $rows[0], $meta[(int) $rows[0]['id']] ?? array()))) continue;
             $events[] = kop_ptl_event($y, 'story', (string) $lead_row['title'], array(
                 'date' => $sort, 'when' => $label,
                 'lead' => 'Covered by ' . count($outlets) . ' outlets: ' . kop_ptl_list_words($outlets) . '.',
@@ -480,7 +481,7 @@ if (!function_exists('kop_ptl_press_events')) {
         foreach ($news as $n) {
             if (isset($used[(int) $n['id']]) || !isset($featured[(int) $n['id']])) continue;
             list($y, $sort, $label) = kop_ptl_date($n['date']);
-            if (!$y || ($in_years && !$in_years($y, $n))) continue;
+            if (!$y || ($in_years && !$in_years($y, $n, $meta[(int) $n['id']] ?? array()))) continue;
             $note = $featured[(int) $n['id']]['note'];
             $events[] = kop_ptl_event($y, 'featured', (string) $n['title'], array(
                 'date' => $sort, 'when' => $label,
@@ -639,7 +640,8 @@ if (!function_exists('kop_ptl_operator')) {
             $fname = (string) $l['node']['name'];
             $fid = (int) ($l['node']['facilityId'] ?? 0);
             $nk = kop_facility_pages_name_key($fname);
-            $map_years[$nk] = true;
+            // A line without years leaves the program's own years in charge.
+            if ($from) $map_years[$nk] = true;
             $span_id = isset($by_key[$nk]) ? (int) $by_key[$nk]['id'] : $fid;
             if ($from && $span_id > 0) $spans[$span_id] = array($from, $to ?: $now);
             if (!$from) continue;
@@ -661,7 +663,8 @@ if (!function_exists('kop_ptl_operator')) {
             $it = $program($f['name'], (int) $f['id']);
             if (!empty($f['start_year'])) $add(kop_ptl_event((int) $f['start_year'], 'opened', 'Opened ' . $f['name'], array('items' => array($it))));
             if (!empty($f['end_year'])) $add(kop_ptl_event((int) $f['end_year'], 'closed', 'Closed ' . $f['name'], array('items' => array($it))));
-            if (!empty($f['start_year']) && !isset($spans[(int) $f['id']])) $spans[(int) $f['id']] = array((int) $f['start_year'], (int) $f['end_year'] ?: $now);
+            // With no opening year on record, all of the program's years up to its closing are the company's.
+            if (!isset($spans[(int) $f['id']])) $spans[(int) $f['id']] = array((int) $f['start_year'], (int) $f['end_year'] ?: $now);
         }
         $count_words = static function ($n) { return $n === 1 ? 'a program' : $n . ' programs'; };
         foreach ($began as $year => $by_prev) {
@@ -770,9 +773,13 @@ if (!function_exists('kop_ptl_operator')) {
         // ---- The press ------------------------------------------------------------
         $news = (array) ($ctx['news'] ?? array());
         $fid_by_news = (array) ($ctx['news_facilities'] ?? array());
-        foreach (kop_ptl_press_events($news, static function ($year, $n) use ($in_span, $fid_by_news) {
-            if (($n['about'] ?? '') === 'company') return true;
-            return $in_span((array) ($fid_by_news[(int) $n['id']] ?? array()), $year);
+        foreach (kop_ptl_press_events($news, static function ($year, $n, $m) use ($in_span, $fid_by_news, $by_key, $me) {
+            if ($in_span((array) ($fid_by_news[(int) $n['id']] ?? array()), $year)) return true;
+            if (($n['about'] ?? '') !== 'company') return false;
+            // An article naming the company in passing does not bring in a story about another
+            // program: one mention of Teen Challenge put the Provo Canyon School story on its page.
+            $about = (string) ($m['arc_facility'] ?? '');
+            return empty($m['arc']) || $about === '' || isset($by_key[kop_facility_pages_name_key($about)]) || kop_ptl_company_key($about) === $me;
         }) as $e) $add($e);
 
         // An approved founding milestone says more than the bare "Founded" from the record.

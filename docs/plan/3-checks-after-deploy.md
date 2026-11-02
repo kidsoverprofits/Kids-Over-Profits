@@ -158,3 +158,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    -d '{"urls":["https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0209.pdf#page=20"]}'
    https://kidsoverprofits.org/wp-json/kop/v1/citations` answers Woodbury Reports, February 2009, p. 20; a facility page
    citing a news article lists its author, date, title and publication.
+36. **Company timelines from the programs' own years** (inc/operator-pages.php, inc/profile-timeline.php, 2026-11-02):
+   approve "Founded by David Wilkerson in New York City" (teen-challenge-1958-72a6ec1b) at Review inbox > Company
+   milestones, then https://kidsoverprofits.org/operator/teen-challenge/ shows a timeline from 1958: the openings, the
+   Lakeland, Treasure Coast and Refuge closings, the Kansas City Girls Academy and Indiana suits, and no "Provo Canyon
+   School Closure". Acadia, Devereux and Straight no longer show that story either; Aspen, Family Help & Wellness and
+   CEDU gain their programs' openings, closings and deaths.

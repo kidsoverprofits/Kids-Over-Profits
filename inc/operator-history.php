@@ -136,7 +136,8 @@ if (!function_exists('kop_operator_history_timeline')) {
             $url = $fid > 0 && function_exists('kop_facility_page_url') ? kop_facility_page_url($fid) : '';
             $item = array('name' => $name, 'url' => $url);
             $nk = kop_facility_pages_name_key($name);
-            $map_years[$nk] = true;
+            // A line without years leaves the program's own years in charge.
+            if ($from) $map_years[$nk] = true;
             if ($from) {
                 $span_id = isset($by_key[$nk]) ? (int) $by_key[$nk]['id'] : $fid;
                 if ($span_id > 0) $spans[$span_id] = array($from, $to ?: $now);
@@ -154,7 +155,7 @@ if (!function_exists('kop_operator_history_timeline')) {
             $item = array('name' => $f['name'], 'url' => $f['has_page'] ? $f['url'] : '');
             if (!empty($f['start_year'])) $add($f['start_year'], 'opened', 'Opened', $item);
             if (!empty($f['end_year'])) $add($f['end_year'], 'closed', 'Closed', $item);
-            if (!empty($f['start_year']) && !isset($spans[(int) $f['id']])) {
+            if (!isset($spans[(int) $f['id']])) {
                 $spans[(int) $f['id']] = array((int) $f['start_year'], (int) $f['end_year'] ?: $now);
             }
         }

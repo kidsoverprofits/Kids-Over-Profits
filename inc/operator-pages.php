@@ -663,6 +663,13 @@ if (!function_exists('kop_operator_page_data')) {
                 ARRAY_A
             );
             $founded_year = preg_match('/\b(1[89]\d\d|20\d\d)\b/', (string) ($op['founded'] ?? ''), $fy) ? (int) $fy[1] : 0;
+            // Else an approved "founded" milestone (seeds/company-milestones.json) gives the year.
+            if (!$founded_year && function_exists('kop_ptl_ms_approved')) {
+                $me = kop_ptl_company_key($name);
+                foreach (kop_ptl_ms_approved() as $m) {
+                    if (($m['kind'] ?? '') === 'founded' && isset(kop_ptl_ms_companies($m)[$me])) $founded_year = (int) $m['year'];
+                }
+            }
             // A renamed program is listed by the name it had while this company
             // ran it (kop_facility_eras_name_under()): Three Springs of Courtland
             // under Three Springs, Sequel TSI Courtland under Sequel.
@@ -681,18 +688,23 @@ if (!function_exists('kop_operator_page_data')) {
                 $facility_ids[$fid] = true;
                 // The program's own years are the company's only when it ran the
                 // program from the start: no earlier operator on record, this
-                // company the current one, opened in or after its founding year.
+                // company the current one, not opened before its founding year.
                 // Otherwise they may predate an acquisition (UHS bought hospitals
-                // that opened decades before it existed).
+                // that opened decades before it existed; with no founding year on
+                // record, none count). An unknown opening year does not count
+                // against a program (most of Teen Challenge's have none). The
+                // company's own name among the past operators is not an earlier one.
                 $fdoc = json_decode((string) $r['json_data'], true);
                 $ident = is_array($fdoc['identification'] ?? null) ? $fdoc['identification'] : array();
                 $then_names[$fid] = function_exists('kop_facility_eras_name_under') && is_array($fdoc)
                     ? kop_facility_eras_name_under($fid, $fdoc, $company_names, (string) $r['relationship'])
                     : null;
-                $past_ops = array_filter(array_map('trim', array_map('strval', (array) ($ident['pastOperators'] ?? array()))), 'strlen');
+                $past_ops = array_filter(array_map('trim', array_map('strval', (array) ($ident['pastOperators'] ?? array()))), static function ($p) use ($my_keys) {
+                    return $p !== '' && !isset($my_keys[kop_facility_pages_name_key($p)]);
+                });
                 $current_op = kop_facility_pages_name_key((string) ($ident['currentOperator'] ?? ''));
                 $own_years = !$past_ops && $current_op !== '' && isset($my_keys[$current_op])
-                    && $founded_year > 0 && (int) $r['start_year'] >= $founded_year;
+                    && $founded_year > 0 && (!(int) $r['start_year'] || (int) $r['start_year'] >= $founded_year);
                 $state = ($r['state'] && function_exists('kop_state_canonical_name')) ? (string) kop_state_canonical_name($r['state']) : (string) $r['state'];
                 $country = (string) $r['country'];
                 $place = trim(($r['city'] ? $r['city'] . ', ' : '') . ($state !== '' ? $state : ($country !== '' && $country !== 'United States' ? $country : '')), ', ');
