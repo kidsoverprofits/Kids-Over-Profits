@@ -73,6 +73,28 @@ function kop_rinbox_test_card_addons(callable $check) {
         $res = kop_rinbox_rest_act($req)->get_data();
         $check('addons: its action is answered before the queue\'s own (and even where it is off, so an Undo still works)',
             ($res['message'] ?? '') === 'Add-on ran.' && $GLOBALS['kop_rinbox_addon_ran'] === array('zz-plain:a:zz_do'), json_encode($res));
+
+        // Action ids with a value after a colon (Map questions' "answer:<a record's name>") reach the queue as sent;
+        // the part before the colon is still a plain key, and control characters are dropped.
+        kop_rinbox_register('zz-colon', function () {
+            $get = function ($k) { return array('key' => $k, 'title' => 'Card ' . $k, 'actions' => array()); };
+            return array('label' => 'Colon test', 'views' => array('waiting' => 'Waiting'), 'addons' => array(),
+                'count' => function () { return 1; },
+                'list' => function () use ($get) { return array('items' => array($get('a')), 'total' => 1); },
+                'get' => $get,
+                'act' => function ($key, $action) { return array('message' => 'got ' . $action); });
+        });
+        kop_rinbox_sources(true);
+        $sent = function ($action) {
+            $req = new WP_REST_Request();
+            foreach (array('source' => 'zz-colon', 'key' => 'a', 'action' => $action, 'params' => array()) as $k => $v) $req->set_param($k, $v);
+            return (string) (kop_rinbox_rest_act($req)->get_data()['message'] ?? '');
+        };
+        $name = "answer:Schrom Boy's Home @ Hawk's Landing \u{2014} Ni\u{f1}os";
+        $check('act: an "answer:<name>" id reaches the queue as sent through REST', $sent($name) === 'got ' . $name, $sent($name));
+        $check('act: the part before the colon is still a plain key, control characters dropped',
+            $sent("Answer<b>:x\ny") === 'got answerb:xy' && $sent('Approve') === 'got approve', $sent("Answer<b>:x\ny"));
+        $check('act: a value that is not UTF-8 is dropped', $sent("answer:\xC3") === 'got answer:', $sent("answer:\xC3"));
     });
 
     // The owner's choices: on for zz-plain, off for zz-lists; only differences are kept.

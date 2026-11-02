@@ -143,7 +143,7 @@ function kop_rinbox_q_item($key) {
         $actions[] = array('id' => 'dismiss', 'label' => 'Dismiss', 'style' => 'reject',
             'help' => 'Nothing on the site changes and the page stops asking this question. Undo on the Dismissed tab.');
     } else {
-        $actions[] = array('id' => 'undo', 'label' => $status === 'settled' ? 'Undo' : 'Ask again', 'style' => $status === 'settled' ? 'undo' : 'neutral',
+        $actions[] = array('id' => 'undo', 'label' => $status === 'settled' ? 'Undo' : 'Ask again', 'style' => 'undo',
             'help' => $status === 'settled' ? 'Takes back what was written to the record and asks the question again.' : 'The page asks this question again.');
         $details[] = array('label' => $status === 'settled' ? 'Settled' : 'Dismissed',
             'value' => trim((string) $state['answer'] . ' (' . $state['reviewed_by'] . ', ' . $state['reviewed_at'] . ' UTC)'));

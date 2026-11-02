@@ -306,7 +306,7 @@ function kop_rinbox_fornits_item(array $r) {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes it out of the record\'s write-up and puts it back in the waiting list. The record was never changed.');
     } else {
-        $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'neutral',
+        $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the item waits for review again.');
     }
 

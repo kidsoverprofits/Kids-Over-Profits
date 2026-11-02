@@ -8,6 +8,9 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # a source in inc/review-inbox/<name>.php, registered with kop_rinbox_register(), calling the queue's own apply/undo functions;
 # cards edit name/details, category, tags (shared {prefix}kop_review_tags unless the queue keeps its own), "Move to" another queue,
 # "Fill empty fields with AI" (news/lawsuits: kop_enrich_*_row(), else a generic filler). A new queue gets a source file there.
+# Action ids are keys; one may carry a value after a colon ("answer:<option>", "unconnect:company:<id>"): kop_rinbox_action_id()
+# keeps that value as sent, so the handler must match it against what it offers. A "Back to review" that reverses a reject or
+# dismiss is style 'undo' (Recently done offers the first 'undo' action the item shows after the decision).
 # Every approve/reject action carries 'help' (one sentence: what clicking does), shown on the card. inc/review-inbox-log.php:
 # Recently done ({prefix}kop_review_log, Undo = the item's 'undo' action, or 'restore' for the five native types, logged from
 # api/manage-submissions.php), Later = snooze / hand to an admin ({prefix}kop_review_holds, off everyone else's list), "Needs research" on every card

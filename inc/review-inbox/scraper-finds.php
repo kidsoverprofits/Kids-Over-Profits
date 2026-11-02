@@ -197,7 +197,7 @@ function kop_scraper_finds_item(array $e) {
             'help' => 'Takes the find back out of where it was sent (while nobody has reviewed it there) and puts it on the list again.');
         $why[] = (string) ($d['message'] ?? 'Sent.');
     } else {
-        $actions[] = array('id' => 'undo', 'label' => 'Back to the list', 'style' => 'neutral',
+        $actions[] = array('id' => 'undo', 'label' => 'Back to the list', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the find goes back on the list.');
     }
     $title = trim((string) ($d['title'] ?? '') !== '' ? $d['title'] : ($e['title'] ?? ''));

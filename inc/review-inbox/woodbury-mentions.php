@@ -282,7 +282,7 @@ function kop_rinbox_wb_item(array $r) {
             'help' => 'Deletes the filed PDF from every record it is listed under and puts the pages back in the waiting list.',
             'confirm' => 'Delete the filed copy of these pages and put them back in the queue?');
     } else {
-        $actions[] = array('id' => 'reopen', 'label' => 'Put back', 'style' => 'neutral',
+        $actions[] = array('id' => 'reopen', 'label' => 'Put back', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the pages wait for review again.');
     }
 

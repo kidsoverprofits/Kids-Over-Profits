@@ -312,7 +312,7 @@ function kop_rinbox_gdl_item(array $r) {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes the link off where it was added and puts it back in the waiting list.');
     } else {
-        $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'neutral',
+        $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the link waits for review again.');
     }
     $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'rejected' => 'Skipped', 'gone' => 'No longer offered');

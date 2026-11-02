@@ -139,7 +139,7 @@ function kop_rinbox_sc_item(array $p) {
         $actions[] = array('id' => 'undo', 'label' => 'Undo: put the old values back', 'style' => 'undo',
             'help' => 'Restores the record as it was before, except fields someone has edited since, and the update waits for review again.');
     } else {
-        $actions[] = array('id' => 'reopen', 'label' => 'Back to review', 'style' => 'neutral', 'help' => 'Nothing on the site changes; the update waits for review again.');
+        $actions[] = array('id' => 'reopen', 'label' => 'Back to review', 'style' => 'undo', 'help' => 'Nothing on the site changes; the update waits for review again.');
     }
     $details = array(array('label' => 'Source', 'value' => (string) $p['source_label']));
     if ($p['quote'] !== '' && !$p['quote_found']) {

@@ -926,11 +926,26 @@ function kop_rinbox_apply_action($source, $key, $action, array $params) {
     return $res;
 }
 
+/**
+ * The action id a card's button sent. Most are plain keys; a few carry a value after a colon (Map questions'
+ * "answer:<option>", an option being a record's name; News "unconnect:company:<id>"), which sanitize_key() would
+ * strip. So only the part before the first colon is a key, and the rest is kept as written (valid UTF-8, no control
+ * characters, 300 characters at most): the handlers that read it match it against the values they offer.
+ */
+function kop_rinbox_action_id($raw) {
+    $raw = (string) $raw;
+    $at = strpos($raw, ':');
+    if ($at === false) return sanitize_key($raw);
+    $value = substr($raw, $at + 1);
+    $value = preg_match('//u', $value) ? mb_substr(preg_replace('/[\x00-\x1F\x7F]+/u', '', $value), 0, 300) : '';
+    return sanitize_key(substr($raw, 0, $at)) . ':' . $value;
+}
+
 function kop_rinbox_rest_act(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {
         $params = $req->get_param('params');
         return kop_rinbox_apply_action((string) $req->get_param('source'), (string) $req->get_param('key'),
-            sanitize_key((string) $req->get_param('action')), is_array($params) ? wp_unslash($params) : array());
+            kop_rinbox_action_id($req->get_param('action')), is_array($params) ? wp_unslash($params) : array());
     });
 }
 

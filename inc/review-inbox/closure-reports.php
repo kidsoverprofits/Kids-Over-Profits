@@ -188,7 +188,7 @@ function kop_rinbox_closure_item(array $r) {
         $actions[] = array('id' => 'undo', 'label' => 'Undo: restore the old status', 'style' => 'undo',
             'help' => 'Puts the facility back to the status and end year it had before, and the report waits for review again.');
     } else {
-        $actions[] = array('id' => 'reopen', 'label' => 'Back to review', 'style' => 'neutral',
+        $actions[] = array('id' => 'reopen', 'label' => 'Back to review', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the report waits for review again.');
     }
     $quote = (string) $r['quote'];

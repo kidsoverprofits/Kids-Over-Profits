@@ -19,10 +19,15 @@ function kop_rinbox_test_closure(array $src, array $item, callable $check) {
     } catch (RuntimeException $e) {
         $check('closure: a date that is not a date is refused', true, $e->getMessage());
     }
-    call_user_func($src['act'], $item['key'], 'dismiss', array());
-    $check('closure: dismiss', kop_closure_get_report($pdo, (int) $item['key'])['status'] === 'dismissed');
-    call_user_func($src['act'], $item['key'], 'reopen', array());
-    $check('closure: back to review', kop_closure_get_report($pdo, (int) $item['key'])['status'] === 'pending');
+    // Dismissed through the page's path, then taken back from Recently done: "Back to review" is the dismiss's Undo.
+    kop_rinbox_test_with_wpdb_writes(function () use ($pdo, $item, $check) {
+        kop_rinbox_apply_action('closure', $item['key'], 'dismiss', array());
+        $check('closure: dismiss', kop_closure_get_report($pdo, (int) $item['key'])['status'] === 'dismissed');
+        $log = $pdo->query("SELECT id, undo_action FROM wpdl_kop_review_log WHERE source = 'closure' AND item_key = " . $pdo->quote((string) $item['key']) . ' ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+        $check('closure: a dismiss has Undo in Recently done ("Back to review")', ($log['undo_action'] ?? '') === 'reopen', json_encode($log));
+        if ($log) kop_rinbox_log_undo((int) $log['id']);
+        $check('closure: back to review', kop_closure_get_report($pdo, (int) $item['key'])['status'] === 'pending');
+    });
     $pdo->prepare('UPDATE facility_closure_reports SET program_name = ?, stage = ?, target_status = ?, status = ? WHERE id = ?')
         ->execute(array($before['program_name'], $before['stage'], $before['target_status'], $before['status'], (int) $item['key']));
 

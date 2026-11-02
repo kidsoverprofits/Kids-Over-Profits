@@ -127,8 +127,12 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
             } catch (RuntimeException $e) {
                 $check('news: a program is refused (it goes under Facilities mentioned)', stripos($e->getMessage(), 'Facilities mentioned') !== false);
             }
-            call_user_func($src['act'], $nid, 'unconnect:company:' . $oid, array());
-            $check('news: Take off unlists it from the company exactly', $linked() === $was && !kop_rinbox_native_connections($nid));
+            // Through the page's REST route, as the button sends it: the id's ":company:<id>" must survive.
+            $req = new WP_REST_Request();
+            foreach (array('source' => 'news', 'key' => (string) $nid, 'action' => 'unconnect:company:' . $oid, 'params' => array()) as $k => $v) $req->set_param($k, $v);
+            $res = kop_rinbox_rest_act($req)->get_data();
+            $check('news: Take off (sent through REST) unlists it from the company exactly', empty($res['error']) && $linked() === $was && !kop_rinbox_native_connections($nid),
+                json_encode($res['error'] ?? $res['message'] ?? null));
 
             $ct = '';
             foreach (array('wpdl_referrers_master', 'referrers_master') as $t) {
