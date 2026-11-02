@@ -151,6 +151,22 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
                 // Compared as data: the stored text may escape slashes differently from wp_json_encode().
                 $check('news: Take off removes the consultant\'s note exactly', json_decode($json(), true) === json_decode($before, true));
             }
+
+            // A Christian rehab for adults (a related-category record): a note citing the article, Take off exact.
+            if (function_exists('kop_related_save')) {
+                $rid = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'News Connect Test Rehab'),
+                    'locationDetails' => array('state' => 'MO', 'country' => 'United States'), 'notes' => array('An older note')));
+                $notes = function () use ($rid) { return kop_related_get($rid)['doc']['notes']; };
+                $before = $notes();
+                $check('news: Connect a record offers Christian rehab for adults', in_array('cra', kop_rinbox_native_connect_kinds(), true));
+                $res = call_user_func($src['act'], $nid, 'connect', array('record' => 'cra:' . $rid));
+                $check('news: connecting a Christian rehab adds a note citing the article',
+                    count($notes()) === count($before) + 1 && strpos(implode("
+", $notes()), kop_rinbox_native_url('news', kop_rinbox_native_row('news', $nid))) !== false
+                    && isset(kop_rinbox_native_connections($nid)['cra:' . $rid]), $res['message']);
+                call_user_func($src['act'], $nid, 'unconnect:cra:' . $rid, array());
+                $check('news: Take off removes the note of the Christian rehab exactly', $notes() === $before && !kop_rinbox_native_connections($nid));
+            }
         });
     }
 

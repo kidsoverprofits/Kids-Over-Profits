@@ -686,7 +686,7 @@
     function buildPlace(id, f) {
         var value = f.value || '';
         var wrap = el('div', { class: 'kop-ie-place' });
-        var q = el('input', { type: 'search', id: id, class: 'kop-ie-input', placeholder: 'Facility, young adult program or folder name', autocomplete: 'off',
+        var q = el('input', { type: 'search', id: id, class: 'kop-ie-input', placeholder: 'Facility, young adult program, Christian rehab for adults or folder name', autocomplete: 'off',
             role: 'combobox', 'aria-expanded': 'false', 'aria-autocomplete': 'list' });
         var list = el('ul', { class: 'kop-ie-place-list', role: 'listbox', hidden: '' });
         var picked = el('p', { class: 'kop-ie-place-picked', 'aria-live': 'polite' });

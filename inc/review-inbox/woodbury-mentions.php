@@ -69,7 +69,7 @@ kop_rinbox_register('woodbury-reports', function () {
 
 /** The kinds of record the pages can be filed under: every kind with a document folder (kop_wbc_existing_target()). */
 function kop_rinbox_wb_record_kinds() {
-    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya');
+    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya', 'cra');
 }
 
 function kop_rinbox_wb_kinds() {
@@ -230,10 +230,10 @@ function kop_rinbox_wb_item(array $r) {
             'params' => kop_rinbox_wb_target_params($r, $best, $alts, $best ? kop_rinbox_wb_parents(array($best)) : array(), 'File under'));
         if (function_exists('kop_wbc_existing_target')) {
             $actions[] = array('id' => 'file_record', 'label' => 'File under that record', 'style' => 'neutral',
-                'help' => 'Files the pages under the company, educational consultant, provider, transporter, marketing company, trade organization or young adult program you pick instead (and any facilities added).',
+                'help' => 'Files the pages under the company, educational consultant, provider, transporter, marketing company, trade organization, young adult program or Christian rehab for adults you pick instead (and any facilities added).',
                 'params' => array(
                 // The any-record finder ("company:45", "consultant:12"...), narrowed at KOP Tools > Card Fields.
-                array('name' => 'record', 'label' => 'A company, consultant, provider, transporter, marketing company, trade organization or young adult program', 'type' => 'record', 'value' => '',
+                array('name' => 'record', 'label' => 'A company, consultant, provider, transporter, marketing company, trade organization, young adult program or Christian rehab for adults', 'type' => 'record', 'value' => '',
                     'kinds' => array_values(array_diff(kop_rinbox_wb_record_kinds(), array('facility')))),
                 array('name' => 'facilities', 'label' => 'And these facilities', 'type' => 'facilities', 'value' => array(), 'optional' => true),
             ));
@@ -320,7 +320,7 @@ function kop_rinbox_wb_row($key) {
 
 /** " (company)" or " (young adult program)" after a place's name; nothing for a facility. */
 function kop_rinbox_wb_kind_note($kind) {
-    $notes = array('company' => ' (company)', 'ya' => ' (young adult program)');
+    $notes = array('company' => ' (company)', 'ya' => ' (young adult program)', 'cra' => ' (Christian rehab for adults)');
     return $notes[$kind] ?? '';
 }
 
@@ -335,7 +335,7 @@ function kop_rinbox_wb_names(array $places) {
 function kop_rinbox_wb_record($value) {
     $value = strtolower(trim((string) $value));
     if (preg_match('/^c(\d+)$/', $value, $m)) return array('company', (int) $m[1]);
-    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg|ya):(\d+)$/', $value, $m)) return array($m[1], (int) $m[2]);
+    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg|ya|cra):(\d+)$/', $value, $m)) return array($m[1], (int) $m[2]);
     throw new RuntimeException('Pick the record from the list that opens as you type its name.');
 }
 

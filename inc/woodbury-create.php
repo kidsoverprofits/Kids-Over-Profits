@@ -1190,7 +1190,7 @@ function kop_wbc_render_assets() {
 function kop_wbc_parse_record_token($value) {
     $value = trim((string) $value);
     if (preg_match('/^\d+$/', $value)) return (int) $value > 0 ? array('facility', (int) $value) : null;
-    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg):(\d+)$/', $value, $m) && (int) $m[2] > 0) return array($m[1], (int) $m[2]);
+    if (preg_match('/^(company|consultant|provider|transporter|marketer|tradeorg|cra):(\d+)$/', $value, $m) && (int) $m[2] > 0) return array($m[1], (int) $m[2]);
     return null;
 }
 
@@ -1252,6 +1252,29 @@ function kop_wbc_remove_notes($kind, $id, array $lines) {
 }
 
 function kop_wbc_change_notes($kind, $id, array $lines, $add) {
+    if (function_exists('kop_related_kinds') && isset(kop_related_kinds()[$kind])) {
+        // A related-category record (Christian rehab for adults...): its document's notes list.
+        $rec = kop_related_get((int) $id);
+        if (!$rec || $rec['category'] !== kop_related_kinds()[$kind]) throw new RuntimeException(ucfirst(kop_related_kind_words()[$kind]) . ' #' . (int) $id . ' not found.');
+        $doc = $rec['doc'];
+        $list = array_values(array_map('strval', (array) ($doc['notes'] ?? array())));
+        $changed = array();
+        foreach (array_values(array_filter(array_map('trim', $lines), 'strlen')) as $line) {
+            $at = array_search($line, $list, true);
+            if ($add && $at === false) {
+                $list[] = $line;
+                $changed[$line] = true;
+            } elseif (!$add && $at !== false) {
+                array_splice($list, $at, 1);
+                $changed[$line] = true;
+            }
+        }
+        if ($changed) {
+            $doc['notes'] = $list;
+            kop_related_save($rec['category'], $doc, (int) $id);
+        }
+        return array('kind' => $kind, 'id' => (int) $id, 'name' => (string) $doc['identification']['name'], 'lines' => array_keys($changed));
+    }
     $pdo = kop_wbc_pdo();
     list($table, $id, $name, $payload) = kop_wbc_load_record($pdo, $kind, $id);
     $lines = array_values(array_filter(array_map('trim', $lines), 'strlen'));

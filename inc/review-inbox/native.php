@@ -441,8 +441,8 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
  * on the site) and is also filed on a record that is not a program, as
  * kop_rinbox_file_on_record() files things: a company lists it on its page
  * (kop_operator_links, shown once the article is approved), a young adult
- * program gets the link, a consultant, transporter, provider, marketer or
- * trade organization a line in its notes citing the article. Programs are
+ * program gets the link, a consultant, transporter, provider, marketer,
+ * trade organization or Christian rehab for adults a line in its notes citing the article. Programs are
  * connected through the card's "Facilities mentioned". Each connection gets a
  * "Take off" button (the Undo). Option kop_review_news_connections =
  * {news id: {"<kind>:<id>": what kop_rinbox_file_on_record() did + by, at}}.
@@ -450,7 +450,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
 
 /** The kinds "Connect a record" offers. */
 function kop_rinbox_native_connect_kinds() {
-    return array('company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya');
+    return array('company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya', 'cra');
 }
 
 function kop_rinbox_native_connections($news_id = null) {
@@ -479,7 +479,7 @@ function kop_rinbox_native_connect_actions(array $r) {
     if (!function_exists('kop_record_field_param')) return $actions;
     $actions[] = array('id' => 'connect', 'label' => 'Connect a record', 'style' => 'neutral', 'submit' => 'Connect',
         'help' => 'The article stays in the news and is also filed on the record you pick: a company lists it on its page once it is approved, '
-            . 'a young adult program gets the link, any other kind a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes it.',
+            . 'a young adult program gets the link, any other kind (a Christian rehab for adults too) a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes it.',
         'params' => array(kop_record_field_param('record', 'Record', array('kinds' => kop_rinbox_native_connect_kinds(), 'create' => false))));
     return $actions;
 }

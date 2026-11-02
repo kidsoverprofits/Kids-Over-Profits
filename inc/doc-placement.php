@@ -194,7 +194,7 @@ function kop_dp_fields($att_id, $home) {
         'section' => $section,
         'options' => array(
             array('value' => '', 'label' => 'Leave it where it is'),
-            array('value' => 'move', 'label' => 'Move it to another facility, young adult program or folder'),
+            array('value' => 'move', 'label' => 'Move it to another facility, young adult program, Christian rehab for adults or folder'),
             array('value' => 'remove', 'label' => 'Take it off this page (it stays in the media library)'),
             array('value' => 'delete', 'label' => 'Delete the document for good'),
         ),
@@ -203,7 +203,7 @@ function kop_dp_fields($att_id, $home) {
     $fields[] = kop_ie_field('dp_target', 'Move to', 'place', '', array(
         'section' => $section,
         'show_if' => array('dp_action' => 'move'),
-        'help'    => 'Type a facility name (past names work), a young adult program or a folder name.',
+        'help'    => 'Type a facility name (past names work), a young adult program, a Christian rehab for adults or a folder name.',
     ));
     $fields[] = kop_ie_field('dp_keep_sub', 'Keep its subfolder (e.g. Woodbury Reports Mentions) when moving to a facility', 'bool', true, array(
         'section' => $section,
@@ -236,13 +236,13 @@ function kop_dp_child_folder($name, $parent) {
 }
 
 /**
- * "f:12" -> the facility's folder, "y:6" -> the young adult program's, "d:34"
- * -> that folder. [folder id, label, is a record's folder (a subfolder such as
+ * "f:12" -> the facility's folder, "y:6" -> the young adult program's, "cra:7"
+ * -> the Christian rehab for adults', "d:34" -> that folder. [folder id, label, is a record's folder (a subfolder such as
  * Woodbury Reports Mentions can be kept)].
  */
 function kop_dp_target($value) {
     global $wpdb;
-    if (!preg_match('/^([fdy]):(\d+)$/', (string) $value, $m)) {
+    if (!preg_match('/^(f|d|y|cra):(\d+)$/', (string) $value, $m)) {
         throw new RuntimeException('Pick where to move it from the list under "Move to".');
     }
     $id = (int) $m[2];
@@ -253,6 +253,14 @@ function kop_dp_target($value) {
         $t = kop_wbc_existing_target('ya', $id);
         kop_dp_folders(true);
         return array((int) $t['folder'], $t['name'] . ' (young adult program)', true);
+    }
+    if ($m[1] === 'cra') {
+        if (!function_exists('kop_wbc_existing_target')) {
+            throw new RuntimeException('Christian rehab folders cannot be found here.');
+        }
+        $t = kop_wbc_existing_target('cra', $id);
+        kop_dp_folders(true);
+        return array((int) $t['folder'], $t['name'] . ' (Christian rehab for adults)', true);
     }
     if ($m[1] === 'd') {
         if (!isset(kop_dp_folders()[$id])) {
@@ -356,6 +364,9 @@ function kop_dp_target_url($value) {
     if (preg_match('/^y:(\d+)$/', (string) $value, $m) && function_exists('kop_ya_url')) {
         return kop_ya_url((int) $m[1]);
     }
+    if (preg_match('/^cra:(\d+)$/', (string) $value, $m) && function_exists('kop_related_url')) {
+        return (string) kop_related_url((int) $m[1]);
+    }
     return '';
 }
 
@@ -453,7 +464,7 @@ function kop_dp_many_fields(array $items, $action = '') {
         kop_ie_field('dp_list', count($items) . ' picked', 'note', $titles),
         kop_ie_field('dp_action', 'What to do', 'select', in_array($action, array('move', 'remove', 'delete'), true) ? $action : 'move', array(
             'options' => array(
-                array('value' => 'move', 'label' => 'Move them to another facility, young adult program or folder'),
+                array('value' => 'move', 'label' => 'Move them to another facility, young adult program, Christian rehab for adults or folder'),
                 array('value' => 'remove', 'label' => 'Take them off this page (they stay in the media library)'),
                 array('value' => 'delete', 'label' => 'Delete them for good'),
             ),
@@ -461,7 +472,7 @@ function kop_dp_many_fields(array $items, $action = '') {
         )),
         kop_ie_field('dp_target', 'Move to', 'place', '', array(
             'show_if' => array('dp_action' => 'move'),
-            'help'    => 'Type a facility name (past names work), a young adult program or a folder name.',
+            'help'    => 'Type a facility name (past names work), a young adult program, a Christian rehab for adults or a folder name.',
         )),
         kop_ie_field('dp_keep_sub', 'Keep their subfolders (e.g. Woodbury Reports Mentions) when moving to a facility', 'bool', true, array(
             'show_if' => array('dp_action' => 'move'),
@@ -667,6 +678,20 @@ function kop_dp_ya_search($q, $limit = 5) {
     return $out;
 }
 
+/** Christian rehabs for adults (inc/related-facilities.php) whose name or other name has $q: rows for the "Move to" list. */
+function kop_dp_related_search($q, $limit = 5) {
+    $q = trim((string) $q);
+    if (mb_strlen($q) < 2 || !function_exists('kop_related_search')) {
+        return array();
+    }
+    $out = array();
+    foreach (kop_related_search('christian-adult-rehabs', $q, $limit) as $p) {
+        $out[] = array('value' => 'cra:' . (int) $p['id'], 'kind' => 'Christian rehab for adults', 'label' => (string) $p['name'],
+            'meta' => implode(' · ', array_filter(array(implode(', ', array_filter(array($p['city'], $p['state']))), '#' . (int) $p['id']))));
+    }
+    return $out;
+}
+
 /** Folders whose name contains $q, the fullest first: [{id, path, files}]. */
 function kop_dp_folder_search($q, $limit = 10) {
     global $wpdb;
@@ -715,6 +740,9 @@ add_action('rest_api_init', function () {
             }
             foreach (kop_dp_ya_search($q) as $y) {
                 $out[] = $y;
+            }
+            foreach (kop_dp_related_search($q) as $c) {
+                $out[] = $c;
             }
             foreach (kop_dp_folder_search($q) as $f) {
                 $out[] = array('value' => 'd:' . $f['id'], 'kind' => 'Folder', 'label' => $f['path'], 'meta' => $f['files'] . ' file' . ($f['files'] === 1 ? '' : 's') . ' · #' . $f['id']);

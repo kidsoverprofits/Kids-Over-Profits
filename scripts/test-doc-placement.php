@@ -226,6 +226,32 @@ if (!$yp) {
     $check('a program that is not there is refused', stripos($threw, 'not found') !== false, $threw);
 }
 
+echo "-- Move to a Christian rehab for adults --
+";
+$crid = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'Doc Placement Test Rehab'),
+    'locationDetails' => array('city' => 'Springfield', 'state' => 'MO', 'country' => 'United States')));
+$hits = kop_dp_related_search('Placement Test Rehab');
+$check('"Move to" finds a Christian rehab for adults by name', in_array('cra:' . $crid, array_column($hits, 'value'), true)
+    && ($hits[0]['kind'] ?? '') === 'Christian rehab for adults', wp_json_encode($hits[0] ?? null));
+$t = kop_dp_target('cra:' . $crid);
+$parent = (string) $pdo->query('SELECT p.name FROM wpdl_fbv f JOIN wpdl_fbv p ON p.id = f.parent WHERE f.id = ' . (int) $t[0])->fetchColumn();
+$check('its folder is made under the folder of its category and is a record folder', $t[0] > 0 && $t[2] === true && $parent === 'Christian Rehabs for Adults'
+    && strpos($t[1], 'Doc Placement Test Rehab (Christian rehab for adults)') === 0, $parent . ' / ' . $t[1]);
+$check('a second look finds the same folder', kop_dp_target('cra:' . $crid)[0] === $t[0]);
+$check('the move links its page', kop_dp_target_url('cra:' . $crid) === kop_related_url($crid) && strpos(kop_dp_target_url('cra:' . $crid), '/related/christian-adult-rehabs/') !== false);
+$before = $filed($woodbury_doc);
+$res = kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'move', 'dp_rows' => array('r:' . $sub['sub']), 'dp_target' => 'cra:' . $crid, 'dp_keep_sub' => true));
+$now = $filed($woodbury_doc);
+$check('the document lands in a Woodbury subfolder of the folder of the rehab', count($now) === 1
+    && (int) $pdo->query('SELECT parent FROM wpdl_fbv WHERE id = ' . (int) $now[0])->fetchColumn() === $t[0], $res['message']);
+$check('the message names the rehab', strpos($res['message'], 'Doc Placement Test Rehab (Christian rehab for adults)') !== false, $res['message']);
+list($src, $parts) = kop_ie_resolve($res['undo']);
+call_user_func($src['save'], $parts, array());
+$check('undo puts it back', $filed($woodbury_doc) === $before);
+$threw = '';
+try { kop_dp_target('cra:999999'); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+$check('a rehab that is not there is refused', stripos($threw, 'not found') !== false, $threw);
+
 $threw = '';
 try { kop_dp_apply($root_doc, $home, array('dp_action' => 'move', 'dp_rows' => array('r:' . $home), 'dp_target' => '')); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
 $check('a move with no target is refused', $threw !== '' && $filed($root_doc) === array_values(array_unique($filed($root_doc))), $threw);

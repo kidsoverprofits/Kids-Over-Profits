@@ -272,5 +272,28 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
         $check('websites: approve puts the link in the record\'s Materials and links', in_array($url, $links_of()[0], true) && $status() === 'trash', $res['message']);
         $res = call_user_func($src['act'], $item['key'], 'unmove', array());
         $check('websites: Undo move takes the approved link off exactly', $links_of() === $before && $status() === 'pending', $res['message']);
+
+        // A Christian rehab for adults (a related-category record) takes the link the same way; Undo move takes it off exactly.
+        if (function_exists('kop_related_save')) {
+            $rid = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'Websites Move Test Rehab'),
+                'locationDetails' => array('state' => 'MO', 'country' => 'United States')));
+            $cra_links = function () use ($rid) {
+                $doc = kop_related_get($rid)['doc'];
+                return array(array_column(array_filter((array) ($doc['resourceLinks'] ?? array()), 'is_array'), 'url'), (array) ($doc['profileLinks'] ?? array()));
+            };
+            $cra_before = $cra_links();
+            $card = kop_rinbox_get_item('websites', $item['key']);
+            $res_move = array_values(array_filter($card['moves'], function ($m) { return $m['id'] === 'resource'; }));
+            $check('websites: the Materials and links move offers Christian rehab for adults', in_array('cra', (array) ($res_move[0]['params'][0]['kinds'] ?? array()), true));
+            $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'resource', 'facility_id' => 'cra:' . $rid, 'kind' => 'social'));
+            $check('websites: a Christian rehab picked in "Move to" takes the link in its Materials and links', in_array($url, $cra_links()[0], true)
+                && $status() === 'trash', $res['message']);
+            $res = call_user_func($src['act'], $item['key'], 'unmove', array());
+            $check('websites: Undo move takes the link off the Christian rehab exactly', $cra_links() === $cra_before && $status() === 'pending', $res['message']);
+            $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'website', 'facility_id' => 'cra:' . $rid));
+            $check('websites: a Christian rehab picked for "Website" takes it in its websites', in_array($url, $cra_links()[1], true), $res['message']);
+            call_user_func($src['act'], $item['key'], 'unmove', array());
+            $check('websites: Undo move takes the website off the Christian rehab', $cra_links() === $cra_before && $status() === 'pending');
+        }
     });
 }

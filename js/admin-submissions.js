@@ -421,7 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ['marketer', 'Marketing company'],
         ['tradeorg', 'Trade organization'],
         ['provider', 'Mental health provider'],
-        ['ya', 'Young adult program']
+        ['ya', 'Young adult program'],
+        ['cra', 'Christian rehab for adults']
     ];
 
     function toggleCardMove(card, target) {

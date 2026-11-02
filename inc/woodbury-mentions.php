@@ -430,7 +430,8 @@ function kop_wb_folder_path($folder_id) {
 /**
  * A "File under" choice as the page sends it: "123" is facility 123, "c45" is
  * company (operator) 45, "ya:6" is young adult program 6
- * (inc/young-adult-programs.php). Returns [kind, id], or null.
+ * (inc/young-adult-programs.php), "cra:7" is Christian rehab for adults 7
+ * (inc/related-facilities.php). Returns [kind, id], or null.
  */
 function kop_wb_parse_target($token) {
     $token = strtolower(trim((string) $token));
@@ -439,6 +440,9 @@ function kop_wb_parse_target($token) {
     }
     if (preg_match('/^ya:(\d+)$/', $token, $m) && (int) $m[1] > 0) {
         return array('ya', (int) $m[1]);
+    }
+    if (preg_match('/^cra:(\d+)$/', $token, $m) && (int) $m[1] > 0) {
+        return array('cra', (int) $m[1]);
     }
     return null;
 }
@@ -454,7 +458,7 @@ function kop_wb_target_token($kind, $id) {
     if ($id <= 0) {
         return '';
     }
-    $tokens = array('facility' => (string) $id, 'company' => 'c' . $id, 'ya' => 'ya:' . $id);
+    $tokens = array('facility' => (string) $id, 'company' => 'c' . $id, 'ya' => 'ya:' . $id, 'cra' => 'cra:' . $id);
     return $tokens[$kind] ?? '';
 }
 
@@ -474,6 +478,8 @@ function kop_wb_place($fid, $name, $folder, $primary, $kind = 'facility') {
         $page = $fid && function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $fid) : '';
     } elseif ($kind === 'ya') {
         $page = $fid && function_exists('kop_ya_url') ? kop_ya_url((int) $fid) : '';
+    } elseif ($kind === 'cra') {
+        $page = $fid && function_exists('kop_related_url') ? kop_related_url((int) $fid) : '';
     } elseif ($kind === 'facility' && $fid && ($moved = kop_wb_moved_program($fid))) {
         $page = kop_ya_url($moved['id']); // filed while it was a facility record
     } elseif ($kind === 'facility' && $fid && function_exists('kop_facility_page_url')) {
@@ -496,7 +502,7 @@ function kop_wb_also(array $r) {
     $also = json_decode((string) ($r['also_facilities'] ?? ''), true);
     $also = is_array($also) ? array_values($also) : array();
     foreach ($also as &$a) {
-        $a['kind'] = in_array($a['kind'] ?? '', array('company', 'ya'), true) ? $a['kind'] : 'facility';
+        $a['kind'] = in_array($a['kind'] ?? '', array('company', 'ya', 'cra'), true) ? $a['kind'] : 'facility';
     }
     unset($a);
     return $also;
@@ -581,9 +587,9 @@ function kop_wb_moved_program($fid) {
  */
 function kop_wb_target_for($kind, $id) {
     global $wpdb;
-    if ($kind === 'company' || $kind === 'ya') {
+    if ($kind === 'company' || $kind === 'ya' || $kind === 'cra') {
         if (!function_exists('kop_wbc_existing_target')) {
-            throw new RuntimeException('Filing under a company or young adult program is not available.');
+            throw new RuntimeException('Filing under a company, young adult program or Christian rehab for adults is not available.');
         }
         return kop_wbc_existing_target($kind, $kind === 'company' ? kop_wb_company_lead($id) : (int) $id);
     }
@@ -614,14 +620,14 @@ function kop_wb_retitle(array $r) {
  * it as a tag in their own Woodbury subfolder.
  */
 function kop_wb_file_many(array $r, array $tokens, $reviewer) {
-    $by = array('facility' => array(), 'company' => array(), 'ya' => array());
+    $by = array('facility' => array(), 'company' => array(), 'ya' => array(), 'cra' => array());
     foreach ($tokens as $t) {
         $p = kop_wb_parse_target($t);
         if ($p) {
             $by[$p[0]][$p[1]] = kop_wb_target_token($p[0], $p[1]);
         }
     }
-    $tokens = array_merge(array_values($by['facility']), array_values($by['company']), array_values($by['ya']));
+    $tokens = array_merge(array_values($by['facility']), array_values($by['company']), array_values($by['ya']), array_values($by['cra']));
     if (!$tokens) {
         throw new RuntimeException('Tick at least one facility, company or young adult program to file it under.');
     }
@@ -1111,6 +1117,8 @@ function kop_wb_place_html(array $p) {
         $name .= ' <span class="kop-wb-muted">company</span>';
     } elseif ($p['kind'] === 'ya') {
         $name .= ' <span class="kop-wb-muted">young adult program</span>';
+    } elseif ($p['kind'] === 'cra') {
+        $name .= ' <span class="kop-wb-muted">Christian rehab for adults</span>';
     }
     return '<li data-fid="' . esc_attr($p['key']) . '">' . $name
         . ($p['where'] !== '' ? '<span class="kop-wb-where">Folder: ' . esc_html($p['where']) . '</span>' : '')

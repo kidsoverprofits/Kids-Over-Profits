@@ -119,6 +119,54 @@ function kop_rinbox_test_card_fields(callable $check) {
         $check('card-fields: a program pick is left to the queue', $refused !== '');
     });
 
+    // A Christian rehab for adults (a related-category record): link, website and note, twice refused, exact Undo.
+    if (function_exists('kop_related_save')) {
+        $check('card-fields: the pickers offer Christian rehab for adults', isset(kop_rinbox_record_kinds()['cra']));
+        $cid = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'Card Fields Test Rehab'),
+            'locationDetails' => array('state' => 'MO', 'country' => 'United States'), 'notes' => array('An older note')));
+        $doc_of = function () use ($cid) { return kop_related_get($cid)['doc']; };
+        $before = $doc_of();
+        $url = 'https://example.org/cra-test-' . $cid;
+        $check('card-fields: a Christian rehab has a page to link to', kop_rinbox_record_url('cra', $cid) !== '');
+        $done = kop_rinbox_file_on_record('cra:' . $cid, array('what' => 'link', 'url' => $url, 'title' => 'A rehab page', 'kind' => 'reference', 'source' => 'Card fields test'), 'tester');
+        $links = array_column((array) ($doc_of()['resourceLinks'] ?? array()), 'url');
+        $check('card-fields: a link filed on a Christian rehab is in its "Materials and links"', in_array($url, $links, true) && ($done['what'] ?? '') === 'link', json_encode($done));
+        $twice = '';
+        try {
+            kop_rinbox_file_on_record('cra:' . $cid, array('what' => 'website', 'url' => $url), 'tester');
+        } catch (RuntimeException $e) {
+            $twice = $e->getMessage();
+        }
+        $check('card-fields: the same link twice on a Christian rehab is refused', strpos($twice, 'already') !== false, $twice);
+        kop_rinbox_unfile_from_record($done);
+        $check('card-fields: Undo takes the Christian rehab link off exactly', ($doc_of()['resourceLinks'] ?? array()) == ($before['resourceLinks'] ?? array())
+            && ($doc_of()['profileLinks'] ?? array()) == ($before['profileLinks'] ?? array()));
+        $site = $url . '/site';
+        $done = kop_rinbox_file_on_record('cra:' . $cid, array('what' => 'website', 'url' => $site), 'tester');
+        $check('card-fields: a website goes in the program website list of a Christian rehab', in_array($site, (array) ($doc_of()['profileLinks'] ?? array()), true), json_encode($doc_of()['profileLinks'] ?? null));
+        kop_rinbox_unfile_from_record($done);
+        $check('card-fields: Undo takes the Christian rehab website off exactly', ($doc_of()['profileLinks'] ?? array()) == ($before['profileLinks'] ?? array()));
+        $done = kop_rinbox_file_on_record('cra:' . $cid, array('what' => 'note', 'text' => 'Seen in a news story', 'url' => $url), 'tester');
+        $check('card-fields: a note is added to the notes of a Christian rehab beside the old one', count($doc_of()['notes']) === count($before['notes']) + 1
+            && in_array('An older note', $doc_of()['notes'], true), json_encode($done));
+        $twice = '';
+        try {
+            kop_rinbox_file_on_record('cra:' . $cid, array('what' => 'note', 'text' => 'Seen in a news story', 'url' => $url), 'tester');
+        } catch (RuntimeException $e) {
+            $twice = $e->getMessage();
+        }
+        $check('card-fields: the same note twice on a Christian rehab is refused', strpos($twice, 'already') !== false, $twice);
+        kop_rinbox_unfile_from_record($done);
+        $check('card-fields: Undo takes the Christian rehab note off exactly', $doc_of()['notes'] == $before['notes']);
+        $refused = '';
+        try {
+            kop_rinbox_file_on_record('cra:999999', array('what' => 'note', 'text' => 'x'), 'tester');
+        } catch (RuntimeException $e) {
+            $refused = $e->getMessage();
+        }
+        $check('card-fields: a Christian rehab that is not on file is refused', $refused !== '', $refused);
+    }
+
     // A website of a consultant, transporter, marketer or trade organization: its websites list, twice refused, exact Undo.
     $pdo = kop_wbc_pdo();
     if (!function_exists('kop_resolve_table_name')) {

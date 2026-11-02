@@ -386,6 +386,29 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         }
     });
     kop_ya_delete($ya, $yid);
+
+    // A Christian rehab for adults picked in the finder: the item goes in its notes, citing its source; Undo takes the line off.
+    if (function_exists('kop_related_save') && (kop_wbf_rows(array($wait))[0]['status'] ?? '') === 'pending') {
+        $check('woodbury-facts: the Record box offers Christian rehab for adults', in_array('cra', (array) ($apply['params'][0]['kinds'] ?? array()), true));
+        $rid = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'Woodbury Pick Test Rehab'),
+            'locationDetails' => array('state' => 'MO', 'country' => 'United States')));
+        $notes = function () use ($rid) { return (array) (kop_related_get($rid)['doc']['notes'] ?? array()); };
+        kop_rinbox_test_with_wpdb_writes(function () use ($src, $wait, $check, $notes, $rid) {
+            $res = call_user_func($src['act'], $wait, 'apply', array('facility' => 'cra:' . $rid));
+            $r = kop_wbf_rows(array($wait))[0];
+            $done = json_decode((string) $r['applied'], true) ?: array();
+            $check('woodbury-facts: a Christian rehab picked beside Add gets the item as a note', $r['status'] === 'applied' && count($notes()) === 1
+                && ($done['filed'] ?? '') === 'cra' && (int) ($done['id'] ?? 0) === $rid, $res['message']);
+            try {
+                call_user_func($src['act'], $wait, 'undo', array());
+                $check('woodbury-facts: Undo takes the note off the Christian rehab', kop_wbf_rows(array($wait))[0]['status'] === 'pending' && $notes() === array());
+            } catch (Throwable $e) {
+                kop_wbc_remove_notes('cra', $rid, (array) $done['lines']);
+                $GLOBALS['pdo']->prepare('UPDATE wpdl_kop_woodbury_facts SET status = ?, applied = NULL WHERE pkey = ?')->execute(array('pending', $wait));
+                kop_rinbox_test_skip('woodbury-facts: Undo of a Christian rehab pick', $e->getMessage());
+            }
+        });
+    }
 }
 
 /**

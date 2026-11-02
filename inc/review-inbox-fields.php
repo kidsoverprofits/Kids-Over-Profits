@@ -39,6 +39,7 @@ function kop_rinbox_record_kinds() {
         'marketer'    => 'Marketing company',
         'tradeorg'    => 'Trade organization',
         'ya'          => 'Young adult program (18+)',
+        'cra'         => 'Christian rehab for adults',
     );
 }
 

@@ -50,6 +50,7 @@ function kop_rinbox_record_url($kind, $id) {
     if ($kind === 'facility') return function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($id) : '';
     if ($kind === 'company') return function_exists('kop_operator_page_url') ? (string) kop_operator_page_url($id) : '';
     if ($kind === 'ya') return home_url('/young-adult-programs/#kop-ya-program-' . $id);
+    if (function_exists('kop_related_kinds') && isset(kop_related_kinds()[$kind])) return function_exists('kop_related_url') ? (string) kop_related_url($id) : '';
     $pages = array('consultant' => '/referrers-educational-consultants/', 'transporter' => '/youth-transport-companies/', 'provider' => '/mental-health-providers/',
         'marketer' => '/marketing-companies/', 'tradeorg' => '/trade-organizations/');
     return isset($pages[$kind]) ? home_url($pages[$kind]) : '';
@@ -142,6 +143,11 @@ function kop_rinbox_file_on_record($value, array $p, $reviewer = '') {
             'message' => 'Put it on ' . kop_rinbox_record_words($kind, $name) . '.');
     }
 
+    // A related-category record (Christian rehab for adults...): a website in profileLinks, a link in resourceLinks, else a line in notes.
+    if (function_exists('kop_related_kinds') && isset(kop_related_kinds()[$kind])) {
+        return kop_rinbox_file_on_related($kind, $id, $name, $what, $p, $reviewer);
+    }
+
     // A website of a consultant, transporter, marketer or trade organization: its websites list.
     if ($what === 'website' && $url !== '' && in_array($kind, kop_rinbox_record_website_kinds(), true)) {
         $done = kop_rinbox_record_websites($kind, $id, $url, true);
@@ -157,6 +163,66 @@ function kop_rinbox_file_on_record($value, array $p, $reviewer = '') {
     if ($kind === 'company') kop_rinbox_record_changed('company', $id);
     return array('kind' => $kind, 'id' => $id, 'name' => $name, 'what' => 'note', 'lines' => array_values((array) $done['lines']),
         'message' => 'Added a line to the notes of ' . kop_rinbox_record_words($kind, $name) . '.');
+}
+
+/**
+ * File on a related-category record (inc/related-facilities.php, kind "cra"...). Its document keeps
+ * profileLinks (websites), resourceLinks and notes; what was added is returned for the Undo.
+ */
+function kop_rinbox_file_on_related($kind, $id, $name, $what, array $p, $reviewer = '') {
+    $rec = kop_related_get($id);
+    if (!$rec || $rec['category'] !== kop_related_kinds()[$kind]) throw new RuntimeException('That record is not on file any more.');
+    $doc = $rec['doc'];
+    $url = trim((string) ($p['url'] ?? ''));
+    $title = trim((string) ($p['title'] ?? ''));
+    $words = kop_rinbox_record_words($kind, $name);
+    $done = array('kind' => $kind, 'id' => $id, 'name' => $name, 'related' => true);
+    if (($what === 'link' || $what === 'website') && $url !== '') {
+        $key = kop_gdl_url_key($url);
+        $have = array_merge(array_map(function ($w) { return is_array($w) ? ($w['url'] ?? '') : $w; }, (array) ($doc['profileLinks'] ?? array())),
+            array_column(array_filter((array) ($doc['resourceLinks'] ?? array()), 'is_array'), 'url'));
+        foreach ($have as $h) {
+            if (is_string($h) && kop_gdl_url_key($h) === $key) throw new RuntimeException('That link is already on ' . $words . '.');
+        }
+        if ($what === 'website') {
+            $doc['profileLinks'][] = $url;
+        } else {
+            $kinds = function_exists('kop_facility_resource_link_kinds') ? kop_facility_resource_link_kinds() : array('other' => 'Other links');
+            $rk = (string) ($p['kind'] ?? 'other');
+            $doc['resourceLinks'][] = array('url' => $url, 'label' => $title !== '' ? $title : $url,
+                'kind' => isset($kinds[$rk]) ? $rk : 'other', 'source' => (string) ($p['source'] ?? 'Sent in for review'));
+        }
+        $done += array('what' => $what, 'url' => $url, 'message' => 'Put the link on ' . $words . ($what === 'website' ? ' (its websites).' : ' ("Materials and links").'));
+    } else {
+        $line = kop_rinbox_record_note_line($p);
+        if (in_array($line, array_map('strval', (array) ($doc['notes'] ?? array())), true)) throw new RuntimeException('That is already in the notes of ' . $words . '.');
+        $doc['notes'][] = $line;
+        $done += array('what' => 'note', 'lines' => array($line), 'message' => 'Added a line to the notes of ' . $words . '.');
+    }
+    kop_related_save($rec['category'], $doc, $id);
+    return $done;
+}
+
+/** Take back kop_rinbox_file_on_related(): the link or note line it added, nothing else. */
+function kop_rinbox_unfile_from_related(array $done) {
+    $id = (int) ($done['id'] ?? 0);
+    $rec = kop_related_get($id);
+    if (!$rec) return;
+    $doc = $rec['doc'];
+    if (!empty($done['url'])) {
+        $key = kop_gdl_url_key((string) $done['url']);
+        $doc['profileLinks'] = array_values(array_filter((array) ($doc['profileLinks'] ?? array()), function ($w) use ($key) {
+            return kop_gdl_url_key(is_array($w) ? ($w['url'] ?? '') : $w) !== $key;
+        }));
+        $doc['resourceLinks'] = array_values(array_filter((array) ($doc['resourceLinks'] ?? array()), function ($w) use ($key) {
+            return !is_array($w) || kop_gdl_url_key($w['url'] ?? '') !== $key;
+        }));
+    } elseif (!empty($done['lines'])) {
+        $doc['notes'] = array_values(array_diff(array_map('strval', (array) ($doc['notes'] ?? array())), array_map('strval', (array) $done['lines'])));
+    } else {
+        return;
+    }
+    kop_related_save($rec['category'], $doc, $id);
 }
 
 /** Take back what kop_rinbox_file_on_record() did. */
@@ -177,6 +243,10 @@ function kop_rinbox_unfile_from_record(array $done) {
     }
     if ($what === 'website' && in_array($kind, kop_rinbox_record_website_kinds(), true)) {
         kop_rinbox_record_websites($kind, $id, (string) $done['url'], false);
+        return;
+    }
+    if (!empty($done['related'])) {
+        kop_rinbox_unfile_from_related($done);
         return;
     }
     if ($kind === 'ya' && !empty($done['ya_done'])) {
