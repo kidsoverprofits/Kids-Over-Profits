@@ -150,7 +150,7 @@ function kop_memorial_date($date, $precision) {
             <div class="kop-card-tags">
                 <?php $program_url = $program_urls[trim((string) $v['program']) . '|' . trim((string) $v['location'])] ?? ''; ?>
                 <?php if ($program_url !== ''): ?>
-                <a class="kop-tag kop-tag-facility" href="<?php echo esc_url($program_url); ?>" title="Open this facility's page"><?php echo esc_html($v['program']); ?></a>
+                <a class="kop-tag kop-tag-facility" href="<?php echo esc_url($program_url); ?>" title="Open this program's page"><?php echo esc_html($v['program']); ?></a>
                 <?php else: ?>
                 <span class="kop-tag kop-tag-facility"><?php echo esc_html($v['program']); ?></span>
                 <?php endif; ?>

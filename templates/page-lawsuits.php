@@ -173,16 +173,27 @@ $facility_profile_url = static function (string $name, int $facility_id = 0) use
     return add_query_arg('search', rawurlencode($name), $index_url);
 };
 
+// Where a mention no linked row pairs with goes: the one facility page its name
+// (and the case's state) pins, else the operator page of that name
+// (kop_facility_link_resolve_placed()).
+$mention_pairs = [];
+foreach ($lawsuits as $case) {
+    foreach (json_decode($case['facilities_mentioned'] ?? '[]', true) ?: [] as $m) {
+        if (is_string($m)) $mention_pairs[] = [$m, (string) ($case['jurisdiction'] ?? '')];
+    }
+}
+$mention_urls = function_exists('kop_facility_link_resolve_placed') ? kop_facility_link_resolve_placed($mention_pairs) : [];
+
 /**
  * Pair a case's mentioned facility names with its linked facility rows.
  * A mention links when one of its spellings (kop_facility_name_variants) matches
  * the linked row's unique_name or an alias; a lone mention pairs with a lone
- * link regardless.
+ * link regardless; any other mention links through $mention_urls.
  * Linked rows nothing paired with are appended so every profile is reachable.
  *
  * @return array<int, array{label:string, url:?string}>
  */
-$facility_tags_for = static function (array $mentions, array $linked) use ($facility_profile_url): array {
+$facility_tags_for = static function (array $mentions, array $linked, string $place = '') use ($facility_profile_url, $mention_urls): array {
     $tags = [];
     $used = [];
     foreach ($mentions as $mention) {
@@ -200,7 +211,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             $used[$match] = true;
             $tags[] = ['label' => $mention, 'url' => $facility_profile_url($linked[$match]['name'], (int)($linked[$match]['id'] ?? 0))];
         } else {
-            $tags[] = ['label' => $mention, 'url' => null];
+            $tags[] = ['label' => $mention, 'url' => $mention_urls[trim((string) $mention) . '|' . trim($place)] ?? null];
         }
     }
     foreach ($linked as $i => $lf) {
@@ -277,7 +288,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
             $status_label = kop_lawsuit_status_label($status_slug);   // KOP Tools > Dropdown Lists
             $claims_json  = htmlspecialchars(json_encode($claims), ENT_QUOTES);
             $lawsuit_id   = (int)$case['id'];
-            $facility_tags = $facility_tags_for($facilities, $facility_links[$lawsuit_id] ?? []);
+            $facility_tags = $facility_tags_for($facilities, $facility_links[$lawsuit_id] ?? [], (string) ($case['jurisdiction'] ?? ''));
             $coverage      = $news_links[$lawsuit_id] ?? [];
             // A case's own FileBird folder (and its subfolders) lists every filing,
             // minus the ones already linked as "Court doc N" above it. Only a
@@ -357,7 +368,7 @@ $facility_tags_for = static function (array $mentions, array $linked) use ($faci
                 <?php endforeach; ?>
                 <?php foreach (array_slice($facility_tags, 0, 5) as $tag): ?>
                     <?php if ($tag['url']): ?>
-                        <a class="kop-tag kop-tag-facility" href="<?php echo esc_url($tag['url']); ?>" title="View this facility in the program index"><?php echo esc_html($tag['label']); ?></a>
+                        <a class="kop-tag kop-tag-facility" href="<?php echo esc_url($tag['url']); ?>" title="Open this program's page"><?php echo esc_html($tag['label']); ?></a>
                     <?php else: ?>
                         <span class="kop-tag kop-tag-facility"><?php echo esc_html($tag['label']); ?></span>
                     <?php endif; ?>

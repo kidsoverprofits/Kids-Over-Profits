@@ -311,7 +311,9 @@ if (!function_exists('kop_facility_link_resolve_placed')) {
      * by exactly one record with a page links; carried by several, the one
      * in the same state; carried by none, the one record in the same state
      * whose name starts with it ("Spring Creek Lodge" -> "Spring Creek Lodge
-     * Academy", 8+ characters). Anything still ambiguous stays unlinked.
+     * Academy", 8+ characters). A brand name one record carries as another
+     * name ("Teen Challenge") and anything still ambiguous link to the
+     * operator page of that name when there is one, else stay unlinked.
      * Cached a day on the page index's fingerprint, like the resolver above.
      */
     function kop_facility_link_resolve_placed(array $pairs) {
@@ -344,7 +346,18 @@ if (!function_exists('kop_facility_link_resolve_placed')) {
             foreach ($map[$key] ?? array() as $id) {
                 if (isset($index['ids'][$id])) $ids[] = (int) $id;
             }
-            if (count($ids) > 1 && $code !== '') {
+            if (count($ids) === 1 && kop_facility_link_key($index['ids'][$ids[0]]['name']) !== $key) {
+                // A brand ("Teen Challenge") one record carries as another name:
+                // the start of two or more other records' names, so not that record.
+                $brand = 0;
+                foreach ($map as $mk => $mids) {
+                    if ($mk === $key || strpos($mk, $key . ' ') !== 0) continue;
+                    foreach ($mids as $id) {
+                        if ((int) $id !== $ids[0]) $brand++;
+                    }
+                    if ($brand >= 2) { $ids = array(); break; }
+                }
+            } elseif (count($ids) > 1 && $code !== '') {
                 $ids = array_values(array_filter($ids, function ($id) use ($states, $code) { return $states[$id] === $code; }));
             } elseif (!$ids && $code !== '' && mb_strlen($key) >= 8) {
                 $found = array();
@@ -356,10 +369,10 @@ if (!function_exists('kop_facility_link_resolve_placed')) {
                 }
                 $ids = array_keys($found);
             }
-            if (count($ids) === 1) {
-                $url = kop_facility_page_url($ids[0]);
-                if ($url !== '') $out[$k] = $url;
-            }
+            $url = count($ids) === 1 ? kop_facility_page_url($ids[0]) : '';
+            // No one facility: a company's name ("Teen Challenge") goes to its operator page.
+            if ($url === '' && function_exists('kop_operator_page_url_for_name')) $url = kop_operator_page_url_for_name($name);
+            if ($url !== '') $out[$k] = $url;
         }
         if ($fingerprint !== '') set_transient($cache_key, $out, DAY_IN_SECONDS);
         return $out;
