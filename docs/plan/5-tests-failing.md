@@ -58,6 +58,15 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    run (state carried over from earlier checks), and one line fewer moves the whole settle, so the unanchored names
    reorder. A fix to weigh: seed the unanchored names from something stable (their own two-step neighbours' order,
    or the map's positions) instead of the last view, so the same graph always draws the same rows.
+   Checked 2026-11-02: that is not it. For a click, seedCluster() places every name in the view by hand (fan rows
+   round the click, then each two-step name beyond what it hangs off), overwriting the `seed` positions, so the
+   last view never reaches the settle. A new check in test-network-modules.js draws Provo Canyon School, opens
+   WWASPS, draws it again and compares every name's position: identical (median 654px both times). The same graph
+   does draw the same rows. What one line changes is the hand seed itself (fanRows' order and each anchor's `hung`
+   offsets follow the edge list), then 220 ticks of the force settle, then shelve() cutting rows by y; a small
+   change upstream moves names across a row cut, and orderRow() then sorts the unanchored ones by settled x. Making
+   that insensitive to one line is a layout redesign (e.g. rows by graph distance from the click instead of by
+   settled y), not a tie-break: owner's call whether it is worth it. The 674px run stays unexplained; not reproduced.
 3. **Found 2026-10-28 while fixing items 2-5 of that day** (archive, "5. Tests failing on main, 2026-10-28"):
    - test-review-inbox.php rerun 2026-11-01 (quiet checkout, 2026-11-01 13:36 mirror): 1418 pass, 25 fail.
      Fixed the same day: business-filings (#100175 Three Strands moved to the young adult programs; kop_bizf_candidates()
@@ -76,6 +85,10 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      news resync in the tests, as lawsuit-facility-links did). Still logged in test runs: api/news-mentions.php's
      `INSERT IGNORE` ("near IGNORE", SQLite wants `OR IGNORE`) and two missing tables in the scratch copy
      (news_story_arcs, journalists). news-mentions.php was being edited by another session that day, so left alone.
+     Fixed 2026-11-02 (090976e1): news-mentions.php and kop_link_mentioned_operators() (api/facility-aliases.php,
+     the same "near IGNORE") say INSERT OR IGNORE on SQLite; the scratch copy takes news_story_arcs, journalists,
+     journalist_articles, marketers_master and tradeorgs_master. Review inbox 1523 pass, 0 fail. Still logged:
+     five `SHOW COLUMNS ... LIKE` probes (bug_reports.notify_updates, wpdl_kop_people.pool), MySQL-only, harmless.
    - (The 10-28 Drive Docs and lawsuit-links items were fixed in e163d779. A 'gone' Drive Docs row needs no follow: a
      revived one takes the build's id again as 'pending' and the follow after every sync moves it.)
    - Production: check that the PA scraper's Python has `wordfreq` (`python -c "import wordfreq"`). Without it

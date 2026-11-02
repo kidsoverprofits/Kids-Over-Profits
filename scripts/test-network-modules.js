@@ -1631,6 +1631,28 @@ function run() {
         Math.round(shortShare * 100) + '% within 260px',
         'lines in the ' + hub.name + ' view: median ' + Math.round(medianSpan) + 'px, ' +
         Math.round(shortShare * 100) + '% within 260px');
+
+    /* The same view draws the same whatever was on screen before it: the
+     * row order must not hang on the last view's positions (2026-11-02). */
+    const drawnAt = () => ownView.nodes.map((n) => {
+        const p = focus.positionOf(n);
+        return n.id + '@' + Math.round(p.x) + ',' + Math.round(p.y);
+    }).join(' ');
+    const firstDraw = drawnAt();
+    focus.clear();
+    flushFrames();
+    focus.select(store.node('wwasps'));
+    flushFrames();
+    focus.clear();
+    flushFrames();
+    focus.select(hub);
+    flushFrames();
+    const againDraw = drawnAt();
+    const movedNames = firstDraw.split(' ').filter((s) => againDraw.split(' ').indexOf(s) === -1);
+    check(movedNames.length === 0,
+        hub.name + ' draws differently after another view: ' + movedNames.length + ' names moved, e.g. ' +
+        movedNames.slice(0, 3).join(', '),
+        hub.name + ' draws the same after another view');
     focus.clear();
     flushFrames();
     focus.select(store.node('wwasps'));
