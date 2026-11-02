@@ -2057,6 +2057,40 @@ p.kop-op-draft {
     color: var(--kop-navy-blue, #000080);
 }
 
+/* A company's programs (and related programs) as tiles, several across:
+   the name, then where, when and whether it is open on the line under it.
+   A program with licensed homes takes the full row so its list has room. */
+.kop-fp-records.kop-op-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+    gap: 0.6rem;
+}
+
+.kop-fp-records.kop-op-tiles > li {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--kop-border-secondary, #d9d3c0);
+    border-radius: 6px;
+    background: var(--kop-white, #fff);
+    line-height: 1.35;
+}
+
+.kop-fp-records.kop-op-tiles > li:last-child {
+    border-bottom: 1px solid var(--kop-border-secondary, #d9d3c0);
+}
+
+.kop-fp-records.kop-op-tiles > li:has(.kop-op-homes) {
+    grid-column: 1 / -1;
+}
+
+.kop-fp-records.kop-op-tiles > li > a {
+    display: block;
+}
+
+.kop-fp-records.kop-op-tiles > li > .meta {
+    display: block;
+    margin: 0.2rem 0 0;
+}
+
 .kop-op-homes {
     margin: 0.35rem 0 0;
 }

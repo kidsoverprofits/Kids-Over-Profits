@@ -217,7 +217,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             <section class="kop-fp-section" id="programs">
                 <h2>Programs it has run</h2>
                 <p class="kop-fp-count"><?php echo esc_html(count($page['facilities']) . ' on record' . ($page['open_count'] ? ', open ones first' : '') . '.'); ?></p>
-                <ul class="kop-fp-records kop-fp-siblings">
+                <ul class="kop-fp-records kop-fp-siblings kop-op-tiles">
                     <?php foreach (($page['program_tree'] ?? $page['facilities']) as $f) :
                         // A renamed program goes by its name under this company (inc/facility-eras.php), then says what it is called now.
                         $bits = array_filter(array(!empty($f['also_names']) ? 'Also called ' . implode(', ', $f['also_names']) : '', !empty($f['now_name']) ? 'Now known as ' . $f['now_name'] : '', $f['place'], $f['years'], ($f['status'] !== '' && $f['status'] !== 'Unknown') ? $f['status'] : ''), 'strlen');
@@ -250,7 +250,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
             <section class="kop-fp-section" id="related">
                 <h2>Related programs</h2>
                 <p class="kop-fp-count">Programs it runs or ran that are not troubled teen programs, by the category they are listed under.</p>
-                <ul class="kop-fp-records kop-fp-siblings">
+                <ul class="kop-fp-records kop-fp-siblings kop-op-tiles">
                     <?php foreach ($page['related'] as $r) :
                         $bits = array_filter(array($r['label'], $r['place'], ($r['status'] !== '' && $r['status'] !== 'Unknown') ? $r['status'] : '', $r['past'] ? 'Ran it in the past' : ''), 'strlen');
                         ?>
