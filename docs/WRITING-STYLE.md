@@ -119,6 +119,13 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
   (js/citation-previews.js), so keep writing "source": the number is the reader's view, not the stored text.
 - Articles and related-industry pages cite with numbered superscripts and a Sources list (`[^n]` in page text),
   not long inline phrase links.
+- Every factual sentence carries a citation. A claim with no source gets one found or is cut; no uncited sentence
+  stays in the text.
+- Trace a secondary summary to its origin. The r/troubledteens wiki, HEAL and similar pages often summarize news
+  coverage without inline citations: check their reference lists, cite the original article, and state only what
+  the original supports. Drop any detail the summary added.
+- A founder's book, a program's website or an organization's own history is that party's account, and is written
+  as one ("his own account"), never as neutral fact.
 - Anything read from the Wayback Machine or another archive is downloaded as a PDF into the media library and our
   copy is cited beside the archive link (CLAUDE.md, "Archive what you cite").
 - A source found while writing that KOP doesn't hold yet is submitted to the review inbox (CLAUDE.md, "Sources
@@ -132,6 +139,9 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
   one-holder titles (director, CEO, founder, headmaster, president).
 - No "Former" and no abbreviations inside a role. A closed program's staff are written in the past tense.
 - One paragraph per person.
+- Name the people the sources name: staff, executives, people charged with crimes. Never "a female staff member"
+  when the source gives her name. Report only what the sources support, and never state an outcome of charges you
+  can't confirm. (The "a therapist" rule above is about the title; the person is still named.)
 - Someone who went through a program and now works in the industry is a professional and is named for that work.
 
 ## 9. Words to get right
@@ -248,6 +258,30 @@ more detail than a spotlight would. The rules on wording, sourcing and tone abov
   (enrollment papers, business filings, newsletters and press releases, lawsuits, inspection reports, archived
   website pages, brochures).
 
+From the owner's review of the first rewritten Abouts and company histories (2026-11-02):
+
+- **The lede summarizes the whole record:** what the organization is, why it matters, how long problems have been
+  documented, and one or two concrete, dated examples.
+- **Organize by subject, then by time.** The default order: what it is, origins and ownership, programs,
+  regulatory and political history, abuse, deaths and investigations, lawsuits, current status.
+- **Write it like an article, not a list of facts.** Each paragraph covers one topic or one stretch of time, and
+  each sentence follows from the one before. Each paragraph picks up where the last left off ("As president, Bush
+  kept shielding the ministry"); two facts that don't connect belong in different paragraphs.
+- **Keep one incident, one facility or one legal fight together.** No arbitration ruling inside a death
+  narrative, no cost figure in the middle of the history.
+- **Date every event,** with the month when it's known. Never "investigators found ..." or "a girl died ..."
+  without the year.
+- **Don't frame long-running abuse as recent.** Survivors have spoken out for decades. Before writing "now",
+  "recently" or "dozens now allege", look for earlier complaints, lawsuits or investigations, and lead with how far
+  back the record goes.
+- **Lawsuits have a history.** Look for earlier suits and give them in order; recent suits are "a new wave", not
+  the first.
+- **Give big events their real weight.** A licensing fight, scandal or policy change that changed state law,
+  national policy or a political career says so plainly and shows the chain of consequences, never one neutral
+  sentence.
+- **Look beyond the given facts when they're thin.** A name, date or context a reader would obviously want is
+  searched for, cited, and flagged to the owner as added.
+
 In a company history (`operator.history`), a paragraph whose lines all start with "|" is a table, with an optional
 first line "Table: <caption>" and the first row as column heads; a paragraph whose lines start with "> " is a pull
 quote. The rewritten Sequel TSI history (https://kidsoverprofits.org/operator/sequel-tsi/) uses both.
@@ -309,3 +343,5 @@ check each one. It does not need connecting prose.
     carry the argument?
 13. Is the strongest counterpoint answered? Is inferred motive marked as inference?
 14. Are the primary sources excerpted after the piece, with graphic details behind a click?
+15. For a profile or About: does every event have its year, does the lede say how far back the problems go, is
+    every sentence cited, is any self-told story stated as fact, and is anyone the sources name left unnamed?
