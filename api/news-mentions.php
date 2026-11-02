@@ -132,8 +132,10 @@ if (!function_exists('kop_sync_news_facility_links')) {
             );
             $stmt->execute(array_merge([$newsId], $desiredIds));
 
+            // The offline tests run on SQLite, which spells it INSERT OR IGNORE.
+            $verb = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? 'INSERT OR IGNORE' : 'INSERT IGNORE';
             $ins = $pdo->prepare(
-                "INSERT IGNORE INTO news_facility_links (news_id, facility_id, link_type, created_by)
+                "$verb INTO news_facility_links (news_id, facility_id, link_type, created_by)
                  VALUES (?, ?, 'mentioned', ?)"
             );
             foreach ($desiredIds as $fid) {

@@ -37,6 +37,10 @@ $wanted = array(
     'referrers_master', 'wpdl_referrers_master', 'providers_master', 'wpdl_providers_master', 'transporters_master', 'wpdl_transporters_master',
     // Program homes: without them the scratch copy makes its own empty tables (inspection-links' program cards).
     'wpdl_kop_program_homes', 'wpdl_kop_program_groups',
+    // The news resync matches story arcs and relinks bylines (api/news-story-arcs.php, api/lib-journalists.php).
+    'news_story_arcs', 'journalists', 'journalist_articles',
+    // Read by the record search (inc/ajax-search-lite.php) and the admin's record lists.
+    'marketers_master', 'tradeorgs_master',
 );
 foreach ($wanted as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();

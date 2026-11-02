@@ -295,7 +295,9 @@ if (!function_exists('kop_link_mentioned_operators')) {
         if (!$operatorIds || empty($index['operator_links'])) return;
         $table = $index['operator_links'];
         try {
-            $ins = $pdo->prepare("INSERT IGNORE INTO `{$table}` (operator_id, link_kind, link_id, link_type, created_by, created_at)
+            // The offline tests run on SQLite, which spells it INSERT OR IGNORE.
+            $verb = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? 'INSERT OR IGNORE' : 'INSERT IGNORE';
+            $ins = $pdo->prepare("$verb INTO `{$table}` (operator_id, link_kind, link_id, link_type, created_by, created_at)
                                   VALUES (?, ?, ?, 'mentioned', ?, ?)");
             foreach (array_keys(array_flip(array_map('intval', $operatorIds))) as $oid) {
                 $ins->execute([$oid, $kind, $recordId, $createdBy ?? 'auto', gmdate('Y-m-d H:i:s')]);
