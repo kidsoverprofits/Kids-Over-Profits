@@ -38,7 +38,10 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      `kop_fmerge_links_follow_log` says `news_facility_links: 100175 -> 900013 (2 moved, 0 already there)`, and the
      readers test's "every linked news and lawsuit id resolves to a name" passes on a fresh dump.
      Done 2026-11-02 (deploy checked on a fresh mirror): the log says exactly that; news 10763 and 10764 are on
-     #900013 and nothing is on #100175. Still open: rerun the readers test on a fresh dump.
+     #900013 and nothing is on #100175. Still open: rerun the readers test on a fresh dump. A full dump of
+     2026-11-02 12:51 is in `tmp/prod-dump.sql` (1.1 GB); load it as above and expect 37 of 37. Before using
+     `tmp/prod.sqlite` or the dump, check the sizes (about 1.2 GB / 1.1 GB): on 2026-11-02 a sync of only the volunteer
+     tables replaced the whole mirror with a 32 KB file for a few minutes, until a full sync ran.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
