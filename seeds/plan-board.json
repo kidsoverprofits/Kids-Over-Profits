@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 18:11 UTC",
- "source": "bc87a9ff8d5857d2f6ce4bc83d5f3242fc5e8ff9",
+ "built": "2026-11-02 18:16 UTC",
+ "source": "6416d1f8428fd9d7ea321b8871f6c541eca108e0",
  "sections": [
   {
    "key": "2",
@@ -1524,9 +1524,9 @@
        "id": "4.7:company-timelines-the-data-behind-the-owner-s-minimum",
        "lead": "Company timelines: the data behind the owner's minimum",
        "text": "**Company timelines: the data behind the owner's minimum** (2026-11-02; rules in docs/claude/facility-pages.md). The code puts every kind on the timeline; what is missing is years: - Leadership: only 11 changes on all 46 timelines. Past jobs with a top title at a company's own name and a span of years are rare (13 rows); most leaders' years are one sighting year (\"(2008, Woodbury Reports)\"), which does not count. Add a CEO change with its source at Review inbox > Company milestones (kind Leadership), or fix the job's years at KOP Tools > People > Past jobs. - Everything at a program (opening, closing, deaths, incidents, lawsuits) counts only inside the company's known years (owner, 2026-11-02: nothing from before it ran the program): the map's \"operated 2009-2021\", or the program's own years when the company has a founding year and no earlier operator. A company with neither (UHS has no founding year on record and no dated map lines) shows none of its programs' openings, deaths or incidents; 31 of the 46 company timelines have something. Fill a founding year on the company record, or years on the map's \"operated\" lines, to bring them in. - Owner lines on the map carry no years, so private equity owners reach the timeline only through investor links with years (KOP Tools > Investors, 7 links today), owners/investors typed with years on the company record, or a Company milestone of kind \"Ownership\". - Sales and transfers (2026-11-02): read from the map's years and the programs' own operator lists. Many company sales are deal milestones in seeds/company-milestones.json (37) that show only once approved at Review inbox > Company milestones. Approving \"UHS bought Psychiatric Solutions\" (universal-health-services-uhs-2010-faaa5fe6) also dates UHS's years at the 8 programs PSI ran, so their 2010-on incidents and deaths come onto the UHS page; the offline test approves it to check that. A program a company no longer runs whose record gives no years (111 of 185) still has no dated transfer.",
-       "ask": "Approve the waiting deal milestones at Review inbox > Company milestones (UHS bought Psychiatric Solutions first)?",
+       "ask": "Approve the waiting deal milestones at Review inbox > Company milestones (UHS bought Psychiatric Solutions first)? - Owners a program's record skips (owner, 2026-11-02: \"don't let it skip owners\"). Where one operator's years end and the next on the record has no start year, the timeline no longer names that one as the buyer unless a dated deal (approved milestone, dated map line) between the two says so; otherwise it reads \"Stopped running X. Next on record: Y, from a year the records do not give. Who ran it in between, if anyone, is not on record.\" The records themselves still need the owners: `(kop-pipeline) python scripts/find-operator-gaps.py` lists 49 programs (2026-11-02), nearly all a few deals (PSI to UHS 2010, Three Springs to Sequel 2009-2010, Sequel's 2021-2022 break-up to Vivant, Rite of Passage, Youth Opportunity, Wayne Halfway House, Willow Grove; YSI and TrueCore to Rite of Passage). Provo Canyon School needs Ardent Health Services (2000-2005) and Psychiatric Solutions (2005-2010) added to its past operators, with sources. Each fix is a start year on the next operator or a missing owner in the program's pastOperators (admin data form), from a source; re-run the finder after. Research the 49 and fill the missing owners and years on the records (a write to production)?",
        "date": "2026-11-02",
-       "hash": "a0f9c230d9d1"
+       "hash": "c1bffe25ae14"
       }
      ]
     },
