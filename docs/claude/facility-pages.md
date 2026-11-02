@@ -48,7 +48,7 @@ php scripts/test-operator-pages.php               # renders every /operator/<slu
 # go, or in years the records do not tie to it. Sales and transfers (takeover / "X passed to Y" / "Stopped running"):
 # the map's "operated" years, else the program's own operator list ("Aspen Education Group (2000-2014)", the current operator
 # after it; kop_ptl_run_years()). A current operator with no year of its own starts when the one before it ended only where an
-# approved deal milestone or dated map line between the two says so (Provo Canyon lists Charter until 2000, then UHS); the
+# approved deal milestone or dated map line between the two says so (Daytona listed YSI until 2016, then Rite of Passage, skipping G4S and TrueCore); the
 # same rule names the buyer on the seller's page, else "Stopped running X. Next on record: Y, from a year the records do
 # not give". Records that skip owners: (kop-pipeline) python scripts/find-operator-gaps.py.
 # Owners and investors typed as text with years ("CIC Partners (majority owner, 2006-2011)") count beside investor links. Review inbox > Company milestones has a Leadership kind for a change no past job dates

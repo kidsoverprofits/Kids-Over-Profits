@@ -1091,7 +1091,8 @@ if (!function_exists('kop_ptl_run_years')) {
         // The current operator with no year of its own may have begun when the last one before it
         // ended ("Psychiatric Solutions, Inc. (2003-2010)", then Universal Health Services); 'last'
         // names that one, for the timeline to use only where a dated deal between the two says so
-        // (Provo Canyon School lists Charter until 2000, then UHS, with no word of the ten years between).
+        // (Daytona Juvenile Residential Facility listed YSI until 2016, then Rite of Passage, with no word
+        // of G4S and TrueCore between).
         $last = null;
         if ($still && !$from && $mine && !$cur) {
             foreach ($others as $e) {
@@ -1107,8 +1108,8 @@ if (!function_exists('kop_ptl_run_years')) {
         }
         // An operator with a start year as ours ends took it from us. One with no year of its own (the
         // current one, usually) is only the next on record: it may have come years later, with owners
-        // between that the record leaves out (Provo Canyon School: Charter until 2000, then UHS, and
-        // nothing of Ardent and Psychiatric Solutions). 'after' names it for the timeline, which calls
+        // between that the record leaves out (Daytona Juvenile Residential Facility: YSI until 2016, then
+        // Rite of Passage, and nothing of G4S and TrueCore). 'after' names it for the timeline, which calls
         // it a handover only where a dated deal between the two says so.
         if ($to && $next === '' && $cur) {
             if ($cur['from'] >= $to && $cur['from'] <= $to + 1) $next = $cur['name'];

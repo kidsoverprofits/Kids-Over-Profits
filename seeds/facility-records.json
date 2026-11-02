@@ -11182,5 +11182,577 @@
         "Takes men 18 and older: the Adult & Teen Challenge national program finder lists 20515 N. Fraser St, Georgetown as a men's (18+) residential center (https://teenchallengeusa.org/centers/tcsc101/, checked 2026-11-02). Its nonprofit (EIN 57-1101736) once gave its mission as helping \"teenagers and young adults\" overcome substance abuse; no source found yet that minors lived at the Georgetown center."
       ]
     }
+  },
+  {
+    "id": 9606,
+    "unique_name": "Daytona Juvenile Residential Facility",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ CARs FY2012-13 on: G4S Youth Services (renamed TrueCore 2016) to FY2020-21, Rite of Passage from FY2020-21; owner 2026-11-02: keep YSI to 2012. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (1997-2012)",
+        "G4S Youth Services (2012-2016)",
+        "TrueCore Behavioral Solutions (2016-2021)",
+        "Rite of Passage, Inc. (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 9607,
+    "unique_name": "Falcon Ridge Ranch",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): KOP Wayback homepages: Sequel 2021-09-27, RoP 2021-10-22 (att 14500/14501). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Centers for Adolescent Recovery and Education (CARE)",
+        "Sequel TSI (2016-2021)",
+        "Rite of Passage, Inc. (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 9611,
+    "unique_name": "Lava Heights Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): KOP Wayback homepages: Sequel 2021-09-28, RoP 2021-10-20 (att 14502/14503). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2016-2021)",
+        "Rite of Passage, Inc. (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 9614,
+    "unique_name": "Norris Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel-branded site 2021-12-06 (att 14532), RoP by 2022-04-26 (att 14533); could be late 2021. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2011-2021)",
+        "Camelot System of Care (2008-2011)",
+        "Rite of Passage, Inc. (since 2022)"
+      ]
+    }
+  },
+  {
+    "id": 9616,
+    "unique_name": "Palm Beach Youth Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ: Sequel to FY2021-22, RoP in FY2022-23; DJJ page Sequel 2021-12-14, RoP 2023-05-04. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (2003-2016)",
+        "Sequel TSI (2016-2022)",
+        "Rite of Passage, Inc. (since 2022)"
+      ]
+    }
+  },
+  {
+    "id": 9663,
+    "unique_name": "McIntosh Youth Development Center",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): KOP YSI page, Wayback 2006-11-15 (att 14547/14548). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (2001-2006)",
+        "Youth Services International (since 2006)"
+      ]
+    }
+  },
+  {
+    "id": 9686,
+    "unique_name": "Mountain Home Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Three Springs deal announced 2009-12-30 (att 11809); Sequel SEC proxy 2017 (kop_source 15895): joined 2009. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (2001-2009)",
+        "Sequel TSI (2009-2021)"
+      ]
+    }
+  },
+  {
+    "id": 9690,
+    "unique_name": "Intermountain Hospital",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): PSI bought Ardent behavioral 2005-07-01 (PSI 10-K); UHS closed PSI 2010-11-15. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2005-2010)",
+        "Ardent Health Services (until 2005)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 10345,
+    "unique_name": "Youth Care of Utah",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Acadia closed CRC Health 2015-02-11 (Acadia 10-K 2015). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Aspen Education Group (until 2015)",
+        "CRC Health Group (parent, 2006-2015)",
+        "Acadia HealthCare (since 2015)"
+      ]
+    }
+  },
+  {
+    "id": 10367,
+    "unique_name": "Mount Pleasant Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel bought the CARE entities 2016-08-16 (SEC proxy; Drive). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Centers for Adolescent Recovery and Education (CARE) (2011-2016)",
+        "Sequel TSI (2016-2019)"
+      ]
+    }
+  },
+  {
+    "id": 10368,
+    "unique_name": "Red Rock Canyon School",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): as Mount Pleasant; undated CARE duplicate dropped. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Centers for Adolescent Recovery and Education (CARE) (1999-2016)",
+        "Sequel TSI (2016-2019)"
+      ]
+    }
+  },
+  {
+    "id": 10370,
+    "unique_name": "Copper Hills Youth Center",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Horizon bought it Jan 2006 (Deseret News); PSI bought Horizon 2007-05-31. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2007-2010)",
+        "Kids Behavioral Health of Utah (until 2006)",
+        "Horizon Health Corporation (2006-2007)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 10371,
+    "unique_name": "Provo Canyon School",
+    "version": 4,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): UHS bought it from Charter Aug 2000 (TODAY; UHS 10-Ks 2001/2004); never in PSI filings, so no Ardent/PSI step. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Robert H. Crist and Jack Williams (founders; Dennis Eugene Thorne co-owner 1978-1986)",
+        "Charter Behavioral Health Systems (1986-2000)",
+        "Charter Medical Corporation (parent company, later closed)",
+        "UHS, Inc. (UHS of Provo Canyon)",
+        "Universal Health Services",
+        "Universal Health Services (since 2000)"
+      ]
+    }
+  },
+  {
+    "id": 10618,
+    "unique_name": "San Marcos Treatment Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): PSI bought six Brown Schools facilities Apr 2003 (PSI 10-K). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2003-2010)",
+        "Brown Schools (until 2003)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 10707,
+    "unique_name": "Cypress Creek",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): PSI bought it 2001-09-01 from a seller no source names; Brown Schools unsupported. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2001-2010)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 11091,
+    "unique_name": "Alachua Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ QI 2025-09-12 still Wayne; RoP on the DJJ page by 2026-10-26. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2016-2022)",
+        "Wayne Halfway House (2023-2026)",
+        "Rite of Passage, Inc. (since 2026)"
+      ]
+    }
+  },
+  {
+    "id": 11093,
+    "unique_name": "Columbus Youth Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ page TrueCore 2024-06-13, RoP 2025-07-22; CAR FY2024-25. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "TrueCore Behavioral Solutions (2010-2018)",
+        "Sequel TSI (2018-2022)",
+        "TrueCore Behavioral Solutions (2023-2025)",
+        "Rite of Passage, Inc. (since 2025)"
+      ]
+    }
+  },
+  {
+    "id": 11094,
+    "unique_name": "Duval Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ page Wayne 2025-12-28, RoP by 2026-10-26. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (2013-2016)",
+        "Sequel TSI (2016-2022)",
+        "Wayne Halfway House (2023-2026)",
+        "Rite of Passage, Inc. (since 2026)"
+      ]
+    }
+  },
+  {
+    "id": 11095,
+    "unique_name": "Marion Youth Academy",
+    "version": 4,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): No program FY2022-24; reopened as Silver Springs Youth Academy under YOI, contract from 2024-09-01, same address (DJJ). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2016-2022)",
+        "Youth Services International (2010-2016)",
+        "Three Springs, Inc. (2007-2010)",
+        "Youth Opportunity Investments (since 2024)"
+      ]
+    }
+  },
+  {
+    "id": 11103,
+    "unique_name": "Fort Myers Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): TrueCore contract ended 2024-08-31 (DJJ CARs FY2022-24, QI page); RoP in CAR FY2024-25. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "TrueCore Behavioral Solutions (until 2024)",
+        "Rite of Passage, Inc. (since 2024)"
+      ]
+    }
+  },
+  {
+    "id": 11110,
+    "unique_name": "Orange Youth Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): as Fort Myers; YOI in CAR FY2024-25. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "TrueCore Behavioral Solutions (until 2024)",
+        "Youth Opportunity Investments (since 2024)"
+      ]
+    }
+  },
+  {
+    "id": 11116,
+    "unique_name": "Gulf Coast Treatment Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Ramsay inferred from PSI 10-K date 6/03 shared with Ramsay sites. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2003-2010)",
+        "Ramsay Youth Services (until 2003)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 11129,
+    "unique_name": "Kissimmee Youth Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DJJ CAR FY2009-10: contract to Sequel 2009-12-23; DJJ FY2018-19: ownership transfer 2016-08-01. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (2002-2009)",
+        "Sequel TSI (2009-2016)",
+        "Youth Opportunity Investments (since 2016)"
+      ]
+    }
+  },
+  {
+    "id": 11144,
+    "unique_name": "Britt Technical Youth Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel to ~2022, no program FY2022-24, Wayne from FY2024-25 (contract 10845): a real idle gap. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (2013-2016)",
+        "Sequel TSI (2016-2022)",
+        "Wayne Halfway House (2024-2026)"
+      ]
+    }
+  },
+  {
+    "id": 11242,
+    "unique_name": "Kingston Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Camelot sites joined Sequel 2011 (SEC proxy; LLCP release 2011-03-04). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Camelot System of Care (until 2011)",
+        "Sequel TSI (2011-2019)"
+      ]
+    }
+  },
+  {
+    "id": 11939,
+    "unique_name": "Three Points Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Three Springs deal 2009. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (2001-2009)",
+        "Sequel TSI (2009-2021)"
+      ]
+    }
+  },
+  {
+    "id": 12162,
+    "unique_name": "Casa Grande Academy",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Vivant took Sequel AZ in fall 2021 (formed 2021-04-29, AZ registration 2021-09-20). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2020-2021)",
+        "Vivant Behavioral Health (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 12163,
+    "unique_name": "Mingus Mountain Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): as Casa Grande. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel Youth and Family Services (2004-2021)",
+        "Vivant Behavioral Healthcare (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 12164,
+    "unique_name": "Sequel TSI Sierra Vista",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel TSI of Arizona LLC filed 2009-11-19 (att 10667); 2011 closing from your tracker. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (2008-2009)",
+        "Sequel TSI (2009-2011)"
+      ]
+    }
+  },
+  {
+    "id": 12419,
+    "unique_name": "Willow Springs Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): as Intermountain. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2005-2010)",
+        "Universal Health Services (since 2010)",
+        "Ardent Health Services (until 2005)"
+      ]
+    }
+  },
+  {
+    "id": 12592,
+    "unique_name": "Lakeside Academy of Kansas",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Successful Dreams from 2022-05-01 (KCUR). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel Youth and Family Services (2011-2022)",
+        "Successful Dreams (since 2022)"
+      ]
+    }
+  },
+  {
+    "id": 13209,
+    "unique_name": "Starr Commonwealth",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Management partnership, not a sale (SEC proxy: joined 2014); Starr board ended it July 2020. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Starr Commonwealth (1913-2014)",
+        "Sequel TSI (2014-2020)"
+      ]
+    }
+  },
+  {
+    "id": 13226,
+    "unique_name": "Sequel Pomegranate Health Systems",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Purchased 2016-10-27. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Pomegranate Health Systems of Central Ohio, Inc. (2007-2016)",
+        "Sequel TSI (2016-2021)"
+      ]
+    }
+  },
+  {
+    "id": 13285,
+    "unique_name": "Lexington Academy",
+    "version": 3,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Three Springs deal 2009; 2017 closing from tracker/Wikipedia. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (1996-2009)",
+        "Sequel TSI (2009-2017)"
+      ]
+    }
+  },
+  {
+    "id": 13378,
+    "unique_name": "Clarinda Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Management with Clarinda Youth Corporation from 1999 (APM; SEC proxy). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (1992-1999)",
+        "Sequel TSI (1999-2021)"
+      ]
+    }
+  },
+  {
+    "id": 13379,
+    "unique_name": "Forest Ridge Youth Services",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel bought the non-real-estate assets 2014-12-01 for $1.9M (SEC proxy). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (1993-2014)",
+        "Sequel TSI (2014-2021)"
+      ]
+    }
+  },
+  {
+    "id": 13380,
+    "unique_name": "Woodward Academy",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Vivant Oct 2021 hires; Senate report. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel Youth and Family Services (2000-2021)",
+        "Vivant Behavioral Healthcare (since 2021)"
+      ]
+    }
+  },
+  {
+    "id": 13639,
+    "unique_name": "Brighter Path Courtland",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Sequel TSI of Alabama renamed Brighter Path ~2022-03-01; Vivant owned it until ~2023-03-15 (TrueCore Acquisitions added, AL SOS att 8573). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (1990-2009)",
+        "Sequel TSI (2010-2021)",
+        "Vivant Behavioral Health (2021-2023)",
+        "Brighter Path Alabama, LLC (since 2023)"
+      ]
+    }
+  },
+  {
+    "id": 13640,
+    "unique_name": "Brighter Path Montgomery",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): as Courtland. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Sequel TSI (2013-2021)",
+        "Vivant Behavioral Health (2021-2023)",
+        "Brighter Path Alabama, LLC (since 2023)"
+      ]
+    }
+  },
+  {
+    "id": 13641,
+    "unique_name": "Brighter Path Tuskegee",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): DHR is the licensor, not an operator; Vivant controlled the Alabama LLC from 2021-10-01 (Brantz affidavit). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs Inc. (2001-2009)",
+        "Sequel TSI (2009-2021)",
+        "Vivant Behavioral Health (2021-2023)",
+        "Brighter Path Alabama, LLC (since 2023)"
+      ]
+    }
+  },
+  {
+    "id": 13670,
+    "unique_name": "Laurel Oaks Behavioral Health Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): PSI bought Ramsay June 2003. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Ramsay Youth Services (until 2003)",
+        "Psychiatric Solutions, Inc. (2003-2010)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 13690,
+    "unique_name": "Sequel TSI Paint Rock Valley",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Three Springs deal 2009. Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (1985-2009)",
+        "Sequel TSI (2009-2011)"
+      ]
+    }
+  },
+  {
+    "id": 13737,
+    "unique_name": "Victor Cullen Center",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Closed April 2002, reopened by DJS July 2007 (Maryland Manual). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Youth Services International (1999-2002)",
+        "Maryland Department of Juvenile Services (since 2007)"
+      ]
+    }
+  },
+  {
+    "id": 14164,
+    "unique_name": "River Point Behavioral Health",
+    "version": 1,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): PSI bought 5 United Medical Corp facilities Mar 2008 (PSI 10-K). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Psychiatric Solutions, Inc. (2008-2010)",
+        "United Medical Corporation (until 2008)",
+        "Universal Health Services (since 2010)"
+      ]
+    }
+  },
+  {
+    "id": 100076,
+    "unique_name": "Sequel TSI Madison (AL)",
+    "version": 2,
+    "note": "Past operators dated (company timelines, plan 4.7 item 17, 2026-11-02): Three Springs deal 2009; closed Aug 2019 (al.com, att 11803). Only pastOperators changes; copied from production 2026-11-02.",
+    "facility": {
+      "pastOperators": [
+        "Three Springs, Inc. (1999-2009)",
+        "Sequel TSI (2009-2019)"
+      ]
+    }
   }
 ]
