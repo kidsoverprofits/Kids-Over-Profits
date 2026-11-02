@@ -888,6 +888,47 @@
     display: none;
 }
 
+/* Subfolders as a compact grid of one-line rows, several across, instead of
+   one tall row each down the page; an open one takes the full width. The
+   type filter, search and loose files (everything else in the folder box)
+   span the row too. No inner padding: the box lines up with the heading. */
+.kop-fp-documents .kop-document-folder {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+    gap: 0.4rem 1rem;
+    align-items: start;
+    max-width: none;
+    padding: 0;
+}
+
+.kop-fp-documents .kop-document-folder > :not(.doc-subfolder),
+.kop-fp-documents .kop-document-folder > .doc-subfolder[open] {
+    grid-column: 1 / -1;
+}
+
+.kop-fp-documents .kop-document-folder > .doc-subfolder {
+    margin: 0;
+    padding: 0.3rem 0 0.3rem 0.6rem;
+}
+
+.kop-fp-documents .kop-document-folder > .doc-subfolder[open] {
+    margin: 0.4rem 0;
+}
+
+.kop-fp-documents .doc-subfolder-title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.kop-fp-documents .doc-subfolder[open] > .doc-subfolder-title {
+    margin-bottom: 0.5rem;
+}
+
+.kop-fp-documents .doc-subfolder .doc-subfolder {
+    margin-top: 0.5rem;
+}
+
 @media (max-width: 640px) {
     .kop-fp-reports li {
         grid-template-columns: 1fr;
