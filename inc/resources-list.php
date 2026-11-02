@@ -248,6 +248,11 @@ function kop_resources_groups() {
                     'note' => 'Program-by-program entries written and sourced by survivors.',
                 ),
                 array(
+                    'name' => 'Teen Challenge Research Map',
+                    'url'  => 'https://teenchallenge-network.netlify.app/',
+                    'note' => 'An independent, source-linked map of the Teen Challenge network: its corporations, programs for teenagers and adults, leaders and court cases.',
+                ),
+                array(
                     'name' => 'Surviving Straight Inc.',
                     'url'  => 'https://survivingstraightinc.com/',
                     'note' => 'The record of Straight, Inc. and the programs that came out of it.',

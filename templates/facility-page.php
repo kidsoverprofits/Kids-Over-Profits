@@ -362,6 +362,7 @@ $kop_fp_has_inspections = !empty($page['inspections']);
 $kop_fp_has_research = !empty($page['research']);
 $kop_fp_has_unsilenced = !empty($page['unsilenced']['groups']);
 $kop_fp_has_survivor_sites = !empty($page['survivor_sites']);
+$kop_fp_outside = function_exists('kop_outside_research_for_facility') ? kop_outside_research_for_facility($page['slug'] ?? '') : array();
 $kop_fp_has_docs = !empty($page['documents']['html']) || $kop_fp_has_research || $kop_fp_has_unsilenced || $kop_fp_has_survivor_sites;
 $kop_fp_has_wiki = !empty($page['wiki']);
 $kop_fp_has_siblings = !empty($page['siblings']);
@@ -619,6 +620,9 @@ get_header();
                 <?php if ($page['hub_url'] !== '') : ?>
                     <li><a href="<?php echo esc_url($page['hub_url']); ?>"><?php echo esc_html($page['hub_name']); ?> hub</a><span class="meta">Every facility, lawsuit, and bill in <?php echo esc_html($page['hub_name']); ?></span></li>
                 <?php endif; ?>
+                <?php foreach ($kop_fp_outside as $kop_fp_o) : ?>
+                    <li><a href="<?php echo esc_url($kop_fp_o['url']); ?>" target="_blank" rel="noopener"><?php echo esc_html($kop_fp_o['name']); ?></a><span class="meta">Research by <?php echo esc_html($kop_fp_o['by']); ?></span></li>
+                <?php endforeach; ?>
                 <?php if ($kop_fp_has_inspections && $page['inspections']['page_url'] !== '') : ?>
                     <li><a href="<?php echo esc_url($page['inspections']['page_url']); ?>">State inspection reports</a><span class="meta">Searchable archive</span></li>
                 <?php endif; ?>
@@ -639,6 +643,7 @@ get_header();
         <div class="kop-fp-body kop-fp-generated-body">
 
             <p class="kop-fp-summary"<?php echo $kop_fp_edit('all', 'every field of this facility'); ?>><?php echo esc_html($page['summary']); ?></p>
+            <?php echo function_exists('kop_outside_research_render') ? kop_outside_research_render($kop_fp_outside) : ''; // Escaped inside. ?>
 
             <?php
             // The record in numbers, worst first; each tile jumps to its section.

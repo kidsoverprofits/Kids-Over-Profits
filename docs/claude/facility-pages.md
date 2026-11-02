@@ -88,4 +88,7 @@ php scripts/test-inline-edit.php                  # every facility sent back unc
 # Closed folds on facility and company pages go out as <template data-kop-defer>, drawn when opened (inc/defer-folds.php,
 # js/defer-folds.js fires 'kop:stamped'); a script that sets up pieces once listens for it. data-kop-nodefer keeps a fold whole
 php scripts/test-defer-folds.php [--pages=<dir of saved pages>]
+# Research by others (inc/outside-research.php, kop_outside_research_projects()): a project about a company gets a boxed
+# note under the summary and an "Also see" line on its company page and on each program page it covers ({page slug => its
+# page there}; related records' slugs work too). First: the Teen Challenge Research Map (2026-11-02). Add a project there.
 ```

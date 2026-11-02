@@ -46,6 +46,7 @@ if ($kop_op_businesses) $kop_op_sections['business-filings'] = 'Business filings
 $kop_op_has_research = !empty($page['research']);
 $kop_op_has_unsilenced = !empty($page['unsilenced']['groups']);
 $kop_op_has_survivor_sites = !empty($page['survivor_sites']);
+$kop_op_outside = function_exists('kop_outside_research_for_operator') ? kop_outside_research_for_operator($page['name']) : array();
 $kop_op_has_program_docs = !empty($page['program_docs']['programs']);
 $kop_op_has_docs = !empty($page['documents']['html']) || $kop_op_has_program_docs || $kop_op_has_research || $kop_op_has_unsilenced || $kop_op_has_survivor_sites;
 if ($kop_op_has_docs) $kop_op_sections['documents'] = 'Documents';
@@ -131,6 +132,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <?php if ($page['network_url'] !== '') : ?>
                     <li><a href="<?php echo esc_url($page['network_url']); ?>">On the network map</a><span class="meta">Its programs, people and owners</span></li>
                 <?php endif; ?>
+                <?php foreach ($kop_op_outside as $kop_op_o) : ?>
+                    <li><a href="<?php echo esc_url($kop_op_o['url']); ?>" target="_blank" rel="noopener"><?php echo esc_html($kop_op_o['name']); ?></a><span class="meta">Research by <?php echo esc_html($kop_op_o['by']); ?></span></li>
+                <?php endforeach; ?>
                 <?php if (!empty($page['index_url'])) : ?>
                     <li><a href="<?php echo esc_url($page['index_url']); ?>">Every parent company</a><span class="meta">The companies behind the programs</span></li>
                 <?php endif; ?>
@@ -147,6 +151,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
         <div class="kop-fp-body kop-fp-generated-body">
 
             <p class="kop-fp-summary"><?php echo esc_html($page['summary']); ?></p>
+            <?php echo function_exists('kop_outside_research_render') ? kop_outside_research_render($kop_op_outside) : ''; // Escaped inside. ?>
 
             <?php if (count($kop_op_sections) > 1) : ?>
             <nav class="kop-fp-jump" aria-label="On this page">
