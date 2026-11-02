@@ -42,6 +42,17 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      2026-11-02 12:51 is in `tmp/prod-dump.sql` (1.1 GB); load it as above and expect 37 of 37. Before using
      `tmp/prod.sqlite` or the dump, check the sizes (about 1.2 GB / 1.1 GB): on 2026-11-02 a sync of only the volunteer
      tables replaced the whole mirror with a 32 KB file for a few minutes, until a full sync ran.
+     Rerun 2026-11-02 on that dump (1,132,304,362 bytes; 162 tables, 5069 facilities; the load needs
+     `SET SESSION sql_mode=''` first, or wpdl_comments' zero-date default stops it): 36 of 37. The one failure is
+     no longer a dangling id: "every linked news and lawsuit id resolves to a name" misses 900013, 901001, 901002,
+     which are live related_facilities records (news 10763/10764 on Three Strands, 10559 on Cape Fear Teen
+     Challenge, 250 on Grace House Teen Challenge). `kop_v2_pdo_names_by_id()` (inc/facility-v2-writer.php) reads
+     only facilities_v2 and kop_operators, and real readers share that blind spot, not just the test:
+     api/link-news-to-facility.php's GET drops a news item's links to related records from its list, and its POST
+     answers 404 "facility_id not found" for a related id; api/lawsuit-facility-links.php finds no document folder
+     for one; api/data-manager.php shows no name. The public pages are fine (Three Strands and Grace House show
+     their links). Open: teach the name lookup (or those callers) about related_facilities, then the test passes as
+     written; decide whether the data manager should list related records at all.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that
