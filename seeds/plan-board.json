@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 17:42 UTC",
- "source": "0e1689e77eb3fe0129ec3ebf84d0f2518d4a4fa3",
+ "built": "2026-11-02 17:57 UTC",
+ "source": "968ba4dd6d1894cc4b5815557e4c1b2704887ca2",
  "sections": [
   {
    "key": "2",
@@ -1523,10 +1523,10 @@
       {
        "id": "4.7:company-timelines-the-data-behind-the-owner-s-minimum",
        "lead": "Company timelines: the data behind the owner's minimum",
-       "text": "**Company timelines: the data behind the owner's minimum** (2026-11-02; rules in docs/claude/facility-pages.md). The code puts every kind on the timeline; what is missing is years: - Leadership: only 11 changes on all 46 timelines. Past jobs with a top title at a company's own name and a span of years are rare (13 rows); most leaders' years are one sighting year (\"(2008, Woodbury Reports)\"), which does not count. Add a CEO change with its source at Review inbox > Company milestones (kind Leadership), or fix the job's years at KOP Tools > People > Past jobs. - Everything at a program (opening, closing, deaths, incidents, lawsuits) counts only inside the company's known years (owner, 2026-11-02: nothing from before it ran the program): the map's \"operated 2009-2021\", or the program's own years when the company has a founding year and no earlier operator. A company with neither (UHS has no founding year on record and no dated map lines) shows none of its programs' openings, deaths or incidents; 31 of the 46 company timelines have something. Fill a founding year on the company record, or years on the map's \"operated\" lines, to bring them in. - Owner lines on the map carry no years, so private equity owners reach the timeline only through investor links with years (KOP Tools > Investors, 7 links today) or a Company milestone of kind \"Ownership\".",
-       "ask": "",
+       "text": "**Company timelines: the data behind the owner's minimum** (2026-11-02; rules in docs/claude/facility-pages.md). The code puts every kind on the timeline; what is missing is years: - Leadership: only 11 changes on all 46 timelines. Past jobs with a top title at a company's own name and a span of years are rare (13 rows); most leaders' years are one sighting year (\"(2008, Woodbury Reports)\"), which does not count. Add a CEO change with its source at Review inbox > Company milestones (kind Leadership), or fix the job's years at KOP Tools > People > Past jobs. - Everything at a program (opening, closing, deaths, incidents, lawsuits) counts only inside the company's known years (owner, 2026-11-02: nothing from before it ran the program): the map's \"operated 2009-2021\", or the program's own years when the company has a founding year and no earlier operator. A company with neither (UHS has no founding year on record and no dated map lines) shows none of its programs' openings, deaths or incidents; 31 of the 46 company timelines have something. Fill a founding year on the company record, or years on the map's \"operated\" lines, to bring them in. - Owner lines on the map carry no years, so private equity owners reach the timeline only through investor links with years (KOP Tools > Investors, 7 links today), owners/investors typed with years on the company record, or a Company milestone of kind \"Ownership\". - Sales and transfers (2026-11-02): read from the map's years and the programs' own operator lists. Many company sales are deal milestones in seeds/company-milestones.json (37) that show only once approved at Review inbox > Company milestones. Approving \"UHS bought Psychiatric Solutions\" (universal-health-services-uhs-2010-faaa5fe6) also dates UHS's years at the 8 programs PSI ran, so their 2010-on incidents and deaths come onto the UHS page; the offline test approves it to check that. A program a company no longer runs whose record gives no years (111 of 185) still has no dated transfer.",
+       "ask": "Approve the waiting deal milestones at Review inbox > Company milestones (UHS bought Psychiatric Solutions first)?",
        "date": "2026-11-02",
-       "hash": "6c59465836f2"
+       "hash": "a0f9c230d9d1"
       }
      ]
     },
