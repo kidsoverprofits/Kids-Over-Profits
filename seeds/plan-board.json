@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 15:00 UTC",
- "source": "3f201298d379125f4674e3494dc379f65064cef1",
+ "built": "2026-11-02 15:40 UTC",
+ "source": "9b14dfb59849c3803be89c9c44a6ba62fb0c18b0",
  "sections": [
   {
    "key": "2",
@@ -345,6 +345,14 @@
        "ask": "Have you rejected data submissions #56, #57 and #58?",
        "date": "2026-10-21",
        "hash": "bc2ef45f2775"
+      },
+      {
+       "id": "2.4:featuring-the-teen-challenge-research-map",
+       "lead": "Featuring the Teen Challenge Research Map",
+       "text": "**Featuring the Teen Challenge Research Map** (https://teenchallenge-network.netlify.app/, a reader's project built partly on KOP open data, 2026-11-02). A session proposed placements (operator page callout, rail link on the 29 matched facility pages with deep links, glossary, David Wilkerson wiki, marketing essays, Resources) and drafted the copy. The site's own About page says it is published anonymously.",
+       "ask": "Which placements go ahead, and do we credit the creator by name or as \"an independent researcher\"?",
+       "date": "2026-11-02",
+       "hash": "6d641cbdea3e"
       }
      ]
     },
@@ -718,6 +726,14 @@
        "ask": "",
        "date": "2026-11-01",
        "hash": "206e1a195223"
+      },
+      {
+       "id": "3:teen-challenge-adult-programs-template-151-2026-11-02",
+       "lead": "Teen Challenge adult programs (template 151, 2026-11-02)",
+       "text": "**Teen Challenge adult programs (template 151, 2026-11-02).** https://kidsoverprofits.org/facility/cape-fear-teen-challenge-nc/ and https://kidsoverprofits.org/facility/teen-challenge-of-south-carolina-sc/ say \"operated by Teen Challenge\" (not \"NO LONGER ADMITS MINORS\"), show men 18+ and the new note, and both appear on https://kidsoverprofits.org/operator/teen-challenge/. If a page still shows the old text, purge LiteSpeed.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "c401729b5fe2"
       }
      ]
     }
@@ -1017,6 +1033,14 @@
        "ask": "",
        "date": "2026-10-30",
        "hash": "c8df105bd600"
+      },
+      {
+       "id": "4.3:teen-challenge-records-adult-programs-ages-a-duplicate-and-d",
+       "lead": "Teen Challenge records: adult programs, ages, a duplicate and deaths (found 2026-11-02 comparing https://teenchallenge-network.netlify.app/ with https://kidsoverprofits.org/operator/teen-challenge/)",
+       "text": "**Teen Challenge records: adult programs, ages, a duplicate and deaths (found 2026-11-02 comparing https://teenchallenge-network.netlify.app/ with https://kidsoverprofits.org/operator/teen-challenge/).** Adult programs filed as teen facilities. Fixed 2026-11-02 (seeds/facility-records.json, template 151): Cape Fear (#11720) and Teen Challenge of South Carolina (#14004) had \"NO LONGER ADMITS/ACCEPTS MINORS\" typed into operator and owners; now operator Teen Challenge, men 18+, with a sourced note. Research (national finder, sandhillstc.org, indiana-atc.org, Charity Navigator, ProPublica, KY3) found: Owner decision, move to Christian Rehabs for Adults? Cape Fear (men 18+, Sandhills founded 1987 as a men's program, no sign of minors ever), Grace House #100225 (women 18+, indiana-atc.org/women/grace-house, separate from Refuge Girls Academy), Teen Challenge of South Carolina (men 18+ now, but its nonprofit EIN 57-1101736 once said \"teenagers and young adults\" and HEAL 2012 calls it a placement service sending children to other states' programs: read its 990 Part III before moving). The facility-to-related-record move has no tool yet. Still open: Columbus Teen Challenge GA #12493 (15 W 10th St is Teen Challenge Southeast's regional office per rehabs.org; no residential program confirmed there; call 706-596-8731 or check a Georgia license). Heart of America Teen Challenge WY #13411 (EIN 43-1155204 filed 990s 2016-2021, so \"Closed\" needs a date; sources say men 16+; pull a Wayback capture of heartofamericatc.com). Victory House #12618 (Charity Navigator: Victory House Christian Academy, EIN 27-1418708, \"teens\", Brewster KS; no source ties it to Teen Challenge: check the operator). Ozarks Teen Challenge #11357 is confirmed boys 12/13-17 (KY3 2022, 2025 release): fill its age range. Possible duplicate: /facility/the-refuge-girls-academy-in/ and /facility/central-indiana-teen-challenge-in/ are both live and both under the operator; the map treats them as one campus (Refuge Girls Academy, run by Central Indiana Teen Challenge). Deaths: the map's \"deaths\" list has 6 entries but only 4 are deaths. Minors: Mindy Mae Davis (15, Indianapolis TC, 1979, survivor testimony only), Danielle DiPietro (15, ran from the Seale AL girls' home, car crash 2004), Naomi Wood (17, Lakeland 2020). Adult: Nicklaus Ellison (enrolled at 19, adult program, died 2011 after dismissal). Not deaths: Samson Lehman (15, near-fatal medical neglect, Bonifay 2008) and a pregnant 16-year-old (Indianapolis 1978, denied hospital care). None is in api/memorial-seed.json; check against its sources first.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "c0093da0529f"
       }
      ]
     },
@@ -1563,18 +1587,18 @@
       {
        "id": "5:provo-canyon-school-s-view-reorders-its-rows-when-one-line-l",
        "lead": "Provo Canyon School's view reorders its rows when one line leaves",
-       "text": "**Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 -> 8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on 654px; the run before the fix printed 674px, unexplained). The bound in `scripts/test-network-modules.js` is now 720px with the reason written above it. Look at why the row order in focus.js is that sensitive (a stable tie-break, or ordering rows by what they connect to), and whether the 674px run points to state carried over from earlier checks. Read 2026-11-01 (no code changed; the 2026-11-01 full run passes at 654px again): a tie-break would not help, the keys are floats. orderRow() sorts a row by where each name's neighbours sit on the row already placed, and a name with no neighbour there falls back to the x the force settle left it at (`keys[p.id] = n ? sum / n : p.x`). The settle starts from `seed`, which for a new view is positionOf(node), where the previous view drew each name (settleLayout(), the `from` argument). So the order depends on what was on screen before, which fits the 674px run (state carried over from earlier checks), and one line fewer moves the whole settle, so the unanchored names reorder. A fix to weigh: seed the unanchored names from something stable (their own two-step neighbours' order, or the map's positions) instead of the last view, so the same graph always draws the same rows.",
+       "text": "**Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 -> 8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on 654px; the run before the fix printed 674px, unexplained). The bound in `scripts/test-network-modules.js` is now 720px with the reason written above it. Look at why the row order in focus.js is that sensitive (a stable tie-break, or ordering rows by what they connect to), and whether the 674px run points to state carried over from earlier checks. Read 2026-11-01 (no code changed; the 2026-11-01 full run passes at 654px again): a tie-break would not help, the keys are floats. orderRow() sorts a row by where each name's neighbours sit on the row already placed, and a name with no neighbour there falls back to the x the force settle left it at (`keys[p.id] = n ? sum / n : p.x`). The settle starts from `seed`, which for a new view is positionOf(node), where the previous view drew each name (settleLayout(), the `from` argument). So the order depends on what was on screen before, which fits the 674px run (state carried over from earlier checks), and one line fewer moves the whole settle, so the unanchored names reorder. A fix to weigh: seed the unanchored names from something stable (their own two-step neighbours' order, or the map's positions) instead of the last view, so the same graph always draws the same rows. Checked 2026-11-02: that is not it. For a click, seedCluster() places every name in the view by hand (fan rows round the click, then each two-step name beyond what it hangs off), overwriting the `seed` positions, so the last view never reaches the settle. A new check in test-network-modules.js draws Provo Canyon School, opens WWASPS, draws it again and compares every name's position: identical (median 654px both times). The same graph does draw the same rows. What one line changes is the hand seed itself (fanRows' order and each anchor's `hung` offsets follow the edge list), then 220 ticks of the force settle, then shelve() cutting rows by y; a small change upstream moves names across a row cut, and orderRow() then sorts the unanchored ones by settled x. Making that insensitive to one line is a layout redesign (e.g. rows by graph distance from the click instead of by settled y), not a tie-break: owner's call whether it is worth it. The 674px run stays unexplained; not reproduced.",
        "ask": "",
-       "date": "2026-11-01",
-       "hash": "f08c796cfaf0"
+       "date": "2026-11-02",
+       "hash": "088b24cccff7"
       },
       {
        "id": "5:found-2026-10-28-while-fixing-items-2-5-of-that-day",
        "lead": "Found 2026-10-28 while fixing items 2-5 of that day",
-       "text": "**Found 2026-10-28 while fixing items 2-5 of that day** (archive, \"5. Tests failing on main, 2026-10-28\"): - test-review-inbox.php rerun 2026-11-01 (quiet checkout, 2026-11-01 13:36 mirror): 1418 pass, 25 fail. Fixed the same day: business-filings (#100175 Three Strands moved to the young adult programs; kop_bizf_candidates() now drops moved records), conflicts (the owner settled every type conflict and roll-up: the test seeds them, and resets the conflict memo after seeding), data-audit (links_move follows merges: #13090 -> #13209), program-practices (`doc-text.py restore` in kop-pipeline now leaves out reader-account lines; the 1461-vs-1419 count was those 101 lines), questions (stale since 37922245: settled answers are applied, not held), reader-accounts (the new machine's CRLF checkout, below), writeups (the test now picks a record with nothing held, and compares `covered` with the record's notes), young-adult-programs (opens its own test program by id), woodbury-facts (picks an item whose close names include another record), wiki-updates (skips the draft comparisons when tmp/wiki-updates/drafts is missing; rebuild it with kop-pipeline scripts/wiki-drafts.py to run them), recent (the import count reads fresh counts before as well as after). program-practices also failed only in a full run: the facility-merge checks copy the mirror's practices table in first, readers' lines included, so its checks now look at documents' lines (answer_id = 0) only. - Also 2026-11-01: api/lawsuit-news-links.php got a SQLite table and upsert (it logged \"near COMMENT\" on every news resync in the tests, as lawsuit-facility-links did). Still logged in test runs: api/news-mentions.php's `INSERT IGNORE` (\"near IGNORE\", SQLite wants `OR IGNORE`) and two missing tables in the scratch copy (news_story_arcs, journalists). news-mentions.php was being edited by another session that day, so left alone. - (The 10-28 Drive Docs and lawsuit-links items were fixed in e163d779. A 'gone' Drive Docs row needs no follow: a revived one takes the build's id again as 'pending' and the follow after every sync moves it.) - Production: check that the PA scraper's Python has `wordfreq` (`python -c \"import wordfreq\"`). Without it ocr_repair.py now prints a warning; before 2026-10-28 it repaired with zero word frequencies and said nothing. - The network embed is now uncapped: Provo Canyon School's slice is 135 KB (was 102 KB). Look at the live /facility/provo-canyon-school-ut/ after deploy: it should paint, now with the Aspen owners, and the caption no longer says \"N more on the full map\".",
+       "text": "**Found 2026-10-28 while fixing items 2-5 of that day** (archive, \"5. Tests failing on main, 2026-10-28\"): - test-review-inbox.php rerun 2026-11-01 (quiet checkout, 2026-11-01 13:36 mirror): 1418 pass, 25 fail. Fixed the same day: business-filings (#100175 Three Strands moved to the young adult programs; kop_bizf_candidates() now drops moved records), conflicts (the owner settled every type conflict and roll-up: the test seeds them, and resets the conflict memo after seeding), data-audit (links_move follows merges: #13090 -> #13209), program-practices (`doc-text.py restore` in kop-pipeline now leaves out reader-account lines; the 1461-vs-1419 count was those 101 lines), questions (stale since 37922245: settled answers are applied, not held), reader-accounts (the new machine's CRLF checkout, below), writeups (the test now picks a record with nothing held, and compares `covered` with the record's notes), young-adult-programs (opens its own test program by id), woodbury-facts (picks an item whose close names include another record), wiki-updates (skips the draft comparisons when tmp/wiki-updates/drafts is missing; rebuild it with kop-pipeline scripts/wiki-drafts.py to run them), recent (the import count reads fresh counts before as well as after). program-practices also failed only in a full run: the facility-merge checks copy the mirror's practices table in first, readers' lines included, so its checks now look at documents' lines (answer_id = 0) only. - Also 2026-11-01: api/lawsuit-news-links.php got a SQLite table and upsert (it logged \"near COMMENT\" on every news resync in the tests, as lawsuit-facility-links did). Still logged in test runs: api/news-mentions.php's `INSERT IGNORE` (\"near IGNORE\", SQLite wants `OR IGNORE`) and two missing tables in the scratch copy (news_story_arcs, journalists). news-mentions.php was being edited by another session that day, so left alone. Fixed 2026-11-02 (090976e1): news-mentions.php and kop_link_mentioned_operators() (api/facility-aliases.php, the same \"near IGNORE\") say INSERT OR IGNORE on SQLite; the scratch copy takes news_story_arcs, journalists, journalist_articles, marketers_master and tradeorgs_master. Review inbox 1523 pass, 0 fail. Still logged: five `SHOW COLUMNS ... LIKE` probes (bug_reports.notify_updates, wpdl_kop_people.pool), MySQL-only, harmless. - (The 10-28 Drive Docs and lawsuit-links items were fixed in e163d779. A 'gone' Drive Docs row needs no follow: a revived one takes the build's id again as 'pending' and the follow after every sync moves it.) - Production: check that the PA scraper's Python has `wordfreq` (`python -c \"import wordfreq\"`). Without it ocr_repair.py now prints a warning; before 2026-10-28 it repaired with zero word frequencies and said nothing. - The network embed is now uncapped: Provo Canyon School's slice is 135 KB (was 102 KB). Look at the live /facility/provo-canyon-school-ut/ after deploy: it should paint, now with the Aspen owners, and the caption no longer says \"N more on the full map\".",
        "ask": "",
-       "date": "2026-11-01",
-       "hash": "76a0ea21e9a9"
+       "date": "2026-11-02",
+       "hash": "b742de0f579d"
       }
      ]
     }
