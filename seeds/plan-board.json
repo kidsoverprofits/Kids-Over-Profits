@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 16:05 UTC",
- "source": "1aa5d330f3e495fac7a874c99fcace53db96d03a",
+ "built": "2026-11-02 16:10 UTC",
+ "source": "fa916c2b238b8636c66b5a3015468a3d341fa441",
  "sections": [
   {
    "key": "2",
@@ -345,14 +345,6 @@
        "ask": "Have you rejected data submissions #56, #57 and #58?",
        "date": "2026-10-21",
        "hash": "bc2ef45f2775"
-      },
-      {
-       "id": "2.4:teen-challenge-research-map-links",
-       "lead": "Teen Challenge Research Map links",
-       "text": "**Teen Challenge Research Map links** (https://teenchallenge-network.netlify.app/, a reader's project built partly on KOP open data). Live 2026-11-02 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/e2e3b205188ed84396272fab65a551da4f2b81e9, inc/outside-research.php): boxed note + \"Also see\" on /operator/teen-challenge/ and the 30 program pages it matches (10 to its full profiles), and Resources > Research and reading. Credited to \"an independent researcher\", as the site says it is published anonymously. Not done: the glossary's Adult & Teen Challenge entry (the glossary has no links yet), the David Wilkerson wiki entry (map page #/person/p-david-wilkerson) and the marketing essays (free-help-paid-by-programs, how-troubled-teen-programs-market-themselves-online, deceptive-marketing-then-and-now -> #/profile/marketing-and-placement-network).",
-       "ask": "Does the creator want her name on the credit, and should the wiki entry and the three essays get the link?",
-       "date": "2026-11-02",
-       "hash": "616189f0b274"
       }
      ]
     },
