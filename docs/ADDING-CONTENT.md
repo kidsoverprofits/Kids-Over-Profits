@@ -357,6 +357,7 @@ when its version moves, and most never change a record that is already on file.
 | Fixes to a published page's words | `seeds/text-fixes.json` | a new `fix` id (also fix the `seeds/history/` copy) |
 | Facility records, merges, names | `seeds/facility-records.json` and the other `seeds/*.json` read by `kop_apply_template_assignments()` | the template assignments version |
 | Young adult programs (18+) | `seeds/young-adult-programs.json` (`kop_ya_apply_seeds()`, added once by name) | the template assignments version |
+| A facility record that belongs in a related category (Christian Rehabs for Adults...) | `seeds/related-moves.json` (`kop_apply_related_move_seeds()`, once per record; Undo `kop_rmove_undo()`) | the template assignments version |
 | Taking a seeded company link off | `"drop": true` on the facility in `seeds/operator-records.json` | the template assignments version |
 | Correcting a seeded company note | new wording in the entry's `operator.notes`, the old wording in its `drop_notes` (`seeds/operator-records.json`) | the template assignments version |
 

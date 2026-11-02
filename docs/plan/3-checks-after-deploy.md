@@ -142,3 +142,10 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
   and https://kidsoverprofits.org/facility/teen-challenge-of-south-carolina-sc/ say "operated by Teen Challenge" (not
   "NO LONGER ADMITS MINORS"), show men 18+ and the new note, and both appear on
   https://kidsoverprofits.org/operator/teen-challenge/. If a page still shows the old text, purge LiteSpeed.
+
+- **Adult Teen Challenge centers moved (template 153, 2026-11-02).** https://kidsoverprofits.org/facility/cape-fear-teen-challenge-nc/
+  and https://kidsoverprofits.org/facility/grace-house-teen-challenge-in/ 301 to pages under
+  https://kidsoverprofits.org/related/christian-adult-rehabs/ that show the same notes, news and operator; both list there;
+  neither is on https://kidsoverprofits.org/operator/teen-challenge/ "Programs it has run" any more, and the operator
+  page's related section shows them. `SELECT option_value FROM wpdl_options WHERE option_name='kop_related_move_log'`
+  names both. Undo if wrong: `kop_rmove_undo($pdo, 'wpdl_', <id>)`.

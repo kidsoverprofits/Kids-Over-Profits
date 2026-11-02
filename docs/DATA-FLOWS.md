@@ -95,6 +95,8 @@ request.
   - program homes undo (inc/program-homes.php:679)
   - record to company (inc/record-to-company.php: deletes the row, its Undo
     re-inserts it)
+  - record to a related category (inc/related-move.php: deletes the row, its Undo
+    re-inserts it)
 - **Readers:** facility page (live), facility index, state feed, directory
   feed, alias index and search, mobile API, open data (daily), network map
   (hourly fingerprint, then the GitHub build), people sync (hourly), the
@@ -344,6 +346,17 @@ reads the same list: link rows (`kop_rtc_link_tables()`) are deleted, rows still
 waiting for review are set to facility_id 0 with a `match_note`, decided rows keep
 the id. `/facility/<slug>/` 301s to the company from option
 `kop_record_to_company_log`, which also holds everything for Undo.
+
+A record moved into a related category, such as Christian Rehabs for Adults
+(`kop_rmove_convert()`, seeds/related-moves.json), becomes a new related record
+(id above KOP_RELATED_FIRST_ID) with the same document and the folder its page
+showed. Its company, news, lawsuit and nonprofit-filing links
+(`kop_rmove_kept_tables()`) move to the new id; location, identity, address,
+business and investor rows (`kop_rmove_dropped_tables()`) are deleted; waiting
+queue rows are unmatched as above. `/facility/<slug>/` 301s to the related page
+from option `kop_related_move_log`, which also holds everything for Undo
+(`kop_rmove_undo()`). Test: `php -d extension=pdo_sqlite -d extension=mbstring
+scripts/test-related-move.php`.
 
 ## 3. Where it drifts
 

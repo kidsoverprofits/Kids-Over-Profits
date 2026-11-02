@@ -245,6 +245,8 @@ require_once get_stylesheet_directory() . '/inc/wiki-auto-updates.php';
 require_once get_stylesheet_directory() . '/inc/facility-merge.php';
 // Facility records that are really a parent company leave the facility table, their page 301s to the company (seeds/record-to-company.json)
 require_once get_stylesheet_directory() . '/inc/record-to-company.php';
+// Facility records that belong in a related category (Christian Rehabs for Adults...) move there, their page 301s (seeds/related-moves.json)
+require_once get_stylesheet_directory() . '/inc/related-move.php';
 // A person id for everyone on a staff list, stamped as personId by an hourly sync (KOP Tools > People)
 require_once get_stylesheet_directory() . '/inc/people.php';
 require_once get_stylesheet_directory() . '/inc/person-jobs.php';   // a person's past jobs, held once (kop_person_jobs)
