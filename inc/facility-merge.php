@@ -773,6 +773,27 @@ if (!function_exists('kop_facility_merge_resolve')) {
     }
 }
 
+if (!function_exists('kop_facility_follow_moves')) {
+    /**
+     * The record a facility id now lives in, following merges, moves into a
+     * related category (kop_rmove_log()) and moves into the young adult
+     * programs (kop_ya_moved_from_map()). An id that never moved comes back as it is.
+     */
+    function kop_facility_follow_moves($id) {
+        $id = (int) $id;
+        $related = function_exists('kop_rmove_log') ? kop_rmove_log() : array();
+        $ya = function_exists('kop_ya_moved_from_map') ? kop_ya_moved_from_map() : array();
+        for ($i = 0; $i < 10; $i++) {
+            $next = kop_facility_merge_resolve($id);
+            if ($next === $id && !empty($related[$id]['related_id'])) $next = (int) $related[$id]['related_id'];
+            if ($next === $id && !empty($ya[$id]['id'])) $next = function_exists('kop_ya_id') ? kop_ya_id($ya[$id]['id']) : (int) $ya[$id]['id'];
+            if ($next === $id || $next <= 0) break;
+            $id = $next;
+        }
+        return $id;
+    }
+}
+
 if (!function_exists('kop_facility_merge_follow_candidates')) {
     /**
      * A build file's candidate records ([{id, kind?, ...}], kind 'facility' or none) with each merged-away
@@ -854,6 +875,51 @@ if (!function_exists('kop_fmerge_flush')) {
             delete_transient($t);
         }
     }
+}
+
+if (!function_exists('kop_fmerge_links_follow_moves')) {
+    /**
+     * Move news and lawsuit links filed on a moved or merged facility id to the
+     * record it lives in now (kop_facility_follow_moves()). The link syncs follow
+     * moves since 2026-11-02; this takes care of links filed before, e.g. two
+     * articles sent on 2026-10-27 to #100175 Three Strands, a young adult program
+     * since the day before. Returns 'table: from -> to (n)' lines.
+     */
+    function kop_fmerge_links_follow_moves(PDO $pdo) {
+        $lines = array();
+        foreach (array('news_facility_links', 'lawsuit_facility_links') as $table) {
+            if (!kop_fmerge_table_columns($pdo, $table)) continue;
+            foreach ($pdo->query("SELECT DISTINCT facility_id FROM `{$table}`")->fetchAll(PDO::FETCH_COLUMN) as $from) {
+                $to = kop_facility_follow_moves((int) $from);
+                if ($to === (int) $from) continue;
+                $undo = array();
+                list($moved, $removed) = kop_fmerge_move_rows($pdo, $table, 'facility_id', (int) $from, $to, $undo);
+                if ($moved || $removed) $lines[] = "{$table}: {$from} -> {$to} ({$moved} moved, {$removed} already there)";
+            }
+        }
+        return $lines;
+    }
+}
+
+if (!function_exists('kop_fmerge_maybe_links_follow_moves')) {
+    /** Version 1: run kop_fmerge_links_follow_moves() once; log in kop_fmerge_links_follow_log. */
+    function kop_fmerge_maybe_links_follow_moves() {
+        $version = '1';
+        if (get_option('kop_fmerge_links_follow_done') === $version) return;
+        $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
+        if (!$pdo) return;
+        update_option('kop_fmerge_links_follow_done', $version);
+        try {
+            $lines = kop_fmerge_links_follow_moves($pdo);
+            if ($lines) kop_fmerge_flush();
+        } catch (Throwable $e) {
+            $lines = array('Stopped: ' . $e->getMessage());
+            update_option('kop_fmerge_links_follow_done', '');
+        }
+        update_option('kop_fmerge_links_follow_log', array('time' => time(), 'lines' => $lines), false);
+    }
+    // After the young adult moves (admin_init 19-23), so their map is complete.
+    add_action('admin_init', 'kop_fmerge_maybe_links_follow_moves', 30);
 }
 
 if (!function_exists('kop_fmerge_page_folder')) {

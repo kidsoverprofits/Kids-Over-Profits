@@ -190,6 +190,12 @@ request.
   A company's name resolves to its operator id, which the sync writes to
   `kop_operator_links` (link_kind 'news'; lawsuits the same), never to
   `news_facility_links` (2026-10-28; before that 382 such rows sat there, read by no page).
+  A mention that carries a `facility_id` is filed on the record that id lives in now
+  (`kop_facility_follow_moves()`: merges, moves to a related category, moves to the young
+  adult programs; lawsuits the same, 2026-11-02). Before that the Send page filed two
+  articles on #100175 a day after it became a young adult program; a one-time repair
+  (`kop_fmerge_maybe_links_follow_moves()`, log in option `kop_fmerge_links_follow_log`)
+  moves links filed on moved ids before then.
   The state hub JS matches by stored name instead (js/state-page.js:837).
 - **Readers:** facility and operator pages, mobile, state hub, search
   (`facilities_mentioned LIKE`), story groups, featured reporting, news

@@ -29,12 +29,14 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      scripts/test-facility-v2-<readers|writer>.php --dsn "mysql:host=127.0.0.1;port=3399;dbname=kop;charset=utf8mb4"
      --user root`. The readers test is read-only; the writer test edits the copy, so reload before each writer run
      (about 2.5 minutes). On the 2026-11-01 copy: writer 63 of 63 pass; readers 36 of 37, the one failure real data:
-   - Open, owner's go needed (a production write): news 10763 and 10764 (status submitted) are linked to #100175
-     Three Strands, which moved to the young adult programs on 2026-10-26 19:01 (the move deleted its links);
-     "Claude research agent (Send page)" linked them again on 2026-10-27 14:25. Repoint them to the program or drop
-     them.
-   - Open: the Send/mobile link path accepts a facility id that no longer exists (moved or merged). It should refuse
-     it or follow the move/merge map (docs/claude/mobile-extension.md area).
+   - Fixed 2026-11-02 (owner: repoint, and follow the move): news 10763 and 10764 (status submitted) were linked to
+     #100175 Three Strands, a young adult program since 2026-10-26 19:01; "Claude research agent (Send page)" linked
+     them again on 2026-10-27 14:25. The news and lawsuit link syncs now file a mention's facility_id on the record it
+     lives in (kop_facility_follow_moves(): merges, related moves, young adult moves), and a one-time repair on
+     admin_init (kop_fmerge_maybe_links_follow_moves(), version 1) moves links already on moved ids; on the 2026-11-01
+     mirror that is exactly those two, to #900013. After deploy, check on production: option
+     `kop_fmerge_links_follow_log` says `news_facility_links: 100175 -> 900013 (2 moved, 0 already there)`, and the
+     readers test's "every linked news and lawsuit id resolves to a name" passes on a fresh dump.
    - Fixed 2026-11-02 (found by the writer round trip): saving an operator project in the data form deleted its
      joins to related-category records (ids above KOP_RELATED_FIRST_ID, which the form never lists): Embark (10) lost
      900002 Optimum Performance Institute and 900007 Dragonfly Transitions. After deploy, check on production that

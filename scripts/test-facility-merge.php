@@ -242,6 +242,38 @@ foreach ($sample as $p) {
     if ($diff) $before = $after;
 }
 
+// ---- Links follow moves ----------------------------------------------------
+// Made-up ids far from real ones: 7000001 merged into 7000002, 7000003 moved
+// to a related category (900444), 7000004 moved to young adult program 13.
+echo "\nLinks follow moves\n";
+$GLOBALS['kop_test_options']['kop_facility_merged_into'] = array('ids' => array(7000001 => 7000002), 'slugs' => array());
+$GLOBALS['kop_test_options']['kop_related_move_log'] = array(7000003 => array('related_id' => 900444, 'category' => 'x'));
+$GLOBALS['kop_test_ya_moved'] = array(7000004 => array('id' => 13, 'name' => 'Test Program'));
+if (!function_exists('kop_rmove_log')) {
+    function kop_rmove_log() { return get_option('kop_related_move_log', array()); }
+}
+if (!function_exists('kop_ya_moved_from_map')) {
+    function kop_ya_moved_from_map() { return $GLOBALS['kop_test_ya_moved']; }
+    function kop_ya_id($id) { $id = (int) $id; return ($id > 0 && $id < 1000) ? KOP_RELATED_FIRST_ID + $id : $id; }
+}
+check(kop_facility_follow_moves(7000001) === 7000002, 'a merged id follows its merge');
+check(kop_facility_follow_moves(7000003) === 900444, 'an id moved to a related category follows the move');
+check(kop_facility_follow_moves(7000004) === 900013, 'an id moved to the young adult programs follows the move');
+check(kop_facility_follow_moves(7000002) === 7000002, 'an id that never moved stays');
+if (in_array('news_facility_links', $copied, true)) {
+    $pdo->beginTransaction();
+    $ins = $pdo->prepare("INSERT INTO news_facility_links (news_id, facility_id, link_type, created_by) VALUES (?, ?, 'mentioned', 'test')");
+    foreach (array(array(9000001, 7000001), array(9000001, 7000002), array(9000002, 7000003), array(9000003, 7000004)) as $l) $ins->execute($l);
+    $lines = kop_fmerge_links_follow_moves($pdo);
+    $now = $pdo->query("SELECT news_id || ':' || facility_id FROM news_facility_links WHERE news_id >= 9000001 ORDER BY news_id, facility_id")->fetchAll(PDO::FETCH_COLUMN);
+    check($now === array('9000001:7000002', '9000002:900444', '9000003:900013'), 'old links move to the record each id lives in, a duplicate goes: ' . implode(', ', $now));
+    check(count($lines) === 3, count($lines) . ' moves logged');
+    check(kop_fmerge_links_follow_moves($pdo) === array(), 'a second run finds nothing to move');
+    $pdo->rollBack();
+}
+unset($GLOBALS['kop_test_options']['kop_facility_merged_into'], $GLOBALS['kop_test_options']['kop_related_move_log']);
+$GLOBALS['kop_test_ya_moved'] = array();
+
 // ---- The screen's data -----------------------------------------------------
 echo "\nScreen\n";
 $data = kop_fmerge_screen_data(true);

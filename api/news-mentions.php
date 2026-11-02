@@ -92,7 +92,9 @@ if (!function_exists('kop_sync_news_facility_links')) {
         $unresolvedNames = [];
         foreach ($normalizedMentions as $m) {
             if (!empty($m['facility_id'])) {
-                $desiredIds[(int)$m['facility_id']] = true;
+                // An id sent before its record moved or merged files on the record it is now.
+                $fid = function_exists('kop_facility_follow_moves') ? kop_facility_follow_moves((int)$m['facility_id']) : (int)$m['facility_id'];
+                $desiredIds[$fid] = true;
             } elseif (!empty($m['name'])) {
                 $unresolvedNames[$m['name']] = true;
             }
