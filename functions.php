@@ -35,6 +35,8 @@ require_once get_stylesheet_directory() . '/inc/kind-pill.php';
 
 // Shared source citation links and previews
 require_once get_stylesheet_directory() . '/inc/citations.php';
+// Proper citations for the numbered Sources list (POST kop/v1/citations, js/citation-previews.js)
+require_once get_stylesheet_directory() . '/inc/citation-lookup.php';
 
 // heal-online.org is offline: its links go to the Wayback Machine copy
 require_once get_stylesheet_directory() . '/inc/heal-archive.php';

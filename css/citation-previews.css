@@ -55,3 +55,99 @@ a[data-kop-citation-preview]:focus-visible::after {
         transition: none;
     }
 }
+
+/*
+ * Numbered citations (js/citation-previews.js turns each "source" link into
+ * a superscript [n]). line-height 0 keeps the number from opening a gap
+ * between lines; the link keeps Kadence's link colour.
+ */
+sup.kop-cite {
+    font-size: 0.72em;
+    line-height: 0;
+    vertical-align: super;
+    white-space: nowrap;
+}
+
+sup.kop-cite a.kop-cite__link {
+    padding: 0 0.05em;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+sup.kop-cite a.kop-cite__link:hover,
+sup.kop-cite a.kop-cite__link:focus-visible {
+    text-decoration: underline;
+}
+
+
+/* A wrapper holding only numbered citations (span.kop-fp-src on the facility
+   pages) sits inline after the text it cites. Doubled class: the page's own
+   ".kop-fp-about-text .kop-fp-src" rules are two classes too. */
+body .kop-cite-group.kop-cite-group {
+    display: inline;
+    margin: 0;
+    font-size: inherit;
+    vertical-align: baseline;
+}
+
+/* Where a number or a ^ link lands: clear of the sticky header, and lit up as on Wikipedia. */
+sup.kop-cite,
+.kop-cite-refs__list > li {
+    scroll-margin-top: 6rem;
+}
+
+sup.kop-cite:target,
+.kop-cite-refs__list > li:target {
+    background: var(--kop-soft-pastel-yellow, #fff5cb);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+/* The "Sources" list at the foot of the page (js/citation-previews.js). */
+.kop-cite-refs {
+    margin-top: 2rem;
+}
+
+.kop-cite-refs__list {
+    margin: 0.5rem 0 0;
+    padding-left: 2.2em;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--kop-text-primary, #1a202c);
+}
+
+.kop-cite-refs__list > li {
+    margin: 0 0 0.35rem;
+    padding: 0.05rem 0.25rem;
+    border-radius: 0.25rem;
+    overflow-wrap: anywhere;
+}
+
+.kop-cite-refs__back {
+    font-weight: 700;
+    color: var(--kop-text-primary, #1a202c);
+}
+
+.kop-cite-refs__back a.kop-cite-back {
+    color: var(--kop-navy, #000080);
+    text-decoration: none;
+}
+
+.kop-cite-refs__back a.kop-cite-back:hover,
+.kop-cite-refs__back a.kop-cite-back:focus-visible {
+    color: var(--kop-midnight-blue, #000435);
+    text-decoration: underline;
+}
+
+.kop-cite-refs__back sup {
+    font-size: 0.75em;
+    font-style: italic;
+}
+
+.kop-cite-refs__list a.kop-cite-refs__link {
+    color: var(--kop-navy, #000080);
+}
+
+.kop-cite-refs__list a.kop-cite-refs__link:hover,
+.kop-cite-refs__list a.kop-cite-refs__link:focus-visible {
+    color: var(--kop-midnight-blue, #000435);
+}

@@ -149,3 +149,12 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
   neither is on https://kidsoverprofits.org/operator/teen-challenge/ "Programs it has run" any more, and the operator
   page's related section shows them. `SELECT option_value FROM wpdl_options WHERE option_name='kop_related_move_log'`
   names both. Undo if wrong: `kop_rmove_undo($pdo, 'wpdl_', <id>)`.
+35. **Numbered citations** (js/citation-previews.js, 2026-11-02): logged out, on
+   https://kidsoverprofits.org/facility/9607/ every "source" reads as a superscript [n] after the full stop (the rail's right
+   after the value), hover shows the source, a click jumps to the Sources list at the foot and its ^ / a b links jump back,
+   opening a collapsed section. Check one state report page, one wiki entry and one /related/ page for a "source" link left
+   unnumbered, or a number where "source" was a button or label rather than a citation (opt it out with class
+   kop-no-cite-numbers). The Sources entries are full citations: `curl -s -X POST -H "Content-Type: application/json"
+   -d '{"urls":["https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0209.pdf#page=20"]}'
+   https://kidsoverprofits.org/wp-json/kop/v1/citations` answers Woodbury Reports, February 2009, p. 20; a facility page
+   citing a news article lists its author, date, title and publication.

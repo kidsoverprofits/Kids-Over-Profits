@@ -15,6 +15,20 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-profile-notes.php
 # this site; kop_facility_pages_is_own_source()) is not shown, and the Woodbury Reports wording ("Woodbury Reports, May 2007, p. 20") is
 # not printed or put in a preview, only the link to our copy of the issue (kop_facility_pages_woodbury_clean(), _tidy_citations(), _cited_html())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-citation-cleanup.php [--no-db] [--id=9607]   # functions, then real pages from tmp/prod.sqlite
+# On every front-end page js/citation-previews.js turns each link reading "source" / "source 2" into a Wikipedia-style superscript
+# [n] that jumps to a "Sources" list it adds at the foot of the main column (#kop-sources; on facility/operator pages a
+# .kop-fp-section, so it folds like the rest), each entry with ^ / ^ a b backlinks that open a folded section first. Same address,
+# same number; "(source; source)." -> ".[1][2]"; a span.kop-fp-src of only citations goes inline (.kop-cite-group) and a rail
+# <dd class="kop-fp-src"> is folded into the value's <dd>. Entry text: data-kop-citation-preview, else title, else host + page
+# name. Each entry is a proper citation, Wikipedia style ('Author (Date). "Title". Publication.'): the page asks POST
+# kop/v1/citations (inc/citation-lookup.php) once per batch, which answers from Woodbury file names (issue, page), the media
+# library (title, original site), approved news_submissions (author, date, title, publication; its link or archive_url),
+# published lawsuits' document_urls (case, number, court, filed) and published kop_source posts. The news and lawsuit address
+# maps are kept an hour (transients kop_cite_news_urls / kop_cite_lawsuit_urls). With no record the entry is the page's text +
+# website, or "Archived from the original (site) on <date>" for archive.org. Pages of one PDF (#page=N) are separate sources.
+# Later links (JS-drawn pages) are numbered by a MutationObserver. Skipped: a <td> holding only the link (a "Source" column)
+# and anything inside class kop-no-cite-numbers.
+php -d extension=mbstring -d extension=pdo_sqlite scripts/test-citation-lookup.php   # each kind of record, from tmp/prod.sqlite
 # Facility pages show approved serious findings (inspection_highlights), staff with their other industry roles
 # (other records' staff lists + network map), incidents as a timeline, and news cards with pictures:
 # inc/news-images.php copies each article's share image (else the outlet's logo) into uploads/kop-news-images/, hourly cron

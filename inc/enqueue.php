@@ -62,6 +62,8 @@ function kadence_child_enqueue_styles() {
             filemtime($citation_js),
             true
         );
+        // The Sources list asks inc/citation-lookup.php for each cited address's proper citation.
+        wp_localize_script('kop-citation-previews', 'kopCitations', array('lookupUrl' => rest_url('kop/v1/citations')));
     }
 
     // Primary sidebar tweaks (newsletter embed spacing, sticky column on desktop)

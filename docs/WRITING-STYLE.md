@@ -115,6 +115,8 @@ Foster care, adult disability group homes, nursing homes, psychiatric hospitals 
 - On facility and company pages, wiki entries and the app, a citation is the linked word "source":
   "([source](url))", several as "([source](a); [source](b))". Never write out "Woodbury Reports, October 2008
   (#170), p. 21" or "Woodbury Reports said ...".
+  The page shows each "source" link as a numbered superscript [n] with a Sources list at the foot, as on Wikipedia
+  (js/citation-previews.js), so keep writing "source": the number is the reader's view, not the stored text.
 - Articles and related-industry pages cite with numbered superscripts and a Sources list (`[^n]` in page text),
   not long inline phrase links.
 - Anything read from the Wayback Machine or another archive is downloaded as a PDF into the media library and our
