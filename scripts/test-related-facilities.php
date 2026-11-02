@@ -87,6 +87,16 @@ $check('no TTI location rows', !$wpdb->get_var("SELECT COUNT(*) FROM wpdl_kop_fa
 // A save replaces the document, as for a facility: the stored one, sent again without its id, finds its record by name and place.
 $again = kop_related_save('christian-adult-rehabs', array_merge($rec['doc'], array('facility_id' => null)));
 $check('the same name and place is the same record', $again === $id, (string) $again);
+// The data manager's rename (rename_record kind=related) saves the stored doc with a new name, then the old one.
+$doc = $rec['doc'];
+$doc['identification']['name'] = 'Test Renamed Center';
+kop_related_save($rec['category'], $doc, $id);
+$doc['identification']['name'] = $rec['doc']['identification']['name'];
+kop_related_save($rec['category'], $doc, $id);
+$back = kop_related_get($id);
+$check('a rename and back keeps the document\'s unique name', $back && $back['doc']['provenance']['uniqueName'] === $rec['unique_name']
+    && $back['doc']['provenance']['uniqueName'] !== '' && $back['doc']['identification']['name'] === $rec['doc']['identification']['name'],
+    json_encode($back['doc']['provenance'] ?? null));
 $id2 = kop_related_save('christian-adult-rehabs', array('identification' => array('name' => 'Test Women\'s Home'),
     'locationDetails' => array('city' => 'Pueblo', 'state' => 'CO', 'country' => 'United States')));
 $check('the next record takes the next id', $id2 === $id + 1, (string) $id2);

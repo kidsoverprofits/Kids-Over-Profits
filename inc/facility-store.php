@@ -2254,6 +2254,10 @@ if (!function_exists('kop_facility_save')) {
             $id = $existing['id'];
             $doc['facility_id'] = $id;
             $doc['identification']['nameKey'] = kop_facility_name_key($doc['identification']['name']);
+            // The normalizer fills uniqueName only from $opts or a wrapper; a stored doc saved again keeps its own.
+            if ((string)($doc['provenance']['uniqueName'] ?? '') === '' && (string)($existing['doc']['provenance']['uniqueName'] ?? '') !== '') {
+                $doc['provenance']['uniqueName'] = $existing['doc']['provenance']['uniqueName'];
+            }
             if (kop_facility_same_document($existing['doc'], $doc)) {
                 $status = 'unchanged';
                 return $id;

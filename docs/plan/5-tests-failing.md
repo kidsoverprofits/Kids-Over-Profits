@@ -72,11 +72,13 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
      column stayed). kop_related_save() runs the stored doc through kop_facility_normalize(), which sets
      provenance.uniqueName only from $opts['unique_name'] or a wrapper, never from a v2 doc's own provenance, and the
      update path of kop_facility_save() does not refill it. #901002's original json_data was written back byte for byte
-     (md5 checked); no other related record had it blank. Open: any related-record edit through kop_related_save()
-     (Data Manager rename, and any other caller passing a stored doc with an id) still blanks it; readers that use it
-     are inc/inline-edit.php:910 (`?? $stored['unique_name']` does not catch ''), inc/closure-reports.php:974 and
-     inc/drive-docs.php:359. Fix: pass the stored unique_name as $opts['unique_name'] from kop_related_save() when $id
-     is given (or keep $prov['uniqueName'] in the normalizer), and add the round trip to test-related-facilities.
+     (md5 checked); no other related record had it blank. Readers that use it: inc/inline-edit.php:910
+     (`?? $stored['unique_name']` does not catch ''), inc/closure-reports.php:974, inc/drive-docs.php:359.
+     Fixed 2026-11-02: kop_facility_save()'s update path (inc/facility-store.php) keeps the stored record's
+     provenance.uniqueName when the incoming doc has none, for every caller (no record on the mirror, 5069 facilities
+     and 16 related, has it blank, so nothing needs repair). test-related-facilities checks a rename and back ("a rename
+     and back keeps the document's unique name"; fails without the fix); it and test-inline-edit pass. Not rerun:
+     test-facility-v2-writer (needs the MySQL load); run it with the next writer round trip.
      Rerun again 2026-11-02 13:40 by a second session at d6520999, on a fresh portable MySQL load of the same dump
      (162 tables, 5069 facilities, `SET SESSION sql_mode=''` at the top of the load file): readers 37 of 37, "every
      linked news and lawsuit id resolves to a name" passes with 1282 linked ids, 900013 / 901001 / 901002 named.
