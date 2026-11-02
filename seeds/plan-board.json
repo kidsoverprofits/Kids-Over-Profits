@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 17:25 UTC",
- "source": "1eed2f091de1362d46e4cd009fe70c3916a5da7b",
+ "built": "2026-11-02 17:35 UTC",
+ "source": "fa18fbe780f3bb05d707908517710982b91cf68b",
  "sections": [
   {
    "key": "2",
@@ -750,6 +750,14 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "648da179fe55"
+      },
+      {
+       "id": "3:company-timelines-the-owner-s-minimum",
+       "lead": "Company timelines: the owner's minimum",
+       "text": "**Company timelines: the owner's minimum** (inc/profile-timeline.php, inc/operator-pages.php, 2026-11-02): every program's opening and closing, critical incidents, deaths, leadership changes, ownership and lawsuits. After deploy (LiteSpeed may hold the old page until it is purged), logged out: https://kidsoverprofits.org/operator/aspen-education-group/ starts in 1961 with \"Camp Huntington opened\" / \"Before Aspen Education Group was founded in 1997\", has \"Elliot Sainer became chief executive\" (2006), \"15 incidents at Mount Bachelor Academy\" (2009) as one event whose card lists them, and Brandon Hoffman's death once, not again as an incident. https://kidsoverprofits.org/operator/sequel-tsi/ has \"Chris Roussos succeeded John Stupak as chief executive\" (2019). https://kidsoverprofits.org/operator/universal-health-services/ shows \"Provo Canyon School opened\" (1971) with no \"Opened ...\" of its own. The filter button reads \"Ownership and leadership\". Review inbox > Company milestones > Add offers the Leadership kind.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "db5bfa6b4914"
       }
      ]
     }
@@ -1511,6 +1519,14 @@
        "ask": "",
        "date": "2026-10-28",
        "hash": "172f37b74023"
+      },
+      {
+       "id": "4.7:company-timelines-the-data-behind-the-owner-s-minimum",
+       "lead": "Company timelines: the data behind the owner's minimum",
+       "text": "**Company timelines: the data behind the owner's minimum** (2026-11-02; rules in docs/claude/facility-pages.md). The code puts every kind on the timeline; what is missing is years: - Leadership: only 11 changes on all 46 timelines. Past jobs with a top title at a company's own name and a span of years are rare (13 rows); most leaders' years are one sighting year (\"(2008, Woodbury Reports)\"), which does not count. Add a CEO change with its source at Review inbox > Company milestones (kind Leadership), or fix the job's years at KOP Tools > People > Past jobs. - Deaths, incidents and lawsuits at a program count only inside the company's known years: the map's \"operated 2009-2021\", or the program's own years when the company has a founding year and no earlier operator. A company with neither (UHS has no founding year on record and no dated map lines) shows its programs' openings and closings but none of their deaths or incidents. Fill a founding year on the company record, or years on the map's \"operated\" lines, to bring them in. - Owner lines on the map carry no years, so private equity owners reach the timeline only through investor links with years (KOP Tools > Investors, 7 links today) or a Company milestone of kind \"Ownership\".",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "0b2a9156e50e"
       }
      ]
     },
@@ -1622,6 +1638,14 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "b742de0f579d"
+      },
+      {
+       "id": "5:test-operator-pages-embark-behavioral-health-lists-its-progr",
+       "lead": "test-operator-pages: \"embark-behavioral-health lists its programs\"",
+       "text": "**test-operator-pages: \"embark-behavioral-health lists its programs\"** (found 2026-11-02): the check counts `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261) has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "411f80103a35"
       }
      ]
     }
