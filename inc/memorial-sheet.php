@@ -258,7 +258,7 @@ function kop_ms_clean_add(array $in) {
 
 /**
  * memorial_victims.sheet_row: the Death Toll sheet row a page entry came from (the sheet was submitted by
- * Christina Vandercar; the page marks these with a thorn and a note at the bottom). Adds the column when it is
+ * Christina Vandercar; the page marks these with a dagger and a note at the bottom). Adds the column when it is
  * missing, then marks the rows seeds/memorial.json put in from the sheet and the ones Add put in. Idempotent.
  */
 function kop_ms_mark_sheet_rows(PDO $pdo) {

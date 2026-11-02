@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `memorial_victims` (
   `source_url` varchar(1000) DEFAULT NULL,
   `kop_url` varchar(1000) DEFAULT NULL COMMENT 'Related page on kidsoverprofits.org (document library, lawsuits, etc.)',
   `notes` text DEFAULT NULL COMMENT 'Internal notes, not displayed',
-  `sheet_row` int(11) DEFAULT NULL COMMENT 'Row of the Death Toll sheet (Christina Vandercar) the entry came from; shows a thorn',
+  `sheet_row` int(11) DEFAULT NULL COMMENT 'Row of the Death Toll sheet (Christina Vandercar) the entry came from; shows a dagger',
   `publication_status` enum('draft','published','archived') NOT NULL DEFAULT 'published',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -625,19 +625,19 @@ a.kop-tag:focus-visible {
     font-weight: 600;
 }
 
-/* Thorn: the entry came from Christina Vandercar's Death Toll sheet (note at the foot of the page). */
-.kop-memorial-thorn,
-.kop-memorial-thorn a {
+/* Dagger: the entry came from Christina Vandercar's Death Toll sheet (note at the foot of the page). */
+.kop-memorial-dagger,
+.kop-memorial-dagger a {
     color: var(--kop-teal-ink, #24757F);
     font-weight: 600;
     text-decoration: none;
 }
 
-.kop-memorial-thorn {
+.kop-memorial-dagger {
     margin-left: 0.15em;
 }
 
-#memorial-thorn-note + .kop-memorial-credit {
+#memorial-dagger-note + .kop-memorial-credit {
     margin-top: 0.5rem;
 }
 

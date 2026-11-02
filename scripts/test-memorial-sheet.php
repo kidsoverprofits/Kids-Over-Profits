@@ -225,7 +225,7 @@ $r0 = $rev();
 $id = kop_ms_add($no_src['key'], $fields + array('source_url' => 'https://example.test/found-source'));
 $new = $get($id);
 $check('with a source it goes in, published', $new && $new['publication_status'] === 'published' && $new['source_url'] === 'https://example.test/found-source' && $rev() === $r0 + 1);
-$check('and it carries its sheet row (the thorn on the page)', (int) $new['sheet_row'] === (int) $no_src['a']['row']);
+$check('and it carries its sheet row (the dagger on the page)', (int) $new['sheet_row'] === (int) $no_src['a']['row']);
 $check('adding it twice is refused', $throws(function () use ($no_src, $fields) { kop_ms_add($no_src['key'], $fields + array('source_url' => 'https://example.test/x')); }) !== '');
 kop_ms_undo($no_src['key']);
 $check('Undo removes the row', !$get($id) && (int) $mem->query('SELECT COUNT(*) FROM memorial_victims')->fetchColumn() === $count);
@@ -235,7 +235,7 @@ $check('Skip remembers', kop_ms_add_rows()[$no_src['key']]['state'] === 'skipped
 kop_ms_undo($no_src['key']);
 $check('Undo of a skip puts it back', kop_ms_add_rows()[$no_src['key']]['state'] === 'open');
 
-echo "-- Sheet rows marked (Christina Vandercar's thorn) --\n";
+echo "-- Sheet rows marked (Christina Vandercar's dagger) --\n";
 $mem->exec('UPDATE memorial_victims SET sheet_row = NULL');
 $sheet_seeds = array_filter(json_decode(file_get_contents(dirname(__DIR__) . '/seeds/memorial.json'), true)['entries'], function ($e) { return !empty($e['sheet_row']); });
 $n = kop_ms_mark_sheet_rows($mem);

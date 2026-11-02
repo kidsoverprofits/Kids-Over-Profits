@@ -2160,7 +2160,7 @@ function kop_apply_memorial_seeds() {
             ));
             $done[] = (int) $pdo->lastInsertId();
         }
-        // The Death Toll sheet's rows get their thorn on /in-loving-memory/ (inc/memorial-sheet.php).
+        // The Death Toll sheet's rows get their dagger on /in-loving-memory/ (inc/memorial-sheet.php).
         $sheet_marked = function_exists('kop_ms_mark_sheet_rows') ? kop_ms_mark_sheet_rows($pdo) : 0;
         if ($done || $sheet_marked) {
             if ($done && function_exists('kop_record_changed')) {
