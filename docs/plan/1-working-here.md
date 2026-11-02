@@ -61,12 +61,12 @@ Mechanics:
 - **The Bash tool collapses backslashes.** Put regex-bearing edit scripts in
   a file and run the file, or use the Edit tool. A Python script containing
   `unlink` was refused as destructive where the same Edit went through.
-- **PHP**: none on PATH. Use
-  `$LOCALAPPDATA/Programs/Local/resources/extraResources/lightning-services/php-8.2.*/bin/win64/php.exe` (8.2.29+0 since the
-  2026-11-01 machine move; the version folder changes when Local updates)
-  with `-n -l` to lint, and `-n -d extension_dir=<that bin>/ext -d
-  extension=pdo_sqlite -d extension=mbstring` (plus `sodium`, `fileinfo`,
-  `zip` where a test needs them) for the harnesses.
+- **PHP**: WinGet's PHP 8.2 (`$LOCALAPPDATA/Microsoft/WinGet/Packages/PHP.PHP.8.2_*/php.exe`) is on the user PATH
+  since 2026-11-01. Its `php.ini` loads curl, openssl, sodium, fileinfo and zip, with an absolute `extension_dir`.
+  mbstring and pdo_sqlite are deliberately left out of the ini (loading them twice printed "already loaded"
+  warnings), so pass the documented `-d extension=pdo_sqlite -d extension=mbstring`. A shell opened before the PATH
+  change (VS Code included) won't find `php` until the app is fully restarted. Local's
+  `lightning-services/php-8.2.*/bin/win64/php.exe` is still the fallback, used with `-n -d extension_dir=<that bin>/ext`.
 - **Production mirror**: `tmp/prod.sqlite`, refreshed by
   `python scripts/sync-prod-sqlite.py`. It goes stale fast; refresh before
   inventory work, and confirm a finding on the rendered page before
