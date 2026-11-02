@@ -1,6 +1,6 @@
 {
- "built": "2026-11-02 16:24 UTC",
- "source": "e9258ccdb7a1bc00131b4ed80ab9689edd83e4c5",
+ "built": "2026-11-02 16:29 UTC",
+ "source": "459e8a41dd1bf92b64244ed5ef352febc7fc8a97",
  "sections": [
   {
    "key": "2",
@@ -734,6 +734,14 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "49c1fc5ddb7d"
+      },
+      {
+       "id": "3:numbered-citations",
+       "lead": "Numbered citations",
+       "text": "**Numbered citations** (js/citation-previews.js, 2026-11-02): logged out, on https://kidsoverprofits.org/facility/9607/ every \"source\" reads as a superscript [n] after the full stop (the rail's right after the value), hover shows the source, a click jumps to the Sources list at the foot and its ^ / a b links jump back, opening a collapsed section. Check one state report page, one wiki entry and one /related/ page for a \"source\" link left unnumbered, or a number where \"source\" was a button or label rather than a citation (opt it out with class kop-no-cite-numbers). The Sources entries are full citations: `curl -s -X POST -H \"Content-Type: application/json\" -d '{\"urls\":[\"https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0209.pdf#page=20\"]}' https://kidsoverprofits.org/wp-json/kop/v1/citations` answers Woodbury Reports, February 2009, p. 20; a facility page citing a news article lists its author, date, title and publication.",
+       "ask": "",
+       "date": "2026-11-02",
+       "hash": "66d58151c9fd"
       }
      ]
     }
