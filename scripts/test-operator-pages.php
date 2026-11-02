@@ -160,19 +160,18 @@ foreach ($index['ids'] as $id => $e) {
     if ($data['network_url'] !== '') $with['network']++;
     if (!empty($data['timeline'])) $with['timeline']++;
     if ($e['slug'] === 'universal-health-services') {
-        // UHS bought hospitals that opened decades before it: their openings are on its
-        // timeline (every program's opening is), but as the program's ("Provo Canyon School
-        // opened"), never as UHS's own; their deaths from before it owned them stay off.
+        // UHS bought hospitals that opened decades before it, and no years of its own are on
+        // record: none of their openings or deaths may land on its timeline (owner, 2026-11-02:
+        // nothing from before the company ran the program).
         $kinds = array();
-        $own_openings = array();
-        $provo = false;
-        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) {
-            $kinds[$ev['kind']] = true;
-            if ($ev['kind'] === 'opened' && strpos($ev['title'], 'Opened ') === 0) $own_openings[] = $y['year'] . ' ' . $ev['title'];
-            if ($y['year'] === 1971 && $ev['title'] === 'Provo Canyon School opened' && $ev['lead'] !== '') $provo = true;
-        }
-        $check('the UHS timeline names no program opening as its own', !$own_openings && !isset($kinds['death']), implode(' | ', $own_openings));
-        $check('the UHS timeline has Provo Canyon School opening in 1971, as the program\'s', $provo);
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) $kinds[$ev['kind']] = true;
+        $check('the UHS timeline has no program years from before it owned them', !isset($kinds['opened']) && !isset($kinds['death']), implode(',', array_keys($kinds)));
+    }
+    if ($e['slug'] === 'aspen-education-group') {
+        // Founded 1997: Camp Huntington (opened 1961) and the rest of its older programs' openings stay off.
+        $early = array();
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) if ($y['year'] < 1997 && in_array($ev['kind'], array('opened', 'closed'), true)) $early[] = $y['year'] . ' ' . $ev['title'];
+        $check('the Aspen timeline has no program openings from before its founding', !$early, implode(' | ', $early));
     }
     if ($e['slug'] === 'teen-challenge') {
         // No founding year and no opening years on record, but it is the only operator its

@@ -12,10 +12,9 @@
  *     year another began is a takeover, named as such), its investors' stakes
  *     (inc/investors.php, when the link has years); on a facility page the
  *     companies that ran it and the deals that moved it from one to the next.
- *   - programs: on a company page every program's opening and closing year on
- *     record. Inside the company's years they are its own ("Opened X"); an
- *     opening from before it ran the program, or a closing after it let go,
- *     reads "X opened" with who ran it then, so it is never the company's doing.
+ *   - programs: on a company page the openings and closings of its programs
+ *     inside the years it is known to have run them; nothing from before it
+ *     took a program over or after it let go.
  *   - leadership: a chief executive, president, executive director, chair or
  *     owner of the company starting or leaving, from past jobs
  *     ({prefix}kop_person_jobs) and the map's leadership lines, only where the
@@ -770,54 +769,25 @@ if (!function_exists('kop_ptl_operator')) {
             }
         }
 
-        // ---- Every program's opening and closing on record ------------------------
-        // Inside the company's years they are its own ("Opened X"). An opening before it ran the
-        // program, a closing after it let go, or one in years the records do not tie to it is the
-        // program's ("X opened"), saying who ran it then. A program linked to it now that has
-        // closed closed under it. Nothing the company could not have done counts as its own:
-        // none before its founding year.
-        $who = $name !== '' ? $name : 'the company';
-        $opens = array();   // year => [mine|before|unknown => [items]]
-        $shuts = array();   // year => [mine|after|unknown => [items]]
+        // ---- Its programs' openings and closings, while it ran them ---------------
+        // Only inside the company's known years (owner, 2026-11-02): an opening before it took a program
+        // over, a closing after it let go, or one in years the records do not tie to it stays off. A
+        // program linked to it now that has closed closed under it; nothing before its founding year.
+        $opens = array();   // year => [items]
+        $shuts = array();
         foreach ($by_id as $fid => $f) {
             $span = $spans[$fid] ?? null;
             $s = (int) $f['start_year'];
             $e = strcasecmp((string) $f['status'], 'Closed') === 0 ? (int) $f['end_year'] : 0;
-            if ($s) {
-                $as = !$span ? 'unknown' : ($s >= $span[0] && $s <= $span[1] ? 'mine' : ($s < $span[0] ? 'before' : 'unknown'));
-                $it = $program($f['name'], $fid);
-                if ($as === 'before') $it['meta'] = trim($it['meta'] . ($it['meta'] !== '' ? '; ' : '') . 'run by ' . $who . ' from ' . $span[0]);
-                $opens[$s][$as][] = $it;
-            }
-            if ($e && !isset($closed_fids[$fid])) {
-                $as = !$span ? (($f['relationship'] ?? '') === 'current' ? 'mine' : 'unknown') : ($e >= $span[0] && $e <= $span[1] ? 'mine' : ($e > $span[1] ? 'after' : 'unknown'));
-                $it = $program($f['name'], $fid);
-                if ($as === 'after') $it['meta'] = trim($it['meta'] . ($it['meta'] !== '' ? '; ' : '') . 'run by ' . $who . ' until ' . $span[1]);
-                $shuts[$e][$as][] = $it;
+            if ($s && $span && $s >= $span[0] && $s <= $span[1]) $opens[$s][] = $program($f['name'], $fid);
+            if ($e && !isset($closed_fids[$fid]) && ($span ? $e >= $span[0] && $e <= $span[1] : ($f['relationship'] ?? '') === 'current')) {
+                $shuts[$e][] = $program($f['name'], $fid);
             }
         }
-        $push = static function (array $e) use (&$events, $now) {
-            if ($e['year'] >= 1800 && $e['year'] <= $now + 1) $events[] = $e;
-        };
-        $them = static function ($n) { return $n === 1 ? 'it' : 'them'; };
-        foreach (array('opened' => $opens, 'closed' => $shuts) as $kind => $by_year) {
-            foreach ($by_year as $year => $by_as) {
-                if ($founded && $year < $founded && isset($by_as['mine'])) {
-                    $by_as['unknown'] = array_merge($by_as['unknown'] ?? array(), $by_as['mine']);
-                    unset($by_as['mine']);
-                }
-                foreach ($by_as as $as => $items) {
-                    $n = count($items);
-                    if ($as === 'mine') {
-                        $add(kop_ptl_event((int) $year, $kind, ($kind === 'opened' ? 'Opened ' : 'Closed ') . ($n === 1 ? $items[0]['name'] : $n . ' programs'), array('items' => $items, 'major' => $n >= 3)));
-                        continue;
-                    }
-                    $lead = $founded && $year < $founded ? 'Before ' . $who . ' was founded in ' . $founded . '.'
-                        : ($as === 'before' ? 'Before ' . $who . ' ran ' . $them($n) . '.'
-                        : ($as === 'after' ? 'After ' . $who . ' stopped running ' . $them($n) . '.'
-                        : 'The records do not say whether ' . $who . ' ran ' . $them($n) . ' then.'));
-                    $push(kop_ptl_event((int) $year, $kind, ($n <= 2 ? kop_ptl_list_words(array_column($items, 'name'), 2) : $n . ' programs') . ' ' . $kind, array('items' => $items, 'lead' => $lead)));
-                }
+        foreach (array('Opened ' => array('opened', $opens), 'Closed ' => array('closed', $shuts)) as $verb => $pair) {
+            foreach ($pair[1] as $year => $items) {
+                $n = count($items);
+                $add(kop_ptl_event((int) $year, $pair[0], $verb . ($n === 1 ? $items[0]['name'] : $n . ' programs'), array('items' => $items, 'major' => $n >= 3)));
             }
         }
 
@@ -887,7 +857,7 @@ if (!function_exists('kop_ptl_operator')) {
         }
 
         // ---- Leadership and investors ------------------------------------------------
-        foreach (kop_ptl_leadership_events((array) ($ctx['leaders'] ?? array()), $who) as $e) $add($e);
+        foreach (kop_ptl_leadership_events((array) ($ctx['leaders'] ?? array()), $name !== '' ? $name : 'the company') as $e) $add($e);
         foreach (kop_ptl_investor_events((array) ($ctx['investors'] ?? array())) as $e) $add($e);
 
         // ---- Serious findings by state inspectors --------------------------------
