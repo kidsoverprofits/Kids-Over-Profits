@@ -149,6 +149,8 @@ $facility_pages = 0;
 $GLOBALS['kop_test_options']['kop_company_milestones_review'] = array(
     'teen-challenge-1958-72a6ec1b' => array('decision' => 'approved'),
     'teen-challenge-2026-4d311033' => array('decision' => 'approved'),
+    // UHS bought Psychiatric Solutions in 2010: the deal that dates UHS's years at the programs PSI ran.
+    'universal-health-services-uhs-2010-faaa5fe6' => array('decision' => 'approved'),
 );
 foreach ($index['ids'] as $id => $e) {
     $data = kop_operator_page_data($id);
@@ -163,15 +165,36 @@ foreach ($index['ids'] as $id => $e) {
         // UHS bought hospitals that opened decades before it, and no years of its own are on
         // record: none of their openings or deaths may land on its timeline (owner, 2026-11-02:
         // nothing from before the company ran the program).
-        $kinds = array();
-        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) $kinds[$ev['kind']] = true;
-        $check('the UHS timeline has no program years from before it owned them', !isset($kinds['opened']) && !isset($kinds['death']), implode(',', array_keys($kinds)));
+        // Provo Canyon School lists Charter until 2000 and then UHS: no deal says UHS took it in 2000.
+        $early = array();
+        $psi = false;
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) {
+            if ($y['year'] < 2010 && in_array($ev['kind'], array('opened', 'death', 'incident', 'takeover', 'began'), true)) $early[] = $y['year'] . ' ' . $ev['title'];
+            if ($y['year'] === 2010 && $ev['kind'] === 'deal' && strpos($ev['title'], 'Psychiatric Solutions') !== false && count($ev['items']) > 0) $psi = true;
+        }
+        $check('the UHS timeline has no program years from before it owned them', !$early, implode(' | ', $early));
+        $check('the UHS timeline has the 2010 Psychiatric Solutions deal carrying its programs', $psi);
     }
     if ($e['slug'] === 'aspen-education-group') {
         // Founded 1997: Camp Huntington (opened 1961) and the rest of its older programs' openings stay off.
         $early = array();
         foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) if ($y['year'] < 1997 && in_array($ev['kind'], array('opened', 'closed'), true)) $early[] = $y['year'] . ' ' . $ev['title'];
         $check('the Aspen timeline has no program openings from before its founding', !$early, implode(' | ', $early));
+        // Sales and transfers from the programs' own lists of operators ("Aspen Education Group (until 2015)",
+        // current operator Acadia HealthCare), where the map has no years.
+        $handovers = array();
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) if ($ev['kind'] === 'handover') $handovers[] = $y['year'] . ' ' . $ev['title'];
+        $check('the Aspen timeline has Youth Care of Utah passing to Acadia in 2015', in_array('2015 Youth Care of Utah passed to Acadia HealthCare', $handovers, true), implode(' | ', $handovers));
+    }
+    if ($e['slug'] === 'psychiatric-solutions-inc') {
+        // Its programs went to UHS in 2010: on the approved deal (the milestone above) or as a handover.
+        $titles = array();
+        $to_uhs = false;
+        foreach ($data['timeline'] as $y) foreach ($y['events'] as $ev) {
+            $titles[] = $y['year'] . ' ' . $ev['title'];
+            if ($y['year'] === 2010 && strpos($ev['title'], 'Universal Health Services') !== false && count($ev['items']) > 1) $to_uhs = true;
+        }
+        $check('the Psychiatric Solutions timeline has its programs passing to UHS in 2010', $to_uhs, implode(' | ', $titles));
     }
     if ($e['slug'] === 'teen-challenge') {
         // No founding year and no opening years on record, but it is the only operator its

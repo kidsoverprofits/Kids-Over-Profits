@@ -32,7 +32,9 @@
  *     article's picture.
  * A program's events count on its company's timeline only inside the years
  * the company is known to have run it (a death at Provo Canyon School in 1990
- * is not UHS history).
+ * is not UHS history): the map's "operated" years, else the program's own list
+ * of operators with years (kop_ptl_run_years()), which also dates its sale or
+ * transfer to the next one.
  *
  * Shape: [{year, events: [event], text}] oldest first; an event is
  *   {kind, group, year, date, when, title, lead, items: [{name, url, meta}],
@@ -611,7 +613,7 @@ if (!function_exists('kop_ptl_operator')) {
         $node = $ctx['map_node'] ?? null;
         $node_id = $node ? (string) $node['id'] : '';
 
-        if ($founded) $add(kop_ptl_event($founded, 'founded', 'Founded' . (preg_match('/\b(?:in|at)\s+([A-Z][^,;.]+(?:,\s*[A-Z][^,;.]+)?)/', (string) $ctx['founded'], $where) ? ' in ' . trim($where[1]) : '')));
+        if ($founded) $add(kop_ptl_event($founded, 'founded', 'Founded' . (preg_match('/\b(?:in|at)\s+([A-Z][^,;.()]+(?:,\s*[A-Z][^,;.()]+)?)/', (string) $ctx['founded'], $where) ? ' in ' . trim($where[1]) : '')));
 
         // Facility id => [from, to]: the map's "operated 2009-2021", else the program's own years when
         // the company ran it from the start (own_years, operator-pages.php), else from a dated deal below.
@@ -701,6 +703,43 @@ if (!function_exists('kop_ptl_operator')) {
             // Began running it the year it opened: the opening below says so.
             if ($prev !== '' || !$f || (int) $f['start_year'] !== $from) $began[$from][$prev][] = $program($fname, $fid);
             if ($to) $ended[$to][$next][] = $program($fname, $fid);
+        }
+        // Where the map has no years, the program's own record of its operators ("Aspen Education Group
+        // (2000-2014)", the current operator after it): the takeover, and the sale or transfer away.
+        // One spelling per company ("Three Springs Inc." / "Three Springs, Inc."): the first one met.
+        $spelled = array();
+        foreach (array($began, $ended) as $list) foreach ($list as $by) foreach (array_keys($by) as $c) {
+            if ($c !== '' && !isset($spelled[kop_ptl_company_key($c)])) $spelled[kop_ptl_company_key($c)] = (string) $c;
+        }
+        $spell = static function ($c) use (&$spelled) {
+            $c = (string) $c;
+            if ($c === '') return '';
+            $ck = kop_ptl_company_key($c);
+            if (!isset($spelled[$ck])) $spelled[$ck] = $c;
+            return $spelled[$ck];
+        };
+        foreach ($by_key as $k => $f) {
+            $run = (array) ($f['run'] ?? array());
+            // Taken over with a dated deal: the company that ran it last before sold it (or itself) to us that year.
+            if (empty($run['from']) && !empty($run['last'])) {
+                $lk = kop_ptl_company_key($run['last']['name']);
+                $ly = (int) $run['last']['to'];
+                if (isset($ms_pairs[$lk][$ly]) || isset($ms_pairs[$lk][$ly - 1]) || isset($ms_pairs[$lk][$ly + 1])) {
+                    $run['from'] = $ly;
+                    $run['prev'] = $run['last']['name'];
+                }
+            }
+            if (isset($map_years[$k]) || (empty($run['from']) && empty($run['to']))) continue;
+            $fid = (int) $f['id'];
+            $from = (int) $run['from'];
+            $to = (int) $run['to'];
+            if ($from && !$to && strcasecmp((string) $f['status'], 'Closed') === 0 && (int) $f['end_year'] >= $from) $to = (int) $f['end_year'];
+            $map_years[$k] = true;
+            if ($from) {
+                $spans[$fid] = array($from, $to ?: $now);
+                if ($run['prev'] !== '' || (int) $f['start_year'] !== $from) $began[$from][$spell($run['prev'])][] = $program($f['name'], $fid);
+            }
+            if ($to) $ended[$to][$spell($run['next'])][] = $program($f['name'], $fid);
         }
         foreach ($by_key as $k => $f) {
             if (isset($map_years[$k]) || empty($f['own_years'])) continue;
@@ -965,6 +1004,85 @@ if (!function_exists('kop_ptl_death_event')) {
     }
 }
 
+if (!function_exists('kop_ptl_run_entry')) {
+    /**
+     * One of a program's operators as its record writes them (identification.pastOperators,
+     * currentOperator): "Aspen Education Group (2000-2014)", "(until 2015)", "(since 2014)",
+     * "CRC Health Group (parent, 2006-2014)" => {name, from, to, parent}; 0 for a year not given.
+     */
+    function kop_ptl_run_entry($text) {
+        $text = trim(preg_replace('/\s+/', ' ', str_replace(array("\xE2\x80\x93", "\xE2\x80\x94"), '-', (string) $text)));
+        $name = $text;
+        $in = '';
+        if (preg_match('/^(.+?)\s*\(([^()]*)\)\s*$/u', $text, $m)) {
+            $name = trim($m[1]);
+            $in = strtolower($m[2]);
+        }
+        $from = $to = 0;
+        if (preg_match('/\b(1[89]\d\d|20\d\d)\s*(?:-|to)\s*(1[89]\d\d|20\d\d)\b/', $in, $m)) {
+            $from = (int) $m[1];
+            $to = (int) $m[2];
+        } elseif (preg_match('/\b(?:until|through|to|till|sold in|exited)\s+(?:[a-z]+\s+)?(1[89]\d\d|20\d\d)\b/', $in, $m)) {
+            $to = (int) $m[1];
+        } elseif (preg_match('/\b(1[89]\d\d|20\d\d)\b/', $in, $m)) {
+            // "since 2014", "from 2010", "(2016)": the year it began.
+            $from = (int) $m[1];
+        }
+        return array('name' => $name, 'from' => $from, 'to' => $to, 'parent' => (bool) preg_match('/\bparent\b|\bowned by\b/', $in));
+    }
+}
+
+if (!function_exists('kop_ptl_run_years')) {
+    /**
+     * The years a company ran a program by the program's own record, and who ran it before
+     * and after: {from, to, prev, next} (0 / '' when not said). $past: pastOperators;
+     * $current: currentOperator; $is_me(name): whether a name is this company;
+     * $still: the company is linked to it now (no end). The one it passed to is the
+     * operator whose years start as the company's end, else the current one.
+     */
+    function kop_ptl_run_years(array $past, $current, callable $is_me, $still) {
+        $mine = array();
+        $others = array();
+        foreach ($past as $p) {
+            if (!is_string($p) || trim($p) === '') continue;
+            $e = kop_ptl_run_entry($p);
+            if ($is_me($e['name'])) $mine[] = $e;
+            elseif (!$e['parent']) $others[] = $e;
+        }
+        $cur = trim((string) $current) !== '' ? kop_ptl_run_entry($current) : null;
+        if ($cur && $is_me($cur['name'])) {
+            $mine[] = $cur;
+            $cur = null;
+        }
+        $from = 0;
+        $to = 0;
+        foreach ($mine as $e) {
+            if ($e['from'] && (!$from || $e['from'] < $from)) $from = $e['from'];
+            if ($e['to'] > $to) $to = $e['to'];
+        }
+        if ($still) $to = 0;
+        if ($from && $to && $to < $from) $to = 0;
+        // The current operator with no year of its own may have begun when the last one before it
+        // ended ("Psychiatric Solutions, Inc. (2003-2010)", then Universal Health Services); 'last'
+        // names that one, for the timeline to use only where a dated deal between the two says so
+        // (Provo Canyon School lists Charter until 2000, then UHS, with no word of the ten years between).
+        $last = null;
+        if ($still && !$from && $mine && !$cur) {
+            foreach ($others as $e) {
+                if ($e['to'] && (!$last || $e['to'] > $last['to'])) $last = array('name' => $e['name'], 'to' => $e['to']);
+            }
+        }
+        $prev = '';
+        $next = '';
+        foreach ($others as $e) {
+            if ($from && $e['to'] && $e['to'] >= $from - 1 && $e['to'] <= $from) $prev = $e['name'];
+            if ($to && $e['from'] && $e['from'] >= $to && $e['from'] <= $to + 1) $next = $e['name'];
+        }
+        if ($to && $next === '' && $cur && (!$cur['from'] || ($cur['from'] >= $to && $cur['from'] <= $to + 1))) $next = $cur['name'];
+        return array('from' => $from, 'to' => $to, 'prev' => $prev, 'next' => $next, 'last' => $last);
+    }
+}
+
 if (!function_exists('kop_ptl_incident_year')) {
     /** The year a critical incident line (kop_facility_pages_incidents()) happened, or 0. */
     function kop_ptl_incident_year(array $inc) {
@@ -1107,7 +1225,14 @@ if (!function_exists('kop_ptl_investor_events')) {
             $facts = ($s['detail'] ?? '') !== '' ? array(array('Stake', (string) $s['detail'])) : array();
             $sources = ($s['source_url'] ?? '') !== '' ? array(array('url' => (string) $s['source_url'], 'cite' => '')) : array();
             if ((int) ($s['start_year'] ?? 0)) {
-                $events[] = kop_ptl_event((int) $s['start_year'], 'deal', $r !== '' ? $s['name'] . ' became ' . (preg_match('/^[aeiou]/', $r) ? 'an ' : 'a ') . $r : $s['name'] . ' invested', array(
+                // The investor roles (Dropdown Lists 'investor-roles') as what the investor did.
+                if (preg_match('/majority|controlling/', $r)) $did = ' became majority owner';
+                elseif (preg_match('/^(co-)?owner$/', $r)) $did = ' became an owner';
+                elseif (strpos($r, 'minority') !== false) $did = ' became a minority investor';
+                elseif (preg_match('/preferred|royalt/', $r)) $did = ' took preferred equity or royalties';
+                elseif (preg_match('/lend|financ|loan|debt|credit/', $r)) $did = ' lent it money';
+                else $did = ' invested';
+                $events[] = kop_ptl_event((int) $s['start_year'], 'deal', $s['name'] . $did, array(
                     'lead' => (int) ($s['end_year'] ?? 0) ? 'Until ' . (int) $s['end_year'] . '.' : '',
                     'items' => array($who), 'facts' => $facts, 'sources' => $sources, 'major' => $owner,
                 ));

@@ -45,7 +45,11 @@ php scripts/test-operator-pages.php               # renders every /operator/<slu
 # deaths, leadership changes (top titles with a span of years from {prefix}kop_person_jobs at the company's names + the map's
 # lines; one year alone is a sighting), ownership (deals, milestones, investor links with years) and lawsuits. Only what
 # happened while the company ran the program (owner, 2026-11-02): nothing from before it took a program over, after it let
-# go, or in years the records do not tie to it. Review inbox > Company milestones has a Leadership kind for a change no past job dates
+# go, or in years the records do not tie to it. Sales and transfers (takeover / "X passed to Y" / "Stopped running"):
+# the map's "operated" years, else the program's own operator list ("Aspen Education Group (2000-2014)", the current operator
+# after it; kop_ptl_run_years()). A current operator with no year of its own starts when the one before it ended only where an
+# approved deal milestone or dated map line between the two says so (Provo Canyon lists Charter until 2000, then UHS).
+# Owners and investors typed as text with years ("CIC Partners (majority owner, 2006-2011)") count beside investor links. Review inbox > Company milestones has a Leadership kind for a change no past job dates
 (kop-pipeline) python scripts/build-operator-histories.py <slug> ...   # merges those drafts into seeds/operator-histories.json, which is the
                                                 # source of truth (--export refreshes kop-pipeline's tmp/ drafts from it); bump
                                                 # KOP_OPERATOR_HISTORY_SEED_VERSION to apply (replaces only drafts nobody edited)

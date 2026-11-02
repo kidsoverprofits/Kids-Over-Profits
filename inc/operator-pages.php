@@ -740,6 +740,13 @@ if (!function_exists('kop_operator_page_data')) {
                     'end_year'   => (int) $r['end_year'],
                     'own_years'  => $own_years,
                     'relationship' => (string) $r['relationship'],
+                    // Its years under this company by its own list of operators, and who ran it before and after.
+                    'run'        => function_exists('kop_ptl_run_years') ? kop_ptl_run_years(
+                        array_values((array) ($ident['pastOperators'] ?? array())),
+                        (string) ($ident['currentOperator'] ?? ''),
+                        static function ($n) use ($my_keys) { return isset($my_keys[kop_facility_pages_name_key($n)]); },
+                        (string) $r['relationship'] !== 'past'
+                    ) : array(),
                 );
             }
             if (function_exists('kop_facility_eras_name_under_settle')) $then_names = kop_facility_eras_name_under_settle($then_names);
@@ -996,6 +1003,22 @@ if (!function_exists('kop_operator_page_data')) {
                     if (!(int) $il['start_year'] && !(int) $il['end_year']) continue;
                     $inv = kop_inv_get((int) $il['investor_id']);
                     if ($inv) $investors[] = array('name' => trim((string) $inv['name']), 'url' => '') + $il;
+                }
+            }
+        }
+        // Owners and investors the record names only in words, with years ("CIC Partners (majority
+        // owner, 2006-2011)"), unless a link above already holds them.
+        if (function_exists('kop_inv_parse_entry')) {
+            $linked_inv = array();
+            foreach ($investors as $iv) $linked_inv[kop_facility_pages_name_key($iv['name'])] = true;
+            foreach (array('owners' => 'Owner', 'investors' => '') as $field => $as_role) {
+                foreach (kop_facility_pages_text_items($op[$field] ?? null) as $stake_text) {
+                    $stake = kop_inv_parse_entry($stake_text);
+                    $stake_key = kop_facility_pages_name_key($stake['name']);
+                    if ((!$stake['start_year'] && !$stake['end_year']) || $stake_key === '' || isset($linked_inv[$stake_key])) continue;
+                    $linked_inv[$stake_key] = true;
+                    if ($as_role !== '' && $stake['role'] === 'Investor') $stake['role'] = $as_role;
+                    $investors[] = array('url' => '', 'source_url' => '') + $stake;
                 }
             }
         }
