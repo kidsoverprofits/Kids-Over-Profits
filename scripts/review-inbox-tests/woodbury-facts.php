@@ -193,6 +193,16 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         'staff' => array('administrator' => array(array('name' => 'John Santa', 'role' => 'Co-Founder', 'pastJobs' => ''),
             array('name' => 'Matt Hendry', 'role' => 'Clinical Director', 'pastJobs' => 'a Teacher at the reportedly abusive [Cherokee Creek Boys School](https://www'),
             array('name' => 'Dace Goulding', 'role' => 'Operations Manager', 'pastJobs' => ''))));
+    // A link inside the citation's bracket goes without the bracket: two unrelated notes citing one article are not the same note.
+    $cited = function ($t) { return kop_wbf_text_core($t . ' (The Salt Lake Tribune, "Provo Canyon", 2026-06-01: https://www.sltrib.com/news/2026/06/01/provo/)')[0]; };
+    $rec_note = 'Practice: The program used lie detector tests on boys (The Salt Lake Tribune, "Provo Canyon", 2026-06-01: https://www.sltrib.com/news/2026/06/01/provo/)';
+    $check('woodbury-facts: the citation strip keeps its bracket when the link is inside it; a bare trailing link still goes',
+        $cited('Practice: The program used lie detector tests on boys') === 'The program used lie detector tests on boys'
+        && kop_wbf_text_core('Owner: Universal Health Services https://www.example.com/a')[0] === 'Universal Health Services'
+        && kop_wbf_text_core('Owner: Universal Health Services: https://www.example.com/a.')[0] === 'Universal Health Services'
+        && kop_wbf_text_core('Owner: Universal Health Services (HEAL, page (archived 2016): https://example.com/a)')[0] === 'Universal Health Services'
+        && !kop_wbf_text_same(kop_wbf_text_core($rec_note)[0], kop_wbf_text_core('Statement: a former resident described the hair dance as punishment (The Salt Lake Tribune, "Provo Canyon", 2026-06-01: https://www.sltrib.com/news/2026/06/01/provo/)')[0]),
+        kop_wbf_text_core($rec_note)[0]);
     $covers = function ($note) use ($rec) { return kop_wbf_list_covers($rec, 'notes', $note . ' (HEAL, staff list (archived 2016))') !== ''; };
     $check('woodbury-facts: same information in other words is on the record; anything more is not',
         $covers('Ages: boys 12-17') && $covers('Ages: youth, ages 12 to 17 at admission') && !$covers('Ages: boys 12-17; ranch-style boarding school') && !$covers('Ages: girls 12-17')

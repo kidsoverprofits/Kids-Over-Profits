@@ -343,7 +343,11 @@ function kop_wbf_list_has(array $list, $value) {
 /** A list line without its citation, link, label or date: [text, year or null]. */
 function kop_wbf_text_core($s, $incident = false) {
     $s = trim((string) $s);
-    $s = rtrim(preg_replace('/[:\s]+https?:\/\/\S+\s*$/', '', $s), " .");
+    // A trailing link goes; when it sat inside the citation ("(Tribune, "X", 2026-06-01: https://...)") the bracket it closed stays,
+    // so the citation strip below still finds its pair.
+    $bare = preg_replace('/[:\s]+https?:\/\/\S+\s*$/', '', $s);
+    if ($bare !== $s && substr($s, -1) === ')' && substr_count($bare, '(') > substr_count($bare, ')')) $bare .= ')';
+    $s = rtrim($bare, " .");
     // The last balanced "( ... )" is the citation ("(HEAL, staff list for X (archived 2016))").
     if (substr($s, -1) === ')') {
         $depth = 0;

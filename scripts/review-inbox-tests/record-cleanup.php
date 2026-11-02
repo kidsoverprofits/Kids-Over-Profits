@@ -40,6 +40,20 @@ function kop_rinbox_test_record_cleanup(array $src, array $item, callable $check
         kop_dd_same_event($death_a, $death_b) && !kop_dd_same_event($girl_a, $girl_b)
         && !kop_dd_same_event('1994: Death: In 1994 a 17-year-old resident drowned in a canal (wiki)', '1994-06-27: Death: A youth died on June 27, 1994 at Arizona Boys Ranch (HEAL)'));
 
+    // Different full dates, or different campuses, are different events even in one month (Provo Canyon School, 2026-07).
+    $spring = '2026-07-06: License action: Utah officials revoked the license for Provo Canyon School\'s Springville campus. (The Salt Lake Tribune, "Provo Canyon School appeals", 2026-07-27)';
+    $spring_m = '2026-07: License action: Utah regulators revoked the license of the Springville campus in July 2026 (found by regulators). (Fashion Times, "Reckless Ben", 2026-08-05)';
+    $provo = '2026-07-17: License action: The state of Utah revoked the license of Provo Canyon School\'s Provo campus. (KSL, "State revokes license", 2026-07-17)';
+    $provo_m = '2026-07: License action: Utah revoked the license of the Provo campus of Provo Canyon School. (AP, "License revoked", 2026-07-20)';
+    $nidorf_a = '2023-05-09: Death: A 17-year-old died of a fentanyl overdose at Barry J. Nidorf Juvenile Hall on May 9, 2023. (LA Times)';
+    $nidorf_b = '2023: Death: A 17-year-old died of a fentanyl overdose at Barry J. Nidorf Juvenile Hall in 2023. (wiki)';
+    $check('record-cleanup: two full dates that differ, or two different campuses, are two events; the same campus, or one telling that names none, is one',
+        !kop_dd_same_event($spring, $provo) && !kop_dd_same_event($spring_m, $provo) && !kop_dd_same_event($spring_m, $provo_m)
+        && kop_dd_same_event($spring_m, $spring) && kop_dd_same_event($provo_m, $provo)
+        && kop_dd_same_event('2026-07: License action: Utah revoked the license of Provo Canyon School (found by regulators). (Tribune)', $provo_m)
+        && kop_dd_same_event($nidorf_a, $nidorf_b),
+        json_encode(array(kop_dd_same_event($nidorf_a, $nidorf_b))));
+
     $check('record-cleanup: "X (AYA)", "X (2006-2015)", "X, LLC", "X of Y" / "X Y" are the same name',
         kop_dd_name_key('Alternative Youth Adventures (AYA)') === kop_dd_name_key('Alternative Youth Adventures')
         && kop_dd_name_key('Red River Academy (2006-2015)') === kop_dd_name_key('Red River Academy')

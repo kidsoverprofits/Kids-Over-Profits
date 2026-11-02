@@ -341,6 +341,16 @@ if (!function_exists('kop_dd_event_parts')) {
     }
 }
 
+if (!function_exists('kop_dd_campuses')) {
+    /** The places a line gives as a campus or site: "the Springville campus" -> ["springville"]. A line that names none gives []. */
+    function kop_dd_campuses($line) {
+        $s = preg_replace('/\s*\((?:[^()]|\([^()]*\))*\)\s*$/', '', (string) $line);
+        preg_match_all('/\b([A-Z][a-z]{2,})(?:\'s)?\s+(?:campus|facility|location|site|branch|unit|center|centre|home)\b/', $s, $m);
+        $skip = array('the', 'this', 'that', 'its', 'school', 'academy', 'ranch', 'program', 'treatment', 'residential', 'main', 'new', 'old', 'former');
+        return array_values(array_unique(array_diff(array_map('strtolower', $m[1]), $skip)));
+    }
+}
+
 if (!function_exists('kop_dd_same_event')) {
     /**
      * Whether two incident lines tell one event: the same kind on the same day, the same kind in the same
@@ -366,6 +376,10 @@ if (!function_exists('kop_dd_same_event')) {
         $pa = $people($a);
         $pb = $people($b);
         if ($pa && $pb && !array_intersect($pa, $pb)) return false;
+        // ...or name different campuses ("the Springville campus", "the Provo campus": two revocations in one month).
+        $ca = kop_dd_campuses($a);
+        $cb = kop_dd_campuses($b);
+        if ($ca && $cb && !array_intersect($ca, $cb)) return false;
         if (strlen($x['date']) === 10 && $x['date'] === $y['date']) return true;
         if (substr($x['date'], 0, 4) !== substr($y['date'], 0, 4)) return false;
         $small = min(count($x['words']), count($y['words']));
