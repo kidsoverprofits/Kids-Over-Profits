@@ -179,7 +179,8 @@ function kop_memorial_date($date, $precision) {
     <?php if (array_filter(array_column($victims, 'sheet_row'))): ?>
     <p class="kop-memorial-credit" id="memorial-dagger-note">
         <span class="kop-memorial-dagger">&dagger;</span>
-        Entries marked with a dagger come from a list of deaths compiled and submitted by Christina Vandercar.
+        Entries marked with a dagger come from a list of deaths compiled and submitted by Christina Vandercar
+        (<a href="mailto:ttichristina@gmail.com">ttichristina@gmail.com</a>).
     </p>
     <?php endif; ?>
 
