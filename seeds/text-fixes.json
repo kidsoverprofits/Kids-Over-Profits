@@ -275,5 +275,49 @@
         "<strong>1983</strong>"
       ]
     ]
+  },
+  {
+    "post": "david-wilkerson",
+    "fix": "2026-11-02-teen-challenge-research-map-david-wilkerson",
+    "note": "Link the independent Teen Challenge Research Map (teenchallenge-network.netlify.app), a reader's project built partly on KOP open data; owner's decision 2026-11-02, credited without a name as the site asks.",
+    "replace": [
+      [
+        "Teen Challenge USA operates as a missionary department of the Assemblies of God.<sup",
+        "Teen Challenge USA operates as a missionary department of the Assemblies of God. The independent <a href=\"https://teenchallenge-network.netlify.app/\">Teen Challenge Research Map</a> traces the separate nonprofits, programs, leaders and court cases that share the name today, and has <a href=\"https://teenchallenge-network.netlify.app/#/person/p-david-wilkerson\">a page on Wilkerson</a>.<sup"
+      ]
+    ]
+  },
+  {
+    "post": "free-help-paid-by-programs",
+    "fix": "2026-11-02-teen-challenge-research-map-free-help-paid-by-programs",
+    "note": "Link the independent Teen Challenge Research Map (teenchallenge-network.netlify.app), a reader's project built partly on KOP open data; owner's decision 2026-11-02, credited without a name as the site asks.",
+    "replace": [
+      [
+        "they were registered with Microsoft's search tools through the same account.</p>",
+        "they were registered with Microsoft's search tools through the same account. The independent <a href=\"https://teenchallenge-network.netlify.app/#/profile/marketing-and-placement-network\">Teen Challenge Research Map</a> follows the same family's companies through the Teen Challenge programs they market, along with a Christian standards group that was founded at a Teen Challenge conference center.</p>"
+      ]
+    ]
+  },
+  {
+    "post": "how-troubled-teen-programs-market-themselves-online",
+    "fix": "2026-11-02-teen-challenge-research-map-how-troubled-teen-programs-market-themselves-online",
+    "note": "Link the independent Teen Challenge Research Map (teenchallenge-network.netlify.app), a reader's project built partly on KOP open data; owner's decision 2026-11-02, credited without a name as the site asks.",
+    "replace": [
+      [
+        "since we began using them we have not had a month go by that our beds were not full.\"</p>",
+        "since we began using them we have not had a month go by that our beds were not full.\" The independent <a href=\"https://teenchallenge-network.netlify.app/#/profile/marketing-and-placement-network\">Teen Challenge Research Map</a> traces Exceed and its sister companies across the Teen Challenge network.</p>"
+      ]
+    ]
+  },
+  {
+    "post": "deceptive-marketing-then-and-now",
+    "fix": "2026-11-02-teen-challenge-research-map-deceptive-marketing-then-and-now",
+    "note": "Link the independent Teen Challenge Research Map (teenchallenge-network.netlify.app), a reader's project built partly on KOP open data; owner's decision 2026-11-02, credited without a name as the site asks.",
+    "replace": [
+      [
+        "Both companies trace to one family, as <a href=\"/free-help-paid-by-programs/\">Free to Parents</a> shows.</p>",
+        "Both companies trace to one family, as <a href=\"/free-help-paid-by-programs/\">Free to Parents</a> shows, and the independent <a href=\"https://teenchallenge-network.netlify.app/#/profile/marketing-and-placement-network\">Teen Challenge Research Map</a> follows them through the Teen Challenge programs they market.</p>"
+      ]
+    ]
   }
 ]

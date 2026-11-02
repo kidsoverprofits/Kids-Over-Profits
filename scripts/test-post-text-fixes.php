@@ -44,7 +44,7 @@ if (!is_readable($db)) {
     echo "  (no mirror at $db; skipped)\n";
 } else {
     $pdo = new PDO('sqlite:' . $db);
-    $q = $pdo->prepare("SELECT post_content FROM wpdl_posts WHERE post_name = ? AND post_type IN ('page','post') AND post_status = 'publish' ORDER BY ID DESC LIMIT 1");
+    $q = $pdo->prepare("SELECT post_content FROM wpdl_posts WHERE post_name = ? AND post_type IN ('page','post') AND post_status IN ('publish','draft','pending','private') ORDER BY post_status = 'publish' DESC, ID DESC LIMIT 1");
     $done = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_post_text_fixes_done'")->fetchColumn();
     $done = $done ? (array) @unserialize($done) : array();
     $ids = array();
