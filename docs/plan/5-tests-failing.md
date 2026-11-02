@@ -59,10 +59,11 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
        seed record 0 (#10371 Provo Canyon School) has gender "boys (Provo campus; girls at ...)", and
        kop_facility_gender() (since 0afffc3d, 2026-09-18) keeps that as a "Gender as recorded: ..." note. Same seed
        and code on 10-21, so this was probably one of that day's 4.
-   - Blocked: the pre-switch reruns (both tests on the September copy, then finding which side moved for the readers
-     test's 3 failures above). `tmp/prod-app-dump.sql` (2026-09-17 15:03) is only on the owner's old, broken PC
-     (owner, 2026-11-02). Recover it from that PC's drive first. Nothing else holds that pre-switch state: today's
-     dump has the legacy table but not September's v2 tables, alias data or record tables.
+   - Dropped (owner, 2026-11-02: use current data only): the September pre-switch reruns. The readers test's 3
+     failures above came from the 2026-09-17 copy; on today's copy every readers check passes (search, autocomplete,
+     alias index, state pages, news/lawsuit links), so nothing is lost on current data and the 3 are closed as not
+     reproducing. Left: the decision above, i.e. retire or rebase both tests on v2 only. The writer's opening rebuild
+     from the frozen legacy table is what makes most of its 7 failures; on current data that rehearsal tests nothing live.
 2. **Provo Canyon School's view reorders its rows when one line leaves** (found 2026-10-26 working item 6, now in
    PLAN-ARCHIVE). One staff line leaving the live records (Fitisemanu II - Provo Canyon School, kop-data f649268 ->
    8d8af9a) moved the view's median line from 571px to 654px (the 2026-10-26 full run after the fix and a probe agree on
