@@ -208,7 +208,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-research-tasks.ph
 # notification list is (every 15 min per volunteer at most, option kop_volm_email)
 # Agreed calls go through on their own (inc/volunteer-auto.php, option kop_vol_auto, OFF until the owner ticks On at Volunteer Reviewers >
 # "Let agreed calls go through on their own"): 2+ trusted volunteers (20 admin-decided calls, 90% agreed, all three settable) give the same
-# approve/reject, nobody disagrees or says Not sure, queue ticked (only kop_vol_auto_allowed() can be) -> kop_rinbox_apply_action() as reviewer
+# approve/reject, nobody disagrees (a Not sure is left out, owner 2026-11-03), queue ticked (only kop_vol_auto_allowed() can be) -> kop_rinbox_apply_action() as reviewer
 # 'volunteers' (KOP_VOL_AUTO_BY via $GLOBALS['kop_rinbox_reviewer_as']), in Recently done with Undo; once undone an item never auto-applies again.
 # Recs closed this way (outcome_by 'volunteers') never count toward agreement or self-assign. Per person, the Volunteers table's "Goes through on
 # their own" (option kop_vol_auto_people): Yes counts without a record, No never counts, default by record. Tests: the last section of test-review-volunteers.php

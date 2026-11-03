@@ -303,7 +303,7 @@ $check('a disagreement waits', $status('c') === 'pending');
 kop_vol_recommend($va, 'folder-links', 'd', 'approve', '');
 kop_vol_recommend($vc, 'folder-links', 'd', 'unsure', 'Not sure the towns match');
 kop_vol_recommend($vb, 'folder-links', 'd', 'approve', '');
-$check('a Not sure holds it', $status('d') === 'pending');
+$check('a Not sure does not hold it: two trusted agreeing go through', $status('d') === 'approved');
 
 kop_vol_recommend($va, 'folder-links', 'e', 'reject', '');
 kop_vol_recommend($vc, 'folder-links', 'e', 'reject', '');

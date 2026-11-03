@@ -10,7 +10,7 @@
  *   publishing, a named person, survivor material, a public status, merges or
  *   the five submission queues;
  * - at least 'agree' trusted volunteers said the same and nobody said
- *   otherwise (a Not sure holds it for the admin);
+ *   otherwise (a Not sure is left out: it neither agrees nor holds it back);
  * - trusted = 'decided' calls the admin decided, agreeing 'rate' % or more;
  * - the card's own button runs with what the card holds (kop_volp_pick_action());
  * - it has never gone through this way before (once an admin Undoes one, the
@@ -24,8 +24,8 @@
  *
  * Each volunteer can be marked in the Volunteers table (option kop_vol_auto_people
  * [id => yes|no]): "Yes, I trust them" counts without a record, "No, never"
- * never counts toward the agreeing volunteers (a disagreement or Not sure from
- * them still holds the item for the admin).
+ * never counts toward the agreeing volunteers (a disagreement from them still
+ * holds the item for the admin).
  *
  * Option kop_vol_auto {on, sources, agree, decided, rate}.
  * Tested by scripts/test-review-volunteers.php.
@@ -144,6 +144,8 @@ function kop_vol_auto_try($source, $key) {
         global $wpdb;
         $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT r.volunteer_id, r.verdict, v.revoked_at FROM ' . kop_vol_recs_table() . ' r JOIN ' . kop_vol_table()
             . " v ON v.id = r.volunteer_id WHERE r.source = %s AND r.item_key = %s AND r.outcome = ''", (string) $source, (string) $key), ARRAY_A);
+        // A Not sure neither agrees nor disagrees (owner, 2026-11-03): only the approves and rejects are weighed.
+        $rows = array_values(array_filter($rows, function ($r) { return $r['verdict'] !== 'unsure'; }));
         $verdicts = array_values(array_unique(array_column($rows, 'verdict')));
         if (count($verdicts) !== 1 || !in_array($verdicts[0], array('approve', 'reject'), true)) return null;
         $live = array();
