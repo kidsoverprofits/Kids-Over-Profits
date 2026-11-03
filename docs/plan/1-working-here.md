@@ -41,6 +41,15 @@ other sessions that commit and push to `main` at the same time:
   of `HEAD` plus only your change (`git hash-object -w`, then
   `git update-index --cacheinfo`). Committing another session's
   `require_once` of an uncommitted file would fatal production.
+- **Keep the working trees clean** (owner, 2026-11-03). Scratch files (exports, previews, dry runs, test
+  output) go to the session scratchpad or `tmp/`, never into the tree. Before a session hands off, every file it
+  created or changed is committed, moved to `tmp/`, ignored, or deleted by that session; data a scraper wrote is
+  committed after a look at its diff (fewer reports, or bot-check pages, means the run failed: say so, don't commit).
+  `powershell -File scripts	ree-check.ps1` lists what is dirty in all four checkouts and marks files untouched for
+  24 hours FORGOTTEN; it only reads. Personal and editor files (`*.code-workspace`, `desktop.ini`) are ignored for
+  every repo by the owner's `~/.config/git/ignore`, not by the public `.gitignore` files. Still to add: a `Stop`
+  hook in `.claude/settings.json` that runs `tree-check.ps1 -Quiet` and shows its list (report only, never block,
+  since another session's file may be in progress).
 - Push with `git pull --rebase --autostash origin main`, then
   `git push origin HEAD:main`.
 - If Source Control fills with files already on `main`, compare each to
