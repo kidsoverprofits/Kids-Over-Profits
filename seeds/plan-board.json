@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 17:42 UTC",
- "source": "73588bf4cf3b9338751d4debaf82f968bed7136c",
+ "built": "2026-11-03 17:50 UTC",
+ "source": "428116624b64fa49a670ac995f76d371218a7e8c",
  "sections": [
   {
    "key": "2",
@@ -876,20 +876,20 @@
        "hash": "b95bbbdce57c"
       },
       {
-       "id": "4.2:mn-run-of-2026-11-01-hit-dhs-s-bot-check-do-not-commit-it",
-       "lead": "MN run of 2026-11-01 hit DHS's bot check; do not commit it",
-       "text": "**MN run of 2026-11-01 hit DHS's bot check; do not commit it** (found 2026-11-03). `kop-data/mn_reports.json` in the working tree has \"Verifying your browser before proceeding...\" pages in place of real reports (e.g. `MN-1074484-002`, the 2024-12-02 180 Degrees correction order, lost its 10,625-character text and its date), and 225 reports dropped to 204. The committed copy (run of 2026-10-18) is the good one; it was left uncommitted, not reverted, until the owner says. Fix `mn_scraper.py`: treat a page whose text is the bot check (or \"HTTP ERROR 503\") as a failed fetch, keep the held report instead of overwriting it, and never drop a held report because one run could not reach it. Then rerun with Chrome closed and restore the file (`git -C ../kop-data checkout -- mn_reports.json`).",
-       "ask": "May I restore kop-data's mn_reports.json to the committed 2026-10-18 copy now?",
+       "id": "4.2:mn-run-of-2026-11-01-hit-dhs-s-bot-check",
+       "lead": "MN run of 2026-11-01 hit DHS's bot check",
+       "text": "**MN run of 2026-11-01 hit DHS's bot check** (found 2026-11-03). `mn_scraper.py` fixed 2026-11-03 (kop-pipeline, tests `scrapers/test_mn_scraper.py`): a run now starts from kop-data's `mn_reports.json`, not from `mn_progress.json` alone (the 11-01 progress file had been renumbered in page order and lacked 22 held reports, which is how 225 became 204); a bot check or Chrome 503/403 page is a failed fetch; held reports keep their id and text; held bot pages are fetched again; block-page reports are never posted; the file is not written if it would hold fewer reports; 5 blocked fetches in a row stop the run. kop-data's file was restored to the 2026-10-18 copy. The committed copy itself held 13 bot pages and 3 Chrome error pages: 11 of the 13 are repaired from good text the 11-01 run got, the other 2 (MN-831080-015, and any the rerun still cannot reach) are fetched again; MN-1086169-003/4/5 (`LLO_HCT`, `LLO_style1`, `LLO_style2`: page tokens, not documents) are dropped. Dry run on the real files: 222 held + 2 new = 224. Still open: - Owner: rerun MN with Chrome closed, then commit kop-data with the `git add` / `git commit` lines the run prints (it prints a warning in their place if anything is off). - The 11-01 run already posted to production: the 11-03 mirror has 230 MN reports, 9 of them bot pages, and ids numbered the progress file's way (MN-1106748-001 = LLO_473258 instead of LLO_464296). The rerun's post puts the held ids back; check after it that `inspection_reports` has no MN `raw_content LIKE 'Verifying your browser%'` rows, and delete the MN-1086169-003/4/5 rows and any MN ids the post no longer sends (the write API never deletes). - The PDFs printed from bot pages in `My Drive/KOP Inspection Reports/mn_pdfs` are moved aside on the first run as `<name>.blockpage`; the owner can delete those.",
+       "ask": "",
        "date": "2026-11-03",
-       "hash": "45fc1809a5c1"
+       "hash": "5b75453907e7"
       },
       {
        "id": "4.2:scrapers-finish-by-naming-what-they-changed",
        "lead": "Scrapers finish by naming what they changed",
-       "text": "**Scrapers finish by naming what they changed** (2026-11-03, part of keeping the trees clean): the UT run of 2026-11-01 sat uncommitted for two days and the MN one is still there. At the end of each run the scraper launcher prints the data files it wrote, and the `git add <paths>` / `git commit -m \"data(<st>): <month> scrape\"` lines for them (kop-pipeline's `scrapers/middle/` or kop-data), after a sanity check: fewer reports than the held copy, or any bot-check / error page text, prints a warning instead of the commit line. The dated `utah_citations_*.csv` files are monthly snapshots, tracked on purpose; they are data, not scratch.",
+       "text": "**Scrapers finish by naming what they changed** (2026-11-03, part of keeping the trees clean): the UT run of 2026-11-01 sat uncommitted for two days and the MN one is still there. At the end of each run the scraper launcher prints the data files it wrote, and the `git add <paths>` / `git commit -m \"data(<st>): <month> scrape\"` lines for them (kop-pipeline's `scrapers/middle/` or kop-data), after a sanity check: fewer reports than the held copy, or any bot-check / error page text, prints a warning instead of the commit line. The dated `utah_citations_*.csv` files are monthly snapshots, tracked on purpose; they are data, not scratch. MN does this itself since 2026-11-03 (`print_commit_lines` / `run_check` in `mn_scraper.py`, a pattern to copy); the launcher-wide version for the other states is still open.",
        "ask": "",
        "date": "2026-11-03",
-       "hash": "6711d6d69e06"
+       "hash": "f163951c83d6"
       }
      ]
     },
