@@ -25,14 +25,14 @@ Record numbers: 00 Colorado County Boot Camp, 01 Aspen Ranch, 02 Provo Canyon Sc
 2. Never cite KOP's files, sheets, notes or site pages. Cite the original they record. Where the only copy of an original is a file in Dani's Drive, cite the original as a print citation (empty URL, full outlet/date/docket label).
 3. HEAL, the r/troubledteens wiki, Fornits, Wikipedia and Breaking Code Silence are not primary sources. Follow their citations to the original article, filing, record, or the survivor's own published account, and cite that.
 4. Survivor testimony is primary when cited to where the survivor published it, and attributed in the text.
-5. A claim with no traceable original stays out of the text. List it in the note with the lead source.
+5. HEAL, the wiki and KOP's pages and files each carry their own citation for a claim (a footnote, a link, a named article or docket). Take that citation and cite the original. You don't have to fetch or verify the original first (Dani, Nov 3). Never cut a claim because the original couldn't be opened or checked. A claim stays out only when the citing source gives no citation at all; list it in the note with the page checked.
 6. A "correction" that contradicts KOP's records gets flagged in the note, not silently written into the text.
 7. Every sentence naming a person with an accusation, charge, conviction, lawsuit, firing or death must match its source's strength (alleged / charged / convicted, dates, ages, counts). Check new ones against the source before publishing.
 
-Scan for banned hosts after any change:
+Scan for banned hosts after any change (survivors' own Reddit posts are primary under rule 4, so only the wiki is matched):
 
 ```
-grep -oE 'href="[^"]*(heal-online|reddit\.com/r/troubledteens|fornits|wikipedia\.org|docs\.google|drive\.google|breakingcodesilence|kidsoverprofits\.org/(facility|operator|glossary))[^"]*"' out/rec*.html
+grep -oE 'href="[^"]*(heal-online|reddit\.com/r/troubledteens/wiki|fornits|wikipedia\.org|docs\.google|drive\.google|breakingcodesilence|kidsoverprofits\.org/(facility|operator|glossary))[^"]*"' out/rec*.html
 ```
 
 ## Writing rules
