@@ -237,6 +237,9 @@ function kop_test_fact_fold(callable $check) {
     $check('fact-fold: Undo on its card puts it back, and it is not cleared again', $nf['status'] === 'pending' && $nf['reviewed_by'] === 'inbox-test'
         && $pdo->query('SELECT status FROM news_facts WHERE id = 990002')->fetchColumn() === 'pending');
 
+    // 7. The AI step (d) with a stubbed AI (no network): what it answers, the engine checks and writes.
+    kop_test_fact_fold_ai($check, $w, $get, $mkdoc, $F1);
+
     // 6. Linking a waiting news fact by the exact-name rule, with Undo. The name index is built once per process, before the
     // fixtures: the fixture fact names a record the mirror has (one the rule links today), its own facts made up.
     $probe = kop_nf_link_waiting($pdo, false, 60)['map'];
@@ -271,4 +274,119 @@ function kop_test_fact_fold(callable $check) {
     $pdo->exec('DELETE FROM news_submissions WHERE id >= 990100');
     $pdo->exec('DELETE FROM news_facility_links WHERE news_id = 990101');
     $pdo->exec("DELETE FROM wpdl_kop_auto_connect WHERE source LIKE 'news-facts%'");
+}
+
+/**
+ * The AI step (d) on made-up lines of record $F1, with $GLOBALS['kop_fold_ai_call'] answering instead of a provider:
+ * same_as an on-hand line clears, same_as a waiting line folds, differs marks a conflict, a bad reply changes nothing,
+ * the cache saves the second call, a spent budget stops only the AI, kop_fact_differs() overrules an AI "same", Undo.
+ */
+function kop_test_fact_fold_ai(callable $check, callable $w, callable $get, callable $mkdoc, $F1) {
+    require_once dirname(__DIR__, 2) . '/api/ai-usage.php';
+    $pdo = $GLOBALS['pdo'];
+    $wt = 'wpdl_kop_woodbury_facts';
+    $inc = 'criticalIncidents.customIncidents';
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    $doc = $mkdoc();
+    $doc['criticalIncidents']['customIncidents'][] = '2024-03-10: Injury: A resident broke her wrist when staff pinned her to the gym floor during a restraint.';
+    $pdo->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($doc), $F1));
+    unset($GLOBALS['kop_test_options'][kop_fold_ai_cache_name('r:' . $F1)]);
+
+    $h1 = $w($F1, $inc, 'Injury: A resident\'s wrist was fractured when workers held her on the gymnasium floor.', '2024-04-02', 301);
+    $s1 = $w($F1, $inc, '2025-02-11: Injury: Staff locked a boy in a seclusion room without food, state records show.', '2025-03-01', 302);
+    $s2 = $w($F1, $inc, 'Injury: A boy was kept alone in a seclusion room with no meals, a state report found after an inspection.', '2025-03-05', 303);
+    $d1 = $w($F1, $inc, 'Injury: Staff ignored a camper\'s asthma attack on a mountain hike.', '2025-07-01', 304);
+    $d2 = $w($F1, $inc, 'Injury: Counselors waited before calling for help when a camper had an asthma attack at the lake.', '2025-07-03', 305);
+
+    $calls = 0;
+    $plan = 'bad';
+    $GLOBALS['kop_fold_ai_call'] = function ($prompt) use (&$calls, &$plan) {
+        $calls++;
+        if ($plan === 'bad') return 'Sorry, here is my reading: line 1 looks like line 2.';
+        $num = array();
+        foreach (explode("\n", $prompt) as $l) if (preg_match('/^(\d+)\. (?:WAITING|ON HAND): (.*)$/', $l, $m)) $num[(int) $m[1]] = $m[2];
+        preg_match('/^Judge: (.*)$/m', $prompt, $jm);
+        $find = function ($frag) use ($num) { foreach ($num as $n => $t) if (strpos($t, $frag) !== false) return $n; return 0; };
+        $out = array();
+        foreach (array_map('intval', explode(',', $jm[1] ?? '')) as $n) {
+            $ans = array('line' => $n, 'answer' => 'new');
+            foreach ($plan as $frag => $v) {
+                if (strpos($num[$n] ?? '', $frag) === false) continue;
+                $ans = array('line' => $n, 'answer' => $v[0]);
+                if (isset($v[1])) $ans['to'] = $find($v[1]);
+            }
+            $out[] = $ans;
+        }
+        return json_encode(array('verdicts' => $out));
+    };
+    $GLOBALS['kop_fold_ai_providers'] = array('groq', 'gemini');
+    $GLOBALS['kop_ai_budget_counts'] = array('start' => kop_ai_budget_day_start());   // nothing spent today
+    $run = function () use ($F1) { return kop_fold_run(true, 60, array('only' => array('r:' . $F1), 'ai' => 'live')); };
+    $waiting = function () use ($pdo, $wt, $F1) { return (int) $pdo->query("SELECT COUNT(*) FROM $wt WHERE facility_id = $F1 AND status = 'pending'")->fetchColumn(); };
+
+    try {
+        // A reply that cannot be read changes nothing.
+        $S = $run();
+        $check('fact-fold AI: the close lines go to one call', $calls === 1 && ($S['ai_candidates'] ?? 0) >= 3, json_encode(array($calls, $S['ai_candidates'] ?? 0, $S['ai_errors'] ?? null)));
+        $check('fact-fold AI: a bad reply changes nothing', $waiting() === 5 && ($S['ai_bad_replies'] ?? 0) === 1 && strpos((string) $get($d1)['extra'], 'ai_differs') === false);
+
+        // A spent budget stops the AI part only: the rules still fold two word-for-word tellings.
+        $r1 = $w($F1, $inc, '2022-05-04: Death: A 15-year-old resident died after staff restrained him face down in the dorm.', '2022-06-01', 306);
+        $r2 = $w($F1, $inc, '2022-05-04: Death: A 15-year-old resident died after staff restrained him face down in the dorm.', '2022-06-09', 307);
+        $GLOBALS['kop_ai_budget_counts'] = array('start' => kop_ai_budget_day_start(), 'groq' => 100000, 'gemini' => 100000);
+        $S = $run();
+        $check('fact-fold AI: a spent budget makes no call and says so', $calls === 1 && $S['ai_stopped'] === 'budget', json_encode(array($calls, $S['ai_stopped'])));
+        $check('fact-fold AI: ...and the rules still fold', $get($r2)['status'] === 'merged' || $get($r1)['status'] === 'merged');
+        $check('fact-fold AI: ...and nothing the AI would judge moved', $get($h1)['status'] === 'pending' && $get($s2)['status'] === 'pending');
+        $GLOBALS['kop_ai_budget_counts'] = array('start' => kop_ai_budget_day_start());
+
+        // The answers: h1 is the record's line in other words, s2 tells s1 again, d1 disagrees with d2.
+        $plan = array('wrist was fractured' => array('same_as', 'broke her wrist'), 'kept alone in a seclusion' => array('same_as', 'locked a boy'),
+            'mountain hike' => array('differs', 'at the lake'));
+        $S = $run();
+        $rh = $get($h1);
+        $ah = json_decode((string) $rh['applied'], true);
+        $check('fact-fold AI: same_as an on-hand line clears it (how ai, "Already on hand in other words")', $rh['status'] === 'rejected' && $rh['reviewed_by'] === 'auto'
+            && ($ah['how'] ?? '') === 'ai' && strpos($ah['reason'] ?? '', 'Already on hand in other words: ') === 0 && ($ah['cleared'] ?? '') === 'on_hand', json_encode($ah));
+        $m = $get($s1)['status'] === 'merged' ? $s1 : $s2;
+        $k = $m === $s1 ? $s2 : $s1;
+        $am = json_decode((string) $get($m)['applied'], true);
+        $check('fact-fold AI: same_as a waiting line folds them (how ai), the kept card cites both', $get($m)['status'] === 'merged' && $get($k)['status'] === 'pending'
+            && ($am['how'] ?? '') === 'ai' && count(kop_wbf_evidence($get($k))) === 2, json_encode(array($get($s1)['status'], $get($s2)['status'], $am)));
+        $xd = json_decode((string) $get($d1)['extra'], true);
+        $check('fact-fold AI: differs leaves it waiting, marked as a conflict', $get($d1)['status'] === 'pending' && $get($d2)['status'] === 'pending'
+            && strpos($xd['ai_differs']['line'] ?? '', 'at the lake') !== false, json_encode($xd));
+        $item = kop_rinbox_get_item('woodbury-facts', $d1);
+        $check('fact-fold AI: ...and its card shows the Conflict mark', strpos((string) ($item['conflict'] ?? ''), 'AI check') !== false, (string) ($item['conflict'] ?? ''));
+        $before = $calls;
+        $S = $run();
+        $check('fact-fold AI: an unchanged record costs no second call (cache)', $calls === $before && $get($d1)['status'] === 'pending'
+            && strpos((string) $get($d1)['extra'], 'ai_differs') !== false, json_encode(array($before, $calls)));
+
+        // Undo of an AI fold: back to waiting, its citation off the kept card, not folded again (a person has it now).
+        kop_fold_undo_member('wbf', $get($m), 'tester');
+        $check('fact-fold AI: Undo restores an AI fold', $get($m)['status'] === 'pending' && count(kop_wbf_evidence($get($k))) === 1);
+        $run();
+        $check('fact-fold AI: ...and it is not folded again', $get($m)['status'] === 'pending');
+
+        // kop_fact_differs() overrules an AI "same": two tellings with other numbers never fold, whatever the answer.
+        $o1 = $w($F1, $inc, '2023-09-14: Injury: 4 residents were hurt when staff restrained them in the dining hall.', '2023-10-01', 308);
+        $o2 = $w($F1, $inc, '2023-09-14: Injury: 7 residents were hurt when staff restrained them in the dining hall.', '2023-10-02', 309);
+        $GLOBALS['kop_test_filters']['kop_fold_ai_pairs'] = array($o2 => array('v' => 'same_as', 'to' => $o1), $o1 => array('v' => 'same_as', 'to' => $o2));
+        $S = $run();
+        unset($GLOBALS['kop_test_filters']['kop_fold_ai_pairs']);
+        $check('fact-fold AI: an AI "same" over different numbers is overruled', $get($o1)['status'] === 'pending' && $get($o2)['status'] === 'pending' && ($S['ai_overruled'] ?? 0) >= 1,
+            json_encode(array($get($o1)['status'], $get($o2)['status'], $S['ai_overruled'] ?? 0)));
+
+        // The reply checks: out of range, pointing at itself, a line not asked.
+        $p = kop_fold_ai_parse('{"verdicts": [{"line": 9, "answer": "new"}, {"line": 1, "answer": "same_as", "to": 1}, {"line": 2, "answer": "same_as", "to": 7},
+            {"line": 3, "answer": "same_as", "to": 1}, {"line": 2, "answer": "differs 3"}]}', array('a', 'b', 'c'), array('a', 'b'));
+        $check('fact-fold AI: the reply check drops numbers out of range, self-matches and lines not asked', $p === array('b' => array('v' => 'differs', 'to' => 'c')), json_encode($p));
+        $cy = kop_fold_ai_drop_cycles(array('a' => array('v' => 'same_as', 'to' => 'b'), 'b' => array('v' => 'same_as', 'to' => 'c'), 'c' => array('v' => 'same_as', 'to' => 'a'),
+            'd' => array('v' => 'same_as', 'to' => 'e'), 'e' => array('v' => 'same_as', 'to' => 'd')), array_fill_keys(array('a', 'b', 'c', 'd', 'e'), 'x'));
+        $check('fact-fold AI: a loop of three answers is dropped, a pair naming each other stands', array_keys($cy) === array('d', 'e'), json_encode($cy));
+    } finally {
+        unset($GLOBALS['kop_fold_ai_call'], $GLOBALS['kop_fold_ai_providers'], $GLOBALS['kop_ai_budget_counts'], $GLOBALS['kop_test_filters']['kop_fold_ai_pairs']);
+        $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    }
 }

@@ -280,4 +280,7 @@ its text and cites every source; each has "Undo the fold" (card and Recently don
 kept card, for good. A different number, date, name or campus never joins, and a different value on the record is a conflict, never
 cleared. Items a person edited or sent back are left alone. News facts that name one record exactly are linked to it first (Recently
 done, source Facts from news; Undo unlinks). Count mode on the mirror: `php scripts/fold-dry-run.php` (also `fact-dedupe.php --engine`).
-Tests: `scripts/review-inbox-tests/fact-fold.php`. The AI step is the hook `kop_fold_ai_pairs()`, not written yet.
+Tests: `scripts/review-inbox-tests/fact-fold.php`. After the rules, the AI step judges close pairs ("the same in other words"):
+its copies are cleared or folded at once like the rule ones (reason "Already on hand in other words: ...", how `ai`), and a telling it
+reads as the same event with another detail keeps waiting with a Conflict mark on its card ("The AI check reads this as...").
+No confirm step; Undo is the check. Budget and calls: `docs/claude/ai-usage.md`.

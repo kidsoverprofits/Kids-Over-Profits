@@ -24,7 +24,12 @@
  *      in it) is NOT folded: a waiting news fact has no place to hold other citations.
  *   An item a person edited (extra.edited_by) or sent back (reviewed_by not empty and not 'auto'), and any item
  *   Undo put back (it gets a person as reviewed_by and extra.fold_undone), is never cleared or folded again.
- *   d  The AI step is a hook: kop_fold_ai_pairs() (returns nothing yet).
+ *   d  AI for "the same in other words" (kop_fold_ai_judge()): after the rules, one call a unit (split past
+ *      KOP_FOLD_AI_MAX_LINES) through kop_ai_generate_alternating(), job "Fact fold: same in other words", within the
+ *      daily budget and KOP_FOLD_AI_CALLS_PER_RUN. Per waiting line: same_as an on-hand line = cleared (how 'ai'),
+ *      same_as a waiting line = folded (how 'ai'), differs = a Conflict mark on the card (kop_fold_write_differs()),
+ *      new = nothing. kop_fact_differs() overrules an AI "same". Answers are remembered per line (option
+ *      kop_fold_ai_<md5 unit>), so an unchanged record costs nothing; put-off units wait on kop_fold_state.ai_todo.
  *
  * Undo: kop_fold_undo_member() (Woodbury, Fornits), kop_nf_undo_auto() (news facts: folded, cleared, linked).
  * kop_nf_link_waiting() links waiting news facts to records by the exact-name rule (docs/claude/fact-shape.md 7.4).
@@ -121,7 +126,7 @@ function kop_fold_add_ev(array $ev, array $new, $mid) {
 }
 
 /**
- * kop_wbf_sync() rewrites a waiting row from the build: the fold marks (extra.folded) and the citations folded in
+ * kop_wbf_sync() rewrites a waiting row from the build: the fold marks (extra.folded, extra.ai_differs) and the citations folded in
  * (evidence entries with "folded_from") are put back on the rewritten row. $row is the row about to be stored,
  * $extra the build's extra, $ev the build's evidence.
  */
@@ -130,8 +135,9 @@ function kop_fold_keep_on_sync(array $row, $pkey, array $extra, array $ev) {
     $old = $wpdb->get_row($wpdb->prepare('SELECT extra, evidence FROM ' . kop_wbf_table() . ' WHERE pkey = %s', $pkey), ARRAY_A);
     if (!$old) return $row;
     $ox = json_decode((string) $old['extra'], true) ?: array();
-    if (!empty($ox['folded'])) {
-        $extra['folded'] = $ox['folded'];
+    if (!empty($ox['folded']) || !empty($ox['ai_differs'])) {
+        // The fold marks and the AI step's Conflict mark (kop_fold_write_differs()) outlive a reload.
+        foreach (array('folded', 'ai_differs') as $k) if (!empty($ox[$k])) $extra[$k] = $ox[$k];
         $row['extra'] = wp_json_encode($extra);
     }
     foreach (kop_wbf_evidence($old) as $e) {
@@ -524,16 +530,319 @@ function kop_fold_block_pairs(array $items) {
     return $pairs;
 }
 
+/* ---- The AI step (d): the same fact in other words ---------------------------------------------------------- */
+
+// Lines in one prompt (the asked waiting lines and the lines they are close to). 40 lines of at most 260 characters
+// is about 3,500 tokens with the answer, under Groq's free per-minute token limit; a record with more is split.
+const KOP_FOLD_AI_MAX_LINES = 40;
+const KOP_FOLD_AI_LINE_CHARS = 260;
+// Calls per hourly run. The 90 s time box fits about this many (Gemini is paced 4.5 s apart, a call takes 3-10 s),
+// and 10 an hour (240 a day at most, while a backlog lasts) leaves the background share of the daily budget
+// (0.7 x (500 + 400) = 630) room for the news facts reader (6 an hour) and the hourly enrich.
+const KOP_FOLD_AI_CALLS_PER_RUN = 10;
+// Part of every line key: a new prompt wording asks again.
+const KOP_FOLD_AI_VERSION = 'v1';
+
+/** The job name the AI usage log and budget know this step by (kop_ai_usage_jobs() names the file the same). */
+function kop_fold_ai_job() {
+    return 'Fact fold: same in other words';
+}
+
+/** The line as the AI reads it: its date (or when it was told, for an undated one) and its words. */
+function kop_fold_ai_line(array $f) {
+    $when = $f['date'] !== '' ? '(' . $f['date'] . ') ' : (($f['told'] ?? '') !== '' ? '(no date given; told ' . substr((string) $f['told'], 0, 10) . ') ' : '');
+    return $when . kop_fold_cut($f['text'], KOP_FOLD_AI_LINE_CHARS);
+}
+
+/** A line's cache key: its id and the words sent, so a changed line is asked again. */
+function kop_fold_ai_lkey($id, $line) {
+    return substr(md5(KOP_FOLD_AI_VERSION . "\n" . $id . "\n" . $line), 0, 16);
+}
+
+/** The option that remembers a unit's AI answers (autoload off): {seen: {lkey: 1}, v: {lkey: [verdict, to lkey]}, bad: {chunk: n}, t}. */
+function kop_fold_ai_cache_name($unit) {
+    return 'kop_fold_ai_' . md5((string) $unit);
+}
+
+function kop_fold_ai_prompt($name, array $ids, array $ask, array $rg) {
+    $p = 'These are facts about one program, "' . $name . '", from news articles, a newsletter (Woodbury Reports), a survivor forum (Fornits) and the program\'s own record. '
+        . "Lines marked ON HAND are already on the record or approved; lines marked WAITING wait for review.\n\n"
+        . "For each line listed under \"Judge\", say whether another line tells the same fact:\n"
+        . "- same_as <n>: line n tells the same event or fact. Only when who, what, when and where agree. A shorter or less detailed telling of the same event is the same. If an ON HAND line is the same, point to it.\n"
+        . "- differs <n>: line n is clearly about the same event, but the two disagree on a date, a number, a person or a place.\n"
+        . "- new: no other line tells it.\n"
+        . "Different dates, numbers, people or places are not the same fact. Two events of one kind (two injuries, two inspections, two lawsuits) are not the same; "
+        . "two lawsuits are the same only when they are clearly one case (the same parties, case name or filing). When unsure, answer new.\n"
+        . "Only judge; never rewrite a line.\n\n"
+        . "Return ONLY JSON, no other text: {\"verdicts\": [{\"line\": 3, \"answer\": \"same_as\", \"to\": 1}, {\"line\": 4, \"answer\": \"new\"}, {\"line\": 5, \"answer\": \"differs\", \"to\": 2}]}\n\nLines:\n";
+    $num = array();
+    foreach ($ids as $i => $id) {
+        $num[$id] = $i + 1;
+        $p .= ($i + 1) . '. ' . (isset($rg['onhand'][$id]) ? 'ON HAND' : 'WAITING') . ': ' . $rg['lines'][$id] . "\n";
+    }
+    $p .= "\nJudge: " . implode(', ', array_map(function ($id) use ($num) { return $num[$id]; }, $ask)) . "\n";
+    return $p;
+}
+
 /**
- * The AI step (plan 4.4 item 20 d), not built: gets the close candidates of one record and returns a verdict per waiting
- * line id: array(id => array('v' => 'same_as', 'to' => <id of an on-hand line or another waiting line>) | array('v' => 'new')
- * | array('v' => 'differs')). $record_groups = array('record' => key, 'name' => string, 'waiting' => [id => text],
- * 'onhand' => [id => text], 'state' => [id => 'on_record'|'held'|'kept'|'waiting'], 'pairs' => [[id, id], ...]).
- * Called through kop_alternating (api/ai-providers.php) when it is written; every verdict is checked against
- * kop_fact_differs() before it is used. Returns nothing for now; the filter lets a test (or the next engineer) answer.
+ * The reply as verdicts [id => {v, to?}] for the asked lines only, or null when it cannot be read. A line number out
+ * of range, a line pointing at itself, an answer for a line not asked, or an unknown answer is left out.
  */
-function kop_fold_ai_pairs(array $record_groups) {
-    return (array) apply_filters('kop_fold_ai_pairs', array(), $record_groups);
+function kop_fold_ai_parse($reply, array $ids, array $ask) {
+    $reply = preg_replace('/^\s*```(?:json)?\s*|\s*```\s*$/i', '', trim((string) $reply));
+    $data = json_decode($reply, true);
+    if (!is_array($data) && preg_match('/\{.*\}/s', $reply, $m)) $data = json_decode($m[0], true);
+    if (!is_array($data) || !isset($data['verdicts']) || !is_array($data['verdicts'])) return null;
+    $n = count($ids);
+    $asked = array_flip($ask);
+    $out = array();
+    foreach ($data['verdicts'] as $v) {
+        if (!is_array($v)) continue;
+        $line = (int) ($v['line'] ?? 0);
+        $ans = strtolower(trim((string) ($v['answer'] ?? '')));
+        $to = (int) ($v['to'] ?? 0);
+        if (preg_match('/^(same_as|differs)\s*(\d+)$/', $ans, $m)) { $ans = $m[1]; $to = (int) $m[2]; }
+        if ($line < 1 || $line > $n || !isset($asked[$ids[$line - 1]])) continue;
+        $id = $ids[$line - 1];
+        if ($ans === 'new') { $out[$id] = array('v' => 'new'); continue; }
+        if (!in_array($ans, array('same_as', 'differs'), true) || $to < 1 || $to > $n || $to === $line) continue;
+        $out[$id] = array('v' => $ans, 'to' => $ids[$to - 1]);
+    }
+    return $out;
+}
+
+/** The AI call (a test sets $GLOBALS['kop_fold_ai_call'] to answer without the network). Throws what the providers threw. */
+function kop_fold_ai_call($prompt) {
+    if (!empty($GLOBALS['kop_fold_ai_call']) && is_callable($GLOBALS['kop_fold_ai_call'])) return (string) call_user_func($GLOBALS['kop_fold_ai_call'], $prompt);
+    require_once get_stylesheet_directory() . '/api/ai-providers.php';
+    $GLOBALS['kop_ai_job'] = kop_fold_ai_job();
+    try {
+        return kop_ai_generate_alternating($prompt, array('maxTokens' => 4000, 'temperature' => 0.1));
+    } finally {
+        unset($GLOBALS['kop_ai_job']);
+    }
+}
+
+/** Whether any provider still has room in today's background share (api/ai-usage.php) for this job. */
+function kop_fold_ai_budget_ok() {
+    require_once get_stylesheet_directory() . '/api/ai-providers.php';
+    require_once get_stylesheet_directory() . '/api/ai-usage.php';
+    if (in_array(kop_fold_ai_job(), kop_ai_budget_protected_jobs(), true)) return true;
+    $limits = kop_ai_budget_limits();
+    $ps = isset($GLOBALS['kop_fold_ai_providers']) ? (array) $GLOBALS['kop_fold_ai_providers'] : kop_ai_alternating_providers();   // tests name them
+    foreach ($ps as $p) {
+        if (isset($limits[$p]) && kop_ai_budget_used($p) < $limits[$p]['background']) return true;
+    }
+    return false;
+}
+
+/**
+ * Verdicts for one unit's close candidates: array(verdicts [id => {v: same_as|new|differs, to?}], state) with state
+ * 'none' (nothing to ask), 'done' (every pair judged, now or before), 'deferred' (some left for a later run: the call
+ * cap, the budget, the time box or a failed call), 'estimate' (counted only). $rg: record, name, waiting [id => text],
+ * onhand [id => text], state [id => ...], lines [id => line as sent], pairs [[id, id], ...], unit.
+ * $x: ai ('' | 'estimate' | 'live'), apply, start, seconds, ai_cap. The filter kop_fold_ai_pairs (tests) answers instead.
+ */
+function kop_fold_ai_judge(array $rg, array &$S, array $x) {
+    $forced = apply_filters('kop_fold_ai_pairs', null, $rg);
+    if (is_array($forced)) return array($forced, 'done');
+    $mode = (string) ($x['ai'] ?? '');
+    if ($mode === '' || !$rg['pairs']) return array(array(), 'none');
+    $name = kop_fold_ai_cache_name($rg['unit']);
+    $cache = $mode === 'live' ? get_option($name, array()) : array();
+    $cache = is_array($cache) ? $cache : array();
+    $seen = (array) ($cache['seen'] ?? array());
+    $cv = (array) ($cache['v'] ?? array());
+    $lk = array();
+    foreach ($rg['lines'] as $id => $line) $lk[$id] = kop_fold_ai_lkey($id, $line);
+    $id_of = array_flip($lk);
+    $partners = array();
+    foreach ($rg['pairs'] as $pr) {
+        list($a, $b) = $pr;
+        if (isset($rg['waiting'][$a])) $partners[$a][$b] = true;
+        if (isset($rg['waiting'][$b])) $partners[$b][$a] = true;
+    }
+    // Asked: a waiting line with a partner it has not been sent with before. The rest take their remembered verdicts.
+    $ask = array();
+    $out = array();
+    foreach ($partners as $id => $ps) {
+        $judged = isset($seen[$lk[$id]]);
+        foreach ($ps as $p => $_) if (!isset($seen[$lk[$p]])) $judged = false;
+        if (!$judged) { $ask[] = $id; continue; }
+        $v = $cv[$lk[$id]] ?? null;
+        if (is_array($v) && isset($v[0])) {
+            if ($v[0] === 'new') $out[$id] = array('v' => 'new');
+            elseif (isset($v[1], $id_of[$v[1]])) $out[$id] = array('v' => $v[0], 'to' => $id_of[$v[1]]);
+        }
+    }
+    if (!$ask) {
+        $S['ai_cached_units'] = ($S['ai_cached_units'] ?? 0) + 1;
+        return array($out, 'done');
+    }
+    // Chunks of at most KOP_FOLD_AI_MAX_LINES lines: each asked line with its partners.
+    $chunks = array();
+    $cur = array('ids' => array(), 'ask' => array());
+    foreach ($ask as $id) {
+        $need = array_merge(array($id), array_keys($partners[$id]));
+        $add = array_values(array_diff($need, $cur['ids']));
+        if ($cur['ask'] && count($cur['ids']) + count($add) > KOP_FOLD_AI_MAX_LINES) {
+            $chunks[] = $cur;
+            $cur = array('ids' => array(), 'ask' => array());
+            $add = $need;
+        }
+        $cur['ids'] = array_merge($cur['ids'], array_slice($add, 0, max(1, KOP_FOLD_AI_MAX_LINES - count($cur['ids']))));
+        if (in_array($id, $cur['ids'], true)) $cur['ask'][] = $id;
+    }
+    if ($cur['ask']) $chunks[] = $cur;
+
+    $state = 'done';
+    $dirty = false;
+    foreach ($chunks as $ch) {
+        $prompt = kop_fold_ai_prompt($rg['name'], $ch['ids'], $ch['ask'], $rg);
+        if ($mode === 'estimate') {
+            $S['ai_est']['calls'] = ($S['ai_est']['calls'] ?? 0) + 1;
+            $S['ai_est']['lines'] = ($S['ai_est']['lines'] ?? 0) + count($ch['ids']);
+            $S['ai_est']['asked'] = ($S['ai_est']['asked'] ?? 0) + count($ch['ask']);
+            // About 4 characters a token in, about 20 tokens an answer out.
+            $S['ai_est']['tokens'] = ($S['ai_est']['tokens'] ?? 0) + (int) ceil(strlen($prompt) / 4) + 20 * count($ch['ask']);
+            $state = 'estimate';
+            continue;
+        }
+        if (!empty($S['ai_stopped'])) { $state = 'deferred'; break; }
+        if (($S['ai_calls'] ?? 0) >= (int) ($x['ai_cap'] ?? KOP_FOLD_AI_CALLS_PER_RUN)) { $S['ai_stopped'] = 'call cap'; $state = 'deferred'; break; }
+        if (microtime(true) - (float) $x['start'] > (float) $x['seconds'] - 20) { $S['ai_stopped'] = 'time'; $state = 'deferred'; break; }
+        if (!kop_fold_ai_budget_ok()) { $S['ai_stopped'] = 'budget'; $state = 'deferred'; break; }
+        $chunk_key = substr(md5(implode('|', array_map(function ($id) use ($lk) { return $lk[$id]; }, $ch['ids']))), 0, 12);
+        try {
+            $S['ai_calls'] = ($S['ai_calls'] ?? 0) + 1;
+            $reply = kop_fold_ai_call($prompt);
+        } catch (Throwable $e) {
+            $msg = $e->getMessage();
+            $S['ai_errors'][] = $rg['unit'] . ': ' . mb_substr($msg, 0, 200);
+            // Out of calls (a provider's limit or the budget): no more AI this run; the rules go on.
+            if (stripos($msg, 'rate limit') !== false || stripos($msg, 'quota') !== false || stripos($msg, 'No AI key') !== false) $S['ai_stopped'] = 'provider limit';
+            $state = 'deferred';
+            break;
+        }
+        $S['ai_lines'] = ($S['ai_lines'] ?? 0) + count($ch['ids']);
+        $got = kop_fold_ai_parse($reply, $ch['ids'], $ch['ask']);
+        if ($got === null) {
+            // A reply that cannot be read changes nothing. Asked again once on a later run, then let go.
+            $S['ai_bad_replies'] = ($S['ai_bad_replies'] ?? 0) + 1;
+            $bad = (int) ($cache['bad'][$chunk_key] ?? 0) + 1;
+            $cache['bad'][$chunk_key] = $bad;
+            $dirty = true;
+            if ($bad < 2) { $state = 'deferred'; continue; }
+            $got = array();
+        }
+        foreach ($ch['ids'] as $id) $seen[$lk[$id]] = 1;
+        foreach ($ch['ask'] as $id) {
+            if (!isset($got[$id])) { $cv[$lk[$id]] = array('new'); continue; }
+            $v = $got[$id];
+            $cv[$lk[$id]] = $v['v'] === 'new' ? array('new') : array($v['v'], $lk[$v['to']]);
+            $out[$id] = $v;
+            $S['ai_verdicts'][] = array('unit' => $rg['unit'], 'line' => $rg['lines'][$id], 'v' => $v['v'],
+                'to' => isset($v['to']) ? (isset($rg['onhand'][$v['to']]) ? '[on hand] ' : '[waiting] ') . $rg['lines'][$v['to']] : '');
+        }
+        $dirty = true;
+    }
+    if ($dirty && $mode === 'live' && !empty($x['apply'])) {
+        // Keep the newest 3,000 line keys a unit: a record's lines change slowly, so this is every line it still has.
+        if (count($seen) > 3000) $seen = array_slice($seen, -3000, null, true);
+        if (count($cv) > 3000) $cv = array_slice($cv, -3000, null, true);
+        update_option($name, array('seen' => $seen, 'v' => $cv, 'bad' => (array) ($cache['bad'] ?? array()), 't' => time()), false);
+    }
+    return array($out, $state);
+}
+
+/**
+ * Why an AI "same" between two facts is not taken ('' = nothing against it): other kinds, kop_fact_differs() (dates,
+ * numbers, ages, head counts, places, people), or two incidents of other types (an injury and the neglect or the
+ * investigation that followed it are other facts, docs/claude/fact-shape.md 6.5). A line with no type or the generic
+ * 'incident' (a record line with no label) meets any type.
+ */
+function kop_fold_ai_apart(array $a, array $b) {
+    if (kop_fact_group($a) !== kop_fact_group($b)) return 'kind';
+    $why = kop_fact_differs($a, $b);
+    if ($why !== '') return $why;
+    $loose = array('', 'incident');
+    if ($a['kind'] === 'incident' && $b['kind'] === 'incident' && !in_array($a['type'], $loose, true) && !in_array($b['type'], $loose, true) && $a['type'] !== $b['type']) return 'type';
+    return '';
+}
+
+/** Drops same_as loops of three or more waiting lines (a -> b -> c -> a): the answer contradicts itself. A pair naming each other stands. */
+function kop_fold_ai_drop_cycles(array $verdicts, array $waiting) {
+    $next = array();
+    foreach ($verdicts as $id => $v) {
+        if (($v['v'] ?? '') === 'same_as' && isset($waiting[$id], $waiting[$v['to'] ?? ''])) $next[$id] = (string) $v['to'];
+    }
+    foreach (array_keys($next) as $start) {
+        $path = array((string) $start);
+        $at = (string) $start;
+        while (isset($next[$at])) {
+            $at = $next[$at];
+            $k = array_search($at, $path, true);
+            if ($k !== false) {
+                $loop = array_slice($path, $k);
+                if (count($loop) >= 3) foreach ($loop as $id) unset($verdicts[$id]);
+                break;
+            }
+            $path[] = $at;
+        }
+    }
+    return $verdicts;
+}
+
+/** The Conflict mark an AI "differs" leaves on a waiting card ($note: {with, line, state}). */
+function kop_fold_ai_conflict_text($note) {
+    if (!is_array($note) || empty($note['line'])) return '';
+    $where = array('on_record' => 'on the record', 'held' => 'held for the write-up', 'kept' => 'kept from the news', 'waiting' => 'waiting');
+    return 'The AI check reads this as the same event as another telling that disagrees on a detail (' . ($where[$note['state'] ?? ''] ?? 'another card') . '): "'
+        . kop_fold_cut($note['line'], 200) . '". Check which is right.';
+}
+
+/**
+ * Sets ($note array) or takes off ($note null) the AI conflict mark on a waiting item: Woodbury extra.ai_differs,
+ * Fornits applied.ai_differs (it has no extra column; a waiting kept card already keeps applied.folds there), a news
+ * fact a kop_auto_connect row (source news-facts-ai). Returns the row as it is now.
+ */
+function kop_fold_write_differs($queue, array $row, $note) {
+    global $wpdb;
+    if ($queue === 'wbf') {
+        $extra = json_decode((string) $row['extra'], true) ?: array();
+        if ($note === null && !isset($extra['ai_differs'])) return $row;
+        if ($note !== null && ($extra['ai_differs'] ?? null) == $note) return $row;
+        if ($note === null) unset($extra['ai_differs']); else $extra['ai_differs'] = $note;
+        $row['extra'] = wp_json_encode($extra);
+        $wpdb->update(kop_wbf_table(), array('extra' => $row['extra']), array('pkey' => $row['pkey'], 'status' => 'pending'));
+        return $row;
+    }
+    if ($queue === 'fornits') {
+        $a = json_decode((string) $row['applied'], true);
+        $a = is_array($a) ? $a : array();
+        if ($note === null && !isset($a['ai_differs'])) return $row;
+        if ($note !== null && ($a['ai_differs'] ?? null) == $note) return $row;
+        if ($note === null) unset($a['ai_differs']); else $a['ai_differs'] = $note;
+        $row['applied'] = $a ? wp_json_encode($a) : null;
+        $wpdb->update(kop_fornits_items_table(), array('applied' => $row['applied']), array('pkey' => $row['pkey'], 'status' => 'pending'));
+        return $row;
+    }
+    if (!kop_fold_autoconn_ready()) return $row;
+    if ($note === null) {
+        if (kop_fold_mark_note('news-facts-ai', (int) $row['id'])) $wpdb->delete(kop_autoconn_table(), array('source' => 'news-facts-ai', 'item_key' => (string) (int) $row['id']));
+        return $row;
+    }
+    kop_autoconn_mark('news-facts-ai', (int) $row['id'], (string) ($note['with'] ?? ''), 'differs', wp_json_encode($note));
+    return $row;
+}
+
+/** The AI conflict mark of a waiting row of $queue ('wbf' | 'fornits' | 'news'), or null. */
+function kop_fold_ai_mark($queue, array $row) {
+    if ($queue === 'wbf') { $x = json_decode((string) ($row['extra'] ?? ''), true); return is_array($x) && !empty($x['ai_differs']) ? $x['ai_differs'] : null; }
+    if ($queue === 'fornits') { $x = json_decode((string) ($row['applied'] ?? ''), true); return is_array($x) && !empty($x['ai_differs']) ? $x['ai_differs'] : null; }
+    if (!function_exists('kop_autoconn_table')) return null;
+    $n = kop_fold_mark_note('news-facts-ai', (int) ($row['id'] ?? 0));
+    return $n ? $n : null;
 }
 
 /* ---- One unit ----------------------------------------------------------------------------------------------- */
@@ -550,7 +859,10 @@ function kop_fold_qn($queue) {
     return $queue === 'wbf' ? 'woodbury' : $queue;
 }
 
-/** Clear, group and fold one unit. $apply false counts only. Counts go into $S. */
+/**
+ * Clear, group and fold one unit. $apply false counts only. Counts go into $S. Returns the AI step's state for the unit:
+ * 'none', 'done', 'deferred' (judge it again on a later run) or 'estimate' (kop_fold_ai_judge()).
+ */
 function kop_fold_unit($unit, $apply, array &$S, array $x) {
     global $wpdb;
     $L = kop_fold_load($unit, $x);
@@ -561,7 +873,7 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
     $is_rec = $unit[0] === 'r';
     if ($is_rec && !$doc) {
         $S['skipped']['no_doc'] = ($S['skipped']['no_doc'] ?? 0) + count($L['W']) + count($L['F']) + count($L['N']);
-        return;
+        return 'none';
     }
     $ctx = $is_rec ? array('fid' => $fid, 'record_name' => $name) : array();
 
@@ -632,7 +944,7 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
         if ($why !== '') { kop_fold_union($uf, $i, $j); $how[$items[$j]['id']] = $why; }
     }
 
-    // d: close candidates for the AI step (a hook; it answers nothing yet).
+    // d: close candidates for the AI step: waiting group reps against each other and against on-hand lines.
     $reps = array();
     foreach ($items as $i => $f) $reps[kop_fold_find($uf, $i)][] = $i;
     $keep_of = array();
@@ -650,34 +962,76 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
         $pairs[] = array($all[$i]['id'], $all[$j]['id']);
         $S['ai_candidates'] = ($S['ai_candidates'] ?? 0) + 1;
     }
+    $ai_state = 'none';
     if ($pairs) {
-        $rg = array('record' => $rk, 'name' => $name, 'waiting' => array(), 'onhand' => array(), 'state' => array(), 'pairs' => $pairs);
+        $rg = array('unit' => $unit, 'record' => $rk, 'name' => $name, 'waiting' => array(), 'onhand' => array(), 'state' => array(), 'lines' => array(), 'pairs' => $pairs);
         foreach ($all as $k => $f) {
             $bucket = $k < $nrep ? 'waiting' : 'onhand';
             $rg[$bucket][$f['id']] = $f['text'];
             $rg['state'][$f['id']] = $f['state'];
+            $rg['lines'][$f['id']] = kop_fold_ai_line($f);
         }
         $by_id = array();
         foreach ($all as $f) $by_id[$f['id']] = $f;
-        foreach (kop_fold_ai_pairs($rg) as $id => $v) {
-            if (!isset($by_id[$id]) || !is_array($v) || ($v['v'] ?? '') !== 'same_as' || !isset($by_id[$v['to'] ?? ''])) continue;
+        $item_at = array();
+        foreach ($items as $i => $f) $item_at[$f['id']] = $i;
+        // The members of a waiting rep's group (the rules may have joined others to it already).
+        $members_of = function ($id) use (&$uf, $items, $item_at) {
+            $out = array();
+            if (!isset($item_at[$id])) return $out;
+            $root = kop_fold_find($uf, $item_at[$id]);
+            foreach ($items as $i => $f) if (kop_fold_find($uf, $i) === $root) $out[] = $i;
+            return $out;
+        };
+        list($verdicts, $ai_state) = kop_fold_ai_judge($rg, $S, $x);
+        $verdicts = kop_fold_ai_drop_cycles((array) $verdicts, $rg['waiting']);
+        $marks = array();   // waiting rep id => conflict note | null (take an old mark off)
+        foreach ($verdicts as $id => $v) {
+            if (!isset($by_id[$id], $rg['waiting'][$id]) || !is_array($v)) continue;
+            $vv = (string) ($v['v'] ?? '');
             $a = $by_id[$id];
-            $b = $by_id[$v['to']];
-            if (kop_fact_differs($a, $b) !== '') continue;     // an AI "same" over different numbers, dates or names is dropped
+            $b = isset($v['to']) && isset($by_id[$v['to']]) ? $by_id[$v['to']] : null;
+            if ($vv === 'differs' && $b) {
+                $marks[$id] = array('with' => $b['id'], 'line' => kop_fold_cut($b['text'], 300), 'state' => $b['state'], 'at' => gmdate('Y-m-d'));
+                $S['ai_conflicts'][kop_fold_qn($a['queue'])] = ($S['ai_conflicts'][kop_fold_qn($a['queue'])] ?? 0) + 1;
+                kop_fold_example($S, 'ai_conflict', array('record' => $rk, 'name' => $name, 'queue' => kop_fold_qn($a['queue']), 'line' => kop_fold_cut($a['text'], 160), 'into' => kop_fold_cut($b['text'], 160), 'how' => 'differs'));
+                continue;
+            }
+            $marks[$id] = null;
+            if ($vv !== 'same_as' || !$b || $b['id'] === $a['id']) continue;
+            // An AI "same" over different numbers, dates, names or places, or across kinds, is dropped.
+            if (kop_fold_ai_apart($a, $b) !== '') { $S['ai_overruled'] = ($S['ai_overruled'] ?? 0) + 1; continue; }
             if (isset($rg['onhand'][$b['id']])) {
-                $row = $ref[$a['queue'] . ':' . $a['id']] ?? null;
-                if ($row) {
-                    $held = $b['state'] !== 'on_record';
-                    $clear($row['queue'], $row['row'], $a, array(($held ? 'Held for the write-up: ' : 'Already on the record: ') . kop_fold_cut($b['text'], 300), $held ? 'held' : 'on_hand', 'ai'));
-                    $dead[$a['queue'] . ':' . $a['id']] = true;
+                // On hand in other words: the rep and every item the rules joined to it are cleared.
+                $held = $b['state'] !== 'on_record';
+                foreach ($members_of($a['id']) as $i) {
+                    $m = $items[$i];
+                    $key = $m['queue'] . ':' . $m['id'];
+                    if (isset($dead[$key]) || !isset($ref[$key]) || kop_fold_ai_apart($m, $b) !== '') continue;
+                    $clear($m['queue'], $ref[$key]['row'], $m, array('Already on hand in other words: ' . kop_fold_cut($b['text'], 300), $held ? 'held' : 'on_hand', 'ai'));
+                    $dead[$key] = true;
                 }
-            } else {
-                $ia = array_search($a['id'], array_column($items, 'id'), true);
-                $ib = array_search($b['id'], array_column($items, 'id'), true);
-                if ($ia !== false && $ib !== false && kop_fold_find($uf, $ia) !== kop_fold_find($uf, $ib)) {
-                    kop_fold_union($uf, $ia, $ib);
-                    $how[$a['id']] = 'ai';
-                }
+                continue;
+            }
+            $ma = $members_of($a['id']);
+            $mb = $members_of($b['id']);
+            if (!$ma || !$mb || kop_fold_find($uf, $ma[0]) === kop_fold_find($uf, $mb[0])) continue;
+            // Never join two groups when any pair across them differs.
+            $clash = false;
+            foreach ($ma as $i) foreach ($mb as $j) if (kop_fold_ai_apart($items[$i], $items[$j]) !== '') { $clash = true; break 2; }
+            if ($clash) { $S['ai_overruled'] = ($S['ai_overruled'] ?? 0) + 1; continue; }
+            kop_fold_union($uf, $ma[0], $mb[0]);
+            foreach (array($a['id'], $b['id']) as $hid) if (empty($how[$hid])) $how[$hid] = 'ai';
+            $S['ai_joins'] = ($S['ai_joins'] ?? 0) + 1;
+        }
+        if ($apply) {
+            foreach ($marks as $id => $note) {
+                $a = $by_id[$id];
+                $r = $ref[$a['queue'] . ':' . $a['id']] ?? null;
+                if (!$r || isset($dead[$a['queue'] . ':' . $a['id']])) continue;
+                if ($note === null && !kop_fold_ai_mark($r['queue'], $r['row'])) continue;
+                // The row in memory takes the change too: a kept card's later fold writes its extra / applied from it.
+                $ref[$a['queue'] . ':' . $a['id']]['row'] = kop_fold_write_differs($r['queue'], $r['row'], $note);
             }
         }
     }
@@ -723,6 +1077,7 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
         }
         if ($apply) kop_fold_write_group($kept, $mem, $how);
     }
+    return $ai_state;
 }
 
 /** The item a group keeps: a Woodbury item, then a Fornits item, then a news fact; the longest wording within a queue. */
@@ -741,12 +1096,19 @@ function kop_fold_pick(array $items, array $members) {
  * Clear and fold the waiting facts, one unit (record or program key) at a time until $seconds run out; the next run
  * continues after the last unit done (option kop_fold_state; a finished pass waits 3 hours before it starts over).
  * $apply false writes nothing (the dry run: news facts the exact-name rule would link are treated as linked).
- * $opts: only => [unit, ...] (tests, --facility), ignore_cursor => true.
- * Returns the counts: checked, cleared[queue][on_hand|held], folded[queue][kind], groups, ..., examples, units_done, done.
+ * $opts: only => [unit, ...] (tests, --facility), ignore_cursor => true, ai => '' (default: no AI) | 'estimate' (count
+ * the calls a pass would make) | 'live' (call; the hourly run), ai_cap => calls this run (KOP_FOLD_AI_CALLS_PER_RUN).
+ * A unit whose AI part was put off (call cap, budget, time box, a failed call) goes on state.ai_todo; the next live
+ * run judges those first, even while the pass itself waits its 3 hours, so the cursor never skips them.
+ * Returns the counts: checked, cleared[queue][on_hand|held], folded[queue][kind], groups, ..., examples, units_done, done,
+ * ai_calls, ai_stopped, ai_todo, ai_est.
  */
 function kop_fold_run($apply = false, $seconds = 90, array $opts = array()) {
     $S = array('apply' => (bool) $apply, 'checked' => array(), 'cleared' => array(), 'cleared_kind' => array(), 'folded' => array(), 'left_alone' => array(),
-        'conflicts_kept' => array(), 'skipped' => array(), 'examples' => array(), 'groups' => 0, 'units_done' => 0, 'units_total' => 0, 'done' => true, 'news_linked_in_memory' => 0);
+        'conflicts_kept' => array(), 'skipped' => array(), 'examples' => array(), 'groups' => 0, 'units_done' => 0, 'units_total' => 0, 'done' => true, 'news_linked_in_memory' => 0,
+        'ai_calls' => 0, 'ai_stopped' => '');
+    $ai = $opts['ai'] ?? '';
+    $ai = $ai === true ? 'live' : (in_array($ai, array('estimate', 'live'), true) ? $ai : '');
     foreach (array('kop_fact_shape', 'kop_wbf_on_record', 'kop_wbf_conflict_parts', 'kop_nf_record_for') as $fn) {
         if (!function_exists($fn)) { $S['error'] = "Missing $fn"; return $S; }
     }
@@ -762,31 +1124,59 @@ function kop_fold_run($apply = false, $seconds = 90, array $opts = array()) {
     list($units, $noreq) = kop_fold_units($pdo, $news_map);
     $only = isset($opts['only']) ? (array) $opts['only'] : null;
     $state = (array) get_option('kop_fold_state', array());
-    $cursor = ($apply && $only === null && empty($opts['ignore_cursor'])) ? (string) ($state['cursor'] ?? '') : '';
-    if ($apply && $only === null && $cursor === '' && !empty($state['finished']) && time() - (int) $state['finished'] < 3 * HOUR_IN_SECONDS && empty($opts['ignore_cursor'])) {
+    $live = $apply && $only === null;
+    $cursor = ($live && empty($opts['ignore_cursor'])) ? (string) ($state['cursor'] ?? '') : '';
+    $todo = ($live && $ai === 'live') ? array_values(array_unique(array_map('strval', (array) ($state['ai_todo'] ?? array())))) : array();
+    $idle = $live && $cursor === '' && !empty($state['finished']) && time() - (int) $state['finished'] < 3 * HOUR_IN_SECONDS && empty($opts['ignore_cursor']);
+    if ($idle && !$todo) {
         $S['idle'] = 'The last pass finished ' . gmdate('Y-m-d H:i', (int) $state['finished']) . ' UTC; the next starts after 3 hours.';
         return $S;
     }
     if ($only !== null) $units = array_values(array_intersect($units, $only));
     $S['units_total'] = count($units);
-    $x = array('pdo' => $pdo, 'noreq' => $noreq, 'news_map' => $news_map);
-    $last = $cursor;
-    foreach ($units as $u) {
-        if (!kop_fold_unit_after($u, $cursor)) continue;
-        if (microtime(true) - $start > $seconds) { $S['done'] = false; break; }
+    $x = array('pdo' => $pdo, 'noreq' => $noreq, 'news_map' => $news_map, 'ai' => $ai, 'apply' => (bool) $apply, 'start' => $start, 'seconds' => (float) $seconds,
+        'ai_cap' => (int) ($opts['ai_cap'] ?? KOP_FOLD_AI_CALLS_PER_RUN));
+    $one = function ($u) use ($apply, &$S, $x) {
         try {
-            kop_fold_unit($u, $apply, $S, $x);
+            return kop_fold_unit($u, $apply, $S, $x);
         } catch (Throwable $e) {
             $S['errors'][] = $u . ': ' . $e->getMessage();
             error_log('kop fold ' . $u . ': ' . $e->getMessage());
+            return 'none';
         }
-        $S['units_done']++;
-        $last = $u;
-        if ($apply && $only === null) update_option('kop_fold_state', array('cursor' => $u) + $state, false);
+    };
+    // First the units whose AI part a run put off: judged before the pass goes on (the rules run on them again; that is a no-op).
+    $known = array_flip($units);
+    $did = array();
+    $left = array();
+    foreach ($todo as $u) {
+        if (!isset($known[$u])) continue;                 // nothing waits there any more
+        if ($S['ai_stopped'] !== '' || microtime(true) - $start > $seconds) { $left[] = $u; continue; }
+        $did[$u] = true;
+        if ($one($u) === 'deferred') $left[] = $u;
     }
-    if ($apply && $only === null) {
-        $new = array('cursor' => $S['done'] ? '' : $last, 'finished' => $S['done'] ? time() : (int) ($state['finished'] ?? 0), 'last_run' => time(),
-            'last' => array('units' => $S['units_done'], 'cleared' => $S['cleared'], 'folded' => $S['folded'], 'groups' => $S['groups']));
+    $todo = $left;
+    $last = $cursor;
+    if (!$idle) {
+        foreach ($units as $u) {
+            if (!kop_fold_unit_after($u, $cursor)) continue;
+            if (microtime(true) - $start > $seconds) { $S['done'] = false; break; }
+            if (!isset($did[$u])) {
+                if ($one($u) === 'deferred' && !in_array($u, $todo, true)) $todo[] = $u;
+                $S['units_done']++;
+            }
+            $last = $u;
+            if ($live) update_option('kop_fold_state', array('cursor' => $u, 'ai_todo' => $todo) + $state, false);
+        }
+    } else {
+        $S['idle'] = 'The last pass finished ' . gmdate('Y-m-d H:i', (int) $state['finished']) . ' UTC; only the AI step of ' . count($did) . ' put-off units ran.';
+    }
+    $S['ai_todo'] = count($todo);
+    if ($live) {
+        $finished = $idle ? (int) $state['finished'] : ($S['done'] ? time() : (int) ($state['finished'] ?? 0));
+        $new = array('cursor' => ($idle || $S['done']) ? '' : $last, 'finished' => $finished, 'last_run' => time(), 'ai_todo' => $todo,
+            'last' => array('units' => $S['units_done'], 'cleared' => $S['cleared'], 'folded' => $S['folded'], 'groups' => $S['groups'],
+                'ai_calls' => $S['ai_calls'], 'ai_stopped' => $S['ai_stopped'], 'ai_todo' => count($todo)));
         update_option('kop_fold_state', $new, false);
         if (($S['cleared'] || $S['folded']) && function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
     }
@@ -805,7 +1195,8 @@ function kop_fold_hourly() {
             kop_nf_ensure_tables($pdo);
             kop_nf_link_waiting($pdo, true, 30);
         }
-        $S = kop_fold_run(true, 90);
+        // The rules, then the AI step (d) within its call cap and the daily budget.
+        $S = kop_fold_run(true, 90, array('ai' => 'live'));
         if (!empty($S['errors'])) error_log('kop fold: ' . wp_json_encode(array_slice($S['errors'], 0, 5)));
         return $S;
     } catch (Throwable $e) {

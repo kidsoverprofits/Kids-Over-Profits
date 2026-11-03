@@ -129,6 +129,8 @@ function kop_rinbox_nf_item(array $r) {
         'details'      => $details,
         'links'        => array(array('label' => 'The article', 'url' => (string) $r['article_url'])),
         'actions'      => $actions,
+        // The fold's AI step read another telling of the same event that disagrees (inc/fact-fold.php): marked, never ticked.
+        'conflict'     => $r['status'] === 'pending' && function_exists('kop_fold_ai_mark') ? kop_fold_ai_conflict_text(kop_fold_ai_mark('news', $r)) : '',
     );
 }
 

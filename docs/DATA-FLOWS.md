@@ -381,6 +381,18 @@ Nothing here changes a record: `held` stays the only state the write-up reads (`
     `route = 'merged'` and `wbf_pkey` = the kept card's pkey (its target also in the `news-facts-fold` mark). The kept
     card takes the citations: a Woodbury card's `evidence` list (entries tagged `folded_from`) and `extra.folded` (the list the
     card shows); a Fornits card's `applied.folds` (no `extra` column). A group whose best item would be a news fact is not folded.
+  - *AI step (d)* (`kop_fold_ai_judge()`, after the rules, same run, live only on the hourly event): the close pairs the rules did
+    not join (`kop_fact_close()`: waiting group reps against each other and against on-hand lines) go to one
+    `kop_ai_generate_alternating()` call per unit (split past 40 lines), job "Fact fold: same in other words", which only judges:
+    per waiting line `same_as <n>`, `differs <n>` or `new`. `same_as` an on-hand line = the clear above with reason
+    "Already on hand in other words: <line>" and `how 'ai'`; `same_as` a waiting line = the fold above with `how 'ai'`;
+    `differs` = it stays waiting with a Conflict mark on its card (Woodbury `extra.ai_differs`, kept by `kop_wbf_sync()`;
+    Fornits `applied.ai_differs`; news facts a `kop_auto_connect` row, source `news-facts-ai`), not on the Conflicts tab (that tab
+    settles record-vs-item values); a later answer that is not `differs` takes the mark off. `kop_fold_ai_apart()`
+    (`kop_fact_differs()`, other kinds, two incident types) overrules any AI "same". Answers are remembered per line (option
+    `kop_fold_ai_<md5 unit>`, autoload off: line keys sent together + verdicts), so only a line with a partner it was never
+    sent with is asked; a unit whose AI part was put off (10 calls a run, the daily budget, the time box, a failed call) waits
+    on `kop_fold_state.ai_todo` and is judged first on the next run, even during the 3-hour idle between passes.
   - *Link* (`kop_nf_link_waiting()`, on the hourly auto-connect as source `news-facts` and before the fold): a waiting news fact
     naming one record exactly gets `facility_id`; when `kop_nf_wbf_row()` makes a card for it the card is filed
     (`kop_nf_file_wbf()`) and the fact becomes `route 'facility'`, `status 'filed'`, `wbf_pkey`. What Undo needs is the

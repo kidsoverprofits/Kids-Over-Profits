@@ -644,10 +644,12 @@ function kop_wbf_on_record(array $doc, array $r) {
 
 /** Every conflict for a waiting item: the build's own note and what the record says now. */
 function kop_rinbox_wbf_conflict(array $r) {
+    // The fold's AI step read another telling of the same event that disagrees (inc/fact-fold.php): marked, never ticked.
+    $ai = function_exists('kop_fold_ai_mark') ? kop_fold_ai_conflict_text(kop_fold_ai_mark('wbf', $r)) : '';
     $f = (int) $r['facility_id'] > 0 ? kop_on_file_doc($r['facility_id']) : null;
     $live = $f ? kop_wbf_conflict_parts($f['doc'], $r) : null;
-    if (!$live && !kop_rinbox_wbf_built_conflict($r, $f ? $f['doc'] : null)) return '';
-    return kop_rinbox_wbf_conflict_text($r, $live);
+    if (!$live && !kop_rinbox_wbf_built_conflict($r, $f ? $f['doc'] : null)) return $ai;
+    return trim(kop_rinbox_wbf_conflict_text($r, $live) . ' ' . $ai);
 }
 
 /** The build's notes and the live conflict ($live: kop_wbf_conflict_parts()) as one line. */

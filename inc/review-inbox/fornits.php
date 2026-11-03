@@ -384,7 +384,9 @@ function kop_rinbox_fornits_item(array $r) {
         'links'        => $links,
         'details'      => $details,
         // What the record says that disagrees (a staff role, a closure): marked, never ticked.
-        'conflict'     => $pending && ($f = kop_on_file_doc($r['facility_id'])) ? kop_fornits_conflict($f['doc'], $r) : '',
+        // Also the fold's AI step: another telling of the same event that disagrees (applied.ai_differs, inc/fact-fold.php).
+        'conflict'     => $pending ? trim((($f = kop_on_file_doc($r['facility_id'])) ? kop_fornits_conflict($f['doc'], $r) : '')
+            . ' ' . (function_exists('kop_fold_ai_mark') ? kop_fold_ai_conflict_text(kop_fold_ai_mark('fornits', $r)) : '')) : '',
         // The reading's most important items, with a quote found in the post, start ticked.
         'selected'     => $pending && (int) $r['preselect'] === 1,
     );

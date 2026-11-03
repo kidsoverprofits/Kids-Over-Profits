@@ -45,6 +45,7 @@ if (!function_exists('kop_ai_usage_record')) {
             'drive-docs.php'               => 'Drive Docs',
             'lib-record-enrich.php'        => 'Hourly enrich',
             'news-clippings.php'           => 'News clippings',
+            'fact-fold.php'                => 'Fact fold: same in other words',
         ];
     }
 

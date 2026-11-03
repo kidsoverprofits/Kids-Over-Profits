@@ -6,8 +6,12 @@
  * the news facts the exact-name rule would link. Compare with scripts/fact-dedupe.php (the measurement it replaces).
  *
  *   php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=2G scripts/fold-dry-run.php [--db=tmp/prod.sqlite]
- *       [--facility=N] [--examples=15] [--json=path]
+ *       [--facility=N] [--examples=15] [--json=path] [--ai-estimate | --ai --facility=N]
  *   (scripts/fact-dedupe.php --engine runs the same thing.)
+ *
+ * The AI step (d) makes no call by default. --ai-estimate counts the calls, lines and tokens a full pass would make
+ * (nothing cached: every close pair asked). --ai --facility=N makes the real calls for that one record (provider keys
+ * from .env / api/config.local.php, logged as AI usage) and prints the verdicts; nothing is written or remembered.
  */
 
 if (PHP_SAPI !== 'cli') exit("CLI only.\n");
@@ -37,8 +41,15 @@ require_once dirname(__DIR__) . '/inc/fact-shape.php';
 require_once dirname(__DIR__) . '/inc/fact-fold.php';
 
 $only = isset($opt['facility']) ? array('r:' . (int) $opt['facility']) : null;
+$ai = !empty($opt['ai-estimate']) ? 'estimate' : (!empty($opt['ai']) ? 'live' : '');
+if ($ai === 'live' && !$only) {
+    fwrite(STDERR, "--ai makes real calls: name one record with --facility=N.\n");
+    exit(2);
+}
 $t0 = microtime(true);
-$S = kop_fold_run(false, 100000, $only ? array('only' => $only) : array());
+$run_opts = array('ai' => $ai, 'ai_cap' => 1000);
+if ($only) $run_opts['only'] = $only;
+$S = kop_fold_run(false, 100000, $run_opts);
 $n_ex = isset($opt['examples']) ? max(0, (int) $opt['examples']) : 15;
 
 echo "\n=== Fold engine, count mode (writes nothing) ===  db={$db_path}  " . round(microtime(true) - $t0, 1) . "s  units " . $S['units_done'] . '/' . $S['units_total'] . "\n";
@@ -66,6 +77,22 @@ foreach ($S['folded'] as $q => $by) {
 echo "  total folded: $ft in " . $S['groups'] . ' groups (' . ($S['groups_cross_queue'] ?? 0) . ' mix queues); '
     . ($S['groups_news_only'] ?? 0) . ' groups of news facts alone left unfolded (' . ($S['news_only_members'] ?? 0) . " items; no place for their citations)\n";
 echo 'AI candidate pairs (for the AI step): ' . ($S['ai_candidates'] ?? 0) . "\n";
+if ($ai === 'estimate') {
+    $e = $S['ai_est'] ?? array();
+    $calls = (int) ($e['calls'] ?? 0);
+    echo sprintf("AI estimate, full pass with nothing cached: %d calls, %d lines sent (%d waiting lines asked), about %d tokens; %d hourly runs at %d calls a run\n",
+        $calls, $e['lines'] ?? 0, $e['asked'] ?? 0, $e['tokens'] ?? 0, (int) ceil($calls / KOP_FOLD_AI_CALLS_PER_RUN), KOP_FOLD_AI_CALLS_PER_RUN);
+}
+if ($ai === 'live') {
+    echo 'AI calls made: ' . $S['ai_calls'] . ($S['ai_stopped'] !== '' ? ' (stopped: ' . $S['ai_stopped'] . ')' : '') . '; lines sent ' . ($S['ai_lines'] ?? 0)
+        . '; unreadable replies ' . ($S['ai_bad_replies'] ?? 0) . '; AI joins ' . ($S['ai_joins'] ?? 0) . '; AI "same" overruled by the rules ' . ($S['ai_overruled'] ?? 0) . "\n";
+    foreach ($S['ai_errors'] ?? array() as $err) echo '  error: ' . preg_replace('/key=[^&\s]+/', 'key=...', $err) . "\n";
+    echo "\n--- AI verdicts (nothing written) ---\n";
+    foreach ($S['ai_verdicts'] ?? array() as $v) {
+        echo sprintf("  %-8s %s\n%s", $v['v'], $v['line'], $v['to'] !== '' ? '           -> ' . $v['to'] . "\n" : '');
+    }
+}
+if (!empty($S['ai_conflicts'])) echo 'AI conflicts (differs): ' . json_encode($S['ai_conflicts']) . "\n";
 if (!empty($S['errors'])) echo 'Errors: ' . json_encode(array_slice($S['errors'], 0, 5)) . "\n";
 foreach (array('cleared', 'folded') as $b) {
     echo "\n--- Examples: $b ---\n";
