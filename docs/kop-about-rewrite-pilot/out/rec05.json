@@ -1,0 +1,48 @@
+{
+ "sources": {
+  "wusf": [
+   "https://www.wusf.org/law-order/2013-08-18/juveniles-riot-at-polk-county-facility",
+   "WUSF, Aug 18, 2013"
+  ],
+  "fox15": [
+   "https://www.fox13news.com/news/report-g4s-run-youth-facility-should-be-closed-in-wake-of-riots",
+   "FOX 13, Jul 20, 2015"
+  ],
+  "fox17a": [
+   "https://www.fox13news.com/news/three-former-g4s-employees-arrested-on-felony-charges",
+   "FOX 13, Aug 18, 2017"
+  ],
+  "fox17b": [
+   "https://www.fox13news.com/news/sheriff-highlands-youth-academy-is-unequivocal-train-wreck",
+   "FOX 13, Aug 18, 2017"
+  ],
+  "pcso": [
+   "https://bradley.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+   "Polk County Sheriff's Office, Aug 18, 2017"
+  ],
+  "midfl": [
+   "https://www.midfloridanewspapers.com/highlands_news-sun/news/highlands-youth-academy-closes-with-contract-expiration/article_d65b7976-fbe2-11e9-9295-231b842dc667.html",
+   "Highlands News-Sun, Oct 31, 2019"
+  ],
+  "ojp": [
+   "https://crimesolutions.ojp.gov/ratedprograms/533",
+   "CrimeSolutions (U.S. Justice Department)"
+  ],
+  "ct02": [
+   "https://ojp.gov/ncjrs/virtual-library/abstracts/hammer-and-nail-approach-rebuilding-young-lives-floridas-avon-park",
+   "Corrections Today, June 2002 (NCJRS abstract)"
+  ],
+  "tb28": [
+   "https://www.tampabay28.com/news/local-news/i-team-investigates/girls-death-other-issues-spark-concerns-involving-other-florida-facilities-run-by-truecore",
+   "ABC Action News (Tampa Bay 28)"
+  ]
+ },
+ "paragraphs": [
+  "Highlands Youth Academy, also called Avon Park Youth Academy, was a secure residential facility for boys in the Florida Department of Juvenile Justice system, in Avon Park. For years it was run by the private contractor G4S.{wusf,fox15} Its problems were public for years before it closed in October 2019. A 2013 riot wrecked 18 of its 20 buildings, and a 2015 grand jury said the facility should be shut down.{wusf,fox15,midfl} In 2017 three of its former administrators were arrested on charges of covering up abuse and neglect.{fox17a}",
+  "The academy, designed by the Department of Juvenile Justice, held about 212 adjudicated boys in 2002 for stays of about nine months of academic and vocational training, followed by an aftercare program called STREET Smart.{ct02} It later took moderate-risk boys aged 16 to 18.{ojp} G4S ran it under a five-year, $40 million contract with the department.{fox15} In August 2013 it held 138 boys.{wusf}",
+  "On the evening of August 17, 2013, a fight after a basketball game between groups of boys from Orlando and St. Petersburg grew into a riot. The boys destroyed 18 of the facility's 20 buildings, set fire to an office holding juvenile records and took staff radios and golf carts; seven were hospitalized.{wusf} Sixty-one were arrested.{fox17a} In March 2015 a boy escaped while five staff members were in the room, and a Polk County grand jury began investigating.{fox15} Sheriff Grady Judd later said staff took four hours to tell his office about a 2015 escape.{fox17b} His investigation found that many escapes had never been reported to the sheriff.{fox17a}",
+  "In July 2015 the grand jury's report said the buildings were in disrepair and not secure, the boys were improperly supervised and the staff was \"woefully under-trained.\" It called for the facility to be closed.{fox15} Judd said G4S kept staff from reporting violent incidents.{fox15} The department kept the facility open, said it was spending more than $2 million on renovations and improvements, and kept contracting with G4S until March 2017.{fox15,fox17a}",
+  "Abuse inside went unreported for years. In November 2015 detectives got tips about crimes that had never been reported, including sexual contact between staff and residents. In May 2016 they arrested Deidre Baucom, a youth care worker, who later pleaded guilty to sexual misconduct with a juvenile.{fox17a,fox17b} On August 17, 2017, the sheriff's office arrested the former facility administrator, Norma Wynn, and two former assistant administrators, Jose Sanchez and Johnny Hart. They were accused of destroying or tampering with evidence, failing to report child abuse and willfully neglecting the juveniles in their care.{pcso,fox17a} Hart was by then running the Okaloosa Youth Development Center.{fox17a} Judd called the academy \"an absolute, unequivocal train wreck.\"{fox17b}",
+  "In 2017 an investment fund bought G4S's youth business for $56.5 million, and it was renamed TrueCore Behavioral Solutions.{tb28} TrueCore ran Highlands until October 2019, when the facility closed as its contract with the department expired.{midfl}"
+ ]
+}

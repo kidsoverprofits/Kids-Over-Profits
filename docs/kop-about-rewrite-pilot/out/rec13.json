@@ -1,0 +1,54 @@
+{
+ "sources": {
+  "w1212": [
+   "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1212.pdf#page=1",
+   "Woodbury Reports, Dec. 2012"
+  ],
+  "w0213": [
+   "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0213.pdf#page=10",
+   "Woodbury Reports, Feb. 2013"
+  ],
+  "lha": [
+   "https://web.archive.org/web/20210928185101/https://lavaheightsacademy.com/",
+   "Lava Heights Academy website (archived)"
+  ],
+  "sgn19": [
+   "https://www.stgeorgeutah.com/news/local/as-red-rock-canyon-school-gears-for-closure-parent-company-shutters-sister-institution/article_def202e9-b52b-57e6-89b9-6a17e5299fa5.html",
+   "St. George News, July 16, 2019"
+  ],
+  "slt19": [
+   "https://www.sltrib.com/news/2019/07/15/embattled-company-close/",
+   "The Salt Lake Tribune, July 15, 2019"
+  ],
+  "ksl22": [
+   "https://www.ksl.com/article/50530931/southern-utah-man-accused-of-abusing-girls-at-residential-treatment-program",
+   "KSL, Dec. 2, 2022"
+  ],
+  "kjzz22": [
+   "https://kjzz.com/news/local/southern-utah-lava-heights-academy-school-employee-arrested-after-alleged-sexual-abuse-students-minors-paul-anthony-nichols-toquerville",
+   "KUTV, Dec. 2, 2022"
+  ],
+  "sgn22": [
+   "https://stgeorgeutah.com/?p=968228",
+   "St. George News, Dec. 2022"
+  ],
+  "sgn23": [
+   "https://stgeorgeutah.com/?p=1009351",
+   "St. George News, May 2023"
+  ],
+  "yelp18": [
+   "https://www.yelp.com/not_recommended_reviews/lava-heights-academy-toquerville",
+   "Former employee's review on Yelp, Feb. 20, 2018"
+  ],
+  "indeed20": [
+   "https://www.indeed.com/cmp/Lava-Heights-Academy/reviews/they-abuse-the-residents-and-try-to-blame-the-staff?id=37b762a3cedd6122",
+   "Former staff review on Indeed, July 13, 2020"
+  ]
+ },
+ "paragraphs": [
+  "Lava Heights Academy is a residential treatment center in Toquerville, Utah, run since 2021 by Rite of Passage.{lha} It opened in 2012, took both boys and girls for most of its history, and now serves girls.{w1212,ksl22} It has passed through three owners, including Sequel Youth and Family Services, which closed two of its other Utah programs amid abuse investigations in 2019.{lha,slt19} Former employees complained publicly about how it treated children as early as 2018, and in 2023 Paul Anthony Nichols, a staff member there, was sent to prison for sexually abusing two girls he supervised.{yelp18,sgn23}",
+  "The Centers for Adolescent Recovery and Education (CARE) built Lava Heights and opened it in 2012 as a treatment program centered on the performing arts.{w1212,w0213} In 2016 Sequel Youth and Family Services acquired it along with three other Utah programs, Falcon Ridge Ranch, Red Rock Canyon School and Mount Pleasant Academy.{slt19} In July 2019 Sequel closed Red Rock Canyon School and Mount Pleasant Academy amid investigations into abuse.{sgn19,slt19} Rite of Passage took over Lava Heights from Sequel in October 2021, and Utah has licensed it to Care Youth Corporation, doing business as Rite of Passage, since January 31, 2022.{lha}",
+  "In February 2018 a former employee wrote on Yelp that management told staff how to word restraint incident reports, that reports of medication errors disappeared, and that staff who raised concerns were let go; the employee said incidents reported to Sequel's compliance manager went nowhere.{yelp18} In July 2020 another former staff member wrote on Indeed: \"They hurt kids and blame staff.\"{indeed20}",
+  "In September 2022 Lava Heights hired Paul Anthony Nichols, 22, of St. George, to supervise girls in the program.{ksl22,sgn22} Three days later he started a game of \"truth or dare\" with students he supervised. Two girls under 16 told detectives he touched them inappropriately on at least eight occasions, including sexual abuse in the facility's restrooms, and that he photographed one of them partly undressed.{ksl22,sgn22} Officials received the first report on October 20, 2022, and Nichols was arrested in December and charged with rape, forcible sexual abuse and sexual exploitation of a minor.{kjzz22,ksl22} He admitted to investigators that he had touched the girls on multiple occasions and photographed one.{sgn22} On March 28, 2023, he pleaded guilty to five counts of forcible sexual abuse and two of sexual exploitation of a minor, and the rape charge was dismissed. On May 16, 2023, Judge Jay Winward sentenced him to 1 to 15 years in prison on each count, to run concurrently, and ordered him to register as a sex offender.{sgn23}"
+ ]
+}

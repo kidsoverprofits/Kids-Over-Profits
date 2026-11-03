@@ -1,0 +1,30 @@
+{
+ "sources": {
+  "ut25": [
+   "https://cclapi.dlbc.utah.gov/api/public/checklist/664428?dl=1",
+   "Utah Office of Licensing inspection checklist, Aug. 14, 2025"
+  ],
+  "woodbury13": [
+   "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1213.pdf#page=9",
+   "Woodbury Reports, Dec. 2013"
+  ],
+  "dsn00": [
+   "https://www.deseret.com/2000/10/9/19532813/arslanian-files-lawsuit-over-firing-by-utah-state",
+   "Deseret News, Oct. 9, 2000"
+  ],
+  "wwasp": [
+   "https://wwaspsurvivors.com/?p=682",
+   "WWASP Survivors: Eagle Ranch Academy (survivor and parent posts)"
+  ],
+  "yelp": [
+   "https://www.yelp.com/biz/eagle-ranch-academy-saint-george",
+   "Parent review on Yelp, Jan. 13, 2020"
+  ]
+ },
+ "paragraphs": [
+  "Eagle Ranch Academy is a licensed residential treatment center for teenagers at 115 West 1470 South in St. George, Utah, with room for 57 young people.{ut25} It was founded by the brothers Paul and David Arslanian, former Utah State University football coaches.{woodbury13,dsn00} Former students have described isolation, painful restraints and humiliating group seminars there in accounts going back to at least 2014, and in 2020 a parent wrote that her daughter was restrained in a neck hold on her first day.{wwasp,yelp}",
+  "David Arslanian was Utah State's head football coach in 1998 and 1999. He hired his brother Paul as a coordinator over the university president's objection, was fired on December 2, 1999, and sued the university in 2000.{dsn00} By 2013 Woodbury Reports, an industry newsletter, listed David as the academy's co-founder and director of admissions.{woodbury13} Paul Arslanian was the person on site when state licensers inspected the program in August 2025.{ut25}",
+  "Former students posting on the survivor site WWASP Survivors describe the regime from the inside. One wrote in March 2014 that new students were denied shoes and socks and made to walk on hot pavement, that students were isolated in rooms for days or \"ghosted\" for months with no contact except staff, and that staff restrained children until their arms bled.{wwasp} Another, writing that September, described being made to stand before about 20 people in a seminar and be \"verbally dismantled,\" being put on antipsychotics and antidepressants without a choice, and being denied contact with parents at the start.{wwasp}",
+  "In January 2020 a mother wrote on Yelp that her daughter was assaulted on her first day and then restrained by an adult man who dragged her down a hall in a neck hold and put her face down on the floor; she said her husband watched the video with police, and that her daughter slept on the floor for 14 days.{yelp}"
+ ]
+}
