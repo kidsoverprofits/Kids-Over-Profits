@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 16:36 UTC",
- "source": "3d208dddb9f33f8cf9f3da06813563f2a310eb7b",
+ "built": "2026-11-03 17:36 UTC",
+ "source": "89ed6bb1b6ddcc445b2ed9d0824f6328fca0f063",
  "sections": [
   {
    "key": "2",
@@ -874,6 +874,22 @@
        "ask": "",
        "date": "2026-11-01",
        "hash": "b95bbbdce57c"
+      },
+      {
+       "id": "4.2:mn-run-of-2026-11-01-hit-dhs-s-bot-check-do-not-commit-it",
+       "lead": "MN run of 2026-11-01 hit DHS's bot check; do not commit it",
+       "text": "**MN run of 2026-11-01 hit DHS's bot check; do not commit it** (found 2026-11-03). `kop-data/mn_reports.json` in the working tree has \"Verifying your browser before proceeding...\" pages in place of real reports (e.g. `MN-1074484-002`, the 2024-12-02 180 Degrees correction order, lost its 10,625-character text and its date), and 225 reports dropped to 204. The committed copy (run of 2026-10-18) is the good one; it was left uncommitted, not reverted, until the owner says. Fix `mn_scraper.py`: treat a page whose text is the bot check (or \"HTTP ERROR 503\") as a failed fetch, keep the held report instead of overwriting it, and never drop a held report because one run could not reach it. Then rerun with Chrome closed and restore the file (`git -C ../kop-data checkout -- mn_reports.json`).",
+       "ask": "May I restore kop-data's mn_reports.json to the committed 2026-10-18 copy now?",
+       "date": "2026-11-03",
+       "hash": "45fc1809a5c1"
+      },
+      {
+       "id": "4.2:scrapers-finish-by-naming-what-they-changed",
+       "lead": "Scrapers finish by naming what they changed",
+       "text": "**Scrapers finish by naming what they changed** (2026-11-03, part of keeping the trees clean): the UT run of 2026-11-01 sat uncommitted for two days and the MN one is still there. At the end of each run the scraper launcher prints the data files it wrote, and the `git add <paths>` / `git commit -m \"data(<st>): <month> scrape\"` lines for them (kop-pipeline's `scrapers/middle/` or kop-data), after a sanity check: fewer reports than the held copy, or any bot-check / error page text, prints a warning instead of the commit line. The dated `utah_citations_*.csv` files are monthly snapshots, tracked on purpose; they are data, not scratch.",
+       "ask": "",
+       "date": "2026-11-03",
+       "hash": "6711d6d69e06"
       }
      ]
     },
