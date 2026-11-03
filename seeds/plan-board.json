@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 21:01 UTC",
- "source": "fad23a5b3fa4cfe7d6213a46673b0c9717731bd2",
+ "built": "2026-11-03 21:11 UTC",
+ "source": "6643369281cc6254f16542403f637c12f13ac385",
  "sections": [
   {
    "key": "2",
@@ -1386,10 +1386,10 @@
       {
        "id": "4.6:podcasts",
        "lead": "Podcasts",
-       "text": "**Podcasts**: pilot episodes 221, 115 and 116 for the owner; read every batch as transcripts finish; copy each `proposals.json` to `~/kop-import/podcasts/`; write person and program facts onto records with Undo; `attended` facts draw the survivor-category map line (old 3.18).",
+       "text": "**Podcasts**: pilot episodes 221, 115 and 116 for the owner; read every batch as transcripts finish; copy each `proposals.json` to `~/kop-import/podcasts/`; write person and program facts onto records with Undo; `attended` facts draw the survivor-category map line (old 3.18). **2026-11-03: start over.** The old laptop died and every transcript, reader facts file and proposal under `tmp/podcasts/` was lost (none had reached `~/kop-import/` or production). The code and `podcast-vocab/` survived in git. The run is going again on the new machine with `py -3.12` (no 3.13 here; Whisper and ffmpeg from winget, the ffmpeg bin folder added to PATH), 335 episodes, 251.7 h. The 68 episodes read before have to be read again once their transcripts are back. If the old drive can still be read, copying its `kop-pipeline\\tmp\\podcasts\\` here would skip all of this.",
        "ask": "",
-       "date": "",
-       "hash": "52e89665df08"
+       "date": "2026-11-03",
+       "hash": "36d17a3fc0ad"
       },
       {
        "id": "4.6:google-docs",
