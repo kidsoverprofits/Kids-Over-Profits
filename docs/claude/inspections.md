@@ -29,6 +29,13 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # pages are read from __NEXT_DATA__, SPEP from its button/region accordion, the PREA list from the page drawn in headless
 # Chromium (_rendered_download_links(); needs Playwright). Closed programs prod files under: DJJ_CLOSED_FACILITIES; reports
 # no index lists any more: DJJ_EXTRA_QI_REPORTS.
+# UT: the finding statement is declarativeStatement in Utah's API since mid-2026 (findingText before); utah_citation_scraper.py
+# reads both (STATEMENT_KEYS) and won't post when most findings lack one. raw_content keeps "rule: title — statement" (ut.js and
+# api/inspection-verdicts/ut.php count only those lines: a title-only line shows "No findings"); level, CMP, correction action/date/
+# verification go in categories_json "Findings". Rows the Sept 28 / Nov 1 2026 runs stripped: ut_backfill_statements.py rebuilds
+# only the finding lines of each prod row (checklist lines and the facility row kept as prod has them); dry run unless --post
+(kop-pipeline) .venv/Scripts/python scrapers/test_utah_scraper.py
+(kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_statements.py [--ids=94202] [--only=restored] [--from-api-cache DIR] [--post]
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
 # suggested); rows a home already shows are not offered; "Link an entry by hand" links any row to any record
