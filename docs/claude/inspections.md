@@ -23,7 +23,9 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # FL DJJ matching rule (fl_scraper.py _match_to_facility): never across detention/residential (_facility_kind); a one-word
 # key matches only as the facility's side ("Orange ... TrueCore" -> Orange Youth Academy, "Lake Academy" not -> Lake Parrish);
 # ambiguous = DJJ-unmatched-<name>. Renamed programs: DJJ_FORMER_NAMES. The DJJ site is Next.js since 2026: the directory
-# pages are read from __NEXT_DATA__, SPEP from its button/region accordion; the PREA list loads in the browser (open item).
+# pages are read from __NEXT_DATA__, SPEP from its button/region accordion, the PREA list from the page drawn in headless
+# Chromium (_rendered_download_links(); needs Playwright). Closed programs prod files under: DJJ_CLOSED_FACILITIES; reports
+# no index lists any more: DJJ_EXTRA_QI_REPORTS.
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
 # suggested); rows a home already shows are not offered; "Link an entry by hand" links any row to any record

@@ -1288,24 +1288,6 @@
    }
   },
   {
-   "id": 54385,
-   "report_id": "766181",
-   "report_type": "PREA",
-   "program_name_raw": "Brevard Regional Juvenile Detetion Center",
-   "from": {
-    "id": 4302,
-    "facility_name": "Brevard Juvenile Detention Center",
-    "program_name": "DJJ-brevard-juvenile-detention-center"
-   },
-   "to": {
-    "create": {
-     "program_name": "DJJ-unmatched-brevard-regional-juvenile-detetion-center",
-     "facility_name": "Brevard Regional Juvenile Detetion Center",
-     "program_category": "PREA"
-    }
-   }
-  },
-  {
    "id": 54386,
    "report_id": "25088",
    "report_type": "SPEP",
@@ -1681,22 +1663,6 @@
      "facility_name": "brevard group treatment home",
      "program_category": "PREA"
     }
-   }
-  },
-  {
-   "id": 54436,
-   "report_id": "23081",
-   "report_type": "PREA",
-   "program_name_raw": "marion regional juvenile deterntion center",
-   "from": {
-    "id": 4307,
-    "facility_name": "Marion Regional Juvenile Detention Center",
-    "program_name": "DJJ-marion-regional-juvenile-detention-center"
-   },
-   "to": {
-    "id": 4294,
-    "facility_name": "Silver Springs Youth Academy",
-    "program_name": "DJJ-silver-springs-youth-academy"
    }
   },
   {
@@ -2233,6 +2199,136 @@
      "facility_name": "central pasco girls academy",
      "program_category": "PREA"
     }
+   }
+  },
+  {
+   "id": 54631,
+   "report_id": "23021",
+   "report_type": "PREA",
+   "program_name_raw": "crestviewyouthacademy",
+   "from": {
+    "id": 4325,
+    "facility_name": "crestviewyouthacademy",
+    "program_name": "DJJ-unmatched-crestviewyouthacademy"
+   },
+   "to": {
+    "id": 4273,
+    "facility_name": "Crestview Youth Academy",
+    "program_name": "DJJ-crestview-youth-academy"
+   }
+  },
+  {
+   "id": 54637,
+   "report_id": "23018",
+   "report_type": "PREA",
+   "program_name_raw": "collierregionaljuveniledetentioncenter",
+   "from": {
+    "id": 4331,
+    "facility_name": "collierregionaljuveniledetentioncenter",
+    "program_name": "DJJ-unmatched-collierregionaljuveniledetentioncenter"
+   },
+   "to": {
+    "id": 4303,
+    "facility_name": "Collier Juvenile Detention Center",
+    "program_name": "DJJ-collier-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 54638,
+   "report_id": "23020",
+   "report_type": "PREA",
+   "program_name_raw": "columbuspreareport",
+   "from": {
+    "id": 4332,
+    "facility_name": "columbuspreareport",
+    "program_name": "DJJ-unmatched-columbuspreareport"
+   },
+   "to": {
+    "id": 4272,
+    "facility_name": "Columbus Youth Academy",
+    "program_name": "DJJ-columbus-youth-academy"
+   }
+  },
+  {
+   "id": 54641,
+   "report_id": "23043",
+   "report_type": "PREA",
+   "program_name_raw": "escambiarjdc",
+   "from": {
+    "id": 4335,
+    "facility_name": "escambiarjdc",
+    "program_name": "DJJ-unmatched-escambiarjdc"
+   },
+   "to": {
+    "id": 4304,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-escambia-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 54704,
+   "report_id": "23162",
+   "report_type": "PREA",
+   "program_name_raw": "okaloosarjdc",
+   "from": {
+    "id": 4355,
+    "facility_name": "okaloosarjdc",
+    "program_name": "DJJ-unmatched-okaloosarjdc"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54705,
+   "report_id": "23163",
+   "report_type": "PREA",
+   "program_name_raw": "okaloosayouthacademyreport",
+   "from": {
+    "id": 4356,
+    "facility_name": "okaloosayouthacademyreport",
+    "program_name": "DJJ-unmatched-okaloosayouthacademyreport"
+   },
+   "to": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   }
+  },
+  {
+   "id": 54711,
+   "report_id": "23177",
+   "report_type": "PREA",
+   "program_name_raw": "pascoregionaljuveniledetentioncenter prea audit",
+   "from": {
+    "id": 4362,
+    "facility_name": "pascoregionaljuveniledetentioncenter prea audit",
+    "program_name": "DJJ-unmatched-pascoregionaljuveniledetentioncenter-prea-audit"
+   },
+   "to": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 54742,
+   "report_id": "23219",
+   "report_type": "PREA",
+   "program_name_raw": "tamparesidentialfacilityreport",
+   "from": {
+    "id": 4374,
+    "facility_name": "tamparesidentialfacilityreport",
+    "program_name": "DJJ-unmatched-tamparesidentialfacilityreport"
+   },
+   "to": {
+    "id": 4298,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-tampa-residential-facility"
    }
   },
   {
