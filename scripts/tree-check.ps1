@@ -9,9 +9,14 @@
 # Files older than -Hours (default 24) are marked FORGOTTEN: nobody is still
 # working on them, so commit them, move them to tmp/ or the scratchpad, or ignore them.
 
+#   ... -Hook SessionStart                # Claude Code hook: JSON for the user and the session, nothing when clean
+#   ... -Hook Stop                        # Claude Code hook: only FORGOTTEN files, nothing otherwise
+
 param(
     [int]$Hours = 24,
-    [switch]$Quiet
+    [switch]$Quiet,
+    [ValidateSet('', 'SessionStart', 'Stop')]
+    [string]$Hook = ''
 )
 
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -20,6 +25,7 @@ $now = Get-Date
 $dirtyCount = 0
 $forgottenCount = 0
 $lines = @()
+$forgotten = @()
 
 foreach ($name in $repos) {
     $path = Join-Path $root $name
@@ -42,8 +48,30 @@ foreach ($name in $repos) {
             if ($span.TotalHours -ge $Hours) { $flag = '  FORGOTTEN'; $forgottenCount++ }
         }
         $dirtyCount++
-        $lines += ('  {0} {1,5}  {2}{3}' -f $code, $age, $file, $flag)
+        $entry = ('  {0} {1,5}  {2}{3}' -f $code, $age, $file, $flag)
+        $lines += $entry
+        if ($flag) { $forgotten += "$name/$file ($age)" }
     }
+}
+
+if ($Hook) {
+    if ($Hook -eq 'Stop') {
+        if ($forgottenCount -eq 0) { exit 0 }
+        $msg = "Uncommitted for over ${Hours}h: " + ($forgotten -join ', ') + '. Commit, move to tmp/, or ignore them (scripts\tree-check.ps1).'
+        $out = @{ systemMessage = $msg }
+    } else {
+        if ($dirtyCount -eq 0) { exit 0 }
+        $text = "Working trees not clean at session start:`n" + ($lines -join "`n") + "`n$dirtyCount uncommitted file(s), $forgottenCount older than ${Hours}h."
+        $out = @{
+            systemMessage = $text
+            hookSpecificOutput = @{
+                hookEventName = 'SessionStart'
+                additionalContext = $text + "`nThese may belong to another session still working; do not stage, revert or delete them unless they are yours or the owner says so. Mention FORGOTTEN ones to the owner."
+            }
+        }
+    }
+    Write-Output ($out | ConvertTo-Json -Depth 4 -Compress)
+    exit 0
 }
 
 if ($dirtyCount -eq 0) {

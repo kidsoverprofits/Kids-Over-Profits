@@ -47,9 +47,11 @@ other sessions that commit and push to `main` at the same time:
   committed after a look at its diff (fewer reports, or bot-check pages, means the run failed: say so, don't commit).
   `powershell -File scripts	ree-check.ps1` lists what is dirty in all four checkouts and marks files untouched for
   24 hours FORGOTTEN; it only reads. Personal and editor files (`*.code-workspace`, `desktop.ini`) are ignored for
-  every repo by the owner's `~/.config/git/ignore`, not by the public `.gitignore` files. Still to add: a `Stop`
-  hook in `.claude/settings.json` that runs `tree-check.ps1 -Quiet` and shows its list (report only, never block,
-  since another session's file may be in progress).
+  every repo by the owner's `~/.config/git/ignore`, not by the public `.gitignore` files. Hooks: `-Hook SessionStart`
+  prints the whole list for the owner and the new session; `-Hook Stop` (runs after every reply) names only FORGOTTEN
+  files. Both only report, never block, since another session's file may be in progress. They are wired in the
+  owner's local `.claude/settings.json` (gitignored) of this checkout and kop-pipeline's; a session may not write that
+  file itself (auto mode refuses it as self-modification).
 - Push with `git pull --rebase --autostash origin main`, then
   `git push origin HEAD:main`.
 - If Source Control fills with files already on `main`, compare each to
