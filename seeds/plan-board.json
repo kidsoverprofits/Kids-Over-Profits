@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 20:11 UTC",
- "source": "844f2c9c21c73b2b9f872b234b93499653f3e3af",
+ "built": "2026-11-03 20:18 UTC",
+ "source": "a266693c6563d8938f8556fa7554abd344d8ed78",
  "sections": [
   {
    "key": "2",
@@ -910,10 +910,10 @@
       {
        "id": "4.2:utah-findings-stored-without-the-state-s-statement",
        "lead": "Utah findings stored without the state's statement",
-       "text": "**Utah findings stored without the state's statement** (found 2026-11-03, About rewrite pilot, Lava Heights): of the 411 UT reports in prod with a finding, 181 (2023-26, all inspection types) hold only the rule title in `inspection_reports.raw_content` (e.g. report 75584: \"R380-80-5(10): Services and supervision...\"); the other 230 carry the state's \"out of compliance... During the inspection...\" text. Utah's API (`cclapi.dlbc.utah.gov/api/public/facilities/<id>`) gives `declarativeStatement`, `noncomplianceLevel`, `cmpAmount` and `correctionAction` for every finding, checklist or not. Find why the UT scraper drops it for those 181 and backfill them. (kop-data's `ut_reports.json`, last updated 2025-10-17, is the old static file; the site reads prod, which has the 2026 inspections.)",
+       "text": "**Utah findings stored without the state's statement** (found 2026-11-03, About rewrite pilot, Lava Heights): of the 411 UT reports in prod with a finding, 181 (2023-26, all inspection types) hold only the rule title in `inspection_reports.raw_content` (e.g. report 75584: \"R380-80-5(10): Services and supervision...\"); the other 230 carry the state's \"out of compliance... During the inspection...\" text. Utah's API (`cclapi.dlbc.utah.gov/api/public/facilities/<id>`) gives `declarativeStatement`, `noncomplianceLevel`, `cmpAmount` and `correctionAction` for every finding, checklist or not. Find why the UT scraper drops it for those 181 and backfill them. (kop-data's `ut_reports.json`, last updated 2025-10-17, is the old static file; the site reads prod, which has the 2026 inspections.) - **Cause (2026-11-03)**: Utah renamed the field `findingText` -> `declarativeStatement` (the March 2026 export `ut_reports_03182026.json` still has `findingText` on every finding); `utah_citation_scraper.py` read only `findingText`, and its Sept 28 and Nov 1 runs re-posted with the title alone (`inspections-write.php` overwrites `raw_content` on the duplicate key). Counting every row with a title-only line it is **212** rows, not 181. The site's UT reader only counts \"rule: title — text\" lines, so all 212 showed **\"No findings\"** on /ut-reports/, the hub cards and the rankings' verdicts. - **Fixed in kop-pipeline**: reads both names, writes the verdict fields (level, CMP, correction action/date/verification, appeal) to `categories_json` \"Findings\" (raw_content line format unchanged), refuses to post when most findings lack a statement. Test: `scrapers/test_utah_scraper.py`. - **Backfill (OWNER: say go)**: `ut_backfill_statements.py` dry run against the Nov 3 mirror wrote `scrapers/middle/ut_backfill_2026-11-03.json` + `.md`: 370 reports under 100 facilities = 212 restored, 153 good rows gaining only the verdict fields, 5 whose statement Utah has since extended (\"This is a repeat noncompliance\", Kiva's numbered items; listed in the .md; their plain-summary excerpts will change and get new drafts). The facility rows are sent back exactly as prod has them. Not touched: 34 rows from 2023 Utah's API no longer lists (all have statements), and 7 facilities Utah's API answers HTTP 500 for (none has a title-only row). Post: `.venv/Scripts/python scrapers/ut_backfill_statements.py --from-api-cache <dir> --post` (or `--only=restored` for just the 212). - After the post: sync the mirror, re-run the dry run (restored should be 0), check Lava Heights 2026-04-29 on /ut-reports/ shows 1 finding, bump `kop_irl_version()` if the rankings don't recount, and let the hourly highlight scan pick up the restored findings (new serious-finding candidates: elopement, abuse). - Follow-up (theme): show `categories.Findings` (level, CMP, correction) on the UT report cards in `js/inspections/states/ut.js`.",
        "ask": "",
        "date": "2026-11-03",
-       "hash": "a6ffda63ca91"
+       "hash": "8e895c158a96"
       }
      ]
     },
