@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 19:12 UTC",
- "source": "89b537b5e0ab2f365f25fb65a9f298ffa7d0732c",
+ "built": "2026-11-03 19:17 UTC",
+ "source": "c0743edc9bdf7056bc0232004c02a2721e051171",
  "sections": [
   {
    "key": "2",
@@ -894,18 +894,18 @@
       {
        "id": "4.2:fl-djj-reports-filed-under-the-wrong-facility",
        "lead": "FL DJJ reports filed under the wrong facility",
-       "text": "**FL DJJ reports filed under the wrong facility** (found 2026-11-03, from SPEP reports sent in to Websites sent in). `_normalize_key()` in kop-pipeline `scrapers/fl_scraper.py` drops \"academy\", \"detention\", \"regional\", \"juvenile\", \"girls\", \"group\", \"home\", \"treatment\", so \"Marion Youth Academy\" and \"Marion Regional Juvenile Detention Center\" both key to `marion`; `_match_to_facility()`'s token fallback then takes a one-word overlap (overlap / smaller set >= 0.8). On prod: Marion Youth Academy's 20 reports sit under Marion RJDC (4307), Brevard Group Treatment Home's 24 under Brevard JDC (4302), the Alachua / Duval / Broward / Orange RJDC reports under the academies of the same county (4268, 4278, 4270, 4310), Hillsborough Girls Academy under Hillsborough JDC West (4282), Central Pasco Girls Academy under Pasco JDC (4311), \"Lake Academy\" under Lake Parrish (7391), Tampa Bay Girls High/Max under Tampa Residential (4298). Fix: keep a kind (detention vs residential vs group home) beside the key and never match across kinds; no one-token containment match. Then a rerun, and a check that the importer moves a report already held (keyed by facility_id + report_id) instead of leaving the old row: the moved rows must leave the old facility. The rest of FL DJJ is untidy too: each QI and PREA run adds `DJJ-unmatched-*` twins of directory facilities (Alachua Academy 4268 + 14419, ~60 pairs) and PREA file-name facilities (\"columbuspreareport\").",
+       "text": "**FL DJJ reports filed under the wrong facility** (found 2026-11-03, from SPEP reports sent in to Websites sent in). Matcher fixed 2026-11-03 (kop-pipeline `scrapers/fl_scraper.py`, tests `scrapers/test_fl_scraper.py`): no match across detention/residential, a one-word key only as the facility's side, ambiguous = unmatched, \"girls\"/\"boys\" kept, Marion Youth Academy = Silver Springs Youth Academy (`DJJ_FORMER_NAMES`: DJJ's own marion-youth-academy page is Silver Springs, same address 10420 NW Gainesville Rd, Ocala). Lake Academy is TrueCore's program at 9504 E Columbus Dr, Tampa, not Lake Parrish. The DJJ site went Next.js, so the directory readers (empty since, which is where the ~60 `DJJ-unmatched-*` twins came from) now read `__NEXT_DATA__` (36 residential + 21 detention) and the SPEP reader the new accordion (910 links). Cleanup plan `seeds/fl-inspection-cleanup.json` (theme; built by kop-pipeline `scripts/build-fl-djj-refile.py`): 313 rows, 159 moved, 154 folded into the copy the target already holds, 17 facilities created, 64 emptied twins removed; `scripts/test-fl-inspection-cleanup.php` passes on the mirror. Still open: - Owner, after deploy: `php api/clean-fl-inspections.php` on the server (dry run should print the same counts), then `php api/clean-fl-inspections.php apply`. Order against the next FL run does not matter (a twin the run makes is folded). - Then check /fl-reports/: Marion Youth Academy's SPEP reports under Silver Springs Youth Academy, Hillsborough Girls Academy and Brevard Group Treatment Home as facilities of their own, Marion RJDC with only detention reports; and that the two SPEP cards in Websites sent in now name the right facility under \"Already on file\". - **PREA index broken**: the Completed PREA Audit Reports page now loads its file list in the browser (an Ibexa \"file_tables\" block on media folder location 22992, served from `fldjj-media.ccplatform.net/graphql`), so `fetch_prea_index()` finds 0. Querying that GraphQL backend from a script was refused by the session's permission check; the owner decides: allow it, read the list from a rendered page (Playwright), or leave PREA as held. - Closed programs DJJ no longer lists (Redwood, Britt Technical, Wimauma, Lake Academy...) still go to `DJJ-unmatched-*` facilities on a `--full` run; the plan keeps the ones prod already files under a `DJJ-<slug>` row there. A held-closed list in the scraper would close that gap. - Small facilities of a PREA file name (\"brevard group treatment home prea report\", \"hillsborough rjdc\": East or West) stay as they are; a person can link them at KOP Tools > Inspection Links.",
        "ask": "",
        "date": "2026-11-03",
-       "hash": "e90d5bc5d15e"
+       "hash": "46b3f39b6af5"
       },
       {
        "id": "4.2:three-fl-djj-reports-sent-in-that-we-do-not-hold",
        "lead": "Three FL DJJ reports sent in that we do not hold",
-       "text": "**Three FL DJJ reports sent in that we do not hold** (Websites sent in, 2026-11-03): #17046 Crestview Youth Academy Non-Secure FY20-21 (download 23556), #17186 Marion Youth Academy FY21-22 (232583), #17208 Kissimmee Youth Academy FY18-19 (23594). Older QI reports the scraper's index pages no longer list. Add them to `fl_scraper.py` as extra entries (or a \"closed / older reports\" index) after item 10, so they file like the rest; then trash the cards. The CAR \"Residential chapter\" PDFs (#17073, #17192-17204) are statewide annual reports, not inspections: they stay websites (government), or go to the media library.",
+       "text": "**Three FL DJJ reports sent in that we do not hold** (Websites sent in, 2026-11-03): #17046 Crestview Youth Academy Non-Secure FY20-21 (download 23556), #17186 Marion Youth Academy FY21-22 (232583), #17208 Kissimmee Youth Academy FY18-19 (23594). Older QI reports the scraper's index pages no longer list. Add them to `fl_scraper.py` as extra entries (or a \"closed / older reports\" index), so they file like the rest; then trash the cards. Checked 2026-11-03: none of the three is on the live SPEP or QI index pages. The CAR \"Residential chapter\" PDFs (#17073, #17192-17204) are statewide annual reports, not inspections: they stay websites (government), or go to the media library.",
        "ask": "",
        "date": "2026-11-03",
-       "hash": "222b3de7ea13"
+       "hash": "b2b226359919"
       }
      ]
     },

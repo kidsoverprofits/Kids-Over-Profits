@@ -14,6 +14,16 @@ node scripts/test-inspection-verdicts.js --php=<Local php.exe> [--states=PA,NC] 
 # NC rows the old nc_scraper.py matcher misfiled (adult-only, one facility under many licences): seeds/nc-inspection-cleanup.json
 php -d extension=pdo_sqlite scripts/test-nc-inspection-cleanup.php   # on an in-memory copy of tmp/prod.sqlite
 php api/clean-nc-inspections.php [apply]      # on the server (ea-php82): dry run; apply backs up to ~/kop-backups/ first
+# FL DJJ rows the old fl_scraper.py matcher misfiled (Marion Youth Academy on Marion RJDC, ...) and DJJ-unmatched-* twins:
+# seeds/fl-inspection-cleanup.json, built with the fixed matcher against DJJ's live directory + the closed programs prod holds
+(kop-pipeline) .venv/Scripts/python scripts/build-fl-djj-refile.py [--list] [--offline]   # after a mirror sync; writes the seed here
+(kop-pipeline) .venv/Scripts/python scrapers/test_fl_scraper.py                           # matcher kinds, renames, __NEXT_DATA__ directory
+php -d extension=pdo_sqlite scripts/test-fl-inspection-cleanup.php   # on an in-memory copy of tmp/prod.sqlite
+php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry run; apply backs up to ~/kop-backups/ first
+# FL DJJ matching rule (fl_scraper.py _match_to_facility): never across detention/residential (_facility_kind); a one-word
+# key matches only as the facility's side ("Orange ... TrueCore" -> Orange Youth Academy, "Lake Academy" not -> Lake Parrish);
+# ambiguous = DJJ-unmatched-<name>. Renamed programs: DJJ_FORMER_NAMES. The DJJ site is Next.js since 2026: the directory
+# pages are read from __NEXT_DATA__, SPEP from its button/region accordion; the PREA list loads in the browser (open item).
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
 # suggested); rows a home already shows are not offered; "Link an entry by hand" links any row to any record

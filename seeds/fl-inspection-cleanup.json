@@ -1,0 +1,5241 @@
+{
+ "about": "FL DJJ reports the old fl_scraper.py matcher filed under the wrong facility (found 2026-11-03): each row moves to the facility the fixed matcher posts it to. Built by kop-pipeline scripts/build-fl-djj-refile.py from tmp/prod.sqlite; applied by api/clean-fl-inspections.php.",
+ "moves": [
+  {
+   "id": 53546,
+   "report_id": "1176781",
+   "report_type": "PREA",
+   "program_name_raw": "Alachua Regional Juvenile Detention Center",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53550,
+   "report_id": "22996",
+   "report_type": "PREA",
+   "program_name_raw": "alachua regional juvenile detention center",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53551,
+   "report_id": "22997",
+   "report_type": "PREA",
+   "program_name_raw": "alachua rjdc",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53552,
+   "report_id": "23048",
+   "report_type": "PREA",
+   "program_name_raw": "alachua regional juvenile detention center",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53575,
+   "report_id": "1268750",
+   "report_type": "QI Detention",
+   "program_name_raw": "Alachua Regional Juvenile Detention Center",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53579,
+   "report_id": "1837970",
+   "report_type": "QI Detention",
+   "program_name_raw": "Alachua Regional Juvenile Detention Center",
+   "from": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53585,
+   "report_id": "1194056",
+   "report_type": "PREA",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53588,
+   "report_id": "23010",
+   "report_type": "PREA",
+   "program_name_raw": "broward juvenile detention center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53590,
+   "report_id": "23053",
+   "report_type": "PREA",
+   "program_name_raw": "broward rjdc",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53592,
+   "report_id": "54642",
+   "report_type": "PREA",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53593,
+   "report_id": "55290",
+   "report_type": "PREA",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53618,
+   "report_id": "1456313",
+   "report_type": "QI Detention",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53620,
+   "report_id": "1953148",
+   "report_type": "QI Detention",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53821,
+   "report_id": "1158695",
+   "report_type": "PREA",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53825,
+   "report_id": "23032",
+   "report_type": "PREA",
+   "program_name_raw": "duval regional juvenile detention center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53826,
+   "report_id": "23033",
+   "report_type": "PREA",
+   "program_name_raw": "duval rjdc",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53828,
+   "report_id": "23066",
+   "report_type": "PREA",
+   "program_name_raw": "duval regional juvenile detention center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53847,
+   "report_id": "1235727",
+   "report_type": "QI Detention",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53852,
+   "report_id": "1545277",
+   "report_type": "QI Detention",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 53917,
+   "report_id": "23071",
+   "report_type": "PREA",
+   "program_name_raw": "hillsborough girls academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53918,
+   "report_id": "23072",
+   "report_type": "PREA",
+   "program_name_raw": "hillsborough regional juvenile detention center",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-regional-juvenile-detention-center",
+     "facility_name": "hillsborough regional juvenile detention center",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53919,
+   "report_id": "23127",
+   "report_type": "PREA",
+   "program_name_raw": "hillsborough girls academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53921,
+   "report_id": "23129",
+   "report_type": "PREA",
+   "program_name_raw": "hillsborough rjdc",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-rjdc",
+     "facility_name": "hillsborough rjdc",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53922,
+   "report_id": "908839",
+   "report_type": "PREA",
+   "program_name_raw": "Hillsborough Juvenile Detention Center",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-juvenile-detention-center",
+     "facility_name": "Hillsborough Juvenile Detention Center",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53923,
+   "report_id": "25148",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53924,
+   "report_id": "25149",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53925,
+   "report_id": "25150",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53926,
+   "report_id": "24491",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53927,
+   "report_id": "24492",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53928,
+   "report_id": "24493",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53929,
+   "report_id": "24624",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53930,
+   "report_id": "24625",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53931,
+   "report_id": "24626",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53932,
+   "report_id": "24968",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53933,
+   "report_id": "24969",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53934,
+   "report_id": "24970",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53935,
+   "report_id": "24869",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53936,
+   "report_id": "24870",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53937,
+   "report_id": "24871",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53938,
+   "report_id": "25073",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53939,
+   "report_id": "25074",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53940,
+   "report_id": "25075",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53941,
+   "report_id": "56000",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53942,
+   "report_id": "56001",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53943,
+   "report_id": "56002",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53944,
+   "report_id": "608474",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53945,
+   "report_id": "608475",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53946,
+   "report_id": "608476",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53947,
+   "report_id": "1298155",
+   "report_type": "QI Residential",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53949,
+   "report_id": "1571144",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53950,
+   "report_id": "1571145",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 53951,
+   "report_id": "1571146",
+   "report_type": "SPEP",
+   "program_name_raw": "Hillsborough Girls Academy",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-girls-academy",
+     "facility_name": "hillsborough girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54021,
+   "report_id": "1189753",
+   "report_type": "PREA",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment Twin Oaks Academy II",
+   "from": {
+    "id": 4285,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST)",
+    "program_name": "DJJ-juvenile-unit-for-specialized-treatment-just"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 54040,
+   "report_id": "1298050",
+   "report_type": "QI Residential",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+   "from": {
+    "id": 4285,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST)",
+    "program_name": "DJJ-juvenile-unit-for-specialized-treatment-just"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 54041,
+   "report_id": "1473519",
+   "report_type": "QI Residential",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+   "from": {
+    "id": 4285,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST)",
+    "program_name": "DJJ-juvenile-unit-for-specialized-treatment-just"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 54042,
+   "report_id": "1953171",
+   "report_type": "QI Residential",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+   "from": {
+    "id": 4285,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST)",
+    "program_name": "DJJ-juvenile-unit-for-specialized-treatment-just"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 54172,
+   "report_id": "1027679",
+   "report_type": "PREA",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54173,
+   "report_id": "1952751",
+   "report_type": "PREA",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54175,
+   "report_id": "23089",
+   "report_type": "PREA",
+   "program_name_raw": "okaloosa regional juvenile detention center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54210,
+   "report_id": "1235726",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54217,
+   "report_id": "1298723",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54219,
+   "report_id": "1815045",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54248,
+   "report_id": "1229588",
+   "report_type": "PREA",
+   "program_name_raw": "Palm Beach Regional Juvenile Detention Center",
+   "from": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54250,
+   "report_id": "23098",
+   "report_type": "PREA",
+   "program_name_raw": "palm beach rjdc",
+   "from": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54252,
+   "report_id": "23172",
+   "report_type": "PREA",
+   "program_name_raw": "palm beach juvenile detention center",
+   "from": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54254,
+   "report_id": "56187",
+   "report_type": "PREA",
+   "program_name_raw": "Palm Beach Regional Detention Center",
+   "from": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54277,
+   "report_id": "1952881",
+   "report_type": "QI Detention",
+   "program_name_raw": "Palm Beach Regional Juvenile Detention Center",
+   "from": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54335,
+   "report_id": "1849388",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- High/Max",
+   "from": {
+    "id": 4298,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-tampa-residential-facility"
+   },
+   "to": {
+    "id": 7395,
+    "facility_name": "Tampa Bay Girls Academy",
+    "program_name": "DJJ-tampa-bay-girls-academy"
+   }
+  },
+  {
+   "id": 54338,
+   "report_id": "23227",
+   "report_type": "PREA",
+   "program_name_raw": "walton",
+   "from": {
+    "id": 4299,
+    "facility_name": "Walton Academy for Growth and Change",
+    "program_name": "DJJ-walton-academy-for-growth-and-change"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-walton",
+     "facility_name": "walton",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54380,
+   "report_id": "23006",
+   "report_type": "PREA",
+   "program_name_raw": "brevard group treatment home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54381,
+   "report_id": "23007",
+   "report_type": "PREA",
+   "program_name_raw": "brevard group treatment home prea report",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home-prea-report",
+     "facility_name": "brevard group treatment home prea report",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54383,
+   "report_id": "23050",
+   "report_type": "PREA",
+   "program_name_raw": "brevard group treatment home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54385,
+   "report_id": "766181",
+   "report_type": "PREA",
+   "program_name_raw": "Brevard Regional Juvenile Detetion Center",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-regional-juvenile-detetion-center",
+     "facility_name": "Brevard Regional Juvenile Detetion Center",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54386,
+   "report_id": "25088",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54387,
+   "report_id": "25089",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54388,
+   "report_id": "25090",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54389,
+   "report_id": "24448",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54390,
+   "report_id": "24449",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54391,
+   "report_id": "24450",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54392,
+   "report_id": "24587",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54393,
+   "report_id": "24588",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54394,
+   "report_id": "24589",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54395,
+   "report_id": "24707",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54396,
+   "report_id": "24708",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54397,
+   "report_id": "24709",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54398,
+   "report_id": "24971",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54399,
+   "report_id": "24972",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54400,
+   "report_id": "24973",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54401,
+   "report_id": "24894",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54402,
+   "report_id": "24895",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54403,
+   "report_id": "24896",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54404,
+   "report_id": "184528",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54405,
+   "report_id": "184529",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54406,
+   "report_id": "184530",
+   "report_type": "SPEP",
+   "program_name_raw": "Brevard Group Treatment Home",
+   "from": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-brevard-group-treatment-home",
+     "facility_name": "brevard group treatment home",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54436,
+   "report_id": "23081",
+   "report_type": "PREA",
+   "program_name_raw": "marion regional juvenile deterntion center",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54437,
+   "report_id": "23082",
+   "report_type": "PREA",
+   "program_name_raw": "marion youth academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54440,
+   "report_id": "23152",
+   "report_type": "PREA",
+   "program_name_raw": "marion youth academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54441,
+   "report_id": "23153",
+   "report_type": "PREA",
+   "program_name_raw": "marion youth academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54442,
+   "report_id": "24512",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54443,
+   "report_id": "24513",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54444,
+   "report_id": "24639",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54445,
+   "report_id": "24640",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54446,
+   "report_id": "24641",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54447,
+   "report_id": "24785",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54448,
+   "report_id": "24786",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54449,
+   "report_id": "24787",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54450,
+   "report_id": "25032",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54451,
+   "report_id": "25033",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54452,
+   "report_id": "25034",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54453,
+   "report_id": "53172",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54454,
+   "report_id": "53173",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54455,
+   "report_id": "53174",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54456,
+   "report_id": "424881",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54457,
+   "report_id": "424882",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54458,
+   "report_id": "424883",
+   "report_type": "SPEP",
+   "program_name_raw": "Marion Youth Academy",
+   "from": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 54463,
+   "report_id": "23024",
+   "report_type": "PREA",
+   "program_name_raw": "dade juvenile residential facility",
+   "from": {
+    "id": 4308,
+    "facility_name": "Miami Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-miami-dade-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-dade-juvenile-residential-facility",
+     "facility_name": "dade juvenile residential facility",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54464,
+   "report_id": "23062",
+   "report_type": "PREA",
+   "program_name_raw": "dade juvenile residential",
+   "from": {
+    "id": 4308,
+    "facility_name": "Miami Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-miami-dade-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-dade-juvenile-residential",
+     "facility_name": "dade juvenile residential",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54480,
+   "report_id": "1952757",
+   "report_type": "PREA",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54483,
+   "report_id": "23097",
+   "report_type": "PREA",
+   "program_name_raw": "orange regional juvenile detention center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54485,
+   "report_id": "23168",
+   "report_type": "PREA",
+   "program_name_raw": "orange regional juvenile detention center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54486,
+   "report_id": "23169",
+   "report_type": "PREA",
+   "program_name_raw": "orange rjdc",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54488,
+   "report_id": "706129",
+   "report_type": "PREA",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54520,
+   "report_id": "1154798",
+   "report_type": "QI Detention",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54524,
+   "report_id": "1298440",
+   "report_type": "QI Detention",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54525,
+   "report_id": "1849397",
+   "report_type": "QI Detention",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 4310,
+    "facility_name": "Orange Youth Academy",
+    "program_name": "DJJ-orange-youth-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 54527,
+   "report_id": "23012",
+   "report_type": "PREA",
+   "program_name_raw": "central pasco girls academy",
+   "from": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-central-pasco-girls-academy",
+     "facility_name": "central pasco girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 54528,
+   "report_id": "23056",
+   "report_type": "PREA",
+   "program_name_raw": "central pasco girls academy",
+   "from": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-central-pasco-girls-academy",
+     "facility_name": "central pasco girls academy",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 74290,
+   "report_id": "1849396",
+   "report_type": "QI Residential",
+   "program_name_raw": "Redwood Youth Academy",
+   "from": {
+    "id": 7363,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-unmatched-redwood-youth-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 74291,
+   "report_id": "23104",
+   "report_type": "PREA",
+   "program_name_raw": "redwood academy",
+   "from": {
+    "id": 7364,
+    "facility_name": "redwood academy",
+    "program_name": "DJJ-unmatched-redwood-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 74292,
+   "report_id": "1952967",
+   "report_type": "SPEP",
+   "program_name_raw": "Redwood Academy",
+   "from": {
+    "id": 7364,
+    "facility_name": "redwood academy",
+    "program_name": "DJJ-unmatched-redwood-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 74293,
+   "report_id": "1952968",
+   "report_type": "SPEP",
+   "program_name_raw": "Redwood Academy",
+   "from": {
+    "id": 7364,
+    "facility_name": "redwood academy",
+    "program_name": "DJJ-unmatched-redwood-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 74294,
+   "report_id": "1952969",
+   "report_type": "SPEP",
+   "program_name_raw": "Redwood Academy",
+   "from": {
+    "id": 7364,
+    "facility_name": "redwood academy",
+    "program_name": "DJJ-unmatched-redwood-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 74321,
+   "report_id": "1094587",
+   "report_type": "PREA",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74322,
+   "report_id": "23077",
+   "report_type": "PREA",
+   "program_name_raw": "lake academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74323,
+   "report_id": "23141",
+   "report_type": "PREA",
+   "program_name_raw": "lake academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74324,
+   "report_id": "25157",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74325,
+   "report_id": "25158",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74326,
+   "report_id": "25159",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74327,
+   "report_id": "25160",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74328,
+   "report_id": "24506",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74329,
+   "report_id": "24507",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74330,
+   "report_id": "24508",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74331,
+   "report_id": "24509",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74332,
+   "report_id": "24633",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74333,
+   "report_id": "24634",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74334,
+   "report_id": "24635",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74335,
+   "report_id": "24636",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74336,
+   "report_id": "24778",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74337,
+   "report_id": "24779",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74338,
+   "report_id": "24780",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74339,
+   "report_id": "25026",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74340,
+   "report_id": "25027",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74341,
+   "report_id": "25028",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74342,
+   "report_id": "47078",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74343,
+   "report_id": "47079",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74344,
+   "report_id": "47080",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74345,
+   "report_id": "380821",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74346,
+   "report_id": "380822",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74347,
+   "report_id": "380825",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74348,
+   "report_id": "979596",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74349,
+   "report_id": "979597",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74350,
+   "report_id": "979609",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74351,
+   "report_id": "979610",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74352,
+   "report_id": "979611",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74353,
+   "report_id": "979612",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74354,
+   "report_id": "1189964",
+   "report_type": "QI Residential",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74355,
+   "report_id": "1565375",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74356,
+   "report_id": "1565376",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74357,
+   "report_id": "1565377",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74358,
+   "report_id": "1565378",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74359,
+   "report_id": "1565379",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4319,
+    "facility_name": "Lake Academy",
+    "program_name": "DJJ-unmatched-lake-academy"
+   }
+  },
+  {
+   "id": 74360,
+   "report_id": "1565380",
+   "report_type": "SPEP",
+   "program_name_raw": "Lake Academy (Secure)",
+   "from": {
+    "id": 7391,
+    "facility_name": "Lake Parrish Youth Academy",
+    "program_name": "DJJ-lake-parrish-youth-academy"
+   },
+   "to": {
+    "id": 4383,
+    "facility_name": "Lake Academy (Secure)",
+    "program_name": "DJJ-unmatched-lake-academy-secure"
+   }
+  },
+  {
+   "id": 74364,
+   "report_id": "1849387",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- Moderate",
+   "from": {
+    "id": 7395,
+    "facility_name": "Tampa Bay Girls Academy",
+    "program_name": "DJJ-tampa-bay-girls-academy"
+   },
+   "to": {
+    "id": 4297,
+    "facility_name": "Tampa Bay Girls Academy - Moderate",
+    "program_name": "DJJ-tampa-bay-girls-academy-moderate"
+   }
+  },
+  {
+   "id": 74366,
+   "report_id": "1952781",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- Moderate",
+   "from": {
+    "id": 7395,
+    "facility_name": "Tampa Bay Girls Academy",
+    "program_name": "DJJ-tampa-bay-girls-academy"
+   },
+   "to": {
+    "id": 4297,
+    "facility_name": "Tampa Bay Girls Academy - Moderate",
+    "program_name": "DJJ-tampa-bay-girls-academy-moderate"
+   }
+  },
+  {
+   "id": 74368,
+   "report_id": "1955993",
+   "report_type": "QI Detention",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 74369,
+   "report_id": "1304749",
+   "report_type": "PREA",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74370,
+   "report_id": "1298195",
+   "report_type": "QI Residential",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74371,
+   "report_id": "1565392",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74372,
+   "report_id": "1565393",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74373,
+   "report_id": "1565394",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74374,
+   "report_id": "1464897",
+   "report_type": "QI Residential",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74375,
+   "report_id": "1952970",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74376,
+   "report_id": "1952971",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74377,
+   "report_id": "1952972",
+   "report_type": "SPEP",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 74378,
+   "report_id": "1956081",
+   "report_type": "QI Residential",
+   "program_name_raw": "Wimauma Academy",
+   "from": {
+    "id": 7398,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-unmatched-wimauma-academy"
+   },
+   "to": {
+    "id": 4300,
+    "facility_name": "Wimauma Academy",
+    "program_name": "DJJ-wimauma-academy"
+   }
+  },
+  {
+   "id": 75198,
+   "report_id": "1956137",
+   "report_type": "PREA",
+   "program_name_raw": "Hillsborough Regional Juvenile Detention Center",
+   "from": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-unmatched-hillsborough-regional-juvenile-detention-center",
+     "facility_name": "hillsborough regional juvenile detention center",
+     "program_category": "PREA"
+    }
+   }
+  },
+  {
+   "id": 75202,
+   "report_id": "1427645",
+   "report_type": "QI Residential",
+   "program_name_raw": "Britt Technical Youth Academy",
+   "from": {
+    "id": 7712,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-unmatched-britt-technical-youth-academy"
+   },
+   "to": {
+    "id": 4269,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-britt-technical-youth-academy"
+   }
+  },
+  {
+   "id": 75203,
+   "report_id": "1952956",
+   "report_type": "SPEP",
+   "program_name_raw": "Britt Technical Youth Academy",
+   "from": {
+    "id": 7712,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-unmatched-britt-technical-youth-academy"
+   },
+   "to": {
+    "id": 4269,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-britt-technical-youth-academy"
+   }
+  },
+  {
+   "id": 75204,
+   "report_id": "1952958",
+   "report_type": "SPEP",
+   "program_name_raw": "Britt Technical Youth Academy",
+   "from": {
+    "id": 7712,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-unmatched-britt-technical-youth-academy"
+   },
+   "to": {
+    "id": 4269,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-britt-technical-youth-academy"
+   }
+  },
+  {
+   "id": 75205,
+   "report_id": "1956224",
+   "report_type": "QI Residential",
+   "program_name_raw": "Redwood Youth Academy Re-Review",
+   "from": {
+    "id": 7713,
+    "facility_name": "Redwood Youth Academy Re-Review",
+    "program_name": "DJJ-unmatched-redwood-youth-academy-re-review"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 75206,
+   "report_id": "1852269",
+   "report_type": "PREA",
+   "program_name_raw": "Britt Technical Youth Adademy",
+   "from": {
+    "id": 7714,
+    "facility_name": "Britt Technical Youth Adademy",
+    "program_name": "DJJ-unmatched-britt-technical-youth-adademy"
+   },
+   "to": {
+    "id": 4269,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-britt-technical-youth-academy"
+   }
+  },
+  {
+   "id": 77685,
+   "report_id": "1956375",
+   "report_type": "QI Residential",
+   "program_name_raw": "Britt Technical Youth Academy",
+   "from": {
+    "id": 7712,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-unmatched-britt-technical-youth-academy"
+   },
+   "to": {
+    "id": 4269,
+    "facility_name": "Britt Technical Youth Academy",
+    "program_name": "DJJ-britt-technical-youth-academy"
+   }
+  },
+  {
+   "id": 126010,
+   "report_id": "1961839",
+   "report_type": "QI Residential",
+   "program_name_raw": "AMIkids Polk",
+   "from": {
+    "id": 14418,
+    "facility_name": "AMIkids Polk",
+    "program_name": "DJJ-unmatched-amikids-polk"
+   },
+   "to": {
+    "id": 4316,
+    "facility_name": "AMIKids Polk Inc.",
+    "program_name": "DJJ-amikids-polk-inc"
+   }
+  },
+  {
+   "id": 126011,
+   "report_id": "1310489",
+   "report_type": "QI Residential",
+   "program_name_raw": "Alachua Academy",
+   "from": {
+    "id": 14419,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-unmatched-alachua-academy"
+   },
+   "to": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   }
+  },
+  {
+   "id": 126012,
+   "report_id": "1945890",
+   "report_type": "QI Residential",
+   "program_name_raw": "Alachua Academy",
+   "from": {
+    "id": 14419,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-unmatched-alachua-academy"
+   },
+   "to": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   }
+  },
+  {
+   "id": 126013,
+   "report_id": "1961862",
+   "report_type": "QI Residential",
+   "program_name_raw": "Alachua Academy",
+   "from": {
+    "id": 14419,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-unmatched-alachua-academy"
+   },
+   "to": {
+    "id": 4268,
+    "facility_name": "Alachua Academy",
+    "program_name": "DJJ-alachua-academy"
+   }
+  },
+  {
+   "id": 126016,
+   "report_id": "1427649",
+   "report_type": "QI Residential",
+   "program_name_raw": "Broward Youth Treatment Center",
+   "from": {
+    "id": 14421,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-unmatched-broward-youth-treatment-center"
+   },
+   "to": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   }
+  },
+  {
+   "id": 126017,
+   "report_id": "1956084",
+   "report_type": "QI Residential",
+   "program_name_raw": "Broward Youth Treatment Center",
+   "from": {
+    "id": 14421,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-unmatched-broward-youth-treatment-center"
+   },
+   "to": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   }
+  },
+  {
+   "id": 126018,
+   "report_id": "1961861",
+   "report_type": "QI Residential",
+   "program_name_raw": "Broward Youth Treatment Center",
+   "from": {
+    "id": 14421,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-unmatched-broward-youth-treatment-center"
+   },
+   "to": {
+    "id": 4270,
+    "facility_name": "Broward Youth Treatment Center",
+    "program_name": "DJJ-broward-youth-treatment-center"
+   }
+  },
+  {
+   "id": 126019,
+   "report_id": "1473524",
+   "report_type": "QI Residential",
+   "program_name_raw": "Center for Success and Independence Ocala",
+   "from": {
+    "id": 14422,
+    "facility_name": "Center for Success and Independence Ocala",
+    "program_name": "DJJ-unmatched-center-for-success-and-independence-ocala"
+   },
+   "to": {
+    "id": 4271,
+    "facility_name": "Center for Success and Independence - Ocala",
+    "program_name": "DJJ-center-for-success-and-independence-ocala"
+   }
+  },
+  {
+   "id": 126020,
+   "report_id": "1955991",
+   "report_type": "QI Residential",
+   "program_name_raw": "Center for Success and Independence Ocala",
+   "from": {
+    "id": 14422,
+    "facility_name": "Center for Success and Independence Ocala",
+    "program_name": "DJJ-unmatched-center-for-success-and-independence-ocala"
+   },
+   "to": {
+    "id": 4271,
+    "facility_name": "Center for Success and Independence - Ocala",
+    "program_name": "DJJ-center-for-success-and-independence-ocala"
+   }
+  },
+  {
+   "id": 126021,
+   "report_id": "1490746",
+   "report_type": "QI Residential",
+   "program_name_raw": "Columbus Youth Academy",
+   "from": {
+    "id": 14423,
+    "facility_name": "Columbus Youth Academy",
+    "program_name": "DJJ-unmatched-columbus-youth-academy"
+   },
+   "to": {
+    "id": 4272,
+    "facility_name": "Columbus Youth Academy",
+    "program_name": "DJJ-columbus-youth-academy"
+   }
+  },
+  {
+   "id": 126022,
+   "report_id": "1507969",
+   "report_type": "QI Residential",
+   "program_name_raw": "Crestview Youth Academy",
+   "from": {
+    "id": 14424,
+    "facility_name": "Crestview Youth Academy",
+    "program_name": "DJJ-unmatched-crestview-youth-academy"
+   },
+   "to": {
+    "id": 4273,
+    "facility_name": "Crestview Youth Academy",
+    "program_name": "DJJ-crestview-youth-academy"
+   }
+  },
+  {
+   "id": 126023,
+   "report_id": "1962035",
+   "report_type": "QI Residential",
+   "program_name_raw": "Crestview Youth Academy",
+   "from": {
+    "id": 14424,
+    "facility_name": "Crestview Youth Academy",
+    "program_name": "DJJ-unmatched-crestview-youth-academy"
+   },
+   "to": {
+    "id": 4273,
+    "facility_name": "Crestview Youth Academy",
+    "program_name": "DJJ-crestview-youth-academy"
+   }
+  },
+  {
+   "id": 126024,
+   "report_id": "1450591",
+   "report_type": "QI Residential",
+   "program_name_raw": "Cypress Creek Max Risk",
+   "from": {
+    "id": 14425,
+    "facility_name": "Cypress Creek Max Risk",
+    "program_name": "DJJ-unmatched-cypress-creek-max-risk"
+   },
+   "to": {
+    "id": 4274,
+    "facility_name": "Cypress Creek",
+    "program_name": "DJJ-cypress-creek"
+   }
+  },
+  {
+   "id": 126025,
+   "report_id": "1961821",
+   "report_type": "QI Residential",
+   "program_name_raw": "Cypress Creek Max Risk",
+   "from": {
+    "id": 14425,
+    "facility_name": "Cypress Creek Max Risk",
+    "program_name": "DJJ-unmatched-cypress-creek-max-risk"
+   },
+   "to": {
+    "id": 4274,
+    "facility_name": "Cypress Creek",
+    "program_name": "DJJ-cypress-creek"
+   }
+  },
+  {
+   "id": 126026,
+   "report_id": "1464889",
+   "report_type": "QI Residential",
+   "program_name_raw": "Cypress Creek High Risk",
+   "from": {
+    "id": 14426,
+    "facility_name": "Cypress Creek High Risk",
+    "program_name": "DJJ-unmatched-cypress-creek-high-risk"
+   },
+   "to": {
+    "id": 4274,
+    "facility_name": "Cypress Creek",
+    "program_name": "DJJ-cypress-creek"
+   }
+  },
+  {
+   "id": 126027,
+   "report_id": "1961822",
+   "report_type": "QI Residential",
+   "program_name_raw": "Cypress Creek High Risk",
+   "from": {
+    "id": 14426,
+    "facility_name": "Cypress Creek High Risk",
+    "program_name": "DJJ-unmatched-cypress-creek-high-risk"
+   },
+   "to": {
+    "id": 4274,
+    "facility_name": "Cypress Creek",
+    "program_name": "DJJ-cypress-creek"
+   }
+  },
+  {
+   "id": 126028,
+   "report_id": "1436286",
+   "report_type": "QI Residential",
+   "program_name_raw": "Daytona Juvenile Residential Facility",
+   "from": {
+    "id": 14427,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-unmatched-daytona-juvenile-residential-facility"
+   },
+   "to": {
+    "id": 4275,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-daytona-juvenile-residential-facility"
+   }
+  },
+  {
+   "id": 126029,
+   "report_id": "1952759",
+   "report_type": "QI Residential",
+   "program_name_raw": "Daytona Juvenile Residential Facility",
+   "from": {
+    "id": 14427,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-unmatched-daytona-juvenile-residential-facility"
+   },
+   "to": {
+    "id": 4275,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-daytona-juvenile-residential-facility"
+   }
+  },
+  {
+   "id": 126030,
+   "report_id": "1961860",
+   "report_type": "QI Residential",
+   "program_name_raw": "Daytona Juvenile Residential Facility",
+   "from": {
+    "id": 14427,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-unmatched-daytona-juvenile-residential-facility"
+   },
+   "to": {
+    "id": 4275,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-daytona-juvenile-residential-facility"
+   }
+  },
+  {
+   "id": 126031,
+   "report_id": "1962055",
+   "report_type": "QI Residential",
+   "program_name_raw": "Daytona Juvenile Residential Facility",
+   "from": {
+    "id": 14427,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-unmatched-daytona-juvenile-residential-facility"
+   },
+   "to": {
+    "id": 4275,
+    "facility_name": "Daytona Juvenile Residential Facility",
+    "program_name": "DJJ-daytona-juvenile-residential-facility"
+   }
+  },
+  {
+   "id": 126032,
+   "report_id": "1525195",
+   "report_type": "QI Residential",
+   "program_name_raw": "Deep Creek Youth Academy - Intensive",
+   "from": {
+    "id": 14428,
+    "facility_name": "Deep Creek Youth Academy - Intensive",
+    "program_name": "DJJ-unmatched-deep-creek-youth-academy-intensive"
+   },
+   "to": {
+    "id": 4276,
+    "facility_name": "Deep Creek Youth Academy",
+    "program_name": "DJJ-deep-creek-youth-academy"
+   }
+  },
+  {
+   "id": 126033,
+   "report_id": "1956034",
+   "report_type": "QI Residential",
+   "program_name_raw": "Deep Creek Youth Academy - Intensive",
+   "from": {
+    "id": 14428,
+    "facility_name": "Deep Creek Youth Academy - Intensive",
+    "program_name": "DJJ-unmatched-deep-creek-youth-academy-intensive"
+   },
+   "to": {
+    "id": 4276,
+    "facility_name": "Deep Creek Youth Academy",
+    "program_name": "DJJ-deep-creek-youth-academy"
+   }
+  },
+  {
+   "id": 126034,
+   "report_id": "1525180",
+   "report_type": "QI Residential",
+   "program_name_raw": "Deep Creek Youth Academy - MHSA",
+   "from": {
+    "id": 14429,
+    "facility_name": "Deep Creek Youth Academy - MHSA",
+    "program_name": "DJJ-unmatched-deep-creek-youth-academy-mhsa"
+   },
+   "to": {
+    "id": 4276,
+    "facility_name": "Deep Creek Youth Academy",
+    "program_name": "DJJ-deep-creek-youth-academy"
+   }
+  },
+  {
+   "id": 126035,
+   "report_id": "1507970",
+   "report_type": "QI Residential",
+   "program_name_raw": "DOVE Academy",
+   "from": {
+    "id": 14430,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-unmatched-dove-academy"
+   },
+   "to": {
+    "id": 4277,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-dove-academy"
+   }
+  },
+  {
+   "id": 126036,
+   "report_id": "1860845",
+   "report_type": "QI Residential",
+   "program_name_raw": "DOVE Academy",
+   "from": {
+    "id": 14430,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-unmatched-dove-academy"
+   },
+   "to": {
+    "id": 4277,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-dove-academy"
+   }
+  },
+  {
+   "id": 126037,
+   "report_id": "1956087",
+   "report_type": "QI Residential",
+   "program_name_raw": "DOVE Academy",
+   "from": {
+    "id": 14430,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-unmatched-dove-academy"
+   },
+   "to": {
+    "id": 4277,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-dove-academy"
+   }
+  },
+  {
+   "id": 126038,
+   "report_id": "1962039",
+   "report_type": "QI Residential",
+   "program_name_raw": "DOVE Academy",
+   "from": {
+    "id": 14430,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-unmatched-dove-academy"
+   },
+   "to": {
+    "id": 4277,
+    "facility_name": "DOVE Academy",
+    "program_name": "DJJ-dove-academy"
+   }
+  },
+  {
+   "id": 126039,
+   "report_id": "1757601",
+   "report_type": "QI Residential",
+   "program_name_raw": "Duval Academy",
+   "from": {
+    "id": 14431,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-unmatched-duval-academy"
+   },
+   "to": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   }
+  },
+  {
+   "id": 126040,
+   "report_id": "1907246",
+   "report_type": "QI Residential",
+   "program_name_raw": "Duval Academy",
+   "from": {
+    "id": 14431,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-unmatched-duval-academy"
+   },
+   "to": {
+    "id": 4278,
+    "facility_name": "Duval Academy",
+    "program_name": "DJJ-duval-academy"
+   }
+  },
+  {
+   "id": 126041,
+   "report_id": "1467768",
+   "report_type": "QI Residential",
+   "program_name_raw": "Escambia Boys Base",
+   "from": {
+    "id": 14432,
+    "facility_name": "Escambia Boys Base",
+    "program_name": "DJJ-unmatched-escambia-boys-base"
+   },
+   "to": {
+    "id": 4279,
+    "facility_name": "Escambia Boys Base",
+    "program_name": "DJJ-escambia-boys-base"
+   }
+  },
+  {
+   "id": 126042,
+   "report_id": "1956223",
+   "report_type": "QI Residential",
+   "program_name_raw": "Escambia Boys Base",
+   "from": {
+    "id": 14432,
+    "facility_name": "Escambia Boys Base",
+    "program_name": "DJJ-unmatched-escambia-boys-base"
+   },
+   "to": {
+    "id": 4279,
+    "facility_name": "Escambia Boys Base",
+    "program_name": "DJJ-escambia-boys-base"
+   }
+  },
+  {
+   "id": 126043,
+   "report_id": "1416161",
+   "report_type": "QI Residential",
+   "program_name_raw": "Everglades Youth Academy - Max",
+   "from": {
+    "id": 14433,
+    "facility_name": "Everglades Youth Academy - Max",
+    "program_name": "DJJ-unmatched-everglades-youth-academy-max"
+   },
+   "to": {
+    "id": 4280,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-everglades-youth-academy"
+   }
+  },
+  {
+   "id": 126044,
+   "report_id": "1922680",
+   "report_type": "QI Residential",
+   "program_name_raw": "Everglades Youth Academy - Max",
+   "from": {
+    "id": 14433,
+    "facility_name": "Everglades Youth Academy - Max",
+    "program_name": "DJJ-unmatched-everglades-youth-academy-max"
+   },
+   "to": {
+    "id": 4280,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-everglades-youth-academy"
+   }
+  },
+  {
+   "id": 126045,
+   "report_id": "1416163",
+   "report_type": "QI Residential",
+   "program_name_raw": "Everglades Youth Academy - SOP",
+   "from": {
+    "id": 14434,
+    "facility_name": "Everglades Youth Academy - SOP",
+    "program_name": "DJJ-unmatched-everglades-youth-academy-sop"
+   },
+   "to": {
+    "id": 4280,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-everglades-youth-academy"
+   }
+  },
+  {
+   "id": 126046,
+   "report_id": "1952676",
+   "report_type": "QI Residential",
+   "program_name_raw": "Everglades Youth Academy - SOP",
+   "from": {
+    "id": 14434,
+    "facility_name": "Everglades Youth Academy - SOP",
+    "program_name": "DJJ-unmatched-everglades-youth-academy-sop"
+   },
+   "to": {
+    "id": 4280,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-everglades-youth-academy"
+   }
+  },
+  {
+   "id": 126047,
+   "report_id": "1961859",
+   "report_type": "QI Residential",
+   "program_name_raw": "Everglades Youth Academy",
+   "from": {
+    "id": 14435,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-unmatched-everglades-youth-academy"
+   },
+   "to": {
+    "id": 4280,
+    "facility_name": "Everglades Youth Academy",
+    "program_name": "DJJ-everglades-youth-academy"
+   }
+  },
+  {
+   "id": 126048,
+   "report_id": "1849393",
+   "report_type": "QI Residential",
+   "program_name_raw": "Fort Myers Youth Academy",
+   "from": {
+    "id": 14436,
+    "facility_name": "Fort Myers Youth Academy",
+    "program_name": "DJJ-unmatched-fort-myers-youth-academy"
+   },
+   "to": {
+    "id": 4281,
+    "facility_name": "Fort Myers Academy",
+    "program_name": "DJJ-fort-myers-academy"
+   }
+  },
+  {
+   "id": 126049,
+   "report_id": "1961858",
+   "report_type": "QI Residential",
+   "program_name_raw": "Fort Myers Youth Academy",
+   "from": {
+    "id": 14436,
+    "facility_name": "Fort Myers Youth Academy",
+    "program_name": "DJJ-unmatched-fort-myers-youth-academy"
+   },
+   "to": {
+    "id": 4281,
+    "facility_name": "Fort Myers Academy",
+    "program_name": "DJJ-fort-myers-academy"
+   }
+  },
+  {
+   "id": 126050,
+   "report_id": "1961764",
+   "report_type": "QI Residential",
+   "program_name_raw": "Fort Myers Youth Academy",
+   "from": {
+    "id": 14436,
+    "facility_name": "Fort Myers Youth Academy",
+    "program_name": "DJJ-unmatched-fort-myers-youth-academy"
+   },
+   "to": {
+    "id": 4281,
+    "facility_name": "Fort Myers Academy",
+    "program_name": "DJJ-fort-myers-academy"
+   }
+  },
+  {
+   "id": 126051,
+   "report_id": "1952678",
+   "report_type": "QI Residential",
+   "program_name_raw": "Jacksonville Youth Academy",
+   "from": {
+    "id": 14437,
+    "facility_name": "Jacksonville Youth Academy",
+    "program_name": "DJJ-unmatched-jacksonville-youth-academy"
+   },
+   "to": {
+    "id": 4283,
+    "facility_name": "Jacksonville Youth Academy",
+    "program_name": "DJJ-jacksonville-youth-academy"
+   }
+  },
+  {
+   "id": 126052,
+   "report_id": "1961857",
+   "report_type": "QI Residential",
+   "program_name_raw": "Jacksonville Youth Academy",
+   "from": {
+    "id": 14437,
+    "facility_name": "Jacksonville Youth Academy",
+    "program_name": "DJJ-unmatched-jacksonville-youth-academy"
+   },
+   "to": {
+    "id": 4283,
+    "facility_name": "Jacksonville Youth Academy",
+    "program_name": "DJJ-jacksonville-youth-academy"
+   }
+  },
+  {
+   "id": 126053,
+   "report_id": "1513727",
+   "report_type": "QI Residential",
+   "program_name_raw": "JoAnn Bridges Academy",
+   "from": {
+    "id": 14438,
+    "facility_name": "JoAnn Bridges Academy",
+    "program_name": "DJJ-unmatched-joann-bridges-academy"
+   },
+   "to": {
+    "id": 4284,
+    "facility_name": "JoAnn Bridges Academy",
+    "program_name": "DJJ-joann-bridges-academy"
+   }
+  },
+  {
+   "id": 126054,
+   "report_id": "1952674",
+   "report_type": "QI Residential",
+   "program_name_raw": "JoAnn Bridges Academy",
+   "from": {
+    "id": 14438,
+    "facility_name": "JoAnn Bridges Academy",
+    "program_name": "DJJ-unmatched-joann-bridges-academy"
+   },
+   "to": {
+    "id": 4284,
+    "facility_name": "JoAnn Bridges Academy",
+    "program_name": "DJJ-joann-bridges-academy"
+   }
+  },
+  {
+   "id": 126055,
+   "report_id": "1473519",
+   "report_type": "QI Residential",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+   "from": {
+    "id": 14439,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+    "program_name": "DJJ-unmatched-juvenile-unit-for-specialized-treatment-just-twin-oaks-vocational-academy-ii"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 126056,
+   "report_id": "1953171",
+   "report_type": "QI Residential",
+   "program_name_raw": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+   "from": {
+    "id": 14439,
+    "facility_name": "Juvenile Unit for Specialized Treatment (JUST) & Twin Oaks Vocational Academy II",
+    "program_name": "DJJ-unmatched-juvenile-unit-for-specialized-treatment-just-twin-oaks-vocational-academy-ii"
+   },
+   "to": {
+    "id": 4317,
+    "facility_name": "Twin Oaks Academy II",
+    "program_name": "DJJ-twin-oaks-academy-ii"
+   }
+  },
+  {
+   "id": 126057,
+   "report_id": "1473542",
+   "report_type": "QI Residential",
+   "program_name_raw": "Kissimmee Youth Academy - BDD/DD",
+   "from": {
+    "id": 14440,
+    "facility_name": "Kissimmee Youth Academy - BDD/DD",
+    "program_name": "DJJ-unmatched-kissimmee-youth-academy-bdddd"
+   },
+   "to": {
+    "id": 4286,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-kissimmee-youth-academy"
+   }
+  },
+  {
+   "id": 126058,
+   "report_id": "1925261",
+   "report_type": "QI Residential",
+   "program_name_raw": "Kissimmee Youth Academy - BDD/DD",
+   "from": {
+    "id": 14440,
+    "facility_name": "Kissimmee Youth Academy - BDD/DD",
+    "program_name": "DJJ-unmatched-kissimmee-youth-academy-bdddd"
+   },
+   "to": {
+    "id": 4286,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-kissimmee-youth-academy"
+   }
+  },
+  {
+   "id": 126059,
+   "report_id": "1473541",
+   "report_type": "QI Residential",
+   "program_name_raw": "Kissimmee Youth Academy - MHOS",
+   "from": {
+    "id": 14441,
+    "facility_name": "Kissimmee Youth Academy - MHOS",
+    "program_name": "DJJ-unmatched-kissimmee-youth-academy-mhos"
+   },
+   "to": {
+    "id": 4286,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-kissimmee-youth-academy"
+   }
+  },
+  {
+   "id": 126060,
+   "report_id": "1952715",
+   "report_type": "QI Residential",
+   "program_name_raw": "Kissimmee Youth Academy - MHOS",
+   "from": {
+    "id": 14441,
+    "facility_name": "Kissimmee Youth Academy - MHOS",
+    "program_name": "DJJ-unmatched-kissimmee-youth-academy-mhos"
+   },
+   "to": {
+    "id": 4286,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-kissimmee-youth-academy"
+   }
+  },
+  {
+   "id": 126061,
+   "report_id": "1961863",
+   "report_type": "QI Residential",
+   "program_name_raw": "Kissimmee Youth Academy",
+   "from": {
+    "id": 14442,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-unmatched-kissimmee-youth-academy"
+   },
+   "to": {
+    "id": 4286,
+    "facility_name": "Kissimmee Youth Academy",
+    "program_name": "DJJ-kissimmee-youth-academy"
+   }
+  },
+  {
+   "id": 126062,
+   "report_id": "1553905",
+   "report_type": "QI Residential",
+   "program_name_raw": "Les Peters Academy",
+   "from": {
+    "id": 14443,
+    "facility_name": "Les Peters Academy",
+    "program_name": "DJJ-unmatched-les-peters-academy"
+   },
+   "to": {
+    "id": 4287,
+    "facility_name": "Les Peters Academy",
+    "program_name": "DJJ-les-peters-academy"
+   }
+  },
+  {
+   "id": 126063,
+   "report_id": "1961868",
+   "report_type": "QI Residential",
+   "program_name_raw": "Les Peters Academy",
+   "from": {
+    "id": 14443,
+    "facility_name": "Les Peters Academy",
+    "program_name": "DJJ-unmatched-les-peters-academy"
+   },
+   "to": {
+    "id": 4287,
+    "facility_name": "Les Peters Academy",
+    "program_name": "DJJ-les-peters-academy"
+   }
+  },
+  {
+   "id": 126064,
+   "report_id": "1377633",
+   "report_type": "QI Residential",
+   "program_name_raw": "Miami Youth Academy",
+   "from": {
+    "id": 14444,
+    "facility_name": "Miami Youth Academy",
+    "program_name": "DJJ-unmatched-miami-youth-academy"
+   },
+   "to": {
+    "id": 4288,
+    "facility_name": "Miami Youth Academy",
+    "program_name": "DJJ-miami-youth-academy"
+   }
+  },
+  {
+   "id": 126065,
+   "report_id": "1956268",
+   "report_type": "QI Residential",
+   "program_name_raw": "Miami Youth Academy",
+   "from": {
+    "id": 14444,
+    "facility_name": "Miami Youth Academy",
+    "program_name": "DJJ-unmatched-miami-youth-academy"
+   },
+   "to": {
+    "id": 4288,
+    "facility_name": "Miami Youth Academy",
+    "program_name": "DJJ-miami-youth-academy"
+   }
+  },
+  {
+   "id": 126066,
+   "report_id": "1473523",
+   "report_type": "QI Residential",
+   "program_name_raw": "Oak Grove Academy",
+   "from": {
+    "id": 14445,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-unmatched-oak-grove-academy"
+   },
+   "to": {
+    "id": 4289,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-oak-grove-academy"
+   }
+  },
+  {
+   "id": 126067,
+   "report_id": "1849399",
+   "report_type": "QI Residential",
+   "program_name_raw": "Oak Grove Academy",
+   "from": {
+    "id": 14445,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-unmatched-oak-grove-academy"
+   },
+   "to": {
+    "id": 4289,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-oak-grove-academy"
+   }
+  },
+  {
+   "id": 126068,
+   "report_id": "1961856",
+   "report_type": "QI Residential",
+   "program_name_raw": "Oak Grove Academy",
+   "from": {
+    "id": 14445,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-unmatched-oak-grove-academy"
+   },
+   "to": {
+    "id": 4289,
+    "facility_name": "Oak Grove Academy",
+    "program_name": "DJJ-oak-grove-academy"
+   }
+  },
+  {
+   "id": 126069,
+   "report_id": "1464896",
+   "report_type": "QI Residential",
+   "program_name_raw": "Okaloosa Youth Academy",
+   "from": {
+    "id": 14446,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-unmatched-okaloosa-youth-academy"
+   },
+   "to": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   }
+  },
+  {
+   "id": 126070,
+   "report_id": "1955978",
+   "report_type": "QI Residential",
+   "program_name_raw": "Okaloosa Youth Academy",
+   "from": {
+    "id": 14446,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-unmatched-okaloosa-youth-academy"
+   },
+   "to": {
+    "id": 4290,
+    "facility_name": "Okaloosa Youth Academy",
+    "program_name": "DJJ-okaloosa-youth-academy"
+   }
+  },
+  {
+   "id": 126071,
+   "report_id": "1574026",
+   "report_type": "QI Residential",
+   "program_name_raw": "Orange Youth Academy & Orlando Intensive Youth Academy",
+   "from": {
+    "id": 14447,
+    "facility_name": "Orange Youth Academy & Orlando Intensive Youth Academy",
+    "program_name": "DJJ-unmatched-orange-youth-academy-orlando-intensive-youth-academy"
+   },
+   "to": {
+    "id": 4291,
+    "facility_name": "Orlando Intensive Youth Academy",
+    "program_name": "DJJ-orlando-intensive-youth-academy"
+   }
+  },
+  {
+   "id": 126072,
+   "report_id": "1375358",
+   "report_type": "QI Residential",
+   "program_name_raw": "Palm Beach Youth Academy",
+   "from": {
+    "id": 14448,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-unmatched-palm-beach-youth-academy"
+   },
+   "to": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   }
+  },
+  {
+   "id": 126073,
+   "report_id": "1953120",
+   "report_type": "QI Residential",
+   "program_name_raw": "Palm Beach Youth Academy",
+   "from": {
+    "id": 14448,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-unmatched-palm-beach-youth-academy"
+   },
+   "to": {
+    "id": 4292,
+    "facility_name": "Palm Beach Youth Academy",
+    "program_name": "DJJ-palm-beach-youth-academy"
+   }
+  },
+  {
+   "id": 126075,
+   "report_id": "1962036",
+   "report_type": "QI Residential",
+   "program_name_raw": "Redwood Youth Academy",
+   "from": {
+    "id": 7363,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-unmatched-redwood-youth-academy"
+   },
+   "to": {
+    "id": 4293,
+    "facility_name": "Redwood Youth Academy",
+    "program_name": "DJJ-redwood-youth-academy"
+   }
+  },
+  {
+   "id": 126076,
+   "report_id": "1860839",
+   "report_type": "QI Residential",
+   "program_name_raw": "Silver Springs Youth Academy",
+   "from": {
+    "id": 14450,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-unmatched-silver-springs-youth-academy"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 126077,
+   "report_id": "1961855",
+   "report_type": "QI Residential",
+   "program_name_raw": "Silver Springs Youth Academy",
+   "from": {
+    "id": 14450,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-unmatched-silver-springs-youth-academy"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 126078,
+   "report_id": "1959059",
+   "report_type": "QI Residential",
+   "program_name_raw": "Silver Springs Youth Academy",
+   "from": {
+    "id": 14450,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-unmatched-silver-springs-youth-academy"
+   },
+   "to": {
+    "id": 4294,
+    "facility_name": "Silver Springs Youth Academy",
+    "program_name": "DJJ-silver-springs-youth-academy"
+   }
+  },
+  {
+   "id": 126079,
+   "report_id": "1298814",
+   "report_type": "QI Residential",
+   "program_name_raw": "South Florida Youth Academy",
+   "from": {
+    "id": 14451,
+    "facility_name": "South Florida Youth Academy",
+    "program_name": "DJJ-unmatched-south-florida-youth-academy"
+   },
+   "to": {
+    "id": 4295,
+    "facility_name": "South Florida Youth Academy",
+    "program_name": "DJJ-south-florida-youth-academy"
+   }
+  },
+  {
+   "id": 126080,
+   "report_id": "1961834",
+   "report_type": "QI Residential",
+   "program_name_raw": "South Florida Youth Academy",
+   "from": {
+    "id": 14451,
+    "facility_name": "South Florida Youth Academy",
+    "program_name": "DJJ-unmatched-south-florida-youth-academy"
+   },
+   "to": {
+    "id": 4295,
+    "facility_name": "South Florida Youth Academy",
+    "program_name": "DJJ-south-florida-youth-academy"
+   }
+  },
+  {
+   "id": 126081,
+   "report_id": "1490750",
+   "report_type": "QI Residential",
+   "program_name_raw": "St. Augustine Youth Academy",
+   "from": {
+    "id": 14452,
+    "facility_name": "St. Augustine Youth Academy",
+    "program_name": "DJJ-unmatched-st-augustine-youth-academy"
+   },
+   "to": {
+    "id": 4296,
+    "facility_name": "St. Augustine Youth Academy",
+    "program_name": "DJJ-st.-augustine-youth-academy"
+   }
+  },
+  {
+   "id": 126082,
+   "report_id": "1958999",
+   "report_type": "QI Residential",
+   "program_name_raw": "St. Augustine Youth Academy",
+   "from": {
+    "id": 14452,
+    "facility_name": "St. Augustine Youth Academy",
+    "program_name": "DJJ-unmatched-st-augustine-youth-academy"
+   },
+   "to": {
+    "id": 4296,
+    "facility_name": "St. Augustine Youth Academy",
+    "program_name": "DJJ-st.-augustine-youth-academy"
+   }
+  },
+  {
+   "id": 126083,
+   "report_id": "1849387",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- Moderate",
+   "from": {
+    "id": 14453,
+    "facility_name": "Tampa Bay Girls Academy- Moderate",
+    "program_name": "DJJ-unmatched-tampa-bay-girls-academy-moderate"
+   },
+   "to": {
+    "id": 4297,
+    "facility_name": "Tampa Bay Girls Academy - Moderate",
+    "program_name": "DJJ-tampa-bay-girls-academy-moderate"
+   }
+  },
+  {
+   "id": 126084,
+   "report_id": "1961853",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- Moderate",
+   "from": {
+    "id": 14453,
+    "facility_name": "Tampa Bay Girls Academy- Moderate",
+    "program_name": "DJJ-unmatched-tampa-bay-girls-academy-moderate"
+   },
+   "to": {
+    "id": 4297,
+    "facility_name": "Tampa Bay Girls Academy - Moderate",
+    "program_name": "DJJ-tampa-bay-girls-academy-moderate"
+   }
+  },
+  {
+   "id": 126085,
+   "report_id": "1849388",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Bay Girls Academy- High/Max",
+   "from": {
+    "id": 14454,
+    "facility_name": "Tampa Bay Girls Academy- High/Max",
+    "program_name": "DJJ-unmatched-tampa-bay-girls-academy-highmax"
+   },
+   "to": {
+    "id": 7395,
+    "facility_name": "Tampa Bay Girls Academy",
+    "program_name": "DJJ-tampa-bay-girls-academy"
+   }
+  },
+  {
+   "id": 126086,
+   "report_id": "1374216",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Residential Facility",
+   "from": {
+    "id": 14455,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-unmatched-tampa-residential-facility"
+   },
+   "to": {
+    "id": 4298,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-tampa-residential-facility"
+   }
+  },
+  {
+   "id": 126087,
+   "report_id": "1958947",
+   "report_type": "QI Residential",
+   "program_name_raw": "Tampa Residential Facility",
+   "from": {
+    "id": 14455,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-unmatched-tampa-residential-facility"
+   },
+   "to": {
+    "id": 4298,
+    "facility_name": "Tampa Residential Facility",
+    "program_name": "DJJ-tampa-residential-facility"
+   }
+  },
+  {
+   "id": 126088,
+   "report_id": "1464901",
+   "report_type": "QI Residential",
+   "program_name_raw": "Walton Academy for Growth and Change",
+   "from": {
+    "id": 14456,
+    "facility_name": "Walton Academy for Growth and Change",
+    "program_name": "DJJ-unmatched-walton-academy-for-growth-and-change"
+   },
+   "to": {
+    "id": 4299,
+    "facility_name": "Walton Academy for Growth and Change",
+    "program_name": "DJJ-walton-academy-for-growth-and-change"
+   }
+  },
+  {
+   "id": 126089,
+   "report_id": "1956033",
+   "report_type": "QI Residential",
+   "program_name_raw": "Walton Academy for Growth and Change",
+   "from": {
+    "id": 14456,
+    "facility_name": "Walton Academy for Growth and Change",
+    "program_name": "DJJ-unmatched-walton-academy-for-growth-and-change"
+   },
+   "to": {
+    "id": 4299,
+    "facility_name": "Walton Academy for Growth and Change",
+    "program_name": "DJJ-walton-academy-for-growth-and-change"
+   }
+  },
+  {
+   "id": 126092,
+   "report_id": "1837970",
+   "report_type": "QI Detention",
+   "program_name_raw": "Alachua Regional Juvenile Detention Center",
+   "from": {
+    "id": 14458,
+    "facility_name": "Alachua Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-alachua-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-alachua-regional-juvenile-detention-center",
+     "facility_name": "Alachua Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126093,
+   "report_id": "1295544",
+   "report_type": "QI Detention",
+   "program_name_raw": "Bay Regional Juvenile Detention Center",
+   "from": {
+    "id": 14459,
+    "facility_name": "Bay Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-bay-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4301,
+    "facility_name": "Bay Regional Juvenile Detention Center",
+    "program_name": "DJJ-bay-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126094,
+   "report_id": "1956311",
+   "report_type": "QI Detention",
+   "program_name_raw": "Bay Regional Juvenile Detention Center",
+   "from": {
+    "id": 14459,
+    "facility_name": "Bay Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-bay-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4301,
+    "facility_name": "Bay Regional Juvenile Detention Center",
+    "program_name": "DJJ-bay-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126095,
+   "report_id": "1556774",
+   "report_type": "QI Detention",
+   "program_name_raw": "Bay Regional Juvenile Detention Center Re-Review",
+   "from": {
+    "id": 14460,
+    "facility_name": "Bay Regional Juvenile Detention Center Re-Review",
+    "program_name": "DJJ-unmatched-bay-regional-juvenile-detention-center-re-review"
+   },
+   "to": {
+    "id": 4301,
+    "facility_name": "Bay Regional Juvenile Detention Center",
+    "program_name": "DJJ-bay-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126096,
+   "report_id": "1298685",
+   "report_type": "QI Detention",
+   "program_name_raw": "Brevard Regional Juvenile Detention Center",
+   "from": {
+    "id": 14461,
+    "facility_name": "Brevard Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-brevard-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126097,
+   "report_id": "1953026",
+   "report_type": "QI Detention",
+   "program_name_raw": "Brevard Regional Juvenile Detention Center",
+   "from": {
+    "id": 14461,
+    "facility_name": "Brevard Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-brevard-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126098,
+   "report_id": "1962020",
+   "report_type": "QI Detention",
+   "program_name_raw": "Brevard Regional Juvenile Detention Center",
+   "from": {
+    "id": 14461,
+    "facility_name": "Brevard Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-brevard-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4302,
+    "facility_name": "Brevard Juvenile Detention Center",
+    "program_name": "DJJ-brevard-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126099,
+   "report_id": "1456313",
+   "report_type": "QI Detention",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 14462,
+    "facility_name": "Broward Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-broward-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126100,
+   "report_id": "1953148",
+   "report_type": "QI Detention",
+   "program_name_raw": "Broward Regional Juvenile Detention Center",
+   "from": {
+    "id": 14462,
+    "facility_name": "Broward Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-broward-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-broward-juvenile-detention-center",
+     "facility_name": "Broward Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126101,
+   "report_id": "1358376",
+   "report_type": "QI Detention",
+   "program_name_raw": "Collier Regional Juvenile Detention Center",
+   "from": {
+    "id": 14463,
+    "facility_name": "Collier Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-collier-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4303,
+    "facility_name": "Collier Juvenile Detention Center",
+    "program_name": "DJJ-collier-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126102,
+   "report_id": "1952679",
+   "report_type": "QI Detention",
+   "program_name_raw": "Collier Regional Juvenile Detention Center",
+   "from": {
+    "id": 14463,
+    "facility_name": "Collier Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-collier-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4303,
+    "facility_name": "Collier Juvenile Detention Center",
+    "program_name": "DJJ-collier-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126103,
+   "report_id": "1962023",
+   "report_type": "QI Detention",
+   "program_name_raw": "Collier Regional Juvenile Detention Center",
+   "from": {
+    "id": 14463,
+    "facility_name": "Collier Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-collier-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4303,
+    "facility_name": "Collier Juvenile Detention Center",
+    "program_name": "DJJ-collier-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126104,
+   "report_id": "1545277",
+   "report_type": "QI Detention",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 14464,
+    "facility_name": "Duval Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-duval-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126105,
+   "report_id": "1955993",
+   "report_type": "QI Detention",
+   "program_name_raw": "Duval Regional Juvenile Detention Center",
+   "from": {
+    "id": 14464,
+    "facility_name": "Duval Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-duval-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-duval-regional-juvenile-detention-center",
+     "facility_name": "Duval Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126106,
+   "report_id": "1298816",
+   "report_type": "QI Detention",
+   "program_name_raw": "Escambia Regional Juvenile Detention Center",
+   "from": {
+    "id": 14465,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-escambia-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4304,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-escambia-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126107,
+   "report_id": "1952766",
+   "report_type": "QI Detention",
+   "program_name_raw": "Escambia Regional Juvenile Detention Center",
+   "from": {
+    "id": 14465,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-escambia-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4304,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-escambia-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126108,
+   "report_id": "1962019",
+   "report_type": "QI Detention",
+   "program_name_raw": "Escambia Regional Juvenile Detention Center",
+   "from": {
+    "id": 14465,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-escambia-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4304,
+    "facility_name": "Escambia Regional Juvenile Detention Center",
+    "program_name": "DJJ-escambia-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126109,
+   "report_id": "1410405",
+   "report_type": "QI Detention",
+   "program_name_raw": "Hillsborough West Regional Juvenile Detention Center",
+   "from": {
+    "id": 14466,
+    "facility_name": "Hillsborough West Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-hillsborough-west-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   }
+  },
+  {
+   "id": 126110,
+   "report_id": "1952920",
+   "report_type": "QI Detention",
+   "program_name_raw": "Hillsborough West Regional Juvenile Detention Center",
+   "from": {
+    "id": 14466,
+    "facility_name": "Hillsborough West Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-hillsborough-west-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4282,
+    "facility_name": "Hillsborough Juvenile Detention Center West",
+    "program_name": "DJJ-hillsborough-juvenile-detention-center-west"
+   }
+  },
+  {
+   "id": 126111,
+   "report_id": "1345878",
+   "report_type": "QI Detention",
+   "program_name_raw": "Leon Regional Juvenile Detention Center",
+   "from": {
+    "id": 14467,
+    "facility_name": "Leon Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-leon-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4305,
+    "facility_name": "Leon Regional Juvenile Detention Center",
+    "program_name": "DJJ-leon-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126112,
+   "report_id": "1952904",
+   "report_type": "QI Detention",
+   "program_name_raw": "Leon Regional Juvenile Detention Center",
+   "from": {
+    "id": 14467,
+    "facility_name": "Leon Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-leon-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4305,
+    "facility_name": "Leon Regional Juvenile Detention Center",
+    "program_name": "DJJ-leon-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126113,
+   "report_id": "1525181",
+   "report_type": "QI Detention",
+   "program_name_raw": "Manatee Regional Juvenile Detention Center",
+   "from": {
+    "id": 14468,
+    "facility_name": "Manatee Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-manatee-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4306,
+    "facility_name": "Manatee Regional Juvenile Detention Center",
+    "program_name": "DJJ-manatee-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126114,
+   "report_id": "1961876",
+   "report_type": "QI Detention",
+   "program_name_raw": "Manatee Regional Juvenile Detention Center",
+   "from": {
+    "id": 14468,
+    "facility_name": "Manatee Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-manatee-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4306,
+    "facility_name": "Manatee Regional Juvenile Detention Center",
+    "program_name": "DJJ-manatee-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126115,
+   "report_id": "1298438",
+   "report_type": "QI Detention",
+   "program_name_raw": "Marion Regional Juvenile Detention Center",
+   "from": {
+    "id": 14469,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126116,
+   "report_id": "1786305",
+   "report_type": "QI Detention",
+   "program_name_raw": "Marion Regional Juvenile Detention Center",
+   "from": {
+    "id": 14469,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-marion-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4307,
+    "facility_name": "Marion Regional Juvenile Detention Center",
+    "program_name": "DJJ-marion-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126117,
+   "report_id": "1574025",
+   "report_type": "QI Detention",
+   "program_name_raw": "Miami-Dade Regional Juvenile Detention Center",
+   "from": {
+    "id": 14470,
+    "facility_name": "Miami-Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-miami-dade-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4308,
+    "facility_name": "Miami Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-miami-dade-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126118,
+   "report_id": "1953196",
+   "report_type": "QI Detention",
+   "program_name_raw": "Miami-Dade Regional Juvenile Detention Center",
+   "from": {
+    "id": 14470,
+    "facility_name": "Miami-Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-miami-dade-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4308,
+    "facility_name": "Miami Dade Regional Juvenile Detention Center",
+    "program_name": "DJJ-miami-dade-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126119,
+   "report_id": "1298801",
+   "report_type": "QI Detention",
+   "program_name_raw": "Monroe Regional Juvenile Detention Center",
+   "from": {
+    "id": 14471,
+    "facility_name": "Monroe Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-monroe-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4309,
+    "facility_name": "Monroe Juvenile Detention Center",
+    "program_name": "DJJ-monroe-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126120,
+   "report_id": "1952879",
+   "report_type": "QI Detention",
+   "program_name_raw": "Monroe Regional Juvenile Detention Center",
+   "from": {
+    "id": 14471,
+    "facility_name": "Monroe Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-monroe-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4309,
+    "facility_name": "Monroe Juvenile Detention Center",
+    "program_name": "DJJ-monroe-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126121,
+   "report_id": "1298723",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 14472,
+    "facility_name": "Okaloosa Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-okaloosa-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126122,
+   "report_id": "1815045",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 14472,
+    "facility_name": "Okaloosa Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-okaloosa-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126123,
+   "report_id": "1962037",
+   "report_type": "QI Detention",
+   "program_name_raw": "Okaloosa Regional Juvenile Detention Center",
+   "from": {
+    "id": 14472,
+    "facility_name": "Okaloosa Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-okaloosa-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-okaloosa-regional-juvenile-detention-center",
+     "facility_name": "Okaloosa Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126124,
+   "report_id": "1298440",
+   "report_type": "QI Detention",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 14473,
+    "facility_name": "Orange Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-orange-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126125,
+   "report_id": "1849397",
+   "report_type": "QI Detention",
+   "program_name_raw": "Orange Regional Juvenile Detention Center",
+   "from": {
+    "id": 14473,
+    "facility_name": "Orange Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-orange-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-orange-regional-juvenile-detention-center",
+     "facility_name": "Orange Regional Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126126,
+   "report_id": "1952881",
+   "report_type": "QI Detention",
+   "program_name_raw": "Palm Beach Regional Juvenile Detention Center",
+   "from": {
+    "id": 14474,
+    "facility_name": "Palm Beach Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-palm-beach-regional-juvenile-detention-center"
+   },
+   "to": {
+    "create": {
+     "program_name": "DJJ-palm-beach-juvenile-detention-center",
+     "facility_name": "Palm Beach Juvenile Detention Center",
+     "program_category": "Detention"
+    }
+   }
+  },
+  {
+   "id": 126128,
+   "report_id": "1298718",
+   "report_type": "QI Detention",
+   "program_name_raw": "Pasco Regional Juvenile Detention Center",
+   "from": {
+    "id": 14475,
+    "facility_name": "Pasco Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-pasco-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126129,
+   "report_id": "1711561",
+   "report_type": "QI Detention",
+   "program_name_raw": "Pasco Regional Juvenile Detention Center",
+   "from": {
+    "id": 14475,
+    "facility_name": "Pasco Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-pasco-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126130,
+   "report_id": "1962022",
+   "report_type": "QI Detention",
+   "program_name_raw": "Pasco Regional Juvenile Detention Center",
+   "from": {
+    "id": 14475,
+    "facility_name": "Pasco Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-pasco-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4311,
+    "facility_name": "Pasco Juvenile Detention Center",
+    "program_name": "DJJ-pasco-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126131,
+   "report_id": "1367436",
+   "report_type": "QI Detention",
+   "program_name_raw": "Pinellas Regional Juvenile Detention Center",
+   "from": {
+    "id": 14476,
+    "facility_name": "Pinellas Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-pinellas-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4312,
+    "facility_name": "Pinellas Juvenile Detention Center",
+    "program_name": "DJJ-pinellas-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126132,
+   "report_id": "1953254",
+   "report_type": "QI Detention",
+   "program_name_raw": "Pinellas Regional Juvenile Detention Center",
+   "from": {
+    "id": 14476,
+    "facility_name": "Pinellas Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-pinellas-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4312,
+    "facility_name": "Pinellas Juvenile Detention Center",
+    "program_name": "DJJ-pinellas-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126133,
+   "report_id": "1487869",
+   "report_type": "QI Detention",
+   "program_name_raw": "St. Lucie Regional Juvenile Detention Center",
+   "from": {
+    "id": 14477,
+    "facility_name": "St. Lucie Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-st-lucie-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4313,
+    "facility_name": "St. Lucie Regional Juvenile Detention Center",
+    "program_name": "DJJ-st.-lucie-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126134,
+   "report_id": "1962021",
+   "report_type": "QI Detention",
+   "program_name_raw": "St. Lucie Regional Juvenile Detention Center",
+   "from": {
+    "id": 14477,
+    "facility_name": "St. Lucie Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-st-lucie-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4313,
+    "facility_name": "St. Lucie Regional Juvenile Detention Center",
+    "program_name": "DJJ-st.-lucie-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126137,
+   "report_id": "1697159",
+   "report_type": "QI Detention",
+   "program_name_raw": "Volusia Regional Juvenile Detention Center",
+   "from": {
+    "id": 14479,
+    "facility_name": "Volusia Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-volusia-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4314,
+    "facility_name": "Volusia Regional Juvenile Detention Center",
+    "program_name": "DJJ-volusia-regional-juvenile-detention-center"
+   }
+  },
+  {
+   "id": 126138,
+   "report_id": "1961848",
+   "report_type": "QI Detention",
+   "program_name_raw": "Volusia Regional Juvenile Detention Center",
+   "from": {
+    "id": 14479,
+    "facility_name": "Volusia Regional Juvenile Detention Center",
+    "program_name": "DJJ-unmatched-volusia-regional-juvenile-detention-center"
+   },
+   "to": {
+    "id": 4314,
+    "facility_name": "Volusia Regional Juvenile Detention Center",
+    "program_name": "DJJ-volusia-regional-juvenile-detention-center"
+   }
+  }
+ ]
+}
