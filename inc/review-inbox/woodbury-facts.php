@@ -516,6 +516,9 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
                 $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'extra' => wp_json_encode($extra)), array('pkey' => $r['pkey']));
                 return array('message' => 'Waiting for review again. The next Woodbury build will not take it off the list.');
             }
+            if ($r['status'] === 'pending' && kop_wbf_auto_unlink($r)) {
+                return array('message' => 'Unlinked: it is back on "Programs with no record" with the name Woodbury gave. The automatic link will not be made again.');
+            }
             if (!in_array($r['status'], array('applied', 'rejected', 'held', 'merged'), true)) throw new RuntimeException('Nothing to undo.');
             $was = $r['status'];
             if ($was === 'merged') {
@@ -626,7 +629,10 @@ function kop_wbf_on_record(array $doc, array $r) {
                 return 'already listed (' . (is_array($value) ? (string) ($value['raw'] ?? wp_json_encode($value)) : mb_substr((string) $value, 0, 120)) . ')';
             }
             // The same information in other words (kop_wbf_list_covers()): Add would refuse it too.
-            return kop_wbf_list_covers($doc, (string) $r['path'], $value);
+            $why = kop_wbf_list_covers($doc, (string) $r['path'], $value);
+            // A state's order to close is not the closure (owner, 2026-11-03): a record line of the other sort never covers it.
+            if ($why !== '' && function_exists('kop_fact_closure_clash_why') && kop_fact_closure_clash_why(kop_fact_shape('wbf', $r), $why)) return '';
+            return $why;
         case 'set_if_empty':
             $slot = kop_wbf_get($doc, $r['path']);
             if (kop_wbf_slot_empty($r['path'], $slot)) return '';

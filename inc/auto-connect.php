@@ -29,7 +29,8 @@
  *     api/undo-auto-drive-news.php took them back); a person adds them.
  *   - Waiting news facts (Review inbox > Facts from news) whose subject is exactly one record's name: linked to it and
  *     filed on Woodbury Facts (kop_nf_link_waiting(), inc/fact-fold.php; Undo unlinks).
- * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()).
+ * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()); items with no record whose program is exactly
+ * one record's name are linked to it first (kop_autoconn_woodbury_facts(), source woodbury-facts-link; Undo unlinks).
  *
  * Each item is done once: {prefix}kop_auto_connect remembers it, so one a
  * person undoes is never connected again by itself. Each appears in its own
@@ -255,6 +256,56 @@ function kop_autoconn_woodbury($deadline) {
             $n++;
         } catch (Throwable $e) {
             kop_autoconn_mark('woodbury-reports', $r['ckey'], (string) (int) $r['facility_id'], 'failed', $e->getMessage());
+        }
+    }
+    return $n;
+}
+
+/**
+ * Pending Woodbury Facts items with no record (the build found none) whose program name is exactly one record's, by
+ * kop_autoconn_exact_record() (the full key, distinctive, one holder; ambiguous, generic and no match stay) [owner,
+ * 2026-11-03]. Young adult programs and consultants have their own tabs and are not touched. [pkey, row, record id].
+ * kop_autoconn_woodbury() above does not see them: it reads the Woodbury Reports pages (kop_wb_table()), and only pages
+ * whose record the build already found; these are fact rows in kop_wbf_table(), matched once by the build, and nothing
+ * in PHP matched them again (kop_wbf_auto_where() starts from facility_id > 0).
+ */
+function kop_autoconn_woodbury_facts_rows($limit = 400) {
+    global $wpdb;
+    if (!function_exists('kop_wbf_table')) return array();
+    $names = (array) $wpdb->get_col('SELECT DISTINCT program FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND facility_id = 0 AND grp <> 'consultant'
+        AND ya = 0 AND program <> '' AND (reviewed_by IS NULL OR reviewed_by = '') ORDER BY program");
+    $tried = kop_autoconn_tried('woodbury-facts-link');
+    $pdo = kop_seed_pdo();
+    $out = array();
+    foreach ($names as $program) {
+        list($fid, $how) = kop_autoconn_exact_record($pdo, $program);
+        if ($how !== 'exact' || $fid <= 0) continue;
+        $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND facility_id = 0 AND program = %s
+            AND grp <> 'consultant' AND ya = 0 AND (reviewed_by IS NULL OR reviewed_by = '')", $program), ARRAY_A);
+        foreach ($rows as $r) {
+            if (isset($tried[$r['pkey']])) continue;
+            $out[] = array($r['pkey'], $r, $fid);
+            if (count($out) >= $limit) return $out;
+        }
+    }
+    return $out;
+}
+
+/** Link those items to their record (kop_wbf_auto_link()); Undo is the card's own (kop_wbf_auto_unlink()). */
+function kop_autoconn_woodbury_facts($deadline) {
+    if (!function_exists('kop_wbf_auto_link')) return 0;
+    $n = 0;
+    foreach (kop_autoconn_woodbury_facts_rows() as $row) {
+        list($pkey, $r, $fid) = $row;
+        if (microtime(true) > $deadline) break;
+        try {
+            if (!kop_wbf_auto_link($r, $fid)) continue;
+            kop_autoconn_mark('woodbury-facts-link', $pkey, (string) $fid, 'done');
+            kop_autoconn_log('woodbury-facts', $pkey, (string) $r['label'],
+                'Linked to #' . $fid . ': the program name "' . $r['program'] . '" is exactly that record\'s.');
+            $n++;
+        } catch (Throwable $e) {
+            kop_autoconn_mark('woodbury-facts-link', $pkey, (string) $fid, 'failed', $e->getMessage());
         }
     }
     return $n;
@@ -778,7 +829,7 @@ function kop_autoconn_run($seconds = 120) {
         kop_autoconn_ensure_table();
         foreach (array('submissions' => 'kop_autoconn_submissions', 'wiki-links' => 'kop_autoconn_wiki','state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
-                'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury',
+                'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury', 'woodbury-facts-link' => 'kop_autoconn_woodbury_facts',
                 'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies',
                 'news-facts' => 'kop_autoconn_news_facts') as $source => $fn) {
             if (microtime(true) > $deadline) break;

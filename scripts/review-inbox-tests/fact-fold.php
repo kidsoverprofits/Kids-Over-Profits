@@ -239,6 +239,8 @@ function kop_test_fact_fold(callable $check) {
 
     // 7. The AI step (d) with a stubbed AI (no network): what it answers, the engine checks and writes.
     kop_test_fact_fold_ai($check, $w, $get, $mkdoc, $F1);
+    // 8. The owner's four decisions of 2026-11-03.
+    kop_test_fact_fold_decisions($check, $w, $get, $mkdoc, $F1);
 
     // 6. Linking a waiting news fact by the exact-name rule, with Undo. The name index is built once per process, before the
     // fixtures: the fixture fact names a record the mirror has (one the rule links today), its own facts made up.
@@ -387,6 +389,131 @@ function kop_test_fact_fold_ai(callable $check, callable $w, callable $get, call
         $check('fact-fold AI: a loop of three answers is dropped, a pair naming each other stands', array_keys($cy) === array('d', 'e'), json_encode($cy));
     } finally {
         unset($GLOBALS['kop_fold_ai_call'], $GLOBALS['kop_fold_ai_providers'], $GLOBALS['kop_ai_budget_counts'], $GLOBALS['kop_test_filters']['kop_fold_ai_pairs']);
+        $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    }
+}
+
+/**
+ * The owner's four decisions of 2026-11-03 on made-up lines of record $F1: an undated incident folds with a dated one any
+ * number of years apart; an "alleged" telling folds with a "found" one and the found wording is kept; a state's closure
+ * order never folds or clears against a closure fact; a no-record Woodbury item moves onto the one record its program
+ * name is exactly (two holders: it stays).
+ */
+function kop_test_fact_fold_decisions(callable $check, callable $w, callable $get, callable $mkdoc, $F1) {
+    global $wpdb;
+    $pdo = $GLOBALS['pdo'];
+    $wt = 'wpdl_kop_woodbury_facts';
+    $inc = 'criticalIncidents.customIncidents';
+    $run = function () use ($F1) { return kop_fold_run(true, 60, array('only' => array('r:' . $F1))); };
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    $pdo->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($mkdoc()), $F1));
+
+    // 1. Undated with dated, seven years apart; two different dates never join.
+    $line = 'A 13-year-old resident suffered a fractured jaw and a traumatic brain injury when staff slammed him into the ground at the school.';
+    $d1 = $w($F1, $inc, '2019-05-14: Injury: ' . $line, '2019-06-15', 401);
+    $u1 = $w($F1, $inc, 'Injury: ' . $line, '2026-07-17', 402);
+    $d2 = $w($F1, $inc, '2021-02-03: Injury: ' . $line, '2021-03-01', 403);
+    $run();
+    $states = array_map(function ($pk) use ($get) { return $get($pk)['status']; }, array($d1, $u1, $d2));
+    $check('fact-fold decisions: an undated incident folds with a dated one seven years apart', count(array_keys($states, 'merged', true)) === 1 && $get($u1)['status'] === 'merged', json_encode($states));
+    $check('fact-fold decisions: ...and two different dates never join (the other dated telling stays)', $get($d1)['status'] === 'pending' && $get($d2)['status'] === 'pending');
+    $fa = kop_fact_shape('wbf', $get($d1));
+    $fb = kop_fact_shape('wbf', $get($u1));
+    $check('fact-fold decisions: the shapes say so (dates fit, nothing differs, rule "text")', kop_fact_dates_fit($fa, $fb) && kop_fact_differs($fa, $fb) === '' && kop_fact_rule_same($fa, $fb) === 'text');
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+
+    // 2. Alleged with found: one card, the found telling's wording kept, whatever the queue order or length.
+    $al = $w($F1, $inc, '2021-03-04: Abuse: Staff repeatedly beat a 14-year-old resident at the school, according to two former students (alleged).', '2021-04-01', 411,
+        array('extra' => json_encode(array('via' => 'news', 'news_id' => 411, 'category' => 'abuse', 'standing' => 'alleged'))));
+    $fo = $w($F1, $inc, '2021-03-04: Abuse: Staff beat a 14-year-old resident at the school (found by regulators).', '2021-09-10', 412,
+        array('extra' => json_encode(array('via' => 'news', 'news_id' => 412, 'category' => 'abuse', 'standing' => 'found'))));
+    $sa = kop_fact_shape('wbf', $get($al));
+    $sf = kop_fact_shape('wbf', $get($fo));
+    $check('fact-fold decisions: standing ranks found 2, alleged 0, unstated 1', kop_fact_standing_rank($sf) === 2 && kop_fact_standing_rank($sa) === 0
+        && kop_fact_standing_rank(array('standing' => '', 'text' => 'Staff beat a resident.')) === 1);
+    $check('fact-fold decisions: standing never keeps them apart (no reason, rule "event")', kop_fact_differs($sa, $sf) === '' && kop_fact_rule_same($sa, $sf) === 'event');
+    $sa['queue'] = $sf['queue'] = 'wbf';
+    $check('fact-fold decisions: the keeper is the found telling even though the alleged one is longer and listed first', kop_fold_pick(array($sa, $sf), array(0, 1)) === 1
+        && kop_fold_pick(array($sf, $sa), array(0, 1)) === 0);
+    $fn = $sf;
+    $fn['queue'] = 'news';
+    $check('fact-fold decisions: a news fact is kept only when the group has no Woodbury or Fornits item', kop_fold_pick(array($sa, $fn), array(0, 1)) === 0
+        && kop_fold_pick(array($fn, $fn), array(0, 1)) === 0);
+    $run();
+    $ka = $get($al);
+    $kf = $get($fo);
+    $check('fact-fold decisions: an alleged telling folds with the found one of the same event', $ka['status'] === 'merged' && $kf['status'] === 'pending', json_encode(array($ka['status'], $kf['status'])));
+    $check('fact-fold decisions: ...and the card kept is the found telling (its wording), citing both', strpos($kf['label'], 'found by regulators') !== false && count(kop_wbf_evidence($kf)) === 2);
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+
+    // 3. A closure order is not the closure.
+    $co = $w($F1, $inc, '2019-06-01: Closure order: The state ordered the program closed after finding child abuse at the school.', '2019-06-20', 421,
+        array('extra' => json_encode(array('via' => 'news', 'news_id' => 421, 'category' => 'closure_order'))));
+    $lic = $w($F1, $inc, '2019-06-01: License action: The state revoked the school license after finding child abuse at the school.', '2019-06-20', 424,
+        array('extra' => json_encode(array('via' => 'news', 'news_id' => 424, 'category' => 'license_action'))));
+    $cl = $w($F1, 'operatingPeriod.status', 'Closed in 2019', '2019-07-01', 422, array('grp' => 'details', 'op' => 'set_closed', 'value' => json_encode(array('endYear' => '2019')),
+        'label' => 'Closed in 2019: The state ordered the program closed after finding child abuse at the school.'));
+    $sco = kop_fact_shape('wbf', $get($co));
+    $slic = kop_fact_shape('wbf', $get($lic));
+    $scl = kop_fact_shape('wbf', $get($cl));
+    $check('fact-fold decisions: a closure order and a license revocation are not closures, a set_closed is', kop_fact_is_closure_order($sco) && kop_fact_is_closure_order($slic)
+        && !kop_fact_is_closure_order($scl) && $scl['kind'] === 'closure');
+    $check('fact-fold decisions: the rules never join them, either way round', kop_fact_differs($sco, $scl) === 'closure order' && kop_fact_differs($scl, $sco) === 'closure order'
+        && kop_fact_rule_same($sco, $scl) === '' && kop_fact_rule_same($scl, $slic) === '' && !kop_fact_close($sco, $scl) && !kop_fact_close($scl, $slic));
+    $check('fact-fold decisions: an AI "same" is overruled (closure order)', kop_fold_ai_apart($sco, $scl) === 'closure order' && kop_fold_ai_apart($scl, $slic) === 'closure order');
+    $run();
+    $check('fact-fold decisions: the run folds none of the three', $get($co)['status'] === 'pending' && $get($cl)['status'] === 'pending' && $get($lic)['status'] === 'pending');
+    // The on-hand check: a record line "Closed (...) per news report" does not clear the order.
+    $doc = $mkdoc();
+    $doc['operatingPeriod']['notes'] = array('Closed (2019-06-01) per news report: The state ordered the program closed after finding child abuse at the school.');
+    $row = $get($co);
+    $covers = kop_wbf_list_covers($doc, $inc, kop_wbf_row_value($row));
+    $check('fact-fold decisions: (fixture bites) the legacy text check alone would call the order covered', $covers !== '', $covers);
+    $check('fact-fold decisions: the on-hand check does not clear a closure order against the closure note', kop_wbf_on_record($doc, $row) === '');
+    $doc2 = $mkdoc();
+    $doc2['criticalIncidents']['customIncidents'] = array('2019-06-01: Closure order: The state ordered the program closed after finding child abuse at the school.');
+    $check('fact-fold decisions: an order against an order line still clears (the same kind of fact)', kop_wbf_on_record($doc2, $row) !== '');
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+
+    // 4. A no-record Woodbury item takes the one record its program name is exactly.
+    $one = $two = null;
+    foreach ($pdo->query('SELECT id, name FROM facilities_v2 WHERE id < 900000 ORDER BY id LIMIT 6000')->fetchAll(PDO::FETCH_ASSOC) as $f) {
+        list($id, $how) = kop_autoconn_exact_record($pdo, $f['name']);
+        if ($how === 'exact' && !$one && $id === (int) $f['id']) $one = $f;
+        if ($how === 'ambiguous' && !$two) $two = $f;
+        if ($one && $two) break;
+    }
+    if (!$one || !$two) { echo "  (the scratch copy has no exact and no ambiguous record name: the Woodbury link checks are not run)\n"; return; }
+    $pk = array();
+    $n = 0;
+    foreach (array('one' => $one['name'], 'two' => $two['name'], 'none' => 'Nonexistent Fixture Academy of Nowhere') as $k => $prog) {
+        $n++;
+        $pk[$k] = $w(0, 'staff.notableStaff', 'Staff: Pat Roe, Director', '2026-01-10', 430 + $n, array('program' => $prog, 'program_as_written' => $prog, 'match_kind' => 'none',
+            'grp' => 'staff', 'op' => 'add_staff', 'value' => json_encode(array('name' => 'Pat Roe', 'role' => 'Director', 'pastJobs' => '')), 'label' => 'Staff: Pat Roe, Director'));
+    }
+    // Park the scratch copy's own no-record items so the pass touches only these.
+    $keep = "'" . implode("','", $pk) . "'";
+    $pdo->exec("UPDATE $wt SET status = 'zzpark' WHERE status = 'pending' AND facility_id = 0 AND pkey NOT IN ($keep)");
+    try {
+        $found = array_column(kop_autoconn_woodbury_facts_rows(), 2, 0);
+        $check('fact-fold decisions: the link finds the item whose program is exactly one record', ($found[$pk['one']] ?? 0) === (int) $one['id'] && !isset($found[$pk['two']]) && !isset($found[$pk['none']]),
+            json_encode(array($found, $one['id'])));
+        $linked = kop_autoconn_woodbury_facts(microtime(true) + 30);
+        $r1 = $get($pk['one']);
+        $x1 = json_decode($r1['extra'], true);
+        $check('fact-fold decisions: it moves onto that record (facility_id, match id) and nothing else moves', $linked === 1 && (int) $r1['facility_id'] === (int) $one['id'] && $r1['match_kind'] === 'id'
+            && $r1['status'] === 'pending' && !empty($x1['auto_linked']) && (int) $get($pk['two'])['facility_id'] === 0 && (int) $get($pk['none'])['facility_id'] === 0, json_encode(array($linked, $r1['facility_id'], $x1)));
+        $check('fact-fold decisions: two holders of the name (ambiguous) stay without a record', (int) $get($pk['two'])['facility_id'] === 0);
+        $check('fact-fold decisions: the link is in the auto-connect memory (source woodbury-facts-link)', isset(kop_autoconn_tried('woodbury-facts-link')[$pk['one']]));
+        $m = call_user_func(kop_rinbox_source('woodbury-facts')['act'], $pk['one'], 'undo', array());
+        $r1 = $get($pk['one']);
+        $check('fact-fold decisions: Undo puts it back without a record', (int) $r1['facility_id'] === 0 && $r1['match_kind'] === 'none' && $r1['status'] === 'pending'
+            && empty(json_decode($r1['extra'], true)['auto_linked']), $m['message']);
+        $check('fact-fold decisions: an unlinked item is never linked again', kop_autoconn_woodbury_facts(microtime(true) + 30) === 0 && (int) $get($pk['one'])['facility_id'] === 0);
+    } finally {
+        $pdo->exec("UPDATE $wt SET status = 'pending' WHERE status = 'zzpark'");
+        $pdo->exec("DELETE FROM $wt WHERE pkey IN ($keep)");
+        $pdo->exec("DELETE FROM wpdl_kop_auto_connect WHERE source = 'woodbury-facts-link'");
         $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
     }
 }

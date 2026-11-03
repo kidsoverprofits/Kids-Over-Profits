@@ -123,7 +123,9 @@ function kop_wbf_sync($force = false) {
             $manual[$r['pkey']] = true;
         }
         // Matched or noted by the AI reader (api/apply-woodbury-agent-verdicts.php): kept like a hand correction.
-        if (strpos((string) $r['extra'], '"edited_by"') !== false || strpos((string) $r['extra'], '"ai_note"') !== false || $r['match_kind'] === 'ai') {
+        // Linked to a record by its exact program name (kop_wbf_auto_link()): kept the same way until Undo.
+        if (strpos((string) $r['extra'], '"edited_by"') !== false || strpos((string) $r['extra'], '"ai_note"') !== false || $r['match_kind'] === 'ai'
+            || strpos((string) $r['extra'], '"auto_linked"') !== false) {
             $edited[$r['pkey']] = true;
         }
         // A person added by hand (kop_wbf_add_person), or an item put back from "No longer proposed".
@@ -1538,6 +1540,31 @@ function kop_wbf_ya_override($program, $on) {
     update_option('kop_wbf_ya_overrides', $o, false);
     $wpdb->query($wpdb->prepare('UPDATE ' . kop_wbf_table() . " SET ya = %d WHERE program = %s AND facility_id = 0 AND status IN ('pending', 'gone')",
         $on ? 1 : 0, (string) $program));
+}
+
+/**
+ * The exact-name link of a no-record item (owner, 2026-11-03; kop_autoconn_woodbury_facts()): its program is exactly one
+ * record's name, so the item takes that record (facility_id, match 'id'). `extra.auto_linked` keeps what it was, so Undo
+ * (kop_wbf_auto_unlink()) puts it back and kop_wbf_sync() does not overwrite the link on the next build.
+ */
+function kop_wbf_auto_link(array $r, $fid) {
+    global $wpdb;
+    $extra = json_decode((string) $r['extra'], true) ?: array();
+    $extra['auto_linked'] = array('was_kind' => (string) $r['match_kind'], 'was_note' => (string) $r['match_note'], 'at' => current_time('mysql', true));
+    return (int) $wpdb->update(kop_wbf_table(), array('facility_id' => (int) $fid, 'match_kind' => 'id',
+        'match_note' => 'Linked automatically: the program name is exactly this record\'s.', 'extra' => wp_json_encode($extra)),
+        array('pkey' => $r['pkey'], 'status' => 'pending', 'facility_id' => 0)) > 0;
+}
+
+/** Undo of kop_wbf_auto_link() on a waiting item: false when it was never auto-linked. */
+function kop_wbf_auto_unlink(array $r) {
+    global $wpdb;
+    $extra = json_decode((string) $r['extra'], true) ?: array();
+    if (empty($extra['auto_linked']) || !is_array($extra['auto_linked'])) return false;
+    $was = $extra['auto_linked'];
+    unset($extra['auto_linked']);
+    return $wpdb->update(kop_wbf_table(), array('facility_id' => 0, 'match_kind' => (string) ($was['was_kind'] ?? 'none') ?: 'none',
+        'match_note' => (string) ($was['was_note'] ?? ''), 'extra' => wp_json_encode($extra)), array('pkey' => $r['pkey'], 'status' => 'pending')) !== false;
 }
 
 /**

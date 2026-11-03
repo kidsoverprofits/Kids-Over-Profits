@@ -541,7 +541,7 @@ const KOP_FOLD_AI_LINE_CHARS = 260;
 // (0.7 x (500 + 400) = 630) room for the news facts reader (6 an hour) and the hourly enrich.
 const KOP_FOLD_AI_CALLS_PER_RUN = 10;
 // Part of every line key: a new prompt wording asks again.
-const KOP_FOLD_AI_VERSION = 'v1';
+const KOP_FOLD_AI_VERSION = 'v2';   // v2 (2026-11-03): the prompt says an undated telling and an alleged / found pair can be one event, a closure order is not a closure
 
 /** The job name the AI usage log and budget know this step by (kop_ai_usage_jobs() names the file the same). */
 function kop_fold_ai_job() {
@@ -569,9 +569,10 @@ function kop_fold_ai_prompt($name, array $ids, array $ask, array $rg) {
         . "Lines marked ON HAND are already on the record or approved; lines marked WAITING wait for review.\n\n"
         . "For each line listed under \"Judge\", say whether another line tells the same fact:\n"
         . "- same_as <n>: line n tells the same event or fact. Only when who, what, when and where agree. A shorter or less detailed telling of the same event is the same. If an ON HAND line is the same, point to it.\n"
-        . "- differs <n>: line n is clearly about the same event, but the two disagree on a date, a number, a person or a place.\n"
+        . "- differs <n>: line n is clearly about the same event, but the two disagree on a date, a number, a person or a place. Whether a telling says \"alleged\" or says the event was found, substantiated, confirmed or ended in a conviction is not a disagreement: they are one event at different stages, so that is same_as.\n"
         . "- new: no other line tells it.\n"
-        . "Different dates, numbers, people or places are not the same fact. Two events of one kind (two injuries, two inspections, two lawsuits) are not the same; "
+        . "Different dates, numbers, people or places are not the same fact, but a line with no date can be the same event as a dated line, however many years apart; judge it by who, what and where. "
+        . "A state's order to close a program (ordered closed, license revoked, cease and desist) is not the program's closing: they are two facts, never same_as. Two events of one kind (two injuries, two inspections, two lawsuits) are not the same; "
         . "two lawsuits are the same only when they are clearly one case (the same parties, case name or filing). When unsure, answer new.\n"
         . "Only judge; never rewrite a line.\n\n"
         . "Return ONLY JSON, no other text: {\"verdicts\": [{\"line\": 3, \"answer\": \"same_as\", \"to\": 1}, {\"line\": 4, \"answer\": \"new\"}, {\"line\": 5, \"answer\": \"differs\", \"to\": 2}]}\n\nLines:\n";
@@ -758,10 +759,12 @@ function kop_fold_ai_judge(array $rg, array &$S, array $x) {
 /**
  * Why an AI "same" between two facts is not taken ('' = nothing against it): other kinds, kop_fact_differs() (dates,
  * numbers, ages, head counts, places, people), or two incidents of other types (an injury and the neglect or the
- * investigation that followed it are other facts, docs/claude/fact-shape.md 6.5). A line with no type or the generic
+ * investigation that followed it are other facts, docs/claude/fact-shape.md 6.5), or a closure order against a closure fact
+ * (owner, 2026-11-03: a state's order to close is not the closure). A line with no type or the generic
  * 'incident' (a record line with no label) meets any type.
  */
 function kop_fold_ai_apart(array $a, array $b) {
+    if (kop_fact_closure_clash($a, $b)) return 'closure order';
     if (kop_fact_group($a) !== kop_fact_group($b)) return 'kind';
     $why = kop_fact_differs($a, $b);
     if ($why !== '') return $why;
@@ -937,11 +940,23 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
     $n = count($items);
     $uf = $n ? range(0, $n - 1) : array();
     $how = array();   // shape id => how it matched
+    $mem = array();   // group root => its member indexes (to refuse a join that would put two different dates in one group)
+    foreach ($items as $i => $_) $mem[$i] = array($i);
     foreach (kop_fold_block_pairs($items) as $pr) {
         list($i, $j) = $pr;
-        if (kop_fold_find($uf, $i) === kop_fold_find($uf, $j)) continue;
+        $ri = kop_fold_find($uf, $i);
+        $rj = kop_fold_find($uf, $j);
+        if ($ri === $rj) continue;
         $why = kop_fact_rule_same($items[$i], $items[$j]);
-        if ($why !== '') { kop_fold_union($uf, $i, $j); $how[$items[$j]['id']] = $why; }
+        if ($why === '') continue;
+        // An undated telling fits every dated one (owner, 2026-11-03), so it must not bring two dated ones that differ into one group.
+        $clash = false;
+        foreach ($mem[$ri] as $mx) foreach ($mem[$rj] as $my) if (kop_fact_differs($items[$mx], $items[$my]) !== '') { $clash = true; break 2; }
+        if ($clash) { $S['rule_clash'] = ($S['rule_clash'] ?? 0) + 1; continue; }
+        kop_fold_union($uf, $i, $j);
+        $mem[$ri] = array_merge($mem[$ri], $mem[$rj]);
+        unset($mem[$rj]);
+        $how[$items[$j]['id']] = $why;
     }
 
     // d: close candidates for the AI step: waiting group reps against each other and against on-hand lines.
@@ -1080,11 +1095,22 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
     return $ai_state;
 }
 
-/** The item a group keeps: a Woodbury item, then a Fornits item, then a news fact; the longest wording within a queue. */
+/**
+ * The item a group keeps (owner, 2026-11-03: an "alleged" telling folds with a "found / substantiated / confirmed /
+ * convicted" telling of the same event, and the found telling's wording is the one kept). The order:
+ * 1. a Woodbury or Fornits item before a news fact (a waiting news fact has no place for other citations), when the group has one;
+ * 2. the strongest standing first (found, convicted, ruled, admitted; then unstated; "alleged" last), whatever the queue order;
+ * 3. a Woodbury item, then a Fornits item;
+ * 4. the longest wording; then the first in the list.
+ */
 function kop_fold_pick(array $items, array $members) {
     $rank = array('wbf' => 0, 'fornits' => 1, 'news' => 2);
+    $holder = false;
+    foreach ($members as $m) if ($items[$m]['queue'] !== 'news') $holder = true;
+    if ($holder) $members = array_values(array_filter($members, function ($m) use ($items) { return $items[$m]['queue'] !== 'news'; }));
     usort($members, function ($a, $b) use ($items, $rank) {
-        return ($rank[$items[$a]['queue']] ?? 3) <=> ($rank[$items[$b]['queue']] ?? 3)
+        return kop_fact_standing_rank($items[$b]) <=> kop_fact_standing_rank($items[$a])
+            ?: ($rank[$items[$a]['queue']] ?? 3) <=> ($rank[$items[$b]['queue']] ?? 3)
             ?: strlen($items[$b]['core'] ?: $items[$b]['text']) <=> strlen($items[$a]['core'] ?: $items[$a]['text']) ?: $a <=> $b;
     });
     return $members[0];

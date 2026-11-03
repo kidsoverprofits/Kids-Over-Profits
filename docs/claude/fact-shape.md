@@ -54,9 +54,9 @@ These numbers change what the work buys. The big ones:
 | `subject` | the line's core: "A 13-year-old resident suffered a fractured jaw ..." | display; its words feed `words` |
 | `keys` | `{person: "", org: [], name: [], url: "", nums: ["13"], ages: [13], people: []}` | grouping (per kind, 6.1) |
 | `date` | `2026-05-14` | grouping: `YYYY`, `YYYY-MM`, `YYYY-MM-DD`, or `''` for unknown |
-| `told` | `2026-06-15` (publication, issue month or post date) | grouping: limits an undated fact (6.3) |
+| `told` | `2026-06-15` (publication, issue month or post date) | display and the AI line only (an undated fact fits a dated one whatever `told` says, 6.3) |
 | `place` | `[]`, or `["springville"]` | grouping: `kop_dd_campuses()` of the text, and `kop_wbf_street_key()` / city+state for `place` facts |
-| `standing` | `alleged` | display only (the kept card shows the strongest; see open question 4) |
+| `standing` | `alleged` | never keeps two tellings apart; it picks the keeper (`kop_fact_standing_rank()`, 6.4) |
 | `words`, `dwords`, `caps` | from `kop_wbf_words()` on the core | grouping: rule and close-pair tests |
 | `src` | `news` | counting: origin family, one of `woodbury`, `heal`, `wiki`, `news`, `questions`, `fornits`, `paper`, `record` |
 | `told_by` | `["news:207"]` | counting and citing: one id per telling (6.6) |
@@ -253,8 +253,8 @@ Two facts are candidates when they have the same `record` and share a block key.
 `kop_fact_blocks($f)` gives the keys:
 
 - staff: `person:<key>`; founder, owner and connection with a person subject: the same `person:<key>`
-- incident: `incident:<type>:<year>` for a dated fact. An undated fact gets two keys, `<told year>` and the year
-  before it (an event is told after it happens)
+- incident: `incident:<type>:<year>` and `incident:<type>:any` for a dated fact; `incident:<type>:any` for an undated one,
+  so an undated telling meets every dated one of its type (owner, 2026-11-03: any number of years apart)
 - closure, opening, size, ages, gender, type, cost, detail, money, practice, note: `<kind>` (one bucket per record;
   values and words decide inside it)
 - name: `name:<key>` for each name
@@ -279,7 +279,7 @@ with each other. All others compare only within their own kind.
 | owner ~ operator ~ sale ~ founder (company) | same company (`kop_wbf_org_is()`). Owner and operator are the same fact only when both say the same relation ("parent company" vs "runs it" goes to the AI step, never folds by rule) |
 | name (note "also known as") ~ name (pastNames / otherNames) ~ name (renamed) | same `kop_dd_name_key()` |
 | closure (set_closed) ~ closure (Fornits lead) ~ closure (record line) | dates fit (6.3) and the end years are equal when both give one |
-| incident `closure_order` / `license_action` ~ closure | never folded: an order and a closing are two facts. The closure keeps the order as context only (open question 3) |
+| incident or note that is a closure order ~ closure | never folded or cleared, either way round (owner, 2026-11-03): an order and a closing are two facts. A closure order is an incident or note of type `closure_order`, or whose words say ordered closed / to cease / shut down, closure or cease order, license revoked, cease and desist (`kop_fact_is_closure_order()`). `kop_fact_differs()` gives "closure order", so the rules, `kop_fact_close()`, an AI "same" (`kop_fold_ai_apart()`) and the on-hand check (`kop_wbf_on_record()` through `kop_fact_closure_clash_why()`) all keep them apart |
 | opening (set_if_empty) ~ opening ("Opened: 1976 per ...") ~ opening (record) | same year |
 | link (Fornits lead url) ~ link (record news link) ~ link (resourceLinks) | same url key |
 
@@ -289,7 +289,10 @@ with each other. All others compare only within their own kind.
 join, by the rules or by the AI:
 
 - **dates:** both are dated and differ: different years; different months when both give one; different days when
-  both give one. An undated fact fits a dated one only when the date is no later than the undated one's `told` date.
+  both give one. An empty date never blocks (owner, 2026-11-03): an undated fact fits a dated one any number of years
+  apart (the `told` date no longer limits it); two different dates still never join.
+- **closure order:** a closure order against a closure fact (6.2), whatever the words.
+- **standing** never keeps two tellings apart: "alleged" and "found by regulators" are one event at two stages.
 - **numbers:** `keys.nums` differ when both have numbers (the script's current rule, which keeps the 44 pairs
   `kop_wbf_text_same()` wrongly calls the same apart).
 - **ages and head counts:** the `kop_dd_same_event()` checks, applied to every kind.
@@ -309,13 +312,17 @@ join, by the rules or by the AI:
    `kop_dd_join_role()`; 421 of the 473 Fornits staff folds join different roles), same name key, same company with
    the same relation, or the same single value (closure year, opening year, ages, gender, size): same.
 3. Incidents: `kop_dd_same_event()`. It needs the date and the kind, so it is called on lines rebuilt from the shape
-   as `"<date>: <Type>: <subject>"` (the shape supplies the kind the label lacked on undated lines). For two undated
-   lines, or one undated: not by rule, so the pair goes to step (d) if it is close.
+   as `"<date>: <Type>: <subject>"` (the shape supplies the kind the label lacked on undated lines), with the standing
+   words ("alleged", "found by regulators", ...) taken out of the core first (`kop_fact_strip_standing()`). For two
+   undated lines, or one undated: the same words by `kop_wbf_text_same()` join by rule ("text"); otherwise the pair goes
+   to step (d) if it is close.
 4. Every other kind: `kop_wbf_text_same()` on the two cores, both ways. For type, `kop_wbf_value_same()`.
 
 Close pairs (the script's `close_pair()`: dates fit, at least 3 shared distinctive words, Jaccard at least 0.30) that
 the rules did not join go to the AI step (d). So do all owner/operator pairs with the same company and a different
-relation, and the undated incident pairs whose `told` dates fit. The AI's answer (`same_as <n>`, `new`, `differs`)
+relation, and the undated incident pairs (any dated telling of the type, any years apart). The prompt tells the model
+that an undated line can be a dated one's event, that alleged and found are one event, and that a state's order to close
+is not the closing (`KOP_FOLD_AI_VERSION` 'v2' re-asks the cached answers). The AI's answer (`same_as <n>`, `new`, `differs`)
 is checked against `kop_fact_differs()` before it is used: an AI "same" over different numbers is dropped.
 
 ### 6.5 The Provo Canyon injury, worked through
@@ -532,16 +539,27 @@ as the plan says.
 2. **Generic names.** `kop_autoconn_distinctive()` passes "Child and Family Services" ("child" is not on the generic
    word list). Add "child" and "services" to `kop_wiki_upd_tokens()`'s generic list? That also changes the
    Woodbury, wiki and Fornits auto-connect passes. Or check the article's state or country against the record's?
-3. **Closure order vs closure.** 41 waiting Woodbury incident lines are "Closure order". Keep them as incidents only
-   (this spec), or let a closure order also stand for the closure when no other closure fact exists?
-4. **Standing.** Fold an "alleged" telling with a "found by regulators" one of the same event into one card that
-   shows the strongest standing and cites both? (This spec folds them; standing is display only.)
+3. **Closure order vs closure. Answered 2026-11-03: a state closure order is not the closure.** It never folds or clears
+   against a closure fact, and a closure never clears an order (6.2; built in `kop_fact_differs()`, `kop_fold_ai_apart()`,
+   `kop_wbf_on_record()`).
+4. **Standing. Answered 2026-11-03: fold them.** An "alleged" telling folds with a found / substantiated / confirmed / convicted
+   telling of the same event and the kept card is the found one (its wording), citing both. Standing never keeps two
+   tellings apart. Keeper order (`kop_fold_pick()`): a Woodbury or Fornits item before a news fact when the group has one;
+   then the strongest standing (found 2, unstated 1, alleged 0, `kop_fact_standing_rank()`); then Woodbury before Fornits;
+   then the longest wording. A found telling that is only a waiting news fact cannot be kept (no place for citations): the
+   best Woodbury or Fornits telling is, even when it says alleged.
 5. **Owner and operator.** Treat "Owner: X" and "Operator: X" for the same company as one fact (fold by rule), or
    always ask (this spec sends them to the AI step)?
 6. **One URL key.** Fornits' on-file rule uses `kop_gdl_url_key()`; `fact-dedupe.php` and the news links use
    `kop_normalize_urls()`. Use `kop_normalize_urls()` everywhere for links?
-7. **No-record items that now match a record.** 199 pending no-record Woodbury items, on 23 program names, are now
-   exactly one record's name (some generic: "life", "seed", "teen challenge"). Leave them to `kop_wbf_auto_run()`'s
-   own rules, or let the fold use the record when the name is distinctive?
-8. **Undated incidents.** Allow the undated news lines (343) into the AI step against any dated telling up to their
-   publication date (this spec), or only within the 12 months before it?
+7. **No-record items that now match a record. Answered 2026-11-03: move them onto it automatically.** The hourly
+   auto-connect (`kop_autoconn_woodbury_facts()`, source `woodbury-facts-link`) links a pending no-record Woodbury Facts item
+   whose program is exactly one record's name (`kop_autoconn_exact_record()`: full key, distinctive, one holder; ambiguous,
+   generic and none stay) to that record: `facility_id`, `match_kind 'id'`, `extra.auto_linked`; Undo on the card or in
+   Recently done (`kop_wbf_auto_unlink()`). Young adult and consultant items are not touched. Why `kop_autoconn_woodbury()`
+   never did it: it reads the Woodbury Reports page queue (`kop_wb_table()`, `facility_id > 0`), not fact rows; the facts'
+   record is set once by the build (`scripts/woodbury-facts.py`) and no PHP pass matched `match_kind none` rows again
+   (`kop_wbf_auto_where()` starts from `facility_id > 0`).
+8. **Undated incidents. Answered 2026-11-03: any number of years apart.** An empty date never blocks (`kop_fact_dates_fit()`);
+   two different dates still never join, and a rule join that would put two different dates in one group through an
+   undated telling is refused (`rule_clash`).

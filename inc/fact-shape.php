@@ -163,26 +163,61 @@ function kop_fact_incident_type($label) {
     return in_array($t, kop_fact_incident_types(), true) ? $t : 'incident';
 }
 
-function kop_fact_pad_date($d) {
-    $d = (string) $d;
-    return $d === '' ? '' : substr($d . '-01-01', 0, 10);
-}
-
-/** Whether two shapes' dates allow one event (6.3), told dates included. */
+/**
+ * Whether two shapes' dates allow one event (6.3). Two different dates never fit. An empty date never blocks (owner,
+ * 2026-11-03): an undated telling fits a dated one however many years apart, so the day it was told does not matter.
+ */
 function kop_fact_dates_fit(array $a, array $b) {
     $x = (string) $a['date'];
     $y = (string) $b['date'];
-    if ($x !== '' && $y !== '') {
-        if (substr($x, 0, 4) !== substr($y, 0, 4)) return false;
-        if (strlen($x) >= 7 && strlen($y) >= 7 && substr($x, 0, 7) !== substr($y, 0, 7)) return false;
-        return !(strlen($x) === 10 && strlen($y) === 10 && $x !== $y);
-    }
-    if ($x === '' && $y === '') return true;
-    // One is undated: the dated event is no later than the day the undated one was told.
-    $dated = $x !== '' ? $x : $y;
-    $told = (string) ($x !== '' ? $b['told'] : $a['told']);
-    if ($told === '') return true;
-    return kop_fact_pad_date($dated) <= kop_fact_pad_date($told);
+    if ($x === '' || $y === '') return true;
+    if (substr($x, 0, 4) !== substr($y, 0, 4)) return false;
+    if (strlen($x) >= 7 && strlen($y) >= 7 && substr($x, 0, 7) !== substr($y, 0, 7)) return false;
+    return !(strlen($x) === 10 && strlen($y) === 10 && $x !== $y);
+}
+
+/** The words of a state's order to close: closure order, ordered closed / to cease, license revoked, cease and desist. */
+function kop_fact_text_closure_order($s) {
+    return (bool) preg_match('/\b(?:closure|cease|shut\s?down)\s+order\b|\border(?:s|ed|ing)?\b[^.;]{0,60}\b(?:clos\w*|shut\s?down|shut|cease\w*|revok\w*|revocation)\b'
+        . '|\b(?:revok\w*|revocation of)\b[^.;]{0,40}\blicen[cs]e|\blicen[cs]e\b[^.;]{0,30}\brevok\w*|\bcease and desist\b/i', (string) $s);
+}
+
+/** Whether a shape is a state's order to close (an incident or a note): never the closure itself (owner, 2026-11-03). */
+function kop_fact_is_closure_order(array $f) {
+    if (!in_array($f['kind'], array('incident', 'note'), true)) return false;
+    return $f['type'] === 'closure_order' || kop_fact_text_closure_order($f['text'] !== '' ? $f['text'] : $f['core']);
+}
+
+/** Whether one of two shapes is a closure order and the other a closure fact (either way round): they never fold or clear. */
+function kop_fact_closure_clash(array $a, array $b) {
+    return ($a['kind'] === 'closure' && kop_fact_is_closure_order($b)) || ($b['kind'] === 'closure' && kop_fact_is_closure_order($a));
+}
+
+/**
+ * Whether the record line a legacy on-record check matched ("the record says the same: <line>", "the record has this
+ * event: <line>") is a closure where $f is a closure order, or a closure order where $f is a closure. $f null: false.
+ */
+function kop_fact_closure_clash_why($f, $why) {
+    if (!is_array($f) || !preg_match('/(?:says the same|has this event): (.*)$/s', (string) $why, $m)) return false;
+    $line = trim($m[1]);
+    if ($line === '') return false;
+    $g = kop_fact_note_line(array('queue' => 'doc', 'id' => 'doc:line', 'record' => (string) $f['record'], 'state' => 'on_record'), $line, '', true);
+    return (kop_fact_is_closure_order($f) && $g['kind'] === 'closure') || ($f['kind'] === 'closure' && kop_fact_text_closure_order($line));
+}
+
+/** A telling's standing as a rank: 2 found / substantiated / confirmed / convicted, 0 alleged, 1 anything else (owner, 2026-11-03). */
+function kop_fact_standing_rank(array $f) {
+    $st = strtolower(trim((string) ($f['standing'] ?? '')));
+    if (in_array($st, array('found', 'convicted', 'ruled', 'admitted'), true)) return 2;
+    if ($st === 'alleged') return 0;
+    $t = (string) ($f['text'] ?? '');
+    if (preg_match('/\b(?:found by regulators|substantiated|confirmed by|convicted|found guilty|ruled by a court)\b/i', $t)) return 2;
+    return preg_match('/\balleged(?:ly)?\b/i', $t) ? 0 : 1;
+}
+
+/** A core without its standing words, so "alleged" and "found by regulators" never keep two tellings of one event apart. */
+function kop_fact_strip_standing($core) {
+    return trim(preg_replace('/\s+/', ' ', preg_replace('/\b(?:alleged(?:ly)?|found by regulators|substantiated|confirmed by regulators|convicted|found guilty)\b/i', ' ', (string) $core)));
 }
 
 /* ---- Names ------------------------------------------------------------------------------------------ */
@@ -777,10 +812,10 @@ function kop_fact_blocks(array $f) {
         case 'investor':
             return $orgs();
         case 'incident':
-            if ($f['date'] !== '') return array('incident:' . $f['type'] . ':' . substr($f['date'], 0, 4));
-            if ($f['told'] === '') return array('incident:' . $f['type'] . ':?');
-            $y = (int) substr($f['told'], 0, 4);
-            return array('incident:' . $f['type'] . ':' . $y, 'incident:' . $f['type'] . ':' . ($y - 1));
+            // An undated incident may fold with a dated one any number of years apart (owner, 2026-11-03): every incident of
+            // the type also shares the "any" key, so an undated telling meets each dated one.
+            if ($f['date'] !== '') return array('incident:' . $f['type'] . ':' . substr($f['date'], 0, 4), 'incident:' . $f['type'] . ':any');
+            return array('incident:' . $f['type'] . ':any');
         case 'name':
             return array_map(function ($n) { return 'name:' . $n; }, $kk['name']);
         case 'link':
@@ -824,6 +859,7 @@ function kop_fact_person_pair(array $a, array $b, $loose = false) {
 /** Why two facts are never one ('' when nothing keeps them apart) (6.3). */
 function kop_fact_differs(array $a, array $b) {
     if ($a['kind'] === 'testimony' || $b['kind'] === 'testimony') return 'testimony';
+    if (kop_fact_closure_clash($a, $b)) return 'closure order';
     $g = kop_fact_group($a);
     if ($g !== kop_fact_group($b)) return '';
     $kind = $a['kind'];
@@ -865,8 +901,8 @@ function kop_fact_rule_same(array $a, array $b) {
     $ka = $a['kind'];
     $kb = $b['kind'];
     $text = function () use ($a, $b) {
-        $x = $a['core'];
-        $y = $b['core'];
+        $x = kop_fact_strip_standing($a['core']);
+        $y = kop_fact_strip_standing($b['core']);
         return $x !== '' && $y !== '' && (kop_wbf_text_same($x, $y) || kop_wbf_text_same($y, $x)) && $a['keys']['nums'] === $b['keys']['nums'] && kop_fact_dates_fit($a, $b);
     };
     switch ($g) {
@@ -915,7 +951,7 @@ function kop_fact_rule_same(array $a, array $b) {
         case 'incident':
             if ($a['type'] !== $b['type']) return '';
             if ($a['date'] !== '' && $b['date'] !== '') {
-                $mk = function ($f) { return $f['date'] . ': ' . ucfirst(str_replace('_', ' ', $f['type'])) . ': ' . $f['core']; };
+                $mk = function ($f) { return $f['date'] . ': ' . ucfirst(str_replace('_', ' ', $f['type'])) . ': ' . kop_fact_strip_standing($f['core']); };
                 if (kop_dd_same_event($mk($a), $mk($b))) return 'event';
             }
             return $text() ? 'text' : '';

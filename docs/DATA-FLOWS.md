@@ -397,6 +397,13 @@ Nothing here changes a record: `held` stays the only state the write-up reads (`
     naming one record exactly gets `facility_id`; when `kop_nf_wbf_row()` makes a card for it the card is filed
     (`kop_nf_file_wbf()`) and the fact becomes `route 'facility'`, `status 'filed'`, `wbf_pkey`. What Undo needs is the
     `kop_auto_connect` note.
+  - *Woodbury link* (`kop_autoconn_woodbury_facts()`, hourly auto-connect, source `woodbury-facts-link`, key = pkey): a pending
+    Woodbury Facts item with `facility_id = 0` whose program is exactly one record's name (`kop_autoconn_exact_record()` 'exact')
+    gets `facility_id`, `match_kind 'id'` and `extra.auto_linked` (what it was). `kop_wbf_sync()` keeps such a row as it keeps an
+    edited one. Undo (Recently done, or the card) runs `kop_wbf_auto_unlink()`; the `kop_auto_connect` row stops a second link.
+    Young adult and consultant items stay out. The fold reads the new record on its next pass.
+  - *Fold rules (2026-11-03)*: an empty date never keeps tellings apart; alleged and found fold and the found one is kept
+    (`kop_fold_pick()`); a closure order never folds or clears against a closure (also `kop_wbf_on_record()`).
 - **Undo:** a card's action or Recently done: Woodbury `kop_wbf_undo()` / the inbox `undo` action, Fornits `kop_fornits_undo()`,
   news facts `kop_nf_undo_auto()`. A folded member goes back to `pending` with the person as `reviewed_by` (and
   `extra.fold_undone`), its citations come off the kept card (`kop_fold_unfold_kept()`, only while that card is still
