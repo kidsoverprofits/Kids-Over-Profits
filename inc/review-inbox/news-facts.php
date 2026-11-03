@@ -96,6 +96,11 @@ function kop_rinbox_nf_item(array $r) {
     }
     if ((int) $r['names_removed']) $details[] = array('label' => 'Survivor', 'value' => 'A survivor\'s name was taken out of this fact.');
     if ($r['status'] !== 'pending') $details[] = array('label' => $statuses[$r['status']] ?? $r['status'], 'value' => trim(substr((string) $r['reviewed_at'], 0, 10) . ' by ' . $r['reviewed_by']));
+    // Cleared or folded by the hourly pass (inc/fact-fold.php): why, and where.
+    if ((string) $r['reviewed_by'] === 'auto' && in_array($r['status'], array('dropped', 'merged'), true) && function_exists('kop_fold_mark_note')) {
+        $note = kop_fold_mark_note('news-facts-fold', $r['id']);
+        if (!empty($note['reason'])) $details[] = array('label' => $r['status'] === 'merged' ? 'Folded into' : 'Cleared because', 'value' => (string) $note['reason']);
+    }
 
     $actions = array();
     if ($r['status'] === 'pending') {
@@ -103,6 +108,9 @@ function kop_rinbox_nf_item(array $r) {
             'help' => 'Marks the fact as right. It goes onto the company, person or program record when that kind of record gets its Add from this list; nothing on the site changes yet.');
         $actions[] = array('id' => 'drop', 'label' => 'Reject: drop', 'style' => 'reject',
             'help' => 'Nothing on the site changes; the fact moves to Dropped.');
+    } elseif ($r['status'] === 'merged') {
+        $actions[] = array('id' => 'undo', 'label' => 'Undo the fold', 'style' => 'undo',
+            'help' => 'Takes its source off the card it was folded into and puts it back with the waiting facts; it is not folded again.');
     } else {
         $actions[] = array('id' => 'undo', 'label' => 'Back to waiting', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the fact waits again.');
@@ -130,5 +138,10 @@ function kop_rinbox_nf_act($key, $action, array $params) {
     kop_rinbox_flush_counts();
     $to = array('keep' => 'kept', 'drop' => 'dropped', 'undo' => 'pending');
     if (!isset($to[$action])) throw new RuntimeException('Unknown action.');
+    if ($action === 'undo' && function_exists('kop_nf_undo_auto')) {
+        // Linked to a record, folded or cleared by the hourly pass (inc/fact-fold.php): its own Undo.
+        $row = kop_nf_row($pdo, (int) $key);
+        if ($row && ($said = kop_nf_undo_auto($pdo, $row, $who)) !== '') return array('message' => $said);
+    }
     return array('message' => kop_nf_decide($pdo, (int) $key, $to[$action], $who));
 }

@@ -9,6 +9,7 @@
  *       [--examples=20] [--json=<path>] [--facility=10371] [--shapes] [--noexamples]
  *   --facility=N        only that record (the groups of the record are listed; with --shapes every shape of it, one per line)
  *   --shapes            with --facility: print every shape of the record to check the mapping by eye
+ *   --engine            instead: the live fold engine (inc/fact-fold.php) in count mode, scripts/fold-dry-run.php
  *   --recheck-cleared   instead of the measurement: re-check every Woodbury item the hourly clear filed as "already on the
  *                       record" against its record with the current kop_wbf_on_record() and count those no longer on it.
  *
@@ -30,6 +31,7 @@ $opt = array();
 foreach (array_slice($argv, 1) as $a) {
     if (preg_match('/^--([a-z-]+)(?:=(.*))?$/', $a, $m)) $opt[$m[1]] = $m[2] ?? true;
 }
+if (!empty($opt['engine'])) { require __DIR__ . '/fold-dry-run.php'; exit; }   // the live engine in count mode (inc/fact-fold.php)
 $db_path = (string) ($opt['db'] ?? (dirname(__DIR__) . '/tmp/prod.sqlite'));
 if (!file_exists($db_path)) {
     fwrite(STDERR, "Need $db_path (python ../kop-pipeline/scripts/sync-prod-sqlite.py).\n");

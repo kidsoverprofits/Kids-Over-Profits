@@ -706,19 +706,20 @@ function kop_nf_cron() {
 /* ---- The waiting facts (Review inbox > Facts from news) --------------- */
 
 function kop_nf_statuses() {
-    return array('pending' => 'Waiting', 'kept' => 'Kept for the record', 'dropped' => 'Dropped');
+    // 'merged': folded into another card (inc/fact-fold.php); its route is 'merged' too, so no other list shows it as waiting.
+    return array('pending' => 'Waiting', 'kept' => 'Kept for the record', 'dropped' => 'Dropped', 'merged' => 'Folded together');
 }
 
 function kop_nf_counts(PDO $pdo) {
     $out = array_fill_keys(array_keys(kop_nf_statuses()), 0);
-    foreach ($pdo->query("SELECT status, COUNT(*) FROM news_facts WHERE route = 'waiting' GROUP BY status")->fetchAll(PDO::FETCH_NUM) as $r) {
+    foreach ($pdo->query("SELECT status, COUNT(*) FROM news_facts WHERE route IN ('waiting', 'merged') GROUP BY status")->fetchAll(PDO::FETCH_NUM) as $r) {
         if (isset($out[$r[0]])) $out[$r[0]] = (int) $r[1];
     }
     return $out;
 }
 
 function kop_nf_rows(PDO $pdo, $status, $search, $offset, $limit, $category = '') {
-    $where = "f.route = 'waiting' AND f.status = ?";
+    $where = ($status === 'merged' ? "f.route = 'merged'" : "f.route = 'waiting'") . ' AND f.status = ?';
     $params = array($status);
     if ($category !== '') {
         $where .= ' AND f.category = ?';
@@ -751,8 +752,10 @@ function kop_nf_decide(PDO $pdo, $id, $status, $who) {
     $row = kop_nf_row($pdo, $id);
     if (!$row || $row['route'] !== 'waiting') throw new RuntimeException('No such fact.');
     if ($status !== 'pending' && $row['status'] !== 'pending') throw new RuntimeException('Already ' . $row['status'] . '.');
-    $pdo->prepare('UPDATE news_facts SET status = ?, reviewed_by = ?, reviewed_at = ' . ($status === 'pending' ? 'NULL' : 'UTC_TIMESTAMP()') . ' WHERE id = ?')
-        ->execute(array($status, $status === 'pending' ? null : $who, (int) $id));
+    // Put back from the engine's clear (reviewed_by 'auto'): the person stays on it, so it is not cleared or folded again.
+    $keep = $status === 'pending' && (string) $row['reviewed_by'] === 'auto';
+    $pdo->prepare('UPDATE news_facts SET status = ?, reviewed_by = ?, reviewed_at = ' . ($status === 'pending' && !$keep ? 'NULL' : 'UTC_TIMESTAMP()') . ' WHERE id = ?')
+        ->execute(array($status, $status === 'pending' && !$keep ? null : $who, (int) $id));
     return $status === 'kept' ? 'Kept: it goes onto the record when that kind of record gets its Add.'
         : ($status === 'dropped' ? 'Dropped.' : 'Back with the waiting facts.');
 }

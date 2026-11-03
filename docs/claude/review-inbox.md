@@ -272,7 +272,7 @@ facility has "Everything waiting for this record". Tested in `test-review-inbox.
 
 ## Clear and fold (Woodbury Facts, Fornits, Facts from news)
 
-Hourly, after the Woodbury clear, `kop_fold_hourly()` (inc/fact-fold.php) files what is already on hand and folds the same fact told
+Hourly, on its own event half an hour after the Woodbury clear, `kop_fold_hourly()` (inc/fact-fold.php) files what is already on hand and folds the same fact told
 several times into one card; there is no sample and no confirm step, Undo is the check (owner, 2026-11-02). **Cleared** items sit on
 each queue's Rejected / Skipped tab (news facts: Dropped) with the reason ("Already on the record: ...", "Held for the write-up:
 ..."). **Folded** items sit on "Folded together" (every status filter of the three queues has it), and the kept card lists them under

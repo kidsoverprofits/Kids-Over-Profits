@@ -32,6 +32,7 @@ kop_rinbox_register('fornits', function () {
     $views['held'] = 'Approved, held for the write-up';
     $views['applied'] = 'Added';
     $views['rejected'] = 'Skipped or already there';
+    $views['merged'] = 'Folded together';
     return array(
         'label'    => 'Fornits',
         'group'    => 'Imports to review',
@@ -120,7 +121,7 @@ function kop_rinbox_fornits_list(array $q) {
     }
     $where = kop_rinbox_fornits_where($q['view'], $q);
     $total = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_fornits_items_table() . " i WHERE {$where}");
-    $order = in_array($q['view'], array('applied', 'rejected'), true)
+    $order = in_array($q['view'], array('applied', 'rejected', 'merged'), true)
         ? 'i.reviewed_at DESC, i.id DESC'
         : 'i.importance DESC, i.preselect DESC, i.facility_id, i.post_date, i.id';
     $rows = kop_rinbox_fornits_select($where, array(), $order, $q['limit'], $q['offset']);
@@ -133,7 +134,7 @@ function kop_rinbox_fornits_where($view, array $q) {
     $kinds = kop_fornits_kinds();
     if (isset($kinds[$view])) {
         $where = $wpdb->prepare("i.status = 'pending' AND i.kind = %s", $view);
-    } elseif (in_array($view, array('applied', 'held', 'rejected'), true)) {
+    } elseif (in_array($view, array('applied', 'held', 'rejected', 'merged'), true)) {
         $where = $wpdb->prepare('i.status = %s', $view);
     } else {
         $where = "i.status = 'pending'";
@@ -165,7 +166,7 @@ function kop_rinbox_fornits_where($view, array $q) {
 function kop_rinbox_fornits_view_counts(array $q) {
     global $wpdb;
     $out = array();
-    foreach (array_merge(array('pending'), array_keys(kop_fornits_kinds()), array('applied', 'rejected')) as $v) {
+    foreach (array_merge(array('pending'), array_keys(kop_fornits_kinds()), array('applied', 'rejected', 'merged')) as $v) {
         $out[$v] = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . kop_fornits_items_table() . ' i WHERE ' . kop_rinbox_fornits_where($v, $q));
     }
     return $out;
@@ -240,6 +241,13 @@ function kop_rinbox_fornits_item(array $r) {
         }, array_slice($also, 0, 5))) . '. Check it is this one.';
     }
     if (!empty($done['reason'])) $lines[] = $done['reason'];
+    // The card other tellings were folded into lists them (inc/fact-fold.php); each has Undo under "Folded together".
+    if (!empty($done['folds'])) {
+        $lines[] = 'Folded together: ' . count($done['folds']) . ' other ' . (count($done['folds']) === 1 ? 'telling of this fact is' : 'tellings of this fact are') . ' on this card; they are cited when it is written up.';
+        foreach (array_slice($done['folds'], 0, 12) as $fo) {
+            $lines[] = '  - ' . (string) ($fo['text'] ?? '') . ' (' . implode('; ', array_map(function ($c) { return (string) ($c['cite'] ?? ''); }, (array) ($fo['cites'] ?? array()))) . ')';
+        }
+    }
     if (($done['via'] ?? '') === 'record' && !empty($done['record']['message'])) $lines[] = (string) $done['record']['message'];
     if (($done['via'] ?? '') === 'company_staff') $lines[] = 'Went to: the key staff of company #' . (int) ($done['operator_id'] ?? 0) . '.';
     if (($done['filed'] ?? '') === 'young_adult') $lines[] = 'Went to: the young adult program "' . (string) ($done['name'] ?? '') . '".';
@@ -339,7 +347,7 @@ function kop_rinbox_fornits_item(array $r) {
     // The facility the reading matched (the row's facility_id): programs only.
     $fields[] = array('name' => 'facility_id', 'label' => 'Facility', 'type' => 'facility', 'value' => (int) $r['facility_id'], 'readonly' => $ro, 'facility_only' => true);
 
-    $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'held' => 'Held for the write-up', 'rejected' => 'Skipped');
+    $statuses = array('pending' => 'Waiting', 'applied' => 'Added', 'held' => 'Held for the write-up', 'rejected' => 'Skipped', 'merged' => 'Folded together');
     $fid = in_array($r['status'], array('applied', 'held'), true) ? (int) $r['applied_fid'] : (int) $r['facility_id'];
     $when = kop_fornits_month($r['post_date']);
 

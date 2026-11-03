@@ -900,6 +900,29 @@ function kop_fornits_lead_targets() {
     return array('news' => 'News queue', 'lawsuit' => 'Lawsuits queue', 'closed' => 'Mark the facility closed', 'note' => 'A note on the record');
 }
 
+/** The other items folded into this one (inc/fact-fold.php, applied.folds): [{id, text, cites: [{cite, url}]}]. */
+function kop_fornits_folds(array $r) {
+    $a = json_decode((string) ($r['applied'] ?? ''), true);
+    return is_array($a) && !empty($a['folds']) ? (array) $a['folds'] : array();
+}
+
+/** Their citations as evidence entries (tagged so Woodbury's source line cites them) and as a line suffix. */
+function kop_fornits_fold_cites(array $r) {
+    $out = array();
+    foreach (kop_fornits_folds($r) as $f) {
+        foreach ((array) ($f['cites'] ?? array()) as $c) {
+            if (!empty($c['url'])) $out[] = array('cite' => (string) ($c['cite'] ?? ''), 'url' => (string) $c['url'], 'folded_from' => array((string) ($f['id'] ?? 'fold')));
+        }
+    }
+    return $out;
+}
+
+function kop_fornits_fold_suffix(array $r) {
+    $s = '';
+    foreach (kop_fornits_fold_cites($r) as $c) $s .= ' (' . $c['cite'] . ': ' . $c['url'] . ')';
+    return $s;
+}
+
 /**
  * Apply one proposal to a document. Returns what was done, for Undo; throws
  * when the record already has it. Staff, incident lines, closures and notes
@@ -908,9 +931,9 @@ function kop_fornits_lead_targets() {
  */
 function kop_fornits_doc_apply(array &$doc, array $r, $target) {
     $v = json_decode((string) $r['value'], true) ?: array();
-    $evidence = wp_json_encode(array(array('cite' => 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member')
+    $evidence = wp_json_encode(array_merge(array(array('cite' => 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member')
         . (kop_fornits_month($r['post_date']) ? ', ' . kop_fornits_month($r['post_date']) : ''),
-        'url' => kop_fornits_post_url($r['topic_id'], $r['post_n']))));
+        'url' => kop_fornits_post_url($r['topic_id'], $r['post_n']))), kop_fornits_fold_cites($r)));
     $wbf = function ($op, $path, $value, $label) use (&$doc, $evidence) {
         return array('via' => 'wbf') + kop_wbf_doc_apply($doc, array('op' => $op, 'path' => $path, 'value' => wp_json_encode($value),
             'label' => $label, 'evidence' => $evidence, 'extra' => ''));
@@ -934,7 +957,7 @@ function kop_fornits_doc_apply(array &$doc, array $r, $target) {
             'pastJobs' => ''), 'Staff: ' . $v['person']);
     }
     if ($r['kind'] === 'incident') {
-        return $wbf('add_list', 'criticalIncidents.customIncidents', kop_fornits_incident_line($r), 'Incident');
+        return $wbf('add_list', 'criticalIncidents.customIncidents', kop_fornits_incident_line($r) . kop_fornits_fold_suffix($r), 'Incident');
     }
     if ($r['kind'] === 'testimony') {
         $id = 'fornits-' . (int) $r['topic_id'] . '-' . (int) $r['post_n'];
@@ -952,7 +975,7 @@ function kop_fornits_doc_apply(array &$doc, array $r, $target) {
         return $wbf('set_closed', 'operatingPeriod.status', array('endYear' => $v['year'] !== '' ? (int) $v['year'] : null),
             'Reported closed on Fornits: ' . $v['summary']);
     }
-    return $wbf('add_list', 'notes', kop_fornits_lead_line($r), 'Lead');
+    return $wbf('add_list', 'notes', kop_fornits_lead_line($r) . kop_fornits_fold_suffix($r), 'Lead');
 }
 
 /** The incident line a Fornits incident adds to the record: "2004: Abuse: <summary>. (Fornits forum, post by X, March 2005: <url>)". */
@@ -974,9 +997,9 @@ function kop_fornits_lead_line(array $r) {
 /** A staff item or a closure lead as the Woodbury change it makes (kop_wbf_doc_apply()), citing the post; null for other kinds. */
 function kop_fornits_as_wbf(array $r, $target = '') {
     $v = json_decode((string) $r['value'], true) ?: array();
-    $evidence = wp_json_encode(array(array('cite' => 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member')
+    $evidence = wp_json_encode(array_merge(array(array('cite' => 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member')
         . (kop_fornits_month($r['post_date']) ? ', ' . kop_fornits_month($r['post_date']) : ''),
-        'url' => kop_fornits_post_url($r['topic_id'], $r['post_n']))));
+        'url' => kop_fornits_post_url($r['topic_id'], $r['post_n']))), kop_fornits_fold_cites($r)));
     if ($r['kind'] === 'staff') {
         $role = trim(($v['role'] ?? '') . (!empty($v['years']) ? ' (' . $v['years'] . ')' : ''));
         return array('op' => 'add_staff', 'path' => 'staff.notableStaff', 'label' => 'Staff: ' . ($v['person'] ?? ''), 'extra' => '',
@@ -1103,6 +1126,8 @@ function kop_fornits_apply(array $rows, array $targets, $fid, $reviewer, $hold =
     $results = array();
     $now = current_time('mysql', true);
     $mark = function ($r, $status, $applied, $applied_fid) use ($wpdb, $reviewer, $now) {
+        // What was folded into this item (inc/fact-fold.php) stays with it, so Undo and the write-up still have it.
+        if (is_array($applied) && ($folds = kop_fornits_folds($r))) $applied['folds'] = $folds;
         $wpdb->update(kop_fornits_items_table(), array('status' => $status, 'applied' => wp_json_encode($applied),
             'applied_fid' => (int) $applied_fid, 'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
     };
@@ -1206,13 +1231,18 @@ function kop_fornits_undo(array $rows, $reviewer) {
     global $wpdb;
     $results = array();
     $back = function ($r) use ($wpdb, $reviewer) {
-        $wpdb->update(kop_fornits_items_table(), array('status' => 'pending', 'applied' => null, 'applied_fid' => 0,
+        $folds = kop_fornits_folds($r);
+        $wpdb->update(kop_fornits_items_table(), array('status' => 'pending', 'applied' => $folds ? wp_json_encode(array('folds' => $folds)) : null, 'applied_fid' => 0,
             'reviewed_by' => $reviewer, 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
     };
     $by_fid = array();
     foreach ($rows as $r) {
         $done = json_decode((string) $r['applied'], true) ?: array();
-        if ($r['status'] === 'rejected' || $r['status'] === 'held') {
+        if ($r['status'] === 'merged') {
+            // Folded into another card (inc/fact-fold.php): its citations come off that card; it is never folded again.
+            kop_fold_undo_member('fornits', $r, $reviewer);
+            $results[$r['pkey']] = array('ok' => true);
+        } elseif ($r['status'] === 'rejected' || $r['status'] === 'held') {
             // Held for a write-up: never on the record, so only the item goes back.
             $back($r);
             $results[$r['pkey']] = array('ok' => true);
@@ -1394,7 +1424,7 @@ function kop_render_fornits_page() {
     }
     echo kop_ak_tabs($kind_tabs, $kind, function ($k) use ($base) { return add_query_arg('fn_kind', $k, $base); }, array('label' => 'Kinds'));
     $state_tabs = array();
-    foreach (array('pending' => 'Waiting', 'held' => 'Approved, held for the write-up', 'applied' => 'Added', 'rejected' => 'Skipped or already there') as $k => $label) {
+    foreach (array('pending' => 'Waiting', 'held' => 'Approved, held for the write-up', 'applied' => 'Added', 'rejected' => 'Skipped or already there', 'merged' => 'Folded together') as $k => $label) {
         $state_tabs[$k] = array('label' => $label,
             'count' => (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$items} WHERE kind = %s AND status = %s", $kind, $k)));
     }

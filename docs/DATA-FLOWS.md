@@ -364,6 +364,44 @@ from option `kop_related_move_log`, which also holds everything for Undo
 (`kop_rmove_undo()`). Test: `php -d extension=pdo_sqlite -d extension=mbstring
 scripts/test-related-move.php`.
 
+### Fact queues (`kop_woodbury_facts`, `kop_fornits_items`, `news_facts`): clear, fold, link (2026-11-02)
+
+The three queues of facts waiting to be added to a record. Statuses: Woodbury Facts `pending, held, applied, rejected,
+gone, merged`; Fornits `pending, held, applied, rejected, merged`; news facts `pending, kept, dropped, filed, merged`
+(`filed` = a card on Woodbury Facts was made from it). **`merged` is new** and means "folded into another card".
+Nothing here changes a record: `held` stays the only state the write-up reads (`kop_wu_held_rows()`).
+
+- **Writes (inc/fact-fold.php, its own hourly event `kop_fold_hourly_event`, half an hour after the Woodbury hook, `kop_fold_hourly()`):**
+  - *Clear* (`kop_fold_write_clear()`): a waiting item already on hand (record, held items, approved items of the other
+    queues) goes to Woodbury `rejected` / Fornits `rejected` / news `dropped`, `reviewed_by 'auto'`, `applied`
+    `{"reason": "Already on the record: ..." | "Held for the write-up: ...", "cleared": "on_hand" | "held"}`. A news fact
+    keeps the reason in `kop_auto_connect` (source `news-facts-fold`; the table has no column for it).
+  - *Fold* (`kop_fold_write_group()`): the members get `merged`; a Woodbury member also `extra.merged_into` + `merged_into_queue`
+    and `applied {"merged_into": "woodbury:<pkey>"}`; a Fornits member `applied {"merged_into": "<queue>:<pkey>"}`; a news fact
+    `route = 'merged'` and `wbf_pkey` = the kept card's pkey (its target also in the `news-facts-fold` mark). The kept
+    card takes the citations: a Woodbury card's `evidence` list (entries tagged `folded_from`) and `extra.folded` (the list the
+    card shows); a Fornits card's `applied.folds` (no `extra` column). A group whose best item would be a news fact is not folded.
+  - *Link* (`kop_nf_link_waiting()`, on the hourly auto-connect as source `news-facts` and before the fold): a waiting news fact
+    naming one record exactly gets `facility_id`; when `kop_nf_wbf_row()` makes a card for it the card is filed
+    (`kop_nf_file_wbf()`) and the fact becomes `route 'facility'`, `status 'filed'`, `wbf_pkey`. What Undo needs is the
+    `kop_auto_connect` note.
+- **Undo:** a card's action or Recently done: Woodbury `kop_wbf_undo()` / the inbox `undo` action, Fornits `kop_fornits_undo()`,
+  news facts `kop_nf_undo_auto()`. A folded member goes back to `pending` with the person as `reviewed_by` (and
+  `extra.fold_undone`), its citations come off the kept card (`kop_fold_unfold_kept()`, only while that card is still
+  waiting or held), and it is never folded or cleared again. A cleared item uses the queue's own "Back to review"
+  (`reviewed_by` becomes the person; for news facts too: `kop_nf_decide()` keeps the person on a fact the engine had cleared).
+  Unlinking removes the evidence the link added from the Woodbury card, or deletes the card when the link made it and nothing
+  else rests on it.
+- **Readers of the statuses** (checked 2026-11-02): the inbox views and counts (`merged` is its own view and never pending),
+  the old Woodbury and Fornits screens (a "Folded together" tab; the Woodbury page's generic back-to-review button), the
+  on-file and conflict caches (pending only), the data audit count (pending only), `kop_fmerge_*` (every status moves with a
+  merge, so `merged_into` stays right), the write-up (`kop_wu_fact()` cites `folded_from` sources and a Fornits card's folds).
+  `kop_wbf_sync()` rewrites only `pending` and `gone` rows, never a `merged` one, and puts a kept card's folded citations
+  and `extra.folded` back after a reload.
+- **Known drift:** rejecting a kept card leaves its members `merged` (visible under Folded together, each with Undo); approving a
+  kept Fornits card writes its folded citations into the record line, but a member undone after that no longer finds
+  the card to take them off.
+
 ## 3. Where it drifts
 
 Ranked by how often a reader would see it. "Fix" names the change, and the

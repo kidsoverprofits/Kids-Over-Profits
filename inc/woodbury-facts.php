@@ -114,8 +114,14 @@ function kop_wbf_sync($force = false) {
     $existing = array();
     $edited = array();
     $manual = array();
+    $folded = array();
     foreach ((array) $wpdb->get_results("SELECT pkey, status, extra, match_kind FROM {$table}", ARRAY_A) as $r) {
         $existing[$r['pkey']] = $r['status'];
+        // The kept card of a fold (inc/fact-fold.php): other sources' citations ride on it, and a reload keeps them.
+        if (strpos((string) $r['extra'], '"folded"') !== false) {
+            $folded[$r['pkey']] = true;
+            $manual[$r['pkey']] = true;
+        }
         // Matched or noted by the AI reader (api/apply-woodbury-agent-verdicts.php): kept like a hand correction.
         if (strpos((string) $r['extra'], '"edited_by"') !== false || strpos((string) $r['extra'], '"ai_note"') !== false || $r['match_kind'] === 'ai') {
             $edited[$r['pkey']] = true;
@@ -177,6 +183,10 @@ function kop_wbf_sync($force = false) {
             // Corrected by hand: the rebuild's reading does not replace it.
             continue;
         } elseif (in_array($existing[$pkey], array('pending', 'gone'), true)) {
+            // A 'merged' item (folded into another card) is neither of these: a reload never brings it back.
+            if (isset($folded[$pkey]) && function_exists('kop_fold_keep_on_sync')) {
+                $row = kop_fold_keep_on_sync($row, $pkey, $extra, (array) ($p['evidence'] ?? array()));
+            }
             $row['status'] = 'pending';
             $wpdb->update($table, $row, array('pkey' => $pkey));
             $updated++;
@@ -315,7 +325,14 @@ function kop_wbf_source_ref(array $r) {
 
 /** The line a structured change leaves in the notes, so the record says where it came from. */
 function kop_wbf_source_line(array $r) {
-    return $r['label'] . ' (' . kop_wbf_cite($r) . ')';
+    $line = $r['label'] . ' (' . kop_wbf_cite($r) . ')';
+    // A card other tellings were folded into (inc/fact-fold.php) cites every one of them.
+    foreach (array_slice(kop_wbf_evidence($r), 1) as $e) {
+        if (is_array($e) && !empty($e['folded_from'])) {
+            $line .= ' (' . (!empty($e['cite']) ? $e['cite'] : kop_wbf_ev_label($e)) . (!empty($e['url']) ? ': ' . $e['url'] : '') . ')';
+        }
+    }
+    return $line;
 }
 
 function kop_wbf_list_has(array $list, $value) {
@@ -1714,6 +1731,9 @@ function kop_wbf_undo(array $rows, $reviewer) {
         } elseif ($r['status'] === 'rejected') {
             $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'reviewed_by' => $reviewer,
                 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
+        } elseif ($r['status'] === 'merged') {
+            // Folded into another card: its citations come off that card, and it waits again for good (inc/fact-fold.php).
+            kop_fold_undo_member('wbf', $r, $reviewer);
         } elseif ($r['status'] === 'held') {
             // Held for a write-up: never on the record, so only the item goes back.
             $held = json_decode((string) $r['applied'], true);
@@ -2639,6 +2659,8 @@ function kop_wbf_tabs() {
         'applied'  => array('label' => 'Added', 'where' => "status = 'applied'"),
         'auto'     => array('label' => 'Approved automatically', 'where' => "status IN ('applied', 'held') AND reviewed_by = 'auto'"),
         'rejected' => array('label' => 'Rejected', 'where' => "status = 'rejected'"),
+        // Items folded into another card (inc/fact-fold.php): the same fact from another telling or source; "Back to review" undoes the fold.
+        'merged'   => array('label' => 'Folded together', 'where' => "status = 'merged'"),
         // Items the latest build no longer makes (kop_wbf_sync()); "Back to review" keeps one waiting.
         'gone'     => array('label' => 'No longer proposed', 'where' => "status = 'gone'"),
     );

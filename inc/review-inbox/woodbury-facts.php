@@ -101,7 +101,7 @@ function kop_rinbox_wbf_list(array $q) {
     $where = kop_rinbox_wbf_where($q['view'], $q);
     $table = kop_wbf_table();
     $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE {$where}");
-    $order = in_array($q['view'], array('applied', 'auto', 'rejected'), true)
+    $order = in_array($q['view'], array('applied', 'auto', 'rejected', 'merged'), true)
         ? 'reviewed_at DESC, id DESC'
         : "facility_id = 0, program, facility_id, CASE grp WHEN 'staff' THEN 0 WHEN 'incident' THEN 1 WHEN 'history' THEN 2 WHEN 'details' THEN 3 ELSE 4 END, issue_date, label, id";
     $rows = (array) $wpdb->get_results("SELECT * FROM {$table} WHERE {$where} ORDER BY {$order} LIMIT " . (int) $q['limit'] . ' OFFSET ' . (int) $q['offset'], ARRAY_A);
@@ -231,6 +231,18 @@ function kop_rinbox_wbf_item(array $r) {
         $why = json_decode((string) $r['applied'], true);
         if (!empty($why['reason'])) $lines[] = 'Skipped: ' . $why['reason'];
     }
+    // The card other tellings were folded into lists them (inc/fact-fold.php); each has Undo under "Folded together".
+    if (!empty($extra['folded']) && is_array($extra['folded'])) {
+        $lines[] = 'Folded together: ' . count($extra['folded']) . ' other ' . (count($extra['folded']) === 1 ? 'telling of this fact is' : 'tellings of this fact are')
+            . ' on this card (their sources are listed above). Undo each on the "Folded together" tab.';
+        foreach (array_slice($extra['folded'], 0, 12) as $fo) {
+            $lines[] = '  - ' . (string) ($fo['text'] ?? '');
+        }
+    }
+    if ($r['status'] === 'merged') {
+        $why = json_decode((string) $r['applied'], true);
+        $lines[] = !empty($why['reason']) ? (string) $why['reason'] : 'Folded into another card.';
+    }
     if ($r['status'] === 'held') {
         $lines[] = 'Approved and held for the write-up of ' . kop_rinbox_wbf_name((int) $r['applied_fid'])
             . ': only admins see it until that write-up is approved (Review inbox > Write-ups to approve).';
@@ -339,12 +351,15 @@ function kop_rinbox_wbf_item(array $r) {
     } elseif ($r['status'] === 'held') {
         $actions[] = array('id' => 'undo', 'label' => 'Undo', 'style' => 'undo',
             'help' => 'Takes it out of the record\'s write-up and puts it back in the waiting list. The record was never changed.');
+    } elseif ($r['status'] === 'merged') {
+        $actions[] = array('id' => 'undo', 'label' => 'Undo the fold', 'style' => 'undo',
+            'help' => 'Takes its sources off the card it was folded into and puts it back in the waiting list; it is not folded again.');
     } else {
         $actions[] = array('id' => 'undo', 'label' => 'Back to review', 'style' => 'undo',
             'help' => 'Nothing on the site changes; the item waits for review again.');
     }
 
-    $statuses = array('pending' => 'Waiting', 'applied' => $r['reviewed_by'] === 'auto' ? 'Added automatically' : 'Added',
+    $statuses = array('pending' => 'Waiting', 'merged' => 'Folded together', 'applied' => $r['reviewed_by'] === 'auto' ? 'Added automatically' : 'Added',
         'held' => $r['reviewed_by'] === 'auto' ? 'Approved automatically, held for the write-up' : 'Held for the write-up',
         'rejected' => 'Rejected', 'gone' => 'No longer proposed');
     return array(
@@ -501,8 +516,13 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
                 $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'extra' => wp_json_encode($extra)), array('pkey' => $r['pkey']));
                 return array('message' => 'Waiting for review again. The next Woodbury build will not take it off the list.');
             }
-            if (!in_array($r['status'], array('applied', 'rejected', 'held'), true)) throw new RuntimeException('Nothing to undo.');
+            if (!in_array($r['status'], array('applied', 'rejected', 'held', 'merged'), true)) throw new RuntimeException('Nothing to undo.');
             $was = $r['status'];
+            if ($was === 'merged') {
+                kop_fold_undo_member('wbf', $r, $user);
+                kop_rinbox_flush_counts();
+                return array('message' => 'Undone: it is waiting for review again, its sources are off the card it was folded into, and it will not be folded again.');
+            }
             if ($was === 'rejected') {
                 // The items rejected with this one come back with it.
                 foreach ((array) $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'rejected' AND applied LIKE %s",

@@ -27,6 +27,8 @@
  *     page. News links are never added by themselves (owner, 2026-10-20: the
  *     8,561 sent in approved on 2026-10-14..16 had no summary and wrong dates;
  *     api/undo-auto-drive-news.php took them back); a person adds them.
+ *   - Waiting news facts (Review inbox > Facts from news) whose subject is exactly one record's name: linked to it and
+ *     filed on Woodbury Facts (kop_nf_link_waiting(), inc/fact-fold.php; Undo unlinks).
  * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()).
  *
  * Each item is done once: {prefix}kop_auto_connect remembers it, so one a
@@ -753,6 +755,17 @@ function kop_autoconn_submissions($deadline) {
     return $n;
 }
 
+/* ---- Waiting news facts ------------------------------------------------------ */
+
+/** A waiting news fact whose subject is exactly one record's name is linked to it and filed on Woodbury Facts (kop_nf_link_waiting(), inc/fact-fold.php). */
+function kop_autoconn_news_facts($deadline) {
+    if (!function_exists('kop_nf_link_waiting') || !function_exists('kop_nf_pdo') || !kop_nf_pdo()) return 0;
+    $pdo = kop_nf_pdo();
+    kop_nf_ensure_tables($pdo);
+    $r = kop_nf_link_waiting($pdo, true, max(5, (int) ($deadline - microtime(true))));
+    return (int) $r['linked'];
+}
+
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -766,7 +779,8 @@ function kop_autoconn_run($seconds = 120) {
         foreach (array('submissions' => 'kop_autoconn_submissions', 'wiki-links' => 'kop_autoconn_wiki','state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
                 'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury',
-                'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies') as $source => $fn) {
+                'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies',
+                'news-facts' => 'kop_autoconn_news_facts') as $source => $fn) {
             if (microtime(true) > $deadline) break;
             try {
                 $done[$source] = $fn($deadline);

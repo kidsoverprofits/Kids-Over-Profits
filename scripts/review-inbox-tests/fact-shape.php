@@ -1,7 +1,7 @@
 <?php
 /**
  * Checks for inc/fact-shape.php (docs/claude/fact-shape.md section 10), on made-up fixtures: no mirror rows are shaped.
- * kop_rinbox_test_woodbury_facts() calls kop_test_fact_shape(); the end-to-end fold stays in scripts/test-review-on-file.php.
+ * kop_rinbox_test_woodbury_facts() calls kop_test_fact_shape(); the end-to-end fold is checked in scripts/review-inbox-tests/fact-fold.php (it needs the scratch copy's $wpdb writes, which test-review-on-file.php does not have).
  */
 
 require_once dirname(__DIR__, 2) . '/inc/woodbury-facts.php';

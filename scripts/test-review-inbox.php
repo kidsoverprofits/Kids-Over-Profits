@@ -463,5 +463,15 @@ if ($only === '' || $only === 'ya-moved') {
     }
 }
 
+// The live fold engine alone (--source=fact-fold; the full run reaches it through the woodbury-facts checks).
+if ($only === 'fact-fold') {
+    echo "-- Fact fold (inc/fact-fold.php) --\n";
+    try {
+        kop_test_fact_fold($check);
+    } catch (Throwable $e) {
+        $check('fact-fold: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

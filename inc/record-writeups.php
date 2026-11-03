@@ -283,9 +283,14 @@ function kop_wu_fact(array $h) {
             if ($shown !== '' && stripos($what, $shown) === false) $what .= ': ' . $shown;
         }
         $where = function_exists('kop_wbf_where_it_goes') ? kop_wbf_where_it_goes($r) : $r['path'];
+        // Other tellings folded into this card (inc/fact-fold.php) are sources of the same fact: each is cited too.
+        $also = array();
+        foreach (array_slice($ev, 1, 8) as $e) {
+            if (is_array($e) && !empty($e['url']) && !empty($e['folded_from'])) $also[] = array('cite' => function_exists('kop_wbf_ev_label') ? (string) (!empty($e['cite']) ? $e['cite'] : kop_wbf_ev_label($e)) : '', 'url' => (string) $e['url']);
+        }
         return array('key' => kop_wu_item_key($h), 'label' => (string) $r['label'], 'where' => $where, 'what' => $what,
             'quote' => trim((string) ($first['quote'] ?? '')), 'cite' => function_exists('kop_wbf_ev_label') && $first ? kop_wbf_ev_label($first) : 'Woodbury Reports',
-            'url' => (string) ($first['url'] ?? ''), 'when' => (string) $r['issue_date']);
+            'url' => (string) ($first['url'] ?? ''), 'when' => (string) $r['issue_date'], 'also' => $also);
     }
     $v = json_decode((string) $r['value'], true) ?: array();
     $what = (string) $r['label'];
@@ -295,7 +300,9 @@ function kop_wu_fact(array $h) {
         $what = trim((string) $v['summary']) . (!empty($v['year']) ? ' (' . $v['year'] . ')' : '');
     }
     $kinds = array('staff' => 'Staff', 'incident' => 'Critical incidents', 'lead' => 'Lead kept on the record');
-    return array('key' => kop_wu_item_key($h), 'label' => (string) $r['label'], 'where' => $kinds[$r['kind']] ?? $r['kind'],
+    $also = array();
+    foreach (array_slice(function_exists('kop_fornits_fold_cites') ? kop_fornits_fold_cites($r) : array(), 0, 8) as $c) $also[] = array('cite' => $c['cite'], 'url' => $c['url']);
+    return array('key' => kop_wu_item_key($h), 'label' => (string) $r['label'], 'where' => $kinds[$r['kind']] ?? $r['kind'], 'also' => $also,
         'what' => $what, 'quote' => trim((string) $r['quote']),
         'cite' => 'Fornits forum, post by ' . ($r['author'] !== '' ? $r['author'] : 'a member') . (function_exists('kop_fornits_month') && kop_fornits_month($r['post_date']) ? ', ' . kop_fornits_month($r['post_date']) : ''),
         'url' => function_exists('kop_fornits_post_url') ? kop_fornits_post_url($r['topic_id'], $r['post_n']) : '', 'when' => substr((string) $r['post_date'], 0, 7));
@@ -567,8 +574,16 @@ function kop_wu_prompt($fid, array $page = null, array $facts = null) {
     foreach ($facts as $f) {
         $n++;
         $urls[$n] = (string) $f['url'];
-        $new[] = '[' . $n . '] ' . $f['where'] . ': ' . $f['what'] . ($f['quote'] !== '' ? ' (the source\'s words: "' . mb_substr($f['quote'], 0, 600) . '")' : '')
+        $line = '[' . $n . '] ' . $f['where'] . ': ' . $f['what'] . ($f['quote'] !== '' ? ' (the source\'s words: "' . mb_substr($f['quote'], 0, 600) . '")' : '')
             . ' (' . $f['cite'] . ')';
+        // The same fact told by other sources (folded together): each gets its own number, and a sentence on the fact cites them all.
+        $extra_n = array();
+        foreach ((array) ($f['also'] ?? array()) as $a) {
+            $n++;
+            $urls[$n] = (string) $a['url'];
+            $extra_n[] = '[' . $n . '] (' . $a['cite'] . ')';
+        }
+        $new[] = $line . ($extra_n ? ' Also told by: ' . implode(', ', $extra_n) . '.' : '');
     }
     $record = array();
     foreach (kop_wu_record_facts($page) as $f) {
@@ -589,7 +604,7 @@ function kop_wu_prompt($fid, array $page = null, array $facts = null) {
         . "- Restraint is restraint (held down, zipped into a bag, strapped): never soften the word.\n"
         . "- Roles: \"a therapist\" for roles many hold, \"the director\" for one-holder titles. No year on a role unless it is a start or an end. No \"Former\" in a role; staff of a closed program in the past tense.\n"
         . "- Never write out a source's name or issue (\"Woodbury Reports, May 2007, p. 20\"); the citation numbers carry the sources.\n"
-        . "- After each sentence put the numbers of the facts it rests on, in brackets: [3] or [3][7]. Every sentence needs at least one.\n"
+        . "- After each sentence put the numbers of the facts it rests on, in brackets: [3] or [3][7]. Every sentence needs at least one. A fact that says \"Also told by\" rests on every number it lists: cite them all.\n"
         . "- 1 to 5 short paragraphs; fewer when the facts are few. Leave out what only repeats the page's fact box (ages, size, type) unless it matters to the story.\n\n"
         . ($now ? "What the About section says now:\n" . implode("\n", $now) . "\n\n" : "The page has no About section yet.\n\n")
         . "New facts approved for this page:\n" . ($new ? implode("\n", $new) : 'None: the record itself changed.') . "\n\n"
