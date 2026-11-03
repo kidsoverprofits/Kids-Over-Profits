@@ -188,7 +188,7 @@ sizes.
 
 | Kind on the row | Count | Kind | How the fields are filled |
 | --- | --- | --- | --- |
-| link `{url, board}` | 7,013 | link (forum) | `keys.url` = `kop_normalize_urls()`. The Fornits on-file rule uses `kop_gdl_url_key()` instead; the shape uses one key (open question 6) |
+| link `{url, board}` | 7,013 | link (forum) | `keys.url` = `kop_normalize_urls()`; the Fornits on-file rule uses it too since 2026-11-03 (`kop_fornits_url_key()`) |
 | staff `{person, role, years}` | 1,882 | staff | `keys.person`; `type` = role; `date` = the first year of `years`; `told` = the post month |
 | incident `{category, year, summary}` | 1,365 (abuse 568, investigation 122, other 109, death 107, restraint 105, sexual_abuse 74, neglect 73, lawsuit 73, injury 60, runaway 44, seclusion 30) | incident | `type` = category (`other` gives `incident`); `date` = year (599) or `''` (766); `told` = the post date |
 | testimony `{who, years, summary}` | 1,352 | testimony | never grouped: each post is one person's account; only its own id on `survivorTestimony` clears it, as now |
@@ -296,8 +296,16 @@ join, by the rules or by the AI:
 - **numbers:** `keys.nums` differ when both have numbers (the script's current rule, which keeps the 44 pairs
   `kop_wbf_text_same()` wrongly calls the same apart).
 - **ages and head counts:** the `kop_dd_same_event()` checks, applied to every kind.
-- **places:** both name campuses and none is shared (`kop_dd_campuses()`). Two `place` facts with different street
-  keys, or different cities, also never join.
+- **places:** both name places and `kop_dd_places_clash()` says they differ (2026-11-03). `kop_dd_campuses($line, $program)`
+  reads each place name whole ("the Mount Hope campus" is `mount hope`, not `hope`; "Provo Canyon School's Springville
+  campus" is `springville`) from "X campus/facility/location/site/...", and, given the record's own name, a city put against
+  it: `The Cleveland Seed closed` is `cleveland`, `The Seed of St. Petersburg` is `st petersburg`, `The Seed closed` names none
+  (a state is no branch). `kop_fact_shape()` passes `ctx.record_name` (`kop_fact_add_place()`), so the waiting items, the
+  on-hand lines, the rules, the on-hand check and `kop_fold_ai_apart()` all see the same places. A name that holds all the
+  words of the other ("Mount Hope" / "Hope") is one place; a telling with no place meets any. Two `place` facts with different
+  street keys, or different cities, also never join. `kop_wbf_text_same()` (hourly clear, `kop_wbf_list_covers()`) is false for
+  different full dates (`kop_wbf_full_dates()`: ISO or "July 6, 2026") or different places, and `kop_wbf_list_covers()` skips an
+  incident line with another leading full day.
 - **people:** `kop_dd_same_person()` is false, or the two names have different suffixes (Jr / III vs none).
 - **single values:** closure end year, opening year, ages, gender and a dated size that differ are not one fact. They
   stay apart in the group listing as `differs`, and a waiting fact that differs from an on-hand one is a conflict
@@ -413,6 +421,28 @@ linking gap, so the same rule also runs inside `kop_nf_parse_reply()` against th
    Woodbury row, or deletes the row when this link created it and it is still pending, then resets `facility_id`,
    `route = 'waiting'`, `wbf_pkey = ''` and `status = 'pending'`. This is a new write path: add it to
    `docs/DATA-FLOWS.md` (news facts store) in the same commit.
+
+### 7.5 The open linking passes (built 2026-11-03, owner approved)
+
+Each is a pass of `kop_autoconn_run()` with `kop_autoconn_mark()` / `kop_autoconn_log()` and Undo; `scripts/fact-links-measure.php` counts
+all of them on the mirror, read only. Tests: `scripts/review-inbox-tests/fact-links.php` (`--source=fact-links`).
+
+- **Woodbury Reports pages with no record** (`kop_autoconn_woodbury_nomatch()`): `unmatched` pages whose header is exactly one record's name
+  (`kop_autoconn_exact_record()` 'exact'), the page's state, when it has one, the record's. Filed with `kop_wb_file_many()`. Mirror: 10 pages on
+  9 names (Gatehouse Academy, Northwest Passage System, Pasadena Villa, Independence Center, Step Beyond, Ponca Pines Academy, Pine River
+  Institute, Red Hill Academy x2, Sycamore Canyon Academy); an 11th, Expedition Therapy (page UT, record #100253 in AK), is refused by the state rule.
+- **Company link** (`kop_nf_link_companies()`): subject_kind `company` (or a `facility` subject that is no program's name) that is exactly one
+  `kop_operators` name key (name, current name, other names). No place on a company takes a news fact as such, so the fact becomes a cited note
+  line on the company (`kop_wbc_add_notes('company')`, as `kop_wbf_file_existing()`), route `company`, status `filed`. Mirror: 55 of 238 checked
+  (Wayne Halfway House about 35, Newport Healthcare 3, Altior Healthcare 5, Devereux Advanced Behavioral Health 10, EOSIS 2 ...).
+- **Person pass** (`kop_nf_link_people()`): the person (`subject_name`) is a staff entry (`kop_dd_same_person()`) of exactly one record, AND that
+  record is linked to the article or the fact's words name it exactly, AND the record's state is one the article is about. Then `kop_nf_link_one()`
+  (the same writes and Undo as `kop_nf_link_waiting()`). Mirror: 2 of 241 (Bryan Clemensen, Agape Boarding School, #11361): the article-or-name
+  condition is strict, nearly all person facts wait. Agencies never link.
+- **State rule** (`kop_autoconn_exact_record($pdo, $name, $prefer, $index, $states)`, fourth outcome `'state'`): `kop_nf_record_for()` passes
+  `kop_nf_article_states()` (the article's location, its linked records' states, states and provinces named in the fact). An exact record in none
+  of them is refused. Nothing is refused when no state is known. `kop_autoconn_distinctive()` is unchanged. On the mirror no waiting fact is
+  turned away now (the engine linked the 20 on 2026-11-03).
 
 ## 8. PHP: `inc/fact-shape.php`
 
@@ -547,11 +577,16 @@ as the plan says.
    tellings apart. Keeper order (`kop_fold_pick()`): a Woodbury or Fornits item before a news fact when the group has one;
    then the strongest standing (found 2, unstated 1, alleged 0, `kop_fact_standing_rank()`); then Woodbury before Fornits;
    then the longest wording. A found telling that is only a waiting news fact cannot be kept (no place for citations): the
-   best Woodbury or Fornits telling is, even when it says alleged.
+   best Woodbury or Fornits telling is, even when it says alleged. **Built 2026-11-03** (`kop_fold_found_news()`): that card
+   stays, the news fact folds into it, and the card takes the news fact's standing (`extra.standing = 'found'`, Fornits
+   `applied.found.standing`) and the line `Found: <news fact summary>` (`extra.found` / `applied.found` = {id, text, standing, prev}).
+   Its write-up and Add use the found wording: `kop_wbf_clear_alleged()` takes "alleged" / "allegedly" out of the line (not out
+   of the citation); the AI never writes wording. Undo of the news fact takes the line off and gives the old standing back.
 5. **Owner and operator.** Treat "Owner: X" and "Operator: X" for the same company as one fact (fold by rule), or
    always ask (this spec sends them to the AI step)?
-6. **One URL key.** Fornits' on-file rule uses `kop_gdl_url_key()`; `fact-dedupe.php` and the news links use
-   `kop_normalize_urls()`. Use `kop_normalize_urls()` everywhere for links?
+6. **One URL key. Built 2026-11-03.** `kop_normalize_urls()` is the key in the shape, the fold and `inc/fornits.php`
+   (`kop_fornits_url_key()`, compared in memory only; stored links and keys are unchanged). `kop_gdl_url_key()` stays in
+   `inc/drive-docs.php` for the Drive links (not part of the fold).
 7. **No-record items that now match a record. Answered 2026-11-03: move them onto it automatically.** The hourly
    auto-connect (`kop_autoconn_woodbury_facts()`, source `woodbury-facts-link`) links a pending no-record Woodbury Facts item
    whose program is exactly one record's name (`kop_autoconn_exact_record()`: full key, distinctive, one holder; ambiguous,

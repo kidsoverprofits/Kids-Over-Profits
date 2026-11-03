@@ -69,18 +69,27 @@ if (!function_exists('kop_dd_person_parts')) {
     }
 }
 
+if (!function_exists('kop_dd_suffix')) {
+    /** The generation suffix of a name ("jr", "sr", "ii", "iii", "iv"), lower case, or ''. */
+    function kop_dd_suffix($name) {
+        return preg_match('/(?:^|[\s,])(jr|sr|ii|iii|iv)\b\.?/i', (string) $name, $m) ? strtolower($m[1]) : '';
+    }
+}
+
 if (!function_exists('kop_dd_same_person')) {
     /**
      * Whether two names on one record are one person. Same first name (nicknames folded) and the same last name,
      * or a surname the other name gives ("Sturges-Ullrich" / "Sturges", "Agundez (Smith)" / "Smith"), or a last
      * name one letter off in 5+ letters ("Clark" / "Clarke", "McLain" / "McClain"). Two different middle initials
-     * are two people (Robert W. and Robert B. Lichfield, father and son); one missing is no difference. An entry
+     * (or generation suffixes, "III" / "Jr.") are two people (Robert W. and Robert B. Lichfield, father and son); one missing is no difference. An entry
      * naming two people ("Mark and Jan Gregston") is never folded.
      */
     function kop_dd_same_person($a, $b) {
         $x = kop_dd_person_parts($a);
         $y = kop_dd_person_parts($b);
         if (!$x || !$y || $x['first'] !== $y['first']) return false;
+        // "John Smith III" and "John Smith Jr." are not "John Smith" (father and son share a name): never one person.
+        if (kop_dd_suffix($a) !== kop_dd_suffix($b)) return false;
         // "Mark and Jan Gregston" is two people in one entry, never one of them.
         if (preg_match('/\s(?:and|&)\s/i', (string) $a) || preg_match('/\s(?:and|&)\s/i', (string) $b)) return false;
         $xm = $x['middles'] ? $x['middles'][0][0] : '';
@@ -341,13 +350,101 @@ if (!function_exists('kop_dd_event_parts')) {
     }
 }
 
+if (!function_exists('kop_dd_state_words')) {
+    /** Lower-case state and country names as array keys (a state is not a branch's city). */
+    function kop_dd_state_words() {
+        static $s = null;
+        if ($s === null) {
+            $s = array_flip(array('alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho',
+                'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi',
+                'missouri', 'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina', 'north dakota', 'ohio',
+                'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina', 'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia',
+                'washington', 'west virginia', 'wisconsin', 'wyoming', 'america', 'canada', 'mexico', 'united states'));
+        }
+        return $s;
+    }
+}
+
+if (!function_exists('kop_dd_place_clean')) {
+    /**
+     * The place a capitalized run names ("The Mount Hope", "School's Springville"): leading filler off, only what follows
+     * a school/ranch word kept ("Provo Canyon School's Springville" -> "springville"). '' when nothing is left; a lone filler
+     * word ("the new campus") is no place, while "New Hope" and "Mount Hope" stay whole.
+     */
+    function kop_dd_place_clean(array $words) {
+        $words = array_values(array_filter(array_map(function ($w) { return strtolower(preg_replace('/\'s$/i', '', (string) $w)); }, $words), 'strlen'));
+        $inst = array('school', 'academy', 'ranch', 'program', 'center', 'centre', 'treatment', 'residential');
+        for ($i = count($words) - 1; $i >= 0; $i--) {
+            if (in_array($words[$i], $inst, true)) { $words = array_slice($words, $i + 1); break; }
+        }
+        $filler = array('the', 'this', 'that', 'its', 'a', 'an', 'at', 'in', 'of', 'and', 'by', 'after', 'state', 'county', 'mr', 'mrs', 'ms', 'dr', 'gov',
+            'governor', 'judge', 'sen', 'rep', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december');
+        while ($words && in_array($words[0], $filler, true)) array_shift($words);
+        if (count($words) === 1 && in_array($words[0], array('main', 'new', 'old', 'former', 'county'), true)) return '';
+        return $words ? implode(' ', $words) : '';
+    }
+}
+
 if (!function_exists('kop_dd_campuses')) {
-    /** The places a line gives as a campus or site: "the Springville campus" -> ["springville"]. A line that names none gives []. */
-    function kop_dd_campuses($line) {
+    /**
+     * The places a line gives, each name whole and lower case: "the Springville campus" -> ["springville"], "the Mount Hope
+     * campus" -> ["mount hope"] (one place, not "hope"). Read from "X campus/facility/location/site/...". With $program (the
+     * record's own name) it also reads a city placed against the program's name, which is how one chain tells its branches:
+     * "The Cleveland Seed closed" -> ["cleveland"], "The Seed of St. Petersburg" -> ["st petersburg"], "The Seed closed" -> [].
+     * A state is no branch. A line that names none gives []. Two lists clash only through kop_dd_places_clash().
+     */
+    function kop_dd_campuses($line, $program = '') {
         $s = preg_replace('/\s*\((?:[^()]|\([^()]*\))*\)\s*$/', '', (string) $line);
-        preg_match_all('/\b([A-Z][a-z]{2,})(?:\'s)?\s+(?:campus|facility|location|site|branch|unit|center|centre|home)\b/', $s, $m);
-        $skip = array('the', 'this', 'that', 'its', 'school', 'academy', 'ranch', 'program', 'treatment', 'residential', 'main', 'new', 'old', 'former');
-        return array_values(array_unique(array_diff(array_map('strtolower', $m[1]), $skip)));
+        $out = array();
+        if (preg_match_all('/\b((?:[A-Z][a-z]{2,}(?:\'s)?\s+){0,3}[A-Z][a-z]{2,})(?:\'s)?\s+(?:campus|facility|location|site|branch|unit|center|centre|home)\b/', $s, $m)) {
+            foreach ($m[1] as $run) {
+                $p = kop_dd_place_clean(preg_split('/\s+/', trim($run)));
+                if ($p !== '') $out[] = $p;
+            }
+        }
+        $prog = strtolower(preg_replace('/\([^)]*\)/', ' ', (string) $program));
+        $prog = preg_replace('/\b(?:inc|llc|corp|corporation|co|company|ltd|the)\b\.?/', ' ', $prog);
+        $pw = preg_split('/[^a-z0-9]+/', $prog, -1, PREG_SPLIT_NO_EMPTY);
+        if ($pw) {
+            $re = '/\b' . implode('[\s-]+', array_map(function ($w) { return preg_quote($w, '/'); }, $pw)) . '\b/i';
+            $states = kop_dd_state_words();
+            if (preg_match_all($re, $s, $pm, PREG_OFFSET_CAPTURE)) {
+                foreach ($pm[0] as $hit) {
+                    $before = substr($s, 0, $hit[1]);
+                    $after = substr($s, $hit[1] + strlen($hit[0]));
+                    if (preg_match('/((?:\b[A-Z][a-z]{2,}\s+){1,2})$/', $before, $b)) {
+                        $p = kop_dd_place_clean(preg_split('/\s+/', trim($b[1])));
+                        if ($p !== '' && !isset($states[$p])) $out[] = $p;
+                    }
+                    if (preg_match('/^\s*,?\s*(?:of|in|at|near)\s+((?:(?:St|Ft|Mt)\.?\s+|Saint\s+|Fort\s+|Mount\s+|Lake\s+|Los\s+|San\s+|Santa\s+|Las\s+|East\s+|West\s+|North\s+|South\s+|New\s+)?[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?)/', $after, $a)) {
+                        $words = preg_split('/[^A-Za-z]+/', $a[1], -1, PREG_SPLIT_NO_EMPTY);
+                        while ($words && in_array(strtolower(end($words)), array('inc', 'llc', 'academy', 'school', 'ministries', 'center', 'services', 'county'), true)) array_pop($words);
+                        $p = kop_dd_place_clean($words);
+                        if ($p !== '' && !isset($states[$p])) $out[] = $p;
+                    }
+                }
+            }
+        }
+        return array_values(array_unique($out));
+    }
+}
+
+if (!function_exists('kop_dd_places_clash')) {
+    /**
+     * Whether two lists of places name different places: both give some, and no name of one is the other or holds all its
+     * words ("Mount Hope" and "Hope" are one place). A telling that names no place never clashes.
+     */
+    function kop_dd_places_clash(array $a, array $b) {
+        if (!$a || !$b) return false;
+        foreach ($a as $x) {
+            foreach ($b as $y) {
+                if ($x === $y) return false;
+                $xw = preg_split('/\s+/', (string) $x);
+                $yw = preg_split('/\s+/', (string) $y);
+                if (!array_diff($xw, $yw) || !array_diff($yw, $xw)) return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -357,7 +454,7 @@ if (!function_exists('kop_dd_same_event')) {
      * month told in mostly the same words (half of the shorter telling's words), or, when one line gives only
      * the year, three quarters of them. A death a year apart, or two deaths in one month told differently, stay two.
      */
-    function kop_dd_same_event($a, $b) {
+    function kop_dd_same_event($a, $b, $program = '') {
         $x = kop_dd_event_parts($a);
         $y = kop_dd_event_parts($b);
         if ($x['date'] === '' || $y['date'] === '' || $x['kind'] === '' || $x['kind'] !== $y['kind']) return false;
@@ -377,9 +474,7 @@ if (!function_exists('kop_dd_same_event')) {
         $pb = $people($b);
         if ($pa && $pb && !array_intersect($pa, $pb)) return false;
         // ...or name different campuses ("the Springville campus", "the Provo campus": two revocations in one month).
-        $ca = kop_dd_campuses($a);
-        $cb = kop_dd_campuses($b);
-        if ($ca && $cb && !array_intersect($ca, $cb)) return false;
+        if (kop_dd_places_clash(kop_dd_campuses($a, $program), kop_dd_campuses($b, $program))) return false;
         if (strlen($x['date']) === 10 && $x['date'] === $y['date']) return true;
         if (substr($x['date'], 0, 4) !== substr($y['date'], 0, 4)) return false;
         $small = min(count($x['words']), count($y['words']));

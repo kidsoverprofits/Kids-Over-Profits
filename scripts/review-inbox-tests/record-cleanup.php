@@ -54,6 +54,24 @@ function kop_rinbox_test_record_cleanup(array $src, array $item, callable $check
         && kop_dd_same_event($nidorf_a, $nidorf_b),
         json_encode(array(kop_dd_same_event($nidorf_a, $nidorf_b))));
 
+    // A place is a whole name ("Mount Hope"), and a city put against the program's name is a place too ("The Cleveland Seed").
+    $check('record-cleanup: "Mount Hope campus" is one place, not "Hope"; a city before or after the program name is read with the program name',
+        kop_dd_campuses('2026: The Mount Hope campus closed') === array('mount hope')
+        && kop_dd_campuses("Utah revoked the license for Provo Canyon School's Springville campus.") === array('springville')
+        && kop_dd_campuses('The Cleveland Seed closed', 'The Seed') === array('cleveland')
+        && kop_dd_campuses('The Seed of St. Petersburg closed', 'The Seed') === array('st petersburg')
+        && kop_dd_campuses('The Seed closed', 'The Seed') === array()
+        && kop_dd_campuses('Teen Challenge of Florida closed', 'Teen Challenge') === array()
+        && kop_dd_places_clash(array('mount hope'), array('mount zion')) && kop_dd_places_clash(array('cleveland'), array('st petersburg'))
+        && !kop_dd_places_clash(array('mount hope'), array('hope')) && !kop_dd_places_clash(array('cleveland'), array()),
+        json_encode(array(kop_dd_campuses('2026: The Mount Hope campus closed'), kop_dd_campuses('The Seed of St. Petersburg closed', 'The Seed'))));
+    $hope_a = '2026-03: Abuse: Staff hit residents at the Mount Hope campus of the school in March 2026. (Tribune)';
+    $hope_b = '2026-03: Abuse: Staff hit residents at the Mount Zion campus of the school in March 2026. (Tribune)';
+    $check('record-cleanup: two named multi-word places are two events; a telling with no place meets either',
+        !kop_dd_same_event($hope_a, $hope_b) && kop_dd_same_event($hope_a, str_replace('the Mount Hope campus of the school', 'the school', $hope_a))
+        && !kop_dd_same_event('2026-03: Abuse: Staff hit residents at The Cleveland Seed in March 2026. (Tribune)', '2026-03: Abuse: Staff hit residents at The Seed of St. Petersburg in March 2026. (Tribune)', 'The Seed')
+        && kop_dd_same_event('2026-03: Abuse: Staff hit residents at The Cleveland Seed in March 2026. (Tribune)', '2026-03: Abuse: Staff hit residents at The Seed in March 2026. (Tribune)', 'The Seed'));
+
     $check('record-cleanup: "X (AYA)", "X (2006-2015)", "X, LLC", "X of Y" / "X Y" are the same name',
         kop_dd_name_key('Alternative Youth Adventures (AYA)') === kop_dd_name_key('Alternative Youth Adventures')
         && kop_dd_name_key('Red River Academy (2006-2015)') === kop_dd_name_key('Red River Academy')

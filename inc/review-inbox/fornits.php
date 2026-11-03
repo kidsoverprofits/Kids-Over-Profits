@@ -248,6 +248,9 @@ function kop_rinbox_fornits_item(array $r) {
             $lines[] = '  - ' . (string) ($fo['text'] ?? '') . ' (' . implode('; ', array_map(function ($c) { return (string) ($c['cite'] ?? ''); }, (array) ($fo['cites'] ?? array()))) . ')';
         }
     }
+    if (!empty($done['found']['text'])) {
+        $lines[] = 'Found: ' . (string) $done['found']['text'] . ' (from a news fact; the write-up leaves out the "alleged").';
+    }
     if (($done['via'] ?? '') === 'record' && !empty($done['record']['message'])) $lines[] = (string) $done['record']['message'];
     if (($done['via'] ?? '') === 'company_staff') $lines[] = 'Went to: the key staff of company #' . (int) ($done['operator_id'] ?? 0) . '.';
     if (($done['filed'] ?? '') === 'young_adult') $lines[] = 'Went to: the young adult program "' . (string) ($done['name'] ?? '') . '".';
@@ -633,9 +636,9 @@ function kop_rinbox_fornits_on_file() {
             };
             $why = '';
             if ($r['kind'] === 'link') {
-                $key = kop_gdl_url_key((string) ($v['url'] ?? ''));
+                $key = kop_fornits_url_key((string) ($v['url'] ?? ''));
                 foreach ((array) ($doc['resourceLinks'] ?? array()) as $l) {
-                    if ($key !== '' && is_array($l) && kop_gdl_url_key($l['url'] ?? '') === $key) { $why = 'the thread is in its Materials and links'; break; }
+                    if ($key !== '' && is_array($l) && kop_fornits_url_key($l['url'] ?? '') === $key) { $why = 'the thread is in its Materials and links'; break; }
                 }
             } elseif ($r['kind'] === 'staff') {
                 $key = kop_wbf_person_key($v['person'] ?? '');

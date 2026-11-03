@@ -78,6 +78,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # "KOP #10608") and exact one-record names in the title and notes (one word 8+ letters or several 9+, not generic or everyday words,
 # kop_autoconn_text_distinctive()). Websites sent in pre-pick it on the Approve card; news and lawsuits sent with no facility get it in
 # facilities_mentioned at insert (inc/source-submissions.php) and, for ones already waiting, in the hourly 'submissions' pass. The item still waits
+# Item 20 linking passes (2026-11-03, kop_autoconn_run() sources woodbury-nomatch, news-facts-companies, news-facts-people): Woodbury Reports pages with no
+# record whose header is exactly one record's name in the page's state; waiting news facts about a company that is exactly one operator (filed as a
+# cited note on the company); about a person on one record's staff when the article is linked to it or the fact names it. Agencies never; a record in
+# another state than the article refuses every exact-name link (kop_autoconn_exact_record() $states, kop_nf_article_states()). Docs: docs/claude/fact-shape.md 7.5, docs/DATA-FLOWS.md.
+php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=2G scripts/test-review-inbox.php --source=fact-links < /dev/null   # fixtures: one holder, two, Undo, agency, state
+php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=2G scripts/fact-links-measure.php [--examples=5]   # read only: what each pass would link on tmp/prod.sqlite
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php [--list]   # every pick is exact, wiki link + log + undo, on a scratch copy
 # Pending items already in our records leave the waiting list: news/lawsuits/bills (inc/review-inbox/_on-file.php: same link on a kept
 # record or in a facility's resourceLinks, same headline+outlet, case number, bill, or a state inspection report we hold:

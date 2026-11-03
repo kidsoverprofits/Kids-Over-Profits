@@ -140,6 +140,11 @@ function kop_rinbox_nf_act($key, $action, array $params) {
     kop_rinbox_flush_counts();
     $to = array('keep' => 'kept', 'drop' => 'dropped', 'undo' => 'pending');
     if (!isset($to[$action])) throw new RuntimeException('Unknown action.');
+    if ($action === 'undo' && function_exists('kop_nf_undo_link')) {
+        // Filed as a note on a company by the hourly pass (kop_nf_link_companies()): its own Undo.
+        $row = kop_nf_row($pdo, (int) $key);
+        if ($row && ($said = kop_nf_undo_link($pdo, $row, $who)) !== '') return array('message' => $said);
+    }
     if ($action === 'undo' && function_exists('kop_nf_undo_auto')) {
         // Linked to a record, folded or cleared by the hourly pass (inc/fact-fold.php): its own Undo.
         $row = kop_nf_row($pdo, (int) $key);

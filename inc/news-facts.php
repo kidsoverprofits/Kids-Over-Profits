@@ -245,7 +245,55 @@ function kop_nf_record_for(PDO $pdo, array $fact) {
     if ($kind === 'person' || $kind === 'agency') return array(0, $kind);
     $ids = array();
     foreach (kop_nf_linked($pdo, (int) ($fact['news_id'] ?? 0)) as $f) $ids[] = (int) $f['id'];
-    return kop_autoconn_exact_record($pdo, (string) ($fact['subject_name'] ?? ($fact['subject'] ?? '')), $ids);
+    $name = (string) ($fact['subject_name'] ?? ($fact['subject'] ?? ''));
+    $res = kop_autoconn_exact_record($pdo, $name, $ids);
+    if ($res[1] === 'exact' || $res[1] === 'article') {
+        // A record of another state than the article's is not the program it names (Manitoba's "Child and Family Services" is not New York's).
+        $states = kop_nf_article_states($pdo, (int) ($fact['news_id'] ?? 0), (string) ($fact['summary'] ?? '') . ' ' . (string) ($fact['quote'] ?? ''));
+        if ($states) $res = kop_autoconn_exact_record($pdo, $name, $ids, null, $states);
+    }
+    return $res;
+}
+
+/**
+ * The states (codes, upper case; a Canadian province as "CA-MB") an article is known to be about: its location, the states of the
+ * records it is linked to, and the states named in $text (the fact's own words). array() when none is known, so nothing is refused.
+ */
+function kop_nf_article_states(PDO $pdo, $news_id, $text = '') {
+    $names = function_exists('kop_wb_state_names') ? kop_wb_state_names() : array();
+    if (!$names) return array();
+    $names['DC'] = 'District of Columbia';
+    $places = array_flip(array_map('strtolower', $names));
+    foreach (array('AB' => 'Alberta', 'BC' => 'British Columbia', 'MB' => 'Manitoba', 'NB' => 'New Brunswick', 'NL' => 'Newfoundland and Labrador',
+            'NS' => 'Nova Scotia', 'ON' => 'Ontario', 'PE' => 'Prince Edward Island', 'QC' => 'Quebec', 'SK' => 'Saskatchewan') as $code => $n) {
+        $places[strtolower($n)] = 'CA-' . $code;
+    }
+    $found = function ($s) use ($places) {
+        $out = array();
+        $s = ' ' . strtolower(preg_replace('/[^A-Za-z]+/', ' ', (string) $s)) . ' ';
+        $list = array_keys($places);
+        usort($list, function ($a, $b) { return strlen($b) <=> strlen($a); });   // West Virginia before Virginia
+        foreach ($list as $n) {
+            if (strpos($s, ' ' . $n . ' ') !== false) {
+                $out[$places[$n]] = true;
+                $s = str_replace(' ' . $n . ' ', ' ', $s);
+            }
+        }
+        return array_keys($out);
+    };
+    $states = array();
+    try {
+        $stmt = $pdo->prepare('SELECT article_location FROM news_submissions WHERE id = ?');
+        $stmt->execute(array((int) $news_id));
+        foreach ($found((string) $stmt->fetchColumn()) as $c) $states[$c] = true;
+        foreach (kop_nf_linked($pdo, (int) $news_id) as $f) {
+            if (trim((string) $f['state']) !== '') $states[strtoupper(trim($f['state']))] = true;
+        }
+    } catch (Throwable $e) {
+        // A read that fails refuses nothing.
+    }
+    foreach ($found($text) as $c) $states[$c] = true;
+    return array_keys($states);
 }
 
 /* ---- Asking the AI --------------------------------------------------- */
@@ -758,4 +806,253 @@ function kop_nf_decide(PDO $pdo, $id, $status, $who) {
         ->execute(array($status, $status === 'pending' && !$keep ? null : $who, (int) $id));
     return $status === 'kept' ? 'Kept: it goes onto the record when that kind of record gets its Add.'
         : ($status === 'dropped' ? 'Dropped.' : 'Back with the waiting facts.');
+}
+
+/* ---- Company and person links (docs/claude/fact-shape.md 7.5) --------- */
+
+/** Waiting facts with no record and no decision yet, of these subject kinds, with their article's columns. */
+function kop_nf_unlinked_rows(PDO $pdo, array $kinds) {
+    $in = implode(',', array_map(function ($k) use ($pdo) { return $pdo->quote($k); }, $kinds));
+    try {
+        return $pdo->query("SELECT n.*, s.publication_name, s.article_title, s.publication_date, s.article_url
+            FROM news_facts n JOIN news_submissions s ON s.id = n.news_id
+            WHERE n.status = 'pending' AND n.route = 'waiting' AND (n.facility_id IS NULL OR n.facility_id = 0) AND n.subject_kind IN ($in)
+              AND (n.reviewed_by IS NULL OR n.reviewed_by = '') ORDER BY n.id")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return array();
+    }
+}
+
+/** item keys already tried for a source of kop_autoconn_table() (done, failed or undone); array() when the table is not there. */
+function kop_nf_tried($source) {
+    try {
+        return function_exists('kop_autoconn_tried') ? kop_autoconn_tried($source) : array();
+    } catch (Throwable $e) {
+        return array();
+    }
+}
+
+/** What kop_autoconn_mark() stored in a mark's note for a source and key, decoded; array() when there is none. */
+function kop_nf_mark_note($source, $key) {
+    global $wpdb;
+    if (!function_exists('kop_autoconn_table')) return array();
+    try {
+        $n = $wpdb->get_var($wpdb->prepare('SELECT note FROM ' . kop_autoconn_table() . ' WHERE source = %s AND item_key = %s', $source, (string) $key));
+    } catch (Throwable $e) {
+        return array();
+    }
+    $d = json_decode((string) $n, true);
+    return is_array($d) ? $d : array();
+}
+
+/** operator name key => [operator id => true], over each company's name, current name and other names. */
+function kop_nf_operator_index(PDO $pdo) {
+    global $wpdb;
+    $index = array();
+    try {
+        foreach ($pdo->query('SELECT id, name, json_data FROM `' . $wpdb->prefix . 'kop_operators`')->fetchAll(PDO::FETCH_ASSOC) as $o) {
+            $d = json_decode((string) $o['json_data'], true);
+            $op = is_array($d) ? (array) ($d['operator'] ?? array()) : array();
+            $all = array($o['name'], $op['name'] ?? '', $op['currentName'] ?? '');
+            foreach ((array) ($op['otherNames'] ?? array()) as $n) $all[] = is_array($n) ? ($n['name'] ?? '') : $n;
+            foreach ($all as $n) {
+                $k = kop_autoconn_key(is_string($n) ? $n : '');
+                if ($k !== '') $index[$k][(int) $o['id']] = true;
+            }
+        }
+    } catch (Throwable $e) {
+        // No operators table: nothing to link to.
+    }
+    return $index;
+}
+
+/** The cited note line a company fact becomes on the company: "2026-05: Closure: ... (Paper, "Headline", 2026-06-01: https://...)". */
+function kop_nf_company_line(array $r) {
+    $cats = kop_nf_categories();
+    $label = $cats[$r['category']][0] ?? (string) $r['category'];
+    $news = array('publication_name' => (string) $r['publication_name'], 'article_title' => (string) $r['article_title'], 'publication_date' => (string) $r['publication_date']);
+    return ((string) $r['event_date'] !== '' ? $r['event_date'] . ': ' : '') . $label . ': ' . rtrim(trim((string) $r['summary']), '.')
+        . ' (' . kop_nf_cite($news) . ': ' . $r['article_url'] . ')';
+}
+
+/**
+ * Waiting facts about a company, linked to a company record [owner, 2026-11-03]: subject_kind 'company', or a 'facility' subject that is
+ * no program's name (kop_nf_record_for() 'none'), whose subject is exactly one operator's name key in kop_operators (name, current and
+ * other names, distinctive, one holder). Nothing on a company page takes a fact as such, so the fact is filed the way Woodbury Facts
+ * files an item on an existing company (kop_wbf_file_existing()): a cited note line (kop_wbc_add_notes('company')), and the fact is
+ * route 'company', status 'filed'. kop_autoconn_mark() (source news-facts-company, note = the lines added) means one a person undoes is
+ * never linked again; kop_autoconn_log() puts it in Recently done (source news-facts, Undo = kop_nf_undo_link()). $write false only counts.
+ * Returns array(checked, linked, ambiguous, examples, done).
+ */
+function kop_nf_link_companies(PDO $pdo, $write = true, $seconds = 30) {
+    $out = array('checked' => 0, 'linked' => 0, 'ambiguous' => 0, 'examples' => array(), 'done' => true);
+    if (!function_exists('kop_wbc_add_notes')) return $out;
+    $start = microtime(true);
+    $tried = kop_nf_tried('news-facts-company');
+    $index = kop_nf_operator_index($pdo);
+    foreach (kop_nf_unlinked_rows($pdo, array('company', 'facility')) as $r) {
+        if (isset($tried[(string) $r['id']])) continue;
+        if ($write && microtime(true) - $start > $seconds) { $out['done'] = false; break; }
+        list($fid, $how) = kop_nf_record_for($pdo, $r);
+        // A program of that name (or two) is the facility link's business, not a company's.
+        if (in_array($how, array('exact', 'article', 'ambiguous'), true)) continue;
+        if ($r['subject_kind'] === 'facility' && $how !== 'none') continue;
+        $out['checked']++;
+        $holders = $index[kop_autoconn_key($r['subject_name'])] ?? array();
+        if (count($holders) > 1) { $out['ambiguous']++; continue; }
+        if (count($holders) !== 1 || !kop_autoconn_distinctive($r['subject_name'])) continue;
+        $oid = (int) key($holders);
+        $out['linked']++;
+        if (count($out['examples']) < 50) $out['examples'][] = 'n' . $r['id'] . ' ' . $r['subject_name'] . ' -> company #' . $oid . ' [' . $r['category'] . '] ' . mb_substr((string) $r['summary'], 0, 90);
+        if (!$write) continue;
+        try {
+            $added = kop_wbc_add_notes('company', $oid, array(kop_nf_company_line($r)));
+        } catch (Throwable $e) {
+            kop_autoconn_mark('news-facts-company', (int) $r['id'], 'c' . $oid, 'failed', $e->getMessage());
+            continue;
+        }
+        $pdo->prepare("UPDATE news_facts SET route = 'company', status = 'filed' WHERE id = ? AND status = 'pending' AND route = 'waiting'")->execute(array((int) $r['id']));
+        kop_autoconn_mark('news-facts-company', (int) $r['id'], 'c' . $oid, 'done', wp_json_encode(array('oid' => $oid, 'lines' => (array) $added['lines'])));
+        kop_autoconn_log('news-facts', (int) $r['id'], mb_substr((string) $r['summary'], 0, 120),
+            'Filed as a note on the company ' . $added['name'] . ' (company #' . $oid . '): the fact names it exactly.');
+    }
+    return $out;
+}
+
+/**
+ * Undo of kop_nf_link_companies(): the note line comes off the company (only when this link added it), and the fact waits again with no
+ * record; never linked again. Returns the message, or '' when the fact was not filed that way.
+ */
+function kop_nf_undo_link(PDO $pdo, array $row, $who) {
+    if ($row['route'] !== 'company' || $row['status'] !== 'filed') return '';
+    $id = (int) $row['id'];
+    $note = kop_nf_mark_note('news-facts-company', $id);
+    if (!$note) return '';
+    if (!empty($note['lines']) && function_exists('kop_wbc_remove_notes')) {
+        try {
+            kop_wbc_remove_notes('company', (int) $note['oid'], (array) $note['lines']);
+        } catch (Throwable $e) {
+            // The company is gone: nothing to take the line off.
+        }
+    }
+    $pdo->prepare("UPDATE news_facts SET route = 'waiting', status = 'pending', reviewed_by = ?, reviewed_at = UTC_TIMESTAMP() WHERE id = ?")->execute(array($who, $id));
+    kop_autoconn_mark('news-facts-company', $id, '', 'undone', '');
+    return 'Taken off the company: the fact waits again with no record, and is not linked again.';
+}
+
+/**
+ * Link one waiting fact to a record and file it on Woodbury Facts, as kop_nf_link_waiting() (inc/fact-fold.php) does for an exact program
+ * name: facility_id, the row kop_nf_wbf_row() makes filed with kop_nf_file_wbf(), route 'facility', status 'filed', wbf_pkey. The mark is
+ * source news-facts, so that engine's Undo (kop_nf_unlink()) takes it back; $note adds to what the mark remembers. Returns true when the
+ * fact has a Woodbury row now.
+ */
+function kop_nf_link_one(PDO $pdo, array $r, $fid, array $note, $message) {
+    global $wpdb;
+    $cats = kop_nf_categories();
+    $st = $pdo->prepare('SELECT unique_name FROM facilities_v2 WHERE id = ?');
+    $st->execute(array((int) $fid));
+    $rec_name = (string) $st->fetchColumn();
+    $fact = array('facility_id' => (int) $fid, 'category' => (string) $r['category'], 'date' => (string) $r['event_date'], 'summary' => (string) $r['summary'],
+        'standing' => (string) $r['standing'], 'person' => (string) $r['person'], 'role' => (string) $r['role'], 'value' => (string) $r['value'],
+        'quote' => (string) $r['quote'], 'names_removed' => (int) $r['names_removed'], 'subject' => (string) $r['subject_name'], 'linked_name' => $rec_name);
+    $news = array('id' => (int) $r['news_id'], 'publication_name' => (string) $r['publication_name'], 'article_title' => (string) $r['article_title'],
+        'publication_date' => (string) $r['publication_date'], 'article_url' => (string) $r['article_url']);
+    $wbf = isset($cats[$fact['category']]) ? kop_nf_wbf_row($fact, $news, !empty($r['quote_found'])) : null;
+    $note += array('fid' => (int) $fid);
+    $pkey = '';
+    if ($wbf) {
+        $have = $wpdb->get_row($wpdb->prepare('SELECT status, evidence FROM ' . kop_wbf_table() . ' WHERE pkey = %s', $wbf['pkey']), ARRAY_A);
+        $url = (string) $news['article_url'];
+        $had_url = false;
+        if ($have) foreach (kop_wbf_evidence($have) as $e) if (($e['url'] ?? '') === $url) $had_url = true;
+        $pkey = kop_nf_file_wbf($wbf);
+        $note += array('pkey' => $pkey, 'created' => !$have, 'added_ev' => !$had_url, 'news_id' => (int) $r['news_id'], 'url' => $url);
+    }
+    $pdo->prepare("UPDATE news_facts SET facility_id = ?, route = ?, wbf_pkey = ?, status = ? WHERE id = ? AND status = 'pending' AND route = 'waiting'")
+        ->execute(array((int) $fid, $wbf ? 'facility' : 'waiting', $pkey, $wbf ? 'filed' : 'pending', (int) $r['id']));
+    kop_autoconn_mark('news-facts', (int) $r['id'], (string) $fid, 'done', wp_json_encode($note));
+    kop_autoconn_log('news-facts', (int) $r['id'], mb_substr((string) $r['summary'], 0, 120),
+        $message . ($wbf ? '; filed on Woodbury Facts (From: News articles).' : '; it has no card of its own yet, so it waits here with its record.'));
+    return (bool) $wbf;
+}
+
+/** last-name token => [record id => [staff names]], over every record's administrators and notable staff. */
+function kop_nf_staff_index(PDO $pdo) {
+    $index = array();
+    if (!function_exists('kop_dd_person_parts') || !function_exists('kop_wbf_staff_all')) return $index;
+    foreach ($pdo->query('SELECT id, json_data FROM facilities_v2')->fetchAll(PDO::FETCH_ASSOC) as $f) {
+        $d = json_decode((string) $f['json_data'], true);
+        if (!is_array($d) || empty($d['staff'])) continue;
+        foreach (kop_wbf_staff_all($d) as $s) {
+            $name = trim((string) ($s['name'] ?? ''));
+            $parts = $name !== '' ? kop_dd_person_parts($name) : null;
+            if (!$parts) continue;
+            foreach (array_merge(array($parts['last']), $parts['others']) as $k) $index[$k][(int) $f['id']][] = $name;
+        }
+    }
+    return $index;
+}
+
+/** The records (ids) with a staff entry that is this person (kop_dd_same_person()), from kop_nf_staff_index(). */
+function kop_nf_staff_records($name, array $index) {
+    $parts = function_exists('kop_dd_person_parts') ? kop_dd_person_parts($name) : null;
+    if (!$parts) return array();
+    $out = array();
+    foreach (array_merge(array($parts['last']), $parts['others']) as $k) {
+        foreach ($index[$k] ?? array() as $fid => $names) {
+            foreach ($names as $n) {
+                if (kop_dd_same_person($name, $n)) { $out[(int) $fid] = true; break; }
+            }
+        }
+    }
+    return array_keys($out);
+}
+
+/** True when the text says one of the record's names exactly: a full name key with no other holder and more than generic words. */
+function kop_nf_text_names(PDO $pdo, $fid, $text, array $by_id) {
+    $hay = ' ' . kop_autoconn_key($text) . ' ';
+    foreach ($by_id[(int) $fid] ?? array() as $key) {
+        if (strpos($hay, ' ' . $key . ' ') !== false && kop_autoconn_names_only($pdo, $key, $fid)) return true;
+    }
+    return false;
+}
+
+/**
+ * Waiting facts about a person, linked to a record [owner, 2026-11-03]: the subject's name is a staff entry (kop_dd_same_person()) of exactly
+ * one record, AND that record is linked to the fact's article (news_facility_links) or the fact's words name it exactly
+ * (kop_nf_text_names()), and the record's state is none the article is known to be about elsewhere (kop_nf_article_states()). Otherwise the
+ * fact waits. An agency subject never links. The link is kop_nf_link_one(): the same write path, mark (source news-facts) and Undo as an
+ * exact program name. $write false only counts. Returns array(checked, linked, filed, examples, done).
+ */
+function kop_nf_link_people(PDO $pdo, $write = true, $seconds = 30) {
+    $out = array('checked' => 0, 'linked' => 0, 'filed' => 0, 'examples' => array(), 'done' => true);
+    if (!function_exists('kop_dd_same_person') || !function_exists('kop_wbf_staff_all')) return $out;
+    $start = microtime(true);
+    $tried = kop_nf_tried('news-facts');
+    $rows = array_values(array_filter(kop_nf_unlinked_rows($pdo, array('person')), function ($r) use ($tried) { return !isset($tried[(string) $r['id']]); }));
+    if (!$rows) return $out;
+    $staff = kop_nf_staff_index($pdo);
+    $by_id = array();
+    foreach (kop_autoconn_name_index($pdo) as $k => $ids) foreach ($ids as $id => $_) $by_id[(int) $id][] = (string) $k;
+    foreach ($rows as $r) {
+        if ($write && microtime(true) - $start > $seconds) { $out['done'] = false; break; }
+        $out['checked']++;
+        $recs = kop_nf_staff_records((string) $r['subject_name'], $staff);
+        if (count($recs) !== 1) continue;
+        $fid = (int) $recs[0];
+        $linked = array();
+        foreach (kop_nf_linked($pdo, (int) $r['news_id']) as $f) $linked[(int) $f['id']] = true;
+        $words = (string) $r['summary'] . ' ' . (string) $r['quote'] . ' ' . (string) $r['value'] . ' ' . (string) $r['role'];
+        $how = isset($linked[$fid]) ? 'article' : (kop_nf_text_names($pdo, $fid, $words, $by_id) ? 'named' : '');
+        if ($how === '') continue;
+        $states = kop_nf_article_states($pdo, (int) $r['news_id'], $words);
+        $st = kop_autoconn_record_state($pdo, $fid);
+        if ($states && $st !== '' && !in_array($st, $states, true)) continue;
+        $out['linked']++;
+        if (count($out['examples']) < 50) $out['examples'][] = 'n' . $r['id'] . ' ' . $r['subject_name'] . ' -> #' . $fid . ' (' . $how . ') [' . $r['category'] . '] ' . mb_substr((string) $r['summary'], 0, 90);
+        if (!$write) continue;
+        if (kop_nf_link_one($pdo, $r, $fid, array('how' => 'person-' . $how),
+            'Linked to #' . $fid . ': ' . $r['subject_name'] . ' is on its staff, and ' . ($how === 'article' ? 'the article is linked to it' : 'the fact names it exactly'))) $out['filed']++;
+    }
+    return $out;
 }

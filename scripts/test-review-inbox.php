@@ -473,5 +473,15 @@ if ($only === 'fact-fold') {
     }
 }
 
+// The open linking passes (kop_nf_link_companies() and kop_nf_link_people() in inc/news-facts.php, inc/auto-connect.php).
+if ($only === '' || $only === 'fact-links') {
+    echo "-- Fact links: Woodbury Reports pages, companies, people, states --\n";
+    try {
+        kop_test_fact_links($check);
+    } catch (Throwable $e) {
+        $check('fact-links: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

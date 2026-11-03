@@ -241,6 +241,8 @@ function kop_test_fact_fold(callable $check) {
     kop_test_fact_fold_ai($check, $w, $get, $mkdoc, $F1);
     // 8. The owner's four decisions of 2026-11-03.
     kop_test_fact_fold_decisions($check, $w, $get, $mkdoc, $F1);
+    // 9. Places, staff role history, AI conflict marks, a found telling that exists only as a news fact, one URL key.
+    kop_test_fact_fold_fixes($check, $w, $get, $mkdoc, $F1, $F2);
 
     // 6. Linking a waiting news fact by the exact-name rule, with Undo. The name index is built once per process, before the
     // fixtures: the fixture fact names a record the mirror has (one the rule links today), its own facts made up.
@@ -516,4 +518,158 @@ function kop_test_fact_fold_decisions(callable $check, callable $w, callable $ge
         $pdo->exec("DELETE FROM wpdl_kop_auto_connect WHERE source = 'woodbury-facts-link'");
         $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
     }
+}
+
+/**
+ * The open points of docs/plan/4.4 item 20 (2026-11-03): two named places never fold or clear each other, a kept staff
+ * card takes the folded members' roles (never across III / Jr.), a Fornits card keeps its AI conflict mark through Undo,
+ * an alleged card keeps a found news telling's standing and line, one URL key.
+ */
+function kop_test_fact_fold_fixes(callable $check, callable $w, callable $get, callable $mkdoc, $F1, $F2) {
+    global $wpdb;
+    $pdo = $GLOBALS['pdo'];
+    $wt = 'wpdl_kop_woodbury_facts';
+    $ft = 'wpdl_kop_fornits_items';
+    $inc = 'criticalIncidents.customIncidents';
+    $run = function ($f) { return kop_fold_run(true, 60, array('only' => array('r:' . $f))); };
+    $pdo->exec("DELETE FROM $wt WHERE facility_id IN ($F1, $F2)");
+    $pdo->exec("DELETE FROM $ft WHERE facility_id IN ($F1, $F2)");
+    $pdo->prepare('UPDATE facilities_v2 SET json_data = ? WHERE id = ?')->execute(array(json_encode($mkdoc()), $F1));
+
+    // 1. Places: the program "Fold Test School" tells branches by city; a telling with no place meets either.
+    $mk = function ($line, $n) use ($w, $F1, $inc) {
+        return $w($F1, $inc, $line, '2026-06-01', $n, array('extra' => json_encode(array('via' => 'news', 'news_id' => $n, 'category' => 'abuse'))));
+    };
+    $pa = $mk('2026-03-04: Abuse: Staff hit residents at Fold Test School in Cleveland, according to former students.', 501);
+    $pb = $mk('2026-03-04: Abuse: Staff hit residents at Fold Test School of Tulsa, according to former students.', 502);
+    $pc = $mk('2026-03-04: Abuse: Staff hit residents at Fold Test School, according to former students.', 503);
+    $pm = $mk('2026-03-05: Abuse: Staff hit residents at the Mount Hope campus, according to former students.', 504);
+    $pn = $mk('2026-03-05: Abuse: Staff hit residents at the Mount Zion campus, according to former students.', 505);
+    $S1 = $run($F1);
+    $st = array_map(function ($k) use ($get) { return $get($k)['status']; }, array($pa, $pb, $pc, $pm, $pn));
+    $check('fact-fold fixes: Cleveland and Tulsa tellings never fold; the one with no place folds into one of them; Mount Hope and Mount Zion stay apart',
+        count(array_keys($st, 'merged', true)) === 1 && $get($pa)['status'] !== 'merged' && $get($pb)['status'] !== 'merged' && $get($pm)['status'] === 'pending' && $get($pn)['status'] === 'pending',
+        json_encode(array($st, array($pa, $pb, $pc), array_map(function ($k) use ($get) { return json_decode($get($k)['extra'], true)['merged_into'] ?? ''; }, array($pa, $pb, $pc)),
+        array_map(function ($k) use ($get) { return kop_fact_shape('wbf', $get($k), array('fid' => 990001, 'record_name' => 'Fold Test School'))['place']; }, array($pa, $pb, $pc)),
+        array('clash' => $S1['rule_clash'] ?? 0, 'ai' => $S1['ai_joins'] ?? 0, 'folded' => $S1['examples']['folded'] ?? array(), 'err' => $S1['errors'] ?? array()))));
+    $sa = kop_fact_shape('wbf', $get($pa), array('fid' => $F1, 'record_name' => 'Fold Test School'));
+    $sb = kop_fact_shape('wbf', $get($pb), array('fid' => $F1, 'record_name' => 'Fold Test School'));
+    $check('fact-fold fixes: the AI override and the rules both read the places (kop_fold_ai_apart "places")', $sa['place'] === array('cleveland') && $sb['place'] === array('tulsa')
+        && kop_fold_ai_apart($sa, $sb) === 'places' && kop_fact_rule_same($sa, $sb) === '', json_encode(array($sa['place'], $sb['place'])));
+    // On hand: a record line about Cleveland does not clear the Tulsa telling.
+    $doc = $mkdoc();
+    $doc['identification']['name'] = 'Fold Test School';
+    $doc['criticalIncidents']['customIncidents'] = array('2026-03-04: Abuse: Staff hit residents at Fold Test School in Cleveland, according to former students. (Tribune)');
+    $oh = kop_fact_onhand($doc, $F1);
+    $check('fact-fold fixes: on hand, a Cleveland line clears the Cleveland telling and not the Tulsa one', kop_fold_match($sa, $oh) !== null && kop_fold_match($sb, $oh) === null
+        && kop_wbf_list_covers($doc, $inc, kop_wbf_row_value($get($pb))) === '' && kop_wbf_list_covers($doc, $inc, kop_wbf_row_value($get($pa))) !== '',
+        json_encode(array(kop_fold_match($sa, $oh) !== null, kop_fold_match($sb, $oh) === null, kop_wbf_list_covers($doc, $inc, kop_wbf_row_value($get($pb))), kop_wbf_list_covers($doc, $inc, kop_wbf_row_value($get($pa))), array_column($oh, 'place'))));
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+
+    // 2. Staff roles: the kept card takes the folded members' roles; "III" never folds with the plain name.
+    $sv = function ($name, $role, $n) use ($w, $F1) {
+        return $w($F1, 'staff.notableStaff', 'Staff: ' . $name . ', ' . $role, '2026-01-10', $n, array('grp' => 'staff', 'op' => 'add_staff',
+            'value' => json_encode(array('name' => $name, 'role' => $role, 'pastJobs' => '')), 'label' => 'Staff: ' . $name . ', ' . $role, 'extra' => json_encode(array('via' => 'news'))));
+    };
+    $s1 = $sv('Dana Finch', 'Director (2005-2007)', 511);
+    $s2 = $sv('Dana Finch', 'Executive Director and Founder (2008-2012)', 512);
+    $s3 = $sv('Dana Finch III', 'Director', 513);
+    $run($F1);
+    $rows = array($s1 => $get($s1), $s2 => $get($s2), $s3 => $get($s3));
+    $merged = array_keys(array_filter($rows, function ($r) { return $r['status'] === 'merged'; }));
+    $keptpk = array_values(array_diff(array($s1, $s2), $merged));
+    $check('fact-fold fixes: two Dana Finch cards fold into one; Dana Finch III stays his own card', count($merged) === 1 && count($keptpk) === 1 && $get($s3)['status'] === 'pending',
+        json_encode(array_map(function ($r) { return $r['status']; }, $rows)));
+    $kr = $get($keptpk[0]);
+    $fs = json_decode($kr['extra'], true)['folded'][0]['staff'] ?? null;
+    $check('fact-fold fixes: the kept card stores the folded member\'s role and years', is_array($fs) && $fs['name'] === 'Dana Finch' && strpos($fs['role'], '(') !== false, json_encode($fs));
+    $d = $mkdoc();
+    $d['identification']['name'] = 'Fold Test School';
+    kop_wbf_doc_apply($d, $kr);
+    $entry = $d['staff']['notableStaff'][0] ?? array();
+    $both = ($entry['role'] ?? '') . ' | ' . ($entry['pastJobs'] ?? '');
+    $check('fact-fold fixes: approving the kept card writes both roles and both year ranges to the record\'s staff entry', strpos($both, '2005-2007') !== false && strpos($both, '2008-2012') !== false, $both);
+    $d2 = $mkdoc();
+    $d2['staff']['notableStaff'][] = array('name' => 'Dana Finch', 'role' => 'Teacher', 'pastJobs' => '');
+    kop_wbf_doc_apply($d2, $get($s3));
+    $check('fact-fold fixes: "Dana Finch III" is added beside the plain "Dana Finch", never merged into it', count($d2['staff']['notableStaff']) === 2 && $d2['staff']['notableStaff'][0]['role'] === 'Teacher',
+        json_encode($d2['staff']['notableStaff']));
+    $check('fact-fold fixes: kop_dd_same_person() never calls III / Jr. / Sr. the plain name', !kop_dd_same_person('John Smith III', 'John Smith') && !kop_dd_same_person('John Smith Jr.', 'John Smith')
+        && !kop_dd_same_person('John Smith Sr.', 'John Smith Jr.') && kop_dd_same_person('John Smith Jr.', 'John Smith, Jr.'));
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+
+    // 2b. The same on Fornits: two staff posts with other roles and years.
+    $fr = function ($pk, $person, $role, $years, $n) use ($wpdb, $ft, $F2) {
+        $wpdb->insert($ft, array('pkey' => $pk, 'topic_id' => 5100 + $n, 'kind' => 'staff', 'facility_id' => $F2, 'also' => '[]', 'how' => 'x', 'label' => 'Staff: ' . $person,
+            'value' => json_encode(array('person' => $person, 'role' => $role, 'years' => $years)), 'quote' => 'quote', 'quote_found' => 1, 'context' => '', 'post_n' => 1, 'author' => 'poster' . $n,
+            'post_date' => '2005-03-0' . $n, 'preselect' => 0, 'status' => 'pending', 'applied' => null, 'applied_fid' => 0, 'reviewed_by' => null, 'created_at' => '2026-11-02 00:00:00',
+            'summary' => '', 'categories' => '', 'importance' => 0));
+    };
+    $pdo->exec("DELETE FROM $ft WHERE facility_id = $F2");
+    $fr('fe100001', 'Lee Marsh', 'Director', '2004-2006', 1);
+    $fr('fe100002', 'Lee Marsh', 'Business Manager', '2007-2009', 2);
+    $fr('fe100003', 'Lee Marsh Jr.', 'Director', '', 3);
+    $run($F2);
+    $fl = $pdo->query("SELECT pkey, status FROM $ft WHERE facility_id = $F2 ORDER BY pkey")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $check('fact-fold fixes: two Lee Marsh posts fold, Lee Marsh Jr. does not', count(array_keys($fl, 'merged', true)) === 1 && $fl['fe100003'] === 'pending', json_encode($fl));
+    $kp = '';
+    foreach ($fl as $k => $s) if ($s === 'pending' && $k !== 'fe100003') $kp = $k;
+    $krow = kop_fornits_rows(array($kp))[0];
+    $d3 = $mkdoc();
+    $d3['identification']['name'] = 'Fold Other School';
+    kop_fornits_doc_apply($d3, $krow, '');
+    $e3 = $d3['staff']['notableStaff'][0] ?? array();
+    $both = ($e3['role'] ?? '') . ' | ' . ($e3['pastJobs'] ?? '');
+    $check('fact-fold fixes: approving the kept Fornits card writes both roles and years to the staff entry', strpos($both, 'Director') !== false && strpos($both, 'Business Manager') !== false
+        && strpos($both, '2004-2006') !== false && strpos($both, '2007-2009') !== false, $both);
+    $pdo->exec("DELETE FROM $ft WHERE facility_id = $F2");
+
+    // 3. A Fornits card's AI conflict mark survives the approval that holds it and a person's Undo.
+    $mark = array('with' => 'x', 'line' => 'Another telling says 2019.', 'state' => 'waiting');
+    $FM = (int) $pdo->query('SELECT id FROM facilities_v2 WHERE id < 900000 ORDER BY id LIMIT 1')->fetchColumn();
+    $wpdb->insert($ft, array('pkey' => 'fe200001', 'topic_id' => 5200, 'kind' => 'incident', 'facility_id' => $FM, 'also' => '[]', 'how' => 'x', 'label' => 'Incident',
+        'value' => json_encode(array('category' => 'abuse', 'year' => '2005', 'summary' => 'Kids were hit.')), 'quote' => 'q', 'quote_found' => 1, 'context' => '', 'post_n' => 1,
+        'author' => 'a', 'post_date' => '2005-03-04', 'preselect' => 0, 'status' => 'pending', 'applied' => json_encode(array('ai_differs' => $mark)), 'applied_fid' => 0,
+        'reviewed_by' => null, 'created_at' => '2026-11-02 00:00:00', 'summary' => '', 'categories' => '', 'importance' => 0));
+    kop_fornits_apply(kop_fornits_rows(array('fe200001')), array(), $FM, 'tester', true);
+    $held = $pdo->query("SELECT status, applied FROM $ft WHERE pkey = 'fe200001'")->fetch(PDO::FETCH_ASSOC);
+    $check('fact-fold fixes: approving the Fornits card (held for the write-up) keeps the Conflict mark', $held['status'] === 'held' && (json_decode($held['applied'], true)['ai_differs'] ?? null) == $mark, json_encode($held));
+    kop_fornits_undo(kop_fornits_rows(array('fe200001')), 'tester');
+    $back = $pdo->query("SELECT status, applied FROM $ft WHERE pkey = 'fe200001'")->fetch(PDO::FETCH_ASSOC);
+    $check('fact-fold fixes: ...and so does the person\'s Undo (the mark is still on the waiting card)', $back['status'] === 'pending' && (json_decode($back['applied'], true)['ai_differs'] ?? null) == $mark, json_encode($back));
+    $pdo->exec("DELETE FROM $ft WHERE pkey = 'fe200001'");
+
+    // 4. A found telling that exists only as a waiting news fact: the alleged card stays, with the found standing and a "Found:" line.
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    $pdo->exec('DELETE FROM news_facts WHERE id >= 990200');
+    if (!$pdo->query('SELECT COUNT(*) FROM news_submissions WHERE id = 990101')->fetchColumn()) {
+        $wpdb->insert('news_submissions', array('id' => 990101, 'article_title' => 'The director', 'publication_name' => 'The Gazette', 'publication_date' => '2026-02-01',
+            'article_url' => 'https://example.org/gazette-director', 'archive_url' => '', 'status' => 'approved'));
+    }
+    $al = $w($F1, $inc, '2021-03-04: Abuse: Staff allegedly beat a 14-year-old resident at the school, according to two former students. (The Gazette)', '2021-04-01', 521,
+        array('extra' => json_encode(array('via' => 'news', 'news_id' => 521, 'category' => 'abuse', 'standing' => 'alleged'))));
+    $pdo->exec("INSERT INTO news_facts (id, news_id, fkey, category, subject_kind, subject_name, facility_id, person, role, value, summary, standing, event_date, quote, quote_found, names_removed, route, wbf_pkey, status, created_at)
+        VALUES (990201, 990101, 'fk201', 'abuse', 'facility', 'Fold Test School', $F1, '', '', '', 'Staff beat a 14-year-old resident at the school', 'found', '2021-03-04', 'q', 1, 0, 'waiting', '', 'pending', '2026-11-02 00:00:00')");
+    $run($F1);
+    $nf = $pdo->query('SELECT route, status, wbf_pkey FROM news_facts WHERE id = 990201')->fetch(PDO::FETCH_ASSOC);
+    $kx = json_decode($get($al)['extra'], true);
+    $check('fact-fold fixes: the alleged Woodbury card stays pending and the found news fact folds into it', $get($al)['status'] === 'pending' && $nf['status'] === 'merged' && $nf['wbf_pkey'] === $al, json_encode(array($nf, $kx)));
+    $check('fact-fold fixes: the card carries the news fact\'s standing and its "Found:" text', ($kx['standing'] ?? '') === 'found' && strpos($kx['found']['text'] ?? '', 'Staff beat a 14-year-old') === 0
+        && strpos(kop_rinbox_get_item('woodbury-facts', $al)['text'], 'Found: Staff beat a 14-year-old') !== false);
+    $dd = $mkdoc();
+    kop_wbf_doc_apply($dd, $get($al));
+    $line = $dd['criticalIncidents']['customIncidents'][0] ?? '';
+    $check('fact-fold fixes: the write-up line uses the found wording (no "allegedly", the citation untouched)', $line !== '' && stripos($line, 'allegedly') === false && strpos($line, 'Staff beat a 14-year-old') !== false
+        && strpos($line, '(The Gazette)') !== false, $line);
+    kop_nf_undo_auto($pdo, kop_nf_row($pdo, 990201), 'tester');
+    $kx = json_decode($get($al)['extra'], true);
+    $check('fact-fold fixes: Undo of the news fact takes the found line off and gives the card its old standing back', empty($kx['found']) && ($kx['standing'] ?? '') === 'alleged', json_encode($kx));
+    $check('fact-fold fixes: kop_wbf_clear_alleged() leaves a headline in the citation alone', kop_wbf_clear_alleged('Staff allegedly hit a boy. (Tribune, "Alleged abuse at X", 2026-06-01)') === 'Staff hit a boy. (Tribune, "Alleged abuse at X", 2026-06-01)',
+        kop_wbf_clear_alleged('Staff allegedly hit a boy. (Tribune, "Alleged abuse at X", 2026-06-01)'));
+    $pdo->exec("DELETE FROM $wt WHERE facility_id = $F1");
+    $pdo->exec('DELETE FROM news_facts WHERE id >= 990200');
+
+    // 5. One URL key.
+    $check('fact-fold fixes: Fornits links use the key the fold and the shape use (kop_normalize_urls)', kop_fornits_url_key('http://www.Example.com/a/#top') === (kop_normalize_urls('http://www.Example.com/a/#top')[0] ?? 'x')
+        && kop_fornits_url_key('') === '' && kop_fornits_url_key('https://example.com/a') === kop_fornits_url_key('http://example.com/a/'));
 }

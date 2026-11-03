@@ -239,6 +239,10 @@ function kop_rinbox_wbf_item(array $r) {
             $lines[] = '  - ' . (string) ($fo['text'] ?? '');
         }
     }
+    // A found telling that exists only as a waiting news fact was folded into this card (it cannot be kept): the write-up uses the found wording.
+    if (!empty($extra['found']['text'])) {
+        $lines[] = 'Found: ' . (string) $extra['found']['text'] . ' (from a news fact; the write-up leaves out the "alleged").';
+    }
     if ($r['status'] === 'merged') {
         $why = json_decode((string) $r['applied'], true);
         $lines[] = !empty($why['reason']) ? (string) $why['reason'] : 'Folded into another card.';

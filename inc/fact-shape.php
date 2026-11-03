@@ -515,17 +515,35 @@ function kop_fact_note_line(array $base, $line, $news_category = '', $in_period 
  * $ctx: ['fid' => int, 'record_name' => string, 'state' => 'waiting'|'held'|'on_record'|'kept'].
  */
 function kop_fact_shape($src, array $row, array $ctx = array()) {
+    $f = null;
     switch ($src) {
         case 'wbf':
-            return kop_fact_from_wbf($row, $ctx);
+            $f = kop_fact_from_wbf($row, $ctx);
+            break;
         case 'fornits':
-            return kop_fact_from_fornits($row, $ctx);
+            $f = kop_fact_from_fornits($row, $ctx);
+            break;
         case 'news':
-            return kop_fact_from_news($row, $ctx);
+            $f = kop_fact_from_news($row, $ctx);
+            break;
         case 'doc_line':
-            return kop_fact_from_doc_line($row, $ctx);
+            $f = kop_fact_from_doc_line($row, $ctx);
+            break;
     }
-    return null;
+    return $f ? kop_fact_add_place($f, (string) ($ctx['record_name'] ?? '')) : null;
+}
+
+/**
+ * Adds the city a telling puts against the record's own name ("The Cleveland Seed closed" on the record "The Seed") to a
+ * shape's place list, so tellings about different branches of one chain never fold or clear each other. Facts about
+ * people, links and places themselves are left as they are.
+ */
+function kop_fact_add_place(array $f, $program) {
+    $program = trim((string) $program);
+    if ($program === '' || !in_array($f['kind'], array('incident', 'closure', 'opening', 'note', 'sale', 'operator', 'owner', 'practice', 'statement', 'money'), true)) return $f;
+    $p = kop_dd_campuses((string) $f['core'], $program);
+    if ($p) $f['place'] = array_values(array_unique(array_merge((array) $f['place'], $p)));
+    return $f;
 }
 
 function kop_fact_from_wbf(array $r, array $ctx) {
@@ -603,7 +621,7 @@ function kop_fact_from_fornits(array $r, array $ctx) {
     $post = (string) ($r['post_date'] ?? '');
     $base = array('src' => 'fornits', 'srcs' => array('fornits'), 'told_by' => $told_by, 'queue' => 'fornits', 'id' => (string) ($r['pkey'] ?? ''),
         'record' => $fid > 0 ? (string) $fid : '', 'state' => (string) ($ctx['state'] ?? 'waiting'), 'told' => substr($post, 0, 10), 'op' => 'fornits_' . $kind,
-        'path' => '');
+        'path' => '', 'standing' => function_exists('kop_fornits_found') && ($fnd = kop_fornits_found($r)) ? (string) ($fnd['standing'] ?? 'found') : '');
     kop_fact_need('kop_fornits_incident_line', 'inc/fornits.php');
     switch ($kind) {
         case 'link':
@@ -699,7 +717,7 @@ function kop_fact_onhand(array $doc, $fid, array $held_rows = array(), array $ke
     $out = array();
     $fid = (int) $fid;
     $id = (array) ($doc['identification'] ?? array());
-    $ctx = array('fid' => $fid, 'state' => 'on_record');
+    $ctx = array('fid' => $fid, 'state' => 'on_record', 'record_name' => (string) ($id['name'] ?? ''));
     $mk = function ($path, $i, $kind, $type, $text, $date = '') use (&$out, $fid) {
         $out[] = kop_fact_build(array('src' => 'record', 'srcs' => array('record'), 'told_by' => array('record:' . $path), 'queue' => 'doc',
             'id' => 'doc:' . $path . '#' . $i, 'record' => (string) $fid, 'state' => 'on_record', 'op' => 'doc_field', 'path' => $path, 'text' => (string) $text),
@@ -751,17 +769,17 @@ function kop_fact_onhand(array $doc, $fid, array $held_rows = array(), array $ke
             $line = is_array($line) ? (string) ($line['raw'] ?? ($line['name'] ?? '')) : (string) $line;
             if (trim($line) === '') continue;
             $f = kop_fact_from_doc_line(array('path' => $p, 'line' => $line, 'i' => $i), $ctx);
-            if ($f) $out[] = $f;
+            if ($f) $out[] = kop_fact_add_place($f, $ctx['record_name']);
         }
     }
     foreach ($held_rows as $r) {
-        $f = kop_fact_shape('wbf', $r, array('fid' => $fid, 'state' => 'held'));
+        $f = kop_fact_shape('wbf', $r, array('fid' => $fid, 'state' => 'held', 'record_name' => $ctx['record_name']));
         if ($f) $out[] = $f;
     }
     foreach ($kept_news as $r) {
         // An article linked to this record can tell of another one: that fact is on hand for the other, not here.
         if ((int) ($r['facility_id'] ?? 0) > 0 && (int) $r['facility_id'] !== $fid) continue;
-        $f = kop_fact_shape('news', $r, array('fid' => $fid, 'state' => 'kept'));
+        $f = kop_fact_shape('news', $r, array('fid' => $fid, 'state' => 'kept', 'record_name' => $ctx['record_name']));
         if ($f) $out[] = $f;
     }
     return $out;
@@ -876,7 +894,7 @@ function kop_fact_differs(array $a, array $b) {
             $pb = array_filter($b['place'], function ($p) use ($pre) { return strpos($p, $pre) === 0; });
             if ($pa && $pb && !array_intersect($pa, $pb)) return 'places';
         }
-    } elseif ($a['place'] && $b['place'] && !array_intersect($a['place'], $b['place'])) {
+    } elseif (kop_dd_places_clash((array) $a['place'], (array) $b['place'])) {
         return 'places';
     }
     if ($g === 'person' || $g === 'connection-person') {

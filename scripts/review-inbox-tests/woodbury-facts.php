@@ -203,6 +203,20 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
         && kop_wbf_text_core('Owner: Universal Health Services (HEAL, page (archived 2016): https://example.com/a)')[0] === 'Universal Health Services'
         && !kop_wbf_text_same(kop_wbf_text_core($rec_note)[0], kop_wbf_text_core('Statement: a former resident described the hair dance as punishment (The Salt Lake Tribune, "Provo Canyon", 2026-06-01: https://www.sltrib.com/news/2026/06/01/provo/)')[0]),
         kop_wbf_text_core($rec_note)[0]);
+    // Two same-month revocations worded alike are two events: another full date, or another campus, makes the text unlike.
+    $rv_a = 'Utah officials revoked the license for Provo Canyon School on 2026-07-06 after state inspectors found unsafe conditions at the Springville campus';
+    $rv_b = 'Utah officials revoked the license for Provo Canyon School on 2026-07-17 after state inspectors found unsafe conditions at the Provo campus';
+    $rv_c = 'Utah officials revoked the license for Provo Canyon School after state inspectors found unsafe conditions at the Springville campus';
+    $rv_d = 'Utah officials revoked the license for Provo Canyon School on July 17, 2026 after state inspectors found unsafe conditions at the school';
+    $rv_e = 'Utah officials revoked the license for Provo Canyon School on 2026-07-06 after state inspectors found unsafe conditions at the school';
+    $check('woodbury-facts: kop_wbf_text_same() is false for different full dates or different campuses, true for the same or an undated one',
+        !kop_wbf_text_same($rv_a, $rv_b) && !kop_wbf_text_same($rv_e, $rv_d) && kop_wbf_text_same($rv_c, $rv_a) && kop_wbf_text_same($rv_e, $rv_a)
+        && kop_wbf_text_same($rv_c, $rv_c) && kop_wbf_full_dates('on July 17, 2026 and 2026-07-06') === array('2026-07-06', '2026-07-17'),
+        json_encode(array(kop_wbf_text_same($rv_a, $rv_b), kop_wbf_text_same($rv_e, $rv_d), kop_wbf_text_same($rv_c, $rv_a), kop_wbf_text_same($rv_e, $rv_a), kop_wbf_full_dates('on July 17, 2026 and 2026-07-06'))));
+    $rv_doc = array('identification' => array('name' => 'Provo Canyon School'), 'criticalIncidents' => array('customIncidents' => array('2026-07-06: License action: ' . $rv_a . '. (Tribune)')));
+    $check('woodbury-facts: the hourly clear keeps the 2026-07-17 Provo revocation and clears a second telling of the 2026-07-06 one',
+        kop_wbf_list_covers($rv_doc, 'criticalIncidents.customIncidents', '2026-07-17: License action: ' . $rv_b . '. (KSL)') === ''
+        && kop_wbf_list_covers($rv_doc, 'criticalIncidents.customIncidents', '2026-07-06: License action: ' . $rv_e . '. (KSL)') !== '');
     $covers = function ($note) use ($rec) { return kop_wbf_list_covers($rec, 'notes', $note . ' (HEAL, staff list (archived 2016))') !== ''; };
     $check('woodbury-facts: same information in other words is on the record; anything more is not',
         $covers('Ages: boys 12-17') && $covers('Ages: youth, ages 12 to 17 at admission') && !$covers('Ages: boys 12-17; ranch-style boarding school') && !$covers('Ages: girls 12-17')

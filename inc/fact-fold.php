@@ -137,7 +137,8 @@ function kop_fold_keep_on_sync(array $row, $pkey, array $extra, array $ev) {
     $ox = json_decode((string) $old['extra'], true) ?: array();
     if (!empty($ox['folded']) || !empty($ox['ai_differs'])) {
         // The fold marks and the AI step's Conflict mark (kop_fold_write_differs()) outlive a reload.
-        foreach (array('folded', 'ai_differs') as $k) if (!empty($ox[$k])) $extra[$k] = $ox[$k];
+        foreach (array('folded', 'ai_differs', 'found') as $k) if (!empty($ox[$k])) $extra[$k] = $ox[$k];
+        if (!empty($ox['found'])) $extra['standing'] = (string) ($ox['standing'] ?? 'found');
         $row['extra'] = wp_json_encode($extra);
     }
     foreach (kop_wbf_evidence($old) as $e) {
@@ -309,6 +310,35 @@ function kop_fold_member_ev($queue, array $row) {
     return array(kop_fold_news_ev($row));
 }
 
+/** A staff member's {name, role, pastJobs} of a folded row (a Woodbury add_staff, a Fornits staff item, a news staff fact), or null. */
+function kop_fold_member_staff($queue, array $row) {
+    if ($queue === 'wbf') {
+        if (($row['op'] ?? '') !== 'add_staff') return null;
+        $v = json_decode((string) ($row['value'] ?? ''), true);
+        return is_array($v) && trim((string) ($v['name'] ?? '')) !== '' ? array('name' => (string) $v['name'], 'role' => (string) ($v['role'] ?? ''), 'pastJobs' => (string) ($v['pastJobs'] ?? '')) : null;
+    }
+    if ($queue === 'fornits') {
+        if (($row['kind'] ?? '') !== 'staff') return null;
+        $v = json_decode((string) ($row['value'] ?? ''), true);
+        if (!is_array($v) || trim((string) ($v['person'] ?? '')) === '') return null;
+        return array('name' => (string) $v['person'], 'role' => trim((string) ($v['role'] ?? '') . (!empty($v['years']) ? ' (' . $v['years'] . ')' : '')), 'pastJobs' => '');
+    }
+    if (($row['category'] ?? '') !== 'staff' || trim((string) ($row['person'] ?? '')) === '') return null;
+    return array('name' => (string) $row['person'], 'role' => (string) ($row['role'] ?? ''), 'pastJobs' => '');
+}
+
+/**
+ * The news fact a kept card cannot be: when the group's strongest telling (found, convicted, ruled, admitted) is a waiting news
+ * fact and the kept Woodbury or Fornits item is not as strong ("alleged" or unstated), that news shape; else null.
+ */
+function kop_fold_found_news(array $items, array $members, $keep) {
+    if (kop_fact_standing_rank($items[$keep]) >= 2) return null;
+    foreach ($members as $m) {
+        if ($m !== $keep && $items[$m]['queue'] === 'news' && kop_fact_standing_rank($items[$m]) >= 2) return $items[$m];
+    }
+    return null;
+}
+
 /** "woodbury:<pkey>", "fornits:<pkey>" or "news:<id>": a member's id in folded lists. */
 function kop_fold_mid($queue, array $row) {
     return $queue === 'wbf' ? 'woodbury:' . $row['pkey'] : ($queue === 'fornits' ? 'fornits:' . $row['pkey'] : 'news:' . (int) $row['id']);
@@ -336,7 +366,7 @@ function kop_fold_write_clear($queue, array $row, $reason, $cleared, $how = '') 
 }
 
 /** Fold the members into the kept item: members first, then the kept item takes the citations of those that went through. */
-function kop_fold_write_group(array $kept, array $members, array $how) {
+function kop_fold_write_group(array $kept, array $members, array $how, ?array $found = null) {
     global $wpdb;
     $now = current_time('mysql', true);
     $pdo = kop_fold_pdo();
@@ -373,6 +403,13 @@ function kop_fold_write_group(array $kept, array $members, array $how) {
             kop_fold_cut($m['shape']['text'], 120), $reason . ' (' . ($how[$m['shape']['id']] ?? 'same fact') . ').');
     }
     if (!$done) return 0;
+    // A found telling that exists only as a waiting news fact cannot be kept: the card stays and takes its standing and its line ("Found: ...").
+    $found_note = null;
+    if ($found) {
+        foreach ($done as $m) {
+            if ($m['queue'] === 'news' && kop_fold_mid('news', $m['row']) === ($found['id'] ?? '')) $found_note = $found;
+        }
+    }
     if ($kq === 'wbf') {
         $extra = json_decode((string) $krow['extra'], true) ?: array();
         $ev = kop_wbf_evidence($krow);
@@ -380,9 +417,17 @@ function kop_fold_write_group(array $kept, array $members, array $how) {
         foreach ($done as $m) {
             $mid = kop_fold_mid($m['queue'], $m['row']);
             $ev = kop_fold_add_ev($ev, kop_fold_member_ev($m['queue'], $m['row']), $mid);
-            $folded[] = array('id' => $mid, 'text' => kop_fold_cut($m['shape']['text'], 240), 'how' => $how[$m['shape']['id']] ?? '');
+            $entry = array('id' => $mid, 'text' => kop_fold_cut($m['shape']['text'], 240), 'how' => $how[$m['shape']['id']] ?? '');
+            // A staff member's role and years stay with the kept card, so its record entry takes the role history when it is written.
+            if ($st = kop_fold_member_staff($m['queue'], $m['row'])) $entry['staff'] = $st;
+            $folded[] = $entry;
         }
         $extra['folded'] = $folded;
+        if ($found_note) {
+            $found_note['prev'] = (string) ($extra['standing'] ?? '');
+            $extra['found'] = $found_note;
+            $extra['standing'] = 'found';
+        }
         $wpdb->update(kop_wbf_table(), array('evidence' => wp_json_encode(array_values($ev)), 'extra' => wp_json_encode($extra)), array('pkey' => $krow['pkey']));
     } else {
         $a = json_decode((string) $krow['applied'], true);
@@ -391,9 +436,12 @@ function kop_fold_write_group(array $kept, array $members, array $how) {
         foreach ($done as $m) {
             $cites = array();
             foreach (kop_fold_member_ev($m['queue'], $m['row']) as $e) $cites[] = array('cite' => (string) ($e['cite'] ?? kop_wbf_ev_label($e)), 'url' => (string) ($e['url'] ?? ''));
-            $folds[] = array('id' => kop_fold_mid($m['queue'], $m['row']), 'text' => kop_fold_cut($m['shape']['text'], 240), 'cites' => $cites, 'how' => $how[$m['shape']['id']] ?? '');
+            $entry = array('id' => kop_fold_mid($m['queue'], $m['row']), 'text' => kop_fold_cut($m['shape']['text'], 240), 'cites' => $cites, 'how' => $how[$m['shape']['id']] ?? '');
+            if ($st = kop_fold_member_staff($m['queue'], $m['row'])) $entry['staff'] = $st;
+            $folds[] = $entry;
         }
         $a['folds'] = $folds;
+        if ($found_note) $a['found'] = $found_note;
         $wpdb->update(kop_fornits_items_table(), array('applied' => wp_json_encode($a)), array('pkey' => $krow['pkey']));
     }
     return count($done);
@@ -873,12 +921,14 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
     $rk = $L['rk'];
     $name = $L['name'];
     $doc = $L['doc'];
+    // The record's own name is what a city is read against ("The Cleveland Seed"): the table's, else the document's.
+    if (trim((string) $name) === '' && is_array($doc)) $name = (string) ($doc['identification']['name'] ?? ($doc['identification']['currentName'] ?? ''));
     $is_rec = $unit[0] === 'r';
     if ($is_rec && !$doc) {
         $S['skipped']['no_doc'] = ($S['skipped']['no_doc'] ?? 0) + count($L['W']) + count($L['F']) + count($L['N']);
         return 'none';
     }
-    $ctx = $is_rec ? array('fid' => $fid, 'record_name' => $name) : array();
+    $ctx = $is_rec ? array('fid' => $fid, 'record_name' => $name) : ($name !== '' ? array('record_name' => $name) : array());
 
     // The doc with the held items laid over it; the held and kept items of every queue as shapes.
     $docH = $doc;
@@ -891,7 +941,7 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
     $onhand = $doc ? kop_fact_onhand($doc, $fid, $L['held_w'], $L['kept_n'], $L['news_urls']) : array();
     $other = array();    // held Fornits items: on hand for the Woodbury and news items
     foreach ($L['held_f'] as $h) {
-        $f = kop_fact_shape('fornits', $h, array('fid' => $fid, 'state' => 'held'));
+        $f = kop_fact_shape('fornits', $h, array('fid' => $fid, 'state' => 'held', 'record_name' => $name));
         if ($f) { $onhand[] = $f; $other[] = $f; }
     }
     foreach ($onhand as $o) {
@@ -1090,7 +1140,14 @@ function kop_fold_unit($unit, $apply, array &$S, array $x) {
             kop_fold_example($S, 'folded', array('record' => $rk, 'name' => $name, 'queue' => $q, 'line' => kop_fold_cut($items[$m]['text'], 160),
                 'into' => kop_fold_cut($kf['text'], 160), 'how' => $how[$items[$m]['id']] ?? ''));
         }
-        if ($apply) kop_fold_write_group($kept, $mem, $how);
+        $fnews = kop_fold_found_news($items, $members, $keep);
+        $found = null;
+        if ($fnews) {
+            $fr = $ref['news:' . $fnews['id']];
+            $found = array('id' => kop_fold_mid('news', $fr['row']), 'text' => kop_fold_cut($fnews['core'] !== '' ? $fnews['core'] : $fnews['text'], 300), 'standing' => 'found');
+            $S['found_marked'] = ($S['found_marked'] ?? 0) + 1;
+        }
+        if ($apply) kop_fold_write_group($kept, $mem, $how, $found);
     }
     return $ai_state;
 }
@@ -1280,6 +1337,11 @@ function kop_fold_unfold_kept($kq, $kpkey, $mid) {
         $extra = json_decode((string) $k['extra'], true) ?: array();
         $extra['folded'] = array_values(array_filter((array) ($extra['folded'] ?? array()), function ($f) use ($mid) { return ($f['id'] ?? '') !== $mid; }));
         if (!$extra['folded']) unset($extra['folded']);
+        if (!empty($extra['found']) && ($extra['found']['id'] ?? '') === $mid) {
+            $prev = (string) ($extra['found']['prev'] ?? '');
+            unset($extra['found']);
+            if ($prev === '') unset($extra['standing']); else $extra['standing'] = $prev;
+        }
         $wpdb->update(kop_wbf_table(), array('extra' => wp_json_encode($extra), 'evidence' => wp_json_encode(array_values(kop_fold_remove_ev(kop_wbf_evidence($k), $mid)))), array('pkey' => $kpkey));
         return;
     }
@@ -1290,6 +1352,7 @@ function kop_fold_unfold_kept($kq, $kpkey, $mid) {
         $a = is_array($a) ? $a : array();
         $folds = array_values(array_filter((array) ($a['folds'] ?? array()), function ($f) use ($mid) { return ($f['id'] ?? '') !== $mid; }));
         if ($folds) $a['folds'] = $folds; else unset($a['folds']);
+        if (!empty($a['found']) && ($a['found']['id'] ?? '') === $mid) unset($a['found']);
         $wpdb->update(kop_fornits_items_table(), array('applied' => $a ? wp_json_encode($a) : null), array('pkey' => $kpkey));
     }
 }

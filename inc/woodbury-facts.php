@@ -393,14 +393,38 @@ function kop_wbf_words($s) {
     return array_values(array_unique(array_diff($m[0], $stop)));
 }
 
-/** Whether two lines say the same: nearly the same words, and every number of the first in the second. */
-function kop_wbf_text_same($a, $b) {
+/** The full dates a text gives, as YYYY-MM-DD: "2026-07-06" and "July 6, 2026". */
+function kop_wbf_full_dates($s) {
+    $s = (string) $s;
+    $out = array();
+    if (preg_match_all('/\b((?:19|20)\d\d)-(\d\d)-(\d\d)\b/', $s, $m, PREG_SET_ORDER)) {
+        foreach ($m as $d) $out[] = $d[1] . '-' . $d[2] . '-' . $d[3];
+    }
+    if (preg_match_all('/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+((?:19|20)\d\d)\b/i', $s, $m, PREG_SET_ORDER)) {
+        foreach ($m as $d) {
+            $mon = (int) date('n', strtotime(substr($d[1], 0, 3) . ' 1 2000'));
+            $out[] = $d[3] . '-' . sprintf('%02d', $mon) . '-' . sprintf('%02d', (int) $d[2]);
+        }
+    }
+    return array_values(array_unique($out));
+}
+
+/**
+ * Whether two lines say the same: nearly the same words, and every number of the first in the second. Two lines that give
+ * different full dates, or name different campuses or branches ($program is the record's own name, which lets "The Cleveland
+ * Seed" and "The Seed of St. Petersburg" be told apart), are two events worded alike, never the same.
+ */
+function kop_wbf_text_same($a, $b, $program = '') {
     $x = kop_wbf_words($a);
     $y = kop_wbf_words($b);
     if (count($x) < 5 || count($y) < 5) return false;
     preg_match_all('/\d+(?:\.\d+)?/', str_replace(',', '', (string) $a), $na);
     preg_match_all('/\d+(?:\.\d+)?/', str_replace(',', '', (string) $b), $nb);
     if (array_diff($na[0], $nb[0])) return false;
+    $da = kop_wbf_full_dates($a);
+    $db = kop_wbf_full_dates($b);
+    if ($da && $db && !array_intersect($da, $db)) return false;
+    if (function_exists('kop_dd_places_clash') && kop_dd_places_clash(kop_dd_campuses((string) $a, $program), kop_dd_campuses((string) $b, $program))) return false;
     $both = count(array_intersect($x, $y));
     $small = min(count($x), count($y));
     if ($both === count($x)) return true;
@@ -542,13 +566,15 @@ function kop_wbf_list_covers(array $doc, $path, $value) {
     if ($incident) {
         // The same event told by another source (the same kind in the same month, mostly the same words).
         foreach ((array) kop_wbf_get($doc, 'criticalIncidents.customIncidents') as $line) {
-            if (is_string($line) && kop_dd_same_event($line, $text)) return 'the record has this event: ' . mb_substr(trim($line), 0, 160);
+            if (is_string($line) && kop_dd_same_event($line, $text, (string) ($doc['identification']['name'] ?? ''))) return 'the record has this event: ' . mb_substr(trim($line), 0, 160);
         }
     }
     if ($path !== 'notes' && !$incident) return '';
 
     list($body, $year) = kop_wbf_text_core($text, $incident);
     if ($body === '') return '';
+    $program = (string) ($doc['identification']['name'] ?? '');
+    $lead_day = preg_match('/^(?:19|20)\d\d-\d\d-\d\d\b/', trim($text), $m0) ? $m0[0] : '';
     $pool = array();
     foreach (array('notes', 'operatingPeriod.notes', 'criticalIncidents.customIncidents', 'memberships', 'licensing', 'accreditations.current', 'accreditations.past', 'certifications') as $p) {
         foreach ((array) kop_wbf_get($doc, $p) as $line) {
@@ -559,7 +585,9 @@ function kop_wbf_list_covers(array $doc, $path, $value) {
     foreach ($pool as $line) {
         list($b, $y) = kop_wbf_text_core($line, (bool) preg_match('/^(?:Reported\s+)?(?:19|20)\d\d\b/', $line));
         if ($incident && $year && $y && $year !== $y) continue;
-        if (kop_wbf_text_same($body, $b)) return 'the record says the same: ' . mb_substr(trim($line), 0, 160);
+        // Two different full days are two events, however alike the words ("2026-07-06 ... Springville", "2026-07-17 ... Provo campus").
+        if ($incident && $lead_day !== '' && preg_match('/^(?:19|20)\d\d-\d\d-\d\d\b/', trim($line), $ld) && $ld[0] !== $lead_day) continue;
+        if (kop_wbf_text_same($body, $b, $program)) return 'the record says the same: ' . mb_substr(trim($line), 0, 160);
     }
     if ($incident) return '';
 
@@ -849,6 +877,45 @@ function kop_wbf_value_same($path, $a, $b) {
 }
 
 /**
+ * A staff value with the roles of the cards folded into it (extra.folded[].staff = {name, role, pastJobs}, written by
+ * inc/fact-fold.php) as its role history: each other role becomes a past job with its years, as a second source's role does
+ * (kop_wbf_staff_merge()). A folded member whose name carries another generation suffix ("III", "Jr.", "Sr.") is left out.
+ */
+function kop_wbf_staff_with_folded(array $value, array $extra, array $doc) {
+    $name = (string) ($value['name'] ?? '');
+    foreach ((array) ($extra['folded'] ?? array()) as $fo) {
+        $st = is_array($fo) && is_array($fo['staff'] ?? null) ? $fo['staff'] : null;
+        if (!$st || kop_dd_suffix($name) !== kop_dd_suffix((string) ($st['name'] ?? ''))) continue;
+        list($role, $jobs) = kop_wbf_staff_merge(array('role' => (string) ($value['role'] ?? ''), 'pastJobs' => (string) ($value['pastJobs'] ?? '')),
+            array('role' => (string) ($st['role'] ?? ''), 'pastJobs' => (string) ($st['pastJobs'] ?? '')), $doc);
+        // "Director" inside "Executive Director" reads as one title; the years still say it was another stretch of the person's time there.
+        $fy = preg_match('/\(([^()]*)\)\s*$/', (string) ($st['role'] ?? ''), $ym) && preg_match('/(?:19|20)\d\d(?:\s*[-\x{2013}]\s*(?:(?:19|20)\d\d|present))?/iu', $ym[1], $yy) ? $yy[0] : '';
+        if ($fy !== '' && strpos($role . ' ' . $jobs, $fy) === false) $jobs = kop_dd_join_jobs($jobs, kop_wbf_role_job((string) $st['role'], $doc));
+        $value['role'] = $role;
+        $value['pastJobs'] = $jobs;
+    }
+    return $value;
+}
+
+/** A telling without its "alleged" ("allegedly hit" -> "hit"; "alleged abuse" -> "abuse"): the found wording of a card a found telling was folded into. */
+function kop_wbf_clear_alleged($line) {
+    $line = (string) $line;
+    // The citation at the end ("(Tribune, "Alleged abuse at X", 2026-06-01)") is left as it is.
+    $cite = '';
+    if (substr(rtrim($line), -1) === ')') {
+        $depth = 0;
+        for ($i = strlen($line) - 1; $i >= 0; $i--) {
+            if ($line[$i] === ')') $depth++;
+            elseif ($line[$i] === '(' && --$depth === 0) { $cite = ' ' . substr($line, $i); $line = substr($line, 0, $i); break; }
+        }
+    }
+    $s = preg_replace('/\b(?:allegedly|alleged)\s+/i', '', $line);
+    $s = preg_replace('/\s*,?\s*\(?\ballegedly\b\)?/i', '', $s);
+    $s = preg_replace('/\s+([,.;])/', '$1', $s);
+    return trim(preg_replace('/ {2,}/', ' ', $s)) . $cite;
+}
+
+/**
  * A role at this program written as a past job: "Founder (2021, HEAL)" ->
  * "Founder - Canyon State Academy (2021)", the shape the builds give pastJobs.
  */
@@ -870,6 +937,12 @@ function kop_wbf_role_job($role, array $doc) {
  */
 function kop_wbf_doc_apply(array &$doc, array $r) {
     $value = kop_wbf_row_value($r);
+    $extra0 = json_decode((string) ($r['extra'] ?? ''), true);
+    $extra0 = is_array($extra0) ? $extra0 : array();
+    // A telling kept with a "found" one folded into it (inc/fact-fold.php) is written with the found wording: only the "alleged" goes.
+    if (!empty($extra0['found']) && $r['op'] === 'add_list' && is_string($value)) $value = kop_wbf_clear_alleged($value);
+    // A kept staff card takes the roles and years of the cards folded into it (the record's staff entry keeps the role history).
+    if ($r['op'] === 'add_staff' && is_array($value)) $value = kop_wbf_staff_with_folded($value, $extra0, $doc);
     $done = array('op' => $r['op'], 'path' => $r['path'], 'notes' => array());
     $add_note = function ($path, $line) use (&$doc, &$done) {
         $list = &kop_wbf_ref($doc, $path);
@@ -891,8 +964,10 @@ function kop_wbf_doc_apply(array &$doc, array $r) {
             foreach ($list as $i => $s) {
                 $s = is_array($s) ? $s : array('name' => (string) $s, 'role' => '', 'pastJobs' => '');
                 // Another source's spelling of someone listed ("Jim Omer", "Adam McClain", "Angela Agundez (Smith)") is that person.
-                if (($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) || kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))
-                    || kop_dd_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))) {
+                // "John Smith III" and "John Smith Jr." are never the plain "John Smith".
+                if ((($key !== '' && kop_wbf_person_key($s['name'] ?? '') === $key) || kop_wbf_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? ''))
+                    || kop_dd_same_person((string) ($value['name'] ?? ''), (string) ($s['name'] ?? '')))
+                    && kop_dd_suffix((string) ($value['name'] ?? '')) === kop_dd_suffix((string) ($s['name'] ?? ''))) {
                     $before = array('role' => (string) ($s['role'] ?? ''), 'pastJobs' => (string) ($s['pastJobs'] ?? ''),
                         'source' => $s['source'] ?? null, 'sourceUrl' => $s['sourceUrl'] ?? null);
                     list($role, $jobs) = kop_wbf_staff_merge($s, (array) $value, $doc);

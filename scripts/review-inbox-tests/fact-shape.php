@@ -59,6 +59,17 @@ function kop_test_fact_shape(callable $check) {
     $p1 = $inc('2026-07-06: License action: Utah officials revoked the license of the Provo campus.', 'license_action', 302, '2026-07-10');
     $check('fact-shape: Springville and Provo campus revocations are kept apart (places)', kop_fact_differs($s1, $p1) === 'places' && kop_fact_rule_same($s1, $p1) === '' && !kop_fact_close($s1, $p1));
 
+    // 2b. A city before or after the program's name is a place: three branches of one chain on the record "The Seed".
+    $seed = function ($summary) { return kop_fact_shape('fornits', array('pkey' => 'sd' . md5($summary), 'topic_id' => 6, 'kind' => 'lead', 'facility_id' => 77, 'post_n' => 1, 'post_date' => '2004-05-06', 'author' => 'Sam',
+        'value' => json_encode(array('type' => 'closure', 'year' => '1990', 'summary' => $summary, 'url' => ''))), array('fid' => 77, 'record_name' => 'The Seed')); };
+    $sc = $seed('The Cleveland Seed closed');
+    $sp = $seed('The Seed closed');
+    $ss = $seed('The Seed of St. Petersburg closed');
+    $check('fact-shape: The Cleveland Seed, The Seed and The Seed of St. Petersburg: two named places never meet, a telling with none meets either',
+        $sc['place'] === array('cleveland') && $ss['place'] === array('st petersburg') && $sp['place'] === array()
+        && kop_fact_differs($sc, $ss) === 'places' && kop_fact_rule_same($sc, $ss) === ''
+        && kop_fact_rule_same($sc, $sp) !== '' && kop_fact_rule_same($sp, $ss) !== '' && !kop_fact_close($sc, $ss) && kop_fact_differs($sc, $sp) === '');
+
     // 3. A closure three ways.
     $c1 = kop_fact_shape('wbf', $w('set_closed', 'operatingPeriod.status', array('endYear' => 2017), array(), array(), $fid));
     $row = array('pkey' => 'fl1', 'topic_id' => 5, 'kind' => 'lead', 'facility_id' => $fid, 'post_n' => 3, 'post_date' => '2005-03-04', 'author' => 'Sam',

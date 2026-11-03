@@ -397,6 +397,22 @@ Nothing here changes a record: `held` stays the only state the write-up reads (`
     naming one record exactly gets `facility_id`; when `kop_nf_wbf_row()` makes a card for it the card is filed
     (`kop_nf_file_wbf()`) and the fact becomes `route 'facility'`, `status 'filed'`, `wbf_pkey`. What Undo needs is the
     `kop_auto_connect` note.
+  - *Company link* (`kop_nf_link_companies()`, hourly auto-connect pass `news-facts-companies`, mark source `news-facts-company`, key = fact id,
+    note `{oid, lines}`): a waiting `company` fact (or a `facility` fact that is no program's name) whose subject is exactly one operator's name key
+    (`kop_operators`: name, current name, other names; distinctive; one holder) is filed as a cited note line on the company
+    (`kop_wbc_add_notes('company')`, the way Woodbury Facts files on an existing company) and becomes `route 'company'`, `status 'filed'`
+    (no `facility_id`, no card). Undo (Facts from news item, Recently done as source `news-facts`): `kop_nf_undo_link()` takes the line off
+    (`kop_wbc_remove_notes()`, only the lines this link added), the fact is `route 'waiting'`, `status 'pending'`, `reviewed_by` the person; the
+    mark becomes `undone`, so it is not linked again. `kop_rinbox_nf_act()` tries it before `kop_nf_undo_auto()`.
+  - *Person link* (`kop_nf_link_people()`, pass `news-facts-people`): a waiting `person` fact whose name is a staff entry
+    (`kop_dd_same_person()`) of exactly one record, which the article is linked to (`news_facility_links`) or the fact's words name exactly, and
+    whose state is one the article is about (`kop_nf_article_states()`): `kop_nf_link_one()`, the same writes, `news-facts` mark and Undo
+    (`kop_nf_unlink()`) as the *Link* above, with `how` = `person-article` or `person-named` in the note. Agency subjects never.
+  - *State rule* (`kop_autoconn_exact_record(..., $states)`, from `kop_nf_record_for()`): an exact name whose record's state is none of the states
+    the article is about (location, linked records, states named in the fact) is `'state'`, not linked.
+  - *Woodbury Reports page link* (`kop_autoconn_woodbury_nomatch()`, pass `woodbury-nomatch`, mark and log source `woodbury-reports`, key = ckey):
+    a pending `unmatched` page whose header is exactly one record's name (and the page's state, when it has one, is the record's) is filed with
+    `kop_wb_file_many()` as any filed page; Undo is the page's own `kop_wb_undo()`, and the mark stops a second filing.
   - *Woodbury link* (`kop_autoconn_woodbury_facts()`, hourly auto-connect, source `woodbury-facts-link`, key = pkey): a pending
     Woodbury Facts item with `facility_id = 0` whose program is exactly one record's name (`kop_autoconn_exact_record()` 'exact')
     gets `facility_id`, `match_kind 'id'` and `extra.auto_linked` (what it was). `kop_wbf_sync()` keeps such a row as it keeps an
@@ -404,6 +420,15 @@ Nothing here changes a record: `held` stays the only state the write-up reads (`
     Young adult and consultant items stay out. The fold reads the new record on its next pass.
   - *Fold rules (2026-11-03)*: an empty date never keeps tellings apart; alleged and found fold and the found one is kept
     (`kop_fold_pick()`); a closure order never folds or clears against a closure (also `kop_wbf_on_record()`).
+  - *Places, roles, marks (2026-11-03)*: two tellings naming different places (`kop_dd_campuses()` with the record's name:
+    "The Cleveland Seed" / "The Seed of St. Petersburg"; "Mount Hope" whole) never fold or clear each other, in the rules, the
+    on-hand check and the AI override; `kop_wbf_text_same()` also needs the same full dates. A kept staff card stores each folded
+    member's role and years (`extra.folded[].staff`, Fornits `applied.folds[].staff`), and `kop_wbf_doc_apply()` writes them as the
+    person's role history (`kop_wbf_staff_with_folded()`); "III" / "Jr." / "Sr." never fold or merge with the plain name
+    (`kop_dd_suffix()`). A Fornits card keeps `applied.ai_differs`, `applied.folds` and `applied.found` through approve and Undo
+    (`kop_fornits_applied_carry()`). An alleged card whose only found telling is a waiting news fact stays, takes
+    `extra.found` / `applied.found` + standing "found", and is written with the "alleged" cleared; `kop_fold_unfold_kept()`
+    removes the mark when that news fact is undone.
 - **Undo:** a card's action or Recently done: Woodbury `kop_wbf_undo()` / the inbox `undo` action, Fornits `kop_fornits_undo()`,
   news facts `kop_nf_undo_auto()`. A folded member goes back to `pending` with the person as `reviewed_by` (and
   `extra.fold_undone`), its citations come off the kept card (`kop_fold_unfold_kept()`, only while that card is still

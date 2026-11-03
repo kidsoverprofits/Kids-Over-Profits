@@ -28,7 +28,11 @@
  *     8,561 sent in approved on 2026-10-14..16 had no summary and wrong dates;
  *     api/undo-auto-drive-news.php took them back); a person adds them.
  *   - Waiting news facts (Review inbox > Facts from news) whose subject is exactly one record's name: linked to it and
- *     filed on Woodbury Facts (kop_nf_link_waiting(), inc/fact-fold.php; Undo unlinks).
+ *     filed on Woodbury Facts (kop_nf_link_waiting(), inc/fact-fold.php; Undo unlinks). Then those about a company that is exactly
+ *     one operator's name (filed as a cited note on the company, Undo takes it off) and those about a person on the staff of one
+ *     record the article is linked to or the fact names (linked like the first). Agencies never; a record in another state than the
+ *     article's is refused (kop_autoconn_exact_record() $states).
+ *   - Woodbury Reports pages with no record whose header is exactly one record's name, in the page's state (kop_autoconn_woodbury_nomatch()).
  * Woodbury Facts adds its exact-name items in its own run (kop_wbf_auto_run()); items with no record whose program is exactly
  * one record's name are linked to it first (kop_autoconn_woodbury_facts(), source woodbury-facts-link; Undo unlinks).
  *
@@ -114,10 +118,10 @@ function kop_autoconn_key($s) {
     return preg_replace('/ (inc|llc|ltd|co|corp|l l c)$/', '', $s);
 }
 
-/** name key => [facility id => true] over every record's names (name, current, other and past names). */
-function kop_autoconn_name_index(PDO $pdo) {
+/** name key => [facility id => true] over every record's names (name, current, other and past names). Kept for the run; $fresh (tests) reads again. */
+function kop_autoconn_name_index(PDO $pdo, $fresh = false) {
     static $index = null;
-    if ($index !== null) return $index;
+    if ($index !== null && !$fresh) return $index;
     $index = array();
     foreach ($pdo->query('SELECT id, name, json_data FROM facilities_v2') as $f) kop_autoconn_index_add($index, $f);
     return $index;
@@ -193,25 +197,47 @@ function kop_autoconn_distinctive($name) {
     return count($words) >= 3 && (bool) array_intersect($words, $place);
 }
 
+/** A record's state code ("UT"), or '' when the record has none or is not there. */
+function kop_autoconn_record_state(PDO $pdo, $fid) {
+    try {
+        $stmt = $pdo->prepare('SELECT state FROM facilities_v2 WHERE id = ?');
+        $stmt->execute(array((int) $fid));
+        return strtoupper(trim((string) $stmt->fetchColumn()));
+    } catch (Throwable $e) {
+        return '';
+    }
+}
+
 /**
  * The one record a name is, by its exact key and nothing looser (docs/claude/fact-shape.md 7.1): no partial name, no
  * distinctive-word guess. Returns array(record id, how), id 0 unless how is 'exact' or 'article':
  * exact (one record holds the key), article (several do and exactly one of $prefer_ids is among them), ambiguous (several,
- * no tie-break), generic (the name says only generic words, kop_autoconn_distinctive()), none.
+ * no tie-break), generic (the name says only generic words, kop_autoconn_distinctive()), state (the one record is in another
+ * state than the source: $states, state codes the source is known to be about; empty = not known, nothing is refused;
+ * "Child and Family Services" of Manitoba is not New York's), none.
  * $index is for tests: a name key => [record id => true] map in place of kop_autoconn_name_index().
  */
-function kop_autoconn_exact_record(PDO $pdo, $name, array $prefer_ids = array(), $index = null) {
+function kop_autoconn_exact_record(PDO $pdo, $name, array $prefer_ids = array(), $index = null, array $states = array()) {
     $key = kop_autoconn_key($name);
     if ($key === '') return array(0, 'none');
     $holders = ($index !== null ? $index : kop_autoconn_name_index($pdo))[$key] ?? array();
     if (!$holders) return array(0, 'none');
     if (!kop_autoconn_distinctive($name)) return array(0, 'generic');
-    if (count($holders) === 1) return array((int) key($holders), 'exact');
-    $hit = array();
-    foreach ($prefer_ids as $id) {
-        if (isset($holders[(int) $id])) $hit[(int) $id] = true;
+    if (count($holders) === 1) {
+        $found = array((int) key($holders), 'exact');
+    } else {
+        $hit = array();
+        foreach ($prefer_ids as $id) {
+            if (isset($holders[(int) $id])) $hit[(int) $id] = true;
+        }
+        if (count($hit) !== 1) return array(0, 'ambiguous');
+        $found = array((int) key($hit), 'article');
     }
-    return count($hit) === 1 ? array((int) key($hit), 'article') : array(0, 'ambiguous');
+    if ($states) {
+        $st = kop_autoconn_record_state($pdo, $found[0]);
+        if ($st !== '' && !in_array($st, array_map('strtoupper', $states), true)) return array(0, 'state');
+    }
+    return $found;
 }
 
 /* ---- Woodbury Reports pages ------------------------------------------------- */
@@ -256,6 +282,53 @@ function kop_autoconn_woodbury($deadline) {
             $n++;
         } catch (Throwable $e) {
             kop_autoconn_mark('woodbury-reports', $r['ckey'], (string) (int) $r['facility_id'], 'failed', $e->getMessage());
+        }
+    }
+    return $n;
+}
+
+/**
+ * Woodbury Reports pages with no record (kind 'unmatched', "No facility match") whose header is exactly one record's name,
+ * by kop_autoconn_exact_record(): the full key, distinctive, one holder (several holders stay), and the page's state, when it has one, is the record's [owner, 2026-11-03]. The build
+ * matched headers once; a record named or renamed since is found here. [row, record id].
+ */
+function kop_autoconn_woodbury_nomatch_rows($limit = 200) {
+    global $wpdb;
+    $rows = (array) $wpdb->get_results('SELECT * FROM ' . kop_wb_table() . " WHERE status = 'pending' AND facility_id = 0 AND kind = 'unmatched'
+        AND (target_kind = 'facility' OR target_kind = '') AND header <> '' AND (alternatives IS NULL OR alternatives = '' OR alternatives = '[]')
+        AND (reviewed_by = '' OR reviewed_by IS NULL) ORDER BY id", ARRAY_A);
+    $tried = kop_autoconn_tried('woodbury-reports');
+    $pdo = kop_seed_pdo();
+    $out = array();
+    foreach ($rows as $r) {
+        if (isset($tried[$r['ckey']])) continue;
+        $states = preg_match('/^[A-Za-z]{2}$/', trim((string) $r['facility_state'])) ? array(strtoupper(trim($r['facility_state']))) : array();
+        list($fid, $how) = kop_autoconn_exact_record($pdo, $r['header'], array(), null, $states);
+        if ($how !== 'exact' || $fid <= 0) continue;
+        $out[] = array($r, $fid);
+        if (count($out) >= $limit) break;
+    }
+    return $out;
+}
+
+/** File those pages under their record (kop_wb_file_many()); Undo is the page's own (kop_wb_undo()), in Recently done as "woodbury-reports". */
+function kop_autoconn_woodbury_nomatch($deadline) {
+    if (!function_exists('kop_wb_file_many')) return 0;
+    kop_wb_ensure_table();
+    $n = 0;
+    $pdo = kop_seed_pdo();
+    foreach (kop_autoconn_woodbury_nomatch_rows() as $row) {
+        list($r, $fid) = $row;
+        if (microtime(true) > $deadline) break;
+        try {
+            $name = (string) $pdo->query('SELECT name FROM facilities_v2 WHERE id = ' . (int) $fid)->fetchColumn();
+            kop_wb_file_many($r, array((string) (int) $fid), 'auto');
+            kop_autoconn_mark('woodbury-reports', $r['ckey'], (string) (int) $fid, 'done', 'no-match page');
+            kop_autoconn_log('woodbury-reports', $r['ckey'], kop_wb_title($r, $name),
+                'Filed under ' . $name . ': the page had no record, and its header "' . $r['header'] . '" is exactly that record\'s name.');
+            $n++;
+        } catch (Throwable $e) {
+            kop_autoconn_mark('woodbury-reports', $r['ckey'], (string) (int) $fid, 'failed', $e->getMessage());
         }
     }
     return $n;
@@ -817,6 +890,32 @@ function kop_autoconn_news_facts($deadline) {
     return (int) $r['linked'];
 }
 
+/**
+ * Waiting news facts about a company that is exactly one operator's name in kop_operators (name, current and other names; distinctive;
+ * one holder) and no program's: filed as a cited note on that company (kop_nf_link_companies(), inc/news-facts.php; owner, 2026-11-03).
+ * Undo (Facts from news, Recently done) takes the note line off again.
+ */
+function kop_autoconn_news_companies($deadline) {
+    if (!function_exists('kop_nf_link_companies') || !function_exists('kop_nf_pdo') || !kop_nf_pdo()) return 0;
+    $pdo = kop_nf_pdo();
+    kop_nf_ensure_tables($pdo);
+    $r = kop_nf_link_companies($pdo, true, max(5, (int) ($deadline - microtime(true))));
+    return (int) $r['linked'];
+}
+
+/**
+ * Waiting news facts about a person on the staff of exactly one record that the article is linked to or the fact names exactly:
+ * linked to it and filed on Woodbury Facts like any linked fact (kop_nf_link_people(), inc/news-facts.php; owner, 2026-11-03).
+ * Agencies never. Undo is the engine's (kop_nf_unlink()).
+ */
+function kop_autoconn_news_people($deadline) {
+    if (!function_exists('kop_nf_link_people') || !function_exists('kop_nf_pdo') || !kop_nf_pdo()) return 0;
+    $pdo = kop_nf_pdo();
+    kop_nf_ensure_tables($pdo);
+    $r = kop_nf_link_people($pdo, true, max(5, (int) ($deadline - microtime(true))));
+    return (int) $r['linked'];
+}
+
 /* ---- The run ---------------------------------------------------------------- */
 
 /** Connect what is exact in every queue, cheapest first, until $seconds run out. [source => count]. */
@@ -830,8 +929,10 @@ function kop_autoconn_run($seconds = 120) {
         foreach (array('submissions' => 'kop_autoconn_submissions', 'wiki-links' => 'kop_autoconn_wiki','state-lists' => 'kop_autoconn_state_lists',
                 'nonprofit-filings' => 'kop_autoconn_nonprofits', 'business-filings' => 'kop_autoconn_businesses',
                 'fornits' => 'kop_autoconn_fornits', 'woodbury-reports' => 'kop_autoconn_woodbury', 'woodbury-facts-link' => 'kop_autoconn_woodbury_facts',
+                'woodbury-nomatch' => 'kop_autoconn_woodbury_nomatch',
                 'drive-docs' => 'kop_autoconn_drive_docs', 'drive-docs-companies' => 'kop_autoconn_drive_companies',
-                'news-facts' => 'kop_autoconn_news_facts') as $source => $fn) {
+                'news-facts' => 'kop_autoconn_news_facts', 'news-facts-companies' => 'kop_autoconn_news_companies',
+                'news-facts-people' => 'kop_autoconn_news_people') as $source => $fn) {
             if (microtime(true) > $deadline) break;
             try {
                 $done[$source] = $fn($deadline);
