@@ -80,10 +80,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # facilities_mentioned at insert (inc/source-submissions.php) and, for ones already waiting, in the hourly 'submissions' pass. The item still waits
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-auto-connect.php [--list]   # every pick is exact, wiki link + log + undo, on a scratch copy
 # Pending items already in our records leave the waiting list: news/lawsuits/bills (inc/review-inbox/_on-file.php: same link on a kept
-# record or in a facility's resourceLinks, same headline+outlet, case number, bill) go to the Submissions Review "Already on file" tab
+# record or in a facility's resourceLinks, same headline+outlet, case number, bill, or a state inspection report we hold:
+# kop_on_file_inspection_matches(), same report_url on a .gov/.us host, FL DJJ by its /content/download/<n>/ number) go to the Submissions Review "Already on file" tab
 # Any other queue gives its source an 'on_file' => fn(): [key => {label, url}] (kop_rinbox_on_file_keys()): those leave the waiting view and
 # its count for an "Already on file" view. Facilities from News (article already listed on the record meant), Websites sent in (link on a
-# facility or kept record), State Lists (listed name now exactly one record's in that state: own tab, Link offered first, kop_sl_on_file())
+# facility or kept record, or an inspection report we hold, e.g. a DJJ SPEP PDF), State Lists (listed name now exactly one record's in that state: own tab, Link offered first, kop_sl_on_file())
 # Woodbury Facts and Fornits: what Add would find already on the record (kop_wbf_on_record(); a different value is a conflict and waits),
 # filtered in their own SQL ('on_file_in_list'), cached by kop_on_file_cached() until the queue or any record changes
 # Conflicts are always marked: an item's 'conflict' (another value on the record, an open record for a closure, another role, a

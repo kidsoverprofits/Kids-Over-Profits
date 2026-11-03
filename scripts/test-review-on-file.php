@@ -101,6 +101,33 @@ check(isset($b[4]), 'bill #4 on file: the kept bill\'s address');
 
 check(kop_on_file_ids($pdo, 'news') === array(2, 6, 8, 10), 'ids in order: ' . implode(',', kop_on_file_ids($pdo, 'news')));
 check(kop_on_file_pending($pdo, 'wiki') === array(), 'other types: nothing');
+check(kop_on_file_inspection_matches($pdo, array('djj.state.fl.us/content/download/1/file/x.pdf')) === array(), 'no inspection tables: nothing, no error');
+
+// State inspection reports (Websites sent in passes $websites = true).
+$pdo->exec("CREATE TABLE inspection_facilities (id INTEGER PRIMARY KEY, state TEXT, facility_name TEXT)");
+$pdo->exec("CREATE TABLE inspection_reports (id INTEGER PRIMARY KEY, facility_id INTEGER, report_id TEXT, report_date TEXT, report_url TEXT, categories_json TEXT)");
+$pdo->exec("INSERT INTO inspection_facilities VALUES (1, 'FL', 'Alachua Academy'), (2, 'PA', 'Ranch School'), (3, 'FL', 'Psych Hospital')");
+$st = $pdo->prepare("INSERT INTO inspection_reports (id, facility_id, report_id, report_date, report_url, categories_json) VALUES (?, ?, ?, ?, ?, ?)");
+$st->execute(array(1, 1, '24445', '06/30/2017', '', json_encode(array('source' => 'DJJ', 'report_type' => 'SPEP', 'fiscal_year' => 'FY16-17',
+    'pdf_url' => 'https://www.djj.state.fl.us/content/download/24445/file/FY-2016-17-Alachua-Academy-IOC.pdf?version=2'))));
+$st->execute(array(2, 2, 'r-9', '2024-05-01', 'https://www.dhs.pa.gov/reports/r-9.pdf', '{}'));
+$st->execute(array(3, 3, '777', '08/01/2024', '', json_encode(array('source' => 'AHCA'))));   // a digit id that is not a DJJ file
+$want = array();
+foreach (array(
+    'a' => 'https://fldjj-media.ccplatform.net/content/download/24445/file/fy-2016-17-alachua-academy-ioc.pdf',  // other host, name and no ?version
+    'b' => 'http://dhs.pa.gov/reports/r-9.pdf',                                                                  // http, no www
+    'c' => 'https://www.djj.state.fl.us/content/download/99999/file/new.pdf',                                    // not held
+    'd' => 'https://www.djj.state.fl.us/content/download/777/file/x.pdf',                                        // only an AHCA row has 777
+    'e' => 'https://www.djj.state.fl.us/programs-facilities/residential-facilities/alachua-academy',             // a program page
+) as $key => $url) {
+    foreach (kop_on_file_urls($url, true) as $u) $want[$u][] = $key;
+}
+$w = kop_on_file_match_urls($pdo, $want, '', true);
+check(isset($w['a']) && strpos($w['a']['label'], 'Alachua Academy, SPEP FY16-17') !== false, 'DJJ file on file by its download number' . (isset($w['a']) ? ' -> ' . $w['a']['label'] : ''));
+check(isset($w['b']) && strpos($w['b']['label'], 'PA, Ranch School') !== false, 'same report_url (http, no www) on file');
+check(!isset($w['c']), 'a DJJ file we do not hold stays');
+check(!isset($w['d']), 'a DJJ number matching only a non-DJJ row stays');
+check(!isset($w['e']), 'a DJJ program page stays');
 
 /* ---- The mirror ------------------------------------------------------------ */
 
@@ -123,6 +150,19 @@ if (is_file($mirror)) {
             }
         }
     }
+    // Websites sent in (kop_source posts) that are inspection reports we hold.
+    $want = array();
+    foreach ($real->query("SELECT p.ID, m.meta_value FROM wpdl_posts p JOIN wpdl_postmeta m ON m.post_id = p.ID AND m.meta_key = '_kop_url'
+                            WHERE p.post_type = 'kop_source' AND p.post_status = 'pending'") as $r) {
+        foreach (kop_on_file_urls($r[1], true) as $u) $want[$u][] = (int) $r[0];
+    }
+    $start = microtime(true);
+    $insp = kop_on_file_inspection_matches($real, array_keys($want));
+    $ids = array();
+    foreach ($insp as $u => $hit) foreach ($want[$u] as $id) $ids[$id] = $hit['label'];
+    ksort($ids);
+    printf("  %-12s %4d pending, %3d an inspection report we hold (%.2f s)\n", 'websites', count($want), count($ids), microtime(true) - $start);
+    if (!empty($args['list'])) foreach ($ids as $id => $label) echo "      #$id -> $label\n";
 } else {
     echo "\n(no mirror at $mirror: made-up rows only)\n";
 }

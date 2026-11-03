@@ -14,6 +14,9 @@
  *     links"); a link only mentioned in notes or a staff source does not count
  *   - the same address in a company's operator.resourceLinks ("Materials and
  *     links" on its /operator/ page; {prefix}kop_operators.json_data)
+ *   - a state inspection report we hold (inspection_reports): the same
+ *     report_url, or for Florida DJJ files the same /content/download/<n>/
+ *     number (kop_on_file_inspection_matches())
  *   - news: the same headline from the same outlet (kop_news_find_title_duplicates()'s rule)
  *   - lawsuits: the same case number (with a digit, 5+ characters)
  *   - bills: the same bill number, jurisdiction and session year
@@ -83,6 +86,11 @@ function kop_on_file_fingerprint(PDO $pdo, $type) {
     }
     $parts[] = implode(',', $pdo->query('SELECT COUNT(*), MAX(updated_at) FROM facilities_v2')->fetch(PDO::FETCH_NUM));
     $parts[] = kop_on_file_operators_fp($pdo);
+    try {
+        $parts[] = implode(',', $pdo->query('SELECT COUNT(*), MAX(id) FROM inspection_reports')->fetch(PDO::FETCH_NUM));
+    } catch (Throwable $e) {
+        $parts[] = '';
+    }
     return md5($type . '|' . implode('|', $parts));
 }
 
@@ -275,7 +283,87 @@ function kop_on_file_match_urls(PDO $pdo, array $want, $self_type = '', $website
             // No companies table here: the facilities and records above still count.
         }
     }
+
+    // A state inspection report we already hold (inspection_reports, shown on the state's reports page).
+    foreach (kop_on_file_inspection_matches($pdo, array_keys($want)) as $u => $hit) {
+        foreach ($want[$u] as $id) $mark($id, $hit['label'], $hit['url']);
+    }
     return $found;
+}
+
+/**
+ * Normalized addresses (kop_on_file_urls()) that are a state inspection report we
+ * hold: [address => {label, url}]. Two lookups, both on the wanted addresses only:
+ *   - Florida DJJ files (www.djj.state.fl.us or fldjj-media.ccplatform.net
+ *     /content/download/<n>/...): the scraper keeps <n> as the report_id
+ *     (kop-pipeline scrapers/fl_scraper.py _stable_report_id()), the file name and
+ *     ?version= vary between links to the same report.
+ *   - any state: the same report_url, with or without https:// and www.
+ * Nothing when the inspection tables are not here.
+ */
+function kop_on_file_inspection_matches(PDO $pdo, array $addresses) {
+    $out = array();
+    if (!$addresses) return $out;
+    $djj = array();
+    $raw = array();
+    foreach ($addresses as $u) {
+        $u = (string) $u;
+        if (preg_match('#^(?:djj\.state\.fl\.us|fldjj-media\.ccplatform\.net)/content/download/(\d+)/#i', $u, $m)) {
+            $djj[$m[1]][] = $u;
+            continue;
+        }
+        // report_url has no index, so only a state agency's address is looked up there.
+        if (!preg_match('#^[^/]*(?:\.gov|\.us|\.my\.site\.com)(?:[:/]|$)#i', $u)) continue;
+        foreach (array('https://', 'http://', 'https://www.', 'http://www.') as $p) $raw[$p . $u] = $u;
+    }
+    if (!$djj && !$raw) return $out;
+    // Cached until the addresses or the reports change (the scan of report_url is the slow part).
+    try {
+        $fp = implode(',', $pdo->query('SELECT COUNT(*), MAX(id) FROM inspection_reports')->fetch(PDO::FETCH_NUM));
+    } catch (Throwable $e) {
+        return $out;
+    }
+    $ck = 'kop_on_file_insp_' . md5($fp . '|' . implode('|', array_keys($djj)) . '|' . implode('|', array_keys($raw)));
+    $cached = function_exists('get_transient') ? get_transient($ck) : false;
+    if (is_array($cached)) return $cached;
+    $hit = function (array $r) {
+        $cat = json_decode((string) ($r['categories_json'] ?? ''), true);
+        $cat = is_array($cat) ? $cat : array();
+        $what = trim(implode(' ', array_filter(array((string) ($cat['report_type'] ?? ''), (string) ($cat['fiscal_year'] ?? '')))));
+        $date = trim((string) ($r['report_date'] ?? ''));
+        $label = 'Inspection report (' . $r['state'] . ', ' . trim((string) $r['facility_name'])
+            . ($what !== '' ? ', ' . $what : ($date !== '' ? ', ' . $date : '')) . ')';
+        $url = '';
+        if (function_exists('kop_search_inspection_page_url')) $url = (string) kop_search_inspection_page_url((int) $r['facility_id'], (string) $r['facility_name'], (string) $r['state']);
+        if ($url === '' && function_exists('home_url')) $url = home_url('/' . strtolower((string) $r['state']) . '-reports/');
+        return array('label' => $label, 'url' => $url);
+    };
+    $sel = 'SELECT r.facility_id, r.report_id, r.report_url, r.report_date, r.categories_json, f.facility_name, f.state
+              FROM inspection_reports r JOIN inspection_facilities f ON f.id = r.facility_id';
+    try {
+        foreach (array_chunk(array_keys($djj), 200) as $ids) {
+            $q = $pdo->prepare("$sel WHERE f.state = 'FL' AND r.report_id IN (" . implode(',', array_fill(0, count($ids), '?')) . ') ORDER BY r.id');
+            $q->execute(array_map('strval', $ids));
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                if (strpos((string) $r['categories_json'], '"DJJ"') === false) continue;
+                foreach ($djj[(string) $r['report_id']] ?? array() as $u) {
+                    if (!isset($out[$u])) $out[$u] = $hit($r);
+                }
+            }
+        }
+        foreach (array_chunk(array_keys($raw), 400) as $urls) {
+            $q = $pdo->prepare("$sel WHERE r.report_url IN (" . implode(',', array_fill(0, count($urls), '?')) . ') ORDER BY r.id');
+            $q->execute($urls);
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $u = $raw[(string) $r['report_url']] ?? '';
+                if ($u !== '' && !isset($out[$u])) $out[$u] = $hit($r);
+            }
+        }
+    } catch (Throwable $e) {
+        return array(); // the other records still count
+    }
+    if (function_exists('set_transient')) set_transient($ck, $out, HOUR_IN_SECONDS);
+    return $out;
 }
 
 /** The companies table ({prefix}kop_operators), '' when WordPress's prefix is not known. */
