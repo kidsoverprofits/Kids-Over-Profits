@@ -13,7 +13,10 @@
  * or one to create with the name and DJJ-<slug> program the scraper uses, so a
  * later run upserts onto it instead of adding a twin):
  *
- *   - the row and its findings and counts move to the target facility
+ *   - the row and its findings and counts move to the target facility; a
+ *     report about several facilities (a joint QI report, the "JUST / Twin
+ *     Oaks Academy II" audit) stays on (or moves to) one of them and each
+ *     other one gets a copy of it
  *   - when the target already holds the same report_id, the target's copy
  *     stays and takes the reviews the moved copy had; the moved copy goes
  *   - a DJJ-unmatched-* facility left with no reports goes; Inspection Links
@@ -81,12 +84,59 @@ function kop_flclean_fold(PDO $pdo, $rid, $twin, $target_fid, array &$stats) {
     kop_ncclean_drop_reports($pdo, array((int) $rid));
 }
 
+/** The facility id a plan target names (creating it when $apply), null when it changed. */
+function kop_flclean_target(PDO $pdo, array $t, $apply, array &$created, array &$stats) {
+    if (!empty($t['id'])) {
+        $to = kop_flclean_facility($pdo, $t['id']);
+        return ($to && strcasecmp($to['program_name'], $t['program_name']) === 0) ? (int) $to['id'] : null;
+    }
+    $c = (array) ($t['create'] ?? array());
+    if (empty($c['program_name'])) return null;
+    $key = strtolower($c['facility_name'] . '|' . $c['program_name']);
+    if (!isset($created[$key])) {
+        $have = kop_flclean_find($pdo, $c['facility_name'], $c['program_name']);
+        if ($have) {
+            $created[$key] = (int) $have['id'];
+        } elseif ($apply) {
+            $pdo->prepare("INSERT INTO inspection_facilities (state, facility_name, program_name, program_category) VALUES ('FL', ?, ?, ?)")
+                ->execute(array($c['facility_name'], $c['program_name'], (string) ($c['program_category'] ?? '')));
+            $created[$key] = (int) $pdo->lastInsertId();
+            $stats['facilities_created']++;
+        } else {
+            $created[$key] = -(count($created) + 1);
+            $stats['facilities_created']++;
+        }
+    }
+    return $created[$key];
+}
+
+/** The row id of this report on facility $fid (held, or placed earlier in this run), else false. */
+function kop_flclean_holds(PDO $pdo, PDOStatement $twin_q, array $placed, $fid, $report_id, $not_id) {
+    if (isset($placed[$fid . '|' . $report_id])) return $placed[$fid . '|' . $report_id];
+    if ($fid <= 0) return false;
+    $twin_q->execute(array($fid, $report_id, (int) $not_id));
+    return $twin_q->fetchColumn();
+}
+
+/** A copy of report row $rid on facility $fid (every column but the id and the stamps); its new id. */
+function kop_flclean_copy(PDO $pdo, $rid, $fid) {
+    $st = $pdo->prepare('SELECT * FROM inspection_reports WHERE id = ?');
+    $st->execute(array((int) $rid));
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    unset($row['id'], $row['created_at'], $row['updated_at']);
+    $row['facility_id'] = (int) $fid;
+    $cols = array_keys($row);
+    $pdo->prepare('INSERT INTO inspection_reports (' . implode(', ', $cols) . ') VALUES (' . implode(', ', array_fill(0, count($cols), '?')) . ')')
+        ->execute(array_values($row));
+    return (int) $pdo->lastInsertId();
+}
+
 /**
  * Apply (or, with $apply false, only check) the plan. Returns
  * array('stats' => counts, 'skipped' => reasons, 'removed' => facility ids, 'merged' => removed id => facility its reports went to).
  */
 function kop_flclean_run(PDO $pdo, array $plan, $apply) {
-    $stats = array('moved' => 0, 'twins_folded' => 0, 'findings_moved' => 0, 'reviews_kept' => 0,
+    $stats = array('moved' => 0, 'copied' => 0, 'twins_folded' => 0, 'findings_moved' => 0, 'reviews_kept' => 0,
                    'facilities_created' => 0, 'empty_facilities_removed' => 0);
     $skipped = array();
     $created = array();      // lower(name|program) => id (negative in a dry run)
@@ -108,51 +158,49 @@ function kop_flclean_run(PDO $pdo, array $plan, $apply) {
             $from = kop_flclean_facility($pdo, $m['from']['id']);
             if (!$from || $from['program_name'] !== $m['from']['program_name']) { $skipped[] = "report $rid: facility {$m['from']['id']} changed"; continue; }
 
-            if (!empty($m['to']['id'])) {
-                $to = kop_flclean_facility($pdo, $m['to']['id']);
-                if (!$to || strcasecmp($to['program_name'], $m['to']['program_name']) !== 0) { $skipped[] = "report $rid: target {$m['to']['id']} changed or gone"; continue; }
-                $target = (int) $to['id'];
-            } else {
-                $c = (array) $m['to']['create'];
-                $key = strtolower($c['facility_name'] . '|' . $c['program_name']);
-                if (!isset($created[$key])) {
-                    $have = kop_flclean_find($pdo, $c['facility_name'], $c['program_name']);
-                    if ($have) {
-                        $created[$key] = (int) $have['id'];
-                    } elseif ($apply) {
-                        $pdo->prepare("INSERT INTO inspection_facilities (state, facility_name, program_name, program_category) VALUES ('FL', ?, ?, ?)")
-                            ->execute(array($c['facility_name'], $c['program_name'], (string) ($c['program_category'] ?? '')));
-                        $created[$key] = (int) $pdo->lastInsertId();
-                        $stats['facilities_created']++;
-                    } else {
-                        $created[$key] = -(count($created) + 1);
-                        $stats['facilities_created']++;
+            // Every facility the report is about; a plan of the first shape had one ('to' => {...}).
+            $targets = isset($m['to']['id']) || isset($m['to']['create']) ? array($m['to']) : (array) $m['to'];
+            $tids = array();
+            foreach ($targets as $t) {
+                $tid = kop_flclean_target($pdo, $t, $apply, $created, $stats);
+                if ($tid === null) { $skipped[] = "report $rid: target " . ($t['id'] ?? $t['create']['program_name']) . ' changed or gone'; $tids = array(); break; }
+                if (!in_array($tid, $tids, true)) $tids[] = $tid;
+            }
+            if (!$tids) continue;
+            $fid = (int) $from['id'];
+            $home = in_array($fid, $tids, true) ? $fid : $tids[0];
+
+            if ($home !== $fid) {
+                // The target's own copy: one it held, or (seen only here in a dry run) one an earlier move put there.
+                $twin = kop_flclean_holds($pdo, $twin_q, $placed, $home, (string) $row['report_id'], $rid);
+                if ($twin) {
+                    if ($apply) kop_flclean_fold($pdo, $rid, (int) $twin, $home, $stats);
+                    $stats['twins_folded']++;
+                    $rid_now = (int) $twin;
+                } else {
+                    $placed[$home . '|' . $row['report_id']] = $rid;
+                    if ($apply) {
+                        $pdo->prepare('UPDATE inspection_reports SET facility_id = ? WHERE id = ?')->execute(array($home, $rid));
+                        $pdo->prepare('UPDATE inspection_highlights SET facility_id = ? WHERE report_id = ?')->execute(array($home, $rid));
+                        try { $pdo->prepare('UPDATE inspection_report_counts SET facility_id = ? WHERE report_id = ?')->execute(array($home, $rid)); } catch (Throwable $e) {}
                     }
+                    $stats['moved']++;
+                    $rid_now = $rid;
                 }
-                $target = $created[$key];
+                $went[$fid][$home] = ($went[$fid][$home] ?? 0) + 1;
+                $left[$fid] = ($left[$fid] ?? 0) + 1;
+            } else {
+                $placed[$home . '|' . $row['report_id']] = $rid;
+                $rid_now = $rid;
             }
 
-            // The target's own copy: one it held, or (seen only here in a dry run) one an earlier move put there.
-            $twin = $placed[$target . '|' . $row['report_id']] ?? false;
-            if (!$twin && $target > 0) {
-                $twin_q->execute(array($target, (string) $row['report_id'], $rid));
-                $twin = $twin_q->fetchColumn();
+            // The other facilities it is about get a copy of the report (not of its findings: the scan reads the copy).
+            foreach ($tids as $tid) {
+                if ($tid === $home || kop_flclean_holds($pdo, $twin_q, $placed, $tid, (string) $row['report_id'], 0)) continue;
+                $new_id = $apply ? kop_flclean_copy($pdo, $rid_now, $tid) : -$rid;
+                $placed[$tid . '|' . $row['report_id']] = $new_id;
+                $stats['copied']++;
             }
-            if ($twin) {
-                if ($apply) kop_flclean_fold($pdo, $rid, (int) $twin, $target, $stats);
-                $stats['twins_folded']++;
-            } else {
-                $placed[$target . '|' . $row['report_id']] = $rid;
-                if ($apply) {
-                    $pdo->prepare('UPDATE inspection_reports SET facility_id = ? WHERE id = ?')->execute(array($target, $rid));
-                    $pdo->prepare('UPDATE inspection_highlights SET facility_id = ? WHERE report_id = ?')->execute(array($target, $rid));
-                    try { $pdo->prepare('UPDATE inspection_report_counts SET facility_id = ? WHERE report_id = ?')->execute(array($target, $rid)); } catch (Throwable $e) {}
-                }
-                $stats['moved']++;
-            }
-            $fid = (int) $from['id'];
-            $went[$fid][$target] = ($went[$fid][$target] ?? 0) + 1;
-            $left[$fid] = ($left[$fid] ?? 0) + 1;
         }
 
         // DJJ-unmatched-* facilities the moves emptied.

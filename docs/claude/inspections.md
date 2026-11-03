@@ -22,7 +22,10 @@ php -d extension=pdo_sqlite scripts/test-fl-inspection-cleanup.php   # on an in-
 php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry run; apply backs up to ~/kop-backups/ first
 # FL DJJ matching rule (fl_scraper.py _match_to_facility): never across detention/residential (_facility_kind); a one-word
 # key matches only as the facility's side ("Orange ... TrueCore" -> Orange Youth Academy, "Lake Academy" not -> Lake Parrish);
-# ambiguous = DJJ-unmatched-<name>. Renamed programs: DJJ_FORMER_NAMES. The DJJ site is Next.js since 2026: the directory
+# a report goes to every facility it is about (fl_scraper.py _resolve: a joint name "A & B" / "A/B" part by part; a name
+# that cannot tell, and every PREA audit, also by the report's own "Name of Facility" (split on and, &, /) and, between the
+# facilities a name fits (Hillsborough East/West), its street address; an address alone never picks one, DJJ reuses
+# campuses); nothing settles it = DJJ-unmatched-<name>. Renamed programs: DJJ_FORMER_NAMES. The DJJ site is Next.js since 2026: the directory
 # pages are read from __NEXT_DATA__, SPEP from its button/region accordion, the PREA list from the page drawn in headless
 # Chromium (_rendered_download_links(); needs Playwright). Closed programs prod files under: DJJ_CLOSED_FACILITIES; reports
 # no index lists any more: DJJ_EXTRA_QI_REPORTS.

@@ -326,18 +326,26 @@ function kop_on_file_inspection_matches(PDO $pdo, array $addresses) {
     $ck = 'kop_on_file_insp_' . md5($fp . '|' . implode('|', array_keys($djj)) . '|' . implode('|', array_keys($raw)));
     $cached = function_exists('get_transient') ? get_transient($ck) : false;
     if (is_array($cached)) return $cached;
-    $hit = function (array $r) {
+    // A report filed with several facilities (a joint report) names them all.
+    $hit = function (array $rows) {
+        $r = $rows[0];
+        $names = array();
+        foreach ($rows as $x) {
+            $n = trim((string) $x['facility_name']);
+            if ($n !== '' && !in_array($n, $names, true)) $names[] = $n;
+        }
         $cat = json_decode((string) ($r['categories_json'] ?? ''), true);
         $cat = is_array($cat) ? $cat : array();
         $what = trim(implode(' ', array_filter(array((string) ($cat['report_type'] ?? ''), (string) ($cat['fiscal_year'] ?? '')))));
         $date = trim((string) ($r['report_date'] ?? ''));
-        $label = 'Inspection report (' . $r['state'] . ', ' . trim((string) $r['facility_name'])
+        $label = 'Inspection report (' . $r['state'] . ', ' . implode(' and ', $names)
             . ($what !== '' ? ', ' . $what : ($date !== '' ? ', ' . $date : '')) . ')';
         $url = '';
         if (function_exists('kop_search_inspection_page_url')) $url = (string) kop_search_inspection_page_url((int) $r['facility_id'], (string) $r['facility_name'], (string) $r['state']);
         if ($url === '' && function_exists('home_url')) $url = home_url('/' . strtolower((string) $r['state']) . '-reports/');
         return array('label' => $label, 'url' => $url);
     };
+    $rows = array();   // address => the report's rows, one per facility holding it
     $sel = 'SELECT r.facility_id, r.report_id, r.report_url, r.report_date, r.categories_json, f.facility_name, f.state
               FROM inspection_reports r JOIN inspection_facilities f ON f.id = r.facility_id';
     try {
@@ -346,9 +354,7 @@ function kop_on_file_inspection_matches(PDO $pdo, array $addresses) {
             $q->execute(array_map('strval', $ids));
             foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
                 if (strpos((string) $r['categories_json'], '"DJJ"') === false) continue;
-                foreach ($djj[(string) $r['report_id']] ?? array() as $u) {
-                    if (!isset($out[$u])) $out[$u] = $hit($r);
-                }
+                foreach ($djj[(string) $r['report_id']] ?? array() as $u) $rows[$u][] = $r;
             }
         }
         foreach (array_chunk(array_keys($raw), 400) as $urls) {
@@ -356,12 +362,14 @@ function kop_on_file_inspection_matches(PDO $pdo, array $addresses) {
             $q->execute($urls);
             foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
                 $u = $raw[(string) $r['report_url']] ?? '';
-                if ($u !== '' && !isset($out[$u])) $out[$u] = $hit($r);
+                if ($u !== '' && !isset($rows[$u])) $rows[$u] = array();
+                if ($u !== '') $rows[$u][] = $r;
             }
         }
     } catch (Throwable $e) {
         return array(); // the other records still count
     }
+    foreach ($rows as $u => $list) if ($list) $out[$u] = $hit($list);
     if (function_exists('set_transient')) set_transient($ck, $out, HOUR_IN_SECONDS);
     return $out;
 }

@@ -106,12 +106,15 @@ check(kop_on_file_inspection_matches($pdo, array('djj.state.fl.us/content/downlo
 // State inspection reports (Websites sent in passes $websites = true).
 $pdo->exec("CREATE TABLE inspection_facilities (id INTEGER PRIMARY KEY, state TEXT, facility_name TEXT)");
 $pdo->exec("CREATE TABLE inspection_reports (id INTEGER PRIMARY KEY, facility_id INTEGER, report_id TEXT, report_date TEXT, report_url TEXT, categories_json TEXT)");
-$pdo->exec("INSERT INTO inspection_facilities VALUES (1, 'FL', 'Alachua Academy'), (2, 'PA', 'Ranch School'), (3, 'FL', 'Psych Hospital')");
+$pdo->exec("INSERT INTO inspection_facilities VALUES (1, 'FL', 'Alachua Academy'), (2, 'PA', 'Ranch School'), (3, 'FL', 'Psych Hospital'), (4, 'FL', 'Twin Oaks Academy II'), (5, 'FL', 'JUST')");
 $st = $pdo->prepare("INSERT INTO inspection_reports (id, facility_id, report_id, report_date, report_url, categories_json) VALUES (?, ?, ?, ?, ?, ?)");
 $st->execute(array(1, 1, '24445', '06/30/2017', '', json_encode(array('source' => 'DJJ', 'report_type' => 'SPEP', 'fiscal_year' => 'FY16-17',
     'pdf_url' => 'https://www.djj.state.fl.us/content/download/24445/file/FY-2016-17-Alachua-Academy-IOC.pdf?version=2'))));
 $st->execute(array(2, 2, 'r-9', '2024-05-01', 'https://www.dhs.pa.gov/reports/r-9.pdf', '{}'));
 $st->execute(array(3, 3, '777', '08/01/2024', '', json_encode(array('source' => 'AHCA'))));   // a digit id that is not a DJJ file
+foreach (array(4 => 4, 5 => 5) as $id => $fid) {   // a joint report, filed with both programs
+    $st->execute(array($id, $fid, '5555', '', '', json_encode(array('source' => 'DJJ', 'report_type' => 'QI Residential', 'fiscal_year' => 'FY20-21'))));
+}
 $want = array();
 foreach (array(
     'a' => 'https://fldjj-media.ccplatform.net/content/download/24445/file/fy-2016-17-alachua-academy-ioc.pdf',  // other host, name and no ?version
@@ -119,6 +122,7 @@ foreach (array(
     'c' => 'https://www.djj.state.fl.us/content/download/99999/file/new.pdf',                                    // not held
     'd' => 'https://www.djj.state.fl.us/content/download/777/file/x.pdf',                                        // only an AHCA row has 777
     'e' => 'https://www.djj.state.fl.us/programs-facilities/residential-facilities/alachua-academy',             // a program page
+    'f' => 'https://www.djj.state.fl.us/content/download/5555/file/just-toa.pdf',                                 // filed with two facilities
 ) as $key => $url) {
     foreach (kop_on_file_urls($url, true) as $u) $want[$u][] = $key;
 }
@@ -128,6 +132,7 @@ check(isset($w['b']) && strpos($w['b']['label'], 'PA, Ranch School') !== false, 
 check(!isset($w['c']), 'a DJJ file we do not hold stays');
 check(!isset($w['d']), 'a DJJ number matching only a non-DJJ row stays');
 check(!isset($w['e']), 'a DJJ program page stays');
+check(isset($w['f']) && strpos($w['f']['label'], 'Twin Oaks Academy II and JUST') !== false, 'a report filed with two facilities names both' . (isset($w['f']) ? ' -> ' . $w['f']['label'] : ''));
 
 /* ---- The mirror ------------------------------------------------------------ */
 
