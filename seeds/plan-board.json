@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 19:53 UTC",
- "source": "3f47c79f0047c5f641134add3dbbc9e0f91ee932",
+ "built": "2026-11-03 19:55 UTC",
+ "source": "0dacdda644cb8cbdcaecc19e5643655419fa7318",
  "sections": [
   {
    "key": "2",
@@ -910,10 +910,10 @@
       {
        "id": "4.2:utah-findings-stored-without-the-state-s-statement",
        "lead": "Utah findings stored without the state's statement",
-       "text": "**Utah findings stored without the state's statement** (found 2026-11-03, About rewrite pilot, Lava Heights): prod's `inspection_reports.raw_content` for UT holds only the rule title (report 75584: \"R380-80-5(10): Services and supervision...\"), while Utah's API (`cclapi.dlbc.utah.gov/api/public/facilities/<id>`) also gives `declarativeStatement`, `noncomplianceLevel`, `cmpAmount` and `correctionAction` for checklist-less investigations. Keep those in the UT scraper. kop-data's `ut_reports.json` was last updated 2025-10-17, so it lacks every 2026 UT inspection.",
+       "text": "**Utah findings stored without the state's statement** (found 2026-11-03, About rewrite pilot, Lava Heights): of the 411 UT reports in prod with a finding, 181 (2023-26, all inspection types) hold only the rule title in `inspection_reports.raw_content` (e.g. report 75584: \"R380-80-5(10): Services and supervision...\"); the other 230 carry the state's \"out of compliance... During the inspection...\" text. Utah's API (`cclapi.dlbc.utah.gov/api/public/facilities/<id>`) gives `declarativeStatement`, `noncomplianceLevel`, `cmpAmount` and `correctionAction` for every finding, checklist or not. Find why the UT scraper drops it for those 181 and backfill them. (kop-data's `ut_reports.json`, last updated 2025-10-17, is the old static file; the site reads prod, which has the 2026 inspections.)",
        "ask": "",
        "date": "2026-11-03",
-       "hash": "fa6be4e6e86e"
+       "hash": "a6ffda63ca91"
       }
      ]
     },
