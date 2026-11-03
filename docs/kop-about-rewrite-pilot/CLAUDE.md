@@ -59,11 +59,22 @@ for f in out/rec*.json; do python3 -I gen.py "$f" > "${f%.json}.html"; done
 python3 -I rebuild.py   # writes page.html from page.v6.html + out/
 ```
 
-## State as of Nov 3, 2026
+## State as of Nov 3, 2026 (evening)
 
-All 21 records have been rewritten, rechecked against KOP's Drive, rechecked against archived originals, and fact-checked. Open items are in each `out/recNN.note.txt`. Notable ones:
-- Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC. Dani hasn't decided whether ISAC counts as primary.
-- archive.is/archive.ph links can't be read by automation (CAPTCHA). Open them in a browser by hand.
-- The Aspen Ranch enrollment packet survives only as a scan on HEAL's site.
-- Conflicts to settle: Falcon Ridge Sequel end date (2020 vs Oct 2021); Lava Heights Nichols listed as Sequel staff but hired under Rite of Passage; Midwest Academy custody date; Savage's age (32 vs 23).
-- Ian Mulhare died at Island View on July 1, 2004, before Aspen bought it (Nov 30, 2004). It belongs on Island View's record.
+All 21 records rewritten and fact-checked. Every sentence carries its own citation. Claims the earlier passes cut as
+untraceable were restored, each cited to the original that HEAL, the wiki, Wikipedia or KOP's files name (rule 5).
+Each `out/recNN.note.txt` lists what was restored, what is still out and why. Settled by Dani: Fager's case list is a
+source; plaintiff counts take the highest reputable-media figure (Mount Bachelor: 51, The Bulletin); Daily Star = Oct 2009.
+
+Open:
+- HEAL's archived pages: the Wayback Machine blocks automated fetches, so claims only HEAL carries are still out until
+  someone opens those pages in a browser and copies their citations (Aspen Ranch cottages/levels and $7,100/month,
+  Eagle Ranch 2006-13 police list and 2009 recording, Canyon State $3M settlement and police complaints, Midwest
+  Academy April 2015 runaways and fraud probe, Falcon Ridge 2020 Savage regulator reports). Lists are in each note.
+- Mount Bachelor suit dates: The Bulletin puts the 2nd and 3rd suits in 2012; the complaint gives Nov 2011 and Jan 2013.
+- Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC.
+- archive.is/archive.ph links can't be read by automation (CAPTCHA); the St. George Spectrum capture for Falcon Ridge is one.
+- Conflicts: Falcon Ridge Sequel end date (2020 vs Oct 2021); Lava Heights Nichols (Sequel vs Rite of Passage);
+  Midwest Academy custody date; Savage's age (32 vs 23).
+- Ian Mulhare died at Island View on July 1, 2004, before Aspen bought it (Nov 30, 2004): belongs on Island View's record.
+- Then: the owner's go-ahead on the before/after, and the full run (docs/plan/2.5 item 5).
