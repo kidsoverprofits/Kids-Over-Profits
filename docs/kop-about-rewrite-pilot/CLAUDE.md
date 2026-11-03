@@ -2,7 +2,7 @@
 
 Rewrites of the "About" text for 21 Kids Over Profits facility and operator records. Each record shows what the site prints now next to a sourced rewrite. Nothing here is on kidsoverprofits.org yet.
 
-Published preview (private, owned by Dani): https://claude.ai/code/artifact/1db0c755-2e91-4a1b-b58a-5cef38081450
+Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655wtt6zshbvg3kDm (same artifact as claude.ai/code/artifact/1db0c755-2e91-4a1b-b58a-5cef38081450)
 
 ## Files
 
@@ -67,10 +67,15 @@ Each `out/recNN.note.txt` lists what was restored, what is still out and why. Se
 source; plaintiff counts take the highest reputable-media figure (Mount Bachelor: 51, The Bulletin); Daily Star = Oct 2009.
 
 Open:
-- HEAL's archived pages: the Wayback Machine blocks automated fetches, so claims only HEAL carries are still out until
-  someone opens those pages in a browser and copies their citations (Aspen Ranch cottages/levels and $7,100/month,
-  Eagle Ranch 2006-13 police list and 2009 recording, Canyon State $3M settlement and police complaints, Midwest
-  Academy April 2015 runaways and fraud probe, Falcon Ridge 2020 Savage regulator reports). Lists are in each note.
+- HEAL's archived pages were opened in Chrome on Nov 3 (evening); WebFetch is still blocked from web.archive.org,
+  so use Claude in Chrome. Restored: Aspen Ranch levels, blackout, accreditation and court-custody clause (enrollment
+  agreement pp. 17, 27-28); Eagle Ranch police calls (St. George PD incident table, 2006-13) and the Dec 2009 recording;
+  Canyon State police calls (MCSO Location History Report, 2000-13); Falcon Ridge's Apr 2019 e-mail account (Fakahua)
+  and the regulator reports (Salt Lake Tribune, Mar 15, 2022, via the wiki mirror). Still out (no citation on HEAL's
+  pages): Aspen Ranch cottages, $7,100, Alexander, Hirsch/Finney, cavity search; Canyon State $3M; Midwest Academy
+  runaways, foster-care application, fraud probe. To do: archive the HEAL-hosted police PDFs into the media library;
+  check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
+- reddit.com is blocked in Claude in Chrome ("safety restrictions"), and archive.is/archive.ph show a CAPTCHA.
 - Mount Bachelor suit dates: The Bulletin puts the 2nd and 3rd suits in 2012; the complaint gives Nov 2011 and Jan 2013.
 - Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC.
 - archive.is/archive.ph links can't be read by automation (CAPTCHA); the St. George Spectrum capture for Falcon Ridge is one.
