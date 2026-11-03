@@ -1,6 +1,6 @@
 {
- "built": "2026-11-03 18:33 UTC",
- "source": "a241d33d7488989ba1ad98e786d6a323e118fe0c",
+ "built": "2026-11-03 19:01 UTC",
+ "source": "158d4fedbcbd5e2eecfabd5e4712c8bdf888b44a",
  "sections": [
   {
    "key": "2",
@@ -890,6 +890,22 @@
        "ask": "",
        "date": "2026-11-03",
        "hash": "f163951c83d6"
+      },
+      {
+       "id": "4.2:fl-djj-reports-filed-under-the-wrong-facility",
+       "lead": "FL DJJ reports filed under the wrong facility",
+       "text": "**FL DJJ reports filed under the wrong facility** (found 2026-11-03, from SPEP reports sent in to Websites sent in). `_normalize_key()` in kop-pipeline `scrapers/fl_scraper.py` drops \"academy\", \"detention\", \"regional\", \"juvenile\", \"girls\", \"group\", \"home\", \"treatment\", so \"Marion Youth Academy\" and \"Marion Regional Juvenile Detention Center\" both key to `marion`; `_match_to_facility()`'s token fallback then takes a one-word overlap (overlap / smaller set >= 0.8). On prod: Marion Youth Academy's 20 reports sit under Marion RJDC (4307), Brevard Group Treatment Home's 24 under Brevard JDC (4302), the Alachua / Duval / Broward / Orange RJDC reports under the academies of the same county (4268, 4278, 4270, 4310), Hillsborough Girls Academy under Hillsborough JDC West (4282), Central Pasco Girls Academy under Pasco JDC (4311), \"Lake Academy\" under Lake Parrish (7391), Tampa Bay Girls High/Max under Tampa Residential (4298). Fix: keep a kind (detention vs residential vs group home) beside the key and never match across kinds; no one-token containment match. Then a rerun, and a check that the importer moves a report already held (keyed by facility_id + report_id) instead of leaving the old row: the moved rows must leave the old facility. The rest of FL DJJ is untidy too: each QI and PREA run adds `DJJ-unmatched-*` twins of directory facilities (Alachua Academy 4268 + 14419, ~60 pairs) and PREA file-name facilities (\"columbuspreareport\").",
+       "ask": "",
+       "date": "2026-11-03",
+       "hash": "e90d5bc5d15e"
+      },
+      {
+       "id": "4.2:three-fl-djj-reports-sent-in-that-we-do-not-hold",
+       "lead": "Three FL DJJ reports sent in that we do not hold",
+       "text": "**Three FL DJJ reports sent in that we do not hold** (Websites sent in, 2026-11-03): #17046 Crestview Youth Academy Non-Secure FY20-21 (download 23556), #17186 Marion Youth Academy FY21-22 (232583), #17208 Kissimmee Youth Academy FY18-19 (23594). Older QI reports the scraper's index pages no longer list. Add them to `fl_scraper.py` as extra entries (or a \"closed / older reports\" index) after item 10, so they file like the rest; then trash the cards. The CAR \"Residential chapter\" PDFs (#17073, #17192-17204) are statewide annual reports, not inspections: they stay websites (government), or go to the media library.",
+       "ask": "",
+       "date": "2026-11-03",
+       "hash": "222b3de7ea13"
       }
      ]
     },
