@@ -170,6 +170,23 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
                     && isset(kop_rinbox_native_connections($nid)['cra:' . $rid]), $res['message']);
                 call_user_func($src['act'], $nid, 'unconnect:cra:' . $rid, array());
                 $check('news: Take off removes the note of the Christian rehab exactly', $notes() === $before && !kop_rinbox_native_connections($nid));
+
+                // Several at once (the chips): the company and the rehab in one Connect, one Undo takes both off.
+                $res = call_user_func($src['act'], $nid, 'connect', array('record' => array('company:' . $oid, 'cra:' . $rid)));
+                $both = kop_rinbox_native_connections($nid);
+                $check('news: Connect records with two picks connects both', isset($both['company:' . $oid], $both['cra:' . $rid]) && $linked() === $was + 1
+                    && ($res['undo']['action'] ?? '') === 'unconnect:company:' . $oid . ',cra:' . $rid, $res['message']);
+                $req = new WP_REST_Request();
+                foreach (array('source' => 'news', 'key' => (string) $nid, 'action' => $res['undo']['action'], 'params' => array()) as $k => $v) $req->set_param($k, $v);
+                $undo = kop_rinbox_rest_act($req)->get_data();
+                $check('news: the one Undo (through REST) takes both off exactly', empty($undo['error']) && $linked() === $was && $notes() === $before
+                    && !kop_rinbox_native_connections($nid), json_encode($undo['error'] ?? $undo['message'] ?? null));
+                try {
+                    call_user_func($src['act'], $nid, 'connect', array('record' => array('company:' . $oid, '12')));
+                    $check('news: a program among the picks refuses them all', false);
+                } catch (RuntimeException $e) {
+                    $check('news: a program among the picks refuses them all', $linked() === $was && !kop_rinbox_native_connections($nid), $e->getMessage());
+                }
             }
         });
     }

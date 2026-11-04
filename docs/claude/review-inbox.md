@@ -67,6 +67,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=card-fields
 # News cards: "Connect a record" files the article on a company (kop_operator_links), consultant, transporter, provider, marketer,
 # trade org or Christian rehab for adults (a note citing it) or young adult program while it stays in the news; "Take off" undoes (option kop_review_news_connections)
+# More than one record per link (2026-11-04): pickers that file a link on records are the chips ('facilities' type,
+# kop_rdest_records_param()); kop_rdest_put() takes facility_id as one ref or a list (kop_rdest_record_refs(): id, "<kind>:<id>",
+# "a, b") and kop_rdest_put_many() puts it on each (all or nothing; a record already holding it is skipped), stored as
+# {many: [...]} so kop_rdest_take_back() undoes them all. Websites Sent In Approve, every "Move to" website/Materials and links;
+# news "Connect records" (kop_rinbox_native_connect_many(), Undo "unconnect:<ref>,<ref>"). Card Fields gives the chips the
+# queue's kinds (kop_rinbox_card_record_param()). Tests: --source=websites, --source=news ("several", "both")
 # Imports connect themselves when the name is exact (inc/auto-connect.php, hourly): a name found in the text that is exactly one record's
 # (same name key, more than generic words, no other record's) is connected with no click: Woodbury Reports pages, wiki links, Fornits
 # discussion links (records whose every name is 10+ letters), State Lists rows now on file, nonprofit and business filings on "Same name and town", Drive Docs links (no-record ones re-tied by their SCIAD collection or wiki page name; company-only

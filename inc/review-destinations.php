@@ -17,6 +17,9 @@
  * kop_rinbox_file_on_record() (inc/review-record-file.php; a company's websites
  * or "Materials and links", the others' links or notes), and Undo through
  * kop_rinbox_unfile_from_record(). A program (a bare number) is unchanged.
+ * facility_id may also be a list of those (the 'facilities' chip picker):
+ * the link goes on every record picked (kop_rdest_put_many()), and one Undo
+ * takes it off them all.
  *
  * The queue rows go in through kop_ext_insert_*() (the browser extension's
  * inserts, with its duplicate check) without emailing admins; the record
@@ -54,7 +57,7 @@ function kop_rdest_moves(array $except = array(), $default_fid = 0, $default_kin
         if (in_array($id, $except, true)) continue;
         $move = array('id' => $id, 'label' => 'Move to ' . $t['label']);
         if ($t['needs_facility']) {
-            $move['params'] = array(array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => (int) $default_fid));
+            $move['params'] = array(kop_rdest_records_param($default_fid));
             if ($id === 'resource') {
                 $move['params'][] = array('name' => 'kind', 'label' => 'Kind', 'type' => 'select', 'options' => $kinds, 'value' => isset($kinds[$default_kind]) ? $default_kind : 'reference');
             }
@@ -71,6 +74,41 @@ function kop_rdest_moves(array $except = array(), $default_fid = 0, $default_kin
         $out[] = $move;
     }
     return $out;
+}
+
+/**
+ * The "which records" picker of a website/resource put: chips, one or more records
+ * ('facilities' type; a queue that takes any record gets its kinds from Card Fields).
+ * $start: a program id, a "<kind>:<id>" or a list of those, picked to begin with.
+ */
+function kop_rdest_records_param($start = 0, $label = 'Records (one or more)') {
+    $value = array();
+    foreach (kop_rdest_record_refs($start) as $ref) {
+        $name = function_exists('kop_record_field_label') ? (string) kop_record_field_label($ref) : '';
+        $value[] = array('id' => $ref, 'name' => $name !== '' ? $name : '#' . $ref);
+    }
+    return array('name' => 'facility_id', 'label' => $label, 'type' => 'facilities', 'value' => $value);
+}
+
+/**
+ * The records a facility_id param names, as a list of refs (a program's id or "<kind>:<id>"),
+ * each once: a single value, a list, "a, b" or one per line. '' and 0 are none.
+ */
+function kop_rdest_record_refs($value) {
+    if (is_array($value)) {
+        $list = array();
+        foreach ($value as $v) $list[] = is_array($v) ? (string) ($v['id'] ?? '') : (string) $v;
+    } else {
+        $list = preg_split('/[\s,;]+/', trim((string) $value)) ?: array();
+    }
+    $out = array();
+    foreach ($list as $ref) {
+        $ref = trim($ref);
+        if ($ref === '' || $ref === '0') continue;
+        if (preg_match('/^facility:(\d+)$/', $ref, $m)) $ref = $m[1];
+        $out[$ref] = true;
+    }
+    return array_map('strval', array_keys($out));
 }
 
 /** Choices for "Young adult programs": one on file, or a new one by name (0). */
@@ -179,7 +217,12 @@ function kop_rdest_put($to, array $p, $reviewer) {
     if (!isset($targets[$to])) throw new RuntimeException('Pick where it goes.');
     $url = trim((string) ($p['url'] ?? ''));
     if (!preg_match('#^https?://#i', $url)) throw new RuntimeException('It has no web address to move.');
-    if ($targets[$to]['needs_facility']) return kop_rdest_put_on_record($to, $p, $reviewer);
+    if ($targets[$to]['needs_facility']) {
+        $refs = kop_rdest_record_refs($p['facility_id'] ?? '');
+        if (count($refs) > 1) return kop_rdest_put_many($to, $refs, $p, $reviewer);
+        $p['facility_id'] = $refs ? $refs[0] : '';
+        return kop_rdest_put_on_record($to, $p, $reviewer);
+    }
 
     if (!function_exists('kop_ext_insert_news')) throw new RuntimeException('The queue inserts are not loaded.');
     kop_ext_load_record_libs();
@@ -290,8 +333,56 @@ function kop_rdest_put_on_other_record($to, $value, array $p, $reviewer) {
     return array('to' => $to, 'record' => $done, 'url' => $url, 'message' => (string) $done['message']);
 }
 
+/**
+ * The website or "Materials and links" on several records at once. A record that already has the
+ * link is skipped (said in the message); any other failure takes back what was put so far and
+ * throws, so it is all or nothing. Returns ['to', 'url', 'many' => [each put], 'message'].
+ */
+function kop_rdest_put_many($to, array $refs, array $p, $reviewer) {
+    $many = array();
+    $names = array();
+    $skipped = array();
+    foreach ($refs as $ref) {
+        try {
+            $done = kop_rdest_put_on_record($to, array('facility_id' => $ref) + $p, $reviewer);
+        } catch (RuntimeException $e) {
+            $label = function_exists('kop_record_field_label') ? (string) kop_record_field_label($ref) : '';
+            $label = $label !== '' ? $label : '#' . $ref;
+            if (stripos($e->getMessage(), 'already') !== false) {
+                $skipped[] = $label;
+                continue;
+            }
+            foreach (array_reverse($many) as $d) {
+                try { kop_rdest_take_back($d); } catch (Throwable $ignore) { /* best effort */ }
+            }
+            throw new RuntimeException($label . ': ' . $e->getMessage() . ' Nothing was put on any record.');
+        }
+        $many[] = $done;
+        $names[] = (string) ($done['facility_name'] ?? ($done['record']['name'] ?? '#' . $ref));
+    }
+    if (!$many) throw new RuntimeException('That link is already on every record picked.');
+    $where = $to === 'website' ? 'as their own website' : 'under Materials and links';
+    $message = count($many) === 1 ? (string) $many[0]['message'] : 'Put on ' . kop_rdest_and_list($names) . ' ' . $where . '.';
+    if ($skipped) $message .= ' Already on ' . kop_rdest_and_list($skipped) . ', so not added there.';
+    return array('to' => $to, 'url' => trim((string) ($p['url'] ?? '')), 'many' => $many, 'message' => $message);
+}
+
+/** "A", "A and B", "A, B and C". */
+function kop_rdest_and_list(array $names) {
+    $names = array_values($names);
+    if (count($names) < 2) return (string) ($names[0] ?? '');
+    $last = array_pop($names);
+    return implode(', ', $names) . ' and ' . $last;
+}
+
 /** Undo kop_rdest_put(): take the new row back while nobody has reviewed it, or the link off the record. */
 function kop_rdest_take_back(array $done) {
+    if (!empty($done['many']) && is_array($done['many'])) {
+        foreach (array_reverse($done['many']) as $d) {
+            if (is_array($d)) kop_rdest_take_back($d);
+        }
+        return;
+    }
     $to = (string) ($done['to'] ?? ($done['target'] ?? ''));
     if (($to === 'website' || $to === 'resource') && !empty($done['record']) && is_array($done['record'])) {
         kop_rinbox_unfile_from_record($done['record']);

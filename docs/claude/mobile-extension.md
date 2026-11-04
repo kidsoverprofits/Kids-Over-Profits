@@ -33,6 +33,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-eras.php
 # "Send to KOP" Chrome extension (its own repo, kop-send-to-kop; loaded unpacked, not deployed) posts to
 # kop/v1/extension/* (inc/source-submissions.php): articles -> news_submissions, lawsuits, legislation,
 # anything else -> KOP Tools > Websites Sent In; same duplicate rules as the public forms
+# "facility" (Related programs or companies) may name several, split by ";" or lines (kop_ext_related_names()): news and
+# lawsuits get each in facilities_mentioned, bills in facilities_affected, a website keeps "A; B" in _kop_facility and its
+# Approve card pre-picks every name that is exactly one record's (kop_autoconn_submission_records() reads each)
 php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an in-memory copy of tmp/prod.sqlite
 # The app's "Send" tab (inc/mobile-submit.php): public kop/v1/mobile/submit + /mobile/check, the extension's inserts for links,
 # suggested_edits for facility_new/facility_correction; duplicates come back as {type, status} only (never ids/titles); 12 an hour per sender.

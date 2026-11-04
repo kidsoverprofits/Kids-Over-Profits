@@ -89,9 +89,10 @@ get_header();
                 </div>
 
                 <div class="kop-send__field">
-                    <label for="kop-send-facility">Program it is about <span class="kop-send__optional">(optional)</span></label>
-                    <input type="text" id="kop-send-facility" name="facility" maxlength="255" list="kop-send-facility-list" autocomplete="off">
+                    <label for="kop-send-facility">Programs or companies it is about <span class="kop-send__optional">(optional)</span></label>
+                    <input type="text" id="kop-send-facility" name="facility" maxlength="1000" list="kop-send-facility-list" autocomplete="off" aria-describedby="kop-send-facility-hint">
                     <datalist id="kop-send-facility-list"></datalist>
+                    <p class="kop-send__hint" id="kop-send-facility-hint">More than one? Put a semicolon between them: Program One; Program Two.</p>
                 </div>
 
                 <div class="kop-send__field">

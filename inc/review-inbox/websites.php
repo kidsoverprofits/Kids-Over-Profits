@@ -113,11 +113,11 @@ function kop_rinbox_websites_item($p) {
         // The usual approval: the link goes on a record's page (the "Move to" website/resource path, so Undo move takes it back).
         $res_kinds = function_exists('kop_facility_resource_link_kinds') ? kop_facility_resource_link_kinds() : array('reference' => 'Reference');
         $res_kind = kop_rinbox_websites_resource_kind($kind);
-        $actions[] = array('id' => 'attach', 'label' => 'Approve: put on a record\'s page', 'style' => 'approve',
-            'help' => 'Puts the link on the page of the program, company or other record you pick (its Materials and links, or its own website), then takes it off this list. Undo move on the Trashed tab takes it back off the record.',
+        $actions[] = array('id' => 'attach', 'label' => 'Approve: put on records\' pages', 'style' => 'approve',
+            'help' => 'Puts the link on the page of every program, company or other record you pick (its Materials and links, or its own website), then takes it off this list. Undo move on the Trashed tab takes it back off them all.',
             'params' => array(
-                array('name' => 'facility_id', 'label' => 'Record', 'type' => 'facility', 'value' => kop_rinbox_websites_guess_record($meta['facility'], implode("
-", array($p->post_title, $p->post_content, $meta['description'], $meta['selection']))) ?: ''),
+                kop_rdest_records_param(kop_rinbox_websites_guess_record($meta['facility'], implode("
+", array($p->post_title, $p->post_content, $meta['description'], $meta['selection'])))),
                 array('name' => 'as', 'label' => 'Put it under', 'type' => 'select', 'value' => $kind === 'program' ? 'website' : 'resource',
                     'options' => array('resource' => 'Materials and links', 'website' => 'Its own website')),
                 array('name' => 'kind', 'label' => 'Kind (Materials and links)', 'type' => 'select', 'options' => $res_kinds,
@@ -176,15 +176,15 @@ function kop_rinbox_websites_item($p) {
     );
 }
 
-/** The record the sender's "About", a KOP id in the note or an exact name in the text names (kop_autoconn_submission_records(); else 0: the reviewer picks). */
+/** The records the sender's "About" (one or more names), a KOP id in the note or an exact name in the text name (kop_autoconn_submission_records(); empty: the reviewer picks). */
 function kop_rinbox_websites_guess_record($about, $text = '') {
-    if (!function_exists('kop_autoconn_submission_records')) return 0;
+    if (!function_exists('kop_autoconn_submission_records')) return array();
     try {
         $found = kop_autoconn_submission_records(kop_rinbox_pdo(), $about, $text);
     } catch (Throwable $e) {
-        return 0;
+        return array();
     }
-    return $found ? (int) key($found) : 0;
+    return array_map('intval', array_keys($found));
 }
 
 /** The "Materials and links" kind a website of this kind goes under on a facility. */
@@ -230,7 +230,7 @@ function kop_rinbox_websites_act($key, $action, array $params) {
             $now = kop_rinbox_websites_post($id);
             return array('message' => 'Restored ' . $name . ($now && $now->post_status === 'publish' ? ' to the Kept tab.' : ' to the waiting list.'));
         case 'attach':
-            if (trim((string) ($params['facility_id'] ?? '')) === '') throw new RuntimeException('Pick the record it goes on.');
+            if (!kop_rdest_record_refs($params['facility_id'] ?? '')) throw new RuntimeException('Pick the record(s) it goes on.');
             $params['to'] = ($params['as'] ?? '') === 'website' ? 'website' : 'resource';
             // fall through: the same put as "Move to", so Undo move takes it back
         case 'move':
@@ -240,7 +240,7 @@ function kop_rinbox_websites_act($key, $action, array $params) {
                 'site_name' => (string) get_post_meta($id, '_kop_site_name', true),
                 'published' => (string) get_post_meta($id, '_kop_published', true),
                 'facility' => (string) get_post_meta($id, '_kop_facility', true),
-                'facility_id' => (string) ($params['facility_id'] ?? ''), /* a program's id or "<kind>:<id>" */ 'kind' => (string) ($params['kind'] ?? ''),
+                'facility_id' => $params['facility_id'] ?? '', /* a program's id, "<kind>:<id>" or a list of them */ 'kind' => (string) ($params['kind'] ?? ''),
                 'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
                 'source_note' => 'Sent in from the browser extension', 'note' => 'Sent in as a website; moved here by ' . kop_rinbox_reviewer() . '.',
                 'via' => 'browser extension',

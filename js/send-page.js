@@ -156,6 +156,8 @@
     titleBox.addEventListener('change', function () { guess(); });
 
     // ---- Facility names (kop/v1/facility-suggest) into a datalist ----
+    // Several names go in one box split by ";" (kop_ext_related_names()): suggestions are for the
+    // last name typed, each offered with the names before it kept, so picking one completes only that.
 
     var facBox = form.elements.facility;
     var facList = $('kop-send-facility-list');
@@ -164,7 +166,9 @@
     if (facBox && facList && cfg.suggestUrl) {
         facBox.addEventListener('input', function () {
             clearTimeout(facTimer);
-            var phrase = facBox.value.trim();
+            var cut = facBox.value.lastIndexOf(';');
+            var before = cut < 0 ? '' : facBox.value.slice(0, cut + 1).replace(/\s*$/, ' ');
+            var phrase = facBox.value.slice(cut + 1).trim();
             if (phrase.length < 3) return;
             facTimer = setTimeout(function () {
                 var seq = ++facSeq;
@@ -177,7 +181,7 @@
                         list.slice(0, 8).forEach(function (row) {
                             if (!row || !row.name) return;
                             var o = document.createElement('option');
-                            o.value = row.name;
+                            o.value = before + row.name;
                             if (row.place) o.label = row.name + ' (' + row.place + ')';
                             facList.appendChild(o);
                         });

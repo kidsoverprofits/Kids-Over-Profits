@@ -113,7 +113,7 @@ function kop_ext_source_fields() {
         'site_name'   => 'Site',
         'author'      => 'Author or source',
         'published'   => 'Date',
-        'facility'    => 'Related facility',
+        'facility'    => 'Related programs or companies (split by ;)',
         'tags'        => 'Tags',
         'description' => 'Page description',
         'selection'   => 'Highlighted text',
@@ -290,6 +290,21 @@ function kop_ext_text($value, $max = 2000) {
         return '';
     }
     return mb_substr(sanitize_text_field((string) $value), 0, $max);
+}
+
+/**
+ * The programs, companies or other records a sender says a link is about: one or more names,
+ * one per line or split by ";" (a list works too), each cleaned, each once, at most 20.
+ */
+function kop_ext_related_names($value) {
+    $parts = is_array($value) ? $value : (preg_split('/[\r\n;]+/', (string) $value) ?: array());
+    $out = array();
+    foreach ($parts as $part) {
+        $name = is_array($part) ? '' : kop_ext_text($part, 255);
+        if ($name !== '' && !in_array($name, $out, true)) $out[] = $name;
+        if (count($out) >= 20) break;
+    }
+    return $out;
 }
 
 function kop_ext_textarea($value, $max = 5000) {
@@ -528,8 +543,7 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
     $author     = kop_ext_text($p['author'] ?? '', 255);
     $date       = kop_ext_date($p['published'] ?? '');
     $tags       = kop_news_tags_normalize(kop_ext_list($p['tags'] ?? array()));
-    $facility   = kop_ext_text($p['facility'] ?? '', 255);
-    $names      = $facility !== '' ? array($facility) : array();
+    $names      = kop_ext_related_names($p['facility'] ?? '');
     $summary    = kop_ext_textarea(is_array($full) && isset($p['summary']) ? $p['summary'] : ($p['description'] ?? ''), 2000);
     $status     = 'submitted';
     $alt = ''; $type = 'general'; $location = ''; $staff = array(); $survivors = array(); $warnings = array();
@@ -622,7 +636,8 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
 
 /** A lawsuit's facilities_mentioned: the name sent, else the records its title and notes name. */
 function kop_ext_lawsuit_mentions(PDO $pdo, $facility, $text) {
-    if ($facility !== '') return array($facility);
+    $named = kop_ext_related_names($facility);
+    if ($named) return $named;
     return function_exists('kop_autoconn_submission_mentions') ? kop_autoconn_submission_mentions($pdo, '', $text) : array();
 }
 
@@ -680,7 +695,7 @@ function kop_ext_lawsuit_full_fields(array $p) {
  */
 function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note, $full = null) {
     $url      = esc_url_raw((string) $p['url']);
-    $facility = kop_ext_text($p['facility'] ?? '', 255);
+    $facility = kop_ext_related_names($p['facility'] ?? '');
     $list     = function (array $items) {
         return wp_json_encode(array_values($items), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     };
@@ -723,7 +738,7 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note, $full = n
         $fields['document_urls'] = $list($full['document_urls']);
         if ($full['source_urls']) $fields['source_urls'] = $list(array_values(array_unique(array_merge(array($url), $full['source_urls']))));
         // The full list when given (plus the facility sent); else the records the text names, as before.
-        $named = array_values(array_unique(array_merge($facility !== '' ? array($facility) : array(), $full['facilities_mentioned'])));
+        $named = array_values(array_unique(array_merge($facility, $full['facilities_mentioned'])));
         if ($full['facilities_mentioned']) $fields['facilities_mentioned'] = $list($named);
         $published = !empty($full['published']);
         if ($published) {
@@ -767,7 +782,7 @@ function kop_ext_insert_lawsuit(PDO $pdo, array $p, $submitter, $note, $full = n
 
 function kop_ext_insert_legislation(PDO $pdo, array $p, $submitter, $note) {
     $url      = esc_url_raw((string) $p['url']);
-    $facility = kop_ext_text($p['facility'] ?? '', 255);
+    $facility = kop_ext_related_names($p['facility'] ?? '');
     $list     = function (array $items) {
         return wp_json_encode(array_values($items), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     };
@@ -788,7 +803,7 @@ function kop_ext_insert_legislation(PDO $pdo, array $p, $submitter, $note) {
         'full_text_url'       => '',
         'official_url'        => $url,
         'position'            => 'unknown',
-        'facilities_affected' => $list($facility !== '' ? array($facility) : array()),
+        'facilities_affected' => $list($facility),
         'tags'                => $list(kop_ext_list($p['tags'] ?? array())),
         'publication_status'  => 'pending',
         'submitted_by'        => $submitter,
@@ -828,7 +843,7 @@ function kop_ext_insert_website(array $p, $submitter, $note) {
         'site_name'    => kop_ext_text($p['site_name'] ?? '', 255),
         'author'       => kop_ext_text($p['author'] ?? '', 255),
         'published'    => (string) kop_ext_date($p['published'] ?? ''),
-        'facility'     => kop_ext_text($p['facility'] ?? '', 255),
+        'facility'     => mb_substr(implode('; ', kop_ext_related_names($p['facility'] ?? '')), 0, 1000), // several: "A; B"
         'tags'         => implode(', ', kop_ext_list($p['tags'] ?? array())),
         'description'  => kop_ext_textarea($p['description'] ?? '', 2000),
         'selection'    => kop_ext_textarea($p['selection'] ?? '', 2000),

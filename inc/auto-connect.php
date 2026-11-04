@@ -767,8 +767,8 @@ function kop_autoconn_record_names(PDO $pdo) {
 /**
  * The records a submission is about, most likely first: [facility id => name].
  * Research sends say which in their notes ("New Summit Academy Costa Rica
- * (#14110)", "KOP #10608"), so in order: the sender's "about" name when it is
- * exactly one record's, a KOP id written in the text, then names found in the
+ * (#14110)", "KOP #10608"), so in order: each of the sender's "about" names
+ * ("A; B") that is exactly one record's, a KOP id written in the text, then names found in the
  * text that are exactly one record's (one word of eight letters or more, several words of
  * nine, more than generic or everyday words; the longest name wins, so "Canyon State Academy" is not "Canyon State").
  * Only a suggestion: the card shows it and a person approves.
@@ -777,9 +777,11 @@ function kop_autoconn_submission_records(PDO $pdo, $about, $text, $body = '') {
     $index = kop_autoconn_name_index($pdo);
     $names = kop_autoconn_record_names($pdo);
     $out = array();
-    $about = trim((string) $about);
-    if ($about !== '') {
-        $holders = $index[kop_autoconn_key($about)] ?? array();
+    // The sender may name several ("A; B", one per line): each that is exactly one record's.
+    foreach (preg_split('/[\r\n;]+/', trim((string) $about)) ?: array() as $one) {
+        $one = trim($one);
+        if ($one === '') continue;
+        $holders = $index[kop_autoconn_key($one)] ?? array();
         if (count($holders) === 1) $out[(int) key($holders)] = true;
     }
     $text = (string) $text;

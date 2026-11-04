@@ -92,6 +92,13 @@ function kop_rinbox_card_fields_note(array $seen_now) {
 
 /** A picker param or field as the any-record finder, offering $kinds. */
 function kop_rinbox_card_record_param(array $f, array $kinds) {
+    if (empty($f['facility_only']) && ($f['type'] ?? '') === 'facilities') {
+        // The several-records chips: the same kinds, picks sent as "<kind>:<id>" (a program as its id).
+        $f['kinds'] = !empty($f['kinds'])
+            ? (array_values(array_intersect(array_map('kop_record_field_kind', (array) $f['kinds']), $kinds)) ?: $f['kinds'])
+            : $kinds;
+        return $f;
+    }
     if (!empty($f['facility_only']) || !in_array($f['type'] ?? '', array('facility', 'record'), true)) return $f;
     if (($f['type'] ?? '') === 'record' && !empty($f['kinds'])) {
         // A picker that already names its kinds keeps only those the owner allows.

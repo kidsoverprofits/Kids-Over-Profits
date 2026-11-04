@@ -353,9 +353,15 @@ check(($GLOBALS['kop_posts'][$r->data['id']]['post_status'] ?? '') === 'pending'
 $r2 = submit(array('type' => 'website', 'url' => 'http://example-academy.test', 'title' => 'x'));
 check($r2 instanceof WP_REST_Response && $r2->status === 409 && $r2->data['duplicates'][0]['type'] === 'website', 'same website without www or slash -> 409');
 
+// Several related records ("A; B" or one per line): each name kept once, the website stores them as "A; B".
+check(kop_ext_related_names("Example Academy; Other Ranch\nExample Academy\n ; ") === array('Example Academy', 'Other Ranch'), 'related names split by ; and lines, each once');
+check(kop_ext_related_names(array('One', '', 'Two')) === array('One', 'Two'), 'related names from a list');
+$r3 = submit(array('type' => 'website', 'url' => 'https://two-programs.test/page', 'title' => 'About two programs', 'facility' => "Example Academy;\nOther Ranch"));
+check($r3 instanceof WP_REST_Response && get_post_meta($r3->data['id'], '_kop_facility') === 'Example Academy; Other Ranch', 'a website about two programs keeps both names');
+
 $r = submit(array('type' => 'article', 'url' => 'javascript:alert(1)'));
 check($r instanceof WP_Error && $r->data['status'] === 400, 'non-http link -> 400');
-check(($GLOBALS['kop_notified'] ?? array()) === array('news', 'lawsuit', 'legislation', 'website'), 'one admin email per new record');
+check(($GLOBALS['kop_notified'] ?? array()) === array('news', 'lawsuit', 'legislation', 'website', 'website'), 'one admin email per new record');
 
 // Fallback auth header: only on the extension's routes.
 $cred = 'Basic ' . base64_encode('someone:abcd efgh');

@@ -342,8 +342,8 @@ function kop_rinbox_native_act($type, $key, $action, array $params) {
     if ($action === 'lawsuit_news' && $type === 'lawsuit') {
         return kop_rinbox_native_move('lawsuit', $key, 'news', array('lawsuit_news' => true) + $params);
     }
-    if ($action === 'connect' && $type === 'news') return kop_rinbox_native_connect($key, (string) ($params['record'] ?? ''));
-    if (strpos($action, 'unconnect:') === 0 && $type === 'news') return kop_rinbox_native_unconnect($key, substr($action, 10));
+    if ($action === 'connect' && $type === 'news') return kop_rinbox_native_connect_many($key, $params['record'] ?? '');
+    if (strpos($action, 'unconnect:') === 0 && $type === 'news') return kop_rinbox_native_unconnect_many($key, substr($action, 10));
     if ($action === 'unmove') return kop_rinbox_native_unmove($type, $key);
     if ($action === 'restore') return kop_rinbox_native_restore($type, $key, (string) ($params['status'] ?? ''));
     throw new RuntimeException('Approve and reject this with the buttons on its card.');
@@ -402,7 +402,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
             'url' => $url, 'title' => (string) $r[$t['title']],
             'site_name' => (string) ($r['publication_name'] ?? (parse_url($url, PHP_URL_HOST) ?: '')),
             'published' => (string) ($r['publication_date'] ?? ''),
-            'facility_id' => (string) ($params['facility_id'] ?? ''), /* a program's id or "<kind>:<id>" */ 'kind' => (string) ($params['kind'] ?? ''),
+            'facility_id' => $params['facility_id'] ?? '', /* a program's id, "<kind>:<id>" or a list of them */ 'kind' => (string) ($params['kind'] ?? ''),
             'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
             'source_note' => 'Sent in as ' . strtolower($t['label']) . ' (#' . (int) $r['id'] . ')',
             'note' => 'Moved from the ' . $t['label'] . ' queue (#' . (int) $r['id'] . ') by ' . $reviewer . '.',
@@ -415,8 +415,9 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
         }
         $pdo->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ?, reviewer_notes = ? WHERE id = ?")
             ->execute(array($t['rejected'], trim($prev_notes . "\n" . $message), (int) $r['id']));
-        if ($type === 'news' && in_array($to, array('website', 'resource'), true) && empty($done['record'])) {
+        if ($type === 'news' && in_array($to, array('website', 'resource'), true) && empty($done['record']) && empty($done['many'])) {
             // The note the page's own "Move to facility record" button leaves, so its card shows the move too.
+            // (A put on several records has none: that button's Undo takes back one record, the inbox's Undo all.)
             $json = json_decode((string) $r['json_data'], true);
             $json = is_array($json) ? $json : array();
             $json['movedTo'] = array('target' => $done['target'], 'facility_id' => $done['facility_id'], 'url' => $done['url'],
@@ -476,12 +477,64 @@ function kop_rinbox_native_connect_actions(array $r) {
             'label' => 'Take off ' . ($words[$done['kind'] ?? ''] ?? 'record') . ' "' . (string) ($done['name'] ?? $ref) . '"');
     }
     if (!in_array((string) $r['status'], array('submitted', 'approved', 'published'), true) || kop_rinbox_native_url('news', $r) === '') return $actions;
-    if (!function_exists('kop_record_field_param')) return $actions;
-    $actions[] = array('id' => 'connect', 'label' => 'Connect a record', 'style' => 'neutral', 'submit' => 'Connect',
-        'help' => 'The article stays in the news and is also filed on the record you pick: a company lists it on its page once it is approved, '
-            . 'a young adult program gets the link, any other kind (a Christian rehab for adults too) a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes it.',
-        'params' => array(kop_record_field_param('record', 'Record', array('kinds' => kop_rinbox_native_connect_kinds(), 'create' => false))));
+    $actions[] = array('id' => 'connect', 'label' => 'Connect records', 'style' => 'neutral', 'submit' => 'Connect',
+        'help' => 'The article stays in the news and is also filed on every record you pick: a company lists it on its page once it is approved, '
+            . 'a young adult program gets the link, any other kind (a Christian rehab for adults too) a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes each one.',
+        'params' => array(array('name' => 'record', 'label' => 'Records (one or more)', 'type' => 'facilities',
+            'kinds' => kop_rinbox_native_connect_kinds(), 'value' => array())));
     return $actions;
+}
+
+/**
+ * "Connect records" with one or more picks (the chips; a single "<kind>:<id>" still works). A pick
+ * already connected is skipped; any other refusal takes back the ones just made, so it is all or
+ * nothing. Undo takes them all off ("unconnect:<ref>,<ref>").
+ */
+function kop_rinbox_native_connect_many($key, $value) {
+    $refs = function_exists('kop_rdest_record_refs') ? kop_rdest_record_refs($value) : array_filter(array(trim((string) $value)));
+    if (!$refs) throw new RuntimeException('Pick a company, consultant or other record in the finder first.');
+    foreach ($refs as $ref) {
+        list($kind) = kop_rinbox_record_of($ref);
+        if ($kind === 'facility') throw new RuntimeException('A program is connected through the card\'s "Facilities mentioned" (View details, then edit); take it out of the picks.');
+    }
+    if (count($refs) === 1) return kop_rinbox_native_connect($key, $refs[0]);
+    $made = array();
+    $messages = array();
+    $skipped = array();
+    foreach ($refs as $ref) {
+        try {
+            $res = kop_rinbox_native_connect($key, $ref);
+        } catch (RuntimeException $e) {
+            if (strpos($e->getMessage(), 'already connected') !== false) {
+                $skipped[] = $e->getMessage();
+                continue;
+            }
+            foreach (array_reverse($made) as $m) {
+                try { kop_rinbox_native_unconnect($key, $m); } catch (Throwable $ignore) { /* best effort */ }
+            }
+            throw new RuntimeException($e->getMessage() . ' Nothing was connected.');
+        }
+        $made[] = substr((string) $res['undo']['action'], strlen('unconnect:'));
+        $messages[] = preg_replace('/ The article stays in the news\.$/', '', (string) $res['message']);
+    }
+    if (!$made) throw new RuntimeException('This article is already connected to every record picked.');
+    return array('message' => implode(' ', array_merge($messages, $skipped)) . ' The article stays in the news.',
+        'undo' => array('action' => 'unconnect:' . implode(',', $made), 'params' => array()));
+}
+
+/** Take off one connection, or several ("<ref>,<ref>": the Undo of a many-record connect). */
+function kop_rinbox_native_unconnect_many($key, $refs) {
+    $list = array_values(array_filter(array_map('trim', explode(',', (string) $refs))));
+    if (count($list) <= 1) return kop_rinbox_native_unconnect($key, $list[0] ?? '');
+    $messages = array();
+    foreach ($list as $ref) {
+        try {
+            $messages[] = kop_rinbox_native_unconnect($key, $ref)['message'];
+        } catch (RuntimeException $e) {
+            $messages[] = $e->getMessage();
+        }
+    }
+    return array('message' => implode(' ', $messages));
 }
 
 function kop_rinbox_native_connect($key, $value) {

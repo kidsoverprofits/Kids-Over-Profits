@@ -222,7 +222,7 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
     // "Materials and links", the same link sent in again is on file there, and Undo move takes it off.
     $card = kop_rinbox_get_item('websites', $item['key']);
     $res_move = array_values(array_filter($card['moves'], function ($m) { return $m['id'] === 'resource'; }));
-    $check('websites: the Materials and links move offers any record', $res_move && $res_move[0]['params'][0]['type'] === 'record'
+    $check('websites: the Materials and links move offers any record, several at once', $res_move && $res_move[0]['params'][0]['type'] === 'facilities'
         && in_array('company', (array) $res_move[0]['params'][0]['kinds'], true), wp_json_encode($res_move[0]['params'][0] ?? null));
     $oid = (int) $GLOBALS['pdo']->query("SELECT id FROM wpdl_kop_operators WHERE json_data LIKE '%\"operator\"%' ORDER BY id LIMIT 1")->fetchColumn();
     if (!$oid) {
@@ -260,7 +260,7 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
         $card = kop_rinbox_get_item('websites', $item['key']);
         $first = $card['actions'][0] ?? array();
         $check('websites: the approve button asks for the record', ($first['id'] ?? '') === 'attach' && ($first['style'] ?? '') === 'approve'
-            && ($first['params'][0]['type'] ?? '') === 'record' && in_array('company', (array) ($first['params'][0]['kinds'] ?? array()), true),
+            && ($first['params'][0]['type'] ?? '') === 'facilities' && in_array('company', (array) ($first['params'][0]['kinds'] ?? array()), true),
             implode(', ', array_column($card['actions'], 'id')));
         try {
             call_user_func($src['act'], $item['key'], 'attach', array('facility_id' => '', 'as' => 'resource'));
@@ -294,6 +294,20 @@ function kop_rinbox_test_websites(array $src, array $item, callable $check) {
             $check('websites: a Christian rehab picked for "Website" takes it in its websites', in_array($url, $cra_links()[1], true), $res['message']);
             call_user_func($src['act'], $item['key'], 'unmove', array());
             $check('websites: Undo move takes the website off the Christian rehab', $cra_links() === $cra_before && $status() === 'pending');
+
+            // Several records at once (the chips): one approve puts it on the company and the rehab, one Undo takes both off.
+            $res = call_user_func($src['act'], $item['key'], 'attach', array('facility_id' => array('company:' . $oid, 'cra:' . $rid), 'as' => 'resource', 'kind' => 'social'));
+            $check('websites: approve with two records puts the link on both', in_array($url, $links_of()[0], true) && in_array($url, $cra_links()[0], true)
+                && $status() === 'trash', $res['message']);
+            $res = call_user_func($src['act'], $item['key'], 'unmove', array());
+            $check('websites: one Undo takes it off both records exactly', $links_of() === $before && $cra_links() === $cra_before && $status() === 'pending', $res['message']);
+            // A record that cannot take it (gone) refuses the lot: nothing is left on the other.
+            try {
+                call_user_func($src['act'], $item['key'], 'attach', array('facility_id' => array('company:' . $oid, '999999999'), 'as' => 'resource', 'kind' => 'social'));
+                $check('websites: a bad record among several refuses them all', false);
+            } catch (RuntimeException $e) {
+                $check('websites: a bad record among several refuses them all', $links_of() === $before && $status() === 'pending', $e->getMessage());
+            }
         }
     });
 }
