@@ -10,7 +10,7 @@ Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655w
 - `out/recNN.html`: built from the json by `gen.py`.
 - `out/recNN.note.txt`: that record's check-note additions. These cover what was added and from where, what was cut and why, conflicts, and open gaps.
 - `out/recNN.orig.html`: the record as it stood before the rewrite work (old check note, "Now" text, first draft). Use it as reference only.
-- `gen.py`: builds a record's Rewrite column. `python3 -I gen.py out/rec05.json > out/rec05.html`. Citations are numbered by first appearance. A source with an empty URL renders as a print citation.
+- `gen.py`: builds a record's Rewrite column. `python -I gen.py out/rec05.json > out/rec05.html`. Citations are numbered by first appearance. A source with an empty URL renders as a print citation.
 - `page.v6.html`: the base page (layout, the "Now" columns, the original check notes).
 - `page.html`: the current full page. It is rebuilt from `page.v6.html` plus every `out/recNN.html` and `out/recNN.note.txt` (see Rebuild).
 - `archive/`: text of archived originals fetched through Chrome, plus `index.md` (claim → URL → supports it?).
@@ -55,11 +55,11 @@ grep -oE 'href="[^"]*(heal-online|reddit\.com/r/troubledteens/wiki|fornits|wikip
 ## Rebuild
 
 ```
-for f in out/rec*.json; do python3 -I gen.py "$f" > "${f%.json}.html"; done
-python3 -I rebuild.py   # writes page.html from page.v6.html + out/
+for f in out/rec??.json; do python -I gen.py "$f" > "${f%.json}.html"; done   # python, not python3, on this machine
+python -I rebuild.py   # writes page.html from page.v6.html + out/
 ```
 
-## State as of Nov 3, 2026 (evening)
+## State as of Nov 4, 2026
 
 All 21 records rewritten and fact-checked. Every sentence carries its own citation. Claims the earlier passes cut as
 untraceable were restored, each cited to the original that HEAL, the wiki, Wikipedia or KOP's files name (rule 5).
@@ -73,10 +73,14 @@ Open:
   Canyon State police calls (MCSO Location History Report, 2000-13); Falcon Ridge's Apr 2019 e-mail account (Fakahua)
   and the regulator reports (Salt Lake Tribune, Mar 15, 2022, via the wiki mirror). Still out (no citation on HEAL's
   pages): Aspen Ranch cottages, $7,100, Alexander, Hirsch/Finney, cavity search; Canyon State $3M; Midwest Academy
-  runaways, foster-care application, fraud probe. To do: archive the HEAL-hosted police PDFs into the media library;
-  check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
+  runaways, foster-care application, fraud probe. Done Nov 4: both HEAL-hosted police PDFs are in the media library
+  (17220 St. George PD / Eagle Ranch, 17221 MCSO / Canyon State; Wayback bytes fetched in Chrome, since curl gets
+  a block page) and sent to Websites Sent In; sgpd14 and mcso14 link KOP's copies. To do: the Eagle Ranch Dec 2009
+  recording, if Wayback has it; check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
 - reddit.com is blocked in Claude in Chrome ("safety restrictions"), and archive.is/archive.ph show a CAPTCHA.
-- Mount Bachelor suit dates: The Bulletin puts the 2nd and 3rd suits in 2012; the complaint gives Nov 2011 and Jan 2013.
+- Mount Bachelor suit dates (reconciled Nov 4): the 2nd suit stays Nov 2011 (Oregonian and KTVZ, both Nov 10, 2011);
+  the 3rd is dated 2012 on The Bulletin (2015), the only source dating it. Jan 2013 is Ahern's limitations ruling, not
+  a filing. The Bulletin's 2012 for the 2nd suit is flagged in rec09's note. Open: the 3rd suit's month and plaintiffs.
 - Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC.
 - archive.is/archive.ph links can't be read by automation (CAPTCHA); the St. George Spectrum capture for Falcon Ridge is one.
 - Conflicts: Falcon Ridge Sequel end date (2020 vs Oct 2021); Lava Heights Nichols (Sequel vs Rite of Passage);
