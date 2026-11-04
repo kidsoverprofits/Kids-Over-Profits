@@ -40,7 +40,11 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # UT checklists: census/capacity come from two side-by-side boxes on the checklist PDF, read by word position first
 # (layout_reading; the text regexes are the fallback, they swap the boxes and drop program numbers). A read with capacity or census
 # missing (box not seen blank) or census above capacity goes to troubleshooting (scrapers/ut_checklist_troubleshoot.py):
-# re-read by word position (pdfplumber), then Tesseract OCR (turned upright, each box OCR'd twice; disagreement = unresolved).
+# re-read by word position (pdfplumber), then Tesseract OCR (turned upright, each box OCR'd twice; disagreement = unresolved),
+# then the AI (ai_reading, kop-pipeline scrapers/ai_vision.py): the upright page to both Groq (first active image model it lists)
+# and Gemini, alternating who goes first, each asked only to copy the two boxes' text; that text goes through the same parser
+# and checks. Two AI reads must agree, or one AI read must match an earlier reader; UT_CHECKLIST_AI=0 turns it off,
+# UT_CHECKLIST_AI_MAX (60) caps calls a run (the site's keys: they count against its daily limits, not on the AI Usage screen).
 # Census above capacity stands only when two readers agree (over_capacity). Unresolved: no numbers posted, listed in
 # middle/ut_checklist_review_<date>.json. Multi-program boxes post as "Capacity: 66 (SD 16, RT 50)" (no ";" inside: ut.js
 # splits checklist fields on it). --recheck-json re-reads an export's suspect checklists; post it after with --from-json.
