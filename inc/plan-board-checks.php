@@ -83,13 +83,6 @@ function kop_pb_records($sql, array $args = array()) {
 function kop_pb_checks() {
     $home = dirname(rtrim(ABSPATH, '/'));
     return array(
-        '2.1:severe-findings-scan-cron' => function () use ($home) {
-            $line = kop_pb_cron_line('scan-inspection-highlights.php');
-            if ($line) return array(true, 'The crontab runs scan-inspection-highlights.php');
-            $log = $home . '/logs/inspection-highlights-scan.log';
-            if (file_exists($log) && filemtime($log) > time() - 3 * DAY_IN_SECONDS) return array(true, 'Its log was written ' . human_time_diff(filemtime($log)) . ' ago');
-            return $line === null ? null : array(false, 'No scan line in the crontab');
-        },
         '2.1:search-console' => function () use ($home) {
             $left = array_filter(array('kop-gsc.json', 'kop-gsc.err'), function ($f) use ($home) { return file_exists($home . '/' . $f); });
             return $left ? array(false, implode(' and ', $left) . ' still on the server') : array(true, 'The kop-gsc files are gone from the server');

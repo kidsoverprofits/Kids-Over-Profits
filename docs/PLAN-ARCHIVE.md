@@ -4,6 +4,19 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-04
+
+### 2.1 cPanel, server and accounts
+
+1. **Severe findings scan cron** (2026-10-25: marked Done on the Plan Board, but `crontab -l` on the server has no
+   `scan-inspection-highlights` line and `/home/kidsover/logs/inspection-highlights-scan.log` does not exist; it
+   was likely added under another account or not saved). In cPanel > Cron Jobs, "Add New Cron Job", minute 15,
+   hour 4, the rest `*`, command:
+   `cd /home/kidsover/public_html/wp-content/themes/child && /opt/cpanel/ea-php82/root/usr/bin/php api/scan-inspection-highlights.php apply >> /home/kidsover/logs/inspection-highlights-scan.log 2>&1`
+   The site check marks it done once the line is in.
+   Ask: Severe findings scan cron: added in cPanel > Cron Jobs (the server's crontab still lacks it)?
+   Done 2026-11-04 (Plan Board auto-check): the server crontab runs `scan-inspection-highlights.php`.
+
 ## Moved 2026-11-01
 
 ### 2.1 cPanel, server and accounts

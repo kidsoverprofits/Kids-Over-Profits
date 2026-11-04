@@ -1,6 +1,18 @@
 {
  "passes": [
   {
+   "at": "2026-11-04 15:03",
+   "entries": [
+    {
+     "answer": 0,
+     "itemId": "2.1:severe-findings-scan-cron",
+     "lead": "Severe findings scan cron",
+     "kind": "auto",
+     "result": "Archived: the site check confirms the server crontab runs the scan."
+    }
+   ]
+  },
+  {
    "at": "2026-10-25 23:10",
    "entries": [
     {
