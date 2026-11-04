@@ -47,7 +47,7 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 (kop-pipeline) .venv/Scripts/python scrapers/test_utah_scraper.py
 (kop-pipeline) .venv/Scripts/python scrapers/utah_citation_scraper.py --recheck-json [middle/ut_reports_with_ocr.json]
 # Prod's UT checklist lines re-read in place (finding lines, categories, facility row kept as prod has them); dry run unless --post
-(kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_checklists.py [--ids=93323] [--db tmp/prod.sqlite] [--from-api-cache DIR] [--post]
+(kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_checklists.py [--ids=93323] [--db tmp/prod.sqlite] [--from-api-cache DIR] [--pdf-dir DIR] [--post]
 (kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_statements.py [--ids=94202] [--only=restored] [--from-api-cache DIR] [--post]
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
