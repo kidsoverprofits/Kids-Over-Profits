@@ -409,9 +409,22 @@ if (!function_exists('kop_alias_homonyms')) {
             $k = kop_normalize_name_key((string) $r['name']);
             if ($k !== '') $by[$k][(int) $r['id']] = strtoupper(trim((string) $r['state']));
         }
+        // Records grouped as one program (KOP Tools > Program Homes: homes, satellite homes or campuses, e.g. Hyde
+        // School in Bath, ME and Woodstock, CT) are one program, not two that share a name.
+        $program_of = [];
+        try {
+            $prefix = function_exists('kop_v2_detect_prefix') ? (string) kop_v2_detect_prefix($pdo) : '';
+            foreach ($pdo->query("SELECT home_id, program_id FROM {$prefix}kop_program_homes")->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $program_of[(int) $r['home_id']] = (int) $r['program_id'];
+            }
+        } catch (Throwable $e) {
+        }
         $out = [];
         foreach ($by as $k => $ids) {
-            if (count($ids) > 1 && count(array_unique(array_filter($ids))) > 1) $out[$k] = $ids;
+            if (count($ids) < 2 || count(array_unique(array_filter($ids))) < 2) continue;
+            $programs = [];
+            foreach (array_keys($ids) as $id) $programs[$program_of[$id] ?? $id] = true;
+            if (count($programs) > 1) $out[$k] = $ids;
         }
         return $out;
     }

@@ -334,7 +334,9 @@ $kop_fp_homes = !empty($page['program_homes']['homes']) ? $page['program_homes']
 $kop_fp_is_program = !empty($page['program_homes']['homes']);
 // Satellite homes of a main facility (KOP Tools > Program Homes > By hand) read as such.
 $kop_fp_satellite = $kop_fp_is_program ? !empty($page['program_homes']['satellite']) : !empty($page['home_of']['satellite']);
-if ($kop_fp_homes) $kop_fp_sections['homes'] = $kop_fp_is_program ? ($kop_fp_satellite ? 'Satellite homes' : 'Homes') : ($kop_fp_satellite ? 'Other satellite homes' : 'Other homes');
+// One school on several campuses (Hyde School, Bath ME and Woodstock CT): its homes read as its other campuses.
+$kop_fp_campuses = $kop_fp_is_program ? !empty($page['program_homes']['campus']) : !empty($page['home_of']['campus']);
+if ($kop_fp_homes) $kop_fp_sections['homes'] = $kop_fp_campuses ? 'Other campuses' : ($kop_fp_is_program ? ($kop_fp_satellite ? 'Satellite homes' : 'Homes') : ($kop_fp_satellite ? 'Other satellite homes' : 'Other homes'));
 // Separate programs on one campus (inc/campus-programs.php); a program and its academic program (school) are one too.
 $kop_fp_campus = !empty($page['campus']['others']) ? $page['campus'] : null;
 $kop_fp_school_of = $kop_fp_campus ? (array) ($kop_fp_campus['school_of'] ?? array()) : array();
@@ -536,9 +538,9 @@ get_header();
             <p class="kop-fp-formerly">Also known as <?php echo esc_html(implode(', ', $page['aka'])); ?></p>
         <?php endif; ?>
         <?php if (!empty($page['home_of'])) : $kop_fp_ho = $page['home_of']; ?>
-            <p class="kop-fp-formerly kop-fp-home-of"><?php echo $kop_fp_satellite ? ((int) $kop_fp_ho['count'] === 1 ? 'Satellite home of ' : 'One of ' . (int) $kop_fp_ho['count'] . ' satellite homes of ') : 'One of ' . (int) $kop_fp_ho['count'] . ' homes of '; ?><?php echo $kop_fp_ho['program']['url'] !== '' ? '<a href="' . esc_url($kop_fp_ho['program']['url']) . '">' . esc_html($kop_fp_ho['program']['name']) . '</a>' : esc_html($kop_fp_ho['program']['name']); ?></p>
+            <p class="kop-fp-formerly kop-fp-home-of"><?php echo $kop_fp_campuses ? 'Another campus of ' : ($kop_fp_satellite ? ((int) $kop_fp_ho['count'] === 1 ? 'Satellite home of ' : 'One of ' . (int) $kop_fp_ho['count'] . ' satellite homes of ') : 'One of ' . (int) $kop_fp_ho['count'] . ' homes of '); ?><?php echo $kop_fp_ho['program']['url'] !== '' ? '<a href="' . esc_url($kop_fp_ho['program']['url']) . '">' . esc_html($kop_fp_ho['program']['name']) . '</a>' : esc_html($kop_fp_ho['program']['name']); ?></p>
         <?php elseif ($kop_fp_is_program) : ?>
-            <p class="kop-fp-formerly kop-fp-home-of"><?php echo $kop_fp_satellite ? 'Main facility of ' . count($kop_fp_homes) . ' satellite ' . (count($kop_fp_homes) === 1 ? 'home' : 'homes') : 'A program of ' . count($kop_fp_homes) . ' licensed homes'; ?></p>
+            <p class="kop-fp-formerly kop-fp-home-of"><?php echo $kop_fp_campuses ? 'Main campus; also at ' . esc_html(implode(', ', array_map(static function ($h) { return $h['place'] !== '' ? $h['place'] : $h['name']; }, $kop_fp_homes))) : ($kop_fp_satellite ? 'Main facility of ' . count($kop_fp_homes) . ' satellite ' . (count($kop_fp_homes) === 1 ? 'home' : 'homes') : 'A program of ' . count($kop_fp_homes) . ' licensed homes'); ?></p>
         <?php endif; ?>
         <?php if ($kop_fp_campus) :
             $kop_fp_cl = array_map(static function ($c) {
@@ -721,13 +723,13 @@ get_header();
             <?php if ($kop_fp_homes) : ?>
             <section class="kop-fp-section kop-fp-homes-section" id="<?php echo $kop_fp_id('homes'); ?>">
                 <?php if ($kop_fp_is_program) : ?>
-                    <h2><?php echo $kop_fp_satellite ? 'Satellite homes' : 'Homes'; ?></h2>
+                    <h2><?php echo $kop_fp_campuses ? 'Other campuses' : ($kop_fp_satellite ? 'Satellite homes' : 'Homes'); ?></h2>
                     <p class="kop-fp-count"><?php
                         $kop_fp_open_homes = count(array_filter($kop_fp_homes, static function ($h) { return strcasecmp($h['status'], 'Open') === 0; }));
-                        echo esc_html(($kop_fp_satellite ? 'Homes run from this facility, each licensed on its own: ' : 'The state licenses this program home by home: ') . count($kop_fp_homes) . ' on record' . ($kop_fp_open_homes ? ', ' . $kop_fp_open_homes . ' open' : '') . (!empty($page['program_homes']['reports']) ? ', with ' . number_format((int) $page['program_homes']['reports']) . ' inspection reports between them' : '') . '. Each has its own page with its licence and reports; their news, lawsuits and serious findings are gathered here too.');
+                        echo esc_html($kop_fp_campuses ? 'The same school at ' . count($kop_fp_homes) . ' other ' . (count($kop_fp_homes) === 1 ? 'campus' : 'campuses') . '. Each has its own page; their news, lawsuits and serious findings are gathered here too.' : ($kop_fp_satellite ? 'Homes run from this facility, each licensed on its own: ' : 'The state licenses this program home by home: ') . count($kop_fp_homes) . ' on record' . ($kop_fp_open_homes ? ', ' . $kop_fp_open_homes . ' open' : '') . (!empty($page['program_homes']['reports']) ? ', with ' . number_format((int) $page['program_homes']['reports']) . ' inspection reports between them' : '') . '. Each has its own page with its licence and reports; their news, lawsuits and serious findings are gathered here too.');
                     ?></p>
                 <?php else : ?>
-                    <h2><?php echo $kop_fp_satellite ? 'Other satellite homes of ' : 'Other homes of '; ?><?php echo esc_html($page['home_of']['program']['name']); ?></h2>
+                    <h2><?php echo $kop_fp_campuses ? 'Other campuses of ' : ($kop_fp_satellite ? 'Other satellite homes of ' : 'Other homes of '); ?><?php echo esc_html($page['home_of']['program']['name']); ?></h2>
                 <?php endif; ?>
                 <ul class="kop-fp-records kop-fp-homes">
                     <?php foreach ($kop_fp_homes as $h) :
@@ -740,7 +742,7 @@ get_header();
                     <?php endforeach; ?>
                 </ul>
                 <?php if (!$kop_fp_is_program && $page['home_of']['program']['url'] !== '') : ?>
-                    <p class="kop-fp-count"><a href="<?php echo esc_url($page['home_of']['program']['url']); ?>"><?php echo $kop_fp_satellite ? 'The main facility' : 'The whole program'; ?>, with every home's news, lawsuits and serious findings</a></p>
+                    <p class="kop-fp-count"><a href="<?php echo esc_url($page['home_of']['program']['url']); ?>"><?php echo $kop_fp_campuses ? 'The main campus, with every campus&rsquo;s news, lawsuits and serious findings' : ($kop_fp_satellite ? 'The main facility' : 'The whole program') . ', with every home&rsquo;s news, lawsuits and serious findings'; ?></a></p>
                 <?php endif; ?>
             </section>
             <?php endif; ?>

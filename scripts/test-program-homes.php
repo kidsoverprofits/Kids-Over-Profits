@@ -314,6 +314,26 @@ $check('Undo unties it and clears the satellite mark', !kop_program_homes_progra
     && (int) $wpdb->get_var("SELECT COUNT(*) FROM facilities_v2 WHERE id = $main") === 1);
 $GLOBALS['kop_test_wpdb_writes'] = $keep_writes;
 
+// ---- One school on two campuses (Hyde School: Bath, ME and Woodstock, CT; owner 2026-11-04) ----
+echo "
+-- Campuses of one school (Hyde School) --
+";
+kop_program_homes_group(array(100107 => 'Woodstock, CT'), 11021, 'Hyde School', array('satellite' => 'campus'));
+$check('Woodstock is tied to Bath as its other campus', (kop_program_homes_program_of(100107)[0] ?? 0) === 11021
+    && kop_program_homes_is_campus(11021) && !kop_program_homes_is_satellite(11021));
+kop_facility_pages_index(true);
+$html = $render('facility-page.php', 'kop_facility_page', kop_facility_page_data(11021));
+$check('the Bath page says "Main campus; also at" and lists "Other campuses"', strpos($html, 'Main campus; also at ') !== false
+    && strpos($html, '>Other campuses<') !== false && strpos($html, 'licensed homes') === false);
+$html = $render('facility-page.php', 'kop_facility_page', kop_facility_page_data(100107));
+$check('the Woodstock page says "Another campus of Hyde School"', (bool) preg_match('/Another campus of (<a [^>]*>)?Hyde School/', $html)
+    && strpos($html, 'homes of') === false);
+kop_program_homes_set_satellite(11021, false);
+$check('the wording switch turns campuses into homes', !kop_program_homes_is_campus(11021));
+kop_program_homes_set_satellite(11021, 'campus');
+$check('and back to campuses', kop_program_homes_is_campus(11021));
+$check('undo unties the campus and clears the mark', kop_program_homes_undo(11021) === 'kept' && !kop_program_homes_program_of(100107) && !kop_program_homes_is_campus(11021));
+
 register_shutdown_function(function () use ($db_path) {
     try { @unlink($db_path); } catch (Throwable $e) {}
 });

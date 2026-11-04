@@ -12,6 +12,8 @@
  *   {prefix}kop_program_homes    home_id (PK), program_id, home_name
  *   {prefix}kop_program_groups   program_id (PK), created_record, created_at, created_by, satellite
  *
+ * satellite = 2: one school on several campuses (Hyde School: Bath, ME and Woodstock, CT); the program record is
+ * the main campus, the homes are its other campuses, and the pages say "campuses".
  * satellite = 1: the program record is a facility of its own (a main campus)
  * and the homes are its satellite homes, run from it; the pages say so
  * ("Satellite homes", "Satellite home of ..."). Set when an admin ties homes
@@ -100,7 +102,7 @@ if (!function_exists('kop_program_homes_map')) {
     function kop_program_homes_map($refresh = false) {
         static $memo = null;
         if ($memo !== null && !$refresh) return $memo;
-        $memo = array('homes' => array(), 'programs' => array(), 'satellite' => array());
+        $memo = array('homes' => array(), 'programs' => array(), 'satellite' => array(), 'campus' => array());
         if (!kop_program_homes_ready()) return $memo;
         global $wpdb;
         $rows = $wpdb->get_results(
@@ -123,6 +125,9 @@ if (!function_exists('kop_program_homes_map')) {
         try {
             foreach ((array) $wpdb->get_col('SELECT program_id FROM ' . kop_program_homes_table('groups') . ' WHERE satellite = 1') as $pid) {
                 if (isset($memo['programs'][(int) $pid])) $memo['satellite'][(int) $pid] = true;
+            }
+            foreach ((array) $wpdb->get_col('SELECT program_id FROM ' . kop_program_homes_table('groups') . ' WHERE satellite = 2') as $pid) {
+                if (isset($memo['programs'][(int) $pid])) $memo['campus'][(int) $pid] = true;
             }
         } catch (Throwable $e) {
         }
@@ -155,6 +160,14 @@ if (!function_exists('kop_program_homes_is_satellite')) {
     }
 }
 
+if (!function_exists('kop_program_homes_is_campus')) {
+    /** True when the program record is one school's main campus and its homes are its other campuses. */
+    function kop_program_homes_is_campus($program_id) {
+        $map = kop_program_homes_map();
+        return !empty($map['campus'][(int) $program_id]);
+    }
+}
+
 if (!function_exists('kop_program_homes_cache_key')) {
     /** Part of kop_facility_pages_fingerprint(): a grouping changes pages. */
     function kop_program_homes_cache_key() {
@@ -162,7 +175,7 @@ if (!function_exists('kop_program_homes_cache_key')) {
         global $wpdb;
         $row = $wpdb->get_row('SELECT COUNT(*), MAX(home_id), SUM(program_id) FROM ' . kop_program_homes_table('homes'), ARRAY_N);
         // The wording follows the satellite flag, so it moves the key too.
-        $sat = implode(',', array_keys(kop_program_homes_map()['satellite']));
+        $sat = implode(',', array_keys(kop_program_homes_map()['satellite'])) . 'c' . implode(',', array_keys(kop_program_homes_map()['campus']));
         return (is_array($row) ? implode('|', array_map('strval', $row)) : '?') . '|s' . md5($sat);
     }
 }
@@ -604,9 +617,9 @@ if (!function_exists('kop_program_homes_group')) {
      * Ties $homes (home_id => home name) to a program: $program_id when given
      * (an existing record), else a new record named $name. Returns the
      * program id. A home already in another group moves to this one.
-     * $opts['satellite'] (true/false) sets the group's wording: satellite
-     * homes of a main facility, or homes of a program; left out, an existing
-     * group keeps its own.
+     * $opts['satellite'] (true/false, or 'campus') sets the group's wording: satellite
+     * homes of a main facility, homes of a program, or campuses of one school; left
+     * out, an existing group keeps its own.
      */
     function kop_program_homes_group(array $homes, $program_id, $name, array $opts) {
         global $wpdb;
@@ -641,10 +654,10 @@ if (!function_exists('kop_program_homes_group')) {
                 'created_record' => $created ? 1 : 0,
                 'created_by'     => function_exists('get_current_user_id') ? (int) get_current_user_id() : 0,
             );
-            if (!empty($opts['satellite'])) $row['satellite'] = 1;
+            if (!empty($opts['satellite'])) $row['satellite'] = $opts['satellite'] === 'campus' ? 2 : 1;
             $wpdb->insert($gt, $row);
         } elseif (isset($opts['satellite'])) {
-            $wpdb->query($wpdb->prepare("UPDATE {$gt} SET satellite = %d WHERE program_id = %d", $opts['satellite'] ? 1 : 0, $program_id));
+            $wpdb->query($wpdb->prepare("UPDATE {$gt} SET satellite = %d WHERE program_id = %d", $opts['satellite'] === 'campus' ? 2 : ($opts['satellite'] ? 1 : 0), $program_id));
         }
         kop_program_homes_after_change();
         return $program_id;
@@ -652,10 +665,10 @@ if (!function_exists('kop_program_homes_group')) {
 }
 
 if (!function_exists('kop_program_homes_set_satellite')) {
-    /** Words a group as satellite homes of a main facility ($on) or as homes of a program. */
+    /** Words a group as satellite homes of a main facility ($on true), campuses of one school ($on 'campus') or homes of a program. */
     function kop_program_homes_set_satellite($program_id, $on) {
         global $wpdb;
-        $wpdb->query($wpdb->prepare('UPDATE ' . kop_program_homes_table('groups') . ' SET satellite = %d WHERE program_id = %d', $on ? 1 : 0, (int) $program_id));
+        $wpdb->query($wpdb->prepare('UPDATE ' . kop_program_homes_table('groups') . ' SET satellite = %d WHERE program_id = %d', $on === 'campus' ? 2 : ($on ? 1 : 0), (int) $program_id));
         kop_program_homes_after_change();
     }
 }
@@ -784,7 +797,7 @@ if (!function_exists('kop_program_homes_rollup')) {
         global $wpdb;
         $home_ids = kop_program_homes_homes_of($program_id);
         $out = array('homes' => array(), 'news' => array(), 'lawsuits' => array(), 'violations' => array(), 'reports' => 0,
-            'satellite' => kop_program_homes_is_satellite($program_id));
+            'satellite' => kop_program_homes_is_satellite($program_id), 'campus' => kop_program_homes_is_campus($program_id));
         if (!$home_ids) return $out;
         $out['homes'] = kop_program_homes_home_rows($home_ids);
         $label = array();
@@ -896,6 +909,7 @@ if (!function_exists('kop_program_homes_for_home')) {
             'program'   => array('id' => $program_id, 'name' => $name, 'url' => function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($program_id) : ''),
             'home_name' => $home_name,
             'satellite' => kop_program_homes_is_satellite($program_id),
+            'campus'    => kop_program_homes_is_campus($program_id),
             'count'     => count($others) + 1,
             'others'    => kop_program_homes_home_rows($others),
         );
@@ -979,7 +993,7 @@ if (!function_exists('kop_program_homes_handle_post')) {
                 $program = (string) ($_POST['program'] ?? 'new');
                 $name = sanitize_text_field(wp_unslash($_POST['program_name'] ?? ''));
                 $opts = kop_program_homes_opts();
-                if (isset($_POST['satellite'])) $opts['satellite'] = $_POST['satellite'] === '1';
+                if (isset($_POST['satellite'])) $opts['satellite'] = $_POST['satellite'] === '2' ? 'campus' : $_POST['satellite'] === '1';
                 if (ctype_digit($program)) {
                     // A main facility picked by hand that is itself someone's home.
                     $up = kop_program_homes_program_of((int) $program);
@@ -990,10 +1004,11 @@ if (!function_exists('kop_program_homes_handle_post')) {
                     }
                 }
                 $pid = kop_program_homes_group($homes, ctype_digit($program) ? (int) $program : 0, $name, $opts);
-                $msg = (kop_program_homes_is_satellite($pid) ? 'Tied ' . count($homes) . ' satellite ' . (count($homes) === 1 ? 'home' : 'homes') . ' to #' : 'Grouped ' . count($homes) . ' homes under #') . $pid . ' ' . $name . '.';
+                $msg = kop_program_homes_is_campus($pid) ? 'Tied ' . count($homes) . ' other ' . (count($homes) === 1 ? 'campus' : 'campuses') . ' to #' . $pid . ' ' . $name . '.' : (kop_program_homes_is_satellite($pid) ? 'Tied ' . count($homes) . ' satellite ' . (count($homes) === 1 ? 'home' : 'homes') . ' to #' : 'Grouped ' . count($homes) . ' homes under #') . $pid . ' ' . $name . '.';
             } elseif ($do === 'set_satellite') {
-                kop_program_homes_set_satellite((int) ($_POST['program_id'] ?? 0), ($_POST['satellite'] ?? '') === '1');
-                $msg = ($_POST['satellite'] ?? '') === '1' ? 'Its pages now say "satellite homes" of the main facility.' : 'Its pages now say "homes" of the program.';
+                $want = (string) ($_POST['satellite'] ?? '');
+                kop_program_homes_set_satellite((int) ($_POST['program_id'] ?? 0), $want === '2' ? 'campus' : $want === '1');
+                $msg = $want === '2' ? 'Its pages now say "campuses" of one school.' : ($want === '1' ? 'Its pages now say "satellite homes" of the main facility.' : 'Its pages now say "homes" of the program.');
             } elseif ($do === 'dismiss' || $do === 'undismiss') {
                 kop_program_homes_set_dismissed(sanitize_text_field(wp_unslash($_POST['key'] ?? '')), $do === 'dismiss');
                 $msg = $do === 'dismiss' ? 'Marked as not one program.' : 'Back in the suggestions.';
@@ -1218,6 +1233,7 @@ if (!function_exists('kop_program_homes_page_byhand')) {
                     <legend>On the pages, call them</legend>
                     <label><input type="radio" name="satellite" value="1" checked> Satellite homes of the main facility (it is a campus or program site of its own)</label>
                     <label><input type="radio" name="satellite" value="0"> Homes of the program (the main record stands for the whole program)</label>
+                    <label><input type="radio" name="satellite" value="2"> Campuses of one school (the same program in more places, e.g. Hyde School in Maine and Connecticut)</label>
                 </fieldset>
                 <button type="submit" class="button button-primary kop-ph-submit" disabled>Tie these homes to the main facility</button>
             </form>
@@ -1305,7 +1321,10 @@ if (!function_exists('kop_program_homes_page_grouped')) {
             }
             echo '</tbody></table>';
             $sat = !empty($map['satellite'][$pid]);
-            echo '<p class="kop-ph-meta">The pages call them <strong>' . ($sat ? 'satellite homes of this facility' : 'homes of this program') . '</strong>.</p>';
+            $campus = !empty($map['campus'][$pid]);
+            $kind = $campus ? '2' : ($sat ? '1' : '0');
+            $words = array('0' => 'homes of this program', '1' => 'satellite homes of this facility', '2' => 'other campuses of this school');
+            echo '<p class="kop-ph-meta">The pages call them <strong>' . $words[$kind] . '</strong>.</p>';
             if (function_exists('kop_facility_finder_field')) {
                 echo '<form method="post" class="kop-ph-add" action="' . esc_url(admin_url('admin-post.php')) . '">';
                 $hidden(array('do' => 'group', 'program' => $pid, 'program_name' => $names[$pid] ?? ''));
@@ -1313,8 +1332,15 @@ if (!function_exists('kop_program_homes_page_grouped')) {
                     . '<button type="submit" class="button kop-ph-submit" disabled>Add</button></form>';
             }
             echo '<div class="kop-ph-actions" style="margin-top:8px"><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-            $hidden(array('do' => 'set_satellite', 'program_id' => $pid, 'satellite' => $sat ? '0' : '1'));
-            echo '<button class="button">' . ($sat ? 'Call them homes of the program' : 'Call them satellite homes of this facility') . '</button></form>';
+            $labels = array('0' => 'Call them homes of the program', '1' => 'Call them satellite homes of this facility', '2' => 'Call them campuses of one school');
+            $first = true;
+            foreach ($labels as $to => $label) {
+                if ((string) $to === $kind) continue;
+                if (!$first) echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+                $first = false;
+                $hidden(array('do' => 'set_satellite', 'program_id' => $pid, 'satellite' => (string) $to));
+                echo '<button class="button">' . $label . '</button></form>';
+            }
             echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
             $hidden(array('do' => 'undo', 'program_id' => $pid));
             echo '<button class="button">Undo this group</button></form></div></div>';

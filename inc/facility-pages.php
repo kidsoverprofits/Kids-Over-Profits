@@ -522,10 +522,18 @@ if (!function_exists('kop_facility_pages_build_index')) {
         $unlisted = function_exists('kop_wu_unlisted_ids') ? array_flip(kop_wu_unlisted_ids()) : array();
         // Names records in two or more states carry (Lakeside Academy, MI and MN): a folder of that name is not
         // assumed to be either's (kop_facility_pages_homonym_folder()). Homes of one program share a state and stay as they were.
+        // Records grouped as one program (Program Homes: homes or campuses, e.g. Hyde School ME and CT) count once.
         $name_states = array();
+        $name_roots = array();
         foreach ((array) $rows as $row) {
             $k = kop_facility_pages_name_key((string) $row['name']);
-            if ($k !== '') $name_states[$k][strtoupper(trim((string) $row['state']))] = true;
+            if ($k === '') continue;
+            $name_states[$k][strtoupper(trim((string) $row['state']))] = true;
+            $up = function_exists('kop_program_homes_program_of') ? kop_program_homes_program_of((int) $row['id']) : null;
+            $name_roots[$k][$up ? (int) $up[0] : (int) $row['id']] = true;
+        }
+        foreach (array_keys($name_states) as $k) {
+            if (count($name_roots[$k] ?? array()) < 2) $name_states[$k] = array_slice($name_states[$k], 0, 1, true);
         }
         $folder_candidates = !empty($links['folders']) ? kop_facility_pages_folder_candidates() : array();
         $companies = array();   // company name key => true; operator id => name
