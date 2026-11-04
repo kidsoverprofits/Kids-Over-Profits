@@ -174,3 +174,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    #277 (Jeffries v. Teen Challenge Training Center) comes in on Teen Challenge Training Center, and no Teen Challenge
    article or lawsuit lands on Teen Challenge Riverside Facility (#100720). If one does, take it off on the card: it
    stays off.
+   - Checked 2026-11-04 (mirror after the 18:15 UTC run): the pass ran (submissions 1). Lawsuit #277 is on #100713
+     Teen Challenge Training Center (pass) and no lawsuit is on #100720. 7 'no article text', 0 'article read': six
+     archive.is/archive.md copies and one dead page, each taking the full 30 s curl timeout, so the half-run fetch
+     budget ran out after 7, not 15. #10669 / #10814 not linked yet. Approved news #11017 (Naomi Wood, Lakeland Girls
+     Academy) holds #100720 from the old linker (approved 2026-11-02): take it off. Still to check: a run with
+     'article read' notes. Proposed: skip archive.is/archive.md/archive.ph URLs in the fetch (they block bots).
