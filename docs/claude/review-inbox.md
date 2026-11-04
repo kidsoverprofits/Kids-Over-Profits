@@ -88,6 +88,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # 'no article text'; there only names of 2+ words, no KOP ids), looks again each run at items that found nothing (only 'done' is
 # final, so a record added later links them), and never picks a company's name a record holds only as an other name
 # ("Teen Challenge" on #100720; kop_autoconn_names_in_text()). Filter kop_autoconn_article_text stubs the fetch in the test. The item still waits
+# Same day, after the dry run over approved news: a name found in the text (title/notes or article) is refused when the text names US states
+# in full and none is the record's, unless it names the record's city (kop_autoconn_same_state(), kop_autoconn_text_states(): text only,
+# unlike kop_nf_article_states(), so the Websites card gets it too); whole names that read as prose are never picks ($prose in
+# kop_autoconn_text_distinctive(): "Michigan House", "Everyday Life Inc", "Milestones", "Cunningham", "The Approach"); archive.today
+# copies are not fetched (kop_autoconn_archive_today(), note 'archive copy not read').
 # Item 20 linking passes (2026-11-03, kop_autoconn_run() sources woodbury-nomatch, news-facts-companies, news-facts-people): Woodbury Reports pages with no
 # record whose header is exactly one record's name in the page's state; waiting news facts about a company that is exactly one operator (filed as a
 # cited note on the company); about a person on one record's staff when the article is linked to it or the fact names it. Agencies never; a record in

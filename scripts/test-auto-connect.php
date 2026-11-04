@@ -361,6 +361,28 @@ $check('submissions: a KOP id in the article text is not a pick', !kop_autoconn_
 // Waiting #10669 ("Lawsuit claims teen was assaulted at Upstate boarding school") names its school only in the article.
 $body = kop_autoconn_submission_records($pdo, '', 'Lawsuit claims teen was assaulted at Upstate boarding school', 'The suit says staff at Whetstone Academy in Greenville County did nothing.');
 $check('submissions: a record named in the article text is a pick', !in_array('Whetstone Academy', $names, true) || in_array('Whetstone Academy', $body, true), json_encode($body));
+// Same state (2026-11-04 dry run over approved news): a name found in a text that names US states, none of them the record's, is refused.
+$check('submissions: text states: "West Virginia" is not also Virginia', array_keys(kop_autoconn_text_states('Lawmakers in West Virginia and New York.')) === array('NY', 'WV')
+    || array_keys(kop_autoconn_text_states('Lawmakers in West Virginia and New York.')) === array('WV', 'NY'), json_encode(kop_autoconn_text_states('Lawmakers in West Virginia and New York.')));
+if (isset($names[100729]) && $names[100729] === 'Youthful Offender Transition Program') {
+    $mi = kop_autoconn_submission_records($pdo, '', 'Michigan bill on juvenile justice', 'Michigan lawmakers looked at a youthful offender transition program for the state.');
+    $check('submissions: a Wyoming record is not picked from a Michigan story', !isset($mi[100729]), json_encode($mi));
+    $wy = kop_autoconn_submission_records($pdo, '', 'Wyoming program', 'The Youthful Offender Transition Program in Wyoming took in a boy.');
+    $check('submissions: the same name in a story naming its state is a pick', isset($wy[100729]), json_encode($wy));
+    $gillette = kop_autoconn_submission_records($pdo, '', 'A Michigan boy sent away', 'He went to the Youthful Offender Transition Program in Gillette.');
+    $check('submissions: the record\'s city in the text keeps it though another state is named', isset($gillette[100729]), json_encode($gillette));
+    $none = kop_autoconn_submission_records($pdo, '', 'A boy sent away', 'He went to the Youthful Offender Transition Program.');
+    $check('submissions: a text naming no state refuses nothing', isset($none[100729]), json_encode($none));
+}
+// Names that read as prose, a surname or a legislature before they are a program's.
+foreach (array(10038 => 'Michigan House', 10731 => 'Everyday Life Inc', 100632 => 'Milestones', 100347 => 'Cunningham', 100684 => 'The Approach') as $fid => $nm) {
+    if (!isset($names[$fid])) continue;
+    $p = kop_autoconn_submission_records($pdo, '', 'Notes: ' . $nm . ' said so.', 'A story: ' . $nm . ' voted on it, said ' . $nm . '.');
+    $check("submissions: \"$nm\" in running text is prose, not #$fid", !isset($p[$fid]), json_encode($p));
+}
+$check('submissions: archive.today copies are not fetched', kop_autoconn_archive_today('https://archive.ph/AbC12') && kop_autoconn_archive_today('http://archive.is/x')
+    && kop_autoconn_archive_today('https://www.archive.md/x') && !kop_autoconn_archive_today('https://web.archive.org/web/2020/https://x.com/')
+    && !kop_autoconn_archive_today('https://myarchive.is/x'));
 $GLOBALS['kop_test_filters']['kop_autoconn_article_text'] = '';  // no fetches from the test
 // The waiting websites in the mirror: the id each note gives first is the card's pick.
 $mirror_pdo = new PDO('sqlite:' . $mirror);

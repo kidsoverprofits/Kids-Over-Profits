@@ -180,3 +180,6 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
      budget ran out after 7, not 15. #10669 / #10814 not linked yet. Approved news #11017 (Naomi Wood, Lakeland Girls
      Academy) holds #100720 from the old linker (approved 2026-11-02): take it off. Still to check: a run with
      'article read' notes. Proposed: skip archive.is/archive.md/archive.ph URLs in the fetch (they block bots).
+   - Done 2026-11-04: archive.today copies are no longer fetched (note 'archive copy not read'), and the text match has a
+     same-state rule and a prose-name list. After the next deploy + hourly run: the six archive copies show 'archive copy
+     not read', 'article read' notes appear (the budget is no longer spent on them), and no Michigan story gets #10038 or #100729.

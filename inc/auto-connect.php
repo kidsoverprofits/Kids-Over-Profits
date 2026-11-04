@@ -790,10 +790,13 @@ function kop_autoconn_submission_records(PDO $pdo, $about, $text, $body = '') {
             if (isset($names[(int) $id])) $out[(int) $id] = true;
         }
     }
-    $out += kop_autoconn_names_in_text($pdo, $text, 1);
+    $found = kop_autoconn_names_in_text($pdo, $text, 1);
     // An article's own text is long prose: there a one-word name is as often a surname or a word
     // ("Cunningham", "The Approach") as the program, so only names of two words or more count, and no KOP ids.
-    if ((string) $body !== '') $out += kop_autoconn_names_in_text($pdo, (string) $body, 2);
+    if ((string) $body !== '') $found += kop_autoconn_names_in_text($pdo, (string) $body, 2);
+    // A name found in the text is refused when the text names US states and not the record's (2026-11-04: #10038
+    // "Michigan House" of Fresno CA in every Michigan legislature story), unless the text names the record's city too.
+    $out += kop_autoconn_same_state($pdo, $found, $text . "\n" . (string) $body);
     $res = array();
     foreach (array_keys($out) as $fid) {
         if (isset($names[$fid])) $res[$fid] = $names[$fid];
@@ -829,6 +832,59 @@ function kop_autoconn_names_in_text(PDO $pdo, $text, $min_words = 1) {
     return $out;
 }
 
+/** True for an archive.today copy (archive.is, .md, .ph, .today, .li, .vn, .fo), which is not fetched. */
+function kop_autoconn_archive_today($url) {
+    $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+    return (bool) preg_match('/(^|\.)archive\.(is|md|ph|today|li|vn|fo)$/', $host);
+}
+
+/** The US state codes a text names in full ("Michigan", "West Virginia" but not also "Virginia"): [code => true]. */
+function kop_autoconn_text_states($text) {
+    static $states = array('alabama' => 'AL', 'alaska' => 'AK', 'arizona' => 'AZ', 'arkansas' => 'AR', 'california' => 'CA',
+        'colorado' => 'CO', 'connecticut' => 'CT', 'delaware' => 'DE', 'florida' => 'FL', 'georgia' => 'GA', 'hawaii' => 'HI',
+        'idaho' => 'ID', 'illinois' => 'IL', 'indiana' => 'IN', 'iowa' => 'IA', 'kansas' => 'KS', 'kentucky' => 'KY',
+        'louisiana' => 'LA', 'maine' => 'ME', 'maryland' => 'MD', 'massachusetts' => 'MA', 'michigan' => 'MI', 'minnesota' => 'MN',
+        'mississippi' => 'MS', 'missouri' => 'MO', 'montana' => 'MT', 'nebraska' => 'NE', 'nevada' => 'NV', 'new hampshire' => 'NH',
+        'new jersey' => 'NJ', 'new mexico' => 'NM', 'new york' => 'NY', 'north carolina' => 'NC', 'north dakota' => 'ND', 'ohio' => 'OH',
+        'oklahoma' => 'OK', 'oregon' => 'OR', 'pennsylvania' => 'PA', 'rhode island' => 'RI', 'south carolina' => 'SC',
+        'south dakota' => 'SD', 'tennessee' => 'TN', 'texas' => 'TX', 'utah' => 'UT', 'vermont' => 'VT', 'west virginia' => 'WV',
+        'virginia' => 'VA', 'washington' => 'WA', 'wisconsin' => 'WI', 'wyoming' => 'WY', 'puerto rico' => 'PR');
+    $t = ' ' . kop_autoconn_key($text) . ' ';
+    $out = array();
+    // Two-word names first, taken out of the text so "west virginia" is not also Virginia.
+    foreach ($states as $name => $code) {
+        if (strpos($name, ' ') === false || strpos($t, ' ' . $name . ' ') === false) continue;
+        $out[$code] = true;
+        $t = str_replace(' ' . $name . ' ', '  ', $t);
+    }
+    foreach ($states as $name => $code) {
+        if (strpos($name, ' ') === false && strpos($t, ' ' . $name . ' ') !== false) $out[$code] = true;
+    }
+    return $out;
+}
+
+/**
+ * $found ([record id => true]) less the records in a US state the text does not name, when it names any: a record
+ * with no state, or whose city the text names too, stays. Like kop_autoconn_exact_record()'s $states.
+ */
+function kop_autoconn_same_state(PDO $pdo, array $found, $text) {
+    if (!$found) return $found;
+    $states = kop_autoconn_text_states($text);
+    if (!$states) return $found;
+    $t = ' ' . kop_autoconn_key($text) . ' ';
+    foreach (array_keys($found) as $fid) {
+        $stmt = $pdo->prepare('SELECT state, city FROM facilities_v2 WHERE id = ?');
+        $stmt->execute(array((int) $fid));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: array();
+        $st = strtoupper(trim((string) ($row['state'] ?? '')));
+        if (!preg_match('/^[A-Z]{2}$/', $st) || isset($states[$st])) continue;
+        $city = kop_autoconn_key((string) ($row['city'] ?? ''));
+        if ($city !== '' && strpos($t, ' ' . $city . ' ') !== false) continue;
+        unset($found[$fid]);
+    }
+    return $found;
+}
+
 /** Company name keys (kop_operators: name, current and other names) => true. Kept for the run. */
 function kop_autoconn_operator_keys(PDO $pdo) {
     static $keys = null;
@@ -858,6 +914,11 @@ function kop_autoconn_operator_keys(PDO $pdo) {
  * they are a program's name.
  */
 function kop_autoconn_text_distinctive($key) {
+    // Whole names that read as prose, a surname or a body's name in a story before they are a program's (the
+    // 2026-11-04 dry run over approved news: "Everyday Life Inc", "Milestones", "Cunningham", "The Approach",
+    // "Michigan House" in Michigan legislature stories). Keys, so "the" and "inc" are already off.
+    $prose = array('everyday life', 'milestones', 'cunningham', 'approach', 'michigan house');
+    if (in_array(kop_autoconn_key($key), $prose, true)) return false;
     if (!function_exists('kop_wiki_upd_tokens')) return true;
     $everyday = array('industrial', 'state', 'county', 'city', 'training', 'reform', 'day', 'one', 'two', 'first', 'second',
         'chance', 'hope', 'people', 'way', 'view', 'development', 'detention', 'justice', 'regional', 'correctional',
@@ -913,7 +974,12 @@ function kop_autoconn_submissions($deadline) {
             if ($mark && $mark['outcome'] === 'done') continue;
             $head = $r['title'] . "\n" . $r['notes'] . "\n" . $r['summary'];
             $mentions = kop_autoconn_submission_mentions($pdo, '', $head);
-            $read = $mark && in_array((string) $mark['note'], array('article read', 'no article text'), true);
+            $read = $mark && in_array((string) $mark['note'], array('article read', 'no article text', 'archive copy not read'), true);
+            // archive.today copies (archive.is/.md/.ph...) refuse bots and each took the whole 30 s timeout (2026-11-04).
+            if (!$mentions && !$read && $kind === 'news' && kop_autoconn_archive_today((string) $r['url'])) {
+                kop_autoconn_mark('submissions', $key, '', 'none', 'archive copy not read');
+                continue;
+            }
             if (!$mentions && !$read && $kind === 'news' && $r['url'] !== '' && function_exists('kop_closure_article_text')
                     && $fetches < 15 && microtime(true) < $fetch_until) {
                 $fetches++;
