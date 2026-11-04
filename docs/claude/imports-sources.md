@@ -96,5 +96,6 @@ python scripts/test-gemini.py                     # is a Gemini key usable? list
 # tmp/podcasts/<show>/proposals.json -> ~/kop-import/podcasts/<show>.json -> Review inbox > Podcast statements (inc/podcast-statements.php,
 # {prefix}kop_podcast_items): "Approve and link" fixes the words, links a person id and programs/companies; admins only (People screen, "On air"
 # on the linked pages), exact Undo
+# check times each quote at the Whisper segment it starts in (transcripts/<stem>.json), not its paragraph, which can run for minutes
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=podcasts
 ```

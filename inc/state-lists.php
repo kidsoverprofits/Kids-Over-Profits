@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_STATE_LISTS_DB_VERSION = '1';
+const KOP_STATE_LISTS_DB_VERSION = '1';  // `undo` is quoted in the CREATE: a reserved word in MySQL 8
 const KOP_STATE_LISTS_FORMAT = 'kop-state-lists/1';
 
 function kop_sl_table() {
@@ -101,7 +101,7 @@ function kop_sl_ensure_table(PDO $pdo) {
         left_seen TINYINT NOT NULL DEFAULT 0,
         status VARCHAR(12) NOT NULL DEFAULT 'open',
         facility_id INT NULL,
-        undo MEDIUMTEXT NULL,
+        `undo` MEDIUMTEXT NULL,
         decided_by VARCHAR(60) NULL,
         decided_at DATETIME NULL,
         imported_at DATETIME NOT NULL,
@@ -445,7 +445,7 @@ function kop_sl_list_citation(array $r) {
 /* ---- Decisions ------------------------------------------------------------- */
 
 function kop_sl_set(PDO $pdo, $id, $status, $fid, $undo, $user) {
-    $pdo->prepare('UPDATE `' . kop_sl_table() . '` SET status = ?, facility_id = ?, undo = ?, decided_by = ?, decided_at = ? WHERE id = ?')
+    $pdo->prepare('UPDATE `' . kop_sl_table() . '` SET status = ?, facility_id = ?, `undo` = ?, decided_by = ?, decided_at = ? WHERE id = ?')
         ->execute(array($status, $fid ? (int) $fid : null, $undo !== null ? wp_json_encode($undo) : null, $user, gmdate('Y-m-d H:i:s'), (int) $id));
 }
 

@@ -43,3 +43,7 @@ What each table holds and which file owns it. A new table goes here (and in `DAT
 - `{prefix}kop_glossary_feedback` - Reader notes from the glossary's "My facility used this too" / "Suggest a correction" buttons (`inc/glossary-feedback.php`; reviewed under KOP Tools > Glossary Feedback)
 - `{prefix}kop_question_answers` / `{prefix}kop_question_state` / `{prefix}kop_question_batches` - Readers' answers on /questions/, one per person and question; each settled or dismissed question with what it wrote for Undo; and the sets of answers whose reader asked for one email when they are checked (`inc/questions.php`; Review inbox > Answers to our questions). An answer's `read_status` / `read_json` hold its reading into lines, what is not published and its leads (`inc/reader-accounts.php`)
 - `{prefix}kop_addresses` / `{prefix}kop_facility_addresses` - Physical address IDs and which facility stood where (`api/manage-addresses.php`; join table rebuilt from facility data on each seed)
+
+A new table's CREATE quotes any column named after a MySQL 8 reserved word (`undo`, `rank`, `groups`, `lead`, `window`, ...) in
+backticks: the server runs MySQL 8.0.37, the tests run SQLite, which allows them, so the CREATE fails only on the server.
+An installer sets its version option only once the table exists, so a failed CREATE is tried again.

@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const KOP_POD_DB_VERSION = '1';
+const KOP_POD_DB_VERSION = '2';  // 2: `undo` quoted (a reserved word in MySQL 8, so version 1's CREATE failed on the server)
 
 function kop_pod_table() {
     global $wpdb;
@@ -62,14 +62,19 @@ function kop_pod_install($force = false) {
         status VARCHAR(10) NOT NULL DEFAULT 'pending',
         decided_by VARCHAR(100) NOT NULL DEFAULT '',
         decided_at DATETIME NULL,
-        undo LONGTEXT NULL,
+        `undo` LONGTEXT NULL,
         created_at DATETIME NOT NULL,
         PRIMARY KEY (id),
         UNIQUE KEY ikey (ikey),
         KEY status (status),
         KEY person_id (person_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    update_option('kop_pod_db', KOP_POD_DB_VERSION, false);
+    // Only once the table is there, so a failed CREATE is tried again on the next admin page.
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', kop_pod_table())) === kop_pod_table()) {
+        update_option('kop_pod_db', KOP_POD_DB_VERSION, false);
+    } elseif ($wpdb->last_error) {
+        error_log('kop_pod_install: ' . $wpdb->last_error);
+    }
 }
 add_action('admin_init', 'kop_pod_install');
 
