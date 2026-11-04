@@ -59,31 +59,38 @@ for f in out/rec??.json; do python -I gen.py "$f" > "${f%.json}.html"; done   # 
 python -I rebuild.py   # writes page.html from page.v6.html + out/
 ```
 
-## State as of Nov 4, 2026
+## State as of Nov 4, 2026 (evening, preview version 19)
 
 All 21 records rewritten and fact-checked. Every sentence carries its own citation. Claims the earlier passes cut as
 untraceable were restored, each cited to the original that HEAL, the wiki, Wikipedia or KOP's files name (rule 5).
 Each `out/recNN.note.txt` lists what was restored, what is still out and why. Settled by Dani: Fager's case list is a
 source; plaintiff counts take the highest reputable-media figure (Mount Bachelor: 51, The Bulletin); Daily Star = Oct 2009.
 
+Settled Nov 4 (evening):
+- Mount Bachelor's three suits, from the federal coverage opinion Nautilus Ins. v. Mount Bachelor Educational Center
+  (D. Or. 3:12-cv-00825, Dec 21, 2012, govinfo): MLM No. 1107-08552 (Multnomah, July 2011); LF No. 1109-11909
+  (Multnomah, dated Sept 13, 2011); Doe 210 No. 12-cv-0008 (Deschutes, Jan 4, 2012). Per-suit counts from The Bulletin,
+  Jan 7, 2014: 17/$26M, 15/$22.85M, 13/$19.5M. The Bulletin, Nov 10, 2011: second suit filed Nov 9, 2011 (14, $23M).
+  rec09's text gives the third suit's date and case number; its note flags the LF Sept-vs-Nov date and 45-vs-51 totals.
+- Falcon Ridge / Lava Heights: the schools' own sites name Sequel through Sept 27-28, 2021 and Rite of Passage by
+  Oct 20-22, 2021 (Wayback). KOP's "Sequel 2016-2020" is wrong. The old frr/lha citations (Sept 2021 captures) never
+  named Rite of Passage; rec12/13/16 now cite both captures, and the Jan 31, 2022 licences to Utah's records.
+- Nichols was Rite of Passage staff (hired Sept 2022), not Sequel's; now in rec16 too. Savage was 32 (Tribune, Fox13,
+  Gephardt), now in rec12. Midwest Academy: Trane surrendered Mar 6, 2023 (WGEM); the 2021 date has no source.
+- Ian Mulhare stays off Aspen (rec20 note): his death goes on Island View's record (facility 100601; successor
+  Elevations RTC 10356) in the full run, cited to the police report (KOP media 2006 holds a copy).
+- Eagle Ranch Dec 2009 recording: Wayback holds HEAL's eradec09.mp3 (41 MB, captures from Apr 28, 2012); era09's label
+  names it. Not yet in the media library (see Open).
+
 Open:
-- HEAL's archived pages were opened in Chrome on Nov 3 (evening); WebFetch is still blocked from web.archive.org,
-  so use Claude in Chrome. Restored: Aspen Ranch levels, blackout, accreditation and court-custody clause (enrollment
-  agreement pp. 17, 27-28); Eagle Ranch police calls (St. George PD incident table, 2006-13) and the Dec 2009 recording;
-  Canyon State police calls (MCSO Location History Report, 2000-13); Falcon Ridge's Apr 2019 e-mail account (Fakahua)
-  and the regulator reports (Salt Lake Tribune, Mar 15, 2022, via the wiki mirror). Still out (no citation on HEAL's
-  pages): Aspen Ranch cottages, $7,100, Alexander, Hirsch/Finney, cavity search; Canyon State $3M; Midwest Academy
-  runaways, foster-care application, fraud probe. Done Nov 4: both HEAL-hosted police PDFs are in the media library
-  (17220 St. George PD / Eagle Ranch, 17221 MCSO / Canyon State; Wayback bytes fetched in Chrome, since curl gets
-  a block page) and sent to Websites Sent In; sgpd14 and mcso14 link KOP's copies. To do: the Eagle Ranch Dec 2009
-  recording, if Wayback has it; check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
+- Import eradec09.mp3 into the media library (folder UTAH / Eagle Ranch Academy), then link era09 to KOP's copy.
+  This session's server-side fetch over SSH was refused by the permission check; the owner runs it or allows it:
+  `ssh kop_nixihost`, then curl `https://web.archive.org/web/20151128081535id_/http://www.heal-online.org/eradec09.mp3`
+  into a staging folder with a manifest.json and run `php api/import-documents.php <dir> apply`.
+- KOP data fixes (owner): Sequel's Falcon Ridge/Lava Heights tenure ends Oct 2021, not 2020; Nichols belongs to
+  Rite of Passage, not Sequel; Savage's age 32.
+- Check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
 - reddit.com is blocked in Claude in Chrome ("safety restrictions"), and archive.is/archive.ph show a CAPTCHA.
-- Mount Bachelor suit dates (reconciled Nov 4): the 2nd suit stays Nov 2011 (Oregonian and KTVZ, both Nov 10, 2011);
-  the 3rd is dated 2012 on The Bulletin (2015), the only source dating it. Jan 2013 is Ahern's limitations ruling, not
-  a filing. The Bulletin's 2012 for the 2nd suit is flagged in rec09's note. Open: the 3rd suit's month and plaintiffs.
 - Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC.
-- archive.is/archive.ph links can't be read by automation (CAPTCHA); the St. George Spectrum capture for Falcon Ridge is one.
-- Conflicts: Falcon Ridge Sequel end date (2020 vs Oct 2021); Lava Heights Nichols (Sequel vs Rite of Passage);
-  Midwest Academy custody date; Savage's age (32 vs 23).
-- Ian Mulhare died at Island View on July 1, 2004, before Aspen bought it (Nov 30, 2004): belongs on Island View's record.
+- Mount Bachelor: per-suit plaintiff counts at settlement need OECI (login).
 - Then: the owner's go-ahead on the before/after, and the full run (docs/plan/2.5 item 5).
