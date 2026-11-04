@@ -77,7 +77,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Submissions come in linked (2026-10-25): kop_autoconn_submission_records() reads the sender's "about", a KOP id in the notes ("(#14110)",
 # "KOP #10608") and exact one-record names in the title and notes (one word 8+ letters or several 9+, not generic or everyday words,
 # kop_autoconn_text_distinctive()). Websites sent in pre-pick it on the Approve card; news and lawsuits sent with no facility get it in
-# facilities_mentioned at insert (inc/source-submissions.php) and, for ones already waiting, in the hourly 'submissions' pass. The item still waits
+# facilities_mentioned at insert (inc/source-submissions.php) and, for ones already waiting, in the hourly 'submissions' pass.
+# Since 2026-11-04 that pass also reads a waiting news article's own text (once per article, 15 a run, note 'article read' /
+# 'no article text'; there only names of 2+ words, no KOP ids), looks again each run at items that found nothing (only 'done' is
+# final, so a record added later links them), and never picks a company's name a record holds only as an other name
+# ("Teen Challenge" on #100720; kop_autoconn_names_in_text()). Filter kop_autoconn_article_text stubs the fetch in the test. The item still waits
 # Item 20 linking passes (2026-11-03, kop_autoconn_run() sources woodbury-nomatch, news-facts-companies, news-facts-people): Woodbury Reports pages with no
 # record whose header is exactly one record's name in the page's state; waiting news facts about a company that is exactly one operator (filed as a
 # cited note on the company); about a person on one record's staff when the article is linked to it or the fact names it. Agencies never; a record in

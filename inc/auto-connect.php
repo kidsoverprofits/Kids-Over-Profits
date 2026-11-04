@@ -773,7 +773,7 @@ function kop_autoconn_record_names(PDO $pdo) {
  * nine, more than generic or everyday words; the longest name wins, so "Canyon State Academy" is not "Canyon State").
  * Only a suggestion: the card shows it and a person approves.
  */
-function kop_autoconn_submission_records(PDO $pdo, $about, $text) {
+function kop_autoconn_submission_records(PDO $pdo, $about, $text, $body = '') {
     $index = kop_autoconn_name_index($pdo);
     $names = kop_autoconn_record_names($pdo);
     $out = array();
@@ -788,6 +788,26 @@ function kop_autoconn_submission_records(PDO $pdo, $about, $text) {
             if (isset($names[(int) $id])) $out[(int) $id] = true;
         }
     }
+    $out += kop_autoconn_names_in_text($pdo, $text, 1);
+    // An article's own text is long prose: there a one-word name is as often a surname or a word
+    // ("Cunningham", "The Approach") as the program, so only names of two words or more count, and no KOP ids.
+    if ((string) $body !== '') $out += kop_autoconn_names_in_text($pdo, (string) $body, 2);
+    $res = array();
+    foreach (array_keys($out) as $fid) {
+        if (isset($names[$fid])) $res[$fid] = $names[$fid];
+    }
+    return $res;
+}
+
+/**
+ * [record id => true] for the names in $text that are exactly one record's (one word of eight letters
+ * or more, several words of nine; $min_words words at least; distinctive, not everyday words; the
+ * longest name wins). A company's name a record holds only as an other name is skipped.
+ */
+function kop_autoconn_names_in_text(PDO $pdo, $text, $min_words = 1) {
+    $index = kop_autoconn_name_index($pdo);
+    $names = kop_autoconn_record_names($pdo);
+    $out = array();
     $words = explode(' ', kop_autoconn_key($text));
     $count = count($words);
     for ($i = 0; $i < $count; $i++) {
@@ -796,16 +816,38 @@ function kop_autoconn_submission_records(PDO $pdo, $about, $text) {
             if (strlen($k) < ($n === 1 ? 8 : 9) || !isset($index[$k]) || count($index[$k]) !== 1) continue;
             $fid = (int) key($index[$k]);
             if (!kop_autoconn_distinctive($k) || !kop_autoconn_text_distinctive($k)) continue;
-            $out[$fid] = true;
+            // A company's name that a record holds only as an other name ("Teen Challenge" on Teen Challenge
+            // Riverside) is the company, not that site: it is not the record's pick. Its words are taken.
+            $company = isset($names[$fid]) && kop_autoconn_key($names[$fid]) !== $k && isset(kop_autoconn_operator_keys($pdo)[$k]);
+            if (!$company && $n >= $min_words) $out[$fid] = true;
             $i += $n - 1;
             break;
         }
     }
-    $res = array();
-    foreach (array_keys($out) as $fid) {
-        if (isset($names[$fid])) $res[$fid] = $names[$fid];
+    return $out;
+}
+
+/** Company name keys (kop_operators: name, current and other names) => true. Kept for the run. */
+function kop_autoconn_operator_keys(PDO $pdo) {
+    static $keys = null;
+    if ($keys !== null) return $keys;
+    global $wpdb;
+    $keys = array();
+    try {
+        foreach ($pdo->query('SELECT name, json_data FROM `' . $wpdb->prefix . 'kop_operators`')->fetchAll(PDO::FETCH_ASSOC) as $o) {
+            $d = json_decode((string) $o['json_data'], true);
+            $op = is_array($d) ? (array) ($d['operator'] ?? array()) : array();
+            $all = array($o['name'], $op['name'] ?? '', $op['currentName'] ?? '');
+            foreach ((array) ($op['otherNames'] ?? array()) as $n) $all[] = is_array($n) ? ($n['name'] ?? '') : $n;
+            foreach ($all as $n) {
+                $k = kop_autoconn_key(is_string($n) ? $n : '');
+                if ($k !== '') $keys[$k] = true;
+            }
+        }
+    } catch (Throwable $e) {
+        // No operators table: no company names to step around.
     }
-    return $res;
+    return $keys;
 }
 
 /**
@@ -822,9 +864,9 @@ function kop_autoconn_text_distinctive($key) {
 }
 
 /** facilities_mentioned entries ({name, facility_id}) for a submission's guessed records. */
-function kop_autoconn_submission_mentions(PDO $pdo, $about, $text) {
+function kop_autoconn_submission_mentions(PDO $pdo, $about, $text, $body = '') {
     $out = array();
-    foreach (kop_autoconn_submission_records($pdo, $about, $text) as $fid => $name) {
+    foreach (kop_autoconn_submission_records($pdo, $about, $text, $body) as $fid => $name) {
         $out[] = array('name' => $name, 'facility_id' => $fid);
     }
     return $out;
@@ -832,8 +874,12 @@ function kop_autoconn_submission_mentions(PDO $pdo, $about, $text) {
 
 /**
  * Waiting news and lawsuit submissions sent with no facility get the records
- * their title and notes name (kop_autoconn_submission_records()), so the card
- * comes in linked. Each item once; the item still waits for a person.
+ * their title, notes and summary name (kop_autoconn_submission_records()), and
+ * for news the article's own text (read once per article, a few a run: the
+ * fetch is slow), so the card comes in linked. One linked ('done') is never
+ * linked again, so a link a person takes off stays off; one that found nothing
+ * is looked at again each run, so a record or other name added later links it
+ * (2026-11-04: all 120 waiting unlinked articles had been marked once and never again). The item still waits for a person.
  */
 function kop_autoconn_submissions($deadline) {
     foreach (array('news-mentions.php', 'lawsuit-facility-links.php') as $file) {
@@ -841,22 +887,49 @@ function kop_autoconn_submissions($deadline) {
     }
     $pdo = kop_seed_pdo();
     if (!$pdo || !function_exists('kop_sync_news_facility_links') || !function_exists('kop_sync_lawsuit_facility_links')) return 0;
-    $tried = kop_autoconn_tried('submissions');
+    global $wpdb;
+    $marks = array();
+    foreach ((array) $wpdb->get_results($wpdb->prepare('SELECT item_key, outcome, note FROM ' . kop_autoconn_table() . ' WHERE source = %s', 'submissions'), ARRAY_A) as $m) {
+        $marks[$m['item_key']] = $m;
+    }
+    // Article fetches stop at half the run's time and after 15, leaving the rest for the other queues.
+    $start = microtime(true);
+    $fetch_until = $start + max(0, ($deadline - $start) / 2);
+    $fetches = 0;
     $n = 0;
     $sets = array(
-        'news' => "SELECT id, article_title AS title, submission_notes AS notes, summary FROM news_submissions
+        'news' => "SELECT id, article_title AS title, submission_notes AS notes, summary, article_url AS url FROM news_submissions
             WHERE status = 'submitted' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]')) ORDER BY id DESC LIMIT 300",
-        'lawsuit' => "SELECT id, case_name AS title, reviewer_notes AS notes, summary FROM lawsuits
+        'lawsuit' => "SELECT id, case_name AS title, reviewer_notes AS notes, summary, '' AS url FROM lawsuits
             WHERE publication_status = 'pending' AND (facilities_mentioned IS NULL OR facilities_mentioned IN ('', '[]')) ORDER BY id DESC LIMIT 300",
     );
     foreach ($sets as $kind => $sql) {
         foreach ($pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
             if (microtime(true) > $deadline) return $n;
             $key = $kind . ':' . $r['id'];
-            if (isset($tried[$key])) continue;
-            $mentions = kop_autoconn_submission_mentions($pdo, '', $r['title'] . "\n" . $r['notes'] . "\n" . $r['summary']);
+            $mark = $marks[$key] ?? null;
+            if ($mark && $mark['outcome'] === 'done') continue;
+            $head = $r['title'] . "\n" . $r['notes'] . "\n" . $r['summary'];
+            $mentions = kop_autoconn_submission_mentions($pdo, '', $head);
+            $read = $mark && in_array((string) $mark['note'], array('article read', 'no article text'), true);
+            if (!$mentions && !$read && $kind === 'news' && $r['url'] !== '' && function_exists('kop_closure_article_text')
+                    && $fetches < 15 && microtime(true) < $fetch_until) {
+                $fetches++;
+                // The filter hands the text in place of the fetch (the offline test).
+                $text = apply_filters('kop_autoconn_article_text', null, (string) $r['url']);
+                try {
+                    if (!is_string($text)) $text = kop_closure_article_text((string) $r['url']);
+                } catch (Throwable $e) {
+                    error_log('kop auto connect: ' . $key . ' article fetch failed: ' . $e->getMessage());
+                }
+                $mentions = $text === '' ? array() : kop_autoconn_submission_mentions($pdo, '', $head, $text);
+                if (!$mentions) {
+                    kop_autoconn_mark('submissions', $key, '', 'none', $text === '' ? 'no article text' : 'article read');
+                    continue;
+                }
+            }
             if (!$mentions) {
-                kop_autoconn_mark('submissions', $key, '', 'none');
+                if (!$mark) kop_autoconn_mark('submissions', $key, '', 'none');
                 continue;
             }
             $json = wp_json_encode($mentions, JSON_UNESCAPED_UNICODE);

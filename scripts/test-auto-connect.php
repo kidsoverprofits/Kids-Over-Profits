@@ -347,6 +347,21 @@ $found = kop_autoconn_submission_records($pdo, '', 'Some program (KOP #' . $some
 $check('submissions: a KOP id in the notes is the record', key($found) === $some, json_encode($found));
 $check('submissions: generic words and short names find nothing', !kop_autoconn_submission_records($pdo, '', 'The children\'s home and the academy, from day one, in the residential treatment center.'));
 $check('submissions: an id that is no record is ignored', !kop_autoconn_submission_records($pdo, '', 'Reference #1 and case #99999999.'));
+// A company's name one record holds as an other name is the company, not that site (2026-11-04: "Teen Challenge" is an other
+// name of Teen Challenge Riverside Facility, and every waiting Teen Challenge article and lawsuit would have gone on it).
+$tc = kop_autoconn_submission_records($pdo, '', 'Jeffries v. Teen Challenge Training Center, et al.: abuse at Teen Challenge.');
+$check('submissions: a company name held as a record\'s other name picks no record', !isset($tc[100720]) || !isset($names[100720]), json_encode($tc));
+// In an article's own text only names of two words or more count: a one-word name there is as often a surname.
+$one = array_filter($names, function ($n) { return !preg_match('/\s/', trim($n)) && strlen($n) >= 10; });
+$word = $one ? reset($one) : '';
+if ($word !== '' && kop_autoconn_submission_records($pdo, '', 'Notes: ' . $word . '.')) {
+    $check('submissions: a one-word name in the article text is not a pick', !kop_autoconn_submission_records($pdo, '', 'A note.', 'The article quotes ' . $word . ' twice.'), $word);
+}
+$check('submissions: a KOP id in the article text is not a pick', !kop_autoconn_submission_records($pdo, '', 'A note.', 'Story #' . $some . ' of the day.'));
+// Waiting #10669 ("Lawsuit claims teen was assaulted at Upstate boarding school") names its school only in the article.
+$body = kop_autoconn_submission_records($pdo, '', 'Lawsuit claims teen was assaulted at Upstate boarding school', 'The suit says staff at Whetstone Academy in Greenville County did nothing.');
+$check('submissions: a record named in the article text is a pick', !in_array('Whetstone Academy', $names, true) || in_array('Whetstone Academy', $body, true), json_encode($body));
+$GLOBALS['kop_test_filters']['kop_autoconn_article_text'] = '';  // no fetches from the test
 // The waiting websites in the mirror: the id each note gives first is the card's pick.
 $mirror_pdo = new PDO('sqlite:' . $mirror);
 $sites = $mirror_pdo->query("SELECT p.ID, p.post_title, p.post_content, (SELECT meta_value FROM wpdl_postmeta WHERE post_id = p.ID AND meta_key = '_kop_facility') AS about

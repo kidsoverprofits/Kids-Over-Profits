@@ -167,3 +167,10 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
 37. **Company timelines: the owner's minimum** (4ae96ec2, 2026-11-02): checked live logged out the same day (Aspen,
    Sequel TSI and UHS timelines as expected, no critical error). Left, signed in: Review inbox > Company milestones > Add
    offers the Leadership kind, and one saved shows on its company's timeline under "Ownership and leadership".
+38. **Waiting news linked from the article's own text** (inc/auto-connect.php, 2026-11-04): after the next hourly
+   auto-connect run, `SELECT outcome, note, COUNT(*) FROM wpdl_kop_auto_connect WHERE source = 'submissions' GROUP BY 1, 2`
+   shows 'article read' and 'no article text' notes growing (15 a run at most), and Review inbox > News waiting shows
+   records on cards that had none (from a local probe: #10669 Whetstone Academy, #10814 Rebekah Home for Girls). Lawsuit
+   #277 (Jeffries v. Teen Challenge Training Center) comes in on Teen Challenge Training Center, and no Teen Challenge
+   article or lawsuit lands on Teen Challenge Riverside Facility (#100720). If one does, take it off on the card: it
+   stays off.
