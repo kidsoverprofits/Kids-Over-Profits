@@ -70,6 +70,13 @@ php api/scan-new-facilities.php --ids=502         # on the server: dry run; "app
 # Every path writing a news article, lawsuit or bill resyncs its facility links, case coverage and story groups (api/lib-record-resync.php);
 # kop_record_changed() (inc/record-events.php) moves the page caches and purges the facility pages. docs/DATA-FLOWS.md is the map
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php   # every path calls it, no link lost, reject/undo, deletes, duplicates
+# Articles and cases are saved with their facility ids (2026-11-04): both link syncs first fill each mention's missing id
+# (kop_mentions_fill_ids(), api/facility-aliases.php): the record its name resolves to, else, for a name several states'
+# records share ("Lakeside Academy": MI, MN, UT; "Hyde School"), the one record of that name the item already links. Then they
+# write it into facilities_mentioned (kop_mentions_save_ids(); an id already stored is never changed). Before this, a re-save
+# dropped those links. Two linked records of the name = no id guessed. Rows saved earlier: api/fill-mention-ids.php
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mention-ids.php   # the real syncs on scratch tables + the mirror's records
+php api/fill-mention-ids.php                      # on the server: dry run; "apply" writes only ids the row already links; "undo apply"
 # The feed's record links (2026-11-01): each /tti-news-feed/ card ends with "On KOP:" pills to the facility and operator pages the
 # article is linked to (kop_news_mention_links(), api/news-mentions.php): read from news_facility_links + kop_operator_links, never
 # resolved afresh, so the feed links what the record pages list; a linked record no mention names shows under its own name. The

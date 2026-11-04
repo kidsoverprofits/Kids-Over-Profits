@@ -58,9 +58,21 @@ if (!function_exists('kop_sync_lawsuit_facility_links')) {
     function kop_sync_lawsuit_facility_links(PDO $pdo, int $lawsuitId, $mentionsValue, ?string $createdBy = null): array {
         kop_lawsuit_links_ensure_table($pdo);
 
+        static $aliasIndex = null;
+        // The case is saved with its facility ids (kop_mentions_fill_ids(), as for news).
+        $mentions = kop_normalize_facility_mentions($mentionsValue);
+        if ($mentions) {
+            if ($aliasIndex === null) $aliasIndex = kop_build_facility_alias_index($pdo);
+            $filled = kop_mentions_fill_ids($pdo, 'lawsuit', $lawsuitId, $mentions, $aliasIndex);
+            if ($filled !== $mentions) {
+                kop_mentions_save_ids($pdo, 'lawsuit', $lawsuitId, $filled);
+                $mentions = $filled;
+            }
+        }
+
         $desiredIds = [];
         $unresolvedNames = [];
-        foreach (kop_normalize_facility_mentions($mentionsValue) as $m) {
+        foreach ($mentions as $m) {
             if (!empty($m['facility_id'])) {
                 // An id sent before its record moved or merged files on the record it is now.
                 $fid = function_exists('kop_facility_follow_moves') ? kop_facility_follow_moves((int)$m['facility_id']) : (int)$m['facility_id'];
@@ -70,7 +82,6 @@ if (!function_exists('kop_sync_lawsuit_facility_links')) {
             }
         }
 
-        static $aliasIndex = null;
         if ($aliasIndex === null && ($desiredIds || $unresolvedNames)) {
             $aliasIndex = kop_build_facility_alias_index($pdo);
         }

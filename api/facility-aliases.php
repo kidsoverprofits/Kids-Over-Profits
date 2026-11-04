@@ -514,3 +514,89 @@ if (!function_exists('kop_fuzzy_resolve_name')) {
         return null;
     }
 }
+
+if (!function_exists('kop_mentions_fill_ids')) {
+    /**
+     * A news article's or case's mentions with every id that can be settled filled in, so the record is saved with
+     * its facility ids (owner, 2026-11-04). A mention with no id gets the record its name resolves to; a name several
+     * states' records share ("Lakeside Academy": MI, MN, UT) resolves to none of them, so it gets the one record of that
+     * name the item is already linked to (a person linked it, or an older sync did). Without this, every re-save,
+     * resync or auto-connect pass dropped that 'mentioned' link. Operators are never filled in (their own id space).
+     *
+     * @param string $kind 'news' or 'lawsuit'
+     * @param array $mentions kop_normalize_facility_mentions() output
+     * @return array the same list, ids filled where settled
+     */
+    function kop_mentions_fill_ids(PDO $pdo, string $kind, int $rowId, array $mentions, array $index): array {
+        $linked = null;
+        $operators = $index['operators'] ?? [];
+        foreach ($mentions as $i => $m) {
+            if (!empty($m['facility_id']) || trim((string)($m['name'] ?? '')) === '') continue;
+            $fid = kop_resolve_mention_to_facility((string)$m['name'], $index);
+            if ($fid !== null && !isset($operators[$fid])) {
+                $mentions[$i]['facility_id'] = (int)$fid;
+                continue;
+            }
+            if ($fid !== null || empty($index['homonyms'])) continue;
+            if ($linked === null) {
+                $linked = [];
+                $table = $kind === 'news' ? 'news_facility_links' : 'lawsuit_facility_links';
+                $col = $kind === 'news' ? 'news_id' : 'lawsuit_id';
+                try {
+                    $st = $pdo->prepare("SELECT facility_id FROM {$table} WHERE {$col} = ?");
+                    $st->execute([$rowId]);
+                    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $id) $linked[(int)$id] = true;
+                } catch (Throwable $e) {
+                }
+            }
+            foreach (kop_facility_name_variants((string)$m['name']) as $variant) {
+                $records = $index['homonyms'][kop_normalize_name_key($variant)] ?? null;
+                if (!$records) continue;
+                $hits = array_keys(array_intersect_key($records, $linked));
+                if (count($hits) === 1) $mentions[$i]['facility_id'] = (int)$hits[0];
+                break;
+            }
+        }
+        return $mentions;
+    }
+}
+
+if (!function_exists('kop_mentions_save_ids')) {
+    /**
+     * Writes the ids kop_mentions_fill_ids() settled into the row's stored facilities_mentioned, entry by entry (a
+     * plain-string entry becomes {name, facility_id}; other keys of an entry are kept; an id already there is never
+     * changed). Returns the number of entries given an id.
+     */
+    function kop_mentions_save_ids(PDO $pdo, string $kind, int $rowId, array $filled): int {
+        $ids = [];
+        foreach ($filled as $m) {
+            if (!empty($m['facility_id'])) $ids[strtolower(trim((string)$m['name']))] = (int)$m['facility_id'];
+        }
+        if (!$ids) return 0;
+        $table = $kind === 'news' ? 'news_submissions' : 'lawsuits';
+        $st = $pdo->prepare("SELECT facilities_mentioned FROM {$table} WHERE id = ?");
+        $st->execute([$rowId]);
+        $raw = $st->fetchColumn();
+        $st->closeCursor();
+        $items = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($items)) return 0;
+        $n = 0;
+        foreach ($items as $i => $item) {
+            $name = is_string($item) ? trim($item) : (is_array($item) ? trim((string)($item['name'] ?? '')) : '');
+            $fid = $ids[strtolower($name)] ?? null;
+            if ($name === '' || $fid === null) continue;
+            if (is_string($item)) {
+                $items[$i] = ['name' => $name, 'facility_id' => $fid];
+                $n++;
+            } elseif (empty($item['facility_id'])) {
+                $items[$i]['facility_id'] = $fid;
+                $n++;
+            }
+        }
+        if ($n) {
+            $pdo->prepare("UPDATE {$table} SET facilities_mentioned = ? WHERE id = ?")
+                ->execute([json_encode(array_values($items), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $rowId]);
+        }
+        return $n;
+    }
+}

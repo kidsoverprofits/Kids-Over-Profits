@@ -88,6 +88,20 @@ if (!function_exists('kop_sync_news_facility_links')) {
      * facilities the same way. A name with no confident match stays text-only.
      */
     function kop_sync_news_facility_links(PDO $pdo, int $newsId, array $normalizedMentions, ?string $createdBy = null): void {
+        // Built once per request and cached; the index reads every facility and
+        // operator record, so we avoid rebuilding it if this runs again in the same save.
+        static $aliasIndex = null;
+        // The article is saved with its facility ids: what resolves, and a shared name's one linked record
+        // (kop_mentions_fill_ids()), so this sync never drops a link its stored mentions had no id for.
+        if ($normalizedMentions) {
+            if ($aliasIndex === null) $aliasIndex = kop_build_facility_alias_index($pdo);
+            $filled = kop_mentions_fill_ids($pdo, 'news', $newsId, $normalizedMentions, $aliasIndex);
+            if ($filled !== $normalizedMentions) {
+                kop_mentions_save_ids($pdo, 'news', $newsId, $filled);
+                $normalizedMentions = $filled;
+            }
+        }
+
         $desiredIds = [];
         $unresolvedNames = [];
         foreach ($normalizedMentions as $m) {
@@ -100,9 +114,6 @@ if (!function_exists('kop_sync_news_facility_links')) {
             }
         }
 
-        // Built once per request and cached; the index reads every facility and
-        // operator record, so we avoid rebuilding it if this runs again in the same save.
-        static $aliasIndex = null;
         if ($aliasIndex === null && ($desiredIds || $unresolvedNames)) {
             $aliasIndex = kop_build_facility_alias_index($pdo);
         }

@@ -58,6 +58,10 @@ Contents:
 
   A write path that skips the sync leaves the link wrong until someone runs
   `api/backfill-lawsuit-*-links.php` by hand.
+  The two facility syncs also write each mention's settled id back into the
+  row's `facilities_mentioned` (`kop_mentions_fill_ids()` /
+  `kop_mentions_save_ids()`, 2026-11-04), so a bare shared name keeps the link
+  it had; `api/fill-mention-ids.php` did the rows saved before.
 
 ## 2. The map, store by store
 
