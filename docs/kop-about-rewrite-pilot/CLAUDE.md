@@ -79,16 +79,17 @@ Settled Nov 4 (evening):
   Gephardt), now in rec12. Midwest Academy: Trane surrendered Mar 6, 2023 (WGEM); the 2021 date has no source.
 - Ian Mulhare stays off Aspen (rec20 note): his death goes on Island View's record (facility 100601; successor
   Elevations RTC 10356) in the full run, cited to the police report (KOP media 2006 holds a copy).
-- Eagle Ranch Dec 2009 recording: Wayback holds HEAL's eradec09.mp3 (41 MB, captures from Apr 28, 2012); era09's label
-  names it. Not yet in the media library (see Open).
+- Eagle Ranch Dec 2009 recording: HEAL's eradec09.mp3 (Wayback Nov 28, 2015, 41 MB) is in the media library
+  (17225, UTAH / Eagle Ranch Academy) and sent to Websites Sent In; era09 links KOP's copy.
+- Drive "Seq Timeline Draft": the Nichols entry now says he was Rite of Passage staff hired Sept 2022, and a 2021
+  entry records the Oct 2021 handover. Savage's age needs no fix: no KOP file gives 23 (the timeline says 32).
+  The site's Falcon Ridge (9607) and Lava Heights (9611) records already end Sequel in Oct 2021.
 
 Open:
-- Import eradec09.mp3 into the media library (folder UTAH / Eagle Ranch Academy), then link era09 to KOP's copy.
-  This session's server-side fetch over SSH was refused by the permission check; the owner runs it or allows it:
-  `ssh kop_nixihost`, then curl `https://web.archive.org/web/20151128081535id_/http://www.heal-online.org/eradec09.mp3`
-  into a staging folder with a manifest.json and run `php api/import-documents.php <dir> apply`.
-- KOP data fixes (owner): Sequel's Falcon Ridge/Lava Heights tenure ends Oct 2021, not 2020; Nichols belongs to
-  Rite of Passage, not Sequel; Savage's age 32.
+- Drive sheet "Sequel/TSI/YSI/Vivant" opens View only in Claude in Chrome's profile, so it is not fixed yet (owner):
+  operators tab, Falcon Ridge Ranch row, Sequel column: 2016-2020 -> 2016-2021; staff tab, Nichols, Paul Anthony:
+  "Sequel TSI: Staff member at Lava Heights Academy" -> Rite of Passage staff (hired Sept 2022), not Sequel.
+- Delete the server staging folder ~/staged-era09 (the MP3 is in uploads now).
 - Check sltrib22 when archive.ph opens (wiki says 2020, Savage was reported Mar 2021).
 - reddit.com is blocked in Claude in Chrome ("safety restrictions"), and archive.is/archive.ph show a CAPTCHA.
 - Cross Creek: the "Level 2 secured facility" claim rests on ISAC's 2004 report, attributed to ISAC.
