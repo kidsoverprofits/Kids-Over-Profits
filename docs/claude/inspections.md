@@ -20,6 +20,9 @@ php api/clean-nc-inspections.php [apply]      # on the server (ea-php82): dry ru
 (kop-pipeline) .venv/Scripts/python scrapers/test_fl_scraper.py                           # matcher kinds, renames, __NEXT_DATA__ directory
 php -d extension=pdo_sqlite scripts/test-fl-inspection-cleanup.php   # on an in-memory copy of tmp/prod.sqlite
 php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry run; apply backs up to ~/kop-backups/ first
+# FL DJJ PREA list: the page draws its table from fldjj-media.ccplatform.net/api/data/fetch (folder = the page's
+# source_location_id, 22992); fl_scraper.py reads that API, the headless browser only as fallback. A QI/PREA/SPEP list
+# that cannot be read is skipped (rest still posted) and the run exits 1 ("Finished with parts skipped: ...").
 # FL DJJ matching rule (fl_scraper.py _match_to_facility): never across detention/residential (_facility_kind); a one-word
 # key matches only as the facility's side ("Orange ... TrueCore" -> Orange Youth Academy, "Lake Academy" not -> Lake Parrish);
 # a report goes to every facility it is about (fl_scraper.py _resolve: a joint name "A & B" / "A/B" part by part; a name
@@ -34,7 +37,8 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # api/inspection-verdicts/ut.php count only those lines: a title-only line shows "No findings"); level, CMP, correction action/date/
 # verification go in categories_json "Findings". Rows the Sept 28 / Nov 1 2026 runs stripped: ut_backfill_statements.py rebuilds
 # only the finding lines of each prod row (checklist lines and the facility row kept as prod has them); dry run unless --post
-# UT checklists: census/capacity come from two side-by-side boxes on the checklist PDF. A read with capacity or census
+# UT checklists: census/capacity come from two side-by-side boxes on the checklist PDF, read by word position first
+# (layout_reading; the text regexes are the fallback, they swap the boxes and drop program numbers). A read with capacity or census
 # missing (box not seen blank) or census above capacity goes to troubleshooting (scrapers/ut_checklist_troubleshoot.py):
 # re-read by word position (pdfplumber), then Tesseract OCR (turned upright, each box OCR'd twice; disagreement = unresolved).
 # Census above capacity stands only when two readers agree (over_capacity). Unresolved: no numbers posted, listed in
@@ -42,6 +46,8 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # splits checklist fields on it). --recheck-json re-reads an export's suspect checklists; post it after with --from-json.
 (kop-pipeline) .venv/Scripts/python scrapers/test_utah_scraper.py
 (kop-pipeline) .venv/Scripts/python scrapers/utah_citation_scraper.py --recheck-json [middle/ut_reports_with_ocr.json]
+# Prod's UT checklist lines re-read in place (finding lines, categories, facility row kept as prod has them); dry run unless --post
+(kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_checklists.py [--ids=93323] [--db tmp/prod.sqlite] [--from-api-cache DIR] [--post]
 (kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_statements.py [--ids=94202] [--only=restored] [--from-api-cache DIR] [--post]
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
