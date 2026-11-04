@@ -43,6 +43,7 @@ function kop_outside_research_projects() {
                 'heartland-boys-academy-ky'             => '#/profile/heartland-boys-academy-kentucky',
                 'kansas-city-girls-academy-mo'          => '#/profile/kansas-city-girls-academy',
                 'lakeland-girls-academy-fl'             => '#/profile/lakeland-girls-academy',
+                'lakeside-academy-mn'                   => '#/campus/SL-722',
                 'new-hope-boys-home-tx'                 => '#/campus/SL-734',
                 'new-lifehouse-academy-ok'              => '#/profile/new-lifehouse-girls-academy',
                 'north-carolina-boys-academy-nc'        => '#/campus/SL-736',
