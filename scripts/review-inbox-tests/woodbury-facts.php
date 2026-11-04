@@ -438,6 +438,104 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     kop_test_fact_shape($check);
     // The live fold engine (inc/fact-fold.php), on fixtures.
     kop_test_fact_fold($check);
+    // A podcast's items (kop-pipeline scripts/podcast-wbf.py): listened to before anything is added.
+    kop_rinbox_test_wbf_podcasts($src, $check);
+}
+
+/**
+ * A podcast's items, copied from real waiting items with the build's podcast
+ * marks (extra.listen, evidence with audio and time): never added
+ * automatically or linked by name, the card plays the audio and every add
+ * asks for "I listened", refused without it (the inbox and kop_wbf_apply()
+ * itself); "Podcasts" is their origin; a reload keeps the tick. A former
+ * student goes on the person's past jobs, and Undo takes the job and the
+ * person id it made off again.
+ */
+function kop_rinbox_test_wbf_podcasts(array $src, callable $check) {
+    global $wpdb;
+    $pdo = $GLOBALS['pdo'];
+    $t = 'wpdl_kop_woodbury_facts';
+    $base = $pdo->query("SELECT * FROM $t WHERE status = 'pending' AND op = 'add_staff' AND facility_id > 0 ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    if (!$base) {
+        $check('woodbury-facts: a waiting staff item to copy for the podcast checks', false);
+        return;
+    }
+    $ev = array(array('issue' => '095-test', 'label' => 'Episode 95: Test', 'number' => 95, 'issue_id' => 0, 'page' => 1,
+        'url' => 'https://traffic.libsyn.com/test.mp3#t=373', 'quote' => 'words said on air', 'found' => true, 'pub' => 'Stories from the Field',
+        'cite' => 'Stories from the Field, Episode 95: Test (at 0:06:13)', 'date' => '2020-09', 'listen' => true,
+        'audio' => 'https://traffic.libsyn.com/test.mp3#t=373', 'time' => '0:06:13'));
+    $insert = function (array $over) use ($pdo, $t, $base, $ev) {
+        $copy = $base;
+        unset($copy['id']);
+        $copy = array_merge($copy, array('status' => 'pending', 'conflict' => '', 'current_val' => '', 'extra' => json_encode(array('listen' => true)),
+            'evidence' => json_encode($ev), 'found' => 1, 'auto' => 1, 'preselect' => 0, 'match_kind' => 'exact', 'match_note' => '', 'alternatives' => '[]',
+            'reviewed_by' => null, 'reviewed_at' => null, 'applied' => null, 'applied_fid' => 0), $over);
+        $pdo->exec("DELETE FROM $t WHERE pkey = " . $pdo->quote($copy['pkey']));
+        $pdo->prepare("INSERT INTO $t (" . implode(', ', array_keys($copy)) . ') VALUES (' . implode(', ', array_fill(0, count($copy), '?')) . ')')
+            ->execute(array_values($copy));
+        return $copy['pkey'];
+    };
+    $staff = $insert(array('pkey' => substr(md5('wbf-test|podcast|staff'), 0, 16)));
+    $r = kop_wbf_rows(array($staff))[0];
+    $check('woodbury-facts: a podcast item needs listening and its origin is Podcasts', kop_wbf_needs_listen($r) && kop_wbf_origin($r) === 'podcasts');
+    $check('woodbury-facts: a podcast item is never added automatically, even marked auto with an exact match',
+        !(int) $pdo->query("SELECT COUNT(*) FROM $t WHERE pkey = " . $pdo->quote($staff) . ' AND ' . kop_wbf_auto_where())->fetchColumn());
+    $card = kop_rinbox_get_item('woodbury-facts', $staff);
+    $apply = array_values(array_filter($card['actions'], function ($a) { return $a['id'] === 'apply'; }))[0] ?? array();
+    $tick = array_values(array_filter((array) ($apply['params'] ?? array()), function ($p) { return $p['name'] === 'listened'; }))[0] ?? null;
+    $check('woodbury-facts: a podcast card plays the audio from its second and Add asks for "I listened" (not optional)',
+        ($card['audio'][0]['url'] ?? '') === $ev[0]['audio'] && $tick && $tick['type'] === 'checkbox' && empty($tick['optional'])
+        && strpos($tick['label'], '0:06:13') !== false && strpos($card['text'], 'listen at 0:06:13') !== false, json_encode($card['audio'] ?? null));
+    $refused = '';
+    try { call_user_func($src['act'], $staff, 'apply', array('facility' => (int) $base['facility_id'])); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
+    $check('woodbury-facts: Add without the tick is refused and changes nothing', strpos($refused, 'Listen first') === 0 && kop_wbf_rows(array($staff))[0]['status'] === 'pending', $refused);
+    $res = kop_wbf_apply(array($r), (int) $base['facility_id'], 'tester');
+    $check('woodbury-facts: kop_wbf_apply() refuses an unheard podcast item too', !empty($res[$staff]['listen']) && kop_wbf_rows(array($staff))[0]['status'] === 'pending', json_encode($res));
+    $refused = '';
+    try { kop_wbf_consultant_apply($r); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
+    $check('woodbury-facts: the consultant path refuses it as well', strpos($refused, 'Listen first') === 0, $refused);
+    kop_wbf_mark_listened($staff, 'tester');
+    $r = kop_wbf_rows(array($staff))[0];
+    $card = kop_rinbox_get_item('woodbury-facts', $staff);
+    $check('woodbury-facts: once ticked it may be added, the card says who listened and asks no more',
+        !kop_wbf_needs_listen($r) && strpos($card['text'], 'Listened to by tester') !== false
+        && !array_filter($card['actions'], function ($a) { return in_array('listened', array_column((array) ($a['params'] ?? array()), 'name'), true); }));
+    $pdo->exec("DELETE FROM $t WHERE pkey = " . $pdo->quote($staff));
+
+    // A former student: a past job on the person's id; Undo takes it and the person id made for it off.
+    if (!function_exists('kop_pjobs_save')) require_once dirname(__DIR__, 2) . '/inc/person-jobs.php';
+    if (!function_exists('kop_people_load')) require_once dirname(__DIR__, 2) . '/inc/people.php';
+    $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_people (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, name_key TEXT NOT NULL,
+        aliases TEXT, merged_into INTEGER, notes TEXT, created_at TEXT, updated_at TEXT)");
+    $cols = array_column($pdo->query('PRAGMA table_info(wpdl_kop_people)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    if (!in_array('pool', $cols, true)) $pdo->exec("ALTER TABLE wpdl_kop_people ADD COLUMN pool TEXT NOT NULL DEFAULT 'industry'");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_person_roles (record_kind TEXT NOT NULL, record_id INTEGER NOT NULL, list TEXT NOT NULL,
+        position INTEGER NOT NULL, person_id INTEGER NOT NULL, name TEXT NOT NULL DEFAULT '', role TEXT, ref TEXT NOT NULL DEFAULT '',
+        PRIMARY KEY (record_kind, record_id, list, position))");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS wpdl_kop_person_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, person_id INTEGER NOT NULL, place TEXT NOT NULL DEFAULT '',
+        role TEXT NOT NULL DEFAULT '', years TEXT NOT NULL DEFAULT '', source TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '',
+        origin TEXT NOT NULL DEFAULT 'manual', import_key TEXT NOT NULL DEFAULT '', hidden INTEGER NOT NULL DEFAULT 0, created_at TEXT, updated_at TEXT)");
+    $GLOBALS['kop_test_options']['kop_people_db'] = KOP_PEOPLE_DB_VERSION;
+    $GLOBALS['kop_test_options']['kop_person_jobs_db'] = KOP_PERSON_JOBS_DB_VERSION;
+    $name = 'Quillon Testattendee';
+    $job = $insert(array('pkey' => substr(md5('wbf-test|podcast|job'), 0, 16), 'op' => 'person_job', 'path' => 'person.jobs', 'grp' => 'staff',
+        'value' => json_encode(array('name' => $name, 'role' => 'Former student (attended 2009)', 'place' => $base['program'], 'years' => '2009')),
+        'label' => $name . ', Former student (attended 2009) at ' . $base['program'],
+        'extra' => json_encode(array('listen' => true, 'person' => $name, 'listened' => array('by' => 'tester', 'at' => '2026-11-04 00:00:00')))));
+    $people = (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_people')->fetchColumn();
+    $jobs = (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_person_jobs')->fetchColumn();
+    $msg = '';
+    try { $msg = call_user_func($src['act'], $job, 'apply', array('facility' => (int) $base['facility_id'], 'listened' => '1'))['message']; } catch (Throwable $e) { $msg = 'ERROR ' . $e->getMessage(); }
+    $row = $pdo->query("SELECT j.role, j.source, j.years, p.name FROM wpdl_kop_person_jobs j JOIN wpdl_kop_people p ON p.id = j.person_id ORDER BY j.id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    $after = kop_wbf_rows(array($job))[0];
+    $check('woodbury-facts: a former student goes on the person\'s past jobs (a new person id), citing the episode at its time, never held',
+        $after['status'] === 'applied' && $row && $row['name'] === $name && $row['role'] === 'Former student (attended 2009)' && strpos($row['source'], '(at 0:06:13)') !== false
+        && (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_people')->fetchColumn() === $people + 1, $msg);
+    if ($after['status'] === 'applied') call_user_func($src['act'], $job, 'undo', array());
+    $check('woodbury-facts: Undo takes the job and the person id it made off again and the item waits',
+        kop_wbf_rows(array($job))[0]['status'] === 'pending' && (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_person_jobs')->fetchColumn() === $jobs
+        && (int) $pdo->query('SELECT COUNT(*) FROM wpdl_kop_people')->fetchColumn() === $people);
+    $pdo->exec("DELETE FROM $t WHERE pkey = " . $pdo->quote($job));
 }
 
 /**

@@ -92,22 +92,40 @@ function kop_wbf_path() {
 }
 
 /**
+ * facts.json and every facts-<name>.json beside it that can be read. A source
+ * built on its own goes in its own file (facts-podcasts.json, kop-pipeline
+ * scripts/podcast-wbf.py), so it can be rebuilt without the newsletter's inputs.
+ */
+function kop_wbf_paths() {
+    $main = kop_wbf_path();
+    $more = glob(dirname($main) . '/facts-*.json') ?: array();
+    sort($more);
+    return array_values(array_filter(array_merge(array($main), $more), 'is_readable'));
+}
+
+/**
  * Load a new facts.json. New proposals are added, waiting ones take the
  * build's latest match and text, decided ones are left alone, and waiting
  * ones the build no longer makes are marked 'gone'.
  */
 function kop_wbf_sync($force = false) {
-    $path = kop_wbf_path();
-    if (!is_readable($path)) {
+    // facts.json (Woodbury, HEAL, the wiki) must be there; the files beside it (facts-podcasts.json) are read with it,
+    // so "no longer proposed" is judged across all of them.
+    if (!is_readable(kop_wbf_path())) {
         return null;
     }
-    $md5 = md5_file($path);
+    $paths = kop_wbf_paths();
+    $md5 = count($paths) === 1 ? md5_file($paths[0]) : md5(implode('|', array_map(function ($f) { return basename($f) . ':' . md5_file($f); }, $paths)));
     if (!$force && get_option('kop_woodbury_facts_md5') === $md5) {
         return null;
     }
-    $data = json_decode((string) file_get_contents($path), true);
-    if (!is_array($data) || !isset($data['proposals']) || !is_array($data['proposals'])) {
-        return null;
+    $data = array('proposals' => array());
+    foreach ($paths as $path) {
+        $one = json_decode((string) file_get_contents($path), true);
+        if (!is_array($one) || !isset($one['proposals']) || !is_array($one['proposals'])) {
+            return null; // a half-copied file: nothing loads, or its waiting rows would all be marked gone
+        }
+        foreach ($one['proposals'] as $p) $data['proposals'][] = $p;
     }
     global $wpdb;
     $table = kop_wbf_table();
@@ -115,8 +133,13 @@ function kop_wbf_sync($force = false) {
     $edited = array();
     $manual = array();
     $folded = array();
+    $listened = array();
     foreach ((array) $wpdb->get_results("SELECT pkey, status, extra, match_kind FROM {$table}", ARRAY_A) as $r) {
         $existing[$r['pkey']] = $r['status'];
+        // Someone listened to a recording's item (kop_wbf_mark_listened()): a reload keeps it.
+        if (strpos((string) $r['extra'], '"listened"') !== false) {
+            $listened[$r['pkey']] = (json_decode((string) $r['extra'], true) ?: array())['listened'] ?? null;
+        }
         // The kept card of a fold (inc/fact-fold.php): other sources' citations ride on it, and a reload keeps them.
         if (strpos((string) $r['extra'], '"folded"') !== false) {
             $folded[$r['pkey']] = true;
@@ -145,10 +168,14 @@ function kop_wbf_sync($force = false) {
         }
         $seen[$pkey] = true;
         $extra = array();
-        foreach (array('person', 'career', 'note_line') as $k) {
+        // listen: a recording's item (kop_wbf_needs_listen()).
+        foreach (array('person', 'career', 'note_line', 'listen') as $k) {
             if (isset($p[$k])) {
                 $extra[$k] = $p[$k];
             }
+        }
+        if (!empty($listened[$pkey])) {
+            $extra['listened'] = $listened[$pkey];
         }
         $row = array(
             'facility_id'        => (int) ($p['facility_id'] ?? 0),
@@ -276,19 +303,21 @@ function kop_wbf_ev_label(array $e) {
 function kop_wbf_origin(array $r) {
     $extra = is_array($r['extra'] ?? null) ? $r['extra'] : (json_decode((string) ($r['extra'] ?? ''), true) ?: array());
     $via = $extra['via'] ?? '';
+    if (!empty($extra['listen'])) return 'podcasts';
     return in_array($via, array('questions', 'news'), true) ? $via : 'woodbury';
 }
 
 /** 'news': facts the news reader proposed about a program its article is linked to (inc/news-facts.php). */
 function kop_wbf_origins() {
-    return array('woodbury' => 'Woodbury Reports', 'questions' => 'Questions page', 'news' => 'News articles');
+    return array('woodbury' => 'Woodbury Reports', 'questions' => 'Questions page', 'news' => 'News articles', 'podcasts' => 'Podcasts');
 }
 
 /** SQL for one origin's rows (the questions page writes extra as {"manual":1,"via":"questions",...}). */
 function kop_wbf_origin_where($origin) {
     if ($origin === 'questions') return " AND extra LIKE '%\"via\":\"questions\"%'";
     if ($origin === 'news') return " AND extra LIKE '%\"via\":\"news\"%'";
-    if ($origin === 'woodbury') return " AND (extra IS NULL OR (extra NOT LIKE '%\"via\":\"questions\"%' AND extra NOT LIKE '%\"via\":\"news\"%'))";
+    if ($origin === 'podcasts') return " AND extra LIKE '%\"listen\"%'";
+    if ($origin === 'woodbury') return " AND (extra IS NULL OR (extra NOT LIKE '%\"via\":\"questions\"%' AND extra NOT LIKE '%\"via\":\"news\"%' AND extra NOT LIKE '%\"listen\"%'))";
     return '';
 }
 
@@ -1462,9 +1491,25 @@ function kop_wbf_apply(array $rows, $fid, $reviewer, $hold = null) {
             $doc = kop_wu_doc_with_held($doc, $fid);
         }
         $applied = array();
+        $direct = array();
         foreach ($rows as $r) {
             if ($r['status'] !== 'pending') {
                 $results[$r['pkey']] = array('ok' => false, 'error' => 'Already ' . $r['status'] . '.');
+                continue;
+            }
+            // A recording's item waits until someone has listened (kop_wbf_listen_gate()); nothing changes.
+            if (kop_wbf_needs_listen($r)) {
+                $results[$r['pkey']] = array('ok' => false, 'error' => 'Listen first: the audio at ' . (kop_wbf_listen_times($r) ?: 'its time') . '.', 'listen' => true);
+                continue;
+            }
+            // A former student: a past job on the person's id, not the record; never held for the write-up.
+            if (($r['op'] ?? '') === 'person_job') {
+                try {
+                    $direct[$r['pkey']] = kop_wbf_person_job_apply($r, $fid);
+                    $results[$r['pkey']] = array('ok' => true);
+                } catch (RuntimeException $e) {
+                    $results[$r['pkey']] = array('ok' => false, 'error' => $e->getMessage(), 'already' => strpos($e->getMessage(), 'already listed') !== false);
+                }
                 continue;
             }
             try {
@@ -1489,7 +1534,10 @@ function kop_wbf_apply(array $rows, $fid, $reviewer, $hold = null) {
         }
         $now = current_time('mysql', true);
         foreach ($rows as $r) {
-            if (isset($applied[$r['pkey']]) && $hold) {
+            if (isset($direct[$r['pkey']])) {
+                $wpdb->update(kop_wbf_table(), array('status' => 'applied', 'applied' => wp_json_encode($direct[$r['pkey']]),
+                    'applied_fid' => $fid, 'facility_id' => $fid, 'reviewed_by' => $reviewer, 'reviewed_at' => $now), array('pkey' => $r['pkey']));
+            } elseif (isset($applied[$r['pkey']]) && $hold) {
                 // Held for the write-up: the record is unchanged. 'from_fid' lets Undo put it back under the record it named.
                 $held = array('held' => 1);
                 if ((int) $r['facility_id'] !== $fid) $held['from_fid'] = (int) $r['facility_id'];
@@ -1624,6 +1672,7 @@ function kop_wbf_ya_override($program, $on) {
  */
 function kop_wbf_auto_link(array $r, $fid) {
     global $wpdb;
+    if (kop_wbf_is_recording($r)) return false; // a podcast's item: the person who listens links it
     $extra = json_decode((string) $r['extra'], true) ?: array();
     $extra['auto_linked'] = array('was_kind' => (string) $r['match_kind'], 'was_note' => (string) $r['match_note'], 'at' => current_time('mysql', true));
     return (int) $wpdb->update(kop_wbf_table(), array('facility_id' => (int) $fid, 'match_kind' => 'id',
@@ -1692,6 +1741,7 @@ function kop_wbf_ya_file(PDO $pdo, array $rows, $yid, $reviewer) {
     if (!$p) {
         throw new RuntimeException('Pick the young adult program first.');
     }
+    foreach ($rows as $r) kop_wbf_listen_gate($r);
     $results = array();
     $now = current_time('mysql', true);
     foreach ($rows as $r) {
@@ -1772,6 +1822,7 @@ function kop_wbf_file_items(array $rows, $kind, array $f, $reviewer) {
         throw new RuntimeException('Record creation is not available.');
     }
     $rows = array_values(array_filter($rows, function ($r) { return $r['status'] === 'pending' && $r['grp'] !== 'consultant'; }));
+    foreach ($rows as $r) kop_wbf_listen_gate($r);
     if (!$rows) {
         throw new RuntimeException('Tick at least one waiting item.');
     }
@@ -1824,6 +1875,11 @@ function kop_wbf_undo(array $rows, $reviewer) {
             }
             $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'reviewed_by' => $reviewer,
                 'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
+        } elseif ($r['status'] === 'applied' && ($r['op'] ?? '') === 'person_job') {
+            // A former student's past job: off the person's id again (and a person id made for it).
+            kop_wbf_person_job_undo($r);
+            $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'applied_fid' => 0, 'reviewed_by' => $reviewer,
+                'reviewed_at' => current_time('mysql', true)), array('pkey' => $r['pkey']));
         } elseif ($r['status'] === 'applied' && $r['grp'] === 'consultant') {
             kop_wbf_consultant_undo($r);
             $wpdb->update(kop_wbf_table(), array('status' => 'pending', 'applied' => null, 'reviewed_by' => $reviewer,
@@ -1871,6 +1927,127 @@ function kop_wbf_undo(array $rows, $reviewer) {
     }
 }
 
+/* ---- Recordings: podcast facts (kop-pipeline scripts/podcast-wbf.py) ------- */
+
+/*
+ * A podcast's facts come from a Whisper transcript, which mishears names and
+ * words. Nothing from one is added, and so nothing is quoted publicly, until
+ * someone has listened to the audio at that second and ticked "listened" on
+ * the card (owner, 2026-11-04). The build marks such items extra.listen; the
+ * tick is extra.listened {by, at}. Every way of adding an item checks it
+ * (kop_wbf_listen_gate()), the automatic runs leave them alone.
+ */
+
+function kop_wbf_extra_of(array $r) {
+    return is_array($r['extra'] ?? null) ? $r['extra'] : (json_decode((string) ($r['extra'] ?? ''), true) ?: array());
+}
+
+/** A recording's item (a podcast). */
+function kop_wbf_is_recording(array $r) {
+    return !empty(kop_wbf_extra_of($r)['listen']);
+}
+
+/** A recording's item nobody has said they listened to yet. */
+function kop_wbf_needs_listen(array $r) {
+    $x = kop_wbf_extra_of($r);
+    return !empty($x['listen']) && empty($x['listened']);
+}
+
+/** "0:06:13, 0:41:02": where in the episode(s) to listen. */
+function kop_wbf_listen_times(array $r) {
+    $t = array();
+    foreach (kop_wbf_evidence($r) as $e) {
+        if (!empty($e['time'])) $t[] = (string) $e['time'];
+    }
+    return implode(', ', array_unique($t));
+}
+
+/** Throws when $r is a recording's item nobody listened to. */
+function kop_wbf_listen_gate(array $r) {
+    if (kop_wbf_needs_listen($r)) {
+        throw new RuntimeException('Listen first: tick "I listened" once you have heard the audio at ' . (kop_wbf_listen_times($r) ?: 'its time')
+            . ' and the words are right (the transcript can mishear).');
+    }
+}
+
+/** Record that $who listened to item $pkey. Returns the row as it now is. */
+function kop_wbf_mark_listened($pkey, $who) {
+    global $wpdb;
+    $r = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . ' WHERE pkey = %s', (string) $pkey), ARRAY_A);
+    if (!$r || !kop_wbf_is_recording($r)) return $r;
+    $x = kop_wbf_extra_of($r);
+    $x['listened'] = array('by' => (string) $who, 'at' => current_time('mysql', true));
+    $wpdb->update(kop_wbf_table(), array('extra' => wp_json_encode($x)), array('pkey' => (string) $pkey));
+    $r['extra'] = wp_json_encode($x);
+    return $r;
+}
+
+/**
+ * A former student (an "attended" fact): a past job on the person's id,
+ * "Former student (attended 2009)" at the program, citing the episode at its
+ * time ({prefix}kop_person_jobs, inc/person-jobs.php). The network map draws
+ * it as a survivor line (kop-pipeline build-network-graph.js,
+ * readFormerStudentJobs(); owner 2026-11-04: attended = survivor). A person
+ * id made for it is noted so Undo takes it off again while nothing else names
+ * them. $fid: the record picked on the card, whose name is the place.
+ */
+function kop_wbf_person_job_apply(array $r, $fid) {
+    if (!function_exists('kop_pjobs_save') || !function_exists('kop_people_load')) {
+        throw new RuntimeException('Person ids are not available here.');
+    }
+    $v = kop_wbf_row_value($r);
+    $name = trim((string) ($v['name'] ?? ''));
+    // The picked record's own name (what the map resolves), else the program as the build named it.
+    $stored = (int) $fid > 0 ? kop_facility_load((int) $fid, kop_wbf_opts()) : null;
+    $names = $stored ? kop_wbf_record_names((array) $stored['doc']) : array();
+    $place = $names ? $names[0] : trim((string) ($v['place'] ?? $r['program']));
+    if ($name === '' || $place === '') throw new RuntimeException('A name and a program are needed.');
+    $state = kop_people_load();
+    $pid = kop_people_find($state, $name, 'industry');
+    $made = 0;
+    if (!$pid) {
+        $created = 0;
+        $pid = kop_people_assign($state, $name, 0, array(), $created, 'industry');
+        if (!$pid) throw new RuntimeException('"' . $name . '" cannot be a person id: give a first and last name.');
+        if ($created) {
+            $pid = kop_people_find(kop_people_load(), $name, 'industry') ?: $pid;
+            $made = (int) $pid;
+        }
+    }
+    $pid = function_exists('kop_people_resolve') ? kop_people_resolve(kop_people_load(), (int) $pid) : (int) $pid;
+    $src = kop_wbf_source_ref($r);
+    foreach (kop_pjobs_for_person($pid) as $j) {
+        if (kop_wbf_org_key($j['place']) === kop_wbf_org_key($place) && preg_match('/\b(former student|attended)\b/i', (string) $j['role'])) {
+            throw new RuntimeException($name . ' is already listed as a former student of ' . $place . '.');
+        }
+    }
+    $job = kop_pjobs_save($pid, 0, array('place' => $place, 'role' => (string) ($v['role'] ?? 'Former student'), 'years' => (string) ($v['years'] ?? ''),
+        'source' => (string) ($src['source'] ?? ''), 'source_url' => (string) ($src['sourceUrl'] ?? '')));
+    return array('op' => 'person_job', 'person_id' => (int) $pid, 'job_id' => (int) $job, 'made_person' => $made, 'place' => $place);
+}
+
+/** Undo of kop_wbf_person_job_apply(): the job comes off, and a person id made for it while nothing else names them. */
+function kop_wbf_person_job_undo(array $r) {
+    $done = json_decode((string) $r['applied'], true);
+    if (!is_array($done) || ($done['op'] ?? '') !== 'person_job') return;
+    if (!empty($done['job_id']) && function_exists('kop_pjobs_table')) {
+        $t = kop_pjobs_table();
+        $before = kop_facility_db_rows("SELECT * FROM {$t} WHERE id = ?", array((int) $done['job_id']))[0] ?? null;
+        kop_facility_db_exec("DELETE FROM {$t} WHERE id = ?", array((int) $done['job_id']));
+        if ($before && function_exists('kop_pjobs_log')) kop_pjobs_log(array('id' => (int) $done['job_id'], 'person' => (int) $done['person_id'], 'before' => $before, 'after' => null));
+        $GLOBALS['kop_pjobs_cache'] = null;
+    }
+    $made = (int) ($done['made_person'] ?? 0);
+    if ($made > 0 && function_exists('kop_people_table')) {
+        global $wpdb;
+        $named = (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_people_table('roles') . ' WHERE person_id = %d', $made))
+            + (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_people_table('people') . ' WHERE merged_into = %d', $made))
+            + (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . kop_pjobs_table() . ' WHERE person_id = %d', $made));
+        if (!$named) $wpdb->delete(kop_people_table('people'), array('id' => $made));
+    }
+    if (function_exists('kop_people_version_bump')) kop_people_version_bump();
+}
+
 /* ---- Automatic additions --------------------------------------------------- */
 
 /**
@@ -1880,11 +2057,13 @@ function kop_wbf_undo(array $rows, $reviewer) {
  * record's name (or a past name of it, with no other doubt noted), quote found
  * in the source, nothing else it could be, no conflict, not a young adult
  * program, and never one a person has sent back, edited or settled. From any
- * source (Woodbury, HEAL, the wiki). Each lands on the "Added automatically"
+ * source (Woodbury, HEAL, the wiki) but a recording (a podcast: someone listens
+ * first, owner 2026-11-04). Each lands on the "Added automatically"
  * tab with Undo; an undone item keeps its reviewer and is never added again.
  */
 function kop_wbf_auto_where() {
-    return "status = 'pending' AND facility_id > 0 AND (auto = 1 OR (found = 1 AND ya = 0
+    // A recording's item (a podcast, extra.listen) never: someone listens first (kop_wbf_needs_listen()).
+    return "status = 'pending' AND facility_id > 0 AND INSTR(COALESCE(extra, ''), '\"listen\"') = 0 AND (auto = 1 OR (found = 1 AND ya = 0
         AND (conflict IS NULL OR conflict = '') AND (alternatives IS NULL OR alternatives = '' OR alternatives = '[]')
         AND (reviewed_by IS NULL OR reviewed_by = '') AND INSTR(COALESCE(extra, ''), '\"edited_by\"') = 0
         AND ((match_kind = 'exact' AND match_note = '')
@@ -2055,6 +2234,7 @@ function kop_wbf_consultant_entries(array &$data, $key) {
  * Consultants). Returns what Undo needs.
  */
 function kop_wbf_consultant_apply(array $r) {
+    kop_wbf_listen_gate($r);
     $v = kop_wbf_row_value($r);
     $pdo = function_exists('kop_closure_pdo') ? kop_closure_pdo() : null;
     if (!$pdo) {
@@ -2224,6 +2404,9 @@ function kop_wbf_label_for(array $r, $v) {
     if ($r['op'] === 'add_staff') {
         return $v['name'] . ($v['role'] !== '' ? ', ' . $v['role'] : '') . (preg_match('/ \(died [^()]*\)$/', $old, $m) ? $m[0] : '');
     }
+    if ($r['op'] === 'person_job') {
+        return $v['name'] . ', ' . $v['role'] . ' at ' . ($v['place'] ?? $r['program']);
+    }
     if ($r['op'] === 'consultant_jobs') {
         $jobs = array();
         foreach ($v['jobs'] as $j) {
@@ -2278,6 +2461,13 @@ function kop_wbf_edit_fields(array $r) {
             array('city', 'City', 'text', (string) ($v['city'] ?? '')),
             array('state', 'State', 'text', (string) ($v['state'] ?? '')),
             array('jobs', 'Industry jobs, one a line: Role | Program | Year', 'area', implode("\n", $lines)),
+        );
+    }
+    if ($r['op'] === 'person_job') {
+        return array(
+            array('name', 'Name', 'text', (string) ($v['name'] ?? '')),
+            array('role', 'Role', 'text', (string) ($v['role'] ?? '')),
+            array('years', 'Year(s) there', 'text', (string) ($v['years'] ?? '')),
         );
     }
     if ($r['op'] === 'add_list' && is_string($v)) {
@@ -2385,6 +2575,13 @@ function kop_wbf_edited_value(array $r, array $f) {
         }
         $v['jobs'] = $jobs;
         return array($v, $path);
+    }
+    if ($r['op'] === 'person_job') {
+        if ($t('name') === '') throw new RuntimeException('A name is needed.');
+        $role = $t('role') !== '' ? $t('role') : 'Former student';
+        // The map draws a survivor line only from a former student's role (build-network-graph.js FORMER_STUDENT).
+        if (!preg_match('/\b(former student|attended)\b/i', $role)) throw new RuntimeException('The role must say "Former student" (or "attended"): it is what this item records.');
+        return array(array('name' => $t('name'), 'role' => $role, 'place' => (string) ($old['place'] ?? $r['program']), 'years' => $t('years')), $path);
     }
     if ($r['op'] === 'add_list' && is_string($old)) {
         $text = trim((string) ($f['text'] ?? ''));
@@ -2547,8 +2744,9 @@ function kop_wbf_add_person(array $from, array $f, $reviewer) {
         'label'              => kop_wbf_label_for($shape, $value),
         'conflict'           => '',
         'current_val'        => '',
+        // From a recording: the new item is listened to before it is added, like the one it came from.
         'extra'              => wp_json_encode(array('manual' => 1, 'from' => $from['pkey'], 'person' => $value['name'],
-            'edited_by' => $reviewer, 'edited_at' => $now)),
+            'edited_by' => $reviewer, 'edited_at' => $now) + (kop_wbf_is_recording($from) ? array('listen' => true) : array())),
         'evidence'           => wp_json_encode($evidence),
         'found'              => $found,
         'preselect'          => 1,
@@ -2794,6 +2992,7 @@ function kop_wbf_where_it_goes(array $r) {
         'facilityDetails.gender'            => 'Gender',
         'facilityDetails.type'              => 'Type',
         'referrer'                          => 'Consultant record: Career History, flagged former industry staff',
+        'person.jobs'                       => 'The person\'s past jobs (their person id): former student, a survivor line on the map',
     );
     return $map[$r['path']] ?? $r['path'];
 }
@@ -3304,6 +3503,7 @@ function kop_wbf_file_existing(array $rows, $kind, $id, $reviewer) {
     global $wpdb;
     $rows = array_values(array_filter($rows, function ($r) { return $r['status'] === 'pending'; }));
     if (!$rows) throw new RuntimeException('Those items were already handled. Reload the list.');
+    foreach ($rows as $r) kop_wbf_listen_gate($r);
     $results = array();
     $now = current_time('mysql', true);
     foreach ($rows as $r) {

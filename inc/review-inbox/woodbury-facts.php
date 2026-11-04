@@ -35,6 +35,7 @@ kop_rinbox_register('woodbury-facts', function () {
             . 'Wrong program? Pick another record beside Add, or create one. Items with a checked quote and a sure match start ticked. '
             . 'Items whose program is exactly the name of one record (or a past name of it), with the quote found and nothing on the record in the way, are added for you every hour, '
             . 'whatever the source (held for the write-up like any other): check or undo them on "Approved automatically"; anything you undo stays manual. Close names, other possible records, conflicts and programs with no record wait for you.'
+            . ' Podcast items (From: Podcasts) are never added for you: the card plays the episode from the second the words are said; listen, correct any misheard words, tick "I listened", then Add. A former student goes on the person\'s past jobs and the map draws a survivor line.'
             . (is_readable(kop_wbf_path()) ? '' : ' No facts uploaded yet: run python scripts/woodbury-facts.py and copy facts.json to ' . dirname(kop_wbf_path()) . '.'),
         'views'    => $views,
         'filters'  => array(array('name' => 'grp', 'label' => 'Kind', 'options' => kop_wbf_groups()),
@@ -195,14 +196,22 @@ function kop_rinbox_wbf_item(array $r) {
 
     $lines = array();
     if ($pending && (int) $r['facility_id'] > 0 && !in_array($r['match_kind'], array('exact', 'id'), true)) {
-        $lines[] = 'Woodbury calls it "' . $r['program_as_written'] . ($r['place'] !== '' ? ', ' . $r['place'] : '') . '". '
+        $lines[] = (!empty($ev[0]['pub']) ? (string) $ev[0]['pub'] : 'Woodbury') . ' calls it "' . $r['program_as_written'] . ($r['place'] !== '' ? ', ' . $r['place'] : '') . '". '
             . ($r['match_note'] ?: 'Close name: check it is the same program.');
     }
     if ($ya && $pending && !empty($r['ya_why'])) $lines[] = 'Young adult program: ' . $r['ya_why'];
     foreach ($ev as $e) {
         $line = kop_wbf_ev_label($e) . (!empty($e['quote']) ? ': "' . kop_rinbox_excerpt($e['quote'], 700) . '"' : '');
-        if (empty($e['found']) && !empty($e['quote'])) $line .= ' (these words were not found in the ' . (!empty($e['pub']) ? 'archived page' : 'issue text') . ': check the page before adding)';
+        if (empty($e['found']) && !empty($e['quote'])) $line .= ' (these words were not found in the ' . (!empty($e['audio']) ? 'transcript' : (!empty($e['pub']) ? 'archived page' : 'issue text')) . ': check the page before adding)';
         $lines[] = $line;
+    }
+    // A podcast's item: heard before it is added (kop_wbf_needs_listen()); the player below starts at the time.
+    $listen = kop_wbf_needs_listen($r);
+    if (kop_wbf_is_recording($r)) {
+        $heard = kop_wbf_extra_of($r)['listened'] ?? null;
+        $lines[] = is_array($heard)
+            ? 'Listened to by ' . ($heard['by'] ?? '') . ' on ' . substr((string) ($heard['at'] ?? ''), 0, 10) . '.'
+            : 'From a recording, transcribed by machine: listen at ' . (kop_wbf_listen_times($r) ?: 'its time') . ' and tick "I listened" before adding. Names and words can be misheard; correct them first.';
     }
     // Conflicts (the build's, and the record as it is now) are the card's Conflict mark, not a line here.
     $conflict = $pending ? kop_rinbox_wbf_conflict($r) : '';
@@ -253,8 +262,13 @@ function kop_rinbox_wbf_item(array $r) {
     }
 
     $links = array();
+    $audio = array();
     foreach ($ev as $e) {
-        if (!empty($e['url'])) $links[] = array('label' => kop_wbf_ev_label($e), 'url' => (string) $e['url']);
+        if (!empty($e['audio'])) {
+            $audio[] = array('label' => kop_wbf_ev_label($e), 'url' => (string) $e['audio']);
+        } elseif (!empty($e['url'])) {
+            $links[] = array('label' => kop_wbf_ev_label($e), 'url' => (string) $e['url']);
+        }
     }
     if ($ya) $links[] = array('label' => 'Young Adult Programs list', 'url' => admin_url('admin.php?page=kop-young-adult-programs'));
 
@@ -363,6 +377,17 @@ function kop_rinbox_wbf_item(array $r) {
             'help' => 'Nothing on the site changes; the item waits for review again.');
     }
 
+    // Every way of adding it asks for the tick (bulk Add too: a card without it is left out); kop_wbf_listen_gate() checks it again.
+    if ($listen) {
+        foreach ($actions as &$a) {
+            if (in_array($a['id'], array('apply', 'create', 'consultant', 'ya_apply', 'ya_create'), true) || strpos($a['id'], 'apply_to_') === 0) {
+                $a['params'] = array_merge((array) ($a['params'] ?? array()), array(array('name' => 'listened', 'type' => 'checkbox', 'value' => '',
+                    'label' => 'I listened at ' . (kop_wbf_listen_times($r) ?: 'its time') . ' and the words are right')));
+                $a['help'] = str_replace(array('citing the Woodbury page', 'citing Woodbury'), 'citing the episode at its time', (string) ($a['help'] ?? ''));
+            }
+        }
+        unset($a);
+    }
     $statuses = array('pending' => 'Waiting', 'merged' => 'Folded together', 'applied' => $r['reviewed_by'] === 'auto' ? 'Added automatically' : 'Added',
         'held' => $r['reviewed_by'] === 'auto' ? 'Approved automatically, held for the write-up' : 'Held for the write-up',
         'rejected' => 'Rejected', 'gone' => 'No longer proposed');
@@ -386,6 +411,8 @@ function kop_rinbox_wbf_item(array $r) {
         'fields'       => kop_rinbox_wbf_fields($r),
         'actions'      => $actions,
         'links'        => $links,
+        // [{label, url}]: a recording, played on the card from the second (url ends #t=N).
+        'audio'        => $audio,
         'conflict'     => $conflict,
         // As the old screen: a checked quote and a sure match start ticked (records and consultants).
         'selected'     => $pending && !empty($r['preselect']) && ((int) $r['facility_id'] > 0 || $r['grp'] === 'consultant'),
@@ -418,6 +445,15 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
         if (!empty($res['already'])) return array('message' => 'Not added: ' . $res['error'] . ' It is now under Rejected.');
         throw new RuntimeException($res['error']);
     };
+    // A podcast's item: the tick first, before a record is made or anything added (kop_wbf_listen_gate() checks again).
+    if ($r['status'] === 'pending' && kop_wbf_needs_listen($r)
+        && (in_array($action, array('apply', 'create', 'consultant', 'ya_apply', 'ya_create'), true) || strpos($action, 'apply_to_') === 0)) {
+        if (empty($params['listened'])) {
+            throw new RuntimeException('Listen first: play the audio at ' . (kop_wbf_listen_times($r) ?: 'its time')
+                . ', correct any misheard words, then tick "I listened".');
+        }
+        $r = kop_wbf_mark_listened($r['pkey'], $user) ?: $r;
+    }
     if (preg_match('/^apply_to_(\d+)$/', $action, $m)) {
         // One of the build's other close names.
         $params = array('facility' => (int) $m[1]);
@@ -447,6 +483,12 @@ function kop_rinbox_wbf_act($key, $action, array $params) {
                 if (!(int) $st->fetchColumn()) throw new RuntimeException('Facility #' . $fid . ' does not exist.');
             }
             if ($fid <= 0) throw new RuntimeException('Pick the record first (the Record box beside the button).');
+            if (($r['op'] ?? '') === 'person_job') {
+                $v = kop_wbf_row_value($r);
+                return $result(kop_wbf_apply(array($r), $fid, $user), 'Added to the past jobs of ' . ($v['name'] ?? 'this person') . ' (their person id, People > Past jobs): '
+                    . ($v['role'] ?? 'Former student') . ' at ' . kop_rinbox_wbf_name($fid) . ', citing ' . kop_wbf_ev_label(kop_wbf_evidence($r)[0] ?? array('label' => '', 'page' => 0))
+                    . '. The network map draws it as a survivor line on its next build. Undo is on the Added tab.');
+            }
             return $result(kop_wbf_apply(array($r), $fid, $user), kop_fact_hold_on()
                 ? 'Approved for ' . kop_rinbox_wbf_name($fid) . ' (' . kop_wbf_where_it_goes($r) . '). It is held for the record\'s write-up, seen only by admins, and goes on the page when that write-up is approved (Review inbox > Write-ups to approve). Undo is on the "Approved, held" tab.'
                 : 'Added to ' . kop_rinbox_wbf_name($fid) . ' (' . kop_wbf_where_it_goes($r) . '), citing ' . (kop_wbf_ev_label(kop_wbf_evidence($r)[0] ?? array('label' => 'Woodbury Reports', 'page' => 0))) . '. Undo is on the Added tab.');

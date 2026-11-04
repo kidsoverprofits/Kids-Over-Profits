@@ -97,5 +97,13 @@ python scripts/test-gemini.py                     # is a Gemini key usable? list
 # {prefix}kop_podcast_items): "Approve and link" fixes the words, links a person id and programs/companies; admins only (People screen, "On air"
 # on the linked pages), exact Undo
 # check times each quote at the Whisper segment it starts in (transcripts/<stem>.json), not its paragraph, which can run for minutes
+# Podcast facts can go through Woodbury Facts separately; statements stay in Podcast statements. The converter reads the checked
+# proposals and transcripts; the regular builder matches, deduplicates and prepares them for the same review screen.
+(kop-pipeline) py -3.12 scripts/podcast-wbf.py --show sftf
+(kop-pipeline) py -3.12 scripts/woodbury-facts.py --dir tmp/podcasts/sftf/wbf --out tmp/podcasts/sftf/wbf/facts-podcasts.json
+# Copy facts-podcasts.json to ~/kop-import/woodbury/ (the theme loads it beside facts.json). Do not merge it into facts.json:
+# keeping a sidecar lets the podcast export be rebuilt without replacing the Woodbury, HEAL or wiki proposals.
+# Every podcast card plays from the cited second and requires a listener to hear and correct the quote before Add; see the button test below.
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=podcasts
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=woodbury-facts
 ```

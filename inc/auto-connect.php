@@ -345,8 +345,10 @@ function kop_autoconn_woodbury_nomatch($deadline) {
 function kop_autoconn_woodbury_facts_rows($limit = 400) {
     global $wpdb;
     if (!function_exists('kop_wbf_table')) return array();
+    // A recording's items (a podcast, extra.listen) are linked by the person who listens to them, never here.
+    $no_rec = "AND INSTR(COALESCE(extra, ''), '\"listen\"') = 0";
     $names = (array) $wpdb->get_col('SELECT DISTINCT program FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND facility_id = 0 AND grp <> 'consultant'
-        AND ya = 0 AND program <> '' AND (reviewed_by IS NULL OR reviewed_by = '') ORDER BY program");
+        AND ya = 0 AND program <> '' AND (reviewed_by IS NULL OR reviewed_by = '') {$no_rec} ORDER BY program");
     $tried = kop_autoconn_tried('woodbury-facts-link');
     $pdo = kop_seed_pdo();
     $out = array();
@@ -354,7 +356,7 @@ function kop_autoconn_woodbury_facts_rows($limit = 400) {
         list($fid, $how) = kop_autoconn_exact_record($pdo, $program);
         if ($how !== 'exact' || $fid <= 0) continue;
         $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . kop_wbf_table() . " WHERE status = 'pending' AND facility_id = 0 AND program = %s
-            AND grp <> 'consultant' AND ya = 0 AND (reviewed_by IS NULL OR reviewed_by = '')", $program), ARRAY_A);
+            AND grp <> 'consultant' AND ya = 0 AND (reviewed_by IS NULL OR reviewed_by = '') {$no_rec}", $program), ARRAY_A);
         foreach ($rows as $r) {
             if (isset($tried[$r['pkey']])) continue;
             $out[] = array($r['pkey'], $r, $fid);

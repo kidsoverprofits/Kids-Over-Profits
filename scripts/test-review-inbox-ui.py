@@ -84,6 +84,7 @@ def closure_item(status="pending", stage="closed", name="Sunrise Ranch", message
             {"name": "notes", "label": "Notes", "type": "textarea", "value": ""},
         ],
         "actions": acts, "moves": [], "links": [], "tags": ["follow up"],
+        "audio": [{"label": "Stories from the Field, Episode 95 (at 0:06:13)", "url": "https://traffic.libsyn.com/test.mp3#t=373"}],
         "details": [{"label": "Facility status now", "value": "Open"}],
         "compare": {"heads": ["This report", "The record"], "rows": [{"label": "Status", "values": ["Closed", "Open"], "differs": True}]},
         "preview": {"label": "Show the article", "url": "https://inbox.test/preview.html"},
@@ -433,6 +434,12 @@ def main():
             open_queue(pg, "Daily news scans", "Closure reports")
             pg.wait_for_selector(".rinbox-card")
             check(pg.locator(".rinbox-card").first.locator(".rinbox-details").inner_text().find("Open") >= 0, f"@{width} facts show on the card")
+            audio = pg.locator(".rinbox-card .rinbox-audio audio")
+            first_audio = audio.first
+            check(audio.count() == 2 and first_audio.get_attribute("src") == "https://traffic.libsyn.com/test.mp3#t=373"
+                  and first_audio.get_attribute("preload") == "none"
+                  and first_audio.get_attribute("aria-label") == "Play Stories from the Field, Episode 95 (at 0:06:13)",
+                  f"@{width} a recording card plays from its cited second")
             check(pg.locator(".rinbox-card").first.locator(".rinbox-compare tr.rinbox-differs").count() == 1, f"@{width} a comparison marks what differs")
             pg.locator(".rinbox-card").first.locator(".rinbox-preview-toggle").click()
             check(pg.locator(".rinbox-card").first.locator(".rinbox-preview iframe").is_visible(), f"@{width} the preview opens inside the card")

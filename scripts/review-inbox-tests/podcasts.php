@@ -121,4 +121,18 @@ function kop_rinbox_test_podcasts(array $src, array $item, callable $check) {
     }), (string) $only['total']);
     $ser = kop_rinbox_pod_list(array('view' => 'waiting', 'search' => '', 'offset' => 0, 'limit' => 500, 'filters' => array('severity' => 'serious')));
     $check('podcasts: the severity filter narrows the list', $ser['total'] > 0 && $ser['total'] < $count("status = 'pending'"), (string) $ser['total']);
+
+    // A newer export replaces what nobody decided: an old waiting item it no longer holds goes, a decided one stays.
+    $show = (string) $wpdb->get_var("SELECT show_key FROM {$table} ORDER BY id LIMIT 1");
+    $old = array('show_key' => $show, 'episode' => 'old-pilot', 'kind' => 'statement', 'seconds' => 1, 'quote' => 'q', 'quote_orig' => 'q',
+        'data' => '{}', 'created_at' => gmdate('Y-m-d H:i:s'));
+    $wpdb->insert($table, $old + array('ikey' => sha1('stale-waiting'), 'status' => 'pending'));
+    $wpdb->insert($table, $old + array('ikey' => sha1('stale-decided'), 'status' => 'rejected', 'decided_by' => 'tester'));
+    $total = $count();
+    kop_pod_import(true);
+    $left = $wpdb->get_col($wpdb->prepare("SELECT status FROM {$table} WHERE ikey IN (%s, %s)", sha1('stale-waiting'), sha1('stale-decided')));
+    $check('podcasts: a newer export drops the old waiting items it no longer holds and keeps decided ones',
+        $left === array('rejected') && $count() === $total - 1, json_encode($left));
+    $check('podcasts: an export with no items drops nothing', kop_pod_drop_stale(array($show => array())) === 0);
+    $wpdb->delete($table, array('ikey' => sha1('stale-decided')));
 }

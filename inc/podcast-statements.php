@@ -141,14 +141,17 @@ function kop_pod_import($force = false) {
     global $wpdb;
     $kinds = kop_pod_kinds();
     $added = 0;
+    $in_file = array();   // show => [item key => true]: what each show's export holds now
     foreach ($files as $file) {
         $data = json_decode((string) file_get_contents($file), true);
         if (!is_array($data)) continue;
         $show = sanitize_key((string) ($data['show'] ?? basename($file, '.json')));
         $episodes = (array) ($data['episodes'] ?? array());
+        if (!isset($in_file[$show])) $in_file[$show] = array();
         foreach ((array) ($data['items'] ?? array()) as $it) {
             if (!is_array($it) || !isset($kinds[$it['kind'] ?? '']) || trim((string) ($it['quote'] ?? '')) === '') continue;
             $key = kop_pod_item_key($show, $it);
+            $in_file[$show][$key] = true;
             if ($wpdb->get_var($wpdb->prepare('SELECT id FROM ' . kop_pod_table() . ' WHERE ikey = %s', $key))) continue;
             $ep = (array) ($episodes[$it['episode'] ?? ''] ?? array());
             $it['show'] = $show;
@@ -167,8 +170,29 @@ function kop_pod_import($force = false) {
             if ($wpdb->insert_id) $added++;
         }
     }
+    kop_pod_drop_stale($in_file);
     update_option('kop_pod_import_seen', $sig, false);
     return $added;
+}
+
+/**
+ * A newer export replaces what nobody has decided (owner, 2026-11-04): a
+ * show's waiting items its export no longer holds go (a rebuilt export times
+ * each quote at its own words, so the old items' keys differ). Approved and
+ * rejected items always stay. A show whose export holds no items at all is
+ * left alone, so a half-copied file cannot empty its queue. Returns items dropped.
+ */
+function kop_pod_drop_stale(array $in_file) {
+    global $wpdb;
+    $dropped = 0;
+    foreach ($in_file as $show => $keys) {
+        if (!$keys) continue;
+        $rows = (array) $wpdb->get_results($wpdb->prepare('SELECT id, ikey FROM ' . kop_pod_table() . " WHERE show_key = %s AND status = 'pending'", (string) $show), ARRAY_A);
+        foreach ($rows as $row) {
+            if (!isset($keys[$row['ikey']])) $dropped += (int) $wpdb->delete(kop_pod_table(), array('id' => (int) $row['id'], 'status' => 'pending'));
+        }
+    }
+    return $dropped;
 }
 
 /* ---- Rows ----------------------------------------------------------------- */

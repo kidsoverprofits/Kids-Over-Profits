@@ -1902,6 +1902,15 @@
         if (item.hold) node.appendChild(holdNote(item, src, node));
         if (item.recs && item.recs.length) node.appendChild(recNote(item));
         if (links.childNodes.length) node.appendChild(links);
+        // A recording (a podcast's item): played here from the second the words are said (the url ends #t=N).
+        // preload none: a list of cards never downloads episodes nobody plays.
+        (item.audio || []).forEach(function (a) {
+            if (!safeHref(a.url)) return;
+            node.appendChild(el('div', { class: 'rinbox-audio' }, [
+                el('span', { class: 'rinbox-audio-label', text: a.label }),
+                el('audio', { controls: true, preload: 'none', src: a.url, 'aria-label': 'Play ' + a.label })
+            ]));
+        });
         node.appendChild(pane);
         if (item.text) node.appendChild(el('p', { class: 'rinbox-text', text: item.text }));
         // item.compare_first: the comparison comes right after the text (Data audit: KOP as it is now, before the steps).
