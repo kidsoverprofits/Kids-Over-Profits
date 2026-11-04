@@ -34,7 +34,14 @@ php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry ru
 # api/inspection-verdicts/ut.php count only those lines: a title-only line shows "No findings"); level, CMP, correction action/date/
 # verification go in categories_json "Findings". Rows the Sept 28 / Nov 1 2026 runs stripped: ut_backfill_statements.py rebuilds
 # only the finding lines of each prod row (checklist lines and the facility row kept as prod has them); dry run unless --post
+# UT checklists: census/capacity come from two side-by-side boxes on the checklist PDF. A read with capacity or census
+# missing (box not seen blank) or census above capacity goes to troubleshooting (scrapers/ut_checklist_troubleshoot.py):
+# re-read by word position (pdfplumber), then Tesseract OCR (turned upright, each box OCR'd twice; disagreement = unresolved).
+# Census above capacity stands only when two readers agree (over_capacity). Unresolved: no numbers posted, listed in
+# middle/ut_checklist_review_<date>.json. Multi-program boxes post as "Capacity: 66 (SD 16, RT 50)" (no ";" inside: ut.js
+# splits checklist fields on it). --recheck-json re-reads an export's suspect checklists; post it after with --from-json.
 (kop-pipeline) .venv/Scripts/python scrapers/test_utah_scraper.py
+(kop-pipeline) .venv/Scripts/python scrapers/utah_citation_scraper.py --recheck-json [middle/ut_reports_with_ocr.json]
 (kop-pipeline) .venv/Scripts/python scrapers/ut_backfill_statements.py [--ids=94202] [--only=restored] [--from-api-cache DIR] [--post]
 # Facility records linked to state inspection rows whose names differ (KOP Tools > Inspection Links, inc/inspection-links.php)
 # A program with homes under it (Program Homes) is one card there, linked as a unit ("Same program"; "Only <home>" for a row one home
