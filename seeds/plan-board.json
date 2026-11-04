@@ -1,6 +1,6 @@
 {
- "built": "2026-11-04 17:55 UTC",
- "source": "461e19e24d8ef6296bb563ddb196794ddc5524d2",
+ "built": "2026-11-04 18:04 UTC",
+ "source": "f2b74688a44edf880c1e74da31838d513985f607",
  "sections": [
   {
    "key": "2",
@@ -1153,6 +1153,14 @@
        "ask": "",
        "date": "2026-11-04",
        "hash": "a35a47e1bfdf"
+      },
+      {
+       "id": "4.3:four-programs-called-lakeside-academy-2026-11-04",
+       "lead": "Four programs called Lakeside Academy (2026-11-04)",
+       "text": "**Four programs called Lakeside Academy (2026-11-04)**. #100098 Kalamazoo MI (Sequel, closed 2020), #100099 Buffalo MN (Teen Challenge only), #10459 Clearfield UT (Youth Health Associates), #12592 Lakeside Academy of Kansas. The bare name is #10459's unique name, so the link syncs filed the Michigan news, lawsuit 205 and a Sequel report's links on Utah, and the pages matched Michigan's deaths, cases, milestones and folder onto Minnesota by name. Code fixed (names shared across states resolve only with a place; pages drop items naming another state; such a record's folder is chosen by state/company and shown alone); kop-data's Unsilenced list for #100099 lost the 4 Michigan/Sequel files. Still open: - Owner, after deploy, on the server: `php api/fix-lakeside-academy-split.php` (dry run; ~95 lines expected), then `... apply`, then `php scripts/build-open-data.php`. Undo: `... undo apply`. (SSH is refused to Claude here.) - Then check logged out: /facility/lakeside-academy-mn/ shows no Sequel, Michigan, Cornelius Frederick, Goshay or Sequel TSI documents; /facility/lakeside-academy-mi/ keeps them plus lawsuit 205 and the 2020 articles; /facility/lakeside-academy-ut/ has only Youth Health Associates items and the March 2010 Woodbury page. - Unsilenced's MN folder also holds \"Lakeside Academy1.pdf\" / \"Lakeside Academy2.pdf\" (same names as in its MI folder, different files); not opened. If they are the Michigan school's, add them to OTHER_PROGRAM in kop-pipeline scripts/build-unsilenced-links.py and drop them from kop-data unsilenced/f/100099.json. - 35 names are now ambiguous for the news/lawsuit linker (e.g. bare \"Hyde School\", \"Embark Behavioral Health\"): a re-save of an article naming one bare drops its auto ('mentioned') link. Review whether any needs a curated matchAlias (those still win), list: kop_alias_homonyms().",
+       "ask": "",
+       "date": "2026-11-04",
+       "hash": "ff601701ae59"
       }
      ]
     },
