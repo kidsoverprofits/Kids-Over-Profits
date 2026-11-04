@@ -79,7 +79,8 @@ const getFolderMatchIndex = (folders, isPlace) => {
         const words = (parentNorm + ' ' + e.norm).split(/\s+/).filter(w => w.length > 2);
         if (words.length >= 2) e.pathWords = words;
     });
-    index = { entries, results: new Map() };
+    const sharedNorms = new Set(folders.filter(f => f && f.name && f.shared_name).map(f => normalize(String(f.name).toLowerCase())));
+    index = { entries, sharedNorms, results: new Map() };
     folderMatchIndexes.set(folders, index);
     return index;
 };
@@ -90,6 +91,11 @@ const matchFolderByName = (folders, name, isPlace) => {
     const index = getFolderMatchIndex(folders, isPlace);
     if (index.results.has(name)) return index.results.get(name);
     const normName = name.replace(/[^\w\s]/g, '').trim();
+    // A shared name never loose-matches a longer folder ("Lakeside Academy of Kansas").
+    if (index.sharedNorms.has(normName)) {
+        index.results.set(name, null);
+        return null;
+    }
     const entries = index.entries;
     let hit = entries.find(e => e.lower === name)
         || entries.find(e => e.norm === normName)
