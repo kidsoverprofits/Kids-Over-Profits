@@ -12111,7 +12111,648 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:how-many-cottages-did-aspen-ranch-in-loa-utah-ha",
+   "section": "About rewrite pilot: claims still out",
+   "title": "How many cottages did Aspen Ranch in Loa, Utah have, and how many teens lived in each?",
+   "text": "The r/troubledteens wiki (Aspen Ranch page) says seven cottages, 3 for girls and 4 for boys, up to 13 teens each, with no footnote. HEAL's Aspen Ranch pages (aspenranch.htm 2012, aspenrch.htm 2013) don't have it. The wiki's sources list includes Woodbury's April 2008 visit report, which may. Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "HEAL Aspen Ranch page, archived Oct 2012",
+     "url": "https://web.archive.org/web/20121023073805/http://www.heal-online.org/aspenranch.htm",
+     "kind": "note"
+    },
+    {
+     "label": "Woodbury Reports visit report, April 2008",
+     "url": "https://strugglingteens.com/artman/publish/AspenRanchVR_080406.shtml",
+     "kind": "note"
+    },
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:what-did-aspen-ranch-in-loa-utah-charge-per-mont",
+   "section": "About rewrite pilot: claims still out",
+   "title": "What did Aspen Ranch in Loa, Utah charge per month around 2005?",
+   "text": "The wiki and Breaking Code Silence say about $7,100 a month in 2005 ('reportedly'), with no citation. The 2010 enrollment agreement says $350 a day (already in the text). Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:was-aspen-ranch-in-loa-utah-a-natsap-member-unti",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Was Aspen Ranch in Loa, Utah a NATSAP member until it closed in 2011?",
+   "text": "The wiki says NATSAP member 1999-2011 with no citation. The NATSAP 2009 directory (Drive copy) confirms membership from 1999 only. Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:what-jobs-did-matt-alexander-hold-at-aspen-ranch",
+   "section": "About rewrite pilot: claims still out",
+   "title": "What jobs did Matt Alexander hold at Aspen Ranch in Loa, Utah, and when?",
+   "text": "The wiki says he started in 2000 as English teacher, then academic director and program director, and became executive director in 2004 (no citation; BCS repeats it). HEAL's 2013 staff list doesn't name him. Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:what-roles-did-drew-hirsch-and-sarah-finney-have",
+   "section": "About rewrite pilot: claims still out",
+   "title": "What roles did Drew Hirsch and Sarah Finney have at Aspen Ranch in Loa, Utah?",
+   "text": "Named in KOP's facility record with no source; not on HEAL's archived staff list (Jan 2013). Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:did-aspen-ranch-in-loa-utah-carry-out-body-cavit",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Did Aspen Ranch in Loa, Utah carry out body-cavity searches on students?",
+   "text": "HEAL says body cavity searches were done on every child, citing the enrollment agreement's intake clause (pp. 27-28). The clause, as HEAL quotes it, says 'a thorough intake which includes a strip search and search of all belongings' and doesn't mention cavities. Removed from the rewrite for that reason. Needs a source that says cavity searches. Answer goes into docs/kop-about-rewrite-pilot/out/rec01.json (Aspen Ranch rewrite) and its note.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "HEAL Aspen Ranch enrollment agreement review, archived Oct 2012",
+     "url": "https://web.archive.org/web/20121023073805/http://www.heal-online.org/aspenranch.htm",
+     "kind": "note"
+    },
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:did-a-scott-peterson-convicted-of-sexually-abusi",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Did a Scott Peterson convicted of sexually abusing a teen client in 2014 ever work at Aspen Ranch in Loa, Utah?",
+   "text": "The wiki calls Scott Andrew Peterson a former equine therapist at Aspen Ranch; FOX 13 (Oct 31, 2013) and the Salt Lake Tribune (Mar 10, 2014) cover his arrest and sentence for his own practice, Therapy on the Fly, and don't mention Aspen Ranch. HEAL's 2013 staff list has only Gaelynn Peterson, registrar. Out of docs/kop-about-rewrite-pilot/out/rec01.json until a source ties him to the ranch.",
+   "context": "",
+   "records": [
+    10347
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Aspen shuts down five programs! (Community Alliance for the Ethical Treatment of Youth (CAFETY), 2011-03-26)",
+     "url": "http://www.cafety.org/solutions-and-successes/830-aspen-shuts-down-of-five-programs",
+     "kind": "news"
+    },
+    {
+     "label": "News: Upon discharge from programs, teens report happiness (cafety.org, 2006-08-17)",
+     "url": "http://cafety.org/index.php?option=com_content&task=view&id=372&Itemid=35",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, January 2014, p. 8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-january-2014-p-8-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2012, p. 9 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2012-p-9-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, November 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-november-2011-p-10-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-aspen-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon1.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/aspenrchanon2.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:did-arizona-boys-ranch-pay-a-3-million-settlemen",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Did Arizona Boys Ranch pay a $3 million settlement, and to whom?",
+   "text": "The r/troubledteens wiki (Canyon State page) says $3 million, no citation; HEAL's Canyon State page (2025) doesn't have it. AP (July 1999) says Nicholaus Contreraz's mother received more than $1 million; that is in the text. Answer goes in docs/kop-about-rewrite-pilot/out/rec11.json.",
+   "context": "",
+   "records": [
+    9605
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Queen Creek police investigating alleged assault at Desert Lily Academy (Queen Creek Independent, 2025-09-16)",
+     "url": "https://www.yourvalley.net/queen-creek-independent/stories/queen-creek-police-investigating-alleged-assault-at-residential-school,615952",
+     "kind": "news"
+    },
+    {
+     "label": "News: Canyon State Academy employee accused of assault, arrested at school in Queen Creek (Arizona Republic, 2023-07-20)",
+     "url": "https://archive.is/zEaJ9",
+     "kind": "news"
+    },
+    {
+     "label": "News: 'He hit me so hard': Police records reveal staff assaulting students at Queen Creek school (FOX 10 Phoenix, 2023-07-19)",
+     "url": "https://archive.is/SUwGB",
+     "kind": "news"
+    },
+    {
+     "label": "News: Canyon State Academy is addressing concerns following the recent death of a teen and hundreds of service calls (FOX 10, 2022-11-01)",
+     "url": "https://archive.is/txCXu",
+     "kind": "news"
+    },
+    {
+     "label": "News: Canyon State Academy addresses concerns after recent teen death, hundreds of calls for service (FOX 10 Phoenix, 2022-10-31)",
+     "url": "https://archive.is/GW3da",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived canyonstateacademy.com)",
+     "url": "https://web.archive.org/web/2*/http://www.canyonstateacademy.com/csa/site/default.asp",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived nospank.net)",
+     "url": "https://web.archive.org/web/2*/http://nospank.net/n-b38.htm",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/abrcsaroppolicecalls.pdf",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:were-midwest-academy-students-in-keokuk-iowa-who",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Were Midwest Academy students in Keokuk, Iowa who ran away in April 2015 held in isolation rooms for at least three weeks?",
+   "text": "In the first draft of the Midwest Academy rewrite, cited only to HEAL's midwest.html (Wayback July 19, 2025), which doesn't contain it (checked in Chrome Nov 3); HEAL's teennews.html doesn't either. Probably from AP or Des Moines Register reporting in Feb-Mar 2016. Answer goes in docs/kop-about-rewrite-pilot/out/rec10.json.",
+   "context": "",
+   "records": [
+    13398
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Investigation into death at Elan School in Maine (Secret Prisons for Teens, 2016-03-14)",
+     "url": "https://archive.md/0fPRT",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Wood, et al. v. World Wide Association of Specialty Programs and Schools, Inc., et al. (Fifth Judicial District Court, Washington County, Utah)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/StGeorgeUtah.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: State of Iowa v. Benjamin G. Trane (Iowa District Court for Lee (South) County; Iowa Supreme Court)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/Ben-Trane-Testimony-Part-1-midwest-academy.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Linked from its record (archived midwestacademy.net)",
+     "url": "https://web.archive.org/web/20040101231154/http://www.midwestacademy.net/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:had-midwest-academy-in-keokuk-iowa-applied-for-f",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Had Midwest Academy in Keokuk, Iowa applied for foster-care licences before it closed in 2016, and was the application incomplete?",
+   "text": "First draft: the academy had applied for foster care licences for both sites, the application was incomplete and no site visit had taken place. Cited only to HEAL's midwest.html, which doesn't contain it. Likely an Iowa DHS statement reported in Jan-Feb 2016. Answer goes in docs/kop-about-rewrite-pilot/out/rec10.json.",
+   "context": "",
+   "records": [
+    13398
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Investigation into death at Elan School in Maine (Secret Prisons for Teens, 2016-03-14)",
+     "url": "https://archive.md/0fPRT",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Wood, et al. v. World Wide Association of Specialty Programs and Schools, Inc., et al. (Fifth Judicial District Court, Washington County, Utah)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/StGeorgeUtah.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: State of Iowa v. Benjamin G. Trane (Iowa District Court for Lee (South) County; Iowa Supreme Court)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/Ben-Trane-Testimony-Part-1-midwest-academy.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Linked from its record (archived midwestacademy.net)",
+     "url": "https://web.archive.org/web/20040101231154/http://www.midwestacademy.net/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:did-investigators-in-2016-examine-fraud-at-midwe",
+   "section": "About rewrite pilot: claims still out",
+   "title": "Did investigators in 2016 examine fraud at Midwest Academy in Keokuk, Iowa, as well as child endangerment?",
+   "text": "First draft: investigators also examined fraud and child endangerment in the use of the isolation rooms. Cited only to HEAL's midwest.html, which doesn't say it (it has the families' civil suit 'including fraud', a different claim). Answer goes in docs/kop-about-rewrite-pilot/out/rec10.json.",
+   "context": "",
+   "records": [
+    13398
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "News: Investigation into death at Elan School in Maine (Secret Prisons for Teens, 2016-03-14)",
+     "url": "https://archive.md/0fPRT",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Wood, et al. v. World Wide Association of Specialty Programs and Schools, Inc., et al. (Fifth Judicial District Court, Washington County, Utah)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/StGeorgeUtah.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: State of Iowa v. Benjamin G. Trane (Iowa District Court for Lee (South) County; Iowa Supreme Court)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/Ben-Trane-Testimony-Part-1-midwest-academy.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Linked from its record (archived midwestacademy.net)",
+     "url": "https://web.archive.org/web/20040101231154/http://www.midwestacademy.net/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrite-pilot-claims-still:in-what-year-were-utah-regulators-told-that-a-fa",
+   "section": "About rewrite pilot: claims still out",
+   "title": "In what year were Utah regulators told that a Falcon Ridge Ranch staff member in Virgin, Utah slapped residents and showed them an explicit photo, and was she Guyla Savage?",
+   "text": "The wiki (via KOP pipeline mirror falconridge.md) says 2020, citing the Salt Lake Tribune, Mar 15, 2022 (archive.ph/fDXKK, CAPTCHA, not read). KUTV (Mar 11, 2021) and the Tribune (Mar 12, 2021) say the ranch reported Savage in early March 2021. The rewrite cites the 2022 story without a year or name. Also unread: the St. George Spectrum capture archive.is/0sbUi. Answer goes in docs/kop-about-rewrite-pilot/out/rec12.json.",
+   "context": "",
+   "records": [
+    9607
+   ],
+   "found": "found 2026-11-04, About rewrite pilot session, Nov 3 2026",
+   "directions": [
+    {
+     "label": "St. George Spectrum (archive.is)",
+     "url": "https://archive.is/0sbUi",
+     "kind": "note"
+    },
+    {
+     "label": "Salt Lake Tribune, Mar 15, 2022 (archive.ph)",
+     "url": "https://archive.ph/fDXKK",
+     "kind": "note"
+    },
+    {
+     "label": "News: ‘State-sponsored Abandonment’ No More: California Stops Paying for Adoptees Sent to Out-of-State Treatment Centers (The Imprint, 2025-07-22)",
+     "url": "https://imprintnews.org/top-stories/state-sponsored-abandonment-no-more-california-stops-paying-for-adoptees-sent-to-out-of-state-treatment-centers/262649",
+     "kind": "news"
+    },
+    {
+     "label": "News: Former counselor at youth treatment center in Toquerville sentenced in 'egregious' case (St. George News, 2023-06-02)",
+     "url": "https://archive.is/Ku7au",
+     "kind": "news"
+    },
+    {
+     "label": "News: Former counselor at youth treatment center in Toquerville appears for sentencing in ‘egregious’ case (St. George News, 2023-06-01)",
+     "url": "https://archive.is/jQTdx",
+     "kind": "news"
+    },
+    {
+     "label": "News: Staff member at ‘troubled-teen’ center in southern Utah accused of showing porn to minors (The Salt Lake Tribune, 2021-03-11)",
+     "url": "https://www.sltrib.com/news/2021/03/12/staff-member-troubled/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Employee at teen behavior facility arrested for sexual battery, showing porn to minors (St. George Spectrum & Daily News, 2021-03-11)",
+     "url": "https://archive.is/0sbUi",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Falcon Ridge Ranch, Inc., et al. v. Sequel Youth Services of Red Rock Canyon, LLC, et al. (Fifth Judicial District Court in and for Washington County, State of Utah)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, December 2012, p. 1 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-december-2012-p-1-falcon-ridge-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, October 2010, p. 2,3 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2010-pp-2-3-falcon-ridge-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, October 2010, p. 1 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2010-p-1-falcon-ridge-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-falcon-ridge-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived falconridgeranch.com)",
+     "url": "https://web.archive.org/web/2*/https://falconridgeranch.com/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/falcon.htm",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived falconridgeranch.com)",
+     "url": "https://web.archive.org/web/2*/https://falconridgeranch.com/about-falcon-ridge-ranch/",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-11-02 19:52"
+ "built": "2026-11-04 16:49"
 }
