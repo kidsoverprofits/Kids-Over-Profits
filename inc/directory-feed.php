@@ -87,7 +87,7 @@ function kop_directory_feed_slim_facility($facility) {
     if (!is_array($facility)) return $facility;
     $place = array('street', 'city', 'state', 'zip', 'zipcode', 'country');
     $out = kop_directory_feed_pick($facility, array(
-        'facility_id', 'facilityId', 'name', 'programName', 'facilityName', 'title', 'program_name', 'facility_name',
+        'facility_id', 'facilityId', 'documentFolderId', 'name', 'programName', 'facilityName', 'title', 'program_name', 'facility_name',
         'pastNames', 'formerNames', 'otherNames', 'currentOperator', 'current_operator',
         'currentOwners', 'current_owners', 'currentOwner', 'current_owner',
         'previousOwners', 'previous_owners', 'previousOwner', 'previous_owner', 'formerOwners', 'former_owners', 'formerOwner', 'former_owner',

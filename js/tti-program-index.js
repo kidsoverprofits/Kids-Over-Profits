@@ -22,7 +22,8 @@ const getFolderMatchIndex = (folders, isPlace) => {
     const normalize = s => s.replace(/[^\w\s]/g, '').trim();
     const byId = {};
     folders.forEach(f => { if (f) byId[String(f.id)] = f; });
-    const entries = folders.filter(f => f && f.name).map(f => {
+    // Folders whose name several states' programs share (Lakeside Academy) are only reached by a record's explicit documentFolderId.
+    const entries = folders.filter(f => f && f.name && !f.shared_name).map(f => {
         const lower = String(f.name).toLowerCase();
         return { folder: f, lower: lower.trim(), norm: normalize(lower), place: isPlace(f.name), parentId: String(f.parent || '0') };
     });

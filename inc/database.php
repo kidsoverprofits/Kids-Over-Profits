@@ -925,8 +925,13 @@ function kop_attach_folder_file_counts($folders) {
         return $subtree[$id] = $n;
     };
 
+    // A name records in several states share: the directory must not guess which program's folder it is.
+    $homonyms = kop_get_homonym_folder_names();
     foreach ($rows as &$f) {
         $f['files'] = $count((int) $f['id']);
+        if (isset($homonyms[strtolower(trim((string) ($f['name'] ?? '')))])) {
+            $f['shared_name'] = true;
+        }
     }
     unset($f);
 
@@ -1024,7 +1029,48 @@ function kop_get_descendant_ids_for_roots($root_ids) {
 }
 
 /**
+ * Lower-cased names that facility records of two or more states (and two or
+ * more programs) share: "Lakeside Academy" in MI, MN and UT. Folders of such a
+ * name are different programs' folders, so they are never merged by name.
+ *
+ * @return array<string,true> lower-cased trimmed name => true
+ */
+function kop_get_homonym_folder_names() {
+    global $wpdb;
+    static $memo = null;
+    if ($memo !== null) {
+        return $memo;
+    }
+    $memo = array();
+    if ($wpdb->get_var("SHOW TABLES LIKE 'facilities_v2'") !== 'facilities_v2') {
+        return $memo;
+    }
+    $by_name = array();
+    foreach ((array) $wpdb->get_results('SELECT id, name, state FROM facilities_v2', ARRAY_A) as $row) {
+        $key = strtolower(trim((string) $row['name']));
+        if ($key === '') {
+            continue;
+        }
+        $up = function_exists('kop_program_homes_program_of') ? kop_program_homes_program_of((int) $row['id']) : null;
+        $by_name[$key]['programs'][$up ? (int) $up[0] : (int) $row['id']] = true;
+        $state = strtoupper(trim((string) $row['state']));
+        if ($state !== '') {
+            $by_name[$key]['states'][$state] = true;
+        }
+    }
+    foreach ($by_name as $key => $info) {
+        if (count($info['programs']) > 1 && count($info['states'] ?? array()) > 1) {
+            $memo[$key] = true;
+        }
+    }
+    return $memo;
+}
+
+/**
  * Find every folder that shares the given folder's exact name.
+ *
+ * A name that records in several states share (kop_get_homonym_folder_names())
+ * is not merged: each such folder stays alone.
  *
  * FileBird allows the same facility to appear as multiple folders in different
  * organizational trees (e.g. "Spring Ridge Academy" exists at the root and again
@@ -1052,6 +1098,9 @@ function kop_get_same_name_folder_ids($folder_id) {
         $wpdb->prepare("SELECT name FROM $folder_table WHERE id = %d AND type = 0", $folder_id)
     );
     if ($name === null || trim($name) === '') {
+        return array($folder_id);
+    }
+    if (isset(kop_get_homonym_folder_names()[strtolower(trim($name))])) {
         return array($folder_id);
     }
 
