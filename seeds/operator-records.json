@@ -1084,5 +1084,59 @@
         "update": true
       }
     ]
+  },
+  {
+    "name": "Teen Challenge",
+    "operator": {
+      "notes": []
+    },
+    "facilities": [
+      {
+        "id": 11779,
+        "unique_name": "Harmony Teen Challenge",
+        "relationship": "current"
+      },
+      {
+        "id": 13766,
+        "unique_name": "Grace Christian Home and Academy",
+        "relationship": "current"
+      },
+      {
+        "id": 100210,
+        "unique_name": "Cross Christian Academy",
+        "relationship": "current"
+      },
+      {
+        "id": 100248,
+        "unique_name": "Lebanon Girls Shelter",
+        "relationship": "current"
+      },
+      {
+        "id": 100549,
+        "unique_name": "West Florida Teen Challenge Boys Ranch",
+        "relationship": "current"
+      },
+      {
+        "id": 100704,
+        "unique_name": "Teen Challenge 30-bed boys' facility outside of Branson",
+        "relationship": "current"
+      },
+      {
+        "id": 100705,
+        "unique_name": "Teen Challenge center for adolescent girls in Casper",
+        "relationship": "current"
+      },
+      {
+        "id": 100709,
+        "unique_name": "Dallas Teen Challenge Boys Ranch",
+        "relationship": "current"
+      },
+      {
+        "id": 100725,
+        "unique_name": "Teen Challenge Boston",
+        "relationship": "current"
+      }
+    ],
+    "_note": "Item 29 (owner, 2026-11-04): Teen Challenge programs on file without the company link. Applied over SSH that day; the adult ones moved to Christian Rehabs for Adults (seeds/related-moves.json) with their links."
   }
 ]

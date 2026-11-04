@@ -9,7 +9,7 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 (kop-pipeline) node scripts/test-network-graph.js
 
 # The map rebuilds itself: inc/network-rebuild.php hashes what the build reads (staff, owners, names, years, status,
-# consultants) hourly and, when it moves, starts kop-pipeline's build-network-map.yml (sync 7 tables over SSH,
+# consultants) hourly and, when it moves, starts kop-pipeline's build-network-map.yml (sync its tables over SSH, related_facilities among them,
 # build, test, commit graph.json + layout.json to kop-data, whose deploy ships them). Status and "Rebuild now" at
 # KOP Tools > Map Rebuild. The workflow's repo is KOP_NETWORK_REBUILD_REPO in api/config.local.php or .env
 # (kop_network_rebuild_repo()), the token KOP_GITHUB_DISPATCH_TOKEN there (Actions: write on that repo)
@@ -59,3 +59,14 @@ an investor the board already drew by hand (the four behind Sequel, `kind: "inve
 drawer label follow it (`filters.js`, `drawer.js`, `kop_network_map_label()`), and a new kind goes in all four plus
 the build's KINDS and `scripts/test-network-graph.js`. The hourly fingerprint covers the two investor tables and
 `{prefix}kop_network_answers`.
+
+Programs for adults (item 29, owner 2026-11-04): a map name pinned in `network-overrides.json`'s `facilities` to an approved
+`related_facilities` record (the build reads those by pin only, never by name) takes that record's years, and when its category is
+an adult one (`ADULT_CATEGORIES` in the build: christian-adult-rehabs, young-adult-programs, nursing-homes,
+disability-group-homes) the node carries `adult: true` (set only when true; `meta.counts.adult`). It is drawn as ADULT in the
+kind word's place under a program's name (`canvas.js` kindWord), has a legend row "Program for adults (ADULT under the name)"
+(`filters.js`), and the drawer heads it "Program for adults" (`drawer.js` factsFor); `store.js` copies the flag. An adult
+program that is a facility record is moved to Christian Rehabs for Adults first (`seeds/related-moves.json`, `inc/related-move.php`),
+as the adult Teen Challenge centers were. A pin is keyed by the board name, or by the map id where two board names are the same
+(`gateway-academy-teen-challenge` -> #11099). `scripts/test-network-graph.js` checks the adult marks against the mirror and that
+every program linked to Teen Challenge is on the map.

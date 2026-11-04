@@ -58,7 +58,7 @@
     /** "Program · Closed · 1985-2009": what a name is, as the drawer and
      * the hover card both head it. */
     function factsFor(node) {
-        var facts = [KIND_WORDS[node.kind] || node.kind];
+        var facts = [node.adult && node.kind === 'facility' ? 'Program for adults' : (KIND_WORDS[node.kind] || node.kind)];
         if (node.status && STATUS_WORDS[node.status]) facts.push(STATUS_WORDS[node.status]);
         if (node.years) facts.push(node.years);
         return facts.filter(Boolean).join(' · ');

@@ -205,6 +205,8 @@
                     chain: raw.chain || '',
                     regions: raw.regions || [],
                     natsap: !!raw.natsap,
+                    /* A program for adults (its record's related category). */
+                    adult: !!raw.adult,
                     importance: raw.importance || 0,
                     degree: raw.degree || 0,
                     degreeByCategory: raw.degreeByCategory || {},

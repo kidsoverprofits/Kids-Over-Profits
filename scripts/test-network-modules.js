@@ -3968,7 +3968,7 @@ function run() {
      * unmarked: the plain box and the ellipse are the board's own key. */
     {
     const painter = sandbox.KOPNetworkCanvas;
-    const marked = /^(COMPANY|TRADE GROUP|GOVERNMENT|CHURCH|INVESTOR)$/;
+    const marked = /^(COMPANY|TRADE GROUP|GOVERNMENT|CHURCH|INVESTOR|ADULT)$/;
     check(painter.kindWord('parent') === 'COMPANY' && painter.kindWord('association') === 'TRADE GROUP' &&
         painter.kindWord('government') === 'GOVERNMENT' && painter.kindWord('church') === 'CHURCH' &&
         painter.kindWord('investor') === 'INVESTOR' &&
@@ -3976,6 +3976,13 @@ function run() {
         'the kind words are not the chosen set');
     const aCompany = store.nodes.find((n) => n.kind === 'parent');
     check(painter.kindWord(aCompany) === 'COMPANY', 'kindWord does not read a node');
+    /* Item 29: a program for adults (node.adult) says ADULT in the kind word's place; the flag
+     * means nothing on another kind, and the drawer heads it "Program for adults". */
+    check(painter.kindWord({ kind: 'facility', adult: true }) === 'ADULT' && painter.kindWord({ kind: 'facility' }) === '' &&
+        painter.kindWord({ kind: 'parent', adult: true }) === 'COMPANY', 'the adult mark is not ADULT on a program alone');
+    check(sandbox.KOPNetworkDrawer.factsFor({ kind: 'facility', adult: true, status: 'open', years: '' }) === 'Program for adults · Operating' &&
+        sandbox.KOPNetworkDrawer.factsFor({ kind: 'facility', status: 'open', years: '' }) === 'Program · Operating',
+        'the drawer does not head an adult program "Program for adults"');
 
     /* The mark never changes a bubble's height: it shares the years line
      * where the node has one, and fits inside the bubble's own padding
@@ -4035,6 +4042,9 @@ function run() {
         check(kindsShowing.has(kind) === (rowTexts.indexOf(label) !== -1),
             'the legend and the map disagree about a ' + kind + ' being on screen');
     });
+    const adultShowing = kindScene.nodes.some((n) => n.kind === 'facility' && n.adult);
+    check(adultShowing === (rowTexts.indexOf('Program for adults (ADULT under the name)') !== -1),
+        'the legend and the map disagree about a program for adults being on screen');
     const wordSpans = shell.legend.querySelectorAll('span')
         .filter((s) => s.className === 'kop-network__legend-kind-word');
     check(wordSpans.length > 0 && wordSpans.every((s) => marked.test(s.textContent)),

@@ -281,11 +281,13 @@
                 { kind: 'association', label: 'Trade group' },
                 { kind: 'government', label: 'Government body' },
                 { kind: 'church', label: 'Church' },
-                { kind: 'investor', label: 'Investor' }
+                { kind: 'investor', label: 'Investor' },
+                /* A program for adults (item 29): its word under a program's name. */
+                { kind: 'facility', adult: true, label: 'Program for adults' }
             ].forEach(function (entry) {
-                var word = painter.kindWord ? painter.kindWord(entry.kind) : '';
+                var word = painter.kindWord ? painter.kindWord(entry.adult ? { kind: entry.kind, adult: true } : entry.kind) : '';
                 if (!word) return;
-                var when = function (n) { return n.kind === entry.kind; };
+                var when = function (n) { return n.kind === entry.kind && (!entry.adult || !!n.adult); };
                 if (!has(when)) return;
                 var built = row('', tally(when));
                 var text = built.item.children[1];

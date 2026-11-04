@@ -34,5 +34,61 @@
     "drop_name": "Eagle Point Christian Academy",
     "as_duplicate": true,
     "note": "One program at 2147 Mill St, Lucedale, MS under several names (Bethel Baptist Children's Home, Bethel Boys Academy, Gulf Coast Academy, Eagle Point Christian Academy); the owner said it is the same program and the page keeps Bethel Boys' Academy, 2026-10-23. Merged as one program, not a rename (no years per name). Undo on the Merged tab."
+  },
+  {
+    "keep": 11356,
+    "keep_name": "Kansas City Girls Academy",
+    "drop": 100722,
+    "drop_name": "Teen Challenge Kansas City Girls Academy",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 13541,
+    "keep_name": "New Lifehouse Academy",
+    "drop": 100721,
+    "drop_name": "Teen Challenge New Lifehouse",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 11100,
+    "keep_name": "Lakeland Girls Academy",
+    "drop": 100718,
+    "drop_name": "Teen Challenge Lakeland Girls Home",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 100549,
+    "keep_name": "West Florida Teen Challenge Boys Ranch",
+    "drop": 100714,
+    "drop_name": "West Florida Boy’s Ranch",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 11468,
+    "keep_name": "Teen Challenge Adventure Ranch",
+    "drop": 11538,
+    "drop_name": "Teen Challenge Ranch of Northwest Arkansas",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 10369,
+    "keep_name": "180 Ministries for Girls",
+    "drop": 10538,
+    "drop_name": "Teen Challenge of the Rocky Mountains – 180 Ministries for Girls",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 10261,
+    "keep_name": "Teen Challenge Southern California",
+    "drop": 100720,
+    "drop_name": "Teen Challenge Riverside Facility",
+    "as_duplicate": true,
+    "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
   }
 ]

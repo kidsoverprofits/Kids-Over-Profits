@@ -74,6 +74,8 @@ if (!function_exists('kop_network_rebuild_fingerprint')) {
             'investors'       => "SELECT id, name, kind FROM {$prefix}kop_investors ORDER BY id",
             'investor_links'  => "SELECT investor_id, operator_id, facility_id, role, start_year, end_year, detail FROM {$prefix}kop_investor_links ORDER BY id",
             'network_answers' => "SELECT question_id, section, subject, answer FROM {$prefix}kop_network_answers ORDER BY id",
+            // Related records (adult rehabs, ...): a map name pinned to one takes its years, and an adult category marks it adult.
+            'related'         => "SELECT id, name, state, status, start_year, end_year, category FROM related_facilities WHERE review = 'approved' ORDER BY id",
         );
         foreach ($optional as $label => $sql) {
             try {

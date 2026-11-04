@@ -275,9 +275,15 @@
         government: 'GOVERNMENT', church: 'CHURCH', investor: 'INVESTOR'
     };
 
+    /* A program for adults (node.adult, from its record's related category:
+     * an Adult & Teen Challenge men's center) says so in the same place,
+     * since a program is otherwise unmarked (item 29, owner 2026-11-04). */
+    var ADULT_WORD = 'ADULT';
+
     /** The word under this node (or kind), or '' for the unmarked kinds. */
     function kindWord(nodeOrKind) {
         var kind = nodeOrKind && nodeOrKind.kind !== undefined ? nodeOrKind.kind : nodeOrKind;
+        if (nodeOrKind && nodeOrKind.adult && kind === 'facility') return ADULT_WORD;
         return KIND_WORDS[kind] || '';
     }
 
