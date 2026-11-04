@@ -1,6 +1,6 @@
 {
- "built": "2026-11-04 20:55 UTC",
- "source": "4cef35e1ec2795a240128973d9395b4aec6a3793",
+ "built": "2026-11-04 20:58 UTC",
+ "source": "2a3e6904eaffd2472b307d823011713e650acc57",
  "sections": [
   {
    "key": "2",
@@ -1161,6 +1161,14 @@
        "ask": "",
        "date": "2026-11-04",
        "hash": "291cd708ad82"
+      },
+      {
+       "id": "4.3:every-teen-challenge-program-on-the-network-map-adult-ones-m",
+       "lead": "Every Teen Challenge program on the network map, adult ones marked (owner, 2026-11-04)",
+       "text": "**Every Teen Challenge program on the network map, adult ones marked (owner, 2026-11-04)**. Owner: \"i want all the tc programs on the map, but adult facilities should be marked as such\". Not started; its own session. What is there (tmp/prod.sqlite, 2026-11-04 13:21): the company row is `wpdl_kop_operators` 22 \"Teen Challenge\", with 28 programs linked (#100099 Lakeside Academy MN added that day). The map (kop-data network/graph.json) has 15 of them on its \"teen-challenge\" parent node (Boise Girls Academy, Columbus Girls Academy, New Lifehouse, ...); Bloom Home, Victory House, Teen Challenge Girls NV, Lakeside MN and others are missing. Not linked to the company at all, though named Teen Challenge: 28 facilities_v2 records, among them adult ones (#100701 Southeast Florida Women's Rehab, #100702 Alabama Teen Challenge Men's Induction Center, #100703 adult female center in Ozark, #100717 Central Florida Mens Rehab, #100719 Shafter Induction Center) and likely duplicates of linked programs (#100722 \"Teen Challenge Kansas City Girls Academy\" / #11356, #100721 \"Teen Challenge New Lifehouse\" / #13541, #100718 \"Teen Challenge Lakeland Girls Home\" / #11100, #100714 \"West Florida Boy's Ranch\" / #100549). Related records (adult categories): 900014 Alabama Teen Challenge Women's Center (young-adult-programs), 901001 Cape Fear and 901002 Grace House (christian-adult-rehabs). The Teen Challenge Research Map (https://teenchallenge-network.netlify.app/, inc/outside-research.php) lists 247 programs and campuses, most for adults, each with a type (\"Boys' program\", \"Men's program\"). Steps: (a) ask the owner which set \"all\" is: the records KOP holds, or also the research map's programs it does not; (b) merge the duplicates (KOP Tools > Merge Duplicates) and link the rest to company 22 (adult ones too); (c) an \"adult\" mark on map nodes: from the record's age range / facility type / related category, carried by the build (kop-pipeline scripts/build-network-graph.js, another session had it open 2026-11-04) into graph.json, drawn under the name (canvas.js KIND_WORDS-style), in the legend and drawer (filters.js, drawer.js, kop_network_map_label()) and tested (scripts/test-network-graph.js); docs/claude/network-map.md lists the places a node attribute touches; (d) programs added through network-overrides.json (never the CSVs). A homonym needs its own map name and a pin to its record: the map's \"lakeside-academy\" is Michigan's (#100098).",
+       "ask": "",
+       "date": "2026-11-04",
+       "hash": "0371af3374db"
       }
      ]
     },
