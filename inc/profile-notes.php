@@ -252,16 +252,39 @@ if (!function_exists('kop_pnotes_clause')) {
     }
 }
 
+if (!function_exists('kop_pnotes_is_current')) {
+    /**
+     * Whether a company a note names is one $ctx['current'] lists as running the record now (case, punctuation
+     * and a legal suffix like "Inc." aside). $ctx['current'] is given only for an open program.
+     */
+    function kop_pnotes_is_current($name, array $ctx) {
+        $key = function ($s) {
+            $s = strtolower(trim((string) $s));
+            $s = (string) preg_replace('/[\s,]+(inc|incorporated|llc|corp|corporation|ltd|co)\.?$/', '', $s);
+            return (string) preg_replace('/[^a-z0-9]+/', '', $s);
+        };
+        $k = $key($name);
+        if ($k === '') return false;
+        foreach ((array) ($ctx['current'] ?? array()) as $c) {
+            if ($key($c) === $k) return true;
+        }
+        return false;
+    }
+}
+
 if (!function_exists('kop_pnotes_sentence')) {
     /**
      * One note's words as a sentence: {text, topic}, topic 'history' (when and what happened, with the
      * year to order it by), 'program' (what it was like) or 'oversight' (licences, accreditation,
      * memberships). $label is the note's "Label:" ('' for none), $body the words after it.
      */
-    function kop_pnotes_sentence($label, $body) {
+    function kop_pnotes_sentence($label, $body, array $ctx = array()) {
         $l = strtolower(trim((string) $label));
         $b = trim((string) $body);
         if ($b === '') return null;
+        // A company the record names as running it now ($ctx['current'], given only for an open program) reads in
+        // the present: "It is run by Teen Challenge", not "It was run by" (owner, 2026-11-04).
+        $now = function ($name) use ($ctx) { return kop_pnotes_is_current($name, $ctx); };
         $topic_of = array(
             'opened' => 'history', 'founded' => 'history', 'founded by' => 'history', 'closed' => 'history', 'acquired' => 'history',
             'merger' => 'history', 'name change' => 'history', 'move' => 'history', 'owner' => 'history', 'owners' => 'history',
@@ -289,17 +312,17 @@ if (!function_exists('kop_pnotes_sentence')) {
             case 'owner':
             case 'owners':
                 $text = kop_pnotes_clause($b);
-                if ($text === '') $text = kop_pnotes_end('It was owned by ' . $b);
+                if ($text === '') $text = kop_pnotes_end(($now($b) ? 'It is owned by ' : 'It was owned by ') . $b);
                 break;
             case 'operator':
             case 'operator/owner':
                 if (preg_match('/^parent company:\s*(.+)$/i', $b, $m)) {
-                    $text = kop_pnotes_end('Its parent company was ' . $m[1]);
+                    $text = kop_pnotes_end(($now($m[1]) ? 'Its parent company is ' : 'Its parent company was ') . $m[1]);
                 } elseif (preg_match('/^(.+?)-affiliated$/i', $b, $m)) {
-                    $text = kop_pnotes_end('It was affiliated with ' . $m[1]);
+                    $text = kop_pnotes_end(($now($m[1]) ? 'It is affiliated with ' : 'It was affiliated with ') . $m[1]);
                 } else {
                     $text = kop_pnotes_clause($b);
-                    if ($text === '') $text = kop_pnotes_end('It was run by ' . $b);
+                    if ($text === '') $text = kop_pnotes_end(($now($b) ? 'It is run by ' : 'It was run by ') . $b);
                 }
                 break;
             case 'sister facility':
@@ -506,6 +529,7 @@ if (!function_exists('kop_pnotes_build')) {
      * Notes (strings) as {paragraphs: [[{text, topic, sources: [{source, cite, url}]}]], also: [{label,
      * cite, url}], forum: [lines], sentences: n}. The same fact from two sources is one sentence citing
      * both; history is ordered by year. $opts['max'] = sentences per paragraph before it is cut (6).
+     * $opts['current'] = the companies running it now, for an open program: their operator/owner notes read in the present.
      */
     function kop_pnotes_build(array $notes, array $opts = array()) {
         $max = max(3, (int) ($opts['max'] ?? 6));
@@ -584,7 +608,7 @@ if (!function_exists('kop_pnotes_build')) {
             if (strtolower($label) === 'opened' && $cite === '' && preg_match('/\bper\s+([^(]+?)\s*(?:\(the record says|$)/i', $words, $pm)) {
                 $cite = trim($pm[1], " ,");
             }
-            $s = kop_pnotes_sentence($label, $words);
+            $s = kop_pnotes_sentence($label, $words, array('current' => (array) ($opts['current'] ?? array())));
             if (!$s) continue;
             // "(Homepage, Wayback capture (2021-09-27); KOP copy: <our PDF>, 2021-09-27: <archive>)": the archive and
             // our copy of it are both sources (CLAUDE.md: cite our copy beside the archive link).

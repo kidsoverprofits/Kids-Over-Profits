@@ -89,6 +89,20 @@ foreach ($cases as $line => $want) {
     $check('"' . mb_substr($line, 0, 60) . '" -> ' . $want, $got === $want, 'got: ' . $got);
 }
 
+// An open program's current company reads in the present (owner, 2026-11-04: Lakeside Academy MN, Teen Challenge).
+$now = function ($line, array $current) {
+    $b = kop_pnotes_build(array($line), array('current' => $current));
+    return $b['paragraphs'] ? $b['paragraphs'][0][0]['text'] : '(none)';
+};
+$tc = 'Operator: Teen Challenge (r/troubledteens wiki, page "Teen Challenge" (as of 2026-01-07))';
+$check('open, run by it now: "It is run by Teen Challenge."', ($g = $now($tc, array('Teen Challenge'))) === 'It is run by Teen Challenge.', 'got: ' . $g);
+$check('same name with "Inc." and other case still counts', ($g = $now($tc, array('teen challenge, Inc.'))) === 'It is run by Teen Challenge.', 'got: ' . $g);
+$check('another company now: stays "It was run by"', ($g = $now($tc, array('Sequel TSI'))) === 'It was run by Teen Challenge.', 'got: ' . $g);
+$check('no current company given (closed): stays "It was run by"', ($g = $now($tc, array())) === 'It was run by Teen Challenge.', 'got: ' . $g);
+$check('parent company now: "Its parent company is"', ($g = $now('Operator: parent company: Universal Health Services (Woodbury Reports, December 2008, p. 19)', array('Universal Health Services'))) === 'Its parent company is Universal Health Services.', 'got: ' . $g);
+$check('affiliated now: "It is affiliated with"', ($g = $now('Operator: WWASP-affiliated (Woodbury Reports, May 2008, p. 2)', array('WWASP'))) === 'It is affiliated with WWASP.', 'got: ' . $g);
+$check('owner now: "It is owned by"', ($g = $now('Owner: Acadia Healthcare (Woodbury Reports, May 2008, p. 2)', array('Acadia Healthcare'))) === 'It is owned by Acadia Healthcare.', 'got: ' . $g);
+
 $s = $one('Cost: about $7,100 per month (r/troubledteens wiki, page "Aspen Ranch" (as of 2025-12-18))');
 $check('a citation stays with its sentence', $s && count($s['sources']) === 1 && $s['sources'][0]['cite'] === 'r/troubledteens wiki, page "Aspen Ranch" (as of 2025-12-18)');
 $s = $one('In Emmett since 2015 and closed March 18, 2022 (Idaho Press): https://www.idahopress.com/x');

@@ -3831,13 +3831,15 @@ if (!function_exists('kop_facility_page_data')) {
             // The notes as paragraphs with their sources (inc/profile-notes.php), printed as the page's "About".
             // A citation the staff or incident lists give with its address lends it to the same citation there.
             // An approved write-up (inc/record-writeups.php) takes its place, with the notes added since under it.
-            'about'         => (static function () use ($facility_id, $notes, $staff, $incidents) {
+            'about'         => (static function () use ($facility_id, $notes, $staff, $incidents, $status, $operator_name, $operator_past) {
                 if (!function_exists('kop_pnotes_build')) return null;
                 $known = array();
                 foreach (array_merge($incidents, ...array_values($staff ?: array(array()))) as $it) {
                     if (is_array($it) && ($it['cite'] ?? '') !== '' && ($it['url'] ?? '') !== '' && !isset($known[$it['cite']])) $known[$it['cite']] = $it['url'];
                 }
-                $build = static function (array $lines) use ($known) { return kop_pnotes_build($lines, array('known' => $known)); };
+                // An open program's current company: its "Operator: X" note reads "It is run by X".
+                $current = (strtolower((string) $status) === 'open' && !$operator_past && (string) $operator_name !== '') ? array((string) $operator_name) : array();
+                $build = static function (array $lines) use ($known, $current) { return kop_pnotes_build($lines, array('known' => $known, 'current' => $current)); };
                 $about = $build($notes);
                 return function_exists('kop_wu_page_about') ? kop_wu_page_about($facility_id, $notes, $about, $build) : $about;
             })(),
