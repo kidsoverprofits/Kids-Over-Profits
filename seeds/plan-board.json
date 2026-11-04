@@ -1,6 +1,6 @@
 {
- "built": "2026-11-04 16:49 UTC",
- "source": "c331eecc6a0cc2a3b8ecfa0c18178f3a44d3ba1f",
+ "built": "2026-11-04 17:04 UTC",
+ "source": "3728fa847069db626ee4bdb555225b73da89c058",
  "sections": [
   {
    "key": "2",
@@ -1386,10 +1386,10 @@
       {
        "id": "4.6:podcasts",
        "lead": "Podcasts",
-       "text": "**Podcasts**: pilot episodes 221, 115 and 116 for the owner; read every batch as transcripts finish; copy each `proposals.json` to `~/kop-import/podcasts/`; write person and program facts onto records with Undo; `attended` facts draw the survivor-category map line (old 3.18). **2026-11-03: restored after the old laptop died.** The hourly Drive backup (`G:\\My Drive\\Podcast Transcripts` on the kidsoverprofitsdani Drive, I: on the old laptop) held everything to 2026-10-28: 326 transcripts, the 5 pilot facts files, `proposals.json` (148 items), the 20 queued batches. Copied back; the last 7 done 2026-11-04 with `py -3.12` (no 3.13 on this machine; Whisper + winget ffmpeg): **all 335 transcribed** and backed up. Open: the owner registers the hourly backup task here (`scripts\\podcast-backup.ps1 -Register`, now finds the Drive letter itself); `podcast-run-task.ps1` still calls `py -3.13`.",
+       "text": "**Podcasts**: pilot episodes 221, 115 and 116 for the owner; read every batch as transcripts finish; copy each `proposals.json` to `~/kop-import/podcasts/`; write person and program facts onto records with Undo; `attended` facts draw the survivor-category map line (old 3.18). **2026-11-03: restored after the old laptop died.** The hourly Drive backup (`G:\\My Drive\\Podcast Transcripts` on the kidsoverprofitsdani Drive, I: on the old laptop) held everything to 2026-10-28: 326 transcripts, the 5 pilot facts files, `proposals.json` (148 items), the 20 queued batches. Copied back; the last 7 done 2026-11-04 with `py -3.12` (no 3.13 on this machine; Whisper + winget ffmpeg): **all 335 transcribed** and backed up. Open: the owner registers the hourly backup task here (`scripts\\podcast-backup.ps1 -Register`, now finds the Drive letter itself); `podcast-run-task.ps1` still calls `py -3.13`. **2026-11-04: all 335 episodes read** (Sonnet readers, batches b00-b100 + two redos). `check`: 4015 items, 3964 kept (911 statements, 59 serious; 3053 facts), 16 quotes not found and 35 malformed thrown out (listed in `tmp/podcasts/sftf/report.md`). Facts files and `proposals.json` backed up to the KOP Drive. Open: (a) upload `tmp/podcasts/sftf/proposals.json` to the server as `~/kop-import/podcasts/sftf.json` for Review inbox > Podcast statements; (b) someone listens at each statement's time before any quote is used publicly; (c) the person/program facts onto records with Undo, `attended` -> survivor map lines. Spot-check before trusting: two 318 episodes were first skimmed (redone in full, which found 4 facts the skim missed); a shared helper script overwrote 069-071 (deleted and redone). Readers must write files with Write only, no helper scripts. INSTRUCTIONS.md paths said `C:/Users/daniu/` (fixed to `dani`).",
        "ask": "",
        "date": "2026-11-04",
-       "hash": "5aaec86760e7"
+       "hash": "288e83d2af00"
       },
       {
        "id": "4.6:google-docs",
