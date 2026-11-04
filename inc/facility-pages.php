@@ -444,7 +444,7 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
         }
         // New records held until their write-up is approved (inc/record-writeups.php).
         $parts[] = 'unlisted:' . (function_exists('kop_wu_unlisted_key') ? kop_wu_unlisted_key() : '-');
-        $parts[] = 'v:8';   // 8: own_folder for names shared across states
+        $parts[] = 'v:9';   // 8-9: own_folder for names shared across states
         return md5(implode(';', $parts));
     }
 }
@@ -615,6 +615,7 @@ if (!function_exists('kop_facility_pages_build_index')) {
                 'editorial' => $e['editorial'],
                 'profile_post' => $e['profile_post'],
                 'folder'    => $e['folder'],
+                'own_folder' => !empty($e['own_folder']),
                 'signals'   => count($e['signals']),
             );
         }
