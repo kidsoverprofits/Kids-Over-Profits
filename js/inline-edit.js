@@ -684,9 +684,12 @@
      * row's value ("f:12", "y:6", "d:34").
      */
     function buildPlace(id, f) {
-        var value = f.value || '';
+        // f.multi: several picks (the document pencil's "Also show on"), each a line with Remove; get() is the list.
+        var multi = !!f.multi;
+        var value = multi ? [] : (f.value || '');
+        var many = [];
         var wrap = el('div', { class: 'kop-ie-place' });
-        var q = el('input', { type: 'search', id: id, class: 'kop-ie-input', placeholder: 'Facility, young adult program, Christian rehab for adults or folder name', autocomplete: 'off',
+        var q = el('input', { type: 'search', id: id, class: 'kop-ie-input', placeholder: 'Facility, company, young adult program, Christian rehab for adults or folder name', autocomplete: 'off',
             role: 'combobox', 'aria-expanded': 'false', 'aria-autocomplete': 'list' });
         var list = el('ul', { class: 'kop-ie-place-list', role: 'listbox', hidden: '' });
         var picked = el('p', { class: 'kop-ie-place-picked', 'aria-live': 'polite' });
@@ -696,7 +699,27 @@
         var results = [], active = -1, timer = null, seq = 0;
 
         function close() { list.hidden = true; active = -1; q.setAttribute('aria-expanded', 'false'); }
+        function drawMany() {
+            picked.textContent = '';
+            many.forEach(function (r) {
+                var rm = el('button', { type: 'button', class: 'kop-ie-mini', text: 'Remove', 'aria-label': 'Remove ' + r.label });
+                rm.addEventListener('click', function () {
+                    many = many.filter(function (x) { return x.value !== r.value; });
+                    drawMany();
+                });
+                picked.appendChild(el('span', { class: 'kop-ie-place-chip' }, [
+                    el('strong', { text: r.kind + ': ' }), document.createTextNode(r.label + ' '), rm
+                ]));
+            });
+        }
         function choose(r) {
+            if (multi) {
+                if (!many.some(function (x) { return x.value === r.value; })) many.push(r);
+                drawMany();
+                q.value = '';
+                close();
+                return;
+            }
             value = r.value;
             picked.textContent = '';
             picked.appendChild(el('strong', { text: r.kind + ': ' }));
@@ -754,7 +777,7 @@
                 close();
             }
         });
-        return { node: wrap, get: function () { return value; } };
+        return { node: wrap, get: function () { return multi ? many.map(function (x) { return x.value; }) : value; } };
     }
 
     /**

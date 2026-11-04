@@ -7,6 +7,13 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # A document on the wrong page: its tile's pencil (doc:<id>:h<page folder>) lists where it is filed and moves it to another
 # facility or a folder found by name, takes it off the page, or deletes it (inc/doc-placement.php; move/remove have Undo)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-doc-placement.php   # real moves + undo on TEMP copies of the folder tables
+# One document on several pages, never a copy (owner, 2026-11-04): the pencil's (and "Select documents"') "Also show it on other
+# pages" (kop_dp_also()) adds a row in {prefix}kop_media_folder_tags per picked record (f:/o: company/y:/cra:, or d:<folder> exactly
+# there). FileBird keeps its one home folder and cannot see or wipe the tags; every folder feed (kop_get_attachments_in_folder_ids())
+# and folder count reads them, so the document shows as a normal tile on each page. It lands in the record's subfolder of the same
+# name as its own ("Student Handbooks", "Woodbury Reports Mentions") when that record has one (none is made), else its top folder;
+# a page already holding it is skipped; one Undo (docundo:) takes the lot off. The pencil lists them as "Also listed in"; "Take it
+# off this page" removes one. Merges move tag rows (inc/facility-merge.php); delete removes them. Picker: 'place' field with multi
 # "Move to" also takes a young adult program (y:<id>): its folder (young_adult_programs.document_folder_id, made under "Young
 # Adult Programs" the first time by kop_wbc_existing_target('ya', id)), shown on its card at /young-adult-programs/ (kop_ya_documents_html())
 # Many at once: "Select documents" on each library (js/inline-edit.js docSel; click, shift-click, "Pick all in this folder"), a bar at the

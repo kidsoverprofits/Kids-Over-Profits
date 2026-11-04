@@ -102,6 +102,56 @@ with sync_playwright() as p:
     if ARGS.shots:
         pathlib.Path(ARGS.shots).mkdir(parents=True, exist_ok=True)
         pg.screenshot(path=str(pathlib.Path(ARGS.shots) / "selecting.png"))
+    pg.click(".kop-ie-docsel-toggle")
+    pg.wait_for_timeout(200)
+
+    # The pencil's "Also show on": several picks as lines with Remove, saved as a list (inc/doc-placement.php kop_dp_also_field()).
+    import json as _json
+    posted = []
+    spec = {"title": "Edit Doc 1", "fields": [
+        {"name": "dp_action", "label": "What to do", "type": "select", "value": "",
+         "options": [{"value": "", "label": "Leave it"}, {"value": "also", "label": "Also show it on other pages"}]},
+        {"name": "dp_also", "label": "Also show on", "type": "place", "value": [], "multi": True, "show_if": {"dp_action": "also"}},
+    ]}
+    def rest(route):
+        if route.request.method == "GET":
+            route.fulfill(json=spec)
+        else:
+            posted.append(route.request.post_data_buffer or b"")
+            route.fulfill(json={"message": "ok"})
+    pg.unroute("http://kop.test/rest*")
+    pg.route("http://kop.test/rest*", rest)
+    hits = [{"value": "f:12", "kind": "Facility", "label": "Norris Academy", "meta": "TN"},
+            {"value": "o:7", "kind": "Company", "label": "Acadia Healthcare", "meta": "#7"}]
+    pg.route("http://kop.test/ps*", lambda r: r.fulfill(json=hits))
+    pg.evaluate("() => [...document.querySelectorAll('.kop-ie-pen')].find(p => p.title === 'Edit Doc 1').click()")
+    pg.wait_for_selector(".kop-ie-dialog select")
+    check("Also show on hides until picked", pg.locator(".kop-ie-place").first.evaluate("n => !!n.closest('[hidden]')"))
+    pg.select_option(".kop-ie-dialog select", "also")
+    box = pg.locator(".kop-ie-place input[type=search]")
+    for want in ("Norris", "Acadia", "Norris"):
+        box.fill(want)
+        pg.wait_for_selector(".kop-ie-place-list li[role=option]")
+        pg.locator(".kop-ie-place-list li[role=option]", has_text=want).first.dispatch_event("mousedown")
+        pg.wait_for_timeout(100)
+    check("each pick is a line, a repeat added once", pg.locator(".kop-ie-place-chip").count() == 2, pg.locator(".kop-ie-place-chip").all_inner_texts())
+    pg.locator(".kop-ie-place-chip", has_text="Norris").locator("button").click()
+    box.fill("Norris")
+    pg.wait_for_selector(".kop-ie-place-list li[role=option]")
+    pg.locator(".kop-ie-place-list li[role=option]", has_text="Norris").first.dispatch_event("mousedown")
+    check("Remove takes one off, it can be picked again", pg.locator(".kop-ie-place-chip").count() == 2)
+    if ARGS.shots:
+        pg.screenshot(path=str(pathlib.Path(ARGS.shots) / "also-show-on.png"))
+    pg.click(".kop-ie-save")
+    pg.wait_for_timeout(400)
+    raw = posted[-1].decode("utf-8", "replace") if posted else ""
+    start = raw.find("{")
+    vals = {}
+    try:
+        vals = _json.JSONDecoder().raw_decode(raw[start:])[0].get("values", {}) if start >= 0 else {}
+    except ValueError:
+        pass
+    check("Save sends the picks as a list", vals.get("dp_action") == "also" and vals.get("dp_also") == ["o:7", "f:12"], vals)
     b.close()
 print("All passed" if not fails else f"{fails} FAILED")
 sys.exit(1 if fails else 0)

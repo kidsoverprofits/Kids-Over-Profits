@@ -135,7 +135,9 @@ $fields = $values(kop_dp_fields($root_doc, $home));
 $check('lists where it is filed', isset($fields['dp_rows']) && count($fields['dp_rows']['options']) >= 1);
 $check('ticks the filing that puts it on this page', in_array('r:' . $home, $fields['dp_rows']['value'], true));
 $check('says which filing puts it here', strpos(json_encode($fields['dp_rows']['options']), 'puts it on this page') !== false);
-$check('offers move, remove and delete', array_column($fields['dp_action']['options'], 'value') === array('', 'move', 'remove', 'delete'));
+$check('offers move, also show, remove and delete', array_column($fields['dp_action']['options'], 'value') === array('', 'move', 'also', 'remove', 'delete'));
+$check('"Also show on" picks several, shown only for it', ($fields['dp_also']['multi'] ?? false) === true && $fields['dp_also']['type'] === 'place'
+    && ($fields['dp_also']['show_if'] ?? null) === array('dp_action' => 'also'));
 $check('delete asks first', !empty($fields['dp_action']['confirm']['delete']));
 $check('the target shows only for a move', ($fields['dp_target']['show_if'] ?? null) === array('dp_action' => 'move') && $fields['dp_target']['type'] === 'place');
 $check('the doc: ref reads its page folder', kop_ie_doc_home(array('5', 'h' . $home)) === $home && kop_ie_doc_home(array('5')) === 0);
@@ -356,6 +358,61 @@ $check('a move of many with no target is refused', $threw !== '' && $filed($root
 $threw = '';
 try { kop_dp_apply_many($items, array('dp_action' => '')); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
 $check('no action is refused', $threw !== '', $threw);
+
+echo "-- Also show on other pages (a tag, no copy) --\n";
+// Two other facility pages with folders of their own; the second gets a "Woodbury Reports Mentions" subfolder,
+// so a document in that subfolder here lands in the same-named one there, and in the top folder of the first.
+$others = array();
+foreach (kop_facility_pages_index()['ids'] as $id => $entry) {
+    $f = (int) ($entry['folder'] ?? 0);
+    if ($f && !in_array($f, $page['all'], true) && !kop_wb_find_folder('Woodbury Reports Mentions', $f)) {
+        $others[(int) $id] = $f;
+        if (count($others) === 2) break;
+    }
+}
+if (count($others) < 2) {
+    echo "SKIP fewer than two other facility pages with folders\n";
+} else {
+    list($fa, $fb) = array_keys($others);
+    $fa_folder = $others[$fa];
+    $fb_folder = $others[$fb];
+    $fb_sub = kop_dp_child_folder('Woodbury Reports Mentions', $fb_folder);
+    $b_files = $filed($woodbury_doc);
+    $b_tags = $tagged($woodbury_doc);
+    $res = kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'also', 'dp_also' => array('f:' . $fa, 'f:' . $fb)));
+    $now = $tagged($woodbury_doc);
+    $check('also show adds a tag on each page, FileBird untouched', $filed($woodbury_doc) === $b_files && count($now) === count($b_tags) + 2, json_encode($now));
+    $check('a page with the same-named subfolder gets it there', in_array($fb_sub, $now, true), kop_dp_folder_path($fb_sub));
+    $check('a page without it gets the top folder', in_array($fa_folder, $now, true));
+    $check('the message names both and says nothing was copied', strpos($res['message'], ' and ') !== false && strpos($res['message'], 'nothing was copied') !== false, $res['message']);
+    $check('the facility pages list it (the folder feed reads tags)', in_array($woodbury_doc, kop_get_tagged_attachment_ids(kop_dp_page_folders($fb_folder)['all']), true));
+    $threw = '';
+    try { kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'also', 'dp_also' => array('f:' . $fa))); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+    $check('a page it is already on is not added twice', stripos($threw, 'already') !== false && $tagged($woodbury_doc) === $now, $threw);
+    $fields_now = $values(kop_dp_fields($woodbury_doc, $home));
+    $check('the pencil lists the extra pages as "Also listed in"', substr_count(json_encode($fields_now['dp_rows']['options']), 'Also listed in') >= 2);
+    list($src, $parts) = kop_ie_resolve($res['undo']);
+    $undone = call_user_func($src['save'], $parts, array());
+    $check('one Undo takes it off both pages, home kept', $tagged($woodbury_doc) === $b_tags && $filed($woodbury_doc) === $b_files, $undone['message']);
+    $threw = '';
+    try { kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'also', 'dp_also' => array('f:' . $fa, 'f:999999999'))); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+    $check('a bad pick refuses the lot before writing', $threw !== '' && $tagged($woodbury_doc) === $b_tags, $threw);
+    $threw = '';
+    try { kop_dp_apply($woodbury_doc, $home, array('dp_action' => 'also', 'dp_also' => array())); } catch (RuntimeException $e) { $threw = $e->getMessage(); }
+    $check('no pick is refused', $threw !== '', $threw);
+    // A folder picked by name: exactly there.
+    $res = kop_dp_apply($root_doc, $home, array('dp_action' => 'also', 'dp_also' => array('d:' . $fb_sub)));
+    $check('a folder picked by name takes it exactly there', in_array($fb_sub, $tagged($root_doc), true), $res['message']);
+    list($src, $parts) = kop_ie_resolve($res['undo']);
+    call_user_func($src['save'], $parts, array());
+    // Several documents at once.
+    $b_root_t = $tagged($root_doc);
+    $res = kop_dp_apply_many(array(array($root_doc, $home), array($woodbury_doc, $home)), array('dp_action' => 'also', 'dp_also' => array('f:' . $fa)));
+    $check('many: both documents show on the page', in_array($fa_folder, $tagged($root_doc), true) && in_array($fa_folder, $tagged($woodbury_doc), true), $res['message']);
+    list($src, $parts) = kop_ie_resolve($res['undo']);
+    call_user_func($src['save'], $parts, array());
+    $check('many: one Undo takes both off', $tagged($root_doc) === $b_root_t && $tagged($woodbury_doc) === $b_tags);
+}
 
 echo "-- Deleting keeps files another record uses --\n";
 $pair = $pdo->query("SELECT pdf.post_id AS pdf, jpg.post_id AS jpg, jpg.meta_value AS path

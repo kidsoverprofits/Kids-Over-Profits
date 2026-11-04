@@ -567,6 +567,17 @@ button.kop-ie-checks-all {
     color: var(--kop-midnight, #000435);
 }
 
+/* "Also show on": one line per pick, its Remove after the name. */
+.kop-ie-dialog .kop-ie-place-chip {
+    display: block;
+    margin: 4px 0 0;
+    padding: 4px 6px;
+    border-left: 3px solid var(--kop-teal-fill, #1F6F7A);
+    color: var(--kop-midnight, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    overflow-wrap: anywhere;
+}
+
 .kop-ie-undo {
     position: fixed;
     right: 12px;

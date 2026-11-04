@@ -22,6 +22,13 @@
  *           name (folder lookup). A filing stays a filing
  *           and a tag stays a tag. Moving to a facility keeps a subfolder such
  *           as "Woodbury Reports Mentions" (found or made under the target).
+ *   also    show it on other pages as well, with no copy: a tag
+ *           (kop_media_folder_tags) in each picked record's folder, in the
+ *           subfolder of the same name when that record has one ("Student
+ *           Handbooks" -> its "Student Handbooks"), else its top folder; a
+ *           folder picked by name takes it exactly there. FileBird keeps the
+ *           one home folder, and the record's page lists it like its own
+ *           (every folder feed reads the tags). kop_dp_also().
  *   remove  unfile / untag it here; it stays in the media library
  *   delete  delete the document for good (files another record still uses
  *           are kept on disk)
@@ -194,7 +201,8 @@ function kop_dp_fields($att_id, $home) {
         'section' => $section,
         'options' => array(
             array('value' => '', 'label' => 'Leave it where it is'),
-            array('value' => 'move', 'label' => 'Move it to another facility, young adult program, Christian rehab for adults or folder'),
+            array('value' => 'move', 'label' => 'Move it to another facility, company, young adult program, Christian rehab for adults or folder'),
+            array('value' => 'also', 'label' => 'Also show it on other pages (the same file, no copy made)'),
             array('value' => 'remove', 'label' => 'Take it off this page (it stays in the media library)'),
             array('value' => 'delete', 'label' => 'Delete the document for good'),
         ),
@@ -203,8 +211,9 @@ function kop_dp_fields($att_id, $home) {
     $fields[] = kop_ie_field('dp_target', 'Move to', 'place', '', array(
         'section' => $section,
         'show_if' => array('dp_action' => 'move'),
-        'help'    => 'Type a facility name (past names work), a young adult program, a Christian rehab for adults or a folder name.',
+        'help'    => 'Type a facility name (past names work), a company, a young adult program, a Christian rehab for adults or a folder name.',
     ));
+    $fields[] = kop_dp_also_field();
     $fields[] = kop_ie_field('dp_keep_sub', 'Keep its subfolder (e.g. Woodbury Reports Mentions) when moving to a facility', 'bool', true, array(
         'section' => $section,
         'show_if' => array('dp_action' => 'move'),
@@ -242,7 +251,7 @@ function kop_dp_child_folder($name, $parent) {
  */
 function kop_dp_target($value) {
     global $wpdb;
-    if (!preg_match('/^(f|d|y|cra):(\d+)$/', (string) $value, $m)) {
+    if (!preg_match('/^(f|d|y|cra|o):(\d+)$/', (string) $value, $m)) {
         throw new RuntimeException('Pick where to move it from the list under "Move to".');
     }
     $id = (int) $m[2];
@@ -253,6 +262,14 @@ function kop_dp_target($value) {
         $t = kop_wbc_existing_target('ya', $id);
         kop_dp_folders(true);
         return array((int) $t['folder'], $t['name'] . ' (young adult program)', true);
+    }
+    if ($m[1] === 'o') {
+        if (!function_exists('kop_wbc_existing_target')) {
+            throw new RuntimeException('Company folders cannot be found here.');
+        }
+        $t = kop_wbc_existing_target('company', $id);
+        kop_dp_folders(true);
+        return array((int) $t['folder'], $t['name'] . ' (company)', true);
     }
     if ($m[1] === 'cra') {
         if (!function_exists('kop_wbc_existing_target')) {
@@ -306,6 +323,12 @@ function kop_dp_apply($att_id, $home, array $v) {
         }
         kop_dp_after();
         return array('message' => 'Deleted "' . $title . '"' . ($done > 1 ? ' and ' . ($done - 1) . ' identical ' . ($done === 2 ? 'copy' : 'copies') : '') . '.');
+    }
+
+    if ($action === 'also') {
+        $res = kop_dp_also(array(array($att_id, $page)), (array) ($v['dp_also'] ?? array()));
+        $res['message'] = '"' . $title . '" ' . $res['message'];
+        return $res;
     }
 
     // Which folders to change. For the shown document, the ticked rows; a
@@ -363,6 +386,9 @@ function kop_dp_target_url($value) {
     }
     if (preg_match('/^y:(\d+)$/', (string) $value, $m) && function_exists('kop_ya_url')) {
         return kop_ya_url((int) $m[1]);
+    }
+    if (preg_match('/^o:(\d+)$/', (string) $value, $m) && function_exists('kop_operator_page_url')) {
+        return (string) kop_operator_page_url((int) $m[1]);
     }
     if (preg_match('/^cra:(\d+)$/', (string) $value, $m) && function_exists('kop_related_url')) {
         return (string) kop_related_url((int) $m[1]);
@@ -427,6 +453,119 @@ function kop_dp_place(array $ids, $att_id, $picked, array $page, $target, $keep_
     }
 }
 
+/* ---- Also show on other pages ------------------------------------------------- */
+
+/** The "Also show on" picker: several records or folders (the place search, as chips). */
+function kop_dp_also_field() {
+    return kop_ie_field('dp_also', 'Also show on', 'place', array(), array(
+        'multi'   => true,
+        'show_if' => array('dp_action' => 'also'),
+        'help'    => 'Pick one or more facilities, companies, young adult programs or Christian rehabs: it goes in the folder of the same name '
+            . 'on each (e.g. Student Handbooks) when the page has one, else its top folder. Pick a folder by name to put it exactly there.',
+    ));
+}
+
+/**
+ * Show documents on other pages too: a tag in each target's folder, no copy. $docs: [[attachment id, its page
+ * folders (kop_dp_page_folders() of the page it is shown on)], ...]; $targets: kop_dp_target() values. A document
+ * already on a target page (filed or tagged anywhere in its folder group) is skipped there. One Undo for the lot.
+ * Returns ['message', 'undo', 'link'] for the inline editor.
+ */
+function kop_dp_also(array $docs, array $targets) {
+    global $wpdb;
+    $tags = kop_dp_tag_table();
+    if (!$tags) {
+        throw new RuntimeException('The extra-folders table (kop_media_folder_tags) is missing.');
+    }
+    $targets = array_values(array_unique(array_filter(array_map('strval', $targets))));
+    if (!$targets) {
+        throw new RuntimeException('Pick at least one page under "Also show on".');
+    }
+    $resolved = array();
+    foreach ($targets as $value) {
+        $resolved[] = array($value, kop_dp_target($value)); // a bad pick throws before anything is written
+    }
+    $added = array();
+    $shown = array();
+    $already = array();
+    foreach ($resolved as $pair) {
+        list($value, $t) = $pair;
+        list($folder, $label, $is_record) = $t;
+        $group = kop_dp_page_folders($folder)['all'] ?: array((int) $folder);
+        foreach ($docs as $d) {
+            list($att, $page) = $d;
+            $on_page = false;
+            foreach (kop_dp_memberships($att) as $r) {
+                if (in_array($r['folder'], $group, true)) {
+                    $on_page = true;
+                    break;
+                }
+            }
+            if ($on_page) {
+                $already[$label] = true;
+                continue;
+            }
+            $dest = $is_record ? kop_dp_also_folder($att, $page, (int) $folder) : (int) $folder;
+            $wpdb->insert($tags, array('folder_id' => $dest, 'attachment_id' => (int) $att), array('%d', '%d'));
+            $added[] = array('t', (int) $att, $dest);
+            $sub = $dest !== (int) $folder ? kop_dp_relative_names($dest, array((int) $folder)) : array();
+            $shown[$label . ($sub ? ' (' . implode(' > ', $sub) . ')' : '')] = true;
+        }
+    }
+    if (!$added) {
+        throw new RuntimeException('Already shown on ' . kop_dp_and(array_keys($already)) . '; nothing to add.');
+    }
+    $token = kop_dp_undo_store(array(), $added, 'the extra pages');
+    kop_dp_after();
+    $msg = 'now also shows on ' . kop_dp_and(array_keys($shown)) . '. It is the same file: nothing was copied.';
+    if ($already) {
+        $msg .= ' Already on ' . kop_dp_and(array_keys($already)) . '.';
+    }
+    $link = count($resolved) === 1 ? kop_dp_target_url($resolved[0][0]) : '';
+    return array('message' => $msg, 'undo' => 'docundo:' . $token, 'link' => $link);
+}
+
+/**
+ * Where on a record a document goes: its subfolder path on its own page ("Student Handbooks", "Woodbury Reports
+ * Mentions"), followed under the record's folder as far as folders of those names exist there (none is made).
+ */
+function kop_dp_also_folder($att_id, array $page, $root) {
+    $map = kop_dp_folders();
+    $names = array();
+    foreach (kop_dp_memberships($att_id) as $r) {
+        if ($r['kind'] !== 'r') {
+            continue;
+        }
+        $names = $page['roots'] ? kop_dp_relative_names($r['folder'], $page['roots']) : array((string) ($map[$r['folder']][1] ?? ''));
+        break;
+    }
+    $dest = (int) $root;
+    foreach ($names as $name) {
+        $next = 0;
+        foreach ($map as $id => $f) {
+            if ($f[0] === $dest && strcasecmp(trim($f[1]), trim((string) $name)) === 0) {
+                $next = (int) $id;
+                break;
+            }
+        }
+        if (!$next) {
+            break;
+        }
+        $dest = $next;
+    }
+    return $dest;
+}
+
+/** "A", "A and B", "A, B and C". */
+function kop_dp_and(array $names) {
+    $names = array_values($names);
+    if (count($names) < 2) {
+        return (string) ($names[0] ?? '');
+    }
+    $last = array_pop($names);
+    return implode(', ', $names) . ' and ' . $last;
+}
+
 /* ---- Several documents at once (the library's "Select documents") ------------- */
 
 /**
@@ -462,9 +601,10 @@ function kop_dp_many_fields(array $items, $action = '') {
     }
     $fields = array(
         kop_ie_field('dp_list', count($items) . ' picked', 'note', $titles),
-        kop_ie_field('dp_action', 'What to do', 'select', in_array($action, array('move', 'remove', 'delete'), true) ? $action : 'move', array(
+        kop_ie_field('dp_action', 'What to do', 'select', in_array($action, array('move', 'also', 'remove', 'delete'), true) ? $action : 'move', array(
             'options' => array(
-                array('value' => 'move', 'label' => 'Move them to another facility, young adult program, Christian rehab for adults or folder'),
+                array('value' => 'move', 'label' => 'Move them to another facility, company, young adult program, Christian rehab for adults or folder'),
+                array('value' => 'also', 'label' => 'Also show them on other pages (the same files, no copies made)'),
                 array('value' => 'remove', 'label' => 'Take them off this page (they stay in the media library)'),
                 array('value' => 'delete', 'label' => 'Delete them for good'),
             ),
@@ -472,8 +612,9 @@ function kop_dp_many_fields(array $items, $action = '') {
         )),
         kop_ie_field('dp_target', 'Move to', 'place', '', array(
             'show_if' => array('dp_action' => 'move'),
-            'help'    => 'Type a facility name (past names work), a young adult program, a Christian rehab for adults or a folder name.',
+            'help'    => 'Type a facility name (past names work), a company, a young adult program, a Christian rehab for adults or a folder name.',
         )),
+        kop_dp_also_field(),
         kop_ie_field('dp_keep_sub', 'Keep their subfolders (e.g. Woodbury Reports Mentions) when moving to a facility', 'bool', true, array(
             'show_if' => array('dp_action' => 'move'),
         )),
@@ -488,6 +629,22 @@ function kop_dp_many_fields(array $items, $action = '') {
 function kop_dp_apply_many(array $items, array $v) {
     $action = (string) ($v['dp_action'] ?? '');
     $target = null;
+    if ($action === 'also') {
+        $list = array();
+        foreach ($items as $it) {
+            if (get_post_type($it[0]) === 'attachment') {
+                $list[] = array((int) $it[0], kop_dp_page_folders($it[1]));
+            }
+        }
+        if (!$list) {
+            throw new RuntimeException('None of those documents exist any more. Reload the page.');
+        }
+        $res = kop_dp_also($list, (array) ($v['dp_also'] ?? array()));
+        $res['message'] = count($list) === 1 ? 'The document ' . $res['message']
+            : count($list) . ' documents ' . str_replace(array('now also shows on', 'It is the same file: nothing was copied.'),
+                array('now also show on', 'They are the same files: nothing was copied.'), $res['message']);
+        return $res;
+    }
     if ($action === 'move') {
         $target = kop_dp_target($v['dp_target'] ?? '');
     } elseif ($action !== 'remove' && $action !== 'delete') {
@@ -624,7 +781,8 @@ function kop_ie_docundo_load(array $p) {
     if (!is_array($u)) {
         throw new RuntimeException('That change can no longer be undone.');
     }
-    return array('title' => 'Undo the move of "' . $u['title'] . '"', 'fields' => array());
+    $what = $u['title'] === 'the extra pages' ? 'Take it off the extra pages again' : 'Undo the move of "' . $u['title'] . '"';
+    return array('title' => $what, 'fields' => array());
 }
 
 function kop_ie_docundo_save(array $p, array $v) {
@@ -657,7 +815,8 @@ function kop_ie_docundo_save(array $p, array $v) {
     }
     delete_transient($key);
     kop_dp_after();
-    return array('message' => 'Undone: "' . $u['title'] . '" is back where it was.');
+    return array('message' => $u['title'] === 'the extra pages' ? 'Undone: taken off the extra pages; it is still on its own page.'
+        : 'Undone: "' . $u['title'] . '" is back where it was.');
 }
 
 /* ---- Search: facilities, young adult programs and folders ---------------------- */
@@ -688,6 +847,27 @@ function kop_dp_related_search($q, $limit = 5) {
     foreach (kop_related_search('christian-adult-rehabs', $q, $limit) as $p) {
         $out[] = array('value' => 'cra:' . (int) $p['id'], 'kind' => 'Christian rehab for adults', 'label' => (string) $p['name'],
             'meta' => implode(' · ', array_filter(array(implode(', ', array_filter(array($p['city'], $p['state']))), '#' . (int) $p['id']))));
+    }
+    return $out;
+}
+
+/** Companies whose name has $q: rows for the "Move to" / "Also show on" list (their library folder, made when first used). */
+function kop_dp_company_search($q, $limit = 5) {
+    $q = trim((string) $q);
+    if (mb_strlen($q) < 2 || !function_exists('kop_wbc_find_records') || !function_exists('kop_wbc_pdo')) {
+        return array();
+    }
+    $out = array();
+    try {
+        foreach (kop_wbc_find_records(kop_wbc_pdo(), $q, $limit, 'company') as $o) {
+            if (($o['kind'] ?? '') !== 'company') {
+                continue;
+            }
+            $out[] = array('value' => 'o:' . (int) $o['id'], 'kind' => 'Company', 'label' => (string) $o['name'],
+                'meta' => implode(' · ', array_filter(array((string) ($o['detail'] ?? ''), '#' . (int) $o['id']))));
+        }
+    } catch (Throwable $e) {
+        return array();
     }
     return $out;
 }
@@ -737,6 +917,9 @@ add_action('rest_api_init', function () {
                     ));
                     $out[] = array('value' => 'f:' . (int) $f['id'], 'kind' => 'Facility', 'label' => (string) $f['name'], 'meta' => implode(' · ', $meta));
                 }
+            }
+            foreach (kop_dp_company_search($q) as $o) {
+                $out[] = $o;
             }
             foreach (kop_dp_ya_search($q) as $y) {
                 $out[] = $y;
