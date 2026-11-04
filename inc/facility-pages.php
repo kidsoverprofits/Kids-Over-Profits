@@ -444,7 +444,7 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
         }
         // New records held until their write-up is approved (inc/record-writeups.php).
         $parts[] = 'unlisted:' . (function_exists('kop_wu_unlisted_key') ? kop_wu_unlisted_key() : '-');
-        $parts[] = 'v:7';
+        $parts[] = 'v:8';   // 8: own_folder for names shared across states
         return md5(implode(';', $parts));
     }
 }
@@ -520,6 +520,24 @@ if (!function_exists('kop_facility_pages_build_index')) {
         $merged = kop_facility_pages_merged_profile_posts();
 
         $unlisted = function_exists('kop_wu_unlisted_ids') ? array_flip(kop_wu_unlisted_ids()) : array();
+        // Names records in two or more states carry (Lakeside Academy, MI and MN): a folder of that name is not
+        // assumed to be either's (kop_facility_pages_homonym_folder()). Homes of one program share a state and stay as they were.
+        $name_states = array();
+        foreach ((array) $rows as $row) {
+            $k = kop_facility_pages_name_key((string) $row['name']);
+            if ($k !== '') $name_states[$k][strtoupper(trim((string) $row['state']))] = true;
+        }
+        $folder_candidates = !empty($links['folders']) ? kop_facility_pages_folder_candidates() : array();
+        $companies = array();   // company name key => true; operator id => name
+        $company_names = array();
+        $ops_table = $wpdb->prefix . 'kop_operators';
+        if ($folder_candidates && kop_facility_pages_table_exists($ops_table)) {
+            foreach ((array) $wpdb->get_results("SELECT id, name FROM `{$ops_table}`", ARRAY_A) as $o) {
+                $company_names[(int) $o['id']] = (string) $o['name'];
+                $k = kop_facility_pages_name_key($o['name']);
+                if ($k !== '') $companies[$k] = true;
+            }
+        }
         $entries = array();
         $groups = array();
         foreach ((array) $rows as $row) {
@@ -536,9 +554,19 @@ if (!function_exists('kop_facility_pages_build_index')) {
             // The document folder is settled here, once, so a page render
             // never has to scan the FileBird tree.
             $folder = !empty($doc['documentFolderId']) ? (int) $doc['documentFolderId'] : 0;
+            $homonym = count($name_states[kop_facility_pages_name_key($name)] ?? array()) > 1;
             if ($folder <= 0 && !empty($links['folders'])) {
                 foreach (kop_facility_pages_doc_name_keys($doc, (string) $row['unique_name']) as $fk) {
-                    if (isset($links['folders'][$fk])) { $folder = (int) $links['folders'][$fk]; break; }
+                    if (!isset($links['folders'][$fk])) continue;
+                    if (count($name_states[$fk] ?? array()) > 1) {
+                        $op_id = (int) ($links['operators'][$id] ?? 0);
+                        $folder = kop_facility_pages_homonym_folder($folder_candidates[$fk] ?? array(), $state, $doc, $companies,
+                            isset($company_names[$op_id]) ? array($company_names[$op_id]) : array());
+                        if ($folder > 0) break;
+                        continue;
+                    }
+                    $folder = (int) $links['folders'][$fk];
+                    break;
                 }
             }
             $entries[$id] = array(
@@ -549,6 +577,8 @@ if (!function_exists('kop_facility_pages_build_index')) {
                 'editorial' => isset($editorial[$id]) ? $editorial[$id] : '',
                 'profile_post' => isset($merged[$id]) ? $merged[$id] : 0,
                 'folder'    => $folder,
+                // Another record shares the name: the page shows this folder alone, not every folder of that name.
+                'own_folder' => $homonym,
                 'signals'   => kop_facility_page_signals($doc, $id, $links, (string) $row['unique_name']),
             );
             $groups[$candidate][] = $id;
@@ -904,6 +934,54 @@ if (!function_exists('kop_facility_pages_name_key')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_place_state')) {
+    /**
+     * The US state code a name or place names, or ''. $paren_only: read only a trailing "(City, State)" on a
+     * program name ("Lakeside Academy (Kalamazoo, Michigan)" -> MI); otherwise the whole text is a place
+     * ("Michigan", "Kalamazoo, MI").
+     */
+    function kop_facility_pages_place_state($text, $paren_only = true) {
+        $text = trim((string) $text);
+        if ($text === '' || !function_exists('kop_state_abbrev_to_name')) return '';
+        if (preg_match('/\(([^()]*)\)\s*$/u', $text, $m)) {
+            $place = $m[1];
+        } elseif ($paren_only) {
+            return '';
+        } else {
+            $place = $text;
+        }
+        $parts = array_map('trim', explode(',', $place));
+        $last = (string) end($parts);
+        if ($last === '') return '';
+        // A two-letter code counts after a comma ("Kalamazoo, MI"), in capitals ("Lakeside Academy (MI)") or as a whole place.
+        $code_ok = count($parts) > 1 || !$paren_only || preg_match('/^[A-Z]{2}$/', $last);
+        foreach (kop_state_abbrev_to_name() as $code => $state) {
+            if (strcasecmp($last, $state) === 0) return strtoupper((string) $code);
+            if ($code_ok && strcasecmp($last, (string) $code) === 0) return strtoupper((string) $code);
+        }
+        return '';
+    }
+}
+
+if (!function_exists('kop_facility_pages_place_elsewhere')) {
+    /**
+     * True when a name or place names a state other than the record's. Two programs can share a name
+     * (Lakeside Academy in Kalamazoo, MI and in Buffalo, MN): a lawsuit, death or milestone that says
+     * which state it is about never lands on the other one.
+     */
+    function kop_facility_pages_place_elsewhere($text, $state_code, $paren_only = true) {
+        $state_code = trim((string) $state_code);
+        if ($state_code === '') return false;
+        if (strlen($state_code) > 2) {   // a state name ("Minnesota")
+            $state_code = kop_facility_pages_place_state($state_code, false);
+            if ($state_code === '') return false;
+        }
+        $state_code = strtoupper($state_code);
+        $named = kop_facility_pages_place_state($text, $paren_only);
+        return $named !== '' && $named !== $state_code;
+    }
+}
+
 if (!function_exists('kop_facility_pages_dedupe_name_lists')) {
     /**
      * The same name never displays in two of "Formerly", "Later called", "Also known as", "Other names" (or twice in one),
@@ -1099,21 +1177,85 @@ if (!function_exists('kop_facility_pages_folder_map')) {
      */
     function kop_facility_pages_folder_map() {
         $map = array();
-        if (!function_exists('kop_get_filebird_folders') || !function_exists('kop_attach_folder_file_counts')) return $map;
+        foreach (kop_facility_pages_folder_candidates() as $k => $list) {
+            $best = null;
+            foreach ($list as $f) {
+                if ($best === null || $f['files'] > $best['files']) $best = $f;
+            }
+            if ($best) $map[$k] = $best['id'];
+        }
+        return $map;
+    }
+}
+
+if (!function_exists('kop_facility_pages_folder_candidates')) {
+    /** name key => [{id, files, parent}] for every folder holding files; parent = the parent folder's name. */
+    function kop_facility_pages_folder_candidates() {
+        static $cache = null;
+        if ($cache !== null) return $cache;
+        $cache = array();
+        if (!function_exists('kop_get_filebird_folders') || !function_exists('kop_attach_folder_file_counts')) return $cache;
         $folders = kop_get_filebird_folders();
-        if (empty($folders)) return $map;
-        $best = array();
+        if (empty($folders)) return $cache;
+        $names = array();
+        foreach ($folders as $f) {
+            $f = (array) $f;
+            $names[(int) $f['id']] = (string) ($f['name'] ?? '');
+        }
         foreach (kop_attach_folder_file_counts($folders) as $f) {
+            $f = (array) $f;
             $files = (int) ($f['files'] ?? 0);
             if ($files <= 0) continue;
             $k = kop_facility_pages_name_key($f['name'] ?? '');
             if ($k === '') continue;
-            if (!isset($best[$k]) || $files > $best[$k]['files']) {
-                $best[$k] = array('id' => (int) $f['id'], 'files' => $files);
+            $cache[$k][] = array('id' => (int) $f['id'], 'files' => $files, 'parent' => $names[(int) ($f['parent'] ?? 0)] ?? '');
+        }
+        return $cache;
+    }
+}
+
+if (!function_exists('kop_facility_pages_homonym_folder')) {
+    /**
+     * The folder of a record whose name a record in another state shares (Lakeside Academy, MI and MN). A
+     * same-name folder filed under another state's folder ("MICHIGAN") or under a company that never ran this
+     * one ("Sequel TSI" for the Minnesota program) belongs to the other program; of the rest, one under this
+     * record's state or company wins, then the fullest. $companies = name keys of every company on file;
+     * $operators = names of the companies linked to this record. 0 when none is left.
+     */
+    function kop_facility_pages_homonym_folder(array $candidates, $state_code, array $doc, array $companies, array $operators = array()) {
+        $states = array();
+        if (function_exists('kop_state_abbrev_to_name')) {
+            foreach (kop_state_abbrev_to_name() as $code => $state) $states[kop_facility_pages_name_key($state)] = strtoupper((string) $code);
+        }
+        $own = array();
+        $ident = (array) ($doc['identification'] ?? array());
+        $ops = array_merge($operators, array((string) ($ident['currentOperator'] ?? '')), (array) ($ident['pastOperators'] ?? array()), (array) ($ident['otherOperators'] ?? array()));
+        foreach ($ops as $op) {
+            if (!is_string($op)) continue;
+            $op = trim(preg_replace('/\s*\([^)]*\)\s*$/', '', $op));
+            if ($op !== '') $own[kop_facility_pages_name_key($op)] = true;
+        }
+        $state_code = strtoupper(trim((string) $state_code));
+        $best = null;
+        $best_rank = -1;
+        foreach ($candidates as $f) {
+            $pk = kop_facility_pages_name_key($f['parent']);
+            if (isset($states[$pk])) {
+                if ($states[$pk] !== $state_code) continue;
+                $rank = 1;
+            } elseif (isset($own[$pk])) {
+                $rank = 1;
+            } elseif (isset($companies[$pk])) {
+                continue;
+            } else {
+                $rank = 0;
+            }
+            if ($rank > $best_rank || ($rank === $best_rank && $f['files'] > $best['files'])) {
+                $best = $f;
+                $best_rank = $rank;
             }
         }
-        foreach ($best as $k => $b) $map[$k] = $b['id'];
-        return $map;
+        return $best ? (int) $best['id'] : 0;
     }
 }
 
@@ -2521,6 +2663,7 @@ if (!function_exists('kop_facility_page_signals')) {
                             $loc_name = function_exists('kop_state_canonical_name') ? kop_state_canonical_name($e['location']) : $e['location'];
                             if (strcasecmp($loc_name, $state_name) !== 0) continue;
                         }
+                        if ($exact && kop_facility_pages_place_elsewhere($e['location'], $state_code, false)) continue;
                         $s[] = 'memorials';
                         break 3;
                     }
@@ -3536,11 +3679,11 @@ if (!function_exists('kop_facility_page_data')) {
         $name_keys = kop_facility_pages_doc_name_keys($doc, $unique_name);
         $news = kop_facility_pages_news($facility_id);
         $research = kop_facility_pages_research($facility_id);
-        $lawsuits = kop_facility_pages_lawsuits($facility_id, $name_keys);
+        $lawsuits = kop_facility_pages_lawsuits($facility_id, $name_keys, $state_code);
         $memorials = kop_facility_pages_memorials($name_keys, $state_name);
         $wiki = kop_facility_pages_wiki($name, $unique_name, $current_name);
         $inspections = kop_facility_pages_inspections($name_keys, $state_code, $state_name, $facility_id);
-        $documents = kop_facility_pages_documents($doc, $entry ? $entry['folder'] : 0);
+        $documents = kop_facility_pages_documents($doc, $entry ? $entry['folder'] : 0, $entry && !empty($entry['own_folder']));
         $unsilenced = function_exists('kop_unsilenced_archive') ? kop_unsilenced_archive('f', $facility_id) : null;
         $survivor_sites = function_exists('kop_survivor_archives') ? kop_survivor_archives('f', $facility_id) : array();
 
@@ -3874,8 +4017,12 @@ if (!function_exists('kop_facility_pages_news')) {
 }
 
 if (!function_exists('kop_facility_pages_lawsuits')) {
-    /** Published cases linked by id or naming the facility, newest first. */
-    function kop_facility_pages_lawsuits($facility_id, array $name_keys) {
+    /**
+     * Published cases linked by id or naming the facility, newest first. A name match is left out when the
+     * mention names another state ("Lakeside Academy (Kalamazoo, Michigan)") or the case is linked by id to
+     * another record of the same name (two programs called Lakeside Academy: the link says which one).
+     */
+    function kop_facility_pages_lawsuits($facility_id, array $name_keys, $state_code = '') {
         global $wpdb;
         if (!kop_facility_pages_table_exists('lawsuits')) return array();
         $rows = $wpdb->get_results(
@@ -3890,12 +4037,25 @@ if (!function_exists('kop_facility_pages_lawsuits')) {
             $links = $wpdb->get_results($wpdb->prepare('SELECT lawsuit_id, link_type FROM lawsuit_facility_links WHERE facility_id = %d', (int) $facility_id), ARRAY_A);
             foreach ((array) $links as $l) $linked[(int) $l['lawsuit_id']] = (string) $l['link_type'];
         }
+        // Cases tied by id to another record carrying one of this record's names.
+        $taken = array();
+        if ($name_keys && kop_facility_pages_table_exists('lawsuit_facility_links') && kop_facility_pages_table_exists('facilities_v2')) {
+            $others = $wpdb->get_results($wpdb->prepare(
+                'SELECT lf.lawsuit_id, f.name FROM lawsuit_facility_links lf JOIN facilities_v2 f ON f.id = lf.facility_id WHERE lf.facility_id <> %d',
+                (int) $facility_id
+            ), ARRAY_A);
+            $own = array_flip($name_keys);
+            foreach ((array) $others as $o) {
+                if (isset($own[kop_facility_pages_name_key($o['name'])])) $taken[(int) $o['lawsuit_id']] = true;
+            }
+        }
         $out = array();
         foreach ($rows as $r) {
             $lid = (int) $r['id'];
             $link_type = isset($linked[$lid]) ? $linked[$lid] : '';
-            if ($link_type === '') {
+            if ($link_type === '' && !isset($taken[$lid])) {
                 foreach (kop_facility_pages_mentioned_names($r['facilities_mentioned']) as $n) {
+                    if (kop_facility_pages_place_elsewhere($n, $state_code)) continue;
                     $rk = kop_facility_pages_name_key($n);
                     foreach ($name_keys as $fk) {
                         if (kop_facility_pages_key_matches($fk, $rk)) { $link_type = 'mentioned'; break 2; }
@@ -3944,6 +4104,9 @@ if (!function_exists('kop_facility_pages_memorials')) {
                     $loc = function_exists('kop_state_canonical_name') ? kop_state_canonical_name($r['location']) : $r['location'];
                     if (strcasecmp($loc, $state_name) !== 0) continue;
                 }
+                // The same name in another state is another program (Lakeside Academy, MI and MN).
+                if ($exact && (kop_facility_pages_place_elsewhere($r['location'], $state_name, false)
+                        || kop_facility_pages_place_elsewhere($r['program'], $state_name))) continue;
                 $hit = true;
                 break;
             }
@@ -4247,13 +4410,15 @@ if (!function_exists('kop_facility_pages_documents')) {
      * after it that the index build matched) rendered through the theme's
      * folder shortcode.
      */
-    function kop_facility_pages_documents(array $doc, $folder_id) {
+    function kop_facility_pages_documents(array $doc, $folder_id, $own_folder = false) {
         $folder_id = (int) $folder_id;
         if ($folder_id <= 0 && !empty($doc['documentFolderId'])) $folder_id = (int) $doc['documentFolderId'];
         if ($folder_id <= 0) return array('folder_id' => 0, 'html' => '');
         $html = '';
         if (function_exists('shortcode_exists') && shortcode_exists('filebird_folder')) {
-            $html = do_shortcode('[filebird_folder folder_id="' . $folder_id . '" merge="name" layout="grid" title="Documents on file" show_count="yes"]');
+            // merge="own": the folder and its subfolders only, when other records share the folder's name.
+            $merge = $own_folder ? 'own' : 'name';
+            $html = do_shortcode('[filebird_folder folder_id="' . $folder_id . '" merge="' . $merge . '" layout="grid" title="Documents on file" show_count="yes"]');
             if (stripos($html, 'no-documents') !== false) $html = '';
         }
         return array('folder_id' => $folder_id, 'html' => $html);

@@ -257,6 +257,17 @@ if (!function_exists('kop_build_facility_alias_index')) {
         //   1. auto aliases that aren't ambiguous
         //   2. curated matchAliases (admin-assigned) - override the ambiguity guard
         //   3. unique_names - always win
+        // A name records in different states carry (Lakeside Academy: Kalamazoo MI, Buffalo MN, Clearfield UT)
+        // is ambiguous even where one record's unique_name is that bare name: the name alone does not say which
+        // program. A mention giving the place ("Lakeside Academy (Kalamazoo, Michigan)") resolves by state
+        // (kop_resolve_mention_to_facility()); otherwise it waits for a person to link it.
+        $homonyms = kop_alias_homonyms($pdo);
+        // An admin's curated matchAlias (an explicit choice) still wins.
+        foreach (array_keys($homonyms) as $k) {
+            unset($exactUnique[$k], $aliasTo[$k]);
+            $aliasAmbiguous[$k] = true;
+        }
+
         $exact = [];
         foreach ($aliasTo as $k => $id) {
             if (!isset($aliasAmbiguous[$k])) $exact[$k] = $id;
@@ -270,6 +281,7 @@ if (!function_exists('kop_build_facility_alias_index')) {
 
         return [
             'exact'     => $exact,
+            'homonyms'  => $homonyms,
             // A key that a curated alias or unique_name resolves is never ambiguous.
             'ambiguous' => array_diff_key($aliasAmbiguous, $curatedTo, $exactUnique),
             'tokens'    => $tokens,
@@ -351,12 +363,75 @@ if (!function_exists('kop_facility_name_variants')) {
     }
 }
 
+if (!function_exists('kop_alias_state_code')) {
+    /** The US state a place names ("Kalamazoo, Michigan", "Buffalo, MN", "Utah"), as its code, or ''. */
+    function kop_alias_state_code(string $place): string {
+        static $states = null;
+        if ($states === null) {
+            $states = function_exists('kop_state_abbrev_to_name') ? kop_state_abbrev_to_name() : [
+                'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California',
+                'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'DC' => 'District of Columbia',
+                'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois',
+                'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana',
+                'ME' => 'Maine', 'MD' => 'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota',
+                'MS' => 'Mississippi', 'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+                'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
+                'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma', 'OR' => 'Oregon',
+                'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina', 'SD' => 'South Dakota',
+                'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont', 'VA' => 'Virginia',
+                'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming',
+            ];
+        }
+        $parts = array_map('trim', explode(',', $place));
+        $last = (string) end($parts);
+        foreach ($states as $code => $state) {
+            if (strcasecmp($last, (string) $state) === 0) return strtoupper((string) $code);
+            // A code after a comma or in capitals ("Buffalo, MN", "(MN)"), never a lone lower-case word.
+            if ((count($parts) > 1 || preg_match('/^[A-Z]{2}$/', $last)) && strcasecmp($last, (string) $code) === 0) return strtoupper((string) $code);
+        }
+        return '';
+    }
+}
+
+if (!function_exists('kop_alias_homonyms')) {
+    /**
+     * name key => [facility id => state code] for every plain name that records in two or more states carry
+     * (Lakeside Academy: MI, MN, UT). Same-state groups (homes of one program) are left out.
+     */
+    function kop_alias_homonyms(PDO $pdo): array {
+        $by = [];
+        try {
+            $rows = $pdo->query('SELECT id, name, state FROM facilities_v2')->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            return [];
+        }
+        foreach ($rows as $r) {
+            $k = kop_normalize_name_key((string) $r['name']);
+            if ($k !== '') $by[$k][(int) $r['id']] = strtoupper(trim((string) $r['state']));
+        }
+        $out = [];
+        foreach ($by as $k => $ids) {
+            if (count($ids) > 1 && count(array_unique(array_filter($ids))) > 1) $out[$k] = $ids;
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_resolve_mention_to_facility')) {
     /**
      * Resolve a free-text mention (as written in facilities_mentioned) to a
      * facility_id, trying each spelling from kop_facility_name_variants().
      */
     function kop_resolve_mention_to_facility(string $name, array $index): ?int {
+        // "Lakeside Academy (Kalamazoo, Michigan)": a name several states' records share, settled by the place given.
+        if (!empty($index['homonyms']) && preg_match('/^(.*?)\s*\(([^()]*)\)\s*$/', trim($name), $m)) {
+            $records = $index['homonyms'][kop_normalize_name_key(trim($m[1]))] ?? null;
+            $state = $records ? kop_alias_state_code($m[2]) : '';
+            if ($state !== '') {
+                $hits = array_keys($records, $state, true);
+                if (count($hits) === 1) return (int) $hits[0];
+            }
+        }
         foreach (kop_facility_name_variants($name) as $variant) {
             $fid = kop_resolve_name_to_facility($variant, $index);
             if ($fid !== null) return $fid;

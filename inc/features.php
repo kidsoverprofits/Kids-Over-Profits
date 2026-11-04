@@ -1078,8 +1078,9 @@ function kop_filebird_folder_shortcode($atts) {
     // name across organizational trees AND preserve the subfolder structure so
     // nested documents stay grouped under their folder. Embedded shortcodes
     // default to a flat list of just this folder's own subtree.
-    if ($atts['merge'] === 'name' && function_exists('kop_get_facility_doc_tree')) {
-        $tree = kop_get_facility_doc_tree($atts['folder_id'], true);
+    // merge="own" keeps the same tree view without the same-name folders (two programs share the name).
+    if (($atts['merge'] === 'name' || $atts['merge'] === 'own') && function_exists('kop_get_facility_doc_tree')) {
+        $tree = kop_get_facility_doc_tree($atts['folder_id'], $atts['merge'] === 'name');
         $count = count($tree['files']) + kop_count_facility_doc_tree($tree['subfolders']);
         if (function_exists('kop_dp_set_home')) {
             kop_dp_set_home($atts['folder_id']);

@@ -1333,6 +1333,8 @@ if (!function_exists('kop_ptl_facility')) {
             $cos = kop_ptl_ms_companies($m);
             $named = false;
             foreach ((array) ($m['programs'] ?? array()) as $p) {
+                // "Lakeside Academy (Kalamazoo, Michigan)" is not the Lakeside Academy in Minnesota.
+                if (function_exists('kop_facility_pages_place_elsewhere') && kop_facility_pages_place_elsewhere($p, (string) ($page['state_code'] ?? ''))) continue;
                 if (kop_facility_pages_name_key($p) === kop_facility_pages_name_key($name)) $named = true;
             }
             $ours = array_intersect_key($run_keys, $cos);

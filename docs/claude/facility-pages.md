@@ -108,6 +108,11 @@ php scripts/test-inline-edit.php                  # every facility sent back unc
 # (map "operated 1999-2004", "(1999-2002)" in pastOperators), a buyer after the company it bought only when years are missing,
 # else the first link. The page, cards and JSON-LD word it as the former operator, never "operated by", the rest under
 # "Other past operators"; a new place that prints the operator reads $page['operator']['past'] (or the card's past_operators)
+# One name, several states (Lakeside Academy: MI Sequel, MN Teen Challenge, UT Youth Health Associates): an item matched by name
+# never lands on the record of another state. kop_facility_pages_place_elsewhere() reads "(Kalamazoo, Michigan)" on a lawsuit
+# mention or milestone program and a memorial's location; a case linked by id to another record of the same name stays there.
+# Such a record's FileBird folder is a same-name folder under its own state or company folder (never another state's or another
+# company's, kop_facility_pages_homonym_folder()), shown alone (shortcode merge="own"), not merged with every folder of the name.
 # One name shows once on facility and company pages: "Formerly", "Later called", "Also known as" / "Other names" never repeat a name
 # between them (or inside one), nor the page's own title or "Now known as". Priority: Formerly, then Later called, then Also known as.
 # Names compare by kop_facility_pages_name_key(); every new name list on a page goes through kop_facility_pages_dedupe_name_lists()

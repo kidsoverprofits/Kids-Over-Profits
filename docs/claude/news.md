@@ -55,6 +55,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-discovery-priorit
 php scripts/discover-articles.php --dry-run --max-facilities 40 --no-topics   # against the live API, submits nothing (local php needs -d curl.cainfo=)
 # Facilities the news mentions that have no record (inc/facility-discovery.php): the hourly scan creates
 # them from the article, or links a known one; KOP Tools > Facilities from News to remove or create by hand
+# A name records in two or more states carry (kop_alias_homonyms(), api/facility-aliases.php; Lakeside Academy MI/MN/UT) never
+# resolves bare, even where it is one record's unique name: "Lakeside Academy (Kalamazoo, Michigan)" resolves by the state given,
+# a bare mention waits for a person (a curated matchAlias still wins). Same-state groups (homes of one program) are not affected.
 # Links follow records created later (kop_facdisc_relink_resolved(), 2026-10-28): links are worked out only when an article is
 # saved, so each hourly run then resyncs (kop_resync_news()) up to 100 live articles naming a record or company by exact name
 # that they are not linked to. An article is held back whole when one such name is a record's that another record repeats with a

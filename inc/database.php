@@ -482,6 +482,9 @@ function kop_attach_memorials_to_projects($db_connection, array &$projects) {
                         $loc = $canon($e['location'] ?? '');
                         if ($loc !== '' && strcasecmp($loc, $facility_state) !== 0) continue;
                     }
+                    // The same name in another state is another program (Lakeside Academy, MI and MN).
+                    if ($exact && $facility_state !== '' && function_exists('kop_facility_pages_place_elsewhere')
+                        && kop_facility_pages_place_elsewhere($e['location'] ?? '', $facility_state, false)) continue;
                     $seen[$e['id']] = true;
                     $out[] = $e;
                 }
