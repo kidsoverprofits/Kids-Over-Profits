@@ -1,6 +1,6 @@
 {
- "built": "2026-11-04 17:04 UTC",
- "source": "3728fa847069db626ee4bdb555225b73da89c058",
+ "built": "2026-11-04 17:30 UTC",
+ "source": "8aee382b5ebfbe1b42d6b2676f95eddff43f69c3",
  "sections": [
   {
    "key": "2",
@@ -766,6 +766,14 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "62edecd29647"
+      },
+      {
+       "id": "3:waiting-news-linked-from-the-article-s-own-text",
+       "lead": "Waiting news linked from the article's own text",
+       "text": "**Waiting news linked from the article's own text** (inc/auto-connect.php, 2026-11-04): after the next hourly auto-connect run, `SELECT outcome, note, COUNT(*) FROM wpdl_kop_auto_connect WHERE source = 'submissions' GROUP BY 1, 2` shows 'article read' and 'no article text' notes growing (15 a run at most), and Review inbox > News waiting shows records on cards that had none (from a local probe: #10669 Whetstone Academy, #10814 Rebekah Home for Girls). Lawsuit #277 (Jeffries v. Teen Challenge Training Center) comes in on Teen Challenge Training Center, and no Teen Challenge article or lawsuit lands on Teen Challenge Riverside Facility (#100720). If one does, take it off on the card: it stays off.",
+       "ask": "",
+       "date": "2026-11-04",
+       "hash": "26f0f51bc117"
       }
      ]
     }
@@ -1121,6 +1129,22 @@
        "ask": "",
        "date": "2026-11-02",
        "hash": "7135efa5bc5f"
+      },
+      {
+       "id": "4.3:teen-challenge-as-an-other-name-of-teen-challenge-riverside",
+       "lead": "\"Teen Challenge\" as an other name of Teen Challenge Riverside Facility (#100720) (2026-11-04)",
+       "text": "**\"Teen Challenge\" as an other name of Teen Challenge Riverside Facility (#100720) (2026-11-04)**. The record holds the company's own name, so every exact-name matcher that does not step around company names (the submissions pass now does: kop_autoconn_names_in_text()) would put every Teen Challenge story on that one site. Take \"Teen Challenge\" off its otherNames (keep \"Teen Challenge Riverside\"), then look for other records holding their operator's bare name: the records whose json identification.otherNames contains a kop_operators name.",
+       "ask": "",
+       "date": "2026-11-04",
+       "hash": "1920b8f04b7f"
+      },
+      {
+       "id": "4.3:live-news-articles-that-name-a-record-only-in-their-text-202",
+       "lead": "Live news articles that name a record only in their text (2026-11-04)",
+       "text": "**Live news articles that name a record only in their text (2026-11-04)**. The submissions pass now reads the article body of waiting news with no record (inc/auto-connect.php); approved articles are not re-read (74 approved with facilities_mentioned empty on the 2026-11-03 mirror). Run the same body match over them once, as a dry-run list first (kop_autoconn_submission_records($pdo, '', $head, $text)), then resync the ones that hold (kop_resync_news()).",
+       "ask": "",
+       "date": "2026-11-04",
+       "hash": "a35a47e1bfdf"
       }
      ]
     },
