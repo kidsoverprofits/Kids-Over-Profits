@@ -194,7 +194,7 @@ if ($undo) {
         $now = kop_facility_load((int) $id, $opts);
         if (!$now || json_encode($now['doc']) !== $entry['after']) { echo "  #$id changed since the fix, skipped (put it back by hand)\n"; continue; }
         echo "  #$id: record put back\n";
-        if ($apply) kop_facility_save(json_decode($entry['before'], true), $opts);
+        if ($apply) kop_facility_save(kop_lks_normalize(json_decode($entry['before'], true), (int) $id, $now['unique_name']), $opts);
     }
     foreach (array('news' => array('news_submissions', 'news_facility_links', 'news_id'), 'lawsuit' => array('lawsuits', 'lawsuit_facility_links', 'lawsuit_id')) as $kind => $t) {
         foreach ((array) ($log[$kind] ?? array()) as $id => $entry) {
@@ -221,6 +221,16 @@ if ($undo) {
     exit(0);
 }
 
+/**
+ * The document in today's shape before a save: records written before a section existed (providerDetails) fail
+ * kop_facility_save()'s check otherwise. Only adds empty sections and orders keys; values stay as they are.
+ */
+function kop_lks_normalize(array $doc, $id, $unique_name) {
+    return function_exists('kop_facility_normalize')
+        ? kop_facility_normalize($doc, array('facility_id' => (int) $id, 'unique_name' => (string) $unique_name))
+        : $doc;
+}
+
 /** Fresh pages, search and open data after a change. */
 function kop_lks_after(array $log) {
     if (function_exists('kop_record_changed')) {
@@ -232,11 +242,18 @@ function kop_lks_after(array $log) {
     do_action('litespeed_purge_all');
 }
 
-if (get_option(KOP_LKS_LOG)) {
-    echo "Already applied (option " . KOP_LKS_LOG . " is set). Run 'undo apply' first to redo it.\n";
+$log = get_option(KOP_LKS_LOG);
+if (!empty($log['done'])) {
+    echo "Already applied (option " . KOP_LKS_LOG . "). Run 'undo apply' first to redo it.\n";
     exit(0);
 }
-$log = array('at' => gmdate('c'), 'docs' => array(), 'news' => array(), 'lawsuit' => array());
+if (is_array($log)) {
+    // A run that stopped part way: the steps it finished find nothing left to do, their undo entries stay.
+    echo "Finishing the run started {$log['at']}.\n";
+    foreach ($log['docs'] ?? array() as $id => $entry) if (empty($entry['after'])) unset($log['docs'][$id]);   // never saved
+} else {
+    $log = array('at' => gmdate('c'), 'docs' => array(), 'news' => array(), 'lawsuit' => array());
+}
 $total = 0;
 
 // ---- News and lawsuits ----------------------------------------------------------
@@ -295,7 +312,7 @@ if ($recs) {
             if ($doc === $recs[$id]['doc']) continue;
             $log['docs'][$id] = array('before' => json_encode($recs[$id]['doc']));
             update_option(KOP_LKS_LOG, $log, false);
-            kop_facility_save($doc, $opts);
+            kop_facility_save(kop_lks_normalize($doc, $id, $recs[$id]['unique_name']), $opts);
             $saved = kop_facility_load($id, $opts);
             $log['docs'][$id]['after'] = json_encode($saved['doc']);
             update_option(KOP_LKS_LOG, $log, false);
@@ -330,5 +347,9 @@ foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
     if (!isset($known[(int) $r['id']])) echo "  check by hand: news {$r['id']} \"" . mb_substr((string) $r['article_title'], 0, 70) . "\" is on #" . KOP_LKS_UT . "\n";
 }
 
-if ($apply && $total) kop_lks_after($log);
+if ($apply) {
+    $log['done'] = true;
+    update_option(KOP_LKS_LOG, $log, false);
+    kop_lks_after($log);
+}
 echo ($apply ? 'Applied: ' : 'Dry run: ') . "$total changes\n";
