@@ -42,7 +42,8 @@ $LOG = 'kop_fix_lakeside_mn_log';
 
 echo ($apply ? 'APPLY' : 'DRY RUN (add apply to write)') . ($undo ? ' UNDO' : '') . "\n";
 
-$doc = kop_facility_load($FID);
+$loaded = kop_facility_load($FID);   // {id, unique_name, doc}
+$doc = is_array($loaded) ? ($loaded['doc'] ?? null) : null;
 if (!$doc || ($doc['identification']['name'] ?? '') !== 'Lakeside Academy' || ($doc['location']['state'] ?? '') !== 'MN') {
     fwrite(STDERR, "#$FID is not Lakeside Academy, MN; stopping\n");
     exit(1);
@@ -124,7 +125,7 @@ update_option($LOG, $log, false);
 kop_facility_save($doc);
 if ($drop_folder) $wpdb->delete("{$p}fbv", array('id' => $FOLDER));
 $changed();
-$after = kop_facility_load($FID);
+$after = kop_facility_load($FID)['doc'] ?? array();
 echo 'after: currentOperator=' . wp_json_encode($after['identification']['currentOperator'] ?? null)
     . ' legacyIds=' . wp_json_encode($after['provenance']['legacyIds'] ?? null)
     . ' links=' . wp_json_encode($links_of()) . "\ndone\n";
