@@ -279,9 +279,9 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 **Purpose:** Programs for people 18 and older, kept apart from `facilities_v2`; `facts` is a JSON list of cited Woodbury items (`inc/young-adult-programs.php`, /young-adult-programs/). `document_folder_id` is the program's FileBird folder (made under "Young Adult Programs" the first time something is filed under it, `kop_wbc_existing_target('ya', id)`; a moved facility brings its own).
 
 ### bug_reports
-**Columns:** `id`, `feature`, `category`, `description`, `steps`, `contact`, `notify_updates`, `page_url`, `page_title`, `user_agent`, `viewport`, `console_errors`, `context_json`, `ip_hash`, `status`, `admin_note`, `created_at`, `updated_at`
+**Columns:** `id`, `feature`, `category`, `description`, `steps`, `contact`, `notify_updates`, `page_url`, `page_title`, `user_agent`, `viewport`, `console_errors`, `context_json`, `ip_hash`, `status`, `admin_note`, `claude_queued_at`, `created_at`, `updated_at`
 
-**Purpose:** The site's bug reporter (`api/save-bug-report.php`).
+**Purpose:** The site's bug reporter (`api/save-bug-report.php`). `claude_queued_at` is set when the owner clicks Send to Claude Code in the Review inbox, and cleared when /fix-bugs closes the report out (`inc/bug-reports-claude.php`).
 
 ---
 

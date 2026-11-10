@@ -109,6 +109,8 @@ require_once get_stylesheet_directory() . '/inc/highlight-summaries.php';
 
 // Bug report status emails (shared by inc/admin.php and api/save-bug-report.php)
 require_once get_stylesheet_directory() . '/inc/bug-report-notify.php';
+// Bug reports the owner sends to Claude Code (/fix-bugs): queue column + kop/v1/claude/bug-reports
+require_once get_stylesheet_directory() . '/inc/bug-reports-claude.php';
 
 // One-line help for the submission form's collapsed panels
 require_once get_stylesheet_directory() . '/inc/form-help.php';

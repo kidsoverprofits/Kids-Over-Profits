@@ -32,7 +32,9 @@ wp-config-local.php
 # KOP API configuration
 api/config.local.php
 api/ai-config.php
-.claude/
+.claude/*
+# Project skills are shared (/fix-bugs); local settings stay out.
+!.claude/skills/
 settings.json
 
 # SQL reference files (not for deployment)

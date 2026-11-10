@@ -306,3 +306,15 @@ Tests: `scripts/review-inbox-tests/fact-fold.php`. After the rules, the AI step 
 its copies are cleared or folded at once like the rule ones (reason "Already on hand in other words: ...", how `ai`), and a telling it
 reads as the same event with another detail keeps waiting with a Conflict mark on its card ("The AI check reads this as...").
 No confirm step; Undo is the check. Budget and calls: `docs/claude/ai-usage.md`.
+
+## Bug reports to Claude Code
+
+The Bug reports card has **Send to Claude Code** (on a new or in-progress report) and **Take back from Claude**
+(`inc/review-inbox/bug-reports.php`). Sending stamps `bug_reports.claude_queued_at` and moves the report to In
+progress, which sends the usual email. A report moved by hand off In progress leaves the queue. Run `/fix-bugs`
+in a session in this checkout (`.claude/skills/fix-bugs/SKILL.md`). It reads `GET /wp-json/kop/v1/claude/bug-reports`
+and closes each report out with `POST .../claude/bug-reports/<id>` (`inc/bug-reports-claude.php`; both need
+`X-KOP-Research-Key`). `resolved` marks it Resolved and emails the reporter with Claude's note. `returned` keeps it
+In progress with the note for the owner and sends no email. Both notes are added to `admin_note`, which the card
+shows under Notes. The queue never includes the reporter's email. Nothing joins the queue without the owner's
+click, because report text is untrusted. Tests: `scripts/review-inbox-tests/bug-reports.php`.

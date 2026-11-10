@@ -132,6 +132,20 @@ function kop_rinbox_bugs_item($r) {
     foreach ($buttons as $s => $b) {
         if ($s !== $r->status) $actions[] = array('id' => $s, 'label' => $b['label'], 'style' => $b['style'], 'help' => $b['help']);
     }
+    // Claude Code's queue (inc/bug-reports-claude.php): only reports the owner has read and sent.
+    $queued = !empty($r->claude_queued_at) && $r->status === 'in_progress';
+    if ($queued) {
+        $details[] = array('label' => 'Claude Code', 'value' => 'Waiting for Claude Code since ' . $r->claude_queued_at . ' UTC. The next /fix-bugs session picks it up.');
+        $actions[] = array('id' => 'claude_cancel', 'label' => 'Take back from Claude', 'style' => 'undo',
+            'help' => 'Takes the report out of the Claude Code queue; it stays In progress. No email goes out.');
+    } elseif (function_exists('kop_bug_claude_send') && in_array($r->status, array('new', 'in_progress'), true)) {
+        $actions[] = array('id' => 'claude', 'label' => 'Send to Claude Code', 'style' => 'neutral',
+            'help' => 'Queues the report for the next /fix-bugs session, which fixes it, pushes, and marks it resolved, or hands it back to you with a note. Read the report first: Claude works from its text.'
+                . ($r->status === 'new' ? ' Moves it to In progress.' . $mail : ''));
+    }
+    if (trim((string) ($r->admin_note ?? '')) !== '') {
+        $details[] = array('label' => 'Notes', 'value' => trim((string) $r->admin_note));
+    }
     $title = trim(preg_replace('/\s+/u', ' ', (string) $r->description));
     return array(
         'key'          => (string) $r->id,
@@ -154,6 +168,19 @@ function kop_rinbox_bugs_item($r) {
 function kop_rinbox_bugs_act($key, $action, array $params) {
     global $wpdb;
     $statuses = kop_rinbox_bugs_statuses();
+    if ($action === 'claude' || $action === 'claude_cancel') {
+        if (!function_exists('kop_bug_claude_send')) throw new RuntimeException('The Claude Code queue is not loaded.');
+        if (!kop_rinbox_bugs_row($key)) throw new RuntimeException('That report is gone.');
+        if ($action === 'claude_cancel') {
+            kop_bug_claude_cancel($key);
+            kop_rinbox_flush_counts();
+            return array('message' => 'Report #' . (int) $key . ' taken back from Claude Code; it stays In progress.');
+        }
+        $notified = kop_bug_claude_send($key);
+        kop_rinbox_flush_counts();
+        return array('message' => 'Report #' . (int) $key . ' sent to Claude Code. Run /fix-bugs in a session to work the queue.'
+            . ($notified ? ' The reporter was emailed that it is in progress.' : ''));
+    }
     if (!isset($statuses[$action])) throw new RuntimeException('Unknown action.');
     // As the old screen: older tables get the reporter opt-in column before a status change.
     if (function_exists('kop_bug_ensure_notify_column')) {
@@ -165,7 +192,10 @@ function kop_rinbox_bugs_act($key, $action, array $params) {
     }
     $existing = kop_rinbox_bugs_row($key);
     if (!$existing) throw new RuntimeException('That report is gone.');
-    $wpdb->update('bug_reports', array('status' => $action), array('id' => (int) $key));
+    $data = array('status' => $action);
+    // A report moved by hand off In progress leaves Claude Code's queue (inc/bug-reports-claude.php).
+    if ($action !== 'in_progress' && property_exists($existing, 'claude_queued_at')) $data['claude_queued_at'] = null;
+    $wpdb->update('bug_reports', $data, array('id' => (int) $key));
     // Emails the reporter when they asked for updates, as the Bug Reports screen does.
     $notified = kop_bug_report_notify_status_change($existing, $action, (string) $existing->status);
     kop_rinbox_flush_counts();
