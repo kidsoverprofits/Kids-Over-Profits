@@ -1,6 +1,6 @@
 {
- "built": "2026-11-10 20:53 UTC",
- "source": "98e79f276625659719247b738c22cc7c43a16008",
+ "built": "2026-11-10 21:36 UTC",
+ "source": "de6220378d7cdb89bdec9945ad7d32c5561a9134",
  "sections": [
   {
    "key": "2",
@@ -433,9 +433,9 @@
       {
        "id": "2.2:unsilenced-backup",
        "lead": "Unsilenced backup",
-       "text": "**Unsilenced backup** (~118 GB, into the owner's Google Drive, which has room). It ran 2026-10-02 to 2026-10-06 and stopped there: 4,188 of 58,961 files copied to `I:\\My Drive\\Unsilenced archive backup`, 1,450 failed, the last lines Google's rate limit (`tmp/unsilenced-titles/run.log` in kop-pipeline); nothing has run since. Restart it with `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline: it resumes, retries the failed ones, and pauses on its own if C: drops under 4 GB (Drive for desktop stages uploads there; 12 GB free on 2026-10-25). The local free-space figure for I: is not the Drive quota. Then ask a session for the titles and rebuild (old 3.11). The Drive is now mounted at G: (memory: kop-drive-mount); check the script's target path first.",
+       "text": "**Unsilenced backup** (~118 GB, into the owner's Google Drive, which has room). It ran 2026-10-02 to 2026-10-06 and stopped there: 4,188 of 58,961 files copied to `I:\\My Drive\\Unsilenced archive backup`, 1,450 failed, the last lines Google's rate limit (`tmp/unsilenced-titles/run.log` in kop-pipeline); nothing has run since. Restart it with `Start-Process python -ArgumentList 'scripts/unsilenced-backup.py','run' -WindowStyle Hidden` in kop-pipeline: it resumes, retries the failed ones, and pauses on its own if C: drops under 4 GB (Drive for desktop stages uploads there; 12 GB free on 2026-10-25). The local free-space figure for I: is not the Drive quota. Then ask a session for the titles and rebuild (old 3.11). Checked 2026-11-10: the script's default is now `G:/My Drive/Unsilenced archive backup`, where the copies made so far are intact (4,218 files, 5.5 GB). The old laptop's `tmp/unsilenced/files.jsonl` (the file list) and `tmp/unsilenced-titles/state.jsonl` did not come over. Losing the state is fine: `run` counts a copy already on disk whose md5 matches as done, so it only re-reads those 4,218 to check them. The list has to come down from the server first: `scp -i ~/.ssh/kop_nixihost -P 1157 kidsover@dfw-s07.nixihost.com:kop-import/unsilenced/files.jsonl ../kop-pipeline/tmp/unsilenced/` (if `check/files.jsonl` there is newer, from the monthly cron, take that one instead).",
        "ask": "Restart the Unsilenced archive backup (stopped Oct 6 at 4,188 of 58,961 files)",
-       "date": "2026-10-25",
+       "date": "2026-11-10",
        "why": "Unsilenced's archive is the only copy of many survivor records; it could go offline.",
        "go": [],
        "choices": [],
@@ -444,8 +444,8 @@
        "focus": false,
        "steps": [
         {
-         "id": "tell-claude-check-the-unsilenced-backup-points-at",
-         "label": "Tell Claude \"check the Unsilenced backup points at G:\" (the Drive moved from I: to G:)",
+         "id": "let-claude-copy-the-file-list-down-from-the-server",
+         "label": "Let Claude copy the file list down from the server over SSH (or run the scp line above)",
          "url": "",
          "note": ""
         },
@@ -456,7 +456,7 @@
          "note": ""
         }
        ],
-       "hash": "73083457ec91"
+       "hash": "4609a231f3a6"
       },
       {
        "id": "2.2:document-finder-retries",

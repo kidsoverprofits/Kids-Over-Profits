@@ -62,7 +62,7 @@ php api/list-unsilenced-files.php [probe] [--minutes=25]   # on the server (ea-p
 php api/list-unsilenced-files.php restart --check          # monthly cron: lists into ~/kop-import/unsilenced/check/, mails when Unsilenced added enough
 (kop-pipeline) python scripts/build-unsilenced-links.py                   # report in tmp/unsilenced/build-report.md
 php scripts/test-unsilenced-archive.php                    # inc/unsilenced-archive.php, fixture + the build
-# Backup + content titles for the listed files (docs/PLAN.md 3.11): md5-checked copies to I:/My Drive/Unsilenced archive backup,
+# Backup + content titles for the listed files (docs/PLAN.md 3.11): md5-checked copies to G:/My Drive/Unsilenced archive backup,
 # title evidence -> tmp/unsilenced-titles/; titles.json is read by the build (link shows the title, Unsilenced's name muted).
 # Generated titles never name a person (court: type/case/date; reports: type/program/date; clippings: headline/paper/date)
 (kop-pipeline) python scripts/unsilenced-backup.py run [--limit N] [--dest DIR] [--no-keep]   # resumable, ~2-3 s/file, pauses when C: < 4 GB
