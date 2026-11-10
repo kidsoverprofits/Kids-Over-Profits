@@ -20,6 +20,11 @@ php api/clean-nc-inspections.php [apply]      # on the server (ea-php82): dry ru
 (kop-pipeline) .venv/Scripts/python scrapers/test_fl_scraper.py                           # matcher kinds, renames, __NEXT_DATA__ directory
 php -d extension=pdo_sqlite scripts/test-fl-inspection-cleanup.php   # on an in-memory copy of tmp/prod.sqlite
 php api/clean-fl-inspections.php [apply]      # on the server (ea-php82): dry run; apply backs up to ~/kop-backups/ first
+# OR: Trillium's site visits or_scraper.py filed under Parry Center (bug report #5). The scraper now splits an
+# AGENCY_CAMPUSES agency's visits by the campuses each names; seeds/or-inspection-cleanup.json (built from the mirror,
+# "state": "OR", moves with "twin" for older copies under another report_id) moves the old rows to those campus rows
+php -d extension=pdo_sqlite scripts/test-or-inspection-cleanup.php   # on an in-memory copy of tmp/prod.sqlite
+php api/clean-or-inspections.php [apply]      # on the server (ea-php82), or /wp-content/themes/child/api/clean-or-inspections.php as an admin (?apply=1)
 # FL DJJ PREA list: the page draws its table from fldjj-media.ccplatform.net/api/data/fetch (folder = the page's
 # source_location_id, 22992); fl_scraper.py reads that API, the headless browser only as fallback. A QI/PREA/SPEP list
 # that cannot be read is skipped (rest still posted) and the run exits 1 ("Finished with parts skipped: ...").

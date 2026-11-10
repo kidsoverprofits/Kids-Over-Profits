@@ -25,21 +25,33 @@
  * A row that changed since the plan (gone, on another facility, another
  * report_id) is skipped. Portable SQL, so the test runs it on SQLite.
  * The generic row helpers are the NC cleanup's.
+ *
+ * Other states use it too (api/clean-or-inspections.php): a plan's "state"
+ * (default FL) is the state every facility it names must be in, and a move's
+ * "twin" is the row id of the target's own copy of the same report when an
+ * older import gave that copy another report_id (it folds in as above).
  */
+
+/** The state the running plan is about (set by kop_flclean_run). */
+function kop_flclean_state($set = null) {
+    static $state = 'FL';
+    if ($set !== null) $state = strtoupper((string) $set);
+    return $state;
+}
 
 require_once __DIR__ . '/lib-nc-inspection-cleanup.php';
 
 function kop_flclean_facility(PDO $pdo, $id) {
-    $st = $pdo->prepare("SELECT id, facility_name, program_name FROM inspection_facilities WHERE id = ? AND state = 'FL'");
-    $st->execute(array((int) $id));
+    $st = $pdo->prepare('SELECT id, facility_name, program_name FROM inspection_facilities WHERE id = ? AND state = ?');
+    $st->execute(array((int) $id, kop_flclean_state()));
     return $st->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
 /** The FL row with this name and program (the write API's identity), or null. */
 function kop_flclean_find(PDO $pdo, $name, $program) {
     $st = $pdo->prepare("SELECT id, facility_name, program_name FROM inspection_facilities
-                          WHERE state = 'FL' AND LOWER(facility_name) = LOWER(?) AND LOWER(program_name) = LOWER(?) ORDER BY id LIMIT 1");
-    $st->execute(array((string) $name, (string) $program));
+                          WHERE state = ? AND LOWER(facility_name) = LOWER(?) AND LOWER(program_name) = LOWER(?) ORDER BY id LIMIT 1");
+    $st->execute(array(kop_flclean_state(), (string) $name, (string) $program));
     return $st->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
@@ -98,8 +110,8 @@ function kop_flclean_target(PDO $pdo, array $t, $apply, array &$created, array &
         if ($have) {
             $created[$key] = (int) $have['id'];
         } elseif ($apply) {
-            $pdo->prepare("INSERT INTO inspection_facilities (state, facility_name, program_name, program_category) VALUES ('FL', ?, ?, ?)")
-                ->execute(array($c['facility_name'], $c['program_name'], (string) ($c['program_category'] ?? '')));
+            $pdo->prepare('INSERT INTO inspection_facilities (state, facility_name, program_name, program_category) VALUES (?, ?, ?, ?)')
+                ->execute(array(kop_flclean_state(), $c['facility_name'], $c['program_name'], (string) ($c['program_category'] ?? '')));
             $created[$key] = (int) $pdo->lastInsertId();
             $stats['facilities_created']++;
         } else {
@@ -136,6 +148,7 @@ function kop_flclean_copy(PDO $pdo, $rid, $fid) {
  * array('stats' => counts, 'skipped' => reasons, 'removed' => facility ids, 'merged' => removed id => facility its reports went to).
  */
 function kop_flclean_run(PDO $pdo, array $plan, $apply) {
+    kop_flclean_state($plan['state'] ?? 'FL');
     $stats = array('moved' => 0, 'copied' => 0, 'twins_folded' => 0, 'findings_moved' => 0, 'reviews_kept' => 0,
                    'facilities_created' => 0, 'empty_facilities_removed' => 0);
     $skipped = array();
@@ -143,6 +156,7 @@ function kop_flclean_run(PDO $pdo, array $plan, $apply) {
     $went = array();         // from facility id => [target id => n]
     $left = array();         // from facility id => reports moved off it
     $placed = array();       // "target|report_id" => row id the run put there
+    $row_at = array();       // row id => facility id the run moved it to
 
     if ($apply) $pdo->beginTransaction();
     try {
@@ -173,12 +187,21 @@ function kop_flclean_run(PDO $pdo, array $plan, $apply) {
             if ($home !== $fid) {
                 // The target's own copy: one it held, or (seen only here in a dry run) one an earlier move put there.
                 $twin = kop_flclean_holds($pdo, $twin_q, $placed, $home, (string) $row['report_id'], $rid);
+                if (!$twin && !empty($m['twin'])) {
+                    // The target's copy under another report_id: it must be on the target (or moved there by this run).
+                    $row_q->execute(array((int) $m['twin']));
+                    $tw = $row_q->fetch(PDO::FETCH_ASSOC);
+                    $tw_at = $row_at[(int) $m['twin']] ?? ($tw ? (int) $tw['facility_id'] : 0);
+                    if ($tw && $tw_at === $home) $twin = (int) $m['twin'];
+                    elseif (!$tw) { $skipped[] = "report $rid: its twin {$m['twin']} is gone"; continue; }
+                }
                 if ($twin) {
                     if ($apply) kop_flclean_fold($pdo, $rid, (int) $twin, $home, $stats);
                     $stats['twins_folded']++;
                     $rid_now = (int) $twin;
                 } else {
                     $placed[$home . '|' . $row['report_id']] = $rid;
+                    $row_at[$rid] = $home;
                     if ($apply) {
                         $pdo->prepare('UPDATE inspection_reports SET facility_id = ? WHERE id = ?')->execute(array($home, $rid));
                         $pdo->prepare('UPDATE inspection_highlights SET facility_id = ? WHERE report_id = ?')->execute(array($home, $rid));

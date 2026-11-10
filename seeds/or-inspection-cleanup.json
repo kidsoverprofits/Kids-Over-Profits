@@ -1,0 +1,529 @@
+{
+ "about": "Oregon ODHS site visits of Trillium Family Services filed under Parry Center (bug report #5, 2026-11-10): or_scraper.py grouped an agency's visits when the library gave no program and named the group from the last licensee line, so every Trillium visit sat on 7171 'Trillium Family Services - Parry Center (Portland' (and older imports on 1711/3740). Each visit goes to every campus its text names (Children's Farm Home, Parry Center, Sender House; the license renewals name all three), under the names the fixed scraper posts; older copies fold into the 7171 copy ('twin'). Built from tmp/prod.sqlite; applied by api/clean-or-inspections.php.",
+ "state": "OR",
+ "moves": [
+  {
+   "id": 73371,
+   "report_id": "1174",
+   "report_date": "04/22/2021",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73372,
+   "report_id": "1176",
+   "report_date": "08/24/2021",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home",
+    "Trillium Family Services - Parry Center",
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    },
+    {
+     "id": 7171,
+     "program_name": "Trillium Family Services - Parry Center (Portland"
+    },
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73374,
+   "report_id": "1177",
+   "report_date": "05/11/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73375,
+   "report_id": "1178",
+   "report_date": "08/05/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73376,
+   "report_id": "1092",
+   "report_date": "09/08/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73377,
+   "report_id": "1179",
+   "report_date": "11/30/2022",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73379,
+   "report_id": "1173",
+   "report_date": "07/25/2023",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home",
+    "Trillium Family Services - Parry Center",
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    },
+    {
+     "id": 7171,
+     "program_name": "Trillium Family Services - Parry Center (Portland"
+    },
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73380,
+   "report_id": "1181",
+   "report_date": "11/29/2023",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73382,
+   "report_id": "1183",
+   "report_date": "05/14/2024",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 73383,
+   "report_id": "1185",
+   "report_date": "01/29/2025",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 7171,
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ]
+  },
+  {
+   "id": 19569,
+   "report_id": "39",
+   "report_date": "04/22/2021",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73371
+  },
+  {
+   "id": 19572,
+   "report_id": "263",
+   "report_date": "05/11/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73374
+  },
+  {
+   "id": 19573,
+   "report_id": "287",
+   "report_date": "08/05/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73375
+  },
+  {
+   "id": 19574,
+   "report_id": "298",
+   "report_date": "09/08/2022",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73376
+  },
+  {
+   "id": 19575,
+   "report_id": "334",
+   "report_date": "11/30/2022",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73377
+  },
+  {
+   "id": 19578,
+   "report_id": "1313",
+   "report_date": "11/29/2023",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73380
+  },
+  {
+   "id": 19580,
+   "report_id": "1472",
+   "report_date": "05/14/2024",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73382
+  },
+  {
+   "id": 19581,
+   "report_id": "1563",
+   "report_date": "01/29/2025",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 1711,
+    "facility_name": "Parry Center",
+    "program_name": "272"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73383
+  },
+  {
+   "id": 42563,
+   "report_id": "1313",
+   "report_date": "11/29/2023",
+   "campuses": [
+    "Trillium Family Services - Children's Farm Home"
+   ],
+   "from": {
+    "id": 3740,
+    "facility_name": "Trillium Family Services - Parry Center (Portland Date of site visit: May 6th, 2025 Campus)",
+    "program_name": "400"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Children's Farm Home",
+      "program_name": "Trillium Family Services - Children's Farm Home",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73380
+  },
+  {
+   "id": 42565,
+   "report_id": "1472",
+   "report_date": "05/14/2024",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 3740,
+    "facility_name": "Trillium Family Services - Parry Center (Portland Date of site visit: May 6th, 2025 Campus)",
+    "program_name": "400"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73382
+  },
+  {
+   "id": 42566,
+   "report_id": "1563",
+   "report_date": "01/29/2025",
+   "campuses": [
+    "Trillium Family Services - Sender House"
+   ],
+   "from": {
+    "id": 3740,
+    "facility_name": "Trillium Family Services - Parry Center (Portland Date of site visit: May 6th, 2025 Campus)",
+    "program_name": "400"
+   },
+   "to": [
+    {
+     "create": {
+      "facility_name": "Trillium Family Services - Sender House",
+      "program_name": "Trillium Family Services - Sender House",
+      "program_category": "Residential Care"
+     }
+    }
+   ],
+   "twin": 73383
+  }
+ ],
+ "renames": [
+  {
+   "id": 7171,
+   "from": {
+    "facility_name": "Trillium Family Services - Parry Center (Portland",
+    "program_name": "Trillium Family Services - Parry Center (Portland"
+   },
+   "to": {
+    "facility_name": "Trillium Family Services - Parry Center",
+    "program_name": "Trillium Family Services - Parry Center"
+   }
+  },
+  {
+   "id": 3740,
+   "from": {
+    "facility_name": "Trillium Family Services - Parry Center (Portland Date of site visit: May 6th, 2025 Campus)",
+    "program_name": "400"
+   },
+   "to": {
+    "facility_name": "Trillium Family Services - Parry Center",
+    "program_name": "400"
+   }
+  }
+ ]
+}
