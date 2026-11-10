@@ -149,3 +149,8 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261)
    has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the
    first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.
+5. **test-review-inbox: "nonprofit-filings: every organization is well formed and names records that exist"** (found
+   2026-11-10 on main at fe44d9ce, mirror as of that day, `-d memory_limit=1G`): 696 organizations, and EIN 571101736
+   names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow
+   the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in
+   business-filings, so keep the `memory_limit` above.
