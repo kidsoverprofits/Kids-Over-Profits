@@ -1,6 +1,6 @@
 {
- "built": "2026-11-10 20:18 UTC",
- "source": "0af5f4ffd23da89cb2d78dbdb7128fdeab4f0670",
+ "built": "2026-11-10 20:39 UTC",
+ "source": "4d0f5806c88ec5c677252e61897bdf9df3575ef0",
  "sections": [
   {
    "key": "2",
@@ -2982,6 +2982,21 @@
        "focus": false,
        "steps": [],
        "hash": "d78862458731"
+      },
+      {
+       "id": "4.2:or-trillium-reports-filed-under-the-wrong-campus",
+       "lead": "OR: Trillium reports filed under the wrong campus",
+       "text": "**OR: Trillium reports filed under the wrong campus** (bug report #5, 2026-11-10). A reader says the 4/22/2021 and 5/11/2022 visits on Parry Center's card are Children's Farm Home, and the report text agrees (\"Licensee: Trillium Family Services, Children's Farm Home\"; \"site visit was conducted at Children's Farm Home\"). `inspection_facilities` 1711 \"Parry Center\" and 7171 \"Trillium Family Services - Parry Center (Portland\" each hold all 11 Trillium site visits, Farm Home ones included (8/5/2022, 9/8/2022, 11/29/2023 too); 3740 and 7171 carry names cut from the PDF text (\"... (Portland Date of site visit: May 6th, 2025 Campus)\"). Fix: move each visit to its campus by the licensee/scope line, rename 3740/7171 (or merge them into the Parry Center row), check /oregon/ and /or-reports/.",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "1076e61da820"
       }
      ]
     },
@@ -4354,6 +4369,21 @@
        "focus": false,
        "steps": [],
        "hash": "2b1db0e7e826"
+      },
+      {
+       "id": "4.7:or-where-to-report-list-misses-odhs-and-otis",
+       "lead": "OR: where-to-report list misses ODHS and OTIS",
+       "text": "**OR: where-to-report list misses ODHS and OTIS** (bug reports #6, #7, #8, 2026-11-10; kop-data `reporting/states/or.json`). Readers say: Oregon's child-caring agencies (CCAs) are licensed by ODHS, not OHA (#6); OTIS (ODHS Office of Training, Investigations and Safety) investigates abuse in CCAs (#8); the Mental Health Regulatory Agency handles complaints and admin for the boards, while licensing is OBLPCT's and the Board of Psychology's (#7). ODHS's own rules and quarterly ORS 418.259 reports bear out #6 and #8 (https://www.oregon.gov/odhs/rules-policy/sharedservicesrules/otis-1-2026.pdf, https://www.oregon.gov/odhs/about/legislativeinformation/2023-q4-ors-418-259-report.pdf). Fix: add an ODHS Children's Care Licensing Program / OTIS facility-licensing channel (verified phone, form, address), keep OHA's for the OHA-licensed behavioral health programs and say which is which, reword the state note and the MHRA channel to #7, rebuild `directory.json`, check /oregon/ and /report-abuse/?state=oregon.",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "3c3ff00e56c6"
       }
      ]
     },
