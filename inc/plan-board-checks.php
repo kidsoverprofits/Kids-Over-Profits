@@ -9,7 +9,8 @@
  * session's next pass sees it in the export (kind "auto") and archives the item like a Done.
  *
  * A check only reads. Queue items count as done when the queue is empty (caught up), from the Review inbox's own
- * stored counts. A check whose item has left the plan is never run, so stale entries here do no harm.
+ * stored counts. A check whose item has left the plan is never run, so stale entries here do no harm. A check that
+ * is not done yet still shows its evidence on the card ("Now: 12 left in Map Years"), so a queue card carries its count.
  */
 
 if (!defined('ABSPATH')) {
@@ -90,11 +91,13 @@ function kop_pb_checks() {
         '2.3:wiki-links' => function () { return kop_pb_queues_empty(array('wiki-links' => 'Wiki links')); },
         '2.3:data-audit' => function () { return kop_pb_queues_empty(array('data-audit' => 'Data audit')); },
         '2.3:record-cleanup' => function () { return kop_pb_queues_empty(array('record-cleanup' => 'Record cleanup')); },
-        '2.3:rules-from-documents' => function () {
-            return kop_pb_queues_empty(array('program-practices' => 'Rules from documents', 'company-milestones' => 'Company milestones',
-                'federal-funding' => 'Federal funding', 'nonprofit-filings' => 'Nonprofit tax filings', 'business-filings' => 'Business filings'));
-        },
-        '2.3:map-years' => function () { return kop_pb_queues_empty(array('map-years' => 'Map Years', 'map-renames' => 'Map Renames')); },
+        '2.3:rules-from-documents' => function () { return kop_pb_queues_empty(array('program-practices' => 'Rules from documents')); },
+        '2.3:company-milestones' => function () { return kop_pb_queues_empty(array('company-milestones' => 'Company milestones')); },
+        '2.3:federal-funding' => function () { return kop_pb_queues_empty(array('federal-funding' => 'Federal funding')); },
+        '2.3:nonprofit-tax-filings' => function () { return kop_pb_queues_empty(array('nonprofit-filings' => 'Nonprofit tax filings')); },
+        '2.3:business-filings' => function () { return kop_pb_queues_empty(array('business-filings' => 'Business filings')); },
+        '2.3:map-years' => function () { return kop_pb_queues_empty(array('map-years' => 'Map Years')); },
+        '2.3:map-renames' => function () { return kop_pb_queues_empty(array('map-renames' => 'Map Renames')); },
         '2.3:map-questions' => function () {
             if (!function_exists('kop_network_questions_open')) return null;
             $open = kop_network_questions_open();

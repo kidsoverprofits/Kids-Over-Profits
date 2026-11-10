@@ -16,7 +16,7 @@ button.kop-pb-tab:focus-visible { outline: 2px solid #1e6f79; outline-offset: 2p
 .kop-pb-section > h2 { font-size: 1.35em; margin: 26px 0 4px; }
 .kop-pb-group > h3 { font-size: 1.08em; margin: 18px 0 6px; }
 .kop-pb-intro { color: var(--kop-text-muted, #4A5568); max-width: 72ch; margin: 0 0 8px; }
-.kop-pb.is-view-needs .kop-pb-intro { display: none; }
+.kop-pb.is-view-flat .kop-pb-intro { display: none; }
 .kop-pb-card { background: #fff; border: 1px solid #dcdcde; border-radius: 6px; padding: 12px 14px; margin: 0 0 10px; min-width: 0; }
 .kop-pb-card[data-state="answer"] { border-left: 4px solid #1e6f79; }
 .kop-pb-card[data-state="done"] { border-left: 4px solid #2f6b2a; }
@@ -52,3 +52,45 @@ button.kop-pb-tab:focus-visible { outline: 2px solid #1e6f79; outline-offset: 2p
 .kop-pb-pass { margin: 4px 0 4px 18px; list-style: disc; }
 .kop-pb-pass li { margin: 4px 0; overflow-wrap: anywhere; }
 .kop-pb-result { color: var(--kop-text-muted, #4A5568); }
+
+/* The card's kind, time, why, live count (2026-11-10 redesign). */
+.kop-pb-kind { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; color: #fff; background: #000435; }
+.kop-pb-kind.is-decide { background: #000080; }
+.kop-pb-kind.is-do { background: #1e6f79; }
+.kop-pb-kind.is-check { background: #2f6b2a; }
+.kop-pb-time { font-weight: 600; color: #000435; }
+.kop-pb-card[data-kind="decide"] { border-top: 3px solid #000080; }
+.kop-pb-card[data-kind="do"] { border-top: 3px solid #1e6f79; }
+.kop-pb-card[data-kind="check"] { border-top: 3px solid #2f6b2a; }
+.kop-pb-card[data-state="retire"] { opacity: .8; border-left: 4px solid #8c8f94; }
+.kop-pb-chip.is-retire { color: #50575e; } .kop-pb-chip.is-edit { color: #000080; }
+.kop-pb-why, .kop-pb-now { margin: 0 0 6px; font-size: 14px; line-height: 1.5; color: #1d2327; overflow-wrap: anywhere; }
+.kop-pb-why > span, .kop-pb-now > span:first-child, .kop-pb-next-label > span:first-child { font-weight: 700; color: #000435; }
+.kop-pb-now { background: #f2eedf; border-radius: 4px; padding: 4px 8px; }
+.kop-pb-when-inline { font-size: 12px; color: var(--kop-text-muted, #4A5568); }
+.kop-pb .button.kop-pb-go { text-decoration: none; }
+
+/* Steps: the next one up front, the rest folded. */
+.kop-pb-steps { margin: 8px 0 2px; border: 1px solid #dcdcde; border-radius: 6px; padding: 8px 10px; background: #fbfaf6; }
+.kop-pb-progress { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #1d2327; font-variant-numeric: tabular-nums; }
+.kop-pb-bar { flex: 1 1 auto; max-width: 260px; height: 8px; border-radius: 99px; background: #e2ddcb; overflow: hidden; }
+.kop-pb-bar > span { display: block; height: 100%; background: #1e6f79; }
+.kop-pb-next { margin-top: 8px; }
+.kop-pb-next-label { margin: 0 0 6px; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.kop-pb-step-note { color: var(--kop-text-muted, #4A5568); font-size: 13px; }
+.kop-pb-allsteps { margin-top: 8px; }
+.kop-pb-allsteps > summary { cursor: pointer; font-size: 13px; color: #1e6f79; }
+.kop-pb-allsteps ul { margin: 6px 0 0; padding: 0; list-style: none; max-height: 320px; overflow: auto; }
+.kop-pb-allsteps li { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-top: 1px solid #eee9d8; font-size: 13.5px; }
+.kop-pb-allsteps li:first-child { border-top: 0; }
+.kop-pb-step-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.kop-pb-step-text a { color: #1e6f79; }
+.kop-pb-allsteps li.is-step .kop-pb-step-text, .kop-pb-allsteps li.is-skip .kop-pb-step-text { text-decoration: line-through; color: var(--kop-text-muted, #4A5568); }
+.kop-pb-step-mark { width: 1.1em; text-align: center; color: #2f6b2a; font-weight: 700; }
+
+/* Edit and Retire, and their forms. */
+.kop-pb-manage { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #dcdcde; }
+.kop-pb-manage .kop-ak-btn { font-size: 12.5px; }
+.kop-pb-form label { font-size: 13px; font-weight: 600; color: #1d2327; }
+.kop-pb-form input[type="text"], .kop-pb-edit-text { width: 100%; box-sizing: border-box; }
+.kop-pb-form { margin-top: 8px; }

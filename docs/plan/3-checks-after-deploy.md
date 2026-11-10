@@ -91,7 +91,12 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
     `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
     Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
-    Ask: The 8,561 taken-back Drive Docs news links: work through them again, or skip them in bulk?
+    Ask: 8,561 news links were taken back from an automatic import. Review them again, or skip them all?
+    Why: They are mostly duplicate or off-topic links; reviewing them is many hours.
+    Go: [Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox&type=drive-docs)
+    Choices: Skip them all | Review them again
+    Time: 1 min to decide
+    Focus: yes
 27. **Desktop sidebar sticky column** (2026-10-21, docs/plan/4.7 item 16): at 1280+ wide, open a post (any
     https://kidsoverprofits.org/ blog post), https://kidsoverprofits.org/ and a facility page: the newsletter and Donate sit in the
     side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom.
@@ -104,7 +109,11 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     seeds/research-tasks.json): 140 open tasks in 23 sections, KOP Tools lists it under Review queue, a record finder on
     Add a task and Edit. Then give one task to a test volunteer (Send to a volunteer), answer it on their page, reload:
     the card is Answered with the answer and links; Undo of the send closes the project.
-    Ask: Research Tasks is up with the old list's 140 questions; give some to Claude or a volunteer to try it?
+    Ask: Research Tasks has 140 open questions. Hand some out to try it?
+    Why: Each answered task fixes a record; nobody is working them yet.
+    Go: [Research Tasks](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-research-tasks)
+    Choices: Give some to Claude | Give some to a volunteer | Not yet
+    Time: 1 min
 
 29. **Volunteer page chooser** (2026-10-25, [b5acfd97](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b5acfd97)):
     signed in as admin, open https://kidsoverprofits.org/volunteer-review/ : "Choose your work" shows four cards

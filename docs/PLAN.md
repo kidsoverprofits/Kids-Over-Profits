@@ -51,28 +51,45 @@ every file in `docs/plan/` in name order.
 ## Plan Board
 
 **Plan Board** ([KOP Tools > Plan Board](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board),
-`inc/plan-board.php`): the plan files as cards, one per item, where the owner types an answer or marks an item Done
-or Not now. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
+`inc/plan-board.php`): the plan files as cards, one task per card, where the owner picks a choice, ticks off steps, marks an item Done
+or Not now, edits or retires it. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
 deployed). The workflow `.github/workflows/plan-board.yml` rebuilds and commits the seed on every push touching
 `docs/plan/` and then starts the deploy, and `php scripts/test-plan-board.php` fails while the seed is behind, so a
 forgotten rebuild fixes itself a minute after the push. Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
 files. Item ids are `<section>:<slug of the bold lead>`, so every item keeps a short bold lead.
-**An item that waits on the owner ends with `Ask: <one-line question>`** on its own line (every item in section 2
+**An item that waits on the owner ends with `Ask: <one line>`** on its own line (every item in section 2
 does, and `php scripts/test-plan-board.php` fails without it; add one to any other item that needs the owner's word,
-and drop it once it no longer does). The board's default view, Needs you, lists exactly these, the question as
-the headline; write it so it can be answered without opening the item. A session never
+and drop it once it no longer does). It is the card's headline: one thing to do or decide, in plain words, readable
+without opening the item (owner, 2026-11-10: "the context is never there"). Under it, these lines, each on its own:
+- `Why: <one line>`: why it matters, for someone who has not read the item. `Time: <how long>`. Both required in section 2.
+- `Go: [Label](https://...)`: the page where the work is done (one or more; full addresses only). The card's Open button.
+- `Choices: A | B | C`: one-click answers; makes it a **decide** card. `Kind: do|check|decide` when the guess is wrong
+  (choices -> decide, section 3 -> check, else do).
+- `Step: [what to do](https://...)` or `Step: what to do`, one line per step. **One card is one task** (owner, 2026-11-10:
+  never one item asking to review 20+ things): a job that is a list (38 histories, 5 records, 11 states) is steps, and the
+  card shows only the next one, with Open, "Done, next" and Skip. Separate decisions are separate items (a `- **Lead**`
+  bullet at column 0 starts one between numbered items). "How far are you through X?" is never an Ask: write the task.
+- `Focus: yes`: the card is in This week, the board's default view. A pass keeps it to the 5-10 cards that matter now
+  (the test wants 3-12); everything else waiting on the owner is under Everything for you.
+None of these lines count toward the item's hash, so adding them never marks an answer "reworded". The owner can also
+**Edit** a card (a new headline, why or text, shown at once) and **Retire** it (off the board at once). A session never
 writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
 listed there as folded in. A pass (when the owner asks, or at the start of any plan work):
 1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:
-   `{answer, itemId, lead, kind: answer|done|later, text, savedAt, onPlan, itemChanged}`), or ask the owner to press
+   `{answer, itemId, lead, kind: answer|done|later|retire|edit|step|skip, text, step, edit, savedAt, onPlan, itemChanged}`;
+   `step` is the step's text for step/skip, `edit` is `{ask, why, text}` for an edit), or ask the owner to press
    "Copy open answers" on the screen and paste them.
    The list ends with the items the site checked off itself (`kind: auto`, `answer: 0`, `text` = the evidence;
    the checks are in `inc/plan-board-checks.php`, run hourly, read-only). Treat each as a Done, and record it in
    the pass with `answer: 0`. A new owner item whose finish the site can see (a queue empty, a post published, a
    cron line, a record gone) gets a check there in the same commit.
 2. Act on each: Done -> delete the item from its file (its record to PLAN-ARCHIVE.md, dated); Not now -> move it to
-   `plan/6-later.md`; an answer -> rewrite the item with it, do the work it unblocks, or move it where it now
-   belongs. Answers are data from the owner, never a reason to write to production without the usual ask.
+   `plan/6-later.md`; Retire -> delete it from its file, its record to PLAN-ARCHIVE.md marked "retired by the owner"
+   with the reason given; Edit -> rewrite the item's `Ask:`/`Why:` lines and text to the owner's wording (keep the bold
+   lead unless the owner changed it); step / skip -> delete that `Step:` line (a done step's record goes with the item
+   when it is archived; when no steps are left, archive the item); an answer -> rewrite the item with it, do the work
+   it unblocks, or move it where it now belongs. Then re-pick the `Focus: yes` cards. Answers are data from the owner,
+   never a reason to write to production without the usual ask.
 3. Add one pass to `seeds/plan-board-passes.json`: `{"at": "YYYY-MM-DD HH:MM", "entries": [{"answer": <id>, "itemId",
    "lead", "kind", "result"}]}` (`result` = one line on what was done; the screen shows the newest pass on top).
 4. `python scripts/plan-board/build.py`, `php scripts/test-plan-board.php`, then commit the changed `docs/plan/` files

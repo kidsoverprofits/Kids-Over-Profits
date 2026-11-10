@@ -11,7 +11,14 @@ repeats its section heading ("## 4. ..."), which joins the section already read.
 Every list item in sections 2 and up becomes a card with a stable id
 ("<section>:<slug of its bold lead>") and a hash of its text. An item that waits on the owner ends with a line
 "Ask: <one-line question>" (every item of section 2 does); it becomes the card's "ask" and puts the card in the
-screen's "Needs you" view. The owner's answers are kept on the site
+screen's "Needs you" view. Under it, optional lines written for the owner (each its own line, any order, after
+the item's text): "Why: <one line on why it matters>", "Go: [Label](url)" (one or more: the card's Open buttons),
+"Choices: A | B | C" (one-click answers; makes it a "decide" card), "Time: 5 min", "Kind: decide|do|check"
+(else guessed: choices -> decide, section 3 -> check, otherwise do), "Focus: yes" (the card is in This week) and
+"Step: <one small task>" or "Step: [Label](url)", one line per step: a job that is really a list (35 histories
+to read, 5 records to fix) is steps, and the card shows only the next one with its own Open, Done and Skip.
+A step's id is "<item id>#<slug of its text>"; a pass deletes the steps the owner ticked.
+They are not part of the item's hash, so adding them never marks an answer "reworded". The owner's answers are kept on the site
 ({prefix}kop_plan_answers, inc/plan-board.php), never in these files. docs/PLAN.md section "Plan Board" says how a
 session folds them in. docs/ is not deployed, so this file is how the server sees the plan.
 """
@@ -29,6 +36,8 @@ PLAN_DIR = ROOT / 'docs' / 'plan'
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
 LEAD = re.compile(r'^\*\*(.+?)\*\*')
 ASK = re.compile(r'^Ask:\s*')
+META = re.compile(r'^(Ask|Why|Go|Choices|Time|Kind|Focus|Step):\s*')
+GO = re.compile(r'\[([^\]]+)\]\((https?://[^)\s]+)\)|(https?://\S+)')
 DATE = re.compile(r'\b(20\d\d-[01]\d-[0-3]\d)\b')
 
 
@@ -87,15 +96,21 @@ def parse(md):
         if ITEM_START.match(line):
             flush_para()
             body = ITEM_START.sub('', line, count=1)
-            item = {'body': [body], 'ask': []}
+            item = {'body': [body], 'ask': [], 'meta': {}, 'cur': None}
             grp['items'].append(item)
             continue
         if item is not None and raw[:1] in (' ', '\t'):
-            # "Ask: <question>" (its own line, last in the item) is the one-line question for the owner.
-            if item['ask'] or ASK.match(line.strip()):
-                item['ask'].append(ASK.sub('', line.strip(), count=1))
+            # "Ask: <question>" and the other owner lines (META) follow the item's text; a line that starts no key
+            # continues the key before it.
+            st = line.strip()
+            mm = META.match(st)
+            if mm:
+                item['cur'] = mm.group(1)
+                item['meta'].setdefault(item['cur'], []).append(META.sub('', st, count=1))
+            elif item['cur']:
+                item['meta'][item['cur']][-1] += ' ' + st
             else:
-                item['body'].append(line.strip())
+                item['body'].append(st)
             continue
         close_item()
         para.append(line)
@@ -109,7 +124,8 @@ def parse(md):
             items = []
             for it in g['items']:
                 text = ' '.join(it['body'])
-                ask = ' '.join(it['ask'])
+                meta = it['meta']
+                ask = ' '.join(meta.get('Ask', []))
                 lm = LEAD.match(text)
                 lead = lm.group(1).rstrip(':.') if lm else ' '.join(text.split()[:8])
                 base = g['key'] + ':' + slug(lead)
@@ -119,7 +135,28 @@ def parse(md):
                 seen.add(iid)
                 # The newest date in the item: when it was written or last brought up to date. Needs you sorts by it.
                 dates = DATE.findall(text)
-                items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask, 'date': max(dates) if dates else ''})
+                choices = [c.strip() for c in ' | '.join(meta.get('Choices', [])).split('|') if c.strip()]
+                go = []
+                for g_line in meta.get('Go', []):
+                    for gm in GO.finditer(g_line):
+                        go.append({'label': gm.group(1), 'url': gm.group(2)} if gm.group(2) else {'label': 'Open', 'url': gm.group(3).rstrip('.,;')})
+                steps, sseen = [], set()
+                for st_line in meta.get('Step', []):
+                    sm = re.match(r'^\[([^\]]+)\]\((https?://[^)\s]+)\)\s*(.*)$', st_line)
+                    label, url, rest = (sm.group(1), sm.group(2), sm.group(3)) if sm else (st_line, '', '')
+                    sid, k = slug(label, 50), 2
+                    while sid in sseen:
+                        sid, k = f'{slug(label, 50)}-{k}', k + 1
+                    sseen.add(sid)
+                    steps.append({'id': sid, 'label': label, 'url': url, 'note': rest.strip(' -:;')})
+                kind = ' '.join(meta.get('Kind', [])).strip().lower()
+                if kind not in ('decide', 'do', 'check'):
+                    kind = 'decide' if choices else ('check' if s['key'] == '3' else 'do')
+                items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask, 'date': max(dates) if dates else '',
+                              'why': ' '.join(meta.get('Why', [])), 'go': go, 'choices': choices,
+                              'time': ' '.join(meta.get('Time', [])), 'kind': kind,
+                              'focus': ' '.join(meta.get('Focus', [])).strip().lower() in ('yes', 'y', 'true', '1'),
+                              'steps': steps})
             if items or g['intro']:
                 groups.append({'key': g['key'], 'title': g['title'], 'intro': g['intro'], 'items': items})
         out.append({'key': s['key'], 'title': s['title'], 'groups': groups})

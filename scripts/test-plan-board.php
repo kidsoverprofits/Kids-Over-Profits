@@ -1,7 +1,8 @@
 <?php
 /**
- * KOP Tools > Plan Board (inc/plan-board.php): the plan seed reads, every item has a unique id and a hash, the
- * markdown renders, open vs folded-in answers, the export, and every card renders. Offline, WordPress stubbed.
+ * KOP Tools > Plan Board (inc/plan-board.php): the plan seed reads, every item has a unique id and a hash, every
+ * owner card says why and how long and links where it can, the markdown renders, open vs folded-in answers, steps,
+ * edits and retirements, the export, and every card renders. Offline, WordPress stubbed.
  *
  *   php scripts/test-plan-board.php
  */
@@ -21,6 +22,7 @@ function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function esc_textarea($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 function wp_date($f, $t = null) { return date($f, $t ?? time()); }
+function wp_json_encode($v) { return json_encode($v); }
 function wp_trim_words($s, $n) { $w = preg_split('/\s+/', trim($s)); return implode(' ', array_slice($w, 0, $n)) . (count($w) > $n ? '...' : ''); }
 $GLOBALS['theme'] = $theme;
 
@@ -51,15 +53,38 @@ $asks = array_filter($items, function ($it) { return $it['ask'] !== ''; });
 $check('no "Ask:" text left inside an item', !array_filter($items, function ($it) { return preg_match('/(^|\s)Ask:\s/', $it['text']); }));
 $long = array_filter($asks, function ($it) { return mb_strlen($it['ask']) > 140; });
 $check('every question is one line (140 characters at most)', !$long, implode(', ', array_keys($long)));
+// The owner's lines (scripts/plan-board/build.py): every section 2 card says why it matters and how long it takes,
+// every link is a full address, choices make a decide card, and none of it leaks into the item's text.
+$owner = array_filter($items, function ($it) { return $it['section'] === '2'; });
+$nowhy = array_filter($owner, function ($it) { return $it['why'] === '' || $it['time'] === ''; });
+$check('every section 2 card has a "Why:" and a "Time:" line', !$nowhy, implode(', ', array_slice(array_keys($nowhy), 0, 5)));
+$badurl = array();
+foreach ($items as $it) {
+    foreach ($it['go'] as $g) if (!preg_match('#^https://#', $g['url'])) $badurl[] = $it['id'];
+    foreach ($it['steps'] as $st) if ($st['url'] !== '' && !preg_match('#^https://#', $st['url'])) $badurl[] = $it['id'] . '#' . $st['id'];
+}
+$check('every Go and Step link is a full https address', !$badurl, implode(', ', array_slice($badurl, 0, 5)));
+$check("no owner line left inside an item's text", !array_filter($items, function ($it) { return preg_match('/(^|\s)(Why|Go|Choices|Time|Kind|Focus|Step):\s/', $it['text']); }));
+$check('choices make a decide card', !array_filter($items, function ($it) { return $it['choices'] && $it['kind'] !== 'decide'; }));
+$nfocus = count(array_filter($items, function ($it) { return $it['focus']; }));
+$check('This week has a few cards (3 to 12)', $nfocus >= 3 && $nfocus <= 12, (string) $nfocus);
+$withsteps = array_filter($items, function ($it) { return count($it['steps']) > 1; });
+$check('step ids are unique within their item', !array_filter($withsteps, function ($it) { $ids = array_column($it['steps'], 'id'); return count($ids) !== count(array_unique($ids)); }));
+
 $a = reset($asks);
-$c = kop_pb_card_html($a, null, null);
-$check('a card with a question leads with it, folds the text under Details and is marked as needing the owner',
-    strpos($c, '<p class="kop-pb-ask">') !== false && strpos($c, '<details class="kop-pb-details"><summary>Details: ') !== false && strpos($c, 'data-needs="1"') !== false
-    && strpos($c, 'data-act="open"') !== false && strpos($c, 'data-group="' . $a['group'] . '"') !== false, $c);
-$plain = array_filter($items, function ($it) { return $it['ask'] === '' && mb_strlen($it['text']) <= 260; });
-if ($plain) {
-    $c = kop_pb_card_html(reset($plain), null, null);
-    $check('a short item without a question shows its text, not folded', strpos($c, 'kop-pb-details') === false && strpos($c, 'data-needs=""') !== false);
+$c = kop_pb_card_html($a, array(), array());
+$check('a card with a question leads with it, folds the text under Notes for Claude and is marked as needing the owner',
+    strpos($c, '<p class="kop-pb-ask">') !== false && strpos($c, '<details class="kop-pb-details"><summary>Notes for Claude</summary>') !== false && strpos($c, 'data-needs="1"') !== false
+    && strpos($c, 'data-group="' . $a['group'] . '"') !== false, $c);
+$check('every card has Edit and Retire', strpos($c, 'data-act="open-edit"') !== false && strpos($c, 'data-act="open-retire"') !== false);
+$dec = current(array_filter($items, function ($it) { return $it['choices'] && !$it['steps']; }));
+$c = kop_pb_card_html($dec, array(), array());
+$check('a decide card has one button per choice and Other', substr_count($c, 'data-act="choice"') === count($dec['choices']) && strpos($c, 'Other...') !== false
+    && strpos($c, 'data-choice="' . esc_attr($dec['choices'][0]) . '"') !== false, $dec['id']);
+$go = current(array_filter($items, function ($it) { return $it['go'] && !$it['steps'] && $it['kind'] === 'do'; }));
+if ($go) {
+    $c = kop_pb_card_html($go, array(), array());
+    $check('a do card opens its link and has Done', strpos($c, 'href="' . esc_attr($go['go'][0]['url']) . '"') !== false && strpos($c, 'data-act="done"') !== false);
 }
 $check('a group name reads "2.4 Decisions waiting"', ($items['2.4:wiki-updates-for-entries-with-no-exported-draft']['where'] ?? '') === '2.4 Decisions waiting',
     $items['2.4:wiki-updates-for-entries-with-no-exported-draft']['where'] ?? 'missing');
@@ -113,15 +138,49 @@ $check('no column named after a MySQL 8 reserved word', !preg_match('/^\s+(lead|
 $errs = array();
 foreach ($items as $it) {
     try {
-        $html = kop_pb_card_html($it, null, null);
-        if (strpos($html, 'data-act="answer"') === false) $errs[] = $it['id'];
+        $html = kop_pb_card_html($it, array(), array());
+        if (strpos($html, 'data-act="answer"') === false || strpos($html, 'data-act="retire"') === false) $errs[] = $it['id'];
     } catch (Throwable $e) { $errs[] = $it['id'] . ': ' . $e->getMessage(); }
 }
-$check('every card renders with its answer box', !$errs, implode('; ', array_slice($errs, 0, 3)));
-$c = kop_pb_card_html($first, $open[$first['id']], null);
-$check('an open answer shows its text, Change and Withdraw, and the reworded note', strpos($c, 'newer') !== false && strpos($c, 'data-act="withdraw"') !== false && strpos($c, 'reworded') !== false);
-$c = kop_pb_card_html($first, null, $rows[0] + array('pass' => array('at' => '2026-10-21', 'result' => '**moved** to 6')));
+$check('every card renders with its answer box and Retire', !$errs, implode('; ', array_slice($errs, 0, 3)));
+$c = kop_pb_card_html($first, $open, array());
+$check('an open answer shows its text, Undo, and the reworded note', strpos($c, 'newer') !== false && strpos($c, 'data-act="withdraw"') !== false && strpos($c, 'reworded') !== false);
+$c = kop_pb_card_html($first, array(), array($first['id'] => $rows[0] + array('pass' => array('at' => '2026-10-21', 'result' => '**moved** to 6'))));
 $check('a folded-in answer shows the pass result and a fresh box', strpos($c, 'Folded in 2026-10-21') !== false && strpos($c, '<strong>moved</strong>') !== false && strpos($c, 'data-act="answer"') !== false);
+
+// Steps, edits, retirements.
+$check('targets: item, step, edit', kop_pb_target('2.3:a#b') === array('2.3:a', 'b', false) && kop_pb_target('2.3:a@edit') === array('2.3:a', '', true)
+    && kop_pb_target('2.3:a') === array('2.3:a', '', false));
+$check('kinds per target', kop_pb_kinds_for('x:a#s') === array('step', 'skip') && kop_pb_kinds_for('x:a@edit') === array('edit') && in_array('retire', kop_pb_kinds_for('x:a'), true));
+$st = reset($withsteps);
+$s0 = $st['steps'][0]; $s1 = $st['steps'][1];
+$c = kop_pb_card_html($st, array(), array());
+$check('a card with steps shows the first step as Next, with Done, next and Skip, and the progress', strpos($c, 'data-step="' . esc_attr($s0['id']) . '"') !== false
+    && strpos($c, 'Done, next') !== false && strpos($c, '0 of ' . count($st['steps']) . ' done') !== false && strpos($c, 'All steps (' . count($st['steps']) . ')') !== false, $st['id']);
+$srow = function ($key, $kind) use ($st) { return array('id' => 9, 'item_id' => $key, 'item_hash' => $st['hash'], 'item_lead' => $st['lead'], 'kind' => $kind, 'body' => '', 'saved_at' => '2026-11-10 10:00:00'); };
+$sopen = array($st['id'] . '#' . $s0['id'] => $srow($st['id'] . '#' . $s0['id'], 'step'));
+$c = kop_pb_card_html($st, $sopen, array());
+$check('a done step moves Next on, counts, and can be undone', strpos($c, '<div class="kop-pb-next" data-step="' . esc_attr($s1['id']) . '"') !== false && strpos($c, '1 of ') !== false
+    && strpos($c, 'data-act="unstep"') !== false && strpos($c, 'data-waiting="1"') !== false, $c);
+$all = array();
+foreach ($st['steps'] as $x) $all[$st['id'] . '#' . $x['id']] = $srow($st['id'] . '#' . $x['id'], 'skip');
+$check('an item whose steps are all done leaves Everything for you', strpos(kop_pb_card_html($st, $all, array()), 'data-needs=""') !== false);
+$exp = kop_pb_open_export($sopen, $items);
+$check('export: a step names its item and its text', count($exp) === 1 && $exp[0]['itemId'] === $st['id'] && $exp[0]['step'] === $s0['label'] && $exp[0]['kind'] === 'step' && $exp[0]['onPlan'], json_encode($exp));
+$eopen = array($first['id'] . '@edit' => array('id' => 10, 'item_id' => $first['id'] . '@edit', 'item_hash' => $first['hash'], 'item_lead' => $first['lead'], 'kind' => 'edit',
+    'body' => json_encode(array('ask' => 'My new headline', 'why' => 'Because', 'text' => '')), 'saved_at' => '2026-11-10 10:00:00'));
+$c = kop_pb_card_html($first, $eopen, array());
+$check('an edit shows at once, marked Edited, with Undo my edit', strpos($c, 'My new headline') !== false && strpos($c, 'Because') !== false && strpos($c, 'is-edit') !== false
+    && strpos($c, 'data-act="unedit"') !== false && strpos($c, kop_pb_md($first['text'])) !== false);
+$exp = kop_pb_open_export($eopen, $items);
+$check('export: an edit carries the new wording', count($exp) === 1 && $exp[0]['kind'] === 'edit' && ($exp[0]['edit']['ask'] ?? '') === 'My new headline' && $exp[0]['itemId'] === $first['id'], json_encode($exp));
+$ropen = array($first['id'] => array('id' => 11, 'item_id' => $first['id'], 'item_hash' => $first['hash'], 'item_lead' => $first['lead'], 'kind' => 'retire', 'body' => 'old news', 'saved_at' => '2026-11-10 10:00:00'));
+$c = kop_pb_card_html($first, $ropen, array());
+$check('a retired card leaves Everything for you, waits for Claude, and can be undone', strpos($c, 'data-state="retire"') !== false && strpos($c, 'data-needs=""') !== false
+    && strpos($c, 'data-waiting="1"') !== false && strpos($c, 'data-act="withdraw"') !== false && strpos($c, 'data-act="open-retire"') === false, $c);
+$q = current(array_filter($items, function ($it) { return $it['ask'] !== '' && !$it['steps']; }));
+$c = kop_pb_card_html($q, array(), array(), array('done' => false, 'evidence' => '12 left in Map Years', 'at' => 1792800000));
+$check('a check not done yet shows its count on the card', strpos($c, 'kop-pb-now') !== false && strpos($c, '12 left in Map Years') !== false && strpos($c, 'data-needs="1"') !== false);
 
 // Checks (inc/plan-board-checks.php): every check names an item on the plan, a done check takes the item out of
 // Needs you until the owner says Not done for this wording, and the export hands it to the next pass.
@@ -133,9 +192,9 @@ $auto = kop_pb_auto_done($items, $fake, array());
 $check('a passing check is done, a failing one is not', isset($auto[$ids[0]]) && !isset($auto[$ids[1]]));
 $check('Not done holds for the same wording', !kop_pb_auto_done($items, $fake, array($ids[0] => $items[$ids[0]]['hash'])));
 $check('a reworded item is checked again', (bool) kop_pb_auto_done($items, $fake, array($ids[0] => 'oldhash')));
-$c = kop_pb_card_html($items[$ids[0]], null, null, $auto[$ids[0]]);
+$c = kop_pb_card_html($items[$ids[0]], array(), array(), $auto[$ids[0]]);
 $check('a checked-off card shows its evidence and Not done, and leaves Needs you', strpos($c, 'data-state="auto"') !== false && strpos($c, '0 left') !== false
-    && strpos($c, 'data-act="notdone"') !== false && strpos($c, 'data-act="open"') === false, $c);
+    && strpos($c, 'data-act="notdone"') !== false && strpos($c, 'data-act="open"') === false && strpos($c, 'data-needs=""') !== false, $c);
 $exp = kop_pb_open_export(array(), $items, $auto);
 $check('the export lists a checked-off item as kind auto', count($exp) === 1 && $exp[0]['kind'] === 'auto' && $exp[0]['itemId'] === $ids[0] && $exp[0]['text'] === '0 left', json_encode($exp));
 $check('an open answer wins over a check', kop_pb_open_export(array($ids[0] => $rows[0]), $items, $auto)[0]['kind'] !== 'auto' && count(kop_pb_open_export(array($ids[0] => $rows[0]), $items, $auto)) === 1);
