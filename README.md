@@ -24,22 +24,25 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 - `api/` holds procedural endpoints (data forms, submissions, inspections, AI processing, server CLI jobs).
 - `templates/` holds every page template and the generated-page templates (`facility-page.php`, `operator-page.php`, `site-map.php`, ...). There are no root `page-*.php` files any more.
 - `js/`, `css/`: page scripts and styles (`css/colors.css` is the palette).
-- `scripts/`: the offline tests and page checks (`scripts/test-*.php`, most run against the `tmp/prod.sqlite` mirror; the Node parity tests; the Playwright checks) and the few scripts the server runs (`discover-articles.php`, `build-open-data.php`, the anonymous portal key tools). The builders, importers and scrapers are in the private `kop-pipeline` repo.
+- `scripts/`: the offline tests and page checks (`scripts/test-*.php`, most run against the `tmp/prod.sqlite` production mirror, which lives in kop-pipeline and is linked here as `tmp/`; the Node parity tests; the Playwright checks) and the few scripts the server runs (`discover-articles.php`, `build-open-data.php`, the anonymous portal key tools). The builders, importers and scrapers are in the private `kop-pipeline` repo.
 - `js/data/`: only `pages/` and `glossary/` live here; the rest is the `kop-data` repo, deployed into this folder on the server and linked here by `scripts/link-data.ps1`.
 - `seeds/`: data shipped with a deploy and applied once per version.
+- `researcher-kit/`: record shapes, blank templates and examples for outside researchers, served at `/researcher-kit/` (`?download=zip` bundles them).
 - `wp-plugins/kop-tools/`: the KOP Tools admin menu. The "Send to KOP" extension is the `kop-send-to-kop` repo.
-- `docs/`: workflow docs; `docs/PLAN.md` is the single list of open work. `CLAUDE.md` indexes every subsystem's commands and tests (in `docs/claude/`).
+- `docs/`: workflow docs. `docs/PLAN.md` is the index of open work; the items themselves are in `docs/plan/`, one file per section, and finished ones move to `docs/PLAN-ARCHIVE.md`. `CLAUDE.md` indexes every subsystem's commands and tests (in `docs/claude/`).
 
 ## Major Subsystems
 
 ### Facility records
 - Facilities live in `facilities_v2` (one JSON document per facility, schema in `docs/FACILITY-SCHEMA.md`) with parent companies in `{prefix}kop_operators`. The legacy `facilities_master` table was retired in data model phase 5 (2026-10-25).
 - Admins edit through the admin data form (`api/save-master.php`); the public suggests through `/tti-data-submission/` (guided start, `api/save-suggestion.php` into `suggested_edits`).
-- Other record categories: referrers/educational consultants, transporters, mental health providers (`providers_master`), marketing companies (`marketers_master`), trade organizations (`tradeorgs_master`), young adult programs (`young_adult_programs`) and Indigenous residential schools (`indigenous_schools`), each kept out of the facility tables. See `docs/data-forms/README.md`.
+- Other record categories: referrers/educational consultants, transporters, mental health providers (`providers_master`), marketing companies (`marketers_master`) and trade organizations (`tradeorgs_master`). See `docs/data-forms/README.md`.
+- Related programs that are not TTI facilities (Christian rehabs for adults, young adult programs, acute psychiatric inpatient, nursing homes, I/DD group homes, Indian boarding schools, foster care) are facility-shaped records in `related_facilities` (`inc/related-facilities.php`), shown at `/related/<category>/` and kept off the facility pages, hubs, map and search. A facility record can be moved into one of these categories. Indian boarding school records are still in `indigenous_schools` until they move.
 - Every named person has an id (`{prefix}kop_people`, `inc/people.php`). Duplicates are merged (Merge Duplicates, Merge People), homes grouped under programs (Program Homes), renamed programs kept by name era (`inc/facility-eras.php`).
 
 ### Public pages
-- Generated `/facility/<slug>/` and `/operator/<slug>/` pages (`inc/facility-pages.php`, `inc/operator-history.php`), the facility directory at `/tti-program-index/` (company and location tabs, `inc/directory-feed.php`), state and country hubs, the network map (`/network-map/`, `js/network-map/`), the glossary, the reporting directory (`/report-abuse/`), the memorial, lawsuits and legislation trackers, document libraries and document types (`/documents/<type>/`), essential reporting (`/essential-reporting/`), hub and article pages with pull quotes, the reader's site map and `/how-to-use-this-site/`.
+- Generated `/facility/<slug>/` and `/operator/<slug>/` pages (`inc/facility-pages.php`, `inc/operator-history.php`), the facility directory at `/tti-program-index/` (company and location tabs, `inc/directory-feed.php`), state and country hubs, the network map (`/network-map/`, `js/network-map/`), the glossary, the reporting directory (`/report-abuse/`), the memorial, lawsuits and legislation trackers, document libraries and document types (`/documents/<type>/`), essential reporting (`/essential-reporting/`), hub and article pages with pull quotes, the reader's site map, `/how-to-use-this-site/` and the Researcher Data Kit (`/researcher-kit/`).
+- Records cite their sources Wikipedia-style, with numbered citations and a Sources list.
 - Admins edit most of it in place with a pencil (`inc/inline-edit.php`).
 
 ### State inspection reports
@@ -56,10 +59,11 @@ Kids Over Profits is open source. Advocates, researchers, journalists and surviv
 
 ## Program Data Pipeline (wiki editor auto-linker)
 
-- Program name lists for the wiki editor live under `js/data/reddit-wiki/programs-XX.json`; uncategorized leftovers in `js/data/tti-program-links.json`.
-- Regenerate the aggregate files after editing them (see `QUICK-REFERENCE.md`):
+- Program name lists for the wiki editor live in the `kop-data` repo under `js/data/reddit-wiki/programs-XX.json`; uncategorized leftovers are in `js/data/tti-program-links.json`.
+- After editing them, regenerate `programs-array.json`, `search-index.json` and `metadata.json` from a `kop-pipeline` checkout next to this one:
 
 ```bash
+# in kop-pipeline
 node scripts/aggregate-all-programs.js
 ```
 
@@ -70,5 +74,8 @@ node scripts/aggregate-all-programs.js
 - `DATABASE-COLUMNS.md` (main tables and columns)
 - `environment-summary.md`
 - `QUICK-REFERENCE.md`
-- `docs/README.md`, `docs/PLAN.md`
+- `docs/ADDING-CONTENT.md` (every list to update when adding a record kind, page, screen, queue or table)
+- `docs/DATA-FLOWS.md` (who reads each store and what keeps it fresh)
+- `docs/WRITING-STYLE.md`
+- `docs/README.md`, `docs/PLAN.md` + `docs/plan/`
 - `docs/state-inspection-reports/README.md`
