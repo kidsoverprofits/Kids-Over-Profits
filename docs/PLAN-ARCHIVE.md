@@ -4,6 +4,18 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-10
+
+### 2.2 Scrapers and long runs on the owner's computer
+
+8. **Windows blocks torch on this machine** (found 2026-11-10): Smart App Control / Application Control refuses
+   `torch_python.dll` under Python 3.14, so EasyOCR (UT, `easyocr_extraction.py`, `ut_parser.py`) and Whisper
+   (`scripts/podcast-transcribe.py`) cannot load. The three scrapers now carry on without EasyOCR (kop-pipeline
+   73a9c7d8; Tesseract and the AI reader still read scans), but podcast transcription will fail. Fix: Windows
+   Security > App & browser control > Smart App Control (turning it off cannot be undone without a reset), or
+   run those tools somewhere else.
+   Done 2026-11-10: the owner changed the setting; `import torch` (2.15.0) and `import easyocr` load under Python 3.14.
+
 ## Moved 2026-11-04
 
 ### 2.1 cPanel, server and accounts
