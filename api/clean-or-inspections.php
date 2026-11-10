@@ -61,6 +61,20 @@ echo ($apply ? 'Applied' : 'Dry run') . ":\n";
 foreach ($result['stats'] as $k => $v) echo "  $k: $v\n";
 foreach ($result['skipped'] as $s) echo "  skipped: $s\n";
 
+// The renames, after the moves (the plan names the rows by their old names).
+foreach ((array) ($plan['renames'] ?? array()) as $r) {
+    $f = kop_flclean_facility($pdo, $r['id']);
+    if (!$f || $f['facility_name'] !== $r['from']['facility_name'] || $f['program_name'] !== $r['from']['program_name']) {
+        echo "  rename {$r['id']}: skipped (changed since the plan)\n";
+        continue;
+    }
+    if ($apply) {
+        $pdo->prepare('UPDATE inspection_facilities SET facility_name = ?, program_name = ? WHERE id = ?')
+            ->execute(array($r['to']['facility_name'], $r['to']['program_name'], (int) $r['id']));
+    }
+    echo "  rename {$r['id']}: \"{$f['facility_name']}\" -> \"{$r['to']['facility_name']}\"\n";
+}
+
 if (function_exists('get_option') && !function_exists('kop_inspection_links_get')) {
     $links_file = dirname(__DIR__) . '/inc/inspection-links.php';
     if (file_exists($links_file)) require_once $links_file;
