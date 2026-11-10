@@ -268,6 +268,12 @@
     overflow-wrap: anywhere;
 }
 
+.kop-od-subtitle {
+    margin: 2rem 0 0.5rem;
+    font-size: 1.2rem;
+    color: var(--kop-navy-blue, #000080);
+}
+
 .kop-od-table-wrap {
     overflow-x: auto;
 }
@@ -328,5 +334,9 @@
 
     .kop-od-table td:nth-child(2)::after {
         content: " facilities";
+    }
+
+    .kop-od-table--fulltext td:nth-child(2)::after {
+        content: " reports";
     }
 }

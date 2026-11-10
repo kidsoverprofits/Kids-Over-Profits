@@ -277,6 +277,13 @@ file_put_contents("$dir/page.html", str_replace('facility-profile.css', 'open-da
 $check('page lists every dataset', substr_count($html, 'class="kop-od-item"') === count($manifest['datasets']));
 $check('page links the ZIP', strpos($html, KOP_OPEN_DATA_ZIP) !== false);
 $check('page lists the past editions', strpos($html, 'Past editions') !== false && strpos($html, 'editions/' . $month . '/') !== false);
+$check('monthly editions table has no full-text column', strpos($html, 'not kept this month') === false);
+if (!isset($args['skip-fulltext'])) {
+    $check('full text listed by quarter', strpos($html, 'Inspection full text, by quarter') !== false
+        && strpos($html, 'editions/' . $month . '/' . KOP_OPEN_DATA_FULLTEXT) !== false);
+} else {
+    $check('no quarterly list without a full-text edition', strpos($html, 'Inspection full text, by quarter') === false);
+}
 $check('page states the license', strpos($html, 'Attribution-ShareAlike 4.0') !== false);
 echo "  wrote $dir/page.html\n";
 

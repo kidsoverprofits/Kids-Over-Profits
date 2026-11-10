@@ -166,7 +166,7 @@ $kop_od_built = !empty($kop_od_manifest['generated_at']) ? strtotime($kop_od_man
             <h2 id="kop-od-editions-heading" class="kop-od-section-title">Past editions</h2>
             <p>
                 The downloads above change every day. To cite the data, use a monthly edition: it is frozen on the first build of the month and never changes,
-                so anyone can check your numbers against the same files. The full text of the inspection reports is kept once a quarter.
+                so anyone can check your numbers against the same files.
             </p>
             <p class="kop-od-cite">
                 <strong>How to cite:</strong>
@@ -180,7 +180,6 @@ $kop_od_built = !empty($kop_od_manifest['generated_at']) ? strtotime($kop_od_man
                             <th scope="col">Edition</th>
                             <th scope="col">Facilities</th>
                             <th scope="col">All datasets</th>
-                            <th scope="col">Inspection full text</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -198,17 +197,6 @@ $kop_od_built = !empty($kop_od_manifest['generated_at']) ? strtotime($kop_od_man
                                         <span class="kop-od-file-size"><?php echo esc_html(kop_open_data_size($kop_od_ed['zip']['bytes'])); ?></span>
                                     </a>
                                 </td>
-                                <td>
-                                    <?php if (!empty($kop_od_ed['full_text'])) : ?>
-                                        <a class="kop-od-file" href="<?php echo esc_url(kop_open_data_edition_url($kop_od_ed['edition'], $kop_od_ed['full_text']['name'])); ?>" download>
-                                            <?php echo $kop_od_icon('download'); ?>
-                                            <span>JSONL.GZ</span>
-                                            <span class="kop-od-file-size"><?php echo esc_html(kop_open_data_size($kop_od_ed['full_text']['bytes'])); ?></span>
-                                        </a>
-                                    <?php else : ?>
-                                        <span class="kop-od-table-sub">not kept this month</span>
-                                    <?php endif; ?>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -217,6 +205,50 @@ $kop_od_built = !empty($kop_od_manifest['generated_at']) ? strtotime($kop_od_man
             <p class="kop-od-table-sub">
                 Each edition's row counts and checksums are in its <code>edition.json</code>, next to the ZIP.
             </p>
+
+            <?php
+            $kop_od_quarters = array_values(array_filter($kop_od_editions, static function ($ed) { return !empty($ed['full_text']); }));
+            $kop_od_quarter = static function ($edition) {
+                $ts = strtotime($edition . '-15 12:00:00 UTC');
+                return 'Q' . (int) ceil(gmdate('n', $ts) / 3) . ' ' . gmdate('Y', $ts);
+            };
+            ?>
+            <?php if ($kop_od_quarters) : ?>
+                <h3 id="kop-od-quarters-heading" class="kop-od-subtitle">Inspection full text, by quarter</h3>
+                <p>
+                    The full text of every inspection report is over 100 MB, so it is frozen once a quarter instead of every month,
+                    on the first build of the quarter.
+                </p>
+                <div class="kop-od-table-wrap">
+                    <table class="kop-od-table kop-od-table--fulltext" aria-labelledby="kop-od-quarters-heading">
+                        <thead>
+                            <tr>
+                                <th scope="col">Quarter</th>
+                                <th scope="col">Reports</th>
+                                <th scope="col">Full text</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($kop_od_quarters as $kop_od_ed) : ?>
+                                <tr id="<?php echo esc_attr('full-text-' . $kop_od_ed['edition']); ?>">
+                                    <th scope="row">
+                                        <?php echo esc_html($kop_od_quarter($kop_od_ed['edition'])); ?>
+                                        <span class="kop-od-table-sub">built <?php echo esc_html(wp_date(get_option('date_format'), strtotime($kop_od_ed['full_text']['generated_at']))); ?></span>
+                                    </th>
+                                    <td><?php echo esc_html(number_format_i18n((int) ($kop_od_ed['full_text']['rows'] ?? 0))); ?></td>
+                                    <td>
+                                        <a class="kop-od-file" href="<?php echo esc_url(kop_open_data_edition_url($kop_od_ed['edition'], $kop_od_ed['full_text']['name'])); ?>" download>
+                                            <?php echo $kop_od_icon('download'); ?>
+                                            <span>JSONL.GZ</span>
+                                            <span class="kop-od-file-size"><?php echo esc_html(kop_open_data_size($kop_od_ed['full_text']['bytes'])); ?></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </section>
     <?php endif; ?>
 
