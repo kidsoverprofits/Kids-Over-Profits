@@ -1,6 +1,6 @@
 {
- "built": "2026-11-10 19:32 UTC",
- "source": "cca80e4c780e9529abf44708924ab7df36edd450",
+ "built": "2026-11-10 19:49 UTC",
+ "source": "61645d856321bd587070d99cbc52c65f6431adf3",
  "sections": [
   {
    "key": "2",
@@ -4582,6 +4582,21 @@
        "focus": false,
        "steps": [],
        "hash": "411f80103a35"
+      },
+      {
+       "id": "5:test-review-inbox-nonprofit-filings-every-organization-is-we",
+       "lead": "test-review-inbox: \"nonprofit-filings: every organization is well formed and names records that exist\"",
+       "text": "**test-review-inbox: \"nonprofit-filings: every organization is well formed and names records that exist\"** (found 2026-11-10 on main at fe44d9ce, mirror as of that day, `-d memory_limit=1G`): 696 organizations, and EIN 571101736 names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in business-filings, so keep the `memory_limit` above.",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "e7c91e99c17f"
       }
      ]
     }
