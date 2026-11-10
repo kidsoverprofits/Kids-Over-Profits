@@ -197,11 +197,12 @@ function kop_render_bug_reports_page() {
                 kop_bug_ensure_notify_column();
             }
             $existing = $wpdb->get_row($wpdb->prepare('SELECT * FROM bug_reports WHERE id = %d', $id));
-            $wpdb->query($wpdb->prepare(
-                'UPDATE bug_reports SET status = %s WHERE id = %d',
-                $new_status,
-                $id
-            ));
+            $data = array('status' => $new_status);
+            // A report moved by hand off In progress leaves Claude Code's queue (inc/bug-reports-claude.php).
+            if ($new_status !== 'in_progress' && $existing && property_exists($existing, 'claude_queued_at')) {
+                $data['claude_queued_at'] = null;
+            }
+            $wpdb->update('bug_reports', $data, array('id' => $id));
             $notified = false;
             if ($existing && function_exists('kop_bug_report_notify_status_change')) {
                 $notified = kop_bug_report_notify_status_change($existing, $new_status, (string) $existing->status);
@@ -210,6 +211,29 @@ function kop_render_bug_reports_page() {
                 . ' marked as ' . esc_html(str_replace('_', ' ', $new_status)) . '.'
                 . ($notified ? ' The reporter was emailed about the change.' : '')
                 . '</p></div>';
+        }
+    }
+
+    // Send to / take back from Claude Code's /fix-bugs queue (inc/bug-reports-claude.php).
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kop_bug_id'], $_POST['kop_bug_claude'])
+        && function_exists('kop_bug_claude_send')) {
+        check_admin_referer('kop_bug_triage');
+        $id = (int) $_POST['kop_bug_id'];
+        try {
+            if ($_POST['kop_bug_claude'] === 'cancel') {
+                kop_bug_claude_cancel($id);
+                $msg = 'Report #' . $id . ' taken back from Claude Code; it stays In progress.';
+            } else {
+                $notified = kop_bug_claude_send($id);
+                $msg = 'Report #' . $id . ' sent to Claude Code. Run /fix-bugs in a session to work the queue.'
+                    . ($notified ? ' The reporter was emailed that it is in progress.' : '');
+            }
+            if (function_exists('kop_rinbox_flush_counts')) {
+                kop_rinbox_flush_counts();
+            }
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($msg) . '</p></div>';
+        } catch (RuntimeException $e) {
+            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($e->getMessage()) . '</p></div>';
         }
     }
 
@@ -235,6 +259,9 @@ function kop_render_bug_reports_page() {
     }
     if (function_exists('kop_bug_ensure_notify_column')) {
         kop_bug_ensure_notify_column();
+    }
+    if (function_exists('kop_bug_claude_ensure_quietly')) {
+        kop_bug_claude_ensure_quietly();
     }
 
     // Status filter tabs with counts.
@@ -327,9 +354,18 @@ function kop_render_bug_reports_page() {
             }
             echo '</div></details>';
         }
+        if (trim((string) ($r->admin_note ?? '')) !== '') {
+            echo '<p style="margin:6px 0 0"><em>Notes:</em> ' . nl2br(esc_html(trim((string) $r->admin_note))) . '</p>';
+        }
         echo '</td>';
 
-        echo '<td>' . esc_html(ucwords(str_replace('_', ' ', $r->status))) . '</td>';
+        $queued = !empty($r->claude_queued_at) && $r->status === 'in_progress';
+        echo '<td>' . esc_html(ucwords(str_replace('_', ' ', $r->status)));
+        if ($queued) {
+            echo '<br><span style="display:inline-block;margin-top:4px;padding:1px 6px;border-radius:3px;background:#e8eefc;color:#1d3a8a;font-size:11px">'
+                . 'Waiting for Claude Code since ' . esc_html($r->claude_queued_at) . ' UTC</span>';
+        }
+        echo '</td>';
 
         echo '<td>';
         foreach ($statuses as $s) {
@@ -341,6 +377,18 @@ function kop_render_bug_reports_page() {
             echo '<input type="hidden" name="kop_bug_id" value="' . (int) $r->id . '">';
             echo '<input type="hidden" name="kop_bug_status" value="' . esc_attr($s) . '">';
             echo '<button type="submit" class="button button-small">' . esc_html(ucwords(str_replace('_', ' ', $s))) . '</button>';
+            echo '</form>';
+        }
+        if (function_exists('kop_bug_claude_send') && ($queued || in_array($r->status, array('new', 'in_progress'), true))) {
+            echo '<form method="post" style="display:inline-block;margin:0 4px 4px 0">';
+            wp_nonce_field('kop_bug_triage');
+            echo '<input type="hidden" name="kop_bug_id" value="' . (int) $r->id . '">';
+            echo '<input type="hidden" name="kop_bug_claude" value="' . ($queued ? 'cancel' : 'send') . '">';
+            echo '<button type="submit" class="button button-small' . ($queued ? '' : ' button-primary') . '" title="'
+                . esc_attr($queued
+                    ? 'Takes the report out of the Claude Code queue; it stays In progress. No email goes out.'
+                    : 'Queues the report for the next /fix-bugs session. Read the report first: Claude works from its text.')
+                . '">' . ($queued ? 'Take back from Claude' : 'Send to Claude Code') . '</button>';
             echo '</form>';
         }
         echo '</td>';
