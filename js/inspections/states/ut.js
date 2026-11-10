@@ -20,6 +20,10 @@
  * grouped by facility, date and type and paired across sources by the rules
  * they cite: copies collapse, same-day inspections stay separate. Newer
  * files come first and the database last; checklists are combined.
+ * A checklist both a file and the database have shows the database's census,
+ * capacity and licensor: the files keep the scraper's first read (capacity
+ * taken for census, boxes missed), and the database rows were re-read and
+ * corrected (ut_backfill_checklists.py), a blank census box included.
  *
  * Checklist PDFs link to the state's download by checklist_id. Local copies
  * exist for only part of the oldest file, and the March 2026 file points at
@@ -54,13 +58,19 @@
         return /^(19|20)/.test(t) ? parseInt(t, 10) : parseInt(t.slice(4) + t.slice(0, 4), 10);
     }
 
+    /** An empty licensor box comes through as ":". */
+    function licensorName(text) {
+        var t = safeString(text).trim();
+        return /[A-Za-z]/.test(t) ? t : '';
+    }
+
     function readChecklists(list) {
         return (Array.isArray(list) ? list : []).filter(function (c) { return c && c.checklist_id; }).map(function (c) {
             return {
                 id: String(c.checklist_id),
                 census: c.census === null || c.census === undefined ? '' : String(c.census),
                 capacity: c.capacity === null || c.capacity === undefined ? '' : String(c.capacity),
-                licensor: safeString(c.licensor)
+                licensor: licensorName(c.licensor)
             };
         });
     }
@@ -84,11 +94,18 @@
             var c = l.match(/^Checklist\s+(\d+):\s*(.*)$/);
             if (c) {
                 var fields = {};
+                var last = '';
                 c[2].split(/;\s*/).forEach(function (pair) {
-                    var kv = pair.match(/^(\w+):\s*(.*)$/);
-                    if (kv) fields[kv[1].toLowerCase()] = kv[2];
+                    var kv = pair.match(/^(Census|Capacity|Contact|Licensor):\s*(.*)$/i);
+                    if (kv) {
+                        last = kv[1].toLowerCase();
+                        fields[last] = kv[2];
+                    } else if (last && pair) {
+                        // A second name: "Licensor: Mary Bokinskie; Josilyn Bertrand".
+                        fields[last] += '; ' + pair;
+                    }
                 });
-                checklists.push({ id: c[1], census: fields.census || '', capacity: fields.capacity || '', licensor: fields.licensor || '' });
+                checklists.push({ id: c[1], census: fields.census || '', capacity: fields.capacity || '', licensor: licensorName(fields.licensor) });
                 return;
             }
             var f = l.match(/^(R\d[\w.()\-]*):\s*(.*?)\s+\u2014\s+(.*)$/);
@@ -131,6 +148,16 @@
      */
     function merge(sources) {
         var facilities = {};
+        // Checklist id -> the database's read of it (see the header).
+        var corrected = {};
+        sources.forEach(function (source) {
+            if (!source.correctedChecklists) return;
+            source.facilities.forEach(function (raw) {
+                raw.inspections.forEach(function (insp) {
+                    insp.checklists.forEach(function (c) { corrected[c.id] = c; });
+                });
+            });
+        });
         sources.forEach(function (source) {
             var grouped = {};
             var groupOrder = [];
@@ -192,6 +219,13 @@
             var f = facilities[fid];
             var reports = [];
             f.order.forEach(function (key) { reports = reports.concat(f.groups[key]); });
+            reports.forEach(function (r) {
+                r.checklists = r.checklists.map(function (c) {
+                    var fix = corrected[c.id];
+                    if (!fix) return c;
+                    return { id: c.id, census: fix.census, capacity: fix.capacity, licensor: fix.licensor || c.licensor };
+                });
+            });
             reports.sort(function (a, b) { return parseDate(b.date) - parseDate(a.date); });
             var x = f.fields;
             return {
@@ -235,6 +269,7 @@
 
     function apiSource(data) {
         return {
+            correctedChecklists: true,
             facilities: ((data && data.facilities) || []).map(function (raw) {
                 var info = raw.facility_info || {};
                 return {
@@ -330,7 +365,9 @@
         report: function (report, ctx) {
             var count = report.findings.length;
             var first = report.checklists[0] || {};
-            var census = first.census ? 'Census ' + first.census + (first.capacity ? ' of ' + first.capacity : '') : '';
+            var census = first.census
+                ? 'Census ' + first.census + (first.capacity ? ' of ' + first.capacity : '')
+                : (first.capacity ? 'Capacity ' + first.capacity : '');
 
             var links = [];
             report.checklists.forEach(function (c, i) {
