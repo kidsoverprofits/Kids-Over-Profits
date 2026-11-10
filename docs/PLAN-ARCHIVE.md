@@ -3720,3 +3720,17 @@ From docs/plan/5-tests-failing.md item 1, verbatim. Both tests were rebased on v
      - the save rewrites about 4,550 of 5,067 documents, adding empty fields older documents lack (providerDetails,
        identification.dbaNames/legalName/registrants/pastOwners, federalFunding, ...) and bumping schema_version.
        Being isolated (round trip alone on a fresh copy) to see whether anything besides empty fields changes.
+
+### 4.7 Pages and templates (done 2026-11-10)
+
+- **OR: where-to-report list misses ODHS and OTIS** (bug reports #6, #7, #8, 2026-11-10; kop-data
+  `reporting/states/or.json`). Readers say: Oregon's child-caring agencies (CCAs) are licensed by ODHS, not OHA (#6);
+  OTIS (ODHS Office of Training, Investigations and Safety) investigates abuse in CCAs (#8); the Mental Health
+  Regulatory Agency handles complaints and admin for the boards, while licensing is OBLPCT's and the Board of
+  Psychology's (#7). ODHS's own rules and quarterly ORS 418.259 reports bear out #6 and #8
+  (https://www.oregon.gov/odhs/rules-policy/sharedservicesrules/otis-1-2026.pdf,
+  https://www.oregon.gov/odhs/about/legislativeinformation/2023-q4-ors-418-259-report.pdf). Fix: add an ODHS
+  Children's Care Licensing Program / OTIS facility-licensing channel (verified phone, form, address), keep OHA's
+  for the OHA-licensed behavioral health programs and say which is which, reword the state note and the MHRA
+  channel to #7, rebuild `directory.json`, check /oregon/ and /report-abuse/?state=oregon.
+  - Done 2026-11-10: kop-data 49622876 adds the ODHS Children's Care Licensing Program (OTIS) channel, says which programs OHA licenses, rewords the MHRA note; live on /oregon/.
