@@ -1,6 +1,6 @@
 {
- "built": "2026-11-11 21:03 UTC",
- "source": "072d49c0920b0ab6976dbecb6079a63370de334d",
+ "built": "2026-11-11 21:35 UTC",
+ "source": "3acac019bc9ebc64f5f537d23f85351c375574b6",
  "sections": [
   {
    "key": "2",
@@ -3816,6 +3816,21 @@
        "focus": false,
        "steps": [],
        "hash": "f406719f05fa"
+      },
+      {
+       "id": "4.4:approving-slow-cards-jumping",
+       "lead": "Approving slow, cards jumping",
+       "text": "**Approving slow, cards jumping** (owner, 2026-11-11: \"things jump around after being approved. it also thinks for a long time when approving\"). Done in 41c81aa5: Inspection links no longer rebuilds its 654 pairs inside any inbox request (it made review-inbox/sources and /recent take ~30 s and ran production out of database connections), and Just in adds queue sections below the others as they answer. Open: a. Check live in the browser (the extension dropped before the deploy): on /admin-submissions/, every review-inbox/* and manage-submissions.php request in the Network tab should be a few seconds at most, approves too. b. If the owner still sees jumping: in the queues opened from a tab (not Just in, not News), an approved card shrinks to one line and the cards below slide up (run() / keepInView() in js/review-inbox.js). Ask which queue first. c. The page still fires ~25 requests on load (7 manage-submissions stats calls, ~16 Just in batches); on shared hosting each is a WordPress boot. Fewer, bigger batches if it is still slow after a.",
+       "ask": "",
+       "date": "2026-11-11",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "e66f9cd5817b"
       }
      ]
     },
