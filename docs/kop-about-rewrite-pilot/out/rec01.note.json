@@ -1,0 +1,29 @@
+{
+ "needs_you": [
+  {
+   "ask": "Nate's Unsilenced testimony names staff member Joe Giles as breaking a boy's wrist; it is the only source. Keep his name in the quote?",
+   "choices": [
+    "Keep the name as published",
+    "Cut the name with …",
+    "Drop that passage"
+   ]
+  },
+  {
+   "ask": "KOP's Staff & Owners list says Aspen Ranch merged into Outback; Aspen's 2011 release says it was discontinued and Aspen Achievement Academy merged into Outback. Fix KOP's record?",
+   "choices": [
+    "Fix the record to match the release",
+    "Leave the record as it is"
+   ]
+  }
+ ],
+ "research": [
+  "Find the publication date of Nate's Aspen Ranch testimony on Unsilenced (unsilenced.org/portfolio-items/aspen-ranch/; the page gives only the years attended, 2008-2009).",
+  "Import the two HEAL-hosted accounts into the media library from Wayback (web.archive.org/web/2016/http://www.heal-online.org/aspenrchanon1.pdf and .../aspenrchanon2.pdf) per the archive rule, then link anon05/anon06 to KOP's copies with the archive link in the label.",
+  "Find a non-HEAL copy of the Aspen Ranch enrollment agreement (33 pp.; HEAL says downloaded from aspenranch.com Sept 22, 2010; only copy archived Jan 7, 2016 at heal-online.org/aspenranchcontract.pdf) so ascon can carry a link; import that Wayback scan into the media library too.",
+  "Read Woodbury's April 2008 Aspen Ranch visit report (strugglingteens.com/artman/publish/AspenRanchVR_080406.shtml) for the seven cottages and the level names.",
+  "Find original sources for claims HEAL and the wiki give without citation: seven cottages, about $7,100 a month (2005), NATSAP membership to 2011, Matt Alexander's roles, Drew Hirsch and Sarah Finney, Kreg Gillman's 1998-2001 dates.",
+  "Get the words of the other Aspen Ranch accounts the r/troubledteens wiki quotes (Ashley, Survivors Breaking Silence, 2000 stay: survivorsbreakingsilence.com/stories/survivor-aspen-ranch-2000; an anonymous Sept 2021 submission) if more testimony is wanted.",
+  "Fix KOP's Aspen Ranch record: fact 20 lists 'Aspen Education Group' as an also-known-as name, and the fact box gives capacity 80 'as of 2025' for a program closed in 2011."
+ ],
+ "log": "Rewritten Nov 2-3: Woodbury (2000 visit report, 2007-2010), NATSAP 2009 directory (print), Aspen's Mar 24, 2011 release, strugglingteens article 5918 (Scott Hess), and the enrollment agreement HEAL quoted page by page (print, ascon: fees, nine-month minimum, transition fee, Robin Stephens, strip search, restraint, eight-week blackout, Rider/Wrangler, psychiatrist, Northwest accreditation, court-custody clause). Cut: the Scott Peterson section (nothing ties the 2014 conviction to the ranch), Gil Hallows and Cheryl Kehl (Aspen Achievement Academy), HEAL's body-cavity claim (the clause says strip search), 'not licensed by the Department of Health' (HEAL's own reading). Nov 11 (testimony rule): removed the two paragraphs retelling the 2005 and 2006 accounts and Nate's Unsilenced account, and the lede's Unsilenced sentence; the lede now points to the accounts in one sentence. Three quotes added, all read from the originals (the two HEAL PDFs via Wayback, Unsilenced live); spelling and punctuation only. Nate's text confirms the boy waited hours for care."
+}

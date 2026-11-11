@@ -50,15 +50,15 @@
   ],
   "yelpfr": [
    "https://www.yelp.com/not_recommended_reviews/falcon-ridge-ranch-virgin",
-   "Yelp, Falcon Ridge Ranch reviews (review by \"Jaimie\")"
+   "Yelp, Falcon Ridge Ranch, review by \"Jaimie S.\", Aug. 14, 2018"
   ],
   "redditfr": [
    "https://www.reddit.com/r/troubledteens/comments/clubam/any_other_falcon_ridge_ranch_red_rock_canyon/",
-   "Reddit, r/troubledteens thread \"Any other Falcon Ridge Ranch / Red Rock Canyon\" (2019)"
+   "Reddit, r/troubledteens, \"Any other Falcon Ridge Ranch/ Red Rock Canyon school survivors? Here is my story\", Aug. 4, 2019"
   ],
   "email19": [
    "",
-   "Former Falcon Ridge Ranch resident, e-mail account dated Apr. 3, 2019 (published on HEAL's Falcon Ridge Ranch page)"
+   "Former Falcon Ridge Ranch resident, e-mail dated Apr. 3, 2019, as quoted on HEAL's Falcon Ridge Ranch page (Wayback capture of May 5, 2025)"
   ],
   "sltrib22": [
    "https://archive.ph/fDXKK",
@@ -71,6 +71,10 @@
   "ut94203": [
    "https://ccl.utah.gov/ccl/facility/94203",
    "Utah Office of Licensing, facility record for license 94203 (Care Youth Corporation - Falcon Ridge Ranch dba Rite of Passage)"
+  ],
+  "gtony": [
+   "https://www.google.com/maps/contrib/100642492328334698589/place/ChIJYRUikuHxyoARRrADIfTjB_Q/@29.0389598,-134.8154501,5z/data=!4m6!1m5!8m4!1e1!2s100642492328334698589!3m1!1e1?hl=en-US",
+   "Google review of Falcon Ridge Ranch by \"Tony\" (parent), 2014"
   ]
  },
  "paragraphs": [
@@ -78,6 +82,38 @@
   "Under CARE, Falcon Ridge was built around horses, with 47 of them on 12 acres.{w1010b} It paired the horse work with Positive Peer Culture, a confrontational group method, and Larry Brendtro, an early promoter of that approach, trained its staff.{w1010b} It was licensed by the state.{w0707} In the 2009 directory of the National Association of Therapeutic Schools and Programs (NATSAP), which it had joined in 2008, Falcon Ridge listed 22 students and stays of 9 to 12 months and said its school was accredited by the Northwest Association of Accredited Schools.{natsap09}",
   "In August 2016 CARE sold Falcon Ridge and its sister programs, Red Rock Canyon School, Lava Heights Academy and Mount Pleasant Academy, to Sequel; Sequel described the deal to investors in a 2017 SEC filing.{frr,sec17} The sellers were the family of Frank and Melanie Habibian, who had opened the first of the four CARE schools in St. George in 1996; their agreement with Sequel, dated August 16, 2016, set a base price of $23.5 million plus a contingent payment tied to later earnings.{arb} The sellers' filing names Brian Pace as Falcon Ridge's executive director.{arb} In June 2017 Sequel paid the United States and Nevada about $2.58 million to settle claims over $1.72 million in Nevada Medicaid payments for students who had been referred to the CARE schools by organizations that were then paid referral fees.{arb} That October Sequel sought $2.67 million from the sellers in arbitration to cover the settlement and its costs.{arb} On May 1, 2020, the arbitrator rejected Sequel's claims, found that the sellers were owed a contingent payment of at least $3.1 million, and awarded them $1.3 million in attorneys' fees and costs; the sellers then asked the Washington County court to confirm the award.{arb} Red Rock Canyon came under scrutiny in 2019.{sgn} After a riot there on April 28, Utah investigated claims of sexual assault, violence and neglect and put its license on conditional status, and in June an employee was charged with punching a 17-year-old girl.{sgn} That July Sequel announced it would close Red Rock Canyon, and it also closed Mount Pleasant, which it said was unrelated.{sgn} Sequel ran Falcon Ridge until the fall of 2021: the school's website still carried Sequel's notices on September 27, 2021, and by October 22 it called Falcon Ridge \"A Rite of Passage Program.\"{frr,frr_oct} Utah has licensed it to Care Youth Corporation, doing business as Rite of Passage, since January 31, 2022.{ut94203}",
   "In early March 2021 Falcon Ridge reported a staff member, Guyla Reann Savage, 32, to the Washington County Sheriff's Office.{kutv,sltrib21,sgn21} Four students told detectives she had touched or slapped their buttocks numerous times and shown them an explicit photo of her husband on her phone.{kutv,sltrib21,sgn21} She was arrested and charged with four felony counts of dealing in material harmful to minors and four misdemeanor counts of sexual battery.{kutv,sltrib21,sgn21} A year later the Salt Lake Tribune, reviewing state data on staff fired for sexual misconduct, reported that regulators had been told of a female staff member at Falcon Ridge who slapped residents' buttocks and showed them a photo of her husband's genitals, that the ranch fired her, and that it faced no regulatory action.{sltrib22}",
-  "A former resident wrote in an e-mail dated April 3, 2019 that the residential director at the time, Nale Fakahua, had restrained the resident by twisting the resident's arm behind the back to cause pain, and had said, \"If I wanted to break your arm, I would break your arm.\"{email19} Other former residents have posted accounts online describing abuse, forced manual labor and medical neglect at the ranch.{yelpfr,redditfr}"
+  "Former residents and parents have published accounts of the ranch since 2014 (see Survivor testimony below).{gtony,yelpfr,email19,redditfr}"
+ ],
+ "testimony": [
+  {
+   "text": "I would highly recommend never sending your child here!!! They gave my daughter a drug that caused her to become ill. It was approximately one week before they got her appropriate medical care. She was placed in the hospital and in I.C.U. It could have cost my child her life!!! They are terrible in communication. The staff directory seems to be wrong and they do not allow children to call home outside of family therapy (15 minutes) once per week.",
+   "who": "Parent (\"Tony\")",
+   "where": "Google review",
+   "date": "2014",
+   "key": "gtony",
+   "via": "the r/troubledteens wiki's quotation"
+  },
+  {
+   "text": "They are a joke; they force kids to work the horses. They will not let you talk to your girl. They took all my rights away. Now they hurt kids … they made her take 16 pills a day.",
+   "who": "Jaimie S.",
+   "where": "Yelp",
+   "date": "August 2018",
+   "key": "yelpfr"
+  },
+  {
+   "text": "The residential director (at the time), Nale Fakahua, used an illegal restraint on me. He twisted my arm behind my back in such a way as to deliberately inflict pain. He asked me if I was ready to calm down and kept twisting until I replied \"yes\". I told him it felt like he was trying to break my arm. His response was, \"If I wanted to break your arm, I would break your arm. I'm very skilled like that.\"",
+   "who": "Former resident",
+   "where": "E-mail quoted by HEAL",
+   "date": "April 2019",
+   "key": "email19",
+   "via": "HEAL's quotation"
+  },
+  {
+   "text": "Anyways, I feel like Falcon Ridge was more equipped with dealing with troubled teens and not with kids who were severely mentally ill. While I was on cleaning duty, I drank half a bottle of bleach and had to get my stomach pumped.",
+   "who": "Former student",
+   "where": "Reddit, r/troubledteens",
+   "date": "August 2019",
+   "key": "redditfr"
+  }
  ]
 }

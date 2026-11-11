@@ -1,0 +1,26 @@
+{
+ "needs_you": [
+  {
+   "ask": "KOP's In Loving Memory page gives Nicholaus Contreraz's cause of death as 'Restraint'; the medical examiner found empyema (an untreated chest infection). Correct the memorial?",
+   "choices": [
+    "Change it to untreated infection (empyema) and neglect",
+    "Keep 'Restraint'",
+    "Give both"
+   ]
+  }
+ ],
+ "research": [
+  "Get the foster parent's own words from 3TV/CBS 5 (Alexis Dominguez), \"Parent of former student at Queen Creek school calls for changes after teen's death\", Oct. 7, 2022 (archive.is/cIdqU, CAPTCHA; find the azfamily.com original) and turn \"A foster parent called for closer state oversight\" into a direct quote (rule 31).",
+  "Read FOX 10, Nov. 1, 2022 (archive.is/txCXu) and WBRC, Oct. 6, 2022 (archive.is/EtHH8, a former student's account) for quotes the text should carry; both captures show a CAPTCHA.",
+  "Find an original for the founders Howard Pyle, Al Waters and George Miller (checked: r/troubledteens wiki archived June 11, 2023, HEAL's staff list, Drive Canyon State wiki PDF and Rite of Passage folder: none cite one). KOP's record lists Howard Pyle and John Howard Pyle separately; merge them if one person.",
+  "Find an original for the $3 million settlement (wiki and KOP facts 62 and 106, no citation); the text uses AP's 'more than $1 million' (July 1999) and Montini's estimated $1 million (2000). Open the AP capture archive.is/ZhgwY (CAPTCHA).",
+  "Find originals for: ranches in Payson and Williams; Rite of Passage taking over in April 2000; James Bednark as president; CPS watching the ranch from 1971 (r/troubledteens wiki, no citation; the Arizona Republic, May 31, 1998 does not say it).",
+  "Check Rite of Passage's own filings (IRS 990s, Arizona Corporation Commission) on whether it is a for-profit management company running a nonprofit with its own board (HEAL's Yockus entry, no citation).",
+  "Archive the Arizona Republic, May 31, 1998 (Dennis Wagner) from an original (Newspapers.com/ProQuest); the cited copy is a personal mirror at ackert.fortunecity.ws.",
+  "Read the entries of the MCSO Location History Report (media library 17221) and confirm the call types the text gives (sexual assault of minors, child abuse, missing persons), now taken from HEAL's description.",
+  "Reconcile KOP's 'New Names for the Same Programs' page ('at least 29 other reported incidents') with DES's count of 32 instances of abuse or neglect of Contreraz; fix the page if it confuses the two.",
+  "Fix facility 9605's data: fact box 'Operated: 1998 to present' (the ranch dates to 1949); the death record spells the name 'Contreras' (sources: Contreraz).",
+  "Check whether the 2020 HHS photographs belong to this facility, and put the Sept. 2025 Desert Lily Academy arrest and FOX 10's 118 Desert Lily police calls (Jan. 15 to Oct. 6, 2022) on Desert Lily's own record."
+ ],
+ "log": "Nov 11 testimony pass: the line 'Former students described a punitive environment' became direct quotes from FOX 10, Oct. 31, 2022 (Christopher Nixon; his adoptive mother Tiffany Nixon; archive/rec11-fox10-2022-10.txt). The foster-parent sentence stays, now cited to 3TV/CBS 5 alone (KOP's news record 1058 shows it is that story). The record has no self-published accounts, so it has no testimony block. Earlier passes: rewritten Nov 2 from the Arizona Republic (May 31, 1998: founding, 1971-1987 history), the LA Times (June 14, 1998) and the Baltimore Sun (Aug. 27, 1998): Alameda 1995, the firings, the 1996 memo, provisional licenses, complaint counts, the Child Abuser Directory. Also added: the 2020 overdose (FOX 10), the 1998 reopening settlement (Phoenix New Times), the 2003 rename quote (East Valley Tribune), and the dropped charges and estimated $1M settlement (Montini, 2000). Restored Nov 3: the Dec. 1999 dismissals, the AP July 1999 settlement, Maryland JJMU 2015, and the MCSO 2000-2013 call record (KOP copy, media 17221). All HEAL and wiki citations removed. Left out as other programs: the 2009 student fight, the 2023 off-campus arrest, Silver State 2015, Gina Score, the 2007 testimony."
+}

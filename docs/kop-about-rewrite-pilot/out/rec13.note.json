@@ -1,0 +1,16 @@
+{
+ "needs_you": [],
+ "research": [
+  "Read The Spectrum, Feb. 23, 2018 ('Mother angry over S. Utah treatment center's response after son runs away'; paywalled, no Wayback capture) and replace 'One of their mothers said staff did not file a missing-person report…' with her own words as the paper quotes them (rule 31).",
+  "Check the Feb. 20, 2018 Yelp review by a former employee against an original: on Nov. 11, 2026 Yelp's not-recommended page for Lava Heights shows only a June 2022 review and a removed June 2020 one. The quote is read through the wiki's copy.",
+  "Check the July 13, 2020 Indeed review against the original (Indeed returns 403; no Wayback capture); quote read through the wiki's copy.",
+  "Find when Lava Heights became girls-only (the wiki says 'until very recently'; KSL, Dec. 2022, says it serves girls).",
+  "Find originals for executive directors David Allred, Kim Seay-Smith and Brian Pace (2016) and admissions director Amber Austin; lead: web.archive.org/web/20171021121151/http://sequelyouthservices.com/html/staffsecure-lavaheights.html.",
+  "Find originals for $10,500 a month in 2015, the name 'Lava Heights RTC', and the location across from Ashcreek Ranch (wiki, no citation).",
+  "Date the FOX 13 report of a 22-year-old staff member's arrest (Lava Heights fact 31) and confirm that it is the Nichols case. Find the filing date and outcome for fact 32 (truncated).",
+  "Cite each Utah finding to its own inspection report (Feb. 1, 2024; Sept. 18, 2024; Apr. 17, 2025; June 4, 2025; Apr. 29, 2026) instead of the facility page, license 94202.",
+  "Refresh kop-data's ut_reports.json (last updated Oct. 2025) and store the state's statement in production's inspection_reports for report 75584, which holds only the rule title.",
+  "Get the original of the 2018 Google review by 'Mekeda' (former resident, quoted on the wiki) and decide whether it adds to the testimony."
+ ],
+ "log": "Nov 11 testimony pass: the lede's 'Former employees complained publicly…' and paragraph 3's paraphrase of the Feb. 2018 Yelp review and the 2020 Indeed line are out. The lede now carries the pointer sentence. Two testimony quotes added, both read through the r/troubledteens wiki's copy (archive/rec13-wiki-quotes.txt) because Yelp no longer shows the review and Indeed blocks reads: a former employee on Yelp (Feb. 2018) and a former direct support staff member on Indeed (July 2020). The Spectrum's runaway paragraph is unchanged (article unreadable; research). Earlier passes: CARE built it in 2012 as a performing-arts program (Woodbury); 2016 Sequel purchase (Tribune 2019); Sequel to Rite of Passage between the Sept. 28 and Oct. 20, 2021 captures; licensed to Care Youth Corp. dba Rite of Passage from Jan. 31, 2022; Nichols hired Sept. 2022 and sentenced May 16, 2023 (KSL, KUTV, St. George News), so he was Rite of Passage staff; Utah findings 2024-2026 from license 94202 (the Apr. 29, 2026 'Extreme' finding with its $500 fine was confirmed through the state API)."
+}

@@ -14,7 +14,7 @@
   ],
   "unsil": [
    "https://www.unsilenced.org/portfolio-items/aspen-ranch/",
-   "Unsilenced, former student testimony (2008-2009)"
+   "Nate, former Aspen Ranch student (2008-2009), testimony on Unsilenced"
   ],
   "w1103": [
    "https://strugglingteens.com/artman/publish/AspenEducationGroupBN_110324.shtml",
@@ -38,11 +38,11 @@
   ],
   "anon05": [
    "",
-   "Anonymous former Aspen Ranch student, written account, Sep 23, 2005 (published as heal-online.org/aspenrchanon2.pdf)"
+   "Anonymous former Aspen Ranch student, email to HEAL, Sep 23, 2005, published by HEAL as aspenrchanon2.pdf (read from the Wayback Machine copy)"
   ],
   "anon06": [
    "",
-   "Anonymous former Aspen Ranch student, written account, Jun 16, 2006 (published as heal-online.org/aspenrchanon1.pdf)"
+   "Anonymous former Aspen Ranch student, email to HEAL, Jun 16, 2006, published by HEAL as aspenrchanon1.pdf (read from the Wayback Machine copy)"
   ],
   "st5918": [
    "https://strugglingteens.com/artman/publish/article_5918.shtml",
@@ -50,11 +50,32 @@
   ]
  },
  "paragraphs": [
-  "Aspen Ranch was a residential treatment center for teenagers in Loa, Utah, run by Aspen Education Group, a division of CRC Health Group, until 2011.{w1208,w1103} It combined a working horse ranch with a school.{w0010} A former student there in 2008 and 2009 has said staff pinned teenagers face down when they refused orders and that one staff member broke a boy's wrist.{unsil} Aspen Education Group closed the ranch in 2011, saying demand for therapeutic programs had fallen.{w1103}",
+  "Aspen Ranch was a residential treatment center for teenagers in Loa, Utah, run by Aspen Education Group, a division of CRC Health Group, until 2011.{w1208,w1103} It combined a working horse ranch with a school.{w0010} Former students have published accounts of the ranch since 2005 (see Survivor testimony below).{anon05,anon06,unsil} Aspen Education Group closed the ranch in 2011, saying demand for therapeutic programs had fallen.{w1103}",
   "Its 2009 listing with the National Association of Therapeutic Schools and Programs gave 1995 as its founding year and 1999 as the year it joined.{natsap09} The ranch was operating by 2000.{w0010} That September it had 55 students aged 13 to 17, with room for 70; new arrivals lived in a building called \"Roundup,\" and students moved up through levels named Mustang, Maverick, Greenhorn and Rancher.{w0010} Kreg Gillman was executive director, and the average stay was about five months.{w0010} Scott Hess was clinical director until 2000.{st5918} The Utah Department of Human Services licensed it as a residential treatment center.{w0010,w0307} In 2010 Woodbury Reports said CARF had accredited it for three years.{w1009}",
   "By 2009 the ranch listed 80 students aged 13 to 18, stays of six to 12 months, and Melodie Rose as its executive contact.{natsap09} Woodbury Reports named Brandon Burr as clinical director in 2009.{w0911} The ranch's enrollment agreement set the price at $350 a day with a minimum stay of nine months.{ascon} The first payment was $18,715: the first month's tuition of $7,982.50, a $7,982.50 prepaid fee for transition services that the program kept if the child left early, and a $2,750 enrollment fee.{ascon} The agreement named Robin Stephens as Aspen Education's regional director.{ascon} Parents handed Aspen temporary custody of the child by power of attorney, and the agreement also provided for students placed in Aspen's custody by a court.{ascon} It called for a strip search and a search of all belongings at intake.{ascon} It also allowed staff to physically restrain, control and detain students, including to bring back runaways.{ascon} The program details in the same packet said the first eight weeks were a time of adjustment that went better with family and student apart, so parent visits could be arranged only after the eighth week.{ascon} Students could receive letters from friends only in the final stages of treatment and with their parents' approval.{ascon} Those who reached the top levels, Rider and Wrangler, could earn off-campus trips, which the packet said usually took at least six months.{ascon} It said a psychiatrist visited the ranch once a month and a family nurse practitioner once a week, and that the school was accredited by the Northwest Association of Accredited Schools.{ascon}",
-  "Former students have described what that meant in practice.{anon05,anon06} One who was there around 2005 said new arrivals spent their first weeks on \"round-up,\" either silent in a basement or doing manual labor outside, with no contact with their parents.{anon05} When the student refused to go outside one July morning, the student said, staff ripped the sheets out from under the student, threw the student onto a staircase and dragged the student to the field to work.{anon05} The student said all letters were read before they were sent, weekly calls home were on speakerphone with a therapist and were cut off if a student described abuse, and students were threatened with transfer to a program outside the country.{anon05} Another former student, writing in June 2006, said staff restrained students with the Positive Control System, using pressure points, bent wrists and locked joints, usually for 45 minutes to an hour, and that many friends ended up with broken wrists.{anon06} The student said the on-campus psychiatrist prescribed medication from staff behavior reports without consulting the student or checking medical records, and that a Ritalin prescription led to a number of seizures.{anon06}",
-  "A former student who was there in 2008 and 2009 described the ranch on Unsilenced, a site that publishes survivor accounts.{unsil} The student said staff pinned teenagers face down when they refused orders.{unsil} The student said a staff member, Joe Giles, broke a boy's wrist taking him to the ground, and that the boy waited hours for care.{unsil}",
   "On March 24, 2011, Aspen Education Group announced it would discontinue five programs, Aspen Ranch among them, and consolidate three others.{w1103} The company cited \"the reduced demand for therapeutic schools and programs in today's economy.\"{w1103} Aspen Ranch closed that year; Aspen Achievement Academy, the company's wilderness program in the same town, was merged into Outback Therapeutic Expeditions.{w1103}"
+ ],
+ "testimony": [
+  {
+   "text": "For the first two weeks you arrive at Aspen Ranch you are placed on a level known as round-up. During this period of time you are either silent in a basement, or outside doing manual labor (changing watering pipes, building fences etc). You cannot have any contact with your parents and get to talk to a therapist maybe once or twice. One July morning when I refused to go outside, the sheets were ripped out from under me and I was carried and thrown onto a staircase where two men put my shoes on, picked me up and dragged me to the field where I was to work. \u2026 Every week you got to speak with your parents, on speakerphone, with your therapist present for 20 minutes. If you ever tried to tell your parents about the torture you were suffering through, the conversation would be immediately terminated. All letters were read before sent, all incoming mail opened, read and inspected before given to you. \u2026 We were often threatened to be sent to an out of country program where we were told there was no child labor laws.",
+   "who": "Former student",
+   "where": "Email to HEAL, published on HEAL's site",
+   "date": "September 2005",
+   "key": "anon05"
+  },
+  {
+   "text": "Aspen Ranch uses a physical restraint system called PCS (positive control system) which is actually FAR from positive. PCS includes a barrage or various pressure points and bent wrists, locked joints, and strained tendons. Once put into PCS submission you are held here by a minimum of 3 staff, your pulse regularly checked to indicate your level of anger. You are normally on the ground (also known as \"Carpet Time\" for a norm of 45 minutes to an hour). \u2026 I have seen many of my friends at Aspen Ranch end up with broken wrists from PCS. \u2026 The \"on campus\" psychiatrists prescribe you medications based on staff behavioral reports, without even consulting you to see how you feel about putting a new foreign substance into your body or checking past medical records (could be detrimental to your well being). \u2026 I myself was a bit ADHD according to staff, and the staff apparently thought that they were doing me a favor recommending that I be prescribed to Ritalin (methylphenidate), which actually led to a number of seizures.",
+   "who": "Former student",
+   "where": "Email to HEAL, published on HEAL's site",
+   "date": "June 2006",
+   "key": "anon06"
+  },
+  {
+   "text": "Any time the patients did not comply with orders from the staff, the staff used something called \"PCS,\" short for positive control system. This was a form of restraint consisting of multiple grown men and women twisting the arms of teenage boys and girls behind their backs in order to position them face down in the ground for minutes to hours at a time. They did this anytime a patient refused an order such as \"time to get out of bed\". Dan (alias) was another patient of Aspen. \u2026 One of the Staff, Joe Giles (not an alias), who was actually a police officer employed by the local town and also a large man pushing 200 lbs, proceeded to lunge at Dan, grabbing him by the arm, sweeping his feet from under him, and shoving him face down in the dirt. During this process, Dan broke his wrist. \u2026 It took hours for Dan to receive any medical attention, and Joe never faced any type of legal repercussion.",
+   "who": "Nate, former student (2008-2009)",
+   "where": "Unsilenced",
+   "date": "undated",
+   "key": "unsil"
+  }
  ]
 }

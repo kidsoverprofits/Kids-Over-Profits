@@ -1,0 +1,23 @@
+{
+ "needs_you": [
+  {
+   "ask": "The December 1998 death of 17-year-old \"Brandon H.\", ruled a suicide, rests on a sheriff's case number Wikipedia cites; nobody has read the record. Keep it?",
+   "choices": [
+    "Keep as written",
+    "Keep without the name",
+    "Cut until the record or a news report is found"
+   ]
+  }
+ ],
+ "research": [
+  "Get the text of the AP story in The Columbian, Mar. 19, 1998 (\"Ex-employees, parents say teens mistreated at private academy\"; HighBeam is paywalled) and replace the paraphrase of the four former employees' and two parents' claims with their own words (rule 31).",
+  "Find Crook County Sheriff's Office case no. 982737 (Dec. 1998) or a contemporaneous news report of Brandon H.'s death; the surname and Dec. 16 date come only from Fornits and stay out.",
+  "Read Mother Jones, Nov. 4, 2009 (motherjones.com/?p=28871) and confirm it supports the sentence on former students describing Lifesteps to reporters.",
+  "Settle the second suit's date and per-suit plaintiff counts at settlement from the state dockets (LF No. 1109-11909, Multnomah, Sept. 13, 2011 vs The Bulletin's Nov. 9, 2011; OECI needs a login).",
+  "Find a source for the founders Steve Houghton, Alex Bitz and Greg Andrick (wiki and HEAL staff list give none).",
+  "Find Mount Bachelor's NATSAP membership (since 1999 per the wiki): the NATSAP 2009 directory text in drive/ lacks the MBA entry.",
+  "Find a deed or news report for the 2016 church purchase of the campus for $950,000.",
+  "Consider a sentence on Forest Grove School District v. T.A. (U.S. Supreme Court, 2009): TIME, Apr. 17, 2009 says Mount Bachelor was the school in the case (the reimbursement claim was against the district)."
+ ],
+ "log": "Nov 2-4: rebuilt from originals: the school's archived history (Weiss and Houghton, 1987-88; Brace 1993-97; Bitz from May 1997), The Bulletin Nov. 15, 2009 (CEDU/Synanon lineage, 1998 spin-off, DHS wording), KOHD, The Oregonian and TIME 2009 (closure, size, findings), Central Oregonian 2010 (settlement), The Bulletin 2011, 2014 and 2015 and the federal Nautilus opinion (three suits, case numbers, Jan. 4, 2012 third suit, 51 plaintiffs per Dani's highest-figure rule). Restored via Wikipedia's citations: the 1998 AP complaints, DHS clearing the school (TIME), Brandon H.'s 1998 death (sheriff case), DHS licence, NAAS. Fornits, HEAL and wiki citations removed. Nov 11: the 2009 lap-dance account is now Jane's own words as TIME printed them; the 2011 suit's claims are now the complaint's words as Courthouse News quoted it. The live TIME article was read in full: it does say DHS cleared the program after 1998 (the Nov. 2 excerpt file said it did not). No self-published survivor accounts remain in the text, so there is no Survivor testimony block."
+}

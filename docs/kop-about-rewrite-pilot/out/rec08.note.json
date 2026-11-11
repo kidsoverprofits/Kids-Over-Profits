@@ -1,0 +1,23 @@
+{
+ "needs_you": [
+  {
+   "ask": "The sentences naming SLS staff (Sena and Caputo assaulting patients; Prichard calling the opt-out meeting) rest on an unsigned 2007 press release read through HEAL and a law-firm page now offline. Keep them?",
+   "choices": [
+    "Keep, stated as allegations",
+    "Keep the suit, drop the staff names until the complaint is read",
+    "Cut both sentences"
+   ]
+  }
+ ],
+ "research": [
+  "Find the docket of Romano and Morgan v. SLS Residential, Inc. (S.D.N.Y., 2007; plaintiffs' counsel probably Michael Sussman) and read the complaint; replace the paraphrase of its claims (restraints, isolation rooms, nightly searches, patients' rights, ADA, $75M/$150M) with its own words (rule 31), and name who issued the Apr. 29, 2007 press release.",
+  "YourLawyer.com's SLS page (yourlawyer.com/new-york-medical-malpractice/sls-residential-defendants-sanctioned/) is a 404 as of Nov. 11, 2026: find a Wayback copy and archive it; it is the only source for the $35,000 sanction, the opt-out finding, Prichard's meeting and the sedation charge.",
+  "Find the year and outcome of Judge Robinson's $35,000 sanction ruling and of the class action itself.",
+  "Find the OMH charge that SLS sedated patients who refused medication in the court record (Matter of SLS Residential v. OMH, 2011) or other primary text.",
+  "Find when SLS stopped operating after the Nov. 2011 ruling.",
+  "Find a source naming the OMH commissioner who adopted the fines in July 2008 (Michael Hogan is not named by any cited source).",
+  "Check the clinical officer's spelling (Shawn Prichard vs Pritchard) against the court decisions.",
+  "Archive The Journal News, July 9, 2008 (lohud.com) original; it was read through HEAL's adult.htm reprint."
+ ],
+ "log": "Nov 2: rebuilt on the Appellate Division decisions (Nov. 10, 2009; Nov. 15, 2011; Nov. 12, 2014), YourLawyer.com and Struggling Teens' LoHud roundup. Corrections: OMH filed revocation charges on Aug. 29, 2008 and revoked on Aug. 9, 2010 (not 2008); the Dec. 2008 ruling annulling the fines was reversed in 2009 and $100,000 reinstated ($10,000 restraint fine struck); 11 violations in all (8 + 3). Nov 3: restored the chairmen Joseph Santoro and Alfred Bergman, the affiliates and Route 6 headquarters (The Journal News, July 9, 2008, via HEAL's reprint), and the plaintiffs, named staff, the complaint's assault allegation and the $950-a-day price (Apr. 29, 2007 press release, print, via HEAL), all as allegations. Michael Hogan's name dropped (no source). Nov 11: no self-published survivor accounts in the record; the class action's claims stay as written because the YourLawyer page is now a 404 (research line above)."
+}

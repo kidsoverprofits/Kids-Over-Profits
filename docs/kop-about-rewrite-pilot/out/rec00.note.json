@@ -1,0 +1,20 @@
+{
+ "needs_you": [
+  {
+   "ask": "A youth died at the boot camp on Aug 31, 2002 (name never released). Add an unnamed entry to KOP's In Loving Memory list?",
+   "choices": [
+    "Add it unnamed now",
+    "Wait until a name is found",
+    "Leave it off"
+   ]
+  }
+ ],
+ "research": [
+  "Find the closing year of Colorado County Boot Camp / Colorado County Juvenile Facility, Eagle Lake, Texas (CSC 10-Ks list it through March 2005; GEO and YSI filings after 2005 may say).",
+  "Find a citable source that YSI ran the Eagle Lake facility from 2001 to 2008 (KOP's Sequel/TSI/YSI/Vivant sheet says so; its only link is the 2003 YSI page, which gives no dates).",
+  "Find a source tying the boot camp's site, 600 Highway 3013 West, Eagle Lake, to the Texas ChalleNGe Academy campus opened there in July 2015 (the Texas Military Department gives the address; nothing reachable ties it to the boot camp).",
+  "Open and check YSI's archived Eagle Lake page (web.archive.org/web/20030430171141/http://ysii.com/Programs/Facility_Type/Program_Offerings/Eagle/eagle.html); it is cited but could not be opened.",
+  "Find the name of the youth who died at the boot camp on Aug 31, 2002 (Prison Legal News, Jun 15, 2003 gives none; try Colorado County and Texas juvenile records and Houston and Columbus newspapers)."
+ ],
+ "log": "Rewritten Nov 2 under the writing rules; KOP's operator sheet, YSI timeline and a Palm Beach Post PDF used as leads only. Corrected the first pass: YSI was a separate company (founded 1991 by W. James Hindman; FundingUniverse) that CSC bought in 1999 (CSC 10-K 2002), not CSC's brand; this settles who ran the camp (CSC opened it in 1998, then under YSI's name). GEO's Nov 7, 2005 purchase of CSC and the $3.75 million sale of YSI to James F. Slattery cited to GEO's 8-K exhibit (replaces Wikipedia). YSI's 2016 Florida exit cited to WUSF. Capacity given as 100 (1998) and 156 (2002) with years. Left out for lack of a citable source: YSI's 2001-2008 dates, the closing, and the Texas ChalleNGe Academy on the site. Drive checked Nov 2 and 3: nothing new. No survivor testimony in this record (Nov 11 check)."
+}

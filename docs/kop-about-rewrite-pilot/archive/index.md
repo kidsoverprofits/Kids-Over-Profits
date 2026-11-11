@@ -58,3 +58,57 @@ These are sources the redo couldn't reach from the cloud workspace, opened in Da
 - HighBeam (Columbian 1998): paywall, headline only.
 - Aspen Ranch enrollment packet: loads, but it's a scanned PDF with no text layer.
 - stgeorgeutah.com/?p=929339: redirects to the homepage.
+
+## Testimony pass, rec16-rec20 (Nov 11, 2026)
+
+| record | claim (short) | URL | saved file | supports? | supporting text |
+|---|---|---|---|---|---|
+| rec17 Teen Challenge | Prayer Mountain: child services twice removed children; hoses, sandpit in winter (now a testimony quote) | Google review by "Chris", 2020 (via r/troubledteens wiki prayermtn page) | rec17-google-2020.txt | yes (via wiki copy) | "There are two accounts of child services having to take children out of there" |
+| rec17 Teen Challenge | Lakeland adoptions: Doucette, Foster, Burris quotes; Megan's journal; Kansas City "projects"; lawyer's reply | The New Yorker, Oct 2021 (KOP media 5432 PDF) | rec17-newyorker-2021-10.txt | yes | "they're forcing me to give away my baby"; "My child was stolen from me"; "That's not an option"; "I've witnessed 13 suicide attempts not including my own" |
+
+## Added Nov 11, 2026 (testimony pass, rec06-rec10; fetched with curl, not Chrome)
+
+| record | claim (short) | URL | saved file | supports? | supporting text |
+|---|---|---|---|---|---|
+| rec06 Swift River | "remains unlicensed"; "escorted the state off their property" | govinfo CHRG-110hhrg41839 (House hearing, Apr. 24, 2008) | rec06-hearing-2008-04.txt | yes | Statement for the record by Deborah Thomas-Vigliano, Plano, Texas (parent) |
+| rec06 Swift River | 2008 Base Camp ration account (testimony) | troubledteensurvivor.com Survivor_Stories.html (Wayback 2008) | rec06-troubledteensurvivor-2008-11.txt | via copy | r/troubledteens wiki's verbatim quotation; Wayback blocked here |
+| rec06 Swift River | 2014 anonymous account (testimony) | teenliberty.org Voices.htm (Wayback 2014-10-15) | rec06-teenliberty-2014-10.txt | via copy | Same wiki page's quotation |
+| rec06 Swift River | 2016 Reddit account, u/MD994 (testimony) | reddit.com/r/troubledteens/comments/4s1y7e | rec06-reddit-2016-07.txt | via copy | Same wiki page's quotation; reddit.com blocked here |
+| rec07 Family Foundation | Martin-Crawford's testimony (duct tape, punching, chase and tackle, forced eating, 6X6 room) | govinfo CHRG-110hhrg41839 | rec07-hearing-2008-04.txt | yes | Oral and prepared statements, verbatim |
+| rec07 Family Foundation | June 2026 suit: complaint quotations, Michael and Cindy Argiros, K9 dogs | New York Post 2026-06-20 | rec07-nypost-2026-06.txt | yes | Graves and vomit are the reporter's paraphrase only |
+| rec09 Mount Bachelor | Jane's Lifesteps quotes; DHS cleared the program after 1998 | TIME 2009-04-17 (live content.time.com) | rec09-time-2009-04.txt | yes | "The Oregon DHS cleared the program following the investigation." Corrects the Nov. 2 row above. |
+| rec09 Mount Bachelor | July 2011 complaint's words | Courthouse News 2011-07-07 | rec09-courthousenews-2011-07.txt | yes | "exposure to the elements; extreme cold; ..." |
+| rec10 Midwest Academy | AP interviews of six former students (Snyder, Beaman, Adkisson quotes) | KSL/AP 2016-02-13 | rec10-ap-2016-02.txt | yes | "It was complete hell"; "It's like torture" |
+| rec10 Midwest Academy | March 2016 families' suit, petition quotations | TSPR 2016-03-15 | rec10-tspr-2016-03.txt | yes | "culture of punishment, confinement, coercion..." |
+| rec10 Midwest Academy | OSS rooms: lights, camera, structure, 24 hours | TSPR 2017-12-14 | rec10-tspr-2017-12.txt | yes | Prosecutor's opening statement |
+| rec08 SLS | Class action, $35,000 sanction | yourlawyer.com SLS page | — | not loaded | 404 as of Nov. 11, 2026 |
+| rec01 Aspen Ranch | Sep 2005 former student's account (round-up, staircase, calls cut off, letters read) | web.archive.org/web/2016/http://www.heal-online.org/aspenrchanon2.pdf | rec01-heal-2005-09.txt | yes | Original PDF read through Wayback (curl, Nov. 11, 2026); quoted as testimony |
+| rec01 Aspen Ranch | Jun 2006 former student's account (PCS, broken wrists, Ritalin seizures) | web.archive.org/web/2016/http://www.heal-online.org/aspenrchanon1.pdf | rec01-heal-2006-06.txt | yes | Same; quoted as testimony |
+| rec01 Aspen Ranch | Nate's testimony (PCS, Joe Giles, "It took hours for Dan to receive any medical attention") | unsilenced.org/portfolio-items/aspen-ranch/ | rec01-unsilenced-undated.txt | yes | Live page; no publication date shown. Settles the "waited hours" clause |
+| rec02 Provo Canyon | Parent's complaint summary (RN, Haldol, DA closed the case as civil) | fornits.com topic 5262.0 (Apr. 27, 2004) | rec02-fornits-2004-04.txt | yes | Live thread; KOP's link 5262 is the right thread after all |
+| rec02 Provo Canyon | darkhunterhope post (Haldol, ob's room) | fornits.com topic 5238.75, post #76 (May 2, 2004) | rec02-fornits-2004-05.txt | yes | Live |
+| rec02 Provo Canyon | Petition comment, 1990-91 stay (Thorazine) | fornits.com topic 5238.140, post #142 (Jun. 1, 2004) | rec02-fornits-2004-06.txt | yes | A petition comment reposted by another poster |
+| rec02 Provo Canyon | Whiteley, Lewis, Robison, Hilton quotes; "pattern ... from the 1980s to today" | Salt Lake Tribune 2020-09-20 via centerforhealthjournalism.org | rec02-sltrib-2020-09.txt | yes | Full article text |
+| rec03 Cross Creek | Joy G., Yelp, Feb. 2013 (testimony) | yelp.com/biz/cross-creek-residential-treatment-la-verkin | rec03-yelp-2013-02.txt | via copy | Yelp 403 to scripts, no Wayback capture; r/troubledteens wiki's verbatim quotation |
+| rec03 Cross Creek | Brian K., former staff, Yelp, Aug. 2013 (testimony) | yelp.com/not_recommended_reviews/cross-creek-residential-treatment-la-verkin | rec03-yelp-2013-08.txt | via copy | Page renders reviews by script; wiki's quotation |
+| rec03 Cross Creek | Former student, Mar. 2018 (testimony) | archive.ph/fPqwG (Places that Changed People) | rec03-placesthatchangedpeople-2018-03.txt | via copy | archive.ph CAPTCHA; wiki's quotation |
+| rec04 Eagle Ranch | WWASP Survivors comments, Aug. 2013, Sep. 2014, Mar. 2015 (Dj hansen), Sep. 2020 | wwaspsurvivors.com/?p=682 | rec04-wwaspsurvivors-2013-08.txt, -2014-09, -2015-03, -2020-09 | yes | Live page. Dj hansen's comment is dated Mar. 4, 2015 on the page (the wiki says 3/4/2014) |
+| rec04 Eagle Ranch | Parent, Yelp, Jan. 2020 (neck hold) | yelp.com/biz/eagle-ranch-academy-saint-george | rec04-yelp-2020-01.txt | via copy | Yelp 403, no Wayback capture; wiki's quotation |
+| rec04 Eagle Ranch | Parent, Google review, 2018 (SAIS/SACSCOC) | Google Maps contributor review (rlcowley) | rec04-google-2018.txt | via copy | Wiki's quotation |
+| rec04 Eagle Ranch | St. George PD incident table, page 2 | kidsoverprofits.org uploads (KOP copy) | — | not loaded | Scan with no text layer; "sexual offenses" and "children found unconscious" still unseen |
+
+## Testimony pass, rec11-rec15 (Nov 11, 2026)
+
+| record | claim (short) | URL | saved file | supports? | supporting text |
+|---|---|---|---|---|---|
+| rec11 Canyon State | Former students and a parent on a punitive school (now direct quotes) | FOX 10 Phoenix, Oct. 31, 2022 (live page) | rec11-fox10-2022-10.txt | yes | "It's our goal to like, make you hate it here"; "It's just not a safe environment"; "this desire to punish, not just the mind, but the body and the soul" |
+| rec12 Falcon Ridge | Horse work, 16 pills a day (testimony quote) | yelp.com/not_recommended_reviews/falcon-ridge-ranch-virgin (live) | rec12-yelp-2018-08.txt | yes | Jaimie S., Aug 14, 2018 |
+| rec12 Falcon Ridge | Bleach on cleaning duty (testimony quote) | reddit.com/r/troubledteens/comments/clubam (Wayback 2025-01-15) | rec12-reddit-2019-08.txt | yes | post created 2019-08-04, author deleted |
+| rec12 Falcon Ridge | Arm-twisting restraint by the residential director (testimony quote) | heal-online.org/falcon.htm (Wayback 2025-05-05) | rec12-heal-email-2019-04.txt | yes (HEAL's quotation of the e-mail) | "If I wanted to break your arm, I would break your arm." |
+| rec12 Falcon Ridge | Delayed medical care, ICU (testimony quote) | Google review by "Tony", 2014 (via the r/troubledteens wiki's copy) | rec12-wiki-quotes.txt | yes (via wiki copy) | "It was approximately one week before they got her appropriate medical care." |
+| rec13 Lava Heights | Former employee: restraint reports, med errors, staff let go (testimony quote) | Yelp, Feb 20, 2018 (via wiki copy; no longer on Yelp) | rec13-wiki-quotes.txt | yes (via wiki copy) | "Management would tell staff a specific way to word the incident report" |
+| rec13 Lava Heights | Former staff: "They hurt kids and blame staff" (testimony quote) | Indeed, July 13, 2020 (via wiki copy; Indeed 403) | rec13-wiki-quotes.txt | yes (via wiki copy) | "They abuse the residents and try to blame the staff." |
+| rec15 Straight Hampton Roads | Restraints, spit therapy, naked searches; Newport News client and mother (now direct quotes) | survivingstraightinc.com scan, Virginian-Pilot Mar 1, 1991 | rec15-virginianpilot-1991-03-01.txt | yes | "severe tactics were the norm"; "You have to stand there and take it." |
+| rec15 Straight Hampton Roads | Chesapeake mother's 16-year-old thrown to the floor, neck burned (now the paper's words) | survivingstraightinc.com scan, Virginian-Pilot Feb 8, 1991 | rec15-virginianpilot-1991-02-08.txt | yes | "When I found him he was having an asthma attack" |
+
+Not readable on Nov 11: The Spectrum, Feb 23, 2018 (402 paywall, no Wayback); archive.is captures of 3TV/CBS 5, FOX 10 Nov 1 2022 and WBRC (CAPTCHA); the Cincinnati Enquirer Aug 7, 1989 and Post Sept 18, 1987 scans (garbled or no text layer); pfctruth.com (no answer).

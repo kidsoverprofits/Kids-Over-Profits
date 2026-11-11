@@ -6,13 +6,14 @@ Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655w
 
 ## Files
 
-- `out/recNN.json`: the source of truth for each record's rewrite (`sources` map plus `paragraphs` with `{key}` citations). Edit these, never the HTML.
+- `out/recNN.json`: the source of truth for each record's rewrite (`sources` map, `paragraphs` with `{key}` citations, and `testimony`: survivor and family accounts quoted word for word, see gen.py). Edit these, never the HTML.
+- `out/recNN.note.json`: the record's note in three parts (owner, 2026-11-11): `needs_you` (decisions only, shown on the record and gathered at the top of the page), `research` (tasks for agents) and `log` (folded). This replaces the base note in `page.v6.html`.
 - `out/recNN.html`: built from the json by `gen.py`.
-- `out/recNN.note.txt`: that record's check-note additions. These cover what was added and from where, what was cut and why, conflicts, and open gaps.
+- `out/recNN.note.txt`: the older check-note additions, kept as history (folded into note.json). These cover what was added and from where, what was cut and why, conflicts, and open gaps.
 - `out/recNN.orig.html`: the record as it stood before the rewrite work (old check note, "Now" text, first draft). Use it as reference only.
 - `gen.py`: builds a record's Rewrite column. `python -I gen.py out/rec05.json > out/rec05.html`. Citations are numbered by first appearance. A source with an empty URL renders as a print citation.
 - `page.v6.html`: the base page (layout, the "Now" columns, the original check notes).
-- `page.html`: the current full page. It is rebuilt from `page.v6.html` plus every `out/recNN.html` and `out/recNN.note.txt` (see Rebuild).
+- `page.html`: the current full page. It is rebuilt from `page.v6.html` plus every `out/recNN.html` and `out/recNN.note.json` (see Rebuild).
 - `archive/`: text of archived originals fetched through Chrome, plus `index.md` (claim → URL → supports it?).
 - `drive/`: text extracted from originals saved in Dani's Google Drive (NATSAP 2009 directory, Provo 1996–97 parent manual, Swift River family handbook, ISAC WWASP report, Wood v. WWASPS complaint).
 - `verify.md`, `verify2.md`, `verify3.md`: independent fact-checks of every sentence that names a person.
@@ -24,7 +25,7 @@ Record numbers: 00 Colorado County Boot Camp, 01 Aspen Ranch, 02 Provo Canyon Sc
 1. Check KOP's own research first: the Google Drive program folders, operator sheets, and site facility/operator pages. Use them to find facts and the sources behind them.
 2. Never cite KOP's files, sheets, notes or site pages. Cite the original they record. Where the only copy of an original is a file in Dani's Drive, cite the original as a print citation (empty URL, full outlet/date/docket label).
 3. HEAL, the r/troubledteens wiki, Fornits, Wikipedia and Breaking Code Silence are not primary sources. Follow their citations to the original article, filing, record, or the survivor's own published account, and cite that.
-4. Survivor testimony is primary when cited to where the survivor published it, and attributed in the text.
+4. Survivor testimony is primary when cited to where the survivor published it. It is never retold in the text (owner, 2026-11-11): it is quoted word for word in `testimony`, only spelling and punctuation fixed, "…" for cuts, with one pointer sentence in the text. A survivor quoted by a reporter, court or hearing stays in the text only as a direct quote, named as the source names them. kop-pipeline `scripts/about-rewrite/BRIEF.md` rules 28 to 32.
 5. HEAL, the wiki and KOP's pages and files each carry their own citation for a claim (a footnote, a link, a named article or docket). Take that citation and cite the original. You don't have to fetch or verify the original first (Dani, Nov 3). Never cut a claim because the original couldn't be opened or checked. A claim stays out only when the citing source gives no citation at all; list it in the note with the page checked.
 6. A "correction" that contradicts KOP's records gets flagged in the note, not silently written into the text.
 7. Every sentence naming a person with an accusation, charge, conviction, lawsuit, firing or death must match its source's strength (alleged / charged / convicted, dates, ages, counts). Check new ones against the source before publishing.
