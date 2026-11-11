@@ -13,6 +13,7 @@ Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655w
 - `out/recNN.orig.html`: the record as it stood before the rewrite work (old check note, "Now" text, first draft). Use it as reference only.
 - `gen.py`: builds a record's Rewrite column. `python -I gen.py out/rec05.json > out/rec05.html`. Citations are numbered by first appearance. A source with an empty URL renders as a print citation.
 - `page.v6.html`: the base page (layout, the "Now" columns, the original check notes).
+- Dani's answers to the "Needs you" questions: saved by the page's buttons to the artifact's database, collection `answers`, one doc per question (`recNN-i`: choice, note, q, rec, at). Read them with the ArtifactData tool (`list`, collection `answers`) and apply them; only the owner can write.
 - `page.html`: the current full page. It is rebuilt from `page.v6.html` plus every `out/recNN.html` and `out/recNN.note.json` (see Rebuild).
 - `archive/`: text of archived originals fetched through Chrome, plus `index.md` (claim → URL → supports it?).
 - `drive/`: text extracted from originals saved in Dani's Google Drive (NATSAP 2009 directory, Provo 1996–97 parent manual, Swift River family handbook, ISAC WWASP report, Wood v. WWASPS complaint).
