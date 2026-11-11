@@ -1,6 +1,6 @@
 {
- "built": "2026-11-11 21:35 UTC",
- "source": "3acac019bc9ebc64f5f537d23f85351c375574b6",
+ "built": "2026-11-11 21:44 UTC",
+ "source": "9b0e99c024b0a8ac2ad219d18dba08ae09d9560b",
  "sections": [
   {
    "key": "2",
@@ -3831,6 +3831,21 @@
        "focus": false,
        "steps": [],
        "hash": "e66f9cd5817b"
+      },
+      {
+       "id": "4.4:reorganize-the-review-inbox-around-how-the-owner-works",
+       "lead": "Reorganize the Review inbox around how the owner works",
+       "text": "**Reorganize the Review inbox around how the owner works** (owner, 2026-11-11: \"too hard to navigate to the categories i use most often, too many useless categories, it's unclear what's going to be categorized where\"). Audit done, nothing built. Read on tmp/prod.sqlite (2026-11-10): saved counts (kop_review_inbox_counts), the review log (wpdl_kop_review_log, 30 days: 21,642 decisions, 17,729 by 'auto', 3,913 by the admin account) and each queue's table. The admin account's clicks are almost all in four queues: News 669, Serious violations 598, Answers to our questions 516, Document types 513; in the last 7 days only News, Answers, What readers remember, Glossary feedback, Data, Lawsuits, Legislation and Plain summaries had a click. 14 queues had no click in 30 days. Proposal sent to the owner: tabs by the kind of decision, not by where an item came from (Just in / News / From readers / Inspections / Fix records / Imports / Your inbox; All tools becomes a link); a pinned row of the queues used most; empty queues off the row; Wiki x5, Network map x3, filings x3, \"same or different?\" x6 merged; imports' badges count only what needs a person; cards show the decision buttons + Preview, the rest under More. Open: the owner's reactions to the sketch, then build. Nothing changed yet.",
+       "ask": "",
+       "date": "2026-11-11",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "8cbcf67b2c62"
       }
      ]
     },
