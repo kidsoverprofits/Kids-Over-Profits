@@ -716,6 +716,51 @@ function kop_rinbox_load_enrich() {
     return true;
 }
 
+/* ---- Who sent it ----------------------------------------------------------- */
+
+/**
+ * SQL: true when $col (a "submitted by" value) is a research send, not a person (owner, 2026-11-11: "make sure that
+ * only things that are ACTUALLY sent in by people are flagged that way"). Every research-key send ends
+ * "(research key)" (kop_msub_submitter()); older ones were "Claude research agent (Send page)" or
+ * "... import via Claude"; the 2026-10-28 load of Amber Foster's research map came through the key too and is
+ * relabelled by kop_rinbox_relabel_research_sends().
+ */
+function kop_rinbox_research_sender_sql($col) {
+    return "($col LIKE '%(research key)%' OR $col LIKE '%research agent%' OR $col LIKE '%import via Claude%')";
+}
+
+/** PHP twin of kop_rinbox_research_sender_sql(). */
+function kop_rinbox_is_research_sender($by) {
+    return (bool) preg_match('/\(research key\)|research agent|import via Claude/i', (string) $by);
+}
+
+/**
+ * Once: the research-key sends from before the label existed get it. Amber Foster's research map rows
+ * (2026-10-28, 203 news + lawsuits + websites in an hour, past the public cap of 12) and every
+ * "Claude research agent (Send page)" row read "... (research key)" after this.
+ */
+function kop_rinbox_relabel_research_sends() {
+    if (get_option('kop_rinbox_research_relabel') === '2026-11-11') return;
+    $from = array('Amber Foster (Teen Challenge Network research map) (Send page)', 'Claude research agent (Send page)');
+    $to = array('Amber Foster (Teen Challenge Network research map) (research key)', 'Claude research agent (research key)');
+    try {
+        $pdo = kop_rinbox_pdo();
+        foreach (array('news_submissions', 'lawsuits', 'legislation') as $t) {
+            $st = $pdo->prepare("UPDATE $t SET submitted_by = ? WHERE submitted_by = ?");
+            foreach ($from as $i => $f) $st->execute(array($to[$i], $f));
+        }
+        global $wpdb;
+        foreach ($from as $i => $f) {
+            $wpdb->query($wpdb->prepare("UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = '_kop_submitted_by' AND meta_value = %s", $to[$i], $f));
+        }
+    } catch (Throwable $e) {
+        return; // tried again on the next admin page
+    }
+    update_option('kop_rinbox_research_relabel', '2026-11-11', false);
+    delete_transient('kop_rinbox_native_split');
+}
+add_action('admin_init', 'kop_rinbox_relabel_research_sends');
+
 /* ---- REST ----------------------------------------------------------------- */
 
 add_action('rest_api_init', function () {
@@ -756,7 +801,12 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
         // The saved counts only: counting here kept the page blank for up to half a minute.
         $counts = kop_rinbox_counts((bool) $req->get_param('fresh'));
         $out = array();
+        $split = function_exists('kop_rinbox_native_split_counts') ? kop_rinbox_native_split_counts() : array();
         foreach (kop_rinbox_sources() as $key => $src) {
+            // A queue that knows who sent each item: [people => n, imports => n] (Websites sent in).
+            if (!empty($src['split']) && is_callable($src['split'])) {
+                try { $split[$key] = (array) call_user_func($src['split']); } catch (Throwable $e) { /* whole count instead */ }
+            }
             $out[] = array(
                 'key' => $key, 'label' => $src['label'], 'group' => $src['group'], 'area' => kop_rinbox_area($src), 'views' => $src['views'],
                 'count' => kop_rinbox_count_for_me($key, $counts[$key] ?? null), 'native' => (bool) $src['native'], 'tool_url' => (string) $src['tool_url'],
@@ -767,7 +817,7 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
                 'filters' => kop_rinbox_spec_list($src, 'filters'),
             );
         }
-        return array('sources' => $out, 'split' => function_exists('kop_rinbox_native_split_counts') ? kop_rinbox_native_split_counts() : array(),
+        return array('sources' => $out, 'split' => $split,
             'stale' => kop_rinbox_counts_stale(), 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
             'me' => get_current_user_id(), 'pins' => kop_rinbox_pins(), 'held' => kop_rinbox_held_counts() + array('volunteers' => function_exists('kop_vol_open_count') ? kop_vol_open_count() : 0));
     });

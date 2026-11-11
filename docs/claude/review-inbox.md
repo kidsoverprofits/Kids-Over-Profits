@@ -28,6 +28,11 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # saved whole by POST review-inbox/pins). Unset = kop_rinbox_default_pins() (News, Answers to our questions, Serious violations,
 # Websites sent in, Bill and lawsuit updates). A star beside every queue button, Find result and area-page row pins or unpins
 # at once (js/review-inbox.js pinToggle()/togglePin()); keys are the tab entries' keys, "<native>-imports" too. Your inbox's lists never pin
+# "Sent in by people" is only what a person sent (owner, 2026-11-11): research-key sends ("(research key)", older "Claude research
+# agent", "import via Claude"; kop_rinbox_research_sender_sql()), News clipping OCR and any "(... import)" sender count as imports
+# (kop_rinbox_native_origins() 'claude', 'clippings', 'other-imports'). A non-native queue that knows its senders gives 'split' => fn():
+# [people, scans, imports] and 'origins' people/imports (Websites sent in): its people count under Sent in by people, "<Queue> (imports)"
+# under Found by imports. kop_rinbox_relabel_research_sends() relabelled the older research sends once (option kop_rinbox_research_relabel)
 # Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
 # (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'
 # and the imports' are counts per queue in two folds. A source answers with 'recent' (native: by created_at) or 'recent_count'

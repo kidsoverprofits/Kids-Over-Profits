@@ -48,6 +48,11 @@ kop_rinbox_register('websites', function () {
             return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'pending'", KOP_EXT_SOURCE_CPT));
         },
         'list'     => 'kop_rinbox_websites_list',
+        'origins'  => 'kop_rinbox_websites_origins',
+        'split'    => function () {
+            $o = kop_rinbox_websites_origin_counts('pending');
+            return array('people' => $o['people'], 'scans' => 0, 'imports' => $o['imports']);
+        },
         'on_file'  => 'kop_rinbox_websites_on_file',
         'get'      => function ($key) {
             $p = kop_rinbox_websites_post($key);
@@ -79,6 +84,10 @@ function kop_rinbox_websites_list(array $q) {
     $where = $status === 'all'
         ? $wpdb->prepare("post_type = %s AND post_status IN ('pending','publish','draft')", KOP_EXT_SOURCE_CPT)
         : $wpdb->prepare('post_type = %s AND post_status = %s', KOP_EXT_SOURCE_CPT, $status);
+    $origin = (string) ($q['origin'] ?? '');
+    if ($origin === 'people' || $origin === 'imports') {
+        $where .= ' AND ' . ($origin === 'people' ? 'NOT ' : '') . kop_rinbox_websites_research_where();
+    }
     if ($q['search'] !== '') {
         $like = '%' . $wpdb->esc_like($q['search']) . '%';
         $where .= $wpdb->prepare(" AND (post_title LIKE %s OR ID IN (SELECT post_id FROM {$wpdb->postmeta}
@@ -88,6 +97,36 @@ function kop_rinbox_websites_list(array $q) {
     $rows = $wpdb->get_results("SELECT ID, post_title, post_content, post_status, post_date FROM {$wpdb->posts} WHERE $where
         ORDER BY post_date DESC, ID DESC LIMIT " . (int) $q['limit'] . ' OFFSET ' . (int) $q['offset']);
     return array('items' => array_map('kop_rinbox_websites_item', (array) $rows), 'total' => $total);
+}
+
+/** SQL on the posts table: the website came in with the research key (kop_rinbox_research_sender_sql()). */
+function kop_rinbox_websites_research_where() {
+    global $wpdb;
+    return "ID IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_kop_submitted_by' AND "
+        . kop_rinbox_research_sender_sql('meta_value') . ')';
+}
+
+/** [people => n, imports => n] in one status. */
+function kop_rinbox_websites_origin_counts($status) {
+    global $wpdb;
+    $base = $status === 'all'
+        ? $wpdb->prepare("post_type = %s AND post_status IN ('pending','publish','draft')", KOP_EXT_SOURCE_CPT)
+        : $wpdb->prepare('post_type = %s AND post_status = %s', KOP_EXT_SOURCE_CPT, $status);
+    $research = kop_rinbox_websites_research_where();
+    $row = $wpdb->get_row("SELECT COUNT(*) AS n, SUM(CASE WHEN $research THEN 1 ELSE 0 END) AS r FROM {$wpdb->posts} WHERE $base", ARRAY_A) ?: array();
+    $n = (int) ($row['n'] ?? 0);
+    $r = (int) ($row['r'] ?? 0);
+    return array('people' => $n - $r, 'imports' => $r);
+}
+
+/** "Came from": people, or Claude research (the research key). */
+function kop_rinbox_websites_origins(array $q) {
+    $view = in_array($q['view'] ?? '', array('pending', 'publish', 'draft', 'trash', 'all'), true) ? $q['view'] : 'pending';
+    $o = kop_rinbox_websites_origin_counts($view);
+    $out = array();
+    if ($o['people']) $out[] = array('key' => 'people', 'label' => 'People (readers, volunteers, admins)', 'count' => $o['people']);
+    if ($o['imports']) $out[] = array('key' => 'imports', 'label' => 'Claude research (research key)', 'count' => $o['imports']);
+    return $out;
 }
 
 function kop_rinbox_websites_item($p) {
@@ -152,6 +191,8 @@ function kop_rinbox_websites_item($p) {
     $sent_by['readonly'] = true;
     return array(
         'key'          => (string) $id,
+        // Just in: a person's send is a card there; a research-key send is only counted (inc/review-inbox-recent.php).
+        'people'       => !kop_rinbox_is_research_sender($meta['submitted_by']),
         'title'        => (string) $p->post_title,
         'subtitle'     => implode(' · ', $sub),
         'url'          => $meta['url'],

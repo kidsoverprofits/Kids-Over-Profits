@@ -305,6 +305,9 @@ if ($real !== '') {
     $before_count = get_transient(kop_msub_rate_key());
     check(is_resp($keyed($real, 1), 201), 'research key -> 201 past the hourly cap');
     check(get_transient(kop_msub_rate_key()) === $before_count, 'a research send does not count toward the hour');
+    // Whatever name it gives, a research send is never counted as sent in by a person (Review inbox).
+    $n = $pdo->query("SELECT submitted_by FROM news_submissions WHERE article_url = 'https://example-news.test/research/1'")->fetchColumn();
+    check($n === '(research key)', 'a research send is stored as "(research key)", not the page it came through', (string) $n);
 } else {
     echo "  (skipped: ~/kop-research-key.txt not here)\n";
 }

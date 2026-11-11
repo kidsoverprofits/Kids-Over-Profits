@@ -721,7 +721,8 @@ function kop_rinbox_native_origins($type) {
         'fornits'        => array('Fornits', "$by LIKE '%(Fornits import)%'"),
         'extension'      => array('Browser extension', "$by LIKE '%(browser extension)%'"),
         'moved'          => array('Moved from another queue', "($by LIKE '%(moved)%' OR $by LIKE '%(review inbox)%')"),
-        'claude'         => array('Imported by Claude', "$by LIKE '%import via Claude%'"),
+        'claude'         => array('Claude research (research key)', kop_rinbox_research_sender_sql($by)),
+        'clippings'      => array('News clipping OCR', "$by = 'News clipping OCR'"),
         'oldsite'        => array('Old site posts', "$by IN ('wp-news-import', 'bulk-upload', 'reimport-regenerated')"),
     );
     if (!$has_notes) {
@@ -729,6 +730,10 @@ function kop_rinbox_native_origins($type) {
         $all['gdocs'][1] = "$by LIKE '%(Google Docs import)%'";
     }
     if ($type === 'data') return array();
+    // Any other import names itself "(<something> import)": never counted as a person's.
+    $named = array();
+    foreach ($all as $o) $named[] = '(' . $o[1] . ')';
+    $all['other-imports'] = array('Other imports', "$by LIKE '%import)%' AND NOT (" . implode(' OR ', $named) . ')');
     $others = array();
     $imports = array();
     foreach ($all as $key => $o) {

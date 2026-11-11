@@ -72,10 +72,14 @@ function kop_msub_via(array $p) {
     return $labels[$via] ?? $labels['app'];
 }
 
-/** Who sent it, as the records tables write it. */
-function kop_msub_submitter(array $p) {
+/**
+ * Who sent it, as the records tables write it. A send with the research key (Claude's research sessions and the
+ * scripts that load a dataset for someone) ends "(research key)" instead of the page it came through, so the
+ * Review inbox never counts it as sent in by a person (kop_rinbox_research_sender_sql(), owner 2026-11-11).
+ */
+function kop_msub_submitter(array $p, $research = false) {
     $name = kop_ext_text($p['submitter_name'] ?? '', 120);
-    return mb_substr(($name !== '' ? $name . ' ' : '') . '(' . kop_msub_via($p) . ')', 0, 255);
+    return mb_substr(($name !== '' ? $name . ' ' : '') . '(' . ($research ? 'research key' : kop_msub_via($p)) . ')', 0, 255);
 }
 
 /** Public form of the extension's duplicate list: type and whether it is live. */
@@ -250,7 +254,7 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
     }
 
     kop_ext_load_record_libs();
-    $submitter = kop_msub_submitter($p);
+    $submitter = kop_msub_submitter($p, $research);
     $note = kop_ext_note($p);
     $queue_labels = array(
         'article' => 'news review', 'lawsuit' => 'lawsuit review', 'legislation' => 'legislation review',

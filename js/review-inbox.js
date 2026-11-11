@@ -180,8 +180,13 @@
     /** One queue as a tab entry: {key, label, group, area, count, help, active, open}. */
     function queueEntry(s) {
         if (!s.native) {
-            return { key: s.key, label: s.label, group: s.group, area: s.area, help: s.help || '', count: s.count,
-                active: state.source === s.key, open: function () { openSource(s.key); } };
+            // A queue that knows who sent each item (Websites sent in): under "Sent in by people" it counts and opens
+            // only what people sent; the research sends are its "(imports)" entry under Found by imports.
+            var sp = state.split[s.key];
+            var peopleOnly = s.area === 'people' && sp && sp.people !== null && sp.people !== undefined;
+            return { key: s.key, label: s.label, group: s.group, area: s.area, help: s.help || '', count: peopleOnly ? sp.people : s.count,
+                active: state.source === s.key && !(peopleOnly && state.origin === 'imports'),
+                open: function () { openSource(s.key, peopleOnly ? 'people' : ''); } };
         }
         if (s.key === 'news') {
             return { key: 'news', label: 'News', group: '', area: 'news', help: 'Every news article waiting for review.', count: nativeCount(s),
@@ -210,11 +215,12 @@
             // What imports (Google Docs, SCIAD NET, ...) sent to the page's own lists is neither people's nor the scans':
             // without this entry no tab would show it.
             state.sources.forEach(function (s) {
-                var n = s.native && s.key !== 'news' && state.split[s.key] ? state.split[s.key].imports : 0;
+                var n = s.key !== 'news' && state.split[s.key] ? state.split[s.key].imports : 0;
                 if (!n) return;
                 out.push({ key: s.key + '-imports', label: s.label + ' (imports)', group: 'Sent to the review lists by imports',
-                    help: s.label + ' items that imports (Google Docs, SCIAD NET, the wiki, Scraper finds...) sent in.', count: n,
-                    active: nativeShowing() === s.key && state.nativeArea === 'found', open: function () { openNative(s, 'imports', 'found'); } });
+                    help: s.label + ' items that imports and Claude research (the research key) sent in, not a person.', count: n,
+                    active: s.native ? nativeShowing() === s.key && state.nativeArea === 'found' : state.source === s.key && state.origin === 'imports',
+                    open: function () { if (s.native) openNative(s, 'imports', 'found'); else openSource(s.key, 'imports'); } });
             });
         }
         return out.sort(function (a, b) { return byLabel(a.group, b.group) || byLabel(a.label, b.label); });
@@ -335,7 +341,11 @@
         if (state.areaPage) return state.areaPage;
         if (state.special === '_new' || state.special === '_tools') return state.special;
         if (state.special) return '_yours';
-        if (state.source && state.byKey[state.source]) return state.byKey[state.source].area;
+        if (state.source && state.byKey[state.source]) {
+            // Websites sent in opened on its research sends sits under Found by imports, with the other imports.
+            if (state.origin === 'imports' && state.split[state.source] && state.byKey[state.source].area === 'people') return 'found';
+            return state.byKey[state.source].area;
+        }
         if (nativeShowing() === 'news') return 'news'; // News is always its own tab
         return state.nativeArea || 'people';
     }
@@ -523,7 +533,7 @@
         } catch (e) { /* old browser: the tab just is not remembered */ }
     }
 
-    function openSource(key) {
+    function openSource(key, origin) {
         var s = state.byKey[key];
         if (!s || s.native) return;
         state.source = key;
@@ -531,7 +541,7 @@
         state.areaPage = null;
         state.view = Object.keys(s.views)[0];
         state.search = '';
-        state.origin = '';
+        state.origin = origin || '';
         state.filters = {};
         state.offset = 0;
         state.pages = [];

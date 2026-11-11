@@ -58,6 +58,8 @@ php -d extension=pdo_sqlite scripts/test-source-submissions.php   # against an i
 # extension/submit type=lawsuit with full=1 (kop_ext_lawsuit_full_fields()) writes every field above + document_urls + extra source_urls; publish=1 and
 # manage_options files it publication_status 'published' (+ published_at, kop_resync_after_status, logged for Recently done: Undo restores 'pending')
 # and answers {published:true, queue:'the published lawsuits'}; otherwise it waits as 'pending'. Without full=1 nothing changes.
+# A research-key send is stored as "<name> (research key)" (kop_msub_submitter()), never "(Send page)": the Review inbox counts it as an
+# import, not as sent in by a person (kop_rinbox_research_sender_sql(), 2026-11-11)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-submit.php [--db=...]
 # The same route serves the browser extension without an account (via=extension; Chrome/Edge/Firefox from one folder, Safari via
 # xcrun safari-web-extension-converter; package.ps1 zips it for the stores) and the /send/ page + bookmarklet for any browser (via=web;
