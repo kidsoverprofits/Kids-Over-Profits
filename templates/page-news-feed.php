@@ -687,7 +687,12 @@ try {
                         </span>
                         <span class="meta-separator">•</span>
                         <?php endif; ?>
-                        <span class="meta-item publication">
+                        <?php
+                        // The coverage pencil (admins only): on the list below when the story has other
+                        // coverage, otherwise here on the outlet name so a card shows no empty list.
+                        $cov_attr = function_exists('kop_story_cov_attr') ? kop_story_cov_attr((int) $item['id']) : '';
+                        ?>
+                        <span class="meta-item publication"<?php echo empty($also_covered) ? $cov_attr : ''; ?>>
                             <?php echo esc_html($item['publication_name'] ?: 'Unknown Publication'); ?>
                         </span>
                         <span class="meta-separator">•</span>
@@ -697,11 +702,11 @@ try {
                     </div>
 
                     <?php
-                    // The pencil (admins only): take a wrong article off the list, or add the right one.
-                    $cov_attr = function_exists('kop_story_cov_attr') ? kop_story_cov_attr((int) $item['id']) : '';
-                    if (!empty($also_covered) || $cov_attr !== ''): ?>
-                        <div class="news-coverage<?php echo empty($also_covered) ? ' news-coverage--empty' : ''; ?>"<?php echo $cov_attr; ?>>
-                            <span class="coverage-label"><?php echo empty($also_covered) ? 'Also covered by: no other articles yet' : 'Also covered by:'; ?></span>
+                    // Only when other articles cover the same story. The pencil (admins only): take a
+                    // wrong article off the list, or add the right one.
+                    if (!empty($also_covered)): ?>
+                        <div class="news-coverage"<?php echo $cov_attr; ?>>
+                            <span class="coverage-label">Also covered by:</span>
                             <?php foreach ($also_covered as $cov):
                                 $covTitle = !empty($cov['alternate_title']) ? $cov['alternate_title'] : $cov['article_title'];
                                 $covOutlet = $cov['publication_name'] ?: (parse_url($cov['article_url'] ?? '', PHP_URL_HOST) ?: 'Unknown outlet');

@@ -100,7 +100,7 @@ The form captures:
 - articles about the same event from different outlets are not duplicates; they are clustered under a shared `story_group_id` on save (`api/news-story-groups.php`)
 - the news feed (`templates/page-news-feed.php`) renders one card per story with an "Also covered by" list of the other outlets
 - `api/rebuild-news-story-groups.php` (admin-only, POST) re-clusters the whole archive
-- an admin corrects a wrong grouping with the pencil on a card's "Also covered by" list (`storycov:<id>`, `inc/story-coverage.php`; admins see it on cards with no coverage too): untick an article to take it off, paste a link or `#id` to add one, exact Undo. Every row the save touches gets `story_group_manual = 1`, which the automatic grouping (each save, the rebuild) never changes or joins to another story. Test: `php -d extension=pdo_sqlite -d extension=mbstring scripts/test-story-coverage.php`
+- an admin corrects a wrong grouping with the pencil on a card's "Also covered by" list (`storycov:<id>`, `inc/story-coverage.php`; on a card with no other coverage the list is hidden and admins find the pencil on the outlet name instead): untick an article to take it off, paste a link or `#id` to add one, exact Undo. Every row the save touches gets `story_group_manual = 1`, which the automatic grouping (each save, the rebuild) never changes or joins to another story. Test: `php -d extension=pdo_sqlite -d extension=mbstring scripts/test-story-coverage.php`
 - story arcs are long-running, admin-curated stories (`news_story_arcs`, managed in `api/manage-story-arcs.php`); an article joins an arc on save when its text matches one of the arc's match terms
 
 ### Admin Notifications
