@@ -117,6 +117,6 @@ function kop_rinbox_test_highlight_summaries(array $src, array $item, callable $
     $check('highlight-summaries: a finding the AI cannot summarise is parked, not retried every hour', $res['unclear'] === 1 && $parked && $parked['status'] === 'rejected' && $parked['reviewed_by'] === 'system');
     $none = $pdo->query("SELECT highlight_id FROM inspection_highlight_summaries WHERE summary LIKE 'No summary:%'")->fetchColumn();
     $card = kop_rinbox_get_item('highlight-summaries', (string) $none);
-    $check('highlight-summaries: a parked one says "Not written" and can be written again', $card['status_label'] === 'Not written' && array_column($card['actions'], 'id') === array('rewrite'));
+    $check('highlight-summaries: a parked one says "Not written" and can be written again', $card['status_label'] === 'Not written' && kop_rinbox_test_own_actions($card) === array('rewrite'));
     unset($GLOBALS['kop_hs_ai']);
 }

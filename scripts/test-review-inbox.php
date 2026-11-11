@@ -311,6 +311,16 @@ if ($only === '' || $only === 'ya-file') {
     }
 }
 
+if ($only === '' || $only === 'claude') {
+    echo "-- Send to Claude (every card) --
+";
+    try {
+        kop_rinbox_test_claude_action($check);
+    } catch (Throwable $e) {
+        $check('claude: no errors', false, get_class($e) . ': ' . $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
+    }
+}
+
 if ($only === '' || $only === 'addons') {
     echo "-- Card add-ons and the find-or-make record field --\n";
     try {

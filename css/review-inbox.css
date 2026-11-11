@@ -1624,7 +1624,8 @@ button.rinbox-pv-btn:focus-visible {
     font-size: 13px;
 }
 
-/* What volunteer reviewers recommended (inc/review-volunteers.php). */
+/* What volunteer reviewers recommended (inc/review-volunteers.php); a card add-on's note (Send to Claude). */
+.rinbox-addon-note,
 .rinbox-recs {
     margin: 8px 0;
     padding: 6px 10px;

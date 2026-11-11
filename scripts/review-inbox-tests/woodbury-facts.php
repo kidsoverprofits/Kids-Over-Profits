@@ -75,7 +75,7 @@ function kop_rinbox_test_woodbury_facts(array $src, array $item, callable $check
     // No record: add needs a record; create and young adult are offered.
     $none = $pick("SELECT pkey FROM $t WHERE status = 'pending' AND facility_id = 0 AND grp <> 'consultant' AND ya = 0 ORDER BY id LIMIT 1");
     $it = kop_rinbox_get_item('woodbury-facts', $none);
-    $ids = array_column($it['actions'], 'id');
+    $ids = kop_rinbox_test_own_actions($it);
     $check('woodbury-facts: a program with no record can be pointed at one, created, or moved to young adult', array_values(array_diff($ids, array('add_person'))) === array('apply', 'create', 'ya_on', 'reject'), implode(',', $ids));
     try {
         call_user_func($src['act'], $none, 'apply', array('facility' => ''));

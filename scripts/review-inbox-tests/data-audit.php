@@ -224,7 +224,7 @@ function kop_rinbox_test_data_audit(array $src, array $item, callable $check) {
         if ($p['ops'] || empty($p['renames'])) continue;
         $card = kop_rinbox_get_item('data-audit', (string) $key);
         // "Home of a program" is on every card about one facility (_homes-action.php), not this queue's.
-        $ids = array_values(array_diff(array_column($card['actions'], 'id'), KOP_RINBOX_HOMES_ACTIONS));
+        $ids = kop_rinbox_test_own_actions($card);
         if (!in_array('rename_merge', $ids, true)) continue;
         $check('data-audit: a card holding only a rename offers the merge both ways and "not one program", no Approve',
             array_values(array_diff($ids, array('rename_fold', 'alias_merge', 'name_alias'))) === array('rename_merge', 'rename_merge_reversed', 'reject')

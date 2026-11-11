@@ -428,7 +428,7 @@ function kop_rinbox_finish_items($source, array $items) {
     foreach ($items as &$it) {
         $it += array('subtitle' => '', 'url' => '', 'text' => '', 'created' => '', 'status' => '', 'status_label' => '',
             'facility' => null, 'fields' => array(), 'actions' => array(), 'moves' => array(), 'links' => array(),
-            'details' => array(), 'compare' => null, 'preview' => null, 'selected' => false, 'conflict' => '');
+            'details' => array(), 'compare' => null, 'preview' => null, 'selected' => false, 'conflict' => '', 'notes' => array());
         $it['key'] = (string) $it['key'];
         // A conflict is always marked, and never ticked for a bulk Add.
         $it['conflict'] = trim(implode(' ', array_filter(array_map('trim', array_map('strval', (array) $it['conflict'])), 'strlen')));
@@ -440,7 +440,12 @@ function kop_rinbox_finish_items($source, array $items) {
         foreach (kop_rinbox_addons() as $aid => $a) {
             if (!is_callable($a['card']) || !kop_rinbox_addon_on($aid, $source)) continue;
             try {
-                if ($act = call_user_func($a['card'], $source, $it)) $it['actions'][] = $act;
+                if ($act = call_user_func($a['card'], $source, $it)) {
+                    // An add-on may also put a note on the card ('notes' => [text]: Send to Claude's "Claude read it").
+                    if (!empty($act['notes'])) $it['notes'] = array_merge((array) $it['notes'], array_map('strval', (array) $act['notes']));
+                    unset($act['notes']);
+                    $it['actions'][] = $act;
+                }
             } catch (Throwable $e) {
                 // The card still draws without it.
             }

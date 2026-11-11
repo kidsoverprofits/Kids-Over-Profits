@@ -334,3 +334,23 @@ and closes each report out with `POST .../claude/bug-reports/<id>` (`inc/bug-rep
 In progress with the note for the owner and sends no email. Both notes are added to `admin_note`, which the card
 shows under Notes. The queue never includes the reporter's email. Nothing joins the queue without the owner's
 click, because report text is untrusted. Tests: `scripts/review-inbox-tests/bug-reports.php`.
+
+## Any card sent to Claude (Send to Claude)
+
+Every waiting card in every queue but Bug reports and Write-ups has **Send to Claude** (a card add-on,
+`inc/review-inbox/_claude-action.php`; off per queue at KOP Tools > Card Add-ons), with an optional note for Claude.
+It is for links "Fill empty fields with AI" cannot read on the server, and for cards the owner wants sorted: the owner,
+2026-11-11, "sending to claude should have claude decide: what is this, how should it be filed, and where". The card
+stays in its queue with "Waiting for Claude since ..." and **Take back from Claude** (each the other's Undo in
+Recently done). Run `/read-sent-to-claude` in a session in this checkout (`.claude/skills/read-sent-to-claude/SKILL.md`).
+It reads `GET /wp-json/kop/v1/claude/review-items` (each card's fields, details, links, the buttons it offers with
+their params, its "Move to" queues) and answers each with `POST .../claude/review-items` `{source, key, outcome:
+filed|filled|returned, note, fields, steps}` (both need `X-KOP-Research-Key`). Fields save through the queue's own
+'save'; steps (at most 5) are the card's own buttons or a "Move to", run through `kop_rinbox_apply_action()` as
+reviewer "Claude", so each is in Recently done with its Undo; never an Undo button. The five native types are approved
+only on the page's own buttons, so there Claude fills, moves and connects and says in the note whether to approve.
+The card then shows "Claude read it on ...: <note>" (option `kop_rinbox_claude_done`; the list is `kop_rinbox_claude`).
+A card add-on can put such a line on any card with `'notes' => [text]` in its action (drawn on native cards too).
+```bash
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=claude
+```

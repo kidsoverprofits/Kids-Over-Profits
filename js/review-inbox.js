@@ -1423,6 +1423,11 @@
         })]);
     }
 
+    /** The card add-ons' notes (Send to Claude: "Waiting for Claude since ...", "Claude read it ..."). */
+    function addonNotes(item) {
+        return (item.notes || []).map(function (t) { return el('p', { class: 'rinbox-addon-note', role: 'note', text: String(t) }); });
+    }
+
     /** What volunteer reviewers recommended: "Volunteers: Sam recommends approve: note". */
     function recNote(item) {
         var box = el('div', { class: 'rinbox-recs' }, [el('strong', { text: 'Volunteers: ' })]);
@@ -2061,6 +2066,7 @@
         }
         if (item.hold) node.appendChild(holdNote(item, src, node));
         if (item.recs && item.recs.length) node.appendChild(recNote(item));
+        addonNotes(item).forEach(function (n) { node.appendChild(n); });
         if (links.childNodes.length) node.appendChild(links);
         // A recording (a podcast's item): played here from the second the words are said (the url ends #t=N).
         // preload none: a list of cards never downloads episodes nobody plays.
@@ -2599,6 +2605,7 @@
         var oldEv = card.querySelector(':scope > .rinbox-native-evidence');
         var ev = el('div', { class: 'rinbox-native-evidence' });
         if (item.hold) ev.appendChild(holdNote(item, src, row));
+        addonNotes(item).forEach(function (n) { ev.appendChild(n); });
         if (item.recs && item.recs.length) ev.appendChild(recNote(item));
         var pane = previewPane();
         if (safeHref(item.url)) {
