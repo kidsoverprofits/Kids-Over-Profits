@@ -1,6 +1,6 @@
 {
- "built": "2026-11-10 21:36 UTC",
- "source": "de6220378d7cdb89bdec9945ad7d32c5561a9134",
+ "built": "2026-11-11 21:03 UTC",
+ "source": "072d49c0920b0ab6976dbecb6079a63370de334d",
  "sections": [
   {
    "key": "2",
@@ -2986,9 +2986,9 @@
       {
        "id": "4.2:or-trillium-reports-filed-under-the-wrong-campus",
        "lead": "OR: Trillium reports filed under the wrong campus",
-       "text": "**OR: Trillium reports filed under the wrong campus** (bug report #5, 2026-11-10). Cause: or_scraper.py grouped an agency's visits when the library gave no program and named the group from the last licensee line, so every Trillium visit sat on 7171 \"Trillium Family Services - Parry Center (Portland\". Fixed: the scraper splits AGENCY_CAMPUSES agencies by the campuses a report names; `api/clean-or-inspections.php` moves the old rows (seed `seeds/or-inspection-cleanup.json`) and renames 7171/3740. - Open: other agencies the same lumping may hit (their licensee lines name several programs on one row, from the 2026-11-10 mirror): J Bar J (The Academy at Sisters on \"The Boys Ranch and J5\"), Embark (New Leaf Academy), Tempo Y.A.T. (Cadenza House), New Avenues for Youth (Alba / transitional housing), Looking Glass RCC (Pathways). Read a few of each; add the real multi-campus ones to AGENCY_CAMPUSES and a cleanup seed.",
+       "text": "**OR: Trillium reports filed under the wrong campus** (bug report #5, 2026-11-10). Cause: or_scraper.py grouped an agency's visits when the library gave no program and named the group from the last licensee line, so every Trillium visit sat on 7171 \"Trillium Family Services - Parry Center (Portland\". Fixed: the scraper splits AGENCY_CAMPUSES agencies by the campuses a report names; `api/clean-or-inspections.php` moves the old rows (seed `seeds/or-inspection-cleanup.json`) and renames 7171/3740. - Open: other agencies the same lumping may hit (their licensee lines name several programs on one row, from the 2026-11-10 mirror): J Bar J (The Academy at Sisters on \"The Boys Ranch and J5\"), Embark (New Leaf Academy), Tempo Y.A.T. (Cadenza House), New Avenues for Youth (Alba / transitional housing), Looking Glass RCC (Pathways). Read a few of each; add the real multi-campus ones to AGENCY_CAMPUSES and a cleanup seed. - Open (2026-11-11, live check): the cleanup is applied (reports #5-#8 closed), but the ODHS restraint and seclusion row (2021-12-31) still carries the cut-off name \"Trillium Family Services - Parry Center (Portland\"; find what importer named it, fix the name there and rename the row.",
        "ask": "",
-       "date": "2026-11-10",
+       "date": "2026-11-11",
        "why": "",
        "go": [],
        "choices": [],
@@ -2996,7 +2996,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "217c640bb1a8"
+       "hash": "35ad9d9a574d"
       }
      ]
     },
@@ -3801,6 +3801,21 @@
        "focus": false,
        "steps": [],
        "hash": "f664ebce4520"
+      },
+      {
+       "id": "4.4:show-all-n-here-beside-select-all",
+       "lead": "\"Show all N here\" beside Select all",
+       "text": "**\"Show all N here\" beside Select all** (efa43dc1, 2026-11-11; owner asked for check/uncheck all with apply/dismiss all on Answers to our questions). Select all and the bulk buttons already existed but only reached the 25 cards on a page; the new button loads the rest of the queue (100 a call, 500 at most) and ticks every card. Every queue gets it. a. Check after deploy (the Deploy to cPanel run sat queued 23+ minutes at push): Answers to our questions > Waiting shows \"Show all 149 here\"; pressing it shows all cards ticked and \"Use this answer (149)\" / \"Dismiss (149)\"; untick Select all clears them; Previous/Next is gone until the queue is opened again.",
+       "ask": "",
+       "date": "2026-11-11",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "f406719f05fa"
       }
      ]
     },
