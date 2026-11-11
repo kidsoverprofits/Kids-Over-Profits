@@ -96,12 +96,11 @@ if (!function_exists('kop_prel_for_person')) {
      */
     function kop_prel_for_person($person_id, array $opts = array()) {
         if (!kop_prel_ready($opts)) return null;
-        $state = kop_people_load($opts);
+        $state = kop_people_cached($opts);   // once per request: staff lists ask about each person in turn
         $me = kop_people_resolve($state, (int) $person_id);
         if ($me === 0) return array();
         // Every id merged into this person counts as this person.
-        $mine = array();
-        foreach ($state['rows'] as $r) if (kop_people_resolve($state, $r['id']) === $me) $mine[] = (int) $r['id'];
+        $mine = kop_people_ids_of($state, $me, $opts);
         $in = implode(',', array_fill(0, count($mine), '?'));
         $rows = kop_facility_db_rows('SELECT * FROM ' . kop_prel_table($opts) . " WHERE person_id IN ({$in}) OR other_id IN ({$in}) ORDER BY hidden, id",
             array_merge($mine, $mine), $opts);
@@ -234,7 +233,7 @@ if (!function_exists('kop_prel_public_lines')) {
         $rels = kop_prel_ready($opts) ? kop_prel_for_person((int) $person_id, $opts) : null;
         $out = array();
         if ($rels) {
-            $state = kop_people_load($opts);
+            $state = kop_people_cached($opts);
             foreach ($rels as $r) {
                 if (!empty($r['hidden'])) continue;
                 $other = (int) $r['other_resolved'];

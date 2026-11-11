@@ -204,17 +204,9 @@ if (!function_exists('kop_pjobs_by_person')) {
         return kop_pjobs_by_person($opts)[$pid] ?? array();
     }
 
-    /**
-     * The people table (kop_people_load()) for resolving merged ids, read once per request on the site:
-     * a staff list calls kop_pjobs_for_person() once a person, and loading the whole table each time
-     * took Provo Canyon School's page past 90 seconds. kop_people_version_bump() drops it after a write.
-     * With $opts (tests, a SQLite copy) it is read fresh. null without the people module.
-     */
+    /** The people table for resolving merged ids, read once per request (kop_people_cached()); null without the people module. */
     function kop_pjobs_people(array $opts = array()) {
-        if (!function_exists('kop_people_load')) return null;
-        if (!empty($opts)) return kop_people_load($opts);
-        if (!isset($GLOBALS['kop_pjobs_people']) || !is_array($GLOBALS['kop_pjobs_people'])) $GLOBALS['kop_pjobs_people'] = kop_people_load();
-        return $GLOBALS['kop_pjobs_people'];
+        return function_exists('kop_people_cached') ? kop_people_cached($opts) : null;
     }
 }
 

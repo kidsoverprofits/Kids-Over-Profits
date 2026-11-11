@@ -270,7 +270,8 @@ if (!function_exists('kop_people_version_bump')) {
     function kop_people_version_bump() {
         if (function_exists('update_option')) update_option('kop_people_version', (string) microtime(true), false);
         $GLOBALS['kop_people_group_state'] = null;
-        $GLOBALS['kop_pjobs_people'] = null;   // inc/person-jobs.php kop_pjobs_people()
+        $GLOBALS['kop_people_cached'] = null;   // kop_people_cached()
+        $GLOBALS['kop_people_ids_of'] = null;   // kop_people_ids_of()
     }
 }
 
@@ -396,6 +397,31 @@ if (!function_exists('kop_people_load')) {
         $state = array('rows' => $rows, 'by_key' => array(), 'keys' => array(), 'initials' => array());
         foreach ($rows as $id => $r) kop_people_index_row($state, $id);
         return $state;
+    }
+
+    /**
+     * kop_people_load() read once per request, for readers that only look people up: a staff list asks
+     * about each person in turn, and loading the whole table each time took Provo Canyon School's page
+     * past 90 seconds. Writers keep calling kop_people_load() (they change their copy).
+     * kop_people_version_bump() drops it after a write. With $opts (tests, a SQLite copy) it is read fresh.
+     */
+    function kop_people_cached(array $opts = array()) {
+        if (!empty($opts)) return kop_people_load($opts);
+        if (!isset($GLOBALS['kop_people_cached']) || !is_array($GLOBALS['kop_people_cached'])) $GLOBALS['kop_people_cached'] = kop_people_load();
+        return $GLOBALS['kop_people_cached'];
+    }
+
+    /** Every id that is this person ($me, already resolved): theirs and the ones merged into them. */
+    function kop_people_ids_of(array $state, $me, array $opts = array()) {
+        $me = (int) $me;
+        $cache = empty($opts);
+        $map = $cache && isset($GLOBALS['kop_people_ids_of']) && is_array($GLOBALS['kop_people_ids_of']) ? $GLOBALS['kop_people_ids_of'] : null;
+        if ($map === null) {
+            $map = array();
+            foreach ($state['rows'] as $r) $map[kop_people_resolve($state, $r['id'])][] = (int) $r['id'];
+            if ($cache) $GLOBALS['kop_people_ids_of'] = $map;
+        }
+        return $map[$me] ?? array();
     }
 }
 
