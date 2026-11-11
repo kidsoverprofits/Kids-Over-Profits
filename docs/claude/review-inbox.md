@@ -354,3 +354,5 @@ A card add-on can put such a line on any card with `'notes' => [text]` in its ac
 ```bash
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=claude
 ```
+The skill also runs from any folder: `%USERPROFILE%\.claude\skills\read-sent-to-claude` is a junction to this checkout's
+copy (made once with `New-Item -ItemType Junction`; remake it on a new machine), so edits here reach it.
