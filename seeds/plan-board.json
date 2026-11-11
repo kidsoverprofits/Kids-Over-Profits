@@ -1,6 +1,6 @@
 {
  "built": "2026-11-11 22:07 UTC",
- "source": "3b4a9ad2467e54e8ff88a4f45a64543ccff67eb3",
+ "source": "79d9286be0c4fee5e7577c65c6caf2f66ece5cb4",
  "sections": [
   {
    "key": "2",
@@ -3846,6 +3846,21 @@
        "focus": false,
        "steps": [],
        "hash": "c6889139290b"
+      },
+      {
+       "id": "4.4:bulk-approving-was-slow-5-45-s-a-card",
+       "lead": "Bulk approving was slow: 5-45 s a card",
+       "text": "**Bulk approving was slow: 5-45 s a card** (200d03d6, 2026-11-11). Cause: every facility save moves the /facility/ page index fingerprint, so the next card's link (kop_rinbox_facility() -> kop_facility_page_url()) and the post-save LiteSpeed purge rebuilt the whole index (every record's json). Both now use kop_facility_page_url_quick() (the last index built). a. Check: after the owner's next bulk run, Recently done (log?source=questions) times should be a second or two apart, not 5-8 s. If still slow, profile one 'act' request on the host (the 1.8 s rebuild was the only big cost on the mirror). b. If more speed is wanted: run bulk cards a few at a time (facility writes are under one GET_LOCK, safe), but kop_wiki_auto_queue and kop_wu_mark_changed() are read-modify-write options that parallel saves could drop a facility from; make those row inserts first, or add a server-side batch 'act' that runs N keys in one request.",
+       "ask": "",
+       "date": "2026-11-11",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "bc344528c7cf"
       }
      ]
     },
