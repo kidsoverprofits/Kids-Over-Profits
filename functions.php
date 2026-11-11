@@ -194,6 +194,8 @@ require_once get_stylesheet_directory() . '/inc/inline-edit.php';
 require_once get_stylesheet_directory() . '/inc/directory-names.php';
 // Which company ran a program under which name, set in that table (admins)
 require_once get_stylesheet_directory() . '/inc/name-eras.php';
+// The facility page's "Names and eras" pencil: every name, its company and years, in one dialog
+require_once get_stylesheet_directory() . '/inc/facility-eras-editor.php';
 
 // Indigenous residential schools: their own records, never TTI facilities
 // (listed on /indian-boarding-schools/, KOP Data Tools > Indigenous Schools)

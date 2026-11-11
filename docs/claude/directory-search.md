@@ -16,7 +16,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-directory-editor.
 php -d extension=mbstring scripts/test-directory-names.php
 # Its "Run by then" column (admins: Set company): which company ran a program under which name, and when ({prefix}kop_name_eras,
 # inc/name-eras.php, kop/v1/name-eras/save|undo, exact Undo). Wins over the guesses: the directory's name under a company
-# (kop_name_eras_name_under() in kop_v2_get_facilities_projects()), the facility page's "Formerly" years; not read by the map build yet
+# (kop_name_eras_name_under() in kop_v2_get_facilities_projects()), the facility page's "Formerly" years and its "As <name>" sections
+# (kop_facility_eras_hand_years()); not read by the map build yet. The facility page's "Names and eras" pencil edits every name's row at once
+# (docs/claude/facility-pages.md)
 php -d extension=mbstring scripts/test-name-eras.php
 # Survivor Testimony "Move to testimony" in the admin data form (js/data-form/testimony.js): every copy of a
 # moved note can be cleared ("Remove copy"), moved text leaves the fields the public pages list

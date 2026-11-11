@@ -271,8 +271,109 @@ if (!function_exists('kop_facility_eras_chain')) {
      * cut is the year the name came into use (null for the first), which is
      * what dated items are sorted by; 0 when the rename was saved without
      * its year and the names' own years do not tell it.
+     *
+     * The names come from the record (a merged rename), else the map's
+     * rename lines, else the eras set by hand (inc/name-eras.php, the
+     * facility page's "Names and eras" pencil). A name's hand-set company
+     * and years win over what the record or the map says.
      */
     function kop_facility_eras_chain($facility_id, array $doc = null) {
+        $chain = kop_facility_eras_found_chain($facility_id, $doc);
+        if (count($chain) < 2) $chain = kop_facility_eras_hand_chain($facility_id, $doc);
+        return kop_facility_eras_hand_years($chain, $facility_id);
+    }
+}
+
+if (!function_exists('kop_facility_eras_hand_era')) {
+    /** The era set by hand for a name in a chain: on its own record, else on $facility_id's. null when none. */
+    function kop_facility_eras_hand_era($facility_id, $name, $owner = 0) {
+        if (!function_exists('kop_name_eras_for')) return null;
+        $key = kop_name_eras_key($name);
+        if ($key === '') return null;
+        $owner = (int) $owner;
+        if ($owner > 0 && $owner !== (int) $facility_id) {
+            $own = kop_name_eras_for($owner);
+            if (isset($own[$key])) return $own[$key];
+        }
+        $mine = kop_name_eras_for((int) $facility_id);
+        return $mine[$key] ?? null;
+    }
+}
+
+if (!function_exists('kop_facility_eras_hand_years')) {
+    /**
+     * A chain with each name's hand-set company and years over it. A name
+     * whose start is set by hand comes into use that year where the chain
+     * gave no year of its own.
+     */
+    function kop_facility_eras_hand_years(array $chain, $facility_id) {
+        foreach ($chain as $i => $era) {
+            $e = kop_facility_eras_hand_era($facility_id, $era['name'], $era['facility_id'] ?? 0);
+            if (!$e) continue;
+            if ((int) $e['start_year']) $chain[$i]['start'] = (int) $e['start_year'];
+            if ((int) $e['end_year']) $chain[$i]['end'] = (int) $e['end_year'];
+            if (trim((string) $e['operator_name']) !== '') $chain[$i]['operators'] = array(trim((string) $e['operator_name']));
+            if ($i > 0 && !$era['cut'] && (int) $e['start_year']) $chain[$i]['cut'] = (int) $e['start_year'];
+        }
+        return $chain;
+    }
+}
+
+if (!function_exists('kop_facility_eras_hand_chain')) {
+    /**
+     * A record's names from the eras set by hand alone, for a record the
+     * map does not join to its other names and that was not merged as a
+     * rename: every name with a year, earliest first, and the record's own
+     * name last when it has none. array() when fewer than two names, or
+     * when their years overlap so that no year splits them.
+     */
+    function kop_facility_eras_hand_chain($facility_id, array $doc = null) {
+        if (!function_exists('kop_name_eras_for')) return array();
+        $facility_id = (int) $facility_id;
+        $dated = array();
+        foreach (kop_name_eras_for($facility_id) as $key => $e) {
+            $start = (int) $e['start_year'];
+            $end = (int) $e['end_year'];
+            if ($start || $end) $dated[$key] = array('name' => trim((string) $e['name']), 'start' => $start ?: null, 'end' => $end ?: null,
+                'operators' => trim((string) $e['operator_name']) !== '' ? array(trim((string) $e['operator_name'])) : array());
+        }
+        if (!$dated) return array();
+        if ($doc === null) {
+            global $wpdb;
+            $json = $wpdb->get_var($wpdb->prepare('SELECT json_data FROM facilities_v2 WHERE id = %d', $facility_id));
+            $doc = is_string($json) ? (json_decode($json, true) ?: array()) : array();
+        }
+        $ident = is_array($doc['identification'] ?? null) ? $doc['identification'] : array();
+        $own = trim((string) ($ident['currentName'] ?? '')) ?: trim((string) ($ident['name'] ?? ''));
+        uasort($dated, static function ($a, $b) {
+            return ((int) ($a['start'] ?: $a['end'])) <=> ((int) ($b['start'] ?: $b['end'])) ?: ((int) $a['end'] ?: 9999) <=> ((int) $b['end'] ?: 9999);
+        });
+        $rows = array_values($dated);
+        if ($own !== '' && !isset($dated[kop_name_eras_key($own)])) {
+            $last = 0;
+            foreach ($rows as $r) $last = max($last, (int) $r['end'], (int) $r['start']);
+            $rows[] = array('name' => $own, 'start' => $last ?: null, 'end' => null, 'operators' => array());
+        }
+        if (count($rows) < 2) return array();
+        $chain = array();
+        $last_cut = 0;
+        foreach ($rows as $i => $r) {
+            $cut = null;
+            if ($i > 0) {
+                $cut = (int) ($r['start'] ?: $rows[$i - 1]['end']);
+                if ($cut && $cut < $last_cut) return array();
+                if ($cut) $last_cut = $cut;
+            }
+            $chain[] = array('node' => '', 'name' => $r['name'], 'start' => $r['start'], 'end' => $r['end'], 'cut' => $cut,
+                'facility_id' => $facility_id, 'operators' => $r['operators']);
+        }
+        return $chain;
+    }
+}
+
+if (!function_exists('kop_facility_eras_found_chain')) {
+    /** kop_facility_eras_chain() from the record's merged renames or the map, before any hand-set era. */
+    function kop_facility_eras_found_chain($facility_id, array $doc = null) {
         // A merged renamed program knows its own names.
         if ($doc !== null) {
             $own = kop_facility_eras_doc_chain($doc);

@@ -93,6 +93,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.ph
 # (kop_facility_eras_item_key()). The page cuts by those names (kop_facility_eras_doc_chain()) and an item stays with the name it was filed
 # under whatever its date; the map build gives that name its own years; a closure dated in its years never closes the record
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-rename-merge.php [--list]   # Copper Canyon into Sedona Sky + undo on a scratch copy; --list = every renamed pair
+# Names and eras in one dialog (inc/facility-eras-editor.php, pencil eras:<id> on the names lines under the title and on "As <name>"
+# sections with no pencil of their own): one row per name (record's names, merged renames, map rename-line names, names with a hand-set
+# era) with company, from, to. Save writes changed rows to {prefix}kop_name_eras, new/removed/renamed rows to identification.pastNames,
+# the rename year to a merged rename's legacy.mergedFacilities entry or to the Map Renames decision (year + swap when both names' years
+# put the line the other way), one Undo (erasundo:<token>, option kop_eras_editor_log). The record's own name, merged, map and other
+# records' names cannot be removed or renamed there. kop_facility_eras_chain() lays hand-set years and company over the record's/map's
+# names, and cuts a record that has neither by its hand-set eras alone (kop_facility_eras_hand_chain())
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-eras-editor.php   # plain / merged-rename / map-line record, save + exact undo, refusals
 # Investors (inc/investors.php, KOP Tools > Investors): one row per investor ({prefix}kop_investors, kind from Dropdown Lists 'investor-kinds'),
 # one per stake in a company or program ({prefix}kop_investor_links: role 'investor-roles', years, detail, source), every change in
 # {prefix}kop_investor_log (Undo puts back exactly that change while nothing changed it since). The pages' Investors line is

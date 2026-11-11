@@ -523,6 +523,15 @@ get_header();
             return $url !== '' ? '<a href="' . esc_url($url) . '">' . esc_html($n) . '</a>' : esc_html($n);
         };
         ?>
+        <?php
+        // An admin's "Names and eras" pencil (inc/facility-eras-editor.php) on the names lines; with none, a line saying so.
+        $kop_fp_eras_edit = function_exists('kop_ie_attr') ? kop_ie_attr('eras:' . (int) $page['id'], 'names and eras') : '';
+        $kop_fp_has_names = $page['current_name'] !== '' || $page['formerly'] || !empty($page['later']) || $page['aka'];
+        ?>
+        <?php if ($kop_fp_eras_edit !== '') : ?><div class="kop-fp-names"<?php echo $kop_fp_eras_edit; ?>><?php endif; ?>
+        <?php if ($kop_fp_eras_edit !== '' && !$kop_fp_has_names) : ?>
+            <p class="kop-fp-formerly">No other names on file</p>
+        <?php endif; ?>
         <?php if ($page['current_name'] !== '') : ?>
             <p class="kop-fp-formerly">Now known as <?php echo $kop_fp_name($page['current_name']); ?></p>
         <?php endif; ?>
@@ -537,6 +546,7 @@ get_header();
         <?php if ($page['aka']) : ?>
             <p class="kop-fp-formerly">Also known as <?php echo esc_html(implode(', ', $page['aka'])); ?></p>
         <?php endif; ?>
+        <?php if ($kop_fp_eras_edit !== '') : ?></div><?php endif; ?>
         <?php if (!empty($page['home_of'])) : $kop_fp_ho = $page['home_of']; ?>
             <p class="kop-fp-formerly kop-fp-home-of"><?php echo $kop_fp_campuses ? 'Another campus of ' : ($kop_fp_satellite ? ((int) $kop_fp_ho['count'] === 1 ? 'Satellite home of ' : 'One of ' . (int) $kop_fp_ho['count'] . ' satellite homes of ') : 'One of ' . (int) $kop_fp_ho['count'] . ' homes of '); ?><?php echo $kop_fp_ho['program']['url'] !== '' ? '<a href="' . esc_url($kop_fp_ho['program']['url']) . '">' . esc_html($kop_fp_ho['program']['name']) . '</a>' : esc_html($kop_fp_ho['program']['name']); ?></p>
         <?php elseif ($kop_fp_is_program) : ?>
@@ -878,7 +888,7 @@ get_header();
                 $kop_fp_era_notes = (array) ($kop_fp_era['notes'] ?? array());
                 $kop_fp_era_parts = count($kop_fp_era_notes);
                 ?>
-            <section class="kop-fp-section kop-fp-era" id="<?php echo esc_attr($kop_fp_era['id']); ?>"<?php echo (!empty($kop_fp_era['edit']) && function_exists('kop_ie_attr')) ? kop_ie_attr($kop_fp_era['edit'], 'this earlier name') : ''; ?>>
+            <section class="kop-fp-section kop-fp-era" id="<?php echo esc_attr($kop_fp_era['id']); ?>"<?php echo function_exists('kop_ie_attr') ? (!empty($kop_fp_era['edit']) ? kop_ie_attr($kop_fp_era['edit'], 'this earlier name') : kop_ie_attr('eras:' . (int) $page['id'], 'names and eras')) : ''; ?>>
                 <h2><span class="kop-fp-era-as">As</span> <?php echo esc_html($kop_fp_era['name']); ?></h2>
                 <?php if ($kop_fp_era_meta) : ?><p class="kop-fp-era-meta"><?php echo esc_html(implode(' | ', $kop_fp_era_meta)); ?></p><?php endif; ?>
                 <?php if (!empty($kop_fp_era['closed']) && function_exists('kop_ie_can') && kop_ie_can()) : ?>

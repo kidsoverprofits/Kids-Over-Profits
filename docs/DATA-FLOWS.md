@@ -336,8 +336,12 @@ request.
 - **Homes, conversions and campuses** each have a cache key in the facility
   fingerprint and are registered for merges. Fine.
 - **Eras** are computed per request from graph.json, option
-  `kop_network_rename_review` and the record. The directory and alias index
-  include that option. The mobile ETag does not.
+  `kop_network_rename_review`, `{prefix}kop_name_eras` and the record. The
+  directory and alias index include that option. The mobile ETag does not.
+  The facility page's "Names and eras" pencil (inc/facility-eras-editor.php)
+  writes all three: the record through `kop_facility_save()`, eras through
+  `kop_name_eras_put()` (flushes the page index, purges the page), the option
+  directly as Map Renames does.
 
 ### Merges (`kop_fmerge_ref_tables()`, `kop_fmerge_json_tables()`)
 

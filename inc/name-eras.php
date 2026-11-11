@@ -9,6 +9,11 @@
  *     (kop_v2_get_facilities_projects(): nameUnderOperator), and every
  *     facility in the feed carries its eras ('nameEras') for the table;
  *   - the facility page's "Formerly" line gives the company and years.
+ *   - the facility page's "As <name>" sections take a name's years and company
+ *     from here, and a record the map does not join to its other names is cut
+ *     by these alone (kop_facility_eras_chain() in inc/facility-eras.php).
+ * Edited here one name at a time, or every name at once with the facility
+ * page's "Names and eras" pencil (inc/facility-eras-editor.php).
  * Not yet read by the network map build (kop-pipeline; docs/PLAN.md 3.33).
  *
  *   POST kop/v1/name-eras/save  {facility_id, name, operator, operator_id?, start, end}   (all empty = clear)
