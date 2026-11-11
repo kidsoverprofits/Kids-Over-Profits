@@ -289,7 +289,9 @@ function kop_rinbox_facility($fid, PDO $pdo = null) {
         $cache[$fid] = array(
             'id'   => $fid,
             'name' => $name !== '' ? $name : 'facility #' . $fid,
-            'url'  => function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '',
+            // The quick lookup: after a save the full one rebuilds the whole page index (kop_facility_page_url_quick()).
+            'url'  => function_exists('kop_facility_page_url_quick') ? (string) kop_facility_page_url_quick($fid)
+                : (function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : ''),
         );
     }
     return $cache[$fid];

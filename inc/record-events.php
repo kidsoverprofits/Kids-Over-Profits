@@ -76,7 +76,9 @@ if (!function_exists('kop_record_changed_purge')) {
                 return;
             }
             foreach ($fids as $fid) {
-                $url = function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '';
+                // The address the cached page has: the last index built (rebuilding it here cost every save seconds).
+                $url = function_exists('kop_facility_page_url_quick') ? (string) kop_facility_page_url_quick($fid)
+                    : (function_exists('kop_facility_page_url') ? (string) kop_facility_page_url($fid) : '');
                 if ($url !== '') do_action('litespeed_purge_url', $url);
             }
         } catch (Throwable $e) {

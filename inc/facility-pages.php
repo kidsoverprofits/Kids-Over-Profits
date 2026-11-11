@@ -2724,6 +2724,32 @@ if (!function_exists('kop_facility_page_url')) {
     }
 }
 
+if (!function_exists('kop_facility_page_url_quick')) {
+    /**
+     * kop_facility_page_url() from the last index built, even when a record
+     * changed since (its fingerprint moved): for links on admin cards and the
+     * LiteSpeed purge after a save, where the page's address is what matters.
+     * Every facility save moves the fingerprint, so the full lookup rebuilt the
+     * whole index (every record's json) on the next request: once per card in a
+     * Review inbox bulk run (owner 2026-11-11: bulk approving took minutes).
+     * A record not in that index (new, or newly qualifying) gets the full lookup.
+     */
+    function kop_facility_page_url_quick($facility_id) {
+        static $stale = null;
+        $facility_id = (int) $facility_id;
+        if ($facility_id <= 0) return '';
+        if (kop_facility_is_related_id($facility_id)) return kop_facility_page_url($facility_id);
+        if ($stale === null) {
+            $cached = function_exists('get_transient') ? get_transient('kop_facility_pages_index') : false;
+            $stale = is_array($cached) && isset($cached['ids']) ? $cached['ids'] : array();
+        }
+        if (!isset($stale[$facility_id])) return kop_facility_page_url($facility_id);
+        $entry = $stale[$facility_id];
+        if ((string) ($entry['editorial'] ?? '') !== '') return $entry['editorial'];
+        return kop_facility_pages_url_for_slug($entry['slug']);
+    }
+}
+
 if (!function_exists('kop_facility_page_url_for_name')) {
     /**
      * Profile URL for a facility named in free text (a story arc's facility
