@@ -28,8 +28,9 @@
  * a decided one. Decisions: option kop_pp_log, batch => {facility_id, topic,
  * added, left, ticks, by, at}.
  *
- * Readers' answers on the questions page are read into rows of the same table
- * (inc/reader-accounts.php): answer_id > 0, doc_id 0, doc_title who they are.
+ * Readers' answers on the questions page are kept as testimony in rows of the
+ * same table (inc/reader-accounts.php): answer_id > 0, topic 'account', doc_id
+ * 0, doc_title who they are, value their words (spelling fixed).
  * Every documents path here keeps to answer_id = 0 ('kind' => 'doc'); those
  * rows have their own card, section and decisions there.
  *
@@ -485,11 +486,11 @@ function kop_pp_ie_load(array $p) {
     if (!$r) throw new RuntimeException('That line is gone.');
     $reader = (int) ($r['answer_id'] ?? 0) > 0;
     return array(
-        'title'  => $reader ? 'A line from a reader\'s answer' : 'A line from ' . $r['doc_title'],
-        'help'   => $reader ? 'What ' . lcfirst(strtok((string) $r['doc_title'], ',')) . ' remembers, in plain words. Their words it rests on: "' . $r['quote'] . '".'
+        'title'  => $reader ? 'A reader\'s testimony' : 'A line from ' . $r['doc_title'],
+        'help'   => $reader ? 'The words of ' . lcfirst(strtok((string) $r['doc_title'], ',')) . ', quoted under Survivor testimony. Fix spelling and punctuation only; never reword. As they sent it: "' . $r['quote'] . '".'
             : 'What the document says, in plain words. The quote it rests on: "' . $r['quote'] . '" (page ' . (int) $r['page'] . ').',
         'fields' => array(
-            kop_ie_field('value', 'The line', 'textarea', (string) $r['value'], array('rows' => 3)),
+            kop_ie_field('value', $reader ? 'Their words' : 'The line', 'textarea', (string) $r['value'], array('rows' => $reader ? 8 : 3)),
             kop_ie_field('off', 'Take this line off the page', 'bool', false),
         ),
     );

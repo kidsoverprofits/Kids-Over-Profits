@@ -41,8 +41,8 @@
  *                    ages, practice ticks; staff years go into that person's
  *                    role ("Director (2003)", op 'staff_years'). Conflicts
  *                    are marked and wait like any other. A rules answer
- *                    writes nothing here: inc/reader-accounts.php reads it
- *                    into the page's "What people who were there remember".
+ *                    writes nothing here: inc/reader-accounts.php puts their
+ *                    words, spelling fixed, under the page's "Survivor testimony".
  *                    kop_q_release_held() moved the answers held before then.
  *   earlier names    kop_name_eras_save() (end year), Undo kop_name_eras_undo()
  *   companies        kop_dired_edit(), Undo kop_dired_undo()
@@ -1000,7 +1000,7 @@ function kop_q_settle($qkey, $answer_key, $by, $typed = '') {
                     $q['person']['name'] . ': there in ' . implode(', ', $years), $yes, $by);
             }
         } elseif ($what === 'rules') {
-            // The answer's words are read into lines for the page's "What people who were there remember"
+            // The answer's words wait as testimony for the page's "Survivor testimony"
             // (inc/reader-accounts.php, Review inbox > What readers remember); nothing else is written.
             $done = array('nothing' => 1);
         } elseif (strpos($what, 'renamed.') === 0) {

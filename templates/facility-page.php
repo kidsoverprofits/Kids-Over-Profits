@@ -347,10 +347,10 @@ if ($kop_fp_campus) $kop_fp_sections['campus'] = $kop_fp_school_only ? ($kop_fp_
 // Rules and practices read from the program's own handbooks (inc/program-practices.php), read at render time.
 $kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
 $kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
-// What readers who were there told the questions page, read into lines (inc/reader-accounts.php): its own section.
-$kop_fp_remember = function_exists('kop_ra_section_html') ? kop_pp_for_facility((int) $page['id'], 'account') : array();
+// What readers who were there told the questions page, in their own words (inc/reader-accounts.php): quotes under Survivor testimony.
+$kop_fp_remember = function_exists('kop_ra_for_facility') ? kop_ra_for_facility((int) $page['id']) : array();
 $kop_fp_has_staff = !empty($page['staff']);
-$kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']);
+$kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']) || $kop_fp_remember;
 $kop_fp_has_videos = !empty($page['videos']);
 $kop_fp_has_news = !empty($page['news']);
 $kop_fp_has_lawsuits = !empty($page['lawsuits']);
@@ -464,7 +464,6 @@ if ($kop_fp_has_news) $kop_fp_sections['news'] = 'News coverage';
 if ($kop_fp_has_videos && !isset($kop_fp_psec['videos'])) $kop_fp_sections['videos'] = 'Videos';
 if ($kop_fp_has_staff) $kop_fp_sections['staff'] = 'Staff';
 if ($kop_fp_has_practices) $kop_fp_sections['practices'] = 'Rules and practices';
-if ($kop_fp_remember) $kop_fp_sections['remember'] = 'What people remember';
 if ($kop_fp_has_inspections) $kop_fp_sections['inspections'] = 'Licensing';
 if ($kop_fp_has_network) $kop_fp_sections['network'] = 'Network';
 if ($kop_fp_has_docs) $kop_fp_sections['documents'] = 'Documents';
@@ -827,7 +826,7 @@ get_header();
             <section class="kop-fp-section kop-fp-testimony-section" id="<?php echo $kop_fp_id('testimony'); ?>"<?php echo $kop_fp_edit('testimony', 'survivor testimony'); ?>>
                 <?php echo $kop_fp_alias('testimony', 'testimony'); ?>
                 <h2><?php echo $kop_fp_icon('users'); ?><?php echo esc_html($kop_fp_title('testimony', 'Survivor testimony')); ?></h2>
-                <p class="kop-fp-testimony-lead">What people who lived or worked here say happened. Survivors' own words are published with their permission; forum accounts are what was posted publicly and are reported as claims, not findings.</p>
+                <p class="kop-fp-testimony-lead">What people who lived or worked here say happened. Survivors' own words are published with their permission; forum accounts are what was posted publicly and are reported as claims, not findings.<?php if ($kop_fp_remember) : ?> Answers sent on our questions page are quoted as written, with only the spelling and punctuation fixed and the names of people taken out.<?php endif; ?></p>
                 <?php if (isset($kop_fp_psec['testimony'])) $kop_fp_render_items($kop_fp_psec['testimony']['items']); ?>
                 <?php foreach ((array) ($page['testimony'] ?? array()) as $kop_fp_t) : ?>
                     <figure class="kop-fp-testimony">
@@ -835,6 +834,7 @@ get_header();
                         <figcaption><?php echo !empty($kop_fp_t['submitted']) ? 'Submitted by a survivor' : 'Survivor account'; ?><?php if ($kop_fp_t['date_label'] !== '') : ?>, shared <?php echo esc_html($kop_fp_t['date_label']); ?><?php endif; ?></figcaption>
                     </figure>
                 <?php endforeach; ?>
+                <?php if ($kop_fp_remember) echo kop_ra_section_html($kop_fp_remember); // Escaped inside. ?>
                 <?php if (!empty($page['forum'])) : $kop_fp_forum = $page['forum']; ?>
                     <h3 class="kop-fp-subhead">Reported on survivor forums</h3>
                     <?php if (!empty($kop_fp_forum['incidents'])) : ?>
@@ -1087,13 +1087,6 @@ get_header();
             </section>
             <?php endif; ?>
 
-            <?php if ($kop_fp_remember) : ?>
-            <section class="kop-fp-section kop-ra-section" id="<?php echo $kop_fp_id('remember'); ?>">
-                <h2>What people who were there remember</h2>
-                <p class="kop-fp-count">What people who were at <?php echo esc_html($page['name']); ?>, or had a child there, told us on our questions page. Under each line are their own words.</p>
-                <?php echo kop_ra_section_html($kop_fp_remember); // Escaped inside. ?>
-            </section>
-            <?php endif; ?>
 
             <?php if ($kop_fp_has_inspections) :
                 $insp = $page['inspections'];
