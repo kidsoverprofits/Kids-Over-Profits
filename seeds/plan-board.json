@@ -1,6 +1,6 @@
 {
- "built": "2026-11-11 22:24 UTC",
- "source": "a9bbd9cfe24baac2973bd46fb1a6b87f9479c4ab",
+ "built": "2026-11-11 22:32 UTC",
+ "source": "dffe6fe958734b641baca80eeb5975e8841b2fc6",
  "sections": [
   {
    "key": "2",
@@ -3008,9 +3008,9 @@
       {
        "id": "4.3:name-eras",
        "lead": "Name eras",
-       "text": "**Name eras**: rename years into the records (`identification.renamedFrom` / `renamedTo`) so the map draws from them; dated items follow the years (articles, lawsuits, inspections, closures); a name never resolves through another record's names, and Facilities from News offers \"Create this name's record\" (old 3.7, steps 2-4). Hand-set eras (`kop_name_eras`): into the map build, its sync and `inc/network-rebuild.php`'s fingerprint, and cutting the facility page; company names have no column yet. About 150 past names not on the map have no rename year.",
+       "text": "**Name eras**: rename years into the records (`identification.renamedFrom` / `renamedTo`) so the map draws from them; dated items follow the years (articles, lawsuits, inspections, closures); a name never resolves through another record's names, and Facilities from News offers \"Create this name's record\" (old 3.7, steps 2-4). Hand-set eras (`kop_name_eras`): into the map build, its sync and `inc/network-rebuild.php`'s fingerprint; company names have no column yet. About 150 past names not on the map have no rename year. Done 2026-11-11: the facility page's \"Names and eras\" pencil (`eras:<id>`, inc/facility-eras-editor.php) edits every name's company and years in one dialog, adds/removes past names, and writes the rename year to the merged rename entry or Map Renames; hand-set eras now cut the facility page (`kop_facility_eras_hand_chain()`). Still open: - After deploy (owner): on a facility page with a past name (e.g. /facility/ of Palm Beach Youth Academy), the pencil on the \"Formerly\" line opens \"names and eras\"; set a year on each row, Save, check the \"As <name>\" sections, then Undo. - The map build still ignores hand-set years for names not on a rename line (item above). - The directory's \"Run by then\" column and Map Renames still edit the same data one piece at a time; once the pencil is in use, consider pointing them at it instead.",
        "ask": "",
-       "date": "",
+       "date": "2026-11-11",
        "why": "",
        "go": [],
        "choices": [],
@@ -3018,7 +3018,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "ab3f5ed1d7c2"
+       "hash": "3f2e40f350a8"
       },
       {
        "id": "4.3:data-flows",
