@@ -30,7 +30,7 @@
 
     var state = { sources: [], byKey: {}, tags: [], admins: [], me: 0, held: { mine: 0, snoozed: 0 }, special: null,
         source: null, view: '', search: '', origin: '', filters: {}, offset: 0, pages: [], nextOffset: 0, limit: 25, total: 0,
-        split: {}, newCount: 0, areaPage: null, nativeArea: null, wantOrigin: '' };
+        split: {}, newCount: 0, areaPage: null, nativeArea: null, wantOrigin: '', pins: [] };
 
     function api(path, body, query) {
         var url = cfg.rest + path;
@@ -144,6 +144,9 @@
     var areaRow = el('div', { class: 'rinbox-areas', role: 'tablist', 'aria-label': 'Review areas' });
     var findInput = el('input', { type: 'search', class: 'rinbox-find', placeholder: 'Find a queue…', 'aria-label': 'Find a queue by name' });
     var queueRow = el('div', { class: 'rinbox-queues' });
+    // The queues this admin pinned, above the tabs on every tab (review-inbox/pins, user meta).
+    var pinsRow = el('div', { class: 'rinbox-pins', role: 'group', 'aria-label': 'Pinned queues' });
+    tabsRow.appendChild(pinsRow);
     tabsRow.appendChild(el('div', { class: 'rinbox-areas-bar' }, [areaRow, findInput]));
     tabsRow.appendChild(queueRow);
     findInput.addEventListener('input', function () { renderTabs(); });
@@ -251,6 +254,83 @@
         ]);
     }
 
+    /* ---- Pins: the queues an admin uses most, in a row above the tabs ---- */
+
+    function isPinned(key) {
+        return state.pins.indexOf(key) !== -1;
+    }
+
+    /** The tab entry for a pinned key, wherever its tab is (null once the queue is gone). */
+    function entryFor(key) {
+        var found = null;
+        ['news', 'people', 'scans', 'found', 'checks'].some(function (area) {
+            areaEntries(area).some(function (e) { if (e.key === key) { found = e; return true; } return false; });
+            return !!found;
+        });
+        return found;
+    }
+
+    var PIN_ON = '★', PIN_OFF = '☆';
+
+    /** The star beside a queue: pins it to the row above the tabs, or takes it off. */
+    function pinToggle(e) {
+        var on = isPinned(e.key);
+        return el('button', {
+            type: 'button', class: 'rinbox-pin' + (on ? ' is-pinned' : ''), 'data-pin': e.key, 'data-pin-label': e.label,
+            'aria-pressed': on ? 'true' : 'false', 'aria-label': 'Pin ' + e.label,
+            title: on ? 'Pinned: click to take it off the row above the tabs' : 'Pin it to the row above the tabs',
+            onclick: function (ev) { ev.stopPropagation(); togglePin(e.key); }
+        }, [el('span', { 'aria-hidden': 'true', text: on ? PIN_ON : PIN_OFF })]);
+    }
+
+    /** A queue button with its star. */
+    function queueChip(e, areaLabel) {
+        return el('span', { class: 'rinbox-q-wrap' }, [queueButton(e, areaLabel), pinToggle(e)]);
+    }
+
+    function togglePin(key) {
+        var before = state.pins.slice();
+        state.pins = isPinned(key) ? state.pins.filter(function (k) { return k !== key; }) : state.pins.concat([key]);
+        refreshPins(key);
+        api('pins', { pins: state.pins }).then(function (data) {
+            if (data && Array.isArray(data.pins)) state.pins = data.pins;
+        }).catch(function (err) {
+            state.pins = before;
+            refreshPins(key);
+            pinsRow.appendChild(el('span', { class: 'rinbox-pins-error', role: 'alert', text: 'The pin was not saved: ' + err.message }));
+        });
+    }
+
+    /** Redraw the rows and every star on the page, keeping focus on the star just clicked. */
+    function refreshPins(key) {
+        var act = document.activeElement;
+        var hadFocus = act && act.getAttribute && act.getAttribute('data-pin') === key ? (pinsRow.contains(act) ? 'pins' : 'other') : null;
+        renderTabs();
+        var on = isPinned(key);
+        page.querySelectorAll('.rinbox-pin[data-pin="' + key + '"]').forEach(function (b) {
+            b.classList.toggle('is-pinned', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            b.title = on ? 'Pinned: click to take it off the row above the tabs' : 'Pin it to the row above the tabs';
+            b.firstChild.textContent = on ? PIN_ON : PIN_OFF;
+        });
+        // A star on an area page is not redrawn and keeps its focus. A redrawn one hands focus to its copy;
+        // one unpinned from the pinned row is gone, so focus goes to the same queue's star in the tab row.
+        if (!hadFocus || act.isConnected) return;
+        var again = (hadFocus === 'pins' ? pinsRow.querySelector('.rinbox-pin[data-pin="' + key + '"]') : null)
+            || queueRow.querySelector('.rinbox-pin[data-pin="' + key + '"]')
+            || page.querySelector('.rinbox-pin[data-pin="' + key + '"]');
+        if (again) again.focus();
+    }
+
+    function renderPins() {
+        pinsRow.innerHTML = '';
+        if (!state.sources.length) return;
+        var chips = state.pins.map(entryFor).filter(Boolean).map(function (e) { return queueChip(e); });
+        pinsRow.appendChild(el('span', { class: 'rinbox-pins-name', 'aria-hidden': 'true', text: PIN_ON + ' Pinned' }));
+        if (chips.length) chips.forEach(function (c) { pinsRow.appendChild(c); });
+        else pinsRow.appendChild(el('span', { class: 'rinbox-help', text: 'Nothing pinned. Click the ' + PIN_OFF + ' beside any queue to keep it here, on every tab.' }));
+    }
+
     function currentArea() {
         if (state.areaPage) return state.areaPage;
         if (state.special === '_new' || state.special === '_tools') return state.special;
@@ -263,6 +343,7 @@
     function renderTabs() {
         var focusKey = document.activeElement && queueRow.contains(document.activeElement) ? document.activeElement.getAttribute('data-source') : null;
         page.classList.add('rinbox-dd-ready');
+        renderPins();
         var cur = currentArea();
         areaRow.innerHTML = '';
         AREAS.forEach(function (a) {
@@ -282,7 +363,7 @@
             AREAS.forEach(function (a) {
                 if (a.key === '_new' || a.key === '_tools') return;
                 areaEntries(a.key).forEach(function (e) {
-                    if ((e.label + ' ' + (e.group || '')).toLowerCase().indexOf(q) !== -1) hits.push(queueButton(e, a.label));
+                    if ((e.label + ' ' + (e.group || '')).toLowerCase().indexOf(q) !== -1) hits.push(queueChip(e, a.label));
                 });
             });
             queueRow.appendChild(hits.length ? el('div', { class: 'rinbox-q-group' }, hits)
@@ -299,7 +380,8 @@
                 box = el('div', { class: 'rinbox-q-group' }, e.group && named === null ? [el('span', { class: 'rinbox-q-group-name', text: e.group })] : []);
                 queueRow.appendChild(box);
             }
-            box.appendChild(queueButton(e));
+            // "Your inbox" holds fixed lists, not queues: nothing there is pinned.
+            box.appendChild(cur === '_yours' ? queueButton(e) : queueChip(e));
         });
         var f = focusKey && queueRow.querySelector('.rinbox-q[data-source="' + focusKey + '"]');
         if (f) f.focus();
@@ -332,13 +414,14 @@
                 current = e.group;
                 list.appendChild(el('h3', { class: 'rinbox-tools-heading', text: e.group }));
             }
-            list.appendChild(el('button', { type: 'button', class: 'rinbox-area-row' + (e.count ? '' : ' is-empty'), onclick: function () { e.open(); } }, [
+            var row = el('button', { type: 'button', class: 'rinbox-area-row' + (e.count ? '' : ' is-empty'), onclick: function () { e.open(); } }, [
                 el('span', { class: 'rinbox-area-row-text' }, [
                     el('strong', { text: e.label }),
                     e.help ? el('span', { class: 'rinbox-help', text: e.help }) : null
                 ]),
                 countBadge(e.count, e.count === null || e.count === undefined)
-            ]));
+            ]);
+            list.appendChild(key === '_yours' ? row : el('div', { class: 'rinbox-area-row-wrap' }, [row, pinToggle(e)]));
         });
         panel.appendChild(list);
     }
@@ -370,6 +453,7 @@
             state.tags = data.tags || [];
             state.admins = data.admins || [];
             state.me = data.me || 0;
+            state.pins = Array.isArray(data.pins) ? data.pins : [];
             state.held = data.held || { mine: 0, snoozed: 0 };
             state.split = data.split || {};
             state.byKey = {};

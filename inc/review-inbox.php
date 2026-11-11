@@ -731,6 +731,7 @@ add_action('rest_api_init', function () {
         'tool'    => array('POST', 'kop_rinbox_rest_tool'),
         'lookup'  => array('GET', 'kop_rinbox_rest_lookup'),
         'all-tools' => array('GET', 'kop_rinbox_rest_all_tools'),
+        'pins'    => array('POST', 'kop_rinbox_rest_pins'),
     );
     foreach ($routes as $path => $r) {
         register_rest_route('kop/v1', '/review-inbox/' . $path, array(
@@ -766,7 +767,47 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
         }
         return array('sources' => $out, 'split' => function_exists('kop_rinbox_native_split_counts') ? kop_rinbox_native_split_counts() : array(),
             'stale' => kop_rinbox_counts_stale(), 'tags' => kop_rinbox_known_tags(), 'admins' => kop_rinbox_admins(),
-            'me' => get_current_user_id(), 'held' => kop_rinbox_held_counts() + array('volunteers' => function_exists('kop_vol_open_count') ? kop_vol_open_count() : 0));
+            'me' => get_current_user_id(), 'pins' => kop_rinbox_pins(), 'held' => kop_rinbox_held_counts() + array('volunteers' => function_exists('kop_vol_open_count') ? kop_vol_open_count() : 0));
+    });
+}
+
+/*
+ * Pinned queues (owner, 2026-11-11: "too hard to navigate to the categories i use most often"): a row above the tabs,
+ * each admin's own (user meta kop_rinbox_pins, so it follows them to every device). Keys are the tab entries' keys:
+ * a queue's key, or "<native>-imports". Until an admin pins or unpins anything they get the five the review log shows
+ * the owner using most (News, Answers to our questions, Serious violations, Websites sent in, Bill and lawsuit updates).
+ */
+function kop_rinbox_default_pins() {
+    return array('news', 'questions', 'inspection-highlights', 'websites', 'status_checks');
+}
+
+/** The current admin's pinned queue keys, in their order. */
+function kop_rinbox_pins($user_id = 0) {
+    $user_id = $user_id ?: get_current_user_id();
+    if (!$user_id || !function_exists('metadata_exists') || !metadata_exists('user', $user_id, 'kop_rinbox_pins')) return kop_rinbox_default_pins();
+    $pins = get_user_meta($user_id, 'kop_rinbox_pins', true);
+    return is_array($pins) ? array_values($pins) : array();
+}
+
+/** Keep only well-formed keys, once each, in order, at most 30. */
+function kop_rinbox_clean_pins($pins) {
+    $out = array();
+    foreach ((array) $pins as $k) {
+        $k = sanitize_key((string) $k);
+        if ($k !== '' && strlen($k) <= 64 && !in_array($k, $out, true)) $out[] = $k;
+        if (count($out) >= 30) break;
+    }
+    return $out;
+}
+
+/** POST review-inbox/pins {pins: [key, ...]}: saves the whole list (an empty list = nothing pinned). */
+function kop_rinbox_rest_pins(WP_REST_Request $req) {
+    return kop_rinbox_rest(function () use ($req) {
+        $pins = $req->get_param('pins');
+        if (!is_array($pins)) throw new RuntimeException('pins must be a list.');
+        $pins = kop_rinbox_clean_pins($pins);
+        update_user_meta(get_current_user_id(), 'kop_rinbox_pins', $pins);
+        return array('pins' => $pins);
     });
 }
 

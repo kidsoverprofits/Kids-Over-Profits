@@ -201,6 +201,110 @@ button.rinbox-q.is-empty:not(.is-active) .rinbox-q-label {
     display: none;
 }
 
+/* Pinned queues: a row above the tabs, and a star joined to every queue button (js/review-inbox.js pinToggle()). */
+.rinbox-pins {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.rinbox-pins:empty {
+    display: none;
+}
+
+.rinbox-pins-name {
+    color: var(--kop-orange-ink, #A3570D);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.rinbox-pins-error {
+    color: var(--kop-coral-pink-ink, #D9020F);
+    font-size: 13px;
+}
+
+.rinbox-q-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+}
+
+.rinbox-q-wrap button.rinbox-q,
+.rinbox-q-wrap button.rinbox-q:hover,
+.rinbox-q-wrap button.rinbox-q:focus,
+.rinbox-q-wrap button.rinbox-q:active {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    min-width: 0;
+}
+
+button.rinbox-pin,
+button.rinbox-pin:hover,
+button.rinbox-pin:focus,
+button.rinbox-pin:active {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    margin: 0 0 0 -1px;
+    padding: 0 6px;
+    border: 1px solid var(--rv-line, #D5DAE1);
+    border-radius: 0 var(--rv-radius, 3px) var(--rv-radius, 3px) 0;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-muted, #4A5568);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+button.rinbox-pin:hover,
+button.rinbox-pin:focus {
+    border-color: var(--kop-midnight-blue, #000435);
+    background: var(--rv-subtle, #F5F6F8);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+button.rinbox-pin:focus-visible {
+    outline: 2px solid var(--kop-navy, #000080);
+    outline-offset: 2px;
+}
+
+button.rinbox-pin.is-pinned,
+button.rinbox-pin.is-pinned:hover,
+button.rinbox-pin.is-pinned:focus,
+button.rinbox-pin.is-pinned:active {
+    background: var(--kop-white, #fff);
+    color: var(--kop-orange-ink, #A3570D);
+}
+
+button.rinbox-pin.is-pinned:hover,
+button.rinbox-pin.is-pinned:focus {
+    background: var(--rv-subtle, #F5F6F8);
+}
+
+/* An area page's rows: the star beside each. */
+.rinbox-area-row-wrap {
+    display: flex;
+    align-items: stretch;
+}
+
+.rinbox-area-row-wrap button.rinbox-area-row,
+.rinbox-area-row-wrap button.rinbox-area-row:hover,
+.rinbox-area-row-wrap button.rinbox-area-row:focus,
+.rinbox-area-row-wrap button.rinbox-area-row:active {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.rinbox-area-row-wrap button.rinbox-pin {
+    min-width: 40px;
+}
+
 /* An area's own page: one row per queue with what it holds. */
 .rinbox-area-list {
     display: flex;

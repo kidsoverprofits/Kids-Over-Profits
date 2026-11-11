@@ -24,6 +24,10 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # Google Docs, the wiki, Scraper finds...). Other native queues' imports show as "<Queue> (imports)" under Found by imports; counts from
 # kop_rinbox_native_split_counts(). The page's own five
 # type tabs stay hidden. ?type= takes a queue, a special list (_new, _done...) or an area (people, scans, found, checks, _yours)
+# Pinned row above the tabs (2026-11-11): each admin's own queues (user meta kop_rinbox_pins; 'pins' in review-inbox/sources,
+# saved whole by POST review-inbox/pins). Unset = kop_rinbox_default_pins() (News, Answers to our questions, Serious violations,
+# Websites sent in, Bill and lawsuit updates). A star beside every queue button, Find result and area-page row pins or unpins
+# at once (js/review-inbox.js pinToggle()/togglePin()); keys are the tab entries' keys, "<native>-imports" too. Your inbox's lists never pin
 # Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
 # (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'
 # and the imports' are counts per queue in two folds. A source answers with 'recent' (native: by created_at) or 'recent_count'

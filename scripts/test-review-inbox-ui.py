@@ -136,7 +136,7 @@ SOURCES = {"sources": [
     {"key": "nom", "label": "Nominated", "group": "Essential reporting", "area": "people", "views": {"nominated": "Nominated", "featured": "Featured", "passed": "Passed over"},
      "count": 1, "native": False, "tool_url": "", "help": "Stored articles put forward as especially good journalism.", "can_save": False, "can_ai": False},
 ], "tags": ["follow up", "needs source", "Neglect"], "admins": [{"id": 1, "name": "Dani"}, {"id": 2, "name": "Pat"}],
-    "me": 1, "held": {"mine": 1, "snoozed": 0}, "stale": ["drive"], "split": {"news": {"people": 1, "scans": 3}}}
+    "me": 1, "pins": ["closure"], "held": {"mine": 1, "snoozed": 0}, "stale": ["drive"], "split": {"news": {"people": 1, "scans": 3}}}
 
 # "Just in": a reader's article and a nomination as cards; the scans' and the imports' finds as counts.
 RECENT = {"days": 2, "recent": {
@@ -277,6 +277,8 @@ def main():
                 else:
                     item = closure_item(stage=f.get("stage", "closed"), name=f.get("program_name", "Sunrise Ranch"))
                 out = {"message": "Saved.", "item": item}
+            elif path == "pins":
+                out = {"pins": body["pins"]}
             elif path == "tags":
                 out = {"tags": sorted(body["tags"], key=str.lower), "message": "Tags saved."}
             elif path == "ai":
@@ -376,6 +378,32 @@ def main():
             check(wide["page"] <= width and not wide["out"], f"@{width} an area's page fits the screen", f"{wide}")
             pg.screenshot(path=str(shots / f"area-{width}.png"), full_page=True)
 
+            # Pinned queues: a row above the tabs, a star beside every queue to pin or unpin it, saved per admin.
+            pinned = [t.replace(chr(10), " ") for t in pg.locator(".rinbox-pins button.rinbox-q").all_inner_texts()]
+            check(pinned and pinned[0].startswith("Closure reports") and len(pinned) == 1
+                  and pg.locator(".rinbox-pins .rinbox-pin[data-pin='closure']").get_attribute("aria-pressed") == "true",
+                  f"@{width} the pinned row shows the saved pins", " | ".join(pinned))
+            check(pg.locator(".rinbox-area-row-wrap .rinbox-pin[data-pin='closure']").get_attribute("aria-pressed") == "true",
+                  f"@{width} an area page's row has its star, pressed when pinned")
+            pg.locator("button.rinbox-area", has_text="Found by imports").click()
+            pg.locator(".rinbox-queues .rinbox-pin[data-pin='drive']").click()
+            check(pg.locator(".rinbox-pins button.rinbox-q", has_text="Drive Docs").count() == 1
+                  and [c[1] for c in calls if c[0] == "pins"][-1:] == [{"pins": ["closure", "drive"]}],
+                  f"@{width} a star pins the queue at once and saves the list", json.dumps([c[1] for c in calls if c[0] == "pins"]))
+            wide = pg.evaluate(WIDTH_JS)
+            check(wide["page"] <= width and not wide["out"], f"@{width} the pinned row fits the screen", f"{wide}")
+            pg.screenshot(path=str(shots / f"pins-{width}.png"), full_page=False)
+            pg.locator(".rinbox-pins .rinbox-pin[data-pin='drive']").click()
+            check(pg.locator(".rinbox-pins button.rinbox-q", has_text="Drive Docs").count() == 0
+                  and [c[1] for c in calls if c[0] == "pins"][-1:] == [{"pins": ["closure"]}]
+                  and pg.evaluate("() => document.activeElement && document.activeElement.getAttribute('data-pin')") == "drive"
+                  and pg.locator(".rinbox-queues .rinbox-pin[data-pin='drive']").get_attribute("aria-pressed") == "false",
+                  f"@{width} the star in the pinned row unpins it; focus moves to the queue's own star")
+            pg.locator(".rinbox-pins button.rinbox-q", has_text="Closure reports").click()
+            pg.wait_for_selector(".rinbox-card[data-key='36']")
+            check("is-current" in (pg.locator("button.rinbox-area", has_text="Daily news scans").get_attribute("class") or ""),
+                  f"@{width} a pinned queue opens under its own tab")
+
             # Find a queue: by name, from any tab.
             pg.locator("input.rinbox-find").fill("drive")
             hit = pg.locator("button.rinbox-q", has_text="Drive Docs")
@@ -390,7 +418,7 @@ def main():
             open_news(pg)
             check("type=news" in pg.url, f"@{width} the News list is in the address", pg.url)
             check("is-current" in (pg.locator("button.rinbox-area", has_text="News").first.get_attribute("class") or "")
-                  and pg.locator("button.rinbox-q").count() == 0, f"@{width} the News tab is current, with no queue row under it")
+                  and pg.locator(".rinbox-queues button.rinbox-q").count() == 0, f"@{width} the News tab is current, with no queue row under it")
             pg.wait_for_selector(".submission-card .rinbox-native")
             check(pg.locator(".submission-card .rinbox-native select").count() >= 1, f"@{width} the page's own card gets the quick row")
             ev = pg.locator(".submission-card .rinbox-native-evidence")
