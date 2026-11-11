@@ -183,7 +183,7 @@ if (!function_exists('kop_pjobs_by_person')) {
         $opts = $opts ?: (array) ($GLOBALS['kop_pjobs_opts'] ?? array());
         $out = array();
         if (kop_pjobs_ready($opts)) {
-            $state = function_exists('kop_people_load') ? kop_people_load($opts) : null;
+            $state = kop_pjobs_people($opts);
             foreach (kop_facility_db_rows('SELECT id, person_id, place, role, years, source, source_url, origin FROM ' . kop_pjobs_table($opts)
                 . ' WHERE hidden = 0 ORDER BY id', array(), $opts) as $r) {
                 $pid = $state ? kop_people_resolve($state, (int) $r['person_id']) : (int) $r['person_id'];
@@ -199,8 +199,22 @@ if (!function_exists('kop_pjobs_by_person')) {
         $opts = $opts ?: (array) ($GLOBALS['kop_pjobs_opts'] ?? array());
         if (!kop_pjobs_ready($opts)) return null;
         $pid = (int) $person_id;
-        if (function_exists('kop_people_load')) $pid = kop_people_resolve(kop_people_load($opts), $pid);
+        $state = kop_pjobs_people($opts);
+        if ($state) $pid = kop_people_resolve($state, $pid);
         return kop_pjobs_by_person($opts)[$pid] ?? array();
+    }
+
+    /**
+     * The people table (kop_people_load()) for resolving merged ids, read once per request on the site:
+     * a staff list calls kop_pjobs_for_person() once a person, and loading the whole table each time
+     * took Provo Canyon School's page past 90 seconds. kop_people_version_bump() drops it after a write.
+     * With $opts (tests, a SQLite copy) it is read fresh. null without the people module.
+     */
+    function kop_pjobs_people(array $opts = array()) {
+        if (!function_exists('kop_people_load')) return null;
+        if (!empty($opts)) return kop_people_load($opts);
+        if (!isset($GLOBALS['kop_pjobs_people']) || !is_array($GLOBALS['kop_pjobs_people'])) $GLOBALS['kop_pjobs_people'] = kop_people_load();
+        return $GLOBALS['kop_pjobs_people'];
     }
 }
 

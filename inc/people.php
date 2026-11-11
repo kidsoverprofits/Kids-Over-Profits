@@ -270,6 +270,7 @@ if (!function_exists('kop_people_version_bump')) {
     function kop_people_version_bump() {
         if (function_exists('update_option')) update_option('kop_people_version', (string) microtime(true), false);
         $GLOBALS['kop_people_group_state'] = null;
+        $GLOBALS['kop_pjobs_people'] = null;   // inc/person-jobs.php kop_pjobs_people()
     }
 }
 
