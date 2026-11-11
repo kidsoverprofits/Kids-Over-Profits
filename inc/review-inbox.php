@@ -45,7 +45,10 @@
  *              buttons over the queue that are not about one item (scan now,
  *              read now, add every sure match for a facility). 'fold' => true
  *              folds a long form under its label (Add a milestone); a link with
- *              ?tool=<id>&p_<param>=<value> opens it filled in
+ *              ?tool=<id>&p_<param>=<value> opens it filled in. 'tools' and
+ *              'filters' may be fn(): [...] when their options cost a query:
+ *              only the sources list and that queue's own list then work them out
+ *              (kop_rinbox_spec_list()), not every inbox request
  *   'tool'     fn(string $id, array $params): ['message' => ...]
  *   'tool_url' the queue's full screen, for what this one does not do
  *   'native'   true for the five types the page already draws itself
@@ -757,8 +760,8 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
                 'help' => (string) ($src['help'] ?? ''), 'can_save' => !empty($src['save']),
                 'can_ai' => (!empty($src['save']) && empty($src['no_ai'])) || !empty($src['ai_fill']),
                 'has_origins' => !empty($src['origins']),
-                'tools' => array_values((array) ($src['tools'] ?? array())),
-                'filters' => array_values((array) ($src['filters'] ?? array())),
+                'tools' => kop_rinbox_spec_list($src, 'tools'),
+                'filters' => kop_rinbox_spec_list($src, 'filters'),
             );
         }
         return array('sources' => $out, 'split' => function_exists('kop_rinbox_native_split_counts') ? kop_rinbox_native_split_counts() : array(),
@@ -837,10 +840,17 @@ function kop_rinbox_rest_items(WP_REST_Request $req) {
     });
 }
 
+/** A source's 'tools' or 'filters' list, worked out now when the queue gives a function for it. */
+function kop_rinbox_spec_list(array $src, $name) {
+    $list = $src[$name] ?? array();
+    if ($list instanceof Closure || (is_string($list) && is_callable($list))) $list = call_user_func($list);
+    return array_values((array) $list);
+}
+
 /** The source's 'filters' values from a request: [name => value], only values that are one of its options. */
 function kop_rinbox_chosen_filters(array $src, callable $param) {
     $out = array();
-    foreach ((array) ($src['filters'] ?? array()) as $f) {
+    foreach (kop_rinbox_spec_list($src, 'filters') as $f) {
         $name = (string) ($f['name'] ?? '');
         $v = $name !== '' ? (string) call_user_func($param, $name) : '';
         if ($v !== '' && array_key_exists($v, (array) ($f['options'] ?? array()))) $out[$name] = $v;

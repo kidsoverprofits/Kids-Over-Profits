@@ -7,9 +7,15 @@
  *
  * The suggestions are computed state by state with
  * kop_inspection_link_suggestions(), which reads every record and licensing
- * row of each state: the list of every state's pairs is cached an hour here
- * (transient kop_rinbox_inspection_links), and pairs decided since are left
- * out as it is read. Removing a link clears it, so the pair can come back.
+ * row of each state (4-10 s on the mirror, longer on production): the list of
+ * every state's pairs is kept in the option kop_rinbox_inspection_links and
+ * worked out again in the background (kop_rinbox_ilinks_rebuild, a one-off
+ * cron event) once it is an hour old; requests read the last list meanwhile,
+ * so no approve anywhere in the inbox waits on it (owner 2026-11-11: approving
+ * took up to half a minute). Pairs decided since are left out as it is read.
+ * Removing a link marks it old, so the pair comes back after the rebuild.
+ * The State filter and the tool's state list are functions, worked out only
+ * for the sources list and this queue's own list.
  *
  * As on the Inspection Links screen: a State filter, pairs in the same town
  * start ticked (select them all and press "Same facility"), and a tool links
@@ -44,13 +50,17 @@ kop_rinbox_register('inspection-links', function () {
         },
         // The companies watched closely (the Serious violations queue's list) come first: linking their
         // records' licensed names is what brings their findings to the front of that queue.
-        'filters'  => array(array('name' => 'state', 'label' => 'State', 'options' => kop_rinbox_ilinks_state_options()),
-            array('name' => 'watch', 'label' => 'Company', 'options' => array('' => 'All companies (watched first)', 'watched' => 'Watched companies only'))),
-        'tools'    => array(array('id' => 'link_same_town', 'label' => 'Link every same-town pair', 'style' => 'approve',
+        'filters'  => function () {
+            return array(array('name' => 'state', 'label' => 'State', 'options' => kop_rinbox_ilinks_state_options()),
+                array('name' => 'watch', 'label' => 'Company', 'options' => array('' => 'All companies (watched first)', 'watched' => 'Watched companies only')));
+        },
+        'tools'    => function () {
+            return array(array('id' => 'link_same_town', 'label' => 'Link every same-town pair', 'style' => 'approve',
             'help' => 'Links every suggested pair whose licensing entry is in the facility record\'s town (the ones the Inspection Links screen ticks in advance). Each can be removed on the Linked tab.',
             'confirm' => 'Link every suggested pair in the same town? Each can be removed on the Linked tab.',
             'params' => array(array('name' => 'state', 'label' => 'In', 'type' => 'select', 'value' => 'all',
-                'options' => array('all' => 'every state') + kop_rinbox_ilinks_state_options())))),
+                'options' => array('all' => 'every state') + kop_rinbox_ilinks_state_options()))));
+        },
         'tool'     => 'kop_rinbox_ilinks_tool',
         'list'     => 'kop_rinbox_ilinks_list',
         'get'      => 'kop_rinbox_ilinks_get',
@@ -58,10 +68,47 @@ kop_rinbox_register('inspection-links', function () {
     );
 });
 
-/** Every state's suggested pairs, computed once an hour. */
+/**
+ * Every state's suggested pairs. The last list is returned at once; one over an
+ * hour old (or marked old) is worked out again by a one-off cron event. Only
+ * the first time ever, $fresh or the cron itself works it out in the request.
+ */
 function kop_rinbox_ilinks_all($fresh = false) {
-    $cached = $fresh ? false : get_transient('kop_rinbox_inspection_links');
-    if (is_array($cached)) return $cached;
+    static $memo = null;
+    if ($memo !== null && !$fresh) return $memo;
+    $saved = $fresh ? null : get_option('kop_rinbox_inspection_links', null);
+    if (is_array($saved) && isset($saved['pairs']) && is_array($saved['pairs'])) {
+        $old = time() - (int) ($saved['at'] ?? 0) >= HOUR_IN_SECONDS;
+        if (!$old || !(function_exists('wp_doing_cron') && wp_doing_cron())) {
+            if ($old) kop_rinbox_ilinks_rebuild_later();
+            return $memo = $saved['pairs'];
+        }
+    }
+    return $memo = kop_rinbox_ilinks_build();
+}
+
+/** Work the pairs out again soon, off the request (WordPress drops a copy of a one-off event already due). */
+function kop_rinbox_ilinks_rebuild_later() {
+    if (function_exists('wp_next_scheduled') && !wp_next_scheduled('kop_rinbox_ilinks_rebuild')) {
+        wp_schedule_single_event(time(), 'kop_rinbox_ilinks_rebuild');
+    }
+}
+
+/** A decision a rebuild must see (a link removed, a rejection taken back): the list is old now. */
+function kop_rinbox_ilinks_mark_old() {
+    $saved = get_option('kop_rinbox_inspection_links', null);
+    if (is_array($saved)) {
+        $saved['at'] = 0;
+        update_option('kop_rinbox_inspection_links', $saved, false);
+    }
+    kop_rinbox_ilinks_rebuild_later();
+}
+
+add_action('kop_rinbox_ilinks_rebuild', function () {
+    kop_rinbox_ilinks_build();
+});
+
+function kop_rinbox_ilinks_build() {
     global $wpdb;
     $stored = kop_inspection_links_get();
     $pairs = array();
@@ -86,7 +133,8 @@ function kop_rinbox_ilinks_all($fresh = false) {
             }
         }
     }
-    set_transient('kop_rinbox_inspection_links', $pairs, HOUR_IN_SECONDS);
+    update_option('kop_rinbox_inspection_links', array('at' => time(), 'pairs' => $pairs), false);
+    delete_transient('kop_rinbox_inspection_links'); // the hour-long cache before 2026-11-11
     return $pairs;
 }
 
@@ -307,19 +355,19 @@ function kop_rinbox_ilinks_act($key, $action, array $params) {
             $hid = (int) ($p['home']['id'] ?? 0);
             if (!$hid) throw new RuntimeException('That entry was not suggested for one of the program\'s homes.');
             kop_inspection_links_save(array('decide' => array($key => 'home:' . $hid)));
-            delete_transient('kop_rinbox_inspection_links');
+            kop_rinbox_ilinks_mark_old();
             return array('message' => 'Linked to ' . $p['home']['name'] . '. Its page and the program\'s page show that entry\'s reports now. Remove is on the Linked tab.');
         case 'reject':
             kop_inspection_links_save(array('decide' => array($key => 'reject')));
             return array('message' => 'Marked not the same. This pair will not be suggested again; "Suggest it again" is on the Not this one tab.');
         case 'unreject':
             kop_inspection_links_save(array('unreject' => array($key)));
-            delete_transient('kop_rinbox_inspection_links');
+            kop_rinbox_ilinks_mark_old();
             return array('message' => 'Back in the suggestions.');
         case 'unlink':
             kop_inspection_links_save(array('unlink' => array($key)));
             // The pair may be suggested again: the list is worked out afresh.
-            delete_transient('kop_rinbox_inspection_links');
+            kop_rinbox_ilinks_mark_old();
             return array('message' => 'Link removed. The facility\'s page no longer shows that entry\'s reports.');
     }
     throw new RuntimeException('Unknown action.');

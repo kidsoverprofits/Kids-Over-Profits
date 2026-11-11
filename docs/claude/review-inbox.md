@@ -33,6 +33,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # Counts never block the page: review-inbox/sources returns the saved counts (option kop_review_inbox_counts) + 'stale', the page
 # recounts those after drawing (review-inbox/counts?sources=a,b, slow counters alone), a 10-minute cron keeps them warm;
 # kop_rinbox_flush_counts() only marks them stale. A queue whose count scans goes in SLOW_COUNTS there
+# Every inbox request (an approve too) builds every queue's spec (kop_rinbox_sources()), so a builder never queries:
+# options that cost a query go in 'filters' / 'tools' as fn(): [...] (kop_rinbox_spec_list(), worked out only for the
+# sources list and that queue's list). Inspection links' pairs (4-10 s to work out) live in option
+# kop_rinbox_inspection_links {at, pairs}: requests read the last list, a one-off cron event (kop_rinbox_ilinks_rebuild)
+# works it out once it is an hour old or marked old (owner 2026-11-11: it made approving take up to 30 s and, with
+# Just in's parallel requests all rebuilding it, ran production out of database connections)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php [--source=closure]   # every source on a scratch copy; checks in scripts/review-inbox-tests/
 # "File under a young adult program" on every waiting card of a content queue (inc/review-inbox/_ya-file-action.php, like "Home of a program";
 # kop_rinbox_cross_act()): a fact (People/Incidents/History/About) citing the card's link, or only the link, on a picked or new (hidden)

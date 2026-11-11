@@ -28,7 +28,10 @@ function kop_rinbox_test_inspection_links(array $src, array $item, callable $che
     $states = array();
     foreach (kop_rinbox_ilinks_pairs() as $p) $states[$p['state']] = true;
     $check('inspection-links: one list across states', count($states) > 1, implode(',', array_keys($states)));
-    $check('inspection-links: the list is cached', is_array(get_transient('kop_rinbox_inspection_links')));
+    $saved = get_option('kop_rinbox_inspection_links', null);
+    $check('inspection-links: the list is kept with its time', is_array($saved) && isset($saved['pairs'], $saved['at']) && $saved['at'] > 0);
+    $check('inspection-links: State filter and tool are worked out only when asked for', ($src['filters'] ?? null) instanceof Closure
+        && ($src['tools'] ?? null) instanceof Closure && count(kop_rinbox_spec_list($src, 'tools')) === 1);
     $check('inspection-links: record and licensing entry side by side', count($item['compare']['heads'] ?? array()) === 2
         && in_array('Town or address', array_column($item['compare']['rows'], 'label'), true));
     $pairs = kop_rinbox_ilinks_pairs();
@@ -42,7 +45,7 @@ function kop_rinbox_test_inspection_links(array $src, array $item, callable $che
     }
     // The State filter: only that state's pairs.
     $state = $pairs[$key]['state'];
-    $filter = $src['filters'][0] ?? array();
+    $filter = kop_rinbox_spec_list($src, 'filters')[0] ?? array();
     $check('inspection-links: a State filter with every state that has pairs', ($filter['name'] ?? '') === 'state' && isset($filter['options'][$state]), count($filter['options'] ?? array()) . ' states');
     $res = call_user_func($src['list'], array('view' => 'suggested', 'search' => '', 'offset' => 0, 'limit' => 100, 'filters' => array('state' => $state)));
     $in = count(array_filter($pairs, function ($p) use ($state) { return $p['state'] === $state; }));

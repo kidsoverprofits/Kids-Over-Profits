@@ -1556,12 +1556,13 @@
         var sources = state.sources.slice().sort(function (a, b) {
             return (areaOrder[a.area] || 0) - (areaOrder[b.area] || 0) || byLabel(a.group, b.group) || byLabel(a.label, b.label);
         });
-        // A section per queue that people send to, in order, filled as its answer comes.
+        // A section per queue that people send to, added under the others as its answer comes: a slow
+        // queue answering late never pushes down the cards being worked on (owner 2026-11-11: things
+        // jumped around while approving).
         var slots = {};
         sources.forEach(function (s) {
             if (s.area !== 'people') return;
             slots[s.key] = el('section', { class: 'rinbox-justin-queue', hidden: true });
-            listEl.appendChild(slots[s.key]);
         });
         var empty = el('p', { class: 'rinbox-help', hidden: true, text: 'Nobody sent anything in ' + (days === 1 ? 'the last 24 hours.' : 'the last ' + days + ' days.') });
         listEl.appendChild(empty);
@@ -1599,6 +1600,7 @@
             if (items.length && slots[s.key]) {
                 var slot = slots[s.key];
                 slot.hidden = false;
+                listEl.insertBefore(slot, empty);
                 slot.appendChild(el('h3', { class: 'rinbox-justin-head' }, [
                     el('span', { text: s.label + ' ' }),
                     el('span', { class: 'tab-count has-items', text: fmtCount(items.length) }),
