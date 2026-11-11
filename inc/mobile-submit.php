@@ -73,13 +73,22 @@ function kop_msub_via(array $p) {
 }
 
 /**
- * Who sent it, as the records tables write it. A send with the research key (Claude's research sessions and the
- * scripts that load a dataset for someone) ends "(research key)" instead of the page it came through, so the
- * Review inbox never counts it as sent in by a person (kop_rinbox_research_sender_sql(), owner 2026-11-11).
+ * Who sent it, as the records tables write it. A send with the research key ends "(research key)" instead of the
+ * page it came through when Claude or an agent sent it for itself (no name, or a name like "Claude research agent"),
+ * so the Review inbox never counts it as sent in by a person (kop_rinbox_research_sender_sql(), owner 2026-11-11).
+ * A research-key send in a person's name is a script loading that person's own research (Amber Foster's research
+ * map, 2026-10-28): it ends "(researcher upload)" and stays theirs (owner, same day: "rather show it as hers").
  */
 function kop_msub_submitter(array $p, $research = false) {
     $name = kop_ext_text($p['submitter_name'] ?? '', 120);
-    return mb_substr(($name !== '' ? $name . ' ' : '') . '(' . ($research ? 'research key' : kop_msub_via($p)) . ')', 0, 255);
+    $via = kop_msub_via($p);
+    if ($research) $via = ($name === '' || kop_msub_is_bot_name($name)) ? 'research key' : 'researcher upload';
+    return mb_substr(($name !== '' ? $name . ' ' : '') . '(' . $via . ')', 0, 255);
+}
+
+/** A sender name that is Claude, an agent or a bot, not a person. */
+function kop_msub_is_bot_name($name) {
+    return (bool) preg_match('/\bclaude\b|\bagent\b|\bbot\b|auto-discovery/i', (string) $name);
 }
 
 /** Public form of the extension's duplicate list: type and whether it is live. */

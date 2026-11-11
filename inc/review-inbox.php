@@ -720,10 +720,9 @@ function kop_rinbox_load_enrich() {
 
 /**
  * SQL: true when $col (a "submitted by" value) is a research send, not a person (owner, 2026-11-11: "make sure that
- * only things that are ACTUALLY sent in by people are flagged that way"). Every research-key send ends
- * "(research key)" (kop_msub_submitter()); older ones were "Claude research agent (Send page)" or
- * "... import via Claude"; the 2026-10-28 load of Amber Foster's research map came through the key too and is
- * relabelled by kop_rinbox_relabel_research_sends().
+ * only things that are ACTUALLY sent in by people are flagged that way"). Claude's own research-key sends end
+ * "(research key)" (kop_msub_submitter()); older ones were "Claude research agent (Send page)" or "... import via
+ * Claude". A researcher's own data loaded with the key ends "(researcher upload)" and is theirs, so it is not here.
  */
 function kop_rinbox_research_sender_sql($col) {
     return "($col LIKE '%(research key)%' OR $col LIKE '%research agent%' OR $col LIKE '%import via Claude%')";
@@ -735,14 +734,16 @@ function kop_rinbox_is_research_sender($by) {
 }
 
 /**
- * Once: the research-key sends from before the label existed get it. Amber Foster's research map rows
- * (2026-10-28, 203 news + lawsuits + websites in an hour, past the public cap of 12) and every
- * "Claude research agent (Send page)" row read "... (research key)" after this.
+ * Once: the research-key sends from before the labels existed get them. Every "Claude research agent (Send page)"
+ * row reads "... (research key)" (an import); Amber Foster's research map rows (2026-10-28, 203 items in an hour
+ * through the key) read "... (researcher upload)" and stay hers, people's (owner, 2026-11-11), also where the
+ * first version of this (option value '2026-11-11') had marked them "(research key)".
  */
 function kop_rinbox_relabel_research_sends() {
-    if (get_option('kop_rinbox_research_relabel') === '2026-11-11') return;
-    $from = array('Amber Foster (Teen Challenge Network research map) (Send page)', 'Claude research agent (Send page)');
-    $to = array('Amber Foster (Teen Challenge Network research map) (research key)', 'Claude research agent (research key)');
+    if (get_option('kop_rinbox_research_relabel') === '2026-11-11b') return;
+    $amber = 'Amber Foster (Teen Challenge Network research map)';
+    $from = array('Claude research agent (Send page)', $amber . ' (Send page)', $amber . ' (research key)');
+    $to = array('Claude research agent (research key)', $amber . ' (researcher upload)', $amber . ' (researcher upload)');
     try {
         $pdo = kop_rinbox_pdo();
         foreach (array('news_submissions', 'lawsuits', 'legislation') as $t) {
@@ -756,7 +757,7 @@ function kop_rinbox_relabel_research_sends() {
     } catch (Throwable $e) {
         return; // tried again on the next admin page
     }
-    update_option('kop_rinbox_research_relabel', '2026-11-11', false);
+    update_option('kop_rinbox_research_relabel', '2026-11-11b', false);
     delete_transient('kop_rinbox_native_split');
 }
 add_action('admin_init', 'kop_rinbox_relabel_research_sends');

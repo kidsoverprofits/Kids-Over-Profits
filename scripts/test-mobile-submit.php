@@ -308,7 +308,13 @@ if ($real !== '') {
     // Whatever name it gives, a research send is never counted as sent in by a person (Review inbox).
     $n = $pdo->query("SELECT submitted_by FROM news_submissions WHERE article_url = 'https://example-news.test/research/1'")->fetchColumn();
     check($n === '(research key)', 'a research send is stored as "(research key)", not the page it came through', (string) $n);
-} else {
+    // Claude in its own name is an import; a person's own research loaded with the key stays theirs.
+    foreach (array('Claude research agent' => 'Claude research agent (research key)', 'Amber Foster (her map)' => 'Amber Foster (her map) (researcher upload)') as $name => $want) {
+        $u = 'https://example-news.test/research/named-' . md5($name);
+        kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => $u, 'title' => $name, 'submitter_name' => $name, 'via' => 'web'), array('x_kop_research_key' => $real)));
+        $got = $pdo->query('SELECT submitted_by FROM news_submissions WHERE article_url = ' . $pdo->quote($u))->fetchColumn();
+        check($got === $want, "research send named \"$name\" -> \"$want\"", (string) $got);
+    }} else {
     echo "  (skipped: ~/kop-research-key.txt not here)\n";
 }
 check(is_err($keyed('not-the-key', 2), 'kop_rate_limited', 429), 'wrong research key -> still 429');

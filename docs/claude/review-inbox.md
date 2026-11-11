@@ -32,7 +32,8 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 # agent", "import via Claude"; kop_rinbox_research_sender_sql()), News clipping OCR and any "(... import)" sender count as imports
 # (kop_rinbox_native_origins() 'claude', 'clippings', 'other-imports'). A non-native queue that knows its senders gives 'split' => fn():
 # [people, scans, imports] and 'origins' people/imports (Websites sent in): its people count under Sent in by people, "<Queue> (imports)"
-# under Found by imports. kop_rinbox_relabel_research_sends() relabelled the older research sends once (option kop_rinbox_research_relabel)
+# under Found by imports. kop_rinbox_relabel_research_sends() relabelled the older research sends once (option kop_rinbox_research_relabel
+# '2026-11-11b'). A researcher's data loaded with the key ("<name> (researcher upload)", Amber Foster's map) is people's (owner 2026-11-11)
 # Just in (the page opens on it; review-inbox/recent?sources=a,b&days=1|2|3|7): waiting items created in the window. People's are cards
 # (News/Data/Wiki/Lawsuits/Legislation get Approve/Reject posting to api/manage-submissions.php, so Undo is in Recently done); the scans'
 # and the imports' are counts per queue in two folds. A source answers with 'recent' (native: by created_at) or 'recent_count'
