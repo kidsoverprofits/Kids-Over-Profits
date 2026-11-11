@@ -1,14 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "This record covers two programs at one Milford address: Straight's branch (1982-1987/88) and Kids Helping Kids / Pathway (1993-2008). Split it?",
-   "choices": [
-    "Split into two records",
-    "Keep one record, widen its years to 1982-2008",
-    "Keep as is"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Get the words of the 1982 Cincinnati Enquirer and Post stories the Points timeline summarises (a teenager who said she was forced into Straight; a 14-year-old taken by six people in September) and turn that sentence into direct quotes (rule 31).",
   "Read Camilla Warrick's Enquirer column of Aug. 7, 1989 by eye (the scan's text layer is garbled) and replace 'the first witness … testified that force was routinely used' with the column's own words.",
@@ -19,5 +10,5 @@
   "Fix fact 3 on record 9626, which puts Hebron in Ohio; it is in Kentucky (Cincinnati Post, 1993).",
   "Find the roles of Jerry and Betty Rushing (facts 16, 17) and anything on daily practice inside the Milford building (Surviving Straight's Cincinnati scans)."
  ],
- "log": "Nov 11 testimony pass: no self-published accounts in the text, so no testimony block and no changes. Three news paraphrases of survivors' and parents' words remain because the scans couldn't be read; they're research items. Earlier passes: the Jan. 6, 1982 opening and the 1982 ACLU complaints and state probe (Points timeline); the 1986 and 1987 $1M suits, the drop from 200+ clients to 65 and the end of inpatient care in Sept. 1987 (Cincinnati Post scan); the May 1989 Weaver trial and settlement (Enquirer, May 24 and 26 and Aug. 7, 1989); the Oct. 1989 property settlement (Enquirer). Fager's 2002 case list covers the 1983-85 Scacchetti suits and the Doyle investigation (settled by Dani: Fager is a source). Kids Helping Kids came to Milford in 1993 (Post; Ohio SOS). Penny Walker was director (The Times, 2007). WCPO aired a report in Nov. 2005, and the center closed in autumn 2008 (WCPO 2009). The address follows the Post (6074 Branch Hill-Guinea Road; the Enquirer has 1074 Branch Hill-Guinea Pike). The text gives both closing years, 1987 and 1988."
+ "log": "Nov 11 testimony pass: no self-published accounts in the text, so no testimony block and no changes. Three news paraphrases of survivors' and parents' words remain because the scans couldn't be read; they're research items. Earlier passes: the Jan. 6, 1982 opening and the 1982 ACLU complaints and state probe (Points timeline); the 1986 and 1987 $1M suits, the drop from 200+ clients to 65 and the end of inpatient care in Sept. 1987 (Cincinnati Post scan); the May 1989 Weaver trial and settlement (Enquirer, May 24 and 26 and Aug. 7, 1989); the Oct. 1989 property settlement (Enquirer). Fager's 2002 case list covers the 1983-85 Scacchetti suits and the Doyle investigation (settled by Dani: Fager is a source). Kids Helping Kids came to Milford in 1993 (Post; Ohio SOS). Penny Walker was director (The Times, 2007). WCPO aired a report in Nov. 2005, and the center closed in autumn 2008 (WCPO 2009). The address follows the Post (6074 Branch Hill-Guinea Road; the Enquirer has 1074 Branch Hill-Guinea Pike). The text gives both closing years, 1987 and 1988.\nOwner (Nov 11): Kids Helping Kids is a rebrand of Straight, not a second program: one record. The text now says Straight's program came back to the same building under the new name. KOP's record years should run 1982-2008 (plan 2.5 item 5)."
 }

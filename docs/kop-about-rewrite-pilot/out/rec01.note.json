@@ -1,21 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "Nate's Unsilenced testimony names staff member Joe Giles as breaking a boy's wrist; it is the only source. Keep his name in the quote?",
-   "choices": [
-    "Keep the name as published",
-    "Cut the name with …",
-    "Drop that passage"
-   ]
-  },
-  {
-   "ask": "KOP's Staff & Owners list says Aspen Ranch merged into Outback; Aspen's 2011 release says it was discontinued and Aspen Achievement Academy merged into Outback. Fix KOP's record?",
-   "choices": [
-    "Fix the record to match the release",
-    "Leave the record as it is"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Find the publication date of Nate's Aspen Ranch testimony on Unsilenced (unsilenced.org/portfolio-items/aspen-ranch/; the page gives only the years attended, 2008-2009).",
   "Import the two HEAL-hosted accounts into the media library from Wayback (web.archive.org/web/2016/http://www.heal-online.org/aspenrchanon1.pdf and .../aspenrchanon2.pdf) per the archive rule, then link anon05/anon06 to KOP's copies with the archive link in the label.",
@@ -25,5 +9,5 @@
   "Get the words of the other Aspen Ranch accounts the r/troubledteens wiki quotes (Ashley, Survivors Breaking Silence, 2000 stay: survivorsbreakingsilence.com/stories/survivor-aspen-ranch-2000; an anonymous Sept 2021 submission) if more testimony is wanted.",
   "Fix KOP's Aspen Ranch record: fact 20 lists 'Aspen Education Group' as an also-known-as name, and the fact box gives capacity 80 'as of 2025' for a program closed in 2011."
  ],
- "log": "Rewritten Nov 2-3: Woodbury (2000 visit report, 2007-2010), NATSAP 2009 directory (print), Aspen's Mar 24, 2011 release, strugglingteens article 5918 (Scott Hess), and the enrollment agreement HEAL quoted page by page (print, ascon: fees, nine-month minimum, transition fee, Robin Stephens, strip search, restraint, eight-week blackout, Rider/Wrangler, psychiatrist, Northwest accreditation, court-custody clause). Cut: the Scott Peterson section (nothing ties the 2014 conviction to the ranch), Gil Hallows and Cheryl Kehl (Aspen Achievement Academy), HEAL's body-cavity claim (the clause says strip search), 'not licensed by the Department of Health' (HEAL's own reading). Nov 11 (testimony rule): removed the two paragraphs retelling the 2005 and 2006 accounts and Nate's Unsilenced account, and the lede's Unsilenced sentence; the lede now points to the accounts in one sentence. Three quotes added, all read from the originals (the two HEAL PDFs via Wayback, Unsilenced live); spelling and punctuation only. Nate's text confirms the boy waited hours for care."
+ "log": "Rewritten Nov 2-3: Woodbury (2000 visit report, 2007-2010), NATSAP 2009 directory (print), Aspen's Mar 24, 2011 release, strugglingteens article 5918 (Scott Hess), and the enrollment agreement HEAL quoted page by page (print, ascon: fees, nine-month minimum, transition fee, Robin Stephens, strip search, restraint, eight-week blackout, Rider/Wrangler, psychiatrist, Northwest accreditation, court-custody clause). Cut: the Scott Peterson section (nothing ties the 2014 conviction to the ranch), Gil Hallows and Cheryl Kehl (Aspen Achievement Academy), HEAL's body-cavity claim (the clause says strip search), 'not licensed by the Department of Health' (HEAL's own reading). Nov 11 (testimony rule): removed the two paragraphs retelling the 2005 and 2006 accounts and Nate's Unsilenced account, and the lede's Unsilenced sentence; the lede now points to the accounts in one sentence. Three quotes added, all read from the originals (the two HEAL PDFs via Wayback, Unsilenced live); spelling and punctuation only. Nate's text confirms the boy waited hours for care.\nOwner (Nov 11): keep Joe Giles's name in the quote, as published.\nOwner (Nov 11): leave KOP's Staff & Owners note as it is."
 }

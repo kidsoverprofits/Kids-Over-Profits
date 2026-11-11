@@ -1,14 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "A 2019 e-mail, known only through HEAL's quotation, names residential director Nale Fakahua twisting a resident's arm. Publish the quote with his name?",
-   "choices": [
-    "Publish with his name",
-    "Publish it, name cut ('The residential director (at the time) …')",
-    "Leave the quote out"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Open the 2014 Google review by 'Tony' (parent) on Google Maps (contributor 100642492328334698589) and check the quote, read through the wiki's copy, against it; add the month.",
   "Find the outcome of Guyla Reann Savage's case (Washington County, charged Mar. 2021) in Utah court records or St. George News.",
@@ -22,5 +13,5 @@
   "Find the originals of the other accounts the wiki quotes (Breaking Code Silence 'Emily's story', Nov. 1, 2020; Yelp review of Oct. 15, 2020 on yelp.com/biz/falcon-ridge-ranch-virgin; 'Jacqueline' Google review, 2016) and add a quote if one carries something the testimony block lacks.",
   "Fix the Drive sheet 'Sequel/TSI/YSI/Vivant' (needs edit access; Chrome's profile is view-only): Falcon Ridge's Sequel years 2016-2020 -> 2016-2021; Nichols -> Rite of Passage staff hired Sept. 2022."
  ],
- "log": "Nov 11 testimony pass: the last paragraph, which retold the Apr. 3, 2019 e-mail (via HEAL) and summed up Yelp and Reddit posts, is now one pointer sentence. Four testimony quotes were added: a parent's 2014 Google review (through the wiki's copy, archive/rec12-wiki-quotes.txt); Jaimie S. on Yelp, Aug. 2018 (live page, archive/rec12-yelp-2018-08.txt); the 2019 e-mail (through HEAL's quotation, archive/rec12-heal-email-2019-04.txt); and a former student's Reddit post of Aug. 4, 2019 (Wayback capture of the original, archive/rec12-reddit-2019-08.txt). Earlier passes: the NATSAP 2009 directory (22 students, 9-12 months, NAAS, member since 2008); Woodbury 2007/2009/2010; the 2017 SEC filing; the Habibian arbitration filing (Aug. 16, 2016 deal, $23.5M, 2017 Medicaid settlement, the May 1, 2020 award); Savage, 32, March 2021 (KUTV, Tribune, St. George News); the Tribune's 2022 data story. Settled Nov 4: Sequel ran the ranch until Sept./Oct. 2021 (Wayback captures), and the license has gone to Care Youth Corp. dba Rite of Passage since Jan. 31, 2022. Wiki and BCS citations removed."
+ "log": "Nov 11 testimony pass: the last paragraph, which retold the Apr. 3, 2019 e-mail (via HEAL) and summed up Yelp and Reddit posts, is now one pointer sentence. Four testimony quotes were added: a parent's 2014 Google review (through the wiki's copy, archive/rec12-wiki-quotes.txt); Jaimie S. on Yelp, Aug. 2018 (live page, archive/rec12-yelp-2018-08.txt); the 2019 e-mail (through HEAL's quotation, archive/rec12-heal-email-2019-04.txt); and a former student's Reddit post of Aug. 4, 2019 (Wayback capture of the original, archive/rec12-reddit-2019-08.txt). Earlier passes: the NATSAP 2009 directory (22 students, 9-12 months, NAAS, member since 2008); Woodbury 2007/2009/2010; the 2017 SEC filing; the Habibian arbitration filing (Aug. 16, 2016 deal, $23.5M, 2017 Medicaid settlement, the May 1, 2020 award); Savage, 32, March 2021 (KUTV, Tribune, St. George News); the Tribune's 2022 data story. Settled Nov 4: Sequel ran the ranch until Sept./Oct. 2021 (Wayback captures), and the license has gone to Care Youth Corp. dba Rite of Passage since Jan. 31, 2022. Wiki and BCS citations removed.\nOwner (Nov 11): publish the e-mail quote with Nale Fakahua's name."
 }

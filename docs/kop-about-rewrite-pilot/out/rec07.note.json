@@ -1,14 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "KOP's memorial records the March 4, 2004 death as a balcony fall (marked unconfirmed); Struggling Teens reports the school called it suicide. Which should the record say?",
-   "choices": [
-    "Keep the school's report in the text; mark the memorial disputed",
-    "Give both accounts, each attributed",
-    "Leave the death out until a police or news record is found"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Get the former student's own words from WBNG, Aug. 11, 2014 (web.archive.org/web/20140819084624/http://www.wbng.com/news/local/A-controversial-history--Allynwood-Academy-plagued-with-abuse-allegations-270842071.html) and replace the flood-light paraphrase with a direct quote (rule 31); note which Argiros family member denied it.",
   "Find the docket of the June 2026 $10 million suit (Brooklyn federal court, plaintiff anonymous, student 2000-03) and read the complaint; quote its words on strip searches, closets, digging graves and eating vomit, now attributed to WION's and the Post's reporting.",
@@ -19,5 +10,5 @@
   "Add the Employee Guide (consequences revised Sept. 2008) and Rita Argiros's June 15, 2010 restraint log to KOP's media library (Drive copies are the only ones), then cite KOP's copy beside the print citation.",
   "Find a source for the Truth Campaign's \"more than 100 alumni testimonials\" and for the 1984 move to Chapel Hill Road (none found; the wiki gives none)."
  ],
- "log": "Nov 2-3: primary sources added: the Apr. 24, 2008 House hearing (Jon Martin-Crawford), the school's May 11, 2008 reply, Rita Argiros's account of the June 2010 CQC visit, the Sept. 8, 2010 joint CQC/OMH/OASAS letter, Croke's FamilyLight profile (foster-home origin), Woodbury 2006 (1977), NATSAP 2009 (1979 founding, 200 students), Royal Gazette 2019, the Daily Star CAFETY letter (Oct. 2009, settled), WBNG Aug. 2014 (closing, 15 students kept), NYT 2018 (count of 90, Ianelli's 101, truth campaign), NYT Jan. 2022 (ten suits; print), the Employee Guide and 2010 restraint log (print), and the Geer case (DOJ, WBNG). Founding year has three versions (1977, 1979, 1984); the text attributes 1977 and 1979. Nov 11: Martin-Crawford's testimony, in the lede and paragraph 3, is now his own words from the govinfo transcript instead of a paraphrase. The 2026 suit's allegations are now the complaint's words as the New York Post quoted them; the strip-search, closet, graves and vomit allegations stay, attributed to WION's and the Post's reporting, until the complaint's own words are read. No self-published survivor accounts are in the text, so there is no Survivor testimony block."
+ "log": "Nov 2-3: primary sources added: the Apr. 24, 2008 House hearing (Jon Martin-Crawford), the school's May 11, 2008 reply, Rita Argiros's account of the June 2010 CQC visit, the Sept. 8, 2010 joint CQC/OMH/OASAS letter, Croke's FamilyLight profile (foster-home origin), Woodbury 2006 (1977), NATSAP 2009 (1979 founding, 200 students), Royal Gazette 2019, the Daily Star CAFETY letter (Oct. 2009, settled), WBNG Aug. 2014 (closing, 15 students kept), NYT 2018 (count of 90, Ianelli's 101, truth campaign), NYT Jan. 2022 (ten suits; print), the Employee Guide and 2010 restraint log (print), and the Geer case (DOJ, WBNG). Founding year has three versions (1977, 1979, 1984); the text attributes 1977 and 1979. Nov 11: Martin-Crawford's testimony, in the lede and paragraph 3, is now his own words from the govinfo transcript instead of a paraphrase. The 2026 suit's allegations are now the complaint's words as the New York Post quoted them; the strip-search, closet, graves and vomit allegations stay, attributed to WION's and the Post's reporting, until the complaint's own words are read. No self-published survivor accounts are in the text, so there is no Survivor testimony block.\nOwner (Nov 11): give both accounts of the March 4, 2004 death. The text gives the school's report (suicide) and the unconfirmed balcony-fall account, marked unconfirmed."
 }

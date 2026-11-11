@@ -2208,6 +2208,29 @@ function kop_apply_memorial_seeds() {
             ));
             $done[] = (int) $pdo->lastInsertId();
         }
+        // Corrections to rows already on the page: {id, expect: {col: value}, set: {col: value}, why}. Applied only
+        // while the row still holds every `expect` value, so each runs once and never overwrites a later edit; saved
+        // through the pencil's kop_ie_row_save(), which fires kop_record_changed('memorial') and purges the page.
+        if (!empty($spec['corrections']) && is_array($spec['corrections']) && function_exists('kop_ie_row_save')) {
+            $row_q = $pdo->prepare('SELECT * FROM memorial_victims WHERE id = ?');
+            foreach ($spec['corrections'] as $c) {
+                $row_q->execute(array((int) ($c['id'] ?? 0)));
+                $row = $row_q->fetch(PDO::FETCH_ASSOC);
+                if (!$row || empty($c['set']) || !is_array($c['set']) || empty($c['expect']) || !is_array($c['expect'])) {
+                    continue;
+                }
+                $matches = true;
+                foreach ($c['expect'] as $col => $val) {
+                    if (!array_key_exists($col, $row) || (string) $row[$col] !== (string) $val) {
+                        $matches = false;
+                        break;
+                    }
+                }
+                if ($matches) {
+                    kop_ie_row_save(array('memorial', (int) $row['id']), $c['set'], array('source' => 'seed-correction'));
+                }
+            }
+        }
         // The Death Toll sheet's rows get their dagger on /in-loving-memory/ (inc/memorial-sheet.php).
         $sheet_marked = function_exists('kop_ms_mark_sheet_rows') ? kop_ms_mark_sheet_rows($pdo) : 0;
         if ($done || $sheet_marked) {
@@ -2705,7 +2728,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '156';
+    $version = '157';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

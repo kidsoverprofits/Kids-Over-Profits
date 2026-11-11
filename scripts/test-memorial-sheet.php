@@ -40,6 +40,7 @@ if (!function_exists('wp_unslash')) {
 if (!function_exists('get_current_user_id')) {
     function get_current_user_id() { return 1; }
 }
+require_once dirname(__DIR__) . '/inc/admin.php';   // kop_seed_pdo() (reads $GLOBALS['pdo']) and kop_apply_memorial_seeds()
 if (!function_exists('kop_seed_pdo')) {
     function kop_seed_pdo() { return $GLOBALS['kop_test_mem_pdo']; }
 }
@@ -63,6 +64,7 @@ foreach ($src->query('SELECT * FROM memorial_victims')->fetchAll(PDO::FETCH_ASSO
     $mem->prepare('INSERT INTO memorial_victims (' . implode(',', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')')->execute(array_values($r));
 }
 $GLOBALS['kop_test_mem_pdo'] = $mem;
+$GLOBALS['pdo'] = $mem;
 $get = function ($id) use ($mem) {
     $q = $mem->prepare('SELECT * FROM memorial_victims WHERE id = ?');
     $q->execute(array((int) $id));
@@ -243,6 +245,25 @@ $check('every sheet entry in seeds/memorial.json is marked', $n === count($sheet
 $check('nothing else is', (int) $mem->query('SELECT COUNT(*) FROM memorial_victims WHERE sheet_row IS NOT NULL')->fetchColumn() === count($sheet_seeds));
 $check('the news-archive seeds are not', !$mem->query("SELECT sheet_row FROM memorial_victims WHERE name = 'Gina Score'")->fetchColumn());
 $check('a second run marks nothing new', kop_ms_mark_sheet_rows($mem) === 0);
+
+echo "-- Seed corrections (seeds/memorial.json 'corrections') --\n";
+$corr = json_decode(file_get_contents(dirname(__DIR__) . '/seeds/memorial.json'), true)['corrections'] ?? array();
+foreach ($corr as $c) {
+    $before = $get($c['id']);
+    if (!$before) { $check('correction ' . $c['id'] . ': the row is in the mirror', false); continue; }
+    foreach ($c['expect'] as $col => $val) $mem->prepare("UPDATE memorial_victims SET `$col` = ? WHERE id = ?")->execute(array($val, $c['id']));
+    $r0 = $rev();
+    kop_apply_memorial_seeds();
+    $after = $get($c['id']);
+    $ok = true;
+    foreach ($c['set'] as $col => $val) $ok = $ok && (string) $after[$col] === (string) $val;
+    $check('correction ' . $c['id'] . ' applies while the row holds the expected values', $ok);
+    $check('and fires the memorial change event', $rev() > $r0);
+    $mem->prepare('UPDATE memorial_victims SET notes = ? WHERE id = ?')->execute(array('edited later on the page', $c['id']));
+    kop_apply_memorial_seeds();
+    $check('a second run leaves a later edit alone', $get($c['id'])['notes'] === 'edited later on the page');
+}
+$check('the new seed entries went in once', (int) $mem->query("SELECT COUNT(*) FROM memorial_victims WHERE program = 'Colorado County Boot Camp' AND date_of_death = '2002-08-31'")->fetchColumn() === 1);
 
 echo $failures ? "\n$failures failed.\n" : "\nAll passed.\n";
 exit($failures ? 1 : 0);

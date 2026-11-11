@@ -1,13 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "The 'Level 2 secured facility, not a school' line rests only on ISAC's 2004 survivor-group report, attributed to ISAC. Keep it?",
-   "choices": [
-    "Keep, attributed to ISAC",
-    "Cut it"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Get the words of Xandir O'Cando's May 25, 2011 testimony about Cross Creek (archive.ph/jcWwD; archive.ph shows a CAPTCHA to scripts) and add it to the testimony list.",
   "Check the three quotes read through the r/troubledteens wiki against the originals: Joy G. (Yelp, Feb 24, 2013), Brian K. (Yelp not-recommended reviews, Aug 2, 2013), and the Mar 14, 2018 account on Places that Changed People (archive.ph/fPqwG).",
@@ -18,5 +10,5 @@
   "Find originals for: the boys' program in the late 1990s and the shared campus around 2001; capacity of about 430; Farnsworth's 1999 ownership interest; $4,495 a month and 16-18 / 12-14 month stays.",
   "Find the Examiner.com article of Jun 14, 2011 (fact 50) and the source of fact 45 (Marie Peart, 'admits to unlawfully housing')."
  ],
- "log": "Rewritten Nov 2-3 without HEAL, Fornits, wiki or Wikipedia citations. Origins from the Salt Lake Tribune (May 25, 2003: Lichfield and Brent Facer opened Cross Creek Manor in 1988) and Forbes (Mar 22, 1999), replacing Deseret's 'Lichfield and Farnsworth'; WWASPS set up in 1998 (Deseret 2003). Added: 2003 costs, stay, rules and isolation rooms (Tribune); Burton's suits (Forbes, Tribune); the 2006 Wood suit and 25 added plaintiffs (CAICA); the 2011 refiling and 2012 move to St. George (Deseret, Spectrum); the 2013 Artim suit (Courthouse News); the parent manual and contract (print, Drive); ISAC's Level 2 line (attributed); escort companies (LA Times 1992); NWAC accreditation; Vice 2021; the motel video. Not restored: the 1986 founding and the 'fake address' licensing claim (sources contradict them). Nov 11 (testimony rule): the paragraph retelling three accounts became one pointer sentence plus three quotes (via the wiki's quotations; Yelp and archive.ph blocked); the O'Cando sentence and source removed; the Tribune's survivor summary is now a direct quote; the lede no longer paraphrases accounts."
+ "log": "Rewritten Nov 2-3 without HEAL, Fornits, wiki or Wikipedia citations. Origins from the Salt Lake Tribune (May 25, 2003: Lichfield and Brent Facer opened Cross Creek Manor in 1988) and Forbes (Mar 22, 1999), replacing Deseret's 'Lichfield and Farnsworth'; WWASPS set up in 1998 (Deseret 2003). Added: 2003 costs, stay, rules and isolation rooms (Tribune); Burton's suits (Forbes, Tribune); the 2006 Wood suit and 25 added plaintiffs (CAICA); the 2011 refiling and 2012 move to St. George (Deseret, Spectrum); the 2013 Artim suit (Courthouse News); the parent manual and contract (print, Drive); ISAC's Level 2 line (attributed); escort companies (LA Times 1992); NWAC accreditation; Vice 2021; the motel video. Not restored: the 1986 founding and the 'fake address' licensing claim (sources contradict them). Nov 11 (testimony rule): the paragraph retelling three accounts became one pointer sentence plus three quotes (via the wiki's quotations; Yelp and archive.ph blocked); the O'Cando sentence and source removed; the Tribune's survivor summary is now a direct quote; the lede no longer paraphrases accounts.\nOwner (Nov 11): cut the ISAC \"Level 2 secured facility\" line. Cut, and its source with it."
 }

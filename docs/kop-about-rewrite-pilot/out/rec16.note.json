@@ -1,14 +1,5 @@
 {
- "needs_you": [
-  {
-   "ask": "Paul Choy (1992 restraint): the SF Chronicle says he died that February at 16; the AARMS article says he was critically injured and died in 2017. Which goes in the text?",
-   "choices": [
-    "Keep both versions, attributed",
-    "Use the Chronicle only",
-    "Use AARMS only"
-   ]
-  }
- ],
+ "needs_you": [],
  "research": [
   "Find the original 1992 San Francisco Chronicle article on Paul Choy's death (KOP's memorial links nospank.net/n-b98.htm, now a parked domain; try Wayback) and archive it as a PDF.",
   "Read AARMS article 883 (folyoirat.ludovika.hu/index.php/aarms/article/view/883) and confirm it says Choy was critically injured in 1992 and died in 2017.",
@@ -20,5 +11,5 @@
   "Find a Rite of Passage filing or program list for a dated program count (the cut '28 programs in 10 states, 11 in Florida' was KOP's own count).",
   "Find Silver State Academy's closing year."
  ],
- "log": "Rewritten under the Nov 2 writing rules from KOP's Rite of Passage folder, the Sequel/TSI/YSI/Vivant sheet, ROPM99, the memorial export and staff list; wiki/HEAL citations replaced. Added GAO HRD-87-23BR (1986, tribal licensing, federal foster-care payments), CDSS All County Letter 99-74 and the 1999 CDSS certification review (print citation: tribal licensing, no Nevada CPS authority on tribal land, restraint and slur allegations, late abuse report, inadequate grievance process). Restored Nov 3: March 2000 Canyon State renaming (archived About Us), Paul Choy with both sources' versions. Nov 4: October 2021 Sequel->Rite of Passage handover cited to both schools' archived sites, Jan 31, 2022 Utah licences, Paul Anthony Nichols (hired Sept 2022, sentenced May 2023). Savage stays out (her conduct fell under Sequel). Cut: program count cited to KOP's page. Nov 11 testimony pass: no self-published accounts in this record; nothing changed in the text."
+ "log": "Rewritten under the Nov 2 writing rules from KOP's Rite of Passage folder, the Sequel/TSI/YSI/Vivant sheet, ROPM99, the memorial export and staff list; wiki/HEAL citations replaced. Added GAO HRD-87-23BR (1986, tribal licensing, federal foster-care payments), CDSS All County Letter 99-74 and the 1999 CDSS certification review (print citation: tribal licensing, no Nevada CPS authority on tribal land, restraint and slur allegations, late abuse report, inadequate grievance process). Restored Nov 3: March 2000 Canyon State renaming (archived About Us), Paul Choy with both sources' versions. Nov 4: October 2021 Sequel->Rite of Passage handover cited to both schools' archived sites, Jan 31, 2022 Utah licences, Paul Anthony Nichols (hired Sept 2022, sentenced May 2023). Savage stays out (her conduct fell under Sequel). Cut: program count cited to KOP's page. Nov 11 testimony pass: no self-published accounts in this record; nothing changed in the text.\nOwner (Nov 11): keep both versions of Paul Choy's death, attributed. They already are."
 }
