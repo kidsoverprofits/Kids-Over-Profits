@@ -1,6 +1,6 @@
 {
- "built": "2026-11-11 22:32 UTC",
- "source": "dffe6fe958734b641baca80eeb5975e8841b2fc6",
+ "built": "2026-11-11 22:36 UTC",
+ "source": "563c4ab0b7cef313d15194ef11627ddb1f5e33c3",
  "sections": [
   {
    "key": "2",
@@ -3861,6 +3861,21 @@
        "focus": false,
        "steps": [],
        "hash": "bc344528c7cf"
+      },
+      {
+       "id": "4.4:send-to-claude-on-every-card",
+       "lead": "Send to Claude on every card",
+       "text": "**Send to Claude on every card** (2026-11-11, owner: \"all submissions should have a 'send to claude' button in case the regular ai can't read it\" / \"claude decide: what is this, how should it be filed, and where\"). `inc/review-inbox/_claude-action.php`, skill `/read-sent-to-claude`, docs/claude/review-inbox.md \"Any card sent to Claude\". a. Check after deploy: a News card and a Websites sent in card show Send to Claude (a small form with a note); sending one shows \"Waiting for Claude since ...\" and Take back; `GET /wp-json/kop/v1/claude/review-items` with the key lists it. b. Then the owner sends a few hard ones (a paywalled article, a Facebook post) and runs `/read-sent-to-claude`; check that what Claude filed reads right on the cards and in Recently done (by \"Claude\", with Undo). c. Not done: native News / Lawsuits / Bills cannot be approved through the inbox's act, so Claude only fills, moves and connects there and says \"approve\" in the note. If the owner wants Claude to approve those too, add an 'approve' native act that calls the same code as api/manage-submissions.php (and its Recently done log).",
+       "ask": "",
+       "date": "2026-11-11",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "9d048c204f05"
       }
      ]
     },
