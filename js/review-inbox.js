@@ -575,9 +575,8 @@
         listEl.style.minHeight = listEl.offsetHeight + 'px';
         listEl.innerHTML = '';
         pagerEl.innerHTML = '';
-        var query = { source: src, view: state.view, search: state.search, origin: state.origin, offset: state.offset, limit: state.limit };
-        Object.keys(state.filters).forEach(function (k) { query['f_' + k] = state.filters[k]; });
-        api('items', null, query).then(function (data) {
+        state.allShown = false;
+        api('items', null, itemsQuery(state.offset, state.limit)).then(function (data) {
             if (state.source !== src) return;
             state.total = data.total || 0;
             state.nextOffset = data.next_offset || (state.offset + (data.items || []).length);
@@ -600,12 +599,63 @@
         });
     }
 
+    /** The queue's list query as the toolbar has it now. */
+    function itemsQuery(offset, limit) {
+        var query = { source: state.source, view: state.view, search: state.search, origin: state.origin, offset: offset, limit: limit };
+        Object.keys(state.filters).forEach(function (k) { query['f_' + k] = state.filters[k]; });
+        return query;
+    }
+
+    var SHOW_ALL_MAX = 500, SHOW_ALL_CHUNK = 100; // the items route gives 100 at most per call
+
+    /**
+     * "Show all N": the rest of the queue (from this page on, up to SHOW_ALL_MAX) on this one page,
+     * so "Select all" and the bulk buttons reach every item, not only the 25 shown. Ticks them all.
+     */
+    function showAll() {
+        var src = state.source, start = state.offset;
+        var want = Math.min(state.total - start, SHOW_ALL_MAX);
+        var seen = {};
+        listEl.querySelectorAll('.rinbox-card').forEach(function (c) { if (c.kopItem) seen[c.kopItem.key] = true; });
+        bulkEl.innerHTML = '';
+        statusEl.textContent = 'Loading ' + want + '…';
+        // Cards already acted on left the queue, so the next unseen item sits that much earlier (as Next does).
+        var offset = Math.max(start, start + listEl.querySelectorAll('.rinbox-card').length - leftThisPage());
+        function next() {
+            if (state.source !== src) return null;
+            if (offset >= start + want) return null;
+            return api('items', null, itemsQuery(offset, Math.min(SHOW_ALL_CHUNK, start + want - offset))).then(function (data) {
+                if (state.source !== src) return null;
+                var items = data.items || [];
+                items.forEach(function (it) {
+                    if (seen[it.key]) return;
+                    seen[it.key] = true;
+                    listEl.appendChild(card(it));
+                });
+                offset += SHOW_ALL_CHUNK;
+                return items.length ? next() : null;
+            });
+        }
+        Promise.resolve(next()).then(function () {
+            if (state.source !== src) return;
+            state.allShown = true;
+            var shown = listEl.querySelectorAll('.rinbox-card').length;
+            statusEl.textContent = state.total + (state.total === 1 ? ' item' : ' items') + ', ' + shown + ' shown here'
+                + (shown < state.total - start ? ' (' + SHOW_ALL_MAX + ' at most at once: act on these, then open the queue again for the rest)' : '') + '.';
+            pagerEl.innerHTML = '';
+            renderBulk(true);
+        }).catch(function (e) {
+            statusEl.textContent = 'Could not load the rest of this queue: ' + e.message;
+            renderBulk();
+        });
+    }
+
     /** "Select all" and the buttons every selected card has (those that need no answer, or have one filled in). */
-    function renderBulk() {
+    function renderBulk(tickAll) {
         bulkEl.innerHTML = '';
         var cards = listEl.querySelectorAll('.rinbox-card');
-        if (cards.length < 2) return;
-        var all = el('input', { type: 'checkbox', 'aria-label': 'Select every item on this page' });
+        if (cards.length < 2 && !(state.source && !state.special && state.total > cards.length)) return;
+        var all = el('input', { type: 'checkbox', 'aria-label': 'Select every item shown' });
         var count = el('span', { class: 'rinbox-bulk-count', text: '0 selected' });
         var buttons = el('span', { class: 'rinbox-bulk-actions' });
         all.addEventListener('change', function () {
@@ -642,8 +692,21 @@
             });
         }
         bulkEl.appendChild(el('label', { class: 'rinbox-quick-field' }, [all, ' Select all']));
+        var rest = state.total - state.offset;
+        if (state.source && !state.special && !state.allShown && rest > cards.length) {
+            bulkEl.appendChild(el('button', {
+                type: 'button', class: 'rinbox-btn rinbox-btn-neutral',
+                text: rest > SHOW_ALL_MAX ? 'Show ' + SHOW_ALL_MAX + ' of ' + rest + ' here' : 'Show all ' + rest + ' here',
+                title: 'Loads the rest of this queue onto this page and ticks every card, so the buttons act on all of them.',
+                onclick: showAll
+            }));
+        }
         bulkEl.appendChild(count);
         bulkEl.appendChild(buttons);
+        if (tickAll === true) {
+            all.checked = true;
+            listEl.querySelectorAll('.rinbox-select').forEach(function (c) { if (!c.disabled) c.checked = true; });
+        }
         update(); // sure matches start ticked
     }
 
@@ -838,6 +901,7 @@
     /** Pages follow the queue's own order: set-aside items are skipped, so Next starts where the server says. */
     function renderPager() {
         pagerEl.innerHTML = '';
+        if (state.allShown) return; // "Show all" put the rest on this page
         if (state.total <= state.limit && !state.pages.length) return;
         var pageNo = state.pages.length + 1, pageCount = Math.max(pageNo, Math.ceil(state.total / state.limit));
         pagerEl.appendChild(el('button', {
