@@ -824,6 +824,13 @@
     color: var(--kop-text-secondary, #4a4f6a);
 }
 
+/* A reader's quote that names staff (inc/reader-accounts.php): marked as their allegation. */
+.kop-ra-allegation {
+    display: block;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
 .kop-fp-detail {
     display: block;
     font-size: 0.88rem;

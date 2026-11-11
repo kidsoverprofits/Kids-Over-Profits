@@ -30,8 +30,8 @@ kop_rinbox_register('reader-accounts', function () {
         'group'       => 'Sent in by readers',
         'help'        => 'What readers wrote on the questions page (/questions/): the rules they remember at a program, and the notes they add under an answer. '
             . 'Each answer is testimony: Add puts it on the facility page under "Survivor testimony" as a quote, in their own words with only the spelling '
-            . 'and punctuation fixed, cited by who the reader is (a former resident, a parent...), never by name. Contact details and the names of people '
-            . 'are taken out first. An offer of contact, a court case or another program named waits on the Leads tab.',
+            . 'and punctuation fixed, cited by who the reader is (a former resident, a parent...), never by name. Contact details and the names of the reader, '
+            . 'other residents and family are taken out first; staff named stay, marked as the reader\'s allegations. An offer of contact, a court case or another program named waits on the Leads tab.',
         'views'       => array('waiting' => 'To review', 'leads' => 'Leads', 'added' => 'Added', 'left' => 'Left off', 'nothing' => 'Nothing to add'),
         'count'       => function () { return kop_rinbox_ra_view_counts()['waiting']; },
         'view_counts' => 'kop_rinbox_ra_view_counts',
@@ -113,6 +113,8 @@ function kop_rinbox_ra_item($id, array $c = null) {
     foreach ((array) ($j['leads'] ?? array()) as $l) {
         $details[] = array('label' => 'Lead: ' . (kop_ra_lead_kinds()[$l['kind']] ?? $l['kind']) . (!empty($j['lead_done']) ? ' (followed up)' : ''), 'value' => $l['text']);
     }
+    if (!empty($j['staff'])) $details[] = array('label' => 'Staff named (shown, marked as allegations)', 'value' => implode(', ', $j['staff'])
+        . '. If one of them was not staff, take the name out with the pencil on the page after adding.');
     if (!empty($j['names'])) $details[] = array('label' => 'Names taken out', 'value' => implode(', ', $j['names']));
     if (!empty($j['as_written'])) $details[] = array('label' => 'Kept as written', 'value' => 'The spelling pass changed more than spelling and punctuation, so their words are as they sent them. Fix a slip with the pencil on the page after adding.');
 

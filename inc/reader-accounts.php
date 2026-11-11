@@ -12,14 +12,17 @@
  * names of people in it. The fixed text is checked word by word against
  * theirs (kop_ra_same_words()); a pass that changed more than that is thrown
  * away and their words are kept as written. Email addresses, phone numbers
- * and links are taken out before the AI sees it (kop_ra_redact()); names of
- * people are taken out of the words shown ("[name]").
+ * and links are taken out before the AI sees it (kop_ra_redact()). Names of
+ * staff stay, and the quote says what it says of them is the reader's
+ * allegation (owner, 2026-11-11); every other name (their own, other
+ * residents, family) is taken out of the words shown ("[name]").
  *
  * What a reading finds:
  *   testimony  one row of {prefix}kop_program_practices per answer, topic
  *              'account', answer_id = the answer's id (doc_id 0, doc_title =
  *              who they are, kop_ra_cite(); value = the words published;
- *              quote = their words as sent, contact details out), waiting at
+ *              quote = their words as sent, contact details out; why =
+ *              the staff it names, "; "-separated), waiting at
  *              Review inbox > What readers remember
  *              (inc/review-inbox/reader-accounts.php). Add puts it in the
  *              facility page's "Survivor testimony" section as a quote
@@ -29,7 +32,7 @@
  *              named: the card's Leads tab, admin-only, beside their whole answer
  *
  * The answer row keeps the reading: read_status ('' not read yet, 'read',
- * 'failed') and read_json {role, attended, cite, leads, names, contact,
+ * 'failed') and read_json {role, attended, cite, leads, names, staff, contact,
  * as_written, provider, read_at, error, lead_done}. A reader who answers the
  * same question again replaces their row (kop_q_answer()); the old row's
  * testimony nobody has decided goes with it (kop_ra_forget()).
@@ -212,7 +215,7 @@ function kop_ra_prompt(array $ctx, $text) {
     return 'You prepare one answer that a reader of Kids Over Profits gave about a youth residential program, "' . $ctx['name'] . "\", to be published as their testimony, in their own words.\n"
         . $asked . "\n\nTheir words:\n<<<\n" . $text . "\n>>>\n\n"
         . "Answer with JSON only, in this shape:\n"
-        . '{"words": "", "role": "", "attended": "", "checklist": [], "leads": [{"kind": "", "text": ""}], "names": []}' . "\n\n"
+        . '{"words": "", "role": "", "attended": "", "checklist": [], "leads": [{"kind": "", "text": ""}], "names": [{"name": "", "staff": false}]}' . "\n\n"
         . "words: their whole text, every word of it in their order, with ONLY spelling, capital letters and punctuation fixed (full stops between "
         . "run-on sentences, apostrophes, commas, a capital at the start of a sentence). Never add, drop, reorder, replace or explain a word; never "
         . "expand an abbreviation or change their grammar, slang or swearing; a word you cannot make out stays as it is. Keep their line breaks and "
@@ -222,7 +225,9 @@ function kop_ra_prompt(array $ctx, $text) {
         . 'checklist: those of these their words show the program did, else []: ' . implode(', ', $checks) . ".\n"
         . "leads: kind \"contact\" when they offer to be contacted, \"court\" when they mention a court case or lawsuit, \"other_program\" when the answer "
         . "is about a different program (name it in text), \"other\" for anything else a researcher should follow up; text says what it is.\n"
-        . "names: every name of a person in their words (their own or anyone else's), as written.";
+        . "names: every name of a person in their words, as written, each as {\"name\": \"\", \"staff\": false}. staff is true only when their "
+        . "words show that person worked at the program (staff, counselor, therapist, teacher, director, owner, guard, \"Mr. X\" giving orders); "
+        . "false for themselves, other residents, their family and anyone else.";
 }
 
 /** One AI call; a test stands in with $GLOBALS['kop_ra_ai']. */
@@ -234,7 +239,7 @@ function kop_ra_ai($prompt) {
 
 /**
  * The AI's answer, checked: {words, as_written, role, attended, checklist,
- * leads, names}. Throws when it is not the JSON asked for.
+ * leads, names (taken out), staff (left in)}. Throws when it is not the JSON asked for.
  */
 function kop_ra_parse($raw, $text) {
     $s = trim(preg_replace('/^```\w*\s*|\s*```$/', '', trim((string) $raw)));
@@ -244,10 +249,20 @@ function kop_ra_parse($raw, $text) {
     if (!is_array($j) || !array_key_exists('words', $j)) throw new RuntimeException('The AI did not answer with the JSON asked for.');
 
     $names = array();
+    $staff = array();
     foreach ((array) ($j['names'] ?? array()) as $n) {
-        $n = trim((string) $n);
-        if (mb_strlen($n) >= 2 && mb_strlen($n) <= 60 && mb_stripos($text, $n) !== false) $names[] = $n;
+        // Staff stay named; anyone else, or a name given without saying, comes out.
+        $is_staff = is_array($n) && !empty($n['staff']) && $n['staff'] !== 'false';
+        $n = trim((string) (is_array($n) ? ($n['name'] ?? '') : $n));
+        if (mb_strlen($n) < 2 || mb_strlen($n) > 60 || mb_stripos($text, $n) === false) continue;
+        if ($is_staff) $staff[] = $n;
+        else $names[] = $n;
     }
+    // A name both ways ("John" a resident, "Mr. John Smith" staff) comes out.
+    $staff = array_values(array_unique(array_filter($staff, function ($n) use ($names) {
+        foreach ($names as $m) if (mb_strtolower($m) === mb_strtolower($n)) return false;
+        return true;
+    })));
     // The longest first, so "Mr. John Smith" goes before "John".
     usort($names, function ($x, $y) { return mb_strlen($y) <=> mb_strlen($x); });
     $unname = function ($s) use ($names) {
@@ -270,7 +285,7 @@ function kop_ra_parse($raw, $text) {
     return array(
         'words' => $unname($words), 'as_written' => $as_written, 'role' => $role, 'attended' => $attended,
         'checklist' => array_values(array_unique(array_filter(array_map('kop_pp_clean_check', (array) ($j['checklist'] ?? array()))))),
-        'leads' => $leads, 'names' => $names,
+        'leads' => $leads, 'names' => $names, 'staff' => $staff,
     );
 }
 
@@ -314,13 +329,13 @@ function kop_ra_read(array $row) {
         $wpdb->insert(kop_pp_table(), array(
             'ikey' => sha1('answer|' . $id . '|' . $text), 'facility_id' => $ctx['fid'], 'doc_id' => 0, 'answer_id' => $id,
             'doc_title' => mb_substr($cite, 0, 255), 'doc_url' => '', 'page' => 0, 'topic' => KOP_RA_TOPIC, 'value' => $got['words'], 'value_orig' => $got['words'],
-            'quote' => $text, 'why' => '', 'year' => $got['attended'] !== '' ? (int) substr($got['attended'], -4) : 0,
+            'quote' => $text, 'why' => mb_substr(implode('; ', $got['staff']), 0, 500), 'year' => $got['attended'] !== '' ? (int) substr($got['attended'], -4) : 0,
             'checklist' => implode(',', $got['checklist']), 'status' => 'pending', 'batch' => '', 'created_at' => gmdate('Y-m-d H:i:s'),
         ));
         if ($wpdb->insert_id) $added++;
     }
     kop_ra_save_json($id, 'read', array('role' => $got['role'], 'attended' => $got['attended'], 'cite' => $cite,
-        'leads' => $got['leads'], 'names' => $got['names'], 'contact' => $contact, 'as_written' => $got['as_written'],
+        'leads' => $got['leads'], 'names' => $got['names'], 'staff' => $got['staff'], 'contact' => $contact, 'as_written' => $got['as_written'],
         'provider' => (string) ($GLOBALS['kop_ai_last_provider'] ?? ''), 'read_at' => gmdate('Y-m-d H:i:s'))
         + array_intersect_key($old, array('lead_done' => 1)));
     if (function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
@@ -350,11 +365,22 @@ function kop_ra_forget(array $ids, $all = false) {
  * Once (2026-11-11): the lines read from readers' answers before, our plain
  * wording of their words, go, from the cards and from the pages; every answer
  * is read again into testimony and waits for review. Boxes those lines ticked
- * on records stay ticked.
+ * on records stay ticked. Then once more (mode testimony2, staff names left
+ * in): testimony still waiting is read again; what was added or left off stays.
  */
 function kop_ra_migrate_to_testimony() {
-    if (get_option('kop_ra_mode') === 'testimony' || !kop_pp_ready() || !kop_pp_has_accounts()) return;
+    if (!kop_pp_ready() || !kop_pp_has_accounts()) return;
+    $mode = get_option('kop_ra_mode');
+    if ($mode === 'testimony2') return;
     global $wpdb;
+    if ($mode === 'testimony') {
+        kop_q_ensure_tables();
+        $wpdb->query('DELETE FROM ' . kop_pp_table() . " WHERE answer_id > 0 AND status = 'pending'");
+        $wpdb->query('UPDATE ' . kop_q_table() . " SET read_status = '' WHERE " . kop_ra_where() . " AND read_status <> ''"
+            . ' AND id NOT IN (SELECT answer_id FROM ' . kop_pp_table() . ' WHERE answer_id > 0)');
+        update_option('kop_ra_mode', 'testimony2', false);
+        return;
+    }
     $fids = array_map('intval', (array) $wpdb->get_col('SELECT DISTINCT facility_id FROM ' . kop_pp_table() . " WHERE answer_id > 0 AND status = 'added'"));
     $wpdb->query('DELETE FROM ' . kop_pp_table() . " WHERE answer_id > 0 AND topic <> '" . KOP_RA_TOPIC . "'");
     $log = kop_pp_log();
@@ -364,7 +390,7 @@ function kop_ra_migrate_to_testimony() {
     $wpdb->query('UPDATE ' . kop_q_table() . " SET read_status = '' WHERE " . kop_ra_where() . " AND read_status <> ''");
     foreach ($fids as $fid) kop_pp_purge($fid);
     if ($fids && function_exists('kop_record_changed')) kop_record_changed('facility', $fids);
-    update_option('kop_ra_mode', 'testimony', false);
+    update_option('kop_ra_mode', 'testimony2', false);
 }
 
 /* ---- Decisions ------------------------------------------------------------ */
@@ -422,7 +448,7 @@ function kop_ra_for_facility($fid) {
     return $rows;
 }
 
-/** Their words as quotes in the "Survivor testimony" section, each with who they are. */
+/** Their words as quotes in the "Survivor testimony" section, each with who they are and, when it names staff, that it is their allegation. */
 function kop_ra_section_html(array $rows) {
     $qurl = function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/');
     ob_start();
@@ -432,7 +458,10 @@ function kop_ra_section_html(array $rows) {
         ?>
         <figure class="kop-fp-testimony kop-ra-testimony"<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('pp:' . (int) $r['id'], 'these words') : ''; ?>>
             <blockquote><?php foreach (preg_split('/\R\s*\R/', trim((string) $r['value'])) as $para) : ?><p><?php echo nl2br(esc_html(trim($para))); ?></p><?php endforeach; ?></blockquote>
-            <figcaption><?php echo $cite; // Escaped above. ?></figcaption>
+            <figcaption><?php echo $cite; // Escaped above. ?>
+                <?php $staff = array_filter(array_map('trim', explode(';', (string) ($r['why'] ?? '')))); if ($staff) : ?>
+                <span class="kop-ra-allegation">Names staff: <?php echo esc_html(implode(', ', $staff)); ?>. What it says about them is this reader's allegation, not a finding; Kids Over Profits has not verified it.</span>
+                <?php endif; ?></figcaption>
         </figure>
     <?php endforeach;
     return ob_get_clean();
