@@ -337,9 +337,48 @@
     transition: all 0.2s;
 }
 
+.news-tag {
+    cursor: pointer;
+}
+
 .news-tag:hover {
     background-color: var(--kop-orange-fill, #A3570D);
     color: var(--kop-white);
+}
+
+/* A tag naming a record with a page: the name filters, the joined "page" link opens the record. */
+.news-tag-group {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.news-tag-group .news-tag {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.news-tags a.news-tag-page,
+.news-tags a.news-tag-page:visited {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px 3px 8px;
+    border: 1px solid var(--kop-orange);
+    border-left: 0;
+    border-radius: 0 9999px 9999px 0;
+    background-color: var(--kop-midnight-blue);
+    color: var(--kop-white);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.news-tags a.news-tag-page:hover,
+.news-tags a.news-tag-page:focus,
+.news-tags a.news-tag-page:active {
+    background-color: var(--kop-orange-fill, #A3570D);
+    color: var(--kop-white);
+    text-decoration: none;
 }
 
 /* Filter Section */

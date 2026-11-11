@@ -734,11 +734,32 @@ try {
                         </div>
                     <?php endif; ?>
 
+                    <?php
+                    // The records this article is linked to, each a link to its page. A tag naming
+                    // one keeps filtering the feed and gets a "page" link joined to it; the rest are
+                    // listed under "On KOP:" below.
+                    $record_links = array_values(array_filter($mention_links[(int) $item['id']] ?? array(), static function ($e) { return $e['url'] !== ''; }));
+                    $tag_pages = array();
+                    foreach ($record_links as $e) {
+                        $tag_key = strtolower((string) kop_news_tag_display($e['name']));
+                        if ($tag_key !== '' && !isset($tag_pages[$tag_key])) $tag_pages[$tag_key] = $e['url'];
+                    }
+                    $tag_page_used = array();
+                    ?>
                     <?php if (!empty($tags)): ?>
                         <div class="news-tags">
                             <div class="news-tags-list">
-                                <?php foreach ($tags as $tag): ?>
-                                    <span class="news-tag" data-tag="<?php echo esc_attr($tag); ?>"><?php echo esc_html($tag); ?></span>
+                                <?php foreach ($tags as $tag):
+                                    $tag_page = $tag_pages[strtolower($tag)] ?? '';
+                                    if ($tag_page !== '') $tag_page_used[$tag_page] = true;
+                                ?>
+                                    <?php if ($tag_page !== ''): ?>
+                                        <span class="news-tag-group">
+                                            <span class="news-tag" data-tag="<?php echo esc_attr($tag); ?>" title="Show articles tagged <?php echo esc_attr($tag); ?>"><?php echo esc_html($tag); ?></span><a class="news-tag-page" href="<?php echo esc_url($tag_page); ?>" title="Open the <?php echo esc_attr($tag); ?> page on KOP" aria-label="<?php echo esc_attr($tag); ?> page on KOP">page &rarr;</a>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="news-tag" data-tag="<?php echo esc_attr($tag); ?>"><?php echo esc_html($tag); ?></span>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -755,10 +776,8 @@ try {
                     </div>
 
                     <?php
-                    // The records this article is linked to, each a link to its page. The names
-                    // themselves are the tags above; this replaces the "Facilities" / "Key Figures"
-                    // text lists, which the stylesheet had hidden since 2026-01.
-                    $record_links = array_values(array_filter($mention_links[(int) $item['id']] ?? array(), static function ($e) { return $e['url'] !== ''; }));
+                    // Linked records whose page isn't already on a tag above.
+                    $record_links = array_values(array_filter($record_links, static function ($e) use ($tag_page_used) { return !isset($tag_page_used[$e['url']]); }));
                     ?>
                     <?php if (!empty($record_links)): ?>
                         <div class="news-entities news-record-links">
