@@ -29,8 +29,8 @@ kop_rinbox_register('reader-accounts', function () {
         'label'       => 'What readers remember',
         'group'       => 'Sent in by readers',
         'help'        => 'What readers wrote on the questions page (/questions/): the rules they remember at a program, and the notes they add under an answer. '
-            . 'Each answer is testimony: Add puts it on the facility page under "Survivor testimony" as a quote, in their own words with only the spelling '
-            . 'and punctuation fixed, cited by who the reader is (a former resident, a parent...), never by name. Contact details and the names of the reader, '
+            . 'Each answer is quoted in their own words with only the spelling and punctuation fixed, cut into its rules (under "Rules and practices") '
+            . 'and its testimony (always under "Survivor testimony"), cited by who the reader is (a former resident, a parent...), never by name. Contact details and the names of the reader, '
             . 'other residents and family are taken out first; staff named stay, marked as the reader\'s allegations. An offer of contact, a court case or another program named waits on the Leads tab.',
         'views'       => array('waiting' => 'To review', 'leads' => 'Leads', 'added' => 'Added', 'left' => 'Left off', 'nothing' => 'Nothing to add'),
         'count'       => function () { return kop_rinbox_ra_view_counts()['waiting']; },
@@ -121,7 +121,8 @@ function kop_rinbox_ra_item($id, array $c = null) {
     $checklist = array();
     foreach (kop_pp_rows(array('answer_id' => (int) $id)) as $r) {
         $checks = array_filter(explode(',', (string) $r['checklist']));
-        $sub = 'Their words as they would be quoted under Survivor testimony, cited "' . $r['doc_title'] . '"'
+        $sec = $r['topic'] === KOP_RA_RULES_TOPIC ? 'Rules and practices' : 'Survivor testimony';
+        $sub = $sec . ': quoted as written here, cited "' . $r['doc_title'] . '"'
             . ($checks ? '. Ticks: ' . implode(', ', array_map(function ($k) use ($labels) { return $labels[$k] ?? $k; }, $checks)) : '');
         if ($r['status'] === 'pending') {
             $checklist[] = array('keys' => array((string) $r['id']), 'label' => (string) $r['value'], 'url' => '', 'sub' => $sub, 'note' => '', 'checked' => true);
@@ -134,8 +135,8 @@ function kop_rinbox_ra_item($id, array $c = null) {
     $name = $fac ? $fac['name'] : 'the facility';
     if ($checklist) {
         $actions[] = array('id' => 'add', 'label' => 'Add to the page', 'style' => 'approve',
-            'help' => 'Puts their words on ' . $name . '\'s page under "Survivor testimony" as a quote, with who they are, '
-                . 'and ticks the record\'s boxes their words show. Undo on the Added tab.');
+            'help' => 'Quotes the ticked parts on ' . $name . '\'s page, each where it is marked (the rules under "Rules and practices", the rest under '
+                . '"Survivor testimony"), with who they are, and ticks the record\'s boxes their words show; unticked parts are left off. Undo on the Added tab.');
         $actions[] = array('id' => 'leave', 'label' => 'Leave off', 'style' => 'reject', 'help' => 'Nothing on the site changes; the card moves to Left off.');
     }
     if ($c['lead']) {

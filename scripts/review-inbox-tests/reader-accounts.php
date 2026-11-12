@@ -5,13 +5,14 @@
  * answers shaped like the live site's first ones (contact details made up)
  * on a real record of the mirror and an AI stand-in: only facility answers
  * with free text are read; contact details never reach the AI; their whole
- * answer becomes one testimony with only spelling and punctuation fixed, and a
+ * answer is quoted with only spelling and punctuation fixed, cut into its rules
+ * and its testimony (an AI answering with one "words" still works), and a
  * pass that changed words is thrown away for their words as written; a name is
  * taken out of the words shown; who they are becomes the citation; a reply
  * that is not JSON gets one more try, a failure is marked and a "rate limit"
- * leaves it unread; the card's testimony, leads and actions; Add puts it under
- * Survivor testimony as a quote and never under Rules and practices or on the
- * documents' cards; Undo, Leave off, Followed up and its Undo, Read again; a
+ * leaves it unread; the card's parts, leads and actions; Add quotes the rules
+ * under Rules and practices and the testimony under Survivor testimony, never
+ * on the documents' cards; Undo, Leave off, Followed up and its Undo, Read again; a
  * reader's new answer takes their old one's waiting testimony with it; the
  * old paraphrased lines go once and their answers are read again; a hedged
  * note keeps three agreeing answers from settling; remembered rules leave the
@@ -40,8 +41,10 @@ function kop_ra_test_ai($prompt) {
     }
     return json_encode(array('role' => 'was_there', 'attended' => '2010 - 2012', 'checklist' => array(),
         'leads' => array(array('kind' => 'court', 'text' => 'Says they went to court with the program.')), 'names' => array(array('name' => 'Hanks', 'staff' => true), array('name' => 'Amy', 'staff' => false), 'Nobody Here'),
-        'words' => "Well, if one girl got in trouble, we all got in trouble, Amy too. Mr. Hanks made us scrub floors a lot. If you have more questions, mail me at [email removed] "
-            . "or call [phone removed], see [link removed]. I went from 2010-2012."));
+        'parts' => array(
+            array('kind' => 'rules', 'words' => 'Well, if one girl got in trouble, we all got in trouble.'),
+            array('kind' => 'testimony', 'words' => 'Amy too. Mr. Hanks made us scrub floors a lot.'),
+            array('kind' => 'testimony', 'words' => 'If you have more questions, mail me at [email removed] or call [phone removed], see [link removed]. I went from 2010-2012.'))));
 }
 
 function kop_rinbox_test_reader_accounts_from_empty(array $src, callable $check) {
@@ -122,10 +125,12 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     $ra = kop_ra_answer($a);
     $ja = kop_ra_json($ra);
     $rows = kop_pp_rows(array('answer_id' => $a));
-    $check('reader-accounts: one answer is one testimony, the spelling fixed, staff named, a resident taken out', $ra['read_status'] === 'read' && count($rows) === 1
-        && $rows[0]['topic'] === 'account' && strpos($rows[0]['value'], 'Mr. Hanks made us scrub floors a lot.') !== false
-        && strpos($rows[0]['value'], '[name] too.') !== false && strpos($rows[0]['value'], 'Amy') === false
-        && strpos($rows[0]['value'], 'Well, if one girl') === 0 && empty($ja['as_written']) && $rows[0]['why'] === 'Hanks', json_encode($rows));
+    $check('reader-accounts: an answer is cut into its rules and its testimony (one part each, in order), the spelling fixed', $ra['read_status'] === 'read'
+        && count($rows) === 2 && $rows[0]['topic'] === 'account_rules' && $rows[0]['value'] === 'Well, if one girl got in trouble, we all got in trouble.'
+        && $rows[1]['topic'] === 'account' && strpos($rows[1]['value'], '[name] too. Mr. Hanks made us scrub floors a lot. If you have') === 0
+        && empty($ja['as_written']), json_encode($rows));
+    $check('reader-accounts: staff stay named in the part that names them, a resident is taken out', strpos($rows[1]['value'], 'Amy') === false
+        && $rows[1]['why'] === 'Hanks' && $rows[0]['why'] === '', json_encode($rows));
     $check('reader-accounts: only names in their words are kept, staff apart', $ja['names'] === array('Amy') && $ja['staff'] === array('Hanks'),
         json_encode(array($ja['names'], $ja['staff'])));
     $check('reader-accounts: who they are is the citation', $rows[0]['doc_title'] === "A former resident (2010\u{2013}2012), answering on Kids Over Profits' questions page, October 2026"
@@ -136,15 +141,16 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     $check('reader-accounts: a note is read with its question; only boxes a reader may tick are kept', count($lb) === 1 && $lb[0]['value'] === 'Earth, Fire, Water, Air.'
         && $lb[0]['checklist'] === 'ttiPractices.hasLevelSystem', json_encode($lb));
     $lw = kop_pp_rows(array('answer_id' => $w));
-    $check('reader-accounts: a pass that rewrote their words is thrown away; their words stand as written', count($lw) === 1
+    $check('reader-accounts: a pass that rewrote their words is thrown away; their words stand as written, as testimony', count($lw) === 1 && $lw[0]['topic'] === 'account'
         && $lw[0]['value'] === 'We had to coean staff bathrooms if got in trouble' && !empty(kop_ra_json(kop_ra_answer($w))['as_written'])
         && strpos(json_encode(kop_rinbox_ra_item($w)['details']), 'Kept as written') !== false, json_encode($lw));
 
     // The card.
     $card = kop_rinbox_ra_item($a);
     $check('reader-accounts: the card shows the whole answer to admins, their words ticked, and the leads',
-        strpos($card['text'], 'jane.doe@example.com') !== false && count($card['checklist']) === 1 && $card['checklist'][0]['checked']
-        && $card['checklist'][0]['label'] === $rows[0]['value'] && strpos(json_encode($card['details']), 'Court case') !== false, json_encode($card['details']));
+        strpos($card['text'], 'jane.doe@example.com') !== false && count($card['checklist']) === 2 && $card['checklist'][0]['checked']
+        && $card['checklist'][0]['label'] === $rows[0]['value'] && strpos($card['checklist'][0]['sub'], 'Rules and practices') === 0
+        && strpos($card['checklist'][1]['sub'], 'Survivor testimony') === 0 && strpos(json_encode($card['details']), 'Court case') !== false, json_encode($card['checklist']));
     $check('reader-accounts: a waiting card offers Add, Leave off, Followed up and Read again, each with its help',
         array_column($card['actions'], 'id') === array('add', 'leave', 'lead_done', 'read') && !array_filter($card['actions'], function ($x) { return empty($x['help']); }),
         json_encode(array_column($card['actions'], 'id')));
@@ -154,10 +160,14 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     $check('reader-accounts: readers\' testimony never makes cards under Rules from documents', kop_rinbox_pp_item($fid, 'account') === null && kop_rinbox_pp_item($fid, 'levels') === null);
 
     // Add, the section, Undo.
-    $msg = kop_rinbox_ra_act("a$a", 'add', array('picked' => array($card['checklist'][0]['keys'][0])))['message'];
+    $msg = kop_rinbox_ra_act("a$a", 'add', array('picked' => array($card['checklist'][0]['keys'][0], $card['checklist'][1]['keys'][0])))['message'];
     $on = kop_ra_for_facility($fid);
-    $check('reader-accounts: Add puts their words on the page, never under Rules and practices', count($on) === 1 && !kop_pp_for_facility($fid)
-        && strpos($msg, 'Survivor testimony') !== false, $msg);
+    $ru = kop_ra_for_facility($fid, KOP_RA_RULES_TOPIC);
+    $check('reader-accounts: Add quotes the rules under Rules and practices and the testimony under Survivor testimony, never as documents\' lines',
+        count($on) === 1 && count($ru) === 1 && !kop_pp_for_facility($fid) && strpos($msg, '"Rules and practices" and "Survivor testimony"') !== false, $msg);
+    $rh = kop_ra_rules_html($ru);
+    $check('reader-accounts: the rules readers remember are quoted under their own heading', strpos($rh, 'What people who were there remember') !== false
+        && strpos($rh, esc_html('Well, if one girl got in trouble, we all got in trouble.')) !== false && strpos($rh, 'Hanks') === false, $rh);
     $html = kop_ra_section_html($on);
     $check('reader-accounts: the page quotes their words and who they are, linking the questions page',
         strpos($html, '<figure class="kop-fp-testimony') !== false && strpos($html, esc_html('Mr. Hanks made us scrub floors a lot.')) !== false
@@ -166,7 +176,7 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     $check('reader-accounts: the card moves to Added with Undo', kop_rinbox_ra_item($a)['status'] === 'added' && in_array('undo', array_column(kop_rinbox_ra_item($a)['actions'], 'id'), true));
     $msg = kop_rinbox_ra_act("a$a", 'undo', array())['message'];
     $check('reader-accounts: Undo puts it back to waiting and off the page', !kop_ra_for_facility($fid)
-        && count(kop_pp_rows(array('answer_id' => $a, 'status' => 'pending'))) === 1, $msg);
+        && !kop_ra_for_facility($fid, KOP_RA_RULES_TOPIC) && count(kop_pp_rows(array('answer_id' => $a, 'status' => 'pending'))) === 2, $msg);
     kop_rinbox_ra_act("a$b", 'leave', array());
     $check('reader-accounts: Leave off changes no page', kop_rinbox_ra_item($b)['status'] === 'left' && !kop_ra_for_facility($fid));
     kop_rinbox_ra_act("a$b", 'undo', array());
@@ -176,7 +186,7 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     $check('reader-accounts: Followed up takes the lead off the Leads tab', !in_array("a$a", $keys('leads'), true));
     kop_rinbox_ra_act("a$a", 'undo', array());
     $check('reader-accounts: Undo opens the lead again and leaves the testimony waiting', in_array("a$a", $keys('leads'), true)
-        && count(kop_pp_rows(array('answer_id' => $a, 'status' => 'pending'))) === 1);
+        && count(kop_pp_rows(array('answer_id' => $a, 'status' => 'pending'))) === 2);
 
     // Read again replaces the waiting testimony; a failure is marked; out of calls leaves it unread.
     kop_rinbox_ra_act("a$b", 'read', array());
@@ -196,15 +206,15 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     delete_option('kop_ra_mode');
     kop_ra_migrate_to_testimony();
     $check('reader-accounts: the move to testimony takes the old lines off and reads their answers again', !kop_pp_rows(array('answer_id' => $b, 'topic' => 'levels'))
-        && kop_ra_answer($b)['read_status'] === '' && get_option('kop_ra_mode') === 'testimony2');
+        && kop_ra_answer($b)['read_status'] === '' && get_option('kop_ra_mode') === 'testimony3');
     kop_ra_cron();
     // The second step (staff names): waiting testimony is read again, a decided one stays.
     kop_rinbox_ra_act("a$b", 'leave', array());
-    update_option('kop_ra_mode', 'testimony', false);
+    update_option('kop_ra_mode', 'testimony2', false);
     kop_ra_migrate_to_testimony();
-    $check('reader-accounts: the staff-names step reads waiting testimony again and keeps what was decided',
+    $check('reader-accounts: a later step (rules apart) reads waiting testimony again and keeps what was decided',
         kop_ra_answer($a)['read_status'] === '' && !kop_pp_rows(array('answer_id' => $a)) && kop_ra_answer($b)['read_status'] === 'read'
-        && count(kop_pp_rows(array('answer_id' => $b, 'status' => 'left'))) === 1 && get_option('kop_ra_mode') === 'testimony2');
+        && count(kop_pp_rows(array('answer_id' => $b, 'status' => 'left'))) === 1 && get_option('kop_ra_mode') === 'testimony3');
     kop_ra_cron();
 
     // The reader answers again: their old answer's waiting testimony goes with it.

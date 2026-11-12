@@ -346,8 +346,10 @@ $kop_fp_school_only = $kop_fp_campus && count($kop_fp_school_of) + count($kop_fp
 if ($kop_fp_campus) $kop_fp_sections['campus'] = $kop_fp_school_only ? ($kop_fp_school_of ? 'Its program' : 'Academic program') : 'Same campus';
 // Rules and practices read from the program's own handbooks (inc/program-practices.php), read at render time.
 $kop_fp_rules = function_exists('kop_pp_for_facility') ? kop_pp_for_facility((int) $page['id']) : array();
-$kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules;
-// What readers who were there told the questions page, in their own words (inc/reader-accounts.php): quotes under Survivor testimony.
+// What readers who were there told the questions page, in their own words (inc/reader-accounts.php): the rules they remember
+// quoted under Rules and practices, everything else under Survivor testimony.
+$kop_fp_reader_rules = function_exists('kop_ra_for_facility') ? kop_ra_for_facility((int) $page['id'], KOP_RA_RULES_TOPIC) : array();
+$kop_fp_has_practices = !empty($page['practices']) || $kop_fp_rules || $kop_fp_reader_rules;
 $kop_fp_remember = function_exists('kop_ra_for_facility') ? kop_ra_for_facility((int) $page['id']) : array();
 $kop_fp_has_staff = !empty($page['staff']);
 $kop_fp_has_testimony = !empty($page['testimony']) || !empty($page['forum']) || $kop_fp_remember;
@@ -1088,6 +1090,7 @@ get_header();
                     <p class="kop-fp-count"><?php echo esc_html(kop_pp_sources_line($kop_fp_rules)); ?></p>
                     <?php echo kop_pp_section_html($kop_fp_rules); // Escaped inside. ?>
                 <?php endif; ?>
+                <?php if ($kop_fp_reader_rules) echo kop_ra_rules_html($kop_fp_reader_rules); // Escaped inside. ?>
             </section>
             <?php endif; ?>
 

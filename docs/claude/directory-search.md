@@ -70,13 +70,16 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-questions.php    
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=questions   # the queue, settle + Undo, dismiss, deck
 # Free text is testimony (owner, 2026-10-23; changed 2026-11-11: never paraphrased; inc/reader-accounts.php): remembered rules
 # (f<id>.rules) and every note on a facility answer get an hourly spelling pass (cron kop_ra_hourly, KOP_RA_BATCH 8,
-# kop_ai_generate_alternating()) into ONE row of kop_program_practices per answer, topic 'account', answer_id = the answer: value =
-# their whole text with only spelling, capitals and punctuation fixed (kop_ra_same_words() checks it word by word; a pass that
-# changed a word is thrown away and their words stand as written, "as_written"), checklist boxes, year. Staff names stay
+# kop_ai_generate_alternating()) into rows of kop_program_practices, answer_id = the answer, one per part in order (page = part
+# number): the AI cuts their text into "rules" (topic 'account_rules': how it ran for everyone) and "testimony" (topic 'account':
+# everything else, and anything unsure; owner 2026-11-12: testimony mixed into a rules answer is always moved out). value =
+# their words with only spelling, capitals and punctuation fixed (kop_ra_same_words() checks the parts joined, word by word; a pass
+# that changed a word is thrown away and their words stand as written, all testimony, "as_written"), checklist boxes, year. Staff names stay
 # (owner, 2026-11-11; in `why`, and the quote says "Names staff: X. What it says about them is this reader's allegation, not a
 # finding"); their own, other residents' and family names -> [name].
 # Emails, phones and links are cut before the AI sees it (kop_ra_redact()). Reviewed one card per answer at Review inbox >
-# What readers remember (never volunteers): Add -> quoted under the facility page's "Survivor testimony" (kop_ra_section_html(),
+# What readers remember (never volunteers): Add -> rules quoted under "Rules and practices" (kop_ra_rules_html(), heading "What
+# people who were there remember"), testimony under "Survivor testimony" (kop_ra_section_html(),
 # cited "A former resident (2010-2012), answering on Kids Over Profits' questions page, October 2026"); contact offers, court
 # cases and other programs named are the Leads tab. A reader's new answer drops their old one's waiting testimony
 # (kop_ra_forget()). kop_ra_migrate_to_testimony() (once, option kop_ra_mode) took the old paraphrased lines off (mode testimony2 re-read the waiting ones for staff names). Not in the app or wiki yet
