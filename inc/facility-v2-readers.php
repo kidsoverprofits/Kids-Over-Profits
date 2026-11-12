@@ -674,6 +674,45 @@ if (!function_exists('kop_v2_search_name_list')) {
     }
 }
 
+if (!function_exists('kop_facility_popular_names')) {
+    /**
+     * id => popular name (identification.popularName) for every facility
+     * that has one picked: few records, so one small query, kept for the
+     * request and in a transient keyed by facilities_v2's row count and last
+     * update. For lists that read only the name column.
+     */
+    function kop_facility_popular_names() {
+        global $wpdb;
+        static $map = null;
+        if ($map !== null) return $map;
+        $fp = $wpdb->get_row("SELECT COUNT(*), MAX(id), MAX(updated_at) FROM facilities_v2", ARRAY_N);
+        $key = 'kop_fac_popular_' . md5(implode('|', (array) $fp));
+        $cached = function_exists('get_transient') ? get_transient($key) : false;
+        if (is_array($cached)) return $map = $cached;
+        $map = array();
+        $rows = $wpdb->get_results(
+            "SELECT id, json_data FROM facilities_v2
+              WHERE json_data LIKE '%popularName%'",
+            ARRAY_A
+        );
+        foreach ((array) $rows as $r) {
+            $doc = kop_v2_decode($r['json_data']);
+            $p = is_array($doc) ? trim((string) ($doc['identification']['popularName'] ?? '')) : '';
+            if ($p !== '') $map[(int) $r['id']] = $p;
+        }
+        if (function_exists('set_transient')) set_transient($key, $map, DAY_IN_SECONDS);
+        return $map;
+    }
+}
+
+if (!function_exists('kop_facility_shown_name')) {
+    /** The name facility $id is shown under: its popular name, else $name (its name column). */
+    function kop_facility_shown_name($id, $name) {
+        $map = kop_facility_popular_names();
+        return isset($map[(int) $id]) ? $map[(int) $id] : (string) $name;
+    }
+}
+
 if (!function_exists('kop_v2_alias_index')) {
     /**
      * Every alternate name on file, for search: {facilities: [[id, alias,
@@ -885,6 +924,154 @@ if (!function_exists('kop_v2_search_rank')) {
     }
 }
 
+if (!function_exists('kop_v2_search_place_line')) {
+    /** "Hebron, KY" for one location entry (city and state code, else country, else its raw line cut short); '' when empty. */
+    function kop_v2_search_place_line($l) {
+        if (!is_array($l)) return is_string($l) ? trim(mb_substr(trim($l), 0, 60)) : '';
+        $city = trim((string) ($l['city'] ?? ''));
+        $state = trim((string) ($l['state'] ?? ''));
+        $country = trim((string) ($l['country'] ?? ''));
+        // A city that is really a sentence fragment ("OH in 1993") is left out.
+        if ($city !== '' && (preg_match('/\d/', $city) || mb_strlen($city) > 40)) $city = '';
+        $where = $state !== '' ? $state : (($country !== '' && strcasecmp($country, 'United States') !== 0) ? $country : '');
+        $line = trim($city . ($city !== '' && $where !== '' ? ', ' : '') . $where);
+        if ($line === '') {
+            $raw = trim((string) ($l['raw'] ?? ($l['text'] ?? '')));
+            $line = mb_strlen($raw) > 60 ? rtrim(mb_substr($raw, 0, 57)) . '...' : $raw;
+        }
+        return $line;
+    }
+}
+
+if (!function_exists('kop_v2_search_name_lines')) {
+    /**
+     * A record's other names as search previews word them, the name that
+     * matched first: ["Formerly X", "Now known as Y", "Also known as Z"].
+     * $display is the result's title (left out); $lists = {current[], past[],
+     * other[]}.
+     */
+    function kop_v2_search_name_lines($display, array $lists, $matched_name = '', $matched_kind = '') {
+        $seen = array(mb_strtolower(trim((string) $display)) => true);
+        $out = array();
+        $add = static function ($kind, $n) use (&$seen, &$out) {
+            $n = trim((string) $n);
+            if ($n === '' || isset($seen[mb_strtolower($n)])) return;
+            $seen[mb_strtolower($n)] = true;
+            $out[] = kop_alias_label($kind, $n);
+        };
+        if ((string) $matched_name !== '') $add((string) $matched_kind, $matched_name);
+        foreach ((array) ($lists['current'] ?? array()) as $n) $add('current', $n);
+        foreach ((array) ($lists['past'] ?? array()) as $n) $add('past', $n);
+        foreach ((array) ($lists['other'] ?? array()) as $n) $add('other', $n);
+        return $out;
+    }
+}
+
+if (!function_exists('kop_v2_search_facility_preview')) {
+    /**
+     * What a facility search result shows besides its name: {display (its
+     * popular name, else its name), names (kop_v2_search_name_lines(), the
+     * record's own name among them when the popular name is the title),
+     * places ("Also at Ogden, UT", "Formerly in Hebron, KY (until 1990)"),
+     * matched_name (null when the name that matched is the title), matched_kind}.
+     * $direct: the record's own name matched; under a popular name that name
+     * is then the match to explain (first in names). The main city and state
+     * stay the result's `location`.
+     */
+    function kop_v2_search_facility_preview(array $doc, $row_name, $matched_name = '', $matched_kind = '', $direct = false) {
+        $ident = is_array($doc['identification'] ?? null) ? $doc['identification'] : array();
+        $name = trim((string) ($ident['name'] ?? '')) ?: trim((string) $row_name);
+        $current = trim((string) ($ident['currentName'] ?? ''));
+        $past = kop_v2_search_name_list($ident['pastNames'] ?? null);
+        $other = kop_v2_search_name_list($ident['otherNames'] ?? null);
+        $popular = function_exists('kop_facility_popular_name_clean') ? kop_facility_popular_name_clean($ident['popularName'] ?? '', array('name' => $name) + $ident) : '';
+        $display = $name;
+        if ($popular !== '' && function_exists('kop_facility_pages_popular_name_lists')) {
+            list($display, $current, $past, , $other) = kop_facility_pages_popular_name_lists($popular, $name, $current, $past, array(), $other);
+            $current = (string) $current;
+        } elseif ($popular !== '') {
+            $display = $popular;
+            $other[] = $name;
+        }
+        // The record's own name matched while the title is its popular name: that name is what found it.
+        if ($direct && (string) $matched_name === '' && mb_strtolower($display) !== mb_strtolower($name)) {
+            $matched_name = $name;
+            $matched_kind = mb_strtolower($current) === mb_strtolower($name) ? 'current'
+                : (in_array(mb_strtolower($name), array_map('mb_strtolower', $past), true) ? 'past' : 'other');
+        }
+        // The name that matched is the title itself: nothing to explain.
+        if ((string) $matched_name !== '' && mb_strtolower(trim((string) $matched_name)) === mb_strtolower($display)) $matched_name = '';
+        $names = kop_v2_search_name_lines($display, array('current' => $current !== '' ? array($current) : array(), 'past' => $past, 'other' => $other), (string) $matched_name, (string) $matched_kind);
+
+        $loc = is_array($doc['location'] ?? null) ? $doc['location'] : array();
+        $places = array();
+        $seen = array(mb_strtolower(kop_v2_search_place_line($loc)) => true, '' => true);
+        foreach ((array) ($loc['additionalLocations'] ?? array()) as $l) {
+            $line = kop_v2_search_place_line($l);
+            if (isset($seen[mb_strtolower($line)])) continue;
+            $seen[mb_strtolower($line)] = true;
+            $places[] = 'Also at ' . $line;
+        }
+        foreach ((array) ($loc['formerLocations'] ?? array()) as $l) {
+            $line = kop_v2_search_place_line($l);
+            if (isset($seen[mb_strtolower($line)])) continue;
+            $seen[mb_strtolower($line)] = true;
+            $from = is_array($l) && !empty($l['fromYear']) ? (string) $l['fromYear'] : '';
+            $to = is_array($l) && !empty($l['toYear']) ? (string) $l['toYear'] : '';
+            $years = ($from !== '' && $to !== '') ? $from . ' to ' . $to : ($from !== '' ? 'from ' . $from : ($to !== '' ? 'until ' . $to : ''));
+            $places[] = 'Formerly in ' . $line . ($years !== '' ? ' (' . $years . ')' : '');
+        }
+        $matched = (string) $matched_name !== '' ? (string) $matched_name : null;
+        return array('display' => $display, 'names' => $names, 'places' => $places, 'matched_name' => $matched, 'matched_kind' => $matched !== null ? (string) $matched_kind : null);
+    }
+}
+
+if (!function_exists('kop_v2_search_operator_preview')) {
+    /** The same for a company: {names, places}, places being its headquarters ("Based in Nashville, TN"). */
+    function kop_v2_search_operator_preview(array $op, $name, $matched_name = '', $matched_kind = '') {
+        $names = kop_v2_search_name_lines($name, array(
+            'current' => kop_v2_search_name_list($op['currentName'] ?? null),
+            'past'    => array_merge(kop_v2_search_name_list($op['pastNames'] ?? null), kop_v2_search_name_list($op['previousNames'] ?? null), kop_v2_search_name_list($op['formerNames'] ?? null)),
+            'other'   => array_merge(kop_v2_search_name_list($op['otherNames'] ?? null), kop_v2_search_name_list($op['aliases'] ?? null)),
+        ), (string) $matched_name, (string) $matched_kind);
+        $hq = is_string($op['headquarters'] ?? null) ? trim($op['headquarters']) : '';
+        if ($hq === '') {
+            $hq = kop_v2_search_place_line(array(
+                'city'  => is_string($op['headquartersCity'] ?? null) ? $op['headquartersCity'] : '',
+                'state' => is_string($op['headquartersState'] ?? null) ? $op['headquartersState'] : '',
+            ));
+        }
+        if (mb_strlen($hq) > 80) $hq = rtrim(mb_substr($hq, 0, 77)) . '...';
+        return array('names' => $names, 'places' => $hq !== '' ? array('Based in ' . $hq) : array());
+    }
+}
+
+if (!function_exists('kop_v2_search_preview_lines')) {
+    /**
+     * A kop_v2_search() result's names and places as at most two short lines
+     * ("Formerly X; Also known as Y", "Also at A; Formerly in B (until 1990)"),
+     * $max_names / $max_places of each, "and N more" after. For the renderers
+     * that print text (the header dropdown, search.php); the popup gets the
+     * lists themselves. $location_shown: the caller prints `location` already,
+     * so a company's "Based in" line (the same headquarters) is left out.
+     */
+    function kop_v2_search_preview_lines(array $r, $max_names = 4, $max_places = 3, $location_shown = false) {
+        $out = array();
+        $places = (array) ($r['places'] ?? array());
+        if ($location_shown && ($r['kind'] ?? '') === 'operator') {
+            $places = array_values(array_filter($places, static function ($p) { return strpos((string) $p, 'Based in ') !== 0; }));
+        }
+        foreach (array(array((array) ($r['names'] ?? array()), $max_names), array($places, $max_places)) as $part) {
+            list($list, $max) = $part;
+            if (!$list) continue;
+            $line = implode('; ', array_slice($list, 0, $max));
+            if (count($list) > $max) $line .= '; and ' . (count($list) - $max) . ' more';
+            $out[] = $line;
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_v2_search')) {
     /**
      * Operators, facilities and places matching a phrase, from v2.
@@ -958,6 +1145,7 @@ if (!function_exists('kop_v2_search')) {
                 $stored = json_decode($o['json_data'], true);
                 $op = (is_array($stored) && isset($stored['operator'])) ? $stored['operator'] : array();
                 $hq = isset($op['headquarters']) && is_string($op['headquarters']) ? $op['headquarters'] : '';
+                $preview = kop_v2_search_operator_preview($op, (string) $o['name'], $c['alias'] ? $c['name'] : '', $c['alias'] ? $c['kind'] : '');
                 $out['operators'][] = array(
                     'id' => (int)$o['id'],
                     'kind' => 'operator', 'display' => $o['name'], 'operator' => $o['name'],
@@ -965,6 +1153,9 @@ if (!function_exists('kop_v2_search')) {
                     'profile_url' => function_exists('kop_operator_page_url') ? kop_operator_page_url((int)$o['id']) : '',
                     'matched_name' => $c['alias'] ? $c['name'] : null,
                     'matched_kind' => $c['alias'] ? $c['kind'] : null,
+                    // Its other names and headquarters, for the previews (kop_v2_search_preview_lines()).
+                    'names' => $preview['names'],
+                    'places' => $preview['places'],
                 );
             }
         }
@@ -1003,7 +1194,7 @@ if (!function_exists('kop_v2_search')) {
             if ($ids) {
                 $by_id = array();
                 $found = $wpdb->get_results(
-                    "SELECT id, name, state, city, country, status FROM facilities_v2 WHERE id IN (" . implode(',', $ids) . ")",
+                    "SELECT id, name, state, city, country, status, json_data FROM facilities_v2 WHERE id IN (" . implode(',', $ids) . ")",
                     ARRAY_A
                 );
                 foreach ((array)$found as $r) $by_id[(int)$r['id']] = $r;
@@ -1012,6 +1203,7 @@ if (!function_exists('kop_v2_search')) {
                     $r = $by_id[$c['id']];
                     $r['matched_name'] = $c['alias'] ? $c['name'] : null;
                     $r['matched_kind'] = $c['alias'] ? $c['kind'] : null;
+                    $r['direct'] = !$c['alias'] && isset($c['score']);
                     $rows[] = $r;
                 }
             }
@@ -1021,14 +1213,19 @@ if (!function_exists('kop_v2_search')) {
         foreach ($rows as $r) {
             $place = $r['state'] ? trim($r['city'] . ', ' . $r['state'], ', ') : trim($r['city'] . ', ' . $r['country'], ', ');
             $op_name = isset($operators[(int)$r['id']]) ? $operators[(int)$r['id']]['name'] : '';
+            // Shown under its popular name, with its other names and places for the preview.
+            $doc = kop_v2_decode($r['json_data']);
+            $preview = kop_v2_search_facility_preview(is_array($doc) ? $doc : array(), (string) $r['name'], (string) $r['matched_name'], (string) $r['matched_kind'], !empty($r['direct']));
             $out['facilities'][] = array(
                 'id' => (int)$r['id'],
-                'kind' => 'facility', 'display' => $r['name'], 'operator' => $op_name,
+                'kind' => 'facility', 'display' => $preview['display'], 'operator' => $op_name,
                 'location' => $place . ($r['status'] && $r['status'] !== 'Unknown' ? ' (' . $r['status'] . ')' : ''),
                 'fac_count' => 0, 'url' => kop_v2_place_page_url($r['state'], $r['country']),
                 'profile_url' => function_exists('kop_facility_page_url') ? kop_facility_page_url((int)$r['id']) : '',
-                'matched_name' => $r['matched_name'],
-                'matched_kind' => $r['matched_kind'],
+                'matched_name' => $preview['matched_name'],
+                'matched_kind' => $preview['matched_kind'],
+                'names' => $preview['names'],
+                'places' => $preview['places'],
             );
         }
 

@@ -109,6 +109,29 @@
         return graph;
     }
 
+    /* The name people know a facility by (its record's popularName, stamped by
+     * the build): it becomes the label, and the board's name stays findable
+     * as what it is now called (when the popular name is a past one) or as
+     * another name. */
+    function labelByPopularName(node, popular) {
+        popular = String(popular || '').trim();
+        var key = function (n) { return String(n || '').trim().toLowerCase(); };
+        if (!popular || key(popular) === key(node.name)) return;
+        var board = node.name;
+        var wasPast = node.formerNames.some(function (n) { return key(n) === key(popular); });
+        node.formerNames = node.formerNames.filter(function (n) { return key(n) !== key(popular); });
+        node.otherNames = node.otherNames.filter(function (n) { return key(n) !== key(popular); });
+        // The board's name is an old one and the popular name is what it is called now.
+        var boardIsOld = key(node.currentName) === key(popular);
+        if (boardIsOld) node.currentName = '';
+        if (boardIsOld) node.formerNames.unshift(board);
+        else if (wasPast && !node.currentName) node.currentName = board;
+        else if (wasPast) node.formerNames.unshift(board);
+        else node.otherNames.unshift(board);
+        node.boardName = board;
+        node.name = popular;
+    }
+
     function toSet(list) {
         var set = Object.create(null);
         (list || []).forEach(function (v) { set[v] = true; });
@@ -232,6 +255,7 @@
                     r: pos.r,
                     pinned: false
                 };
+                labelByPopularName(node, raw.popularName);
                 store.nodes.push(node);
                 store.nodeById[node.id] = node;
                 store.adjacency[node.id] = [];
@@ -814,7 +838,7 @@
         return store;
     }
 
-    var api = { create: create, statusBucket: statusBucket, applyStatusOverrides: applyStatusOverrides, applyRenameFlips: applyRenameFlips, DEFAULT_CATEGORIES: DEFAULT_CATEGORIES };
+    var api = { create: create, statusBucket: statusBucket, applyStatusOverrides: applyStatusOverrides, applyRenameFlips: applyRenameFlips, labelByPopularName: labelByPopularName, DEFAULT_CATEGORIES: DEFAULT_CATEGORIES };
 
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.KOPNetworkStore = api;

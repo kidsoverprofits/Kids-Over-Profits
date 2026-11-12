@@ -730,7 +730,9 @@ if (!function_exists('kop_operator_page_data')) {
                 $url = kop_facility_page_url($fid);
                 $facilities[] = array(
                     'id'     => $fid,
-                    'name'   => (string) $r['name'],
+                    // Its popular name when one is picked (kop_facility_display_name()); record_name is its own.
+                    'name'   => function_exists('kop_facility_display_name') ? kop_facility_display_name($ident, (string) $r['name']) : (string) $r['name'],
+                    'record_name' => (string) $r['name'],
                     'place'  => $place,
                     'status' => $fstatus,
                     'years'  => $years,
@@ -754,7 +756,7 @@ if (!function_exists('kop_operator_page_data')) {
                 $then = $then_names[$f['id']] ?? null;
                 if ($then === null) continue;
                 // 'name' is the name then; 'now_name' the record's name today.
-                $facilities[$i]['now_name'] = $f['name'];
+                $facilities[$i]['now_name'] = $f['record_name'];
                 $facilities[$i]['name'] = $then['name'];
                 $facilities[$i]['name_years'] = $then['years'];
                 $facilities[$i]['also_names'] = array_values((array) ($then['also'] ?? array()));

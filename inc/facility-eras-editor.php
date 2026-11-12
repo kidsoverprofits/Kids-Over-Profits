@@ -21,6 +21,9 @@
  *     line (year, and a swap when the years put the line's names the other
  *     way round). A record with neither is cut by the hand-set eras alone
  *     (kop_facility_eras_hand_chain()).
+ *   - the most popular name (identification.popularName, the name people know
+ *     it by, shown first wherever the facility is named): a pick among the
+ *     record's names, as on the names pencil (kop_ie_popular_name_options()).
  * Every save can be undone in one go (erasundo:<token>) while nothing it wrote
  * has changed since.
  *
@@ -164,7 +167,8 @@ function kop_eras_ed_load(array $p) {
     $help = 'One row a name, earliest first: the company that ran it under that name and its first and last year. '
         . 'The years split the page into an "As <name>" section for each name, and set the year of the rename on the network map. '
         . 'Add a row for a name the record does not have yet (it is added as a past name); Remove takes a past name off the record. '
-        . 'Leave company and years empty when they are not known.';
+        . 'Leave company and years empty when they are not known. '
+        . 'Most popular name: the name people know it by, shown first wherever the facility is named (a name added here can be picked after saving).';
     if ($notes) $help .= ' ' . implode(' ', $notes);
     return array(
         'title'  => (string) ($doc['identification']['name'] ?? '') . ': names and eras',
@@ -173,9 +177,20 @@ function kop_eras_ed_load(array $p) {
             kop_ie_field('eras', 'Names', 'rows', $value, array('columns' => array(
                 'name' => 'Name', 'company' => 'Run by (company)', 'from' => 'From (year)', 'to' => 'To (year)',
             ))),
+            kop_eras_ed_popular_field($doc),
         ),
         'alt'    => array('ref' => 'facility:' . $fid . ':names', 'label' => 'Name fields'),
     );
+}
+
+/** The "Most popular name" pick: the record's names (kop_ie_popular_name_options()), its stored choice selected. */
+function kop_eras_ed_popular_field(array $doc) {
+    $ident = is_array($doc['identification'] ?? null) ? $doc['identification'] : array();
+    $options = kop_ie_popular_name_options($ident);
+    $value = (string) ($ident['popularName'] ?? '');
+    $known = false;
+    foreach ($options as $o) $known = $known || $o['value'] === $value;
+    return kop_ie_field('popular', 'Most popular name (shown first wherever it is named)', 'select', $known ? $value : '', array('options' => $options));
 }
 
 /** The rows a save was sent, checked: [{id, name, key, company, from, to}]. */
@@ -238,10 +253,12 @@ function kop_eras_ed_save(array $p, array $v) {
     kop_name_eras_install();
     $opts = kop_ie_facility_opts($fid);
     $sent = kop_eras_ed_parse((array) ($v['eras'] ?? array()));
+    // null: not sent (an older dialog), left as it is.
+    $popular_sent = array_key_exists('popular', $v) ? trim(kop_ie_clean_text((string) $v['popular'])) : null;
     $log = array('fid' => $fid, 'eras' => array(), 'doc' => null, 'map' => array(), 'by' => get_current_user_id(), 'at' => current_time('mysql'));
     $owners = array($fid => true);
 
-    kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $opts, $sent, &$log, &$owners) {
+    kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $opts, $sent, $popular_sent, &$log, &$owners) {
         $stored = kop_eras_ed_stored($fid, $opts);
         $doc = $stored['doc'];
         $loaded = kop_eras_ed_rows($fid, $doc);
@@ -297,6 +314,18 @@ function kop_eras_ed_save(array $p, array $v) {
         $merged_before = (array) ($doc['legacy']['mergedFacilities'] ?? array());
         $doc['identification']['pastNames'] = $past_after;
 
+        // The most popular name: one of the dialog's choices; a renamed past name takes its pick along.
+        $popular_before = (string) ($ident['popularName'] ?? '');
+        $popular_after = $popular_sent === null ? $popular_before : $popular_sent;
+        if ($popular_after !== '') {
+            $allowed = array();
+            foreach (kop_ie_popular_name_options($ident) as $o) $allowed[mb_strtolower($o['value'])] = true;
+            if (!isset($allowed[mb_strtolower($popular_after)])) throw new RuntimeException('Most popular name: pick one of its names.');
+            $pk = kop_name_eras_key($popular_after);
+            if (isset($rename[$pk])) $popular_after = $rename[$pk];
+        }
+        $doc['identification']['popularName'] = $popular_after;
+
         // Era rows: what changed from what the dialog showed, written as set by hand.
         $era_changes = array();
         foreach ($final as $f) {
@@ -349,7 +378,7 @@ function kop_eras_ed_save(array $p, array $v) {
         }
         $merged_after = (array) ($doc['legacy']['mergedFacilities'] ?? array());
 
-        if ($past_after !== $past_before || $merged_after !== $merged_before) {
+        if ($past_after !== $past_before || $merged_after !== $merged_before || $popular_after !== $popular_before) {
             $out = kop_facility_normalize($doc, array('facility_id' => $doc['facility_id'] ?? $fid, 'unique_name' => $stored['unique_name']));
             try {
                 kop_facility_save($out, $opts);
@@ -360,6 +389,7 @@ function kop_eras_ed_save(array $p, array $v) {
             $log['doc'] = array(
                 'past_before' => $past_before, 'past_after' => array_values((array) ($saved['identification']['pastNames'] ?? array())),
                 'merged_before' => $merged_before, 'merged_after' => (array) ($saved['legacy']['mergedFacilities'] ?? array()),
+                'popular_before' => $popular_before, 'popular_after' => (string) ($saved['identification']['popularName'] ?? ''),
             );
         }
 
@@ -477,10 +507,12 @@ function kop_eras_ed_undo_save(array $p, array $v) {
             $doc = $stored['doc'];
             $d = $log['doc'];
             if (array_values((array) ($doc['identification']['pastNames'] ?? array())) != $d['past_after']
-                || (array) ($doc['legacy']['mergedFacilities'] ?? array()) != $d['merged_after']) {
+                || (array) ($doc['legacy']['mergedFacilities'] ?? array()) != $d['merged_after']
+                || (isset($d['popular_after']) && (string) ($doc['identification']['popularName'] ?? '') !== $d['popular_after'])) {
                 throw new RuntimeException($changed);
             }
             $doc['identification']['pastNames'] = $d['past_before'];
+            if (isset($d['popular_before'])) $doc['identification']['popularName'] = $d['popular_before'];
             if ($d['merged_before']) {
                 $doc['legacy']['mergedFacilities'] = $d['merged_before'];
             } else {

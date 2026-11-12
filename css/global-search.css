@@ -170,6 +170,21 @@
     overflow-wrap: anywhere;
 }
 
+/* A result's other names and places, under its name (js/global-search.js previewLines()). */
+.kop-global-search__result-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.kop-global-search__result-more {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--kop-navy-blue, #000080);
+    overflow-wrap: anywhere;
+}
+
 .kop-global-search__result-meta {
     flex-shrink: 0;
     max-width: 45%;

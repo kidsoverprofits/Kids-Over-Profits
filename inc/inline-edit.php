@@ -475,6 +475,8 @@ function kop_ie_facility_groups() {
             array('identification.currentName', 'Name it uses now, if different', 'text'),
             array('identification.pastNames', 'Past names', 'lines'),
             array('identification.otherNames', 'Also known as', 'lines'),
+            // The name people know it by (inc/facility-store.php kop_facility_popular_name_clean()); choices from the names above.
+            array('identification.popularName', 'Most popular name (shown first wherever it is named)', 'select', array('help' => 'The name people know it by. The other names still show as Formerly, Now known as or Also known as. A name added above can be picked after saving.')),
         )),
         // The state business filing behind the program (inc/facility-store.php).
         'filing' => array('Business filing', array(
@@ -649,10 +651,37 @@ function kop_ie_facility_field(array $doc, array $def) {
             if ($path === 'facilityDetails.isPrivatelyOwned') {
                 $raw = $raw === null ? '' : ($raw ? 'yes' : 'no');
             }
+            if ($path === 'identification.popularName') {
+                $extra['options'] = kop_ie_popular_name_options((array) ($doc['identification'] ?? array()));
+                $raw = (string) $raw;
+                $known = false;
+                foreach ($extra['options'] as $o) $known = $known || $o['value'] === $raw;
+                if (!$known) $raw = '';
+            }
             return kop_ie_field($name, $label, 'select', (string) $raw, $extra);
         default:
             return kop_ie_field($name, $label, $type, $raw === null ? '' : (string) $raw, $extra);
     }
+}
+
+/**
+ * The choices for identification.popularName: the record's own name (value '', the default), then the name it uses
+ * now, its past names and its other names, each once. Shared by the names pencil and the "Names and eras" dialog.
+ */
+function kop_ie_popular_name_options(array $ident) {
+    $name = trim((string) ($ident['name'] ?? ''));
+    $out = array(array('value' => '', 'label' => $name !== '' ? $name . ' (the record name)' : 'The record name'));
+    $seen = array(mb_strtolower($name) => true);
+    $add = static function ($n, $said) use (&$out, &$seen) {
+        $n = trim((string) $n);
+        if ($n === '' || isset($seen[mb_strtolower($n)])) return;
+        $seen[mb_strtolower($n)] = true;
+        $out[] = array('value' => $n, 'label' => $n . ' (' . $said . ')');
+    };
+    $add($ident['currentName'] ?? '', 'name it uses now');
+    foreach ((array) ($ident['pastNames'] ?? array()) as $n) if (is_string($n)) $add($n, 'past name');
+    foreach ((array) ($ident['otherNames'] ?? array()) as $n) if (is_string($n)) $add($n, 'also known as');
+    return $out;
 }
 
 /** A stored list as table rows, each carrying __i (its place in the list). */

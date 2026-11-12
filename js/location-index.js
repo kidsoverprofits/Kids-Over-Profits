@@ -429,6 +429,11 @@ function initLocationIndex() {
         'name', 'programName', 'facilityName', 'title'
     ]) || '';
 
+    // The name people know it by (identification.popularName, inc/facility-store.php) heads the card when one is
+    // picked; the record's own name then shows as "Now known as" (after a past name) or "Also known as".
+    const getFacilityPopularName = facility => cleanText(getValueFromKeys(facility, ['identification.popularName', 'popularName']) || '');
+    const getFacilityShownName = facility => getFacilityPopularName(facility) || getFacilityDisplayName(facility);
+
     const mergeToolkit = window.KOPFacilityMerge;
     if (!mergeToolkit || typeof mergeToolkit.createApi !== 'function') {
         console.error('KOPFacilityMerge helper is missing. Include js/facility-merge.js before js/location-index.js.');
@@ -455,7 +460,7 @@ function initLocationIndex() {
 
     const sortFacilitiesAlphabetically = facilities => toArray(facilities)
         .slice()
-        .sort((a, b) => compareDisplayText(getFacilityDisplayName(a), getFacilityDisplayName(b)));
+        .sort((a, b) => compareDisplayText(getFacilityShownName(a), getFacilityShownName(b)));
 
     const getMergedLocation = (obj) => {
         if (!obj || typeof obj !== 'object') return null;
@@ -686,7 +691,7 @@ function initLocationIndex() {
             // Search within facility names, former names, and aliases
             const matchingFacilities = loc.facilities.filter(facility => {
                 const name = getFacilityDisplayName(facility).toLowerCase();
-                if (name.includes(query)) return true;
+                if (name.includes(query) || getFacilityPopularName(facility).toLowerCase().includes(query)) return true;
                 const formerNames = collectUniqueTexts(
                     getValueFromKeys(facility, ['identification.pastNames', 'pastNames', 'identification.formerNames', 'formerNames'])
                 );
@@ -823,7 +828,9 @@ function initLocationIndex() {
                 // "unknown"/placeholder status renders no badge at all.
                 const hasStatus = !isValueEmpty(operatingPeriod.status);
 
-                const facilityHeaderRaw = getFacilityDisplayName(facility);
+                const facilityHeaderRaw = getFacilityShownName(facility);
+                const facilityRecordName = getFacilityDisplayName(facility);
+                const facilityHeaderKey = normalizeTextKey(facilityHeaderRaw);
                 const facilityHeader = escapeHtml(facilityHeaderRaw || 'Unnamed Facility');
                 const facilityDatasetName = escapeAttribute(facilityHeaderRaw || 'Unnamed Facility');
 
@@ -847,11 +854,14 @@ function initLocationIndex() {
                     getValueFromKeys(facility, ['identification.pastNames', 'pastNames', 'identification.formerNames', 'formerNames'])
                 );
                 const cleanHeaderText = value => cleanText(value).replace(/\s*\($/, '').trim();
-                const normalizedFormerNames = collectUniqueTexts(formerNames.map(cleanHeaderText));
-                const formerNameKeys = new Set(normalizedFormerNames.map(normalizeTextKey));
+                const allFormerNames = collectUniqueTexts(formerNames.map(cleanHeaderText));
+                const formerNameKeys = new Set(allFormerNames.map(normalizeTextKey));
+                const popularIsPast = facilityHeaderRaw !== facilityRecordName && formerNameKeys.has(facilityHeaderKey);
+                const normalizedFormerNames = allFormerNames.filter(name => normalizeTextKey(name) !== facilityHeaderKey);
                 const otherNames = collectUniqueTexts(
+                    facilityHeaderRaw !== facilityRecordName && !popularIsPast ? [facilityRecordName] : [],
                     getValueFromKeys(facility, ['identification.otherNames', 'otherNames'])
-                ).map(cleanHeaderText).filter(name => !formerNameKeys.has(normalizeTextKey(name)));
+                ).map(cleanHeaderText).filter(name => !formerNameKeys.has(normalizeTextKey(name)) && normalizeTextKey(name) !== facilityHeaderKey);
                 const currentOp = getValueFromKeys(facility, ['identification.currentOperator', 'currentOperator', 'current_operator', 'sourceOperator.name']);
                 // Current owner(s) for privately-owned facilities — suppressed from
                 // "More details", so surface here or they'd be hidden entirely.
@@ -903,6 +913,7 @@ function initLocationIndex() {
                 }
 
                 let subtextParts = [];
+                if (popularIsPast) subtextParts.push(`Now known as: ${escapeHtml(facilityRecordName)}`);
                 if (normalizedFormerNames.length > 0) subtextParts.push(`Formerly: ${escapeHtml(normalizedFormerNames.join(', '))}`);
                 const aliasNames = collectUniqueTexts(otherNames, legalNameAliases);
                 if (aliasNames.length > 0) subtextParts.push(`Also known as: ${escapeHtml(aliasNames.join(', '))}`);
@@ -1170,7 +1181,7 @@ function initLocationIndex() {
 
                 // Suppress keys already shown in the header / facts / notes
                 const suppressedFieldKeys = new Set([
-                    'identification.name', 'identification.currentName',
+                    'identification.name', 'identification.currentName', 'identification.popularName', 'popularName',
                     'name', 'programName', 'facilityName', 'title', 'program_name', 'facility_name',
                     'identification.otherNames', 'otherNames',
                     'identification.pastNames', 'pastNames',

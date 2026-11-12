@@ -725,6 +725,49 @@ if (!function_exists('kop_facility_location_text_names_country')) {
 // Normalizer
 // ---------------------------------------------------------------------------
 
+if (!function_exists('kop_facility_popular_name_clean')) {
+    /**
+     * identification.popularName as stored: $popular when it is one of the
+     * record's names (currentName, pastNames, otherNames; compared without
+     * case, stored with that name's spelling), '' when it is the record's own
+     * name (the default) or no longer one of its names. Mirrors
+     * v2PopularNameClean() in js/data-form-modules/data-normalizer.js.
+     */
+    function kop_facility_popular_name_clean($popular, array $ident) {
+        $popular = kop_facility_str($popular);
+        if ($popular === '') return '';
+        $want = mb_strtolower($popular);
+        if ($want === mb_strtolower(kop_facility_str($ident['name'] ?? ''))) return '';
+        $names = array_merge(
+            array(kop_facility_str($ident['currentName'] ?? '')),
+            kop_facility_list($ident['pastNames'] ?? array()),
+            kop_facility_list($ident['otherNames'] ?? array())
+        );
+        foreach ($names as $n) {
+            if ($n !== '' && mb_strtolower($n) === $want) return $n;
+        }
+        return '';
+    }
+}
+
+if (!function_exists('kop_facility_display_name')) {
+    /**
+     * The name a facility is shown under: its popular name (the name people
+     * know it by, identification.popularName) when one is picked, else the
+     * record's name, else $fallback. Every place that prints a facility's
+     * name for readers goes through this, or kop_facility_shown_name() when
+     * it has only the id and the name column.
+     */
+    function kop_facility_display_name($ident, $fallback = '') {
+        $ident = is_array($ident) ? $ident : array();
+        if (isset($ident['identification']) && is_array($ident['identification'])) $ident = $ident['identification'];
+        $popular = kop_facility_str($ident['popularName'] ?? '');
+        if ($popular !== '') return $popular;
+        $name = kop_facility_str($ident['name'] ?? '');
+        return $name !== '' ? $name : trim((string) $fallback);
+    }
+}
+
 if (!function_exists('kop_facility_blank_document')) {
     /** The canonical skeleton. Every section is always present, so readers stop guarding. */
     function kop_facility_blank_document() {
@@ -878,6 +921,11 @@ if (!function_exists('kop_facility_normalize')) {
             kop_facility_list($ident['previousNames'] ?? array())
         );
         $doc['identification']['pastNames'] = kop_facility_list($past_names);
+        // The name people know it by: one of the names above, shown first wherever the facility is named
+        // (kop_facility_display_name()). Kept only while it is still one of them; the record's own name is the default,
+        // and then the key is left out, so records without one keep their stored shape.
+        $popular = kop_facility_popular_name_clean($ident['popularName'] ?? '', $doc['identification']);
+        if ($popular !== '') $doc['identification']['popularName'] = $popular;
 
         // The name on its state business filing, the trade names that filing
         // registers (doing business as), and who is named on it.
@@ -1864,6 +1912,8 @@ if (!function_exists('kop_facility_to_legacy')) {
             'survivorTestimony' => $doc['survivorTestimony'] ?? array(),
         );
         if (!empty($doc['providerDetails'])) $legacy['providerDetails'] = $doc['providerDetails'];
+        // The name people know it by, only when one is picked (kop_facility_popular_name_clean()).
+        if (trim((string) ($ident['popularName'] ?? '')) !== '') $legacy['identification']['popularName'] = $ident['popularName'];
 
         if ($doc['facility_id'] !== null) $legacy['facility_id'] = $doc['facility_id'];
         if ($doc['documentFolderId'] !== null) $legacy['documentFolderId'] = $doc['documentFolderId'];

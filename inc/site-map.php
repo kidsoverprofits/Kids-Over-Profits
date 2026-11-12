@@ -539,8 +539,10 @@ if (!function_exists('kop_site_map_build')) {
         if (function_exists('kop_facility_pages_index')) {
             $index = kop_facility_pages_index();
             $list = array();
-            foreach ((array) ($index['ids'] ?? array()) as $e) {
-                $list[] = kop_site_map_item($e['name'], kop_facility_pages_url_for_slug($e['slug']), kop_site_map_slug_place($e['name'], $e['slug']));
+            foreach ((array) ($index['ids'] ?? array()) as $fid => $e) {
+                // Listed under its popular name when one is picked (kop_facility_shown_name()).
+                $shown = function_exists('kop_facility_shown_name') ? kop_facility_shown_name((int) $fid, $e['name']) : $e['name'];
+                $list[] = kop_site_map_item($shown, kop_facility_pages_url_for_slug($e['slug']), kop_site_map_slug_place($e['name'], $e['slug']));
             }
             $facility_count = count($list);
             $sections['facilities']['letters'] = kop_site_map_by_letter($list);

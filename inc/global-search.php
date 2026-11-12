@@ -106,13 +106,17 @@ function kop_global_search_collect($phrase) {
             $meta = $r['kind'] === 'operator'
                 ? ($r['fac_count'] . ' facilit' . ($r['fac_count'] === 1 ? 'y' : 'ies'))
                 : ($r['kind'] === 'place' ? ($r['fac_count'] . ' facilities') : $r['location']);
+            // names / places: its other names (the one that matched first) and its other and former places,
+            // each a line under the result in the popup (js/global-search.js); the alias hint is the first name.
+            $names = array_values((array) ($r['names'] ?? array()));
+            $places = array_values((array) ($r['places'] ?? array()));
             $alias_hint = function_exists('kop_v2_search_alias_hint') ? kop_v2_search_alias_hint($r) : '';
-            if ($alias_hint !== '') {
+            if ($alias_hint !== '' && !$names) {
                 $meta = $meta !== '' ? $meta . ' - ' . $alias_hint : $alias_hint;
             }
             // kind: the popup pills companies and facilities (inc/kind-pill.php),
             // one name can be both
-            return array('title' => $r['display'], 'url' => $url, 'meta' => $meta, 'kind' => $r['kind']);
+            return array('title' => $r['display'], 'url' => $url, 'meta' => $meta, 'kind' => $r['kind'], 'names' => $names, 'places' => $places);
         };
         $items = array_map($to_item, array_merge($v2['operators'], $v2['facilities']));
         if ($items) {

@@ -767,10 +767,11 @@ if (!function_exists('kop_program_homes_home_rows')) {
                 $years = ($r['start_year'] ?: '?') . ($r['end_year'] ? '-' . $r['end_year'] : (strcasecmp($status, 'Open') === 0 ? '-present' : ''));
             }
             $home_name = $names[$id] ?? ($map['homes'][$id][1] ?? '');
+            $shown = function_exists('kop_facility_shown_name') ? kop_facility_shown_name($id, (string) $r['name']) : (string) $r['name'];
             $out[] = array(
                 'id'        => $id,
-                'name'      => (string) $r['name'],
-                'home_name' => $home_name !== '' ? $home_name : (string) $r['name'],
+                'name'      => $shown,
+                'home_name' => $home_name !== '' ? $home_name : $shown,
                 'place'     => kop_program_homes_place($r['city'], $r['state'], $r['country']),
                 'status'    => $status,
                 'years'     => $years,

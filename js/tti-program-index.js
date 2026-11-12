@@ -457,7 +457,11 @@ function displayFacilities(facilitiesData, containerId) {
     // Under a company, a renamed program goes by the name it had while that
     // company ran it (nameUnderOperator, inc/facility-eras.php); its card says
     // what it is called now.
-    const getFacilityCardName = facility => cleanText(facility && facility.nameUnderOperator) || getFacilityDisplayName(facility);
+    // The name people know it by (identification.popularName, inc/facility-store.php), when one is picked:
+    // it heads the card and the record's own name moves to "Now known as" / "Also known as".
+    const getFacilityPopularName = facility => cleanText(getValueFromKeys(facility, ['identification.popularName', 'popularName']) || '');
+    const getFacilityShownName = facility => getFacilityPopularName(facility) || getFacilityDisplayName(facility);
+    const getFacilityCardName = facility => cleanText(facility && facility.nameUnderOperator) || getFacilityShownName(facility);
 
     const getMergedLocation = (obj) => {
         if (!obj || typeof obj !== 'object') return null;
@@ -982,10 +986,12 @@ function displayFacilities(facilitiesData, containerId) {
         const operatingPeriod = facility && facility.operatingPeriod ? facility.operatingPeriod : {};
         const facilityHeaderRaw = getFacilityDisplayName(facility);
         const names = facilityNameInfo(facility, facilityHeaderRaw);
-        const name = cleanText(identification.name) || cleanText(identification.currentName) || cleanText(facilityHeaderRaw) || 'Unnamed Facility';
+        const recordName = cleanText(identification.name) || cleanText(identification.currentName) || cleanText(facilityHeaderRaw) || 'Unnamed Facility';
+        const name = getFacilityPopularName(facility) || recordName;
 
         // Searchable text: facility name + former names + aliases + location
         const searchParts = [name];
+        if (recordName !== name) searchParts.push(recordName);
         names.formerNames.forEach(n => searchParts.push(n));
         names.otherNames.forEach(n => searchParts.push(n));
         const facLocation = getMergedLocation(facility);
@@ -1008,7 +1014,7 @@ function displayFacilities(facilitiesData, containerId) {
         const aliases = [];
         // Company and years set by hand for a name (inc/name-eras.php), by name.
         const erasByName = new Map(toArray(facility && facility.nameEras).map(era => [eraNameKey(era.name), era]));
-        collectUniqueTexts(names.normalizedFormerNames, names.aliasNames, nameThen ? [name] : []).forEach(alias => {
+        collectUniqueTexts(names.normalizedFormerNames, names.aliasNames, nameThen ? [name] : [], recordName !== name ? [recordName] : []).forEach(alias => {
             if (normalizeTextKey(alias) === normalizeTextKey(nameThen || name)) return;
             aliases.push({ alias, target: operatorName, facility: name, pastOperators: aliasPastOperators,
                 edit: facilityId ? 'facility:' + facilityId + ':names' : '',
@@ -1613,7 +1619,16 @@ function displayFacilities(facilitiesData, containerId) {
             // Build facility header with Name - Enhanced lookup
             const facilityHeaderRaw = getFacilityCardName(facility);
             const facilityHeader = escapeHtml(facilityHeaderRaw || 'Unnamed Facility');
-            const facilityNowName = facilityHeaderRaw !== getFacilityDisplayName(facility) ? getFacilityDisplayName(facility) : '';
+            // The record's own name, when the card is headed by another: "Now known as" after an earlier name
+            // (the name under this company, or a past name picked as the popular one), else "Also known as".
+            const facilityRecordName = getFacilityDisplayName(facility);
+            const facilityNameThen = cleanText(facility && facility.nameUnderOperator);
+            const facilityPopular = getFacilityPopularName(facility);
+            const popularIsPast = !facilityNameThen && facilityPopular !== '' && collectUniqueTexts(
+                expandNames(getValueFromKeys(facility, ['identification.pastNames', 'pastNames', 'identification.formerNames', 'formerNames'])))
+                .some(n => normalizeTextKey(n) === normalizeTextKey(facilityPopular));
+            const facilityNowName = facilityHeaderRaw !== facilityRecordName && (facilityNameThen || popularIsPast) ? facilityRecordName : '';
+            const facilityAlsoName = facilityHeaderRaw !== facilityRecordName && !facilityNowName ? facilityRecordName : '';
 
             // Data for display above the "cut"
             const facilityLocation = getMergedLocation(facility) ? escapeHtml(getMergedLocation(facility)) : '';
@@ -1641,9 +1656,9 @@ function displayFacilities(facilitiesData, containerId) {
 
             let subtextParts = [];
 
-            if (facilityNowName) {
+            if (facilityNowName) subtextParts.push(`Now known as: ${escapeHtml(facilityNowName)}`);
+            if (facilityNameThen && facilityNowName) {
                 const thenYears = cleanText(facility.nameUnderOperatorYears);
-                subtextParts.push(`Now known as: ${escapeHtml(facilityNowName)}`);
                 if (thenYears) subtextParts.push(`Under this name: ${escapeHtml(thenYears)}`);
                 const alsoThen = collectUniqueTexts(facility.nameUnderOperatorAlso);
                 if (alsoThen.length) subtextParts.push(`Also called under this company: ${escapeHtml(alsoThen.join(', '))}`);
@@ -1654,8 +1669,9 @@ function displayFacilities(facilitiesData, containerId) {
                 subtextParts.push(`Formerly: ${escapeHtml(formerNamesShown.join(', '))}`);
             }
 
-            if (aliasNames.length > 0) {
-                subtextParts.push(`Also known as: ${escapeHtml(aliasNames.join(', '))}`);
+            const aliasNamesShown = facilityAlsoName ? collectUniqueTexts([facilityAlsoName], aliasNames) : aliasNames;
+            if (aliasNamesShown.length > 0) {
+                subtextParts.push(`Also known as: ${escapeHtml(aliasNamesShown.join(', '))}`);
             }
 
             const uniqueCurrentOwners = collectUniqueTexts(currentOwnerList);
@@ -1878,7 +1894,7 @@ function displayFacilities(facilitiesData, containerId) {
             };
 
             const suppressedFieldKeys = new Set([
-                'identification.name', 'identification.currentName',
+                'identification.name', 'identification.currentName', 'identification.popularName', 'popularName',
                 'name', 'programName', 'facilityName', 'title',
                 'program_name', 'facility_name',
                 'identification.otherNames', 'otherNames',

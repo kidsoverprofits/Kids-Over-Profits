@@ -1486,6 +1486,17 @@
         return Object.prototype.hasOwnProperty.call(V2_TYPE_SYNONYMS, key) ? V2_TYPE_SYNONYMS[key] : s;
     }
 
+    /** Mirrors kop_facility_popular_name_clean(): one of the record's other names, '' for its own name or none. */
+    function v2PopularNameClean(popular, ident) {
+        const want = v2Str(popular).toLowerCase();
+        if (want === '' || want === v2Str(ident.name).toLowerCase()) return '';
+        const names = [v2Str(ident.currentName)].concat(v2List(ident.pastNames), v2List(ident.otherNames));
+        for (const n of names) {
+            if (n !== '' && n.toLowerCase() === want) return n;
+        }
+        return '';
+    }
+
     /** Mirrors kop_facility_operator_block(). */
     function v2OperatorBlock(value) {
         if (value === null || typeof value !== 'object' || Array.isArray(value) || !Object.keys(value).length) return null;
@@ -1562,6 +1573,10 @@
         if (doc.identification.currentName.toLowerCase() === name.toLowerCase()) doc.identification.currentName = '';
         doc.identification.otherNames = v2List(ident.otherNames);
         doc.identification.pastNames = v2List(v2List(ident.pastNames).concat(v2List(ident.previousNames)));
+        // The name people know it by, kept only while it is one of the names above (kop_facility_popular_name_clean()).
+        // Left out when none is picked, as the PHP side does.
+        const popular = v2PopularNameClean(ident.popularName, doc.identification);
+        if (popular !== '') doc.identification.popularName = popular;
         // The name on its state business filing, the trade names that filing
         // registers (doing business as), and who is named on it.
         doc.identification.legalName = v2Str(ident.legalName);

@@ -269,6 +269,19 @@
         groups.forEach(renderGroup);
     }
 
+    /** At most two lines: the names (4, then "and N more"), the places (3). Mirrors kop_v2_search_preview_lines(). */
+    function previewLines(item) {
+        var out = [];
+        [[item.names, 4], [item.places, 3]].forEach(function (part) {
+            var list = Array.isArray(part[0]) ? part[0].filter(Boolean) : [];
+            if (!list.length) return;
+            var line = list.slice(0, part[1]).join('; ');
+            if (list.length > part[1]) line += '; and ' + (list.length - part[1]) + ' more';
+            out.push(line);
+        });
+        return out;
+    }
+
     function renderGroup(group) {
             var section = el('div', 'kop-global-search__group');
             section.appendChild(el('h3', 'kop-global-search__group-label', group.label));
@@ -285,7 +298,17 @@
                 var pill = window.kopKindPillNode ? window.kopKindPillNode(item.kind) : null;
                 if (pill) title.appendChild(pill);
                 title.appendChild(document.createTextNode(item.title));
-                link.appendChild(title);
+                // Its other names and places (kop_v2_search_preview_lines() in inc/facility-v2-readers.php):
+                // why an old name found it, and where it is. A line each under the name.
+                var more = previewLines(item);
+                if (more.length) {
+                    var main = el('span', 'kop-global-search__result-main', '');
+                    main.appendChild(title);
+                    more.forEach(function (line) { main.appendChild(el('span', 'kop-global-search__result-more', line)); });
+                    link.appendChild(main);
+                } else {
+                    link.appendChild(title);
+                }
                 if (item.meta) {
                     link.appendChild(el('span', 'kop-global-search__result-meta', item.meta));
                 }

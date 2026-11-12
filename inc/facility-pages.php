@@ -1018,6 +1018,43 @@ if (!function_exists('kop_facility_pages_dedupe_name_lists')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_popular_name_lists')) {
+    /**
+     * The page's names with the popular name (identification.popularName, the name people know it by) as the title:
+     * [title, now known as, formerly, later called, also known as]. The popular name leaves the list it was in and the
+     * record's own name takes a line by what the popular name was: a past name -> the record's name is "Now known as"
+     * (or "Formerly", when the record has a currentName that stays "Now known as"); the currentName -> the record's
+     * name joins "Formerly"; an other name -> the record's name joins "Also known as". $popular '' (or the record's
+     * name) gives the lists back unchanged. Then kop_facility_pages_dedupe_name_lists() as always.
+     */
+    function kop_facility_pages_popular_name_lists($popular, $name, $current, array $formerly, array $later, array $aka) {
+        $popular = trim((string) $popular);
+        $pk = kop_facility_pages_name_key($popular);
+        if ($pk === '' || $pk === kop_facility_pages_name_key($name)) return array($name, $current, $formerly, $later, $aka);
+        $in = static function (array $list) use ($pk) {
+            foreach ($list as $n) if (kop_facility_pages_name_key($n) === $pk) return true;
+            return false;
+        };
+        $drop = static function (array $list) use ($pk) {
+            return array_values(array_filter($list, static function ($n) use ($pk) { return kop_facility_pages_name_key($n) !== $pk; }));
+        };
+        if ($current !== '' && kop_facility_pages_name_key($current) === $pk) {
+            $current = '';
+            array_unshift($formerly, $name);
+        } elseif ($in($formerly) || $in($later)) {
+            if ($current === '') $current = $name;
+            else array_unshift($formerly, $name);
+        } else {
+            array_unshift($aka, $name);
+        }
+        list($formerly, $later, $aka) = kop_facility_pages_dedupe_name_lists(
+            array($popular, $current),
+            array($drop($formerly), $drop($later), $drop($aka))
+        );
+        return array($popular, $current, $formerly, $later, $aka);
+    }
+}
+
 if (!function_exists('kop_facility_pages_key_matches')) {
     /** Exact match, or the record name extends the facility name (12+ chars). */
     function kop_facility_pages_key_matches($facility_key, $record_key) {
@@ -3497,7 +3534,7 @@ if (!function_exists('kop_facility_page_data')) {
                 $s_state = ($r['state'] && function_exists('kop_state_canonical_name')) ? kop_state_canonical_name($r['state']) : '';
                 $s_place = trim(($r['city'] ? $r['city'] . ', ' : '') . ($s_state ?: ($r['country'] && $r['country'] !== 'United States' ? $r['country'] : '')), ', ');
                 $siblings[] = array(
-                    'name'   => (string) $r['name'],
+                    'name'   => function_exists('kop_facility_shown_name') ? kop_facility_shown_name((int) $r['id'], (string) $r['name']) : (string) $r['name'],
                     'place'  => $s_place,
                     'status' => (string) $r['status'],
                     'url'    => kop_facility_page_url((int) $r['id']),
@@ -3571,6 +3608,12 @@ if (!function_exists('kop_facility_page_data')) {
 
         // One name shows once: Formerly wins over Later called, which wins over Also known as; none repeats the page's own name.
         list($formerly, $later, $aka) = kop_facility_pages_dedupe_name_lists(array($name, $current_name), array($formerly, $later, $aka));
+        // The name people know it by heads the page; the record's own name moves to a names line
+        // (kop_facility_pages_popular_name_lists()). $name stays the record's name for matching below.
+        list($shown_name, $shown_current, $shown_formerly, $shown_later, $shown_aka) = kop_facility_pages_popular_name_lists(
+            function_exists('kop_facility_popular_name_clean') ? kop_facility_popular_name_clean($ident['popularName'] ?? '', array('name' => $name) + $ident) : '',
+            $name, $current_name, $formerly, $later, $aka
+        );
 
         // ---- Facts rail -------------------------------------------------------
         $facts = array();
@@ -3767,9 +3810,9 @@ if (!function_exists('kop_facility_page_data')) {
         }
 
         // ---- Copy ----------------------------------------------------------------
-        $summary = kop_facility_pages_summary_sentence($name, $type, $place, $operator_name, $status, $start, $end, $years_text, $operator_past);
+        $summary = kop_facility_pages_summary_sentence($shown_name, $type, $place, $operator_name, $status, $start, $end, $years_text, $operator_past);
         if ($related) $summary = trim($summary . ' It is not a troubled teen program; it is listed under ' . $related['label'] . '.');
-        $seo_title = $name . ($place !== '' ? ' (' . $place . ')' : '') . ' | Kids Over Profits';
+        $seo_title = $shown_name . ($place !== '' ? ' (' . $place . ')' : '') . ' | Kids Over Profits';
         $seo_description = $summary;
         // A merged profile post's content is printed on the page; its excerpt is the description it had.
         $profile_post = $entry ? (int) ($entry['profile_post'] ?? 0) : 0;
@@ -3799,14 +3842,14 @@ if (!function_exists('kop_facility_page_data')) {
         $formerly_years = array();
         if (function_exists('kop_facility_eras_former_years')) {
             $by_name = kop_facility_eras_former_years($doc);
-            foreach ($formerly as $n) {
+            foreach ($shown_formerly as $n) {
                 if (isset($by_name[strtolower($n)])) $formerly_years[$n] = $by_name[strtolower($n)];
             }
         }
         // A name set by hand to the company that ran it (inc/name-eras.php): "Three Springs Inc., 1998 to 2008".
         if (function_exists('kop_name_eras_for')) {
             $set = kop_name_eras_for($facility_id);
-            foreach ($formerly as $n) {
+            foreach ($shown_formerly as $n) {
                 $e = $set[kop_name_eras_key($n)] ?? null;
                 if ($e && ($label = kop_name_eras_label($e)) !== '') $formerly_years[$n] = $label;
             }
@@ -3818,14 +3861,16 @@ if (!function_exists('kop_facility_page_data')) {
             'url'           => $related ? kop_related_url($facility_id) : kop_facility_pages_url_for_slug($slug),
             // {category, label, one, url} for a related-category record, else null.
             'related'       => $related,
-            'name'          => $name,
+            // The name it is shown under (its popular name, else the record's name); record_name is the record's own.
+            'name'          => $shown_name,
+            'record_name'   => $name,
             'unique_name'   => $unique_name,
-            'current_name'  => $current_name,
-            'formerly'      => $formerly,
+            'current_name'  => $shown_current,
+            'formerly'      => $shown_formerly,
             'formerly_years' => $formerly_years,
-            'later'         => $later,
+            'later'         => $shown_later,
             'name_urls'     => $name_urls,
-            'aka'           => $aka,
+            'aka'           => $shown_aka,
             'status'        => $status,
             'status_class'  => sanitize_html_class(strtolower($status)),
             'end_year'      => $end,

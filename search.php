@@ -276,8 +276,14 @@ global $wpdb;
                         <?php if ($r['location']): ?>
                             <span class="kop-result-meta"><?php echo esc_html($r['location']); ?></span>
                         <?php endif; ?>
+                        <?php // Its other names (the one that matched first) and its other and former places (kop_v2_search_preview_lines()) ?>
+                        <?php $kop_preview = function_exists('kop_v2_search_preview_lines') ? kop_v2_search_preview_lines($r, 8, 6, true) : array(); ?>
                         <?php $alias_hint = function_exists('kop_v2_search_alias_hint') ? kop_v2_search_alias_hint($r) : ''; ?>
-                        <?php if ($alias_hint !== ''): ?>
+                        <?php if ($kop_preview): ?>
+                            <?php foreach ($kop_preview as $kop_line): ?>
+                                <span class="kop-result-meta kop-result-alias"><?php echo esc_html($kop_line); ?></span>
+                            <?php endforeach; ?>
+                        <?php elseif ($alias_hint !== ''): ?>
                             <span class="kop-result-meta kop-result-alias"><?php echo esc_html($alias_hint); ?></span>
                         <?php endif; ?>
                         <?php if ($r['fac_count'] > 0): ?>

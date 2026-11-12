@@ -74,7 +74,11 @@ function kop_asl_collect_database_matches($phrase) {
             $items[] = array(
                 'title' => $r['display'],
                 'link'  => $link !== '' ? $link : home_url('/?s=' . rawurlencode($phrase)),
-                'meta'  => $labels[$r['kind']] . ($r['location'] !== '' ? ' - ' . $r['location'] : '') . ($alias_hint !== '' ? ' (' . $alias_hint . ')' : ''),
+                // Its other names and places (kop_v2_search_preview_lines()): why an old name found it, and where it is.
+                'meta'  => $labels[$r['kind']] . ($r['location'] !== '' ? ' - ' . $r['location'] : '')
+                    . (function_exists('kop_v2_search_preview_lines') && kop_v2_search_preview_lines($r, 4, 3, true)
+                        ? '. ' . implode('. ', kop_v2_search_preview_lines($r, 4, 3, true))
+                        : ($alias_hint !== '' ? ' (' . $alias_hint . ')' : '')),
             );
         }
         $master_tables = array_values(array_filter($master_tables, function ($cfg) {

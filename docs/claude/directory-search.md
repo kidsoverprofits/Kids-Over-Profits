@@ -100,6 +100,13 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-name-under-operat
 # the admin finder, facility-search.php (Data Manager, news processor, wiki picker), the data forms' autocompletes
 # (js/autocomplete.js alternateNameDetail()), the wizard and the map search carry the kind too. A new box does the same
 php scripts/test-search-aliases.php               # against tmp/prod.sqlite
+# Search previews (owner 2026-11-11): each kop_v2_search() facility/company result carries names (its other names worded by
+# kop_alias_label(), the one that matched first) and places (facility: "Also at <city, ST>", "Formerly in <city, ST> (years)";
+# company: "Based in <headquarters>"). The header dropdown and search.php print them as kop_v2_search_preview_lines(); the popup
+# (js/global-search.js previewLines()) as lines under the name. A facility with a most popular name (identification.popularName,
+# docs/claude/facility-pages.md) is listed under it; a hit on the record's own name says so ("Now known as ..."). The directory cards
+# (js/tti-program-index.js, js/location-index.js) head with it too, the record's name under "Now known as" / "Also known as"
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-popular-name.php   # the previews and the three renderers, on a scratch copy
 # Wherever companies and facilities share a list, each row carries a Company / Facility pill: kop_kind_pill() == kopKindPill() (inc/kind-pill.php)
 php scripts/test-kind-pill.php                    # PHP == JS markup (needs node)
 # Reader's site map (/site-map/, a route like /operator/, inc/site-map.php + templates/site-map.php + js/site-map.js): every public

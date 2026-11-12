@@ -192,3 +192,10 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    - Done 2026-11-04: archive.today copies are no longer fetched (note 'archive copy not read'), and the text match has a
      same-state rule and a prose-name list. After the next deploy + hourly run: the six archive copies show 'archive copy
      not read', 'article read' notes appear (the budget is no longer spent on them), and no Michigan story gets #10038 or #100729.
+39. **Most popular name and search previews** (inc/facility-v2-readers.php, inc/facility-pages.php, 2026-11-11): signed in,
+   on a facility page with a past name (e.g. [Chrysalis Therapeutic Boarding School](https://kidsoverprofits.org/facility/chrysalis-therapeutic-boarding-school-mt/)),
+   open the names pencil, pick a "Most popular name", save: the title, the browser tab, its directory card (both tabs),
+   the header search and the search popup show that name, and the record's name reads "Now known as". Set it back
+   to the record's name. Logged out, search an old name ("Stone Mountain School"): the header dropdown, the popup
+   (at 390 px too) and the search page list its other names and former places under the result. After the next map
+   build, a picked name labels its map node.

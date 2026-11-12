@@ -625,6 +625,7 @@ function kop_wiki_upd_person_key($name) {
 function kop_wiki_upd_aliases(array $entry, array $page) {
     $names = kop_wiki_upd_entry_names($entry);
     $names[] = (string) ($page['name'] ?? '');
+    $names[] = (string) ($page['record_name'] ?? '');
     $names[] = (string) ($page['current_name'] ?? '');
     foreach (array('formerly', 'later', 'aka') as $f) {
         foreach ((array) ($page[$f] ?? array()) as $n) $names[] = is_array($n) ? (string) ($n['name'] ?? '') : (string) $n;
@@ -712,9 +713,11 @@ function kop_wiki_upd_gaps(array $entry, array $page, PDO $pdo = null) {
         if (!$era || !$until) return true;
         return !preg_match('/(\d{4})/', (string) $date, $m) || (int) $m[1] <= $until;
     };
-    if ($era && !kop_wiki_upd_mentions($words, $page['name'])) {
-        $add('name', 'Later operated as ' . $page['name'] . ($era['next_from'] ? ' (from ' . $era['next_from'] . ')' : '') . '.', $kop_page, 'KOP facility page', '',
-            array('name' => $page['name'], 'how' => 'later'));
+    // The record's own name (the page's title can be its popular name, kop_facility_pages_popular_name_lists()).
+    $own_name = (string) ($page['record_name'] ?? $page['name']);
+    if ($era && !kop_wiki_upd_mentions($words, $own_name)) {
+        $add('name', 'Later operated as ' . $own_name . ($era['next_from'] ? ' (from ' . $era['next_from'] . ')' : '') . '.', $kop_page, 'KOP facility page', '',
+            array('name' => $own_name, 'how' => 'later'));
     }
 
     // Status and years.
@@ -1090,11 +1093,11 @@ function kop_wiki_upd_case_cite(array $l) {
  * name)}, from the page's name sections when it has them. Null otherwise.
  */
 function kop_wiki_upd_era(array $entry, array $page) {
-    $own = kop_wiki_upd_key($page['name'] ?? '');
+    $own = kop_wiki_upd_key($page['record_name'] ?? ($page['name'] ?? ''));
     $past = array();
     foreach ((array) ($page['formerly'] ?? array()) as $n) {
         $n = is_array($n) ? (string) ($n['name'] ?? '') : (string) $n;
-        if ($n !== '') $past[kop_wiki_upd_key($n)] = $n;
+        if ($n !== '' && kop_wiki_upd_key($n) !== $own) $past[kop_wiki_upd_key($n)] = $n;
     }
     $hit = '';
     foreach (kop_wiki_upd_entry_names($entry) as $n) {
