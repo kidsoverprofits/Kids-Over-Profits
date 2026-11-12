@@ -832,7 +832,7 @@ get_header();
                     <figure class="kop-fp-testimony">
                         <blockquote><?php foreach (preg_split('/\R\s*\R/', $kop_fp_t['text']) as $kop_fp_para) : ?><p><?php echo nl2br(esc_html(trim($kop_fp_para))); ?></p><?php endforeach; ?></blockquote>
                         <?php if (($kop_fp_t['credit'] ?? '') !== '') : ?>
-                        <figcaption><?php echo ($kop_fp_t['url'] ?? '') !== '' && function_exists('kop_citation_link') ? kop_citation_link($kop_fp_t['url'], $kop_fp_t['credit'], '', true, '', true) : esc_html($kop_fp_t['credit']); ?><?php if (($kop_fp_t['note'] ?? '') !== '') : ?><span class="kop-fp-testimony-note"><?php echo esc_html($kop_fp_t['note']); ?></span><?php endif; ?></figcaption>
+                        <figcaption><?php echo ($kop_fp_t['url'] ?? '') !== '' && function_exists('kop_citation_link') ? kop_citation_link($kop_fp_t['url'], $kop_fp_t['credit'], '', true, '', true) : esc_html($kop_fp_t['credit']); ?><?php if (($kop_fp_t['note'] ?? '') !== '') : ?><span class="kop-ra-allegation"><?php echo esc_html($kop_fp_t['note']); ?></span><?php endif; ?></figcaption>
                         <?php else : ?>
                         <figcaption><?php echo !empty($kop_fp_t['submitted']) ? 'Submitted by a survivor' : 'Survivor account'; ?><?php if ($kop_fp_t['date_label'] !== '') : ?>, shared <?php echo esc_html($kop_fp_t['date_label']); ?><?php endif; ?></figcaption>
                         <?php endif; ?>

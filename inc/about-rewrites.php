@@ -116,6 +116,7 @@ function kop_about_rewrite_notes($kind, $id) {
 function kop_about_rewrite_testimony_entry(array $t, $key) {
     $credit = implode(', ', array_filter(array(trim((string) ($t['who'] ?? '')), trim((string) ($t['where'] ?? ''))), 'strlen'));
     $date = trim((string) ($t['date'] ?? ''));
+    if (preg_match('/^(undated|unknown|n\.?d\.?)$/i', $date)) $date = '';
     $when = strtotime('1 ' . $date) ?: (preg_match('/^\d{4}$/', $date) ? strtotime($date . '-01-01') : false);
     return array(
         'id'        => $key,

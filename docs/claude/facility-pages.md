@@ -10,7 +10,7 @@ php scripts/test-facility-pages.php
 # A record's research notes are printed as prose, each sentence with its "source" link, in an "About" section near the top of
 # facility and company pages (inc/profile-notes.php; bookkeeping lines become "Also drawn on", rail facts and forum claims stay out).
 # Claude's About rewrites (kop-pipeline scripts/about-rewrite/; owner 2026-11-11) go live on deploy from seeds/about-rewrites/<kind>-<slug>.json
-# (inc/about-rewrites.php, run by the template pass; bump its version in inc/admin.php): the About becomes the record's
+# (inc/about-rewrites.php, run by the template pass, which runs only when its version in inc/admin.php changes: bump it with every batch): the About becomes the record's
 # published write-up with its sentences kept as written (print sources keep their citation), held facts are not released,
 # and its survivor quotes go on the facility published (a company's on the program each names), credit + address + note.
 # Once per seed version; a write-up changed since is left alone; seeds/about-rewrites/_undo.json lists pages to put back.
@@ -108,6 +108,14 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-rename-merge.php 
 # records' names cannot be removed or renamed there. kop_facility_eras_chain() lays hand-set years and company over the record's/map's
 # names, and cuts a record that has neither by its hand-set eras alone (kop_facility_eras_hand_chain())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-eras-editor.php   # plain / merged-rename / map-line record, save + exact undo, refusals
+# Most popular name (identification.popularName, owner 2026-11-11): the name people know it by, picked among the record's own names
+# in the names pencil (facility:<id>:names) and the "Names and eras" dialog ('popular', in its Undo; a renamed past name takes the pick
+# along). It titles the page and the browser tab; the record's name moves to a names line by what the pick was
+# (kop_facility_pages_popular_name_lists(): a past name -> record's name "Now known as"; the currentName -> record's name "Formerly";
+# an other name -> "Also known as"). $page['name'] is the shown name, $page['record_name'] the record's own: match on record_name.
+# Lists that read only the name column use kop_facility_shown_name($id, $name) (sibling programs, homes, site map); the company page,
+# directory cards (both tabs), search and the network map label (build stamps node.popularName, js/network-map/store.js relabels) too
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-popular-name.php   # store + JS normalizer, name lines, both pencils + undo, page, search previews, map label
 # Investors (inc/investors.php, KOP Tools > Investors): one row per investor ({prefix}kop_investors, kind from Dropdown Lists 'investor-kinds'),
 # one per stake in a company or program ({prefix}kop_investor_links: role 'investor-roles', years, detail, source), every change in
 # {prefix}kop_investor_log (Undo puts back exactly that change while nothing changed it since). The pages' Investors line is
