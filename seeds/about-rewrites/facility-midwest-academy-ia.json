@@ -1,0 +1,584 @@
+{
+ "page": "facility/midwest-academy-ia",
+ "name": "Midwest Academy",
+ "from": "pilot rec10",
+ "sentences": [
+  [
+   {
+    "text": "Midwest Academy was a private, for-profit boarding school for teenagers near Keokuk, Iowa, that operated for more than a decade until state and federal agents raided it in January 2016.",
+    "sources": [
+     {
+      "url": "https://www.bleedingheartland.com/2021/09/04/the-miracle-on-the-mississippi-keokuk-and-midwest-academy/",
+      "cite": "Bleeding Heartland, 2021"
+     },
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     },
+     {
+      "url": "https://www.cbsnews.com/news/benjamin-trane-midwest-academy-boarding-school-owner-charged-sexual-abuse-iowa",
+      "cite": "Associated Press, Sept. 8, 2017"
+     }
+    ]
+   },
+   {
+    "text": "Its campus belonged to companies tied to Robert Lichfield, founder of the World Wide Association of Specialty Programs and Schools (WWASPS).",
+    "sources": [
+     {
+      "url": "https://www.bleedingheartland.com/2021/09/04/the-miracle-on-the-mississippi-keokuk-and-midwest-academy/",
+      "cite": "Bleeding Heartland, 2021"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-06/former-midwest-academy-owner-i-walked-away-from-the-school-with-nothing",
+      "cite": "Tri States Public Radio, Dec. 6, 2017"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2019-02-28/site-of-former-boarding-school-in-lee-county-might-get-new-owner",
+      "cite": "Tri States Public Radio, Feb. 28, 2019"
+     }
+    ]
+   },
+   {
+    "text": "In 2016 six former students who attended between 2008 and 2015 told the Associated Press about its isolation rooms; \"It was complete hell,\" said one, Lauren Snyder.",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "No state agency inspected the school in its 13 years.",
+    "sources": [
+     {
+      "url": "https://www.yahoo.com/news/iowas-top-court-upholds-keokuk-222529587.html",
+      "cite": "Des Moines Register, Jan. 11, 2023"
+     }
+    ]
+   },
+   {
+    "text": "In December 2017 a jury convicted its owner, Benjamin Trane, of assault with intent to commit sexual abuse of a student, sexual exploitation by a counselor and endangering children held in isolation, and he was sentenced to nine years in prison.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-22/ben-trane-found-guilty-sentencing-in-early-2018",
+      "cite": "Tri States Public Radio, Dec. 22, 2017"
+     },
+     {
+      "url": "https://www.ksl.com/article/news/us/iowa-boarding-school-director-sentenced-to-9-years-for-abuse/46318579",
+      "cite": "Associated Press, May 11, 2018"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The Iowa Supreme Court has said Trane and his wife opened the school in 2002 and that he was its owner and de facto director.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     }
+    ]
+   },
+   {
+    "text": "A local history dates the start to March 2003, when the Lichfield family partnership bought Charleston Place, a former senior living home on the edge of Keokuk, for $500,000, and Trane and Brian Vaifanua opened the academy there.",
+    "sources": [
+     {
+      "url": "https://www.bleedingheartland.com/2021/09/04/the-miracle-on-the-mississippi-keokuk-and-midwest-academy/",
+      "cite": "Bleeding Heartland, 2021"
+     }
+    ]
+   },
+   {
+    "text": "Trane testified at his 2017 trial that he started out as a minority owner and bought the school outright from three other partners in 2007.",
+    "sources": [
+     {
+      "url": "http://tspr.org/post/trane-spends-hours-witness-stand-wed-cross-examination-thurs",
+      "cite": "Tri States Public Radio (Jason Parrott), \"Trane Spends Hours on Witness Stand Wed.; Cross Examination Thurs.\", Dec. 2017"
+     }
+    ]
+   },
+   {
+    "text": "Midwest Twister LLC, a Utah company, bought the property in 2006 and leased it to Trane; it denied any other connection to the school in court filings.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2019-02-28/site-of-former-boarding-school-in-lee-county-might-get-new-owner",
+      "cite": "Tri States Public Radio, Feb. 28, 2019"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-06/former-midwest-academy-owner-i-walked-away-from-the-school-with-nothing",
+      "cite": "Tri States Public Radio, Dec. 6, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The campus had eight buildings, including residence halls, a gymnasium, a metal shop and an auditorium, with an assessed value of just under $2 million.",
+    "sources": [
+     {
+      "url": "http://www.desmoinesregister.com/story/opinion/editorials/2016/02/07/who-is-behind-midwest-academy/79867582/",
+      "cite": "Des Moines Register, editorial, \"Who is behind Midwest Academy?\", Feb. 7, 2016"
+     }
+    ]
+   },
+   {
+    "text": "The academy also ran the Midwest Treatment Center in nearby Montrose.",
+    "sources": [
+     {
+      "url": "https://digital-release.ksn.com/?p=237381",
+      "cite": "Associated Press, Jan. 29, 2016"
+     }
+    ]
+   },
+   {
+    "text": "Families paid about $5,000 a month.",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "Because it was privately funded and took no state placements, it needed no license, and the Iowa Department of Human Services never licensed it.",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     },
+     {
+      "url": "https://digital-release.ksn.com/?p=237381",
+      "cite": "Associated Press, Jan. 29, 2016"
+     }
+    ]
+   },
+   {
+    "text": "A later Iowa Department of Education review found it had misstated its accreditations and affiliations.",
+    "sources": [
+     {
+      "url": "https://www.yahoo.com/news/iowas-top-court-upholds-keokuk-222529587.html",
+      "cite": "Des Moines Register, Jan. 11, 2023"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Court records and the prosecution's case at Trane's trial describe a regime built on isolation.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-14/prosecution-lays-out-criminal-case-against-former-boarding-school-owner",
+      "cite": "Tri States Public Radio, Dec. 14, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The rooms, which the school called OSS, were meant for one student at a time; the lights were always on and a camera watched.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-14/prosecution-lays-out-criminal-case-against-former-boarding-school-owner",
+      "cite": "Tri States Public Radio, Dec. 14, 2017"
+     }
+    ]
+   },
+   {
+    "text": "A student was expected to sit \"in structure,\" in a set posture, and the prosecutor told the jury students could not move or talk for 24 hours at a time.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     },
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-14/prosecution-lays-out-criminal-case-against-former-boarding-school-owner",
+      "cite": "Tri States Public Radio, Dec. 14, 2017"
+     }
+    ]
+   },
+   {
+    "text": "New arrivals were barred from talking to other students or to staff.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-14/prosecution-lays-out-criminal-case-against-former-boarding-school-owner",
+      "cite": "Tri States Public Radio, Dec. 14, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The Iowa Supreme Court recounted that one boy spent at least 133 of his 210 days at the school in isolation and dropped from 115 to 89 pounds, and another spent about half his time there and went from 120 to 90 pounds.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     }
+    ]
+   },
+   {
+    "text": "At trial the prosecutor told the jury the two boys were 12 and 13 years old.",
+    "sources": [
+     {
+      "url": "http://www.thehawkeye.com/news/20171221/trane-jury-begins-deliberations",
+      "cite": "The Hawk Eye, \"Trane jury begins deliberations\", Dec. 21, 2017"
+     }
+    ]
+   },
+   {
+    "text": "Former students told the AP in 2016 what the rooms were like.",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "\"You spend your time pounding your head against the wall. You can't sleep because there is a lot of noise,\" said Emily Beaman, then 17; Rachel Adkisson, 19, said, \"It's like torture.\"",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "A 2016 Des Moines Register review found scores of police calls to the academy over three years, at least five of them alleging sexual abuse.",
+    "sources": [
+     {
+      "url": "https://www.yahoo.com/news/iowas-top-court-upholds-keokuk-222529587.html",
+      "cite": "Des Moines Register, Jan. 11, 2023"
+     }
+    ]
+   },
+   {
+    "text": "Lee County sheriff's records released to the Register showed five reports of sexual offenses at the school in the previous three years and 73 other incidents, from runaways to assaults on staff and students to suicide attempts.",
+    "sources": [
+     {
+      "url": "http://www.desmoinesregister.com/story/news/2016/02/18/dhs-chief-midwest-academy-used-outdated-methods/80551784/",
+      "cite": "Des Moines Register (Lee Rood), \"DHS chief: Midwest Academy used outdated methods\", Feb. 18, 2016"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The school's collapse began in late 2015.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-10/midwest-academy-owner-added-to-lawsuit",
+      "cite": "Tri States Public Radio, Mar. 10, 2016"
+     }
+    ]
+   },
+   {
+    "text": "A child protection worker later testified at Trane's trial that Human Services and the FBI had received a report as early as March 2015 that students were held in isolation rooms with human waste.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Trial testimony of a child protection worker, State of Iowa v. Benjamin G. Trane, Iowa District Court for Lee County, December 2017 (transcript)"
+     }
+    ]
+   },
+   {
+    "text": "On December 1, 2015, Cheyenne Jerred, a night supervisor, reported to her superiors and to Human Services a student's allegation that Trane had sexually assaulted her; the academy fired Jerred four days later, and she sued in January 2016.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-10/midwest-academy-owner-added-to-lawsuit",
+      "cite": "Tri States Public Radio, Mar. 10, 2016"
+     }
+    ]
+   },
+   {
+    "text": "On January 28, 2016, the Iowa Division of Criminal Investigation, the FBI and other agencies served search warrants at the Keokuk campus and the Montrose center.",
+    "sources": [
+     {
+      "url": "https://digital-release.ksn.com/?p=237381",
+      "cite": "Associated Press, Jan. 29, 2016"
+     },
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "Human Services opened child abuse assessments of 28 students, and the school's roughly 90 students were removed.",
+    "sources": [
+     {
+      "url": "https://digital-release.ksn.com/?p=237381",
+      "cite": "Associated Press, Jan. 29, 2016"
+     },
+     {
+      "url": "https://www.ksl.com/article/news/us/ex-students-say-boarding-school-kept-them-in-isolation-boxes/38492500",
+      "cite": "Associated Press, Feb. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In February the Lee County sheriff's office said 19 abuse accusations it had investigated were founded.",
+    "sources": [
+     {
+      "url": "https://www.bleedingheartland.com/2021/09/04/the-miracle-on-the-mississippi-keokuk-and-midwest-academy/",
+      "cite": "Bleeding Heartland, 2021"
+     }
+    ]
+   },
+   {
+    "text": "The academy laid off its staff and never reopened.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-10/midwest-academy-owner-added-to-lawsuit",
+      "cite": "Tri States Public Radio, Mar. 10, 2016"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The case showed how little power Iowa had over such schools.",
+    "sources": [
+     {
+      "url": "https://www.iowapublicradio.org/state-government-news/2016-03-16/oversight-committees-probe-boarding-school-abuse-allegations",
+      "cite": "Iowa Public Radio, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In March 2016 a Human Services administrator told legislators the department had nothing in law that let it shut a facility down.",
+    "sources": [
+     {
+      "url": "https://www.iowapublicradio.org/state-government-news/2016-03-16/oversight-committees-probe-boarding-school-abuse-allegations",
+      "cite": "Iowa Public Radio, 2016"
+     }
+    ]
+   },
+   {
+    "text": "Earlier in 2016 the Iowa Senate had voted for SF 2235, which would have set basic certification and oversight for such facilities, but the House did not take it up, state Sen. Tony Bisignano wrote that March.",
+    "sources": [
+     {
+      "url": "http://www.desmoinesregister.com/story/opinion/2016/03/16/tony-bisignano-midwest-academy-boarding-schools/81849200/",
+      "cite": "Des Moines Register, Sen. Tony Bisignano, \"Setting standards for boarding schools\", Mar. 16, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In April 2016 the Iowa House passed a bill, prompted by the Midwest Academy investigation, requiring the state to certify and inspect private children's residential facilities, with an exemption for the curricula of religious organizations.",
+    "sources": [
+     {
+      "url": "https://www.thegazette.com/?p=186565",
+      "cite": "The Gazette, Apr. 13, 2016"
+     }
+    ]
+   },
+   {
+    "text": "It became law that year as Iowa Code chapter 237C, which sets standards for abuse protection, background checks, and seclusion and restraint.",
+    "sources": [
+     {
+      "url": "https://www.legis.iowa.gov/docs/code/2017/237C.3.pdf",
+      "cite": "Iowa Code §237C.3 (2016 Acts, ch. 1114)"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Former students and staff took the school to court.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-15/former-students-parents-sue-midwest-academy",
+      "cite": "Tri States Public Radio, Mar. 15, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In March 2016 six former students who attended between November 2010 and September 2015, and their parents, sued the academy, Trane and associated companies.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-15/former-students-parents-sue-midwest-academy",
+      "cite": "Tri States Public Radio, Mar. 15, 2016"
+     }
+    ]
+   },
+   {
+    "text": "They said they were subjected to a \"culture of punishment, confinement, coercion, physical confrontation and violence,\" and that the school \"seeks to break the will of the vulnerable children entrusted to its care through a harsh and inflexible indoctrination system.\"",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2016-03-15/former-students-parents-sue-midwest-academy",
+      "cite": "Tri States Public Radio, Mar. 15, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In November 2017 an Iowa judge granted them a default judgment, with damages to be set later.",
+    "sources": [
+     {
+      "url": "http://www.houstonchronicle.com/news/education/article/Ex-boarding-school-students-win-lawsuit-over-12379785.php",
+      "cite": "Associated Press, \"Ex-boarding school students win lawsuit over mistreatment\", Nov. 23, 2017"
+     }
+    ]
+   },
+   {
+    "text": "In March 2019 a judge dismissed Midwest Twister from the case, finding nothing tied it to the school beyond owning the land, and about half the plaintiffs later asked to withdraw.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2019-10-02/former-students-parents-leaving-lawsuit-against-closed-boarding-school-in-lee-county",
+      "cite": "Tri States Public Radio, Oct. 2, 2019"
+     }
+    ]
+   },
+   {
+    "text": "Cheyenne Jerred did better: in May 2017 Judge John Wright awarded her $748,800 against the academy, which had defaulted.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-05-10/six-figure-award-in-southeast-iowa-whistleblower-lawsuit",
+      "cite": "Tri States Public Radio, May 10, 2017"
+     }
+    ]
+   },
+   {
+    "text": "Trane told her lawyer that December that he had \"walked away from the school with nothing,\" having signed its assets over to Midwest Twister and another Lichfield company after the raid.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-06/former-midwest-academy-owner-i-walked-away-from-the-school-with-nothing",
+      "cite": "Tri States Public Radio, Dec. 6, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The campus itself went to a county tax auction in June 2016 over unpaid property taxes, and in February 2019 the tax-certificate buyer, Oak Helm Partners, moved to take ownership.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2019-02-28/site-of-former-boarding-school-in-lee-county-might-get-new-owner",
+      "cite": "Tri States Public Radio, Feb. 28, 2019"
+     }
+    ]
+   },
+   {
+    "text": "Midwest Academy was also caught up in the long-running Utah suit against the Lichfield network.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Wood v. World Wide Association of Specialty Programs and Schools, Plaintiffs' First Amended Complaint, Utah Fifth District Court, Washington County, No. 120500380"
+     }
+    ]
+   },
+   {
+    "text": "In Wood v. WWASPS, former students named Midwest Academy, L.L.C. as a defendant and called it a school associated with WWASPS.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Wood v. World Wide Association of Specialty Programs and Schools, Plaintiffs' First Amended Complaint, Utah Fifth District Court, Washington County, No. 120500380"
+     }
+    ]
+   },
+   {
+    "text": "Their amended complaint said Iowa records listed Brian Viafanua as its owner.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Wood v. World Wide Association of Specialty Programs and Schools, Plaintiffs' First Amended Complaint, Utah Fifth District Court, Washington County, No. 120500380"
+     }
+    ]
+   },
+   {
+    "text": "It also named a Midwest Outsource Services, L.L.C. whose listed member was Robert B. Lichfield.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Wood v. World Wide Association of Specialty Programs and Schools, Plaintiffs' First Amended Complaint, Utah Fifth District Court, Washington County, No. 120500380"
+     }
+    ]
+   },
+   {
+    "text": "And it cited a 2004 email exchange in which, the plaintiffs said, WWASPS's Ken Kay worked behind the scenes so that Midwest would not appear connected to the network.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "Wood v. World Wide Association of Specialty Programs and Schools, Plaintiffs' First Amended Complaint, Utah Fifth District Court, Washington County, No. 120500380"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Trane was charged in September 2017, after a 19-month investigation, with third-degree sexual abuse, sexual exploitation by a counselor and child endangerment.",
+    "sources": [
+     {
+      "url": "https://www.cbsnews.com/news/benjamin-trane-midwest-academy-boarding-school-owner-charged-sexual-abuse-iowa",
+      "cite": "Associated Press, Sept. 8, 2017"
+     }
+    ]
+   },
+   {
+    "text": "Prosecutors said that during 2015 he pressured a student into sexual acts by tying them to her progress through the levels and to contact with her family, and had girls undress before a mirror in what was called \"body image therapy.\"",
+    "sources": [
+     {
+      "url": "https://www.cbsnews.com/news/benjamin-trane-midwest-academy-boarding-school-owner-charged-sexual-abuse-iowa",
+      "cite": "Associated Press, Sept. 8, 2017"
+     }
+    ]
+   },
+   {
+    "text": "On December 22, 2017, a jury convicted him of the lesser offense of assault with intent to commit sexual abuse, along with sexual exploitation by a counselor and child endangerment.",
+    "sources": [
+     {
+      "url": "https://www.tspr.org/tspr-local/2017-12-22/ben-trane-found-guilty-sentencing-in-early-2018",
+      "cite": "Tri States Public Radio, Dec. 22, 2017"
+     }
+    ]
+   },
+   {
+    "text": "In May 2018 Judge Mark Kruse gave him the maximum nine years and ordered him to register as a sex offender, saying Trane's claims of innocence had \"revictimized the victims.\"",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/news/us/iowa-boarding-school-director-sentenced-to-9-years-for-abuse/46318579",
+      "cite": "Associated Press, May 11, 2018"
+     }
+    ]
+   },
+   {
+    "text": "In 2019 the Iowa Supreme Court ordered a hearing on whether the girl had made false accusations before; the trial judge found she had not.",
+    "sources": [
+     {
+      "url": "https://www.yahoo.com/news/iowas-top-court-upholds-keokuk-222529587.html",
+      "cite": "Des Moines Register, Jan. 11, 2023"
+     }
+    ]
+   },
+   {
+    "text": "The Iowa Supreme Court upheld the conviction in January 2023.",
+    "sources": [
+     {
+      "url": "https://www.yahoo.com/news/iowas-top-court-upholds-keokuk-222529587.html",
+      "cite": "Des Moines Register, Jan. 11, 2023"
+     }
+    ]
+   },
+   {
+    "text": "On March 6, 2023, he surrendered to the Lee County Sheriff's Office to begin serving his sentence.",
+    "sources": [
+     {
+      "url": "https://www.wgem.com/2023/03/06/former-midwest-academy-owner-surrenders-lee-county-sheriff/",
+      "cite": "WGEM (Mark Meyer), \"Former Midwest Academy owner surrenders to Lee County Sheriff\", Mar. 6, 2023"
+     }
+    ]
+   },
+   {
+    "text": "In January 2025 it reversed a lower court's order granting him a new trial on the child endangerment count, holding that a flawed jury instruction had not prejudiced him.",
+    "sources": [
+     {
+      "url": "https://cases.justia.com/iowa/supreme-court/2025-23-1928.pdf",
+      "cite": "Trane v. State, Iowa Supreme Court No. 23-1928, Jan. 31, 2025"
+     }
+    ]
+   }
+  ]
+ ],
+ "testimony": [],
+ "version": "ad5057e2bece3745"
+}

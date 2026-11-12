@@ -2659,6 +2659,7 @@ function kop_apply_template_assignments() {
     $summary['lawsuits']     = kop_apply_lawsuit_seeds();
     $summary['legislation']  = kop_apply_legislation_seeds();
     $summary['memorial']     = kop_apply_memorial_seeds();
+    $summary['about_rewrites'] = function_exists('kop_apply_about_rewrites') ? kop_apply_about_rewrites() : array();
     $summary['media']       = kop_apply_media_folder_fixes();
     $summary['research_tags'] = kop_apply_research_facility_tags();
     $summary['subfolders']   = kop_apply_media_subfolders();
@@ -2728,7 +2729,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '157';
+    $version = '158';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

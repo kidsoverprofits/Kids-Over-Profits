@@ -1,0 +1,462 @@
+{
+ "page": "operator/g4s-youth-services",
+ "name": "G4S Youth Services",
+ "from": "pilot rec18",
+ "sentences": [
+  [
+   {
+    "text": "G4S Youth Services was the American juvenile justice arm of the British security company G4S. From offices in Florida it ran state-contracted lockups and treatment programs for youths in Florida, Tennessee, Arkansas and Texas.",
+    "sources": [
+     {
+      "url": "https://www.brownwoodnews.com/2013/03/11/county-approves-lease-for-brown-county-juvenile-justice-building/",
+      "cite": "Brownwood News, 2013"
+     },
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     },
+     {
+      "url": "https://digital-release.wkrn.com/news/2-juveniles-captured-after-escaping-donelson-youth-facility",
+      "cite": "WKRN, 2019"
+     }
+    ]
+   },
+   {
+    "text": "In 2002 some of the Florida facilities it later ran, including Avon Park Youth Academy, were run by Securicor New Century, a subsidiary of a British company; one of Securicor's three Florida sites had been the subject of a state report that guards abused teenagers and shackled one to a bed for 14 hours.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     },
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "For 15 years its facilities drew state sanctions and criminal investigations.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "In 2008 Florida declared it in default at Hastings Youth Academy after a youth's arm was broken in a restraint.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "In 2013 a riot broke out at Avon Park Youth Academy.",
+    "sources": [
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "In 2015 a grand jury called for Highlands Youth Academy to be closed.",
+    "sources": [
+     {
+      "url": "https://www.fox13news.com/news/report-g4s-run-youth-facility-should-be-closed-in-wake-of-riots",
+      "cite": "FOX 13, 2015"
+     }
+    ]
+   },
+   {
+    "text": "Escapes followed at four of its Florida sites.",
+    "sources": [
+     {
+      "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/four-youth-detention-workers-suspended-after-waiting-more-than-an-hour-to-report-escape",
+      "cite": "ABC Action News, 2016"
+     },
+     {
+      "url": "https://www.wptv.com/news/region-okeechobee-county/six-juveniles-caught-after-escaping-from-okeechobee-youth-development-center",
+      "cite": "WPTV, 2016"
+     },
+     {
+      "url": "https://actionnewsjax.com/news/local/state-imposes-admissions-freeze-at-hastings-youth-academy-following-escapes/531333968",
+      "cite": "Action News Jax, 2017"
+     },
+     {
+      "url": "https://www.wokv.com/news/local/president-youth-services-contractor-upset-about-escape-jacksonville-youth-academy/xpF49hV9UVziZK8oIjAPjO",
+      "cite": "WOKV, 2017"
+     }
+    ]
+   },
+   {
+    "text": "In April 2017 G4S sold the business, which carried on as TrueCore Behavioral Solutions.",
+    "sources": [
+     {
+      "url": "https://blog.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+      "cite": "Polk County Sheriff's Office, 2017"
+     },
+     {
+      "url": "https://www.brownwoodnews.com/2020/06/15/commissioners-approve-transfer-of-truecore-lease/",
+      "cite": "Brownwood News, 2020"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The Florida contracts go back to Securicor.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "In 2002 Securicor New Century, of Richmond, Virginia, a subsidiary of the British firm Securicor, ran three Florida juvenile facilities, among them Avon Park Youth Academy in Polk County and Sago Palm Academy in western Palm Beach County.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "It had taken over operations from Correctional Services Corp.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "That August, when Nevada chose Securicor to run a youth prison, the losing bidder, Rite of Passage, pointed to a 2000 Florida Department of Juvenile Justice report that guards at Sago Palm had abused teenagers, shackled one to a bed for 14 hours and used a choke hold.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "It also cited a 2001 state report that rated Avon Park's programs below average.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "Securicor's chief executive, Gail Browne, said early problems had been corrected.",
+    "sources": [
+     {
+      "url": "https://lasvegassun.com/news/2002/aug/09/summit-views-woes-remain/",
+      "cite": "Las Vegas Sun, 2002"
+     }
+    ]
+   },
+   {
+    "text": "Group 4 Falck had bought the Wackenhut Corporation in 2002.",
+    "sources": [
+     {
+      "url": "https://www.nytimes.com/2002/03/09/business/company-news-expanding-in-us-falck-buys-wackenhut-security.html",
+      "cite": "The New York Times (Bloomberg News), Mar 9, 2002"
+     }
+    ]
+   },
+   {
+    "text": "In July 2004 Securicor merged with Group 4 Falck's security business to form Group 4 Securicor, later G4S.",
+    "sources": [
+     {
+      "url": "http://www.digitallook.com/investing/visual_tools/security.cgi?csi=104331&amp;ac=&amp;username=",
+      "cite": "Digital Look, G4S share price page"
+     }
+    ]
+   },
+   {
+    "text": "G4S Youth Services later said it had served more than 12,000 Florida youths since 2002.",
+    "sources": [
+     {
+      "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/four-youth-detention-workers-suspended-after-waiting-more-than-an-hour-to-report-escape",
+      "cite": "ABC Action News, 2016"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The division grew mainly through Florida Department of Juvenile Justice contracts.",
+    "sources": [
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "By August 2013 it ran 16 state facilities: 13 in Florida, two in Tennessee and one in Arkansas.",
+    "sources": [
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "The Arkansas site was the state's Juvenile Assessment and Treatment Center near Alexander, which it ran from 2007.",
+    "sources": [
+     {
+      "url": "https://www.arkansasonline.com/news/2016/sep/15/2-youth-jail-execs-jumped-ship-20160915/",
+      "cite": "Arkansas Democrat-Gazette, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In Nashville it ran the G4S Academy for Young Men, also called Stones River Academy, a program for 24 boys committed to the Tennessee Department of Children's Services.",
+    "sources": [
+     {
+      "url": "https://digital-release.wkrn.com/news/2-juveniles-captured-after-escaping-donelson-youth-facility",
+      "cite": "WKRN, 2019"
+     }
+    ]
+   },
+   {
+    "text": "In March 2013 Brown County, Texas, agreed to lease part of its juvenile justice building in Brownwood to the company.",
+    "sources": [
+     {
+      "url": "https://www.brownwoodnews.com/2013/03/11/county-approves-lease-for-brown-county-juvenile-justice-building/",
+      "cite": "Brownwood News, 2013"
+     }
+    ]
+   },
+   {
+    "text": "In 2015 Florida's Department of Juvenile Justice listed G4S Youth Services as the provider of the Columbus Juvenile Residential Facility in Tampa, later Columbus Youth Academy.",
+    "sources": [
+     {
+      "url": "https://web.archive.org/web/20150419075337/https://www.djj.state.fl.us/programs-facilities/residential-facilities/residential-facility-details/columbus-jrf",
+      "cite": "Florida Department of Juvenile Justice, Columbus Juvenile Residential Facility page (archived Apr 19, 2015)"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Its record in Florida went bad early.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "After a February 2008 incident, a Hastings Youth Academy employee, Kutanna Woods, was fired for using unnecessary force on a youth, who suffered a broken shoulder.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "His lawyer said surveillance video showed her twisting his arm behind his back until it broke after he refused to sweep a floor.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "The department's inspector general found that staff used unnecessary force, but the sheriff declined to file charges.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "In March 2008 the department declared G4S in default of its Hastings contract, citing serious incidents, inappropriate staff-youth relationships and no effective behavior management system.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   },
+   {
+    "text": "It lifted the notice that July, saying the company had substantially complied.",
+    "sources": [
+     {
+      "url": "https://historiccity.com/2009/staugustine/news/lawsuit-abuse-at-hastings-youth-academy-2085",
+      "cite": "HistoricCity News, 2009"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The problems continued for years.",
+    "sources": [
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "In August 2013, 21 staff were on shift for 144 youths when a riot broke out at Avon Park Youth Academy, and 64 youths were sent to the Polk County Jail.",
+    "sources": [
+     {
+      "url": "https://treatmentmagazine.com/huge-riot-breaks-out-at-florida-youth-center/",
+      "cite": "Treatment Magazine, 2013"
+     }
+    ]
+   },
+   {
+    "text": "In July 2015 a Polk County grand jury said Highlands Youth Academy, which G4S ran under a five-year, $40 million state contract, should be closed.",
+    "sources": [
+     {
+      "url": "https://www.fox13news.com/news/report-g4s-run-youth-facility-should-be-closed-in-wake-of-riots",
+      "cite": "FOX 13, 2015"
+     }
+    ]
+   },
+   {
+    "text": "In early 2016 a youth escaped from Falkenburg Academy in Tampa, and no one called 911 for more than 13 hours; four staff members were suspended.",
+    "sources": [
+     {
+      "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/four-youth-detention-workers-suspended-after-waiting-more-than-an-hour-to-report-escape",
+      "cite": "ABC Action News, 2016"
+     }
+    ]
+   },
+   {
+    "text": "That May six youths escaped from the Okeechobee Youth Development Center.",
+    "sources": [
+     {
+      "url": "https://www.wptv.com/news/region-okeechobee-county/six-juveniles-caught-after-escaping-from-okeechobee-youth-development-center",
+      "cite": "WPTV, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In June 2017 the state froze admissions at Hastings after its third escape in three months, citing critical failures in how the company supervised youths.",
+    "sources": [
+     {
+      "url": "https://actionnewsjax.com/news/local/state-imposes-admissions-freeze-at-hastings-youth-academy-following-escapes/531333968",
+      "cite": "Action News Jax, 2017"
+     }
+    ]
+   },
+   {
+    "text": "Youths escaped from Jacksonville Youth Academy that month too.",
+    "sources": [
+     {
+      "url": "https://www.wokv.com/news/local/president-youth-services-contractor-upset-about-escape-jacksonville-youth-academy/xpF49hV9UVziZK8oIjAPjO",
+      "cite": "WOKV, 2017"
+     }
+    ]
+   },
+   {
+    "text": "In August 2017 three former Highlands administrators were arrested.",
+    "sources": [
+     {
+      "url": "https://blog.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+      "cite": "Polk County Sheriff's Office, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The sheriff said G4S staff there had routinely covered up fights, uses of force, contraband and escapes.",
+    "sources": [
+     {
+      "url": "https://blog.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+      "cite": "Polk County Sheriff's Office, 2017"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "By then G4S was leaving the business.",
+    "sources": [
+     {
+      "url": "https://www.arkansasonline.com/news/2016/sep/15/2-youth-jail-execs-jumped-ship-20160915/",
+      "cite": "Arkansas Democrat-Gazette, 2016"
+     }
+    ]
+   },
+   {
+    "text": "In May 2016 the division's president, Jim Hill, and Brian Neupaver, who ran its operations, left for a rival, Youth Opportunity Investments, and G4S sued both men and the new company in Florida.",
+    "sources": [
+     {
+      "url": "https://www.arkansasonline.com/news/2016/sep/15/2-youth-jail-execs-jumped-ship-20160915/",
+      "cite": "Arkansas Democrat-Gazette, 2016"
+     }
+    ]
+   },
+   {
+    "text": "That July Rite of Passage won the $34.1 million Arkansas contract G4S had held since 2007.",
+    "sources": [
+     {
+      "url": "https://www.arkansasonline.com/news/2016/sep/15/2-youth-jail-execs-jumped-ship-20160915/",
+      "cite": "Arkansas Democrat-Gazette, 2016"
+     }
+    ]
+   },
+   {
+    "text": "On April 1, 2017, G4S sold its American youth business to BHSB Holdings for $56.5 million, and it was renamed TrueCore Behavioral Solutions.",
+    "sources": [
+     {
+      "url": "https://blog.polksheriff.org/news-investigations/2017/08/18/three-former-department-of-juvenile-justice-g4s-highlands-youth-academy-staff-members-arrested-for-multiple-felonies",
+      "cite": "Polk County Sheriff's Office, 2017"
+     },
+     {
+      "url": "https://digital-release.wkrn.com/news/2-juveniles-captured-after-escaping-donelson-youth-facility",
+      "cite": "WKRN, 2019"
+     },
+     {
+      "url": "https://www.brownwoodnews.com/2020/06/15/commissioners-approve-transfer-of-truecore-lease/",
+      "cite": "Brownwood News, 2020"
+     }
+    ]
+   },
+   {
+    "text": "On October 16, 2019, TrueCore's former chief operating officer, Rodney Brockenbrough, filed a sealed whistleblower complaint in federal court in Tampa against TrueCore and its owners that also named G4S US, G4S Youth Services, LLC and G4S Secure Solutions.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "United States ex rel. Brockenbrough v. TrueCore Behavioral Solutions, LLC, et al., No. 8:19-cv-02557 (U.S. District Court, M.D. Fla., Tampa Division), complaint filed Oct. 16, 2019"
+     }
+    ]
+   },
+   {
+    "text": "It alleged that a nonprofit, the Henry & Rilla White Youth Foundation, posed as the owner of 19 for-profit G4S and TrueCore youth facilities so they could collect National School Lunch Program money that only nonprofits may receive.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "United States ex rel. Brockenbrough v. TrueCore Behavioral Solutions, LLC, et al., No. 8:19-cv-02557 (U.S. District Court, M.D. Fla., Tampa Division), complaint filed Oct. 16, 2019"
+     }
+    ]
+   },
+   {
+    "text": "TrueCore left Texas in June 2020 and handed The Oaks in Brownwood to Rite of Passage.",
+    "sources": [
+     {
+      "url": "https://www.brownwoodnews.com/2020/06/15/commissioners-approve-transfer-of-truecore-lease/",
+      "cite": "Brownwood News, 2020"
+     }
+    ]
+   }
+  ]
+ ],
+ "testimony": [],
+ "version": "56cdd5b66f9f58d6"
+}

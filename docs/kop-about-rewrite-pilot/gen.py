@@ -47,6 +47,8 @@ def testimony(items):
             where = f'<a href="{html.escape(url, quote=True)}">{where}</a>'
         credit = " &middot; ".join(x for x in (html.escape(t.get("who", "")), where, html.escape(t.get("date", ""))) if x)
         via = f'<br><span class="via">Read through {html.escape(t["via"])}; check against the original</span>' if t.get("via") else ""
+        if t.get("note"):
+            via = f'<br>{html.escape(t["note"])}' + via
         text = html.escape(t.get("text", "")) or '<span class="empty">(recording, no transcript yet)</span>'
         out += f"<blockquote>{text}<footer>{credit}{via}</footer></blockquote>"
     return f'<div class="testimony"><h4>Survivor testimony</h4>{out}</div>' if out else ""

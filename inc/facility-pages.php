@@ -2452,6 +2452,10 @@ if (!function_exists('kop_facility_pages_testimony')) {
                 'text'       => $text,
                 'date_label' => $time ? date('F Y', $time) : '',
                 'submitted'  => (bool) preg_match('/^(Submitted by a survivor|Submission #\d+)/i', trim((string) ($entry['source'] ?? ''))),
+                // A quote from where the person published it (inc/about-rewrites.php): its credit line, address and note.
+                'credit'     => strpos((string) ($entry['id'] ?? ''), 'about:') === 0 ? trim((string) ($entry['source'] ?? '')) : '',
+                'url'        => preg_match('#^https?://#i', (string) ($entry['url'] ?? '')) ? (string) $entry['url'] : '',
+                'note'       => strpos((string) ($entry['id'] ?? ''), 'about:') === 0 ? trim((string) ($entry['note'] ?? '')) : '',
             );
         }
         return $out;

@@ -888,6 +888,8 @@
                 text,
                 source: v2Str(entry.source),
                 date: v2Str(entry.date),
+                url: v2Str(entry.url),
+                note: v2Str(entry.note),
                 movedFrom: v2Str(entry.movedFrom),
                 publish: publish === true || publish === 1 || publish === '1' || publish === 'true'
             });

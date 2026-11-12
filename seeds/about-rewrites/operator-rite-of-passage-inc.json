@@ -1,0 +1,547 @@
+{
+ "page": "operator/rite-of-passage-inc",
+ "name": "Rite of Passage, Inc.",
+ "from": "pilot rec16",
+ "sentences": [
+  [
+   {
+    "text": "Rite of Passage is a company based in Minden, Nevada, that has run residential programs for young people since 1984, including juvenile justice facilities run under state contracts.",
+    "sources": [
+     {
+      "url": "https://riteofpassage.com/history/",
+      "cite": "Rite of Passage, History"
+     },
+     {
+      "url": "https://www.pbcommercial.com/contractor-ineligible-to-run-youth-lockups/",
+      "cite": "Pine Bluff Commercial, March 23, 2019"
+     }
+    ]
+   },
+   {
+    "text": "Questions about its oversight go back to its first years: in 1986 federal auditors found that the Indian tribes licensing its Nevada campuses had not documented inspections.",
+    "sources": [
+     {
+      "url": "https://gao.justia.com/department-of-health-and-human-services/1986/12/foster-care-hrd-87-23br",
+      "cite": "U.S. General Accounting Office, HRD-87-23BR, December 9, 1986"
+     }
+    ]
+   },
+   {
+    "text": "It has grown by taking over programs other operators lost or gave up, among them Arizona Boys Ranch, where a boy died in 1998 and which it now operates as Canyon State Academy.",
+    "sources": [
+     {
+      "url": "https://archive.is/ZhgwY",
+      "cite": "Associated Press, July 10, 1999"
+     },
+     {
+      "url": "https://canyonstateacademy.com/about-us/",
+      "cite": "Canyon State Academy, About Us"
+     }
+    ]
+   },
+   {
+    "text": "States have repeatedly pulled children from its programs or ended its contracts.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/mar/06/state-pulls-teens-from-rite-of-passage-silver-stat",
+      "cite": "Northern Nevada Business Weekly, March 6, 2015"
+     },
+     {
+      "url": "https://nnbw.com/news/2015/apr/17/rite-of-passage-sues-state-over-closure-of-red-roc",
+      "cite": "Northern Nevada Business Weekly, April 17, 2015"
+     },
+     {
+      "url": "https://www.pbcommercial.com/contractor-ineligible-to-run-youth-lockups/",
+      "cite": "Pine Bluff Commercial, March 23, 2019"
+     }
+    ]
+   },
+   {
+    "text": "Nevada closed one of its facilities and removed children from another in 2015, and Colorado suspended a detention center's license in 2018 after staff improperly restrained children.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/mar/06/state-pulls-teens-from-rite-of-passage-silver-stat",
+      "cite": "Northern Nevada Business Weekly, March 6, 2015"
+     },
+     {
+      "url": "https://nnbw.com/news/2015/apr/17/rite-of-passage-sues-state-over-closure-of-red-roc",
+      "cite": "Northern Nevada Business Weekly, April 17, 2015"
+     },
+     {
+      "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+      "cite": "KUNC, August 24, 2018"
+     }
+    ]
+   },
+   {
+    "text": "In Arkansas, state monitors found children confined alone for long periods in 2017 and again in 2023.",
+    "sources": [
+     {
+      "url": "https://jjie.org/?p=520466",
+      "cite": "Arkansas Nonprofit News Network via JJIE, 2017"
+     },
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   },
+   {
+    "text": "Two students have died at its Arizona school, Canyon State Academy, since 2020.",
+    "sources": [
+     {
+      "url": "https://www.azcentral.com/story/news/local/pinal/2020/01/23/17-year-old-canyon-state-academy-student-dies/4558938002/",
+      "cite": "Arizona Republic, January 23, 2020"
+     },
+     {
+      "url": "https://www.abc15.com/news/region-southeast-valley/queen-creek/one-dead-two-hospitalized-during-possible-overdose-at-canyon-state-academy-in-queen-creek",
+      "cite": "ABC15, October 2022"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "By the company's own account, Dave Maguire, a psychiatric technician who saw that young people at California's Napa State Hospital were not improving, founded it in 1984 with a small group home in the Sierra Nevada.",
+    "sources": [
+     {
+      "url": "https://riteofpassage.com/history/",
+      "cite": "Rite of Passage, History"
+     }
+    ]
+   },
+   {
+    "text": "California placed youths in the program early on.",
+    "sources": [
+     {
+      "url": "https://gao.justia.com/department-of-health-and-human-services/1986/12/foster-care-hrd-87-23br",
+      "cite": "U.S. General Accounting Office, HRD-87-23BR, December 9, 1986"
+     }
+    ]
+   },
+   {
+    "text": "In 1986, at Congress's request, the U.S. General Accounting Office reviewed federal foster care money paid for youths in the program.",
+    "sources": [
+     {
+      "url": "https://gao.justia.com/department-of-health-and-human-services/1986/12/foster-care-hrd-87-23br",
+      "cite": "U.S. General Accounting Office, HRD-87-23BR, December 9, 1986"
+     }
+    ]
+   },
+   {
+    "text": "It found that California had paid about $434,000 in federal funds for such placements.",
+    "sources": [
+     {
+      "url": "https://gao.justia.com/department-of-health-and-human-services/1986/12/foster-care-hrd-87-23br",
+      "cite": "U.S. General Accounting Office, HRD-87-23BR, December 9, 1986"
+     }
+    ]
+   },
+   {
+    "text": "The Indian tribes that licensed Rite of Passage's facilities applied California and tribal standards, but did not document inspections for compliance with all of them and did not inspect personnel files.",
+    "sources": [
+     {
+      "url": "https://gao.justia.com/department-of-health-and-human-services/1986/12/foster-care-hrd-87-23br",
+      "cite": "U.S. General Accounting Office, HRD-87-23BR, December 9, 1986"
+     }
+    ]
+   },
+   {
+    "text": "In 1992 a teenager named Paul Choy was restrained at a Rite of Passage camp in Nevada.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "San Francisco Chronicle, 1992, on the death of Paul Choy (as reprinted on nospank.net, n-b98)"
+     },
+     {
+      "url": "https://folyoirat.ludovika.hu/index.php/aarms/article/view/883",
+      "cite": "AARMS (Academic and Applied Research in Military and Public Management Science), article 883"
+     }
+    ]
+   },
+   {
+    "text": "The San Francisco Chronicle reported that he died after the restraint on February 4, 1992, at 16.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "San Francisco Chronicle, 1992, on the death of Paul Choy (as reprinted on nospank.net, n-b98)"
+     }
+    ]
+   },
+   {
+    "text": "An article in the journal AARMS says instead that he was critically injured in the 1992 restraint and died in 2017.",
+    "sources": [
+     {
+      "url": "https://folyoirat.ludovika.hu/index.php/aarms/article/view/883",
+      "cite": "AARMS (Academic and Applied Research in Military and Public Management Science), article 883"
+     }
+    ]
+   },
+   {
+    "text": "California's Department of Social Services reviewed the Nevada program in January and April 1999.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "California Department of Social Services, Out-of-State Certification Review of Rite of Passage, Minden and Yerington, Nevada (site visits Jan. 4–8 and Apr. 5–8, 1999)"
+     }
+    ]
+   },
+   {
+    "text": "It found that three of the company's group homes there were licensed by the Washoe Tribal Council, its 225-bed Athletic Training Campus by the Paiute Tribal Council and its Remote Training Center by the Walker River Tribe, and that Nevada's child protective services had no authority to investigate complaints on tribal land.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "California Department of Social Services, Out-of-State Certification Review of Rite of Passage, Minden and Yerington, Nevada (site visits Jan. 4–8 and Apr. 5–8, 1999)"
+     }
+    ]
+   },
+   {
+    "text": "Youths told the reviewers of staff throwing youths against a wall, pulling their arms up behind their backs and putting them in full and half nelsons, and of staff calling them \"moron\" and \"retard\"; the department said the allegations were under further investigation.",
+    "sources": [
+     {
+      "url": "",
+      "cite": "California Department of Social Services, Out-of-State Certification Review of Rite of Passage, Minden and Yerington, Nevada (site visits Jan. 4–8 and Apr. 5–8, 1999)"
+     }
+    ]
+   },
+   {
+    "text": "It also found that Rite of Passage had failed to report at least one alleged sexual abuse on time, and that its administration \"admitted that the grievance procedure has not been adequate.\"",
+    "sources": [
+     {
+      "url": "",
+      "cite": "California Department of Social Services, Out-of-State Certification Review of Rite of Passage, Minden and Yerington, Nevada (site visits Jan. 4–8 and Apr. 5–8, 1999)"
+     }
+    ]
+   },
+   {
+    "text": "That year California certified the program for out-of-state placements, except its Remote Treatment Campus.",
+    "sources": [
+     {
+      "url": "https://www.cdss.ca.gov/lettersnotices/entres/getinfo/acl99/99-74.PDF",
+      "cite": "California Department of Social Services, All County Letter 99-74, 1999"
+     }
+    ]
+   },
+   {
+    "text": "The company now says it runs more than 70 programs in 18 states.",
+    "sources": [
+     {
+      "url": "https://riteofpassage.com/history/",
+      "cite": "Rite of Passage, History"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "At Arizona Boys Ranch, 16-year-old Nicholaus Contreraz died of an untreated infection in March 1998; his mother settled with the ranch in July 1999.",
+    "sources": [
+     {
+      "url": "https://archive.is/ZhgwY",
+      "cite": "Associated Press, July 10, 1999"
+     }
+    ]
+   },
+   {
+    "text": "The ranch, renamed Canyon State Academy, is a nonprofit school that Rite of Passage operates.",
+    "sources": [
+     {
+      "url": "https://canyonstateacademy.com/about-us/",
+      "cite": "Canyon State Academy, About Us"
+     }
+    ]
+   },
+   {
+    "text": "The renaming came in March 2000, under Rite of Passage's ownership.",
+    "sources": [
+     {
+      "url": "https://web.archive.org/web/20200702090627/https://canyonstateacademy.com/about-us/",
+      "cite": "Canyon State Academy, About Us (archived July 2, 2020)"
+     }
+    ]
+   },
+   {
+    "text": "On January 21, 2020, a 17-year-old student was found unresponsive there and died.",
+    "sources": [
+     {
+      "url": "https://www.azcentral.com/story/news/local/pinal/2020/01/23/17-year-old-canyon-state-academy-student-dies/4558938002/",
+      "cite": "Arizona Republic, January 23, 2020"
+     }
+    ]
+   },
+   {
+    "text": "On October 3, 2022, a 16-year-old student died of a suspected overdose and two others were hospitalized.",
+    "sources": [
+     {
+      "url": "https://www.abc15.com/news/region-southeast-valley/queen-creek/one-dead-two-hospitalized-during-possible-overdose-at-canyon-state-academy-in-queen-creek",
+      "cite": "ABC15, October 2022"
+     }
+    ]
+   },
+   {
+    "text": "In July 2023 police records described staff assaulting students during restraints, and several staff members were charged.",
+    "sources": [
+     {
+      "url": "https://archive.is/SUwGB",
+      "cite": "FOX 10 Phoenix, July 19, 2023"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Nevada acted against two of its programs in 2015.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/apr/17/rite-of-passage-sues-state-over-closure-of-red-roc",
+      "cite": "Northern Nevada Business Weekly, April 17, 2015"
+     }
+    ]
+   },
+   {
+    "text": "Rite of Passage says it took over Red Rock Academy, north of Las Vegas, in 2013.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/apr/17/rite-of-passage-sues-state-over-closure-of-red-roc",
+      "cite": "Northern Nevada Business Weekly, April 17, 2015"
+     }
+    ]
+   },
+   {
+    "text": "In March 2015 the state closed it after it repeatedly failed compliance checks, removed its 40 youths and canceled its $11.5 million contract; the company sued for more than $1 million.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/apr/17/rite-of-passage-sues-state-over-closure-of-red-roc",
+      "cite": "Northern Nevada Business Weekly, April 17, 2015"
+     }
+    ]
+   },
+   {
+    "text": "That same month, after a February 28 riot at its Silver State Academy near Yerington, Nevada's child welfare agency removed every youth it had placed there.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/mar/06/state-pulls-teens-from-rite-of-passage-silver-stat",
+      "cite": "Northern Nevada Business Weekly, March 6, 2015"
+     }
+    ]
+   },
+   {
+    "text": "Teens set fire to two buildings, staff were hurt and ten youths escaped.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/mar/06/state-pulls-teens-from-rite-of-passage-silver-stat",
+      "cite": "Northern Nevada Business Weekly, March 6, 2015"
+     }
+    ]
+   },
+   {
+    "text": "It was the fourth uprising at the academy in four months.",
+    "sources": [
+     {
+      "url": "https://nnbw.com/news/2015/mar/06/state-pulls-teens-from-rite-of-passage-silver-stat",
+      "cite": "Northern Nevada Business Weekly, March 6, 2015"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "In 2018 it was Colorado's turn.",
+    "sources": [
+     {
+      "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+      "cite": "KUNC, August 24, 2018"
+     }
+    ]
+   },
+   {
+    "text": "In July the state shut the Betty K. Marler center in Lakewood, which Rite of Passage ran, after staff lost control of teenage girls there.",
+    "sources": [
+     {
+      "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+      "cite": "KUNC, August 24, 2018"
+     }
+    ]
+   },
+   {
+    "text": "On August 23 it suspended the license of the company's Robert E. DeNier Youth Services Center in Durango, after staff improperly restrained two or more children, and the center closed.",
+    "sources": [
+     {
+      "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+      "cite": "KUNC, August 24, 2018"
+     }
+    ]
+   },
+   {
+    "text": "The company's regional director called its Colorado facilities \"well-run.\"",
+    "sources": [
+     {
+      "url": "https://www.kunc.org/news/2018-08-24/state-suspends-license-for-durango-youth-detention-center",
+      "cite": "KUNC, August 24, 2018"
+     }
+    ]
+   },
+   {
+    "text": "Colorado ended the Durango contract.",
+    "sources": [
+     {
+      "url": "https://www.pbcommercial.com/contractor-ineligible-to-run-youth-lockups/",
+      "cite": "Pine Bluff Commercial, March 23, 2019"
+     }
+    ]
+   },
+   {
+    "text": "In March 2019 that termination cost Rite of Passage a $15.8 million contract to run Arkansas's juvenile lockups.",
+    "sources": [
+     {
+      "url": "https://www.pbcommercial.com/contractor-ineligible-to-run-youth-lockups/",
+      "cite": "Pine Bluff Commercial, March 23, 2019"
+     }
+    ]
+   },
+   {
+    "text": "Arkansas bars bidders with a contract ended for nonperformance in the past five years.",
+    "sources": [
+     {
+      "url": "https://www.pbcommercial.com/contractor-ineligible-to-run-youth-lockups/",
+      "cite": "Pine Bluff Commercial, March 23, 2019"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Arkansas has kept the company despite repeated findings.",
+    "sources": [
+     {
+      "url": "https://jjie.org/?p=520466",
+      "cite": "Arkansas Nonprofit News Network via JJIE, 2017"
+     },
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   },
+   {
+    "text": "Rite of Passage took over the Arkansas Juvenile Assessment and Treatment Center in Alexander in August 2016.",
+    "sources": [
+     {
+      "url": "https://jjie.org/?p=520466",
+      "cite": "Arkansas Nonprofit News Network via JJIE, 2017"
+     }
+    ]
+   },
+   {
+    "text": "In 2017 the state's youth ombudsman found children held alone in cells in the center's Building 19, two of them for more than 72 hours.",
+    "sources": [
+     {
+      "url": "https://jjie.org/?p=520466",
+      "cite": "Arkansas Nonprofit News Network via JJIE, 2017"
+     }
+    ]
+   },
+   {
+    "text": "The company rejected the words \"isolation\" and \"solitary\" and ended room confinement as punishment for classroom misbehavior that June.",
+    "sources": [
+     {
+      "url": "https://jjie.org/?p=520466",
+      "cite": "Arkansas Nonprofit News Network via JJIE, 2017"
+     }
+    ]
+   },
+   {
+    "text": "When the operator Youth Opportunity Investments quit, Rite of Passage took over the state's treatment centers at Dermott, Mansfield and Harrisburg on July 1, 2020.",
+    "sources": [
+     {
+      "url": "https://humanservices.arkansas.gov/news/dhs-amends-contract-with-rite-of-passage-to-manage-juvenile-treatment-centers/",
+      "cite": "Arkansas Department of Human Services, 2020"
+     }
+    ]
+   },
+   {
+    "text": "In 2023 a Mansfield employee, Aileen Ledesma, pleaded guilty to sexually assaulting youths there and was sentenced to five years in prison.",
+    "sources": [
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   },
+   {
+    "text": "State investigators found a boy confined to his room for 36 hours, and staff rotating children through 59-minute confinements to stay under the limit that required approval.",
+    "sources": [
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   },
+   {
+    "text": "The ombudsman found that every one of 50 treatment charts she audited at Alexander was out of compliance, with youths \"going months without individual therapy services.\"",
+    "sources": [
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   },
+   {
+    "text": "The company said it disputed most of the allegations, and the state did not take action against its contract.",
+    "sources": [
+     {
+      "url": "https://arkansasadvocate.com/2023/07/26/sex-therapy-isolation-concerns-pile-up-in-arkansas-juvenile-lockups/",
+      "cite": "Arkansas Advocate, July 26, 2023"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "In October 2021 Rite of Passage took over two Utah programs from Sequel Youth and Family Services, Falcon Ridge Ranch in Virgin and Lava Heights Academy in Toquerville; both schools' websites still named Sequel in late September and named Rite of Passage by October 22.",
+    "sources": [
+     {
+      "url": "https://web.archive.org/web/20210927030443/https://falconridgeranch.com/",
+      "cite": "Falcon Ridge Ranch website, Sept. 27, 2021 (archived)"
+     },
+     {
+      "url": "https://web.archive.org/web/20211022150240/https://www.falconridgeranch.com/",
+      "cite": "Falcon Ridge Ranch website, Oct. 22, 2021 (archived)"
+     },
+     {
+      "url": "https://web.archive.org/web/20211020025015/https://lavaheightsacademy.com/",
+      "cite": "Lava Heights Academy website, Oct. 20, 2021 (archived)"
+     }
+    ]
+   },
+   {
+    "text": "Utah has licensed both to Care Youth Corporation, doing business as Rite of Passage, since January 31, 2022.",
+    "sources": [
+     {
+      "url": "https://ccl.utah.gov/ccl/facility/94203",
+      "cite": "Utah Office of Licensing, facility record for license 94203 (Care Youth Corporation - Falcon Ridge Ranch dba Rite of Passage)"
+     },
+     {
+      "url": "https://ccl.utah.gov/ccl/facility/94202",
+      "cite": "Utah Office of Licensing, facility record for license 94202 (Care Youth Corporation dba Rite of Passage / Lava Heights Academy)"
+     }
+    ]
+   },
+   {
+    "text": "In September 2022 Lava Heights hired Paul Anthony Nichols, 22, to supervise girls; that December he was charged with sexually abusing two girls under 16 in the program, and in May 2023 he was sentenced to prison after pleading guilty to five counts of forcible sexual abuse and two of sexual exploitation of a minor.",
+    "sources": [
+     {
+      "url": "https://www.ksl.com/article/50530931/southern-utah-man-accused-of-abusing-girls-at-residential-treatment-program",
+      "cite": "KSL, Dec. 2, 2022"
+     },
+     {
+      "url": "https://stgeorgeutah.com/?p=1009351",
+      "cite": "St. George News, May 2023"
+     }
+    ]
+   }
+  ]
+ ],
+ "testimony": [],
+ "version": "5140d5fe573bfbad"
+}

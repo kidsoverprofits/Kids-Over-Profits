@@ -154,3 +154,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow
    the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in
    business-filings, so keep the `memory_limit` above.
+6. **test-facility-pages: "every map slice holds its root and only graph names, under 120 KB"** (found 2026-11-11 on
+   main, mirror of 2026-11-10): Aspen Education Group (100001), SUWS of the Carolinas, Provo Canyon School, Aspen
+   Achievement Academy and Asheville Academy for Girls fail the slice check. It reads kop-data's network/graph.json,
+   which the About rewrite work did not touch; check whether a graph rebuild changed those slices.

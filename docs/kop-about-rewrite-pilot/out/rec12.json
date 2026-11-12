@@ -87,7 +87,7 @@
  "testimony": [
   {
    "text": "I would highly recommend never sending your child here!!! They gave my daughter a drug that caused her to become ill. It was approximately one week before they got her appropriate medical care. She was placed in the hospital and in I.C.U. It could have cost my child her life!!! They are terrible in communication. The staff directory seems to be wrong and they do not allow children to call home outside of family therapy (15 minutes) once per week.",
-   "who": "Parent (\"Tony\")",
+   "who": "Parent",
    "where": "Google review",
    "date": "2014",
    "key": "gtony",
@@ -95,7 +95,7 @@
   },
   {
    "text": "They are a joke; they force kids to work the horses. They will not let you talk to your girl. They took all my rights away. Now they hurt kids … they made her take 16 pills a day.",
-   "who": "Jaimie S.",
+   "who": "Parent",
    "where": "Yelp",
    "date": "August 2018",
    "key": "yelpfr"
@@ -106,7 +106,8 @@
    "where": "E-mail quoted by HEAL",
    "date": "April 2019",
    "key": "email19",
-   "via": "HEAL's quotation"
+   "via": "HEAL's quotation",
+   "note": "What this account says about Nale Fakahua is the writer's allegation, not a finding."
   },
   {
    "text": "Anyways, I feel like Falcon Ridge was more equipped with dealing with troubled teens and not with kids who were severely mentally ill. While I was on cleaning duty, I drank half a bottle of bleach and had to get my stomach pumped.",

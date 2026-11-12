@@ -121,7 +121,8 @@ if (!function_exists('kop_facility_str')) {
 
 if (!function_exists('kop_facility_testimony_list')) {
     /**
-     * Survivor testimony entries: {id, text, source, date, movedFrom, publish}.
+     * Survivor testimony entries: {id, text, source, date, url, note, movedFrom, publish}. url: where the
+     * person published it (a quote from an About rewrite, inc/about-rewrites.php).
      * A bare string becomes an entry; entries without text are dropped.
      * publish is true only when an admin ticked "OK to publish", so nothing
      * shows on a public page by default. Mirrors v2TestimonyList() in
@@ -141,6 +142,8 @@ if (!function_exists('kop_facility_testimony_list')) {
                 'text'      => $text,
                 'source'    => kop_facility_str($entry['source'] ?? ''),
                 'date'      => kop_facility_str($entry['date'] ?? ''),
+                'url'       => kop_facility_str($entry['url'] ?? ''),
+                'note'      => kop_facility_str($entry['note'] ?? ''),
                 'movedFrom' => kop_facility_str($entry['movedFrom'] ?? ''),
                 'publish'   => $publish === true || $publish === 1 || $publish === '1' || $publish === 'true',
             );

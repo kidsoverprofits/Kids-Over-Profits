@@ -1,0 +1,665 @@
+{
+ "page": "facility/canyon-state-academy-az",
+ "name": "Canyon State Academy",
+ "from": "pilot rec11",
+ "sentences": [
+  [
+   {
+    "text": "Canyon State Academy is a residential treatment center for boys in Queen Creek, Arizona, run by Rite of Passage.",
+    "sources": [
+     {
+      "url": "https://canyonstateacademy.com/about-us/",
+      "cite": "Canyon State Academy website, \"About Us\""
+     }
+    ]
+   },
+   {
+    "text": "Until 2000 it was Arizona Boys Ranch, which by 1998 held more than 500 boys, about three-quarters of them placed by California.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Accusations that its staff hurt boys go back to at least 1971.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1998 a 16-year-old, Nicholaus Contreraz, died after staff punished him for complaining that he was sick; Arizona refused to renew the ranch's license and a grand jury indicted five staff members.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     },
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Under its new name, two students have died of drug overdoses since 2020, and in 2023 several staff members were charged with assaulting students.",
+    "sources": [
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     },
+     {
+      "url": "https://archive.is/8hGag",
+      "cite": "YourValley.net, Oct. 5, 2022"
+     },
+     {
+      "url": "https://archive.is/SUwGB",
+      "cite": "FOX 10 Phoenix, July 19, 2023"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The Phoenix Rotary Club founded Arizona Boys Ranch as a nonprofit in 1949.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1971 it held 109 boys at its Queen Creek compound.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Robert B. Thomas, who came from a Michigan youth camp in 1977, ran it for the next two decades and built a hard-line, discipline-first program.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "By 1998 it housed more than 500 boys on seven campuses across Arizona, including the Queen Creek compound and a boot camp near Oracle.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Its $26 million budget came mostly from taxpayers, and California's Department of Social Services paid for about three-quarters of the boys.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The violence was reported from the start of that period.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1971 the superintendent, Wendell Newell, was accused of punching boys, and the ranch's president answered that wayward youth could not be \"handled by pantywaist methods\".",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "A 1982 state report described staff grabbing boys by the throat and throwing them to the ground, and Maricopa County courts removed 19 boys from the ranch.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1987, after runaways reported abuse, a state Department of Corrections investigation supported Child Protective Services' findings; the ranch disputed them.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1994 Child Protective Services substantiated 13 incidents of abuse and suspended the ranch's license.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1995 Alameda County, California, withdrew its 67 boys after half of them said ranch staff had abused them, and the county's juvenile court concluded there was \"systematic abuse\".",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     },
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "That year the ranch fired two employees who had struck a 15-year-old California boy 25 to 30 times.",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The ranch paid a team led by former U.S. Attorney Melvin McDonald about $400,000 to investigate, and the team called the abuse claims bogus.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     },
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In 1996 five state employees wrote in an internal memo that the ranch \"continues to abuse children, thwart regulations and use their political influence\" to fight licensing rules.",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     }
+    ]
+   },
+   {
+    "text": "That year the Department of Economic Security agreed to give the ranch 48 hours' notice before inspections.",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The state put the ranch's license on provisional status for abuse three times.",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     }
+    ]
+   },
+   {
+    "text": "By mid-1998 nearly 100 child abuse complaints had been made against the ranch or its staff in five years, and state officials had substantiated 21.",
+    "sources": [
+     {
+      "url": "https://www.latimes.com/archives/la-xpm-1998-jun-14-me-59904-story.html",
+      "cite": "Los Angeles Times, June 14, 1998"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "On June 27, 1994, 17-year-old Lorenzo Johnson ran from ranch employees while being driven from Queen Creek to Oracle.",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/news/murdering-the-truth-6425048/",
+      "cite": "Phoenix New Times, 1994"
+     }
+    ]
+   },
+   {
+    "text": "Cornered at a bridge, he went into the Central Arizona Project canal and drowned; his body was found seven days later, 15 miles downstream.",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/news/murdering-the-truth-6425048/",
+      "cite": "Phoenix New Times, 1994"
+     }
+    ]
+   },
+   {
+    "text": "A Pinal County detective ruled the death accidental.",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/news/murdering-the-truth-6425048/",
+      "cite": "Phoenix New Times, 1994"
+     }
+    ]
+   },
+   {
+    "text": "His mother, Minnie Dunwoody, told the Arizona Republic, \"I think they killed him, but why, I do not know.\"",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/news/murdering-the-truth-6425048/",
+      "cite": "Phoenix New Times, 1994"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "Nicholaus Contreraz, 16, was sent from California to the ranch's Oracle boot camp after stealing a car.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     },
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In his last weeks there he had chest pain, trouble breathing, diarrhea and constant vomiting, and lost 14 pounds in two months.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     },
+     {
+      "url": "https://www.phoenixnewtimes.com/news/death-camp-6421818",
+      "cite": "Phoenix New Times, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Staff called him a malingerer and punished him harder when he complained.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The nurse, Linda Babb, kept sending him back to strenuous exercise.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Staff made him do push-ups over a bucket of his own soiled clothes and threw water on his face when he passed out.",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/news/death-camp-6421818",
+      "cite": "Phoenix New Times, 1998"
+     }
+    ]
+   },
+   {
+    "text": "He collapsed and died on March 2, 1998.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The medical examiner found empyema, an infection that had filled his chest cavity with pus, and his body had 71 cuts and bruises.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     },
+     {
+      "url": "https://www.phoenixnewtimes.com/news/death-camp-6421818",
+      "cite": "Phoenix New Times, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The ranch first said he died during recreation, and later acknowledged he had been mistreated.",
+    "sources": [
+     {
+      "url": "https://ackert.fortunecity.ws/0531ranch.htm",
+      "cite": "The Arizona Republic, May 31, 1998"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "The state's response was the most serious the ranch had faced.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "On August 26, 1998, Linda Blessing, director of the Arizona Department of Economic Security (DES), refused to renew its license.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "DES found 17 employees, including supervisors, responsible for 32 instances of abuse or neglect of Contreraz, part of what investigators called \"a pattern of abuse and neglect\".",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "The state would put 17 former staff members on its Child Abuser Directory, and officials could not recall Arizona ever denying such a license before.",
+    "sources": [
+     {
+      "url": "https://www.baltimoresun.com/1998/08/27/arizona-denies-license-to-boot-camp-after-death-calif-teen-died-of-abuse-neglect-at-juvenile-facility/",
+      "cite": "The Baltimore Sun (wire), Aug. 27, 1998"
+     }
+    ]
+   },
+   {
+    "text": "A California report found \"medical neglect and physical abuse\" and \"widespread excessive use of physical restraint\" at the ranch.",
+    "sources": [
+     {
+      "url": "https://www.baltimoresun.com/1998/08/27/arizona-denies-license-to-boot-camp-after-death-calif-teen-died-of-abuse-neglect-at-juvenile-facility/",
+      "cite": "The Baltimore Sun (wire), Aug. 27, 1998"
+     }
+    ]
+   },
+   {
+    "text": "California cut off funding, and enrollment fell from nearly 600 boys at seven sites to 150.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/1998/8/28/19398585/abuse-allegations-have-arizona-boys-ranch-surrounded/",
+      "cite": "Deseret News (The Arizona Republic), Aug. 28, 1998"
+     }
+    ]
+   },
+   {
+    "text": "On October 1, 1998, a Pinal County grand jury indicted Babb and four \"work specialists\", Geoffrey Sean Lewis, Montgomery Clayton Hoover, Michael Martin Moreno and Troy Michael Jones, each on one count of child abuse and one of manslaughter.",
+    "sources": [
+     {
+      "url": "https://archive.seattletimes.com/archive/19981002/2775433/arizona-boys-ranch-staff-indicted-in-teens-death----five-including-nurse-face-abuse-charges-after-16-year-old-died",
+      "cite": "The Seattle Times, Oct. 2, 1998"
+     }
+    ]
+   },
+   {
+    "text": "In December 1999 a judge dismissed felony child abuse charges against two of the former workers after prosecutors concluded they could not be linked to his injuries.",
+    "sources": [
+     {
+      "url": "https://azdailysun.com/article_213ca401-d535-5db5-9429-db3cae68afec.html",
+      "cite": "Arizona Daily Sun (AP), December 1999"
+     }
+    ]
+   },
+   {
+    "text": "By September 2000 none of the five still faced charges.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/2000/9/5/19527219/lack-of-murder-trial-reeks/",
+      "cite": "Deseret News (E.J. Montini, The Arizona Republic), Sept. 5, 2000"
+     }
+    ]
+   },
+   {
+    "text": "The last was the nurse, Linda Babb, whose charges prosecutors dropped after a key medical witness, Dr. Robert Kearl, reversed his testimony.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/2000/9/5/19527219/lack-of-murder-trial-reeks/",
+      "cite": "Deseret News (E.J. Montini, The Arizona Republic), Sept. 5, 2000"
+     }
+    ]
+   },
+   {
+    "text": "The ranch stayed shut only briefly: about two months after the denial, a settlement with the state let it reopen on condition that it adopt a \"zero tolerance\" policy on abuse and hire an ombudsman to advocate for the boys.",
+    "sources": [
+     {
+      "url": "https://www.phoenixnewtimes.com/?p=40507545",
+      "cite": "Phoenix New Times (Chris Farnsworth), Oct. 15, 1998"
+     }
+    ]
+   },
+   {
+    "text": "Nicholaus Contreraz's family settled a civil suit against the ranch for an estimated $1 million.",
+    "sources": [
+     {
+      "url": "https://www.deseret.com/2000/9/5/19527219/lack-of-murder-trial-reeks/",
+      "cite": "Deseret News (E.J. Montini, The Arizona Republic), Sept. 5, 2000"
+     }
+    ]
+   },
+   {
+    "text": "The Associated Press reported in July 1999 that his mother had received more than $1 million in civil settlements.",
+    "sources": [
+     {
+      "url": "https://archive.is/ZhgwY",
+      "cite": "Associated Press, \"Mother of dead boy reaches settlement with Boys Ranch\", July 10, 1999"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "In 2000 Arizona Boys Ranch was renamed Canyon State Academy.",
+    "sources": [
+     {
+      "url": "https://www.eastvalleytribune.com/news/worker-accused-of-sex-with-teen/article_97db1f5e-9c27-5d2f-bc5f-bb7a9cf9133d.html",
+      "cite": "East Valley Tribune, 2003"
+     }
+    ]
+   },
+   {
+    "text": "The East Valley Tribune reported in 2003 that the name was changed \"to help improve its image after a student died amid allegations of abuse\".",
+    "sources": [
+     {
+      "url": "https://www.eastvalleytribune.com/news/worker-accused-of-sex-with-teen/article_97db1f5e-9c27-5d2f-bc5f-bb7a9cf9133d.html",
+      "cite": "East Valley Tribune, 2003"
+     }
+    ]
+   },
+   {
+    "text": "It is now operated by Rite of Passage, and the school is a nonprofit 501(c)(3) organization.",
+    "sources": [
+     {
+      "url": "https://canyonstateacademy.com/about-us/",
+      "cite": "Canyon State Academy website, \"About Us\""
+     }
+    ]
+   },
+   {
+    "text": "Complaints continued under the new name.",
+    "sources": [
+     {
+      "url": "https://www.eastvalleytribune.com/news/worker-accused-of-sex-with-teen/article_97db1f5e-9c27-5d2f-bc5f-bb7a9cf9133d.html",
+      "cite": "East Valley Tribune, 2003"
+     }
+    ]
+   },
+   {
+    "text": "Maricopa County Sheriff's Office records of calls to the Queen Creek campus from 2000 through 2013 run to 109 pages and include reports of sexual assault of minors, child abuse and missing persons.",
+    "sources": [
+     {
+      "url": "https://kidsoverprofits.org/wp-content/uploads/MCSO-Canyon-State-Academy-location-history-2000-13-HEAL-copy-Wayback-2021-07-24.pdf",
+      "cite": "Maricopa County Sheriff's Office, Location History Report, 20061 E. Rittenhouse Rd., Queen Creek (Arizona Boys Ranch / Canyon State Academy), Jan. 1, 2000 – Dec. 31, 2013, printed Aug. 19, 2014 (109 pp.) (KOP copy of the record HEAL posted, from the Wayback Machine capture of July 24, 2021: web.archive.org/web/20210724065811/http://www.heal-online.org/abrcsaroppolicecalls.pdf)"
+     }
+    ]
+   },
+   {
+    "text": "In February 2003 a 26-year-old employee was placed on leave over allegations that she had sex with a 16-year-old student.",
+    "sources": [
+     {
+      "url": "https://www.eastvalleytribune.com/news/worker-accused-of-sex-with-teen/article_97db1f5e-9c27-5d2f-bc5f-bb7a9cf9133d.html",
+      "cite": "East Valley Tribune, 2003"
+     }
+    ]
+   },
+   {
+    "text": "In 2014 Sycamore Canyon Academy in Oracle began housing unaccompanied migrant children, and Oracle residents reported runaways and a rise in violence.",
+    "sources": [
+     {
+      "url": "https://archive.is/ygxKD",
+      "cite": "Arizona Daily Independent, Nov. 11, 2014"
+     },
+     {
+      "url": "https://archive.is/mNgC0",
+      "cite": "Arizona Daily Independent, Aug. 25, 2014"
+     }
+    ]
+   },
+   {
+    "text": "In December 2015 Maryland's Juvenile Justice Monitoring Unit reported that two boys the state had sent to Canyon State were seriously injured in restraints in which staff held their arms behind their heads and pressed their heads to their knees; one had trouble breathing and injured his knee and face, and the other suffered a compression fracture of his back.",
+    "sources": [
+     {
+      "url": "http://www.oag.state.md.us/jjmu/reports/15_Quarter3.pdf",
+      "cite": "Maryland Juvenile Justice Monitoring Unit, 2015 Third Quarter Report (December 2015)"
+     }
+    ]
+   }
+  ],
+  [
+   {
+    "text": "On January 21, 2020, a 17-year-old student was found unresponsive at Canyon State and died; the Maricopa County Sheriff's Office investigated, and the medical examiner later ruled that he died of a drug overdose.",
+    "sources": [
+     {
+      "url": "https://www.azcentral.com/story/news/local/pinal/2020/01/23/17-year-old-canyon-state-academy-student-dies/4558938002/",
+      "cite": "The Arizona Republic, Jan. 23, 2020"
+     },
+     {
+      "url": "https://www.12news.com/article/news/local/valley/student-found-unresponsive-queen-creek/75-0da0a54d-1c2e-459a-ad07-e64dc36a83fa",
+      "cite": "12 News, Jan. 22, 2020"
+     },
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     }
+    ]
+   },
+   {
+    "text": "On October 3, 2022, a 16-year-old student died of a suspected overdose and two others were hospitalized; early reports suggested family members may have supplied the drugs.",
+    "sources": [
+     {
+      "url": "https://archive.is/8hGag",
+      "cite": "YourValley.net, Oct. 5, 2022"
+     },
+     {
+      "url": "https://archive.is/oudCT",
+      "cite": "AZFamily, Oct. 4, 2022"
+     },
+     {
+      "url": "https://www.abc15.com/news/region-southeast-valley/queen-creek/one-dead-two-hospitalized-during-possible-overdose-at-canyon-state-academy-in-queen-creek",
+      "cite": "ABC15, Oct. 2022"
+     }
+    ]
+   },
+   {
+    "text": "Officers had responded to the school 239 times between January 12 and October 4, 2022.",
+    "sources": [
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     }
+    ]
+   },
+   {
+    "text": "The school then faced questions over those calls, many about missing students and assaults.",
+    "sources": [
+     {
+      "url": "https://archive.is/txCXu",
+      "cite": "FOX 10, Nov. 1, 2022"
+     },
+     {
+      "url": "https://archive.is/GW3da",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     },
+     {
+      "url": "https://archive.is/cIdqU",
+      "cite": "3TV/CBS 5, Oct. 7, 2022"
+     },
+     {
+      "url": "https://archive.is/EtHH8",
+      "cite": "WBRC, Oct. 6, 2022"
+     }
+    ]
+   },
+   {
+    "text": "Former students spoke to FOX 10 that October.",
+    "sources": [
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     }
+    ]
+   },
+   {
+    "text": "Christopher Nixon said, \"I remember, like the staff saying, 'It's our goal to like, make you hate it here, so you never want to come back,'\" and \"It's just not a safe environment.\"",
+    "sources": [
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     }
+    ]
+   },
+   {
+    "text": "His mother, Tiffany Nixon, who adopted him, said, \"I feel like there was this desire to punish, not just the mind, but the body and the soul, you know.\"",
+    "sources": [
+     {
+      "url": "https://fox10phoenix.com/news/canyon-state-academy-addresses-concerns-teen-death-hundreds-police-calls-service-queen-creek",
+      "cite": "FOX 10 Phoenix, Oct. 31, 2022"
+     }
+    ]
+   },
+   {
+    "text": "A foster parent called for closer state oversight.",
+    "sources": [
+     {
+      "url": "https://archive.is/cIdqU",
+      "cite": "3TV/CBS 5, Oct. 7, 2022"
+     }
+    ]
+   },
+   {
+    "text": "In July 2023 police records and Department of Child Safety files detailed staff assaulting students during restraints, and several staff members were charged, some with aggravated assault.",
+    "sources": [
+     {
+      "url": "https://archive.is/SUwGB",
+      "cite": "FOX 10 Phoenix, July 19, 2023"
+     }
+    ]
+   }
+  ]
+ ],
+ "testimony": [],
+ "version": "490a8d0a59981a88"
+}

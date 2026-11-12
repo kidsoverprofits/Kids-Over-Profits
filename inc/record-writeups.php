@@ -425,9 +425,14 @@ function kop_wu_page_about($fid, array $notes, $about, callable $build = null) {
     $paras = (array) ($wu['published']['paragraphs'] ?? array());
     if (!$paras) return $about;
     $out = array('paragraphs' => array(), 'also' => array(), 'writeup' => true);
-    foreach ($paras as $p) {
-        $s = kop_wu_paragraph_sentences($p);
-        if ($s) $out['paragraphs'][] = $s;
+    if (!empty($wu['published']['sentences']) && is_array($wu['published']['sentences'])) {
+        // A rewrite (inc/about-rewrites.php) keeps its sentences as written: print sources keep their citation.
+        foreach ($wu['published']['sentences'] as $p) if (is_array($p) && $p) $out['paragraphs'][] = $p;
+    } else {
+        foreach ($paras as $p) {
+            $s = kop_wu_paragraph_sentences($p);
+            if ($s) $out['paragraphs'][] = $s;
+        }
     }
     $covered = array_flip((array) ($wu['published']['covered'] ?? array()));
     $left = array_values(array_filter($notes, function ($l) use ($covered) { return !isset($covered[kop_wu_note_key($l)]); }));
