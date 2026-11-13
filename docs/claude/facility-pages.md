@@ -117,8 +117,18 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-eras-editor.php  
 # (kop_facility_pages_popular_name_lists(): a past name -> record's name "Now known as"; the currentName -> record's name "Formerly";
 # an other name -> "Also known as"). $page['name'] is the shown name, $page['record_name'] the record's own: match on record_name.
 # Lists that read only the name column use kop_facility_shown_name($id, $name) (sibling programs, homes, site map); the company page,
-# directory cards (both tabs), search and the network map label (build stamps node.popularName, js/network-map/store.js relabels) too
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-popular-name.php   # store + JS normalizer, name lines, both pencils + undo, page, search previews, map label
+# directory cards (both tabs), search and the network map label (build stamps node.popularName, js/network-map/store.js relabels) too.
+# The state hub cards (kop_state_attach_v2_names() sets popular_name, js/state-page.js titles the card; folder/news matching keeps the
+# tile's own name) and the prose links (inc/content-links.php: the popular name and the currentName match too, the link is labelled
+# by the popular name) follow it. Admin screens (finder, Data Manager, review cards, Merge Duplicates) keep the record's name on
+# purpose: it is the name admins match, merge and rename by.
+# A company's popular name (operator.popularName, 2026-11-13): picked in the company names pencil (operator:<id>:names) among its
+# currentName, pastNames and otherNames, kept only while it is one of them (kop_operator_popular_name_clean(), applied on every save).
+# kop_operator_pages_index() gives it as 'display' (the page title, company index, search, prose-link label, site map, Woodbury) and
+# keeps the record's 'record_display' for the slug, which never moves; kop_operator_page_data() puts the record's name on a names
+# line ('current_name' / 'formerly' / 'aka', the facility rule), the app gets 'formerly' too. Search previews, the directory's
+# company headings (data-operator-shown; data-operator stays the record's, for matching) and the network map label follow it.
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-popular-name.php   # store + JS normalizer, name lines, both pencils + undo, page, search previews, map label, state hub, prose links, companies
 # Investors (inc/investors.php, KOP Tools > Investors): one row per investor ({prefix}kop_investors, kind from Dropdown Lists 'investor-kinds'),
 # one per stake in a company or program ({prefix}kop_investor_links: role 'investor-roles', years, detail, source), every change in
 # {prefix}kop_investor_log (Undo puts back exactly that change while nothing changed it since). The pages' Investors line is

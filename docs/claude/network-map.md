@@ -9,7 +9,8 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 (kop-pipeline) node scripts/test-network-graph.js
 # A facility's most popular name (identification.popularName): the build stamps node.popularName on its node (not when that
 # name is another node on the board) and js/network-map/store.js labelByPopularName() makes it the label, the board name
-# kept as "now called" / "formerly" / other name. Shows after the next build
+# kept as "now called" / "formerly" / other name. A company's (operator.popularName) is stamped on its node the same way.
+# Shows after the next build
 
 # The map rebuilds itself: inc/network-rebuild.php hashes what the build reads (staff, owners, names, years, status,
 # consultants) hourly and, when it moves, starts kop-pipeline's build-network-map.yml (sync its tables over SSH, related_facilities among them,

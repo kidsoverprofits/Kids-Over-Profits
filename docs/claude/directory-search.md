@@ -107,7 +107,8 @@ php scripts/test-search-aliases.php               # against tmp/prod.sqlite
 # kop_alias_label(), the one that matched first) and places (facility: "Also at <city, ST>", "Formerly in <city, ST> (years)";
 # company: "Based in <headquarters>"). The header dropdown and search.php print them as kop_v2_search_preview_lines(); the popup
 # (js/global-search.js previewLines()) as lines under the name. A facility with a most popular name (identification.popularName,
-# docs/claude/facility-pages.md) is listed under it; a hit on the record's own name says so ("Now known as ..."). The directory cards
+# docs/claude/facility-pages.md) is listed under it, and so is a company with one (operator.popularName,
+# kop_v2_search_operator_preview() 'display'); a hit on the record's own name says so ("Now known as ..."). The directory cards
 # (js/tti-program-index.js, js/location-index.js) head with it too, the record's name under "Now known as" / "Also known as"
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-popular-name.php   # the previews and the three renderers, on a scratch copy
 # Wherever companies and facilities share a list, each row carries a Company / Facility pill: kop_kind_pill() == kopKindPill() (inc/kind-pill.php)

@@ -462,6 +462,18 @@ function displayFacilities(facilitiesData, containerId) {
     const getFacilityPopularName = facility => cleanText(getValueFromKeys(facility, ['identification.popularName', 'popularName']) || '');
     const getFacilityShownName = facility => getFacilityPopularName(facility) || getFacilityDisplayName(facility);
     const getFacilityCardName = facility => cleanText(facility && facility.nameUnderOperator) || getFacilityShownName(facility);
+    // A company's popular name (operator.popularName, inc/operator-pages.php kop_operator_popular_name_clean()):
+    // only while it is still one of its names (the name it uses now, past names, also known as).
+    const getOperatorPopularName = operator => {
+        const popular = cleanText(operator && operator.popularName);
+        if (!popular) return '';
+        const key = popular.toLowerCase();
+        const own = [operator.currentName].concat(
+            Array.isArray(operator.pastNames) ? operator.pastNames : [],
+            Array.isArray(operator.otherNames) ? operator.otherNames : []
+        ).map(n => (typeof n === 'string' ? cleanText(n) : '')).find(n => n && n.toLowerCase() === key);
+        return own || '';
+    };
 
     const getMergedLocation = (obj) => {
         if (!obj || typeof obj !== 'object') return null;
@@ -872,8 +884,8 @@ function displayFacilities(facilitiesData, containerId) {
     operatorGroups.sort((a, b) => {
         const operatorA = a && a.operator ? a.operator : {};
         const operatorB = b && b.operator ? b.operator : {};
-        const nameA = cleanText(operatorA.name) || cleanText(operatorA.currentName) || cleanText(a && a.name) || '';
-        const nameB = cleanText(operatorB.name) || cleanText(operatorB.currentName) || cleanText(b && b.name) || '';
+        const nameA = getOperatorPopularName(operatorA) || cleanText(operatorA.name) || cleanText(operatorA.currentName) || cleanText(a && a.name) || '';
+        const nameB = getOperatorPopularName(operatorB) || cleanText(operatorB.name) || cleanText(operatorB.currentName) || cleanText(b && b.name) || '';
         return compareDisplayText(nameA, nameB);
     });
 
@@ -1100,6 +1112,8 @@ function displayFacilities(facilitiesData, containerId) {
         if (operatorName === 'Unknown Parent Company') {
             return null;
         }
+        // The heading shows its popular name, if picked; operatorName stays the record's, for matching.
+        const operatorShownName = getOperatorPopularName(operator) || operatorName;
 
         // Operator-level searchable text: display name + the organization's
         // alternate/past names + the project name, so searching an old or
@@ -1117,7 +1131,7 @@ function displayFacilities(facilitiesData, containerId) {
             ]))
         );
         const operatorSearchText = collectUniqueTexts(
-            [operatorName],
+            [operatorShownName, operatorName],
             operatorAltNames,
             [cleanText(operatorGroup && operatorGroup.name) || '']
         ).join(' | ');
@@ -1136,10 +1150,10 @@ function displayFacilities(facilitiesData, containerId) {
         });
 
         // Build operator header with Name - add class for long names or long words
-        const hasLongWord = operatorName.split(' ').some(word => word.length > 14);
-        const isTooLong = operatorName.length > 25;
+        const hasLongWord = operatorShownName.split(' ').some(word => word.length > 14);
+        const isTooLong = operatorShownName.length > 25;
         const operatorNameClass = (hasLongWord || isTooLong) ? 'operator-name operator-name-long' : 'operator-name';
-        const operatorHeaderName = escapeHtml(operatorName);
+        const operatorHeaderName = escapeHtml(operatorShownName);
         let operatorHeader = `<span class="${operatorNameClass}">${operatorHeaderName}</span>`;
         // Build location and years - each on separate lines
         let locationYearsLine = '';
@@ -1175,7 +1189,7 @@ function displayFacilities(facilitiesData, containerId) {
             const operatorReportCount = facilityMeta.reduce((sum, meta) => sum + meta.reports, 0);
             return {
                 facilities: facilityMeta,
-                html: '<details class="operator-section" data-section="' + sectionIndex + '" data-operator="' + escapeAttribute(operatorName) + '" data-operator-search="' + escapeAttribute(operatorSearchText) + '" data-violation-facilities="' + operatorViolationFacilities + '" data-report-count="' + operatorReportCount + '" data-kop-bug-feature="program-index/operator-card" data-kop-bug-label="Operator: ' + escapeAttribute(operatorName) + '">' +
+                html: '<details class="operator-section" data-section="' + sectionIndex + '" data-operator="' + escapeAttribute(operatorName) + '" data-operator-shown="' + escapeAttribute(operatorShownName) + '" data-operator-search="' + escapeAttribute(operatorSearchText) + '" data-violation-facilities="' + operatorViolationFacilities + '" data-report-count="' + operatorReportCount + '" data-kop-bug-feature="program-index/operator-card" data-kop-bug-label="Operator: ' + escapeAttribute(operatorShownName) + '">' +
                     '<summary class="operator-header">' +
                         operatorHeader +
                         locationYearsLine +
@@ -2701,7 +2715,7 @@ function filterFacilities() {
     const operatorSections = document.querySelectorAll('#facilities-container .operator-section');
 
     operatorSections.forEach(section => {
-        const operatorName = section.dataset.operator.toLowerCase();
+        const operatorName = (section.dataset.operatorShown || section.dataset.operator).toLowerCase();
 
         // Includes the organization's alternate/past names, not just the
         // display name, so old org names still match.
@@ -3199,7 +3213,7 @@ function handleSort() {
         return textA.localeCompare(textB, undefined, { numeric: true, sensitivity: 'base' });
     };
 
-    const byName = (a, b) => compareOperatorText(a.dataset.operator, b.dataset.operator);
+    const byName = (a, b) => compareOperatorText(a.dataset.operatorShown || a.dataset.operator, b.dataset.operatorShown || b.dataset.operator);
     const reportCount = (section) => Number(section.dataset.reportCount) || 0;
 
     switch (sortValue) {

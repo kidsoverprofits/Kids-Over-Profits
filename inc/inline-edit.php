@@ -651,8 +651,9 @@ function kop_ie_facility_field(array $doc, array $def) {
             if ($path === 'facilityDetails.isPrivatelyOwned') {
                 $raw = $raw === null ? '' : ($raw ? 'yes' : 'no');
             }
-            if ($path === 'identification.popularName') {
-                $extra['options'] = kop_ie_popular_name_options((array) ($doc['identification'] ?? array()));
+            // A facility's popular name, or a company's (its fields sit at the top of the operator object).
+            if ($path === 'identification.popularName' || $path === 'popularName') {
+                $extra['options'] = kop_ie_popular_name_options($path === 'popularName' ? $doc : (array) ($doc['identification'] ?? array()));
                 $raw = (string) $raw;
                 $known = false;
                 foreach ($extra['options'] as $o) $known = $known || $o['value'] === $raw;
@@ -1379,6 +1380,8 @@ function kop_ie_operator_fields() {
             array('currentName', 'Name it uses now, if different', 'text'),
             array('otherNames', 'Also known as', 'lines'),
             array('pastNames', 'Past names', 'lines'),
+            // The name people know it by (inc/operator-pages.php kop_operator_popular_name_clean()); choices from the names above.
+            array('popularName', 'Most popular name (shown first wherever it is named)', 'select', array('help' => 'The name people know it by. The record name then shows as Now known as, Formerly or Also known as. A name added above can be picked after saving.')),
             array('type', 'Type', 'text'),
             array('status', 'Status (Active, Defunct, Acquired, Merged)', 'text'),
             array('founded', 'Founded', 'text'),
@@ -1452,6 +1455,12 @@ function kop_ie_operator_apply_values(array $op, array $values) {
             kop_ie_facility_apply($op, $field, $values[$field['name']]);
         }
     }
+    // The popular name stays only while it is one of the names above (a name taken out in this save takes the pick along).
+    if (array_key_exists('popularName', $op) && function_exists('kop_operator_popular_name_clean')) {
+        $popular = kop_operator_popular_name_clean($op['popularName'], $op);
+        if ($popular === '') unset($op['popularName']);
+        else $op['popularName'] = $popular;
+    }
     return $op;
 }
 
@@ -1468,7 +1477,7 @@ function kop_ie_operator_load(array $p) {
     // The directory's alternate-name rows (js/tti-program-index.js) open this one.
     if (($p[1] ?? 'all') === 'names') {
         $fields = array_values(array_filter(kop_ie_operator_form($json['operator']), static function ($f) {
-            return in_array($f['name'], array('currentName', 'otherNames', 'pastNames'), true);
+            return in_array($f['name'], array('currentName', 'otherNames', 'pastNames', 'popularName'), true);
         }));
         return array(
             'title'  => $row['name'] . ': names',
@@ -1520,6 +1529,10 @@ function kop_ie_operator_save(array $p, array $v) {
     });
     if (function_exists('kop_operator_pages_flush_index')) {
         kop_operator_pages_flush_index();
+    }
+    // Its names (a popular name, an other name) are what prose links match on (inc/content-links.php).
+    if (function_exists('kop_clinks_flush')) {
+        kop_clinks_flush();
     }
     $url = function_exists('kop_operator_page_url') ? (string) kop_operator_page_url($id) : '';
     kop_ie_purge_url($url);

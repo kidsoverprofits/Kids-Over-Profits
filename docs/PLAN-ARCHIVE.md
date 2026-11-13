@@ -3734,3 +3734,17 @@ From docs/plan/5-tests-failing.md item 1, verbatim. Both tests were rebased on v
   for the OHA-licensed behavioral health programs and say which is which, reword the state note and the MHRA
   channel to #7, rebuild `directory.json`, check /oregon/ and /report-abuse/?state=oregon.
   - Done 2026-11-10: kop-data 49622876 adds the ODHS Children's Care Licensing Program (OTIS) channel, says which programs OHA licenses, rewords the MHRA note; live on /oregon/.
+
+### 4.3 Records, names and data quality (done 2026-11-13)
+
+- **Most popular name, what is left** (2026-11-11, `identification.popularName`; docs/claude/facility-pages.md):
+  - Companies have no popular name yet (only facilities). Add one to the operator names pencil (operator:<id>:names)
+    and kop_operator_pages_*/search if the owner wants it.
+  - Admin screens (finder, Data Manager, review cards, Merge Duplicates) and the state hub lists still print the
+    record's name: they read the name column. Switch them to kop_facility_shown_name() if readers see them.
+  - Prose links (inc/content-links.php) match the record's name and alternate names from the index; check a mention
+    of a popular name still links once one is picked.
+  - Done 2026-11-13: companies have a popular name (operator.popularName, company names pencil; page, company index,
+    search, directory headings, prose links, network map build); the state hub cards title by the facility's popular
+    name; prose links match a popular name and the name a facility uses now. Admin screens keep the record's name on
+    purpose (docs/claude/facility-pages.md).

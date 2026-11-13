@@ -1027,13 +1027,29 @@ if (!function_exists('kop_v2_search_facility_preview')) {
 }
 
 if (!function_exists('kop_v2_search_operator_preview')) {
-    /** The same for a company: {names, places}, places being its headquarters ("Based in Nashville, TN"). */
-    function kop_v2_search_operator_preview(array $op, $name, $matched_name = '', $matched_kind = '') {
-        $names = kop_v2_search_name_lines($name, array(
-            'current' => kop_v2_search_name_list($op['currentName'] ?? null),
-            'past'    => array_merge(kop_v2_search_name_list($op['pastNames'] ?? null), kop_v2_search_name_list($op['previousNames'] ?? null), kop_v2_search_name_list($op['formerNames'] ?? null)),
-            'other'   => array_merge(kop_v2_search_name_list($op['otherNames'] ?? null), kop_v2_search_name_list($op['aliases'] ?? null)),
-        ), (string) $matched_name, (string) $matched_kind);
+    /**
+     * The same for a company: {display, names, places}, display being its popular name (operator.popularName)
+     * when one is picked, else $name, and places its headquarters ("Based in Nashville, TN"). $direct as for
+     * a facility: the record's own name matched while the result is titled by the popular name.
+     */
+    function kop_v2_search_operator_preview(array $op, $name, $matched_name = '', $matched_kind = '', $direct = false) {
+        $name = (string) $name;
+        $current = kop_v2_search_name_list($op['currentName'] ?? null);
+        $past = array_merge(kop_v2_search_name_list($op['pastNames'] ?? null), kop_v2_search_name_list($op['previousNames'] ?? null), kop_v2_search_name_list($op['formerNames'] ?? null));
+        $other = array_merge(kop_v2_search_name_list($op['otherNames'] ?? null), kop_v2_search_name_list($op['aliases'] ?? null));
+        $popular = function_exists('kop_operator_popular_name_clean') ? kop_operator_popular_name_clean($op['popularName'] ?? '', array('name' => $name) + $op) : '';
+        $display = $name;
+        if ($popular !== '' && function_exists('kop_facility_pages_popular_name_lists')) {
+            list($display, $now, $past, , $other) = kop_facility_pages_popular_name_lists($popular, $name, (string) ($current[0] ?? ''), $past, array(), $other);
+            $current = (string) $now !== '' ? array((string) $now) : array();
+            if ($direct && (string) $matched_name === '') {
+                $matched_name = $name;
+                $matched_kind = $current && mb_strtolower($current[0]) === mb_strtolower($name) ? 'current'
+                    : (in_array(mb_strtolower($name), array_map('mb_strtolower', $past), true) ? 'past' : 'other');
+            }
+        }
+        if ((string) $matched_name !== '' && mb_strtolower(trim((string) $matched_name)) === mb_strtolower($display)) $matched_name = '';
+        $names = kop_v2_search_name_lines($display, array('current' => $current, 'past' => $past, 'other' => $other), (string) $matched_name, (string) $matched_kind);
         $hq = is_string($op['headquarters'] ?? null) ? trim($op['headquarters']) : '';
         if ($hq === '') {
             $hq = kop_v2_search_place_line(array(
@@ -1042,7 +1058,8 @@ if (!function_exists('kop_v2_search_operator_preview')) {
             ));
         }
         if (mb_strlen($hq) > 80) $hq = rtrim(mb_substr($hq, 0, 77)) . '...';
-        return array('names' => $names, 'places' => $hq !== '' ? array('Based in ' . $hq) : array());
+        $matched = (string) $matched_name !== '' ? (string) $matched_name : null;
+        return array('display' => $display, 'names' => $names, 'places' => $hq !== '' ? array('Based in ' . $hq) : array(), 'matched_name' => $matched, 'matched_kind' => $matched !== null ? (string) $matched_kind : null);
     }
 }
 
@@ -1145,14 +1162,15 @@ if (!function_exists('kop_v2_search')) {
                 $stored = json_decode($o['json_data'], true);
                 $op = (is_array($stored) && isset($stored['operator'])) ? $stored['operator'] : array();
                 $hq = isset($op['headquarters']) && is_string($op['headquarters']) ? $op['headquarters'] : '';
-                $preview = kop_v2_search_operator_preview($op, (string) $o['name'], $c['alias'] ? $c['name'] : '', $c['alias'] ? $c['kind'] : '');
+                $preview = kop_v2_search_operator_preview($op, (string) $o['name'], $c['alias'] ? $c['name'] : '', $c['alias'] ? $c['kind'] : '', !$c['alias']);
                 $out['operators'][] = array(
                     'id' => (int)$o['id'],
-                    'kind' => 'operator', 'display' => $o['name'], 'operator' => $o['name'],
+                    // Shown under its popular name, if picked; `operator` stays the record's name.
+                    'kind' => 'operator', 'display' => $preview['display'], 'operator' => $o['name'],
                     'location' => $hq, 'fac_count' => (int)$o['n'], 'url' => '',
                     'profile_url' => function_exists('kop_operator_page_url') ? kop_operator_page_url((int)$o['id']) : '',
-                    'matched_name' => $c['alias'] ? $c['name'] : null,
-                    'matched_kind' => $c['alias'] ? $c['kind'] : null,
+                    'matched_name' => $preview['matched_name'],
+                    'matched_kind' => $preview['matched_kind'],
                     // Its other names and headquarters, for the previews (kop_v2_search_preview_lines()).
                     'names' => $preview['names'],
                     'places' => $preview['places'],

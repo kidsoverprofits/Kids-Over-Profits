@@ -1318,7 +1318,8 @@
     // searching a name the program has since dropped, or the one it trades
     // under now, has to see it without opening Details.
     const renderAltNameLines = (facility, displayName) => {
-        const seen = new Set([displayName, facility.name].map(n => String(n || '').trim().toLowerCase()));
+        // Under a popular name the tile's own name is one of the lines (the server put it there), so it is not skipped.
+        const seen = new Set([displayName, facility.popular_name ? '' : facility.name].map(n => String(n || '').trim().toLowerCase()));
         const now = collectAltNames(facility, ['current_name', 'currentName'], seen);
         const also = collectAltNames(facility, ['other_names', 'otherNames', 'aliases'], seen);
         const formerly = collectAltNames(facility, ['past_names', 'pastNames', 'former_names', 'formerNames'], seen);
@@ -1335,8 +1336,13 @@
         return lines.length ? `<div class="facility-card-akas">${lines.join('')}</div>` : '';
     };
 
+    // The card's title: the name people know it by (popular_name, inc/rest-api.php kop_state_attach_v2_names()),
+    // else the best of its names. matchName (without the popular name) finds its folder and news.
+    const getFacilityShownName = facility => normalizeText(facility && facility.popular_name) || getFacilityDisplayName(facility);
+
     const facilityCardHtml = facility => {
-        const displayName = getFacilityDisplayName(facility);
+        const matchName = getFacilityDisplayName(facility);
+        const displayName = getFacilityShownName(facility);
 
         // The collapsible "Details" panel: titled groups of label / value rows.
         // Current, other and past names are drawn on the card face, not in here.
@@ -1498,10 +1504,10 @@
         detailRows.length = 0;
         detailRows.push(...filteredDetailRows);
 
-        const folderId = findFolderForFacility(displayName);
+        const folderId = findFolderForFacility(matchName);
         const hasInspections = Array.isArray(facility.inspections) && facility.inspections.length > 0;
         const hasDetails = detailRows.length > 0;
-        const newsItems = mergeNewsItems(findNewsForFacility(displayName), facility.linked_news);
+        const newsItems = mergeNewsItems(findNewsForFacility(matchName), facility.linked_news);
         const hasNews = newsItems.length > 0;
         const lawsuitItems = Array.isArray(facility.linked_lawsuits) ? facility.linked_lawsuits : [];
         const memorialItems = Array.isArray(facility.memorials) ? facility.memorials : [];
@@ -1705,7 +1711,7 @@
         // out, matching the state-reports page convention.
         const presentLetters = new Set();
         [...consolidatedActive, ...consolidatedClosed].forEach(f => {
-            const name = getFacilityDisplayName(f);
+            const name = getFacilityShownName(f);
             const first = (name.match(/[A-Za-z0-9]/) || ['#'])[0].toUpperCase();
             presentLetters.add(/[A-Z]/.test(first) ? first : '#');
         });

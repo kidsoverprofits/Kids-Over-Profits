@@ -86,6 +86,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
         <?php if ($page['current_name'] !== '') : ?>
             <p class="kop-fp-formerly">Now known as <?php echo esc_html($page['current_name']); ?></p>
         <?php endif; ?>
+        <?php if (!empty($page['formerly'])) : ?>
+            <p class="kop-fp-formerly">Formerly <?php echo esc_html(implode(', ', $page['formerly'])); ?></p>
+        <?php endif; ?>
         <?php if ($page['aka']) : ?>
             <p class="kop-fp-formerly">Also known as <?php echo esc_html(implode(', ', $page['aka'])); ?></p>
         <?php endif; ?>

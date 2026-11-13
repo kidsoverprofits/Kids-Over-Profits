@@ -5040,6 +5040,12 @@ function kop_state_merge_programs_and_inspections(array $programs, array $inspec
 
     kop_state_attach_v2_names($merged, $state_name);
     kop_state_attach_related_records($merged, $state_name);
+    // A tile shown under its popular name (popular_name, kop_state_attach_v2_names()) sorts under it.
+    if (array_filter(array_column($merged, 'popular_name'))) {
+        usort($merged, static function ($a, $b) {
+            return strnatcasecmp((string) (($a['popular_name'] ?? '') ?: $a['name']), (string) (($b['popular_name'] ?? '') ?: $b['name']));
+        });
+    }
 
     $is_closed = static function ($status) {
         $s = strtolower(trim((string)$status));
@@ -5093,6 +5099,8 @@ function kop_state_attach_v2_names(array &$facilities, $page_name) {
         $operator = $doc['provenance']['sourceOperator'] ?? null;
         return array(
             'name'           => trim((string)($ident['name'] ?? '')),
+            // The name people know it by (identification.popularName), only while it is one of its names.
+            'popular'        => function_exists('kop_facility_popular_name_clean') ? kop_facility_popular_name_clean($ident['popularName'] ?? '', $ident) : '',
             'city'           => trim((string)($doc['location']['city'] ?? '')),
             'current_name'   => trim((string)($ident['currentName'] ?? '')),
             'other_names'    => is_array($ident['otherNames'] ?? null) ? $ident['otherNames'] : array(),
@@ -5213,6 +5221,24 @@ function kop_state_attach_v2_names(array &$facilities, $page_name) {
                 }));
             }
             if (isset($operator_names[mb_strtolower(trim((string)($f['current_name'] ?? '')))])) $f['current_name'] = '';
+        }
+
+        // The tile's record has a popular name: the card is titled by it (popular_name, js/state-page.js) and the
+        // tile's own name takes a names line, as on the facility page (kop_facility_pages_popular_name_lists()).
+        $popular = '';
+        foreach ($matched as $fid) {
+            if ($records[$fid]['popular'] !== '') { $popular = $records[$fid]['popular']; break; }
+        }
+        if ($popular !== '' && function_exists('kop_facility_pages_popular_name_lists')
+            && kop_normalize_facility_name($popular) !== kop_normalize_facility_name((string)($f['name'] ?? ''))) {
+            list($shown, $now, $past, , $other) = kop_facility_pages_popular_name_lists(
+                $popular, (string)($f['name'] ?? ''), trim((string)($f['current_name'] ?? '')),
+                $name_list($f['past_names'] ?? array()), array(), $name_list($f['other_names'] ?? array())
+            );
+            $f['popular_name'] = $shown;
+            $f['current_name'] = (string)$now;
+            $f['past_names'] = $past;
+            $f['other_names'] = $other;
         }
     }
     unset($f);

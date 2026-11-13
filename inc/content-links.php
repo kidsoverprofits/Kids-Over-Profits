@@ -25,7 +25,7 @@ if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
 }
 
 if (!defined('KOP_CONTENT_LINKS_VERSION')) {
-    define('KOP_CONTENT_LINKS_VERSION', 1);
+    define('KOP_CONTENT_LINKS_VERSION', 2);
 }
 
 /** Words that may stay lower case inside a name ("Academy of the Sierras"). */
@@ -130,12 +130,13 @@ function kop_clinks_build_dict() {
     };
     $abbr_to_state = function_exists('kop_state_abbrev_to_name') ? kop_state_abbrev_to_name() : array();
 
-    // Facilities with a page: their name, then other and past names.
+    // Facilities with a page: their name, then their popular name and the name they use now, then other and past names.
     if (function_exists('kop_facility_pages_index') && isset($wpdb)) {
         $index = kop_facility_pages_index();
         if (!empty($index['ids'])) {
             $rows = $wpdb->get_results('SELECT id, name, state, country, json_data FROM facilities_v2 ORDER BY id', ARRAY_A);
             $later = array();
+            $popular = array();
             foreach ((array) $rows as $r) {
                 $id = (int) $r['id'];
                 if (!isset($index['ids'][$id])) continue;
@@ -143,10 +144,15 @@ function kop_clinks_build_dict() {
                 if ($url === '') continue;
                 $st = strtoupper(trim((string) $r['state']));
                 $place = $st !== '' ? ($abbr_to_state[$st] ?? $st) : trim((string) $r['country']);
-                $t = $add_target('facility', $url, $index['ids'][$id]['name'], $place);
-                $add_key($index['ids'][$id]['name'], $t);
                 $doc = function_exists('kop_v2_decode') ? kop_v2_decode($r['json_data']) : json_decode((string) $r['json_data'], true);
                 $ident = is_array($doc) ? (array) ($doc['identification'] ?? array()) : array();
+                $own = $index['ids'][$id]['name'];
+                // The name people know it by (identification.popularName) labels the link; the record's name still matches.
+                $pop = function_exists('kop_facility_popular_name_clean') ? kop_facility_popular_name_clean($ident['popularName'] ?? '', array('name' => $own) + $ident) : '';
+                $t = $add_target('facility', $url, $pop !== '' ? $pop : $own, $place);
+                $add_key($own, $t);
+                if ($pop !== '') $popular[] = array($pop, $t);
+                if (is_string($ident['currentName'] ?? null) && trim($ident['currentName']) !== '') $later[] = array($ident['currentName'], $t);
                 foreach (array('otherNames', 'pastNames') as $k) {
                     $items = function_exists('kop_facility_pages_text_items') ? kop_facility_pages_text_items($ident[$k] ?? null) : (array) ($ident[$k] ?? array());
                     foreach ($items as $n) if (is_string($n)) $later[] = array($n, $t);
@@ -154,7 +160,14 @@ function kop_clinks_build_dict() {
             }
             // Another record's own name is never taken over by an other name, and a
             // short other name with a common word in it ("New Haven", a city too) is left out.
+            // A popular name comes first and keeps its common words ("Diamond Ranch"), unless every word is one ("The Ranch").
             $generic = kop_clinks_generic_words();
+            foreach ($popular as $pair) {
+                $key = kop_clinks_key($pair[0]);
+                if ($key === '' || isset($dict['keys'][$key])) continue;
+                if (!array_diff_key(array_flip(explode(' ', $key)), $generic)) continue;
+                $add_key($pair[0], $pair[1]);
+            }
             foreach ($later as $pair) {
                 $key = kop_clinks_key($pair[0]);
                 if ($key === '' || isset($dict['keys'][$key])) continue;
@@ -183,6 +196,8 @@ function kop_clinks_build_dict() {
                 $names = array($r['name'], kop_operator_pages_display_name($r['name']), kop_operator_pages_abbreviation($r['name']));
                 foreach ((array) ($op['otherNames'] ?? array()) as $n) $names[] = $n;
                 if (!empty($op['currentName'])) $names[] = $op['currentName'];
+                // Its popular name (operator.popularName), which may be a past name; the link's label is it already ($e['display']).
+                if (function_exists('kop_operator_popular_name_clean')) $names[] = kop_operator_popular_name_clean($op['popularName'] ?? '', array('name' => $r['name']) + $op);
                 foreach ($names as $n) if (is_string($n)) $add_key($n, $tids[$lead]);
             }
         }

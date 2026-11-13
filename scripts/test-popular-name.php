@@ -11,7 +11,9 @@
  * past, current or other name picked; the names pencil and the "Names and eras"
  * dialog save it (exact Undo on the dialog); the facility page, the directory
  * feed's slim copy, the site search and kop_facility_shown_name() show it; the
- * search results carry other names and places (kop_v2_search_preview_lines()).
+ * search results carry other names and places (kop_v2_search_preview_lines()); the state hub cards
+ * (popular_name) and the prose links (inc/content-links.php) take it; a company's popular name
+ * (operator.popularName): the names pencil, the company index, page, search and prose links.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -286,6 +288,95 @@ $groups = kop_global_search_collect('Stone Mountain School');
 $item = null;
 foreach ($groups as $g) foreach ($g['items'] as $it) if (!empty($it['names']) && in_array('Formerly Stone Mountain School', $it['names'], true)) $item = $it;
 $check('the popup gets the names and places as lists', $item !== null && isset($item['places']));
+
+echo "-- State hub cards and prose links, with the facility's pick --\n";
+kop_ie_facility_save(array($fid, 'names'), array('identification.popularName' => $past));
+$fresh();
+$tiles = array(array('name' => $own, 'city' => 'Sanders', 'facility_ids' => array($fid), 'past_names' => array(), 'other_names' => array()));
+kop_state_attach_v2_names($tiles, 'Montana');
+$check('a state hub tile is titled by the popular name', ($tiles[0]['popular_name'] ?? '') === $past, json_encode($tiles[0]));
+$check('...its own name reads "Now known as", and the popular name is not repeated', ($tiles[0]['current_name'] ?? '') === $own && !in_array($past, (array) $tiles[0]['past_names'], true), json_encode($tiles[0]));
+$feed = kop_state_collect_facilities('Montana');
+$tile = null;
+foreach (array_merge($feed['active'], $feed['closed']) as $t) if (in_array($fid, array_map('intval', (array) ($t['facility_ids'] ?? array())), true)) $tile = $t;
+$check('...in the Montana feed too', $tile && ($tile['popular_name'] ?? '') === $past, $tile ? json_encode(array($tile['name'], $tile['popular_name'] ?? null)) : 'no tile');
+$tiles = array(array('name' => 'Tobinworld', 'facility_ids' => array(10271)));
+kop_state_attach_v2_names($tiles, 'California');
+$check('...a tile with no pick has no popular_name', !isset($tiles[0]['popular_name']));
+
+$dict = kop_clinks_dict(true);
+$targets_of = function ($name) use ($dict) {
+    $out = array();
+    foreach ((array) ($dict['keys'][kop_clinks_key($name)] ?? array()) as $t) $out[] = $dict['targets'][$t];
+    return $out;
+};
+$url = kop_facility_page_url($fid);
+$mine = array_values(array_filter($targets_of($own), function ($t) use ($url) { return $t[1] === $url; }));
+$check('prose links: the record\'s own name still links to its page, labelled by the popular name', $mine && $mine[0][2] === $past, json_encode($targets_of($own)));
+$pt = $targets_of($past);
+$check('prose links: the popular name links (to this page, unless another record is called that)', $pt && ($pt[0][1] === $url || count($pt) === 1), json_encode($pt));
+kop_ie_facility_save(array($fid, 'names'), array('identification.popularName' => ''));
+$fresh();
+
+echo "-- A company's popular name: CRC Health Corporation (#500023), now CRC Health Group --\n";
+// (Not G4S Youth Services, now TrueCore: TrueCore Behavioral Solutions is a company record of its own, #23.)
+$oid = 500023;
+$true = 'CRC Health Group';
+$own_op = 'CRC Health Corporation';
+$op_of = function ($id) use ($pdo) {
+    $j = $pdo->query('SELECT json_data FROM wpdl_kop_operators WHERE id = ' . (int) $id)->fetchColumn();
+    return json_decode((string) $j, true)['operator'];
+};
+$ofresh = function () use ($fresh) {
+    $fresh();
+    kop_operator_pages_index(true);
+};
+$check('the mirror still has the company and the name it uses now', ($op_of($oid)['currentName'] ?? '') === $true);
+$check('kop_operator_popular_name_clean(): its names only, the record\'s name (with or without "(UHS)") is the default',
+    kop_operator_popular_name_clean(strtolower($true), $op_of($oid)) === $true
+    && kop_operator_popular_name_clean($own_op, $op_of($oid)) === ''
+    && kop_operator_popular_name_clean('Universal Health Services', array('name' => 'Universal Health Services (UHS)', 'otherNames' => array('Universal Health Services'))) === ''
+    && kop_operator_popular_name_clean('Nope', $op_of($oid)) === '');
+$slug_before = kop_operator_pages_index(true)['ids'][$oid]['slug'] ?? '';
+$form = kop_ie_operator_load(array($oid, 'names'));
+$field = null;
+foreach ($form['fields'] as $f) if ($f['name'] === 'popularName') $field = $f;
+$values = $field ? array_column($field['options'], 'value') : array();
+$check('the company names pencil offers the record name (default) and its names', $field && $values[0] === '' && in_array($true, $values, true), json_encode($values));
+$threw = false;
+try { kop_ie_operator_save(array($oid, 'names'), array('popularName' => 'Not One Of Its Names')); } catch (RuntimeException $e) { $threw = true; }
+$check('...and refuses a name that is not one of them', $threw);
+kop_ie_operator_save(array($oid, 'names'), array('popularName' => $true));
+$ofresh();
+$check('saved', ($op_of($oid)['popularName'] ?? '') === $true);
+$entry = kop_operator_pages_index()['ids'][$oid] ?? array();
+$check('the company index shows it under the popular name; its address stays', ($entry['display'] ?? '') === $true && ($entry['slug'] ?? '') === $slug_before && $slug_before !== '', json_encode($entry));
+$check('...and finds the page by it', kop_operator_page_id_for_name($true) === $oid);
+$opage = kop_operator_page_data($oid);
+$check('the company page is titled by it; the record\'s name reads "Formerly"', $opage['name'] === $true && $opage['current_name'] === '' && $opage['formerly'] === array($own_op), json_encode(array($opage['name'], $opage['current_name'], $opage['formerly'], $opage['aka'])));
+$hit = null;
+foreach (kop_v2_search($true, 0, 5, 0)['operators'] as $o) if ((int) $o['id'] === $oid) $hit = $o;
+$check('searching the popular name finds the company under it', $hit && $hit['display'] === $true && $hit['matched_name'] === null, $hit ? json_encode($hit) : 'no hit');
+$check('...its preview names the record\'s name', $hit && in_array('Formerly ' . $own_op, $hit['names'], true), $hit ? json_encode($hit['names']) : '');
+$hit = null;
+foreach (kop_v2_search($own_op, 0, 5, 0)['operators'] as $o) if ((int) $o['id'] === $oid) $hit = $o;
+$check('searching the record\'s name finds it under the popular name, saying which name matched', $hit && $hit['display'] === $true && $hit['matched_name'] === $own_op, $hit ? json_encode($hit) : 'no hit');
+$dict = kop_clinks_dict(true);
+$ct = array();
+foreach ((array) ($dict['keys'][kop_clinks_key($true)] ?? array()) as $t) $ct[] = $dict['targets'][$t];
+$check('prose links: the popular name links to the company page, labelled by it', $ct && $ct[0][0] === 'operator' && $ct[0][1] === kop_operator_page_url($oid) && $ct[0][2] === $true, json_encode($ct));
+kop_ie_operator_save(array($oid, 'names'), array('currentName' => ''));
+$ofresh();
+$check('taking the name out of its names drops the pick', !array_key_exists('popularName', $op_of($oid)) && kop_operator_page_data($oid)['name'] === $own_op, json_encode($op_of($oid)['popularName'] ?? null));
+
+echo "-- An also-known-as name picked: InnerChange (#500017) known as Solacium --\n";
+kop_ie_operator_save(array(500017, 'names'), array('popularName' => 'Solacium'));
+$ofresh();
+$opage = kop_operator_page_data(500017);
+$check('titled Solacium, the record\'s name joins "Also known as", Solacium not repeated', $opage['name'] === 'Solacium' && in_array('InnerChange', $opage['aka'], true) && !in_array('Solacium', $opage['aka'], true) && $opage['formerly'] === array(), json_encode(array($opage['name'], $opage['aka'], $opage['formerly'])));
+kop_ie_operator_save(array(500017, 'names'), array('popularName' => ''));
+$ofresh();
+$check('cleared: titled by the record\'s name again, no popularName key', kop_operator_page_data(500017)['name'] === 'InnerChange' && !array_key_exists('popularName', $op_of(500017)));
 
 echo $failures ? "\n{$failures} failed.\n" : "\nAll passed.\n";
 exit($failures ? 1 : 0);

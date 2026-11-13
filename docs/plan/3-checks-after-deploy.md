@@ -199,3 +199,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    to the record's name. Logged out, search an old name ("Stone Mountain School"): the header dropdown, the popup
    (at 390 px too) and the search page list its other names and former places under the result. After the next map
    build, a picked name labels its map node.
+   - Added 2026-11-13: on a company page with another name (e.g. [CRC Health Corporation](https://kidsoverprofits.org/operator/crc-health-corporation/),
+     now CRC Health Group), the names pencil has "Most popular name"; pick it and save: the title reads CRC Health Group
+     with "Formerly CRC Health Corporation", the address stays the same, the directory's company heading and the
+     header search show the new name, and the app's company page does too. A state hub (/montana/) card for a facility
+     with a pick is titled by it, its own name under "Now known as". Set both back.

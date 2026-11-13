@@ -109,7 +109,7 @@
         return graph;
     }
 
-    /* The name people know a facility by (its record's popularName, stamped by
+    /* The name people know a facility or company by (its record's popularName, stamped by
      * the build): it becomes the label, and the board's name stays findable
      * as what it is now called (when the popular name is a past one) or as
      * another name. */

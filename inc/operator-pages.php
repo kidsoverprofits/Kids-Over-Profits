@@ -336,6 +336,31 @@ if (!function_exists('kop_operator_pages_abbreviation')) {
     }
 }
 
+if (!function_exists('kop_operator_popular_name_clean')) {
+    /**
+     * operator.popularName (the name people know a company by) as stored: $popular when it is one of the
+     * company's own names (currentName, pastNames, otherNames; compared without case, kept in that name's
+     * spelling), '' when it is the record's name (the default, with or without its "(UHS)") or no longer one
+     * of its names. The company version of kop_facility_popular_name_clean(). $op carries `name`.
+     */
+    function kop_operator_popular_name_clean($popular, array $op) {
+        $popular = trim((string) $popular);
+        if ($popular === '') return '';
+        $want = mb_strtolower($popular);
+        $name = trim((string) ($op['name'] ?? ''));
+        if ($want === mb_strtolower($name) || $want === mb_strtolower(kop_operator_pages_display_name($name))) return '';
+        $names = array((string) ($op['currentName'] ?? ''));
+        foreach (array('pastNames', 'otherNames') as $k) {
+            foreach ((array) ($op[$k] ?? array()) as $n) if (is_string($n)) $names[] = $n;
+        }
+        foreach ($names as $n) {
+            $n = trim($n);
+            if ($n !== '' && mb_strtolower($n) === $want) return $n;
+        }
+        return '';
+    }
+}
+
 if (!function_exists('kop_operator_pages_fingerprint')) {
     function kop_operator_pages_fingerprint() {
         global $wpdb;
@@ -408,8 +433,11 @@ if (!function_exists('kop_operator_pages_build_index')) {
                 return $b['score'] - $a['score'] ?: $a['id'] - $b['id'];
             });
             $lead = $members[0];
-            $display = kop_operator_pages_display_name($lead['name']);
-            $slug = sanitize_title($display);
+            // The page keeps its address under the record's name; it is shown under its popular name, if picked.
+            $record_display = kop_operator_pages_display_name($lead['name']);
+            $popular = kop_operator_popular_name_clean($lead['op']['popularName'] ?? '', array('name' => $lead['name']) + $lead['op']);
+            $display = $popular !== '' ? $popular : $record_display;
+            $slug = sanitize_title($record_display);
             if ($slug === '' || isset($taken[$slug])) $slug = trim($slug . '-' . $lead['id'], '-');
             $taken[$slug] = true;
 
@@ -422,12 +450,13 @@ if (!function_exists('kop_operator_pages_build_index')) {
                 'slug'    => $slug,
                 'name'    => $lead['name'],
                 'display' => $display,
+                'record_display' => $record_display,
                 'members' => $member_ids,
             );
             $index['slugs'][$slug] = $lead['id'];
 
             // Every name a reader might use for it.
-            $names = array($lead['name'], $display, kop_operator_pages_abbreviation($lead['name']));
+            $names = array($lead['name'], $record_display, $display, kop_operator_pages_abbreviation($lead['name']));
             foreach ($members as $m) {
                 foreach ((array) ($m['op']['otherNames'] ?? array()) as $n) $names[] = $n;
                 if (!empty($m['op']['currentName'])) $names[] = $m['op']['currentName'];
@@ -586,7 +615,9 @@ if (!function_exists('kop_operator_page_data')) {
         }
         if (!$lead) return null;
         $op = kop_operator_pages_decode($lead['json_data']);
+        // $name is the name it is shown under (its popular name, if picked); $record_display the record's own, for matching.
         $name = $entry['display'];
+        $record_display = (string) ($entry['record_display'] ?? $entry['display']);
 
         // ---- Facts ---------------------------------------------------------
         $text = function ($v) { return trim((string) $v); };
@@ -622,7 +653,20 @@ if (!function_exists('kop_operator_page_data')) {
         $abbr = kop_operator_pages_abbreviation($entry['name']);
         if ($abbr !== '' && !in_array($abbr, $aka, true)) array_unshift($aka, $abbr);
         // Each name shows once, and never the company's own name.
-        list($aka) = kop_facility_pages_dedupe_name_lists(array($entry['name'], $name), array($aka));
+        list($aka) = kop_facility_pages_dedupe_name_lists(array($entry['name'], $record_display), array($aka));
+        $current_name = $text($op['currentName'] ?? '');
+        $formerly = array();
+        if ($name !== $record_display && function_exists('kop_facility_pages_popular_name_lists')) {
+            // The popular name titles the page and the record's name takes a names line, as on a facility page
+            // (kop_facility_pages_popular_name_lists()). A company's past names are not listed on its page, so
+            // "Formerly" carries only the record's name, when the popular name is the one it uses now.
+            $past = kop_facility_pages_text_items($op['pastNames'] ?? null);
+            list(, $current_name, $shown_formerly, , $aka) = kop_facility_pages_popular_name_lists($name, $record_display, $current_name, $past, array(), $aka);
+            $current_name = (string) $current_name;
+            $past_keys = array();
+            foreach ($past as $p) $past_keys[kop_facility_pages_name_key($p)] = true;
+            foreach ($shown_formerly as $f) if (!isset($past_keys[kop_facility_pages_name_key($f)])) $formerly[] = $f;
+        }
 
         // ---- Parents and subsidiaries --------------------------------------
         $parents = array();
@@ -633,7 +677,7 @@ if (!function_exists('kop_operator_page_data')) {
         }
         $subsidiaries = array();
         $my_keys = array();
-        foreach (array_merge(array($entry['name'], $name, $abbr), $aka) as $n) {
+        foreach (array_merge(array($entry['name'], $record_display, $name, $abbr), $aka) as $n) {
             $k = kop_facility_pages_name_key($n);
             if ($k !== '') $my_keys[$k] = true;
         }
@@ -666,7 +710,7 @@ if (!function_exists('kop_operator_page_data')) {
             $founded_year = preg_match('/\b(1[89]\d\d|20\d\d)\b/', (string) ($op['founded'] ?? ''), $fy) ? (int) $fy[1] : 0;
             // Else an approved "founded" milestone (seeds/company-milestones.json) gives the year.
             if (!$founded_year && function_exists('kop_ptl_ms_approved')) {
-                $me = kop_ptl_company_key($name);
+                $me = kop_ptl_company_key($record_display);
                 foreach (kop_ptl_ms_approved() as $m) {
                     if (($m['kind'] ?? '') === 'founded' && isset(kop_ptl_ms_companies($m)[$me])) $founded_year = (int) $m['year'];
                 }
@@ -674,7 +718,7 @@ if (!function_exists('kop_operator_page_data')) {
             // A renamed program is listed by the name it had while this company
             // ran it (kop_facility_eras_name_under()): Three Springs of Courtland
             // under Three Springs, Sequel TSI Courtland under Sequel.
-            $company_names = array($entry['name'], $name);
+            $company_names = array($entry['name'], $record_display, $name);
             foreach ((array) $rows as $or) {
                 $o = kop_operator_pages_decode($or['json_data']);
                 $company_names[] = (string) $or['name'];
@@ -962,7 +1006,7 @@ if (!function_exists('kop_operator_page_data')) {
         // ---- History (inc/operator-history.php) ------------------------------
         $lawsuits_url = kop_facility_pages_page_url_by_template('page-lawsuits.php', '/lawsuits/');
         $map_node = function_exists('kop_operator_history_map_node')
-            ? kop_operator_history_map_node(array_merge(array($entry['name'], $name, $abbr), $aka))
+            ? kop_operator_history_map_node(array_merge(array($entry['name'], $record_display, $name, $abbr), $aka))
             : null;
         $map_links = $map_node ? kop_operator_history_map_links((string) $map_node['id']) : array();
         // Its leaders' years: past jobs held at the company under any of its names, and the map's
@@ -1072,7 +1116,9 @@ if (!function_exists('kop_operator_page_data')) {
             'full_name'     => $entry['name'],
             'url'           => $url,
             'aka'           => $aka,
-            'current_name'  => $text($op['currentName'] ?? ''),
+            'current_name'  => $current_name,
+            // The record's name when the page is titled by the popular name it uses now ("Formerly").
+            'formerly'      => $formerly,
             'status'        => $status,
             'status_class'  => sanitize_html_class(strtolower($status)),
             'facts'         => $facts,
