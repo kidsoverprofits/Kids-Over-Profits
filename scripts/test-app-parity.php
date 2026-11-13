@@ -69,7 +69,11 @@ foreach ($pages as $kind => $p) {
     $missing = array();
     foreach ($list as $id => $row) {
         if (!isset($row['app'])) continue;
-        if (strpos($app_src, "'" . $row['app'] . "'") === false) $missing[] = $id . ' -> ' . $row['app'];
+        // A piece that is not a section (a box under the summary) names the app file that draws it.
+        $found = isset($row['app_file'])
+            ? strpos((string) @file_get_contents($app_dir . '/' . $row['app_file']), $row['app']) !== false
+            : strpos($app_src, "'" . $row['app'] . "'") !== false;
+        if (!$found) $missing[] = $id . ' -> ' . $row['app'] . (isset($row['app_file']) ? ' in ' . $row['app_file'] : '');
     }
     $check("$kind: every mapped section is in the app's section list ({$p['app']})", !$missing, $missing ? implode(', ', $missing) : '');
 }

@@ -6,6 +6,9 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 ```bash
 # The mobile app (github.com/kidsoverprofits/kids-over-profits-mobile) reads kop/v1/facility/<slug>, /operator/<slug|?name=>,
 # /operators (the Companies list), /news and /resources (the /resources/ list, inc/resources-list.php) (inc/mobile-api.php): named keys copied from the page data, so a new page section goes in the keep lists there
+# Also (2026-11-13): profile (a hand-written Facility Profile post as plain text with [words](address) links, kop_mobile_profile_post(),
+# kop_mobile_html_text()), research, archives (Unsilenced + survivor sites, kop_mobile_archives()) and outside_research; a company
+# related, resource_links and outside_research. Podcast statements are admin-only on the website and stay out of the app
 # Since 2026-11-13 a facility also carries readers (+ reader_rules, questions_url: inc/reader-accounts.php quotes {text, credit, staff}),
 # timeline (kop_ptl_facility() as plain {year, events: [{kind, label, when, title, lead, items, detail, sources, major}]}), nonprofits
 # (Form 990s, kop_mobile_nonprofits()) and businesses (state filings, kop_mobile_businesses()); a company the last two. mobile/suggest

@@ -1,49 +1,148 @@
 {
-  "_about": "Every section the website's facility and company pages can print, and where the mobile app (kidsoverprofits/kids-over-profits-mobile) shows it. scripts/test-app-parity.php fails when a template prints a section not listed here, or when a listed app section is missing from the app's section list (src/components/facility/model.ts presentSections(), src/components/operator/model.ts sectionsOf()). \"app\": the app's section id. \"todo\": not in the app yet, with what porting it needs; each todo is an open item in docs/plan/4.8-app.md. \"skip\": never in the app, with the reason. Sections made by helpers outside the templates (\"helper\") are listed by hand: the test cannot see them.",
+  "_about": "Every section the website's facility and company pages can print, and where the mobile app (kidsoverprofits/kids-over-profits-mobile) shows it. scripts/test-app-parity.php fails when a template prints a section not listed here, or when a listed app section is missing from the app's section list (src/components/facility/model.ts presentSections(), src/components/operator/model.ts sectionsOf()). \"app\": the app's section id. \"todo\": not in the app yet, with what porting it needs; each todo is an open item in docs/plan/4.8-app.md. \"skip\": never in the app, with the reason. \"app_file\": look for \"app\" (as written) in that app file instead of the section list, for a piece that is not a section (a box under the summary). Sections made by helpers outside the templates (\"helper\") are listed by hand: the test cannot see them.",
   "facility": {
-    "history": { "app": "history" },
-    "homes": { "app": "homes" },
-    "campus": { "app": "campus" },
-    "about": { "app": "about" },
-    "testimony": { "app": "testimony" },
-    "timeline": { "app": "timeline" },
-    "memorials": { "app": "memorials" },
-    "violations": { "app": "violations" },
-    "lawsuits": { "app": "lawsuits" },
-    "funding": { "app": "funding" },
-    "tax-filings": { "app": "tax-filings" },
-    "business-filings": { "app": "business-filings" },
-    "incidents": { "app": "incidents" },
-    "news": { "app": "news" },
-    "videos": { "app": "videos" },
-    "staff": { "app": "staff" },
-    "practices": { "app": "practices" },
-    "inspections": { "app": "inspections" },
-    "network": { "app": "network" },
-    "documents": { "app": "documents" },
-    "wiki": { "app": "wiki" },
-    "related": { "app": "related" },
-    "resources": { "app": "resources" },
-    "podcast-statements": { "helper": "kop_pod_section_html()", "todo": "approved podcast statements: add them to kop_mobile_facility_payload() and a section in the app" },
-    "profile-prose": { "helper": "a merged Facility Profile post's sections (kop_facility_profile_parts())", "todo": "the post's written sections as plain paragraphs in the payload, then a section per heading in the app" },
-    "documents:research": { "helper": "outside research links under Documents (kop_outside_research_for_facility())", "todo": "a list under the app's Documents section" },
-    "documents:unsilenced": { "helper": "kop_unsilenced_render()", "todo": "the Unsilenced groups under the app's Documents section" },
-    "documents:survivor-sites": { "helper": "kop_survivor_archives_render()", "todo": "survivor site archives under the app's Documents section" }
+    "history": {
+      "app": "history"
+    },
+    "homes": {
+      "app": "homes"
+    },
+    "campus": {
+      "app": "campus"
+    },
+    "about": {
+      "app": "about"
+    },
+    "testimony": {
+      "app": "testimony"
+    },
+    "timeline": {
+      "app": "timeline"
+    },
+    "memorials": {
+      "app": "memorials"
+    },
+    "violations": {
+      "app": "violations"
+    },
+    "lawsuits": {
+      "app": "lawsuits"
+    },
+    "funding": {
+      "app": "funding"
+    },
+    "tax-filings": {
+      "app": "tax-filings"
+    },
+    "business-filings": {
+      "app": "business-filings"
+    },
+    "incidents": {
+      "app": "incidents"
+    },
+    "news": {
+      "app": "news"
+    },
+    "videos": {
+      "app": "videos"
+    },
+    "staff": {
+      "app": "staff"
+    },
+    "practices": {
+      "app": "practices"
+    },
+    "inspections": {
+      "app": "inspections"
+    },
+    "network": {
+      "app": "network"
+    },
+    "documents": {
+      "app": "documents"
+    },
+    "wiki": {
+      "app": "wiki"
+    },
+    "related": {
+      "app": "related"
+    },
+    "resources": {
+      "app": "resources"
+    },
+    "podcast-statements": {
+      "helper": "kop_pod_section_html()",
+      "skip": "administrators only on the website (machine transcripts, \"listen before quoting\"); the app's pages are public"
+    },
+    "profile-prose": {
+      "helper": "a Facility Profile post (kop_mobile_profile_post(): merged into Hyde School's page, the page itself for the other 14)",
+      "app": "profile"
+    },
+    "documents:research": {
+      "helper": "research naming the program, under Documents ($page['research'])",
+      "app": "documents"
+    },
+    "documents:unsilenced": {
+      "helper": "kop_unsilenced_render(), under Documents (payload 'archives')",
+      "app": "documents"
+    },
+    "documents:survivor-sites": {
+      "helper": "kop_survivor_archives_render(), under Documents (payload 'archives')",
+      "app": "documents"
+    },
+    "outside-research": {
+      "helper": "kop_outside_research_render(), the box under the summary (payload 'outside_research')",
+      "app": "<OutsideResearchBoxes",
+      "app_file": "src/app/facility/[slug].tsx"
+    }
   },
   "operator": {
-    "history": { "app": "history" },
-    "about": { "app": "about" },
-    "programs": { "app": "programs" },
-    "people": { "app": "people" },
-    "ownership": { "app": "ownership" },
-    "news": { "app": "news" },
-    "lawsuits": { "app": "lawsuits" },
-    "memorials": { "app": "deaths" },
-    "tax-filings": { "app": "tax-filings" },
-    "business-filings": { "app": "business-filings" },
-    "documents": { "app": "documents" },
-    "links": { "app": "websites" },
-    "related": { "todo": "\"Related programs\" ($page['related']): add 'related' to kop_mobile_operator_payload()'s keep list and a section in the app" },
-    "materials": { "todo": "\"Materials and links\" ($page['resource_links']): add 'resource_links' to kop_mobile_operator_payload() and reuse the facility ResourcesSection" }
+    "history": {
+      "app": "history"
+    },
+    "about": {
+      "app": "about"
+    },
+    "programs": {
+      "app": "programs"
+    },
+    "people": {
+      "app": "people"
+    },
+    "ownership": {
+      "app": "ownership"
+    },
+    "news": {
+      "app": "news"
+    },
+    "lawsuits": {
+      "app": "lawsuits"
+    },
+    "memorials": {
+      "app": "deaths"
+    },
+    "tax-filings": {
+      "app": "tax-filings"
+    },
+    "business-filings": {
+      "app": "business-filings"
+    },
+    "documents": {
+      "app": "documents"
+    },
+    "links": {
+      "app": "websites"
+    },
+    "related": {
+      "app": "related"
+    },
+    "materials": {
+      "app": "materials"
+    },
+    "outside-research": {
+      "helper": "kop_outside_research_render() under the summary (payload 'outside_research')",
+      "app": "<OutsideResearchBoxes",
+      "app_file": "src/app/operator/[slug].tsx"
+    }
   }
 }
