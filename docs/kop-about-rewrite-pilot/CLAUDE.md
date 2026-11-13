@@ -4,7 +4,7 @@ Rewrites of the "About" text for 21 Kids Over Profits facility and operator reco
 
 "On the site now" under each record is each record's live About and quotes, read by `rebuild.py` from the theme's public read-only `api/about-live.php` and put in the page (`window.KOP_LIVE`); the page highlights any sentence the site prints differently from the rewrite. It is read at build time because claude.ai does not let an artifact page contact other sites (a fetch from the page failed with "Failed to fetch", 2026-11-13). To refresh it: `python -I rebuild.py` and republish the artifact to the same URL (`--offline` builds without the live read). `api/about-live.php` also has an open CORS header (theme .htaccess list), because the server's root .htaccess pins every REST answer to `http://localhost:8000` (plan 2.1 item 7). After changing `out/`, rebuild, republish and re-export the seeds, or the page will show the site as different.
 
-Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655wtt6zshbvg3kDm (same artifact as claude.ai/code/artifact/1db0c755-2e91-4a1b-b58a-5cef38081450)
+Retired 2026-11-13: the preview artifact is deleted and rewrites are reviewed at KOP Tools > About rewrites (theme inc/about-rewrites-screen.php). This folder is the pilot's archive; its 21 rewrites are published.
 
 ## Files
 
