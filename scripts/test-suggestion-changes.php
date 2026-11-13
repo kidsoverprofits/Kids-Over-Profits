@@ -95,7 +95,7 @@ $e = $c['entries'][0] ?? null;
 $check('a name with no record is marked new, with what was sent (not its name again)', $e && $e['is_new'] && count($e['changes']) === 1 && $e['changes'][0]['label'] === 'Program type', json_encode($e));
 
 $c = kop_suggestion_changes($pdo, array('referrerConsultants' => array(array('firstName' => 'Ann', 'lastName' => 'Lee', 'role' => '', 'affiliations' => array()))), '', 'wpdl_');
-$check('other kinds show what was sent, blanks left out', $c['other'] === array(array('label' => 'Referrer consultants', 'after' => 'Ann, Lee')), json_encode($c['other']));
+$check('other kinds show what was sent, blanks left out', count($c['other']) === 1 && $c['other'][0]['label'] === 'Referrer consultants' && $c['other'][0]['after'] === 'Ann, Lee', json_encode($c['other']));
 
 // Form notes (#56): a note on a list item is kept under a random key that names no field.
 $note = array('id' => 'field-1791173405434-9s6b0bg7v_note_1791173405434', 'text' => 'A field note from a reader.', 'timestamp' => '2026-10-05T04:12:42.215Z');
@@ -351,6 +351,57 @@ $tp2 = kop_suggestion_edit($tp2, array('entry' => 'other', 'op' => 'move', 'path
 $check('other: edit, lines and move', $tp2['transporterCompany']['licensing'] === 'Excuse any grammar errors.' && $tp2['transporterCompany']['notes'] === ''
     && $tp2['transporterCompany']['vehicleTypes'] === array('SUV', 'Van', 'Sedan'), json_encode($tp2));
 $check('other: bookkeeping keys are refused', $threw(function () use ($tp) { kop_suggestion_edit($tp, array('entry' => 'other', 'op' => 'set', 'path' => array('facilities'), 'value' => 'x')); }) !== '');
+
+// A transporter's people (a list of entries) item by item, and a tick box.
+$tp = array('transporterCompany' => array('name' => 'Zzq Transport', 'notes' => ''), 'isIndependentTransporter' => true,
+    'transporters' => array(array('firstName' => 'Bobby', 'lastName' => 'Tredinnik', 'role' => 'CEO'), array('firstName' => 'Sam', 'lastName' => 'Lee', 'role' => 'Driver')));
+$c = kop_suggestion_changes($pdo, $tp, '', 'wpdl_');
+$pr = null; $tick = null;
+foreach ($c['other'] as $o) { if ($o['label'] === 'Transporters') $pr = $o; if (!empty($o['bool'])) $tick = $o; }
+$check('other: a list of people has an item per person with its parts', $pr && count($pr['items']) === 2
+    && array_column($pr['items'][0]['parts'], 'key') === array('firstName', 'lastName', 'role'), json_encode($pr));
+$tp2 = kop_suggestion_edit($tp, array('entry' => 'other', 'op' => 'item', 'path' => array('transporters'), 'index' => 0, 'parts' => array('lastName' => 'Tredinnick')));
+$check('other: a person\'s spelling fixed', $tp2['transporters'][0] === array('firstName' => 'Bobby', 'lastName' => 'Tredinnick', 'role' => 'CEO'), json_encode($tp2['transporters']));
+$check('other: a person can not be moved onto a tick box',
+    $threw(function () use ($tp2) { kop_suggestion_edit($tp2, array('entry' => 'other', 'op' => 'move', 'path' => array('transporters'), 'index' => 1, 'to' => 'isIndependentTransporter')); }) !== '');
+$check('other: Move never offers the project\'s own keys', !array_intersect(array_column($pr['moves'], 'path'), kop_suggestion_other_skip()), json_encode($pr['moves']));
+$check('other: a move onto a project key is refused',
+    $threw(function () use ($tp2) { kop_suggestion_edit($tp2 + array('name' => ''), array('entry' => 'other', 'op' => 'move', 'path' => array('transporters'), 'index' => 1, 'to' => 'name')); }) !== '');
+$tp3 = kop_suggestion_edit($tp2, array('entry' => 'other', 'op' => 'remove', 'path' => array('transporters'), 'index' => 1));
+$check('other: one person removed, the other kept', count($tp3['transporters']) === 1 && $tp3['transporters'][0]['firstName'] === 'Bobby');
+$check('other: a tick box shows with only Remove', $tick && $tick['path'] === array('isIndependentTransporter'), json_encode($tick));
+$tp3 = kop_suggestion_edit($tp3, array('entry' => 'other', 'op' => 'remove', 'path' => array('isIndependentTransporter')));
+$check('other: a tick box removed is unticked, not deleted', $tp3['isIndependentTransporter'] === false);
+$check('other: a tick box can not be typed into', $threw(function () use ($tp) { kop_suggestion_edit($tp, array('entry' => 'other', 'op' => 'set', 'path' => array('isIndependentTransporter'), 'value' => 'x')); }) !== '');
+
+// A whole-record edit (sent from the full data form with facility_id) that drops a note and empties the gender: "Keep it" puts them back.
+// A record with notes and a gender (the first test record may have neither).
+$krow = $pdo->query("SELECT id, json_data FROM facilities_v2 WHERE json_extract(json_data, '$.facilityDetails.gender') <> ''
+    AND json_array_length(json_extract(json_data, '$.notes')) > 1 AND json_extract(json_data, '$.facilityDetails.type') <> '' ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$rec = $krow ? kop_facility_normalize(json_decode($krow['json_data'], true), array('facility_id' => (int) $krow['id'])) : array('notes' => array(), 'facilityDetails' => array('gender' => ''));
+if ($rec['notes'] && $rec['facilityDetails']['gender'] !== '') {
+    $whole_entry = $rec;
+    array_shift($whole_entry['notes']);
+    $whole_entry['facilityDetails']['gender'] = '';
+    $whole_entry['facilityDetails']['type'] = $rec['facilityDetails']['type'] . ' (edited)';
+    $wp = array('facilities' => array($whole_entry));
+    $c = $card($wp);
+    $nr = $row_for($c, 'Notes');
+    $cr = $row_for($c, 'Gender');
+    $check('keep: a dropped note shows with its place on the record', $nr && ($nr['dropped_items'][0]['index'] ?? null) === 0, json_encode($nr));
+    $check('keep: an emptied field can be kept or typed into', $cr && $cr['kind'] === 'removed' && $cr['keepable'] && $cr['editable'], json_encode($cr));
+    $check('keep: refused without the record', $threw(function () use ($wp) { kop_suggestion_edit($wp, array('entry' => 0, 'op' => 'keep', 'path' => 'notes', 'index' => 0)); }) !== '');
+    $recdoc = kop_suggestion_record_doc($pdo, $wp, 0, '', 'wpdl_');
+    $wp2 = kop_suggestion_edit($wp, array('entry' => 0, 'op' => 'keep', 'path' => 'notes', 'index' => 0), $recdoc);
+    $wp2 = kop_suggestion_edit($wp2, array('entry' => 0, 'op' => 'keep', 'path' => 'facilityDetails.gender'), $recdoc);
+    $c2 = $card($wp2);
+    $check('keep: the note and the gender are back, the real change stays', !$row_for($c2, 'Notes') && !$row_for($c2, 'Gender') && $row_for($c2, 'Program type'),
+        json_encode($c2['entries'][0]['changes'] ?? null));
+    $wp3 = kop_suggestion_edit($wp2, array('entry' => 0, 'op' => 'keep', 'path' => 'notes', 'index' => 0), $recdoc);
+    $check('keep: twice adds nothing', count(kop_extract_project_data($wp3)['facilities'][0]['notes']) === count($rec['notes']));
+} else {
+    $check('keep: a test record has notes and a gender', false);
+}
 
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

@@ -1058,8 +1058,13 @@ try {
                 $message = 'Edit undone.';
             } else {
                 $req = is_array($data['edit'] ?? null) ? $data['edit'] : [];
+                $payload = json_decode((string) $sugg['edited_json_data'], true);
                 try {
-                    $edited = kop_suggestion_edit(json_decode((string) $sugg['edited_json_data'], true), $req);
+                    // "Keep it" puts back what a whole-record edit dropped, so it needs the record itself.
+                    $recordDoc = ($req['op'] ?? '') === 'keep'
+                        ? kop_suggestion_record_doc($pdo, $payload, $req['entry'] ?? 0, $sugg['reason'] ?? '', isset($GLOBALS['wpdb']->prefix) ? $GLOBALS['wpdb']->prefix : '')
+                        : null;
+                    $edited = kop_suggestion_edit($payload, $req, $recordDoc);
                 } catch (RuntimeException $e) {
                     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
                     exit;

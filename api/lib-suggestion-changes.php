@@ -48,12 +48,10 @@ if (!function_exists('kop_suggestion_changes')) {
                     $record = null;
                 }
             }
-            $changes = kop_suggestion_diff(
-                // Both sides through the normalizer, so a stored entry's key order never reads as a change.
-                kop_suggestion_flatten($record ? kop_facility_normalize($record['doc'], array('facility_id' => $record['id'])) : array()),
-                kop_suggestion_flatten($sent),
-                $whole && $record
-            );
+            // Both sides through the normalizer, so a stored entry's key order never reads as a change.
+            $rec_doc = $record ? kop_facility_normalize($record['doc'], array('facility_id' => $record['id'])) : array();
+            $rec_segs = array();
+            $changes = kop_suggestion_diff(kop_suggestion_flatten($rec_doc, $rec_segs), kop_suggestion_flatten($sent), $whole && $record);
             if (!$changes) {
                 if ($record) $out['unchanged'][] = $name;
                 continue;
@@ -65,8 +63,15 @@ if (!function_exists('kop_suggestion_changes')) {
                 $raw = isset($segs[$ch['path']]) ? kop_suggestion_get($sent, $segs[$ch['path']]) : null;
                 if ($ch['kind'] === 'list') {
                     $ch['items'] = kop_suggestion_row_items(is_array($raw) ? $raw : array(), $ch['added']);
+                    // A whole-record edit that drops items: each can be kept ('keep' puts the record's own item back).
+                    if ($ch['dropped']) {
+                        $had = isset($rec_segs[$ch['path']]) ? kop_suggestion_get($rec_doc, $rec_segs[$ch['path']]) : null;
+                        $ch['dropped_items'] = kop_suggestion_row_items(is_array($had) ? $had : array(), $ch['dropped']);
+                    }
                 } else {
-                    $ch['editable'] = $ch['kind'] !== 'removed' && !is_bool($raw);
+                    // An emptied field (whole-record edit) is edited or kept; a tick box is only removed.
+                    $ch['editable'] = !is_bool($raw);
+                    $ch['keepable'] = $ch['kind'] === 'removed';
                 }
             }
             unset($ch);
@@ -86,11 +91,17 @@ if (!function_exists('kop_suggestion_changes')) {
             $paths = array();
             foreach (kop_suggestion_flatten_any($value, kop_suggestion_label($key), array($key), $paths) as $label => $text) {
                 $row = array('label' => $label, 'after' => $text);
-                // Text and lists of plain lines can be edited on the card (one item per line); lists of people cannot.
+                // Text and lists of plain lines are edited whole (one item per line); a list of people or
+                // other entries item by item (its parts); a tick box can only be removed.
                 if (isset($paths[$label])) {
+                    $cur = kop_suggestion_get($data, $paths[$label]);
                     $row['path'] = $paths[$label];
-                    $row['list'] = is_array(kop_suggestion_get($data, $paths[$label]));
-                    $row['value'] = $row['list'] ? $text : (string) kop_suggestion_get($data, $paths[$label]);
+                    $row['bool'] = is_bool($cur);
+                    $row['list'] = is_array($cur);
+                    $row['value'] = $row['list'] ? $text : (is_bool($cur) ? '' : (string) $cur);
+                    if (is_array($cur) && array_filter($cur, 'is_array')) {
+                        $row['items'] = kop_suggestion_row_items($cur, array_map('kop_suggestion_item_text', $cur));
+                    }
                     $row['moves'] = array();
                     foreach (kop_suggestion_other_targets($data, $paths[$label]) as $k => $l) $row['moves'][] = array('path' => $k, 'label' => $l);
                 }
@@ -274,12 +285,12 @@ if (!function_exists('kop_suggestion_flatten_any')) {
         if (!is_array($paths)) $paths = array();
         if (!is_array($value)) {
             $text = is_bool($value) ? ($value ? 'Yes' : 'No') : trim((string) $value);
-            if ($text !== '' && !is_bool($value) && $segs) $paths[$label] = $segs;
+            if ($text !== '' && $segs) $paths[$label] = $segs;
             return $text === '' ? array() : array($label => $text);
         }
         if ($value && array_keys($value) === range(0, count($value) - 1)) {
             $items = array_values(array_filter(array_map('kop_suggestion_item_text', $value), 'strlen'));
-            if ($items && $segs && !array_filter($value, 'is_array')) $paths[$label] = $segs;
+            if ($items && $segs) $paths[$label] = $segs;
             return $items ? array($label => implode("\n", $items)) : array();
         }
         $out = array();
@@ -389,17 +400,18 @@ if (!function_exists('kop_suggestion_edit')) {
      * The facility entry is stored normalized (kop_suggestion_normalize_facilities()), as
      * api/save-suggestion.php stores new ones; Approve normalizes either shape the same way.
      */
-    function kop_suggestion_edit($payload, array $req) {
+    function kop_suggestion_edit($payload, array $req, $record_doc = null) {
         if (!is_array($payload)) throw new RuntimeException('This suggestion has no data to edit.');
         $op = (string) ($req['op'] ?? '');
-        if (!in_array($op, array('set', 'item', 'remove', 'move'), true)) throw new RuntimeException('Unknown edit.');
+        if (!in_array($op, array('set', 'item', 'remove', 'move', 'keep'), true)) throw new RuntimeException('Unknown edit.');
         $entry = $req['entry'] ?? null;
+        if ($op === 'keep' && $entry === 'other') throw new RuntimeException('Unknown edit.');
         $fn = $entry === 'other'
             ? function (array $data) use ($req, $op) { return kop_suggestion_edit_other($data, $req, $op); }
-            : function (array $data) use ($req, $op, $entry) {
+            : function (array $data) use ($req, $op, $entry, $record_doc) {
                 $i = (int) $entry;
                 if (!is_numeric($entry) || !is_array($data['facilities'][$i] ?? null)) throw new RuntimeException('That facility is not in this suggestion any more. Reload the page.');
-                $data['facilities'][$i] = kop_suggestion_edit_facility($data['facilities'][$i], $req, $op);
+                $data['facilities'][$i] = kop_suggestion_edit_facility($data['facilities'][$i], $req, $op, $record_doc);
                 return $data;
             };
         // The same unwrapping as kop_extract_project_data(), written back at the same depth.
@@ -415,7 +427,7 @@ if (!function_exists('kop_suggestion_edit')) {
 }
 
 if (!function_exists('kop_suggestion_edit_facility')) {
-    function kop_suggestion_edit_facility(array $entry, array $req, $op) {
+    function kop_suggestion_edit_facility(array $entry, array $req, $op, $record_doc = null) {
         if (!function_exists('kop_facility_normalize')) require_once dirname(__DIR__) . '/inc/facility-store.php';
         if (!function_exists('kop_suggestion_normalize_facilities')) require_once __DIR__ . '/lib-suggested-edits.php';
         $norm = function (array $doc) {
@@ -434,6 +446,27 @@ if (!function_exists('kop_suggestion_edit_facility')) {
         $label = kop_suggestion_label($path);
         $has_index = isset($req['index']) && $req['index'] !== '' && $req['index'] !== null;
         $index = (int) ($req['index'] ?? -1);
+
+        if ($op === 'keep') {
+            // A whole-record edit dropped this from the record: put the record's own value or item back.
+            if (!is_array($record_doc)) throw new RuntimeException('The record this suggestion changes was not found.');
+            $rec_segs = array();
+            kop_suggestion_flatten($record_doc, $rec_segs);
+            $had = isset($rec_segs[$path]) ? kop_suggestion_get($record_doc, $rec_segs[$path]) : null;
+            if (is_array($cur) && $path !== 'facilityDetails.ageRange') {
+                $had = is_array($had) ? array_values($had) : array();
+                if (!$has_index || !array_key_exists($index, $had)) throw new RuntimeException('That item is not on the record any more. Reload the page.');
+                $list = array_values($cur);
+                $text = mb_strtolower(kop_suggestion_item_text($had[$index]));
+                foreach ($list as $item) {
+                    if (mb_strtolower(kop_suggestion_item_text($item)) === $text) return $norm($doc);   // already back
+                }
+                $list[] = $had[$index];
+                return $norm(kop_suggestion_put($doc, $at, $list));
+            }
+            if ($had === null) throw new RuntimeException('The record has nothing under ' . $label . ' to keep.');
+            return $norm(kop_suggestion_put($doc, $at, $had));
+        }
         if (is_array($cur) && $path !== 'facilityDetails.ageRange' && ($op !== 'set') && (!$has_index || !array_key_exists($index, array_values($cur)))) {
             throw new RuntimeException('That item is not in the list any more. Reload the page.');
         }
@@ -517,30 +550,86 @@ if (!function_exists('kop_suggestion_edit_other')) {
         $at = is_array($req['path'] ?? null) ? array_values(array_map('strval', $req['path'])) : array();
         if (!$at || in_array($at[0], kop_suggestion_other_skip(), true)) throw new RuntimeException('That field cannot be edited here.');
         $cur = kop_suggestion_get($data, $at);
-        $is_list = is_array($cur) && (!$cur || array_keys($cur) === range(0, count($cur) - 1)) && !array_filter($cur, 'is_array');
-        if ($cur === null || (is_array($cur) && !$is_list) || is_bool($cur)) throw new RuntimeException('That field cannot be edited here. Reload the page.');
+        $seq = is_array($cur) && (!$cur || array_keys($cur) === range(0, count($cur) - 1));
+        if ($cur === null || (is_array($cur) && !$seq)) throw new RuntimeException('That field cannot be edited here. Reload the page.');
+        // A tick box ("Independent consultant: Yes"): only taken off.
+        if (is_bool($cur)) {
+            if ($op !== 'remove') throw new RuntimeException('A tick box can only be removed.');
+            return kop_suggestion_put($data, $at, false);
+        }
         $lines = function ($v) { return array_values(array_filter(array_map('trim', preg_split('/\r?\n/', (string) $v)), 'strlen')); };
-        $empty = $is_list ? array() : '';
-        if ($op === 'set') return kop_suggestion_put($data, $at, $is_list ? $lines($req['value'] ?? '') : trim((string) ($req['value'] ?? '')));
-        if ($op === 'remove') return kop_suggestion_put($data, $at, $empty);
-        if ($op !== 'move') throw new RuntimeException('Unknown edit.');
-        // Move: to another field of the same block (the last key replaced).
-        $to = (string) ($req['to'] ?? '');
         $parent = array_slice($at, 0, -1);
         $siblings = kop_suggestion_get($data, $parent);
-        if ($to === '' || $to === end($at) || !is_array($siblings) || !array_key_exists($to, $siblings)) throw new RuntimeException('Pick where it goes.');
-        $text = $is_list ? implode("\n", $cur) : trim((string) $cur);
-        $data = kop_suggestion_put($data, $at, $empty);
-        $dest = array_merge($parent, array($to));
-        $have = $siblings[$to];
-        if (is_array($have) && !array_filter($have, 'is_array')) {
-            return kop_suggestion_put($data, $dest, array_merge(array_values($have), $lines($text)));
+        // Where a moved piece lands: added to a list of lines, or into an empty text field.
+        $land = function (array $data, $text) use ($req, $at, $parent, $siblings, $lines) {
+            $to = (string) ($req['to'] ?? '');
+            if ($to === '' || $to === end($at) || !is_array($siblings) || !array_key_exists($to, $siblings)
+                || (count($at) === 1 && in_array($to, kop_suggestion_other_skip(), true))) throw new RuntimeException('Pick where it goes.');
+            if (trim($text) === '') throw new RuntimeException('There is no text to move.');
+            $dest = array_merge($parent, array($to));
+            $have = $siblings[$to];
+            if (is_array($have) && !array_filter($have, 'is_array')) {
+                return kop_suggestion_put($data, $dest, array_merge(array_values($have), $lines($text)));
+            }
+            if (is_string($have) || $have === null) {
+                if (trim((string) $have) !== '') throw new RuntimeException(kop_suggestion_label($to) . ' already has something in it. Edit or move that first.');
+                return kop_suggestion_put($data, $dest, $text);
+            }
+            throw new RuntimeException('That field cannot take text.');
+        };
+
+        // A list of people or other entries (Transporters: name, role, company): item by item.
+        if ($seq && array_filter($cur, 'is_array')) {
+            $index = (int) ($req['index'] ?? -1);
+            if (!isset($req['index']) || !array_key_exists($index, $cur)) throw new RuntimeException('That item is not in the list any more. Reload the page.');
+            $list = $cur;
+            $item = $list[$index];
+            if ($op === 'item') {
+                $parts = is_array($req['parts'] ?? null) ? $req['parts'] : array();
+                if (!is_array($item)) {
+                    $item = trim((string) ($parts[''] ?? $item));
+                    $empty = $item === '';
+                } else {
+                    $allowed = array_column(kop_suggestion_item_parts($item), 'key');
+                    foreach ($parts as $k => $v) {
+                        if (in_array((string) $k, $allowed, true)) $item[$k] = trim((string) $v);
+                    }
+                    $empty = kop_suggestion_item_text(array_intersect_key($item, array_flip($allowed))) === '';
+                }
+                if ($empty) array_splice($list, $index, 1); else $list[$index] = $item;
+                return kop_suggestion_put($data, $at, $list);
+            }
+            if ($op !== 'remove' && $op !== 'move') throw new RuntimeException('Edit the items of this list one at a time.');
+            array_splice($list, $index, 1);
+            $data = kop_suggestion_put($data, $at, $list);
+            return $op === 'remove' ? $data : $land($data, kop_suggestion_item_text($item));
         }
-        if (is_string($have) || $have === null) {
-            if (trim((string) $have) !== '') throw new RuntimeException(kop_suggestion_label($to) . ' already has something in it. Edit or move that first.');
-            return kop_suggestion_put($data, $dest, $text);
+
+        // Text, or a list of plain lines edited as one line each.
+        $empty = $seq ? array() : '';
+        if ($op === 'set') return kop_suggestion_put($data, $at, $seq ? $lines($req['value'] ?? '') : trim((string) ($req['value'] ?? '')));
+        if ($op === 'remove') return kop_suggestion_put($data, $at, $empty);
+        if ($op !== 'move') throw new RuntimeException('Unknown edit.');
+        $text = $seq ? implode("\n", array_map('strval', $cur)) : trim((string) $cur);
+        return $land(kop_suggestion_put($data, $at, $empty), $text);
+    }
+}
+
+if (!function_exists('kop_suggestion_record_doc')) {
+    /** The record a suggestion's facility entry is about, normalized as the card compares it ("Keep it"), or null. */
+    function kop_suggestion_record_doc(PDO $pdo, $payload, $index, $reason, $prefix) {
+        if (!function_exists('kop_facility_load') || !function_exists('kop_extract_project_data')) return null;
+        $entry = kop_extract_project_data($payload)['facilities'][(int) $index] ?? null;
+        if (!is_array($entry)) return null;
+        $opts = array('pdo' => $pdo, 'prefix' => $prefix);
+        try {
+            $fid = kop_suggestion_find_facility($entry, kop_facility_normalize($entry), (string) $reason, $opts);
+            $record = $fid ? kop_facility_load($fid, $opts) : null;
+        } catch (Throwable $e) {
+            error_log('kop_suggestion_record_doc: ' . $e->getMessage());
+            return null;
         }
-        throw new RuntimeException('That field cannot take text.');
+        return $record ? kop_facility_normalize($record['doc'], array('facility_id' => $record['id'])) : null;
     }
 }
 
@@ -552,6 +641,7 @@ if (!function_exists('kop_suggestion_other_targets')) {
         if (!is_array($siblings)) return $out;
         foreach ($siblings as $k => $v) {
             if ((string) $k === (string) end($at)) continue;
+            if (count($at) === 1 && in_array((string) $k, kop_suggestion_other_skip(), true)) continue;   // the project's own keys
             if (is_string($v) || $v === null || (is_array($v) && !array_filter($v, 'is_array') && (!$v || array_keys($v) === range(0, count($v) - 1)))) {
                 $out[(string) $k] = kop_suggestion_label((string) $k);
             }

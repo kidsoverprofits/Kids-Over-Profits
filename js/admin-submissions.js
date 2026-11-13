@@ -1081,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Edit / Move / Remove beside a value; the spec says what the server is to change.
         const tools = (spec, ops) => canFix && ops.length
             ? `<span class="sugg-tools" data-spec="${attr(JSON.stringify(spec))}">${ops.map(op =>
-                `<button type="button" class="sugg-act" data-op="${op}">${{ edit: 'Edit', move: 'Move', remove: 'Remove' }[op]}</button>`).join('')}</span>`
+                `<button type="button" class="sugg-act" data-op="${op}">${{ edit: 'Edit', move: 'Move', remove: 'Remove', keep: 'Keep it' }[op]}</button>`).join('')}</span>`
             : '';
         const cell = (text, cls, extra) => text === ''
             ? `<td class="sugg-${cls} sugg-blank">(empty)${extra || ''}</td>`
@@ -1097,12 +1097,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     + tools({ entry: entry, path: ch.path, index: it.index, parts: it.parts, label: ch.label }, ['edit', 'move', 'remove']) + `</li>`).join('');
                 const placedTexts = (ch.items || []).map(it => it.text);
                 const rest = (ch.added || []).filter(t => placedTexts.indexOf(t) === -1);
+                // Items a whole-record edit takes off the record: "Keep it" puts the record's own item back.
+                const kept = (ch.dropped_items || []).map(it => `<li class="sugg-del"><span class="sugg-sign" aria-hidden="true">- </span>`
+                    + `<span class="sugg-text">${escapeHtml(it.text)}</span>`
+                    + tools({ entry: entry, path: ch.path, index: it.index, label: ch.label }, ['keep']) + `</li>`).join('');
+                const keptTexts = (ch.dropped_items || []).map(it => it.text);
+                const gone = (ch.dropped || []).filter(t => keptTexts.indexOf(t) === -1);
                 return `<tr><th scope="row">${escapeHtml(ch.label)}</th>`
                     + `<td class="sugg-before sugg-count${ch.had ? '' : ' sugg-blank'}">${had}</td>`
-                    + `<td class="sugg-after"><ul class="sugg-items">${placed}${items(rest, 'ins', '+ ')}${items(ch.dropped, 'del', '- ')}</ul></td></tr>`;
+                    + `<td class="sugg-after"><ul class="sugg-items">${placed}${items(rest, 'ins', '+ ')}${kept}${items(gone, 'del', '- ')}</ul></td></tr>`;
             }
             const after = ch.kind === 'removed' ? '' : ch.after;
-            const ops = ch.kind === 'removed' ? [] : (ch.editable ? ['edit', 'move', 'remove'] : ['remove']);
+            // An emptied field: type a value, or keep the record's. A tick box: only taken off.
+            const ops = ch.kind === 'removed' ? (ch.editable ? ['edit', 'keep'] : ['keep'])
+                : (ch.editable ? ['edit', 'move', 'remove'] : ['remove']);
             const spec = { entry: entry, path: ch.path, value: after, label: ch.label };
             return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before')}${cell(after, 'after', tools(spec, ops))}</tr>`;
         };
@@ -1127,9 +1135,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if ((c.other || []).length) {
             html += `<div class="sugg-entry"><table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">Sent</th></tr></thead><tbody>`
-                + c.other.map(o => `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after"><span class="sugg-text">${escapeHtml(o.after)}</span>`
-                    + (o.path ? tools({ entry: 'other', path: o.path, value: o.value, list: o.list, moves: o.moves, label: o.label }, ['edit', 'move', 'remove']) : '')
-                    + `</td></tr>`).join('')
+                + c.other.map(o => {
+                    // A list of people or other entries: each with its own buttons, edited by its parts.
+                    if (o.path && o.items) {
+                        return `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after"><ul class="sugg-items">`
+                            + o.items.map(it => `<li class="sugg-ins"><span class="sugg-text">${escapeHtml(it.text)}</span>`
+                                + tools({ entry: 'other', path: o.path, index: it.index, parts: it.parts, moves: o.moves, label: o.label }, ['edit', 'move', 'remove'])
+                                + `</li>`).join('')
+                            + `</ul></td></tr>`;
+                    }
+                    const ops = !o.path ? [] : (o.bool ? ['remove'] : ['edit', 'move', 'remove']);
+                    return `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after"><span class="sugg-text">${escapeHtml(o.after)}</span>`
+                        + tools({ entry: 'other', path: o.path, value: o.value, list: o.list, moves: o.moves, label: o.label }, ops)
+                        + `</td></tr>`;
+                }).join('')
                 + `</tbody></table></div>`;
         }
         if ((c.unchanged || []).length) {
@@ -1165,8 +1184,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let spec;
         try { spec = JSON.parse(holder.dataset.spec); } catch (err) { return; }
         const op = btn.dataset.op;
-        if (op === 'remove') {
-            suggSave(card, submission, { entry: spec.entry, op: 'remove', path: spec.path, index: spec.index });
+        if (op === 'remove' || op === 'keep') {
+            suggSave(card, submission, { entry: spec.entry, op: op, path: spec.path, index: spec.index });
             return;
         }
         // One open box per card.

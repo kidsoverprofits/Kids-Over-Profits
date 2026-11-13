@@ -147,6 +147,11 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # and answers the redrawn changes; the version before each fix is kept in option kop_sugg_edits_<id> (50 at most) for
 # 'undo_suggestion_edit' ("Undo last edit" on the card). Only pending rows; Approve writes the fixed version. A survivor's account
 # keeps their words: the box says spelling and punctuation only (memory: testimony quotes only)
+# Everything on the card has buttons (owner 2026-11-13, "edit everything"): a whole-record edit's dropped list items and emptied fields
+# get "Keep it" (op 'keep': the endpoint loads the record with kop_suggestion_record_doc() and puts its own value or item back; emptied
+# fields can be typed into too); the referrer / transporter / provider blocks' lists of people are edited item by item (their parts),
+# their tick boxes only removed (set false); Move there offers the same block's other fields, never the project's own keys
+# (kop_suggestion_other_skip()). Tick boxes on a facility are only removed. A record on file keeps its name (the card matches by it)
 python scripts/test-suggestion-edit-ui.py         # the card in a browser at 1280 and 390: buttons, edit, person parts, move, refusal, undo
 # Undo of a data approval (Recently done 'restore', or the status set back on Submissions Review) puts the records back:
 # api/lib-suggestion-undo.php (copy taken by kop_apply_suggested_edit(), option kop_sugg_undo_<id>; refuses over later edits)

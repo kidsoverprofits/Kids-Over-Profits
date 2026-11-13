@@ -76,13 +76,21 @@ def changes_for(doc):
                                           {"key": "role", "label": "Role", "value": p["role"]},
                                           {"key": "pastJobs", "label": "Past jobs", "value": ""}]}
                                for i, p in enumerate(doc["staff"])]})
-    if doc["notes"]:
-        rows.append({"label": "Notes", "path": "notes", "kind": "list", "had": 3, "added": list(doc["notes"]), "dropped": [],
-                     "items": [{"index": i, "text": t, "parts": [{"key": "", "label": "", "value": t}]} for i, t in enumerate(doc["notes"])]})
+    if doc["notes"] or doc["dropped"]:
+        rows.append({"label": "Notes", "path": "notes", "kind": "list", "had": 3, "added": list(doc["notes"]), "dropped": list(doc["dropped"]),
+                     "items": [{"index": i, "text": t, "parts": [{"key": "", "label": "", "value": t}]} for i, t in enumerate(doc["notes"])],
+                     "dropped_items": [{"index": 2, "text": t, "parts": []} for t in doc["dropped"]]})
+    if doc["gender_removed"]:
+        rows.append({"label": "Gender", "path": "facilityDetails.gender", "kind": "removed", "before": "Female", "after": "", "editable": True, "keepable": True})
     rows.append({"label": "Has deaths", "path": "criticalIncidents.hasDeaths", "kind": "added", "before": "", "after": "Yes", "editable": False})
     return {"entries": [{"index": 0, "name": "Linden Oaks", "facility_id": 12, "url": "https://kidsoverprofits.org/facility/linden-oaks-il/",
                          "is_new": False, "changes": rows}],
-            "unchanged": [], "other": [], "targets": TARGETS}
+            "unchanged": [], "targets": TARGETS,
+            "other": [{"label": "Transporters", "after": "", "path": ["transporters"], "bool": False, "list": True, "value": "",
+                       "items": [{"index": i, "text": ", ".join(t.values()), "parts": [{"key": k, "label": k, "value": v} for k, v in t.items()]}
+                                 for i, t in enumerate(doc["transporters"])], "moves": []},
+                      {"label": "Is independent transporter", "after": "Yes", "path": ["isIndependentTransporter"], "bool": True, "list": False,
+                       "value": "", "moves": []}]}
 
 
 def main():
@@ -109,7 +117,8 @@ def main():
     for width in (1280, 390):
         doc = {"operator": "This is not a Charter Behavioral Health program.",
                "staff": [{"name": "Brittney-house manager", "role": ""}],
-               "notes": ["Teh staff yelled at us."]}
+               "notes": ["Teh staff yelled at us."], "dropped": ["An old note the sender deleted."], "gender_removed": True,
+               "transporters": [{"firstName": "Bobby", "lastName": "Tredinnik", "role": "CEO"}]}
         history = []
         calls = []
         refuse = {"next": False}
@@ -152,6 +161,12 @@ def main():
                     elif e["op"] == "move" and e["path"] == "identification.currentOperator":
                         doc["notes"].append(doc["operator"])
                         doc["operator"] = ""
+                    elif e["op"] == "keep" and e["path"] == "notes":
+                        doc["dropped"].pop()
+                    elif e["op"] == "keep" and e["path"] == "facilityDetails.gender":
+                        doc["gender_removed"] = False
+                    elif e["op"] == "item" and e["path"] == ["transporters"]:
+                        doc["transporters"][e["index"]].update(e["parts"])
                     elif e["op"] == "remove" and e["path"] == "notes":
                         doc["notes"].pop(e["index"])
                     return route.fulfill(status=200, json={"success": True, "message": "Saved.", "json_data": {},
@@ -237,6 +252,36 @@ def main():
             check(rowof("Operator").count() == 1, f"@{width} Undo puts the moved text back")
             if width == 1280:
                 page.screenshot(path=str(shots / f"card-{width}.png"), full_page=True)
+
+            # What a whole-record edit dropped: Keep it.
+            g = rowof("Gender")
+            check(g.locator("button.sugg-act").all_inner_texts() == ["Edit", "Keep it"], f"@{width} an emptied field can be edited or kept")
+            g.locator('button.sugg-act[data-op="keep"]').click()
+            page.wait_for_function("/3 times/.test(document.querySelector('.sugg-edited').textContent)")
+            check(calls[-1]["edit"] == {"entry": 0, "op": "keep", "path": "facilityDetails.gender"}, f"@{width} Keep it sends keep", json.dumps(calls[-1]))
+            check(rowof("Gender").count() == 0, f"@{width} a kept field leaves the changes")
+            dropped = rowof("Notes").locator("li.sugg-del")
+            check(dropped.locator("button.sugg-act").all_inner_texts() == ["Keep it"], f"@{width} a dropped item has Keep it")
+            dropped.locator('button.sugg-act[data-op="keep"]').click()
+            page.wait_for_function("/4 times/.test(document.querySelector('.sugg-edited').textContent)")
+            check(calls[-1]["edit"] == {"entry": 0, "op": "keep", "path": "notes", "index": 2}, f"@{width} Keep it sends the item's place", json.dumps(calls[-1]))
+
+            # The non-facility parts: a list of people item by item, a tick box only removed.
+            tr = rowof("Transporters").locator("li").first
+            check(tr.locator("button.sugg-act").all_inner_texts() == ["Edit", "Move", "Remove"], f"@{width} a person in a list has Edit, Move, Remove")
+            check(rowof("Is independent transporter").locator("button.sugg-act").all_inner_texts() == ["Remove"], f"@{width} a tick box there has only Remove")
+            tr.locator('button.sugg-act[data-op="edit"]').click()
+            check(card.locator(".sugg-form input").count() == 3, f"@{width} a person there opens as its parts")
+            card.locator(".sugg-form input").nth(1).fill("Tredinnick")
+            card.locator(".sugg-form button", has_text="Save").click()
+            page.wait_for_function("/5 times/.test(document.querySelector('.sugg-edited').textContent)")
+            check(calls[-1]["edit"] == {"entry": "other", "op": "item", "path": ["transporters"], "index": 0,
+                                        "parts": {"firstName": "Bobby", "lastName": "Tredinnick", "role": "CEO"}}, f"@{width} the person's fix is sent", json.dumps(calls[-1]))
+            check("Tredinnick" in rowof("Transporters").inner_text(), f"@{width} the card shows the person's fix")
+            if width == 390:
+                over = page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
+                check(over <= 0, f"@{width} nothing wider than the screen with every row", str(over))
+                page.screenshot(path=str(shots / f"all-{width}.png"), full_page=True)
 
             # An approved suggestion is not edited on its card.
             approved["on"] = True
