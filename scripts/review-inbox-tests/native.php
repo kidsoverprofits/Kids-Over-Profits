@@ -121,11 +121,44 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
             } catch (RuntimeException $e) {
                 $check('news: connecting the same company twice is refused', true);
             }
-            try {
-                call_user_func($src['act'], $nid, 'connect', array('record' => '12'));
-                $check('news: a program is refused (it goes under Facilities mentioned)', false);
-            } catch (RuntimeException $e) {
-                $check('news: a program is refused (it goes under Facilities mentioned)', stripos($e->getMessage(), 'Facilities mentioned') !== false);
+            // A program goes into Facilities mentioned, linked by id (news_facility_links); Take off takes exactly it out again.
+            $fid = (int) $pdo->query("SELECT id FROM facilities_v2 WHERE name <> '' ORDER BY id LIMIT 1")->fetchColumn();
+            if ($fid) {
+                $mentions = function () use ($nid) { return (string) kop_rinbox_native_row('news', $nid)['facilities_mentioned']; };
+                $fac_links = function () use ($pdo, $nid, $fid) {
+                    return (int) $pdo->query("SELECT COUNT(*) FROM news_facility_links WHERE news_id = $nid AND facility_id = $fid")->fetchColumn();
+                };
+                $had = array_column(kop_normalize_facility_mentions($mentions()), 'facility_id');
+                if (in_array($fid, $had, true)) {
+                    try {
+                        call_user_func($src['act'], $nid, 'connect', array('record' => (string) $fid));
+                        $check('news: a program already in Facilities mentioned is refused', false);
+                    } catch (RuntimeException $e) {
+                        $check('news: a program already in Facilities mentioned is refused', stripos($e->getMessage(), 'already connected') !== false, $e->getMessage());
+                    }
+                } else {
+                    $m_before = $mentions();
+                    $res = call_user_func($src['act'], $nid, 'connect', array('record' => (string) $fid));
+                    $now = kop_normalize_facility_mentions($mentions());
+                    $check('news: connecting a program adds it to Facilities mentioned and links it, the article stays pending',
+                        in_array($fid, array_column($now, 'facility_id'), true) && $fac_links() === 1
+                        && kop_rinbox_native_row('news', $nid)['status'] === 'submitted'
+                        && ($res['undo']['action'] ?? '') === 'unconnect:facility:' . $fid, $res['message']);
+                    $ids = array_map(function ($a) { return $a['id']; }, kop_rinbox_native_item('news', kop_rinbox_native_row('news', $nid))['actions']);
+                    $check('news: the card offers Take off for the program', in_array('unconnect:facility:' . $fid, $ids, true), json_encode($ids));
+                    try {
+                        call_user_func($src['act'], $nid, 'connect', array('record' => 'facility:' . $fid));
+                        $check('news: connecting the same program twice is refused', false);
+                    } catch (RuntimeException $e) {
+                        $check('news: connecting the same program twice is refused', true);
+                    }
+                    $req = new WP_REST_Request();
+                    foreach (array('source' => 'news', 'key' => (string) $nid, 'action' => 'unconnect:facility:' . $fid, 'params' => array()) as $k => $v) $req->set_param($k, $v);
+                    $undo = kop_rinbox_rest_act($req)->get_data();
+                    $check('news: Take off (through REST) takes the program out of Facilities mentioned and unlinks it',
+                        empty($undo['error']) && kop_normalize_facility_mentions($mentions()) === kop_normalize_facility_mentions($m_before)
+                        && $fac_links() === 0 && !isset(kop_rinbox_native_connections($nid)['facility:' . $fid]), json_encode($undo['error'] ?? $undo['message'] ?? null));
+                }
             }
             // Through the page's REST route, as the button sends it: the id's ":company:<id>" must survive.
             $req = new WP_REST_Request();
@@ -182,10 +215,10 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
                 $check('news: the one Undo (through REST) takes both off exactly', empty($undo['error']) && $linked() === $was && $notes() === $before
                     && !kop_rinbox_native_connections($nid), json_encode($undo['error'] ?? $undo['message'] ?? null));
                 try {
-                    call_user_func($src['act'], $nid, 'connect', array('record' => array('company:' . $oid, '12')));
-                    $check('news: a program among the picks refuses them all', false);
+                    call_user_func($src['act'], $nid, 'connect', array('record' => array('company:' . $oid, '987654321')));
+                    $check('news: a program that does not exist among the picks refuses them all', false);
                 } catch (RuntimeException $e) {
-                    $check('news: a program among the picks refuses them all', $linked() === $was && !kop_rinbox_native_connections($nid), $e->getMessage());
+                    $check('news: a program that does not exist among the picks refuses them all', $linked() === $was && !kop_rinbox_native_connections($nid), $e->getMessage());
                 }
             }
         });

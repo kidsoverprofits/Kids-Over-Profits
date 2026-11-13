@@ -443,15 +443,55 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
  * kop_rinbox_file_on_record() files things: a company lists it on its page
  * (kop_operator_links, shown once the article is approved), a young adult
  * program gets the link, a consultant, transporter, provider, marketer,
- * trade organization or Christian rehab for adults a line in its notes citing the article. Programs are
- * connected through the card's "Facilities mentioned". Each connection gets a
+ * trade organization or Christian rehab for adults a line in its notes citing the article. A program
+ * goes into the article's "Facilities mentioned" (kop_rinbox_native_connect_program(): the same
+ * facilities_mentioned + kop_resync_news() the Data Manager's link editor writes). Each connection gets a
  * "Take off" button (the Undo). Option kop_review_news_connections =
- * {news id: {"<kind>:<id>": what kop_rinbox_file_on_record() did + by, at}}.
+ * {news id: {"<kind>:<id>": what kop_rinbox_file_on_record() did (a program: kind, id, name) + by, at}}.
  */
 
 /** The kinds "Connect a record" offers. */
 function kop_rinbox_native_connect_kinds() {
-    return array('company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya', 'cra');
+    return array('facility', 'company', 'consultant', 'transporter', 'provider', 'marketer', 'tradeorg', 'ya', 'cra');
+}
+
+/** The article's facilities_mentioned with $fid added (add) or the entry naming it taken out (remove), then every derived link re-run. */
+function kop_rinbox_native_mention_program(array $r, $fid, $name, $add) {
+    if (!function_exists('kop_normalize_facility_mentions')) require_once get_stylesheet_directory() . '/api/news-mentions.php';
+    $pdo = kop_rinbox_pdo();
+    $have = kop_normalize_facility_mentions((string) ($r['facilities_mentioned'] ?? ''));
+    $out = array();
+    foreach ($have as $m) {
+        if ((int) ($m['facility_id'] ?? 0) === (int) $fid) {
+            if ($add) return false; // already there
+            continue;
+        }
+        $out[] = $m;
+    }
+    if ($add) $out[] = array('name' => (string) $name, 'facility_id' => (int) $fid);
+    elseif (count($out) === count($have)) return false; // not there any more
+    $pdo->prepare('UPDATE news_submissions SET facilities_mentioned = ? WHERE id = ?')
+        ->execute(array(wp_json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int) $r['id']));
+    // Facility links, story group, journalists and case links, from the row as it is now.
+    kop_rinbox_native_resync('news', (int) $r['id']);
+    return true;
+}
+
+/** "Connect records" with a program: it goes into the article's Facilities mentioned, linked by id. */
+function kop_rinbox_native_connect_program(array $r, $fid, array $list) {
+    $fid = function_exists('kop_facility_follow_moves') ? (int) kop_facility_follow_moves((int) $fid) : (int) $fid;
+    $st = kop_rinbox_pdo()->prepare('SELECT name FROM facilities_v2 WHERE id = ?');
+    $st->execute(array($fid));
+    $name = trim((string) $st->fetchColumn());
+    if ($name === '') throw new RuntimeException("Program #{$fid} does not exist.");
+    $ref = 'facility:' . $fid;
+    if (isset($list[$ref]) || !kop_rinbox_native_mention_program($r, $fid, $name, true)) {
+        throw new RuntimeException('This article is already connected to ' . kop_rinbox_record_words('facility', $name) . '.');
+    }
+    $list[$ref] = array('kind' => 'facility', 'id' => $fid, 'name' => $name, 'by' => kop_rinbox_reviewer(), 'at' => time());
+    kop_rinbox_native_connections_put((int) $r['id'], $list);
+    return array('message' => 'Added ' . kop_rinbox_record_words('facility', $name) . ' to the article\'s Facilities mentioned. The article stays in the news.',
+        'undo' => array('action' => 'unconnect:' . $ref, 'params' => array()));
 }
 
 function kop_rinbox_native_connections($news_id = null) {
@@ -478,8 +518,8 @@ function kop_rinbox_native_connect_actions(array $r) {
     }
     if (!in_array((string) $r['status'], array('submitted', 'approved', 'published'), true) || kop_rinbox_native_url('news', $r) === '') return $actions;
     $actions[] = array('id' => 'connect', 'label' => 'Connect records', 'style' => 'neutral', 'submit' => 'Connect',
-        'help' => 'The article stays in the news and is also filed on every record you pick: a company lists it on its page once it is approved, '
-            . 'a young adult program gets the link, any other kind (a Christian rehab for adults too) a line in its notes citing the article. Programs go under Facilities mentioned. Take off undoes each one.',
+        'help' => 'The article stays in the news and is also filed on every record you pick: a program goes into its Facilities mentioned, a company lists it on its page once it is approved, '
+            . 'a young adult program gets the link, any other kind (a Christian rehab for adults too) a line in its notes citing the article. Take off undoes each one.',
         'params' => array(array('name' => 'record', 'label' => 'Records (one or more)', 'type' => 'facilities',
             'kinds' => kop_rinbox_native_connect_kinds(), 'value' => array())));
     return $actions;
@@ -492,11 +532,7 @@ function kop_rinbox_native_connect_actions(array $r) {
  */
 function kop_rinbox_native_connect_many($key, $value) {
     $refs = function_exists('kop_rdest_record_refs') ? kop_rdest_record_refs($value) : array_filter(array(trim((string) $value)));
-    if (!$refs) throw new RuntimeException('Pick a company, consultant or other record in the finder first.');
-    foreach ($refs as $ref) {
-        list($kind) = kop_rinbox_record_of($ref);
-        if ($kind === 'facility') throw new RuntimeException('A program is connected through the card\'s "Facilities mentioned" (View details, then edit); take it out of the picks.');
-    }
+    if (!$refs) throw new RuntimeException('Pick a program, company or other record in the finder first.');
     if (count($refs) === 1) return kop_rinbox_native_connect($key, $refs[0]);
     $made = array();
     $messages = array();
@@ -542,10 +578,10 @@ function kop_rinbox_native_connect($key, $value) {
     if (!$r) throw new RuntimeException('That article is gone.');
     if (!in_array((string) $r['status'], array('submitted', 'approved', 'published'), true)) throw new RuntimeException('Only a pending or approved article can be connected to a record.');
     list($kind, $id) = kop_rinbox_record_of($value);
-    if ($kind === 'facility') throw new RuntimeException('A program is connected through the card\'s "Facilities mentioned" (View details, then edit).');
-    if ($kind === '' || $id <= 0 || !in_array($kind, kop_rinbox_native_connect_kinds(), true)) throw new RuntimeException('Pick a company, consultant or other record in the finder first.');
+    if ($kind === '' || $id <= 0 || !in_array($kind, kop_rinbox_native_connect_kinds(), true)) throw new RuntimeException('Pick a program, company or other record in the finder first.');
     $ref = $kind . ':' . $id;
     $list = kop_rinbox_native_connections((int) $r['id']);
+    if ($kind === 'facility') return kop_rinbox_native_connect_program($r, $id, $list);
     if (isset($list[$ref])) throw new RuntimeException('This article is already connected to ' . kop_rinbox_record_words($kind, (string) $list[$ref]['name']) . '.');
     $url = kop_rinbox_native_url('news', $r);
     $title = trim((string) $r['article_title']);
@@ -571,7 +607,13 @@ function kop_rinbox_native_unconnect($key, $ref) {
     $list = kop_rinbox_native_connections((int) $key);
     if (empty($list[$ref])) throw new RuntimeException('This article is not connected to that record any more.');
     $done = $list[$ref];
-    kop_rinbox_unfile_from_record($done);
+    if ((string) ($done['kind'] ?? '') === 'facility') {
+        // Out of Facilities mentioned again (unless someone already took it out by hand).
+        $r = kop_rinbox_native_row('news', $key);
+        if ($r) kop_rinbox_native_mention_program($r, (int) $done['id'], '', false);
+    } else {
+        kop_rinbox_unfile_from_record($done);
+    }
     unset($list[$ref]);
     kop_rinbox_native_connections_put((int) $key, $list);
     return array('message' => 'Took the article off ' . kop_rinbox_record_words((string) $done['kind'], (string) ($done['name'] ?? $ref)) . '.');
