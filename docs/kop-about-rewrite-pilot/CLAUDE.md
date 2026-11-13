@@ -1,6 +1,8 @@
 # KOP About rewrite pilot
 
-Rewrites of the "About" text for 21 Kids Over Profits facility and operator records. Each record shows what the site prints now next to a sourced rewrite. Nothing here is on kidsoverprofits.org yet.
+Rewrites of the "About" text for 21 Kids Over Profits facility and operator records. Each record shows the rule-built About it had before next to a sourced rewrite. The rewrites went live on Nov 12, 2026 (commit 98e878d7: `inc/about-rewrites.php` applies `seeds/about-rewrites/`, made from `out/` by kop-pipeline `scripts/about-rewrite/export-seeds.py`).
+
+The page reads each record's live About and quotes from kidsoverprofits.org when it opens and on its Refresh button ("On the site now", built by `LIVE_SCRIPT` in rebuild.py), from the theme's public read-only `api/about-live.php`. That file is in the theme .htaccess's open-CORS list because the server's root .htaccess (not in any repo) pins every REST answer to `Access-Control-Allow-Origin: http://localhost:8000`, so the page cannot read `wp-json` directly. After changing `out/`, rebuild, republish the artifact (same URL) and re-export the seeds, or the page will flag the site as different.
 
 Published preview (private, owned by Dani): https://claude.ai/artifact/4feUz655wtt6zshbvg3kDm (same artifact as claude.ai/code/artifact/1db0c755-2e91-4a1b-b58a-5cef38081450)
 

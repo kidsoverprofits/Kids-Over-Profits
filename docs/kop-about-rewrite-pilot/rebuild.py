@@ -30,10 +30,156 @@ CSS = """.check ol{margin:6px 0 0;padding-left:22px}.choices{display:block;color
 .st{font:13px/1.4 var(--ui);color:var(--muted);margin:4px 0 0;min-height:1.4em}.ask.done .q::before{content:"\2713  ";color:var(--accent);font-weight:700}
 .todo li{margin:0 0 14px}.todo .how{margin:0 0 10px;color:var(--muted)}
 """
-INTRO = ("21 records: what the page prints now, beside the agents' rewrite from the same facts, with citations numbered "
-         "the way the site numbers them. The yellow list below is everything that needs your decision; each record's "
-         "research to-dos and work log are folded under it. Survivor and family accounts are quoted word for word "
-         "under each rewrite, never retold in it. Nothing here is on the site yet.")
+CSS += """.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;font:14px/1.4 var(--ui)}
+.bar button,.live summary{font:14px/1.3 var(--ui);color:var(--ink);background:var(--panel);border:1px solid var(--accent);border-radius:6px;padding:6px 12px;cursor:pointer}
+.bar button:hover{border-width:2px;padding:5px 11px}.bar button:focus-visible,.live summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar button:disabled{opacity:.55;cursor:not-allowed}.bar .lst{color:var(--muted)}
+.live{border-top:1px solid var(--line);margin:14px 0 0;padding:12px 0 0;font:14px/1.5 var(--ui)}
+.live .lstat{margin:0 0 8px}.live .lstat b{font-weight:700}.live.same .lstat b{color:var(--accent)}
+.live.diff .lstat,.live.old .lstat,.live.err .lstat{background:var(--warn);border-radius:6px;padding:8px 10px}
+.live details{margin:6px 0 0}.live summary{display:inline-block;color:var(--accent);border-color:var(--line)}
+.live .ltext{font:16px/1.6 var(--body);margin:10px 0 0}.live .ltext p{margin:0 0 12px;overflow-wrap:anywhere}
+.live .ltext a{color:var(--accent)}.live mark{background:var(--warn);color:var(--ink);border-bottom:2px solid var(--accent)}
+"""
+INTRO = ("21 records: the rule-built About each page printed before, beside the agents' rewrite from the same facts, "
+         "with citations numbered the way the site numbers them. The rewrites went live on November 12, 2026 "
+         "(inc/about-rewrites.php). Under each record, \"On the site now\" is read from kidsoverprofits.org when this page "
+         "opens; Refresh reads it again and flags any sentence the site prints differently. Survivor and family accounts "
+         "are quoted word for word under each rewrite, never retold in it. Each record's research to-dos and work log "
+         "are folded under it.")
+BAR = ('<div class="bar"><button type="button" id="refresh">Refresh from the live site</button>'
+       '<span class="lst" id="lstat" role="status">Not checked yet.</span></div>\n')
+
+LIVE_SCRIPT = r"""<script>
+/* "On the site now": each record's About and quotes as kidsoverprofits.org prints them, read from the theme's public
+   read-only api/about-live.php (open CORS; the REST routes are pinned to one origin by the site's root .htaccess),
+   compared sentence by sentence with the Rewrite column. Read on open and on Refresh; nothing is written anywhere. */
+(function () {
+  var API = "https://kidsoverprofits.org/wp-content/themes/child/api/about-live.php?page=";
+  var btn = document.getElementById("refresh"), top = document.getElementById("lstat");
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".live[data-page]"));
+  function norm(s) {
+    return String(s || "").normalize("NFKC").replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+      .replace(/[‐-―]/g, "-").replace(/…/g, "...").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+  function rewriteText(box) {
+    var col = box.closest(".rec").querySelector(".col.after").cloneNode(true);
+    col.querySelectorAll("sup,.testimony,.refs,h3").forEach(function (n) { n.remove(); });
+    return norm(Array.prototype.map.call(col.querySelectorAll("p"), function (p) { return p.textContent; }).join(" "));
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function safeUrl(u) { return /^https?:\/\//i.test(u || "") ? u : ""; }
+  function render(box, d) {
+    box.textContent = "";
+    box.className = "live";
+    var stat = el("p", "lstat");
+    box.appendChild(stat);
+    if (!d || !d.ok) {
+      box.classList.add("err");
+      stat.textContent = "This page was not found on the site" + (d && d.status ? " (HTTP " + d.status + ")." : ".");
+      return { kind: "err" };
+    }
+    var rw = rewriteText(box), total = 0, off = [], liveLen = 0;
+    d.paragraphs.forEach(function (para) {
+      para.forEach(function (s) { total++; var t = norm(s.text); liveLen += t.length; if (rw.indexOf(t) < 0) off.push(s); });
+    });
+    // a recording with no transcript yet (.empty) is not a quote the site can print
+    var rq = Array.prototype.filter.call(box.closest(".rec").querySelectorAll(".col.after .testimony blockquote"),
+      function (q) { return !q.querySelector(".empty"); }).length;
+    var lq = d.testimony.length, isOp = box.dataset.page.indexOf("operator/") === 0;
+    var quotes = isOp ? (rq ? " Its " + rq + " quote" + (rq === 1 ? "" : "s") + " go on the programs they name." : "")
+      : " " + lq + " of the " + rq + " quote" + (rq === 1 ? "" : "s") + " shown on the page.";
+    var kind;
+    if (!d.writeup) {
+      kind = "old"; box.classList.add("old");
+      stat.appendChild(el("b", null, "Not live: "));
+      stat.appendChild(document.createTextNode("the site still prints a rule-built About, not this rewrite."));
+    } else if (!off.length && liveLen >= rw.length * 0.9) {
+      kind = "same"; box.classList.add("same");
+      stat.appendChild(el("b", null, "✓ Live as written: "));
+      stat.appendChild(document.createTextNode("the site prints this rewrite, all " + total + " sentences." + quotes));
+    } else {
+      kind = "diff"; box.classList.add("diff");
+      stat.appendChild(el("b", null, "Live, with differences: "));
+      stat.appendChild(document.createTextNode(off.length
+        ? off.length + " of " + total + " sentences on the site are not in the rewrite (highlighted below)." + quotes
+        : "every sentence on the site is in the rewrite, but some of the rewrite is missing from the site." + quotes));
+    }
+    if (d.updated_label) stat.appendChild(document.createTextNode(" Record updated " + d.updated_label + "."));
+    var det = el("details"), sum = el("summary", null, "Show what the site prints");
+    det.appendChild(sum);
+    var wrap = el("div", "ltext"), order = [], refs = el("ol");
+    d.paragraphs.forEach(function (para) {
+      var p = el("p");
+      para.forEach(function (s, i) {
+        if (i) p.appendChild(document.createTextNode(" "));
+        p.appendChild(off.indexOf(s) >= 0 ? el("mark", null, s.text) : document.createTextNode(s.text));
+        s.sources.forEach(function (c) {
+          var key = c.url || c.cite, n = order.indexOf(key);
+          if (n < 0) {
+            order.push(key); n = order.length - 1;
+            var li = el("li"), u = safeUrl(c.url);
+            if (u) { var a = el("a", null, c.cite || u); a.href = u; li.appendChild(a); } else li.textContent = c.cite;
+            refs.appendChild(li);
+          }
+          var sup = el("sup"), u2 = safeUrl(c.url);
+          if (u2) { var a2 = el("a", null, "[" + (n + 1) + "]"); a2.href = u2; sup.appendChild(a2); } else sup.textContent = "[" + (n + 1) + "]";
+          p.appendChild(sup);
+        });
+      });
+      wrap.appendChild(p);
+    });
+    if (lq) {
+      var tw = el("div", "testimony"); tw.appendChild(el("h4", null, "Survivor testimony on the page"));
+      d.testimony.forEach(function (t) {
+        var q = el("blockquote", null, t.text), f = el("footer"), u = safeUrl(t.url);
+        f.appendChild(document.createTextNode(t.credit));
+        if (u) { f.appendChild(document.createTextNode(" · ")); var a = el("a", null, "original"); a.href = u; f.appendChild(a); }
+        if (t.note) { f.appendChild(el("br")); f.appendChild(document.createTextNode(t.note)); }
+        q.appendChild(f); tw.appendChild(q);
+      });
+      wrap.appendChild(tw);
+    }
+    if (order.length) { var r = el("div", "refs"); r.appendChild(el("b", null, "Sources")); r.appendChild(refs); wrap.appendChild(r); }
+    det.appendChild(wrap);
+    box.appendChild(det);
+    return { kind: kind };
+  }
+  function one(box) {
+    var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 30000);
+    return fetch(API + encodeURIComponent(box.dataset.page) + "&_=" + Date.now(), { signal: ctl.signal, credentials: "omit" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (j) { clearTimeout(t); return render(box, (j.pages || {})[box.dataset.page]); })
+      .catch(function (e) {
+        clearTimeout(t);
+        box.className = "live err"; box.textContent = "";
+        box.appendChild(el("p", "lstat", "Could not read this page from kidsoverprofits.org (" + (e && e.name === "AbortError" ? "timed out" : (e && e.message) || "error") + ")."));
+        return { kind: "fail" };
+      });
+  }
+  function run() {
+    btn.disabled = true;
+    top.textContent = "Reading " + boxes.length + " pages from kidsoverprofits.org...";
+    boxes.forEach(function (b) { b.className = "live"; b.textContent = ""; b.appendChild(el("p", "lstat", "Reading the live page...")); });
+    var queue = boxes.slice(), res = [];
+    function worker() { var b = queue.shift(); return b ? one(b).then(function (r) { res.push(r.kind); return worker(); }) : Promise.resolve(); }
+    Promise.all([worker(), worker(), worker(), worker()]).then(function () {
+      btn.disabled = false;
+      var c = function (k) { return res.filter(function (x) { return x === k; }).length; };
+      var at = new Date().toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+      if (c("fail") === res.length) { top.textContent = "Could not reach kidsoverprofits.org from this view (" + at + "). The Rewrite column is the copy from the last build."; return; }
+      var bits = [c("same") + " live as written"];
+      if (c("diff")) bits.push(c("diff") + " live with differences");
+      if (c("old")) bits.push(c("old") + " not live");
+      if (c("err") + c("fail")) bits.push((c("err") + c("fail")) + " not read");
+      top.textContent = "Checked against kidsoverprofits.org " + at + ": " + bits.join(", ") + ".";
+    });
+  }
+  btn.addEventListener("click", run);
+  run();
+})();
+</script>
+"""
 
 SCRIPT = """<script>
 /* Answers to the "Needs you" questions live in the artifact's db: collection "answers", one doc per question id
@@ -159,7 +305,9 @@ for n, (a, b) in enumerate(zip(secs, secs[1:])):
     new = open(f"out/rec{n:02d}.html", encoding="utf-8").read()
     i = sec.index('<div class="col after">')
     j = sec.rindex("</div></section>")
-    sec = sec[:i] + new + sec[j:]
+    href = re.search(r'<h2><a href="https://kidsoverprofits\.org/((?:facility|operator)/[A-Za-z0-9_-]+)/?"', sec).group(1)
+    sec = sec[:i] + new + "</div>" + f'<div class="live" data-page="{href}"><p class="lstat">Not read from the site yet.</p></div>' + sec[j + len("</div>"):]
+    sec = sec.replace("<h3>Now</h3>", "<h3>Before (rule-built)</h3>", 1)
     sec = sec.replace('<section class="rec">', f'<section class="rec" id="rec{n:02d}">', 1)
     asks, research, log, folded = load_note(n)
     c0 = sec.index('<div class="check">')
@@ -175,7 +323,7 @@ summary = (f'<section class="todo"><h2>Needs you <span class="count">({len(todo)
            '<p class="how">Click a choice to save it, or write your own answer. Click a saved choice again to clear it. Claude reads the answers from here.</p>'
            '<ol>' + "".join(todo) + "</ol></section>\n") if todo else \
     '<section class="todo"><h2>Nothing needs you</h2><p>Every open point is a research to-do for the agents.</p></section>\n'
-parts.insert(1, summary)
-parts.append(s[secs[-1]:].replace("</main>", "</main>\n" + SCRIPT, 1))
+parts.insert(1, BAR + summary)
+parts.append(s[secs[-1]:].replace("</main>", "</main>\n" + SCRIPT + LIVE_SCRIPT, 1))
 open("page.html", "w", encoding="utf-8", newline="\n").write("".join(parts))
 print("wrote page.html with", len(secs) - 1, "records,", len(todo), "asks")
