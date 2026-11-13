@@ -1562,8 +1562,38 @@
     color: var(--kop-midnight-blue, #000435);
 }
 
+/* A person with other industry jobs takes a full row (name left, jobs in columns right) and comes
+   first, so one long job list never leaves holes beside the short cards. */
 .kop-fp-person--career {
+    grid-column: 1 / -1;
+    order: -1;
     border-left: 4px solid var(--kop-teal, #33A7B5);
+}
+
+@media (min-width: 640px) {
+    .kop-fp-person--career {
+        display: grid;
+        grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+        column-gap: 1.25rem;
+        align-items: start;
+    }
+
+    .kop-fp-person--career > .kop-fp-career {
+        margin: 0;
+        padding: 0 0 0 1.25rem;
+        border-top: 0;
+        border-left: 1px dashed var(--kop-mint-green, #B6E3D4);
+    }
+
+    .kop-fp-person--career .kop-fp-career ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+        gap: 0.4rem 1rem;
+    }
+
+    .kop-fp-person--career .kop-fp-career li {
+        margin: 0;
+    }
 }
 
 .kop-fp-person-name {

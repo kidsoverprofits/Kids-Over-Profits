@@ -282,6 +282,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     <ul class="kop-fp-staff">
                         <?php foreach ($kop_op_people['leaders'] as $person) : ?>
                             <li class="kop-fp-person<?php echo !empty($person['career']) ? ' kop-fp-person--career' : ''; ?>">
+                                <div class="kop-fp-person-head">
                                 <p class="kop-fp-person-name"><?php echo esc_html($person['name']); ?></p>
                                 <?php if ($person['role'] !== '') : ?><p class="kop-fp-person-role"><?php echo esc_html($person['role']); ?></p><?php endif; ?>
                                 <?php if (!empty($person['relations'])) : ?>
@@ -292,6 +293,7 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                                         if ($rel['source_url'] !== '') echo ' <a class="kop-fp-source" href="' . esc_url($rel['source_url']) . '">source</a>';
                                     endforeach; ?></p>
                                 <?php endif; ?>
+                                </div>
                                 <?php if (!empty($person['career'])) : ?>
                                     <div class="kop-fp-career">
                                         <p class="kop-fp-career-label">Elsewhere in the industry</p>
