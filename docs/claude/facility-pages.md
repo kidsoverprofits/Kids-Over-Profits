@@ -9,13 +9,16 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 php scripts/test-facility-pages.php
 # A record's research notes are printed as prose, each sentence with its "source" link, in an "About" section near the top of
 # facility and company pages (inc/profile-notes.php; bookkeeping lines become "Also drawn on", rail facts and forum claims stay out).
-# Claude's About rewrites (kop-pipeline scripts/about-rewrite/; owner 2026-11-11) go live on deploy from seeds/about-rewrites/<kind>-<slug>.json
-# (inc/about-rewrites.php, run by the template pass, which runs only when its version in inc/admin.php changes: bump it with every batch): the About becomes the record's
-# published write-up with its sentences kept as written (print sources keep their citation), held facts are not released,
-# and its survivor quotes go on the facility published (a company's on the program each names), credit + address + note.
-# Once per seed version; a write-up changed since is left alone; seeds/about-rewrites/_undo.json lists pages to put back.
-(kop-pipeline) python -I scripts/about-rewrite/export-seeds.py --pilot ../Kids-Over-Profits/docs/kop-about-rewrite-pilot   # pilot -> seeds
-php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=3G scripts/test-about-rewrites.php   # every seed resolves, applies once, edited-since, new version, undo
+# Claude writes every page's About (owner, 2026-11-13; the hourly AI drafts are off). The owner reviews each rewrite at
+# KOP Tools > About rewrites (inc/about-rewrites-screen.php + inc/about-rewrites.php, js/about-rewrites.js): the page's
+# About now beside the rewrite and its survivor quotes, her "Needs you" questions as buttons, research and log folded,
+# Publish / Send back to Claude / Undo. A rewrite is the record's write-up draft (kind 'rewrite', kop_record_writeups);
+# Publish makes it the About with its sentences as written, puts the quotes on the facility (published, credit, address,
+# allegation note; a company's on the program each names) and releases the record's held facts. Tabs: To review,
+# With Claude (sent back, or waiting: held facts or a change), Published (each with Undo, which restores About, facts, quotes).
+(kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py --list            # what to write next, and the owner's notes on sent-back ones
+(kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py <rec.json ...>    # send finished rewrites as drafts (pilot shape + "page")
+php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=3G scripts/test-about-rewrites.php   # save, answer, publish, undo, send back, company quotes
 # A citation with no address links our Woodbury issue copy, the wiki page or a HEAL capture another record gives (kop_facility_pages_cite_url())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-profile-notes.php [--list] [--id=10347]   # rules on real lines, every record of the mirror
 # Citations on those pages read as a small "source" link and nothing more: one that only points back to us (the network map, a page of

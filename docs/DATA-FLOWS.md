@@ -87,9 +87,9 @@ request.
     its write-up; `kop_wu_publish()` releases it. The directory, search, API and open data do not read the
     option yet. A company's write-up (`kop_wu_operator_key()`, row key 2e9 + operator id) replaces the
     notes-built About in `kop_operator_page_data()`; nothing drafts company write-ups yet
-  - About rewrites (`kop_apply_about_rewrites()`, inc/about-rewrites.php, template pass): survivorTestimony
-    entries with ids `about:<page>:<n>` through `kop_wbf_save()`, and the record's published write-up
-    (`kop_record_writeups`, by 'about-rewrite', with `sentences`); fires `kop_record_changed()`
+  - About rewrites published at KOP Tools > About rewrites (`kop_ar_publish()` / `kop_ar_undo()`,
+    inc/about-rewrites.php): through `kop_wu_publish()` (held facts), survivorTestimony entries with ids
+    `about:<page>:<n>` through `kop_wbf_save()`, and the published write-up with `sentences`; fires `kop_record_changed()`
   - closure reports, Drive Docs, State Lists, Facilities from News,
     program homes, seeds, and the Data Manager
 

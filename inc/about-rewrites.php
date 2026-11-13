@@ -1,29 +1,19 @@
 <?php
 /**
- * Claude's rewrites of a record's "About" (kop-pipeline scripts/about-rewrite/, pilot in docs/kop-about-rewrite-pilot/),
- * shipped as seeds and applied on deploy by the template pass (kop_apply_template_assignments(), inc/admin.php).
+ * Claude's rewrites of a record's "About" (kop-pipeline scripts/about-rewrite/, BRIEF.md there), reviewed at
+ * KOP Tools > About rewrites (inc/about-rewrites-screen.php). Owner, 2026-11-13: Claude writes every About; the hourly
+ * AI drafts stopped, and the old review inbox queue (Write-ups) and the deploy seeds are gone.
  *
- * seeds/about-rewrites/<kind>-<slug>.json, one per record (written by kop-pipeline scripts/about-rewrite/export-seeds.py):
- *   {"page": "facility/aspen-ranch-ut" | "operator/teen-challenge", "name": "Aspen Ranch", "version": "<hash>",
- *    "sentences": [[{"text": "...", "sources": [{"url": "https://...", "cite": "Outlet, date"}]}, ...], ...],
- *    "testimony": [{"id": "...", "text": "...", "who": "Former student", "where": "WWASP Survivors",
- *                   "date": "March 2014", "url": "https://...", "via": "...", "facility_id": 100753}]}
+ * A rewrite is the record's write-up draft (kop_record_writeups, inc/record-writeups.php) with kind 'rewrite':
+ *   {sentences: [[{text, sources: [{url, cite}]}]], testimony: [{text, who, where, date, url, via, note, facility_id}],
+ *    needs_you: [{ask, choices}], answers: {i: {choice, note}}, research: [...], log, by, at, held, sent_back?}
+ * Claude sends it with POST kop/v1/writeups/claude (research key) and reads what to write next with GET.
  *
- * The About becomes the record's published write-up (kop_record_writeups; read by kop_wu_page_about() on the facility
- * and company page), with "sentences" kept as written so print sources (no address) keep their citation. Held facts
- * are NOT released (kop_wu_publish() would release them). The notes the page has now are "covered"; notes added later
- * show under it, as with any write-up. The previous write-up goes to the write-up log first (kop_wu_log_table()), so
- * kop_about_rewrite_undo() puts it back.
- *
- * Testimony (owner, 2026-11-11): quoted word for word and published at once (publish: true) into the facility's
- * survivorTestimony, with the credit (who, where, date) in "source" and the original's address in "url". A company's
- * quote goes to the program it is about ("facility_id"); one without a program is skipped and logged.
- *
- * Undo: list the page in seeds/about-rewrites/_undo.json (["facility/aspen-ranch-ut", ...]); the next pass puts back
- * what was there and leaves the page alone while it stays listed.
- *
- * Applied once per version. A record whose write-up was changed after the rewrite went on (published.by is no longer
- * 'about-rewrite') is left alone and logged in option kop_about_rewrites_log.
+ * Publishing (kop_ar_publish()): the About goes live with its sentences as written (print sources keep their
+ * citation; kop_wu_page_about() reads them), on a facility the approved facts held for it go onto the record
+ * (kop_wu_publish()), and the quotes go on the facility published (owner, 2026-11-11), with the credit in "source",
+ * the original's address in "url" and, where staff are named, the allegation note. A company's quote goes on the
+ * program it is about (facility_id). Undo (kop_ar_undo()) puts back the About, the facts and the quotes as they were.
  */
 
 if (!defined('ABSPATH')) {
@@ -31,18 +21,6 @@ if (!defined('ABSPATH')) {
 }
 
 const KOP_ABOUT_REWRITE_BY = 'about-rewrite';
-
-function kop_about_rewrite_seeds() {
-    $dir = trailingslashit(get_stylesheet_directory()) . 'seeds/about-rewrites';
-    $out = array();
-    foreach ((array) glob($dir . '/*.json') as $path) {
-        if (basename($path)[0] === '_') continue;
-        $spec = json_decode((string) file_get_contents($path), true);
-        if (is_array($spec) && !empty($spec['page']) && !empty($spec['sentences']) && !empty($spec['version'])) $out[basename($path)] = $spec;
-    }
-    ksort($out);
-    return $out;
-}
 
 /** [kind, id] for "facility/<slug>" or "operator/<slug>", or null when the page is not found. */
 function kop_about_rewrite_resolve($page) {
@@ -168,68 +146,6 @@ function kop_about_rewrite_put_testimony($kind, $id, $page, array $quotes) {
     return $done + array('skipped' => $skipped);
 }
 
-/** Apply every seed whose version is not on its record yet. Returns a summary for the template pass. */
-function kop_apply_about_rewrites() {
-    $summary = array('applied' => array(), 'undone' => array(), 'skipped' => array());
-    if (!function_exists('kop_wu_get') || !function_exists('kop_wbf_opts')) return $summary;
-    $log = (array) get_option('kop_about_rewrites_log', array());
-    $undo_path = trailingslashit(get_stylesheet_directory()) . 'seeds/about-rewrites/_undo.json';
-    $undo = file_exists($undo_path) ? array_map(function ($p) { return trim((string) $p, '/'); }, (array) json_decode((string) file_get_contents($undo_path), true)) : array();
-    foreach ($undo as $page) {
-        if (!empty($log[$page]['undone'])) continue;
-        try {
-            kop_about_rewrite_undo($page);
-            $summary['undone'][] = $page;
-        } catch (Throwable $e) {
-            $summary['skipped'][] = $page . ' (undo): ' . $e->getMessage();
-        }
-        $log = (array) get_option('kop_about_rewrites_log', array());
-    }
-    foreach (kop_about_rewrite_seeds() as $file => $spec) {
-        $page = trim((string) $spec['page'], '/');
-        if (in_array($page, $undo, true)) continue;
-        try {
-            $rec = kop_about_rewrite_resolve($page);
-            if (!$rec) throw new RuntimeException('no page at /' . $page . '/');
-            list($kind, $id) = $rec;
-            $key = $kind === 'facility' ? $id : kop_wu_operator_key($id);
-            $wu = kop_wu_get($key);
-            $pub = $wu['published'];
-            if (($pub['seed'] ?? '') === $spec['version']) continue;
-            if (isset($pub['seed']) && ($pub['by'] ?? '') !== KOP_ABOUT_REWRITE_BY) throw new RuntimeException('its write-up was changed after the rewrite went on');
-            $sentences = kop_about_rewrite_clean_sentences((array) $spec['sentences']);
-            if (!$sentences) throw new RuntimeException('no sentences');
-            global $wpdb;
-            kop_wu_ensure_tables();
-            // Undo goes back to the record as it was before any rewrite: a new version keeps the first one's log entry.
-            if (($pub['by'] ?? '') === KOP_ABOUT_REWRITE_BY && !empty($pub['log'])) {
-                $log_id = (int) $pub['log'];
-            } else {
-                $wpdb->insert(kop_wu_log_table(), array('facility_id' => $key, 'before_row' => wp_json_encode(array('draft' => $wu['draft'], 'published' => $pub)),
-                    'items' => wp_json_encode(array()), 'done_by' => KOP_ABOUT_REWRITE_BY, 'done_at' => current_time('mysql', true)));
-                $log_id = (int) $wpdb->insert_id;
-            }
-            $covered = array_values(array_unique(array_map('kop_wu_note_key', kop_about_rewrite_notes($kind, $id))));
-            $GLOBALS['kop_wu_publishing'] = true;   // our own save is not a change to write up again
-            try {
-                kop_wu_put($key, $wu['draft'], array('paragraphs' => kop_about_rewrite_strings($sentences), 'sentences' => $sentences, 'covered' => $covered,
-                    'by' => KOP_ABOUT_REWRITE_BY, 'at' => gmdate('Y-m-d H:i:s'), 'seed' => (string) $spec['version'], 'log' => $log_id));
-                $quotes = kop_about_rewrite_put_testimony($kind, $id, $page, (array) ($spec['testimony'] ?? array()));
-            } finally {
-                unset($GLOBALS['kop_wu_publishing']);
-            }
-            if (function_exists('kop_record_changed')) kop_record_changed($kind === 'facility' ? 'facility' : 'operator', array($id), array('source' => 'about-rewrite'));
-            $summary['applied'][] = $page;
-            $log[$page] = array('at' => gmdate('Y-m-d H:i:s'), 'version' => $spec['version'], 'id' => $id, 'quotes' => $quotes);
-        } catch (Throwable $e) {
-            $summary['skipped'][] = $page . ': ' . $e->getMessage();
-            $log[$page] = array('at' => gmdate('Y-m-d H:i:s'), 'version' => $spec['version'], 'skipped' => $e->getMessage());
-        }
-    }
-    update_option('kop_about_rewrites_log', $log, false);
-    return $summary;
-}
-
 /** Put back the write-up a rewrite replaced and take its quotes off. */
 function kop_about_rewrite_undo($page) {
     global $wpdb;
@@ -250,4 +166,277 @@ function kop_about_rewrite_undo($page) {
     $log = (array) get_option('kop_about_rewrites_log', array());
     $log[$page] = array('at' => gmdate('Y-m-d H:i:s'), 'undone' => true) + (array) ($log[$page] ?? array());
     update_option('kop_about_rewrites_log', $log, false);
+}
+
+/* ---- One rewrite through the screen (KOP Tools > About rewrites, inc/about-rewrites-screen.php) ---------------- */
+
+/** The write-up row key of a record: the facility id, or 2e9 + the company id (kop_wu_operator_key()). */
+function kop_ar_key($kind, $id) {
+    return $kind === 'operator' ? kop_wu_operator_key((int) $id) : (int) $id;
+}
+
+/** [kind, id] of a write-up row key. */
+function kop_ar_from_key($key) {
+    $key = (int) $key;
+    $base = (int) kop_wu_operator_key(0);
+    return $key >= $base ? array('operator', $key - $base) : array('facility', $key);
+}
+
+/** "facility/<slug>" or "operator/<slug>" for a record, '' when it has no page. */
+function kop_ar_page($kind, $id) {
+    $idx = $kind === 'operator'
+        ? (function_exists('kop_operator_pages_index') ? kop_operator_pages_index() : array())
+        : (function_exists('kop_facility_pages_index') ? kop_facility_pages_index() : array());
+    $slug = (string) ($idx['ids'][(int) $id]['slug'] ?? '');
+    return $slug !== '' ? $kind . '/' . $slug : '';
+}
+
+function kop_ar_name($kind, $id) {
+    $idx = $kind === 'operator'
+        ? (function_exists('kop_operator_pages_index') ? kop_operator_pages_index() : array())
+        : (function_exists('kop_facility_pages_index') ? kop_facility_pages_index() : array());
+    $e = $idx['ids'][(int) $id] ?? array();
+    return (string) ($e['display'] ?? $e['name'] ?? (($kind === 'operator' ? 'Company #' : 'Record #') . (int) $id));
+}
+
+/** A rewrite as Claude sends it, cleaned: {sentences, testimony, needs_you, research, log}. */
+function kop_ar_clean_rewrite(array $rw) {
+    $sentences = kop_about_rewrite_clean_sentences((array) ($rw['sentences'] ?? array()));
+    if (!$sentences) throw new RuntimeException('The rewrite has no sentences.');
+    $quotes = array();
+    foreach ((array) ($rw['testimony'] ?? array()) as $t) {
+        if (!is_array($t)) continue;
+        $q = array();
+        foreach (array('text', 'who', 'where', 'date', 'url', 'via', 'note') as $k) $q[$k] = trim((string) ($t[$k] ?? ''));
+        if (!empty($t['facility_id'])) $q['facility_id'] = (int) $t['facility_id'];
+        if ($q['text'] !== '' || $q['who'] !== '') $quotes[] = $q;
+    }
+    $asks = array();
+    foreach ((array) ($rw['needs_you'] ?? array()) as $a) {
+        $ask = trim((string) (is_array($a) ? ($a['ask'] ?? '') : $a));
+        if ($ask === '') continue;
+        $asks[] = array('ask' => $ask, 'choices' => array_values(array_filter(array_map('trim', array_map('strval', (array) (is_array($a) ? ($a['choices'] ?? array()) : array()))), 'strlen')));
+    }
+    return array(
+        'sentences' => $sentences,
+        'testimony' => $quotes,
+        'needs_you' => $asks,
+        'research'  => array_values(array_filter(array_map('trim', array_map('strval', (array) ($rw['research'] ?? array()))), 'strlen')),
+        'log'       => trim((string) ($rw['log'] ?? '')),
+    );
+}
+
+/** Store Claude's rewrite as the record's draft (replacing any draft) and take the record off Claude's list. */
+function kop_ar_save_rewrite($kind, $id, array $rw, $by = 'Claude') {
+    kop_wu_ensure_tables();
+    $key = kop_ar_key($kind, $id);
+    if (kop_ar_page($kind, $id) === '') throw new RuntimeException(ucfirst($kind) . " #{$id} has no page.");
+    $wu = kop_wu_get($key);
+    $clean = kop_ar_clean_rewrite($rw);
+    $draft = array('kind' => 'rewrite', 'paragraphs' => kop_about_rewrite_strings($clean['sentences'])) + $clean + array(
+        'answers' => array(), 'by' => (string) $by, 'provider' => 'claude', 'at' => gmdate('Y-m-d H:i:s'),
+        'held' => $kind === 'facility' ? array_map('kop_wu_item_key', kop_wu_held_rows((int) $id)) : array(),
+        'check' => '');
+    kop_wu_put($key, $draft, $wu['published']);
+    kop_wu_take_from_claude($key);
+    return $draft;
+}
+
+/** Save the owner's answer to one "Needs you" question ($choice and/or $note; both empty clears it). */
+function kop_ar_answer($key, $i, $choice, $note) {
+    $wu = kop_wu_get($key);
+    $d = $wu['draft'];
+    if (($d['kind'] ?? '') !== 'rewrite' || !isset($d['needs_you'][(int) $i])) throw new RuntimeException('That question is gone. Reload the page.');
+    $choice = trim((string) $choice);
+    $note = trim((string) $note);
+    $answers = (array) ($d['answers'] ?? array());
+    if ($choice === '' && $note === '') unset($answers[(int) $i]);
+    else $answers[(int) $i] = array('choice' => $choice, 'note' => $note, 'at' => gmdate('Y-m-d H:i:s'));
+    $d['answers'] = $answers;
+    kop_wu_put($key, $d, $wu['published']);
+    return $answers[(int) $i] ?? null;
+}
+
+/** The rewrite quotes on facilities now for a page: [fid => [entries]] (what undo puts back). */
+function kop_ar_current_quotes($page) {
+    $prefix = 'about:' . trim($page, '/') . ':';
+    $all = (array) get_option('kop_about_rewrites_testimony', array());
+    $fids = (array) ($all[$page] ?? array());
+    $opts = kop_wbf_opts();
+    $out = array();
+    foreach ($fids as $fid) {
+        $s = kop_facility_load((int) $fid, $opts);
+        if (!$s) continue;
+        $mine = array_values(array_filter((array) ($s['doc']['survivorTestimony'] ?? array()), function ($e) use ($prefix) {
+            return is_array($e) && strpos((string) ($e['id'] ?? ''), $prefix) === 0;
+        }));
+        if ($mine) $out[(int) $fid] = $mine;
+    }
+    return $out;
+}
+
+/** Put back exactly the quotes a page had ([fid => [entries]]), taking off any others it put on since. */
+function kop_ar_restore_quotes($page, array $by_fid) {
+    $prefix = 'about:' . trim($page, '/') . ':';
+    $all = (array) get_option('kop_about_rewrites_testimony', array());
+    $fids = array_unique(array_merge(array_map('intval', (array) ($all[$page] ?? array())), array_map('intval', array_keys($by_fid))));
+    $opts = kop_wbf_opts();
+    foreach ($fids as $fid) {
+        $entries = (array) ($by_fid[$fid] ?? array());
+        kop_v2_with_write_lock($opts['pdo'], function () use ($fid, $entries, $prefix, $opts) {
+            $s = kop_facility_load($fid, $opts);
+            if (!$s) return;
+            $doc = $s['doc'];
+            $list = array_values(array_filter((array) ($doc['survivorTestimony'] ?? array()), function ($e) use ($prefix) {
+                return !(is_array($e) && strpos((string) ($e['id'] ?? ''), $prefix) === 0);
+            }));
+            $doc['survivorTestimony'] = array_merge($list, $entries);
+            kop_wbf_save($doc, $opts);
+        });
+    }
+    $all[$page] = array_values(array_map('intval', array_keys(array_filter($by_fid))));
+    update_option('kop_about_rewrites_testimony', $all, false);
+    if ($fids && function_exists('kop_record_changed')) kop_record_changed('facility', $fids, array('source' => 'about-rewrite'));
+}
+
+/**
+ * Publish the record's rewrite: the About goes live with its sentences as written, its quotes go on the facility
+ * (published), and on a facility every approved fact held for it goes onto the record (kop_wu_publish()). The
+ * quotes the page had before are kept in the log, so Undo puts them back. Returns a message.
+ */
+function kop_ar_publish($key, $reviewer) {
+    global $wpdb;
+    list($kind, $id) = kop_ar_from_key($key);
+    $wu = kop_wu_get($key);
+    $d = $wu['draft'];
+    if (($d['kind'] ?? '') !== 'rewrite' || empty($d['sentences'])) throw new RuntimeException('There is no rewrite to publish for this record.');
+    $page = kop_ar_page($kind, $id);
+    if ($page === '') throw new RuntimeException('This record has no page.');
+    $quotes_before = kop_ar_current_quotes($page);
+    $record = array('rewrite' => true, 'sentences' => $d['sentences'], 'needs_you' => $d['needs_you'] ?? array(),
+        'answers' => $d['answers'] ?? array(), 'research' => $d['research'] ?? array(), 'written_by' => $d['by'] ?? 'Claude');
+    if ($kind === 'facility') {
+        $res = kop_wu_publish($id, $reviewer);
+        $log_id = (int) $res['log'];
+        $message = str_replace(' Undo in Recently done takes it all back.', '', $res['message']);
+        $pub = kop_wu_get($key)['published'];
+        kop_wu_put($key, array(), $record + $pub);
+    } else {
+        kop_wu_ensure_tables();
+        $wpdb->insert(kop_wu_log_table(), array('facility_id' => $key, 'before_row' => wp_json_encode(array('draft' => $d, 'published' => $wu['published'])),
+            'items' => wp_json_encode(array()), 'done_by' => mb_substr((string) $reviewer, 0, 60), 'done_at' => current_time('mysql', true)));
+        $log_id = (int) $wpdb->insert_id;
+        $covered = array_values(array_unique(array_map('kop_wu_note_key', kop_about_rewrite_notes('operator', $id))));
+        $GLOBALS['kop_wu_publishing'] = true;
+        try {
+            kop_wu_put($key, array(), $record + array('paragraphs' => $d['paragraphs'] ?? kop_about_rewrite_strings($d['sentences']), 'covered' => $covered,
+                'by' => (string) $reviewer, 'at' => gmdate('Y-m-d H:i:s'), 'log' => $log_id));
+        } finally {
+            unset($GLOBALS['kop_wu_publishing']);
+        }
+        if (function_exists('kop_record_changed')) kop_record_changed('operator', array($id), array('source' => 'writeup'));
+        $message = 'The rewrite is the page\'s About now.';
+    }
+    // Keep the quotes the page had before with the log entry, for Undo.
+    $row = $wpdb->get_row($wpdb->prepare('SELECT before_row FROM ' . kop_wu_log_table() . ' WHERE id = %d', $log_id), ARRAY_A);
+    $before = $row ? (json_decode((string) $row['before_row'], true) ?: array()) : array();
+    $before['quotes'] = $quotes_before;
+    $wpdb->update(kop_wu_log_table(), array('before_row' => wp_json_encode($before)), array('id' => $log_id));
+    $q = kop_about_rewrite_put_testimony($kind, $id, $page, (array) ($d['testimony'] ?? array()));
+    $n = array_sum(array_diff_key($q, array('skipped' => 1)));
+    return $message . ($n ? ' ' . $n . ' survivor quote' . ($n === 1 ? ' is' : 's are') . ' on the page.' : '');
+}
+
+/** Take back the record's published rewrite: the About, the quotes and (on a facility) the facts, as they were. */
+function kop_ar_undo($key, $reviewer) {
+    global $wpdb;
+    list($kind, $id) = kop_ar_from_key($key);
+    $pub = kop_wu_get($key)['published'];
+    if (empty($pub['log'])) throw new RuntimeException('Nothing published to take back.');
+    $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . kop_wu_log_table() . ' WHERE id = %d', (int) $pub['log']), ARRAY_A);
+    if (!$row || !empty($row['undone_at'])) throw new RuntimeException('That publish was already taken back.');
+    $page = kop_ar_page($kind, $id);
+    if (($row['done_by'] ?? '') === KOP_ABOUT_REWRITE_BY) {   // one of the first 21, put on by the old seed pass
+        kop_about_rewrite_undo($page);
+        return 'Taken back: the About is as it was before the rewrite, and its quotes are off.';
+    }
+    $before = json_decode((string) $row['before_row'], true) ?: array();
+    if ($kind === 'facility') {
+        $msg = kop_wu_undo((int) $pub['log'], $reviewer);
+    } else {
+        kop_wu_put($key, (array) ($before['draft'] ?? array()), (array) ($before['published'] ?? array()));
+        $wpdb->update(kop_wu_log_table(), array('undone_at' => current_time('mysql', true)), array('id' => (int) $pub['log']));
+        if (function_exists('kop_record_changed')) kop_record_changed('operator', array($id), array('source' => 'writeup'));
+        $msg = 'Taken back: the About is as it was.';
+    }
+    if ($page !== '') kop_ar_restore_quotes($page, (array) ($before['quotes'] ?? array()));
+    return $msg . ' The rewrite is waiting again.';
+}
+
+/** Send the rewrite back to Claude with the owner's note (and answers): the record goes on Claude's list. */
+function kop_ar_send_back($key, $note, $by) {
+    $wu = kop_wu_get($key);
+    $d = $wu['draft'];
+    if (($d['kind'] ?? '') !== 'rewrite') throw new RuntimeException('There is no rewrite to send back.');
+    $d['sent_back'] = array('note' => trim((string) $note), 'at' => gmdate('Y-m-d H:i:s'), 'by' => (string) $by);
+    kop_wu_put($key, $d, $wu['published']);
+    kop_wu_send_to_claude($key, $by);
+}
+
+/**
+ * Every record by where it stands, for the screen and for Claude:
+ *   review     a rewrite waiting for the owner (not sent back)
+ *   claude     waiting for Claude: sent back, sent by hand, or with approved facts / changes and no rewrite yet
+ *   published  a published rewrite, newest first
+ * [view => [key => {key, kind, id, why, at}]].
+ */
+function kop_ar_lists() {
+    global $wpdb;
+    kop_wu_ensure_tables();
+    $out = array('review' => array(), 'claude' => array(), 'published' => array());
+    foreach ((array) $wpdb->get_results('SELECT facility_id, draft, published FROM ' . kop_wu_table() . ' ORDER BY id', ARRAY_A) as $r) {
+        $key = (int) $r['facility_id'];
+        list($kind, $id) = kop_ar_from_key($key);
+        $d = json_decode((string) $r['draft'], true) ?: array();
+        $p = json_decode((string) $r['published'], true) ?: array();
+        if (($d['kind'] ?? '') === 'rewrite' && empty($d['sent_back'])) {
+            $out['review'][$key] = array('key' => $key, 'kind' => $kind, 'id' => $id, 'why' => 'rewrite', 'at' => (string) ($d['at'] ?? ''));
+        }
+        if (!empty($p['rewrite']) || ($p['by'] ?? '') === KOP_ABOUT_REWRITE_BY) {
+            $out['published'][$key] = array('key' => $key, 'kind' => $kind, 'id' => $id, 'why' => 'published', 'at' => (string) ($p['at'] ?? ''));
+        }
+    }
+    foreach (kop_wu_claude_queue() as $key => $s) {
+        if (isset($out['review'][(int) $key])) continue;
+        list($kind, $id) = kop_ar_from_key($key);
+        $out['claude'][(int) $key] = array('key' => (int) $key, 'kind' => $kind, 'id' => $id, 'why' => 'sent', 'at' => (string) ($s['at'] ?? ''));
+    }
+    foreach (kop_wu_todo_ids() as $fid) {
+        if (isset($out['review'][(int) $fid]) || isset($out['claude'][(int) $fid])) continue;
+        $out['claude'][(int) $fid] = array('key' => (int) $fid, 'kind' => 'facility', 'id' => (int) $fid,
+            'why' => kop_wu_held_rows((int) $fid) ? 'facts' : 'changed', 'at' => '');
+    }
+    uasort($out['published'], function ($a, $b) { return strcmp($b['at'], $a['at']); });
+    return $out;
+}
+
+/** Claude's list (GET kop/v1/writeups/claude): what to write next and why, with the owner's note and answers on a sent-back one. */
+function kop_ar_claude_list() {
+    $out = array();
+    foreach (kop_ar_lists()['claude'] as $e) {
+        $page = kop_ar_page($e['kind'], $e['id']);
+        if ($page === '') continue;
+        $x = array('kind' => $e['kind'], 'id' => $e['id'], 'packet_id' => ($e['kind'] === 'operator' ? 'o' : 'f') . $e['id'],
+            'name' => kop_ar_name($e['kind'], $e['id']), 'page' => $page, 'url' => home_url('/' . $page . '/'), 'why' => $e['why']);
+        $d = kop_wu_get($e['key'])['draft'];
+        if (($d['kind'] ?? '') === 'rewrite' && !empty($d['sent_back'])) {
+            $x['note'] = (string) ($d['sent_back']['note'] ?? '');
+            $x['answers'] = array();
+            foreach ((array) ($d['needs_you'] ?? array()) as $i => $a) $x['answers'][] = array('ask' => $a['ask'], 'answer' => $d['answers'][$i] ?? null);
+            $x['draft'] = array('sentences' => $d['sentences'], 'testimony' => $d['testimony'] ?? array());
+        }
+        if ($e['kind'] === 'facility') $x['held_facts'] = array_map(function ($h) { $f = kop_wu_fact($h); return array('what' => $f['what'], 'url' => $f['url']); }, kop_wu_held_rows($e['id']));
+        $out[] = $x;
+    }
+    return $out;
 }

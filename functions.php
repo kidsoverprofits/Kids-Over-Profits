@@ -279,7 +279,8 @@ require_once get_stylesheet_directory() . '/inc/pdf-preview.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-mentions.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-create.php';
 require_once get_stylesheet_directory() . '/inc/woodbury-facts.php';
-require_once get_stylesheet_directory() . '/inc/about-rewrites.php';   // Claude's About rewrites, applied on deploy from seeds/about-rewrites/
+require_once get_stylesheet_directory() . '/inc/about-rewrites.php';          // Claude's About rewrites: drafts, publish, undo, Claude's list
+require_once get_stylesheet_directory() . '/inc/about-rewrites-screen.php';   // KOP Tools > About rewrites
 // One shape for every fact (docs/claude/fact-shape.md): rows of every queue and the record's own lines compared like with like; read only
 require_once get_stylesheet_directory() . '/inc/fact-shape.php';
 // Clear what the record already holds and fold the same fact from several sources into one card, hourly, with Undo (docs/plan/4.4 item 20)

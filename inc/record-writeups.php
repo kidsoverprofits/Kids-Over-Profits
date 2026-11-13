@@ -919,8 +919,10 @@ function kop_wu_last_run_line() {
 }
 
 if (function_exists('add_action')) {
+    // Claude writes every About (owner, 2026-11-13): the hourly AI drafts are off. Records waiting for a write-up
+    // are on Claude's list (kop_ar_claude_list(), inc/about-rewrites.php); kop_wu_run_batch() stays for tests.
     add_action('init', function () {
-        if (!wp_next_scheduled('kop_wu_hourly')) wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly');
+        if (wp_next_scheduled('kop_wu_hourly')) wp_clear_scheduled_hook('kop_wu_hourly');
     });
     add_action('kop_record_changed', 'kop_wu_on_change', 20, 3);
     add_action('kop_wu_hourly', function () {
@@ -941,7 +943,7 @@ if (function_exists('add_action')) {
         register_rest_route('kop/v1', '/writeups/claude', array(
             array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function () {
                 kop_wu_ensure_tables();
-                $res = rest_ensure_response(array('records' => kop_wu_claude_list()));
+                $res = rest_ensure_response(array('records' => function_exists('kop_ar_claude_list') ? kop_ar_claude_list() : kop_wu_claude_list()));
                 $res->header('Cache-Control', 'no-store');
                 return $res;
             }),
@@ -949,6 +951,18 @@ if (function_exists('add_action')) {
                 $p = (array) $r->get_json_params();
                 try {
                     kop_wu_ensure_tables();
+                    // A rewrite (inc/about-rewrites.php): {"facility_id" | "operator_id" | "page", "rewrite": {...}}.
+                    if (isset($p['rewrite']) && is_array($p['rewrite']) && function_exists('kop_ar_save_rewrite')) {
+                        if (!empty($p['page'])) {
+                            $rec = kop_about_rewrite_resolve((string) $p['page']);
+                            if (!$rec) throw new RuntimeException('No page at /' . trim((string) $p['page'], '/') . '/.');
+                        } else {
+                            $rec = !empty($p['operator_id']) ? array('operator', (int) $p['operator_id']) : array('facility', (int) ($p['facility_id'] ?? 0));
+                        }
+                        $d = kop_ar_save_rewrite($rec[0], $rec[1], $p['rewrite']);
+                        return array('ok' => true, 'kind' => $rec[0], 'id' => $rec[1], 'paragraphs' => count($d['sentences']), 'quotes' => count($d['testimony']),
+                            'needs_you' => count($d['needs_you']));
+                    }
                     $d = kop_wu_claude_save((int) ($p['facility_id'] ?? 0), $p['answer'] ?? '');
                     return array('ok' => true, 'paragraphs' => count($d['paragraphs']));
                 } catch (Throwable $e) {
@@ -961,11 +975,9 @@ if (function_exists('add_action')) {
 
 /* ---- The admin-only section on the facility page ------------------------------ */
 
-/** Where the record's write-up card is: the review inbox's queue. */
+/** Where the record's write-up is reviewed: KOP Tools > About rewrites (inc/about-rewrites-screen.php). */
 function kop_wu_inbox_url() {
-    $url = function_exists('kop_find_template_page_url') ? (string) kop_find_template_page_url('page-admin-submissions.php') : '';
-    if ($url === '') $url = home_url('/admin-submissions/');
-    return add_query_arg('type', 'writeups', $url);
+    return admin_url('admin.php?page=kop-about-rewrites');
 }
 
 /** The draft as HTML, cited like the About. */
@@ -995,14 +1007,14 @@ function kop_wu_admin_html($fid, $can = null) {
     if (!$held && !$draft) return '';
     $html = '<section class="kop-fp-section kop-wu-section" id="writeup-waiting"><h2>Waiting for the write-up</h2>'
         . '<p class="kop-fp-count">Only administrators see this. ' . count($held) . ' approved fact' . (count($held) === 1 ? ' is' : 's are')
-        . ' held for this page. Nothing here is on the public page until the write-up is approved at <a href="' . esc_url(kop_wu_inbox_url()) . '">Review inbox &gt; Write-ups to approve</a>.</p>';
+        . ' held for this page. Nothing here is on the public page until the rewrite is published at <a href="' . esc_url(kop_wu_inbox_url()) . '">KOP Tools &gt; About rewrites</a>.</p>';
     if ($draft) {
         $new = kop_wu_new_since_draft($fid, $wu['draft'], $held);
         $html .= '<h3 class="kop-fp-subhead">Draft write-up</h3>' . kop_wu_paragraphs_html($draft);
         if (!empty($wu['draft']['check'])) $html .= '<p class="kop-fp-count"><strong>To check:</strong> ' . esc_html($wu['draft']['check']) . '</p>';
         if ($new) $html .= '<p class="kop-fp-count">' . count($new) . ' fact' . (count($new) === 1 ? ' was' : 's were') . ' approved after this draft was written.</p>';
     } else {
-        $html .= '<p class="kop-fp-count">No draft yet: the AI writes one within the hour, or use "Write it with AI" on the card.</p>';
+        $html .= '<p class="kop-fp-count">No rewrite yet: the record is on Claude\'s list.</p>';
     }
     if ($held) {
         $html .= '<h3 class="kop-fp-subhead">Approved facts held for it</h3><ul class="kop-wu-facts">';

@@ -1,9 +1,10 @@
 <?php
 /**
- * inc/about-rewrites.php on a scratch copy of the production mirror: every seed in seeds/about-rewrites/ finds its
- * page, applies once (the About becomes the record's write-up with its sentences and print sources kept, the quotes go
- * on the facility published, with credit, address and note), a second pass changes nothing, a write-up edited since is
- * left alone, a new version re-applies and replaces the quotes, and _undo.json puts back exactly what was there.
+ * inc/about-rewrites.php (KOP Tools > About rewrites) on a scratch copy of the production mirror, with the pilot's
+ * rewrites (docs/kop-about-rewrite-pilot/out/): a rewrite saved as a draft waits to review, an answer is kept,
+ * Publish makes it the page's About (sentences and print sources as written) and puts its quotes on the facility
+ * (published, credit, address, note), Undo puts the About and quotes back, Send back puts it on Claude's list with the
+ * note and answers, a company's quote goes on the program it names, and the hourly AI drafts are off.
  *
  *   php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=3G scripts/test-about-rewrites.php [--db=tmp/prod.sqlite]
  */
@@ -49,6 +50,8 @@ require_once dirname(__DIR__) . '/inc/profile-notes.php';
 require_once dirname(__DIR__) . '/inc/facility-pages.php';
 require_once dirname(__DIR__) . '/inc/operator-pages.php';
 require_once dirname(__DIR__) . '/inc/about-rewrites.php';
+require_once dirname(__DIR__) . '/inc/admin-kit.php';
+require_once dirname(__DIR__) . '/inc/about-rewrites-screen.php';
 $GLOBALS['kop_test_options']['kop_woodbury_facts_db'] = KOP_WOODBURY_FACTS_DB_VERSION;
 $GLOBALS['kop_test_options']['kop_closure_reports_db'] = KOP_CLOSURE_REPORTS_DB_VERSION;
 $GLOBALS['kop_test_options']['kop_record_writeups_db'] = KOP_RECORD_WRITEUPS_DB_VERSION;
@@ -64,82 +67,93 @@ $quotes_on = function ($fid, $page) use ($opts) {
     return array_values(array_filter((array) ($s['doc']['survivorTestimony'] ?? array()), function ($e) use ($page) { return strpos((string) ($e['id'] ?? ''), 'about:' . $page . ':') === 0; }));
 };
 
-echo "-- Every seed finds its page --\n";
-$seeds = kop_about_rewrite_seeds();
-$check('seeds load', count($seeds) >= 21, (string) count($seeds));
-$missing = array();
-foreach ($seeds as $s) if (!kop_about_rewrite_resolve($s['page'])) $missing[] = $s['page'];
-$check('every page resolves to a record', !$missing, implode(', ', $missing));
+/** A pilot record (docs/kop-about-rewrite-pilot/out/recNN.json) as Claude sends a rewrite. */
+$pilot = function ($rec) {
+    $dir = dirname(__DIR__) . '/docs/kop-about-rewrite-pilot/out/';
+    $j = json_decode(file_get_contents($dir . $rec . '.json'), true);
+    $n = json_decode((string) @file_get_contents($dir . $rec . '.note.json'), true) ?: array();
+    $plain = function ($t) { return trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8')))); };
+    $sentences = array();
+    foreach ($j['paragraphs'] as $p) {
+        $units = array();
+        $pos = 0;
+        preg_match_all('/\{([A-Za-z0-9_, ]+)\}/', $p, $m, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        foreach ($m as $hit) {
+            $text = $plain(substr($p, $pos, $hit[0][1] - $pos));
+            $src = array();
+            foreach (array_map('trim', explode(',', $hit[1][0])) as $k) $src[] = array('url' => $j['sources'][$k][0], 'cite' => $plain($j['sources'][$k][1]));
+            if ($text !== '') $units[] = array('text' => $text, 'sources' => $src);
+            elseif ($units) $units[count($units) - 1]['sources'] = array_merge($units[count($units) - 1]['sources'], $src);
+            $pos = $hit[0][1] + strlen($hit[0][0]);
+        }
+        if ($units) $sentences[] = $units;
+    }
+    $quotes = array();
+    foreach ((array) ($j['testimony'] ?? array()) as $t) $quotes[] = $t + array('url' => $j['sources'][$t['key'] ?? ''][0] ?? '');
+    return array('sentences' => $sentences, 'testimony' => $quotes, 'needs_you' => array(array('ask' => 'A test question?', 'choices' => array('Yes', 'No'))),
+        'research' => $n['research'] ?? array(), 'log' => $n['log'] ?? '');
+};
 
-echo "-- First pass --\n";
-$before = array();
-foreach ($seeds as $s) { $r = kop_about_rewrite_resolve($s['page']); if ($r) $before[$s['page']] = kop_wu_get($r[0] === 'facility' ? $r[1] : kop_wu_operator_key($r[1])); }
-$sum = kop_apply_about_rewrites();
-$check('every seed applied', count($sum['applied']) === count($seeds) && !$sum['skipped'], json_encode($sum['skipped']));
-
+echo "-- Save, answer, publish, undo (Eagle Ranch) --\n";
 $eagle = kop_about_rewrite_resolve('facility/eagle-ranch-academy-ut')[1];
+$page = 'facility/eagle-ranch-academy-ut';
+$about_before = kop_facility_page_data($eagle)['about'];
+$quotes_before = $quotes_on($eagle, $page);
+kop_ar_save_rewrite('facility', $eagle, $pilot('rec04'));
+$lists = kop_ar_lists();
+$check('a saved rewrite is waiting to review', isset($lists['review'][$eagle]) && !isset($lists['claude'][$eagle]));
+$check('the page is unchanged until it is published', kop_facility_page_data($eagle)['about'] == $about_before);
+kop_ar_answer($eagle, 0, 'Yes', '');
+kop_ar_answer($eagle, 0, 'Yes', 'and a note');
+$a = kop_wu_get($eagle)['draft']['answers'][0] ?? array();
+$check('an answer is kept, choice and note', ($a['choice'] ?? '') === 'Yes' && ($a['note'] ?? '') === 'and a note');
+$check('the screen card renders', strpos(kop_ar_card($lists['review'][$eagle], 'review'), 'A test question?') !== false);
+$msg = kop_ar_publish($eagle, 'test');
 $about = kop_facility_page_data($eagle)['about'];
 $first = $about['paragraphs'][0][0] ?? array();
-$check('the page About is the rewrite', !empty($about['writeup']) && strpos((string) ($first['text'] ?? ''), 'Eagle Ranch Academy is a licensed residential treatment center') === 0, (string) ($first['text'] ?? ''));
-$check('its sources keep their citation labels', ($first['sources'][0]['cite'] ?? '') !== '' && ($first['sources'][0]['url'] ?? '') !== '');
-$html = kop_pnotes_html($about);
-$check('the About renders', strpos($html, 'St. George, Utah') !== false && strpos($html, 'kop-fp-src') !== false);
+$check('Publish makes the rewrite the page About', !empty($about['writeup']) && strpos((string) ($first['text'] ?? ''), 'Eagle Ranch Academy is a licensed residential treatment center') === 0, $msg);
+$check('with its citation labels', ($first['sources'][0]['cite'] ?? '') !== '');
+$q = $quotes_on($eagle, $page);
+$check('its quotes are on the page, published (the recording without words skipped)', count($q) === 4 && !in_array(false, array_column($q, 'publish'), true), (string) count($q));
+$shown = array_values(array_filter(kop_facility_pages_testimony(kop_facility_load($eagle, $opts)['doc']['survivorTestimony']), function ($t) { return $t['credit'] !== ''; }));
+$check('the page shows them with credit and address', count($shown) === 4 && $shown[0]['url'] !== '');
+$lists = kop_ar_lists();
+$check('it moves to Published', isset($lists['published'][$eagle]) && !isset($lists['review'][$eagle]));
+kop_ar_undo($eagle, 'test');
+$check('Undo puts the About back', kop_facility_page_data($eagle)['about'] == $about_before);
+$check('and the quotes as they were', $quotes_on($eagle, $page) == $quotes_before);
+$check('and the rewrite is waiting again', isset(kop_ar_lists()['review'][$eagle]));
 
-$aspen = kop_about_rewrite_resolve('facility/aspen-ranch-ut')[1];
-$print = 0;
-foreach (kop_wu_get($aspen)['published']['sentences'] as $p) foreach ($p as $sn) foreach ($sn['sources'] as $src) if ($src['url'] === '' && $src['cite'] !== '') $print++;
-$check('print sources (no address) are kept with their citation', $print > 0, "$print");
+echo "-- Send back, Claude's list, rewrite again --\n";
+kop_ar_send_back($eagle, 'Shorter lede, please.', 'test');
+$lists = kop_ar_lists();
+$check('Send back moves it to With Claude', isset($lists['claude'][$eagle]) && !isset($lists['review'][$eagle]));
+$mine = array_values(array_filter(kop_ar_claude_list(), function ($x) use ($eagle) { return $x['kind'] === 'facility' && $x['id'] === $eagle; }));
+$check("Claude's list carries the note, the answers and the draft", $mine && $mine[0]['note'] === 'Shorter lede, please.' && ($mine[0]['answers'][0]['answer']['choice'] ?? '') === 'Yes'
+    && !empty($mine[0]['draft']['sentences']) && $mine[0]['packet_id'] === 'f' . $eagle);
+kop_ar_save_rewrite('facility', $eagle, $pilot('rec04'));
+$lists = kop_ar_lists();
+$check('a new rewrite takes it off the list and back to review', isset($lists['review'][$eagle]) && !isset($lists['claude'][$eagle]));
 
-$q = $quotes_on($eagle, 'facility/eagle-ranch-academy-ut');
-$check('Eagle Ranch has its quotes, published (the recording with no transcript is skipped)', count($q) === 4 && !in_array(false, array_column($q, 'publish'), true), (string) count($q));
-$shown = kop_facility_pages_testimony(kop_facility_load($eagle, $opts)['doc']['survivorTestimony']);
-$mine = array_values(array_filter($shown, function ($t) { return $t['credit'] !== ''; }));
-$check('the page shows them with credit and address', count($mine) === 4 && $mine[0]['url'] !== '' && strpos($mine[0]['credit'], 'WWASP Survivors') !== false, json_encode($mine[0] ?? null));
-$falcon = kop_about_rewrite_resolve('facility/falcon-ridge-ranch-ut')[1];
-$fq = $quotes_on($falcon, 'facility/falcon-ridge-ranch-ut');
-$check('a quote naming staff carries the allegation note', (bool) array_filter($fq, function ($e) { return strpos((string) ($e['note'] ?? ''), 'Nale Fakahua') !== false; }));
-$check("no writer's own name in a credit (Dj hansen, Chris)", !array_filter(array_merge($q, $quotes_on(100753, 'operator/teen-challenge')), function ($e) { return preg_match('/hansen|Chris\b/i', $e['source']); }));
-$check("a company's quote goes on the program it names (Teen Challenge -> Prayer Mountain Academy)", count($quotes_on(100753, 'operator/teen-challenge')) === 1);
+echo "-- A company: Teen Challenge --\n";
 $tc = kop_about_rewrite_resolve('operator/teen-challenge')[1];
+$tkey = kop_ar_key('operator', $tc);
+$rw = $pilot('rec17');
+foreach ($rw['testimony'] as &$t) $t['facility_id'] = 100753;
+unset($t);
+kop_ar_save_rewrite('operator', $tc, $rw);
+kop_ar_publish($tkey, 'test');
 $check('the company page About is the rewrite', !empty(kop_operator_page_data($tc)['about']['writeup']));
+$check('its quote goes on the program it names (Prayer Mountain Academy)', count($quotes_on(100753, 'operator/teen-challenge')) === 1);
+kop_ar_undo($tkey, 'test');
+$check('Undo takes the quote off again', !$quotes_on(100753, 'operator/teen-challenge') && empty(kop_wu_get($tkey)['published']['rewrite']));
 
-echo "-- Again, edited since, new version, undo --\n";
-$sum2 = kop_apply_about_rewrites();
-$check('a second pass changes nothing', !$sum2['applied'] && !$sum2['skipped'], json_encode($sum2));
-$check('and does not double the quotes', count($quotes_on($eagle, 'facility/eagle-ranch-academy-ut')) === 4);
-
-$wu = kop_wu_get($aspen);
-$pub = $wu['published'];
-$pub['by'] = 'owner';
-kop_wu_put($aspen, $wu['draft'], $pub);
-$dir = dirname(__DIR__) . '/seeds/about-rewrites';
-$orig = file_get_contents($dir . '/facility-aspen-ranch-ut.json');
-$GLOBALS['kop_test_seed_override'] = true;
-$edit = json_decode($orig, true);
-$edit['version'] = 'test-new-version';
-file_put_contents($dir . '/facility-aspen-ranch-ut.json', json_encode($edit));
-try {
-    $sum3 = kop_apply_about_rewrites();
-    $check('a write-up edited since is left alone', !in_array('facility/aspen-ranch-ut', $sum3['applied'], true) && kop_wu_get($aspen)['published']['by'] === 'owner');
-    $pub['by'] = KOP_ABOUT_REWRITE_BY;
-    kop_wu_put($aspen, $wu['draft'], $pub);
-    $edit['testimony'] = array_slice($edit['testimony'], 0, 1);
-    file_put_contents($dir . '/facility-aspen-ranch-ut.json', json_encode($edit));
-    $sum4 = kop_apply_about_rewrites();
-    $check('a new version re-applies', in_array('facility/aspen-ranch-ut', $sum4['applied'], true) && kop_wu_get($aspen)['published']['seed'] === 'test-new-version');
-    $check('and replaces the quotes it put on before', count($quotes_on($aspen, 'facility/aspen-ranch-ut')) === 1);
-    file_put_contents($dir . '/_undo.json', json_encode(array('facility/aspen-ranch-ut')));
-    $other = count($quotes_on($eagle, 'facility/eagle-ranch-academy-ut'));
-    $sum5 = kop_apply_about_rewrites();
-    $restored = kop_wu_get($aspen)['published'];
-    $check('_undo.json puts back exactly what was there', in_array('facility/aspen-ranch-ut', $sum5['undone'], true) && $restored == $before['facility/aspen-ranch-ut']['published'], json_encode($sum5));
-    $check('and takes its quotes off, others untouched', !$quotes_on($aspen, 'facility/aspen-ranch-ut') && count($quotes_on($eagle, 'facility/eagle-ranch-academy-ut')) === $other);
-    $sum6 = kop_apply_about_rewrites();
-    $check('it stays undone while listed', !in_array('facility/aspen-ranch-ut', $sum6['applied'], true) && !in_array('facility/aspen-ranch-ut', $sum6['undone'], true));
-} finally {
-    file_put_contents($dir . '/facility-aspen-ranch-ut.json', $orig);
-    @unlink($dir . '/_undo.json');
-}
+echo "-- Claude writes every About --\n";
+$todo = kop_wu_todo_ids();
+$listed = array_column(array_filter(kop_ar_claude_list(), function ($x) { return $x['kind'] === 'facility'; }), 'id');
+$check("records waiting for a write-up are on Claude's list", !array_diff(array_slice($todo, 0, 20), array_merge($listed, array_keys(kop_ar_lists()['review']))), count($todo) . ' waiting');
+$src = file_get_contents(dirname(__DIR__) . '/inc/record-writeups.php');
+$check('the hourly AI drafts are no longer scheduled', strpos($src, "wp_clear_scheduled_hook('kop_wu_hourly')") !== false && strpos($src, "wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly')") === false);
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

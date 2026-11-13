@@ -1,0 +1,51 @@
+/* KOP Tools > About rewrites (inc/about-rewrites-screen.php). wp-admin only: Kadence does not load here. Colours from css/colors.css. */
+.kop-ar-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin: 0 0 18px;
+    max-width: 1200px;
+}
+.kop-ar-card.is-done { opacity: .75; }
+.kop-ar-card.is-done .kop-ak-result { opacity: 1; }
+.kop-ar-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 10px; }
+.kop-ar-head h2 { margin: 0; font-size: 1.25em; }
+.kop-ar-head h2 a { color: var(--kop-midnight-blue, #000435); text-decoration: none; }
+.kop-ar-head h2 a:hover { text-decoration: underline; }
+.kop-ar-meta { color: #50575e; font-size: 13px; }
+
+.kop-ar-needs { background: var(--kop-soft-pastel-yellow, #FFF5CB); border-radius: 6px; padding: 10px 14px; margin: 0 0 14px; }
+.kop-ar-needs h3 { margin: 0 0 6px; font-size: 14px; }
+.kop-ar-count { font-weight: 400; color: #50575e; margin-left: 6px; }
+.kop-ar-needs ol { margin: 0 0 0 20px; }
+.kop-ar-ask { margin: 0 0 12px; }
+.kop-ar-ask > p { margin: 0 0 6px; font-size: 14px; }
+.kop-ar-ask.is-answered > p::before { content: "\2713  "; color: var(--kop-teal-dark, #1d6f79); font-weight: 700; }
+.kop-ar-choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+.kop-ar-choice.button { white-space: normal; height: auto; line-height: 1.35; padding: 5px 10px; text-align: left; }
+.kop-ar-choice.is-on.button { background: var(--kop-navy, #000080); border-color: var(--kop-navy, #000080); color: #fff; }
+.kop-ar-own { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #50575e; }
+.kop-ar-own input { flex: 1 1 240px; min-width: 0; }
+.kop-ar-saved { margin: 2px 0 0; font-size: 12px; color: #50575e; min-height: 1.2em; }
+
+.kop-ar-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 960px) { .kop-ar-cols { grid-template-columns: 1fr; } }
+.kop-ar-col { min-width: 0; }
+.kop-ar-col h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #50575e; }
+.kop-ar-now { background: #f6f7f7; border-radius: 6px; padding: 10px 12px; color: #3c434a; }
+.kop-ar-p { margin: 0 0 10px; line-height: 1.55; overflow-wrap: anywhere; }
+.kop-ar-p .kop-fp-src { font-size: 12px; margin-left: 2px; }
+.kop-ar-empty { font-style: italic; color: #50575e; }
+
+.kop-ar-quotes { border-top: 1px solid #dcdcde; margin-top: 8px; padding-top: 8px; }
+.kop-ar-quotes h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #50575e; }
+.kop-ar-quotes blockquote { margin: 0 0 12px; padding: 2px 0 2px 12px; border-left: 3px solid var(--kop-teal, #33A7B5); overflow-wrap: anywhere; }
+.kop-ar-quotes footer { font-size: 12px; color: #50575e; margin-top: 4px; }
+.kop-ar-note { font-style: italic; }
+
+.kop-ar-folds { margin-top: 10px; }
+.kop-ar-folds textarea { width: 100%; max-width: 640px; display: block; margin: 0 0 6px; }
+.kop-ar-log { white-space: pre-wrap; font-size: 12px; color: #50575e; }
+.kop-ar-sentnote { margin: 0; font-size: 13px; }
+.kop-ak-result.is-error { color: #b32d2e; }

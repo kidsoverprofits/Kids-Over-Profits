@@ -15,6 +15,8 @@ if (!defined('ABSPATH')) {
 }
 
 kop_rinbox_register('writeups', function () {
+    // Moved to KOP Tools > About rewrites (inc/about-rewrites-screen.php, owner 2026-11-13): no longer in the inbox.
+    if (empty($GLOBALS['kop_rinbox_writeups_in_inbox'])) return null;
     if (!function_exists('kop_wu_publish') || !function_exists('kop_wbf_table')) return null;
     return array(
         'label'    => 'Write-ups to approve',
