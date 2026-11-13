@@ -1,6 +1,6 @@
 {
- "built": "2026-11-13 18:02 UTC",
- "source": "025b7e73f09fc3a384cdbe12ad48fbc9e49b9cb9",
+ "built": "2026-11-13 18:15 UTC",
+ "source": "4159d8417973ebcc7f0a83298657078a5839e1db",
  "sections": [
   {
    "key": "2",
@@ -4649,7 +4649,7 @@
       {
        "id": "4.8:the-app-caught-up-with-the-website",
        "lead": "The app caught up with the website",
-       "text": "**The app caught up with the website** (2026-11-13; theme [7474cf6e](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7474cf6e), app [e52da8b](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/e52da8b), EAS preview update out): facility pages gained the About (incl. the published About rewrites), credited survivor quotes, readers' answers, Rules and practices (handbook + readers' rules), the page timeline, federal funding, Form 990s, business filings, same campus, a program's history, name years and \"Later called\", in the website's order; company pages the About, filings and states apart from countries; search results show other names and places. Refresh: reads skip the phone's HTTP cache, screens re-read when the app comes back, every page pulls to refresh, and a new app version shows a \"Restart\" bar. A new website section still needs both sides: a key in `inc/mobile-api.php` and a section in the app (`src/components/facility/`, `src/components/record/`). Not ported yet: podcast statements (`kop_pod_section_html()`), a merged Facility Profile post's prose sections, outside research / Unsilenced / survivor sites under Documents.",
+       "text": "**The app caught up with the website** (2026-11-13; theme [7474cf6e](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7474cf6e), app [e52da8b](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/e52da8b), EAS preview update out): facility pages gained the About (incl. the published About rewrites), credited survivor quotes, readers' answers, Rules and practices (handbook + readers' rules), the page timeline, federal funding, Form 990s, business filings, same campus, a program's history, name years and \"Later called\", in the website's order; company pages the About, filings and states apart from countries; search results show other names and places. Refresh: reads skip the phone's HTTP cache, screens re-read when the app comes back, every page pulls to refresh, and a new app version shows a \"Restart\" bar. A new website section still needs both sides: a key in `inc/mobile-api.php` and a section in the app (`src/components/facility/`, `src/components/record/`). Not ported yet (the `todo` rows of `docs/app-parity.json`, `php scripts/test-app-parity.php --todo`): podcast statements, a merged Facility Profile post's prose sections, outside research / Unsilenced / survivor sites under Documents, and on company pages \"Related programs\" and \"Materials and links\".",
        "ask": "Open the app, close it, open it again (this update downloads on the first open), then check a few pages",
        "date": "2026-11-13",
        "why": "The app now shows the website's newer sections; it has not been seen on a phone.",
@@ -4690,7 +4690,7 @@
          "note": ""
         }
        ],
-       "hash": "81b90704eaf0"
+       "hash": "83d766acee54"
       }
      ]
     }
