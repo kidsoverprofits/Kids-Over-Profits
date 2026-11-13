@@ -1,6 +1,6 @@
 {
- "built": "2026-11-12 19:41 UTC",
- "source": "59ed4ba63f5f988a507da0b9201543d5b2a2b614",
+ "built": "2026-11-13 17:40 UTC",
+ "source": "fdacf17f6815dedd5377827989f5f46af2ca011d",
  "sections": [
   {
    "key": "2",
@@ -182,6 +182,25 @@
        "focus": true,
        "steps": [],
        "hash": "c53810ea18d4"
+      },
+      {
+       "id": "2.1:the-site-s-rest-answers-are-pinned-to-http-localhost-8000",
+       "lead": "The site's REST answers are pinned to `http://localhost:8000`",
+       "text": "**The site's REST answers are pinned to `http://localhost:8000`** (found 2026-11-13). Every `wp-json` answer (and every file outside the theme folder) carries `Access-Control-Allow-Origin: http://localhost:8000`, `Allow-Methods: GET, POST, OPTIONS`, `Allow-Headers: Content-Type, Authorization` and `Allow-Credentials: true`, whatever site asks. Nothing in the theme sets it, so it is a `Header set` in the root `public_html/.htaccess` (or a server rule), probably left from testing something locally. It stops any other site, or a web build of the app, from reading the public API; the theme's own `.htaccess` overrides it only for its listed `api/*.php` files (the About rewrite pilot page reads `api/about-live.php` for this reason). The native app is not affected. Fix: delete those lines from the root .htaccess (WordPress then answers each site itself), or ask a session to read the file over SSH (refused by the auto-mode classifier on 2026-11-13).",
+       "ask": "Remove the \"localhost:8000\" CORS lines from the site's root .htaccess (cPanel > File Manager > public_html)?",
+       "date": "2026-11-13",
+       "why": "They block other sites and a web build of the app from reading the public data; nothing needs them.",
+       "go": [],
+       "choices": [
+        "Done",
+        "Let a session do it over SSH",
+        "Leave it"
+       ],
+       "time": "3 min",
+       "kind": "decide",
+       "focus": false,
+       "steps": [],
+       "hash": "cdeff2d0c9f4"
       }
      ]
     },
