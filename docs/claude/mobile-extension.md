@@ -6,6 +6,10 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 ```bash
 # The mobile app (github.com/kidsoverprofits/kids-over-profits-mobile) reads kop/v1/facility/<slug>, /operator/<slug|?name=>,
 # /operators (the Companies list), /news and /resources (the /resources/ list, inc/resources-list.php) (inc/mobile-api.php): named keys copied from the page data, so a new page section goes in the keep lists there
+# Since 2026-11-13 a facility also carries readers (+ reader_rules, questions_url: inc/reader-accounts.php quotes {text, credit, staff}),
+# timeline (kop_ptl_facility() as plain {year, events: [{kind, label, when, title, lead, items, detail, sources, major}]}), nonprofits
+# (Form 990s, kop_mobile_nonprofits()) and businesses (state filings, kop_mobile_businesses()); a company the last two. mobile/suggest
+# items carry names (other names, the matched one first) and places, as the website's search previews do
 # A facility's names on the network map come as 'network' (kop_mobile_facility_network(), the app's Connections drawing); the app's Map tab is the
 # website's /network-map/ in a web view with the site's header/footer, toolbar and stage buttons hidden by the app (src/lib/mapPage.ts) and
 # its own controls pressing the map's buttons by id and calling window.KOPNetworkMap / KOPNetworkSearch (src/lib/mapBridge.ts), so a class,

@@ -97,7 +97,8 @@ if (!function_exists('kop_mobile_suggest')) {
      * Suggestions as you type for the mobile app (kop/v1/mobile/suggest): facility records and
      * companies matching the phrase, by current, past and other names (kop_v2_search(), which keeps
      * a third of the slots for alternate-name hits). Each item: {kind: 'facility'|'operator', id,
-     * name, hint ("Formerly X"), place, status, slug, url}; slug is the record's page slug ('' when
+     * name, hint ("Formerly X"), place, status, slug, url, names, places}; names are its other names (the one that
+     * matched first) and places its other and former places (kop_v2_search(), as the website's search shows them); slug is the record's page slug ('' when
      * it has no page), which the app opens as its own screen. Facilities first, then companies.
      */
     function kop_mobile_suggest($phrase, array $kinds = array('facility', 'operator'), $limit = 8) {
@@ -107,7 +108,7 @@ if (!function_exists('kop_mobile_suggest')) {
         if (!$kinds) return array();
         $limit = max(1, min(15, (int) $limit));
 
-        $cache_key = 'kop_msug1_' . md5(mb_strtolower($phrase) . '|' . implode(',', $kinds) . '|' . $limit);
+        $cache_key = 'kop_msug2_' . md5(mb_strtolower($phrase) . '|' . implode(',', $kinds) . '|' . $limit);
         $cached = get_transient($cache_key);
         if (is_array($cached)) return $cached;
 
@@ -142,6 +143,7 @@ if (!function_exists('kop_mobile_suggest')) {
                 'kind' => 'facility', 'id' => (int) ($f['id'] ?? 0), 'name' => (string) $f['display'],
                 'hint' => $hint($f), 'place' => $place, 'status' => $status,
                 'slug' => $slug_of($url, 'facility'), 'url' => $url,
+                'names' => array_values((array) ($f['names'] ?? array())), 'places' => array_values((array) ($f['places'] ?? array())),
             );
         }
         foreach ((array) ($found['operators'] ?? array()) as $o) {
@@ -152,6 +154,7 @@ if (!function_exists('kop_mobile_suggest')) {
                 'kind' => 'operator', 'id' => (int) ($o['id'] ?? 0), 'name' => (string) $o['display'],
                 'hint' => $hint($o), 'place' => $n ? $n . ' program' . ($n === 1 ? '' : 's') : '', 'status' => '',
                 'slug' => $slug_of($url, 'operator'), 'url' => $url,
+                'names' => array_values((array) ($o['names'] ?? array())), 'places' => array_values((array) ($o['places'] ?? array())),
             );
         }
         set_transient($cache_key, $out, 10 * MINUTE_IN_SECONDS);

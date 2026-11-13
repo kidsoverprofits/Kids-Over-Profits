@@ -167,6 +167,156 @@ if (!function_exists('kop_mobile_facility_payload')) {
         $out['network'] = !empty($page['id']) ? kop_mobile_facility_network((int) $page['id']) : null;
         // The page's "Rules and practices" lines from the program's own handbooks (inc/program-practices.php), read now.
         $out['rules'] = !empty($page['id']) && function_exists('kop_pp_for_app') ? kop_pp_for_app((int) $page['id']) : array();
+        $fid = (int) ($page['id'] ?? 0);
+        // What readers who were there told the questions page (inc/reader-accounts.php): the rules they remember go under
+        // Rules and practices, everything else under Survivor testimony, their words as quotes.
+        $out['readers'] = $fid && function_exists('kop_ra_for_facility') ? kop_mobile_reader_quotes(kop_ra_for_facility($fid)) : array();
+        $out['reader_rules'] = $fid && function_exists('kop_ra_for_facility') && defined('KOP_RA_RULES_TOPIC')
+            ? kop_mobile_reader_quotes(kop_ra_for_facility($fid, KOP_RA_RULES_TOPIC)) : array();
+        $out['questions_url'] = function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/');
+        // The year-by-year timeline (inc/profile-timeline.php), from the whole lists before the name sections cut them.
+        $out['timeline'] = $fid && function_exists('kop_ptl_facility') ? kop_mobile_timeline(kop_ptl_facility($page)) : array();
+        $out['nonprofits'] = $fid && function_exists('kop_npf_for_facility') ? kop_mobile_nonprofits(kop_npf_for_facility($fid)) : array();
+        $out['businesses'] = $fid && function_exists('kop_bizf_for_facility') ? kop_mobile_businesses(kop_bizf_for_facility($fid)) : array();
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_reader_quotes')) {
+    /** Reader accounts as the app shows them: [{text, credit, staff: [names]}] (kop_ra_section_html()'s words, no HTML). */
+    function kop_mobile_reader_quotes(array $rows) {
+        $out = array();
+        foreach ($rows as $r) {
+            $text = trim((string) ($r['value'] ?? ''));
+            if ($text === '') continue;
+            $out[] = array(
+                'text'   => $text,
+                'credit' => trim((string) ($r['doc_title'] ?? '')),
+                'staff'  => array_values(array_filter(array_map('trim', explode(';', (string) ($r['why'] ?? ''))), 'strlen')),
+            );
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_timeline')) {
+    /**
+     * A page timeline (kop_ptl_facility()) as plain data: [{year, events: [{kind, label, group, when, title, lead,
+     * items: [string], detail: [string], sources: [{url, cite}], major}]}]. Labels are kop_ptl_kinds()' third column.
+     */
+    function kop_mobile_timeline(array $years) {
+        $kinds = function_exists('kop_ptl_kinds') ? kop_ptl_kinds() : array();
+        $plain = function ($v) {
+            if (is_array($v)) $v = $v['text'] ?? $v['name'] ?? $v['title'] ?? $v['label'] ?? '';
+            return trim(html_entity_decode(wp_strip_all_tags((string) $v), ENT_QUOTES, 'UTF-8'));
+        };
+        $out = array();
+        foreach ($years as $y) {
+            $events = array();
+            foreach ((array) ($y['events'] ?? array()) as $e) {
+                if (!is_array($e)) continue;
+                $sources = array();
+                foreach ((array) ($e['sources'] ?? array()) as $s) {
+                    if (!is_array($s)) continue;
+                    $url = (string) ($s['url'] ?? '');
+                    $cite = $plain($s['cite'] ?? $s['label'] ?? $s['source'] ?? $s['title'] ?? '');
+                    if ($url !== '' || $cite !== '') $sources[] = array('url' => $url, 'cite' => $cite);
+                }
+                $kind = (string) ($e['kind'] ?? '');
+                $events[] = array(
+                    'kind'    => $kind,
+                    'label'   => (string) ($kinds[$kind][2] ?? ''),
+                    'group'   => (string) ($e['group'] ?? ''),
+                    'when'    => $plain($e['when'] ?? ''),
+                    'title'   => $plain($e['title'] ?? ''),
+                    'lead'    => $plain($e['lead'] ?? ''),
+                    'items'   => array_values(array_filter(array_map($plain, (array) ($e['items'] ?? array())), 'strlen')),
+                    'detail'  => array_values(array_filter(array_map($plain, (array) ($e['detail'] ?? array())), 'strlen')),
+                    'sources' => $sources,
+                    'major'   => !empty($e['major']),
+                );
+            }
+            if ($events) $out[] = array('year' => (int) ($y['year'] ?? 0), 'events' => $events);
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_nonprofits')) {
+    /** IRS Form 990 filings (kop_npf_for()): [{name, ein_label, place, kind, since, url, years, filings: [{year, form, revenue, expenses, officer_pay, assets, pdf}]}]. */
+    function kop_mobile_nonprofits(array $orgs) {
+        $num = function ($v) { return is_numeric($v) ? (float) $v : null; };
+        $out = array();
+        foreach ($orgs as $o) {
+            $rows = array();
+            foreach ((array) ($o['rows'] ?? array()) as $f) {
+                $rows[] = array(
+                    'year' => (int) ($f['year'] ?? 0), 'form' => (string) ($f['form'] ?? ''),
+                    'revenue' => $num($f['revenue'] ?? null), 'expenses' => $num($f['expenses'] ?? null),
+                    'officer_pay' => $num($f['officer_pay'] ?? null), 'assets' => $num($f['assets'] ?? null),
+                    'pdf' => (string) ($f['pdf'] ?? ''),
+                );
+            }
+            $out[] = array(
+                'name' => (string) ($o['name'] ?? ''), 'ein_label' => (string) ($o['ein_label'] ?? ''), 'place' => (string) ($o['place'] ?? ''),
+                'kind' => (string) ($o['kind'] ?? ''), 'since' => (string) ($o['since'] ?? ''), 'url' => (string) ($o['url'] ?? ''),
+                'years' => (string) ($o['years'] ?? ''), 'filings' => $rows,
+            );
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_businesses')) {
+    /**
+     * State business filings (kop_bizf_for()), worded as kop_bizf_section_html() words them: [{name, state, summary,
+     * url, address, officers: [{name, title, where}], more_officers, agent: {name, where}|null, events: [{date, what,
+     * name, notes, url}], trade_names: [{name, note}]}].
+     */
+    function kop_mobile_businesses(array $entities) {
+        $states = function_exists('kop_bizf_states') ? kop_bizf_states() : array();
+        $date = function ($d, $month = false) { return function_exists('kop_bizf_date') ? kop_bizf_date($d, $month) : (string) $d; };
+        $where = function ($p) { return (string) (($p['kind'] ?? '') === 'company' ? ($p['address'] ?? '') : ($p['place'] ?? '')); };
+        $out = array();
+        foreach ($entities as $e) {
+            $filed = $date($e['filed'] ?? '');
+            $last = $e['reports'][0] ?? null;
+            $status = !empty($e['status_label']) ? strtolower($e['status_label']) : (($e['status'] ?? '') === 'active' ? 'active' : 'inactive');
+            $line = array_filter(array(
+                (string) ($e['type_label'] ?? ''), 'document ' . ($e['doc'] ?? ''), $filed !== '' ? 'filed ' . $filed : '',
+                $status . (($e['status'] ?? '') === 'active' && $last ? ' (last annual report ' . (int) $last['year'] . ')' : ''),
+            ));
+            $copies = function_exists('kop_bizf_copies') ? kop_bizf_copies($e['state'] ?? '', $e['doc'] ?? '') : array();
+            $events = array();
+            foreach ((array) ($e['events'] ?? array()) as $ev) {
+                $events[] = array(
+                    'date' => $date($ev['date'] ?? ''), 'what' => (string) ($ev['what'] ?? ''), 'name' => (string) ($ev['name'] ?? ''),
+                    'notes' => (string) ($ev['notes'] ?? ''),
+                    'url' => function_exists('kop_bizf_event_copy') ? (string) kop_bizf_event_copy($ev, $copies) : '',
+                );
+            }
+            $trade = array();
+            foreach (array_slice((array) ($e['trade_names'] ?? array()), 0, 12) as $t) {
+                $bits = array_filter(array(
+                    !empty($t['county']) ? (strcasecmp($t['county'], 'Multiple') === 0 ? 'several counties' : $t['county'] . ' County') : '',
+                    !empty($t['filed']) ? 'registered ' . $date($t['filed'], true) : '',
+                    ($t['status'] ?? '') === 'active' ? 'active' : (!empty($t['cancelled']) ? 'cancelled ' . $date($t['cancelled'], true) : (string) ($t['status'] ?? '')),
+                ));
+                $trade[] = array('name' => (string) ($t['name'] ?? ''), 'note' => implode(', ', $bits));
+            }
+            $out[] = array(
+                'name'          => (string) ($e['name'] ?? ''),
+                'state'         => (string) ($states[$e['state'] ?? ''] ?? ($e['state'] ?? '')),
+                'summary'       => ucfirst(implode(', ', $line)) . '.' . (!empty($e['fei']) ? ' Federal employer number ' . substr($e['fei'], 0, 2) . '-' . substr($e['fei'], 2) . '.' : ''),
+                'url'           => (string) ($e['url'] ?? ''),
+                'address'       => (string) ($e['address'] ?? ''),
+                'officers'      => array_map(function ($o) use ($where) { return array('name' => (string) ($o['name'] ?? ''), 'title' => (string) ($o['title'] ?? ''), 'where' => $where($o)); }, (array) ($e['officers'] ?? array())),
+                'more_officers' => !empty($e['more_officers']),
+                'agent'         => !empty($e['agent']) ? array('name' => (string) ($e['agent']['name'] ?? ''), 'where' => $where($e['agent'])) : null,
+                'events'        => $events,
+                'trade_names'   => $trade,
+            );
+        }
         return $out;
     }
 }
@@ -325,6 +475,9 @@ if (!function_exists('kop_mobile_operator_payload')) {
             'program_total'  => (int) ($pdocs['total'] ?? 0),
             'url'            => (!empty($docs['folder_id']) || !empty($pdocs['total'])) && !empty($page['url']) ? $page['url'] . '#documents' : '',
         );
+        $oid = (int) ($page['id'] ?? 0);
+        $out['nonprofits'] = $oid && function_exists('kop_npf_for_operator') ? kop_mobile_nonprofits(kop_npf_for_operator($oid)) : array();
+        $out['businesses'] = $oid && function_exists('kop_bizf_for') ? kop_mobile_businesses(kop_bizf_for('operator', $oid)) : array();
         return $out;
     }
 }
