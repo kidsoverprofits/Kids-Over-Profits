@@ -1,6 +1,6 @@
 {
- "built": "2026-11-13 18:40 UTC",
- "source": "bb4b4291d7737a20b769ac0407c7874fd7548e44",
+ "built": "2026-11-13 19:01 UTC",
+ "source": "7bd92fb6ecddf24f959c1e47458539583e8fc9f0",
  "sections": [
   {
    "key": "2",
@@ -2748,6 +2748,21 @@
        "focus": false,
        "steps": [],
        "hash": "483d57e88b25"
+      },
+      {
+       "id": "3:staff-cards-with-other-industry-jobs",
+       "lead": "Staff cards with other industry jobs",
+       "text": "**Staff cards with other industry jobs** (css/facility-profile.css, templates facility-page/operator-page, 2026-11-13, 0263a729): on /facility/aspen-ranch-ut/ at desktop width, Melodie Rose and Gil Hallows have full-width cards first (name left, jobs in two columns right), Kevin Knutson and Matt Alexander side by side under them with no gaps; at phone width the cards stack. A company page's People section (e.g. /operator/ of Aspen Education Group) looks the same.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "473e1d652c32"
       }
      ]
     }
@@ -3504,6 +3519,21 @@
        "focus": false,
        "steps": [],
        "hash": "9a8c0679d490"
+      },
+      {
+       "id": "4.3:gil-hallows-s-elsewhere-in-the-industry-list-repeats-compani",
+       "lead": "Gil Hallows's \"Elsewhere in the industry\" list repeats companies",
+       "text": "**Gil Hallows's \"Elsewhere in the industry\" list repeats companies** (found 2026-11-13 on /facility/aspen-ranch-ut/) \"Legacy Outdoor\", \"Legacy Outdoor Adventures\" and \"Legacy Academy Adventures\" look like one company under three names, and \"Natsap\" (Board member) repeats what his Aspen Achievement Academy line already says (\"NATSAP Board member\"). Check the sources for each job (people records, KOP Tools > People), merge the Legacy names into one place if they are one company, and drop the duplicate NATSAP line; other people's lists likely have the same kind of repeat.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "a17f751ed9aa"
       }
      ]
     },
