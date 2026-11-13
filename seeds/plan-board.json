@@ -1,6 +1,6 @@
 {
- "built": "2026-11-13 17:40 UTC",
- "source": "fdacf17f6815dedd5377827989f5f46af2ca011d",
+ "built": "2026-11-13 18:02 UTC",
+ "source": "025b7e73f09fc3a384cdbe12ad48fbc9e49b9cb9",
  "sections": [
   {
    "key": "2",
@@ -4594,9 +4594,9 @@
       {
        "id": "4.8:volunteer-sign-in-placement",
        "lead": "Volunteer sign-in placement",
-       "text": "**Volunteer sign-in placement** (2026-10-25, kids-over-profits-mobile `e6c0893`): a Volunteers tile on Home, a \"Volunteer? Sign in\" button at the top of Send, and the About section moved up. Open: check it on a phone after the next build or update; three suites (`documents`, `network`, `resources`) were already failing before this change and still need a look.",
+       "text": "**Volunteer sign-in placement** (2026-10-25, kids-over-profits-mobile `e6c0893`): a Volunteers tile on Home, a \"Volunteer? Sign in\" button at the top of Send, and the About section moved up. Open: check it on a phone after the next build or update. (The `documents`, `network` and `resources` suites pass since 2026-11-13; `resources` can time out under a full parallel run, `npx jest --maxWorkers=4` is steady.)",
        "ask": "",
-       "date": "2026-10-25",
+       "date": "2026-11-13",
        "why": "",
        "go": [],
        "choices": [],
@@ -4604,12 +4604,12 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "438c8fe3d1b1"
+       "hash": "ddf255eaf7d5"
       },
       {
        "id": "4.8:news-and-lawsuit-processors-in-admin-mode",
        "lead": "News and Lawsuit processors in admin mode",
-       "text": "**News and Lawsuit processors in admin mode** (2026-10-28; theme [888e1d9d](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/888e1d9dbe483c0b149d8ea3a528f8634fb25e89), app [306153cf](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/306153cfb0a99d2adb65993bad5e833b7fe7f638), EAS preview update out): Admin tab buttons \"Process a news article\" / \"Process a lawsuit\" (`src/app/news-processor.tsx`, `src/app/lawsuit-processor.tsx`, `src/api/processor.ts`) on `kop/v1/extension/news-form`, `/process`, `/archive`, and the new `/lawsuit-form`, `/lawsuit-process` (`inc/extension-lawsuit-processor.php`) and full lawsuit submit (`full=1`, `publish=1` = `published` + Recently done Undo, `inc/source-submissions.php`). Send tab offers \"Open in ... Processor\" to admins. Open: - check on a phone: AI read of a news link and of a court PDF, publish one, Undo it from Recently done; layout never seen; - CourtListener prefill done 2026-10-28 (`api/lib-courtlistener.php`, shared with `api/fetch-lawsuit-details.php`; app [7f3a890c](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/7f3a890c72e51dd063a8e807eb4534a30dd3c760)): a CourtListener docket/RECAP link, or a federal case number the AI read, fills name, number, court, filing date and parties from the docket and keeps the docket page as a second source. Open after deploy: process a CourtListener docket link in the app and check the note under Read names CourtListener (if it never does, the REST side is not finding the key: `kop_cl_token()`); Fetch details on the admin lawsuit form should work as before; ship the app part with an EAS update (`npx eas-cli update --channel preview ...`); - Send to KOP extension Lawsuit panel done 2026-10-30 ([88378587](https://github.com/kidsoverprofits/kop-send-to-kop/commit/8837858790c6de983173256879cdccaa222b138c)): every case field, AI fill with the CourtListener match, publish or queue; an older site keeps the plain send. Open: reload the unpacked extension, open a CourtListener docket while signed in, Fill with AI, then publish and Undo it from Recently done; - app suites `tab-screens`, `resources`, `network` fail (failed before this change too).",
+       "text": "**News and Lawsuit processors in admin mode** (2026-10-28; theme [888e1d9d](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/888e1d9dbe483c0b149d8ea3a528f8634fb25e89), app [306153cf](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/306153cfb0a99d2adb65993bad5e833b7fe7f638), EAS preview update out): Admin tab buttons \"Process a news article\" / \"Process a lawsuit\" (`src/app/news-processor.tsx`, `src/app/lawsuit-processor.tsx`, `src/api/processor.ts`) on `kop/v1/extension/news-form`, `/process`, `/archive`, and the new `/lawsuit-form`, `/lawsuit-process` (`inc/extension-lawsuit-processor.php`) and full lawsuit submit (`full=1`, `publish=1` = `published` + Recently done Undo, `inc/source-submissions.php`). Send tab offers \"Open in ... Processor\" to admins. Open: - check on a phone: AI read of a news link and of a court PDF, publish one, Undo it from Recently done; layout never seen; - CourtListener prefill done 2026-10-28 (`api/lib-courtlistener.php`, shared with `api/fetch-lawsuit-details.php`; app [7f3a890c](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/7f3a890c72e51dd063a8e807eb4534a30dd3c760)): a CourtListener docket/RECAP link, or a federal case number the AI read, fills name, number, court, filing date and parties from the docket and keeps the docket page as a second source. Open after deploy: process a CourtListener docket link in the app and check the note under Read names CourtListener (if it never does, the REST side is not finding the key: `kop_cl_token()`); Fetch details on the admin lawsuit form should work as before; ship the app part with an EAS update (`npx eas-cli update --channel preview ...`); - Send to KOP extension Lawsuit panel done 2026-10-30 ([88378587](https://github.com/kidsoverprofits/kop-send-to-kop/commit/8837858790c6de983173256879cdccaa222b138c)): every case field, AI fill with the CourtListener match, publish or queue; an older site keeps the plain send. Open: reload the unpacked extension, open a CourtListener docket while signed in, Fill with AI, then publish and Undo it from Recently done;",
        "ask": "Try the app's news and lawsuit processors on your phone",
        "date": "2026-10-30",
        "why": "They let you add a story or a case from your phone; never tried on one.",
@@ -4644,7 +4644,53 @@
          "note": ""
         }
        ],
-       "hash": "36d106a95f41"
+       "hash": "537ca270327e"
+      },
+      {
+       "id": "4.8:the-app-caught-up-with-the-website",
+       "lead": "The app caught up with the website",
+       "text": "**The app caught up with the website** (2026-11-13; theme [7474cf6e](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/7474cf6e), app [e52da8b](https://github.com/kidsoverprofits/kids-over-profits-mobile/commit/e52da8b), EAS preview update out): facility pages gained the About (incl. the published About rewrites), credited survivor quotes, readers' answers, Rules and practices (handbook + readers' rules), the page timeline, federal funding, Form 990s, business filings, same campus, a program's history, name years and \"Later called\", in the website's order; company pages the About, filings and states apart from countries; search results show other names and places. Refresh: reads skip the phone's HTTP cache, screens re-read when the app comes back, every page pulls to refresh, and a new app version shows a \"Restart\" bar. A new website section still needs both sides: a key in `inc/mobile-api.php` and a section in the app (`src/components/facility/`, `src/components/record/`). Not ported yet: podcast statements (`kop_pod_section_html()`), a merged Facility Profile post's prose sections, outside research / Unsilenced / survivor sites under Documents.",
+       "ask": "Open the app, close it, open it again (this update downloads on the first open), then check a few pages",
+       "date": "2026-11-13",
+       "why": "The app now shows the website's newer sections; it has not been seen on a phone.",
+       "go": [],
+       "choices": [],
+       "time": "10 min",
+       "kind": "check",
+       "focus": false,
+       "steps": [
+        {
+         "id": "open-the-app-wait-a-few-seconds-close-it-fully-and",
+         "label": "Open the app, wait a few seconds, close it fully and open it again (later updates offer a \"Restart\" bar instead)",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "provo-canyon-school-the-about-near-the-top-the-tim",
+         "label": "Provo Canyon School: the About near the top, the Timeline, quotes with who they're from",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "teen-challenge-the-about-near-the-top-universal-he",
+         "label": "Teen Challenge: the About near the top; Universal Health Services: Business filings and the States line in the facts box",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "pull-down-on-any-page-it-should-spin-and-reload",
+         "label": "Pull down on any page: it should spin and reload",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "search-copper-canyon-the-result-should-say-formerl",
+         "label": "Search \"Copper Canyon\": the result should say \"Formerly Copper Canyon Academy\" under Sedona Sky Academy",
+         "url": "",
+         "note": ""
+        }
+       ],
+       "hash": "81b90704eaf0"
       }
      ]
     }
