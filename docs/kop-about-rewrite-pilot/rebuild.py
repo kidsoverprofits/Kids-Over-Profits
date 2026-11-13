@@ -10,6 +10,7 @@ import html
 import json
 import os
 import re
+import sys
 
 CSS = """.check ol{margin:6px 0 0;padding-left:22px}.choices{display:block;color:var(--muted);font-size:.9em}
 .log{font:13px/1.5 var(--ui);color:var(--muted);margin:0 0 12px}.log summary{cursor:pointer;color:var(--accent)}
@@ -43,20 +44,34 @@ CSS += """.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 
 """
 INTRO = ("21 records: the rule-built About each page printed before, beside the agents' rewrite from the same facts, "
          "with citations numbered the way the site numbers them. The rewrites went live on November 12, 2026 "
-         "(inc/about-rewrites.php). Under each record, \"On the site now\" is read from kidsoverprofits.org when this page "
-         "opens; Refresh reads it again and flags any sentence the site prints differently. Survivor and family accounts "
+         "(inc/about-rewrites.php). Under each record, \"On the site now\" is what kidsoverprofits.org printed when this page "
+         "was last built, with any sentence the site prints differently highlighted. Survivor and family accounts "
          "are quoted word for word under each rewrite, never retold in it. Each record's research to-dos and work log "
          "are folded under it.")
-BAR = ('<div class="bar"><button type="button" id="refresh">Refresh from the live site</button>'
-       '<span class="lst" id="lstat" role="status">Not checked yet.</span></div>\n')
+BAR = ('<div class="bar"><span class="lst" id="lstat" role="status">Not checked against the site.</span></div>\n')
+
+# "On the site now" is read when the page is built, not when it opens: claude.ai does not let an artifact page
+# contact other sites (a fetch from the page fails, tried 2026-11-13). rebuild.py reads every record from the theme's
+# public api/about-live.php and puts the answers in the page; the page compares them with the Rewrite column.
+LIVE_API = "https://kidsoverprofits.org/wp-content/themes/child/api/about-live.php?pages="
+
+
+def fetch_live(pages):
+    import urllib.request
+    out, at = {}, ""
+    for k in range(0, len(pages), 5):
+        req = urllib.request.Request(LIVE_API + ",".join(pages[k:k + 5]), headers={"User-Agent": "Mozilla/5.0 (KOP about pilot rebuild)"})
+        d = json.load(urllib.request.urlopen(req, timeout=120))
+        out.update(d.get("pages") or {})
+        at = d.get("fetched_at") or at
+    return {"fetched_at": at, "pages": out}
+
 
 LIVE_SCRIPT = r"""<script>
-/* "On the site now": each record's About and quotes as kidsoverprofits.org prints them, read from the theme's public
-   read-only api/about-live.php (open CORS; the REST routes are pinned to one origin by the site's root .htaccess),
-   compared sentence by sentence with the Rewrite column. Read on open and on Refresh; nothing is written anywhere. */
+/* "On the site now": each record's About and quotes as kidsoverprofits.org printed them when this page was built
+   (window.KOP_LIVE, from api/about-live.php), compared sentence by sentence with the Rewrite column. */
 (function () {
-  var API = "https://kidsoverprofits.org/wp-content/themes/child/api/about-live.php?page=";
-  var btn = document.getElementById("refresh"), top = document.getElementById("lstat");
+  var LIVE = window.KOP_LIVE || null, top = document.getElementById("lstat");
   var boxes = Array.prototype.slice.call(document.querySelectorAll(".live[data-page]"));
   function norm(s) {
     return String(s || "").normalize("NFKC").replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
@@ -88,7 +103,7 @@ LIVE_SCRIPT = r"""<script>
       function (q) { return !q.querySelector(".empty"); }).length;
     var lq = d.testimony.length, isOp = box.dataset.page.indexOf("operator/") === 0;
     var quotes = isOp ? (rq ? " Its " + rq + " quote" + (rq === 1 ? "" : "s") + " go on the programs they name." : "")
-      : " " + lq + " of the " + rq + " quote" + (rq === 1 ? "" : "s") + " shown on the page.";
+      : (rq || lq ? " " + lq + " of the " + rq + " quote" + (rq === 1 ? "" : "s") + " shown on the page." : "");
     var kind;
     if (!d.writeup) {
       kind = "old"; box.classList.add("old");
@@ -145,38 +160,16 @@ LIVE_SCRIPT = r"""<script>
     box.appendChild(det);
     return { kind: kind };
   }
-  function one(box) {
-    var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 30000);
-    return fetch(API + encodeURIComponent(box.dataset.page) + "&_=" + Date.now(), { signal: ctl.signal, credentials: "omit" })
-      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function (j) { clearTimeout(t); return render(box, (j.pages || {})[box.dataset.page]); })
-      .catch(function (e) {
-        clearTimeout(t);
-        box.className = "live err"; box.textContent = "";
-        box.appendChild(el("p", "lstat", "Could not read this page from kidsoverprofits.org (" + (e && e.name === "AbortError" ? "timed out" : (e && e.message) || "error") + ")."));
-        return { kind: "fail" };
-      });
-  }
-  function run() {
-    btn.disabled = true;
-    top.textContent = "Reading " + boxes.length + " pages from kidsoverprofits.org...";
-    boxes.forEach(function (b) { b.className = "live"; b.textContent = ""; b.appendChild(el("p", "lstat", "Reading the live page...")); });
-    var queue = boxes.slice(), res = [];
-    function worker() { var b = queue.shift(); return b ? one(b).then(function (r) { res.push(r.kind); return worker(); }) : Promise.resolve(); }
-    Promise.all([worker(), worker(), worker(), worker()]).then(function () {
-      btn.disabled = false;
-      var c = function (k) { return res.filter(function (x) { return x === k; }).length; };
-      var at = new Date().toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-      if (c("fail") === res.length) { top.textContent = "Could not reach kidsoverprofits.org from this view (" + at + "). The Rewrite column is the copy from the last build."; return; }
-      var bits = [c("same") + " live as written"];
-      if (c("diff")) bits.push(c("diff") + " live with differences");
-      if (c("old")) bits.push(c("old") + " not live");
-      if (c("err") + c("fail")) bits.push((c("err") + c("fail")) + " not read");
-      top.textContent = "Checked against kidsoverprofits.org " + at + ": " + bits.join(", ") + ".";
-    });
-  }
-  btn.addEventListener("click", run);
-  run();
+  if (!LIVE) return;
+  var res = boxes.map(function (b) { return render(b, LIVE.pages[b.dataset.page]).kind; });
+  var c = function (k) { return res.filter(function (x) { return x === k; }).length; };
+  var at = new Date(LIVE.fetched_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  var bits = [c("same") + " live as written"];
+  if (c("diff")) bits.push(c("diff") + " live with differences");
+  if (c("old")) bits.push(c("old") + " not live");
+  if (c("err")) bits.push(c("err") + " not found");
+  top.textContent = "Checked against kidsoverprofits.org " + at + ": " + bits.join(", ") +
+    ". To check again, ask Claude to rebuild this page.";
 })();
 </script>
 """
@@ -324,6 +317,10 @@ summary = (f'<section class="todo"><h2>Needs you <span class="count">({len(todo)
            '<ol>' + "".join(todo) + "</ol></section>\n") if todo else \
     '<section class="todo"><h2>Nothing needs you</h2><p>Every open point is a research to-do for the agents.</p></section>\n'
 parts.insert(1, BAR + summary)
-parts.append(s[secs[-1]:].replace("</main>", "</main>\n" + SCRIPT + LIVE_SCRIPT, 1))
+live_js = ""
+if "--offline" not in sys.argv:
+    live = fetch_live(re.findall(r'<div class="live" data-page="([^"]+)"', "".join(parts)))
+    live_js = "<script>window.KOP_LIVE = " + json.dumps(live, ensure_ascii=False).replace("</", "<\\/") + ";</script>\n"
+parts.append(s[secs[-1]:].replace("</main>", "</main>\n" + SCRIPT + live_js + LIVE_SCRIPT, 1))
 open("page.html", "w", encoding="utf-8", newline="\n").write("".join(parts))
 print("wrote page.html with", len(secs) - 1, "records,", len(todo), "asks")
