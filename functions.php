@@ -111,6 +111,8 @@ require_once get_stylesheet_directory() . '/inc/highlight-summaries.php';
 require_once get_stylesheet_directory() . '/inc/bug-report-notify.php';
 // Bug reports the owner sends to Claude Code (/fix-bugs): queue column + kop/v1/claude/bug-reports
 require_once get_stylesheet_directory() . '/inc/bug-reports-claude.php';
+// The owner's "Tell Claude" notes from any page (admins only; /claude-feedback): kop/v1/claude/feedback
+require_once get_stylesheet_directory() . '/inc/claude-feedback.php';
 
 // One-line help for the submission form's collapsed panels
 require_once get_stylesheet_directory() . '/inc/form-help.php';

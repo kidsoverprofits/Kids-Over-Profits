@@ -20,7 +20,8 @@
  *   { endpoint: '.../api/save-bug-report.php', fallbackEmail: '...' }
  *
  * KOPBugReporter.captureError(label) pushes a custom entry into the
- * technical log (e.g. a caught save failure).
+ * technical log (e.g. a caught save failure); KOPBugReporter.recentErrors()
+ * reads it (js/claude-feedback.js sends it with an admin's note).
  */
 (function () {
     'use strict';
@@ -160,7 +161,9 @@
      */
     function attach(container, feature, label) {
         if (!container || !feature) return null;
-        if (container.querySelector(':scope > .kop-bug-report-link, :scope > .kop-submit-info-row > .kop-bug-report-link')) return null; // already attached
+        // Already attached. For an admin, js/claude-feedback.js moves the flag into a
+        // .kop-feature-actions row beside its "Tell Claude" button.
+        if (container.querySelector(':scope > .kop-bug-report-link, :scope > .kop-submit-info-row > .kop-bug-report-link, :scope > .kop-feature-actions > .kop-bug-report-link')) return null;
         // An anchor styled with Kadence's own outline-button classes, not a
         // <button>: several page stylesheets restyle every descendant
         // <button> (navy background, white text), which swallowed the flag.
@@ -178,6 +181,9 @@
             + '</span>'
             + '<span class="kop-bug-report-link__text">Report a problem</span>';
         link.setAttribute('aria-label', 'Report a problem with ' + (label || feature));
+        // Read by js/claude-feedback.js (admins only), which puts "Tell Claude" beside every flag.
+        link.setAttribute('data-kop-feature', feature);
+        link.setAttribute('data-kop-feature-label', label || feature);
         link.title = 'Report a problem';
         link.addEventListener('click', function (event) {
             event.preventDefault();
@@ -624,7 +630,8 @@
     window.KOPBugReporter = {
         open: openModal,
         attach: attach,
-        captureError: function (label) { logEntry('app', label); }
+        captureError: function (label) { logEntry('app', label); },
+        recentErrors: function () { return errorLog.slice(); }
     };
 
     function init() {

@@ -1,0 +1,419 @@
+/**
+ * "Tell Claude" (admins only; js/claude-feedback.js, inc/claude-feedback.php).
+ * Every colour is named in every state (docs/claude/css-checks.md): Kadence colours buttons, links, headings and
+ * fields directly, and wp-admin has no css/colors.css, so each var() carries its fallback.
+ */
+
+/* ---- The button beside each feature's flag -------------------------------- */
+/* An <a> with Kadence's outline-button classes, like the flag (css/bug-reporter.css). */
+.button.kop-cfb-link {
+    position: relative;
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    align-items: center;
+    margin: 0;
+    padding: 3px 7px;
+    border-width: 1px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    line-height: 1;
+    opacity: 0.6;
+    --global-palette-btn-out: var(--kop-navy-blue, #000080);
+}
+
+.button.kop-cfb-link,
+.button.kop-cfb-link:hover,
+.button.kop-cfb-link:focus,
+.button.kop-cfb-link:active {
+    background: transparent;
+    color: var(--kop-navy-blue, #000080);
+    border-color: var(--kop-navy-blue, #000080);
+    box-shadow: none;
+}
+
+.button.kop-cfb-link:hover,
+.button.kop-cfb-link:focus-visible {
+    opacity: 1;
+}
+
+.button.kop-cfb-link.kop-cfb-link--on-dark,
+.button.kop-cfb-link.kop-cfb-link--on-dark:hover,
+.button.kop-cfb-link.kop-cfb-link--on-dark:focus,
+.button.kop-cfb-link.kop-cfb-link--on-dark:active {
+    background: transparent;
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+}
+
+.kop-cfb-link__icon {
+    display: inline-flex;
+    font-size: 13px;
+}
+
+.kop-submit-info-row .button.kop-cfb-link {
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+@media (hover: none), (max-width: 640px) {
+    .button.kop-cfb-link {
+        padding: 7px 10px;
+        min-height: 32px;
+        opacity: 0.85;
+    }
+}
+
+/* ---- Floating button ------------------------------------------------------ */
+/* Bottom left, above the search button (16px) and the pencil bar (68px, css/inline-edit.css); the bottom right
+   belongs to the tour "?" and the Undo toast. In wp-admin the left is the menu, so it moves right. */
+button.kop-cfb-fab {
+    position: fixed;
+    left: 12px;
+    bottom: 104px;
+    z-index: 99985;
+    display: inline-flex;
+    width: auto;
+    min-height: 0;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 6px 10px;
+    border: 2px solid var(--kop-midnight-blue, #000435);
+    border-radius: 999px;
+    font: 600 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--kop-midnight-blue, #000435);
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 4, 53, 0.3);
+    cursor: pointer;
+}
+
+button.kop-cfb-fab:hover,
+button.kop-cfb-fab:focus,
+button.kop-cfb-fab:active {
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    border-color: var(--kop-midnight-blue, #000435);
+}
+
+body.wp-admin button.kop-cfb-fab {
+    left: auto;
+    right: 16px;
+    bottom: 16px;
+}
+
+@media (max-width: 640px) {
+    .kop-cfb-fab__text {
+        display: none;
+    }
+}
+
+/* ---- Panel ---------------------------------------------------------------- */
+.kop-cfb-panel {
+    position: fixed;
+    left: 12px;
+    bottom: 148px;
+    z-index: 99995;
+    box-sizing: border-box;
+    width: min(380px, calc(100vw - 24px));
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+    padding: 12px 14px;
+    border: 2px solid var(--kop-midnight-blue, #000435);
+    border-radius: 10px;
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--kop-midnight-blue, #000435);
+    background: #FFFFFF;
+    box-shadow: 0 6px 24px rgba(0, 4, 53, 0.35);
+}
+
+.kop-cfb-panel[hidden] {
+    display: none;
+}
+
+body.wp-admin .kop-cfb-panel {
+    left: auto;
+    right: 16px;
+    bottom: 60px;
+    max-height: calc(100vh - 110px);
+}
+
+.kop-cfb-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.kop-cfb-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-about {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.kop-cfb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100%;
+    padding: 2px 4px 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+    overflow-wrap: anywhere;
+}
+
+.kop-cfb-label {
+    display: block;
+    margin: 0 0 4px;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-panel textarea.kop-cfb-input {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 84px;
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px solid #4A5568;
+    border-radius: 6px;
+    font: inherit;
+    color: var(--kop-midnight-blue, #000435);
+    background: #FFFFFF;
+    resize: vertical;
+}
+
+.kop-cfb-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/* Buttons: colour and background named in every state (Kadence's button:hover / :focus beat one class). */
+.kop-cfb-panel button.kop-cfb-btn,
+.kop-cfb-pickbar button.kop-cfb-btn {
+    display: inline-flex;
+    width: auto;
+    min-height: 0;
+    align-items: center;
+    margin: 0;
+    padding: 5px 12px;
+    border: 1px solid var(--kop-midnight-blue, #000435);
+    border-radius: 6px;
+    font: 600 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.kop-cfb-panel button.kop-cfb-btn--primary,
+.kop-cfb-panel button.kop-cfb-btn--primary:focus,
+.kop-cfb-panel button.kop-cfb-btn--primary:active {
+    color: #FFFFFF;
+    background: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-panel button.kop-cfb-btn--primary:hover {
+    color: #FFFFFF;
+    background: var(--kop-navy-blue, #000080);
+}
+
+.kop-cfb-panel button.kop-cfb-btn--primary:disabled {
+    color: #FFFFFF;
+    background: #4A5568;
+    border-color: #4A5568;
+    cursor: wait;
+}
+
+.kop-cfb-panel button.kop-cfb-btn--outline,
+.kop-cfb-panel button.kop-cfb-btn--outline:focus,
+.kop-cfb-panel button.kop-cfb-btn--quiet,
+.kop-cfb-panel button.kop-cfb-btn--quiet:focus,
+.kop-cfb-pickbar button.kop-cfb-btn--quiet,
+.kop-cfb-pickbar button.kop-cfb-btn--quiet:focus {
+    color: var(--kop-midnight-blue, #000435);
+    background: #FFFFFF;
+}
+
+.kop-cfb-panel button.kop-cfb-btn--outline:hover,
+.kop-cfb-panel button.kop-cfb-btn--outline:active,
+.kop-cfb-panel button.kop-cfb-btn--quiet:hover,
+.kop-cfb-panel button.kop-cfb-btn--quiet:active,
+.kop-cfb-pickbar button.kop-cfb-btn--quiet:hover,
+.kop-cfb-pickbar button.kop-cfb-btn--quiet:active {
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-cfb-panel button.kop-cfb-btn--quiet {
+    border-color: transparent;
+}
+
+.kop-cfb-panel button.kop-cfb-close,
+.kop-cfb-panel button.kop-cfb-chip__x {
+    padding: 2px 4px;
+    background: transparent;
+}
+
+.kop-cfb-panel button.kop-cfb-chip__x,
+.kop-cfb-panel button.kop-cfb-chip__x:hover,
+.kop-cfb-panel button.kop-cfb-chip__x:focus {
+    color: var(--kop-midnight-blue, #000435);
+    background: transparent;
+    border-color: transparent;
+    font-size: 11px;
+}
+
+.kop-cfb-status {
+    min-height: 1em;
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-status--error {
+    color: #9B1C1C;
+}
+
+.kop-cfb-list-head {
+    margin: 10px 0 4px;
+    padding-top: 8px;
+    border-top: 1px solid #CBD5E0;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kop-cfb-item,
+.kop-cfb-empty {
+    margin: 0 0 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--kop-midnight-blue, #000435);
+    background: #F7FAFC;
+}
+
+.kop-cfb-empty {
+    color: #4A5568;
+}
+
+.kop-cfb-item__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.kop-cfb-pill {
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--kop-midnight-blue, #000435);
+    background: var(--kop-sand, #F2EEDF);
+}
+
+.kop-cfb-pill--done {
+    background: var(--kop-mint-green, #B6E3D4);
+}
+
+.kop-cfb-pill--returned {
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+    outline: 1px solid var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-pill--withdrawn {
+    color: #4A5568;
+    background: #FFFFFF;
+}
+
+.kop-cfb-panel a,
+.kop-cfb-panel a:visited {
+    color: var(--kop-navy-blue, #000080);
+    text-decoration: underline;
+}
+
+.kop-cfb-panel a:hover,
+.kop-cfb-panel a:focus {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-item__where {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.kop-cfb-item__msg,
+.kop-cfb-item__reply {
+    margin: 4px 0 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-item__reply {
+    padding-left: 8px;
+    border-left: 3px solid var(--kop-midnight-blue, #000435);
+}
+
+.kop-cfb-panel button.kop-cfb-item__back {
+    margin-top: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+/* ---- Pointing at a thing -------------------------------------------------- */
+.kop-cfb-hover {
+    position: fixed;
+    z-index: 99994;
+    pointer-events: none;
+    outline: 3px solid var(--kop-midnight-blue, #000435);
+    box-shadow: 0 0 0 9999px rgba(0, 4, 53, 0.12);
+}
+
+.kop-cfb-hover[hidden],
+.kop-cfb-pickbar[hidden] {
+    display: none;
+}
+
+.kop-cfb-pickbar {
+    position: fixed;
+    left: 50%;
+    top: 44px; /* below the admin bar */
+    z-index: 99996;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 2px solid var(--kop-midnight-blue, #000435);
+    border-radius: 8px;
+    font: 600 14px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--kop-midnight-blue, #000435);
+    background: #FFFFFF;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 10px rgba(0, 4, 53, 0.35);
+}

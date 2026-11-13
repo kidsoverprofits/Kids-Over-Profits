@@ -339,6 +339,25 @@ In progress with the note for the owner and sends no email. Both notes are added
 shows under Notes. The queue never includes the reporter's email. Nothing joins the queue without the owner's
 click, because report text is untrusted. Tests: `scripts/review-inbox-tests/bug-reports.php`.
 
+## The owner's notes to Claude (Tell Claude)
+
+Admins (`manage_options`) get a **Tell Claude** button on every page: a small sparkles button beside every feature's
+"Report a problem" flag (the two share a `.kop-feature-actions` row; `js/bug-reporter.js` stamps each flag with
+`data-kop-feature`), and a floating **Claude** button (bottom left above the search button and the pencil bar; bottom
+right in wp-admin and KOP Tools). Nobody else is sent the script, the CSS or the routes (`inc/claude-feedback.php`,
+`js/claude-feedback.js`, `css/claude-feedback.css`). The panel takes a note, **Point at it** (click the exact element;
+its selector, text, inline-edit ref and box go with the note), the text selected when it opened, and the page's recent
+errors (`KOPBugReporter.recentErrors()`). Notes go straight to Claude: the owner wrote them, so there is no review
+step and they are not bug reports. "Your notes" in the panel lists the newest 15 with Claude's answer and a link to
+the commit, and **Take back** on one still waiting. Run `/claude-feedback` in a session
+(`.claude/skills/claude-feedback/SKILL.md`, also linked into `%USERPROFILE%\.claude\skills`). It reads
+`GET /wp-json/kop/v1/claude/feedback` and answers each with `POST .../claude/feedback/<id>`
+`{outcome: done|returned, note, commit}` (both need `X-KOP-Research-Key`; the panel uses `.../claude/feedback/mine`
+and `{outcome: withdrawn}` with the admin's cookie). The table is `{prefix}kop_claude_feedback`.
+```bash
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-claude-feedback.php
+```
+
 ## Any card sent to Claude (Send to Claude)
 
 Every waiting card in every queue but Bug reports and Write-ups has **Send to Claude** (a card add-on,
