@@ -180,6 +180,164 @@ if (!function_exists('kop_mobile_facility_payload')) {
         $out['timeline'] = $fid && function_exists('kop_ptl_facility') ? kop_mobile_timeline(kop_ptl_facility($page)) : array();
         $out['nonprofits'] = $fid && function_exists('kop_npf_for_facility') ? kop_mobile_nonprofits(kop_npf_for_facility($fid)) : array();
         $out['businesses'] = $fid && function_exists('kop_bizf_for_facility') ? kop_mobile_businesses(kop_bizf_for_facility($fid)) : array();
+        // Under Documents, as the website prints them: research in our library that names the program, then the files
+        // Unsilenced and survivor sites hold that we do not.
+        $out['research'] = array_values(array_map(function ($d) {
+            return array(
+                'title' => (string) ($d['title'] ?? ''), 'url' => (string) ($d['url'] ?? ''), 'byline' => (string) ($d['byline'] ?? ''),
+                'why' => (string) ($d['why'] ?? ''), 'pages' => (string) ($d['pages'] ?? ''), 'library' => (string) ($d['library'] ?? ''),
+            );
+        }, array_filter((array) ($page['research'] ?? array()), 'is_array')));
+        $out['archives'] = kop_mobile_archives($page);
+        // "Further research" by others (inc/outside-research.php), the box under the summary.
+        $out['outside_research'] = function_exists('kop_outside_research_for_facility') ? array_values(kop_outside_research_for_facility((string) ($page['slug'] ?? ''))) : array();
+        // A hand-written Facility Profile post about this program (the website shows it instead of, or merged into, the page).
+        $out['profile'] = $fid ? kop_mobile_profile_post($fid) : null;
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_archives')) {
+    /**
+     * Files about the program that Unsilenced and survivor sites published and KOP does not hold (kop_unsilenced_render(),
+     * kop_survivor_archives_render()): [{label, url, intro, folders: [{name, url}], groups: [{name, files: [{title, url,
+     * note}]}]}], Unsilenced first. Worded as the website words them.
+     */
+    function kop_mobile_archives(array $page) {
+        $name = (string) ($page['name'] ?? '');
+        $docs = function ($n) { return number_format($n) . ' ' . ($n === 1 ? 'document' : 'documents'); };
+        $out = array();
+        $u = $page['unsilenced'] ?? null;
+        if (is_array($u) && !empty($u['groups'])) {
+            $groups = array();
+            foreach ((array) $u['groups'] as $g) {
+                $files = array();
+                foreach ((array) ($g['files'] ?? array()) as $f) {
+                    $types = function_exists('kop_dt_label') ? array_map('kop_dt_label', (array) ($f['types'] ?? array())) : array();
+                    $titled = (string) ($f['title'] ?? '') !== '';
+                    $files[] = array(
+                        'title' => $titled ? (string) $f['title'] : (string) ($f['name'] ?? ''),
+                        'url'   => (string) ($f['url'] ?? ''),
+                        'note'  => implode(' · ', array_filter(array_merge($types, array($titled ? (string) ($f['name'] ?? '') : '')), 'strlen')),
+                    );
+                }
+                $groups[] = array('name' => (string) ($g['folder'] ?? ''), 'files' => $files);
+            }
+            $out[] = array(
+                'label'   => 'Unsilenced',
+                'url'     => 'https://www.unsilenced.org/program-archive/',
+                'intro'   => $docs((int) ($u['count'] ?? 0)) . " about $name that Unsilenced collected and Kids Over Profits does not hold a copy of. They open on Unsilenced's Google Drive.",
+                'folders' => array_values(array_map(function ($f) { return array('name' => (string) ($f['name'] ?? ''), 'url' => (string) ($f['url'] ?? '')); }, (array) ($u['folders'] ?? array()))),
+                'groups'  => $groups,
+            );
+        }
+        foreach ((array) ($page['survivor_sites'] ?? array()) as $a) {
+            if (!is_array($a) || empty($a['groups'])) continue;
+            $n = (int) ($a['count'] ?? 0);
+            $label = (string) ($a['label'] ?? '');
+            $intro = ($a['site'] ?? '') === 'sciad'
+                ? $docs($n) . " about $name that Kids Over Profits does not hold a copy of. SCIAD NET keeps " . ($n === 1 ? 'it' : 'them') . ' on Google Drive.'
+                : $docs($n) . " about $name that $label published and Kids Over Profits does not hold a copy of. They open on $label's website.";
+            $out[] = array(
+                'label'   => $label,
+                'url'     => (string) ($a['url'] ?? ''),
+                'intro'   => $intro,
+                'folders' => array(),
+                'groups'  => array_values(array_map(function ($g) {
+                    return array('name' => (string) ($g['group'] ?? ''), 'files' => array_values(array_map(function ($f) {
+                        return array('title' => (string) ($f['name'] ?? ''), 'url' => (string) ($f['url'] ?? ''), 'note' => '');
+                    }, (array) ($g['files'] ?? array()))));
+                }, (array) $a['groups'])),
+            );
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_html_text')) {
+    /**
+     * A piece of a post as the app prints it: paragraphs of plain words, links kept as [words](address) (the app's
+     * markdownLinks), list items as "• ", shortcodes and images dropped, a lone embed address kept as a link.
+     */
+    function kop_mobile_html_text($html) {
+        $html = function_exists('strip_shortcodes') ? strip_shortcodes((string) $html) : (string) $html;
+        $html = preg_replace('/<!--.*?-->/s', '', $html);
+        $html = preg_replace('/<(script|style|figure|iframe|noscript)\b.*?<\/\1>/is', '', $html);
+        $html = preg_replace_callback('/<a\b[^>]*\bhref=(["\'])(.*?)\1[^>]*>(.*?)<\/a>/is', function ($m) {
+            $url = html_entity_decode($m[2], ENT_QUOTES, 'UTF-8');
+            $words = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($m[3]), ENT_QUOTES, 'UTF-8')));
+            if ($words === '') return '';
+            if (strpos($url, '/') === 0 && function_exists('home_url')) $url = home_url($url);
+            if (!preg_match('#^https?://#i', $url)) return $words;
+            return '[' . str_replace(array('[', ']'), array('(', ')'), $words) . '](' . str_replace(array('(', ')', ' '), array('%28', '%29', '%20'), $url) . ')';
+        }, $html);
+        $html = preg_replace('/<br\s*\/?>/i', "\n", $html);
+        $html = preg_replace('/<li\b[^>]*>/i', "\n• ", $html);
+        $html = preg_replace('/<\/li>/i', '', $html);   // each <li> starts its own "• " line; the list stays one block
+        $html = preg_replace('/<\/(p|h[1-6]|ul|ol|blockquote|div|tr|table)>/i', "\n\n", $html);
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES, 'UTF-8');
+        $out = array();
+        foreach (preg_split('/\n\s*\n/u', $text) as $para) {
+            $lines = array_values(array_filter(array_map(function ($l) { return trim(preg_replace('/[ \t\x{00A0}]+/u', ' ', $l)); }, explode("\n", $para)), 'strlen'));
+            if (!$lines) continue;
+            $p = implode("\n", $lines);
+            if (preg_match('#^https?://\S+$#', $p)) $p = '[' . $p . '](' . $p . ')';
+            $out[] = $p;
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_mobile_profile_post')) {
+    /**
+     * The program's hand-written Facility Profile post (kop_facility_pages_profile_posts()), as the app shows it: null,
+     * or {url, title, merged, updated, lead: [paragraph], facts: [{label, lines}], sections: [{id, title, kind,
+     * paragraphs: [text], links: [{title, url, summary, outlet}]}]}. kind is the record section a post section joins on
+     * the website (testimony, news, lawsuits, documents, videos, related) or 'prose' for its own written sections.
+     * A merged post (Hyde School) is printed inside the page; any other is the page on the website (its /facility/
+     * address forwards there).
+     */
+    function kop_mobile_profile_post($fid) {
+        if (!function_exists('kop_facility_pages_profile_posts') || !function_exists('get_post')) return null;
+        $posts = kop_facility_pages_profile_posts();
+        if (empty($posts[$fid])) return null;
+        $post = get_post((int) $posts[$fid]['post_id']);
+        if (!$post || $post->post_status !== 'publish') return null;
+        $content = (string) $post->post_content;
+        $parts = function_exists('kop_facility_profile_parts') ? kop_facility_profile_parts($content) : null;
+        $text = function ($raw) { return kop_mobile_html_text($raw); };
+        $out = array(
+            'url'      => (string) $posts[$fid]['url'],
+            'title'    => (string) $post->post_title,
+            'merged'   => !empty($posts[$fid]['merged']),
+            'updated'  => $parts ? (string) $parts['updated'] : '',
+            'lead'     => array(),
+            'facts'    => array(),
+            'sections' => array(),
+        );
+        if (!$parts) {
+            $out['lead'] = $text($content);
+            return $out;
+        }
+        foreach ((array) $parts['lead'] as $b) $out['lead'] = array_merge($out['lead'], $text($b['raw'] ?? ''));
+        foreach ((array) $parts['facts'] as $f) {
+            $lines = array_values(array_filter(array_map(function ($l) { return implode(' ', kop_mobile_html_text($l)); }, (array) ($f['lines'] ?? array())), 'strlen'));
+            if ($lines) $out['facts'][] = array('label' => trim(html_entity_decode(strip_tags((string) ($f['label'] ?? '')), ENT_QUOTES, 'UTF-8')), 'lines' => $lines);
+        }
+        foreach ((array) $parts['sections'] as $s) {
+            $paras = array();
+            $links = array();
+            foreach ((array) ($s['items'] ?? array()) as $it) {
+                if (($it['type'] ?? '') === 'card') {
+                    $c = (array) ($it['card'] ?? array());
+                    if (($c['url'] ?? '') !== '') $links[] = array('title' => (string) ($c['title'] ?? '') ?: (string) $c['url'], 'url' => (string) $c['url'], 'summary' => (string) ($c['summary'] ?? ''), 'outlet' => (string) ($c['outlet'] ?? ''));
+                } else {
+                    $paras = array_merge($paras, $text($it['raw'] ?? ''));
+                }
+            }
+            if (!$paras && !$links) continue;
+            $out['sections'][] = array('id' => (string) $s['id'], 'title' => (string) $s['title'], 'kind' => (string) $s['kind'], 'paragraphs' => $paras, 'links' => $links);
+        }
         return $out;
     }
 }
@@ -480,6 +638,16 @@ if (!function_exists('kop_mobile_operator_payload')) {
         $oid = (int) ($page['id'] ?? 0);
         $out['nonprofits'] = $oid && function_exists('kop_npf_for_operator') ? kop_mobile_nonprofits(kop_npf_for_operator($oid)) : array();
         $out['businesses'] = $oid && function_exists('kop_bizf_for') ? kop_mobile_businesses(kop_bizf_for('operator', $oid)) : array();
+        // "Related programs" (not troubled-teen programs, by their category), "Materials and links", and outside research.
+        $out['related'] = array_values(array_map(function ($r) {
+            return array(
+                'id' => (int) ($r['id'] ?? 0), 'name' => (string) ($r['name'] ?? ''), 'url' => (string) ($r['url'] ?? ''),
+                'label' => (string) ($r['label'] ?? ''), 'place' => (string) ($r['place'] ?? ''), 'status' => (string) ($r['status'] ?? ''),
+                'past' => !empty($r['past']),
+            );
+        }, array_filter((array) ($page['related'] ?? array()), 'is_array')));
+        $out['resource_links'] = array_values(array_filter((array) ($page['resource_links'] ?? array()), 'is_array'));
+        $out['outside_research'] = function_exists('kop_outside_research_for_operator') ? array_values(kop_outside_research_for_operator((string) ($page['name'] ?? ''))) : array();
         return $out;
     }
 }
