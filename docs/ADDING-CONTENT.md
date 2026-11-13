@@ -140,7 +140,9 @@ adult programs, 2026-10-21, are the example: a `document_folder_id` column)
 - `inc/open-data.php` `kop_open_data_datasets()`: a dataset naming every
   column (never `SELECT *`); strip contact details and internal notes. Add the
   key to `$expected` in `scripts/test-open-data.php`.
-- `inc/mobile-api.php` if the app should show it.
+- The app, in the same session (CLAUDE.md, "The app follows the website"): a page section goes in
+  `inc/mobile-api.php`, the app (`kids-over-profits-mobile`) and `docs/app-parity.json`;
+  `php scripts/test-app-parity.php` fails until it is in one or listed as todo/skip.
 
 **Docs**: `docs/claude/database-tables.md` and a test line in the area's `docs/claude/` file, `README.md`,
 `AGENTS.md`, `DATABASE-COLUMNS.md`, `docs/data-forms/README.md`,

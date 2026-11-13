@@ -81,3 +81,33 @@ php scripts/test-send-page.php
 # print the title linked to the original and "(archived copy)" beside it. archive.today short links hide the address, so they stay alone
 php -d extension=pdo_sqlite scripts/test-news-archive.php [--list]   # rules, PHP == both JS copies, the one-time split on a copy of the mirror
 ```
+
+## Keeping the app in step (owner 2026-11-13)
+
+The app mirrors the facility and company pages, the search and suggest routes, the Send routes and the network map page.
+When a session changes any of those (a new or removed section, a reshaped field, new wording the payload carries, a renamed
+map class, id or `window.KOP*` global), it ports the change to the app before it ends, unasked:
+
+1. Clone the app beside this repo if it is missing (`git clone https://github.com/kidsoverprofits/kids-over-profits-mobile`
+   next to `Kids-Over-Profits`), then `npm ci` there.
+2. Theme: the field in `kop_mobile_facility_payload()` / `kop_mobile_operator_payload()` (`inc/mobile-api.php`), plain data,
+   never HTML; a line here under the commands block.
+3. App: the type (`src/api/types.ts`), the section (`src/components/facility/`, `src/components/operator/`, shared pieces in
+   `src/components/record/`), its place in the website's order on the screen and in the jump list (`model.ts`
+   `presentSections()` / `sectionsOf()`), a test in `__tests__/` (`site-catch-up.test.tsx` shows the pattern).
+4. `docs/app-parity.json`: the website section id and the app's (or `todo` / `skip` with why).
+5. Checks: `php scripts/test-app-parity.php --todo` here; in the app `npx tsc --noEmit`, `npx expo lint`,
+   `npx jest --maxWorkers=4` (all suites pass; a full parallel run can time out `resources`).
+6. Commit and push the theme first (so the live API has the field), then the app: its push publishes an EAS update to the
+   preview channel (`.github/workflows/eas-update.yml`; skipped when package.json/app.json change, which need a new build).
+   The app reads an older payload without the new field, so the order only matters for what a phone sees in between.
+7. A change the app does not show (admin screens, styling, wording outside the payload) needs nothing; the report says so.
+
+Safety nets: `.github/workflows/app-parity.yml` runs the parity check on pushes touching the pages or the app API and every
+morning (GitHub emails a failure); `scripts/hooks/app-parity-reminder.py` is a Claude Code PostToolUse hook that reminds a
+session once per app-facing file it edits. The hook is wired in `.claude/settings.json`, which `.gitignore` keeps local:
+on a new computer add
+`{"hooks":{"PostToolUse":[{"matcher":"Edit|Write|MultiEdit","hooks":[{"type":"command","command":"python \"$CLAUDE_PROJECT_DIR/scripts/hooks/app-parity-reminder.py\" 2>/dev/null || true","timeout":15}]}]}}`.
+```bash
+php scripts/test-app-parity.php [--todo]   # every page section in the app or listed; KOP_APP_DIR= for another app checkout
+```

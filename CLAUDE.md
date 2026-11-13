@@ -97,6 +97,15 @@ section it belongs to, before going on. Don't save them all up for the end of th
 a finished step that explains how open work behaves stays. `docs/plan/1-working-here.md` has the owner's rules
 for working in this checkout.
 
+## The app follows the website (standing rule, owner 2026-11-13)
+
+A change to what a facility or company page shows, to a route the app calls, or to the network map page is carried into
+the mobile app (`kids-over-profits-mobile`, cloned beside this repo) in the same session, without being asked: the payload
+in `inc/mobile-api.php`, the app's section, `docs/app-parity.json`, both repos' checks, then commit and push both (the app
+push ships an over-the-air update). `php scripts/test-app-parity.php` fails when a page section is in neither the app nor
+the list; CI runs it (`.github/workflows/app-parity.yml`), and a hook reminds the session when it edits an app-facing file.
+How, step by step: `docs/claude/mobile-extension.md`, "Keeping the app in step".
+
 ## Topic change = handoff + new session (standing rule, 2026-10-20)
 
 When the owner's message moves to a different task than the one the session has been working on (a different

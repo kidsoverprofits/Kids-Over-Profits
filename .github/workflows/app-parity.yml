@@ -1,0 +1,37 @@
+# Website and app in step (docs/claude/mobile-extension.md, "Keeping the app in step"): fails when a facility or company
+# page section is not in docs/app-parity.json, or a section the list maps is missing from the app. Runs on pushes that
+# touch the pages or the app API, and every morning (the app repo can change without a push here). GitHub emails the
+# failure; the next session fixes it.
+name: App parity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'templates/facility-page.php'
+      - 'templates/operator-page.php'
+      - 'inc/mobile-api.php'
+      - 'inc/facility-suggest.php'
+      - 'docs/app-parity.json'
+      - 'scripts/test-app-parity.php'
+      - '.github/workflows/app-parity.yml'
+  schedule:
+    - cron: '17 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the app
+        uses: actions/checkout@v4
+        with:
+          repository: kidsoverprofits/kids-over-profits-mobile
+          path: app
+
+      - name: Compare the website's sections with the app's
+        env:
+          KOP_APP_DIR: ${{ github.workspace }}/app
+        run: php scripts/test-app-parity.php --todo

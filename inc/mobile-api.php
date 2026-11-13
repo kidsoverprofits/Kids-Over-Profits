@@ -113,7 +113,9 @@ if (!function_exists('kop_mobile_facility_payload')) {
     /**
      * The app's copy of one facility page: named keys only. Everything the page
      * prints except the document library HTML (replaced by a link), the
-     * archive blocks and the SEO/page-chrome strings.
+     * archive blocks and the SEO/page-chrome strings. A new page section goes
+     * here, in the app and in docs/app-parity.json in the same session
+     * (CLAUDE.md, "The app follows the website"; php scripts/test-app-parity.php).
      */
     function kop_mobile_facility_payload(array $page) {
         $keep = array(
