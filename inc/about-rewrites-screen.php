@@ -97,7 +97,7 @@ function kop_ar_card($e, $view) {
     $p = $wu['published'];
     $title = $page !== '' ? '<a href="' . esc_url(home_url('/' . $page . '/')) . '" target="_blank" rel="noopener">' . esc_html($name) . '</a>' : esc_html($name);
     $sub = $kind === 'operator' ? 'Company' : 'Program';
-    $held = $kind === 'facility' ? kop_wu_held_rows($id) : array();
+    $held = $kind === 'facility' && $view !== 'published' ? kop_wu_held_rows($id) : array();
     $out = '<article class="kop-ar-card" data-key="' . $key . '">';
 
     if ($view === 'published') {

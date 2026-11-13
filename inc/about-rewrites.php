@@ -411,31 +411,38 @@ function kop_ar_lists() {
         list($kind, $id) = kop_ar_from_key($key);
         $out['claude'][(int) $key] = array('key' => (int) $key, 'kind' => $kind, 'id' => $id, 'why' => 'sent', 'at' => (string) ($s['at'] ?? ''));
     }
+    $counts = kop_wu_held_counts();   // one query for every record's held facts
     foreach (kop_wu_todo_ids() as $fid) {
         if (isset($out['review'][(int) $fid]) || isset($out['claude'][(int) $fid])) continue;
         $out['claude'][(int) $fid] = array('key' => (int) $fid, 'kind' => 'facility', 'id' => (int) $fid,
-            'why' => kop_wu_held_rows((int) $fid) ? 'facts' : 'changed', 'at' => '');
+            'why' => !empty($counts[(int) $fid]) ? 'facts' : 'changed', 'held' => (int) ($counts[(int) $fid] ?? 0), 'at' => '');
     }
     uasort($out['published'], function ($a, $b) { return strcmp($b['at'], $a['at']); });
     return $out;
 }
 
-/** Claude's list (GET kop/v1/writeups/claude): what to write next and why, with the owner's note and answers on a sent-back one. */
-function kop_ar_claude_list() {
+/**
+ * Claude's list (GET kop/v1/writeups/claude?offset=&limit=): what to write next and why, with the owner's note and
+ * answers on a sent-back one. Held facts are counted only (the packet export has them in full), so the list stays
+ * one query per record at most.
+ */
+function kop_ar_claude_list($offset = 0, $limit = 50) {
     $out = array();
-    foreach (kop_ar_lists()['claude'] as $e) {
+    $all = kop_ar_lists()['claude'];
+    $GLOBALS['kop_ar_claude_total'] = count($all);
+    foreach (array_slice($all, max(0, (int) $offset), max(1, min(500, (int) $limit))) as $e) {
         $page = kop_ar_page($e['kind'], $e['id']);
         if ($page === '') continue;
         $x = array('kind' => $e['kind'], 'id' => $e['id'], 'packet_id' => ($e['kind'] === 'operator' ? 'o' : 'f') . $e['id'],
             'name' => kop_ar_name($e['kind'], $e['id']), 'page' => $page, 'url' => home_url('/' . $page . '/'), 'why' => $e['why']);
-        $d = kop_wu_get($e['key'])['draft'];
+        $d = $e['why'] === 'sent' ? kop_wu_get($e['key'])['draft'] : array();
         if (($d['kind'] ?? '') === 'rewrite' && !empty($d['sent_back'])) {
             $x['note'] = (string) ($d['sent_back']['note'] ?? '');
             $x['answers'] = array();
             foreach ((array) ($d['needs_you'] ?? array()) as $i => $a) $x['answers'][] = array('ask' => $a['ask'], 'answer' => $d['answers'][$i] ?? null);
             $x['draft'] = array('sentences' => $d['sentences'], 'testimony' => $d['testimony'] ?? array());
         }
-        if ($e['kind'] === 'facility') $x['held_facts'] = array_map(function ($h) { $f = kop_wu_fact($h); return array('what' => $f['what'], 'url' => $f['url']); }, kop_wu_held_rows($e['id']));
+        if (isset($e['held'])) $x['held_facts'] = $e['held'];
         $out[] = $x;
     }
     return $out;

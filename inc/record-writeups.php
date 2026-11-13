@@ -941,9 +941,14 @@ if (function_exists('add_action')) {
             return function_exists('kop_msub_is_research') && kop_msub_is_research($r);
         };
         register_rest_route('kop/v1', '/writeups/claude', array(
-            array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function () {
+            array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function (WP_REST_Request $r) {
                 kop_wu_ensure_tables();
-                $res = rest_ensure_response(array('records' => function_exists('kop_ar_claude_list') ? kop_ar_claude_list() : kop_wu_claude_list()));
+                if (function_exists('kop_ar_claude_list')) {
+                    $records = kop_ar_claude_list((int) $r->get_param('offset'), (int) ($r->get_param('limit') ?: 50));
+                    $res = rest_ensure_response(array('records' => $records, 'total' => (int) ($GLOBALS['kop_ar_claude_total'] ?? count($records))));
+                } else {
+                    $res = rest_ensure_response(array('records' => kop_wu_claude_list()));
+                }
                 $res->header('Cache-Control', 'no-store');
                 return $res;
             }),

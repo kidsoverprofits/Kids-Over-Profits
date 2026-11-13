@@ -128,7 +128,7 @@ echo "-- Send back, Claude's list, rewrite again --\n";
 kop_ar_send_back($eagle, 'Shorter lede, please.', 'test');
 $lists = kop_ar_lists();
 $check('Send back moves it to With Claude', isset($lists['claude'][$eagle]) && !isset($lists['review'][$eagle]));
-$mine = array_values(array_filter(kop_ar_claude_list(), function ($x) use ($eagle) { return $x['kind'] === 'facility' && $x['id'] === $eagle; }));
+$mine = array_values(array_filter(kop_ar_claude_list(0, 500), function ($x) use ($eagle) { return $x['kind'] === 'facility' && $x['id'] === $eagle; }));
 $check("Claude's list carries the note, the answers and the draft", $mine && $mine[0]['note'] === 'Shorter lede, please.' && ($mine[0]['answers'][0]['answer']['choice'] ?? '') === 'Yes'
     && !empty($mine[0]['draft']['sentences']) && $mine[0]['packet_id'] === 'f' . $eagle);
 kop_ar_save_rewrite('facility', $eagle, $pilot('rec04'));
@@ -149,8 +149,13 @@ kop_ar_undo($tkey, 'test');
 $check('Undo takes the quote off again', !$quotes_on(100753, 'operator/teen-challenge') && empty(kop_wu_get($tkey)['published']['rewrite']));
 
 echo "-- Claude writes every About --\n";
+$t0 = microtime(true);
+$first = kop_ar_claude_list(0, 50);
+$secs = microtime(true) - $t0;
+$check("Claude's list pages and is quick", count($first) <= 50 && ($GLOBALS['kop_ar_claude_total'] ?? 0) >= count($first) && $secs < 20,
+    sprintf('%.1fs for %d of %d', $secs, count($first), $GLOBALS['kop_ar_claude_total'] ?? 0));
 $todo = kop_wu_todo_ids();
-$listed = array_column(array_filter(kop_ar_claude_list(), function ($x) { return $x['kind'] === 'facility'; }), 'id');
+$listed = array_column(array_filter(kop_ar_claude_list(0, 500), function ($x) { return $x['kind'] === 'facility'; }), 'id');
 $check("records waiting for a write-up are on Claude's list", !array_diff(array_slice($todo, 0, 20), array_merge($listed, array_keys(kop_ar_lists()['review']))), count($todo) . ' waiting');
 $src = file_get_contents(dirname(__DIR__) . '/inc/record-writeups.php');
 $check('the hourly AI drafts are no longer scheduled', strpos($src, "wp_clear_scheduled_hook('kop_wu_hourly')") !== false && strpos($src, "wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly')") === false);
