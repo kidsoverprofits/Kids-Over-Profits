@@ -204,3 +204,7 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
      with "Formerly CRC Health Corporation", the address stays the same, the directory's company heading and the
      header search show the new name, and the app's company page does too. A state hub (/montana/) card for a facility
      with a pick is titled by it, its own name under "Now known as". Set both back.
+40. **Staff cards with other industry jobs** (css/facility-profile.css, templates facility-page/operator-page, 2026-11-13,
+    0263a729): on /facility/aspen-ranch-ut/ at desktop width, Melodie Rose and Gil Hallows have full-width cards first
+    (name left, jobs in two columns right), Kevin Knutson and Matt Alexander side by side under them with no gaps; at
+    phone width the cards stack. A company page's People section (e.g. /operator/ of Aspen Education Group) looks the same.
