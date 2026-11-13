@@ -1944,6 +1944,138 @@ button.btn-refile-undo, button.btn-refile-undo:hover, button.btn-refile-undo:foc
     font-weight: 700;
 }
 
+/* Fixing a waiting suggestion on its card: Edit / Move / Remove, the box they open, Undo last edit. */
+.sugg-tools {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: 8px;
+    vertical-align: baseline;
+}
+
+.sugg-entry h4 .sugg-tools {
+    margin-left: 0;
+}
+
+.sugg-tools[hidden] {
+    display: none;
+}
+
+button.sugg-act,
+button.sugg-act:hover,
+button.sugg-act:focus,
+button.sugg-act:active {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 2px 8px;
+    border-radius: var(--rv-radius);
+    border: 1px solid var(--kop-navy-blue, #000080);
+    background: var(--kop-white, #fff);
+    color: var(--kop-navy-blue, #000080);
+    cursor: pointer;
+    box-shadow: none;
+}
+
+button.sugg-act:hover,
+button.sugg-act:focus-visible {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #fff);
+}
+
+button.sugg-act:disabled,
+button.sugg-act:disabled:hover {
+    cursor: wait;
+    background: var(--kop-white, #fff);
+    color: var(--kop-text-muted, #4A5568);
+    border-color: var(--kop-text-muted, #4A5568);
+}
+
+button.sugg-act.sugg-save,
+button.sugg-act.sugg-save:focus,
+button.sugg-act.sugg-save:active {
+    background: var(--kop-navy-blue, #000080);
+    color: var(--kop-white, #fff);
+}
+
+button.sugg-act.sugg-save:hover,
+button.sugg-act.sugg-save:focus-visible {
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+}
+
+.sugg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid var(--rv-line-strong);
+    border-radius: var(--rv-radius);
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue);
+}
+
+.sugg-form label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kop-midnight-blue);
+    margin-bottom: 2px;
+}
+
+.sugg-form .sugg-input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+    padding: 4px 6px;
+    color: var(--kop-midnight-blue);
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--rv-line-strong);
+    border-radius: var(--rv-radius);
+}
+
+.sugg-form textarea.sugg-input {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.sugg-form-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sugg-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--kop-text-muted);
+}
+
+.sugg-edited {
+    margin: 0;
+    font-size: 13px;
+    color: var(--kop-midnight-blue);
+    background: var(--rv-subtle);
+    border-left: 3px solid var(--kop-navy-blue, #000080);
+    padding: 6px 10px;
+}
+
+.sugg-status {
+    margin: 0;
+    font-size: 13px;
+    color: var(--kop-text-muted);
+}
+
+.sugg-status:empty {
+    display: none;
+}
+
+.sugg-status.is-error {
+    color: #9b1c1c;
+    font-weight: 600;
+}
+
 .sugg-raw summary {
     cursor: pointer;
     font-weight: 600;

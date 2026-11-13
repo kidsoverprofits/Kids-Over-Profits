@@ -138,6 +138,16 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # list items and emptied fields show only for whole-record edits (facility_id sent), which Approve writes over the record. Raw JSON is folded.
 # Approve matches an entry sent without facility_id the same way and merges only its filled fields (kop_suggestion_resolve_entries());
 # all on file = those facilities saved alone, no company made from a mini-form's facility name
+# Fixing a suggestion before Approve (owner 2026-11-13: spelling, grammar, things in the wrong field): while it waits, each suggested
+# value and each new list item on the card has Edit / Move / Remove (js/admin-submissions.js renderChanges(), suggSave()). Edit opens
+# the text (a person: name, role, past jobs; an 'other' list: one per line; a new facility's name from its heading); Move puts it
+# in another field (kop_suggestion_move_targets(): Notes, Incidents, Survivor testimony, Staff, names, operator...; a text field that
+# already holds something refuses); number fields take digits only. POST manage-submissions.php action 'edit_suggestion' {id, edit}
+# -> kop_suggestion_edit() in api/lib-suggestion-changes.php rewrites edited_json_data (the entry stored normalized, as new ones are)
+# and answers the redrawn changes; the version before each fix is kept in option kop_sugg_edits_<id> (50 at most) for
+# 'undo_suggestion_edit' ("Undo last edit" on the card). Only pending rows; Approve writes the fixed version. A survivor's account
+# keeps their words: the box says spelling and punctuation only (memory: testimony quotes only)
+python scripts/test-suggestion-edit-ui.py         # the card in a browser at 1280 and 390: buttons, edit, person parts, move, refusal, undo
 # Undo of a data approval (Recently done 'restore', or the status set back on Submissions Review) puts the records back:
 # api/lib-suggestion-undo.php (copy taken by kop_apply_suggested_edit(), option kop_sugg_undo_<id>; refuses over later edits)
 # Since 2026-10-25 api/save-suggestion.php stores a facility suggestion's facilities[] in the v2 shape (kop_suggestion_normalize_facilities()

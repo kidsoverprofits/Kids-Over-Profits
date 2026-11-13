@@ -281,5 +281,76 @@ $check('undo: refused when the record changed since, naming it, and nothing is w
     !$u['success'] && strpos($u['error'], $name) !== false && in_array('Someone edited it afterwards.', json_decode($raw($fid), true)['notes'], true), $u['error']);
 $mp = null;
 
+// Fixing a suggestion on its card before Approve (kop_suggestion_edit(), action 'edit_suggestion').
+$sent = $mini(array(
+    'identification' => array('currentOperator' => 'This is not a Charter program.', 'otherNames' => array('A sentence that is really a note about the place.')),
+    'staff' => array('notableStaff' => array('Brittney-house manager')),
+    'notes' => array('Teh staff yelled.'),
+    'facilityDetails' => array('ageRange' => array('min' => 12, 'max' => 18)),
+));
+$reason = 'from /' . $state_name . '/';
+$card = function ($payload) use ($pdo, $reason) { return kop_suggestion_changes($pdo, $payload, $reason, 'wpdl_'); };
+$row_for = function ($c, $label) { foreach ($c['entries'][0]['changes'] ?? array() as $ch) if ($ch['label'] === $label) return $ch; return null; };
+$c = $card($sent);
+$op = $row_for($c, 'Operator');
+$check('edit: rows carry their field and the entry its index; move targets are listed',
+    $op && $op['path'] === 'identification.currentOperator' && $op['editable'] && $c['entries'][0]['index'] === 0 && count($c['targets']) > 10, json_encode($op));
+$notes = $row_for($c, 'Notes');
+$check('edit: a new list item carries its place and its text', $notes && $notes['items'][0]['text'] === 'Teh staff yelled.' && $notes['items'][0]['parts'][0]['key'] === '', json_encode($notes['items'] ?? null));
+
+$e = kop_suggestion_edit($sent, array('entry' => 0, 'op' => 'item', 'path' => 'notes', 'index' => $notes['items'][0]['index'], 'parts' => array('' => 'The staff yelled.')));
+$check('edit: a spelling fix in a note', ($row_for($card($e), 'Notes')['added'] ?? null) === array('The staff yelled.'), json_encode($row_for($card($e), 'Notes')));
+
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'move', 'path' => 'identification.currentOperator', 'to' => 'notes'));
+$n = $row_for($card($e), 'Notes');
+$check('edit: Operator text moved to Notes leaves Operator empty',
+    !$row_for($card($e), 'Operator') && $n && in_array('This is not a Charter program.', $n['added'], true), json_encode($card($e)['entries'][0]['changes']));
+
+$on = $row_for($card($e), 'Other names');
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'move', 'path' => 'identification.otherNames', 'index' => $on['items'][0]['index'], 'to' => 'notes'));
+$check('edit: a list item moved to another list', !$row_for($card($e), 'Other names') && in_array('A sentence that is really a note about the place.', $row_for($card($e), 'Notes')['added'], true));
+
+$st = $row_for($card($e), 'Staff');
+$parts = array_column($st['items'][0]['parts'], 'value', 'key');
+$check('edit: a person shows as name, role and past jobs', array_keys($parts) === array('name', 'role', 'pastJobs') && $parts['name'] === 'Brittney-house manager', json_encode($st['items'][0]['parts']));
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'item', 'path' => 'staff.notableStaff', 'index' => $st['items'][0]['index'], 'parts' => array('name' => 'Brittney', 'role' => 'House manager')));
+$doc = kop_extract_project_data($e)['facilities'][0];
+$check('edit: "Name-role" split into its parts', ($doc['staff']['notableStaff'][0] ?? null) === array('name' => 'Brittney', 'role' => 'House manager', 'pastJobs' => ''), json_encode($doc['staff']['notableStaff']));
+
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'set', 'path' => 'facilityDetails.ageRange', 'value' => '13-17'));
+$check('edit: ages as "13-17"', kop_extract_project_data($e)['facilities'][0]['facilityDetails']['ageRange'] === array('min' => 13, 'max' => 17));
+$threw = function ($fn) { try { $fn(); return ''; } catch (RuntimeException $x) { return $x->getMessage(); } };
+$check('edit: words in a number field are refused', $threw(function () use ($e) { kop_suggestion_edit($e, array('entry' => 0, 'op' => 'set', 'path' => 'facilityDetails.capacity', 'value' => 'about 60')); }) !== '');
+$e2 = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'set', 'path' => 'location.city', 'value' => 'Somewhere'));
+$e2 = kop_suggestion_edit($e2, array('entry' => 0, 'op' => 'set', 'path' => 'identification.currentName', 'value' => 'Below the campground'));
+$msg = $threw(function () use ($e2) { kop_suggestion_edit($e2, array('entry' => 0, 'op' => 'move', 'path' => 'identification.currentName', 'to' => 'location.city')); });
+$check('edit: a move into a text field that already says something is refused', strpos($msg, 'Somewhere') !== false, $msg);
+$n = $row_for($card($e), 'Notes');
+$idx = null;
+foreach ($n['items'] as $it) if ($it['text'] === 'The staff yelled.') $idx = $it['index'];
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'remove', 'path' => 'notes', 'index' => $idx));
+$check('edit: Remove takes one item out and keeps the rest', !in_array('The staff yelled.', $row_for($card($e), 'Notes')['added'], true) && count($row_for($card($e), 'Notes')['added']) === 2);
+$e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'move', 'path' => 'notes', 'index' => 0, 'to' => 'survivorTestimony'));
+$t = kop_extract_project_data($e)['facilities'][0]['survivorTestimony'][0] ?? null;
+$check('edit: a note moved to survivor testimony keeps its words exactly and is not published', $t && $t['text'] !== '' && $t['publish'] === false, json_encode($t));
+$check('edit: the record is still found after the edits (same entry, same record)', ($card($e)['entries'][0]['facility_id'] ?? null) === (int) $row['id']);
+
+// Wrapped payloads ({data: {...}}) are edited at their own depth.
+$wrapped = array('data' => $sent, 'category' => 'locations');
+$w = kop_suggestion_edit($wrapped, array('entry' => 0, 'op' => 'remove', 'path' => 'identification.currentOperator'));
+$check('edit: a wrapped payload keeps its wrapper', isset($w['data']['facilities'][0]) && $w['category'] === 'locations' && $w['data']['facilities'][0]['identification']['currentOperator'] === '');
+
+// The other kinds: a transporter's notes edited, a list edited as lines, a field moved.
+$tp = array('transporterCompany' => array('name' => 'Zzq Transport', 'notes' => 'Excuse any grammer errors.', 'vehicleTypes' => array('SUV', 'Van'), 'pickupMethods' => array(), 'licensing' => ''));
+$c = kop_suggestion_changes($pdo, $tp, '', 'wpdl_');
+$nr = null; foreach ($c['other'] as $o) if (substr($o['label'], -5) === 'Notes') $nr = $o;
+$check('other: a text field carries its keys and where it can move', $nr && $nr['path'] === array('transporterCompany', 'notes') && in_array('licensing', array_column($nr['moves'], 'path'), true), json_encode($nr));
+$tp2 = kop_suggestion_edit($tp, array('entry' => 'other', 'op' => 'set', 'path' => array('transporterCompany', 'notes'), 'value' => 'Excuse any grammar errors.'));
+$tp2 = kop_suggestion_edit($tp2, array('entry' => 'other', 'op' => 'set', 'path' => array('transporterCompany', 'vehicleTypes'), 'value' => "SUV\nVan\nSedan"));
+$tp2 = kop_suggestion_edit($tp2, array('entry' => 'other', 'op' => 'move', 'path' => array('transporterCompany', 'notes'), 'to' => 'licensing'));
+$check('other: edit, lines and move', $tp2['transporterCompany']['licensing'] === 'Excuse any grammar errors.' && $tp2['transporterCompany']['notes'] === ''
+    && $tp2['transporterCompany']['vehicleTypes'] === array('SUV', 'Van', 'Sedan'), json_encode($tp2));
+$check('other: bookkeeping keys are refused', $threw(function () use ($tp) { kop_suggestion_edit($tp, array('entry' => 'other', 'op' => 'set', 'path' => array('facilities'), 'value' => 'x')); }) !== '');
+
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

@@ -27,7 +27,12 @@ if (!function_exists('kop_suggestion_changes')) {
         $facilities = is_array($data['facilities'] ?? null) ? $data['facilities'] : array();
         $can_compare = function_exists('kop_facility_normalize') && function_exists('kop_facility_load');
         $opts = array('pdo' => $pdo, 'prefix' => $prefix);
-        foreach ($facilities as $entry) {
+        // Where "Move to" on the card can put a piece of text (kop_suggestion_edit()).
+        $out['targets'] = array();
+        foreach (kop_suggestion_move_targets() as $path => $kind) {
+            $out['targets'][] = array('path' => $path, 'label' => kop_suggestion_label($path), 'list' => $kind === 'list');
+        }
+        foreach ($facilities as $index => $entry) {
             if (!is_array($entry)) continue;
             $name = trim((string) ($entry['identification']['name'] ?? $entry['name'] ?? ''));
             if ($name === '') continue;
@@ -53,7 +58,20 @@ if (!function_exists('kop_suggestion_changes')) {
                 if ($record) $out['unchanged'][] = $name;
                 continue;
             }
+            // What the card's Edit / Move / Remove need: each row's field, and each new list item's place and parts.
+            $segs = array();
+            kop_suggestion_flatten($sent, $segs);
+            foreach ($changes as &$ch) {
+                $raw = isset($segs[$ch['path']]) ? kop_suggestion_get($sent, $segs[$ch['path']]) : null;
+                if ($ch['kind'] === 'list') {
+                    $ch['items'] = kop_suggestion_row_items(is_array($raw) ? $raw : array(), $ch['added']);
+                } else {
+                    $ch['editable'] = $ch['kind'] !== 'removed' && !is_bool($raw);
+                }
+            }
+            unset($ch);
             $out['entries'][] = array(
+                'index'       => $index,
                 'name'        => $name,
                 'facility_id' => $record ? $record['id'] : null,
                 'url'         => $record ? kop_suggestion_facility_url($record['id']) : '',
@@ -64,9 +82,19 @@ if (!function_exists('kop_suggestion_changes')) {
 
         // Referrers, transporters, providers' details, marketers, trade orgs: what was sent, empty parts left out.
         foreach ($data as $key => $value) {
-            if (in_array($key, array('facilities', 'name', 'projectName', 'category', 'timestamp', 'currentFacilityIndex', 'documentFolderId'), true)) continue;
-            foreach (kop_suggestion_flatten_any($value, kop_suggestion_label($key)) as $label => $text) {
-                $out['other'][] = array('label' => $label, 'after' => $text);
+            if (in_array($key, kop_suggestion_other_skip(), true)) continue;
+            $paths = array();
+            foreach (kop_suggestion_flatten_any($value, kop_suggestion_label($key), array($key), $paths) as $label => $text) {
+                $row = array('label' => $label, 'after' => $text);
+                // Text and lists of plain lines can be edited on the card (one item per line); lists of people cannot.
+                if (isset($paths[$label])) {
+                    $row['path'] = $paths[$label];
+                    $row['list'] = is_array(kop_suggestion_get($data, $paths[$label]));
+                    $row['value'] = $row['list'] ? $text : (string) kop_suggestion_get($data, $paths[$label]);
+                    $row['moves'] = array();
+                    foreach (kop_suggestion_other_targets($data, $paths[$label]) as $k => $l) $row['moves'][] = array('path' => $k, 'label' => $l);
+                }
+                $out['other'][] = $row;
             }
         }
         return $out;
@@ -160,6 +188,7 @@ if (!function_exists('kop_suggestion_label')) {
             'profileLinks' => 'Profile links', 'resourceLinks' => 'Materials and links', 'notes' => 'Notes',
             'fieldNotes' => 'Field notes', 'survivorTestimony' => 'Survivor testimony', 'criticalIncidents' => 'Incidents',
             'ttiPractices' => 'TTI practices', 'federalFunding' => 'Federal funding',
+            'criticalIncidents.customIncidents' => 'Incidents',
         );
         if (isset($labels[$path])) return $labels[$path];
         // fieldNotes keys are the field's own path ("ttiPractices.hasRestraint") or, for a note on a
@@ -202,24 +231,28 @@ if (!function_exists('kop_suggestion_flatten')) {
     /**
      * A facility document as {path: text | [item texts]}: the bookkeeping parts
      * (ids, name key, provenance, the address as typed) left out, the age range
-     * as one "11-17".
+     * as one "11-17". $segments, when passed, gets each path's keys as a list
+     * (a fieldNotes key can itself hold dots, so the path alone is not enough).
      */
-    function kop_suggestion_flatten(array $doc) {
+    function kop_suggestion_flatten(array $doc, &$segments = null) {
         static $skip = array('schema_version', 'facility_id', 'provenance', 'legacy', 'documentFolderId',
             'identification.name', 'identification.nameKey', 'location.raw', 'sourceProject', 'sourceCategory', 'sourceOperator', 'addressParts', 'locationDetails');
         $out = array();
-        $walk = function ($node, $path) use (&$walk, &$out, $skip) {
+        $segments = array();
+        $walk = function ($node, $path, array $segs) use (&$walk, &$out, &$segments, $skip) {
             if (in_array($path, $skip, true)) return;
             if ($path === 'facilityDetails.ageRange') {
                 $min = $node['min'] ?? null;
                 $max = $node['max'] ?? null;
                 $out[$path] = ($min !== null && $min !== '') || ($max !== null && $max !== '') ? trim($min . '-' . $max, '-') : '';
+                $segments[$path] = $segs;
                 return;
             }
             if (is_array($node) && $node && array_keys($node) !== range(0, count($node) - 1)) {
-                foreach ($node as $k => $v) $walk($v, $path === '' ? (string) $k : $path . '.' . $k);
+                foreach ($node as $k => $v) $walk($v, $path === '' ? (string) $k : $path . '.' . $k, array_merge($segs, array((string) $k)));
                 return;
             }
+            $segments[$path] = $segs;
             if (is_array($node)) {
                 $out[$path] = array_values(array_filter(array_map('kop_suggestion_item_text', $node), 'strlen'));
                 return;
@@ -227,25 +260,301 @@ if (!function_exists('kop_suggestion_flatten')) {
             // A box left unticked is no information (the mini-form sends every flag false).
             $out[$path] = is_bool($node) ? ($node ? 'Yes' : '') : trim((string) $node);
         };
-        $walk($doc, '');
+        $walk($doc, '', array());
         return $out;
     }
 }
 
 if (!function_exists('kop_suggestion_flatten_any')) {
-    /** Any sent block as {label: text}, empty parts left out (the non-facility kinds). */
-    function kop_suggestion_flatten_any($value, $label) {
+    /**
+     * Any sent block as {label: text}, empty parts left out (the non-facility kinds).
+     * $paths gets {label: [keys]} for the parts the card can edit: text, and lists of plain lines.
+     */
+    function kop_suggestion_flatten_any($value, $label, array $segs = array(), &$paths = null) {
+        if (!is_array($paths)) $paths = array();
         if (!is_array($value)) {
             $text = is_bool($value) ? ($value ? 'Yes' : 'No') : trim((string) $value);
+            if ($text !== '' && !is_bool($value) && $segs) $paths[$label] = $segs;
             return $text === '' ? array() : array($label => $text);
         }
         if ($value && array_keys($value) === range(0, count($value) - 1)) {
             $items = array_values(array_filter(array_map('kop_suggestion_item_text', $value), 'strlen'));
+            if ($items && $segs && !array_filter($value, 'is_array')) $paths[$label] = $segs;
             return $items ? array($label => implode("\n", $items)) : array();
         }
         $out = array();
         foreach ($value as $k => $v) {
-            $out += kop_suggestion_flatten_any($v, $label . ': ' . kop_suggestion_label($k));
+            $out += kop_suggestion_flatten_any($v, $label . ': ' . kop_suggestion_label($k), array_merge($segs, array((string) $k)), $paths);
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_suggestion_other_skip')) {
+    /** Top-level keys of a sent project that are bookkeeping, not something sent in. */
+    function kop_suggestion_other_skip() {
+        return array('facilities', 'name', 'projectName', 'category', 'timestamp', 'currentFacilityIndex', 'documentFolderId');
+    }
+}
+
+if (!function_exists('kop_suggestion_get')) {
+    /** The value at a list of keys, or null. */
+    function kop_suggestion_get($node, array $segs) {
+        foreach ($segs as $k) {
+            if (!is_array($node) || !array_key_exists($k, $node)) return null;
+            $node = $node[$k];
+        }
+        return $node;
+    }
+}
+
+if (!function_exists('kop_suggestion_put')) {
+    /** Set the value at a list of keys, making the maps on the way. */
+    function kop_suggestion_put(array $node, array $segs, $value) {
+        $k = array_shift($segs);
+        if (!$segs) {
+            $node[$k] = $value;
+            return $node;
+        }
+        $node[$k] = kop_suggestion_put(is_array($node[$k] ?? null) ? $node[$k] : array(), $segs, $value);
+        return $node;
+    }
+}
+
+if (!function_exists('kop_suggestion_item_parts')) {
+    /**
+     * The parts of one list item the card lets a reviewer edit: a plain line is
+     * one part (key ''); a person is name, role and past jobs; a note its text.
+     * Ids, times, kinds and the publish flag are never edited here.
+     */
+    function kop_suggestion_item_parts($item) {
+        if (!is_array($item)) return array(array('key' => '', 'label' => '', 'value' => trim((string) $item)));
+        static $skip = array('id', 'timestamp', 'nameKey', 'employer', 'kind', 'movedFrom', 'personId', 'publish', 'country');
+        static $labels = array('name' => 'Name', 'role' => 'Role', 'pastJobs' => 'Past jobs', 'text' => 'Text', 'source' => 'Source',
+            'sourceUrl' => 'Source link', 'url' => 'Link', 'label' => 'Title', 'title' => 'Title', 'note' => 'Note', 'date' => 'Date',
+            'organization' => 'Organization', 'raw' => 'Address', 'street' => 'Street', 'city' => 'City', 'state' => 'State', 'zip' => 'ZIP');
+        $parts = array();
+        foreach ($item as $k => $v) {
+            if (in_array($k, $skip, true) || !(is_string($v) || $v === null)) continue;
+            $parts[] = array('key' => (string) $k, 'label' => $labels[$k] ?? ucfirst(strtolower(preg_replace('/(?<=[a-z])(?=[A-Z])/', ' ', (string) $k))), 'value' => (string) $v);
+        }
+        return $parts;
+    }
+}
+
+if (!function_exists('kop_suggestion_row_items')) {
+    /** For a list row on the card: each new item's place in the sent list, its text and its parts. */
+    function kop_suggestion_row_items(array $list, array $added) {
+        $want = array_map(function ($t) { return mb_strtolower(trim((string) $t)); }, $added);
+        $items = array();
+        foreach (array_values($list) as $i => $item) {
+            $text = kop_suggestion_item_text($item);
+            if ($text === '' || !in_array(mb_strtolower($text), $want, true)) continue;
+            $items[] = array('index' => $i, 'text' => $text, 'parts' => kop_suggestion_item_parts($item));
+        }
+        return $items;
+    }
+}
+
+if (!function_exists('kop_suggestion_move_targets')) {
+    /** The fields "Move to" offers on the card: path => 'list' | 'text'. */
+    function kop_suggestion_move_targets() {
+        return array(
+            'notes' => 'list', 'criticalIncidents.customIncidents' => 'list', 'survivorTestimony' => 'list',
+            'operatingPeriod.notes' => 'list', 'staff.notableStaff' => 'list', 'staff.administrator' => 'list',
+            'identification.currentName' => 'text', 'identification.otherNames' => 'list', 'identification.pastNames' => 'list',
+            'identification.legalName' => 'text', 'identification.currentOperator' => 'text', 'identification.otherOperators' => 'list',
+            'identification.pastOperators' => 'list', 'identification.currentOwners' => 'list', 'identification.pastOwners' => 'list',
+            'identification.knownReferrers' => 'list', 'identification.investors' => 'list',
+            'location.street' => 'text', 'location.city' => 'text', 'location.text' => 'text',
+            'operatingPeriod.yearsOfOperation' => 'text', 'facilityDetails.type' => 'text',
+        );
+    }
+}
+
+if (!function_exists('kop_suggestion_edit')) {
+    /**
+     * A reviewer's fix to a waiting data suggestion before Approve, on the card
+     * (api/manage-submissions.php 'edit_suggestion'). Returns the payload with
+     * the fix made; throws RuntimeException with a sentence for the reviewer.
+     *
+     * $req: entry (a facility's index in facilities, or 'other' for the
+     * referrer / transporter / provider blocks), op, path (a card row's path;
+     * for 'other' its list of keys), index (a list item's place), and
+     *   set    value: the field's new text ("11-17" for ages; for an 'other' list, one item per line)
+     *   item   parts: {key: text} for that list item (key '' for a plain line); all empty removes it
+     *   remove the field emptied, or the list item taken out
+     *   move   to: a path from kop_suggestion_move_targets(); the text leaves its field and is
+     *          added to that list, or fills that field (refused when it already holds something)
+     * The facility entry is stored normalized (kop_suggestion_normalize_facilities()), as
+     * api/save-suggestion.php stores new ones; Approve normalizes either shape the same way.
+     */
+    function kop_suggestion_edit($payload, array $req) {
+        if (!is_array($payload)) throw new RuntimeException('This suggestion has no data to edit.');
+        $op = (string) ($req['op'] ?? '');
+        if (!in_array($op, array('set', 'item', 'remove', 'move'), true)) throw new RuntimeException('Unknown edit.');
+        $entry = $req['entry'] ?? null;
+        $fn = $entry === 'other'
+            ? function (array $data) use ($req, $op) { return kop_suggestion_edit_other($data, $req, $op); }
+            : function (array $data) use ($req, $op, $entry) {
+                $i = (int) $entry;
+                if (!is_numeric($entry) || !is_array($data['facilities'][$i] ?? null)) throw new RuntimeException('That facility is not in this suggestion any more. Reload the page.');
+                $data['facilities'][$i] = kop_suggestion_edit_facility($data['facilities'][$i], $req, $op);
+                return $data;
+            };
+        // The same unwrapping as kop_extract_project_data(), written back at the same depth.
+        $apply = function ($node, $depth) use (&$apply, $fn) {
+            if (is_array($node) && isset($node['data']) && is_array($node['data']) && $depth < 3) {
+                $node['data'] = $apply($node['data'], $depth + 1);
+                return $node;
+            }
+            return $fn(is_array($node) ? $node : array());
+        };
+        return $apply($payload, 0);
+    }
+}
+
+if (!function_exists('kop_suggestion_edit_facility')) {
+    function kop_suggestion_edit_facility(array $entry, array $req, $op) {
+        if (!function_exists('kop_facility_normalize')) require_once dirname(__DIR__) . '/inc/facility-store.php';
+        if (!function_exists('kop_suggestion_normalize_facilities')) require_once __DIR__ . '/lib-suggested-edits.php';
+        $norm = function (array $doc) {
+            return kop_suggestion_normalize_facilities(array('facilities' => array($doc)), 'locations')['facilities'][0];
+        };
+        $doc = $norm($entry);
+        $path = (string) ($req['path'] ?? '');
+        $segs = array();
+        kop_suggestion_flatten($doc, $segs);
+        if ($path === 'identification.name') {
+            $segs[$path] = array('identification', 'name');   // a new facility's name, from the card's heading
+        }
+        if (!isset($segs[$path])) throw new RuntimeException('That field is not in this suggestion any more. Reload the page.');
+        $at = $segs[$path];
+        $cur = kop_suggestion_get($doc, $at);
+        $label = kop_suggestion_label($path);
+        $has_index = isset($req['index']) && $req['index'] !== '' && $req['index'] !== null;
+        $index = (int) ($req['index'] ?? -1);
+        if (is_array($cur) && $path !== 'facilityDetails.ageRange' && ($op !== 'set') && (!$has_index || !array_key_exists($index, array_values($cur)))) {
+            throw new RuntimeException('That item is not in the list any more. Reload the page.');
+        }
+        $list = is_array($cur) && $path !== 'facilityDetails.ageRange' ? array_values($cur) : null;
+        if ($op === 'item' && $list === null) throw new RuntimeException($label . ' is not a list.');
+
+        if ($op === 'set') {
+            if ($list !== null) throw new RuntimeException('Edit the items of ' . $label . ' one at a time.');
+            if (is_bool($cur)) throw new RuntimeException($label . ' is a tick box: remove it, or leave it.');
+            $value = trim((string) ($req['value'] ?? ''));
+            if ($path === 'identification.name' && $value === '') throw new RuntimeException('The name cannot be empty.');
+            if (in_array($path, array('operatingPeriod.startYear', 'operatingPeriod.endYear', 'facilityDetails.capacity', 'facilityDetails.currentCensus'), true)
+                && $value !== '' && !ctype_digit($value)) {
+                throw new RuntimeException($label . ' takes a number only. Move any words to Notes.');
+            }
+            if ($path === 'facilityDetails.ageRange') {
+                if ($value !== '' && !preg_match('/^\s*(\d{1,2})?\s*(?:-|–|to)?\s*(\d{1,2})?\s*$/', $value, $m)) {
+                    throw new RuntimeException('Write the ages as 12-17.');
+                }
+                $doc = kop_suggestion_put($doc, $at, array('min' => isset($m[1]) && $m[1] !== '' ? (int) $m[1] : null, 'max' => isset($m[2]) && $m[2] !== '' ? (int) $m[2] : null));
+            } else {
+                $doc = kop_suggestion_put($doc, $at, $value);
+            }
+            return $norm($doc);
+        }
+
+        if ($op === 'item') {
+            $parts = is_array($req['parts'] ?? null) ? $req['parts'] : array();
+            $item = $list[$index];
+            if (!is_array($item)) {
+                $item = trim((string) ($parts[''] ?? $item));
+                $empty = $item === '';
+            } else {
+                $allowed = array_column(kop_suggestion_item_parts($item), 'key');
+                foreach ($parts as $k => $v) {
+                    if (in_array((string) $k, $allowed, true)) $item[$k] = trim((string) $v);
+                }
+                $empty = kop_suggestion_item_text(array_intersect_key($item, array_flip($allowed))) === '';
+            }
+            if ($empty) array_splice($list, $index, 1); else $list[$index] = $item;
+            return $norm(kop_suggestion_put($doc, $at, $list));
+        }
+
+        // remove and move both take the piece out of where it is.
+        if ($list !== null) {
+            $text = kop_suggestion_item_text($list[$index]);
+            array_splice($list, $index, 1);
+            $doc = kop_suggestion_put($doc, $at, $list);
+        } else {
+            if ($path === 'identification.name') throw new RuntimeException('The name cannot be moved or removed.');
+            $text = is_array($cur) ? trim(($cur['min'] ?? '') . '-' . ($cur['max'] ?? ''), '-')   // ages, as the card shows them
+                : (is_bool($cur) ? '' : trim((string) $cur));
+            $doc = kop_suggestion_put($doc, $at, is_bool($cur) ? false : ($path === 'facilityDetails.ageRange' ? array('min' => null, 'max' => null) : ''));
+        }
+        if ($op === 'remove') return $norm($doc);
+
+        $to = (string) ($req['to'] ?? '');
+        $targets = kop_suggestion_move_targets();
+        if (!isset($targets[$to])) throw new RuntimeException('Pick where it goes.');
+        if ($to === $path) throw new RuntimeException('It is already under ' . $label . '.');
+        if ($text === '') throw new RuntimeException('There is no text to move.');
+        $dest = explode('.', $to);
+        $have = kop_suggestion_get($doc, $dest);
+        if ($targets[$to] === 'list') {
+            $items = is_array($have) ? array_values($have) : array();
+            $items[] = $text;   // the normalizer gives it the list's shape (a person's name, a testimony's text)
+            $doc = kop_suggestion_put($doc, $dest, $items);
+        } else {
+            if (trim((string) $have) !== '') {
+                throw new RuntimeException(kop_suggestion_label($to) . ' already says "' . trim((string) $have) . '". Edit or move that first.');
+            }
+            $doc = kop_suggestion_put($doc, $dest, $text);
+        }
+        return $norm($doc);
+    }
+}
+
+if (!function_exists('kop_suggestion_edit_other')) {
+    /** set / remove / move for the referrer, transporter and provider blocks: text, or a list of plain lines. */
+    function kop_suggestion_edit_other(array $data, array $req, $op) {
+        $at = is_array($req['path'] ?? null) ? array_values(array_map('strval', $req['path'])) : array();
+        if (!$at || in_array($at[0], kop_suggestion_other_skip(), true)) throw new RuntimeException('That field cannot be edited here.');
+        $cur = kop_suggestion_get($data, $at);
+        $is_list = is_array($cur) && (!$cur || array_keys($cur) === range(0, count($cur) - 1)) && !array_filter($cur, 'is_array');
+        if ($cur === null || (is_array($cur) && !$is_list) || is_bool($cur)) throw new RuntimeException('That field cannot be edited here. Reload the page.');
+        $lines = function ($v) { return array_values(array_filter(array_map('trim', preg_split('/\r?\n/', (string) $v)), 'strlen')); };
+        $empty = $is_list ? array() : '';
+        if ($op === 'set') return kop_suggestion_put($data, $at, $is_list ? $lines($req['value'] ?? '') : trim((string) ($req['value'] ?? '')));
+        if ($op === 'remove') return kop_suggestion_put($data, $at, $empty);
+        if ($op !== 'move') throw new RuntimeException('Unknown edit.');
+        // Move: to another field of the same block (the last key replaced).
+        $to = (string) ($req['to'] ?? '');
+        $parent = array_slice($at, 0, -1);
+        $siblings = kop_suggestion_get($data, $parent);
+        if ($to === '' || $to === end($at) || !is_array($siblings) || !array_key_exists($to, $siblings)) throw new RuntimeException('Pick where it goes.');
+        $text = $is_list ? implode("\n", $cur) : trim((string) $cur);
+        $data = kop_suggestion_put($data, $at, $empty);
+        $dest = array_merge($parent, array($to));
+        $have = $siblings[$to];
+        if (is_array($have) && !array_filter($have, 'is_array')) {
+            return kop_suggestion_put($data, $dest, array_merge(array_values($have), $lines($text)));
+        }
+        if (is_string($have) || $have === null) {
+            if (trim((string) $have) !== '') throw new RuntimeException(kop_suggestion_label($to) . ' already has something in it. Edit or move that first.');
+            return kop_suggestion_put($data, $dest, $text);
+        }
+        throw new RuntimeException('That field cannot take text.');
+    }
+}
+
+if (!function_exists('kop_suggestion_other_targets')) {
+    /** For an 'other' row: the fields of the same block it can move to, {key: label}. */
+    function kop_suggestion_other_targets(array $data, array $at) {
+        $siblings = kop_suggestion_get($data, array_slice($at, 0, -1));
+        $out = array();
+        if (!is_array($siblings)) return $out;
+        foreach ($siblings as $k => $v) {
+            if ((string) $k === (string) end($at)) continue;
+            if (is_string($v) || $v === null || (is_array($v) && !array_filter($v, 'is_array') && (!$v || array_keys($v) === range(0, count($v) - 1)))) {
+                $out[(string) $k] = kop_suggestion_label((string) $k);
+            }
         }
         return $out;
     }
@@ -273,16 +582,16 @@ if (!function_exists('kop_suggestion_diff')) {
                 $added = array_values(array_filter($new, function ($v) use ($norm, $old_keys) { return !in_array($norm($v), $old_keys, true); }));
                 $dropped = $whole ? array_values(array_filter($old, function ($v) use ($norm, $new_keys) { return !in_array($norm($v), $new_keys, true); })) : array();
                 if ($added || $dropped) {
-                    $rows[] = array('label' => $label, 'kind' => 'list', 'had' => count($old), 'added' => $added, 'dropped' => $dropped);
+                    $rows[] = array('label' => $label, 'path' => $path, 'kind' => 'list', 'had' => count($old), 'added' => $added, 'dropped' => $dropped);
                 }
                 continue;
             }
             if ($empty($new)) {
-                if ($whole && !$empty($old)) $rows[] = array('label' => $label, 'kind' => 'removed', 'before' => (string) $old, 'after' => '');
+                if ($whole && !$empty($old)) $rows[] = array('label' => $label, 'path' => $path, 'kind' => 'removed', 'before' => (string) $old, 'after' => '');
                 continue;
             }
             if ($norm($new) === $norm($old)) continue;
-            $rows[] = array('label' => $label, 'kind' => $empty($old) ? 'added' : 'changed', 'before' => $empty($old) ? '' : (string) $old, 'after' => (string) $new);
+            $rows[] = array('label' => $label, 'path' => $path, 'kind' => $empty($old) ? 'added' : 'changed', 'before' => $empty($old) ? '' : (string) $old, 'after' => (string) $new);
         }
         return $rows;
     }

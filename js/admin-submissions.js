@@ -996,7 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3>${escapeHtml(submission.program_name)}</h3>
                         <span class="status-badge ${statusClass}">${submission.status}</span>
                     </div>
-                    ${renderChanges(submission)}
+                    <div class="sugg-wrap">${renderChanges(submission)}</div>
                     ${footer}
                 `;
             } else if (currentType === 'legislation' || currentType === 'lawsuit') {
@@ -1056,6 +1056,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * only the fields whose sent value differs from the record, as
      * now -> suggested, and the submitter's own note. The whole record sent
      * stays under "View details".
+     *
+     * While it waits, every suggested value and every new list item has
+     * Edit / Move / Remove (suggEditClick()): fix the spelling, split a
+     * "Name-role" into name and role, put a piece in the field it belongs in,
+     * take junk out. Each fix is saved into the suggestion at once
+     * (manage-submissions.php 'edit_suggestion') and Approve writes the fixed
+     * version; "Undo last edit" steps back one fix at a time.
      */
     function renderChanges(submission) {
         const c = submission.changes;
@@ -1068,22 +1075,42 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!c) {
             return `<div class="submission-meta"><span>${kopIcon('refresh')} Data Update</span></div>${note}`;
         }
-        const cell = (text, cls) => text === ''
-            ? `<td class="sugg-${cls} sugg-blank">(empty)</td>`
-            : `<td class="sugg-${cls}">${escapeHtml(text)}</td>`;
+        const canFix = isPendingStatus(submission.status);
+        // escapeHtml() leaves quotes alone; an attribute holding JSON needs them escaped.
+        const attr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Edit / Move / Remove beside a value; the spec says what the server is to change.
+        const tools = (spec, ops) => canFix && ops.length
+            ? `<span class="sugg-tools" data-spec="${attr(JSON.stringify(spec))}">${ops.map(op =>
+                `<button type="button" class="sugg-act" data-op="${op}">${{ edit: 'Edit', move: 'Move', remove: 'Remove' }[op]}</button>`).join('')}</span>`
+            : '';
+        const cell = (text, cls, extra) => text === ''
+            ? `<td class="sugg-${cls} sugg-blank">(empty)${extra || ''}</td>`
+            : `<td class="sugg-${cls}"><span class="sugg-text">${escapeHtml(text)}</span>${extra || ''}</td>`;
         const items = (list, cls, sign) => (list || []).map(t =>
             `<li class="sugg-${cls}"><span class="sugg-sign" aria-hidden="true">${sign}</span>${escapeHtml(t)}</li>`).join('');
-        const row = ch => {
+        const row = (ch, entry) => {
             if (ch.kind === 'list') {
                 const had = ch.had ? `${ch.had} on file` : '(empty)';
+                // New items with their own buttons; any the server could not place are shown as sent.
+                const placed = (ch.items || []).map(it => `<li class="sugg-ins"><span class="sugg-sign" aria-hidden="true">+ </span>`
+                    + `<span class="sugg-text">${escapeHtml(it.text)}</span>`
+                    + tools({ entry: entry, path: ch.path, index: it.index, parts: it.parts, label: ch.label }, ['edit', 'move', 'remove']) + `</li>`).join('');
+                const placedTexts = (ch.items || []).map(it => it.text);
+                const rest = (ch.added || []).filter(t => placedTexts.indexOf(t) === -1);
                 return `<tr><th scope="row">${escapeHtml(ch.label)}</th>`
                     + `<td class="sugg-before sugg-count${ch.had ? '' : ' sugg-blank'}">${had}</td>`
-                    + `<td class="sugg-after"><ul class="sugg-items">${items(ch.added, 'ins', '+ ')}${items(ch.dropped, 'del', '- ')}</ul></td></tr>`;
+                    + `<td class="sugg-after"><ul class="sugg-items">${placed}${items(rest, 'ins', '+ ')}${items(ch.dropped, 'del', '- ')}</ul></td></tr>`;
             }
             const after = ch.kind === 'removed' ? '' : ch.after;
-            return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before')}${cell(after, 'after')}</tr>`;
+            const ops = ch.kind === 'removed' ? [] : (ch.editable ? ['edit', 'move', 'remove'] : ['remove']);
+            const spec = { entry: entry, path: ch.path, value: after, label: ch.label };
+            return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before')}${cell(after, 'after', tools(spec, ops))}</tr>`;
         };
         let html = '';
+        if (canFix && submission.edits) {
+            html += `<p class="sugg-edited">${kopIcon('pen-line')} You fixed this suggestion ${submission.edits === 1 ? 'once' : submission.edits + ' times'} before approving; Approve writes it as shown. `
+                + `<button type="button" class="sugg-act sugg-undo" data-op="undo">Undo last edit</button></p>`;
+        }
         (c.entries || []).forEach(e => {
             const href = e.url ? safeUrl(e.url) : '';
             const name = href
@@ -1092,13 +1119,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const badge = e.is_new
                 ? `<span class="sugg-badge">No record found: Approve adds a new facility</span>`
                 : '';
-            html += `<div class="sugg-entry"><h4>${name}${badge}</h4>`
+            // A new facility's name can be fixed too; one on file is matched by it, so it stays.
+            const rename = e.is_new ? tools({ entry: e.index, path: 'identification.name', value: e.name, label: 'Name' }, ['edit']) : '';
+            html += `<div class="sugg-entry"><h4><span class="sugg-text">${name}</span>${badge}${rename}</h4>`
                 + `<table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">On file now</th><th scope="col">Suggested</th></tr></thead>`
-                + `<tbody>${e.changes.map(row).join('')}</tbody></table></div>`;
+                + `<tbody>${e.changes.map(ch => row(ch, e.index)).join('')}</tbody></table></div>`;
         });
         if ((c.other || []).length) {
             html += `<div class="sugg-entry"><table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">Sent</th></tr></thead><tbody>`
-                + c.other.map(o => `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after">${escapeHtml(o.after)}</td></tr>`).join('')
+                + c.other.map(o => `<tr><th scope="row">${escapeHtml(o.label)}</th><td class="sugg-after"><span class="sugg-text">${escapeHtml(o.after)}</span>`
+                    + (o.path ? tools({ entry: 'other', path: o.path, value: o.value, list: o.list, moves: o.moves, label: o.label }, ['edit', 'move', 'remove']) : '')
+                    + `</td></tr>`).join('')
                 + `</tbody></table></div>`;
         }
         if ((c.unchanged || []).length) {
@@ -1108,7 +1139,161 @@ document.addEventListener('DOMContentLoaded', () => {
                 : `<p class="sugg-same">${kopIcon('check-circle')} Nothing new: everything sent for ${names} is already on the record.</p>`;
         }
         if (!html) html = `<p class="sugg-same">Nothing filled in to compare. Open the details to see what was sent.</p>`;
-        return `<div class="sugg-changes">${note}${html}</div>`;
+        const status = canFix ? `<p class="sugg-status" role="status" aria-live="polite"></p>` : '';
+        return `<div class="sugg-changes">${note}${html}${status}</div>`;
+    }
+
+    /*
+     * Edit / Move / Remove on a data card's "What changed" (renderChanges()).
+     * Edit opens a box in place (a person: name, role, past jobs; a list of
+     * lines: one per line); Move opens a "Move to" list with its own button
+     * (a dropdown never acts by itself); Remove saves at once. Every fix has
+     * "Undo last edit" on the card.
+     */
+    submissionsList.addEventListener('click', (e) => {
+        const btn = e.target.closest('.sugg-act');
+        if (!btn || btn.disabled) return;
+        const card = btn.closest('.submission-card');
+        if (!card) return;
+        const submission = allSubmissions.find(s => String(s.id) === String(card.dataset.id));
+        if (!submission) return;
+        if (btn.dataset.op === 'undo') {
+            suggSave(card, submission, null);
+            return;
+        }
+        const holder = btn.closest('.sugg-tools');
+        let spec;
+        try { spec = JSON.parse(holder.dataset.spec); } catch (err) { return; }
+        const op = btn.dataset.op;
+        if (op === 'remove') {
+            suggSave(card, submission, { entry: spec.entry, op: 'remove', path: spec.path, index: spec.index });
+            return;
+        }
+        // One open box per card.
+        card.querySelectorAll('.sugg-form').forEach(f => f.remove());
+        card.querySelectorAll('.sugg-tools[hidden]').forEach(t => { t.hidden = false; });
+        const form = document.createElement('div');
+        form.className = 'sugg-form';
+        const close = () => { form.remove(); holder.hidden = false; };
+        const button = (text, cls, onclick) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'sugg-act ' + cls;
+            b.textContent = text;
+            b.addEventListener('click', onclick);
+            return b;
+        };
+        const fieldId = 'sugg-' + card.dataset.id + '-' + Math.random().toString(36).slice(2, 8);
+        if (op === 'edit') {
+            const inputs = [];
+            const addField = (key, label, value, multi) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'sugg-field';
+                const id = fieldId + '-' + inputs.length;
+                const lab = document.createElement('label');
+                lab.setAttribute('for', id);
+                lab.textContent = label;
+                const input = document.createElement(multi ? 'textarea' : 'input');
+                input.id = id;
+                input.className = 'sugg-input';
+                if (multi) input.rows = Math.min(10, Math.max(2, Math.ceil(String(value).length / 70) + String(value).split('\n').length - 1));
+                else input.type = 'text';
+                input.value = value;
+                input.dataset.key = key;
+                input.spellcheck = true;
+                wrap.appendChild(lab);
+                wrap.appendChild(input);
+                form.appendChild(wrap);
+                inputs.push(input);
+            };
+            const parts = spec.parts || null;
+            if (parts && !(parts.length === 1 && parts[0].key === '')) {
+                parts.forEach(p => addField(p.key, p.label, p.value || '', p.key === 'text' || p.key === 'note'));
+            } else {
+                const value = parts ? parts[0].value : String(spec.value == null ? '' : spec.value);
+                addField('', spec.list ? spec.label + ' (one per line)' : spec.label, value, true);
+            }
+            const hint = document.createElement('p');
+            hint.className = 'sugg-hint';
+            hint.textContent = 'Fix spelling, punctuation and which field it is in. A survivor\'s own account keeps their words: correct spelling and punctuation only, never reword it.';
+            form.appendChild(hint);
+            const actions = document.createElement('div');
+            actions.className = 'sugg-form-actions';
+            actions.appendChild(button('Save', 'sugg-save', () => {
+                let edit;
+                if (parts) {
+                    const sent = {};
+                    inputs.forEach(i => { sent[i.dataset.key] = i.value; });
+                    edit = { entry: spec.entry, op: 'item', path: spec.path, index: spec.index, parts: sent };
+                } else {
+                    edit = { entry: spec.entry, op: 'set', path: spec.path, value: inputs[0].value };
+                }
+                suggSave(card, submission, edit);
+            }));
+            actions.appendChild(button('Cancel', 'sugg-cancel', close));
+            form.appendChild(actions);
+        } else if (op === 'move') {
+            const targets = spec.entry === 'other'
+                ? (spec.moves || [])
+                : ((submission.changes && submission.changes.targets) || []).filter(t => t.path !== spec.path);
+            const lab = document.createElement('label');
+            lab.setAttribute('for', fieldId);
+            lab.textContent = 'Move to';
+            const sel = document.createElement('select');
+            sel.id = fieldId;
+            sel.className = 'sugg-input';
+            sel.innerHTML = '<option value="">Pick a field…</option>' + targets.map(t =>
+                `<option value="${escapeHtml(t.path)}">${escapeHtml(t.label)}${t.list ? ' (adds to the list)' : ''}</option>`).join('');
+            form.appendChild(lab);
+            form.appendChild(sel);
+            const actions = document.createElement('div');
+            actions.className = 'sugg-form-actions';
+            actions.appendChild(button('Move', 'sugg-save', () => {
+                if (!sel.value) { sel.focus(); return; }
+                suggSave(card, submission, { entry: spec.entry, op: 'move', path: spec.path, index: spec.index, to: sel.value });
+            }));
+            actions.appendChild(button('Cancel', 'sugg-cancel', close));
+            form.appendChild(actions);
+        }
+        holder.hidden = true;
+        holder.after(form);
+        const first = form.querySelector('.sugg-input');
+        if (first) first.focus();
+    });
+
+    /** Save one fix (or, with no edit, undo the last) and redraw the card's "What changed". */
+    async function suggSave(card, submission, edit) {
+        const wrap = card.querySelector('.sugg-wrap');
+        const say = (text, bad) => {
+            const st = card.querySelector('.sugg-status');
+            if (st) { st.textContent = text; st.classList.toggle('is-error', !!bad); }
+        };
+        card.querySelectorAll('.sugg-act').forEach(b => { b.disabled = true; });
+        say(edit ? 'Saving…' : 'Undoing…');
+        try {
+            const response = await fetch(MANAGE_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(edit
+                    ? { action: 'edit_suggestion', type: 'data', id: submission.id, edit: edit }
+                    : { action: 'undo_suggestion_edit', type: 'data', id: submission.id })
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error || 'It did not save.');
+            submission.changes = result.changes;
+            submission.json_data = result.json_data;
+            submission.edits = result.edits;
+            if (wrap) wrap.innerHTML = renderChanges(submission);
+            say(result.message || 'Saved.');
+            // Details open on this one: its raw copy follows, so a later save there keeps these fixes.
+            if (currentSubmission && String(currentSubmission.id) === String(submission.id)) {
+                currentSubmission.json_data = result.json_data;
+                renderStructuredEditor('data', currentSubmission, result.json_data);
+            }
+        } catch (err) {
+            card.querySelectorAll('.sugg-act').forEach(b => { b.disabled = false; });
+            say('Not saved: ' + err.message, true);
+        }
     }
 
     /**

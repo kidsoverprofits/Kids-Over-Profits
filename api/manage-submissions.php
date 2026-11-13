@@ -261,6 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $submission['submitted_by'] = $submission['submitter_ip'] ?? 'Anonymous';
             $submission['submission_notes'] = $submission['reason'] ?? '';
             $submission['changes'] = kop_suggestion_changes_safe($pdo, $submission['json_data'], $submission['reason'] ?? '');
+            $submission['edits'] = ($submission['status'] ?? '') === 'pending' ? count((array) get_option('kop_sugg_edits_' . (int) $submission['id'], [])) : 0;
         }
 
         echo json_encode(['success' => true, 'data' => $submission]);
@@ -416,6 +417,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         if ($type === 'data') {
             $row['changes'] = kop_suggestion_changes_safe($pdo, $row['json_data'], $row['submission_notes'] ?? '');
+            // Fixes made on the card before Approve (the 'edit_suggestion' action), for its "Undo last edit".
+            $row['edits'] = ($row['status'] ?? '') === 'pending' ? count((array) get_option('kop_sugg_edits_' . (int) $row['id'], [])) : 0;
         }
     }
     unset($row);
@@ -1017,6 +1020,73 @@ try {
                     ]);
                 }
             }
+            break;
+
+        case 'edit_suggestion':
+        case 'undo_suggestion_edit':
+            // A data suggestion fixed on its card before Approve: wording, a piece moved to the
+            // field it belongs in, a piece taken out (kop_suggestion_edit()). Each fix keeps the
+            // version before it (option kop_sugg_edits_<id>), so "Undo last edit" steps back.
+            $id = (int) ($data['id'] ?? ($ids[0] ?? 0));
+            if ($type !== 'data' || $id <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'A data suggestion id is required']);
+                exit;
+            }
+            $rowStmt = $pdo->prepare("SELECT id, status, reason, edited_json_data FROM $table WHERE id = ?");
+            $rowStmt->execute([$id]);
+            $sugg = $rowStmt->fetch();
+            if (!$sugg) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Submission not found']);
+                exit;
+            }
+            if (($sugg['status'] ?? '') !== 'pending') {
+                echo json_encode(['success' => false, 'error' => 'Only a waiting suggestion can be edited. Put it back to waiting first.']);
+                exit;
+            }
+            $histKey = 'kop_sugg_edits_' . $id;
+            $hist = get_option($histKey, []);
+            if (!is_array($hist)) $hist = [];
+            if ($action === 'undo_suggestion_edit') {
+                if (!$hist) {
+                    echo json_encode(['success' => false, 'error' => 'There is no edit to undo.']);
+                    exit;
+                }
+                $last = array_pop($hist);
+                $newJson = (string) $last['json'];
+                $message = 'Edit undone.';
+            } else {
+                $req = is_array($data['edit'] ?? null) ? $data['edit'] : [];
+                try {
+                    $edited = kop_suggestion_edit(json_decode((string) $sugg['edited_json_data'], true), $req);
+                } catch (RuntimeException $e) {
+                    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                    exit;
+                }
+                $newJson = json_encode($edited, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($newJson === false) {
+                    echo json_encode(['success' => false, 'error' => 'The edited suggestion could not be saved.']);
+                    exit;
+                }
+                $hist[] = [
+                    'at'   => gmdate('c'),
+                    'by'   => function_exists('wp_get_current_user') ? (string) wp_get_current_user()->user_login : '',
+                    'op'   => (string) ($req['op'] ?? ''),
+                    'json' => (string) $sugg['edited_json_data'],
+                ];
+                $hist = array_slice($hist, -50);
+                $message = 'Saved.';
+            }
+            $pdo->prepare("UPDATE $table SET edited_json_data = ? WHERE id = ?")->execute([$newJson, $id]);
+            if ($hist) update_option($histKey, $hist, false); else delete_option($histKey);
+            echo json_encode([
+                'success'   => true,
+                'message'   => $message,
+                'json_data' => json_decode($newJson, true),
+                'changes'   => kop_suggestion_changes_safe($pdo, json_decode($newJson, true), $sugg['reason'] ?? ''),
+                'edits'     => count($hist),
+            ]);
             break;
 
         case 'update_fields':
