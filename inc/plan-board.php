@@ -2,12 +2,13 @@
 /**
  * KOP Tools > Plan Board: the work plan (docs/plan/*.md) as cards, one per item, each one thing to do. The owner
  * picks a choice, presses Done or Not now, ticks off the steps of a job that is really a list, rewords an item
- * (Edit) or takes it off the plan (Retire). Edits, retirements and steps show at once; a Claude session then folds
+ * (Edit), takes it off the plan (Retire), marks it Needs research (Claude looks into it and brings it back with
+ * sources) or hands it over (Send to Claude: Claude does it). Edits, retirements and steps show at once; a Claude session then folds
  * every open answer into the plan files and says what it did, and the screen shows each answer as folded in.
  *
  * The plan reaches the server as seeds/plan-board.json (scripts/plan-board/build.py; docs/ is not deployed).
  * Answers are rows of {prefix}kop_plan_answers keyed by what they answer: "<item id>" (answer, done, later,
- * retire), "<item id>#<step id>" (step, skip) or "<item id>@edit" (edit, JSON {ask, why, text}). Changing one
+ * retire, research, claude), "<item id>#<step id>" (step, skip) or "<item id>@edit" (edit, JSON {ask, why, text}). Changing one
  * withdraws the old row and adds a new one, so nothing typed is lost. A session never writes here: what it did
  * with each answer is committed as seeds/plan-board-passes.json ({passes: [{at, entries: [{answer, itemId, kind,
  * result}]}]}), and an answer whose id is listed there counts as folded in. Sessions read the open answers with
@@ -78,12 +79,13 @@ function kop_pb_install($force = false) {
 add_action('admin_init', 'kop_pb_install', 5);
 
 /**
- * The kinds of answer and their labels. On an item: answer, done, later, retire. On a step ("<item>#<step>"):
+ * The kinds of answer and their labels. On an item: answer, done, later, retire, research (Claude researches it and
+ * brings it back with what it found) and claude (Claude does it). On a step ("<item>#<step>"):
  * step (done) and skip. On "<item>@edit": edit (the owner's rewording, JSON {ask, why, text}).
  */
 function kop_pb_kinds() {
     return array('answer' => 'Answered', 'done' => 'Done', 'later' => 'Not now', 'retire' => 'Retired',
-        'edit' => 'Edited', 'step' => 'Step done', 'skip' => 'Step skipped');
+        'research' => 'Needs research', 'claude' => 'Sent to Claude', 'edit' => 'Edited', 'step' => 'Step done', 'skip' => 'Step skipped');
 }
 
 /** The card kinds and their labels. */
@@ -150,7 +152,12 @@ function kop_pb_kinds_for($row_item_id) {
     list(, $step, $edit) = kop_pb_target($row_item_id);
     if ($edit) return array('edit');
     if ($step !== '') return array('step', 'skip');
-    return array('answer', 'done', 'later', 'retire');
+    return array('answer', 'done', 'later', 'retire', 'research', 'claude');
+}
+
+/** The answers that hand the item to Claude: the card shows only Undo while one stands. */
+function kop_pb_handed_over($kind) {
+    return in_array($kind, array('retire', 'research', 'claude'), true);
 }
 
 /** seeds/plan-board-passes.json as answer id => {at, result}, plus the passes themselves (newest first). */
@@ -300,7 +307,8 @@ function kop_pb_link_button($label, $url, $variant = 'secondary') {
 /**
  * One card, one thing to do: what it is (Decide / Do / Check, where, how long), the headline, why it matters, the
  * site's live count when a check reads one, the next step of a job with steps, then the buttons for its kind; Edit
- * and Retire on every card; the full item for Claude folded at the bottom.
+ * and Retire on every card, Needs research and Send to Claude on every card not answered yet; the full item for
+ * Claude folded at the bottom.
  * $it comes from kop_pb_items(); $open/$folded are the split rows (all of them: the card picks its own);
  * $check is the item's stored check result {done, evidence, at} or null.
  */
@@ -370,10 +378,15 @@ function kop_pb_card_html(array $it, array $open, array $folded, $check = null) 
     if ($item_open) {
         $changed = $item_open['item_hash'] !== '' && $item_open['item_hash'] !== ($it['hash'] ?? '');
         $label = $kinds[$state] ?? '';
-        $note = $state === 'retire' ? 'Retired: it leaves the plan on the next pass.' : $label . ', saved ' . kop_pb_when($item_open['saved_at']) . '. Waiting for the next pass.';
+        $notes = array(
+            'retire' => 'Retired: it leaves the plan on the next pass.',
+            'research' => 'Needs research, saved ' . kop_pb_when($item_open['saved_at']) . '. On the next pass Claude looks into it and brings it back to you with what it found and the sources.',
+            'claude' => 'Sent to Claude, saved ' . kop_pb_when($item_open['saved_at']) . '. Claude does it on the next pass and says what it did.',
+        );
+        $note = $notes[$state] ?? $label . ', saved ' . kop_pb_when($item_open['saved_at']) . '. Waiting for the next pass.';
         $out .= '<div class="kop-pb-saved">' . ($item_open['body'] !== '' && $item_open['body'] !== null ? nl2br(esc_html($item_open['body'])) : '<em>' . esc_html($label) . '</em>')
             . '<span class="kop-pb-when">' . esc_html($note) . ($changed ? ' The item has been reworded since.' : '') . '</span></div>';
-        $out .= '<div class="kop-pb-buttons">' . ($state !== 'retire' ? kop_ak_button('Change', 'secondary', 'data-act="edit-answer"') : '')
+        $out .= '<div class="kop-pb-buttons">' . (!kop_pb_handed_over($state) ? kop_ak_button('Change', 'secondary', 'data-act="edit-answer"') : '')
             . kop_ak_button('Undo', 'quiet', 'data-act="withdraw"') . '</div>';
         $out .= '<div class="kop-pb-form" data-form="answer" hidden>' . kop_pb_form_html($it, (string) $item_open['body'], 'Your answer') . '</div>';
     } elseif ($auto) {
@@ -389,6 +402,14 @@ function kop_pb_card_html(array $it, array $open, array $folded, $check = null) 
         $out .= '<div class="kop-pb-buttons kop-pb-quick">' . kop_pb_actions_html($it, (bool) $steps) . '</div>';
         $placeholder = $kind === 'check' ? 'What is wrong?' : ($kind === 'decide' ? 'Your answer' : 'A note: what happened, how far you got, what is in the way');
         $out .= '<div class="kop-pb-form" data-form="answer" hidden>' . kop_pb_form_html($it, '', $placeholder) . '</div>';
+        $out .= '<div class="kop-pb-buttons kop-pb-handoff">' . kop_ak_button('Needs research', 'secondary', 'data-act="open-research"')
+            . kop_ak_button('Send to Claude', 'secondary', 'data-act="open-claude"') . '</div>';
+        $out .= '<div class="kop-pb-form" data-form="research" hidden>' . kop_pb_handoff_form_html($it, 'research',
+            'Needs research: Claude looks into it on the next pass (KOP\'s own holdings first, then the web) and brings it back to you with what it found and the sources. What should it find out? (optional)',
+            'Who runs it now, did the bill pass, is the address right...', 'Send for research') . '</div>';
+        $out .= '<div class="kop-pb-form" data-form="claude" hidden>' . kop_pb_handoff_form_html($it, 'claude',
+            'Send to Claude: Claude does this item itself on the next pass and says what it did. Anything it should know? (optional)',
+            'How you want it done, what to leave alone...', 'Send to Claude') . '</div>';
     }
 
     // Edit and Retire, on every card.
@@ -443,6 +464,15 @@ function kop_pb_form_html(array $it, $value, $placeholder) {
         . '<textarea id="' . esc_attr($id) . '" class="kop-pb-ta" rows="3" placeholder="' . esc_attr($placeholder) . '">' . esc_textarea($value) . '</textarea>'
         . '<div class="kop-pb-buttons">' . kop_ak_button('Save', 'primary', 'data-act="answer"')
         . kop_ak_button('Cancel', 'quiet', 'data-act="cancel"') . '<span class="kop-pb-hint">Ctrl+Enter saves</span></div>';
+}
+
+/** The Needs research / Send to Claude box: one optional line and its button. */
+function kop_pb_handoff_form_html(array $it, $kind, $label, $placeholder, $button) {
+    $id = 'kop-pb-' . $kind . '-' . md5($it['id']);
+    return '<label for="' . esc_attr($id) . '">' . esc_html($label) . '</label>'
+        . '<textarea id="' . esc_attr($id) . '" class="kop-pb-handoff-text" rows="2" placeholder="' . esc_attr($placeholder) . '"></textarea>'
+        . '<div class="kop-pb-buttons">' . kop_ak_button($button, 'primary', 'data-act="' . esc_attr($kind) . '"')
+        . kop_ak_button('Cancel', 'quiet', 'data-act="cancel"') . '<span class="kop-pb-hint">Ctrl+Enter sends</span></div>';
 }
 
 /** Edit: the headline, the why, and the item's full text, as the owner wants them to read. */
@@ -543,12 +573,12 @@ add_action('wp_ajax_kop_plan_board', function () {
     if ($act === 'withdraw') { kop_pb_withdraw($item); $reply('Undone.'); }
     if ($act === 'unedit') { kop_pb_withdraw($item . '@edit'); $reply('Your edit is undone.'); }
     if ($act === 'unstep') { kop_pb_withdraw($item . '#' . $step); $reply('Step undone.'); }
-    $targets = array('answer' => $item, 'done' => $item, 'later' => $item, 'retire' => $item, 'edit' => $item . '@edit',
+    $targets = array('answer' => $item, 'done' => $item, 'later' => $item, 'retire' => $item, 'research' => $item, 'claude' => $item, 'edit' => $item . '@edit',
         'step' => $item . '#' . $step, 'skip' => $item . '#' . $step);
     if (isset($targets[$act])) {
         $res = kop_pb_save($targets[$act], $act, wp_unslash($_POST['text'] ?? ''), get_current_user_id());
         if (!is_int($res)) wp_send_json_error(array('message' => $res));
-        $msgs = array('retire' => 'Retired.', 'edit' => 'Edit saved.', 'step' => 'Step done.', 'skip' => 'Step skipped.', 'later' => 'Parked for later.');
+        $msgs = array('research' => 'Marked Needs research. Claude looks into it on the next pass.', 'claude' => 'Sent to Claude. It does this on the next pass.', 'retire' => 'Retired.', 'edit' => 'Edit saved.', 'step' => 'Step done.', 'skip' => 'Step skipped.', 'later' => 'Parked for later.');
         $reply($msgs[$act] ?? 'Saved.');
     }
     wp_send_json_error(array('message' => 'Unknown action.'));
@@ -576,6 +606,7 @@ function kop_pb_page() {
             '<strong>Decide</strong> cards: press one of the choices (or <em>Other...</em> to type). <strong>Do</strong> cards: <em>Open</em> takes you there; press <em>Done</em> after. <strong>Check</strong> cards: look, then <em>Looks right</em> or <em>Something is wrong</em>.',
             'A job with steps shows only the next step: <em>Done, next</em> or <em>Skip</em>. <em>All steps</em> lists the rest.',
             '<em>Edit</em> rewords a card, <em>Retire</em> takes it off the board. Both show at once; <em>Not now</em> parks it.',
+            '<em>Needs research</em>: Claude looks into it and brings it back with what it found. <em>Send to Claude</em>: Claude does it for you. Both move the card to <em>Waiting for Claude</em>.',
             'Say "next pass" to Claude: it makes the plan match your answers and does the work they unblock. Until then, <em>Undo</em> takes any of it back.',
         ),
         'help' => '<p>The cards come from the plan files in the theme repository (docs/plan/), rebuilt on every push that changes them. <em>Notes for Claude</em> on each card is the full item as Claude wrote it. Claude never writes your answers or this screen: it reads them and commits what it did.</p>',

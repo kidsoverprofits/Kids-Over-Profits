@@ -1,7 +1,7 @@
 /**
  * KOP Tools > Plan Board (inc/plan-board.php): the views (This week, Everything for you, Waiting for Claude, Whole
- * plan), the kind, section and search filters and their counts; choices, Done / Not now, steps, notes, Edit and
- * Retire, each saved at once; keeps an unsent note per card in the browser, and copies the open answers for a
+ * plan), the kind, section and search filters and their counts; choices, Done / Not now, steps, notes, Edit,
+ * Retire, Needs research and Send to Claude, each saved at once; keeps an unsent note per card in the browser, and copies the open answers for a
  * Claude session. A card answered in this view stays in sight until the view or a filter changes, so its Undo
  * stays at hand.
  */
@@ -141,6 +141,8 @@
         if (act === 'open' || act === 'edit-answer') { showForm(card, 'answer'); return; }
         if (act === 'open-edit') { showForm(card, 'edit'); return; }
         if (act === 'open-retire') { showForm(card, 'retire'); return; }
+        if (act === 'open-research') { showForm(card, 'research'); return; }
+        if (act === 'open-claude') { showForm(card, 'claude'); return; }
         if (act === 'cancel') { showForm(card, ''); return; }
 
         var data = { act: act, item: id };
@@ -154,6 +156,10 @@
         if (act === 'retire') {
             var why = card.querySelector('.kop-pb-retire-why');
             data.text = why ? why.value.trim() : '';
+        }
+        if (act === 'research' || act === 'claude') {
+            var hb = card.querySelector('[data-form="' + act + '"] .kop-pb-handoff-text');
+            data.text = hb ? hb.value.trim() : '';
         }
         if (act === 'edit') {
             var f = card.querySelector('[data-form="edit"]');

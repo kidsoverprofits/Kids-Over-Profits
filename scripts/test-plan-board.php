@@ -178,6 +178,20 @@ $ropen = array($first['id'] => array('id' => 11, 'item_id' => $first['id'], 'ite
 $c = kop_pb_card_html($first, $ropen, array());
 $check('a retired card leaves Everything for you, waits for Claude, and can be undone', strpos($c, 'data-state="retire"') !== false && strpos($c, 'data-needs=""') !== false
     && strpos($c, 'data-waiting="1"') !== false && strpos($c, 'data-act="withdraw"') !== false && strpos($c, 'data-act="open-retire"') === false, $c);
+$check('every card not answered yet has Needs research and Send to Claude, each with its box', strpos(kop_pb_card_html($first, array(), array()), 'data-act="open-research"') !== false
+    && strpos(kop_pb_card_html($first, array(), array()), 'data-form="claude"') !== false && strpos(kop_pb_card_html($first, array(), array()), 'data-act="research"') !== false);
+$check('research and claude are kinds an item takes', in_array('research', kop_pb_kinds_for('x:a'), true) && in_array('claude', kop_pb_kinds_for('x:a'), true)
+    && !in_array('research', kop_pb_kinds_for('x:a#s'), true));
+foreach (array('research' => 'Needs research', 'claude' => 'Sent to Claude') as $hk => $hl) {
+    $hopen = array($first['id'] => array('id' => 12, 'item_id' => $first['id'], 'item_hash' => $first['hash'], 'item_lead' => $first['lead'], 'kind' => $hk, 'body' => 'who runs it now', 'saved_at' => '2026-11-13 10:00:00'));
+    $c = kop_pb_card_html($first, $hopen, array());
+    $check("a card marked $hl leaves Everything for you, waits for Claude, shows the note and can be undone",
+        strpos($c, 'data-state="' . $hk . '"') !== false && strpos($c, 'data-needs=""') !== false && strpos($c, 'data-waiting="1"') !== false
+        && strpos($c, 'who runs it now') !== false && strpos($c, 'data-act="withdraw"') !== false && strpos($c, 'data-act="edit-answer"') === false
+        && strpos($c, 'data-act="open-' . $hk . '"') === false && strpos($c, $hl) !== false, $c);
+    $exp = kop_pb_open_export($hopen, $items);
+    $check("export: $hl carries its kind and note", count($exp) === 1 && $exp[0]['kind'] === $hk && $exp[0]['text'] === 'who runs it now', json_encode($exp));
+}
 $q = current(array_filter($items, function ($it) { return $it['ask'] !== '' && !$it['steps']; }));
 $c = kop_pb_card_html($q, array(), array(), array('done' => false, 'evidence' => '12 left in Map Years', 'at' => 1792800000));
 $check('a check not done yet shows its count on the card', strpos($c, 'kop-pb-now') !== false && strpos($c, '12 left in Map Years') !== false && strpos($c, 'data-needs="1"') !== false);

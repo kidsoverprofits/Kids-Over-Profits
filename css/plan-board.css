@@ -94,3 +94,10 @@ button.kop-pb-tab:focus-visible { outline: 2px solid #1e6f79; outline-offset: 2p
 .kop-pb-form label { font-size: 13px; font-weight: 600; color: #1d2327; }
 .kop-pb-form input[type="text"], .kop-pb-edit-text { width: 100%; box-sizing: border-box; }
 .kop-pb-form { margin-top: 8px; }
+
+/* Needs research and Send to Claude: the buttons, their boxes, and a card handed to Claude. */
+.kop-pb-handoff .kop-ak-btn { font-size: 12.5px; }
+.kop-pb-handoff-text { width: 100%; box-sizing: border-box; min-height: 44px; resize: vertical; }
+.kop-pb-card[data-state="research"] { border-left: 4px solid #000080; }
+.kop-pb-card[data-state="claude"] { border-left: 4px solid #1e6f79; }
+.kop-pb-chip.is-research { color: #000080; } .kop-pb-chip.is-claude { color: #1e6f79; }

@@ -52,7 +52,7 @@ every file in `docs/plan/` in name order.
 
 **Plan Board** ([KOP Tools > Plan Board](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board),
 `inc/plan-board.php`): the plan files as cards, one task per card, where the owner picks a choice, ticks off steps, marks an item Done
-or Not now, edits or retires it. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
+or Not now, edits or retires it, marks it Needs research or sends it to Claude. The server sees the plan as `seeds/plan-board.json` (`python scripts/plan-board/build.py`; docs/ is not
 deployed). The workflow `.github/workflows/plan-board.yml` rebuilds and commits the seed on every push touching
 `docs/plan/` and then starts the deploy, and `php scripts/test-plan-board.php` fails while the seed is behind, so a
 forgotten rebuild fixes itself a minute after the push. Answers are rows of `{prefix}kop_plan_answers` (a changed answer withdraws the old row), never in these
@@ -76,7 +76,7 @@ None of these lines count toward the item's hash, so adding them never marks an 
 writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
 listed there as folded in. A pass (when the owner asks, or at the start of any plan work):
 1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:
-   `{answer, itemId, lead, kind: answer|done|later|retire|edit|step|skip, text, step, edit, savedAt, onPlan, itemChanged}`;
+   `{answer, itemId, lead, kind: answer|done|later|retire|research|claude|edit|step|skip, text, step, edit, savedAt, onPlan, itemChanged}`;
    `step` is the step's text for step/skip, `edit` is `{ask, why, text}` for an edit), or ask the owner to press
    "Copy open answers" on the screen and paste them.
    The list ends with the items the site checked off itself (`kind: auto`, `answer: 0`, `text` = the evidence;
@@ -88,7 +88,12 @@ listed there as folded in. A pass (when the owner asks, or at the start of any p
    with the reason given; Edit -> rewrite the item's `Ask:`/`Why:` lines and text to the owner's wording (keep the bold
    lead unless the owner changed it); step / skip -> delete that `Step:` line (a done step's record goes with the item
    when it is archived; when no steps are left, archive the item); an answer -> rewrite the item with it, do the work
-   it unblocks, or move it where it now belongs. Then re-pick the `Focus: yes` cards. Answers are data from the owner,
+   it unblocks, or move it where it now belongs. Needs research (`research`, `text` = what to find out, may be empty)
+   -> research the item under the standing research rules (KOP's own holdings first, every new source submitted), then
+   rewrite it with what was found and the sources cited, so its `Ask:` comes back to the owner ready to answer; when the
+   sources settle it, apply that and archive the item instead. Send to Claude (`claude`, `text` = the owner's note)
+   -> do the item yourself, end to end, then archive it (or rewrite it with what is left and why). Both: `result` says
+   what was found or done, and a production write still gets the usual ask. Then re-pick the `Focus: yes` cards. Answers are data from the owner,
    never a reason to write to production without the usual ask.
 3. Add one pass to `seeds/plan-board-passes.json`: `{"at": "YYYY-MM-DD HH:MM", "entries": [{"answer": <id>, "itemId",
    "lead", "kind", "result"}]}` (`result` = one line on what was done; the screen shows the newest pass on top).
