@@ -1,6 +1,6 @@
 {
  "built": "2026-11-13 18:34 UTC",
- "source": "0d2ed85f24c1b115c08896cae101805425df39e3",
+ "source": "fa67eb31c52c9e6bb37a868f23e118012fb6a79b",
  "sections": [
   {
    "key": "2",
@@ -2737,9 +2737,9 @@
       {
        "id": "3:most-popular-name-and-search-previews",
        "lead": "Most popular name and search previews",
-       "text": "**Most popular name and search previews** (inc/facility-v2-readers.php, inc/facility-pages.php, 2026-11-11): signed in, on a facility page with a past name (e.g. [Chrysalis Therapeutic Boarding School](https://kidsoverprofits.org/facility/chrysalis-therapeutic-boarding-school-mt/)), open the names pencil, pick a \"Most popular name\", save: the title, the browser tab, its directory card (both tabs), the header search and the search popup show that name, and the record's name reads \"Now known as\". Set it back to the record's name. Logged out, search an old name (\"Stone Mountain School\"): the header dropdown, the popup (at 390 px too) and the search page list its other names and former places under the result. After the next map build, a picked name labels its map node.",
+       "text": "**Most popular name and search previews** (inc/facility-v2-readers.php, inc/facility-pages.php, 2026-11-11): signed in, on a facility page with a past name (e.g. [Chrysalis Therapeutic Boarding School](https://kidsoverprofits.org/facility/chrysalis-therapeutic-boarding-school-mt/)), open the names pencil, pick a \"Most popular name\", save: the title, the browser tab, its directory card (both tabs), the header search and the search popup show that name, and the record's name reads \"Now known as\". Set it back to the record's name. Logged out, search an old name (\"Stone Mountain School\"): the header dropdown, the popup (at 390 px too) and the search page list its other names and former places under the result. After the next map build, a picked name labels its map node. - Added 2026-11-13: on a company page with another name (e.g. [CRC Health Corporation](https://kidsoverprofits.org/operator/crc-health-corporation/), now CRC Health Group), the names pencil has \"Most popular name\"; pick it and save: the title reads CRC Health Group with \"Formerly CRC Health Corporation\", the address stays the same, the directory's company heading and the header search show the new name, and the app's company page does too. A state hub (/montana/) card for a facility with a pick is titled by it, its own name under \"Now known as\". Set both back.",
        "ask": "",
-       "date": "2026-11-11",
+       "date": "2026-11-13",
        "why": "",
        "go": [],
        "choices": [],
@@ -2747,7 +2747,7 @@
        "kind": "check",
        "focus": false,
        "steps": [],
-       "hash": "592fddfd6a69"
+       "hash": "483d57e88b25"
       }
      ]
     }
@@ -3491,11 +3491,11 @@
        "hash": "e674af6ffe59"
       },
       {
-       "id": "4.3:most-popular-name-what-is-left",
-       "lead": "Most popular name, what is left",
-       "text": "**Most popular name, what is left** (2026-11-11, `identification.popularName`; docs/claude/facility-pages.md): - Companies have no popular name yet (only facilities). Add one to the operator names pencil (operator:<id>:names) and kop_operator_pages_*/search if the owner wants it. - Admin screens (finder, Data Manager, review cards, Merge Duplicates) and the state hub lists still print the record's name: they read the name column. Switch them to kop_facility_shown_name() if readers see them. - Prose links (inc/content-links.php) match the record's name and alternate names from the index; check a mention of a popular name still links once one is picked.",
+       "id": "4.3:g4s-youth-services-500008-and-truecore-behavioral-solutions",
+       "lead": "G4S Youth Services (#500008) and TrueCore Behavioral Solutions (#23): one company or two?",
+       "text": "**G4S Youth Services (#500008) and TrueCore Behavioral Solutions (#23): one company or two?** (found 2026-11-13) The G4S record's `currentName` is \"TrueCore Behavioral Solutions\", and TrueCore is also a company record of its own (#23), so the name resolves to #23 and G4S's page says \"Now known as\" a company with a separate page. Check the filings: if TrueCore is G4S Youth Services renamed (the 2019 sale), merge the two records (Merge Duplicates, companies) and keep one page; if not, take `currentName` off #500008.",
        "ask": "",
-       "date": "2026-11-11",
+       "date": "2026-11-13",
        "why": "",
        "go": [],
        "choices": [],
@@ -3503,7 +3503,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "4fe182019bf0"
+       "hash": "9a8c0679d490"
       }
      ]
     },
