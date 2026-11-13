@@ -117,6 +117,21 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     foreach ($differ as $p) $ok = $ok && !kop_ra_same_words($p[0], $p[1]);
     $check('reader-accounts: the word check lets spelling and punctuation through and stops a word added, dropped or changed', $ok);
 
+    // Feelings about a rule, excuses for it and softeners are testimony, even inside a part the AI marked rules.
+    $sifted = kop_ra_rules_sift(array(
+        array('kind' => 'rules', 'words' => "There were 6 levels. Restraints were used only as a last resort. Level ones could not talk.\n- No physical contact.\n- No blankets in the common area, which was for our safety."),
+        array('kind' => 'testimony', 'words' => 'I hated it.'),
+    ));
+    $check('reader-accounts: a softener or an excuse in a rules part moves to testimony, whole sentence; the rest stays rules, in order',
+        $sifted === array(
+            array('kind' => 'rules', 'words' => 'There were 6 levels.'),
+            array('kind' => 'testimony', 'words' => 'Restraints were used only as a last resort.'),
+            array('kind' => 'rules', 'words' => "Level ones could not talk.\n- No physical contact."),
+            array('kind' => 'testimony', 'words' => "- No blankets in the common area, which was for our safety. I hated it."),
+        ), json_encode($sifted));
+    $check('reader-accounts: the prompt says feelings, excuses and "as a last resort" are testimony',
+        strpos(kop_ra_prompt(array('ask' => 'q', 'answer' => '', 'name' => 'X', 'fid' => 1), 't'), 'only as a last resort') !== false);
+
     kop_ra_cron();
     $sent = implode("\n", $GLOBALS['kop_ra_test_prompts']);
     $check('reader-accounts: the AI never sees the contact details', strpos($sent, 'jane.doe') === false && strpos($sent, '555-123') === false && strpos($sent, 'www.example') === false);
@@ -206,15 +221,15 @@ function kop_rinbox_test_reader_accounts(array $src, array $item, callable $chec
     delete_option('kop_ra_mode');
     kop_ra_migrate_to_testimony();
     $check('reader-accounts: the move to testimony takes the old lines off and reads their answers again', !kop_pp_rows(array('answer_id' => $b, 'topic' => 'levels'))
-        && kop_ra_answer($b)['read_status'] === '' && get_option('kop_ra_mode') === 'testimony3');
+        && kop_ra_answer($b)['read_status'] === '' && get_option('kop_ra_mode') === 'testimony4');
     kop_ra_cron();
     // The second step (staff names): waiting testimony is read again, a decided one stays.
     kop_rinbox_ra_act("a$b", 'leave', array());
-    update_option('kop_ra_mode', 'testimony2', false);
+    update_option('kop_ra_mode', 'testimony3', false);
     kop_ra_migrate_to_testimony();
     $check('reader-accounts: a later step (rules apart) reads waiting testimony again and keeps what was decided',
         kop_ra_answer($a)['read_status'] === '' && !kop_pp_rows(array('answer_id' => $a)) && kop_ra_answer($b)['read_status'] === 'read'
-        && count(kop_pp_rows(array('answer_id' => $b, 'status' => 'left'))) === 1 && get_option('kop_ra_mode') === 'testimony3');
+        && count(kop_pp_rows(array('answer_id' => $b, 'status' => 'left'))) === 1 && get_option('kop_ra_mode') === 'testimony4');
     kop_ra_cron();
 
     // The reader answers again: their old answer's waiting testimony goes with it.

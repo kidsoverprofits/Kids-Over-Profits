@@ -231,7 +231,11 @@ function kop_ra_prompt(array $ctx, $text) {
         . "  kind: \"rules\" for a stretch that says how the program was run for everyone there: its rules, levels or phases and what each allowed, "
         . "the punishments it used, the daily schedule, limits on contact with family, what was allowed or not. \"testimony\" for everything else: "
         . "what happened to them or to someone, what they saw, how it felt, opinions, anything said about a named person. A sentence that does both, "
-        . "or that you are not sure of, is testimony. Make each part as long as it can be: a new part only where the kind changes.\n"
+        . "or that you are not sure of, is testimony. A rules part only states what the rule or practice was. How they felt about it, what they "
+        . "think of it, and any reason, excuse or defence for it (\"it was for our safety\", \"they had to\", \"to their credit\", \"it wasn't that bad\", "
+        . "\"it was pretty chill\", \"it made sense at the time\") is testimony, and so is a sentence that softens or limits a rule "
+        . "(\"only as a last resort\", \"only when needed\", \"rarely\", \"for the most part\"): the whole sentence goes, even in the middle of a list of "
+        . "rules: cut it out of the rules into its own testimony part. Make each part as long as it can be: a new part only where the kind changes.\n"
         . "role: was_there if they say they were in the program, worked if they worked there, parent if their child was there, else unknown.\n"
         . "attended: the years they say they were there, like \"2010-2012\" or \"2007\", else \"\".\n"
         . 'checklist: those of these their words show the program did, else []: ' . implode(', ', $checks) . ".\n"
@@ -297,6 +301,7 @@ function kop_ra_parse($raw, $text) {
         if ($n && $parts[$n - 1]['kind'] === $kind) $parts[$n - 1]['words'] .= (preg_match('/\n\s*$/', $parts[$n - 1]['words']) ? '' : ' ') . $w;
         else $parts[] = array('kind' => $kind, 'words' => $w);
     }
+    $parts = kop_ra_rules_sift($parts);
     $as_written = !$parts || !kop_ra_same_words($text, implode(' ', array_column($parts, 'words')));
     if ($as_written) $parts = array(array('kind' => 'testimony', 'words' => trim(str_replace("\r\n", "\n", (string) $text))));
     foreach ($parts as &$pt) {
@@ -315,6 +320,47 @@ function kop_ra_parse($raw, $text) {
         'checklist' => array_values(array_unique(array_filter(array_map('kop_pp_clean_check', (array) ($j['checklist'] ?? array()))))),
         'leads' => $leads, 'names' => $names, 'staff' => $staff,
     );
+}
+
+/**
+ * Words that make a sentence testimony however it is marked (owner, 2026-11-13): how they felt about a rule, an excuse or
+ * defence for it, or a softener ("as a last resort"). Matched on whole words, lower case.
+ */
+function kop_ra_not_rules_words() {
+    return array(
+        'last resort', 'only when needed', 'only when necessary', 'only if needed', 'only if necessary', 'when absolutely necessary',
+        'for the most part', 'rarely', 'to their credit', 'in fairness', 'to be fair', 'for our safety', 'for our own safety',
+        'for our own good', 'for our protection', 'it made sense', 'made sense at the time', 'not that bad', "wasn't that bad",
+        'wasnt that bad', "wasn't so bad", 'pretty chill', 'chill af', 'i think', 'i guess', 'i felt', 'i feel', 'i hated', 'i liked',
+        'i loved', 'honestly', 'unfair', 'ridiculous', 'stupid', 'abusive', 'traumatizing', 'traumatising', 'traumatic', 'cruel', 'awful',
+        'horrible', 'terrible', 'understandable', 'reasonable', 'necessary evil', 'good intentions', 'meant well',
+    );
+}
+
+/**
+ * The backstop: a sentence of a rules part carrying kop_ra_not_rules_words() moves to testimony, whole. The parts stay
+ * consecutive and same-kind neighbours are joined, so their words in order are unchanged.
+ */
+function kop_ra_rules_sift(array $parts) {
+    $pat = '/(?<![\p{L}\'])(?:' . implode('|', array_map(function ($w) { return preg_quote($w, '/'); }, kop_ra_not_rules_words())) . ')(?![\p{L}])/iu';
+    $out = array();
+    $push = function ($kind, $w) use (&$out) {
+        $w = trim($w, " \t");
+        if (trim($w) === '') return;
+        $n = count($out);
+        if ($n && $out[$n - 1]['kind'] === $kind) $out[$n - 1]['words'] .= (preg_match('/\n\s*$/', $out[$n - 1]['words']) ? '' : ' ') . $w;
+        else $out[] = array('kind' => $kind, 'words' => $w);
+    };
+    foreach ($parts as $pt) {
+        $w = str_replace(array("\u{2019}", "\u{2018}"), "'", $pt['words']);
+        if ($pt['kind'] !== 'rules' || !preg_match($pat, $w)) { $push($pt['kind'], $pt['words']); continue; }
+        foreach (preg_split('/(?<=[.!?])[ \t]+|(?<=\n)/u', $pt['words']) as $sentence) {
+            $push(preg_match($pat, str_replace(array("\u{2019}", "\u{2018}"), "'", $sentence)) ? 'testimony' : 'rules', $sentence);
+        }
+    }
+    foreach ($out as &$o) $o['words'] = trim($o['words']);
+    unset($o);
+    return $out;
 }
 
 /** What a lead's kind is called on the card. */
@@ -396,20 +442,21 @@ function kop_ra_forget(array $ids, $all = false) {
  * wording of their words, go, from the cards and from the pages; every answer
  * is read again into testimony and waits for review. Boxes those lines ticked
  * on records stay ticked. Then again for each change since (testimony2: staff
- * names left in; testimony3, 2026-11-12: rules apart from testimony):
+ * names left in; testimony3, 2026-11-12: rules apart from testimony;
+ * testimony4, 2026-11-13: feelings about and excuses for rules are testimony):
  * testimony still waiting is read again; what was added or left off stays.
  */
 function kop_ra_migrate_to_testimony() {
     if (!kop_pp_ready() || !kop_pp_has_accounts()) return;
     $mode = get_option('kop_ra_mode');
-    if ($mode === 'testimony3') return;
+    if ($mode === 'testimony4') return;
     global $wpdb;
-    if ($mode === 'testimony' || $mode === 'testimony2') {
+    if ($mode === 'testimony' || $mode === 'testimony2' || $mode === 'testimony3') {
         kop_q_ensure_tables();
         $wpdb->query('DELETE FROM ' . kop_pp_table() . " WHERE answer_id > 0 AND status = 'pending'");
         $wpdb->query('UPDATE ' . kop_q_table() . " SET read_status = '' WHERE " . kop_ra_where() . " AND read_status <> ''"
             . ' AND id NOT IN (SELECT answer_id FROM ' . kop_pp_table() . ' WHERE answer_id > 0)');
-        update_option('kop_ra_mode', 'testimony3', false);
+        update_option('kop_ra_mode', 'testimony4', false);
         return;
     }
     $fids = array_map('intval', (array) $wpdb->get_col('SELECT DISTINCT facility_id FROM ' . kop_pp_table() . " WHERE answer_id > 0 AND status = 'added'"));
@@ -421,7 +468,7 @@ function kop_ra_migrate_to_testimony() {
     $wpdb->query('UPDATE ' . kop_q_table() . " SET read_status = '' WHERE " . kop_ra_where() . " AND read_status <> ''");
     foreach ($fids as $fid) kop_pp_purge($fid);
     if ($fids && function_exists('kop_record_changed')) kop_record_changed('facility', $fids);
-    update_option('kop_ra_mode', 'testimony3', false);
+    update_option('kop_ra_mode', 'testimony4', false);
 }
 
 /* ---- Decisions ------------------------------------------------------------ */
