@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 16:16 UTC",
- "source": "769561c33a9888e95b77770f464c5738cdc06be5",
+ "built": "2026-11-16 16:30 UTC",
+ "source": "816058c5e5b0de2a93f45b1b7c8ddd86a9a8c83c",
  "sections": [
   {
    "key": "2",
@@ -128,24 +128,6 @@
        "hash": "3774d5106505"
       },
       {
-       "id": "2.1:google-docs-export-last-two-sheets",
-       "lead": "Google Docs export, last two sheets",
-       "text": "**Google Docs export, last two sheets** (2026-10-01). Ask a session for a fresh `tmp/gdocs/export.gs`, paste it at script.google.com and Run once more (\"TTI Database - Master\" and the 2014 analysis sheet hit Google's rate limit).",
-       "ask": "Rerun the Google export for the last two sheets (\"TTI Database - Master\", the 2014 analysis)?",
-       "date": "2026-10-01",
-       "why": "Those two sheets hit Google's limit and never came across.",
-       "go": [],
-       "choices": [
-        "Yes, prepare the script",
-        "No, skip them"
-       ],
-       "time": "1 min to decide, 10 min to run",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "5b1556503a9d"
-      },
-      {
        "id": "2.1:billings-clinic-testimony",
        "lead": "Billings Clinic testimony",
        "text": "**Billings Clinic testimony** (2026-09-30). In the [admin data form](https://kidsoverprofits.org/admin-data/), providers tab, MONTANA PROVIDERS > Survivor Testimony: delete the stray paragraph \"Medication\", tick \"OK to publish\", save.",
@@ -168,39 +150,36 @@
       {
        "id": "2.1:deploys-now-and-then-meet-the-host-s-bot-check",
        "lead": "Deploys now and then meet the host's bot check",
-       "text": "**Deploys now and then meet the host's bot check** (found 2026-11-01). 2 of the last 30 deploy.yml runs failed at \"Pull latest commit on server\": cPanel's API on port 2083 answered the GitHub runner with the \"One moment, please...\" challenge page instead of JSON (runs 41338180817, 41338193179). The next push or a rerun deploys it. To stop it, allow the GitHub Actions runners past the challenge for port 2083 (NixiHost support or the firewall/Imunify whitelist), or leave it and rerun when a deploy fails.",
-       "ask": "About 1 deploy in 15 fails at the host's bot check. Ask NixiHost to fix it, or live with it?",
-       "date": "2026-11-01",
-       "why": "A failed deploy means a change silently doesn't go live until the next push.",
+       "text": "**Deploys now and then meet the host's bot check** (found 2026-11-01). 2 of the last 30 deploy.yml runs failed at \"Pull latest commit on server\": cPanel's API on port 2083 answered the GitHub runner with the \"One moment, please...\" challenge page instead of JSON (runs 41338180817, 41338193179). The next push or a rerun deploys it. To stop it, allow the GitHub Actions runners past the challenge for port 2083 (NixiHost support or the firewall/Imunify whitelist), or leave it and rerun when a deploy fails. Owner, Plan Board 2026-11-10: \"how do i ask nixihost?\" NixiHost takes requests as support tickets from its client area (where the hosting is paid). Ticket to paste, subject then text: Subject: \"cPanel API on port 2083 sometimes answers GitHub Actions with your bot check\". Text: \"Our site kidsoverprofits.org (cPanel user kidsover, server dfw-s07) deploys from GitHub Actions by calling the cPanel UAPI VersionControl/update on port 2083 with an API token. About 1 call in 15 gets the 'One moment, please...' challenge page instead of JSON, so that deploy fails. Could you let API-token requests to port 2083 past the challenge for this account, or allow GitHub Actions' runner addresses (the 'actions' list at https://api.github.com/meta)? Thank you.\"",
+       "ask": "Send NixiHost a support ticket about the deploy bot check (the text is ready in the notes)",
+       "date": "2026-11-10",
+       "why": "About 1 deploy in 15 fails at their bot check, and a failed deploy means a change silently doesn't go live.",
        "go": [],
-       "choices": [
-        "I'll ask NixiHost",
-        "Live with it (Claude reruns failed deploys)"
-       ],
-       "time": "1 min",
-       "kind": "decide",
+       "choices": [],
+       "time": "5 min",
+       "kind": "do",
        "focus": true,
-       "steps": [],
-       "hash": "c53810ea18d4"
-      },
-      {
-       "id": "2.1:the-site-s-rest-answers-are-pinned-to-http-localhost-8000",
-       "lead": "The site's REST answers are pinned to `http://localhost:8000`",
-       "text": "**The site's REST answers are pinned to `http://localhost:8000`** (found 2026-11-13). Every `wp-json` answer (and every file outside the theme folder) carries `Access-Control-Allow-Origin: http://localhost:8000`, `Allow-Methods: GET, POST, OPTIONS`, `Allow-Headers: Content-Type, Authorization` and `Allow-Credentials: true`, whatever site asks. Nothing in the theme sets it, so it is a `Header set` in the root `public_html/.htaccess` (or a server rule), probably left from testing something locally. It stops any other site, or a web build of the app, from reading the public API; the theme's own `.htaccess` overrides it only for its listed `api/*.php` files (the About rewrite pilot page reads `api/about-live.php` for this reason). The native app is not affected. Fix: delete those lines from the root .htaccess (WordPress then answers each site itself), or ask a session to read the file over SSH (refused by the auto-mode classifier on 2026-11-13).",
-       "ask": "Remove the \"localhost:8000\" CORS lines from the site's root .htaccess (cPanel > File Manager > public_html)?",
-       "date": "2026-11-13",
-       "why": "They block other sites and a web build of the app from reading the public data; nothing needs them.",
-       "go": [],
-       "choices": [
-        "Done",
-        "Let a session do it over SSH",
-        "Leave it"
+       "steps": [
+        {
+         "id": "log-in-to-the-nixihost-client-area-then-support-op",
+         "label": "Log in to the NixiHost client area, then Support > Open Ticket (technical support)",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "paste-the-subject-and-text-from-the-notes-and-send",
+         "label": "Paste the subject and text from the notes and send it",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "when-they-answer-tell-claude-what-they-changed-it",
+         "label": "When they answer, tell Claude what they changed (it then watches the next deploys)",
+         "url": "",
+         "note": ""
+        }
        ],
-       "time": "3 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "cdeff2d0c9f4"
+       "hash": "37a8015cbd0c"
       }
      ]
     },
@@ -240,9 +219,9 @@
       {
        "id": "2.2:backfills",
        "lead": "Backfills",
-       "text": "**Backfills**: MN with Chrome closed (`py -3 scrapers/mn_scraper.py --backfill-pdfs`, ~20 min). GA, TX and CT were started 2026-10-17: confirm they finished.",
-       "ask": "Finish the state report backfills (confirm GA, TX, CT; run MN)",
-       "date": "2026-10-17",
+       "text": "**Backfills**: MN with Chrome closed (`py -3 scrapers/mn_scraper.py --backfill-pdfs`, ~20 min). GA, TX and CT were started 2026-10-17: confirm they finished. GA confirmed finished by the owner (Plan Board step, 2026-11-13).",
+       "ask": "Finish the state report backfills (confirm TX, CT; run MN)",
+       "date": "2026-11-13",
        "why": "Reports without their PDFs can vanish when a state takes its copy down.",
        "go": [],
        "choices": [],
@@ -250,12 +229,6 @@
        "kind": "do",
        "focus": false,
        "steps": [
-        {
-         "id": "check-the-ga-backfill-finished-the-end-of-its-run",
-         "label": "Check the GA backfill finished (the end of its run log)",
-         "url": "",
-         "note": ""
-        },
         {
          "id": "check-the-tx-backfill-finished",
          "label": "Check the TX backfill finished",
@@ -275,26 +248,7 @@
          "note": ""
         }
        ],
-       "hash": "8720914ff8f7"
-      },
-      {
-       "id": "2.2:california-backfill",
-       "lead": "California backfill",
-       "text": "**California backfill** (the owner's call): 30,885 reports: sync the mirror, then `py -3.14 ca_scraper.py --backfill-pdfs`. Fixed 2026-10-20 in kop-pipeline `c228130`: CCL's end-of-list answer (HTTP 400 \"Index out of range\") had made every facility count as unfinished, so each run started over. CCL now takes ~1 minute a report page, so the whole walk is closer to 3 weeks than 3-5 days; it resumes, so it can run in evening stretches.",
-       "ask": "Run the California PDF backfill (about 3 weeks of evening runs; it resumes)?",
-       "date": "2026-10-20",
-       "why": "Saves our own copy of 30,885 CA reports before the state drops any.",
-       "go": [],
-       "choices": [
-        "Yes, start it",
-        "Not this month",
-        "No, skip California"
-       ],
-       "time": "1 min to decide",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "85509cb8cd27"
+       "hash": "6e7c7a4ca690"
       },
       {
        "id": "2.2:first-posts-then-publish-the-page",
@@ -346,8 +300,8 @@
          "note": ""
         },
         {
-         "id": "maryland-after-the-maryland-question-in-2-4",
-         "label": "Maryland (after the Maryland question in 2.4)",
+         "id": "maryland-children-s-initials-are-now-cut-from-the",
+         "label": "Maryland (children's initials are now cut from the summaries, kop-pipeline 2e70fe1; first post, then publish /md-reports/)",
          "url": "",
          "note": ""
         },
@@ -377,25 +331,6 @@
         }
        ],
        "hash": "55b5aca94db9"
-      },
-      {
-       "id": "2.2:colorado-is-blocked",
-       "lead": "Colorado is blocked",
-       "text": "**Colorado is blocked** (2026-10-20). The dashboard's View Data command (`get-view-data-dialog-tab-pres-model`) never answers, though every other call answers in under 2 s; it is the only way to the lists and the citation text. See `plans/colorado.md` Status. Next: one View Data try in real Chrome on an evening, or a Colorado Open Records Act request to CDPHE for the inspection and citation data.",
-       "ask": "Colorado's report site won't hand over its data. File a records request, try once more, or drop it?",
-       "date": "2026-10-20",
-       "why": "Colorado has no inspection reports on KOP at all.",
-       "go": [],
-       "choices": [
-        "File a records request (Claude drafts it)",
-        "Try once more in Chrome",
-        "Drop Colorado for now"
-       ],
-       "time": "1 min to decide",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "c1e0e523271e"
       },
       {
        "id": "2.2:regular-runs",
@@ -1257,24 +1192,6 @@
      "intro": [],
      "items": [
       {
-       "id": "2.4:wiki-updates-for-entries-with-no-exported-draft",
-       "lead": "Wiki updates for entries with no exported draft",
-       "text": "**Wiki updates for entries with no exported draft** (~170 of 296): should the site draft their old gaps too (one switch: drop the baseline for entries `update-drafts.json` lacks) (old 3.12 step 6).",
-       "ask": "About 170 wiki entries have old gaps no draft covers. Have the site draft updates for them too?",
-       "date": "",
-       "why": "Without it, those entries only get updates for news that comes in from now on.",
-       "go": [],
-       "choices": [
-        "Yes, draft them",
-        "No, only new gaps"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "fa0e932d04ac"
-      },
-      {
        "id": "2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check",
        "lead": "NH: The Ridge RTC statement held by the privacy check",
        "text": "**NH: The Ridge RTC statement held by the privacy check** (2025-12-15). The visit posts without it; children are lettered only, and the trigger was the words \"Child Advocacy Center\" (PLAN-ARCHIVE, New Hampshire 2026-10-01).",
@@ -1311,24 +1228,6 @@
        "hash": "2a6c5fe54d16"
       },
       {
-       "id": "2.4:md-post-the-15-summaries-with-initials-cut-out",
-       "lead": "MD: post the 15 summaries with initials cut out?",
-       "text": "**MD: post the 15 summaries with initials cut out?**",
-       "ask": "Maryland: post the 15 report summaries with children's initials cut out?",
-       "date": "",
-       "why": "Maryland's page can't go up until this is settled.",
-       "go": [],
-       "choices": [
-        "Yes, with initials cut",
-        "No, hold Maryland"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "2aafcbc133ba"
-      },
-      {
        "id": "2.4:wv-the-16-unsure-rows-and-1-gb-of-drive-for-wv-pdfs",
        "lead": "WV: the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`",
        "text": "**WV: the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`**. The scope has 66 included, 122 excluded and 16 unsure records; unsure records are not scraped (PLAN-ARCHIVE, West Virginia).",
@@ -1355,104 +1254,6 @@
         }
        ],
        "hash": "fd90337fd52d"
-      },
-      {
-       "id": "2.4:co-the-9-unsure-facilities",
-       "lead": "CO: the 9 unsure facilities",
-       "text": "**CO: the 9 unsure facilities**: West Pines, Sierra Vista, Johnstown Heights, West Springs, three Eating Recovery Center licences, HCA Aurora, M.I.K.I.D. (PLAN-ARCHIVE, Colorado). Moot while Colorado is blocked (2.2).",
-       "ask": "Colorado: are these 9 in scope? West Pines, Sierra Vista, Johnstown Heights, West Springs, 3 Eating Recovery Centers, HCA Aurora, M.I.K.I.D.",
-       "date": "",
-       "why": "Only matters once Colorado's data can be fetched (see 2.2).",
-       "go": [],
-       "choices": [],
-       "time": "5 min",
-       "kind": "do",
-       "focus": false,
-       "steps": [],
-       "hash": "5cbd5a8313f3"
-      },
-      {
-       "id": "2.4:nv-go-ahead-to-delete-the-junk-reports",
-       "lead": "NV: go-ahead to delete the junk reports",
-       "text": "**NV: go-ahead to delete the junk reports** \"1\", \"2\", \"3\", \"...\" on /nv-reports/.",
-       "ask": "Nevada: delete the junk reports named \"1\", \"2\", \"3\", \"...\" on /nv-reports/?",
-       "date": "",
-       "why": "They are scraper debris showing on a public page.",
-       "go": [
-        {
-         "label": "/nv-reports/",
-         "url": "https://kidsoverprofits.org/nv-reports/"
-        }
-       ],
-       "choices": [
-        "Yes, delete them",
-        "No, look at them first"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": true,
-       "steps": [],
-       "hash": "131ff8e2f48a"
-      },
-      {
-       "id": "2.4:or-a-records-request-for-complaint-investigations-and-licens",
-       "lead": "OR: a records request for complaint investigations and licensing actions",
-       "text": "**OR: a records request for complaint investigations and licensing actions.**",
-       "ask": "Oregon: file a records request for complaint investigations and licensing actions?",
-       "date": "",
-       "why": "Oregon doesn't publish them; a request is the only way to get them.",
-       "go": [],
-       "choices": [
-        "Yes (Claude drafts it)",
-        "No"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "69363a0de646"
-      },
-      {
-       "id": "2.4:the-misplaced-1933-line",
-       "lead": "The misplaced 1933 line",
-       "text": "**The misplaced 1933 line** on /idd-timeline/ (\"Initially served 'mental defectives'\"): Devereux or the Southard School.",
-       "ask": "The 1933 \"Initially served 'mental defectives'\" line on /idd-timeline/: which school is it about?",
-       "date": "",
-       "why": "It is attached to the wrong school on a public page.",
-       "go": [
-        {
-         "label": "/idd-timeline/",
-         "url": "https://kidsoverprofits.org/idd-timeline/"
-        }
-       ],
-       "choices": [
-        "Devereux",
-        "The Southard School",
-        "Not sure: research it"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": true,
-       "steps": [],
-       "hash": "bd70aef9702e"
-      },
-      {
-       "id": "2.4:rules-from-documents-card-length",
-       "lead": "Rules-from-documents card length",
-       "text": "**Rules-from-documents card length**: tighten the Rules-from-documents cap if long cards bother. (The other half of this item, an AI pass smoothing the About prose, is now the About rewrite in 2.5.)",
-       "ask": "Rules from documents cards: shorten them?",
-       "date": "",
-       "why": "Long cards are slower to review; shorter ones may cut useful detail.",
-       "go": [],
-       "choices": [
-        "Yes, tighten the cap",
-        "Leave them"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "6db27cc58328"
       },
       {
        "id": "2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58",
@@ -1825,24 +1626,6 @@
        "hash": "2e1c4f583913"
       },
       {
-       "id": "2.5:long-form-articles",
-       "lead": "Long-form articles",
-       "text": "**Long-form articles**: which sections to wrap in `[kop_section]` (15B); summaries, \"Why this matters\", era tags (15C-E); Advocacy History, Corporatization, Lawsuits (18A-C) (old 3.4).",
-       "ask": "Long-form articles: should Claude propose the sections, summaries and era tags for you to approve?",
-       "date": "",
-       "why": "It makes the long articles skimmable; nothing moves until you say which.",
-       "go": [],
-       "choices": [
-        "Yes, propose them",
-        "Not now"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "5149e0f51432"
-      },
-      {
        "id": "2.5:rewrite-of-generated-prose-by-claude-agents",
        "lead": "Rewrite of generated prose by Claude agents",
        "text": "**Rewrite of generated prose by Claude agents** (owner, 2026-11-02): the rule-built \"About\" on facility and company pages (inc/profile-notes.php), the company histories and the timeline event text read badly. Decided: Claude agents write offline from a packet of each record's facts (kop-pipeline `scripts/about-rewrite/`, brief in BRIEF.md there); the text goes live as soon as it deploys, fixed with the pencil, the rule-built prose kept as the fallback. A 20-record pilot (before/after) comes first, then the full run (about 1,100 records). Open: the pilot; an apply path that writes kop_record_writeups.published WITHOUT releasing held facts (kop_wu_publish() releases them); company histories and timeline text after the About. Citations (owner, same day): cite the source a research note names, never the note. About 100 citations in 30 seeded company histories point at KOP material (research-notes Google Docs, the research spreadsheet, the glossary, /corporatization/, /three-springs-inc/; Straight Inc. 16, Three Springs 14, Teen Challenge 5); the history rewrite traces each to the source behind it. Pilot (2026-11-02): https://claude.ai/artifact/4feUz655wtt6zshbvg3kDm (20 Abouts + the Teen Challenge history; packets from scripts/export-about-packets.php, page from kop-pipeline scripts/about-rewrite/compare.py). Teen Challenge follow-ups: the research-notes Doc's Texas timeline is copied from the Texas Freedom Network's 2002 report (now cited); Henry Lozano's Teen Challenge role rests on a 2005 Rockefeller Institute interview only on the Wayback Machine (archive it as a PDF, then cite it); founding year 1958 (its own history page, Woodbury) vs 1960 on the fact box. The writer swapped the New Yorker, FOX 13, FOX4 and Kokomo Tribune citations for other outlets only because its fetches failed: put the originals back beside the new ones. Five new sources it found were sent to the review inbox. Pilot (2026-11-03, docs/kop-about-rewrite-pilot/, commit dc310e7c, preview version 16): every sentence cited; claims earlier passes cut as \"untraceable\" restored, cited to the original HEAL/the wiki/Wikipedia/KOP name (owner: take the citation inside that source, never cut for not being able to check the original). Owner answers: Fager's case list is a source; plaintiff counts take the highest reputable-media figure; Daily Star dated Oct 2009. HEAL browser pass done 2026-11-04 (Claude in Chrome; commit d3d53380, preview version 17): restored Aspen Ranch agreement terms, Eagle Ranch and Canyon State police logs, the 2009 Eagle Ranch recording, Falcon Ridge's 2019 e-mail account and the Tribune 2022 regulator story. The 12 claims HEAL gives no citation for are research tasks (section \"About rewrite pilot: claims still out\"). 2026-11-04: both HEAL-hosted police PDFs archived (media library 17220, 17221) and sent to Websites Sent In; Mount Bachelor suit dates reconciled (2nd Nov 2011 per the reports at the time; 3rd 2012 per The Bulletin; Jan 2013 was a ruling); preview republished (version 18). 2026-11-04 (evening): Mount Bachelor's three suits dated with case numbers from the federal coverage opinion (D. Or. 3:12-cv-00825; third = Doe 210, Deschutes, Jan 4, 2012, 13 plaintiffs per The Bulletin 2014); Falcon Ridge / Lava Heights handover dated Oct 2021 from the schools' own archived sites; Nichols = Rite of Passage staff; Savage 32; Trane in custody Mar 6, 2023; Mulhare goes to Island View (100601 / Elevations 10356) in the full run. Six sources sent (1 lawsuit, 4 articles, 1 website). Preview republished (version 19). Later that evening: eradec09.mp3 imported (media 17225) and sent; era09 links KOP's copy; Drive \"Seq Timeline Draft\" corrected (Nichols = Rite of Passage staff; Oct 2021 handover added). Savage's \"23\" is in no KOP file. Open: submit the Salt Lake Tribune Mar 15, 2022 story once its original URL is known (archive.ph/fDXKK, CAPTCHA). 2026-11-11 (owner): notes were overwhelming and survivor testimony was being retold in the prose. Now: each record's note is out/recNN.note.json (needs_you shown and gathered at the top; research and log folded), and survivor/family accounts are exact quotes in `testimony` (spelling and punctuation only, \"…\" cuts) with one pointer sentence; a survivor quoted by a reporter/court/hearing stays only as a direct quote (kop-pipeline BRIEF.md rules 28-32, compare.py renders it; commit 0a618f1 there). Open: the full run's apply path must write `testimony` into the facility's survivorTestimony store (kop_facility_testimony_list(), publish flag) instead of the About; the pilot's `research` lines go to the research tasks queue (wpdl_kop_research_tasks) for agents. Owner answered all 12 asks on the page the same day (artifact db, collection `answers`); applied: rec03 ISAC line cut, rec07 both 2004 accounts, rec14 one program (Kids Helping Kids = Straight rebranded). Memorial via seeds/memorial.json (seed version 157): the unnamed Colorado County Boot Camp youth (Aug 31, 2002) added, and row 163 corrected to Nicholaus Contreraz, untreated infection (empyema) and neglect (new `corrections` list). After deploy: check both on /in-loving-memory/. Open: KOP's Straight - Cincinnati record should run 1982-2008 as one program (owner); the Family Foundation School memorial row (118, balcony fall) has no source yet. 2026-11-11: the pilot goes live on deploy (inc/about-rewrites.php, seeds/about-rewrites/, template pass 158; quotes published at once, owner). After deploy: check Eagle Ranch, Aspen Ranch and Teen Challenge's About and the quotes on Eagle Ranch, Falcon Ridge and Prayer Mountain Academy. Full run order (owner): first the parent companies (UHS, Acadia, Sequel TSI, Vivant, Charter, Psychiatric Solutions, CRC, Magellan, WWASPS, CEDU, Straight, KIDS, Brown Schools, Three Springs, YSI, CSC, GEO, TrueCore, AMIkids, Abraxas, Eckerd, Ramsay, Youth Opportunity, Devereux, Embark, Ascent, Family Help & Wellness, Newport, Paradigm, JRI), then the most notorious programs (list in this session's handoff; KOP's death/lawsuit/news counts plus how widely known, since the counts alone miss Casa by the Sea, Hephzibah House and others). Duplicates to merge first: VisionQuest (4 records), Catherine Freer (2). 2026-11-13 (owner): no artifact, no seeds: rewrites are reviewed at KOP Tools > About rewrites (one card per record, Needs you buttons, Publish / Send back to Claude / Undo), and Claude writes every About (hourly AI drafts off; the inbox's Write-ups queue is gone). The 21 pilot rewrites show under Published. About 390 records the AI used to draft are under With Claude. Open: the full run's agents write in the pilot shape and the lead sends them with kop-pipeline send-rewrites.py (BRIEF.md \"Sending it\"). The old preview artifact is deleted (2026-11-13). Full run, how (owner, 2026-11-13): writers draft (Sonnet / Opus medium), then Opus at high effort edits every rewrite for concision and clarity before it is sent (BRIEF.md \"Who does what\"); fetching, archiving, link checks and source submission go to Haiku/Sonnet. Send with send-rewrites.py; the owner reviews at KOP Tools > About rewrites. First batch: the 30 parent companies listed above, then the notorious programs. Batch 1 started 2026-11-13: packets, drafts, editor/writer instructions (WRITER.md, EDITOR.md) and `convert.py` (draft -> pilot shape, warns on uncited text, missing labels/urls, non-original hosts) in kop-pipeline `tmp/about-rewrite/batch1/`. 13 writers (Opus medium: Sequel, Acadia, WWASPS, UHS/PSI/Ramsay, Charter/Magellan/CRC, CEDU/Brown, Straight/KIDS, Devereux/JRI; Sonnet: CSC/GEO/Abraxas/YOI, YSI/Vivant/TrueCore, Three Springs/Eckerd/AMIkids, Embark/Newport/Paradigm, Ascent/FHW), then one Opus high editor per group, a Sonnet agent for Wayback PDFs and link checks, then send-sources.py and send-rewrites.py. Company packets carry the written `history` (unnumbered); Paradigm and GEO have 0 numbered facts. Status 2026-11-16: all 13 drafts written; 18 of 30 edited and converted (`sendable/`). Five Opus edit passes (Three Springs group, UHS group, CEDU/Brown, Straight/KIDS, Devereux/JRI) hit the 5-hour usage limit on 2026-11-13 and were resumed. Still to do before sending: a testimony pass for the companies edited before the testimony rule (Ascent, FHW, Embark, Newport, Paradigm, CSC, GEO, Abraxas, YOI, YSI, Vivant, Magellan); the support agent (Drive-cited files into the media library, Wayback PDFs, link check); send-sources.py on `sources/*.not-sent.json`; then send-rewrites.py. KOP record fixes the agents found are in `batch1/LEAD-NOTES.md`; they go to the research tasks queue with each rewrite's `research` lines.",
@@ -1961,44 +1744,17 @@
       {
        "id": "2.6:artwork-and-listing",
        "lead": "Artwork and listing",
-       "text": "**Artwork and listing**: icon, splash, adaptive icon; short and long descriptions, screenshots, age rating.",
-       "ask": "Who makes the app's icon, splash screen and store listing?",
-       "date": "",
-       "why": "The stores won't take the app without them.",
+       "text": "**Artwork and listing**: icon, splash, adaptive icon; short and long descriptions, screenshots, age rating. Owner, Plan Board 2026-11-13: Claude drafts the text (4.8), a person makes the art.",
+       "ask": "Find a person to make the app's icon, splash screen and Android adaptive icon",
+       "date": "2026-11-13",
+       "why": "The stores won't take the app without them; the listing text is being drafted.",
        "go": [],
-       "choices": [
-        "Me",
-        "The design volunteer",
-        "Claude drafts the text, a person makes the art"
-       ],
-       "time": "1 min",
-       "kind": "decide",
+       "choices": [],
+       "time": "10 min to ask someone",
+       "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "b3297a91f7c6"
-      },
-      {
-       "id": "2.6:privacy-policy-and-the-app",
-       "lead": "Privacy policy and the app",
-       "text": "**Privacy policy and the app**: check `/privacy-policy/` covers the app.",
-       "ask": "Does the privacy policy cover the app? (the stores ask)",
-       "date": "",
-       "why": "Both stores require a policy that covers what the app collects.",
-       "go": [
-        {
-         "label": "/privacy-policy/",
-         "url": "https://kidsoverprofits.org/privacy-policy/"
-        }
-       ],
-       "choices": [
-        "It covers it",
-        "It doesn't: Claude drafts an app section"
-       ],
-       "time": "5 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "eebf78c483ac"
+       "hash": "410fde749aba"
       },
       {
        "id": "2.6:site-links-that-open-the-app",
@@ -2495,25 +2251,17 @@
       {
        "id": "3:drive-docs-news-waits-for-review",
        "lead": "Drive Docs news waits for review",
-       "text": "**Drive Docs news waits for review** (2026-10-20, [587a4532](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/587a4532)): in [Review inbox > Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox) Add one news link; it shows waiting in [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/), not on the site; within an hour or two the reader fills its summary and date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by \"undo of auto news (2026-10-20)\"). Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.",
-       "ask": "8,561 news links were taken back from an automatic import. Review them again, or skip them all?",
-       "date": "2026-10-20",
-       "why": "They are mostly duplicate or off-topic links; reviewing them is many hours.",
-       "go": [
-        {
-         "label": "Drive Docs",
-         "url": "https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox&type=drive-docs"
-        }
-       ],
-       "choices": [
-        "Skip them all",
-        "Review them again"
-       ],
-       "time": "1 min to decide",
-       "kind": "decide",
-       "focus": true,
+       "text": "**Drive Docs news waits for review** (2026-10-20, [587a4532](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/587a4532)): in [Review inbox > Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox) Add one news link; it shows waiting in [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/), not on the site; within an hour or two the reader fills its summary and date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by \"undo of auto news (2026-10-20)\"). Owner, Plan Board 2026-11-10: \"Skip them all\". Done 2026-11-13: all 8,561 (SCIAD 7,611, wiki 584, Google Docs 319, data audit 47; none touched since) set to Skipped as the screen's Skip does, reviewed_by \"owner: skip all (Plan Board, 2026-11-10)\"; they are on the \"Skipped or already there\" tab.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
        "steps": [],
-       "hash": "0a3fe2407943"
+       "hash": "9f0818f3466d"
       },
       {
        "id": "3:desktop-sidebar-sticky-column",
@@ -2763,6 +2511,21 @@
        "focus": false,
        "steps": [],
        "hash": "473e1d652c32"
+      },
+      {
+       "id": "3:plan-board-pass-of-2026-11-16",
+       "lead": "Plan Board pass of 2026-11-16",
+       "text": "**Plan Board pass of 2026-11-16** (seeds text-fixes and memorial, template pass v160): - https://kidsoverprofits.org/idd-timeline/ reads \"1938 - Devereux Foundation Established as a Nonprofit\" with the \"mental defectives\" line under it (the 1935 heading gone). - https://kidsoverprofits.org/in-loving-memory/ lists Donald MacNeil (Robert Land Academy, November 2010) and no longer shows Roberta Evers, Amari Boone, Diane Ramirez or Dustin E. Phelps (archived; owner: no foster care or in-home deaths); the count drops by three. - KOP Tools > Memorial sheet: the Add tab has no \"Before 1971\" notes, and Evers, Gulley and Boone are under skipped. - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "7ed8ed1e9260"
       }
      ]
     }
@@ -3046,6 +2809,21 @@
        "focus": false,
        "steps": [],
        "hash": "35ad9d9a574d"
+      },
+      {
+       "id": "4.2:nv-facilities-listed-twice",
+       "lead": "NV facilities listed twice",
+       "text": "**NV facilities listed twice** (found 2026-11-13 in the live `api/inspections-read.php?state=NV`): Sierra Sage Residential Treatment (the same five reports twice, e.g. report 44041 as rows 66057 and 122413), Sunarch Academy (17 + 17), Thrive Greenhouse LLC (0 + 0) and Momentum Centers (2 + 1). Fold each pair into one facility row, drop the duplicate reports, and find why the NV scraper made a second row.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "a8713572e670"
       }
      ]
     },
@@ -3207,20 +2985,17 @@
       {
        "id": "4.3:data-model-phase-5",
        "lead": "Data model phase 5",
-       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit. Owner: go (2026-10-25). Backup taken 2026-10-25 17:30 server time: `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server (facilities_master, locations_master, the six `_bak_2026091x` tables, facilities_v2; 4.3 MB) and a copy in `tmp/backups/`. Client side of the form's step 6 done ([aab73af](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/aab73afde3a1b65971461fb3e21c8f782df60995)). Step 1 done 2026-10-25: every live reader and writer of facilities_master / locations_master facility arrays reads the v2 tables ([4297942](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4297942a965086b2435d61fcc021ab6312acaae0), [abffd0c](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/abffd0c64d531410a71eddd3c6e6db20736d1264), [961ea19](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/961ea19544efce38fad7f9cec62889baa080d3ac)); fixed on the way: Link wiki facility refused every record made since the write switch. Done the same day: old-table tools deleted ([9723d93](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/9723d931dc4b3dd5e437512b6d256e668ac2d064)); on production `api/phase5-retire-tables.php apply` emptied locations_master's 4,962 facility entries, renamed facilities_master (4,591 rows, last changed 2026-09-16) to `retired_facilities_master_20261025` and dropped the six `_bak_2026091x` tables; pages, search, the data form, the feeds and the PHP logs checked after, all clean. Dead branches removed so far ([2ae5d34](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/2ae5d3453efd0976b8d4e52cb04ae0dbdbf9db60), [b3265f9](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b3265f9ba38c834ada9eca9a43f1ef95098a5f84)): get-master-data, facility-search, facility-aliases, link-news-to-facility, lawsuit-facility-links, save-wiki-submission, facility-picker, the wiki sync merge, suggestion approval, get-autocomplete; api/facility-promotion.php deleted. Still to remove (dead, harmless meanwhile): the Data Manager's 20 v2 checks (several combine with other tables, so trim by hand), save-master's companies/locations legacy save/rename/delete, inc/database.php attachers, rest-api.php state map / name map / state collector, country-rest-api.php, single-facility-profile.php, page-home.php, widgets.php, the search files' table checks, the legacy shapes in kop_normalize_project_payload; and in files another session had uncommitted (inc/admin.php seed branches incl. the apply_to fan-out, page-news-feed.php, page-lawsuits.php). Earlier list: the dead legacy branches (the survey's list: get-master-data, get-autocomplete, facility-search, facility-picker, facility-aliases, data-manager, link-news-to-facility, lawsuit-facility-links, lib-suggested-edits, save-wiki-submission, sync-wiki-facilities merge, save-master companies/locations, page-news-feed, page-lawsuits, inc/database.php attachers, rest-api state map / name map / state collector, country-rest-api, single-facility-profile, page-home, widgets, search, global-search, ajax-search-lite, admin.php seed branches), then docs (DATABASE-COLUMNS.md, CLAUDE.md, the three-copies memory note). 2026-10-28: save-master's legacy companies/locations save/rename/delete and the location tools removed ([b43bff8](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b43bff89cb21d08848cdae2b6a704d4bcd587118); off-switch now 409s), Data Manager branches ([a54c4a3](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/a54c4a38)); the form's location search reads `location.city`/`.state` ([96d3624](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/96d36245206d05b412f6d07b39f3a916c9436873)). `scripts/test-data-form-equivalence.py` hung, not run to the end; rerun after deploy. 2026-10-28 also: the rest of the dead branches removed (Data Manager, search files, widgets + home, inc/database.php, rest-api.php collectors and maps, country-rest-api.php, admin.php seeds incl. the apply_to fan-out, news feed, lawsuits, single-facility-profile; docs say retired): commits a54c4a38, ee6051b0, 3f4a8d1e, ec2ea59c, 1e9107a6, abf2a2be, 4fbda951, 2dbc4335, 5105e775 under https://github.com/kidsoverprofits/Kids-Over-Profits/commit/. Left on purpose: `kop_normalize_project_payload` legacy shapes (still reachable from `__facility_ref` rows and old `suggested_edits`), `kop_unwrap_project_payload` (referrers/transporters), the virtual 'facilities_master' name, the Data Manager's locations_master path. After deploy check: /state/ and /country/ hubs list facilities, home widgets and counts, /lawsuits/ chips, a single-facility-profile page, Data Manager on a company, site search, the PHP error log; and that inc/database.php still lacks the facilities_master fallbacks (a peer's stale copy put them back once). test-search-aliases.php fails \"Bethel Boys Academy also finds Eagle Point Christian Academy\" (alias data, untouched by this).",
-       "ask": "Delete the old retired facilities table now? (a backup copy is kept)",
-       "date": "2026-10-28",
-       "why": "Nothing reads it since Oct 25; it only takes space.",
+       "text": "**Data model phase 5** (owner first): remove the old model per `docs/DATA-MODEL-MIGRATION.md`, backup first, one step per commit. Owner: go (2026-10-25). Backup taken 2026-10-25 17:30 server time: `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server (facilities_master, locations_master, the six `_bak_2026091x` tables, facilities_v2; 4.3 MB) and a copy in `tmp/backups/`. Client side of the form's step 6 done ([aab73af](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/aab73afde3a1b65971461fb3e21c8f782df60995)). Step 1 done 2026-10-25: every live reader and writer of facilities_master / locations_master facility arrays reads the v2 tables ([4297942](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4297942a965086b2435d61fcc021ab6312acaae0), [abffd0c](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/abffd0c64d531410a71eddd3c6e6db20736d1264), [961ea19](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/961ea19544efce38fad7f9cec62889baa080d3ac)); fixed on the way: Link wiki facility refused every record made since the write switch. Done the same day: old-table tools deleted ([9723d93](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/9723d931dc4b3dd5e437512b6d256e668ac2d064)); on production `api/phase5-retire-tables.php apply` emptied locations_master's 4,962 facility entries, renamed facilities_master (4,591 rows, last changed 2026-09-16) to `retired_facilities_master_20261025` and dropped the six `_bak_2026091x` tables; pages, search, the data form, the feeds and the PHP logs checked after, all clean. Dead branches removed so far ([2ae5d34](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/2ae5d3453efd0976b8d4e52cb04ae0dbdbf9db60), [b3265f9](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b3265f9ba38c834ada9eca9a43f1ef95098a5f84)): get-master-data, facility-search, facility-aliases, link-news-to-facility, lawsuit-facility-links, save-wiki-submission, facility-picker, the wiki sync merge, suggestion approval, get-autocomplete; api/facility-promotion.php deleted. Still to remove (dead, harmless meanwhile): the Data Manager's 20 v2 checks (several combine with other tables, so trim by hand), save-master's companies/locations legacy save/rename/delete, inc/database.php attachers, rest-api.php state map / name map / state collector, country-rest-api.php, single-facility-profile.php, page-home.php, widgets.php, the search files' table checks, the legacy shapes in kop_normalize_project_payload; and in files another session had uncommitted (inc/admin.php seed branches incl. the apply_to fan-out, page-news-feed.php, page-lawsuits.php). Earlier list: the dead legacy branches (the survey's list: get-master-data, get-autocomplete, facility-search, facility-picker, facility-aliases, data-manager, link-news-to-facility, lawsuit-facility-links, lib-suggested-edits, save-wiki-submission, sync-wiki-facilities merge, save-master companies/locations, page-news-feed, page-lawsuits, inc/database.php attachers, rest-api state map / name map / state collector, country-rest-api, single-facility-profile, page-home, widgets, search, global-search, ajax-search-lite, admin.php seed branches), then docs (DATABASE-COLUMNS.md, CLAUDE.md, the three-copies memory note). 2026-10-28: save-master's legacy companies/locations save/rename/delete and the location tools removed ([b43bff8](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/b43bff89cb21d08848cdae2b6a704d4bcd587118); off-switch now 409s), Data Manager branches ([a54c4a3](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/a54c4a38)); the form's location search reads `location.city`/`.state` ([96d3624](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/96d36245206d05b412f6d07b39f3a916c9436873)). `scripts/test-data-form-equivalence.py` hung, not run to the end; rerun after deploy. 2026-10-28 also: the rest of the dead branches removed (Data Manager, search files, widgets + home, inc/database.php, rest-api.php collectors and maps, country-rest-api.php, admin.php seeds incl. the apply_to fan-out, news feed, lawsuits, single-facility-profile; docs say retired): commits a54c4a38, ee6051b0, 3f4a8d1e, ec2ea59c, 1e9107a6, abf2a2be, 4fbda951, 2dbc4335, 5105e775 under https://github.com/kidsoverprofits/Kids-Over-Profits/commit/. Left on purpose: `kop_normalize_project_payload` legacy shapes (still reachable from `__facility_ref` rows and old `suggested_edits`), `kop_unwrap_project_payload` (referrers/transporters), the virtual 'facilities_master' name, the Data Manager's locations_master path. After deploy check: /state/ and /country/ hubs list facilities, home widgets and counts, /lawsuits/ chips, a single-facility-profile page, Data Manager on a company, site search, the PHP error log; and that inc/database.php still lacks the facilities_master fallbacks (a peer's stale copy put them back once). test-search-aliases.php fails \"Bethel Boys Academy also finds Eagle Point Christian Academy\" (alias data, untouched by this). Owner, Plan Board 2026-11-10: delete the retired table now. Done 2026-11-13: `retired_facilities_master_20261025` (4,591 rows, as in the backup) dropped on production; `~/backups/phase5-legacy-tables-20261025.sql.gz` keeps it (zcat into mysql to restore).",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
        "go": [],
-       "choices": [
-        "Delete it now",
-        "Keep it a while"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": true,
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
        "steps": [],
-       "hash": "04eccaf2510a"
+       "hash": "68129003cd07"
       },
       {
        "id": "4.3:business-filing-fields",
@@ -3255,40 +3030,32 @@
       {
        "id": "4.3:in-loving-memory-vs-the-death-toll-sheet",
        "lead": "In Loving Memory vs the \"Death Toll\" sheet",
-       "text": "**In Loving Memory vs the \"Death Toll\" sheet** (2026-10-23; owner's private Google Sheet https://docs.google.com/spreadsheets/d/1gH0q_Z1yrIgv2RyUfSSbCdSOu6iizaHVwoMuLqCqTSE/edit, 466 rows; the page has 230 rows in `memorial_victims`). Snapshot, diff and the matching script are in `tmp/memorial-sheet-2026-10-23.json`, `tmp/memorial-sheet-diff.json`, `tmp/memorial-sheet-diff.py` (not in git; the sheet's CSV export is off, so it was read through gviz in the owner's browser). 220 match, 246 rows are only in the sheet, 10 only on the page. a. Owner decisions first: (1) scope: 95 sheet rows died before 1971 (Dozier School 88 with the undated ones, the 1959 Arkansas Negro Boys' Industrial School fire 19, Whittier State School...); the page starts at 1971. In, or a separate historical section? (2) foster care and in-home cases (Roberta Evers, row 237, \"therapy in the home\"; Amari Boone, row 421, kinship foster; Darvell Gulley, row 283, foster home), against the industry-scope rule; the page already has Lancaster foster home (id 164) and Diane Ramirez (id 47). (3) which one is kept up from now on: proposal is the page, with the sheet frozen as an archive. b. Built 2026-10-23: KOP Tools > Memorial sheet (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-memorial-sheet, inc/memorial-sheet.php), fed from seeds/memorial-sheet.json (kop-pipeline scripts/build-memorial-sheet-seed.py; the page side is read live). Conflicts: 397 lines over 200 people, 59 marked \"Check the source\" (the 15d pairs), empty sheet sides left out; Add: 222 waiting (the 24 seeded rows listed apart), Add needs a source link; Only on the page: the 10. Saves go through `kop_ie_row_save()`, which now fires `kop_record_changed('memorial')` for the pencil too; a restraint row's cause that says restraint can't be replaced by one that doesn't, and the cause filter is never changed there. Test: scripts/test-memorial-sheet.php. 2026-10-28: the builder reads found/ (second pass wins) and prefills each Add card (source, our media copy, cause/category drafts, notes); out_of_scope rows skipped, row 12 folds into 112 and row 42 into page id 22 (row 40 stays: a separate Jan 2020 death); 5 of the 6 linkless page rows get a found link ([461c1e8](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/461c1e8915e87239479cb44831a1827bb09e55ee), [kop-pipeline f0ff94e](https://github.com/kidsoverprofits/kop-pipeline/commit/f0ff94e87b343eb8a84bb7eba7d9366b4251aaed)). Add now 237 rows (212 waiting + 25 seeded): 167 found, 14 partial, 31 none. After deploy check rows 33, 146, 112, 40 and Conflicts ids 81/118/212. Still open: a second source column (a \"Source\" line's Sheet pick replaces the page's link, so for now type the better one); program lines don't link to facility records yet; a new sheet snapshot means rerunning tmp/memorial-sheet-diff.py + the builder and deploying. c. Done 2026-10-23 (owner: \"every new entry that has a source should be seeded\"): the 24 sheet-only rows with a source go in on deploy from `seeds/memorial.json` via `kop_apply_memorial_seeds()` (template pass v136), pre-1971 Dozier rows and the two the sheet flags (Roberta Evers, Amari Boone) included. Marshall Wheeler (row 168) is left out: his link was Robby Lynn Peay's FamilySearch page, so Peay (row 162) went in with it. Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 254 remembered. A new sourced sheet row reaches the page only when it is added to seeds/memorial.json (the sheet is private, the server can't read it). Still open: 222 sheet-only rows with no source. Additions: 104 sheet-only deaths from 1971 on, only 13 with a source; 47 undated. A research agent finds a source for each (submitting what it finds under the sources rule) before the owner approves; a row with no source stays out. 2026-10-25: source hunt handed to research agents in six batches (227 entries: 221 sheet-only + the 6 page rows with no link), lists in kop-pipeline `tmp/memorial-sources/todo/`, results to `tmp/memorial-sources/found/<batch>.json`. Open after they report: merge the found links into seeds/memorial-sheet.json (the builder should read found/ and prefill each Add row's source, with the agent's notes) and deploy, so the owner approves them on the Add tab; fix the 6 page rows through the pencil. Sheet-internal duplicates to fold: George Owen Smith rows 12 and 112; Canyon State Academy rows 40, 42 and 449 (449 says \"Canyon River Academy\" but is the page's id 22); blank-name rows 461-462. Owner 2026-10-25: the memorial leaves out adult facilities (prisons, jails, adult care homes) and foster homes. Marked `out_of_scope` in found/A2-1971-on.json: rows 350, 393 (foster), 382 (adult prison), 398, 412 (adult jails), 417 (adult care home); the builder should skip them. Age: 18-year-olds stay in; 21 is too old. Dozier row 8 (Sam Morgan, 21 per USF) marked `out_of_scope` in found/D-dozier.json. 2026-10-25 results (227 entries): 158 found, 19 partial, 50 none (A1 16/3/26, A2 30/8/7, C 13/4/15, D 79/1/0, E 18/0/1, F 2/3/1). Each entry carries `cause_draft` + `category_draft`, worded and tagged to match the page per kop-pipeline tmp/memorial-sources/CAUSE-GUIDE.md (the builder should prefill both). 40 open questions went to Research Tasks, section \"In Loving Memory\". PDFs imported: media 16935-16938, 16940-16942 (new FileBird folder \"In Loving Memory\" #8514). Still open: - Owner: the 1959 fire boys locked in their dormitory are drafted \"accident\"; witness beatings with a natural official cause (Dozier rows 116, 142) drafted \"unknown\", the Del'Quan Seagers pattern; Jaquin Thomas (A2 398) is now out of scope. 2026-10-25 second pass on the 69 unfinished rows (found/G-second-pass.json, one entry per row of todo/G-second-pass.json, with its `batch`): 20 found, 17 partial, 32 none. Unsilenced's table HTML and its program-archive pages (archive.unsilenced.org/program-archive/us-programs/<state>/<slug>/) carry Wayback, newspapers.com and Drive links beside the archive.today ones; most finds came from there. Matches: C 33 is Jamal Miller, IYC St. Charles, Sept 1, 2009 (Chicago Tribune); A2 346 Westerfield is NOT that boy and has no source; C 35 Jake Spencer is unconfirmed. PDFs imported: media 16943-16953 (folder #8514), written into each entry's `media_id`. Seven first-pass tasks answered with cited claims (rows 215, 274, 346, C 33, C 40, C 41, page id 89), 16 new ones added. Sources: both passes' 95 unsent sources went to review on 2026-10-25 with the new research key (commit 39bf5b69, kop-pipeline scripts/send-sources.py): 71 article, 21 website, 3 lawsuit; the 7 only about out_of_scope rows are set aside in found/A2-1971-on.out-of-scope-sources.json. Still open: - The rows still \"none\" mostly have only an archive.today link; they are listed for the owner to open in two Research Tasks (rows 287/310, and 14 others). - Two PDFs show only the first screen (media 16951 row C 20, newspapers.com page; 16953 row C 45, This Is Reno); the full text is in the Wayback capture. 16948 (row 284, SD DOC release) has no text layer. d. Conflicts to settle (each needs the source checked, not a pick by vote): - Names (40): most are the sheet's full middle names (take them); spellings to check: Roger/Robert Doyle Erwin, Prinkley/Prinkey, Wauketta/Waketta, Johnathan/Jonathan Avila, Contreraz/Contreras, Neil/Niel Rider, Herron/Heron, Meyers/Meyer, Mangham/Mangum, Dysheka/Dyskeha, Rolf/Rolph-Jackson, Bobby Joe/Jo Randolph, Cory/Corey Baines, Wiltsie/Ibarra-Wiltsie. Page id 118 \"(Unknown from Virginia)\" is Thomas Robert Malkowski. - Dates (51): most one or two days apart (incident vs death; the page keeps the death date, the incident goes in the cause). Wrong year on one side: Bobby Joe Randolph 1998/1996, Maria Mendoza 2003/2002, Shirley Arciszewski 2005/2004, Alana Richardson 2020/2023, Arianna Duenez 2024/2023; other big gaps: Earl Smith Jan/Nov 1995, Willie Wright Mar/Feb 2000, Shanice Nibbs Jul 16/Aug 18 2010, Angel Rolf-Jackson May 1/19 2021. Page rows stored as an exact day on the 1st where the sheet has another day or only a month: Connie Munson (226), ids 92 and 89. - Ages (8): Paul Choy, Cory Baines, Levi Snyder, Del'Quan Seagers, Joshua Hancey, Asheville id 3, id 89. - Locations (24): the page files 11 VisionQuest deaths under Pennsylvania (the company's home) where the sheet has where they died (Baja coast, Tucson, Tracy CA, New Mexico...); the column should be where the death happened. Plain mismatches: Munson Missouri/Hattiesburg MS, Roxanna Gray Indiana/La Crosse WI, Erica Harvey Nevada/Oregon, Cory Baines Utah/Oregon, Carey Dunn California/Jay FL, Levi Snyder SC/NC, Kevin Rider Utah/Bend OR, Caleb Jensen Utah/Montrose CO, Christy Scheck PA/Chula Vista CA, Dawn Birnbaum PA/Poland ME. - Programs (77): mostly spelling of one name (keep the page's or, better, link to the facility record). Different places: Katherine Lank (Red Rock Canyon School / Redrock Ranch Academy), Joshua Sharpe (Oconomowoc DTC / Wisconsin Treatment Center), Jared Camacho (Steps Academy / Rose-Mary Center), Naomi Wood (Lakeland Girls Academy / Lakeland Teen Challenge), Dillon Peak (Peace River / De Soto Outward Bound); the sheet names the home where the page is generic: Sabrina Day, Shirley Arciszewski, Roger Benson. - Causes (182 differ, 24 in a different category): keep the page's longer text and add facts the sheet adds. Real disagreements: Kevin Rider (perforated ulcer / suicide), Thomas Malkowski (suicide / fall from balcony), Nicholaus Contreraz (lung infection / restraint: stays restraint, the infection goes in the text), Joy Evans, Shinaul McGraw, Anthony Parker, Sitlalli Avelar. - Sources (23): the page has one source_url; the sheet's go in as a second source (needs a column or a sources list), with `?utm_source=chatgpt.com` stripped. e. Only on the page (10, add to the sheet if it stays in use): Tulsa Boys Home 2025 (1), Owen at Thompson's RTC (4), North Central Kansas JDC (6), Cleveland Dodd (13), Addison Manson (16), Loyce Tucker (24), Cameron Dail (43), Catherine Freer 2002 (127), Aaron Albert Grey (137), Paul Choy (51). Paul Choy is on the page twice (51 dated 2017, 195 dated 1992): fold into one row dated 2017 with the 1992 restraint in the cause. Owner: the Memorial sheet screen is live: work through Conflicts (start with the \"Check the source\" filter) and Add at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-memorial-sheet c. 2026-11-02 (owner: the sheet was submitted by Christina Vandercar; mark what came from her): `memorial_victims.sheet_row` marks every entry the sheet put in (the 25 sheet entries of seeds/memorial.json, ids 231-254 and 267 on the 2026-11-01 mirror, plus every Add); the page shows a dagger by the name and a note at the foot. Template pass v152 adds the column and marks them. Check after deploy: https://kidsoverprofits.org/in-loving-memory/ has 25 daggers (more if Add was used since) and the note. The note's wording is a draft; the rows only corrected from the sheet through Conflicts get no dagger (they came from the original list). d. 2026-11-02 (owner: the pills don't link): the program pill links to the facility page through `kop_facility_link_resolve_placed()` (inc/facility-suggest.php; commit 80678310): 139 of 266 on the mirror. Check after deploy: Spring Creek Lodge, KidsPeace and Diamond Ranch Academy cards open their /facility/ pages. Open: the other 127 name a program with no record or a different spelling (Island View, Dozier School, Catherine Freer Wilderness, Vision Quest, Hyde Schools) or two same-state records (Liahona Academy, Oak Plains Academy, Integrity House, Chad Youth Enhancement Center). Fix by adding the memorial's spelling as an other name on the right record, or a `facility_id` column on `memorial_victims` if spellings keep missing. 2026-11-02 (owner: check the other pill pages; bare Teen Challenge goes to the operator profile): the same resolver now links /lawsuits/ mentions no `lawsuit_facility_links` row pairs with (42 more of 207 on the mirror), and a name that pins no one facility goes to the operator page of that name (Teen Challenge, CEDU, Brown Schools, Sequel, Meridian -> Eosis). A brand one record carries as another name no longer goes to that record. Check after deploy: https://kidsoverprofits.org/lawsuits/ \"Teen Challenge\" pills open /operator/teen-challenge/. Legislation pills are topics (no facilities); news card tags filter the feed by design and the \"On KOP:\" row under each card links the stored facility links, so neither changed. Still unlinked on /lawsuits/: ~165 mentions, mostly units and non-TTI places (Maine's Long Creek cottages, county jails, hospitals).",
-       "ask": "Death Toll sheet: include deaths before 1971, in foster care and at home? And are the source notes and daggers right?",
-       "date": "2026-11-02",
-       "why": "246 deaths in your sheet aren't on In Loving Memory; this decides which belong.",
-       "go": [
-        {
-         "label": "The Death Toll sheet",
-         "url": "https://docs.google.com/spreadsheets/d/1gH0q_Z1yrIgv2RyUfSSbCdSOu6iizaHVwoMuLqCqTSE/edit"
-        }
-       ],
+       "text": "**In Loving Memory vs the \"Death Toll\" sheet** (2026-10-23; owner's private Google Sheet https://docs.google.com/spreadsheets/d/1gH0q_Z1yrIgv2RyUfSSbCdSOu6iizaHVwoMuLqCqTSE/edit, 466 rows; the page has 230 rows in `memorial_victims`). Snapshot, diff and the matching script are in `tmp/memorial-sheet-2026-10-23.json`, `tmp/memorial-sheet-diff.json`, `tmp/memorial-sheet-diff.py` (not in git; the sheet's CSV export is off, so it was read through gviz in the owner's browser). 220 match, 246 rows are only in the sheet, 10 only on the page. a. Owner decisions first: (1) scope: 95 sheet rows died before 1971 (Dozier School 88 with the undated ones, the 1959 Arkansas Negro Boys' Industrial School fire 19, Whittier State School...); the page starts at 1971. In, or a separate historical section? (2) foster care and in-home cases (Roberta Evers, row 237, \"therapy in the home\"; Amari Boone, row 421, kinship foster; Darvell Gulley, row 283, foster home), against the industry-scope rule; the page already has Lancaster foster home (id 164) and Diane Ramirez (id 47). (3) which one is kept up from now on: proposal is the page, with the sheet frozen as an archive. b. Built 2026-10-23: KOP Tools > Memorial sheet (https://kidsoverprofits.org/wp-admin/admin.php?page=kop-memorial-sheet, inc/memorial-sheet.php), fed from seeds/memorial-sheet.json (kop-pipeline scripts/build-memorial-sheet-seed.py; the page side is read live). Conflicts: 397 lines over 200 people, 59 marked \"Check the source\" (the 15d pairs), empty sheet sides left out; Add: 222 waiting (the 24 seeded rows listed apart), Add needs a source link; Only on the page: the 10. Saves go through `kop_ie_row_save()`, which now fires `kop_record_changed('memorial')` for the pencil too; a restraint row's cause that says restraint can't be replaced by one that doesn't, and the cause filter is never changed there. Test: scripts/test-memorial-sheet.php. 2026-10-28: the builder reads found/ (second pass wins) and prefills each Add card (source, our media copy, cause/category drafts, notes); out_of_scope rows skipped, row 12 folds into 112 and row 42 into page id 22 (row 40 stays: a separate Jan 2020 death); 5 of the 6 linkless page rows get a found link ([461c1e8](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/461c1e8915e87239479cb44831a1827bb09e55ee), [kop-pipeline f0ff94e](https://github.com/kidsoverprofits/kop-pipeline/commit/f0ff94e87b343eb8a84bb7eba7d9366b4251aaed)). Add now 237 rows (212 waiting + 25 seeded): 167 found, 14 partial, 31 none. After deploy check rows 33, 146, 112, 40 and Conflicts ids 81/118/212. Still open: a second source column (a \"Source\" line's Sheet pick replaces the page's link, so for now type the better one); program lines don't link to facility records yet; a new sheet snapshot means rerunning tmp/memorial-sheet-diff.py + the builder and deploying. c. Done 2026-10-23 (owner: \"every new entry that has a source should be seeded\"): the 24 sheet-only rows with a source go in on deploy from `seeds/memorial.json` via `kop_apply_memorial_seeds()` (template pass v136), pre-1971 Dozier rows and the two the sheet flags (Roberta Evers, Amari Boone) included. Marshall Wheeler (row 168) is left out: his link was Robby Lynn Peay's FamilySearch page, so Peay (row 162) went in with it. Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 254 remembered. A new sourced sheet row reaches the page only when it is added to seeds/memorial.json (the sheet is private, the server can't read it). Still open: 222 sheet-only rows with no source. Additions: 104 sheet-only deaths from 1971 on, only 13 with a source; 47 undated. A research agent finds a source for each (submitting what it finds under the sources rule) before the owner approves; a row with no source stays out. 2026-10-25: source hunt handed to research agents in six batches (227 entries: 221 sheet-only + the 6 page rows with no link), lists in kop-pipeline `tmp/memorial-sources/todo/`, results to `tmp/memorial-sources/found/<batch>.json`. Open after they report: merge the found links into seeds/memorial-sheet.json (the builder should read found/ and prefill each Add row's source, with the agent's notes) and deploy, so the owner approves them on the Add tab; fix the 6 page rows through the pencil. Sheet-internal duplicates to fold: George Owen Smith rows 12 and 112; Canyon State Academy rows 40, 42 and 449 (449 says \"Canyon River Academy\" but is the page's id 22); blank-name rows 461-462. Owner 2026-10-25: the memorial leaves out adult facilities (prisons, jails, adult care homes) and foster homes. Marked `out_of_scope` in found/A2-1971-on.json: rows 350, 393 (foster), 382 (adult prison), 398, 412 (adult jails), 417 (adult care home); the builder should skip them. Age: 18-year-olds stay in; 21 is too old. Dozier row 8 (Sam Morgan, 21 per USF) marked `out_of_scope` in found/D-dozier.json. 2026-10-25 results (227 entries): 158 found, 19 partial, 50 none (A1 16/3/26, A2 30/8/7, C 13/4/15, D 79/1/0, E 18/0/1, F 2/3/1). Each entry carries `cause_draft` + `category_draft`, worded and tagged to match the page per kop-pipeline tmp/memorial-sources/CAUSE-GUIDE.md (the builder should prefill both). 40 open questions went to Research Tasks, section \"In Loving Memory\". PDFs imported: media 16935-16938, 16940-16942 (new FileBird folder \"In Loving Memory\" #8514). Still open: - Owner: the 1959 fire boys locked in their dormitory are drafted \"accident\"; witness beatings with a natural official cause (Dozier rows 116, 142) drafted \"unknown\", the Del'Quan Seagers pattern; Jaquin Thomas (A2 398) is now out of scope. 2026-10-25 second pass on the 69 unfinished rows (found/G-second-pass.json, one entry per row of todo/G-second-pass.json, with its `batch`): 20 found, 17 partial, 32 none. Unsilenced's table HTML and its program-archive pages (archive.unsilenced.org/program-archive/us-programs/<state>/<slug>/) carry Wayback, newspapers.com and Drive links beside the archive.today ones; most finds came from there. Matches: C 33 is Jamal Miller, IYC St. Charles, Sept 1, 2009 (Chicago Tribune); A2 346 Westerfield is NOT that boy and has no source; C 35 Jake Spencer is unconfirmed. PDFs imported: media 16943-16953 (folder #8514), written into each entry's `media_id`. Seven first-pass tasks answered with cited claims (rows 215, 274, 346, C 33, C 40, C 41, page id 89), 16 new ones added. Sources: both passes' 95 unsent sources went to review on 2026-10-25 with the new research key (commit 39bf5b69, kop-pipeline scripts/send-sources.py): 71 article, 21 website, 3 lawsuit; the 7 only about out_of_scope rows are set aside in found/A2-1971-on.out-of-scope-sources.json. Still open: - The rows still \"none\" mostly have only an archive.today link; they are listed for the owner to open in two Research Tasks (rows 287/310, and 14 others). - Two PDFs show only the first screen (media 16951 row C 20, newspapers.com page; 16953 row C 45, This Is Reno); the full text is in the Wayback capture. 16948 (row 284, SD DOC release) has no text layer. d. Conflicts to settle (each needs the source checked, not a pick by vote): - Names (40): most are the sheet's full middle names (take them); spellings to check: Roger/Robert Doyle Erwin, Prinkley/Prinkey, Wauketta/Waketta, Johnathan/Jonathan Avila, Contreraz/Contreras, Neil/Niel Rider, Herron/Heron, Meyers/Meyer, Mangham/Mangum, Dysheka/Dyskeha, Rolf/Rolph-Jackson, Bobby Joe/Jo Randolph, Cory/Corey Baines, Wiltsie/Ibarra-Wiltsie. Page id 118 \"(Unknown from Virginia)\" is Thomas Robert Malkowski. - Dates (51): most one or two days apart (incident vs death; the page keeps the death date, the incident goes in the cause). Wrong year on one side: Bobby Joe Randolph 1998/1996, Maria Mendoza 2003/2002, Shirley Arciszewski 2005/2004, Alana Richardson 2020/2023, Arianna Duenez 2024/2023; other big gaps: Earl Smith Jan/Nov 1995, Willie Wright Mar/Feb 2000, Shanice Nibbs Jul 16/Aug 18 2010, Angel Rolf-Jackson May 1/19 2021. Page rows stored as an exact day on the 1st where the sheet has another day or only a month: Connie Munson (226), ids 92 and 89. - Ages (8): Paul Choy, Cory Baines, Levi Snyder, Del'Quan Seagers, Joshua Hancey, Asheville id 3, id 89. - Locations (24): the page files 11 VisionQuest deaths under Pennsylvania (the company's home) where the sheet has where they died (Baja coast, Tucson, Tracy CA, New Mexico...); the column should be where the death happened. Plain mismatches: Munson Missouri/Hattiesburg MS, Roxanna Gray Indiana/La Crosse WI, Erica Harvey Nevada/Oregon, Cory Baines Utah/Oregon, Carey Dunn California/Jay FL, Levi Snyder SC/NC, Kevin Rider Utah/Bend OR, Caleb Jensen Utah/Montrose CO, Christy Scheck PA/Chula Vista CA, Dawn Birnbaum PA/Poland ME. - Programs (77): mostly spelling of one name (keep the page's or, better, link to the facility record). Different places: Katherine Lank (Red Rock Canyon School / Redrock Ranch Academy), Joshua Sharpe (Oconomowoc DTC / Wisconsin Treatment Center), Jared Camacho (Steps Academy / Rose-Mary Center), Naomi Wood (Lakeland Girls Academy / Lakeland Teen Challenge), Dillon Peak (Peace River / De Soto Outward Bound); the sheet names the home where the page is generic: Sabrina Day, Shirley Arciszewski, Roger Benson. - Causes (182 differ, 24 in a different category): keep the page's longer text and add facts the sheet adds. Real disagreements: Kevin Rider (perforated ulcer / suicide), Thomas Malkowski (suicide / fall from balcony), Nicholaus Contreraz (lung infection / restraint: stays restraint, the infection goes in the text), Joy Evans, Shinaul McGraw, Anthony Parker, Sitlalli Avelar. - Sources (23): the page has one source_url; the sheet's go in as a second source (needs a column or a sources list), with `?utm_source=chatgpt.com` stripped. e. Only on the page (10, add to the sheet if it stays in use): Tulsa Boys Home 2025 (1), Owen at Thompson's RTC (4), North Central Kansas JDC (6), Cleveland Dodd (13), Addison Manson (16), Loyce Tucker (24), Cameron Dail (43), Catherine Freer 2002 (127), Aaron Albert Grey (137), Paul Choy (51). Paul Choy is on the page twice (51 dated 2017, 195 dated 1992): fold into one row dated 2017 with the 1992 restraint in the cause. Owner: the Memorial sheet screen is live: work through Conflicts (start with the \"Check the source\" filter) and Add at https://kidsoverprofits.org/wp-admin/admin.php?page=kop-memorial-sheet c. 2026-11-02 (owner: the sheet was submitted by Christina Vandercar; mark what came from her): `memorial_victims.sheet_row` marks every entry the sheet put in (the 25 sheet entries of seeds/memorial.json, ids 231-254 and 267 on the 2026-11-01 mirror, plus every Add); the page shows a dagger by the name and a note at the foot. Template pass v152 adds the column and marks them. Check after deploy: https://kidsoverprofits.org/in-loving-memory/ has 25 daggers (more if Add was used since) and the note. The note's wording is a draft; the rows only corrected from the sheet through Conflicts get no dagger (they came from the original list). d. 2026-11-02 (owner: the pills don't link): the program pill links to the facility page through `kop_facility_link_resolve_placed()` (inc/facility-suggest.php; commit 80678310): 139 of 266 on the mirror. Check after deploy: Spring Creek Lodge, KidsPeace and Diamond Ranch Academy cards open their /facility/ pages. Open: the other 127 name a program with no record or a different spelling (Island View, Dozier School, Catherine Freer Wilderness, Vision Quest, Hyde Schools) or two same-state records (Liahona Academy, Oak Plains Academy, Integrity House, Chad Youth Enhancement Center). Fix by adding the memorial's spelling as an other name on the right record, or a `facility_id` column on `memorial_victims` if spellings keep missing. 2026-11-02 (owner: check the other pill pages; bare Teen Challenge goes to the operator profile): the same resolver now links /lawsuits/ mentions no `lawsuit_facility_links` row pairs with (42 more of 207 on the mirror), and a name that pins no one facility goes to the operator page of that name (Teen Challenge, CEDU, Brown Schools, Sequel, Meridian -> Eosis). A brand one record carries as another name no longer goes to that record. Check after deploy: https://kidsoverprofits.org/lawsuits/ \"Teen Challenge\" pills open /operator/teen-challenge/. Legislation pills are topics (no facilities); news card tags filter the feed by design and the \"On KOP:\" row under each card links the stored facility links, so neither changed. Still unlinked on /lawsuits/: ~165 mentions, mostly units and non-TTI places (Maine's Long Creek cottages, county jails, hospitals). Owner, Plan Board 2026-11-10: deaths before 1971 belong; deaths in foster care and at home do not; the source notes and daggers are right. Done 2026-11-16: the Memorial sheet's Add tab lost its \"Before 1971\" notes and skips rows 237, 283 and 421 (kop-pipeline [db62e08](https://github.com/kidsoverprofits/kop-pipeline/commit/db62e084b655f25e7b0bb3c30b03f9daefb4f0b3)); seeds/memorial.json archives the four foster or in-home rows on the page (ids 241 Roberta Evers, 249 Amari Boone, 47 Diane Ramirez, 164 Dustin E. Phelps) through `corrections`, undone with the pencil. The sheet snapshot (tmp/memorial-sheet-2026-10-23.json) is not on this computer, so seeds/memorial-sheet.json was edited to match by hand; a rebuild needs a fresh snapshot.",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
        "choices": [],
-       "time": "10 min",
+       "time": "",
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "61446be7f686"
+       "hash": "3f7731e71a4b"
       },
       {
        "id": "4.3:in-loving-memory-vs-the-news-archive",
        "lead": "In Loving Memory vs the news archive",
-       "text": "**In Loving Memory vs the news archive** (2026-10-23 scan of `news_submissions` approved + submitted in the tmp/prod.sqlite mirror of that morning: 376 articles match a death word, 81 name someone already on the page, agents read the other 295). Deaths in the archive that are on neither the page nor `seeds/memorial.json` (news id in brackets; https://kidsoverprofits.org/wp-admin/ news editor): a. Done 2026-10-23 (owner: yes): these 12 go in on deploy from `seeds/memorial.json` (the entries with `news_ids`; template pass v140). Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 266 remembered (230 + 24 sheet + 12). Dates: Aswad 1981-07-17 and Milletich 1985-07-23 from Boston Magazine; Diaz 2023-05-09; Cornerstone 2026-03-15 (WSOC); Payne's day from the sheet; Canyon State, Toppi and Brown, and Bailey are month only; Kreimeyer year only (the NYT page can't be fetched here). Gina Score, 14, SD State Training School boot camp, Plankinton SD, 1999-07-21, heatstroke on a forced run [1075] (sheet row 249, no source there); Monique Payne, 14, Westwood Lodge, Westwood MA, 2006, untreated brain tumour [701] (sheet row 322 says Wadesboro NC: wrong); Unnamed 17M, Canyon State Academy, AZ, 2020-01-21/22, cause not released [999, 1000, 1054, 1061] (sheet row 40; not the 2022 overdose, page id 22); Mystie Kreimeyer, 15, Forest Ridge Youth Services (YSI), IA, 1995, embolism after delayed care [931]; Vincent Milletich, 22, Behavior Research Institute (JRC), MA, 1985, asphyxiated in restraint [781, 573, 564, 556]; Danny Aswad, 14, BRI Northridge CA, 1981, held face-down [556, 564, 958]; Bryan Diaz, 18, Barry J. Nidorf juvenile hall, CA, May 2023, fentanyl overdose [112, 450]; Nicholas Walter Brown, 16, Midlands Center (SC DDSN), 2025-05-25, hyperthermia in a canvas wrap restraint [905, 906, 10469]; Unnamed teen girl, Cornerstone Treatment Facility, Wadesboro NC, March 2026 [70]; Matt Toppi and Christopher Brown, Robert Land Academy, Ontario, 1998, died running away [419]; De'Vonte Bailey, 11, Turning Point group home (Lucas County placement), Toledo OH, 2025, hit while riding his bike unsupervised [10458]. b. Need a check first: Linda Cornelison, BRI Attleboro MA, 1990 (age not in the article) [556]; daughter of Karly Briscoe-Vega, Florida Youth Challenge Academy, Starke, 2024-25, no name or date [9]; Antonio Martinez, 17, Starr Commonwealth MI, 2016-01-01, hit on I-94, ran away? [695]; Steve Matthews, Straight Inc, suicide soon after leaving, year unknown [1587]; \"Jimmy\", San Marcos Treatment Center TX, seclusion-room death before 1991 (source page gone) [10546]; Bryan Alexander, 18, YSI boot camp TX, ~2002 vs sheet row 265 (Bryan Dale Alexander, Tarrant County CCC, 2001-01-09, pneumonia) [656, 657]; Carlisle Indian School children returned to Alaska in 2026: Tummassak (d. 1900-04-08, TB), Edward Angalook, a third [10485]; unnamed restraint death, JRC or FINR [954]; KLTV group home wrongful death, no details [10555]; #1373 clipping titled \"died\", empty. c. Scope calls (industry-scope rule): Kanaiyah Ward, 16, Maryland DHS hotel placement, suicide [6, 10545, 10549]; Xavia Butler, 15, Manitoba CFS [10344]; Tarsha Golightly, 18, died in adult prison days after Parkville youth justice, Victoria AU, 2026-07-27 [279]. d. Article ages differ from the page: the Asheville Academy girls are 13 and 12 in [119, 446, 456] (page id 3 says 14; already in 15d). Brad Glickman likely the subject of [1452, 1456] (Elan, empty clippings). e. Also in [419] (The Walrus) and not on the page: Donald MacNeil, Robert Land Academy, 2010, suicide while being taken back to the school after a term break.",
-       "ask": "Add Donald MacNeil to In Loving Memory? (Robert Land Academy, 2010, suicide on the way back to the school)",
-       "date": "2026-10-23",
-       "why": "The Walrus reported his death; the memorial doesn't list him.",
+       "text": "**In Loving Memory vs the news archive** (2026-10-23 scan of `news_submissions` approved + submitted in the tmp/prod.sqlite mirror of that morning: 376 articles match a death word, 81 name someone already on the page, agents read the other 295). Deaths in the archive that are on neither the page nor `seeds/memorial.json` (news id in brackets; https://kidsoverprofits.org/wp-admin/ news editor): a. Done 2026-10-23 (owner: yes): these 12 go in on deploy from `seeds/memorial.json` (the entries with `news_ids`; template pass v140). Check after deploy: https://kidsoverprofits.org/in-loving-memory/ reads 266 remembered (230 + 24 sheet + 12). Dates: Aswad 1981-07-17 and Milletich 1985-07-23 from Boston Magazine; Diaz 2023-05-09; Cornerstone 2026-03-15 (WSOC); Payne's day from the sheet; Canyon State, Toppi and Brown, and Bailey are month only; Kreimeyer year only (the NYT page can't be fetched here). Gina Score, 14, SD State Training School boot camp, Plankinton SD, 1999-07-21, heatstroke on a forced run [1075] (sheet row 249, no source there); Monique Payne, 14, Westwood Lodge, Westwood MA, 2006, untreated brain tumour [701] (sheet row 322 says Wadesboro NC: wrong); Unnamed 17M, Canyon State Academy, AZ, 2020-01-21/22, cause not released [999, 1000, 1054, 1061] (sheet row 40; not the 2022 overdose, page id 22); Mystie Kreimeyer, 15, Forest Ridge Youth Services (YSI), IA, 1995, embolism after delayed care [931]; Vincent Milletich, 22, Behavior Research Institute (JRC), MA, 1985, asphyxiated in restraint [781, 573, 564, 556]; Danny Aswad, 14, BRI Northridge CA, 1981, held face-down [556, 564, 958]; Bryan Diaz, 18, Barry J. Nidorf juvenile hall, CA, May 2023, fentanyl overdose [112, 450]; Nicholas Walter Brown, 16, Midlands Center (SC DDSN), 2025-05-25, hyperthermia in a canvas wrap restraint [905, 906, 10469]; Unnamed teen girl, Cornerstone Treatment Facility, Wadesboro NC, March 2026 [70]; Matt Toppi and Christopher Brown, Robert Land Academy, Ontario, 1998, died running away [419]; De'Vonte Bailey, 11, Turning Point group home (Lucas County placement), Toledo OH, 2025, hit while riding his bike unsupervised [10458]. b. Need a check first: Linda Cornelison, BRI Attleboro MA, 1990 (age not in the article) [556]; daughter of Karly Briscoe-Vega, Florida Youth Challenge Academy, Starke, 2024-25, no name or date [9]; Antonio Martinez, 17, Starr Commonwealth MI, 2016-01-01, hit on I-94, ran away? [695]; Steve Matthews, Straight Inc, suicide soon after leaving, year unknown [1587]; \"Jimmy\", San Marcos Treatment Center TX, seclusion-room death before 1991 (source page gone) [10546]; Bryan Alexander, 18, YSI boot camp TX, ~2002 vs sheet row 265 (Bryan Dale Alexander, Tarrant County CCC, 2001-01-09, pneumonia) [656, 657]; Carlisle Indian School children returned to Alaska in 2026: Tummassak (d. 1900-04-08, TB), Edward Angalook, a third [10485]; unnamed restraint death, JRC or FINR [954]; KLTV group home wrongful death, no details [10555]; #1373 clipping titled \"died\", empty. c. Scope calls (industry-scope rule): Kanaiyah Ward, 16, Maryland DHS hotel placement, suicide [6, 10545, 10549]; Xavia Butler, 15, Manitoba CFS [10344]; Tarsha Golightly, 18, died in adult prison days after Parkville youth justice, Victoria AU, 2026-07-27 [279]. d. Article ages differ from the page: the Asheville Academy girls are 13 and 12 in [119, 446, 456] (page id 3 says 14; already in 15d). Brad Glickman likely the subject of [1452, 1456] (Elan, empty clippings). e. Also in [419] (The Walrus) and not on the page: Donald MacNeil, Robert Land Academy, 2010, suicide while being taken back to the school after a term break. Owner, Plan Board 2026-11-10: add Donald MacNeil. Done 2026-11-16 in seeds/memorial.json: age 18 (The Walrus; CHCH said 17), Robert Land Academy, November 2010, Ontario; filed \"During escape attempt\" like Toppi and Brown, since neither source calls it a suicide (that word came from the AI summary of news 419). CHCH, Nov. 30, 2010: https://www.chch.com/chch-news/teen-jumps-out-of-moms-car-and-runs-into-traffic/.",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
        "go": [],
-       "choices": [
-        "Yes, add him",
-        "No"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": true,
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
        "steps": [],
-       "hash": "7d201d64b0e8"
+       "hash": "88beaa449549"
       },
       {
        "id": "4.3:form-and-suggestions-in-the-v2-shape",
@@ -4523,6 +4290,21 @@
        "focus": false,
        "steps": [],
        "hash": "2b1db0e7e826"
+      },
+      {
+       "id": "4.7:long-form-articles-propose-sections-summaries-and-era-tags",
+       "lead": "Long-form articles: propose sections, summaries and era tags",
+       "text": "**Long-form articles: propose sections, summaries and era tags** (owner, Plan Board 2026-11-13: \"Yes, propose them\"; was 2.5 item 4, old 3.4): for each long-form history article, propose which sections to wrap in `[kop_section]` (15B), a summary and \"Why this matters\" per section and era tags (15C-E); then Advocacy History, Corporatization and Lawsuits (18A-C). Nothing moves until the owner approves. The proposals go on a KOP Tools screen (one place to review, not an artifact), the prose through the Opus high-effort edit pass; then an `Ask:` comes back to section 2.5.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "3f873e72e64b"
       }
      ]
     },
@@ -4721,6 +4503,36 @@
         }
        ],
        "hash": "4a8bed5d1640"
+      },
+      {
+       "id": "4.8:store-listing-text",
+       "lead": "Store listing text",
+       "text": "**Store listing text** (owner, Plan Board 2026-11-13: \"Claude drafts the text, a person makes the art\"; 2.6 item 2): draft the short and long descriptions for both stores, the age rating answers and the screenshot list (which screens, at which sizes), from what the app shows. Prose for the public: the Opus high-effort edit pass. The owner reviews it on a KOP Tools screen or in the app repo, not an artifact.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "399d8aaced66"
+      },
+      {
+       "id": "4.8:privacy-policy-an-app-section",
+       "lead": "Privacy policy: an app section",
+       "text": "**Privacy policy: an app section** (owner, Plan Board 2026-11-13: \"It doesn't: Claude drafts an app section\"; was 2.6): read https://kidsoverprofits.org/privacy-policy/ and what the app collects and sends (Send, volunteer sign-in, crash or analytics libraries in `kids-over-profits-mobile`), and draft the app section both stores ask for; the owner publishes it in the page editor. Then an `Ask:` in 2.6 to publish it.",
+       "ask": "",
+       "date": "2026-11-13",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "e76b30d9c75b"
       }
      ]
     }
@@ -4990,6 +4802,66 @@
        "focus": false,
        "steps": [],
        "hash": "c5fe9b646be8"
+      },
+      {
+       "id": "6:california-backfill",
+       "lead": "California backfill",
+       "text": "**California backfill** (the owner's call): 30,885 reports: sync the mirror, then `py -3.14 ca_scraper.py --backfill-pdfs`. Fixed 2026-10-20 in kop-pipeline `c228130`: CCL's end-of-list answer (HTTP 400 \"Index out of range\") had made every facility count as unfinished, so each run started over. CCL now takes ~1 minute a report page, so the whole walk is closer to 3 weeks than 3-5 days; it resumes, so it can run in evening stretches. Owner, Plan Board 2026-11-10: \"Not this month\" (was 2.2). Ask again in December.",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "fc70a4b14cda"
+      },
+      {
+       "id": "6:colorado-is-blocked",
+       "lead": "Colorado is blocked",
+       "text": "**Colorado is blocked** (2026-10-20). The dashboard's View Data command (`get-view-data-dialog-tab-pres-model`) never answers, though every other call answers in under 2 s; it is the only way to the lists and the citation text. See `plans/colorado.md` Status. Next: one View Data try in real Chrome on an evening, or a Colorado Open Records Act request to CDPHE for the inspection and citation data. Owner, Plan Board 2026-11-10: \"Drop Colorado for now\" (was 2.2).",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "e54b81c32b25"
+      },
+      {
+       "id": "6:co-the-9-unsure-facilities",
+       "lead": "CO: the 9 unsure facilities",
+       "text": "**CO: the 9 unsure facilities**: West Pines, Sierra Vista, Johnstown Heights, West Springs, three Eating Recovery Center licences, HCA Aurora, M.I.K.I.D. (PLAN-ARCHIVE, Colorado). Moot while Colorado is blocked (2.2). Moved with Colorado (was 2.4).",
+       "ask": "",
+       "date": "",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "5a9b0d3321b7"
+      },
+      {
+       "id": "6:or-a-records-request-for-complaint-investigations-and-licens",
+       "lead": "OR: a records request for complaint investigations and licensing actions",
+       "text": "**OR: a records request for complaint investigations and licensing actions.** Owner, Plan Board 2026-11-10: Not now (was 2.4). A session drafts the request on the word.",
+       "ask": "",
+       "date": "2026-11-10",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "59c35f2841ff"
       }
      ]
     },

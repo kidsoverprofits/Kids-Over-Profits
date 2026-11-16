@@ -4,6 +4,77 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-16 (Plan Board pass)
+
+### 2.1 cPanel, server and accounts
+
+4. **Google Docs export, last two sheets** (2026-10-01). Ask a session for a fresh `tmp/gdocs/export.gs`,
+   paste it at script.google.com and Run once more ("TTI Database - Master" and the 2014 analysis sheet hit
+   Google's rate limit).
+   Ask: Rerun the Google export for the last two sheets ("TTI Database - Master", the 2014 analysis)?
+   Why: Those two sheets hit Google's limit and never came across.
+   Choices: Yes, prepare the script | No, skip them
+   Time: 1 min to decide, 10 min to run
+   Owner, Plan Board 2026-11-10: "No, skip them". Not rerun; the two sheets stay out.
+
+7. **The site's REST answers are pinned to `http://localhost:8000`** (found 2026-11-13). Every `wp-json` answer (and every file
+   outside the theme folder) carries `Access-Control-Allow-Origin: http://localhost:8000`, `Allow-Methods: GET, POST, OPTIONS`,
+   `Allow-Headers: Content-Type, Authorization` and `Allow-Credentials: true`, whatever site asks. Nothing in the theme sets it,
+   so it is a `Header set` in the root `public_html/.htaccess` (or a server rule), probably left from testing something locally.
+   It stops any other site, or a web build of the app, from reading the public API; the theme's own `.htaccess` overrides it
+   only for its listed `api/*.php` files (the About rewrite pilot page reads `api/about-live.php` for this reason). The native
+   app is not affected. Fix: delete those lines from the root .htaccess (WordPress then answers each site itself), or ask a
+   session to read the file over SSH (refused by the auto-mode classifier on 2026-11-13).
+   Ask: Remove the "localhost:8000" CORS lines from the site's root .htaccess (cPanel > File Manager > public_html)?
+   Why: They block other sites and a web build of the app from reading the public data; nothing needs them.
+   Choices: Done | Let a session do it over SSH | Leave it
+   Time: 3 min
+   Done 2026-11-13 (owner: "Let a session do it over SSH"): the five-line `<IfModule mod_headers.c>` block (lines 85-89, inside the Wordfence WAF block) deleted from `public_html/.htaccess`, the file first copied to `~/backups/root-htaccess-before-cors-removal-20261113`. Checked the same minute: a `wp-json` answer to `Origin: https://example.org` carries `access-control-allow-origin: https://example.org` (WordPress's own), and the home page answers 200.
+
+### 2.4 Decisions waiting
+
+1. **Wiki updates for entries with no exported draft** (~170 of 296): should the site draft their old gaps
+   too (one switch: drop the baseline for entries `update-drafts.json` lacks) (old 3.12 step 6).
+   Ask: About 170 wiki entries have old gaps no draft covers. Have the site draft updates for them too?
+   Why: Without it, those entries only get updates for news that comes in from now on.
+   Choices: Yes, draft them | No, only new gaps
+   Time: 1 min
+   Owner, Plan Board 2026-11-13: "Yes, draft them". Done 2026-11-16: an entry with no exported draft starts with an empty baseline (`kop_wiki_auto_refresh()`), and `kop_wiki_auto_rebaseline_once()` cleared the baselines already taken for entries nobody had decided on, so their old gaps are drafted over the next hourly runs (151 entries in the local test). Check: section 3.
+
+- **MD: post the 15 summaries with initials cut out?**
+  Ask: Maryland: post the 15 report summaries with children's initials cut out?
+  Why: Maryland's page can't go up until this is settled.
+  Choices: Yes, with initials cut | No, hold Maryland
+  Time: 1 min
+  Owner, Plan Board 2026-11-10: "Yes, with initials cut". Done 2026-11-16: `cut_initials()` in kop-pipeline `scrapers/md_scraper.py` ([2e70fe1](https://github.com/kidsoverprofits/kop-pipeline/commit/2e70fe117fc36544846cd082377a0c6660882614)) replaces them with "[initials removed]" before the privacy check; Maryland's first post is a step of 2.2's "First posts".
+
+- **NV: go-ahead to delete the junk reports** "1", "2", "3", "..." on /nv-reports/.
+  Ask: Nevada: delete the junk reports named "1", "2", "3", "..." on /nv-reports/?
+  Why: They are scraper debris showing on a public page.
+  Go: [/nv-reports/](https://kidsoverprofits.org/nv-reports/)
+  Choices: Yes, delete them | No, look at them first
+  Time: 1 min
+  Focus: yes
+  Owner, Plan Board 2026-11-10: "Yes, delete them". Checked 2026-11-13: nothing to delete. The live `api/inspections-read.php?state=NV` (20 facilities, 215 reports) and the mirror have no report named "1", "2", "3" or "..."; a later NV run had already replaced them. Found on the way: four NV facilities listed twice (4.2).
+
+3. **The misplaced 1933 line** on /idd-timeline/ ("Initially served 'mental defectives'"): Devereux or the
+   Southard School.
+   Ask: The 1933 "Initially served 'mental defectives'" line on /idd-timeline/: which school is it about?
+   Why: It is attached to the wrong school on a public page.
+   Go: [/idd-timeline/](https://kidsoverprofits.org/idd-timeline/)
+   Choices: Devereux | The Southard School | Not sure: research it
+   Time: 1 min
+   Focus: yes
+   Owner, Plan Board 2026-11-10: "Not sure: research it". Settled 2026-11-16 from the sources: the line stays with Devereux, where the 2026-10-08 text fix put it. The Southard School has its own 1926 entry on the page saying the same of itself ("Originally intended for children with intellectual disabilities"), and Helena Devereux's 1909 report was "Report of a Year's Work on Defectives in a Public School" (The Psychological Clinic 3:2). The Devereux year was wrong: established as a nonprofit in 1938 (Congressional Record, 112th Congress, "Recognizing the Devereux Foundation"; Devereux's own history: "In 1938 the Commonwealth of Pennsylvania granted Devereux its nonprofit charter"), not 1935. seeds/text-fixes.json `2026-11-16-devereux-1938` changes the heading to "1938 - Devereux Foundation Established as a Nonprofit". No period source found uses "mental defectives" for either school.
+
+4. **Rules-from-documents card length**: tighten the Rules-from-documents cap if long cards bother. (The other half of
+   this item, an AI pass smoothing the About prose, is now the About rewrite in 2.5.)
+   Ask: Rules from documents cards: shorten them?
+   Why: Long cards are slower to review; shorter ones may cut useful detail.
+   Choices: Yes, tighten the cap | Leave them
+   Time: 1 min
+   Owner, Plan Board 2026-11-13: "Yes, tighten the cap". Done 2026-11-16 in kop-pipeline ([81e26a7](https://github.com/kidsoverprofits/kop-pipeline/commit/81e26a72ef07d680281aa276b3c17ef8619aa9fe)): the readers' brief (scripts/doc-read-instructions.md) caps each document at 12 items, the most telling; `doc-text.py export` lists any document still over it. The 297 cards already waiting are left as they are (12 run over 12 lines; cutting them would drop lines by position, not merit).
+
 ## Moved 2026-11-10
 
 ### 2.2 Scrapers and long runs on the owner's computer

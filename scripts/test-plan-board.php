@@ -86,8 +86,8 @@ if ($go) {
     $c = kop_pb_card_html($go, array(), array());
     $check('a do card opens its link and has Done', strpos($c, 'href="' . esc_attr($go['go'][0]['url']) . '"') !== false && strpos($c, 'data-act="done"') !== false);
 }
-$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:wiki-updates-for-entries-with-no-exported-draft']['where'] ?? '') === '2.4 Decisions waiting',
-    $items['2.4:wiki-updates-for-entries-with-no-exported-draft']['where'] ?? 'missing');
+$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check']['where'] ?? '') === '2.4 Decisions waiting',
+    $items['2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check']['where'] ?? 'missing');
 
 // The seed is built from the plan files as they are (build.py's source_text(): name order, LF, joined by a blank
 // line). docs/ is not deployed, so this only runs in a checkout.

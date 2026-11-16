@@ -90,13 +90,7 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     [Submissions Review > News](https://kidsoverprofits.org/admin-submissions/), not on the site; within an hour or two the reader fills its summary and
     date; approve it there, then Undo the Add on a second one. The 8,561 news rows auto-connect approved on 2026-10-14..16 were taken back by
     `api/undo-auto-drive-news.php apply` (soft-deleted, links back to waiting in Drive Docs, reviewed_by "undo of auto news (2026-10-20)").
-    Open: the owner works through those links again in Drive Docs (SCIAD NET source filter), or skips them in bulk.
-    Ask: 8,561 news links were taken back from an automatic import. Review them again, or skip them all?
-    Why: They are mostly duplicate or off-topic links; reviewing them is many hours.
-    Go: [Drive Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox&type=drive-docs)
-    Choices: Skip them all | Review them again
-    Time: 1 min to decide
-    Focus: yes
+    Owner, Plan Board 2026-11-10: "Skip them all". Done 2026-11-13: all 8,561 (SCIAD 7,611, wiki 584, Google Docs 319, data audit 47; none touched since) set to Skipped as the screen's Skip does, reviewed_by "owner: skip all (Plan Board, 2026-11-10)"; they are on the "Skipped or already there" tab.
 27. **Desktop sidebar sticky column** (2026-10-21, docs/plan/4.7 item 16): at 1280+ wide, open a post (any
     https://kidsoverprofits.org/ blog post), https://kidsoverprofits.org/ and a facility page: the newsletter and Donate sit in the
     side column, not in the body, and stay in view (below the sticky header, not under it) while scrolling to the bottom.
@@ -208,3 +202,12 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     0263a729): on /facility/aspen-ranch-ut/ at desktop width, Melodie Rose and Gil Hallows have full-width cards first
     (name left, jobs in two columns right), Kevin Knutson and Matt Alexander side by side under them with no gaps; at
     phone width the cards stack. A company page's People section (e.g. /operator/ of Aspen Education Group) looks the same.
+41. **Plan Board pass of 2026-11-16** (seeds text-fixes and memorial, template pass v160):
+    - https://kidsoverprofits.org/idd-timeline/ reads "1938 - Devereux Foundation Established as a Nonprofit" with the
+      "mental defectives" line under it (the 1935 heading gone).
+    - https://kidsoverprofits.org/in-loving-memory/ lists Donald MacNeil (Robert Land Academy, November 2010) and no
+      longer shows Roberta Evers, Amari Boone, Diane Ramirez or Dustin E. Phelps (archived; owner: no foster care or
+      in-home deaths); the count drops by three.
+    - KOP Tools > Memorial sheet: the Add tab has no "Before 1971" notes, and Evers, Gulley and Boone are under skipped.
+    - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported
+      draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).

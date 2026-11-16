@@ -1,6 +1,151 @@
 {
  "passes": [
   {
+   "at": "2026-11-16 12:00",
+   "entries": [
+    {
+     "answer": 28,
+     "itemId": "2.1:deploys-now-and-then-meet-the-host-s-bot-check",
+     "lead": "Deploys now and then meet the host's bot check",
+     "kind": "answer",
+     "result": "Rewritten as a task: a ready-to-paste support ticket for NixiHost and the steps to send it from their client area."
+    },
+    {
+     "answer": 29,
+     "itemId": "4.3:data-model-phase-5",
+     "lead": "Data model phase 5",
+     "kind": "answer",
+     "result": "Dropped retired_facilities_master_20261025 on production (4,591 rows, as in the backup, which keeps it)."
+    },
+    {
+     "answer": 30,
+     "itemId": "4.3:in-loving-memory-vs-the-news-archive",
+     "lead": "In Loving Memory vs the news archive",
+     "kind": "answer",
+     "result": "Donald MacNeil goes on In Loving Memory on deploy (age 18, Robert Land Academy, November 2010; The Walrus and CHCH)."
+    },
+    {
+     "answer": 31,
+     "itemId": "2.4:nv-go-ahead-to-delete-the-junk-reports",
+     "lead": "NV: go-ahead to delete the junk reports",
+     "kind": "answer",
+     "result": "Nothing left to delete: a later Nevada run had already replaced them. Four Nevada facilities listed twice went to 4.2."
+    },
+    {
+     "answer": 32,
+     "itemId": "3:drive-docs-news-waits-for-review",
+     "lead": "Drive Docs news waits for review",
+     "kind": "answer",
+     "result": "All 8,561 links skipped on production; they are on Drive Docs' \"Skipped or already there\" tab."
+    },
+    {
+     "answer": 33,
+     "itemId": "2.4:the-misplaced-1933-line",
+     "lead": "The misplaced 1933 line",
+     "kind": "answer",
+     "result": "Researched: the line stays with Devereux (Southard has its own entry saying the same), and Devereux's year is fixed to 1938 on deploy."
+    },
+    {
+     "answer": 35,
+     "itemId": "2.2:california-backfill",
+     "lead": "California backfill",
+     "kind": "answer",
+     "result": "Moved to Later; asked again in December."
+    },
+    {
+     "answer": 36,
+     "itemId": "2.2:colorado-is-blocked",
+     "lead": "Colorado is blocked",
+     "kind": "answer",
+     "result": "Moved to Later, with Colorado's 9 unsure facilities."
+    },
+    {
+     "answer": 37,
+     "itemId": "2.1:google-docs-export-last-two-sheets",
+     "lead": "Google Docs export, last two sheets",
+     "kind": "answer",
+     "result": "Archived: the two sheets stay out."
+    },
+    {
+     "answer": 38,
+     "itemId": "2.4:md-post-the-15-summaries-with-initials-cut-out",
+     "lead": "MD: post the 15 summaries with initials cut out?",
+     "kind": "answer",
+     "result": "The Maryland scraper now cuts children's initials before its privacy check; Maryland's first post is a step under First posts."
+    },
+    {
+     "answer": 39,
+     "itemId": "2.4:or-a-records-request-for-complaint-investigations-and-licens",
+     "lead": "OR: a records request for complaint investigations and licensing actions",
+     "kind": "later",
+     "result": "Moved to Later."
+    },
+    {
+     "answer": 40,
+     "itemId": "2.4:rules-from-documents-card-length",
+     "lead": "Rules-from-documents card length",
+     "kind": "answer",
+     "result": "The readers now record at most 12 items a document; cards already waiting are unchanged."
+    },
+    {
+     "answer": 41,
+     "itemId": "2.5:long-form-articles",
+     "lead": "Long-form articles",
+     "kind": "answer",
+     "result": "Moved to session work (4.7): Claude proposes the sections, summaries and era tags on a KOP Tools screen for your approval."
+    },
+    {
+     "answer": 42,
+     "itemId": "4.3:in-loving-memory-vs-the-death-toll-sheet",
+     "lead": "In Loving Memory vs the \"Death Toll\" sheet",
+     "kind": "answer",
+     "result": "Pre-1971 deaths are in; the four foster care and in-home deaths on the page are archived on deploy (Evers, Boone, Ramirez, Phelps)."
+    },
+    {
+     "answer": 43,
+     "itemId": "2.2:unsilenced-backup",
+     "lead": "Unsilenced backup",
+     "kind": "step",
+     "result": "That step (checking the backup's folder) was done on 2026-11-10; the next step is copying the file list down."
+    },
+    {
+     "answer": 44,
+     "itemId": "2.1:the-site-s-rest-answers-are-pinned-to-http-localhost-8000",
+     "lead": "The site's REST answers are pinned to `http://localhost:8000`",
+     "kind": "answer",
+     "result": "Done over SSH: the localhost CORS lines are out of the root .htaccess (a copy kept in ~/backups); the API now answers any site."
+    },
+    {
+     "answer": 45,
+     "itemId": "2.4:wiki-updates-for-entries-with-no-exported-draft",
+     "lead": "Wiki updates for entries with no exported draft",
+     "kind": "answer",
+     "result": "On deploy the site drafts the old gaps of entries with no exported draft; they arrive in Wiki updates over the next hours."
+    },
+    {
+     "answer": 46,
+     "itemId": "2.6:artwork-and-listing",
+     "lead": "Artwork and listing",
+     "kind": "answer",
+     "result": "The listing text is session work (4.8); the card now asks you to find a person for the art."
+    },
+    {
+     "answer": 47,
+     "itemId": "2.6:privacy-policy-and-the-app",
+     "lead": "Privacy policy and the app",
+     "kind": "answer",
+     "result": "Moved to session work (4.8): Claude drafts the app section, then asks you to publish it."
+    },
+    {
+     "answer": 48,
+     "itemId": "2.2:backfills",
+     "lead": "Backfills",
+     "kind": "step",
+     "result": "GA marked finished; TX, CT and MN are left."
+    }
+   ]
+  },
+  {
    "at": "2026-11-04 15:03",
    "entries": [
     {
