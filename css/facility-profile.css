@@ -10,7 +10,9 @@
    the same width as every other post); nothing here widens it. */
 :is(.kop-facility-profile, .kop-person-profile) {
     margin: 0 auto;
-    padding: 1.5rem 1.25rem 3rem;
+    /* 2rem at the sides, as on articles and Kadence's own boxed pages: at 1.25rem
+       the lists and their dividers ran almost to the panel's edge (Claude note #10) */
+    padding: 1.5rem 2rem 3rem;
     box-sizing: border-box;
 }
 
@@ -746,6 +748,17 @@
 }
 
 .kop-fp-records .meta a {
+    font-weight: 500;
+}
+
+/* A row that is only a title (Materials and links: dozens of filings, trackers and pages in a row) is
+   one line, so it needs no divider: a rule under every one of fifty links read as clutter (Claude note #10). */
+.kop-fp-records li:not(:has(> .meta, > .kop-fp-record-summary)) {
+    padding: 0.3rem 0;
+    border-bottom: 0;
+}
+
+.kop-fp-records li:not(:has(> .meta, > .kop-fp-record-summary)) > a {
     font-weight: 500;
 }
 
