@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 18:15 UTC",
- "source": "6cf48eb8b18d78fbb9048cdfb0c824128f01c78f",
+ "built": "2026-11-16 18:43 UTC",
+ "source": "f98ace068ec09e8f09bd81fdf33c8d53d5b3da6f",
  "sections": [
   {
    "key": "2",
@@ -4355,6 +4355,21 @@
        "focus": false,
        "steps": [],
        "hash": "d479559065dc"
+      },
+      {
+       "id": "4.7:parent-company-pages-a-layout-pass-for-the-long-ones",
+       "lead": "Parent company pages: a layout pass for the long ones",
+       "text": "**Parent company pages: a layout pass for the long ones** (owner's Tell Claude note #10, 2026-11-16, on /operator/acadia-healthcare/: \"weird right margins, cluttered spacing\"). Done in that session: the profile panel has 2rem at the sides (was 1.25rem, lists ran almost to its edge) and title-only rows in Materials and links have no divider each. Still open, for a session of its own: the page is about 19,000px tall at 1280 wide (History about 6,400px with the draft and its year-by-year list, News coverage 3,000px, Materials and links 2,200px); running text stops at the 64ch measure while lists and boxes take the full column, so the right side alternates empty and full; with edit pencils on, a pencil sits over the end of each news title. Options: fold News coverage and Materials after the first ten, a two-column Materials list, a narrower column for the whole body. Ask the owner which before building.",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "888e1e03256a"
       }
      ]
     },
