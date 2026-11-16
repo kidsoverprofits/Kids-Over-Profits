@@ -1844,3 +1844,16 @@ details.operator-section:not([open]) {
 .tti-program-index-wrapper .operator-content-scrollable p.operator-profile-bar a.operator-profile-bar-link {
     font-size: 1em;
 }
+
+/* By location tab: the United States / International group headings (Claude note #3), on the white page card. */
+.tti-program-index-wrapper h2.kop-loc-group-heading {
+    margin: 1.2em 0 0.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 2px solid var(--kop-teal, #33A7B5);
+    color: var(--kop-text-primary, #000435);
+    font-size: 1.5em;
+}
+
+.tti-program-index-wrapper h2.kop-loc-group-heading:first-child {
+    margin-top: 0.5em;
+}

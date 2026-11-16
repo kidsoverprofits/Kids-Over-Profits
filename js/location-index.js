@@ -252,6 +252,15 @@ function initLocationIndex() {
         'TENNESSEE', 'TEXAS', 'UTAH', 'VERMONT', 'VIRGINIA', 'WASHINGTON', 'WEST VIRGINIA',
         'WISCONSIN', 'WYOMING'
     ]);
+    // Places that are part of the United States without being states: listed with the states (Claude note #3).
+    const US_OTHER = new Set([
+        'DISTRICT OF COLUMBIA', 'WASHINGTON DC', 'WASHINGTON D.C.', 'PUERTO RICO', 'VIRGIN ISLANDS',
+        'US VIRGIN ISLANDS', 'U.S. VIRGIN ISLANDS', 'GUAM', 'AMERICAN SAMOA', 'NORTHERN MARIANA ISLANDS'
+    ]);
+    const isUsPlace = name => {
+        const key = cleanText(name).toUpperCase();
+        return US_STATES.has(key) || US_OTHER.has(key);
+    };
 
     const normalizeFolderMatchText = value => cleanText(value).toLowerCase().replace(/[^\w\s]/g, '').trim();
 
@@ -636,7 +645,7 @@ function initLocationIndex() {
             } else {
                 locationMap.set(mergeKey, {
                     name: project.name,
-                    type: US_STATES.has(project.name.toUpperCase()) ? 'state' : 'country',
+                    type: isUsPlace(project.name) ? 'state' : 'country',
                     facilities: facilities.slice(),
                     projectKeys: [projectKey]
                 });
@@ -726,10 +735,26 @@ function initLocationIndex() {
             return;
         }
 
-        const grid = document.createElement('div');
-        grid.className = 'facilities-database';
+        // United States first, then International, each under its own heading (Claude note #3).
+        const groups = [
+            { type: 'state', title: 'United States', grid: null },
+            { type: 'country', title: 'International', grid: null }
+        ];
+        groups.forEach(group => {
+            const places = filteredLocations.filter(loc => loc.type === group.type);
+            if (!places.length) return;
+            const heading = document.createElement('h2');
+            heading.className = 'kop-loc-group-heading';
+            heading.textContent = group.title + ' (' + places.length + ')';
+            container.appendChild(heading);
+            group.grid = document.createElement('div');
+            group.grid.className = 'facilities-database';
+            container.appendChild(group.grid);
+        });
+        const gridFor = loc => (groups.find(group => group.type === loc.type) || groups[1]).grid || groups[0].grid;
 
         filteredLocations.forEach(loc => {
+            const grid = gridFor(loc);
             const details = document.createElement('details');
             details.className = 'operator-section';
             // A search that narrows to a few places shows its facilities without a second click.
@@ -772,8 +797,6 @@ function initLocationIndex() {
             if (details.open) fill();
             else details.addEventListener('toggle', () => { if (details.open) fill(); });
         });
-
-        container.appendChild(grid);
     }
 
     // The list is drawn from the index feed (each facility cut to its names,

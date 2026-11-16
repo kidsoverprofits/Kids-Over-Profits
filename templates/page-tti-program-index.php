@@ -81,7 +81,7 @@ get_header();
 
                     <select id="loc-typeFilter">
                         <option value="">All Types</option>
-                        <option value="state">US States</option>
+                        <option value="state">United States</option>
                         <option value="country">International</option>
                     </select>
 
