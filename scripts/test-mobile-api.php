@@ -501,7 +501,7 @@ $r = kop_mobile_operators_rest(new KOP_Mobile_Test_Request(array(), array()));
 $ol = $r instanceof WP_REST_Response ? $r->data : array();
 $check('operators route lists every company page', $r instanceof WP_REST_Response && $r->status === 200 && ($ol['total'] ?? -1) === count($oindex['ids']) && isset($r->headers['ETag']),
     ($ol['total'] ?? '?') . ' of ' . count($oindex['ids']));
-$okeys = array('id', 'slug', 'name', 'url', 'programs', 'open', 'places', 'years', 'status', 'major');
+$okeys = array('id', 'slug', 'name', 'url', 'programs', 'open', 'places', 'years', 'status', 'major', 'active');
 $check('operators items carry only the named keys', $ol && !array_filter($ol['items'], function ($i) use ($okeys) { return array_keys($i) !== $okeys; }));
 $check('operators slugs resolve to their company', $ol && !array_filter($ol['items'], function ($i) { return kop_mobile_resolve_operator_id($i['slug'], false) !== $i['id']; }));
 $names = $ol ? array_column($ol['items'], 'name') : array();

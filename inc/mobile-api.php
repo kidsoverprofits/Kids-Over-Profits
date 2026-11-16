@@ -679,7 +679,7 @@ if (!function_exists('kop_mobile_operator_rest')) {
 
 if (!function_exists('kop_mobile_operators')) {
     /**
-     * {total, items: [{id, slug, name, url, programs, open, places, years, status, major}]}, A to Z:
+     * {total, items: [{id, slug, name, url, programs, open, places, years, status, major, active}]}, A to Z:
      * the /operator/ index without its ledes and map numbers. Named keys only.
      */
     function kop_mobile_operators() {
@@ -696,6 +696,7 @@ if (!function_exists('kop_mobile_operators')) {
                 'years'    => (string) $row['years'],
                 'status'   => (string) $row['status'],
                 'major'    => !empty($row['major']),
+                'active'   => !isset($row['active']) || !empty($row['active']),
             );
         }
         usort($items, static function ($a, $b) { return strcasecmp($a['name'], $b['name']); });

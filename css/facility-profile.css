@@ -1820,6 +1820,15 @@ p.kop-op-draft {
     color: var(--kop-navy-blue, #000080);
 }
 
+/* Closed, merged or acquired: the same cards with a muted top rule. */
+.kop-operator-index #defunct .kop-oi-card {
+    border-top-color: var(--kop-text-muted, #4A5568);
+}
+
+.kop-oi-cards + .kop-fp-records {
+    margin-top: 1rem;
+}
+
 .kop-oi-meta {
     margin: 0 0 0.4rem;
     font-size: 0.88rem;

@@ -572,10 +572,25 @@ if (!function_exists('kop_operator_history_is_major')) {
     }
 }
 
+if (!function_exists('kop_operator_history_is_active')) {
+    /**
+     * Still operating? The record's own status settles it (Active; Defunct, Acquired,
+     * Merged, Closed, Dissolved). Without one, an open program means yes, programs with
+     * none open mean no, and a company with no programs on record counts as operating.
+     */
+    function kop_operator_history_is_active(array $row) {
+        $status = strtolower(trim((string) ($row['status'] ?? '')));
+        if ($status === 'active' || $status === 'operating') return true;
+        if (preg_match('/defunct|acquired|merged|closed|dissolved|bankrupt|ceased|inactive/', $status)) return false;
+        if ((int) ($row['open'] ?? 0) > 0) return true;
+        return (int) ($row['programs'] ?? 0) === 0;
+    }
+}
+
 if (!function_exists('kop_operator_history_index_rows')) {
     /**
      * Every company page: [{id, name, slug, url, programs, open, states, countries, places,
-     * years, status, has_history, lede, map_degree, major}], majors first by size. Read
+     * years, status, has_history, lede, map_degree, major, active}], majors first by size. Read
      * from the tables in two queries, so the index never builds whole pages.
      */
     function kop_operator_history_index_rows() {
@@ -645,6 +660,7 @@ if (!function_exists('kop_operator_history_index_rows')) {
                 'map_degree'  => (int) ($node['degree'] ?? 0),
             );
             $row['major'] = kop_operator_history_is_major($row);
+            $row['active'] = kop_operator_history_is_active($row);
             $out[] = $row;
         }
         usort($out, static function ($a, $b) {

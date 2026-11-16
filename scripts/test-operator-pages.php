@@ -113,6 +113,17 @@ include dirname(__DIR__) . '/templates/operator-index.php';
 $kop_index_html = ob_get_clean();
 file_put_contents($out_dir . '/_index.html', $kop_index_html);
 $check('the index prints a card per major company', substr_count($kop_index_html, 'class="kop-oi-card"') === count($kop_majors));
+$kop_closed = array_values(array_filter($GLOBALS['kop_operator_index']['rows'], function ($r) { return !$r['active']; }));
+$check('the index splits operating companies from closed ones', strpos($kop_index_html, 'id="active"') !== false && ($kop_closed ? strpos($kop_index_html, 'id="defunct"') > strpos($kop_index_html, 'id="active"') : true));
+$check('a stated status settles operating or closed',
+    kop_operator_history_is_active(array('status' => 'Active', 'programs' => 3, 'open' => 0))
+    && !kop_operator_history_is_active(array('status' => 'Defunct', 'programs' => 3, 'open' => 2))
+    && !kop_operator_history_is_active(array('status' => 'Acquired', 'programs' => 0, 'open' => 0))
+    && !kop_operator_history_is_active(array('status' => 'Merged', 'programs' => 0, 'open' => 0)));
+$check('without a status, open programs decide',
+    kop_operator_history_is_active(array('status' => '', 'programs' => 3, 'open' => 1))
+    && !kop_operator_history_is_active(array('status' => 'unknown', 'programs' => 2, 'open' => 0))
+    && kop_operator_history_is_active(array('status' => '', 'programs' => 0, 'open' => 0)));
 $GLOBALS['kop_operator_index'] = null;
 
 // Written history: drafts for admins only, links made safe.
