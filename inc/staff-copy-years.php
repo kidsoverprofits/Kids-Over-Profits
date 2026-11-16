@@ -34,7 +34,10 @@ if (!defined('ABSPATH')) {
 if (!function_exists('kop_scy_copy_year')) {
     /** The year of a wiki copy a source names ('r/troubledteens wiki, page "X" (as of 2025-12-18)'), else 0. */
     function kop_scy_copy_year($source) {
-        return preg_match('#r/troubledteens wiki\b.*\(as of ((?:19|20)\d{2})-#i', (string) $source, $m) ? (int) $m[1] : 0;
+        if (preg_match('#r/troubledteens wiki\b.*\(as of ((?:19|20)\d{2})-#i', (string) $source, $m)) return (int) $m[1];
+        // Version 4: a wiki source with no date is a copy too, and the oldest copy KOP holds is 2025-12-18
+        // (Karr Farnsworth "Casa by the Sea, Administrator, 2025": it closed in 2009).
+        return preg_match('#^r/troubledteens wiki\b#i', trim((string) $source)) ? 2025 : 0;
     }
 
     /** Is this source a HEAL page (whose years are when it was retrieved)? */

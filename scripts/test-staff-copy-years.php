@@ -30,6 +30,8 @@ $check = function ($label, $ok, $detail = '') use (&$failures) {
 // --- the rules ------------------------------------------------------------------
 $wiki = 'r/troubledteens wiki, page "Spring Ridge Academy" (as of 2025-12-18)';
 $check('a wiki copy names its year', kop_scy_copy_year($wiki) === 2025);
+$check('an undated wiki source is a 2025 copy', kop_scy_copy_year('r/troubledteens wiki') === 2025);
+$check('...so its "2025" comes off', kop_scy_job_action(array('id' => 9, 'years' => '2025', 'source' => 'r/troubledteens wiki'), array()) === 'clear');
 $check('HEAL and Woodbury name none', kop_scy_copy_year('HEAL, staff list for X (archived 2025-07-11)') === 0 && kop_scy_copy_year('Woodbury Reports, May 2013, p. 9') === 0);
 $check('the copy year comes off a role', kop_scy_role('Former Therapist (2025, r/troubledteens wiki)', $wiki) === 'Former Therapist');
 $check('"before" the copy year comes off', kop_scy_role('Former Staff (before 2025, r/troubledteens wiki)', $wiki) === 'Former Staff');
@@ -130,7 +132,7 @@ if (!file_exists($db_path)) {
         if (array_keys($nb) != array_keys($na)) $names_ok = false;
     }
     $check('a folded record still names everyone it did', $names_ok);
-    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND ((source LIKE '%troubledteens wiki%(as of %' AND substr(years, 1, 4) >= substr(source, instr(source, '(as of ') + 7, 4) AND years GLOB '[12][0-9][0-9][0-9]*') OR years LIKE 'before %' OR (source LIKE 'HEAL%' AND years <> ''))")->fetchColumn();
+    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND ((source LIKE 'r/troubledteens wiki%' AND source NOT LIKE '%(as of %' AND years GLOB '202[5-9]*') OR (source LIKE '%troubledteens wiki%(as of %' AND substr(years, 1, 4) >= substr(source, instr(source, '(as of ') + 7, 4) AND years GLOB '[12][0-9][0-9][0-9]*') OR years LIKE 'before %' OR (source LIKE 'HEAL%' AND years <> ''))")->fetchColumn();
     $check('no shown job keeps a copy year', (int) $j === 0, "$j left");
     $check('jobs were cleared and hidden', $res['jobs_cleared'] > 0 && $res['jobs_hidden'] > 0);
     $sra = json_decode((string) $pdo->query('SELECT json_data FROM facilities_v2 WHERE id = 12293')->fetchColumn(), true);
