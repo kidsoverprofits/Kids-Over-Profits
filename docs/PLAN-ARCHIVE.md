@@ -4,6 +4,22 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-16 (plan 4.7 #19 finished)
+
+### 4.7 Pages and templates
+
+19. **Common Survivor Experiences, left from Tell Claude note #7** (2026-11-16; the layout itself is live, commits 96ef0dd1, 663e978b,
+    898dd28e, 08f47d0f). Two things the checks report on that page that the note did not ask about and that were there before:
+    (a) `check-contrast.py` fails the cover block at the top (white heading, tagline and photo credit): the checker cannot see
+    the photo behind them, but the credit line (#EDF2F7, small) is also faint over the lighter half of the photo for a reader;
+    (b) `check-mobile-overflow.py` reports the Easy Table of Contents toggle icon 2px past its edge at 390 and 768. Also for the
+    owner to decide: /spiritual-abuse/ (17 h4 entries, 6 groups) is the sister page and could take the same three classes
+    (`docs/claude/pages-content.md`, "Guide pieces").
+    Done 2026-11-16, commit a9f51cba: the credit is on a midnight label (`kop-photo-credit`, seeded), a cover's photo now fills
+    its block (the 600px picture cap had stopped it at 600 x 400) with midnight behind it, the TOC icon box fits its button,
+    /spiritual-abuse/ has the guide pieces (seeded, no words changed). check-contrast and check-mobile-overflow pass on both
+    pages live, signed out; checked signed in by eye.
+
 ## Moved 2026-11-16 (Plan Board pass)
 
 ### 2.1 cPanel, server and accounts
