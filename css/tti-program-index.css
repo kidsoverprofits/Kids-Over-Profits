@@ -1818,7 +1818,14 @@ details.operator-section:not([open]) {
 }
 
 .tti-program-index-wrapper a.operator-profile-link {
+    /* its own line, so the card's "+ Click for details" stays whole below it */
+    display: table;
     margin: 2px auto 8px;
+}
+
+/* The opened card starts with the larger link instead. */
+.tti-program-index-wrapper details[open] > summary a.operator-profile-link {
+    display: none;
 }
 
 .tti-program-index-wrapper a.operator-profile-link:hover,
