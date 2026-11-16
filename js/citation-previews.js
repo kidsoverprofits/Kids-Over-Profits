@@ -37,7 +37,8 @@
      * Hover or focus on a number shows the source. The stored text keeps
      * "source", so pages read the same without JS. A container with class
      * kop-no-cite-numbers opts out, and a table cell holding only the link (a
-     * "Source" column) is left as it is.
+     * "Source" column) is left as it is. A citation with no address
+     * (span.kop-cite-text) is numbered too; its entry is the citation text.
      */
     var SOURCE_TEXT = /^source(?:\s+\d+)?$/i;
     var SKIP = 'form, textarea, [contenteditable], .kop-no-cite-numbers, .kop-cite-refs, #wpadminbar';
@@ -227,8 +228,9 @@
 
         link.removeAttribute('data-kop-citation-preview');
         link.removeAttribute('aria-label');
-        link.classList.remove('kop-citation-link');
-        link.classList.add('kop-cite-refs__link');
+        link.removeAttribute('title');
+        link.classList.remove('kop-citation-link', 'kop-cite-text');
+        link.classList.add(link.tagName === 'A' ? 'kop-cite-refs__link' : 'kop-cite-refs__text');
         ref.link = link;
         drawEntry(ref);
         sourcesList().appendChild(ref.li);
@@ -281,15 +283,17 @@
 
     function numberLink(link) {
         // One source per address, except that pages of one PDF ("#page=20") are cited apart.
-        var key = link.href.replace(/#(?!page=\d+$).*$/, '');
+        // A citation with no address (span.kop-cite-text) is one source per citation text.
+        var plain = link.tagName !== 'A';
+        var text = (link.textContent || '').trim();
+        var label = (link.getAttribute('data-kop-citation-preview') || link.getAttribute('title') || (SOURCE_TEXT.test(text) ? '' : text)).trim();
+        var key = plain ? 'text:' + (label || 'unnamed ' + (count + 1)) : link.href.replace(/#(?!page=\d+$).*$/, '');
         var ref = refs[key];
         var isNew = !ref;
         if (isNew) {
-            var text = (link.textContent || '').trim();
-            var label = (link.getAttribute('data-kop-citation-preview') || link.getAttribute('title') || (SOURCE_TEXT.test(text) ? '' : text)).trim();
             var fromCite = label !== '' && !SOURCE_TEXT.test(label);
-            if (!fromCite) label = fallbackPreview(link) || link.href;
-            ref = refs[key] = { n: ++count, url: link.href, label: label, fromCite: fromCite, cite: null, backs: [], anchors: [], back: null, li: null, link: null };
+            if (!fromCite) label = plain ? 'Source not named' : (fallbackPreview(link) || link.href);
+            ref = refs[key] = { n: ++count, url: plain ? '' : link.href, label: label, fromCite: fromCite, cite: null, backs: [], anchors: [], back: null, li: null, link: null };
         }
 
         var sup = document.createElement('sup');
@@ -413,16 +417,21 @@
     }
 
     function numberSources(root) {
-        var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link)');
+        // With the citations that have no address (span.kop-cite-text, kop_facility_pages_sources_html()), in reading order.
+        var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link), span.kop-cite-text');
         var made = [];
         var named = [];
         Array.prototype.forEach.call(links, function (link) {
-            if (named.indexOf(link) !== -1 || SOURCE_TEXT.test((link.textContent || '').trim())) return;
+            if (link.tagName !== 'A' || named.indexOf(link) !== -1 || SOURCE_TEXT.test((link.textContent || '').trim())) return;
             var group = bracketGroup(link);
             if (group) named.push.apply(named, group);
         });
         Array.prototype.forEach.call(links, function (link) {
             var text = (link.textContent || '').trim();
+            if (link.tagName !== 'A') {
+                if (!link.children.length && !link.closest(SKIP)) made.push(numberLink(link));
+                return;
+            }
             if (!SOURCE_TEXT.test(text) && named.indexOf(link) === -1) return;
             if (link.children.length || link.closest(SKIP)) return;
             var cell = link.closest('td');

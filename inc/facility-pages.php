@@ -1770,7 +1770,8 @@ if (!function_exists('kop_facility_pages_sources_html')) {
             if ($url === '') $url = kop_facility_pages_cite_url($cite);
             $links[] = $url !== '' && function_exists('kop_citation_link')
                 ? kop_citation_link($url, $label, $preview, true, '', true)
-                : '<span title="' . esc_attr($preview) . '">' . esc_html($label) . '</span>';
+                // No address: js/citation-previews.js still numbers it and lists the citation text under Sources.
+                : '<span class="kop-cite-text" title="' . esc_attr($preview) . '">' . esc_html($label) . '</span>';
         }
         return '<' . $tag . ' class="kop-fp-src">' . implode(', ', $links) . '</' . $tag . '>';
     }
