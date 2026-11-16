@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 17:14 UTC",
- "source": "a037a5bedb9cbac0734b90119df0241c639c242c",
+ "built": "2026-11-16 17:20 UTC",
+ "source": "48fff003bef3b0517c2f3d447795ac0f3c65bf2f",
  "sections": [
   {
    "key": "2",
@@ -4324,7 +4324,7 @@
       {
        "id": "4.7:ongoing-stories-that-follow-what-is-in-the-news",
        "lead": "Ongoing Stories that follow what is in the news",
-       "text": "**Ongoing Stories that follow what is in the news** (owner's Tell Claude note #5, 2026-11-13): \"a way to automatically update ongoing stories based on what's currently trending\". Built 2026-11-16: a daily pass (`inc/story-arc-suggestions.php`) proposes at Review inbox > Suggested ongoing stories a new story for a facility several outlets keep covering, archiving a story with no article in 6 months, and same-event coverage to add; Add / Dismiss / exact Undo, nothing published straight. The owner's open question (what counts as trending) has a default and a knob: >= 3 approved articles in 60 days from >= 2 outlets, spread over >= 14 days, newest within 30 (the queue's \"What counts as trending\" tool). On the 11-16 mirror it finds 9: the NH Youth Development Center trial, New Lifehouse Academy, Kearney YRTC lawsuit, Fox Run's former CEO, Les Peters Academy closure, Wyoming Boys' School trial, Pathway of Madison County escapes, Bimberi, Children's Home of Kingston closure. Story terms now take `facility: <id>` and `not: <phrase>` / `not: #<id>` lines (Detach writes the second, so it sticks); Fuller v. Hyde School and Refuge Girls Academy were fixed once on deploy (option `kop_arc_terms_1116`). Open: - **Review the suggested stories** (owner)",
+       "text": "**Ongoing Stories that follow what is in the news** (owner's Tell Claude note #5, 2026-11-13): \"a way to automatically update ongoing stories based on what's currently trending\". Built 2026-11-16: a daily pass (`inc/story-arc-suggestions.php`) proposes at Review inbox > Suggested ongoing stories a new story for a facility several outlets keep covering, archiving a story with no new article in 3 weeks (owner, 2026-11-16: a quiet story makes way for a more current one; its card names the new stories waiting), and same-event coverage to add; Add / Dismiss / exact Undo, nothing published straight. The owner's open question (what counts as trending) has a default and a knob: >= 3 approved articles in 60 days from >= 2 outlets, spread over >= 14 days, newest within 21 (the queue's \"What counts as trending\" tool). With the 3-week rule all four current stories (Hyde, Provo Canyon, Refuge, Bevin) are suggested for archiving. On the 11-16 mirror it first found 9 (7 with the newest within 21 days): the NH Youth Development Center trial, New Lifehouse Academy, Kearney YRTC lawsuit, Fox Run's former CEO, Les Peters Academy closure, Wyoming Boys' School trial, Pathway of Madison County escapes, Bimberi, Children's Home of Kingston closure. Story terms now take `facility: <id>` and `not: <phrase>` / `not: #<id>` lines (Detach writes the second, so it sticks); Fuller v. Hyde School and Refuge Girls Academy were fixed once on deploy (option `kop_arc_terms_1116`). Open: - **Review the suggested stories** (owner)",
        "ask": "Add or dismiss the suggested Ongoing Stories; fix each title before adding",
        "date": "2026-11-16",
        "why": "Nothing shows on the news page until it is added; the titles are drafts from the facility name and the headlines.",
@@ -4339,7 +4339,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "776802c1b54e"
+       "hash": "222369460a34"
       }
      ]
     },
