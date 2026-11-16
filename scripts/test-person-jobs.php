@@ -67,7 +67,7 @@ $pdo->exec("CREATE TABLE {$prefix}kop_person_roles (record_kind TEXT NOT NULL, r
     position INTEGER NOT NULL, person_id INTEGER NOT NULL, name TEXT NOT NULL DEFAULT '', role TEXT, ref TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (record_kind, record_id, list, position))");
 $pdo->exec("CREATE TABLE {$prefix}kop_person_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, person_id INTEGER NOT NULL, place TEXT NOT NULL DEFAULT '',
-    role TEXT NOT NULL DEFAULT '', years TEXT NOT NULL DEFAULT '', source TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT '', years TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL DEFAULT '', source TEXT NOT NULL DEFAULT '', source_url TEXT NOT NULL DEFAULT '',
     origin TEXT NOT NULL DEFAULT 'manual', import_key TEXT NOT NULL DEFAULT '', hidden INTEGER NOT NULL DEFAULT 0, created_at TEXT, updated_at TEXT)");
 $opts = array('pdo' => $pdo, 'prefix' => $prefix, 'graph' => array('nodes' => array()));
 $GLOBALS['kop_pjobs_opts'] = $opts;
@@ -130,6 +130,20 @@ check(array_map(function ($j) { return array($j['id'], $j['role'], $j['place'], 
 $refused = '';
 try { kop_pjobs_undo($log[0]['n'], $opts); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
 check($refused !== '', 'an undone change cannot be undone twice');
+
+// ---- Industry or another noteworthy position ---------------------------------------------------
+$kj = kop_pjobs_save($pid, 0, array('role' => 'Staff', 'place' => 'Kind Test Department', 'kind' => 'other'), $opts);
+$row = array_column(kop_pjobs_for_person($pid, $opts), null, 'id')[$kj] ?? null;
+check($row && $row['kind'] === 'other', 'a job added as another noteworthy position keeps its kind');
+kop_pjobs_save($pid, $kj, array('kind' => 'industry'), $opts);
+$kl = kop_pjobs_log_for($pid);
+kop_pjobs_undo($kl[0]['n'], $opts);
+$row = array_column(kop_pjobs_for_person($pid, $opts), null, 'id')[$kj] ?? null;
+check($row && $row['kind'] === 'other', 'Undo puts the kind back');
+$refused = '';
+try { kop_pjobs_save($pid, $kj, array('kind' => 'politics'), $opts); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
+check($refused !== '', 'a kind is industry, other or left to the guess');
+kop_pjobs_undo($kl[1]['n'], $opts);
 
 // ---- Fixes from seeds/person-job-fixes.json ----------------------------------------------------
 $fx = kop_pjobs_save($pid, 0, array('role' => 'Founder', 'place' => 'Fix Test Ranch', 'years' => ''), $opts);

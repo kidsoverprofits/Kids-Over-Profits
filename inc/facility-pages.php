@@ -2253,7 +2253,8 @@ if (!function_exists('kop_facility_pages_person_career')) {
                 $url = (string) kop_operator_page_url_for_name($place);
             }
             // A government body on the map (a state department, a sheriff's office) is a noteworthy job, not the industry.
-            $add($place, $role, '', $url, $kind === 'government' ? 'other' : ($url !== '' || $kind !== '' ? 'industry' : ''));
+            // The map's "other" places are mixed (Bootcamps for Teens, the Gates Foundation): the guess decides those.
+            $add($place, $role, '', $url, $kind === 'government' ? 'other' : ($url !== '' || ($kind !== '' && $kind !== 'other') ? 'industry' : ''));
         }
         // The owner's tick on KOP Tools > People: they became an educational consultant (inc/people.php).
         if ((int) $person_id > 0 && function_exists('kop_people_is_ed_consultant') && kop_people_is_ed_consultant((int) $person_id)) {
@@ -2285,11 +2286,12 @@ if (!function_exists('kop_facility_pages_job_kind')) {
         $program = '/\b(?:academy|ranch|wilderness|treatment|RTC|residential|boys|girls|youth home|programs?|camp|transports?|'
             . 'school(?!\s+district)|recovery|therapy|therapeutic|lodge|teens?|adolescent|expeditions?|outdoor|behavioral|psychiatric|college excel|sober college)\b/i';
         if (preg_match($program, $place)) return 'industry';
-        $weak = '/\b(?:corrections?|juvenile justice|health and welfare|public health|human services|county|state of|church|ministries|'
-            . 'football|basketball|baseball|coach|real estate|realty|bank|law firm|insurance|hospital)\b/i';
+        // Not "hospital" (Benchmark, Charter, Cross Creek Hospital are the industry), "ministries" (Roloff) or "coach" (parent coaching).
+        $weak = '/\b(?:corrections?|juvenile justice|health and welfare|public health|human services|county|state of|church|'
+            . 'football|basketball|baseball|real estate|realty|bank|law firm|insurance|army medical)\b/i';
         if (preg_match($weak, $place)) return 'other';
         $roles = '/\b(?:senator|state representative|legislator|governor|mayor|city council(?:man| member)?|'
-            . 'county commissioner|judge|sheriff|police|coach|pastor|bishop)\b/i';
+            . 'county commissioner|judge|sheriff|police|(?:football|basketball|baseball|athletic|head) coach|pastor|bishop)\b/i';
         if (preg_match($roles, $role)) return 'other';
         return 'industry';
     }

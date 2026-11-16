@@ -25,6 +25,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php  
 # Careers fold repeats on display (kop_facility_pages_career_fold()): one place under two unlinked names ("Legacy Outdoor" / "Legacy Outdoor
 # Adventures", unless the short name starts two names or the long one is a campus), and a line another line's role already says ("NATSAP:
 # Board member" beside "NATSAP Board member"); two linked names stay two lines, since they are two records (merge them instead)
+# Person cards split a career in two (kop_facility_pages_career_groups()): "Elsewhere in the industry" and "Other notable positions"
+# (a state department, a legislature, police, a university, a church job, coaching). Each job's kind (kop_person_jobs.kind: '' = guessed
+# by kop_facility_pages_job_kind(), 'industry', 'other') is set at People > Past jobs ("Shown under"); a place with a page is always the
+# industry; a kind set by hand wins when two lines fold. A map line can't be marked: add the job on the person with its kind instead
+# (Rae Ann Knopf's Bill and Melinda Gates Foundation job). The app's PersonCard draws the same two headings from each job's kind
 # The People editor also holds "Became an educational consultant" (kop_people.ed_consultant: a ticked person's career ends "Educational
 # consultant" on every page; details saves logged in kop_people_details_log, Undo there) and relationships ({prefix}kop_person_relations,
 # inc/person-relations.php: family, business partners; by id or name, shown on both people, Parent <-> Child; kinds in Dropdown Lists 'person-relations')

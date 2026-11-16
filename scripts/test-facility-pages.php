@@ -639,6 +639,29 @@ $check('a career folds two unlinked names of one place and drops a line another 
         'Friends of Families with Children in Crisis Foundation', 'Fulshear Treatment to Transition – The Ranch', 'Fulshear Treatment to Transition',
         'Camas Ranch', 'NATSAP Council', 'Telos')
     && $fold[1]['role'] === 'Executive Director, Founder' && $fold[1]['years'] === '2013', wp_json_encode($fold));
+$kinds = array();
+foreach (array(
+    array('Idaho Department of Health and Welfare', 'Staff', 'other'), array('Utah State Senate', '', 'other'), array('Howland Police Department', 'Police chief', 'other'),
+    array('Utah State University football', 'Football coach', 'other'), array('Utah State Hospital', 'Staff', 'other'), array('West Valley School District', 'Superintendent', 'other'),
+    array('Trinity Church', 'Youth Pastor', 'other'), array('Utah', 'State Senator', 'other'),
+    array('Riverside Military Academy', 'Teacher', 'industry'), array('Benchmark Hospital', 'Mentor', 'industry'), array('Roloff Ministries', 'Staff', 'industry'),
+    array('Parent Coach Professionals', 'Parent Coach', 'industry'), array('Sober College', 'Admissions', 'industry'), array('NATSAP', 'Board member', 'industry'),
+    array('Baldwin County Residential Wilderness Facility', 'Director', 'industry'), array('Legacy Outdoor Adventures', 'Executive Director', 'industry'),
+) as $k) if (kop_facility_pages_job_kind($k[0], $k[1]) !== $k[2]) $kinds[] = $k[0];
+$check('jobs outside the industry are told apart: government, politics, universities, coaching, churches; programs stay the industry', !$kinds, implode(', ', $kinds));
+$groups = kop_facility_pages_career_groups(array(
+    array('role' => 'Director', 'place' => 'A Ranch', 'years' => '', 'url' => '/facility/a/', 'kind' => 'industry'),
+    array('role' => 'Senator', 'place' => 'Utah State Senate', 'years' => '', 'url' => '', 'kind' => 'other'),
+    array('role' => 'Staff', 'place' => 'B Academy', 'years' => '', 'url' => ''),
+));
+$check('a career is shown as "Elsewhere in the industry" and "Other notable positions"',
+    array_column($groups, 'label') === array('Elsewhere in the industry', 'Other notable positions')
+    && array_column($groups[0]['jobs'], 'place') === array('A Ranch', 'B Academy') && array_column($groups[1]['jobs'], 'place') === array('Utah State Senate'),
+    wp_json_encode($groups));
+$check('a person with only industry jobs gets one group', count(kop_facility_pages_career_groups(array(array('place' => 'X', 'kind' => 'industry')))) === 1);
+$merged = kop_facility_pages_career_kind_merge(array('kind' => 'other', 'kind_set' => false), array('kind' => 'industry', 'kind_set' => false));
+$kept = kop_facility_pages_career_kind_merge(array('kind' => 'industry', 'kind_set' => false), array('kind' => 'other', 'kind_set' => true));
+$check('one place under two lines: a kind set by hand wins, else the industry', $merged['kind'] === 'industry' && $kept['kind'] === 'other');
 $check('nicknames fold into one person', kop_facility_pages_person_key('Steve Roach') === kop_facility_pages_person_key('Steven Roach')
     && kop_facility_pages_person_key('Clint Dorny') === kop_facility_pages_person_key('Clinton Dorny')
     && kop_facility_pages_person_key('Jack Williams') !== kop_facility_pages_person_key('John Williams'));
