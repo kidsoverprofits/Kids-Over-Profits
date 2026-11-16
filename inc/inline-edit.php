@@ -536,6 +536,10 @@ function kop_ie_facility_groups() {
             array('staff.notableStaff', 'Notable staff', 'rows', array('columns' => array('name' => 'Name', 'role' => 'Role', 'pastJobs' => 'Past jobs'))),
             array('staff.pastTTIJobs', 'Staff who came from other programs', 'rows', array('columns' => array('role' => 'Role', 'organization' => 'Program', 'employer' => 'Employer'))),
         )),
+        // The small ticked boxes under "Materials and links" (Claude note #18).
+        'resources' => array('Materials held', array(
+            array('resources', 'Materials the project holds', 'checks'),
+        )),
         'notes' => array('Research notes', array(
             array('notes', 'Research notes', 'items'),
         )),
@@ -571,6 +575,17 @@ function kop_ie_facility_opts($fid = 0) {
 /** Checklist options for a section: the form's labels plus any other true/false keys the record holds. */
 function kop_ie_check_options($section, $map) {
     $opts = array();
+    if ($section === 'resources') {
+        // Only the has* flags: the *Details texts and notes beside them are not boxes.
+        foreach (kop_facility_resource_catalog() as $k => $meta) $opts[$k] = $meta[0];
+        foreach ((array) $map as $k => $v) {
+            $k = (string) $k;
+            if (!isset($opts[$k]) && strpos($k, 'has') === 0 && (is_bool($v) || is_string($v))) $opts[$k] = kop_facility_pages_humanize_key($k);
+        }
+        $out = array();
+        foreach ($opts as $k => $label) $out[] = array('value' => $k, 'label' => $label);
+        return $out;
+    }
     foreach (kop_facility_checklist_labels() as $k => $label) {
         if (strpos($k, $section . '.') === 0) {
             $opts[substr($k, strlen($section) + 1)] = $label;

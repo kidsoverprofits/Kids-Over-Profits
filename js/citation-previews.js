@@ -417,8 +417,9 @@
     }
 
     function numberSources(root) {
-        // With the citations that have no address (span.kop-cite-text, kop_facility_pages_sources_html()), in reading order.
-        var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link), span.kop-cite-text');
+        // With the citations that have no address (span.kop-cite-text, kop_facility_pages_sources_html(); a cached page
+        // from before that class has the bare span[title] in .kop-fp-src), in reading order.
+        var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link), span.kop-cite-text, .kop-fp-src > span[title]');
         var made = [];
         var named = [];
         Array.prototype.forEach.call(links, function (link) {

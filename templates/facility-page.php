@@ -249,9 +249,26 @@ $kop_fp_staff_lists = static function (array $staff, $tag = 'h3') use ($kop_fp_s
                     <li><?php echo esc_html($person['text']); ?><?php if ($person['source'] !== '') $kop_fp_sources(array($person), 'span'); ?></li>
                 <?php endforeach; ?>
             </ul>
-        <?php else : ?>
+        <?php else :
+            // People with nothing else on record (no other job, no relation) fold under a "more" line (Claude note #15).
+            $kop_fp_linked = array();
+            $kop_fp_alone = array();
+            foreach ($staff[$key] as $person) {
+                if (!empty($person['career']) || !empty($person['relations'])) $kop_fp_linked[] = $person;
+                else $kop_fp_alone[] = $person;
+            }
+            // Folding everyone, or a short list, hides nothing worth hiding.
+            if (!$kop_fp_linked || count($kop_fp_alone) < 4) {
+                $kop_fp_linked = $staff[$key];
+                $kop_fp_alone = array();
+            }
+            foreach (array_filter(array('linked' => $kop_fp_linked, 'alone' => $kop_fp_alone)) as $kop_fp_part => $kop_fp_people) :
+                if ($kop_fp_part === 'alone') : ?>
+            <details class="kop-fp-more kop-fp-staff-more">
+                <summary><?php echo count($kop_fp_people); ?> more staff with no other connections on record</summary>
+                <?php endif; ?>
             <ul class="kop-fp-staff">
-                <?php foreach ($staff[$key] as $person) : ?>
+                <?php foreach ($kop_fp_people as $person) : ?>
                     <li class="kop-fp-person<?php echo !empty($person['career']) ? ' kop-fp-person--career' : ''; ?>">
                         <?php if (isset($person['name'])) : ?>
                             <div class="kop-fp-person-head">
@@ -296,6 +313,10 @@ $kop_fp_staff_lists = static function (array $staff, $tag = 'h3') use ($kop_fp_s
                     </li>
                 <?php endforeach; ?>
             </ul>
+                <?php if ($kop_fp_part === 'alone') : ?>
+            </details>
+                <?php endif; ?>
+            <?php endforeach; ?>
         <?php endif; ?>
     <?php endforeach; ?>
     <?php
@@ -1306,19 +1327,12 @@ get_header();
             <?php if ($kop_fp_has_resources) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('resources'); ?>">
                 <h2>Materials and links</h2>
-                <?php if ($page['resources']) :
-                    $grouped = array();
-                    foreach ($page['resources'] as $r) $grouped[$r['group']][] = $r;
-                    ?>
-                    <p class="kop-fp-count">Materials the project holds for this facility. Ask through the correction form to see any of them.</p>
-                    <?php foreach ($grouped as $group => $items) : ?>
-                        <h3 class="kop-fp-subhead"><?php echo esc_html($group); ?></h3>
-                        <ul class="kop-fp-notes">
-                            <?php foreach ($items as $r) : ?>
-                                <li><?php echo esc_html($r['label']); ?><?php if ($r['detail'] !== '') : ?><span class="kop-fp-detail"><?php echo esc_html($r['detail']); ?></span><?php endif; ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endforeach; ?>
+                <?php if ($page['resources']) : // A row of small ticked boxes, the pencil ticks them (Claude note #18). ?>
+                    <ul class="kop-fp-held" aria-label="Materials the project holds"<?php echo $kop_fp_edit('resources', 'the materials held'); ?>>
+                        <?php foreach ($page['resources'] as $r) : ?>
+                            <li<?php echo $r['detail'] !== '' ? ' title="' . esc_attr($r['detail']) . '"' : ''; ?>><span class="kop-fp-held-box" aria-hidden="true">&#10003;</span><?php echo esc_html($r['label'] === 'Note' && $r['detail'] !== '' ? $r['detail'] : $r['label']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
                 <?php endif; ?>
                 <?php if ($page['profile_links']) : ?>
                     <h3 class="kop-fp-subhead"<?php echo $kop_fp_edit('links', 'external links'); ?>>External links</h3>
