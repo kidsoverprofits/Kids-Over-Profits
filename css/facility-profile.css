@@ -2108,14 +2108,43 @@ p.kop-op-draft {
     border-bottom: 1px solid var(--kop-border-secondary, #d9d3c0);
 }
 
-/* Company pages: the header and the body are one centred column at the reading measure (owner, plan 4.7 #20).
-   Paragraphs already stopped there (css/reading-measure.css) while lists, the timeline and tiles ran the full
-   width, so the right side went empty and full by turns. The facts rail still floats at the right of the grid,
-   hanging past the column's edge; on phones the column is narrower than the measure, so nothing changes. */
-.kop-operator-profile .kop-fp-header,
-.kop-operator-profile .kop-fp-generated-body {
+/* Generated program and company pages: the header and the body are one centred column at the reading measure
+   (owner, plan 4.7 #20). Paragraphs already stopped there (css/reading-measure.css) while lists, the timeline and
+   tiles ran the full width, so the right side went empty and full by turns. The body keeps the grid's width and
+   is padded in to the column, so tables and card grids can step back out to the full width (owner: "tables etc
+   can be full width"). The facts rail still floats at the right of the grid, hanging past the column's edge; on
+   phones the grid is narrower than the measure, the gutter is 0 and nothing changes.
+   --kop-col-gutter is registered as a length so it is worked out once, on the body (17px text, 100cqi = the
+   grid), and every piece inside inherits the same pixels whatever its own font size. */
+@property --kop-col-gutter {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+}
+
+.kop-facility-generated .kop-fp-header {
     max-width: var(--kop-measure, 64ch);
     margin-inline: auto;
+}
+
+.kop-facility-generated .kop-fp-grid {
+    container-type: inline-size;
+}
+
+.kop-facility-generated .kop-fp-generated-body {
+    --kop-col-gutter: max(0px, (100cqi - var(--kop-measure, 64ch)) / 2);
+    padding-inline: var(--kop-col-gutter);
+}
+
+/* Full width: tables and their scroll boxes, card grids, the video strip, the network map, document folders.
+   Not one inside another, which would step out twice. */
+.kop-facility-generated .kop-fp-generated-body :is(table, [class*="-scroll"], .kop-fp-vcards, .kop-fp-staff, .kop-vc, .kop-network-embed, .kop-document-folder):not(:is(table, [class*="-scroll"], .kop-fp-vcards, .kop-fp-staff, .kop-vc, .kop-network-embed, .kop-document-folder) *) {
+    margin-inline: calc(-1 * var(--kop-col-gutter));
+    max-width: none;
+}
+
+.kop-facility-generated .kop-fp-generated-body table:not(:is([class*="-scroll"], .kop-fp-vcards, .kop-fp-staff, .kop-vc, .kop-network-embed, .kop-document-folder) *) {
+    width: calc(100% + 2 * var(--kop-col-gutter));
 }
 
 /* A company's Materials and links: two columns where the reading column has room for them, so a list of
