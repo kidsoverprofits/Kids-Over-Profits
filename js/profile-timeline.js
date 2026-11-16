@@ -166,4 +166,10 @@
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
+    // A timeline sent inside a closed fold (a company's "Year by year", inc/defer-folds.php) is drawn when it opens.
+    document.addEventListener('kop:stamped', function (e) {
+        var t = e.target;
+        if (!t || !t.querySelectorAll) return;
+        Array.prototype.forEach.call(t.querySelectorAll('[data-kop-ptl]'), init);
+    });
 })();

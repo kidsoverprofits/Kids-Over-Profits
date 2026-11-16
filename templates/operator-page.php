@@ -194,17 +194,25 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 <?php elseif ($kop_op_history_edit !== '') : ?>
                     <p class="kop-op-draft"<?php echo $kop_op_history_edit; ?>>No written history yet. Use the pencil to add one; it stays a draft, seen only by admins, until it is set to Published.</p>
                 <?php endif; ?>
-                <?php if (!empty($page['timeline'])) : ?>
+                <?php if (!empty($page['timeline']) && function_exists('kop_ptl_html') && isset($page['timeline'][0]['events'][0]['title'])) :
+                    // Folded (plan 4.7 #20): the year-by-year list made up most of a long company's History. A link
+                    // to one of its years (#tl-2010) opens the fold (js/defer-folds.js, or the browser itself).
+                    $kop_op_tl_n = 0;
+                    foreach ($page['timeline'] as $kop_op_tl_y) $kop_op_tl_n += count($kop_op_tl_y['events']);
+                    $kop_op_tl_first = (int) $page['timeline'][0]['year'];
+                    $kop_op_tl_last = (int) $page['timeline'][count($page['timeline']) - 1]['year'];
+                    ?>
                     <h3 class="kop-fp-subhead" id="timeline">Year by year</h3>
-                    <?php
-                    // inc/profile-timeline.php: escaped inside. A program's events count only in the years the company ran it.
-                    if (function_exists('kop_ptl_html') && isset($page['timeline'][0]['events'][0]['title'])) {
+                    <details class="kop-fp-more kop-op-timeline-fold">
+                        <summary><?php echo esc_html('Show the timeline: ' . $kop_op_tl_n . ' ' . ($kop_op_tl_n === 1 ? 'event' : 'events') . ($kop_op_tl_last > $kop_op_tl_first ? ', ' . $kop_op_tl_first . ' to ' . $kop_op_tl_last : ', ' . $kop_op_tl_first)); ?></summary>
+                        <?php
+                        // inc/profile-timeline.php: escaped inside. A program's events count only in the years the company ran it.
                         echo kop_ptl_html($page['timeline'], array(
                             'id'    => 'tl',
                             'intro' => 'From the records: deals and takeovers, the programs it ran, and the deaths, lawsuits, inspection findings and news stories from the years it ran them. Point at an event, or tap "More about this", for the details.',
                         ));
-                    }
-                    ?>
+                        ?>
+                    </details>
                 <?php endif; ?>
                 <?php
                 // Admins only: add a dated event to this company's timeline (Review inbox > Company milestones, the form open with the company filled in).
@@ -374,10 +382,22 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                 ?>
             <section class="kop-fp-section" id="news">
                 <h2>News coverage</h2>
-                <?php if ($kop_op_news_main) : ?>
+                <?php if ($kop_op_news_main) :
+                    // The first ten (essential reporting first), the rest folded (plan 4.7 #20).
+                    $kop_op_news_later = count($kop_op_news_main) > 12 ? array_slice($kop_op_news_main, 10) : array();
+                    if ($kop_op_news_later) $kop_op_news_main = array_slice($kop_op_news_main, 0, 10);
+                    ?>
                 <ul class="kop-fp-records">
                     <?php foreach ($kop_op_news_main as $n) $kop_op_news_row($n); ?>
                 </ul>
+                <?php if ($kop_op_news_later) : ?>
+                <details class="kop-fp-more">
+                    <summary><?php echo esc_html(count($kop_op_news_later) . ' more ' . (count($kop_op_news_later) === 1 ? 'article' : 'articles')); ?></summary>
+                    <ul class="kop-fp-records">
+                        <?php foreach ($kop_op_news_later as $n) $kop_op_news_row($n); ?>
+                    </ul>
+                </details>
+                <?php endif; ?>
                 <?php endif; ?>
                 <?php if ($kop_op_news_aside) : ?>
                 <details class="kop-fp-more kop-fp-news-aside">
@@ -497,18 +517,35 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
 
             <section class="kop-fp-section" id="materials">
                 <h2>Materials and links</h2>
-                <?php foreach ($page['resource_links'] as $kop_op_group) : ?>
+                <?php
+                $kop_op_link_row = static function (array $l) {
+                    ?>
+                    <li>
+                        <a href="<?php echo esc_url($l['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($l['label']); ?></a>
+                        <?php if (!empty($l['live_url'])) : ?>
+                            <span class="meta"><a href="<?php echo esc_url($l['go_url']); ?>" target="_blank" rel="nofollow noreferrer noopener">live site</a></span>
+                        <?php endif; ?>
+                    </li>
+                    <?php
+                };
+                foreach ($page['resource_links'] as $kop_op_group) :
+                    // Two columns where there is room (css/facility-profile.css); a long group shows ten, the rest folded (plan 4.7 #20).
+                    $kop_op_links_shown = (array) $kop_op_group['links'];
+                    $kop_op_links_later = count($kop_op_links_shown) > 12 ? array_slice($kop_op_links_shown, 10) : array();
+                    if ($kop_op_links_later) $kop_op_links_shown = array_slice($kop_op_links_shown, 0, 10);
+                    ?>
                     <h3 class="kop-fp-subhead"><?php echo esc_html($kop_op_group['label']); ?></h3>
-                    <ul class="kop-fp-records">
-                        <?php foreach ($kop_op_group['links'] as $l) : ?>
-                            <li>
-                                <a href="<?php echo esc_url($l['url']); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html($l['label']); ?></a>
-                                <?php if (!empty($l['live_url'])) : ?>
-                                    <span class="meta"><a href="<?php echo esc_url($l['go_url']); ?>" target="_blank" rel="nofollow noreferrer noopener">live site</a></span>
-                                <?php endif; ?>
-                            </li>
-                        <?php endforeach; ?>
+                    <ul class="kop-fp-records kop-op-links">
+                        <?php foreach ($kop_op_links_shown as $l) $kop_op_link_row($l); ?>
                     </ul>
+                    <?php if ($kop_op_links_later) : ?>
+                    <details class="kop-fp-more">
+                        <summary><?php echo esc_html(count($kop_op_links_later) . ' more ' . strtolower($kop_op_group['label'])); ?></summary>
+                        <ul class="kop-fp-records kop-op-links">
+                            <?php foreach ($kop_op_links_later as $l) $kop_op_link_row($l); ?>
+                        </ul>
+                    </details>
+                    <?php endif; ?>
                     <?php foreach ((array) ($kop_op_group['credits'] ?? array()) as $kop_op_credit) : ?>
                         <p class="kop-fp-count">
                             <?php echo $kop_op_credit['count'] < count($kop_op_group['links']) ? esc_html(sprintf('%d of these from', $kop_op_credit['count'])) : 'From'; ?>

@@ -2108,6 +2108,32 @@ p.kop-op-draft {
     border-bottom: 1px solid var(--kop-border-secondary, #d9d3c0);
 }
 
+/* Company pages: the header and the body are one centred column at the reading measure (owner, plan 4.7 #20).
+   Paragraphs already stopped there (css/reading-measure.css) while lists, the timeline and tiles ran the full
+   width, so the right side went empty and full by turns. The facts rail still floats at the right of the grid,
+   hanging past the column's edge; on phones the column is narrower than the measure, so nothing changes. */
+.kop-operator-profile .kop-fp-header,
+.kop-operator-profile .kop-fp-generated-body {
+    max-width: var(--kop-measure, 64ch);
+    margin-inline: auto;
+}
+
+/* A company's Materials and links: two columns where the reading column has room for them, so a list of
+   short titles fills the width instead of running down one side (plan 4.7 #20). One column on phones. */
+.kop-fp-records.kop-op-links {
+    columns: 2 15rem;
+    column-gap: 2.25rem;
+}
+
+.kop-fp-records.kop-op-links > li {
+    break-inside: avoid;
+}
+
+/* The year-by-year timeline under History, folded. */
+.kop-op-timeline-fold {
+    margin-top: 0.25rem;
+}
+
 .kop-fp-records.kop-op-tiles > li:has(.kop-op-homes) {
     grid-column: 1 / -1;
 }
