@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 19:43 UTC",
- "source": "6de782d3d55af60a7458aa1830e72df04f21fd86",
+ "built": "2026-11-16 20:36 UTC",
+ "source": "14f16eaaf8d3c0ca28b13eb070985980341cbaff",
  "sections": [
   {
    "key": "2",
@@ -4663,9 +4663,9 @@
       {
        "id": "5:test-operator-pages-embark-behavioral-health-lists-its-progr",
        "lead": "test-operator-pages: \"embark-behavioral-health lists its programs\"",
-       "text": "**test-operator-pages: \"embark-behavioral-health lists its programs\"** (found 2026-11-02): the check counts `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261) has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.",
+       "text": "**test-operator-pages: \"embark-behavioral-health lists its programs\"** (and \"teen-challenge\", same cause, still both on 2026-11-16) (found 2026-11-02): the check counts `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261) has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.",
        "ask": "",
-       "date": "2026-11-02",
+       "date": "2026-11-16",
        "why": "",
        "go": [],
        "choices": [],
@@ -4673,7 +4673,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "411f80103a35"
+       "hash": "625e7f528645"
       },
       {
        "id": "5:test-review-inbox-nonprofit-filings-every-organization-is-we",
