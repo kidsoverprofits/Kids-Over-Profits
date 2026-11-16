@@ -208,3 +208,6 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     - KOP Tools > Memorial sheet: the Add tab has no "Before 1971" notes, and Evers, Gulley and Boone are under skipped.
     - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported
       draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).
+42. **Suggested ongoing stories** (plan 4.7 #18): the queue opens at Review inbox > Suggested ongoing stories; "Look
+   now" lists about nine new stories; Add one, see it on [/tti-news-feed/](https://kidsoverprofits.org/tti-news-feed/),
+   Undo, it is gone again. Manage Ongoing Stories: Detach an article, the arc's terms gain `not: #<id>`.

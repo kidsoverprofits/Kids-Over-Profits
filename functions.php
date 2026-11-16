@@ -289,6 +289,8 @@ require_once get_stylesheet_directory() . '/inc/fact-shape.php';
 require_once get_stylesheet_directory() . '/inc/fact-fold.php';
 // Facts from news articles: an hourly reader proposes what each approved article says that belongs on a record (Woodbury Facts cards + Review inbox > Facts from news)
 require_once get_stylesheet_directory() . '/inc/news-facts.php';
+// Suggested Ongoing Stories: a daily pass proposes new stories from what several outlets keep covering, archives quiet ones, adds same-event coverage (Review inbox)
+require_once get_stylesheet_directory() . '/inc/story-arc-suggestions.php';
 // Copies earlier approvals and merges left on facility records (one person twice, a name twice, one event twice), tidied in the review inbox
 require_once get_stylesheet_directory() . '/inc/record-cleanup.php';
 // Corrections found by checking KOP's data against outside sources (scripts/data-audit.py), approved in the review inbox

@@ -252,6 +252,11 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 
 **Purpose:** Essential reporting: articles picked as especially good journalism, with an optional note (`inc/featured-reporting.php`, /essential-reporting/), and the nominations waiting at Submissions Review > Nominated (`inc/featured-nominations.php`, seeded from `js/data/featured/nominations.json`).
 
+### news_story_arc_suggestions
+**Columns:** `id`, `skey`, `kind`, `arc_id`, `news_id`, `facility_ids`, `title`, `description`, `match_terms`, `article_ids`, `evidence`, `status`, `created_at`, `updated_at`, `decided_by`, `decided_at`, `undo`
+
+**Purpose:** Suggested Ongoing Stories from the daily pass over approved news (`inc/story-arc-suggestions.php`): a new story for a facility several outlets keep covering, archiving a story gone quiet, or a same-event article to add, waiting at Review inbox > Suggested ongoing stories (Add with exact Undo, Dismiss).
+
 ### facility_closure_reports / news_closure_scans
 **Columns (reports):** `id`, `news_id`, `facility_id`, `program_name`, `location`, `stage`, `target_status`, `closure_date`, `quote`, `quote_found`, `status`, `previous_status`, `previous_end_year`, `applied_note`, `reviewed_by`, `reviewed_at`, `created_at`
 **Columns (scans):** `news_id`, `content_hash`, `outcome`, `attempts`, `detail`, `scanned_at`

@@ -94,9 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_arc
                 : "Article #{$articleId} not found (or already attached).";
         } elseif ($action === 'detach') {
             $articleId = (int) ($_POST['article_id'] ?? 0);
+            $cur = $pdo->prepare("SELECT story_arc_id FROM news_submissions WHERE id = ?");
+            $cur->execute([$articleId]);
+            $fromArc = (int) $cur->fetchColumn();
             $pdo->prepare("UPDATE news_submissions SET story_arc_id = NULL WHERE id = ?")
                 ->execute([$articleId]);
-            $notices[] = "Detached article #{$articleId}.";
+            // A "not: #id" line keeps it off when it is saved again or the archive is scanned.
+            if ($fromArc > 0) {
+                $t = $pdo->prepare("SELECT match_terms FROM news_story_arcs WHERE id = ?");
+                $t->execute([$fromArc]);
+                $pdo->prepare("UPDATE news_story_arcs SET match_terms = ? WHERE id = ?")
+                    ->execute([kop_news_arc_add_not_id((string) $t->fetchColumn(), $articleId), $fromArc]);
+            }
+            $notices[] = "Detached article #{$articleId}; a line \"not: #{$articleId}\" keeps it off this story.";
         }
     } catch (PDOException $e) {
         $errors[] = 'Database error: ' . $e->getMessage()
@@ -201,7 +211,8 @@ form.inline { display: inline; }
 Articles attach automatically when they contain one of an arc's <strong>match terms</strong>
 (checked against title, summary, and facility names), or manually below.
 This is separate from the automatic "Also covered by" grouping of same-event coverage.
-Duplicate copies of one article are cleaned up in <a href="manage-duplicate-articles.php">Manage Duplicate Articles</a>.</p>
+Duplicate copies of one article are cleaned up in <a href="manage-duplicate-articles.php">Manage Duplicate Articles</a>.
+New stories suggested from what is in the news wait at <a href="/wp-admin/admin.php?page=kop-review-inbox&amp;type=story-arc-suggestions">Review inbox &gt; Suggested ongoing stories</a>.</p>
 
 <?php foreach ($notices as $n): ?><div class="notice"><?php echo esc_html($n); ?></div><?php endforeach; ?>
 <?php foreach ($errors as $e): ?><div class="error"><?php echo esc_html($e); ?></div><?php endforeach; ?>
@@ -225,7 +236,7 @@ Duplicate copies of one article are cleaned up in <a href="manage-duplicate-arti
         <input type="text" name="title" value="<?php echo esc_attr($arc['title']); ?>" required>
         <label>Description (shown on the news page)</label>
         <textarea name="description"><?php echo esc_textarea($arc['description'] ?? ''); ?></textarea>
-        <label>Match terms (one per line — new articles containing one are auto-attached; a line "since: 2026-06-01" keeps out articles published before that date, and saving takes off the ones already attached)</label>
+        <label>Match terms (one per line — new articles containing one are auto-attached; "since: 2026-06-01" keeps out articles published before that date; "facility: 11021" attaches every article linked to that record; "not: newspaper awards" or "not: #10464" keeps out what contains the phrase, or that one article. Saving takes off members these lines keep out)</label>
         <textarea name="match_terms" placeholder="hyde school&#10;fuller v. hyde"><?php echo esc_textarea($arc['match_terms'] ?? ''); ?></textarea>
         <p class="hint">Keep terms specific: “hyde school”, not “school”. Checked case-insensitively against title, summary, and facility names.</p>
         <label>Facility button (optional)</label>
