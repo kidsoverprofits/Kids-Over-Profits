@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 20:36 UTC",
- "source": "14f16eaaf8d3c0ca28b13eb070985980341cbaff",
+ "built": "2026-11-16 21:00 UTC",
+ "source": "024e36976c44e998b43f2c8dafb2258e6db7e5a3",
  "sections": [
   {
    "key": "2",
@@ -1254,6 +1254,25 @@
         }
        ],
        "hash": "fd90337fd52d"
+      },
+      {
+       "id": "2.4:provo-canyon-school-what-is-wrong-with-universal-health-serv",
+       "lead": "Provo Canyon School: what is wrong with \"Universal Health Services, Acquired this program\"",
+       "text": "**Provo Canyon School: what is wrong with \"Universal Health Services, Acquired this program\"** (Claude note #17, 2026-11-16). The map line is kop-data `network/graph.json` edge e1033 (UHS -> provo-canyon-school, \"acquired\"). The record's sources say UHS bought PCS from Charter Behavioral Health Systems in June 2000 (HEAL \"Program Staff\", archived 2025-07-16; r/troubledteens wiki \"Provo Canyon School\"). The same list says PCS acquired Academy at Canyon Creek (e0540), which now runs as the Springville campus (e0003, a rebrand).",
+       "ask": "Provo Canyon's map connections: which part is wrong, UHS buying it (2000), the wording with no year, or Academy at Canyon Creek?",
+       "date": "2026-11-16",
+       "why": "The sources on the record say UHS bought it in 2000, so I need to know what to change.",
+       "go": [],
+       "choices": [
+        "UHS did not buy it",
+        "Say \"bought it from Charter in 2000\"",
+        "The Canyon Creek line is wrong"
+       ],
+       "time": "1 min",
+       "kind": "decide",
+       "focus": false,
+       "steps": [],
+       "hash": "a489c58f5617"
       },
       {
        "id": "2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58",
