@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 17:20 UTC",
- "source": "48fff003bef3b0517c2f3d447795ac0f3c65bf2f",
+ "built": "2026-11-16 17:28 UTC",
+ "source": "4b4b68e66533b1c0573f7306c152e48198a845a6",
  "sections": [
   {
    "key": "2",
@@ -4340,6 +4340,21 @@
        "focus": false,
        "steps": [],
        "hash": "222369460a34"
+      },
+      {
+       "id": "4.7:common-survivor-experiences-left-from-tell-claude-note-7",
+       "lead": "Common Survivor Experiences, left from Tell Claude note #7",
+       "text": "**Common Survivor Experiences, left from Tell Claude note #7** (2026-11-16; the layout itself is live, commits 96ef0dd1, 663e978b, 898dd28e, 08f47d0f). Two things the checks report on that page that the note did not ask about and that were there before: (a) `check-contrast.py` fails the cover block at the top (white heading, tagline and photo credit): the checker cannot see the photo behind them, but the credit line (#EDF2F7, small) is also faint over the lighter half of the photo for a reader; (b) `check-mobile-overflow.py` reports the Easy Table of Contents toggle icon 2px past its edge at 390 and 768. Also for the owner to decide: /spiritual-abuse/ (17 h4 entries, 6 groups) is the sister page and could take the same three classes (`docs/claude/pages-content.md`, \"Guide pieces\").",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "8a71c4608485"
       }
      ]
     },
