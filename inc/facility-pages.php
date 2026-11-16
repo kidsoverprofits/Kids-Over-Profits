@@ -1498,7 +1498,34 @@ if (!function_exists('kop_facility_pages_staff_items')) {
             }));
             if (!$out[$k]) unset($out[$k]);
         }
+        // "Staff who came from other programs" repeats the cards when a line ("Robert H. Crist and Kreg Gillman: founded
+        // Silverado Academy") is only about people listed above whose card already has their other jobs (Claude note #16).
+        if (!empty($out['pastTTIJobs'])) {
+            $shown = array();
+            foreach (array('administrator', 'notableStaff') as $k) {
+                foreach ($out[$k] ?? array() as $e) {
+                    if (isset($e['name']) && !empty($e['career'])) $shown[kop_facility_pages_person_line_key($e['name'])] = true;
+                }
+            }
+            $out['pastTTIJobs'] = array_values(array_filter($out['pastTTIJobs'], static function ($e) use ($shown) {
+                if (!preg_match('/^([^:]{3,160}):\s*\S/', (string) $e['text'], $m)) return true;
+                $names = preg_split('/\s*,\s*(?:and\s+)?|\s+and\s+/', trim($m[1]));
+                foreach ($names as $n) {
+                    if (!isset($shown[kop_facility_pages_person_line_key($n)])) return true;
+                }
+                return false;
+            }));
+            if (!$out['pastTTIJobs']) unset($out['pastTTIJobs']);
+        }
         return $out;
+    }
+}
+
+if (!function_exists('kop_facility_pages_person_line_key')) {
+    /** A person's name as a match key: lower case, no "Dr.", no punctuation or spaces. */
+    function kop_facility_pages_person_line_key($name) {
+        $name = preg_replace('/^(?:dr|mr|mrs|ms)\.?\s+/i', '', trim((string) $name));
+        return preg_replace('/[^a-z0-9]+/', '', strtolower($name));
     }
 }
 
