@@ -395,7 +395,8 @@ $kop_fp_outside = function_exists('kop_outside_research_for_facility') ? kop_out
 $kop_fp_has_docs = !empty($page['documents']['html']) || $kop_fp_has_research || $kop_fp_has_unsilenced || $kop_fp_has_survivor_sites;
 $kop_fp_has_wiki = !empty($page['wiki']);
 $kop_fp_has_siblings = !empty($page['siblings']);
-$kop_fp_has_resources = !empty($page['resources']) || !empty($page['profile_links']) || !empty($page['resource_links']);
+// The materials held are ticked under "At a glance" (Claude note #18); this section is the links.
+$kop_fp_has_resources = !empty($page['profile_links']) || !empty($page['resource_links']);
 $kop_fp_has_network = !empty($page['network']);   // the embedded map, even when the record already names every company on it
 
 $kop_fp_violations = $kop_fp_has_inspections ? (array) ($page['inspections']['violations'] ?? array()) : array();
@@ -644,6 +645,24 @@ get_header();
                         <?php $kop_fp_sources($page['fact_sources'][$fact['label']] ?? array()); ?>
                     </div>
                 <?php endforeach; ?>
+                <?php if ($page['resources']) : // Small ticked boxes, each a link to where it is on the page; the pencil ticks them (Claude note #18). ?>
+                    <div class="kop-fp-held-fact"<?php echo $kop_fp_edit('resources', 'the materials held'); ?>>
+                        <dt>Materials held</dt>
+                        <dd><ul class="kop-fp-held" aria-label="Materials the project holds">
+                            <?php foreach ($page['resources'] as $r) :
+                                $kop_fp_r_text = $r['label'] === 'Note' && $r['detail'] !== '' ? $r['detail'] : $r['label'];
+                                $kop_fp_r_to = '';
+                                foreach ((array) ($r['anchors'] ?? array()) as $kop_fp_a) {
+                                    if (isset($kop_fp_sections[$kop_fp_a])) { $kop_fp_r_to = $kop_fp_id($kop_fp_a); break; }
+                                }
+                                ?>
+                                <li<?php echo $r['detail'] !== '' ? ' title="' . esc_attr($r['detail']) . '"' : ''; ?>><span class="kop-fp-held-box" aria-hidden="true">&#10003;</span><?php
+                                    echo $kop_fp_r_to !== '' ? '<a href="#' . esc_attr($kop_fp_r_to) . '">' . esc_html($kop_fp_r_text) . '</a>' : esc_html($kop_fp_r_text);
+                                ?></li>
+                            <?php endforeach; ?>
+                        </ul></dd>
+                    </div>
+                <?php endif; ?>
                 <?php foreach ($kop_fp_parts ? $kop_fp_parts['facts'] : array() as $kop_fp_f) : ?>
                     <div class="kop-fp-profile-fact">
                         <dt><?php echo $kop_fp_f['label'] !== '' ? wp_kses_post($kop_fp_f['label']) : 'History'; ?></dt>
@@ -1327,13 +1346,6 @@ get_header();
             <?php if ($kop_fp_has_resources) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('resources'); ?>">
                 <h2>Materials and links</h2>
-                <?php if ($page['resources']) : // A row of small ticked boxes, the pencil ticks them (Claude note #18). ?>
-                    <ul class="kop-fp-held" aria-label="Materials the project holds"<?php echo $kop_fp_edit('resources', 'the materials held'); ?>>
-                        <?php foreach ($page['resources'] as $r) : ?>
-                            <li<?php echo $r['detail'] !== '' ? ' title="' . esc_attr($r['detail']) . '"' : ''; ?>><span class="kop-fp-held-box" aria-hidden="true">&#10003;</span><?php echo esc_html($r['label'] === 'Note' && $r['detail'] !== '' ? $r['detail'] : $r['label']); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
                 <?php if ($page['profile_links']) : ?>
                     <h3 class="kop-fp-subhead"<?php echo $kop_fp_edit('links', 'external links'); ?>>External links</h3>
                     <?php

@@ -502,8 +502,10 @@ if (!function_exists('kop_mobile_facility_network')) {
             $kind = (string) ($link['kind'] ?? '');
             if ($relation === 'became' || $relation === 'formerly') {
                 $group = 'Names';
+            } elseif ($relation === 'acquired by') {
+                $group = 'Acquired by';   // as the website (kop_facility_pages_network(), Claude note #17)
             } elseif ($relation !== '') {
-                $group = 'Acquisitions';
+                $group = 'Programs it acquired';
             } elseif ($kind === 'person') {
                 $group = 'People';
             } else {
@@ -512,8 +514,7 @@ if (!function_exists('kop_mobile_facility_network')) {
             $role = (string) ($link['role'] ?? '');
             if ($relation === 'became') $role = 'Later known as';
             elseif ($relation === 'formerly') $role = 'Earlier name';
-            elseif ($relation === 'acquired') $role = 'Acquired by this program' . ($role !== '' ? ' (' . $role . ')' : '');
-            elseif ($relation === 'acquired by') $role = 'Acquired this program' . ($role !== '' ? ' (' . $role . ')' : '');
+            elseif ($relation === 'acquired' || $relation === 'acquired by') $role = strcasecmp($role, 'acquired') === 0 ? '' : $role;
 
             $key = (string) $link['node'];
             if (isset($links[$key])) {

@@ -1504,14 +1504,22 @@ if (!function_exists('kop_facility_pages_staff_items')) {
             $shown = array();
             foreach (array('administrator', 'notableStaff') as $k) {
                 foreach ($out[$k] ?? array() as $e) {
-                    if (isset($e['name']) && !empty($e['career'])) $shown[kop_facility_pages_person_line_key($e['name'])] = true;
+                    if (!isset($e['name']) || empty($e['career'])) continue;
+                    $shown[kop_facility_pages_person_line_key($e['name'])] = true;
+                    // "Brent Hall" in a line is the card's "Brent R. Hall" (kop_people's name key drops the initial).
+                    $kop_loose = kop_facility_pages_person_key($e['name']);
+                    if ($kop_loose !== '') $shown['loose:' . $kop_loose] = true;
                 }
             }
             $out['pastTTIJobs'] = array_values(array_filter($out['pastTTIJobs'], static function ($e) use ($shown) {
                 if (!preg_match('/^([^:]{3,160}):\s*\S/', (string) $e['text'], $m)) return true;
                 $names = preg_split('/\s*,\s*(?:and\s+)?|\s+and\s+/', trim($m[1]));
                 foreach ($names as $n) {
-                    if (!isset($shown[kop_facility_pages_person_line_key($n)])) return true;
+                    if (isset($shown[kop_facility_pages_person_line_key($n)])) continue;
+                    // A line name with no middle initial matches a card that has one; "Robert B." never matches "Robert W.".
+                    $has_initial = preg_match('/\s[A-Za-z]\.?\s/', ' ' . $n . ' ');
+                    if (!$has_initial && isset($shown['loose:' . kop_facility_pages_person_key($n)])) continue;
+                    return true;
                 }
                 return false;
             }));
@@ -2787,7 +2795,7 @@ if (!function_exists('kop_facility_pages_resources_held')) {
                 $detail_key = preg_replace('/^has/', '', $k);
                 $detail_key = lcfirst($detail_key) . 'Details';
                 $detail = isset($resources[$detail_key]) && is_string($resources[$detail_key]) ? trim($resources[$detail_key]) : '';
-                $out[] = array('label' => $meta[0], 'group' => $meta[1], 'detail' => $detail);
+                $out[] = array('label' => $meta[0], 'group' => $meta[1], 'detail' => $detail, 'key' => (string) $k, 'anchors' => kop_facility_pages_resource_anchors($k));
                 $seen[$detail_key] = true;
             }
         }
@@ -2795,16 +2803,35 @@ if (!function_exists('kop_facility_pages_resources_held')) {
             if (substr((string) $k, -7) === 'Details' && !isset($seen[$k]) && is_string($v) && trim($v) !== '') {
                 $flag = 'has' . ucfirst(substr($k, 0, -7));
                 $meta = $catalog[$flag] ?? array(kop_facility_pages_humanize_key($flag), 'Other documentation');
-                $out[] = array('label' => $meta[0], 'group' => $meta[1], 'detail' => trim($v));
+                $out[] = array('label' => $meta[0], 'group' => $meta[1], 'detail' => trim($v), 'key' => $flag, 'anchors' => kop_facility_pages_resource_anchors($flag));
             }
         }
         foreach (kop_facility_pages_text_items($resources['customResources'] ?? null) as $t) {
-            $out[] = array('label' => $t, 'group' => 'Other documentation', 'detail' => '');
+            $out[] = array('label' => $t, 'group' => 'Other documentation', 'detail' => '', 'key' => '', 'anchors' => kop_facility_pages_resource_anchors(''));
         }
         foreach (kop_facility_pages_text_items($resources['notes'] ?? null) as $t) {
-            $out[] = array('label' => 'Note', 'group' => 'Other documentation', 'detail' => $t);
+            $out[] = array('label' => 'Note', 'group' => 'Other documentation', 'detail' => $t, 'key' => '', 'anchors' => kop_facility_pages_resource_anchors(''));
         }
         return $out;
+    }
+}
+
+if (!function_exists('kop_facility_pages_resource_anchors')) {
+    /**
+     * The page sections a held material links to under "At a glance", best first; the page (and the app) takes
+     * the first one it shows (Claude note #18). Anything else goes to the documents, then "Materials and links".
+     */
+    function kop_facility_pages_resource_anchors($flag) {
+        $map = array(
+            'hasNews' => array('news'), 'hasPressReleases' => array('news'), 'hasVideo' => array('videos', 'news'),
+            'hasInspections' => array('inspections', 'violations'), 'hasStateReports' => array('inspections', 'violations'),
+            'hasRegulatoryFilings' => array('inspections', 'business-filings'), 'hasViolations' => array('violations', 'inspections'),
+            'hasLawsuits' => array('lawsuits'), 'hasSettlements' => array('lawsuits'), 'hasPoliceReports' => array('incidents'),
+            'hasArticlesOfOrganization' => array('business-filings'), 'hasPropertyRecords' => array('business-filings'),
+            'hasFinancial' => array('tax-filings', 'business-filings'), 'hasSurvivorStories' => array('testimony'),
+            'hasStudent' => array('practices'), 'hasStaff' => array('practices'), 'hasParent' => array('practices'),
+        );
+        return array_merge($map[(string) $flag] ?? array(), array('documents', 'resources'));
     }
 }
 
@@ -4843,16 +4870,18 @@ if (!function_exists('kop_facility_pages_network')) {
                 && isset($named_keys[kop_facility_pages_name_key($link['name'] ?? '')])) continue;
             if ($link['relation'] === 'became' || $link['relation'] === 'formerly') {
                 $label = 'Names';
+            } elseif ($link['relation'] === 'acquired by') {
+                // Its buyer apart from what it bought, so neither reads the wrong way round (Claude note #17).
+                $label = 'Acquired by';
             } elseif ($link['relation'] !== '') {
-                $label = 'Acquisitions';
+                $label = 'Programs it acquired';
             } else {
                 $label = function_exists('kop_network_map_label') ? kop_network_map_label($link['category'], 'category') : ucfirst($link['category']);
             }
             $role = $link['role'];
             if ($link['relation'] === 'became') $role = 'Later known as';
             elseif ($link['relation'] === 'formerly') $role = 'Earlier name';
-            elseif ($link['relation'] === 'acquired') $role = 'Acquired by this program' . ($role !== '' ? ' (' . $role . ')' : '');
-            elseif ($link['relation'] === 'acquired by') $role = 'Acquired this program' . ($role !== '' ? ' (' . $role . ')' : '');
+            elseif ($link['relation'] === 'acquired' || $link['relation'] === 'acquired by') $role = strcasecmp($role, 'acquired') === 0 ? '' : $role;
             $url = !empty($link['facilityId']) && (int) $link['facilityId'] !== (int) $facility_id
                 ? kop_facility_page_url((int) $link['facilityId'])
                 : '';

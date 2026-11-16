@@ -827,6 +827,17 @@
     color: var(--kop-text-primary, #1a1a2e);
 }
 
+/* In the "At a glance" rail (Claude note #18): a narrower, tighter list. */
+.kop-fp-held-fact .kop-fp-held {
+    gap: 0.3rem 0.8rem;
+    margin: 0.15rem 0 0;
+    font-size: 0.88rem;
+}
+
+.kop-fp-held a {
+    color: var(--kop-navy, #000080);
+}
+
 .kop-fp-held li {
     display: inline-flex;
     align-items: baseline;
