@@ -2136,6 +2136,17 @@ p.kop-op-draft {
     padding-inline: var(--kop-col-gutter);
 }
 
+/* Index pages built the same way (/operator/) have no .kop-fp-grid, so 100cqi fell back to the whole viewport
+   and the gutter squeezed the body to a 70px strip (Claude note #11). They keep the page's width, header too. */
+.kop-facility-generated:not(:has(.kop-fp-grid)) .kop-fp-header {
+    margin-inline: 0;
+}
+
+.kop-facility-generated:not(:has(.kop-fp-grid)) .kop-fp-generated-body {
+    --kop-col-gutter: 0px;
+    padding-inline: 0;
+}
+
 /* Full width: tables and their scroll boxes, card grids, the video strip, the network map, document folders.
    Not one inside another, which would step out twice. */
 .kop-facility-generated .kop-fp-generated-body :is(table, [class*="-scroll"], .kop-fp-vcards, .kop-fp-staff, .kop-vc, .kop-network-embed, .kop-document-folder):not(:is(table, [class*="-scroll"], .kop-fp-vcards, .kop-fp-staff, .kop-vc, .kop-network-embed, .kop-document-folder) *) {
