@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 16:30 UTC",
- "source": "816058c5e5b0de2a93f45b1b7c8ddd86a9a8c83c",
+ "built": "2026-11-16 16:33 UTC",
+ "source": "e11505cc537de7c35a1a18d230d4621e527c47f2",
  "sections": [
   {
    "key": "2",
@@ -2515,7 +2515,7 @@
       {
        "id": "3:plan-board-pass-of-2026-11-16",
        "lead": "Plan Board pass of 2026-11-16",
-       "text": "**Plan Board pass of 2026-11-16** (seeds text-fixes and memorial, template pass v160): - https://kidsoverprofits.org/idd-timeline/ reads \"1938 - Devereux Foundation Established as a Nonprofit\" with the \"mental defectives\" line under it (the 1935 heading gone). - https://kidsoverprofits.org/in-loving-memory/ lists Donald MacNeil (Robert Land Academy, November 2010) and no longer shows Roberta Evers, Amari Boone, Diane Ramirez or Dustin E. Phelps (archived; owner: no foster care or in-home deaths); the count drops by three. - KOP Tools > Memorial sheet: the Add tab has no \"Before 1971\" notes, and Evers, Gulley and Boone are under skipped. - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).",
+       "text": "**Plan Board pass of 2026-11-16** (seeds text-fixes and memorial, template pass v160): - Checked live 2026-11-16 after the deploy: /idd-timeline/ reads \"1938 - Devereux Foundation Established as a Nonprofit\"; /in-loving-memory/ lists Donald MacNeil, none of the four archived names, 265 remembered. - KOP Tools > Memorial sheet: the Add tab has no \"Before 1971\" notes, and Evers, Gulley and Boone are under skipped. - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).",
        "ask": "",
        "date": "2026-11-16",
        "why": "",
@@ -2525,7 +2525,7 @@
        "kind": "check",
        "focus": false,
        "steps": [],
-       "hash": "7ed8ed1e9260"
+       "hash": "8c2d52dd2a4a"
       }
      ]
     }

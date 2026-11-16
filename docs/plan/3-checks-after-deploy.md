@@ -203,11 +203,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     (name left, jobs in two columns right), Kevin Knutson and Matt Alexander side by side under them with no gaps; at
     phone width the cards stack. A company page's People section (e.g. /operator/ of Aspen Education Group) looks the same.
 41. **Plan Board pass of 2026-11-16** (seeds text-fixes and memorial, template pass v160):
-    - https://kidsoverprofits.org/idd-timeline/ reads "1938 - Devereux Foundation Established as a Nonprofit" with the
-      "mental defectives" line under it (the 1935 heading gone).
-    - https://kidsoverprofits.org/in-loving-memory/ lists Donald MacNeil (Robert Land Academy, November 2010) and no
-      longer shows Roberta Evers, Amari Boone, Diane Ramirez or Dustin E. Phelps (archived; owner: no foster care or
-      in-home deaths); the count drops by three.
+    - Checked live 2026-11-16 after the deploy: /idd-timeline/ reads "1938 - Devereux Foundation Established as a
+      Nonprofit"; /in-loving-memory/ lists Donald MacNeil, none of the four archived names, 265 remembered.
     - KOP Tools > Memorial sheet: the Add tab has no "Before 1971" notes, and Evers, Gulley and Boone are under skipped.
     - Review inbox > Wiki updates from record changes: over the next hours it fills with drafts for entries no exported
       draft covered (option `kop_wiki_auto_rebaseline_20261116` holds how many were reset).
