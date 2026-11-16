@@ -66,7 +66,7 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 ### facilities_master
 **Columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`
 
-**Purpose:** Retired. The pre-2026-09-18 master facility database (all projects as JSON). On 2026-10-25 production renamed it `retired_facilities_master_20261025` (4,591 rows, last changed 2026-09-16; also in the backup `~/backups/phase5-legacy-tables-20261025.sql.gz`) and nothing reads or writes it. Facility records are `facilities_v2`, operators `{prefix}kop_operators`. The name `facilities_master` survives only as the old category name in the Data Manager and the autocomplete routes, served from the v2 tables, and as the `source_table` tag on rows `kop_v2_legacy_shaped_rows()` builds.
+**Purpose:** Retired. The pre-2026-09-18 master facility database (all projects as JSON). On 2026-10-25 production renamed it `retired_facilities_master_20261025` (4,591 rows, last changed 2026-09-16) and dropped it on 2026-11-13 (owner, Plan Board); the backup `~/backups/phase5-legacy-tables-20261025.sql.gz` on the server keeps it. Facility records are `facilities_v2`, operators `{prefix}kop_operators`. The name `facilities_master` survives only as the old category name in the Data Manager and the autocomplete routes, served from the v2 tables, and as the `source_table` tag on rows `kop_v2_legacy_shaped_rows()` builds.
 **Former columns:** `id`, `unique_name`, `json_data`, `created_at`, `updated_at`. Its ids are the facility ids in `facilities_v2`, `news_facility_links`, `lawsuit_facility_links` and the other id stores.
 
 ---

@@ -13,7 +13,9 @@
  *     as the wiki editor's template places them. It also walks every linked entry in turn (kop_wiki_auto_sweep), so a
  *     write that skips the event (the memorial, an approved finding) still reaches its entry within a day or two.
  *   - "New" means not known yet: the first time the job sees an entry, the gaps it has then are its baseline (option
- *     kop_wiki_auto_known, sha1 keys per entry; the exported drafts in update-drafts.json already cover those). A
+ *     kop_wiki_auto_known, sha1 keys per entry; the exported drafts in update-drafts.json already cover those). An
+ *     entry with no exported draft starts with an empty baseline, so its old gaps are drafted too (owner, 2026-11-13;
+ *     kop_wiki_auto_rebaseline_once() cleared the baselines taken before that for entries nobody had decided on). A
  *     decision adds the draft's keys (Approve, Set aside; a line emptied before approving is decided too), and its
  *     Undo takes them off again, so nothing is drafted twice and nothing decided comes back.
  *   - The draft waits at Review inbox > Wiki updates from record changes (inc/review-inbox/wiki-changes.php), in the
@@ -148,6 +150,7 @@ function kop_wiki_auto_run(PDO $pdo, $seconds = 45, $sweep_max = 30) {
     $t0 = microtime(true);
     $entries = kop_wiki_upd_entries($pdo);
     $linked = kop_wiki_auto_linked($entries, $pdo);
+    kop_wiki_auto_rebaseline_once();
     $q = kop_wiki_auto_queue();
     update_option('kop_wiki_auto_queue', array(), false);
     $todo = kop_wiki_auto_queued_entries($q, $entries, $linked, $pdo);
@@ -221,6 +224,28 @@ function kop_wiki_auto_known_all() {
 function kop_wiki_auto_known($id) {
     $all = kop_wiki_auto_known_all();
     return isset($all[(int) $id]) ? (array) $all[(int) $id] : null;
+}
+
+/**
+ * Once (owner, Plan Board 2026-11-13: draft the old gaps of entries no exported draft covers): an entry seen before
+ * that rule, with no exported draft and no decision on it (no Approve or Set aside in kop_wiki_auto_state), loses its
+ * baseline, so its next look drafts everything it lacks. Entries with a decision keep theirs: the baseline and the
+ * decided keys share one list, and nothing decided may come back.
+ */
+function kop_wiki_auto_rebaseline_once() {
+    if (get_option('kop_wiki_auto_rebaseline_20261116') || !function_exists('kop_wiki_drafts_all')) return 0;
+    $all = kop_wiki_auto_known_all();
+    $exported = kop_wiki_drafts_all();
+    $state = kop_wiki_auto_state();
+    $n = 0;
+    foreach (array_keys($all) as $eid) {
+        if (isset($exported[$eid]) || !empty($state[$eid])) continue;
+        unset($all[$eid]);
+        $n++;
+    }
+    update_option('kop_wiki_auto_known', $all, false);
+    update_option('kop_wiki_auto_rebaseline_20261116', array('at' => gmdate('c'), 'entries' => $n), false);
+    return $n;
 }
 
 function kop_wiki_auto_add_known($id, array $keys) {
@@ -327,8 +352,14 @@ function kop_wiki_auto_refresh($eid, array $entry, $fid, PDO $pdo) {
     }
     $known = kop_wiki_auto_known($eid);
     if ($known === null) {
-        kop_wiki_auto_add_known($eid, array_keys($keyed));
-        return 'baseline';
+        // An exported draft (update-drafts.json) already covers what the entry lacks now, so that is its baseline.
+        // An entry with none has its old gaps drafted too (owner, Plan Board 2026-11-13: "Yes, draft them").
+        if (!function_exists('kop_wiki_drafts_all') || isset(kop_wiki_drafts_all()[$eid])) {
+            kop_wiki_auto_add_known($eid, array_keys($keyed));
+            return 'baseline';
+        }
+        kop_wiki_auto_add_known($eid, array());
+        $known = array();
     }
     $fresh = array_diff_key($keyed, $known);
     $state = kop_wiki_auto_state()[$eid] ?? null;

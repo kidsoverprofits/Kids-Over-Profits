@@ -2,7 +2,7 @@
 
 What each table holds and which file owns it. A new table goes here (and in `DATABASE-COLUMNS.md`).
 
-- `facilities_v2` (+ `{prefix}kop_operators`, `kop_operator_facilities`, `kop_facility_locations`) - Facility records, one JSON document per facility (`docs/FACILITY-SCHEMA.md`). `facilities_master` was retired in data model phase 5 (2026-10-25): renamed `retired_facilities_master_20261025`, read by nothing
+- `facilities_v2` (+ `{prefix}kop_operators`, `kop_operator_facilities`, `kop_facility_locations`) - Facility records, one JSON document per facility (`docs/FACILITY-SCHEMA.md`). `facilities_master` was retired in data model phase 5 (2026-10-25): renamed `retired_facilities_master_20261025`, dropped 2026-11-13 (kept in `~/backups/phase5-legacy-tables-20261025.sql.gz`), read by nothing
 - `suggested_edits` - Public submissions pending approval
 - `locations_master` - One row per state or country: its state-level data (referrerConsultants, fieldNotes); no facilities since phase 5 (a place's facilities are `kop_facility_locations` memberships)
 - `referrers_master` - Referrer projects

@@ -5,7 +5,7 @@
  *     fieldNotes, ...) and loses its frozen facility arrays: a place's
  *     facilities are memberships in the v2 tables since the 2026-09-18 write switch;
  *   - facilities_master, frozen since then, is renamed
- *     retired_facilities_master_20261025 (dropped later; RENAME it back to undo);
+ *     retired_facilities_master_20261025 (dropped 2026-11-13; restore it from the backup below);
  *   - the backup copies from the migration (*_bak_20260916, *_bak_20260917) are dropped.
  * Backup first: ~/backups/phase5-legacy-tables-20261025.sql.gz holds every table
  * this touches as it was (zcat it into mysql to restore one).

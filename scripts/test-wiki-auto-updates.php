@@ -141,17 +141,40 @@ $check('entries linked to facility records', count($linked) > 100, count($linked
 $eid = 0;
 foreach ($linked as $id => $fid) {
     $md = kop_wiki_upd_markdown($entries[$id]);
-    if (preg_match('/^#+.*(staff|founder)/im', $md) && preg_match('/^#+.*media/im', $md) && kop_facility_page_data($fid)) { $eid = $id; break; }
+    if (isset(kop_wiki_drafts_all()[$id]) && preg_match('/^#+.*(staff|founder)/im', $md) && preg_match('/^#+.*media/im', $md) && kop_facility_page_data($fid)) { $eid = $id; break; }
 }
 $fid = $linked[$eid] ?? 0;
 $check('an entry to test with', $eid > 0, $eid ? $entries[$eid]['program_name'] . ' -> record ' . $fid : 'none');
 if (!$eid) exit(1);
 
+// The one-time reset (owner, 2026-11-13): an entry with no exported draft and no decision loses its old baseline.
+$plain = $decided = 0;
+foreach ($linked as $id => $f) {
+    if (isset(kop_wiki_drafts_all()[$id])) continue;
+    if (!$plain) $plain = $id; elseif (!$decided) { $decided = $id; break; }
+}
+if ($plain && $decided) {
+    update_option('kop_wiki_auto_known', array($plain => array('k1' => 1), $decided => array('k2' => 1), $eid => array('k3' => 1)), false);
+    kop_wiki_auto_set_state($decided, array('view' => 'skip', 'by' => 'test', 'at' => gmdate('c'), 'keys' => array('k2')));
+    delete_option('kop_wiki_auto_rebaseline_20261116');
+    $n = kop_wiki_auto_rebaseline_once();
+    $k = kop_wiki_auto_known_all();
+    $check('the one-time reset clears only undecided entries with no exported draft, and runs once',
+        $n === 1 && !isset($k[$plain]) && isset($k[$decided]) && isset($k[$eid]) && kop_wiki_auto_rebaseline_once() === 0, json_encode(array_keys($k)));
+    kop_wiki_auto_set_state($decided, null);
+    update_option('kop_wiki_auto_known', array(), false);
+}
+
+$exported = array_intersect_key($linked, kop_wiki_drafts_all());
 $res = kop_wiki_auto_run($pdo, 600, 5);
-$check('the first run takes baselines and drafts nothing', kop_wiki_auto_known($eid) !== null && !kop_wiki_auto_drafts() && $res['baselines'] >= count($linked) - 5,
-    json_encode($res));
+$old = kop_wiki_auto_drafts();
+$check('the first run takes baselines for entries with an exported draft and drafts the old gaps of the others',
+    kop_wiki_auto_known($eid) !== null && !array_intersect_key($old, $exported) && $res['baselines'] >= count($exported) - 5
+    && $res['drafts'] === count($old) && count($old) > 0, json_encode($res) . ' ' . count($exported) . ' with an exported draft');
 $res = kop_wiki_auto_run($pdo, 600, 5);
-$check('a second run with nothing changed drafts nothing', !kop_wiki_auto_drafts() && $res['left'] === 0, json_encode($res));
+$check('a second run with nothing changed drafts nothing new', array_keys(kop_wiki_auto_drafts()) === array_keys($old) && $res['left'] === 0, json_encode($res));
+// Those old-gap drafts set aside, so the walk-through below sees only its own entry.
+foreach (array_keys($old) as $id) kop_wiki_auto_skip($id, 'test');
 
 // The change: a new staff member on the record, saved as a writer would, and the event it fires.
 $doc = json_decode($pdo->query('SELECT json_data FROM facilities_v2 WHERE id = ' . (int) $fid)->fetchColumn(), true);

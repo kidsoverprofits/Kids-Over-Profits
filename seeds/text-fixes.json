@@ -319,5 +319,16 @@
         "Both companies trace to one family, as <a href=\"/free-help-paid-by-programs/\">Free to Parents</a> shows, and the independent <a href=\"https://teenchallenge-network.netlify.app/#/profile/marketing-and-placement-network\">Teen Challenge Research Map</a> follows them through the Teen Challenge programs they market.</p>"
       ]
     ]
+  },
+  {
+    "post": "idd-timeline",
+    "fix": "2026-11-16-devereux-1938",
+    "note": "Devereux was established as a nonprofit in 1938, not 1935 (Congressional Record, 112th Congress, 'Recognizing the Devereux Foundation'; Devereux's own history: 'In 1938 the Commonwealth of Pennsylvania granted Devereux its nonprofit charter'). The 'mental defectives' line stays with Devereux: the Southard School has its own 1926 entry saying the same of itself, and Helena Devereux's 1909 report was 'Report of a Year's Work on Defectives in a Public School' (Plan Board, owner: research it, 2026-11-10).",
+    "replace": [
+      [
+        "<li><strong>1935</strong> – Devereux Foundation Formally Incorporated",
+        "<li><strong>1938</strong> – Devereux Foundation Established as a Nonprofit"
+      ]
+    ]
   }
 ]

@@ -167,7 +167,8 @@ if ($restraint) {
 echo "-- Research finds on the Add rows --\n";
 $by_row = array();
 foreach ($seed['add'] as $a) $by_row[(int) $a['row']] = $a;
-$check('out-of-scope rows (adult prison/jail/care home, foster, 21+) are not Add rows', !array_intersect(array(8, 350, 382, 393, 398, 412, 417), array_keys($by_row)) && count($seed['add_skipped']) === 7);
+$check('out-of-scope rows (adult prison/jail/care home, foster, at home, 21+) are not Add rows', !array_intersect(array(8, 237, 283, 350, 382, 393, 398, 412, 417, 421), array_keys($by_row)) && count($seed['add_skipped']) === 10);
+$check('deaths before 1971 carry no flag (owner, 2026-11-10: they belong)', !array_filter($seed['add'], function ($a) { return (bool) preg_grep('/Before 1971/', (array) $a['flags']); }));
 $check('duplicates are folded: rows 12 and 42 are gone, 112 and 40 stay', !isset($by_row[12]) && !isset($by_row[42]) && isset($by_row[112], $by_row[40]) && count($seed['add_folded']) === 2);
 $check('row 112 says row 12 was folded in', (bool) array_filter($by_row[112]['flags'], function ($f) { return strpos($f, 'row 12') !== false; }));
 $bad_cat = array();

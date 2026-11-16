@@ -67,7 +67,7 @@ Read `docs/WRITING-STYLE.md` every time you write something a paragraph or longe
 
 ### Data Stores (overview; columns in `DATABASE-COLUMNS.md`)
 - `facilities_v2` stores the facility records; `{prefix}kop_operators` / `kop_operator_facilities` the parent companies and their programs; `{prefix}kop_facility_locations` which state/country pages list each.
-- `facilities_master` was retired in phase 5 (renamed `retired_facilities_master_20261025`); `suggested_edits` stores public submissions awaiting review.
+- `facilities_master` was retired in phase 5 (renamed `retired_facilities_master_20261025`, dropped 2026-11-13; the backup `~/backups/phase5-legacy-tables-20261025.sql.gz` keeps it); `suggested_edits` stores public submissions awaiting review.
 - `locations_master`, `referrers_master`, `{prefix}transporters_master` (`kop_transporters_table()`), `providers_master`, `marketers_master`, `tradeorgs_master` store the other record categories.
 - `young_adult_programs` and `indigenous_schools` hold programs kept apart from the TTI facility tables.
 - `wiki_submissions`, `news_submissions`, `lawsuits`, `legislation`, `memorial_victims`, `news_featured` (+ `news_featured_nominations`) are records tables in the records database.
