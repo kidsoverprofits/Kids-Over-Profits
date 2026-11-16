@@ -488,8 +488,12 @@ def main():
             check(any(c[0] == "tool" and c[1]["tool"] == "add" and c[1]["params"].get("company") == "Acme Youth" and c[1]["params"].get("kind") == "deal"
                       and c[1]["params"].get("sources", "").startswith("https://a.test/x") for c in calls), f"@{width} the folded tool sends its form")
             pg.wait_for_selector(".rinbox-card")
+            check(pg.locator(".rinbox-bulk-end").is_hidden(), f"@{width} the bar under the list waits until a card is ticked")
             pg.locator(".rinbox-bulk input[type='checkbox']").check()
-            pg.locator(".rinbox-bulk button", has_text="Dismiss (2)").click()
+            # The same buttons under the list, so a reviewer ticking on the way down need not scroll back up.
+            check(pg.locator(".rinbox-bulk-end button", has_text="Dismiss (2)").count() == 1
+                  and "2 selected" in pg.locator(".rinbox-bulk-end").inner_text(), f"@{width} the bulk buttons are under the list too")
+            pg.locator(".rinbox-bulk-end button", has_text="Dismiss (2)").click()
             pg.wait_for_function("() => /Dismiss: 2 done/.test(document.querySelector('.rinbox-status').textContent)")
             check(sum(1 for c in calls if c[0] == "act" and c[1]["action"] == "dismiss") == 2, f"@{width} a bulk action runs on every selected card")
             check(pg.locator(".rinbox-bulk button", has_text="Confirm closure").count() == 0, f"@{width} an action that needs a value per item is not offered in bulk unless filled")
@@ -576,7 +580,7 @@ def main():
             check("Added (7)" in pg.locator(".rinbox-views").inner_text(), f"@{width} the view tabs show their counts", pg.locator(".rinbox-views").inner_text())
             ticked = pg.evaluate("() => [...document.querySelectorAll('.rinbox-card .rinbox-select')].map(c => c.checked)")
             check(ticked == [True, False, False], f"@{width} a sure match starts ticked", json.dumps(ticked))
-            check(pg.locator(".rinbox-bulk button", has_text="Add: News queue (1)").count() == 1,
+            check(pg.locator(".rinbox-bulk:not(.rinbox-bulk-end) button", has_text="Add: News queue (1)").count() == 1,
                   f"@{width} an action whose values may stay empty is offered in bulk")
             pg.locator(".rinbox-filter").select_option("news")
             pg.wait_for_timeout(300)
@@ -586,7 +590,7 @@ def main():
             look.fill("Aspen")
             pg.wait_for_function("() => [...document.querySelectorAll('datalist option')].some(o => o.value === 'c45')")
             check(any(c[0] == "lookup" and "name=company" in c[2] and "q=Aspen" in c[2] for c in calls), f"@{width} a lookup field suggests values as it is typed")
-            pg.locator(".rinbox-bulk button", has_text="Add: News queue (1)").click()
+            pg.locator(".rinbox-bulk:not(.rinbox-bulk-end) button", has_text="Add: News queue (1)").click()
             pg.wait_for_function("() => /Add: News queue: 1 done/.test(document.querySelector('.rinbox-status').textContent)")
             check(any(c[0] == "act" and c[1]["source"] == "drive" and c[1]["key"] == "a1" and c[1]["params"] == {"facility": ""} for c in calls),
                   f"@{width} bulk sends each card's own values", json.dumps([c[1] for c in calls if c[0] == "act" and c[1]["source"] == "drive"]))

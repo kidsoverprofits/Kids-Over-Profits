@@ -559,7 +559,8 @@
 
     /* ---- Panel ------------------------------------------------------------- */
 
-    var listEl, pagerEl, statusEl, bulkEl, viewButtons = {};
+    // bulkEndEl: the same count and buttons again under the list (Claude note #6), queue views only.
+    var listEl, pagerEl, statusEl, bulkEl, bulkEndEl = null, viewButtons = {};
 
     function renderPanel() {
         var s = state.byKey[state.source];
@@ -643,6 +644,7 @@
         }
         statusEl = el('p', { class: 'rinbox-status', role: 'status' });
         bulkEl = el('div', { class: 'rinbox-bulk' });
+        bulkEndEl = el('div', { class: 'rinbox-bulk rinbox-bulk-end' });
         listEl = el('div', { class: 'rinbox-list' });
         pagerEl = el('div', { class: 'rinbox-pager' });
         panel.appendChild(head);
@@ -658,6 +660,7 @@
         panel.appendChild(statusEl);
         panel.appendChild(bulkEl);
         panel.appendChild(listEl);
+        panel.appendChild(bulkEndEl);
         panel.appendChild(pagerEl);
     }
 
@@ -665,6 +668,7 @@
         var src = state.source;
         statusEl.textContent = 'Loading…';
         bulkEl.innerHTML = '';
+        if (bulkEndEl) bulkEndEl.innerHTML = '';
         // Keep the list's height while the page loads, so the page does not collapse and spring back.
         listEl.style.minHeight = listEl.offsetHeight + 'px';
         listEl.innerHTML = '';
@@ -712,6 +716,7 @@
         var seen = {};
         listEl.querySelectorAll('.rinbox-card').forEach(function (c) { if (c.kopItem) seen[c.kopItem.key] = true; });
         bulkEl.innerHTML = '';
+        if (bulkEndEl) bulkEndEl.innerHTML = '';
         statusEl.textContent = 'Loading ' + want + '…';
         // Cards already acted on left the queue, so the next unseen item sits that much earlier (as Next does).
         var offset = Math.max(start, start + listEl.querySelectorAll('.rinbox-card').length - leftThisPage());
@@ -747,11 +752,16 @@
     /** "Select all" and the buttons every selected card has (those that need no answer, or have one filled in). */
     function renderBulk(tickAll) {
         bulkEl.innerHTML = '';
+        if (bulkEndEl) bulkEndEl.innerHTML = '';
         var cards = listEl.querySelectorAll('.rinbox-card');
         if (cards.length < 2 && !(state.source && !state.special && state.total > cards.length)) return;
         var all = el('input', { type: 'checkbox', 'aria-label': 'Select every item shown' });
         var count = el('span', { class: 'rinbox-bulk-count', text: '0 selected' });
         var buttons = el('span', { class: 'rinbox-bulk-actions' });
+        // Under the list: the count and the same buttons, so a reviewer ticking cards on the way
+        // down acts on them without scrolling back up (Claude note #6).
+        var endCount = el('span', { class: 'rinbox-bulk-count', text: '0 selected' });
+        var endButtons = el('span', { class: 'rinbox-bulk-actions' });
         all.addEventListener('change', function () {
             listEl.querySelectorAll('.rinbox-select').forEach(function (c) { if (!c.disabled) c.checked = all.checked; });
             update();
@@ -766,7 +776,10 @@
         function update() {
             var sel = selected();
             count.textContent = sel.length + ' selected';
+            endCount.textContent = sel.length + ' selected';
             buttons.innerHTML = '';
+            endButtons.innerHTML = '';
+            if (bulkEndEl) bulkEndEl.hidden = !sel.length;
             if (!sel.length) return;
             (sel[0].kopItem.actions || []).forEach(function (a) {
                 var ready = function (c) {
@@ -779,10 +792,12 @@
                     });
                 };
                 if (!sel.every(ready)) return;
-                buttons.appendChild(el('button', {
-                    type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'), text: a.label + ' (' + sel.length + ')',
-                    onclick: function () { runBulk(sel, a); }
-                }));
+                [buttons, endButtons].forEach(function (into) {
+                    into.appendChild(el('button', {
+                        type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'), text: a.label + ' (' + sel.length + ')',
+                        onclick: function () { runBulk(sel, a); }
+                    }));
+                });
             });
         }
         bulkEl.appendChild(el('label', { class: 'rinbox-quick-field' }, [all, ' Select all']));
@@ -797,6 +812,10 @@
         }
         bulkEl.appendChild(count);
         bulkEl.appendChild(buttons);
+        if (bulkEndEl) {
+            bulkEndEl.appendChild(endCount);
+            bulkEndEl.appendChild(endButtons);
+        }
         if (tickAll === true) {
             all.checked = true;
             listEl.querySelectorAll('.rinbox-select').forEach(function (c) { if (!c.disabled) c.checked = true; });
@@ -1647,6 +1666,7 @@
         statusEl = el('p', { class: 'rinbox-status', role: 'status', text: 'Reading the queues…' });
         listEl = el('div', { class: 'rinbox-list rinbox-justin' });
         bulkEl = el('div', { class: 'rinbox-bulk' });
+        bulkEndEl = null;
         pagerEl = el('div', { class: 'rinbox-pager' });
         panel.appendChild(statusEl);
         panel.appendChild(listEl);
@@ -1817,6 +1837,7 @@
         statusEl = el('p', { class: 'rinbox-status', role: 'status', text: 'Loading…' });
         listEl = el('div', { class: 'rinbox-list' });
         bulkEl = el('div', { class: 'rinbox-bulk' });
+        bulkEndEl = null;
         pagerEl = el('div', { class: 'rinbox-pager' });
         panel.appendChild(statusEl);
         panel.appendChild(listEl);
@@ -1871,6 +1892,7 @@
         statusEl = el('p', { class: 'rinbox-status', role: 'status', text: state.record ? 'Gathering every queue’s cards about this record (up to a minute)…' : 'Find a record to see everything waiting about it.' });
         listEl = el('div', { class: 'rinbox-list' });
         bulkEl = el('div', { class: 'rinbox-bulk' });
+        bulkEndEl = null;
         pagerEl = el('div', { class: 'rinbox-pager' });
         panel.appendChild(statusEl);
         panel.appendChild(listEl);

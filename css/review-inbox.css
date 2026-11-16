@@ -1254,6 +1254,16 @@ details.rinbox-tool-fold > summary {
     align-self: flex-start;
 }
 
+/* The same count and buttons under the list, shown once a card is ticked (Claude note #6). */
+.rinbox-bulk.rinbox-bulk-end {
+    padding-top: 10px;
+    border-top: 1px solid var(--kop-text-muted, #4A5568);
+}
+
+.rinbox-bulk.rinbox-bulk-end[hidden] {
+    display: none;
+}
+
 .rinbox-bulk-count {
     font-size: 13px;
     color: var(--kop-text-muted, #4A5568);
