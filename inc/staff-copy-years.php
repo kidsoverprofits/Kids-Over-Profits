@@ -18,6 +18,12 @@
  * is (the job is taken off instead when the person has another job at that place). Roles are logged in
  * the option kop_staff_copy_years_log for kop_scy_undo(); jobs through kop_pjobs_save() (KOP Tools > People >
  * Past jobs, Undo there). Run once by kop_apply_staff_copy_years() (inc/admin.php).
+ *
+ * Version 3 (owner, 2026-11-16, Claude note #19: "wrong year, all the 'before 2022' etc should be stripped too"):
+ * every "before YYYY" comes off, whatever the source (a guess from the source's date, never when the job was),
+ * and so does a year or range starting at the copy year or later ("Founder, Owner, 2025-2026" on a page copied
+ * 2025-12-18). A range starting earlier ("2008-2025") still stays. A job is taken off, not cleared, only when
+ * another job at that place has the same role.
  * Tested by scripts/test-staff-copy-years.php.
  */
 
@@ -45,8 +51,18 @@ if (!function_exists('kop_scy_copy_year')) {
         $years = '(?:before\s+)?(?:19|20)\d{2}(?:\s*-\s*(?:19|20)\d{2})?';
         $role = preg_replace('#\s*\(' . $years . ',\s*HEAL\)\s*$#', '', $role);
         if (kop_scy_is_heal($source)) $role = preg_replace('#\s*\(' . $years . '\)\s*$#', '', $role);
+        // Version 3: every "before 2009" is a guess from the source's own date, whatever the source (Claude note #19).
+        $role = preg_replace_callback('#\s*\(\s*before\s+(?:19|20)\d{2}\s*(?:,\s*([^()]*))?\)#i', function ($m) {
+            $rest = trim($m[1] ?? '');
+            return $rest === '' || preg_match('#^(?:r/troubledteens wiki|Woodbury Reports|HEAL|Fornits)$#i', $rest) ? '' : ' (' . $rest . ')';
+        }, $role);
         $y = kop_scy_copy_year($source);
-        if ($y) $role = preg_replace('#\s*\((?:before\s+)?' . $y . '(?:,\s*r/troubledteens wiki)?\)\s*$#i', '', $role);
+        // A year or range starting at the copy or after it ("2025-2026" on a page copied in 2025) is only the copy.
+        if ($y) {
+            $role = preg_replace_callback('#\s*\(((?:19|20)\d{2})(?:\s*-\s*(?:19|20)\d{2})?(?:,\s*r/troubledteens wiki)?\)\s*$#i', function ($m) use ($y) {
+                return (int) $m[1] >= $y ? '' : $m[0];
+            }, $role);
+        }
         return trim($role);
     }
 
@@ -55,10 +71,14 @@ if (!function_exists('kop_scy_copy_year')) {
         $y = kop_scy_copy_year($job['source'] ?? '');
         $years = trim((string) ($job['years'] ?? ''));
         if ($years === '') return '';
-        $copy = kop_scy_is_heal($job['source'] ?? '') || ($y && ($years === (string) $y || strcasecmp($years, 'before ' . $y) === 0));
+        $copy = kop_scy_is_heal($job['source'] ?? '')
+            || preg_match('/^before\s/i', $years)
+            || ($y && preg_match('/^((?:19|20)\d{2})(?:\s*-\s*(?:19|20)\d{2})?$/', $years, $m) && (int) $m[1] >= $y);
         if (!$copy) return '';
+        // Taken off only when another job at the place says the same (or it says nothing): a role is never lost.
+        $role = kop_scy_place_key($job['role'] ?? '');
         foreach ($same_place_jobs as $o) {
-            if ((int) $o['id'] !== (int) $job['id']) return 'hide';
+            if ((int) $o['id'] !== (int) $job['id'] && ($role === '' || kop_scy_place_key($o['role'] ?? '') === $role)) return 'hide';
         }
         return 'clear';
     }
@@ -117,7 +137,7 @@ if (!function_exists('kop_scy_copy_year')) {
             }
             if (function_exists('kop_pjobs_ready') && kop_pjobs_ready($opts)) {
                 $by_place = array();
-                foreach (kop_facility_db_rows('SELECT id, person_id, place, years, source FROM ' . kop_pjobs_table($opts) . ' WHERE hidden = 0 ORDER BY id', array(), $opts) as $j) {
+                foreach (kop_facility_db_rows('SELECT id, person_id, place, role, years, source FROM ' . kop_pjobs_table($opts) . ' WHERE hidden = 0 ORDER BY id', array(), $opts) as $j) {
                     $by_place[(int) $j['person_id'] . '|' . kop_scy_place_key($j['place'])][] = $j;
                 }
                 foreach ($by_place as $jobs) {
