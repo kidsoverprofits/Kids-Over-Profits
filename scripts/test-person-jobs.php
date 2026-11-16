@@ -131,6 +131,45 @@ $refused = '';
 try { kop_pjobs_undo($log[0]['n'], $opts); } catch (RuntimeException $e) { $refused = $e->getMessage(); }
 check($refused !== '', 'an undone change cannot be undone twice');
 
+// ---- Fixes from seeds/person-job-fixes.json ----------------------------------------------------
+$fx = kop_pjobs_save($pid, 0, array('role' => 'Founder', 'place' => 'Fix Test Ranch', 'years' => ''), $opts);
+$done = array();
+$res = kop_pjobs_apply_fixes(array(
+    array('key' => 'k1', 'person' => $pid, 'job' => $fx, 'place' => 'Fix Test Ranch', 'set' => array('role' => 'Co-founder', 'years' => '2011-2019')),
+    array('key' => 'k2', 'person' => $pid, 'job' => $fx, 'place' => 'Some Other Name', 'set' => array('hidden' => 1)),
+    array('key' => 'k3', 'person' => $pid + 999999, 'job' => $fx, 'place' => 'Fix Test Ranch', 'set' => array('hidden' => 1)),
+), $done, $opts);
+$row = array_column(kop_pjobs_for_person($pid, $opts), null, 'id')[$fx] ?? null;
+check(($res['k1'] ?? '') === 'applied' && $row && $row['role'] === 'Co-founder' && $row['years'] === '2011-2019' && isset($done['k1']),
+    'a fix changes its job', json_encode($res));
+check(strpos($res['k2'] ?? '', 'skipped') === 0 && strpos($res['k3'] ?? '', 'skipped') === 0 && !isset($done['k2']),
+    'a fix whose job reads another place, or is someone else\'s, is left alone');
+check(kop_pjobs_apply_fixes(array(array('key' => 'k1', 'person' => $pid, 'job' => $fx, 'place' => 'Fix Test Ranch', 'set' => array('hidden' => 1))), $done, $opts) === array(),
+    'a fix applies once per key');
+$fl = kop_pjobs_log_for($pid);
+check($fl && (int) $fl[0]['id'] === $fx, 'a fix is in the People screen\'s log (Undo there)');
+kop_pjobs_undo($fl[0]['n'], $opts);
+kop_pjobs_undo($fl[1]['n'], $opts);
+$seed = json_decode((string) file_get_contents($root . '/seeds/person-job-fixes.json'), true);
+$keys = array();
+$ok = is_array($seed) && !empty($seed['fixes']);
+foreach ((array) ($seed['fixes'] ?? array()) as $f) {
+    $ok = $ok && !empty($f['key']) && !isset($keys[$f['key']]) && (int) ($f['person'] ?? 0) > 0 && (int) ($f['job'] ?? 0) > 0 && ($f['place'] ?? '') !== '' && !empty($f['set']) && !empty($f['why']);
+    $keys[$f['key'] ?? ''] = true;
+}
+check($ok, 'seeds/person-job-fixes.json: every fix has a unique key, person, job, place, set and why');
+// Against the production mirror's own jobs: each fix still names its job as it reads there.
+$mirror = new PDO('sqlite:' . $db_path);
+$has = $mirror->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = '{$prefix}kop_person_jobs'")->fetchColumn();
+if ($has) {
+    $bad = array();
+    foreach ((array) ($seed['fixes'] ?? array()) as $f) {
+        $r = $mirror->query('SELECT person_id, place FROM ' . $prefix . 'kop_person_jobs WHERE id = ' . (int) $f['job'])->fetch(PDO::FETCH_ASSOC);
+        if (!$r || (int) $r['person_id'] !== (int) $f['person'] || $r['place'] !== $f['place']) $bad[] = $f['key'];
+    }
+    check(!$bad, 'each seeded fix matches its job in the production mirror', implode(', ', $bad));
+}
+
 // ---- Merges -----------------------------------------------------------------------------------
 $other = (int) $pdo->query("SELECT person_id FROM {$prefix}kop_person_jobs WHERE person_id <> $pid LIMIT 1")->fetchColumn();
 $theirs = count(kop_pjobs_for_person($other, $opts));

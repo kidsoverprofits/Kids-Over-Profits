@@ -19,7 +19,12 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-people.php [--lis
 # A person's past jobs are held once on the person ({prefix}kop_person_jobs, inc/person-jobs.php): the hourly people sync reads each staff
 # entry's pastJobs text in once (kop_pjobs_import()); every page that lists the person reads them (kop_facility_pages_person_career()), so a
 # job is fixed once at KOP Tools > People > Past jobs (add, change, take off, put back; Undo there, log kop_person_jobs_log), not per profile
-php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php   # reading pastJobs, the import, edits + undo, merges
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php   # reading pastJobs, the import, edits + undo, merges, the seeded fixes
+# Corrections found by a session go in seeds/person-job-fixes.json ({key, person, job, place, set, why}): kop_apply_person_job_fixes()
+# applies each key once on deploy through kop_pjobs_save() (logged, Undo at People > Past jobs), only while the job still reads that place
+# Careers fold repeats on display (kop_facility_pages_career_fold()): one place under two unlinked names ("Legacy Outdoor" / "Legacy Outdoor
+# Adventures", unless the short name starts two names or the long one is a campus), and a line another line's role already says ("NATSAP:
+# Board member" beside "NATSAP Board member"); two linked names stay two lines, since they are two records (merge them instead)
 # The People editor also holds "Became an educational consultant" (kop_people.ed_consultant: a ticked person's career ends "Educational
 # consultant" on every page; details saves logged in kop_people_details_log, Undo there) and relationships ({prefix}kop_person_relations,
 # inc/person-relations.php: family, business partners; by id or name, shown on both people, Parent <-> Child; kinds in Dropdown Lists 'person-relations')

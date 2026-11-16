@@ -1446,6 +1446,27 @@ function kop_apply_staff_copy_years() {
     }
 }
 
+/**
+ * Corrections to people's past jobs (seeds/person-job-fixes.json, kop_pjobs_apply_fixes()), each once by its key;
+ * the keys applied are kept in the option kop_person_job_fixes_done. Undo per job on KOP Tools > People > Past jobs.
+ */
+function kop_apply_person_job_fixes() {
+    $path = trailingslashit(get_stylesheet_directory()) . 'seeds/person-job-fixes.json';
+    $seed = file_exists($path) ? json_decode((string) file_get_contents($path), true) : null;
+    if (!is_array($seed) || empty($seed['fixes']) || !function_exists('kop_pjobs_apply_fixes')) {
+        return array();
+    }
+    $done = (array) get_option('kop_person_job_fixes_done', array());
+    try {
+        $out = kop_pjobs_apply_fixes((array) $seed['fixes'], $done);
+    } catch (Throwable $e) {
+        error_log('kop_apply_person_job_fixes: ' . $e->getMessage());
+        return array();
+    }
+    update_option('kop_person_job_fixes_done', $done, false);
+    return $out;
+}
+
 function kop_apply_facility_record_seeds() {
     $done = array();
     $path = trailingslashit(get_stylesheet_directory()) . 'seeds/facility-records.json';
@@ -2653,6 +2674,7 @@ function kop_apply_template_assignments() {
     $summary['young_adult']  = function_exists('kop_ya_apply_seeds') ? kop_ya_apply_seeds() : array();
     $summary['staff_dedupe'] = kop_apply_staff_dedupe();
     $summary['staff_copy_years'] = kop_apply_staff_copy_years();
+    $summary['person_jobs']  = kop_apply_person_job_fixes();
     if (function_exists('kop_facility_v2_request_sync')) {
         kop_facility_v2_request_sync();   // before the write switch the seeds above edit the legacy tables
     }
@@ -2728,7 +2750,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '160';
+    $version = '161';
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

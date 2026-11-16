@@ -360,6 +360,7 @@ when its version moves, and most never change a record that is already on file.
 | Facility records, merges, names | `seeds/facility-records.json` and the other `seeds/*.json` read by `kop_apply_template_assignments()` | the template assignments version |
 | Young adult programs (18+) | `seeds/young-adult-programs.json` (`kop_ya_apply_seeds()`, added once by name) | the template assignments version |
 | A facility record that belongs in a related category (Christian Rehabs for Adults...) | `seeds/related-moves.json` (`kop_apply_related_move_seeds()`, once per record; Undo `kop_rmove_undo()`) | the template assignments version |
+| Corrections to a person's past jobs (hide, rename, years, source) | `seeds/person-job-fixes.json` (`kop_apply_person_job_fixes()`, once per `key`; Undo at KOP Tools > People > Past jobs) | the template assignments version |
 | Taking a seeded company link off | `"drop": true` on the facility in `seeds/operator-records.json` | the template assignments version |
 | Correcting a seeded company note | new wording in the entry's `operator.notes`, the old wording in its `drop_notes` (`seeds/operator-records.json`) | the template assignments version |
 

@@ -297,3 +297,33 @@ if (!function_exists('kop_pjobs_save')) {
         if (function_exists('kop_people_version_bump')) kop_people_version_bump();
     }
 }
+
+if (!function_exists('kop_pjobs_apply_fixes')) {
+    /**
+     * Corrections from seeds/person-job-fixes.json: each fix {key, person, job, place, set} changes one job through
+     * kop_pjobs_save() (logged, Undo on KOP Tools > People > Past jobs), once per key ($done holds the keys applied).
+     * A fix is skipped while the job is gone, is someone else's, or no longer has the place it names (someone
+     * changed it since). Returns [key => 'applied' | 'skipped: why'].
+     */
+    function kop_pjobs_apply_fixes(array $fixes, array &$done, array $opts = array()) {
+        $out = array();
+        if (!kop_pjobs_ready($opts)) return $out;
+        $t = kop_pjobs_table($opts);
+        foreach ($fixes as $f) {
+            $key = (string) ($f['key'] ?? '');
+            if ($key === '' || isset($done[$key])) continue;
+            $row = kop_facility_db_rows("SELECT * FROM {$t} WHERE id = ?", array((int) ($f['job'] ?? 0)), $opts)[0] ?? null;
+            if (!$row) { $out[$key] = 'skipped: no such job'; continue; }
+            if ((int) $row['person_id'] !== (int) ($f['person'] ?? 0)) { $out[$key] = 'skipped: another person\'s job'; continue; }
+            if ((string) $row['place'] !== (string) ($f['place'] ?? '')) { $out[$key] = 'skipped: the job now reads ' . $row['place']; continue; }
+            try {
+                kop_pjobs_save((int) $row['person_id'], (int) $row['id'], (array) ($f['set'] ?? array()), $opts);
+                $out[$key] = 'applied';
+                $done[$key] = gmdate('Y-m-d H:i:s');
+            } catch (Throwable $e) {
+                $out[$key] = 'skipped: ' . $e->getMessage();
+            }
+        }
+        return $out;
+    }
+}

@@ -2260,14 +2260,49 @@ if (!function_exists('kop_facility_pages_career_fold')) {
      * Academy"), and an unlinked name that is a shorter or longer form of
      * exactly one linked place ("Provo Canyon", "Auldern" for Auldern
      * Academy) or the same words spaced differently ("Heart Cry"/"HeartCry")
-     * joins it. The first entry keeps its place in the list; a linked
-     * record's name wins over free text; empty role and years are filled.
+     * joins it. Two unlinked names of two words or more where one starts the
+     * other join too, when nothing else matches ("Legacy Outdoor" and "Legacy
+     * Outdoor Adventures"), unless the longer one names a campus ("New Leaf
+     * Academy at Rock Mesa", "Fulshear Treatment to Transition - The Ranch").
+     * The first entry keeps its place in the list; a linked record's name
+     * wins over free text; two unlinked names keep the longer name and both
+     * roles (each title once); empty role and years are filled.
+     * Last, an unlinked line that another line's role already says in full
+     * goes ("NATSAP: Board member" beside "Executive Director, NATSAP Board
+     * member"; "WWASPS: President" beside "President of WWASPS").
      */
     function kop_facility_pages_career_fold(array $jobs) {
         $words = static function ($place) {
             $k = preg_replace('/^the\s+/', '', kop_facility_pages_name_key($place));
             $k = trim(preg_replace('/\s+(inc|llc|corp|corporation|company|co|ltd)$/', '', $k));
             return $k === '' ? array() : explode(' ', $k);
+        };
+        // A role's titles: "Former Director (2008), Founder" -> ["Former Director (2008)", "Founder"]; commas inside brackets stay.
+        $titles = static function ($role) {
+            return array_values(array_filter(array_map('trim', preg_split('/,(?![^()]*\))/', (string) $role)), 'strlen'));
+        };
+        // A title compared without "Former"/"later", its brackets, case and punctuation.
+        $title_key = static function ($title) {
+            $t = strtolower(preg_replace('/\([^)]*\)/', ' ', (string) $title));
+            $t = trim(preg_replace('/[^a-z0-9]+/', ' ', $t));
+            return trim(preg_replace('/^(?:former|later|then|now|previously)\s+/', '', $t));
+        };
+        $join_roles = static function ($a, $b) use ($titles, $title_key) {
+            $a = trim((string) $a);
+            $b = trim((string) $b);
+            if ($a === '' || $b === '') return $a !== '' ? $a : $b;
+            $have = $titles($a);
+            $keys = array_map($title_key, $have);
+            foreach ($titles($b) as $t) {
+                $k = $title_key($t);
+                if ($k === '') continue;
+                $dup = false;
+                foreach ($keys as $hk) if ($hk === $k || strpos(' ' . $hk . ' ', ' ' . $k . ' ') !== false) { $dup = true; break; }
+                if ($dup) continue;
+                $have[] = $t;
+                $keys[] = $k;
+            }
+            return implode(', ', $have);
         };
         // $a's words start $b's, spaces aside ("Blue Fire" starts "BlueFire Wilderness"), ending where a word of $b ends.
         $is_prefix = static function (array $a, array $b) {
@@ -2281,10 +2316,14 @@ if (!function_exists('kop_facility_pages_career_fold')) {
             }
             return false;
         };
-        $merge = static function (array $into, array $from) {
+        $merge = static function (array $into, array $from) use ($join_roles) {
             if ($into['url'] === '' && $from['url'] !== '') {
                 $into['url'] = $from['url'];
                 $into['place'] = $from['place'];
+            } elseif ($into['url'] === '' && $from['url'] === '') {
+                // Two unlinked names of one place: the fuller name, both roles.
+                if (strlen($from['place']) > strlen($into['place'])) $into['place'] = $from['place'];
+                $into['role'] = $join_roles($into['role'], $from['role']);
             }
             if ($into['role'] === '' && $from['role'] !== '') $into['role'] = $from['role'];
             if ($into['years'] === '' && $from['years'] !== '') $into['years'] = $from['years'];
@@ -2313,9 +2352,31 @@ if (!function_exists('kop_facility_pages_career_fold')) {
             $target = count($hits) === 1 ? reset($hits) : null;
             if ($target === null && !$hits) {
                 foreach ($out as $j => $other) {
-                    if ($j === $i || $other['url'] !== '') continue;
+                    if ($j === $i || !isset($out[$j]) || $other['url'] !== '') continue;
                     if (implode('', $words($other['place'])) === implode('', $w)) { $target = $j; break; }
                 }
+            }
+            if ($target === null && !$hits && count($w) >= 2) {
+                // Another unlinked name this one starts (or that starts this one), when the shorter of the two starts
+                // no other name in the list ("Friends of Families" beside two longer Friends of Families names stays).
+                $starts = static function (array $short, $self) use (&$out, $words, $is_prefix) {
+                    $n = 0;
+                    foreach ($out as $k => $o) if ($k !== $self && isset($out[$k]) && $is_prefix($short, $words($o['place']))) $n++;
+                    return $n;
+                };
+                $cands = array();
+                foreach ($out as $j => $other) {
+                    if ($j === $i || !isset($out[$j]) || $out[$j]['url'] !== '') continue;
+                    $ow = $words($out[$j]['place']);
+                    if (count($ow) < 2 || $ow === $w) continue;
+                    if ($is_prefix($w, $ow)) { $long = $out[$j]['place']; $short = $w; $self = $i; }
+                    elseif ($is_prefix($ow, $w)) { $long = $job['place']; $short = $ow; $self = $j; }
+                    else continue;
+                    if (preg_match('/\s(?:at|–|—)\s|\s-\s/u', $long)) continue;   // a campus of it
+                    if ($starts($short, $self) !== 1) continue;
+                    $cands[] = $j;
+                }
+                if (count($cands) === 1) $target = $cands[0];
             }
             if ($target === null) continue;
             // The earlier of the two keeps its place in the list.
@@ -2324,6 +2385,32 @@ if (!function_exists('kop_facility_pages_career_fold')) {
             $out[$keep] = $merge($out[$keep], $out[$drop]);
             unset($out[$drop]);
             if (isset($linked[$target])) { unset($linked[$target]); $linked[$keep] = $words($out[$keep]['place']); }
+        }
+        // An unlinked line another line's role already says: "NATSAP" + "Board member" inside "NATSAP Board member",
+        // "President of WWASPS", "Admissions Coordinator for High Impact". Every title of the line is said there, and its years.
+        $out = array_values($out);
+        $role_keys = array();
+        foreach ($out as $i => $job) $role_keys[$i] = ' ' . trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower($job['role'] . ' ' . $job['years']))) . ' ';
+        foreach ($out as $i => $job) {
+            if ($job['url'] !== '') continue;
+            $p = implode(' ', $words($job['place']));
+            if ($p === '') continue;
+            $ts = array_values(array_filter(array_map($title_key, $titles($job['role'])), 'strlen'));
+            $years = trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower($job['years'])));
+            foreach ($out as $j => $other) {
+                if ($j === $i || !isset($out[$j])) continue;
+                $rk = $role_keys[$j];
+                if ($years !== '' && strpos($rk, ' ' . $years . ' ') === false) continue;
+                $said = $ts ? true : (strpos($rk, ' ' . $p . ' ') !== false);
+                foreach ($ts as $t) {
+                    $found = false;
+                    foreach (array("$p $t", "$t $p", "$t of $p", "$t for $p", "$t at $p", "$t with $p", "$t of the $p", "$t at the $p") as $phrase) {
+                        if (strpos($rk, ' ' . $phrase . ' ') !== false) { $found = true; break; }
+                    }
+                    if (!$found) { $said = false; break; }
+                }
+                if ($said) { unset($out[$i]); break; }
+            }
         }
         return array_values($out);
     }

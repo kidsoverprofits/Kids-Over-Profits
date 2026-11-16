@@ -1,0 +1,34 @@
+{
+  "_about": "Corrections to people's past jobs ({prefix}kop_person_jobs), applied once each by kop_pjobs_apply_fixes() on deploy through kop_pjobs_save(), so each one is logged and has Undo on KOP Tools > People > Past jobs. A fix applies only while the job still has the place in 'place' and belongs to 'person'. A new fix needs a new 'key'.",
+  "fixes": [
+    {
+      "key": "hallows-legacy-academy-adventures",
+      "person": 263,
+      "job": 999,
+      "place": "Legacy Academy Adventures",
+      "set": { "hidden": 1 },
+      "why": "Gil Hallows founded Legacy Outdoor Adventures (Loa, UT, 2011), not Legacy Academy Adventures (Jericho Springs, MO, 2020-2022, record #11414). No source puts him at the Missouri program; the name was a misreading of LOA."
+    },
+    {
+      "key": "hallows-legacy-outdoor",
+      "person": 263,
+      "job": 1001,
+      "place": "Legacy Outdoor",
+      "set": { "hidden": 1 },
+      "why": "\"Legacy Outdoor\" is Woodbury Reports' short name for Legacy Outdoor Adventures (June 2013 visit report, same Loa office and phone); one program, held on job 1000."
+    },
+    {
+      "key": "hallows-legacy-outdoor-adventures",
+      "person": 263,
+      "job": 1000,
+      "place": "Legacy Outdoor Adventures",
+      "set": {
+        "role": "Co-founder, Executive Director",
+        "years": "2011-2019",
+        "source": "Woodbury Reports, October 2011, p. 11 (launch); Stories from the Field, episode 19 (2019-01-29)",
+        "source_url": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1011.pdf#page=11"
+      },
+      "why": "Woodbury Reports, October 2011, p. 11: \"Gil Hallows announced the launching of Legacy Outdoor Adventures, a wilderness treatment program for young adult males.\" Executive director in the July 2012 and June 2013 visit reports, and still in January 2019 (Stories from the Field ep. 19, \"Derek Daley and Gil Hallows: Co-founders of Legacy Outdoor Adventures\")."
+    }
+  ]
+}

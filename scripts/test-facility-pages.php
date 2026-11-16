@@ -619,6 +619,26 @@ $fold = kop_facility_pages_career_fold(array(
 $check('a career lists each place once: same page, unlinked short form, spacing; ambiguous names stay',
     array_column($fold, 'place') === array('Provo Canyon School', 'Silverado Boys Ranch', 'BlueFire Wilderness Therapy', 'Cross Creek', 'Cross Creek Manor', 'Cross Creek Center', 'Heart Cry Recovery')
     && $fold[0]['role'] === 'Therapist' && $fold[0]['years'] === '2001' && $fold[0]['url'] === '/facility/pcs/', wp_json_encode($fold));
+$fold = kop_facility_pages_career_fold(array(
+    array('role' => 'Executive Director, NATSAP Board member', 'place' => 'Aspen Achievement Academy', 'years' => '', 'url' => '/facility/aaa/'),
+    array('role' => 'Board member', 'place' => 'Natsap', 'years' => '', 'url' => ''),
+    array('role' => 'Executive Director', 'place' => 'Legacy Outdoor Adventures', 'years' => '', 'url' => ''),
+    array('role' => 'Executive Director, Founder', 'place' => 'Legacy Outdoor', 'years' => '2013', 'url' => ''),
+    array('role' => 'Co-Founder', 'place' => 'Friends of Families Foundation', 'years' => '', 'url' => ''),
+    array('role' => 'Founder', 'place' => 'Friends of Families', 'years' => '', 'url' => ''),
+    array('role' => 'Staff', 'place' => 'Friends of Families with Children in Crisis Foundation', 'years' => '', 'url' => ''),
+    array('role' => 'Executive Director', 'place' => 'Fulshear Treatment to Transition – The Ranch', 'years' => '', 'url' => ''),
+    array('role' => 'exec director', 'place' => 'Fulshear Treatment to Transition', 'years' => '', 'url' => ''),
+    array('role' => 'President', 'place' => 'Wwasps', 'years' => '', 'url' => ''),
+    array('role' => 'President of WWASPS', 'place' => 'Camas Ranch', 'years' => '', 'url' => '/facility/camas/'),
+    array('role' => 'President, Vice President', 'place' => 'NATSAP Council', 'years' => '', 'url' => ''),
+    array('role' => 'Therapist, NATSAP Council President', 'place' => 'Telos', 'years' => '', 'url' => '/facility/telos/'),
+));
+$check('a career folds two unlinked names of one place and drops a line another role already says; ambiguous names and campuses stay',
+    array_column($fold, 'place') === array('Aspen Achievement Academy', 'Legacy Outdoor Adventures', 'Friends of Families Foundation', 'Friends of Families',
+        'Friends of Families with Children in Crisis Foundation', 'Fulshear Treatment to Transition – The Ranch', 'Fulshear Treatment to Transition',
+        'Camas Ranch', 'NATSAP Council', 'Telos')
+    && $fold[1]['role'] === 'Executive Director, Founder' && $fold[1]['years'] === '2013', wp_json_encode($fold));
 $check('nicknames fold into one person', kop_facility_pages_person_key('Steve Roach') === kop_facility_pages_person_key('Steven Roach')
     && kop_facility_pages_person_key('Clint Dorny') === kop_facility_pages_person_key('Clinton Dorny')
     && kop_facility_pages_person_key('Jack Williams') !== kop_facility_pages_person_key('John Williams'));
