@@ -445,8 +445,8 @@ article .entry-content h3.wp-block-heading.kop-guide-section {
     color: var(--kop-white, #fff);
 }
 
-.entry-content:has(.kop-guide-section) > h4,
-.entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
+article .entry-content:has(.kop-guide-section) > h4,
+article .entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
     margin-top: 3.25rem;
     margin-bottom: 0.75rem;
     padding: 0.1rem 0 0.1rem 0.9rem;
