@@ -456,6 +456,32 @@ article .entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
     line-height: 1.3;
 }
 
+/*
+ * The bands, panels and tables fill the column and the pictures are centred in
+ * it, so the measured text (css/article.css, "Reading measure") is centred too:
+ * at the left it left a wide empty strip on the right, beside centred pictures.
+ * The h4 is set larger, so its measure is divided back to the paragraphs' width.
+ */
+.kop-article .entry-content:has(.kop-guide-section) > p,
+.kop-article .entry-content:has(.kop-guide-section) > ul,
+.kop-article .entry-content:has(.kop-guide-section) > ol,
+.kop-article .entry-content:has(.kop-guide-section) > blockquote,
+.kop-article .entry-content:has(.kop-guide-section) > h4,
+.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > p,
+.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > ul,
+.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > ol,
+.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > blockquote,
+.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+article.kop-article .entry-content:has(.kop-guide-section) > h4,
+article.kop-article .entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
+    box-sizing: border-box;
+    max-width: calc(var(--kop-measure, 64ch) / 1.3);
+}
+
 .entry-content:has(.kop-guide-section) > p,
 .entry-content:has(.kop-guide-section) > .kop-ie-block > p {
     margin-bottom: 1rem;
