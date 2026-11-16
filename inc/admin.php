@@ -2750,7 +2750,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '163';
+    $version = '164';   // 164: staff copy years version 3 (Claude note #19)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
