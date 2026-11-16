@@ -815,6 +815,42 @@
     line-height: 1.45;
 }
 
+/* Materials the project holds: a row of small ticked boxes (Claude note #18). */
+.kop-fp-held {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+    color: var(--kop-text-primary, #1a1a2e);
+}
+
+.kop-fp-held li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.kop-fp-held-box {
+    flex: none;
+    display: inline-block;
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 1px solid var(--kop-teal-ink, #24757F);
+    border-radius: 2px;
+    background: var(--kop-white, #fff);
+    color: var(--kop-teal-ink, #24757F);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 0.95rem;
+    text-align: center;
+}
+
 .kop-fp-testimony {
     margin: 0 0 1rem;
     padding: 0.75rem 1rem;
