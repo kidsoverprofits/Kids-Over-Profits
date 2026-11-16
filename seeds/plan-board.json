@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 16:39 UTC",
- "source": "d975ac92e2abfcb6bf2042ea324078b6d2df4b1c",
+ "built": "2026-11-16 16:40 UTC",
+ "source": "e8e12eb06deb2c635a28c08f9674bb18f6c9757b",
  "sections": [
   {
    "key": "2",
@@ -4305,6 +4305,21 @@
        "focus": false,
        "steps": [],
        "hash": "3f873e72e64b"
+      },
+      {
+       "id": "4.7:ongoing-stories-that-follow-what-is-in-the-news",
+       "lead": "Ongoing Stories that follow what is in the news",
+       "text": "**Ongoing Stories that follow what is in the news** (owner's Tell Claude note #5, 2026-11-13): \"a way to automatically update ongoing stories based on what's currently trending\". Today an arc is made by hand in Manage Ongoing Stories (`api/manage-story-arcs.php`) and fills from its match terms (`api/news-story-arcs.php`); since 2026-11-16 a `since: YYYY-MM-DD` line in its terms bounds it in time (the Provo Canyon closure arc had pulled in every article naming the school since 1980: 355, now 16 published). A session of its own: propose new arcs from clusters of recent approved articles (story groups across outlets, the same facility or case named by several outlets within a few weeks), retire arcs with no new article for N months, and refresh each arc's latest development, every change through a Review inbox queue (Add / Dismiss / Undo), never published straight. Open question for the owner: how many outlets or articles in what window count as \"trending\", and whether a proposed arc goes up on approval only. Opening line: \"Plan item 4.7 #18: build suggested Ongoing Stories from what is trending in approved news, reviewed in a Review inbox queue.\"",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "69db72c141bb"
       }
      ]
     },
@@ -4639,6 +4654,36 @@
        "focus": false,
        "steps": [],
        "hash": "6901d3670b1b"
+      },
+      {
+       "id": "5:test-directory-feed-py-one-company-section-differs-per-run-a",
+       "lead": "test-directory-feed.py: one \"company section differs\" per run, a different company each time",
+       "text": "**test-directory-feed.py: one \"company section differs\" per run, a different company each time** (found 2026-11-16): the split feed and the whole feed draw a company's opened section differently for one or three companies per run (Psychiatric Solutions, Three Springs, WWASPS on one run; Straight Inc. on a run of unchanged main). Not the same company twice, so likely timing (link previews or document lists filled after the snapshot); make the test wait for them or diff the HTML to see what moves.",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "34e4fb86872d"
+      },
+      {
+       "id": "5:test-record-resync-some-live-articles-name-a-record-created",
+       "lead": "test-record-resync: \"some live articles name a record created or renamed after they were saved\"",
+       "text": "**test-record-resync: \"some live articles name a record created or renamed after they were saved\"** (found 2026-11-16, mirror of 2026-11-13): the check expects the mirror to hold at least one unlinked mention and found none (everything is linked). A data-dependent expectation; make it an info line or seed one unlinked mention.",
+       "ask": "",
+       "date": "2026-11-16",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "c1752497c1df"
       }
      ]
     }
