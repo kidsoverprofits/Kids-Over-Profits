@@ -283,6 +283,7 @@ function kop_rinbox_websites_act($key, $action, array $params) {
                 'facility' => (string) get_post_meta($id, '_kop_facility', true),
                 'facility_id' => $params['facility_id'] ?? '', /* a program's id, "<kind>:<id>" or a list of them */ 'kind' => (string) ($params['kind'] ?? ''),
                 'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
+                    'rel_id' => (int) ($params['rel_id'] ?? 0), 'rel_name' => (string) ($params['rel_name'] ?? ''),
                 'source_note' => 'Sent in from the browser extension', 'note' => 'Sent in as a website; moved here by ' . kop_rinbox_reviewer() . '.',
                 'via' => 'browser extension',
             ), kop_rinbox_reviewer());

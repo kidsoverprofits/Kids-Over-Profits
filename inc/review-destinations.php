@@ -8,6 +8,10 @@
  *   legislation  a pending legislation row
  *   promo        Industry PR: a news row filed as 'promotional' (the internal
  *                index of the facilities' own marketing; never public)
+ *   related_<kind>  a record of a related industry (inc/related-facilities.php:
+ *                Christian rehabs for adults, psychiatric inpatient, nursing
+ *                homes, I/DD group homes, foster care): the link goes under its
+ *                "Materials and links"; a new record by name waits for review
  *   website      the program's own website on a facility record (profileLinks)
  *   resource     "Materials and links" on a facility record (resourceLinks)
  *
@@ -32,7 +36,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/** Destinations: id => [label, needs_facility]. */
+/** Destinations: id => [label, needs_facility] (a related industry's also carry 'related' => its category slug). */
 function kop_rdest_targets() {
     return array(
         'news'        => array('label' => 'News', 'needs_facility' => false),
@@ -41,6 +45,7 @@ function kop_rdest_targets() {
         'promo'       => array('label' => 'Industry PR', 'needs_facility' => false),
         'indigenous'  => array('label' => 'Indian boarding schools', 'needs_facility' => false),
         'young_adult' => array('label' => 'Young adult programs (18+)', 'needs_facility' => false),
+    ) + kop_rdest_related_targets() + array(
         'website'     => array('label' => 'Website on the page of a program or other record', 'needs_facility' => true),
         'resource'    => array('label' => 'Materials and links on the page of a program or other record', 'needs_facility' => true),
     );
@@ -64,6 +69,12 @@ function kop_rdest_moves(array $except = array(), $default_fid = 0, $default_kin
         }
         if ($id === 'indigenous') {
             $move['params'] = array(array('name' => 'school_id', 'label' => 'About', 'type' => 'select', 'options' => kop_rdest_school_options(), 'value' => '0'));
+        }
+        if (!empty($t['related'])) {
+            $move['params'] = array(
+                array('name' => 'rel_id', 'label' => 'Record', 'type' => 'select', 'options' => kop_rdest_related_options($t['related']), 'value' => '0'),
+                array('name' => 'rel_name', 'label' => 'or new record named', 'type' => 'text', 'value' => '', 'optional' => true),
+            );
         }
         if ($id === 'young_adult') {
             $move['params'] = array(
@@ -109,6 +120,74 @@ function kop_rdest_record_refs($value) {
         $out[$ref] = true;
     }
     return array_map('strval', array_keys($out));
+}
+
+/**
+ * The related industries (inc/related-facilities.php) as destinations, 'related_<kind>' => [label,
+ * needs_facility, related => slug]. Young adult programs keep their own ('young_adult'), and a
+ * category whose records are still on a page of their own (Indian boarding schools) has no kind.
+ */
+function kop_rdest_related_targets() {
+    if (!function_exists('kop_related_kinds')) return array();
+    $out = array();
+    foreach (kop_related_kinds() as $kind => $slug) {
+        if ($kind === 'ya') continue;
+        $out['related_' . $kind] = array('label' => kop_related_category($slug)['label'], 'needs_facility' => false, 'related' => $slug);
+    }
+    return $out;
+}
+
+/** The destinations that file outside the queues and facility records (every link queue offers them). */
+function kop_rdest_is_sort($to) {
+    $to = (string) $to;
+    return $to === 'indigenous' || $to === 'young_adult' || isset(kop_rdest_related_targets()[$to]);
+}
+
+/** Choices for a related industry: its records (approved or waiting), or a new one by name (0). */
+function kop_rdest_related_options($slug) {
+    $options = array('0' => 'A new record (name it below)');
+    foreach (function_exists('kop_related_all') ? kop_related_all($slug, array(), null) : array() as $r) {
+        $where = trim(implode(', ', array_filter(array((string) $r['city'], (string) $r['state']))));
+        $options[(string) (int) $r['id']] = (string) $r['name'] . ($where !== '' ? ' (' . $where . ')' : '')
+            . ($r['review'] === 'pending' ? ' [waiting for review]' : '');
+    }
+    return $options;
+}
+
+/** Put the link under "Materials and links" on a related industry's record (a new record waits for review). */
+function kop_rdest_put_related($to, array $p, $reviewer) {
+    $t = kop_rdest_related_targets()[$to];
+    $slug = $t['related'];
+    $kind = substr($to, strlen('related_'));
+    if (!function_exists('kop_rinbox_file_on_record')) throw new RuntimeException('The record filing is not loaded.');
+    $id = (int) ($p['rel_id'] ?? 0);
+    $created = false;
+    if ($id > 0) {
+        $rec = kop_related_get($id);
+        if (!$rec || $rec['category'] !== $slug) throw new RuntimeException('That record is gone.');
+    } else {
+        $name = trim((string) ($p['rel_name'] ?? ''));
+        if ($name === '') throw new RuntimeException('Pick the record, or type a name for a new one.');
+        $id = kop_related_find($slug, $name);
+        if (!$id) {
+            $id = kop_related_save($slug, array('identification' => array('name' => $name)), 0, array('review' => 'pending'));
+            $created = true;
+        }
+    }
+    $url = trim((string) $p['url']);
+    try {
+        $record = kop_rinbox_file_on_record($kind . ':' . $id, array(
+            'what' => 'link', 'url' => $url, 'title' => trim((string) ($p['title'] ?? '')), 'kind' => 'other',
+            'source' => (string) ($p['source_note'] ?? 'Sent in for review'), 'key' => $url,
+        ), $reviewer);
+    } catch (RuntimeException $e) {
+        if ($created) kop_related_delete($id);
+        throw $e;
+    }
+    $one = kop_related_category($slug)['one'];
+    return array('to' => $to, 'id' => $id, 'url' => $url, 'created' => $created, 'record' => $record,
+        'message' => $created ? 'Made the ' . $one . ' "' . trim((string) $p['rel_name']) . '" (waiting for review) and put the link on it.'
+            : (string) $record['message']);
 }
 
 /** Choices for "Young adult programs": one on file, or a new one by name (0). */
@@ -228,6 +307,7 @@ function kop_rdest_put($to, array $p, $reviewer) {
     kop_ext_load_record_libs();
     $pdo = kop_rinbox_pdo();
     if ($to === 'young_adult') return kop_rdest_put_young_adult($p, $reviewer);
+    if (!empty($targets[$to]['related'])) return kop_rdest_put_related($to, $p, $reviewer);
     $type = array('news' => 'article', 'promo' => 'article', 'indigenous' => 'article', 'lawsuit' => 'lawsuit', 'legislation' => 'legislation')[$to];
     $q = array(
         'url' => $url, 'title' => trim((string) ($p['title'] ?? '')) ?: $url, 'type' => $type,
@@ -405,6 +485,15 @@ function kop_rdest_take_back(array $done) {
         kop_rdest_take_back_young_adult($done);
         return;
     }
+    if (strncmp($to, 'related_', 8) === 0) {
+        if (!empty($done['record'])) kop_rinbox_unfile_from_record((array) $done['record']);
+        // A record this move made goes again when nothing else was put on it since.
+        $rec = !empty($done['created']) ? kop_related_get($id) : null;
+        if ($rec && $rec['review'] === 'pending' && empty($rec['doc']['resourceLinks']) && empty($rec['doc']['profileLinks']) && empty($rec['doc']['notes'])) {
+            kop_related_delete($id);
+        }
+        return;
+    }
     if ($to === 'indigenous') {
         $pdo_s = kop_ischools_pdo();
         if ($pdo_s) kop_ischools_unlink_news($pdo_s, (int) ($done['school_id'] ?? 0), $id);
@@ -438,9 +527,9 @@ function kop_rdest_resync($type, $id) {
     }
 }
 
-/** "Move to" entries for the two sorting destinations every link queue offers (Indian boarding schools, young adult programs). */
+/** "Move to" entries for the sorting destinations every link queue offers (Indian boarding schools, young adult programs, the other related industries). */
 function kop_rdest_sort_moves() {
-    return array_values(array_filter(kop_rdest_moves(), function ($m) { return in_array($m['id'], array('indigenous', 'young_adult'), true); }));
+    return array_values(array_filter(kop_rdest_moves(), function ($m) { return kop_rdest_is_sort($m['id']); }));
 }
 
 /**

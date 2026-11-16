@@ -157,7 +157,7 @@ function kop_rinbox_test_fornits(array $src, array $item, callable $check) {
     $it = kop_rinbox_get_item('fornits', $lead);
     // A lead with a link can also go to the indigenous schools or young adult programs (kop_rdest_sort_moves()).
     $check('fornits: a lead with a news link defaults to the news queue', strpos($it['actions'][0]['label'], 'News queue') !== false
-        && array_column($it['moves'], 'id') === array('lawsuit', 'closed', 'note', 'indigenous', 'young_adult'),
+        && array_column($it['moves'], 'id') === array_merge(array('lawsuit', 'closed', 'note', 'indigenous', 'young_adult'), array_keys(kop_rdest_related_targets())),
         $it['actions'][0]['label'] . ' ' . json_encode(array_column($it['moves'], 'id')));
     try {
         $m = call_user_func($src['act'], $lead, 'apply', array());

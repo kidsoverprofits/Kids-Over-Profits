@@ -229,7 +229,8 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
     $approved = kop_rinbox_native_row('news', $item['key']);
     if (kop_rinbox_native_url('news', $approved) !== '') {
         $ids = array_map(function ($m) { return $m['id']; }, kop_rinbox_native_item('news', $approved)['moves']);
-        $check('news: an approved article offers Indian boarding schools and young adult programs only', $ids === array('indigenous', 'young_adult'), json_encode($ids));
+        $check('news: an approved article offers Indian boarding schools, young adult programs and the other related industries only',
+            $ids === array_merge(array('indigenous', 'young_adult'), array_keys(kop_rdest_related_targets())) && in_array('related_cra', $ids, true), json_encode($ids));
         call_user_func($src['act'], $item['key'], 'move', array('to' => 'indigenous', 'school_id' => 0));
         $linked = (int) kop_ischools_pdo()->query('SELECT COUNT(*) FROM indigenous_school_news WHERE school_id = 0 AND news_id = ' . (int) $item['key'])->fetchColumn();
         $check('news: filing an approved article under the schools links it and keeps it approved',
@@ -243,6 +244,15 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
             $prog && strpos((string) $prog['links'], kop_rinbox_native_url('news', $approved)) !== false && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved', $res['message'] ?? '');
         call_user_func($src['act'], $item['key'], 'unmove', array());
         $check('news: Undo takes the program it made back off', !kop_ya_find_by_name(kop_ya_pdo(), 'Test YA Program From News'));
+        // Claude note #12: every related industry is a destination; a new record by name is made waiting for review.
+        $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'related_nursing', 'rel_id' => 0, 'rel_name' => 'Test Nursing Home From News'));
+        $rid = kop_related_find('nursing-homes', 'Test Nursing Home From News');
+        $rec = $rid ? kop_related_get($rid) : null;
+        $check('news: an approved article listed on a new nursing home puts the link under its Materials and links, waiting for review',
+            $rec && $rec['review'] === 'pending' && in_array(kop_rinbox_native_url('news', $approved), array_column((array) $rec['doc']['resourceLinks'], 'url'), true)
+            && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved', $res['message'] ?? '');
+        call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('news: Undo takes the nursing home it made back off', !kop_related_find('nursing-homes', 'Test Nursing Home From News'));
     }
     $pdo->prepare('UPDATE news_submissions SET article_title = ?, article_type = ?, tags = ?, status = ? WHERE id = ?')
         ->execute(array($before['article_title'], $before['article_type'], $before['tags'], $before['status'], (int) $item['key']));

@@ -265,9 +265,10 @@ function kop_rinbox_native_filed_ok(array $r) {
 function kop_rinbox_native_filed_moves() {
     $moves = kop_rdest_sort_moves();
     foreach ($moves as &$m) {
-        $m['label'] = $m['id'] === 'indigenous'
-            ? 'File under Indian boarding schools (leaves the news list)'
-            : 'Also list on a young adult program (stays in the news)';
+        $targets = kop_rdest_targets();
+        $m['label'] = $m['id'] === 'indigenous' ? 'File under Indian boarding schools (leaves the news list)'
+            : ($m['id'] === 'young_adult' ? 'Also list on a young adult program (stays in the news)'
+            : 'Also list under ' . $targets[$m['id']]['label'] . ' (stays in the news)');
     }
     unset($m);
     return $moves;
@@ -381,6 +382,10 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
         $r = kop_rinbox_native_row('news', $key);
         if ($r && kop_rinbox_native_filed_ok($r)) return kop_rinbox_native_filed_to_ya($r, $params);
     }
+    if ($type === 'news' && !empty($targets[$to]['related'])) {
+        $r = kop_rinbox_native_row('news', $key);
+        if ($r && kop_rinbox_native_filed_ok($r)) return kop_rinbox_native_filed_to_related($r, $to, $params);
+    }
     if (!$t['moves'] || !isset($targets[$to]) || $to === $type) throw new RuntimeException('It cannot move there.');
     $r = kop_rinbox_native_row($type, $key);
     if (!$r) throw new RuntimeException('That submission is gone.');
@@ -404,6 +409,7 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
             'published' => (string) ($r['publication_date'] ?? ''),
             'facility_id' => $params['facility_id'] ?? '', /* a program's id, "<kind>:<id>" or a list of them */ 'kind' => (string) ($params['kind'] ?? ''),
             'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
+                    'rel_id' => (int) ($params['rel_id'] ?? 0), 'rel_name' => (string) ($params['rel_name'] ?? ''),
             'source_note' => 'Sent in as ' . strtolower($t['label']) . ' (#' . (int) $r['id'] . ')',
             'note' => 'Moved from the ' . $t['label'] . ' queue (#' . (int) $r['id'] . ') by ' . $reviewer . '.',
             'self' => array($type, (int) $r['id']), 'via' => 'moved',
@@ -656,9 +662,25 @@ function kop_rinbox_native_filed_to_ya(array $r, array $params) {
     $done = kop_rdest_put_young_adult(array(
         'url' => $url, 'title' => (string) $r['article_title'],
         'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
+                    'rel_id' => (int) ($params['rel_id'] ?? 0), 'rel_name' => (string) ($params['rel_name'] ?? ''),
     ), $reviewer);
     $log = kop_rinbox_native_moves();
     $log['news:' . (int) $r['id']] = array('to' => 'young_adult', 'done' => $done, 'prev_status' => (string) $r['status'],
+        'prev_notes' => (string) ($r['reviewer_notes'] ?? ''), 'by' => $reviewer, 'at' => time());
+    update_option('kop_review_inbox_moves', $log, false);
+    return array('message' => $done['message'] . ' The article stays in the news. Undo takes the link off.');
+}
+
+/** An approved article also listed on a related industry's record; the article itself stays as it is. */
+function kop_rinbox_native_filed_to_related(array $r, $to, array $params) {
+    $reviewer = kop_rinbox_reviewer();
+    $done = kop_rdest_put($to, array(
+        'url' => kop_rinbox_native_url('news', $r), 'title' => (string) $r['article_title'],
+        'rel_id' => (int) ($params['rel_id'] ?? 0), 'rel_name' => (string) ($params['rel_name'] ?? ''),
+        'source_note' => 'News article #' . (int) $r['id'],
+    ), $reviewer);
+    $log = kop_rinbox_native_moves();
+    $log['news:' . (int) $r['id']] = array('to' => $to, 'done' => $done, 'prev_status' => (string) $r['status'],
         'prev_notes' => (string) ($r['reviewer_notes'] ?? ''), 'by' => $reviewer, 'at' => time());
     update_option('kop_review_inbox_moves', $log, false);
     return array('message' => $done['message'] . ' The article stays in the news. Undo takes the link off.');

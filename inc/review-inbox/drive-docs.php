@@ -406,11 +406,12 @@ function kop_rinbox_gdl_act($key, $action, array $params) {
     switch ($action) {
         case 'apply':
         case 'move':
-            if ($action === 'move' && in_array((string) ($params['to'] ?? ''), array('indigenous', 'young_adult'), true)) {
+            if ($action === 'move' && kop_rdest_is_sort((string) ($params['to'] ?? ''))) {
                 if ($r['status'] !== 'pending') throw new RuntimeException('This link was already handled (' . $r['status'] . ').');
                 return array('message' => kop_rdest_send_row(kop_gdl_table(), $r['pkey'], (string) $params['to'], array(
                     'url' => (string) $r['url'], 'title' => (string) $r['label'], 'site_name' => (string) $r['domain'],
                     'school_id' => (int) ($params['school_id'] ?? 0), 'ya_id' => (int) ($params['ya_id'] ?? 0), 'ya_name' => (string) ($params['ya_name'] ?? ''),
+                    'rel_id' => (int) ($params['rel_id'] ?? 0), 'rel_name' => (string) ($params['rel_name'] ?? ''),
                     'note' => 'Sent from Drive Docs by ' . $user . '.', 'via' => 'Drive Docs',
                 ), $user));
             }
