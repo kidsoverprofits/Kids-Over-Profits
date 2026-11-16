@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 18:43 UTC",
- "source": "f98ace068ec09e8f09bd81fdf33c8d53d5b3da6f",
+ "built": "2026-11-16 19:13 UTC",
+ "source": "fe7e592380619d94806c49e5c49680e88023640d",
  "sections": [
   {
    "key": "2",
@@ -4359,7 +4359,7 @@
       {
        "id": "4.7:parent-company-pages-a-layout-pass-for-the-long-ones",
        "lead": "Parent company pages: a layout pass for the long ones",
-       "text": "**Parent company pages: a layout pass for the long ones** (owner's Tell Claude note #10, 2026-11-16, on /operator/acadia-healthcare/: \"weird right margins, cluttered spacing\"). Done in that session: the profile panel has 2rem at the sides (was 1.25rem, lists ran almost to its edge) and title-only rows in Materials and links have no divider each. Still open, for a session of its own: the page is about 19,000px tall at 1280 wide (History about 6,400px with the draft and its year-by-year list, News coverage 3,000px, Materials and links 2,200px); running text stops at the 64ch measure while lists and boxes take the full column, so the right side alternates empty and full; with edit pencils on, a pencil sits over the end of each news title. Options: fold News coverage and Materials after the first ten, a two-column Materials list, a narrower column for the whole body. Ask the owner which before building.",
+       "text": "**Parent company pages: a layout pass for the long ones** (owner's Tell Claude note #10, 2026-11-16, on /operator/acadia-healthcare/: \"weird right margins, cluttered spacing\"). Done in that session: the profile panel has 2rem at the sides (was 1.25rem, lists ran almost to its edge) and title-only rows in Materials and links have no divider each. Still open, for a session of its own: the page is about 19,000px tall at 1280 wide (History about 6,400px with the draft and its year-by-year list, News coverage 3,000px, Materials and links 2,200px); running text stops at the 64ch measure while lists and boxes take the full column, so the right side alternates empty and full; with edit pencils on, a pencil sits over the end of each news title. - Built 2026-11-16 (owner picked: fold lists after ten, two-column Materials, fold History's year list, and the whole column centred at the measure), every /operator/ page (templates/operator-page.php, css/facility-profile.css, js/profile-timeline.js inits a timeline drawn from a deferred fold). News coverage shows ten and folds the rest (when more than 12); a Materials group over 12 links shows ten; Materials lists are two columns (15rem each); \"Year by year\" is a closed fold (\"Show the timeline: N events, first to last\"); header and body are one centred 64ch column, the facts rail hanging past its right edge. Overflow (390/1024/1280) and contrast pass with --local. - Check after deploy: /operator/acadia-healthcare/ at 1280: page height (was about 19,000px), the folds open, the timeline's filters and \"More about this\" work after opening its fold, /operator/acadia-healthcare/#tl-2010 opens the fold at that year. - Open: the pencil over the end of each news title with edit pencils on (not looked at yet). Program pages (/facility/) have the same ragged right side; centring them too is for the owner once company pages are seen live. - Already failing before this change: scripts/test-operator-pages.php \"embark-behavioral-health lists its programs\" and \"teen-challenge lists its programs\".",
        "ask": "",
        "date": "2026-11-16",
        "why": "",
@@ -4369,7 +4369,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "888e1e03256a"
+       "hash": "9a22af2eaaaa"
       }
      ]
     },
