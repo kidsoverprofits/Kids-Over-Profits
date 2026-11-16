@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 16:40 UTC",
- "source": "e8e12eb06deb2c635a28c08f9674bb18f6c9757b",
+ "built": "2026-11-16 16:42 UTC",
+ "source": "28a0871d2af305ed386153a7510d2472d2685996",
  "sections": [
   {
    "key": "2",
@@ -4309,7 +4309,7 @@
       {
        "id": "4.7:ongoing-stories-that-follow-what-is-in-the-news",
        "lead": "Ongoing Stories that follow what is in the news",
-       "text": "**Ongoing Stories that follow what is in the news** (owner's Tell Claude note #5, 2026-11-13): \"a way to automatically update ongoing stories based on what's currently trending\". Today an arc is made by hand in Manage Ongoing Stories (`api/manage-story-arcs.php`) and fills from its match terms (`api/news-story-arcs.php`); since 2026-11-16 a `since: YYYY-MM-DD` line in its terms bounds it in time (the Provo Canyon closure arc had pulled in every article naming the school since 1980: 355, now 16 published). A session of its own: propose new arcs from clusters of recent approved articles (story groups across outlets, the same facility or case named by several outlets within a few weeks), retire arcs with no new article for N months, and refresh each arc's latest development, every change through a Review inbox queue (Add / Dismiss / Undo), never published straight. Open question for the owner: how many outlets or articles in what window count as \"trending\", and whether a proposed arc goes up on approval only. Opening line: \"Plan item 4.7 #18: build suggested Ongoing Stories from what is trending in approved news, reviewed in a Review inbox queue.\"",
+       "text": "**Ongoing Stories that follow what is in the news** (owner's Tell Claude note #5, 2026-11-13): \"a way to automatically update ongoing stories based on what's currently trending\". Today an arc is made by hand in Manage Ongoing Stories (`api/manage-story-arcs.php`) and fills from its match terms (`api/news-story-arcs.php`); since 2026-11-16 a `since: YYYY-MM-DD` line in its terms bounds it in time (the Provo Canyon closure arc had pulled in every article naming the school since 1980: 355, now 16 published). A session of its own: propose new arcs from clusters of recent approved articles (story groups across outlets, the same facility or case named by several outlets within a few weeks), retire arcs with no new article for N months, and refresh each arc's latest development, every change through a Review inbox queue (Add / Dismiss / Undo), never published straight. Open question for the owner: how many outlets or articles in what window count as \"trending\", and whether a proposed arc goes up on approval only. Two other arcs show the same broad-term problem on 2026-11-16: Fuller v. Hyde School (terms \"fuller\", \"hyde\") has a Maine newspaper-awards piece as its latest development, and Refuge Girls Academy Lawsuit has a Teen Challenge of Oklahoma article; tighten their terms (or add a since line) in Manage Ongoing Stories first. Opening line: \"Plan item 4.7 #18: build suggested Ongoing Stories from what is trending in approved news, reviewed in a Review inbox queue.\"",
        "ask": "",
        "date": "2026-11-16",
        "why": "",
@@ -4319,7 +4319,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "69db72c141bb"
+       "hash": "4b60feaf744f"
       }
      ]
     },
