@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 17:46 UTC",
- "source": "2af58698b81ffac0ba6b483e0c1364f0935743ba",
+ "built": "2026-11-16 18:15 UTC",
+ "source": "6cf48eb8b18d78fbb9048cdfb0c824128f01c78f",
  "sections": [
   {
    "key": "2",
@@ -4342,9 +4342,9 @@
        "hash": "222369460a34"
       },
       {
-       "id": "4.7:common-survivor-experiences-left-from-tell-claude-note-7",
-       "lead": "Common Survivor Experiences, left from Tell Claude note #7",
-       "text": "**Common Survivor Experiences, left from Tell Claude note #7** (2026-11-16; the layout itself is live, commits 96ef0dd1, 663e978b, 898dd28e, 08f47d0f). Two things the checks report on that page that the note did not ask about and that were there before: (a) `check-contrast.py` fails the cover block at the top (white heading, tagline and photo credit): the checker cannot see the photo behind them, but the credit line (#EDF2F7, small) is also faint over the lighter half of the photo for a reader; (b) `check-mobile-overflow.py` reports the Easy Table of Contents toggle icon 2px past its edge at 390 and 768. Also for the owner to decide: /spiritual-abuse/ (17 h4 entries, 6 groups) is the sister page and could take the same three classes (`docs/claude/pages-content.md`, \"Guide pieces\").",
+       "id": "4.7:link-preview-cards-on-spiritual-abuse-are-very-tall",
+       "lead": "Link-preview cards on /spiritual-abuse/ are very tall",
+       "text": "**Link-preview cards on /spiritual-abuse/ are very tall** (found 2026-11-16 while giving the page the guide pieces, commit a9f51cba). The Visual Link Preview cards under Works Cited and the Resources / Legislative Loopholes parts draw each site's picture at full column width, so a card is 780-1,280px tall at 1280 wide and most of the page's lower half is pictures. Was so before the change. A fix would cap `.vlp-image` height (or show cards as a compact list); for the owner to decide whether that page should change.",
        "ask": "",
        "date": "2026-11-16",
        "why": "",
@@ -4354,7 +4354,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "8a71c4608485"
+       "hash": "d479559065dc"
       }
      ]
     },
