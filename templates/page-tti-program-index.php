@@ -71,6 +71,11 @@ get_header();
         </section>
 
         <section id="kop-dir-panel-location" role="tabpanel" aria-labelledby="kop-dir-tab-location"<?php echo $kop_dir_view === 'location' ? '' : ' hidden'; ?>>
+            <?php
+            // The state pages' facilities note, from the same page-text key so one edit changes both (Claude note #4).
+            if (function_exists('kop_text')) : ?>
+            <p class="kop-dir-location-intro"<?php echo function_exists('kop_text_attr') ? kop_text_attr('state-hub:facilities-intro', 'Facilities intro (every state page)') : ''; ?>><?php echo esc_html(kop_text('state-hub:facilities-intro', 'Residential facilities providing religious, behavioral, and mental health treatment to children exist in all 50 states. Some of these facilities are known to be part of the Troubled Teen Industry, while others have not yet been verified. Any facility where children live and receive care requires additional oversight. This directory helps communities monitor local programs and advocate for accountability.', 'Facilities intro (every state page)')); ?></p>
+            <?php endif; ?>
             <div class="controls" data-kop-bug-feature="location-index/search" data-kop-bug-label="Location Search">
                 <div class="controls-row">
                     <input

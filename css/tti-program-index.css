@@ -1857,3 +1857,10 @@ details.operator-section:not([open]) {
 .tti-program-index-wrapper h2.kop-loc-group-heading:first-child {
     margin-top: 0.5em;
 }
+
+/* By location tab: the state pages' facilities note above the controls (Claude note #4). It sits on the white page card. */
+.tti-program-index-wrapper p.kop-dir-location-intro {
+    margin: 0.5em 0 1em;
+    color: var(--kop-text-primary, #000435);
+    line-height: 1.5;
+}
