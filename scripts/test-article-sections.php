@@ -163,5 +163,10 @@ check('an id the editor set is kept', $out['toc'][0][0], 'already-here');
 check('and is not duplicated on the element',
     substr_count($out['html'], 'id="already-here"'), 1);
 
+$broken = '<h2>What Happened to Me?<br>Why Am I Like This?</h2><p>a</p><h2>Two</h2><p>b</p><h2>Three</h2><p>c</p>';
+$out = kop_article_sections($broken);
+check('a line break in a heading reads as a space in the contents',
+    $out['toc'][0][1], 'What Happened to Me? Why Am I Like This?');
+
 echo $failures ? "\n$failures FAILURES\n" : "\narticle sections: PASS\n";
 exit($failures ? 1 : 0);

@@ -107,6 +107,14 @@ if (!function_exists('kop_article_sections')) {
         $toc  = array();
         $used = array();
 
+        // A heading's text for the contents list: a line break inside the
+        // heading ("What Happened to Me?<br>Why Am I Like This?") reads as a
+        // space, never as the two lines run together.
+        $plain = static function ($inner) {
+            $inner = preg_replace('#<br\s*/?>#i', ' ', $inner);
+            return trim(preg_replace('/\s+/u', ' ', wp_strip_all_tags($inner)));
+        };
+
         $make_id = static function ($text, $existing) use (&$used) {
             $id = $existing !== '' ? $existing : sanitize_title(wp_strip_all_tags($text));
             if ($id === '') {
@@ -124,8 +132,8 @@ if (!function_exists('kop_article_sections')) {
         // Real headings first.
         $html = preg_replace_callback(
             '#<(h[23])([^>]*)>(.*?)</\1>#is',
-            static function ($m) use (&$toc, $make_id) {
-                $text = trim(wp_strip_all_tags($m[3]));
+            static function ($m) use (&$toc, $make_id, $plain) {
+                $text = $plain($m[3]);
                 if ($text === '') {
                     return $m[0];
                 }
@@ -148,8 +156,8 @@ if (!function_exists('kop_article_sections')) {
             $markers = array();
             $html = preg_replace_callback(
                 '#<p([^>]*)>\s*(?:<em>)?<strong>(.*?)</strong>(?:</em>)?\s*(?:<br\s*/?>)?\s*</p>#is',
-                static function ($m) use (&$markers, $make_id) {
-                    $text = trim(wp_strip_all_tags($m[2]));
+                static function ($m) use (&$markers, $make_id, $plain) {
+                    $text = $plain($m[2]);
                     if ($text === '' || mb_strlen($text) > 90 || preg_match('/[.!?]\s*$/u', $text)) {
                         return $m[0];
                     }
@@ -266,6 +274,9 @@ while (have_posts()) :
                                 <li class="kop-toc-l<?php echo (int) $item[2]; ?>"><a href="#<?php echo esc_attr($item[0]); ?>"><?php echo esc_html($item[1]); ?></a></li>
                             <?php endforeach; ?>
                         </ol>
+                        <?php if (current_user_can('edit_post', get_the_ID())) : ?>
+                            <p class="kop-article-toc-note">Made from the page's headings: edit a heading below to change it here.</p>
+                        <?php endif; ?>
                     </details>
                 <?php endif; ?>
                 <?php

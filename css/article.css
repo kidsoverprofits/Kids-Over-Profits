@@ -85,6 +85,14 @@
     font-size: 0.95rem;
 }
 
+/* Editors only: the box has no pencil of its own, so it says where its text comes from */
+.kop-article-toc .kop-article-toc-note {
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--kop-text-muted, #4a4a4a);
+}
+
 /* ---- Reading measure --------------------------------------------------- */
 
 .kop-article .entry-content > p,
