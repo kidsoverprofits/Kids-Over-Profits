@@ -169,3 +169,15 @@ html body .mobile-toggle-open-container button.menu-toggle-open:active {
 html body .vlp-link-container .vlp-link-url {
     display: none;
 }
+
+/* Easy Table of Contents: its icon box is a fixed 35px wide with a border
+   round a 35px icon, and is nudged 10px right, so the icon ran past the box
+   and the box past the toggle button. Both size to the icon instead. */
+html body .ez-toc-title-toggle a.ez-toc-toggle {
+    width: auto !important;
+}
+
+html body .ez-toc-toggle .ez-toc-js-icon-con {
+    left: 0 !important;
+    width: auto !important;
+}

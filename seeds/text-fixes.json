@@ -385,5 +385,135 @@
         "<!-- wp:table {\"className\":\"kop-accent-table\"} -->\n<figure class=\"wp-block-table kop-accent-table\"><table class=\"has-fixed-layout\"><thead><tr><th>Diagnosis</th><th>What it involves</th></tr></thead><tbody><tr><td>Complex Post-Traumatic Stress Disorder (C-PTSD)</td><td>Marked by emotional dysregulation, dissociation, hypervigilance, identity disturbance, and chronic shame. Unlike standard PTSD, C-PTSD stems from prolonged, repeated trauma, especially trauma inflicted by authority figures.</td></tr><tr><td>Major Depressive Disorder (MDD)</td><td>Characterized by persistent sadness, loss of interest, fatigue, feelings of worthlessness, and thoughts of death or suicide. Survivors may internalize program messages of brokenness, fueling these patterns long after discharge.</td></tr><tr><td>Generalized Anxiety Disorder (GAD)</td><td>Involves excessive worry that is difficult to control, often accompanied by restlessness, muscle tension, and sleep disturbance. The need to constantly anticipate danger, developed in institutional settings, often continues into adulthood.</td></tr></tbody></table></figure>\n<!-- /wp:table -->"
       ]
     ]
+  },
+  {
+    "post": "spiritual-abuse",
+    "fix": "2026-11-16-spiritual-abuse-guide-layout",
+    "note": "Plan 4.7 #19, the sister page of Common Survivor Experiences (owner, 2026-11-16): the same guide pieces, no words changed. The two side-by-side text columns and the column sets under 'Where...' and 'Growth...' become one flow so each h4 entry stands on its own; the seven part headings (Defining Characteristics, Impacts, Where, Growth, Works Cited, Resources for All Survivors, Legislative Loopholes) take kop-guide-section (Spectra headings become core headings), the h4 entries drop their centring, 'Spiritual Abuse of Indigenous Youth' goes in a kop-accent-panel, one empty paragraph goes. No dense lists here, so no table. Styles: css/article-pieces.css, 'Guide pieces'.",
+    "replace": [
+      [
+        "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":3} -->\n<h3 class=\"wp-block-heading has-text-align-center\">Defining Characteristics of Spiritual Abuse</h3>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Defining Characteristics of Spiritual Abuse</h3>\n<!-- /wp:heading -->\n\n"
+      ],
+      [
+        "</div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":3} -->\n<h3 class=\"wp-block-heading has-text-align-center\">Impacts of Spiritual Abuse on TTI Survivors</h3>\n<!-- /wp:heading -->",
+        "\n\n<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Impacts of Spiritual Abuse on TTI Survivors</h3>\n<!-- /wp:heading -->\n\n"
+      ],
+      [
+        "<!-- wp:uagb/advanced-heading {\"block_id\":\"17a33352\",\"classMigrate\":true,\"headingDescToggle\":false,\"headingAlign\":\"center\",\"headingTag\":\"h4\",\"headingWrapper\":\"header\"} -->\n<header class=\"wp-block-uagb-advanced-heading uagb-block-17a33352\"><h4 class=\"uagb-heading-text\">Spiritual and Existential Harm</h4></header>\n<!-- /wp:uagb/advanced-heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Spiritual and Existential Harm</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:group {\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group\"><!-- wp:paragraph -->\n<p>Development of PTSD-like",
+        "<!-- wp:paragraph -->\n<p>Development of PTSD-like"
+      ],
+      [
+        "leading to re-victimization and abandonment.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->",
+        "leading to re-victimization and abandonment.</p>\n<!-- /wp:paragraph -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":3} -->\n<h3 class=\"wp-block-heading has-text-align-center\">Where Spiritual Abuse Happens in the TTI</h3>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Where Spiritual Abuse Happens in the TTI</h3>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Cult-like and Extreme Religious Programs</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Cult-like and Extreme Religious Programs</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "</div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Evangelical and Fundamentalist Institutions</h4>\n<!-- /wp:heading -->",
+        "\n\n<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Evangelical and Fundamentalist Institutions</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "\"neoliberal spirituality\" contexts.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->",
+        "\"neoliberal spirituality\" contexts.</p>\n<!-- /wp:paragraph -->"
+      ],
+      [
+        "<!-- wp:uagb/advanced-heading {\"block_id\":\"6b1c62f3\",\"classMigrate\":true,\"headingDescToggle\":false,\"headingAlign\":\"center\",\"headingTag\":\"h3\"} -->\n<div class=\"wp-block-uagb-advanced-heading uagb-block-6b1c62f3\"><h3 class=\"uagb-heading-text\">Growth After Spiritual Abuse in the TTI</h3></div>\n<!-- /wp:uagb/advanced-heading -->",
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Growth After Spiritual Abuse in the TTI</h3>\n<!-- /wp:heading -->"
+      ],
+      [
+        "begin their healing journey.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Naming the Abuse and Validating the Experience</h4>\n<!-- /wp:heading -->",
+        "begin their healing journey.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Naming the Abuse and Validating the Experience</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "</div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Telling Your Story and Reclaiming Your Voice</h4>\n<!-- /wp:heading -->",
+        "\n\n<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Telling Your Story and Reclaiming Your Voice</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "</div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Redefining Spirituality on Your Own Terms</h4>\n<!-- /wp:heading -->",
+        "\n\n<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Redefining Spirituality on Your Own Terms</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "reclaim spiritual rituals with new meaning.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:group {\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group\"><!-- wp:group {\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group\"><!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Spiritual Abuse of Indigenous Youth</h4>\n<!-- /wp:heading -->",
+        "reclaim spiritual rituals with new meaning.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:group {\"className\":\"kop-accent-panel\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group kop-accent-panel\"><!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Spiritual Abuse of Indigenous Youth</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<p>While unique to Native American experiences, historical trauma fits many spiritual abuse criteria. This includes colonial and cultural genocide efforts, such as the banning of traditional religious ceremonies, the prevention of access to sacred sites, and the forced assimilation in boarding schools.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->\n\n",
+        "<p>While unique to Native American experiences, historical trauma fits many spiritual abuse criteria. This includes colonial and cultural genocide efforts, such as the banning of traditional religious ceremonies, the prevention of access to sacred sites, and the forced assimilation in boarding schools.</p>\n<!-- /wp:paragraph -->\n\n"
+      ],
+      [
+        "<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Works Cited:</h3>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Works Cited:</h3>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\"} -->\n<h2 class=\"wp-block-heading has-text-align-center\">Resources for All Survivors</h2>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":2,\"className\":\"kop-guide-section\"} -->\n<h2 class=\"wp-block-heading has-text-align-center kop-guide-section\">Resources for All Survivors</h2>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- /wp:columns -->\n\n<!-- wp:uagb/advanced-heading {\"block_id\":\"4de74f26\",\"classMigrate\":true,\"headingDescToggle\":false,\"headingAlign\":\"center\",\"headingTag\":\"h3\"} -->\n<div class=\"wp-block-uagb-advanced-heading uagb-block-4de74f26\"><h3 class=\"uagb-heading-text\">Legislative Loopholes</h3></div>\n<!-- /wp:uagb/advanced-heading --></div>\n<!-- /wp:group -->",
+        "<!-- /wp:columns --></div>\n<!-- /wp:group -->\n\n<!-- wp:heading {\"textAlign\":\"center\",\"level\":3,\"className\":\"kop-guide-section\"} -->\n<h3 class=\"wp-block-heading has-text-align-center kop-guide-section\">Legislative Loopholes</h3>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Misuse of Religious Authority and Power</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Misuse of Religious Authority and Power</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Manipulation and Coercion</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Manipulation and Coercion</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Shame, Guilt, and Conditional Love</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Shame, Guilt, and Conditional Love</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Silencing, Isolation, and Control</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Silencing, Isolation, and Control</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Abuse Embedded in the System</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Abuse Embedded in the System</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Emotional and Psychological Trauma</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Emotional and Psychological Trauma</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Physical and Somatic Symptoms</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Physical and Somatic Symptoms</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Social Disconnection and Strained Relationships</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Social Disconnection and Strained Relationships</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Clergy Sexual Abuse</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Clergy Sexual Abuse</h4>\n<!-- /wp:heading -->"
+      ],
+      [
+        "<!-- wp:heading {\"textAlign\":\"center\",\"level\":4} -->\n<h4 class=\"wp-block-heading has-text-align-center\">Large Group Awareness Trainings</h4>\n<!-- /wp:heading -->",
+        "<!-- wp:heading {\"level\":4} -->\n<h4 class=\"wp-block-heading\">Large Group Awareness Trainings</h4>\n<!-- /wp:heading -->"
+      ]
+    ]
+  },
+  {
+    "post": "common-survivor-experiences",
+    "fix": "2026-11-16-common-survivor-experiences-photo-credit",
+    "note": "Plan 4.7 #19 (a): the cover photo credit (#EDF2F7, small, over the light window side of the photo) takes the class kop-photo-credit, a midnight label (css/content-images.css).",
+    "replace": [
+      [
+        "<!-- wp:paragraph {\"align\":\"right\",\"style\":{\"elements\":{\"link\":{\"color\":{\"text\":\"var:preset|color|theme-palette7\"}}}},\"textColor\":\"theme-palette7\",\"fontSize\":\"small\"} -->\n<p class=\"has-text-align-right has-theme-palette-7-color has-text-color has-link-color has-small-font-size\"><em>Photo by <a>Kate Williams</a>",
+        "<!-- wp:paragraph {\"align\":\"right\",\"className\":\"kop-photo-credit\",\"style\":{\"elements\":{\"link\":{\"color\":{\"text\":\"var:preset|color|theme-palette7\"}}}},\"textColor\":\"theme-palette7\",\"fontSize\":\"small\"} -->\n<p class=\"has-text-align-right kop-photo-credit has-theme-palette-7-color has-text-color has-link-color has-small-font-size\"><em>Photo by <a>Kate Williams</a>"
+      ]
+    ]
   }
 ]

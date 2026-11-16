@@ -66,3 +66,38 @@
 .entry-content .alignright img.kop-img-fill {
     width: auto;
 }
+
+/* A cover block's photo is its background: it fills the block, whatever the
+   600px cap above says (it stopped at 600 x 400 and left a grey strip). The
+   :not()s match that rule's weight so this one wins. */
+.entry-content .wp-block-cover img.wp-block-cover__image-background:not(.alignleft):not(.alignright) {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+}
+
+/* Midnight behind the photo: the white text on a cover stays readable while
+   the photo loads, or if it never does. */
+.entry-content .wp-block-cover:has(> img.wp-block-cover__image-background) {
+    background-color: var(--kop-midnight-blue, #000435);
+}
+
+/* A photo credit on a cover ("Additional CSS class" kop-photo-credit) sits on
+   a midnight label, readable over a light part of any photo. */
+.entry-content .wp-block-cover p.kop-photo-credit {
+    display: table;
+    margin: 0.75rem 0 0 auto;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+    line-height: 1.5;
+}
+
+.entry-content .wp-block-cover p.kop-photo-credit a,
+.entry-content .wp-block-cover p.kop-photo-credit a:visited,
+.entry-content .wp-block-cover p.kop-photo-credit a:hover,
+.entry-content .wp-block-cover p.kop-photo-credit a:focus {
+    color: var(--kop-white, #fff);
+}

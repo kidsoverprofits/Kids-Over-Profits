@@ -103,6 +103,9 @@ php -d extension=mbstring scripts/test-pull-quotes.php [--wp=<WordPress root>]  
 # classes typed into a block's "Additional CSS class". kop-guide-section on a heading = the midnight band that opens a part (a page with
 # one also gets room and a teal bar on its h4 entries); kop-accent-panel on a group = mint panel (+ kop-accent-panel--sand = sand);
 # kop-accent-table on a table = midnight header row, sand stripes, rows stacked on a phone
+# Used on /common-survivor-experiences/ and /spiritual-abuse/ (seeds/text-fixes.json). Text in side-by-side columns is unwrapped
+# into one flow first: the h4 entry style only reaches h4s that sit straight in the page. A photo credit on a cover takes
+# kop-photo-credit (css/content-images.css): a midnight label. A cover's photo fills the block (the 600px picture cap skips it)
 # Links read as words, never as web addresses: kop_url_label() (inc/url-labels.php, a late the_content filter) and
 # kopUrlLabel() (js/url-labels.js, on every page, relabels JS-drawn lists as they appear) must give the same label;
 # a new renderer that prints a link uses one of them for its text. data-kop-keep-url opts an element out
