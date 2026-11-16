@@ -1795,3 +1795,52 @@ body.kop-doc-modal-open {
         white-space: nowrap;
     }
 }
+
+/* Link from a company card to its own page (/operator/<slug>/), on the closed card and at the top of the
+   opened one (js/tti-program-index.js, Claude note #2). The card is midnight: midnight on bright teal
+   (6.86:1), midnight on chartreuse when hovered or focused. Kadence colours every <a>, so all states are set. */
+details.operator-section:not([open]) {
+    height: auto;
+    min-height: 220px;
+}
+
+.tti-program-index-wrapper a.operator-profile-link,
+.tti-program-index-wrapper a.operator-profile-bar-link {
+    display: inline-block;
+    padding: 0.3em 0.8em;
+    border-radius: 4px;
+    background: var(--kop-teal, #33A7B5);
+    color: var(--kop-midnight, #000435) !important;
+    font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1.3;
+    text-decoration: none;
+}
+
+.tti-program-index-wrapper a.operator-profile-link {
+    margin: 2px auto 8px;
+}
+
+.tti-program-index-wrapper a.operator-profile-link:hover,
+.tti-program-index-wrapper a.operator-profile-link:focus,
+.tti-program-index-wrapper a.operator-profile-link:active,
+.tti-program-index-wrapper a.operator-profile-bar-link:hover,
+.tti-program-index-wrapper a.operator-profile-bar-link:focus,
+.tti-program-index-wrapper a.operator-profile-bar-link:active {
+    background: var(--kop-chartreuse, #B2E102);
+    color: var(--kop-midnight, #000435) !important;
+    text-decoration: underline;
+}
+
+.tti-program-index-wrapper .operator-content-scrollable p.operator-profile-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em 0.8em;
+    margin: 0 0 16px;
+    color: #ffffff;
+}
+
+.tti-program-index-wrapper .operator-content-scrollable p.operator-profile-bar a.operator-profile-bar-link {
+    font-size: 1em;
+}

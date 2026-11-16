@@ -46,7 +46,8 @@ function kop_directory_feed_fingerprint() {
     $parts[] = 'v2:' . ((function_exists('kop_v2_active') && kop_v2_active('program_index')) ? '1' : '0');
     // Saved rename years decide which name a record has under each company.
     $parts[] = 'renames:' . md5(serialize(function_exists('get_option') ? get_option('kop_network_rename_review', array()) : array()));
-    $parts[] = 'v:4';   // 3: names then from the company's name in a record's names (kop_facility_eras_name_under_branded())
+    $parts[] = 'v:5';   // 5: company profile_url on each project
+    // 3: names then from the company's name in a record's names (kop_facility_eras_name_under_branded())
     return $key = substr(md5(implode(';', $parts)), 0, 16);
 }
 
@@ -127,7 +128,7 @@ function kop_directory_feed_slim_facility($facility) {
 
 /** A project for the index: its keys, the operator record, slim facilities. */
 function kop_directory_feed_slim_project($project) {
-    $out = kop_directory_feed_pick($project, array('id', 'name', 'label', 'category'));
+    $out = kop_directory_feed_pick($project, array('id', 'name', 'label', 'category', 'profile_url'));
     $data = (isset($project['data']) && is_array($project['data'])) ? $project['data'] : array();
     $slim = array();
     if (isset($data['operator'])) $slim['operator'] = $data['operator'];

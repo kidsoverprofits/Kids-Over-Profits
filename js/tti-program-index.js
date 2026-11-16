@@ -825,6 +825,8 @@ function displayFacilities(facilitiesData, containerId) {
             operator,
             facilities,
             name: cleanText(project.name),
+            // The company's own page (/operator/<slug>/), stamped by the feed.
+            profileUrl: cleanText(project.profile_url),
             // Explicit document-library folder ID (set via the wiki program
             // picker). Preferred over fuzzy folder-name matching when present.
             documentFolderId: projectData.documentFolderId || project.documentFolderId || null,
@@ -1181,6 +1183,13 @@ function displayFacilities(facilitiesData, containerId) {
             locationYearsLine = `<span class="operator-location">${locationLines.join('')}</span>`;
         }
 
+        // The company's own page, on the card itself (Claude note #2: no clear link to it before).
+        // A link inside <summary> follows the link without opening the card.
+        const operatorProfileUrl = cleanText(operatorGroup && operatorGroup.profileUrl);
+        const operatorProfileLink = operatorProfileUrl
+            ? `<a class="operator-profile-link" href="${escapeAttribute(operatorProfileUrl)}">Company profile</a>`
+            : '';
+
         if (mode === 'list') {
             const facilityMeta = facilities.map(facility => facilityListMeta(facility, operatorName));
             facilityMeta.forEach(meta => meta.aliases.forEach(entry => aliasEntries.push(entry)));
@@ -1193,6 +1202,7 @@ function displayFacilities(facilitiesData, containerId) {
                     '<summary class="operator-header">' +
                         operatorHeader +
                         locationYearsLine +
+                        operatorProfileLink +
                     '</summary>' +
                 '</details>'
             };
@@ -1397,6 +1407,10 @@ function displayFacilities(facilitiesData, containerId) {
             if (!key || typeof key !== 'string') return false;
             if (suppressedOperatorFieldKeys.has(key)) return true;
             if (/^(locationDetails|location_details)\.(city|state)$/i.test(key)) return true;
+            // Split copies of the place the header shows, and the history writer's bookkeeping
+            // (status, seed hash, review notes are for KOP Tools, never readers).
+            if (/^(headquarters|location)(City|State)$/.test(key)) return true;
+            if (/^history(Status|SeedHash|ReviewNotes)$/.test(key)) return true;
             const lower = key.toLowerCase();
             if (/(^|\.)(source_?project_?id|project_?id|post_?id|wp_?id|master_?id|record_?id|row_?id|document_?folder_?id|_?id|slug|guid|uuid|created_?at|updated_?at|modified_?at)$/.test(lower)) return true;
             return false;
@@ -1515,7 +1529,11 @@ function displayFacilities(facilitiesData, containerId) {
             )
             : '';
 
-        const additionalOperatorDetailsHtml = otherOperatorData
+        // With a company page, its history, notes and sources are read there, laid out for
+        // reading; the card keeps the quick facts and the programs (Claude note #2).
+        const additionalOperatorDetailsHtml = operatorProfileUrl
+            ? ''
+            : otherOperatorData
             ? renderDetailSection(
                 'More details',
                 `<div class="facility-detail-grid">${otherOperatorData}</div>`,
@@ -1597,14 +1615,19 @@ function displayFacilities(facilitiesData, containerId) {
             operatorPeopleHtml,
             operatorDocLibraryHtml,
             additionalOperatorDetailsHtml,
-            operatorFieldNotesSectionHtml
+            operatorProfileUrl ? '' : operatorFieldNotesSectionHtml
         ].join('');
 
         const operatorDetailsDiv = operatorSectionsHtml
             ? `<div class="operator-details">${operatorSectionsHtml}</div>`
             : '';
 
+        const operatorProfileBar = operatorProfileUrl
+            ? `<p class="operator-profile-bar"><a class="operator-profile-bar-link" href="${escapeAttribute(operatorProfileUrl)}">Open the ${escapeHtml(operatorShownName)} company page</a> <span>History, people, documents and sources</span></p>`
+            : '';
+
         let html = '<div class="operator-content-scrollable">' +
+                    operatorProfileBar +
                     operatorLatestNewsHtml +
                     operatorLawsuitBits.strip +
                     operatorDetailsDiv +

@@ -493,6 +493,11 @@ if (!function_exists('kop_v2_get_facilities_projects')) {
                 'timestamp'            => isset($blocks['timestamp']) && is_string($blocks['timestamp']) ? $blocks['timestamp'] : (string)$op['updated_at'],
                 'currentFacilityIndex' => isset($blocks['currentFacilityIndex']) ? (int)$blocks['currentFacilityIndex'] : 0,
             );
+            // The company's own page, linked from its directory card (Claude note #2).
+            if (function_exists('kop_operator_page_url')) {
+                $op_url = kop_operator_page_url((int)$op['id']);
+                if ($op_url !== '') $projects[$op['unique_name']]['profile_url'] = $op_url;
+            }
         }
 
         $by_location = array();
