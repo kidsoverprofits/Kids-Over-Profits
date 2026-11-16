@@ -1237,6 +1237,39 @@ function kop_document_shortcode($atts) {
 add_shortcode('kop_document', 'kop_document_shortcode');
 
 /**
+ * Once (option kop_arc_pcs_window): the Provo Canyon School Closure story had 355
+ * articles, every article naming the school since 1980 (its only match term was
+ * "provo canyon school"; Claude note #5). It gets a since line at 2026-06-01 (Utah's
+ * sanctions, then the licence revocation, the appeal and after); the members dated
+ * before it come off, and so do the undated ones that are not about the closure
+ * (#219 "Families scramble ... after Provo Canyon School closes" stays).
+ * api/news-story-arcs.php keeps later saves inside the window.
+ */
+add_action('init', static function () {
+    if (get_option('kop_arc_pcs_window') === '1') return;
+    global $wpdb;
+    $arc = $wpdb->get_row("SELECT id, match_terms FROM news_story_arcs WHERE slug = 'provo-canyon-school-closure'", ARRAY_A);
+    if (!$arc) {
+        if ($wpdb->last_error === '') update_option('kop_arc_pcs_window', '1', false);
+        return;
+    }
+    $id = (int) $arc['id'];
+    $terms = (string) $arc['match_terms'];
+    if (!preg_match('/^\s*since:/mi', $terms)) {
+        $wpdb->update('news_story_arcs', array('match_terms' => rtrim($terms) . "\nsince: 2026-06-01"), array('id' => $id));
+    }
+    $wpdb->query($wpdb->prepare(
+        "UPDATE news_submissions SET story_arc_id = NULL
+         WHERE story_arc_id = %d AND publication_date >= '1000-01-01' AND publication_date < '2026-06-01'", $id));
+    $wpdb->query($wpdb->prepare(
+        "UPDATE news_submissions SET story_arc_id = NULL
+         WHERE story_arc_id = %d AND publication_date IS NULL AND id <> 219", $id));
+    update_option('kop_arc_pcs_window', '1', false);
+    do_action('litespeed_purge_url', home_url('/tti-news-feed/'));
+    do_action('litespeed_purge_url', home_url('/'));
+}, 30);
+
+/**
  * Shortcode: featured ongoing stories (news story arcs) for the home page.
  * Usage: [kop_ongoing_stories limit="3" articles="3" heading="Ongoing Stories"]
  *

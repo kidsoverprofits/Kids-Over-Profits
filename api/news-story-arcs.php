@@ -9,7 +9,12 @@
  * a curated narrative: created by an admin in api/manage-story-arcs.php,
  * membership assigned manually there and automatically here via each arc's
  * match_terms (newline-separated phrases; an article whose title/summary/
- * facilities contain one is attached on save).
+ * facilities contain one is attached on save). A "since: YYYY-MM-DD" line in
+ * match_terms bounds the arc in time: articles published before that date (or
+ * undated) never join automatically, and saving the arc in the tool takes the
+ * earlier ones off (kop_news_arc_prune). Without it a term like "provo canyon
+ * school" pulled every article naming the school since 1980 into a 2026
+ * closure story (Claude note #5, 333 articles).
  *
  * Tables: news_story_arcs + news_submissions.story_arc_id (see
  * api/update-schema.php). All helpers tolerate a database that predates the
@@ -32,11 +37,54 @@ if (!function_exists('kop_news_arc_slug')) {
         $out = [];
         foreach (preg_split('/\r\n|\r|\n/', (string) $matchTerms) as $line) {
             $t = strtolower(trim($line));
+            if (str_starts_with($t, 'since:')) {
+                continue; // the arc's start date, kop_news_arc_since()
+            }
             if ($t !== '') {
                 $out[] = $t;
             }
         }
         return $out;
+    }
+
+    /** The arc's "since: YYYY-MM-DD" line as 'YYYY-MM-DD', or '' when it has none. */
+    function kop_news_arc_since(?string $matchTerms): string {
+        if (preg_match('/^\s*since:\s*(\d{4}-\d{2}-\d{2})\s*$/mi', (string) $matchTerms, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
+
+    /**
+     * May an article published on $pubDate join the arc automatically? Always
+     * without a since line; with one, only when it is dated on or after it.
+     */
+    function kop_news_arc_in_window(array $arc, ?string $pubDate): bool {
+        $since = kop_news_arc_since($arc['match_terms'] ?? '');
+        if ($since === '') {
+            return true;
+        }
+        $day = substr(trim((string) $pubDate), 0, 10);
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $day) === 1 && $day >= $since;
+    }
+
+    /**
+     * Take off the arc's members dated before its since line. Undated members
+     * stay (an admin attached them, or they predate the line). Returns how many.
+     */
+    function kop_news_arc_prune(PDO $pdo, int $arcId): int {
+        $stmt = $pdo->prepare("SELECT match_terms FROM news_story_arcs WHERE id = ?");
+        $stmt->execute([$arcId]);
+        $since = kop_news_arc_since((string) $stmt->fetchColumn());
+        if ($since === '') {
+            return 0;
+        }
+        $detach = $pdo->prepare(
+            "UPDATE news_submissions SET story_arc_id = NULL
+             WHERE story_arc_id = ? AND publication_date >= '1000-01-01' AND publication_date < ?"
+        );
+        $detach->execute([$arcId, $since]);
+        return $detach->rowCount();
     }
 
     /**
@@ -73,7 +121,7 @@ if (!function_exists('kop_news_arc_slug')) {
     function kop_news_assign_story_arc(PDO $pdo, int $id): ?int {
         try {
             $stmt = $pdo->prepare(
-                "SELECT article_title, alternate_title, summary, facilities_mentioned, story_arc_id
+                "SELECT article_title, alternate_title, summary, facilities_mentioned, story_arc_id, publication_date
                  FROM news_submissions WHERE id = ?"
             );
             $stmt->execute([$id]);
@@ -93,7 +141,7 @@ if (!function_exists('kop_news_arc_slug')) {
 
             $haystack = kop_news_arc_haystack($row);
             foreach ($arcs as $arc) {
-                if (kop_news_arc_match($arc, $haystack) !== null) {
+                if (kop_news_arc_in_window($arc, $row['publication_date'] ?? '') && kop_news_arc_match($arc, $haystack) !== null) {
                     $pdo->prepare("UPDATE news_submissions SET story_arc_id = ? WHERE id = ?")
                         ->execute([(int) $arc['id'], $id]);
                     return (int) $arc['id'];
@@ -122,7 +170,7 @@ if (!function_exists('kop_news_arc_slug')) {
         }
 
         $rows = $pdo->query(
-            "SELECT id, article_title, alternate_title, summary, facilities_mentioned
+            "SELECT id, article_title, alternate_title, summary, facilities_mentioned, publication_date
              FROM news_submissions
              WHERE story_arc_id IS NULL AND status NOT IN ('rejected', 'deleted')"
         )->fetchAll(PDO::FETCH_ASSOC);
@@ -130,7 +178,7 @@ if (!function_exists('kop_news_arc_slug')) {
         $attach = $pdo->prepare("UPDATE news_submissions SET story_arc_id = ? WHERE id = ?");
         $attached = 0;
         foreach ($rows as $row) {
-            if (kop_news_arc_match($arc, kop_news_arc_haystack($row)) !== null) {
+            if (kop_news_arc_in_window($arc, $row['publication_date'] ?? '') && kop_news_arc_match($arc, kop_news_arc_haystack($row)) !== null) {
                 $attach->execute([$arcId, (int) $row['id']]);
                 $attached++;
             }

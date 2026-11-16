@@ -76,7 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_admin_referer('kop_manage_arc
                     (int) ($_POST['display_order'] ?? 0),
                     $arcId,
                 ]);
-                $notices[] = "Updated arc #{$arcId}.";
+                // A "since:" line takes off the members dated before it.
+                $pruned = kop_news_arc_prune($pdo, $arcId);
+                $notices[] = "Updated arc #{$arcId}." . ($pruned ? " {$pruned} article(s) dated before its since line taken off." : '');
             }
         } elseif ($action === 'scan') {
             $arcId = (int) ($_POST['arc_id'] ?? 0);
@@ -223,7 +225,7 @@ Duplicate copies of one article are cleaned up in <a href="manage-duplicate-arti
         <input type="text" name="title" value="<?php echo esc_attr($arc['title']); ?>" required>
         <label>Description (shown on the news page)</label>
         <textarea name="description"><?php echo esc_textarea($arc['description'] ?? ''); ?></textarea>
-        <label>Match terms (one per line — new articles containing one are auto-attached)</label>
+        <label>Match terms (one per line — new articles containing one are auto-attached; a line "since: 2026-06-01" keeps out articles published before that date, and saving takes off the ones already attached)</label>
         <textarea name="match_terms" placeholder="hyde school&#10;fuller v. hyde"><?php echo esc_textarea($arc['match_terms'] ?? ''); ?></textarea>
         <p class="hint">Keep terms specific: “hyde school”, not “school”. Checked case-insensitively against title, summary, and facility names.</p>
         <label>Facility button (optional)</label>
