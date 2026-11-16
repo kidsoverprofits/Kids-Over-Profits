@@ -442,7 +442,7 @@ article .entry-content h3.wp-block-heading.kop-guide-section {
 .entry-content .kop-guide-section .kop-article-anchor,
 .entry-content .kop-guide-section .kop-article-anchor:hover,
 .entry-content .kop-guide-section .kop-article-anchor:focus {
-    color: var(--kop-teal, #33a7b5);
+    color: var(--kop-white, #fff);
 }
 
 .entry-content:has(.kop-guide-section) > h4,

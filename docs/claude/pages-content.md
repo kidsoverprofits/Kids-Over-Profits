@@ -99,6 +99,10 @@ php scripts/test-content-images.php
 # ("> -- Name", "> (right)"); the button there uses pqh:<o|p>:<company>:<paragraph>:<hash>; the app gets it as plain words.
 # Another page joins by marking its paragraphs data-kop-pq="<ref base>" and adding a source
 php -d extension=mbstring scripts/test-pull-quotes.php [--wp=<WordPress root>]   # add/edit/undo on WordPress's own block parser (Local's by default)
+# Guide pieces for a long editor page (css/article-pieces.css, "Guide pieces"; first used on /common-survivor-experiences/): three
+# classes typed into a block's "Additional CSS class". kop-guide-section on a heading = the midnight band that opens a part (a page with
+# one also gets room and a teal bar on its h4 entries); kop-accent-panel on a group = mint panel (+ kop-accent-panel--sand = sand);
+# kop-accent-table on a table = midnight header row, sand stripes, rows stacked on a phone
 # Links read as words, never as web addresses: kop_url_label() (inc/url-labels.php, a late the_content filter) and
 # kopUrlLabel() (js/url-labels.js, on every page, relabels JS-drawn lists as they appear) must give the same label;
 # a new renderer that prints a link uses one of them for its text. data-kop-keep-url opts an element out

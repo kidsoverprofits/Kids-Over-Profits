@@ -41,6 +41,12 @@ the rest, `:hover`, `:focus` and `:active` states (links styled as buttons too:
 Kadence's `a:focus` is midnight). A reusable component sets its own foreground
 and background instead of inheriting. No `*` colour blankets.
 
+**The owner's view has a wrapper readers don't.** For an admin, every top-level editor block of a page sits in
+`<div class="kop-ie-block">` (edit in place; `display:contents`). The layout is the same, but the block is no longer a
+child of `.entry-content`, so `.entry-content > h3` stops matching and the owner sees a page without that rule. Every
+`.entry-content > x` rule is written a second time as `.entry-content > .kop-ie-block > x` (`:not(:first-child)` goes on
+the wrapper; `a + b` becomes `.kop-ie-block:has(> a) + .kop-ie-block > b`), as in `css/section-spacing.css`.
+
 Every text passes WCAG AA (4.5:1, large text 3:1) and every icon 3:1, in every state.
 - Accent as **text or icon** on a light ground: `--kop-*-ink` (teal, orange, coral-pink,
   chartreuse, bubblegum-pink). On navy/midnight keep the bright accent.
