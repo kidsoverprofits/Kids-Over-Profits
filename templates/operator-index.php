@@ -3,7 +3,8 @@
  * /operator/: every parent company with a page (inc/operator-pages.php routes
  * here with $GLOBALS['kop_operator_index'], rows from
  * kop_operator_history_index_rows()). Operating companies, then those closed,
- * merged or acquired; in each the major companies as cards, the rest as a list.
+ * merged or acquired; every company a card, the major ones first (owner, Claude
+ * note #13: no flat list under the cards).
  * Uses the facility profile stylesheet.
  */
 
@@ -13,7 +14,7 @@ if (!defined('ABSPATH')) {
 
 $kop_oi = isset($GLOBALS['kop_operator_index']) && is_array($GLOBALS['kop_operator_index']) ? $GLOBALS['kop_operator_index'] : array('rows' => array(), 'title' => 'Parent companies', 'summary' => '');
 // Operating companies first, then those closed, merged or acquired
-// (kop_operator_history_is_active()); in each, the major ones as cards, the rest as a list.
+// (kop_operator_history_is_active()); in each, the major ones first, then the rest, all as cards.
 $kop_oi_groups = array(
     'active'  => array('title' => 'Operating companies', 'note' => 'Companies still running programs, or with no closure on record.', 'major' => array(), 'other' => array()),
     'defunct' => array('title' => 'Closed, merged or acquired', 'note' => 'Companies that have shut down or been taken over, or whose programs on record have all closed. Their pages keep the history.', 'major' => array(), 'other' => array()),
@@ -48,9 +49,8 @@ get_header();
         <section class="kop-fp-section" id="<?php echo esc_attr($kop_oi_key); ?>">
             <h2><?php echo esc_html($g['title']); ?></h2>
             <p class="kop-fp-count"><?php echo esc_html(count($g['major']) + count($g['other'])); ?> companies. <?php echo esc_html($g['note']); ?></p>
-            <?php if ($g['major']) : ?>
             <ul class="kop-oi-cards">
-                <?php foreach ($g['major'] as $r) : ?>
+                <?php foreach (array_merge($g['major'], $g['other']) as $r) : ?>
                     <li class="kop-oi-card">
                         <h3><a href="<?php echo esc_url($r['url']); ?>"><?php echo esc_html($r['name']); ?></a></h3>
                         <?php $bits = $kop_oi_bits($r); if ($bits) : ?><p class="kop-oi-meta"><?php echo esc_html(implode(' | ', $bits)); ?></p><?php endif; ?>
@@ -58,17 +58,6 @@ get_header();
                     </li>
                 <?php endforeach; ?>
             </ul>
-            <?php endif; ?>
-            <?php if ($g['other']) : ?>
-            <ul class="kop-fp-records">
-                <?php foreach ($g['other'] as $r) : ?>
-                    <li>
-                        <a href="<?php echo esc_url($r['url']); ?>"><?php echo esc_html($r['name']); ?></a>
-                        <?php $bits = $kop_oi_bits($r); if ($bits) : ?><span class="meta"><?php echo esc_html(implode(' | ', $bits)); ?></span><?php endif; ?>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-            <?php endif; ?>
         </section>
         <?php endforeach; ?>
 

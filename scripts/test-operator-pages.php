@@ -112,7 +112,7 @@ ob_start();
 include dirname(__DIR__) . '/templates/operator-index.php';
 $kop_index_html = ob_get_clean();
 file_put_contents($out_dir . '/_index.html', $kop_index_html);
-$check('the index prints a card per major company', substr_count($kop_index_html, 'class="kop-oi-card"') === count($kop_majors));
+$check('the index prints a card per company, no flat list (Claude note #13)', substr_count($kop_index_html, 'class="kop-oi-card"') === count($GLOBALS['kop_operator_index']['rows']) && strpos($kop_index_html, 'kop-fp-records') === false);
 $kop_closed = array_values(array_filter($GLOBALS['kop_operator_index']['rows'], function ($r) { return !$r['active']; }));
 $check('the index splits operating companies from closed ones', strpos($kop_index_html, 'id="active"') !== false && ($kop_closed ? strpos($kop_index_html, 'id="defunct"') > strpos($kop_index_html, 'id="active"') : true));
 $check('a stated status settles operating or closed',

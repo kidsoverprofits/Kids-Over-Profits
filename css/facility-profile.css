@@ -1825,10 +1825,6 @@ p.kop-op-draft {
     border-top-color: var(--kop-text-muted, #4A5568);
 }
 
-.kop-oi-cards + .kop-fp-records {
-    margin-top: 1rem;
-}
-
 .kop-oi-meta {
     margin: 0 0 0.4rem;
     font-size: 0.88rem;
