@@ -8,7 +8,9 @@
  *                             source + source_url, origin ('pastjobs' = read from a staff entry's
  *                             pastJobs text, 'manual' = added on KOP Tools > People), import_key
  *                             (the text it was read from, so it is read once), hidden (taken off by
- *                             an admin: kept so the text never brings it back).
+ *                             an admin: kept so the text never brings it back), kind ('' = guessed by
+ *                             kop_facility_pages_job_kind(), 'industry', or 'other' = a noteworthy
+ *                             position outside the industry: a state department, a legislature...).
  *   option kop_person_jobs_log  every change on the People screen, {at, by, id, before, after}, for Undo.
  *
  * The staff entries keep their pastJobs text (the forms, Woodbury Facts and the wiki still write it):
@@ -22,7 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KOP_PERSON_JOBS_DB_VERSION', '1');
+define('KOP_PERSON_JOBS_DB_VERSION', '2');   // 2: kind
 
 if (!function_exists('kop_pjobs_table')) {
     function kop_pjobs_table(array $opts = array()) {
@@ -41,6 +43,7 @@ if (!function_exists('kop_pjobs_table')) {
             place VARCHAR(255) NOT NULL DEFAULT '',
             role VARCHAR(255) NOT NULL DEFAULT '',
             years VARCHAR(64) NOT NULL DEFAULT '',
+            kind VARCHAR(12) NOT NULL DEFAULT '',
             source VARCHAR(255) NOT NULL DEFAULT '',
             source_url VARCHAR(500) NOT NULL DEFAULT '',
             origin VARCHAR(12) NOT NULL DEFAULT 'manual',
@@ -52,6 +55,10 @@ if (!function_exists('kop_pjobs_table')) {
             KEY person_id (person_id),
             KEY import_key (import_key)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        // Version 2: a table made before has no kind column yet.
+        if (!$wpdb->get_var("SHOW COLUMNS FROM {$t} LIKE 'kind'")) {
+            $wpdb->query("ALTER TABLE {$t} ADD COLUMN kind VARCHAR(12) NOT NULL DEFAULT '' AFTER years");
+        }
         update_option('kop_person_jobs_db', KOP_PERSON_JOBS_DB_VERSION, false);
     }
     if (function_exists('add_action')) add_action('admin_init', 'kop_pjobs_install');
@@ -176,7 +183,7 @@ if (!function_exists('kop_pjobs_import')) {
 }
 
 if (!function_exists('kop_pjobs_by_person')) {
-    /** Every shown job, [resolved person id => [{id, place, role, years, source, source_url, origin}]], cached per request. */
+    /** Every shown job, [resolved person id => [{id, place, role, years, kind, source, source_url, origin, ...}]], cached per request. */
     function kop_pjobs_by_person(array $opts = array()) {
         $cache = empty($opts);
         if ($cache && isset($GLOBALS['kop_pjobs_cache']) && is_array($GLOBALS['kop_pjobs_cache'])) return $GLOBALS['kop_pjobs_cache'];
@@ -184,8 +191,8 @@ if (!function_exists('kop_pjobs_by_person')) {
         $out = array();
         if (kop_pjobs_ready($opts)) {
             $state = kop_pjobs_people($opts);
-            foreach (kop_facility_db_rows('SELECT id, person_id, place, role, years, source, source_url, origin FROM ' . kop_pjobs_table($opts)
-                . ' WHERE hidden = 0 ORDER BY id', array(), $opts) as $r) {
+            foreach (kop_facility_db_rows('SELECT * FROM ' . kop_pjobs_table($opts) . ' WHERE hidden = 0 ORDER BY id', array(), $opts) as $r) {
+                $r['kind'] = (string) ($r['kind'] ?? '');
                 $pid = $state ? kop_people_resolve($state, (int) $r['person_id']) : (int) $r['person_id'];
                 $out[$pid][] = $r;
             }
@@ -222,6 +229,10 @@ if (!function_exists('kop_pjobs_save')) {
             if (array_key_exists($k, $fields)) $clean[$k] = mb_substr(trim(preg_replace('/\s+/u', ' ', (string) $fields[$k])), 0, $max);
         }
         if (array_key_exists('hidden', $fields)) $clean['hidden'] = $fields['hidden'] ? 1 : 0;
+        if (array_key_exists('kind', $fields)) {
+            $clean['kind'] = (string) $fields['kind'];
+            if (!in_array($clean['kind'], array('', 'industry', 'other'), true)) throw new RuntimeException('A job is the industry, another noteworthy position, or left to the guess.');
+        }
         if (isset($clean['source_url']) && $clean['source_url'] !== '' && !preg_match('#^https?://#i', $clean['source_url'])) throw new RuntimeException('The source link must start with http:// or https://.');
         $before = null;
         if ($id) {
@@ -241,6 +252,8 @@ if (!function_exists('kop_pjobs_save')) {
                 array((int) $person_id, $clean['place'], $clean['role'], $clean['years'], $clean['source'], $clean['source_url']), $opts);
             $new = kop_facility_db_rows("SELECT MAX(id) AS id FROM {$t} WHERE person_id = ?", array((int) $person_id), $opts);
             $id = (int) ($new[0]['id'] ?? 0);
+            // Set apart, so adding a job works before the kind column is made (the first admin load after a deploy).
+            if (($clean['kind'] ?? '') !== '') kop_facility_db_exec("UPDATE {$t} SET kind = ? WHERE id = ?", array($clean['kind'], $id), $opts);
         }
         $after = kop_facility_db_rows("SELECT * FROM {$t} WHERE id = ?", array((int) $id), $opts)[0] ?? null;
         kop_pjobs_log(array('id' => (int) $id, 'person' => (int) $person_id, 'before' => $before, 'after' => $after));
@@ -278,9 +291,10 @@ if (!function_exists('kop_pjobs_save')) {
         $t = kop_pjobs_table($opts);
         $now = kop_facility_db_rows("SELECT * FROM {$t} WHERE id = ?", array((int) $l['id']), $opts)[0] ?? null;
         $cols = array('place', 'role', 'years', 'source', 'source_url', 'hidden');
+        if (is_array($l['before'] ?? null) && array_key_exists('kind', $l['before']) && (!$now || array_key_exists('kind', $now))) $cols[] = 'kind';
         $same = function ($a, $b) use ($cols) {
             if (!$a || !$b) return !$a && !$b;
-            foreach ($cols as $c) if ((string) $a[$c] !== (string) $b[$c]) return false;
+            foreach ($cols as $c) if ((string) ($a[$c] ?? '') !== (string) ($b[$c] ?? '')) return false;
             return true;
         };
         if (!$same($now, $l['after'])) throw new RuntimeException('That job changed since; undo the later change first.');
@@ -288,7 +302,7 @@ if (!function_exists('kop_pjobs_save')) {
             kop_facility_db_exec("DELETE FROM {$t} WHERE id = ?", array((int) $l['id']), $opts);
         } else {
             $set = implode(', ', array_map(function ($k) { return "$k = ?"; }, $cols));
-            kop_facility_db_exec("UPDATE {$t} SET {$set} WHERE id = ?", array_merge(array_map(function ($c) use ($l) { return (string) $l['before'][$c]; }, $cols), array((int) $l['id'])), $opts);
+            kop_facility_db_exec("UPDATE {$t} SET {$set} WHERE id = ?", array_merge(array_map(function ($c) use ($l) { return (string) ($l['before'][$c] ?? ''); }, $cols), array((int) $l['id'])), $opts);
         }
         $log[$at]['undone'] = true;
         if ($key === 'opt') update_option('kop_person_jobs_log', $log, false);

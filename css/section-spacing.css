@@ -8,6 +8,13 @@
  * Where a page's sections are boxes that open with their heading, the space
  * goes on the box (margins collapse, so 3.5rem is the gap, not an addition).
  * A new page kind with its own section boxes adds them here.
+ *
+ * An admin's page has every editor block inside a .kop-ie-block wrapper (edit
+ * in place, inc/inline-edit.php). It is display:contents, so the layout is the
+ * same, but a block is then no longer a child of .entry-content: every
+ * `.entry-content > x` rule here, in css/reading-measure.css and in
+ * css/article.css is written a second time through the wrapper, or the owner
+ * sees a tighter page than readers do.
  */
 
 :root {
@@ -17,24 +24,41 @@
 
 /* Posts and pages written in the editor: articles, hubs, profiles, editorials. */
 .entry-content > h2:not(:first-child),
-.entry-content > p.kop-article-marker:not(:first-child) {
+.entry-content > p.kop-article-marker:not(:first-child),
+.entry-content > .kop-ie-block:not(:first-child) > h2,
+.entry-content > .kop-ie-block:not(:first-child) > p.kop-article-marker {
     margin-top: var(--kop-section-gap);
 }
 
-.entry-content > h3:not(:first-child) {
+.entry-content > h3:not(:first-child),
+.entry-content > .kop-ie-block:not(:first-child) > h3 {
     margin-top: var(--kop-subsection-gap);
 }
 
-.entry-content > h2 {
+/* A heading inside a subsection: Kadence gives it no room of its own at all. */
+.entry-content > h4:not(:first-child),
+.entry-content > .kop-ie-block:not(:first-child) > h4 {
+    margin-top: 1.75rem;
+}
+
+.entry-content > h4,
+.entry-content > .kop-ie-block > h4 {
+    margin-bottom: 0.5rem;
+}
+
+.entry-content > h2,
+.entry-content > .kop-ie-block > h2 {
     margin-bottom: 1rem;
 }
 
-.entry-content > h3 {
+.entry-content > h3,
+.entry-content > .kop-ie-block > h3 {
     margin-bottom: 0.75rem;
 }
 
 /* A subheading straight under its section heading stays with it. */
-.entry-content > h2 + h3:not(:first-child) {
+.entry-content > h2 + h3:not(:first-child),
+.entry-content > .kop-ie-block:has(> h2) + .kop-ie-block > h3 {
     margin-top: 1.25rem;
 }
 

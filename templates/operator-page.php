@@ -296,21 +296,23 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                                 </div>
                                 <?php if (!empty($person['career'])) : ?>
                                     <div class="kop-fp-career">
-                                        <p class="kop-fp-career-label">Elsewhere in the industry</p>
-                                        <ul>
-                                            <?php foreach ($person['career'] as $job) :
-                                                $job_meta = trim($job['role'] . ($job['years'] !== '' ? ($job['role'] !== '' ? ', ' : '') . $job['years'] : ''));
-                                                ?>
-                                                <li>
-                                                    <?php if ($job['url'] !== '') : ?>
-                                                        <a href="<?php echo esc_url($job['url']); ?>"><?php echo esc_html($job['place']); ?></a>
-                                                    <?php else : ?>
-                                                        <span class="kop-fp-career-place"><?php echo esc_html($job['place']); ?></span>
-                                                    <?php endif; ?>
-                                                    <?php if ($job_meta !== '') : ?><span class="kop-fp-career-role"><?php echo esc_html($job_meta); ?></span><?php endif; ?>
-                                                </li>
-                                            <?php endforeach; ?>
-                                        </ul>
+                                        <?php foreach (kop_facility_pages_career_groups($person['career']) as $group) : ?>
+                                            <p class="kop-fp-career-label"><?php echo esc_html($group['label']); ?></p>
+                                            <ul>
+                                                <?php foreach ($group['jobs'] as $job) :
+                                                    $job_meta = trim($job['role'] . ($job['years'] !== '' ? ($job['role'] !== '' ? ', ' : '') . $job['years'] : ''));
+                                                    ?>
+                                                    <li>
+                                                        <?php if ($job['url'] !== '') : ?>
+                                                            <a href="<?php echo esc_url($job['url']); ?>"><?php echo esc_html($job['place']); ?></a>
+                                                        <?php else : ?>
+                                                            <span class="kop-fp-career-place"><?php echo esc_html($job['place']); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if ($job_meta !== '') : ?><span class="kop-fp-career-role"><?php echo esc_html($job_meta); ?></span><?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
                             </li>

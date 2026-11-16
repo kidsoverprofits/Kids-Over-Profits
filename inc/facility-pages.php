@@ -2177,24 +2177,33 @@ if (!function_exists('kop_facility_pages_person_career')) {
         $here_names = array();
         if ($here && isset($index_ids[$here])) $here_names[] = kop_facility_pages_name_key($index_ids[$here]['name']);
         $out = array();
-        $add = static function ($place, $role, $years, $url) use (&$out, $here_names) {
+        // $kind: 'industry' or 'other' as set on KOP Tools > People ($set), else kop_facility_pages_job_kind()'s guess.
+        $add = static function ($place, $role, $years, $url, $kind = '', $set = false) use (&$out, $here_names) {
             $place = trim((string) $place);
             if ($place === '') return;
             $pk = kop_facility_pages_name_key($place);
             if ($pk === '' || in_array($pk, $here_names, true)) return;
+            if ($kind !== 'industry' && $kind !== 'other') {
+                $kind = $url !== '' ? 'industry' : kop_facility_pages_job_kind($place, (string) $role);
+                $set = false;
+            }
             if (isset($out[$pk])) {
                 if ($out[$pk]['role'] === '' && $role !== '') $out[$pk]['role'] = $role;
                 if ($out[$pk]['url'] === '' && $url !== '') $out[$pk]['url'] = $url;
+                $out[$pk] = kop_facility_pages_career_kind_merge($out[$pk], array('kind' => $kind, 'kind_set' => $set));
                 return;
             }
-            $out[$pk] = array('role' => trim((string) $role), 'place' => $place, 'years' => trim((string) $years), 'url' => $url);
+            $out[$pk] = array('role' => trim((string) $role), 'place' => $place, 'years' => trim((string) $years), 'url' => $url, 'kind' => $kind, 'kind_set' => $set);
         };
 
         // The person's jobs, held once on the person (inc/person-jobs.php): every profile shows the same ones,
         // this entry's own pastJobs text included (the hourly sync reads it in). No id or no table: the text.
         $held = ((int) $person_id > 0 && function_exists('kop_pjobs_for_person')) ? kop_pjobs_for_person((int) $person_id) : null;
         if ($held !== null) {
-            foreach ($held as $job) $add($job['place'], $job['role'], $job['years'], kop_facility_pages_facility_url_by_name($job['place']));
+            foreach ($held as $job) {
+                $set = in_array($job['kind'] ?? '', array('industry', 'other'), true);
+                $add($job['place'], $job['role'], $job['years'], kop_facility_pages_facility_url_by_name($job['place']), $set ? $job['kind'] : '', $set);
+            }
             // Text the sync has not read in yet still shows; a job read in (and perhaps taken off since) does not.
             $fresh = array();
             foreach (kop_pjobs_parse($past_jobs) as $job) {
@@ -2232,7 +2241,7 @@ if (!function_exists('kop_facility_pages_person_career')) {
                 if (!preg_match('/Woodbury|HEAL|wiki|Fornits/i', $m[1])) return $m[0];
                 return preg_match('/\d{4}(?:-\d{4})?/', $m[1], $y) ? ' (' . $y[0] . ')' : '';
             }, kop_facility_pages_drop_left($role)), ' ,');
-            $add($fname, $role, '', isset($index_ids[$fid]) ? kop_facility_page_url($fid) : '');
+            $add($fname, $role, '', isset($index_ids[$fid]) ? kop_facility_page_url($fid) : '', 'industry');
         }
         foreach (kop_facility_pages_map_people()[$key] ?? array() as $hit) {
             list($place, $role, $fid, $kind) = $hit;
@@ -2243,13 +2252,77 @@ if (!function_exists('kop_facility_pages_person_career')) {
             } elseif ($kind === 'parent' && function_exists('kop_operator_page_url_for_name')) {
                 $url = (string) kop_operator_page_url_for_name($place);
             }
-            $add($place, $role, '', $url);
+            // A government body on the map (a state department, a sheriff's office) is a noteworthy job, not the industry.
+            $add($place, $role, '', $url, $kind === 'government' ? 'other' : ($url !== '' || $kind !== '' ? 'industry' : ''));
         }
         // The owner's tick on KOP Tools > People: they became an educational consultant (inc/people.php).
         if ((int) $person_id > 0 && function_exists('kop_people_is_ed_consultant') && kop_people_is_ed_consultant((int) $person_id)) {
-            $add('Educational consultant', '', '', (string) kop_facility_pages_page_url_by_template('page-referrer-index.php', '/referrers-educational-consultants/'));
+            $add('Educational consultant', '', '', (string) kop_facility_pages_page_url_by_template('page-referrer-index.php', '/referrers-educational-consultants/'), 'industry');
         }
-        return kop_facility_pages_career_fold(array_values($out));
+        return array_map(static function ($job) {
+            unset($job['kind_set']);
+            return $job;
+        }, kop_facility_pages_career_fold(array_values($out)));
+    }
+}
+
+if (!function_exists('kop_facility_pages_job_kind')) {
+    /**
+     * Is a job somewhere in the industry, or another noteworthy position (a state department, a sheriff's office,
+     * a legislature, a university, a church, coaching)? A guess for jobs nobody has marked on KOP Tools > People;
+     * a place with a page of its own is always the industry. Programs win over the weaker signs: "Riverside
+     * Military Academy" and "Baldwin County Residential Wilderness Facility" are the industry, "Sober College" too.
+     */
+    function kop_facility_pages_job_kind($place, $role = '') {
+        $place = (string) $place;
+        $role = (string) $role;
+        $strong = '/\b(?:department of|dept\.? of|division of|DHHS|DCFS|health and human services|'
+            . 'sheriff|police|national guard|army|navy|air force|marine corps|CIA|FBI|central intelligence|'
+            . 'senate|legislature|congress|house of representatives|city council|county commission|governor|mayor|'
+            . 'board of education|school district|public schools|university|community college|career college|'
+            . 'state hospital|juvenile court|probation department|correctional facility|youth commission)\b/i';
+        if (preg_match($strong, $place)) return 'other';
+        $program = '/\b(?:academy|ranch|wilderness|treatment|RTC|residential|boys|girls|youth home|programs?|camp|transports?|'
+            . 'school(?!\s+district)|recovery|therapy|therapeutic|lodge|teens?|adolescent|expeditions?|outdoor|behavioral|psychiatric|college excel|sober college)\b/i';
+        if (preg_match($program, $place)) return 'industry';
+        $weak = '/\b(?:corrections?|juvenile justice|health and welfare|public health|human services|county|state of|church|ministries|'
+            . 'football|basketball|baseball|coach|real estate|realty|bank|law firm|insurance|hospital)\b/i';
+        if (preg_match($weak, $place)) return 'other';
+        $roles = '/\b(?:senator|state representative|legislator|governor|mayor|city council(?:man| member)?|'
+            . 'county commissioner|judge|sheriff|police|coach|pastor|bishop)\b/i';
+        if (preg_match($roles, $role)) return 'other';
+        return 'industry';
+    }
+}
+
+if (!function_exists('kop_facility_pages_career_kind_merge')) {
+    /** Two lines of one place: a kind set by hand wins (the first one set), else the industry wins. */
+    function kop_facility_pages_career_kind_merge(array $into, array $from) {
+        $ik = $into['kind'] ?? 'industry';
+        $fk = $from['kind'] ?? 'industry';
+        if (!empty($into['kind_set'])) return $into;
+        if (!empty($from['kind_set'])) {
+            $into['kind'] = $fk;
+            $into['kind_set'] = true;
+            return $into;
+        }
+        $into['kind'] = ($ik === 'industry' || $fk === 'industry') ? 'industry' : 'other';
+        return $into;
+    }
+}
+
+if (!function_exists('kop_facility_pages_career_groups')) {
+    /**
+     * A career split for the person cards: [['label' => 'Elsewhere in the industry', 'jobs' => [...]],
+     * ['label' => 'Other notable positions', 'jobs' => [...]]], each group only when it has jobs.
+     */
+    function kop_facility_pages_career_groups(array $career) {
+        $groups = array('industry' => array(), 'other' => array());
+        foreach ($career as $job) $groups[($job['kind'] ?? 'industry') === 'other' ? 'other' : 'industry'][] = $job;
+        $out = array();
+        if ($groups['industry']) $out[] = array('label' => 'Elsewhere in the industry', 'jobs' => $groups['industry']);
+        if ($groups['other']) $out[] = array('label' => 'Other notable positions', 'jobs' => $groups['other']);
+        return $out;
     }
 }
 
@@ -2327,6 +2400,7 @@ if (!function_exists('kop_facility_pages_career_fold')) {
             }
             if ($into['role'] === '' && $from['role'] !== '') $into['role'] = $from['role'];
             if ($into['years'] === '' && $from['years'] !== '') $into['years'] = $from['years'];
+            if (isset($into['kind']) || isset($from['kind'])) $into = kop_facility_pages_career_kind_merge($into, $from);
             return $into;
         };
         $out = array();

@@ -174,7 +174,8 @@
  * otherwise win on specificity.
  */
 .kop-article-summary,
-.kop-article .entry-content > p.kop-article-summary {
+.kop-article .entry-content > p.kop-article-summary,
+.kop-article .entry-content > .kop-ie-block > p.kop-article-summary {
     max-width: 60ch;
     margin: 0.35rem 0 1.25rem;
     padding: 0 0 0 0.9rem;
@@ -185,7 +186,8 @@
 }
 
 /* Under a bold marker paragraph the gap above is already there. */
-.kop-article .entry-content > p.kop-article-marker + p.kop-article-summary {
+.kop-article .entry-content > p.kop-article-marker + p.kop-article-summary,
+.kop-article .entry-content > .kop-ie-block:has(> p.kop-article-marker) + .kop-ie-block > p.kop-article-summary {
     margin-top: 0;
 }
 
@@ -399,5 +401,232 @@
 @media (max-width: 600px) {
     .kop-names {
         padding: 0.9rem 1rem 1rem;
+    }
+}
+
+/* ---- Guide pieces: section band, accent panel, accent table -------------- */
+
+/*
+ * For a long page a reader looks things up in (Common Survivor Experiences):
+ * each part opens with a band, each entry under it stands apart, and the dense
+ * lists sit in a panel or a table. All three are classes set on the block in
+ * the editor ("Additional CSS class"), so the page's words stay in the page:
+ *
+ *   kop-guide-section   on a heading: the band that opens a part
+ *   kop-accent-panel    on a group: a mint panel (add kop-accent-panel--sand
+ *                       for the sand one)
+ *   kop-accent-table    on a table: midnight header row, sand stripes
+ *
+ * A page with a band also gets room around its h4 entries and their lists.
+ * Each rule is written twice, once through .kop-ie-block (an admin's edit in
+ * place wrapper; css/section-spacing.css says why). Kadence colours headings
+ * and table cells itself, so every colour is named here.
+ */
+
+/* `article` lifts these past the heading margins in css/section-spacing.css,
+ * which loads later and ties through the edit in place wrapper. */
+article .entry-content h2.wp-block-heading.kop-guide-section,
+article .entry-content h3.wp-block-heading.kop-guide-section {
+    max-width: none;
+    margin: 5rem 0 1.75rem;
+    padding: 1.1rem 1.25rem 1rem;
+    border-bottom: 5px solid var(--kop-teal, #33a7b5);
+    border-radius: 6px;
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+    font-size: 1.6rem;
+    line-height: 1.25;
+    text-align: center;
+}
+
+.entry-content .kop-guide-section .kop-article-anchor,
+.entry-content .kop-guide-section .kop-article-anchor:hover,
+.entry-content .kop-guide-section .kop-article-anchor:focus {
+    color: var(--kop-teal, #33a7b5);
+}
+
+.entry-content:has(.kop-guide-section) > h4,
+.entry-content:has(.kop-guide-section) > .kop-ie-block > h4 {
+    margin-top: 3.25rem;
+    margin-bottom: 0.75rem;
+    padding: 0.1rem 0 0.1rem 0.9rem;
+    border-left: 5px solid var(--kop-teal, #33a7b5);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 1.3rem;
+    line-height: 1.3;
+}
+
+.entry-content:has(.kop-guide-section) > p,
+.entry-content:has(.kop-guide-section) > .kop-ie-block > p {
+    margin-bottom: 1rem;
+}
+
+.entry-content:has(.kop-guide-section) > ul,
+.entry-content:has(.kop-guide-section) > .kop-ie-block > ul {
+    margin-bottom: 1.5rem;
+}
+
+.entry-content:has(.kop-guide-section) > ul > li,
+.entry-content:has(.kop-guide-section) > .kop-ie-block > ul > li {
+    margin-bottom: 0.55rem;
+}
+
+.entry-content:has(.kop-guide-section) > figure.wp-block-image,
+.entry-content:has(.kop-guide-section) > .kop-ie-block > figure.wp-block-image {
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+
+/* Panel */
+
+.entry-content .wp-block-group.kop-accent-panel {
+    margin: 3.25rem 0 1.5rem;
+    padding: 1.25rem 1.5rem 1.1rem;
+    border-left: 6px solid var(--kop-teal-ink, #24757f);
+    border-radius: 6px;
+    background: var(--kop-mint-green, #b6e3d4);
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.entry-content .wp-block-group.kop-accent-panel--sand {
+    margin-top: 1.25rem;
+    border-left-color: var(--kop-orange, #ef9034);
+    background: var(--kop-sand, #f2eedf);
+}
+
+.entry-content .kop-accent-panel h3,
+.entry-content .kop-accent-panel h4 {
+    margin: 0 0 0.75rem;
+    padding: 0;
+    border: 0;
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 1.2rem;
+    line-height: 1.3;
+}
+
+.entry-content .kop-accent-panel p,
+.entry-content .kop-accent-panel li {
+    color: var(--kop-midnight-blue, #000435);
+    line-height: 1.6;
+}
+
+.entry-content .kop-accent-panel > ul,
+.entry-content .kop-accent-panel > p {
+    max-width: var(--kop-measure, 64ch);
+}
+
+.entry-content .kop-accent-panel ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.entry-content .kop-accent-panel li {
+    margin-bottom: 0.5rem;
+}
+
+.entry-content .kop-accent-panel a,
+.entry-content .kop-accent-panel a:visited {
+    color: var(--kop-navy-blue, #000080);
+}
+
+.entry-content .kop-accent-panel a:hover,
+.entry-content .kop-accent-panel a:focus {
+    color: var(--kop-midnight-blue, #000435);
+}
+
+.entry-content .kop-accent-panel .wp-block-columns {
+    gap: 0.25rem 2rem;
+    margin-bottom: 0;
+}
+
+/* Table */
+
+.entry-content .wp-block-table.kop-accent-table {
+    margin: 1.5rem 0 2rem;
+    overflow-x: auto;
+}
+
+.entry-content .wp-block-table.kop-accent-table table {
+    width: 100%;
+    border: 0;
+    border-collapse: collapse;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    font-size: 0.97rem;
+}
+
+.entry-content .wp-block-table.kop-accent-table thead {
+    border: 0;
+}
+
+.entry-content .wp-block-table.kop-accent-table th {
+    padding: 0.7rem 1rem;
+    border: 0;
+    border-bottom: 5px solid var(--kop-teal, #33a7b5);
+    background: var(--kop-midnight-blue, #000435);
+    color: var(--kop-white, #fff);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.entry-content .wp-block-table.kop-accent-table th:first-child {
+    width: 34%;
+}
+
+.entry-content .wp-block-table.kop-accent-table td {
+    padding: 0.8rem 1rem;
+    border: 0;
+    border-bottom: 1px solid var(--kop-powder-blue, #aee0ed);
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    line-height: 1.55;
+    vertical-align: top;
+}
+
+.entry-content .wp-block-table.kop-accent-table tbody tr:nth-child(even) td {
+    background: var(--kop-sand, #f2eedf);
+}
+
+.entry-content .wp-block-table.kop-accent-table td:first-child {
+    color: var(--kop-navy-blue, #000080);
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    article .entry-content h2.wp-block-heading.kop-guide-section,
+    article .entry-content h3.wp-block-heading.kop-guide-section {
+        margin-top: 3.5rem;
+        font-size: 1.35rem;
+    }
+
+    .entry-content .wp-block-group.kop-accent-panel {
+        padding: 1rem 1rem 0.9rem;
+    }
+
+    /* Two columns of prose do not fit a phone: each row becomes its name
+     * above its text. The header row stays for a screen reader. */
+    .entry-content .wp-block-table.kop-accent-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .entry-content .wp-block-table.kop-accent-table tr,
+    .entry-content .wp-block-table.kop-accent-table td {
+        display: block;
+        width: auto;
+    }
+
+    .entry-content .wp-block-table.kop-accent-table td:first-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .entry-content .wp-block-table.kop-accent-table {
+        border-top: 5px solid var(--kop-teal, #33a7b5);
     }
 }

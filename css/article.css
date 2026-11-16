@@ -93,19 +93,33 @@
 .kop-article .entry-content > blockquote,
 .kop-article .entry-content > h2,
 .kop-article .entry-content > h3,
-.kop-article .entry-content > h4 {
+.kop-article .entry-content > h4,
+/* An admin's edit-in-place wrapper (css/section-spacing.css says why). */
+.kop-article .entry-content > .kop-ie-block > p,
+.kop-article .entry-content > .kop-ie-block > ul,
+.kop-article .entry-content > .kop-ie-block > ol,
+.kop-article .entry-content > .kop-ie-block > blockquote,
+.kop-article .entry-content > .kop-ie-block > h2,
+.kop-article .entry-content > .kop-ie-block > h3,
+.kop-article .entry-content > .kop-ie-block > h4 {
     max-width: var(--kop-measure, 64ch);
 }
 
 .kop-article .entry-content > p,
 .kop-article .entry-content > ul,
-.kop-article .entry-content > ol {
+.kop-article .entry-content > ol,
+.kop-article .entry-content > .kop-ie-block > p,
+.kop-article .entry-content > .kop-ie-block > ul,
+.kop-article .entry-content > .kop-ie-block > ol {
     line-height: 1.7;
 }
 
 .kop-article .entry-content > p.has-text-align-center,
 .kop-article .entry-content > h2.has-text-align-center,
-.kop-article .entry-content > h3.has-text-align-center {
+.kop-article .entry-content > h3.has-text-align-center,
+.kop-article .entry-content > .kop-ie-block > p.has-text-align-center,
+.kop-article .entry-content > .kop-ie-block > h2.has-text-align-center,
+.kop-article .entry-content > .kop-ie-block > h3.has-text-align-center {
     margin-left: auto;
     margin-right: auto;
 }
@@ -468,11 +482,13 @@ a.kop-article-timeline__mark:focus-visible {
 /* ---- Timelines (History section) ------------------------------------- */
 /* Entries are "<strong>date</strong> – event" with detail in a nested list. */
 
-.kop-article .entry-content > ul > li {
+.kop-article .entry-content > ul > li,
+.kop-article .entry-content > .kop-ie-block > ul > li {
     margin-bottom: 0.9rem;
 }
 
-.kop-article .entry-content > ul > li > strong:first-child {
+.kop-article .entry-content > ul > li > strong:first-child,
+.kop-article .entry-content > .kop-ie-block > ul > li > strong:first-child {
     color: var(--kop-navy-blue, #000080);
     white-space: nowrap;
 }
@@ -488,7 +504,9 @@ a.kop-article-timeline__mark:focus-visible {
 }
 
 .kop-article .entry-content > h2 + ul,
-.kop-article .entry-content > h3 + ul {
+.kop-article .entry-content > h3 + ul,
+.kop-article .entry-content > .kop-ie-block:has(> h2) + .kop-ie-block > ul,
+.kop-article .entry-content > .kop-ie-block:has(> h3) + .kop-ie-block > ul {
     margin-top: 0.5rem;
 }
 

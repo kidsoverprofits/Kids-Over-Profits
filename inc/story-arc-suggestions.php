@@ -20,14 +20,17 @@
  *            terms are "facility: <id>" lines and a since line at the first
  *            article, never loose words, so it cannot pull in articles that
  *            only share a word (Hyde, Refuge, Provo Canyon, 2026-11-16).
- *  - retire: an active story with no approved article in 6 months. Adding it
+ *  - retire: an active story with no approved article in 3 weeks (owner,
+ *            2026-11-16: a story that has gone 3 weeks without an update makes
+ *            way for a more current one; the card names the new stories
+ *            waiting to take its place). Adding it
  *            archives the story (off the news page, articles kept).
  *  - join:   a recent approved article in no story, grouped as the same event
  *            ("Also covered by") with an article already in an active story.
  *
  * A dismissed new story comes back only when 3 (min_articles) more articles
  * arrive after it was dismissed; a dismissed retire comes back after another
- * 6 months; a dismissed join never comes back. A suggestion that stops
+ * 3 weeks; a dismissed join never comes back. A suggestion that stops
  * fitting (the story got a new article, the article joined a story) is
  * marked stale.
  *
@@ -92,7 +95,7 @@ function kop_arcsug_ensure(PDO $pdo) {
 
 function kop_arcsug_defaults() {
     return array('window_days' => 60, 'min_articles' => 3, 'min_outlets' => 2, 'min_span_days' => 14,
-                 'fresh_days' => 30, 'retire_months' => 6);
+                 'fresh_days' => 21, 'retire_days' => 21);
 }
 
 function kop_arcsug_settings() {
@@ -108,8 +111,8 @@ function kop_arcsug_settings() {
 function kop_arcsug_rule_line() {
     $s = kop_arcsug_settings();
     return sprintf('Trending now means at least %d approved articles about one facility in the last %d days, from at least %d outlets, '
-        . 'spread over at least %d days, the newest within %d days. A story with no article in %d months is suggested for archiving.',
-        $s['min_articles'], $s['window_days'], $s['min_outlets'], $s['min_span_days'], $s['fresh_days'], $s['retire_months']);
+        . 'spread over at least %d days, the newest within %d days. A story with no new article in %d days is suggested for archiving, to make way for a more current one.',
+        $s['min_articles'], $s['window_days'], $s['min_outlets'], $s['min_span_days'], $s['fresh_days'], $s['retire_days']);
 }
 
 /* ---- Helpers ----------------------------------------------------------- */
@@ -356,7 +359,7 @@ function kop_arcsug_run(PDO $pdo, $today = null) {
     }
 
     // Stories gone quiet.
-    $quiet = gmdate('Y-m-d', strtotime($today . ' 00:00:00 UTC -' . (int) $s['retire_months'] . ' months'));
+    $quiet = kop_arcsug_day_minus($today, $s['retire_days']);
     foreach ($arcs as $aid => $arc) {
         $latest = $arc['latest'] !== '' ? $arc['latest'] : substr((string) $arc['created_at'], 0, 10);
         if ($latest === '' || $latest >= $quiet) continue;

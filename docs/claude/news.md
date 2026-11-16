@@ -109,8 +109,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-story-coverage.ph
 # Prefer facility lines to loose words: "hyde", "jamaica" pulled in unrelated articles (Provo Canyon, Hyde and Refuge fixed 2026-11-16).
 # Suggested ongoing stories (inc/story-arc-suggestions.php, plan 4.7 #18): a daily WP-Cron pass proposes, at Review inbox > Suggested
 # ongoing stories, a new story for a facility several outlets keep covering (defaults: >= 3 approved articles in 60 days, >= 2 outlets,
-# spread over >= 14 days, newest within 30, not followed by an active story; the queue's "What counts as trending" tool changes them,
-# option kop_arc_suggest_settings), archiving a story with no article in 6 months, and adding same-event coverage ("Also covered by")
+# spread over >= 14 days, newest within 21, not followed by an active story; the queue's "What counts as trending" tool changes them,
+# option kop_arc_suggest_settings), archiving a story with no new article in 21 days (owner 2026-11-16: make way for a more current one), and adding same-event coverage ("Also covered by")
 # of a story's article. Add / Dismiss / exact Undo; a new story's terms are facility lines + a since line, never loose words.
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=story-arc-suggestions   # rule lines, the 11-16 fix, a run, Add/Undo
 # Facts from news articles (inc/news-facts.php, 2026-10-28; owner's rules in docs/plan/4.6 item 17): hourly WP-Cron, 6 approved articles

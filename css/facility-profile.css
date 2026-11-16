@@ -1643,6 +1643,11 @@
     list-style: none;
 }
 
+/* "Other notable positions" under "Elsewhere in the industry" (kop_facility_pages_career_groups()). */
+.kop-fp-career ul + .kop-fp-career-label {
+    margin-top: 0.55rem;
+}
+
 .kop-fp-career li {
     margin: 0 0 0.25rem;
     font-size: 0.86rem;

@@ -86,7 +86,7 @@ Tabs are grouped under headings (the source's `'group'`). Each tab's own help li
 - **Facilities from news:** names the hourly news scan found that match no record exactly: "Same program" lists the article on the record shown, "A different record" searches for the right one, "New program" makes a record, "Skip" when it is not a program we track; the scan's own new records are on their own tab.
 - **Indigenous schools:** Indian boarding and residential schools the scan found; Approve lists one on the Indian Boarding Schools page.
 - **Scraper finds:** articles the nightly news scraper turned away; send a good one to the news queue (or elsewhere with Move to), or dismiss it.
-- **Suggested ongoing stories:** a daily pass over approved news: a new Ongoing Story for a facility several outlets keep covering (title, description and terms editable on the card), archiving a story with no article in six months, and same-event coverage to add to a story. Add (exact Undo) or Dismiss; "What counts as trending" changes the rule.
+- **Suggested ongoing stories:** a daily pass over approved news: a new Ongoing Story for a facility several outlets keep covering (title, description and terms editable on the card), archiving a story with no new article in three weeks (the card names the new stories waiting to replace it), and same-event coverage to add to a story. Add (exact Undo) or Dismiss; "What counts as trending" changes the rule.
 - **Bill and lawsuit updates:** status changes the nightly check of every unfinished published bill and lawsuit found (govinfo for federal bills, the state's page, CourtListener dockets); Apply, with exact Undo; a dismissed change never comes back.
 
 **Imports to review**

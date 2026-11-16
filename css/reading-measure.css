@@ -24,6 +24,11 @@
 .entry-content > ul,
 .entry-content > ol,
 .entry-content > blockquote:not(.wp-block-pullquote),
+/* ...and the same four inside an admin's edit-in-place wrapper (css/section-spacing.css says why). */
+.entry-content > .kop-ie-block > p,
+.entry-content > .kop-ie-block > ul,
+.entry-content > .kop-ie-block > ol,
+.entry-content > .kop-ie-block > blockquote:not(.wp-block-pullquote),
 /* Page Text pages (FAQ, Indian boarding schools, related industries; inc/page-text.php). */
 .kop-faq-page section > p,
 .kop-faq-page section > ul,
@@ -49,6 +54,7 @@
 }
 
 .entry-content > p,
+.entry-content > .kop-ie-block > p,
 .kop-op-history-text > p,
 .kop-faq-page section > p,
 .kop-ibs-page section > p,
@@ -57,7 +63,8 @@
 }
 
 /* A centred paragraph stays centred in the column. */
-.entry-content > p.has-text-align-center {
+.entry-content > p.has-text-align-center,
+.entry-content > .kop-ie-block > p.has-text-align-center {
     margin-left: auto;
     margin-right: auto;
 }

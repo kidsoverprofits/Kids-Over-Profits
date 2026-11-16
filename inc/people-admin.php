@@ -104,7 +104,7 @@ function kop_people_admin_handle() {
     // Past jobs, held once on the person (inc/person-jobs.php): every page that lists them shows the change.
     if (in_array($do, array('job_save', 'job_add', 'job_hide', 'job_show'), true) && $id > 0 && function_exists('kop_pjobs_save')) {
         $fields = array();
-        foreach (array('place', 'role', 'years', 'source', 'source_url') as $k) {
+        foreach (array('place', 'role', 'years', 'source', 'source_url', 'kind') as $k) {
             if (isset($_POST[$k])) $fields[$k] = sanitize_text_field(wp_unslash($_POST[$k]));
         }
         if ($do === 'job_hide') $fields = array('hidden' => 1);
@@ -448,14 +448,24 @@ function kop_people_admin_jobs($id) {
         . 'that lists them is under "Where they are named" above.</p>';
     $t = kop_pjobs_table();
     $hidden = kop_facility_db_rows("SELECT * FROM {$t} WHERE person_id = ? AND hidden = 1 ORDER BY id", array((int) $id));
-    echo '<table class="widefat striped kop-people__jobs"><thead><tr><th>Role</th><th>Place</th><th>Years</th><th>Source</th><th></th></tr></thead><tbody>';
+    echo '<table class="widefat striped kop-people__jobs"><thead><tr><th>Role</th><th>Place</th><th>Years</th><th>Shown under</th><th>Source</th><th></th></tr></thead><tbody>';
+    // "Elsewhere in the industry" or "Other notable positions" on the person cards; left alone, the place decides.
+    $kind_select = function ($value, $guess) {
+        $opts = array('' => 'Guess (' . ($guess === 'other' ? 'other position' : 'industry') . ')', 'industry' => 'The industry', 'other' => 'Other notable position');
+        $html = '<label class="screen-reader-text">Shown under</label><select name="kind" aria-label="Shown under">';
+        foreach ($opts as $k => $label) $html .= '<option value="' . esc_attr($k) . '"' . ((string) $value === $k ? ' selected' : '') . '>' . esc_html($label) . '</option>';
+        return $html . '</select>';
+    };
     $field = function ($name, $value, $label, $size = 0) {
         return '<label class="screen-reader-text">' . esc_html($label) . '</label><input type="text" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"'
             . ($size ? ' size="' . (int) $size . '"' : ' class="regular-text"') . ' aria-label="' . esc_attr($label) . '">';
     };
     foreach ($jobs as $j) {
         $form = 'kop-job-' . (int) $j['id'];
+        $guess = function_exists('kop_facility_pages_facility_url_by_name') && kop_facility_pages_facility_url_by_name($j['place']) !== ''
+            ? 'industry' : (function_exists('kop_facility_pages_job_kind') ? kop_facility_pages_job_kind($j['place'], $j['role']) : 'industry');
         echo '<tr><td>' . $field('role', $j['role'], 'Role') . '</td><td>' . $field('place', $j['place'], 'Place') . '</td><td>' . $field('years', $j['years'], 'Years', 12) . '</td><td>'
+            . $kind_select($j['kind'] ?? '', $guess) . '</td><td>'
             . $field('source', $j['source'], 'Source') . $field('source_url', $j['source_url'], 'Source link') . '</td><td>';
         // One form per row: the inputs above sit in its cells through the form attribute.
         echo '<form method="post" id="' . esc_attr($form) . '" class="kop-people__bar">';
@@ -468,14 +478,16 @@ function kop_people_admin_jobs($id) {
     }
     echo '</tbody></table>';
     echo '<script>document.querySelectorAll(".kop-people__jobs tbody tr").forEach(function (tr) { var f = tr.querySelector("form"); '
-        . 'if (f) tr.querySelectorAll("input[type=text]").forEach(function (i) { i.setAttribute("form", f.id); }); });</script>';
+        . 'if (f) tr.querySelectorAll("input[type=text], select").forEach(function (i) { i.setAttribute("form", f.id); }); });</script>';
     if (!$jobs) echo '<p class="kop-people__muted">No past jobs on file.</p>';
 
     echo '<form method="post" class="kop-people__form"><h3>Add a job</h3>';
     kop_people_admin_hidden('job_add', $id);
     echo '<p><label>Role<br><input type="text" name="role" class="regular-text" placeholder="Program Director"></label> '
         . '<label>Place<br><input type="text" name="place" class="regular-text" placeholder="A program, company or anything else" required></label> '
-        . '<label>Years<br><input type="text" name="years" size="12" placeholder="2008-2011"></label></p>'
+        . '<label>Years<br><input type="text" name="years" size="12" placeholder="2008-2011"></label> '
+        . '<label>Shown under<br><select name="kind"><option value="">Guess from the place</option><option value="industry">The industry</option>'
+        . '<option value="other">Other notable position (government, politics, a university...)</option></select></label></p>'
         . '<p><label>Source<br><input type="text" name="source" class="regular-text" placeholder="Woodbury Reports, May 2007"></label> '
         . '<label>Source link<br><input type="url" name="source_url" class="regular-text" placeholder="https://"></label></p>'
         . '<p><button type="submit" class="button">Add the job</button></p></form>';

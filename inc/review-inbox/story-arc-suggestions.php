@@ -35,7 +35,7 @@ kop_rinbox_register('story-arc-suggestions', function () {
                         array('name' => 'min_outlets', 'label' => 'from at least this many outlets', 'type' => 'number', 'value' => $s['min_outlets']),
                         array('name' => 'min_span_days', 'label' => 'spread over at least this many days (first to newest)', 'type' => 'number', 'value' => $s['min_span_days']),
                         array('name' => 'fresh_days', 'label' => 'the newest within this many days', 'type' => 'number', 'value' => $s['fresh_days']),
-                        array('name' => 'retire_months', 'label' => 'Suggest archiving a story with no article in this many months', 'type' => 'number', 'value' => $s['retire_months']),
+                        array('name' => 'retire_days', 'label' => 'Suggest archiving a story with no new article in this many days', 'type' => 'number', 'value' => $s['retire_days']),
                     )),
             );
         },
@@ -112,7 +112,7 @@ function kop_rinbox_arcsug_list(array $q) {
     $total = (int) $st->fetchColumn();
     // New stories first, then by how recent their newest article is.
     $st = $pdo->prepare("SELECT * FROM news_story_arc_suggestions WHERE $where
-                          ORDER BY CASE kind WHEN 'new' THEN 0 WHEN 'join' THEN 1 ELSE 2 END, COALESCE(updated_at, created_at) DESC, id DESC
+                          ORDER BY CASE kind WHEN 'retire' THEN 0 WHEN 'new' THEN 1 ELSE 2 END, COALESCE(updated_at, created_at) DESC, id DESC
                           LIMIT " . (int) $q['limit'] . ' OFFSET ' . (int) $q['offset']);
     $st->execute($args);
     return array('items' => array_map('kop_rinbox_arcsug_item', $st->fetchAll(PDO::FETCH_ASSOC)), 'total' => $total);
@@ -170,6 +170,8 @@ function kop_rinbox_arcsug_item(array $r) {
         $kindLabel = 'Gone quiet';
         $subtitle = !empty($ev['last']) ? 'Newest article ' . $ev['last'] . ', ' . (int) ($ev['articles'] ?? 0) . ' in all' : 'No approved article in it';
         $details[] = array('label' => 'Story', 'value' => (string) $r['title']);
+        $next = $pdo->query("SELECT title FROM news_story_arc_suggestions WHERE kind = 'new' AND status = 'pending' ORDER BY COALESCE(updated_at, created_at) DESC LIMIT 5")->fetchAll(PDO::FETCH_COLUMN);
+        $details[] = array('label' => 'Waiting to take its place', 'value' => $next ? implode('; ', $next) : 'No new story is suggested right now.');
         $addHelp = 'Archives the story: it leaves Ongoing Stories on the news page and the home page; its articles stay where they are. Undo makes it active again.';
     } else {
         $kindLabel = 'Article to add';

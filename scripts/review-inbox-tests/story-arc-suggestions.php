@@ -126,7 +126,9 @@ function kop_rinbox_test_story_arc_suggestions_from_empty($src, callable $check)
     $quietId = (int) $pdo->lastInsertId();
     kop_arcsug_run($pdo, $today);
     $q = $pdo->query("SELECT * FROM news_story_arc_suggestions WHERE skey = 'retire:$quietId'")->fetch(PDO::FETCH_ASSOC);
-    $check("$t: a story with no article in months is suggested for archiving", $q && $q['status'] === 'pending');
+    $qi = $q ? call_user_func($src['get'], (string) $q['id']) : null;
+    $check("$t: a story with no article in 3 weeks is suggested for archiving, naming what waits to replace it", $q && $q['status'] === 'pending'
+        && strpos(json_encode($qi['details']), 'Waiting to take its place') !== false, $qi ? json_encode($qi['details']) : '');
     if ($q) {
         call_user_func($src['act'], (string) $q['id'], 'add', array());
         $st = (string) $pdo->query("SELECT status FROM news_story_arcs WHERE id = $quietId")->fetchColumn();
@@ -134,9 +136,17 @@ function kop_rinbox_test_story_arc_suggestions_from_empty($src, callable $check)
         $st2 = (string) $pdo->query("SELECT status FROM news_story_arcs WHERE id = $quietId")->fetchColumn();
         $check("$t: Add archives it, Undo makes it active", $st === 'archived' && $st2 === 'active', "$st / $st2");
     }
-    $live = $pdo->query("SELECT COUNT(*) FROM news_story_arc_suggestions s JOIN news_story_arcs a ON a.id = s.arc_id
-                          WHERE s.kind = 'retire' AND a.slug IN ('refuge-girls-academy')")->fetchColumn();
-    $check("$t: a story with recent articles is not suggested for archiving", (int) $live === 0);
+    // A story with an article from the last 3 weeks stays.
+    $pdo->exec("INSERT INTO news_story_arcs (title, slug, description, match_terms, facility_label, facility_url, status, display_order, created_at)
+                VALUES ('Fresh Test Story', 'fresh-test-story', '', 'zzzz no such phrase', '', '', 'active', 0, '2020-01-01 00:00:00')");
+    $freshId = (int) $pdo->lastInsertId();
+    $recent = (int) $pdo->query("SELECT id FROM news_submissions WHERE story_arc_id IS NULL AND status IN ('approved','published')
+                                  AND publication_date >= '" . kop_arcsug_day_minus($today, 7) . "' ORDER BY id LIMIT 1")->fetchColumn();
+    $pdo->exec("UPDATE news_submissions SET story_arc_id = $freshId WHERE id = $recent");
+    kop_arcsug_run($pdo, $today);
+    $fr = $pdo->query("SELECT COUNT(*) FROM news_story_arc_suggestions WHERE skey = 'retire:$freshId'")->fetchColumn();
+    $check("$t: a story with an article this week is not suggested for archiving", $recent > 0 && (int) $fr === 0, "#$recent");
+    $pdo->exec("UPDATE news_submissions SET story_arc_id = NULL WHERE id = $recent");
 
     // Same-event coverage: Add puts the article in the story, Undo takes it out.
     $j = $pdo->query("SELECT * FROM news_story_arc_suggestions WHERE kind = 'join' AND status = 'pending' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
@@ -154,7 +164,7 @@ function kop_rinbox_test_story_arc_suggestions_from_empty($src, callable $check)
     if (kop_rinbox_test_options_persist()) {
         call_user_func($src['tool'], 'settings', array('min_articles' => '4', 'window_days' => '-3'));
         $s = kop_arcsug_settings();
-        $check("$t: settings keep a good number, ignore a bad one", $s['min_articles'] === 4 && $s['window_days'] === 60, json_encode($s));
+        $check("$t: settings keep a good number, ignore a bad one", $s['min_articles'] === 4 && $s['window_days'] === 60 && $s['retire_days'] === 21, json_encode($s));
         update_option('kop_arc_suggest_settings', array());
     }
 }
