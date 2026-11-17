@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 16:41 UTC",
- "source": "d58b57579952f81843540f6456d9e049b15b5100",
+ "built": "2026-11-17 16:46 UTC",
+ "source": "c9e621d6f349b841a1f0e32cc769b5542db7f6bd",
  "sections": [
   {
    "key": "2",
@@ -3349,6 +3349,24 @@
        "focus": false,
        "steps": [],
        "hash": "aa1ff15883ae"
+      },
+      {
+       "id": "4.3:articles-linked-to-the-wrong-facility-page-2026-11-17-found",
+       "lead": "Articles linked to the wrong facility page (2026-11-17, found working Claude note #21)",
+       "text": "**Articles linked to the wrong facility page (2026-11-17, found working Claude note #21)**. Provo Canyon School's page (`/facility/provo-canyon-school-ut/`, id 10371) lists the HuffPost article \"Former Spring Ridge Academy Students Say School Inflicted Abuse, Trauma\" (2025-10-10), and its timeline shows it in 2025. The link comes from approved `news_submissions` #18, whose `facilities_mentioned` names Spring Ridge Academy (12293), Blue Ridge Wilderness Therapy (12506) and Provo Canyon School (10371); its two deleted copies (#84, #85) do not name Provo Canyon. - Spring Ridge, now: read the article (KOP's copy first, then the HuffPost link). If it names Provo Canyon only in passing or not at all, take 10371 off #18 (both `facilities_mentioned` and `news_facility_links`, then the page's LiteSpeed purge; how a link is written and kept fresh: `docs/DATA-FLOWS.md`, `docs/claude/news.md` \"Articles and cases are saved with their facility ids\"). Check Blue Ridge the same way. If the article does name it, decide whether a passing mention belongs on the page at all (that is the site-wide question below). - Site-wide check: for every approved article linked to a facility, test whether the facility's name, a past name or an alias (`kop_facility_name_variants()`, alternate names) appears in the article's title, summary or saved text. Links with no hit at all are the first suspects; links where the record's name appears only once in a long article are \"passing mention\" suspects. Run it as a read-only script against `tmp/prod.sqlite` (refresh it first), write the suspects to a JSON report (article id, title, facility id/name, why), and spot-check 20 by hand. - Then fix by kind: wrong ids from a name several records share (a Lakeside Academy kind of mix-up) are re-pointed; unrelated links are removed; passing mentions wait on the owner's answer below. Every change is logged with an exact undo, the way Merge Duplicates and the mention-id fill (`api/fill-mention-ids.php`) do. - Find out how #18 got the Provo Canyon id (the AI tagger at approval, an auto-connect rule, the mention-id fill) and fix that path so it stops making such links.",
+       "ask": "Should an article that only mentions a program in passing be listed on that program's page?",
+       "date": "2026-11-17",
+       "why": "It decides whether the site-wide check removes passing-mention links or only clearly wrong ones.",
+       "go": [],
+       "choices": [
+        "Only articles about the program",
+        "Passing mentions too, marked \"mentioned\""
+       ],
+       "time": "",
+       "kind": "decide",
+       "focus": false,
+       "steps": [],
+       "hash": "6d525619aebc"
       }
      ]
     },
