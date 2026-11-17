@@ -2450,6 +2450,67 @@ if (!function_exists('kop_facility_pages_career_fold')) {
             }
             if (!$done) $out[] = $job;
         }
+        // Other spellings of one place, matched exactly (Claude note #19 follow-up, owner 2026-11-17): each half of
+        // "Silverado Boys Ranch/Silverado Academy", the name in brackets ("Heritage Schools (Heritage RTC)",
+        // "...(WWASPS)"), without "the/of/at/and" and the generic "RTC, residential, treatment, program, inc, llc"
+        // words (not "center": "Cross Creek" beside a Center and a Manor stays), doubled letters and a plural "s"
+        // ("Wwasp" = "WWASPS", "Sommerset" = "Somerset Program", "Three Springs Duck River" = "...of Duck River",
+        // "Telos Residential Treatment" = "Telos RTC"). Two linked places sharing a spelling leave the line alone.
+        $variants = static function ($place) {
+            $parts = array((string) $place);
+            if (preg_match('/^(.*?)\s*\(([^()]+)\)\s*$/', $place, $m)) { $parts = array($m[1], $m[2]); }
+            foreach ($parts as $p) {
+                if (strpos($p, '/') === false) continue;
+                foreach (explode('/', $p) as $half) $parts[] = $half;
+            }
+            $out = array();
+            foreach ($parts as $p) {
+                $p = strtolower(preg_replace('/[^\w\s]+/u', ' ', $p));
+                $ws = preg_split('/\s+/', trim($p), -1, PREG_SPLIT_NO_EMPTY);
+                $ws = array_values(array_diff($ws, array('the', 'of', 'at', 'and', 'a')));
+                $core = array_values(array_diff($ws, array('rtc', 'residential', 'treatment', 'program', 'programs', 'inc', 'llc', 'corp')));
+                if ($core) $ws = $core;
+                $ws = array_map(static function ($w) {
+                    $w = preg_replace('/(.)\1+/', '$1', $w);
+                    return strlen($w) > 3 ? preg_replace('/s$/', '', $w) : $w;
+                }, $ws);
+                // A one-word half is only an acronym ("CALO", "WWASPS"), never "Boys Ranch" alone or a bare word.
+                $k = implode(' ', $ws);
+                if ($k === '' || (count($ws) === 1 && strlen($k) < 3)) continue;
+                $out[$k] = true;
+            }
+            return array_keys($out);
+        };
+        // "the Director of Clinical Services at Telos RTC": a role written into the place.
+        foreach ($out as $i => $job) {
+            if ($job['url'] === '') $out[$i]['place'] = preg_replace('/^the\s+[\w\s]*?\b(?:director|manager|officer|coordinator|therapist|supervisor)\b[\w\s]*?\s+at\s+/i', '', $job['place']);
+        }
+        // Each line's spellings, kept across merges so a folded pair still meets its linked page ("The Change Academy
+        // at Lake of the Ozarks" + "Change Academy Lake of the Ozarks (CALO)" -> "CALO Programs").
+        $alts = array();
+        foreach ($out as $i => $job) $alts[$i] = $variants($job['place']);
+        do {
+            $changed = false;
+            foreach ($out as $i => $job) {
+                if (!isset($out[$i]) || $job['url'] !== '' || !$alts[$i]) continue;
+                $hit_urls = array();
+                $first_unlinked = null;
+                foreach ($out as $j => $other) {
+                    if ($j === $i || !isset($out[$j]) || !array_intersect($alts[$i], $alts[$j])) continue;
+                    if ($other['url'] !== '') $hit_urls[$other['url']][] = $j;
+                    elseif ($first_unlinked === null) $first_unlinked = $j;
+                }
+                if (count($hit_urls) > 1) continue;   // two linked places share the name: leave it
+                $target = $hit_urls ? reset($hit_urls)[0] : $first_unlinked;
+                if ($target === null) continue;
+                $keep = min($i, $target);
+                $drop = max($i, $target);
+                $out[$keep] = $merge($out[$keep], $out[$drop]);
+                $alts[$keep] = array_values(array_unique(array_merge($alts[$keep], $alts[$drop])));
+                unset($out[$drop], $alts[$drop]);
+                $changed = true;
+            }
+        } while ($changed);
         // Unlinked names against the linked places (and each other).
         $linked = array();
         foreach ($out as $i => $job) if ($job['url'] !== '') $linked[$i] = $words($job['place']);

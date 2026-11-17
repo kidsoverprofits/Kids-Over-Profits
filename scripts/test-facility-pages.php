@@ -620,6 +620,36 @@ $check('a career lists each place once: same page, unlinked short form, spacing;
     array_column($fold, 'place') === array('Provo Canyon School', 'Silverado Boys Ranch', 'BlueFire Wilderness Therapy', 'Cross Creek', 'Cross Creek Manor', 'Cross Creek Center', 'Heart Cry Recovery')
     && $fold[0]['role'] === 'Therapist' && $fold[0]['years'] === '2001' && $fold[0]['url'] === '/facility/pcs/', wp_json_encode($fold));
 $fold = kop_facility_pages_career_fold(array(
+    array('role' => 'Owner', 'place' => 'Teen Help', 'years' => '', 'url' => ''),
+    array('role' => 'Founder', 'place' => 'World Wide Association of Specialty Programs and Schools (WWASPS)', 'years' => '', 'url' => '/operator/wwasps/'),
+    array('role' => 'Owner/Founder', 'place' => 'Wwasp', 'years' => '', 'url' => ''),
+    array('role' => 'Staff', 'place' => 'Cross Creek Manor', 'years' => '', 'url' => '/facility/ccm/'),
+    array('role' => 'Founder, Owner', 'place' => 'Cross Creek Programs', 'years' => '', 'url' => '/facility/ccp/'),
+    array('role' => 'Staff', 'place' => 'Cross Creek', 'years' => '', 'url' => ''),
+    array('role' => 'Founder', 'place' => 'Silverado Boys Ranch/Silverado Academy', 'years' => '', 'url' => ''),
+    array('role' => 'Director', 'place' => 'Silverado Academy', 'years' => '', 'url' => '/facility/silverado/'),
+    array('role' => 'Program Supervisor', 'place' => 'Heritage RTC', 'years' => '', 'url' => ''),
+    array('role' => 'therapist', 'place' => 'Heritage Schools (Heritage RTC)', 'years' => '', 'url' => '/facility/heritage/'),
+    array('role' => 'Staff', 'place' => 'The Heritage School', 'years' => '', 'url' => '/facility/ths/'),
+    array('role' => 'COO', 'place' => 'Sommerset', 'years' => '2008', 'url' => ''),
+    array('role' => 'Admissions', 'place' => 'Somerset Program', 'years' => '', 'url' => ''),
+    array('role' => 'Admissions', 'place' => 'Three Springs Duck River', 'years' => '', 'url' => ''),
+    array('role' => 'Director of Admissions', 'place' => 'Three Springs of Duck River', 'years' => '', 'url' => '/facility/tsdr/'),
+    array('role' => 'Director of Clinical Services', 'place' => 'Telos Residential Treatment', 'years' => '', 'url' => ''),
+    array('role' => 'Director of Clinical Services', 'place' => 'Telos RTC', 'years' => '', 'url' => ''),
+    array('role' => '', 'place' => 'the Director of Clinical Services at Telos RTC', 'years' => '', 'url' => ''),
+    array('role' => 'Founder', 'place' => 'The Change Academy at Lake of the Ozarks', 'years' => '', 'url' => ''),
+    array('role' => 'Founder and CEO', 'place' => 'CALO Programs', 'years' => '', 'url' => '/facility/calo/'),
+    array('role' => 'CEO', 'place' => 'Change Academy Lake of the Ozarks (CALO)', 'years' => '', 'url' => ''),
+    array('role' => 'Board member', 'place' => 'Certified Educational, Recreational, and Therapeutic Schools and Programs (CERTS)', 'years' => '', 'url' => ''),
+    array('role' => 'Director', 'place' => 'CERTS – Kolob Canyon Residential Treatment Center', 'years' => '', 'url' => '/facility/kolob/'),
+));
+$check('a career folds other spellings of one place: halves, brackets, acronyms, "of", doubled letters, RTC (Claude note #19)',
+    array_column($fold, 'place') === array('Teen Help', 'World Wide Association of Specialty Programs and Schools (WWASPS)', 'Cross Creek Manor', 'Cross Creek Programs',
+        'Silverado Academy', 'Heritage Schools (Heritage RTC)', 'The Heritage School', 'Somerset Program', 'Three Springs of Duck River', 'Telos Residential Treatment',
+        'CALO Programs', 'Certified Educational, Recreational, and Therapeutic Schools and Programs (CERTS)', 'CERTS – Kolob Canyon Residential Treatment Center')
+    && $fold[7]['role'] === 'COO, Admissions' && $fold[7]['years'] === '2008', wp_json_encode(array_column($fold, 'place')) . ' ' . ($fold[7]['role'] ?? ''));
+$fold = kop_facility_pages_career_fold(array(
     array('role' => 'Executive Director, NATSAP Board member', 'place' => 'Aspen Achievement Academy', 'years' => '', 'url' => '/facility/aaa/'),
     array('role' => 'Board member', 'place' => 'Natsap', 'years' => '', 'url' => ''),
     array('role' => 'Executive Director', 'place' => 'Legacy Outdoor Adventures', 'years' => '', 'url' => ''),
