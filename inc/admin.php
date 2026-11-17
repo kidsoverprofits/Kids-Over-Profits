@@ -2760,7 +2760,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '168';   // 168: Agape + Mohican (rename) merges, JRC's past name Behavior Research Institute (plan 4.3 item 31)
+    $version = '169';   // 169: /spiritual-abuse/ rewritten to the writing style (text fix, plan 4.7 item 21)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

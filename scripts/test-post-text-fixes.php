@@ -68,7 +68,17 @@ if (!is_readable($db)) {
             foreach ($e['replace'] as $pair) {
                 if ($pair[1] !== '') {
                     $want = $pair[1];
-                    foreach ($later as $lp) $want = str_replace($lp[0], $lp[1], $want);
+                    // A later fix whose old text holds this whole piece rewrote the passage it sat in
+                    // (2026-11-17 spiritual-abuse rewrite over the 11-16 layout fix): nothing left to find.
+                    $swallowed = false;
+                    foreach ($later as $lp) {
+                        if (strpos(str_replace(array("\r\n", "\r"), "\n", $lp[0]), str_replace(array("\r\n", "\r"), "\n", $want)) !== false) $swallowed = true;
+                        else $want = str_replace($lp[0], $lp[1], $want);
+                    }
+                    if ($swallowed) {
+                        check(true, $e['post'] . ': replaced by a later fix (' . mb_substr(strip_tags($pair[1]), 0, 50) . ')');
+                        continue;
+                    }
                     check(strpos(str_replace(array("\r\n", "\r"), "\n", $content), str_replace(array("\r\n", "\r"), "\n", $want)) !== false,
                         $e['post'] . ': new text is on the page (' . mb_substr(strip_tags($pair[1]), 0, 50) . ')');
                 }
