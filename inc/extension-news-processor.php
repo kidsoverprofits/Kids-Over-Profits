@@ -82,6 +82,8 @@ function kop_ext_news_ai_fields(array $d) {
         'location'         => $str($d['location'] ?? ''),
         'tags'             => function_exists('kop_news_tags_normalize') ? kop_news_tags_normalize($list($d['tags'] ?? array())) : $list($d['tags'] ?? array()),
         'facilities'       => $list($d['facilities'] ?? array()),
+        // Named only in passing (inc/news-passing.php): linked, but listed apart on the pages.
+        'passing_facilities' => array_values(array_diff($list($d['passingMentions'] ?? array()), $list($d['facilities'] ?? array()))),
         'staff'            => $list($d['staff'] ?? array()),
         'survivors'        => $list($d['survivors'] ?? array()),
         'summary'          => $str($d['summary'] ?? ''),

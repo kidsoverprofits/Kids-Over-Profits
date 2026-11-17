@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS `news_facility_links` (
   `news_id` int(11) NOT NULL COMMENT 'FK -> news_submissions.id',
   `facility_id` int(11) NOT NULL COMMENT 'FK -> facilities_master.id',
   `link_type` enum('mentioned','primary','related') NOT NULL DEFAULT 'mentioned' COMMENT 'How the article relates to the facility',
+  `passing` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = the article names the program only in passing',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` varchar(255) DEFAULT NULL COMMENT 'User who created the link',
   PRIMARY KEY (`news_id`, `facility_id`),

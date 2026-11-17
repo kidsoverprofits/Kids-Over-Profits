@@ -114,3 +114,6 @@ on a new computer add
 ```bash
 php scripts/test-app-parity.php [--todo]   # every page section in the app or listed; KOP_APP_DIR= for another app checkout
 ```
+News cards (`kop_mobile_news_card()`) carry `aside` (celebrity/viral) and `passing` (names the program only in passing,
+2026-11-17); the app folds both apart under the news list (`src/components/site/NewsFold.tsx`) and its news tile leaves
+`passing` out, as the website does.

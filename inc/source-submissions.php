@@ -518,6 +518,8 @@ function kop_ext_news_full_fields(array $p) {
         'survivors'        => kop_ext_list($p['survivors'] ?? array()),
         'content_warnings' => kop_ext_list($p['content_warnings'] ?? array()),
         'facilities'       => kop_ext_list($p['facilities'] ?? array()),
+        // Names the article mentions only in passing (inc/news-passing.php): linked, listed apart.
+        'passing_facilities' => kop_ext_list($p['passing_facilities'] ?? array()),
         'details'          => array(),
     );
     $keys = function_exists('kop_rinbox_native_news_detail_keys') ? kop_rinbox_native_news_detail_keys() : array();
@@ -557,7 +559,13 @@ function kop_ext_insert_news(PDO $pdo, array $p, $submitter, $note, $full = null
         $names     = array_values(array_unique(array_merge($names, $full['facilities'])));
         if (($full['status'] ?? '') === 'approved') $status = 'approved';
     }
-    $facilities = kop_normalize_facility_mentions($names);
+    $passing = array();
+    if (is_array($full)) {
+        foreach ($full['passing_facilities'] ?? array() as $pn) {
+            if (!in_array(strtolower($pn), array_map('strtolower', $names), true)) $passing[] = array('name' => $pn, 'passing' => true);
+        }
+    }
+    $facilities = kop_normalize_facility_mentions(array_merge($names, $passing));
     // Sent with no facility: the records the title and notes name, so the card comes in linked.
     if (!$facilities && function_exists('kop_autoconn_submission_mentions')) {
         $facilities = kop_autoconn_submission_mentions($pdo, '', $title . "

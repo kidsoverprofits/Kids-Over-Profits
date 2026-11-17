@@ -451,7 +451,7 @@ if (!function_exists('kop_ptl_press_events')) {
      * says whether an article counts here (meta: its kop_ptl_news_meta() row).
      */
     function kop_ptl_press_events(array $news, $in_years = null) {
-        $news = array_values(array_filter($news, static function ($n) { return empty($n['aside']) && !empty($n['id']) && !empty($n['date']); }));
+        $news = array_values(array_filter($news, static function ($n) { return empty($n['aside']) && empty($n['passing']) && !empty($n['id']) && !empty($n['date']); }));
         if (!$news) return array();
         $meta = kop_ptl_news_meta(array_column($news, 'id'));
         $featured = function_exists('kop_feat_map') ? kop_feat_map() : array();

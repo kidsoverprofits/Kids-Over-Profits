@@ -147,7 +147,7 @@ function kop_clip_news_params(array $fields, $title, $url) {
         'summary'   => $fields['summary'] ?? '',
         'full'      => 1,
     );
-    foreach (array('alternate_title', 'article_type', 'location', 'staff', 'survivors', 'content_warnings', 'facilities', 'details') as $k) {
+    foreach (array('alternate_title', 'article_type', 'location', 'staff', 'survivors', 'content_warnings', 'facilities', 'passing_facilities', 'details') as $k) {
         if (isset($fields[$k])) $p[$k] = $fields[$k];
     }
     return $p;

@@ -376,7 +376,9 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     </li>
                     <?php
                 };
-                $kop_op_news_main = array_values(array_filter($page['news'], static function ($n) { return empty($n['aside']); }));
+                $kop_op_news_main = array_values(array_filter($page['news'], static function ($n) { return empty($n['aside']) && empty($n['passing']); }));
+                // Articles that name its programs only in passing (inc/news-passing.php): folded, before the celebrity list.
+                $kop_op_news_passing = array_values(array_filter($page['news'], static function ($n) { return empty($n['aside']) && !empty($n['passing']); }));
                 if (function_exists('kop_feat_first')) $kop_op_news_main = kop_feat_first($kop_op_news_main);   // essential reporting first
                 $kop_op_news_aside = array_values(array_filter($page['news'], static function ($n) { return !empty($n['aside']); }));
                 ?>
@@ -398,6 +400,14 @@ $kop_op_edit = function_exists('kop_ie_attr') ? kop_ie_attr('operator:' . (int) 
                     </ul>
                 </details>
                 <?php endif; ?>
+                <?php endif; ?>
+                <?php if ($kop_op_news_passing) : ?>
+                <details class="kop-fp-more kop-fp-news-aside kop-fp-news-passing">
+                    <summary><?php echo esc_html(count($kop_op_news_passing) . ' ' . (count($kop_op_news_passing) === 1 ? 'article that mentions' : 'articles that mention') . ' its programs in passing'); ?></summary>
+                    <ul class="kop-fp-records">
+                        <?php foreach ($kop_op_news_passing as $n) $kop_op_news_row($n); ?>
+                    </ul>
+                </details>
                 <?php endif; ?>
                 <?php if ($kop_op_news_aside) : ?>
                 <details class="kop-fp-more kop-fp-news-aside">

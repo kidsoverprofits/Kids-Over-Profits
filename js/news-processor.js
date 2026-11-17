@@ -138,7 +138,8 @@
             const key = name.toLowerCase();
             if (seen.has(key)) continue;
             seen.add(key);
-            out.push({ name, facility_id: fid });
+            // passing: the article names it only in passing; linked, but listed apart on its page (inc/news-passing.php).
+            out.push(item && typeof item === 'object' && item.passing ? { name, facility_id: fid, passing: true } : { name, facility_id: fid });
         }
         return out;
     }
@@ -982,7 +983,9 @@
                 const name = (row.dataset.name || '').trim();
                 if (!name) return;
                 const fid = row.dataset.facilityId ? parseInt(row.dataset.facilityId, 10) : null;
-                items.push({ name, facility_id: Number.isFinite(fid) && fid > 0 ? fid : null });
+                const item = { name, facility_id: Number.isFinite(fid) && fid > 0 ? fid : null };
+                if (row.dataset.passing === '1') item.passing = true;
+                items.push(item);
             });
             formData.facilities = items;
             saveToLocalStorage();
@@ -993,6 +996,7 @@
             row.className = 'facility-row';
             row.dataset.name = entry.name;
             if (entry.facility_id) row.dataset.facilityId = String(entry.facility_id);
+            if (entry.passing) row.dataset.passing = '1';
 
             const display = document.createElement('div');
             display.className = 'facility-row-display';
@@ -1031,8 +1035,28 @@
                 syncFromDom();
             });
 
+            // Named only in passing: the article stays linked, listed apart and folded on the program's page.
+            const passingLabel = document.createElement('label');
+            passingLabel.className = 'facility-row-passing';
+            passingLabel.style.marginLeft = 'auto';
+            passingLabel.style.fontSize = '0.85em';
+            passingLabel.style.color = '#000435';
+            passingLabel.title = 'The article names this program only in passing; its page lists the article apart, folded';
+            const passingBox = document.createElement('input');
+            passingBox.type = 'checkbox';
+            passingBox.checked = !!entry.passing;
+            passingBox.addEventListener('change', () => {
+                if (passingBox.checked) row.dataset.passing = '1';
+                else delete row.dataset.passing;
+                syncFromDom();
+            });
+            passingLabel.appendChild(passingBox);
+            passingLabel.appendChild(document.createTextNode(' In passing'));
+            removeBtn.style.marginLeft = '';
+
             display.appendChild(nameEl);
             display.appendChild(metaEl);
+            display.appendChild(passingLabel);
             display.appendChild(removeBtn);
             row.appendChild(display);
             return row;
@@ -1399,8 +1423,12 @@
                     const filteredTags = filterGenericTags(data.tags);
                     formData.tags = filteredTags.join('\n');
                 }
-                if (data.facilities) {
-                    formData.facilities = normalizeFacilitiesValue(data.facilities);
+                if (data.facilities || data.passingMentions) {
+                    // Names the AI found only in passing come in ticked "In passing" (inc/news-passing.php).
+                    const passing = (Array.isArray(data.passingMentions) ? data.passingMentions : [])
+                        .map(n => ({ name: String(n && typeof n === 'object' ? n.name || '' : n || '').trim(), passing: true }))
+                        .filter(n => n.name);
+                    formData.facilities = normalizeFacilitiesValue([].concat(normalizeFacilitiesValue(data.facilities), passing));
                     if (typeof window.refreshFacilityPicker === 'function') {
                         window.refreshFacilityPicker();
                     }

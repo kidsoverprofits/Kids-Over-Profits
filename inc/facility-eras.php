@@ -815,6 +815,10 @@ if (!function_exists('kop_facility_eras_build')) {
             'news'       => static function ($a, $b) { return strcmp((string) $b['date'], (string) $a['date']) ?: $b['id'] - $a['id']; },
         );
         $totals = array_fill_keys($kinds, 0);
+        // The page's totals leave out articles that name the program only in passing (inc/news-passing.php).
+        $tally = static function ($kind, $items) {
+            return $kind === 'news' ? count(array_filter($items, static function ($n) { return empty($n['passing']); })) : count($items);
+        };
         $filled = 0;
         $count = static function ($kind, $items) {
             return $kind === 'staff' ? count($items['administrator'] ?? array()) + count($items['notableStaff'] ?? array()) + count($items['pastTTIJobs'] ?? array()) : count($items);
@@ -826,7 +830,7 @@ if (!function_exists('kop_facility_eras_build')) {
                 $has += $count($kind, $list[$i][$kind]);
                 $totals[$kind] += $kind === 'staff'
                     ? count($list[$i]['staff']['administrator'] ?? array()) + count($list[$i]['staff']['notableStaff'] ?? array())
-                    : count($list[$i][$kind]);
+                    : $tally($kind, $list[$i][$kind]);
             }
             if ($has > 0) $filled++;
         }
@@ -848,7 +852,7 @@ if (!function_exists('kop_facility_eras_build')) {
             if (isset($sorts[$kind])) usort($rest[$kind], $sorts[$kind]);
             $totals[$kind] += $kind === 'staff'
                 ? count($rest['staff']['administrator'] ?? array()) + count($rest['staff']['notableStaff'] ?? array())
-                : count($rest[$kind]);
+                : $tally($kind, $rest[$kind]);
         }
         return array('list' => array_values($list), 'rest' => $rest, 'totals' => $totals);
     }

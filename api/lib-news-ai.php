@@ -570,7 +570,9 @@ function buildPrompt($content, $url = '', $customInstructions = '') {
     $prompt .= "  \"publicationName\": \"publication name\",\n";
     $prompt .= "  \"location\": \"City, State (or Country) where the main events took place\",\n";
     $prompt .= "  \"tags\": [\"3-5 themes. Use these exact labels where one fits: " . implode(', ', kop_news_tag_prompt_vocabulary()) . ". Add a new label only for a theme none of these covers. Add Celebrity when the article is mainly about a celebrity or public figure (their memories, interviews, memoir, show or own legal trouble) rather than what a program did or what regulators, courts or lawmakers did about it; add Viral when it is mainly about a social media post, influencer or YouTuber video, or a TV show. Do not use generic tags like Abuse, Lawsuit, Youth, or Residential Treatment\"],\n";
-    $prompt .= "  \"facilities\": [\"list of facilities/companies mentioned\"],\n";
+    // Owner, 2026-11-17 (plan 4.3 item 31): an article that names a program only in passing is listed apart on its page.
+    $prompt .= "  \"facilities\": [\"the programs, facilities and companies the article reports on: where its events took place, or whose staff, owners, practices or record it describes\"],\n";
+    $prompt .= "  \"passingMentions\": [\"programs, facilities and companies the article names only in passing: a one-line aside, a comparison, a list of examples, where someone was before or after, another person's story. A name goes in one of the two lists, never both\"],\n";
     $prompt .= "  \"staff\": [\"list of staff/owners mentioned\"],\n";
     $prompt .= "  \"survivors\": [\"list of survivors and victims mentioned (use initials or pseudonyms if provided)\"],\n";
     $prompt .= "  \"summary\": \"2-3 sentence trauma-sensitive summary using factual, neutral language\",\n";
@@ -589,6 +591,7 @@ function buildPrompt($content, $url = '', $customInstructions = '') {
     $prompt .= "- Only include content warnings that are clearly present in the article\n";
     $prompt .= "- Keep the published headline in title; put any trauma-sensitive alternative in alternateTitle\n";
     $prompt .= "- Detect the article type based on the content\n";
+    $prompt .= "- A program the article names once, in passing, goes in passingMentions, not facilities\n";
     $prompt .= "- Only fill typeSpecificData for the detected article type\n";
     $prompt .= "- Return ONLY valid JSON, no additional text or markdown formatting\n";
     $prompt .= "- Do not wrap the JSON in code blocks (```json)\n";

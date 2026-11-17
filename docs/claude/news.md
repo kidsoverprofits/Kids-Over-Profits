@@ -77,6 +77,16 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-resync.php
 # dropped those links. Two linked records of the name = no id guessed. Rows saved earlier: api/fill-mention-ids.php
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mention-ids.php   # the real syncs on scratch tables + the mirror's records
 php api/fill-mention-ids.php                      # on the server: dry run; "apply" writes only ids the row already links; "undo apply"
+# Named only in passing (owner, 2026-11-17, plan 4.3 item 31): an article that names a program in passing stays linked, but
+# its page lists it apart, folded ("N articles that mention it in passing", before the celebrity/viral fold), leaves it off
+# the timeline and the news tile; the app does the same (NewsFold). The mark lives on the stored mention
+# ({"name","facility_id","passing":true}); kop_sync_news_facility_links() copies it to news_facility_links.passing (column
+# added once by inc/news-passing.php), on hand-made links the mention names too. The AI read returns such names apart
+# ("passingMentions", api/lib-news-ai.php); the News Processor ticks them "In passing", the extension/app/clippings
+# intake stores them as passing_facilities. A company page folds an article when every link to its programs is passing.
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-news-passing.php   # the mark through normalizer, sync and a table without the column
+php api/fix-news-facility-links.php --passing=18:12506 | --remove=18:10371 | --repoint=526:12339>12410 | --file=x.json   # on the server: dry run; apply --note="why"; undo apply
+(kop-pipeline) python scripts/check-news-facility-links.py --fetch   # read-only: every live link tested against the article's text (tmp/news-link-check/)
 # The feed's record links (2026-11-01): each /tti-news-feed/ card ends with "On KOP:" pills to the facility and operator pages the
 # article is linked to (kop_news_mention_links(), api/news-mentions.php): read from news_facility_links + kop_operator_links, never
 # resolved afresh, so the feed links what the record pages list; a linked record no mention names shows under its own name. The

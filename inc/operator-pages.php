@@ -848,6 +848,7 @@ if (!function_exists('kop_operator_page_data')) {
         $news = array();
         $news_facilities = array();
         $seen_news = array();
+        $news_passing = array();
         $links_table = $wpdb->prefix . 'kop_operator_links';
         if (kop_facility_pages_table_exists('news_submissions')) {
             $news_ids = array();
@@ -858,9 +859,12 @@ if (!function_exists('kop_operator_page_data')) {
             }
             if ($facility_ids && kop_facility_pages_table_exists('news_facility_links')) {
                 $fin = implode(',', array_keys($facility_ids));
-                foreach ((array) $wpdb->get_results("SELECT news_id, facility_id FROM news_facility_links WHERE facility_id IN ({$fin})", ARRAY_A) as $nr) {
+                $passing_sql = function_exists('kop_facility_pages_news_passing_sql') ? kop_facility_pages_news_passing_sql() : '0';
+                foreach ((array) $wpdb->get_results("SELECT l.news_id, l.facility_id, {$passing_sql} AS passing FROM news_facility_links l WHERE l.facility_id IN ({$fin})", ARRAY_A) as $nr) {
                     $nid = (int) $nr['news_id'];
                     if (!isset($news_ids[$nid])) $news_ids[$nid] = 'facility';
+                    // Passing on the company's page only when every program link it has is (inc/news-passing.php).
+                    $news_passing[$nid] = !empty($nr['passing']) && ($news_passing[$nid] ?? true);
                     // Which programs each article is about: the timeline counts it only in the years the company ran them.
                     $news_facilities[$nid][] = (int) $nr['facility_id'];
                 }
@@ -891,6 +895,7 @@ if (!function_exists('kop_operator_page_data')) {
                         'summary'    => trim((string) $r['summary']),
                         'about'      => $news_ids[(int) $r['id']],
                         'aside'      => kop_news_is_aside((string) $r['tags']),
+                        'passing'    => $news_ids[(int) $r['id']] === 'facility' && !empty($news_passing[(int) $r['id']]),
                         // The same card the facility pages and the mobile app draw (inc/mobile-api.php).
                         'image'      => function_exists('kop_news_image') ? kop_news_image((int) $r['id'], (string) $r['article_url']) : null,
                     );

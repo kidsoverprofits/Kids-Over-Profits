@@ -184,6 +184,9 @@ request.
   | update_fields (`manage-submissions.php:1236`) | story group, story arc, journalist |
   | duplicate merge (`api/manage-duplicate-articles.php:73`) | the dropped copies' facility, case, bill and featured links do not move |
   | hard deletes (`manage-submissions.php:850`, `manage-duplicate-articles.php:111`) | orphan link rows |
+- **Passing mentions (2026-11-17):** `news_facility_links.passing` follows the stored
+  mention's `"passing": true`; the pages and app fold those articles apart and leave
+  them off the timeline. The facility fingerprint sums the column, so a mark moves it.
 - **Tied to facilities by:** `news_facility_links` only. There is **no name
   fallback** at read time. A mention that didn't resolve when saved links
   later two ways, both hourly with the Facilities from News run: the scan

@@ -29,6 +29,7 @@ if (!function_exists('kop_normalize_facility_mentions')) {
         foreach ($value as $item) {
             $name = '';
             $fid = null;
+            $passing = false;
 
             if (is_string($item)) {
                 $name = trim($item);
@@ -38,6 +39,7 @@ if (!function_exists('kop_normalize_facility_mentions')) {
                     $fid = (int)$item['facility_id'];
                     if ($fid <= 0) $fid = null;
                 }
+                $passing = !empty($item['passing']);
             }
 
             if ($name === '') continue;
@@ -50,7 +52,9 @@ if (!function_exists('kop_normalize_facility_mentions')) {
                 continue;
             }
             $seen[$key] = count($out);
-            $out[] = ['name' => $name, 'facility_id' => $fid];
+            // 'passing' (owner, 2026-11-17): the article names the program only in passing; its link is kept,
+            // and the pages list it apart, folded (plan 4.3 item 31). The key is there only when set.
+            $out[] = $passing ? ['name' => $name, 'facility_id' => $fid, 'passing' => true] : ['name' => $name, 'facility_id' => $fid];
         }
         return $out;
     }
@@ -104,23 +108,26 @@ if (!function_exists('kop_sync_news_facility_links')) {
 
         $desiredIds = [];
         $unresolvedNames = [];
+        $passingIds = [];   // facility id => the mention says the article names it only in passing
         foreach ($normalizedMentions as $m) {
             if (!empty($m['facility_id'])) {
                 // An id sent before its record moved or merged files on the record it is now.
                 $fid = function_exists('kop_facility_follow_moves') ? kop_facility_follow_moves((int)$m['facility_id']) : (int)$m['facility_id'];
                 $desiredIds[$fid] = true;
+                $passingIds[$fid] = !empty($m['passing']) && ($passingIds[$fid] ?? true);
             } elseif (!empty($m['name'])) {
-                $unresolvedNames[$m['name']] = true;
+                $unresolvedNames[$m['name']] = !empty($m['passing']);
             }
         }
 
         if ($aliasIndex === null && ($desiredIds || $unresolvedNames)) {
             $aliasIndex = kop_build_facility_alias_index($pdo);
         }
-        foreach (array_keys($unresolvedNames) as $name) {
+        foreach ($unresolvedNames as $name => $passing) {
             $fid = kop_resolve_mention_to_facility((string)$name, $aliasIndex);
             if ($fid !== null) {
                 $desiredIds[$fid] = true;
+                $passingIds[$fid] = $passing && ($passingIds[$fid] ?? true);
             }
         }
 
@@ -154,7 +161,51 @@ if (!function_exists('kop_sync_news_facility_links')) {
             foreach ($desiredIds as $fid) {
                 $ins->execute([$newsId, $fid, $createdBy]);
             }
+            // The passing flag follows the stored mention on every row a mention names, a hand-made link's too.
+            if (kop_news_links_has_passing($pdo)) {
+                $set = $pdo->prepare('UPDATE news_facility_links SET passing = ? WHERE news_id = ? AND facility_id = ? AND passing <> ?');
+                foreach ($desiredIds as $fid) {
+                    $p = !empty($passingIds[$fid]) ? 1 : 0;
+                    $set->execute([$p, $newsId, $fid, $p]);
+                }
+            }
         }
+    }
+}
+
+if (!function_exists('kop_news_links_has_passing')) {
+    /**
+     * Whether news_facility_links has the passing column (added by kop_news_links_ensure_passing(); the offline
+     * tests' scratch tables may not have it).
+     */
+    function kop_news_links_has_passing(PDO $pdo, bool $fresh = false): bool {
+        static $cache = [];
+        $k = spl_object_id($pdo);
+        if ($fresh || !isset($cache[$k])) {
+            try {
+                if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                    $cols = array_column($pdo->query('PRAGMA table_info(news_facility_links)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+                    $cache[$k] = in_array('passing', $cols, true);
+                } else {
+                    $cache[$k] = (bool) $pdo->query("SHOW COLUMNS FROM news_facility_links LIKE 'passing'")->fetch();
+                }
+            } catch (Throwable $e) {
+                $cache[$k] = false;
+            }
+        }
+        return $cache[$k];
+    }
+}
+
+if (!function_exists('kop_news_links_ensure_passing')) {
+    /** Adds news_facility_links.passing (1 = the article names the program only in passing). */
+    function kop_news_links_ensure_passing(PDO $pdo): bool {
+        if (kop_news_links_has_passing($pdo)) return true;
+        $sqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+        $pdo->exec($sqlite
+            ? 'ALTER TABLE news_facility_links ADD COLUMN passing INTEGER NOT NULL DEFAULT 0'
+            : "ALTER TABLE news_facility_links ADD COLUMN passing TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = the article names the program only in passing' AFTER link_type");
+        return kop_news_links_has_passing($pdo, true);
     }
 }
 

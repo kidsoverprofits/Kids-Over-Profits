@@ -371,7 +371,8 @@ if (!function_exists('kop_facility_pages_fingerprint')) {
         $parts = array();
         $counts = array(
             'facilities_v2'                          => 'COUNT(*), MAX(id), MAX(updated_at)',
-            'news_facility_links'                    => 'COUNT(*)',
+            // The sum too: an article marked as naming a program only in passing keeps the count the same.
+            'news_facility_links'                    => kop_facility_pages_news_passing_sql() === 'l.passing' ? 'COUNT(*), SUM(passing)' : 'COUNT(*)',
             'lawsuit_facility_links'                 => 'COUNT(*)',
             'lawsuits'                               => 'COUNT(*), MAX(updated_at)',
             'wiki_submissions'                       => 'COUNT(*), MAX(updated_at)',
@@ -4430,13 +4431,27 @@ if (!function_exists('kop_facility_pages_research_item')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_news_passing_sql')) {
+    /** "l.passing" when news_facility_links has the column (inc/news-passing.php), else "0". */
+    function kop_facility_pages_news_passing_sql() {
+        global $wpdb;
+        static $has = null;
+        if ($has === null) {
+            $has = kop_facility_pages_table_exists('news_facility_links')
+                && (bool) $wpdb->get_var("SHOW COLUMNS FROM news_facility_links LIKE 'passing'");
+        }
+        return $has ? 'l.passing' : '0';
+    }
+}
+
 if (!function_exists('kop_facility_pages_news')) {
     /** Published articles linked to the facility by id, newest first. */
     function kop_facility_pages_news($facility_id) {
         global $wpdb;
         if (!kop_facility_pages_table_exists('news_facility_links') || !kop_facility_pages_table_exists('news_submissions')) return array();
+        $passing_sql = kop_facility_pages_news_passing_sql();
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT n.id, n.article_title, n.alternate_title, n.publication_name, n.publication_date, n.article_url, n.archive_url, n.article_type, n.summary, n.tags, l.link_type
+            "SELECT n.id, n.article_title, n.alternate_title, n.publication_name, n.publication_date, n.article_url, n.archive_url, n.article_type, n.summary, n.tags, l.link_type, {$passing_sql} AS passing
                FROM news_facility_links l
                JOIN news_submissions n ON n.id = l.news_id
               WHERE l.facility_id = %d AND n.status IN ('approved','published')
@@ -4462,6 +4477,8 @@ if (!function_exists('kop_facility_pages_news')) {
                 'link_type' => (string) $r['link_type'],
                 // Celebrity or Viral tag: listed apart, collapsed (kop_news_is_aside()).
                 'aside'     => kop_news_is_aside((string) $r['tags']),
+                // Names the program only in passing (inc/news-passing.php): listed apart, folded; not on the timeline.
+                'passing'   => !empty($r['passing']),
                 'image'     => function_exists('kop_news_image') ? kop_news_image((int) $r['id'], (string) $r['article_url']) : null,
             );
         }

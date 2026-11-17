@@ -377,3 +377,6 @@ require_once get_stylesheet_directory() . '/inc/wiki-contact.php';
 
 // Celebrity and viral articles already on file get their tag once (collapsed on facility and company pages)
 require_once get_stylesheet_directory() . '/inc/news-aside-tags.php';
+
+// Articles that name a program only in passing: news_facility_links.passing, listed apart on the pages
+require_once get_stylesheet_directory() . '/inc/news-passing.php';

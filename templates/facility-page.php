@@ -204,10 +204,13 @@ $kop_fp_incident_list = static function (array $items) use ($kop_fp_sources) {
     <?php
 };
 // Articles tagged Celebrity or Viral (kop_news_is_aside()) only pass through
-// the program: they follow the rest, collapsed in a list of their own.
+// the program: they follow the rest, collapsed in a list of their own. So do
+// articles that name it only in passing (inc/news-passing.php), in a list before them.
 $kop_fp_news_list = static function (array $items) use ($kop_fp_news_card) {
     $kop_fp_n_aside = array_values(array_filter($items, static function ($n) { return !empty($n['aside']); }));
     $items = array_values(array_filter($items, static function ($n) { return empty($n['aside']); }));
+    $kop_fp_n_passing = array_values(array_filter($items, static function ($n) { return !empty($n['passing']); }));
+    $items = array_values(array_filter($items, static function ($n) { return empty($n['passing']); }));
     if (function_exists('kop_feat_first')) $items = kop_feat_first($items);   // essential reporting first
     $kop_fp_n_first = array_slice($items, 0, 12);
     $kop_fp_n_rest = array_slice($items, 12);
@@ -222,6 +225,14 @@ $kop_fp_news_list = static function (array $items) use ($kop_fp_news_card) {
             <summary><?php echo count($kop_fp_n_rest); ?> more <?php echo count($kop_fp_n_rest) === 1 ? 'article' : 'articles'; ?></summary>
             <ul class="kop-fp-news">
                 <?php foreach ($kop_fp_n_rest as $n) $kop_fp_news_card($n); ?>
+            </ul>
+        </details>
+    <?php endif; ?>
+    <?php if ($kop_fp_n_passing) : ?>
+        <details class="kop-fp-more kop-fp-news-aside kop-fp-news-passing">
+            <summary><?php echo esc_html(kop_news_passing_label(count($kop_fp_n_passing))); ?></summary>
+            <ul class="kop-fp-news">
+                <?php foreach ($kop_fp_n_passing as $n) $kop_fp_news_card($n); ?>
             </ul>
         </details>
     <?php endif; ?>
@@ -330,6 +341,8 @@ $kop_fp_timeline = function_exists('kop_ptl_facility') ? kop_ptl_facility($page)
 $kop_fp_eras = !empty($page['eras']['list']) ? $page['eras'] : null;
 $kop_fp_totals = array();
 foreach (array('memorials', 'lawsuits', 'incidents', 'news') as $kop_fp_k) $kop_fp_totals[$kop_fp_k] = count($page[$kop_fp_k] ?? array());
+// An article that names the program only in passing is listed, folded, but not counted as its coverage.
+$kop_fp_totals['news'] = count(array_filter((array) ($page['news'] ?? array()), static function ($n) { return empty($n['passing']); }));
 $kop_fp_totals['staff'] = count($page['staff']['administrator'] ?? array()) + count($page['staff']['notableStaff'] ?? array());
 if ($kop_fp_eras) {
     foreach (array('memorials', 'lawsuits', 'incidents', 'news', 'staff') as $kop_fp_k) $page[$kop_fp_k] = $kop_fp_eras['rest'][$kop_fp_k];

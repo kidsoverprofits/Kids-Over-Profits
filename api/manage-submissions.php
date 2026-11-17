@@ -1183,13 +1183,17 @@ try {
                     $cur = $pdo->prepare("SELECT facilities_mentioned FROM $table WHERE id = ?");
                     $cur->execute([(int)$id]);
                     $existingByName = [];
+                    $passingByName = [];
                     foreach (kop_normalize_facility_mentions($cur->fetchColumn() ?: '[]') as $m) {
                         if ($m['facility_id'] !== null) {
                             $existingByName[strtolower($m['name'])] = $m['facility_id'];
                         }
+                        // Named only in passing (inc/news-passing.php): the editor sends names, so the mark carries over.
+                        if (!empty($m['passing'])) $passingByName[strtolower($m['name'])] = true;
                     }
                     $aliasIndex = null;
                     foreach ($mentions as &$m) {
+                        if (isset($passingByName[strtolower($m['name'])])) $m['passing'] = true;
                         if ($m['facility_id'] !== null) continue;
                         $nameKey = strtolower($m['name']);
                         if (isset($existingByName[$nameKey])) {
