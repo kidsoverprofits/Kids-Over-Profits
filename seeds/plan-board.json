@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 14:55 UTC",
- "source": "526a14a4f0c645eb69054ec85810e0766a38692d",
+ "built": "2026-11-17 16:41 UTC",
+ "source": "d58b57579952f81843540f6456d9e049b15b5100",
  "sections": [
   {
    "key": "2",
@@ -1208,6 +1208,24 @@
        "focus": false,
        "steps": [],
        "hash": "a889768d6eeb"
+      },
+      {
+       "id": "2.4:facility-pages-the-timeline-and-incidents-on-record-list-the",
+       "lead": "Facility pages: the timeline and \"Incidents on record\" list the same incidents",
+       "text": "**Facility pages: the timeline and \"Incidents on record\" list the same incidents** (Claude note #21, 2026-11-17). Every dated incident line shows twice on a page: as a Timeline event and again in the \"Incidents on record\" section further down (Provo Canyon School: 36 timeline events, 40 incident lines). The same-event duplicates inside both were merged in the note #21 commit; this is the repeat between the two sections. The app shows both too. Recommended: keep the timeline; \"Incidents on record\" lists only what the timeline can't place (lines with no year), headed by a link up to the timeline, on the site and in the app.",
+       "ask": "Incidents on facility pages: show them once (timeline only, undated ones in a short list), or keep both?",
+       "date": "2026-11-17",
+       "why": "The owner asked \"why are there so many duplicated timelines?\"; this is the repeat that is left.",
+       "go": [],
+       "choices": [
+        "Timeline only, undated in a short list",
+        "Keep both sections"
+       ],
+       "time": "1 min",
+       "kind": "decide",
+       "focus": false,
+       "steps": [],
+       "hash": "5fbf621e9843"
       },
       {
        "id": "2.4:wy-meadowlark-notice-held-by-the-privacy-check",
