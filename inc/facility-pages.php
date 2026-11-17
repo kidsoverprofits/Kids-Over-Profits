@@ -655,6 +655,8 @@ if (!function_exists('kop_facility_pages_merged_profiles')) {
     function kop_facility_pages_merged_profiles() {
         return array_values(array_unique(array_map('strval', (array) apply_filters('kop_facility_pages_merged_profiles', array(
             'hyde',
+            'elan',
+            'elevations-rtc',
         )))));
     }
 }

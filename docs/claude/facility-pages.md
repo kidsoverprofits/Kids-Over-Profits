@@ -5,7 +5,7 @@ for it go here, not in CLAUDE.md. `(kop-pipeline)` = run from that checkout.
 
 ```bash
 # Generated /facility/ and /operator/ (parent company) pages, against tmp/prod.sqlite
-# Facility Profile posts listed in kop_facility_pages_merged_profiles() (hyde) print unchanged on their /facility/ page, the post 301s there
+# Facility Profile posts listed in kop_facility_pages_merged_profiles() (hyde, elan, elevations-rtc) print unchanged on their /facility/ page, the post 301s there
 php scripts/test-facility-pages.php
 # A record's research notes are printed as prose, each sentence with its "source" link, in an "About" section near the top of
 # facility and company pages (inc/profile-notes.php; bookkeeping lines become "Also drawn on", rail facts and forum claims stay out).

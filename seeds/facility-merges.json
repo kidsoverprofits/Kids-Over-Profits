@@ -106,5 +106,26 @@
     "drop_name": "CERTS – Kolob Canyon Residential Treatment Center",
     "as_duplicate": true,
     "note": "Item 30 (owner, 2026-11-17): one program on file twice. Both records are Kolob Canyon RTC at 1338 E 600 S, New Harmony, UT, a CERTS program, with Kent Tasso and Craig Rodabough on both staff lists; the second came from a 2006 Woodbury Reports listing under the CERTS name. Merged as one program. Undo on the Merged tab."
+  },
+  {
+    "keep": 12341,
+    "keep_name": "Catherine Freer Wilderness Program",
+    "drop": 100681,
+    "drop_name": "Catherine Freer Wilderness Program (NV)",
+    "note": "The Nevada record was a stub the news scan made from the 2002 death story (strugglingteens.com, Jun 27, 2002); one program, run from Albany, OR. Merged at the owner's request 2026-11-17 before the About rewrite batch 2; Undo on the Merged tab."
+  },
+  {
+    "keep": 10309,
+    "keep_name": "VisionQuest",
+    "drop": 12313,
+    "drop_name": "Vision Quest – 7 Directions",
+    "note": "VisionQuest's Tucson headquarters program (600 N Swan Rd, also called VisionQuest Arizona, from 1973): one VisionQuest record, at the owner's request 2026-11-17 before the About rewrite batch 2; Undo on the Merged tab."
+  },
+  {
+    "keep": 10309,
+    "keep_name": "VisionQuest",
+    "drop": 10983,
+    "drop_name": "VisionQuest Residential Fort Worth",
+    "note": "VisionQuest's Fort Worth residential program (1518 Vaughn Blvd): one VisionQuest record, at the owner's request 2026-11-17 before the About rewrite batch 2; Undo on the Merged tab."
   }
 ]
