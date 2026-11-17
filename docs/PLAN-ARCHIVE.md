@@ -4,6 +4,19 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-17 (plan 4.7 #19 finished)
+
+### 4.7 Pages and templates
+
+19. **Link-preview cards on /spiritual-abuse/ are very tall** (found 2026-11-16 while giving the page the guide pieces, commit
+    a9f51cba). The Visual Link Preview cards under Works Cited and the Resources / Legislative Loopholes parts draw each site's
+    picture at full column width, so a card is 780-1,280px tall at 1280 wide and most of the page's lower half is pictures.
+    Was so before the change. A fix would cap `.vlp-image` height (or show cards as a compact list); for the owner to decide
+    whether that page should change.
+    Done 2026-11-17 (owner's Tell Claude note #22: "the resources section here looks awful"): every link card outside facility
+    and company pages is a short picture strip (9rem, the whole picture on sand, never stretched) over the title and four lines
+    of summary, no Read More button (css/plugin-contrast.css). /spiritual-abuse/ went from 21,234px to about 14,600px at 1280.
+
 ## Moved 2026-11-16 (plan 4.7 #19 finished)
 
 ### 4.7 Pages and templates
