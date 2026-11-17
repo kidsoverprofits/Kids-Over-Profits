@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 20:34 UTC",
- "source": "c470d68771b9212a665f62795384d0956fb1c348",
+ "built": "2026-11-17 20:40 UTC",
+ "source": "ac603ece28ad1c564acfde6a653a2b7a0d038179",
  "sections": [
   {
    "key": "2",
@@ -4407,7 +4407,7 @@
       {
        "id": "4.7:spiritual-abuse-rewrite-the-guide-to-the-writing-style",
        "lead": "/spiritual-abuse/: rewrite the guide to the writing style",
-       "text": "**/spiritual-abuse/: rewrite the guide to the writing style** (owner's Tell Claude note #23, 2026-11-17, pointing at \"Impacts of Spiritual Abuse on TTI Survivors\": \"this also obviously needs to be rewritten to be up to the standards of the rest of the page\"). The page (post `spiritual-abuse`, layout from seeds/text-fixes.json 2026-11-16-spiritual-abuse-guide-layout) is general bullet lists from academic papers on church abuse: no TTI program, person or date in it, and no citation on any bullet. The Impacts part (Spiritual and Existential Harm, Emotional and Psychological Trauma, Physical and Somatic Symptoms, Social Disconnection) comes first; Defining Characteristics and Where Spiritual Abuse Happens read the same way and likely need the same pass (ask the owner whether the whole page goes in one session). Follow docs/WRITING-STYLE.md: prose, not bullets; each effect shown through named TTI programs and survivors' own words (exact quotes only, memory: testimony as quotes only), recent cases first (Roloff homes, Teen Challenge, Agape, Circle of Hope, Missouri's 2021 law, Florida's FACCCA exemption are already in the page's own link list); every sentence cited with [^n]. KOP holdings first (tmp/prod.sqlite news_submissions, wpdl_kop_doc_text, Drive), then the web; submit new sources. Opus at high effort writes it (memory: writing model routing). Apply as a seeds/text-fixes.json replace so the change is recorded, keep the guide pieces (kop-guide-section, h4 entries).",
+       "text": "**/spiritual-abuse/: rewrite the guide to the writing style** (owner's Tell Claude note #23, 2026-11-17, pointing at \"Impacts of Spiritual Abuse on TTI Survivors\": \"this also obviously needs to be rewritten to be up to the standards of the rest of the page\"). The page (post `spiritual-abuse`, layout from seeds/text-fixes.json 2026-11-16-spiritual-abuse-guide-layout) is general bullet lists from academic papers on church abuse: no TTI program, person or date in it, and no citation on any bullet. The Impacts part (Spiritual and Existential Harm, Emotional and Psychological Trauma, Physical and Somatic Symptoms, Social Disconnection) comes first; Defining Characteristics and Where Spiritual Abuse Happens read the same way and need the same pass: the owner said the whole page goes in one session (2026-11-17, \"yes whole page\"). Follow docs/WRITING-STYLE.md: prose, not bullets; each effect shown through named TTI programs and survivors' own words (exact quotes only, memory: testimony as quotes only), recent cases first (Roloff homes, Teen Challenge, Agape, Circle of Hope, Missouri's 2021 law, Florida's FACCCA exemption are already in the page's own link list); every sentence cited with [^n]. KOP holdings first (tmp/prod.sqlite news_submissions, wpdl_kop_doc_text, Drive), then the web; submit new sources. Opus at high effort writes it (memory: writing model routing). Apply as a seeds/text-fixes.json replace so the change is recorded, keep the guide pieces (kop-guide-section, h4 entries).",
        "ask": "",
        "date": "2026-11-17",
        "why": "",
@@ -4417,7 +4417,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "edef51eac6d4"
+       "hash": "8af40002b7fc"
       }
      ]
     },
