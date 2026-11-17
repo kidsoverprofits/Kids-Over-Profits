@@ -204,8 +204,18 @@ foreach ($byNews as $nid => $list) {
         }
         kop_sync_news_facility_links($pdo, (int) $nid, kop_normalize_facility_mentions($after_mentions), 'link-check');
         foreach ($list as $c) {
-            // A link added by hand (primary/related) is not the sync's to prune.
-            if (!$c[4]) $pdo->prepare('DELETE FROM news_facility_links WHERE news_id = ? AND facility_id = ?')->execute(array($nid, $c[1]));
+            if ($c[4]) continue;
+            // A link added by hand (primary/related) is not the sync's to prune; a re-pointed one goes on the right
+            // record with its own type, also when no stored mention named it (a scan's link).
+            if ($c[2]) {
+                foreach ($links_before as $l) {
+                    if ((int) $l['facility_id'] !== $c[1]) continue;
+                    $verb = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? 'INSERT OR IGNORE' : 'INSERT IGNORE';
+                    $pdo->prepare("$verb INTO news_facility_links (news_id, facility_id, link_type, created_by) VALUES (?, ?, ?, ?)")
+                        ->execute(array($nid, $c[2], $l['link_type'], 'link-check'));
+                }
+            }
+            $pdo->prepare('DELETE FROM news_facility_links WHERE news_id = ? AND facility_id = ?')->execute(array($nid, $c[1]));
         }
         $pdo->commit();
     } catch (Throwable $e) {
