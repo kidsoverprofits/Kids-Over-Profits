@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 19:05 UTC",
- "source": "58ed792b45e98bd9d924c6f7824354bd19cfcf82",
+ "built": "2026-11-17 19:28 UTC",
+ "source": "6f99ea45063f35cc5b947fa16ec7d4b982a95a90",
  "sections": [
   {
    "key": "2",
@@ -4388,21 +4388,6 @@
        "focus": false,
        "steps": [],
        "hash": "222369460a34"
-      },
-      {
-       "id": "4.7:link-preview-cards-on-spiritual-abuse-are-very-tall",
-       "lead": "Link-preview cards on /spiritual-abuse/ are very tall",
-       "text": "**Link-preview cards on /spiritual-abuse/ are very tall** (found 2026-11-16 while giving the page the guide pieces, commit a9f51cba). The Visual Link Preview cards under Works Cited and the Resources / Legislative Loopholes parts draw each site's picture at full column width, so a card is 780-1,280px tall at 1280 wide and most of the page's lower half is pictures. Was so before the change. A fix would cap `.vlp-image` height (or show cards as a compact list); for the owner to decide whether that page should change.",
-       "ask": "",
-       "date": "2026-11-16",
-       "why": "",
-       "go": [],
-       "choices": [],
-       "time": "",
-       "kind": "do",
-       "focus": false,
-       "steps": [],
-       "hash": "d479559065dc"
       },
       {
        "id": "4.7:parent-company-pages-a-layout-pass-for-the-long-ones",
