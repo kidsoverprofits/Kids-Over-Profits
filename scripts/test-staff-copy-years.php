@@ -41,7 +41,8 @@ $check('...a Woodbury one too', kop_scy_role('Former Admissions (before 2009, Wo
 $check('...keeping any other words in its brackets', kop_scy_role('Former Director (before 2007, the boys program)', 'Woodbury Reports') === 'Former Director (the boys program)');
 $check('a range from the copy year on comes off', kop_scy_role('Founder (2025-2026, r/troubledteens wiki)', $wiki) === 'Founder');
 $check('a year the source gave stays', kop_scy_role('Former Staff (2001, r/troubledteens wiki)', $wiki) === 'Former Staff (2001, r/troubledteens wiki)');
-$check('a range ending in the copy year stays', kop_scy_role('CEO (2021-2025, r/troubledteens wiki)', $wiki) === 'CEO (2021-2025, r/troubledteens wiki)');
+$check('a range ending in the copy year comes off (owner, 2026-11-17)', kop_scy_role('CEO (2021-2025, r/troubledteens wiki)', $wiki) === 'CEO');
+$check('a range ending before the copy stays', kop_scy_role('CEO (2016-2020, r/troubledteens wiki)', $wiki) === 'CEO (2016-2020, r/troubledteens wiki)');
 $heal = 'HEAL, staff list for X (archived 2025-07-16)';
 $check('a HEAL year comes off (a retrieval date)', kop_scy_role('Therapist (2025, HEAL)', $heal) === 'Therapist');
 $check('a HEAL range comes off', kop_scy_role('Former CEO (2021-2025, HEAL)', 'r/troubledteens wiki') === 'Former CEO');
@@ -61,7 +62,9 @@ $wb = array('id' => 5, 'role' => 'Clinical Director', 'years' => 'before 2008', 
 $check('a Woodbury "before 2008" loses its years', kop_scy_job_action($wb, array($wb)) === 'clear');
 $check('...and stays when another job there has another role', kop_scy_job_action($wb, array($wb, array('id' => 6, 'role' => 'Therapist', 'years' => '2003'))) === 'clear');
 $check('...but goes when one there has the same role', kop_scy_job_action($wb, array($wb, array('id' => 6, 'role' => 'clinical director', 'years' => '2003'))) === 'hide');
-$check('a range starting before the copy stays', kop_scy_job_action(array('id' => 7, 'years' => '2008-2025', 'source' => $wiki), array()) === '');
+$check('a range ending at the copy loses its years', kop_scy_job_action(array('id' => 7, 'years' => '2008-2025', 'source' => $wiki), array()) === 'clear');
+$check('Lichfield: Teen Help "1991-2025" (undated wiki) loses its years', kop_scy_job_action(array('id' => 10, 'years' => '1991-2025', 'source' => 'r/troubledteens wiki'), array()) === 'clear');
+$check('a range ending before the copy stays', kop_scy_job_action(array('id' => 11, 'years' => '2010-2016', 'source' => $wiki), array()) === '');
 
 // --- the pass and its undo, on a copy of the mirror ------------------------------
 if (!file_exists($db_path)) {
@@ -132,7 +135,7 @@ if (!file_exists($db_path)) {
         if (array_keys($nb) != array_keys($na)) $names_ok = false;
     }
     $check('a folded record still names everyone it did', $names_ok);
-    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND ((source LIKE 'r/troubledteens wiki%' AND source NOT LIKE '%(as of %' AND years GLOB '202[5-9]*') OR (source LIKE '%troubledteens wiki%(as of %' AND substr(years, 1, 4) >= substr(source, instr(source, '(as of ') + 7, 4) AND years GLOB '[12][0-9][0-9][0-9]*') OR years LIKE 'before %' OR (source LIKE 'HEAL%' AND years <> ''))")->fetchColumn();
+    $j = $pdo->query("SELECT COUNT(*) FROM kop_person_jobs WHERE hidden = 0 AND ((source LIKE 'r/troubledteens wiki%' AND source NOT LIKE '%(as of %' AND (years GLOB '202[5-9]*' OR years GLOB '*-202[5-9]')) OR (source LIKE '%troubledteens wiki%(as of %' AND max(substr(years, 1, 4), substr(years, -4)) >= substr(source, instr(source, '(as of ') + 7, 4) AND years GLOB '[12][0-9][0-9][0-9]*') OR years LIKE 'before %' OR (source LIKE 'HEAL%' AND years <> ''))")->fetchColumn();
     $check('no shown job keeps a copy year', (int) $j === 0, "$j left");
     $check('jobs were cleared and hidden', $res['jobs_cleared'] > 0 && $res['jobs_hidden'] > 0);
     $sra = json_decode((string) $pdo->query('SELECT json_data FROM facilities_v2 WHERE id = 12293')->fetchColumn(), true);

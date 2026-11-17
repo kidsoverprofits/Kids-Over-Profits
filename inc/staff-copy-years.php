@@ -22,7 +22,8 @@
  * Version 3 (owner, 2026-11-16, Claude note #19: "wrong year, all the 'before 2022' etc should be stripped too"):
  * every "before YYYY" comes off, whatever the source (a guess from the source's date, never when the job was),
  * and so does a year or range starting at the copy year or later ("Founder, Owner, 2025-2026" on a page copied
- * 2025-12-18). A range starting earlier ("2008-2025") still stays. A job is taken off, not cleared, only when
+ * 2025-12-18). Version 5 (owner, 2026-11-17, "they need to go"): a range ending at the copy year ("1991-2025")
+ * goes too; its end is the copy, not when the job ended. A job is taken off, not cleared, only when
  * another job at that place has the same role.
  * Tested by scripts/test-staff-copy-years.php.
  */
@@ -60,10 +61,10 @@ if (!function_exists('kop_scy_copy_year')) {
             return $rest === '' || preg_match('#^(?:r/troubledteens wiki|Woodbury Reports|HEAL|Fornits)$#i', $rest) ? '' : ' (' . $rest . ')';
         }, $role);
         $y = kop_scy_copy_year($source);
-        // A year or range starting at the copy or after it ("2025-2026" on a page copied in 2025) is only the copy.
+        // A year or range reaching the copy year ("2025-2026", and since version 5 "1991-2025") is only the copy.
         if ($y) {
-            $role = preg_replace_callback('#\s*\(((?:19|20)\d{2})(?:\s*-\s*(?:19|20)\d{2})?(?:,\s*r/troubledteens wiki)?\)\s*$#i', function ($m) use ($y) {
-                return (int) $m[1] >= $y ? '' : $m[0];
+            $role = preg_replace_callback('#\s*\(((?:19|20)\d{2})(?:\s*-\s*((?:19|20)\d{2}))?(?:,\s*r/troubledteens wiki)?\)\s*$#i', function ($m) use ($y) {
+                return max((int) $m[1], (int) ($m[2] ?? 0)) >= $y ? '' : $m[0];
             }, $role);
         }
         return trim($role);
@@ -76,7 +77,7 @@ if (!function_exists('kop_scy_copy_year')) {
         if ($years === '') return '';
         $copy = kop_scy_is_heal($job['source'] ?? '')
             || preg_match('/^before\s/i', $years)
-            || ($y && preg_match('/^((?:19|20)\d{2})(?:\s*-\s*(?:19|20)\d{2})?$/', $years, $m) && (int) $m[1] >= $y);
+            || ($y && preg_match('/^((?:19|20)\d{2})(?:\s*-\s*((?:19|20)\d{2}))?$/', $years, $m) && max((int) $m[1], (int) ($m[2] ?? 0)) >= $y);
         if (!$copy) return '';
         // Taken off only when another job at the place says the same (or it says nothing): a role is never lost.
         $role = kop_scy_place_key($job['role'] ?? '');
