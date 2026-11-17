@@ -1615,7 +1615,8 @@ function kop_apply_name_correction_seeds() {
  * merged; logged like a merge from the screen, so its Merged tab can undo it.
  * 'as_duplicate': true merges a pair whose names read as a rename as one
  * program (the owner says it is the same place, no years per name); 'alias'
- * files the dropped name as an other name (kop_fmerge_do_merge()).
+ * files the dropped name as an other name (kop_fmerge_do_merge()); 'rename':
+ * {"year": N} merges a renamed pair as a rename (keep = the later name).
  */
 function kop_apply_facility_merge_seeds() {
     $done = array();
@@ -1650,7 +1651,16 @@ function kop_apply_facility_merge_seeds() {
         }
         try {
             $dup = $e['as_duplicate'] ?? false;
-            $done[] = kop_fmerge_do_merge($pdo, $prefix, $keep, $drop, 'seed', null, $dup === 'alias' ? 'alias' : !empty($dup));
+            // 'rename': {"year": N} merges as a rename, the way Merge Duplicates > Renamed programs does: 'keep' is the
+            // later name, 'drop' the earlier one, which keeps its own years and what was filed under it.
+            $rename = null;
+            if (!empty($e['rename']) && is_array($e['rename'])) {
+                $year = (int) ($e['rename']['year'] ?? 0);
+                $rename = array('year' => $year, 'earlier' => array('end' => $year ?: null), 'later' => array('start' => $year ?: null));
+            }
+            $done[] = $rename
+                ? kop_fmerge_do_merge($pdo, $prefix, $keep, $drop, 'seed', $rename)
+                : kop_fmerge_do_merge($pdo, $prefix, $keep, $drop, 'seed', null, $dup === 'alias' ? 'alias' : !empty($dup));
         } catch (Throwable $ex) {
             error_log('kop_apply_facility_merge_seeds: ' . $ex->getMessage());
         }
@@ -2750,7 +2760,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '167';   // 167: Aspen Education Group record folded into the company, RedCliff + Kolob merges, Telos names (item 30)
+    $version = '168';   // 168: Agape + Mohican (rename) merges, JRC's past name Behavior Research Institute (plan 4.3 item 31)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -3,7 +3,8 @@
  * Offline checks for KOP Tools > Merge Duplicates (inc/facility-merge.php,
  * inc/facility-merge-match.php) against the production mirror.
  *
- *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.php [--db=tmp/prod.sqlite] [--list] [--pairs=keep:drop,...]
+ *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.php [--db=tmp/prod.sqlite] [--list] [--pairs=keep:drop[@year],...]
+ *   (keep:drop@year merges as a rename, the way a seeds/facility-merges.json entry with "rename" does: keep = the later name)
  *
  * Every table a merge touches is copied, with its keys, into an in-memory
  * database, so the mirror is never changed. For a sample of real pairs it
@@ -178,8 +179,9 @@ if (!empty($args['pairs'])) {
     // --pairs=keep:drop,...: only these (a seeds/facility-merges.json entry before it ships).
     $sample = array();
     foreach (explode(',', (string) $args['pairs']) as $pp) {
+        list($pp, $year) = explode('@', $pp) + array('', '');
         list($a, $b) = array_map('intval', explode(':', $pp) + array(0, 0));
-        if ($a && $b && isset($names[$a], $names[$b])) $sample[] = array('a' => $a, 'b' => $b);
+        if ($a && $b && isset($names[$a], $names[$b])) $sample[] = array('a' => $a, 'b' => $b, 'rename' => $year !== '' ? (int) $year : null);
         else echo "  (pair $pp: not both on file)\n";
     }
 }
@@ -200,7 +202,9 @@ foreach ($sample as $p) {
     $news = $pdo->query("SELECT COUNT(DISTINCT news_id) FROM news_facility_links WHERE facility_id IN ($keep, $drop)")->fetchColumn();
 
     $pdo->beginTransaction();
-    $entry = kop_fmerge_execute($pdo, $prefix, $keep, $drop, array('folder_keep' => $fk, 'folder_drop' => $fd));
+    $ry = $p['rename'] ?? null;
+    $entry = kop_fmerge_execute($pdo, $prefix, $keep, $drop, array('folder_keep' => $fk, 'folder_drop' => $fd) + ($ry === null ? array()
+        : array('rename' => array('year' => $ry, 'earlier' => array('end' => $ry ?: null), 'later' => array('start' => $ry ?: null)))));
     $pdo->commit();
     echo '  moved: ' . json_encode($entry['report']) . "\n";
 
@@ -223,7 +227,12 @@ foreach ($sample as $p) {
     check((int) $pdo->query("SELECT COUNT(DISTINCT news_id) FROM news_facility_links WHERE facility_id = $keep")->fetchColumn() === (int) $news, "the kept record has all $news articles");
 
     $merged = json_decode((string) $pdo->query("SELECT json_data FROM facilities_v2 WHERE id = $keep")->fetchColumn(), true);
-    $names_now = array_map('kop_facility_name_key', array_merge(array($merged['identification']['name']), (array) ($merged['identification']['otherNames'] ?? array())));
+    $names_now = array_map('kop_facility_name_key', array_merge(array($merged['identification']['name']), (array) ($merged['identification']['otherNames'] ?? array()),
+        (array) ($merged['identification']['pastNames'] ?? array())));
+    if ($ry !== null) {
+        check(in_array(kop_facility_name_key($drop_doc['identification']['name']), array_map('kop_facility_name_key', (array) ($merged['identification']['pastNames'] ?? array())), true),
+            'a rename files the earlier name as a past name');
+    }
     check(in_array(kop_facility_name_key($drop_doc['identification']['name']), $names_now, true), 'the dropped name is one of its names');
     $lost = array();
     foreach (array('staff', 'credentials', 'notes', 'resources') as $k) {

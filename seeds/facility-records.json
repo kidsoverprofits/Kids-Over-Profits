@@ -11877,5 +11877,27 @@
         "currentOperator": "CERTS Group"
       }
     }
+  },
+  {
+    "id": 12008,
+    "unique_name": "Judge Rotenberg Educational Center",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Judge Rotenberg Educational Center",
+        "nameKey": "judge rotenberg educational center",
+        "investors": [],
+        "pastNames": [
+          "Behavior Research Institute"
+        ],
+        "otherNames": [],
+        "currentName": "",
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": ""
+      }
+    }
   }
 ]

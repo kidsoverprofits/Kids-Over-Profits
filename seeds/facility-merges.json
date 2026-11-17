@@ -127,5 +127,23 @@
     "drop": 10983,
     "drop_name": "VisionQuest Residential Fort Worth",
     "note": "VisionQuest's Fort Worth residential program (1518 Vaughn Blvd): one VisionQuest record, at the owner's request 2026-11-17 before the About rewrite batch 2; Undo on the Merged tab."
+  },
+  {
+    "keep": 11361,
+    "keep_name": "Agape Baptist Academy",
+    "drop": 100708,
+    "drop_name": "Agapé Boarding School",
+    "as_duplicate": "alias",
+    "note": "Agape Boarding School, Stockton, MO: the 'Stockton, CA' record was an empty news-scan stub whose one article is a Missouri bill story; 11361 already lists the name (plan 4.3 item 31, owner go-ahead 2026-11-17). Undo on the Merged tab."
+  },
+  {
+    "keep": 100760,
+    "keep_name": "Empowering to Elevate Academy",
+    "drop": 13261,
+    "drop_name": "Mohican Young Star Academy",
+    "rename": {
+      "year": 2025
+    },
+    "note": "Mohican Young Star Academy (Perrysville, OH) rebranded as Empowering to Elevate Academy late in 2025: Signal Cleveland 2026, \"Mohican, which late last year rebranded as Empowering to Elevate Academy\" (news #10317). Merged as a rename (plan 4.3 item 31, owner go-ahead 2026-11-17). Undo on the Merged tab."
   }
 ]
