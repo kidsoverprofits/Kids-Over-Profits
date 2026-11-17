@@ -4068,15 +4068,11 @@ if (!function_exists('kop_facility_page_data')) {
         foreach ($staff as $group => $people) $staff[$group] = kop_facility_pages_tidy_citations($people);
         $testimony = kop_facility_pages_testimony($doc['survivorTestimony'] ?? null);
         // What survivors and families wrote on the Fornits forum is testimony, not a finding of the record:
-        // its incident lines, leads and discussion links leave their sections and join the survivor testimony.
-        $forum_incidents = array();
+        // its leads and discussion links leave their sections and join the survivor testimony. Its incident lines
+        // leave the record's incidents and are not shown at all: no dated timeline of forum posts (owner, 2026-11-17).
         foreach ($incidents as $i => $inc) {
-            if (stripos((string) $inc['cite'], 'Fornits') === 0) {
-                $forum_incidents[] = $inc;
-                unset($incidents[$i]);
-            }
+            if (stripos((string) $inc['cite'], 'Fornits') === 0) unset($incidents[$i]);
         }
-        $forum_incidents = kop_facility_pages_tidy_citations($forum_incidents);
         $incidents = array_values($incidents);
         $forum_leads = array();
         foreach ($notes as $i => $note) {
@@ -4097,8 +4093,8 @@ if (!function_exists('kop_facility_page_data')) {
                 }
             }
         }
-        $forum = ($forum_incidents || $forum_leads || $forum_links)
-            ? array('incidents' => $forum_incidents, 'leads' => $forum_leads, 'links' => $forum_links)
+        $forum = ($forum_leads || $forum_links)
+            ? array('leads' => $forum_leads, 'links' => $forum_links)
             : array();
         $profile_links = array();
         foreach ((array) ($doc['profileLinks'] ?? array()) as $link) {

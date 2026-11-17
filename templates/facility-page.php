@@ -900,21 +900,6 @@ get_header();
                 <?php if ($kop_fp_remember) echo kop_ra_section_html($kop_fp_remember); // Escaped inside. ?>
                 <?php if (!empty($page['forum'])) : $kop_fp_forum = $page['forum']; ?>
                     <h3 class="kop-fp-subhead">Reported on survivor forums</h3>
-                    <?php if (!empty($kop_fp_forum['incidents'])) : ?>
-                    <ol class="kop-fp-timeline kop-fp-forum">
-                        <?php foreach ($kop_fp_forum['incidents'] as $inc) : ?>
-                            <li>
-                                <?php if ($inc['when'] !== '' || $inc['kind'] !== '') : ?>
-                                    <p class="kop-fp-tl-head">
-                                        <?php if ($inc['when'] !== '') : ?><span class="kop-fp-tl-when"><?php echo esc_html($inc['when']); ?></span><?php endif; ?>
-                                        <?php if ($inc['kind'] !== '') : ?><span class="kop-fp-tl-kind"><?php echo esc_html($inc['kind']); ?></span><?php endif; ?>
-                                    </p>
-                                <?php endif; ?>
-                                <p class="kop-fp-tl-text"><?php echo esc_html($inc['text']); ?><?php if ($inc['source'] !== '') $kop_fp_sources(array($inc), 'span'); ?></p>
-                            </li>
-                        <?php endforeach; ?>
-                    </ol>
-                    <?php endif; ?>
                     <?php if (!empty($kop_fp_forum['leads'])) : ?>
                     <ul class="kop-fp-notes">
                         <?php foreach ($kop_fp_forum['leads'] as $kop_fp_lead) : ?><li><?php echo kop_facility_pages_cited_html($kop_fp_lead); ?></li><?php endforeach; ?>
