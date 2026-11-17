@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 14:52 UTC",
- "source": "f9983d1a10b7cd6cd34a71c6c49d95c3a6e607ce",
+ "built": "2026-11-17 14:55 UTC",
+ "source": "526a14a4f0c645eb69054ec85810e0766a38692d",
  "sections": [
   {
    "key": "2",
@@ -3185,9 +3185,9 @@
       {
        "id": "4.3:staff-years-that-were-only-a-wiki-page-s-copy-date-2026-10-3",
        "lead": "Staff years that were only a wiki page's copy date (2026-10-30, owner: \"fix the wider problem\")",
-       "text": "**Staff years that were only a wiki page's copy date (2026-10-30, owner: \"fix the wider problem\")**. The facts build read each r/troubledteens wiki page as an issue dated by its copy (\"as of 2025-12-18\") and gave that year to everyone on it: \"Former Therapist (2025, r/troubledteens wiki)\", \"before 2025\", and past jobs dated 2025. Owner, 2026-10-30: HEAL's years are retrieval years too (\"the heal page absolutely DID NOT say jeannie worked there in 2020\"). Fixed in the build (kop-pipeline `scripts/woodbury-facts.py`: a wiki or HEAL copy gives no year; KOP library documents keep theirs). The one-time pass `kop_apply_staff_copy_years()` (inc/staff-copy-years.php) runs with the deploy seeds. Version 1 (template 149, ran 2026-10-28) took the wiki copy years off. Version 2 (template 150) also takes every year off a role tagged \", HEAL)\", ranges included, and off every past job a HEAL page gave. On the mirror the two together fixed 5,611 roles on 372 records, cleared the years of 1,759 past jobs and hid 109 that repeated another job at the same place. Woodbury years stay. Undo: roles via `kop_scy_undo()` (log in option kop_staff_copy_years_log), jobs at KOP Tools > People > Past jobs. Check after deploy: `SELECT option_value FROM wpdl_options WHERE option_name='kop_staff_copy_years_version'` = 2, and https://kidsoverprofits.org/facility/spring-ridge-academy-az/ shows Gayle L. Gregory as \"Former Psychiatrist\".",
+       "text": "**Staff years that were only a wiki page's copy date (2026-10-30, owner: \"fix the wider problem\")**. The facts build read each r/troubledteens wiki page as an issue dated by its copy (\"as of 2025-12-18\") and gave that year to everyone on it: \"Former Therapist (2025, r/troubledteens wiki)\", \"before 2025\", and past jobs dated 2025. Owner, 2026-10-30: HEAL's years are retrieval years too (\"the heal page absolutely DID NOT say jeannie worked there in 2020\"). Fixed in the build (kop-pipeline `scripts/woodbury-facts.py`: a wiki or HEAL copy gives no year; KOP library documents keep theirs). The one-time pass `kop_apply_staff_copy_years()` (inc/staff-copy-years.php) runs with the deploy seeds. Version 1 (template 149, ran 2026-10-28) took the wiki copy years off. Version 2 (template 150) also takes every year off a role tagged \", HEAL)\", ranges included, and off every past job a HEAL page gave. On the mirror the two together fixed 5,611 roles on 372 records, cleared the years of 1,759 past jobs and hid 109 that repeated another job at the same place. Woodbury years stay. Undo: roles via `kop_scy_undo()` (log in option kop_staff_copy_years_log), jobs at KOP Tools > People > Past jobs. Check after deploy: `SELECT option_value FROM wpdl_options WHERE option_name='kop_staff_copy_years_version'` = 2, and https://kidsoverprofits.org/facility/spring-ridge-academy-az/ shows Gayle L. Gregory as \"Former Psychiatrist\". - Version 6 (Claude note #20, 2026-11-17, commit f57008b5): a \"(1971-2025, r/troubledteens wiki)\" range goes even when the merged entry cites a HEAL page (Provo Canyon's founders), and staff cards no longer repeat the cited source's name in the role's brackets (kop_scy_role_display()). Open: a card whose years came from the wiki but whose link cites HEAL keeps \"(2002-2022, r/troubledteens wiki)\" inline (Provo Canyon: Jerry Spanos, Ken Huey, Drew Hirsch, Alan Pontius). The fix is a second \"source\" link per card (kop_facility_pages_sources_html() already numbers several): carry the wiki citation as a per-person sources list in kop_facility_pages_staff_items(), print it in templates/facility-page.php, and add it to the app's staff card (a new payload field: app parity).",
        "ask": "",
-       "date": "2026-10-30",
+       "date": "2026-11-17",
        "why": "",
        "go": [],
        "choices": [],
@@ -3195,7 +3195,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "c8df105bd600"
+       "hash": "d19812a81738"
       },
       {
        "id": "4.3:teen-challenge-records-adult-programs-ages-a-duplicate-and-d",
