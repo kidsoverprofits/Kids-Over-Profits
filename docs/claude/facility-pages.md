@@ -42,6 +42,11 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-citation-cleanup.
 php -d extension=mbstring -d extension=pdo_sqlite scripts/test-citation-lookup.php   # each kind of record, from tmp/prod.sqlite
 # Facility pages show approved serious findings (inspection_highlights), staff with their other industry roles
 # (other records' staff lists + network map), incidents as a timeline, and news cards with pictures:
+# One event told twice (a record's short "1974: shut down ..." line beside the wiki's fuller one) shows once: same year, not two
+# different months, 3+ of their own words shared and 40% of the shorter's (kop_facility_pages_incident_same()); the fuller
+# stays, the other's source joins it and its words go in the timeline card ("Also on record"). On the timeline a line
+# about a lawsuit on record (suit/court/jury/injunction/sanction words, filed -2..+5 years) goes into that case's card, and
+# two lawsuit records of one docket number ("1:2014cv00015" = "1:14-cv-00015", kop_ptl_case_key()) are one card (Claude note #21)
 # inc/news-images.php copies each article's share image (else the outlet's logo) into uploads/kop-news-images/, hourly cron
 php scripts/test-news-images.php [--live=20]      # parser fixture; --live fetches real articles (needs -d extension=curl)
 php api/fetch-news-images.php apply --limit=400 --minutes=25   # on the server (ea-php82): fill the backlog now

@@ -1012,6 +1012,17 @@ if (!function_exists('kop_ptl_lawsuit_event')) {
     }
 }
 
+if (!function_exists('kop_ptl_case_key')) {
+    /**
+     * A federal docket number in one spelling, or '': "1:2014cv00015" and "1:14-cv-00015" are both "1:14cv15"
+     * (Claude note #21: two lawsuit records of one case).
+     */
+    function kop_ptl_case_key($text) {
+        if (!preg_match('/\b(\d):(?:19|20)?(\d{2})\s*-?\s*(cv|cr)\s*-?\s*0*(\d+)\b/i', (string) $text, $m)) return '';
+        return $m[1] . ':' . $m[2] . strtolower($m[3]) . (int) $m[4];
+    }
+}
+
 if (!function_exists('kop_ptl_death_event')) {
     function kop_ptl_death_event(array $m, $year, array $program = null) {
         $who = trim($m['name'] . (($m['age'] ?? '') !== '' ? ', ' . $m['age'] . ',' : ''));
@@ -1139,12 +1150,21 @@ if (!function_exists('kop_ptl_incident_event')) {
         if ($text === '') return null;
         $first = preg_match('/^(.{20,180}?[.!?])(\s|$)/u', $text, $s) ? $s[1] : kop_ptl_short($text, 160);
         $sources = array();
-        if (($inc['source'] ?? '') !== '' || ($inc['url'] ?? '') !== '') $sources[] = array('url' => (string) ($inc['url'] ?? ''), 'cite' => (string) ($inc['cite'] ?? $inc['source'] ?? ''));
+        // A line merged with another telling of it (kop_facility_pages_incidents_dedupe()) keeps both sources.
+        foreach (array_merge(array($inc), array_filter((array) ($inc['also'] ?? array()), 'is_array')) as $s) {
+            if (($s['source'] ?? '') !== '' || ($s['url'] ?? '') !== '') $sources[] = array('url' => (string) ($s['url'] ?? ''), 'cite' => (string) ($s['cite'] ?? $s['source'] ?? ''));
+        }
         $label = ($inc['kind'] ?? '') !== '' ? (string) $inc['kind'] : 'Incident';
+        $detail = $first !== $text ? array(kop_ptl_short($text, 600)) : array();
+        // ...and its words, in the card: nothing a merge took is lost from the page.
+        foreach (array_filter((array) ($inc['also'] ?? array()), 'is_array') as $s) {
+            $t = trim(preg_replace('/\s+/', ' ', strip_tags((string) ($s['text'] ?? ''))));
+            if ($t !== '' && $t !== $text) $detail[] = 'Also on record' . (($s['when'] ?? '') !== '' && $s['when'] !== $inc['when'] ? ' (' . $s['when'] . ')' : '') . ': ' . kop_ptl_short($t, 400);
+        }
         return kop_ptl_event($y, 'incident', $program ? $label . ' at ' . $program['name'] : $label, array(
             'when'    => trim((string) $inc['when']) !== (string) $y ? (string) $inc['when'] : '',
             'lead'    => trim($lead_prefix . $first),
-            'detail'  => $first !== $text ? array(kop_ptl_short($text, 600)) : array(),
+            'detail'  => $detail,
             'items'   => $program && $program['url'] !== '' ? array($program) : array(),
             'sources' => $sources,
             'major'   => (bool) preg_match('/\b(riots?|uprising|escaped?|runaways?|fires?|arson|died|death|killed|suicide|murder(ed)?|shot|stabbed|raped?|sexual(ly)? assault(ed)?)\b/i', $label . ' ' . $first),
@@ -1414,12 +1434,68 @@ if (!function_exists('kop_ptl_facility')) {
             $e['lead'] = trim($as($m) . $e['lead']);
             $events[] = $e;
         }
+        $law_events = array();
+        $law_text = array();
+        $law_case = array();
         foreach ($lists['lawsuits'] as $l) {
             if (($l['year'] ?? '') === '') continue;
             $e = kop_ptl_lawsuit_event($l, (string) ($page['lawsuits_url'] ?? ''));
             $e['lead'] = trim($as($l) . $e['lead']);
-            $events[] = $e;
+            $text = implode(' ', array((string) $l['case_name'], (string) ($l['court'] ?? ''), (string) ($l['case_number'] ?? ''), (string) ($l['summary'] ?? ''), (string) ($l['outcome'] ?? '')));
+            // Two records of one case ("Court opinion - Elevations RTC (case no. 1:2014cv00015)" and "Hinman v. Island
+            // View Academy et al.", 1:14-cv-00015): one card, under the case's own name (Claude note #21).
+            $case = kop_ptl_case_key((string) ($l['case_number'] ?? '') . ' ' . (string) $l['case_name']);
+            if ($case !== '' && isset($law_case[$case])) {
+                $k = $law_case[$case];
+                $a = $law_events[$k];
+                $named = static function ($t) { return !preg_match('/^Court (?:opinion|record)\b/i', $t); };
+                $main = $named($e['title']) && !$named($a['title']) ? $e : $a;
+                $other = $main === $e ? $a : $e;
+                foreach ($other['detail'] as $d) {
+                    if (!in_array($d, $main['detail'], true)) $main['detail'][] = $d;
+                }
+                $have = array_map(static function ($f) { return $f[0]; }, $main['facts']);
+                foreach ($other['facts'] as $f) {
+                    if (!in_array($f[0], $have, true)) $main['facts'][] = $f;
+                }
+                $main['sources'] = array_merge($main['sources'], $other['sources']);
+                $main['major'] = $main['major'] || $other['major'];
+                $main['year'] = min($a['year'], $e['year']);
+                $law_events[$k] = $main;
+                $law_text[$k] .= ' ' . $text;
+                continue;
+            }
+            $law_events[] = $e;
+            $law_text[] = $text;
+            if ($case !== '') $law_case[$case] = count($law_events) - 1;
         }
+        // An incident line retelling a lawsuit on record goes into that lawsuit's card, with its date and source, not
+        // beside it (Claude note #21: Milonas v. Williams was the 1979 case, a 1980 "Federal jury sides with the
+        // school in Milonas and Rice" line and a 1982 "district court's permanent injunction" line): filed up to two
+        // years after the line's year or up to five before, and most of the line's own words in the case's.
+        $fold = function_exists('kop_facility_pages_incident_same');
+        $common = $fold ? kop_facility_pages_incident_common(array_merge(array_column($lists['incidents'], 'text'), $law_text)) : array();
+        $incidents = array();
+        foreach ($lists['incidents'] as $inc) {
+            $iy = kop_ptl_incident_year($inc);
+            $into = null;
+            // Only a line about the case itself: "HEAL says police call records show complaints" stays its own event.
+            $courtly = preg_match('/\b(?:law)?suits?\b|\bsued?\b|\bcourts?\b|\bjury\b|\bjurors\b|\bverdict\b|\binjunction\b|\bruling\b|\bjudge\b|\bsanction/i', (string) ($inc['kind'] ?? '') . ' ' . (string) $inc['text']);
+            foreach ($fold && $iy && $courtly ? $law_events : array() as $k => $le) {
+                if ($iy < $le['year'] - 2 || $iy > $le['year'] + 5) continue;
+                if (kop_facility_pages_incident_same((string) $inc['text'], $law_text[$k], $common)) { $into = $k; break; }
+            }
+            if ($into === null) { $incidents[] = $inc; continue; }
+            $when = trim((string) ($inc['when'] ?? ''));
+            $law_events[$into]['detail'][] = ($when !== '' ? $when . ': ' : '') . kop_ptl_short(trim(preg_replace('/\s+/', ' ', strip_tags((string) $inc['text']))), 420);
+            foreach (array_merge(array($inc), array_filter((array) ($inc['also'] ?? array()), 'is_array')) as $n => $s) {
+                if ($n > 0 && trim((string) ($s['text'] ?? '')) !== '') {
+                    $law_events[$into]['detail'][] = 'Also on record' . (($s['when'] ?? '') !== '' ? ' (' . $s['when'] . ')' : '') . ': ' . kop_ptl_short(trim(preg_replace('/\s+/', ' ', strip_tags((string) $s['text']))), 400);
+                }
+                if (($s['source'] ?? '') !== '' || ($s['url'] ?? '') !== '') $law_events[$into]['sources'][] = array('url' => (string) ($s['url'] ?? ''), 'cite' => (string) ($s['cite'] ?? $s['source'] ?? ''));
+            }
+        }
+        foreach ($law_events as $e) $events[] = $e;
         // A page cut by name lists each finding under its name's section (#<era id>-violations), not #violations.
         $viol_at = array();
         foreach ($eras as $era) {
@@ -1453,7 +1529,7 @@ if (!function_exists('kop_ptl_facility')) {
                 'major'  => $grave,
             ));
         }
-        foreach ($lists['incidents'] as $inc) {
+        foreach ($incidents as $inc) {
             $e = kop_ptl_incident_event($inc, $as($inc));
             if ($e) $events[] = $e;
         }

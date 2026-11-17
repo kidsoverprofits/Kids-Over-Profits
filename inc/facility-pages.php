@@ -1553,7 +1553,8 @@ if (!function_exists('kop_facility_pages_incidents')) {
             if ($text === '') continue;
             $cite = '';
             $url = '';
-            if (preg_match('#\s*\(((?:Fornits|Woodbury Reports|HEAL|r/troubledteens wiki)[^()]*(?:\([^()]*\)[^()]*)?)\)\s*\.?$#', $text, $m)) {
+            // Two brackets inside: 'page "National Association of Therapeutic Schools and Programs (NATSAP)" (as of 2025-12-18)' (Claude note #21).
+            if (preg_match('#\s*\(((?:Fornits|Woodbury Reports|HEAL|r/troubledteens wiki)[^()]*(?:\([^()]*\)[^()]*)*)\)\s*\.?$#', $text, $m)) {
                 $text = trim(substr($text, 0, -strlen($m[0])));
                 if (preg_match('#:?\s*(https?://\S+)$#', $m[1], $u)) {
                     $url = rtrim($u[1], ').');
@@ -1937,6 +1938,11 @@ if (!function_exists('kop_facility_pages_incidents_dedupe')) {
      * year, the same "N-year-old", and three more words in common. The fuller
      * one stays (exact date first, then the longer text); the other's source
      * is added to it. Anything less alike is kept as it is.
+     * Also (Claude note #21, owner 2026-11-17: "a vague version and a detailed version of the same event keep
+     * getting stacked back to back"): the same year and most of the shorter one's own words in the longer one
+     * ("1974: shut down over child abuse and neglect allegations; reopened the same year" beside the wiki's
+     * "Provo Canyon School was shut down and quickly reopened in 1974 due to child abuse and neglect"),
+     * kop_facility_pages_incident_same().
      */
     function kop_facility_pages_incidents_dedupe(array $items) {
         $stop = array_flip(explode(' ', 'that this with from after into their were have been staff facility program center treatment about which while there where when what they them his her him she'));
@@ -1944,6 +1950,7 @@ if (!function_exists('kop_facility_pages_incidents_dedupe')) {
             preg_match_all('/[a-z]{4,}/', strtolower((string) $t), $m);
             return array_diff_key(array_flip($m[0]), $stop);
         };
+        $common = kop_facility_pages_incident_common(array_column($items, 'text'));
         $keep = array();
         foreach ($items as $inc) {
             $dupe = null;
@@ -1951,6 +1958,13 @@ if (!function_exists('kop_facility_pages_incidents_dedupe')) {
                 foreach ($keep as $k => $other) {
                     if ($other['year'] !== $inc['year'] || !preg_match('/\b' . $age[1] . '[- ]year[- ]old\b/i', $other['text'])) continue;
                     if (count(array_intersect_key($words($inc['text']), $words($other['text']))) >= 3) { $dupe = $k; break; }
+                }
+            }
+            if ($dupe === null && $inc['year'] !== 9999) {
+                foreach ($keep as $k => $other) {
+                    // Two months named and not the same one: two events (Cinnamon Hills: a January and an October 2008 arrest).
+                    if ((int) $inc['sort'] >= 100 && (int) $other['sort'] >= 100 && intdiv((int) $inc['sort'], 100) !== intdiv((int) $other['sort'], 100)) continue;
+                    if ($other['year'] === $inc['year'] && kop_facility_pages_incident_same($inc['text'], $other['text'], $common)) { $dupe = $k; break; }
                 }
             }
             if ($dupe === null) { $keep[] = $inc; continue; }
@@ -1963,6 +1977,54 @@ if (!function_exists('kop_facility_pages_incidents_dedupe')) {
             $keep[$dupe] = $fuller;
         }
         return $keep;
+    }
+}
+
+if (!function_exists('kop_facility_pages_incident_words')) {
+    /**
+     * An incident's own words for telling two lines apart: words of four letters or more cut to their first six
+     * ("injection" = "injections", "licensers" = "licensing"), and numbers ("341", "27"), less the everyday words
+     * of incident lines and $common (words on many of the page's lines, like its own name).
+     */
+    function kop_facility_pages_incident_words($text, array $common = array()) {
+        static $everyday = null;
+        if ($everyday === null) {
+            $everyday = array_flip(explode(' ', 'about after also another away been being but could did does during each from had has have her him his into its more most other over said same says some such than that their them then there these they this those through under were what when where which while who with would year years program school staff student students resident residents youth child children teen teens parent report reported alleged alleges allegation former abuse physical emotional sexual restraint forced including facility center academy treatment isolation according neglect medical behavior member members against'));
+        }
+        preg_match_all("/[a-z]{4,}|\\d+/", strtolower(str_replace("'s", '', (string) $text)), $m);
+        $out = array();
+        foreach ($m[0] as $w) {
+            if (isset($everyday[$w])) continue;
+            if (!ctype_digit($w)) $w = substr($w, 0, 6);
+            if (!isset($common[$w])) $out[$w] = true;
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('kop_facility_pages_incident_common')) {
+    /** The words on more than a quarter of a page's incident lines (its name, "HEAL"): too common to match two lines by. */
+    function kop_facility_pages_incident_common(array $texts) {
+        $n = array();
+        foreach ($texts as $t) {
+            foreach (kop_facility_pages_incident_words($t) as $w => $_) $n[$w] = ($n[$w] ?? 0) + 1;
+        }
+        $limit = max(2, (int) ceil(count($texts) / 4));
+        return array_filter($n, static function ($c) use ($limit) { return $c > $limit; });
+    }
+}
+
+if (!function_exists('kop_facility_pages_incident_same')) {
+    /**
+     * Whether two lines tell one event (Claude note #21): three of their own words in common, and those are at
+     * least 40% of the shorter one's. "Staff member arrested for striking a 15-year-old" and "Staff member struck a
+     * client during a restraint" share none, and stay two.
+     */
+    function kop_facility_pages_incident_same($a, $b, array $common = array()) {
+        $wa = kop_facility_pages_incident_words($a, $common);
+        $wb = kop_facility_pages_incident_words($b, $common);
+        $shared = count(array_intersect_key($wa, $wb));
+        return $shared >= 3 && $shared >= 0.4 * min(count($wa), count($wb));
     }
 }
 

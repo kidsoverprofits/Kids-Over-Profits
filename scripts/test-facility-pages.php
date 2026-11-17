@@ -566,6 +566,41 @@ $check('wiki dates read and sort; one event written twice shows once, both sourc
     array_column($inc, 'when') === array('August 18, 1997', 'February 6, 2000', '2006', 'April 9, 2006', '')
     && count($inc[1]['also'] ?? array()) === 1 && strpos($inc[1]['text'], 'one month into his stay') !== false,
     wp_json_encode(array_column($inc, 'when')));
+// Claude note #21 (Provo Canyon): a short summary line and the wiki's fuller telling of one event show once; a wiki
+// page title in brackets still splits off as the citation (it was left in the text, dated by the copy, 2025).
+$inc = kop_facility_pages_incidents(array(
+    '1974: shut down over child abuse and neglect allegations; reopened the same year',
+    '2004: parent complaint alleges a 15-year-old\'s nose was broken before a forced Haldol injection and children were held in Observation most of the day',
+    '2015-2020: 341 Office of Licensing investigations, 27 substantiated violations',
+    'September 2024: staff member arrested for striking a 15-year-old during a restraint; guilty plea July 2025',
+    'December 1, 2024: staff member struck a client during a restraint (substantiated, repeat noncompliance)',
+    '1974: Closure order: Provo Canyon School was shut down and quickly reopened in 1974 due to child abuse and neglect. (r/troubledteens wiki, page "National Association of Therapeutic Schools and Programs (NATSAP)" (as of 2025-12-18))',
+    '2004: Incident: A 2004 complaint by a parent alleged assault, forced Haldol injections and prolonged isolation in the Investment and Observation units; the Utah Valley DA reportedly closed the case within a week as not criminal. (r/troubledteens wiki, page "Provo Canyon School" (as of 2025-12-18))',
+    '2015: Investigation: From 2015 to 2020 the Utah Office of Licensing conducted 341 investigations at the four campuses and substantiated 27 violations. (r/troubledteens wiki, page "Provo Canyon School" (as of 2025-12-18))',
+    'Reported 2025-12: Lawsuit: Two teens sent by their home state juvenile justice systems (Alaska and Nevada) ran away and sued the original owners, Jack Williams and Robert Crist. (r/troubledteens wiki, page "National Association of Therapeutic Schools and Programs (NATSAP)" (as of 2025-12-18))',
+));
+$check('one event in a short and a full telling shows once, with both sources; a bracketed wiki title is a citation (Claude note #21)',
+    array_map(static function ($x) { return $x['when'] . '|' . substr($x['text'], 0, 14); }, $inc) === array(
+        '1974|Provo Canyon S', '2004|A 2004 complai', '2015|From 2015 to 2', 'September 2024|Staff member a', 'December 1, 2024|Staff member s', '|Two teens sent')
+    && count($inc[0]['also'] ?? array()) === 1 && strpos($inc[0]['cite'], '(NATSAP)') !== false && strpos($inc[0]['text'], 'troubledteens') === false,
+    wp_json_encode(array_map(static function ($x) { return $x['when'] . '|' . substr($x['text'], 0, 14); }, $inc)));
+$check('a docket number in either spelling is one case', kop_ptl_case_key('Court opinion - Elevations RTC (case no. 1:2014cv00015)') === kop_ptl_case_key('1:14-cv-00015 (D. Utah)')
+    && kop_ptl_case_key('1:14-cv-00015') !== kop_ptl_case_key('2:22-cv-00053') && kop_ptl_case_key('691 F.2d 931') === '');
+$pcs = kop_facility_page_data(10371);
+if ($pcs) {
+    $tl = kop_ptl_facility($pcs);
+    $milonas = 0;
+    $hinman = 0;
+    $y1974 = 0;
+    foreach ($tl as $y) {
+        foreach ($y['events'] as $e) {
+            if (stripos($e['title'] . ' ' . $e['lead'], 'Milonas') !== false) $milonas++;
+            if (preg_match('/Hinman|Elevations RTC/', $e['title'])) $hinman++;
+            if ($y['year'] === 1974) $y1974++;
+        }
+    }
+    $check('Provo Canyon\'s timeline: Milonas is one card, Hinman one, 1974 one event (Claude note #21)', $milonas === 1 && $hinman === 1 && $y1974 === 1, "milonas $milonas, hinman $hinman, 1974 $y1974");
+}
 // "Reported" + the date the wiki page was read or HEAL's page was archived is not when it happened: the words
 // date it, or it has no date, placed after the item it is about (San Marcos: the lawsuit over the 2008 injury).
 $inc = kop_facility_pages_incidents(array(
