@@ -2750,7 +2750,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '166';   // 166: staff copy years version 5 (Claude note #19)
+    $version = '167';   // 167: Aspen Education Group record folded into the company, RedCliff + Kolob merges, Telos names (item 30)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

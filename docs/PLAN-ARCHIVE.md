@@ -3835,3 +3835,28 @@ From docs/plan/5-tests-failing.md item 1, verbatim. Both tests were rebased on v
     search, directory headings, prose links, network map build); the state hub cards title by the facility's popular
     name; prose links match a popular name and the name a facility uses now. Admin screens keep the record's name on
     purpose (docs/claude/facility-pages.md).
+
+### 4.3 Records, names and data quality (done 2026-11-17)
+
+30. **Facility records that are one program or a company** (owner, 2026-11-17, Provo Canyon staff careers, Claude note
+    #19 follow-up). The career fold (`kop_facility_pages_career_fold()`, 1f83e3fb) joins other spellings of a place, but
+    two linked records stay two lines:
+    - Merge candidates: RedCliff Ascent (`redcliff-ascent-ut`) and RedCliff Ascent Wilderness Program
+      (`redcliff-ascent-wilderness-program-ut`); Kolob Canyon RTC (`kolob-canyon-rtc-ut`) and "CERTS – Kolob Canyon
+      Residential Treatment Center" (`certs-kolob-canyon-residential-treatment-center-ut`, whose name also has a broken
+      dash). Check with the sources, then merge (`docs/claude/facility-pages.md`, merges).
+    - Telos RTC (free text on several careers) is Telos Academy's earlier name if the sources say so: add it as a past
+      name of `telos-academy-ut` and the careers link it.
+    - Aspen Education Group (`/facility/aspen-education-group/`, id 100001) is a company filed as a facility: move it to
+      a company page (`kop_apply_record_to_company_seeds()`, inc/admin.php) and point its staff, map lines and careers
+      (Kreg Gillman, Brad Gerrard, Larry Carter) at the operator.
+    - Done 2026-11-17: seeds/record-to-company.json folds record 100001 ("Aspen Education Group #2") into the existing
+      company (new 'fold': 38 people to keyExecutives, 17 notes and incident lines, exact undo); careers read company
+      staff (kop_facility_pages_people_index()), so the Aspen line links /operator/aspen-education-group/. Merges
+      (seeds/facility-merges.json): 10511 into RedCliff Ascent 10338 as another name (same Enterprise UT program, 1993,
+      Ascent, shared staff); 10414 into Kolob Canyon RTC 10342 (same New Harmony address, Kent Tasso and Craig Rodabough
+      on both). Telos RTC is not an earlier name: Woodbury Reports (March 2007, p. 27) calls Telos Academy "the
+      educational arm of Telos Residential Treatment Center (RTC)", and the program still goes by Telos RTC (wiki
+      2025, Breaking Code Silence), so Telos RTC, Telos Residential Treatment Center and Telos Residential Treatment
+      are other names of 10540 (seeds/facility-records.json v2), as is Kolob Canyon Residential Treatment Center on
+      10342. After-deploy checks stay open in docs/plan/4.3, item 30.

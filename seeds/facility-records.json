@@ -11825,5 +11825,57 @@
         "currentOperator": "Brighter Path Alabama, LLC"
       }
     }
+  },
+  {
+    "id": 10540,
+    "unique_name": "Telos Academy",
+    "version": 2,
+    "note": "Other names Telos RTC, Telos Residential Treatment Center, Telos Residential Treatment (2026-11-17, item 30). Telos Academy is the school of Telos RTC (Woodbury Reports, March 2007, p. 27: \"Telos Academy, the educational arm of Telos Residential Treatment Center (RTC), opened its doors Tuesday, January 16, 2007\"); the program is still called Telos RTC (r/troubledteens wiki page \"Telos RTC\", 2025; Breaking Code Silence \"Telos RTC (2004-present) Orem, UT\"), and Telos Academy is its north campus at 870 W Center St, this record's address. So these are other names, not earlier ones. Identification copied from production 2026-11-17.",
+    "facility": {
+      "identification": {
+        "name": "Telos Academy",
+        "nameKey": "telos academy",
+        "investors": [],
+        "pastNames": [],
+        "otherNames": [
+          "Telos RTC",
+          "Telos Residential Treatment Center",
+          "Telos Residential Treatment"
+        ],
+        "currentName": "",
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": ""
+      }
+    }
+  },
+  {
+    "id": 10342,
+    "unique_name": "Kolob Canyon RTC",
+    "version": 2,
+    "note": "Other name Kolob Canyon Residential Treatment Center (2026-11-17, item 30; the CERTS listing merged into this record, seeds/facility-merges.json). Identification copied from production 2026-11-17.",
+    "facility": {
+      "identification": {
+        "name": "Kolob Canyon RTC",
+        "nameKey": "kolob canyon rtc",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [],
+        "otherNames": [
+          "Kolob Canyon Residential Treatment Center"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "CERTS Group"
+      }
+    }
   }
 ]

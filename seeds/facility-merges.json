@@ -90,5 +90,21 @@
     "drop_name": "Teen Challenge Riverside Facility",
     "as_duplicate": true,
     "note": "Teen Challenge cleanup, item 29 (owner, 2026-11-04): one program on file twice (the second from the news scan, Woodbury or the reddit wiki). Merged as one program, not a rename. Undo on the Merged tab."
+  },
+  {
+    "keep": 10338,
+    "keep_name": "RedCliff Ascent",
+    "drop": 10511,
+    "drop_name": "RedCliff Ascent Wilderness Program",
+    "as_duplicate": "alias",
+    "note": "Item 30 (owner, 2026-11-17): one wilderness program on file twice. Both records are RedCliff Ascent in Enterprise, UT, opened 1993, run by the Ascent company, with the same staff (Andrea Burgess, Dan Sanderson, Matt Bulkley, Fotu Soliai); the second came from the r/troubledteens wiki page \"Redcliff Ascent Wilderness Program\". Its name is filed as an other name, not a past name. Undo on the Merged tab."
+  },
+  {
+    "keep": 10342,
+    "keep_name": "Kolob Canyon RTC",
+    "drop": 10414,
+    "drop_name": "CERTS – Kolob Canyon Residential Treatment Center",
+    "as_duplicate": true,
+    "note": "Item 30 (owner, 2026-11-17): one program on file twice. Both records are Kolob Canyon RTC at 1338 E 600 S, New Harmony, UT, a CERTS program, with Kent Tasso and Craig Rodabough on both staff lists; the second came from a 2006 Woodbury Reports listing under the CERTS name. Merged as one program. Undo on the Merged tab."
   }
 ]

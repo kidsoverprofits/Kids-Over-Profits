@@ -362,7 +362,13 @@ A record that becomes a company (`kop_rtc_convert()`, seeds/record-to-company.js
 reads the same list: link rows (`kop_rtc_link_tables()`) are deleted, rows still
 waiting for review are set to facility_id 0 with a `match_note`, decided rows keep
 the id. `/facility/<slug>/` 301s to the company from option
-`kop_record_to_company_log`, which also holds everything for Undo.
+`kop_record_to_company_log`, which also holds everything for Undo. A seed entry
+with `fold: true` names a company that already exists: the record's staff join its
+`keyStaff.keyExecutives` (one entry per person id), its notes and incident lines its
+notes, its folder an empty `document_folder_id` (`kop_rtc_fold()`); Undo restores the
+company's json as it was, or, if edited since, takes off only what the fold added.
+Readers: the company page, careers (`kop_facility_pages_people_index()` reads company
+staff), the people sync, and the map build (operator-profile lines, next rebuild).
 
 A record moved into a related category, such as Christian Rehabs for Adults
 (`kop_rmove_convert()`, seeds/related-moves.json), becomes a new related record

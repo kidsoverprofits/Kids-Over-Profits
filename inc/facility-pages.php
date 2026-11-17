@@ -2171,6 +2171,8 @@ if (!function_exists('kop_facility_pages_people_index')) {
         $fingerprint = (string) ($index['fingerprint'] ?? '');
         // A merge or a separation of people (inc/people.php) regroups them.
         if ($fingerprint !== '') $fingerprint .= '|' . (string) get_option('kop_people_version', '');
+        // Company staff are read too: a company edit rebuilds it.
+        if ($fingerprint !== '') $fingerprint .= '|' . (string) $wpdb->get_var("SELECT CONCAT(COUNT(*), ':', COALESCE(MAX(updated_at), '')) FROM `{$wpdb->prefix}kop_operators`");
         $cached = get_transient('kop_facility_pages_people');
         if ($fingerprint !== '' && is_array($cached) && ($cached['fingerprint'] ?? '') === $fingerprint) {
             return $memo = $cached['people'];
@@ -2188,6 +2190,26 @@ if (!function_exists('kop_facility_pages_people_index')) {
                     $role = trim((string) ($person['role'] ?? ''));
                     $people[$key][] = array((int) $row['id'], (string) $row['name'], $role);
                 }
+            }
+        }
+        // Company staff (keyStaff founders and keyExecutives, a named CEO) as [0, company, role, company page]:
+        // a career line to a company links its page, as a facility record's staff line does
+        // (Aspen Education Group's head office staff, folded off a facility record 2026-11-17).
+        $ops = $wpdb->prefix . 'kop_operators';
+        foreach ((array) $wpdb->get_results("SELECT id, name, json_data FROM `{$ops}` WHERE json_data LIKE '%keyStaff%'", ARRAY_A) as $row) {
+            $doc = json_decode((string) $row['json_data'], true);
+            $ks = is_array($doc['operator']['keyStaff'] ?? null) ? $doc['operator']['keyStaff'] : array();
+            if (!$ks) continue;
+            $company = function_exists('kop_operator_pages_display_name') ? kop_operator_pages_display_name((string) $row['name']) : (string) $row['name'];
+            $url = function_exists('kop_operator_page_url') ? (string) kop_operator_page_url((int) $row['id']) : '';
+            $list = array();
+            if (is_string($ks['ceo'] ?? null) && trim($ks['ceo']) !== '') $list[] = array('name' => $ks['ceo'], 'role' => 'CEO');
+            foreach ((array) ($ks['founders'] ?? array()) as $p) $list[] = is_array($p) ? $p + array('role' => 'Founder') : array('name' => (string) $p, 'role' => 'Founder');
+            foreach ((array) ($ks['keyExecutives'] ?? array()) as $p) if (is_array($p)) $list[] = $p;
+            foreach ($list as $person) {
+                $key = kop_facility_pages_group_key($person['name'] ?? '', (int) ($person['personId'] ?? 0));
+                if ($key === '') continue;
+                $people[$key][] = array(0, $company, trim((string) ($person['role'] ?? '')), $url);
             }
         }
         if ($fingerprint !== '') set_transient('kop_facility_pages_people', array('fingerprint' => $fingerprint, 'people' => $people), DAY_IN_SECONDS);
@@ -2334,14 +2356,16 @@ if (!function_exists('kop_facility_pages_person_career')) {
 
         foreach (kop_facility_pages_people_index()[$key] ?? array() as $hit) {
             list($fid, $fname, $role) = $hit;
+            // A company's staff list (fid 0) carries the company page; a company page leaves its own names out itself.
+            $company_url = isset($hit[3]) ? (string) $hit[3] : null;
             // A record merged into this one (until the hourly people sync moves its roles) is this place.
-            if ($fid === $here || (function_exists('kop_facility_merge_resolve') && kop_facility_merge_resolve($fid) === $here)) continue;
+            if ($company_url === null && ($fid === $here || (function_exists('kop_facility_merge_resolve') && kop_facility_merge_resolve($fid) === $here))) continue;
             // "Director (2008, Woodbury Reports), left": the year stays, the citation and the "left" go.
             $role = trim(preg_replace_callback('/\s*\(([^()]*)\)/', static function ($m) {
                 if (!preg_match('/Woodbury|HEAL|wiki|Fornits/i', $m[1])) return $m[0];
                 return preg_match('/\d{4}(?:-\d{4})?/', $m[1], $y) ? ' (' . $y[0] . ')' : '';
             }, kop_facility_pages_drop_left($role)), ' ,');
-            $add($fname, $role, '', isset($index_ids[$fid]) ? kop_facility_page_url($fid) : '', 'industry');
+            $add($fname, $role, '', $company_url !== null ? $company_url : (isset($index_ids[$fid]) ? kop_facility_page_url($fid) : ''), 'industry');
         }
         foreach (kop_facility_pages_map_people()[$key] ?? array() as $hit) {
             list($place, $role, $fid, $kind) = $hit;

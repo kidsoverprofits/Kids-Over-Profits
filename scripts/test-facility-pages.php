@@ -638,6 +638,10 @@ $check('past jobs split into place, role and years',
     && $career[1]['place'] === 'Cinnamon Hills Youth Crisis Center', wp_json_encode($career));
 $career = kop_facility_pages_person_career('Nobody Atall', 'Director of Admissions - Provo Canyon School (2008-2009) [joined 2008-07; joined 2008-10-13]', 0);
 $check('a note holding ";" does not split a past job', count($career) === 1 && $career[0]['place'] === 'Provo Canyon School' && $career[0]['url'] !== '', wp_json_encode($career));
+// A company's staff list (keyStaff) gives a career line linking the company page (Aspen Education Group, 2026-11-17).
+$career = kop_facility_pages_person_career('David Michel', '', 10371);
+$hit = array_values(array_filter($career, function ($j) { return $j['place'] === 'InnerChange'; }));
+$check("a company executive's career links the company page", $hit && strpos($hit[0]['url'], '/operator/') !== false && strpos($hit[0]['role'], 'Woodbury') === false, wp_json_encode($career));
 $fold = kop_facility_pages_career_fold(array(
     array('role' => 'Therapist', 'place' => 'Provo Canyon', 'years' => '2001', 'url' => ''),
     array('role' => '', 'place' => 'Silverado Boys Ranch', 'years' => '', 'url' => '/facility/silverado/'),
@@ -732,7 +736,7 @@ $check('nicknames fold into one person', kop_facility_pages_person_key('Steve Ro
     && kop_facility_pages_person_key('Jack Williams') !== kop_facility_pages_person_key('John Williams'));
 // Everyone at two or more places, staff lists and the network map together.
 $places = array();
-foreach (kop_facility_pages_people_index() as $key => $hits) foreach ($hits as $h) $places[$key]['f' . $h[0]] = true;
+foreach (kop_facility_pages_people_index() as $key => $hits) foreach ($hits as $h) $places[$key][isset($h[3]) ? 'c' . $h[1] : 'f' . $h[0]] = true;
 foreach (kop_facility_pages_map_people() as $key => $hits) foreach ($hits as $h) $places[$key][$h[2] ? 'f' . $h[2] : 'n' . $h[0]] = true;
 $multi = 0;
 foreach ($places as $p) if (count($p) > 1) $multi++;

@@ -3,7 +3,7 @@
  * Offline checks for KOP Tools > Merge Duplicates (inc/facility-merge.php,
  * inc/facility-merge-match.php) against the production mirror.
  *
- *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.php [--db=tmp/prod.sqlite] [--list]
+ *   php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.php [--db=tmp/prod.sqlite] [--list] [--pairs=keep:drop,...]
  *
  * Every table a merge touches is copied, with its keys, into an in-memory
  * database, so the mirror is never changed. For a sample of real pairs it
@@ -21,7 +21,7 @@ set_error_handler(function ($no, $str, $file, $line) {
     throw new ErrorException($str, 0, $no, $file, $line);
 });
 
-$args = getopt('', array('db::', 'list'));
+$args = getopt('', array('db::', 'list', 'pairs::'));
 $db_path = $args['db'] ?? (dirname(__DIR__) . '/tmp/prod.sqlite');
 if (!file_exists($db_path)) {
     fwrite(STDERR, "Need $db_path (scripts/sync-prod-sqlite.py).\n");
@@ -174,6 +174,15 @@ foreach ($pairs as $p) {
     $separate++;
 }
 echo "  ($separate pairs with two separate libraries)\n";
+if (!empty($args['pairs'])) {
+    // --pairs=keep:drop,...: only these (a seeds/facility-merges.json entry before it ships).
+    $sample = array();
+    foreach (explode(',', (string) $args['pairs']) as $pp) {
+        list($a, $b) = array_map('intval', explode(':', $pp) + array(0, 0));
+        if ($a && $b && isset($names[$a], $names[$b])) $sample[] = array('a' => $a, 'b' => $b);
+        else echo "  (pair $pp: not both on file)\n";
+    }
+}
 
 $before = snapshot($pdo, $copied);
 foreach ($sample as $p) {

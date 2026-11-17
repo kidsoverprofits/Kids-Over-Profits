@@ -108,7 +108,13 @@ foreach ((array) $entries as $e) {
         echo "  skip (not on file under that name in this mirror)\n";
         continue;
     }
-    check(in_array($e['company'], $company_names, true), 'seeds/operator-records.json makes the company');
+    if (!empty($e['fold'])) {
+        $q = $pdo->prepare("SELECT COUNT(*) FROM {$prefix}kop_operators WHERE name = ?");
+        $q->execute(array($e['company']));
+        check((int) $q->fetchColumn() === 1, 'the company it folds into is on file');
+    } else {
+        check(in_array($e['company'], $company_names, true), 'seeds/operator-records.json makes the company');
+    }
     $q = $pdo->prepare("SELECT COUNT(*) FROM {$prefix}kop_operators WHERE LOWER(unique_name) = LOWER(?)");
     $q->execute(array($e['unique_name']));
     check((int) $q->fetchColumn() === 0, 'no company holds the key yet');
@@ -120,7 +126,29 @@ foreach ((array) $entries as $e) {
     $pending_keys = $pdo->query("SELECT pkey FROM `$wbf` WHERE facility_id = $fid AND status IN ('pending', 'gone')")->fetchAll(PDO::FETCH_COLUMN);
 
     $before = snapshot($pdo, $copied);
-    $entry = kop_rtc_convert($pdo, $prefix, $fid, $e['unique_name'], $e['company'], (string) ($e['note'] ?? ''));
+    $staff_before = array();
+    if (!empty($e['fold'])) {
+        $doc = json_decode((string) $pdo->query("SELECT json_data FROM facilities_v2 WHERE id = $fid")->fetchColumn(), true);
+        foreach (array('administrator', 'notableStaff') as $l) foreach ((array) ($doc['staff'][$l] ?? array()) as $p) $staff_before[] = $p['name'];
+    }
+    $entry = kop_rtc_convert($pdo, $prefix, $fid, $e['unique_name'], $e['company'], (string) ($e['note'] ?? ''), array('fold' => !empty($e['fold'])));
+    if (!empty($e['fold'])) {
+        $q = $pdo->prepare("SELECT json_data FROM {$prefix}kop_operators WHERE name = ?");
+        $q->execute(array($e['company']));
+        $op = json_decode((string) $q->fetchColumn(), true)['operator'] ?? array();
+        $execs = array_map(function ($p) { return $p['name']; }, (array) ($op['keyStaff']['keyExecutives'] ?? array()));
+        echo '  folded: ' . json_encode($entry['report']['folded']) . "
+";
+        $ids_on = array();
+        foreach ((array) ($op['keyStaff']['keyExecutives'] ?? array()) as $p) $ids_on[(int) ($p['personId'] ?? 0)] = true;
+        $lost = array();
+        foreach (array('administrator', 'notableStaff') as $l) foreach ((array) ($doc['staff'][$l] ?? array()) as $p) {
+            if (!in_array($p['name'], $execs, true) && !isset($ids_on[(int) ($p['personId'] ?? 0)])) $lost[] = $p['name'];
+        }
+        check(!$lost && $entry['report']['folded']['people'] > 0, 'every person on its staff is on the company (' . count($staff_before) . ' entries, ' . $entry['report']['folded']['people'] . ' people)' . ($lost ? ': lost ' . implode(', ', $lost) : ''));
+        foreach (array('Larry Carter', 'Brad Gerrard', 'Kreg D. Gillman') as $who) check(in_array($who, $execs, true), "$who is on the company");
+        check(count($op['notes'] ?? array()) > 1, 'its notes are on the company');
+    }
     echo '  report: ' . json_encode($entry['report']) . '  slugs: ' . implode(', ', $entry['slugs']) . "\n";
     check($name_of($fid) === false, 'the record left facilities_v2');
     foreach (kop_rtc_link_tables($prefix) as $l) {
@@ -169,6 +197,8 @@ echo "\nSeeds\n";
 foreach ((array) $companies as $c) {
     if (!in_array($c['name'], array('InnerChange', 'Embark Behavioral Health', 'Aspen Education Group'), true) || empty($c['note']) || strpos($c['note'], '2026-10-14') === false) continue;
     foreach ((array) ($c['facilities'] ?? array()) as $f) {
+        if ($name_of($f['id']) === false) { echo "  skip {$c['name']}: #{$f['id']} (merged or gone since)
+"; continue; }
         check($name_of($f['id']) === $f['unique_name'], "{$c['name']}: #{$f['id']} is {$f['unique_name']}");
     }
 }

@@ -102,6 +102,13 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-campus-programs.p
 # Import loads (Woodbury facts.json, Fornits batches, Drive Docs links.json) write the build's old ids back: kop_fmerge_follow_waiting()
 # re-points waiting rows of merged-away records after each load and hourly (a Fornits thread link gets the kept record's key)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-facility-merge.php [--list]   # real merges + undo on an in-memory copy
+# --pairs=keep:drop,... runs those merges only (a seeds/facility-merges.json entry before it ships; add -d memory_limit=2G)
+# A facility record that is really a company (seeds/record-to-company.json, inc/record-to-company.php): it leaves facilities_v2,
+# its links come off, waiting queue rows are unmatched, its page 301s to the company. 'fold': true when the company already exists
+# (Aspen Education Group #2, 2026-11-17): its staff become the company's keyExecutives, its notes and incidents the company's notes
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-record-to-company.php   # convert/fold + exact undo on a copy of the mirror
+# Careers on facility and company pages read company staff too (keyStaff ceo/founders/keyExecutives in kop_facility_pages_people_index(),
+# linked to the company page), so a person listed on a company shows it on every page that lists them
 # Renamed programs are never merged as duplicates (a plain merge is refused): Merge Duplicates > Renamed programs (or "Merge as a rename")
 # keeps the later name's record with its own years; the earlier name goes to pastNames and keeps its years, status, operator (moved company
 # links become 'past') and notes on its legacy.mergedFacilities entry ('rename'), with the keys of what each record listed
