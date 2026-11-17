@@ -44,6 +44,16 @@ $check('a year the source gave stays', kop_scy_role('Former Staff (2001, r/troub
 $check('a range ending in the copy year comes off (owner, 2026-11-17)', kop_scy_role('CEO (2021-2025, r/troubledteens wiki)', $wiki) === 'CEO');
 $check('a range ending before the copy stays', kop_scy_role('CEO (2016-2020, r/troubledteens wiki)', $wiki) === 'CEO (2016-2020, r/troubledteens wiki)');
 $heal = 'HEAL, staff list for X (archived 2025-07-16)';
+$check('a wiki-tagged range ending at 2025 comes off an entry citing HEAL (Claude note #20)',
+    kop_scy_role('Former Medical Director, Founder (1971-2025, r/troubledteens wiki)', 'HEAL, staff list for Discovery Academy (archived 2025-07-11)') === 'Former Medical Director, Founder');
+$check('...but an untagged year on a Woodbury entry stays', kop_scy_role('Director (2001)', 'Woodbury Reports, May 2013, p. 9') === 'Director (2001)');
+$check('the card shows the years without the source it already cites (Claude note #20)',
+    kop_scy_role_display('Former Clinician (2017, r/troubledteens wiki)', $wiki) === 'Former Clinician (2017)'
+    && kop_scy_role_display('Therapist (r/troubledteens wiki)', 'r/troubledteens wiki') === 'Therapist'
+    && kop_scy_role_display('Former Admissions (2009, Woodbury Reports)', 'Woodbury Reports, April 2009 (#176), p. 18') === 'Former Admissions (2009)');
+$check('...a tag naming another publication than the cited one stays',
+    kop_scy_role_display('Former Teacher (1990, r/troubledteens wiki)', 'HEAL, staff list for X (archived 2025-07-11)') === 'Former Teacher (1990, r/troubledteens wiki)'
+    && kop_scy_role_display('Former Clinician (2017, r/troubledteens wiki)', '') === 'Former Clinician (2017, r/troubledteens wiki)');
 $check('a HEAL year comes off (a retrieval date)', kop_scy_role('Therapist (2025, HEAL)', $heal) === 'Therapist');
 $check('a HEAL range comes off', kop_scy_role('Former CEO (2021-2025, HEAL)', 'r/troubledteens wiki') === 'Former CEO');
 $check('"before" a HEAL year comes off', kop_scy_role('Former Staff (before 2020, HEAL)', $heal) === 'Former Staff');

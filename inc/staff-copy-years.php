@@ -25,6 +25,8 @@
  * 2025-12-18). Version 5 (owner, 2026-11-17, "they need to go"): a range ending at the copy year ("1991-2025")
  * goes too; its end is the copy, not when the job ended. A job is taken off, not cleared, only when
  * another job at that place has the same role.
+ * Version 6 (Claude note #20): a range tagged "r/troubledteens wiki" reaching 2025 goes even when the entry cites
+ * another page. kop_scy_role_display() is the role a staff card shows (no source name the card already cites).
  * Tested by scripts/test-staff-copy-years.php.
  */
 
@@ -62,11 +64,31 @@ if (!function_exists('kop_scy_copy_year')) {
         }, $role);
         $y = kop_scy_copy_year($source);
         // A year or range reaching the copy year ("2025-2026", and since version 5 "1991-2025") is only the copy.
-        if ($y) {
-            $role = preg_replace_callback('#\s*\(((?:19|20)\d{2})(?:\s*-\s*((?:19|20)\d{2}))?(?:,\s*r/troubledteens wiki)?\)\s*$#i', function ($m) use ($y) {
-                return max((int) $m[1], (int) ($m[2] ?? 0)) >= $y ? '' : $m[0];
-            }, $role);
-        }
+        // Version 6 (Claude note #20): a "(1971-2025, r/troubledteens wiki)" tag is a wiki copy's years even when
+        // the entry was merged with one citing another page (Robert H. Crist at Provo Canyon cites HEAL).
+        $role = preg_replace_callback('#\s*\(((?:19|20)\d{2})(?:\s*-\s*((?:19|20)\d{2}))?(,\s*r/troubledteens wiki)?\)\s*$#i', function ($m) use ($y) {
+            $copy = $y ?: (($m[3] ?? '') !== '' ? 2025 : 0);
+            return $copy && max((int) $m[1], (int) ($m[2] ?? 0)) >= $copy ? '' : $m[0];
+        }, $role);
+        return trim($role);
+    }
+
+    /**
+     * A role as a staff card shows it beside its "source" link (Claude note #20, "the wrong citation style"):
+     * without copy years, and without the source's name in its brackets when the link cites that publication:
+     * "Former Clinician (2017, r/troubledteens wiki)" -> "Former Clinician (2017)". A tag naming another
+     * publication than the one cited stays, so the years keep their source.
+     */
+    function kop_scy_role_display($role, $source) {
+        $role = kop_scy_role($role, $source);
+        $source = trim((string) $source);
+        if ($source === '') return $role;
+        $tags = 'r/troubledteens wiki|HEAL|Woodbury Reports|Fornits';
+        $role = preg_replace_callback('#\s*\(([^()]*?)(?:,\s*)?\b(' . $tags . ')\)#i', function ($m) use ($source) {
+            if (stripos($source, $m[2]) !== 0) return $m[0];
+            $rest = trim($m[1], " ,");
+            return $rest === '' ? '' : ' (' . $rest . ')';
+        }, $role);
         return trim($role);
     }
 

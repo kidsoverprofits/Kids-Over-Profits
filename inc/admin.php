@@ -1426,7 +1426,7 @@ function kop_apply_staff_dedupe() {
  * Once per KOP_STAFF_COPY_YEARS_VERSION: take off the staff years that are only the
  * date a wiki page was copied (inc/staff-copy-years.php, kop_scy_pass(); undo with kop_scy_undo()).
  */
-define('KOP_STAFF_COPY_YEARS_VERSION', 5);   // 2: HEAL years too (owner, 2026-10-30); 3: every "before" year, copy-year ranges; 4: undated wiki sources are 2025 copies; 5: ranges ending at the copy year (Claude note #19)
+define('KOP_STAFF_COPY_YEARS_VERSION', 6);   // 2: HEAL years too (owner, 2026-10-30); 3: every "before" year, copy-year ranges; 4: undated wiki sources are 2025 copies; 5: ranges ending at the copy year (Claude note #19); 6: a wiki-tagged range on an entry citing another page (Claude note #20)
 function kop_apply_staff_copy_years() {
     if ((int) get_option('kop_staff_copy_years_version', 0) >= KOP_STAFF_COPY_YEARS_VERSION || !function_exists('kop_scy_pass')) {
         return array();

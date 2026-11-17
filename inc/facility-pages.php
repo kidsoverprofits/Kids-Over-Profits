@@ -1469,6 +1469,8 @@ if (!function_exists('kop_facility_pages_staff_items')) {
                     $name = trim((string) $item['name']);
                     // "Admissions: Jane Doe" from the old forms: the label is her role.
                     $role = kop_facility_pages_drop_left((string) ($item['role'] ?? ''));
+                    // Its years and source as the card cites them, not "(2017, r/troubledteens wiki)" (Claude note #20).
+                    if (function_exists('kop_scy_role_display')) $role = kop_scy_role_display($role, $cite);
                     $entry['text'] = kop_facility_pages_drop_left($entry['text']);
                     if (preg_match('/^([A-Za-z][A-Za-z &\/-]{2,40}):\s*(\S.*)$/', $name, $m)) {
                         $name = $m[2];
