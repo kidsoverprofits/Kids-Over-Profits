@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 17:21 UTC",
- "source": "07ef7f6e6438193a72829994c579eb8af3496f6f",
+ "built": "2026-11-17 17:23 UTC",
+ "source": "031c70c391b495024a6859c84409fba2448e74c7",
  "sections": [
   {
    "key": "2",
@@ -3338,7 +3338,7 @@
       {
        "id": "4.3:facility-records-that-are-one-program-or-a-company-after-the",
        "lead": "Facility records that are one program or a company: after the deploy",
-       "text": "**Facility records that are one program or a company: after the deploy** (owner, 2026-11-17; the work shipped in the item-30 commit, archived in docs/PLAN-ARCHIVE.md). Open: - Check live once the seeds run (template assignments 167): /facility/aspen-education-group/ 301s to /operator/aspen-education-group/, the company page lists the folded staff, Provo Canyon's Larry Carter, Brad Gerrard and Kreg Gillman show \"Aspen Education Group\" linking the company page; /facility/redcliff-ascent-wilderness-program-ut/ and /facility/certs-kolob-canyon-residential-treatment-center-ut/ 301 to the kept records; Telos Academy shows \"Also known as Telos RTC\" and careers' \"Telos RTC\" lines link it. - The map still has facilityId 100001 on the Aspen node and \"facility profile\" lines from the record until the next network map build; after it, the staff lines come from the company (\"operator profile\"). Check the node's lines then. All folded people are drawn as company leadership (the build files every keyExecutives entry under leadership, `build-network-graph.js`), so a therapist such as Aaron Shaw shows among the leaders; a staff list on companies would fix that if the owner wants it. - About 38 Fornits items waiting on the Aspen record are unmatched now (match note names the company): file them on the company or on the program each thread is about, at KOP Tools > Fornits. - The record's resource links (mostly stray links from other wiki pages) were not carried over; they stay in `kop_record_to_company_log` (undo raw) if any is wanted on the company. - Two tests already failed on main before this work: test-facility-pages \"every map slice ... under 120 KB\" (Aspen, SUWS of the Carolinas, Provo Canyon, Aspen Achievement Academy, Asheville Academy) and test-people \"company and region owners get no id\" (New Passages, Bruce Goldsmith, Southern New York, Lester Roloff).",
+       "text": "**Facility records that are one program or a company: after the deploy** (owner, 2026-11-17; the work shipped in the item-30 commit ad58effd, archived in docs/PLAN-ARCHIVE.md; checked live 2026-11-17: the three old addresses 301, Provo Canyon's Aspen and Telos RTC career lines link the company and Telos Academy). Open: - The map still has facilityId 100001 on the Aspen node and \"facility profile\" lines from the record until the next network map build; after it, the staff lines come from the company (\"operator profile\"). Check the node's lines then. All folded people are drawn as company leadership (the build files every keyExecutives entry under leadership, `build-network-graph.js`), so a therapist such as Aaron Shaw shows among the leaders; a staff list on companies would fix that if the owner wants it. - About 38 Fornits items waiting on the Aspen record are unmatched now (match note names the company): file them on the company or on the program each thread is about, at KOP Tools > Fornits. - The record's resource links (mostly stray links from other wiki pages) were not carried over; they stay in `kop_record_to_company_log` (undo raw) if any is wanted on the company. - Two tests already failed on main before this work: test-facility-pages \"every map slice ... under 120 KB\" (Aspen, SUWS of the Carolinas, Provo Canyon, Aspen Achievement Academy, Asheville Academy) and test-people \"company and region owners get no id\" (New Passages, Bruce Goldsmith, Southern New York, Lester Roloff).",
        "ask": "",
        "date": "2026-11-17",
        "why": "",
@@ -3348,7 +3348,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "b669d64b6d23"
+       "hash": "ec87570d50bf"
       },
       {
        "id": "4.3:articles-linked-to-the-wrong-facility-page-2026-11-17-found",
