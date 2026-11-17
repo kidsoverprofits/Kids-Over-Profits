@@ -1,6 +1,6 @@
 {
- "built": "2026-11-16 21:15 UTC",
- "source": "14f16eaaf8d3c0ca28b13eb070985980341cbaff",
+ "built": "2026-11-17 14:52 UTC",
+ "source": "f9983d1a10b7cd6cd34a71c6c49d95c3a6e607ce",
  "sections": [
   {
    "key": "2",
@@ -3316,6 +3316,21 @@
        "focus": false,
        "steps": [],
        "hash": "3edbab9a341a"
+      },
+      {
+       "id": "4.3:facility-records-that-are-one-program-or-a-company",
+       "lead": "Facility records that are one program or a company",
+       "text": "**Facility records that are one program or a company** (owner, 2026-11-17, Provo Canyon staff careers, Claude note #19 follow-up). The career fold (`kop_facility_pages_career_fold()`, 1f83e3fb) joins other spellings of a place, but two linked records stay two lines: - Merge candidates: RedCliff Ascent (`redcliff-ascent-ut`) and RedCliff Ascent Wilderness Program (`redcliff-ascent-wilderness-program-ut`); Kolob Canyon RTC (`kolob-canyon-rtc-ut`) and \"CERTS – Kolob Canyon Residential Treatment Center\" (`certs-kolob-canyon-residential-treatment-center-ut`, whose name also has a broken dash). Check with the sources, then merge (`docs/claude/facility-pages.md`, merges). - Telos RTC (free text on several careers) is Telos Academy's earlier name if the sources say so: add it as a past name of `telos-academy-ut` and the careers link it. - Aspen Education Group (`/facility/aspen-education-group/`, id 100001) is a company filed as a facility: move it to a company page (`kop_apply_record_to_company_seeds()`, inc/admin.php) and point its staff, map lines and careers (Kreg Gillman, Brad Gerrard, Larry Carter) at the operator.",
+       "ask": "",
+       "date": "2026-11-17",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "aa1ff15883ae"
       }
      ]
     },
