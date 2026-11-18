@@ -233,8 +233,18 @@ function kop_ar_save_rewrite($kind, $id, array $rw, $by = 'Claude') {
     if (kop_ar_page($kind, $id) === '') throw new RuntimeException(ucfirst($kind) . " #{$id} has no page.");
     $wu = kop_wu_get($key);
     $clean = kop_ar_clean_rewrite($rw);
+    // A resent rewrite keeps the owner's answers to questions it still asks (matched by the question's text).
+    $old = (array) $wu['draft'];
+    $kept = array();
+    if (($old['kind'] ?? '') === 'rewrite') {
+        foreach ((array) ($clean['needs_you'] ?? array()) as $i => $a) {
+            foreach ((array) ($old['needs_you'] ?? array()) as $j => $b) {
+                if (($a['ask'] ?? '') !== '' && ($a['ask'] ?? '') === ($b['ask'] ?? null) && isset($old['answers'][$j])) $kept[$i] = $old['answers'][$j];
+            }
+        }
+    }
     $draft = array('kind' => 'rewrite', 'paragraphs' => kop_about_rewrite_strings($clean['sentences'])) + $clean + array(
-        'answers' => array(), 'by' => (string) $by, 'provider' => 'claude', 'at' => gmdate('Y-m-d H:i:s'),
+        'answers' => $kept, 'by' => (string) $by, 'provider' => 'claude', 'at' => gmdate('Y-m-d H:i:s'),
         'held' => $kind === 'facility' ? array_map('kop_wu_item_key', kop_wu_held_rows((int) $id)) : array(),
         'check' => '');
     kop_wu_put($key, $draft, $wu['published']);
