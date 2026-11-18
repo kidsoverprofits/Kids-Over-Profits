@@ -1,6 +1,6 @@
 {
- "built": "2026-11-17 21:17 UTC",
- "source": "2fb151b8e5086399ff81077610ee0371cd4d29b6",
+ "built": "2026-11-18 15:07 UTC",
+ "source": "1a0cdd90e41ac5af6c9dd25ae985107d2c990a0b",
  "sections": [
   {
    "key": "2",
@@ -4407,9 +4407,9 @@
       {
        "id": "4.7:spiritual-abuse-rewrite-the-guide-to-the-writing-style",
        "lead": "/spiritual-abuse/: rewrite the guide to the writing style",
-       "text": "**/spiritual-abuse/: rewrite the guide to the writing style** (owner's Tell Claude note #23, 2026-11-17, pointing at \"Impacts of Spiritual Abuse on TTI Survivors\": \"this also obviously needs to be rewritten to be up to the standards of the rest of the page\"). The page (post `spiritual-abuse`, layout from seeds/text-fixes.json 2026-11-16-spiritual-abuse-guide-layout) is general bullet lists from academic papers on church abuse: no TTI program, person or date in it, and no citation on any bullet. The Impacts part (Spiritual and Existential Harm, Emotional and Psychological Trauma, Physical and Somatic Symptoms, Social Disconnection) comes first; Defining Characteristics and Where Spiritual Abuse Happens read the same way and need the same pass: the owner said the whole page goes in one session (2026-11-17, \"yes whole page\"). Follow docs/WRITING-STYLE.md: prose, not bullets; each effect shown through named TTI programs and survivors' own words (exact quotes only, memory: testimony as quotes only), recent cases first (Roloff homes, Teen Challenge, Agape, Circle of Hope, Missouri's 2021 law, Florida's FACCCA exemption are already in the page's own link list); every sentence cited with [^n]. KOP holdings first (tmp/prod.sqlite news_submissions, wpdl_kop_doc_text, Drive), then the web; submit new sources. Opus at high effort writes it (memory: writing model routing). Apply as a seeds/text-fixes.json replace so the change is recorded, keep the guide pieces (kop-guide-section, h4 entries). - Done 2026-11-17: text fix 2026-11-17-spiritual-abuse-rewrite (seed pass 169), about 4,100 words, 156 \"(source)\" links numbered by js/citation-previews.js; 132 quotes checked against their sources. 49 new sources sent to the review queues. Check after deploy: the page shows the new text, the cases table and a numbered Sources list. - Still open: the Missouri HB 557 / HB 560 witness testimony PDFs (documents.house.mo.gov) and the Utah 2021 and Indiana 2026 hearings were not read; they are the best place for more survivors' own words on faith. The Indiana complaint itself (S.D. Ind., DuPuis v. Indiana Teen Challenge) was not found; the page cites CohenMalad's summary. Topic and verdict sentences that sum up the cited sentences around them carry no citation of their own.",
+       "text": "**/spiritual-abuse/: rewrite the guide to the writing style** (owner's Tell Claude note #23, 2026-11-17, pointing at \"Impacts of Spiritual Abuse on TTI Survivors\": \"this also obviously needs to be rewritten to be up to the standards of the rest of the page\"). The page (post `spiritual-abuse`, layout from seeds/text-fixes.json 2026-11-16-spiritual-abuse-guide-layout) is general bullet lists from academic papers on church abuse: no TTI program, person or date in it, and no citation on any bullet. The Impacts part (Spiritual and Existential Harm, Emotional and Psychological Trauma, Physical and Somatic Symptoms, Social Disconnection) comes first; Defining Characteristics and Where Spiritual Abuse Happens read the same way and need the same pass: the owner said the whole page goes in one session (2026-11-17, \"yes whole page\"). Follow docs/WRITING-STYLE.md: prose, not bullets; each effect shown through named TTI programs and survivors' own words (exact quotes only, memory: testimony as quotes only), recent cases first (Roloff homes, Teen Challenge, Agape, Circle of Hope, Missouri's 2021 law, Florida's FACCCA exemption are already in the page's own link list); every sentence cited with [^n]. KOP holdings first (tmp/prod.sqlite news_submissions, wpdl_kop_doc_text, Drive), then the web; submit new sources. Opus at high effort writes it (memory: writing model routing). Apply as a seeds/text-fixes.json replace so the change is recorded, keep the guide pieces (kop-guide-section, h4 entries). - Done 2026-11-17: text fix 2026-11-17-spiritual-abuse-rewrite (seed pass 169), about 4,100 words, 156 \"(source)\" links numbered by js/citation-previews.js; 132 quotes checked against their sources. 49 new sources sent to the review queues. Checked live 2026-11-18: new text, the cases table, 7 bands, 16 h4 entries, 54 numbered sources. - Still open: the Missouri HB 557 / HB 560 witness testimony PDFs (documents.house.mo.gov) and the Utah 2021 and Indiana 2026 hearings were not read; they are the best place for more survivors' own words on faith. The Indiana complaint itself (S.D. Ind., DuPuis v. Indiana Teen Challenge) was not found; the page cites CohenMalad's summary. Topic and verdict sentences that sum up the cited sentences around them carry no citation of their own.",
        "ask": "",
-       "date": "2026-11-17",
+       "date": "2026-11-18",
        "why": "",
        "go": [],
        "choices": [],
@@ -4417,7 +4417,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "33e82ba567c6"
+       "hash": "1b909dfa2986"
       }
      ]
     },
