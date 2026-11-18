@@ -12752,7 +12752,309 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "about-rewrites-endings:have-st-lawrence-county-prosecutors-charged-anyo",
+   "section": "About rewrites: endings",
+   "title": "Have St. Lawrence County prosecutors charged anyone, or closed their investigation, since opening a probe of the Academy at Ivy Ridge in Ogdensburg, NY in March 2024?",
+   "text": "DA Gary Pasqua opened the investigation in March 2024 after Netflix's The Program (North Country This Week, Mar 11, 2024: https://northcountrynow.com/stories/county-da-sheriff-investigating-allegations-of-abuse-at-academy-at-ivy-ridge-victims-urged-to,230980). A Nov 2026 search found no later news. The About ends on the open investigation: kop-pipeline tmp/about-rewrite/batch2/sendable/f12023.json.",
+   "context": "",
+   "records": [
+    12023
+   ],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": [
+    {
+     "label": "News: I was abandoned 2.5k miles from home at ‘Lord of the Flies’ troubled teen school – I thought I’d die any day from abuse (The US Sun, 2024-07-27)",
+     "url": "https://www.the-sun.com/news/12011792/bethel-boys-academy-abusive-trouble-teen-school-hbo-documentary/",
+     "kind": "news"
+    },
+    {
+     "label": "News: ‘I’d rather die than go back’: Jamaica’s school for troubled US boys (The Times, 2024-07-13)",
+     "url": "https://www.thetimes.com/world/us-world/article/american-teenagers-jamaica-atlantis-academy-j25rgm0p5",
+     "kind": "news"
+    },
+    {
+     "label": "News: St. Lawrence County DA investigating Ivy Ridge allegations from documentary (North Country Public Radio, 2024-03-13)",
+     "url": "https://www.northcountrypublicradio.org/news/story/49472/20240313/st-lawrence-county-da-investigating-ivy-ridge-allegations-from-documentary",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Founder's Passion Is Helping Youths (The Salt Lake Tribune, 2003-05-25)",
+     "url": "http://insidecostarica.com/dailynews/2003/may/25/founders_passion.htm",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Dungan, et al. v. The Academy at Ivy Ridge, et al. (U.S. District Court for the Northern District of New York, filed 2006-07-25)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/ivyridge_classaction_suit.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Wood, et al. v. World Wide Association of Specialty Programs and Schools, Inc., et al. (Fifth Judicial District Court, Washington County, Utah)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/09/StGeorgeUtah.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: In the Matter of the Academy at Ivy Ridge, Assurance of Discontinuance (NY Attorney General, Aug 17, 2005)",
+     "url": "https://web.archive.org/web/20061212143617/http://www.oag.state.ny.us/press/2005/aug/SignedAssurance.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, April 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2009-176-p-18-academy-at-ivy-ridge/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, October 2006, p. 29 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2006-146-p-29-academy-at-ivy-ridge/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, February 2006, p. 29 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2006-138-p-29-academy-at-ivy-ridge/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived ivyridge.us)",
+     "url": "https://web.archive.org/web/20021129100706/http://www.ivyridge.us/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived academyivyridge.com)",
+     "url": "https://web.archive.org/web/20041215111405/http://academyivyridge.com/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived ivyridge.info)",
+     "url": "https://web.archive.org/web/20080807120353/http://www.ivyridge.info/index.php",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: northcountrynow.com/stories/county-da-sheriff-investigating-allegations-of-abuse",
+     "url": "https://northcountrynow.com/stories/county-da-sheriff-investigating-allegations-of-abuse-at-academy-at-ivy-ridge-victims-urged-to,230980",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-endings:how-did-provo-canyon-school-s-july-2026-appeal-o",
+   "section": "About rewrites: endings",
+   "title": "How did Provo Canyon School's July 2026 appeal of Utah's licence revocations turn out?",
+   "text": "Utah revoked both Provo Canyon campuses' licences in July 2026; the school (Universal Health Services) appealed both orders on July 27, 2026. No ruling found by November 2026. Ends the UHS About: kop-pipeline tmp/about-rewrite/batch1/sendable/o25.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:how-did-the-wood-v-wwasps-lawsuit-brought-in-uta",
+   "section": "About rewrites: endings",
+   "title": "How did the Wood v. WWASPS lawsuit, brought in Utah by 357 former students and parents, end?",
+   "text": "Amended 2013; names Casa by the Sea, High Impact, Ivy Ridge, Tranquility Bay and Dundee Ranch among the defendants. No outcome found. Casa by the Sea's About ends on the 2013 filing: kop-pipeline tmp/about-rewrite/batch2/sendable/f14135.json.",
+   "context": "",
+   "records": [
+    14135
+   ],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": [
+    {
+     "label": "News: Man claims abuse in teen boot camps (The Spokesman-Review, 2011-06-03)",
+     "url": "https://www.spokesman.com/stories/2011/jun/03/man-claims-abuse-teen-boot-camps/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Romney, Torture, and Teens (Reason, 2007-06-27)",
+     "url": "https://reason.com/2007/06/27/romney-torture-and-teens/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Mexico Shutters U.S.-Run Rehab Centers for Teens (WUWF / NPR, 2005-01-02)",
+     "url": "https://www.wuwf.org/2005-01-02/mexico-shutters-u-s-run-rehab-centers-for-teens",
+     "kind": "news"
+    },
+    {
+     "label": "News: Founder's Passion Is Helping Youths (The Salt Lake Tribune, 2003-05-25)",
+     "url": "http://insidecostarica.com/dailynews/2003/may/25/founders_passion.htm",
+     "kind": "news"
+    },
+    {
+     "label": "News: Controversy surrounds Tranquility Bay (Caymanian Compass, Basia Pioro, Jul 13, 2006)",
+     "url": "http://www.caycompass.com/cgi-bin/CFPnews.cgi?ID=1014776",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived vpp.com)",
+     "url": "https://web.archive.org/web/20000309114029/http://www.vpp.com/teenhelp/casa.html",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived nospank.net)",
+     "url": "https://web.archive.org/web/2*/http://www.nospank.net/ramey.htm",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived nospank.net)",
+     "url": "https://web.archive.org/web/2*/http://www.nospank.net/sarah_b.htm",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-endings:how-did-brighter-path-of-alabama-s-may-2025-laws",
+   "section": "About rewrites: endings",
+   "title": "How did Brighter Path of Alabama's May 2025 lawsuit against the Courtland mayor and council over its licence vote end?",
+   "text": "Brighter Path (formerly Three Springs, a Sequel program) sued in May 2025 under the Open Meetings Act (WHNT and WAFF, both in KOP's news). Ends the Three Springs About: kop-pipeline tmp/about-rewrite/batch1/sendable/o24.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:was-altior-healthcare-owner-of-paradigm-treatmen",
+   "section": "About rewrites: endings",
+   "title": "Was Altior Healthcare, owner of Paradigm Treatment Centers, sold after Pine Tree put it up for auction in May 2026?",
+   "text": "Axios, May 2026 (in KOP's news). Ends the Paradigm About: kop-pipeline tmp/about-rewrite/batch1/sendable/o33.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:what-happened-to-the-charges-against-devereux-st",
+   "section": "About rewrites: endings",
+   "title": "What happened to the charges against Devereux staff Caitlin Cambridge and Erika Travis over a classroom incident at Devereux's Red Hook, NY campus in 2026?",
+   "text": "Charged March 2026; still pending when the Times Union reported on April 1, 2026. KOP's lawsuits table has the Thomas suit dismissed Oct 2026 and Doe 8 still open, with no docket links. Ends the Devereux About: kop-pipeline tmp/about-rewrite/batch1/sendable/o8.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:does-truecore-behavioral-solutions-still-run-any",
+   "section": "About rewrites: endings",
+   "title": "Does TrueCore Behavioral Solutions still run any Florida juvenile justice programs?",
+   "text": "Florida DJJ's program pages now name Rite of Passage, Inc. as provider at seven programs KOP records as TrueCore's (Tampa Residential, Miami, South Florida, Jacksonville and Columbus Youth Academies, Daytona, Les Peters); truecorebehavioral.com redirects to an unrelated Polish site. If TrueCore is gone, the TrueCore About (lede and ending) and those seven records' operators need correcting: kop-pipeline tmp/about-rewrite/batch1/sendable/o23.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:who-is-acadia-healthcare-s-chief-executive-now-a",
+   "section": "About rewrites: endings",
+   "title": "Who is Acadia Healthcare's chief executive now, and when did Christopher Hunter leave?",
+   "text": "Acadia's Q3 2026 10-Q names Debra K. Osteen as chief executive from January 2026; KOP's company page names Christopher Hunter. Correct the company record's people. The About no longer names a CEO: kop-pipeline tmp/about-rewrite/batch1/sendable/o6.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:how-many-people-applied-to-florida-s-compensatio",
+   "section": "About rewrites: endings",
+   "title": "How many people applied to Florida's compensation fund for survivors of the Dozier and Okeechobee reform schools by the end-2024 deadline?",
+   "text": "The Dozier About says more than 800 (its source f32); WUSF / News Service of Florida, Jun 27, 2025 (https://www.wusf.org/courts-law/2025-06-27/hundreds-suffered-abuse-florida-reform-schools-compensation-dozier-okeechobee) gives 1,023 applications and 926 checks of $21,253.98. Fix the number: kop-pipeline tmp/about-rewrite/batch2/sendable/f11138.json.",
+   "context": "",
+   "records": [
+    11138
+   ],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": [
+    {
+     "label": "News: First-Ever National Survey Finds Forgotten Graves of Incarcerated Children (The Imprint, 2026-09-18)",
+     "url": "https://imprintnews.org/top-stories/first-ever-national-survey-finds-forgotten-graves-of-incarcerated-children/277236",
+     "kind": "news"
+    },
+    {
+     "label": "News: Sixth Set of Dozier Remains ID'd; USF's Site Access Extended (WUSF, 2015-08-05)",
+     "url": "https://wusf.org/law-order/2015-08-05/sixth-set-of-dozier-remains-idd-usfs-site-access-extended",
+     "kind": "news"
+    },
+    {
+     "label": "News: Dozens of Teens Who Spent Time at Abusive Florida Reform School Ended Up on Death Row (The Marshall Project with Tampa Bay Times, 2025-07-14)",
+     "url": "https://www.themarshallproject.org/2025/07/14/florida-death-row-teens-abuse",
+     "kind": "news"
+    },
+    {
+     "label": "News: Researchers Identify Two Sets of Boys Remains at Notorious Dozier School (NBC News, 2014-09-25)",
+     "url": "https://www.nbcnews.com/news/us-news/researchers-identify-two-sets-boys-remains-notorious-dozier-school-n211781",
+     "kind": "news"
+    },
+    {
+     "label": "News: Boy missing since 1940 ID’d at Florida’s boys school (CNN, 2014-08-07)",
+     "url": "https://www.cnn.com/2014/08/07/us/florida-boys-school-dna-match/index.html?iref=allsearch",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-endings:does-eckerd-connects-still-run-juvenile-justice",
+   "section": "About rewrites: endings",
+   "title": "Does Eckerd Connects still run juvenile justice programs?",
+   "text": "eckerd.org (Nov 2026) describes Job Corps, workforce development and family services in 20 states and D.C., and no longer mentions juvenile justice; the Eckerd About's lede says it now runs juvenile justice programs: kop-pipeline tmp/about-rewrite/batch1/sendable/o9.json.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-endings:what-became-of-the-thayer-learning-center-campus",
+   "section": "About rewrites: endings",
+   "title": "What became of the Thayer Learning Center campus in Kidder, Missouri after White Buffalo Academy took it over in 2009?",
+   "text": "A search snippet of a Daviess County Historical Society page (https://daviesscountyhistoricalsociety.com/?p=6344, error 525 on 2026-11-18, unread) says the buildings later stood empty and were bought by a family from Gallatin. Read it, send it as a source (website) if it holds, and end the Thayer About on it: kop-pipeline tmp/about-rewrite/batch2/sendable/f11449.json.",
+   "context": "",
+   "records": [
+    11449
+   ],
+   "found": "found 2026-11-18, About endings pass, 2026-11-18",
+   "directions": [
+    {
+     "label": "Daviess County Historical Society (unread)",
+     "url": "https://daviesscountyhistoricalsociety.com/?p=6344",
+     "kind": "note"
+    },
+    {
+     "label": "News: Parents Tell Of Horrors At Youth Boot Camps (Arizona Republic, 2007-10-11)",
+     "url": "https://archive.is/vkOhd",
+     "kind": "news"
+    },
+    {
+     "label": "News: Breaking Down Our Kids; Child Abuse for Profit is Occurring in America (2006-04-20) (Dissident Voice, 2006-04-20)",
+     "url": "http://www.nospank.net/chapeli.htm",
+     "kind": "news"
+    },
+    {
+     "label": "News: Teen boot camp hearing targets Missouri agency (The Kansas City Star, April 2008)",
+     "url": "http://www.kansascity.com/news/local/story/590996.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Missouri boot camp part of national investigation (The Kansas City Star, Oct 3, 2007)",
+     "url": "http://www.kansascity.com/105/story/302379.html",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, September 2008, p. 25 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2008-169-p-25-thayer-learning-center/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 27 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-p-27-thayer-learning-center/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, February 2006, p. 28 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2006-138-p-28-thayer-learning-center/",
+     "kind": "woodbury"
+    }
+   ]
   }
  ],
- "built": "2026-11-04 16:49"
+ "built": "2026-11-18 21:13"
 }
