@@ -781,21 +781,34 @@
             endButtons.innerHTML = '';
             if (bulkEndEl) bulkEndEl.hidden = !sel.length;
             if (!sel.length) return;
-            (sel[0].kopItem.actions || []).forEach(function (a) {
+            // Every action any ticked card has, in the order the cards list them. A card without the action
+            // is left out of that button and the button says so ("2 of 3"): one ticked question that is no
+            // longer asked (Dismiss only) used to take "Use this answer" off the bar for all (Claude note #24).
+            var order = [], byId = {};
+            sel.forEach(function (c) {
+                (c.kopItem.actions || []).forEach(function (a) { if (!byId[a.id]) { byId[a.id] = a; order.push(a.id); } });
+            });
+            order.forEach(function (id) {
+                var a = byId[id];
+                var mineOf = function (c) { return (c.kopItem.actions || []).filter(function (b) { return b.id === id; })[0]; };
                 var ready = function (c) {
-                    var mine = (c.kopItem.actions || []).filter(function (b) { return b.id === a.id; })[0];
-                    if (!mine) return false;
+                    var mine = mineOf(c);
                     var now = paramsOf(c, mine);
                     return (mine.params || []).every(function (p) {
                         var v = now[p.name];
                         return p.optional || (v !== '' && v !== null && v !== undefined && v !== 0 && !(Array.isArray(v) && !v.length));
                     });
                 };
-                if (!sel.every(ready)) return;
+                var having = sel.filter(mineOf);
+                // A value that has to be typed on each card first keeps the button away until all are filled.
+                if (!having.every(ready)) return;
+                var skipped = sel.length - having.length;
                 [buttons, endButtons].forEach(function (into) {
                     into.appendChild(el('button', {
-                        type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'), text: a.label + ' (' + sel.length + ')',
-                        onclick: function () { runBulk(sel, a); }
+                        type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'),
+                        text: a.label + ' (' + (skipped ? having.length + ' of ' + sel.length : sel.length) + ')',
+                        title: skipped ? skipped + ' of the ticked cards have no "' + a.label + '" button and are left as they are.' : '',
+                        onclick: function () { runBulk(having, a); }
                     }));
                 });
             });
