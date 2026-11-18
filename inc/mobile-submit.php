@@ -36,14 +36,9 @@ const KOP_MSUB_HOURLY_CAP = 12;
  */
 const KOP_MSUB_RESEARCH_KEY_SHA256 = 'e40e145dbf09ba6b289797052480e21e6d91ec3ed03e8e7c5006bf3d009aff3e';
 
-/** A temporary key for one cloud session (the owner away from the computer); removed when that session ends. */
-const KOP_MSUB_RESEARCH_KEY_TEMP_SHA256 = '8df96a9dbffedfac5d5a1fb963e86c173c52799b55420c0282d60eed851907fd';
-
 function kop_msub_is_research(WP_REST_Request $req) {
     $key = trim((string) $req->get_header('x_kop_research_key'));
-    if ($key === '') return false;
-    $h = hash('sha256', $key);
-    return hash_equals(KOP_MSUB_RESEARCH_KEY_SHA256, $h) || hash_equals(KOP_MSUB_RESEARCH_KEY_TEMP_SHA256, $h);
+    return $key !== '' && hash_equals(KOP_MSUB_RESEARCH_KEY_SHA256, hash('sha256', $key));
 }
 
 function kop_msub_link_types() {
