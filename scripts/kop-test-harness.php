@@ -68,6 +68,7 @@ function sanitize_title($s) {
     $s = remove_accents(strip_tags((string) $s));
     $s = strtolower($s);
     $s = preg_replace('/&[a-z]+;/', '', $s);
+    $s = preg_replace("/['\x{2018}\x{2019}]/u", '', $s);   // WordPress drops apostrophes: "Camp O'Neal" -> camp-oneal
     $s = preg_replace('/[^a-z0-9]+/', '-', $s);
     return trim($s, '-');
 }
