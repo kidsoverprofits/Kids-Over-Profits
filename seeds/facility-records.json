@@ -12176,5 +12176,362 @@
         ]
       }
     }
+  },
+  {
+    "id": 100362,
+    "unique_name": "Maple Lake Academy, LLC",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2005,
+        "endYear": null,
+        "status": "Open",
+        "yearsOfOperation": "2005-present",
+        "notes": [
+          "Ages 12-18 (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/maplelake)",
+          "Serves: Female (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/maplelake)",
+          "The girls' program (Girls' Home) closed in October 2024 after the state declined to renew its license; the boys' program is licensed separately and stays open (The Salt Lake Tribune, Oct 25, 2024: https://www.sltrib.com/news/health/2024/10/25/maple-lake-academy-embattled-teen/)",
+          "Maple Lake Academy, LLC dba Boy's Home, 6612 S 3200 W, Spanish Fork: Utah DHHS Office of Licensing, Residential Treatment license 93524, status Licensed, expires Jul 31, 2027 (Utah licensing list, read 2026-11-04)"
+        ]
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "Reported 2025-12: Abuse: Survivors report excessive and violent restraints, verbal and emotional abuse, medical neglect, over-medication, forced labor and food deprivation. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "2022-05: License action: Utah's Office of Licensing moved to revoke Maple Lake Academy's license after the January 2022 death; regulators reversed the revocation in August 2022 and the program stayed open. (HEAL, staff list for Maple Lake Academy (archived 2025-07-13); The Salt Lake Tribune, Oct 25, 2024: https://www.sltrib.com/news/health/2024/10/25/maple-lake-academy-embattled-teen/)",
+          "2022-01-16: Death: On January 16, 2022, a 14-year-old resident died of an unspecified medical issue after reportedly complaining of worsening symptoms to staff for at least a week and not being returned to the doctor after a January 15 visit. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "2019: Investigation: In late 2019, Utah DHS records show a female staff member twisted a male resident's nipple; she told investigators it was inappropriate and crossed a boundary, a 2020 Corrective Action Plan was filed, and she was transferred to the girls' program and remains employed. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "2022: License action: After the 2022 death, Utah's Office of Licensing issued a Notice of Agency Action placing the license on conditional status and required the program to stop accepting new students pending investigation. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "2022-08: License action: In August 2022 regulators reversed the revocation and reached a deal that let Maple Lake Academy keep its license and stay open. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "Reported 2025-12: Restraint: A survivor reports one of the directors put them in a chokehold for walking out of class. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))",
+          "Reported 2025-12: Restraint: Survivors report punishments including communication blocks, solitary confinement, therapeutic holds and a forced all-day mattress status. (r/troubledteens wiki, page \"Maple Lake Academy\" (as of 2025-12-18))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 10476,
+    "unique_name": "Maple Lake Academy, LLC – Girls’ Home",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": 2024,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": [
+          "Closed in October 2024, after the state declined in August to renew its license and a court fight (The Salt Lake Tribune, Oct 25, 2024: https://www.sltrib.com/news/health/2024/10/25/maple-lake-academy-embattled-teen/)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 10865,
+    "unique_name": "Rebekah Home for Girls",
+    "version": 1,
+    "facility": {
+      "criticalIncidents": {
+        "customIncidents": [
+          "Reported November 2004: Abuse: Mrs. Cameron disciplined girls by beating them with a board. (Fornits forum, post by Anonymous, November 2004: https://www.fornits.com/phpbb/index.php?topic=2107.98)",
+          "1977: Abuse: Survivor describes being tied, mind controlled, and beaten until bleeding and blistered. (Fornits forum, post by Anonymous, August 2004: https://www.fornits.com/phpbb/index.php?topic=2107.81)",
+          "Reported November 2004: Sexual abuse: Staff members Miss Sue and Miss Cindy were caught sexually abusing a student by Mrs. Cameron and fired. (Fornits forum, post by Anonymous, November 2004: https://www.fornits.com/phpbb/index.php?topic=2107.102)",
+          "Reported April 2003: Injury: A girl tied to a bed in restraints escaped and jumped out of a second-story window. (Fornits forum, post by Anonymous, April 2003: https://www.fornits.com/phpbb/index.php?topic=2107.0)",
+          "Reported March 2004: Restraint: A student trying to get the attention of a 20/20 camera crew was restrained, pulled inside, and locked up. (Fornits forum, post by Anonymous, March 2004: https://www.fornits.com/phpbb/index.php?topic=2107.11)",
+          "Reported July 2004: Abuse: Girls had mouths washed out with lye soap, clothespins stuck on ears, and were subjected to physical licks, lock-up, and kneeling on linoleum. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.40)",
+          "Reported June 2004: Abuse: Survivor forced to kneel in hallway for hours and placed in lockup as punishment. (Fornits forum, post by mac10k, June 2004: https://www.fornits.com/phpbb/index.php?topic=2107.30)",
+          "1985: Injury: A struggling black student broke a perfume bottle, used the glass to slit her wrists, and was initially denied an ER trip before being locked in a room shortly after returning with stitches. (Fornits forum, post by Anonymous, August 2004: https://www.fornits.com/phpbb/index.php?topic=2107.64)",
+          "Reported July 2004: Abuse: A girl with severe epilepsy was accused of being possessed by the devil and forced to have others gather around and sing hymns until her convulsions stopped. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.41)",
+          "Reported July 2004: Runaway: A girl named Bini jumped out of a 3-story window to escape and broke her back. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.41)",
+          "Reported April 2003: Restraint: A girl was tied and chained to a bed after running away, then jumped out of a second-story window. (Fornits forum, post by Anonymous, April 2003: https://www.fornits.com/phpbb/index.php?topic=2107.0)",
+          "1978: Abuse: Physical abuse with a boat paddle by staff. (Fornits forum, post by Anonymous, May 2004: https://www.fornits.com/phpbb/index.php?topic=2107.21)",
+          "1983: Abuse: A former resident recalls physical punishments including licks, lock-up, having mouths washed out with lye soap, clothespins stuck on ears, and prolonged kneeling on linoleum. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.40)",
+          "1976: Seclusion: A student was locked in a darkened room for three days. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.59)",
+          "Reported January 2005: Sexual abuse: Staff member Sherri Compton molested underage girls at Rebekah. (Fornits forum, post by Anonymous, January 2005: https://www.fornits.com/phpbb/index.php?topic=2107.116)",
+          "Reported January 2005: Lawsuit: Parents filed a lawsuit against Rebekah regarding staff member Sherri Compton's molestation of a student. (Fornits forum, post by Anonymous, January 2005: https://www.fornits.com/phpbb/index.php?topic=2107.116)",
+          "Reported January 2005: Sexual abuse: Staff member Sherri Compton molested underage girls at Rebekah, leading to a lawsuit and an out-of-court settlement. (Fornits forum, post by Anonymous, January 2005: https://www.fornits.com/phpbb/index.php?topic=2107.116)",
+          "1986: Abuse: A resident with severe epilepsy was accused of being possessed by the devil and forced to undergo group hymn-singing during convulsions. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.41)",
+          "1981: Abuse: A resident was placed in a windowless lock-up room with roaches for a week and received physical paddlings (\"whakings\"). (Fornits forum, post by Melanie, April 2004: https://www.fornits.com/phpbb/index.php?topic=2107.12)",
+          "Reported May 2004: Runaway: A girl left and shot her father, and two friends went missing. (Fornits forum, post by Anonymous, May 2004: https://www.fornits.com/phpbb/index.php?topic=2107.21)",
+          "Reported July 2003: Abuse: Girls were forced to kneel on salt and were chained to beds. (Fornits forum, post by Anonymous, July 2003: https://www.fornits.com/phpbb/index.php?topic=2107.3)",
+          "Reported June 2004: Abuse: A survivor was forced to write 250 sentences a day until she confessed to lying about being raped. (Fornits forum, post by mac10k, June 2004: https://www.fornits.com/phpbb/index.php?topic=2107.30)",
+          "1981: Seclusion: A student spent a week in a windowless lock-up room with roaches, and received paddlings. (Fornits forum, post by Melanie, April 2004: https://www.fornits.com/phpbb/index.php?topic=2107.12)",
+          "Reported May 2004: Abuse: Inmates experienced hunger, lock-ups, excessive beatings, bleeding, and standing or kneeling for hours. (Fornits forum, post by Anonymous, May 2004: https://www.fornits.com/phpbb/index.php?topic=2107.22)",
+          "1982: Restraint: A girl was chained to a bed after running away. (Fornits forum, post by Anonymous, July 2003: https://www.fornits.com/phpbb/index.php?topic=2107.3)",
+          "Reported June 2004: Abuse: Staff forced survivor to write 250 sentences a day denying a previous rape until she confessed to lying. (Fornits forum, post by mac10k, June 2004: https://www.fornits.com/phpbb/index.php?topic=2107.30)",
+          "Reported June 2004: Abuse: Staff slapped survivor across the face. (Fornits forum, post by mac10k, June 2004: https://www.fornits.com/phpbb/index.php?topic=2107.30)",
+          "1976: Abuse: Severe beatings resulting in bruises and bleeding, lack of food, and denial of schooling. (Fornits forum, post by LIZ MALDONADO, May 2004: https://www.fornits.com/phpbb/index.php?topic=2107.23)",
+          "Reported May 2004: Abuse: Inmates experienced hunger, lock-up, excessive licks, bleeding, and lack of menses. (Fornits forum, post by Anonymous, May 2004: https://www.fornits.com/phpbb/index.php?topic=2107.22)",
+          "Reported November 2004: Sexual abuse: Staff members Miss Sue and Miss Cindy were caught sexually abusing one of the girls. (Fornits forum, post by Anonymous, November 2004: https://www.fornits.com/phpbb/index.php?topic=2107.102)",
+          "Reported June 2004: Abuse: Residents were subjected to frequent physical beatings and paddlings for demerits. (Fornits forum, post by mac10k, June 2004: https://www.fornits.com/phpbb/index.php?topic=2107.30)",
+          "1986: Runaway: A resident known as Bini jumped out of a third-story window to escape and broke her back. (Fornits forum, post by Anonymous, July 2004: https://www.fornits.com/phpbb/index.php?topic=2107.41)",
+          "Reported November 2004: Investigation: DCF was called on Mrs. Cameron at the Florida home for hitting a young lady with a curtain rod. (Fornits forum, post by Anonymous, November 2004: https://www.fornits.com/phpbb/index.php?topic=2107.101)",
+          "Reported 2025-12: Abuse: Punishment included kneeling for hours on hardwood floors, paddle or strap licks, spankings with a belt, and lockup in an isolation room where sermons were played for days. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Survivors report extreme physical abuse, lengthy solitary confinement, sexual abuse, sleep deprivation, and restraints including handcuffs. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "1985-12: Closure order: A court order required the homes to get a state license or close by January 1, 1986; at the end of 1985 Wiley Cameron moved the girls by bus to Missouri, where no license was required. The Missouri homes closed in 1987, two days after a Kansas City Times report on abuse there. (Texas Monthly, Dec 2001: https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/)",
+          "1979-06: Closure order: On June 22, 1979 Roloff surrendered to a court order to close the home; the girls returned to Texas on September 13, 1979, with 50 of the original 180 girls. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "2001: Closure order: Rebekah Home for Girls, which MGGA is widely recognized as a rebrand of, was forced to shut down by the state of Texas in 2001. (r/troubledteens wiki, page \"Marvelous Grace Girls Academy\" (as of 2025-12-18))",
+          "1973: Criminal charge: In 1973 a misdemeanor charge was filed against a house parent after parents saw a girl whipped; Roloff refused welfare workers entry. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "2001: Incident: Wiley Cameron closed the Rebekah Home in summer 2001, after the Legislature let the law that let faith-based homes be accredited privately instead of licensed by the state lapse. (Texas Monthly, Dec 2001: https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/)",
+          "1973: Investigation: In 1973 visiting parents reported seeing a girl whipped; 16 girls told investigators they had been whipped, paddled, handcuffed and confined to cells. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "1978: Lawsuit: After losing his last Supreme Court appeal in 1978, religious leaders formed a human chain around the home in the Christian Alamo; ownership was later moved to a church so a state court ruled it could operate without a license. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "Reported 2025-12: Lawsuit: Court battles followed the 1973 reports and Roloff was jailed for refusing to follow court-ordered reforms. (r/troubledteens wiki, page \"Rebekah Home for Girls\" (as of 2025-12-18))",
+          "1999-06: License action: In June 1999 Texas Child Protective Services issued findings of physical abuse and medical neglect at the Rebekah Home, a sister school of the Anchor Home, and banned its head from working with juveniles in Texas. (HEAL, staff list for Anchor Academy (archived 2025-07-11))",
+          "1999-06: License action: In June 1999 Texas found evidence of abuse and neglect at the Roloff Homes' Rebekah Home for girls; Texas child-protection officials banned supervisor Faye Cameron for life from working in any juvenile home in Texas, yet TACCCA reaccredited the home. (Texas Freedom Network, The Texas Faith-Based Initiative at Five Years, 2002: https://tfn.org/cms/assets/uploads/2016/01/TFN_CC_REPORT-FINAL.pdf; Texas Monthly, Dec 2001: https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/)",
+          "1983: Investigation: The Rebekah Home was the subject of state investigations through the 1970s after parents saw a girl whipped; Roloff temporarily closed his homes after state prosecution on behalf of 16 former residents. (HEAL, ﻿ HEAL TEEN LIBERTY NEWS (archived 2019-04-21))"
+        ]
+      },
+      "locationDetails": {
+        "city": "Corpus Christi",
+        "state": "TX",
+        "country": "United States",
+        "zip": "78415",
+        "additionalLocations": [],
+        "formerLocations": [
+          {
+            "state": "MO",
+            "city": "Belton",
+            "address": "Belton, MO area",
+            "zip": "",
+            "fromYear": "1985",
+            "toYear": "1987"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": 11656,
+    "unique_name": "Asheville Academy for Girls",
+    "version": 3,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2011,
+        "endYear": 2025,
+        "status": "Closed",
+        "yearsOfOperation": "2011-2025",
+        "notes": [
+          "Ages 10-14 (Woodbury Reports, February 2012, p. 15: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0212.pdf#page=15)",
+          "Type: Therapeutic Boarding School (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/ashevilleacademy)",
+          "Capacity: 40 (as of 2025) (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/ashevilleacademy)",
+          "Opened December 1, 2011 in Weaverville, NC, and held its grand opening in early 2012 (Woodbury Reports, July 2013, p. 2: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0713.pdf#page=2; March 2012, p. 10: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0312.pdf#page=10; February 2012, p. 14: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0212.pdf#page=14)"
+        ]
+      },
+      "notes": [
+        "Founded by: former employees of New Leaf Academy of North Carolina (r/troubledteens wiki, page \"Family Help & Wellness\" (as of 2026-01-07))",
+        "Cost: $66,250 per year ($5,520 per month) (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18))",
+        "Move: moved to its own campus in Black Mountain, NC; had been next door to Solstice East (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Move: Asheville Academy for Girls moved into the former Stone Mountain School campus (r/troubledteens wiki, page \"Stone Mountain School\" (as of 2025-12-18))",
+        "Address: 126 Camp Elliot Rd, Black Mountain, NC 28711 (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18))",
+        "Ages: girls 10-14 (Woodbury Reports, February 2012, p. 15)",
+        "Merger: merged with Magnolia Mill School (formerly Solstice East) (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18))",
+        "Length of stay: 9 to 12 months average (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18))",
+        "Former location: 530 Upper Flat Creek Rd, Weaverville, NC (shared with Solstice East) (moved 2017) (r/troubledteens wiki, page \"Asheville Academy for Girls\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/ashevilleacademy)",
+        "Ages: girls, ages 10 to 14 (Woodbury Reports, March 2012, p. 10)",
+        "Operator: member of CRC Health Group (Woodbury Reports, April 2009, p. 12) https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0409.pdf#page=12",
+        "Accreditation: awarded three-year CARF Accreditation (Woodbury Reports, September 2010, p. 10)",
+        "Note: added equine therapy via contract with Horse Sense (Woodbury Reports, April 2009, p. 12)",
+        "Note: dam repair phase one (emptying the lake) complete; beginning phase two (reconstruction plan) (Woodbury Reports, February 2007, p. 30)",
+        "Address: 126 Camp Elliott School, Black Mountain, NC 28711 (r/troubledteens wiki, page \"Stone Mountain School\" (as of 2025-12-18))",
+        "Cost: $4,900 per month plus $2,500 enrollment fee (r/troubledteens wiki, page \"Stone Mountain School\" (as of 2025-12-18))",
+        "Acquired: acquired by Aspen Education Group in 2000 (HEAL, staff list for Lake House Academy (archived 2025-07-20))"
+      ]
+    }
+  },
+  {
+    "id": 11659,
+    "unique_name": "Magnolia Mill School",
+    "version": 2,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2012,
+        "endYear": 2025,
+        "status": "Closed",
+        "yearsOfOperation": "2012-2025",
+        "notes": [
+          "Serves: Female (Woodbury Reports, October 2012, p. 16: https://kidsoverprofits.org/wp-content/uploads/woodbury-1012.pdf#page=16)",
+          "migration: unparsed capacity: 48 residents",
+          "Ages 14-18 (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/solsticeeast)",
+          "Opened in late 2012 as Solstice East, sharing 25 acres with Asheville Academy for Girls (Woodbury Reports, October 2012, p. 16: https://kidsoverprofits.org/wp-content/uploads/woodbury-1012.pdf#page=16); the state cited Solstice East, LLC at 530 Upper Flat Creek Road, Weaverville, license MHL011-398, in December 2020 (https://info.ncdhhs.gov/dhsr/mhlcs/sods/2020/20201223-011296.pdf)",
+          "Rebranded Magnolia Mill School in early 2024 (All Kinds of Therapy, Feb 5, 2024: https://www.allkindsoftherapy.com/introducing-magnolia-mill-school-long-term-residential-therapy-reimagined)"
+        ]
+      },
+      "notes": [
+        "Opened: new East Coast expansion of Solstice, scheduled to open in Asheville, NC (Woodbury Reports, October 2012, p. 16)",
+        "Cost: $10,000-12,000 per month (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Length of stay: 9 to 12 months reported, usually longer (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Membership: NATSAP since 2012 (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Closed: license MHL-011-398 at 530 Upper Flat Creek Road, by then Asheville Academy, was surrendered effective June 4, 2025 (WLOS, Jun 9, 2025: https://wlos.com/news/local/asheville-academy-closes-license-surrender-investigation-remain-ongoing-weaverville-north-carolina-department-health-human-services-ncdhhs-wilderness-training-consulting-trails-carolina)",
+        "Note: transition program The Journey Home East (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Merger: merger with Asheville Academy for Girls announced, to be called Asheville Academy (r/troubledteens wiki, page \"Magnolia Mill School\" (as of 2025-12-18))",
+        "Name change: rebranding as Magnolia Mill School (r/troubledteens wiki, page \"Solstice East\" (as of 2025-12-18))",
+        "Address: Weaverville, NC (Solstice East) (HEAL, staff list for Solstice RTC (archived 2022-09-26))"
+      ],
+      "identification": {
+        "name": "Magnolia Mill School",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [
+          "Solstice East"
+        ],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "Family Help & Wellness",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      }
+    }
+  },
+  {
+    "id": 12621,
+    "unique_name": "Devereux Cleo Wallace Center",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1943,
+        "endYear": 2023,
+        "status": "Closed",
+        "yearsOfOperation": "1943-2023",
+        "notes": [
+          "Founded in 1943 by Cleo Wallace, a Denver speech and language specialist; moved to its 33-acre Westminster site in 1958 (Westword, Mar 9, 1994: https://www.westword.com/news/wild-at-heart-5053758)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 12945,
+    "unique_name": "Echo Glen Children’s Center",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1967,
+        "endYear": null,
+        "status": "Open",
+        "yearsOfOperation": "1967-present",
+        "notes": [
+          "Opened in 1967 as the state's first co-ed Juvenile Rehabilitation institution (FOX 13, Jan 26, 2022: https://www.fox13seattle.com/news/what-is-echo-glen-childrens-center-in-snoqualmie-washington)",
+          "Run by the Department of Social and Health Services' Juvenile Rehabilitation Administration until Juvenile Rehabilitation moved to the Department of Children, Youth, and Families on July 1, 2019 (WSR 19-14-079: https://lawfilesext.leg.wa.gov/law/wsr/2019/14/19-14-079.htm)"
+        ]
+      },
+      "identification": {
+        "name": "Echo Glen Children’s Center",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "Washington State Department of Children, Youth, and Families",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      },
+      "pastOperators": [
+        "Washington State DSHS Juvenile Rehabilitation Administration (1967-2019)"
+      ]
+    }
+  },
+  {
+    "id": 13983,
+    "unique_name": "Carolina Springs Academy",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Carolina Springs Academy",
+        "currentName": "",
+        "otherNames": [
+          "Magnolia Hills Christian Academy"
+        ],
+        "pastNames": [
+          "Magnolia Hills Christian Academy around 2011",
+          "Seneca Ranch about 2011 to 2016",
+          "Second Chance Ranch",
+          "Southern Oaks Therapeutic Boarding School in 2018"
+        ],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      },
+      "notes": [
+        "Address: 210 Green Acres Ln, Donalds, SC 29638 (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Length of stay: 2-3 years (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Note: first residents came from Morava Academy, a WWASP program raided and shut down in 1998 (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Campus: new dormitory built 2004; capacity raised from 58 to 162 (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Founded by: Narvin Lichfield and Richard Byars (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Founded by: Narvin Lichfield, who founded it in 1998 near Due West (HEAL, staff list for Carolina Springs Academy on border of South Carolina & Georgia (archived 2025-07-12))",
+        "Name change: re-opened in 2011 as Magnolia Christian School (HEAL, staff list for Carolina Springs Academy on border of South Carolina & Georgia (archived 2025-07-12))",
+        "Owner: property owned by Carolina Honey, owned by the Lichfield family (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Membership: one of more than a dozen institutions affiliated with the Utah-based Worldwide Association of Specialty Programs and Schools (WWASPS) (HEAL, California | Colorado | Illinois | Iowa (archived 2025-07-12))",
+        "Name change: renamed from Carolina Springs Academy (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))",
+        "Past name: Magnolia Hills Christian Academy around 2011 (r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/carolinasprings)",
+        "Name change: Narvin Lichfield ran schools on the same Donalds site under later names: Seneca Ranch (about 2011 to 2016, after Magnolia Hills Christian Academy) and Second Chance Ranch; by July 2018 it was Southern Oaks Therapeutic Boarding School (babe, Harry Shukman, Jul 27, 2018: https://web.archive.org/web/20191210124051/https://babe.net/2018/07/27/southern-oaks-narvin-lichfield-wwasps-73748; r/troubledteens wiki, page \"Carolina Springs Academy\" (as of 2025-12-18))"
+      ]
+    }
+  },
+  {
+    "id": 9691,
+    "unique_name": "Northwest Academy",
+    "version": 3,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1994,
+        "endYear": 2018,
+        "status": "Closed",
+        "yearsOfOperation": "1994-2018",
+        "notes": [
+          "Closed September 26, 2018 (Julia Andrick's notice: https://strugglingteens.com/artman/publish/NWA-BN08222018.shtml; Sandpoint Reader, Aug 30, 2018: https://sandpointreader.com/northwest-academy-closing-after-24-years/)"
+        ]
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "2003: Abuse: A survivor told HEAL that Northwest Academy therapy consisted of groups of 25 yelling at students until they cried, with labor and talking bans as punishment. (HEAL, Quick Links | cedu family of programs (archived 2025-07-16))",
+          "Reported 2025-07: Injury: A parent alleged that after a riot at Northwest Academy an employee promised the student would be kept safe, and the student was then allegedly struck in the head with a weapon by another student (allegation in court record). (HEAL, THE CASES AGAINST CEDU FAMILY OF PROGRAMS (archived 2025-07-13))",
+          "1997-01: Injury: In January 1997 about 20 students rioted, beating workers with fire extinguishers and damaging a car and buildings; five people were hospitalized. (r/troubledteens wiki, page \"Northwest Academy\" (as of 2025-12-18))",
+          "1998-03: Lawsuit: A companion 1998 lawsuit against the same CEDU entities alleged negligent hiring and emotional and physical abuse of students by staff members, including an injury during a counseling session; the Idaho Supreme Court sent those claims to arbitration on Dec. 28, 2000 (allegations). (HEAL, THE CASES AGAINST CEDU FAMILY OF PROGRAMS (archived 2025-07-13))",
+          "1996: Lawsuit: In 1996 a former student sued Ascent Wilderness and Northwest Academy claiming abuse in 1994-1995, including deprivation of medication and being forced to sit outside in January. (r/troubledteens wiki, page \"Northwest Academy\" (as of 2025-12-18))",
+          "2000: Lawsuit: Northwest Academy was mentioned in the 2000 Accomazzo v. CEDU Educational Services Inc lawsuit. (r/troubledteens wiki, page \"Northwest Academy\" (as of 2025-12-18))",
+          "Reported 2025-12: Sexual abuse: A survivor reports that staff member Mick Taylor had an inappropriate sexual relationship with a 17-year-old resident; this has not been independently verified. (r/troubledteens wiki, page \"Northwest Academy\" (as of 2025-12-18))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 9851,
+    "unique_name": "Camp O’Neal",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": 1990,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": [
+          "Closed 1990: the state suspended its license on March 16, 1990 and social workers removed the last 16 residents, after three boys and four rescuers drowned at Convict Lake on February 19, 1990 (UPI, \"State closes camp where 7 were drowned\", Times-Standard, Mar 17, 1990, p. 5: https://newspaperarchive.com/eureka-times-standard-mar-17-1990-p-5/; Mammoth Times, Feb 17, 2012: https://www.mammothtimes.com/content/book-convict-lake-drowning-accident-both-heals-hurts)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 13931,
+    "unique_name": "Bethesda Home for Girls",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": 1986,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": [
+          "Closed in 1986: a Mississippi youth court ruled it an illegal detention center and the state took custody of nearly 120 girls; the court found 137 minors had been moved out of the state against its order (SPLC, Jan 4, 2018: https://www.splcenter.org/resources/stories/look-back-splc-lawsuit-led-closure-abusive-home-teenage-girls/; In the Interest of M.I., 519 So. 2d 433 (Miss. 1988): https://hallapproved.com/ms/cases/supreme/1988/7631382). NBC News (Nov 2021) gives 1987. HEAL's 1980 names no source."
+        ]
+      }
+    }
   }
 ]

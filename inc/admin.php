@@ -2760,7 +2760,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '170';   // 170: About batch 2 record fixes (VisionQuest, Spring Creek, Dundee Ranch, Tranquility Bay, Dozier, Agape, Thayer, High Impact, Lakeside; memorial; Dundee -> WWASPS)
+    $version = '171';   // 171: About batch 3 record fixes (Maple Lake LLC open + Girls' Home Oct 2024, Rebekah Home, Asheville Academy 2011, Magnolia Mill 2012, Cleo Wallace 1943, Echo Glen, Carolina Springs names, Northwest Academy 2018, Camp O'Neal 1990, Bethesda 1986; memorial: Asheville age 13, Angela Miller Mar 3)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }
