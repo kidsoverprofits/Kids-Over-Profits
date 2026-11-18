@@ -211,3 +211,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
 42. **Suggested ongoing stories** (plan 4.7 #18): the queue opens at Review inbox > Suggested ongoing stories; "Look
    now" lists about nine new stories; Add one, see it on [/tti-news-feed/](https://kidsoverprofits.org/tti-news-feed/),
    Undo, it is gone again. Manage Ongoing Stories: Detach an article, the arc's terms gain `not: #<id>`.
+43. **Search indexing, robots.txt** (Search Console "Indexed, though blocked by robots.txt", 2026-11-12): logged out,
+   [robots.txt](https://kidsoverprofits.org/robots.txt) disallows only `/researcher-upload`;
+   [the data form](https://kidsoverprofits.org/tti-data-submission/) has `<meta name="robots" content="noindex, follow`;
+   within 12 hours (transient `kop_seo_tool_page_ids`, Yoast's sitemap cache)
+   [page-sitemap.xml](https://kidsoverprofits.org/page-sitemap.xml) no longer lists it. Then Validate Fix on that
+   report in Search Console; the URLs move to "Excluded by noindex" over the following weeks.

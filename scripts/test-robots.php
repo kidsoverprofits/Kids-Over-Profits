@@ -44,9 +44,11 @@ $yoast = "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDis
 $live = "Disallow: /go/\n\n" . $yoast;
 $out = kop_robots_txt($live);
 $g = star_group($out);
-foreach (array('/go/', '/tti-data-submission') as $p) {
-    ok("live file: Disallow: $p is in the * group", in_array('Disallow: ' . $p, $g, true));
-}
+ok('live file: a stray Disallow: /go/ is moved into the * group', in_array('Disallow: /go/', $g, true));
+ok('live file: Disallow: /researcher-upload is in the * group', in_array('Disallow: /researcher-upload', $g, true));
+// Search Console 2026-11-12, "Indexed, though blocked by robots.txt": pages kept out of search use noindex,
+// which Google can only read on a page it may fetch.
+ok('live file: the data form is not disallowed', !in_array('Disallow: /tti-data-submission', $g, true));
 ok('live file: the empty Disallow is gone', !in_array('Disallow:', $g, true));
 ok('live file: nothing sits before the first User-agent but comments',
     !preg_match('/\A(?:\s*#[^\n]*\n|\s*\n)*\s*disallow/i', $out));
@@ -58,12 +60,13 @@ ok('no line twice', count($g) === count(array_unique(array_filter($g))) + count(
 $wp = kop_robots_txt("User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n");
 $g = star_group($wp);
 ok('stock file: wp-admin rule kept', in_array('Disallow: /wp-admin/', $g, true));
-ok('stock file: data form disallowed', in_array('Disallow: /tti-data-submission', $g, true));
+ok('stock file: data form not disallowed (it is noindex instead)', !in_array('Disallow: /tti-data-submission', $g, true));
+ok('stock file: /go/ not disallowed (it sends noindex instead)', !in_array('Disallow: /go/', $g, true));
 // The staging copy is gone: Google may recrawl its old addresses and see the 404s and redirects.
 ok('stock file: /staging/ is not disallowed', !in_array('Disallow: /staging/', $g, true));
 ok('stock file: researcher upload page disallowed', in_array('Disallow: /researcher-upload', $g, true));
 
-ok('an empty file gets a group', array_values(array_filter(star_group(kop_robots_txt('')))) === array('Disallow: /tti-data-submission', 'Disallow: /researcher-upload'));
+ok('an empty file gets a group', array_values(array_filter(star_group(kop_robots_txt('')))) === array('Disallow: /researcher-upload'));
 
 $hooked = array();
 foreach ($GLOBALS['kop_test_filters']['robots_txt'] as $f) $hooked[$f[0]] = $f[1];

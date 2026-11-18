@@ -131,7 +131,9 @@ php -d extension=mbstring scripts/test-proper-names.php   # rules, every case ch
 # by api/ endpoints without WordPress); window.KOP_CHOICE_LISTS for lists registered 'js'. A new list goes there (docs/ADDING-CONTENT.md 10)
 php -d extension=mbstring scripts/test-choice-lists.php [--list]   # merge, form, Undo, every registered list reads
 # robots.txt (inc/robots.php): every Disallow line goes inside Yoast's "User-agent: *" group (lines outside a group are ignored);
-# a path to keep crawlers out of goes in kop_robots_disallow_paths(). WP-Cron runs from the server's crontab (wp-cron.php every
+# a path to keep crawlers out of goes in kop_robots_disallow_paths(). A page to keep out of SEARCH gets noindex instead, never a
+# Disallow: Google indexes blocked pages from links and can't read their noindex ("Indexed, though blocked by robots.txt",
+# 2026-11-12). So /go/ (X-Robots-Tag) and the data form (kop_seo_is_data_form(), inc/seo.php) are crawlable and noindex. WP-Cron runs from the server's crontab (wp-cron.php every
 # 5 min, ~/logs/wp-cron.log); visitors start it only if that run has not been seen for 20 min (inc/server-cron.php)
 php scripts/test-robots.php
 # Search engines (inc/seo.php, the search plan https://claude.ai/artifact/FEpJSHihC9fDgdxoxzuQqb): facility and company titles and descriptions

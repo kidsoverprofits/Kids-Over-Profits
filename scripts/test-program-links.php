@@ -257,7 +257,7 @@ $check('program site: archived url', strpos($link['url'], 'https://web.archive.o
 $check('program site: go_url set', $link['go_url'] === home_url('/go/') . '?u=' . rawurlencode($program_url), $link['go_url']);
 $exempt = kop_facility_pages_archive_link('https://www.reddit.com/r/troubledteens/');
 $check('exempt host: untouched, no go_url', $exempt['url'] === 'https://www.reddit.com/r/troubledteens/' && $exempt['go_url'] === '');
-$check('robots.txt disallows /go/', strpos(kop_program_go_robots("User-agent: *\n"), 'Disallow: /go/') !== false);
+$check('robots.txt leaves /go/ crawlable so Google reads its noindex', !function_exists('kop_program_go_robots'));
 
 echo $failures ? "$failures failure(s)\n" : "All /go/ checks passed\n";
 exit($failures ? 1 : 0);

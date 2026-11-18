@@ -3510,8 +3510,9 @@ if (!function_exists('kop_facility_pages_resource_link_credit')) {
 //
 // The archived snapshot is always the primary link. A reader who wants the
 // live site gets it through /go/?u=<url>, which answers noindex/nofollow,
-// forwards with no referrer, and is disallowed in robots.txt, so the program
-// gets no ranking and no referral from us. It only forwards to hosts that
+// forwards with no referrer, so the program gets no ranking and no referral
+// from us. It is not disallowed in robots.txt: Google has to fetch it to read
+// the noindex (inc/robots.php). It only forwards to hosts that
 // appear in our own records, so it cannot be used as an open redirect.
 
 if (!function_exists('kop_program_go_url')) {
@@ -3606,13 +3607,6 @@ if (!function_exists('kop_program_go_route')) {
         exit;
     }
     add_action('template_redirect', 'kop_program_go_route', -10);
-}
-
-if (!function_exists('kop_program_go_robots')) {
-    function kop_program_go_robots($output) {
-        return rtrim((string) $output) . "\nDisallow: /go/\n";
-    }
-    add_filter('robots_txt', 'kop_program_go_robots', 20);
 }
 
 if (!function_exists('kop_program_links_register_script')) {

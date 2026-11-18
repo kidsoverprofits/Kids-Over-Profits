@@ -360,7 +360,7 @@ require_once get_stylesheet_directory() . '/inc/article-pieces.php';
 // Keeps crawlers out of the staging copy of the site
 require_once get_stylesheet_directory() . '/inc/staging-links.php';
 
-// robots.txt: every Disallow line inside the "User-agent: *" group, the data form kept out
+// robots.txt: every Disallow line inside the "User-agent: *" group (pages kept out of search use noindex)
 require_once get_stylesheet_directory() . '/inc/robots.php';
 // Search engines: other names in titles, structured data, missing descriptions, share image (docs/PLAN.md 3.24)
 require_once get_stylesheet_directory() . '/inc/seo.php';

@@ -2,15 +2,21 @@
 /**
  * The site's robots.txt rules in one group crawlers actually read.
  *
- * WordPress serves a virtual robots.txt; inc/facility-pages.php (/go/) adds a
- * Disallow line to it, and Yoast then rebuilds the file around its own "User-agent: *" block. That left our
+ * WordPress serves a virtual robots.txt; a filter may add a Disallow line to it,
+ * and Yoast then rebuilds the file around its own "User-agent: *" block. That left our
  * lines above any User-agent line, outside every group, where crawlers ignore
  * them. This runs after Yoast, takes every Disallow line that sits outside a
  * group and puts it, with the paths below, into the "User-agent: *" group.
  *
- * /tti-data-submission: every facility and company page links the data form
- * with ?find=<its name>, so a crawler that follows links builds the form once
- * per record. The form is for people; nothing on it is worth indexing.
+ * Keep a page out of search with noindex, not here: a blocked page can still be
+ * indexed from links (Search Console's "Indexed, though blocked by robots.txt",
+ * 2026-11-12), and Google never reads the noindex of a page it may not fetch.
+ * So /go/ (X-Robots-Tag noindex) and the data form /tti-data-submission
+ * (noindex, inc/seo.php) are no longer disallowed (2026-11-18).
+ *
+ * /researcher-upload: a private page reached only by a keyed link, never linked
+ * or in the sitemap; it is noindex too, and stays disallowed so crawlers never
+ * load a keyed upload page.
  *
  * A request, not a control: a scraper that ignores robots.txt is not stopped.
  */
@@ -21,7 +27,7 @@ if (!defined('ABSPATH')) {
 
 /** Paths every crawler is asked to leave alone, besides the ones other files add. */
 function kop_robots_disallow_paths() {
-    return array('/tti-data-submission', '/researcher-upload');
+    return array('/researcher-upload');
 }
 
 function kop_robots_txt($output) {

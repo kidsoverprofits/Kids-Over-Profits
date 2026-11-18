@@ -505,9 +505,45 @@ if (!function_exists('kop_seo_noindex_page')) {
     function kop_seo_noindex_page($post, $template) {
         $tpls = function_exists('kop_template_layout_noindex') ? kop_template_layout_noindex() : array();
         $tpls[] = 'templates/page-location-index.php';
+        $tpls[] = 'templates/page-data.php';
         if (in_array((string) $template, $tpls, true)) return true;
-        return in_array((string) ($post->post_name ?? ''), array('tti-wiki-entry-generator', 'wiki-editor', 'news-processor', 'location-index'), true);
+        return in_array((string) ($post->post_name ?? ''), array('tti-wiki-entry-generator', 'wiki-editor', 'news-processor', 'location-index', 'tti-data-submission'), true);
     }
+}
+
+if (!function_exists('kop_seo_is_data_form')) {
+    /**
+     * The public data form (/tti-data-submission/, linked from every record page as ?find=<name>): for people, not
+     * search. It is noindex (links still followed) and out of the sitemap; robots.txt no longer blocks it, because
+     * Google must fetch it to read the noindex (Search Console, "Indexed, though blocked by robots.txt", 2026-11-12).
+     */
+    function kop_seo_is_data_form() {
+        if (!function_exists('is_page') || !is_page()) return false;
+        if (is_page('tti-data-submission')) return true;
+        $tpl = function_exists('get_page_template_slug') ? (string) get_page_template_slug() : '';
+        return in_array($tpl, array('templates/page-data.php', 'page-data.php'), true);
+    }
+}
+
+if (!function_exists('kop_seo_data_form_robots')) {
+    function kop_seo_data_form_robots($robots) {
+        if (!is_array($robots) || !kop_seo_is_data_form()) return $robots;
+        $robots['index'] = 'noindex';
+        $robots['follow'] = 'follow';
+        return $robots;
+    }
+    add_filter('wpseo_robots_array', 'kop_seo_data_form_robots', 30);
+}
+
+if (!function_exists('kop_seo_data_form_wp_robots')) {
+    /** The same when Yoast is off: core's robots tag. */
+    function kop_seo_data_form_wp_robots($robots) {
+        if (!is_array($robots) || !kop_seo_is_data_form()) return $robots;
+        $robots['noindex'] = true;
+        unset($robots['index']);
+        return $robots;
+    }
+    add_filter('wp_robots', 'kop_seo_data_form_wp_robots', 30);
 }
 
 if (!function_exists('kop_seo_sitemap_exclude_tools')) {

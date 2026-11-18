@@ -226,5 +226,31 @@ $check('any other page keeps its robots', kop_seo_tag_robots($yoast) === $yoast)
 $check('tags leave the sitemap, categories stay', kop_seo_sitemap_exclude_tags(false, 'post_tag') === true
     && kop_seo_sitemap_exclude_tags(false, 'category') === false);
 
+echo "-- Data form --\n";
+if (!function_exists('is_page')) {
+    function is_page($slug = '') {
+        $on = $GLOBALS['kop_test_page'] ?? '';
+        if ($on === '') return false;
+        return $slug === '' || $slug === $on || (is_array($slug) && in_array($on, $slug, true));
+    }
+}
+if (!function_exists('get_page_template_slug')) {
+    function get_page_template_slug() { return $GLOBALS['kop_test_tpl'] ?? ''; }
+}
+$GLOBALS['kop_test_page'] = 'tti-data-submission';
+$r = kop_seo_data_form_robots($yoast);
+$check('the data form is noindex, its links still followed', $r['index'] === 'noindex' && $r['follow'] === 'follow', json_encode($r));
+$w = kop_seo_data_form_wp_robots(array('max-image-preview' => 'large'));
+$check('the data form is noindex without Yoast too', !empty($w['noindex']), json_encode($w));
+$GLOBALS['kop_test_page'] = 'another-page';
+$GLOBALS['kop_test_tpl'] = 'templates/page-data.php';
+$check('a page on the data form template is noindex', kop_seo_data_form_robots($yoast)['index'] === 'noindex');
+$GLOBALS['kop_test_tpl'] = '';
+$check('any other page keeps its robots (data form)', kop_seo_data_form_robots($yoast) === $yoast);
+$GLOBALS['kop_test_page'] = '';
+$check('the data form leaves the sitemap', kop_seo_noindex_page((object) array('post_name' => 'tti-data-submission'), '') === true
+    && kop_seo_noindex_page((object) array('post_name' => 'x'), 'templates/page-data.php') === true
+    && kop_seo_noindex_page((object) array('post_name' => 'about'), 'templates/page-about.php') === false);
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);
