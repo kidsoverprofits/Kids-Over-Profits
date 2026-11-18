@@ -1,6 +1,6 @@
 {
- "built": "2026-11-18 21:38 UTC",
- "source": "d6f868494f2b6d2f14cc689fb7a4625cb1662e9e",
+ "built": "2026-11-18 21:47 UTC",
+ "source": "833e6da4d9cb8c4aaa16feec52db1bf36e5e065b",
  "sections": [
   {
    "key": "2",
@@ -2559,6 +2559,21 @@
        "focus": false,
        "steps": [],
        "hash": "63e02e524d3e"
+      },
+      {
+       "id": "3:search-indexing-robots-txt",
+       "lead": "Search indexing, robots.txt",
+       "text": "**Search indexing, robots.txt** (Search Console \"Indexed, though blocked by robots.txt\", 2026-11-12): logged out, [robots.txt](https://kidsoverprofits.org/robots.txt) disallows only `/researcher-upload`; [the data form](https://kidsoverprofits.org/tti-data-submission/) has `<meta name=\"robots\" content=\"noindex, follow`; within 12 hours (transient `kop_seo_tool_page_ids`, Yoast's sitemap cache) [page-sitemap.xml](https://kidsoverprofits.org/page-sitemap.xml) no longer lists it. Then Validate Fix on that report in Search Console; the URLs move to \"Excluded by noindex\" over the following weeks.",
+       "ask": "",
+       "date": "2026-11-12",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "f60ff1de1d23"
       }
      ]
     }
