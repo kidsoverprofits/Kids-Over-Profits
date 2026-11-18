@@ -510,6 +510,31 @@ add_action('rest_api_init', function () {
     ));
 });
 
+/**
+ * GET kop/v1/claude/research-tasks (research key, read-only), what /research-tasks reads without SSH:
+ * ?view=claude (default) the open tasks given to Claude; ?view=open every open and answered one; ?section= narrows.
+ * Answers and new tasks still go through seeds/research-tasks.json (scripts/research-tasks/tasks.py), committed.
+ */
+add_action('rest_api_init', function () {
+    register_rest_route('kop/v1', '/claude/research-tasks', array(
+        'methods' => 'GET',
+        'permission_callback' => function (WP_REST_Request $req) {
+            return function_exists('kop_msub_is_research') && kop_msub_is_research($req);
+        },
+        'callback' => function (WP_REST_Request $req) {
+            kop_rt_install();
+            kop_rt_import_seed();
+            kop_rt_sync_volunteer_answers();
+            $view = $req->get_param('view') === 'open' ? 'open' : 'claude';
+            $rows = kop_rt_list($view, sanitize_text_field((string) $req->get_param('section')));
+            if ($view === 'claude') $rows = array_values(array_filter($rows, function ($t) { return $t['status'] === 'open'; }));
+            $resp = new WP_REST_Response(array('success' => true, 'view' => $view, 'counts' => kop_rt_counts(), 'tasks' => kop_rt_export($rows)));
+            $resp->header('Cache-Control', 'no-store');
+            return $resp;
+        },
+    ));
+});
+
 /** POST volunteer/research: {do: 'list'} the questions to pick from; {do: 'take', ids: [...]} takes them. */
 function kop_rt_rest_volunteer(WP_REST_Request $req) {
     return kop_rinbox_rest(function () use ($req) {

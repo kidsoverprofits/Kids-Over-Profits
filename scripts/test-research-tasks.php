@@ -140,7 +140,7 @@ $inside = array_filter($seed['tasks'], function ($t) { return empty($t['settled'
 $check('no open question points inside our files (rows, record numbers, "in scope")', !$inside, implode(' | ', array_column($inside, 'title')));
 $nodir = array_filter($seed['tasks'], function ($t) { return !is_array($t['directions'] ?? null); });
 $check('every task carries a where-to-look list', !$nodir);
-$with = count(array_filter($seed['tasks'], function ($t) { return $t['directions'] || $t['records'] || $t['companies']; }));
+$with = count(array_filter($seed['tasks'], function ($t) { return $t['directions'] || $t['records'] || ($t['companies'] ?? array()); }));
 $check('most tasks point somewhere we hold (records, companies or links)', $with >= 90, "$with of " . count($keys));
 $badurl = array();
 foreach ($seed['tasks'] as $t) foreach ($t['directions'] as $d) if (!preg_match('#^https?://\S+$#', $d['url']) || trim($d['label']) === '') $badurl[] = $t['key'];

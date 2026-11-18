@@ -86,6 +86,14 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    409 = duplicate (fine). A 429 means the key was missing or wrong.
 5. The report says how many sources were sent and to which queues.
 
+## Open research questions go to Research Tasks as they come up (standing rule, owner 2026-11-18)
+
+A question only research can settle (an outcome nobody has found, sources that disagree, a status that may be out
+of date, a link that wouldn't open), met in any work and not settled in that session, is filed in KOP Tools >
+Research Tasks right then with `python scripts/research-tasks/tasks.py add`, then committed and pushed. That includes
+a draft's `research` lines when its lead sends it. They wait there until the owner gives them to Claude. Run
+`/research-tasks` to work them (`.claude/skills/research-tasks/SKILL.md`). Staff jobs still go in `docs/plan/`.
+
 ## Open items go in the plan files as you go (standing rule, 2026-10-14)
 
 The open list is split by section: `docs/PLAN.md` is the index (one line per file, the Plan Board pass) and the
