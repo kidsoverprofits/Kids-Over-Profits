@@ -21,6 +21,7 @@ An answer cites every piece of information: one --claim per fact, each with the 
         --claim "Norris Academy is in Andersonville, TN | https://... | the sentence on that page that says it"
     python scripts/research-tasks/tasks.py settle <key> --text "Record fixed in commit <url>"
     python scripts/research-tasks/tasks.py list [--open]
+    python scripts/research-tasks/tasks.py sections [--show <section>]   # live: open tasks by section (/research-tasks list)
     python scripts/research-tasks/tasks.py import-md      # done once, 2026-10-23: docs/RESEARCH-TASKS.md "Open" -> tasks (the file has no Open list since)
 
 Record ids (--records, and the ids import-md finds in the text) are checked against tmp/prod.sqlite when it is there.
@@ -478,6 +479,44 @@ def cmd_list(a):
         print('%-9s %s\n          %s' % (state, t['key'], t['title']))
 
 
+def live_tasks(section=''):
+    """The open and answered tasks as the live screen has them (owner edits and assignments included), read with the
+    research key from %USERPROFILE%\\kop-research-key.txt (never printed)."""
+    import urllib.parse
+    import urllib.request
+    key = open(os.path.join(os.path.expanduser('~'), 'kop-research-key.txt'), encoding='utf-8').read().strip()
+    url = 'https://kidsoverprofits.org/wp-json/kop/v1/claude/research-tasks?view=open'
+    if section:
+        url += '&section=' + urllib.parse.quote(section)
+    req = urllib.request.Request(url, headers={'X-KOP-Research-Key': key, 'User-Agent': 'kop-research-tasks'})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return json.loads(r.read().decode('utf-8'))['tasks']
+
+
+def cmd_sections(a):
+    """Open tasks by section, from the live screen: how many, who holds them, how many answered, oldest first."""
+    tasks = live_tasks()
+    who = {'': 'nobody', 'owner': 'you', 'claude': 'Claude', 'volunteer': 'volunteer'}
+    by = {}
+    for t in tasks:
+        s = by.setdefault(t['section'] or '(no section)', {'open': 0, 'answered': 0, 'held': {}, 'first': t['id'], 'records': set()})
+        s['answered' if t['status'] == 'answered' else 'open'] += 1
+        if t['status'] == 'open':
+            h = who.get(t['assignee'], t['assignee'])
+            s['held'][h] = s['held'].get(h, 0) + 1
+        s['first'] = min(s['first'], t['id'])
+        s['records'].update(t['records'] or [])
+    rows = sorted(by.items(), key=lambda kv: (-kv[1]['open'], kv[1]['first']))
+    print('%5s %5s  %-60s %s' % ('open', 'ans.', 'section', 'open tasks held by'))
+    for name, s in rows:
+        held = ', '.join('%s %d' % (k, v) for k, v in sorted(s['held'].items(), key=lambda kv: -kv[1]))
+        print('%5d %5d  %-60s %s' % (s['open'], s['answered'], name[:60], held))
+    print('\n%d open, %d answered, in %d sections' % (sum(s['open'] for s in by.values()), sum(s['answered'] for s in by.values()), len(by)))
+    if a.show:
+        for t in live_tasks(a.show):
+            print('\n[%s, %s] %s\n  key: %s' % (t['status'], who.get(t['assignee'], t['assignee']), t['title'], t['key']))
+
+
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -509,6 +548,9 @@ def main():
     s = sub.add_parser('list')
     s.add_argument('--open', action='store_true')
     s.set_defaults(fn=cmd_list)
+    s = sub.add_parser('sections', help='open tasks by section from the live screen (what /research-tasks list shows)')
+    s.add_argument('--show', default='', help='also list one section\'s questions')
+    s.set_defaults(fn=cmd_sections)
     s = sub.add_parser('import-md')
     s.add_argument('--force', action='store_true')
     s.set_defaults(fn=cmd_import_md)

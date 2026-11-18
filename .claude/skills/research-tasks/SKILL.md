@@ -1,6 +1,6 @@
 ---
 name: research-tasks
-description: File open research questions into KOP Tools > Research Tasks as they come up (`/research-tasks add`), or work the open tasks the owner has given to Claude (`/research-tasks` or `/research-tasks work [section]`). Every session files its own open questions here without being asked; run the work half only when the owner asks.
+description: File open research questions into KOP Tools > Research Tasks as they come up (`/research-tasks add`), show the open tasks by section so the owner can pick one (`/research-tasks list [section]`), or work the open tasks the owner has given to Claude (`/research-tasks` or `/research-tasks work [section]`). Every session files its own open questions here without being asked; run the work half only when the owner asks.
 ---
 
 # /research-tasks: file the open questions, work them when the owner is ready
@@ -41,6 +41,20 @@ A writer's `research` line in a draft is filed the same way when the lead sends 
    - **`--look`** names a document KOP holds about it (repeatable).
 3. **Commit and push** `seeds/research-tasks.json` (one commit for the batch). The cards show up after the deploy.
 4. **Report** how many were filed and under which section.
+
+## Listing (`/research-tasks list [section]`)
+
+Show the open tasks by section so the owner can choose what to work. This reads the live screen, so the owner's
+edits and assignments are included:
+
+```bash
+python scripts/research-tasks/tasks.py sections                       # every section: open, answered, who holds them
+python scripts/research-tasks/tasks.py sections --show "<section>"    # and that section's questions
+```
+
+Reply with the table as it prints: sections with the most open tasks first, and who holds them. Add a line for any
+section whose tasks someone else holds. With a section named, list its questions too, one line each. Then stop:
+don't start work until the owner names a section (`/research-tasks work <section>`).
 
 ## Working (`/research-tasks`, `/research-tasks work [section]`)
 
