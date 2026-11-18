@@ -2760,7 +2760,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '169';   // 169: /spiritual-abuse/ rewritten to the writing style (text fix, plan 4.7 item 21)
+    $version = '170';   // 170: About batch 2 record fixes (VisionQuest, Spring Creek, Dundee Ranch, Tranquility Bay, Dozier, Agape, Thayer, High Impact, Lakeside; memorial; Dundee -> WWASPS)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

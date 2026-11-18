@@ -1,6 +1,6 @@
 {
   "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes. New cases in seeds/lawsuits.json are inserted in the same pass.",
-  "version": "2026-10-21",
+  "version": "2026-11-18",
   "updates": [
     {
       "id": 24,
@@ -12,6 +12,23 @@
         }
       ],
       "note": "Facility link moved from 13930 (Bethel Academy, only in the frozen facilities_master) to 100180 (Bethel Boys' Academy), same program per the owner 2026-10-21."
+    },
+    {
+      "id": 81,
+      "case_name": "Lawsuit alleges ‘horrific sexual abuse’ at Arizona facility for troubled teens – Mingus Mountain Academy : r/troubledteens",
+      "set": {
+        "facilities_mentioned": [
+          {
+            "name": "Mingus Mountain Academy",
+            "facility_id": 12163
+          },
+          {
+            "name": "Mingus Mountain Youth Treatment Center",
+            "facility_id": 12163
+          }
+        ]
+      },
+      "note": "Facilities cut to the defendants (Mingus Mountain): the other programs (Robert Land Academy, Trails Carolina, West Ridge, Provo Canyon and others) are only named in the Reddit thread's comments, not in the suit (About rewrite batch 2, 2026-11-18)."
     }
   ]
 }

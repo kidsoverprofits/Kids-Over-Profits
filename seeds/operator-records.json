@@ -1138,5 +1138,19 @@
       }
     ],
     "_note": "Item 29 (owner, 2026-11-04): Teen Challenge programs on file without the company link. Applied over SSH that day; the adult ones moved to Christian Rehabs for Adults (seeds/related-moves.json) with their links."
+  },
+  {
+    "name": "World Wide Association of Specialty Programs and Schools (WWASPS)",
+    "note": "Link added 2026-11-18 (About rewrite batch 2): Dundee Ranch was a WWASPS program, owned by Narvin Lichfield (AP, Jun 17, 2003; The Tico Times, 2003-2007).",
+    "operator": {
+      "notes": []
+    },
+    "facilities": [
+      {
+        "id": 14109,
+        "unique_name": "Academy at Dundee Ranch",
+        "relationship": "current"
+      }
+    ]
   }
 ]

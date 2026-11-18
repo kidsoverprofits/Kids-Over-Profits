@@ -11899,5 +11899,282 @@
         "currentOperator": ""
       }
     }
+  },
+  {
+    "id": 10309,
+    "unique_name": "VisionQuest",
+    "version": 1,
+    "facility": {
+      "location": "Tucson, AZ",
+      "address": "600 N Swan Rd, Tucson, AZ 85711",
+      "addressParts": {
+        "street": "600 N Swan Rd",
+        "city": "Tucson",
+        "state": "AZ",
+        "zip": "85711"
+      },
+      "locationDetails": {
+        "city": "Tucson",
+        "state": "AZ",
+        "country": "United States",
+        "zip": "85711",
+        "additionalLocations": [],
+        "formerLocations": [
+          {
+            "state": "CA",
+            "city": "Hesperia",
+            "address": "Fred D. Jones Youth Center, Hesperia, CA",
+            "zip": "",
+            "fromYear": "2004",
+            "toYear": ""
+          }
+        ]
+      },
+      "operatingPeriod": {
+        "startYear": 1973,
+        "endYear": null,
+        "status": "Open",
+        "yearsOfOperation": "1973-present",
+        "notes": [
+          "Founded in 1973 by Bob Burton in Tucson, Arizona; an Arizona-based company (UPI, Nov 29, 1980: https://www.upi.com/Archives/1980/11/29/Sponsors-of-a-survival-adventure-for-troubled-teen-agers-which-went/2363344322000/; Reveal, Nov 21, 2019: https://revealnews.org/article/troubled-youth-detention-firm-seeks-to-open-migrant-child-shelter-in-los-angeles/)",
+          "Still operating in 2026 as VisionQuest National, Ltd., with programs in Arizona, Delaware, Maryland, Pennsylvania and Texas (vq.com, 2026: https://www.vq.com/)",
+          "Its Hesperia, California site (Fred D. Jones Youth Center) opened in 2004; San Bernardino County later canceled the contract (Reveal, Nov 21, 2019: https://revealnews.org/article/troubled-youth-detention-firm-seeks-to-open-migrant-child-shelter-in-los-angeles/)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 12729,
+    "unique_name": "Spring Creek Lodge Academy",
+    "version": 2,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1996,
+        "endYear": 2009,
+        "status": "Closed",
+        "yearsOfOperation": "1996-2009",
+        "notes": [
+          "Opened in 1996; about 600 teenagers in residence in 2004, the largest WWASPS affiliate, owned and run by Cameron and Chaffin Pullan (TIME, Nov 22, 2004: https://kidsoverprofits.org/wp-content/uploads/wendy-colde-time-magazine-2004.pdf)",
+          "Withdrew from the World Wide Association of Specialty Programs and Schools on June 23, 2006 (PRWeb, Jun 23, 2006: https://www.prweb.com/releases/2006/06/prweb403054.htm)",
+          "Steve Cawdrey founded the earlier Spring Creek Community in 1979; it closed about 1991 (The Spokesman-Review, Jun 2, 1996: https://www.spokesman.com/stories/1996/jun/02/importing-troubled-teenagers-behavior-cs/)"
+        ]
+      },
+      "facilityDetails": {
+        "type": "Specialty Boarding School",
+        "capacity": 600,
+        "currentCensus": null,
+        "ageRange": {
+          "max": null,
+          "min": null
+        },
+        "gender": "Co-ed"
+      }
+    }
+  },
+  {
+    "id": 14109,
+    "unique_name": "Academy at Dundee Ranch",
+    "version": 2,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2001,
+        "endYear": 2003,
+        "status": "Closed",
+        "yearsOfOperation": "2001-2003",
+        "notes": [
+          "Type: Specialty Boarding School (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/dundee)",
+          "Ages 11-17 (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/dundee)",
+          "Capacity: 200 (as of 2025) (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/index/dundee)",
+          "Opened in October 2001 (Associated Press, Jun 17, 2003: https://insidecostarica.com/specialreports/dundee_ranch.htm)",
+          "Closed May 24, 2003, after a week of rioting, runaways and two government interventions (The Tico Times, Jul 12, 2003: https://web.archive.org/web/2009/http://www.wwaspsinfo.net/dundee/dundee-ranch.07.12.03.html)",
+          "A new program, Pillars of Hope, opened on the property in 2004 (The Tico Times, Feb 23, 2007: https://ticotimes.net/2007/02/23/academy-owner-declared-innocent)"
+        ]
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "2003-05: Abuse: A 17-year-old boy said a teacher beat him with a stick after he refused to sign a statement saying he was well treated. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: A survivor testimony says an operations staff member, Mr. Bailey, grabbed a girl by the hair and slammed her into a cement wall during the riot. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Survivors report being deprived of food and sleep, restrained, beaten and placed in solitary confinement, with punishment called Observation Placement. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003-05: Closure order: In May 2003 Costa Rican authorities raided and shut down the Academy at Dundee Ranch after an investigation into reports of physical and emotional abuse. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Students who habitually broke rules were held in the High Impact walled compound until they walked 100 miles around a gravel track. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003-05: Restraint: A 14-year-old girl who fled after the raid reported staff beat and physically restrained children who tried to leave. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2007-02: Criminal charge: Narvin Lichfield was detained on charges of child abuse and false imprisonment and found innocent of torture, deprivation of liberty and coercion in February 2007; the judge said abuse had occurred but there was insufficient evidence he ordered it. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003: Criminal charge: Three other Jamaican employees were wanted in connection with the abuse case but fled Costa Rica after the closure. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003-05: Investigation: Costa Rican authorities alleged abuse, isolation and restraints, an inadequate plant, untrained personnel, 100 of 193 children with expired tourist visas, and overcrowding. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2002-08: Sexual abuse: In August 2002 two employees were reportedly fired after a male staffer allegedly raped and assaulted a female staff member, who was treated for a brain hemorrhage; the director said no charges were filed. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003-05: Runaway: After the raid, children reported that between 30 and 50 students revolted and some fled on foot. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003-01: Lawsuit: In January 2003 a Louisiana judge ruled two boys pulled out by their mother would not be ordered back to Dundee Ranch; the case drew the attention of Costa Rica's child welfare minister, who opened an investigation. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))",
+          "2003: Arrest: Narvin Lichfield was arrested following the 2003 closure of Dundee Ranch by Costa Rican authorities. (r/troubledteens wiki, page \"Academy at Dundee Ranch\" (as of 2025-12-18))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 14131,
+    "unique_name": "Tranquility Bay",
+    "version": 1,
+    "facility": {
+      "criticalIncidents": {
+        "customIncidents": [
+          "2004: Restraint: A student reported being restrained by the director of Tranquility Bay during a directors' meeting. (Fornits forum, post by chrisgentile, November 2004: https://www.fornits.com/phpbb/index.php?topic=4457.67)",
+          "Reported April 2004: Abuse: A former student reports being beaten and molested during their two years at Tranquility Bay. (Fornits forum, post by Anonymous, April 2004: https://www.fornits.com/phpbb/index.php?topic=5238.48)",
+          "Reported 2025-12: Abuse: A Texas mother reported her two sons had ringworm scars and chemical burns and slept on soiled plywood beds with no soap, toilet paper or hot water. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: A mother told Fox her son was pepper sprayed by Jay Kay and Randall Hinton daily for over eight months. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Jay Kay, Director of Tranquility Bay, admitted to pepper spraying students on multiple occasions. (r/troubledteens wiki, page \"Brightway Adolescent Hospital\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Residents were held in Observational Placement, a form of solitary confinement lying on the floor in a guarded room, reportedly for a week or even months. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "Reported 2025-12: Abuse: Survivors report pepper spray, painful limb twisting, violent restraints and beatings by staff, some hard enough to knock out teeth. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "1997: Abuse: Former student Layne Brown told the Columbia Daily Tribune in April 2005 that after he arrived in 1997 staff twisted his arms behind his back and pepper-sprayed him, about three times a day for three or four months; a 2006 French documentary showed Randall Hinton admitting to pepper-spraying a teen several times a day. (Columbia Daily Tribune, Apr 15, 2005: https://web.archive.org/web/2009/http://www.unmarriedamerica.org/emancipation/stories/Former_student_alleges_months_of_abuse.htm; r/troubledteens wiki, page \"White River Academy\" (as of 2025-12-18))",
+          "2001-08-10: Death: On August 10, 2001 a 17-year-old resident from Alabama died by suicide, jumping from a 35-foot-high balcony in the girls' building; witnesses say no staff were present and residents were ordered not to discuss it. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "2008: Investigation: Psychologist David Pelcovitz interviewed a resident in Jamaica in the presence of a US embassy official, determined he had been abused, and brought him back to the United States. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "Reported 2025-12: Investigation: Three survivors testified about food containing bugs, raw sewage in the boys' showers, scabies outbreaks and weeks in observation placement. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "2006: Lawsuit: A Florida family sued for negligence after a daughter was violently restrained and dislodged a disc in her chin, and the 2006 Turley lawsuit named numerous WWASP facilities. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "2008-03: Lawsuit: A separate Utah suit by former students against private boot camps including Tranquility Bay alleged beatings, forced vomit-eating and prolonged stress positions. (HEAL, HEAL TEEN LIBERTY NEWS (archived 2025-07-09))",
+          "2004: Lawsuit: Jay Kay attended the 2004 trial of WWASP vs. Sue Scheff, where a video of him admitting he had pepper spray was shown. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "1999: Sexual abuse: BBC reported an alleged rape in 1999 that was not reported to local authorities, a staff member fired for selling drugs to residents, and another dismissed for seeking inappropriate contact with a female student. (r/troubledteens wiki, page \"Tranquility Bay\" (as of 2025-12-18))",
+          "Reported 2006-04: Abuse: An article reported that Tranquility Bay students cannot call home, are escorted by Jamaican chaperones and are pinned by guards as punishment, according to a student quoted by The Guardian (allegations). (HEAL, THE REAL NEWS THIS PAGE HAS BEEN ARCHIVED. PLEASE FOLLOW OUR TWITTER FEED FOR NEWS UPDATES FROM EXTE... (archived 2006-04-21))",
+          "2008: Abuse: Former students filed a suit in Utah alleging children were beaten, forced to eat vomit and made to stand in painful contortions at private boot camps including Tranquility Bay in Jamaica; a Brooklyn family fought over a teen held there. (HEAL, California | Colorado | Illinois | Iowa (archived 2025-07-12))",
+          "2001: Injury: A former student alleged that at Tranquility Bay in early 2001 staff restraint left her with a jaw injury that went largely untreated; the family said the school called on Christmas Eve 2001 to say she could not open her mouth to eat. (HEAL, California | Colorado | Illinois | Iowa (archived 2025-07-12))",
+          "2001: Restraint: A former student told the Miami New Times that in early 2001 staff restrained her and she fell onto her chin, causing a jaw injury that her family says went largely untreated. (HEAL, HEAL TEEN LIBERTY NEWS (archived 2025-07-09))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 100098,
+    "unique_name": "Lakeside Academy (MI)",
+    "version": 2,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1907,
+        "endYear": 2020,
+        "status": "Closed",
+        "yearsOfOperation": "from 1907",
+        "notes": [
+          "Lakeside Academy in Kalamazoo was founded in 1907 and was run by Sequel Youth and Family Services from 2007; Michigan ended its contracts and moved to revoke its licence in June 2020 after the April 2020 restraint death of Cornelius Fredrick, and it closed in 2020 (SEC proxy filing, January 2017; The New York Times, 2020-06-24).",
+          "Closed per news report: The Imprint, \"Behavioral Health Contractor Sequel Absorbs Two Blows\", 2021-10-25 https://imprintnews.org/news-briefs/behavioral-health-contractor-sequel-absorbs-two-blows/59863",
+          "Announced closing (2020-06-20) per news report: WKZO, \"Gov. Whitmer issues statement on Lakeside Academy death | WKZO | Everything Kalamazoo | 590 AM · 106.9 FM\", 2020-06-20 https://wkzo.com/2020/06/21/gov-whitmer-issues-statement-on-lakeside-academy-death/1031567/",
+          "Lakeside for Children entered an agreement with Sequel Youth and Family Services in July 2007 and the facility was renamed Lakeside Academy; Michigan ended its contracts on June 18, 2020 after the death of Cornelius Fredrick, and the academy closed. (Goshay v. Lakeside for Children, W.D. Mich. 1:21-cv-848, 2021-09-30: https://dockets.justia.com/docket/michigan/miwdce/1:2021cv00848/102821)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 11138,
+    "unique_name": "Arthur G. Dozier School for Boys",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1900,
+        "endYear": 2011,
+        "status": "Closed",
+        "yearsOfOperation": "1900-2011",
+        "notes": [
+          "Closed in 2011 (sets status Closed, end year 2011) (HEAL, HEAL TEEN LIBERTY NEWS (archived 2025-07-09): https://web.archive.org/web/20250709153320/https://heal-online.org/teennews_view-print-comm_ref-false.html)",
+          "Opened in January 1900; closed June 30, 2011 (CBS News, Aug 9, 2013: https://www.cbsnews.com/news/the-search-for-the-dead-former-inmates-at-shuttered-dozier-juvenile-detention-facility-detail-alleged-abuse/)"
+        ]
+      },
+      "notes": []
+    }
+  },
+  {
+    "id": 11361,
+    "unique_name": "Agape Baptist Academy",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 1990,
+        "endYear": 2023,
+        "status": "Closed",
+        "yearsOfOperation": "1990-2023",
+        "notes": [
+          "Ages 10-18 (Woodbury Reports, July 2009 (#179), p. 4: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0709.pdf#page=4)",
+          "Capacity: 120 (as of 2009) (Woodbury Reports, April 2009 (#176), p. 15: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0409.pdf#page=15)",
+          "Stopped serving boys effective Jan. 20, 2023 (Wikipedia, Agape Baptist Academy); a 2003 tornado damaged the school but it kept operating. (Agape Baptist Academy, 2023: https://en.wikipedia.org/wiki/Agape_Baptist_Academy)"
+        ]
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "2020: Sexual abuse: Missouri DSS confirmed one substantiated allegation of sexual abuse at Agape since 2010. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "2021-02: Legislation: A Missouri House committee advanced bipartisan legislation in February 2021 requiring religious boarding schools to register with the state. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "2015: Lawsuit: A 2015 personal injury suit against Agape Boarding School, Agape Baptist Church and James Clemensen was settled out of court. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "Reported 2025-07: Restraint: Some former students said Bryan Clemensen used a blow called the \"Jurassic elbow\" to the back of the head or between the shoulders. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "1995: License action: The Washington campus was shut down in 1995 after being cited for permitting and code violations. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "2005: Sexual abuse: An 18-year-old Agape student and junior staff member was charged in 2004 and convicted in 2005 of three counts of first-degree statutory sodomy involving a 13-year-old student. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "1998-07: Criminal charge: James Clemensen, the school's former operator, was charged in federal court on July 27, 1998 with asbestos violations: insulation removed from steam pipes at the Othello, Washington campus in 1993-1994 and buried on school grounds. (U.S. EPA news release, Aug 8, 1998: https://www.epa.gov/archive/epapages/newsroom_archive/newsreleases/aaf8ac0d3704857c8525665d004bedcb.html)",
+          "2020: Abuse: The Kansas City Star interviewed 16 former students over nearly 20 years who described beatings, manual labor, and food and water withheld as punishment. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "Reported 2025-07: Abuse: Police call records include allegations of youth being kicked and punched by staff, resulting in bruises over the youth's body. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "2021-02: Investigation: Missouri opened a criminal investigation into abuse and neglect allegations at Agape, confirmed by the Highway Patrol in February 2021. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))",
+          "2017-12: Criminal charge: Court reports list Jareth Clemensen of Stockton charged with two counts of first-degree and two counts of second-degree child molestation, hearing Dec. 19, 2017. (HEAL, staff list for Agape Boarding School (archived 2025-07-12))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 11449,
+    "unique_name": "Thayer Learning Center",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2002,
+        "endYear": 2009,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": [
+          "Closed in 2009 (sets status Closed, end year 2009) (r/troubledteens wiki, page \"Active Programs in Missouri\" (as of 2025-12-18): https://www.reddit.com/r/troubledteens/wiki/active-programs/active-programs-missouri)",
+          "Opened in mid-2002 by John and Willa Bundy (The Kansas City Star, Oct 2, 2005: https://web.archive.org/web/2012/http://closethayerlearningcenter.com/thayer-learning-center.10.02.05.html)"
+        ]
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "2003-04: Abuse: At least seven people reported more than a dozen allegations of child abuse at Thayer Learning Center (Kidder, MO) to the Caldwell County sheriff's office since April 2003; as of late 2005 the Missouri Attorney General's office had not joined the investigation. (Woodbury Reports, February 2006, p. 28)",
+          "2004-11: Death: A 15-year-old died at Thayer Learning Center in November 2004, after which allegations of child abuse at the center came to light. (Woodbury Reports, July 2008, p. 27)",
+          "2008-06-03: Lawsuit: Five former Thayer Learning Center employees, previously sued by Thayer in a dropped case, sued the center for malicious prosecution; child abuse allegations at Thayer surfaced after a 15-year-old died there in November 2004 (Kansas City Star). (Woodbury Reports, July 2008, p. 27)",
+          "2008-07-30: Runaway: Two youths assaulted a security guard while escaping from Thayer Learning Center; local law enforcement apprehended and took them into custody. (Woodbury Reports, September 2008, p. 25)",
+          "Reported 2016-01: Abuse: A former resident told HEAL that runaways were held in isolation for a week, then made to crawl in sand and do push-ups. (HEAL, HAVE A QUESTION? CONTACT US! (archived 2016-01-03))",
+          "2007-10: Investigation: Thayer was a key focus of a nationwide GAO investigation into residential programs; it is exempt from Missouri oversight and houses 100+ teens. (HEAL, HEAL TEEN LIBERTY NEWS (archived 2025-07-09))",
+          "2008-06: Lawsuit: Five former Thayer Learning Center employees sued the Kidder, MO boot camp and owner Willa Bundy in June 2008 for malicious prosecution after Thayer dropped its lawsuit accusing them of making false abuse statements. (HEAL, California | Colorado | Illinois | Iowa (archived 2025-07-12))",
+          "Reported 2016-01: Restraint: A former resident told HEAL that a sergeant punched a resident in the chest during a confrontation, leaving a red mark. (HEAL, HAVE A QUESTION? CONTACT US! (archived 2016-01-03))",
+          "Reported 2016-01: Sexual abuse: A former resident told HEAL that a sergeant groped girls repeatedly with the owner watching. (HEAL, HAVE A QUESTION? CONTACT US! (archived 2016-01-03))",
+          "Reported 2016-01: Sexual abuse: A former resident told HEAL that two or three male sergeants forced girls to perform oral sex and that one raped them. (HEAL, HAVE A QUESTION? CONTACT US! (archived 2016-01-03))"
+        ]
+      }
+    }
+  },
+  {
+    "id": 14140,
+    "unique_name": "High Impact",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2000,
+        "endYear": 2001,
+        "status": "Closed",
+        "yearsOfOperation": "2000-2001",
+        "notes": [
+          "Advertised as a \"28 Day Boot Camp\" by April 17, 2001 (Wayback capture of parentresources.net: https://kidsoverprofits.org/wp-content/uploads/2025/09/high-impact-website-2001.pdf)",
+          "Mexican officials inspected the compound near Tecate on Dec. 5, 2001 and took the last eight teens into protective custody on Dec. 8 (Rocky Mountain News, Jan 3, 2002: https://www.helpsavetroubledteens.com/news---old-hi-article.html)"
+        ]
+      },
+      "facilityDetails": {
+        "type": "Boot Camp",
+        "capacity": null,
+        "currentCensus": null,
+        "ageRange": {
+          "max": null,
+          "min": null
+        },
+        "gender": ""
+      },
+      "criticalIncidents": {
+        "customIncidents": [
+          "Reported 2025-12: Abuse: Survivors report teens were confined in dog cages and stress positions in the desert sun, forced to run laps, and starved, losing about 35-65 lbs in around 60 days. (r/troubledteens wiki, page \"High Impact\" (as of 2025-12-18))",
+          "2001-12-05: Closure order: On December 5, 2001 Mexican authorities raided the facility, found children dirty and injured with sunburns and blisters, and took the teens into protective custody; the program closed shortly after. (r/troubledteens wiki, page \"High Impact\" (as of 2025-12-18))",
+          "2001: Investigation: Mexican authorities raided High Impact in 2001 amid allegations of child abuse, neglect and abhorrent conditions. (r/troubledteens wiki, page \"High Impact\" (as of 2025-12-18))",
+          "Reported 2025-12: Restraint: Survivors report violent restraints as punishment causing spinal injuries, broken jaws and other broken bones, with no medical attention. (r/troubledteens wiki, page \"High Impact\" (as of 2025-12-18))",
+          "Reported 2025-12: Sexual abuse: Survivors accuse director Miguel Rodriguez of assault, rape and attempted murder of children at High Impact; one survivor reports he groped her and other girls during night showers. (r/troubledteens wiki, page \"High Impact\" (as of 2025-12-18))",
+          "Reported 2006-04: Abuse: Two parents told the Rocky Mountain News their children at High Impact were made to lie in underwear for three nights with fire ants and threatened with a cattle prod if they scratched (allegations). (HEAL, THE REAL NEWS THIS PAGE HAS BEEN ARCHIVED. PLEASE FOLLOW OUR TWITTER FEED FOR NEWS UPDATES FROM EXTE... (archived 2006-04-21))"
+        ]
+      }
+    }
   }
 ]
