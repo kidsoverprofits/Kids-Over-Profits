@@ -167,6 +167,13 @@ if (!function_exists('kop_facility_pages_route')) {
                 wp_safe_redirect($thin, 302);
                 exit;
             }
+        } elseif ($id === 0) {
+            // A record whose state was corrected (VisionQuest CA -> AZ, 2026-11-18) keeps its old address working.
+            $moved = kop_facility_pages_moved_state_slug($slug, array_keys($index['slugs']));
+            if ($moved !== '') {
+                wp_safe_redirect(kop_facility_pages_url_for_slug($moved), 301);
+                exit;
+            }
         }
 
         // A record moved to the young adult programs page (inc/young-adult-programs.php).
@@ -503,6 +510,25 @@ if (!function_exists('kop_facility_page_slug_candidate')) {
             if ($place !== '') $slug .= '-' . $place;
         }
         return $slug;
+    }
+}
+
+if (!function_exists('kop_facility_pages_moved_state_slug')) {
+    /**
+     * "visionquest-ca" when no page has that slug: the one live slug with the same name part and another
+     * two-letter state ("visionquest-az"), or '' when there is none or more than one (Hyde School ME and CT).
+     */
+    function kop_facility_pages_moved_state_slug($slug, array $slugs) {
+        $slug = strtolower((string) $slug);
+        if (!preg_match('/^(.+)-[a-z]{2}$/', $slug, $m)) return '';
+        $found = '';
+        foreach ($slugs as $s) {
+            $s = (string) $s;
+            if ($s === $slug || !preg_match('/^' . preg_quote($m[1], '/') . '-[a-z]{2}$/', $s)) continue;
+            if ($found !== '') return '';
+            $found = $s;
+        }
+        return $found;
     }
 }
 
