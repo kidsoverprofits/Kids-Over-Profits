@@ -28,7 +28,14 @@ add_action('admin_enqueue_scripts', function ($hook) {
     $dir = get_stylesheet_directory();
     $uri = get_stylesheet_directory_uri();
     wp_enqueue_style('kop-about-rewrites', $uri . '/css/about-rewrites.css', array('kop-admin-kit'), (string) @filemtime($dir . '/css/about-rewrites.css'));
-    // The page's own citations read as the site's (superscript numbers are only on the front end; here "source" links).
+    // Citations read as on the page: numbered [n] with a Sources list, each column (kop-cite-scope) numbered on its own.
+    if (file_exists($dir . '/css/citation-previews.css')) {
+        wp_enqueue_style('kop-citation-previews', $uri . '/css/citation-previews.css', wp_style_is('kop-colors', 'registered') ? array('kop-colors') : array(), (string) filemtime($dir . '/css/citation-previews.css'));
+    }
+    if (file_exists($dir . '/js/citation-previews.js')) {
+        wp_enqueue_script('kop-citation-previews', $uri . '/js/citation-previews.js', array(), (string) filemtime($dir . '/js/citation-previews.js'), true);
+        wp_localize_script('kop-citation-previews', 'kopCitations', array('lookupUrl' => rest_url('kop/v1/citations')));
+    }
     wp_enqueue_script('kop-about-rewrites', $uri . '/js/about-rewrites.js', array('kop-admin-kit'), (string) @filemtime($dir . '/js/about-rewrites.js'), true);
     wp_localize_script('kop-about-rewrites', 'KOP_ABOUT_REWRITES', array('nonce' => wp_create_nonce('kop_about_rewrites')));
 });
@@ -104,7 +111,7 @@ function kop_ar_card($e, $view) {
         $when = (string) ($p['at'] ?? '');
         $out .= '<header class="kop-ar-head"><h2>' . $title . '</h2><span class="kop-ar-meta">' . $sub . ' &middot; published '
             . esc_html($when !== '' ? mysql2date('M j, Y', $when) : '') . '</span></header>';
-        $out .= kop_ak_fold('Read the published About', kop_ar_sentences_html((array) ($p['sentences'] ?? array())));
+        $out .= kop_ak_fold('Read the published About', '<div class="kop-cite-scope">' . kop_ar_sentences_html((array) ($p['sentences'] ?? array())) . '</div>');
         return $out . kop_ak_card_actions(kop_ak_button('Undo publish', 'quiet', 'data-act="undo"')) . '</article>';
     }
 
@@ -127,8 +134,8 @@ function kop_ar_card($e, $view) {
         foreach ($asks as $i => $a) $out .= kop_ar_ask_html($key, $i, $a, $answers[$i] ?? null);
         $out .= '</ol></section>';
     }
-    $out .= '<div class="kop-ar-cols"><div class="kop-ar-col kop-ar-now"><h3>On the page now</h3>' . kop_ar_now_html($kind, $id) . '</div>'
-        . '<div class="kop-ar-col kop-ar-new"><h3>Rewrite</h3>' . kop_ar_sentences_html((array) ($d['sentences'] ?? array()))
+    $out .= '<div class="kop-ar-cols"><div class="kop-ar-col kop-ar-now kop-cite-scope"><h3>On the page now</h3>' . kop_ar_now_html($kind, $id) . '</div>'
+        . '<div class="kop-ar-col kop-ar-new kop-cite-scope"><h3>Rewrite</h3>' . kop_ar_sentences_html((array) ($d['sentences'] ?? array()))
         . kop_ar_quotes_html((array) ($d['testimony'] ?? array()), $kind, $id) . '</div></div>';
     $folds = '';
     if ($held) {

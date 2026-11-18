@@ -49,3 +49,13 @@
 .kop-ar-log { white-space: pre-wrap; font-size: 12px; color: #50575e; }
 .kop-ar-sentnote { margin: 0; font-size: 13px; }
 .kop-ak-result.is-error { color: #b32d2e; }
+
+/* Each column's own Sources list (js/citation-previews.js, kop-cite-scope). */
+.kop-ar .kop-cite-refs--scope {
+    margin-top: 1rem;
+    font-size: 0.9em;
+}
+
+.kop-ar .kop-cite-refs--scope h4 {
+    margin: 0 0 0.25rem;
+}

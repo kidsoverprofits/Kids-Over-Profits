@@ -42,9 +42,14 @@
      */
     var SOURCE_TEXT = /^source(?:\s+\d+)?$/i;
     var SKIP = 'form, textarea, [contenteditable], .kop-no-cite-numbers, .kop-cite-refs, #wpadminbar';
-    var refs = Object.create(null);
-    var count = 0;
-    var list = null;
+    /*
+     * Numbering state. The page has one; each element with class kop-cite-scope (a column on KOP Tools >
+     * About rewrites, where many Abouts share one screen) has its own, numbered from [1] with its own
+     * Sources list at its foot, and the page's numbering leaves it alone.
+     */
+    var page = { refs: Object.create(null), count: 0, list: null, prefix: '', root: null };
+    var ctx = page;
+    var scopes = 0;
 
     function fallbackPreview(link) {
         var url;
@@ -77,22 +82,22 @@
 
     /* The "Sources" list, made at the foot of the page's main column the first time it is needed. */
     function sourcesList() {
-        if (list && document.contains(list)) return list;
-        var main = document.querySelector('.kop-fp-generated-body') || document.querySelector('.entry-content')
+        if (ctx.list && document.contains(ctx.list)) return ctx.list;
+        var main = ctx.root || document.querySelector('.kop-fp-generated-body') || document.querySelector('.entry-content')
             || document.querySelector('main') || document.body;
         var section = document.createElement('section');
-        section.className = 'kop-cite-refs' + (main.classList.contains('kop-fp-generated-body') ? ' kop-fp-section' : '');
-        section.id = 'kop-sources';
-        section.setAttribute('aria-labelledby', 'kop-sources-heading');
-        var h2 = document.createElement('h2');
-        h2.id = 'kop-sources-heading';
+        section.className = 'kop-cite-refs' + (ctx.root ? ' kop-cite-refs--scope' : main.classList.contains('kop-fp-generated-body') ? ' kop-fp-section' : '');
+        section.id = 'kop-sources' + (ctx.prefix ? '-' + ctx.prefix.replace(/-$/, '') : '');
+        section.setAttribute('aria-labelledby', section.id + '-heading');
+        var h2 = document.createElement(ctx.root ? 'h4' : 'h2');
+        h2.id = section.id + '-heading';
         h2.textContent = 'Sources';
-        list = document.createElement('ol');
-        list.className = 'kop-cite-refs__list';
+        ctx.list = document.createElement('ol');
+        ctx.list.className = 'kop-cite-refs__list';
         section.appendChild(h2);
-        section.appendChild(list);
+        section.appendChild(ctx.list);
         main.appendChild(section);
-        return list;
+        return ctx.list;
     }
 
     function letters(i) {
@@ -221,7 +226,7 @@
 
     function addEntry(ref, link) {
         ref.li = document.createElement('li');
-        ref.li.id = 'kop-source-' + ref.n;
+        ref.li.id = 'kop-source-' + ref.p + ref.n;
         ref.back = document.createElement('span');
         ref.back.className = 'kop-cite-refs__back';
         ref.li.appendChild(ref.back);
@@ -287,21 +292,21 @@
         var plain = link.tagName !== 'A';
         var text = (link.textContent || '').trim();
         var label = (link.getAttribute('data-kop-citation-preview') || link.getAttribute('title') || (SOURCE_TEXT.test(text) ? '' : text)).trim();
-        var key = plain ? 'text:' + (label || 'unnamed ' + (count + 1)) : link.href.replace(/#(?!page=\d+$).*$/, '');
-        var ref = refs[key];
+        var key = plain ? 'text:' + (label || 'unnamed ' + (ctx.count + 1)) : link.href.replace(/#(?!page=\d+$).*$/, '');
+        var ref = ctx.refs[key];
         var isNew = !ref;
         if (isNew) {
             var fromCite = label !== '' && !SOURCE_TEXT.test(label);
             if (!fromCite) label = plain ? 'Source not named' : (fallbackPreview(link) || link.href);
-            ref = refs[key] = { n: ++count, url: plain ? '' : link.href, label: label, fromCite: fromCite, cite: null, backs: [], anchors: [], back: null, li: null, link: null };
+            ref = ctx.refs[key] = { n: ++ctx.count, p: ctx.prefix, url: plain ? '' : link.href, label: label, fromCite: fromCite, cite: null, backs: [], anchors: [], back: null, li: null, link: null };
         }
 
         var sup = document.createElement('sup');
         sup.className = 'kop-cite';
-        sup.id = 'kop-cite-' + ref.n + '-' + (ref.backs.length + 1);
+        sup.id = 'kop-cite-' + ref.p + ref.n + '-' + (ref.backs.length + 1);
         var a = document.createElement('a');
         a.className = 'kop-cite__link';
-        a.href = '#kop-source-' + ref.n;
+        a.href = '#kop-source-' + ref.p + ref.n;
         a.textContent = '[' + ref.n + ']';
         sup.appendChild(a);
         ref.anchors.push(a);
@@ -416,7 +421,18 @@
         return group.every(citeLink) ? group : null;
     }
 
+    /* Number each kop-cite-scope on its own, then the rest of the page. */
+    function numberAll() {
+        Array.prototype.forEach.call(document.querySelectorAll('.kop-cite-scope'), function (el) {
+            if (!el.kopCite) el.kopCite = { refs: Object.create(null), count: 0, list: null, prefix: 's' + (++scopes) + '-', root: el };
+            ctx = el.kopCite;
+            try { numberSources(el); } finally { ctx = page; }
+        });
+        numberSources(document);
+    }
+
     function numberSources(root) {
+        var skip = ctx.root ? SKIP : SKIP + ', .kop-cite-scope';
         // With the citations that have no address (span.kop-cite-text, kop_facility_pages_sources_html(); a cached page
         // from before that class has the bare span[title] in .kop-fp-src), in reading order.
         var links = (root || document).querySelectorAll('a[href]:not(.kop-cite__link):not(.kop-cite-refs__link), span.kop-cite-text, .kop-fp-src > span[title]');
@@ -430,11 +446,11 @@
         Array.prototype.forEach.call(links, function (link) {
             var text = (link.textContent || '').trim();
             if (link.tagName !== 'A') {
-                if (!link.children.length && !link.closest(SKIP)) made.push(numberLink(link));
+                if (!link.children.length && !link.closest(skip)) made.push(numberLink(link));
                 return;
             }
             if (!SOURCE_TEXT.test(text) && named.indexOf(link) === -1) return;
-            if (link.children.length || link.closest(SKIP)) return;
+            if (link.children.length || link.closest(skip)) return;
             var cell = link.closest('td');
             if (cell && cell.textContent.trim() === text) return;
             var href = link.getAttribute('href') || '';
@@ -478,7 +494,7 @@
 
     function initialize() {
         document.querySelectorAll('a[href^="#"]').forEach(addSourcePreview);
-        numberSources(document);
+        numberAll();
         // Capture phase: the theme's smooth scroll for "#" links would otherwise scroll to a folded section first.
         document.addEventListener('click', followCitation, true);
 
@@ -492,7 +508,7 @@
                     pending = true;
                     window.requestAnimationFrame(function () {
                         pending = false;
-                        numberSources(document);
+                        numberAll();
                     });
                     return;
                 }
