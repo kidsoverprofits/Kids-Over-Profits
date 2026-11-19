@@ -78,7 +78,7 @@ $kop_net_directory = function_exists('kop_location_index_url')
 
 		<?php
 		// Sources and methods (2026-11-19): where the lines come from, how they are
-		// verified (survivor-submitted, checked against records: owner 2026-11-19), and
+		// verified (wording approved by the owner 2026-11-19), and
 		// what the map is not. Closed by default so the intro stays one band.
 		$kop_net_graph_file = function_exists('kop_network_map_file') ? kop_network_map_file('graph.json') : '';
 		$kop_net_built = ($kop_net_graph_file && is_readable($kop_net_graph_file)) ? (int) filemtime($kop_net_graph_file) : 0;
@@ -88,7 +88,7 @@ $kop_net_directory = function_exists('kop_location_index_url')
 			<summary>Sources and methods</summary>
 			<ul>
 				<li><strong>Where the lines come from:</strong> most come from KOP's research board, a hand-built chart of programs, companies and people. The rest are added by the build from KOP's facility and company profiles, staff lists, reviewed staff moves, and its relationship and investor records. Each line in the data says which of these it came from.</li>
-				<li><strong>Sources:</strong> much of the map comes from survivors, who send in what they know. KOP verifies each connection with LinkedIn profiles, resumes, social media, government reports, industry newsletters, program websites, archived pages on the Wayback Machine and court cases. Where one connection has its own source recorded, it is named when you open a name on the map, and in the data.</li>
+				<li><strong>Sources:</strong> Connections come from many sources. Survivor reports are a major one. We verify connections using LinkedIn, resumes, social media, government reports, industry newsletters, program websites, the Wayback Machine and court records.</li>
 				<li><strong>Kinds of names:</strong> people, programs, parent companies, trade groups, government bodies, churches, investors, and marketing or referral companies. A name's kind is set by an editor or guessed from its wording; a marketing or referral company is only ever set by an editor.</li>
 				<li><strong>What a line means:</strong> that a relationship was documented, such as a job, an owner, a rebrand or a staff move. It is not an allegation of wrongdoing.</li>
 				<li><strong>What it is not:</strong> a complete picture of the industry. It shows what KOP has found and recorded so far.</li>

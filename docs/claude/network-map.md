@@ -67,9 +67,9 @@ drawer label follow it (`filters.js`, `drawer.js`, `kop_network_map_label()`), a
 the build's KINDS and `scripts/test-network-graph.js`. The hourly fingerprint covers the two investor tables and
 `{prefix}kop_network_answers`.
 
-Per-line sources (2026-11-19, optional): much of the map is survivor-submitted and verified against LinkedIn, resumes,
-social media, government reports, industry newsletters, program websites, the Wayback Machine and court cases, not cited
-per connection (owner 2026-11-19: "I'm not filling in a source for each individual data point"). So `cite` is optional, empty shows nothing, and nothing flags a line without one. An edge may carry `cite` (a URL or a short citation, several joined by "; ") and `added: true`
+Per-line sources (2026-11-19, optional): connections come from many sources (survivor reports a major one), verified with
+LinkedIn, resumes, social media, government reports, industry newsletters, program websites, the Wayback Machine and court
+records, not cited per connection; the page note's wording is the owner's, approved 2026-11-19 (owner 2026-11-19: "I'm not filling in a source for each individual data point"). So `cite` is optional, empty shows nothing, and nothing flags a line without one. An edge may carry `cite` (a URL or a short citation, several joined by "; ") and `added: true`
 (a line from `network-overrides.json`'s `edges`). `cite` comes from `sources` in the overrides (`[{from, to, source}]`,
 matched on the pair of names either way round like `lines`, a lone match only, the wording untouched), from the `source` of an
 `edges` or `lines` entry, and from a `source` / `source_url` column in `staff-movement.csv` or the staff lists. The drawer
