@@ -15,6 +15,7 @@ $theme = dirname(__DIR__);
 $tmp = sys_get_temp_dir() . '/kop-ai-usage-test-' . getmypid();
 @mkdir($tmp, 0755, true);
 $GLOBALS['kop_ai_usage_dir'] = $tmp . '/log';
+$GLOBALS['kop_lai_dir'] = $tmp . '/local-ai'; // the local Qwen's folder (api/local-ai.php)
 
 $fails = 0;
 $check = function ($name, $ok, $detail = '') use (&$fails) {

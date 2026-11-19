@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 require_once get_stylesheet_directory() . '/api/ai-usage.php';
+require_once __DIR__ . '/local-ai.php'; // the owner's local Qwen after both: its routes and status line
 
 add_filter('kop_admin_kit_pages', function ($pages) {
     $pages[] = 'kop-ai-usage';
@@ -148,6 +149,7 @@ function kop_ai_usage_page() {
             . ($used >= $l['background'] ? ' (<strong>background jobs paused</strong> at ' . (int) $l['background'] . ')' : ' (background jobs pause at ' . (int) $l['background'] . ')');
     }
     $status[] = '<br>Today since midnight Pacific: ' . implode('; ', $budget) . '.';
+    $status[] = '<br>' . kop_lai_status_html() . '.';
 
     echo '<div class="wrap kop-ak kop-aiu">';
     echo kop_ak_header('AI Usage', array(

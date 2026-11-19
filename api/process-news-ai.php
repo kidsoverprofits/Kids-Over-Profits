@@ -158,6 +158,16 @@ try {
     }
     $errors = [];
     $result = null;
+    // Groq and Gemini both failed on this article before and the owner's local
+    // Qwen has read it since (api/local-ai.php): keyed by the link, since a page
+    // fetched twice rarely gives the same text.
+    $localKey = $url !== '' ? 'news:' . $url . '|' . $customInstructions : null;
+    $useLocal = $provider === 'auto';
+    if ($useLocal && ($saved = kop_lai_take_answer(kop_lai_key(buildPrompt($content, $url, $customInstructions), $localKey))) !== null) {
+        $result = parseAIResponse($saved, 'Local');
+        $provider = 'local';
+        $order = [];
+    }
     foreach ($order as $p) {
         try {
             $result = processNewsWith($p, $apiKeys, $content, $url, $customInstructions);
@@ -167,6 +177,12 @@ try {
             error_log("AI processing error [$p]: " . $e->getMessage());
             $errors[] = $e->getMessage();
         }
+    }
+    if ($result === null && $useLocal) {
+        // The owner's local Qwen when the PC is on, else a saved job; throws with every error.
+        $result = parseAIResponse(kop_lai_fallback(buildPrompt($content, $url, $customInstructions),
+            ['maxTokens' => 4000, 'temperature' => 0.1], $errors, $localKey), 'Local');
+        $provider = 'local';
     }
     if ($result === null) {
         throw new Exception(implode(' | ', $errors));

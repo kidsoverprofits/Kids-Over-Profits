@@ -56,7 +56,7 @@ if (!function_exists('kop_ai_usage_record')) {
 
     function kop_ai_usage_job(): string {
         if (!empty($GLOBALS['kop_ai_job'])) return (string) $GLOBALS['kop_ai_job'];
-        $lib = ['ai-providers.php', 'lib-news-ai.php'];
+        $lib = ['ai-providers.php', 'lib-news-ai.php', 'local-ai.php'];
         $names = kop_ai_usage_jobs();
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 16) as $f) {
             $b = basename((string) ($f['file'] ?? ''));

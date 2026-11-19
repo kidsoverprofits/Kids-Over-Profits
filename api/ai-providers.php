@@ -13,7 +13,10 @@
  * through to the other when the one whose turn it is fails.
  * API keys come from environment variables (loaded by config.php from .env),
  * or $_ENV/$_SERVER/constants.
+ * When both fail, the owner's own Qwen gets the prompt (api/local-ai.php).
  */
+
+require_once __DIR__ . '/local-ai.php';
 
 if (!function_exists('kop_ai_api_keys')) {
 
@@ -183,6 +186,12 @@ if (!function_exists('kop_ai_api_keys')) {
      * $GLOBALS['kop_ai_last_provider'].
      */
     function kop_ai_generate_alternating(string $prompt, array $opts = []): string {
+        // Groq and Gemini both failed on this prompt before and the owner's
+        // local Qwen has answered it since (api/local-ai.php).
+        if (empty($opts['noLocal']) && ($saved = kop_lai_take_answer(kop_lai_key($prompt))) !== null) {
+            $GLOBALS['kop_ai_last_provider'] = 'local';
+            return $saved;
+        }
         $order = kop_ai_turn_order($opts['providers'] ?? null);
         if (!$order) {
             throw new Exception('No AI key configured. Add GROQ_API_KEY or GEMINI_API_KEY to the .env file.');
@@ -197,7 +206,7 @@ if (!function_exists('kop_ai_api_keys')) {
                 $errors[] = $e->getMessage();
             }
         }
-        throw new Exception(implode(' | ', $errors));
+        return kop_lai_fallback($prompt, $opts, $errors); // the owner's local Qwen, or a saved job; throws
     }
 
     function kop_ai_curl(string $url, array $payload, array $headers, int $timeout = 90): array {

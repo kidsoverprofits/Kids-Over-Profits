@@ -22,4 +22,15 @@ php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=2G scripts/fol
 (kop-pipeline) python scripts/fornits-crawl.py                   # resumable, one request per 3 s
 (kop-pipeline) python scripts/fornits-process.py [--no-upload] [--keep-crawling]   # --no-upload: dry run, marks nothing read
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # every link + each kind on real docs, exact undo
+# Local Qwen after both (api/local-ai.php, routes inc/local-ai.php): when Groq and Gemini both fail (out of quota, budget held),
+# kop_ai_generate_alternating(), process-news-ai.php 'auto' and the text titles try the owner's Ollama through the PC worker's
+# Cloudflare quick tunnel while it checks in (every 60 s, fresh 180 s); else the prompt is saved in uploads/kop-local-ai/jobs/
+# (300 max, 7 days), the call still fails with the old errors (so "rate limit" deferrals work), and once the worker answers,
+# the next identical prompt (news: same link) gets the saved answer without calling anyone. Usage rows say provider 'local'.
+# The AI Usage status line says whether it is on and how many wait. Opt out per call with 'noLocal', site-wide KOP_LOCAL_AI=off.
+(kop-pipeline) python scripts/local-ai-worker.py              # live + queue until Ctrl+C; own Ollama on the Intel graphics (:11436)
+(kop-pipeline) python scripts/local-ai-worker.py --once       # answer what waits, then stop; --no-tunnel = queue only
+php -d extension=mbstring scripts/test-local-ai.php           # KOP_LAI_LIVE=http://127.0.0.1:11435 KOP_LAI_TOKEN=... adds a live ask
+# Speed (qwen3.5:4b, Core Ultra 9): a full news article ~36 s on the graphics, ~2.5 min on the processor alone (too slow for
+# discovery's 90 s wait), which is why the worker starts its own Ollama with OLLAMA_VULKAN=1 OLLAMA_IGPU_ENABLE=1.
 ```

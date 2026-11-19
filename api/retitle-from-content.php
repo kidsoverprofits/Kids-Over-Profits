@@ -610,6 +610,13 @@ function kop_rtc_suggest_from_text($context_header, $doc_text) {
         'groq'   => static fn() => kop_rtc_groq_chat(getenv('GROQ_MODEL') ?: 'openai/gpt-oss-120b', $prompt),
         'gemini' => static fn() => kop_rtc_gemini_chat($prompt),
     ]);
+    if (!$result['ok']) { // the owner's local Qwen (api/local-ai.php); text only, it has no eyes here
+        try {
+            $result = kop_rtc_parse_title_reply(kop_lai_fallback($prompt, ['maxTokens' => 600], [$result['error']]), 'stop');
+        } catch (Throwable $e) {
+            $result = ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
     if ($result['ok'] && $result['basis'] === 'ocr') $result['basis'] = 'content';
     return $result;
 }
