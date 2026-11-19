@@ -57,6 +57,23 @@ function kop_lawsuit_rows_by_docket(PDO $pdo, $docket, $name_contains = '', $pub
     return $out;
 }
 
+/** Rows whose caption holds every word of $name_contains and whose filing date is $date (Y-m-d). */
+function kop_lawsuit_rows_by_name_date(PDO $pdo, $name_contains, $date) {
+    $words = array_filter(preg_split('/\s+/', trim((string) $name_contains)));
+    if (!$words || !preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) return array();
+    $st = $pdo->prepare('SELECT * FROM lawsuits WHERE filing_date LIKE ? ORDER BY id');
+    $st->execute(array($date . '%'));
+    $out = array();
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $ok = true;
+        foreach ($words as $w) {
+            if (stripos((string) $row['case_name'], $w) === false) $ok = false;
+        }
+        if ($ok) $out[] = $row;
+    }
+    return $out;
+}
+
 /**
  * Merge second copies of one case ('merge_duplicates' in seeds/lawsuit-updates.json):
  * each entry names the docket, a word of the caption, the filing date and the court's
@@ -236,10 +253,16 @@ function kop_apply_lawsuit_updates() {
         foreach ($spec['updates'] as $u) {
             // 'match': {docket, name_contains} finds the row when its id is not known; only a lone match counts.
             $was = '';
-            if (empty($u['id']) && !empty($u['match']['docket'])) {
-                $found = kop_lawsuit_rows_by_docket($pdo, (string) $u['match']['docket'], (string) ($u['match']['name_contains'] ?? ''));
+            // A row with no docket number on file is found by {name_contains, filing_date} instead.
+            if (empty($u['id']) && (!empty($u['match']['docket']) || (!empty($u['match']['name_contains']) && !empty($u['match']['filing_date'])))) {
+                $found = !empty($u['match']['docket'])
+                    ? kop_lawsuit_rows_by_docket($pdo, (string) $u['match']['docket'], (string) ($u['match']['name_contains'] ?? ''))
+                    : array();
+                if (!$found && !empty($u['match']['name_contains']) && !empty($u['match']['filing_date'])) {
+                    $found = kop_lawsuit_rows_by_name_date($pdo, (string) $u['match']['name_contains'], (string) $u['match']['filing_date']);
+                }
                 if (count($found) !== 1) {
-                    $done['skipped'][] = 'docket ' . $u['match']['docket'] . ': ' . count($found) . ' rows';
+                    $done['skipped'][] = 'match ' . ($u['match']['docket'] ?? $u['match']['name_contains']) . ': ' . count($found) . ' rows';
                     continue;
                 }
                 $u['id'] = (int) $found[0]['id'];
@@ -315,7 +338,10 @@ function kop_apply_lawsuit_updates() {
             if (!$set && !$moved) {
                 continue;
             }
-            if (!empty($u['note'])) {
+            // A note already on the row (the same update run again under a later version) is not added twice.
+            $notes_now = $pdo->prepare('SELECT reviewer_notes FROM lawsuits WHERE id = ?');
+            $notes_now->execute(array($id));
+            if (!empty($u['note']) && strpos((string) $notes_now->fetchColumn(), (string) $u['note']) === false) {
                 $set[] = "reviewer_notes = CONCAT(COALESCE(reviewer_notes, ''), ?)";
                 $args[] = "\n[claude " . (string) ($spec['version'] ?? '') . '] ' . (string) $u['note'] . $was;
             }

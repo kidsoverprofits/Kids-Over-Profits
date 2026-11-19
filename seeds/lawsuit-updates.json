@@ -1,6 +1,6 @@
 {
-  "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes. New cases in seeds/lawsuits.json are inserted in the same pass. An update may name its case by 'match': {docket, name_contains} instead of id + case_name (only a lone match counts; the replaced values go into the note). 'merge_duplicates' joins second copies of one case (same docket, filing date and court), keeping the row with the full docket number: kop_apply_lawsuit_merges().",
-  "version": "2026-11-19",
+  "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes once (not again when the file is run under a later version). New cases in seeds/lawsuits.json are inserted in the same pass. An update may name its case by 'match': {docket, name_contains} (or {name_contains, filing_date} for a row with no docket number) instead of id + case_name (only a lone match counts; the replaced values go into the note). 'merge_duplicates' joins second copies of one case (same docket, filing date and court), keeping the row with the full docket number: kop_apply_lawsuit_merges().",
+  "version": "2026-11-19b",
   "updates": [
     {
       "id": 24,
@@ -46,15 +46,17 @@
     {
       "match": {
         "docket": "7:06-cv-0908",
-        "name_contains": "Dungan"
+        "name_contains": "Dungan",
+        "filing_date": "2006-07-25"
       },
       "set": {
         "defendant_types": [
           "facility",
           "marketer"
-        ]
+        ],
+        "case_number": "7:06-cv-0908"
       },
-      "note": "Defendant types from the court record: the Academy at Ivy Ridge (the caption) and the marketing groups Teen Help and Lifelines, both defendants on the fraud claims (Report-Recommendation, N.D.N.Y., Apr 22, 2008). Whether an operator is also a defendant was not checked (GAO prep, 2026-11-19)."
+      "note": "Defendant types from the court record: the Academy at Ivy Ridge (the caption) and the marketing groups Teen Help and Lifelines, both defendants on the fraud claims (Report-Recommendation, N.D.N.Y., Apr 22, 2008). Whether an operator is also a defendant was not checked. Docket number 7:06-cv-0908 added from the same court record; the row had none, so it is found by caption and filing date (Jul 25, 2006) (GAO prep, 2026-11-19)."
     }
   ],
   "merge_duplicates": [

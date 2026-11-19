@@ -220,7 +220,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
 44. **GAO prep fixes** (2026-11-19, plan 4.3 #32): over SSH or in WP-CLI, option `kop_lawsuit_updates_result` shows the
     Goshay (1:21-cv-00848) and Parker (4:26-cv-00526) merges done, or why one was skipped (dropped rows logged in
     `kop_lawsuit_merges_log`); [/lawsuits/](https://kidsoverprofits.org/lawsuits/) lists each once, Liparote reads in
-    progress, the "Brought against" filter and methods note show. Option `kop_marketers_fill_result` names the seven
+    progress, the methods note shows. Seed 2026-11-19b: Dungan v. Academy at Ivy Ridge gains docket 7:06-cv-0908 and
+    types facility and marketer, and the "All defendant types" filter appears (checked live 2026-11-19: the
+    Goshay merge and the methods note were there; the first run missed Dungan, whose row had no docket number). Option `kop_marketers_fill_result` names the seven
     filled companies; [Marketing Companies](https://kidsoverprofits.org/marketing-companies/) shows their sourced notes
     above the old ones. [/network-map/](https://kidsoverprofits.org/network-map/): "Sources and methods" opens, the
     legend has "Marketing or referral company" (after the next map build). Run check-contrast and check-mobile-overflow
