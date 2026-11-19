@@ -217,3 +217,12 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    within 12 hours (transient `kop_seo_tool_page_ids`, Yoast's sitemap cache)
    [page-sitemap.xml](https://kidsoverprofits.org/page-sitemap.xml) no longer lists it. Then Validate Fix on that
    report in Search Console; the URLs move to "Excluded by noindex" over the following weeks.
+44. **GAO prep fixes** (2026-11-19, plan 4.3 #32): over SSH or in WP-CLI, option `kop_lawsuit_updates_result` shows the
+    Goshay (1:21-cv-00848) and Parker (4:26-cv-00526) merges done, or why one was skipped (dropped rows logged in
+    `kop_lawsuit_merges_log`); [/lawsuits/](https://kidsoverprofits.org/lawsuits/) lists each once, Liparote reads in
+    progress, the "Brought against" filter and methods note show. Option `kop_marketers_fill_result` names the seven
+    filled companies; [Marketing Companies](https://kidsoverprofits.org/marketing-companies/) shows their sourced notes
+    above the old ones. [/network-map/](https://kidsoverprofits.org/network-map/): "Sources and methods" opens, the
+    legend has "Marketing or referral company" (after the next map build). Run check-contrast and check-mobile-overflow
+    on both pages (docs/claude/css-checks.md). Open Data: network-edges has `basis` and `citation`, facilities `funding`,
+    lawsuits `defendant_types`.

@@ -31183,7 +31183,57 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "marketing-companies:is-teens-in-crisis-a-party-in-wood-v-wwasp-d-uta",
+   "section": "Marketing companies",
+   "title": "Is Teens In Crisis a party in Wood v. WWASP (D. Utah, 2:06-cv-708) on the court docket?",
+   "text": "Its only source so far is an advocacy group's 2006 press releases naming it in the case. The Marketing Companies entry says it is not yet sourced (seeds/marketers.json fills, 2026-11-19). Needs the docket's party list.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
+   "directions": []
+  },
+  {
+   "key": "marketing-companies:who-owned-help-my-teen-and-how-was-it-paid-for-r",
+   "section": "Marketing companies",
+   "title": "Who owned Help My Teen, and how was it paid for referrals to the Academy at Ivy Ridge?",
+   "text": "Dungan v. Academy at Ivy Ridge (N.D.N.Y., Report-Recommendation Apr 22, 2008) has plaintiffs testifying it made representations about Ivy Ridge; nothing found yet on its owner or payment.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
+   "directions": []
+  },
+  {
+   "key": "marketing-companies:who-founded-lifelines-family-services-teen-lifel",
+   "section": "Marketing companies",
+   "title": "Who founded Lifelines Family Services (Teen Lifelines)?",
+   "text": "A defendant in Dungan v. Academy at Ivy Ridge (N.D.N.Y.); its founder is not confirmed by a primary source.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
+   "directions": []
+  },
+  {
+   "key": "marketing-companies:is-there-a-primary-source-for-2-boot-camp-or-tee",
+   "section": "Marketing companies",
+   "title": "Is there a primary source for 2 Boot Camp or Teens with Problems?",
+   "text": "Both Marketing Companies entries rest only on r/troubledteens wiki entries (added 2026-10-13); the GAO prep research found no primary source. Left as they are.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
+   "directions": []
+  },
+  {
+   "key": "marketing-companies:did-teen-revitalization-advertise-midwest-academ",
+   "section": "Marketing companies",
+   "title": "Did Teen Revitalization advertise Midwest Academy, per the 2016 article filed as a court exhibit in Lee County, Iowa?",
+   "text": "The GAO prep notes cite a 2016 article filed as an exhibit in a Lee County, Iowa case; its case number and the article were not recorded, so it was left off the entry.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
+   "directions": []
   }
  ],
- "built": "2026-11-19 13:57"
+ "built": "2026-11-19 14:11"
 }
