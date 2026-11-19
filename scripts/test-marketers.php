@@ -103,6 +103,23 @@ if ($short !== '') {
     $check('a filled field is kept and the earlier note stays', $got['city'] === 'Kept' && substr($got['notes'], -16) === 'An earlier note.', $got['city']);
     $mk->prepare('DELETE FROM marketers_master WHERE unique_name = ?')->execute(array($short));
 }
+// dropNotes: a fill takes out the exact "not yet sourced" sentence an earlier fill put there, keeps the rest.
+$drops = array_values(array_filter($fills, function ($f) { return !empty($f['dropNotes']); }));
+$check('a later fill names the sentence it replaces', count($drops) > 0);
+if ($drops) {
+    $d = $drops[0];
+    $old_note = (string) $d['dropNotes'][0];
+    $mk->prepare('INSERT INTO marketers_master (unique_name, json_data) VALUES (?, ?)')->execute(array($d['name'], json_encode(array(
+        'name' => $d['name'], 'category' => 'marketers',
+        'data' => array('marketerCompany' => array('name' => $d['name'], 'notes' => $old_note . "\n\nA note someone added by hand."), 'category' => 'marketers')))));
+    kop_marketers_apply_fills($mk);
+    $got = kop_marketer_company_from_json($mk->query('SELECT json_data FROM marketers_master WHERE unique_name = ' . $mk->quote($d['name']))->fetchColumn());
+    $add_note = trim((string) $d['company']['notes']);
+    $check('the replaced sentence is gone, the new note leads, the hand note stays',
+        substr_count($got['notes'], $old_note) === substr_count($add_note, $old_note) && strpos($got['notes'], $add_note) === 0 && substr($got['notes'], -29) === 'A note someone added by hand.', $got['notes']);
+    $check('a second run with dropNotes changes nothing', kop_marketers_apply_fills($mk) === array());
+    $mk->prepare('DELETE FROM marketers_master WHERE unique_name = ?')->execute(array($d['name']));
+}
 
 echo "-- The page (/marketing-companies/) --\n";
 $all = kop_marketers_all();

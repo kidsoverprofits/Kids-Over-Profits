@@ -3771,7 +3771,34 @@
      "url": "https://web.archive.org/web/20121018055440/http://bernalilloacademy.org/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes: children still lived there into December 2021. No source gives the last child's departure date or a census for Oct-Dec 2021. A guardian ad litem suit (Santa Fe New Mexican) alleges a child was there until November 2021. The record's 'until it closed in December 2021' holds; cite ProPublica and APM. Guerra v. Sequel of New Mexico (D.N.M.) not read (PACER).",
+    "claims": [
+     {
+      "claim": "Sequel agreed in October 2021 to begin shutting the academy down",
+      "url": "https://www.apmreports.org/story/2021/12/03/sequel-bernalillo-academy-abuse-allegations",
+      "quote": "by October, Sequel agreed to begin shutting the academy down"
+     },
+     {
+      "claim": "On Dec. 3, 2021 the state was still finding placements for each child",
+      "url": "https://www.apmreports.org/story/2021/12/03/sequel-bernalillo-academy-abuse-allegations",
+      "quote": "is working with each child's providers, treatment teams and their families to find appropriate placements"
+     },
+     {
+      "claim": "The settlement with the state set Dec. 22, 2021 for the closure",
+      "url": "https://imprintnews.org/top-stories/nm-sequel-run-facility-closes-amid-abuse-claims/61222",
+      "quote": "the facility entered into a settlement agreement with the state to close the facility by Dec. 22."
+     },
+     {
+      "claim": "When it closed in December 2021, CYFD looked for beds for the displaced children",
+      "url": "https://www.propublica.org/article/new-mexico-child-welfare-reforms",
+      "quote": "Child welfare officials called an emergency meeting of shelter directors, looking for beds for the displaced kids."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "federal-funding:evoke-cascades",
@@ -3797,7 +3824,29 @@
    "found": "found 2026-10-12",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes, ARP EANS (Department of Education, emergency aid for non-public schools; table dated Aug 18, 2022). EANS pays for services and goods, not cash. Neither school is in the first-round CRRSA EANS table (Aug 9, 2021). Caveat: no page ties the name Three Points Academy to Three Points Center in Hurricane, though it is very likely its school (Washington County 501(c)(3) school, started 2015). No PPP loan found for it.",
+    "claims": [
+     {
+      "claim": "Utah's ARP EANS table allots Three Points Academy $271,149",
+      "url": "https://schools.utah.gov/coronavirus/_corona_virus_/_arp-eans/ARPEANSSchoolsDistributionTable.pdf",
+      "quote": "Three Points Academy $271,149.00"
+     },
+     {
+      "claim": "The same table allots Lava Heights $172,900",
+      "url": "https://schools.utah.gov/coronavirus/_corona_virus_/_arp-eans/ARPEANSSchoolsDistributionTable.pdf",
+      "quote": "Lava Heights $172,900.00"
+     },
+     {
+      "claim": "Three Points Academy Inc is a 501(c)(3) school in Washington, Utah",
+      "url": "https://projects.propublica.org/nonprofits/organizations/473006182",
+      "quote": "Organization is a school. Details are reported on Schedule E."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "federal-funding:18-funded-programs-with-no-kop-record",
@@ -3845,7 +3894,39 @@
    "companies": [
     8
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "HigherGov matches USAspending exactly for all four 2026 ORR grants (CFDA 93.566, 2026-04-01 to 2029-03-31). Two KOP figures are stale first-tranche numbers: KidsPeace (KOP $8.44M, now $16.9M) and Youth For Tomorrow (KOP $15.08M, now $30.2M). MercyFirst's $7.4M is right but was 'raised to', not received in April. Rite of Passage's $11.8M raised to $23.5M is right. These are obligations, not payments (outlays so far: ROP $11.1M, MercyFirst $3.6M, KidsPeace $6.0M, YFT $12.8M). Compass Connections 90ZU0528 now shows $228.7M vs KOP's $231.6M from the Senate Finance letter (likely a closeout de-obligation, not checked). TAGGS not checked; Devereux Westminster years not covered.",
+    "claims": [
+     {
+      "claim": "KidsPeace's ORR grant 90ZU0671 now totals $16,871,153",
+      "url": "https://api.usaspending.gov/api/v2/awards/ASST_NON_90ZU0671_075/",
+      "quote": "\"total_obligation\": 16871153.0"
+     },
+     {
+      "claim": "HigherGov shows the same doubling from $8,435,577",
+      "url": "https://www.highergov.com/grant/90ZU0671/",
+      "quote": "Since initial award the total obligations have increased 100% from $8,435,577 to $16,871,153."
+     },
+     {
+      "claim": "Youth For Tomorrow's grant 90ZU0670 now totals $30,164,247",
+      "url": "https://api.usaspending.gov/api/v2/awards/ASST_NON_90ZU0670_075/",
+      "quote": "\"total_obligation\": 30164247.0"
+     },
+     {
+      "claim": "MercyFirst's grant 90ZU0687 totals $7,448,260, doubled from $3,724,130",
+      "url": "https://www.highergov.com/grant/90ZU0687/",
+      "quote": "Since initial award the total obligations have increased 100% from $3,724,130 to $7,448,260."
+     },
+     {
+      "claim": "Rite of Passage's grant 90ZU0692 totals $23,530,145",
+      "url": "https://api.usaspending.gov/api/v2/awards/ASST_NON_90ZU0692_075/",
+      "quote": "\"total_obligation\": 23530145.0"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "federal-funding:not-read-yet",
@@ -4067,7 +4148,39 @@
    "found": "found 2026-10-13",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Very likely yes: same founding year and five founding programs, same research cooperative, and the IRS entity still carries the Industry Council name with officers NATSAP names as OBHC people. No source says 'renamed' in so many words; obhcouncil.com's own history couldn't be read (Wayback blocked). Record changes to consider: founded 1996; founders Anasazi, Aspen, Catherine Freer, RedCliff Ascent, SUWS; legal name and EIN; chairs from the 990s (Gil Hallows 2014-15, Danny Frazer 2016-17, Rich Heizer 2018-19, Lynette Spencer 2020-21, Karen Scrafford 2022-23); joined NATSAP Dec 2024, so status may not be plain Active.",
+    "claims": [
+     {
+      "claim": "OBHIC was formed in 1996 by five wilderness programs",
+      "url": "https://strugglingteens.com/archives/1997/10/news01.html",
+      "quote": "We had an exploratory meeting November 16, 1996 in Salt Lake City."
+     },
+     {
+      "claim": "The OBH Council's own history gives the same founding, 1996, by five wilderness programs",
+      "url": "https://natsap.org/natsap-and-the-outdoor-behavioral-healthcare-council-unite",
+      "quote": "was formed in the summer of 1996 by representatives from five leading wilderness therapy programs."
+     },
+     {
+      "claim": "The research cooperative tied to the OBH Council was set up in 1999 with OBHIC",
+      "url": "https://www.strugglingteens.com/archives/2003/7/obhrc2.html",
+      "quote": "established in 1999 as a collaboration between the Outdoor Behavioral Healthcare Industry Council (OBHIC)"
+     },
+     {
+      "claim": "The IRS-registered body is still named Outdoor Behavioral Health Industry Council (Huntington, UT, EIN 74-3195458)",
+      "url": "https://projects.propublica.org/nonprofits/organizations/743195458",
+      "quote": "Tax exemption issued: June 2012"
+     },
+     {
+      "claim": "NATSAP announced the OBH Council's integration into NATSAP on Dec 19, 2024, calling Gil Hallows a founding member",
+      "url": "https://members.natsap.org/news/Details/press-release-natsap-welcomes-outdoor-behavioral-health-council-obhc-into-its-network-243539",
+      "quote": "OBHC, which was founded in 1996, has long focused on advancing outcomes research"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "trade-organizations-and-marketer:natc-s-current-name",
@@ -4091,7 +4204,39 @@
    "found": "found 2026-10-13",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes. The source is NATSAP's own newsletter (NATSAP News, 1Q 2006; no copy found online outside KOP's library). Two corrections for the record: the newsletter shows NAPHS was 'quite receptive' and a meeting with its Youth Service Committee was set up, not that a formal alliance was formed; and the bill was Miller's 2005 H.R. 1738, still pending in early 2006, not a 2006 bill. NAPHS is now NABH. People: Mark Covall (NAPHS), Rosemary Tippett (NATSAP public relations), Elliot Sainer (Aspen, NAPHS member).",
+    "claims": [
+     {
+      "claim": "NATSAP's president attended a NAPHS meeting (NATSAP News, 1st quarter 2006, KOP's copy)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/1Q06News-Web-natsap.pdf",
+      "quote": "I recently had the opportunity to attend a meeting of the National Association of Psychiatric Health Systems (NAPHS)."
+     },
+     {
+      "claim": "NAPHS was receptive to an alliance against ill-conceived regulation",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/1Q06News-Web-natsap.pdf",
+      "quote": "they were quite receptive to forming an alliance to help advocate on behalf of mental health care"
+     },
+     {
+      "claim": "NAPHS executive director Mark Covall invited NATSAP's public relations director to its annual meeting",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/1Q06News-Web-natsap.pdf",
+      "quote": "Rosemary was invited by Mark Covall (Executive Director of NAPHS) to attend their annual meeting"
+     },
+     {
+      "claim": "Miller's pending bill was H.R. 1738, the End Institutionalized Abuse Against Children Act",
+      "url": "https://www.apa.org/monitor/dec05/ppup",
+      "quote": "the End Institutionalized Abuse Against Children Act (H.R. 1738)"
+     },
+     {
+      "claim": "NAPHS renamed itself the National Association for Behavioral Healthcare in 2018",
+      "url": "https://prnewswire.com/news-releases/naphs-becomes-national-association-for-behavioral-healthcare-300615811.html",
+      "quote": "the association has changed its name to the National Association for Behavioral Healthcare (NABH)"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "trade-organizations-and-marketer:amats",
@@ -4115,7 +4260,39 @@
    "found": "found 2026-10-13",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "All three look active. YATA is clearest (own site, 2026 board with Patrick Brown as president, Oct 21-23, 2026 conference in San Diego, nine founding members named). SBSA: active through at least April 2025; its own site couldn't be read. NIPSA: no website found; the NCPSA page and Rancho Solano post are undated. IRS checks not done.",
+    "claims": [
+     {
+      "claim": "YATA's own site lists a 2026 board and an October 2026 conference and dates the group to 2011",
+      "url": "https://www.yata.net/",
+      "quote": "In 2011 several young adult programs came together to discuss common issues"
+     },
+     {
+      "claim": "YATA's 2026 annual conference is listed by an events site",
+      "url": "https://helloalleva.com/events/yata-annual-conference/",
+      "quote": "YATA Annual Conference"
+     },
+     {
+      "claim": "SBSA held a conference at Priory in April 2025",
+      "url": "https://www.prioryca.org/student-life/boarding/sbsa-conference",
+      "quote": "Join us from April 15th to 17th, 2025"
+     },
+     {
+      "claim": "NIPSA is a member organization of NCPSA",
+      "url": "https://ncpsa.org/accreditation/",
+      "quote": "National Independent Private Schools Association (NIPSA)"
+     },
+     {
+      "claim": "NIPSA renewed a school's accreditation to June 2029",
+      "url": "https://ranchosolano.com/renewed-accreditation-until-2029/",
+      "quote": "the National Independent Private Schools Association (NIPSA) has granted renewed accreditation until June 2029"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "trade-organizations-and-marketer:exceed-marketing-solutions",
@@ -7653,7 +7830,34 @@
    "records": [],
    "found": "found 2026-10-25, split out of a card that asked several questions at once",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Partly: ORR stopped using it in mid-2023 (grant ended June 30, 2023), but the center kept running for local youth (Virginia DJJ FY2025: 58 beds, average 15). The record should not say it closed; the ORR years should be at least 2021-2023 (grant 90ZU0353, $7.2M), and it also held ORR children under a 2009-2010 contract (FPDS). No ORR award after June 2023 found, though a USAspending recipient search couldn't be run.",
+    "claims": [
+     {
+      "claim": "ORR's secure-care grant 90ZU0353 ran Jan 1, 2021 to June 30, 2023",
+      "url": "https://api.usaspending.gov/api/v2/awards/ASST_NON_90ZU0353_075/",
+      "quote": "\"end_date\": \"2023-06-30\""
+     },
+     {
+      "claim": "The grant's end date was shortened from Dec 31, 2023",
+      "url": "https://www.highergov.com/grant/90ZU0353",
+      "quote": "the End Date has been shortened from 12/31/23 to 06/30/23."
+     },
+     {
+      "claim": "An immigration advocate was quoted in 2025 saying ORR has not used it since 2023",
+      "url": "https://www.elfinanciero.com.mx/mundo/2025/03/21/trump-abrira-un-centro-para-detener-a-ninos-migrantes-en-eu-esto-sabemos-de-su-plan/",
+      "quote": "ORR no ha utilizado estas instalaciones desde 2023"
+     },
+     {
+      "claim": "The center still ran as a juvenile detention center in FY2025, with 58 certified beds",
+      "url": "https://djj.virginia.gov/documents/about-djj/drg/Detention_Centers.pdf",
+      "quote": "Capacity and ADP, FY 2025"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "federal-funding:why-do-the-federal-awards-to-northern-virginia-j",
@@ -7666,7 +7870,39 @@
    ],
    "found": "found 2026-10-25, split out of a card that asked several questions at once",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "They are de-obligations: in 2023 HHS took back about $1.3M of unspent money while closing out two old ORR secure-bed contracts. They are not new 2023 awards. KOP's entry ('about $1.3 million in three federal awards in 2023') is wrong; it should say the center held ORR secure-bed contracts in about 2009-2013 (about $5.0M obligated) and 2017-2018 (about $3.1M net), closed out in 2023. ORR grants after 2018 not checked.",
+    "claims": [
+     {
+      "claim": "Contract HHSP233201700038C's 2023 action of -$895,958 is a close-out modification",
+      "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=PIID:HHSP233201700038C",
+      "quote": "reasonForModification: K, CLOSE OUT"
+     },
+     {
+      "claim": "That contract was first obligated in September 2017 for secure bed capacity",
+      "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=PIID:HHSP233201700038C",
+      "quote": "IGF::OT::IGF UNACCOMPANIED ALIEN CHILDREN SECURE BED CAPACITY"
+     },
+     {
+      "claim": "Its net total after the de-obligation is $3,074,554",
+      "url": "https://api.usaspending.gov/api/v2/awards/CONT_AWD_HHSP233201700038C_7570_-NONE-_-NONE-/",
+      "quote": "\"total_obligation\": 3074554.0"
+     },
+     {
+      "claim": "Contract HHSP23320092905YC had a -$401,293.92 funding-only action on Aug 9, 2023, then a close-out",
+      "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=PIID:HHSP23320092905YC+SIGNED_DATE:[2014/01/01,2026/12/31]",
+      "quote": "C, FUNDING ONLY ACTION"
+     },
+     {
+      "claim": "HHSP23320092905YC was a secure-care contract for unaccompanied children from FY2009",
+      "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=PIID:HHSP23320092905YC",
+      "quote": "SECURE CARE PROVIDER FOR UNACCOMPANIED ALIEN CHILDREN"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "news-records-and-reporting-kop-l:who-wrote-the-new-yorker-s-october-11-2021-artic",
@@ -7852,7 +8088,39 @@
    "companies": [
     22
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes: a referral and lead-generation service paid per enrollment, not a marketing company that builds programs' websites. Its 'For Programs' page carries an image named site-managed-by-exceed-small.png and its help email is the help line on Exceed's directory therapeuticboardingschools.org, so Exceed runs its site. Reclassifying it is the owner's call. No corporate registration checked.",
+    "claims": [
+     {
+      "claim": "Best Choice says participating schools pay it",
+      "url": "https://bestresidentialtreatment.com/",
+      "quote": "Our service is completely free to you, as we are compensated by participating schools."
+     },
+     {
+      "claim": "It calls itself a referral service",
+      "url": "https://bestresidentialtreatment.com/",
+      "quote": "Free placement advisory / referral service - not a treatment provider."
+     },
+     {
+      "claim": "It charges programs a fee per enrolled student",
+      "url": "https://myadmissionshelp.com/",
+      "quote": "A set fee is charged only per student we bring you that you agree to enroll."
+     },
+     {
+      "claim": "It runs its own advertising network for leads",
+      "url": "https://myadmissionshelp.com/",
+      "quote": "Our advertising network captures a steady flow of leads."
+     },
+     {
+      "claim": "Legal name and address",
+      "url": "https://bestresidentialtreatment.com/",
+      "quote": "Best Choice Admissions Services LLC, 3207 116th Ave NE, Lake Stevens, WA 98258"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "rename-years:in-what-year-was-aspen-youth-alternatives-of-sou",
@@ -11872,7 +12140,24 @@
    "context": "",
    "records": [],
    "found": "found 2026-10-26, map years research 2026-10-26",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Two programs share the name. JRI's Attleboro home has no tie to Family Help & Wellness that any source shows. FHW's own website timeline (KOP's archive copy) lists a Journey Home in 2012, which is the Utah young adult program, so the map's FHW line belongs to the Utah program. The map node is linked to the facility record 9672 (staff Justin Lubecki, Andrea Jones, Donovan Tagaloa, therapist Emily Smith); if that record is the Attleboro one, the record link is what's wrong, not the FHW line. Fix: point the node at (or make) the Utah Journey Home record, and keep JRI's Attleboro home off the FHW chain. The Utah site found is a pages.dev copy that doesn't name FHW; a first-party FHW or Utah licensing source is still wanted. Not settled.",
+    "claims": [
+     {
+      "claim": "Journey Home in Attleboro is Justice Resource Institute's group home for adolescent boys, referred by Massachusetts DCF",
+      "url": "https://jri.org/program/journey-home/",
+      "quote": "Journey Home is a therapeutic intensive group home for adolescent males ... Referrals come from the Massachusetts Department of Children and Families."
+     },
+     {
+      "claim": "A different Journey Home, a young adult transition program, is in Salt Lake City, Utah",
+      "url": "https://journeyhomeyoungadult.pages.dev/about-us/",
+      "quote": "Journey Home Young Adult is located in beautiful Salt Lake City, Utah."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "network-map:which-program-is-the-map-s-laurel-hills-behavior",
@@ -11882,7 +12167,19 @@
    "context": "",
    "records": [],
    "found": "found 2026-10-26, map years research 2026-10-26",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The map node 'Laurel Hills Behavioral Health' sits between Ramsay Youth Services (owner) and Universal Health Services (acquired). Psychiatric Solutions' 2003 10-K lists Laurel Oaks (Dothan, AL) as its one Laurel facility from Ramsay; Laurel Ridge (San Antonio) came from The Brown Schools. So 'Laurel Hills' is most likely Laurel Oaks, Dothan; no source names a 'Laurel Hills'. Laurel Heights (Atlanta) is not in the Ramsay list. The node says closed but Laurel Oaks is open, so the owner should confirm before it is renamed or aliased on the board (network-overrides.json in kop-data). Not settled.",
+    "claims": [
+     {
+      "claim": "The only Laurel facility Psychiatric Solutions got from Ramsay Youth Services in June 2003 was Laurel Oaks Behavioral Health Center in Dothan, Alabama",
+      "url": "https://www.sec.gov/Archives/edgar/data/829608/000095014404003028/g87995e10vk.htm",
+      "quote": "Acquisition dates of June 2003 indicate facilities acquired in connection with the acquisition of Ramsay (facility table: Laurel Oaks Behavioral Health Center, Dothan, AL, 6/03)"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "network-map:is-deep-creek-youth-academy-the-program-once-cal",
@@ -11892,7 +12189,24 @@
    "context": "",
    "records": [],
    "found": "found 2026-10-26, map years research 2026-10-26",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Same street address for both names, so very likely one campus renamed (probably when the contract passed from G4S/TrueCore to Youth Opportunity). No source found that states the rename or its year, so the Map Renames year is still unknown; GreatSchools is a directory, not the state. Next look: Florida DJJ contract award or program page for Deep Creek, and the St. Johns County school district's school list. Not settled.",
+    "claims": [
+     {
+      "claim": "Hastings Youth Academy's school was at 765 E Saint Johns Ave, Hastings, FL 32145 in its 2020-21 school improvement plan",
+      "url": "https://www.floridacims.org/plans/43738/view.pdf",
+      "quote": "The mission of Hastings Youth Academy is to provide rigorous, relevant learning experiences (header: Hastings Juvenile Correctional, 765 E SAINT JOHNS AVE, Hastings, FL 32145; 2020-21 Schoolwide Improvement Plan)"
+     },
+     {
+      "claim": "Deep Creek Youth Academy's school is at the same address, 765 East Saint Johns Avenue, Hastings, FL 32145",
+      "url": "https://www.greatschools.org/florida/hastings/20237-Deep-Creek-Youth-Academy/",
+      "quote": "765 East Saint Johns Avenue, Hastings, FL 32145"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "company-histories:does-heartland-academy-llc-of-columbus-georgia-f",
@@ -31192,7 +31506,38 @@
    "context": "",
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Settled by the federal court record (govinfo). Also named, as allegations, in the 2012 Utah state refiling (Washington County No. 120500380; plaintiffs' firm copy https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf, which lists Willard Jake Peart as its member) and as 'Teen In Crisis, Inc./LLC' in Dungan v. Academy at Ivy Ridge (N.D.N.Y. 7:06-cv-00908). The commission statement is Teens In Crisis' own.",
+    "claims": [
+     {
+      "claim": "Teens In Crisis is a named defendant in Wood v. WWASP, D. Utah 2:06-cv-00708",
+      "url": "https://www.govinfo.gov/metadata/granule/USCOURTS-utd-2_06-cv-00708/USCOURTS-utd-2_06-cv-00708-4/mods.xml",
+      "quote": "<party fullName=\"Teens In Crisis\" lastName=\"Teens In Crisis\" role=\"Defendant\"/>"
+     },
+     {
+      "claim": "The court granted Teens In Crisis' motion to dismiss in April 2007 (Docket No. 166)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-utd-2_06-cv-00708/pdf/USCOURTS-utd-2_06-cv-00708-1.pdf",
+      "quote": "It is therefore ORDERED that Defendant Teens in Crisis' Motion to Dismiss (Docket No. 134) is GRANTED."
+     },
+     {
+      "claim": "The court found the fraud claims against it were not pleaded with particularity",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-utd-2_06-cv-00708/pdf/USCOURTS-utd-2_06-cv-00708-1.pdf",
+      "quote": "The Court finds that Plaintiffs have failed to plead any fraudulent conduct with particularity as to Teens in Crisis."
+     },
+     {
+      "claim": "Teens In Crisis said it had received no commission for any plaintiff's enrollment",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-utd-2_06-cv-00708/pdf/USCOURTS-utd-2_06-cv-00708-1.pdf",
+      "quote": "it had not received any commission for the enrollment of any plaintiff."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   },
+   "settled": {
+    "text": "The Marketing Companies entry now cites the court order (seeds/marketers.json fills version 3; the 'not yet sourced' note is taken out). Commit link in the report.",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "marketing-companies:who-owned-help-my-teen-and-how-was-it-paid-for-r",
@@ -31232,7 +31577,43 @@
    "context": "",
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes, as reported: the 2016 article is Heavy.com's 'Midwest Academy: 5 Fast Facts You Need to Know' (Stephanie Dube Dwilson, Feb 13, 2016), still live. Caveat: Heavy's own evidence is a school newsletter, not a Teen Revitalization page naming Midwest. The tie of Exhibit B to the Register's access case rests on the matching Feb 16 file stamp and the TSPR report; the exhibit pages carry no caption. The court copies are hosted on a survivor site (wwaspsurvivors.com) but are court-stamped. Suggested entry wording: Heavy.com (Feb 13, 2016) reported that Teen Revitalization's website advertised Midwest Academy, citing a school newsletter; the article was filed as part of Exhibit B in Lee County (Des Moines Register and Tribune Co. v. Short, SWSW000569/570). Optional: a Wayback copy of the 2016 Teen Revitalization site or newsletter.",
+    "claims": [
+     {
+      "claim": "Heavy.com reported in February 2016 that Teen Revitalization's website advertised Midwest Academy",
+      "url": "https://heavy.com/news/2016/02/midwest-academy-keokuk-iowa-wwasp-robert-lichfield-world-wide-assocation-of-specialty-schools-lawsuit-student-abuse/",
+      "quote": "On the website Teen Revitalization, which advertises Midwest Academy, month-to-month rates are $3,490"
+     },
+     {
+      "claim": "The same article says the website itself did not name Midwest; a school newsletter listed Midwest among its schools",
+      "url": "https://heavy.com/news/2016/02/midwest-academy-keokuk-iowa-wwasp-robert-lichfield-world-wide-assocation-of-specialty-schools-lawsuit-student-abuse/",
+      "quote": "Although Teen Revitalization doesn't name Midwest as the school on its website, this school newsletter shows Midwest as being one of their schools."
+     },
+     {
+      "claim": "A printout of that article is in Exhibit B, e-filed in Lee County district court (Keokuk) on Feb 16, 2016",
+      "url": "https://wwaspsurvivors.com/wp-content/uploads/2018/06/2016-2-16-Exhibit-B.pdf",
+      "quote": "E-FILED 2016 FEB 16 3:57 PM LEE SOUTH - KEOKUK - CLERK OF DISTRICT COURT"
+     },
+     {
+      "claim": "The Des Moines Register petitioned the court for the sealed Midwest Academy search warrants on Feb 16, 2016",
+      "url": "https://www.tspr.org/tspr-local/2016-02-20/midwest-academy-documents-made-public",
+      "quote": "(Tri States Public Radio, Feb 20, 2016: the Register petitioned on February 16 for the warrants)"
+     },
+     {
+      "claim": "The case numbers are SWSW000569 and SWSW000570 (Des Moines Register and Tribune Co. v. Short and Londrie)",
+      "url": "https://wwaspsurvivors.com/wp-content/uploads/2018/06/2016-2-26-SWSW000569-and-SWSW000570-Resistance-to-Plaintiffs-Request-for-Immediate-Access-to-Sealed-Search-Warrant.pdf",
+      "quote": "CRIMINAL NO. SWSW000569 SWSW000570"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-19)",
+    "at": "2026-11-19"
+   },
+   "settled": {
+    "text": "The Marketing Companies entry now carries the Heavy.com report and the Lee County filing (seeds/marketers.json fills version 3).",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "pending-public-edits-review:did-a-17-year-old-who-ran-away-from-scissor-tail",
@@ -31339,5 +31720,5 @@
    ]
   }
  ],
- "built": "2026-11-19 14:11"
+ "built": "2026-11-19 17:26"
 }

@@ -243,7 +243,8 @@ if (!function_exists('kop_marketers_apply_seed')) {
      * seeds/marketers.json "fills": sourced facts for records already on file, added without taking
      * anything away. An empty text field is filled and a filled one is left as it is; notes are put
      * ahead of the notes there (once: a note already holding the text is left alone); lists gain the
-     * new items; a ticked service stays ticked. A name not on file is skipped, never added. Returns
+     * new items; a ticked service stays ticked; a fill's "dropNotes" takes those exact sentences out of the
+     * notes (a "not yet sourced" line a source has since settled). A name not on file is skipped, never added. Returns
      * the names changed. The page then shows the fuller entry; data form edits made since stay.
      */
     function kop_marketers_apply_fills(PDO $pdo, $file = null) {
@@ -279,8 +280,18 @@ if (!function_exists('kop_marketers_apply_seed')) {
                     $new[$field] = $add[$field];
                 }
             }
-            if ($add['notes'] !== '' && strpos($old['notes'], $add['notes']) === false) {
-                $new['notes'] = $old['notes'] !== '' ? $add['notes'] . "\n\n" . $old['notes'] : $add['notes'];
+            // "dropNotes": exact sentences an earlier fill put in the notes that a later source has replaced
+            // (e.g. "Not yet sourced: ..."). Only that exact text is taken out; anything else stays.
+            // Skipped once the fill's own note is there, so a second run changes nothing.
+            $already = $add['notes'] !== '' && strpos($new['notes'], $add['notes']) !== false;
+            foreach ($already ? array() : (array) ($fill['dropNotes'] ?? array()) as $drop) {
+                $drop = trim((string) $drop);
+                if ($drop !== '' && strpos($new['notes'], $drop) !== false) {
+                    $new['notes'] = trim(preg_replace("/\n{3,}/", "\n\n", str_replace($drop, '', $new['notes'])));
+                }
+            }
+            if ($add['notes'] !== '' && strpos($new['notes'], $add['notes']) === false) {
+                $new['notes'] = $new['notes'] !== '' ? $add['notes'] . "\n\n" . $new['notes'] : $add['notes'];
             }
             foreach (kop_marketer_list_fields() as $field) {
                 $new[$field] = kop_marketer_clean_list(array_merge($old[$field], $add[$field]));

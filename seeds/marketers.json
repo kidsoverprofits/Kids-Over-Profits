@@ -1,6 +1,6 @@
 {
-  "version": "2",
-  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources. fills (version 2, 2026-11-19, the GAO-call fixes): sourced facts for eight of the short entries added 2026-10-13, applied by kop_marketers_apply_fills(): empty fields are filled, notes go ahead of the notes there, lists gain items, nothing is removed. Primary sources only; the r/troubledteens wiki was used for leads, never cited. 2 Boot Camp and Teens with Problems have none yet and are left as they are.",
+  "version": "3",
+  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources. fills (version 2, 2026-11-19, the GAO-call fixes): sourced facts for eight of the short entries added 2026-10-13, applied by kop_marketers_apply_fills(): empty fields are filled, notes go ahead of the notes there, lists gain items, nothing is removed except the exact sentences a fill names in dropNotes. Primary sources only; the r/troubledteens wiki was used for leads, never cited. 2 Boot Camp and Teens with Problems have none yet and are left as they are. Version 3 (2026-11-19, research tasks): Teens In Crisis from the Wood v. WWASP court record (its \"not yet sourced\" note taken out with dropNotes), Teen Revitalization's Midwest Academy advertising (Heavy.com, filed in Lee County).",
   "records": [
     {
       "name": "Exceed Marketing Solutions",
@@ -262,18 +262,32 @@
         "otherServices": [
           "An online directory of \"twenty or more\" programs with costs, a free child assessment and a loan application (its July 2006 press release)"
         ],
-        "notes": "Its own press releases call it \"an organization that consists of a group of premier hand-selected boarding schools\" (PRLeap, August 10, 2006) and say \"Twenty or more troubled youth programs and schools are in the directory\" (PR.com, July 26, 2006). Neither says how it was paid or whether the listed schools own it.",
+        "notes": "Heavy.com reported on February 13, 2016 that \"On the website Teen Revitalization, which advertises Midwest Academy, month-to-month rates are $3,490\", adding that the site did not name Midwest but a school newsletter listed it among its schools. A printout of that article was e-filed in Lee County, Iowa district court on February 16, 2016, as part of Exhibit B in the Des Moines Register's case for the sealed Midwest Academy search warrants (Nos. SWSW000569 and SWSW000570).\n\nIts own press releases call it \"an organization that consists of a group of premier hand-selected boarding schools\" (PRLeap, August 10, 2006) and say \"Twenty or more troubled youth programs and schools are in the directory\" (PR.com, July 26, 2006). Neither says how it was paid or whether the listed schools own it.",
         "sourceUrls": [
           "https://www.pr.com/press-release/14576",
-          "https://www.prleap.com/pr/44022"
+          "https://www.prleap.com/pr/44022",
+          "https://heavy.com/news/2016/02/midwest-academy-keokuk-iowa-wwasp-robert-lichfield-world-wide-assocation-of-specialty-schools-lawsuit-student-abuse/",
+          "https://wwaspsurvivors.com/wp-content/uploads/2018/06/2016-2-16-Exhibit-B.pdf"
         ]
-      }
+      },
+      "dropNotes": [
+        "Its own press releases call it \"an organization that consists of a group of premier hand-selected boarding schools\" (PRLeap, August 10, 2006) and say \"Twenty or more troubled youth programs and schools are in the directory\" (PR.com, July 26, 2006). Neither says how it was paid or whether the listed schools own it."
+      ]
     },
     {
       "name": "Teens In Crisis",
       "company": {
-        "notes": "Not yet sourced: it is named as a party in Wood v. WWASP (D. Utah) only in an advocacy group's 2006 press releases. The court docket has not been checked, so nothing here is confirmed."
-      }
+        "lawsuits": [
+          "Wood v. World Wide Association of Specialty Programs and Schools, D. Utah No. 2:06-cv-00708 (dismissed as to Teens In Crisis, Apr 2007)"
+        ],
+        "notes": "Teens In Crisis, LLC was a named defendant in Wood v. WWASP (D. Utah No. 2:06-cv-00708). In April 2007 Judge Ted Stewart granted its motion to dismiss, finding the plaintiffs \"failed to plead any fraudulent conduct with particularity as to Teens in Crisis\"; in its motion it said it \"had not received any commission for the enrollment of any plaintiff\" (Memorandum Decision and Order, Docket No. 166).",
+        "sourceUrls": [
+          "https://www.govinfo.gov/content/pkg/USCOURTS-utd-2_06-cv-00708/pdf/USCOURTS-utd-2_06-cv-00708-1.pdf"
+        ]
+      },
+      "dropNotes": [
+        "Not yet sourced: it is named as a party in Wood v. WWASP (D. Utah) only in an advocacy group's 2006 press releases. The court docket has not been checked, so nothing here is confirmed."
+      ]
     },
     {
       "name": "Woodbury Reports Inc.",
