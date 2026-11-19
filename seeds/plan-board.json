@@ -1,6 +1,6 @@
 {
  "built": "2026-11-19 17:25 UTC",
- "source": "0e72cc4f91ca4845bdaa3f70f54a884adac5f83a",
+ "source": "3c02233783d6261e72b5cfe7130cf5fb088467aa",
  "sections": [
   {
    "key": "2",
@@ -1183,6 +1183,129 @@
         }
        ],
        "hash": "22b21cafeb1f"
+      },
+      {
+       "id": "2.3:pending-public-facility-edits-17-checked-2026-11-19",
+       "lead": "Pending public facility edits (17, checked 2026-11-19)",
+       "text": "**Pending public facility edits (17, checked 2026-11-19)**: every pending `suggested_edits` row was checked for the record it belongs to, names and parent company; the sources are in item 4.3 #33 and the research tasks under \"Pending public edits review\". Approving normalizes states, years, ages, wording and links; these are the judgment calls on top. Survivor notes stay word for word; a staff entry keeps the name only, the accusation stays in the quoted note.",
+       "ask": "Approve, change or reject each of the 17 pending public edits",
+       "date": "2026-11-19",
+       "why": "Two are wrongly filed as new facilities and several would write wrong data if approved as sent.",
+       "go": [
+        {
+         "label": "Review inbox",
+         "url": "https://kidsoverprofits.org/wp-admin/admin.php?page=kop-review-inbox"
+        }
+       ],
+       "choices": [],
+       "time": "2-3 min each",
+       "kind": "do",
+       "focus": false,
+       "steps": [
+        {
+         "id": "54-cottonwood-youth-academy-keep-the-note-record-m",
+         "label": "54 Cottonwood Youth Academy: keep the note (record merge in 4.3 #33)",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "55-jackson-feild-homes-keep-the-note-name-right-in",
+         "label": "55 Jackson-Feild Homes: keep the note; name right, independent nonprofit",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "56-linden-oaks-drop-the-operated-the-arabella-hous",
+         "label": "56 Linden Oaks: drop the \"Operated the Arabella House\" other name; hold the three group-therapy notes (57); add the Navarete appeal",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "57-linden-oaks-a-request-nothing-to-approve-act-on",
+         "label": "57 Linden Oaks: a request, nothing to approve; act on it through 56",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "58-linden-oaks-don-t-take-not-a-charter-program-as",
+         "label": "58 Linden Oaks: don't take \"not a Charter program\" as operator; Charter was past operator 1994-1999",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "59-interactive-youth-transport-legal-name-interact",
+         "label": "59 Interactive Youth Transport: legal name Interactive Health, LLC; CEO Bobby Tredinnick; the rest is the CEO's own statement",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "60-youth-care-of-utah-capacity-64-not-16-drop-the",
+         "label": "60 Youth Care of Utah: capacity 64, not 16; drop the migration note",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "62-chrysalis-closed-end-2026-11-15-trego-s-mountai",
+         "label": "62 Chrysalis: Closed, end 2026-11-15 (Trego's Mountain Ear 2026-10-08); redo the dismissed closure report",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "63-scissor-tail-pointe-attach-to-13593-scissor-tai",
+         "label": "63 Scissor Tail Pointe: attach to 13593 Scissor Tail Point, not a new facility; hold the operator",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "64-star-academy-closed-april-2016-start-1966-co-ed",
+         "label": "64 STAR Academy: Closed April 2016, start 1966, co-ed, keep Brady Dr; reject the type, \"Demolished\" and the referrer line",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "66-los-pinos-closed-2009-06-30-ortega-highway-lake",
+         "label": "66 Los Pinos: Closed 2009-06-30, Ortega Highway, Lake Elsinore; reject the location, years, capacity 3 and type text",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "67-indiana-united-methodist-children-s-home-add-51",
+         "label": "67 Indiana United Methodist Children's Home: add 515 W Camp St; reject the misspelled current name and type text",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "69-peniel-christian-school-gender-co-ed-hold-the-o",
+         "label": "69 Peniel Christian School: gender Co-ed; hold the operator names and 650 California St",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "70-the-heritage-school-ron-whitney-owner-and-headm",
+         "label": "70 The Heritage School: Ron Whitney owner and headmaster in 1977, boys only; hold \"Howard\" and 152 St Johns Dr",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "71-the-lord-s-ranch-accept-trinity-behavioral-heal",
+         "label": "71 The Lord's Ranch: accept Trinity Behavioral Health and closed 2016; add Ted Suhl as owner",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "72-afic-operator-alexander-m-panio-jr-no-dr-years",
+         "label": "72 AFIC: operator Alexander M. Panio Jr. (no \"Dr.\"), years 1983-2013; reject \"AFIC\" as current name",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "73-gordonstoun-accept-as-new-scotland-operator-gor",
+         "label": "73 Gordonstoun: accept as new; Scotland; operator Gordonstoun Schools Ltd (SC037867)",
+         "url": "",
+         "note": ""
+        }
+       ],
+       "hash": "43d2e9b964de"
       }
      ]
     },
@@ -3424,6 +3547,21 @@
        "focus": false,
        "steps": [],
        "hash": "1aebf8fc15ab"
+      },
+      {
+       "id": "4.3:duplicate-and-mixed-up-facility-records-found-reviewing-the",
+       "lead": "Duplicate and mixed-up facility records found reviewing the pending public edits",
+       "text": "**Duplicate and mixed-up facility records found reviewing the pending public edits** (2026-11-19; the edit decisions are owner item 2.3 #19; research tasks under \"Pending public edits review\"). Each is settled by the sources named: - **Cottonwood**: Cottonwood Youth Academy (100443, Salt Lake City) and Cottonwood Treatment Center (10419, South Salt Lake) are one program. KSL 2005 (news 2245) names \"Cottonwood Youth Academy\"; HEAL calls it \"a.k.a. Cottonwood Treatment Center\"; UHS 10-Ks list \"Cottonwood Treatment Center S. Salt Lake City, Utah 78 Leased\" from the 2007 10-K to the 2014 10-K and drop it from FY2015, so closed or sold in 2015. Merge (Merge Duplicates), keeping UHS as operator. HEAL's page was read from Wayback (https://web.archive.org/web/20250719182329/https://heal-online.org/cotton.html): import it as a PDF (`api/import-documents.php`) and cite our copy. - **The Lord's Ranch**: 11542, Trinity Behavioral Health (11544) and Lords Ranch Behavioral Health Care Systems (11513) are one facility at 1033 Old Burr Rd, Warm Springs, AR 72478 (IRS EIN 71-0782352; Lawsuit Information Center: \"known in more recent times as Trinity Behavioral Health\"). Merge into 11542, Trinity as the later name, open 1976-2016 (KUAR 2023-11-08), owner Ted Suhl. 11544 and 11513 carry the wrong zip 72428. - **Youth Care of Utah**: Brighton House (10591) is one of the four houses on Utah licence F22-93719 (\"Youth Care Of Utah dba Summit House, Alpine House, Horizon House, Brighton House\", 12595 Minuteman Dr, residential capacity 64): fold it into 10345 as a home/campus. Utah's licensing has a public API (cclapi.dlbc.utah.gov/api/public/) and KOP's `inspection_facilities` has no Utah entries; worth a scraper item in 4.2 if wanted. - **The Heritage School (10265, Calistoga, CA)**: its Fornits and wiki resource links belong to Heritage Schools Inc. in Provo, UT (10447). Move them there. The Woodbury pages filed under \"The Heritage School\" from 2008-2014 (attachments 14907, 14995, 15505, 15560) are most likely the Utah school too; check and relink. - **Scissor Tail Point (13593)**: street is 310 12th Ave NE (OKDHS licensing), not NW. - **Linden Oaks (100402)**: Charter ran it 1994-1999 as 75% partner in Naperville Psychiatric Ventures with Edward Hospital (Charter 1994 10-K https://www.sec.gov/Archives/edgar/data/19411/0000019411-94-000008.txt; 1999 10-K https://www.sec.gov/Archives/edgar/data/19411/0000912057-99-010565.txt, \"sold September 1999\"). Add Charter (#500010) as past operator 1994-1999 and close the older research task \"What source links Linden Oaks Hospital in Naperville, Illinois to Charter Behavioral Health Systems\" with these filings. Add the case Navarete v. Naperville Psychiatric Ventures, 2011 IL App (2d) 100614-U (DuPage No. 05-L-520) to the lawsuits table.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "9f7dcd554726"
       }
      ]
     },
