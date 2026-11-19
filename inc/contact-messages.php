@@ -41,8 +41,9 @@ if (!defined('KOP_CONTACT_PER_DAY')) define('KOP_CONTACT_PER_DAY', 150);
 if (!defined('KOP_CONTACT_MAX')) define('KOP_CONTACT_MAX', 10000);
 if (!defined('KOP_CONTACT_MIN_SECONDS')) define('KOP_CONTACT_MIN_SECONDS', 3);
 if (!defined('KOP_CONTACT_ADMIN_PAGE')) define('KOP_CONTACT_ADMIN_PAGE', 'kop-contact-messages');
-// LiteSpeed keeps /contact/ whole: bump this when the form's markup changes so the cached copy goes once.
-if (!defined('KOP_CONTACT_PAGE_VERSION')) define('KOP_CONTACT_PAGE_VERSION', '1');
+// LiteSpeed keeps /contact/ and /privacy-policy/ whole: bump this when the form's markup or the privacy policy's
+// contact form text changes so the cached copies go once (2: the privacy policy's Contact Form section).
+if (!defined('KOP_CONTACT_PAGE_VERSION')) define('KOP_CONTACT_PAGE_VERSION', '2');
 
 /** What the message is about: value => label (Dropdown Lists 'contact-types'). */
 function kop_contact_types($mode = 'all') {
@@ -319,6 +320,7 @@ if (function_exists('add_action')) {
         if (get_option('kop_contact_page_version') === KOP_CONTACT_PAGE_VERSION) return;
         update_option('kop_contact_page_version', KOP_CONTACT_PAGE_VERSION, false);
         do_action('litespeed_purge_url', home_url('/contact/'));
+        do_action('litespeed_purge_url', home_url('/privacy-policy/'));
     });
 }
 
