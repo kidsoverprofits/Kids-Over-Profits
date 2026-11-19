@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 22:57 UTC",
- "source": "9eec270c6c77522b3f737d91dac29b238b93d456",
+ "built": "2026-11-19 23:01 UTC",
+ "source": "af97c68982d16d0575fb1c3e04e779297f71a601",
  "sections": [
   {
    "key": "2",
@@ -2742,21 +2742,6 @@
        "focus": false,
        "steps": [],
        "hash": "9fb56f7ed966"
-      },
-      {
-       "id": "3:local-qwen-after-groq-and-gemini",
-       "lead": "Local Qwen after Groq and Gemini",
-       "text": "**Local Qwen after Groq and Gemini** (2026-11-19): with `python scripts/local-ai-worker.py` running (kop-pipeline), [AI Usage](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-ai-usage) says \"Local Qwen: on\". The first time both providers are out, the usage list shows a `local` row that worked (live) or the job's error ending in \"saved for the local AI\" (PC off); the worker's window logs \"live: answered\" or \"queue: ... answered\". Not yet seen on production: only the tunnel, the token check and the routes were tested from outside.",
-       "ask": "",
-       "date": "2026-11-19",
-       "why": "",
-       "go": [],
-       "choices": [],
-       "time": "",
-       "kind": "check",
-       "focus": false,
-       "steps": [],
-       "hash": "815e90530799"
       }
      ]
     }
