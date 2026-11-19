@@ -41,6 +41,16 @@ get_header();
       </ul>
       <p>All public submissions are held in a pending queue and reviewed by an admin before any data is published.</p>
 
+      <h3>Contact Form</h3>
+      <p>When you write to us through the <a href="<?php echo esc_url(home_url('/contact/')); ?>">contact form</a>, we keep only what you type into it:</p>
+      <ul>
+        <li>What your message is about, and your message</li>
+        <li>Your email address, so we can answer you</li>
+        <li>Optionally, your name, a facility or program, and how you would like to be reached (email, Signal or phone, with the username or number you give)</li>
+      </ul>
+      <p>We do not store your IP address or browser with your message. To limit spam, we count how many messages a device sends in a day, using a scrambled code that cannot be turned back into your IP address and is erased after a day.</p>
+      <p>Only the Kids Over Profits team reads contact messages. They are never published, and we never share your message, your name or your contact details with anyone without your consent. We do not send an automatic reply.</p>
+
       <h3>Automatically Collected Data</h3>
       <p>Like most websites, our server logs standard request data including IP addresses, browser type, and pages visited. These logs are used solely for security monitoring and are not shared.</p>
 
@@ -56,6 +66,7 @@ get_header();
         <li><strong>IP addresses</strong> — to detect spam submissions and investigate abuse; not used to identify or track ordinary visitors</li>
         <li><strong>Submitted data</strong> — to review and, if accurate, incorporate into our public database of TTI facilities</li>
         <li><strong>Email addresses (optional)</strong> — to follow up on your submission if we have questions; never used for marketing</li>
+        <li><strong>Contact messages</strong> — to read and answer what you wrote, the way you asked to be reached; never used for marketing or added to a mailing list</li>
       </ul>
     </section>
     <?php kop_ie_html_end(); ?>
@@ -76,6 +87,7 @@ get_header();
     <section>
       <h2>Data Retention</h2>
       <p>Submitted data is retained indefinitely for research purposes. If you submitted information and wish to request its removal, contact us at the address below.</p>
+      <p>Contact messages are kept so we can follow up on them. If you ask, we will erase your message and your contact details for good.</p>
     </section>
     <?php kop_ie_html_end(); ?>
 
