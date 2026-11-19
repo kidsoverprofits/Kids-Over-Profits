@@ -306,6 +306,76 @@ if (!function_exists('kop_tradeorgs_apply_seed')) {
         return $added;
     }
 
+    /**
+     * seeds/tradeorgs.json "fills": sourced facts for records already on file, the same rules as the marketers'
+     * fills (kop_marketers_apply_fills()): empty text fields are filled, the fill's note goes ahead of the notes
+     * there, lists gain items, activities only get ticked. Nothing is removed except the exact sentences named in
+     * dropNotes and the exact list items named in dropItems / replaceItems (kop_seed_fill_edit_list()).
+     *
+     * @return string[] names of the records changed
+     */
+    function kop_tradeorgs_apply_fills(PDO $pdo, $file = null) {
+        $file = $file ?: get_stylesheet_directory() . '/seeds/tradeorgs.json';
+        $seed = is_readable($file) ? json_decode((string) file_get_contents($file), true) : null;
+        if (!is_array($seed) || !is_array($seed['fills'] ?? null)) {
+            return array();
+        }
+        kop_tradeorgs_ensure_table($pdo);
+        $find = $pdo->prepare('SELECT id, json_data FROM tradeorgs_master WHERE unique_name = ?');
+        $save = $pdo->prepare('UPDATE tradeorgs_master SET json_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+        $changed = array();
+        foreach ($seed['fills'] as $fill) {
+            $name = trim((string) ($fill['name'] ?? ''));
+            if ($name === '' || !is_array($fill['tradeOrg'] ?? null)) {
+                continue;
+            }
+            $find->execute(array($name));
+            $row = $find->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                continue;
+            }
+            $decoded = json_decode((string) $row['json_data'], true);
+            $decoded = is_array($decoded) ? $decoded : array();
+            $old = kop_tradeorg_from_json($decoded);
+            $add = kop_tradeorg_normalize(array_merge($fill['tradeOrg'], array('name' => $old['name'] !== '' ? $old['name'] : $name)));
+            $new = $old;
+            foreach (kop_tradeorg_text_fields() as $field) {
+                if ($field !== 'notes' && $field !== 'name' && $new[$field] === '' && $add[$field] !== '') {
+                    $new[$field] = $add[$field];
+                }
+            }
+            $already = $add['notes'] !== '' && strpos($new['notes'], $add['notes']) !== false;
+            foreach ($already ? array() : (array) ($fill['dropNotes'] ?? array()) as $drop) {
+                $drop = trim((string) $drop);
+                if ($drop !== '' && strpos($new['notes'], $drop) !== false) {
+                    $new['notes'] = trim(preg_replace("/\n{3,}/", "\n\n", str_replace($drop, '', $new['notes'])));
+                }
+            }
+            if ($add['notes'] !== '' && strpos($new['notes'], $add['notes']) === false) {
+                $new['notes'] = $new['notes'] !== '' ? $add['notes'] . "\n\n" . $new['notes'] : $add['notes'];
+            }
+            foreach (kop_tradeorg_list_fields() as $field) {
+                $new[$field] = kop_marketer_clean_list(array_merge(kop_seed_fill_edit_list($old[$field], $fill, $field), $add[$field]));
+            }
+            foreach ($new['activities'] as $key => $on) {
+                $new['activities'][$key] = $on || !empty($add['activities'][$key]);
+            }
+            if (json_encode($new) === json_encode($old)) {
+                continue;
+            }
+            // Keep the stored wrapper ({name, category, data: {tradeOrg}}) and anything else in it.
+            if (isset($decoded['data']) && is_array($decoded['data'])) {
+                $decoded['data']['tradeOrg'] = $new;
+            } else {
+                $decoded = array('name' => $name, 'category' => 'tradeorgs', 'data' => array('tradeOrg' => $new, 'category' => 'tradeorgs'));
+            }
+            $decoded['_filled'] = trim(((string) ($decoded['_filled'] ?? '')) . ' ' . (string) ($seed['version'] ?? ''));
+            $save->execute(array(json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int) $row['id']));
+            $changed[] = $name;
+        }
+        return $changed;
+    }
+
     /** Once per seed version, on any request. */
     function kop_tradeorgs_maybe_apply_seed() {
         $file = get_stylesheet_directory() . '/seeds/tradeorgs.json';
@@ -320,6 +390,10 @@ if (!function_exists('kop_tradeorgs_apply_seed')) {
         }
         try {
             kop_tradeorgs_apply_seed($pdo, $file);
+            $filled = kop_tradeorgs_apply_fills($pdo, $file);
+            if ($filled) {
+                update_option('kop_tradeorgs_fill_result', array('version' => $version, 'filled' => $filled, 'at' => gmdate('c')), false);
+            }
             update_option('kop_tradeorgs_seed_version', $version);
         } catch (Throwable $e) {
             error_log('Trade organizations seed failed: ' . $e->getMessage());

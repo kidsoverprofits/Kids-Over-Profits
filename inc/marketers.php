@@ -293,8 +293,9 @@ if (!function_exists('kop_marketers_apply_seed')) {
             if ($add['notes'] !== '' && strpos($new['notes'], $add['notes']) === false) {
                 $new['notes'] = $new['notes'] !== '' ? $add['notes'] . "\n\n" . $new['notes'] : $add['notes'];
             }
+            // replaceItems / dropItems: exact list items a later source corrects (kop_seed_fill_edit_list()).
             foreach (kop_marketer_list_fields() as $field) {
-                $new[$field] = kop_marketer_clean_list(array_merge($old[$field], $add[$field]));
+                $new[$field] = kop_marketer_clean_list(array_merge(kop_seed_fill_edit_list($old[$field], $fill, $field), $add[$field]));
             }
             foreach ($new['services'] as $key => $on) {
                 $new['services'][$key] = $on || !empty($add['services'][$key]);

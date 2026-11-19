@@ -53,6 +53,25 @@ if (!function_exists('kop_marketer_service_labels')) {
         return $out;
     }
 
+    /**
+     * A seed fill's exact list edits on one field of a record on file (marketers and trade organizations):
+     * "replaceItems": {field: {old item: new item}} swaps the item in place, "dropItems": {field: [items]} takes
+     * items out. Only exact matches change, so an item edited by hand since stays, and a second run does nothing.
+     */
+    function kop_seed_fill_edit_list(array $list, array $fill, $field) {
+        $replace = (array) (($fill['replaceItems'] ?? array())[$field] ?? array());
+        $drop = array_map('strval', (array) (($fill['dropItems'] ?? array())[$field] ?? array()));
+        $out = array();
+        foreach ($list as $item) {
+            $item = (string) $item;
+            if (in_array($item, $drop, true)) {
+                continue;
+            }
+            $out[] = array_key_exists($item, $replace) ? (string) $replace[$item] : $item;
+        }
+        return kop_marketer_clean_list($out);
+    }
+
     /** One marketerCompany block with every field present and typed. */
     function kop_marketer_normalize_company($company) {
         $company = is_array($company) ? $company : [];

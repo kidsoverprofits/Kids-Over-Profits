@@ -88,6 +88,46 @@ $check('every seed record is added', count($added) === count($seed['records']), 
 $check('each seed record cites sources', count(array_filter($seed['records'], function ($r) { return empty($r['sourceUrls']); })) === 0);
 $check('a second run adds nothing', kop_tradeorgs_apply_seed($db) === array());
 
+echo "-- Seed fills (facts for records already on file) --\n";
+$fills = (array) ($seed['fills'] ?? array());
+$check('each fill names a record in the seed', count(array_filter($fills, function ($f) use ($seed) {
+    return !is_array($f['tradeOrg'] ?? null) || !in_array($f['name'] ?? '', array_column($seed['records'], 'name'), true);
+})) === 0);
+$check('each fill cites sources', count(array_filter($fills, function ($f) { return empty($f['tradeOrg']['sourceUrls']); })) === 0);
+$tro_row = function ($name) use ($db) {
+    $q = $db->prepare('SELECT json_data FROM tradeorgs_master WHERE unique_name = ?');
+    $q->execute(array($name));
+    return json_decode((string) $q->fetchColumn(), true);
+};
+$tro_put = function ($name, $json) use ($db) {
+    $db->prepare('UPDATE tradeorgs_master SET json_data = ? WHERE unique_name = ?')->execute(array(json_encode($json), $name));
+};
+// A replaced list item: put the old wording back, as the live record has it, with a hand-added item after it.
+$swap = array_values(array_filter($fills, function ($f) { return !empty($f['replaceItems']); }));
+if ($swap) {
+    $sname = $swap[0]['name'];
+    $sfield = array_keys($swap[0]['replaceItems'])[0];
+    $sold = (string) array_keys($swap[0]['replaceItems'][$sfield])[0];
+    $snew = (string) $swap[0]['replaceItems'][$sfield][$sold];
+    $j = $tro_row($sname);
+    $j['data']['tradeOrg'][$sfield] = array($sold, 'An item added by hand.');
+    $j['data']['tradeOrg']['status'] = 'Edited by hand';
+    $tro_put($sname, $j);
+}
+$filled = kop_tradeorgs_apply_fills($db);
+$check('every fill changes its record', count($filled) === count($fills), implode(', ', $filled));
+$check('a second fill run changes nothing', kop_tradeorgs_apply_fills($db) === array());
+if ($swap) {
+    $got = kop_tradeorg_from_json($tro_row($sname));
+    $check('replaceItems swaps the item in place and keeps the hand-added one', $got[$sfield][0] === $snew && $got[$sfield][1] === 'An item added by hand.'
+        && !in_array($sold, $got[$sfield], true));
+    $check('a filled text field never overwrites one on file', $got['status'] === 'Edited by hand', $got['status']);
+}
+$obh = kop_tradeorg_from_json($tro_row('Outdoor Behavioral Healthcare Council'));
+$check('an empty field is filled and the earlier note stays after the new one', $obh['founded'] === '1996'
+    && strpos($obh['notes'], 'The Outdoor Behavioral Healthcare Industry Council (OBHIC) was formed in 1996') === 0 && substr_count($obh['notes'], 'Undark') === 1);
+$check('dropItems takes out only the exact item', kop_seed_fill_edit_list(array('A', 'B', 'C'), array('dropItems' => array('x' => array('B', 'b '))), 'x') === array('A', 'C'));
+
 echo "-- The page (/trade-organizations/) --\n";
 $all = kop_tradeorgs_all();
 $names = array_map(function ($o) { return $o['org']['name']; }, $all);

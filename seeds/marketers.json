@@ -1,6 +1,6 @@
 {
-  "version": "3",
-  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources. fills (version 2, 2026-11-19, the GAO-call fixes): sourced facts for eight of the short entries added 2026-10-13, applied by kop_marketers_apply_fills(): empty fields are filled, notes go ahead of the notes there, lists gain items, nothing is removed except the exact sentences a fill names in dropNotes. Primary sources only; the r/troubledteens wiki was used for leads, never cited. 2 Boot Camp and Teens with Problems have none yet and are left as they are. Version 3 (2026-11-19, research tasks): Teens In Crisis from the Wood v. WWASP court record (its \"not yet sourced\" note taken out with dropNotes), Teen Revitalization's Midwest Academy advertising (Heavy.com, filed in Lee County).",
+  "version": "4",
+  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources. fills (version 2, 2026-11-19, the GAO-call fixes): sourced facts for eight of the short entries added 2026-10-13, applied by kop_marketers_apply_fills(): empty fields are filled, notes go ahead of the notes there, lists gain items, nothing is removed except the exact sentences a fill names in dropNotes. Primary sources only; the r/troubledteens wiki was used for leads, never cited. 2 Boot Camp and Teens with Problems have none yet and are left as they are. Version 3 (2026-11-19, research tasks): Teens In Crisis from the Wood v. WWASP court record (its \"not yet sourced\" note taken out with dropNotes), Teen Revitalization's Midwest Academy advertising (Heavy.com, filed in Lee County). Version 4 (2026-11-19, research tasks, owner's yes): Best Choice Admissions Services' per-enrollment fee and lead network (its own pages); Exceed's clients corrected with dropItems (exact list items taken out): Vive kept (its ai.txt names Exceed's webmaster), Sunset Bay Academy and Oklahoma Adult and Teen Challenge taken off (they only carry Exceed's LLMS plugin and name other contacts).",
   "records": [
     {
       "name": "Exceed Marketing Solutions",
@@ -47,12 +47,9 @@
         "River View Christian Academy",
         "Safe Harbor Academy",
         "Stillwater Academy",
-        "Vive Adolescent Care",
-        "Sunset Bay Academy"
+        "Vive Adolescent Care"
       ],
-      "clientCompanies": [
-        "Oklahoma Adult and Teen Challenge"
-      ],
+      "clientCompanies": [],
       "notes": "Describes itself as \"a leading marketing partner for boarding schools and adolescent therapeutic programs, helping them achieve and maintain full enrollment,\" and tells programs that \"participation with Exceed includes free featured listings in our highly ranked directories.\" Its directories tell parents their owners have \"no ownership, investment, equity interest, or controlling interest in any program featured or listed.\" On October 2, 2026, 15 of the 16 program and directory websites that publish instructions for AI chatbots (llms.txt) were made with Exceed's software; the programs listed above are the ones whose websites were. A former director of Brush Creek Academy and New Lifehouse Academy gives a testimonial on Exceed's site. Exceed's website, the Best Choice Admissions sites and Exceed's directories share one Bing webmaster verification code.",
       "sourceUrls": [
         "https://kidsoverprofits.org/how-troubled-teen-programs-market-themselves-online/",
@@ -316,6 +313,57 @@
         "notes": "Its own site says Lon Woodbury founded Woodbury Reports, \"an educational consulting firm in North Idaho\", in 1989, that StrugglingTeens.com \"went live in 1995\", and that in 2017 \"the second generation took over\". The same page, labeled \"Paid Advertisement\", names Ron and Kristie Campbell as owners of StrugglingTeens, LLC and invites programs to advertise (January 29, 2020).",
         "sourceUrls": [
           "https://strugglingteens.com/?p=1281"
+        ]
+      }
+    },
+    {
+      "name": "Best Choice Admissions Services",
+      "company": {
+        "city": "Lake Stevens",
+        "state": "WA",
+        "country": "United States",
+        "address": "3207 116th Ave NE, Lake Stevens, WA 98258",
+        "otherNames": [
+          "Best Choice Admissions Services LLC"
+        ],
+        "websites": [
+          "https://myadmissionshelp.com/"
+        ],
+        "services": {
+          "helpLine": true,
+          "leadGeneration": true
+        },
+        "otherServices": [
+          "Charges programs per enrollment: \"A set fee is charged only per student we bring you that you agree to enroll.\"",
+          "Its own advertising network for leads: \"Our advertising network captures a steady flow of leads.\""
+        ],
+        "affiliations": [
+          "Exceed Marketing Solutions: its page for programs carries an image named site-managed-by-exceed-small.png"
+        ],
+        "notes": "A referral and lead-generation service paid by programs, not a company that builds programs' websites. It tells families it is a \"Free placement advisory / referral service - not a treatment provider\" and that \"we are compensated by participating schools\"; its page for programs offers them students for a fee per enrollment. Its help email is the help line on Exceed Marketing Solutions' directory therapeuticboardingschools.org.",
+        "sourceUrls": [
+          "https://bestresidentialtreatment.com/",
+          "https://myadmissionshelp.com/",
+          "https://therapeuticboardingschools.org/"
+        ]
+      }
+    },
+    {
+      "name": "Exceed Marketing Solutions",
+      "dropItems": {
+        "clientFacilities": [
+          "Sunset Bay Academy"
+        ],
+        "clientCompanies": [
+          "Oklahoma Adult and Teen Challenge"
+        ]
+      },
+      "company": {
+        "notes": "Vive Adolescent Care's ai.txt names webmaster@exceedmarketingsolutions.com as its contact (November 2026). Sunset Bay Academy and Oklahoma Adult and Teen Challenge carry files \"Generated by Exceed LLMS plugin\", but their ai.txt files name other contacts (conversiones.com and nicedigitals.com), so they are not listed as its clients.",
+        "sourceUrls": [
+          "https://vivetreatment.com/ai.txt",
+          "https://sunsetbayacademy.com/ai.txt",
+          "https://okteenchallenge.com/ai.txt"
         ]
       }
     }

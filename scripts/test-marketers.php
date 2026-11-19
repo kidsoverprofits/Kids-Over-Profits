@@ -91,7 +91,32 @@ $check('each fill names a record', count(array_filter($fills, function ($f) { re
 $check('no fill cites the r/troubledteens wiki or KOP\'s own pages', count(array_filter($fills, function ($f) {
     return preg_grep('~reddit\.com|kidsoverprofits\.org~i', (array) ($f['company']['sourceUrls'] ?? array()));
 })) === 0);
-$check('fills skip a name not on file', kop_marketers_apply_fills($mk) === array());
+// The live record still lists the clients a later fill takes out (dropItems); put them back to check that.
+$dropper = array_values(array_filter($fills, function ($f) { return !empty($f['dropItems']); }));
+if ($dropper) {
+    $dq = $mk->prepare('SELECT json_data FROM marketers_master WHERE unique_name = ?');
+    $dq->execute(array($dropper[0]['name']));
+    $dj = json_decode((string) $dq->fetchColumn(), true);
+    foreach ($dropper[0]['dropItems'] as $field => $items) {
+        $dj['data']['marketerCompany'][$field] = array_merge((array) $dj['data']['marketerCompany'][$field], $items);
+    }
+    $mk->prepare('UPDATE marketers_master SET json_data = ? WHERE unique_name = ?')->execute(array(json_encode($dj), $dropper[0]['name']));
+}
+$on_file = array_column($seed['records'], 'name');
+$first = kop_marketers_apply_fills($mk);
+$check('fills change only records on file', !array_diff($first, $on_file) && count($first) === count(array_filter($fills, function ($f) use ($on_file) {
+    return in_array($f['name'], $on_file, true);
+})), implode(', ', $first));
+$check('fills skip a name not on file (a second run changes nothing)', kop_marketers_apply_fills($mk) === array());
+if ($dropper) {
+    $dq->execute(array($dropper[0]['name']));
+    $got = kop_marketer_company_from_json($dq->fetchColumn());
+    $left = 0;
+    foreach ($dropper[0]['dropItems'] as $field => $items) {
+        $left += count(array_intersect($items, $got[$field]));
+    }
+    $check('dropItems takes the named list items out', $left === 0 && in_array('Vive Adolescent Care', $got['clientFacilities'], true));
+}
 $short = $fills ? (string) $fills[0]['name'] : '';
 if ($short !== '') {
     $mk->prepare('INSERT INTO marketers_master (unique_name, json_data) VALUES (?, ?)')->execute(array($short, json_encode(array(

@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "_note": "Trade organizations added to tradeorgs_master once per version (inc/tradeorgs.php kop_tradeorgs_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/) and the documents it cites. Member programs are not typed here: the page lists every program whose record names the organization.",
+  "version": 3,
+  "_note": "Trade organizations added to tradeorgs_master once per version (inc/tradeorgs.php kop_tradeorgs_apply_seed()). Only records not on file are added; an existing record is never changed by \"records\". Facts from the reputation series (seeds/reputation/) and the documents it cites. Member programs are not typed here: the page lists every program whose record names the organization. fills (version 3, 2026-11-19, research tasks of the tti-research run, owner's yes): sourced facts for records already on file, applied by kop_tradeorgs_apply_fills() with the marketers' rules: empty fields are filled, notes go ahead of the notes there, lists gain items, activities only get ticked; nothing is removed except exact sentences in dropNotes and exact list items in dropItems / replaceItems. OBH Council's founding and IRS name, NATSAP's 2006 NAPHS approach (receptive, not a formed alliance), NIPSA, SBSA and YATA active.",
   "records": [
     {
       "name": "National Association of Therapeutic Schools and Programs",
@@ -469,6 +469,104 @@
         "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0212.pdf#page=16",
         "https://kidsoverprofits.org/document-library-natsap/"
       ]
+    }
+  ],
+  "fills": [
+    {
+      "name": "Outdoor Behavioral Healthcare Council",
+      "tradeOrg": {
+        "founded": "1996",
+        "city": "Huntington",
+        "state": "UT",
+        "country": "United States",
+        "otherNames": [
+          "Outdoor Behavioral Health Industry Council"
+        ],
+        "keyPersonnel": [
+          "Gil Hallows (chair, 2014-2015, per its IRS filings; a founding member, per NATSAP in 2024)",
+          "Danny Frazer (chair, 2016-2017, per its IRS filings)",
+          "Rich Heizer (chair, 2018-2019, per its IRS filings)",
+          "Lynette Spencer (chair, 2020-2021, per its IRS filings)",
+          "Karen Scrafford (chair, 2022-2023, per its IRS filings)"
+        ],
+        "affiliations": [
+          "National Association of Therapeutic Schools and Programs (NATSAP): joined NATSAP's network in December 2024"
+        ],
+        "notes": "The Outdoor Behavioral Healthcare Industry Council (OBHIC) was formed in 1996 by five wilderness programs (Anasazi, Aspen, Catherine Freer, RedCliff Ascent and SUWS) after \"an exploratory meeting November 16, 1996 in Salt Lake City\" (Woodbury Reports, October 1997). The OBH Council's own history gives the same start: it \"was formed in the summer of 1996 by representatives from five leading wilderness therapy programs.\" The outcomes research cooperative tied to it was \"established in 1999 as a collaboration between the Outdoor Behavioral Healthcare Industry Council (OBHIC)\" and university researchers. Its IRS registration is still in the name Outdoor Behavioral Health Industry Council (Huntington, Utah; EIN 74-3195458; tax exemption issued June 2012). On December 19, 2024 NATSAP announced that the OBH Council had joined its network.",
+        "sourceUrls": [
+          "https://strugglingteens.com/archives/1997/10/news01.html",
+          "https://natsap.org/natsap-and-the-outdoor-behavioral-healthcare-council-unite",
+          "https://www.strugglingteens.com/archives/2003/7/obhrc2.html",
+          "https://projects.propublica.org/nonprofits/organizations/743195458",
+          "https://members.natsap.org/news/Details/press-release-natsap-welcomes-outdoor-behavioral-health-council-obhc-into-its-network-243539"
+        ]
+      }
+    },
+    {
+      "name": "National Association of Therapeutic Schools and Programs",
+      "replaceItems": {
+        "lobbying": {
+          "2006: formed an alliance with a psychiatric hospital trade group \"to mitigate the potential impact of ill conceived regulatory efforts such as the proposed Miller legislation\"": "2006: approached the National Association of Psychiatric Health Systems (NAPHS, now the National Association for Behavioral Healthcare), which NATSAP's newsletter said was \"quite receptive to forming an alliance\" against \"ill conceived regulatory efforts such as the proposed Miller legislation\" (Rep. George Miller's H.R. 1738, introduced in 2005)"
+        }
+      },
+      "tradeOrg": {
+        "keyPersonnel": [
+          "Rosemary Tippett (director of public relations, 2006; arranged the NAPHS meeting)"
+        ],
+        "sourceUrls": [
+          "https://kidsoverprofits.org/wp-content/uploads/1Q06News-Web-natsap.pdf",
+          "https://www.apa.org/monitor/dec05/ppup",
+          "https://prnewswire.com/news-releases/naphs-becomes-national-association-for-behavioral-healthcare-300615811.html"
+        ]
+      }
+    },
+    {
+      "name": "National Independent Private Schools Association",
+      "tradeOrg": {
+        "status": "Active",
+        "affiliations": [
+          "National Council for Private School Accreditation (NCPSA): one of its member organizations"
+        ],
+        "notes": "Listed among the member organizations of the National Council for Private School Accreditation. Rancho Solano Preparatory School wrote (undated) that NIPSA \"has granted renewed accreditation until June 2029.\"",
+        "sourceUrls": [
+          "https://ncpsa.org/accreditation/",
+          "https://ranchosolano.com/renewed-accreditation-until-2029/"
+        ]
+      }
+    },
+    {
+      "name": "Small Boarding School Association",
+      "tradeOrg": {
+        "status": "Active",
+        "otherActivities": [
+          "Conference at Woodside Priory School, California, April 15-17, 2025"
+        ],
+        "sourceUrls": [
+          "https://www.prioryca.org/student-life/boarding/sbsa-conference"
+        ]
+      }
+    },
+    {
+      "name": "Young Adult Transition Association",
+      "tradeOrg": {
+        "status": "Active",
+        "websites": [
+          "https://www.yata.net/"
+        ],
+        "keyPersonnel": [
+          "Patrick Brown (president, 2026)"
+        ],
+        "activities": {
+          "conferences": true
+        },
+        "otherActivities": [
+          "Yearly conference (October 21-23, 2026, San Diego)"
+        ],
+        "sourceUrls": [
+          "https://www.yata.net/",
+          "https://helloalleva.com/events/yata-annual-conference/"
+        ]
+      }
     }
   ]
 }
