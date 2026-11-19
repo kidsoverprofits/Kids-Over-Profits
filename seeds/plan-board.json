@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 17:27 UTC",
- "source": "a9a5872588b3020d4a60bef85605de300900ac57",
+ "built": "2026-11-19 17:28 UTC",
+ "source": "059412109ca69115b33c47f762161cbde90e904a",
  "sections": [
   {
    "key": "2",
@@ -4342,6 +4342,21 @@
        "focus": false,
        "steps": [],
        "hash": "43985067c705"
+      },
+      {
+       "id": "4.6:research-tasks-worked-2026-11-19-tti-research-channel-owner",
+       "lead": "Research tasks worked 2026-11-19 (tti-research channel, owner picked: Liparote, marketing companies and trade groups, federal funding, network map; 22 tasks)",
+       "text": "**Research tasks worked 2026-11-19 (tti-research channel, owner picked: Liparote, marketing companies and trade groups, federal funding, network map; 22 tasks)**: 14 answered in `seeds/research-tasks.json`, 2 of them settled (Teens In Crisis, Teen Revitalization: `seeds/marketers.json` fills version 3, with the new `dropNotes`), 8 left open (Liparote, Help My Teen, Lifelines, 2 Boot Camp, Exceed, AMATS, NATC, Evoke Cascades). The cloud session had no research key, no `tmp/prod.sqlite` and no kop-data checkout. Still open: a. **Send the sources**: 56 sources in `docs/research-sources/2026-11-19-tti-research.not-sent.json`; send with `(kop-pipeline) python scripts/send-sources.py <that file>`, then delete the file. b. **Owner checks**: Liparote v. Discovery Ranch (D. Utah 2:26-cv-00503) on PACER for an Aug 4, 2026 dismissal; Help My Teen and Lifelines Family Services filings at the Utah Division of Corporations; Wayback captures of teenswithproblems.com (about 2002) and 2bootcamp.com (about 2003); AMATS's formation in the Georgia and Oregon business registries; whether NATWC (National Association of Therapeutic Wilderness Camping, Markleysburg PA, last seen 2010) dissolved; a USAspending recipient search for Evoke at Cascades / Evoke Therapy Programs. c. **Record fixes the answers point to (not made yet, the owner's yes first)**: federal funding entries for KidsPeace ($16.9M, was $8.44M), Youth For Tomorrow ($30.2M, was $15.08M), MercyFirst (\"raised to\"), Northern Virginia JDC (2023 negatives are close-out de-obligations of 2009-2013 and 2017-2018 contracts, not 2023 awards), Shenandoah Valley (ORR 2021 to June 2023, the center still runs); Best Choice Admissions as a referral service paid per enrollment; Vive as an Exceed client (Sunset Bay and Oklahoma ATC only use Exceed's plugin); OBH Council's founding and legal name; NATSAP's NAPHS approach (receptive, not a formed alliance; H.R. 1738); NIPSA, SBSA and YATA active. Network map (kop-data `network-overrides.json`): Laurel Hills Behavioral Health is most likely Laurel Oaks, Dothan; Deep Creek Youth Academy and Hastings Youth Academy share 765 E Saint Johns Ave (rename year unknown); the Journey Home node's FHW line belongs to the Utah young adult program, not JRI's Attleboro group home (check which record the node links).",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "a17720d4f075"
       }
      ]
     },
