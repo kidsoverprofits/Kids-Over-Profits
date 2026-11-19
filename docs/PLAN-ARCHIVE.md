@@ -3873,3 +3873,57 @@ From docs/plan/5-tests-failing.md item 1, verbatim. Both tests were rebased on v
       2025, Breaking Code Silence), so Telos RTC, Telos Residential Treatment Center and Telos Residential Treatment
       are other names of 10540 (seeds/facility-records.json v2), as is Kolob Canyon Residential Treatment Center on
       10342. After-deploy checks stay open in docs/plan/4.3, item 30.
+
+### 2.4 Decisions waiting (done 2026-11-19)
+
+Outcomes, 2026-11-19: NH The Ridge RTC and WY Meadowlark were already released in kop-pipeline 1861476 (2026-10-02) and are live (inspection_reports #108480, #108529); West Virginia's 16 unsure rows sorted (6 in, 10 out) and 1 GB of Drive OK'd (kop-pipeline cb19fa5); Linden Oaks #56, #57, #58 rejected in Submissions Review; incidents show once, timeline only, undated lines in a short list (site and app).
+
+1. **NH: The Ridge RTC statement held by the privacy check** (2025-12-15). The visit posts without it; children are
+   lettered only, and the trigger was the words "Child Advocacy Center" (PLAN-ARCHIVE, New Hampshire 2026-10-01).
+   Ask: New Hampshire: post The Ridge RTC's Dec 2025 statement? (children are lettered; "Child Advocacy Center" tripped the privacy check)
+   Why: The privacy check held it, so the visit shows without its findings.
+   Choices: Post it | Keep it held
+   Time: 2 min
+- **Facility pages: the timeline and "Incidents on record" list the same incidents** (Claude note #21, 2026-11-17).
+  Every dated incident line shows twice on a page: as a Timeline event and again in the "Incidents on record"
+  section further down (Provo Canyon School: 36 timeline events, 40 incident lines). The same-event duplicates inside
+  both were merged in the note #21 commit; this is the repeat between the two sections. The app shows both too.
+  Recommended: keep the timeline; "Incidents on record" lists only what the timeline can't place (lines with no
+  year), headed by a link up to the timeline, on the site and in the app.
+  Ask: Incidents on facility pages: show them once (timeline only, undated ones in a short list), or keep both?
+  Why: The owner asked "why are there so many duplicated timelines?"; this is the repeat that is left.
+  Choices: Timeline only, undated in a short list | Keep both sections
+  Time: 1 min
+- **WY: Meadowlark notice held by the privacy check** (2024-04-04): a false positive on "calling a youth Miley
+  Cyrus" (PLAN-ARCHIVE, Wyoming 2026-10-01).
+  Ask: Wyoming: post the Meadowlark Apr 2024 notice? (the privacy check tripped on "calling a youth Miley Cyrus")
+  Why: It looks like a false alarm; the notice is a finding against the program.
+  Choices: Post it | Keep it held
+  Time: 1 min
+- **WV: the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`**. The scope has 66 included, 122 excluded and 16
+  unsure records; unsure records are not scraped (PLAN-ARCHIVE, West Virginia).
+  Ask: West Virginia: sort the 16 unsure facilities in or out, and OK about 1 GB of Drive for its PDFs
+  Why: West Virginia's first post waits on both.
+  Time: 15 min
+  Step: Tell Claude "list West Virginia's 16 unsure rows", then say in or out for each
+  Step: OK about 1 GB of Google Drive for the `wv_pdfs/` folder (add a note if not)
+2. **Linden Oaks (IL, #100402): reject data submissions #56, #57 and #58** at
+    https://kidsoverprofits.org/admin-submissions/?type=data (note: "done by hand 2026-10-21"). Never approve them:
+    #56 would put the three notes back, #57 would add its request as a note, #58 would write its sentence into the
+    operator field. What they asked is done (2026-10-21, checked live): the three group-therapy and level-system
+    notes are off, the Arabella House line is out of "Also known as" (it stays in the history note), the Charter
+    link is dropped (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/227d22eeb19ba2573518daf5269a48b6ff622386),
+    and Arabella House is young adult program #12, run by Linden Oaks, closed 2012
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54511cf3afa48cafd5864bea35933c95906fcf7c). #52 was
+    approved from the admin account on 2026-10-05; nothing skipped review. The "operated by" wording for
+    past-only companies is fixed (2026-10-21, checked live on
+    https://kidsoverprofits.org/facility/lakeside-behavioral-health-system-tn/ and the Tennessee feed): 36 records
+    with no currentOperator and only 'past' links now read "formerly run by X", "Former operator", "Other programs
+    of its former operator, X", no parentOrganization, and the state/country cards list X under Past operators
+    (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/5d3d7ba294c04509f6fa4216f23501bca59b0b85).
+    Only the rejections above are left.
+    Ask: Reject data submissions #56, #57 and #58 (Linden Oaks; note "done by hand 2026-10-21")
+    Why: Their changes are already made; approving one by mistake would undo the fix.
+    Go: [Submissions Review > Data](https://kidsoverprofits.org/admin-submissions/?type=data)
+    Time: 2 min
+    Focus: yes

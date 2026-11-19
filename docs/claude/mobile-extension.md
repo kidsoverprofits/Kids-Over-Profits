@@ -31,6 +31,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-mobile-api.php [-
 # A renamed program's page is cut into one section per name, earliest first ("As Copper Canyon Academy", "As Sedona Sky
 # Academy"; inc/facility-eras.php): names from the map's rename lines, years from Map Renames; each holds the deaths, serious
 # findings, lawsuits, incidents, news and staff of its years, another name's record included (both pages print every name).
+# Incidents show once (owner, 2026-11-19): beside a timeline every incident list (incidents, eras.rest, each era) keeps only the
+# lines with no year (kop_ptl_untimed_incidents()); the payload's incidents_total feeds the tile, incidents_in_timeline (and an
+# era's own) the line pointing to the timeline. The template cuts the same way.
 # No year needed: a name's own record keeps its items under that name whatever their dates; items of a record that also lists a
 # no-record name go by date (every rename has a year), else by the one name their words give. A new dated list goes in kop_facility_eras_kinds()
 # Every page names all the names the map's rename lines join to it, cut or not (kop_facility_eras_map_names(): "Formerly" /

@@ -239,3 +239,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     through red. "Preview the page after Approve" opens the facility page with the dark "Preview, not saved" bar, the
     suggested values on it, no edit pencils; "Live page" shows the record unchanged. Logged out, the same address shows
     the live page with no bar. Phone width: the bar wraps, no sideways scroll.
+47. **Incidents show once** (2026-11-19, plan 2.4): on https://kidsoverprofits.org/facility/provo-canyon-school-ut/
+    "Incidents on record" opens with "The 32 dated incidents are in the timeline. These have no date." and lists 8
+    undated lines; the tile still says 40 incidents on record. A renamed program (/facility/acadia-montana-mt/) shows
+    "Its incidents are in the timeline." under a name whose only items were incidents. In the app (after the EAS
+    update) Provo's Incidents section shows the same line and 8 entries.

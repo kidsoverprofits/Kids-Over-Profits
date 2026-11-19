@@ -178,6 +178,37 @@ if (!function_exists('kop_mobile_facility_payload')) {
         $out['questions_url'] = function_exists('kop_q_url') ? kop_q_url() : home_url('/questions/');
         // The year-by-year timeline (inc/profile-timeline.php), from the whole lists before the name sections cut them.
         $out['timeline'] = $fid && function_exists('kop_ptl_facility') ? kop_mobile_timeline(kop_ptl_facility($page)) : array();
+        // As the template does: beside a timeline the incident lists keep only the lines it can't place (no year), so no
+        // incident shows twice (owner, 2026-11-19). incidents_total is every line, for the tile; incidents_in_timeline
+        // the ones the timeline tells, for the line that points to it.
+        $kop_m_has_eras = !empty($out['eras']['list']) && is_array($out['eras']['list']);
+        $out['incidents_total'] = $kop_m_has_eras && isset($out['eras']['totals']['incidents'])
+            ? (int) $out['eras']['totals']['incidents'] : count((array) ($out['incidents'] ?? array()));
+        $out['incidents_in_timeline'] = 0;
+        if ($out['timeline'] && function_exists('kop_ptl_untimed_incidents')) {
+            // Cuts a list, adds what it took to incidents_in_timeline, returns how many it took.
+            $cut = static function (array $list, &$kept) use (&$out) {
+                $kept = kop_ptl_untimed_incidents($list);
+                $out['incidents_in_timeline'] += count($list) - count($kept);
+                return count($list) - count($kept);
+            };
+            if ($kop_m_has_eras) {
+                // A renamed program's plain section is eras.rest (the app's pageView()); every name's list is cut too.
+                if (isset($out['eras']['rest']['incidents'])) {
+                    $cut((array) $out['eras']['rest']['incidents'], $kept);
+                    $out['eras']['rest']['incidents'] = $kept;
+                }
+                foreach ($out['eras']['list'] as $i => $era) {
+                    if (!is_array($era)) continue;
+                    $out['eras']['list'][$i]['incidents_in_timeline'] = $cut((array) ($era['incidents'] ?? array()), $kept);
+                    $out['eras']['list'][$i]['incidents'] = $kept;
+                }
+                $out['incidents'] = kop_ptl_untimed_incidents((array) ($out['incidents'] ?? array()));
+            } else {
+                $cut((array) ($out['incidents'] ?? array()), $kept);
+                $out['incidents'] = $kept;
+            }
+        }
         $out['nonprofits'] = $fid && function_exists('kop_npf_for_facility') ? kop_mobile_nonprofits(kop_npf_for_facility($fid)) : array();
         $out['businesses'] = $fid && function_exists('kop_bizf_for_facility') ? kop_mobile_businesses(kop_bizf_for_facility($fid)) : array();
         // Under Documents, as the website prints them: research in our library that names the program, then the files

@@ -423,6 +423,23 @@ if (!empty($page['program_homes']['violations'])) {
 if ($kop_fp_eras) $kop_fp_violations = $kop_fp_eras['rest']['violations'];
 else $kop_fp_totals['violations'] = count($kop_fp_violations);
 $kop_fp_has_violations = !empty($kop_fp_violations);
+// Every dated incident is a timeline event, so beside a timeline the incident lists keep only the lines it can't
+// place (owner, 2026-11-19, plan 2.4): no incident shows twice. The tile still counts them all and, with no
+// undated line left, jumps to the timeline.
+$kop_fp_inc_in_tl = 0;
+if ($kop_fp_timeline && function_exists('kop_ptl_untimed_incidents')) {
+    $kop_fp_inc_all = count((array) ($page['incidents'] ?? array()));
+    $page['incidents'] = kop_ptl_untimed_incidents((array) ($page['incidents'] ?? array()));
+    $kop_fp_inc_in_tl = $kop_fp_inc_all - count($page['incidents']);
+    if ($kop_fp_eras) {
+        foreach ($kop_fp_eras['list'] as $kop_fp_ei => $kop_fp_era_row) {
+            $kop_fp_era_inc = (array) ($kop_fp_era_row['incidents'] ?? array());
+            $kop_fp_eras['list'][$kop_fp_ei]['incidents'] = kop_ptl_untimed_incidents($kop_fp_era_inc);
+            $kop_fp_eras['list'][$kop_fp_ei]['_inc_in_tl'] = count($kop_fp_era_inc) - count($kop_fp_eras['list'][$kop_fp_ei]['incidents']);
+            $kop_fp_inc_in_tl += $kop_fp_eras['list'][$kop_fp_ei]['_inc_in_tl'];
+        }
+    }
+}
 $kop_fp_has_incidents = !empty($page['incidents']);
 
 // A merged Facility Profile post (kop_facility_pages_merged_profiles()): its
@@ -726,10 +743,11 @@ get_header();
                 array('staff', 'users', (int) $kop_fp_totals['staff'], 'staff member named', 'staff members named', 'info'),
             );
             // A tile jumps to its section, or on a renamed program's page to the first name that has the kind.
-            $kop_fp_tile_anchor = static function ($kind) use ($kop_fp_eras, $kop_fp_id) {
+            $kop_fp_tile_anchor = static function ($kind) use ($kop_fp_eras, $kop_fp_id, $kop_fp_has_incidents, $kop_fp_timeline) {
                 foreach ($kop_fp_eras ? $kop_fp_eras['list'] : array() as $era) {
                     if (!empty($era[$kind])) return $era['id'] . '-' . $kind;
                 }
+                if ($kind === 'incidents' && !$kop_fp_has_incidents && $kop_fp_timeline) return 'timeline';
                 return $kop_fp_id($kind);
             };
             $kop_fp_tiles = array_values(array_filter($kop_fp_tiles, static function ($t) { return $t[2] > 0; }));
@@ -974,7 +992,8 @@ get_header();
                         ?>
                     </div>
                 <?php endforeach; ?>
-                <?php if (!$kop_fp_era_parts) : ?><p class="kop-fp-count">Nothing on record is dated to these years yet.</p><?php endif; ?>
+                <?php if (!$kop_fp_era_parts && !empty($kop_fp_era['_inc_in_tl'])) : ?><p class="kop-fp-count">Its incidents are in the <a href="#timeline">timeline</a>.</p>
+                <?php elseif (!$kop_fp_era_parts) : ?><p class="kop-fp-count">Nothing on record is dated to these years yet.</p><?php endif; ?>
             </section>
             <?php endforeach; ?>
 
@@ -1049,6 +1068,7 @@ get_header();
             <?php if ($kop_fp_has_incidents) : ?>
             <section class="kop-fp-section" id="<?php echo $kop_fp_id('incidents'); ?>"<?php echo $kop_fp_edit('practices', 'critical incidents'); ?>>
                 <h2><?php echo $kop_fp_icon('siren'); ?>Incidents on record</h2>
+                <?php if ($kop_fp_inc_in_tl) : ?><p class="kop-fp-count"><?php echo $kop_fp_inc_in_tl === 1 ? 'The dated incident is' : 'The ' . (int) $kop_fp_inc_in_tl . ' dated incidents are'; ?> in the <a href="#timeline">timeline</a>. These have no date.</p><?php endif; ?>
                 <?php $kop_fp_incident_list($page['incidents']); ?>
             </section>
             <?php endif; ?>

@@ -171,3 +171,5 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
 10. **test-kop-tools-menu.php: "About rewrites (about-rewrites-screen.php) is on the sidebar but not in
     kop_tools_registry()"** (found 2026-11-19): `inc/about-rewrites-screen.php` registers `kop-about-rewrites` with no
     registry entry in `wp-plugins/kop-tools/kop-tools.php`; add one (and bump the plugin version).
+11. **test-mobile-api.php --fixture: "Hyde aka" comes back empty** (found 2026-11-19, failing on a clean checkout of main too,
+    so not from the incidents change): the made-up Hyde record's aka list is []; likely the same alias change as #9.

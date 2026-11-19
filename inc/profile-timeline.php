@@ -1137,6 +1137,25 @@ if (!function_exists('kop_ptl_incident_year')) {
     }
 }
 
+if (!function_exists('kop_ptl_incident_placed')) {
+    /**
+     * Whether the timeline tells this critical incident line: it has a year and words (kop_ptl_incident_event()).
+     * A page with a timeline lists such a line there only; "Incidents on record" keeps what the timeline can't place
+     * (owner, 2026-11-19, plan 2.4). The website's template and the app's payload both cut with it.
+     */
+    function kop_ptl_incident_placed($inc) {
+        if (!is_array($inc) || !kop_ptl_incident_year($inc)) return false;
+        return trim(preg_replace('/\s+/', ' ', strip_tags((string) ($inc['text'] ?? '')))) !== '';
+    }
+}
+
+if (!function_exists('kop_ptl_untimed_incidents')) {
+    /** The incident lines the timeline can't place (no year): what "Incidents on record" lists beside a timeline. */
+    function kop_ptl_untimed_incidents(array $items) {
+        return array_values(array_filter($items, static function ($inc) { return is_array($inc) && !kop_ptl_incident_placed($inc); }));
+    }
+}
+
 if (!function_exists('kop_ptl_incident_event')) {
     /**
      * A critical incident line as an event, or null without a year or words.
