@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 14:24 UTC",
- "source": "b68be825cf219348365573794432be4fb942d41f",
+ "built": "2026-11-19 17:25 UTC",
+ "source": "0e72cc4f91ca4845bdaa3f70f54a884adac5f83a",
  "sections": [
   {
    "key": "2",
@@ -2589,6 +2589,21 @@
        "focus": false,
        "steps": [],
        "hash": "f9a1c509bf8f"
+      },
+      {
+       "id": "3:contact-form",
+       "lead": "Contact form",
+       "text": "**Contact form** (2026-11-19): logged out, send one message from [/contact/](https://kidsoverprofits.org/contact/) (a type, no name, Signal chosen with a username); the thank-you shows, the email reaches dani@kidsoverprofits.org with the type in the subject and Reply-To the sender; it is under New at [Contact Messages](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-contact-messages). Set In progress, Undo; filter by type; Delete, Restore; Delete and Erase for good. Form at 390 px with no sideways scroll.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "fd1d6782f3f4"
       }
      ]
     }
