@@ -923,7 +923,7 @@
         return out;
     }
 
-    const V2_FEDERAL_FUNDING_STREAMS = ['medicaid', 'medicaid_child_welfare', 'child_welfare', 'orr', 'tricare', 'ppp', 'education', 'other'];
+    const V2_FEDERAL_FUNDING_STREAMS = ['medicaid', 'medicaid_child_welfare', 'child_welfare', 'orr', 'tricare', 'ppp', 'education', 'special_education', 'other'];
 
     /** Mirrors kop_facility_federal_funding_list(). */
     function v2FederalFundingList(value) {

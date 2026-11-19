@@ -104,6 +104,14 @@ function kop_open_data_table_exists(PDO $pdo, $table) {
     }
 }
 
+/** The funding streams a facility record lists (federalFunding), each key once, in the streams' order. */
+function kop_open_data_funding_streams($value) {
+    if (!function_exists('kop_facility_federal_funding_list') || !is_array($value)) return array();
+    $have = array();
+    foreach (kop_facility_federal_funding_list($value) as $e) $have[$e['stream']] = true;
+    return array_values(array_filter(array_keys(kop_facility_federal_funding_streams()), function ($k) use ($have) { return isset($have[$k]); }));
+}
+
 /** What a network map connection was taken from, in words, from the build's provenance. */
 function kop_open_data_network_basis($edge) {
     $words = array(
@@ -154,7 +162,7 @@ function kop_open_data_datasets() {
     $sets['facilities'] = array(
         'title'       => 'Facilities',
         'group'       => 'Facilities and operators',
-        'description' => 'Every program, school, ranch, wilderness program and residential facility in the database: names, status, type, address, years open, operators and accreditations. The JSON file also carries the full facility record (published survivor testimony only).',
+        'description' => 'Every program, school, ranch, wilderness program and residential facility in the database: names, status, type (a psychiatric residential treatment facility is typed "Psychiatric Residential Treatment Facility"), address, years open, operators, accreditations and funding: the public money a facility is recorded as taking (medicaid, child_welfare for Title IV-E foster care funds, special_education for school district placements, and the rest of the federal funding streams; empty where none is recorded yet, not where none is taken). The JSON file also carries the full facility record (published survivor testimony only).',
         'rows'        => static function () use ($wpdb, $p) {
             $operators = array();
             foreach ((array) $wpdb->get_results(
@@ -191,6 +199,9 @@ function kop_open_data_datasets() {
                     'operators'      => $operators[$id] ?? array(),
                     'accreditations' => kop_open_data_names($accred['current'] ?? array()),
                     'past_accreditations' => kop_open_data_names($accred['past'] ?? array()),
+                    // Who pays, where recorded (federalFunding, kop_facility_federal_funding_streams() keys):
+                    // medicaid, child_welfare (Title IV-E), special_education ... Empty means not yet recorded.
+                    'funding'        => kop_open_data_funding_streams($data['federalFunding'] ?? array()),
                     'page_url'       => isset($pages[$id]['slug']) ? kop_facility_pages_url_for_slug($pages[$id]['slug']) : '',
                     'record'         => $data,
                 );

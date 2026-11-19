@@ -206,6 +206,9 @@ if (!function_exists('kop_facility_federal_funding_streams')) {
             'tricare'                => 'TRICARE (health insurance for military families)',
             'ppp'                    => 'Paycheck Protection Program loan',
             'education'              => 'U.S. Department of Education',
+            // 2026-11-19 (GAO's interest in placements paid with public money): a school district
+            // placing a student and paying from special education money (IDEA with state and local funds).
+            'special_education'      => 'Special education placements paid by school districts (IDEA and state funds)',
             'other'                  => 'Other federal money',
         );
     }
