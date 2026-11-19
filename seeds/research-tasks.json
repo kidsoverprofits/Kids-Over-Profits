@@ -31810,7 +31810,23 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "trade-organizations:natsap-did-it-shut-down-after-its-january-2027-c",
+   "section": "Trade organizations",
+   "title": "NATSAP: did it shut down after its January 2027 conference?",
+   "text": "NATSAP's board said by email (October 2026) it is \"officially winding down operations\", dues fund work \"through January 1\", and the January 25-27, 2027 conference is \"our final official gathering\". The live trade org record (tradeorgs_master id 1) says Closing. Find the actual end: a dissolution filing (state of incorporation), natsap.org going dark, or a final announcement; then set the status to Closed with the date and source. Also: which are the \"series of multi-count lawsuits\" the board cites (calling it an accrediting body), and are they in lawsuits?",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, Claude (plan 4.6 #18c, 2026-11-19)",
+   "directions": [
+    {
+     "label": "All Kinds of Therapy blog quoting the board email",
+     "url": "https://www.allkindsoftherapy.com/blog/natsap-board-annouces-closure",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-19 18:58"
+ "built": "2026-11-19 22:25"
 }
