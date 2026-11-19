@@ -1,15 +1,19 @@
 {
-  "version": 1,
-  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources.",
+  "version": "2",
+  "_note": "Marketing companies added to marketers_master once per version (inc/marketers.php kop_marketers_apply_seed()). Only records not on file are added; an existing record is never changed. Facts from the reputation series (seeds/reputation/), each with its sources. fills (version 2, 2026-11-19, the GAO-call fixes): sourced facts for eight of the short entries added 2026-10-13, applied by kop_marketers_apply_fills(): empty fields are filled, notes go ahead of the notes there, lists gain items, nothing is removed. Primary sources only; the r/troubledteens wiki was used for leads, never cited. 2 Boot Camp and Teens with Problems have none yet and are left as they are.",
   "records": [
     {
       "name": "Exceed Marketing Solutions",
-      "otherNames": ["Exceed Marketing Solutions, LLC"],
+      "otherNames": [
+        "Exceed Marketing Solutions, LLC"
+      ],
       "state": "FL",
       "country": "United States",
       "founded": "2021",
       "status": "Active",
-      "websites": ["https://exceedmarketingsolutions.com/"],
+      "websites": [
+        "https://exceedmarketingsolutions.com/"
+      ],
       "keyPersonnel": [
         "David P. Bolthouse (founder and CEO; manager in Florida's corporate register)",
         "Barbro M. Bolthouse (manager in Florida's corporate register)"
@@ -46,7 +50,9 @@
         "Vive Adolescent Care",
         "Sunset Bay Academy"
       ],
-      "clientCompanies": ["Oklahoma Adult and Teen Challenge"],
+      "clientCompanies": [
+        "Oklahoma Adult and Teen Challenge"
+      ],
       "notes": "Describes itself as \"a leading marketing partner for boarding schools and adolescent therapeutic programs, helping them achieve and maintain full enrollment,\" and tells programs that \"participation with Exceed includes free featured listings in our highly ranked directories.\" Its directories tell parents their owners have \"no ownership, investment, equity interest, or controlling interest in any program featured or listed.\" On October 2, 2026, 15 of the 16 program and directory websites that publish instructions for AI chatbots (llms.txt) were made with Exceed's software; the programs listed above are the ones whose websites were. A former director of Brush Creek Academy and New Lifehouse Academy gives a testimonial on Exceed's site. Exceed's website, the Best Choice Admissions sites and Exceed's directories share one Bing webmaster verification code.",
       "sourceUrls": [
         "https://kidsoverprofits.org/how-troubled-teen-programs-market-themselves-online/",
@@ -60,10 +66,17 @@
     },
     {
       "name": "Best Choice Admissions Services",
-      "otherNames": ["Best Choice Admissions", "Best Choice Network"],
+      "otherNames": [
+        "Best Choice Admissions",
+        "Best Choice Network"
+      ],
       "status": "Active",
-      "websites": ["https://bestresidentialtreatment.com/"],
-      "keyPersonnel": ["David Bolthouse (chief executive, as The Warren reported in 2022)"],
+      "websites": [
+        "https://bestresidentialtreatment.com/"
+      ],
+      "keyPersonnel": [
+        "David Bolthouse (chief executive, as The Warren reported in 2022)"
+      ],
       "services": {
         "helpLine": true
       },
@@ -80,9 +93,13 @@
     },
     {
       "name": "The Envoy Group",
-      "otherNames": ["Envoy Group"],
+      "otherNames": [
+        "Envoy Group"
+      ],
       "status": "Closed",
-      "websites": ["https://www.theenvoygroup.com/"],
+      "websites": [
+        "https://www.theenvoygroup.com/"
+      ],
       "keyPersonnel": [
         "Garret Bolthouse (president and chief executive)",
         "David Bolthouse (founder, as The Warren reported)"
@@ -104,12 +121,18 @@
     {
       "name": "All Kinds of Therapy",
       "status": "Active",
-      "websites": ["https://allkindsoftherapy.com/"],
-      "keyPersonnel": ["Jenney Wilder (founder; closed her educational consulting practice in 2015)"],
+      "websites": [
+        "https://allkindsoftherapy.com/"
+      ],
+      "keyPersonnel": [
+        "Jenney Wilder (founder; closed her educational consulting practice in 2015)"
+      ],
       "services": {
         "directories": true
       },
-      "otherServices": ["Directory listings for programs at $400 a month"],
+      "otherServices": [
+        "Directory listings for programs at $400 a month"
+      ],
       "notes": "Its listing pages say \"No pay-to-rank listings. Everyone here is human-verified.\" A 2026 press release calls it \"a leading consumer-advocacy platform.\" Its listing for Provo Canyon School still called it \"a leading national provider of residential youth treatment\" after Utah ordered the school's last campus closed in July 2026.",
       "sourceUrls": [
         "https://kidsoverprofits.org/free-help-paid-by-programs/",
@@ -118,6 +141,169 @@
         "https://kidsoverprofits.org/wp-content/uploads/allkindsoftherapy.com-provo-canyon-school-captured-2026-10-02.pdf",
         "https://www.prweb.com/releases/all-kinds-of-therapy-expands-directory-ecosystem-with-wave-of-innovative-2026-partners-302820202.html"
       ]
+    }
+  ],
+  "fills": [
+    {
+      "name": "Adolescent Services International",
+      "company": {
+        "founded": "1997",
+        "keyPersonnel": [
+          "Narvin Lichfield (founder; brother of Teen Help's founder, Bob Lichfield, per Salon, 1998)"
+        ],
+        "services": {
+          "directories": true,
+          "seo": true
+        },
+        "otherServices": [
+          "Sold schools a place in its directory for parents of \"teens in crisis\", with what it called \"an exclusive technology that ensures top listing of ASI on most major search engines\""
+        ],
+        "lawsuits": [
+          "Wood v. World Wide Association of Specialty Programs, D. Utah No. 2:06-cv-708, Dkt. 282, Sept 16, 2008 (a 1999 Carolina Springs enrollment addendum)"
+        ],
+        "notes": "Salon reported in January 1998 that Adolescent Services was \"founded last year by a man named Narvin Lichfield\", that it and Teen Help \"marketed a single set of closely affiliated schools\", and that hundreds of near-identical copies of its pages filled search results, all recommending the same few schools. In Wood v. WWASP (D. Utah), a 1999 Carolina Springs enrollment addendum says ASI does not own or control the programs and offers a free month of tuition for referrals (Dkt. 282, Sept 16, 2008).",
+        "sourceUrls": [
+          "https://salon.com/1998/01/30/feature_340",
+          "Wood v. World Wide Association of Specialty Programs, D. Utah No. 2:06-cv-708, Dkt. 282 (Sept 16, 2008)"
+        ]
+      }
+    },
+    {
+      "name": "Boot Camps for Teens",
+      "company": {
+        "otherNames": [
+          "Teen Placement Center"
+        ],
+        "city": "St. George",
+        "state": "UT",
+        "country": "United States",
+        "founded": "2002",
+        "websites": [
+          "bootcampsforteens.com"
+        ],
+        "keyPersonnel": [
+          "Kevin Richey, of Kevin Richey Sales Co. L.L.C. (the domain's registrant, per Woodbury Reports, 2002)"
+        ],
+        "services": {
+          "advertising": true
+        },
+        "otherServices": [
+          "Bought other schools' names as search keywords to send people looking for those schools to its own site"
+        ],
+        "notes": "Woodbury Reports (Issue #97, September 2002) found bootcampsforteens.com was registered on August 2, 2002 to Kevin Richey of Kevin Richey Sales Co. L.L.C. in St. George, Utah, that the site called itself Teen Placement Center, and that it \"had purchased the names of those schools as key words to bring browsers interested in those schools to their site instead.\"",
+        "sourceUrls": [
+          "https://strugglingteens.com/archives/2002/9/oe02.html"
+        ]
+      }
+    },
+    {
+      "name": "Help My Teen",
+      "company": {
+        "lawsuits": [
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008"
+        ],
+        "notes": "In Dungan v. Academy at Ivy Ridge (N.D.N.Y.), plaintiffs testified that Help My Teen made representations to them about the Academy at Ivy Ridge (Report-Recommendation, Apr 22, 2008). Who owned it and how it was paid are not yet found.",
+        "sourceUrls": [
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008"
+        ]
+      }
+    },
+    {
+      "name": "Lifelines Family Services/Teen Lifelines",
+      "company": {
+        "otherNames": [
+          "Lifelines Family Services",
+          "Teen Lifelines",
+          "Teen Life Lines"
+        ],
+        "clientFacilities": [
+          "Academy at Ivy Ridge"
+        ],
+        "lawsuits": [
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008"
+        ],
+        "notes": "A defendant in Dungan v. Academy at Ivy Ridge (N.D.N.Y.), where the court describes the Academy at Ivy Ridge as marketing itself through Lifelines and Teen Help, both named on the fraud claims (Report-Recommendation, Apr 22, 2008). Its founder is not yet confirmed.",
+        "sourceUrls": [
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008"
+        ]
+      }
+    },
+    {
+      "name": "Teen Help",
+      "company": {
+        "keyPersonnel": [
+          "Robert (Bob) Lichfield (founder, per Scripps Howard News Service, 1999, and Salon, 1998)"
+        ],
+        "affiliations": [
+          "World Wide Association of Specialty Programs and Schools (WWASP)"
+        ],
+        "clientFacilities": [
+          "Academy at Ivy Ridge"
+        ],
+        "lawsuits": [
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008",
+          "Wood v. World Wide Association of Specialty Programs, D. Utah No. 2:06-cv-708"
+        ],
+        "notes": "Scripps Howard News Service (Lou Kilzer, July 21, 1999) reported that the Utah companies \"commonly known as Teen Help\" were started by Robert Lichfield and that \"Parents pay the company $26,000 to $54,000 a year.\" Salon (January 30, 1998) called Teen Help \"the marketing wing of the World Wide Association of Specialty Schools.\" A defendant in Dungan v. Academy at Ivy Ridge (N.D.N.Y.) and a party in Wood v. WWASP (D. Utah). The TEEN HELP trademark was filed in 1998 (USPTO serial 75473260).",
+        "sourceUrls": [
+          "https://culteducation.com/group/1184-teen-boot-camps/20267-teen-behavioral-centers-push-tough-love.html",
+          "https://salon.com/1998/01/30/feature_340",
+          "USPTO trademark serial 75473260 (TEEN HELP, filed 1998)",
+          "Dungan v. Academy at Ivy Ridge, N.D.N.Y. No. 7:06-cv-0908, Report-Recommendation, Apr 22, 2008"
+        ]
+      }
+    },
+    {
+      "name": "Teen Revitalization",
+      "company": {
+        "services": {
+          "directories": true
+        },
+        "otherServices": [
+          "An online directory of \"twenty or more\" programs with costs, a free child assessment and a loan application (its July 2006 press release)"
+        ],
+        "notes": "Its own press releases call it \"an organization that consists of a group of premier hand-selected boarding schools\" (PRLeap, August 10, 2006) and say \"Twenty or more troubled youth programs and schools are in the directory\" (PR.com, July 26, 2006). Neither says how it was paid or whether the listed schools own it.",
+        "sourceUrls": [
+          "https://www.pr.com/press-release/14576",
+          "https://www.prleap.com/pr/44022"
+        ]
+      }
+    },
+    {
+      "name": "Teens In Crisis",
+      "company": {
+        "notes": "Not yet sourced: it is named as a party in Wood v. WWASP (D. Utah) only in an advocacy group's 2006 press releases. The court docket has not been checked, so nothing here is confirmed."
+      }
+    },
+    {
+      "name": "Woodbury Reports Inc.",
+      "company": {
+        "otherNames": [
+          "StrugglingTeens, LLC",
+          "StrugglingTeens.com",
+          "Woodbury Reports"
+        ],
+        "state": "ID",
+        "country": "United States",
+        "founded": "1989",
+        "websites": [
+          "https://strugglingteens.com/"
+        ],
+        "keyPersonnel": [
+          "Lon Woodbury (founder, 1989; stepped back from the website in 2017)",
+          "Ron and Kristie Campbell (owners of StrugglingTeens, LLC)"
+        ],
+        "services": {
+          "advertising": true
+        },
+        "otherServices": [
+          "Publishes programs' paid articles labeled \"Paid Advertisement\""
+        ],
+        "notes": "Its own site says Lon Woodbury founded Woodbury Reports, \"an educational consulting firm in North Idaho\", in 1989, that StrugglingTeens.com \"went live in 1995\", and that in 2017 \"the second generation took over\". The same page, labeled \"Paid Advertisement\", names Ron and Kristie Campbell as owners of StrugglingTeens, LLC and invites programs to advertise (January 29, 2020).",
+        "sourceUrls": [
+          "https://strugglingteens.com/?p=1281"
+        ]
+      }
     }
   ]
 }

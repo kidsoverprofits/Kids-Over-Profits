@@ -239,6 +239,72 @@ if (!function_exists('kop_marketers_apply_seed')) {
         return $added;
     }
 
+    /**
+     * seeds/marketers.json "fills": sourced facts for records already on file, added without taking
+     * anything away. An empty text field is filled and a filled one is left as it is; notes are put
+     * ahead of the notes there (once: a note already holding the text is left alone); lists gain the
+     * new items; a ticked service stays ticked. A name not on file is skipped, never added. Returns
+     * the names changed. The page then shows the fuller entry; data form edits made since stay.
+     */
+    function kop_marketers_apply_fills(PDO $pdo, $file = null) {
+        $file = $file ?: get_stylesheet_directory() . '/seeds/marketers.json';
+        $seed = is_readable($file) ? json_decode((string) file_get_contents($file), true) : null;
+        if (!is_array($seed) || !is_array($seed['fills'] ?? null)) {
+            return array();
+        }
+        kop_marketers_ensure_table($pdo);
+        $find = $pdo->prepare('SELECT id, json_data FROM marketers_master WHERE unique_name = ?');
+        $save = $pdo->prepare('UPDATE marketers_master SET json_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+        $changed = array();
+        foreach ($seed['fills'] as $fill) {
+            $name = trim((string) ($fill['name'] ?? ''));
+            if ($name === '' || !is_array($fill['company'] ?? null)) {
+                continue;
+            }
+            $find->execute(array($name));
+            $row = $find->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                continue;
+            }
+            $decoded = json_decode((string) $row['json_data'], true);
+            $decoded = is_array($decoded) ? $decoded : array();
+            $old = kop_marketer_company_from_json($decoded);
+            $add = kop_marketer_normalize_company(array_merge($fill['company'], array('name' => $old['name'] !== '' ? $old['name'] : $name)));
+            $new = $old;
+            foreach (kop_marketer_text_fields() as $field) {
+                if ($field === 'notes' || $field === 'name') {
+                    continue;
+                }
+                if ($new[$field] === '' && $add[$field] !== '') {
+                    $new[$field] = $add[$field];
+                }
+            }
+            if ($add['notes'] !== '' && strpos($old['notes'], $add['notes']) === false) {
+                $new['notes'] = $old['notes'] !== '' ? $add['notes'] . "\n\n" . $old['notes'] : $add['notes'];
+            }
+            foreach (kop_marketer_list_fields() as $field) {
+                $new[$field] = kop_marketer_clean_list(array_merge($old[$field], $add[$field]));
+            }
+            foreach ($new['services'] as $key => $on) {
+                $new['services'][$key] = $on || !empty($add['services'][$key]);
+            }
+            if (json_encode($new) === json_encode($old)) {
+                continue;
+            }
+            // Keep the stored wrapper ({name, category, data: {marketerCompany}}) and anything else in it.
+            if (isset($decoded['data']) && is_array($decoded['data'])) {
+                $decoded['data']['marketerCompany'] = $new;
+            } else {
+                $decoded = array('name' => $name, 'category' => 'marketers',
+                    'data' => array('marketerCompany' => $new, 'category' => 'marketers'));
+            }
+            $decoded['_filled'] = trim(((string) ($decoded['_filled'] ?? '')) . ' ' . (string) ($seed['version'] ?? ''));
+            $save->execute(array(json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int) $row['id']));
+            $changed[] = $name;
+        }
+        return $changed;
+    }
+
     /** Once per seed version, on any request, so a deploy fills the page without anyone opening wp-admin. */
     function kop_marketers_maybe_apply_seed() {
         $file = get_stylesheet_directory() . '/seeds/marketers.json';
@@ -253,6 +319,10 @@ if (!function_exists('kop_marketers_apply_seed')) {
         }
         try {
             kop_marketers_apply_seed($pdo, $file);
+            $filled = kop_marketers_apply_fills($pdo, $file);
+            if ($filled) {
+                update_option('kop_marketers_fill_result', array('version' => $version, 'filled' => $filled, 'at' => gmdate('c')), false);
+            }
             update_option('kop_marketers_seed_version', $version);
         } catch (Throwable $e) {
             error_log('Marketers seed failed: ' . $e->getMessage());

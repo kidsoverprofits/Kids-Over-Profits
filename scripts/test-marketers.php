@@ -85,6 +85,25 @@ $check('a second run adds nothing', kop_marketers_apply_seed($mk) === array());
 $row = kop_marketer_company_from_json($mk->query("SELECT json_data FROM marketers_master WHERE unique_name = 'All Kinds of Therapy'")->fetchColumn());
 $check('a record on file is never changed by the seed', $row['status'] === 'Edited', $row['status']);
 
+echo "-- Seed fills (sourced facts for short records already on file) --\n";
+$fills = (array) ($seed['fills'] ?? array());
+$check('each fill names a record', count(array_filter($fills, function ($f) { return trim((string) ($f['name'] ?? '')) === '' || !is_array($f['company'] ?? null); })) === 0);
+$check('no fill cites the r/troubledteens wiki or KOP\'s own pages', count(array_filter($fills, function ($f) {
+    return preg_grep('~reddit\.com|kidsoverprofits\.org~i', (array) ($f['company']['sourceUrls'] ?? array()));
+})) === 0);
+$check('fills skip a name not on file', kop_marketers_apply_fills($mk) === array());
+$short = $fills ? (string) $fills[0]['name'] : '';
+if ($short !== '') {
+    $mk->prepare('INSERT INTO marketers_master (unique_name, json_data) VALUES (?, ?)')->execute(array($short, json_encode(array(
+        'name' => $short, 'category' => 'marketers',
+        'data' => array('marketerCompany' => array('name' => $short, 'notes' => 'An earlier note.', 'city' => 'Kept'), 'category' => 'marketers')))));
+    $check('a fill changes the short record', kop_marketers_apply_fills($mk) === array($short));
+    $check('a second fill run changes nothing', kop_marketers_apply_fills($mk) === array());
+    $got = kop_marketer_company_from_json($mk->query('SELECT json_data FROM marketers_master WHERE unique_name = ' . $mk->quote($short))->fetchColumn());
+    $check('a filled field is kept and the earlier note stays', $got['city'] === 'Kept' && substr($got['notes'], -16) === 'An earlier note.', $got['city']);
+    $mk->prepare('DELETE FROM marketers_master WHERE unique_name = ?')->execute(array($short));
+}
+
 echo "-- The page (/marketing-companies/) --\n";
 $all = kop_marketers_all();
 $check('listed A to Z', array_map(function ($m) { return $m['company']['name']; }, $all)
