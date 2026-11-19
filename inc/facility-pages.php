@@ -1478,19 +1478,17 @@ if (!function_exists('kop_facility_pages_role_tidy')) {
      * Director" beside "Marketing/Admissions Director", "Therapy" beside "Therapist", "CEO" beside "Chief Executive
      * Officer"), unless the longer one only adds a rank ("Director" beside "Assistant Director" stays: two jobs).
      * A bare "Staff", "Management Staff" or "Management team" goes when a real title is there. "(Former)" goes. A
-     * dropped title's bracket ("(2005 became Director of Bus. Dev.)") moves to the title that stays, unless that
-     * one has its own, when both stay. A line that started "Former " still does. Display only: records keep their text.
+     * dropped title's dates move to the title that stays (unless it has its own, when both stay); a dropped title's
+     * note ("Therapy (2005 became Director of Bus. Dev.)") goes when the line already names that job, else the title
+     * stays. A line that started "Former " still does. Display only: records keep their text.
      */
     function kop_facility_pages_role_tidy($role) {
         $role = trim((string) $role);
         if ($role === '' || strpos($role, ',') === false && !preg_match('/\(\s*former\s*\)/i', $role)) return $role;
         $former = (bool) preg_match('/^former\s/i', $role);
-        $titles = array();
-        foreach (preg_split('/,(?![^()]*\))/', $role) as $t) {
-            $t = trim(preg_replace('/\s*\(\s*former\s*\)/i', '', $t));
-            if ($t === '') continue;
-            $bracket = preg_match('/\(([^()]*)\)\s*$/', $t, $m) ? trim($m[1]) : '';
-            $core = strtolower(trim(preg_replace('/\([^()]*\)/', ' ', $t)));
+        // A title's words, abbreviations spelled out: "Dir. of Bus. Dev." = "Director of Business Development".
+        $words_of = static function ($text) {
+            $core = strtolower((string) $text);
             $core = preg_replace(
                 array('/\bbus\.?\s*dev\b\.?/', '/\bdir\b\.?/', '/\bsvcs?\b\.?/', '/\brec\b\.?/', '/\brecreation\b/', '/\bexec\b\.?/',
                     '/\bmgmt\b\.?/', '/\btherapy\b/', '/\bceo\b/', '/\bcoo\b/', '/\bcfo\b/', '/&/'),
@@ -1498,8 +1496,14 @@ if (!function_exists('kop_facility_pages_role_tidy')) {
                     ' management ', 'therapist', ' chief executive officer ', ' chief operating officer ', ' chief financial officer ', ' and '),
                 $core);
             $words = preg_split('/[^a-z0-9]+/', $core, -1, PREG_SPLIT_NO_EMPTY);
-            $words = array_values(array_unique(array_diff($words, array('of', 'and', 'the', 'for', 'a', 'former', 'formerly', 'later', 'then', 'now', 'previously'))));
-            $titles[] = array('text' => $t, 'bracket' => $bracket, 'words' => $words);
+            return array_values(array_unique(array_diff($words, array('of', 'and', 'the', 'for', 'a', 'former', 'formerly', 'later', 'then', 'now', 'previously'))));
+        };
+        $titles = array();
+        foreach (preg_split('/,(?![^()]*\))/', $role) as $t) {
+            $t = trim(preg_replace('/\s*\(\s*former\s*\)/i', '', $t));
+            if ($t === '') continue;
+            $bracket = preg_match('/\(([^()]*)\)\s*$/', $t, $m) ? trim($m[1]) : '';
+            $titles[] = array('text' => $t, 'bracket' => $bracket, 'words' => $words_of(preg_replace('/\([^()]*\)/', ' ', $t)));
         }
         $generic = static function (array $w) {
             sort($w);
@@ -1531,7 +1535,15 @@ if (!function_exists('kop_facility_pages_role_tidy')) {
             if ($by === null) { $keep[$i] = $t; continue; }
             $keep[$i] = $t + array('into' => $by);
         }
-        // Follow each drop to the title that stays; carry its bracket there when that one has none.
+        // A bracket of dates ("2002-2022", "from 1998, r/troubledteens wiki") may move to another title; a note
+        // ("2005 became Director of Bus. Dev.") reads wrong anywhere else (owner, 2026-11-19).
+        $dates_only = static function ($bracket) {
+            if (!preg_match('/\b(?:19|20)\d{2}\b/', $bracket)) return false;
+            $w = preg_split('/[^a-z]+/', strtolower(preg_replace('#r/troubledteens#i', ' ', $bracket)), -1, PREG_SPLIT_NO_EMPTY);
+            return !array_diff($w, array('from', 'until', 'since', 'to', 'before', 'after', 'circa', 'c', 's', 'about', 'wiki', 'heal', 'woodbury', 'reports', 'fornits'));
+        };
+        // Follow each drop to the title that stays; carry its dates there when that one has none. A note naming
+        // a job the line already says goes with its title; any other note keeps its title.
         $out = array();
         foreach ($keep as $i => $t) if (!isset($t['into'])) $out[$i] = $t;
         foreach ($keep as $i => $t) {
@@ -1541,6 +1553,14 @@ if (!function_exists('kop_facility_pages_role_tidy')) {
             while (!isset($out[$to]) && isset($keep[$to]['into']) && !isset($seen[$to])) { $seen[$to] = true; $to = $keep[$to]['into']; }
             if (!isset($out[$to])) { $out[$i] = $t; continue; }
             if ($t['bracket'] === '' || $t['bracket'] === $out[$to]['bracket']) continue;
+            if (!$dates_only($t['bracket'])) {
+                $note = array_values(array_diff($words_of($t['bracket']), array('became', 'promoted', 'to', 'in', 'as', 'from', 'until', 'since', 'was', 'named')));
+                $note = array_filter($note, static function ($w) { return !ctype_digit($w); });
+                $said = false;
+                foreach ($out as $o) if ($note && !array_diff($note, $o['words'])) { $said = true; break; }
+                if (!$said) $out[$i] = $t;
+                continue;
+            }
             if ($out[$to]['bracket'] === '') {
                 $out[$to]['text'] .= ' (' . $t['bracket'] . ')';
                 $out[$to]['bracket'] = $t['bracket'];
@@ -1794,7 +1814,7 @@ if (!function_exists('kop_facility_pages_incidents_place_undated')) {
         if (!$dated) return;
         foreach ($out as $k => &$o) {
             // "Survivors report ...": the program in general, not one event.
-            if (empty($o['snap']) || preg_match('/^(?:Survivors|Parents and survivors|Survivors and parents|Allegations include)/', $o['text'])) continue;
+            if (empty($o['snap']) || preg_match('/^(?:Survivors|Parents and survivors|Survivors and parents|Allegations include)b/', $o['text'])) continue;
             $mine = $words($o['text']);
             $best = 0;
             $at = -1;

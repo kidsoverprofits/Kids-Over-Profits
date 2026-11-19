@@ -663,6 +663,7 @@ foreach (array(
     'Chief Executive Officer, Program director and therapist, CEO' => 'Chief Executive Officer, Program director and therapist',
     'Former Program Director, later Executive Director, Executive Director (2016-2020)' => 'Former Program Director, later Executive Director (2016-2020)',
     'Assistant Director, Director' => 'Assistant Director, Director',
+    'Former Therapist and Director of Business Management, Director of Business Development, Therapy (2005 became Director of Bus. Dev.), Therapist, later Director of Business Development (2002-2022)' => 'Former Therapist and Director of Business Management, Director of Business Development (2002-2022)',
     'Staff' => 'Staff',
     'Former Staff; later WWASP president' => 'Former Staff; later WWASP president',
 ) as $in => $want) {
