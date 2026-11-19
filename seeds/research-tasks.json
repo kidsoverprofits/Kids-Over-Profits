@@ -31825,7 +31825,34 @@
      "url": "https://www.allkindsoftherapy.com/blog/natsap-board-annouces-closure",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The closure can't be confirmed before late January 2027: status stays Closing. To check after Jan 28, 2027: natsap.org going dark or a final notice, a final (terminated) Form 990 on ProPublica, Maryland SDAT entity status (not reachable from here). None of the FFS suits is in lawsuits (only the 2008 Pennsylvania zoning case, #157); lead docket sent to lawsuit review 2026-11-19 with all docket numbers in its notes. No dismissal of NATSAP found in RECAP (only the bought entries; PACER would settle it). Cowan-Johnson 6:26-cv-01560 and Candito 3:26-cv-01817 may not name NATSAP.",
+    "claims": [
+     {
+      "claim": "Not shut down yet: on 2026-11-19 natsap.org is up and lists its last event as the 2027 Final Annual Conference, January 27-28, 2027 in Provo, Utah (the board email had said January 25-27, not in Nashville)",
+      "url": "https://natsap.org/",
+      "quote": "2027 Final Annual Conference January 27-28, 2027 in Provo, UT"
+     },
+     {
+      "claim": "No final return yet: latest Form 990 is FY2024 (filed Nov. 17, 2025; revenue $1,935,351, net assets $145,934), Bowie MD, 501(c)(6), no terminated flag",
+      "url": "https://projects.propublica.org/nonprofits/organizations/770511753",
+      "quote": "Filed on Nov. 17, 2025"
+     },
+     {
+      "claim": "The board's lawsuits are the Family Foundation School (Hancock, NY) RICO suits: about 35 federal suits by former students filed June 22 to Oct 29, 2026 (N.D.N.Y. lead Doe v. Education Plus Corp. 3:26-cv-01397, plus S.D.N.Y. 1:26-cv-05250 and 1:26-cv-08085, E.D.N.Y. 1:26-cv-03885), naming NATSAP beside Education Plus Corporation, the Argiros family, NBT Bank, Sysco, Hancock and Delaware County",
+      "url": "https://www.courtlistener.com/docket/73640402/doe-v-education-plus-corporation/",
+      "quote": "COMPLAINT WITH JURY DEMAND against ... National Association of Therapeutic Schools and Programs ... filed by Jane Doe."
+     },
+     {
+      "claim": "The first hearing was Nov. 4, 2026; plaintiffs' lawyers are considering one omnibus complaint for the 35 cases",
+      "url": "https://www.yahoo.com/news/us/articles/family-foundation-school-lawsuit-first-224247376.html",
+      "quote": "considering consolidating the 35 cases on behalf of 35 former students into one omnibus complaint"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "lawsuits-and-court-records:hobbs-v-state-of-new-york-court-of-claims-uid-20",
@@ -31866,5 +31893,5 @@
    "directions": []
   }
  ],
- "built": "2026-11-19 22:34"
+ "built": "2026-11-19 22:41"
 }
