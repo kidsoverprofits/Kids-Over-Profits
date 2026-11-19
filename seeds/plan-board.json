@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 14:21 UTC",
- "source": "17e6cb376a2fcc614560762a7c4491192a1285e2",
+ "built": "2026-11-19 14:22 UTC",
+ "source": "c27508b47d6dc094367de2da63415f7aaace3676",
  "sections": [
   {
    "key": "2",
@@ -3398,7 +3398,7 @@
       {
        "id": "4.3:gao-prep-fixes-values-only-the-owner-can-give",
        "lead": "GAO prep fixes: values only the owner can give",
-       "text": "**GAO prep fixes: values only the owner can give** (2026-11-19; theme 26b7a2d, bcb2f29, 73177d9, 430c92f, kop-pipeline e4ca75a). The fields are built and left empty where KOP has no checked answer: - **Lawsuit defendant types**: only Dungan carries types (facility, marketer). Tag the rest in the lawsuit editor's \"Brought against\" boxes; the Lawsuits page filter (`?defendant=`) shows only tagged cases until then. - **Status and outcome disagreements**: the lawsuit editor's \"To check\" list (`kop_lawsuit_status_outcome_conflicts()`); Liparote's outcome was corrected but its dismissal is unverified (research task filed: PACER docket check). - **Network map line sources**: not wanted per line (owner 2026-11-19: sources live on the profiles); the note says so. A line may still carry one in `network-overrides.json` `sources` when it is useful; nothing asks for it. - **Marketing and referral companies on the map**: no name is ever guessed into the kind; set it in the overrides `kinds` or answer it in Map Questions. - **PRTFs**: set the type \"Psychiatric Residential Treatment Facility\" on each facility that is one (data form). - **Who pays**: federal funding entries (Medicaid, Title IV-E, special education and the rest) go in through the Federal funding review queue or the data form; Open Data's `funding` column is empty until then. - **Marketing Companies**: 2 Boot Camp and Teens with Problems left as they were (no primary source); Teens In Crisis rests on an advocacy press release (research task filed for the docket).",
+       "text": "**GAO prep fixes: values only the owner can give** (2026-11-19; theme 26b7a2d, bcb2f29, 73177d9, 430c92f, kop-pipeline e4ca75a). The fields are built and left empty where KOP has no checked answer: - **Lawsuit defendant types**: only Dungan carries types (facility, marketer). Tag the rest in the lawsuit editor's \"Brought against\" boxes; the Lawsuits page filter (`?defendant=`) shows only tagged cases until then. - **Status and outcome disagreements**: the lawsuit editor's \"To check\" list (`kop_lawsuit_status_outcome_conflicts()`); Liparote's outcome was corrected but its dismissal is unverified (research task filed: PACER docket check). - **Network map line sources**: not wanted per line (owner 2026-11-19: survivor-submitted, verified against records); the note says so. A line may still carry one in `network-overrides.json` `sources` when it is useful; nothing asks for it. - **Marketing and referral companies on the map**: no name is ever guessed into the kind; set it in the overrides `kinds` or answer it in Map Questions. - **PRTFs**: set the type \"Psychiatric Residential Treatment Facility\" on each facility that is one (data form). - **Who pays**: federal funding entries (Medicaid, Title IV-E, special education and the rest) go in through the Federal funding review queue or the data form; Open Data's `funding` column is empty until then. - **Marketing Companies**: 2 Boot Camp and Teens with Problems left as they were (no primary source); Teens In Crisis rests on an advocacy press release (research task filed for the docket).",
        "ask": "",
        "date": "2026-11-19",
        "why": "",
@@ -3408,7 +3408,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "bb66d484081f"
+       "hash": "ba8685317044"
       }
      ]
     },
