@@ -550,3 +550,91 @@ function kop_related_list_groups($category) {
     foreach ($groups as $place => $items) $out[] = array('place' => $place, 'items' => $items);
     return $out;
 }
+
+// ---------------------------------------------------------------------------
+// Articles about a category as a whole (no one record)
+// ---------------------------------------------------------------------------
+
+/**
+ * related_category_news: an article the Review inbox filed under a related
+ * industry in general ("Move to Nursing Homes" with no record picked or named;
+ * owner, Claude note #26, 2026-11-19). It works like Indian boarding schools'
+ * "the schools in general" (indigenous_school_news, school 0): the article is
+ * approved, listed on /related/<category>/ (templates/related-category.php),
+ * and left out of the TTI news lists, because kop_ischools_news_ids() reads
+ * these ids too. Made on first use, in SQL both MySQL and the SQLite tests take.
+ */
+function kop_related_news_install(PDO $pdo) {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS related_category_news (
+        category VARCHAR(60) NOT NULL,
+        news_id INT NOT NULL,
+        created_by VARCHAR(100) NOT NULL DEFAULT '',
+        created_at DATETIME NULL,
+        PRIMARY KEY (category, news_id))");
+}
+
+/** File article $news_id under $category; false when it is there already. */
+function kop_related_news_link(PDO $pdo, $category, $news_id, $by = '') {
+    kop_related_news_install($pdo);
+    $have = $pdo->prepare('SELECT 1 FROM related_category_news WHERE category = ? AND news_id = ?');
+    $have->execute(array((string) $category, (int) $news_id));
+    if ($have->fetchColumn()) return false;
+    $pdo->prepare('INSERT INTO related_category_news (category, news_id, created_by, created_at) VALUES (?, ?, ?, ?)')
+        ->execute(array((string) $category, (int) $news_id, mb_substr((string) $by, 0, 100), gmdate('Y-m-d H:i:s')));
+    return true;
+}
+
+function kop_related_news_unlink(PDO $pdo, $category, $news_id) {
+    try {
+        $pdo->prepare('DELETE FROM related_category_news WHERE category = ? AND news_id = ?')->execute(array((string) $category, (int) $news_id));
+    } catch (PDOException $e) {
+        // no table yet: nothing was filed
+    }
+}
+
+/** A category's articles on the site, newest first: [{id, title, outlet, date, date_label, url, archive, summary}]. */
+function kop_related_news($category, PDO $pdo = null) {
+    $pdo = $pdo ?: (function_exists('kop_seed_pdo') ? kop_seed_pdo() : null);
+    if (!$pdo) return array();
+    try {
+        $st = $pdo->prepare("SELECT n.id, n.article_title, n.publication_name, n.publication_date, n.article_url, n.archive_url, n.summary
+              FROM related_category_news l JOIN news_submissions n ON n.id = l.news_id
+             WHERE l.category = ? AND n.status IN ('approved', 'published')
+             ORDER BY n.publication_date DESC, n.id DESC");
+        $st->execute(array((string) $category));
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return array();
+    }
+    $out = array();
+    foreach ($rows as $r) {
+        $date = (string) ($r['publication_date'] ?? '');
+        $ts = $date !== '' ? strtotime($date) : false;
+        $out[] = array(
+            'id'         => (int) $r['id'],
+            'title'      => trim((string) $r['article_title']) !== '' ? (string) $r['article_title'] : 'Untitled article',
+            'outlet'     => trim((string) $r['publication_name']),
+            'date'       => $date,
+            'date_label' => $ts ? date('M j, Y', $ts) : '',
+            'url'        => (string) $r['article_url'],
+            'archive'    => (string) ($r['archive_url'] ?? ''),
+            'summary'    => trim((string) ($r['summary'] ?? '')),
+        );
+    }
+    return $out;
+}
+
+/** Ids of every article filed under a category in general (read once per request; empty before the table exists). */
+function kop_related_news_ids() {
+    static $ids = null;
+    if ($ids !== null) return $ids;
+    $ids = array();
+    $pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
+    if (!$pdo) return $ids;
+    try {
+        $ids = array_map('intval', $pdo->query('SELECT DISTINCT news_id FROM related_category_news')->fetchAll(PDO::FETCH_COLUMN));
+    } catch (PDOException $e) {
+        $ids = array();
+    }
+    return $ids;
+}

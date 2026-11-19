@@ -253,6 +253,40 @@ function kop_rinbox_test_news(array $src, array $item, callable $check) {
             && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved', $res['message'] ?? '');
         call_user_func($src['act'], $item['key'], 'unmove', array());
         $check('news: Undo takes the nursing home it made back off', !kop_related_find('nursing-homes', 'Test Nursing Home From News'));
+
+        // Claude note #26: no record picked or named files the article under the industry in general.
+        $filed_under = function () use ($pdo, $item) {
+            try {
+                return (int) $pdo->query("SELECT COUNT(*) FROM related_category_news WHERE category = 'nursing-homes' AND news_id = " . (int) $item['key'])->fetchColumn();
+            } catch (PDOException $e) {
+                return -1;
+            }
+        };
+        $res = call_user_func($src['act'], $item['key'], 'move', array('to' => 'related_nursing', 'rel_id' => 0, 'rel_name' => ''));
+        $check('news: an approved article moved to Nursing Homes with no record is filed under the industry and stays approved',
+            $filed_under() === 1 && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved', $res['message'] ?? '');
+        $listed = array_column(kop_related_news('nursing-homes', $pdo), 'id');
+        $check('news: the category page lists it', in_array((int) $item['key'], $listed, true), json_encode($listed));
+        call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('news: Undo takes it off the industry and it stays approved', $filed_under() === 0 && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved');
+
+        $pdo->prepare("UPDATE news_submissions SET status = 'submitted' WHERE id = ?")->execute(array((int) $item['key']));
+        call_user_func($src['act'], $item['key'], 'move', array('to' => 'related_nursing'));
+        $check('news: a pending article moved to the industry in general is approved and filed there',
+            $filed_under() === 1 && kop_rinbox_native_row('news', $item['key'])['status'] === 'approved');
+        call_user_func($src['act'], $item['key'], 'unmove', array());
+        $check('news: Undo puts the pending article back', $filed_under() === 0 && kop_rinbox_native_row('news', $item['key'])['status'] === 'submitted');
+
+        // From another queue (a link with no news row yet): a new approved article, filed under the industry; Undo deletes it.
+        $done = kop_rdest_put('related_nursing', array('url' => 'https://example.org/kop-test-nursing-homes-in-general', 'title' => 'Test nursing homes story'), 'tester');
+        $nid = (int) ($done['id'] ?? 0);
+        $n_row = $nid ? kop_rinbox_native_row('news', $nid) : null;
+        $check('a link from another queue moved to the industry in general becomes an approved article filed there',
+            !empty($done['general']) && $n_row && $n_row['status'] === 'approved'
+            && (int) $pdo->query("SELECT COUNT(*) FROM related_category_news WHERE news_id = $nid")->fetchColumn() === 1, $done['message'] ?? '');
+        kop_rdest_take_back($done);
+        $check('its Undo deletes the article and takes it off the industry',
+            kop_rinbox_native_row('news', $nid)['status'] === 'deleted' && (int) $pdo->query("SELECT COUNT(*) FROM related_category_news WHERE news_id = $nid")->fetchColumn() === 0);
     }
     $pdo->prepare('UPDATE news_submissions SET article_title = ?, article_type = ?, tags = ?, status = ? WHERE id = ?')
         ->execute(array($before['article_title'], $before['article_type'], $before['tags'], $before['status'], (int) $item['key']));

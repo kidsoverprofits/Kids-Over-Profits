@@ -143,15 +143,24 @@ function kop_rdest_is_sort($to) {
     return $to === 'indigenous' || $to === 'young_adult' || isset(kop_rdest_related_targets()[$to]);
 }
 
-/** Choices for a related industry: its records (approved or waiting), or a new one by name (0). */
+/**
+ * Choices for a related industry: its records (approved or waiting), or 0: the industry in general
+ * (kop_rdest_related_general()), or a new record when a name is typed below (owner, Claude note #26).
+ */
 function kop_rdest_related_options($slug) {
-    $options = array('0' => 'A new record (name it below)');
+    $cat = function_exists('kop_related_category') ? kop_related_category($slug) : null;
+    $options = array('0' => ($cat ? $cat['label'] : 'The industry') . ' in general (or a new record, named below)');
     foreach (function_exists('kop_related_all') ? kop_related_all($slug, array(), null) : array() as $r) {
         $where = trim(implode(', ', array_filter(array((string) $r['city'], (string) $r['state']))));
         $options[(string) (int) $r['id']] = (string) $r['name'] . ($where !== '' ? ' (' . $where . ')' : '')
             . ($r['review'] === 'pending' ? ' [waiting for review]' : '');
     }
     return $options;
+}
+
+/** A move to a related industry with no record picked and no name typed: the industry in general. */
+function kop_rdest_related_general($to, array $p) {
+    return isset(kop_rdest_related_targets()[(string) $to]) && (int) ($p['rel_id'] ?? 0) <= 0 && trim((string) ($p['rel_name'] ?? '')) === '';
 }
 
 /** Put the link under "Materials and links" on a related industry's record (a new record waits for review). */
@@ -307,8 +316,9 @@ function kop_rdest_put($to, array $p, $reviewer) {
     kop_ext_load_record_libs();
     $pdo = kop_rinbox_pdo();
     if ($to === 'young_adult') return kop_rdest_put_young_adult($p, $reviewer);
-    if (!empty($targets[$to]['related'])) return kop_rdest_put_related($to, $p, $reviewer);
-    $type = array('news' => 'article', 'promo' => 'article', 'indigenous' => 'article', 'lawsuit' => 'lawsuit', 'legislation' => 'legislation')[$to];
+    $general = kop_rdest_related_general($to, $p);
+    if (!empty($targets[$to]['related']) && !$general) return kop_rdest_put_related($to, $p, $reviewer);
+    $type = $general ? 'article' : array('news' => 'article', 'promo' => 'article', 'indigenous' => 'article', 'lawsuit' => 'lawsuit', 'legislation' => 'legislation')[$to];
     $q = array(
         'url' => $url, 'title' => trim((string) ($p['title'] ?? '')) ?: $url, 'type' => $type,
         'site_name' => (string) ($p['site_name'] ?? (parse_url($url, PHP_URL_HOST) ?: '')), 'facility' => (string) ($p['facility'] ?? ''),
@@ -346,6 +356,15 @@ function kop_rdest_put($to, array $p, $reviewer) {
         kop_rdest_resync('news', (int) $id);
         return array('to' => 'indigenous', 'id' => (int) $id, 'school_id' => $school_id, 'url' => $url,
             'message' => 'Filed on the Indian boarding schools page as article #' . (int) $id . ' (off the news list).');
+    }
+    if ($general) {
+        // A link about a related industry as a whole: an approved article on its /related/<category>/ page, off the news list.
+        $slug = $targets[$to]['related'];
+        kop_related_news_link($pdo, $slug, (int) $id, $reviewer);
+        $pdo->prepare("UPDATE news_submissions SET status = 'approved', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ?")->execute(array($reviewer, (int) $id));
+        kop_rdest_resync('news', (int) $id);
+        return array('to' => $to, 'id' => (int) $id, 'general' => true, 'category' => $slug, 'url' => $url,
+            'message' => 'Filed under ' . $targets[$to]['label'] . ' in general as article #' . (int) $id . ' (listed on its page, off the news list).');
     }
     $where = $to === 'promo' ? 'the Industry PR index (internal, never public)' : 'the ' . $targets[$to]['label'] . ' queue, waiting for review';
     return array('to' => $to, 'id' => (int) $id, 'url' => $url, 'message' => 'Moved to ' . $where . ' as #' . (int) $id . '.');
@@ -483,6 +502,13 @@ function kop_rdest_take_back(array $done) {
     $id = (int) ($done['id'] ?? 0);
     if ($to === 'young_adult') {
         kop_rdest_take_back_young_adult($done);
+        return;
+    }
+    if (strncmp($to, 'related_', 8) === 0 && !empty($done['general'])) {
+        kop_related_news_unlink($pdo, (string) $done['category'], $id);
+        $st = $pdo->prepare("UPDATE news_submissions SET status = 'deleted' WHERE id = ? AND status = 'approved'");
+        $st->execute(array($id));
+        kop_rdest_resync('news', $id);
         return;
     }
     if (strncmp($to, 'related_', 8) === 0) {

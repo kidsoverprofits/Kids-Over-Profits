@@ -81,6 +81,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 # program, Christian rehab for adults). A queue with 'record_kinds' gets its 'facility' pickers as the any-record finder; a non-program pick is filed by
 # kop_rinbox_file_on_record() (inc/review-record-file.php: company links/news/notes, YA links/facts, Christian rehab for adults ('cra', any related kind: links in profileLinks/resourceLinks, else a note), other kinds a cited note), exact Undo
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php --source=card-fields
+# "Move to <related industry>" (Nursing Homes, Foster Care...): a record picked or a new one named puts the link under its Materials and links;
+# neither = the industry in general (Claude note #26): the article is approved, filed in related_category_news, listed on /related/<category>/
+# and off the news list, like Indian boarding schools' "the schools in general"; Undo puts it back (kop_rdest_related_general())
 # News cards: "Connect a record" files the article on a program (into its facilities_mentioned with the id, then kop_resync_news():
 # news_facility_links, story group, case links; since 2026-11-13), a company (kop_operator_links), consultant, transporter, provider, marketer,
 # trade org or Christian rehab for adults (a note citing it) or young adult program while it stays in the news; "Take off" undoes (option kop_review_news_connections)

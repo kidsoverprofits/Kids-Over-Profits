@@ -268,7 +268,7 @@ function kop_rinbox_native_filed_moves() {
         $targets = kop_rdest_targets();
         $m['label'] = $m['id'] === 'indigenous' ? 'File under Indian boarding schools (leaves the news list)'
             : ($m['id'] === 'young_adult' ? 'Also list on a young adult program (stays in the news)'
-            : 'Also list under ' . $targets[$m['id']]['label'] . ' (stays in the news)');
+            : 'File under ' . $targets[$m['id']]['label'] . ' (on a record it stays in the news; in general it leaves the news list)');
     }
     unset($m);
     return $moves;
@@ -381,6 +381,9 @@ function kop_rinbox_native_move($type, $key, $to, array $params = array()) {
     if ($type === 'news' && $to === 'young_adult') {
         $r = kop_rinbox_native_row('news', $key);
         if ($r && kop_rinbox_native_filed_ok($r)) return kop_rinbox_native_filed_to_ya($r, $params);
+    }
+    if ($type === 'news' && kop_rdest_related_general($to, $params)) {
+        return kop_rinbox_native_move_to_related_general($key, $to);
     }
     if ($type === 'news' && !empty($targets[$to]['related'])) {
         $r = kop_rinbox_native_row('news', $key);
@@ -686,6 +689,35 @@ function kop_rinbox_native_filed_to_related(array $r, $to, array $params) {
     return array('message' => $done['message'] . ' The article stays in the news. Undo takes the link off.');
 }
 
+/**
+ * A pending or approved article about a related industry as a whole (no one record): filed under the category
+ * (related_category_news), approved on the way, listed on /related/<category>/ and off the news list. Undo puts it back.
+ */
+function kop_rinbox_native_move_to_related_general($key, $to) {
+    $targets = kop_rdest_targets();
+    $r = kop_rinbox_native_row('news', $key);
+    if (!$r) throw new RuntimeException('That submission is gone.');
+    $filed = kop_rinbox_native_filed_ok($r);
+    if ((string) $r['status'] !== 'submitted' && !$filed) throw new RuntimeException('Only a pending or approved article can be filed there.');
+    $slug = $targets[$to]['related'];
+    $pdo = kop_rinbox_pdo();
+    $reviewer = kop_rinbox_reviewer();
+    $prev_notes = (string) ($r['reviewer_notes'] ?? '');
+    kop_related_news_link($pdo, $slug, (int) $r['id'], $reviewer);
+    $message = 'Filed under ' . $targets[$to]['label'] . ' in general; it is listed on that page and stays off the news list.';
+    $pdo->prepare("UPDATE news_submissions SET status = " . ($filed ? 'status' : "'approved'") . ", reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP, reviewer_notes = ? WHERE id = ?")
+        ->execute(array($reviewer, trim($prev_notes . "\n" . $message), (int) $r['id']));
+    if (!$filed && function_exists('kop_followup_mark_moved')) {
+        kop_followup_mark_moved(kop_followup_kind_for_native('news'), (int) $r['id']);
+    }
+    kop_rinbox_native_resync('news', (int) $r['id']);
+    $log = kop_rinbox_native_moves();
+    $log['news:' . (int) $r['id']] = array('to' => $to, 'done' => array('to' => $to, 'self' => true, 'general' => true, 'category' => $slug),
+        'prev_status' => (string) $r['status'], 'prev_notes' => $prev_notes, 'by' => $reviewer, 'at' => time());
+    update_option('kop_review_inbox_moves', $log, false);
+    return array('message' => $message . ($filed ? ' Undo puts it back on the news list.' : ' Undo moves it back.'));
+}
+
 function kop_rinbox_native_move_to_school($key, $school_id) {
     $r = kop_rinbox_native_row('news', $key);
     if (!$r) throw new RuntimeException('That submission is gone.');
@@ -730,6 +762,9 @@ function kop_rinbox_native_unmove($type, $key) {
     if (empty($done['self'])) kop_rdest_take_back($done);
     if (!empty($done['self']) && ($done['to'] ?? '') === 'indigenous' && ($pdo_s = kop_ischools_pdo())) {
         kop_ischools_unlink_news($pdo_s, (int) ($done['school_id'] ?? 0), (int) $key);
+    }
+    if (!empty($done['self']) && !empty($done['general']) && function_exists('kop_related_news_unlink')) {
+        kop_related_news_unlink(kop_rinbox_pdo(), (string) $done['category'], (int) $key);
     }
     $pdo = kop_rinbox_pdo();
     $pdo->prepare("UPDATE {$t['table']} SET {$t['status_col']} = ?, reviewer_notes = ? WHERE id = ?")

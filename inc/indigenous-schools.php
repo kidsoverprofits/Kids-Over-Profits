@@ -194,8 +194,9 @@ function kop_ischools_news(PDO $pdo, $all = false) {
 }
 
 /**
- * Ids of every article filed under a school (or the schools in general).
- * Those articles belong on /indian-boarding-schools/ only, so the news feed,
+ * Ids of every article filed under a school (or the schools in general), and
+ * under a related industry in general (kop_related_news_ids()).
+ * Those articles belong on their own pages only, so the news feed,
  * the Latest News widget and the state/country hub news leave them out.
  * Read once per request; empty when the tables are not there yet.
  */
@@ -206,13 +207,16 @@ function kop_ischools_news_ids() {
     }
     $ids = array();
     $pdo = kop_ischools_pdo();
-    if (!$pdo || !kop_ischools_ready($pdo)) {
-        return $ids;
+    if ($pdo && kop_ischools_ready($pdo)) {
+        try {
+            $ids = array_map('intval', $pdo->query('SELECT DISTINCT news_id FROM indigenous_school_news')->fetchAll(PDO::FETCH_COLUMN));
+        } catch (PDOException $e) {
+            $ids = array();
+        }
     }
-    try {
-        $ids = array_map('intval', $pdo->query('SELECT DISTINCT news_id FROM indigenous_school_news')->fetchAll(PDO::FETCH_COLUMN));
-    } catch (PDOException $e) {
-        $ids = array();
+    // Articles filed under a related industry in general live on its /related/<category>/ page the same way.
+    if (function_exists('kop_related_news_ids')) {
+        $ids = array_values(array_unique(array_merge($ids, kop_related_news_ids())));
     }
     return $ids;
 }
