@@ -403,5 +403,27 @@ if ($rec['notes'] && $rec['facilityDetails']['gender'] !== '') {
     $check('keep: a test record has notes and a gender', false);
 }
 
+// The page preview (inc/suggestion-preview.php): the record as Approve would leave it, nothing written.
+$popts = array('pdo' => $pdo, 'prefix' => 'wpdl_');
+$before_json = $pdo->query('SELECT json_data FROM facilities_v2 WHERE id = ' . (int) $row['id'])->fetchColumn();
+$live = kop_facility_load((int) $row['id'], $popts);
+$pv = kop_suggestion_preview_doc($pdo, $mini(array('facilityDetails' => array('type' => 'Preview type'), 'notes' => array('A preview note.'))),
+    0, 'from /' . $state_name . '/', 'wpdl_');
+$check('preview: a mini-form entry is found and merged', $pv && $pv['facility_id'] === (int) $row['id']
+    && $pv['doc']['facilityDetails']['type'] === 'Preview type' && in_array('A preview note.', array_map('kop_suggestion_item_text', $pv['doc']['notes'] ?? array()), true),
+    json_encode($pv ? $pv['doc']['facilityDetails'] : null));
+$check('preview: what the entry leaves empty keeps the record\'s value',
+    $pv && $pv['doc']['identification']['name'] === $live['doc']['identification']['name']
+    && $pv['doc']['operatingPeriod']['status'] === $live['doc']['operatingPeriod']['status']
+    && $pv['doc']['provenance'] == $live['doc']['provenance']);
+$check('preview: nothing is written', $pdo->query('SELECT json_data FROM facilities_v2 WHERE id = ' . (int) $row['id'])->fetchColumn() === $before_json);
+$whole = $live['doc'];
+$whole['facility_id'] = (int) $row['id'];
+$whole['facilityDetails']['type'] = 'Whole-record type';
+$pv = kop_suggestion_preview_doc($pdo, array('facilities' => array($whole), 'name' => $name), 0, '', 'wpdl_');
+$check('preview: a whole-record edit is the record as sent', $pv && $pv['facility_id'] === (int) $row['id'] && $pv['doc']['facilityDetails']['type'] === 'Whole-record type');
+$check('preview: a name with no record has no page to preview',
+    kop_suggestion_preview_doc($pdo, array('facilities' => array(array('identification' => array('name' => 'Zzq No Such Program Anywhere')))), 0, '', 'wpdl_') === null);
+
 echo $fails ? "\n$fails failed\n" : "\nAll passed\n";
 exit($fails ? 1 : 0);

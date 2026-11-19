@@ -1918,6 +1918,40 @@ button.btn-refile-undo, button.btn-refile-undo:hover, button.btn-refile-undo:foc
     background: #e2f6e3;
 }
 
+/* The words a change takes out / puts in (wordDiff() in js/admin-submissions.js), darker than their cell. */
+.sugg-table del.sugg-wd {
+    background: #ffb8b8;
+    color: var(--kop-midnight-blue);
+    text-decoration: line-through;
+    border-radius: 2px;
+}
+
+.sugg-table ins.sugg-wd {
+    background: #a9e2ad;
+    color: var(--kop-midnight-blue);
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 2px;
+}
+
+/* "Preview the page after Approve" beside a facility's name (inc/suggestion-preview.php). */
+.sugg-entry h4 a.sugg-preview,
+.sugg-entry h4 a.sugg-preview:hover,
+.sugg-entry h4 a.sugg-preview:focus {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--kop-teal-ink);
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sugg-entry h4 a.sugg-preview:hover,
+.sugg-entry h4 a.sugg-preview:focus {
+    color: var(--kop-navy-blue);
+}
+
 /* "3 on file": a count of what stays, not something taken away. */
 .sugg-table td.sugg-count,
 .sugg-table td.sugg-blank {

@@ -3838,6 +3838,12 @@ if (!function_exists('kop_facility_page_data')) {
         if (!$row) return null;
         $doc = kop_v2_decode($row['json_data']);
         if ($doc === null) return null;
+        // Submissions Review's preview of a waiting data suggestion (inc/suggestion-preview.php): the record as Approve would leave it.
+        $preview = $GLOBALS['kop_facility_doc_override'][$facility_id] ?? null;
+        if (is_array($preview)) {
+            $doc = $preview;
+            $row['name'] = (string) ($doc['identification']['name'] ?? $row['name']);
+        }
 
         $index = kop_facility_pages_index();
         $entry = isset($index['ids'][$facility_id]) ? $index['ids'][$facility_id] : null;

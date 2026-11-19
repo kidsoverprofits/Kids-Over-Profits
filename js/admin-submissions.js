@@ -1052,6 +1052,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
+     * A word-by-word diff of two texts for a "What changed" row, so a long
+     * description with one word changed shows that word, not two paragraphs
+     * to compare by eye. Returns {before, after}: each escaped, the words only
+     * on that side wrapped in <del> / <ins>. The common start and end are
+     * trimmed first; a middle too long to compare word by word is marked whole.
+     */
+    function wordDiff(a, b) {
+        const split = s => String(s).match(/\s+|[^\s]+/g) || [];
+        const same = (x, y) => x === y || (/^\s+$/.test(x) && /^\s+$/.test(y));
+        const A = split(a);
+        const B = split(b);
+        let start = 0;
+        while (start < A.length && start < B.length && same(A[start], B[start])) start++;
+        let endA = A.length;
+        let endB = B.length;
+        while (endA > start && endB > start && same(A[endA - 1], B[endB - 1])) { endA--; endB--; }
+        const midA = A.slice(start, endA);
+        const midB = B.slice(start, endB);
+        // Each side as [token, changed] pairs.
+        let outA = midA.map(t => [t, true]);
+        let outB = midB.map(t => [t, true]);
+        if (midA.length && midB.length && midA.length * midB.length <= 250000) {
+            // Longest common subsequence of the middles; tokens on it are unchanged.
+            const n = midA.length;
+            const m = midB.length;
+            const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+            for (let i = n - 1; i >= 0; i--) {
+                for (let j = m - 1; j >= 0; j--) {
+                    L[i][j] = same(midA[i], midB[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+                }
+            }
+            let i = 0;
+            let j = 0;
+            while (i < n && j < m) {
+                if (same(midA[i], midB[j])) { outA[i][1] = false; outB[j][1] = false; i++; j++; }
+                else if (L[i + 1][j] >= L[i][j + 1]) i++;
+                else j++;
+            }
+        }
+        const render = (head, mid, tail, tag) => {
+            let html = escapeHtml(head.join(''));
+            let run = '';
+            let marked = false;
+            const flush = () => {
+                if (run === '') return;
+                // Spaces at the edge of a marked run stay unmarked, so the mark covers words only.
+                html += marked ? run.replace(/^(\s*)([\s\S]*?)(\s*)$/, (all, l, w, r) => escapeHtml(l) + (w ? `<${tag} class="sugg-wd">${escapeHtml(w)}</${tag}>` : '') + escapeHtml(r))
+                    : escapeHtml(run);
+                run = '';
+            };
+            mid.forEach(([t, changed]) => {
+                // A space between two changed words joins their mark.
+                const c = changed || (/^\s+$/.test(t) && marked);
+                if (c !== marked) { flush(); marked = c; }
+                run += t;
+            });
+            flush();
+            return html + escapeHtml(tail.join(''));
+        };
+        return {
+            before: render(A.slice(0, start), outA, A.slice(endA), 'del'),
+            after: render(B.slice(0, start), outB, B.slice(endB), 'ins'),
+        };
+    }
+
+    /**
      * "What changed" for a data suggestion (api/lib-suggestion-changes.php):
      * only the fields whose sent value differs from the record, as
      * now -> suggested, and the submitter's own note. The whole record sent
@@ -1083,9 +1149,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<span class="sugg-tools" data-spec="${attr(JSON.stringify(spec))}">${ops.map(op =>
                 `<button type="button" class="sugg-act" data-op="${op}">${{ edit: 'Edit', move: 'Move', remove: 'Remove', keep: 'Keep it' }[op]}</button>`).join('')}</span>`
             : '';
-        const cell = (text, cls, extra) => text === ''
+        // html: the text already escaped and marked (wordDiff()); else the plain text is escaped here.
+        const cell = (text, cls, extra, html) => text === ''
             ? `<td class="sugg-${cls} sugg-blank">(empty)${extra || ''}</td>`
-            : `<td class="sugg-${cls}"><span class="sugg-text">${escapeHtml(text)}</span>${extra || ''}</td>`;
+            : `<td class="sugg-${cls}"><span class="sugg-text">${html || escapeHtml(text)}</span>${extra || ''}</td>`;
         const items = (list, cls, sign) => (list || []).map(t =>
             `<li class="sugg-${cls}"><span class="sugg-sign" aria-hidden="true">${sign}</span>${escapeHtml(t)}</li>`).join('');
         const row = (ch, entry) => {
@@ -1112,7 +1179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const ops = ch.kind === 'removed' ? (ch.editable ? ['edit', 'keep'] : ['keep'])
                 : (ch.editable ? ['edit', 'move', 'remove'] : ['remove']);
             const spec = { entry: entry, path: ch.path, value: after, label: ch.label };
-            return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before')}${cell(after, 'after', tools(spec, ops))}</tr>`;
+            // A changed value: the words taken out struck through on the left, the words put in marked on the right.
+            const d = ch.kind === 'changed' && ch.before && after ? wordDiff(ch.before, after) : null;
+            return `<tr><th scope="row">${escapeHtml(ch.label)}</th>${cell(ch.before, 'before', '', d && d.before)}${cell(after, 'after', tools(spec, ops), d && d.after)}</tr>`;
         };
         let html = '';
         if (canFix && submission.edits) {
@@ -1129,7 +1198,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 : '';
             // A new facility's name can be fixed too; one on file is matched by it, so it stays.
             const rename = e.is_new ? tools({ entry: e.index, path: 'identification.name', value: e.name, label: 'Name' }, ['edit']) : '';
-            html += `<div class="sugg-entry"><h4><span class="sugg-text">${name}</span>${badge}${rename}</h4>`
+            // The facility page drawn as Approve would leave it (inc/suggestion-preview.php); nothing is saved.
+            let preview = '';
+            if (canFix && href && !e.is_new) {
+                const u = new URL(href, window.location.href);
+                u.searchParams.set('kop_sugg_preview', String(submission.id));
+                u.searchParams.set('entry', String(e.index));
+                preview = `<a class="sugg-preview" href="${escapeHtml(u.toString())}" target="_blank" rel="noopener">${kopIcon('eye')} Preview the page after Approve</a>`;
+            }
+            html += `<div class="sugg-entry"><h4><span class="sugg-text">${name}</span>${badge}${rename}${preview}</h4>`
                 + `<table class="sugg-table"><thead><tr><th scope="col">Field</th><th scope="col">On file now</th><th scope="col">Suggested</th></tr></thead>`
                 + `<tbody>${e.changes.map(ch => row(ch, e.index)).join('')}</tbody></table></div>`;
         });

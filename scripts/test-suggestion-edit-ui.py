@@ -193,6 +193,14 @@ def main():
             op_row = rowof("Operator")
             check(op_row.locator("button.sugg-act").all_inner_texts() == ["Edit", "Move", "Remove"], f"@{width} a suggested value has Edit, Move, Remove")
             check(rowof("Has deaths").locator("button.sugg-act").all_inner_texts() == ["Remove"], f"@{width} a tick box can only be removed")
+            # A changed value marks the words it adds; the words both sides share stay plain.
+            ins = op_row.locator("td.sugg-after ins.sugg-wd").all_inner_texts()
+            check(ins == ["This is not a", "program."] and op_row.locator("td.sugg-before del.sugg-wd").count() == 0,
+                  f"@{width} a changed value marks only the words it adds", str(ins))
+            # The page as Approve would leave it, for a facility on file.
+            href = card.locator("a.sugg-preview").first.get_attribute("href") or ""
+            check(href == "https://kidsoverprofits.org/facility/linden-oaks-il/?kop_sugg_preview=58&entry=0",
+                  f"@{width} the card links a preview of the page after Approve", href)
 
             # Edit a note: the box holds the text; Save sends one item edit.
             note_li = rowof("Notes").locator("li.sugg-ins").first

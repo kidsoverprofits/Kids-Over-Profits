@@ -633,6 +633,46 @@ if (!function_exists('kop_suggestion_record_doc')) {
     }
 }
 
+if (!function_exists('kop_suggestion_preview_doc')) {
+    /**
+     * The record one facility entry of a suggestion would leave behind if it
+     * were approved now, for the page preview (inc/suggestion-preview.php).
+     * The same steps as Approve (kop_apply_suggested_edit()), nothing written:
+     * an entry with its facility_id replaces the record (unpublished survivor
+     * testimony put back), one without is merged in (kop_suggestion_merge_into()),
+     * then kop_facility_normalize() with the record's own id, name and
+     * provenance, as kop_v2_save_facility_entries() saves it.
+     * Returns {facility_id, doc}, or null when the entry is about no record on
+     * file (a new facility has no page to preview yet).
+     */
+    function kop_suggestion_preview_doc(PDO $pdo, $payload, $index, $reason, $prefix) {
+        if (!function_exists('kop_facility_load') || !function_exists('kop_extract_project_data')) return null;
+        $data = kop_extract_project_data($payload);
+        $entry = is_array($data) ? ($data['facilities'][(int) $index] ?? null) : null;
+        if (!is_array($entry)) return null;
+        $opts = array('pdo' => $pdo, 'prefix' => $prefix);
+        $fid = kop_suggestion_find_facility($entry, kop_facility_normalize($entry), (string) $reason, $opts);
+        $record = $fid ? kop_facility_load($fid, $opts) : null;
+        if (!$record) return null;
+        if ((int) ($entry['facility_id'] ?? 0) > 0) {
+            $after = $entry;
+            if (function_exists('kop_preserve_hidden_testimony') && !empty($record['doc']['survivorTestimony'])) {
+                $restored = kop_preserve_hidden_testimony(array($entry), array(array(
+                    'facility_id'      => $record['id'],
+                    'identification'   => array('name' => $record['doc']['identification']['name'] ?? ''),
+                    'survivorTestimony' => $record['doc']['survivorTestimony'],
+                )));
+                $after = $restored[0];
+            }
+        } else {
+            $after = kop_suggestion_merge_into($record['doc'], $entry, $record['id']);
+        }
+        $doc = kop_facility_normalize($after, array('facility_id' => $record['id'], 'unique_name' => $record['unique_name']));
+        $doc['provenance'] = $record['doc']['provenance'] ?? $doc['provenance'];
+        return array('facility_id' => $record['id'], 'doc' => $doc);
+    }
+}
+
 if (!function_exists('kop_suggestion_other_targets')) {
     /** For an 'other' row: the fields of the same block it can move to, {key: label}. */
     function kop_suggestion_other_targets(array $data, array $at) {

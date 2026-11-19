@@ -234,3 +234,8 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    with the type in the subject and Reply-To the sender; it is under New at
    [Contact Messages](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-contact-messages). Set In progress,
    Undo; filter by type; Delete, Restore; Delete and Erase for good. Form at 390 px with no sideways scroll.
+46. **Data suggestion diff and page preview** (2026-11-19): on [Submissions Review](https://kidsoverprofits.org/admin-submissions/)
+    > Data > Pending, a card that changes a text field shows the added words marked green and the removed ones struck
+    through red. "Preview the page after Approve" opens the facility page with the dark "Preview, not saved" bar, the
+    suggested values on it, no edit pencils; "Live page" shows the record unchanged. Logged out, the same address shows
+    the live page with no bar. Phone width: the bar wraps, no sideways scroll.

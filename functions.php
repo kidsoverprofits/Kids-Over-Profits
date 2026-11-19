@@ -82,6 +82,8 @@ require_once get_stylesheet_directory() . '/inc/survivor-archives.php';
 require_once get_stylesheet_directory() . '/inc/news-images.php';
 require_once get_stylesheet_directory() . '/inc/record-events.php';   // kop_record_changed(): one event for every record write
 require_once get_stylesheet_directory() . '/inc/facility-pages.php';
+// Submissions Review: a facility page drawn as a waiting data suggestion would leave it (?kop_sugg_preview=<id>&entry=<n>)
+require_once get_stylesheet_directory() . '/inc/suggestion-preview.php';
 // Categories related to the TTI (Christian Rehabs for Adults, Young Adult Programs): facility-shaped records in
 // related_facilities, never TTI facilities; pages at /related/<category>/<slug>/
 require_once get_stylesheet_directory() . '/inc/related-facilities.php';

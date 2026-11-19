@@ -139,6 +139,10 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # finds the record (facility_id, the /facility/<slug>/ or /<state>/ page named in the reason, name + state, the one record with that name),
 # normalizes both sides and lists only fields whose sent value differs; empty, "Unknown" and unticked flags are no information. Dropped
 # list items and emptied fields show only for whole-record edits (facility_id sent), which Approve writes over the record. Raw JSON is folded.
+# A changed value is diffed word by word on the card (wordDiff() in js/admin-submissions.js: <del>/<ins> class sugg-wd). Each facility on
+# file has "Preview the page after Approve": /facility/<slug>/?kop_sugg_preview=<id>&entry=<index> (inc/suggestion-preview.php, admins
+# only, pending rows only) draws the page from kop_suggestion_preview_doc() (the same merge/replace as Approve, nothing written) via
+# $GLOBALS['kop_facility_doc_override'] in kop_facility_page_data(); bar on top, pencils off, no cache, noindex. New facilities: no page yet
 # Approve matches an entry sent without facility_id the same way and merges only its filled fields (kop_suggestion_resolve_entries());
 # all on file = those facilities saved alone, no company made from a mini-form's facility name
 # Fixing a suggestion before Approve (owner 2026-11-13: spelling, grammar, things in the wrong field): while it waits, each suggested

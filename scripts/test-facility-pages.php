@@ -58,6 +58,18 @@ $check('index has entries', $eligible > 0);
 $check('fingerprint set', $index['fingerprint'] !== '');
 $check('cached read returns the same index', kop_facility_pages_index() === $index);
 
+// A suggestion preview (inc/suggestion-preview.php) draws one record from the document it is handed.
+$pv_ids = array_slice(array_keys($index['ids']), 0, 2);
+$pv_live = kop_facility_page_data($pv_ids[0]);
+$pv_doc = kop_v2_decode($wpdb->get_var('SELECT json_data FROM facilities_v2 WHERE id = ' . (int) $pv_ids[0]));
+$pv_doc['identification']['name'] = 'Preview Name Zzq';
+$GLOBALS['kop_facility_doc_override'] = array($pv_ids[0] => $pv_doc);
+$pv_page = kop_facility_page_data($pv_ids[0]);
+$check('preview: the page is drawn from the handed document', $pv_page && $pv_page['name'] === 'Preview Name Zzq', $pv_page['name'] ?? '');
+$check('preview: other records are drawn from the table', kop_facility_page_data($pv_ids[1])['name'] !== 'Preview Name Zzq');
+unset($GLOBALS['kop_facility_doc_override']);
+$check('preview: without it the record is as stored', kop_facility_page_data($pv_ids[0])['name'] === $pv_live['name']);
+
 // Why records qualified (recomputed with the same link sets the build used).
 $links = kop_facility_pages_link_sets();
 $hist = array();

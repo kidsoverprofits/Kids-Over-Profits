@@ -73,7 +73,8 @@ function kop_ie_can() {
         $can = !is_admin() && !wp_doing_ajax() && !(defined('REST_REQUEST') && REST_REQUEST)
             && is_user_logged_in() && current_user_can(KOP_IE_CAP);
     }
-    return $can;
+    // A preview of a waiting suggestion (inc/suggestion-preview.php) shows data not on the record: nothing to edit there.
+    return $can && empty($GLOBALS['kop_sugg_preview']);
 }
 
 /** ' data-kop-edit="ref"' for an admin, '' for everyone else. */
