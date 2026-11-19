@@ -36,6 +36,9 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-jobs.php  
 # Public: facility and company pages print each listed person's ties under their name (kop_prel_public_lines(); never a harmed/press person), the
 # map build draws a line between two people already on the map (kop-pipeline addPersonRelations(), provenance 'relations'; the table is synced and in the rebuild fingerprint)
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-person-relations.php   # details + undo, the tick through merges, relationships both sides + undo
+# One role line says each job once on display (kop_facility_pages_role_tidy(), staff cards + career lines, so the app too): a title
+# another title covers goes ("Director of Bus. Dev./Admissions" beside "...and Admissions", "Therapy" beside "Therapist", "CEO" beside
+# "Chief Executive Officer"), never one only a rank apart ("Assistant Director" + "Director"); bare "Staff"/"Management Staff" go beside a real title
 # kop_facility_save() folds a person listed twice under one role (kop_facility_staff_dedupe()); the one-time pass is kop_apply_staff_dedupe()
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-staff-dedupe.php [--list]
 # Years that were only a wiki or HEAL page's retrieval date ("Former Therapist (2025, r/troubledteens wiki)", "(2019-2025, HEAL)",

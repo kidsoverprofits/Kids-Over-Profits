@@ -654,6 +654,24 @@ $check('a note holding ";" does not split a past job', count($career) === 1 && $
 $career = kop_facility_pages_person_career('David Michel', '', 10371);
 $hit = array_values(array_filter($career, function ($j) { return $j['place'] === 'InnerChange'; }));
 $check("a company executive's career links the company page", $hit && strpos($hit[0]['url'], '/operator/') !== false && strpos($hit[0]['role'], 'Woodbury') === false, wp_json_encode($career));
+// One job said once in a role line (Claude notes #28, #29, Provo Canyon School's staff, 2026-11-19).
+foreach (array(
+    'Management Staff, Director of Business Development and Admissions, Director of Business Development/Admissions' => 'Director of Business Development and Admissions',
+    'Marketing Director, Admissions Director, Marketing/Admissions Director' => 'Marketing/Admissions Director',
+    'Former Therapist (Former)' => 'Former Therapist',
+    'Former Therapy, Therapist' => 'Former Therapist',
+    'Chief Executive Officer, Program director and therapist, CEO' => 'Chief Executive Officer, Program director and therapist',
+    'Former Program Director, later Executive Director, Executive Director (2016-2020)' => 'Former Program Director, later Executive Director (2016-2020)',
+    'Assistant Director, Director' => 'Assistant Director, Director',
+    'Staff' => 'Staff',
+    'Former Staff; later WWASP president' => 'Former Staff; later WWASP president',
+) as $in => $want) {
+    $got = kop_facility_pages_role_tidy($in);
+    $check('role tidy: ' . $in, $got === $want, $got);
+}
+$career = kop_facility_pages_person_career('Deidre Sage Butte', '', 0);
+$hit = array_values(array_filter($career, function ($j) { return $j['place'] === 'Eagle Summit'; }));
+$check('a career line says each job once (Eagle Summit)', !$hit || substr_count($hit[0]['role'], 'Business Development') === 1 && stripos($hit[0]['role'], 'Staff') === false, wp_json_encode($hit));
 $fold = kop_facility_pages_career_fold(array(
     array('role' => 'Therapist', 'place' => 'Provo Canyon', 'years' => '2001', 'url' => ''),
     array('role' => '', 'place' => 'Silverado Boys Ranch', 'years' => '', 'url' => '/facility/silverado/'),

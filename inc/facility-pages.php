@@ -1470,6 +1470,91 @@ if (!function_exists('kop_facility_pages_drop_left')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_role_tidy')) {
+    /**
+     * One role line with each job said once (Claude notes #28, #29, owner 2026-11-19). Titles are split at commas
+     * outside brackets; a title is dropped when another title says it all ("Director of Business Development/
+     * Admissions" beside "Director of Business Development and Admissions", "Marketing Director" and "Admissions
+     * Director" beside "Marketing/Admissions Director", "Therapy" beside "Therapist", "CEO" beside "Chief Executive
+     * Officer"), unless the longer one only adds a rank ("Director" beside "Assistant Director" stays: two jobs).
+     * A bare "Staff", "Management Staff" or "Management team" goes when a real title is there. "(Former)" goes. A
+     * dropped title's bracket ("(2005 became Director of Bus. Dev.)") moves to the title that stays, unless that
+     * one has its own, when both stay. A line that started "Former " still does. Display only: records keep their text.
+     */
+    function kop_facility_pages_role_tidy($role) {
+        $role = trim((string) $role);
+        if ($role === '' || strpos($role, ',') === false && !preg_match('/\(\s*former\s*\)/i', $role)) return $role;
+        $former = (bool) preg_match('/^former\s/i', $role);
+        $titles = array();
+        foreach (preg_split('/,(?![^()]*\))/', $role) as $t) {
+            $t = trim(preg_replace('/\s*\(\s*former\s*\)/i', '', $t));
+            if ($t === '') continue;
+            $bracket = preg_match('/\(([^()]*)\)\s*$/', $t, $m) ? trim($m[1]) : '';
+            $core = strtolower(trim(preg_replace('/\([^()]*\)/', ' ', $t)));
+            $core = preg_replace(
+                array('/\bbus\.?\s*dev\b\.?/', '/\bdir\b\.?/', '/\bsvcs?\b\.?/', '/\brec\b\.?/', '/\brecreation\b/', '/\bexec\b\.?/',
+                    '/\bmgmt\b\.?/', '/\btherapy\b/', '/\bceo\b/', '/\bcoo\b/', '/\bcfo\b/', '/&/'),
+                array(' business development ', ' director ', ' services ', ' recreational ', 'recreational', ' executive ',
+                    ' management ', 'therapist', ' chief executive officer ', ' chief operating officer ', ' chief financial officer ', ' and '),
+                $core);
+            $words = preg_split('/[^a-z0-9]+/', $core, -1, PREG_SPLIT_NO_EMPTY);
+            $words = array_values(array_unique(array_diff($words, array('of', 'and', 'the', 'for', 'a', 'former', 'formerly', 'later', 'then', 'now', 'previously'))));
+            $titles[] = array('text' => $t, 'bracket' => $bracket, 'words' => $words);
+        }
+        $generic = static function (array $w) {
+            sort($w);
+            return in_array(implode(' ', $w), array('', 'staff', 'management staff', 'management team', 'employee', 'unit staff'), true);
+        };
+        $plain = static function ($text) {
+            return preg_match_all('/\btherapy\b|\b[a-z]{2,5}\.|\(/i', preg_replace('/\([^()]*\)\s*$/', '', (string) $text));
+        };
+        $ranks = array('assistant', 'associate', 'deputy', 'vice', 'co', 'interim', 'acting', 'senior', 'junior', 'regional', 'lead', 'head');
+        $real = array_filter($titles, static function ($t) use ($generic) { return !$generic($t['words']); });
+        $keep = array();
+        foreach ($titles as $i => $t) {
+            if ($generic($t['words'])) {
+                if ($real) continue;
+                $keep[$i] = $t;
+                continue;
+            }
+            $by = null;
+            foreach ($titles as $j => $o) {
+                if ($j === $i || $generic($o['words'])) continue;
+                if (array_diff($t['words'], $o['words'])) continue;
+                $extra = array_diff($o['words'], $t['words']);
+                // The same words: the plainer one stays ("Therapist" over "Therapy", "Director" over "Dir."), else the first.
+                if (!$extra && ($plain($o['text']) > $plain($t['text']) || ($plain($o['text']) === $plain($t['text']) && $j > $i))) continue;
+                if (array_intersect($extra, $ranks)) continue; // "Assistant Director" is not "Director"
+                $by = $j;
+                break;
+            }
+            if ($by === null) { $keep[$i] = $t; continue; }
+            $keep[$i] = $t + array('into' => $by);
+        }
+        // Follow each drop to the title that stays; carry its bracket there when that one has none.
+        $out = array();
+        foreach ($keep as $i => $t) if (!isset($t['into'])) $out[$i] = $t;
+        foreach ($keep as $i => $t) {
+            if (!isset($t['into'])) continue;
+            $to = $t['into'];
+            $seen = array();
+            while (!isset($out[$to]) && isset($keep[$to]['into']) && !isset($seen[$to])) { $seen[$to] = true; $to = $keep[$to]['into']; }
+            if (!isset($out[$to])) { $out[$i] = $t; continue; }
+            if ($t['bracket'] === '' || $t['bracket'] === $out[$to]['bracket']) continue;
+            if ($out[$to]['bracket'] === '') {
+                $out[$to]['text'] .= ' (' . $t['bracket'] . ')';
+                $out[$to]['bracket'] = $t['bracket'];
+                continue;
+            }
+            $out[$i] = $t;
+        }
+        ksort($out);
+        $line = implode(', ', array_map(static function ($t) { return $t['text']; }, $out));
+        if ($former && !preg_match('/^former\s/i', $line)) $line = 'Former ' . preg_replace('/^(?:later|then|now|previously|formerly)\s+/i', '', $line);
+        return $line;
+    }
+}
+
 if (!function_exists('kop_facility_pages_staff_items')) {
     /**
      * The staff lists as the page shows them: {text, source, url} per entry,
@@ -1500,6 +1585,7 @@ if (!function_exists('kop_facility_pages_staff_items')) {
                     $role = kop_facility_pages_drop_left((string) ($item['role'] ?? ''));
                     // Its years and source as the card cites them, not "(2017, r/troubledteens wiki)" (Claude note #20).
                     if (function_exists('kop_scy_role_display')) $role = kop_scy_role_display($role, $cite);
+                    $role = kop_facility_pages_role_tidy($role);
                     $entry['text'] = kop_facility_pages_drop_left($entry['text']);
                     if (preg_match('/^([A-Za-z][A-Za-z &\/-]{2,40}):\s*(\S.*)$/', $name, $m)) {
                         $name = $m[2];
@@ -2415,6 +2501,7 @@ if (!function_exists('kop_facility_pages_person_career')) {
         }
         return array_map(static function ($job) {
             unset($job['kind_set']);
+            $job['role'] = kop_facility_pages_role_tidy($job['role']);
             return $job;
         }, kop_facility_pages_career_fold(array_values($out)));
     }
