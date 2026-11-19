@@ -1480,6 +1480,12 @@ if (!function_exists('kop_facility_pages_role_plain')) {
      */
     function kop_facility_pages_role_plain($role) {
         $role = (string) $role;
+        // A department alone is the whole line ("Former Therapy", "Admissions"): "Therapy staff", not a job title the
+        // source never gave. Beside other titles it is left to the role tidy ("Therapy" beside "Therapist" goes).
+        if (strpos($role, ',') === false && preg_match('/^(\s*(?:former\s+)?)(therapy|admissions|nursing|education|medical|maintenance|kitchen|recreation|marketing|admin|administration|residential|clinical|security|transport)(\s*(?:\([^()]*\))?\s*)$/i', $role, $m)) {
+            $dept = strtolower($m[2]) === 'admin' ? 'Administration' : ucfirst(strtolower($m[2]));
+            return $m[1] . $dept . ' staff' . $m[3];
+        }
         if (strpos($role, '/') === false) return $role;
         $creds = array(
             'rn' => 'Nurse (RN)', 'r n' => 'Nurse (RN)', 'lpn' => 'Nurse (LPN)', 'l p n' => 'Nurse (LPN)', 'cna' => 'Nursing Assistant (CNA)',
