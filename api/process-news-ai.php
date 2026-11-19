@@ -78,6 +78,42 @@ if (empty($url) && empty($articleText)) {
     exit;
 }
 
+/**
+ * facilityLinks: {lowercased name: {facility_id, state}} for each name in facilities / passingMentions that
+ * kop_resolve_mention_to_facility() (facility-aliases.php) settles, the match the save makes anyway. The two
+ * lists stay plain names (discover-articles.php and lib-record-enrich.php read them so). This endpoint skips
+ * the database, so it connects only here, only when there are names; any failure leaves the result as it was.
+ */
+function kop_news_ai_link_names(array $result, $host, $name, $user, $pass): array {
+    $names = [];
+    foreach (['facilities', 'passingMentions'] as $key) {
+        foreach ((is_array($result[$key] ?? null) ? $result[$key] : []) as $item) {
+            $n = trim((string) (is_array($item) ? ($item['name'] ?? '') : $item));
+            if ($n !== '') $names[mb_strtolower($n)] = $n;
+        }
+    }
+    if (!$names || !$host || !$name) return $result;
+    try {
+        require_once __DIR__ . '/facility-aliases.php';
+        $pdo = new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4", $user, $pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $index = kop_build_facility_alias_index($pdo);
+        $stateOf = $pdo->prepare('SELECT state FROM facilities_v2 WHERE id = ?');
+        $links = [];
+        foreach ($names as $key => $n) {
+            $fid = kop_resolve_mention_to_facility($n, $index);
+            if (!$fid) continue;
+            $stateOf->execute([(int) $fid]);
+            $links[$key] = ['facility_id' => (int) $fid, 'state' => (string) ($stateOf->fetchColumn() ?: '')];
+        }
+        if ($links) $result['facilityLinks'] = $links;
+    } catch (Throwable $e) {
+        error_log('News AI name linking skipped: ' . $e->getMessage());
+    }
+    return $result;
+}
+
 try {
     // Load API keys from environment variables (set via .env file loaded in config.php)
     $apiKeys = [
@@ -140,6 +176,10 @@ try {
         throw new Exception('The page at this URL is an error page ("' . mb_substr((string) ($result['title'] ?? ''), 0, 120)
             . '"), with no article text; paste the article text instead');
     }
+
+    // The names come back with the record each resolves to, the same match the save makes
+    // (kop_sync_news_facility_links()), so the form shows them linked instead of "unlinked" (Claude note #27).
+    $result = kop_news_ai_link_names($result, $db_host ?? null, $db_name ?? null, $db_user ?? null, $db_pass ?? null);
 
     echo json_encode([
         'success' => true,

@@ -139,7 +139,9 @@
             if (seen.has(key)) continue;
             seen.add(key);
             // passing: the article names it only in passing; linked, but listed apart on its page (inc/news-passing.php).
-            out.push(item && typeof item === 'object' && item.passing ? { name, facility_id: fid, passing: true } : { name, facility_id: fid });
+            const entry = item && typeof item === 'object' && item.passing ? { name, facility_id: fid, passing: true } : { name, facility_id: fid };
+            if (fid && item && typeof item === 'object' && item.state) entry.state = String(item.state);
+            out.push(entry);
         }
         return out;
     }
@@ -984,6 +986,7 @@
                 if (!name) return;
                 const fid = row.dataset.facilityId ? parseInt(row.dataset.facilityId, 10) : null;
                 const item = { name, facility_id: Number.isFinite(fid) && fid > 0 ? fid : null };
+                if (item.facility_id && row.dataset.state) item.state = row.dataset.state;
                 if (row.dataset.passing === '1') item.passing = true;
                 items.push(item);
             });
@@ -996,6 +999,7 @@
             row.className = 'facility-row';
             row.dataset.name = entry.name;
             if (entry.facility_id) row.dataset.facilityId = String(entry.facility_id);
+            if (entry.facility_id && entry.state) row.dataset.state = entry.state;
             if (entry.passing) row.dataset.passing = '1';
 
             const display = document.createElement('div');
@@ -1021,7 +1025,7 @@
             if (entry.facility_id) {
                 metaEl.textContent = entry.state ? `· ${entry.state}` : '· linked';
             } else {
-                metaEl.textContent = '· unlinked (will be saved as text)';
+                metaEl.textContent = '· unlinked (no record matches this name; saved as text)';
             }
 
             const removeBtn = document.createElement('button');
@@ -1429,6 +1433,15 @@
                         .map(n => ({ name: String(n && typeof n === 'object' ? n.name || '' : n || '').trim(), passing: true }))
                         .filter(n => n.name);
                     formData.facilities = normalizeFacilitiesValue([].concat(normalizeFacilitiesValue(data.facilities), passing));
+                    // The record each name resolves to, the match the save makes (api/process-news-ai.php, Claude note #27).
+                    const links = data.facilityLinks && typeof data.facilityLinks === 'object' ? data.facilityLinks : {};
+                    formData.facilities.forEach(f => {
+                        const hit = !f.facility_id && links[f.name.toLowerCase()];
+                        if (hit && parseInt(hit.facility_id, 10) > 0) {
+                            f.facility_id = parseInt(hit.facility_id, 10);
+                            if (hit.state) f.state = String(hit.state);
+                        }
+                    });
                     if (typeof window.refreshFacilityPicker === 'function') {
                         window.refreshFacilityPicker();
                     }
