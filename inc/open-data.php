@@ -537,7 +537,7 @@ function kop_open_data_datasets() {
         $sets['network-edges'] = array(
             'title'       => 'Network map: connections',
             'group'       => 'Network map',
-            'description' => 'Every connection on the network map: who worked where, in what role, which company owns what, rebrands and staff moves. source and target match the node ids. basis says what the connection was taken from (the research board, a facility or company profile, a staff list, reviewed staff moves, a relationship or investor record); citation is where it is documented, when that has been recorded (often empty: the board predates per-line citations).',
+            'description' => 'Every connection on the network map: who worked where, in what role, which company owns what, rebrands and staff moves. source and target match the node ids. basis says what the connection was taken from (the research board, a facility or company profile, a staff list, reviewed staff moves, a relationship or investor record); citation is a source recorded for that one connection, and is usually empty: the sources are kept on the linked facility, company and person profiles.',
             'rows'        => static function () use ($graph) {
                 foreach ((array) ($graph()['edges'] ?? array()) as $e) {
                     yield array(

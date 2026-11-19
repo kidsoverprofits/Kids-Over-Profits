@@ -67,14 +67,16 @@ drawer label follow it (`filters.js`, `drawer.js`, `kop_network_map_label()`), a
 the build's KINDS and `scripts/test-network-graph.js`. The hourly fingerprint covers the two investor tables and
 `{prefix}kop_network_answers`.
 
-Per-line sources (2026-11-19): an edge may carry `cite` (a URL or a short citation, several joined by "; ") and `added: true`
+Per-line sources (2026-11-19, optional): the owner keeps sources at the program and person level (research docs, the
+facility and staff profiles), not per connection (owner 2026-11-19: "I'm not filling in a source for each individual data
+point"). So `cite` is optional, empty shows nothing, and nothing flags a line without one. An edge may carry `cite` (a URL or a short citation, several joined by "; ") and `added: true`
 (a line from `network-overrides.json`'s `edges`). `cite` comes from `sources` in the overrides (`[{from, to, source}]`,
 matched on the pair of names either way round like `lines`, a lone match only, the wording untouched), from the `source` of an
 `edges` or `lines` entry, and from a `source` / `source_url` column in `staff-movement.csv` or the staff lists. The drawer
 shows it under the connection ("Source" link for an https address), the open data `network-edges` set has `basis` (what the
 line came from: research board, added by hand, profile, staff list, staff moves, relationship or investor record,
-`kop_open_data_network_basis()`) and `citation`. The build prints how many lines name one (`counts.citedEdges`,
-`counts.boardEdgesUncited`), and the page's "Sources and methods" note quotes the first. Never fill `cite` from KOP's own
+`kop_open_data_network_basis()`) and `citation`. The build counts the lines that carry one (`counts.citedEdges`); the page's "Sources and methods" note
+says the sources are on the linked profiles and quotes no count. Never fill `cite` from KOP's own
 files or from HEAL or the wiki: the primary record they point to.
 
 Programs for adults (item 29, owner 2026-11-04): a map name pinned in `network-overrides.json`'s `facilities` to an approved
