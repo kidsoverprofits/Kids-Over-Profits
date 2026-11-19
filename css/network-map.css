@@ -87,6 +87,52 @@
 	margin-top: 0.5rem;
 }
 
+/* Sources and methods: a closed panel across the intro's full width. Kadence
+ * colours a and summary-like text directly, so each names its own colour. */
+.kop-network__methods {
+	flex: 1 0 100%;
+	max-width: 60rem;
+	margin: 0.35rem 0 0;
+	padding: 0.35rem 0.85rem;
+	border: 1px solid var(--kop-mint-green, #B6E3D4);
+	border-radius: var(--kop-net-radius);
+	background: var(--kop-white, #fff);
+	color: var(--kop-midnight-blue, #000435);
+	font-size: 0.88rem;
+	line-height: 1.45;
+}
+
+.kop-network__methods summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-network__methods ul {
+	margin: 0.5rem 0 0.25rem 1.1rem;
+	padding: 0;
+}
+
+.kop-network__methods li {
+	margin-bottom: 0.35rem;
+	color: #4a4f6a;
+}
+
+.kop-network__methods li strong {
+	color: var(--kop-midnight-blue, #000435);
+}
+
+.kop-network__methods a,
+.kop-network__methods a:visited {
+	color: var(--kop-navy-blue, #000080);
+	text-decoration: underline;
+}
+
+.kop-network__methods a:hover,
+.kop-network__methods a:focus-visible {
+	color: var(--kop-midnight-blue, #000435);
+}
+
 .kop-network__noscript,
 .kop-network__unavailable {
 	max-width: 60ch;
@@ -1427,6 +1473,26 @@ button.kop-network__popup-person:hover, button.kop-network__popup-person:focus, 
 	padding: 0 0.4rem 0.25rem;
 	font-size: 0.72rem;
 	color: #4a4f6a;
+}
+
+/* Where a connection is documented (edge.cite). Kadence colours a directly,
+ * so the link names its own colour. */
+.kop-network__drawer-cite {
+	display: block;
+	padding: 0 0.4rem 0.25rem;
+	font-size: 0.72rem;
+	color: #4a4f6a;
+}
+
+.kop-network__drawer-cite a,
+.kop-network__drawer-cite a:visited {
+	color: var(--kop-navy-blue, #000080);
+	text-decoration: underline;
+}
+
+.kop-network__drawer-cite a:hover,
+.kop-network__drawer-cite a:focus-visible {
+	color: var(--kop-midnight-blue, #000435);
 }
 
 /* A name and, when it has one, its facility profile beside it. */

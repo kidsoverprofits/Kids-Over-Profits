@@ -104,6 +104,20 @@ function kop_open_data_table_exists(PDO $pdo, $table) {
     }
 }
 
+/** What a network map connection was taken from, in words, from the build's provenance. */
+function kop_open_data_network_basis($edge) {
+    $words = array(
+        'profile'        => 'facility or company profile',
+        'staff-movement' => 'reviewed staff moves',
+        'staff-list'     => 'staff list',
+        'relations'      => 'relationship record',
+        'investors'      => 'investor record',
+    );
+    $p = (string) ($edge['provenance'] ?? '');
+    if ($p === '') return !empty($edge['added']) ? 'added by hand' : 'research board';
+    return $words[$p] ?? $p;
+}
+
 function kop_open_data_json_list($value) {
     $list = is_array($value) ? $value : json_decode((string) $value, true);
     return is_array($list) ? $list : array();
@@ -512,7 +526,7 @@ function kop_open_data_datasets() {
         $sets['network-edges'] = array(
             'title'       => 'Network map: connections',
             'group'       => 'Network map',
-            'description' => 'Every connection on the network map: who worked where, in what role, which company owns what, rebrands and staff moves. source and target match the node ids.',
+            'description' => 'Every connection on the network map: who worked where, in what role, which company owns what, rebrands and staff moves. source and target match the node ids. basis says what the connection was taken from (the research board, a facility or company profile, a staff list, reviewed staff moves, a relationship or investor record); citation is where it is documented, when that has been recorded (often empty: the board predates per-line citations).',
             'rows'        => static function () use ($graph) {
                 foreach ((array) ($graph()['edges'] ?? array()) as $e) {
                     yield array(
@@ -522,6 +536,8 @@ function kop_open_data_datasets() {
                         'category'  => (string) ($e['category'] ?? ''),
                         'roles'     => (array) ($e['roles'] ?? array()),
                         'direction' => (string) ($e['direction'] ?? ''),
+                        'basis'     => kop_open_data_network_basis($e),
+                        'citation'  => (string) ($e['cite'] ?? ''),
                     );
                 }
             },

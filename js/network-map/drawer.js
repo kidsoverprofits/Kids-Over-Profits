@@ -25,7 +25,7 @@
     var KIND_WORDS = {
         facility: 'Program', parent: 'Company', person: 'Person',
         association: 'Trade group', church: 'Church', government: 'Government body',
-        investor: 'Investor'
+        investor: 'Investor', marketer: 'Marketing or referral company'
     };
     var STATUS_WORDS = {
         open: 'Operating', closed: 'Closed', rebranded: 'Rebranded',
@@ -105,7 +105,7 @@
             if (!byLabel[label]) { byLabel[label] = []; order.push(label); }
             byLabel[label].push({
                 node: link.other, provenance: link.edge.provenance || '', raw: link.edge.raw || '',
-                role: wordsOf(link.edge)
+                role: wordsOf(link.edge), cite: link.edge.cite || ''
             });
         });
         order.sort(function (a, b) {
@@ -130,7 +130,9 @@
                  * and the source line does not already say it. */
                 roles: others.map(function (o) {
                     return (o.provenance === 'staff-movement' || o.provenance === 'staff-list') ? '' : o.role;
-                })
+                }),
+                /* Where the connection is documented, when the data names it. */
+                cites: others.map(function (o) { return o.cite; })
             };
         });
     }
@@ -168,6 +170,30 @@
             link.rel = 'noopener';
             link.setAttribute('aria-label', 'Profile of ' + other.name + ' (opens in a new tab)');
             parent.appendChild(link);
+        }
+
+        /**
+         * Where a connection is documented: each https address as a "Source"
+         * link, any other text as plain words. Several are joined with "; ".
+         */
+        function appendCite(parent, cite) {
+            var parts = String(cite || '').split(/\s*;\s*/).filter(Boolean);
+            if (!parts.length) return;
+            var line = el('span', 'kop-network__drawer-cite');
+            parts.forEach(function (part, i) {
+                if (i) line.appendChild(document_.createTextNode('; '));
+                if (/^https:\/\/[^\s"<>]+$/.test(part)) {
+                    var link = el('a', '', parts.length > 1 ? 'Source ' + (i + 1) : 'Source');
+                    link.href = part;
+                    link.target = '_blank';
+                    link.rel = 'noopener nofollow';
+                    link.setAttribute('aria-label', 'Source for this connection (opens in a new tab)');
+                    line.appendChild(link);
+                } else {
+                    line.appendChild(document_.createTextNode((i ? '' : 'Source: ') + part));
+                }
+            });
+            parent.appendChild(line);
         }
 
         function show(node) {
@@ -279,6 +305,7 @@
                          * research board's own. */
                         item.appendChild(el('span', 'kop-network__drawer-source', group.sources[index]));
                     }
+                    if (group.cites && group.cites[index]) appendCite(item, group.cites[index]);
                     var also = alsoFor[other.id];
                     if (showRoles && also && also.length) {
                         var alsoList = el('ul', 'kop-network__drawer-also');

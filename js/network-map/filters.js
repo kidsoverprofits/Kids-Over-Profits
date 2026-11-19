@@ -282,6 +282,7 @@
                 { kind: 'government', label: 'Government body' },
                 { kind: 'church', label: 'Church' },
                 { kind: 'investor', label: 'Investor' },
+                { kind: 'marketer', label: 'Marketing or referral company' },
                 /* A program for adults (item 29): its word under a program's name. */
                 { kind: 'facility', adult: true, label: 'Program for adults' }
             ].forEach(function (entry) {

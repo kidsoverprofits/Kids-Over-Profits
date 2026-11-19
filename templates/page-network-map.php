@@ -77,6 +77,34 @@ $kop_net_directory = function_exists('kop_location_index_url')
 		<?php endif; ?>
 
 		<?php
+		// Sources and methods (2026-11-19): where the lines come from, how far
+		// they are sourced, and what the map is not. Closed by default so the
+		// intro stays one band; the counts come from the build (citedEdges is
+		// absent before the first build that carries per-line sources).
+		$kop_net_graph_file = function_exists('kop_network_map_file') ? kop_network_map_file('graph.json') : '';
+		$kop_net_built = ($kop_net_graph_file && is_readable($kop_net_graph_file)) ? (int) filemtime($kop_net_graph_file) : 0;
+		$kop_net_cited = isset($kop_net_counts['citedEdges']) ? (int) $kop_net_counts['citedEdges'] : null;
+		$kop_net_open_data = home_url('/open-data/');
+		?>
+		<details class="kop-network__methods" id="network-methods">
+			<summary>Sources and methods</summary>
+			<ul>
+				<li><strong>Where the lines come from:</strong> most come from KOP's research board, a hand-built chart of programs, companies and people. The rest are added by the build from KOP's facility and company profiles, staff lists, reviewed staff moves, and its relationship and investor records. Each line in the data says which of these it came from.</li>
+				<li><strong>Sources:</strong> where a line's documentation has been recorded (a court record, a filing, an article, a program's own page), it is named when you open a name on the map, and in the data.
+					<?php if ($kop_net_cited !== null && !empty($kop_net_counts['edges'])) : ?>
+						So far <?php echo esc_html(number_format_i18n($kop_net_cited)); ?> of
+						<?php echo esc_html(number_format_i18n((int) $kop_net_counts['edges'])); ?> lines name one.
+					<?php endif; ?>
+					The board's older lines are still being matched to their sources, so a line without one is not yet traced in the data.</li>
+				<li><strong>Kinds of names:</strong> people, programs, parent companies, trade groups, government bodies, churches, investors, and marketing or referral companies. A name's kind is set by an editor or guessed from its wording; a marketing or referral company is only ever set by an editor.</li>
+				<li><strong>What a line means:</strong> that a relationship was documented, such as a job, an owner, a rebrand or a staff move. It is not an allegation of wrongdoing.</li>
+				<li><strong>What it is not:</strong> a complete picture of the industry. It shows what KOP has found and recorded so far.</li>
+				<li><strong>How current it is:</strong> the map is rebuilt from KOP's records about once a day<?php if ($kop_net_built) : ?>, last on <?php echo esc_html(wp_date(get_option('date_format'), $kop_net_built)); ?><?php endif; ?>.</li>
+				<li><strong>The data:</strong> every name and every line, with what each line came from and its source where recorded, downloads from <a href="<?php echo esc_url($kop_net_open_data); ?>">Open Data</a>. Cite a monthly edition, since the daily counts move.</li>
+			</ul>
+		</details>
+
+		<?php
 		// The site sidebar is dropped for the map's width; its donate button
 		// is not.
 		if (function_exists('kop_donate_widget')) {

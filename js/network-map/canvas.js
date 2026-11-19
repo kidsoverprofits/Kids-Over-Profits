@@ -272,7 +272,9 @@
      */
     var KIND_WORDS = {
         parent: 'COMPANY', association: 'TRADE GROUP',
-        government: 'GOVERNMENT', church: 'CHURCH', investor: 'INVESTOR'
+        government: 'GOVERNMENT', church: 'CHURCH', investor: 'INVESTOR',
+        /* A marketing or referral company (2026-11-19): set by hand only. */
+        marketer: 'MARKETER'
     };
 
     /* A program for adults (node.adult, from its record's related category:

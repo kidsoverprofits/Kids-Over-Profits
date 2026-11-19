@@ -280,7 +280,11 @@
                     /* "profile" for a connection the facility or operator
                      * profile records and the board does not; '' for the
                      * board's own. */
-                    provenance: raw.provenance || ''
+                    provenance: raw.provenance || '',
+                    /* Where the connection is documented (a court record, a
+                     * filing, an article), when the build was given one;
+                     * '' otherwise. A URL or a short citation. */
+                    cite: typeof raw.cite === 'string' ? raw.cite : ''
                 };
                 store.edges.push(edge);
                 store.edgeById[edge.id] = edge;

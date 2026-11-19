@@ -3968,10 +3968,10 @@ function run() {
      * unmarked: the plain box and the ellipse are the board's own key. */
     {
     const painter = sandbox.KOPNetworkCanvas;
-    const marked = /^(COMPANY|TRADE GROUP|GOVERNMENT|CHURCH|INVESTOR|ADULT)$/;
+    const marked = /^(COMPANY|TRADE GROUP|GOVERNMENT|CHURCH|INVESTOR|MARKETER|ADULT)$/;
     check(painter.kindWord('parent') === 'COMPANY' && painter.kindWord('association') === 'TRADE GROUP' &&
         painter.kindWord('government') === 'GOVERNMENT' && painter.kindWord('church') === 'CHURCH' &&
-        painter.kindWord('investor') === 'INVESTOR' &&
+        painter.kindWord('investor') === 'INVESTOR' && painter.kindWord('marketer') === 'MARKETER' &&
         painter.kindWord('facility') === '' && painter.kindWord('person') === '' && painter.kindWord('other') === '',
         'the kind words are not the chosen set');
     const aCompany = store.nodes.find((n) => n.kind === 'parent');
@@ -4037,7 +4037,8 @@ function run() {
         ['association', 'Trade group (TRADE GROUP under the name)'],
         ['government', 'Government body (GOVERNMENT under the name)'],
         ['church', 'Church (CHURCH under the name)'],
-        ['investor', 'Investor (INVESTOR under the name)']
+        ['investor', 'Investor (INVESTOR under the name)'],
+        ['marketer', 'Marketing or referral company (MARKETER under the name)']
     ].forEach(([kind, label]) => {
         check(kindsShowing.has(kind) === (rowTexts.indexOf(label) !== -1),
             'the legend and the map disagree about a ' + kind + ' being on screen');

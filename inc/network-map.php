@@ -363,6 +363,7 @@ if (!function_exists('kop_network_map_label')) {
             'government'  => 'Government bodies',
             'church'      => 'Churches',
             'investor'    => 'Investors',
+            'marketer'    => 'Marketing and referral companies',
             'other'       => 'Other',
         );
         $categories = array(
