@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 17:39 UTC",
- "source": "af7e72aa6c997db7a721c07243c3815c2803778b",
+ "built": "2026-11-19 18:01 UTC",
+ "source": "5eec942657b38d61bc4f209424f2d707816455e2",
  "sections": [
   {
    "key": "2",
@@ -4357,6 +4357,21 @@
        "focus": false,
        "steps": [],
        "hash": "adb3b3893dfa"
+      },
+      {
+       "id": "4.6:program-website-scan-2026-11-19-gao-prep-call-2026-11-30",
+       "lead": "Program website scan, 2026-11-19 (GAO prep, call 2026-11-30)",
+       "text": "**Program website scan, 2026-11-19 (GAO prep, call 2026-11-30)**: kop-pipeline `tmp/seo-scan-2026-11-19/` (778 domains) and its hand-made `changes.md`. The October runs (`tmp/seo-scan/` and the Oct 13 one) died with the old laptop, so `seo-scan-compare.py` had nothing to compare; `changes.md` compares against the published counts and the media-library AI-file copies instead. Scanner fixed (kop-pipeline b5ccd92, 259257c): Google Docs sites from the mirror when `tmp/gdocs/` is missing, cited sites in KNOWN, sitemap fallback. Open: (a) save today's AI files to the media library like the Oct 13 set, at least the five public llms.txt files rewritten 2026-10-27 (New Lifehouse, Brush Creek, BTBS, Military Schools USA, Safe Harbor), the hidden home-page copies that still carry the old instructions, bestresidentialtreatment.com's llms.txt and New Hope's 404s, so the GAO notes can cite KOP copies; (b) back up `tmp/seo-scan-2026-11-19/` to the KOP Drive so the next comparison has a baseline; (c) a Manipulation Watch update (Oct 27 rewrites, the hidden copies left behind, Best Choice's new domain, Safe Harbor's +344 town pages) waits on the owner's word.",
+       "ask": "",
+       "date": "2026-11-30",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "c24e1bd0e754"
       }
      ]
     },
