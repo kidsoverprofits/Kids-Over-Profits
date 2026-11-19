@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `lawsuits` (
   `status` varchar(40) NOT NULL DEFAULT 'unknown' COMMENT 'Lawsuit statuses list (KOP Tools > Dropdown Lists)',
   `plaintiffs` text DEFAULT NULL COMMENT 'JSON array of plaintiff names',
   `defendants` text DEFAULT NULL COMMENT 'JSON array of defendant names',
+  `defendant_types` text DEFAULT NULL COMMENT 'JSON list of lawsuit-defendant-types values (inc/lawsuit-defendant-types.php)',
   `facilities_mentioned` text DEFAULT NULL COMMENT 'JSON array of facility names',
   `staff_mentioned` text DEFAULT NULL COMMENT 'JSON array of staff/owners',
   `organizations_mentioned` text DEFAULT NULL COMMENT 'JSON array of parent orgs / companies',

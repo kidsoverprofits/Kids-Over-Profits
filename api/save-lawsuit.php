@@ -14,6 +14,7 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/config.php';
 if (!function_exists('kop_choices')) require_once dirname(__DIR__) . '/inc/choice-lists.php'; // KOP Tools > Dropdown Lists
+require_once dirname(__DIR__) . '/inc/lawsuit-defendant-types.php';   // defendant_types (facility, operator, consultant, marketer)
 
 // Bootstrap WordPress so we can call current_user_can()
 if (!defined('ABSPATH')) {
@@ -32,7 +33,7 @@ $is_admin = function_exists('current_user_can') && current_user_can('edit_posts'
 function lawsuit_decode_json_fields(array $row): array {
     $jsonFields = [
         'plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned',
-        'organizations_mentioned', 'claims', 'source_urls', 'document_urls', 'tags',
+        'organizations_mentioned', 'claims', 'source_urls', 'document_urls', 'tags', 'defendant_types',
     ];
     foreach ($jsonFields as $field) {
         if (isset($row[$field]) && is_string($row[$field])) {
@@ -60,6 +61,7 @@ function lawsuit_normalize_array($value): array {
 }
 
 try {
+    kop_lawsuits_defendant_types_ready($pdo);   // adds the column the first time
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -189,6 +191,11 @@ try {
         'publication_status'     => $pubStatus,
         'reviewer_notes'         => trim((string)($data['reviewer_notes'] ?? '')),
     ];
+    // Defendant types: only written when the caller sends them, so another
+    // editor that does not know the field never clears it.
+    if (array_key_exists('defendant_types', $data) && kop_lawsuits_defendant_types_ready($pdo)) {
+        $fields['defendant_types'] = json_encode(kop_lawsuit_defendant_types_clean($data['defendant_types']), JSON_UNESCAPED_SLASHES);
+    }
 
     $submittedBy = trim((string)($data['submitted_by'] ?? ''));
     if ($submittedBy === '' && function_exists('wp_get_current_user')) {

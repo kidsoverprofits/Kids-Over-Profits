@@ -38,6 +38,8 @@ function kop_lawsuit_drop_self_links(array $urls) {
 $status_filter  = isset($_GET['status'])       ? sanitize_text_field($_GET['status'])       : '';
 $jurisdiction   = isset($_GET['jurisdiction']) ? sanitize_text_field($_GET['jurisdiction']) : '';
 $claim_filter   = isset($_GET['claim'])        ? sanitize_text_field($_GET['claim'])        : '';
+$dtype_filter   = isset($_GET['defendant'])    ? sanitize_key($_GET['defendant'])           : '';
+if (!function_exists('kop_lawsuit_defendant_types')) require_once get_stylesheet_directory() . '/inc/lawsuit-defendant-types.php';
 
 try {
     $where  = ["publication_status IN ('approved','published')"];
@@ -62,16 +64,24 @@ try {
         }
         $lawsuits = $filtered;
     }
+    if ($dtype_filter !== '') {
+        $lawsuits = array_values(array_filter($lawsuits, static function ($case) use ($dtype_filter) {
+            return in_array($dtype_filter, kop_lawsuit_defendant_types_clean((string) ($case['defendant_types'] ?? '')), true);
+        }));
+    }
 
     // Collect filter options from all published records for dropdowns
-    $all_stmt = $pdo->prepare("SELECT jurisdiction, status, claims FROM lawsuits WHERE publication_status IN ('approved','published')");
+    $all_stmt = $pdo->prepare('SELECT jurisdiction, status, claims' . (kop_lawsuits_defendant_types_ready($pdo) ? ', defendant_types' : '')
+        . " FROM lawsuits WHERE publication_status IN ('approved','published')");
     $all_stmt->execute();
     $all_rows = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $jurisdictions = [];
     $statuses      = [];
     $all_claims    = [];
+    $dtypes_used   = [];
     foreach ($all_rows as $row) {
+        foreach (kop_lawsuit_defendant_types_clean((string) ($row['defendant_types'] ?? '')) as $dt) $dtypes_used[$dt] = true;
         if ($row['jurisdiction']) $jurisdictions[$row['jurisdiction']] = true;
         if ($row['status'])       $statuses[$row['status']] = true;
         $claims = json_decode($row['claims'] ?? '[]', true) ?: [];
@@ -87,8 +97,10 @@ try {
     error_log('Lawsuits page: ' . $e->getMessage());
     $kop_db_error = true;
     $lawsuits = [];
-    $jurisdictions = $statuses = $all_claims = [];
+    $jurisdictions = $statuses = $all_claims = $dtypes_used = [];
 }
+// Defendant types in use, in the list's own order (KOP Tools > Dropdown Lists)
+$dtype_options = array_intersect_key(kop_lawsuit_defendant_types('all'), $dtypes_used);
 
 // Facilities each case is linked to (lawsuit_facility_links -> the v2 facility records)
 // and the news coverage of each case (lawsuit_news_links -> news_submissions).
@@ -228,6 +240,17 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
         <h1>Lawsuits &amp; Legal Cases</h1>
         <?php kop_db_unavailable_notice(!empty($kop_db_error)); ?>
         <p>Court cases involving Troubled Teen Industry facilities, operators, and staff.</p>
+        <details class="kop-records-methods" id="lawsuits-methods">
+            <summary>How this list is made</summary>
+            <ul>
+                <li><strong>Where cases come from:</strong> court records, news coverage of the programs KOP tracks, and cases people send in through the <a href="<?php echo esc_url(home_url('/submit-lawsuit')); ?>">Submit a Lawsuit</a> form. An editor checks each case before it appears here.</li>
+                <li><strong>Sources:</strong> each case gives its court and docket number and links to the court record or the filings themselves where KOP has them. Court papers KOP holds are kept in its document library. News articles are listed as coverage, not as the record of the case.</li>
+                <li><strong>How current it is:</strong> open cases are checked against their court docket about once a day (federal cases on CourtListener, others through a docket link where the case has one). A change waits for an editor before it shows here, so a status can trail the court by a few days.</li>
+                <li><strong>Brought against:</strong> the kinds of defendant the court record names (a facility, an operator or parent company, an educational consultant, a marketing or referral company). It is set by an editor from the parties list; a case without it has not been sorted yet.</li>
+                <li><strong>What it is not:</strong> a complete list of every case. A complaint's claims are allegations until a court rules on them, and a settlement is not an admission of wrongdoing.</li>
+                <li><strong>The data:</strong> every published case, with its parties, claims, outcome and links, downloads from <a href="<?php echo esc_url(home_url('/open-data/')); ?>">Open Data</a> (cite a monthly edition).</li>
+            </ul>
+        </details>
         <p class="kop-records-cta">
             Know of a case we're missing?
             <a class="kop-card-link" href="<?php echo esc_url(home_url('/submit-lawsuit')); ?>">Submit a lawsuit for review &rarr;</a>
@@ -262,6 +285,14 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
             <?php endforeach; ?>
         </select>
 
+        <?php if ($dtype_options): ?>
+        <select class="kop-filter-select" id="filter-defendant" data-filter="defendant">
+            <option value="">All defendant types</option>
+            <?php foreach ($dtype_options as $dt => $dt_label): ?>
+                <option value="<?php echo esc_attr($dt); ?>" <?php selected($dtype_filter, $dt); ?>><?php echo esc_html($dt_label); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php endif; ?>
         <button type="button" class="kop-filter-clear" id="clear-filters">Clear filters</button>
         <span class="kop-filter-count" id="filter-count"><?php echo count($lawsuits); ?> cases</span>
     </div>
@@ -287,6 +318,7 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
             $status_slug  = $case['status'] ?: 'unknown';
             $status_label = kop_lawsuit_status_label($status_slug);   // KOP Tools > Dropdown Lists
             $claims_json  = htmlspecialchars(json_encode($claims), ENT_QUOTES);
+            $dtypes       = kop_lawsuit_defendant_types_clean((string) ($case['defendant_types'] ?? ''));
             $lawsuit_id   = (int)$case['id'];
             $facility_tags = $facility_tags_for($facilities, $facility_links[$lawsuit_id] ?? [], (string) ($case['jurisdiction'] ?? ''));
             $coverage      = $news_links[$lawsuit_id] ?? [];
@@ -317,7 +349,8 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
         <div class="kop-record-card" id="lawsuit-<?php echo (int) $case['id']; ?>"<?php echo function_exists('kop_ie_attr') ? kop_ie_attr('rec:lawsuit:' . (int) $case['id'], (string) $case['case_name']) : ''; ?>
              data-status="<?php echo esc_attr($status_slug); ?>"
              data-jurisdiction="<?php echo esc_attr($case['jurisdiction'] ?? ''); ?>"
-             data-claims="<?php echo $claims_json; ?>">
+             data-claims="<?php echo $claims_json; ?>"
+             data-defendant-types="<?php echo esc_attr(implode(' ', $dtypes)); ?>">
 
             <div class="kop-card-header">
                 <h2 class="kop-card-title"><?php echo esc_html($case['case_name']); ?></h2>
@@ -342,7 +375,7 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
                 <?php endif; ?>
             </div>
 
-            <?php if ($plaintiffs || $defendants): ?>
+            <?php if ($plaintiffs || $defendants || $dtypes): ?>
             <div class="kop-card-parties">
                 <?php if ($plaintiffs): ?>
                     <div class="kop-party-row">
@@ -356,6 +389,12 @@ $facility_tags_for = static function (array $mentions, array $linked, string $pl
                         <span class="kop-party-label">Defendant<?php echo count($defendants) > 1 ? 's' : ''; ?>:</span>
                         <?php echo esc_html(implode(', ', array_slice($defendants, 0, 3))); ?>
                         <?php if (count($defendants) > 3): ?><em> +<?php echo count($defendants) - 3; ?> more</em><?php endif; ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($dtypes): ?>
+                    <div class="kop-party-row kop-party-types">
+                        <span class="kop-party-label">Brought against:</span>
+                        <?php echo esc_html(implode(', ', array_map('kop_lawsuit_defendant_type_label', $dtypes))); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -452,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
             status:       document.getElementById('filter-status').value,
             jurisdiction: document.getElementById('filter-jurisdiction').value,
             claim:        document.getElementById('filter-claim').value,
+            defendant:    (document.getElementById('filter-defendant') || {}).value || '',
         };
     }
 
@@ -468,7 +508,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     claimMatch = claims.includes(f.claim);
                 } catch(_) { claimMatch = false; }
             }
-            const show = statusMatch && jurisMatch && claimMatch;
+            const typeMatch = !f.defendant || (card.dataset.defendantTypes || '').split(' ').includes(f.defendant);
+            const show = statusMatch && jurisMatch && claimMatch && typeMatch;
             card.hidden = !show;
             if (show) visible++;
         });

@@ -24,6 +24,30 @@ get_header();
         <h1>Lawsuit Records</h1>
         <p>Add and edit lawsuit records that show up on state pages.</p>
     </header>
+    <?php
+    // Cases whose status and outcome disagree (inc/lawsuit-updates.php): the court record decides which to fix.
+    $kop_ls_conflicts = array();
+    if (function_exists('kop_lawsuit_status_outcome_conflicts')) {
+        $kop_ls_pdo = function_exists('kop_seed_pdo') ? kop_seed_pdo() : null;
+        if ($kop_ls_pdo instanceof PDO) $kop_ls_conflicts = kop_lawsuit_status_outcome_conflicts($kop_ls_pdo);
+    }
+    if ($kop_ls_conflicts): ?>
+    <details class="lawsuit-check-list" open>
+        <summary>To check: <?php echo count($kop_ls_conflicts); ?> published case<?php echo count($kop_ls_conflicts) === 1 ? '' : 's'; ?> whose status and outcome disagree</summary>
+        <p>Open the court record, then fix whichever is wrong. This list only reads the two fields; it changes nothing.</p>
+        <ul class="record-list">
+            <?php foreach ($kop_ls_conflicts as $c): ?>
+            <li class="record-row">
+                <div class="record-row-main">
+                    <strong><?php echo esc_html($c['case_name']); ?></strong>
+                    <span class="record-meta"><?php echo esc_html($c['why']); ?> Outcome: <?php echo esc_html(wp_trim_words((string) $c['outcome'], 30)); ?></span>
+                </div>
+                <button type="button" class="edit-btn" data-id="<?php echo (int) $c['id']; ?>">Edit</button>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </details>
+    <?php endif; ?>
 
     <div class="admin-state-content-layout">
         <section class="admin-state-content-list">
@@ -142,6 +166,17 @@ get_header();
                     <label>Defendants (one per line)
                         <textarea name="defendants" id="lawsuit-defendants" rows="3"></textarea>
                     </label>
+                </div>
+
+                <div class="form-row">
+                    <fieldset class="lawsuit-defendant-types" id="lawsuit-defendant-types">
+                        <legend>Brought against (defendant types, from the court record; leave blank when unsure)</legend>
+                        <?php
+                        if (!function_exists('kop_lawsuit_defendant_types')) require_once get_stylesheet_directory() . '/inc/lawsuit-defendant-types.php';
+                        foreach (kop_lawsuit_defendant_types('offered') as $dt_value => $dt_label): ?>
+                            <label class="inline-check"><input type="checkbox" name="defendant_types" value="<?php echo esc_attr($dt_value); ?>"> <?php echo esc_html($dt_label); ?></label>
+                        <?php endforeach; ?>
+                    </fieldset>
                 </div>
 
                 <div class="form-row two-col">

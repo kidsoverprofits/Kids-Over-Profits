@@ -17,6 +17,173 @@ if (!defined('ABSPATH')) {
 }
 
 require_once __DIR__ . '/choice-lists.php';   // lawsuit and bill statuses (KOP Tools > Dropdown Lists)
+require_once __DIR__ . '/lawsuit-defendant-types.php';   // defendant_types column and its list
+
+/**
+ * A docket number reduced to what identifies the case in its court: "1:21-cv-00848-RJJ-RSK",
+ * "1:2021cv00848" and "21-cv-848" all give "21-cv-00848"; a state number ("200500204",
+ * "25CV017771-910") gives its letters and digits only. '' for nothing.
+ */
+function kop_lawsuit_docket_key($number) {
+    $number = strtolower(trim((string) $number));
+    if ($number === '') return '';
+    if (preg_match('/(?:\d{1,2}:)?(?:19|20)?(\d{2})[-\s]?(cv|cr|mc|md|bk|ap|mj)[-\s]?(\d{1,6})/', $number, $m)) {
+        return $m[1] . '-' . $m[2] . '-' . str_pad(ltrim($m[3], '0') ?: '0', 5, '0', STR_PAD_LEFT);
+    }
+    return preg_replace('/[^a-z0-9]+/', '', $number);
+}
+
+/**
+ * Lawsuit rows whose docket number has $docket's key and whose case_name holds every word
+ * in $name_contains (case-insensitive), published ones only when $published_only. Whole rows, by id.
+ */
+function kop_lawsuit_rows_by_docket(PDO $pdo, $docket, $name_contains = '', $published_only = false) {
+    $key = kop_lawsuit_docket_key($docket);
+    if ($key === '') return array();
+    $digits = preg_replace('/\D+/', '', substr($key, -5));
+    $like = '%' . ltrim($digits, '0') . '%';
+    $st = $pdo->prepare('SELECT * FROM lawsuits WHERE case_number LIKE ?'
+        . ($published_only ? " AND publication_status IN ('approved','published')" : '') . ' ORDER BY id');
+    $st->execute(array($like));
+    $out = array();
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        if (kop_lawsuit_docket_key($row['case_number']) !== $key) continue;
+        $ok = true;
+        foreach (preg_split('/\s+/', trim((string) $name_contains)) as $w) {
+            if ($w !== '' && stripos((string) $row['case_name'], $w) === false) $ok = false;
+        }
+        if ($ok) $out[] = $row;
+    }
+    return $out;
+}
+
+/**
+ * Merge second copies of one case ('merge_duplicates' in seeds/lawsuit-updates.json):
+ * each entry names the docket, a word of the caption, the filing date and the court's
+ * district word, and how many rows it expects. Only when exactly that many rows match
+ * (same docket key, same filing date, the district word in every court) is anything
+ * done. The row with the court's full docket number (the longest) is kept; it takes the
+ * others' source, document and tag links, claims and defendant types, and any field it
+ * has empty; their facility and news links move to it; the copies are deleted, each one
+ * saved whole in the option kop_lawsuit_merges_log first. A 'keep_status' entry sets the
+ * kept row's status (the copies disagreed).
+ */
+function kop_apply_lawsuit_merges(PDO $pdo, array $spec, array &$done) {
+    $lists = array('source_urls', 'document_urls', 'tags', 'claims');
+    $fill_lists = array('plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned');
+    $scalars = array('court', 'jurisdiction', 'outcome', 'settlement_amount', 'summary', 'filebird_folder_id');
+    $has_dtypes = kop_lawsuits_defendant_types_ready($pdo);
+    $log = function_exists('get_option') ? (array) get_option('kop_lawsuit_merges_log', array()) : array();
+    $enc = static function ($v) {
+        return wp_json_encode(array_values($v), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    };
+    $dec = static function ($v) {
+        $d = json_decode((string) $v, true);
+        return is_array($d) ? $d : array();
+    };
+    foreach ((array) ($spec['merge_duplicates'] ?? array()) as $m) {
+        $rows = kop_lawsuit_rows_by_docket($pdo, (string) ($m['docket'] ?? ''), (string) ($m['name_contains'] ?? ''), true);
+        $label = (string) ($m['docket'] ?? '');
+        if (count($rows) !== (int) ($m['expect'] ?? 2)) {
+            $done['merge_skipped'][] = $label . ': ' . count($rows) . ' rows';
+            continue;
+        }
+        $same = true;
+        foreach ($rows as $r) {
+            if ((string) ($r['filing_date'] ?? '') !== (string) ($m['filing_date'] ?? '')) $same = false;
+            if (!empty($m['court_word']) && stripos((string) $r['court'], (string) $m['court_word']) === false) $same = false;
+        }
+        if (!$same) {
+            $done['merge_skipped'][] = $label . ': filing date or court differ';
+            continue;
+        }
+        usort($rows, static function ($a, $b) {
+            $l = strlen((string) $b['case_number']) - strlen((string) $a['case_number']);
+            return $l !== 0 ? $l : ((int) $a['id'] - (int) $b['id']);
+        });
+        $keep = array_shift($rows);
+        $keep_id = (int) $keep['id'];
+        $set = array();
+        $args = array();
+        $merged = array();
+        foreach ($lists as $col) {
+            $all = $dec($keep[$col]);
+            foreach ($rows as $r) $all = array_merge($all, $dec($r[$col]));
+            $all = array_values(array_unique(array_map('strval', $all)));
+            if ($all !== array_map('strval', $dec($keep[$col]))) {
+                $set[] = "`{$col}` = ?";
+                $args[] = $enc($all);
+            }
+        }
+        foreach ($fill_lists as $col) {
+            if ($dec($keep[$col])) continue;
+            foreach ($rows as $r) {
+                if ($dec($r[$col])) {
+                    $set[] = "`{$col}` = ?";
+                    $args[] = (string) $r[$col];
+                    break;
+                }
+            }
+        }
+        foreach ($scalars as $col) {
+            if (trim((string) ($keep[$col] ?? '')) !== '') continue;
+            foreach ($rows as $r) {
+                if (trim((string) ($r[$col] ?? '')) !== '') {
+                    $set[] = "`{$col}` = ?";
+                    $args[] = $r[$col];
+                    break;
+                }
+            }
+        }
+        if ($has_dtypes) {
+            $types = kop_lawsuit_defendant_types_clean((string) ($keep['defendant_types'] ?? ''));
+            foreach ($rows as $r) $types = array_merge($types, kop_lawsuit_defendant_types_clean((string) ($r['defendant_types'] ?? '')));
+            $types = kop_lawsuit_defendant_types_clean($types);
+            if ($types) {
+                $set[] = '`defendant_types` = ?';
+                $args[] = wp_json_encode($types);
+            }
+        }
+        if (!empty($m['keep_status']) && in_array($m['keep_status'], kop_lawsuit_status_values('all'), true)) {
+            $set[] = '`status` = ?';
+            $args[] = $m['keep_status'];
+        }
+        foreach ($rows as $r) {
+            $merged[] = '#' . (int) $r['id'] . ' "' . $r['case_name'] . '" (' . $r['case_number'] . ', status ' . $r['status'] . ')';
+        }
+        $set[] = "reviewer_notes = CONCAT(COALESCE(reviewer_notes, ''), ?)";
+        $args[] = "\n[claude " . (string) ($spec['version'] ?? '') . '] Merged duplicate ' . implode('; ', $merged)
+            . ' into this case. ' . (string) ($m['note'] ?? '');
+        $pdo->beginTransaction();
+        try {
+            $args[] = $keep_id;
+            $pdo->prepare('UPDATE lawsuits SET ' . implode(', ', $set) . ' WHERE id = ?')->execute($args);
+            foreach ($rows as $r) {
+                $drop = (int) $r['id'];
+                foreach (array('lawsuit_facility_links', 'lawsuit_news_links') as $t) {
+                    try {
+                        $pdo->prepare("UPDATE IGNORE {$t} SET lawsuit_id = ? WHERE lawsuit_id = ?")->execute(array($keep_id, $drop));
+                    } catch (Throwable $e) {
+                        // table not on this database
+                    }
+                }
+                $log[] = array('at' => gmdate('c'), 'kept' => $keep_id, 'row' => $r);
+                $pdo->prepare('DELETE FROM lawsuits WHERE id = ?')->execute(array($drop));
+                $done['merged'][] = $drop . '->' . $keep_id;
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            error_log('kop_apply_lawsuit_merges ' . $label . ': ' . $e->getMessage());
+            $done['merge_skipped'][] = $label . ': ' . $e->getMessage();
+            continue;
+        }
+        if (function_exists('update_option')) update_option('kop_lawsuit_merges_log', $log, false);
+        require_once get_stylesheet_directory() . '/api/lib-record-resync.php';
+        kop_records_deleted($pdo, 'lawsuit', array_map(static function ($r) { return (int) $r['id']; }, $rows));
+        $done['updated'][] = $keep_id;
+    }
+}
 
 function kop_apply_lawsuit_updates() {
     $done = array('updated' => array(), 'skipped' => array(), 'inserted' => array());
@@ -55,6 +222,9 @@ function kop_apply_lawsuit_updates() {
         'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned', 'claims', 'outcome', 'settlement_amount',
         'summary', 'source_urls', 'document_urls', 'tags', 'publication_status',
     );
+    if (kop_lawsuits_defendant_types_ready($pdo)) {
+        $columns[] = 'defendant_types';
+    }
     $lists = array('plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned',
         'claims', 'source_urls', 'document_urls', 'tags');
     $statuses = kop_lawsuit_status_values('all');   // KOP Tools > Dropdown Lists
@@ -64,6 +234,23 @@ function kop_apply_lawsuit_updates() {
     try {
         $read = $pdo->prepare('SELECT source_urls FROM lawsuits WHERE id = ? AND case_name = ?');
         foreach ($spec['updates'] as $u) {
+            // 'match': {docket, name_contains} finds the row when its id is not known; only a lone match counts.
+            $was = '';
+            if (empty($u['id']) && !empty($u['match']['docket'])) {
+                $found = kop_lawsuit_rows_by_docket($pdo, (string) $u['match']['docket'], (string) ($u['match']['name_contains'] ?? ''));
+                if (count($found) !== 1) {
+                    $done['skipped'][] = 'docket ' . $u['match']['docket'] . ': ' . count($found) . ' rows';
+                    continue;
+                }
+                $u['id'] = (int) $found[0]['id'];
+                $u['case_name'] = (string) $found[0]['case_name'];
+                // What the update replaces goes into the note, so it can be put back by hand.
+                foreach (array_keys((array) ($u['set'] ?? array())) as $col) {
+                    if (array_key_exists($col, $found[0]) && trim((string) $found[0][$col]) !== '') {
+                        $was .= ' Was ' . $col . ': ' . $found[0][$col] . '.';
+                    }
+                }
+            }
             $id = (int) ($u['id'] ?? 0);
             $name = (string) ($u['case_name'] ?? '');
             if ($id <= 0 || $name === '') {
@@ -85,6 +272,11 @@ function kop_apply_lawsuit_updates() {
                     continue;
                 }
                 if ($col === 'status' && !in_array($val, $statuses, true)) {
+                    continue;
+                }
+                if ($col === 'defendant_types') {
+                    $set[] = '`defendant_types` = ?';
+                    $args[] = wp_json_encode(kop_lawsuit_defendant_types_clean((array) $val));
                     continue;
                 }
                 if (in_array($col, $lists, true)) {
@@ -125,7 +317,7 @@ function kop_apply_lawsuit_updates() {
             }
             if (!empty($u['note'])) {
                 $set[] = "reviewer_notes = CONCAT(COALESCE(reviewer_notes, ''), ?)";
-                $args[] = "\n[claude " . (string) ($spec['version'] ?? '') . '] ' . (string) $u['note'];
+                $args[] = "\n[claude " . (string) ($spec['version'] ?? '') . '] ' . (string) $u['note'] . $was;
             }
             if (!$set) {
                 $done['updated'][] = $id;
@@ -141,6 +333,7 @@ function kop_apply_lawsuit_updates() {
                 $done['skipped'][] = $id;
             }
         }
+        kop_apply_lawsuit_merges($pdo, $spec, $done);
     } catch (Throwable $e) {
         error_log('kop_apply_lawsuit_updates: ' . $e->getMessage());
         return null;
@@ -151,6 +344,42 @@ function kop_apply_lawsuit_updates() {
         kop_resync_lawsuit($pdo, $done['updated'], 'seed');
     }
     return $done;
+}
+
+/**
+ * Published cases whose status and outcome text disagree (an open case whose outcome says it was
+ * settled or dismissed, a settled case whose outcome says dismissed, and the reverse), for the
+ * "To check" list on the lawsuit editor. Nothing is changed: the court record decides which is right.
+ * [ [id, case_name, status, outcome, why], ... ]
+ */
+function kop_lawsuit_status_outcome_conflicts(PDO $pdo) {
+    $out = array();
+    try {
+        $rows = $pdo->query("SELECT id, case_name, status, outcome FROM lawsuits
+            WHERE publication_status IN ('approved','published') AND outcome IS NOT NULL AND outcome <> '' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return $out;
+    }
+    $open = array('filed', 'in_progress', 'unknown', 'appeal');
+    foreach ($rows as $r) {
+        $text = strtolower(preg_replace('/\bmotions? to dismiss\b|\bnot (?:been )?(?:dismissed|settled)\b|\bpartial(?:ly)? dismiss\w*|\bdismissed (?:as to|against) (?:some|one|two|several|certain)\b/i', '', (string) $r['outcome']));
+        $says_settled = (bool) preg_match('/\bsettle(?:d|ment (?:was )?(?:reached|approved|agreed))\b/', $text);
+        $says_dismissed = (bool) preg_match('/\b(?:case|suit|lawsuit|complaint|action)?\s*(?:was )?dismissed\b/', $text);
+        $says_decided = (bool) preg_match('/\b(?:jury (?:found|verdict|awarded)|verdict for|judgment (?:for|entered|in favor))\b/', $text);
+        $why = '';
+        if (in_array($r['status'], $open, true) && ($says_settled || $says_dismissed || $says_decided)) {
+            $why = 'Status is open, but the outcome says ' . ($says_settled ? 'settled' : ($says_dismissed ? 'dismissed' : 'decided')) . '.';
+        } elseif ($r['status'] === 'settled' && $says_dismissed && !$says_settled) {
+            $why = 'Status is settled, but the outcome says dismissed.';
+        } elseif ($r['status'] === 'dismissed' && $says_settled && !$says_dismissed) {
+            $why = 'Status is dismissed, but the outcome says settled.';
+        }
+        if ($why !== '') {
+            $r['why'] = $why;
+            $out[] = $r;
+        }
+    }
+    return $out;
 }
 
 function kop_maybe_apply_lawsuit_updates() {

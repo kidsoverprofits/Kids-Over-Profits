@@ -1,6 +1,6 @@
 {
-  "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes. New cases in seeds/lawsuits.json are inserted in the same pass.",
-  "version": "2026-11-18",
+  "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes. New cases in seeds/lawsuits.json are inserted in the same pass. An update may name its case by 'match': {docket, name_contains} instead of id + case_name (only a lone match counts; the replaced values go into the note). 'merge_duplicates' joins second copies of one case (same docket, filing date and court), keeping the row with the full docket number: kop_apply_lawsuit_merges().",
+  "version": "2026-11-19",
   "updates": [
     {
       "id": 24,
@@ -29,6 +29,51 @@
         ]
       },
       "note": "Facilities cut to the defendants (Mingus Mountain): the other programs (Robert Land Academy, Trails Carolina, West Ridge, Provo Canyon and others) are only named in the Reddit thread's comments, not in the suit (About rewrite batch 2, 2026-11-18)."
+    },
+    {
+      "match": {
+        "docket": "2:26-cv-00503",
+        "name_contains": "Liparote"
+      },
+      "set": {
+        "outcome": "Open. The court docket's last public listing (Justia, retrieved June 25, 2026) shows no dismissal of the case, a party or a claim. An earlier note here of a dismissal on Aug 4, 2026 was not found in the court record and needs checking on PACER."
+      },
+      "add_source_urls": [
+        "https://dockets.justia.com/docket/utah/utdce/2:2026cv00503/164659"
+      ],
+      "note": "Status (in progress) and outcome (dismissed Aug 4, 2026) disagreed. The Justia docket, retrieved June 25, 2026, lists only the complaint, service and procedural orders; no dismissal found, so the status stays and the outcome says what the record shows (GAO prep, 2026-11-19)."
+    },
+    {
+      "match": {
+        "docket": "7:06-cv-0908",
+        "name_contains": "Dungan"
+      },
+      "set": {
+        "defendant_types": [
+          "facility",
+          "marketer"
+        ]
+      },
+      "note": "Defendant types from the court record: the Academy at Ivy Ridge (the caption) and the marketing groups Teen Help and Lifelines, both defendants on the fraud claims (Report-Recommendation, N.D.N.Y., Apr 22, 2008). Whether an operator is also a defendant was not checked (GAO prep, 2026-11-19)."
+    }
+  ],
+  "merge_duplicates": [
+    {
+      "docket": "1:21-cv-00848",
+      "name_contains": "Goshay",
+      "filing_date": "2021-09-30",
+      "court_word": "Michigan",
+      "expect": 2,
+      "keep_status": "settled",
+      "note": "Same case: docket 1:21-cv-00848 (W.D. Mich.), filed Sept 30, 2021, Tenia Goshay for the Estate of Cornelius Frederick v. Lakeside for Children and the Sequel entities (Justia docket). WWMT (Jan 3, 2022) reports the federal suit settled in December 2021, so the copy's 'dismissed' is not kept (GAO prep, 2026-11-19)."
+    },
+    {
+      "docket": "4:26-cv-00526",
+      "name_contains": "Parker",
+      "filing_date": "2026-08-25",
+      "court_word": "Oklahoma",
+      "expect": 2,
+      "note": "Same case: docket 4:26-cv-00526 (N.D. Okla., Judge Mark T. Steele, the -MTS suffix), filed Aug 25, 2026, Brooke Parker v. Teen Challenge of Oklahoma, Inc. d/b/a New Lifehouse Girls Academy (Justia docket) (GAO prep, 2026-11-19)."
     }
   ]
 }

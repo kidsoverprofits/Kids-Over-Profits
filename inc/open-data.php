@@ -400,11 +400,14 @@ function kop_open_data_datasets() {
         $sets['lawsuits'] = array(
             'title'       => 'Lawsuits',
             'group'       => 'Lawsuits, legislation and news',
-            'description' => 'Published lawsuits against programs, operators and staff: court, parties, claims, outcome, settlement and source links.',
+            'description' => 'Published lawsuits against programs, operators and staff: court, parties, the kinds of defendant (facility, operator, educational consultant, marketing or referral company; empty where not yet sorted), claims, outcome, settlement and source links.',
             'rows'        => static function () use ($pdo) {
+                require_once get_stylesheet_directory() . '/inc/lawsuit-defendant-types.php';
+                $dtypes = kop_lawsuits_defendant_types_ready($pdo);
                 foreach (kop_open_data_pdo_rows($pdo,
-                    'id, case_name, case_number, court, jurisdiction, filing_date, status, plaintiffs, defendants, facilities_mentioned, staff_mentioned, organizations_mentioned, claims, outcome, settlement_amount, summary, source_urls, document_urls, tags, published_at',
+                    'id, case_name, case_number, court, jurisdiction, filing_date, status, plaintiffs, defendants, ' . ($dtypes ? 'defendant_types, ' : '') . 'facilities_mentioned, staff_mentioned, organizations_mentioned, claims, outcome, settlement_amount, summary, source_urls, document_urls, tags, published_at',
                     "lawsuits WHERE publication_status = 'published'") as $row) {
+                    if ($dtypes) $row['defendant_types'] = kop_lawsuit_defendant_types_clean((string) $row['defendant_types']);
                     foreach (array('plaintiffs', 'defendants', 'facilities_mentioned', 'staff_mentioned', 'organizations_mentioned', 'claims', 'source_urls', 'document_urls', 'tags') as $f) {
                         $row[$f] = kop_open_data_json_list($row[$f]);
                     }

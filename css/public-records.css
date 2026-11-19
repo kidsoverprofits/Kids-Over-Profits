@@ -42,6 +42,39 @@
     font-weight: 600;
 }
 
+/* "How this list is made" (lawsuits): a closed note under the intro */
+.kop-records-methods {
+    max-width: 46rem;
+    margin: 1rem auto 0;
+    text-align: left;
+    background: var(--kop-white, #fff);
+    color: var(--kop-midnight-blue, #000435);
+    border: 1px solid var(--kop-mint-green);
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+}
+.kop-records-methods summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--kop-midnight-blue, #000435);
+}
+.kop-records-methods ul {
+    margin: 0.6rem 0 0.2rem 1.1rem;
+    padding: 0;
+}
+.kop-records-methods li {
+    color: var(--kop-text-muted, #4A5568);
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+}
+.kop-records-methods li strong {
+    color: var(--kop-midnight-blue, #000435);
+}
+.kop-records-methods a {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
 /* ── Filter bar ──────────────────────────────────────── */
 
 .kop-records-filters {

@@ -63,6 +63,21 @@ kop_choice_register('lawsuit-statuses', array(
     ),
 ));
 
+kop_choice_register('lawsuit-defendant-types', array(
+    'label'    => 'Lawsuit defendant types',
+    'ordered'  => true,
+    'group'    => 'Lawsuits, bills and volunteers',
+    'where'    => 'The "Defendant types" boxes in the lawsuit editor, the "Defendant type" filter and the "Brought against" line on each case on /lawsuits/, and the defendant_types column of the lawsuits open data set (inc/lawsuit-defendant-types.php).',
+    'note'     => 'A case can carry several types. Set them from the court record (the caption and the parties list), never from a name alone.',
+    'last'     => array(),
+    'defaults' => array(
+        'facility'   => 'Facility',
+        'operator'   => 'Operator or parent company',
+        'consultant' => 'Educational consultant',
+        'marketer'   => 'Marketing or referral company',
+    ),
+));
+
 kop_choice_register('bill-statuses', array(
     'label'    => 'Bill statuses',
     'ordered'  => true, // the order a bill moves through

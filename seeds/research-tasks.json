@@ -31167,7 +31167,23 @@
      "kind": "news"
     }
    ]
+  },
+  {
+   "key": "lawsuits:was-liparote-v-discovery-ranch-d-utah-2-26-cv-00",
+   "section": "Lawsuits",
+   "title": "Was Liparote v. Discovery Ranch (D. Utah, 2:26-cv-00503) dismissed on Aug 4, 2026?",
+   "text": "The lawsuit row (#12) said the court dismissed the case on Aug 4, 2026, while its status said in progress. The Justia docket, last retrieved June 25, 2026, shows only the complaint, service and procedural orders. Needs the current PACER docket; the row's outcome was rewritten to say what the record shows (seeds/lawsuit-updates.json, 2026-11-19).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, GAO prep site fixes session",
+   "directions": [
+    {
+     "label": "Justia docket",
+     "url": "https://dockets.justia.com/docket/utah/utdce/2:2026cv00503/164659",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-18 22:03"
+ "built": "2026-11-19 13:57"
 }

@@ -194,9 +194,19 @@
             status.textContent = '';
         };
 
+        // Defendant types: checkboxes (inc/lawsuit-defendant-types.php). Sent on every save.
+        const defendantTypeBoxes = () => Array.from(document.querySelectorAll('#lawsuit-defendant-types input[name="defendant_types"]'));
+        const setDefendantTypes = values => {
+            const want = new Set(Array.isArray(values) ? values : []);
+            defendantTypeBoxes().forEach(box => { box.checked = want.has(box.value); });
+        };
+
         const populateForm = record => {
             Object.entries(fieldMap).forEach(([key, id]) => setFieldValue(id, record[key]));
             Object.entries(arrayFieldMap).forEach(([key, id]) => setFieldValue(id, record[key]));
+            if (defendantTypeBoxes().length && Object.prototype.hasOwnProperty.call(record, 'defendant_types')) {
+                setDefendantTypes(record.defendant_types);
+            }
         };
 
         const collectPayload = () => {
@@ -209,6 +219,9 @@
             Object.entries(arrayFieldMap).forEach(([key, id]) => {
                 payload[key] = linesToArray(getFieldValue(id));
             });
+            if (defendantTypeBoxes().length) {
+                payload.defendant_types = defendantTypeBoxes().filter(box => box.checked).map(box => box.value);
+            }
             return payload;
         };
 
@@ -251,6 +264,11 @@
             populateForm(data.data);
             window.scrollTo({ top: form.offsetTop - 20, behavior: 'smooth' });
         };
+
+        // "To check" list on the lawsuit editor (status and outcome disagree)
+        document.querySelectorAll('.lawsuit-check-list .edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => loadRecord(parseInt(btn.dataset.id, 10)));
+        });
 
         // ----- Paste raw JSON from external AI --------------------------------
         const pasteJsonBtn    = document.getElementById('pasteJsonBtn');
