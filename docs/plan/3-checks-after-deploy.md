@@ -228,3 +228,9 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     legend has "Marketing or referral company" (after the next map build). Run check-contrast and check-mobile-overflow
     on both pages (docs/claude/css-checks.md). Open Data: network-edges has `basis` and `citation`, facilities `funding`,
     lawsuits `defendant_types`.
+
+45. **Contact form** (2026-11-19): logged out, send one message from [/contact/](https://kidsoverprofits.org/contact/)
+   (a type, no name, Signal chosen with a username); the thank-you shows, the email reaches dani@kidsoverprofits.org
+   with the type in the subject and Reply-To the sender; it is under New at
+   [Contact Messages](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-contact-messages). Set In progress,
+   Undo; filter by type; Delete, Restore; Delete and Erase for good. Form at 390 px with no sideways scroll.

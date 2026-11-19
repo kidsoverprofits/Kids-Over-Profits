@@ -163,6 +163,8 @@ require_once get_stylesheet_directory() . '/inc/how-to-use.php';
 require_once get_stylesheet_directory() . '/inc/questions.php';
 // Sensitivity reader survey on /volunteer/: answers read at KOP Tools > Sensitivity Survey
 require_once get_stylesheet_directory() . '/inc/sensitivity-survey.php';
+// Contact form on /contact/: every message saved privately and read at KOP Tools > Contact Messages
+require_once get_stylesheet_directory() . '/inc/contact-messages.php';
 // Cite and print on /facility/ and /operator/ pages, and the press desk on /journalists/
 require_once get_stylesheet_directory() . '/inc/press-tools.php';
 

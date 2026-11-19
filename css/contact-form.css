@@ -1,0 +1,73 @@
+/* Contact form on /contact/ (inc/contact-messages.php). The panel, fields and button come from
+   css/volunteer-signup.css (.kop-vols); this adds the type dropdown, the radio buttons and the privacy note.
+   Colours are named for every field (docs/claude/css-checks.md, Kadence colour traps). */
+
+.kop-contact {
+    max-width: 44rem;
+}
+
+.kop-contact .kop-vols {
+    margin-top: 1rem;
+}
+
+.kop-vols select {
+    width: 100%;
+    max-width: 26rem;
+    box-sizing: border-box;
+    padding: 0.5rem 0.65rem;
+    font-size: 1rem;
+    color: var(--kop-text-primary, #1a202c);
+    background: var(--kop-white, #fff);
+    border: 1px solid var(--kop-text-muted, #4a5568);
+    border-radius: 6px;
+}
+
+.kop-vols select option {
+    color: var(--kop-text-primary, #1a202c);
+    background: var(--kop-white, #fff);
+}
+
+.kop-vols select:focus,
+.kop-vols input[type="radio"]:focus-visible {
+    outline: 2px solid var(--kop-focus-color, #000080);
+    outline-offset: 1px;
+}
+
+.kop-vols .kop-contact-detail input[type="text"] {
+    margin-top: 0.25rem;
+}
+
+.kop-vols .kop-contact-privacy {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--kop-sand, #f2eedf);
+    border-left: 4px solid var(--kop-navy, #000080);
+    border-radius: 4px;
+}
+
+.kop-vols .kop-contact-privacy p {
+    font-size: 0.95rem;
+    color: var(--kop-text-primary, #1a202c);
+    margin: 0 0 0.5rem;
+}
+
+.kop-vols .kop-contact-privacy p:last-child {
+    margin-bottom: 0;
+}
+
+.kop-vols .kop-contact-privacy a {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
+.kop-contact-done:focus {
+    outline: none;
+}
+
+@media (max-width: 767px) {
+    .kop-vols select,
+    .kop-vols input[type="text"],
+    .kop-vols input[type="email"] {
+        max-width: 100%;
+    }
+}

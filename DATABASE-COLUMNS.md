@@ -228,6 +228,11 @@ Since the 2026-09-18 write switch every reader and writer uses these tables; `fa
 **Columns:** `id`, `groups_json` (values from Dropdown Lists `sensitivity-groups`), `group_other`, `gaps`, `harm`, `context`, `pages`, `more`, `read_later` (1 = ask them to read drafts), `name`, `email`, `status` (new, read, deleted), `created_at`, `updated_by`, `updated_at`
 
 **Purpose:** Answers to the sensitivity reader survey on /volunteer/, read at KOP Tools > Sensitivity Survey (`inc/sensitivity-survey.php`); never published, no address or browser stored
+
+### {prefix}kop_contact_messages (admins only)
+**Columns:** `id`, `type` (values from Dropdown Lists `contact-types`), `name` (optional), `email`, `facility` (optional, free text), `message`, `contact_method` ('' / email / signal / phone), `contact_detail` (Signal name or phone number), `status` (new, in_progress, waiting, done, deleted), `created_at`, `updated_by`, `updated_at`
+
+**Purpose:** Messages from the form on /contact/, tracked at KOP Tools > Contact Messages (`inc/contact-messages.php`); each is also mailed to the owner. Never published, no address or browser stored
 **Primary Key:** `id`
 
 ---

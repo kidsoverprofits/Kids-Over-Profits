@@ -37,8 +37,12 @@ if (!function_exists('kop_utility_config')) {
                           'note' => 'Add or correct what we hold on a facility.'),
                 ),
             ),
+            // The form (inc/contact-messages.php) replaces the editor text, which was a bare mailto line.
             'contact' => array(
-                'share' => false,
+                'standfirst' => 'Write to the Kids Over Profits team.',
+                'share'      => false,
+                'content'    => false,
+                'module'     => 'kop_contact_form_render',
             ),
             'no-access' => array(
                 'share' => false,

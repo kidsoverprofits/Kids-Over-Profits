@@ -2,7 +2,8 @@
 /**
  * Template Name: Utility Page
  * Description: Shared frame for pages whose forms, widgets and link cards live
- * in editor content and must continue to render through the_content().
+ * in editor content and must continue to render through the_content(), or in
+ * a theme function named by kop_utility_config() 'module' (the contact form).
  */
 
 if (!defined('ABSPATH')) {
@@ -47,9 +48,18 @@ while (have_posts()) :
             </p>
         <?php endif; ?>
 
-        <div class="entry-content single-content kop-utility__content">
-            <?php kop_utility_the_content(!empty($kop_utility['share'])); ?>
-        </div>
+        <?php // 'content' => false: a page whose module replaces the editor text (the contact form). ?>
+        <?php if (!isset($kop_utility['content']) || $kop_utility['content'] !== false) : ?>
+            <div class="entry-content single-content kop-utility__content">
+                <?php kop_utility_the_content(!empty($kop_utility['share'])); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($kop_utility['module']) && is_callable($kop_utility['module'])) : ?>
+            <div class="entry-content single-content kop-utility__content kop-utility__module">
+                <?php call_user_func($kop_utility['module']); ?>
+            </div>
+        <?php endif; ?>
 
         <?php if (!empty($kop_utility['other_ways']) && is_array($kop_utility['other_ways'])) : ?>
             <aside class="kop-utility__other-ways" aria-labelledby="kop-utility-other-ways-title">

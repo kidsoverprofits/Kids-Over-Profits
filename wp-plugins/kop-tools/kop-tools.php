@@ -2,7 +2,7 @@
 /**
  * Plugin Name: KOP Tools
  * Description: One menu for every Kids Over Profits admin tool: the admin pages (Submissions Review, Data Manager, Wiki Editor, ...), the theme's wp-admin screens (Bug Reports, Glossary Editor, ...) and the self-contained tools in the child theme's api/ directory. The wp-admin sidebar, the admin bar dropdown and the dashboard all read the same registry.
- * Version: 2.5.17
+ * Version: 2.5.18
  * Author: Kids Over Profits
  * License: GPL-2.0-or-later
  */
@@ -126,6 +126,13 @@ function kop_tools_registry() {
                 'type'     => 'screen',
                 'screen'   => 'kop-state-lists',
                 'requires' => 'kop_sl_page',
+            ),
+            array(
+                'title'    => 'Contact Messages',
+                'desc'     => 'Every message sent from the Contact page, filtered by type (press, survivor or family, records request, collaboration, other) and status (new, in progress, waiting on them, done). Set the status, reply by email, delete or erase, with Undo.',
+                'type'     => 'screen',
+                'screen'   => 'kop-contact-messages',
+                'requires' => 'kop_contact_admin_page',
             ),
             array(
                 'title'    => 'Sensitivity Survey',

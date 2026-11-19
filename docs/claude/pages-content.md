@@ -169,6 +169,19 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-seo-drafts.php [-
 (kop-pipeline) python scripts/seo-scan.py [--limit N] [--domains a.com b.org] [--refresh] [--no-sitemaps] [--report]
 ```
 
+## Contact form (/contact/)
+
+`inc/contact-messages.php`: the form on the Contact page (a utility page; `kop_utility_config()` 'contact' sets
+`'module' => 'kop_contact_form_render'` and `'content' => false`, so the old editor text no longer shows). Messages go
+to `{prefix}kop_contact_messages`, tracked at KOP Tools > Contact Messages (filter by type and status; Undo on every
+status change; Deleted keeps the row, "Erase for good" removes it). Each one mails `KOP_CONTACT_TO`
+(dani@kidsoverprofits.org; option `kop_contact_email` overrides it) with the type in the subject and Reply-To set to
+the sender. The sender gets no email. The types are Dropdown Lists `contact-types` (`inc/choice-lists/contact.php`).
+Spam: honeypot `website`, a token from GET `kop/v1/contact` (nonce + signed start time, at least 3 s old; the page is
+cached, so the token is fetched, never printed), 5 a day per device (keyed hash in a transient, never stored), 150 a day
+in all. The intro and privacy note are edit-in-place blocks `contact:intro` / `contact:privacy`. Markup changes bump
+`KOP_CONTACT_PAGE_VERSION` (purges the LiteSpeed copy). Test: `php -d extension=mbstring scripts/test-contact-messages.php`.
+
 ## Reporting directory data
 
 `js/data/reporting/` (the kop-data repo) holds where to report an abusive therapist or program,
