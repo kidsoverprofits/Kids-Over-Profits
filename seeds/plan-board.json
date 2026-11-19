@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 23:01 UTC",
- "source": "af97c68982d16d0575fb1c3e04e779297f71a601",
+ "built": "2026-11-19 23:14 UTC",
+ "source": "57b9088c7ae77d576ca51da07243663298f798f9",
  "sections": [
   {
    "key": "2",
@@ -1312,111 +1312,10 @@
     {
      "key": "2.4",
      "title": "Decisions waiting",
-     "intro": [],
-     "items": [
-      {
-       "id": "2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check",
-       "lead": "NH: The Ridge RTC statement held by the privacy check",
-       "text": "**NH: The Ridge RTC statement held by the privacy check** (2025-12-15). The visit posts without it; children are lettered only, and the trigger was the words \"Child Advocacy Center\" (PLAN-ARCHIVE, New Hampshire 2026-10-01).",
-       "ask": "New Hampshire: post The Ridge RTC's Dec 2025 statement? (children are lettered; \"Child Advocacy Center\" tripped the privacy check)",
-       "date": "2026-10-01",
-       "why": "The privacy check held it, so the visit shows without its findings.",
-       "go": [],
-       "choices": [
-        "Post it",
-        "Keep it held"
-       ],
-       "time": "2 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "a889768d6eeb"
-      },
-      {
-       "id": "2.4:facility-pages-the-timeline-and-incidents-on-record-list-the",
-       "lead": "Facility pages: the timeline and \"Incidents on record\" list the same incidents",
-       "text": "**Facility pages: the timeline and \"Incidents on record\" list the same incidents** (Claude note #21, 2026-11-17). Every dated incident line shows twice on a page: as a Timeline event and again in the \"Incidents on record\" section further down (Provo Canyon School: 36 timeline events, 40 incident lines). The same-event duplicates inside both were merged in the note #21 commit; this is the repeat between the two sections. The app shows both too. Recommended: keep the timeline; \"Incidents on record\" lists only what the timeline can't place (lines with no year), headed by a link up to the timeline, on the site and in the app.",
-       "ask": "Incidents on facility pages: show them once (timeline only, undated ones in a short list), or keep both?",
-       "date": "2026-11-17",
-       "why": "The owner asked \"why are there so many duplicated timelines?\"; this is the repeat that is left.",
-       "go": [],
-       "choices": [
-        "Timeline only, undated in a short list",
-        "Keep both sections"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "5fbf621e9843"
-      },
-      {
-       "id": "2.4:wy-meadowlark-notice-held-by-the-privacy-check",
-       "lead": "WY: Meadowlark notice held by the privacy check",
-       "text": "**WY: Meadowlark notice held by the privacy check** (2024-04-04): a false positive on \"calling a youth Miley Cyrus\" (PLAN-ARCHIVE, Wyoming 2026-10-01).",
-       "ask": "Wyoming: post the Meadowlark Apr 2024 notice? (the privacy check tripped on \"calling a youth Miley Cyrus\")",
-       "date": "2026-10-01",
-       "why": "It looks like a false alarm; the notice is a finding against the program.",
-       "go": [],
-       "choices": [
-        "Post it",
-        "Keep it held"
-       ],
-       "time": "1 min",
-       "kind": "decide",
-       "focus": false,
-       "steps": [],
-       "hash": "2a6c5fe54d16"
-      },
-      {
-       "id": "2.4:wv-the-16-unsure-rows-and-1-gb-of-drive-for-wv-pdfs",
-       "lead": "WV: the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`",
-       "text": "**WV: the 16 unsure rows and ~1 GB of Drive for `wv_pdfs/`**. The scope has 66 included, 122 excluded and 16 unsure records; unsure records are not scraped (PLAN-ARCHIVE, West Virginia).",
-       "ask": "West Virginia: sort the 16 unsure facilities in or out, and OK about 1 GB of Drive for its PDFs",
-       "date": "",
-       "why": "West Virginia's first post waits on both.",
-       "go": [],
-       "choices": [],
-       "time": "15 min",
-       "kind": "do",
-       "focus": false,
-       "steps": [
-        {
-         "id": "tell-claude-list-west-virginia-s-16-unsure-rows-th",
-         "label": "Tell Claude \"list West Virginia's 16 unsure rows\", then say in or out for each",
-         "url": "",
-         "note": ""
-        },
-        {
-         "id": "ok-about-1-gb-of-google-drive-for-the-wv-pdfs-fold",
-         "label": "OK about 1 GB of Google Drive for the `wv_pdfs/` folder (add a note if not)",
-         "url": "",
-         "note": ""
-        }
-       ],
-       "hash": "fd90337fd52d"
-      },
-      {
-       "id": "2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58",
-       "lead": "Linden Oaks (IL, #100402): reject data submissions #56, #57 and #58",
-       "text": "**Linden Oaks (IL, #100402): reject data submissions #56, #57 and #58** at https://kidsoverprofits.org/admin-submissions/?type=data (note: \"done by hand 2026-10-21\"). Never approve them: #56 would put the three notes back, #57 would add its request as a note, #58 would write its sentence into the operator field. What they asked is done (2026-10-21, checked live): the three group-therapy and level-system notes are off, the Arabella House line is out of \"Also known as\" (it stays in the history note), the Charter link is dropped (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/227d22eeb19ba2573518daf5269a48b6ff622386), and Arabella House is young adult program #12, run by Linden Oaks, closed 2012 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/54511cf3afa48cafd5864bea35933c95906fcf7c). #52 was approved from the admin account on 2026-10-05; nothing skipped review. The \"operated by\" wording for past-only companies is fixed (2026-10-21, checked live on https://kidsoverprofits.org/facility/lakeside-behavioral-health-system-tn/ and the Tennessee feed): 36 records with no currentOperator and only 'past' links now read \"formerly run by X\", \"Former operator\", \"Other programs of its former operator, X\", no parentOrganization, and the state/country cards list X under Past operators (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/5d3d7ba294c04509f6fa4216f23501bca59b0b85). Only the rejections above are left.",
-       "ask": "Reject data submissions #56, #57 and #58 (Linden Oaks; note \"done by hand 2026-10-21\")",
-       "date": "2026-10-21",
-       "why": "Their changes are already made; approving one by mistake would undo the fix.",
-       "go": [
-        {
-         "label": "Submissions Review > Data",
-         "url": "https://kidsoverprofits.org/admin-submissions/?type=data"
-        }
-       ],
-       "choices": [],
-       "time": "2 min",
-       "kind": "do",
-       "focus": true,
-       "steps": [],
-       "hash": "8a43335e53ed"
-      }
-     ]
+     "intro": [
+      "Nothing waiting (2026-11-19)."
+     ],
+     "items": []
     },
     {
      "key": "2.5",
@@ -2742,6 +2641,21 @@
        "focus": false,
        "steps": [],
        "hash": "9fb56f7ed966"
+      },
+      {
+       "id": "3:incidents-show-once",
+       "lead": "Incidents show once",
+       "text": "**Incidents show once** (2026-11-19, plan 2.4): on https://kidsoverprofits.org/facility/provo-canyon-school-ut/ \"Incidents on record\" opens with \"The 32 dated incidents are in the timeline. These have no date.\" and lists 8 undated lines; the tile still says 40 incidents on record. A renamed program (/facility/acadia-montana-mt/) shows \"Its incidents are in the timeline.\" under a name whose only items were incidents. In the app (after the EAS update) Provo's Incidents section shows the same line and 8 entries.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "b7e6d1d4de7b"
       }
      ]
     }
@@ -5085,6 +4999,21 @@
        "focus": false,
        "steps": [],
        "hash": "677a26f0ed1c"
+      },
+      {
+       "id": "5:test-mobile-api-php-fixture-hyde-aka-comes-back-empty",
+       "lead": "test-mobile-api.php --fixture: \"Hyde aka\" comes back empty",
+       "text": "**test-mobile-api.php --fixture: \"Hyde aka\" comes back empty** (found 2026-11-19, failing on a clean checkout of main too, so not from the incidents change): the made-up Hyde record's aka list is []; likely the same alias change as #9.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "13b57f3789ef"
       }
      ]
     }
