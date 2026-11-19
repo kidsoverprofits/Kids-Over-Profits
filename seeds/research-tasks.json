@@ -31740,7 +31740,17 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "marketing:how-many-town-and-city-pages-did-master-s-ranch",
+   "section": "Marketing",
+   "title": "How many town and city pages did Master's Ranch, Brush Creek, New Hope Boys Home, Ozark Trails, TeenChallengeSchools.com and the Exceed directories have in early October 2026?",
+   "text": "The Nov 19 program website scan counts town/city pages on these sites (Master's Ranch 733 of 801, Brush Creek 715 of 793, Ozark Trails 591 of 668, TeenChallengeSchools 338 of 356, New Hope Boys Home 1 of 30; Military Schools USA 1,203, TroubledTeenSchools.us 806, TherapeuticBoardingSchools.org 804, BTBS 443), but the October scan results were lost and the articles publish no October count for them. Wayback copies of their sitemaps from early October 2026 would settle it. New Hope's matters most: its llms.txt and town pages appear to be gone.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, Claude (seo scan 2026-11-19)",
+   "directions": []
   }
  ],
- "built": "2026-11-19 17:39"
+ "built": "2026-11-19 18:01"
 }
