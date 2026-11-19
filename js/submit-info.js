@@ -56,8 +56,11 @@
                 var ages = String(v.ages || '');
                 var m = ages.match(/(\d+)\s*(?:[-–—]|to)\s*(\d+)/);
                 var ageRange = m ? { min: parseInt(m[1], 10), max: parseInt(m[2], 10) } : { min: null, max: null };
+                // "5+", "5 and up", "12 or older": a minimum only, not a note (Claude note #31).
+                var from = !m && ages.match(/^\D*?(\d+)\s*(?:\+|and\s+(?:up|over|older)|or\s+(?:older|over|above))\s*$/i);
+                if (from) ageRange.min = parseInt(from[1], 10);
                 var notes = v.notes ? [v.notes] : [];
-                if (!m && ages.trim()) notes.push('Ages: ' + ages.trim());
+                if (!m && !from && ages.trim()) notes.push('Ages: ' + ages.trim());
                 return {
                     facilities: [{
                         identification: {
