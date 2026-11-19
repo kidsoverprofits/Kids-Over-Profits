@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 18:01 UTC",
- "source": "5eec942657b38d61bc4f209424f2d707816455e2",
+ "built": "2026-11-19 18:04 UTC",
+ "source": "d80e9f4d2f97ae91363e851287d3b4b592edb56b",
  "sections": [
   {
    "key": "2",
@@ -3983,6 +3983,21 @@
        "focus": false,
        "steps": [],
        "hash": "9d048c204f05"
+      },
+      {
+       "id": "4.4:move-an-article-to-a-related-industry-without-naming-a-recor",
+       "lead": "Move an article to a related industry without naming a record",
+       "text": "**Move an article to a related industry without naming a record** (owner, Claude note #26, 2026-11-19: \"i shouldn't have to do this to move to a related industry\", on /admin-submissions/?type=news after the move refused with \"Pick the record, or type a name for a new one.\"). Today \"Move to <related industry>\" (`kop_rdest_put_related()`, inc/review-destinations.php; `kop_rinbox_native_filed_to_related()`, inc/review-inbox/native.php) only puts the link under \"Materials and links\" on one record of the category, so it needs a record id or a new name. Owner's choice (asked 2026-11-19): **file under the industry**. Build, in a session of its own: a. A \"The industry in general\" choice (the default when nothing is picked), the way Indian boarding schools has \"The schools in general\" (`kop_rinbox_native_move_to_school()` with school 0): the article is marked as about that category and comes off the news list; Undo puts it back. b. Somewhere to keep it (a category link for news rows, e.g. a `related_category` on news_facility_links or a small table; read docs/ADDING-CONTENT.md \"a table holding facility ids\" and docs/DATA-FLOWS.md first). c. Each related industry page (templates/page-related-industry.php, js/data/pages/<slug>.json) lists its articles; the app follows (docs/claude/mobile-extension.md \"Keeping the app in step\", docs/app-parity.json). d. Tests in scripts/review-inbox-tests/native.php; check live on a pending news card.",
+       "ask": "Build \"Move to a related industry\" for articles about the industry in general (docs/plan/4.4 item 24).",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "b32da8f37611"
       }
      ]
     },
