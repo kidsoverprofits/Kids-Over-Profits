@@ -166,3 +166,8 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
 8. **test-record-resync: "some live articles name a record created or renamed after they were saved"** (found
    2026-11-16, mirror of 2026-11-13): the check expects the mirror to hold at least one unlinked mention and found
    none (everything is linked). A data-dependent expectation; make it an info line or seed one unlinked mention.
+9. **test-site-map.php throws in kop_site_map_slug_place('Hyde School', 'hyde-school-ct')** (found 2026-11-19, mirror
+   of 2026-11-19, same on main before the contact form): the build stops at site-map.php:545 before any check runs.
+10. **test-kop-tools-menu.php: "About rewrites (about-rewrites-screen.php) is on the sidebar but not in
+    kop_tools_registry()"** (found 2026-11-19): `inc/about-rewrites-screen.php` registers `kop-about-rewrites` with no
+    registry entry in `wp-plugins/kop-tools/kop-tools.php`; add one (and bump the plugin version).
