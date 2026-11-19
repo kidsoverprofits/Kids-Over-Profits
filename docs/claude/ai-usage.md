@@ -32,6 +32,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # e
 #   %LOCALAPPDATA%\kop-local-ai-worker.log); by hand: live + queue until Ctrl+C; own Ollama on the Intel graphics (:11436)
 (kop-pipeline) python scripts/local-ai-worker.py --once       # answer what waits, then stop; --no-tunnel = queue only
 php -d extension=mbstring scripts/test-local-ai.php           # KOP_LAI_LIVE=http://127.0.0.1:11435 KOP_LAI_TOKEN=... adds a live ask
-# Speed (qwen3.5:4b, Core Ultra 9): a full news article ~36 s on the graphics, ~2.5 min on the processor alone (too slow for
-# discovery's 90 s wait), which is why the worker starts its own Ollama with OLLAMA_VULKAN=1 OLLAMA_IGPU_ENABLE=1.
+# Speed on the Intel graphics (Core Ultra 9, full news article): qwen3.5:9b ~57 s (the worker's default: the biggest qwen),
+# qwen3.5:4b ~43 s; on the processor alone ~2.5 min, too slow for the site's 75 s live wait, which is why the worker
+# starts its own Ollama with OLLAMA_VULKAN=1 OLLAMA_IGPU_ENABLE=1. Longer answers miss the live wait and go to the queue.
 ```
