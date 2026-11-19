@@ -1,6 +1,6 @@
 {
- "built": "2026-11-18 22:10 UTC",
- "source": "3d3c56725c86289a06dbff5b0770aaa3abe447cc",
+ "built": "2026-11-19 14:12 UTC",
+ "source": "511a47a3c4623c2b235029dc30e3ab0c10327388",
  "sections": [
   {
    "key": "2",
@@ -2574,6 +2574,21 @@
        "focus": false,
        "steps": [],
        "hash": "f60ff1de1d23"
+      },
+      {
+       "id": "3:gao-prep-fixes",
+       "lead": "GAO prep fixes",
+       "text": "**GAO prep fixes** (2026-11-19, plan 4.3 #32): over SSH or in WP-CLI, option `kop_lawsuit_updates_result` shows the Goshay (1:21-cv-00848) and Parker (4:26-cv-00526) merges done, or why one was skipped (dropped rows logged in `kop_lawsuit_merges_log`); [/lawsuits/](https://kidsoverprofits.org/lawsuits/) lists each once, Liparote reads in progress, the \"Brought against\" filter and methods note show. Option `kop_marketers_fill_result` names the seven filled companies; [Marketing Companies](https://kidsoverprofits.org/marketing-companies/) shows their sourced notes above the old ones. [/network-map/](https://kidsoverprofits.org/network-map/): \"Sources and methods\" opens, the legend has \"Marketing or referral company\" (after the next map build). Run check-contrast and check-mobile-overflow on both pages (docs/claude/css-checks.md). Open Data: network-edges has `basis` and `citation`, facilities `funding`, lawsuits `defendant_types`.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "6450fb9ee1e7"
       }
      ]
     }
@@ -3379,6 +3394,21 @@
        "focus": false,
        "steps": [],
        "hash": "1751e0afa9b9"
+      },
+      {
+       "id": "4.3:gao-prep-fixes-values-only-the-owner-can-give",
+       "lead": "GAO prep fixes: values only the owner can give",
+       "text": "**GAO prep fixes: values only the owner can give** (2026-11-19; theme 26b7a2d, bcb2f29, 73177d9, 430c92f, kop-pipeline e4ca75a). The fields are built and left empty where KOP has no checked answer: - **Lawsuit defendant types**: only Dungan carries types (facility, marketer). Tag the rest in the lawsuit editor's \"Brought against\" boxes; the Lawsuits page filter (`?defendant=`) shows only tagged cases until then. - **Status and outcome disagreements**: the lawsuit editor's \"To check\" list (`kop_lawsuit_status_outcome_conflicts()`); Liparote's outcome was corrected but its dismissal is unverified (research task filed: PACER docket check). - **Network map line sources**: board lines carry no source yet; add them in `network-overrides.json` `sources` (`{from, to, source}`, a URL or citation text; several joined by \"; \"). The methods note counts them. - **Marketing and referral companies on the map**: no name is ever guessed into the kind; set it in the overrides `kinds` or answer it in Map Questions. - **PRTFs**: set the type \"Psychiatric Residential Treatment Facility\" on each facility that is one (data form). - **Who pays**: federal funding entries (Medicaid, Title IV-E, special education and the rest) go in through the Federal funding review queue or the data form; Open Data's `funding` column is empty until then. - **Marketing Companies**: 2 Boot Camp and Teens with Problems left as they were (no primary source); Teens In Crisis rests on an advocacy press release (research task filed for the docket).",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "90e9a4c75e67"
       }
      ]
     },
@@ -4661,6 +4691,21 @@
        "focus": false,
        "steps": [],
        "hash": "e76b30d9c75b"
+      },
+      {
+       "id": "4.8:network-map-and-lawsuits-in-the-app",
+       "lead": "Network map and lawsuits in the app",
+       "text": "**Network map and lawsuits in the app** (2026-11-19, theme bcb2f29, 26b7a2d): the app's map needs the new `marketer` kind (word \"Marketing or referral company\", legend row) and each line's `cite` as a Source link in its drawer, like js/network-map/drawer.js `appendCite()`; its lawsuit list may show \"Brought against\" from `defendant_types`. Not done in the session that shipped them: the app checkout was not available there.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "ea510ed15acc"
       }
      ]
     }
