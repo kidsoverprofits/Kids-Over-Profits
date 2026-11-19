@@ -12894,5 +12894,48 @@
         }
       ]
     }
+  },
+  {
+    "id": 12825,
+    "version": 1,
+    "note": "Plan 4.6 #18c B (owner's yes, 2026-11-19): ORR grant 90ZU0670 raised from $15.08M to $30.2M (USAspending); the entry added from Review inbox > Federal funding on 2026-10-12, rewritten with the card's new wording, ref kept so Undo still finds it.",
+    "facility": {
+      "federalFunding": [
+        {
+          "ref": "ff:youth-for-tomorrow-new-life-center-va:0",
+          "years": "2026",
+          "detail": "Holds an Office of Refugee Resettlement grant (90ZU0670) for shelter and transitional foster care of unaccompanied children on its residential campus, awarded at $15.08 million in April 2026 and since raised to $30.2 million.",
+          "source": "Federal funding research, October 2026",
+          "stream": "orr",
+          "sources": [
+            {
+              "url": "https://www.usaspending.gov/award/ASST_NON_90ZU0670_075",
+              "label": "USAspending (award record)"
+            },
+            {
+              "url": "https://www.highergov.com/grant/90ZU0670/",
+              "label": "HigherGov (grant record)"
+            },
+            {
+              "url": "https://www.acluva.org/cases/jane-p-et-al-v-salazar-et-al/",
+              "label": "acluva.org"
+            }
+          ]
+        },
+        {
+          "ref": "ff:youth-for-tomorrow-new-life-center-va:1",
+          "years": "",
+          "detail": "Its website says it recently certified its programs with TRICARE.",
+          "source": "Federal funding research, October 2026",
+          "stream": "tricare",
+          "sources": [
+            {
+              "url": "https://www.youthfortomorrow.org/residential/tricare/",
+              "label": "youthfortomorrow.org"
+            }
+          ]
+        }
+      ]
+    }
   }
 ]
