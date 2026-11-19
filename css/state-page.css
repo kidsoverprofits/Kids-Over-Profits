@@ -1383,3 +1383,24 @@ button.facility-expand-btn:active {
     color: #ffffff !important;
     text-decoration: none;
 }
+
+/* A state's own intro above its bills on the Legislation tab (js/data/pages/state-legislation-<slug>.json). */
+.kop-sl-intro {
+    margin: 0 0 1.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.kop-sl-intro h3 {
+    color: #00004d;
+    font-size: 1.15em;
+    margin: 1.25em 0 0.5em;
+}
+
+.kop-sl-intro h3:first-child {
+    margin-top: 0;
+}
+
+.kop-sl-intro ul {
+    padding-left: 1.25em;
+}

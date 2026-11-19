@@ -79,6 +79,16 @@ $rest_url = esc_url_raw(rest_url('kop/v1/state/' . $state_slug));
 
     <section class="state-section" id="section-legislation" data-section="legislation" role="tabpanel" hidden data-kop-bug-feature="state-hub/legislation" data-kop-bug-label="State Legislation">
         <h2>Legislation</h2>
+        <?php
+        // This state's own intro above its bills, when it has one (js/data/pages/state-legislation-<slug>.json,
+        // edited at KOP Data Tools > Page Text). Outside .section-content, which state-page.js redraws.
+        $kop_sl_key = 'state-legislation-' . $state_slug;
+        if (function_exists('kop_page_text_page') && kop_page_text_page($kop_sl_key)) :
+            ?>
+            <div class="kop-sl-intro"><?php kop_page_text_render($kop_sl_key); ?></div>
+            <?php
+        endif;
+        ?>
         <div class="section-content"><?php echo kop_loading_skeleton('legislation', 2); ?></div>
     </section>
 </div>

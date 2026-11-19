@@ -51,7 +51,7 @@ function kop_page_text_editor_slug() {
 
 /** Where to look at the page: its permalink, or the preview while a draft. */
 function kop_page_text_view_link($slug) {
-    $post = get_page_by_path($slug);
+    $post = get_page_by_path(kop_page_text_wp_page($slug));
     if (!$post) {
         return array('url' => '', 'status' => '');
     }
@@ -59,7 +59,14 @@ function kop_page_text_view_link($slug) {
     return array('url' => $url ? $url : '', 'status' => $post->post_status, 'id' => $post->ID);
 }
 
+/** The WordPress page a text file shows on: its own slug, or the 'page' it names (a state page's tab intro). */
+function kop_page_text_wp_page($slug) {
+    $page = kop_page_text_page($slug);
+    return $page && !empty($page['page']) ? (string) $page['page'] : $slug;
+}
+
 function kop_page_text_purge($slug) {
+    $slug = kop_page_text_wp_page($slug);
     $post = get_page_by_path($slug);
     if ($post) {
         clean_post_cache($post->ID);

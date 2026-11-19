@@ -71,6 +71,29 @@ function kop_page_text_pages() {
             'css'    => 'css/related-industries.css',
         );
     }
+    // A state page's Legislation tab intro: js/data/pages/state-legislation-<state slug>.json,
+    // printed above that state's bills (templates/page-state.php). 'page' is the WordPress
+    // page it shows on, for the editor's view link and the cache purge.
+    static $state_files = null;
+    if ($state_files === null) {
+        $dir = function_exists('get_stylesheet_directory') ? get_stylesheet_directory() : dirname(__DIR__);
+        $state_files = glob($dir . '/js/data/pages/state-legislation-*.json');
+        $state_files = is_array($state_files) ? $state_files : array();
+    }
+    foreach ($state_files as $path) {
+        $state = substr(basename($path, '.json'), strlen('state-legislation-'));
+        if (!preg_match('/^[a-z-]+$/', $state)) {
+            continue;
+        }
+        $name = function_exists('kop_state_slug_to_name') ? kop_state_slug_to_name($state) : '';
+        $pages['state-legislation-' . $state] = array(
+            'title'  => ($name ? $name : ucwords(str_replace('-', ' ', $state))) . ' state page: Legislation tab intro',
+            'file'   => 'js/data/pages/state-legislation-' . $state . '.json',
+            'prefix' => 'kop-sl',
+            'css'    => 'css/state-page.css',
+            'page'   => $state,
+        );
+    }
     return $pages;
 }
 
