@@ -666,6 +666,26 @@ foreach (array(
     'Former Therapist and Director of Business Management, Director of Business Development, Therapy (2005 became Director of Bus. Dev.), Therapist, later Director of Business Development (2002-2022)' => 'Former Therapist and Director of Business Management, Director of Business Development (2002-2022)',
     'Staff' => 'Staff',
     'Former Staff; later WWASP president' => 'Former Staff; later WWASP president',
+    // A staff directory's "Category/Title" in plain words (Claude note #30).
+    'Former Nurse/LPN' => 'Former Nurse (LPN)',
+    'Former Nurse/R.N.' => 'Former Nurse (RN)',
+    'Nurse / RN' => 'Nurse (RN)',
+    'Former Med/PAC' => 'Former Physician Assistant (PA-C)',
+    'Former Medical/ APRN' => 'Former Nurse Practitioner (APRN)',
+    'Former Medical/ Psychiatrist' => 'Former Psychiatrist',
+    'Former Psych/Ph.D.' => 'Former Psychologist (PhD)',
+    'Psychiatrist/MD' => 'Psychiatrist (MD)',
+    'Former CTRS/TRS' => 'Former Recreational Therapist (CTRS)',
+    'Former Admin/CFO' => 'Former CFO',
+    'Former Therapy/ Supervisor' => 'Former Therapy Supervisor',
+    'Former Therapy/Dir.' => 'Former Therapy Director',
+    'Former Admissions/Dir.' => 'Former Admissions Director',
+    'Former Education/Director' => 'Former Education Director',
+    'Owner/Founder (2003, r/troubledteens wiki)' => 'Owner/Founder (2003, r/troubledteens wiki)',
+    'Teacher/Coach' => 'Teacher/Coach',
+    'Vice Pres./Owner, Owner/Vice President' => 'Owner/Vice President',
+    'Co-Founder and Executive Director, Executive Director, CEO, 2000-2012' => 'Co-Founder and Executive Director, CEO, 2000-2012',
+    'Owner and Executive Director, Co-owner' => 'Owner and Executive Director, Co-owner',
 ) as $in => $want) {
     $got = kop_facility_pages_role_tidy($in);
     $check('role tidy: ' . $in, $got === $want, $got);

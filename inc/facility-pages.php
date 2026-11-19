@@ -1470,6 +1470,49 @@ if (!function_exists('kop_facility_pages_drop_left')) {
     }
 }
 
+if (!function_exists('kop_facility_pages_role_plain')) {
+    /**
+     * A staff directory's "Category/Title" in plain words (Claude note #30, Provo Canyon School's former staff,
+     * owner 2026-11-19): "Nurse/LPN" = "Nurse (LPN)", "Med/PAC" = "Physician Assistant (PA-C)", "Psych/Ph.D." =
+     * "Psychologist (PhD)", "Therapy/ Supervisor" = "Therapy Supervisor", "Admissions/Dir." = "Admissions Director",
+     * "Admin/CFO" = "CFO". Only those shapes: "Owner/Founder" or "Teacher/Coach" is two jobs and stays.
+     * Each comma-separated title is read alone; a bracket after it stays. Display only.
+     */
+    function kop_facility_pages_role_plain($role) {
+        $role = (string) $role;
+        if (strpos($role, '/') === false) return $role;
+        $creds = array(
+            'rn' => 'Nurse (RN)', 'r n' => 'Nurse (RN)', 'lpn' => 'Nurse (LPN)', 'l p n' => 'Nurse (LPN)', 'cna' => 'Nursing Assistant (CNA)',
+            'aprn' => 'Nurse Practitioner (APRN)', 'np' => 'Nurse Practitioner', 'pac' => 'Physician Assistant (PA-C)', 'pa c' => 'Physician Assistant (PA-C)',
+            'pa' => 'Physician Assistant', 'md' => 'Doctor (MD)', 'psychiatrist' => 'Psychiatrist', 'physician' => 'Physician',
+            'phd' => 'Psychologist (PhD)', 'ph d' => 'Psychologist (PhD)', 'psyd' => 'Psychologist (PsyD)', 'psy d' => 'Psychologist (PsyD)',
+            'trs' => 'Recreational Therapist (CTRS)', 'ctrs' => 'Recreational Therapist (CTRS)',
+        );
+        $key = static function ($s) { return trim(preg_replace('/[^a-z]+/', ' ', strtolower($s))); };
+        $parts = preg_split('/(,(?![^()]*\)))/', $role, -1, PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($parts as $n => $part) {
+            if ($part === ',' || strpos($part, '/') === false) continue;
+            if (!preg_match('/^(\s*(?:former\s+)?)([A-Za-z.]{2,12})\s*\/\s*([A-Za-z.\- ]{2,30}?)(\s*(?:\([^()]*\))?\s*)$/i', $part, $m)) continue;
+            list(, $lead, $cat, $title, $tail) = $m;
+            $c = $key($cat);
+            $t = $key($title);
+            $out = null;
+            if (in_array($c, array('nurse', 'nursing', 'med', 'medical', 'psych', 'psychiatry', 'ctrs', 'rec', 'recreation'), true) && isset($creds[$t])) {
+                $out = $t === 'md' && preg_match('/^psych/', $c) ? 'Psychiatrist (MD)' : $creds[$t];
+            } elseif (in_array($t, array('md', 'm d'), true) && in_array($c, array('psychiatrist', 'physician', 'doctor'), true)) {
+                $out = ucfirst($c) . ' (MD)';
+            } elseif (in_array($c, array('admin', 'administration'), true) && preg_match('/^[A-Z]{2,4}$/', trim($title))) {
+                $out = trim($title);   // "Admin/CFO": the title is the job
+            } elseif (in_array($t, array('dir', 'director', 'supervisor', 'coordinator', 'manager'), true)
+                && in_array($c, array('therapy', 'admissions', 'group', 'education', 'clinical', 'medical', 'nursing', 'residential', 'program', 'recreation', 'rec', 'academic', 'school'), true)) {
+                $out = ucfirst($c === 'rec' ? 'recreation' : $c) . ' ' . ($t === 'dir' ? 'Director' : ucfirst($t));
+            }
+            if ($out !== null) $parts[$n] = $lead . $out . $tail;
+        }
+        return implode('', $parts);
+    }
+}
+
 if (!function_exists('kop_facility_pages_role_tidy')) {
     /**
      * One role line with each job said once (Claude notes #28, #29, owner 2026-11-19). Titles are split at commas
@@ -1483,12 +1526,19 @@ if (!function_exists('kop_facility_pages_role_tidy')) {
      * stays. A line that started "Former " still does. Display only: records keep their text.
      */
     function kop_facility_pages_role_tidy($role) {
-        $role = trim((string) $role);
+        $role = kop_facility_pages_role_plain(trim((string) $role));
         if ($role === '' || strpos($role, ',') === false && !preg_match('/\(\s*former\s*\)/i', $role)) return $role;
         $former = (bool) preg_match('/^former\s/i', $role);
         // A title's words, abbreviations spelled out: "Dir. of Bus. Dev." = "Director of Business Development".
         $words_of = static function ($text) {
             $core = strtolower((string) $text);
+            // "Co-Founder" is one job, not "co" + "Founder": "Executive Director" beside "Co-Founder and Executive
+            // Director" goes, "Owner" beside "Co-owner" stays.
+            $core = preg_replace('/\bco-\s*(?=[a-z])/', 'co', $core);
+            $core = preg_replace(
+                array('/\bvice\s+pres\b\.?/', '/\bvp\b\.?/', '/\bpres\b\.?/'),
+                array(' vice president ', ' vice president ', ' president '),
+                $core);
             $core = preg_replace(
                 array('/\bbus\.?\s*dev\b\.?/', '/\bdir\b\.?/', '/\bsvcs?\b\.?/', '/\brec\b\.?/', '/\brecreation\b/', '/\bexec\b\.?/',
                     '/\bmgmt\b\.?/', '/\btherapy\b/', '/\bceo\b/', '/\bcoo\b/', '/\bcfo\b/', '/&/'),
