@@ -239,8 +239,3 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     through red. "Preview the page after Approve" opens the facility page with the dark "Preview, not saved" bar, the
     suggested values on it, no edit pencils; "Live page" shows the record unchanged. Logged out, the same address shows
     the live page with no bar. Phone width: the bar wraps, no sideways scroll.
-47. **Local Qwen after Groq and Gemini** (2026-11-19): with `python scripts/local-ai-worker.py` running (kop-pipeline),
-    [AI Usage](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-ai-usage) says "Local Qwen: on". The first
-    time both providers are out, the usage list shows a `local` row that worked (live) or the job's error ending in
-    "saved for the local AI" (PC off); the worker's window logs "live: answered" or "queue: ... answered". Not yet
-    seen on production: only the tunnel, the token check and the routes were tested from outside.

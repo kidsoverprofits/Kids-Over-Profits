@@ -28,7 +28,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-fornits.php   # e
 # (300 max, 7 days), the call still fails with the old errors (so "rate limit" deferrals work), and once the worker answers,
 # the next identical prompt (news: same link) gets the saved answer without calling anyone. Usage rows say provider 'local'.
 # The AI Usage status line says whether it is on and how many wait. Opt out per call with 'noLocal', site-wide KOP_LOCAL_AI=off.
-(kop-pipeline) python scripts/local-ai-worker.py              # live + queue until Ctrl+C; own Ollama on the Intel graphics (:11436)
+(kop-pipeline) python scripts/local-ai-worker.py              # runs at login (Task Scheduler "KOP local AI worker", log
+#   %LOCALAPPDATA%\kop-local-ai-worker.log); by hand: live + queue until Ctrl+C; own Ollama on the Intel graphics (:11436)
 (kop-pipeline) python scripts/local-ai-worker.py --once       # answer what waits, then stop; --no-tunnel = queue only
 php -d extension=mbstring scripts/test-local-ai.php           # KOP_LAI_LIVE=http://127.0.0.1:11435 KOP_LAI_TOKEN=... adds a live ask
 # Speed (qwen3.5:4b, Core Ultra 9): a full news article ~36 s on the graphics, ~2.5 min on the processor alone (too slow for
