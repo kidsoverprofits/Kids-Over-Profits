@@ -1,6 +1,6 @@
 {
- "built": "2026-11-19 17:25 UTC",
- "source": "3c02233783d6261e72b5cfe7130cf5fb088467aa",
+ "built": "2026-11-19 17:27 UTC",
+ "source": "a9a5872588b3020d4a60bef85605de300900ac57",
  "sections": [
   {
    "key": "2",
@@ -4995,6 +4995,36 @@
        "focus": false,
        "steps": [],
        "hash": "c1752497c1df"
+      },
+      {
+       "id": "5:test-site-map-php-throws-in-kop-site-map-slug-place-hyde-sch",
+       "lead": "test-site-map.php throws in kop_site_map_slug_place('Hyde School', 'hyde-school-ct')",
+       "text": "**test-site-map.php throws in kop_site_map_slug_place('Hyde School', 'hyde-school-ct')** (found 2026-11-19, mirror of 2026-11-19, same on main before the contact form): the build stops at site-map.php:545 before any check runs.",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "2d520fbcb9af"
+      },
+      {
+       "id": "5:test-kop-tools-menu-php-about-rewrites-about-rewrites-screen",
+       "lead": "test-kop-tools-menu.php: \"About rewrites (about-rewrites-screen.php) is on the sidebar but not in kop_tools_registry()\"",
+       "text": "**test-kop-tools-menu.php: \"About rewrites (about-rewrites-screen.php) is on the sidebar but not in kop_tools_registry()\"** (found 2026-11-19): `inc/about-rewrites-screen.php` registers `kop-about-rewrites` with no registry entry in `wp-plugins/kop-tools/kop-tools.php`; add one (and bump the plugin version).",
+       "ask": "",
+       "date": "2026-11-19",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "677a26f0ed1c"
       }
      ]
     }
