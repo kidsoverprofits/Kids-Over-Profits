@@ -31233,6 +31233,110 @@
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
    "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:did-a-17-year-old-who-ran-away-from-scissor-tail",
+   "section": "Pending public edits review",
+   "title": "Did a 17-year-old who ran away from Scissor Tail Point in Norman, Oklahoma, later die from a stabbing, and what was his name and the date?",
+   "text": "A mother's public edit (suggested_edits 63, 2026-11-05) says her son ran from Scissor Tail Point four times and on the last was stabbed and killed at 17. No news or record found (search 2026-11-19). OKDHS licensing reports (case K850054459) show runaways 2024-12-30, 2025-01-09, 2026-02-13. The answer goes on the facility's critical incidents.",
+   "context": "",
+   "records": [
+    13593
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:which-company-or-nonprofit-holds-the-license-for",
+   "section": "Pending public edits review",
+   "title": "Which company or nonprofit holds the license for Scissor Tail Point in Norman, Oklahoma?",
+   "text": "OKDHS licensing lists director James Chester with an okcyc.org email, so likely Oklahoma Children and Youth Coalition (https://okcyc.org/), but no contract or Secretary of State filing names it. OJA lists it as a contracted staff-secure group home (https://oklahoma.gov/oja/youth-placement/group-homes.html). The answer sets the record's operator.",
+   "context": "",
+   "records": [
+    13593
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:who-ran-peniel-christian-school-in-spring-valley",
+   "section": "Pending public edits review",
+   "title": "Who ran Peniel Christian School in Spring Valley, Wisconsin, and was it ever at 650 California Street?",
+   "text": "A survivor's public edit (suggested_edits 69) names the operators as 'Ken and melodies sortedaul' (spelling unclear) and gives 650 California St. Private School Review (https://www.privateschoolreview.com/peniel-christian-school-profile) gives 2995 County Road N, co-ed boarding, closed 2020. No source found for the operators, the other address or the founding year.",
+   "context": "",
+   "records": [
+    12602
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:in-what-year-was-the-lord-s-ranch-in-warm-spring",
+   "section": "Pending public edits review",
+   "title": "In what year was The Lord's Ranch in Warm Springs, Arkansas, renamed Trinity Behavioral Health?",
+   "text": "Sources agree it was later called Trinity Behavioral Health (Lawsuit Information Center; Imboden Live 2014-11-30) and ran 1976-2016 (KUAR 2023-11-08), but none dates the rename. Arkansas Secretary of State entity records may. The answer goes in the record's name history.",
+   "context": "",
+   "records": [
+    11542,
+    11544,
+    11513
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:when-did-the-heritage-school-near-calistoga-cali",
+   "section": "Pending public edits review",
+   "title": "When did The Heritage School near Calistoga, California, run by Ron Whitney, close?",
+   "text": "Press Democrat clippings on Unsilenced's archive (https://archive.unsilenced.org/program-archive/us-programs/california/heritage-school/) show Whitney owner and headmaster from about 1969, charges in 1990, bankruptcy filings around 1994. No closing date found. Also unconfirmed: Whitney's middle name 'Howard' and an address '152 St Johns Dr' from a survivor's edit (suggested_edits 70).",
+   "context": "",
+   "records": [
+    10265
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": [
+    {
+     "label": "News: Seen 'n Heard, 4/1990 (Woodbury Reports, 1990-04-01)",
+     "url": "http://www.strugglingteens.com/archives/1990/4/seen03.html",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "pending-public-edits-review:which-girls-house-at-indiana-united-methodist-ch",
+   "section": "Pending public edits review",
+   "title": "Which girls' house at Indiana United Methodist Children's Home in Lebanon, Indiana, do residents call House 7 in 2026, and is it missing from KOP's cottage list?",
+   "text": "A parent's public edit (suggested_edits 67, 2026-11-09) says their daughter lives in House #7. KOP's cottage records at 515 W Camp St are Coons, Cottage 5, Cottage 6, Godwin, Temple and Wesley; none is 7. Indiana licensing may list the houses. The answer may add a cottage record.",
+   "context": "",
+   "records": [
+    100301,
+    13322,
+    13323,
+    13324,
+    13325,
+    13326,
+    13327
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": []
+  },
+  {
+   "key": "pending-public-edits-review:when-did-arabella-house-the-eating-disorder-prog",
+   "section": "Pending public edits review",
+   "title": "When did Arabella House, the eating disorder program run by Linden Oaks in Naperville, Illinois, close?",
+   "text": "A public edit (suggested_edits 56) says Arabella House closed in 2012. KOP holds a 2010 Daily Herald piece on it. No source for the closing year was found (2026-11-19). The answer goes in the Linden Oaks record's operating notes.",
+   "context": "",
+   "records": [
+    100402
+   ],
+   "found": "found 2026-11-19, Claude session (pending suggested_edits review, 2026-11-19)",
+   "directions": [
+    {
+     "label": "Daily Herald, 2010-02-07: Naperville's Arabella House helps women with eating disorders",
+     "url": "https://www.dailyherald.com/20100207/lifestyle/napervilles-arabella-house-helps-women-with-eating-disorders/",
+     "kind": "note"
+    }
+   ]
   }
  ],
  "built": "2026-11-19 14:11"
