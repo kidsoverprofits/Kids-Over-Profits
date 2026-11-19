@@ -31826,7 +31826,45 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "lawsuits-and-court-records:hobbs-v-state-of-new-york-court-of-claims-uid-20",
+   "section": "Lawsuits and court records",
+   "title": "Hobbs v. State of New York (Court of Claims, UID 2018-018-948): what does the decision say, and was a claim filed and decided after it?",
+   "text": "Lawsuit card #254 (Amaya Stethers, 14, Hutchings Psychiatric Center, died June 1, 2017). The CaseMine copy is behind a CAPTCHA and Studicata's summary is paywalled; that summary says the late-claim motion was granted. Needed: the decision text (NY Court of Claims site or the Law Reporting Bureau) and any later claim, settlement or trial.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, Claude (read-sent-to-claude)",
+   "directions": []
+  },
+  {
+   "key": "lawsuits-and-court-records:jackson-v-johnson-n-d-n-y-1-97-cv-00613-louis-go",
+   "section": "Lawsuits and court records",
+   "title": "Jackson v. Johnson (N.D.N.Y. 1:97-cv-00613, Louis Gossett Jr. Residential Center): how did the case end after the 2000 ruling?",
+   "text": "Lawsuit card #255. The Sept. 13, 2000 decision sent the excessive force and medical care claims toward trial. Settlement, verdict or dismissal after that is not known.",
+   "context": "",
+   "records": [
+    12075
+   ],
+   "found": "found 2026-11-19, Claude (read-sent-to-claude)",
+   "directions": [
+    {
+     "label": "Court case: Jackson v. Johnson, 118 F. Supp. 2d 278 (N.D.N.Y. 2000)",
+     "url": "https://www.courtlistener.com/opinion/2357480/jackson-v-johnson/",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "lawsuits-and-court-records:global-teen-challenge-ein-59-3302759-and-teen-ch",
+   "section": "Lawsuits and court records",
+   "title": "Global Teen Challenge (EIN 59-3302759) and Teen Challenge entities: any PPP loan enforcement, forgiveness dispute or litigation?",
+   "text": "From Amber Foster's Teen Challenge Network map (lawsuit card #286). The CauseIQ profile the map linked lists finances and grants but nothing on PPP. Check SBA PPP data and court records.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-19, Claude (read-sent-to-claude)",
+   "directions": []
   }
  ],
- "built": "2026-11-19 22:25"
+ "built": "2026-11-19 22:34"
 }
