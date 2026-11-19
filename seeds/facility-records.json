@@ -12533,5 +12533,366 @@
         ]
       }
     }
+  },
+  {
+    "id": 13593,
+    "unique_name": "Scissor Tail Point",
+    "version": 1,
+    "note": "2026-11-19 pending-edits review (plan 4.3 #33): street is NE per OKDHS licensing (case K850054459, 310 12th Ave NE, Norman); OJA lists the unit as Scissor Tail Pointe (https://oklahoma.gov/oja/youth-placement/group-homes.html).",
+    "facility": {
+      "identification": {
+        "name": "Scissor Tail Point",
+        "currentName": "",
+        "otherNames": [
+          "Scissor Tail Pointe"
+        ],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      },
+      "address": "310 12th Ave NE, Norman, OK 73071",
+      "addressParts": {
+        "street": "310 12th Ave NE",
+        "city": "Norman",
+        "state": "OK",
+        "zip": "73071"
+      }
+    }
+  },
+  {
+    "id": 11542,
+    "unique_name": "The Lord’s Ranch",
+    "version": 1,
+    "note": "2026-11-19 (plan 4.3 #33): street from the duplicate records merged in (Trinity Behavioral Health 11544, Lords Ranch Behavioral Health Care Systems 11513); zip 72478 per IRS EIN 71-0782352 and https://www.lawsuit-information-center.com/lords-ranch-sexual-abuse-lawsuits.html.",
+    "facility": {
+      "address": "1033 Old Burr Rd, Warm Springs, AR 72478",
+      "addressParts": {
+        "street": "1033 Old Burr Rd",
+        "city": "Warm Springs",
+        "state": "AR",
+        "zip": "72478"
+      }
+    }
+  },
+  {
+    "id": 10265,
+    "unique_name": "The Heritage School",
+    "version": 1,
+    "note": "2026-11-19 (plan 4.3 #33): the Calistoga, CA school (Ron Whitney, closed by the mid-1990s). Its staff and links were the Provo, UT Heritage Schools Inc. (Jeff Scott: 'Therapist - Heritage RTC'; Fornits/wiki links about Provo and Utah NATSAP); moved to 10447.",
+    "facility": {
+      "staff": {
+        "pastTTIJobs": [],
+        "notableStaff": [],
+        "administrator": []
+      },
+      "resourceLinks": []
+    }
+  },
+  {
+    "id": 10447,
+    "unique_name": "Heritage Schools, Inc.",
+    "version": 2,
+    "note": "2026-11-19 (plan 4.3 #33): staff and links moved here from The Heritage School, Calistoga (10265), which they were filed on by name.",
+    "facility": {
+      "staff": {
+        "pastTTIJobs": [],
+        "notableStaff": [
+          {
+            "name": "Jerry Spanos",
+            "role": "Founder and CEO",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "Director of Social Services - West Ridge Academy (1974); Supervising Therapist - Provo Canyon School (1976); CEO - Heritage Center (1984-2008) [founded 1984]; later Founder - Heritage House (2013) [founded 2013]; later Chief executive officer - The Heritage School (2016)",
+            "personId": 727,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Neil Wallace",
+            "role": "Executive Director",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "the Program Director of [Daniels Academy](https://www",
+            "personId": 2153,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "George Ballew",
+            "role": "Clinical Director",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "a Therapist at the reportedly abusive [New Haven RTC](https://www",
+            "personId": 3338,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "McKaye Treanor",
+            "role": "Executive Director",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "",
+            "personId": 3339,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Kristi Naumann",
+            "role": "Clinical Director",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "",
+            "personId": 3340,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Blake Trythall",
+            "role": "Girls Residential Care Manager",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "",
+            "personId": 3341,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Annie Fagnant",
+            "role": "Boys Residential Care Manager",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "the** confirmedly abusive** [Majestic Ranch Academy](https://www",
+            "personId": 3342,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "McKay Livingston",
+            "role": "Clinical Director",
+            "source": "r/troubledteens wiki",
+            "pastJobs": "the reportedly abusive [Telos RTC](https://www",
+            "personId": 3343,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Barry Fell",
+            "role": "Former Unit Counselor",
+            "source": "r/troubledteens wiki, page \"Telos RTC\" (as of 2025-12-18)",
+            "pastJobs": "Executive Director - Telos RTC (2025)",
+            "personId": 3186,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/telosrtc"
+          },
+          {
+            "name": "Brian Kay",
+            "role": "Former Therapist",
+            "source": "r/troubledteens wiki, page \"Discovery Connections\" (as of 2025-12-18)",
+            "pastJobs": "Clinical Director - Discovery Connections (2025); LMFT - LDS Family Services (before 2025)",
+            "personId": 3392,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/discoveryconnect"
+          },
+          {
+            "name": "Chris Johnstoneaux",
+            "role": "Therapist and Business Development Manager (2007, r/troubledteens wiki)",
+            "source": "r/troubledteens wiki, page \"Monarch School\" (as of 2025-12-18)",
+            "pastJobs": "later Therapist - Monarch School (2014); later Primary Therapist/Clinical Supervisor - Boulder Creek Academy (2016) [joined 2016]",
+            "personId": 4316,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/monarch"
+          },
+          {
+            "name": "Ian Peterson",
+            "role": "Business Development Director (2018, r/troubledteens wiki)",
+            "source": "r/troubledteens wiki, page \"Heritage Schools Inc.\" (as of 2025-12-18)",
+            "pastJobs": "",
+            "personId": 5480,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Kade Mathews",
+            "role": "Former Intensive Support Unit Staff",
+            "source": "r/troubledteens wiki, page \"Diamond Ranch Academy\" (as of 2025-12-18)",
+            "pastJobs": "Therapist, Clinical Director - Diamond Ranch Academy (2022-2025); Therapist - Family Support and Treatment Center (before 2025); Therapist - Wasatch Mental Health (before 2025)",
+            "personId": 2089,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/diamondranch"
+          },
+          {
+            "name": "Keven Downs",
+            "role": "Chief Clinical Officer (2018, r/troubledteens wiki)",
+            "source": "r/troubledteens wiki, page \"Heritage Schools Inc.\" (as of 2025-12-18)",
+            "pastJobs": "",
+            "personId": 5481,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Marc McLain",
+            "role": "Staff member (2020, r/troubledteens wiki)",
+            "source": "r/troubledteens wiki, page \"Heritage Schools Inc.\" (as of 2025-12-18)",
+            "pastJobs": "",
+            "personId": 5482,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/heritageschools"
+          },
+          {
+            "name": "Nate Barrus",
+            "role": "Former Staff",
+            "source": "r/troubledteens wiki, page \"Crossroads Academy RTC\" (as of 2025-12-18)",
+            "pastJobs": "Substance Abuse Counselor - Crossroads Academy RTC (2025)",
+            "personId": 5363,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/crossroads"
+          },
+          {
+            "name": "Spencer Cook",
+            "role": "Former Intensive Support Unit Counselor",
+            "source": "r/troubledteens wiki, page \"Discovery Connections\" (as of 2025-12-18)",
+            "pastJobs": "Therapist - Discovery Connections (2022); Social Worker - Copper Hills Youth Center (before 2025)",
+            "personId": 4945,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/discoveryconnect"
+          },
+          {
+            "name": "Cameron Armstrong",
+            "role": "Former Therapist",
+            "source": "HEAL, staff list for Logan River Academy (archived 2025-07-09)",
+            "pastJobs": "Therapist - Logan River Academy (2021); Therapist - ScenicView Academy (before 2021); Therapist - Telos Academy (2021)",
+            "personId": 5483,
+            "sourceUrl": "https://web.archive.org/web/20250709163549/https://heal-online.org/loganrvr.html"
+          },
+          {
+            "name": "Jeff Scott",
+            "role": "Former Staff",
+            "source": "HEAL, staff list for Second Nature Wilderness Program(s) (archived 2022-09-26)",
+            "pastJobs": "Clinical Director, Primary Therapist - Blue Ridge Therapeutic Wilderness (2021-2025); Therapist - SUWS of the Carolinas (before 2021); Intern - Aspen Achievement Academy (before 2021); Therapist - Provo Canyon School (before 2021); Therapist - Heritage RTC (before 2025); Therapist - Coral Reef Academy (before 2025); Clinical Director - Second Nature Wilderness Program (2025)",
+            "personId": 660,
+            "sourceUrl": "https://web.archive.org/web/20220926082934/http://www.heal-online.org/secondnat.htm"
+          },
+          {
+            "name": "Sterling Devereux",
+            "role": "Former Therapist",
+            "source": "r/troubledteens wiki, page \"Coral Reef Academy\" (as of 2025-12-18)",
+            "pastJobs": "Co-Founder - Coral Reef Academy (2025) [founded 2025]",
+            "personId": 2193,
+            "sourceUrl": "https://www.reddit.com/r/troubledteens/wiki/index/coralreef"
+          }
+        ],
+        "administrator": [
+          {
+            "name": "Gerald Spanos",
+            "role": "CEO (2008, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2008 (#171), p. 17",
+            "pastJobs": "",
+            "personId": 727,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1108.pdf#page=17"
+          },
+          {
+            "name": "Glen R. Zaugg",
+            "role": "CEO, NATSAP Board member (2008, Woodbury Reports)",
+            "source": "Woodbury Reports, November 2008 (#171), p. 17",
+            "pastJobs": "",
+            "personId": 728,
+            "sourceUrl": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-1108.pdf#page=17"
+          }
+        ]
+      },
+      "resourceLinks": [
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=23514.0",
+          "kind": "social",
+          "label": "Fornits: Heritage RTC (2007, 50 posts)",
+          "source": "Fornits forum, board \"The Troubled Teen Industry\""
+        },
+        {
+          "url": "https://www.linkedin.com/in/mckaye-treanor-a0419370/overlay/urn:li:fsd_skill:(ACoAAA75_uQBLGq90m9Dzf_jspUw88qPQLgIqRQ,2)/endorsers?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAA75_uQBLGq90m9Dzf_jspUw88qPQLgIqRQ&tabIndex=1&modalTabIndex=1",
+          "kind": "people",
+          "label": "Endorsed by 7 colleagues at The Heritage Community",
+          "source": "Google Doc: Aurora Center for Healing Notes & Links"
+        },
+        {
+          "url": "https://www.yelp.com/biz/heritage-school-provo",
+          "kind": "reference",
+          "label": "Alondra (Yelp)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.yelp.com/biz_photos/heritage-school-provo?select=fISLntiVt-eiyJIEZjpZgg",
+          "kind": "reference",
+          "label": "*Photos",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.yelp.com/not_recommended_reviews/heritage-school-provo",
+          "kind": "reference",
+          "label": "Good (Yelp)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=24731.0",
+          "kind": "social",
+          "label": "reported",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=38250.0",
+          "kind": "social",
+          "label": "Anonymous (Fornits)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.reddit.com/r/troubledteens/comments/811f6w/heritage_school_provo_utah/",
+          "kind": "social",
+          "label": "u/thejim9866 (Reddit)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.reddit.com/r/troubledteens/comments/ho9hn/repost_for_our_new_readers_for_3_years_teen_was/",
+          "kind": "social",
+          "label": "Anonymous (Reddit)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.reddit.com/r/troubledteens/comments/hp2ei5/former_tti_employee_here_voicing_support/",
+          "kind": "social",
+          "label": "u/WaveBlueArrow (Reddit)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.reddit.com/r/troubledteens/comments/lwrfk/heartbreaking_account_of_a_12_year_olds/",
+          "kind": "social",
+          "label": "Anonymous (Reddit)",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://youtu.be/2bdFujJTtfU",
+          "kind": "social",
+          "label": "The Heritage Community (Part 1) - V2V Survivor Series",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=12257.0",
+          "kind": "social",
+          "label": "Fornits: What happened to Bob Lichfield? (2005, 73 posts)",
+          "source": "Fornits forum, board \"The Troubled Teen Industry\""
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=12442.0",
+          "kind": "social",
+          "label": "Fornits: NATSAP- New Developments in Utah (2005-2007, 11 posts)",
+          "source": "Fornits forum, board \"The Troubled Teen Industry\""
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=15050.0",
+          "kind": "social",
+          "label": "Fornits: NATSAP; Promotes Legislation in Utah? (2006, 6 posts)",
+          "source": "Fornits forum, board \"The Troubled Teen Industry\""
+        },
+        {
+          "url": "https://public.cdpehs.com/utenvpbl2/VW_EST_PUBLIC2/ShowViolationsTable.aspx?INSPECTION=174783",
+          "kind": "other",
+          "label": "Food Violations",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=12308.0",
+          "kind": "social",
+          "label": "Heritage School in Provo, Utah",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        },
+        {
+          "url": "https://www.fornits.com/phpbb/index.php?topic=24731.15",
+          "kind": "social",
+          "label": "Heritage School RTC in Provo, Utah",
+          "source": "r/troubledteens wiki: page \"Heritage Schools Inc.\" (as of 2025-12-18)"
+        }
+      ]
+    }
   }
 ]

@@ -6681,7 +6681,29 @@
      "url": "https://web.archive.org/web/2*/http://www.rockfordcenter.com/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "So Charter was a past operator, June 1994 to September 1999, as majority partner; never sole owner, and not since 1999. The company link is restored as past in seeds/operator-records.json (plan 4.3 #33).",
+    "claims": [
+     {
+      "claim": "Charter held 75% of the Naperville hospital, operated through its subsidiary Charter Linden Oaks Behavioral Health System, Inc.",
+      "url": "https://www.sec.gov/Archives/edgar/data/19411/0000019411-94-000008.txt",
+      "quote": "Each hospital is operated by a wholly-owned subsidiary of the Company, except for the hospital located in Naperville, Illinois which is 75% owned by the Company."
+     },
+     {
+      "claim": "The joint venture was Naperville Psychiatric Ventures, formed November 1, 1988 between Naperville Health Ventures (Edward) and P.I.A. Naperville, Inc., whose share passed to Charter Linden Oaks",
+      "url": "https://www.sec.gov/Archives/edgar/data/19411/0000912057-99-010565.txt",
+      "quote": "the Joint Venture Agreement dated as of November 1, 1988, under which Naperville Health Ventures (assignor of Edward Hospital Ventures) and P.I.A. Naperville, Inc. (assignor of Charter Linden Oaks Behavioral Health System, Inc.) formed Naperville Psychiatric Ventures"
+     },
+     {
+      "claim": "Charter's parent (Magellan) sold its 75% share to Edward's side in September 1999",
+      "url": "https://www.sec.gov/Archives/edgar/data/19411/0000912057-99-010565.txt",
+      "quote": "The Company sold its interest in the Chicago, IL joint venture to the minority owner in September 1999."
+     }
+    ],
+    "by": "Claude session (pending suggested_edits review, 2026-11-19)",
+    "at": "2026-11-19"
+   }
   },
   {
    "key": "company-histories:did-g4s-youth-services-florida-contracts-come-fr",
@@ -31720,5 +31742,5 @@
    ]
   }
  ],
- "built": "2026-11-19 17:26"
+ "built": "2026-11-19 17:39"
 }

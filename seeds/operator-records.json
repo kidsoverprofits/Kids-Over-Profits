@@ -601,7 +601,8 @@
         "1999: unannounced JCAHO inspections at 18 Charter hospitals found deficiencies at all; Charter closed two that failed, including Charlotte, and temporarily closed a child and adolescent unit in New Hampshire; settled a Maryland Medicaid billing dispute for $2.8 million; 87 hospitals in 32 states, headquartered in Alpharetta (Atlanta Journal-Constitution, June 27, 1999: https://fbaum.unc.edu/lobby/006_Coverage_Parity/News_Stories/Atlanta_Journal_Constitution_062799.htm)",
         "February 2000: filed for Chapter 11 in Wilmington, Delaware, with under $50 million in assets and over $100 million in debts, while the Justice Department and HHS investigated it for Medicaid billing fraud and patient abuse (California Healthline, February 17, 2000: https://californiahealthline.org/morning-breakout/behavioral-health-charter-files-for-bankruptcy/)",
         "August 18, 2000: agreed to pay the United States $7 million, plus up to $8 million more in bankruptcy claims, over alleged false billing of Medicare and other federal programs, while liquidating (U.S. Justice Department: https://www.justice.gov/archive/opa/pr/2000/August/487civ.htm)",
-        "August 2000: Universal Health Services bought 11 Charter facilities out of bankruptcy: Fairmount (Philadelphia), Rockford (Wilmington, DE), Anchor, Talbott, Laurel Heights and Peachford (Atlanta), Ridge (Lexington, KY), Carolina Center (Greenville, SC), Lakeside (Memphis), Parkwood (Olive Branch, MS) and Provo Canyon (Provo, UT) (Universal Health Services, Form 10-K for 2000: https://www.sec.gov/Archives/edgar/data/352915/000103605001000510/0001036050-01-000510.txt)"
+        "August 2000: Universal Health Services bought 11 Charter facilities out of bankruptcy: Fairmount (Philadelphia), Rockford (Wilmington, DE), Anchor, Talbott, Laurel Heights and Peachford (Atlanta), Ridge (Lexington, KY), Carolina Center (Greenville, SC), Lakeside (Memphis), Parkwood (Olive Branch, MS) and Provo Canyon (Provo, UT) (Universal Health Services, Form 10-K for 2000: https://www.sec.gov/Archives/edgar/data/352915/000103605001000510/0001036050-01-000510.txt)",
+        "Linden Oaks Hospital, Naperville, Illinois (1994-1999): Charter's subsidiary Charter Linden Oaks Behavioral Health System, Inc. held 75% of Naperville Psychiatric Ventures, the joint venture with Edward Hospital's Naperville Health Ventures that ran the hospital (Charter Medical 10-K 1994, hospital table: \"Linden Oaks ... Naperville 92 June 1994\", \"75% owned by the Company\", https://www.sec.gov/Archives/edgar/data/19411/0000019411-94-000008.txt). The joint venture dated from a November 1, 1988 agreement between Naperville Health Ventures and P.I.A. Naperville, Inc., which assigned its share to Charter. Magellan \"sold its interest in the Chicago, IL joint venture to the minority owner in September 1999\" (Magellan 10-K 1999, https://www.sec.gov/Archives/edgar/data/19411/0000912057-99-010565.txt)."
       ]
     },
     "facilities": [
@@ -634,8 +635,7 @@
         "id": 100402,
         "unique_name": "Linden Oaks",
         "relationship": "past",
-        "drop": true,
-        "drop_note": "Taken off 2026-10-21 at the owner's word: the link rested only on a 1994 10-K leased-hospital entry, and data submission #58 says Linden Oaks is not a Charter program."
+        "note": "Restored 2026-11-19 (pending-edits review, plan 4.3 #33): the 2026-10-21 drop rested on submission #58 and a single leased-hospital line; Magellan's 1999 10-K shows Charter held 75% of the joint venture that ran Linden Oaks from June 1994 until September 1999. Past, not current: Edward Hospital has run it alone since."
       }
     ]
   },
