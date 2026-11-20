@@ -2760,7 +2760,7 @@ function kop_apply_template_assignments() {
  * the lists above change.
  */
 function kop_maybe_apply_template_assignments() {
-    $version = '173';   // 173: Youth For Tomorrow (12825) ORR grant raised to $30.2M (plan 4.6 #18c B); 172: pending public edits review (plan 4.3 #33): Lord's Ranch + Trinity + Lords Ranch BHCS merged, Scissor Tail Point NE street, Heritage School Calistoga staff/links moved to Heritage Schools Inc., Charter past link on Linden Oaks restored; 171: About batch 3 record fixes (Maple Lake LLC open + Girls' Home Oct 2024, Rebekah Home, Asheville Academy 2011, Magnolia Mill 2012, Cleo Wallace 1943, Echo Glen, Carolina Springs names, Northwest Academy 2018, Camp O'Neal 1990, Bethesda 1986; memorial: Asheville age 13, Angela Miller Mar 3)
+    $version = '174';   // 174: Sequel research tasks: Brighter Path Tuskegee (13641) opened 1998, Lakeside Academy (100098) death date/restraint, McLogan sentence, Dec 2021 settlements, Brighter Path Montgomery (13640) stale owner Vivant cleared; 173: Youth For Tomorrow (12825) ORR grant raised to $30.2M (plan 4.6 #18c B); 172: pending public edits review (plan 4.3 #33): Lord's Ranch + Trinity + Lords Ranch BHCS merged, Scissor Tail Point NE street, Heritage School Calistoga staff/links moved to Heritage Schools Inc., Charter past link on Linden Oaks restored; 171: About batch 3 record fixes (Maple Lake LLC open + Girls' Home Oct 2024, Rebekah Home, Asheville Academy 2011, Magnolia Mill 2012, Cleo Wallace 1943, Echo Glen, Carolina Springs names, Northwest Academy 2018, Camp O'Neal 1990, Bethesda 1986; memorial: Asheville age 13, Angela Miller Mar 3)
     if (get_option('kop_template_assignments_applied') === $version) {
         return;
     }

@@ -12937,5 +12937,104 @@
         }
       ]
     }
+  },
+  {
+    "id": 13641,
+    "unique_name": "Brighter Path Tuskegee",
+    "version": 4,
+    "note": "Research task 'Did Sequel TSI of Tuskegee open in 1998 or 2001?' (2026-11-20): opened 1998 per the 2017 SEC merger proxy and NBC News 2022; start year 2009 -> 1998 and Three Springs dated 1998-2009. Identification and operatingPeriod copied from production 2026-11-19.",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Tuskegee",
+        "nameKey": "brighter path tuskegee",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Tuskegee",
+          "Three Springs School of Tuskegee",
+          "Sequel TSI of Tuskegee"
+        ],
+        "otherNames": [
+          "Tuskegee Secure Program",
+          "Sequel TSI Tuskegee"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [
+          "Three Springs Inc. (1998-2009)",
+          "Sequel TSI (2009-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [
+          "Sequel TSI",
+          "Vivant Behavioral Health"
+        ],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      },
+      "operatingPeriod": {
+        "notes": [
+          "Opened in 1998 under Three Springs (SEC merger proxy for Sequel, PREM14A, 2017-01-25, program table: \"Tuskegee Secure residential Tuskegee, AL 41 Male, ages 12-18 1998 2009\", https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm; NBC News, 2022: \"The facility, which started operations in 1998\"). The 2001 once given was a website capture year (research task, 2026-11-20)."
+        ],
+        "status": "Open",
+        "endYear": null,
+        "startYear": 1998,
+        "yearsOfOperation": ""
+      }
+    }
+  },
+  {
+    "id": 100098,
+    "unique_name": "Lakeside Academy (MI)",
+    "version": 3,
+    "note": "Research tasks on Cornelius Fredrick's death (2026-11-20): the death was April 29, 2020 (not May) after a 12-minute restraint by seven staff (not 11 minutes); adds Heather McLogan's plea and sentence and the December 2021 settlements. criticalIncidents copied from production 2026-11-19.",
+    "facility": {
+      "criticalIncidents": {
+        "customIncidents": [
+          "2020-04: Death: On April 29, 2020, 16-year-old Cornelius Fredrick died after he threw a sandwich in the cafeteria and staff took him to the floor; seven men who worked for Lakeside then held him down for 12 minutes. (NBC News, \"The brief life of Cornelius Frederick\", 2020, https://www.nbcnews.com/news/us-news/brief-life-cornelius-frederick-warning-signs-missed-teen-s-fatal-n1234660)",
+          "2020: Lawsuit: A multi-million dollar lawsuit was filed against Lakeside Academy and Sequel on behalf of the estate of the 16-year-old who died after restraint. (HEAL, staff list for the Three Springs \"Family\" of Programs/Services (archived 2022-01-27))",
+          "2020: License action: Michigan found 10 licensing violations at the academy, including failure to follow rules on restraint and discipline. (HEAL, staff list for the Three Springs \"Family\" of Programs/Services (archived 2022-01-27))",
+          "2021-09: Criminal case: Director of nursing Heather McLogan, charged with involuntary manslaughter and second-degree child abuse, pleaded no contest to third-degree child abuse in July 2021 and was sentenced to 18 months' probation. (WGVU, 2021-09-29, https://www.wgvunews.org/2021-09-29/nurse-gets-probation-for-role-in-teens-death-at-youth-home)",
+          "2021-12: Settlement: The family settled a federal wrongful-death suit on December 2, 2021 (W.D. Mich.), and a Kalamazoo County judge approved its settlement with Lakeside Academy on December 29, 2021; both were sealed. (Michigan Public / AP, 2022-01-03, https://www.michiganpublic.org/criminal-justice-legal-system/2022-01-03/family-of-teen-who-died-after-being-restrained-at-shuttered-michigan-youth-center-settles-second-wrongful-death-lawsuit)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 13640,
+    "unique_name": "Brighter Path Montgomery",
+    "version": 2,
+    "note": "Research task 'Who runs Brighter Path Montgomery and Tuskegee now?' (2026-11-20): Vivant divested its Alabama facilities (Senate Finance Committee, Warehouses of Neglect, 2024: 'Vivant has made the business decision to divest from our RTFs in Alabama and Florida'), so the stale current owner 'Vivant' is cleared; the new owner (TrueCore Acquisitions per a registry mirror) is not confirmed. Identification copied from production 2026-11-19.",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Montgomery",
+        "nameKey": "brighter path montgomery",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Montgomery"
+        ],
+        "otherNames": [
+          "Brighter Path Montgomery"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [
+          "Sequel TSI (2013-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      }
+    }
   }
 ]
