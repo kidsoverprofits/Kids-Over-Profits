@@ -8719,7 +8719,28 @@
      "url": "https://web.archive.org/web/19970209104916/http://www.youthservices.com/ca.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Hindman founded YSI (the company that opened Clarinda in 1992), not Clarinda as a separate entity; YSI's 10-K lists Clarinda Academy as a de novo start in February 1992. 'Founded by Hindman' is accurate only as 'opened by Hindman's YSI'; the nonprofit Clarinda Youth Corporation owned the program. Confidence: medium. Still open: No source says Hindman personally founded Clarinda Academy or the nonprofit Clarinda Youth Corporation; the SEC 10-K table is paraphrased from fetch output (row values 2/92, de novo).",
+    "claims": [
+     {
+      "claim": "Hindman founded YSI and was its chairman/CEO from the start.",
+      "url": "https://www.sec.gov/Archives/edgar/data/876726/0000950133-96-002122.txt",
+      "quote": "founded the Company and served as Chairman of the Board and Chief Executive Officer from its inception"
+     },
+     {
+      "claim": "YSI opened Clarinda Academy in 1992.",
+      "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+      "quote": "In 1992, Youth Services opened its doors at the Clarinda Academy in — of all places — Iowa."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Clarinda Academy (13378) already says Youth Services International opened it in February 1992; Hindman founded YSI (1996 proxy), and no source credits him personally with Clarinda.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:what-jobs-did-jay-john-f-ripley-hold-at-youth-se",
@@ -8734,7 +8755,29 @@
     26,
     30
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Not settled from primary sources: aggregator profiles say founding stockholder and President/COO/CFO. YSI's 1996 10-K lists Cole as CEO, Felton as President/COO and Mooney as CFO (Ripley absent), and the 1996 proxy says Hindman founded the company; no EDGAR filings before May 1996 were found. Confidence: low. Still open: Exact years 1990-1995 unverified; Crunchbase is a secondary source; LittleSis lists June 1995. Need YSI's 1994-95 filings (not on EDGAR browse list) or the owner's SEC proxy.",
+    "claims": [
+     {
+      "claim": "Hindman, not Slattery, founded YSI (the CSC mix-up is wrong).",
+      "url": "https://www.sec.gov/Archives/edgar/data/876726/0000950133-96-002122.txt",
+      "quote": "founded the Company and served as Chairman of the Board and Chief Executive Officer from its inception"
+     },
+     {
+      "claim": "Ripley described (secondary) as founding stockholder and President, COO, CFO of YSI.",
+      "url": "https://crunchbase.com/person/john-f-ripley",
+      "quote": "He was a founding stockholder of Youth Services International (YSI) and served as its President and COO as well as its CFO."
+     },
+     {
+      "claim": "By 1996 YSI officers were others.",
+      "url": "https://www.sec.gov/Archives/edgar/data/876726/0000950133-96-002043.txt",
+      "quote": "Henry D. Felton as \"President and Chief Operating Officer,\" and William P. Mooney as \"Chief Financial Officer and Treasurer\" (signature page)"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:what-did-altamont-capital-partners-receive-when",
@@ -8748,7 +8791,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "No source found states what Altamont received. Altamont took a majority stake in Sequel in 2017 (terms undisclosed); APM says most remaining former Sequel centers are now under Ripley-family Vivant. Confidence: low. Still open: Consideration to Altamont not found in any source; a Mergr entry lists Vivant 2021-10-01 as 'Sold to Management' (unverified).",
+    "claims": [
+     {
+      "claim": "Altamont took a majority stake in 2017, terms undisclosed.",
+      "url": "https://www.prnewswire.com/news-releases/altamont-capital-partners-invests-in-sequel-youth--family-services-300513614.html",
+      "quote": "today announced a majority equity investment into Sequel Youth & Family Services"
+     },
+     {
+      "claim": "Vivant formed by the Ripley family.",
+      "url": "https://apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "Jay Ripley and his family formed Vivant with the goal to help youth and adult consumers of behavioral health services."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:how-many-programs-did-vivant-behavioral-healthca",
@@ -8786,7 +8846,39 @@
      "url": "https://web.archive.org/web/2*/http://www.sequelyouthservices.com/html/autism-capital.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The Senate Finance Committee report says Sequel sold 13 facilities to Vivant in 2021; Vivant still ran 13 in July 2022 (Arizona, Iowa, South Dakota, Florida, Alabama), then divested the 9 in Alabama and Florida, leaving 4 in Arizona, Iowa and South Dakota. So 13 bought / 9 gone / 4 kept is right; the report does not name the individual 13, and the master doc's 15 and 10 are not supported. Confidence: high for the counts, low for the per-facility list. Still open: The individual names of the 13 are in neither the report nor the APM story. The master-doc list of 15 (Alachua, Columbus, Duval, Marion, Palm Beach) are probably the Florida DJJ programs among the 9 divested. Capital Academy NJ went to Willow Grove per APM, and Forest Ridge (Iowa) closed per APM, so the sheet's Vivant label for Forest Ridge needs checking. The Senate report says 13 sold in 2021 and 13 operated in July 2022, so no additions after 2021.",
+    "claims": [
+     {
+      "claim": "Sequel sold 13 facilities to Vivant in 2021",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "Sequel sold 13 facilities to a newly-incorporated company, Vivant Behavioral Health (Vivant), also founded by Jay Ripley."
+     },
+     {
+      "claim": "Vivant ran 13 facilities in 5 states in July 2022, then divested 9 in Alabama and Florida",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "In July 2022, when the Committee launched this investigation, Vivant operated 13 facilities across Arizona, Iowa, South Dakota, Florida, and Alabama. During the course of the investigation, Vivant divested from the nine facilities across Alabama and Florida."
+     },
+     {
+      "claim": "Four remain, in Arizona, Iowa and South Dakota",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "Vivant provides behavioral health services to children ages 12 - 20 in four facilities in Arizona, Iowa, and South Dakota."
+     },
+     {
+      "claim": "Vivant's own statement (Oct 27, 2023, footnote 78) on the Alabama/Florida divestiture",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "Vivant has made the business decision to divest from our RTFs in Alabama and Florida, with those RTFs continuing operation under new management."
+     },
+     {
+      "claim": "APM: Sequel sold most of the rest to Vivant; other sites went elsewhere (Capital Academy NJ to Willow Grove LLC; three Utah/Tennessee sites to Rite of Passage); Mountain Home, Pompano, both Forest Ridge Iowa sites closed. So Capital Academy was not a Vivant program.",
+      "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "sold most of the rest to a new company called Vivant Behavioral Healthcare"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-sequel-take-over-woodward-academy-in-woodwar",
@@ -8838,7 +8930,38 @@
      "url": "https://web.archive.org/web/19981202142807/http://www.ysii.com/wa.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Sequel joined Woodward Academy in 2000 (the SEC merger proxy's own table says so); it opened in 1995 and was still listed as a YSI program in December 1998. Confidence: medium. Still open: Growth slide (FY2001) and sheet (2001) say 2001; no primary document found giving the exact handover date. FY2001 for a mid-year fiscal year could cover a 2000 handover, so the two may not truly conflict.",
+    "claims": [
+     {
+      "claim": "Sequel's merger proxy table gives Woodward Academy: founded 1995, joined Sequel 2000 (Clarinda: founded 1992, joined 1999).",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "2 Woodward Academy* Staff-secure residential Woodward, IA 265 Male, ages 12-18 1995 2000"
+     },
+     {
+      "claim": "The proxy says Sequel took over management of Woodward (a 501(c)(3) not-for-profit) in the five years after Clarinda (1999).",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "Organic growth fueled Sequel's next five years as it took over the management of three additional 501(c)(3) not-for-profit programs, including Woodward Academy in Woodward, Iowa"
+     },
+     {
+      "claim": "In December 1998 Woodward Academy was still a Youth Services International (YSI) program, so Sequel was not there before 1999.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/ysi-woodward-academy-1998.pdf",
+      "quote": "The goal of YSI programs is to change the thinking and behavior of the students"
+     },
+     {
+      "claim": "KOP's facility page also gives Sequel 2000-2021 (unsourced there), YSI 1995-2000.",
+      "url": "https://kidsoverprofits.org/facility/woodward-academy-ia/",
+      "quote": "Sequel Youth and Family Services (2000-2021)."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Woodward Academy (13380) already gives Sequel 2000-2021 and opened 1995, as the proxy table says (\"1995 2000\"). 2001 (growth slide, sheet) is likely a fiscal-year label.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:in-what-year-did-sequel-start-running-bernalillo",
@@ -8880,7 +9003,33 @@
      "url": "https://web.archive.org/web/20121018055440/http://bernalilloacademy.org/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Bernalillo Academy was founded 2009 and joined Sequel in 2011 (the Camelot deal, March 2011) per the SEC proxy; 2012 is not supported. Confidence: medium. Still open: No document found that names Bernalillo as a Camelot program or dates its opening independently of the proxy; the APM piece gives no date. Sheet's 2012 is unsupported; the program notes' 2009 matches the proxy's founding year but is not the Sequel start. Proxy also gives Norris 2008/2011, Kingston 2002/2011, Northern Illinois 2003/2011 (Capital and Riverside not checked).",
+    "claims": [
+     {
+      "claim": "Proxy table: Bernalillo Academy founded 2009, joined Sequel 2011.",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "2 Bernalillo Academy Psychiatric Residential Treatment Facility Albuquerque, NM 40 ASD, ages 5-17 2009 2011"
+     },
+     {
+      "claim": "Sequel completed the Camelot System of Care acquisition in March 2011.",
+      "url": "https://www.llcp.com/levine-leichtman-capital-partners-and-sequel-youth-and-family-services-anno/",
+      "quote": "now operating 31 programs in 16 states that serve a broad spectrum of clients."
+     },
+     {
+      "claim": "A June 2015 suit names Sequel of New Mexico, LLC d/b/a Bernalillo Academy (Sequel ran it by 2015).",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "Wendell Upton vs. Sequel of New Mexico, LLC d/b/a Bernalillo Academy"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Bernalillo Academy (12743) already says founded 2009, joined Sequel 2011 (proxy). 2012 has no source.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-youth-opportunity-investments-take-over-st-j",
@@ -8928,7 +9077,43 @@
      "url": "https://web.archive.org/web/20080609052550/http://www.threesprings.com/contract_programs/programs/st-johns.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes as to the current operator: Florida DJJ's page for the site (4500 Avenue D, St. Augustine, now named St. Augustine Youth Academy) lists Youth Opportunity Investments as provider. The takeover date and contract award were not found; Sequel then Vivant ran it until DJJ closed the program and ended the contract in Oct 2022. Confidence: medium. Still open: No source gives the date YOI took over (between Oct 2022 and mid-2024) or states outright that it is the same building reopened under a new contract. The Sequel timeline line 'Rebranded to St. Augustine Youth Academy, Youth Opportunity Investments' sits on the wrong row (Tuskegee), as the card says. Check Florida's contract tracker / DJJ procurement for the award.",
+    "claims": [
+     {
+      "claim": "DJJ current provider and address",
+      "url": "https://www.djj.state.fl.us/programs-facilities/residential-facilities/saint-john-s-youth-academy",
+      "quote": "Provider: Youth Opportunity Investments; 4500 Avenue D, St. Augustine, FL 32085; High-risk Residential, Maximum-risk Residential; 64, Ages 14-18"
+     },
+     {
+      "claim": "DJJ ended the contract with Sequel TSI in Oct 2022",
+      "url": "https://www.news4jax.com/news/local/2022/10/28/i-team-closer-look-at-recent-facility-closures-in-florida-following-st-johns-youth-academys-sudden-shutdown",
+      "quote": "ended a contract with Sequel TSI"
+     },
+     {
+      "claim": "Senate report: DJJ terminated its contract with Vivant after the October 2022 incident; Vivant assumed the Florida contracts in 2021",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "DJJ terminated its contract with Vivant following the incident in October 2022."
+     },
+     {
+      "claim": "YOI runs a St. Augustine Youth Academy at the same address (CARF)",
+      "url": "https://carf.org/provider/st-augustine-youth-academy-397250/",
+      "quote": "Youth Opportunity Investments, LLC - Florida (YOI) ... 4500 Avenue D, St. Augustine, FL 32085"
+     },
+     {
+      "claim": "Florida Scholars Academy (education provider FLVS) launched July 1, 2024 with a press conference at the site; not an operator change",
+      "url": "https://actionnewsjax.com/news/local/florida-department-juvenile-justice-marks-start-operations-florida-scholars-academy/AVT6V7FNERFCZFWS42UF65QTDM",
+      "quote": "at a press conference held at the St. Johns Youth Academy"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: St. Augustine Youth Academy (11130) already names Youth Opportunity Investments as current operator (Florida DJJ page). Takeover date still unknown.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:who-runs-brighter-path-montgomery-and-brighter-p",
@@ -8978,7 +9163,43 @@
      "url": "https://web.archive.org/web/20020820163754/http://www.threesprings.com/our.programs/secure/programs/tst.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Not Vivant any more: Vivant told the Senate it divested its Alabama facilities (continuing under new management), and Alabama DHR in May 2023 named Brighter Path of Alabama LLC for Montgomery residential services. That the new owner is TrueCore Acquisitions LLC rests only on an Alabama business-registry mirror (ltddir.com, blocked to me; seen as a search snippet) and a PsychCrime list; I could not confirm it from the Secretary of State itself. No evidence the state took over. Confidence: medium. Still open: News through 2023-24 still describes Vivant as the Tuskegee parent in suits filed against it. The Alabama SOS entity page for Brighter Path Alabama, LLC (formerly Sequel TSI of Alabama, LLC) is needed to pin TrueCore and the date.",
+    "claims": [
+     {
+      "claim": "Vivant divested Alabama RTFs; continued under new management",
+      "url": "https://www.finance.senate.gov/imo/media/doc/rtf_report_warehouses_of_neglect.pdf",
+      "quote": "Vivant has made the business decision to divest from our RTFs in Alabama and Florida, with those RTFs continuing operation under new management."
+     },
+     {
+      "claim": "Alabama DHR chose Brighter Path of Alabama LLC for Montgomery residential services, May 12, 2023",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2023/05/RESULTS-ANNOUNCEMENT-LETTER-MONTGOMERY-INTENSIVE-RESIDENTIAL-SERVICES-5-12-23.pdf",
+      "quote": "The Alabama Department of Human Resources intends to negotiate with the following vendor, Brighter Path of Alabama LLC. to provide Montgomery Residential Services."
+     },
+     {
+      "claim": "DHR Jan 8, 2024: Brighter Path again among vendors for North Alabama moderate residential",
+      "url": "https://dhr.alabama.gov/wp-content/uploads/2024/01/Announcement-Intent-to-Negotiate-Form-Moderate-RFP-GB2023-100-07.pdf",
+      "quote": "intends to negotiate with the following vendors to provide Moderate Residential Services in North Alabama area: Brighter Path, Pathway"
+     },
+     {
+      "claim": "Montgomery Advertiser Sept 1, 2022: name change Sequel TSI of Alabama to Brighter Path of Alabama in spring 2022; Vivant named as parent operating Tuskegee at that time",
+      "url": "https://www.yahoo.com/news/different-name-same-accusations-wrongful-020124584.html",
+      "quote": "Vivant Behavioral Healthcare is the parent company operating Brighter Path Tuskegee."
+     },
+     {
+      "claim": "Secondary list: TrueCore owns/manages both sites (status as of Oct 2022 per the list; no transfer date; advocacy list, not a primary record)",
+      "url": "https://www.psychcrime.org/articles/index.php?vd=82",
+      "quote": "renamed Brighter Path Tuskegee under Vivant Behavioral Health, now owned/managed by TrueCore Acquisitions."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "Brighter Path Montgomery (13640) stale current owner \"Vivant\" cleared (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3); both records already give Brighter Path Alabama, LLC as operator since 2023. TrueCore as owner is unconfirmed (registry mirror only), so no owner is set.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:when-did-rite-of-passage-take-over-falcon-ridge",
@@ -9107,7 +9328,48 @@
      "url": "https://web.archive.org/web/20171021121151/http://sequelyouthservices.com/html/staffsecure-lavaheights.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "October 2021, more precisely between 2021-09-28 and 2021-10-20: both program websites still carried Sequel's notices and job links through late September 2021 and 'A Rite of Passage program' by October 20-22, 2021. Falcon Ridge Ranch did not close in 2020, and Sequel did not run either after about Oct 2021. Confidence: high for the website switch date; the legal transfer date was not found. Still open: The master doc's 'closed 2020' and the sheet's 'Falcon Ridge Sequel 2016-2020' / 'Lava Heights 2016-2021' are not supported: both ran as Sequel until about Oct 2021. Sequel closed Red Rock Canyon School in 2019, not Falcon Ridge. Utah DHHS licensing record not seen.",
+    "claims": [
+     {
+      "claim": "Lava Heights site on 2021-09-28 still Sequel (Sequel notice and sequeljobs.com links) (KOP copy; archive: https://web.archive.org/web/20210928185101/https://www.lavaheightsacademy.com/)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/lavaheightsacademy-com-2021-09-28-wayback.pdf",
+      "quote": "Sequel Youth & Family Services is closely monitoring developments around COVID-19 (coronavirus)."
+     },
+     {
+      "claim": "Lava Heights site on 2021-10-20 is Rite of Passage (KOP copy; archive: https://web.archive.org/web/20211020025015/https://www.lavaheightsacademy.com/)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/lavaheightsacademy-com-2021-10-20-wayback.pdf",
+      "quote": "A Rite of Passage program"
+     },
+     {
+      "claim": "Falcon Ridge site on 2021-09-27 still Sequel (Sequel notice and sequeljobs.com links) (KOP copy; archive: https://web.archive.org/web/20210927030443/https://www.falconridgeranch.com/)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/falconridgeranch-com-2021-09-27-wayback.pdf",
+      "quote": "Sequel Youth & Family Services is closely monitoring developments around COVID-19 (coronavirus)."
+     },
+     {
+      "claim": "Falcon Ridge site on 2021-10-22 is Rite of Passage (KOP copy; archive: https://web.archive.org/web/20211022150240/https://www.falconridgeranch.com/)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/falconridgeranch-com-2021-10-22-wayback.pdf",
+      "quote": "A Rite of Passage Program"
+     },
+     {
+      "claim": "APM April 2022 confirms the shift",
+      "url": "https://www.apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "Websites for three former Sequel facilities in Utah and Tennessee indicate that they are now run by Rite of Passage"
+     },
+     {
+      "claim": "Falcon Ridge still open under Rite of Passage",
+      "url": "https://falconridgeranch.com/about-falcon-ridge-ranch/",
+      "quote": "Falcon Ridge is a Rite of Passage program."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Falcon Ridge Ranch (9607) and Lava Heights Academy (9611) already give Sequel 2016-2021 and Rite of Passage since 2021; the archived sites date the switch to Sep 28-Oct 22, 2021. \"Closed 2020\" in the master doc is wrong.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-mount-pleasant-academy-in-mount-pleasant-uta",
@@ -9164,7 +9426,38 @@
      "url": "https://web.archive.org/web/20170606113839/http://sequelyouthservices.com/html/staffsecure-mountpleasant.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Mount Pleasant Academy was founded in 2011 (not 2001) and Sequel started running it on August 16, 2016. Confidence: high. Still open: 'Opened 2001, CARES School' in program notes has no support found; likely a typo for 2011. Exact opening month not found.",
+    "claims": [
+     {
+      "claim": "Proxy table: Mt Pleasant Academy founded 2011, joined Sequel 2016.",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "29 Mt Pleasant Academy Staff-secure residential Mt. Pleasant, UT 16 Male, ages 12-18 2011 2016"
+     },
+     {
+      "claim": "Sequel bought it on 16 Aug 2016 as part of the CARE Schools acquisition.",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "On August 16, 2016, Sequel acquired certain non-real estate assets and assumed certain liabilities of Falcon Ridge Ranch Inc., Red Rock Canyon School, LLC, Lava Heights Academy, Inc., Mount Pleasant Academy, LLC"
+     },
+     {
+      "claim": "Woodbury Reports, October 2012 calls it newly founded, consistent with 2011/2012 and contradicting 2001.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/woodbury-1012.pdf",
+      "quote": "Newly founded Mount Pleasant Academy, based in central Utah, has opened its doors to school-age boys"
+     },
+     {
+      "claim": "The sellers' Falcon Ridge petition lists Mount Pleasant Academy, LLC among the CARE entities.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+      "quote": "Petitioner Mount Pleasant Academy, LLC is a is a Utah limited liability company."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Mount Pleasant Academy (10367) already gives 2011-2019, CARE 2011-2016, Sequel 2016-2019. \"2001\" was a typo in the program notes.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-red-rock-canyon-school-in-st-george-utah-ope",
@@ -9251,7 +9544,38 @@
      "url": "https://web.archive.org/web/20170606035743/http://sequelyouthservices.com/html/staffsecure-redrockcanyon.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Red Rock Canyon School existed before 2006 (a student was enrolled in August 2001), so 2006 is wrong; the proxy gives 1999, and the Habibians owned it (Melanie named owner/CEO in 2005 suit; sellers' 2020 petition says Frank and Melanie opened their first St. George center in 1996). Confidence: medium. Still open: 1999 (proxy, HEAL) vs 1996 (petition, which may refer to a different first center or the nonprofit). The 2001 enrollment disproves 2006. Frank and Melanie as founders: supported as owners/openers of the CARE schools, but no source states Red Rock itself was founded by both in a given year.",
+    "claims": [
+     {
+      "claim": "Proxy table: Red Rock Canyon School founded 1999, joined Sequel 2016.",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "27 Red Rock Canyon School Staff-secure residential St George, UT 140 Male & Female, ages 12-18 1999 2016"
+     },
+     {
+      "claim": "The Robertson complaint (D. Utah 2:05-cv-758) shows a student enrolled in 2001.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/redrocklawsuit.pdf",
+      "quote": "Chase was enrolled at Red Rock Canyon School from August 6, 2001 to September 13, 2001."
+     },
+     {
+      "claim": "Same complaint on ownership.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/redrocklawsuit.pdf",
+      "quote": "Malanie Habibian, the owner and Chief Executive Officer of Red Rock Canyon School"
+     },
+     {
+      "claim": "Sellers' 2020 Utah court petition on the Habibians opening the first center.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+      "quote": "Habibian and his wife Melanie Habibian opened the first of four residential youth treatment centers in St. George, Utah in 1996."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: Red Rock Canyon School (10368) already says founded 1999 by Frank and Melanie Habibian (proxy; Robertson complaint shows a student in Aug 2001, so 2006 is wrong). The petition's 1996 refers to the Habibians' first St. George center.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-sequel-tsi-kissimmee-in-florida-earlier-thre",
@@ -9265,7 +9589,34 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "A Florida DJJ PREA audit says the Kissimmee program was established in 2001 (run by Three Springs); Sequel took over with the Three Springs acquisition announced December 30, 2009. Confidence: medium. Still open: 2001 rests on one audit sentence (written years later); no contract award or opening record found for 2001 or 2002. Sequel start is Dec 2009 (sheet's 2009 fits). The 2016 end is unconfirmed here.",
+    "claims": [
+     {
+      "claim": "DJJ PREA audit of Sequel TSI of Kissimmee.",
+      "url": "https://www.djj.state.fl.us/content/download/23140/file/kissimmee-sex-offender-program-prea-audit-report.pdf?version=1",
+      "quote": "Sequel TSI of Kissimmee was established in 2001"
+     },
+     {
+      "claim": "DJJ's 2007-08 review lists the facility under Three Springs, Inc.",
+      "url": "https://www.djj.state.fl.us/content/download/21326/file/2007-08_car_(high-risk_residential).pdf",
+      "quote": "Kissimmee Juvenile Correctional Facility SOP      Three Springs, Inc."
+     },
+     {
+      "claim": "Sequel announced acquiring Three Springs on December 30, 2009.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Three-Springs-Acquired-By-Sequel-Youth-And-Family-Services.pdf",
+      "quote": "Sequel Youth and Family Services, a nationally recognized leader in youth services, announces the acquisition of privately held Three Springs, Inc. (TSI)"
+     },
+     {
+      "claim": "A June 2008 Three Springs page still shows Three Springs running it.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/threesprings.com-contract_programs-programs-kissimmee.html-Wayback-2008-06-07.pdf",
+      "quote": "Three Springs of Kissimmee is operated exclusively for the State of Florida Department of Juvenile Justice."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:for-how-many-minutes-and-by-how-many-staff-was-c",
@@ -9312,7 +9663,48 @@
      "url": "https://web.archive.org/web/20171021121145/http://sequelyouthservices.com/html/staffsecure-lakeside.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Cornelius Frederick was held down for about 12 minutes by seven Lakeside staff (NBC News: seven men; Michigan Public: seven other men besides the adult who first pushed him down); the nurse called 911 about 11-12 minutes in. The 10-minute figure is the facility's restraint limit/earlier press wording, and 'eight' counts the first adult plus seven. Confidence: medium. Still open: Some reports say 10 minutes; one NBC video caption says 6 staff; Mother Jones' 'five staff for more than 30 minutes' refers to a different earlier restraint, not this one. Whether the figure is 7 or 8 depends on counting the adult who first took him down. Not checked: the MDHHS report itself.",
+    "claims": [
+     {
+      "claim": "12 minutes, seven Lakeside men held him",
+      "url": "https://www.nbcnews.com/news/us-news/brief-life-cornelius-frederick-warning-signs-missed-teen-s-fatal-n1234660",
+      "quote": "for 12 minutes, as Cornelius struggled and gradually grew still, seven men who worked for Lakeside held him down"
+     },
+     {
+      "claim": "911 called 12 minutes later",
+      "url": "https://www.nbcnews.com/news/us-news/brief-life-cornelius-frederick-warning-signs-missed-teen-s-fatal-n1234660",
+      "quote": "Twelve minutes later, they called 911."
+     },
+     {
+      "claim": "Seven other men plus the adult who first pushed him; 12 minutes",
+      "url": "https://www.michiganpublic.org/families-community/2021-04-30/one-year-later-whats-changed-and-what-hasnt-since-the-killing-of-cornelius-fredrick",
+      "quote": "eventually seven other grown men held the boy down for 12 minutes."
+     },
+     {
+      "claim": "Nurse watched ~11 minutes before 911",
+      "url": "https://www.michiganpublic.org/families-community/2021-04-30/one-year-later-whats-changed-and-what-hasnt-since-the-killing-of-cornelius-fredrick",
+      "quote": "She watched Fredrick lay limp on the floor for 11 minutes before she called 911."
+     },
+     {
+      "claim": "Medical examiner tied death to the 12-minute restraint",
+      "url": "https://wwmt.com/news/local/lakeside-academy-student-cornelius-fredericks-michael-mosley-zachary-solis-restraint-homicide-death-probation-sentence-michigan",
+      "quote": "the 12-minute restraint, specifically the body weight upon his torso."
+     },
+     {
+      "claim": "Michigan Public (settlement story) says 10 minutes, the outlier",
+      "url": "https://www.michiganpublic.org/criminal-justice-legal-system/2022-01-03/family-of-teen-who-died-after-being-restrained-at-shuttered-michigan-youth-center-settles-second-wrongful-death-lawsuit",
+      "quote": "Frederick died after he was restrained for 10 minutes at the center on April 29, 2020."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "Lakeside Academy (100098) incident corrected: April 29, 2020 (was May), 12 minutes by seven staff (was 11-minute), NBC cited (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3).",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:when-did-cornelius-frederick-s-family-settle-its",
@@ -9359,7 +9751,28 @@
      "url": "https://web.archive.org/web/20171021121145/http://sequelyouthservices.com/html/staffsecure-lakeside.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The state-court settlement with Lakeside Academy was approved December 29, 2021 (reported Jan 3, 2022); a second suit was settled December 2, 2021 in federal court (W.D. Mich.). So the master doc's 'December 2, 2020' has the wrong year (2021), and the provider report's 'in 2022' reflects news dates. Confidence: medium. Still open: The year of each date is inferred from the article's Jan 3, 2022 date and its 'second' lawsuit headline; the fetched text did not print the year. Amounts were sealed; which defendants (Sequel?) were in each settlement is not stated. Not checked: court dockets.",
+    "claims": [
+     {
+      "claim": "State settlement approved Dec 29 (2021, article dated 2022-01-03)",
+      "url": "https://www.michiganpublic.org/criminal-justice-legal-system/2022-01-03/family-of-teen-who-died-after-being-restrained-at-shuttered-michigan-youth-center-settles-second-wrongful-death-lawsuit",
+      "quote": "The settlement between the family of Cornelius Fredrick and Lakeside Academy in Kalamazoo was approved December 29"
+     },
+     {
+      "claim": "Another lawsuit settled Dec 2 in federal court",
+      "url": "https://www.michiganpublic.org/criminal-justice-legal-system/2022-01-03/family-of-teen-who-died-after-being-restrained-at-shuttered-michigan-youth-center-settles-second-wrongful-death-lawsuit",
+      "quote": "Another lawsuit was settled December 2 in federal court for the Western District of Michigan."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "Lakeside Academy (100098) incident added: federal suit settled Dec 2, 2021, state settlement approved Dec 29, 2021, both sealed (Michigan Public/AP, 2022-01-03) (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3). The master doc's \"December 2, 2020\" is the wrong year.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:what-was-nurse-heather-mclogan-charged-with-over",
@@ -9406,7 +9819,33 @@
      "url": "https://web.archive.org/web/20171021121145/http://sequelyouthservices.com/html/staffsecure-lakeside.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "McLogan, director of nursing, was charged with involuntary manslaughter and second-degree child abuse; in July 2021 she pleaded no contest to third-degree child abuse and was sentenced (reported Sept 29, 2021) to 18 months' probation. Confidence: high. Still open: Nothing material. The Dec 2023 probation sentences (upnorthlive/WWMT) are for Mosley and Solis, not her. The 'charged June 24, 2020' date was not verified.",
+    "claims": [
+     {
+      "claim": "Plea July 2021, no contest, third-degree child abuse",
+      "url": "https://www.wgvunews.org/2021-09-29/nurse-gets-probation-for-role-in-teens-death-at-youth-home",
+      "quote": "McLogan made a deal with prosecutors in July and pleaded no contest to third-degree child abuse."
+     },
+     {
+      "claim": "Original charges",
+      "url": "https://www.wgvunews.org/2021-09-29/nurse-gets-probation-for-role-in-teens-death-at-youth-home",
+      "quote": "She had been charged with involuntary manslaughter and second-degree child abuse."
+     },
+     {
+      "claim": "18 months probation, confirmed by prosecutor",
+      "url": "https://www.fox17online.com/homepage-showcase/former-nurse-sentenced-to-probation-in-death-of-lakeside-teen",
+      "quote": "was sentenced to 18 months probation on child abuse 3rd degree, the prosecutor's office confirmed."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "Lakeside Academy (100098) incident added: charges, July 2021 no-contest plea to third-degree child abuse, 18 months' probation (WGVU) (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3).",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:were-the-2016-cases-of-clarinda-academy-staff-ab",
@@ -9463,7 +9902,34 @@
      "url": "https://web.archive.org/web/19970209104916/http://www.youthservices.com/ca.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Only one 2016 case was found: overnight counselor Antonio Aranda pleaded guilty in 2016 to sexual misconduct with a juvenile (aggravated misdemeanor), got 10 years' probation and sex-offender registration; the victim was a then-17-year-old. No separate 16-year-old case was found, so the provider report's separate felony is unconfirmed (likely the same case garbled). Confidence: medium. Still open: The provider report says a 40-year-old night staffer was charged with rape of a 17-year-old (plea was to a lesser misdemeanor) plus a separate felony conviction for a 16-year-old; no source found for the 16-year-old case. Not checked: Iowa Courts Online (Page County) docket, Des Moines Register 2016/2018 stories. Waits: the Page County docket (Iowa Courts Online) is needed to rule out a second case.",
+    "claims": [
+     {
+      "claim": "2016 plea, aggravated misdemeanor",
+      "url": "https://www.nbcnews.com/news/us-news/they-told-me-it-was-going-be-good-place-allegations-n987176",
+      "quote": "In 2016, as part of a plea deal, Aranda pleaded guilty to sexual misconduct with a juvenile, an aggravated misdemeanor."
+     },
+     {
+      "claim": "10 years probation, no prison",
+      "url": "https://www.nbcnews.com/news/us-news/they-told-me-it-was-going-be-good-place-allegations-n987176",
+      "quote": "her perpetrator received 10 years of probation and was required to register as a sex offender for the duration of his supervision."
+     },
+     {
+      "claim": "Victim was 17",
+      "url": "https://www.motherjones.com/criminal-justice/2020/07/cornelius-fredericks-i-cant-breathe-sequel-lakeside-michigan/",
+      "quote": "When she was a 17-year-old resident at the Academy, she says, she was raped by a male counselor."
+     },
+     {
+      "claim": "A 2016 female-teacher felony charge, dismissed (different, male student)",
+      "url": "https://www.nbcnews.com/news/us-news/they-told-me-it-was-going-be-good-place-allegations-n987176",
+      "quote": "In 2016, a female teacher was charged with felony exploitation for allegedly touching the genitals of a male student."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:how-many-times-were-police-or-the-sheriff-called",
@@ -9515,7 +9981,24 @@
      "url": "https://web.archive.org/web/20170701000000*/http://www.sequelyouthservices.com/html/kingston.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "No source I could open gives 171, 135 or 36. WPLN reports more than 100 calls to 911 from the facility in the 12 months before it closed (logs from a public records request); a WBIR search snippet says authorities were called 'dozens of times' in 2018 and 2019. WBIR's own page returned 403, so the 171 figure is unverified. Confidence: low. Still open: 171 (master doc, attributed to WBIR 2019), 135 (2018 sheriff), 36 in two months (provider report) are all unconfirmed. 'More than 100 911 calls in 12 months' (WPLN) is the only documented count and matches none of them exactly; 171 could be calls-for-service across 2018-19 but I could not open the WBIR piece. Fix: open the WBIR article in a browser, or file a Roane County Sheriff's Office records request. Waits: none of 171, 135 or 36 could be confirmed; WBIR's page refused us. Only \"more than 100 911 calls\" in the year before closure (WPLN) is documented.",
+    "claims": [
+     {
+      "claim": "WPLN: more than 100 911 calls from Kingston Academy in the year before closure, mostly property destruction and potential runaways (these are 911 calls, not specifically police/sheriff calls).",
+      "url": "https://wpln.org/post/at-a-tennessee-psychiatric-treatment-center-inexperienced-and-overworked-staff-left-kids-without-care/",
+      "quote": "Emergency 911 logs obtained through a public records request show more than 100 calls were made from the facility"
+     },
+     {
+      "claim": "DCS removed 18 children, ages 5 to 17, in February 2019.",
+      "url": "https://www.wvlt.tv/content/news/4M-lawsuit-says-child-was-raped-at-Kingston-Academy-568008361.html",
+      "quote": "In February 2019 , the Tennessee Department of Children's Services removed 18 children, ages five to 17, from the academy due to concerns."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:how-many-red-rock-canyon-school-staff-in-st-geor",
@@ -9602,7 +10085,38 @@
      "url": "https://web.archive.org/web/20170606035743/http://sequelyouthservices.com/html/staffsecure-redrockcanyon.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The Salt Lake Tribune (July 2019) says 24 staffers were investigated for child abuse over the period since 2017 (not in 2017 alone), and 10 employees were charged in about 2.5 years; the Tribune's 23 June 2019 count was 9 charged, the 10th (Gino Sanchez) was charged days later. Confidence: high. Still open: KUTV 2025 says 24 investigated 'in 2017' (secondary, later, appears to compress the Tribune's 'since 2017'). 'PESP: 23 investigated, 9 charged' matches the 23 June 2019 Tribune stage (22 by its yearly figures, 9 charged); 24 and 10 are the later count. Charges are as of mid-2019, before closure.",
+    "claims": [
+     {
+      "claim": "72 police calls and 24 staffers investigated for child abuse since 2017 (through mid-2019).",
+      "url": "https://www.sltrib.com/news/2019/07/10/after-riot-increasing/",
+      "quote": "Since 2017, St. George police have been called to Red Rock Canyon School a total of 72 times. ... \"In that time, 24 staffers were investigated for child abuse.\""
+     },
+     {
+      "claim": "10 staffers charged in the past 2.5 years as of the Sanchez charge (late June 2019).",
+      "url": "https://www.sltrib.com/news/2019/06/27/staffer-school-troubled/",
+      "quote": "Sanchez is the 10th employee to be charged with child abuse since 2017."
+     },
+     {
+      "claim": "Earlier Tribune count (23 June 2019): 9 charged; yearly investigations 3 (2017), 12 (2018), 7 (first half 2019) = 22 at that date.",
+      "url": "https://www.sltrib.com/news/2019/06/23/violence-often-instigated/",
+      "quote": "In the past 2½ years, nine employees have been charged with child abuse for choking, pushing or punching kids in the face."
+     },
+     {
+      "claim": "KUTV 2025 dated the 24 to 2017, which the 2019 Tribune does not support.",
+      "url": "https://kutv.com/news/local/lawsuit-claims-staff-at-former-st-george-youth-center-abused-impregnated-teenage-girls",
+      "quote": "in 2017, 24 staffers were investigated for child abuse"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No KOP record states the disputed count. For any write-up: police called 72 times and 24 staffers investigated for child abuse from 2017 to mid-2019, and 10 employees charged (Salt Lake Tribune, 2019-07-10 and 2019-06-27). KUTV 2025's \"in 2017\" compresses \"since 2017\".",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-sequel-tsi-of-tuskegee-later-brighter-path-t",
@@ -9644,7 +10158,28 @@
      "url": "https://web.archive.org/web/20020820163754/http://www.threesprings.com/our.programs/secure/programs/tst.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "1998 is what NBC (Sept 2022) states, but I found no second or primary source; the 2001 is a Three Springs web-capture year, and KOP's 'renamed Three Springs School of Tuskegee in 2001' is a rename, not an opening. No state license or 1998-2001 news showing the opening year was found. Confidence: low-medium. Still open: Archive captures of threesprings.com 1998-2001 homepages did not mention Tuskegee (fetches were flaky, not a full check). The 2020 NBC article does not give a year.",
+    "claims": [
+     {
+      "claim": "NBC says the facility started operations in 1998",
+      "url": "https://www.nbcnews.com/news/us-news/mom-sues-alabama-youth-facilty-sequel-tsi-son-died-suicide-escape-livi-rcna45729",
+      "quote": "The facility, which started operations in 1998, describes itself as a residential treatment facility that provides"
+     },
+     {
+      "claim": "Three Springs Tuskegee page, Aug 2002 capture, shows it existed by then (capture date, not opening date) (KOP copy; archive: https://web.archive.org/web/20020820163754/http://www.threesprings.com/our.programs/secure/programs/tst.html)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/threesprings-com-tuskegee-2002-08-20-wayback.pdf",
+      "quote": "Three Springs of Tuskegee is committed to providing the resources, opportunities and protection necessary for your child's physical, mental and spiritual growth."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "Brighter Path Tuskegee (13641) start year 2009 -> 1998, Three Springs dated 1998-2009, with the proxy and NBC cited in its notes (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3).",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:what-jobs-did-mike-mcfarland-hold-at-sequel-and",
@@ -9711,7 +10246,29 @@
      "url": "https://web.archive.org/web/20131126081212/http://sequelyouthservices.com/html/staffsecure-mingus.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Sequel's own bio: Executive Director of Clarinda Academy (Iowa) from 2009, Executive Director of Mingus Mountain Academy from 2012, Vice President of Operations from 2014; he left Sequel November 2020 per his LinkedIn. The 'VP of Operations 2009-2020' on the staff tab is the LinkedIn wording and conflicts with Sequel's bio; 'Mingus ED 2013-2015' is not supported. Confidence: medium. Still open: LinkedIn gives one 11-year 'VP of Operations' line from 2009, but Sequel's bio puts 2009-2012 at Clarinda ED, 2012-2014 at Mingus ED, VP from 2014; the LinkedIn line looks like a lumped title. The Onofrio complaint quote ('Mingus Vice President Michael McFarland', 2020) is on the card but I could not open the complaint text; it is consistent with a VP over Mingus. Mingus ED end year (2014) is inferred from the VP promotion year; not independently confirmed. The 2013 Wayback Mingus page could not be fetched (bot block). Waits on the owner: operator 20 (Sequel) lists him as \"vice president of operations, 2009-2020\"; Sequel's own bio supports Clarinda ED 2009, Mingus ED 2012, VP of Operations from 2014 to Nov 2020. Operator staff has no seed path, so this is an edit in the data form.",
+    "claims": [
+     {
+      "claim": "Career steps and years from Sequel's own bio (Wayback copy of sequelyouthservices.com). (KOP copy; archive: https://web.archive.org/web/20181209093629/http://www.sequelyouthservices.com:80/vice-presidents/mike_mcfarland.php)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/sequelyouthservices-com-mike-mcfarland-2018-12-09-wayback.pdf",
+      "quote": "In 2009, Mr. McFarland accepted the Executive Director position at Clarinda Academy with Sequel Youth and Family Services in Clarinda Iowa. In 2012, Mr. McFarland relocated within Sequel to Arizona where he accepted the Executive Director position at Mingus Mountain Academy. In 2014, Mr. McFarland was promoted to Vice President of Operations."
+     },
+     {
+      "claim": "His LinkedIn (KOP copy) lists Sequel VP of Operations Aug 2009 - Nov 2020.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Sequel%20TSI/Sequel%20Corporate/Sequel%20Mike%20McFarland%20LinkedIn.pdf",
+      "quote": "Sequel Youth and Family Services VP of Operations August 2009 - November 2020 (11 years 4 months)"
+     },
+     {
+      "claim": "LinkedIn summary: later VP of Operations Western Division.",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Sequel%20TSI/Sequel%20Corporate/Sequel%20Mike%20McFarland%20LinkedIn.pdf",
+      "quote": "Mike has also served as Vice President of Operations Western Division for Sequel Youth and Family Services where he was responsible for Behavioral Health Facilities encompassing five different states."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:is-the-chris-banken-who-runs-mingus-mountain-aca",
@@ -9778,7 +10335,24 @@
      "url": "https://web.archive.org/web/20131126081212/http://sequelyouthservices.com/html/staffsecure-mingus.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Not the same living person: Chris A. Banken, the Sequel Senior VP (joined January 2004, first Mingus executive director in 1999), died 26 January 2015. A Chris Banken in 2024-25 ADHS records (and still on BBB/NPI listings as CEO/Executive Director) must be a different person or a stale record carried forward. Confidence: medium. Still open: I could not open the ADHS BH1487 record, so I have not seen how it lists 'Chris Banken'. The obituary proves the 2004 SVP died in 2015; it cannot prove whether a second Chris Banken exists or the ADHS/BBB/NPI entries are unrevised. The Sequel-SVP sentences could not be read directly (dcourier paywall; I did not bypass it). Check the ADHS record's last-updated date, or ask ADHS. Waits: the ADHS BH1487 record was not opened, so whether it names a second Chris Banken or carries a stale name is open.",
+    "claims": [
+     {
+      "claim": "Obituary: Chris A. Banken died 26 Jan 2015 aged 45.",
+      "url": "https://www.dcourier.com/obituaries/obituary-chris-a-banken/article_b4aae762-b465-579b-8453-801c9b96b605.html",
+      "quote": "Chris A. Banken, 45, died Monday, Jan. 26, 2015, at Scottsdale Osborne Healthcare in Scottsdale, Arizona."
+     },
+     {
+      "claim": "Messinger Mortuaries lists his dates.",
+      "url": "https://www.messingermortuary.com/obituaries/Chris-A-Banken?obId=27126043",
+      "quote": "Banken November 22, 1969 - January 26, 2015"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:did-sequel-buy-three-springs-inc-on-december-30",
@@ -9792,7 +10366,23 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The deal was announced December 30, 2009 (reposted Jan 2, 2010 on Woodbury); the release only says 'announces the acquisition', so closing date is not stated. Jan 2, 2010 is a posting date, not a purchase date. Confidence: medium. Still open: Wiki profile says September 2009; strugglingteens paid listing says Dec 31, 2009. Closing date unknown; Alabama registration Dec 22, 2009 fits a late-Dec close.",
+    "claims": [
+     {
+      "claim": "Announcement dated Dec 30, 2009, posted Jan 2, 2010.",
+      "url": "https://strugglingteens.com/artman/publish/printer_SequelYouthFamilyBN_010210.shtml",
+      "quote": "December 30, 2009 ... announces the acquisition of privately held Three Springs, Inc. (TSI)"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   },
+   "settled": {
+    "text": "No change needed: the Sequel TSI milestone (seeds/company-milestones.json) already dates the deal 2009-12-30 from the release. Jan 2, 2010 is Woodbury's posting date; no closing date is published.",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-where-sources:how-many-programs-did-three-springs-inc-run-when",
@@ -9806,7 +10396,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Not settled: no 2009 release found stating Three Springs' own count. The announcement gives only 22 combined programs; the earlier figure was over 20 campuses in 10 states (2006). Confidence: low. Still open: The 25/9 (2008) and 21-23/6-7 (2009) figures were not located; 22 is combined.",
+    "claims": [
+     {
+      "claim": "Combined count 22.",
+      "url": "https://strugglingteens.com/artman/publish/printer_SequelYouthFamilyBN_010210.shtml",
+      "quote": "the combined companies operating 22 programs across the country"
+     },
+     {
+      "claim": "2006: over 20 campuses, 10 states.",
+      "url": "https://strugglingteens.com/artman/publish/printer_5485.shtml",
+      "quote": "operates year round on over 20 campuses in 10 states"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:was-sequel-youth-and-family-services-llc-formed",
@@ -32472,5 +33079,5 @@
    "directions": []
   }
  ],
- "built": "2026-11-20 03:19"
+ "built": "2026-11-20 14:30"
 }
