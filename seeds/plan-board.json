@@ -1,6 +1,6 @@
 {
- "built": "2026-11-20 13:54 UTC",
- "source": "56d95ee3dad18ab5829c77ef15b41d0f97a9c6a6",
+ "built": "2026-11-20 14:38 UTC",
+ "source": "e12754808cc16195c6623a0b216a99e3a15405a1",
  "sections": [
   {
    "key": "2",
@@ -4346,6 +4346,21 @@
        "focus": false,
        "steps": [],
        "hash": "e30f3c6bafcd"
+      },
+      {
+       "id": "4.6:research-tasks-worked-2026-11-20-sequel-and-vivant-where-sou",
+       "lead": "Research tasks worked 2026-11-20, \"Sequel and Vivant: where sources disagree\" (all 23)",
+       "text": "**Research tasks worked 2026-11-20, \"Sequel and Vivant: where sources disagree\" (all 23)**: answered in `seeds/research-tasks.json`, 15 settled. Record fixes in [c2e17dd3](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c2e17dd3) (Brighter Path Tuskegee opened 1998; Lakeside Academy: April 29, 2020 death, 12 minutes, seven staff, McLogan sentence, Dec 2021 settlements; Brighter Path Montgomery's stale owner Vivant cleared; template assignments 174). 14 sources sent (6 website, 8 article); 8 Wayback PDFs imported (attachments 17674-17681: Falcon Ridge / Lava Heights 2021 captures, Three Springs Tuskegee 2002, Sequel's McFarland bio). Open: - Owner (data form): Sequel operator 20 staff lists Mike McFarland as \"vice president of operations, 2009-2020\"; Sequel's own bio (attachment 17681) gives Clarinda ED 2009, Mingus ED 2012, VP of Operations from 2014 (left Nov 2020 per his LinkedIn). Operator staff has no seed path. - Waiting on research (answered, not settled): Chris Banken (the Sequel SVP died Jan 26, 2015; open the ADHS BH1487 record to see who is listed now); Kingston Academy police calls (171/135/36 unconfirmed, WBIR 403s to scripts; open it in a browser); Clarinda 2016 cases (Page County docket on Iowa Courts Online); Ripley's YSI titles 1990-95 (YSI's pre-1996 filings, not on EDGAR); what Altamont received for the Vivant sale; Three Springs' own program count in 2009; Vivant's 13 by name; Kissimmee has no facility record (already in plan 4.3 #18's unlinked-inspections item). - After deploy: check /facility/brighter-path-tuskegee-al/ shows 1998 and Lakeside's incidents read April 2020.",
+       "ask": "",
+       "date": "2026-11-20",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "c97e38efe0ef"
       }
      ]
     },
