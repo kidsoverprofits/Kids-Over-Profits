@@ -1560,7 +1560,44 @@
      "url": "https://web.archive.org/web/20071102053207/http://www.adolescentservices.com/dir/Horizon+Academy",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes, in KOP's same-property sense. Three Points Center North Carolina took over Auldern Academy's campus at 990 Glovers Grove Church Rd, Siler City after Auldern closed in early 2021 (APM Reports; NC's 2020-21 closed-schools list). It got an NPI on 24 Nov 2021 under the 'residential treatment facility, emotionally disturbed children' heading. The Three Points company's Chapter 7 (D. Colo. 25-11440-JGR) includes Three Points Center North Carolina, LLC, and the trustee sold the NC campus. So 11939's 'formerly Auldern Academy' is supported as a campus succession (Auldern -> Three Points Center NC, from about late 2021), not as a rename by the same operator. Not confirmed: whether Three Points NC ever took in children. No NC DHHS licence or statement of deficiencies was found, and the SAMHSA listing (feedam.org mirror) and NPI only show it was set up. Implications: (1) Keep Auldern -> Three Points Center NC (11939) with the year about 2021. (2) The map's Auldern (9637) -> 'Sequel TSI North Carolina' line looks wrong: 'Sequel TSI of Auldern, LLC' was Auldern's operating company (it is named as a defendant in Bates v. Sequel), not a later program. (3) 11939 should stay a separate record from Utah 10545. The re-pointing of news #426 from Auldern 11939 to Three Points 10545 on 2026-11-17 is worth a second look, since 11939 now reads as the NC Three Points. (4) 11939's closure note cites KUTV's story on the Utah center; it should cite the bankruptcy and sale instead. 11939's pastOperators (Three Springs 2001-2009, Sequel 2009-2021) are Auldern's own history and fit only if 11939 is meant to hold both eras. The WebSearch budget ran out before a search of NC DHHS licence records. Still needed: NC DHHS DHSR MHL facility search (search form) for 990 Glovers Grove Church Rd, to see whether Three Points Center North Carolina was ever licensed; NC Secretary of State record for Three Points Center North Carolina, LLC (formation date); Chatham County deed for the parcel (Auldern/Sequel to Three Points).",
+    "claims": [
+     {
+      "claim": "Auldern Academy's address was 990 Glovers Grove Church Rd, Siler City, NC",
+      "url": "https://projects.propublica.org/private-school-demographics/schools/auldern-academy-A0302353",
+      "quote": "990 GLOVERS GROVE CHURCH RD, SILER CITY, NC 27344"
+     },
+     {
+      "claim": "NC's closed private schools list for 2020-2021 includes Auldern Academy at that address",
+      "url": "https://www.doa.nc.gov/2020-2021-closed-private-schools/open",
+      "quote": "Chatham Auldern Academy Jim Phillips 990 Glovers Grove Church Siler City"
+     },
+     {
+      "claim": "An NPI was issued 11/24/2021 to Three Points Center North Carolina at Auldern's address, with mailing address the Hurricane UT campus",
+      "url": "https://npiscan.com/npi/1891452876",
+      "quote": "THREE POINTS CENTER NORTH CAROLINA ... 990 GLOVERS GROVE CHURCH RD ... 1500 E 2700 S HURRICANE ... Enumeration date 11/24/2021"
+     },
+     {
+      "claim": "Three Points Center North Carolina, LLC is a debtor in the Three Points Chapter 7 case in D. Colo.",
+      "url": "https://www.keen-summit.com/wp-content/uploads/2025/10/Docket-109-4-Stalking-Horse-Asset-Purchase-Agreement.pdf",
+      "quote": "Three Points Center North Carolina, LLC, and Three Points Center, LLC ... Case No. 25-11440-JGR"
+     },
+     {
+      "claim": "The trustee's broker sold the Siler City campus (990 Glovers Grove Church Road, 85.984 acres) together with the Hurricane UT campus",
+      "url": "https://www.keen-summit.com/project/bankruptcy-sale-two-former-boarding-school-campuses/",
+      "quote": "Chapter 7 Trustee of Three Points Center, LLC, etal., Harvey Sender"
+     },
+     {
+      "claim": "The Siler City campus was marketed as 'Three Points Center - NC'",
+      "url": "https://www.crexi.com/properties/2170236/north-carolina-three-points-center",
+      "quote": "Three Points Center - NC ... 990 Glovers Grove Church Rd, Siler City, NC 27344"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "renames-that-may-be-wrong:rename-lines-pointing-the-wrong-way",
@@ -4192,7 +4229,29 @@
    "found": "found 2026-10-13",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Open. No source found gives any name after the 2006 one, 'National Association of Therapeutic Wilderness Camping' (NATWC). No source found uses the name 'National Association of Therapeutic Camping' (NATC) at all: not the web, ProPublica, or KOP's Drive. KOP's record title may be a mislabel of NATWC; check where 'NATC' came from. New: the August 26, 2010 posting puts the group in Davis, WV with contact Angie Senic Shockley, not Markleysburg, PA. The natwc.org domain now shows unrelated spam, so the domain has lapsed. Read with the 2010 last sign, this points to a group that went quiet or dissolved, not one renamed. That is my inference. ProPublica's API has no exempt organisation named 'Therapeutic Wilderness Camping'. 'Therapeutic Camping' returns only an unrelated Wilderness Road Therapeutic Camping Association Inc (Cameron, NC, EIN 56-1885980). Change for KOP's record: use NATWC as the main name, add Davis, WV (2010) and a 'last seen 2010' note, and drop 'NATC' unless a source for it turns up. I did not search West Virginia or Pennsylvania corporation records by name; the WV hits I opened were unrelated. Still needed: Search the WV Secretary of State business search (apps.sos.wv.gov) and Pennsylvania business search for 'National Association of Therapeutic Wilderness' to get the entity status and dissolution date. Get Wayback captures of natwc.org from 2010-2016 to see when it stopped.",
+    "claims": [
+     {
+      "claim": "The group was founded in the early 1990s as the National Association of Therapeutic Wilderness Camps (NATWC) and renamed in 2006",
+      "url": "https://strugglingteens.com/artman/publish/TodaysNATWC-EI_080130.shtml",
+      "quote": "founded in the early 1990's as the \"National Association of Therapeutic Wilderness Camps (NATWC)\""
+     },
+     {
+      "claim": "In August 2010 the association still used the name NATWC, gave Davis, WV as its location and www.NATWC.org as its website",
+      "url": "https://strugglingteens.com/artman/publish/printer_NATWC_BN_100827.shtml",
+      "quote": "\"The National Association of Therapeutic Wilderness Camping\" ... \"August 26, 2010\" ... \"www.NATWC.org\""
+     },
+     {
+      "claim": "natwc.org now carries unrelated spam content under an old NATWC footer",
+      "url": "https://www.natwc.org",
+      "quote": "\"since2010 © National Association of Therapeutic Wilderness Camps\""
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "trade-organizations-and-marketer:naphs",
@@ -4248,7 +4307,34 @@
    "found": "found 2026-10-13",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Open. No source says AMATS was founded a second time. The current site (copyright 2023) has no history, no founding date and no board. Its menu labels the current member list FOUNDING MEMBERS. Three of those seven names match Woodbury's 2007 founding list: Right Direction Crisis Intervention, Safeguard (Safeguard Adolescent Services in 2007) and West Shield. The likeliest reading is that the site calls its current members 'founding members', not that the group was refounded. That is my inference, not a source. ProPublica's API search for 'AMATS' and 'Mediation Transport' found no tax-exempt organisation with that name, so AMATS may never have filed as a nonprofit. I could not search the Georgia or Oregon corporation registries: they are form-driven, and the shared web-search budget ran out mid-task. Change for KOP's record: add the 2023 site, the McDonough GA (AHQI) contact and the current seven members as 'members listed 2023', without calling them founders. The 2007 Bend, OR / founded May 2007 facts stay as they are. Also note that SafePassage Global is the current name of SafePassage Adolescent Services, once a corporate member of NATWC; this comes from the member listing and is not verified. Still needed: Search the Georgia (ecorp.sos.ga.gov), Oregon (sos.oregon.gov) and Utah corporation registries for 'Association of Mediation and Transport Services' / 'AMATS' to get filing dates. Get Wayback captures of the AMATS site to see when the 'founding members' list first appeared.",
+    "claims": [
+     {
+      "claim": "AMATS's current site lists seven members: Heather R. Hayes & Associates, Hired Power, National Treatment Transport, Right Direction Crisis Intervention, Safeguard Inc, SafePassage Global, West Shield",
+      "url": "https://amats-association.squarespace.com/amats-member",
+      "quote": "\"Heather R. Hayes & Associates\" ... \"Hired Power\" ... \"National Treatment Transport\" ... \"Right Direction Crisis Intervention\" ... \"Safeguard, Inc\" ... \"SafePassage Global\" ... \"West Shield\""
+     },
+     {
+      "claim": "The site's FOUNDING MEMBERS and MEMBERS menu items both open that one members page, and no page gives a founding date",
+      "url": "https://amats-association.squarespace.com",
+      "quote": "FOUNDING MEMBERS (menu label only, no text with it)"
+     },
+     {
+      "claim": "Current contact is an AHQI address in McDonough, Georgia; site copyright 2023",
+      "url": "https://amats-association.squarespace.com/about-amats",
+      "quote": "\"35 Griffin Road,\" McDonough, GA 30253 ... \"Copyright © 2023 AMATS\""
+     },
+     {
+      "claim": "The site calls AMATS a coalition, with no history",
+      "url": "https://amats-association.squarespace.com/amats-faqs",
+      "quote": "\"AMATS is a coalition of professional intervention and transport companies\""
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "trade-organizations-and-marketer:nipsa-sbsa-and-yata",
@@ -4886,7 +4972,44 @@
      "url": "https://web.archive.org/web/20071102053207/http://www.adolescentservices.com/dir/Horizon+Academy",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Fairly sure: neither Olympus Academy nor Diamond Ranch Academy was renamed Three Points Center. Three Points was a new program. Woodbury announced it in September 2014 with new owners (the Thibaults, company based in Castle Rock, CO), and it opened in La Verkin at 150 N State St, the old Cross Creek campus. That puts it on the Horizon Academy / Youth Foundation Success Academy line, about 11 months after YFSA closed (13 Oct 2013, per a survivor blog; no primary source found for the closing date). It moved to the Hurricane campus (former Diamond Ranch, then Olympus) only in 2018 (KOP's own record and the Washington County deed of 2016-10-14 to Three Points Properties LLC). Olympus was still licensed and running in 2015-2016 (KOP's DHS notice of 21 Apr 2015 and checklist of 31 May 2016) while Three Points ran in La Verkin, so Olympus could not have become Three Points in 2014. Changes this implies: (1) Undo the merge that cuts Diamond Ranch Academy (1999-2023) into 10545. Diamond Ranch was a separate program that stayed open at its own new campus until 2023. (2) Under KOP's same-property rule, Olympus as a past name of 10545 fits only the Hurricane campus from 2018, not 2013-2014. (3) Keep the map line Horizon Academy -> Youth Foundation Success Academy (10592) -> Three Points, with 10592 ending in 2013 (not 2014) and Three Points starting in 2014. Still disagreeing: breakingcodesilence puts Horizon/Cross Creek at 180 N State St while Three Points and Cross Creek used 150 N State St. They are probably one 3.11-acre campus, but a Washington County Recorder parcel check would settle it. Also, KOP holds Woodbury pages titled 'Three Points Center' for Aug 2012, Sep 2012, May 2013 and Jul 2013, which is before Three Points existed. Those page attachments may be wrong and need a look. The WebSearch budget ran out during this task, so there was no further search for Utah DOPL/OL licence numbers or St. George News. Still needed: Washington County Recorder lookup for 150 and 180 N State St, La Verkin (owner chain 2011-2017), to confirm YFSA and Three Points used the same parcel; check the Woodbury 2012/2013 pages KOP filed as 'Three Points Center'.",
+    "claims": [
+     {
+      "claim": "Three Points Center was announced in September 2014 as a new residential treatment center in La Verkin, run by the Thibault family (Glenn Thibault president/CEO, Dr. Norm Thibault program director)",
+      "url": "https://strugglingteens.com/artman/publish/ThreePointsCenterBN_140911.shtml",
+      "quote": "Posted: Sep 11, 2014 09:17 ... [the center plans to open] \"in the very near future\" ... inquiries to begin September 22, 2014 (WebFetch paraphrase around the quoted words)"
+     },
+     {
+      "claim": "Woodbury, January 2015: Three Points Center in LaVerkin, UT, Norm Thibault founder and CEO",
+      "url": "https://strugglingteens.com/artman/publish/printer_ThreePointsCenterBN_150101.shtml",
+      "quote": "\"Founder and CEO of Three Points Center\" ... \"LaVerkin, UT\""
+     },
+     {
+      "claim": "Cross Creek's La Verkin campus address was 150 North State Street",
+      "url": "https://en.wikipedia.org/wiki/Cross_Creek_Programs",
+      "quote": "150 North State Street La Verkin, Utah 84745 (infobox; Wikipedia, lead only)"
+     },
+     {
+      "claim": "The 150 N State St, La Verkin property (92,000 SF, 141 rooms) was listed for sale under the name Three Points Center, on the market from 1/12/2017",
+      "url": "https://loopnet.com/Listing/180-N-State-St-La-Verkin-UT/5434952",
+      "quote": "92,000 SF on 3.11 Acres. 141 rooms, full kitchen & cafeteria, indoor basketball court, and seminar room"
+     },
+     {
+      "claim": "Horizon Academy moved onto the Cross Creek campus in 2011 and became Youth Foundation Success Academy, which closed October 13, 2013",
+      "url": "https://wwaspsurvivors.com/?p=1796",
+      "quote": "the facility was re-named Youth Foundation Success Academy ... the school will be closing on Sunday,October 13, 2013 (survivor blog, not primary)"
+     },
+     {
+      "claim": "Three Points first ran at the former Cross Creek Manor, 150 N State St, La Verkin, and since 2018 at 1500 E 2700 S, Hurricane, the former Diamond Ranch and Olympus campus",
+      "url": "https://www.breakingcodesilence.org/three-points-center/",
+      "quote": "(lead only; Breaking Code Silence cites the r/troubledteens wiki and Google Maps)"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "two-florida-renames-whose-earlie:redwood-youth-academy-100071-may-be-closed",
@@ -10738,7 +10861,29 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Role confirmed by two company press releases (Regent Surgical Health, Oct 25, 2021; Aligned Orthopedic Partners, Apr 15, 2024). They add a title KOP doesn't have: Interim President. Years still open. Neither release dates the Sequel job. The order in them is USPI (about 15 years), then Sequel, then Compassus (EVP/COO), then Regent (from Oct 2021), so Sequel ended before Oct 2021 and probably well before. He isn't in Sequel's June 27, 2019 leadership release, which names the CEO, CAO/CFO, compliance, clinical and growth officers. Comparably (an aggregator, a lead only) lists him as 'EVP, Chief Operating Officer'. Searched: PR Newswire, APM Reports, Becker's, Compassus site and general web. The web search budget ran out before a search for a Compassus hiring release, which would give the end date. Suggested change: record 'EVP, Chief Operating Officer and Interim President, Sequel Youth and Family Services (years unknown, before 2021)' and cite the Regent release. Still needed: A Wayback capture of Sequel's own leadership page (around 2019-2021) or a Compassus announcement of his hire would date the job. The owner can find Sequel's corporate domain in KOP's own records.",
+    "claims": [
+     {
+      "claim": "Jeff Andrews was EVP, Chief Operating Officer and Interim President of Sequel Youth and Family Services",
+      "url": "https://business.dptribune.com/dptribune/news/read/41926522/regent_surgical_health_announces_jeff_andrews_as_chief_operating_officer",
+      "quote": "he served as EVP, Chief Operating Officer & Interim President for Sequel Youth and Family Services."
+     },
+     {
+      "claim": "Regent Surgical Health announced him as COO on Oct 25, 2021, so the Sequel job ended before then (Compassus came between)",
+      "url": "https://beckersasc.com/leadership/regent-surgical-names-former-uspi-exec-as-coo.html",
+      "quote": "Before joining Regent, Mr. Andrews was executive vice president and COO of Nashville-based Compassus."
+     },
+     {
+      "claim": "His later employer's release (Apr 15, 2024) also says he was Sequel's COO",
+      "url": "https://www.prnewswire.com/news-releases/aligned-orthopedic-partners-names-jeff-andrews-chief-executive-officer-302116097.html",
+      "quote": "He also served as Chief Operating Officer of Sequel Youth and Family Services,"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-christine-aron-jay-ripley-s-daughter-sequel",
@@ -10752,7 +10897,29 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Confirmed by a primary source: Sequel's own investor presentation, filed with the SEC (Exhibit 99.1, May 2017, 'Deep bench of executives' slide). She joined Sequel in 2014 and was VP of Business Development from 2016; she still held the title in May 2017. No source found gives an end date. Comparably (lead only) also lists her as VP of Business Development. The court filing shows she was a member (owner) of Vivant Behavioral Holdings by April 2022. Family relationship not checked or recorded, as the brief says. Correction for KOP's record: seeds/operator-histories.json cites the Notice of Removal (gov.uscourts.almd.77768.1.0.pdf) for 'Sequel's vice president of business development from 2016'. That filing names her only as a Vivant Holdings member; the VP-from-2016 fact should cite the SEC exhibit instead. I didn't find the Alabama SOS registration she reportedly signed: the SOS entity search is a form. Still needed: Alabama SOS business entity search (a form) for Vivant Behavioral Healthcare, LLC's foreign registration, to confirm who signed it and when.",
+    "claims": [
+     {
+      "claim": "Sequel's May 2017 investor presentation (SEC filing) lists Christine Aron as VP of Business Development",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017005620/ex99.htm",
+      "quote": "Christine Aron VP of Business Development"
+     },
+     {
+      "claim": "She joined Sequel in 2014 and became a vice president in 2016",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017005620/ex99.htm",
+      "quote": "Joined Sequel in 2014 and promoted to Vice President in 2016"
+     },
+     {
+      "claim": "In April 2022 she was a member of Vivant Behavioral Holdings, LLC (court filing, M.D. Ala. 3:22-cv-00190, Doc 1-3)",
+      "url": "https://storage.courtlistener.com/recap/gov.uscourts.almd.77768/gov.uscourts.almd.77768.1.3.pdf",
+      "quote": "The members of Vivant Behavioral Holdings, LLC are Ripley Holdings, LLC, John N. Ripley, Christine B. Aron, Stephanie D. Kellogg, Candace M. Dyas, and Jason K. Riley."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-lynn-askew-a-senior-vice-president-of-busine",
@@ -10809,7 +10976,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The Vivant CFO half is confirmed by two primary sources: his own sworn affidavit (April 2022, read from KOP's Drive copy of the RECAP PDF) and Vivant's website bio (modified Dec 2024). So he was CFO from April 2022 or earlier through at least Dec 2024. The Sequel corporate controller half is still open. His Vivant bio names no earlier employer, and no Sequel filing or release found names him. Correction for KOP's records: the Drive sheet people_jobs2 / 13lBQNwG9... has his roles reversed ('Sequel TSI: CFO; Vivant: Corporate Controller & Liquidity Management Director (2015–2021)'). The task card's order (Sequel controller, then Vivant CFO) fits the sources; the 2015-2021 dates likely belong to the Sequel controller job, but they are unsourced. Still needed: LinkedIn (lead) for the 2015-2021 Sequel controller dates; a primary source would be a Sequel-era filing or a Wayback capture of Sequel's staff page.",
+    "claims": [
+     {
+      "claim": "In an affidavit filed Apr 20, 2022 (M.D. Ala. 3:22-cv-00190, Doc 1-3; notarized in Milwaukee County, WI, 2022) Brantz swore he was Vivant's CFO",
+      "url": "https://storage.courtlistener.com/recap/gov.uscourts.almd.77768/gov.uscourts.almd.77768.1.3.pdf",
+      "quote": "I am the Chief Financial Officer of Vivant Behavioral Healthcare."
+     },
+     {
+      "claim": "Vivant's own site still lists him as CFO (page modified Dec 20, 2024)",
+      "url": "https://www.vivantbh.com/jacob-brantz/",
+      "quote": "Jake currently serves as the Chief Financial Officer for Vivant Behavioral Healthcare."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-jason-cagle-chief-administrative-officer-and",
@@ -10823,7 +11007,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The Sequel half is confirmed by Sequel's own release: he was appointed CAO and CFO, announced June 27, 2019, alongside CEO Chris Roussos. The release says he came from the United Surgical Partners management team. End date unknown. Comparably (lead only) lists 'EVP, Chief Financial and Chief Administrative Officer'. The Vivant EVP/CAO half is open: Vivant's site (bios for the CEO, CFO and others), the NABH committee page and the OPEN MINDS Vivant sponsor page don't name him, and no court filing found does. The Senate Finance report 'Warehouses of Neglect' withholds the names of the Sequel executives who moved to Vivant. It identifies them only as Vivant's President (Sequel VP of Operations Nov 2019 to Sept 2021), Chief Clinical Officer and SVP Strategy & Development. No CAO is among them. Suggested change: record 'Sequel CAO and CFO from June 2019' (cite the PR Newswire release) and leave the Vivant role unverified. Still needed: A Wayback capture of Vivant's site bios (2021-2023) or a Vivant-era court filing might name him.",
+    "claims": [
+     {
+      "claim": "Sequel's press release of June 27, 2019 announced Cagle as Chief Administrative Officer and CFO",
+      "url": "https://www.prnewswire.com/news-releases/chris-roussos-named-ceo-of-sequel-youth-and-family-services-300876446.html",
+      "quote": "Jason Cagle has been appointed Chief Administrative Officer and Chief Financial Officer;"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-elizabeth-carey-president-and-ceo-of-starr-c",
@@ -10906,7 +11102,39 @@
      "url": "https://web.archive.org/web/2*/http://www.montcalmschools.org/montcalm-schools-young-adults",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes. She was President and CEO of Starr Commonwealth from June 1, 2015, and still is on the latest 990 (FY ending Sept 2025). That covers the whole Starr–Sequel partnership. Her own July 2020 statement dates the partnership 'since 2015', so it ran 2015 to July 2020, not ~2017-2020 as the card says. Two corrections for KOP's record. First, she was Starr's CEO (a nonprofit partner), not a Sequel employee, so the staff tab's 'Sequel TSI:' label should become a Starr Commonwealth role with a link to Sequel through the partnership. Second, the partnership start should be checked against 2015. The Battle Creek Enquirer page was refused by the site (counted as tried).",
+    "claims": [
+     {
+      "claim": "Starr Commonwealth named Carey to succeed Martin Mitchell as President and CEO, effective June 1, 2015 (MSU, Sept 21, 2015)",
+      "url": "https://spartan.msu.edu/spartan-story-hub/news/2015/09/spartan-alumna-named-ceo-of-non-profit",
+      "quote": "transitioned to her new position as President and CEO on June 1"
+     },
+     {
+      "claim": "Starr's Form 990s list her as President and CEO for every fiscal year from 2015 to 2025 (FY2014: Executive VP, Chief Strategy Officer)",
+      "url": "https://projects.propublica.org/nonprofits/organizations/381359593",
+      "quote": "Mrs Elizabeth Carey (President And Ceo)"
+     },
+     {
+      "claim": "Starr's own site lists her as President and CEO and says she joined Starr in 2010",
+      "url": "https://starr.org/bio/elizabeth-carey/",
+      "quote": "Prior to joining Starr Commonwealth in 2010"
+     },
+     {
+      "claim": "As Starr's CEO she announced the end of the Sequel partnership in July 2020 and dated it from 2015",
+      "url": "https://www.wilx.com/2020/07/02/starr-commonwealth-severs-sequel-ties/",
+      "quote": "Since 2015, we have run our campus as a partnership with Sequel, using many longtime Starr Commonwealth team members"
+     },
+     {
+      "claim": "NBC News names her as Starr's CEO ending the Sequel contract",
+      "url": "https://www.nbcnews.com/news/us-news/brief-life-cornelius-frederick-warning-signs-missed-teen-s-fatal-n1234660",
+      "quote": "Starr CEO Elizabeth Carey said this month that the facility would end its contract with Sequel"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-sequel-co-founder-cindy-cox-the-assistant-di",
@@ -10963,7 +11191,34 @@
      "url": "https://web.archive.org/web/19970209104916/http://www.youthservices.com/ca.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Co-founder role is settled (SEC proxy, APM). Assistant director is only half-settled: APM Reports (Curtis Gilbert and Lauren Dake, 2020-09-28) says she 'had served as its assistant director in the early days'. The word 'its' could mean YSI or the Clarinda facility. The sentence is about Clarinda, and YSI opened Clarinda Academy in 1992 (eight years before 1999 would be 1991). So it most likely means she was assistant director of Clarinda Academy in the early 1990s. That is still an inference, and no source gives exact years. Searched: Drive (KOP Sequel sheet and doc, leads only), repo seeds, APM, the SEC proxy (no management bios naming her title), Wikipedia refs and web search ('Cindy Cox' Clarinda Academy / assistant director). The search budget ran out before Iowa newspaper archives (Clarinda Herald-Journal, Des Moines Register, KMAland) were checked. Suggested record change: keep co-founder (1999). Record the assistant-director role as 'assistant director in the early days (early 1990s), per APM' and flag the entity as uncertain. Don't give a year range. Still needed: An archived clarindaacademy.org history page or YSI 1990s pages (Wayback), or Clarinda Herald-Journal archives from 1992 to 1999, would settle the entity and the years.",
+    "claims": [
+     {
+      "claim": "Cindy Cox co-founded Sequel in 1999",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "Sequel was founded by John F. (\"Jay\") Ripley (current Chairman), Adam Shapiro and Cindy Cox in 1999,"
+     },
+     {
+      "claim": "Clarinda Academy was Sequel's first program from June 1999",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "In June of 1999, Clarinda Academy became Sequel's first program when operations were commenced under Sequel's management."
+     },
+     {
+      "claim": "APM Reports says Cox brought YSI to Iowa and served as 'its' assistant director in the early days",
+      "url": "https://www.apmreports.org/story/2020/09/28/for-profit-sequel-facilities-children-abused",
+      "quote": "a local civic leader who had wooed YSI to Iowa eight years earlier and had served as its assistant director in the early days"
+     },
+     {
+      "claim": "Cox incorporated Sequel Management Services in 1999",
+      "url": "https://www.apmreports.org/story/2020/09/28/for-profit-sequel-facilities-children-abused",
+      "quote": "Within weeks of YSI's takeover, Cox filed papers to incorporate a limited liability company called Sequel Management Services."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-roy-day-sequel-s-vice-president-of-human-res",
@@ -10977,7 +11232,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes, for 2016. Source: the Interim Award of Arbitrator (AAA, issued March 2, 2020; hearing Nov 4-8, 2019). It is an exhibit to the amended petition in Falcon Ridge Ranch, Inc. et al. v. Sequel Youth Services of Red Rock Canyon, LLC et al., Utah 5th Dist. Ct. (Washington County), Civil No. 200500204. The award refers to the pre-closing town halls in August 2016. I read it from the owner's Drive copy (file 1fj62DYTMx2vrZthvOLrIik1qo4BSIWF3), which carries an Unsilenced watermark. The URL above is KOP's media-library copy of that court filing; cite it as the court record. No source found for his start or end years. Web search for 'Roy Day' Sequel found nothing. Suggested record change: 'Vice President of Human Resources, Sequel (at least 2016)'. Still needed: The Utah docket for Civil No. 200500204 (or the award exhibits), if the owner wants the original court copy. Any year range beyond 2016 would need other records.",
+    "claims": [
+     {
+      "claim": "Roy Day was Sequel's VP of Human Resources in 2016, around Sequel's purchase of the CARE Schools (APA dated Aug 16, 2016). This comes from the arbitration award attached to the Utah court petition (Civil No. 200500204), in KOP's copy",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+      "quote": "Mr. Pace, as well as other witnesses who were employees at the CARE Schools, testified that Sequel's VP of Human Resources, Mr. Roy Day, repeatedly told all of the employees of the CARE Schools in attendance that it would be \"business as usual\" after the Closing Date."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-jacqueline-gabler-vice-president-of-finance",
@@ -10991,7 +11258,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Not settled. The only primary mention found is 'Jacque Gabler' in the witness list of the 2019 Sequel arbitration (Utah Civil No. 200500204). It ties her to Sequel around 2016-2019 but gives no title. Nothing found for VP Finance at Sequel or at Vivant. Searched: repo seeds, owner's Drive (full text 'Gabler'), vivantbh.com (no leadership page; home, CEO page and individual bio pages list no Gabler), and web search ('Jacqueline Gabler' finance; only unrelated people). The search budget ran out before checking Alabama SOS / Arizona eCorp officer filings for Vivant entities. Suggested record change: keep 'not yet checked'. Note that she testified as a Sequel witness in 2019. Still needed: Alabama SOS and Arizona Corporation Commission eCorp filings for Vivant Behavioral Healthcare entities (search forms) may name finance officers. LinkedIn (blocked here) is a lead only.",
+    "claims": [
+     {
+      "claim": "A 'Jacque Gabler' testified for the Sequel side at the Nov 2019 arbitration hearing, with no title given",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+      "quote": "the arbitrator heard live testimony from the following witnesses: Ryan Santi, Sybil Potts, Steve Gilbert, John Stupak, Laurence Freedman, Jeffrey Rinard, John Ripley, Mandy Moses, Jacque Gabler,"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:what-were-steve-gilbert-s-job-titles-at-sequel-m",
@@ -11005,7 +11284,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Two titles are confirmed from primary sources. Senior VP, Business Development, from the OPEN MINDS management newsletter of June 30, 2007, which lists Sequel's executives. EVP of Customer Development, from the arbitration award (hearing Nov 2019, about the period after August 2016). Comparably (an aggregator, lead only) lists him as 'Senior Vice President'. 'Executive VP & Chief Administrative Officer' was NOT found. Comparably gives that title to John Stupak (and Jason Cagle later held CAO, per the 2019 PR Newswire release). The KOP sheet may have mixed this up. Start and end years were not found. Suggested record change: 'SVP Business Development (2007)' and 'EVP Customer Development (c. 2016-2019)'. Mark CAO unverified, or drop it. The web search budget ran out before more Sequel press releases could be checked. Still needed: The full OPEN MINDS article is paywalled. Sequel's own site (sequelyouthservices.com) via Wayback could show leadership pages with dates.",
+    "claims": [
+     {
+      "claim": "Steve Gilbert was Sequel's Senior Vice President, Business Development in June 2007",
+      "url": "https://openminds.com/market-intelligence/editorials/070107c/",
+      "quote": "Steve Gilbert, Senior Vice President, Business Development"
+     },
+     {
+      "claim": "Steve Gilbert was Sequel's EVP of Customer Development during the 2016-2019 CARE Schools dispute (arbitration award in Utah Civil No. 200500204)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/FALCON-RIDGE-RANCH-INC-et-al.-vs.-SEQUEL-YOUTH-SVCS-FALCON-RIDGE-et-al-Amended-Petition.pdf",
+      "quote": "Mr. Steve Gilbert, Sequel's EVP of Customer Development, testified that the CARE Schools were to be left \"to do marketing the same way they had done it pre-Closing\""
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-tony-harper-vice-president-of-human-resource",
@@ -11019,7 +11315,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes to both. Three Springs, Inc. VP of Human Resources: March 18, 2008 company press release. He is also the contact for the Three Springs Foundation in a Sept 14, 2009 release. Sequel: the Chattanoogan's 2017 announcement of his hire as Parkridge Valley Hospital assistant administrator gives his earlier jobs. They were EVP of human resources and regulatory affairs at Strategic Behavioral Health (Memphis), and before that VP of HR and administrative services at Sequel Management Services. Sequel bought Three Springs at the end of 2009, so his Sequel role is likely 2009/2010 to some time before 2017. The exact years are not stated. The Three Springs release is a company document held only in KOP's Drive; its original URL is unknown. Suggested record change: Three Springs VP HR (by 2008, through 2009); Sequel Management Services VP HR & Administrative Services (after the 2009 acquisition; years unknown); later Strategic Behavioral Health EVP HR, and Parkridge Valley assistant administrator from 2017. Still needed: The original URL or a Wayback capture of the Three Springs press release (threesprings.com), so it can be cited beside the Drive copy.",
+    "claims": [
+     {
+      "claim": "Tony Harper was Three Springs' Vice President of Human Resources in March 2008 (Three Springs press release, Huntsville, March 18, 2008; KOP Drive copy)",
+      "url": "https://drive.google.com/file/d/1bBWT6HD68SJ2R33QJjTrnN9yAk-4IXfC/view",
+      "quote": "According to Tony Harper, Vice President of Human Resources \"the recent staff reduction affected approximately 35 full time employees"
+     },
+     {
+      "claim": "Harper was earlier VP of HR and administrative services at Sequel Management Services in Huntsville (Chattanoogan, Aug 1, 2017)",
+      "url": "https://www.chattanoogan.com/2017/8/1/352327/Tony-Harper-Named-Parkridge-Valley.aspx",
+      "quote": "vice president of human resources and administrative services at Sequel Management Services in Huntsville."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-michael-e-henderson-ceo-of-torii-behavioral",
@@ -11066,7 +11379,29 @@
      "url": "https://web.archive.org/web/2*/https://www.casagrandeacademy.com/programs/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes to both, with high confidence. 10TV (Columbus) reports the Sept 8, 2021 closure letter to Ohio MHAS signed by 'Torii CEO Michael Henderson'; the closure date was Oct 8, 2021. AzHHA's member list gives Michael Henderson as Executive Director of Casa Grande Academy (current as of Nov 2025). Casa Grande Academy's own site uses vivantbh.com contact addresses (admissions.az@ and compliance@vivantbh.com), which ties it to Vivant. Neither source gives the middle initial 'E.', and no source gives his Casa Grande start year. Suggested record change: 'CEO, Torii Behavioral Health (Sequel Pomegranate), 2021' and 'Executive Director, Casa Grande Academy (Vivant), by 2025'.",
+    "claims": [
+     {
+      "claim": "Michael Henderson was CEO of Torii Behavioral Health (the renamed Sequel Pomegranate) in September 2021",
+      "url": "https://www.10tv.com/article/news/investigations/10-investigates/sequel-pomegranate-tells-state-it-will-close/530-5ec3694d-29af-46c5-92c7-d06e4310e85a",
+      "quote": "In its letter, Torii CEO Michael Henderson told OHMAS:"
+     },
+     {
+      "claim": "Torii was Sequel Pomegranate's new name",
+      "url": "https://www.10tv.com/article/news/investigations/10-investigates/sequel-pomegranate-tells-state-it-will-close/530-5ec3694d-29af-46c5-92c7-d06e4310e85a",
+      "quote": "Torii Behavioral Health, a re-branded name for the embattled teen psychiatric facility Sequel Pomegranate,"
+     },
+     {
+      "claim": "Michael Henderson is listed as Executive Director, Casa Grande Academy, in the Arizona Hospital and Healthcare Association's Behavioral Health Hospitals Constituency Group (page last modified 2025-11-10)",
+      "url": "https://www.azhha.org/behavioral-health-hospitals-constituency-group/",
+      "quote": "Michael Henderson | Executive Director | Casa Grande Academy"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-sharon-laney-sequel-s-vice-president-of-oper",
@@ -11080,7 +11415,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Yes to both, from two company press releases (contact Aida Porras, VP Marketing). Paint Rock Valley Program Administrator, June 2009 (Three Springs, before the Sequel purchase). VP of Operations for the Private Division, Sequel TSI, Feb 2010. The 2010 release also says she was a 31-year industry veteran, on the NATSAP board for seven years, 2004 conference chair, NATSAP Vice President 2005-2006, President 2007-2008, and earlier Jackson County, Alabama Chief Juvenile Probation Officer. (KOP's Rosemary Tippett draft says VP 2006 and president 2007; the release says VP 2005-2006 and President 2007-2008.) Both releases are held only in KOP's Drive, so their original web URLs are unknown. Suggested record change: Paint Rock Valley Program Administrator (Three Springs, by 2009); VP Operations, Private Division, Sequel TSI (2010). End years unknown. Still needed: Original URLs or Wayback captures of the two releases (threesprings.com / sequeltsi.com press pages), so they can be cited beside the Drive copies.",
+    "claims": [
+     {
+      "claim": "Sharon Laney was Program Administrator of Three Springs Paint Rock Valley in June 2009 (Three Springs press release, Trenton AL, June 13, 2009; KOP Drive copy)",
+      "url": "https://drive.google.com/file/d/1j6dd-t0BfuanDS0jabyVH-cnuPalqeNz/view",
+      "quote": "Program Administrator, Sharon Laney opened the ceremony by highlighting the history of the Paint Rock Valley community."
+     },
+     {
+      "claim": "Sharon Laney was VP of Operations for the Private Division of Sequel TSI (Three Springs) in Feb 2010 (Sequel TSI press release, Huntsville, Feb 22, 2010; KOP Drive copy)",
+      "url": "https://drive.google.com/file/d/10clSXjO07nahCAyqxK6kQa864EXP64to/view",
+      "quote": "Sharon Laney, VP of Operations for the Private Division of Sequel TSI (Three Springs), was honored at the annual National Association of Therapeutic Schools and Programs conference"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-samantha-lee-chief-compliance-officer-at-seq",
@@ -11096,7 +11448,29 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Sequel and South Dakota parts confirmed. Sequel Chief Compliance & Ethics Officer: appointed June 2019 (company release), still in the role Dec 21, 2020 (WWMT, Cornelius Frederick case). Chief Compliance Officer at the SD Human Services Center before 2019, per Sequel's own release. Her SD years are not given. The release also says she spent over a decade at Epic Health Services, last as VP of Regulatory Affairs and Compliance Officer. The Vivant role (EVP, Chief Compliance & Ethics Officer) was NOT confirmed. vivantbh.com has no leadership page. A 'Vivant Compliance Plan' PDF found belongs to a different company: River City Medical Group dba Vivant Health, Sacramento. SD DOC PREA reports and the WA DCYF Sequel review don't name her. Suggested record change: Sequel CCO (2019 to at least Dec 2020); SD HSC CCO (before 2019, per Sequel). Leave the Vivant role unverified. The web search budget ran out before more searching on Vivant. Still needed: Vivant entity filings (Arizona eCorp / Alabama SOS) or a Wayback capture of any vivantbh.com leadership page may confirm the Vivant title.",
+    "claims": [
+     {
+      "claim": "Samantha Lee was appointed Sequel's Chief Compliance and Ethics Officer (PR Newswire, June 27, 2019)",
+      "url": "https://www.prnewswire.com/news-releases/chris-roussos-named-ceo-of-sequel-youth-and-family-services-300876446.html",
+      "quote": "Samantha Lee, RN, CHC, has been appointed Chief Compliance and Ethics Officer;"
+     },
+     {
+      "claim": "Before Sequel she was Chief Compliance Officer at the South Dakota Human Services Center",
+      "url": "https://www.prnewswire.com/news-releases/chris-roussos-named-ceo-of-sequel-youth-and-family-services-300876446.html",
+      "quote": "Prior to joining Sequel, Ms. Lee served as the Chief Compliance Officer at South Dakota Human Services Center."
+     },
+     {
+      "claim": "She still held the Sequel role in December 2020",
+      "url": "https://wwmt.com/news/local/judge-rules-sequel-youth-executives-do-not-have-to-testify-in-teen-death-civil-lawsuit",
+      "quote": "Marko sought testimony from Samantha Lee, chief compliance and ethics officer at Sequel Youth and Family Services"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-kellie-miller-assistant-financial-controller",
@@ -11162,7 +11536,24 @@
      "url": "https://web.archive.org/web/19981202142807/http://www.ysii.com/wa.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Woodward ED part answered: 2001-2008 per Woodward's own blog (Bill Dean ED 2008-2012). Possible earlier start: an archived YSI page (youthservices.com/wa.htm; ysii.com/wa.htm captured 1998-12-02) reads 'Executive Director - Mandy Loving Moses', so she may have been ED under YSI in the late 1990s; the capture needs archiving to cite. Sequel title found: Chief Program Officer (as of July 2015). 'Executive VP of Operations' is unconfirmed. Record: Woodward ED 2001-2008 (possibly from the late 1990s), Sequel Chief Program Officer as of 2015, EVP Operations unconfirmed.",
+    "claims": [
+     {
+      "claim": "Woodward Academy's blog (Jul 23, 2015) lists Mandy Moses as its executive director 2001-2008 and, then, Sequel's Chief Program Officer",
+      "url": "https://wwacademy.blogspot.com/2015/07/i-am-building-woodward-academy-part-3.html",
+      "quote": "Mandy Moses - Chief Program Officer, Sequel Youth and Family Services"
+     },
+     {
+      "claim": "The same post: Moses and Bill Dean were executive directors 2001-2012",
+      "url": "https://wwacademy.blogspot.com/2015/07/i-am-building-woodward-academy-part-3.html",
+      "quote": "Mandy Moses and Bill Dean served as Executive Director for a decade from 2001-2012 and helped build Woodward Academy"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-rebecca-oatts-admissions-director-at-normati",
@@ -11251,7 +11642,29 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Partly answered, and it cuts against KOP's sheet. Swan Valley (Montana) was run by Cornerstone Programs Corp., not Sequel/Three Springs/YSI; he directed it about 2003-2006 and Cornerstone fired him in 2006. In 2007 Maryland DJS hired him to head Victor Cullen Academy (state-run), then made him director of detention facilities; he resigned around Dec 2007 / Jan 2008 (per a CAICA repost of Baltimore City Paper, Dec 12, 2007, whose original should be found). 'Administrator at Maryland State Reform School' and 'Sequel vice president' are unconfirmed: no source ties this Chris Perkins to Sequel; the sheet may be merging two people with a common name. Record: don't link him to Sequel without a source.",
+    "claims": [
+     {
+      "claim": "Chris Perkins was director of Swan Valley Youth Academy in Montana",
+      "url": "https://prisonlegalnews.org/news/2008/aug/15/maryland-juvenile-justice-official-resigns-over-past-abuse-allegations",
+      "quote": "The 21-page report detailed treatment of juveniles while Perkins was director of the Swan Valley Youth Academy"
+     },
+     {
+      "claim": "He was hired as director over Maryland's juvenile detention facilities and resigned about seven months later",
+      "url": "https://prisonlegalnews.org/news/2008/aug/15/maryland-juvenile-justice-official-resigns-over-past-abuse-allegations",
+      "quote": "Just seven months after he was hired as director over Maryland's juvenile detention facilities"
+     },
+     {
+      "claim": "Bigfork Eagle, Jan 17, 2008: he resigned that Maryland post",
+      "url": "https://bigforkeagle.com/news/2008/jan/17/perkins-responds-to-accusations-15",
+      "quote": "Perkins resigned from his recent appointment as the director of Maryland's juvenile detention facilities."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-rod-peterson-sequel-s-vice-president-of-mark",
@@ -11373,7 +11786,29 @@
      "url": "https://web.archive.org/web/19981202142807/http://www.ysii.com/wa.htm",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Woodward Academy's own blog settles the Woodward part: executive director Feb 2013 to about Sept 2016, then Sequel VP of Operations from 2016 (end date not found). The Vivant VP of Operations role is unconfirmed: Vivant's site has no bio for him and no source tied him to Vivant. Record: Woodward Academy ED 2013-2016; Sequel VP of Operations from 2016; Vivant role unconfirmed.",
+    "claims": [
+     {
+      "claim": "Ryan Santi was Woodward Academy's executive director 2013-2016, then promoted to Sequel's vice president of operations (post of Oct 10, 2016)",
+      "url": "https://wwacademy.blogspot.com/2016/10/new-executive-director-shawn-hollenkamp.html",
+      "quote": "The position opened after Ryan Santi, Executive Director from 2013 - 2016, was promoted to Vice President of Operations within Sequel Youth and Family Services."
+     },
+     {
+      "claim": "Shawn Hollenkamp succeeded him in September 2016",
+      "url": "https://wwacademy.blogspot.com/2016/10/new-executive-director-shawn-hollenkamp.html",
+      "quote": "In September, Shawn Hollenkamp accepted the position of Executive Director at Woodward Academy"
+     },
+     {
+      "claim": "He was introduced as executive director in February 2013 (post of May 20, 2013)",
+      "url": "https://wwacademy.blogspot.com/2013/05/new-admissions-director-guthrey-fritz.html",
+      "quote": "Back in February, we introduced Ryan Santi as the new Executive Director of Woodward Academy"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-matt-sparling-a-sequel-marketer-and-director",
@@ -11387,7 +11822,24 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Half answered. The Vivant title is confirmed (undated; the bio gives no years or past employer). His Sequel roles (marketer, director of business development) are unconfirmed: no Sequel press release names him, and only a profile aggregator (lead) does. Record: keep the Vivant title, undated; mark the Sequel roles unconfirmed.",
+    "claims": [
+     {
+      "claim": "Vivant's bio names Matt Sparling its senior vice president for strategy and development",
+      "url": "https://www.vivantbh.com/?p=3095",
+      "quote": "Matt currently services as the Senior Vice President for Strategy & Development for Vivant Behavioral Healthcare."
+     },
+     {
+      "claim": "NABH lists him on a committee for Vivant",
+      "url": "https://www.nabh.org/about-nabh/committees/",
+      "quote": "Matthew Sparling, Vivant Behavioral Healthcare, AZ"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-brian-steinberg-sequel-s-vice-president-of-o",
@@ -11401,7 +11853,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The Sequel VP of Operations role is unconfirmed (no source; Sequel's 2020 Texas release names Dr. Bryan Davey as SVP of Autism Operations, not Steinberg). New: his current Vivant title, President of Operations, Autism Division (undated). Record: add the Vivant role; keep the Sequel role unconfirmed.",
+    "claims": [
+     {
+      "claim": "Vivant's bio names Brian Steinberg President of Operations for its Autism Division",
+      "url": "https://www.vivantbh.com/brian-steinberg/",
+      "quote": "Brian currently serves as President of Operations for the Autism Division for Vivant Behavioral Healthcare."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-beverly-turner-the-human-resources-manager-a",
@@ -11452,7 +11916,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "The Sequel title is unconfirmed. Vivant's bio spells her name Susanne (KOP has Susann) and gives about 30 years in behavioral healthcare, no past employer or dates. Very likely the same person, since Vivant took over Sequel's corporate staff, but the page doesn't say so. Record: spelling Susanne (pending), add the Vivant title, mark the Sequel title unconfirmed.",
+    "claims": [
+     {
+      "claim": "Vivant's bio names Susanne Young, CHC, its vice president of risk management and corporate HIPAA privacy officer",
+      "url": "https://www.vivantbh.com/susanne-young/",
+      "quote": "Susanne Young currently serves as Vice President of Risk Management and Corporate HIPAA Privacy Officer for"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "facility-place-conflicts:where-in-paxton-ma-is-devereux-s-starr-program-a",
@@ -31601,7 +32077,34 @@
    "context": "",
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Partly advanced; owner and payment terms still open. The Wood v. WWASPS First Amended Complaint (Utah 5th Dist. Civil No. 120500380, 2013; plaintiffs' counsel's public copy at wturley.com) places Help My Teen among WWASPS's in-house marketing groups in Nov 2004, with Lisa Irvin (a former Teen Help employee) as intake supervisor. These are complaint allegations and exhibit descriptions. The complaint describes per-enrollment commissions for WWASPS admissions companies generally, not Help My Teen's terms by name; no source names its owner. Lead only (not a primary source): the 2004 ISAC 'WWASP Alleged Crimes Report' says it incorporated in 2003 and quotes a Help My Teen letter linking a branded Ivy Ridge page (hmt.ivyridge.us). Record change to consider: notes line on the 2004 email, WWASPS affiliation, Wood v. WWASPS (Utah 5th Dist.) in its lawsuits. Still needed: Utah Division of Corporations search; Wayback captures of helpmyteen.com and hmt.ivyridge.us (2003-2005); the Wood exhibits on PACER.",
+    "claims": [
+     {
+      "claim": "A Nov 12, 2004 WWASPS email described in the Wood complaint (Exhibit 101) lists Lisa Irvin as Help My Teen's intake supervisor, beside the other WWASPS marketing groups' supervisors",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "Lisa Irvin for Help My Teen"
+     },
+     {
+      "claim": "The same complaint describes Lisa Irvin as a former Teen Help employee deposed in December 2003",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "Exhibit 15 Lisa Irvin 12/01/2003 Deposition(Previous Teen Help employee)"
+     },
+     {
+      "claim": "WWASPS admissions companies could not enroll a student without written approval from Regal Marketing (complaint's description of a March 2004 meeting, Exhibit 33)",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "'Admissions Companies' cannot enroll student unless approved in writing by Regal Marketing"
+     },
+     {
+      "claim": "In Dungan, parents testified to representations Help My Teen made about Ivy Ridge; it was not a named defendant",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-nynd-7_06-cv-00908/pdf/USCOURTS-nynd-7_06-cv-00908-2.pdf",
+      "quote": "Help My Teen (73:8-13),"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "marketing-companies:who-founded-lifelines-family-services-teen-lifel",
@@ -31611,7 +32114,34 @@
    "context": "",
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Founder still not confirmed. The 2013 Wood complaint gives the corporate form (Utah corporation, d/b/a Teen Life Lines) and a last-known registered agent in St. George; a registered agent is not a founder, so KOP should not record him as one. Jane Hawley was its intake supervisor in 2004 per the complaint's exhibit descriptions (allegations). Side finding for the Dungan lawsuit record: the Justia docket (https://dockets.justia.com/docket/new-york/nyndce/7:2006cv00908/64507) shows a judgment dismissing the action after settlement, Aug 26, 2010, and counterclaims dismissed by stipulation Oct 12, 2010 (read via a fetch summary; check against the docket). Record change to consider: d/b/a, Utah incorporation, WWASPS affiliation, Wood v. WWASPS in its lawsuits. Still needed: Utah Division of Corporations search for incorporators; Wayback capture of teenlifelines.com (2003-2006); the Dungan Second Amended Complaint (PACER).",
+    "claims": [
+     {
+      "claim": "The Wood complaint names Lifelines Family Services, Inc. as a Utah corporation doing business as Teen Life Lines",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "Defendant Lifelines Family Services, Inc. is a corporation organized under the laws of the State of Utah, doing business as Teen Life Lines."
+     },
+     {
+      "claim": "A Nov 2004 WWASPS email described in the complaint (Exhibit 105) forwards an email string from Jane Hawley at a teenlifelines.com address",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "an email string from Jane Hawley with email at teenlifelines.com"
+     },
+     {
+      "claim": "A Nov 2004 email (Exhibit 102) told Lifelines and the other marketing companies to present Ivy Ridge to parents",
+      "url": "https://www.wturley.com/wp-content/files/StGeorgeUtah.pdf",
+      "quote": "instruction for marketers of Teen Help, Teens in Crisis, Lifelines, Cross Creek Admissions, Parent Resources, and Teen Soulutions to tell parent inquiries that Academy at Ivy Ridge is an option"
+     },
+     {
+      "claim": "The Dungan Report-Recommendation calls Life Lines one of Ivy Ridge's marketing groups",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-nynd-7_06-cv-00908/pdf/USCOURTS-nynd-7_06-cv-00908-2.pdf",
+      "quote": "marketing groups such as Defendants Teen Help and Life Lines, and magazines."
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "marketing-companies:is-there-a-primary-source-for-2-boot-camp-or-tee",
@@ -31621,7 +32151,19 @@
    "context": "",
    "records": [],
    "found": "found 2026-11-19, GAO call fixes session, 2026-11-19",
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Still no primary source. teenswithproblems.com redirects to a GoDaddy for-sale page; 2bootcamp.com refuses automated fetches; KOP's archived copy (kop-pipeline markdown_output index_teenswithproblems.md) is empty. No Woodbury, news or court mention of either name was found (strugglingteens.com, the Wood complaint, the ISAC report, Dungan, the D. Utah Wood opinions). Leave both entries as they are. Still needed: Wayback captures of teenswithproblems.com (2001-2003) and 2bootcamp.com (2002-2008) for an about or copyright line; the sources the r/troubledteens wiki pages cite.",
+    "claims": [
+     {
+      "claim": "teenswithproblems.com is now a domain-for-sale page",
+      "url": "https://www.teenswithproblems.com/",
+      "quote": "redirects to forsale.godaddy.com"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "marketing-companies:did-teen-revitalization-advertise-midwest-academ",
@@ -31809,7 +32351,44 @@
      "url": "https://web.archive.org/web/2*/https://jri.org/?program=journey-home",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Andrea Jones and Donovan Tagaloa belong to the Utah program, not JRI. Both are on the Journey Home Young Adult team page (Salt Lake City), which also calls Solstice its 'sister program'. Both now work at Sedona Sky Academy, another FHW program. KOP's own staff notes (a lead only) say the same: Jones was a Solstice RTC therapist, then Journey Home clinical director; Tagaloa was Solstice program director, then Journey Home residential director. Caveat: the team page is on a pages.dev (Cloudflare Pages) host, not a domain the program clearly owns, so it may be a copy of the program's site. It is the only source naming them at Journey Home. Woodbury (2014-12-04 and 2018-04-16) has FHW's Journey Home opening in Layton in 2012 as a girls' step-down program. Whether that Layton program is the same as the Salt Lake City young adult program is not settled. Emily Smith: still open. No page that could be opened ties an Emily Smith to any Journey Home. KOP's staff notes (lead only) say she was a therapist at First Light, Trails Carolina and Journey Home East (FHW, Asheville NC), which would still be the FHW line, not JRI. Justin Lubecki (on 9672): no source found anywhere. JRI's Journey Home page names Jack Pinard as Program Director and lists no Lubecki. Implications: pin the FHW Journey Home node to a Utah Journey Home (Young Adult) record and move Jones and Tagaloa there. Leave Emily Smith off until sourced, or tie her to Journey Home East. Lubecki's tie to 9672 is unsourced. The WebSearch budget ran out before searches of Utah DOPL and a Massachusetts license lookup. Still needed: Utah DOPL licence lookup (search form) for Andrea Jones LCSW and Emily Smith; source for Justin Lubecki's role at JRI Journey Home (none found); a Wayback capture of the Journey Home Young Adult site on its own domain to confirm the pages.dev copy.",
+    "claims": [
+     {
+      "claim": "Journey Home Young Adult (Salt Lake City) lists Andrea Jones, LCSW as Clinical Director and Donovan Tagaloa as Residential Director",
+      "url": "https://journeyhomeyoungadult.pages.dev/meet-our-team/",
+      "quote": "Andrea Jones, LCSW, Clinical Director ... Donovan Tagaloa, Residential Director"
+     },
+     {
+      "claim": "Journey Home Young Adult is in Salt Lake City",
+      "url": "https://journeyhomeyoungadult.pages.dev/about-us/",
+      "quote": "Journey Home Young Adult is located in beautiful Salt Lake City, Utah."
+     },
+     {
+      "claim": "Tagaloa's bio on that team page",
+      "url": "https://journeyhomeyoungadult.pages.dev/meet-our-team/",
+      "quote": "Donovan has been working in the residential treatment setting since 2016."
+     },
+     {
+      "claim": "Andrea Jones is now Clinical Director at Sedona Sky Academy (a Family Help & Wellness program)",
+      "url": "https://www.sedonasky.org/team/andrea-jones",
+      "quote": "Andrea graduated from the University of Utah with a Master of Social Work degree."
+     },
+     {
+      "claim": "Donovan Tagaloa is now at Sedona Sky Academy",
+      "url": "https://www.sedonasky.org/team/donovan-tagaloa",
+      "quote": "Donovan Tagaloa is a Residential Director at Sedona Sky Academy."
+     },
+     {
+      "claim": "JRI's Journey Home is a group home for adolescent males at 630 Lindsey Street, Attleboro, and its page names Jack Pinard as Program Director",
+      "url": "https://jri.org/program/journey-home/",
+      "quote": "Journey Home is a therapeutic intensive group home for adolescent males"
+     }
+    ],
+    "by": "Claude session (tti-research, 2026-11-20)",
+    "at": "2026-11-20"
+   }
   },
   {
    "key": "trade-organizations:natsap-did-it-shut-down-after-its-january-2027-c",
@@ -31893,5 +32472,5 @@
    "directions": []
   }
  ],
- "built": "2026-11-19 22:41"
+ "built": "2026-11-20 03:19"
 }
