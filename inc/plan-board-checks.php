@@ -117,12 +117,6 @@ function kop_pb_checks() {
             $left = array_filter($rows, function ($r) use ($names) { return trim((string) $r['name']) === $names[(int) $r['id']]; });
             return $left ? array(false, count($left) . ' of 5 still carry the description as a name') : array(true, 'All five are renamed or removed');
         },
-        '2.4:linden-oaks-il-100402-reject-data-submissions-56-57-and-58' => function () {
-            $rows = kop_pb_records('SELECT id, status FROM suggested_edits WHERE id IN (56, 57, 58)');
-            if ($rows === null) return null;
-            $pending = array_filter($rows, function ($r) { return $r['status'] === 'pending'; });
-            return $pending ? array(false, count($pending) . ' of the 3 still pending') : array(true, '#56, #57 and #58 are no longer pending');
-        },
         '2.5:the-brochure-and-the-record' => function () {
             $p = get_page_by_path('the-brochure-and-the-record');
             if (!$p) return null;

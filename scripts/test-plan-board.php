@@ -86,8 +86,10 @@ if ($go) {
     $c = kop_pb_card_html($go, array(), array());
     $check('a do card opens its link and has Done', strpos($c, 'href="' . esc_attr($go['go'][0]['url']) . '"') !== false && strpos($c, 'data-act="done"') !== false);
 }
-$check('a group name reads "2.4 Decisions waiting"', ($items['2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check']['where'] ?? '') === '2.4 Decisions waiting',
-    $items['2.4:nh-the-ridge-rtc-statement-held-by-the-privacy-check']['where'] ?? 'missing');
+// From the group itself, not one of its items: 2.4 is often empty ("Nothing waiting").
+$label = 'missing';
+foreach ($plan['sections'] as $s) foreach ($s['groups'] as $g) if ($g['key'] === '2.4') $label = kop_pb_group_label($s, $g);
+$check('a group name reads "2.4 Decisions waiting"', $label === '2.4 Decisions waiting', $label);
 
 // The seed is built from the plan files as they are (build.py's source_text(): name order, LF, joined by a blank
 // line). docs/ is not deployed, so this only runs in a checkout.
