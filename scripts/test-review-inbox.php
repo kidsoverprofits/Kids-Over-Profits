@@ -41,6 +41,8 @@ $wanted = array(
     'news_story_arcs', 'journalists', 'journalist_articles',
     // Read by the record search (inc/ajax-search-lite.php) and the admin's record lists.
     'marketers_master', 'tradeorgs_master',
+    // Records moved to a related category (Christian Rehabs for Adults): queues that follow those moves name them.
+    'related_facilities',
 );
 foreach ($wanted as $t) {
     $sql = $copy->query("SELECT sql FROM src.sqlite_master WHERE type = 'table' AND name = " . $copy->quote($t))->fetchColumn();
@@ -62,6 +64,9 @@ require __DIR__ . '/kop-test-harness.php';
 // queues that follow merges (kop_facility_merge_resolve()) see the records merged since their build files.
 $raw = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_facility_merged_into'")->fetchColumn();
 if ($raw !== false) $GLOBALS['kop_test_options']['kop_facility_merged_into'] = unserialize($raw);
+// And the related-category move log (kop_rmove_log()), for queues that follow those moves too.
+$raw = $pdo->query("SELECT option_value FROM wpdl_options WHERE option_name = 'kop_related_move_log'")->fetchColumn();
+if ($raw !== false) $GLOBALS['kop_test_options']['kop_related_move_log'] = unserialize($raw);
 unset($raw);
 // MySQL functions the queues use.
 $pdo->sqliteCreateFunction('UTC_TIMESTAMP', function () { return gmdate('Y-m-d H:i:s'); }, 0);
@@ -176,7 +181,16 @@ $shape_ok = function (array $it) {
 };
 
 // Young adult programs are records in related_facilities: the table, and the copied rows moved in as on the site.
-if (function_exists('kop_ya_move_to_related')) kop_test_related_table($pdo, true);
+if (function_exists('kop_ya_move_to_related')) {
+    kop_test_related_table($pdo, true);
+    // That temp table hides the copied one: add the mirror's other related records (Christian Rehabs for Adults,
+    // ...), which queues that follow related moves name (nonprofit-filings: #14004 -> #901016).
+    $pdo->exec("INSERT INTO temp.related_facilities (id, category, review, unique_name, json_data, created_at, updated_at)
+        SELECT id, category, review, unique_name, json_data, created_at, updated_at FROM main.related_facilities m
+        WHERE m.id NOT IN (SELECT id FROM temp.related_facilities)
+          AND m.unique_name NOT IN (SELECT unique_name FROM temp.related_facilities)");
+    if (function_exists('kop_related_flush')) kop_related_flush();
+}
 
 $sources = kop_rinbox_sources(true);
 $check('sources are registered', count($sources) > 0, implode(', ', array_keys($sources)));

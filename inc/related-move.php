@@ -59,6 +59,36 @@ if (!function_exists('kop_rmove_log')) {
     }
 }
 
+if (!function_exists('kop_rmove_follow_candidates')) {
+    /**
+     * A build file's candidate records ([{id, kind?, ...}]) with each facility moved to a related category since
+     * the file was built handled: $keep true puts the related record's id in its place (a queue that links
+     * related records, nonprofit filings), false drops it (business filings and federal funding, which write
+     * only to TTI facilities). A second candidate landing on the same record is dropped.
+     * Teen Challenge of South Carolina: #14004 -> #901016, 2026-11-04.
+     */
+    function kop_rmove_follow_candidates($cands, $keep) {
+        $log = kop_rmove_log();
+        if (!$log) return (array) $cands;
+        $out = array();
+        $seen = array();
+        foreach ((array) $cands as $c) {
+            if (is_array($c) && in_array($c['kind'] ?? 'facility', array('facility', ''), true)) {
+                $to = (int) ($log[(int) ($c['id'] ?? 0)]['related_id'] ?? 0);
+                if ($to > 0) {
+                    if (!$keep) continue;
+                    $c['id'] = $to;
+                }
+            }
+            $k = (is_array($c) ? ($c['kind'] ?? 'facility') . ':' . (int) ($c['id'] ?? 0) : '') ;
+            if ($k !== '' && isset($seen[$k])) continue;
+            $seen[$k] = true;
+            $out[] = $c;
+        }
+        return $out;
+    }
+}
+
 if (!function_exists('kop_rmove_convert')) {
     /**
      * Move facility record $fid (named $unique_name) into related category

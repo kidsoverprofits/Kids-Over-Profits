@@ -1,6 +1,6 @@
 {
- "built": "2026-11-20 03:20 UTC",
- "source": "ba9d0522c1eafdd22858746f942ae491d66bf3a8",
+ "built": "2026-11-20 13:54 UTC",
+ "source": "808bf6e40b51747a27084c393dbb7f20e58831f4",
  "sections": [
   {
    "key": "2",
@@ -4941,21 +4941,6 @@
        "hash": "625e7f528645"
       },
       {
-       "id": "5:test-review-inbox-nonprofit-filings-every-organization-is-we",
-       "lead": "test-review-inbox: \"nonprofit-filings: every organization is well formed and names records that exist\"",
-       "text": "**test-review-inbox: \"nonprofit-filings: every organization is well formed and names records that exist\"** (found 2026-11-10 on main at fe44d9ce, mirror as of that day, `-d memory_limit=1G`): 696 organizations, and EIN 571101736 names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in business-filings, so keep the `memory_limit` above.",
-       "ask": "",
-       "date": "2026-11-10",
-       "why": "",
-       "go": [],
-       "choices": [],
-       "time": "",
-       "kind": "do",
-       "focus": false,
-       "steps": [],
-       "hash": "e7c91e99c17f"
-      },
-      {
        "id": "5:test-facility-pages-every-map-slice-holds-its-root-and-only",
        "lead": "test-facility-pages: \"every map slice holds its root and only graph names, under 120 KB\"",
        "text": "**test-facility-pages: \"every map slice holds its root and only graph names, under 120 KB\"** (found 2026-11-11 on main, mirror of 2026-11-10): Aspen Education Group (100001), SUWS of the Carolinas, Provo Canyon School, Aspen Achievement Academy and Asheville Academy for Girls fail the slice check. It reads kop-data's network/graph.json, which the About rewrite work did not touch; check whether a graph rebuild changed those slices.",
@@ -5044,6 +5029,21 @@
        "focus": false,
        "steps": [],
        "hash": "13b57f3789ef"
+      },
+      {
+       "id": "5:test-review-inbox-three-checks-fail-on-main",
+       "lead": "test-review-inbox: three checks fail on main",
+       "text": "**test-review-inbox: three checks fail on main** (found 2026-11-20 at 2fc4f197, mirror as of that day, the same three on a clean worktree of main, so not from the related-move change): \"data-audit: every proposal is well formed\" (326 proposals, 31 naming a record merged since; operator_profile-329 names #100001, which the mirror doesn't have as a record), \"facilities-from-news: waiting item is held back\" (detail \"unquoted\") and \"reader-accounts: a later step (rules apart) reads waiting testimony again and keeps what was decided\". 1780 pass.",
+       "ask": "",
+       "date": "2026-11-20",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "520d0f05339e"
       }
      ]
     }

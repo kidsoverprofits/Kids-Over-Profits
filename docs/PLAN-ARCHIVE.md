@@ -3927,3 +3927,19 @@ Outcomes, 2026-11-19: NH The Ridge RTC and WY Meadowlark were already released i
     Go: [Submissions Review > Data](https://kidsoverprofits.org/admin-submissions/?type=data)
     Time: 2 min
     Focus: yes
+
+### 5. Tests failing on main (done 2026-11-19)
+
+5. **test-review-inbox: "nonprofit-filings: every organization is well formed and names records that exist"** (found
+   2026-11-10 on main at fe44d9ce, mirror as of that day, `-d memory_limit=1G`): 696 organizations, and EIN 571101736
+   names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow
+   the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in
+   business-filings, so keep the `memory_limit` above.
+   Done 2026-11-19: #14004 Teen Challenge of South Carolina moved to Christian Rehabs for Adults on 2026-11-04
+   (#901016). kop_npf_candidates() (inc/nonprofit-filings.php) now follows related-category moves
+   (kop_rmove_log()) after merges, so the card offers #901016; no wpdl_kop_nonprofit_links row sat on #14004.
+   test-review-inbox now copies related_facilities and the move log, and adds the mirror's related records to
+   its temp related table; the check passes (696 organizations). Same day: business filings and federal funding
+   drop a candidate moved to a related category (they write only to TTI facilities), and a company or program left
+   with none is not offered; the shared helper is kop_rmove_follow_candidates() (inc/related-move.php). None of
+   their current cards named a moved record.

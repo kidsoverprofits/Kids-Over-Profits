@@ -12,6 +12,8 @@
  */
 
 require_once dirname(__DIR__, 2) . '/inc/federal-funding.php';
+// kop_rmove_follow_candidates(), which functions.php always loads: candidates moved to a related category go.
+require_once dirname(__DIR__, 2) . '/inc/related-move.php';
 if (!function_exists('kop_facdisc_types')) require_once dirname(__DIR__, 2) . '/inc/facility-discovery.php';
 
 function kop_rinbox_test_federal_funding(array $src, array $item, callable $check) {

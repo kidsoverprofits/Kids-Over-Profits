@@ -149,11 +149,6 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261)
    has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the
    first list (e.g. a class of its own on the related list). The rest of the test passes, timelines included.
-5. **test-review-inbox: "nonprofit-filings: every organization is well formed and names records that exist"** (found
-   2026-11-10 on main at fe44d9ce, mirror as of that day, `-d memory_limit=1G`): 696 organizations, and EIN 571101736
-   names facility #14004, which the mirror doesn't have (probably merged or deleted since its filing was built). Follow
-   the merge map, or drop the stale id from the filing. Every other queue passes. With 128M the run dies of memory in
-   business-filings, so keep the `memory_limit` above.
 6. **test-facility-pages: "every map slice holds its root and only graph names, under 120 KB"** (found 2026-11-11 on
    main, mirror of 2026-11-10): Aspen Education Group (100001), SUWS of the Carolinas, Provo Canyon School, Aspen
    Achievement Academy and Asheville Academy for Girls fail the slice check. It reads kop-data's network/graph.json,
@@ -173,3 +168,8 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
     registry entry in `wp-plugins/kop-tools/kop-tools.php`; add one (and bump the plugin version).
 11. **test-mobile-api.php --fixture: "Hyde aka" comes back empty** (found 2026-11-19, failing on a clean checkout of main too,
     so not from the incidents change): the made-up Hyde record's aka list is []; likely the same alias change as #9.
+12. **test-review-inbox: three checks fail on main** (found 2026-11-20 at 2fc4f197, mirror as of that day, the same three
+    on a clean worktree of main, so not from the related-move change): "data-audit: every proposal is well formed"
+    (326 proposals, 31 naming a record merged since; operator_profile-329 names #100001, which the mirror doesn't have
+    as a record), "facilities-from-news: waiting item is held back" (detail "unquoted") and "reader-accounts: a later
+    step (rules apart) reads waiting testimony again and keeps what was decided". 1780 pass.

@@ -110,6 +110,13 @@ function kop_bizf_candidates() {
             $e['state'] = $st;
             // Records merged since the file was built: the one each went into.
             if (function_exists('kop_facility_merge_follow_candidates')) $e['candidates'] = kop_facility_merge_follow_candidates($e['candidates'] ?? array());
+            // Records moved to a related category since (Christian Rehabs for Adults, ...): business filings show
+            // only on TTI facility pages, so the candidate goes; a company left with none is not offered.
+            if (function_exists('kop_rmove_follow_candidates')) {
+                $had = count((array) ($e['candidates'] ?? array()));
+                $e['candidates'] = kop_rmove_follow_candidates($e['candidates'] ?? array(), false);
+                if ($had && !$e['candidates']) continue;
+            }
             // Records moved to the young adult programs since: no facility to link any more (Three Strands, #100175).
             if ($moved) {
                 $e['candidates'] = array_values(array_filter((array) ($e['candidates'] ?? array()), function ($c) use ($moved) {

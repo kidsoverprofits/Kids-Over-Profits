@@ -12,6 +12,8 @@
 
 require_once dirname(__DIR__, 2) . '/inc/nonprofit-filings.php';
 require_once dirname(__DIR__, 2) . '/inc/business-filings.php';
+// kop_rmove_follow_candidates(), which functions.php always loads: candidates moved to a related category go.
+require_once dirname(__DIR__, 2) . '/inc/related-move.php';
 
 $GLOBALS['pdo']->exec('CREATE TABLE IF NOT EXISTS wpdl_kop_business_links (id INTEGER PRIMARY KEY AUTOINCREMENT, state TEXT NOT NULL, doc TEXT NOT NULL,
     facility_id INTEGER NOT NULL DEFAULT 0, operator_id INTEGER NOT NULL DEFAULT 0, created_by TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL)');

@@ -45,6 +45,14 @@ function kop_ffund_proposals() {
         if (!is_array($p) || empty($p['key']) || !is_array($p['entries'] ?? null)) continue;
         // Records merged since the file was built: the one each went into.
         if (isset($p['candidates']) && function_exists('kop_facility_merge_follow_candidates')) $p['candidates'] = kop_facility_merge_follow_candidates($p['candidates']);
+        // Records moved to a related category since (Christian Rehabs for Adults, ...): the entries go on TTI
+        // facility documents only, so the candidate goes; a program left with none is not offered (Create would
+        // make a second record of it).
+        if (isset($p['candidates']) && function_exists('kop_rmove_follow_candidates')) {
+            $had = count((array) $p['candidates']);
+            $p['candidates'] = kop_rmove_follow_candidates($p['candidates'], false);
+            if ($had && !$p['candidates']) continue;
+        }
         $memo[(string) $p['key']] = $p;
     }
     return $memo;

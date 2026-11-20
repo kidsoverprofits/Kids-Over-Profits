@@ -86,6 +86,9 @@ function kop_npf_candidates() {
         if (!is_array($e) || !preg_match('/^\d{9}$/', (string) ($e['ein'] ?? ''))) continue;
         // Records merged since the file was built: the one each went into.
         if (function_exists('kop_facility_merge_follow_candidates')) $e['candidates'] = kop_facility_merge_follow_candidates($e['candidates'] ?? array());
+        // Records moved to a related category since (Teen Challenge of South Carolina, #14004 -> #901016,
+        // 2026-11-04): the related record, which this queue links like a facility.
+        if (function_exists('kop_rmove_follow_candidates')) $e['candidates'] = kop_rmove_follow_candidates($e['candidates'] ?? array(), true);
         $memo[(string) $e['ein']] = $e;
     }
     return $memo;

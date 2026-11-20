@@ -12,6 +12,10 @@
  */
 
 require_once dirname(__DIR__, 2) . '/inc/nonprofit-filings.php';
+// What functions.php always loads: the queue follows records moved to a related category (kop_rmove_log()) and
+// names them (kop_related_get()).
+require_once dirname(__DIR__, 2) . '/inc/related-move.php';
+require_once dirname(__DIR__, 2) . '/inc/related-facilities.php';
 
 $GLOBALS['pdo']->exec('CREATE TABLE IF NOT EXISTS wpdl_kop_nonprofit_links (id INTEGER PRIMARY KEY AUTOINCREMENT, ein TEXT NOT NULL,
     facility_id INTEGER NOT NULL DEFAULT 0, operator_id INTEGER NOT NULL DEFAULT 0, created_by TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL)');
@@ -54,6 +58,20 @@ function kop_rinbox_test_nonprofit_filings(array $src, array $item, callable $ch
     }
     $check('nonprofit-filings: every organization is well formed and names records that exist', !$bad,
         count($cands) . ' organizations, ' . json_encode($views) . ($bad ? '; ' . implode(' | ', array_slice($bad, 0, 6)) : ''));
+
+    // A record moved to a related category: kept as the related record here, dropped by the queues that write
+    // only to TTI facilities (business filings, federal funding).
+    $moved = 0;
+    foreach (kop_rmove_log() as $from => $m) { if (!empty($m['related_id'])) { $moved = (int) $from; break; } }
+    if ($moved) {
+        $to = (int) kop_rmove_log()[$moved]['related_id'];
+        $in = array(array('id' => $moved, 'kind' => 'facility'), array('id' => $to, 'kind' => 'facility'), array('id' => 10, 'kind' => 'operator'));
+        $kept = kop_rmove_follow_candidates($in, true);
+        $dropped = kop_rmove_follow_candidates($in, false);
+        $check('related moves: kept as the related record once, or dropped', array_column($kept, 'id') === array($to, 10)
+            && array_column($dropped, 'id') === array($to, 10) && count(kop_rmove_follow_candidates(array($in[0]), false)) === 0,
+            '#' . $moved . ' -> #' . $to . ': ' . json_encode(array_column($kept, 'id')));
+    }
 
     $check('nonprofit-filings: EIN and money read as on a return', kop_npf_ein_label('236437695') === '23-6437695'
         && kop_npf_money(5422125) === '$5,422,125' && kop_npf_money(-126) === '-$126' && kop_npf_money(null) === '');
