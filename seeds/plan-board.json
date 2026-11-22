@@ -1,6 +1,6 @@
 {
- "built": "2026-11-22 21:53 UTC",
- "source": "5a24b0e59b5e3612c2e12202d8865b53cdde3cdf",
+ "built": "2026-11-22 22:19 UTC",
+ "source": "582a8abdf235ae8a193964b61a6516129715062c",
  "sections": [
   {
    "key": "2",
@@ -180,6 +180,45 @@
         }
        ],
        "hash": "37a8015cbd0c"
+      },
+      {
+       "id": "2.1:bigquery-connector-permission",
+       "lead": "BigQuery connector permission",
+       "text": "**BigQuery connector permission** (2026-11-22). The nightly copy of the live database into BigQuery (`kop-data.kop_prod`, tools/bigquery-sync/README.md) works, but the claude.ai BigQuery connector is refused with \"User does not have mcp.tools.call permission in project kop-data\". Claude's attempt to grant the role was blocked by its own permission check, so the owner grants it: role **MCP Tool User** (`roles/mcp.toolUser`) to kidsoverprofitsdani@gmail.com on project kop-data. Then a session checks with the connector: `SELECT * FROM kop_prod._sync_log ORDER BY run_started DESC LIMIT 5`. Optional: link a billing account to kop-data (free tier covers it) so tables stop being recreated monthly.",
+       "ask": "Give the BigQuery connector the MCP Tool User role in project kop-data",
+       "date": "2026-11-22",
+       "why": "Until then your claude.ai assistant can't query the nightly copy of the database.",
+       "go": [
+        {
+         "label": "IAM for kop-data",
+         "url": "https://console.cloud.google.com/iam-admin/iam?project=kop-data"
+        }
+       ],
+       "choices": [],
+       "time": "2 min",
+       "kind": "do",
+       "focus": false,
+       "steps": [
+        {
+         "id": "on-the-iam-page-find-kidsoverprofitsdani-gmail-com",
+         "label": "On the IAM page, find kidsoverprofitsdani@gmail.com and click the pencil (Edit principal)",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "add-another-role-search-mcp-tool-user-save",
+         "label": "Add another role > search \"MCP Tool User\" > Save",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "tell-claude-which-then-runs-a-test-query-through-t",
+         "label": "Tell Claude, which then runs a test query through the connector",
+         "url": "",
+         "note": ""
+        }
+       ],
+       "hash": "d78db37e1b94"
       }
      ]
     },
