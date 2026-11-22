@@ -92,3 +92,7 @@ node_modules
 
 # Drive Sync run lock (api/sync-drive-documents.php)
 api/.kop-sync-drive-documents.lock
+
+# BigQuery sync: service-account keys and export temp files never go in the repo
+*sa-key*.json
+tools/bigquery-sync/tmp/

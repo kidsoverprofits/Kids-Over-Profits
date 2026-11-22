@@ -25,6 +25,10 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/scripts
     - /bin/cp scripts/discover-articles.php scripts/discovery-queries.json scripts/discovery-blacklist.json scripts/build-open-data.php scripts/anon-portal-keygen.php scripts/anon-portal-decrypt.php $DEPLOYPATH/scripts/
     - /bin/rm -f $DEPLOYPATH/scripts/discovery-rejected.json
+    # Nightly BigQuery copy for the claude.ai connector (tools/bigquery-sync/README.md). Lives outside
+    # public_html; its service-account key is ~/.kop-bigquery/sa-key.json (never in the repo).
+    - /bin/mkdir -p /home/kidsover/bigquery-sync && /bin/chmod 700 /home/kidsover/bigquery-sync
+    - /bin/cp tools/bigquery-sync/bigquery-sync.php tools/bigquery-sync/README.md /home/kidsover/bigquery-sync/
     # Scripts shipped by the old "copy the whole folder" step that nothing on
     # the server runs: tests, builders, the test harness, one-off migrations.
     # Everything but the six files above and the cron's dotfiles goes.
