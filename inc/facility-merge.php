@@ -241,6 +241,8 @@ if (!function_exists('kop_fmerge_ref_tables')) {
             array('t' => $prefix . 'kop_business_links', 'c' => 'facility_id', 'k' => 'id'),
             // Investors (inc/investors.php): a stake in a program.
             array('t' => $prefix . 'kop_investor_links', 'c' => 'facility_id', 'k' => 'id'),
+            // Staff notes (inc/staff-notes.php): private notes on a record.
+            array('t' => $prefix . 'kop_staff_notes', 'c' => 'facility_id', 'k' => 'id'),
             // Research library documents filed under a facility.
             array('t' => $prefix . 'postmeta', 'c' => 'meta_value', 'k' => 'id', 'where' => "meta_key = 'kop_research_facilities'"),
         ), $prefix);

@@ -154,6 +154,9 @@ python scripts/test-review-inbox-ui.py           # the page in a browser against
 # and answers the redrawn changes; the version before each fix is kept in option kop_sugg_edits_<id> (50 at most) for
 # 'undo_suggestion_edit' ("Undo last edit" on the card). Only pending rows; Approve writes the fixed version. A survivor's account
 # keeps their words: the box says spelling and punctuation only (memory: testimony quotes only)
+# Move to "Staff notes (private)" (target 'staffNotes', plan 4.4 item 25): the text leaves the suggestion and is saved at once to the
+# record's staff notes ({prefix}kop_staff_notes, inc/staff-notes.php, KOP Tools > Staff Notes), never into its document; the history
+# entry keeps the note id, so "Undo last edit" deletes it again. Refused for a program not on record yet, or a referrer/transporter block.
 # Everything on the card has buttons (owner 2026-11-13, "edit everything"): a whole-record edit's dropped list items and emptied fields
 # get "Keep it" (op 'keep': the endpoint loads the record with kop_suggestion_record_doc() and puts its own value or item back; emptied
 # fields can be typed into too); the referrer / transporter / provider blocks' lists of people are edited item by item (their parts),

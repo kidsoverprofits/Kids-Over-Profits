@@ -306,6 +306,20 @@ $n = $row_for($card($e), 'Notes');
 $check('edit: Operator text moved to Notes leaves Operator empty',
     !$row_for($card($e), 'Operator') && $n && in_array('This is not a Charter program.', $n['added'], true), json_encode($card($e)['entries'][0]['changes']));
 
+// "Move to: Staff notes (private)" takes the text out of the suggestion and hands it to the caller, who saves it to
+// the record's staff notes (plan 4.4 item 25); it never lands in the record's document.
+$targets = array_column($c['targets'], 'label', 'path');
+$check('edit: Staff notes (private) is a move target', ($targets['staffNotes'] ?? '') === 'Staff notes (private)', json_encode($targets));
+$sn = $row_for($card($e), 'Notes');
+$sn_text = $sn['items'][0]['text'];
+kop_suggestion_staff_note();   // nothing left over from before
+$e_sn = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'move', 'path' => 'notes', 'index' => $sn['items'][0]['index'], 'to' => 'staffNotes'));
+$taken = kop_suggestion_staff_note();
+$after = $row_for($card($e_sn), 'Notes');
+$check('edit: a note moved to Staff notes leaves the suggestion and is handed over once',
+    $taken === $sn_text && !in_array($sn_text, (array) ($after['added'] ?? array()), true) && kop_suggestion_staff_note() === null
+    && strpos(json_encode($e_sn), 'staffNotes') === false, json_encode(array($taken, $after)));
+
 $on = $row_for($card($e), 'Other names');
 $e = kop_suggestion_edit($e, array('entry' => 0, 'op' => 'move', 'path' => 'identification.otherNames', 'index' => $on['items'][0]['index'], 'to' => 'notes'));
 $check('edit: a list item moved to another list', !$row_for($card($e), 'Other names') && in_array('A sentence that is really a note about the place.', $row_for($card($e), 'Notes')['added'], true));

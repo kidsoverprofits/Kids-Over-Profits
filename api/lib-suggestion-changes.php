@@ -180,7 +180,7 @@ if (!function_exists('kop_suggestion_label')) {
     /** A field's name for people: the ones the form shows, else its key in words. */
     function kop_suggestion_label($path) {
         static $labels = array(
-            'identification.name' => 'Name', 'identification.currentName' => 'Current name',
+            'identification.name' => 'Name', 'identification.currentName' => 'Current name', 'staffNotes' => 'Staff notes (private)',
             'identification.otherNames' => 'Other names', 'identification.pastNames' => 'Past names',
             'identification.legalName' => 'Legal name', 'identification.dbaNames' => 'Also does business as',
             'identification.currentOperator' => 'Operator', 'identification.currentOwners' => 'Owners',
@@ -379,7 +379,23 @@ if (!function_exists('kop_suggestion_move_targets')) {
             'identification.knownReferrers' => 'list', 'identification.investors' => 'list',
             'location.street' => 'text', 'location.city' => 'text', 'location.text' => 'text',
             'operatingPeriod.yearsOfOperation' => 'text', 'facilityDetails.type' => 'text',
+            // Not a field of the record: api/manage-submissions.php saves it to the record's staff notes (inc/staff-notes.php).
+            'staffNotes' => 'list',
         );
+    }
+}
+
+if (!function_exists('kop_suggestion_staff_note')) {
+    /**
+     * The text the last edit moved to "Staff notes (private)": set by kop_suggestion_edit_facility(), read once
+     * (and cleared) by api/manage-submissions.php, which saves it to the record's staff notes.
+     */
+    function kop_suggestion_staff_note($set = null) {
+        static $text = null;
+        if ($set !== null) { $text = (string) $set; return $text; }
+        $out = $text;
+        $text = null;
+        return $out;
     }
 }
 
@@ -528,6 +544,11 @@ if (!function_exists('kop_suggestion_edit_facility')) {
         if (!isset($targets[$to])) throw new RuntimeException('Pick where it goes.');
         if ($to === $path) throw new RuntimeException('It is already under ' . $label . '.');
         if ($text === '') throw new RuntimeException('There is no text to move.');
+        if ($to === 'staffNotes') {
+            // Out of the suggestion; the caller saves it to the record's staff notes (kop_suggestion_staff_note()).
+            kop_suggestion_staff_note($text);
+            return $norm($doc);
+        }
         $dest = explode('.', $to);
         $have = kop_suggestion_get($doc, $dest);
         if ($targets[$to] === 'list') {

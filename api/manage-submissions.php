@@ -1056,9 +1056,35 @@ try {
                 $last = array_pop($hist);
                 $newJson = (string) $last['json'];
                 $message = 'Edit undone.';
+                // A piece moved to the record's staff notes leaves them again (inc/staff-notes.php).
+                if (!empty($last['staff_note']) && function_exists('kop_snotes_purge')) {
+                    kop_snotes_purge((int) $last['staff_note']);
+                    $message = 'Edit undone: the note is back on the card and off the record\'s staff notes.';
+                }
             } else {
                 $req = is_array($data['edit'] ?? null) ? $data['edit'] : [];
                 $payload = json_decode((string) $sugg['edited_json_data'], true);
+                // "Move to: Staff notes (private)": the text goes to the record's staff notes, never into the
+                // suggestion, so the record must already exist (plan 4.4 item 25, inc/staff-notes.php).
+                $noteFid = 0;
+                if (($req['op'] ?? '') === 'move' && ($req['to'] ?? '') === 'staffNotes') {
+                    if (!function_exists('kop_snotes_add')) {
+                        echo json_encode(['success' => false, 'error' => 'Staff notes are not set up on this site yet.']);
+                        exit;
+                    }
+                    if (($req['entry'] ?? null) === 'other') {
+                        echo json_encode(['success' => false, 'error' => 'Staff notes go on a program record. Move it from a program\'s fields.']);
+                        exit;
+                    }
+                    $chEntries = kop_suggestion_changes_safe($pdo, $payload, $sugg['reason'] ?? '')['entries'] ?? [];
+                    foreach ($chEntries as $chEntry) {
+                        if ((int) ($chEntry['index'] ?? -1) === (int) ($req['entry'] ?? -2) && empty($chEntry['is_new'])) $noteFid = (int) ($chEntry['facility_id'] ?? 0);
+                    }
+                    if ($noteFid <= 0) {
+                        echo json_encode(['success' => false, 'error' => 'This program is not on record yet, so it has no staff notes. Copy the text, Remove it here, approve, then add it in KOP Tools > Staff Notes.']);
+                        exit;
+                    }
+                }
                 try {
                     // "Keep it" puts back what a whole-record edit dropped, so it needs the record itself.
                     $recordDoc = ($req['op'] ?? '') === 'keep'
@@ -1074,14 +1100,28 @@ try {
                     echo json_encode(['success' => false, 'error' => 'The edited suggestion could not be saved.']);
                     exit;
                 }
+                $staffNoteId = 0;
+                $moved = function_exists('kop_suggestion_staff_note') ? kop_suggestion_staff_note() : null;
+                if ($noteFid > 0) {
+                    if ($moved === null || trim($moved) === '') {
+                        echo json_encode(['success' => false, 'error' => 'There is no text to move.']);
+                        exit;
+                    }
+                    try {
+                        $staffNoteId = kop_snotes_add($noteFid, $moved, 'Data suggestion #' . $id);
+                    } catch (Throwable $e) {
+                        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                        exit;
+                    }
+                }
                 $hist[] = [
                     'at'   => gmdate('c'),
                     'by'   => function_exists('wp_get_current_user') ? (string) wp_get_current_user()->user_login : '',
                     'op'   => (string) ($req['op'] ?? ''),
                     'json' => (string) $sugg['edited_json_data'],
-                ];
+                ] + ($staffNoteId ? ['staff_note' => $staffNoteId] : []);
                 $hist = array_slice($hist, -50);
-                $message = 'Saved.';
+                $message = $staffNoteId ? 'Saved to the record\'s staff notes (KOP Tools > Staff Notes). It is off the suggestion, so Approve will not publish it.' : 'Saved.';
             }
             $pdo->prepare("UPDATE $table SET edited_json_data = ? WHERE id = ?")->execute([$newJson, $id]);
             if ($hist) update_option($histKey, $hist, false); else delete_option($histKey);
