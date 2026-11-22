@@ -1,6 +1,6 @@
 {
   "_about": "One-time corrections to existing lawsuit rows, applied by inc/lawsuit-updates.php when 'version' changes. Each row matches id AND its current case_name; only the listed fields change, add_source_urls is merged into source_urls, move_facility_links moves the case's link from one record to another, and the note is appended to reviewer_notes once (not again when the file is run under a later version). New cases in seeds/lawsuits.json are inserted in the same pass. An update may name its case by 'match': {docket, name_contains} (or {name_contains, filing_date} for a row with no docket number) instead of id + case_name (only a lone match counts; the replaced values go into the note). 'merge_duplicates' joins second copies of one case (same docket, filing date and court), keeping the row with the full docket number: kop_apply_lawsuit_merges().",
-  "version": "2026-11-19b",
+  "version": "2026-11-20a",
   "updates": [
     {
       "id": 24,
@@ -57,6 +57,16 @@
         "case_number": "7:06-cv-0908"
       },
       "note": "Defendant types from the court record: the Academy at Ivy Ridge (the caption) and the marketing groups Teen Help and Lifelines, both defendants on the fraud claims (Report-Recommendation, N.D.N.Y., Apr 22, 2008). Whether an operator is also a defendant was not checked. Docket number 7:06-cv-0908 added from the same court record; the row had none, so it is found by caption and filing date (Jul 25, 2006) (GAO prep, 2026-11-19)."
+    },
+    {
+      "id": 211,
+      "case_name": "Mattie v. Sequel Youth and Family Services, LLC. et al",
+      "set": {
+        "status": "settled",
+        "outcome": "Settled. The plaintiff filed a notice of settlement on March 17, 2023; the defendants filed a stipulation of dismissal on April 7, 2023, and the court dismissed the case with prejudice on April 10, 2023 (docket entries 35, 37 and 38). Terms were not filed.",
+        "summary": "Ronald Lewis Mattie, a former employee, filed a civil rights employment discrimination action (nature of suit 442) on December 22, 2021 in the Middle District of Florida against Sequel Youth and Family Services, LLC (served as d/b/a St. John's Youth Academy), SequelCare of Florida, LLC and Sequel TSI of Florida, LLC. It is an employment case, not a case about the youth held there. The plaintiff filed a notice of settlement on March 17, 2023, and the court dismissed the case with prejudice on April 10, 2023 after the parties' stipulation."
+      },
+      "note": "Research task 'What was Mattie v. Sequel Youth and Family Services (2021) about?' (2026-11-20): the docket (PacerMonitor) shows entry 35, 2023-03-17, \"NOTICE of Settlement by Ronald Lewis Mattie.\"; entry 37 stipulation of dismissal 2023-04-07; entry 38, 2023-04-10, \"ORDER dismissing case with prejudice.\"; entry 18 names \"Sequel Youth and Family Services, LLC d/b/a St. John's Youth Academy\". The summary's 'without a settlement' was wrong."
     }
   ],
   "merge_duplicates": [

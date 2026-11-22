@@ -13036,5 +13036,170 @@
         "currentOperator": "Brighter Path Alabama, LLC"
       }
     }
+  },
+  {
+    "id": 13639,
+    "unique_name": "Brighter Path Courtland",
+    "version": 3,
+    "note": "Research task 'When did TrueCore Acquisitions, LLC become manager and member of Brighter Path Alabama, LLC?' (2026-11-20): TrueCore Acquisitions, LLC added as manager on March 15, 2023 (Alabama Secretary of State, entity 000-440-552 (Brighter Path Alabama, LLC, formerly Sequel TSI of Alabama, LLC): \"03/15/2023 Director/Manager/Organizer Activity *Added TRUECORE ACQUISITIONS, LLC\", https://arc-sos.state.al.us/cgi/corpdetail.mbr/detail?corp=000440552); current owner set to it. Identification copied from production 2026-11-19 (with this session's earlier entry).",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Courtland",
+        "nameKey": "brighter path courtland",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Courtland",
+          "Three Springs of Courtland"
+        ],
+        "otherNames": [],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [
+          "TrueCore Acquisitions, LLC"
+        ],
+        "pastOperators": [
+          "Three Springs, Inc. (1990-2009)",
+          "Sequel TSI (2010-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [
+          "Sequel TSI",
+          "Vivant Behavioral Health"
+        ],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      }
+    }
+  },
+  {
+    "id": 13640,
+    "unique_name": "Brighter Path Montgomery",
+    "version": 3,
+    "note": "Research task 'When did TrueCore Acquisitions, LLC become manager and member of Brighter Path Alabama, LLC?' (2026-11-20): TrueCore Acquisitions, LLC added as manager on March 15, 2023 (Alabama Secretary of State, entity 000-440-552 (Brighter Path Alabama, LLC, formerly Sequel TSI of Alabama, LLC): \"03/15/2023 Director/Manager/Organizer Activity *Added TRUECORE ACQUISITIONS, LLC\", https://arc-sos.state.al.us/cgi/corpdetail.mbr/detail?corp=000440552); current owner set to it. Identification copied from production 2026-11-19 (with this session's earlier entry).",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Montgomery",
+        "nameKey": "brighter path montgomery",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Montgomery"
+        ],
+        "otherNames": [
+          "Brighter Path Montgomery"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [
+          "TrueCore Acquisitions, LLC"
+        ],
+        "pastOperators": [
+          "Sequel TSI (2013-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      }
+    }
+  },
+  {
+    "id": 13641,
+    "unique_name": "Brighter Path Tuskegee",
+    "version": 5,
+    "note": "Research task 'When did TrueCore Acquisitions, LLC become manager and member of Brighter Path Alabama, LLC?' (2026-11-20): TrueCore Acquisitions, LLC added as manager on March 15, 2023 (Alabama Secretary of State, entity 000-440-552 (Brighter Path Alabama, LLC, formerly Sequel TSI of Alabama, LLC): \"03/15/2023 Director/Manager/Organizer Activity *Added TRUECORE ACQUISITIONS, LLC\", https://arc-sos.state.al.us/cgi/corpdetail.mbr/detail?corp=000440552); current owner set to it. Identification copied from production 2026-11-19 (with this session's earlier entry).",
+    "facility": {
+      "identification": {
+        "name": "Brighter Path Tuskegee",
+        "nameKey": "brighter path tuskegee",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "",
+        "pastNames": [
+          "Sequel TSI Tuskegee",
+          "Three Springs School of Tuskegee",
+          "Sequel TSI of Tuskegee"
+        ],
+        "otherNames": [
+          "Tuskegee Secure Program",
+          "Sequel TSI Tuskegee"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [
+          "TrueCore Acquisitions, LLC"
+        ],
+        "pastOperators": [
+          "Three Springs Inc. (1998-2009)",
+          "Sequel TSI (2009-2021)",
+          "Vivant Behavioral Health (2021-2023)",
+          "Brighter Path Alabama, LLC (since 2023)"
+        ],
+        "knownReferrers": [],
+        "otherOperators": [
+          "Sequel TSI",
+          "Vivant Behavioral Health"
+        ],
+        "currentOperator": "Brighter Path Alabama, LLC"
+      }
+    }
+  },
+  {
+    "id": 13209,
+    "unique_name": "Starr Commonwealth",
+    "version": 3,
+    "note": "Research tasks on Starr Albion Prep (2026-11-20): the January 1, 2016 I-94 death (Fox 17), the March 2019 restraint citations and the June 22, 2020 provisional licence (WWMT). criticalIncidents was empty in production 2026-11-19.",
+    "facility": {
+      "criticalIncidents": {
+        "customIncidents": [
+          "2016-01: Death: A 17-year-old Starr Albion Prep student was struck and killed by a vehicle on I-94 in Sheridan Township early on January 1, 2016; Starr's statement called him \"one of our Starr Albion Prep students\". (Fox 17 WXMI, 2016-01-02, https://www.fox17online.com/2016/01/02/i-love-him-with-all-my-heart-a-mother-mourns-the-loss-of-son-killed-on-i-94)",
+          "2019-03: License action: Michigan's health department cited Starr Albion Prep for four instances of a staff member improperly restraining students. (WWMT, 2020, https://wwmt.com/news/local/albion)",
+          "2020-06: License action: On June 22, 2020 the state placed Starr Albion Prep on a provisional licence for multiple licensing violations; Starr ended its residential programs and its ties to Sequel in July 2020. (WWMT, 2020, https://wwmt.com/news/local/albion; Battle Creek Enquirer, 2020-07-09, https://www.battlecreekenquirer.com/story/news/2020/07/09/starr-commonwealth-cuts-ties-sequel-youth-family-services-ends-residential-programs/5383756002/)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 12163,
+    "unique_name": "Mingus Mountain Academy",
+    "version": 2,
+    "note": "Research tasks on Mingus's 2024 penalties (2026-11-20): May 2024 $4,700 fine (ABC15) and the December 3, 2024 $500 enforcement agreement (ADHS). criticalIncidents copied from production 2026-11-19.",
+    "facility": {
+      "criticalIncidents": {
+        "customIncidents": [
+          "Reported 2025-12: Abuse: Survivors report sexual abuse, verbal abuse and violent physical restraints. (r/troubledteens wiki, page \"Mingus Mountain Academy\" (as of 2025-12-18))",
+          "2020-07: Arrest: On July 20, 2020 deputies were called after a student struck a staff member in the head with a rock; the student was booked into juvenile detention. (r/troubledteens wiki, page \"Mingus Mountain Academy\" (as of 2025-12-18))",
+          "2020-07: License action: Arizona forced Mingus Mountain Academy to temporarily halt admissions in July 2020 citing significant health and safety risks. (HEAL, staff list for the Three Springs \"Family\" of Programs/Services (archived 2022-01-27))",
+          "2024-05: License action: Arizona regulators fined Mingus Mountain $4,700 for what they called multiple repeat deficiencies. (ABC15, 2025-01-14, https://www.abc15.com/news/local-news/investigations/i-just-felt-trapped-allegations-of-abuse-at-arizona-facility-for-troubled-teens)",
+          "2024-12: License action: Mingus Mountain Estate Residential Center (licence BH1487) signed an enforcement agreement with the Arizona Department of Health Services on December 3, 2024, paying a $500 civil penalty under rule R9-10-716.A.7.a (a resident having access to materials or activities that may threaten their health or safety). (ADHS enforcement agreement, event 163K11, 2024-12-03)"
+        ]
+      }
+    }
+  },
+  {
+    "id": 100076,
+    "unique_name": "Sequel TSI Madison (AL)",
+    "version": 3,
+    "note": "Research task on the Madison campus (2026-11-20): the city bought it in 2020 and approved the community-center bid in December 2022. operatingPeriod copied from production 2026-11-19.",
+    "facility": {
+      "operatingPeriod": {
+        "notes": [
+          "Three Springs opened the School of Madison in 1999 as a medium-risk secure program for boys placed by Alabama DHR and DYS; Sequel ran it as Sequel TSI Madison from 2010 until it closed in 2019 (Three Springs program page, 2007; owner's research sheet). (Owner's research sheet Sequel/TSI/YSI/Vivant, 2025: https://docs.google.com/spreadsheets/d/1Rl24OnG5-str4pWlhssQ-bYZ9DJyoSZFBU-VU2zHOLU/edit)",
+          "After the program closed, the City of Madison bought the former Three Springs complex in 2020, and in December 2022 the city council approved Lee Builders' $11,205,460 bid to turn it into a community center (The Madison Record, 2022-12-06: \"Before the city bought the complex in 2020\"; https://themadisonrecord.com/2022/12/06/city-council-green-lights-11-million-bid-to-turn-old-three-springs-complex-into-community-center)."
+        ],
+        "status": "Closed",
+        "endYear": 2019,
+        "startYear": 1999,
+        "yearsOfOperation": ""
+      }
+    }
   }
 ]
