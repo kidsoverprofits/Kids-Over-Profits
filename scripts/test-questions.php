@@ -98,7 +98,20 @@ check('one other answer stops it', kop_q_agreed(kop_q_tally(array($row(1, 'a', '
 check('one person answering three times counts once', kop_q_agreed(kop_q_tally(array($row(1, 'a', '1998'), $row(2, 'a', '1998'), $row(3, 'a', '1998')))) === null);
 $t = kop_q_tally(array($row(1, 'a', '1996'), $row(2, 'a', '1998'), $row(3, 'b', '1998'), $row(4, 'c', '1998')));
 check('a person\'s latest answer replaces their earlier one', count($t) === 1 && $t[0]['count'] === 3 && kop_q_agreed($t) !== null);
-check('a No to a practice never settles on its own', kop_q_is_no('f7.practice.hasLevelSystem', 'no') && kop_q_is_no('f7.staff.ab12cd34', 'no'));
+check('a No to a practice is a practice No', kop_q_is_no('f7.practice.hasLevelSystem', 'no') && kop_q_is_no('f7.staff.ab12cd34', 'no'));
+$pt = function (array $answers) {
+    $rows = array();
+    foreach ($answers as $i => $a) $rows[] = array('id' => $i + 1, 'who' => 'p' . $i, 'answer_key' => $a, 'answer' => ucfirst($a), 'value' => '""', 'how' => '', 'source_url' => '', 'note' => '');
+    return kop_q_tally($rows);
+};
+$pk = 'f7.practice.hasLevelSystem';
+check('one Yes to a practice settles it', (kop_q_agreed($pt(array('yes')), $pk)['key'] ?? '') === 'yes');
+check('one Yes to a staff member settles it', (kop_q_agreed($pt(array('yes')), 'f7.staff.ab12cd34')['key'] ?? '') === 'yes');
+check('a Yes against a No does not settle', kop_q_agreed($pt(array('yes', 'no')), $pk) === null);
+check('two Nos to a practice are not enough', kop_q_agreed($pt(array('no', 'no')), $pk) === null);
+check('three Nos to a practice settle it', (kop_q_agreed($pt(array('no', 'no', 'no')), $pk)['key'] ?? '') === 'no');
+check('three Nos and a Yes do not settle', kop_q_agreed($pt(array('no', 'no', 'no', 'yes')), $pk) === null);
+check('one yes outside practices and staff is not enough', kop_q_agreed($pt(array('yes')), 'o3.status') === null);
 check('a Yes to a practice can settle', !kop_q_is_no('f7.practice.hasLevelSystem', 'yes'));
 check('"No, it closed" is not a practice No', !kop_q_is_no('f7.status', 'Closed') && !kop_q_is_no('o3.status', 'no'));
 

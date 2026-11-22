@@ -27,11 +27,12 @@
  * another, the question settles on its own through the Review inbox's own
  * action path (Review inbox > Answers to our questions, 'settle'), so it is
  * in Recently done with Undo. Staff years and rules never settle on their
- * own: they wait for the owner. Neither does a "No" to a practice or a staff
- * member (owner, 2026-10-25: a practice can start or stop over time, and one
- * person not seeing it is not proof): only-no answers are collected out of
- * the owner's way and wait for review once KOP_Q_AGREE people say no
- * (kop_q_is_no()). What settling writes:
+ * own: they wait for the owner. Practices and staff members (owner,
+ * 2026-11-22, kop_q_needed()): one Yes with nobody saying otherwise goes
+ * through; a No needs KOP_Q_AGREE people saying no and nobody saying
+ * otherwise (a practice can start or stop over time, and one person not
+ * seeing it is not proof), and is collected out of the owner's way until
+ * then (kop_q_is_no()). What settling writes:
  *   facility fields  a row in the Woodbury Facts table (extra.via
  *                    'questions', its source "Answers on the questions
  *                    page"), approved through kop_wbf_apply() straight onto
@@ -298,18 +299,36 @@ function kop_q_tally(array $rows) {
     return $groups;
 }
 
-/** The answer a clear majority gave (KOP_Q_AGREE people or more, nobody saying otherwise), or null. */
-function kop_q_agreed(array $tally) {
+/**
+ * The answer that settles the question on its own, or null: nobody saying otherwise, and enough people
+ * (kop_q_needed()) giving it.
+ */
+function kop_q_agreed(array $tally, $qkey = '') {
     if (count($tally) !== 1) return null;
-    return $tally[0]['count'] >= KOP_Q_AGREE ? $tally[0] : null;
+    return $tally[0]['count'] >= kop_q_needed($qkey, $tally[0]['key']) ? $tally[0] : null;
 }
 
 /**
- * Is this answer a "No" to a practice or a staff member? It never settles on
- * its own; the Review inbox collects it until KOP_Q_AGREE people say no.
+ * How many people must give this answer, with nobody saying otherwise, before it goes through
+ * (owner, 2026-11-22): a Yes to a practice or a staff member after one; a No to one, and every
+ * other answer, after KOP_Q_AGREE.
+ */
+function kop_q_needed($qkey, $answer_key) {
+    if ((string) $answer_key === 'yes' && kop_q_is_yes_no($qkey)) return 1;
+    return KOP_Q_AGREE;
+}
+
+/** Is this a yes/no question about a practice or a staff member? */
+function kop_q_is_yes_no($qkey) {
+    return (bool) preg_match('/^f\d+\.(?:practice|staff)\./', (string) $qkey);
+}
+
+/**
+ * Is this answer a "No" to a practice or a staff member? It goes through only once KOP_Q_AGREE people
+ * say no and nobody says otherwise; until then the Review inbox collects it out of Waiting.
  */
 function kop_q_is_no($qkey, $answer_key) {
-    return (string) $answer_key === 'no' && (bool) preg_match('/^f\d+\.(?:practice|staff)\./', (string) $qkey);
+    return (string) $answer_key === 'no' && kop_q_is_yes_no($qkey);
 }
 
 /* ---- Questions ---------------------------------------------------------- */
@@ -783,8 +802,7 @@ function kop_q_answer(array $p) {
     if (function_exists('kop_rinbox_flush_counts')) kop_rinbox_flush_counts();
 
     $rows = kop_q_rows($key);
-    $agreed = $q['auto'] && !kop_q_hedged_rows($rows) ? kop_q_agreed(kop_q_tally($rows)) : null;
-    if ($agreed && kop_q_is_no($key, $agreed['key'])) $agreed = null;
+    $agreed = $q['auto'] && !kop_q_hedged_rows($rows) ? kop_q_agreed(kop_q_tally($rows), $key) : null;
     if ($agreed && function_exists('kop_rinbox_apply_action')) {
         $GLOBALS['kop_rinbox_reviewer_as'] = KOP_Q_BY;
         try {

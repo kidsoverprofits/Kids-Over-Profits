@@ -6,10 +6,11 @@
  * links and notes. A clear majority settles a question on its own (through
  * 'settle' here, as reviewer "questions page"); the rest wait here: staff
  * years always, anything people disagree on, and an answer whose note says
- * they are not sure (kop_q_hedged()). A "No" to a practice or a staff member
- * never settles on its own (kop_q_is_no()): while nobody says otherwise and
- * fewer than KOP_Q_AGREE people say no, the question is under Collecting
- * no answers, out of Waiting; at KOP_Q_AGREE it waits here, flagged.
+ * they are not sure (kop_q_hedged()). A Yes to a practice or a staff member
+ * goes through after one person (kop_q_needed()); a No to one goes through
+ * once KOP_Q_AGREE people say no with nobody saying otherwise, and until then
+ * is under Collecting no answers, out of Waiting (kop_q_is_no()). Nos that
+ * reached KOP_Q_AGREE but could not go through (a hedged note) wait here, flagged.
  * Remembered rules are not here: each
  * answer is read into lines on Review inbox > What readers remember
  * (inc/review-inbox/reader-accounts.php), and so is every note.
@@ -34,9 +35,9 @@ kop_rinbox_register('questions', function () {
         'group'       => 'Sent in by readers',
         'help'        => 'What readers answered on the questions page (/questions/): when a program opened or closed, its town, ages, practices, staff, rules, '
             . 'company facts, and which source is right where sources disagree. When ' . KOP_Q_AGREE . ' different people give the same answer and nobody says otherwise, '
-            . 'it goes through on its own and is listed under Settled with Undo. Staff years always wait here, and so does an answer whose note says they are not sure. '
-            . 'A No to a practice or a staff member never goes through on its own (practices change over time): it is collected under Collecting no answers '
-            . 'and comes to Waiting, flagged, once ' . KOP_Q_AGREE . ' people say no. '
+            . 'it goes through on its own and is listed under Settled with Undo. A Yes to a practice or a staff member goes through after one person, '
+            . 'and a No to one after ' . KOP_Q_AGREE . ' people say no (practices change over time): until then it is collected under Collecting no answers. '
+            . 'Staff years always wait here, and so does an answer whose note says they are not sure. '
             . 'Remembered rules and the notes are read into lines under What readers remember. '
             . 'Use this answer writes it to the record (a program\'s facts wait for its next write-up); Dismiss stops asking.',
         'views'       => array('waiting' => 'Waiting', 'collecting' => 'Collecting no answers', 'settled' => 'Settled', 'dismissed' => 'Dismissed'),
@@ -123,8 +124,8 @@ function kop_rinbox_q_item($key) {
     if ($status === 'waiting') {
         if ($nos) {
             $details[] = array('label' => $nos >= KOP_Q_AGREE ? 'Flagged: ' . $nos . ' people say no' : 'Collecting: ' . $nos . ' of ' . KOP_Q_AGREE . ' say no',
-                'value' => 'A No never goes through on its own: a practice can start or stop over time, and someone not seeing it does not mean it never happened. '
-                    . 'Using No writes nothing and stops the question; Dismiss also stops it.');
+                'value' => 'A No goes through on its own only once ' . KOP_Q_AGREE . ' people say no and nobody says otherwise: a practice can start or stop over time, '
+                    . 'and someone not seeing it does not mean it never happened. Using No writes nothing and stops the question; Dismiss also stops it.');
         }
         $hedged = kop_q_hedged_rows($rows);
         if ($hedged) {
