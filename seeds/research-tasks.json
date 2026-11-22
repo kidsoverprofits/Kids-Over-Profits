@@ -10434,7 +10434,28 @@
      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "True: the 2017 SEC proxy says Sequel was formed in 2006 as an Iowa LLC (to roll up entities formed from 1999), and that it would convert to a Delaware LLC before the merger closed; the Delaware step was planned, and I did not confirm it happened. Confidence: high. Still open: Wikipedia's infobox gives 1992 (Clarinda, Iowa), which conflicts with its own 1999 text and the SEC filing. The GPAC merger was later abandoned, so the Delaware conversion may never have happened; Iowa and Delaware SOS records were not checked.",
+    "claims": [
+     {
+      "claim": "Formed 2006 as Iowa LLC",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "Sequel was formed as an Iowa limited liability company in 2006 to consolidate ownership in a roll-up transaction of various Sequel entities formed starting in 1999."
+     },
+     {
+      "claim": "Planned Delaware conversion",
+      "url": "https://www.sec.gov/Archives/edgar/data/1643953/000121390017000665/prem14a0117_globalpartner.htm",
+      "quote": "Prior to the consummation of the Business Combination, Sequel will convert into a Delaware limited liability company."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "True: the 2017 SEC proxy says Sequel Youth and Family Services, LLC was formed as an Iowa LLC in 2006 and was to convert to a Delaware LLC before the merger (which did not close). No record change.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-buying-camelot-system-of-care-in-2011-bring",
@@ -10455,7 +10476,23 @@
      "url": "https://www.llcp.com/levine-leichtman-capital-partners-and-sequel-youth-and-family-services-anno/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Partly: the LLCP release says Sequel was 'now operating 31 programs in 16 states', so it is 31 programs, not facilities. Confidence: medium. Still open: Only the press release's sentence was retrieved by a page summarizer; I did not confirm the surrounding context (whether it includes Camelot's programs, and the autism care part).",
+    "claims": [
+     {
+      "claim": "31 programs in 16 states after Camelot deal",
+      "url": "https://www.llcp.com/levine-leichtman-capital-partners-and-sequel-youth-and-family-services-anno/",
+      "quote": "now operating 31 programs in 16 states that serve a broad spectrum of clients."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Partly: LLCP's release says Sequel was \"now operating 31 programs in 16 states\" (programs, not facilities). Write-ups say programs. No record change.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-sequel-and-later-vivant-receive-an-average-o",
@@ -10469,7 +10506,19 @@
     20,
     26
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Not verified: the $41.5M/year Florida average appears in none of the APM, NBC or Wikipedia pages I read, and FACTS wasn't reachable by search. Confidence: low. Still open: Nothing found either way. Waits: Florida's FACTS contract system (facts.fldfs.com) needs a browser search for Sequel/Vivant contract totals.",
+    "claims": [
+     {
+      "claim": "APM 2020 states Sequel still operated eight facilities in Florida (context only, no payment figure)",
+      "url": "https://www.apmreports.org/story/2020/09/28/for-profit-sequel-facilities-children-abused",
+      "quote": "Sequel still operates eight facilities in Florida"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-sequel-run-as-many-as-35-residential-treatme",
@@ -10482,7 +10531,28 @@
    "companies": [
     20
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "True for 2017: APM Reports says Sequel operated 35 residential treatment centers in 16 states in 2017; APM's 2020 stories give 36 centers (early 2019) and 29 in 15 states (late 2020). Confidence: medium. Still open: APM's own 36 figure for early 2019 exceeds 35, so 35 is the 2017 count, not necessarily the peak.",
+    "claims": [
+     {
+      "claim": "35 RTCs in 16 states in 2017",
+      "url": "https://apmreports.org/story/2022/04/26/sequel-closes-sells-youth-treatment-centers",
+      "quote": "In 2017 Sequel operated 35 residential treatment centers in 16 states."
+     },
+     {
+      "claim": "2019 count 36",
+      "url": "https://www.apmreports.org/episode/2020/11/22/the-bad-place",
+      "quote": "Since the beginning of 2019, Sequel has shut down eight of its 36 residential treatment centers."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Partly: 35 centers in 16 states is APM's 2017 count; APM gives 36 in early 2019, so 35 was not the peak. Write-ups say \"35 in 2017\". No record change.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:were-the-nonprofit-boards-overseeing-sequel-prog",
@@ -10502,7 +10572,29 @@
      "url": "https://www.apmreports.org/story/2020/09/28/how-sequel-wins-california-business",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Partly true as worded: APM found it for the boards of Sequel's Wyoming and Utah facilities (many members had ties to the company), not for all Sequel nonprofit boards. Confidence: high. Still open: Quotes via WebFetch summarizer, not read verbatim from the full page; verify wording against the archived copy. Waits: APM quotes came through a page summarizer; read the article verbatim before settling.",
+    "claims": [
+     {
+      "claim": "APM scope is Wyoming and Utah boards",
+      "url": "https://www.apmreports.org/story/2020/09/28/how-sequel-wins-california-business",
+      "quote": "many of the members of the boards overseeing Sequel's facilities in Wyoming and Utah have ties to the company"
+     },
+     {
+      "claim": "Ripley personally recruited a board member",
+      "url": "https://www.apmreports.org/story/2020/09/28/how-sequel-wins-california-business",
+      "quote": "Sequel founder Jay Ripley personally asked him to serve on the Wyoming board."
+     },
+     {
+      "claim": "Wyoming board members Joel Smith and Vernon Kalkman were ex-YSI executives",
+      "url": "https://www.apmreports.org/story/2020/09/28/how-sequel-wins-california-business",
+      "quote": "had served as executives at Youth Services International, a forerunner to Sequel, just as Ripley had."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-the-city-of-madison-alabama-buy-the-former-t",
@@ -10538,7 +10630,33 @@
      "url": "https://web.archive.org/web/20020820163014/http://www.threesprings.com/our.programs/secure/programs/som.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "True. The city bought the Three Springs complex in 2020 and, at a special council session on Monday night (Dec 5, 2022), approved an $11,205,460 bid from Lee Builders to renovate it as a community center; it opened Jan 9, 2025. Confidence: high. Still open: Outlet is The Madison Record (the PDF did not show it). Purchase price and exact closing date not found; Dec 5 date is inferred from 'Monday night' in a Dec 6 article (city minutes reportedly list Resolution 2022-321-R, Dec 5, not read directly).",
+    "claims": [
+     {
+      "claim": "Council approved $11,205,460 Lee Builders bid at a special session",
+      "url": "https://themadisonrecord.com/2022/12/06/city-council-green-lights-11-million-bid-to-turn-old-three-springs-complex-into-community-center",
+      "quote": "a $11,205,460 bid from Lee Builders to renovate the current facility"
+     },
+     {
+      "claim": "City bought the complex in 2020",
+      "url": "https://themadisonrecord.com/2022/12/06/city-council-green-lights-11-million-bid-to-turn-old-three-springs-complex-into-community-center",
+      "quote": "Before the city bought the complex in 2020"
+     },
+     {
+      "claim": "Council approved pursuing the purchase in Feb 2020 (price not yet set)",
+      "url": "https://themadisonrecord.com/2020/02/13/madison-city-council-approves-purchasing-three-springs-facility-for-community-center",
+      "quote": "the approval gives the city the go-ahead to negotiate a purchase price and complete the agreement"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Added to Sequel TSI Madison (100076) notes, citing The Madison Record (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc).",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-a-2019-oregon-list-show-28-oregon-youth-plac",
@@ -10622,7 +10740,33 @@
      "url": "https://web.archive.org/web/20170606035743/http://sequelyouthservices.com/html/staffsecure-redrockcanyon.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "False. The list shows 5 Oregon youth at Red Rock Canyon School; the 28 is Provo Canyon School (UHS). The 86 total is correct. The list is dated by file metadata to April 11, 2019. Confidence: high. Still open: The sheet has no printed date; PDF creation date 2019-04-11. A state memo of Apr 30, 2019 says 24 youth at Red Rock (different count date). Layout is a text extraction, row alignment of the 28 to Provo is clear.",
+    "claims": [
+     {
+      "claim": "Red Rock Canyon School row shows 5 Oregon youth",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Out-of-State-Oregon-Youth-Placements.pdf",
+      "quote": "Red Rock Canyon School Utah Sequel $330 JCAHO Accredited 5"
+     },
+     {
+      "claim": "28 Oregon youth are at Provo Canyon School",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Out-of-State-Oregon-Youth-Placements.pdf",
+      "quote": "Provo Canyon School Utah UHS $425 JCAHO Accredited Therapy Assoc 28"
+     },
+     {
+      "claim": "Total column 86",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Out-of-State-Oregon-Youth-Placements.pdf",
+      "quote": "Therapy Assoc 86"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "False as stated: the April 2019 list shows 5 Oregon youth at Red Rock Canyon School; the 28 were at Provo Canyon School; 86 total is right. No KOP record states the 28, so nothing to change; any write-up uses 5.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:when-did-truecore-acquisitions-llc-become-manage",
@@ -10641,7 +10785,28 @@
      "url": "https://arc-sos.state.al.us/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The Alabama SOS entity page shows 'Added TRUECORE ACQUISITIONS, LLC' on 03/15/2023, with a 03/15/2023 Articles of Amendment (2 pgs); the page gives no separate date for membership. Confidence: high. Still open: KOP's scanned PDF reads garbled dates ('03/15/20023', Articles of Amendment '08/15/2023'); the live page via summarizer says 03/15/2023 for both; OCR 08/15 likely a misread.",
+    "claims": [
+     {
+      "claim": "Manager/member activity dated 03/15/2023",
+      "url": "https://arc-sos.state.al.us/cgi/corpdetail.mbr/detail?corp=000440552",
+      "quote": "03/15/2023 | Director/Manager/Organizer Activity | \"Added TRUECORE ACQUISITIONS, LLC\""
+     },
+     {
+      "claim": "Name changed from Sequel TSI of Alabama, LLC on 03/29/2022",
+      "url": "https://arc-sos.state.al.us/cgi/corpdetail.mbr/detail?corp=000440552",
+      "quote": "03/29/2022 | Legal Name Changed | From \"Sequel TSI of Alabama, LLC\""
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Brighter Path Courtland, Montgomery and Tuskegee now give TrueCore Acquisitions, LLC as current owner, citing the Alabama SOS entry of 2023-03-15 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc). KOP's scanned PDF dates (\"03/15/20023\", \"08/15/2023\") were misreads.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:was-shaun-mohon-vivant-behavioral-healthcare-s-c",
@@ -10705,7 +10870,24 @@
      "url": "https://web.archive.org/web/20131126081212/http://sequelyouthservices.com/html/staffsecure-mingus.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "True as his own LinkedIn profile states it (KOP's copy, attachment 11464); no independent source found. Confidence: medium. Waits: an ADHS licence record naming him would confirm.",
+    "claims": [
+     {
+      "claim": "His LinkedIn profile (KOP copy) lists Vivant Behavioral Healthcare COO July 2020-June 2023",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Shaun-Mohon-Mingus-Mountain-ED.pdf",
+      "quote": "Vivant Behavioral Healthcare Chief Operating Officer July 2020 - June 2023 (3 years)"
+     },
+     {
+      "claim": "and Executive Director of Mingus Mountain Youth Treatment Center from June 2023",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Shaun-Mohon-Mingus-Mountain-ED.pdf",
+      "quote": "Mingus Mountain Youth Treatment Center Executive Director June 2023 - Present"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-jay-ripley-say-glen-mills-school-in-pennsylv",
@@ -10718,7 +10900,24 @@
    "companies": [
     20
    ],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "Partly: Reveal's 'The Bad Place' has Ripley visiting an unnamed Pennsylvania reform school and seeing its books; a search summary (not verified on the page) named Glen Mills and a 2015 University of Baltimore talk, and Glen Mills was shut by Pennsylvania in 2019. Confidence: low. Still open: The Glen Mills naming reached me only through search-result summaries (the likely original is the SF Chronicle's 2020 California Sequel project); I couldn't open that page, so no direct quote exists. Not checked: whether Ripley called it 'inspiration' or only an eye-opener on profit. Waits: the SF Chronicle 2020 Sequel project page that names Glen Mills could not be opened.",
+    "claims": [
+     {
+      "claim": "Ripley and mentor visited a Pennsylvania reform school and saw its ledger (school not named on the page)",
+      "url": "https://revealnews.org/podcast/the-bad-place/",
+      "quote": "So they visited one in Pennsylvania to see how it worked."
+     },
+     {
+      "claim": "Ripley's 2015 University of Baltimore remarks (no Glen Mills mention)",
+      "url": "https://www.nbcnews.com/news/us-news/profitable-death-trap-sequel-youth-facilities-raked-millions-while-accused-n1251319",
+      "quote": "You can make money in this business if you control staffing"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:was-michael-e-henderson-executive-director-of-ca",
@@ -10840,7 +11039,24 @@
      "url": "https://kidsoverprofits.org/operator/sequel-tsi/",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Torii CEO Michael Henderson is confirmed (2021 closure letter, 10TV); that the same person later became Casa Grande Academy ED rests only on KOP's notes/LinkedIn and a document list naming 'Michael Henderson - Executive Director of Casa Grande Academy'; not independently confirmed. Confidence: medium. Still open: KVOA 2024 article names no director; web searches found no independent page tying Henderson to Casa Grande. Not checked: ADHS azcarecheck, Ohio SOS. Waits: Casa Grande ED rests on LinkedIn only; check ADHS licensing.",
+    "claims": [
+     {
+      "claim": "Michael Henderson was CEO of Torii Behavioral Health (formerly Sequel Pomegranate) in 2021",
+      "url": "https://kidsoverprofits.org/closure-of-embattled-teen-psychiatric-facility-sequel-pomegranate-provides-relief-to-those-with-history-there-10tv-2021-09-17-wayback-copy/",
+      "quote": "In its letter, Torii CEO Michael Henderson told OHMAS"
+     },
+     {
+      "claim": "KOP's research doc lists Henderson as Casa Grande ED, previously Torii CEO",
+      "url": "https://docs.google.com/document/d/1bWbz0WVQehFcF7lefY4gpkXZzEm-_AnskUqHE8N98-E",
+      "quote": "Executive Director: Michael E. Henderson - Previously: CEO Sequel Youth and Family Services - Torii Behavioral Health"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:was-the-17-year-old-killed-by-a-vehicle-on-i-94",
@@ -10923,7 +11139,23 @@
      "url": "https://web.archive.org/web/2*/http://www.montcalmschools.org/montcalm-schools-young-adults",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "True. Fox 17 reports a 17-year-old Starr Commonwealth resident was struck and killed on I-94 near 26 Mile Rd in Sheridan Township, and Starr's statement calls him one of its Starr Albion Prep students. Date of Jan 1, 2016 (a Friday morning) fits the Jan 2 article. Confidence: high. Still open: Nothing. Boy is named in the article; not named here.",
+    "claims": [
+     {
+      "claim": "Starr statement calls him a Starr Albion Prep student",
+      "url": "https://www.fox17online.com/2016/01/02/i-love-him-with-all-my-heart-a-mother-mourns-the-loss-of-son-killed-on-i-94",
+      "quote": "It is with great sadness that we report the tragic death of one of our Starr Albion Prep students early Friday morning."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Added to Starr Commonwealth (13209) incidents, citing Fox 17 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc).",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-the-2024-sexual-abuse-case-against-a-16-year",
@@ -10980,7 +11212,24 @@
      "url": "https://www.kcci.com/article/woodward-police-chief-worries-juvenile-sex-abuse-case-wont-go-to-trial/64526916",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Not settled. KCCI (updated 2025-04-19) says the 16-year-old was charged as an adult but no Trial Information had been filed and the police chief expected charges to be dropped; no later report of a trial, dismissal or plea was found. Confidence: low. Still open: Outcome unknown; searched web for dismissal/plea/trial news and Boone County Attorney pages. Incident was 'back in November' (2024 per card). Check Iowa Courts Online (Boone County) docket or ask KCCI/Boone County Attorney. Waits: no report after April 2025; check Iowa Courts Online (juvenile records may be closed).",
+    "claims": [
+     {
+      "claim": "No Trial Information filed as of Apr 2025",
+      "url": "https://www.kcci.com/article/woodward-police-chief-worries-juvenile-sex-abuse-case-wont-go-to-trial/64526916",
+      "quote": "a Trial Information has not yet been filed"
+     },
+     {
+      "claim": "Chief says prosecutor said he would not prosecute",
+      "url": "https://www.kcci.com/article/woodward-police-chief-worries-juvenile-sex-abuse-case-wont-go-to-trial/64526916",
+      "quote": "wasn't going to prosecute"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:what-did-mingus-mountain-estate-residential-cent",
@@ -11044,7 +11293,28 @@
      "url": "https://web.archive.org/web/20131126081212/http://sequelyouthservices.com/html/staffsecure-mingus.html",
      "kind": "website"
     }
-   ]
+   ],
+   "settled": {
+    "text": "Added to Mingus Mountain Academy (12163) incidents: 00 civil penalty under R9-10-716.A.7.a, licence BH1487 (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc).",
+    "at": "2026-11-22"
+   },
+   "answer": {
+    "text": "The December 3, 2024 agreement (ADHS event 163K11, licence BH1487, Mingus Mountain Estate Residential Center's Emily House) is a $500 civil penalty for one R9-10-716.A.7.a deficiency; the underlying incident is not described. KOP's copy (attachment 12723) is a scan without a text layer; the quotes were read from the owner's Drive original of the same file. Confidence: medium.",
+    "claims": [
+     {
+      "claim": "A single $500 civil penalty, assessed for health and safety",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Mingus-Emily-House-Enforcement-Agreement-12-03-24.pdf",
+      "quote": "Penalty Assessment Health and safety Penalty Amount 500 Total $500"
+     },
+     {
+      "claim": "Under rule R9-10-716.A.7.a (a resident's access to materials or activities that may threaten health or safety)",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Mingus-Emily-House-Enforcement-Agreement-12-03-24.pdf",
+      "quote": "A resident does not: a. Use or have access to any materials, furnishings, or equipment or participate in any activity or treatment that may present a threat to the resident's health or safety"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:was-mingus-mountain-academy-in-arizona-fined-4-7",
@@ -11116,7 +11386,23 @@
      "url": "https://www.abc15.com/news/local-news/investigations/i-just-felt-trapped-allegations-of-abuse-at-arizona-facility-for-troubled-teens",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Yes as to the $4,700 fine for multiple repeat deficiencies; ABC15 (Jan 14, 2025) says it was levied 'last May', i.e. May 2024. The fetched summary tied an unlicensed clinical director (not licensed in Arizona) to the deficiencies, but I could not confirm the exact sentence linking it to the fine. Confidence: medium. Still open: The 'unlicensed clinical director' detail came via a page-summarizer, not a verbatim quote; re-read the article to quote the sentence. Year 2024 inferred from 'last May' in a Jan 2025 article.",
+    "claims": [
+     {
+      "claim": "Fine of $4,700 in May 2024 for repeat deficiencies",
+      "url": "https://www.abc15.com/news/local-news/investigations/i-just-felt-trapped-allegations-of-abuse-at-arizona-facility-for-troubled-teens",
+      "quote": "Just last May, regulators fined Mingus Mountain $4,700 for what they called multiple repeat deficiencies"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Added to Mingus Mountain Academy (12163) incidents: May 2024 ,700 fine for multiple repeat deficiencies (ABC15) (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc). The unlicensed clinical director detail is left out until read verbatim.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:did-michigan-cite-starr-albion-prep-for-four-imp",
@@ -11199,7 +11485,28 @@
      "url": "https://web.archive.org/web/2*/http://www.montcalmschools.org/montcalm-schools-young-adults",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Half right. MDHHS cited Starr Albion Prep in March 2019 for four instances of improper restraint, but the provisional licence came later, June 22, 2020 (multiple licensing violations), not in 2019. Confidence: medium. Still open: Could not open the Battle Creek Enquirer page (blocked); WWMT text read via fetch summary, date June 22, 2020 from the same summary. Did not see state licensing report itself.",
+    "claims": [
+     {
+      "claim": "March 2019 citation, four restraints",
+      "url": "https://wwmt.com/news/local/albion",
+      "quote": "In March 2019, MDHHS cited Starr Albion Prep for four instances of a staff member improperly restraining students."
+     },
+     {
+      "claim": "Provisional license placed June 22, 2020",
+      "url": "https://wwmt.com/news/local/albion",
+      "quote": "it took action to place Starr Albion Prep on a provisional license as a result of multiple licensing violations."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Partly true: the March 2019 citations are right, but the provisional licence came on June 22, 2020, not 2019. Both added to Starr Commonwealth (13209) incidents, citing WWMT (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc).",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:how-did-durham-v-capital-academy-new-jersey-2018",
@@ -11236,7 +11543,24 @@
      "url": "https://web.archive.org/web/2*/http://www.sequelyouthservices.com/html/autism-capital.html",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Partly true: Durham (Damina Durham) sued under NJ's whistleblower law (CEPA) for retaliatory termination after reporting improper conduct; on 2020-01-31 Judge Bumb DENIED the defendants' summary-judgment motion, so it was headed to trial. I could not reach the later docket (Justia/CourtListener blocked), so how it finally ended (settlement, dismissal or verdict) is unverified. Confidence: low. Still open: Final disposition not found. The card says she was a 'quality-assurance manager' and objected to 'unreported and falsely reported incidents'; the opinion says she reported 'prior incident reports' (May 17, 2017 email) but does not give her title in the part read. KOP lawsuits row 90 has status 'unknown' and cites a labor statute '29 U.S.C. 704', which is just the govinfo cause code (05:704 Labor Litigation); the real claim is state-law CEPA. Waits: the outcome after summary judgment was denied (2020-01-31) needs the docket; lawsuit 90 status is unknown.",
+    "claims": [
+     {
+      "claim": "Claim is CEPA retaliation: terminated for reporting unlawful and improper workplace conduct at Capital Academy; defendants say she was already in a planned reduction in force.",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-njd-1_18-cv-02045/pdf/USCOURTS-njd-1_18-cv-02045-0.pdf",
+      "quote": "Ms. Durham has brought a claim against Defendants for violation of New Jersey's Conscientious Employee Protection Act (\"CEPA\"), N.J.S.A. 34:19-1 et seq., asserting that Defendants' termination of her employment was unlawful retaliation against her for reporting unlawful and improper workplace conduct at Capital Academy."
+     },
+     {
+      "claim": "Summary judgment denied 2020-01-31 (Dkt 40).",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-njd-1_18-cv-02045/pdf/USCOURTS-njd-1_18-cv-02045-0.pdf",
+      "quote": "ORDERED that Defendants' Motion for Summary Judgment [Dkt. No. 29] is DENIED."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:why-was-acosta-v-sequel-of-new-mexico-2021-over",
@@ -11283,7 +11607,33 @@
      "url": "https://www.pacermonitor.com/public/case/41774266/Acosta_et_al_v_Sequel_of_New_Mexico,_LLC_et_al",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Neither: the federal case was REMANDED to state court (Bernalillo County Second Judicial District Court) on a joint stipulated motion, and the federal case closed by final judgment Nov 18, 2021. It was an employment-discrimination suit (not about abuse of youth); any settlement or later ending happened in state court and is not shown. Confidence: high. Still open: Docket page itself does not mention Bernalillo Academy; the link to that facility rests on KOP's record. State-court outcome unknown.",
+    "claims": [
+     {
+      "claim": "Remanded to state court on stipulation and joint motion, 2021-11-15.",
+      "url": "https://www.pacermonitor.com/public/case/41774266/Acosta_et_al_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "ORDER by District Judge James O. Browning granting 14 Stipulation and Joint Motion to Remand to State Court"
+     },
+     {
+      "claim": "Final judgment entered 2021-11-18; letter to state clerk re remand.",
+      "url": "https://www.pacermonitor.com/public/case/41774266/Acosta_et_al_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "2 pgs FINAL JUDGMENT by District Judge James O. Browning."
+     },
+     {
+      "claim": "Nature of suit 442 Civil Rights - Employment; plaintiffs Regina Acosta and Gabriela Nunez Vela; removed 2021-09-09 from Bernalillo County.",
+      "url": "https://www.pacermonitor.com/public/case/41774266/Acosta_et_al_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "442 Civil Rights - Employment (Petition for Removal - Employment Discrimination)"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "No change needed: lawsuit 210 already says the case was remanded to Bernalillo County court (stipulated motion 2021-11-15, federal final judgment 2021-11-18). Neither settlement nor dismissal in federal court.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:why-was-guerra-v-sequel-of-new-mexico-2022-over",
@@ -11325,7 +11675,33 @@
      "url": "https://web.archive.org/web/20121018055440/http://bernalilloacademy.org/",
      "kind": "website"
     }
-   ]
+   ],
+   "answer": {
+    "text": "A voluntary dismissal by the plaintiff: Sharon Guerra filed a notice of voluntary dismissal July 3, 2023 (after a Rule 41(b) warning), and the court entered an order of voluntary dismissal and final judgment July 5, 2023. It was a Fair Labor Standards Act (wage) case; no settlement is stated on the docket. Confidence: medium. Still open: A voluntary dismissal can follow a private settlement; the docket does not say. The 2023-06-07 clerk notice warned of dismissal under Rule 41(b) unless action by 2023-07-03. Whether with or without prejudice not stated.",
+    "claims": [
+     {
+      "claim": "Plaintiff's notice of voluntary dismissal, 2023-07-03.",
+      "url": "https://www.pacermonitor.com/public/case/43373683/Guerra_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "NOTICE of Voluntary Dismissal of Case by Sharon Guerra"
+     },
+     {
+      "claim": "Court order closing the case, 2023-07-05.",
+      "url": "https://www.pacermonitor.com/public/case/43373683/Guerra_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "ORDER OF VOLUNTARY DISMISSAL AND FINAL JUDGMENT by District Judge Matthew L. Garcia."
+     },
+     {
+      "claim": "Nature of suit.",
+      "url": "https://www.pacermonitor.com/public/case/43373683/Guerra_v_Sequel_of_New_Mexico,_LLC_et_al",
+      "quote": "710 Labor - Fair Labor Standards Act"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "No change needed: lawsuit 212 already says dismissed in July 2023; the docket shows a voluntary dismissal by the plaintiff (notice 2023-07-03, order 2023-07-05). Whether it settled is not on the docket.",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:what-was-mattie-v-sequel-youth-and-family-servic",
@@ -11345,7 +11721,38 @@
      "url": "https://www.pacermonitor.com/public/case/43043375/Mattie_v_Sequel_Youth_and_Family_Services,_LLC_et_al",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Mattie v. Sequel Youth and Family Services (M.D. Fla. 3:21-cv-01264) was an employment-discrimination suit by Ronald Lewis Mattie (nature of suit 442) against Sequel Youth and Family Services, SequelCare of Florida and Sequel TSI of Florida, which operated St. John's Youth Academy (Florida). It ended with dismissal with prejudice on April 10, 2023, but after a Notice of Settlement, so it settled. Confidence: medium. Still open: KOP lawsuits row 211 says 'closed the case without a settlement', which contradicts docket #35 (Notice of Settlement). Pacermonitor header lists termination Feb 3, 2023 (the stay date), not the dismissal date. Nature of discrimination (age/race/sex) not stated in the pages I could read; one aggregator mentions ADEA and Title VII. Only inferred St. John's, a Sequel program, from the d/b/a on the docket.",
+    "claims": [
+     {
+      "claim": "Nature of suit 442 Civil Rights - Employment; Judge Marcia Morales Howard; filed 2021-12-22.",
+      "url": "https://www.pacermonitor.com/public/case/43043375/Mattie_v_Sequel_Youth_and_Family_Services,_LLC_et_al",
+      "quote": "442 Civil Rights - Employment"
+     },
+     {
+      "claim": "Notice of settlement 2023-03-17.",
+      "url": "https://www.pacermonitor.com/public/case/43043375/Mattie_v_Sequel_Youth_and_Family_Services,_LLC_et_al",
+      "quote": "NOTICE of Settlement by Ronald Lewis Mattie."
+     },
+     {
+      "claim": "Dismissal with prejudice 2023-04-10 after stipulation filed 2023-04-07.",
+      "url": "https://www.pacermonitor.com/public/case/43043375/Mattie_v_Sequel_Youth_and_Family_Services,_LLC_et_al",
+      "quote": "ORDER dismissing case with prejudice. The Clerk of the Court is directed to close the file."
+     },
+     {
+      "claim": "Program: Sequel Youth and Family Services, LLC is d/b/a St. John's Youth Academy (docket #18 waiver of service).",
+      "url": "https://www.pacermonitor.com/public/case/43043375/Mattie_v_Sequel_Youth_and_Family_Services,_LLC_et_al",
+      "quote": "Sequel Youth and Family Services, LLC d/b/a St. John's Youth Academy"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   },
+   "settled": {
+    "text": "Lawsuit 211 corrected: status settled, outcome and summary rewritten from the docket (notice of settlement 2023-03-17, dismissed with prejudice 2023-04-10; employment case naming St. John's Youth Academy) (https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc).",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:how-did-calvin-v-sequel-of-oklahoma-2016-over-ro",
@@ -11382,7 +11789,29 @@
      "url": "https://cases.justia.com/federal/district-courts/oklahoma/okwdce/5:2016cv01415/98573/15/0.pdf",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "Calvin is an employee's case, not a resident case: Franklin Calvin sued his employer (Sequel of Oklahoma d/b/a Rose Rock Academy) under the ADA, FMLA, a workers' comp retaliation claim and a Burk tort; on 15 Feb 2017 Judge Cauthron granted Sequel's partial motion to dismiss (the workers' comp retaliation count, for lack of jurisdiction). Final disposition is not shown in anything reachable. Confidence: high on nature and the 2017 order; outcome unknown. Still open: Justia's public listing shows only Doc 15; no later entries, no termination date. Needs PACER/CourtListener docket. Waits: the final outcome needs the docket after the 2017-02-15 partial dismissal.",
+    "claims": [
+     {
+      "claim": "Claims",
+      "url": "https://cases.justia.com/federal/district-courts/oklahoma/okwdce/5:2016cv01415/98573/15/0.pdf",
+      "quote": "Plaintiff filed this case alleging that Defendant violated the Americans with Disabilities Act of 1990, as amended, 42 U.S.C. §§ 12101 et seq., the Family and Medical Leave Act, 29 U.S.C. §§ 2615 et seq., and asserting a state law workers' compensation retaliation claim, 85A Okla. Stat. § 7, and a Burk tort claim."
+     },
+     {
+      "claim": "Proper defendant is Rose Rock Academy's operator",
+      "url": "https://cases.justia.com/federal/district-courts/oklahoma/okwdce/5:2016cv01415/98573/15/0.pdf",
+      "quote": "The proper name for Defendant/employer is Sequel of Oklahoma, LLC d/b/a Rose Rock Academy."
+     },
+     {
+      "claim": "Order granting partial dismissal, filed Dec 12 2016, nature of suit Employment",
+      "url": "https://dockets.justia.com/docket/oklahoma/okwdce/5:2016cv01415/98573",
+      "quote": "February 15, 2017 Filing 15 ORDER granting 12 Defendant's Motion for Partial Dismissal. Signed by Honorable Robin J. Cauthron on 2/15/17."
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-facts-to-check:what-was-person-v-vivant-behavioral-healthcare-a",
@@ -11454,7 +11883,24 @@
      "url": "https://dockets.justia.com/docket/arizona/azdce/2:2023cv00094/1322038",
      "kind": "note"
     }
-   ]
+   ],
+   "answer": {
+    "text": "It is a wage-and-hour collective action, not an abuse case: Finis Person sued Vivant on 13 Jan 2023 under the FLSA for unpaid overtime (30-minute automatic meal deductions and off-the-clock work for hourly resident-care staff); Vivant answered 22 Feb 2023 (Judge Lanza). How it ended could not be found (Justia/CourtListener/Law360 blocked; no news). Confidence: high on subject; outcome unknown. Still open: No settlement, dismissal or judgment found. Search used: Justia (403), CourtListener (403/401), Law360 (403), web search, no archive copy. Check docket on CourtListener/PACER. Waits: the outcome needs the docket (Justia/CourtListener blocked to scripts; open in a browser). Lawsuit 204 has no summary yet.",
+    "claims": [
+     {
+      "claim": "Complaint is an FLSA overtime collective action, filed 01/13/23, 2:23-cv-00094-DWL",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Sequel%20TSI/Vivant/Person%20v%20Vivant.pdf",
+      "quote": "Vivant automatically deducted 30 minutes from Person and Putative Class Members' shifts despite requiring them to remain on duty during that time."
+     },
+     {
+      "claim": "Count",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/Sequel%20TSI/Vivant/Person%20v%20Vivant.pdf",
+      "quote": "Failure to Pay Overtime Compensation (Fair Labor Standards Act, 29 U.S.C. § 201 et seq.)"
+     }
+    ],
+    "by": "Claude session 2026-11-20",
+    "at": "2026-11-22"
+   }
   },
   {
    "key": "sequel-and-vivant-staff:was-jeff-andrews-executive-vice-president-and-ch",
@@ -33079,5 +33525,5 @@
    "directions": []
   }
  ],
- "built": "2026-11-20 14:30"
+ "built": "2026-11-22 21:51"
 }
