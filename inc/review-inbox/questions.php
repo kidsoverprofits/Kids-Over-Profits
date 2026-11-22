@@ -116,6 +116,9 @@ function kop_rinbox_q_item($key) {
 
     $actions = array();
     $status = $state ? ($state['status'] === 'settled' ? 'settled' : 'dismissed') : 'waiting';
+    // kop_q_tally() breaks a tie by answer key, so "No" would sort ahead of "Yes" at one each.
+    $tied = count($tally) > 1 && $tally[0]['count'] === $tally[1]['count'];
+    $lead = !$tally ? '' : ($tied ? ' · answers split' : ' · most say ' . mb_substr($tally[0]['label'], 0, 60));
     $nos = count($tally) === 1 && kop_q_is_no($key, $tally[0]['key']) ? (int) $tally[0]['count'] : 0;
     if ($status === 'waiting') {
         if ($nos) {
@@ -132,7 +135,8 @@ function kop_rinbox_q_item($key) {
             $details[] = array('label' => 'No longer asked', 'value' => 'The record has an answer now, or the question was settled another way.');
         } elseif ($options) {
             $actions[] = array('id' => 'settle', 'label' => 'Use this answer', 'style' => 'approve',
-                'params' => array(array('name' => 'answer', 'label' => 'Answer', 'type' => 'select', 'options' => $options, 'value' => (string) array_key_first($options))),
+                // A tie has no leading answer: nothing is picked until the reviewer chooses one.
+                'params' => array(array('name' => 'answer', 'label' => 'Answer', 'type' => 'select', 'options' => $options, 'value' => $tied ? '' : (string) array_key_first($options))),
                 'help' => 'Writes the answer you pick to ' . $question['record']['name'] . ', citing the questions page (a program\'s facts go on with its next write-up). Undo on the Settled tab.');
             if ($question['type'] !== 'swipe') {
                 $actions[] = array('id' => 'settle_own', 'label' => 'Write my own…', 'style' => 'neutral', 'ask' => true, 'submit' => 'Write it',
@@ -152,7 +156,7 @@ function kop_rinbox_q_item($key) {
     return array(
         'key'          => $key,
         'title'        => $ask !== '' ? $ask : $key,
-        'subtitle'     => $total . ' ' . ($total === 1 ? 'answer' : 'answers') . ($tally ? ' · most say ' . mb_substr($tally[0]['label'], 0, 60) : '')
+        'subtitle'     => $total . ' ' . ($total === 1 ? 'answer' : 'answers') . $lead
             . ($nos >= KOP_Q_AGREE ? ' · ' . $nos . ' say no, check it' : ($question && empty($question['auto']) ? ' · always waits for you' : '')),
         'url'          => kop_q_url($key, $question ?: ($fac ? array('kind' => 'facility', 'id' => (int) $fac['id']) : null)),
         'text'         => (string) ($question['sub'] ?? ''),
