@@ -766,7 +766,8 @@
             listEl.querySelectorAll('.rinbox-select').forEach(function (c) { if (!c.disabled) c.checked = all.checked; });
             update();
         });
-        listEl.onchange = function (e) { if (e.target.classList.contains('rinbox-select')) update(); };
+        // Any change on a card, not only its tick box: picking an answer adds that card to "Use this answer (n of m)".
+        listEl.onchange = function () { update(); };
         function selected() {
             return Array.prototype.filter.call(listEl.querySelectorAll('.rinbox-card'), function (c) {
                 var box = c.querySelector('.rinbox-select');
@@ -799,16 +800,23 @@
                         return p.optional || (v !== '' && v !== null && v !== undefined && v !== 0 && !(Array.isArray(v) && !v.length));
                     });
                 };
-                var having = sel.filter(mineOf);
-                // A value that has to be typed on each card first keeps the button away until all are filled.
-                if (!having.every(ready)) return;
+                var withIt = sel.filter(mineOf);
+                // A value that has to be picked or typed on a card first (a split question's answer): the
+                // button acts on the cards that have it and leaves the rest, saying so, instead of leaving the
+                // bar (Claude note #33: "Dismiss all but not approve all").
+                var having = withIt.filter(ready);
+                var unfilled = withIt.length - having.length;
                 var skipped = sel.length - having.length;
+                var why = [];
+                if (sel.length - withIt.length) why.push((sel.length - withIt.length) + ' have no "' + a.label + '" button');
+                if (unfilled) why.push(unfilled + ' have no answer picked yet (pick one on the card to include it)');
                 [buttons, endButtons].forEach(function (into) {
                     into.appendChild(el('button', {
                         type: 'button', class: 'rinbox-btn rinbox-btn-' + (a.style || 'neutral'),
                         text: a.label + ' (' + (skipped ? having.length + ' of ' + sel.length : sel.length) + ')',
-                        title: skipped ? skipped + ' of the ticked cards have no "' + a.label + '" button and are left as they are.' : '',
-                        onclick: function () { runBulk(having, a); }
+                        title: skipped ? 'Of the ticked cards, ' + why.join(' and ') + '; those are left as they are.' : '',
+                        disabled: having.length ? null : 'disabled',
+                        onclick: function () { if (having.length) runBulk(having, a); }
                     }));
                 });
             });
