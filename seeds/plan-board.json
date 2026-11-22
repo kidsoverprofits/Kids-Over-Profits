@@ -1,6 +1,6 @@
 {
  "built": "2026-11-22 21:52 UTC",
- "source": "511b4afd73f1ddef2d610da5f0cb01cfee33db25",
+ "source": "75a7e03abffb5e7089a23e1c0c10539c861f8a77",
  "sections": [
   {
    "key": "2",
@@ -4365,7 +4365,7 @@
       {
        "id": "4.6:research-tasks-worked-2026-11-20-22-sequel-and-vivant-facts",
        "lead": "Research tasks worked 2026-11-20/22, \"Sequel and Vivant: facts to check\" (all 22)",
-       "text": "**Research tasks worked 2026-11-20/22, \"Sequel and Vivant: facts to check\" (all 22)**: answered in `seeds/research-tasks.json`, 13 settled. Fixes in [4e3f14fc](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4e3f14fc): TrueCore Acquisitions as current owner of Brighter Path Courtland/Montgomery/Tuskegee (Alabama SOS, 2023-03-15); Starr Albion Prep incidents (2016 I-94 death, March 2019 citations, June 2020 provisional licence); Mingus's 2024 $4,700 fine and $500 enforcement agreement; Madison campus bought by the city in 2020; lawsuit 211 (Mattie) settled. Template assignments 175, lawsuit updates 2026-11-20a. 5 sources sent; Justia's Calvin docket archived (attachment 17685). Open (answered, not settled): - Browser jobs: Florida FACTS (facts.fldfs.com) for Sequel/Vivant contract totals ($41.5M a year unverified); the SF Chronicle 2020 Sequel project (Glen Mills); APM's 2020 California story read verbatim (boards in Wyoming and Utah); the dockets for Person v. Vivant (D. Ariz. 2:23-cv-94; lawsuit 204 has no summary yet), Calvin v. Sequel of Oklahoma (after the 2017-02-15 partial dismissal) and Durham v. Capital Academy (after summary judgment was denied 2020-01-31; lawsuit 90 status unknown); ADHS licensing for Shaun Mohon (Mingus ED) and Michael E. Henderson (Casa Grande ED). - Woodward Academy's 2024 juvenile case: no report after April 2025. - Mingus enforcement agreement (attachment 12723) is a scan without a text layer; OCR it so the quotes are searchable. - After deploy: lawsuit 211 shows \"settled\"; the three Brighter Path pages list TrueCore as owner.",
+       "text": "**Research tasks worked 2026-11-20/22, \"Sequel and Vivant: facts to check\" (all 22)**: answered in `seeds/research-tasks.json`, 13 settled. Fixes in [4a624f26](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/4a624f26): TrueCore Acquisitions as current owner of Brighter Path Courtland/Montgomery/Tuskegee (Alabama SOS, 2023-03-15); Starr Albion Prep incidents (2016 I-94 death, March 2019 citations, June 2020 provisional licence); Mingus's 2024 $4,700 fine and $500 enforcement agreement; Madison campus bought by the city in 2020; lawsuit 211 (Mattie) settled. Template assignments 175, lawsuit updates 2026-11-20a. 5 sources sent; Justia's Calvin docket archived (attachment 17685). Open (answered, not settled): - Browser jobs: Florida FACTS (facts.fldfs.com) for Sequel/Vivant contract totals ($41.5M a year unverified); the SF Chronicle 2020 Sequel project (Glen Mills); APM's 2020 California story read verbatim (boards in Wyoming and Utah); the dockets for Person v. Vivant (D. Ariz. 2:23-cv-94; lawsuit 204 has no summary yet), Calvin v. Sequel of Oklahoma (after the 2017-02-15 partial dismissal) and Durham v. Capital Academy (after summary judgment was denied 2020-01-31; lawsuit 90 status unknown); ADHS licensing for Shaun Mohon (Mingus ED) and Michael E. Henderson (Casa Grande ED). - Woodward Academy's 2024 juvenile case: no report after April 2025. - Mingus enforcement agreement (attachment 12723) is a scan without a text layer; OCR it so the quotes are searchable. - After deploy: lawsuit 211 shows \"settled\"; the three Brighter Path pages list TrueCore as owner.",
        "ask": "",
        "date": "2026-11-20",
        "why": "",
@@ -4375,7 +4375,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "b27dbeb67631"
+       "hash": "aae325878b1e"
       }
      ]
     },
