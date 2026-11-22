@@ -807,6 +807,9 @@
                 var having = withIt.filter(ready);
                 var unfilled = withIt.length - having.length;
                 var skipped = sel.length - having.length;
+                // Nothing it could act on: shown greyed (with why) only when every ticked card has the button,
+                // so a one-card text box ("Write my own…") stays off the bar.
+                if (!having.length && withIt.length < sel.length) return;
                 var why = [];
                 if (sel.length - withIt.length) why.push((sel.length - withIt.length) + ' have no "' + a.label + '" button');
                 if (unfilled) why.push(unfilled + ' have no answer picked yet (pick one on the card to include it)');
