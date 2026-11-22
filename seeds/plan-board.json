@@ -1,6 +1,6 @@
 {
- "built": "2026-11-20 14:38 UTC",
- "source": "e12754808cc16195c6623a0b216a99e3a15405a1",
+ "built": "2026-11-22 21:50 UTC",
+ "source": "87d28e73a97b54ea9bd4f12a27b2b1bcc8c37ef7",
  "sections": [
   {
    "key": "2",
@@ -3931,9 +3931,9 @@
       {
        "id": "4.4:staff-only-notes-on-a-facility-record",
        "lead": "Staff-only notes on a facility record",
-       "text": "**Staff-only notes on a facility record** (owner, Claude note #31, 2026-11-19, on /admin-submissions/?type=data: \"this info shouldn't be displayed on the live site but i do want the useful pieces slotted into their fields and to save the notes for my own use\"). A data suggestion's \"Anything else\" goes into the record's `notes`, which the facility page shows under About, and `suggested_edits` has no reviewer-notes column, so there is nowhere private to keep a sender's words. Build a staff-only notes list on the facility record (never in the page, the app payload, open data, search or the wiki; read docs/ADDING-CONTENT.md, \"a facility field\"), a \"Move to: Staff notes (private)\" target on the data card (`kop_suggestion_move_targets()`, api/lib-suggestion-changes.php) and a view of them in the record's admin screen. Then put back suggestion #75's note (below) as a staff note. a. Suggestion #75 (Cedar Springs, The Brown Schools at Cedar Springs, #100006), done in the session: ages 5-17 set on the card, the \"Ages: 5+\" line and the sender's note taken off. The note is in the card's edit history (its last edit: \"Undo last edit\" on the card brings it back). It says a clinical director told the sender in person on 2026-09-28 that the minimum intake age is now 5 (it was 12), with no stated maximum and the oldest 17. The other changes (name to \"Cedar Springs Behavioral Health System\", 1923, capacity 110) wait for your review.",
+       "text": "**Staff-only notes on a facility record** (owner, Claude note #31, 2026-11-19, on /admin-submissions/?type=data: \"this info shouldn't be displayed on the live site but i do want the useful pieces slotted into their fields and to save the notes for my own use\"). A data suggestion's \"Anything else\" goes into the record's `notes`, which the facility page shows under About, and `suggested_edits` has no reviewer-notes column, so there is nowhere private to keep a sender's words. Build a staff-only notes list on the facility record (never in the page, the app payload, open data, search or the wiki; read docs/ADDING-CONTENT.md, \"a facility field\"), a \"Move to: Staff notes (private)\" target on the data card (`kop_suggestion_move_targets()`, api/lib-suggestion-changes.php) and a view of them in the record's admin screen. Then put back suggestion #75's note (below) as a staff note. Built 2026-11-22 (owner: \"go ahead here\"): its own table `{prefix}kop_staff_notes` (`inc/staff-notes.php`), not a key in the document, because the document reaches the public (data form, get-master-data, open data, the app); in `kop_fmerge_ref_tables()`. KOP Tools > Staff Notes lists them (all, or one record's), adds one by hand and takes one off with Undo. On the data card, Move to \"Staff notes (private)\" saves the text to the record at once and takes it off the suggestion; \"Undo last edit\" deletes it again (api/manage-submissions.php 'edit_suggestion'). A program not on record yet is refused (copy, Remove, approve, then add it on the screen). a. Suggestion #75 (Cedar Springs, The Brown Schools at Cedar Springs, #100006), done in the session: ages 5-17 set on the card, the \"Ages: 5+\" line and the sender's note taken off. The note is in the card's edit history (its last edit: \"Undo last edit\" on the card brings it back). It says a clinical director told the sender in person on 2026-09-28 that the minimum intake age is now 5 (it was 12), with no stated maximum and the oldest 17. The other changes (name to \"Cedar Springs Behavioral Health System\", 1923, capacity 110) wait for your review.",
        "ask": "",
-       "date": "2026-11-19",
+       "date": "2026-11-22",
        "why": "",
        "go": [],
        "choices": [],
@@ -3941,7 +3941,7 @@
        "kind": "do",
        "focus": false,
        "steps": [],
-       "hash": "b293a2145dbe"
+       "hash": "37521117e6ea"
       }
      ]
     },
