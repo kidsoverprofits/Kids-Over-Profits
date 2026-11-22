@@ -150,6 +150,7 @@
         body.appendChild(head);
         body.appendChild(list);
         body.appendChild(el('div', { class: 'kop-vol-more' }, [more]));
+        bringToTop(body);
         loadMore();
     }
 
@@ -684,6 +685,7 @@
         var st = el('p', { class: 'kop-vol-status', role: 'status', text: 'Loading…' });
         panel.appendChild(st);
         body.appendChild(panel);
+        bringToTop(body);
         api('mine').then(function (data) {
             var rows = data.rows || [];
             st.textContent = rows.length ? '' : (cfg.preview ? 'Admins have no recommendations of their own.' : 'None yet.');
@@ -739,6 +741,15 @@
     /* ---- Projects ----------------------------------------------------------------- */
 
     var projectsPanel = el('section', { class: 'kop-vol-panel kop-vol-projects' });
+    // "Choose more work" and the question picker: under the open item when they have a project, so the item is not buried.
+    var morePanel = el('section', { class: 'kop-vol-panel kop-vol-projects kop-vol-more-work', hidden: true });
+
+    // With a project: its card, then the item they are on, then more work to choose.
+    function layoutWork() {
+        if (!state.projects.length || !projectsPanel.parentNode || projectsPanel.parentNode !== app) return;
+        app.insertBefore(body, projectsPanel.nextSibling);
+        app.insertBefore(morePanel, body.nextSibling);
+    }
 
     function progressBar(done, total) {
         var pct = total ? Math.round(100 * done / total) : 0;
@@ -766,14 +777,18 @@
             ]));
         });
         if (state.projects.length) projectsPanel.appendChild(ul);
+        morePanel.innerHTML = '';
+        var dest = state.projects.length ? morePanel : projectsPanel;
         // The four kinds of work side by side, none put first, whether they are new or already working.
         if (self) {
-            projectsPanel.appendChild(el('h2', { text: state.projects.length ? 'Choose more work' : 'Choose your work' }));
-            projectsPanel.appendChild(chooseWork(self));
+            dest.appendChild(el('h2', { text: state.projects.length ? 'Choose more work' : 'Choose your work' }));
+            dest.appendChild(chooseWork(self));
         }
         // Research questions anyone may pick (an admin reads every cited answer).
-        projectsPanel.appendChild(pickBox);
+        dest.appendChild(pickBox);
+        morePanel.hidden = !morePanel.childNodes.length;
         if (!pickState.loaded || Date.now() - pickState.at > 30000) loadPickable(); else renderPicker();
+        layoutWork();
     }
 
     /* ---- Research questions to pick (inc/research-tasks.php, REST volunteer/research) ------------- */
@@ -1430,6 +1445,10 @@
         if (state.projects.length || canSelf || choosing || state.self) {
             renderProjects();
             app.appendChild(projectsPanel);
+            if (state.projects.length) {
+                app.appendChild(body);
+                app.appendChild(morePanel);
+            }
         }
         // With a project, or no queue of their own yet, the queues are a fold: the panel above is the thing to do.
         // Otherwise they are the choice itself, under a heading that says so.
@@ -1440,7 +1459,7 @@
                 el('h2', { text: 'Choose what to review' }),
                 el('p', { class: 'kop-vol-meta', text: 'Each button is a different kind of work; the number is how many are waiting. Pick one to see its items and what to check.' }),
                 tabs]));
-        app.appendChild(body);
+        if (!body.parentNode) app.appendChild(body);
         startMessages();
         renderTabs();
         var wantedProject = parseInt(param('project'), 10);
