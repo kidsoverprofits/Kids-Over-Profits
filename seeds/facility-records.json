@@ -13201,5 +13201,43 @@
         "yearsOfOperation": ""
       }
     }
+  },
+  {
+    "id": 100806,
+    "version": 2,
+    "note": "2026-11-22: Scissor Tail Landing held boys in 2024 (FOX 25, Oct 7 2024); Dakota Underwood's mother named it.",
+    "facility": {
+      "notes": [
+        "A staff-secure residential home in Norman for youth in the custody of the Oklahoma Office of Juvenile Affairs, run by a contracted provider the OJA pages do not name; school through Canute Schools. In 2026 OJA lists it for girls aged 14 to 18 (OJA, 'Scissortail Landing', https://oklahoma.gov/oja/youth-placement/group-homes/st-landing-.html, last modified Apr 9, 2026); the group homes list gives 11 beds, its own page 'up to seven residents'.",
+        "In 2024 it held boys. FOX 25 (Tom Ferguson, Oct. 7, 2024): a mother's 14-year-old son, Journey, 'is one of several teens who are now missing' after they left 'the Scissortail Landing Juvenile Center on Saturday morning in Norman', climbing under the fence of the basketball court; the Cleveland County Sheriff's Office took over the search (https://okcfox.com/news/local/were-scared-and-worried-14-year-old-missing-from-juvenile-facility-mother-says-angela-navarro-journey-scissortail-landing-cleveland-county-sheriffs-office-office-affairs-ccso-okemah-police-department-mental-health-behavioral-detention-center-oja-danger).",
+        "Dakota Underwood, 17, was stabbed to death in Shawnee on November 2, 2024. His mother told KFOR he 'was one of many teenagers who escaped the Scissor Tail Landing Detention Center in June' (KFOR, Nov. 6, 2024, https://kfor.com/news/local/family-seeks-justice-after-escaped-juvenile-killed-in-shawnee/). It is not one of the 11 county detention centers OJA lists; 'detention center' is the news story's word for this home.",
+        "Added 2026-11-22 (owner: make sure his facility is on file)."
+      ],
+      "identification": {
+        "name": "Scissor Tail Landing",
+        "currentName": "",
+        "currentOperator": "",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [
+          "Scissortail Landing",
+          "ST Landing",
+          "Scissortail Landing Juvenile Center",
+          "Scissor Tail Landing Detention Center"
+        ],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "facilityDetails": {
+        "type": "Group Home",
+        "capacity": 11,
+        "currentCensus": null,
+        "ageRange": {
+          "min": 14,
+          "max": 18
+        },
+        "gender": "Girls (boys in 2024)"
+      }
+    }
   }
 ]
