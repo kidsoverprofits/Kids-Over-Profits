@@ -4589,5 +4589,99 @@
         "Added 2026-09-23 from the research network map (seeds/new-facilities.json)."
       ]
     }
+  },
+  {
+    "location_id": 39,
+    "location_name": "OKLAHOMA",
+    "facility": {
+      "identification": {
+        "name": "Scissor Tail Landing",
+        "currentName": "",
+        "currentOperator": "",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [
+          "Scissortail Landing",
+          "ST Landing",
+          "Scissor Tail Landing Detention Center"
+        ],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Norman",
+        "state": "OK",
+        "country": "United States",
+        "additionalLocations": []
+      },
+      "location": "Norman, OK",
+      "address": "",
+      "otherOperators": [],
+      "pastOperators": [],
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "yearsOfOperation": "",
+        "notes": []
+      },
+      "staff": {
+        "administrator": [],
+        "notableStaff": [],
+        "pastTTIJobs": []
+      },
+      "profileLinks": [
+        "https://oklahoma.gov/oja/youth-placement/group-homes/st-landing-.html",
+        "https://oklahoma.gov/oja/youth-placement/group-homes.html"
+      ],
+      "facilityDetails": {
+        "type": "Group Home",
+        "capacity": 11,
+        "currentCensus": null,
+        "ageRange": {
+          "min": 14,
+          "max": 18
+        },
+        "gender": "Girls"
+      },
+      "accreditations": {
+        "current": [],
+        "past": []
+      },
+      "memberships": [],
+      "certifications": [],
+      "licensing": [],
+      "resources": {
+        "hasNews": true,
+        "hasPressReleases": false,
+        "hasInspections": false,
+        "hasStateReports": false,
+        "hasRegulatoryFilings": false,
+        "hasLawsuits": false,
+        "hasPoliceReports": false,
+        "hasArticlesOfOrganization": false,
+        "hasPropertyRecords": false,
+        "hasPromotionalMaterials": false,
+        "hasEnrollmentDocuments": false,
+        "hasResearch": false,
+        "hasFinancial": false,
+        "hasStudent": false,
+        "hasStaff": false,
+        "hasVideo": false,
+        "hasAudio": false,
+        "hasSocialMedia": false,
+        "hasWebsite": false,
+        "hasNATSAP": false,
+        "hasOther": false,
+        "newsDetails": "KFOR, Nov. 6, 2024 and KOCO, Nov. 7, 2024: Dakota Underwood, 17, killed in Shawnee after running from his placement in June 2024.",
+        "pressReleasesDetails": "",
+        "customResources": []
+      },
+      "notes": [
+        "A staff-secure residential home for girls aged 14 to 18 in the custody of the Oklahoma Office of Juvenile Affairs, run by a contracted provider the OJA pages do not name; school through Canute Schools (OJA, 'Scissortail Landing', https://oklahoma.gov/oja/youth-placement/group-homes/st-landing-.html, last modified Apr 9, 2026). The OJA group homes list gives 11 beds; its own page says 'up to seven residents'.",
+        "Dakota Underwood, 17, was stabbed to death in Shawnee on November 2, 2024. His mother told KFOR he 'was one of many teenagers who escaped the Scissor Tail Landing Detention Center in June' (KFOR, Nov. 6, 2024, https://kfor.com/news/local/family-seeks-justice-after-escaped-juvenile-killed-in-shawnee/). OJA lists this home for girls; its co-ed sister home in Norman is Scissor Tail Pointe (a separate record), so which of the two he left is an open research task.",
+        "Added 2026-11-22 (owner: make sure his facility is on file)."
+      ]
+    }
   }
 ]

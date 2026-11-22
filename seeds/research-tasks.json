@@ -33523,7 +33523,30 @@
    "records": [],
    "found": "found 2026-11-19, Claude (read-sent-to-claude)",
    "directions": []
+  },
+  {
+   "key": "wrong-years-eras-or-places-on-a:which-oklahoma-oja-placement-did-dakota-underwoo",
+   "section": "Wrong years, eras or places on a record",
+   "title": "Which Oklahoma OJA placement did Dakota Underwood run from in June 2024?",
+   "text": "Dakota Underwood, 17, was stabbed to death in Shawnee, Oklahoma on Nov. 2, 2024. His mother told KFOR he was 'one of many teenagers who escaped the Scissor Tail Landing Detention Center in June'; KOCO says only 'a juvenile service'. OJA lists Scissortail Landing in Norman as a group home for girls, and KOP's record Scissor Tail Point (13593, Norman) may be a related home. Settle which placement he left (and its operator) so the memorial entry names it right.",
+   "context": "",
+   "records": [
+    13593
+   ],
+   "found": "found 2026-11-22, Claude (memorial add, 2026-11-22)",
+   "directions": [
+    {
+     "label": "KOCO",
+     "url": "https://www.koco.com/article/arrests-made-as-family-grieves-17-year-old-died-after-stabbing/62845585",
+     "kind": "note"
+    },
+    {
+     "label": "KFOR",
+     "url": "https://kfor.com/news/local/family-seeks-justice-after-escaped-juvenile-killed-in-shawnee/",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-22 21:51"
+ "built": "2026-11-22 23:05"
 }
