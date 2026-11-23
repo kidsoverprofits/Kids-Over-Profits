@@ -78,8 +78,13 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    directories, reports) -> Websites Sent In. A `website` may add `"website_kind"`: forum, reddit, blog, social, program, directory, marketing (marketing group or
    referral service), business (business or property record), staff (staff profile or resume), report, government, media,
    archive or other (kop_ext_website_kinds(); guessed from the address when left out). Nothing is published: it all waits in Review inbox. Never send the user's email.
+   **Fill every field the source gives before sending, not just title and notes (owner 2026-11-23).** `article`:
+   `site_name` (outlet), `author`, `published` (YYYY-MM-DD), `archive_url`, `facility` (names, `;`-separated or a list).
+   `lawsuit`: `case_number`, `court`, `jurisdiction`, `facility`. `legislation`: `bill_number`, `jurisdiction`, `session`,
+   `facility`. `website`: `website_kind`, `site_name`, `author`, `published`, `facility`. Not-sent JSON files carry the
+   same keys; `send-sources.py` passes them all through.
 3. Wayback-only sources still follow the archive rule below (PDF into the media library); submit the original URL with the
-   archive link in `notes`.
+   archive link in `archive_url` (articles) or `notes`.
 4. Send with the header `X-KOP-Research-Key: <key>` (key in `%USERPROFILE%\kop-research-key.txt`, never pasted into a
    prompt, a commit or a report): it skips the public route's 12-an-hour cap. Agents without the key write the links
    (type, url, title, notes) to a not-sent JSON file, and the lead sends them with `(kop-pipeline) python scripts/send-sources.py <files>`.
