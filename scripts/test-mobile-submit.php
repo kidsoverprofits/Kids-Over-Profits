@@ -314,7 +314,26 @@ if ($real !== '') {
         kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => $u, 'title' => $name, 'submitter_name' => $name, 'via' => 'web'), array('x_kop_research_key' => $real)));
         $got = $pdo->query('SELECT submitted_by FROM news_submissions WHERE article_url = ' . $pdo->quote($u))->fetchColumn();
         check($got === $want, "research send named \"$name\" -> \"$want\"", (string) $got);
-    }} else {
+    }
+    // A research send keeps summary and tags and may carry the full field set, but is never published (owner 2026-11-23).
+    $u = 'https://example-news.test/research/full';
+    $r = kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => $u, 'title' => 'Full send',
+        'summary' => 'What it reports.', 'tags' => array('abuse'), 'full' => true, 'publish' => true,
+        'location' => 'Shawnee, OK', 'staff' => array('Jane Roe'), 'submitter_name' => 'Claude research agent', 'via' => 'web'),
+        array('x_kop_research_key' => $real)));
+    $row = $pdo->query('SELECT summary, tags, article_location, staff_mentioned, status FROM news_submissions WHERE article_url = ' . $pdo->quote($u))->fetch(PDO::FETCH_ASSOC);
+    check(is_resp($r, 201) && $row && $row['summary'] === 'What it reports.' && $row['article_location'] === 'Shawnee, OK'
+        && strpos((string) $row['staff_mentioned'], 'Jane Roe') !== false && $row['status'] === 'submitted',
+        'research send keeps summary + full fields, stays submitted even with publish', json_encode($row));
+    $u = 'https://example-news.test/public/full';
+    $cap = $GLOBALS['transients'][kop_msub_rate_key()] ?? false;
+    unset($GLOBALS['transients'][kop_msub_rate_key()]); // earlier cases used up the hour's cap
+    kop_msub_rest_submit(new WP_REST_Request(array(), array('type' => 'article', 'url' => $u, 'title' => 'Public full',
+        'summary' => 'Sender summary.', 'full' => true, 'location' => 'Somewhere')));
+    $GLOBALS['transients'][kop_msub_rate_key()] = $cap;
+    $row = $pdo->query('SELECT summary, article_location FROM news_submissions WHERE article_url = ' . $pdo->quote($u))->fetch(PDO::FETCH_ASSOC);
+    check($row && (string) $row['summary'] === '' && (string) $row['article_location'] === '', 'public send drops summary and full fields', json_encode($row));
+    } else {
     echo "  (skipped: ~/kop-research-key.txt not here)\n";
 }
 check(is_err($keyed('not-the-key', 2), 'kop_rate_limited', 429), 'wrong research key -> still 429');

@@ -78,11 +78,16 @@ unprompted. Research agents do the same: every agent prompt that involves web re
    directories, reports) -> Websites Sent In. A `website` may add `"website_kind"`: forum, reddit, blog, social, program, directory, marketing (marketing group or
    referral service), business (business or property record), staff (staff profile or resume), report, government, media,
    archive or other (kop_ext_website_kinds(); guessed from the address when left out). Nothing is published: it all waits in Review inbox. Never send the user's email.
-   **Fill every field the source gives before sending, not just title and notes (owner 2026-11-23).** `article`:
-   `site_name` (outlet), `author`, `published` (YYYY-MM-DD), `archive_url`, `facility` (names, `;`-separated or a list).
-   `lawsuit`: `case_number`, `court`, `jurisdiction`, `facility`. `legislation`: `bill_number`, `jurisdiction`, `session`,
-   `facility`. `website`: `website_kind`, `site_name`, `author`, `published`, `facility`. Not-sent JSON files carry the
-   same keys; `send-sources.py` passes them all through.
+   **Fill every field the source gives before sending, not just title and notes (owner 2026-11-23).** All types:
+   `summary` (plain, what it reports), `tags` (list), `facility` (names, `;`-separated or a list). `article`: `site_name`
+   (outlet), `author`, `published` (YYYY-MM-DD), `archive_url`, and with `"full": true` the processor's fields:
+   `alternate_title`, `article_type`, `location`, `staff`, `survivors`, `content_warnings`, `facilities`,
+   `passing_facilities` (lists). `lawsuit`: `case_number`, `court`, `jurisdiction`, and with `"full": true` `case_name`,
+   `filing_date`, `status`, `outcome`, `settlement_amount`, `plaintiffs`, `defendants`, `facilities_mentioned`,
+   `staff_mentioned`, `organizations_mentioned`, `claims`, `document_urls`, `source_urls`. `legislation`: `bill_number`,
+   `jurisdiction`, `session`. `website`: `website_kind`, `site_name`, `author`, `published`. Summary, tags and the full
+   set are kept only on research-key sends (`inc/mobile-submit.php`); nothing is ever published from this route. Not-sent
+   JSON files carry the same keys; `send-sources.py` passes them all through.
 3. Wayback-only sources still follow the archive rule below (PDF into the media library); submit the original URL with the
    archive link in `archive_url` (articles) or `notes`.
 4. Send with the header `X-KOP-Research-Key: <key>` (key in `%USERPROFILE%\kop-research-key.txt`, never pasted into a

@@ -247,8 +247,15 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
         return new WP_Error('kop_bad_type', 'Unknown kind of submission.', array('status' => 400));
     }
     $p['type'] = $type;
-    // The extension's description field holds the sender's summary; the app has none.
-    unset($p['description'], $p['tags']);
+    // The extension's description field holds the sender's summary; the app has none. A research-key send keeps
+    // them and may send the processor's full field set ("full": true), so Claude fills every field it can
+    // (owner 2026-11-23). It is never published from here: status stays submitted / unpublished.
+    if (!$research) {
+        unset($p['description'], $p['tags'], $p['full'], $p['summary']);
+    } elseif (isset($p['summary']) && !isset($p['description'])) {
+        $p['description'] = $p['summary'];
+    }
+    unset($p['publish']);
 
     $url = esc_url_raw(trim((string) ($p['url'] ?? '')), array('http', 'https'));
     if ($url !== '' && !wp_http_validate_url($url)) {
@@ -286,11 +293,21 @@ function kop_msub_rest_submit(WP_REST_Request $req) {
             }
             switch ($type) {
                 case 'article':
-                    $id = kop_ext_insert_news($pdo, $p, $submitter, $note);
+                    $full = null;
+                    if ($research && !empty($p['full'])) {
+                        $full = kop_ext_news_full_fields($p);
+                        $full['status'] = 'submitted';
+                    }
+                    $id = kop_ext_insert_news($pdo, $p, $submitter, $note, $full);
                     $kind = 'news';
                     break;
                 case 'lawsuit':
-                    $id = kop_ext_insert_lawsuit($pdo, $p, $submitter, $note);
+                    $full = null;
+                    if ($research && !empty($p['full'])) {
+                        $full = kop_ext_lawsuit_full_fields($p);
+                        $full['published'] = false;
+                    }
+                    $id = kop_ext_insert_lawsuit($pdo, $p, $submitter, $note, $full);
                     $kind = 'lawsuit';
                     break;
                 case 'legislation':
