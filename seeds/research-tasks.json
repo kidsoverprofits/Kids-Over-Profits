@@ -34273,7 +34273,67 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "about-rewrites-status-now:who-bought-the-former-fenster-school-campus-8505",
+   "section": "About rewrites: status now",
+   "title": "Who bought the former Fenster School campus (8505 E. Ocotillo Drive, Tucson) in May 2021 for $6 million?",
+   "text": "Pima County Recorder deed or Assessor sale record, or a Tucson commercial real estate report. The nonprofit’s 990-PF (year ending May 31, 2021) reports the sale but not the buyer: https://projects.propublica.org/nonprofits/organizations/860196442. The answer may change the last paragraph of /facility/fenster-school-az/.",
+   "context": "",
+   "records": [
+    100629
+   ],
+   "found": "found 2026-11-23, Claude note #38, About rewrite note38-f100629 (2026-11-23)",
+   "directions": [
+    {
+     "label": "From the notes: projects.propublica.org/nonprofits/organizations/860196442",
+     "url": "https://projects.propublica.org/nonprofits/organizations/860196442",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:was-2013-14-the-last-school-year-of-fenster-scho",
+   "section": "About rewrites: facts to check",
+   "title": "Was 2013-14 the last school year of Fenster School in Tucson, AZ, by Arizona state records?",
+   "text": "Arizona Corporation Commission status of The Fenster School of Southern Arizona (EIN 86-0196442) and the school’s last entry on the Arizona Department of Education private school list. The record now says Closed, 1944-2014, from the Arizona Daily Star, May 18, 2014.",
+   "context": "",
+   "records": [
+    100629
+   ],
+   "found": "found 2026-11-23, Claude note #38, About rewrite note38-f100629 (2026-11-23)",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-sources-to-find:who-did-fenster-school-in-tucson-az-enroll-and-i",
+   "section": "About rewrites: sources to find",
+   "title": "Who did Fenster School in Tucson, AZ enroll, and is there any source for restraint and seclusion there?",
+   "text": "The record lists restraint and seclusion as practices, but no source for them was found. Look for referral listings (Woodbury Reports, educational consultants), survivor or family accounts, and state complaints.",
+   "context": "",
+   "records": [
+    100629
+   ],
+   "found": "found 2026-11-23, Claude note #38, About rewrite note38-f100629 (2026-11-23)",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-does-tucson-local-media-s-2015-story-say-ab",
+   "section": "About rewrites: sources to find",
+   "title": "What does Tucson Local Media’s 2015 story say about Sabino Recovery opening on the former Fenster School campus?",
+   "text": "Logan Burtch-Buus, Sabino Recovery opening Foothills facility, Tucson Local Media (2015): https://www.tucsonlocalmedia.com/foothillsnews/article_8c374668-50d3-11e5-be7b-a740ce5de030.html (returned HTTP 429). Look for a closure date or lease detail.",
+   "context": "",
+   "records": [
+    100629
+   ],
+   "found": "found 2026-11-23, Claude note #38, About rewrite note38-f100629 (2026-11-23)",
+   "directions": [
+    {
+     "label": "From the notes: tucsonlocalmedia.com/foothillsnews/article_8c374668-50d3-11e5-be7b-a740ce5de030.",
+     "url": "https://www.tucsonlocalmedia.com/foothillsnews/article_8c374668-50d3-11e5-be7b-a740ce5de030.html",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-23 16:00"
+ "built": "2026-11-23 17:05"
 }

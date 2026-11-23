@@ -13322,5 +13322,42 @@
         "isPrivatelyOwned": null
       }
     }
+  },
+  {
+    "id": 100629,
+    "unique_name": "Fenster School",
+    "version": 1,
+    "note": "2026-11-23 Claude note #38 (About rewrite): closed after the 2013-14 school year and never reopened; campus leased to Sabino Recovery from Feb 2015 and sold May 2021; legal name from the nonprofit's IRS filings (EIN 86-0196442).",
+    "facility": {
+      "operatingPeriod": {
+        "notes": [
+          "Founded 1944 by George and Kitty Fenster; closed for the 2014-15 school year and never reopened (Tony Davis, Arizona Daily Star, May 18, 2014: https://tucson.com/article_c7ce6ddc-6731-5948-b574-322270e0e29f.html)",
+          "Campus leased to Sabino Recovery, an adult treatment center, from February 2015 (Arizona Daily Star, Oct 10, 2015: https://tucson.com/news/local/article_d3f30743-5737-50c3-9402-bb173c4cbb48.html); campus land and buildings sold May 2021 for $6,000,000 (Form 990-PF, year ending May 31, 2021: https://projects.propublica.org/nonprofits/organizations/860196442)"
+        ],
+        "status": "Closed",
+        "endYear": 2014,
+        "startYear": 1944,
+        "yearsOfOperation": "1944-2014"
+      },
+      "identification": {
+        "name": "Fenster School",
+        "nameKey": "fenster school",
+        "dbaNames": [],
+        "investors": [],
+        "legalName": "The Fenster School of Southern Arizona",
+        "pastNames": [],
+        "otherNames": [
+          "Fenster private boarding school"
+        ],
+        "pastOwners": [],
+        "currentName": "",
+        "registrants": [],
+        "currentOwners": [],
+        "pastOperators": [],
+        "knownReferrers": [],
+        "otherOperators": [],
+        "currentOperator": "Fenster School (nonprofit corporation)"
+      }
+    }
   }
 ]
