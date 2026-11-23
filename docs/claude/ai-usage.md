@@ -36,5 +36,5 @@ php -d extension=mbstring scripts/test-local-ai.php           # KOP_LAI_LIVE=htt
 # qwen3.5:4b ~43 s; on the processor alone ~2.5 min, too slow for the site's 75 s live wait, which is why the worker
 # starts its own Ollama with OLLAMA_VULKAN=1 OLLAMA_IGPU_ENABLE=1. Longer answers miss the live wait and go to the queue.
 # That Ollama can die mid-answer with nothing in its log (2026-11-23): the worker checks it each minute, starts a new one,
-# and sends the site a stop instead of a heartbeat until it answers; the dead one's log is %TEMP%kop-local-ai-ollama.log.prev.
+# and sends the site a stop instead of a heartbeat until it answers; the dead one's log is %TEMP%\kop-local-ai-ollama.log.prev.
 ```
