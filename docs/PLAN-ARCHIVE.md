@@ -4,6 +4,28 @@ Finished items moved out of [PLAN.md](PLAN.md) once nothing open needed their co
 under the heading they had there. Newest move first. Commit SHAs that name
 `carlygaejepsen/Kids-Over-Profits` resolve in the archived old repository.
 
+## Moved 2026-11-23 (plan 2.1 #6 finished)
+
+### 2.1 cPanel, server and accounts
+
+6. **BigQuery connector permission** (2026-11-22). The nightly copy of the live database into BigQuery
+   (`kop-data.kop_prod`, tools/bigquery-sync/README.md) works, but the claude.ai BigQuery connector is refused with
+   "User does not have mcp.tools.call permission in project kop-data". Claude's attempt to grant the role was blocked
+   by its own permission check, so the owner grants it: role **MCP Tool User** (`roles/mcp.toolUser`) to
+   kidsoverprofitsdani@gmail.com on project kop-data. Then a session checks with the connector:
+   `SELECT * FROM kop_prod._sync_log ORDER BY run_started DESC LIMIT 5`.
+   Optional: link a billing account to kop-data (free tier covers it) so tables stop being recreated monthly.
+   Ask: Give the BigQuery connector the MCP Tool User role in project kop-data
+   Why: Until then your claude.ai assistant can't query the nightly copy of the database.
+   Go: [IAM for kop-data](https://console.cloud.google.com/iam-admin/iam?project=kop-data)
+   Time: 2 min
+   Step: On the IAM page, find kidsoverprofitsdani@gmail.com and click the pencil (Edit principal)
+   Step: Add another role > search "MCP Tool User" > Save
+   Step: Tell Claude, which then runs a test query through the connector
+   Done 2026-11-23: the connector signs in as ttiresearch.dani@gmail.com, not kidsoverprofitsdani. That account got
+   Data Viewer on kop_prod and Job User + MCP Tool User on the project, and the connector now reads kop_prod
+   (`_sync_log` shows every nightly run, 134 tables on 2026-11-23).
+
 ## Moved 2026-11-17 (plan 4.7 #19 finished)
 
 ### 4.7 Pages and templates

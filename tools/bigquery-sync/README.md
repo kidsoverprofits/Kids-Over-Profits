@@ -7,7 +7,7 @@ It needs no libraries, just PHP 8.2 with PDO, curl and openssl.
 
 | What | Where |
 | --- | --- |
-| GCP project / dataset | `kop-data` / `kop_prod` (location US), owned by kidsoverprofitsdani@gmail.com |
+| GCP project / dataset | `kop-data` / `kop_prod` (location US), owned by kidsoverprofitsdani@gmail.com; the connector reads as ttiresearch.dani@gmail.com |
 | Script on the server | `/home/kidsover/bigquery-sync/bigquery-sync.php` (shipped by `.cpanel.yml`, outside `public_html`) |
 | Service account | `kop-bigquery-sync@kop-data.iam.gserviceaccount.com`: BigQuery Data Editor on `kop_prod`, Job User on the project |
 | Key | `/home/kidsover/.kop-bigquery/sa-key.json` (chmod 600, outside `public_html`, never committed) |
@@ -60,9 +60,11 @@ To exclude something more, add it to the lists and push. The next full run delet
 
 ## Who can read it
 
-The connector account (kidsoverprofitsdani@gmail.com) has BigQuery Data Viewer on `kop_prod` and Job User on the
-project. It also owns the project, so ownership gives it more than read access. The connector's read-only tool is
-what keeps queries to SELECT.
+The claude.ai BigQuery connector signs in as **ttiresearch.dani@gmail.com**. That account has BigQuery Data Viewer on
+`kop_prod`, plus BigQuery Job User and MCP Tool User (`roles/mcp.toolUser`) on the project, and nothing else. The
+connector needs MCP Tool User: without it every call is refused with "does not have mcp.tools.call permission".
+kidsoverprofitsdani@gmail.com owns the project (it holds the same three roles too, which add nothing to Owner).
+To give another account read access, grant it the same three roles.
 
 ## Rotating the key
 
