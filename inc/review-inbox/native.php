@@ -247,6 +247,9 @@ function kop_rinbox_native_item($type, array $r) {
         'moves'        => $moves,
         'actions'      => $actions,
         'moved'        => $log ? array('to' => $log['to']) : null,
+        // Still waiting for a decision, though its Approve / Reject are the page's own buttons, not card actions
+        // (so add-ons such as Send to Claude don't read "no actions" as "decided").
+        'waiting'      => $pending && !$log,
         'approve_help' => kop_rinbox_native_help($type)[0],
         'reject_help'  => kop_rinbox_native_help($type)[1],
     );

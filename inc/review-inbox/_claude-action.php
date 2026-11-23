@@ -70,9 +70,12 @@ function kop_rinbox_claude_card($source, array $item) {
     $id = kop_rinbox_claude_id($source, $item['key'] ?? '');
     $q = kop_rinbox_claude_queue()[$id] ?? null;
     // Only a card still waiting for a decision: one offering an Undo (filed, approved, trashed...) or nothing at all
-    // has been decided, unless it is on the list (so it can still be taken back).
+    // has been decided, unless it is on the list (so it can still be taken back). A native card (news, lawsuits,
+    // bills, data, wiki) is approved on the page's own buttons, so it says itself whether it is still waiting
+    // ('waiting', inc/review-inbox/native.php); Claude note #34: Data and Legislation cards had no button.
     $own = (array) ($item['actions'] ?? array());
-    $decided = !$own || array_filter($own, function ($a) { return ($a['style'] ?? '') === 'undo'; });
+    $undo = array_filter($own, function ($a) { return ($a['style'] ?? '') === 'undo'; });
+    $decided = $undo || (!$own && empty($item['waiting']));
     if ($decided && !$q) return null;
     if ($q) {
         $by = (string) ($q['by'] ?? '');

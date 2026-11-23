@@ -1868,6 +1868,7 @@
         api('held', null, { which: which }).then(function (data) {
             var items = data.items || [];
             statusEl.textContent = items.length ? items.length + (items.length === 1 ? ' item' : ' items') : 'Nothing here.';
+            if (which === 'research') researchToClaude(items);
             items.forEach(function (it) {
                 listEl.appendChild(card(it));
                 if (it.native) listEl.lastChild.appendChild(el('p', { class: 'rinbox-help' }, [
@@ -1880,6 +1881,55 @@
                 ]));
             });
         }).catch(function (e) { statusEl.textContent = 'Could not load: ' + e.message; });
+    }
+
+    /*
+     * Needs research: send every card here to Claude in one go (Claude note #34, "why can't i easily send these
+     * to claude?"). Each goes through the card's own Send to Claude (inc/review-inbox/_claude-action.php), so each
+     * lands in Recently done with its Undo and shows "Take back from Claude" on its card.
+     */
+    function researchToClaude(items) {
+        var sendable = items.filter(function (it) {
+            return (it.actions || []).some(function (a) { return a.id === 'send_to_claude'; });
+        });
+        var waiting = items.filter(function (it) {
+            return (it.actions || []).some(function (a) { return a.id === 'claude_take_back'; });
+        }).length;
+        var bar = el('div', { class: 'rinbox-bulk' });
+        if (!sendable.length) {
+            if (waiting) bar.appendChild(el('span', { class: 'rinbox-bulk-count', text: 'All ' + waiting + ' are on Claude’s list.' }));
+            else return;
+            panel.insertBefore(bar, listEl);
+            return;
+        }
+        var note = el('textarea', { class: 'rinbox-claude-note', rows: '2', 'aria-label': 'What should Claude do with these? (optional)',
+            placeholder: 'What should Claude do with these? (optional)' });
+        var btn = el('button', { type: 'button', class: 'rinbox-btn rinbox-btn-neutral',
+            text: 'Send ' + (sendable.length === 1 ? 'it' : 'all ' + sendable.length) + ' to Claude',
+            title: 'Puts every card here that is not already on Claude’s list onto it. A Claude session looks each one up, decides how to file it and does it with the card’s own buttons, leaving a note on the card. Each send has its Undo in Recently done.' });
+        var count = el('span', { class: 'rinbox-bulk-count', role: 'status',
+            text: waiting ? waiting + ' already on Claude’s list.' : '' });
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            var text = note.value.trim();
+            var done = 0, failed = 0;
+            var next = function (i) {
+                if (i >= sendable.length) {
+                    count.textContent = 'Sent ' + done + ' to Claude' + (failed ? '; ' + failed + ' could not be sent' : '') + '.';
+                    setTimeout(function () { renderHeld('research'); }, 1200);
+                    return Promise.resolve();
+                }
+                var it = sendable[i];
+                count.textContent = 'Sending ' + (i + 1) + ' of ' + sendable.length + '…';
+                return api('act', { source: it.source, key: it.key, action: 'send_to_claude', params: { claude_note: text } })
+                    .then(function () { done++; }, function () { failed++; })
+                    .then(function () { return next(i + 1); });
+            };
+            next(0);
+        });
+        bar.appendChild(el('div', { class: 'rinbox-bulk-actions' }, [note, btn]));
+        bar.appendChild(count);
+        panel.insertBefore(bar, listEl);
     }
 
     /*

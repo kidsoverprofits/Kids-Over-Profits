@@ -1275,6 +1275,16 @@ details.rinbox-tool-fold > summary {
     gap: 6px;
 }
 
+/* Needs research: "Send all to Claude" with an optional note (Claude note #34). */
+.rinbox-bulk-actions .rinbox-claude-note {
+    flex: 1 1 320px;
+    min-width: 0;
+    max-width: 560px;
+    box-sizing: border-box;
+    color: var(--kop-midnight-blue, #000435);
+    background: #fff;
+}
+
 .rinbox-title-row {
     display: flex;
     gap: 8px;

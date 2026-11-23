@@ -55,6 +55,11 @@ function kop_rinbox_test_claude_action(callable $check) {
 
     $a = $action($card(), 'send_to_claude');
     $check('claude: every card has Send to Claude, a small form with an optional note', $a && !empty($a['ask']) && ($a['params'][0]['name'] ?? '') === 'claude_note', json_encode($a));
+    // A native card (Data, Legislation...) has no card actions of its own; 'waiting' says it is still undecided (note #34).
+    $native = kop_rinbox_claude_card('data', array('key' => '9', 'actions' => array(), 'waiting' => true));
+    $decidedNative = kop_rinbox_claude_card('data', array('key' => '9', 'actions' => array(), 'waiting' => false));
+    $check('claude: a waiting native card with no buttons of its own still offers Send to Claude, a decided one does not',
+        ($native['id'] ?? '') === 'send_to_claude' && $decidedNative === null, json_encode(array($native, $decidedNative)));
     $check('claude: not on Bug reports or Write-ups (they go to Claude their own way)',
         !kop_rinbox_addon_on('send-to-claude', 'bug-reports') && !kop_rinbox_addon_on('send-to-claude', 'writeups') && kop_rinbox_addon_on('send-to-claude', 'news'));
 
