@@ -33550,7 +33550,95 @@
     "text": "Scissor Tail Landing, Norman (facility 100806). It held boys in 2024: FOX 25, Oct. 7, 2024 (Tom Ferguson) reports a 14-year-old boy and several other teens leaving 'the Scissortail Landing Juvenile Center' in Norman. It is not a county detention center (OJA's list of 11 has no Scissortail). OJA's 2026 pages list it for girls.",
     "at": "2026-11-22"
    }
+  },
+  {
+   "key": "lawsuits:has-p-r-s-2025-suit-against-red-rock-canyon-scho",
+   "section": "Lawsuits",
+   "title": "Has P.R.'s 2025 suit against Red Rock Canyon School and Sequel been ruled on, settled or dismissed?",
+   "text": "P.R. sued Red Rock Canyon School, Sequel and Atonio and Asiah Kavea in May 2025 (Moxie Law Group, at least $10 million). As of November 2026 no ruling, settlement or dismissal was found in KOP's records or news coverage; the About rewrite says so. Find the case number and court (likely Utah Fifth District, Washington County) and its status, then update lawsuit 3 and the About.",
+   "context": "",
+   "records": [
+    10368
+   ],
+   "found": "found 2026-11-23, Claude note #37 session",
+   "directions": [
+    {
+     "label": "KUTV, 2025",
+     "url": "https://kutv.com/news/local/lawsuit-claims-staff-at-former-st-george-youth-center-abused-impregnated-teenage-girls",
+     "kind": "note"
+    },
+    {
+     "label": "News: ‘State-sponsored Abandonment’ No More: California Stops Paying for Adoptees Sent to Out-of-State Treatment Centers (The Imprint, 2025-07-22)",
+     "url": "https://imprintnews.org/top-stories/state-sponsored-abandonment-no-more-california-stops-paying-for-adoptees-sent-to-out-of-state-treatment-centers/262649",
+     "kind": "news"
+    },
+    {
+     "label": "News: Lawsuit claims staff at former St. George youth center abused, impregnated teenage girls (KUTV, 2025-06-10)",
+     "url": "https://kutv.com/news/local/lawsuit-claims-staff-at-former-st-george-youth-center-abused-impregnated-teenage-girls",
+     "kind": "news"
+    },
+    {
+     "label": "News: How Utah became the birthplace of the once-lucrative wilderness therapy industry for ‘troubled teens’ (The Salt Lake Tribune, 2024-05-07)",
+     "url": "https://www.sltrib.com/news/2024/05/07/how-utah-became-birthplace-once/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Multiple injuries as riot breaks out at Red Rock Canyon School in St. George (KJZZ, 2023-10-12)",
+     "url": "https://kjzz.com/news/local/gallery/multiple-injuries-as-riot-breaks-out-at-red-rock-canyon-school-in-st-george",
+     "kind": "news"
+    },
+    {
+     "label": "News: Former Red Rock Canyon School staffer comes forward with abuse and neglect allegations (ABC4 News, 2023-10-04)",
+     "url": "https://www.abc4.com/news/southern-utah/former-red-rock-canyon-school-comes-forward-with-abuse-and-neglect-allegations/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Samantha Gerson v. Logan River Academy (UNITED STATES DISTRICT COURT CENTRAL DISTRICT OF CALIFORNIA, filed 2019-06-09)",
+     "url": "https://storage.courtlistener.com/recap/gov.uscourts.cacd.749325/gov.uscourts.cacd.749325.1.0.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: sued the school (United States District Court, Central District of California, filed 2019-06-09)",
+     "url": "https://www.courtlistener.com/recap/gov.uscourts.cacd.749325/gov.uscourts.cacd.749325.1.0.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: 05-758 - Robertson et al v. Red Rock Canyon School LLC et al - Content Details - (United States District Court for the District of Utah, filed 2008-12-18)",
+     "url": "https://www.govinfo.gov/app/details/USCOURTS-utd-2_05-cv-00758",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Robertson et al v. Red Rock Canyon School LLC et al (Utah District Court, filed 2005-09-12)",
+     "url": "https://www.pacermonitor.com/public/case/16930540/Robertson_et_al_v_Red_Rock_Canyon_School_LLC_et_al",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, April 2011, p. 14 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2011-p-14-red-rock-canyon-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-red-rock-canyon-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, February 2009, p. 20 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-february-2009-174-p-20-red-rock-canyon-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, April 2007, p. 29 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2007-152-p-29-red-rock-canyon-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived sequelyouthservices.com)",
+     "url": "https://web.archive.org/web/20170606035743/http://sequelyouthservices.com/html/staffsecure-redrockcanyon.html",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-11-22 23:16"
+ "built": "2026-11-23 15:52"
 }
