@@ -944,7 +944,8 @@ if (function_exists('add_action')) {
             array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function (WP_REST_Request $r) {
                 kop_wu_ensure_tables();
                 if (function_exists('kop_ar_claude_list')) {
-                    $records = kop_ar_claude_list((int) $r->get_param('offset'), (int) ($r->get_param('limit') ?: 50));
+                    // ?flagged=1: only the records the owner flagged on the Pick next tab, in order.
+                    $records = kop_ar_claude_list((int) $r->get_param('offset'), (int) ($r->get_param('limit') ?: 50), (bool) $r->get_param('flagged'));
                     $res = rest_ensure_response(array('records' => $records, 'total' => (int) ($GLOBALS['kop_ar_claude_total'] ?? count($records))));
                 } else {
                     $res = rest_ensure_response(array('records' => kop_wu_claude_list()));

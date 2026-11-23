@@ -4,7 +4,9 @@
  * quotes, the owner's "Needs you" questions as buttons, research and the work log folded, and Publish / Send back
  * to Claude / Undo. The back end is inc/about-rewrites.php; the buttons are js/about-rewrites.js.
  *
- * Tabs: To review (a rewrite waiting), With Claude (sent back, or waiting for its first rewrite), Published.
+ * Tabs: To review (a rewrite waiting), Pick next (search every program and company page and flag the ones Claude
+ * writes next, in order, with a note: kop_ar_next()), With Claude (flagged, sent back, or waiting for its first
+ * rewrite), Published.
  */
 
 if (!defined('ABSPATH')) {
@@ -116,9 +118,9 @@ function kop_ar_card($e, $view) {
     }
 
     if ($view === 'claude') {
-        $why = array('sent' => 'Sent back to Claude', 'facts' => count($held) . ' approved fact' . (count($held) === 1 ? '' : 's') . ' waiting to be written in',
+        $why = array('sent' => 'Sent back to Claude', 'flagged' => 'You flagged it to write next', 'facts' => count($held) . ' approved fact' . (count($held) === 1 ? '' : 's') . ' waiting to be written in',
             'changed' => 'The record changed since its About was written')[$e['why']] ?? '';
-        $note = (string) ($d['sent_back']['note'] ?? '');
+        $note = $e['why'] === 'flagged' ? (string) ($e['note'] ?? '') : (string) ($d['sent_back']['note'] ?? '');
         $out .= '<header class="kop-ar-head"><h2>' . $title . '</h2><span class="kop-ar-meta">' . $sub . ' &middot; ' . esc_html($why) . '</span></header>';
         if ($note !== '') $out .= '<p class="kop-ar-sentnote"><strong>Your note:</strong> ' . esc_html($note) . '</p>';
         return $out . '</article>';
@@ -166,7 +168,7 @@ function kop_ar_card($e, $view) {
 function kop_ar_screen() {
     if (!current_user_can('manage_options')) wp_die('Not authorized', 'Access Denied', array('response' => 403));
     $view = sanitize_key($_GET['tab'] ?? 'review');
-    $view = in_array($view, array('review', 'claude', 'published'), true) ? $view : 'review';
+    $view = in_array($view, array('review', 'pick', 'claude', 'published'), true) ? $view : 'review';
     $paged = max(1, (int) ($_GET['paged'] ?? 1));
     try {
         $lists = kop_ar_lists();
@@ -185,13 +187,20 @@ function kop_ar_screen() {
             '<strong>Publish</strong> puts the rewrite on the page, its survivor quotes in the page\'s Survivor testimony section, and any approved facts held for the record onto it.',
             'If it needs changes, open <strong>Send back to Claude</strong>, say what, and send it: Claude rewrites it with your answers and note, and it comes back here.',
             '<strong>Published</strong> lists every rewrite on the site, with Undo, which puts back the About, the quotes and the facts as they were.',
+            'To choose what Claude writes next, open <strong>Pick next</strong>: search, press <strong>Flag</strong>, and order the list. Claude takes them from the top.',
         ),
     ));
     echo kop_ak_tabs(array(
         'review'    => array('label' => 'To review', 'count' => count($lists['review'])),
-        'claude'    => array('label' => 'With Claude', 'count' => count($lists['claude']), 'title' => 'Sent back, or waiting for a first rewrite'),
+        'pick'      => array('label' => 'Pick next', 'count' => count(kop_ar_next()), 'title' => 'Search every program and company and flag the ones Claude writes next'),
+        'claude'    => array('label' => 'With Claude', 'count' => count($lists['claude']), 'title' => 'Flagged, sent back, or waiting for a first rewrite'),
         'published' => array('label' => 'Published', 'count' => count($lists['published'])),
     ), $view, function ($k) use ($url) { return $url($k); });
+    if ($view === 'pick') {
+        echo kop_ar_pick_html();
+        echo '</div>';
+        return;
+    }
     $items = array_values($lists[$view]);
     $pages = max(1, (int) ceil(count($items) / KOP_AR_PER_PAGE));
     $paged = min($paged, $pages);
@@ -203,6 +212,33 @@ function kop_ar_screen() {
     foreach ($slice as $e) echo kop_ar_card($e, $view);
     echo kop_ak_pager($paged, $pages, count($items), 'records', function ($n) use ($url, $view) { return $url($view, $n); });
     echo '</div>';
+}
+
+/**
+ * The Pick next tab: the flagged list (Claude writes these first, top down) and a search over every program and company
+ * page. The rows are drawn by js/about-rewrites.js from the 'pick-search' and 'pick-list' answers; this is the frame.
+ */
+function kop_ar_pick_html() {
+    $out = '<section class="kop-ar-pick" aria-labelledby="kop-ar-flagged-h">';
+    $out .= '<h2 id="kop-ar-flagged-h" class="kop-ar-pick__h">Flagged for Claude <span class="kop-ak-count" data-flag-count>' . count(kop_ar_next()) . '</span></h2>';
+    $out .= '<p class="kop-ar-meta">Claude writes these first, top to bottom. Each one leaves this list when its rewrite comes in under To review.</p>';
+    $out .= '<ol class="kop-ar-flagged" data-flagged aria-live="polite"></ol>';
+    $out .= '<p class="kop-ar-empty" data-flagged-empty hidden>Nothing flagged yet. Search below and press Flag.</p>';
+    $out .= '</section>';
+
+    $out .= '<section class="kop-ar-pick" aria-labelledby="kop-ar-find-h">';
+    $out .= '<h2 id="kop-ar-find-h" class="kop-ar-pick__h">Find records</h2>';
+    $out .= '<form class="kop-ar-find" data-find role="search" onsubmit="return false">'
+        . '<label class="screen-reader-text" for="kop-ar-q">Search</label>'
+        . '<input type="search" id="kop-ar-q" name="q" class="kop-ak-search" autocomplete="off" placeholder="Name, other name, city, state (UT), company, or id">'
+        . '<label><span class="screen-reader-text">Kind</span><select name="kind"><option value="">Programs and companies</option><option value="facility">Programs</option><option value="operator">Companies</option></select></label>'
+        . '<label><span class="screen-reader-text">Show</span><select name="show"><option value="none">No rewrite yet</option><option value="">Any</option><option value="published">Published rewrites</option></select></label>'
+        . '<label><span class="screen-reader-text">Sort</span><select name="sort"><option value="">Best match</option><option value="news">Most news</option><option value="lawsuits">Most lawsuits</option><option value="name">A to Z</option></select></label>'
+        . '</form>';
+    $out .= '<p class="kop-ar-meta" data-find-status aria-live="polite"></p>';
+    $out .= '<table class="widefat striped kop-ar-results"><thead><tr><th scope="col">Record</th><th scope="col" class="num">News</th><th scope="col" class="num">Lawsuits</th>'
+        . '<th scope="col">Now</th><th scope="col"><span class="screen-reader-text">Flag</span></th></tr></thead><tbody data-results></tbody></table>';
+    return $out . '</section>';
 }
 
 add_action('wp_ajax_kop_about_rewrites', function () {
@@ -223,6 +259,21 @@ add_action('wp_ajax_kop_about_rewrites', function () {
             case 'send-back':
                 kop_ar_send_back($key, wp_unslash($_POST['note'] ?? ''), $who);
                 wp_send_json_success(array('message' => 'Sent back to Claude. It is under With Claude until the new rewrite comes in.'));
+            case 'pick-search':
+                $rows = kop_ar_search(array('q' => wp_unslash($_POST['q'] ?? ''), 'kind' => sanitize_key($_POST['kind'] ?? ''),
+                    'show' => sanitize_key($_POST['show'] ?? ''), 'sort' => sanitize_key($_POST['sort'] ?? ''), 'limit' => 60));
+                wp_send_json_success(array('rows' => $rows, 'total' => (int) ($GLOBALS['kop_ar_search_total'] ?? count($rows))));
+            case 'pick-list':
+                wp_send_json_success(array('flagged' => kop_ar_flagged_rows()));
+            case 'flag':
+                $n = kop_ar_flag($key, wp_unslash($_POST['note'] ?? ''), $who);
+                wp_send_json_success(array('message' => 'Flagged: number ' . $n . ' on Claude\'s list.', 'flagged' => kop_ar_flagged_rows()));
+            case 'unflag':
+                kop_ar_unflag($key);
+                wp_send_json_success(array('message' => 'Flag taken off.', 'flagged' => kop_ar_flagged_rows()));
+            case 'flag-move':
+                kop_ar_flag_move($key, sanitize_key($_POST['to'] ?? ''));
+                wp_send_json_success(array('flagged' => kop_ar_flagged_rows()));
         }
         wp_send_json_error('Unknown action.');
     } catch (Throwable $e) {

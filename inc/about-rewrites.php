@@ -249,6 +249,7 @@ function kop_ar_save_rewrite($kind, $id, array $rw, $by = 'Claude') {
         'check' => '');
     kop_wu_put($key, $draft, $wu['published']);
     kop_wu_take_from_claude($key);
+    kop_ar_unflag($key);   // the rewrite came in: it leaves the owner's "write next" list
     return $draft;
 }
 
@@ -416,8 +417,15 @@ function kop_ar_lists() {
             $out['published'][$key] = array('key' => $key, 'kind' => $kind, 'id' => $id, 'why' => 'published', 'at' => (string) ($p['at'] ?? ''));
         }
     }
+    // The owner's flags first, in order (Pick next tab), then everything else waiting.
+    foreach (kop_ar_next() as $f) {
+        $key = (int) $f['key'];
+        if (isset($out['review'][$key])) continue;
+        list($kind, $id) = kop_ar_from_key($key);
+        $out['claude'][$key] = array('key' => $key, 'kind' => $kind, 'id' => $id, 'why' => 'flagged', 'note' => (string) ($f['note'] ?? ''), 'at' => (string) ($f['at'] ?? ''));
+    }
     foreach (kop_wu_claude_queue() as $key => $s) {
-        if (isset($out['review'][(int) $key])) continue;
+        if (isset($out['review'][(int) $key]) || isset($out['claude'][(int) $key])) continue;
         list($kind, $id) = kop_ar_from_key($key);
         $out['claude'][(int) $key] = array('key' => (int) $key, 'kind' => $kind, 'id' => $id, 'why' => 'sent', 'at' => (string) ($s['at'] ?? ''));
     }
@@ -436,16 +444,18 @@ function kop_ar_lists() {
  * answers on a sent-back one. Held facts are counted only (the packet export has them in full), so the list stays
  * one query per record at most.
  */
-function kop_ar_claude_list($offset = 0, $limit = 50) {
+function kop_ar_claude_list($offset = 0, $limit = 50, $flagged_only = false) {
     $out = array();
     $all = kop_ar_lists()['claude'];
+    if ($flagged_only) $all = array_filter($all, function ($e) { return $e['why'] === 'flagged'; });
     $GLOBALS['kop_ar_claude_total'] = count($all);
     foreach (array_slice($all, max(0, (int) $offset), max(1, min(500, (int) $limit))) as $e) {
         $page = kop_ar_page($e['kind'], $e['id']);
         if ($page === '') continue;
         $x = array('kind' => $e['kind'], 'id' => $e['id'], 'packet_id' => ($e['kind'] === 'operator' ? 'o' : 'f') . $e['id'],
             'name' => kop_ar_name($e['kind'], $e['id']), 'page' => $page, 'url' => home_url('/' . $page . '/'), 'why' => $e['why']);
-        $d = $e['why'] === 'sent' ? kop_wu_get($e['key'])['draft'] : array();
+        if ($e['why'] === 'flagged' && ($e['note'] ?? '') !== '') $x['note'] = $e['note'];
+        $d = in_array($e['why'], array('sent', 'flagged'), true) ? kop_wu_get($e['key'])['draft'] : array();
         if (($d['kind'] ?? '') === 'rewrite' && !empty($d['sent_back'])) {
             $x['note'] = (string) ($d['sent_back']['note'] ?? '');
             $x['answers'] = array();
@@ -454,6 +464,240 @@ function kop_ar_claude_list($offset = 0, $limit = 50) {
         }
         if (isset($e['held'])) $x['held_facts'] = $e['held'];
         $out[] = $x;
+    }
+    return $out;
+}
+
+/* ---- Pick next: the owner's "write these next" list (Pick next tab) ------------------------------------------ */
+
+/**
+ * The records the owner flagged for Claude to write next, in the owner's order: [{key, at, by, note}], option kop_ar_next.
+ * Claude's list (kop_ar_lists()['claude'], GET kop/v1/writeups/claude) puts them first; a record leaves the list when
+ * its rewrite comes in (kop_ar_save_rewrite()) or the owner takes the flag off.
+ */
+function kop_ar_next() {
+    $q = function_exists('get_option') ? get_option('kop_ar_next', array()) : array();
+    return is_array($q) ? array_values(array_filter($q, function ($f) { return is_array($f) && !empty($f['key']); })) : array();
+}
+
+function kop_ar_next_put(array $list) {
+    update_option('kop_ar_next', array_values($list), false);
+}
+
+/** Flag a record (added at the end), or change the note on one already flagged. Returns its place (1-based). */
+function kop_ar_flag($key, $note, $by) {
+    $key = (int) $key;
+    list($kind, $id) = kop_ar_from_key($key);
+    if (kop_ar_page($kind, $id) === '') throw new RuntimeException('That record has no page, so it cannot get an About.');
+    $wu = kop_wu_get($key);
+    if (($wu['draft']['kind'] ?? '') === 'rewrite' && empty($wu['draft']['sent_back'])) {
+        throw new RuntimeException('Its rewrite is waiting under To review. To have it redone, use Send back to Claude on its card there.');
+    }
+    $list = kop_ar_next();
+    foreach ($list as $i => $f) {
+        if ((int) $f['key'] === $key) {
+            $list[$i]['note'] = trim((string) $note);
+            kop_ar_next_put($list);
+            return $i + 1;
+        }
+    }
+    $list[] = array('key' => $key, 'at' => gmdate('Y-m-d H:i:s'), 'by' => (string) $by, 'note' => trim((string) $note));
+    kop_ar_next_put($list);
+    return count($list);
+}
+
+function kop_ar_unflag($key) {
+    $list = kop_ar_next();
+    $kept = array_values(array_filter($list, function ($f) use ($key) { return (int) $f['key'] !== (int) $key; }));
+    if (count($kept) !== count($list)) kop_ar_next_put($kept);
+}
+
+/** Move a flagged record: $to = up | down | top | bottom. */
+function kop_ar_flag_move($key, $to) {
+    $list = kop_ar_next();
+    $i = null;
+    foreach ($list as $n => $f) if ((int) $f['key'] === (int) $key) $i = $n;
+    if ($i === null) throw new RuntimeException('That record is not flagged any more. Reload the page.');
+    $item = $list[$i];
+    array_splice($list, $i, 1);
+    $j = array('up' => $i - 1, 'down' => $i + 1, 'top' => 0, 'bottom' => count($list))[$to] ?? $i;
+    array_splice($list, max(0, min(count($list), $j)), 0, array($item));
+    kop_ar_next_put($list);
+}
+
+/** News and lawsuit counts by facility id: [fid => [news, lawsuits]]. Passing mentions in news don't count. */
+function kop_ar_counts() {
+    global $wpdb;
+    $out = array();
+    $sets = array(
+        0 => 'SELECT facility_id AS f, COUNT(DISTINCT news_id) AS n FROM news_facility_links WHERE (passing IS NULL OR passing = 0) GROUP BY facility_id',
+        1 => 'SELECT facility_id AS f, COUNT(DISTINCT lawsuit_id) AS n FROM lawsuit_facility_links GROUP BY facility_id',
+    );
+    foreach ($sets as $slot => $sql) {
+        foreach ((array) $wpdb->get_results($sql, ARRAY_A) as $r) {
+            if (!isset($out[(int) $r['f']])) $out[(int) $r['f']] = array(0, 0);
+            $out[(int) $r['f']][$slot] = (int) $r['n'];
+        }
+    }
+    return $out;
+}
+
+/** A name as plain lower-case words, for matching. */
+function kop_ar_norm($s) {
+    $s = (string) $s;
+    if (function_exists('remove_accents')) $s = remove_accents($s);
+    return trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower($s)));
+}
+
+/**
+ * Search every record with a page, for the Pick next tab. $o: q (name, other or past name, city, two-letter state,
+ * company, or a record id like 10545 / o12), kind (facility | operator | ''), show (none = no rewrite yet | published |
+ * flagged | ''), sort (match | news | lawsuits | name), limit. Rows: {key, kind, id, name, page, url, place, years,
+ * status, company, programs, news, lawsuits, stage (none | review | claude | published), flagged (place in the list,
+ * 0 = not)}. With no words it lists the records with the most news first, so the best known surface on their own.
+ */
+function kop_ar_search(array $o) {
+    global $wpdb;
+    $q = kop_ar_norm($o['q'] ?? '');
+    $kind = in_array($o['kind'] ?? '', array('facility', 'operator'), true) ? $o['kind'] : '';
+    $show = in_array($o['show'] ?? '', array('none', 'published', 'flagged'), true) ? $o['show'] : '';
+    $sort = in_array($o['sort'] ?? '', array('news', 'lawsuits', 'name', 'match'), true) ? $o['sort'] : ($q === '' ? 'news' : 'match');
+    $limit = max(1, min(200, (int) ($o['limit'] ?? 60)));
+    $words = $q === '' ? array() : explode(' ', $q);
+    $raw = strtolower(trim((string) ($o['q'] ?? '')));
+    $id_f = preg_match('/^f?(\d+)$/', $raw, $m) ? (int) $m[1] : 0;
+    $id_o = preg_match('/^o(\d+)$/', $raw, $m) ? (int) $m[1] : 0;
+
+    $lists = kop_ar_lists();
+    $stage = function ($key) use ($lists) {
+        if (isset($lists['review'][$key])) return 'review';
+        if (isset($lists['published'][$key])) return 'published';
+        if (isset($lists['claude'][$key]) && $lists['claude'][$key]['why'] === 'sent') return 'claude';
+        return 'none';
+    };
+    $flags = array();
+    foreach (kop_ar_next() as $n => $f) $flags[(int) $f['key']] = $n + 1;
+
+    // 3 = a name starts with the search, 2 = each word starts a word of one name, 1 = each word is somewhere, 0 = none.
+    $score = function (array $names) use ($q, $words) {
+        if ($q === '') return 1;
+        $best = 0;
+        $normed = array_values(array_filter(array_map('kop_ar_norm', $names), 'strlen'));
+        foreach ($normed as $n) {
+            if (strpos($n, $q) === 0) return 3;
+            $ok = true;
+            foreach ($words as $w) if (strpos(' ' . $n, ' ' . $w) === false) { $ok = false; break; }
+            if ($ok) $best = 2;
+        }
+        if ($best) return $best;
+        $all = implode(' | ', $normed);
+        foreach ($words as $w) if (strpos($all, $w) === false) return 0;
+        return 1;
+    };
+
+    $op_index = function_exists('kop_operator_pages_index') ? kop_operator_pages_index() : array();
+    $op_lead = function ($oid) use ($op_index) {
+        $lead = (int) ($op_index['alias_of'][(int) $oid] ?? $oid);
+        return isset($op_index['ids'][$lead]) ? $lead : 0;
+    };
+    $links = array();   // facility id => [company lead id => name]
+    $members = array(); // company lead id => [facility ids]
+    foreach ((array) $wpdb->get_results('SELECT operator_id, facility_id FROM ' . $wpdb->prefix . 'kop_operator_facilities', ARRAY_A) as $r) {
+        $lead = $op_lead((int) $r['operator_id']);
+        if (!$lead) continue;
+        $e = $op_index['ids'][$lead];
+        $links[(int) $r['facility_id']][$lead] = (string) ($e['display'] ?? $e['name']);
+        $members[$lead][(int) $r['facility_id']] = (int) $r['facility_id'];
+    }
+    $counts = kop_ar_counts();
+    $rows = array();
+
+    if ($kind !== 'operator' && !$id_o) {
+        $fidx = function_exists('kop_facility_pages_index') ? kop_facility_pages_index() : array();
+        foreach ((array) $wpdb->get_results('SELECT id, name, state, city, status, start_year, end_year, json_data FROM facilities_v2', ARRAY_A) as $r) {
+            $id = (int) $r['id'];
+            if (!isset($fidx['ids'][$id])) continue;   // no page: merged away, or nothing on record
+            if ($id_f) {
+                if ($id !== $id_f) continue;
+                $s = 4;
+            } else {
+                $doc = json_decode((string) $r['json_data'], true) ?: array();
+                $ident = (array) ($doc['identification'] ?? array());
+                $names = array_merge(array((string) $r['name'], (string) ($ident['currentName'] ?? ''), (string) ($ident['popularName'] ?? ''), (string) $r['city']),
+                    array_map('strval', (array) ($ident['otherNames'] ?? array())), array_map('strval', (array) ($ident['pastNames'] ?? array())));
+                $s = $score($names);
+                if (!$s && $q !== '') {
+                    // A state code ("ut") or a company's name finds its programs, below a name match.
+                    if (strlen($q) === 2 && strtolower(trim((string) $r['state'])) === $q) $s = 1;
+                    elseif (!empty($links[$id]) && $score(array_values($links[$id]))) $s = 1;
+                }
+                if (!$s) continue;
+            }
+            $c = $counts[$id] ?? array(0, 0);
+            $sy = (int) $r['start_year'];
+            $ey = (int) $r['end_year'];
+            $rows[] = array('key' => $id, 'kind' => 'facility', 'id' => $id, 'name' => kop_ar_name('facility', $id), 'page' => 'facility/' . $fidx['ids'][$id]['slug'],
+                'place' => implode(', ', array_filter(array(trim((string) $r['city']), strtoupper(trim((string) $r['state']))), 'strlen')),
+                'years' => ($sy || $ey) ? ($sy ?: '?') . '-' . ($ey ?: '') : '',
+                'status' => (string) $r['status'], 'company' => implode('; ', array_values((array) ($links[$id] ?? array()))), 'programs' => 0,
+                'news' => $c[0], 'lawsuits' => $c[1], 'score' => $s);
+        }
+    }
+    if ($kind !== 'facility' && !$id_f) {
+        $by_lead = array();
+        foreach ((array) ($op_index['names'] ?? array()) as $nk => $lead) $by_lead[(int) $lead][] = (string) $nk;
+        foreach ((array) ($op_index['ids'] ?? array()) as $oid => $e) {
+            $oid = (int) $oid;
+            if ($id_o) {
+                if ($oid !== $id_o) continue;
+                $s = 4;
+            } else {
+                $s = $score(array_merge(array((string) $e['name'], (string) ($e['display'] ?? ''), (string) ($e['record_display'] ?? '')), (array) ($by_lead[$oid] ?? array())));
+                if (!$s) continue;
+            }
+            $news = 0;
+            $suits = 0;
+            foreach ((array) ($members[$oid] ?? array()) as $fid) {
+                $news += $counts[$fid][0] ?? 0;
+                $suits += $counts[$fid][1] ?? 0;
+            }
+            // A company outranks its programs on an equal match: the search named it.
+            $rows[] = array('key' => kop_ar_key('operator', $oid), 'kind' => 'operator', 'id' => $oid, 'name' => kop_ar_name('operator', $oid),
+                'page' => 'operator/' . $e['slug'], 'place' => '', 'years' => '', 'status' => '', 'company' => '',
+                'programs' => count((array) ($members[$oid] ?? array())), 'news' => $news, 'lawsuits' => $suits, 'score' => $s + 0.5);
+        }
+    }
+
+    $out = array();
+    foreach ($rows as $r) {
+        $r['stage'] = $stage((int) $r['key']);
+        $r['flagged'] = (int) ($flags[(int) $r['key']] ?? 0);
+        if ($show === 'none' && ($r['stage'] !== 'none' || $r['flagged'])) continue;
+        if ($show === 'published' && $r['stage'] !== 'published') continue;
+        if ($show === 'flagged' && !$r['flagged']) continue;
+        $r['url'] = home_url('/' . $r['page'] . '/');
+        $out[] = $r;
+    }
+    usort($out, function ($a, $b) use ($sort) {
+        if ($sort === 'name') $c = 0;
+        elseif ($sort === 'lawsuits') $c = array($b['lawsuits'], $b['news']) <=> array($a['lawsuits'], $a['news']);
+        elseif ($sort === 'news') $c = array($b['news'], $b['lawsuits']) <=> array($a['news'], $a['lawsuits']);
+        else $c = array($b['score'], $b['news'] + $b['lawsuits']) <=> array($a['score'], $a['news'] + $a['lawsuits']);
+        return $c ?: strcasecmp($a['name'], $b['name']);
+    });
+    $GLOBALS['kop_ar_search_total'] = count($out);
+    return array_slice($out, 0, $limit);
+}
+
+/** The flagged list for the Pick next tab: [{key, kind, id, name, url, note, at, stage}] in the owner's order. */
+function kop_ar_flagged_rows() {
+    $out = array();
+    foreach (kop_ar_next() as $f) {
+        list($kind, $id) = kop_ar_from_key((int) $f['key']);
+        $page = kop_ar_page($kind, $id);
+        $out[] = array('key' => (int) $f['key'], 'kind' => $kind, 'id' => $id, 'name' => kop_ar_name($kind, $id),
+            'url' => $page !== '' ? home_url('/' . $page . '/') : '', 'note' => (string) ($f['note'] ?? ''), 'at' => (string) ($f['at'] ?? ''),
+            'published' => !empty(kop_wu_get((int) $f['key'])['published']['rewrite']));
     }
     return $out;
 }

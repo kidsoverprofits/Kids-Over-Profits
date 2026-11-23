@@ -168,5 +168,49 @@ $check("records waiting for a write-up are on Claude's list", !array_diff(array_
 $src = file_get_contents(dirname(__DIR__) . '/inc/record-writeups.php');
 $check('the hourly AI drafts are no longer scheduled', strpos($src, "wp_clear_scheduled_hook('kop_wu_hourly')") !== false && strpos($src, "wp_schedule_event(time() + 1200, 'hourly', 'kop_wu_hourly')") === false);
 
+echo "-- Pick next: search and flag --\n";
+$t0 = microtime(true);
+$hits = kop_ar_search(array('q' => 'provo canyon'));
+$secs = microtime(true) - $t0;
+$check('a name search finds the program first', $hits && stripos($hits[0]['name'], 'Provo Canyon') !== false, sprintf('%.1fs, first: %s', $secs, $hits[0]['name'] ?? '-'));
+$check('a search is quick enough to type into', $secs < 5, sprintf('%.1fs', $secs));
+$byid = kop_ar_search(array('q' => (string) $eagle));
+$check('an id finds that record', count($byid) === 1 && $byid[0]['id'] === $eagle);
+$co = kop_ar_search(array('q' => 'teen challenge', 'kind' => 'operator'));
+$check('companies are searchable', $co && $co[0]['kind'] === 'operator' && $co[0]['programs'] > 0, ($co[0]['name'] ?? '-') . ', ' . ($co[0]['programs'] ?? 0) . ' programs');
+$ut = kop_ar_search(array('q' => 'ut', 'kind' => 'facility', 'limit' => 200));
+$check('a state code finds that state\'s programs', count($ut) > 20 && count(array_filter($ut, function ($r) { return substr($r['place'], -2) === 'UT'; })) > 20, count($ut) . ' found');
+$top = kop_ar_search(array('show' => 'none', 'limit' => 10));
+$check('with no words, the most-reported records without a rewrite come first', $top && $top[0]['news'] >= $top[count($top) - 1]['news'] && $top[0]['stage'] === 'none',
+    implode(', ', array_map(function ($r) { return $r['name'] . ' (' . $r['news'] . ')'; }, array_slice($top, 0, 3))));
+$pub = kop_ar_search(array('show' => 'published', 'limit' => 200));
+$check('"Published rewrites" lists only published ones', $pub && !array_filter($pub, function ($r) { return $r['stage'] !== 'published'; }), count($pub) . ' published');
+
+$a = $top[0];
+$b = $top[1];
+$check('Flag puts a record on the list', kop_ar_flag($a['key'], '', 'test') === 1 && kop_ar_flag($b['key'], 'Lead with the 2019 closure', 'test') === 2);
+$lists = kop_ar_lists();
+$first = array_slice($lists['claude'], 0, 2, true);
+$check("flagged records lead Claude's list, in order", array_keys($first) === array((int) $a['key'], (int) $b['key']) && $first[(int) $b['key']]['why'] === 'flagged');
+$mine = kop_ar_claude_list(0, 10, true);
+$check('?flagged=1 lists only the flags, with the note', count($mine) === 2 && ($mine[1]['note'] ?? '') === 'Lead with the 2019 closure' && $mine[0]['why'] === 'flagged');
+kop_ar_flag_move($b['key'], 'top');
+$check('a flag can be moved to the top', (int) kop_ar_next()[0]['key'] === (int) $b['key']);
+kop_ar_flag($b['key'], 'New note', 'test');
+$check('flagging again changes the note, not the place', count(kop_ar_next()) === 2 && kop_ar_next()[0]['note'] === 'New note');
+$check('the search shows the flag and its place', (kop_ar_search(array('q' => (string) $b['id'], 'kind' => $b['kind']))[0]['flagged'] ?? 0) === 1
+    || $b['kind'] === 'operator');
+$threw = false;
+try { kop_ar_flag($eagle, '', 'test'); } catch (RuntimeException $e) { $threw = true; }
+$check('a record whose rewrite waits in To review cannot be flagged', $threw);
+$check('the With Claude card says it was flagged and shows the note', strpos(kop_ar_card(kop_ar_lists()['claude'][(int) $b['key']], 'claude'), 'New note') !== false);
+$check('the Pick next tab renders', strpos(kop_ar_pick_html(), 'data-find') !== false);
+if ($a['kind'] === 'facility') {
+    kop_ar_save_rewrite('facility', $a['id'], $pilot('rec04'));
+    $check('a rewrite coming in takes the flag off', count(kop_ar_next()) === 1 && (int) kop_ar_next()[0]['key'] === (int) $b['key']);
+}
+kop_ar_unflag($b['key']);
+$check('Unflag takes it off', !array_filter(kop_ar_next(), function ($f) use ($b) { return (int) $f['key'] === (int) $b['key']; }));
+
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);
