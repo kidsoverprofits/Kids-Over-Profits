@@ -3035,6 +3035,50 @@ if (!function_exists('kop_facility_pages_testimony')) {
                 'note'       => strpos((string) ($entry['id'] ?? ''), 'about:') === 0 ? trim((string) ($entry['note'] ?? '')) : '',
             );
         }
+        return kop_testimony_group_by_speaker($out);
+    }
+}
+
+if (!function_exists('kop_testimony_speaker')) {
+    /** Who a credited quote is from: the credit's first part ("Jennifer Msumba"), or '' when it names no one. */
+    function kop_testimony_speaker($credit) {
+        $who = trim((string) strtok((string) $credit, ','));
+        return $who === '' || preg_match('/\b(anonymous|unnamed|unidentified)\b/i', $who) ? '' : mb_strtolower($who);
+    }
+}
+
+if (!function_exists('kop_testimony_group_by_speaker')) {
+    /**
+     * One person's quotes together (owner, Claude note #36): a named speaker's later quotes move up behind their
+     * first, a quote from the same source as the one before it joins that quote as a new paragraph, and one from
+     * another source is marked joins_previous, so the page and the app show it in the same box under its own credit.
+     * Items: [{text, credit, url, note, ...}]; items with no named speaker stay where they are.
+     */
+    function kop_testimony_group_by_speaker(array $items) {
+        $order = array();
+        foreach (array_values($items) as $i => $t) {
+            $who = kop_testimony_speaker($t['credit'] ?? '');
+            $order[$who !== '' ? 's:' . $who : 'i:' . $i][] = $t;
+        }
+        $out = array();
+        foreach ($order as $group) {
+            $first = count($out);
+            foreach ($group as $t) {
+                $t['joins_previous'] = false;
+                if (count($out) > $first) {
+                    $prev = &$out[count($out) - 1];
+                    if ((string) ($prev['credit'] ?? '') === (string) ($t['credit'] ?? '') && (string) ($prev['url'] ?? '') === (string) ($t['url'] ?? '')
+                        && (string) ($prev['note'] ?? '') === (string) ($t['note'] ?? '')) {
+                        $prev['text'] = rtrim((string) $prev['text']) . "\n\n" . trim((string) $t['text']);
+                        unset($prev);
+                        continue;
+                    }
+                    unset($prev);
+                    $t['joins_previous'] = true;
+                }
+                $out[] = $t;
+            }
+        }
         return $out;
     }
 }

@@ -63,15 +63,29 @@ function kop_ar_sentences_html(array $sentences) {
 function kop_ar_quotes_html(array $quotes, $kind, $id) {
     if (!$quotes) return '';
     $out = '<div class="kop-ar-quotes"><h4>Survivor testimony (' . count($quotes) . ')</h4>';
+    // One person's quotes together, as the page shows them (kop_testimony_group_by_speaker()).
+    $items = array();
     foreach ($quotes as $q) {
-        $credit = implode(', ', array_filter(array($q['who'] ?? '', $q['where'] ?? '', preg_match('/^undated$/i', (string) ($q['date'] ?? '')) ? '' : ($q['date'] ?? '')), 'strlen'));
+        $q['credit'] = implode(', ', array_filter(array($q['who'] ?? '', $q['where'] ?? '', preg_match('/^undated$/i', (string) ($q['date'] ?? '')) ? '' : ($q['date'] ?? '')), 'strlen'));
+        $q['text'] = trim((string) ($q['text'] ?? ''));
+        $items[] = $q;
+    }
+    if (function_exists('kop_testimony_group_by_speaker')) $items = kop_testimony_group_by_speaker($items);
+    foreach ($items as $i => $q) {
+        $join = !empty($q['joins_previous']) && $i > 0;
+        $next = !empty($items[$i + 1]['joins_previous']);
+        $credit = $q['credit'];
         $where = !empty($q['facility_id']) && (int) $q['facility_id'] !== (int) $id
             ? ' <span class="kop-ar-meta">(goes on ' . esc_html(kop_ar_name('facility', (int) $q['facility_id'])) . ')</span>' : '';
-        $text = trim((string) ($q['text'] ?? ''));
-        $out .= '<blockquote>' . ($text !== '' ? esc_html($text) : '<em>Recording, no transcript yet: not shown on the page.</em>')
+        $text = $q['text'];
+        $paras = '';
+        foreach (preg_split('/\R\s*\R/', $text) as $para) if (trim($para) !== '') $paras .= '<p>' . esc_html(trim($para)) . '</p>';
+        if (!$join && $next) $out .= '<div class="kop-ar-quote-group">';
+        $out .= '<blockquote>' . ($text !== '' ? $paras : '<em>Recording, no transcript yet: not shown on the page.</em>')
             . '<footer>' . (!empty($q['url']) ? '<a href="' . esc_url($q['url']) . '" target="_blank" rel="noopener">' . esc_html($credit) . '</a>' : esc_html($credit)) . $where
             . (!empty($q['note']) ? '<br><span class="kop-ar-note">' . esc_html($q['note']) . '</span>' : '')
             . (!empty($q['via']) ? '<br><span class="kop-ar-meta">Read through ' . esc_html($q['via']) . '</span>' : '') . '</footer></blockquote>';
+        if (($join || $next) && !$next) $out .= '</div>';
     }
     return $out . '</div>';
 }

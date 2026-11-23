@@ -884,6 +884,17 @@
     color: var(--kop-text-secondary, #4a4f6a);
 }
 
+/* One person's quotes from different sources, in one box (kop_testimony_group_by_speaker()). */
+.kop-fp-testimony-part {
+    margin: 0;
+}
+
+.kop-fp-testimony-part + .kop-fp-testimony-part {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--kop-border-secondary, #b6d4e3);
+}
+
 /* A reader's quote that names staff (inc/reader-accounts.php): marked as their allegation. */
 .kop-ra-allegation {
     display: block;

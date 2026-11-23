@@ -905,8 +905,13 @@ get_header();
                 <h2><?php echo $kop_fp_icon('users'); ?><?php echo esc_html($kop_fp_title('testimony', 'Survivor testimony')); ?></h2>
                 <p class="kop-fp-testimony-lead">What people who lived or worked here say happened. Survivors' own words are published with their permission or quoted from where they published them, with only the spelling and punctuation fixed; forum accounts are what was posted publicly and are reported as claims, not findings.<?php if ($kop_fp_remember) : ?> Answers sent on our questions page are quoted as written, with only the spelling and punctuation fixed; what they say about staff they name is their allegation.<?php endif; ?></p>
                 <?php if (isset($kop_fp_psec['testimony'])) $kop_fp_render_items($kop_fp_psec['testimony']['items']); ?>
-                <?php foreach ((array) ($page['testimony'] ?? array()) as $kop_fp_t) : ?>
-                    <figure class="kop-fp-testimony">
+                <?php // One person's quotes share a box (kop_testimony_group_by_speaker()): joins_previous continues the box before it.
+                $kop_fp_tlist = array_values((array) ($page['testimony'] ?? array()));
+                foreach ($kop_fp_tlist as $kop_fp_ti => $kop_fp_t) :
+                    $kop_fp_tjoin = !empty($kop_fp_t['joins_previous']) && $kop_fp_ti > 0;
+                    $kop_fp_tnext = !empty($kop_fp_tlist[$kop_fp_ti + 1]['joins_previous']);
+                    if (!$kop_fp_tjoin && $kop_fp_tnext) echo '<div class="kop-fp-testimony kop-fp-testimony-group">'; ?>
+                    <figure class="<?php echo $kop_fp_tjoin || $kop_fp_tnext ? 'kop-fp-testimony-part' : 'kop-fp-testimony'; ?>">
                         <blockquote><?php foreach (preg_split('/\R\s*\R/', $kop_fp_t['text']) as $kop_fp_para) : ?><p><?php echo nl2br(esc_html(trim($kop_fp_para))); ?></p><?php endforeach; ?></blockquote>
                         <?php if (($kop_fp_t['credit'] ?? '') !== '') : ?>
                         <figcaption><?php echo ($kop_fp_t['url'] ?? '') !== '' && function_exists('kop_citation_link') ? kop_citation_link($kop_fp_t['url'], $kop_fp_t['credit'], '', true, '', true) : esc_html($kop_fp_t['credit']); ?><?php if (($kop_fp_t['note'] ?? '') !== '') : ?><span class="kop-ra-allegation"><?php echo esc_html($kop_fp_t['note']); ?></span><?php endif; ?></figcaption>
@@ -914,6 +919,7 @@ get_header();
                         <figcaption><?php echo !empty($kop_fp_t['submitted']) ? 'Submitted by a survivor' : 'Survivor account'; ?><?php if ($kop_fp_t['date_label'] !== '') : ?>, shared <?php echo esc_html($kop_fp_t['date_label']); ?><?php endif; ?></figcaption>
                         <?php endif; ?>
                     </figure>
+                    <?php if (($kop_fp_tjoin || $kop_fp_tnext) && !$kop_fp_tnext) echo '</div>'; ?>
                 <?php endforeach; ?>
                 <?php if ($kop_fp_remember) echo kop_ra_section_html($kop_fp_remember); // Escaped inside. ?>
                 <?php if (!empty($page['forum'])) : $kop_fp_forum = $page['forum']; ?>

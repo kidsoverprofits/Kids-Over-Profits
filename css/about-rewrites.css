@@ -42,6 +42,10 @@
 .kop-ar-quotes h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #50575e; }
 .kop-ar-quotes blockquote { margin: 0 0 12px; padding: 2px 0 2px 12px; border-left: 3px solid var(--kop-teal, #33A7B5); overflow-wrap: anywhere; }
 .kop-ar-quotes footer { font-size: 12px; color: #50575e; margin-top: 4px; }
+.kop-ar-quotes blockquote p { margin: 0 0 6px; }
+.kop-ar-quote-group { border-left: 3px solid var(--kop-teal, #33A7B5); margin: 0 0 12px; }
+.kop-ar-quote-group blockquote { border-left: 0; margin: 0; }
+.kop-ar-quote-group blockquote + blockquote { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #dcdcde; }
 .kop-ar-note { font-style: italic; }
 
 .kop-ar-folds { margin-top: 10px; }
