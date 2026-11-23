@@ -66,7 +66,9 @@ history and lessons).
    - an instruction to reply with one line per record.
 5. **Editors.** Opus at high effort, one per group, in waves, with EDITOR.md. Every draft gets the edit pass before
    it is sent. The edit pass covers the endings rule (22a), testimony quoted word for word, and restoring claims
-   that were cut only for having no link (rule 11).
+   that were cut only for having no link (rule 11), and ends with a proofread of every sentence (grammar, one tense
+   per sentence, commas, agreement). Before sending, the lead reads each draft's last paragraph aloud-check style:
+   it is the sentence most often rewritten and least often reread.
 6. **Check by script**, not by reading drafts: `python -I -X utf8 check.py`, then `convert.py <ids>` (fix every
    warning), then `linkcheck.py`. Map dead links in `url-map.json` and convert again.
 7. **Sources and archives.**
