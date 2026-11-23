@@ -13239,5 +13239,88 @@
         "gender": "Girls (boys in 2024)"
       }
     }
+  },
+  {
+    "id": 11034,
+    "unique_name": "The Ridge New Hampshire",
+    "version": 3,
+    "note": "2026-11-23 About batch 4 record fixes: opened 2002 as Shortridge Academy; serves all genders 12-20 as The Ridge; wiki's 'listed as closed, 2002' note removed (2002 is the founding year; open).",
+    "facility": {
+      "notes": [
+        "Accreditation: New England Association of Schools and Colleges (NEASC) (Woodbury Reports, April 2011, p. 13)",
+        "Accreditation: accredited by the New England Association of Schools and Colleges (NEASC) (Woodbury Reports, May 2013, p. 11)",
+        "Accreditation: active candidate for accreditation by the New England Association of Schools and Colleges (Woodbury Reports, July 2008, p. 11)",
+        "Accreditation: approved as a candidate for accreditation by the New England Association of Schools and Colleges (Woodbury Reports, January 2008, p. 29)",
+        "Length of stay: average 16-18 months (Woodbury Reports, July 2008, p. 10)",
+        "License: licensed by the State of New Hampshire Department of Education (Woodbury Reports, July 2008, p. 11)",
+        "Note: celebrated National Day on Writing with a Six-Word Memoir Contest, Create-the-Caption contest, Haiku contest, Write-Your-Life-from-A-Z Contest, and ongoing Scrabble Slam and Boggle games (Woodbury Reports, December 2011, p. 11)",
+        "Note: established inaugural Merit Scholarship Program for the Arts for new female applicants; reduced tuition contingent on maintaining a 3.0 GPA (Woodbury Reports, May 2012, p. 10)",
+        "Note: every teacher has a Master's Degree; two hold doctorates (Woodbury Reports, July 2011, p. 5)",
+        "Note: implemented 'PRIME for Life', an evidence-based component to reduce risk for drug or alcohol problems (Woodbury Reports, August 2010, p. 15)",
+        "Note: partnered with OutcomeTools to implement a web-based program evaluation system (Woodbury Reports, November 2012, p. 11)",
+        "Note: searching for a Director of Counseling to support its Positive Youth Development-informed residential/academic component for grades 9-12 (Woodbury Reports, November 2011, p. 9)",
+        "Note: students creating a new festival event for the nonprofit Woods, Water, and Wildlife Festival as part of the Positive Youth Development program (Woodbury Reports, August 2012, p. 11)",
+        "Described as: explicitly utilizes the evidence-based Positive Youth Development (PYD) perspective for individualized therapeutic programming (Woodbury Reports, May 2013, p. 11)",
+        "Campus: completed extensive building project: new classrooms, office space, meeting rooms, art studio, yoga/dance studio, workout room, music room, two-story cathedral great room (Woodbury Reports, November 2007, p. 30)",
+        "Campus: groundbreaking for a 4,400 square foot addition to the school (Woodbury Reports, December 2006, p. 26)",
+        "Length of stay: 10 to 18 months (r/troubledteens wiki, page \"The Ridge RTC NH\" (as of 2025-12-18))",
+        "Membership: NATSAP member from 2013 (r/troubledteens wiki, page \"The Ridge RTC NH\" (as of 2025-12-18))",
+        "Founded by: Adam Rainer (r/troubledteens wiki, page \"The Ridge RTC NH\" (as of 2025-12-18))"
+      ],
+      "operatingPeriod": {
+        "notes": [
+          "Ages 14-17 (Woodbury Reports, July 2008 (#167), p. 10: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0708.pdf#page=10)",
+          "Serves: Male (Woodbury Reports, April 2011, p. 13: https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0411.pdf#page=13)",
+          "Opened fall 2002 as Shortridge Academy; The Ridge RTC from 2023 (Shortridge Academy, 'History of Shortridge Academy', archived Oct 17, 2015: http://web.archive.org/web/20151017062207/http://www.shortridgeacademy.com/about-us/history-of-shortridge-academy/; Pine Tree Equity, Oct 2019: https://web.archive.org/web/20200926080425/https://www.pinetreeequity.com/investment-news/shortridge-academy-recapitalization)",
+          "As The Ridge RTC: all genders, ages 12 to 20 (The Ridge RTC, https://theridgertc.com/new-hampshire-the-ridge-rehab/, checked 2026-11-23); as Shortridge Academy it served teens 14 to 17"
+        ],
+        "status": "Open",
+        "endYear": null,
+        "startYear": 2002,
+        "yearsOfOperation": ""
+      },
+      "facilityDetails": {
+        "type": "Short-term Residential Treatment Center",
+        "gender": "All genders",
+        "ageRange": {
+          "min": 12,
+          "max": 20
+        },
+        "capacity": null,
+        "currentCensus": null,
+        "isPrivatelyOwned": null
+      }
+    }
+  },
+  {
+    "id": 11009,
+    "unique_name": "The Ridge Maine",
+    "version": 1,
+    "note": "2026-11-23 About batch 4 record fixes: opened 2006 as Ironwood Maine; serves all genders 12-20 as The Ridge; capacity 42 after The Cottages (June 2025).",
+    "facility": {
+      "operatingPeriod": {
+        "notes": [
+          "Ages 13-18 (r/troubledteens wiki, page \"The Ridge RTC Maine\" (as of 2026-03-30): https://www.reddit.com/r/troubledteens/wiki/index/ironwoodme)",
+          "Opened 2006 as Ironwood Maine (Fornits, 'Ironwood: New Facility in Maine', Oct 2, 2006: https://www.fornits.com/phpbb/index.php?topic=18283.0); The Ridge RTC Maine from January 2024, still run by Ironwood Maine LLC (PR Newswire, Jan 2024: https://www.prnewswire.com/news-releases/ridge-residential-treatment-center-announces-new-teen-treatment-center-in-maine-for-teens-12-17-302039794.html)",
+          "As The Ridge RTC: all genders, ages 12 to 20 (The Ridge RTC, https://theridgertc.com/maine-the-ridge-treatment-center/, checked 2026-11-23)",
+          "Capacity 42 after The Cottages opened, June 2025 (Newswire: https://www.newswire.com/news/the-ridge-rtc-expands-access-to-care-with-the-launch-of-the-cottages-22587521)"
+        ],
+        "status": "Open",
+        "endYear": null,
+        "startYear": 2006,
+        "yearsOfOperation": ""
+      },
+      "facilityDetails": {
+        "type": "Residential Treatment Center/Therapeutic Boarding School",
+        "gender": "All genders",
+        "ageRange": {
+          "min": 12,
+          "max": 20
+        },
+        "capacity": 42,
+        "currentCensus": null,
+        "isPrivatelyOwned": null
+      }
+    }
   }
 ]

@@ -33638,7 +33638,642 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-original-records-beyond-kop-research-notes",
+   "section": "About rewrites: sources to find",
+   "title": "What original records, beyond KOP research notes and the r/troubledteens wiki, show the CEDU careers of Adam Rainer, Bruce Wilson, Doug Kim-Brown, Mike Strader, Adele Logan and Coyote Karrick at The Ridge RTC in New Hampshire?",
+   "text": "The About cites KOP's research notes and the r/troubledteens wiki for these staff careers. Rocky Mountain Academy staff lists or Woodbury Reports (e.g. https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0708.pdf) may give an original to cite beside them. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Woodbury Reports, Jul 2008",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0708.pdf#page=10",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0708.pdf",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-0708.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:on-what-exact-date-did-shortridge-academy-in-ply",
+   "section": "About rewrites: facts to check",
+   "title": "On what exact date did Shortridge Academy in Plymouth, New Hampshire become The Ridge RTC?",
+   "text": "The Aug 14, 2023 PR Newswire release already uses The Ridge name (https://www.prnewswire.com/news-releases/the-ridge-rtc-partners-with-magellan-healthcare-to-expand-access-to-teen-mental-health-services-301899735.html), but the NH license still read Shortridge Academy on Oct 16, 2023 (https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0028807.pdf). Wikipedia cites a Nov 7, 2023 Reddit announcement. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "NH statement of findings, Oct 16, 2023",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0028807.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:is-there-a-police-licensing-or-court-record-behi",
+   "section": "About rewrites: sources to find",
+   "title": "Is there a police, licensing or court record behind a May 4, 2009 Fornits post saying a Shortridge Academy counselor was accused of sex with students and giving them alcohol and cigarettes, and was fired?",
+   "text": "A former student's May 4, 2009 Fornits post makes the claim about Shortridge Academy in New Hampshire; no official record is known. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:is-there-a-lawsuit-or-criminal-case-behind-a-jun",
+   "section": "About rewrites: sources to find",
+   "title": "Is there a lawsuit or criminal case behind a June 2021 Google review saying a Shortridge Academy student's family was filing sexual abuse charges against the school?",
+   "text": "The review reads 'a student's family is filing sexual abuse charges against the school' (Shortridge Academy, Plymouth NH); see https://www.google.com/maps/contrib/109484327225104513304/place/ChIJjRS1J6DTskwRRjipfRIQytM/ . Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Google Reviews",
+     "url": "https://www.google.com/maps/contrib/109484327225104513304/place/ChIJjRS1J6DTskwRRjipfRIQytM/",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: google.com/maps/contrib/109484327225104513304/place/ChIJjRS1J6DTskwRRjipfRIQytM/",
+     "url": "https://www.google.com/maps/contrib/109484327225104513304/place/ChIJjRS1J6DTskwRRjipfRIQytM/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:where-did-the-alleged-exposure-by-curtis-kramer",
+   "section": "About rewrites: outcomes",
+   "title": "Where did the alleged exposure by Curtis Kramer happen, was the child a Ridge RTC resident, and how did the case end after his Nov 16, 2026 arrest by Newmarket NH police?",
+   "text": "The Boston Globe, Nov 17, 2026 (https://www.bostonglobe.com/2026/11/17/metro/assistant-milton-nh-facility-charges/) reports the charges against an assistant at a Milton NH facility. Need location, whether the child lived at The Ridge RTC, the court and the outcome. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Boston Globe, Nov 17, 2026",
+     "url": "https://www.bostonglobe.com/2026/11/17/metro/assistant-milton-nh-facility-charges/",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-do-nh-child-care-licensing-records-for-lice",
+   "section": "About rewrites: sources to find",
+   "title": "What do NH Child Care Licensing records for license CCRB-07044 (Shortridge Academy / The Ridge RTC) show before October 2023, and can the Dec 15, 2025 and Sep 3, 2026 statements of findings be saved as PDFs?",
+   "text": "KOP holds only the text of the Dec 15, 2025 and Sep 3, 2026 statements (inspection_reports 108480 and 125701), and PDFs from Oct 16, 2023 onward, e.g. https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0028807.pdf . The portal is https://new-hampshire.my.site.com/nhccis/NH_childcaresearchaccountdetail?id=0018z000003tLW7AAM . Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11034.json (the About of /facility/the-ridge-new-hampshire-nh/).",
+   "context": "",
+   "records": [
+    11034
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "NH portal",
+     "url": "https://new-hampshire.my.site.com/nhccis/NH_childcaresearchaccountdetail?id=0018z000003tLW7AAM",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 4,5 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-pp-4-5-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, July 2008, p. 10,11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2008-167-pp-10-11-the-ridge-new-hampshire/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theridgertc.com)",
+     "url": "https://web.archive.org/web/2*/https://theridgertc.com/new-hampshire-the-ridge-rehab/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0028807.pdf",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0028807.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: new-hampshire.my.site.com/nhccis/NH_childcaresearchaccountdetail?id=0018z000003t",
+     "url": "https://new-hampshire.my.site.com/nhccis/NH_childcaresearchaccountdetail?id=0018z000003tLW7AAM",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-primary-source-shows-that-ironwood-maine-op",
+   "section": "About rewrites: sources to find",
+   "title": "What primary source shows that Ironwood Maine opened in 2006 and who owned it, such as the Maine Secretary of State filing for Ironwood Maine, LLC or the Jan 29, 2007 ironwoodmaine.com press release?",
+   "text": "The About relies on secondary sources for the 2006 opening and owners; the press release is http://www.ironwoodmaine.com/press/pr2007_jan29.html and the Maine Secretary of State filing for Ironwood Maine, LLC should show the owners. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Ironwood press release, Jan 29, 2007",
+     "url": "http://www.ironwoodmaine.com/press/pr2007_jan29.html",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: ironwoodmaine.com/press/pr2007_jan29.html",
+     "url": "http://www.ironwoodmaine.com/press/pr2007_jan29.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-primary-source-documents-the-2011-purchase",
+   "section": "About rewrites: sources to find",
+   "title": "What primary source documents the 2011 purchase of Ironwood Maine in Morrill, Maine, by Horton?",
+   "text": "The About states the 2011 Horton purchase from KOP research notes (https://kidsoverprofits.org/the-ridge-rtc-maine/); a deed, filing or news report would be the original. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "KOP research, The Ridge RTC Maine",
+     "url": "https://kidsoverprofits.org/the-ridge-rtc-maine/",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-original-records-such-as-staff-pages-woodbu",
+   "section": "About rewrites: sources to find",
+   "title": "What original records, such as staff pages, Woodbury Reports, or Elan and Turn-About Ranch material, show the careers of Teresa Shinedling, Wayne Stinson and Deanna Valente before Ironwood Maine?",
+   "text": "The About cites KOP's research notes (https://docs.google.com/document/d/1KwaE9dC1bGH4ICckCXFl_qFLZmAk4kKGFOs0Mhvnd3Q/edit) for these staff careers; an original is wanted to cite beside them. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "KOP research notes, Ridge RTC Maine",
+     "url": "https://docs.google.com/document/d/1KwaE9dC1bGH4ICckCXFl_qFLZmAk4kKGFOs0Mhvnd3Q/edit",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-do-the-utah-dhs-licensing-cps-and-garfield",
+   "section": "About rewrites: sources to find",
+   "title": "What do the Utah DHS licensing, CPS and Garfield County sheriff records say about the 2004 complaints against Wayne Stinson at Turn-About Ranch?",
+   "text": "A Fornits post of Oct 2, 2006 (https://www.fornits.com/phpbb/index.php?topic=18283.0) describes the 2004 complaints; no official record is held. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Fornits, Oct 2, 2006",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=18283.0",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-doe-v-excellus-health-plan-supreme-court",
+   "section": "About rewrites: outcomes",
+   "title": "How did Doe v. Excellus Health Plan (Supreme Court, Monroe County NY, index E2019007017) end after the April 21, 2023 ruling?",
+   "text": "The April 21, 2023 decision is at https://www.nycourts.gov/reporter/3dseries/2023/2023_23117.htm and the case involves Ironwood Maine. The outcome afterward is not in the draft. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Doe v Excellus, 2023 NY Slip Op 23117",
+     "url": "https://www.nycourts.gov/reporter/3dseries/2023/2023_23117.htm",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: nycourts.gov/reporter/3dseries/2023/2023_23117.htm",
+     "url": "https://www.nycourts.gov/reporter/3dseries/2023/2023_23117.htm",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-2014-penobscot-county-maine-child-se",
+   "section": "About rewrites: outcomes",
+   "title": "How did the 2014 Penobscot County, Maine, child sex assault charges against former police chief Carl E. Smith end?",
+   "text": "The Portland Press Herald, May 14, 2014 (https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/) reports bail being set; the outcome is not in the draft, and the link to Ironwood Maine is in the About. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Portland Press Herald, May 14, 2014",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-do-maine-dhhs-licensing-records-show-about",
+   "section": "About rewrites: sources to find",
+   "title": "What do Maine DHHS licensing records show about inspections or complaint findings at Ironwood Maine / The Ridge RTC Maine in Morrill?",
+   "text": "KOP holds no Maine DHHS inspection or complaint records for this program. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:which-of-the-ironwood-maine-leads-in-kop-s-resea",
+   "section": "About rewrites: sources to find",
+   "title": "Which of the Ironwood Maine leads in KOP's research notes are not yet held: the Code Adam Podcast episode, Indeed reviews, the 2015 Reddit retrospective, 2023 survivor posts, the 2021 cope.church report and the BCBS Massachusetts class actions?",
+   "text": "Leads: Code Adam Podcast episode with an ex-Ironwood employee (https://open.spotify.com/episode/5pmrhKRUlw9BVgzmwO2NBw), the 2015 Reddit 'Ironwood Maine a quick retrospective', the 2021 cope.church 'conversion program progress report' (https://www.cope.church/ironwoodprogress.pdf), and BCBS Massachusetts class action complaints (2019, 2022) on cafanotices.com naming Ironwood. Each unheld one should be fetched and sent in. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "cope.church report",
+     "url": "https://www.cope.church/ironwoodprogress.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-exactly-did-the-2012-reddit-iama-by-an-iron",
+   "section": "About rewrites: sources to find",
+   "title": "What exactly did the 2012 Reddit IAmA by an Ironwood Maine ex-resident and The Code Adam Podcast's Julia Quinones say, for exact quotes?",
+   "text": "Transcribe or quote from the IAmA (https://www.reddit.com/r/IAmA/comments/oy5ql/iaman_exresident_5_years_ago_of_an_unregulated/) and the podcast (https://open.spotify.com/episode/5pmrhKRUlw9BVgzmwO2NBw); testimony is used as exact quotes only. Answer changes kop-pipeline tmp/about-rewrite/batch4/sendable/f11009.json (the About of /facility/the-ridge-maine-me/).",
+   "context": "",
+   "records": [
+    11009
+   ],
+   "found": "found 2026-11-23, About rewrites batch 4",
+   "directions": [
+    {
+     "label": "Reddit IAmA, 2012",
+     "url": "https://www.reddit.com/r/IAmA/comments/oy5ql/iaman_exresident_5_years_ago_of_an_unregulated/",
+     "kind": "note"
+    },
+    {
+     "label": "News: Altior Healthcare May Hit the Market (Behavioral Health Business, 2026-05-07)",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Ex-police chief accused of child sex assaults worked at Maine teen facility (The Portland Press Herald, 2014-05-14)",
+     "url": "https://www.pressherald.com/2014/05/14/bail_set_for_ex-maine_police_chief_accused_of_child_sex_assaults_/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Doe v. Excellus Health Plan, Inc. (Supreme Court, Monroe County, filed 2023-04-21)",
+     "url": "https://law.justia.com/cases/new-york/other-courts/2023/2023-ny-slip-op-23117.html",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, March 2008, p. 7,8 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2008-163-pp-7-8-the-ridge-maine/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived allkindsoftherapy.com)",
+     "url": "https://web.archive.org/web/2*/https://www.allkindsoftherapy.com/innercept-and-ironwood-now-working-with-commercial-insurance-carriers",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-11-23 15:52"
+ "built": "2026-11-23 16:00"
 }
