@@ -107,7 +107,23 @@ map class, id or `window.KOP*` global), it ports the change to the app before it
 6. Commit and push the theme first (so the live API has the field), then the app: its push publishes an EAS update to the
    preview channel (`.github/workflows/eas-update.yml`; skipped when package.json/app.json change, which need a new build).
    The app reads an older payload without the new field, so the order only matters for what a phone sees in between.
-7. A change the app does not show (admin screens, styling, wording outside the payload) needs nothing; the report says so.
+7. A change the app does not show (styling, wording outside the payload) needs nothing; the report says so. Admin
+   features are not in that group: see "Admin mode follows the admin side" below.
+
+## Admin mode follows the admin side (owner 2026-11-23)
+
+Every admin feature is kept up to date in the app's admin mode in the same session, unasked, as the public pages are:
+
+- **Native admin screens** (app `src/app/news-processor.tsx`, `lawsuit-processor.tsx`, `reviewer.tsx`, `(tabs)/admin.tsx`,
+  shared `src/components/ProcessorParts.tsx`, API in `src/api/processor.ts` / `admin.ts`): a field, option, action or
+  rule added or changed on the website's version (News Processor, Lawsuit Processor, review cards, publish/undo) is
+  ported to the app's screen, with a test in `__tests__/`.
+- **KOP Tools screens** open in the app through `/app/tools` (the KOP Tools registry) in the signed-in web view
+  (`src/app/admin-tool.tsx`). A new screen needs its registry entry (so the Admin tab lists it) and must work at phone
+  width in that view (no sideways scroll, buttons a finger can press); check it there, not only on desktop.
+- An admin feature the web view can't serve well (a file picker, a long table, a flow the phone needs natively) gets a
+  native screen, or an item in `docs/plan/` naming what is missing if it can't be done in the session.
+- Checks, commit and push as in steps 5-6 above (theme first, then the app).
 
 Safety nets: `.github/workflows/app-parity.yml` runs the parity check on pushes touching the pages or the app API and every
 morning (GitHub emails a failure); `scripts/hooks/app-parity-reminder.py` is a Claude Code PostToolUse hook that reminds a

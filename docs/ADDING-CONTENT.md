@@ -239,6 +239,9 @@ Tests: `scripts/test-facility-pages.php`, `scripts/test-inline-edit.php`
 - Anything the owner reviews gets a one-page screen with exact Undo, not a file
   to read.
 - `docs/admin-submissions/README.md` if it is part of reviewing.
+- The app's admin mode: the registry entry puts it on the Admin tab (`/app/tools`, opened in the app's web view); make
+  it work at phone width there, or give it a native app screen (`docs/claude/mobile-extension.md`, "Admin mode follows
+  the admin side").
 
 ---
 

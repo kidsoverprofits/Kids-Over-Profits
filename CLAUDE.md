@@ -123,6 +123,10 @@ in `inc/mobile-api.php`, the app's section, `docs/app-parity.json`, both repos' 
 push ships an over-the-air update). `php scripts/test-app-parity.php` fails when a page section is in neither the app nor
 the list; CI runs it (`.github/workflows/app-parity.yml`), and a hook reminds the session when it edits an app-facing file.
 How, step by step: `docs/claude/mobile-extension.md`, "Keeping the app in step".
+Admin features follow too (owner 2026-11-23): a new or changed KOP Tools screen, review queue, processor or other admin
+feature is carried into the app's admin mode in the same session (native screens like the News and Lawsuit Processors
+ported, web-view screens reachable from the Admin tab and usable at phone width). Admin changes are never "nothing to do"
+for the app.
 
 ## Topic change = handoff + new session (standing rule, 2026-10-20)
 
