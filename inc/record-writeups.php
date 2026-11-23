@@ -976,6 +976,43 @@ if (function_exists('add_action')) {
                 }
             }),
         ));
+        if (!function_exists('kop_ar_search')) return;
+        // The Pick next tab from a session (/about-rewrites, kop-pipeline scripts/about-rewrite/pick.py): search the
+        // records, and flag, unflag or move one when the owner asks for it in chat.
+        register_rest_route('kop/v1', '/writeups/find', array('methods' => 'GET', 'permission_callback' => $is_claude, 'callback' => function (WP_REST_Request $r) {
+            kop_wu_ensure_tables();
+            $rows = kop_ar_search(array('q' => (string) $r->get_param('q'), 'kind' => (string) $r->get_param('kind'), 'show' => (string) $r->get_param('show'),
+                'sort' => (string) $r->get_param('sort'), 'limit' => (int) ($r->get_param('limit') ?: 20)));
+            foreach ($rows as &$row) {
+                $row['packet_id'] = ($row['kind'] === 'operator' ? 'o' : 'f') . $row['id'];
+                unset($row['score']);
+            }
+            unset($row);
+            $res = rest_ensure_response(array('rows' => $rows, 'total' => (int) ($GLOBALS['kop_ar_search_total'] ?? count($rows))));
+            $res->header('Cache-Control', 'no-store');
+            return $res;
+        }));
+        register_rest_route('kop/v1', '/writeups/flag', array('methods' => 'POST', 'permission_callback' => $is_claude, 'callback' => function (WP_REST_Request $r) {
+            $p = (array) $r->get_json_params();
+            try {
+                kop_wu_ensure_tables();
+                // {"packet_id": "f10545" | "o12"} or {"facility_id"} / {"operator_id"}; "do": flag (default) | unflag | top | up | down | bottom.
+                $pid = strtolower(trim((string) ($p['packet_id'] ?? '')));
+                if (preg_match('/^([fo])(\d+)$/', $pid, $m)) $rec = array($m[1] === 'o' ? 'operator' : 'facility', (int) $m[2]);
+                else $rec = !empty($p['operator_id']) ? array('operator', (int) $p['operator_id']) : array('facility', (int) ($p['facility_id'] ?? 0));
+                if (!$rec[1]) throw new RuntimeException('Name the record: packet_id (f123 / o45), facility_id or operator_id.');
+                $key = kop_ar_key($rec[0], $rec[1]);
+                $do = (string) ($p['do'] ?? 'flag');
+                $msg = '';
+                if ($do === 'flag') $msg = 'Flagged: number ' . kop_ar_flag($key, (string) ($p['note'] ?? ''), (string) ($p['by'] ?? 'Claude, for the owner')) . '.';
+                elseif ($do === 'unflag') { kop_ar_unflag($key); $msg = 'Unflagged.'; }
+                elseif (in_array($do, array('top', 'up', 'down', 'bottom'), true)) { kop_ar_flag_move($key, $do); $msg = 'Moved.'; }
+                else throw new RuntimeException('Unknown "do": ' . $do);
+                return array('ok' => true, 'message' => $msg, 'name' => kop_ar_name($rec[0], $rec[1]), 'flagged' => kop_ar_flagged_rows());
+            } catch (Throwable $e) {
+                return new WP_Error('kop_writeups', $e->getMessage(), array('status' => 400));
+            }
+        }));
     });
 }
 

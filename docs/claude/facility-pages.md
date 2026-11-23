@@ -19,6 +19,8 @@ php scripts/test-facility-pages.php
 # with news and lawsuit counts; Flag puts it on kop_ar_next() in the owner's order, with a note; a rewrite coming in takes the flag off),
 # With Claude (the owner's flags first, then sent back, or waiting: held facts or a change), Published (each with Undo, which restores About, facts, quotes).
 # Picking a batch: write the owner's flags first, top down, before anything else (the note says what to focus on).
+# /about-rewrites (.claude/skills/about-rewrites/SKILL.md): list, find, flag/unflag/move from chat, and `work [N]` runs the batch on the flags.
+(kop-pipeline) python -I scripts/about-rewrite/pick.py list|find <words>|flag f123 --note ..|unflag|move f123 top   # REST kop/v1/writeups/find and /writeups/flag (research key)
 (kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py --flagged         # the records the owner flagged on Pick next, in order, with notes
 (kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py --list            # what to write next, and the owner's notes on sent-back ones
 (kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py <rec.json ...>    # send finished rewrites as drafts (pilot shape + "page")
