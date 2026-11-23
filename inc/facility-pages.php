@@ -3040,10 +3040,19 @@ if (!function_exists('kop_facility_pages_testimony')) {
 }
 
 if (!function_exists('kop_testimony_speaker')) {
-    /** Who a credited quote is from: the credit's first part ("Jennifer Msumba"), or '' when it names no one. */
+    /**
+     * Who a credited quote is from: the credit's first part when it is a name ("Jennifer Msumba"), the name a role
+     * gives in brackets ("Former student (Rob Santana)"), or '' when it names no one ("Former student",
+     * "Former student (2020 to 2022)", "Former student (anonymous)", "Parent of a student").
+     */
     function kop_testimony_speaker($credit) {
         $who = trim((string) strtok((string) $credit, ','));
-        return $who === '' || preg_match('/\b(anonymous|unnamed|unidentified)\b/i', $who) ? '' : mb_strtolower($who);
+        $role = '/\b(former|current|student|resident|staff|employee|parent|mother|father|teen|survivor|graduate|alumn\w*|client|patient|camper|counselor|therapist|member|reader|anonymous|unnamed|unidentified)\b/i';
+        if (preg_match($role, $who)) {
+            $who = preg_match('/\(([^()]*)\)/', $who, $m) ? trim($m[1]) : '';
+            if (preg_match('/\d/', $who) || preg_match($role, $who)) $who = '';
+        }
+        return $who === '' ? '' : mb_strtolower($who);
     }
 }
 
