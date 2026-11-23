@@ -53,9 +53,8 @@ kop_rinbox_register('scraper-finds', function () {
         },
         'act'      => 'kop_scraper_finds_act',
         'save'     => 'kop_scraper_finds_save',
-        'ai_fill'  => function () {
-            return array('filled' => array(), 'message' => 'Send it to News first; the news queue reads the article and fills its details (or use its own "Fill empty fields with AI").');
-        },
+        // No AI here: sent to News, the news queue reads the article and fills its details.
+        'no_ai'    => true,
         'origins'  => 'kop_scraper_finds_origins',
     );
 });

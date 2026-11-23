@@ -42,9 +42,7 @@ kop_rinbox_register('program-homes', function () {
         'act'      => 'kop_rinbox_ph_act',
         'save'     => 'kop_rinbox_ph_save',
         // The names come from the records; there is nothing for AI to look up.
-        'ai_fill'  => function ($key) {
-            return array('filled' => array(), 'message' => 'Nothing here for AI to fill: the names come from the records themselves.');
-        },
+        'no_ai'    => true,
     );
 });
 

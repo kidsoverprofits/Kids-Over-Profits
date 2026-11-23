@@ -35,9 +35,8 @@ kop_rinbox_register('wiki-updates', function () {
         },
         'act'      => 'kop_rinbox_wupd_act',
         'save'     => 'kop_rinbox_wupd_save',
-        'ai_fill'  => function () {
-            throw new RuntimeException('Wiki updates are written from the record and checked against their sources; edit a line by hand instead.');
-        },
+        // Written from the record and checked against their sources: edited by hand, never by AI.
+        'no_ai'    => true,
     );
 });
 

@@ -702,8 +702,27 @@ function kop_rinbox_ai_fill_generic($source, $key, $text = '') {
         $fields[$name] = $v;
     }
     if (!$fields) return array('filled' => array(), 'message' => 'The AI found nothing to add from this item and its link.');
-    call_user_func($src['save'], (string) $key, $fields);
-    return array('filled' => array_keys($fields), 'message' => 'Filled: ' . implode(', ', array_map(function ($n) use ($want) { return $want[$n]['label']; }, array_keys($fields))) . '.');
+    // A value the queue's save refuses (a closure date as "November 2014") is left out, not the whole fill:
+    // the rest are saved one by one and the message names what was skipped and why.
+    $skipped = array();
+    try {
+        call_user_func($src['save'], (string) $key, $fields);
+    } catch (RuntimeException $e) {
+        $kept = array();
+        foreach ($fields as $name => $v) {
+            try {
+                call_user_func($src['save'], (string) $key, array($name => $v));
+                $kept[$name] = $v;
+            } catch (RuntimeException $e2) {
+                $skipped[] = $want[$name]['label'] . ' ("' . mb_substr(is_array($v) ? implode('; ', $v) : (string) $v, 0, 80) . '": ' . $e2->getMessage() . ')';
+            }
+        }
+        if (!$kept) throw new RuntimeException('The AI answer could not be saved: ' . implode('; ', $skipped));
+        $fields = $kept;
+    }
+    $label = function ($n) use ($want) { return $want[$n]['label']; };
+    return array('filled' => array_keys($fields), 'message' => 'Filled: ' . implode(', ', array_map($label, array_keys($fields))) . '.'
+        . ($skipped ? ' Left empty: ' . implode('; ', $skipped) . '.' : ''));
 }
 
 function kop_rinbox_load_ai() {
@@ -817,7 +836,7 @@ function kop_rinbox_rest_sources(WP_REST_Request $req) {
                 'key' => $key, 'label' => $src['label'], 'group' => $src['group'], 'area' => kop_rinbox_area($src), 'views' => $src['views'],
                 'count' => kop_rinbox_count_for_me($key, $counts[$key] ?? null), 'native' => (bool) $src['native'], 'tool_url' => (string) $src['tool_url'],
                 'help' => (string) ($src['help'] ?? ''), 'can_save' => !empty($src['save']),
-                'can_ai' => (!empty($src['save']) && empty($src['no_ai'])) || !empty($src['ai_fill']),
+                'can_ai' => empty($src['no_ai']) && (!empty($src['save']) || !empty($src['ai_fill'])),
                 'has_origins' => !empty($src['origins']),
                 'tools' => kop_rinbox_spec_list($src, 'tools'),
                 'filters' => kop_rinbox_spec_list($src, 'filters'),
@@ -1095,6 +1114,7 @@ function kop_rinbox_rest_ai(WP_REST_Request $req) {
         $source = (string) $req->get_param('source');
         $key = (string) $req->get_param('key');
         $src = kop_rinbox_source($source);
+        if (!empty($src['no_ai'])) throw new RuntimeException('This queue has no AI fill; edit the fields by hand.');
         $text = mb_substr(trim((string) $req->get_param('text')), 0, 60000);
         $res = !empty($src['ai_fill']) ? call_user_func($src['ai_fill'], $key, $text) : kop_rinbox_ai_fill_generic($source, $key, $text);
         $res = is_array($res) ? $res : array();

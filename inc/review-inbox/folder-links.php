@@ -49,9 +49,7 @@ kop_rinbox_register('folder-links', function () {
         'tool'     => 'kop_rinbox_flinks_tool',
         'lookup'   => 'kop_rinbox_flinks_lookup',
         // Nothing for AI to look up: the folders and names come from the library.
-        'ai_fill'  => function ($key) {
-            return array('filled' => array(), 'message' => 'Nothing here for AI to fill.');
-        },
+        'no_ai'    => true,
     );
 });
 

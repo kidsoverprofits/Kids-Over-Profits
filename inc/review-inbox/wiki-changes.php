@@ -32,9 +32,8 @@ kop_rinbox_register('wiki-changes', function () {
         },
         'act'      => 'kop_rinbox_wchg_act',
         'save'     => 'kop_rinbox_wchg_save',
-        'ai_fill'  => function () {
-            throw new RuntimeException('These lines are written from the record and cite its sources; edit a line by hand instead.');
-        },
+        // These lines are written from the record and cite its sources: edited by hand, never by AI.
+        'no_ai'    => true,
     );
 });
 
