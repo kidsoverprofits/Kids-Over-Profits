@@ -31,6 +31,19 @@ function kop_rinbox_test_closure(array $src, array $item, callable $check) {
     $pdo->prepare('UPDATE facility_closure_reports SET program_name = ?, stage = ?, target_status = ?, status = ? WHERE id = ?')
         ->execute(array($before['program_name'], $before['stage'], $before['target_status'], $before['status'], (int) $item['key']));
 
+    // A record closed after the scan (Claude note #35): its waiting report leaves the queue for "Already recorded".
+    if ((int) $before['facility_id'] > 0 && $before['status'] === 'pending') {
+        $fid = (int) $before['facility_id'];
+        $was = $pdo->query('SELECT status FROM facilities_v2 WHERE id = ' . $fid)->fetchColumn();
+        $pdo->exec("UPDATE facilities_v2 SET status = 'Closed' WHERE id = " . $fid);
+        $listed = call_user_func($src['list'], array('view' => 'pending', 'search' => '', 'offset' => 0, 'limit' => 1000));
+        $check('closure: a report whose facility is already Closed leaves the queue',
+            !in_array((string) $item['key'], array_column($listed['items'], 'key'), true)
+            && kop_closure_get_report($pdo, (int) $item['key'])['status'] === 'already');
+        $pdo->prepare('UPDATE facilities_v2 SET status = ? WHERE id = ?')->execute(array($was, $fid));
+        $pdo->prepare('UPDATE facility_closure_reports SET status = ? WHERE id = ?')->execute(array($before['status'], (int) $item['key']));
+    }
+
     // The old screen's parts: per-tab counts, the facility as it is now, the confirm form's facility box.
     $counts = call_user_func($src['view_counts'], array());
     $check('closure: every tab has a count', array_keys($counts) === array_keys($src['views']) && $counts['all'] >= $counts['pending'], json_encode($counts));

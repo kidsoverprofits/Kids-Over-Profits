@@ -29,6 +29,7 @@ kop_rinbox_register('closure', function () {
         'count'    => function () {
             $pdo = kop_closure_pdo();
             kop_closure_ensure_tables($pdo);
+            kop_rinbox_closure_settle_recorded($pdo);
             return (int) $pdo->query("SELECT COUNT(*) FROM facility_closure_reports WHERE status IN ('pending','unmatched')")->fetchColumn();
         },
         'list'     => 'kop_rinbox_closure_list',
@@ -108,6 +109,7 @@ function kop_rinbox_closure_waiting() {
 
 function kop_rinbox_closure_view_counts(array $q = array()) {
     $pdo = kop_closure_pdo();
+    kop_rinbox_closure_settle_recorded($pdo);
     $by = array();
     foreach ($pdo->query('SELECT status, COUNT(*) AS n FROM facility_closure_reports GROUP BY status') as $row) $by[$row['status']] = (int) $row['n'];
     return array(
@@ -117,6 +119,26 @@ function kop_rinbox_closure_view_counts(array $q = array()) {
         'other'     => ($by['already'] ?? 0) + ($by['duplicate'] ?? 0) + ($by['vague'] ?? 0) + ($by['old'] ?? 0),
         'all'       => array_sum($by),
     );
+}
+
+/**
+ * A waiting report whose facility the record now marks Closed (or already at
+ * the report's status) is no longer a question: the scan files those as
+ * 'already' (kop_closure_classify_report()), but a record closed after the
+ * scan (another report confirmed, an edit, an import) left its reports in the
+ * queue. They move to "Already recorded" whenever the queue is counted or
+ * listed (owner, Claude note #35). Returns how many moved.
+ */
+function kop_rinbox_closure_settle_recorded(PDO $pdo) {
+    try {
+        $n = $pdo->exec("UPDATE facility_closure_reports SET status = 'already'
+                          WHERE status = 'pending' AND facility_id IS NOT NULL
+                            AND EXISTS (SELECT 1 FROM facilities_v2 f WHERE f.id = facility_closure_reports.facility_id
+                                         AND (f.status = 'Closed' OR f.status = facility_closure_reports.target_status))");
+    } catch (Throwable $e) {
+        return 0;
+    }
+    return (int) $n;
 }
 
 /** "Scan the next 10 articles now", or only the article numbers given (the old screen's scan form). */
@@ -144,6 +166,7 @@ function kop_rinbox_closure_facility_now(PDO $pdo, $fid) {
 function kop_rinbox_closure_list(array $q) {
     $pdo = kop_closure_pdo();
     kop_closure_ensure_tables($pdo);
+    kop_rinbox_closure_settle_recorded($pdo);
     $where = kop_rinbox_closure_view_where($q['view']);
     $params = array();
     if ($q['search'] !== '') {
