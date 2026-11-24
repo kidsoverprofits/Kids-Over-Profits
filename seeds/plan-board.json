@@ -1,6 +1,6 @@
 {
- "built": "2026-11-24 19:54 UTC",
- "source": "0f9189a5f24e56828a88f35cb878b9c1c877f2d1",
+ "built": "2026-11-24 19:57 UTC",
+ "source": "99f6288045b49d221763e53e7d35035a38fd39c0",
  "sections": [
   {
    "key": "2",
@@ -85,8 +85,8 @@
          "note": ""
         },
         {
-         "id": "optional-ask-nixihost-support-to-purge-sub-2025-yl",
-         "label": "Optional: ask NixiHost support to purge `SUB-2025-YLVUY0CL` from the backups",
+         "id": "hold-off-on-asking-nixihost-to-purge-sub-2025-ylvu",
+         "label": "Hold off on asking NixiHost to purge `SUB-2025-YLVUY0CL` from the backups: since the old portal key is lost (item 6), a backup copy may be the only readable one",
          "url": "",
          "note": ""
         }
@@ -180,6 +180,40 @@
         }
        ],
        "hash": "37a8015cbd0c"
+      },
+      {
+       "id": "2.1:anonymous-portal-old-private-key-lost",
+       "lead": "Anonymous portal: old private key lost",
+       "text": "**Anonymous portal: old private key lost** (2026-11-24). The key pair made 2026-09-24 (fingerprint `e2f2be273231e1ff`) had its private key on the owner's old computer, which broke; a content search of OneDrive and Google Drive found no copy. A new pair (fingerprint `0d0a60dad913cd7d`, private key at `%USERPROFILE%\\kop-anon-portal-private.key`) seals everything from 2026-11-24 on. Submissions sealed under the old key stay unreadable unless the old drive is recovered (then run the scratchpad-style content search over it: any small file whose base64 decodes to 64 bytes ending in the old public key) or NixiHost backups from before 2026-09-24 still hold the pre-encryption plaintext of the older ones. Keep the old `.sealed` files.",
+       "ask": "Back up the new anonymous portal key, and get the old computer's drive read if you can",
+       "date": "2026-11-24",
+       "why": "The old key is gone with the old computer, so documents sent in Sep-Nov can't be opened; the new key must not go the same way.",
+       "go": [],
+       "choices": [],
+       "time": "10 min (backup); the drive recovery depends on the shop",
+       "kind": "do",
+       "focus": false,
+       "steps": [
+        {
+         "id": "copy-c-users-dani-kop-anon-portal-private-key-into",
+         "label": "Copy `C:\\Users\\dani\\kop-anon-portal-private.key` into a password manager or onto a USB stick kept away from this computer",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "optional-take-the-old-computer-to-a-repair-shop-or",
+         "label": "Optional: take the old computer to a repair shop (or use a USB drive enclosure) to copy its files off, then tell Claude where they are",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "optional-ask-nixihost-which-dates-their-backups-of",
+         "label": "Optional: ask NixiHost which dates their backups of `wp-content/uploads/anonymous-submissions/` go back to",
+         "url": "",
+         "note": ""
+        }
+       ],
+       "hash": "d6552ff34282"
       }
      ]
     },
@@ -2656,6 +2690,21 @@
        "focus": false,
        "steps": [],
        "hash": "b7e6d1d4de7b"
+      },
+      {
+       "id": "3:new-anonymous-portal-key",
+       "lead": "New anonymous portal key",
+       "text": "**New anonymous portal key** (2026-11-24): [Anonymous Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=anonymous-docs) shows fingerprint `0d0a60dad913cd7d` (if it still shows `e2f2be273231e1ff`, `wp-config.php` defines `KOP_ANON_PORTAL_PUBLIC_KEY`, which wins over the file: change it to the new key). Send one test document from [/anon-submit/](https://kidsoverprofits.org/anon-submit/) and open it with `scripts/anon-portal-decrypt.php`.",
+       "ask": "",
+       "date": "2026-11-24",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "check",
+       "focus": false,
+       "steps": [],
+       "hash": "93e2004cdda8"
       }
      ]
     }
