@@ -285,6 +285,10 @@ python scripts/test-volunteer-review-ui.py [--shots tmp/volunteer-review-ui]   #
 # The block also has "Also sign me up for the newsletter" (never ticked by default; also in the bug reporter): newsletter_email ->
 # inc/newsletter-signup.php -> MailerLite via the plugin's API key, group = KOP_NEWSLETTER_GROUP_ID / kop_newsletter_group_id option,
 # else the plugin form's groups
+# Reviewers see who asked (kop_followup_admin_info(), admins only, read-only): Submissions Review cards say "Asked to hear back when
+# reviewed" with the address as a mailto link (or the submitter's email typed as their name, "no follow-up requested");
+# manage-submissions.php adds 'followup' to list and get rows; Review inbox cards of the native types and glossary notes carry
+# 'private' details lines, which volunteers' cards and the Send to Claude payload drop. A sent or stopped follow-up has no address left.
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-submission-followup.php
 # Data audit (docs/PLAN.md 3.13): flag data outside sources should check (renamed programs ending with their earlier name, status vs
 # years, operators after a sale, one person under two spellings, memorials) -> tmp/data-audit/; research agents per tmp/data-audit/INSTRUCTIONS.md;

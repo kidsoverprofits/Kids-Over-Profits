@@ -169,7 +169,7 @@ function kop_rinbox_claude_payload(array $row) {
     return $out + array(
         'item_title' => (string) $it['title'], 'subtitle' => (string) $it['subtitle'], 'url' => (string) $it['url'],
         'text' => (string) $it['text'], 'status' => (string) $it['status_label'],
-        'facility' => $it['facility'], 'details' => array_values((array) $it['details']), 'links' => array_values((array) $it['links']),
+        'facility' => $it['facility'], 'details' => array_values(array_filter((array) $it['details'], function ($d) { return !is_array($d) || empty($d['private']); })), 'links' => array_values((array) $it['links']),
         'preview' => $it['preview'], 'fields' => $fields,
         // The buttons Claude may press to file it (never the Undo ones, never its own).
         'actions' => array_values(array_filter((array) $it['actions'], function ($a) {

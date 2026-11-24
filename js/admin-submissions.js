@@ -1045,10 +1045,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 const meta = card.querySelector('.submission-meta');
                 if (meta) meta.after(note); else card.prepend(note);
             }
+            const followup = followupNote(submission);
+            if (followup) {
+                const header = card.querySelector('.submission-header');
+                if (header) header.after(followup); else card.prepend(followup);
+            }
             card.querySelector('.btn-view').addEventListener('click', () => viewSubmission(submission.id));
             submissionsList.appendChild(card);
         });
         updateSelectionState();
+    }
+
+    /**
+     * Whether the submitter asked to be emailed when this is reviewed, and the
+     * email they gave (api/manage-submissions.php 'followup', admins only;
+     * inc/submission-followup.php). Null when they did neither.
+     */
+    function followupNote(submission) {
+        const f = submission && submission.followup;
+        if (!f || (!f.email && !f.contact)) return null;
+        const mail = (addr) => {
+            const a = document.createElement('a');
+            a.href = 'mailto:' + addr;
+            a.textContent = addr;
+            return a;
+        };
+        const note = document.createElement('p');
+        note.className = 'followup-note' + (f.asked ? ' is-asked' : '');
+        note.insertAdjacentHTML('beforeend', kopIcon('mail') + ' ');
+        if (f.asked) {
+            const strong = document.createElement('strong');
+            strong.textContent = 'Asked to hear back when reviewed:';
+            note.append(strong, ' ', mail(f.email));
+            if (f.contact) note.append(' (also gave ', mail(f.contact), ')');
+        } else {
+            note.append('Submitter\'s email: ', mail(f.contact), ' (no follow-up requested)');
+        }
+        return note;
     }
 
     /**

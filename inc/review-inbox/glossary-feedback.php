@@ -109,11 +109,20 @@ function kop_rinbox_gfeedback_item($r) {
         ),
         'actions'      => $actions,
         'links'        => array(array('label' => $entry_id !== '' ? 'Edit entry' : 'Entry gone: add it', 'url' => $editor)),
-        'details'      => array_values(array_filter(array(
-            array('label' => 'Note', 'value' => '#' . (int) $r->id),
-            $r->contact ? array('label' => 'Reader\'s email', 'value' => (string) $r->contact, 'url' => 'mailto:' . $r->contact) : null,
-        ))),
+        'details'      => array_merge(array(array('label' => 'Note', 'value' => '#' . (int) $r->id)), kop_rinbox_gfeedback_followup($r)),
     );
+}
+
+/**
+ * Whether the reader asked to hear back (inc/submission-followup.php) and the email they gave; admins only.
+ * Without the follow-up code, the reader's email as before.
+ */
+function kop_rinbox_gfeedback_followup($r) {
+    if (function_exists('kop_followup_admin_info')) {
+        $info = kop_followup_admin_info('glossary', array((int) $r->id => (string) $r->contact));
+        return kop_followup_admin_details($info[(int) $r->id] ?? null);
+    }
+    return $r->contact ? array(array('label' => 'Reader\'s email', 'value' => (string) $r->contact, 'url' => 'mailto:' . $r->contact, 'private' => true)) : array();
 }
 
 function kop_rinbox_gfeedback_act($key, $action, array $params) {

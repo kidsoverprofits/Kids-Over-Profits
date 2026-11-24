@@ -22,6 +22,11 @@
  * of submission and its reference number, and the "added" mail names the item
  * by its title as the reviewer approved it. Once the update is sent (or the
  * person stops it, or the item is deleted) the address is blanked.
+ *
+ * Reviewers see who asked (kop_followup_admin_info()): the Submissions Review
+ * cards and their "View details" (api/manage-submissions.php 'followup'), the
+ * Review inbox's cards of those types and of glossary notes (card details).
+ * Admins only; volunteers' cards drop those lines.
  */
 
 if (!defined('ABSPATH')) {
@@ -207,6 +212,93 @@ function kop_followup_mark_moved($kind, $item_id) {
     global $wpdb;
     $wpdb->update(kop_followup_table(), array('moved' => 1),
         array('kind' => $kind, 'item_id' => (int) $item_id, 'state' => 'waiting'), array('%d'), array('%s', '%d', '%s'));
+}
+
+/**
+ * For the admin review screens (read-only): which items' submitters asked to
+ * hear back, and the address they gave. [item_id => email] for follow-ups
+ * still waiting; once the update is sent or stopped the address is blanked,
+ * so it is gone from here too. Admins only, whatever screen calls it.
+ */
+function kop_followup_waiting_emails($kind, array $ids) {
+    if (!function_exists('current_user_can') || !current_user_can('manage_options')) {
+        return array();
+    }
+    if (get_option('kop_followup_db') !== KOP_FOLLOWUP_DB_VERSION) {
+        return array();
+    }
+    $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+    if (!$ids) {
+        return array();
+    }
+    global $wpdb;
+    $rows = $wpdb->get_results($wpdb->prepare(
+        'SELECT item_id, email FROM ' . kop_followup_table() . " WHERE kind = %s AND state = 'waiting' AND email <> '' AND item_id IN ("
+            . implode(',', $ids) . ') ORDER BY id',
+        $kind
+    ), ARRAY_A);
+    $out = array();
+    foreach ((array) $rows as $r) {
+        $out[(int) $r['item_id']] = (string) $r['email'];
+    }
+    return $out;
+}
+
+/** An email address inside what a submitter typed as their name or contact ('' when there is none). */
+function kop_followup_contact_from($text) {
+    if (preg_match('/[A-Z0-9._%+\'-]+@[A-Z0-9-]+(?:\.[A-Z0-9-]+)*\.[A-Z]{2,}/i', (string) $text, $m) && is_email($m[0])) {
+        return $m[0];
+    }
+    return '';
+}
+
+/**
+ * The submitter's follow-up request and contact for the admin review cards:
+ * [item_id => ['asked' => bool, 'email' => follow-up address, 'contact' => another address the
+ * submitter typed as their name or contact, '' when the same or none]]. Items with neither are left out.
+ *
+ * @param array $items [item_id => what the row holds as its submitter (submitted_by), '' when nothing].
+ */
+function kop_followup_admin_info($kind, array $items) {
+    if (!function_exists('current_user_can') || !current_user_can('manage_options')) {
+        return array();
+    }
+    try {
+        $asked = kop_followup_waiting_emails($kind, array_keys($items));
+    } catch (Throwable $e) {
+        $asked = array();
+    }
+    $out = array();
+    foreach ($items as $id => $by) {
+        $id = (int) $id;
+        $email = isset($asked[$id]) ? $asked[$id] : '';
+        $contact = kop_followup_contact_from($by);
+        if ($contact !== '' && strcasecmp($contact, $email) === 0) {
+            $contact = '';
+        }
+        if ($email === '' && $contact === '') {
+            continue;
+        }
+        $out[$id] = array('asked' => $email !== '', 'email' => $email, 'contact' => $contact);
+    }
+    return $out;
+}
+
+/** The same as lines for a review inbox card's details; 'private' keeps them off volunteers' cards. */
+function kop_followup_admin_details($info) {
+    if (!is_array($info)) {
+        return array();
+    }
+    $d = array();
+    if (!empty($info['asked'])) {
+        $d[] = array('label' => 'Submitter asked to hear back', 'value' => $info['email'], 'url' => 'mailto:' . $info['email'], 'private' => true);
+    } else {
+        $d[] = array('label' => 'Submitter asked to hear back', 'value' => 'No', 'private' => true);
+    }
+    if (!empty($info['contact'])) {
+        $d[] = array('label' => 'Submitter\'s email', 'value' => $info['contact'], 'url' => 'mailto:' . $info['contact'], 'private' => true);
+    }
+    return $d;
 }
 
 /** The review inbox's native type name (inc/review-inbox/native.php) as a follow-up kind. */

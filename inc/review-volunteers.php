@@ -552,7 +552,7 @@ function kop_vol_item($source, array $it) {
         $facts[] = array('label' => (string) ($f['label'] ?? ''), 'value' => $s(kop_rinbox_excerpt($v, 2000)));
     }
     foreach ((array) ($it['details'] ?? array()) as $d) {
-        if (!is_array($d) || kop_vol_private_label($d['label'] ?? '')) continue;
+        if (!is_array($d) || !empty($d['private']) || kop_vol_private_label($d['label'] ?? '')) continue;
         $v = is_array($d['value'] ?? '') ? implode('; ', array_map('strval', $d['value'])) : (string) ($d['value'] ?? '');
         if (trim($v) === '') continue;
         $url = (string) ($d['url'] ?? '');

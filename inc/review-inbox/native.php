@@ -235,8 +235,16 @@ function kop_rinbox_native_item($type, array $r) {
     }
     if ($type === 'news' && !$log) $actions = array_merge($actions, kop_rinbox_native_connect_actions($r));
     $title = (string) ($r[$t['title']] ?? '');
+    // Whether the submitter asked to hear back, and their email (admins only; inc/submission-followup.php).
+    $details = array();
+    if (function_exists('kop_followup_admin_info')) {
+        $kind = kop_followup_kind_for_native($type);
+        $info = kop_followup_admin_info($kind, array((int) $r['id'] => $type === 'data' ? '' : (string) ($r['submitted_by'] ?? '')));
+        $details = kop_followup_admin_details($info[(int) $r['id']] ?? null);
+    }
     return array(
         'key'          => (string) (int) $r['id'],
+        'details'      => $details,
         'title'        => $title !== '' ? $title : '(untitled)',
         'url'          => kop_rinbox_native_url($type, $r),
         'text'         => $type === 'wiki' ? kop_rinbox_excerpt($r['generated_markdown'] ?? '', 3000) : '',

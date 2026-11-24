@@ -49,6 +49,8 @@ function wp_remote_post($url, $args) { $GLOBALS['kop_test_http'][] = array($url,
 function is_wp_error($v) { return false; }
 function wp_remote_retrieve_response_code($r) { return $r['response']['code']; }
 function esc_html($v) { return htmlspecialchars((string) $v, ENT_QUOTES); }
+$GLOBALS['kop_test_admin'] = false;
+function current_user_can($cap) { return $cap === 'manage_options' && $GLOBALS['kop_test_admin']; }
 function wp_mail($to, $subject, $body) { $GLOBALS['kop_test_mail'][] = compact('to', 'subject', 'body'); return true; }
 
 $records = new PDO('sqlite::memory:');
@@ -150,6 +152,26 @@ echo "Waiting\n";
 $t = time();
 $c = kop_followup_run($t);
 check('pending items send nothing', !mails() && $c['sent'] === 0 && $c['waiting'] === 7);
+
+echo "Review cards (admins only, read-only)\n";
+$GLOBALS['kop_test_admin'] = false;
+check('not an admin: nothing shown', kop_followup_admin_info('news', array(21 => '', 22 => 'x@example.org')) === array()
+    && kop_followup_waiting_emails('news', array(21)) === array());
+$GLOBALS['kop_test_admin'] = true;
+$info = kop_followup_admin_info('news', array(21 => '', 22 => 'Jo Smith jo@example.org', 99 => 'Anonymous', 98 => 'pat@example.org'));
+check('asked: marked with the address it gave', $info[21] === array('asked' => true, 'email' => 'a@example.org', 'contact' => ''));
+check('asked, and typed another address as their name: both shown', $info[22] === array('asked' => true, 'email' => 'b@example.org', 'contact' => 'jo@example.org'));
+check('no follow-up and no email: left out', !isset($info[99]));
+check('no follow-up but an email typed: contact only', $info[98] === array('asked' => false, 'email' => '', 'contact' => 'pat@example.org'));
+$info = kop_followup_admin_info('wiki', array(51 => 'B@example.org'));
+check('the same address twice is shown once', $info[51]['contact'] === '' && $info[51]['asked']);
+$d = kop_followup_admin_details($info[51]);
+check('card detail: a private mailto line', count($d) === 1 && $d[0]['url'] === 'mailto:b@example.org' && $d[0]['private'] === true);
+$d = kop_followup_admin_details(array('asked' => false, 'email' => '', 'contact' => 'pat@example.org'));
+check('card detail without a request says No, then the email', count($d) === 2 && $d[0]['value'] === 'No' && $d[1]['url'] === 'mailto:pat@example.org');
+check('nothing to show: no lines', kop_followup_admin_details(null) === array());
+check('reading changes nothing', (int) $wpdb->get_var("SELECT COUNT(*) FROM wp_kop_submission_followups WHERE state = 'waiting' AND email <> ''") === 7 && !mails());
+$GLOBALS['kop_test_admin'] = false;
 
 echo "Decision must stand\n";
 $records->exec("UPDATE suggested_edits SET status = 'approved' WHERE id = 11");

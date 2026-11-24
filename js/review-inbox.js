@@ -2205,6 +2205,8 @@
                     dd.appendChild(el('a', { href: d.url, target: '_blank', rel: 'noopener', text: d.value || linkLabel(d.url) }));
                     dd.appendChild(previewButton(d.url, pane));
                 }
+                // A submitter's or reader's email (inc/submission-followup.php kop_followup_admin_details()).
+                else if (d.url && /^mailto:[^\s<>"]+@[^\s<>"]+$/i.test(String(d.url))) dd.appendChild(el('a', { href: d.url, text: d.value || String(d.url).slice(7) }));
                 else dd.textContent = Array.isArray(d.value) ? d.value.join(', ') : String(d.value === null || d.value === undefined ? '' : d.value);
                 dl.appendChild(dd);
             });

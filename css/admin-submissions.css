@@ -1818,6 +1818,27 @@ button.btn-refile-undo, button.btn-refile-undo:hover, button.btn-refile-undo:foc
     text-decoration: underline;
 }
 
+/* The submitter asked to hear back when it is reviewed, or gave an email (js/admin-submissions.js followupNote()) */
+.submission-card .followup-note {
+    margin: 6px 0 0;
+    padding: 6px 10px;
+    border-left: 4px solid var(--kop-text-muted, #4A5568);
+    background: var(--rv-subtle);
+    color: var(--kop-midnight, #000435);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.submission-card .followup-note.is-asked {
+    border-left-color: var(--kop-orange-ink, #A3570D);
+    background: var(--kop-soft-pastel-yellow, #FFF5CB);
+}
+
+.submission-card .followup-note a {
+    color: var(--kop-navy, #000080);
+    text-decoration: underline;
+}
+
 /* Data suggestions: what changed, not the whole record (js/admin-submissions.js renderChanges()). */
 .sugg-changes {
     display: flex;

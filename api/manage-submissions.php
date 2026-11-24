@@ -243,8 +243,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
+        // Whether the submitter asked to hear back, and their email (inc/submission-followup.php; admins only).
+        $kopFollowup = function_exists('kop_followup_admin_info')
+            ? (kop_followup_admin_info(kop_followup_kind_for_native($type), [(int) $submission['id'] => $type === 'data' ? '' : (string) ($submission['submitted_by'] ?? '')])[(int) $submission['id']] ?? null)
+            : null;
+
         if ($schema['record']) {
-            echo json_encode(['success' => true, 'data' => kop_map_record_submission($submission, $schema)]);
+            echo json_encode(['success' => true, 'data' => kop_map_record_submission($submission, $schema) + ['followup' => $kopFollowup]]);
             exit;
         }
 
@@ -264,6 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $submission['edits'] = ($submission['status'] ?? '') === 'pending' ? count((array) get_option('kop_sugg_edits_' . (int) $submission['id'], [])) : 0;
         }
 
+        $submission['followup'] = $kopFollowup;
         echo json_encode(['success' => true, 'data' => $submission]);
         exit;
     }
@@ -380,7 +386,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // publication_name, author, article_type, and the duplicate map needs
         // article_url) plus the generic aliases shared with wiki/data rows.
         $sql = "SELECT id, article_title, publication_name, author, article_type, article_url, facilities_mentioned,
-                       article_title as program_name, publication_name as organization,
+                       submitted_by as kop_submitter, article_title as program_name, publication_name as organization,
                        article_type as program_type, author as submitted_by,
                        publication_date as years_active, status, created_at, updated_at, json_data
                 FROM $table $whereClause
@@ -420,6 +426,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // Fixes made on the card before Approve (the 'edit_suggestion' action), for its "Undo last edit".
             $row['edits'] = ($row['status'] ?? '') === 'pending' ? count((array) get_option('kop_sugg_edits_' . (int) $row['id'], [])) : 0;
         }
+    }
+    unset($row);
+
+    // Whether the submitter asked to hear back, and their email (inc/submission-followup.php; admins only).
+    $kopBy = [];
+    foreach ($submissions as $row) {
+        $kopBy[(int) $row['id']] = $type === 'data' ? '' : (string) ($row['kop_submitter'] ?? $row['submitted_by'] ?? '');
+    }
+    $kopFollowups = function_exists('kop_followup_admin_info') ? kop_followup_admin_info(kop_followup_kind_for_native($type), $kopBy) : [];
+    foreach ($submissions as &$row) {
+        unset($row['kop_submitter']);
+        $row['followup'] = $kopFollowups[(int) $row['id']] ?? null;
     }
     unset($row);
 
