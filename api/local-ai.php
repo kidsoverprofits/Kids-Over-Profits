@@ -116,6 +116,8 @@ if (!function_exists('kop_lai_dir')) {
                 'prompt'      => $prompt,
                 'maxTokens'   => (int) ($opts['maxTokens'] ?? 4096),
                 'temperature' => (float) ($opts['temperature'] ?? 0.1),
+                // The job that asked (AI Usage's name): the worker may answer it with another model, or only from the queue.
+                'job'         => function_exists('kop_ai_usage_job') ? kop_ai_usage_job() : '',
             ), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
             CURLOPT_HTTPHEADER     => array('Content-Type: application/json', 'X-KOP-Local-Token: ' . $endpoint['token']),
             CURLOPT_CONNECTTIMEOUT => 10,
