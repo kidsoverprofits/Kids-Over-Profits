@@ -34333,7 +34333,2693 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:do-the-court-opinions-christian-v-dcs-state-of-t",
+   "section": "About rewrites: facts to check",
+   "title": "Do the court opinions 'christian-v-dcs-state-of-tn' (casetext) and casemine 59146784add7b049342b41bf concern Youth Villages, and what do they decide?",
+   "text": "KOP lawsuits 196 and 197 are titled 'Court opinion - Youth Villages'. Identify and summarize them; add them to kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/) if they concern Youth Villages.",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:on-what-date-did-a-shelby-county-grand-jury-indi",
+   "section": "About rewrites: outcomes",
+   "title": "On what date did a Shelby County grand jury indict four Youth Villages workers over Alegend Jones's death, who were they, and was the sentinel event review completed?",
+   "text": "FOX13 reported the indictments (https://www.fox13memphis.com/news/youth-villages-workers-accused-in-alegend-jones-death-were-indicted-but-never-prosecuted/article_fc672c8d-1bf3-4e95-a8e9-7783e74573d0.html ; May 13, 2025), and the Daily Memphian reports the case dropped (https://dailymemphian.com/article/51726/shelby-county-district-attorney-criminal-case-against-youth-villages-alegend-jones-dropped ). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-deniro-smith-statutory-rape-case-aga",
+   "section": "About rewrites: outcomes",
+   "title": "How did the Deniro Smith statutory rape case against a Youth Villages worker in Shelby County, Tennessee, end after his October 2015 indictment?",
+   "text": "Source: https://www.actionnews5.com/story/30282954/youth-villages-worker-indicted-on-rape-charges/ . Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: actionnews5.com/story/30282954/youth-villages-worker-indicted-on-rape-charges/",
+     "url": "https://www.actionnews5.com/story/30282954/youth-villages-worker-indicted-on-rape-charges/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:did-wreg-s-may-3-2018-report-on-a-youth-villages",
+   "section": "About rewrites: facts to check",
+   "title": "Did WREG's May 3, 2018 report on a Youth Villages sexual abuse allegation say Francis Agunenye was fired, and was he charged?",
+   "text": "The About read it only through Vasudeva's 2023 thesis (https://jewlscholar.mtsu.edu/bitstreams/324217c6-da5f-4aa8-9b8e-3654c70d4a39/download ). Read the original: https://www.wreg.com/news/wreg-investigates-youth-villages-sexual-abuse-allegation/ . Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: wreg.com/news/wreg-investigates-youth-villages-sexual-abuse-allegation/",
+     "url": "https://www.wreg.com/news/wreg-investigates-youth-villages-sexual-abuse-allegation/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:what-were-the-date-and-outcome-of-the-child-expl",
+   "section": "About rewrites: outcomes",
+   "title": "What were the date and outcome of the child exploitation charge against Youth Villages employee Christiana Brendi Freeman in Douglas County, Georgia?",
+   "text": "JJIE, Aug 9, 2013: https://jjie.org/2013/08/09/youth-villages-employee-charged-with-sexual-exploitation-of-a-minor/ (the page now redirects; use the Wayback copy). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: jjie.org/2013/08/09/youth-villages-employee-charged-with-sexual-exploitation-of-",
+     "url": "https://jjie.org/2013/08/09/youth-villages-employee-charged-with-sexual-exploitation-of-a-minor/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-oregon-s-2015-move-to-revoke-the-license",
+   "section": "About rewrites: outcomes",
+   "title": "How did Oregon's 2015 move to revoke the license of the Youth Villages Oregon psychiatric program end?",
+   "text": "Sources: Statesman Journal, Dec 31, 2015, 'Youth home ends psychiatric program after abuse revealed'; Oregon DHS notice of intent to revoke, Dec 8, 2015; summary https://www.crewjanci.com/oregon-child-care-provider-facing-revocation-of-license-sanctions-for-abuse-and-neglect-of-children/ . Add the outcome to the Youth Villages Oregon record (facility 12414) and kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314,
+    12414
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: crewjanci.com/oregon-child-care-provider-facing-revocation-of-license-sanctions-",
+     "url": "https://www.crewjanci.com/oregon-child-care-provider-facing-revocation-of-license-sanctions-for-abuse-and-neglect-of-children/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:where-was-the-original-report-of-the-june-2011-m",
+   "section": "About rewrites: sources to find",
+   "title": "Where was the original report of the June 2011 merger of Youth Villages and ChristieCare in Oregon?",
+   "text": "Vasudeva's thesis cites Lake Oswego Review, May 31, 2011. Find that article and cite it on the Youth Villages Oregon record (facility 12414). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314,
+    12414
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-survivor-accounts-of-youth-villages-in-tenn",
+   "section": "About rewrites: sources to find",
+   "title": "What survivor accounts of Youth Villages in Tennessee are on Reddit and on the r/troubledteens wiki page youthvillagestn?",
+   "text": "The wiki fetch was blocked. Find accounts and quote them word for word in the testimony of kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-did-the-daily-memphian-s-dec-13-2023-articl",
+   "section": "About rewrites: sources to find",
+   "title": "What did the Daily Memphian's Dec 13, 2023 article report about the second family's allegations against Youth Villages (Latrice and Lawrence Johnson)?",
+   "text": "The article is tagged with their names; they may concern a residential campus. Related coverage: https://dailymemphian.com/article/40482/civil-right-attorney-ben-crump-youth-villages-abuse-memphis . Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100314.json (the About of /facility/youth-villages-tn/).",
+   "context": "",
+   "records": [
+    100314
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Mother of teen who died in the care of Oak Plains Academy speaks out (NewsChannel 5)",
+     "url": "https://www.newschannel5.com/news/mother-of-teen-who-died-in-the-care-of-oak-plains-academy-speaks-out",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages (Supreme Court of Utah)",
+     "url": "https://caselaw.findlaw.com/ut-supreme-court/1039577.html",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://casetext.com/case/christian-v-dcs-state-of-tn",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Court opinion - Youth Villages",
+     "url": "https://www.casemine.com/judgement/us/59146784add7b049342b41bf",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: dailymemphian.com/article/40482/civil-right-attorney-ben-crump-youth-villages-ab",
+     "url": "https://dailymemphian.com/article/40482/civil-right-attorney-ben-crump-youth-villages-abuse-memphis",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-published-accounts-by-former-residents-or-p",
+   "section": "About rewrites: sources to find",
+   "title": "What published accounts by former residents or parents of Devereux's school in Rutland, Massachusetts exist?",
+   "text": "Leads: Reddit; Google, MapQuest and LTC News reviews; a 2015 MapQuest review is by someone who attended 1996 to 1999. Quote them word for word. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100456.json (the About of /facility/devereux-ma/).",
+   "context": "",
+   "records": [
+    100456
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: The schools that take Colorado’s ‘most vulnerable’ children are disappearing (CPR News, 2023-05-11)",
+     "url": "https://www.cpr.org/2023/05/11/the-schools-that-take-colorados-most-vulnerable-children-are-disappearing/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Teen Killed on Route 9 Wandered Off-Campus Unescorted in Pre-Dawn Hours, State Police Say (The Daily Catch, 2022-10-08)",
+     "url": "https://www.thedailycatch.org/articles/devereux-teen-killed-on-route-9-wandered-off-campus-unescorted-in-pre-dawn-hours-state-police-say/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux school employees charged after student's death in pedestrian crash (Poughkeepsie Journal, 2022-10-06)",
+     "url": "https://www.yahoo.com/news/devereux-school-employees-charged-students-001048180.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Will Expand Migrant Children Facility in Westminster (Westword, 2021-04-02)",
+     "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux abandons a plan to house 40 undocumented migrant children in Chester County (The Philadelphia Inquirer, 2020-10-01)",
+     "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Devereux Advanced Behavioral Health (Supreme Court of New Jersey, filed 2012-02-29)",
+     "url": "https://law.justia.com/cases/new-jersey/supreme-court/2012/a-54-10.html",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-do-the-massachusetts-eec-licensing-investig",
+   "section": "About rewrites: sources to find",
+   "title": "What do the Massachusetts EEC licensing investigation reports say about the 301 violations the Boston Globe counted at Devereux Rutland in 2016-2023, including the July 2019 Spencer runaway?",
+   "text": "The Globe count is in https://www.bostonglobe.com/2023/09/27/metro/there-are-no-words/ . Get the EEC reports themselves and cite them beside the Globe. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100456.json (the About of /facility/devereux-ma/).",
+   "context": "",
+   "records": [
+    100456
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "Boston Globe",
+     "url": "https://www.bostonglobe.com/2023/09/27/metro/there-are-no-words/",
+     "kind": "note"
+    },
+    {
+     "label": "News: The schools that take Colorado’s ‘most vulnerable’ children are disappearing (CPR News, 2023-05-11)",
+     "url": "https://www.cpr.org/2023/05/11/the-schools-that-take-colorados-most-vulnerable-children-are-disappearing/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Teen Killed on Route 9 Wandered Off-Campus Unescorted in Pre-Dawn Hours, State Police Say (The Daily Catch, 2022-10-08)",
+     "url": "https://www.thedailycatch.org/articles/devereux-teen-killed-on-route-9-wandered-off-campus-unescorted-in-pre-dawn-hours-state-police-say/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux school employees charged after student's death in pedestrian crash (Poughkeepsie Journal, 2022-10-06)",
+     "url": "https://www.yahoo.com/news/devereux-school-employees-charged-students-001048180.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Will Expand Migrant Children Facility in Westminster (Westword, 2021-04-02)",
+     "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux abandons a plan to house 40 undocumented migrant children in Chester County (The Philadelphia Inquirer, 2020-10-01)",
+     "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Devereux Advanced Behavioral Health (Supreme Court of New Jersey, filed 2012-02-29)",
+     "url": "https://law.justia.com/cases/new-jersey/supreme-court/2012/a-54-10.html",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: bostonglobe.com/2023/09/27/metro/there-are-no-words/",
+     "url": "https://www.bostonglobe.com/2023/09/27/metro/there-are-no-words/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:after-february-3-2027-did-massachusetts-dese-res",
+   "section": "About rewrites: outcomes",
+   "title": "After February 3, 2027, did Massachusetts DESE restore full approval to Devereux Advanced Behavioral Health in Rutland, extend its provisional approval, or withdraw it?",
+   "text": "DESE's 2026 program review (final report Aug 4, 2026) is https://www.doe.mass.edu/oases/ps-cpr/reports/2026/02570805.docx ; download it into the media library. Answer updates the closing sentence of kop-pipeline tmp/about-rewrite/batch5/sendable/f100456.json (the About of /facility/devereux-ma/).",
+   "context": "",
+   "records": [
+    100456
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "DESE 2026 review",
+     "url": "https://www.doe.mass.edu/oases/ps-cpr/reports/2026/02570805.docx",
+     "kind": "note"
+    },
+    {
+     "label": "News: The schools that take Colorado’s ‘most vulnerable’ children are disappearing (CPR News, 2023-05-11)",
+     "url": "https://www.cpr.org/2023/05/11/the-schools-that-take-colorados-most-vulnerable-children-are-disappearing/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Teen Killed on Route 9 Wandered Off-Campus Unescorted in Pre-Dawn Hours, State Police Say (The Daily Catch, 2022-10-08)",
+     "url": "https://www.thedailycatch.org/articles/devereux-teen-killed-on-route-9-wandered-off-campus-unescorted-in-pre-dawn-hours-state-police-say/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux school employees charged after student's death in pedestrian crash (Poughkeepsie Journal, 2022-10-06)",
+     "url": "https://www.yahoo.com/news/devereux-school-employees-charged-students-001048180.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Will Expand Migrant Children Facility in Westminster (Westword, 2021-04-02)",
+     "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux abandons a plan to house 40 undocumented migrant children in Chester County (The Philadelphia Inquirer, 2020-10-01)",
+     "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Devereux Advanced Behavioral Health (Supreme Court of New Jersey, filed 2012-02-29)",
+     "url": "https://law.justia.com/cases/new-jersey/supreme-court/2012/a-54-10.html",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: doe.mass.edu/oases/ps-cpr/reports/2026/02570805.docx",
+     "url": "https://www.doe.mass.edu/oases/ps-cpr/reports/2026/02570805.docx",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:can-the-massachusetts-dese-mid-cycle-review-of-d",
+   "section": "About rewrites: sources to find",
+   "title": "Can the Massachusetts DESE mid-cycle review of Devereux Advanced Behavioral Health in Rutland, issued Jan 24, 2023, be obtained for the media library?",
+   "text": "The report is at https://www.doe.mass.edu/oases/ps-cpr/reports/2023/followup/02570805.docx ; KOP cites it but holds no copy. Answer changes the citation in kop-pipeline tmp/about-rewrite/batch5/sendable/f100456.json (the About of /facility/devereux-ma/).",
+   "context": "",
+   "records": [
+    100456
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "DESE 2023 follow-up",
+     "url": "https://www.doe.mass.edu/oases/ps-cpr/reports/2023/followup/02570805.docx",
+     "kind": "note"
+    },
+    {
+     "label": "News: The schools that take Colorado’s ‘most vulnerable’ children are disappearing (CPR News, 2023-05-11)",
+     "url": "https://www.cpr.org/2023/05/11/the-schools-that-take-colorados-most-vulnerable-children-are-disappearing/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Teen Killed on Route 9 Wandered Off-Campus Unescorted in Pre-Dawn Hours, State Police Say (The Daily Catch, 2022-10-08)",
+     "url": "https://www.thedailycatch.org/articles/devereux-teen-killed-on-route-9-wandered-off-campus-unescorted-in-pre-dawn-hours-state-police-say/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux school employees charged after student's death in pedestrian crash (Poughkeepsie Journal, 2022-10-06)",
+     "url": "https://www.yahoo.com/news/devereux-school-employees-charged-students-001048180.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Will Expand Migrant Children Facility in Westminster (Westword, 2021-04-02)",
+     "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux abandons a plan to house 40 undocumented migrant children in Chester County (The Philadelphia Inquirer, 2020-10-01)",
+     "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Devereux Advanced Behavioral Health (Supreme Court of New Jersey, filed 2012-02-29)",
+     "url": "https://law.justia.com/cases/new-jersey/supreme-court/2012/a-54-10.html",
+     "kind": "court"
+    },
+    {
+     "label": "From the notes: doe.mass.edu/oases/ps-cpr/reports/2023/followup/02570805.docx",
+     "url": "https://www.doe.mass.edu/oases/ps-cpr/reports/2023/followup/02570805.docx",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:did-the-philadelphia-inquirer-s-oct-1-2020-artic",
+   "section": "About rewrites: facts to check",
+   "title": "Did the Philadelphia Inquirer's Oct 1, 2020 article say 12 migrant children were planned for Devereux's Rutland, Massachusetts campus?",
+   "text": "The article is paywalled: https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html . Confirm the figure of 12. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f100456.json (the About of /facility/devereux-ma/).",
+   "context": "",
+   "records": [
+    100456
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: The schools that take Colorado’s ‘most vulnerable’ children are disappearing (CPR News, 2023-05-11)",
+     "url": "https://www.cpr.org/2023/05/11/the-schools-that-take-colorados-most-vulnerable-children-are-disappearing/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Teen Killed on Route 9 Wandered Off-Campus Unescorted in Pre-Dawn Hours, State Police Say (The Daily Catch, 2022-10-08)",
+     "url": "https://www.thedailycatch.org/articles/devereux-teen-killed-on-route-9-wandered-off-campus-unescorted-in-pre-dawn-hours-state-police-say/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux school employees charged after student's death in pedestrian crash (Poughkeepsie Journal, 2022-10-06)",
+     "url": "https://www.yahoo.com/news/devereux-school-employees-charged-students-001048180.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux Will Expand Migrant Children Facility in Westminster (Westword, 2021-04-02)",
+     "url": "https://www.westword.com/news/devereux-will-expand-migrant-children-facility-in-westminster-11931507/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Devereux abandons a plan to house 40 undocumented migrant children in Chester County (The Philadelphia Inquirer, 2020-10-01)",
+     "url": "https://www.inquirer.com/news/devereux-devon-chester-migrant-children-unaccompanied-immigrants-abuse-sexual-massachusetts-20201001.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Court opinion - Devereux Advanced Behavioral Health (Supreme Court of New Jersey, filed 2012-02-29)",
+     "url": "https://law.justia.com/cases/new-jersey/supreme-court/2012/a-54-10.html",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:who-founded-new-haven-residential-treatment-cent",
+   "section": "About rewrites: sources to find",
+   "title": "Who founded New Haven Residential Treatment Center in Spanish Fork, Utah, and what original source names them?",
+   "text": "The r/troubledteens wiki names Mark and Kathy McGregor and Craig and Diane LaMont but gives no source. Find a Utah business filing for New Haven, Inc. or a 1990s news item, then name them in the second paragraph of kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:did-daniel-john-stutz-of-indianola-utah-work-at",
+   "section": "About rewrites: facts to check",
+   "title": "Did Daniel John Stutz of Indianola, Utah work at New Haven Residential Treatment Center, and were his victims not New Haven students?",
+   "text": "The wiki cites an Imgur screenshot (https://imgur.com/a/ikV4NZr, which refuses automated fetches) for his job; news: https://sanpetemessenger.com/man-accused-of-child-sex-abuse-trial-set-for-november/ and https://midutahradio.com/news/local-news/sanpete-man-sentenced-to-prison-for-child-sex-abuse/ . Find a stronger source (licensing record, LinkedIn, news, court filing) with dates, archive the screenshot, and check Sanpete County court records. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: sanpetemessenger.com/man-accused-of-child-sex-abuse-trial-set-for-november/",
+     "url": "https://sanpetemessenger.com/man-accused-of-child-sex-abuse-trial-set-for-november/",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: midutahradio.com/news/local-news/sanpete-man-sentenced-to-prison-for-child-sex-a",
+     "url": "https://midutahradio.com/news/local-news/sanpete-man-sentenced-to-prison-for-child-sex-abuse/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:which-judge-sentenced-new-haven-therapist-calder",
+   "section": "About rewrites: facts to check",
+   "title": "Which judge sentenced New Haven therapist Calder in January 2018, and was the term five years to life per count concurrent, or seven years to life?",
+   "text": "Sources disagree: the wiki names Christine Johnson; a KOP note says five-to-life per count, concurrent; the Salt Lake Tribune says seven to life (https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life ). Check the Daily Herald, Jan 8, 2018 (https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html ) or the 4th District docket. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:did-calder-s-victim-or-anyone-else-sue-new-haven",
+   "section": "About rewrites: outcomes",
+   "title": "Did Calder's victim or anyone else sue New Haven RTC, InnerChange or Embark Behavioral Health in Utah 4th District or federal court in 2017-2020?",
+   "text": "No civil suit is known. Search Utah 4th District and D. Utah dockets, 2017-2020. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:what-do-the-utah-office-of-licensing-checklists",
+   "section": "About rewrites: facts to check",
+   "title": "What do the Utah Office of Licensing checklists for New Haven's licensed houses (Teresa House F22-93541, Roosevelt House F22-93532, F22-93534) show for 2024-2025?",
+   "text": "The checklists are in Drive folder 1p0lAqPtqGoXllgN3KMBuM_CPMWM4L2lv. Read them and import any with findings into inspection_reports for facility 10353. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:when-was-the-r-troubledteens-post-of-new-haven-f",
+   "section": "About rewrites: facts to check",
+   "title": "When was the r/troubledteens post of New Haven food photos posted, and does the quoted text match the original post?",
+   "text": "Post: https://www.reddit.com/r/troubledteens/comments/pjiy8y/photos_my_housemates_and_i_managed_to_sneak_of/ . The quote was taken from the wiki copy. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: reddit.com/r/troubledteens/comments/pjiy8y/photos_my_housemates_and_i_managed_to",
+     "url": "https://www.reddit.com/r/troubledteens/comments/pjiy8y/photos_my_housemates_and_i_managed_to_sneak_of/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:are-the-records-new-haven-residential-treatment",
+   "section": "About rewrites: facts to check",
+   "title": "Are the records 'New Haven Residential Treatment Centre' (HuffPost Canada link) and 'New Haven Residential Treatment Center' (FOX 13 link) duplicates of New Haven RTC in Spanish Fork, Utah?",
+   "text": "Facilities 100278 and 100555 may duplicate 10353 (research task 66 covers 10487); if so, move their links to 10353. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f10353.json (the About of /facility/new-haven-rtc-ut/).",
+   "context": "",
+   "records": [
+    10353,
+    100278,
+    100555
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Utah therapist who pleaded guilty to raping teenage patient sentenced to prison for up to life (The Salt Lake Tribune, 2018-01-09)",
+     "url": "https://sltrib.com/news/2018/01/09/utah-therapist-accused-of-raping-teenage-patient-sentenced-to-prison-for-up-to-life",
+     "kind": "news"
+    },
+    {
+     "label": "News: NEW SOLACIUM CEO PLANS BIG PROGRAM EXPANSIONS (Treatment Magazine, 2008-06-05)",
+     "url": "https://treatmentmagazine.com/new-solacium-ceo-plans-big-program-expansions-2/",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, July 2011, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-july-2011-p-10-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2010, p. 15 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2010-p-15-new-haven-rtc/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, June 2009, p. 18 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-june-2009-178-p-18-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2009, p. 14,19 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2009-177-pp-14-19-new-haven/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived heal-online.org)",
+     "url": "https://web.archive.org/web/2*/http://www.heal-online.org/nhcontract.pdf",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived heraldextra.com)",
+     "url": "https://web.archive.org/web/2*/https://www.heraldextra.com/news/local/crime-and-courts/therapist-may-spend-life-in-prison-for-sexual-relationship-with/article_cb6664fe-2c05-5ec6-a6e5-50c755d06834.html",
+     "kind": "website"
+    },
+    {
+     "label": "News: Canadians Faced Shocking Abuse at US Troubled Teen Boarding Schools (2020-11-22) (HuffPost Canada, 2020-11-22)",
+     "url": "https://www.huffingtonpost.ca/entry/boarding-school-abuse-canadians_ca_5fb53599c5b6f00bd84c6ef7",
+     "kind": "news"
+    },
+    {
+     "label": "News: Utah County therapist arrested for alleged sexual abuse of underage girl (FOX 13 Utah, 2017-09-26)",
+     "url": "https://www.fox13now.com/2017/09/26/utah-county-therapist-arrested-for-alleged-sexual-abuse-of-underage-girl",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:when-did-abraxas-take-over-the-new-morgan-academ",
+   "section": "About rewrites: facts to check",
+   "title": "When did Abraxas take over the New Morgan Academy campus in Morgantown, Pennsylvania and open Abraxas Academy, and when did Cornell Companies come to own Abraxas?",
+   "text": "Cornell gave up New Morgan's license in October 2002; Cornell merged into GEO Group in 2010 (https://correctionalnews.com/2010/08/12/the-geo-group-closes-730-million-merger-cornell-companies/). No source gives the takeover date or when Cornell acquired Abraxas. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "Post-Gazette, Nov 3, 2002 (Wayback)",
+     "url": "https://web.archive.org/web/20030220173640/http://www.post-gazette.com/healthscience/20021103newmorgan3.asp",
+     "kind": "note"
+    },
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:who-were-the-four-new-morgan-academy-staff-membe",
+   "section": "About rewrites: outcomes",
+   "title": "Who were the four New Morgan Academy staff members arrested in Morgantown, Pennsylvania between 2000 and 2002, what were the charges, and how did each case end?",
+   "text": "Cornell says two were convicted. The Pittsburgh Post-Gazette ran a 2001 series, 'New Morgan Academy: Is this private center the answer?', and a Nov 3, 2002 piece (https://web.archive.org/web/20030220173640/http://www.post-gazette.com/healthscience/20021103newmorgan3.asp). Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: post-gazette.com/healthscience/20021103newmorgan3.asp",
+     "url": "http://www.post-gazette.com/healthscience/20021103newmorgan3.asp",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:are-there-survivor-or-family-accounts-of-abraxas",
+   "section": "About rewrites: sources to find",
+   "title": "Are there survivor or family accounts of Abraxas Academy or New Morgan Academy in Morgantown, Pennsylvania (forums, Reddit, survivor blogs, court complaints, lawsuit coverage)?",
+   "text": "None were found in the writing pass. Residents quoted in the 2024-2026 lawsuit coverage (https://www.inquirer.com/news/nation-world/immigration-trump-prison-children-pennsylvania-20260108.html) are one place to look. The answer fills the Survivor testimony list in kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-exactly-did-the-former-abraxas-detainee-say",
+   "section": "About rewrites: sources to find",
+   "title": "What exactly did the former Abraxas detainee say in his 2024 complaint about staff withholding food or gym privileges or locking him in his room when he refused sexual requests?",
+   "text": "The Philadelphia Inquirer's Jan 8, 2026 reprint of a Washington Post story (https://www.inquirer.com/news/nation-world/immigration-trump-prison-children-pennsylvania-20260108.html) gives the allegation in paraphrase. The complaint's own wording is needed to quote it. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-abraxas-academy-s-appeal-of-pennsylvania",
+   "section": "About rewrites: outcomes",
+   "title": "How did Abraxas Academy's appeal of Pennsylvania DHS's November 2025 revocation order for its secure detention unit in Morgantown end?",
+   "text": "WGAL, Mar 6, 2026 (https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320) covers calls to shut the facility. The revocation order and the appeal outcome are not in the draft. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-status-now:is-abraxas-academy-in-morgantown-pennsylvania-st",
+   "section": "About rewrites: status now",
+   "title": "Is Abraxas Academy in Morgantown, Pennsylvania still holding a federal Office of Refugee Resettlement contract after the July 31, 2026 congressional letter, and what did HHS answer by Aug 14, 2026?",
+   "text": "Rep. Summer Lee and colleagues pressed HHS on July 31, 2026 (https://summerlee.house.gov/newsroom/press-releases/rep-lee-colleagues-press-hhs-on-decision-to-detain-migrant-children-at-facility-with-documented-abuse-record); HHS's reply was due Aug 14, 2026. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-case-against-weeko-ethengain-charged",
+   "section": "About rewrites: outcomes",
+   "title": "How did the case against Weeko Ethengain, charged with sexual assault at Abraxas Academy in Berks County, Pennsylvania, end?",
+   "text": "Charge reported Nov 19-20, 2026 by WFMZ (https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html) and Berks Weekly (https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/). The outcome is on the Berks County docket. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11574.json (the About of /facility/abraxas-academy-pa/).",
+   "context": "",
+   "records": [
+    11574
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Employee at juvenile detention center in Berks charged with sexually assaulting resident (Reading Eagle, 2026-11-20)",
+     "url": "https://www.readingeagle.com/2026/11/20/employee-at-juvenile-detention-center-in-berks-charged-with-sexually-assaulting-resident/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Reading woman charged with institutional sexual assault at Abraxas Academy (Berks Weekly, 2026-11-20)",
+     "url": "https://berksweekly.com/news/crime/reading-woman-charged-with-institutional-sexual-assault-at-abraxas-academy/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Abraxas Academy Employee Weeko Ethengain | Sexual Assault Investigation (Andreozzi + Foote, 2026-11-20)",
+     "url": "https://www.victimscivilattorneys.com/perpetrators/weeko-ethengain/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Guard at Berks County youth detention center charged with sexual assault (WFMZ, 2026-11-19)",
+     "url": "https://www.wfmz.com/news/area/berks/southern-berks-county/guard-at-berks-county-youth-detention-center-charged-with-sexual-assault/article_cc038da0-0b13-4677-a060-8e2cfa5e7b92.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Calls to shut down Abraxas Academy in Berks County intensify (WGAL, 2026-03-06)",
+     "url": "https://www.wgal.com/article/calls-shut-down-abraxas-academy-berks-county-intensify/70613320",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived abraxasyfs.com)",
+     "url": "https://web.archive.org/web/2*/http://www.abraxasyfs.com/facility-search2.cfm?f_id=27",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-2018-assault-charges-against-glen-mi",
+   "section": "About rewrites: outcomes",
+   "title": "How did the 2018 assault charges against Glen Mills Schools counselors Patrick Jameson Raquet and Christopher Medina in Delaware County, Pennsylvania end?",
+   "text": "They were arrested in Sept 2018 (https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html). The outcome is on the Delaware County docket. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:what-did-the-2019-pennsylvania-inspector-general",
+   "section": "About rewrites: facts to check",
+   "title": "What did the 2019 Pennsylvania inspector general review, the state auditor general, the Delaware County district attorney and the U.S. Justice Department find about Glen Mills Schools?",
+   "text": "The inspector general review is covered by the Inquirer, Mar 19, 2019 (https://www.inquirer.com/news/glen-mills-schools-abuse-investigation-inspector-general-pennsylvania-dhs-20190319.html). Findings and outcomes of the other three are not in the draft. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:what-happened-in-derrick-v-glen-mills-schools-e",
+   "section": "About rewrites: outcomes",
+   "title": "What happened in Derrick v. Glen Mills Schools (E.D. Pa., filed April 11, 2019) after the August 2024 state settlement, and was class certification denied in May 2024?",
+   "text": "Filed Apr 11, 2019 (https://www.chalkbeat.org/philadelphia/2019/4/11/22186398/lawsuit-filed-on-behalf-of-glen-mills-students-naming-state-officials-and-seeking-millions); the state settlement is in https://www.inquirer.com/education/glen-mills-schools-settlement-abuse-shutdown-20240802.html. The May 2024 denial is reported but not verified. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: inquirer.com/education/glen-mills-schools-settlement-abuse-shutdown-20240802.htm",
+     "url": "https://www.inquirer.com/education/glen-mills-schools-settlement-abuse-shutdown-20240802.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:in-which-court-were-the-five-january-2020-lawsui",
+   "section": "About rewrites: outcomes",
+   "title": "In which court were the five January 2020 lawsuits by attorney Nancy Winkler for former Glen Mills Schools students filed, under what docket numbers, and how did they end?",
+   "text": "NBC10 reported the suits on Jan 29, 2020 (https://www.nbcphiladelphia.com/news/local/i-went-into-this-dark-shell-2-men-recount-beatings-sexual-assaults-inside-shuttered-glen-mills-schools/2281895/). Court, dockets and outcomes are missing. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:what-are-the-court-and-docket-of-the-nov-17-2026",
+   "section": "About rewrites: facts to check",
+   "title": "What are the court and docket of the Nov 17, 2026 lawsuit by four former Glen Mills Schools students, and which years of abuse does it allege?",
+   "text": "6abc (https://6abc.com/post/4-former-students-allege-sexual-abuse-shuttered-glen-mills-schools-delaware-county/20048518/) and MyChesCo say 2004-2013; CBS (https://www.cbsnews.com/philadelphia/news/glen-mills-schools-new-lawsuit/) and Hoodline (https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/) say 2004-2023. Lawyers are Herman Law (Andrew Silvershein). Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-status-now:did-the-clock-tower-schools-provisional-pennsylv",
+   "section": "About rewrites: status now",
+   "title": "Did The Clock Tower Schools' provisional Pennsylvania license from January 2023 become a regular license, what do monitor Justice By Design's reports say, and was Pride Hall's license renewed after it expired March 21, 2026?",
+   "text": "WHYY, Jan 27, 2023 (https://whyy.org/articles/clock-tower-schools-reopen-glen-mills-schools/) reports the two-year provisional license. Pride Hall inspection: https://www.humanservices.dhs.pa.gov/HUMAN_SERVICE_PROVIDER_DIRECTORY/Home/GetAzureFile?directory=inspectionsummary&filename=20260120_14986.pdf. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f11643.json (the About of /facility/the-clock-tower-schools-pa/).",
+   "context": "",
+   "records": [
+    11643,
+    11445
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Lawmakers Issue Warning to Troubled Teen Industry: Congress Will Act (The Imprint, 2021-10-21)",
+     "url": "https://imprintnews.org/top-stories/lawmakers-issue-warning-to-troubled-teen-industry-congress-will-act/59817",
+     "kind": "news"
+    },
+    {
+     "label": "News: 2 Glen Mills school counselors arrested for assaulting a student (WFMZ-TTV, 2018-09-07)",
+     "url": "https://www.wfmz.com/news/crime/2-glen-mills-school-counselors-arrested-for-assaulting-a-student/article_d23c88a2-6207-5e6c-87a8-5b7054521a52.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Four Ex-Glen Mills Students Sue, Alleging Years of Sexual and Physical Abuse (Hoodline, 2026-11-18)",
+     "url": "https://hoodline.com/2026/11/four-ex-glen-mills-students-sue-alleging-years-of-sexual-and-physical-abuse/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Entrepreneur returns to troubled past (Baltimore Sun, 1995-04-16)",
+     "url": "https://www.baltimoresun.com/news/bs-xpm-1995-04-16-1995106090-story.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived glenmillsschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.glenmillsschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: humanservices.dhs.pa.gov/HUMAN_SERVICE_PROVIDER_DIRECTORY/Home/GetAzureFile?dire",
+     "url": "https://www.humanservices.dhs.pa.gov/HUMAN_SERVICE_PROVIDER_DIRECTORY/Home/GetAzureFile?directory=inspectionsummary&filename=20260120_14986.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-and-when-did-lovell-v-devereux-foundation-d",
+   "section": "About rewrites: outcomes",
+   "title": "How and when did Lovell v. Devereux Foundation (D. Conn. 3:17-cv-01411), the 2017 suit over abuse at the Glenholme School in Washington, Connecticut, end?",
+   "text": "The draft says the case was dismissed with prejudice but gives no date or settlement. Docket: https://www.courtlistener.com/docket/7348620/lovell-v-devereux-foundation-inc/ ; complaint: https://kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-08212017.pdf . Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f12672.json (the About of /facility/the-glenholme-school-ct/).",
+   "context": "",
+   "records": [
+    12672
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "Lovell complaint",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-08212017.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Glenholme School worker sentenced to 9 months in prison for sex assault of teen (Register Citizen, 2013-05-21)",
+     "url": "https://www.registercitizen.com/news/article/Glenholme-School-worker-sentenced-to-9-months-in-12005470.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Torrington woman free to travel after probation terms loosened (The Register Citizen, 2011-03-11)",
+     "url": "https://www.registercitizen.com/news/article/Torrington-woman-free-to-travel-after-probation-12073906.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen 'n Heard, 4/1992 (Woodbury Reports, 1992-04-01)",
+     "url": "http://www.strugglingteens.com/archives/1992/4/seen03.html",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, September 2012, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2012-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2012, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2012-p-10-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, August 2010, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-august-2010-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2009, p. 16 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2009-175-p-16-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theglenholmeschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.theglenholmeschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: courtlistener.com/docket/7348620/lovell-v-devereux-foundation-inc/",
+     "url": "https://www.courtlistener.com/docket/7348620/lovell-v-devereux-foundation-inc/",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-082",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-08212017.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:does-the-news-times-article-of-sept-25-2017-suit",
+   "section": "About rewrites: facts to check",
+   "title": "Does the News-Times article of Sept 25, 2017, 'Suit alleges sex abuse at Washington's Glenholme school', match the allegations in the Lovell v. Devereux complaint?",
+   "text": "KOP's news queue holds the article as deleted. Article: https://www.newstimes.com/local/article/Suit-alleges-sex-abuse-at-Washington-s-12229793.php ; complaint: https://kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-08212017.pdf . Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f12672.json (the About of /facility/the-glenholme-school-ct/).",
+   "context": "",
+   "records": [
+    12672
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Glenholme School worker sentenced to 9 months in prison for sex assault of teen (Register Citizen, 2013-05-21)",
+     "url": "https://www.registercitizen.com/news/article/Glenholme-School-worker-sentenced-to-9-months-in-12005470.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Torrington woman free to travel after probation terms loosened (The Register Citizen, 2011-03-11)",
+     "url": "https://www.registercitizen.com/news/article/Torrington-woman-free-to-travel-after-probation-12073906.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen 'n Heard, 4/1992 (Woodbury Reports, 1992-04-01)",
+     "url": "http://www.strugglingteens.com/archives/1992/4/seen03.html",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, September 2012, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2012-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2012, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2012-p-10-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, August 2010, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-august-2010-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2009, p. 16 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2009-175-p-16-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theglenholmeschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.theglenholmeschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: newstimes.com/local/article/Suit-alleges-sex-abuse-at-Washington-s-12229793.php",
+     "url": "https://www.newstimes.com/local/article/Suit-alleges-sex-abuse-at-Washington-s-12229793.php",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-082",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Lovell-v-Devereux-Glenholme-Complaint-08212017.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-published-accounts-by-former-students-or-pa",
+   "section": "About rewrites: sources to find",
+   "title": "What published accounts by former students or parents of the Glenholme School in Washington, Connecticut exist (survivor groups, Fornits topic 21951, reviews)?",
+   "text": "The About currently has few first-person accounts; known ones are Reddit https://www.reddit.com/r/troubledteens/comments/l7er5w/glenholme_devereux_school/ and HEAL http://www.heal-online.org/devglen.htm . Quote any new ones word for word. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f12672.json (the About of /facility/the-glenholme-school-ct/).",
+   "context": "",
+   "records": [
+    12672
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Glenholme School worker sentenced to 9 months in prison for sex assault of teen (Register Citizen, 2013-05-21)",
+     "url": "https://www.registercitizen.com/news/article/Glenholme-School-worker-sentenced-to-9-months-in-12005470.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Torrington woman free to travel after probation terms loosened (The Register Citizen, 2011-03-11)",
+     "url": "https://www.registercitizen.com/news/article/Torrington-woman-free-to-travel-after-probation-12073906.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen 'n Heard, 4/1992 (Woodbury Reports, 1992-04-01)",
+     "url": "http://www.strugglingteens.com/archives/1992/4/seen03.html",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, September 2012, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2012-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2012, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2012-p-10-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, August 2010, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-august-2010-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2009, p. 16 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2009-175-p-16-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theglenholmeschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.theglenholmeschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: reddit.com/r/troubledteens/comments/l7er5w/glenholme_devereux_school/",
+     "url": "https://www.reddit.com/r/troubledteens/comments/l7er5w/glenholme_devereux_school/",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: heal-online.org/devglen.htm",
+     "url": "http://www.heal-online.org/devglen.htm",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:when-was-the-heal-statement-by-a-student-sent-to",
+   "section": "About rewrites: facts to check",
+   "title": "When was the HEAL statement by a student sent to the Glenholme School in Washington, Connecticut in March 1993 written?",
+   "text": "The statement is undated and was read through the r/troubledteens wiki's copy. Check HEAL's own page (Wayback copy of http://www.heal-online.org/devglen.htm, Apr 21, 2010: https://web.archive.org/web/20100421182422/http://www.heal-online.org/devglen.htm ) and date it. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/f12672.json (the About of /facility/the-glenholme-school-ct/).",
+   "context": "",
+   "records": [
+    12672
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: Glenholme School worker sentenced to 9 months in prison for sex assault of teen (Register Citizen, 2013-05-21)",
+     "url": "https://www.registercitizen.com/news/article/Glenholme-School-worker-sentenced-to-9-months-in-12005470.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Torrington woman free to travel after probation terms loosened (The Register Citizen, 2011-03-11)",
+     "url": "https://www.registercitizen.com/news/article/Torrington-woman-free-to-travel-after-probation-12073906.php",
+     "kind": "news"
+    },
+    {
+     "label": "News: Seen 'n Heard, 4/1992 (Woodbury Reports, 1992-04-01)",
+     "url": "http://www.strugglingteens.com/archives/1992/4/seen03.html",
+     "kind": "news"
+    },
+    {
+     "label": "Woodbury Reports, September 2012, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-september-2012-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, May 2012, p. 10 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-may-2012-p-10-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, August 2010, p. 12 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-august-2010-p-12-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, March 2009, p. 16 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-march-2009-175-p-16-the-glenholme-school/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (archived theglenholmeschool.org)",
+     "url": "https://web.archive.org/web/2*/http://www.theglenholmeschool.org/",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: heal-online.org/devglen.htm",
+     "url": "http://www.heal-online.org/devglen.htm",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: web.archive.org/web/20100421182422/http://www.heal-online.org/devglen.htm",
+     "url": "https://web.archive.org/web/20100421182422/http://www.heal-online.org/devglen.htm",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:did-tommy-james-file-the-lawsuit-he-announced-in",
+   "section": "About rewrites: outcomes",
+   "title": "Did Tommy James file the lawsuit he announced in May 2022 over a girl's broken jaw at Sequel TSI in Owens Cross Roads, Alabama, and how did it end?",
+   "text": "WAFF, May 2, 2022 (https://www.waff.com/2022/05/03/long-troubled-sequel-tsi-youth-services-center-shut-down-reopen) covers the announcement. Case, court and outcome are missing. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:what-did-owens-cross-roads-alabama-decide-in-202",
+   "section": "About rewrites: outcomes",
+   "title": "What did Owens Cross Roads, Alabama decide in 2026 on Pathway of Madison County's license amid the nuisance dispute?",
+   "text": "RocketCityNow ran 'Pathway of Madison gets license for 2026 amid nuisance dispute' (KOP news item 10772; the fetch was blocked). A WHNT item is at https://www.yahoo.com/news/owens-cross-roads-city-council-194240066.html. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "From the notes: yahoo.com/news/owens-cross-roads-city-council-194240066.html",
+     "url": "https://www.yahoo.com/news/owens-cross-roads-city-council-194240066.html",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:what-do-the-2024-prea-audit-of-sequel-tsi-owens",
+   "section": "About rewrites: facts to check",
+   "title": "What do the 2024 PREA audit of Sequel TSI Owens Cross Roads and the Alabama Disabilities Advocacy Program's 2020 report on Sequel's Alabama facilities find about the Owens Cross Roads facility?",
+   "text": "The audit is in KOP's media library as 'PREA - Sequel TSI Owens Cross Roads 2024' (attachment 2742). The 2020 report is the childrensrights.org file Sequel-Attachments-A-B-and-C.pdf. Findings are not yet in the draft. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "PREA - Sequel TSI Owens Cross Roads 2024",
+     "url": "media library attachment 2742",
+     "kind": "note"
+    },
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:are-there-survivor-accounts-of-three-springs-new",
+   "section": "About rewrites: sources to find",
+   "title": "Are there survivor accounts of Three Springs New Beginnings, Sequel TSI Owens Cross Roads or Pathway in Alabama on Reddit's r/troubledteens (threads 1lh63jy and 1ljiqwu) or on page 2 of Fornits topic 31043?",
+   "text": "The fetches were blocked in the writing pass. Quotes found go into the testimony list of kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:at-which-three-springs-campus-in-alabama-did-dio",
+   "section": "About rewrites: facts to check",
+   "title": "At which Three Springs campus in Alabama did Dionte Pickens die in 2001, and which campus do the 2017-2019 WAAY, WAFF and AL.com stories (Van Johnson killing, counselor sex charges) concern?",
+   "text": "Those news items are attached to the Pathway of Madison County record but concern Three Springs / Sequel TSI Madison. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:what-are-the-court-and-case-number-of-the-city-o",
+   "section": "About rewrites: facts to check",
+   "title": "What are the court and case number of the City of Owens Cross Roads, Alabama's public nuisance lawsuit against Pathway of Madison County, filed Dec 12, 2025 in Madison County Circuit Court?",
+   "text": "WHNT, Dec 12, 2025 (https://whnt.com/news/huntsville/city-of-owens-cross-roads-officially-files-public-nuisance-lawsuit-against-pathway-of-madison-county/) and Dec 17, 2025 (https://www.yahoo.com/news/articles/owens-cross-roads-city-attorney-021538252.html). Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-does-whnt-s-sep-3-2024-story-would-not-put",
+   "section": "About rewrites: sources to find",
+   "title": "What does WHNT's Sep 3, 2024 story 'Would not put my dog in that place' say about the riot at the Owens Cross Roads, Alabama Pathway facility and its planned October 1, 2024 closure?",
+   "text": "KOP holds it as news item 11161, but the fetch was blocked. It would be cited beside the 2024 source already in the draft. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:did-15-girls-escape-from-the-pathway-facility-in",
+   "section": "About rewrites: facts to check",
+   "title": "Did 15 girls escape from the Pathway facility in Owens Cross Roads, Alabama around Nov 23, 2026, as a WAFF headline suggests, or is it an older escape?",
+   "text": "A sidebar link on WAFF's June 2025 page (https://www.waff.com/2025/06/07/no-decision-after-final-hearing-owens-cross-roads-teen-facilitys-fate/) is headlined '15 girls found after escaping Pathway facility in Owens Cross Roads'. The draft's latest escape is WAFF, Nov 9, 2026 (https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/). Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-original-sources-show-new-beginnings-opened",
+   "section": "About rewrites: sources to find",
+   "title": "What original sources show New Beginnings opened on the Owens Cross Roads, Alabama campus in 1996 and that Sequel Youth and Family Services took over Three Springs' Alabama programs in 2010?",
+   "text": "Both facts are cited only to KOP's ownership timeline. Look for news, Alabama licensing records or Sequel/Three Springs filings. Changes kop-pipeline tmp/about-rewrite/batch5/sendable/f13678.json (the About of /facility/pathway-of-madison-county-al/).",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: UPDATE: Owens Cross Roads Police respond to 3rd escape at Pathway (Yahoo News, 2026-10-11)",
+     "url": "https://www.yahoo.com/news/articles/two-escapes-pathway-facility-owens-165042575.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-does-pamela-colloff-s-remember-the-christia",
+   "section": "About rewrites: sources to find",
+   "title": "What does Pamela Colloff's 'Remember the Christian Alamo' (Texas Monthly, Dec 2001) say about Roloff's 1973 quote, the 1987 Kansas City Times closing and the move to Louisiana?",
+   "text": "The draft takes these from Andrew Gordon Brown's 2022 dissertation (https://kidsoverprofits.org/wp-content/uploads/fountain-of-youth.pdf) and KOP's note on the article, because the site returned 403 at https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "Brown dissertation",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/fountain-of-youth.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: texasmonthly.com/news-politics/remember-the-christian-alamo/",
+     "url": "https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-2000-2001-civil-suits-by-justin-simo",
+   "section": "About rewrites: outcomes",
+   "title": "How did the 2000-2001 civil suits by Justin Simons, Aaron Cavallin and other Lighthouse residents against Roloff's Texas homes end?",
+   "text": "Brown's 2022 dissertation (https://kidsoverprofits.org/wp-content/uploads/fountain-of-youth.pdf) cites Gibeaut, ABA Journal, 'Welcome to HELL'; the Austin Chronicle covers the trial: https://www.austinchronicle.com/news/faith-based-homes-on-trial-11707557/. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: austinchronicle.com/news/faith-based-homes-on-trial-11707557/",
+     "url": "https://www.austinchronicle.com/news/faith-based-homes-on-trial-11707557/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-the-civil-suit-with-deanne-dawsey-as-pla",
+   "section": "About rewrites: outcomes",
+   "title": "How did the civil suit with DeAnne Dawsey as plaintiff, described in Texas Monthly's December 2001 article on Roloff's homes, end?",
+   "text": "Texas Monthly, 'Remember the Christian Alamo', Pamela Colloff, Dec 2001: https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/. The draft gives no outcome. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: texasmonthly.com/news-politics/remember-the-christian-alamo/",
+     "url": "https://www.texasmonthly.com/news-politics/remember-the-christian-alamo/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:is-there-a-court-or-news-record-that-parents-sue",
+   "section": "About rewrites: sources to find",
+   "title": "Is there a court or news record that parents sued the Rebekah Home over staff member Sherri Compton and settled out of court?",
+   "text": "The only source is a Fornits claim from January 2005, in the thread https://www.fornits.com/phpbb/index.php?topic=2107.0 (later page https://www.fornits.com/phpbb/index.php?topic=2107.59). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: fornits.com/phpbb/index.php?topic=2107.0",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=2107.0",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: fornits.com/phpbb/index.php?topic=2107.59",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=2107.59",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-kaufmann-v-mountain-park-academy-2003-en",
+   "section": "About rewrites: outcomes",
+   "title": "How did Kaufmann v. Mountain Park Academy (2003) end?",
+   "text": "Brown's 2022 dissertation cites the complaint at https://nospank.net/stilley.htm. The draft has no outcome. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: nospank.net/stilley.htm",
+     "url": "https://nospank.net/stilley.htm",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:which-date-age-and-cause-of-death-did-the-hattie",
+   "section": "About rewrites: facts to check",
+   "title": "Which date, age and cause of death did the Hattiesburg American give on Aug 27, 1980 for Connie Munson at Bethesda Home for Girls, and is she the girl SPLC describes as run over by a truck?",
+   "text": "KOP's memorial gives Aug 26 and its death list gives Aug 1. Clip: https://www.newspapers.com/article/hattiesburg-american-august-27-1980-pag/17601164/; SPLC: https://www.splcenter.org/resources/stories/look-back-splc-lawsuit-led-closure-abusive-home-teenage-girls/. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: newspapers.com/article/hattiesburg-american-august-27-1980-pag/17601164/",
+     "url": "https://www.newspapers.com/article/hattiesburg-american-august-27-1980-pag/17601164/",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: splcenter.org/resources/stories/look-back-splc-lawsuit-led-closure-abusive-home-",
+     "url": "https://www.splcenter.org/resources/stories/look-back-splc-lawsuit-led-closure-abusive-home-teenage-girls/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:was-william-andrew-futrelle-ii-15-or-16-when-he",
+   "section": "About rewrites: facts to check",
+   "title": "Was William Andrew Futrelle II 15 or 16 when he was killed at Mountain Park Baptist Boarding Academy in 1996?",
+   "text": "St. Louis Post-Dispatch, Mar 31, 1996 (https://www.corpun.com/usre9603.htm) and Brown's dissertation give 16; KOP's memorial, from the Washington Post of Mar 30, 1996, gives 15. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-status-now:how-did-the-2015-2016-texas-dshs-investigation-o",
+   "section": "About rewrites: status now",
+   "title": "How did the 2015-2016 Texas DSHS investigation of the People's Baptist Church adult homes (Jubilee Ladies Home, Roloff Men's Home) end, and do they still operate in 2026?",
+   "text": "KRIS 6 News, Nov 17, 2015: https://web.archive.org/web/20180107191022/http://www.kristv.com/story/30543005/6-investigates-roloff-homes-under-state-investigation-for-treatment-program. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: web.archive.org/web/20180107191022/http://www.kristv.com/story/30543005/6-invest",
+     "url": "https://web.archive.org/web/20180107191022/http://www.kristv.com/story/30543005/6-investigates-roloff-homes-under-state-investigation-for-treatment-program",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-did-sabrina-young-say-about-the-rebekah-hom",
+   "section": "About rewrites: sources to find",
+   "title": "What did Sabrina Young say about the Rebekah Home in survivor testimony to the Senate Finance Committee in 2024?",
+   "text": "KOP's copy 'Warehouses of Neglect Survivor Testimony' (media library attachment 5046) did not download. The quote is wanted for the testimony section. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-source-records-the-closing-of-marvelous-gra",
+   "section": "About rewrites: sources to find",
+   "title": "What source records the closing of Marvelous Grace Girls Academy (KOP says 2022) and of New Beginnings Girls Academy in La Russell, Missouri (KOP says 2015)?",
+   "text": "KOP's 2022 end year for Marvelous Grace comes from the r/troubledteens wiki; the 2015 end year for New Beginnings rests on a Yellow Pages listing. Tampa Bay Times profiles: https://web.archive.org/web/20171024120506/http://www.tampabay.com:80/faccca/group-homes/marvelous-grace-girls-academy and https://web.archive.org/web/20121103122947/http://tampabay.com/faccca/group-homes/new-beginnings-girls-academy. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: web.archive.org/web/20171024120506/http://www.tampabay.com:80/faccca/group-homes",
+     "url": "https://web.archive.org/web/20171024120506/http://www.tampabay.com:80/faccca/group-homes/marvelous-grace-girls-academy",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: web.archive.org/web/20121103122947/http://tampabay.com/faccca/group-homes/new-be",
+     "url": "https://web.archive.org/web/20121103122947/http://tampabay.com/faccca/group-homes/new-beginnings-girls-academy",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:where-did-the-rebekah-home-s-girls-go-in-2001-mi",
+   "section": "About rewrites: facts to check",
+   "title": "Where did the Rebekah Home's girls go in 2001: Missouri before Pace, Florida, or straight to the Camerons' New Beginnings Rebekah Academy in Pace?",
+   "text": "Tampa Bay Times (2012) says Missouri 'for a stint' before Pace (https://web.archive.org/web/20121103122947/http://tampabay.com/faccca/group-homes/new-beginnings-girls-academy); the Pensacola Independent News, Dec 2, 2004 (https://kidsoverprofits.org/wp-content/uploads/inweekly-article-asp-artid-713-wayback.pdf) has the Camerons opening it in Pace. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: tampabay.com/faccca/group-homes/new-beginnings-girls-academy",
+     "url": "http://tampabay.com/faccca/group-homes/new-beginnings-girls-academy",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:was-the-lighthouse-resident-in-the-texas-roloff",
+   "section": "About rewrites: facts to check",
+   "title": "Was the Lighthouse resident in the Texas Roloff abuse case named James Cavallin or Aaron Cavallin?",
+   "text": "The Austin Chronicle, Dec 15, 2000 (https://www.austinchronicle.com/news/faith-based-homes-on-trial-11707557/) gives James Cavallin, 17; the Caller-Times report of Smith's conviction, Jun 15, 2001 (https://kidsoverprofits.org/wp-content/uploads/caller2-2001-june-15-today-localnew-2871-html-wayback.pdf) gives Aaron Cavallin. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o17.json (the About of /operator/roloff-homes/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-status-now:does-innercept-in-coeur-d-alene-idaho-still-run",
+   "section": "About rewrites: status now",
+   "title": "Does Innercept in Coeur d'Alene, Idaho still run under Altior Healthcare, and what is Patriot PowerUp?",
+   "text": "Behavioral Health Business (May 7, 2026, https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/) names only Paradigm, Patriot PowerUp and Ridge RTC as Altior's brands, though Idaho is still among its states. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:do-idaho-licensing-police-or-news-records-exist",
+   "section": "About rewrites: sources to find",
+   "title": "Do Idaho licensing, police or news records exist for Innercept in Coeur d'Alene, and what original supports the claim that it was a Rocky Mountain Academy spin-off?",
+   "text": "The spin-off claim comes only from the r/troubledteens wiki; Fornits topic https://www.fornits.com/phpbb/index.php?topic=26880.0 also covers Innercept. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: fornits.com/phpbb/index.php?topic=26880.0",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=26880.0",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:when-did-ken-kosza-become-chief-executive-of-alt",
+   "section": "About rewrites: facts to check",
+   "title": "When did Ken Kosza become chief executive of Altior Healthcare, and who held the job before him?",
+   "text": "Behavioral Health Business, May 7, 2026: https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "url": "https://bhbusiness.com/2026/05/07/altior-healthcare-may-hit-the-market/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:where-are-the-new-hampshire-dhhs-child-care-lice",
+   "section": "About rewrites: sources to find",
+   "title": "Where are the New Hampshire DHHS child care licensing findings of Mar 6 and Mar 16, 2026 for the Ridge RTC's New Hampshire program on the state's own portal?",
+   "text": "KOP holds copies at https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035836.pdf and https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035835.pdf; portal links should replace them. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035836.pdf",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035836.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035835.pdf",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/CCRB-07044-Visit-0035835.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:was-the-child-named-in-the-boston-globe-s-nov-17",
+   "section": "About rewrites: facts to check",
+   "title": "Was the child named in the Boston Globe's Nov 17, 2026 report on a Milton, New Hampshire facility assistant's charges a resident of the Ridge RTC?",
+   "text": "Boston Globe: https://www.bostonglobe.com/2026/11/17/metro/assistant-milton-nh-facility-charges/. It has not been read in full. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: bostonglobe.com/2026/11/17/metro/assistant-milton-nh-facility-charges/",
+     "url": "https://www.bostonglobe.com/2026/11/17/metro/assistant-milton-nh-facility-charges/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:do-the-innercept-quote-on-fornits-topic-26880-fe",
+   "section": "About rewrites: facts to check",
+   "title": "Do the Innercept quote on Fornits (topic 26880, Feb 5, 2009) and the Yelp quotes about Innercept read on the pages exactly as the Altior About gives them?",
+   "text": "They were read through a page-summary tool, not on the pages themselves: https://www.fornits.com/phpbb/index.php?topic=26880.0. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o3.json (the About of /operator/altior-healthcare/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: fornits.com/phpbb/index.php?topic=26880.0",
+     "url": "https://www.fornits.com/phpbb/index.php?topic=26880.0",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:what-is-the-original-source-for-the-jan-27-2017",
+   "section": "About rewrites: sources to find",
+   "title": "What is the original source for the Jan 27, 2017 sepsis lawsuit against Solstice RTC in Utah?",
+   "text": "Only the r/troubledteens wiki names it, without a link. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": []
+  },
+  {
+   "key": "about-rewrites-outcomes:how-did-richardson-v-elevations-rtc-utah-2nd-dis",
+   "section": "About rewrites: outcomes",
+   "title": "How did Richardson v. Elevations RTC (Utah 2nd District Court, filed Jan 2024) end?",
+   "text": "Complaint: https://kidsoverprofits.org/wp-content/uploads/2024/08/Ryan-Faust_Elevations-Lawsuit-2024.pdf; Salt Lake Tribune, Jan 15, 2024: https://www.sltrib.com/news/2024/01/15/trauma-is-treatment-new-lawsuit/. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: kidsoverprofits.org/wp-content/uploads/2024/08/Ryan-Faust_Elevations-Lawsuit-202",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2024/08/Ryan-Faust_Elevations-Lawsuit-2024.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: sltrib.com/news/2024/01/15/trauma-is-treatment-new-lawsuit/",
+     "url": "https://www.sltrib.com/news/2024/01/15/trauma-is-treatment-new-lawsuit/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-sources-to-find:where-are-the-utah-dhhs-office-of-licensing-repo-2",
+   "section": "About rewrites: sources to find",
+   "title": "Where are the Utah DHHS Office of Licensing reports for Elevations RTC (license 93443, Oct 9, 2024 findings) and Solstice RTC (license 93639, May 22, 2024 finding)?",
+   "text": "The draft cites KOP's Utah reports page, https://kidsoverprofits.org/ut-reports/, instead of the state's own report links. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: kidsoverprofits.org/ut-reports/",
+     "url": "https://kidsoverprofits.org/ut-reports/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:did-meridian-behavioral-health-or-eosis-run-adol",
+   "section": "About rewrites: facts to check",
+   "title": "Did Meridian Behavioral Health or EOSIS run adolescent programs or draw state findings in Minnesota, and were the allegations of the 2017 False Claims Act relator published?",
+   "text": "Docket: https://www.courtlistener.com/docket/13545224/united-states-of-america-ex-rel-v-meridian-behavioral-health/; Meridian bought New Beginnings Minnesota in 2017 (https://www.prnewswire.com/news-releases/meridian-behavioral-health-acquires-new-beginnings-minnesota-300543134.html). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: courtlistener.com/docket/13545224/united-states-of-america-ex-rel-v-meridian-beh",
+     "url": "https://www.courtlistener.com/docket/13545224/united-states-of-america-ex-rel-v-meridian-behavioral-health/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:when-did-lewis-zeidner-become-chief-executive-of",
+   "section": "About rewrites: facts to check",
+   "title": "When did Lewis Zeidner become chief executive of EOSIS, and what were the price and closing date of its Utah purchase?",
+   "text": "EOSIS's About Us says January 2024 for Zeidner; the Utah purchase is announced at https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/ (Jun 23, 2026). Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-u",
+     "url": "https://eosisrecovery.com/eosis-expands-national-footprint-through-acquisition-of-five-utah-behavioral-health-programs/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "about-rewrites-facts-to-check:do-the-venture-capital-journal-jan-12-2007-and-w",
+   "section": "About rewrites: facts to check",
+   "title": "Do the Venture Capital Journal (Jan 12, 2007) and Wall Street Journal (Dec 7, 2015) articles support a 2007 Triton Pacific recapitalization of Meridian and Audax's $120 million purchase?",
+   "text": "Both are cited through Wikipedia: https://www.venturecapitaljournal.com/meridian-behavioral-health-network/ and https://www.wsj.com/articles/DJFLBO0120151207ebc7buu5a. Answer changes kop-pipeline tmp/about-rewrite/batch5/sendable/o500016.json (the About of /operator/eosis/).",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-24, About rewrites batch 5",
+   "directions": [
+    {
+     "label": "From the notes: venturecapitaljournal.com/meridian-behavioral-health-network/",
+     "url": "https://www.venturecapitaljournal.com/meridian-behavioral-health-network/",
+     "kind": "note"
+    },
+    {
+     "label": "From the notes: wsj.com/articles/DJFLBO0120151207ebc7buu5a",
+     "url": "https://www.wsj.com/articles/DJFLBO0120151207ebc7buu5a",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-23 17:05"
+ "built": "2026-11-24 13:51"
 }

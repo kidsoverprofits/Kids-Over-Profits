@@ -13359,5 +13359,30 @@
         "currentOperator": "Fenster School (nonprofit corporation)"
       }
     }
+  },
+  {
+    "id": 11430,
+    "unique_name": "New Beginnings Girls Academy",
+    "version": 1,
+    "note": "2026-11-24 About batch 5 record fix (Roloff Homes o17): after 2001 the home had a stint in Missouri, then ran at 3111 Zepp Lane, Pace, Florida until 2007 before La Russell, MO. Source: Tampa Bay Times, 'In God's Name' group-home profile, New Beginnings Girls Academy (updated Nov 1, 2012): https://web.archive.org/web/20121103122947/http://tampabay.com/faccca/group-homes/new-beginnings-girls-academy",
+    "facility": {
+      "locationDetails": {
+        "city": "La Russell",
+        "state": "MO",
+        "country": "United States",
+        "zip": "64848",
+        "additionalLocations": [],
+        "formerLocations": [
+          {
+            "state": "FL",
+            "city": "Pace",
+            "address": "3111 Zepp Lane, Pace, FL",
+            "zip": "",
+            "fromYear": "",
+            "toYear": "2007"
+          }
+        ]
+      }
+    }
   }
 ]
