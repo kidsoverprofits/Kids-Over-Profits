@@ -6,9 +6,12 @@
  *
  * Writes the private key (the whole key pair, base64) to <private-key-file>
  * and the public key to inc/anonymous-portal-public.key, which is committed
- * and deployed. The private key must never be committed or uploaded: keep it
- * in a password manager. Lose it and every submission sealed with the
- * matching public key is unreadable for good.
+ * and deployed. The private key must never be committed or uploaded. Tell
+ * the owner where it was written and have them keep a second copy that
+ * survives the computer (password manager, USB stick); record the date and
+ * fingerprint under "Key history" in docs/anonymous-portal/README.md. Lose it
+ * and every submission sealed with the matching public key is unreadable for
+ * good.
  *
  * Refuses to overwrite an existing key file, and refuses a private key path
  * inside this repository.

@@ -34,7 +34,10 @@ The same key also drives the URL threat scanner further down `inc/features.php` 
 Every submission is encrypted the moment it reaches the server, before anything is written to disk. The file and the notes are sealed together with the portal's **public key** (a libsodium sealed box, `sodium_crypto_box_seal`). The server never holds the matching **private key**, so it cannot open a submission once it is stored, and neither can anyone who breaks into the server or the hosting account.
 
 - **Public key:** `inc/anonymous-portal-public.key` (committed and deployed), or the `KOP_ANON_PORTAL_PUBLIC_KEY` constant in `wp-config.php`, which takes precedence. The Anonymous Docs screen shows its fingerprint.
-- **Private key:** kept by the site owner, off the server and out of the repository (a password manager). If it is lost, every submission sealed with the matching public key is unreadable for good.
+- **Private key:** kept by the site owner, off the server and out of the repository. If it is lost, every submission sealed with the matching public key is unreadable for good. Keep a second copy somewhere that survives the computer (a password manager or a USB stick).
+- **Key history:**
+  - **2026-09-24 to 2026-11-24, fingerprint `e2f2be273231e1ff`** (public key `2PCBNqtfypCivyDTumvbVOxkp2CgGZ3NI8aMceP/RgE=`). Its private key was written to a file on the owner's old computer, which broke; it is not in OneDrive or Google Drive. Submissions sealed in that window (and the older ones the migration button sealed) open only with it, so keep their `.sealed` files in case that computer's drive is recovered.
+  - **From 2026-11-24, fingerprint `0d0a60dad913cd7d`.** Private key at `%USERPROFILE%\kop-anon-portal-private.key` on the owner's current computer.
 - **No usable key, or no sodium extension:** the portal refuses uploads ("temporarily unavailable") rather than store anything unencrypted, and logs why.
 - **What is sealed:** `"KOPANON1"`, a 4-byte big-endian header length, a JSON header (`id`, original `name`, `notes`, `received`), then the file bytes. `AnonymousDocPortal::seal_submission()` writes it and `scripts/anon-portal-decrypt.php` reads it.
 - **What is not protected by this:** the file travels to the server over HTTPS and is decrypted there only in memory, for the Cloudmersive scan and for sealing. The browser does not encrypt it, so this is encryption on arrival, not end-to-end. Nothing strips document metadata; a submitter who is worried about it should remove it first.
@@ -56,11 +59,13 @@ Recipients come from the `kop_submission_notify_emails` option (comma or newline
 1. KOP Tools > Review Inbox > **Anonymous documents** (`inc/review-inbox/anonymous-docs.php`) lists the sealed submissions, newest first, each with a **Download (encrypted)** link (`admin-post.php?action=kop_anon_download`, nonce-checked per file). Its help line says which key is in use and warns when uploads are being refused (no public key, or no `CLOUDMERSIVE_API_KEY`) or when older unencrypted files remain, with a "Lock the older documents now" button for those. **Mark handled** moves a submission to the Handled view (the file name is kept in the `kop_anon_docs_handled` option; nothing on the server changes); **Mark not handled** puts it back. Volunteer reviewers can never be given this queue (`kop_vol_never_sources()` in `inc/review-volunteers.php`).
 
    The older **Anonymous Docs** screen (`admin.php?page=anonymous-docs`, `manage_options` only) still works, is on the sidebar, and is still where the notification email links; the inbox tab's "Open the full Anonymous documents screen" link opens it too.
-2. Open the downloaded files on your own computer with the private key. With the PHP bundled in Flywheel Local:
+2. Open the downloaded files on your own computer with the private key (the script prints the key's fingerprint; it must match the one the submission was sealed under, see Key history above):
 
    ```
-   php -n -d extension_dir=<php>/ext -d extension=sodium scripts/anon-portal-decrypt.php <private-key-file> <out-folder> <file.sealed>...
+   php scripts/anon-portal-decrypt.php %USERPROFILE%\kop-anon-portal-private.key <out-folder> <file.sealed>...
    ```
+
+   Add `-d extension=sodium` if PHP says the sodium extension is not loaded.
 
    Each file comes out as `<id>_<original name>`, with `<id>_notes.txt` beside it when the submitter left notes.
 
