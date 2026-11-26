@@ -37019,7 +37019,61 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "about-rewrites-status-now:has-the-haven-formerly-home-of-hope-texas-in-con",
+   "section": "About rewrites: status now",
+   "title": "Has The Haven (formerly Home of Hope Texas) in Conroe, Texas closed its residential treatment center for girls, and when?",
+   "text": "Record 10785 still says Open. The owner had a notice from https://thehaven.care/ saying that, due to significant loss in federal funding, it could no longer sustain its residential treatment center for minors. On 2026-11-26 that address showed only a web host page ('Your account has expired!'), so the notice could not be confirmed and the record was left alone. Wayback captures of the home page from 2024-09-05 and 2025-03-05 show the normal site with no closure notice (https://web.archive.org/web/20250305103916/https://thehaven.care/). The 2023-06-15 capture says 'Welcome to the new Home of Hope website, now known as The HAVEN' (https://web.archive.org/web/20230615051441/https://thehaven.care/), so the rename is confirmed; the record does not carry the name The Haven yet. Texas HHSC's open licensing data (https://data.texas.gov/resource/bc5r-88dy.json, active permits only) listed no operation named Home of Hope or The Haven on 2026-11-26. Needed: the notice itself (a later archive capture, a social media post, a news story) or an HHSC closure date. The answer goes on record 10785: status, end year, a note quoting the notice, and the name The Haven.",
+   "context": "",
+   "records": [
+    10785
+   ],
+   "found": "found 2026-11-26, Owner record fixes session, 2026-11-26",
+   "directions": [
+    {
+     "label": "From the notes: thehaven.care/",
+     "url": "https://thehaven.care/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "facility-place-conflicts:where-in-fresno-california-was-mollie-s-house-th",
+   "section": "Facility place conflicts",
+   "title": "Where in Fresno, California was Mollie's House, the group home licensed to Fresh Start Youth Center, Inc.?",
+   "text": "Record 10045 gives 2010 N Fine Ave, Ste 103A, Fresno, CA 93727, which reads like an office suite, not a six-bed home. California Community Care Licensing (facility 107202634, https://www.ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634) withholds the facility's address ('See FAQs'); the 1314 E Shaw Ave, Fresno 93710 in that record is the Fresno licensing office (DOADDRESS, district office FRESNO RO). Needed: a source for the licensed site, and what 2010 N Fine Ave is (the licensee's office?). The answer goes on record 10045's location and on the company Fresh Start Youth Center, Inc.",
+   "context": "",
+   "records": [
+    10045
+   ],
+   "found": "found 2026-11-26, Owner record fixes session, 2026-11-26",
+   "directions": [
+    {
+     "label": "From the notes: ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634",
+     "url": "https://www.ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "who-ran-these-programs-last:did-the-brown-schools-ever-run-the-letot-center",
+   "section": "Who ran these programs last",
+   "title": "Did The Brown Schools ever run the Letot Center in Dallas, Texas, and in which years?",
+   "text": "Record 10605 listed The Brown Schools as its current company with no source; on 2026-11-26 the link was marked past and the Dallas County Juvenile Department (https://www.dallascounty.org/departments/juvenile/letot-residential.php) made the current one. KOP's Brown Schools history says the company lost a major Dallas County juvenile justice contract in July 2004 (https://kidsoverprofits.org/corporatization/) but does not name Letot. If a source ties Brown to Letot, the years go on the past link; if none does, the link comes off.",
+   "context": "",
+   "records": [
+    10605
+   ],
+   "found": "found 2026-11-26, Owner record fixes session, 2026-11-26",
+   "directions": [
+    {
+     "label": "News: Educating Dallas County Incarcerated Youth is a Unique Challenge (Dallas Observer, 2024-09-05)",
+     "url": "https://www.dallasobserver.com/news/educating-dallas-county-incarcerated-youth-challenge-20492643/",
+     "kind": "news"
+    }
+   ]
   }
  ],
- "built": "2026-11-24 13:51"
+ "built": "2026-11-26 17:46"
 }
