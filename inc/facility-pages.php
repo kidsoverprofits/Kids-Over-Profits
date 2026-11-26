@@ -142,6 +142,8 @@ if (!function_exists('kop_facility_pages_route')) {
                 // A slug whose name part is stale still carries the id.
                 $id = (int) $m[1];
             }
+            // The address a record had before its name was corrected (old_slugs in the index): 301 below.
+            if ($id === 0 && isset($index['old_slugs'][$key])) $id = (int) $index['old_slugs'][$key];
         }
 
         if ($id > 0 && isset($index['ids'][$id])) {
@@ -654,7 +656,16 @@ if (!function_exists('kop_facility_pages_build_index')) {
                 'signals'   => count($e['signals']),
             );
         }
-        return array('fingerprint' => $fingerprint, 'built' => time(), 'ids' => $ids, 'slugs' => $slugs);
+        // A record whose name was corrected keeps its old address working (Ain Dah Yung Cener -> Center, 2026-11-26):
+        // the slug its record key (unique_name, which a name fix leaves alone) gives, when no page has it, 301s to the page.
+        $old_slugs = array();
+        foreach ((array) $rows as $row) {
+            $id = (int) $row['id'];
+            if (!isset($ids[$id])) continue;
+            $old = kop_facility_page_slug_candidate((string) $row['unique_name'], strtoupper(trim((string) $row['state'])), trim((string) $row['country']));
+            if ($old !== $ids[$id]['slug'] && !isset($slugs[$old]) && !isset($old_slugs[$old])) $old_slugs[$old] = $id;
+        }
+        return array('fingerprint' => $fingerprint, 'built' => time(), 'ids' => $ids, 'slugs' => $slugs, 'old_slugs' => $old_slugs);
     }
 }
 

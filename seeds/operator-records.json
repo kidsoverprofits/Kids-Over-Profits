@@ -1152,5 +1152,54 @@
         "relationship": "current"
       }
     ]
+  },
+  {
+    "name": "Fresh Start Youth Center, Inc.",
+    "note": "Company record created 2026-11-26 (owner) from the CA CCLD licence record of Mollie's House.",
+    "operator": {
+      "location": "Fresno, CA",
+      "notes": [
+        "Licensee of Mollie's House, a Short Term Residential Therapeutic Program in Fresno County, CA CCLD facility 107202634, closed 12/1/2024 (California Community Care Licensing: https://www.ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10045,
+        "unique_name": "Mollie’s House",
+        "relationship": "current"
+      }
+    ]
+  },
+  {
+    "name": "Dallas County Juvenile Department",
+    "note": "Company record created 2026-11-26 (owner) from the department's own page for the Letot Residential Treatment Center.",
+    "operator": {
+      "location": "Dallas, TX",
+      "notes": [
+        "Runs the Letot Residential Treatment Center, 10505 Denton Drive, Dallas, TX 75220 (Dallas County Juvenile Department: https://www.dallascounty.org/departments/juvenile/letot-residential.php)"
+      ]
+    },
+    "facilities": [
+      {
+        "id": 10605,
+        "unique_name": "Letot Center",
+        "relationship": "current"
+      }
+    ]
+  },
+  {
+    "name": "The Brown Schools",
+    "note": "Owner 2026-11-26: the link to Letot Center had no source and read as current; marked past (the Dallas County Juvenile Department runs it).",
+    "operator": {
+      "notes": []
+    },
+    "facilities": [
+      {
+        "id": 10605,
+        "unique_name": "Letot Center",
+        "relationship": "past",
+        "update": true
+      }
+    ]
   }
 ]

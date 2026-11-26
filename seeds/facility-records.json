@@ -13384,5 +13384,73 @@
         ]
       }
     }
+  },
+  {
+    "id": 10045,
+    "unique_name": "Mollie’s House",
+    "version": 1,
+    "facility": {
+      "operatingPeriod": {
+        "startYear": 2003,
+        "endYear": 2024,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": [
+          "Closed by licensee 12/1/2024 (CA CCLD, facility 107202634: https://www.ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634)"
+        ]
+      },
+      "licensing": [
+        "California Department of Social Services, Community Care Licensing Division: Short Term Residential Therapeutic Program, facility 107202634, capacity 6, license first issued 2/24/2003, status Closed (licensee initiated, 12/1/2024), licensee Fresh Start Youth Center, Inc. (https://www.ccld.dss.ca.gov/transparencyapi/api/FacilityDetail/107202634)"
+      ]
+    },
+    "note": "Owner 2026-11-26: closed by licensee 12/1/2024, first licensed 2/24/2003, licence line (CA CCLD facility 107202634). The address is left as it was: CCLD withholds the facility's address (1314 E Shaw Ave in its record is the Fresno licensing office)."
+  },
+  {
+    "id": 10605,
+    "unique_name": "Letot Center",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Letot Center",
+        "currentName": "",
+        "otherNames": [
+          "Dallas County Juvenile Department – Letot RTC"
+        ],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "Dallas County Juvenile Department",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      }
+    },
+    "note": "Owner 2026-11-26: run by the Dallas County Juvenile Department (its Letot Residential Treatment Center page); The Brown Schools link marked past in operator-records.json."
+  },
+  {
+    "id": 12994,
+    "unique_name": "Ain Dah Yung Cener",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Ain Dah Yung Center",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "our home",
+        "currentOwner": "our home",
+        "currentOwners": [
+          "our home"
+        ],
+        "pastOwners": [],
+        "knownReferrers": []
+      }
+    },
+    "note": "Owner 2026-11-26: name typo fixed (legal name Ain Dah Yung (Our Home) Center, GuideStar EIN 41-1697692). unique_name stays; the old page address 301s through the index's old_slugs."
   }
 ]
