@@ -39,14 +39,41 @@
         return new Promise(function (r) { setTimeout(r, ms); });
     }
 
+    /**
+     * A piece as base64 text, or null when the browser cannot read it. The
+     * site's firewall refuses raw file parts whose bytes happen to look like
+     * PHP, which pieces of ordinary PDFs and pictures can; base64 text cannot
+     * (inc/upload-transport.php decodes it).
+     */
+    function toBase64(blob) {
+        return new Promise(function (resolve) {
+            if (!window.FileReader) { resolve(null); return; }
+            var reader = new FileReader();
+            reader.onload = function () {
+                var s = String(reader.result || '');
+                var comma = s.indexOf(',');
+                resolve(comma === -1 || comma === s.length - 1 ? null : s.slice(comma + 1));
+            };
+            reader.onerror = function () { resolve(null); };
+            reader.readAsDataURL(blob);
+        });
+    }
+
     /** POST to a route; resolves {status, j} (j = parsed JSON or {}); rejects only when the network fails. */
     function api(route, fields, blob) {
         var fd = new FormData();
         fd.append('kop_rup_key', cfg.key);
         fd.append('kop_rup_check', cfg.check);
         Object.keys(fields).forEach(function (k) { fd.append(k, fields[k] == null ? '' : String(fields[k])); });
-        if (blob) fd.append('chunk', blob, 'piece.bin');
-        return fetch(cfg.rest + route, { method: 'POST', body: fd, credentials: 'omit', cache: 'no-store' }).then(function (r) {
+        return (blob ? toBase64(blob) : Promise.resolve(null)).then(function (text) {
+            if (text) {
+                fd.append('encoding', 'base64');
+                fd.append('chunk', new Blob([text], { type: 'text/plain' }), 'piece.bin');
+            } else if (blob) {
+                fd.append('chunk', blob, 'piece.bin');
+            }
+            return fetch(cfg.rest + route, { method: 'POST', body: fd, credentials: 'omit', cache: 'no-store' });
+        }).then(function (r) {
             return r.text().then(function (t) {
                 var j = {};
                 try { j = JSON.parse(t) || {}; } catch (e) { /* the host's own error page */ }
@@ -84,7 +111,9 @@
         return apiRetry('start', fields, null).then(function (res) {
             if (res.status !== 200 || !res.j.upload) throw fail(res, 'The server would not start this file.');
             var upload = res.j.upload;
-            var piece = Math.max(65536, parseInt(res.j.chunk, 10) || 1048576);
+            // Base64 text is a third longer than the bytes, so cut three quarters
+            // of what the server takes: the request stays the size it allows.
+            var piece = Math.max(65536, Math.floor((parseInt(res.j.chunk, 10) || 1048576) * 3 / 4));
             var offset = 0;
             function next() {
                 if (offset >= file.size) {

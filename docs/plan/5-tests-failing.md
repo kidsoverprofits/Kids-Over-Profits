@@ -173,3 +173,7 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
     (326 proposals, 31 naming a record merged since; operator_profile-329 names #100001, which the mirror doesn't have
     as a record), "facilities-from-news: waiting item is held back" (detail "unquoted") and "reader-accounts: a later
     step (rules apart) reads waiting testimony again and keeps what was decided". 1780 pass.
+13. **test-volunteer-projects: "a story links the facility page it is linked to, else the story itself"** (found
+    2026-11-26, mirror as of that day, while adding the base64 upload transport, which does not touch the cards):
+    the roundup's links include a dailymail.com article address where the check expects only site pages. It also
+    prints "no such column: satellite". Everything else passes. Needs `-d extension=gd -d memory_limit=2G` here.

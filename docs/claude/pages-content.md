@@ -76,7 +76,8 @@ php scripts/build-open-data.php                   # on the server (ea-php82), re
 # files (.json/.csv/.tsv/.xlsx/.zip) wait in uploads/kop-private/researcher/<link id>/, never loaded automatically.
 # No size cap (owner, 2026-10-26): js/researcher-upload.js sends every file in pieces through REST
 # kop/v1/researcher-upload/start|chunk|finish|cancel|sent (inc/researcher-documents.php; kop_rup_chunk_bytes() under PHP's
-# per-request limit, 409 = "the server holds this much", pieces in .../incoming/, swept after 2 days by the daily
+# per-request limit, each piece sent as base64 text with encoding=base64 (inc/upload-transport.php; the script cuts pieces
+# to three quarters of that size so the request stays within it), 409 = "the server holds this much", pieces in .../incoming/, swept after 2 days by the daily
 # kop_rup_incoming_sweep). Only kop_rup_room() stops a file (keeps KOP_RUP_KEEP_FREE of disk free). Without JS the data form
 # still posts plainly up to wp_max_upload_size().
 # Documents ("Send documents" on the same page, files, folders or drag and drop; about + source per batch, source per file):

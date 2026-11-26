@@ -221,7 +221,8 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-volunteers
 # picture link -> Send for review; the admin approves or sends back with a note on the project page (a send-back reopens a closed batch). No AI
 # captions, nothing posted yet (plan 4.4 10d). Cards: kop_vsoc_cards() in inc/volunteer-social-cards.php, one kop_vsoc_card_<angle>() per angle
 # in kop_vsoc_angles() (closure, lawsuit, bill, finding with a plain summary, reporting, money) + the week in numbers; only public facts and URLs
-# Picture uploads (REST volunteer/upload, multipart 'image'; kop_vsoc_store_upload()): checked by getimagesize, PNG/JPEG/WebP/GIF, 10 MB
+# Picture uploads (REST volunteer/upload, multipart 'image', sent as base64 text with encoding=base64 so Wordfence does not
+# take the picture's bytes for PHP, inc/upload-transport.php; kop_vsoc_store_upload()): checked by getimagesize, PNG/JPEG/WebP/GIF, 10 MB
 # (kop_vsoc_upload_max), re-encoded by GD (no EXIF/location), kept in uploads/kop-private/social/ (.htaccess denies all); admins preview through
 # admin-post.php?action=kop_vsoc_image; Approve copies it into the media library once (kop_vsoc_to_media(), meta _kop_vsoc_post)
 # Suggest as a post (inc/volunteer-social-suggest.php, js/social-suggest.js, REST volunteer/suggest-post, admins only): an admin-bar item on the

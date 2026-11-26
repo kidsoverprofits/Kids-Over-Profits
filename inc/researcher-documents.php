@@ -7,7 +7,8 @@
  * data or document, in pieces of kop_rup_chunk_bytes() (under the host's
  * per-request limit), so a file has no size cap. REST kop/v1/researcher-upload/
  * start -> chunk (as many as it takes, each a multipart file part at its
- * offset; a wrong offset answers 409 with what the server holds, so the page
+ * offset, sent as base64 text with encoding=base64 so the firewall does not
+ * mistake a piece for PHP, inc/upload-transport.php;a wrong offset answers 409 with what the server holds, so the page
  * picks up from there) -> finish. A finished data file goes through
  * kop_rup_store() like a form upload; a document through kop_rdoc_store().
  * Pieces wait in kop-private/researcher/<link id>/incoming/ and an unfinished
@@ -554,9 +555,20 @@ add_action('rest_api_init', function () {
             if (!$f || (int) ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $f['tmp_name'])) {
                 throw new RuntimeException('A piece did not arrive. Trying again.');
             }
+            // The page sends each piece as base64 text (inc/upload-transport.php):
+            // turn it back into the piece's bytes before it is added.
+            $size = (int) $f['size'];
+            if ((string) $req->get_param('encoding') === 'base64') {
+                require_once __DIR__ . '/upload-transport.php';
+                try {
+                    $size = kop_upload_base64_decode_file((string) $f['tmp_name']);
+                } catch (Throwable $e) {
+                    throw new RuntimeException('A piece did not arrive. Trying again.');
+                }
+            }
             $offset = (int) $req->get_param('offset');
             $have = kop_rup_chunk_append($link, (string) $req->get_param('upload'), $offset, (string) $f['tmp_name']);
-            if ($have !== $offset + (int) $f['size']) {
+            if ($have !== $offset + $size) {
                 return new WP_REST_Response(array('received' => $have, 'message' => 'Picking up where the file stands.'), 409);
             }
             return array('received' => $have);

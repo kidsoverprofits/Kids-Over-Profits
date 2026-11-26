@@ -296,6 +296,40 @@ $check('only a set-aside document can be deleted', $throws(function () use ($r3)
 kop_rup_revoke($id);
 $check('a turned-off link starts nothing', strpos($throws(function () use ($id) { kop_rup_chunk_start(kop_rup_link($id), array('kind' => 'doc', 'name' => 'a.pdf', 'size' => 9)); }), 'stopped') !== false);
 
+// Base64 transport (inc/upload-transport.php): what the firewall would read as
+// PHP travels as plain text and comes back byte for byte (2026-11-26).
+require_once ABSPATH . 'inc/upload-transport.php';
+$trip = "%PDF-1.4\nstream\nq <? Tj (abc) Tj ?> Q\n" . random_bytes(3000) . "<?php echo 1; ?>\nendstream\n";
+$wire = base64_encode($trip);
+$check('an encoded piece has no "<?" for the firewall to trip on', strpos($wire, '<?') === false);
+$p = $file('b64', $wire);
+$check('an encoded piece decodes in place, byte for byte', kop_upload_base64_decode_file($p) === strlen($trip) && file_get_contents($p) === $trip);
+$check('a raw piece marked base64 is refused', $throws(function () use ($file, $trip) { kop_upload_base64_decode_file($file('raw', $trip)); }) !== '');
+$check('an empty piece is refused', $throws(function () use ($file) { kop_upload_base64_decode_file($file('empty', '')); }) !== '');
+$check('a piece over the cap is refused', $throws(function () use ($file, $wire) { kop_upload_base64_decode_file($file('big', $wire), 100); }) === 'The file is too big.');
+$body = random_bytes(700) . '<? x(1) ?>' . random_bytes(700);
+list($uid3) = kop_rup_chunk_start($link, array('kind' => 'doc', 'name' => 'encoded.pdf', 'size' => strlen($body), 'about' => 'Transport test'));
+$off = 0;
+foreach (str_split($body, 500) as $part) {
+    $p = $file('p', base64_encode($part));
+    kop_upload_base64_decode_file($p);
+    $off = kop_rup_chunk_append($link, $uid3, $off, $p);
+}
+list(, $part_path) = kop_rup_chunk_meta($link, $uid3);
+$check('decoded pieces add up to the file that was sent', $off === strlen($body) && file_get_contents($part_path) === $body);
+kop_rup_chunk_cancel($link, $uid3);
+$src = array(
+    'chunk route' => array('inc/researcher-documents.php', "get_param('encoding') === 'base64'"),
+    'chunk route counts the decoded size' => array('inc/researcher-documents.php', '$have !== $offset + $size'),
+    'volunteer picture route' => array('inc/volunteer-social.php', "get_param('encoding') === 'base64'"),
+    'researcher script' => array('js/researcher-upload.js', "fd.append('encoding', 'base64')"),
+    'researcher script cuts pieces to three quarters' => array('js/researcher-upload.js', '* 3 / 4)'),
+    'volunteer script' => array('js/volunteer-review.js', "form.append('encoding', 'base64')"),
+);
+foreach ($src as $label => $s) {
+    $check("base64 transport: $label", strpos((string) file_get_contents(ABSPATH . $s[0]), $s[1]) !== false);
+}
+
 // Clean up the scratch folder.
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($scratch, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
 foreach ($it as $f) $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());

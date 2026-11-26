@@ -460,7 +460,18 @@ function kop_vsoc_rest_upload(WP_REST_Request $req) {
         if (!is_array($f) || (int) ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) $f['tmp_name'])) {
             throw new RuntimeException((int) ($f['error'] ?? 0) === UPLOAD_ERR_INI_SIZE ? 'That picture is too big.' : 'The picture did not arrive. Try again.');
         }
-        $post = kop_vsoc_store_upload($who['vol'], (int) $req->get_param('project_id'), (string) $req->get_param('key'), (string) $f['tmp_name'], (int) $f['size']);
+        // The page sends the picture as base64 text (inc/upload-transport.php):
+        // turn it back into the picture before it is checked.
+        $size = (int) $f['size'];
+        if ((string) $req->get_param('encoding') === 'base64') {
+            require_once __DIR__ . '/upload-transport.php';
+            try {
+                $size = kop_upload_base64_decode_file((string) $f['tmp_name'], (int) ceil(kop_vsoc_upload_max() * 4 / 3) + 1024);
+            } catch (Throwable $e) {
+                throw new RuntimeException($e->getMessage() === 'The file is too big.' ? 'That picture is too big: ' . (int) round(kop_vsoc_upload_max() / 1048576) . ' MB at most.' : 'The picture did not arrive. Try again.');
+            }
+        }
+        $post = kop_vsoc_store_upload($who['vol'], (int) $req->get_param('project_id'), (string) $req->get_param('key'), (string) $f['tmp_name'], $size);
         return array('post' => $post, 'message' => 'Picture saved. Only the reviewers see it until it is approved.');
     });
 }
