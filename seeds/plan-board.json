@@ -1,6 +1,6 @@
 {
- "built": "2026-11-26 12:07 UTC",
- "source": "9234383f50c4152ad72f2e9395f32f204536a1b6",
+ "built": "2026-11-26 16:59 UTC",
+ "source": "2f0455e2fe15a338f0e8eadf08513fa09f387c93",
  "sections": [
   {
    "key": "2",
@@ -218,7 +218,7 @@
       {
        "id": "2.1:anonymous-portal-the-firewall-refused-a-visitor-s-pdf",
        "lead": "Anonymous portal: the firewall refused a visitor's PDF",
-       "text": "**Anonymous portal: the firewall refused a visitor's PDF** (2026-11-26). Wordfence rule 76 (\"Malicious File Upload (PHP)\") refused one visitor's PDF four times, 05:00:39 to 05:01:09 UTC on 2026-11-26, right after they sent a contact message at 04:59 UTC; the rows are in `wpdl_wfhits` (`action = 'blocked:waf'`). Nothing of theirs was received. Fixed in [c51da776](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c51da776569b4401ec6956e419f2b956bed5cf05): the portal now sends the file base64-encoded, and a test upload of a PDF the firewall had refused went through (`sub_6b0820a40fd54`, a test, safe to mark handled). The rule misfires because PHP's `short_open_tag` is on, so any `<?` byte pair in a file counts as PHP. The other forms where a signed-out person uploads a file still send it raw and can be refused the same way: researcher upload links (`inc/researcher-uploads.php`, `inc/researcher-documents.php`) and the volunteer social upload (`inc/volunteer-social.php`). Turning `short_open_tag` off removes most of the misfires for all of them; the theme uses no short tags, plugins were not checked. A session can give those forms the portal's base64 transport if a refusal shows up there (`docs/anonymous-portal/README.md`, \"Submitting\").",
+       "text": "**Anonymous portal: the firewall refused a visitor's PDF** (2026-11-26). Wordfence rule 76 (\"Malicious File Upload (PHP)\") refused one visitor's PDF four times, 05:00:39 to 05:01:09 UTC on 2026-11-26, right after they sent a contact message at 04:59 UTC; the rows are in `wpdl_wfhits` (`action = 'blocked:waf'`). Nothing of theirs was received. Fixed in [c51da776](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c51da776569b4401ec6956e419f2b956bed5cf05): the portal now sends the file base64-encoded, and a test upload of a PDF the firewall had refused went through (`sub_6b0820a40fd54`, a test, safe to mark handled). The rule misfires because PHP's `short_open_tag` is on, so any `<?` byte pair in a file counts as PHP. The researcher upload links' script and the volunteer picture upload got the same base64 transport the same day (`inc/upload-transport.php`). One path still sends files raw and can be refused the same way: the researcher upload page with JavaScript off (the plain form post in `inc/researcher-uploads.php`). Turning `short_open_tag` off removes most of the misfires there too; the theme uses no short tags, plugins were not checked.",
        "ask": "Write back to the person whose document upload failed on Nov 26, and mark the test upload handled",
        "date": "2026-11-26",
        "why": "Their PDF never arrived; the upload page works now, so they can send it again.",
@@ -252,7 +252,7 @@
          "note": ""
         }
        ],
-       "hash": "a66b7a842919"
+       "hash": "2fe834e9aeff"
       }
      ]
     },
@@ -5132,6 +5132,21 @@
        "focus": false,
        "steps": [],
        "hash": "520d0f05339e"
+      },
+      {
+       "id": "5:test-volunteer-projects-a-story-links-the-facility-page-it-i",
+       "lead": "test-volunteer-projects: \"a story links the facility page it is linked to, else the story itself\"",
+       "text": "**test-volunteer-projects: \"a story links the facility page it is linked to, else the story itself\"** (found 2026-11-26, mirror as of that day, while adding the base64 upload transport, which does not touch the cards): the roundup's links include a dailymail.com article address where the check expects only site pages. It also prints \"no such column: satellite\". Everything else passes. Needs `-d extension=gd -d memory_limit=2G` here.",
+       "ask": "",
+       "date": "2026-11-26",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "9eb3fc6af5c1"
       }
      ]
     }
