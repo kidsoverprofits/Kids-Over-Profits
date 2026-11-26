@@ -8,6 +8,8 @@
  * submission opens with scripts/anon-portal-decrypt.php, that the portal
  * refuses to store anything without a key, and that the migration of older
  * plaintext submissions seals them and only then deletes the plaintext.
+ * Also: the portal page is kept out of the page cache, the base64 transport
+ * decodes to the same bytes, and the script names why an upload failed.
  */
 
 if (!function_exists('sodium_crypto_box_keypair')) {
@@ -22,6 +24,8 @@ mkdir($tmp . '/uploads', 0700, true);
 class KopTestStop extends Exception {}
 
 function add_action() {}
+$GLOBALS['kop_test_actions'] = array();
+function do_action($tag, ...$args) { $GLOBALS['kop_test_actions'][] = array($tag, $args); }
 function add_shortcode() {}
 function wp_upload_dir() { global $tmp; return array('basedir' => $tmp . '/uploads'); }
 function wp_mkdir_p($d) { return is_dir($d) || mkdir($d, 0700, true); }
@@ -112,7 +116,11 @@ check($code3 === 0 && @file_get_contents($tmp . '/out/sub_aaaa1111_leak.pdf') ==
 check(trim((string) @file_get_contents($tmp . '/out/sub_aaaa1111_notes.txt')) === 'the notes', 'migrated notes open');
 check(@file_get_contents($tmp . '/out/sub_bbbb2222_notes.txt') === 'a document that happens to be named notes.txt', 'a lone notes.txt is kept as the document');
 
-// 5. No scanner key: a file counts as not clean.
+// 5. No scanner key: a file counts as not clean. (A checkout with a .env
+// holds a real key, so blank it; this test never calls the scanner.)
+$key_prop = $ref->getProperty('cloudmersive_api_key');
+$key_prop->setAccessible(true);
+$key_prop->setValue($portal, '');
 $scan = $call('scan_file_cloudmersive', $key_file);
 check($scan['clean'] === false, 'no Cloudmersive key -> file is not clean');
 
@@ -149,6 +157,33 @@ if (function_exists('mime_content_type')) {
 } else {
     echo "skip type checks (run with -d extension=fileinfo)\n";
 }
+
+// 7. The page holds a nonce for signed-out visitors, so it must not be cached.
+$html = $portal->render_portal(array());
+check(strpos($html, 'id="anonymous-doc-form"') !== false, 'portal form renders');
+check(defined('DONOTCACHEPAGE') && DONOTCACHEPAGE === true, 'rendering the portal sets DONOTCACHEPAGE');
+$nocache = array_filter($GLOBALS['kop_test_actions'], static function ($a) { return $a[0] === 'litespeed_control_set_nocache'; });
+check(count($nocache) === 1, 'rendering the portal tells LiteSpeed not to cache the page');
+$src = file_get_contents(__DIR__ . '/../inc/features.php');
+check(strpos($src, "do_action('litespeed_purge_url', home_url('/anon-submit/'))") !== false, 'the cached copy of /anon-submit/ is purged once');
+
+// 8. Base64 transport: bytes the firewall reads as PHP travel as plain text
+// and come back byte for byte (2026-11-26, Wordfence rule 76).
+$trip = "%PDF-1.4\nstream\nq <? Tj (abc) Tj ?> Q\n" . random_bytes(2000) . "<?php echo 1; ?>\nendstream\n%%EOF\n";
+$wire = base64_encode($trip);
+check(strpos($wire, '<?') === false, 'encoded upload has no "<?" for the firewall to trip on');
+check(AnonymousDocPortal::decode_upload($wire) === $trip, 'encoded upload decodes byte for byte');
+check(AnonymousDocPortal::decode_upload(chunk_split($wire)) === $trip, 'line-wrapped base64 decodes too');
+check(AnonymousDocPortal::decode_upload($trip) === false, 'a raw file marked as base64 is refused');
+check(AnonymousDocPortal::decode_upload('') === false, 'an empty upload is refused');
+check(strpos($src, 'if (isset($_POST[\'doc_encoding\']) && $_POST[\'doc_encoding\'] === \'base64\')') !== false, 'handle_submission decodes a base64 upload');
+
+// 9. The script sends base64 and says why an upload failed.
+$js = file_get_contents(__DIR__ . '/../js/anonymous-portal.js');
+check(strpos($js, "formData.append('doc_encoding', 'base64')") !== false && strpos($js, 'readAsDataURL') !== false, 'script sends the file base64-encoded');
+check(strpos($js, "body === '-1'") !== false && strpos($js, 'i18n.expired') !== false, 'script reads a "-1" answer as an expired page');
+check(strpos($js, 'code === 403') !== false && strpos($js, 'i18n.blocked') !== false, 'script names the security filter on any other 403');
+check(strpos($src, "'expired' =>") !== false && strpos($src, "'blocked' =>") !== false, 'both messages are passed to the script');
 
 // Clean up the temp folder.
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($tmp, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);

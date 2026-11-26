@@ -16,7 +16,10 @@ The **Anonymous Portal** lets whistleblowers, survivors and staff send a documen
 - Allowed extensions: `pdf`, `doc`, `docx`, `txt`, `jpg`, `jpeg`, `png`, `zip`. Maximum size 10 MB. The browser checks both before upload; the server checks them again (`$allowed_types`, `$max_file_size`). The client-side list is a copy of the server one, so change both together.
 - The server also checks that the file's contents match its extension (`AnonymousDocPortal::mime_matches()`, using PHP's fileinfo): a program renamed to `.pdf`, or an HTML page renamed to `.pdf`, is rejected. Any `text/*` type passes for `.txt`; `.docx` may be detected as `application/zip`.
 - An optional notes field. There are no contact fields.
-- The form posts `action`, `security` (the nonce), `doc_file` and `doc_notes` to `admin-ajax.php`. The server verifies the nonce with `check_ajax_referer('anonymous_doc_portal_nonce', 'security')`.
+- The form posts `action`, `security` (the nonce), `doc_encoding`, `doc_file` and `doc_notes` to `admin-ajax.php`. The server verifies the nonce with `check_ajax_referer('anonymous_doc_portal_nonce', 'security')`.
+- **The file travels base64-encoded.** The script reads the file, sends its base64 text as the `doc_file` part with `doc_encoding=base64`, and `handle_submission()` decodes it (`AnonymousDocPortal::decode_upload()`) back into PHP's temp file before the type check, the size check, the scan and the sealing. Reason: Wordfence's firewall (rule 76, "Malicious File Upload (PHP)") runs PHP's tokenizer over every file a signed-out visitor uploads, and with `short_open_tag` on, a stray `<?` inside a PDF's binary data can read as a PHP block. On 2026-11-26 it refused one visitor's 46 KB PDF four times with its own 403 page, before the portal's code ran, so nothing was logged by the portal. Base64 text cannot contain `<?`. A request without `doc_encoding` is still taken as a raw file.
+- **The page is never page-cached.** Rendering the shortcode calls `AnonymousDocPortal::mark_uncacheable()` (`DONOTCACHEPAGE` and `litespeed_control_set_nocache`), because the nonce for signed-out visitors stops working after 12 to 24 hours and a cached page would keep handing out the old one. `KOP_ANON_PORTAL_PAGE_VERSION` purges the cached copy once when bumped.
+- **When an upload fails without a JSON answer**, the script says why: HTTP 403 with the body `-1` is a nonce that ran out ("This page has expired. Reload the page..."); any other 403 is the firewall ("The security filter on this site stopped the upload..."); other codes show the generic message with the code. To see what the firewall did, look in Wordfence > Tools > Live Traffic, or the `wpdl_wfhits` table (`action = 'blocked:waf'`, `actionDescription` names the rule).
 
 ## Malware scanning
 
@@ -72,7 +75,7 @@ Recipients come from the `kop_submission_notify_emails` option (comma or newline
 ## Keys and tests
 
 - `scripts/anon-portal-keygen.php <private-key-file>` makes a new key pair: the private key to the path given (refused inside the repository), the public key to `inc/anonymous-portal-public.key`. It will not overwrite either. To replace the key, move the old public key file away first, keep the old private key for the submissions it sealed, then commit and deploy the new public key.
-- `scripts/test-anon-portal.php` runs offline with a throwaway key: seal and open, wrong key rejected, the no-key refusal, and the migration of older plaintext submissions.
+- `scripts/test-anon-portal.php` runs offline with a throwaway key: seal and open, wrong key rejected, the no-key refusal, the migration of older plaintext submissions, the page being kept out of the cache, the base64 transport, and the script's failure messages.
 
 ## Configuration passed to the JavaScript
 
@@ -81,6 +84,6 @@ Recipients come from the `kop_submission_notify_emails` option (comma or newline
 - `ajax_url`: the `admin-ajax.php` URL.
 - `nonce`: for the `anonymous_doc_portal_nonce` action.
 - `max_file_size`: maximum size in bytes (10485760).
-- `i18n`: status messages (uploading, success, error, file too large, invalid type).
+- `i18n`: status messages (uploading, success, error, expired, blocked, file too large, invalid type).
 
 The allowed extensions are not passed; they are hard-coded in the script.

@@ -248,7 +248,7 @@ class AnonymousDocPortal {
         // Only load scripts on pages with the shortcode
         global $post;
         if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'anonymous_doc_portal')) {
-            wp_enqueue_script('anonymous-portal-js', get_stylesheet_directory_uri() . '/js/anonymous-portal.js', array('jquery'), '1.0.0', true);
+            wp_enqueue_script('anonymous-portal-js', get_stylesheet_directory_uri() . '/js/anonymous-portal.js', array('jquery'), '1.1.0', true);
             
             // Pass localized data to script
             wp_localize_script('anonymous-portal-js', 'anonymousPortal', array(
@@ -259,6 +259,8 @@ class AnonymousDocPortal {
                     'uploading' => __('Uploading and encrypting...', 'kadence-child'),
                     'success' => __('Document submitted securely. Thank you.', 'kadence-child'),
                     'error' => __('Upload failed. Please try again.', 'kadence-child'),
+                    'expired' => __('This page has expired. Reload the page, then choose your file again.', 'kadence-child'),
+                    'blocked' => __('The security filter on this site stopped the upload before it reached us, so nothing was received. Please tell us through the contact page.', 'kadence-child'),
                     'file_too_large' => __('File is too large. Max size is 10MB.', 'kadence-child'),
                     'invalid_type' => __('Invalid file type.', 'kadence-child')
                 )
@@ -268,7 +270,35 @@ class AnonymousDocPortal {
         }
     }
     
+    /**
+     * The page carries a nonce for signed-out visitors, which stops working
+     * after 12 to 24 hours, so a page-cache copy older than that refuses
+     * every upload. Keep the page out of LiteSpeed's cache.
+     */
+    public static function mark_uncacheable() {
+        if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+        do_action('litespeed_control_set_nocache', 'kop anonymous portal: nonce for signed-out visitors');
+    }
+
+    /**
+     * The browser sends the document base64-encoded (doc_encoding=base64).
+     * Wordfence's firewall runs PHP's tokenizer over every file a signed-out
+     * visitor uploads and refuses the request (rule 76, "Malicious File
+     * Upload (PHP)") when stray "<?" bytes inside a PDF or image look like a
+     * PHP block; that refused a visitor's PDF four times on 2026-11-26.
+     * Base64 text cannot contain "<?". Nothing here is ever stored where it
+     * could run: the decoded bytes are type-checked, scanned and sealed.
+     *
+     * @return string|false The document's bytes, or false when not base64.
+     */
+    public static function decode_upload($raw) {
+        $raw = trim((string) $raw);
+        if ($raw === '') return false;
+        return base64_decode($raw, true);
+    }
+
     public function render_portal($atts) {
+        self::mark_uncacheable();
         ob_start();
         ?>
         <div class="anonymous-portal-container" data-kop-bug-feature="document-portal/upload" data-kop-bug-label="Anonymous Document Portal">
@@ -317,6 +347,22 @@ class AnonymousDocPortal {
         }
         
         $file = $_FILES['doc_file'];
+
+        // The portal's script sends the file base64-encoded (decode_upload()).
+        // Put the real bytes back in PHP's temp file, so every check below
+        // (type, size, scan, sealing) works on the document itself.
+        if (isset($_POST['doc_encoding']) && $_POST['doc_encoding'] === 'base64') {
+            if ((int) $file['size'] > (int) ceil($this->max_file_size * 4 / 3) + 1024) {
+                wp_send_json_error(array('message' => 'File too large.'));
+            }
+            $decoded = self::decode_upload(file_get_contents($file['tmp_name']));
+            if ($decoded === false || file_put_contents($file['tmp_name'], $decoded) === false) {
+                wp_send_json_error(array('message' => 'File upload error.'));
+            }
+            $file['size'] = strlen($decoded);
+            unset($decoded);
+            clearstatcache(true, $file['tmp_name']);
+        }
 
         // 0. Refuse outright when there is no key to encrypt with; never
         // store a submission unencrypted.
@@ -625,6 +671,19 @@ class AnonymousDocPortal {
  *
  * This prevents issues with functions like wp_upload_dir() being called too early.
  */
+/**
+ * Clear LiteSpeed's copy of the portal page once after a change to what the
+ * page must carry (version 2: the page is no longer cached at all, and copies
+ * cached before that still hold a nonce that runs out). Bump the version with
+ * any such change.
+ */
+if (!defined('KOP_ANON_PORTAL_PAGE_VERSION')) define('KOP_ANON_PORTAL_PAGE_VERSION', '2');
+add_action('init', function () {
+    if (get_option('kop_anon_portal_page_version') === KOP_ANON_PORTAL_PAGE_VERSION) return;
+    update_option('kop_anon_portal_page_version', KOP_ANON_PORTAL_PAGE_VERSION, false);
+    do_action('litespeed_purge_url', home_url('/anon-submit/'));
+});
+
 function kop_initialize_anonymous_doc_portal() {
     // Kept, so the review inbox can ask it for its status and the encrypt step.
     $GLOBALS['kop_anon_doc_portal'] = new AnonymousDocPortal();

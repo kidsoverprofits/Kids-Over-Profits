@@ -8,6 +8,10 @@
  * Submits to admin-ajax action 'submit_anonymous_doc'; the nonce travels in
  * the 'security' field (check_ajax_referer('anonymous_doc_portal_nonce',
  * 'security')). Config is localized as window.anonymousPortal.
+ *
+ * The file is sent base64-encoded (doc_encoding=base64) and decoded by
+ * AnonymousDocPortal::handle_submission(): the site's firewall refuses raw
+ * uploads whose bytes happen to look like PHP, which ordinary PDFs can.
  */
 
 jQuery(document).ready(function($) {
@@ -133,13 +137,58 @@ jQuery(document).ready(function($) {
         const formData = new FormData();
         formData.append('action', 'submit_anonymous_doc');
         formData.append('security', config.nonce || '');
-        formData.append('doc_file', file);
         formData.append('doc_notes', $notes.val() || '');
 
         $form.addClass('uploading');
         $submitBtn.prop('disabled', true);
         showStatus(i18n.uploading || 'Encrypting and uploading...', 'info');
 
+        // Read the file as base64 text and send that as the file part. If the
+        // browser cannot read it, send the file as it is.
+        const reader = new FileReader();
+        reader.onload = function() {
+            const dataUrl = String(reader.result || '');
+            const comma = dataUrl.indexOf(',');
+            if (comma === -1) {
+                formData.append('doc_file', file);
+            } else {
+                formData.append('doc_encoding', 'base64');
+                formData.append('doc_file', new Blob([dataUrl.slice(comma + 1)], { type: 'text/plain' }), file.name);
+            }
+            send(formData);
+        };
+        reader.onerror = function() {
+            formData.append('doc_file', file);
+            send(formData);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Why an upload that got no JSON answer failed. WordPress answers a nonce
+    // that has run out with HTTP 403 and the body "-1"; any other 403 comes
+    // from the firewall in front of WordPress.
+    function failureMessage(xhr, status) {
+        if (status === 'timeout') {
+            return 'The upload took too long. Please try a smaller file.';
+        }
+        const code = (xhr && xhr.status) || 0;
+        const body = String((xhr && xhr.responseText) || '').trim();
+        if (body === '-1' || (code === 403 && body === '')) {
+            return i18n.expired || 'This page has expired. Reload the page, then choose your file again.';
+        }
+        if (code === 403) {
+            return i18n.blocked || 'The security filter on this site stopped the upload before it reached us, so nothing was received. Please tell us through the contact page.';
+        }
+        if (code === 413) {
+            return i18n.file_too_large || 'File is too large.';
+        }
+        if (code === 0) {
+            return 'The upload did not reach the site. Check your connection and try again.';
+        }
+        return (i18n.error || 'Upload failed. Please try again.') + ' (Error ' + code + ')';
+    }
+
+    function send(formData) {
         $.ajax({
             url: config.ajax_url || '/wp-admin/admin-ajax.php',
             type: 'POST',
@@ -159,16 +208,12 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr, status) {
-                let message = i18n.error || 'Upload failed. Please try again.';
-                if (status === 'timeout') {
-                    message = 'The upload took too long. Please try a smaller file.';
-                }
-                showStatus(message, 'error');
+                showStatus(failureMessage(xhr, status), 'error');
             },
             complete: function() {
                 $form.removeClass('uploading');
                 $submitBtn.prop('disabled', false);
             }
         });
-    });
+    }
 });
