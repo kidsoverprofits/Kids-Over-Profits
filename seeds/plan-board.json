@@ -1,6 +1,6 @@
 {
- "built": "2026-11-24 19:57 UTC",
- "source": "99f6288045b49d221763e53e7d35035a38fd39c0",
+ "built": "2026-11-26 12:07 UTC",
+ "source": "9234383f50c4152ad72f2e9395f32f204536a1b6",
  "sections": [
   {
    "key": "2",
@@ -214,6 +214,45 @@
         }
        ],
        "hash": "d6552ff34282"
+      },
+      {
+       "id": "2.1:anonymous-portal-the-firewall-refused-a-visitor-s-pdf",
+       "lead": "Anonymous portal: the firewall refused a visitor's PDF",
+       "text": "**Anonymous portal: the firewall refused a visitor's PDF** (2026-11-26). Wordfence rule 76 (\"Malicious File Upload (PHP)\") refused one visitor's PDF four times, 05:00:39 to 05:01:09 UTC on 2026-11-26, right after they sent a contact message at 04:59 UTC; the rows are in `wpdl_wfhits` (`action = 'blocked:waf'`). Nothing of theirs was received. Fixed in [c51da776](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c51da776569b4401ec6956e419f2b956bed5cf05): the portal now sends the file base64-encoded, and a test upload of a PDF the firewall had refused went through (`sub_6b0820a40fd54`, a test, safe to mark handled). The rule misfires because PHP's `short_open_tag` is on, so any `<?` byte pair in a file counts as PHP. The other forms where a signed-out person uploads a file still send it raw and can be refused the same way: researcher upload links (`inc/researcher-uploads.php`, `inc/researcher-documents.php`) and the volunteer social upload (`inc/volunteer-social.php`). Turning `short_open_tag` off removes most of the misfires for all of them; the theme uses no short tags, plugins were not checked. A session can give those forms the portal's base64 transport if a refusal shows up there (`docs/anonymous-portal/README.md`, \"Submitting\").",
+       "ask": "Write back to the person whose document upload failed on Nov 26, and mark the test upload handled",
+       "date": "2026-11-26",
+       "why": "Their PDF never arrived; the upload page works now, so they can send it again.",
+       "go": [
+        {
+         "label": "Contact Messages",
+         "url": "https://kidsoverprofits.org/wp-admin/admin.php?page=kop-contact-messages"
+        }
+       ],
+       "choices": [],
+       "time": "5 min",
+       "kind": "do",
+       "focus": false,
+       "steps": [
+        {
+         "id": "reply-to-the-contact-message-from-2026-11-25-10-59",
+         "label": "Reply to the contact message from 2026-11-25 10:59 pm Central: the upload page is fixed, please send the document again at https://kidsoverprofits.org/anon-submit/",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "in-review-inbox-anonymous-documents-mark-sub-6b082",
+         "label": "In Review Inbox > Anonymous documents, mark `sub_6b0820a40fd54` (Claude's test) handled",
+         "url": "",
+         "note": ""
+        },
+        {
+         "id": "optional-in-cpanel-multiphp-ini-editor-turn-short",
+         "label": "Optional: in cPanel > MultiPHP INI Editor, turn `short_open_tag` off, then load the site and KOP Tools to see nothing broke",
+         "url": "",
+         "note": ""
+        }
+       ],
+       "hash": "a66b7a842919"
       }
      ]
     },
@@ -2690,21 +2729,6 @@
        "focus": false,
        "steps": [],
        "hash": "b7e6d1d4de7b"
-      },
-      {
-       "id": "3:new-anonymous-portal-key",
-       "lead": "New anonymous portal key",
-       "text": "**New anonymous portal key** (2026-11-24): [Anonymous Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=anonymous-docs) shows fingerprint `0d0a60dad913cd7d` (if it still shows `e2f2be273231e1ff`, `wp-config.php` defines `KOP_ANON_PORTAL_PUBLIC_KEY`, which wins over the file: change it to the new key). Send one test document from [/anon-submit/](https://kidsoverprofits.org/anon-submit/) and open it with `scripts/anon-portal-decrypt.php`.",
-       "ask": "",
-       "date": "2026-11-24",
-       "why": "",
-       "go": [],
-       "choices": [],
-       "time": "",
-       "kind": "check",
-       "focus": false,
-       "steps": [],
-       "hash": "93e2004cdda8"
       }
      ]
     }
