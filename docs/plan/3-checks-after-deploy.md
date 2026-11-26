@@ -244,7 +244,3 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     undated lines; the tile still says 40 incidents on record. A renamed program (/facility/acadia-montana-mt/) shows
     "Its incidents are in the timeline." under a name whose only items were incidents. In the app (after the EAS
     update) Provo's Incidents section shows the same line and 8 entries.
-48. **New anonymous portal key** (2026-11-24): [Anonymous Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=anonymous-docs)
-    shows fingerprint `0d0a60dad913cd7d` (if it still shows `e2f2be273231e1ff`, `wp-config.php` defines
-    `KOP_ANON_PORTAL_PUBLIC_KEY`, which wins over the file: change it to the new key). Send one test document from
-    [/anon-submit/](https://kidsoverprofits.org/anon-submit/) and open it with `scripts/anon-portal-decrypt.php`.

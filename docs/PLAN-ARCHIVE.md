@@ -3996,3 +3996,16 @@ Outcomes, 2026-11-19: NH The Ridge RTC and WY Meadowlark were already released i
    moved to "Staff notes (private)": it is on Staff Notes under #100006, not on the facility page or get-master-data;
    "Undo last edit" took it off the record and back onto the card, and moving it again put it back. #75's other
    changes wait in the data queue as usual.
+
+### 3. Checks after deploy (done 2026-11-26)
+
+48. **New anonymous portal key** (2026-11-24): [Anonymous Docs](https://kidsoverprofits.org/wp-admin/admin.php?page=anonymous-docs)
+    shows fingerprint `0d0a60dad913cd7d` (if it still shows `e2f2be273231e1ff`, `wp-config.php` defines
+    `KOP_ANON_PORTAL_PUBLIC_KEY`, which wins over the file: change it to the new key). Send one test document from
+    [/anon-submit/](https://kidsoverprofits.org/anon-submit/) and open it with `scripts/anon-portal-decrypt.php`.
+
+    Outcome, 2026-11-26: a test PDF sent from /anon-submit/ in a browser was stored as `sub_6b0820a40fd54.sealed`
+    and opened with the private key at `%USERPROFILE%\kop-anon-portal-private.key`; the script printed fingerprint
+    `0d0a60dad913cd7d` and the opened file matched the upload byte for byte, notes included. The Anonymous Docs
+    screen itself was not looked at. Same test confirmed the fix in
+    [c51da776](https://github.com/kidsoverprofits/Kids-Over-Profits/commit/c51da776569b4401ec6956e419f2b956bed5cf05).
