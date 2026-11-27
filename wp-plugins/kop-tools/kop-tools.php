@@ -171,7 +171,7 @@ function kop_tools_registry() {
             ),
             array(
                 'title'    => 'Plan Board',
-                'desc'     => 'The work plan (docs/plan/) as cards, one per item: type an answer or mark an item Done or Not now; a Claude session folds the answers into the plan and each card then shows what it did.',
+                'desc'     => 'The work plan (docs/plan/) as a tracker: Pick up here shows one next step; every item has a status, a note on where it was left and steps to tick, reword and add. A Claude session folds your changes into the plan.',
                 'type'     => 'screen',
                 'screen'   => 'kop-plan-board',
                 'requires' => 'kop_pb_page',

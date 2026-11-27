@@ -14,9 +14,11 @@ Every list item in sections 2 and up becomes a card with a stable id
 screen's "Needs you" view. Under it, optional lines written for the owner (each its own line, any order, after
 the item's text): "Why: <one line on why it matters>", "Go: [Label](url)" (one or more: the card's Open buttons),
 "Choices: A | B | C" (one-click answers; makes it a "decide" card), "Time: 5 min", "Kind: decide|do|check"
-(else guessed: choices -> decide, section 3 -> check, otherwise do), "Focus: yes" (the card is in This week) and
-"Step: <one small task>" or "Step: [Label](url)", one line per step: a job that is really a list (35 histories
-to read, 5 records to fix) is steps, and the card shows only the next one with its own Open, Done and Skip.
+(else guessed: choices -> decide, section 3 -> check, otherwise do), "Focus: yes" (the card is Active), "Status: waiting"
+(it waits on someone else), "Left: <where the work stopped and what comes next>", "Touched: YYYY-MM-DD" (the day it
+was last worked on) and "Step: <one small task>" or "Step: [Label](url)", one line per step: a job that is really a
+list (35 histories to read, 5 records to fix) is steps, and the card shows only the next one with its own Open, Done
+and Skip. "Note: <text>" under a Step line is what the owner typed for that step (a decision, a command's output).
 A step's id is "<item id>#<slug of its text>"; a pass deletes the steps the owner ticked.
 They are not part of the item's hash, so adding them never marks an answer "reworded". The owner's answers are kept on the site
 ({prefix}kop_plan_answers, inc/plan-board.php), never in these files. docs/PLAN.md section "Plan Board" says how a
@@ -36,7 +38,7 @@ PLAN_DIR = ROOT / 'docs' / 'plan'
 ITEM_START = re.compile(r'^(\d+)\.\s+|^-\s+')
 LEAD = re.compile(r'^\*\*(.+?)\*\*')
 ASK = re.compile(r'^Ask:\s*')
-META = re.compile(r'^(Ask|Why|Go|Choices|Time|Kind|Focus|Step):\s*')
+META = re.compile(r'^(Ask|Why|Go|Choices|Time|Kind|Focus|Step|Note|Left|Status|Touched):\s*')
 GO = re.compile(r'\[([^\]]+)\]\((https?://[^)\s]+)\)|(https?://\S+)')
 DATE = re.compile(r'\b(20\d\d-[01]\d-[0-3]\d)\b')
 
@@ -96,7 +98,7 @@ def parse(md):
         if ITEM_START.match(line):
             flush_para()
             body = ITEM_START.sub('', line, count=1)
-            item = {'body': [body], 'ask': [], 'meta': {}, 'cur': None}
+            item = {'body': [body], 'ask': [], 'meta': {}, 'notes': {}, 'cur': None}
             grp['items'].append(item)
             continue
         if item is not None and raw[:1] in (' ', '\t'):
@@ -104,9 +106,19 @@ def parse(md):
             # continues the key before it.
             st = line.strip()
             mm = META.match(st)
-            if mm:
+            # Note, Left, Status and Touched are ordinary words too ("Left: one page to check" in an item's own
+            # text), so they only count under another owner line: write them below the Ask line.
+            if mm and mm.group(1) in ('Note', 'Left', 'Status', 'Touched') and item['cur'] is None:
+                mm = None
+            if mm and mm.group(1) == 'Note':
+                # The owner's typed answer to the step above it.
+                item['cur'] = 'Note'
+                item['notes'][len(item['meta'].get('Step', [])) - 1] = META.sub('', st, count=1)
+            elif mm:
                 item['cur'] = mm.group(1)
                 item['meta'].setdefault(item['cur'], []).append(META.sub('', st, count=1))
+            elif item['cur'] == 'Note':
+                item['notes'][len(item['meta'].get('Step', [])) - 1] += ' ' + st
             elif item['cur']:
                 item['meta'][item['cur']][-1] += ' ' + st
             else:
@@ -141,22 +153,27 @@ def parse(md):
                     for gm in GO.finditer(g_line):
                         go.append({'label': gm.group(1), 'url': gm.group(2)} if gm.group(2) else {'label': 'Open', 'url': gm.group(3).rstrip('.,;')})
                 steps, sseen = [], set()
-                for st_line in meta.get('Step', []):
+                for st_i, st_line in enumerate(meta.get('Step', [])):
                     sm = re.match(r'^\[([^\]]+)\]\((https?://[^)\s]+)\)\s*(.*)$', st_line)
                     label, url, rest = (sm.group(1), sm.group(2), sm.group(3)) if sm else (st_line, '', '')
                     sid, k = slug(label, 50), 2
                     while sid in sseen:
                         sid, k = f'{slug(label, 50)}-{k}', k + 1
                     sseen.add(sid)
-                    steps.append({'id': sid, 'label': label, 'url': url, 'note': rest.strip(' -:;')})
+                    steps.append({'id': sid, 'label': label, 'url': url, 'note': rest.strip(' -:;'),
+                                  'answer': it['notes'].get(st_i, '')})
                 kind = ' '.join(meta.get('Kind', [])).strip().lower()
+                status = ' '.join(meta.get('Status', [])).strip().lower()
+                touched = DATE.findall(' '.join(meta.get('Touched', [])))
                 if kind not in ('decide', 'do', 'check'):
                     kind = 'decide' if choices else ('check' if s['key'] == '3' else 'do')
                 items.append({'id': iid, 'lead': lead, 'text': text, 'ask': ask, 'date': max(dates) if dates else '',
                               'why': ' '.join(meta.get('Why', [])), 'go': go, 'choices': choices,
                               'time': ' '.join(meta.get('Time', [])), 'kind': kind,
                               'focus': ' '.join(meta.get('Focus', [])).strip().lower() in ('yes', 'y', 'true', '1'),
-                              'steps': steps})
+                              'steps': steps, 'left': ' '.join(meta.get('Left', [])),
+                              'status': status if status in ('waiting',) else '',
+                              'touched': max(touched) if touched else ''})
             if items or g['intro']:
                 groups.append({'key': g['key'], 'title': g['title'], 'intro': g['intro'], 'items': items})
         out.append({'key': s['key'], 'title': s['title'], 'groups': groups})

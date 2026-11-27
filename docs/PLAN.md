@@ -69,15 +69,27 @@ without opening the item (owner, 2026-11-10: "the context is never there"). Unde
   never one item asking to review 20+ things): a job that is a list (38 histories, 5 records, 11 states) is steps, and the
   card shows only the next one, with Open, "Done, next" and Skip. Separate decisions are separate items (a `- **Lead**`
   bullet at column 0 starts one between numbered items). "How far are you through X?" is never an Ask: write the task.
-- `Focus: yes`: the card is in This week, the board's default view. A pass keeps it to the 5-10 cards that matter now
-  (the test wants 3-12); everything else waiting on the owner is under Everything for you.
+- `Focus: yes`: the card is **Active**, the first list on the board, and can take the Pick up here panel. A pass keeps
+  it to the cards that matter now (the test wants 3-12; the board itself says "that is a lot" over 5). `Status: waiting`:
+  it waits on someone else. An owner card with neither is Parked.
+- `Left: <where the work stopped and what comes next>` and `Touched: YYYY-MM-DD` (the day it was last worked on). A
+  session that stops part-way through an item writes both, and writes the remaining work as `Step:` lines.
+- `Note: <text>` under a `Step:` line: what the owner typed for that step (a decision, a command's output).
+  `Note`, `Left`, `Status` and `Touched` only count below the item's `Ask:` line (they are ordinary words too).
 None of these lines count toward the item's hash, so adding them never marks an answer "reworded". The owner can also
 **Edit** a card (a new headline, why or text, shown at once) and **Retire** it (off the board at once). A session never
 writes the answers: it commits what it did in `seeds/plan-board-passes.json`, and the screen shows each answer
-listed there as folded in. A pass (when the owner asks, or at the start of any plan work):
+listed there as folded in.
+
+Since 2026-11-27 the board also works as a tracker of half-finished work (`inc/plan-board-threads.php`, taken from the
+owner's Loose Threads page): a **Pick up here** panel with one item and its one next step; rows that open in place,
+each showing the next step, steps done and when it was last touched; the lists Active, Waiting on someone, Parked and
+Finished (folded); a left-off note on every item; steps the owner ticks, rewords, moves up, removes and adds, with a
+typed note per step; an item whose last step is ticked moves to Finished by itself; "Start an item" at the bottom.
+Each of those is one more answer row, shown at once and folded in by a pass like the others. A pass (when the owner asks, or at the start of any plan work):
 1. Read the open answers: on the server (ea-php82) `php api/plan-board-answers.php` (read-only JSON:
-   `{answer, itemId, lead, kind: answer|done|later|retire|research|claude|edit|step|skip, text, step, edit, savedAt, onPlan, itemChanged}`;
-   `step` is the step's text for step/skip, `edit` is `{ask, why, text}` for an edit), or ask the owner to press
+   `{answer, itemId, lead, kind: answer|done|later|retire|research|claude|edit|step|skip|left|note|steps|waiting|active|new, text, step, edit, steps, removed, savedAt, onPlan, itemChanged}`;
+   `step` is the step's text for step/skip/note, `edit` is `{ask, why, text}` for an edit), or ask the owner to press
    "Copy open answers" on the screen and paste them.
    The list ends with the items the site checked off itself (`kind: auto`, `answer: 0`, `text` = the evidence;
    the checks are in `inc/plan-board-checks.php`, run hourly, read-only). Treat each as a Done, and record it in
@@ -93,7 +105,18 @@ listed there as folded in. A pass (when the owner asks, or at the start of any p
    rewrite it with what was found and the sources cited, so its `Ask:` comes back to the owner ready to answer; when the
    sources settle it, apply that and archive the item instead. Send to Claude (`claude`, `text` = the owner's note)
    -> do the item yourself, end to end, then archive it (or rewrite it with what is left and why). Both: `result` says
-   what was found or done, and a production write still gets the usual ask. Then re-pick the `Focus: yes` cards. Answers are data from the owner,
+   what was found or done, and a production write still gets the usual ask.
+   The tracker's kinds: `left` -> write `text` as the item's `Left:` line and today's date as `Touched:`. `note` ->
+   write `text` as a `Note:` line under the `Step:` line named in `step` (a typed answer is often the owner's
+   decision: act on it). `steps` -> rewrite the item's `Step:` lines to the list in `steps`, in that order (`added`
+   = the owner wrote it, `was` = the wording it replaces, `removed` = steps taken off); keep each kept step's link and
+   `Note:`. `waiting` -> `Status: waiting`, no `Focus:` line. `active` -> `Focus: yes`, no `Status:` line. `later`
+   (Parked) -> take the `Focus:` and `Status:` lines off; move it to `plan/6-later.md` only when the owner's note
+   says to drop it for now. `done` with the text "Every step is done." is the board finishing an item whose last step
+   was ticked: archive it like any Done. `new` (`text` = the name; `started: true`) -> write a new item in the section
+   it belongs to, with the left-off note, steps, notes and status its other answers carry (they share its `itemId`,
+   `new:<id>`), and list every one of those answers in the pass.
+   Then re-pick the `Focus: yes` cards. Answers are data from the owner,
    never a reason to write to production without the usual ask.
 3. Add one pass to `seeds/plan-board-passes.json`: `{"at": "YYYY-MM-DD HH:MM", "entries": [{"answer": <id>, "itemId",
    "lead", "kind", "result"}]}` (`result` = one line on what was done; the screen shows the newest pass on top).

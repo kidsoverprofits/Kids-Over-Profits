@@ -186,6 +186,13 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
    - Done 2026-11-04: archive.today copies are no longer fetched (note 'archive copy not read'), and the text match has a
      same-state rule and a prose-name list. After the next deploy + hourly run: the six archive copies show 'archive copy
      not read', 'article read' notes appear (the budget is no longer spent on them), and no Michigan story gets #10038 or #100729.
+   Ask: Waiting news linked from article text: live check
+   Left: The hourly pass now reads waiting articles' own text and skips archive.today copies. Nobody confirmed a
+   live run (plan 3 item 38).
+   Touched: 2026-11-04
+   Step: Query the auto-connect ledger for 'article read' notes
+   Step: Check #10669 and #10814 now show records in News waiting
+   Step: Check news #10959 on #100720 is that site's own story
 39. **Most popular name and search previews** (inc/facility-v2-readers.php, inc/facility-pages.php, 2026-11-11): signed in,
    on a facility page with a past name (e.g. [Chrysalis Therapeutic Boarding School](https://kidsoverprofits.org/facility/chrysalis-therapeutic-boarding-school-mt/)),
    open the names pencil, pick a "Most popular name", save: the title, the browser tab, its directory card (both tabs),
@@ -244,3 +251,28 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     undated lines; the tile still says 40 incidents on record. A renamed program (/facility/acadia-montana-mt/) shows
     "Its incidents are in the timeline." under a name whose only items were incidents. In the app (after the EAS
     update) Provo's Incidents section shows the same line and 8 entries.
+48. **Live-site checks after November deploys** (gathered 2026-11-16 to 2026-11-27 from the sessions' handoffs).
+    Features that shipped without a browser check on the live site, and a few that need the owner's own click. The
+    first two are items 39 and 40 above; the Pinned row is plan 4.4 item 23 a; Send to Claude is the 4.4 bullet
+    "Send to Claude on every card", b.
+    Ask: Live-site checks after November deploys
+    Left: Several features shipped without a browser check on the live site, and a few need your own click.
+    Touched: 2026-11-16
+    Step: Check 'Most popular name' and search previews (plan 3, item 39)
+    Step: Check the staff card layout on Aspen Ranch (plan 3, item 40)
+    Step: Check the Pinned row and stars on /admin-submissions/
+    Step: Send a few hard cards to Claude and run /read-sent-to-claude (you)
+    Step: Archive the four quiet ongoing stories and add replacements in the Review inbox (you)
+    Step: Close bug reports 5-8 by hand in the Review inbox (you)
+49. **Plan Board works like the Loose Threads tracker: first use on the live site** (2026-11-27). Built and checked
+    in a local harness with Chrome (every feature, 1280 and 390 wide), not yet on the live screen, where the answers
+    table and the admin styles are the real ones.
+    Ask: Try the new Plan Board once and say if anything is off
+    Why: It was tested on a copy, not on the live screen with your real answers.
+    Time: 5 min
+    Touched: 2026-11-27
+    Step: [Open the Plan Board](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-plan-board): Pick up here shows one item and its next step
+    Step: Type a note under that step, press "Done, show the next one", reload: the note and the tick are kept
+    Step: Open a row, write "Where you left off", click away, reload: the note is kept
+    Step: Tick the last open step of a small item: it moves to Finished and a line at the top says so
+    Step: Open the Plan Board from the app's Admin tab: nothing runs off the side of the phone

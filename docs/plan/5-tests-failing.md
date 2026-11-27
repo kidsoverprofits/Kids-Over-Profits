@@ -145,6 +145,18 @@ rerun"). Run them one PHP process at a time from the real checkout, with the por
    - The network embed is now uncapped: Provo Canyon School's slice is 135 KB (was 102 KB). Look at the live
      /facility/provo-canyon-school-ut/ after deploy: it should paint, now with the Aspen owners, and the caption no
      longer says "N more on the full map".
+   Ask: Failing tests and checks after deploy
+   Left: Most failing tests were fixed. A few test fixes and live checks remain (docs/plan/5-tests-failing.md items
+   2 to 4). The Provo Canyon School map steps belong to item 2 here, the test-operator-pages step to item 4, and the
+   last two are checks 35 and the Teen Challenge check in section 3.
+   Touched: 2026-11-02
+   Step: Fix test-operator-pages to count only the first program list (Embark, Teen Challenge)
+   Step: Decide whether the Provo Canyon School map layout redesign is worth doing (you)
+   Step: Check the server's PA scraper Python has wordfreq
+   Step: Look at the live Provo Canyon School network map
+   Step: Rebuild wiki drafts with scripts/wiki-drafts.py
+   Step: Check numbered citations logged out (checks item 35)
+   Step: Check 'Teen Challenge' pills on /lawsuits/ open the company page
 4. **test-operator-pages: "embark-behavioral-health lists its programs"** (and "teen-challenge", same cause, still both on 2026-11-16) (found 2026-11-02): the check counts
    `kop-fp-siblings` once per page, but since 75481c13 the related-programs list (templates/operator-page.php line 261)
    has the same class, so Embark (which has related programs) counts 2. The page is right; the test needs to count only the
