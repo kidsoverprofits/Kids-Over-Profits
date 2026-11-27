@@ -8799,5 +8799,471 @@
         "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 197), checked by KOP against public sources in November 2026."
       ]
     }
+  },
+  {
+    "location_id": 40,
+    "location_name": "ALABAMA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Camille Place",
+        "currentName": "",
+        "currentOperator": "Camille Place",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Monroeville",
+        "state": "AL",
+        "country": "United States"
+      },
+      "location": "Monroeville, AL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: No license found (state funded by ADECA, licensing not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.fox10tv.com/2023/08/31/first-home-young-girls-rescued-human-trafficking-opens-southern-alabama/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.fox10tv.com/2023/10/19/home-girls-rescued-human-trafficking-continues-grow-southern-alabama/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://alreporter.com/2024/03/15/gov-ivey-awards-54596-to-assist-victims-of-sex-trafficking",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://projects.propublica.org/nonprofits/organizations/474627771",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://clarionnews.org/camille-place-announces-completion-of-phase-i/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Camille Place in Monroeville opened in August 2023, when its first resident moved in. By October 2023 it housed four girls; it serves ages 6 to 19 and was planned for up to 16 (FOX10, 2023-08-31 and 2023-10-19). In March 2024 the state (ADECA) gave it $54,596 for staff and housing costs for girls under 19, and its FY2024 Form 990 (filed Oct 2025) shows about $654K in spending. No 2025-2026 report on current residents or licensing was found. No adverse findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 2), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 38,
+    "location_name": "ILLINOIS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Shelter Youth & Family Services residential home for girls",
+        "currentName": "",
+        "currentOperator": "Shelter Youth & Family Services",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IL",
+        "country": "United States"
+      },
+      "location": "IL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential home for girls 12-18; Illinois DCFS (described as DCFS-licensed by the developer and the agency; license record not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://hodc.org/new-safe-haven/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://hodc.org/buildings/palatine-shelter/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.globenewswire.com/news-release/2026/09/22/3366390/0/en/shelter-youth-family-services-names-kristen-daniels-chief-executive-officer.html",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://patch.com/illinois/arlingtonheights/shelter-youth-family-services-embracing-new-chapter-relocation-arlington",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.dailyherald.com/?p=1335540",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.dailyherald.com/?p=1310583",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Shelter Youth & Family Services' 12-bed home for girls 12-18 who survived trafficking (northwest suburbs/Palatine) held its ribbon-cutting in December 2025, per the developer HODC (posted 2026-01-26). HODC calls it Illinois' first DCFS-licensed home for youth trafficking survivors. A Shelter press release of 2026-09-22 says the agency 'opened' this DCFS-licensed residential program; neither source gives a home name or how many girls live there now. No adverse findings found.",
+        "Location as listed: Palatine area (northwest Chicago suburbs).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 62), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 26,
+    "location_name": "NEW MEXICO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Casa Sunrise",
+        "currentName": "",
+        "currentOperator": "Youth Development Inc.",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NM",
+        "country": "United States"
+      },
+      "location": "NM",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Group home for ages 14-17 run with and funded by NM CYFD (license record not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.ydinm.org/program/prevention-intervention-and-behavioral-health/casa-sunrise/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.ydinm.org/program-type/prevention-intervention-behavioral-health/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.ydinm.org/2024/12/19/cyfd-group-home-for-girls-called-hope-house-opens-in-albuquerque/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://youthtoday.org/?p=1088116",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.koat.com/article/cyfd-and-bernalillo-county-to-open-first-safe-home-for-sex-trafficked-teenagers/28802666",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "YDI's own current website lists Casa Sunrise as a specialized YDI group home, run with and funded by CYFD, for New Mexico youth ages 14-17 affected by domestic minor sex trafficking, with a referral contact. This fits the CYFD/Bernalillo County safe house planned since 2019-2022, but no source gives Casa Sunrise's opening date, bed count or licence, and no news coverage of it was found. YDI separately opened HOPE House (girls 12-17 in state care, not trafficking-specific) in December 2024. No adverse findings found.",
+        "Location as listed: Albuquerque area.",
+        "Listed as: Group home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 129), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 14,
+    "location_name": "NEW YORK",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Streetwork youth shelter",
+        "currentName": "",
+        "currentOperator": "Safe Horizon",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "New York",
+        "state": "NY",
+        "country": "United States"
+      },
+      "location": "New York, NY",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Crisis shelter in the NYC DYCD runaway and homeless youth system (certification not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.safehorizon.org/streetwork/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.safehorizon.org/get-help/housing/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.safehorizon.org/safe-blog/streetwork-project-anniversary-homeless-youth/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.idealist.org/es/ong-empleo/d936fcf6bc0f439eaa4a3c2b9135e80d-youth-advocate-streetwork-overnight-harlem-casual-safe-horizon-new-york",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.1degree.org/opp/get-overnight-shelter-for-youth-safe-horizon-new-york-ny",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.nyc.gov/assets/dycd/digital_toolkit/Case_Management_Toolkit/wp-content/uploads/2023/07/Appendix-G-Runaway-Homeless-Youth-Programs.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Safe Horizon's own youth housing page says Streetwork's shelter can hold 24 youth for stays of up to 30 days, and that youth shelter eligibility ends at 21. A Safe Horizon job listing (undated) calls Streetwork Overnight a 24-bed crisis shelter for ages 16-21, open 7 pm to 10 am every night. NYC's DYCD defines crisis shelters as serving ages 16-20, with priority for 16- and 17-year-olds. It is overnight-only, not a full-time residence. It is still listed on Safe Horizon's Streetwork page in Nov 2026. No adverse findings found.",
+        "Location as listed: Harlem, New York City.",
+        "Listed as: Overnight crisis shelter for homeless youth (ages 16-21). Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 132), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 14,
+    "location_name": "NEW YORK",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Transitional Independent Living – GEMS",
+        "currentName": "",
+        "currentOperator": "GEMS",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "New York",
+        "state": "NY",
+        "country": "United States"
+      },
+      "location": "New York, NY",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://gems-girls.org/services",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://impala.digital/public/profiles/13-4150972/programs",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://projects.propublica.org/nonprofits/organizations/134150972",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.1degree.org/opp/get-transitional-and-supportive-girls-educational-mentoring",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.nyc.gov/assets/dycd/digital_toolkit/Case_Management_Toolkit/wp-content/uploads/2023/07/Appendix-G-Runaway-Homeless-Youth-Programs.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "GEMS's FY2023-24 990 program description (as shown on Impala's profile) describes TIL as a 9-bed house for 16- to 20-year-olds with stays of up to 18 months. It also lists Imani as 3 supportive apartments for 18- to 29-year-olds, for 20 residential beds in all. GEMS's current services page says TIL gives young women housing with 24-hour support starting at age 16, so 16- and 17-year-olds can live there overnight alongside young adults. The program looks open: it is on the live site, and ProPublica shows a 990 for the year ending June 2025, filed May 2026. No adverse findings found.",
+        "Location as listed: New York City.",
+        "Listed as: Transitional living home for young women who survived trafficking (ages 16-20). Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 130), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 48,
+    "location_name": "SOUTH DAKOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Children's Home Shelter for Family Safety",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of South Dakota",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Sioux Falls",
+        "state": "SD",
+        "country": "United States"
+      },
+      "location": "Sioux Falls, SD",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: South Dakota DSS Group Care Center for Minors, Shelter Care Facility, up to 8 children 0-17; latest posted license July 2024 to June 2025 (current renewal not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://dss.sd.gov/docs/childprotection/facilitylicensing/CHILDRENS_HOME_FOR_SHELTER_AND_FAMILY_SAFETY/CHSFS_2024.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dss.sd.gov/docs/childprotection/facilitylicensing/CHILDRENS_HOME_FOR_SHELTER_AND_FAMILY_SAFETY/CHSFS_2023.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dss.sd.gov/docs/childprotection/facilitylicensing/CHILDRENS_HOME_FOR_SHELTER_AND_FAMILY_SAFETY/CHSFS_2022.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dss.sd.gov/childprotection/fostercare/facilitylicensing.aspx",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dakotaathome.sd.gov/search/b6b97aec-6dbe-5e9f-9ecb-5e611d7adc3a",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://pigeon605.com/new-childrens-home-shelter-for-family-safety-to-offer-trauma-informed-care-for-victims-of-domestic-violence/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.yahoo.com/news/light-end-tunnel-childrens-inn-103016513.html",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.fnbsf.com/?p=20896",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "South Dakota DSS licensing reports for 2022, 2023 and 2024 show a licensed children's shelter-care unit (formerly the Children's Inn), with children placed through an agency and some stays extended for 'transition into a more permanent placement'. Local reporting also describes child intakes coming 'from a group home'. The latest posted license ran July 2024 to June 2025, in substantial compliance with no violations cited. Current operation is likely but not confirmed for Nov 2026.",
+        "Listed as: Children's emergency shelter (shelter care for ages 0-17) within a family DV shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 158), checked by KOP against public sources in November 2026."
+      ]
+    }
   }
 ]
