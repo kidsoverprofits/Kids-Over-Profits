@@ -37072,7 +37072,24 @@
      "url": "https://www.dallasobserver.com/news/educating-dallas-county-incarcerated-youth-challenge-20492643/",
      "kind": "news"
     }
-   ]
+   ],
+   "answer": {
+    "text": "The owner pointed to the archived Brown Schools pages (2026-11-27); the session that filed this had searched the media library by title only. The 2002 page does not list the seven settings by name. The end of the contract (July 2004) rests on KOP's corporatization page alone (https://kidsoverprofits.org/corporatization/); a primary source for it is still wanted. On record 10605 the link stays, as past; proposed wording for the record: 'The Brown Schools (education services, 1999-2004)'. Neither archive page is in the media library as a PDF yet.",
+    "claims": [
+     {
+      "claim": "The Brown Schools ran the school at Letot Center, not the center itself: Dallas County chose it to provide education services at seven juvenile facilities, Letot Center among them, starting September 1, 1999",
+      "url": "https://web.archive.org/web/20000531075832/http://www.brownschools.com:80/services/dallas.html",
+      "quote": "Dallas County recently selected the Brown Schools to provide education services to the countys pre-adjudicated and post-adjudicated youth. The program is expected to begin operation Sept. 1, 1999 and will serve about 800 Dallas youth at seven diverse facilities including: Juvenile Detention Center Last Chance/Old Detention Center Emergency Shelter Letot Center Substance Abuse Unit Youth Village Secure Youth Village"
+     },
+     {
+      "claim": "In 2002 the program was called the Dallas County Juvenile Justice Charter Schools, a Brown Schools public education program, in seven placement settings",
+      "url": "https://web.archive.org/web/20020806132621/http://brownschools.com:80/dallascounty.html",
+      "quote": "A Brown Schools public education program ... serves pre- and post-adjudicated youth, ages 10-17, who are placed with the Dallas County Juvenile Probation Department. The program serves over 500 students daily in seven diverse placement settings."
+     }
+    ],
+    "by": "Claude",
+    "at": "2026-11-27"
+   }
   },
   {
    "key": "teen-project-csec-home-list:does-youth-crisis-center-inc-of-casper-wy-also-r",
