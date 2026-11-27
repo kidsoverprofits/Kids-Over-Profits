@@ -522,7 +522,10 @@ if (!function_exists('kop_facility_pages_moved_state_slug')) {
      */
     function kop_facility_pages_moved_state_slug($slug, array $slugs) {
         $slug = strtolower((string) $slug);
-        if (!preg_match('/^(.+)-[a-z]{2}$/', $slug, $m)) return '';
+        // A record that had no state on file had no state in its address; once it gains one
+        // (New Directions Home for Boys, 2026-11-27) the old address is the new one without its ending.
+        if (!preg_match('/^(.+)-[a-z]{2}$/', $slug, $m)) $m = array($slug, $slug);
+        if ($m[1] === '') return '';
         $found = '';
         foreach ($slugs as $s) {
             $s = (string) $s;
