@@ -159,5 +159,13 @@
     "drop": 11513,
     "drop_name": "Lords Ranch Behavioral Health Care Systems",
     "note": "One facility at 1033 Old Burr Rd, Warm Springs, AR 72478: The Lord's Ranch, later called Trinity Behavioral Health (Lawsuit Information Center; Imboden Live 2014-11-30; IRS EIN 71-0782352). Rename year not found (research task filed), so merged as one program, the dropped name kept as another name. Pending-edits review 2026-11-19, plan 4.3 #33. Undo on the Merged tab."
+  },
+  {
+    "keep": 9641,
+    "keep_name": "New Directions Home for Boys",
+    "drop": 100906,
+    "drop_name": "Three Springs New Direction",
+    "as_duplicate": "alias",
+    "note": "One program: Three Springs' boys' transitional living home in Huntsville (1007 Douglas Road; admissions director Margaret George on both the Feb 1999 campus listing and record 9641). Record 100906 was created on 2026-11-27 by a session that had not seen 9641, which had no location on file; merged the same day so 9641 gains its address, notes and links, and Three Springs New Direction is another name. Undo on the Merged tab."
   }
 ]
