@@ -13456,7 +13456,7 @@
   {
     "id": 13678,
     "unique_name": "Pathway of Madison County",
-    "version": 1,
+    "version": 2,
     "facility": {
       "identification": {
         "name": "Pathway of Madison County",
@@ -13479,8 +13479,18 @@
         "currentOwners": [],
         "pastOwners": [],
         "knownReferrers": []
+      },
+      "facilityDetails": {
+        "type": "Residential Treatment Center",
+        "capacity": null,
+        "currentCensus": null,
+        "ageRange": {
+          "min": null,
+          "max": null
+        },
+        "gender": "Female"
       }
     },
-    "note": "Owner 2026-11-27: the boys' Three Springs New Direction (1007 Douglas Road, Huntsville; 1999 campus listing) was a different site and is record 9641, New Directions Home for Boys. The name on this campus was the girls' \"Three Springs New Directions\" (Sequel TSI page, archived 2011-03-24, 318 Hamer Rd), so the past name gains its s. The 2026-10-13 merge of the empty record 13709 is left in the log: its Undo would put this record's document back to that day."
+    "note": "Owner 2026-11-27: the boys' Three Springs New Direction (1007 Douglas Road, Huntsville; 1999 campus listing) was a different site and is record 9641, New Directions Home for Boys. The name on this campus was the girls' \"Three Springs New Directions\" (Sequel TSI page, archived 2011-03-24, 318 Hamer Rd), so the past name gains its s. The 2026-10-13 merge of the empty record 13709 is left in the log: its Undo would put this record's document back to that day. Version 2 (owner 2026-11-27): the type and ages on file were Turning Point's (Transitional Living Program, girls 14-18), carried in by the 2026-10-13 merge. Pathway is a residential treatment center for teenage girls in foster care (256 Today, 2026-10-14; WAFF, 2026-10-11: \"a residential treatment and foster care center for troubled teen girls\"); no source gives its age range, so that is cleared."
   }
 ]
