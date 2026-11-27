@@ -1,6 +1,6 @@
 {
- "built": "2026-11-26 17:46 UTC",
- "source": "5829711d54421bd58fe28f48fd700be84d1f32df",
+ "built": "2026-11-27 18:53 UTC",
+ "source": "0a8443d7ac4fe0b6327925873a90a829f432b875",
  "sections": [
   {
    "key": "2",
@@ -4449,6 +4449,21 @@
        "focus": false,
        "steps": [],
        "hash": "aae325878b1e"
+      },
+      {
+       "id": "4.6:three-springs-campuses-archive-copies-owed-claude-note-40-20",
+       "lead": "Three Springs campuses: archive copies owed (Claude note #40, 2026-11-27)",
+       "text": "**Three Springs campuses: archive copies owed (Claude note #40, 2026-11-27)**: the session that split the boys' New Direction out of Pathway of Madison County read these from the Wayback Machine and cited them without a PDF copy in the media library. Print each to PDF (banner kept), import with `api/import-documents.php` into the Three Springs Inc folder (`source_url` = the archive link), then point the citations at our copies (the Pathway About's New Directions sentence, the notes on the Three Springs New Direction record, the three research tasks): - `web.archive.org/web/20110324004228/http://www.sequeltsi.com:80/Programs/Contract/New-Directions` (girls' New Directions at 318 Hamer Rd) - `web.archive.org/web/20100404060823/http://www.sequeltsi.com:80/programs/contract/new_beginnings` (New Beginnings, 318 Hamer Rd) - `web.archive.org/web/20110225003505/http://www.sequeltsi.com:80/programs/private` (Paint Rock Valley, Trenton) - `web.archive.org/web/20110227033011/http://www.sequeltsi.com:80/programs/contract` (Sequel's 2011 program list) - `web.archive.org/web/19990208222105/http://www.threesprings.com/girlslist.html` (girls' campus listing: Turning Point at 318-A Hamer Road; the boys' listing is already held) - `web.archive.org/web/20010222205412/http://threesprings.com:80/programs/locations/new.directions.html` and `web.archive.org/web/20040512093057/http://www.threesprings.com:80/newdirections/` (boys' New Directions, \"Madison, AL\") The first three were sent to Websites Sent In the same day.",
+       "ask": "",
+       "date": "2026-11-27",
+       "why": "",
+       "go": [],
+       "choices": [],
+       "time": "",
+       "kind": "do",
+       "focus": false,
+       "steps": [],
+       "hash": "4e439be28faa"
       }
      ]
     },
