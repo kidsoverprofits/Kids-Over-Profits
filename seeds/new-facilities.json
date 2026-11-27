@@ -8799,5 +8799,109 @@
         "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 197), checked by KOP against public sources in November 2026."
       ]
     }
+  },
+  {
+    "location_id": 40,
+    "location_name": "ALABAMA",
+    "provenance_source": "Three Springs' own campus listing and brochures (KOP media library), Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Three Springs New Direction",
+        "currentName": "",
+        "currentOperator": "",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [
+          "New Directions Boys",
+          "New Direction Transitional Living Program"
+        ],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Huntsville",
+        "state": "AL",
+        "country": "United States",
+        "additionalLocations": []
+      },
+      "location": "Huntsville, AL",
+      "address": "1007 Douglas Road, Huntsville, AL 35758",
+      "otherOperators": [],
+      "pastOperators": [
+        "Three Springs, Inc."
+      ],
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Closed",
+        "yearsOfOperation": "",
+        "notes": []
+      },
+      "staff": {
+        "administrator": [],
+        "notableStaff": [],
+        "pastTTIJobs": []
+      },
+      "profileLinks": [
+        "https://kidsoverprofits.org/wp-content/uploads/2025/06/screencapture-web-archive-org-web-19990203221816-http-www-threesprings-com-boyslist-html-2025-06-24-20_24_56.pdf",
+        "https://kidsoverprofits.org/wp-content/uploads/2025/06/NewDirections-AL.pdf",
+        "https://kidsoverprofits.org/wp-content/uploads/2025/06/Three-Springs-Treatment-Programs.pdf",
+        "https://web.archive.org/web/20010222205412/http://threesprings.com:80/programs/locations/new.directions.html",
+        "https://web.archive.org/web/20040512093057/http://www.threesprings.com:80/newdirections/"
+      ],
+      "facilityDetails": {
+        "type": "Transitional Living Program",
+        "capacity": 15,
+        "currentCensus": null,
+        "ageRange": {
+          "min": 15,
+          "max": 19
+        },
+        "gender": "Boys"
+      },
+      "accreditations": {
+        "current": [
+          "Southern Association of Colleges and Schools (SACS)"
+        ],
+        "past": []
+      },
+      "memberships": [],
+      "certifications": [],
+      "licensing": [
+        "Alabama Department of Mental Health (Three Springs program list, in the document library)"
+      ],
+      "resources": {
+        "hasNews": false,
+        "newsDetails": "",
+        "hasPressReleases": false,
+        "pressReleasesDetails": "",
+        "hasInspections": false,
+        "hasStateReports": false,
+        "hasRegulatoryFilings": false,
+        "hasLawsuits": false,
+        "hasPoliceReports": false,
+        "hasArticlesOfOrganization": false,
+        "hasPropertyRecords": false,
+        "hasPromotionalMaterials": true,
+        "hasEnrollmentDocuments": false,
+        "hasResearch": false,
+        "hasFinancial": false,
+        "hasStudent": false,
+        "hasStaff": false,
+        "hasVideo": false,
+        "hasAudio": false,
+        "hasSocialMedia": false,
+        "hasWebsite": true,
+        "hasNATSAP": false,
+        "hasOther": false,
+        "customResources": []
+      },
+      "notes": [
+        "In February 1999 Three Springs listed New Direction among its therapeutic group homes for boys at 1007 Douglas Road, Huntsville, Alabama 35758, phone (256) 830-9913, with Margaret George as admissions director (Three Springs boys' campus listing, archived Feb 3, 1999: https://kidsoverprofits.org/wp-content/uploads/2025/06/screencapture-web-archive-org-web-19990203221816-http-www-threesprings-com-boyslist-html-2025-06-24-20_24_56.pdf).",
+        "Three Springs described New Direction as a transitional living program in Huntsville for boys aged 15 to 19 who needed a step down before going home, with a private accredited school and job placement help; it enrolled 15 boys (Three Springs Treatment Programs list: https://kidsoverprofits.org/wp-content/uploads/2025/06/Three-Springs-Treatment-Programs.pdf; New Direction brochure: https://kidsoverprofits.org/wp-content/uploads/2025/06/NewDirections-AL.pdf).",
+        "Three Springs' website gave the program's location as Madison, AL in 2001 and 2004 (archived pages: https://web.archive.org/web/20010222205412/http://threesprings.com:80/programs/locations/new.directions.html ; https://web.archive.org/web/20040512093057/http://www.threesprings.com:80/newdirections/). The 1999 listing and the brochures say Huntsville; the 35758 zip code is Madison's.",
+        "This is not the New Directions that Sequel TSI listed in 2011 at 318 Hamer Rd, Owens Cross Roads: that was a moderate-care program for girls aged 15 to 19 on the New Beginnings campus, now Pathway of Madison County (Sequel TSI program page, archived Mar 24, 2011: https://web.archive.org/web/20110324004228/http://www.sequeltsi.com:80/Programs/Contract/New-Directions). When the boys' program closed has not been found."
+      ]
+    }
   }
 ]

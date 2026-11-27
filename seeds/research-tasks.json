@@ -1113,7 +1113,29 @@
    "found": "found 2026-10-12 and 13, Sequel audit sessions",
    "from": "RESEARCH-TASKS.md",
    "companies": [],
-   "directions": []
+   "directions": [],
+   "answer": {
+    "text": "What was wrong: the record was merged into Pathway of Madison County (13678) on 2026-10-13 as if it were the same campus. Fixed 2026-11-27: the boys' program is its own record again (seeds/new-facilities.json) and Pathway's past name is the girls' Three Springs New Directions. Three Springs' website said Madison, AL in 2001 and 2004; the 1999 listing and brochures say Huntsville (zip 35758 is Madison's).",
+    "claims": [
+     {
+      "claim": "In February 1999 New Direction was a boys' therapeutic group home at 1007 Douglas Road, Huntsville, not on the Owens Cross Roads campus",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/2025/06/screencapture-web-archive-org-web-19990203221816-http-www-threesprings-com-boyslist-html-2025-06-24-20_24_56.pdf",
+      "quote": "Therapeutic Group Homes: New Direction, 1007 Douglas Road, Huntsville, Alabama 35758, Phone: (256) 830-9913"
+     },
+     {
+      "claim": "It was a transitional living program for boys aged 15 to 19 with 15 places",
+      "url": "https://kidsoverprofits.org/wp-content/uploads/2025/06/Three-Springs-Treatment-Programs.pdf",
+      "quote": "THREE SPRINGS NEW DIRECTION Huntsville, Alabama Admissions Office: (256) 830-9913 ... Enrollment: 15 Boys"
+     },
+     {
+      "claim": "The New Directions at 318 Hamer Rd was a different, later program for girls aged 15 to 19 under Sequel",
+      "url": "https://web.archive.org/web/20110324004228/http://www.sequeltsi.com:80/Programs/Contract/New-Directions",
+      "quote": "Three Springs New Directions is a Moderate Residential Treatment Program for females ages 15-19 ... Mailing: 318 Hamer Rd., Huntsville, AL"
+     }
+    ],
+    "by": "Claude session",
+    "at": "2026-11-27"
+   }
   },
   {
    "key": "more-sequel-and-three-springs-er:pathway-of-madison-county-13678",
@@ -37231,7 +37253,166 @@
    ],
    "found": "found 2026-11-27, Teen Project home list import",
    "directions": []
+  },
+  {
+   "key": "more-sequel-and-three-springs-er:when-did-three-springs-boys-new-direction-progra",
+   "section": "More Sequel and Three Springs-era questions",
+   "title": "When did Three Springs' boys' New Direction program at 1007 Douglas Road, Huntsville close?",
+   "text": "Listed in February 1999 and still in the mid-2000s brochures (15 boys, phone 256-830-9913). Sequel's 2011 program list has no boys' transitional program; its New Directions was for girls at 318 Hamer Rd. No closing date found.",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-27, Claude note #40 session, 2026-11-27",
+   "directions": [
+    {
+     "label": "Three Springs New Directions page, 2004 (Wayback)",
+     "url": "https://web.archive.org/web/20040512093057/http://www.threesprings.com:80/newdirections/",
+     "kind": "note"
+    },
+    {
+     "label": "Three Springs boys' campus listing, Feb 1999 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/06/screencapture-web-archive-org-web-19990203221816-http-www-threesprings-com-boyslist-html-2025-06-24-20_24_56.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Six desperate teen girls crawl under fence to escape troubled Alabama group home: video (New York Post, 2026-11-25)",
+     "url": "https://nypost.com/2026/11/25/us-news/desperate-teen-girls-crawl-under-fence-to-escape-troubled-group-home-video/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "more-sequel-and-three-springs-er:when-did-the-girls-new-directions-program-open-a",
+   "section": "More Sequel and Three Springs-era questions",
+   "title": "When did the girls' New Directions program open at 318 Hamer Rd, Owens Cross Roads, and was it Turning Point renamed?",
+   "text": "Three Springs ran Turning Point, a transitional living home for girls 14 to 18, at 318-A Hamer Road (1999 listing, brochure). Sequel's site lists New Directions there by February 2011, moderate care for girls 15 to 19, and no Turning Point. Same purpose and ages, so it may be a rename; no source says so. The Pathway record still carries Turning Point's type (Transitional Living Program, girls 14-18), which does not describe Pathway.",
+   "context": "",
+   "records": [
+    13678
+   ],
+   "found": "found 2026-11-27, Claude note #40 session, 2026-11-27",
+   "directions": [
+    {
+     "label": "Sequel TSI contract programs list, Feb 2011 (Wayback)",
+     "url": "https://web.archive.org/web/20110227033011/http://www.sequeltsi.com:80/programs/contract",
+     "kind": "note"
+    },
+    {
+     "label": "Sequel TSI New Directions page, Mar 2011 (Wayback)",
+     "url": "https://web.archive.org/web/20110324004228/http://www.sequeltsi.com:80/Programs/Contract/New-Directions",
+     "kind": "note"
+    },
+    {
+     "label": "Turning Point brochure (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/06/TurnPoint-AL.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Six desperate teen girls crawl under fence to escape troubled Alabama group home: video (New York Post, 2026-11-25)",
+     "url": "https://nypost.com/2026/11/25/us-news/desperate-teen-girls-crawl-under-fence-to-escape-troubled-group-home-video/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 3 more girls escape Pathway Facility in Owens Cross Roads (WAFF, 2026-11-09)",
+     "url": "https://www.waff.com/2026/11/09/3-more-girls-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: 6 juveniles escape Pathway Facility in Owens Cross Roads (WAFF, 2026-10-11)",
+     "url": "https://www.waff.com/2026/10/11/6-juveniles-escape-pathway-facility-owens-cross-roads/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Nine girls’ escapes renew safety concerns at Owens Cross Roads treatment facility (256 Today, 2026-10-14)",
+     "url": "https://256today.com/nine-girls-escapes-renew-safety-concerns-at-owens-cross-roads-treatment-facility/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Renewed concerns following multiple escapes from teen mental health facility (WHNT Huntsville, 2026-10-13)",
+     "url": "https://www.yahoo.com/news/us/articles/renewed-concerns-following-multiple-escapes-032305510.html",
+     "kind": "news"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/nbocr.shtml",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/2*/http://www.threesprings.com/programs/contract/new_beginnings",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20001209190500/http://www.threesprings.com/programs/tphfg.shtml",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "more-sequel-and-three-springs-er:did-three-springs-open-its-englishton-park-progr",
+   "section": "More Sequel and Three Springs-era questions",
+   "title": "Did Three Springs open its Englishton Park program in Lexington, Indiana in 1996 or in January 2006?",
+   "text": "Record 13285 (Lexington Academy) and the owner's Sequel/TSI sheet give Three Springs 1996-2009. Three Springs' own newsletter (May-June 2006) says: 'TSI opened Three Springs Englishton Park in January of 2006', one of four programs added in the last six months.",
+   "context": "",
+   "records": [
+    13285
+   ],
+   "found": "found 2026-11-27, Claude note #40 session, 2026-11-27",
+   "directions": [
+    {
+     "label": "Three Springs Newsletter 1-1, May-June 2006 (our copy)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/2025/06/tsi-newsletter-1-1-May-June-2006-1.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20160519114144/http://www.threesprings.com:80/html/staffsecure-lexington.html",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived threesprings.com)",
+     "url": "https://web.archive.org/web/20090317064044/http://www.threesprings.com:80/englishtonpark",
+     "kind": "website"
+    }
+   ]
   }
  ],
- "built": "2026-11-27 16:39"
+ "built": "2026-11-27 18:49"
 }

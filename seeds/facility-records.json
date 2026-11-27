@@ -13452,5 +13452,35 @@
       }
     },
     "note": "Owner 2026-11-26: name typo fixed (legal name Ain Dah Yung (Our Home) Center, GuideStar EIN 41-1697692). unique_name stays; the old page address 301s through the index's old_slugs."
+  },
+  {
+    "id": 13678,
+    "unique_name": "Pathway of Madison County",
+    "version": 1,
+    "facility": {
+      "identification": {
+        "name": "Pathway of Madison County",
+        "currentName": "",
+        "otherNames": [],
+        "pastNames": [
+          "Sequel TSI Owens Cross Rds",
+          "New Beginnings Residential School",
+          "Three Springs New Directions",
+          "Brighter Path Owens Cross Roads",
+          "Three Springs New Beginnings",
+          "Sequel TSI Owens Cross Roads",
+          "Three Springs Turning Point - Girls"
+        ],
+        "legalName": "",
+        "dbaNames": [],
+        "registrants": [],
+        "currentOperator": "Pathway of Madison County",
+        "currentOwner": "",
+        "currentOwners": [],
+        "pastOwners": [],
+        "knownReferrers": []
+      }
+    },
+    "note": "Owner 2026-11-27: the boys' Three Springs New Direction (1007 Douglas Road, Huntsville; 1999 campus listing) was a different site and is its own record again (seeds/new-facilities.json). The name on this campus was the girls' \"Three Springs New Directions\" (Sequel TSI page, archived 2011-03-24, 318 Hamer Rd), so the past name gains its s. The 2026-10-13 merge of the empty record 13709 is left in the log: its Undo would put this record's document back to that day."
   }
 ]
